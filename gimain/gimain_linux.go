@@ -7,10 +7,13 @@
 
 package gimain
 
-import "goki.dev/gi/v2/gi"
+import (
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfuns"
+)
 
 func init() {
-	gi.DefaultKeyMap = gi.KeyMapName("LinuxStd")
+	gi.DefaultKeyMap = keyfuns.KeyMapName("LinuxStd")
 	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
 	gi.Prefs.FontFamily = "Liberation Sans"
 }

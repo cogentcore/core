@@ -6,7 +6,6 @@ package keyfuns
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -22,13 +21,13 @@ import (
 // https://www.cs.colorado.edu/~main/cs1300/lab/emacs.html
 // https://help.ubuntu.com/community/KeyboardShortcuts
 
-// KeyFuns are functions that keyboard events can perform in the GUI.
+// Funs are functions that keyboard events can perform in the GUI.
 // It seems possible to keep this flat and consistent across different contexts,
 // as long as the functions can be appropriately reinterpreted for each context.
-type KeyFuns int32 //enums:enum -trim-prefix KeyFun
+type Funs int32 //enums:enum -trim-prefix KeyFun
 
 const (
-	Nil KeyFuns = iota
+	Nil Funs = iota
 	MoveUp
 	MoveDown
 	MoveRight
@@ -101,55 +100,55 @@ const (
 	KeyFunMenuCloseAlt2 // alternative version (e.g., alt)
 )
 
-// KeyMap is a map between a key sequence (chord) and a specific KeyFun
+// Map is a map between a key sequence (chord) and a specific KeyFun
 // function.  This mapping must be unique, in that each chord has unique
 // KeyFun, but multiple chords can trigger the same function.
-type KeyMap map[key.Chord]KeyFuns
+type Map map[key.Chord]Funs
 
-// ActiveKeyMap points to the active map -- users can set this to an
+// ActiveMap points to the active map -- users can set this to an
 // alternative map in Prefs
-var ActiveKeyMap *KeyMap
+var ActiveMap *Map
 
-// KeyMapName has an associated Value for selecting from the list of
+// MapName has an associated Value for selecting from the list of
 // available key map names, for use in preferences etc.
-type KeyMapName string
+type MapName string
 
-func (kn KeyMapName) String() string {
+func (kn MapName) String() string {
 	return string(kn)
 }
 
-// ActiveKeyMapName is the name of the active keymap
-var ActiveKeyMapName KeyMapName
+// ActiveMapName is the name of the active keymap
+var ActiveMapName MapName
 
-// SetActiveKeyMap sets the current ActiveKeyMap, calling Update on the map
+// SetActiveMap sets the current ActiveKeyMap, calling Update on the map
 // prior to setting it to ensure that it is a valid, complete map
-func SetActiveKeyMap(km *KeyMap, kmName KeyMapName) {
+func SetActiveMap(km *Map, kmName MapName) {
 	km.Update(kmName)
-	ActiveKeyMap = km
-	ActiveKeyMapName = kmName
+	ActiveMap = km
+	ActiveMapName = kmName
 }
 
-// SetActiveKeyMapName sets the current ActiveKeyMap by name from those
+// SetActiveMapName sets the current ActiveKeyMap by name from those
 // defined in AvailKeyMaps, calling Update on the map prior to setting it to
 // ensure that it is a valid, complete map
-func SetActiveKeyMapName(mapnm KeyMapName) {
-	km, _, ok := AvailKeyMaps.MapByName(mapnm)
+func SetActiveMapName(mapnm MapName) {
+	km, _, ok := AvailMaps.MapByName(mapnm)
 	if ok {
-		SetActiveKeyMap(km, mapnm)
+		SetActiveMap(km, mapnm)
 	} else {
-		slog.Error("gi.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultKeyMap)
-		km, _, ok = AvailKeyMaps.MapByName(DefaultKeyMap)
+		slog.Error("gi.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultMap)
+		km, _, ok = AvailMaps.MapByName(DefaultMap)
 		if ok {
-			SetActiveKeyMap(km, DefaultKeyMap)
+			SetActiveMap(km, DefaultMap)
 		} else {
-			avail := make([]string, len(AvailKeyMaps))
-			for i, km := range AvailKeyMaps {
+			avail := make([]string, len(AvailMaps))
+			for i, km := range AvailMaps {
 				avail[i] = km.Name
 			}
-			slog.Error("gi.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultKeyMap, "available", avail)
-			if len(AvailKeyMaps) > 0 {
-				nkm := AvailKeyMaps[0]
-				SetActiveKeyMap(&nkm.Map, KeyMapName(nkm.Name))
+			slog.Error("gi.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultMap, "available", avail)
+			if len(AvailMaps) > 0 {
+				nkm := AvailMaps[0]
+				SetActiveMap(&nkm.Map, MapName(nkm.Name))
 			}
 		}
 	}
@@ -157,13 +156,13 @@ func SetActiveKeyMapName(mapnm KeyMapName) {
 
 // KeyFun translates chord into keyboard function -- use oswin key.Chord
 // to get chord
-func KeyFun(chord key.Chord) KeyFuns {
+func KeyFun(chord key.Chord) Funs {
 	kf := Nil
 	if chord != "" {
-		kf = (*ActiveKeyMap)[chord]
-		if KeyEventTrace {
-			fmt.Printf("gi.KeyFun chord: %v = %v\n", chord, kf)
-		}
+		kf = (*ActiveMap)[chord]
+		// if KeyEventTrace {
+		// 	fmt.Printf("gi.KeyFun chord: %v = %v\n", chord, kf)
+		// }
 	}
 	return kf
 }
@@ -175,11 +174,11 @@ type KeyMapItem struct {
 	Key key.Chord
 
 	// the function of that key
-	Fun KeyFuns
+	Fun Funs
 }
 
 // ToSlice copies this keymap to a slice of KeyMapItem's
-func (km *KeyMap) ToSlice() []KeyMapItem {
+func (km *Map) ToSlice() []KeyMapItem {
 	kms := make([]KeyMapItem, len(*km))
 	idx := 0
 	for key, fun := range *km {
@@ -190,7 +189,7 @@ func (km *KeyMap) ToSlice() []KeyMapItem {
 }
 
 // ChordForFun returns first key chord trigger for given KeyFun in map
-func (km *KeyMap) ChordForFun(kf KeyFuns) key.Chord {
+func (km *Map) ChordForFun(kf Funs) key.Chord {
 	for key, fun := range *km {
 		if fun == kf {
 			return key
@@ -201,20 +200,20 @@ func (km *KeyMap) ChordForFun(kf KeyFuns) key.Chord {
 
 // ShortcutForFun returns OS-specific formatted shortcut for first key chord
 // trigger for given KeyFun in map
-func (km *KeyMap) ShortcutForFun(kf KeyFuns) key.Chord {
+func (km *Map) ShortcutForFun(kf Funs) key.Chord {
 	return km.ChordForFun(kf).OSShortcut()
 }
 
 // ShortcutForFun returns OS-specific formatted shortcut for first key chord
 // trigger for given KeyFun in the current active map
-func ShortcutForFun(kf KeyFuns) key.Chord {
-	return ActiveKeyMap.ShortcutForFun(kf)
+func ShortcutForFun(kf Funs) key.Chord {
+	return ActiveMap.ShortcutForFun(kf)
 }
 
 // Update ensures that the given keymap has at least one entry for every
 // defined KeyFun, grabbing ones from the default map if not, and also
 // eliminates any Nil entries which might reflect out-of-date functions
-func (km *KeyMap) Update(kmName KeyMapName) {
+func (km *Map) Update(kmName MapName) {
 	for key, val := range *km {
 		if val == Nil {
 			slog.Error("gi.KeyMap: key function is nil; probably renamed", "key", key)
@@ -253,29 +252,14 @@ func (km *KeyMap) Update(kmName KeyMapName) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// Shortcuts
-
-// Shortcuts is a map between a key chord and a specific Button that can be
-// triggered.  This mapping must be unique, in that each chord has unique
-// Button, and generally each Button only has a single chord as well, though
-// this is not strictly enforced.  Shortcuts are evaluated *after* the
-// standard KeyMap event processing, so any conflicts are resolved in favor of
-// the local widget's key event processing, with the shortcut only operating
-// when no conflicting widgets are in focus.  Shortcuts are always window-wide
-// and are intended for global window / toolbar buttons.  Widget-specific key
-// functions should be handled directly within widget key event
-// processing.
-type Shortcuts map[key.Chord]*Button
-
-/////////////////////////////////////////////////////////////////////////////////
 // KeyMaps -- list of KeyMap's
 
-// DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
+// DefaultMap is the overall default keymap -- reinitialized in gimain init()
 // depending on platform
-var DefaultKeyMap = KeyMapName("MacEmacs")
+var DefaultMap = MapName("MacEmacs")
 
-// KeyMapsItem is an entry in a KeyMaps list
-type KeyMapsItem struct { //gti:add -setters
+// MapsItem is an entry in a Maps list
+type MapsItem struct { //gti:add -setters
 
 	// name of keymap
 	Name string `width:"20"`
@@ -284,30 +268,30 @@ type KeyMapsItem struct { //gti:add -setters
 	Desc string
 
 	// to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu
-	Map KeyMap
+	Map Map
 }
 
 // Label satisfies the Labeler interface
-func (km KeyMapsItem) Label() string {
+func (km MapsItem) Label() string {
 	return km.Name
 }
 
-// KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create
+// Maps is a list of KeyMap's -- users can edit these in Prefs -- to create
 // a custom one, just duplicate an existing map, rename, and customize
-type KeyMaps []KeyMapsItem //gti:add
+type Maps []MapsItem //gti:add
 
-// AvailKeyMaps is the current list of available keymaps for use -- can be
+// AvailMaps is the current list of available keymaps for use -- can be
 // loaded / saved / edited with preferences.  This is set to StdKeyMaps at
 // startup.
-var AvailKeyMaps KeyMaps
+var AvailMaps Maps
 
 func init() {
-	AvailKeyMaps.CopyFrom(StdKeyMaps)
+	AvailMaps.CopyFrom(StdKeyMaps)
 }
 
 // MapByName returns a keymap and index by name -- returns false and emits a
 // message to stdout if not found
-func (km *KeyMaps) MapByName(name KeyMapName) (*KeyMap, int, bool) {
+func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 	for i, it := range *km {
 		if it.Name == string(name) {
 			return &it.Map, i, true
@@ -323,7 +307,7 @@ var PrefsKeyMapsFileName = "key_maps_prefs.json"
 
 // OpenJSON opens keymaps from a JSON-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
-func (km *KeyMaps) OpenJSON(filename FileName) error { //gti:add
+func (km *Maps) OpenJSON(filename string) error { //gti:add
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// Note: keymaps are opened at startup, and this can cause crash if called then
@@ -331,13 +315,13 @@ func (km *KeyMaps) OpenJSON(filename FileName) error { //gti:add
 		log.Println(err)
 		return err
 	}
-	*km = make(KeyMaps, 0, 10) // reset
+	*km = make(Maps, 0, 10) // reset
 	return json.Unmarshal(b, km)
 }
 
 // SaveJSON saves keymaps to a JSON-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
-func (km *KeyMaps) SaveJSON(filename FileName) error { //gti:add
+func (km *Maps) SaveJSON(filename string) error { //gti:add
 	b, err := json.MarshalIndent(km, "", "  ")
 	if err != nil {
 		log.Println(err) // unlikely
@@ -353,26 +337,26 @@ func (km *KeyMaps) SaveJSON(filename FileName) error { //gti:add
 
 // OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
 // This is called automatically, so calling it manually should not be necessary in most cases.
-func (km *KeyMaps) OpenPrefs() error { //gti:add
+func (km *Maps) OpenPrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
 	AvailKeyMapsChanged = false
-	return km.OpenJSON(FileName(pnm))
+	return km.OpenJSON(pnm)
 }
 
 // SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,
 // which will be loaded automatically at startup if prefs SaveKeyMaps is checked
 // (should be if you're using custom keymaps)
-func (km *KeyMaps) SavePrefs() error { //gti:add
+func (km *Maps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
 	AvailKeyMapsChanged = false
-	return km.SaveJSON(FileName(pnm))
+	return km.SaveJSON(pnm)
 }
 
 // CopyFrom copies keymaps from given other map
-func (km *KeyMaps) CopyFrom(cp KeyMaps) {
-	*km = make(KeyMaps, 0, len(cp)) // reset
+func (km *Maps) CopyFrom(cp Maps) {
+	*km = make(Maps, 0, len(cp)) // reset
 	b, _ := json.Marshal(cp)
 	json.Unmarshal(b, km)
 }
@@ -381,7 +365,7 @@ func (km *KeyMaps) CopyFrom(cp KeyMaps) {
 // and have all the lastest key functions defined.  If you have edited your maps, and are finding
 // things not working, it is a good idea to save your current maps and try this, or at least do
 // ViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!
-func (km *KeyMaps) RevertToStd() { //gti:add
+func (km *Maps) RevertToStd() { //gti:add
 	km.CopyFrom(StdKeyMaps)
 	AvailKeyMapsChanged = true
 }
@@ -389,8 +373,8 @@ func (km *KeyMaps) RevertToStd() { //gti:add
 // ViewStd shows the standard maps that are compiled into the program and have
 // all the lastest key functions bound to standard values.  Useful for
 // comparing against custom maps.
-func (km *KeyMaps) ViewStd() { //gti:add
-	TheViewIFace.KeyMapsView(&StdKeyMaps)
+func (km *Maps) ViewStd() { //gti:add
+	// TheViewIFace.KeyMapsView(&StdKeyMaps)
 }
 
 // AvailKeyMapsChanged is used to update giv.KeyMapsView toolbars via
@@ -407,8 +391,8 @@ var AvailKeyMapsChanged = false
 
 // StdKeyMaps is the original compiled-in set of standard keymaps that have
 // the lastest key functions bound to standard key chords.
-var StdKeyMaps = KeyMaps{
-	{"MacStd", "Standard Mac KeyMap", KeyMap{
+var StdKeyMaps = Maps{
+	{"MacStd", "Standard Mac KeyMap", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,
 		"Meta+UpArrow":            MoveUp,
@@ -534,7 +518,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
-	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
+	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,
 		"Meta+UpArrow":            MoveUp,
@@ -668,7 +652,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
-	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
+	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,
 		"Alt+UpArrow":             MoveUp,
@@ -787,7 +771,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Alt+W":             KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
-	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
+	{"LinuxStd", "Standard Linux KeyMap", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,
 		"DownArrow":               MoveDown,
@@ -875,7 +859,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
-	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
+	{"WindowsStd", "Standard Windows KeyMap", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,
 		"DownArrow":               MoveDown,
@@ -963,7 +947,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
-	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", KeyMap{
+	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,
 		"DownArrow":               MoveDown,
