@@ -203,7 +203,7 @@ func (sv *StructView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolbarView(sv.Struct, tb)
+	gi.ToolbarFor(sv.Struct, tb)
 	sv.ToolbarStru = sv.Struct
 }
 

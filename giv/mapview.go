@@ -401,7 +401,7 @@ func (mv *MapView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolbarView(mv.Map, tb)
+	gi.ToolbarFor(mv.Map, tb)
 	mv.ToolbarMap = mv.Map
 }
 

@@ -1086,7 +1086,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolbarView(sv.Slice, tb)
+	gi.ToolbarFor(sv.Slice, tb)
 	sv.ToolbarSlice = sv.Slice
 }
 
