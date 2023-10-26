@@ -38,6 +38,20 @@ func KeyMapsView(km *gi.KeyMaps) {
 	gi.NewSeparator(tb)
 	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
 	oj.Args[0].SetTag("ext", ".json")
+	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(gi.KeyFunMenuSaveAs)
+	sj.Args[0].SetTag("ext", ".json")
+	gi.NewSeparator(tb)
+	vs := NewFuncButton(tb, km.ViewStd).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
+	vs.SetUpdateFunc(func() {
+		vs.SetEnabledUpdt(km != &gi.StdKeyMaps)
+	})
+	rs := NewFuncButton(tb, km.RevertToStd).SetConfirm(true).SetText("Revert to standard").SetIcon(icons.DeviceReset)
+	rs.SetUpdateFunc(func() {
+		rs.SetEnabledUpdt(km != &gi.StdKeyMaps)
+	})
+	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpenAlt1)
+	})
 
 	tv := sc.NewChild(TableViewType, "tv").(*TableView)
 	tv.SetSlice(km)

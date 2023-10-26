@@ -673,11 +673,29 @@ var _ = gti.AddType(&gti.Type{
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
+		{"SaveJSON", &gti.Method{Name: "SaveJSON", Doc: "SaveJSON saves keymaps to a JSON-formatted file.\nYou can save and open key maps to / from files to share, experiment, transfer, etc", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"OpenPrefs", &gti.Method{Name: "OpenPrefs", Doc: "OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.\nThis is called automatically, so calling it manually should not be necessary in most cases.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
 		{"SavePrefs", &gti.Method{Name: "SavePrefs", Doc: "SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,\nwhich will be loaded automatically at startup if prefs SaveKeyMaps is checked\n(should be if you're using custom keymaps)", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
+		{"RevertToStd", &gti.Method{Name: "RevertToStd", Doc: "RevertToStd reverts the keymaps to using the StdKeyMaps that are compiled into the program\nand have all the lastest key functions defined.  If you have edited your maps, and are finding\nthings not working, it is a good idea to save your current maps and try this, or at least do\nViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"ViewStd", &gti.Method{Name: "ViewStd", Doc: "ViewStd shows the standard maps that are compiled into the program and have\nall the lastest key functions bound to standard values.  Useful for\ncomparing against custom maps.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 })
 
