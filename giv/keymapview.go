@@ -30,7 +30,16 @@ func KeyMapsView(km *gi.KeyMaps) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 
-	tb := gi.NewToolbar(sc)
+	tv := NewTableView(sc)
+	tv.SetSlice(km)
+	tv.SetStretchMax()
+
+	gi.AvailKeyMapsChanged = false
+	tv.OnChange(func(e events.Event) {
+		gi.AvailKeyMapsChanged = true
+	})
+
+	tb := tv.Toolbar()
 	sp := NewFuncButton(tb, km.SavePrefs).SetIcon(icons.Save).SetShortcutKey(gi.KeyFunMenuSave)
 	sp.SetUpdateFunc(func() {
 		sp.SetEnabled(gi.AvailKeyMapsChanged && km == &gi.AvailKeyMaps)
@@ -51,15 +60,6 @@ func KeyMapsView(km *gi.KeyMaps) {
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
 		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpenAlt1)
-	})
-
-	tv := sc.NewChild(TableViewType, "tv").(*TableView)
-	tv.SetSlice(km)
-	tv.SetStretchMax()
-
-	gi.AvailKeyMapsChanged = false
-	tv.OnChange(func(e events.Event) {
-		gi.AvailKeyMapsChanged = true
 	})
 
 	/* todo: menu, close
