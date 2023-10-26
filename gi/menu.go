@@ -25,9 +25,11 @@ func MenuSceneConfigStyles(msc *Scene) {
 		s.BoxShadow = styles.BoxShadow2()
 	})
 	msc.OnWidgetAdded(func(w Widget) {
+		if bt := AsButton(w); bt != nil {
+			bt.Type = ButtonMenu
+			return
+		}
 		switch w := w.(type) {
-		case *Button:
-			w.Type = ButtonMenu
 		case *Separator:
 			w.Horiz = true
 		}
