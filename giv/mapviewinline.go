@@ -79,7 +79,7 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 				if mv.MapValView != nil {
 					newPath := ""
 					isZero := false
-					title, newPath, isZero = mv.MapValView.AsValueBase().Label()
+					title, newPath, isZero = mv.MapValView.AsValueBase().GetLabel()
 					if isZero {
 						return
 					}

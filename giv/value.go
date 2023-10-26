@@ -53,11 +53,23 @@ type Value interface {
 	// interface doesn't need to provide accessors for them.
 	AsValueBase() *ValueBase
 
-	// Name returns the name
+	// Name returns the name of the value
 	Name() string
 
 	// SetName sets the name of the value
 	SetName(name string)
+
+	// Label returns the label for the value
+	Label() string
+
+	// SetLabel sets the label for the value
+	SetLabel(label string)
+
+	// Doc returns the documentation for the value
+	Doc() string
+
+	// SetDoc sets the documentation for the value
+	SetDoc(doc string)
 
 	// Is checks if flag is set, using atomic, safe for concurrent access
 	Is(f enums.BitFlag) bool
@@ -184,8 +196,14 @@ type Value interface {
 // TextField representation of the string value, and provides the generic
 // fallback for everything that doesn't provide a specific Valuer type.
 type ValueBase struct {
-	// Name is locally-unique name of Value
+	// Nm is locally-unique name of Value
 	Nm string
+
+	// Lbl is the label for the Value
+	Lbl string
+
+	// Dc is the documentation for the Value
+	Dc string
 
 	// Flags are atomic bit flags for Value state
 	Flags ValueFlags
@@ -244,6 +262,22 @@ func (vv *ValueBase) Name() string {
 
 func (vv *ValueBase) SetName(name string) {
 	vv.Nm = name
+}
+
+func (vv *ValueBase) Label() string {
+	return vv.Lbl
+}
+
+func (vv *ValueBase) SetLabel(label string) {
+	vv.Lbl = label
+}
+
+func (vv *ValueBase) Doc() string {
+	return vv.Dc
+}
+
+func (vv *ValueBase) SetDoc(doc string) {
+	vv.Dc = doc
 }
 
 func (vv *ValueBase) String() string {
@@ -646,12 +680,12 @@ func (vv *ValueBase) OwnerLabel() string {
 	return olbl
 }
 
-// Label returns a label for this item suitable for a window title etc.
-// Based on the underlying value type name, owner label, and ViewPath.
+// Label returns a label for this item suitable for a window title etc,
+// based on the underlying value type name, owner label, and ViewPath.
 // newPath returns just what should be added to a ViewPath
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
-func (vv *ValueBase) Label() (label, newPath string, isZero bool) {
+func (vv *ValueBase) GetLabel() (label, newPath string, isZero bool) {
 	lbl := ""
 	var npt reflect.Type
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
