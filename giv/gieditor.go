@@ -311,7 +311,7 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	op.Args[0].SetTag("ext", ".json")
 	save := NewFuncButton(tb, ge.Save)
 	save.SetUpdateFunc(func() {
-		save.SetEnabledStateUpdt(ge.Changed && ge.Filename != "")
+		save.SetEnabledUpdt(ge.Changed && ge.Filename != "")
 	})
 	sa := NewFuncButton(tb, ge.SaveAs)
 	sa.Args[0].SetValue(ge.Filename)
@@ -330,7 +330,7 @@ var GiEditorProps = ki.Props{
 			"icon": icons.Refresh,
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 				ge := gei.(*GiEditor)
-				act.SetEnabledStateUpdt(ge.Changed)
+				act.SetEnabledUpdt(ge.Changed)
 			}),
 		}},
 		{"sep-sel", ki.BlankProp{}},
@@ -369,7 +369,7 @@ var GiEditorProps = ki.Props{
 			"desc": "Save json-formatted Ki tree structure to existing filename",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 				ge := gei.(*GiEditor)
-				act.SetEnabledStateUpdt(ge.Changed && ge.Filename != "")
+				act.SetEnabledUpdt(ge.Changed && ge.Filename != "")
 			}),
 		}},
 		{"SaveAs", ki.Props{

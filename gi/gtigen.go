@@ -945,8 +945,14 @@ var _ = gti.AddType(&gti.Type{
 		{"UpdateAll", &gti.Method{Name: "UpdateAll", Doc: "UpdateAll updates all open windows with current preferences -- triggers\nrebuild of default styles.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "refresh"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Open", &gti.Method{Name: "Open", Doc: "Open preferences from GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
 		{"Save", &gti.Method{Name: "Save", Doc: "Save saves the preferences to the GoGi standard prefs directory", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-confirm", "-show-result"}},
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
@@ -971,6 +977,9 @@ var _ = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
+		{"DeleteSavedWindowGeoms", &gti.Method{Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"EditKeyMaps", &gti.Method{Name: "EditKeyMaps", Doc: "EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /\nload from other files, etc.  Current avail keymaps are saved and loaded\nwith preferences automatically.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-icon", "keyboard"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},

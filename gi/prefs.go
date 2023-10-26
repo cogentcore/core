@@ -176,12 +176,11 @@ func (pf *Preferences) UpdateAll() {
 var PrefsFileName = "prefs.json"
 
 // Open preferences from GoGi standard prefs directory
-func (pf *Preferences) Open() error {
+func (pf *Preferences) Open() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	b, err := ioutil.ReadFile(pnm)
+	b, err := os.ReadFile(pnm)
 	if err != nil {
-		// log.Println(err) // ok to be non-existent
 		return err
 	}
 	err = json.Unmarshal(b, pf)
@@ -204,7 +203,7 @@ func (pf *Preferences) Open() error {
 // Save saves the preferences to the GoGi standard prefs directory
 //
 //gi:toolbar -sep-before -confirm -show-result
-func (pf *Preferences) Save() error {
+func (pf *Preferences) Save() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
@@ -358,10 +357,11 @@ func (pf *Preferences) VersionInfo() string {
 	return vinfo
 }
 
-// DeleteSavedRenderWinGeoms deletes the file that saves the position and size of
-// each window, by screen, and clear current in-memory cache.  You shouldn't
-// need to use this but sometimes useful for testing.
-func (pf *Preferences) DeleteSavedRenderWinGeoms() {
+// DeleteSavedWindowGeoms deletes the file that saves the position and size of
+// each window, by screen, and clear current in-memory cache. You shouldn't generally
+// need to do this, but sometimes it is useful for testing or windows that are
+// showing up in bad places that you can't recover from.
+func (pf *Preferences) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
@@ -468,7 +468,7 @@ var PreferencesProps = ki.Props{
 			"icon": icons.Save,
 			"updtfunc": func(pfi any, bt *Button) {
 				pf := pfi.(*Preferences)
-				bt.SetEnabledStateUpdt(pf.Changed)
+				bt.SetEnabledUpdt(pf.Changed)
 			},
 		}},
 		{"sep-color", ki.BlankProp{}},
@@ -983,7 +983,7 @@ var PrefsDetailedProps = ki.Props{
 			"icon": icons.Save,
 			"updtfunc": func(pfi any, bt *Button) {
 				pf := pfi.(*PrefsDetailed)
-				bt.SetEnabledStateUpdt(pf.Changed)
+				bt.SetEnabledUpdt(pf.Changed)
 			},
 		}},
 	},

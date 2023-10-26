@@ -462,7 +462,7 @@ var KeyMapsProps = ki.Props{
 			"desc":    "Shows the standard maps that are compiled into the program and have all the lastest key functions bound to standard key chords.  Useful for comparing against custom maps.",
 			"confirm": true,
 			"updtfunc": func(kmi any, bt *Button) {
-				bt.SetEnabledStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
+				bt.SetEnabledUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
 			},
 		}},
 		{"RevertToStd", ki.Props{
@@ -470,7 +470,7 @@ var KeyMapsProps = ki.Props{
 			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
 			"confirm": true,
 			"updtfunc": func(kmi any, bt *Button) {
-				bt.SetEnabledStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
+				bt.SetEnabledUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
 			},
 		}},
 	},
