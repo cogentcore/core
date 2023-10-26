@@ -46,7 +46,7 @@ type Scene struct {
 	ki.Node
 
 	// Viewport-level viewbox within any parent Viewport2D
-	Geom mat32.Geom2DInt
+	Geom mat32.Geom2DInt `set:"-"`
 
 	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
 	MultiSample int `def:"4"`
@@ -61,49 +61,49 @@ type Scene struct {
 	BackgroundColor color.RGBA
 
 	// all lights used in the scene
-	Lights ordmap.Map[string, Light]
+	Lights ordmap.Map[string, Light] `set:"-"`
 
 	// meshes -- holds all the mesh data -- must be configured prior to rendering
 	Meshes ordmap.Map[string, Mesh] `set:"-"`
 
 	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
-	Textures ordmap.Map[string, Texture]
+	Textures ordmap.Map[string, Texture] `set:"-"`
 
 	// library of objects that can be used in the scene
-	Library map[string]*Group
+	Library map[string]*Group `set:"-"`
 
 	// don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene
 	NoNav bool
 
 	// saved cameras -- can Save and Set these to view the scene from different angles
-	SavedCams map[string]Camera
+	SavedCams map[string]Camera `set:"-"`
 
 	// has dragging cursor been set yet?
-	SetDragCursor bool `view:"-"`
+	SetDragCursor bool `view:"-" set:"-"`
 
 	// how to deal with selection / manipulation events
 	SelMode SelModes
 
 	// currently selected node
-	CurSel Node `copy:"-" json:"-" xml:"-" view:"-"`
+	CurSel Node `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// currently selected manipulation control point
-	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-"`
+	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// parameters for selection / manipulation box
 	SelParams SelParams `view:"inline"`
 
 	// the vphong rendering system
-	Phong vphong.Phong
+	Phong vphong.Phong `set:"-"`
 
 	// the vgpu render frame holding the rendered scene
-	Frame *vgpu.RenderFrame
+	Frame *vgpu.RenderFrame `set:"-"`
 
 	// index in list of window direct uploading images
-	DirUpIdx int
+	DirUpIdx int `set:"-"`
 
 	// mutex on rendering
-	RenderMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-"`
+	RenderMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 // Defaults sets default scene params (camera, bg = white)

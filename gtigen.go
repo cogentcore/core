@@ -4,14 +4,11 @@ package gi3d
 
 import (
 	"image/color"
-	"sync"
 
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
-	"goki.dev/vgpu/v2/vgpu"
-	"goki.dev/vgpu/v2/vphong"
 )
 
 // GroupType is the [gti.Type] for [Group]
@@ -176,31 +173,17 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Nm", &gti.Field{Name: "Nm", Type: "string", LocalType: "string", Doc: "name of mesh -- meshes are linked to Solids by name so this matters", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"NVtx", &gti.Field{Name: "NVtx", Type: "int", LocalType: "int", Doc: "number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called", Directives: gti.Directives{}, Tag: ""}},
-		{"NIdx", &gti.Field{Name: "NIdx", Type: "int", LocalType: "int", Doc: "number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called", Directives: gti.Directives{}, Tag: ""}},
+		{"NVtx", &gti.Field{Name: "NVtx", Type: "int", LocalType: "int", Doc: "number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"NIdx", &gti.Field{Name: "NIdx", Type: "int", LocalType: "int", Doc: "number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Color", &gti.Field{Name: "Color", Type: "bool", LocalType: "bool", Doc: "has per-vertex colors, as mat32.Vec4 per vertex", Directives: gti.Directives{}, Tag: ""}},
 		{"Dynamic", &gti.Field{Name: "Dynamic", Type: "bool", LocalType: "bool", Doc: "if true, this mesh changes frequently -- otherwise considered to be static", Directives: gti.Directives{}, Tag: ""}},
 		{"Trans", &gti.Field{Name: "Trans", Type: "bool", LocalType: "bool", Doc: "set to true if color has transparency -- not worth checking manually", Directives: gti.Directives{}, Tag: ""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "goki.dev/gi3d.BBox", LocalType: "BBox", Doc: "computed bounding-box and other gross solid properties", Directives: gti.Directives{}, Tag: ""}},
-		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on bbox access", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "goki.dev/gi3d.BBox", LocalType: "BBox", Doc: "computed bounding-box and other gross solid properties", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on bbox access", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// SetNVtx sets the [MeshBase.NVtx]:
-// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
-func (t *MeshBase) SetNVtx(v int) *MeshBase {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [MeshBase.NIdx]:
-// number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
-func (t *MeshBase) SetNIdx(v int) *MeshBase {
-	t.NIdx = v
-	return t
-}
 
 // SetColor sets the [MeshBase.Color]:
 // has per-vertex colors, as mat32.Vec4 per vertex
@@ -220,20 +203,6 @@ func (t *MeshBase) SetDynamic(v bool) *MeshBase {
 // set to true if color has transparency -- not worth checking manually
 func (t *MeshBase) SetTrans(v bool) *MeshBase {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [MeshBase.BBox]:
-// computed bounding-box and other gross solid properties
-func (t *MeshBase) SetBBox(v BBox) *MeshBase {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [MeshBase.BBoxMu]:
-// mutex on bbox access
-func (t *MeshBase) SetBBoxMu(v sync.RWMutex) *MeshBase {
-	t.BBoxMu = v
 	return t
 }
 
@@ -289,26 +258,26 @@ var SceneType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Viewport-level viewbox within any parent Viewport2D", Directives: gti.Directives{}, Tag: ""}},
+		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Viewport-level viewbox within any parent Viewport2D", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"MultiSample", &gti.Field{Name: "MultiSample", Type: "int", LocalType: "int", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame", Directives: gti.Directives{}, Tag: "def:\"4\""}},
 		{"Wireframe", &gti.Field{Name: "Wireframe", Type: "bool", LocalType: "bool", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)", Directives: gti.Directives{}, Tag: "def:\"false\""}},
 		{"Camera", &gti.Field{Name: "Camera", Type: "goki.dev/gi3d.Camera", LocalType: "Camera", Doc: "camera determines view onto scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"BackgroundColor", &gti.Field{Name: "BackgroundColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "background color", Directives: gti.Directives{}, Tag: ""}},
-		{"Lights", &gti.Field{Name: "Lights", Type: "goki.dev/ordmap.Map[string, goki.dev/gi3d.Light]", LocalType: "ordmap.Map[string, Light]", Doc: "all lights used in the scene", Directives: gti.Directives{}, Tag: ""}},
+		{"Lights", &gti.Field{Name: "Lights", Type: "goki.dev/ordmap.Map[string, goki.dev/gi3d.Light]", LocalType: "ordmap.Map[string, Light]", Doc: "all lights used in the scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Meshes", &gti.Field{Name: "Meshes", Type: "goki.dev/ordmap.Map[string, goki.dev/gi3d.Mesh]", LocalType: "ordmap.Map[string, Mesh]", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Textures", &gti.Field{Name: "Textures", Type: "goki.dev/ordmap.Map[string, goki.dev/gi3d.Texture]", LocalType: "ordmap.Map[string, Texture]", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability", Directives: gti.Directives{}, Tag: ""}},
-		{"Library", &gti.Field{Name: "Library", Type: "map[string]*goki.dev/gi3d.Group", LocalType: "map[string]*Group", Doc: "library of objects that can be used in the scene", Directives: gti.Directives{}, Tag: ""}},
+		{"Textures", &gti.Field{Name: "Textures", Type: "goki.dev/ordmap.Map[string, goki.dev/gi3d.Texture]", LocalType: "ordmap.Map[string, Texture]", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Library", &gti.Field{Name: "Library", Type: "map[string]*goki.dev/gi3d.Group", LocalType: "map[string]*Group", Doc: "library of objects that can be used in the scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"NoNav", &gti.Field{Name: "NoNav", Type: "bool", LocalType: "bool", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene", Directives: gti.Directives{}, Tag: ""}},
-		{"SavedCams", &gti.Field{Name: "SavedCams", Type: "map[string]goki.dev/gi3d.Camera", LocalType: "map[string]Camera", Doc: "saved cameras -- can Save and Set these to view the scene from different angles", Directives: gti.Directives{}, Tag: ""}},
-		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", LocalType: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"SavedCams", &gti.Field{Name: "SavedCams", Type: "map[string]goki.dev/gi3d.Camera", LocalType: "map[string]Camera", Doc: "saved cameras -- can Save and Set these to view the scene from different angles", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", LocalType: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}, Tag: "view:\"-\" set:\"-\""}},
 		{"SelMode", &gti.Field{Name: "SelMode", Type: "goki.dev/gi3d.SelModes", LocalType: "SelModes", Doc: "how to deal with selection / manipulation events", Directives: gti.Directives{}, Tag: ""}},
-		{"CurSel", &gti.Field{Name: "CurSel", Type: "goki.dev/gi3d.Node", LocalType: "Node", Doc: "currently selected node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"CurManipPt", &gti.Field{Name: "CurManipPt", Type: "*goki.dev/gi3d.ManipPt", LocalType: "*ManipPt", Doc: "currently selected manipulation control point", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"CurSel", &gti.Field{Name: "CurSel", Type: "goki.dev/gi3d.Node", LocalType: "Node", Doc: "currently selected node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"CurManipPt", &gti.Field{Name: "CurManipPt", Type: "*goki.dev/gi3d.ManipPt", LocalType: "*ManipPt", Doc: "currently selected manipulation control point", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"SelParams", &gti.Field{Name: "SelParams", Type: "goki.dev/gi3d.SelParams", LocalType: "SelParams", Doc: "parameters for selection / manipulation box", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
-		{"Phong", &gti.Field{Name: "Phong", Type: "goki.dev/vgpu/v2/vphong.Phong", LocalType: "vphong.Phong", Doc: "the vphong rendering system", Directives: gti.Directives{}, Tag: ""}},
-		{"Frame", &gti.Field{Name: "Frame", Type: "*goki.dev/vgpu/v2/vgpu.RenderFrame", LocalType: "*vgpu.RenderFrame", Doc: "the vgpu render frame holding the rendered scene", Directives: gti.Directives{}, Tag: ""}},
-		{"DirUpIdx", &gti.Field{Name: "DirUpIdx", Type: "int", LocalType: "int", Doc: "index in list of window direct uploading images", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderMu", &gti.Field{Name: "RenderMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex on rendering", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Phong", &gti.Field{Name: "Phong", Type: "goki.dev/vgpu/v2/vphong.Phong", LocalType: "vphong.Phong", Doc: "the vphong rendering system", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "*goki.dev/vgpu/v2/vgpu.RenderFrame", LocalType: "*vgpu.RenderFrame", Doc: "the vgpu render frame holding the rendered scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"DirUpIdx", &gti.Field{Name: "DirUpIdx", Type: "int", LocalType: "int", Doc: "index in list of window direct uploading images", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"RenderMu", &gti.Field{Name: "RenderMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex on rendering", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -325,13 +294,6 @@ func (t *Scene) KiType() *gti.Type {
 // New returns a new [*Scene] value
 func (t *Scene) New() ki.Ki {
 	return &Scene{}
-}
-
-// SetGeom sets the [Scene.Geom]:
-// Viewport-level viewbox within any parent Viewport2D
-func (t *Scene) SetGeom(v mat32.Geom2DInt) *Scene {
-	t.Geom = v
-	return t
 }
 
 // SetMultiSample sets the [Scene.MultiSample]:
@@ -355,45 +317,10 @@ func (t *Scene) SetBackgroundColor(v color.RGBA) *Scene {
 	return t
 }
 
-// SetLights sets the [Scene.Lights]:
-// all lights used in the scene
-func (t *Scene) SetLights(v ordmap.Map[string, Light]) *Scene {
-	t.Lights = v
-	return t
-}
-
-// SetTextures sets the [Scene.Textures]:
-// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
-func (t *Scene) SetTextures(v ordmap.Map[string, Texture]) *Scene {
-	t.Textures = v
-	return t
-}
-
-// SetLibrary sets the [Scene.Library]:
-// library of objects that can be used in the scene
-func (t *Scene) SetLibrary(v map[string]*Group) *Scene {
-	t.Library = v
-	return t
-}
-
 // SetNoNav sets the [Scene.NoNav]:
 // don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene
 func (t *Scene) SetNoNav(v bool) *Scene {
 	t.NoNav = v
-	return t
-}
-
-// SetSavedCams sets the [Scene.SavedCams]:
-// saved cameras -- can Save and Set these to view the scene from different angles
-func (t *Scene) SetSavedCams(v map[string]Camera) *Scene {
-	t.SavedCams = v
-	return t
-}
-
-// SetSetDragCursor sets the [Scene.SetDragCursor]:
-// has dragging cursor been set yet?
-func (t *Scene) SetSetDragCursor(v bool) *Scene {
-	t.SetDragCursor = v
 	return t
 }
 
@@ -404,52 +331,10 @@ func (t *Scene) SetSelMode(v SelModes) *Scene {
 	return t
 }
 
-// SetCurSel sets the [Scene.CurSel]:
-// currently selected node
-func (t *Scene) SetCurSel(v Node) *Scene {
-	t.CurSel = v
-	return t
-}
-
-// SetCurManipPt sets the [Scene.CurManipPt]:
-// currently selected manipulation control point
-func (t *Scene) SetCurManipPt(v *ManipPt) *Scene {
-	t.CurManipPt = v
-	return t
-}
-
 // SetSelParams sets the [Scene.SelParams]:
 // parameters for selection / manipulation box
 func (t *Scene) SetSelParams(v SelParams) *Scene {
 	t.SelParams = v
-	return t
-}
-
-// SetPhong sets the [Scene.Phong]:
-// the vphong rendering system
-func (t *Scene) SetPhong(v vphong.Phong) *Scene {
-	t.Phong = v
-	return t
-}
-
-// SetFrame sets the [Scene.Frame]:
-// the vgpu render frame holding the rendered scene
-func (t *Scene) SetFrame(v *vgpu.RenderFrame) *Scene {
-	t.Frame = v
-	return t
-}
-
-// SetDirUpIdx sets the [Scene.DirUpIdx]:
-// index in list of window direct uploading images
-func (t *Scene) SetDirUpIdx(v int) *Scene {
-	t.DirUpIdx = v
-	return t
-}
-
-// SetRenderMu sets the [Scene.RenderMu]:
-// mutex on rendering
-func (t *Scene) SetRenderMu(v sync.Mutex) *Scene {
-	t.RenderMu = v
 	return t
 }
 
@@ -509,18 +394,6 @@ func (t *Plane) SetOffset(v float32) *Plane {
 	return t
 }
 
-// SetNVtx sets the [Plane.NVtx]
-func (t *Plane) SetNVtx(v int) *Plane {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [Plane.NIdx]
-func (t *Plane) SetNIdx(v int) *Plane {
-	t.NIdx = v
-	return t
-}
-
 // SetColor sets the [Plane.Color]
 func (t *Plane) SetColor(v bool) *Plane {
 	t.Color = v
@@ -536,18 +409,6 @@ func (t *Plane) SetDynamic(v bool) *Plane {
 // SetTrans sets the [Plane.Trans]
 func (t *Plane) SetTrans(v bool) *Plane {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [Plane.BBox]
-func (t *Plane) SetBBox(v BBox) *Plane {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [Plane.BBoxMu]
-func (t *Plane) SetBBoxMu(v sync.RWMutex) *Plane {
-	t.BBoxMu = v
 	return t
 }
 
@@ -583,18 +444,6 @@ func (t *Box) SetSegs(v mat32.Vec3i) *Box {
 	return t
 }
 
-// SetNVtx sets the [Box.NVtx]
-func (t *Box) SetNVtx(v int) *Box {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [Box.NIdx]
-func (t *Box) SetNIdx(v int) *Box {
-	t.NIdx = v
-	return t
-}
-
 // SetColor sets the [Box.Color]
 func (t *Box) SetColor(v bool) *Box {
 	t.Color = v
@@ -610,18 +459,6 @@ func (t *Box) SetDynamic(v bool) *Box {
 // SetTrans sets the [Box.Trans]
 func (t *Box) SetTrans(v bool) *Box {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [Box.BBox]
-func (t *Box) SetBBox(v BBox) *Box {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [Box.BBoxMu]
-func (t *Box) SetBBoxMu(v sync.RWMutex) *Box {
-	t.BBoxMu = v
 	return t
 }
 
@@ -697,18 +534,6 @@ func (t *Sphere) SetElevLen(v float32) *Sphere {
 	return t
 }
 
-// SetNVtx sets the [Sphere.NVtx]
-func (t *Sphere) SetNVtx(v int) *Sphere {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [Sphere.NIdx]
-func (t *Sphere) SetNIdx(v int) *Sphere {
-	t.NIdx = v
-	return t
-}
-
 // SetColor sets the [Sphere.Color]
 func (t *Sphere) SetColor(v bool) *Sphere {
 	t.Color = v
@@ -724,18 +549,6 @@ func (t *Sphere) SetDynamic(v bool) *Sphere {
 // SetTrans sets the [Sphere.Trans]
 func (t *Sphere) SetTrans(v bool) *Sphere {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [Sphere.BBox]
-func (t *Sphere) SetBBox(v BBox) *Sphere {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [Sphere.BBoxMu]
-func (t *Sphere) SetBBoxMu(v sync.RWMutex) *Sphere {
-	t.BBoxMu = v
 	return t
 }
 
@@ -827,18 +640,6 @@ func (t *Cylinder) SetAngLen(v float32) *Cylinder {
 	return t
 }
 
-// SetNVtx sets the [Cylinder.NVtx]
-func (t *Cylinder) SetNVtx(v int) *Cylinder {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [Cylinder.NIdx]
-func (t *Cylinder) SetNIdx(v int) *Cylinder {
-	t.NIdx = v
-	return t
-}
-
 // SetColor sets the [Cylinder.Color]
 func (t *Cylinder) SetColor(v bool) *Cylinder {
 	t.Color = v
@@ -854,18 +655,6 @@ func (t *Cylinder) SetDynamic(v bool) *Cylinder {
 // SetTrans sets the [Cylinder.Trans]
 func (t *Cylinder) SetTrans(v bool) *Cylinder {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [Cylinder.BBox]
-func (t *Cylinder) SetBBox(v BBox) *Cylinder {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [Cylinder.BBoxMu]
-func (t *Cylinder) SetBBoxMu(v sync.RWMutex) *Cylinder {
-	t.BBoxMu = v
 	return t
 }
 
@@ -949,18 +738,6 @@ func (t *Capsule) SetAngLen(v float32) *Capsule {
 	return t
 }
 
-// SetNVtx sets the [Capsule.NVtx]
-func (t *Capsule) SetNVtx(v int) *Capsule {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [Capsule.NIdx]
-func (t *Capsule) SetNIdx(v int) *Capsule {
-	t.NIdx = v
-	return t
-}
-
 // SetColor sets the [Capsule.Color]
 func (t *Capsule) SetColor(v bool) *Capsule {
 	t.Color = v
@@ -976,18 +753,6 @@ func (t *Capsule) SetDynamic(v bool) *Capsule {
 // SetTrans sets the [Capsule.Trans]
 func (t *Capsule) SetTrans(v bool) *Capsule {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [Capsule.BBox]
-func (t *Capsule) SetBBox(v BBox) *Capsule {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [Capsule.BBoxMu]
-func (t *Capsule) SetBBoxMu(v sync.RWMutex) *Capsule {
-	t.BBoxMu = v
 	return t
 }
 
@@ -1055,18 +820,6 @@ func (t *Torus) SetAngLen(v float32) *Torus {
 	return t
 }
 
-// SetNVtx sets the [Torus.NVtx]
-func (t *Torus) SetNVtx(v int) *Torus {
-	t.NVtx = v
-	return t
-}
-
-// SetNIdx sets the [Torus.NIdx]
-func (t *Torus) SetNIdx(v int) *Torus {
-	t.NIdx = v
-	return t
-}
-
 // SetColor sets the [Torus.Color]
 func (t *Torus) SetColor(v bool) *Torus {
 	t.Color = v
@@ -1082,18 +835,6 @@ func (t *Torus) SetDynamic(v bool) *Torus {
 // SetTrans sets the [Torus.Trans]
 func (t *Torus) SetTrans(v bool) *Torus {
 	t.Trans = v
-	return t
-}
-
-// SetBBox sets the [Torus.BBox]
-func (t *Torus) SetBBox(v BBox) *Torus {
-	t.BBox = v
-	return t
-}
-
-// SetBBoxMu sets the [Torus.BBoxMu]
-func (t *Torus) SetBBoxMu(v sync.RWMutex) *Torus {
-	t.BBoxMu = v
 	return t
 }
 

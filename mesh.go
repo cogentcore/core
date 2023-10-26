@@ -76,10 +76,10 @@ type MeshBase struct { //gti:add -setters
 	Nm string `set:"-"`
 
 	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
-	NVtx int
+	NVtx int `set:"-"`
 
 	// number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
-	NIdx int
+	NIdx int `set:"-"`
 
 	// has per-vertex colors, as mat32.Vec4 per vertex
 	Color bool
@@ -91,10 +91,10 @@ type MeshBase struct { //gti:add -setters
 	Trans bool
 
 	// computed bounding-box and other gross solid properties
-	BBox BBox
+	BBox BBox `set:"-"`
 
 	// mutex on bbox access
-	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"`
+	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ms *MeshBase) Name() string                           { return ms.Nm }
