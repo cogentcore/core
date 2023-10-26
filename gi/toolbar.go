@@ -11,6 +11,8 @@ import (
 	"goki.dev/icons"
 )
 
+// TODO(kai): support AutoOverflowMenu for Toolbar
+
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 type Toolbar struct { //goki:embedder
 	Frame
