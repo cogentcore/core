@@ -9,6 +9,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/laser"
 )
 
@@ -28,6 +29,15 @@ func KeyMapsView(km *gi.KeyMaps) {
 		s.SetStretchMaxWidth()
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
+
+	tb := gi.NewToolbar(sc)
+	sp := NewFuncButton(tb, km.SavePrefs).SetIcon(icons.Save)
+	sp.SetUpdateFunc(func() {
+		sp.SetEnabled(gi.AvailKeyMapsChanged && km == &gi.AvailKeyMaps)
+	})
+	gi.NewSeparator(tb)
+	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen)
+	oj.Args[0].SetTag("ext", ".json")
 
 	tv := sc.NewChild(TableViewType, "tv").(*TableView)
 	tv.SetSlice(km)
