@@ -218,10 +218,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			return true, nil
 		}
 
-		tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
-		s := tp.Underlying().(*types.Struct)
-		fmt.Println(s.Field(0).Type().Underlying())
-
 		typ := &Type{
 			Name:       ts.Name.Name,
 			FullName:   FullName(g.Pkg, ts.Name.Name),
@@ -257,10 +253,38 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				return false, err
 			}
 			typ.Fields = fields
+
+			typ.EmbeddedFields = &gti.Fields{}
+			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
+			g.GetEmbeddedFields(typ.EmbeddedFields, tp)
 		}
 		g.Types = append(g.Types, typ)
 	}
 	return true, nil
+}
+
+// GetEmbeddedFields adds to the given set of embedded fields all of the embedded
+// fields for the given type.
+func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ types.Type) {
+	s, ok := typ.Underlying().(*types.Struct)
+	if !ok {
+		return
+	}
+	nf := s.NumFields()
+	for i := 0; i < nf; i++ {
+		f := s.Field(i)
+		if f.Embedded() {
+			g.GetEmbeddedFields(efields, f.Type())
+			return
+		}
+		field := &gti.Field{
+			Name:      f.Name(),
+			Type:      f.Type().String(),
+			LocalType: f.Type().String(),
+			Tag:       reflect.StructTag(s.Tag(i)),
+		}
+		efields.Add(field.Name, field)
+	}
 }
 
 // InspectFuncDecl is the implementation of [Generator.Inspect]
