@@ -591,11 +591,13 @@ func (t *FileView) SetFiles(v []*filecat.FileInfo) *FileView {
 
 // FuncButtonType is the [gti.Type] for [FuncButton]
 var FuncButtonType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FuncButton",
-	ShortName:  "giv.FuncButton",
-	IDName:     "func-button",
-	Doc:        "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti; add a `//gti:add` comment directive and run `goki generate`\nif you get errors. If the function is a method, both the method and\nits receiver type must be added to gti.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/giv.FuncButton",
+	ShortName: "giv.FuncButton",
+	IDName:    "func-button",
+	Doc:       "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti; add a `//gti:add` comment directive and run `goki generate`\nif you get errors. If the function is a method, both the method and\nits receiver type must be added to gti.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Func", &gti.Field{Name: "Func", Type: "*goki.dev/gti.Func", LocalType: "*gti.Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -611,14 +613,6 @@ var FuncButtonType = gti.AddType(&gti.Type{
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FuncButton{},
 })
-
-// NewFuncButton adds a new [FuncButton] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFuncButton(par ki.Ki, name ...string) *FuncButton {
-	return par.NewChild(FuncButtonType, name...).(*FuncButton)
-}
 
 // KiType returns the [*gti.Type] of [FuncButton]
 func (t *FuncButton) KiType() *gti.Type {
