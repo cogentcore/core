@@ -154,12 +154,12 @@ type Widget interface {
 	// call HandleEvent directly for any existing events.
 	Send(e events.Types, orig ...events.Event)
 
-	// MakeContextMenu adds the context menu items (typically [Button]s)
+	// ContextMenu adds the context menu items (typically [Button]s)
 	// for the widget to the given menu scene. No context menu is defined
 	// by default, but widget types can implement this function if they
-	// have a context menu. MakeContextMenu also calls
+	// have a context menu. ContextMenu also calls
 	// [WidgetBase.CustomContextMenu] if it is not nil.
-	MakeContextMenu(m *Scene)
+	ContextMenu(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus --
 	// by default in the middle its Bounding Box, but can be adapted as

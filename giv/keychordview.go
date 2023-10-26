@@ -98,7 +98,7 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 	})
 }
 
-func (kc *KeyChordEdit) MakeContextMenu(m *gi.Scene) {
+func (kc *KeyChordEdit) ContextMenu(m *gi.Scene) {
 	gi.NewButton(m, "clear").SetText("Clear").OnClick(func(e events.Event) {
 		kc.SetText("")
 		kc.SendChange()
