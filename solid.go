@@ -7,6 +7,8 @@ package gi3d
 import (
 	"fmt"
 	"log"
+
+	"goki.dev/ki/v2"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
@@ -14,6 +16,8 @@ import (
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
+//
+//goki:no-new
 type Solid struct {
 	NodeBase
 
@@ -29,15 +33,12 @@ type Solid struct {
 
 var _ Node = (*Solid)(nil)
 
-/*
 // NewSolid adds a new solid of given name and mesh to given parent
-func NewSolid(sc *Scene, parent ki.Ki, name string, meshName string) *Solid {
-	sld := parent.NewChild(TypeSolid, name).(*Solid)
-	sld.SetMeshName(sc, meshName)
+func NewSolid(parent ki.Ki, name ...string) *Solid {
+	sld := parent.NewChild(SolidType, name...).(*Solid)
 	sld.Defaults()
 	return sld
 }
-*/
 
 func (sld *Solid) CopyFieldsFrom(frm any) {
 	fr := frm.(*Solid)
@@ -178,6 +179,6 @@ func (sld *Solid) Render(sc *Scene) {
 	sld.PoseMu.RLock()
 	sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
 	sld.PoseMu.RUnlock()
-	sld.Mat.Render3D(sc)
+	sld.Mat.Render(sc)
 	sc.Phong.Render()
 }

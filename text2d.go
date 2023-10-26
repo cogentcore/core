@@ -138,12 +138,12 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			sc.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.SetImage(img)
-			txt.Mat.SetTexture(sc, tx)
+			txt.Mat.SetTexture(tx)
 		} else {
 			if vgpu.Debug {
 				fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
 			}
-			txt.Mat.SetTexture(sc, tx)
+			txt.Mat.SetTexture(tx)
 			img = tx.Image()
 		}
 	} else {

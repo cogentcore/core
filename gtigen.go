@@ -789,14 +789,6 @@ var SolidType = gti.AddType(&gti.Type{
 	Instance: &Solid{},
 })
 
-// NewSolid adds a new [Solid] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSolid(par ki.Ki, name ...string) *Solid {
-	return par.NewChild(SolidType, name...).(*Solid)
-}
-
 // KiType returns the [*gti.Type] of [Solid]
 func (t *Solid) KiType() *gti.Type {
 	return SolidType

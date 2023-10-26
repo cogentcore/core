@@ -5,7 +5,6 @@
 package gi3d
 
 import (
-	"image"
 	"sort"
 
 	"goki.dev/ki/v2"
@@ -196,13 +195,13 @@ func (sc *Scene) RenderImpl() {
 		if k == sc.This() {
 			return ki.Continue
 		}
-		ni, nb := AsNode(k)
+		ni, _ := AsNode(k)
 		if ni == nil {
 			return ki.Break // going into a different type of thing, bail
 		}
-		if !ni.IsVisible() || nb.ScBBox == (image.Rectangle{}) {
-			return ki.Break
-		}
+		// if !ni.IsVisible() || nb.ScBBox == (image.Rectangle{}) {
+		// 	return ki.Break
+		// }
 		if !ni.IsSolid() {
 			return ki.Continue
 		}

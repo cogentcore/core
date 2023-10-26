@@ -1,0 +1,59 @@
+Name = "gi3d"
+Desc = ""
+Version = "v0.5.0"
+Type = "Library"
+
+[Build]
+  Package = "."
+  Output = ""
+  ID = "dev.goki.gi3d"
+  Debug = false
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
+
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "gi3d/version.go"
+  Package = "gi3d"
+
+[Generate]
+  Dir = "."
+  Output = "gokigen.go"
+  AddKiTypes = true
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = false
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false

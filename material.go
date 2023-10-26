@@ -35,37 +35,37 @@ func (tl *Tiling) Defaults() {
 // is used for opacity.  The Emissive color is only for glowing objects.
 // The Specular color is always white (multiplied by light color).
 // Textures are stored on the Scene and accessed by name
-type Material struct {
+type Material struct { //gti:add -setters
 
 	// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
-	Color color.RGBA `xml:"color"`
+	Color color.RGBA
 
 	// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
-	Emissive color.RGBA `xml:"emissive"`
+	Emissive color.RGBA
 
 	// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
-	Shiny float32 `xml:"shiny"`
+	Shiny float32
 
 	// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
-	Reflective float32 `xml:"reflective"`
+	Reflective float32
 
 	// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
-	Bright float32 `xml:"bright"`
+	Bright float32
 
 	// prop: texture = texture to provide color for the surface
-	Texture TexName `xml:"texture"`
+	Texture TexName `set:"-"`
 
 	// texture tiling parameters -- repeat and offset
 	Tiling Tiling `view:"inline" viewif:"Texture!=''"`
 
 	// prop: cull-back = cull the back-facing surfaces
-	CullBack bool `xml:"cull-back"`
+	CullBack bool
 
 	// prop: cull-front = cull the front-facing surfaces
-	CullFront bool `xml:"cull-front"`
+	CullFront bool
 
 	// pointer to texture
-	TexPtr Texture `view:"-"`
+	TexPtr Texture `set:"-" view:"-"`
 }
 
 // Defaults sets default surface parameters
@@ -117,13 +117,14 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 }
 
 // SetTexture sets material to use given texture
-func (mt *Material) SetTexture(sc *Scene, tex Texture) {
+func (mt *Material) SetTexture(tex Texture) *Material {
 	mt.TexPtr = tex
 	if mt.TexPtr != nil {
 		mt.Texture = TexName(mt.TexPtr.Name())
 	} else {
 		mt.Texture = ""
 	}
+	return mt
 }
 
 // Validate does overall material validation, including checking that material
@@ -144,7 +145,7 @@ func (mt *Material) Validate(sc *Scene) error {
 	return nil
 }
 
-func (mt *Material) Render3D(sc *Scene) {
+func (mt *Material) Render(sc *Scene) {
 	sc.Phong.UseColor(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
 	sc.Phong.UseTexturePars(mt.Tiling.Repeat, mt.Tiling.Off)
 	if mt.Texture != "" {
