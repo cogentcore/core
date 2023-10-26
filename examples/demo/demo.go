@@ -177,30 +177,30 @@ func makeButtons(ts *gi.Tabs) {
 	})
 
 	menu := func(m *gi.Scene) {
-		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1)
-		m1.SetTooltip("A standard menu item with an icon").
-			OnClick(func(e events.Event) {
-				fmt.Println("Received menu action with data", m1.Data)
-			})
+		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
+			SetTooltip("A standard menu item with an icon")
+		m1.OnClick(func(e events.Event) {
+			fmt.Println("Received menu action with data", m1.Data)
+		})
 
-		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.FileOpen).SetData(2)
-		m2.SetTooltip("A menu item with an icon and a sub menu")
+		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.FileOpen).SetData(2).
+			SetTooltip("A menu item with an icon and a sub menu")
 
 		m2.Menu = func(m *gi.Scene) {
-			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).SetData(2.1)
-			sm2.SetTooltip("A sub menu item with an icon").
-				OnClick(func(e events.Event) {
-					fmt.Println("Received menu action with data", sm2.Data)
-				})
+			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).SetData(2.1).
+				SetTooltip("A sub menu item with an icon")
+			sm2.OnClick(func(e events.Event) {
+				fmt.Println("Received menu action with data", sm2.Data)
+			})
 		}
 
 		gi.NewSeparator(m)
 
-		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").SetData(3)
-		m3.SetTooltip("A standard menu item with an icon, below a separator").
-			OnClick(func(e events.Event) {
-				fmt.Println("Received menu action with data", m3.Data)
-			})
+		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").SetData(3).
+			SetTooltip("A standard menu item with an icon, below a separator")
+		m3.OnClick(func(e events.Event) {
+			fmt.Println("Received menu action with data", m3.Data)
+		})
 	}
 
 	ics := []icons.Icon{
@@ -219,39 +219,36 @@ func makeButtons(ts *gi.Tabs) {
 		s := strings.TrimPrefix(typ.String(), "Button")
 		sl := strings.ToLower(s)
 		art := "A "
-		if typ == gi.ButtonElevated || typ == gi.ButtonOutlined {
+		if typ == gi.ButtonElevated || typ == gi.ButtonOutlined || typ == gi.ButtonAction {
 			art = "An "
 		}
 
-		b := gi.NewButton(brow, "button"+s).SetType(typ).SetText(s).SetIcon(ics[typ])
-		b.Tooltip = "A standard " + sl + " button with a label and icon"
+		b := gi.NewButton(brow, "button"+s).SetType(typ).SetText(s).SetIcon(ics[typ]).
+			SetTooltip("A standard " + sl + " button with a label and icon")
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
 
-		bt := gi.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s)
-		bt.Tooltip = "A standard " + sl + " button with a label"
+		bt := gi.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s).
+			SetTooltip("A standard " + sl + " button with a label")
 		bt.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bt.Nm)
 		})
 
-		bi := gi.NewButton(browi, "buttonIcon"+s).SetType(typ).SetIcon(ics[typ+5])
-		bi.Tooltip = "A standard " + sl + " button with an icon"
+		bi := gi.NewButton(browi, "buttonIcon"+s).SetType(typ).SetIcon(ics[typ+5]).
+			SetTooltip("A standard " + sl + " button with an icon")
 		bi.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bi.Nm)
 		})
 
-		mb := gi.NewButton(mbrow, "menuButton"+s).SetType(typ).SetText(s).SetIcon(ics[typ+10])
-		mb.Menu = menu
-		mb.Tooltip = art + sl + " menu button with a label and icon"
+		gi.NewButton(mbrow, "menuButton"+s).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
+			SetTooltip(art + sl + " menu button with a label and icon")
 
-		mbt := gi.NewButton(mbrowt, "menuButtonText"+s).SetType(typ).SetText(s)
-		mbt.Menu = menu
-		mbt.Tooltip = art + sl + " menu button with a label"
+		gi.NewButton(mbrowt, "menuButtonText"+s).SetType(typ).SetText(s).SetMenu(menu).
+			SetTooltip(art + sl + " menu button with a label")
 
-		mbi := gi.NewButton(mbrowi, "menuButtonIcon"+s).SetType(typ).SetIcon(ics[typ+15])
-		mbi.Menu = menu
-		mbi.Tooltip = art + sl + " menu button with an icon"
+		gi.NewButton(mbrowi, "menuButtonIcon"+s).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
+			SetTooltip(art + sl + " menu button with an icon")
 	}
 }
 
@@ -265,10 +262,10 @@ func makeInputs(ts *gi.Tabs) {
 		s.MaxHeight.SetDp(-1)
 	})
 
-	gi.NewLabel(inputs).SetText("Inputs").SetType(gi.LabelHeadlineLarge)
+	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
-	gi.NewLabel(inputs).SetText(
-		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`).SetType(gi.LabelBodyLarge)
+	gi.NewLabel(inputs).SetType(gi.LabelBodyLarge).SetText(
+		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
