@@ -218,6 +218,10 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			return true, nil
 		}
 
+		tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
+		s := tp.Underlying().(*types.Struct)
+		fmt.Println(s.Field(0).Type().Underlying())
+
 		typ := &Type{
 			Name:       ts.Name.Name,
 			FullName:   FullName(g.Pkg, ts.Name.Name),

@@ -6,6 +6,7 @@ package testdata
 
 import (
 	"fmt"
+	"image/color"
 
 	"goki.dev/gti"
 )
@@ -15,6 +16,7 @@ import (
 //
 //ki:flagtype NodeFlags -field Flag
 type Person struct { //goki:embedder
+	color.RGBA
 	// Name is the name of the person
 	//gi:toolbar -hide
 	Name string //goki:setter
