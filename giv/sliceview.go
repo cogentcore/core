@@ -1068,17 +1068,12 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		return
 	}
 	tb := sv.Toolbar()
-	ndef := 2 // number of default actions
+	ndef := 1 // number of default actions
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() || sv.Is(SliceViewNoAdd) {
-		ndef = 1
+		ndef = 0
 	}
 	if len(*tb.Children()) < ndef {
-		tb.SetStretchMaxWidth()
-		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update this SliceView to reflect current state of slice").
-			OnClick(func(e events.Event) {
-				sv.Update()
-			})
-		if ndef > 1 {
+		if ndef > 0 {
 			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 				OnClick(func(e events.Event) {
 					sv.This().(SliceViewer).SliceNewAt(-1)

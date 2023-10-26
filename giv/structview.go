@@ -22,7 +22,6 @@ import (
 	"goki.dev/glop/bools"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -197,18 +196,7 @@ func (sv *StructView) ConfigToolbar() {
 		return
 	}
 	tb := sv.Toolbar()
-	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
-	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
-	if len(*tb.Children()) == 0 {
-		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip(ttip).
-			OnClick(func(e events.Event) {
-				sv.UpdateFields()
-			})
-	} else {
-		act := tb.Child(0).(*gi.Button)
-		act.Tooltip = ttip
-	}
-	ndef := 1 // number of default actions
+	ndef := 0 // number of default actions
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {

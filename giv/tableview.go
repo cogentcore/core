@@ -881,16 +881,12 @@ func (tv *TableView) ConfigToolbar() {
 		return
 	}
 	tb := tv.Toolbar()
-	ndef := 2 // number of default actions
+	ndef := 1 // number of default actions
 	if tv.Is(SliceViewIsArray) || tv.IsReadOnly() || tv.Is(SliceViewNoAdd) {
-		ndef = 1
+		ndef = 0
 	}
 	if len(*tb.Children()) < ndef {
-		tb.SetStretchMaxWidth()
-		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update this TableView to reflect current state of table").OnClick(func(e events.Event) {
-			tv.SetNeedsLayout()
-		})
-		if ndef > 1 {
+		if ndef > 0 {
 			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the table").
 				OnClick(func(e events.Event) {
 					tv.SliceNewAt(-1)
