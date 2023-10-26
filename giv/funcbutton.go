@@ -7,6 +7,7 @@ package giv
 import (
 	"log/slog"
 	"reflect"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -16,18 +17,20 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
+	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
 // FuncButton is a button that is set up to call a function when it
 // is pressed, using a dialog to prompt the user for any arguments.
 // Also, it automatically sets various properties of the button like
-// the text, tooltip, and icon based on the properties of the
+// the name, text, tooltip, and icon based on the properties of the
 // function, using reflect and gti. The function must be registered
-// with gti; add a `//gti:add` comment directive and run `goki generate`
-// if you get errors. If the function is a method, both the method and
-// its receiver type must be added to gti.
-type FuncButton struct {
+// with gti to get documentation information, but that is not required;
+// add a `//gti:add` comment directive and run `goki generate`
+// if you want tooltips. If the function is a method, both the method and
+// its receiver type must be added to gti to get documentation.
+type FuncButton struct { //goki:no-new
 	gi.Button
 
 	// Func is the [gti.Func] associated with this button.
@@ -75,6 +78,12 @@ type FuncButton struct {
 	ShowReturnAsDialog bool
 }
 
+// NewFuncButton adds a new [FuncButton] with the given function
+// to the given parent.
+func NewFuncButton(par ki.Ki, fun any) *FuncButton {
+	return par.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
+}
+
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.ShowReturn = true
@@ -82,7 +91,8 @@ func (fb *FuncButton) OnInit() {
 
 // SetFunc sets the function associated with the FuncButton to the
 // given function or method value. For documentation information for
-// the function to be obtained, it must be added to gti.
+// the function to be obtained, it must be added to gti. SetFunc is
+// automatically called by [NewFuncButton].
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := gti.FuncName(fun)
 	// the "-fm" suffix indicates that it is a method
@@ -143,6 +153,8 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	if li >= 0 {
 		snm = snm[li+1:] // must also get rid of "."
 	}
+	// func name is not guaranteed to make it unique so we ensure it is (-1 because [ki.New] adds 1 first)
+	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
 	fb.SetText(sentencecase.Of(snm))
 	fb.SetTooltip(gfun.Doc)
 	// we default to the icon with the same name as

@@ -291,11 +291,11 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
-	up := NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
+	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(ge.Changed)
 	})
-	sel := NewFuncButton(tb).SetFunc(ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
+	sel := NewFuncButton(tb, ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
 	sel.SetUpdateFunc(func() {
 		sc, ok := ge.KiRoot.(*gi.Scene)
 		sc.SetEnabled(ok)
@@ -305,23 +305,23 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 		// TODO(kai/sel): check if has flag
 	})
 	tb.AddSeparator()
-	op := NewFuncButton(tb).SetFunc(ge.Open)
+	op := NewFuncButton(tb, ge.Open)
 	op.SetIcon(icons.FileOpen)
 	op.Args[0].SetValue(ge.Filename)
 	op.Args[0].SetTag("ext", ".json")
-	save := NewFuncButton(tb).SetFunc(ge.Save)
+	save := NewFuncButton(tb, ge.Save)
 	save.SetUpdateFunc(func() {
 		save.SetEnabledStateUpdt(ge.Changed && ge.Filename != "")
 	})
-	sa := NewFuncButton(tb).SetFunc(ge.SaveAs)
+	sa := NewFuncButton(tb, ge.SaveAs)
 	sa.Args[0].SetValue(ge.Filename)
 	sa.Args[0].SetTag("ext", ".json")
 	tb.AddSeparator()
-	NewFuncButton(tb).SetFunc(ge.EditColorScheme).SetIcon(icons.Colors)
+	NewFuncButton(tb, ge.EditColorScheme).SetIcon(icons.Colors)
 }
 
 func (ge *GiEditor) MenuBar(mb *gi.MenuBar) {
-	NewFuncButton(mb).SetFunc(ge.Update)
+	NewFuncButton(mb, ge.Update)
 }
 
 var GiEditorProps = ki.Props{
