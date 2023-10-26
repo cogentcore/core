@@ -64,6 +64,11 @@ func (tb *Toolbar) ToolbarStyles() {
 	})
 }
 
+func (tb *Toolbar) IsVisible() bool {
+	// do not render toolbars with no buttons
+	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
+}
+
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 func (tb *Toolbar) SetShortcuts() {
 	em := tb.EventMgr()
