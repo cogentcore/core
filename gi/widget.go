@@ -253,7 +253,7 @@ type WidgetBase struct {
 	ki.Node
 
 	// text for the tooltip for this widget, which can use HTML formatting
-	Tooltip string `set:"-"`
+	Tooltip string
 
 	// todo: remove CSS stuff from here??
 
@@ -261,7 +261,7 @@ type WidgetBase struct {
 	Class string
 
 	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-	CSS ki.Props
+	CSS ki.Props `set:"-"`
 
 	// aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
