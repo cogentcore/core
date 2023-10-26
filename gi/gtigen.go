@@ -17,120 +17,6 @@ import (
 	"goki.dev/pi/v2/complete"
 )
 
-// MenuBarType is the [gti.Type] for [MenuBar]
-var MenuBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.MenuBar",
-	ShortName:  "gi.MenuBar",
-	IDName:     "menu-bar",
-	Doc:        "MenuBar is a Layout (typically LayoutHoriz) that renders a gradient\nbackground and has convenience methods for adding menus.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MainMenu", &gti.Field{Name: "MainMenu", Type: "bool", LocalType: "bool", Doc: "is this the main menu bar for a window?  controls whether displayed on macOS", Directives: gti.Directives{}, Tag: ""}},
-		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*goki.dev/gi/v2/gi.Button", LocalType: "map[string]*Button", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &MenuBar{},
-})
-
-// NewMenuBar adds a new [MenuBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewMenuBar(par ki.Ki, name ...string) *MenuBar {
-	return par.NewChild(MenuBarType, name...).(*MenuBar)
-}
-
-// KiType returns the [*gti.Type] of [MenuBar]
-func (t *MenuBar) KiType() *gti.Type {
-	return MenuBarType
-}
-
-// New returns a new [*MenuBar] value
-func (t *MenuBar) New() ki.Ki {
-	return &MenuBar{}
-}
-
-// SetTooltip sets the [MenuBar.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *MenuBar) SetTooltip(v string) *MenuBar {
-	t.Tooltip = v
-	return t
-}
-
-// SetMainMenu sets the [MenuBar.MainMenu]:
-// is this the main menu bar for a window?  controls whether displayed on macOS
-func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
-	t.MainMenu = v
-	return t
-}
-
-// ToolbarType is the [gti.Type] for [Toolbar]
-var ToolbarType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Toolbar",
-	ShortName: "gi.Toolbar",
-	IDName:    "toolbar",
-	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Toolbar{},
-})
-
-// NewToolbar adds a new [Toolbar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewToolbar(par ki.Ki, name ...string) *Toolbar {
-	return par.NewChild(ToolbarType, name...).(*Toolbar)
-}
-
-// KiType returns the [*gti.Type] of [Toolbar]
-func (t *Toolbar) KiType() *gti.Type {
-	return ToolbarType
-}
-
-// New returns a new [*Toolbar] value
-func (t *Toolbar) New() ki.Ki {
-	return &Toolbar{}
-}
-
-// ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
-type ToolbarEmbedder interface {
-	AsToolbar() *Toolbar
-}
-
-// AsToolbar returns the given value as a value of type Toolbar if the type
-// of the given value embeds Toolbar, or nil otherwise
-func AsToolbar(k ki.Ki) *Toolbar {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(ToolbarEmbedder); ok {
-		return t.AsToolbar()
-	}
-	return nil
-}
-
-// AsToolbar satisfies the [ToolbarEmbedder] interface
-func (t *Toolbar) AsToolbar() *Toolbar {
-	return t
-}
-
-// SetTooltip sets the [Toolbar.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Toolbar) SetTooltip(v string) *Toolbar {
-	t.Tooltip = v
-	return t
-}
-
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Button",
@@ -261,6 +147,24 @@ func (t *Button) SetUpdateFunc(v func()) *Button {
 	return t
 }
 
+// SetClass sets the [Button.Class]
+func (t *Button) SetClass(v string) *Button {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Button.CSS]
+func (t *Button) SetCSS(v ki.Props) *Button {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Button.CustomContextMenu]
+func (t *Button) SetCustomContextMenu(v func(m *Scene)) *Button {
+	t.CustomContextMenu = v
+	return t
+}
+
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Chooser",
@@ -367,6 +271,24 @@ func (t *Chooser) SetTooltips(v []string) *Chooser {
 // maximum label length (in runes)
 func (t *Chooser) SetMaxLength(v int) *Chooser {
 	t.MaxLength = v
+	return t
+}
+
+// SetClass sets the [Chooser.Class]
+func (t *Chooser) SetClass(v string) *Chooser {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Chooser.CSS]
+func (t *Chooser) SetCSS(v ki.Props) *Chooser {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Chooser.CustomContextMenu]
+func (t *Chooser) SetCustomContextMenu(v func(m *Scene)) *Chooser {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -510,9 +432,27 @@ func (t *StyleSheet) SetTooltip(v string) *StyleSheet {
 	return t
 }
 
-// SetSheet sets the [StyleSheet.Sheet]:
+// SetSheet sets the [StyleSheet.Sheet]
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
 	t.Sheet = v
+	return t
+}
+
+// SetClass sets the [StyleSheet.Class]
+func (t *StyleSheet) SetClass(v string) *StyleSheet {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [StyleSheet.CSS]
+func (t *StyleSheet) SetCSS(v ki.Props) *StyleSheet {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [StyleSheet.CustomContextMenu]
+func (t *StyleSheet) SetCustomContextMenu(v func(m *Scene)) *StyleSheet {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -565,6 +505,36 @@ func (t *Frame) SetStripes(v Stripes) *Frame {
 	return t
 }
 
+// SetClass sets the [Frame.Class]
+func (t *Frame) SetClass(v string) *Frame {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Frame.CSS]
+func (t *Frame) SetCSS(v ki.Props) *Frame {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Frame.CustomContextMenu]
+func (t *Frame) SetCustomContextMenu(v func(m *Scene)) *Frame {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Frame.Spacing]
+func (t *Frame) SetSpacing(v units.Value) *Frame {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Frame.StackTop]
+func (t *Frame) SetStackTop(v int) *Frame {
+	t.StackTop = v
+	return t
+}
+
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Icon",
@@ -610,6 +580,24 @@ func (t *Icon) SetTooltip(v string) *Icon {
 	return t
 }
 
+// SetClass sets the [Icon.Class]
+func (t *Icon) SetClass(v string) *Icon {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Icon.CSS]
+func (t *Icon) SetCSS(v ki.Props) *Icon {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Icon.CustomContextMenu]
+func (t *Icon) SetCustomContextMenu(v func(m *Scene)) *Icon {
+	t.CustomContextMenu = v
+	return t
+}
+
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
@@ -651,6 +639,24 @@ func (t *Image) New() ki.Ki {
 // Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
 func (t *Image) SetTooltip(v string) *Image {
 	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Image.Class]
+func (t *Image) SetClass(v string) *Image {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Image.CSS]
+func (t *Image) SetCSS(v ki.Props) *Image {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Image.CustomContextMenu]
+func (t *Image) SetCustomContextMenu(v func(m *Scene)) *Image {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -734,6 +740,24 @@ func (t *Label) SetText(v string) *Label {
 // the type of label
 func (t *Label) SetType(v LabelTypes) *Label {
 	t.Type = v
+	return t
+}
+
+// SetClass sets the [Label.Class]
+func (t *Label) SetClass(v string) *Label {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Label.CSS]
+func (t *Label) SetCSS(v ki.Props) *Label {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Label.CustomContextMenu]
+func (t *Label) SetCustomContextMenu(v func(m *Scene)) *Label {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -829,6 +853,24 @@ func (t *Layout) SetStackTop(v int) *Layout {
 	return t
 }
 
+// SetClass sets the [Layout.Class]
+func (t *Layout) SetClass(v string) *Layout {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Layout.CSS]
+func (t *Layout) SetCSS(v ki.Props) *Layout {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Layout.CustomContextMenu]
+func (t *Layout) SetCustomContextMenu(v func(m *Scene)) *Layout {
+	t.CustomContextMenu = v
+	return t
+}
+
 // StretchType is the [gti.Type] for [Stretch]
 var StretchType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Stretch",
@@ -869,6 +911,24 @@ func (t *Stretch) SetTooltip(v string) *Stretch {
 	return t
 }
 
+// SetClass sets the [Stretch.Class]
+func (t *Stretch) SetClass(v string) *Stretch {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Stretch.CSS]
+func (t *Stretch) SetCSS(v ki.Props) *Stretch {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Stretch.CustomContextMenu]
+func (t *Stretch) SetCustomContextMenu(v func(m *Scene)) *Stretch {
+	t.CustomContextMenu = v
+	return t
+}
+
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Space",
@@ -906,6 +966,104 @@ func (t *Space) New() ki.Ki {
 // Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
 func (t *Space) SetTooltip(v string) *Space {
 	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Space.Class]
+func (t *Space) SetClass(v string) *Space {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Space.CSS]
+func (t *Space) SetCSS(v ki.Props) *Space {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Space.CustomContextMenu]
+func (t *Space) SetCustomContextMenu(v func(m *Scene)) *Space {
+	t.CustomContextMenu = v
+	return t
+}
+
+// MenuBarType is the [gti.Type] for [MenuBar]
+var MenuBarType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.MenuBar",
+	ShortName:  "gi.MenuBar",
+	IDName:     "menu-bar",
+	Doc:        "MenuBar is a Layout (typically LayoutHoriz) that renders a gradient\nbackground and has convenience methods for adding menus.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"MainMenu", &gti.Field{Name: "MainMenu", Type: "bool", LocalType: "bool", Doc: "is this the main menu bar for a window?  controls whether displayed on macOS", Directives: gti.Directives{}, Tag: ""}},
+		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*goki.dev/gi/v2/gi.Button", LocalType: "map[string]*Button", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &MenuBar{},
+})
+
+// NewMenuBar adds a new [MenuBar] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewMenuBar(par ki.Ki, name ...string) *MenuBar {
+	return par.NewChild(MenuBarType, name...).(*MenuBar)
+}
+
+// KiType returns the [*gti.Type] of [MenuBar]
+func (t *MenuBar) KiType() *gti.Type {
+	return MenuBarType
+}
+
+// New returns a new [*MenuBar] value
+func (t *MenuBar) New() ki.Ki {
+	return &MenuBar{}
+}
+
+// SetTooltip sets the [MenuBar.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *MenuBar) SetTooltip(v string) *MenuBar {
+	t.Tooltip = v
+	return t
+}
+
+// SetMainMenu sets the [MenuBar.MainMenu]:
+// is this the main menu bar for a window?  controls whether displayed on macOS
+func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
+	t.MainMenu = v
+	return t
+}
+
+// SetClass sets the [MenuBar.Class]
+func (t *MenuBar) SetClass(v string) *MenuBar {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [MenuBar.CSS]
+func (t *MenuBar) SetCSS(v ki.Props) *MenuBar {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [MenuBar.CustomContextMenu]
+func (t *MenuBar) SetCustomContextMenu(v func(m *Scene)) *MenuBar {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [MenuBar.Spacing]
+func (t *MenuBar) SetSpacing(v units.Value) *MenuBar {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [MenuBar.StackTop]
+func (t *MenuBar) SetStackTop(v int) *MenuBar {
+	t.StackTop = v
 	return t
 }
 
@@ -1220,6 +1378,120 @@ func (t *ProgressBar) SetProgCur(v int) *ProgressBar {
 	return t
 }
 
+// SetClass sets the [ProgressBar.Class]
+func (t *ProgressBar) SetClass(v string) *ProgressBar {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [ProgressBar.CSS]
+func (t *ProgressBar) SetCSS(v ki.Props) *ProgressBar {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [ProgressBar.CustomContextMenu]
+func (t *ProgressBar) SetCustomContextMenu(v func(m *Scene)) *ProgressBar {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetDim sets the [ProgressBar.Dim]
+func (t *ProgressBar) SetDim(v mat32.Dims) *ProgressBar {
+	t.Dim = v
+	return t
+}
+
+// SetMin sets the [ProgressBar.Min]
+func (t *ProgressBar) SetMin(v float32) *ProgressBar {
+	t.Min = v
+	return t
+}
+
+// SetMax sets the [ProgressBar.Max]
+func (t *ProgressBar) SetMax(v float32) *ProgressBar {
+	t.Max = v
+	return t
+}
+
+// SetStep sets the [ProgressBar.Step]
+func (t *ProgressBar) SetStep(v float32) *ProgressBar {
+	t.Step = v
+	return t
+}
+
+// SetPageStep sets the [ProgressBar.PageStep]
+func (t *ProgressBar) SetPageStep(v float32) *ProgressBar {
+	t.PageStep = v
+	return t
+}
+
+// SetValThumb sets the [ProgressBar.ValThumb]
+func (t *ProgressBar) SetValThumb(v bool) *ProgressBar {
+	t.ValThumb = v
+	return t
+}
+
+// SetThumbVal sets the [ProgressBar.ThumbVal]
+func (t *ProgressBar) SetThumbVal(v float32) *ProgressBar {
+	t.ThumbVal = v
+	return t
+}
+
+// SetThumbSize sets the [ProgressBar.ThumbSize]
+func (t *ProgressBar) SetThumbSize(v units.Value) *ProgressBar {
+	t.ThumbSize = v
+	return t
+}
+
+// SetIcon sets the [ProgressBar.Icon]
+func (t *ProgressBar) SetIcon(v icons.Icon) *ProgressBar {
+	t.Icon = v
+	return t
+}
+
+// SetTracking sets the [ProgressBar.Tracking]
+func (t *ProgressBar) SetTracking(v bool) *ProgressBar {
+	t.Tracking = v
+	return t
+}
+
+// SetTrackThr sets the [ProgressBar.TrackThr]
+func (t *ProgressBar) SetTrackThr(v float32) *ProgressBar {
+	t.TrackThr = v
+	return t
+}
+
+// SetSnap sets the [ProgressBar.Snap]
+func (t *ProgressBar) SetSnap(v bool) *ProgressBar {
+	t.Snap = v
+	return t
+}
+
+// SetOff sets the [ProgressBar.Off]
+func (t *ProgressBar) SetOff(v bool) *ProgressBar {
+	t.Off = v
+	return t
+}
+
+// SetPrec sets the [ProgressBar.Prec]
+func (t *ProgressBar) SetPrec(v int) *ProgressBar {
+	t.Prec = v
+	return t
+}
+
+// SetValueColor sets the [ProgressBar.ValueColor]
+func (t *ProgressBar) SetValueColor(v colors.Full) *ProgressBar {
+	t.ValueColor = v
+	return t
+}
+
+// SetThumbColor sets the [ProgressBar.ThumbColor]
+func (t *ProgressBar) SetThumbColor(v colors.Full) *ProgressBar {
+	t.ThumbColor = v
+	return t
+}
+
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Scene",
@@ -1289,6 +1561,42 @@ func (t *Scene) SetBgColor(v colors.Full) *Scene {
 	return t
 }
 
+// SetClass sets the [Scene.Class]
+func (t *Scene) SetClass(v string) *Scene {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Scene.CSS]
+func (t *Scene) SetCSS(v ki.Props) *Scene {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Scene.CustomContextMenu]
+func (t *Scene) SetCustomContextMenu(v func(m *Scene)) *Scene {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Scene.Spacing]
+func (t *Scene) SetSpacing(v units.Value) *Scene {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Scene.StackTop]
+func (t *Scene) SetStackTop(v int) *Scene {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Scene.Stripes]
+func (t *Scene) SetStripes(v Stripes) *Scene {
+	t.Stripes = v
+	return t
+}
+
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Separator",
@@ -1335,6 +1643,24 @@ func (t *Separator) SetTooltip(v string) *Separator {
 // whether this is a horizontal separator; if false, it is vertical
 func (t *Separator) SetHoriz(v bool) *Separator {
 	t.Horiz = v
+	return t
+}
+
+// SetClass sets the [Separator.Class]
+func (t *Separator) SetClass(v string) *Separator {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Separator.CSS]
+func (t *Separator) SetCSS(v ki.Props) *Separator {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Separator.CustomContextMenu]
+func (t *Separator) SetCustomContextMenu(v func(m *Scene)) *Separator {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -1540,6 +1866,24 @@ func (t *Slider) SetThumbColor(v colors.Full) *Slider {
 	return t
 }
 
+// SetClass sets the [Slider.Class]
+func (t *Slider) SetClass(v string) *Slider {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Slider.CSS]
+func (t *Slider) SetCSS(v ki.Props) *Slider {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Slider.CustomContextMenu]
+func (t *Slider) SetCustomContextMenu(v func(m *Scene)) *Slider {
+	t.CustomContextMenu = v
+	return t
+}
+
 // SpellType is the [gti.Type] for [Spell]
 var SpellType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Spell",
@@ -1720,6 +2064,24 @@ func (t *Spinner) SetDownIcon(v icons.Icon) *Spinner {
 	return t
 }
 
+// SetClass sets the [Spinner.Class]
+func (t *Spinner) SetClass(v string) *Spinner {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Spinner.CSS]
+func (t *Spinner) SetCSS(v ki.Props) *Spinner {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Spinner.CustomContextMenu]
+func (t *Spinner) SetCustomContextMenu(v func(m *Scene)) *Spinner {
+	t.CustomContextMenu = v
+	return t
+}
+
 // SplitsType is the [gti.Type] for [Splits]
 var SplitsType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Splits",
@@ -1803,6 +2165,24 @@ func (t *Splits) SetDim(v mat32.Dims) *Splits {
 	return t
 }
 
+// SetClass sets the [Splits.Class]
+func (t *Splits) SetClass(v string) *Splits {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Splits.CSS]
+func (t *Splits) SetCSS(v ki.Props) *Splits {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Splits.CustomContextMenu]
+func (t *Splits) SetCustomContextMenu(v func(m *Scene)) *Splits {
+	t.CustomContextMenu = v
+	return t
+}
+
 // SplitterType is the [gti.Type] for [Splitter]
 var SplitterType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Splitter",
@@ -1850,6 +2230,120 @@ func (t *Splitter) SetTooltip(v string) *Splitter {
 // splitter number this one is
 func (t *Splitter) SetSplitterNo(v int) *Splitter {
 	t.SplitterNo = v
+	return t
+}
+
+// SetClass sets the [Splitter.Class]
+func (t *Splitter) SetClass(v string) *Splitter {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Splitter.CSS]
+func (t *Splitter) SetCSS(v ki.Props) *Splitter {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Splitter.CustomContextMenu]
+func (t *Splitter) SetCustomContextMenu(v func(m *Scene)) *Splitter {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetDim sets the [Splitter.Dim]
+func (t *Splitter) SetDim(v mat32.Dims) *Splitter {
+	t.Dim = v
+	return t
+}
+
+// SetMin sets the [Splitter.Min]
+func (t *Splitter) SetMin(v float32) *Splitter {
+	t.Min = v
+	return t
+}
+
+// SetMax sets the [Splitter.Max]
+func (t *Splitter) SetMax(v float32) *Splitter {
+	t.Max = v
+	return t
+}
+
+// SetStep sets the [Splitter.Step]
+func (t *Splitter) SetStep(v float32) *Splitter {
+	t.Step = v
+	return t
+}
+
+// SetPageStep sets the [Splitter.PageStep]
+func (t *Splitter) SetPageStep(v float32) *Splitter {
+	t.PageStep = v
+	return t
+}
+
+// SetValThumb sets the [Splitter.ValThumb]
+func (t *Splitter) SetValThumb(v bool) *Splitter {
+	t.ValThumb = v
+	return t
+}
+
+// SetThumbVal sets the [Splitter.ThumbVal]
+func (t *Splitter) SetThumbVal(v float32) *Splitter {
+	t.ThumbVal = v
+	return t
+}
+
+// SetThumbSize sets the [Splitter.ThumbSize]
+func (t *Splitter) SetThumbSize(v units.Value) *Splitter {
+	t.ThumbSize = v
+	return t
+}
+
+// SetIcon sets the [Splitter.Icon]
+func (t *Splitter) SetIcon(v icons.Icon) *Splitter {
+	t.Icon = v
+	return t
+}
+
+// SetTracking sets the [Splitter.Tracking]
+func (t *Splitter) SetTracking(v bool) *Splitter {
+	t.Tracking = v
+	return t
+}
+
+// SetTrackThr sets the [Splitter.TrackThr]
+func (t *Splitter) SetTrackThr(v float32) *Splitter {
+	t.TrackThr = v
+	return t
+}
+
+// SetSnap sets the [Splitter.Snap]
+func (t *Splitter) SetSnap(v bool) *Splitter {
+	t.Snap = v
+	return t
+}
+
+// SetOff sets the [Splitter.Off]
+func (t *Splitter) SetOff(v bool) *Splitter {
+	t.Off = v
+	return t
+}
+
+// SetPrec sets the [Splitter.Prec]
+func (t *Splitter) SetPrec(v int) *Splitter {
+	t.Prec = v
+	return t
+}
+
+// SetValueColor sets the [Splitter.ValueColor]
+func (t *Splitter) SetValueColor(v colors.Full) *Splitter {
+	t.ValueColor = v
+	return t
+}
+
+// SetThumbColor sets the [Splitter.ThumbColor]
+func (t *Splitter) SetThumbColor(v colors.Full) *Splitter {
+	t.ThumbColor = v
 	return t
 }
 
@@ -1927,6 +2421,24 @@ func (t *Switch) SetIconDisab(v icons.Icon) *Switch {
 	return t
 }
 
+// SetClass sets the [Switch.Class]
+func (t *Switch) SetClass(v string) *Switch {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Switch.CSS]
+func (t *Switch) SetCSS(v ki.Props) *Switch {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Switch.CustomContextMenu]
+func (t *Switch) SetCustomContextMenu(v func(m *Scene)) *Switch {
+	t.CustomContextMenu = v
+	return t
+}
+
 // SwitchesType is the [gti.Type] for [Switches]
 var SwitchesType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Switches",
@@ -1943,7 +2455,7 @@ var SwitchesType = gti.AddType(&gti.Type{
 		{"Mutex", &gti.Field{Name: "Mutex", Type: "bool", LocalType: "bool", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Switches{},
@@ -2021,6 +2533,42 @@ func (t *Switches) SetTooltips(v []string) *Switches {
 // whether to make the items mutually exclusive (checking one turns off all the others)
 func (t *Switches) SetMutex(v bool) *Switches {
 	t.Mutex = v
+	return t
+}
+
+// SetClass sets the [Switches.Class]
+func (t *Switches) SetClass(v string) *Switches {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Switches.CSS]
+func (t *Switches) SetCSS(v ki.Props) *Switches {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Switches.CustomContextMenu]
+func (t *Switches) SetCustomContextMenu(v func(m *Scene)) *Switches {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Switches.Spacing]
+func (t *Switches) SetSpacing(v units.Value) *Switches {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Switches.StackTop]
+func (t *Switches) SetStackTop(v int) *Switches {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Switches.Stripes]
+func (t *Switches) SetStripes(v Stripes) *Switches {
+	t.Stripes = v
 	return t
 }
 
@@ -2114,6 +2662,36 @@ func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
 	return t
 }
 
+// SetClass sets the [Tabs.Class]
+func (t *Tabs) SetClass(v string) *Tabs {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Tabs.CSS]
+func (t *Tabs) SetCSS(v ki.Props) *Tabs {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Tabs.CustomContextMenu]
+func (t *Tabs) SetCustomContextMenu(v func(m *Scene)) *Tabs {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Tabs.Spacing]
+func (t *Tabs) SetSpacing(v units.Value) *Tabs {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Tabs.StackTop]
+func (t *Tabs) SetStackTop(v int) *Tabs {
+	t.StackTop = v
+	return t
+}
+
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Tab",
@@ -2160,6 +2738,72 @@ func (t *Tab) SetTooltip(v string) *Tab {
 // if true, this tab has a delete button (true by default)
 func (t *Tab) SetDeleteButton(v bool) *Tab {
 	t.DeleteButton = v
+	return t
+}
+
+// SetClass sets the [Tab.Class]
+func (t *Tab) SetClass(v string) *Tab {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Tab.CSS]
+func (t *Tab) SetCSS(v ki.Props) *Tab {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Tab.CustomContextMenu]
+func (t *Tab) SetCustomContextMenu(v func(m *Scene)) *Tab {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetType sets the [Tab.Type]
+func (t *Tab) SetType(v ButtonTypes) *Tab {
+	t.Type = v
+	return t
+}
+
+// SetText sets the [Tab.Text]
+func (t *Tab) SetText(v string) *Tab {
+	t.Text = v
+	return t
+}
+
+// SetIcon sets the [Tab.Icon]
+func (t *Tab) SetIcon(v icons.Icon) *Tab {
+	t.Icon = v
+	return t
+}
+
+// SetIndicator sets the [Tab.Indicator]
+func (t *Tab) SetIndicator(v icons.Icon) *Tab {
+	t.Indicator = v
+	return t
+}
+
+// SetShortcut sets the [Tab.Shortcut]
+func (t *Tab) SetShortcut(v key.Chord) *Tab {
+	t.Shortcut = v
+	return t
+}
+
+// SetMenu sets the [Tab.Menu]
+func (t *Tab) SetMenu(v func(m *Scene)) *Tab {
+	t.Menu = v
+	return t
+}
+
+// SetData sets the [Tab.Data]
+func (t *Tab) SetData(v any) *Tab {
+	t.Data = v
+	return t
+}
+
+// SetUpdateFunc sets the [Tab.UpdateFunc]
+func (t *Tab) SetUpdateFunc(v func()) *Tab {
+	t.UpdateFunc = v
 	return t
 }
 
@@ -2338,6 +2982,124 @@ func (t *TextField) SetMaxWidthReq(v int) *TextField {
 // if true, select text as cursor moves
 func (t *TextField) SetSelectMode(v bool) *TextField {
 	t.SelectMode = v
+	return t
+}
+
+// SetClass sets the [TextField.Class]
+func (t *TextField) SetClass(v string) *TextField {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [TextField.CSS]
+func (t *TextField) SetCSS(v ki.Props) *TextField {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [TextField.CustomContextMenu]
+func (t *TextField) SetCustomContextMenu(v func(m *Scene)) *TextField {
+	t.CustomContextMenu = v
+	return t
+}
+
+// ToolbarType is the [gti.Type] for [Toolbar]
+var ToolbarType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Toolbar",
+	ShortName: "gi.Toolbar",
+	IDName:    "toolbar",
+	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Toolbar{},
+})
+
+// NewToolbar adds a new [Toolbar] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewToolbar(par ki.Ki, name ...string) *Toolbar {
+	return par.NewChild(ToolbarType, name...).(*Toolbar)
+}
+
+// KiType returns the [*gti.Type] of [Toolbar]
+func (t *Toolbar) KiType() *gti.Type {
+	return ToolbarType
+}
+
+// New returns a new [*Toolbar] value
+func (t *Toolbar) New() ki.Ki {
+	return &Toolbar{}
+}
+
+// ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
+type ToolbarEmbedder interface {
+	AsToolbar() *Toolbar
+}
+
+// AsToolbar returns the given value as a value of type Toolbar if the type
+// of the given value embeds Toolbar, or nil otherwise
+func AsToolbar(k ki.Ki) *Toolbar {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ToolbarEmbedder); ok {
+		return t.AsToolbar()
+	}
+	return nil
+}
+
+// AsToolbar satisfies the [ToolbarEmbedder] interface
+func (t *Toolbar) AsToolbar() *Toolbar {
+	return t
+}
+
+// SetTooltip sets the [Toolbar.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Toolbar) SetTooltip(v string) *Toolbar {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Toolbar.Class]
+func (t *Toolbar) SetClass(v string) *Toolbar {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the [Toolbar.CSS]
+func (t *Toolbar) SetCSS(v ki.Props) *Toolbar {
+	t.CSS = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Toolbar.CustomContextMenu]
+func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Toolbar.Spacing]
+func (t *Toolbar) SetSpacing(v units.Value) *Toolbar {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Toolbar.StackTop]
+func (t *Toolbar) SetStackTop(v int) *Toolbar {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Toolbar.Stripes]
+func (t *Toolbar) SetStripes(v Stripes) *Toolbar {
+	t.Stripes = v
 	return t
 }
 
