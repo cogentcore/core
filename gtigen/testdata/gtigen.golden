@@ -27,7 +27,9 @@ var PersonType = gti.AddType(&gti.Type{
 		}, Tag: "json:\"-\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"RGBA", &gti.Field{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Introduction", &gti.Method{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},

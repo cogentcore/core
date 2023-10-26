@@ -89,7 +89,7 @@ func TestPerson(t *testing.T) {
 	if have.Fields.Len() != 3 {
 		t.Errorf("expected 2 fields, but got %d", have.Fields.Len())
 	}
-	if have.Embeds.Len() != 0 {
+	if have.Embeds.Len() != 1 {
 		t.Errorf("expected 0 embeds, but got %v", have.Embeds.Len())
 	}
 	if have.Methods.Len() != 1 {
