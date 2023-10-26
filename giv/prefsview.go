@@ -26,6 +26,18 @@ func PrefsView(pf *gi.Preferences) {
 	gi.NewButton(mb).SetText("File").SetMenu(func(m *gi.Scene) {
 		NewFuncButton(m, pf.UpdateAll).SetIcon(icons.Refresh)
 		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
+		save := NewFuncButton(m, pf.Save).SetShortcutKey(gi.KeyFunMenuSave)
+		save.SetUpdateFunc(func() {
+			save.SetEnabled(pf.Changed)
+		})
+		gi.NewSeparator(m)
+		NewFuncButton(m, pf.LightMode)
+		NewFuncButton(m, pf.DarkMode)
+		gi.NewSeparator(m)
+		sz := NewFuncButton(m, pf.SaveZoom)
+		sz.SetIcon(icons.ZoomIn)
+		sz.Args[0].SetValue(true)
+		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 	})
 
 	tb := gi.NewToolbar(sc)
@@ -33,7 +45,7 @@ func PrefsView(pf *gi.Preferences) {
 	tb.AddSeparator()
 	save := NewFuncButton(tb, pf.Save)
 	save.SetUpdateFunc(func() {
-		save.SetEnabledStateUpdt(pf.Changed)
+		save.SetEnabledUpdt(pf.Changed)
 	})
 	tb.AddSeparator()
 	NewFuncButton(tb, pf.LightMode)

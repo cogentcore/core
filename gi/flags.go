@@ -111,8 +111,8 @@ func (wb *WidgetBase) SetEnabled(enabled bool) {
 	wb.SetState(!enabled, states.Disabled)
 }
 
-// SetEnabledStateUpdt sets the Disabled flag
-func (wb *WidgetBase) SetEnabledStateUpdt(enabled bool) {
+// SetEnabledUpdt sets the Disabled flag
+func (wb *WidgetBase) SetEnabledUpdt(enabled bool) {
 	wb.SetState(!enabled, states.Disabled)
 	wb.ApplyStyleUpdate(wb.Sc)
 }
