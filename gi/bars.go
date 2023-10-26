@@ -346,18 +346,12 @@ func (tb *Toolbar) ToolbarStyles() {
 	tb.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
+			return
+		}
+		if sp, ok := w.(*Separator); ok {
+			sp.Horiz = tb.Lay != LayoutHoriz
 		}
 	})
-}
-
-// AddSeparator adds a new separator to the toolbar. It automatically
-// sets its orientation depending on the layout of the toolbar. The
-// name does not need to be specified, and will default to "separator-"
-// plus the [ki.Ki.NumLifetimeChildren] of the toolbar.
-func (tb *Toolbar) AddSeparator(name ...string) *Separator {
-	sp := NewSeparator(tb, name...)
-	sp.Horiz = tb.Lay != LayoutHoriz
-	return sp
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar

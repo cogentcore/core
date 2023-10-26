@@ -29,9 +29,8 @@ func MenuSceneConfigStyles(msc *Scene) {
 			bt.Type = ButtonMenu
 			return
 		}
-		switch w := w.(type) {
-		case *Separator:
-			w.Horiz = true
+		if sp, ok := w.(*Separator); ok {
+			sp.Horiz = true
 		}
 	})
 }
