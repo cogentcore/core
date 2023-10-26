@@ -7,9 +7,12 @@
 
 package gimain
 
-import "goki.dev/gi/v2/gi"
+import (
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfuns"
+)
 
 func init() {
-	gi.DefaultKeyMap = gi.KeyMapName("WindowsStd")
+	gi.DefaultKeyMap = keyfuns.MapName("WindowsStd")
 	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
 }

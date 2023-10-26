@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfuns"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -41,7 +42,7 @@ func init() {
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() Value {
 		return &FileValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() Value {
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(keyfuns.MapName(""))), func() Value {
 		return &KeyMapValue{}
 	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {

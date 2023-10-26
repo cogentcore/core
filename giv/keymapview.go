@@ -6,6 +6,7 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfuns"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -143,7 +144,7 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
-	_, curRow, _ := gi.AvailKeyMaps.MapByName(gi.KeyMapName(cur))
+	_, curRow, _ := gi.AvailKeyMaps.MapByName(keyfuns.MapName(cur))
 	desc, _ := vv.Desc()
 	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, &gi.AvailKeyMaps, curRow, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {

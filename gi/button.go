@@ -584,3 +584,18 @@ func newButtonMenuImpl(par ki.Ki, parts []string) *Button {
 	return newButtonMenuImpl(newbt, parts[1:])
 }
 */
+
+/////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+// Shortcuts is a map between a key chord and a specific Button that can be
+// triggered.  This mapping must be unique, in that each chord has unique
+// Button, and generally each Button only has a single chord as well, though
+// this is not strictly enforced.  Shortcuts are evaluated *after* the
+// standard KeyMap event processing, so any conflicts are resolved in favor of
+// the local widget's key event processing, with the shortcut only operating
+// when no conflicting widgets are in focus.  Shortcuts are always window-wide
+// and are intended for global window / toolbar buttons.  Widget-specific key
+// functions should be handled directly within widget key event
+// processing.
+type Shortcuts map[key.Chord]*Button
