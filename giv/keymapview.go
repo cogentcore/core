@@ -31,12 +31,12 @@ func KeyMapsView(km *gi.KeyMaps) {
 	})
 
 	tb := gi.NewToolbar(sc)
-	sp := NewFuncButton(tb, km.SavePrefs).SetIcon(icons.Save)
+	sp := NewFuncButton(tb, km.SavePrefs).SetIcon(icons.Save).SetShortcutKey(gi.KeyFunMenuSave)
 	sp.SetUpdateFunc(func() {
 		sp.SetEnabled(gi.AvailKeyMapsChanged && km == &gi.AvailKeyMaps)
 	})
 	gi.NewSeparator(tb)
-	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen)
+	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
 	oj.Args[0].SetTag("ext", ".json")
 
 	tv := sc.NewChild(TableViewType, "tv").(*TableView)
