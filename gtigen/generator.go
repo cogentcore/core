@@ -263,6 +263,21 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 	return true, nil
 }
 
+// LocalTypeNameQualifier returns a [types.Qualifier] similar to that
+// returned by [types.RelativeTo], but using the package name instead
+// of the package path so that it can be used in code.
+func LocalTypeNameQualifier(pkg *types.Package) types.Qualifier {
+	if pkg == nil {
+		return nil
+	}
+	return func(other *types.Package) string {
+		if pkg == other {
+			return "" // same package; unqualified
+		}
+		return other.Name()
+	}
+}
+
 // GetEmbeddedFields recursively adds to the given set of embedded fields all of the embedded
 // fields for the given type. It does not add the fields in the given starting type,
 // as those fields aren't embedded.
@@ -285,7 +300,7 @@ func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ, startTyp types.T
 		field := &gti.Field{
 			Name:      f.Name(),
 			Type:      f.Type().String(),
-			LocalType: f.Type().String(),
+			LocalType: types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types)),
 			Tag:       reflect.StructTag(s.Tag(i)),
 		}
 		efields.Add(field.Name, field)
