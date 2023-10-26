@@ -16,8 +16,6 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events/key"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
@@ -392,95 +390,6 @@ func (km *KeyMaps) ViewStd() { //gti:add
 // following menu, toolbar props update methods -- not accurate if editing any
 // other map but works for now..
 var AvailKeyMapsChanged = false
-
-// KeyMapsProps define the Toolbar and MenuBar for TableView of KeyMaps, e.g., giv.KeyMapsView
-var KeyMapsProps = ki.Props{
-	"MainMenu": ki.PropSlice{
-		{"AppMenu", ki.BlankProp{}},
-		{"File", ki.PropSlice{
-			{"OpenPrefs", ki.Props{}},
-			{"SavePrefs", ki.Props{
-				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(kmi any, bt *Button) {
-					bt.SetEnabled(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
-				},
-			}},
-			{"sep-file", ki.BlankProp{}},
-			{"OpenJSON", ki.Props{
-				"label":    "Open from file",
-				"desc":     "You can save and open key maps to / from files to share, experiment, transfer, etc",
-				"shortcut": KeyFunMenuOpen,
-				"Args": ki.PropSlice{
-					{"File Name", ki.Props{
-						"ext": ".json",
-					}},
-				},
-			}},
-			{"SaveJSON", ki.Props{
-				"label":    "Save to file",
-				"desc":     "You can save and open key maps to / from files to share, experiment, transfer, etc",
-				"shortcut": KeyFunMenuSaveAs,
-				"Args": ki.PropSlice{
-					{"File Name", ki.Props{
-						"ext": ".json",
-					}},
-				},
-			}},
-			{"RevertToStd", ki.Props{
-				"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions defined.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
-				"confirm": true,
-			}},
-		}},
-		{"Edit", "Copy Cut Paste Dupe"},
-		{"RenderWin", "RenderWins"},
-	},
-	"Toolbar": ki.PropSlice{
-		{"SavePrefs", ki.Props{
-			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
-			"icon": icons.Save,
-			"updtfunc": func(kmi any, bt *Button) {
-				bt.SetEnabled(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
-			},
-		}},
-		{"sep-file", ki.BlankProp{}},
-		{"OpenJSON", ki.Props{
-			"label": "Open from file",
-			"icon":  icons.FileOpen,
-			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"SaveJSON", ki.Props{
-			"label": "Save to file",
-			"icon":  icons.SaveAs,
-			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"sep-std", ki.BlankProp{}},
-		{"ViewStd", ki.Props{
-			"desc":    "Shows the standard maps that are compiled into the program and have all the lastest key functions bound to standard key chords.  Useful for comparing against custom maps.",
-			"confirm": true,
-			"updtfunc": func(kmi any, bt *Button) {
-				bt.SetEnabledUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
-			},
-		}},
-		{"RevertToStd", ki.Props{
-			"icon":    icons.DeviceReset,
-			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
-			"confirm": true,
-			"updtfunc": func(kmi any, bt *Button) {
-				bt.SetEnabledUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
-			},
-		}},
-	},
-}
 
 // order is: Shift, Control, Alt, Meta
 // note: shift and meta modifiers for navigation keys do select + move
