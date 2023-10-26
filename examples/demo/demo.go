@@ -299,29 +299,10 @@ func makeInputs(ts *gi.Tabs) {
 		"A widely consumed small, red fruit",
 	}
 
-	chf := gi.NewChooser(choosers)
-	chf.SetPlaceholder("Select a fruit")
-	chf.Items = fruits
-	chf.Tooltips = fruitDescs
-
-	cho := gi.NewChooser(choosers)
-	cho.SetPlaceholder("Select a fruit")
-	cho.Items = fruits
-	cho.Tooltips = fruitDescs
-	cho.Type = gi.ChooserOutlined
-
-	chef := gi.NewChooser(inputs)
-	chef.Editable = true
-	chef.SetPlaceholder("Select or type a fruit")
-	chef.Items = fruits
-	chef.Tooltips = fruitDescs
-
-	cheo := gi.NewChooser(inputs)
-	cheo.Editable = true
-	cheo.SetPlaceholder("Select or type a fruit")
-	cheo.Items = fruits
-	cheo.Tooltips = fruitDescs
-	cheo.Type = gi.ChooserOutlined
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs).SetType(gi.ChooserOutlined)
+	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs)
+	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs).SetType(gi.ChooserOutlined)
 
 	gi.NewSwitch(inputs).SetText("Toggle")
 
