@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -59,13 +60,6 @@ func (t *ArgView) New() ki.Ki {
 	return &ArgView{}
 }
 
-// SetTooltip sets the [ArgView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *ArgView) SetTooltip(v string) *ArgView {
-	t.Tooltip = v
-	return t
-}
-
 // SetArgs sets the [ArgView.Args]:
 // the args that we are a view onto
 func (t *ArgView) SetArgs(v []Value) *ArgView {
@@ -84,6 +78,42 @@ func (t *ArgView) SetTitle(v string) *ArgView {
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 func (t *ArgView) SetViewPath(v string) *ArgView {
 	t.ViewPath = v
+	return t
+}
+
+// SetTooltip sets the [ArgView.Tooltip]
+func (t *ArgView) SetTooltip(v string) *ArgView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [ArgView.Class]
+func (t *ArgView) SetClass(v string) *ArgView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [ArgView.CustomContextMenu]
+func (t *ArgView) SetCustomContextMenu(v func(m *gi.Scene)) *ArgView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [ArgView.Spacing]
+func (t *ArgView) SetSpacing(v units.Value) *ArgView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [ArgView.StackTop]
+func (t *ArgView) SetStackTop(v int) *ArgView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [ArgView.Stripes]
+func (t *ArgView) SetStripes(v gi.Stripes) *ArgView {
+	t.Stripes = v
 	return t
 }
 
@@ -123,13 +153,6 @@ func (t *ColorMapView) New() ki.Ki {
 	return &ColorMapView{}
 }
 
-// SetTooltip sets the [ColorMapView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *ColorMapView) SetTooltip(v string) *ColorMapView {
-	t.Tooltip = v
-	return t
-}
-
 // SetOrient sets the [ColorMapView.Orient]:
 // orientation along which to display the spectrum
 func (t *ColorMapView) SetOrient(v mat32.Dims) *ColorMapView {
@@ -141,6 +164,24 @@ func (t *ColorMapView) SetOrient(v mat32.Dims) *ColorMapView {
 // the colormap that we view
 func (t *ColorMapView) SetMap(v *colormap.Map) *ColorMapView {
 	t.Map = v
+	return t
+}
+
+// SetTooltip sets the [ColorMapView.Tooltip]
+func (t *ColorMapView) SetTooltip(v string) *ColorMapView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [ColorMapView.Class]
+func (t *ColorMapView) SetClass(v string) *ColorMapView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [ColorMapView.CustomContextMenu]
+func (t *ColorMapView) SetCustomContextMenu(v func(m *gi.Scene)) *ColorMapView {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -182,13 +223,6 @@ func (t *ColorView) New() ki.Ki {
 	return &ColorView{}
 }
 
-// SetTooltip sets the [ColorView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *ColorView) SetTooltip(v string) *ColorView {
-	t.Tooltip = v
-	return t
-}
-
 // SetColorHSLA sets the [ColorView.ColorHSLA]:
 // the color that we view, in HSLA form
 func (t *ColorView) SetColorHSLA(v hsl.HSL) *ColorView {
@@ -207,6 +241,42 @@ func (t *ColorView) SetTmpSave(v Value) *ColorView {
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 func (t *ColorView) SetViewPath(v string) *ColorView {
 	t.ViewPath = v
+	return t
+}
+
+// SetTooltip sets the [ColorView.Tooltip]
+func (t *ColorView) SetTooltip(v string) *ColorView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [ColorView.Class]
+func (t *ColorView) SetClass(v string) *ColorView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [ColorView.CustomContextMenu]
+func (t *ColorView) SetCustomContextMenu(v func(m *gi.Scene)) *ColorView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [ColorView.Spacing]
+func (t *ColorView) SetSpacing(v units.Value) *ColorView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [ColorView.StackTop]
+func (t *ColorView) SetStackTop(v int) *ColorView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [ColorView.Stripes]
+func (t *ColorView) SetStripes(v gi.Stripes) *ColorView {
+	t.Stripes = v
 	return t
 }
 
@@ -329,6 +399,42 @@ func (t *FileTree) SetLastWatchTime(v time.Time) *FileTree {
 // Update mutex
 func (t *FileTree) SetUpdtMu(v sync.Mutex) *FileTree {
 	t.UpdtMu = v
+	return t
+}
+
+// SetFPath sets the [FileTree.FPath]
+func (t *FileTree) SetFPath(v gi.FileName) *FileTree {
+	t.FPath = v
+	return t
+}
+
+// SetInfo sets the [FileTree.Info]
+func (t *FileTree) SetInfo(v filecat.FileInfo) *FileTree {
+	t.Info = v
+	return t
+}
+
+// SetBuf sets the [FileTree.Buf]
+func (t *FileTree) SetBuf(v *texteditor.Buf) *FileTree {
+	t.Buf = v
+	return t
+}
+
+// SetFRoot sets the [FileTree.FRoot]
+func (t *FileTree) SetFRoot(v *FileTree) *FileTree {
+	t.FRoot = v
+	return t
+}
+
+// SetDirRepo sets the [FileTree.DirRepo]
+func (t *FileTree) SetDirRepo(v vci.Repo) *FileTree {
+	t.DirRepo = v
+	return t
+}
+
+// SetRepoFiles sets the [FileTree.RepoFiles]
+func (t *FileTree) SetRepoFiles(v vci.Files) *FileTree {
+	t.RepoFiles = v
 	return t
 }
 
@@ -495,10 +601,69 @@ func (t *FileTreeView) AsFileTreeView() *FileTreeView {
 	return t
 }
 
-// SetTooltip sets the [FileTreeView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+// SetTooltip sets the [FileTreeView.Tooltip]
 func (t *FileTreeView) SetTooltip(v string) *FileTreeView {
 	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [FileTreeView.Class]
+func (t *FileTreeView) SetClass(v string) *FileTreeView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [FileTreeView.CustomContextMenu]
+func (t *FileTreeView) SetCustomContextMenu(v func(m *gi.Scene)) *FileTreeView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetIcon sets the [FileTreeView.Icon]
+func (t *FileTreeView) SetIcon(v icons.Icon) *FileTreeView {
+	t.Icon = v
+	return t
+}
+
+// SetIndent sets the [FileTreeView.Indent]
+func (t *FileTreeView) SetIndent(v units.Value) *FileTreeView {
+	t.Indent = v
+	return t
+}
+
+// SetOpenDepth sets the [FileTreeView.OpenDepth]
+func (t *FileTreeView) SetOpenDepth(v int) *FileTreeView {
+	t.OpenDepth = v
+	return t
+}
+
+// SetViewIdx sets the [FileTreeView.ViewIdx]
+func (t *FileTreeView) SetViewIdx(v int) *FileTreeView {
+	t.ViewIdx = v
+	return t
+}
+
+// SetWidgetSize sets the [FileTreeView.WidgetSize]
+func (t *FileTreeView) SetWidgetSize(v mat32.Vec2) *FileTreeView {
+	t.WidgetSize = v
+	return t
+}
+
+// SetRootView sets the [FileTreeView.RootView]
+func (t *FileTreeView) SetRootView(v *TreeView) *FileTreeView {
+	t.RootView = v
+	return t
+}
+
+// SetSelectedNodes sets the [FileTreeView.SelectedNodes]
+func (t *FileTreeView) SetSelectedNodes(v []*TreeView) *FileTreeView {
+	t.SelectedNodes = v
+	return t
+}
+
+// SetactStateLayer sets the [FileTreeView.actStateLayer]
+func (t *FileTreeView) SetactStateLayer(v float32) *FileTreeView {
+	t.actStateLayer = v
 	return t
 }
 
@@ -547,13 +712,6 @@ func (t *FileView) New() ki.Ki {
 	return &FileView{}
 }
 
-// SetTooltip sets the [FileView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *FileView) SetTooltip(v string) *FileView {
-	t.Tooltip = v
-	return t
-}
-
 // SetDirPath sets the [FileView.DirPath]:
 // path to directory of files to display
 func (t *FileView) SetDirPath(v string) *FileView {
@@ -589,12 +747,48 @@ func (t *FileView) SetFiles(v []*filecat.FileInfo) *FileView {
 	return t
 }
 
+// SetTooltip sets the [FileView.Tooltip]
+func (t *FileView) SetTooltip(v string) *FileView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [FileView.Class]
+func (t *FileView) SetClass(v string) *FileView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [FileView.CustomContextMenu]
+func (t *FileView) SetCustomContextMenu(v func(m *gi.Scene)) *FileView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [FileView.Spacing]
+func (t *FileView) SetSpacing(v units.Value) *FileView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [FileView.StackTop]
+func (t *FileView) SetStackTop(v int) *FileView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [FileView.Stripes]
+func (t *FileView) SetStripes(v gi.Stripes) *FileView {
+	t.Stripes = v
+	return t
+}
+
 // FuncButtonType is the [gti.Type] for [FuncButton]
 var FuncButtonType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/giv.FuncButton",
 	ShortName: "giv.FuncButton",
 	IDName:    "func-button",
-	Doc:       "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti; add a `//gti:add` comment directive and run `goki generate`\nif you get errors. If the function is a method, both the method and\nits receiver type must be added to gti.",
+	Doc:       "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti to get documentation information, but that is not required;\nadd a `//gti:add` comment directive and run `goki generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to gti to get documentation.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
 	},
@@ -622,13 +816,6 @@ func (t *FuncButton) KiType() *gti.Type {
 // New returns a new [*FuncButton] value
 func (t *FuncButton) New() ki.Ki {
 	return &FuncButton{}
-}
-
-// SetTooltip sets the [FuncButton.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *FuncButton) SetTooltip(v string) *FuncButton {
-	t.Tooltip = v
-	return t
 }
 
 // SetConfirm sets the [FuncButton.Confirm]:
@@ -659,6 +846,72 @@ func (t *FuncButton) SetShowReturn(v bool) *FuncButton {
 // automatically be set to true.
 func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton {
 	t.ShowReturnAsDialog = v
+	return t
+}
+
+// SetTooltip sets the [FuncButton.Tooltip]
+func (t *FuncButton) SetTooltip(v string) *FuncButton {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [FuncButton.Class]
+func (t *FuncButton) SetClass(v string) *FuncButton {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [FuncButton.CustomContextMenu]
+func (t *FuncButton) SetCustomContextMenu(v func(m *gi.Scene)) *FuncButton {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetType sets the [FuncButton.Type]
+func (t *FuncButton) SetType(v gi.ButtonTypes) *FuncButton {
+	t.Type = v
+	return t
+}
+
+// SetText sets the [FuncButton.Text]
+func (t *FuncButton) SetText(v string) *FuncButton {
+	t.Text = v
+	return t
+}
+
+// SetIcon sets the [FuncButton.Icon]
+func (t *FuncButton) SetIcon(v icons.Icon) *FuncButton {
+	t.Icon = v
+	return t
+}
+
+// SetIndicator sets the [FuncButton.Indicator]
+func (t *FuncButton) SetIndicator(v icons.Icon) *FuncButton {
+	t.Indicator = v
+	return t
+}
+
+// SetShortcut sets the [FuncButton.Shortcut]
+func (t *FuncButton) SetShortcut(v key.Chord) *FuncButton {
+	t.Shortcut = v
+	return t
+}
+
+// SetMenu sets the [FuncButton.Menu]
+func (t *FuncButton) SetMenu(v func(m *gi.Scene)) *FuncButton {
+	t.Menu = v
+	return t
+}
+
+// SetData sets the [FuncButton.Data]
+func (t *FuncButton) SetData(v any) *FuncButton {
+	t.Data = v
+	return t
+}
+
+// SetUpdateFunc sets the [FuncButton.UpdateFunc]
+func (t *FuncButton) SetUpdateFunc(v func()) *FuncButton {
+	t.UpdateFunc = v
 	return t
 }
 
@@ -722,13 +975,6 @@ func (t *GiEditor) New() ki.Ki {
 	return &GiEditor{}
 }
 
-// SetTooltip sets the [GiEditor.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *GiEditor) SetTooltip(v string) *GiEditor {
-	t.Tooltip = v
-	return t
-}
-
 // SetKiRoot sets the [GiEditor.KiRoot]:
 // root of tree being edited
 func (t *GiEditor) SetKiRoot(v ki.Ki) *GiEditor {
@@ -740,6 +986,42 @@ func (t *GiEditor) SetKiRoot(v ki.Ki) *GiEditor {
 // current filename for saving / loading
 func (t *GiEditor) SetFilename(v gi.FileName) *GiEditor {
 	t.Filename = v
+	return t
+}
+
+// SetTooltip sets the [GiEditor.Tooltip]
+func (t *GiEditor) SetTooltip(v string) *GiEditor {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [GiEditor.Class]
+func (t *GiEditor) SetClass(v string) *GiEditor {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [GiEditor.CustomContextMenu]
+func (t *GiEditor) SetCustomContextMenu(v func(m *gi.Scene)) *GiEditor {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [GiEditor.Spacing]
+func (t *GiEditor) SetSpacing(v units.Value) *GiEditor {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [GiEditor.StackTop]
+func (t *GiEditor) SetStackTop(v int) *GiEditor {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [GiEditor.Stripes]
+func (t *GiEditor) SetStripes(v gi.Stripes) *GiEditor {
+	t.Stripes = v
 	return t
 }
 
@@ -778,17 +1060,40 @@ func (t *KeyChordEdit) New() ki.Ki {
 	return &KeyChordEdit{}
 }
 
-// SetTooltip sets the [KeyChordEdit.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+// SetFocusActive sets the [KeyChordEdit.FocusActive]:
+// true if the keyboard focus is active or not -- when we lose active focus we apply changes
+func (t *KeyChordEdit) SetFocusActive(v bool) *KeyChordEdit {
+	t.FocusActive = v
+	return t
+}
+
+// SetTooltip sets the [KeyChordEdit.Tooltip]
 func (t *KeyChordEdit) SetTooltip(v string) *KeyChordEdit {
 	t.Tooltip = v
 	return t
 }
 
-// SetFocusActive sets the [KeyChordEdit.FocusActive]:
-// true if the keyboard focus is active or not -- when we lose active focus we apply changes
-func (t *KeyChordEdit) SetFocusActive(v bool) *KeyChordEdit {
-	t.FocusActive = v
+// SetClass sets the [KeyChordEdit.Class]
+func (t *KeyChordEdit) SetClass(v string) *KeyChordEdit {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [KeyChordEdit.CustomContextMenu]
+func (t *KeyChordEdit) SetCustomContextMenu(v func(m *gi.Scene)) *KeyChordEdit {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetText sets the [KeyChordEdit.Text]
+func (t *KeyChordEdit) SetText(v string) *KeyChordEdit {
+	t.Text = v
+	return t
+}
+
+// SetType sets the [KeyChordEdit.Type]
+func (t *KeyChordEdit) SetType(v gi.LabelTypes) *KeyChordEdit {
+	t.Type = v
 	return t
 }
 
@@ -836,13 +1141,6 @@ func (t *MapView) KiType() *gti.Type {
 // New returns a new [*MapView] value
 func (t *MapView) New() ki.Ki {
 	return &MapView{}
-}
-
-// SetTooltip sets the [MapView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *MapView) SetTooltip(v string) *MapView {
-	t.Tooltip = v
-	return t
 }
 
 // SetMapValView sets the [MapView.MapValView]:
@@ -917,6 +1215,42 @@ func (t *MapView) SetToolbarMap(v any) *MapView {
 	return t
 }
 
+// SetTooltip sets the [MapView.Tooltip]
+func (t *MapView) SetTooltip(v string) *MapView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [MapView.Class]
+func (t *MapView) SetClass(v string) *MapView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [MapView.CustomContextMenu]
+func (t *MapView) SetCustomContextMenu(v func(m *gi.Scene)) *MapView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [MapView.Spacing]
+func (t *MapView) SetSpacing(v units.Value) *MapView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [MapView.StackTop]
+func (t *MapView) SetStackTop(v int) *MapView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [MapView.Stripes]
+func (t *MapView) SetStripes(v gi.Stripes) *MapView {
+	t.Stripes = v
+	return t
+}
+
 // MapViewInlineType is the [gti.Type] for [MapViewInline]
 var MapViewInlineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.MapViewInline",
@@ -957,13 +1291,6 @@ func (t *MapViewInline) KiType() *gti.Type {
 // New returns a new [*MapViewInline] value
 func (t *MapViewInline) New() ki.Ki {
 	return &MapViewInline{}
-}
-
-// SetTooltip sets the [MapViewInline.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *MapViewInline) SetTooltip(v string) *MapViewInline {
-	t.Tooltip = v
-	return t
 }
 
 // SetMapValView sets the [MapViewInline.MapValView]:
@@ -1010,6 +1337,36 @@ func (t *MapViewInline) SetViewPath(v string) *MapViewInline {
 	return t
 }
 
+// SetTooltip sets the [MapViewInline.Tooltip]
+func (t *MapViewInline) SetTooltip(v string) *MapViewInline {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [MapViewInline.Class]
+func (t *MapViewInline) SetClass(v string) *MapViewInline {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [MapViewInline.CustomContextMenu]
+func (t *MapViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *MapViewInline {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [MapViewInline.Spacing]
+func (t *MapViewInline) SetSpacing(v units.Value) *MapViewInline {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [MapViewInline.StackTop]
+func (t *MapViewInline) SetStackTop(v int) *MapViewInline {
+	t.StackTop = v
+	return t
+}
+
 // SliceViewType is the [gti.Type] for [SliceView]
 var SliceViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceView",
@@ -1045,17 +1402,160 @@ func (t *SliceView) New() ki.Ki {
 	return &SliceView{}
 }
 
-// SetTooltip sets the [SliceView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+// SetStyleFunc sets the [SliceView.StyleFunc]:
+// optional styling function
+func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView {
+	t.StyleFunc = v
+	return t
+}
+
+// SetTooltip sets the [SliceView.Tooltip]
 func (t *SliceView) SetTooltip(v string) *SliceView {
 	t.Tooltip = v
 	return t
 }
 
-// SetStyleFunc sets the [SliceView.StyleFunc]:
-// optional styling function
-func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView {
-	t.StyleFunc = v
+// SetClass sets the [SliceView.Class]
+func (t *SliceView) SetClass(v string) *SliceView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [SliceView.CustomContextMenu]
+func (t *SliceView) SetCustomContextMenu(v func(m *gi.Scene)) *SliceView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [SliceView.Spacing]
+func (t *SliceView) SetSpacing(v units.Value) *SliceView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [SliceView.StackTop]
+func (t *SliceView) SetStackTop(v int) *SliceView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [SliceView.Stripes]
+func (t *SliceView) SetStripes(v gi.Stripes) *SliceView {
+	t.Stripes = v
+	return t
+}
+
+// SetViewMu sets the [SliceView.ViewMu]
+func (t *SliceView) SetViewMu(v *sync.Mutex) *SliceView {
+	t.ViewMu = v
+	return t
+}
+
+// SetSliceNPVal sets the [SliceView.SliceNPVal]
+func (t *SliceView) SetSliceNPVal(v reflect.Value) *SliceView {
+	t.SliceNPVal = v
+	return t
+}
+
+// SetSliceValView sets the [SliceView.SliceValView]
+func (t *SliceView) SetSliceValView(v Value) *SliceView {
+	t.SliceValView = v
+	return t
+}
+
+// SetValues sets the [SliceView.Values]
+func (t *SliceView) SetValues(v []Value) *SliceView {
+	t.Values = v
+	return t
+}
+
+// SetSelVal sets the [SliceView.SelVal]
+func (t *SliceView) SetSelVal(v any) *SliceView {
+	t.SelVal = v
+	return t
+}
+
+// SetSelectedIdx sets the [SliceView.SelectedIdx]
+func (t *SliceView) SetSelectedIdx(v int) *SliceView {
+	t.SelectedIdx = v
+	return t
+}
+
+// SetSelectedIdxs sets the [SliceView.SelectedIdxs]
+func (t *SliceView) SetSelectedIdxs(v map[int]struct{}) *SliceView {
+	t.SelectedIdxs = v
+	return t
+}
+
+// SetDraggedIdxs sets the [SliceView.DraggedIdxs]
+func (t *SliceView) SetDraggedIdxs(v []int) *SliceView {
+	t.DraggedIdxs = v
+	return t
+}
+
+// SetViewPath sets the [SliceView.ViewPath]
+func (t *SliceView) SetViewPath(v string) *SliceView {
+	t.ViewPath = v
+	return t
+}
+
+// SetTmpSave sets the [SliceView.TmpSave]
+func (t *SliceView) SetTmpSave(v Value) *SliceView {
+	t.TmpSave = v
+	return t
+}
+
+// SetToolbarSlice sets the [SliceView.ToolbarSlice]
+func (t *SliceView) SetToolbarSlice(v any) *SliceView {
+	t.ToolbarSlice = v
+	return t
+}
+
+// SetRowHeight sets the [SliceView.RowHeight]
+func (t *SliceView) SetRowHeight(v float32) *SliceView {
+	t.RowHeight = v
+	return t
+}
+
+// SetLayoutHeight sets the [SliceView.LayoutHeight]
+func (t *SliceView) SetLayoutHeight(v float32) *SliceView {
+	t.LayoutHeight = v
+	return t
+}
+
+// SetVisRows sets the [SliceView.VisRows]
+func (t *SliceView) SetVisRows(v int) *SliceView {
+	t.VisRows = v
+	return t
+}
+
+// SetStartIdx sets the [SliceView.StartIdx]
+func (t *SliceView) SetStartIdx(v int) *SliceView {
+	t.StartIdx = v
+	return t
+}
+
+// SetRenderedRows sets the [SliceView.RenderedRows]
+func (t *SliceView) SetRenderedRows(v int) *SliceView {
+	t.RenderedRows = v
+	return t
+}
+
+// SetSliceSize sets the [SliceView.SliceSize]
+func (t *SliceView) SetSliceSize(v int) *SliceView {
+	t.SliceSize = v
+	return t
+}
+
+// SetCurIdx sets the [SliceView.CurIdx]
+func (t *SliceView) SetCurIdx(v int) *SliceView {
+	t.CurIdx = v
+	return t
+}
+
+// SetElVal sets the [SliceView.ElVal]
+func (t *SliceView) SetElVal(v reflect.Value) *SliceView {
+	t.ElVal = v
 	return t
 }
 
@@ -1112,13 +1612,6 @@ func (t *SliceViewBase) KiType() *gti.Type {
 // New returns a new [*SliceViewBase] value
 func (t *SliceViewBase) New() ki.Ki {
 	return &SliceViewBase{}
-}
-
-// SetTooltip sets the [SliceViewBase.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase {
-	t.Tooltip = v
-	return t
 }
 
 // SetViewMu sets the [SliceViewBase.ViewMu]:
@@ -1255,6 +1748,42 @@ func (t *SliceViewBase) SetElVal(v reflect.Value) *SliceViewBase {
 	return t
 }
 
+// SetTooltip sets the [SliceViewBase.Tooltip]
+func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [SliceViewBase.Class]
+func (t *SliceViewBase) SetClass(v string) *SliceViewBase {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [SliceViewBase.CustomContextMenu]
+func (t *SliceViewBase) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewBase {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [SliceViewBase.Spacing]
+func (t *SliceViewBase) SetSpacing(v units.Value) *SliceViewBase {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [SliceViewBase.StackTop]
+func (t *SliceViewBase) SetStackTop(v int) *SliceViewBase {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [SliceViewBase.Stripes]
+func (t *SliceViewBase) SetStripes(v gi.Stripes) *SliceViewBase {
+	t.Stripes = v
+	return t
+}
+
 // SliceViewInlineType is the [gti.Type] for [SliceViewInline]
 var SliceViewInlineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceViewInline",
@@ -1296,13 +1825,6 @@ func (t *SliceViewInline) KiType() *gti.Type {
 // New returns a new [*SliceViewInline] value
 func (t *SliceViewInline) New() ki.Ki {
 	return &SliceViewInline{}
-}
-
-// SetTooltip sets the [SliceViewInline.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline {
-	t.Tooltip = v
-	return t
 }
 
 // SetSliceValView sets the [SliceViewInline.SliceValView]:
@@ -1356,6 +1878,36 @@ func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline {
 	return t
 }
 
+// SetTooltip sets the [SliceViewInline.Tooltip]
+func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [SliceViewInline.Class]
+func (t *SliceViewInline) SetClass(v string) *SliceViewInline {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [SliceViewInline.CustomContextMenu]
+func (t *SliceViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewInline {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [SliceViewInline.Spacing]
+func (t *SliceViewInline) SetSpacing(v units.Value) *SliceViewInline {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [SliceViewInline.StackTop]
+func (t *SliceViewInline) SetStackTop(v int) *SliceViewInline {
+	t.StackTop = v
+	return t
+}
+
 // StructViewType is the [gti.Type] for [StructView]
 var StructViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.StructView",
@@ -1401,13 +1953,6 @@ func (t *StructView) KiType() *gti.Type {
 // New returns a new [*StructView] value
 func (t *StructView) New() ki.Ki {
 	return &StructView{}
-}
-
-// SetTooltip sets the [StructView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *StructView) SetTooltip(v string) *StructView {
-	t.Tooltip = v
-	return t
 }
 
 // SetStructValView sets the [StructView.StructValView]:
@@ -1489,6 +2034,42 @@ func (t *StructView) SetTypeFieldTags(v map[string]string) *StructView {
 	return t
 }
 
+// SetTooltip sets the [StructView.Tooltip]
+func (t *StructView) SetTooltip(v string) *StructView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [StructView.Class]
+func (t *StructView) SetClass(v string) *StructView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [StructView.CustomContextMenu]
+func (t *StructView) SetCustomContextMenu(v func(m *gi.Scene)) *StructView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [StructView.Spacing]
+func (t *StructView) SetSpacing(v units.Value) *StructView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [StructView.StackTop]
+func (t *StructView) SetStackTop(v int) *StructView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [StructView.Stripes]
+func (t *StructView) SetStripes(v gi.Stripes) *StructView {
+	t.Stripes = v
+	return t
+}
+
 // StructViewInlineType is the [gti.Type] for [StructViewInline]
 var StructViewInlineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.StructViewInline",
@@ -1530,13 +2111,6 @@ func (t *StructViewInline) KiType() *gti.Type {
 // New returns a new [*StructViewInline] value
 func (t *StructViewInline) New() ki.Ki {
 	return &StructViewInline{}
-}
-
-// SetTooltip sets the [StructViewInline.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *StructViewInline) SetTooltip(v string) *StructViewInline {
-	t.Tooltip = v
-	return t
 }
 
 // SetStructValView sets the [StructViewInline.StructValView]:
@@ -1597,6 +2171,42 @@ func (t *StructViewInline) SetHasViewIfs(v bool) *StructViewInline {
 	return t
 }
 
+// SetTooltip sets the [StructViewInline.Tooltip]
+func (t *StructViewInline) SetTooltip(v string) *StructViewInline {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [StructViewInline.Class]
+func (t *StructViewInline) SetClass(v string) *StructViewInline {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [StructViewInline.CustomContextMenu]
+func (t *StructViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *StructViewInline {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [StructViewInline.Spacing]
+func (t *StructViewInline) SetSpacing(v units.Value) *StructViewInline {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [StructViewInline.StackTop]
+func (t *StructViewInline) SetStackTop(v int) *StructViewInline {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [StructViewInline.Stripes]
+func (t *StructViewInline) SetStripes(v gi.Stripes) *StructViewInline {
+	t.Stripes = v
+	return t
+}
+
 // EditorType is the [gti.Type] for [Editor]
 var EditorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.Editor",
@@ -1634,13 +2244,6 @@ func (t *Editor) New() ki.Ki {
 	return &Editor{}
 }
 
-// SetTooltip sets the [Editor.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Editor) SetTooltip(v string) *Editor {
-	t.Tooltip = v
-	return t
-}
-
 // SetTrans sets the [Editor.Trans]:
 // view translation offset (from dragging)
 func (t *Editor) SetTrans(v mat32.Vec2) *Editor {
@@ -1659,6 +2262,24 @@ func (t *Editor) SetScale(v float32) *Editor {
 // has dragging cursor been set yet?
 func (t *Editor) SetSetDragCursor(v bool) *Editor {
 	t.SetDragCursor = v
+	return t
+}
+
+// SetTooltip sets the [Editor.Tooltip]
+func (t *Editor) SetTooltip(v string) *Editor {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Editor.Class]
+func (t *Editor) SetClass(v string) *Editor {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Editor.CustomContextMenu]
+func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -1701,13 +2322,6 @@ func (t *TableView) KiType() *gti.Type {
 // New returns a new [*TableView] value
 func (t *TableView) New() ki.Ki {
 	return &TableView{}
-}
-
-// SetTooltip sets the [TableView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *TableView) SetTooltip(v string) *TableView {
-	t.Tooltip = v
-	return t
 }
 
 // SetStyleFunc sets the [TableView.StyleFunc]:
@@ -1756,6 +2370,156 @@ func (t *TableView) SetVisFields(v []reflect.StructField) *TableView {
 // number of visible fields
 func (t *TableView) SetNVisFields(v int) *TableView {
 	t.NVisFields = v
+	return t
+}
+
+// SetTooltip sets the [TableView.Tooltip]
+func (t *TableView) SetTooltip(v string) *TableView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [TableView.Class]
+func (t *TableView) SetClass(v string) *TableView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [TableView.CustomContextMenu]
+func (t *TableView) SetCustomContextMenu(v func(m *gi.Scene)) *TableView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [TableView.Spacing]
+func (t *TableView) SetSpacing(v units.Value) *TableView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [TableView.StackTop]
+func (t *TableView) SetStackTop(v int) *TableView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [TableView.Stripes]
+func (t *TableView) SetStripes(v gi.Stripes) *TableView {
+	t.Stripes = v
+	return t
+}
+
+// SetViewMu sets the [TableView.ViewMu]
+func (t *TableView) SetViewMu(v *sync.Mutex) *TableView {
+	t.ViewMu = v
+	return t
+}
+
+// SetSliceNPVal sets the [TableView.SliceNPVal]
+func (t *TableView) SetSliceNPVal(v reflect.Value) *TableView {
+	t.SliceNPVal = v
+	return t
+}
+
+// SetSliceValView sets the [TableView.SliceValView]
+func (t *TableView) SetSliceValView(v Value) *TableView {
+	t.SliceValView = v
+	return t
+}
+
+// SetValues sets the [TableView.Values]
+func (t *TableView) SetValues(v []Value) *TableView {
+	t.Values = v
+	return t
+}
+
+// SetSelVal sets the [TableView.SelVal]
+func (t *TableView) SetSelVal(v any) *TableView {
+	t.SelVal = v
+	return t
+}
+
+// SetSelectedIdx sets the [TableView.SelectedIdx]
+func (t *TableView) SetSelectedIdx(v int) *TableView {
+	t.SelectedIdx = v
+	return t
+}
+
+// SetSelectedIdxs sets the [TableView.SelectedIdxs]
+func (t *TableView) SetSelectedIdxs(v map[int]struct{}) *TableView {
+	t.SelectedIdxs = v
+	return t
+}
+
+// SetDraggedIdxs sets the [TableView.DraggedIdxs]
+func (t *TableView) SetDraggedIdxs(v []int) *TableView {
+	t.DraggedIdxs = v
+	return t
+}
+
+// SetViewPath sets the [TableView.ViewPath]
+func (t *TableView) SetViewPath(v string) *TableView {
+	t.ViewPath = v
+	return t
+}
+
+// SetTmpSave sets the [TableView.TmpSave]
+func (t *TableView) SetTmpSave(v Value) *TableView {
+	t.TmpSave = v
+	return t
+}
+
+// SetToolbarSlice sets the [TableView.ToolbarSlice]
+func (t *TableView) SetToolbarSlice(v any) *TableView {
+	t.ToolbarSlice = v
+	return t
+}
+
+// SetRowHeight sets the [TableView.RowHeight]
+func (t *TableView) SetRowHeight(v float32) *TableView {
+	t.RowHeight = v
+	return t
+}
+
+// SetLayoutHeight sets the [TableView.LayoutHeight]
+func (t *TableView) SetLayoutHeight(v float32) *TableView {
+	t.LayoutHeight = v
+	return t
+}
+
+// SetVisRows sets the [TableView.VisRows]
+func (t *TableView) SetVisRows(v int) *TableView {
+	t.VisRows = v
+	return t
+}
+
+// SetStartIdx sets the [TableView.StartIdx]
+func (t *TableView) SetStartIdx(v int) *TableView {
+	t.StartIdx = v
+	return t
+}
+
+// SetRenderedRows sets the [TableView.RenderedRows]
+func (t *TableView) SetRenderedRows(v int) *TableView {
+	t.RenderedRows = v
+	return t
+}
+
+// SetSliceSize sets the [TableView.SliceSize]
+func (t *TableView) SetSliceSize(v int) *TableView {
+	t.SliceSize = v
+	return t
+}
+
+// SetCurIdx sets the [TableView.CurIdx]
+func (t *TableView) SetCurIdx(v int) *TableView {
+	t.CurIdx = v
+	return t
+}
+
+// SetElVal sets the [TableView.ElVal]
+func (t *TableView) SetElVal(v reflect.Value) *TableView {
+	t.ElVal = v
 	return t
 }
 
@@ -1826,13 +2590,6 @@ func (t *TreeView) AsTreeView() *TreeView {
 	return t
 }
 
-// SetTooltip sets the [TreeView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *TreeView) SetTooltip(v string) *TreeView {
-	t.Tooltip = v
-	return t
-}
-
 // SetIcon sets the [TreeView.Icon]:
 // optional icon, displayed to the the left of the text label
 func (t *TreeView) SetIcon(v icons.Icon) *TreeView {
@@ -1898,6 +2655,24 @@ func (t *TreeView) SetactStateLayer(v float32) *TreeView {
 	return t
 }
 
+// SetTooltip sets the [TreeView.Tooltip]
+func (t *TreeView) SetTooltip(v string) *TreeView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [TreeView.Class]
+func (t *TreeView) SetClass(v string) *TreeView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [TreeView.CustomContextMenu]
+func (t *TreeView) SetCustomContextMenu(v func(m *gi.Scene)) *TreeView {
+	t.CustomContextMenu = v
+	return t
+}
+
 // VCSLogViewType is the [gti.Type] for [VCSLogView]
 var VCSLogViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.VCSLogView",
@@ -1939,13 +2714,6 @@ func (t *VCSLogView) New() ki.Ki {
 	return &VCSLogView{}
 }
 
-// SetTooltip sets the [VCSLogView.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
-	t.Tooltip = v
-	return t
-}
-
 // SetLog sets the [VCSLogView.Log]:
 // current log
 func (t *VCSLogView) SetLog(v vci.Log) *VCSLogView {
@@ -1978,5 +2746,35 @@ func (t *VCSLogView) SetRepo(v vci.Repo) *VCSLogView {
 // double-click will set the A revision -- else B
 func (t *VCSLogView) SetSetA(v bool) *VCSLogView {
 	t.SetA = v
+	return t
+}
+
+// SetTooltip sets the [VCSLogView.Tooltip]
+func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [VCSLogView.Class]
+func (t *VCSLogView) SetClass(v string) *VCSLogView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [VCSLogView.CustomContextMenu]
+func (t *VCSLogView) SetCustomContextMenu(v func(m *gi.Scene)) *VCSLogView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [VCSLogView.Spacing]
+func (t *VCSLogView) SetSpacing(v units.Value) *VCSLogView {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [VCSLogView.StackTop]
+func (t *VCSLogView) SetStackTop(v int) *VCSLogView {
+	t.StackTop = v
 	return t
 }
