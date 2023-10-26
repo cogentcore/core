@@ -127,3 +127,14 @@ func (dv *Device) Destroy() {
 func (dv *Device) DeviceWaitIdle() {
 	vk.DeviceWaitIdle(dv.Device)
 }
+
+// NewGraphicsDevice returns a new Graphics Device, on given GPU.
+// This is suitable for no display offscreen rendering.
+// Typically use the Surface Device for rendering to a display window.
+func NewGraphicsDevice(gp *GPU) (*Device, error) {
+	dev := &Device{}
+	if err := dev.Init(gp, vk.QueueGraphicsBit); err != nil {
+		return nil, err
+	}
+	return dev, nil
+}

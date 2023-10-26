@@ -555,3 +555,18 @@ func ValidationLayers() (names []string, err error) {
 	}
 	return names, err
 }
+
+// NoDisplayGPU Initializes the Vulkan GPU and returns that
+// and the graphics GPU device, with given name, without connecting
+// to the display.
+func NoDisplayGPU(nm string) (*GPU, *Device, error) {
+	if err := InitNoDisplay(); err != nil {
+		return nil, nil, err
+	}
+	gp := NewGPU()
+	if err := gp.Config(nm, nil); err != nil {
+		return nil, nil, err
+	}
+	dev, err := NewGraphicsDevice(gp)
+	return gp, dev, err
+}
