@@ -379,21 +379,16 @@ func (mv *MapView) ConfigToolbar() {
 		return
 	}
 	tb := mv.Toolbar()
-	ndef := 3 // number of default actions
+	ndef := 2 // number of default actions
 	if mv.IsReadOnly() {
-		ndef = 2
+		ndef = 1
 	}
 	if len(*tb.Children()) == 0 {
-		tb.SetStretchMaxWidth()
-		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update the view to reflect current state of map").
-			OnClick(func(e events.Event) {
-				mv.UpdateValues()
-			})
 		gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
 			OnClick(func(e events.Event) {
 				mv.ToggleSort()
 			})
-		if ndef > 2 {
+		if ndef > 1 {
 			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the map").
 				OnClick(func(e events.Event) {
 					mv.MapAdd()
