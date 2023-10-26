@@ -304,7 +304,7 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 		}
 		// TODO(kai/sel): check if has flag
 	})
-	tb.AddSeparator()
+	gi.NewSeparator(tb)
 	op := NewFuncButton(tb, ge.Open)
 	op.SetIcon(icons.FileOpen)
 	op.Args[0].SetValue(ge.Filename)
@@ -316,7 +316,7 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	sa := NewFuncButton(tb, ge.SaveAs)
 	sa.Args[0].SetValue(ge.Filename)
 	sa.Args[0].SetTag("ext", ".json")
-	tb.AddSeparator()
+	gi.NewSeparator(tb)
 	NewFuncButton(tb, ge.EditColorScheme).SetIcon(icons.Colors)
 }
 

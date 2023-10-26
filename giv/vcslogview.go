@@ -147,7 +147,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 	tb := lv.Toolbar()
 	if lv.File != "" {
 		gi.NewLabel(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
-		tb.AddSeparator("flsep")
+		gi.NewSeparator(tb, "flsep")
 		cba := gi.NewSwitch(tb, "a-rev")
 		cba.SetText("A Rev: ")
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
@@ -157,7 +157,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 		tfa.OnChange(func(e events.Event) {
 			lv.RevA = tfa.Text()
 		})
-		tb.AddSeparator("absep")
+		gi.NewSeparator(tb, "absep")
 		cbb := gi.NewSwitch(tb, "b-rev")
 		cbb.SetText("B Rev: ")
 		cbb.Tooltip = "If selected, double-clicking in log will set this B Revision to use for Diff"
@@ -166,7 +166,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 		tfb.OnChange(func(e events.Event) {
 			lv.RevB = tfb.Text()
 		})
-		tb.AddSeparator("dsep")
+		gi.NewSeparator(tb, "dsep")
 		gi.NewButton(tb, "diff").SetText("Diff").SetIcon(icons.Difference).SetTooltip("Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
 				// TOOD: add this back

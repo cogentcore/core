@@ -129,11 +129,11 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 				// if no depth, we go straight in toolbar
 				if depth == 0 {
 					if cfg.SepBefore {
-						tb.AddSeparator()
+						gi.NewSeparator(tb)
 					}
 					tb.AddButton(ao, btf)
 					if cfg.SepAfter {
-						tb.AddSeparator()
+						gi.NewSeparator(tb)
 					}
 					continue
 				}
