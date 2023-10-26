@@ -34,14 +34,6 @@ func (fn FileName) String() string {
 	return string(fn)
 }
 
-// KeyMapName has an associated Value for selecting from the list of
-// available key map names, for use in preferences etc.
-type KeyMapName string
-
-func (kn KeyMapName) String() string {
-	return string(kn)
-}
-
 // HiStyleName is a highlighting style name
 type HiStyleName string
 
