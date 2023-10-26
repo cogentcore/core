@@ -70,14 +70,20 @@ func (tb *Toolbar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
-// OverflowMenu returns the overflow menu element, a button on the right
-// end of the toolbar that has a menu containing all of the toolbar buttons that
-// either don't fit or are low-frequency. If it doesn't already exist, it makes it.
+// OverflowMenu returns the overflow menu element, a button on the end of the toolbar
+// that has a menu containing all of the toolbar buttons that either don't fit or are
+// too low-frequency to go in the main toolbar. If the overflow menu button doesn't
+// already exist, it makes it and a separator separating it from the rest of the toolbar.
+// OverflowMenu is designed to be used by end-user code; for example:
+//
+//	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+//		giv.NewFuncButton(m, me.SomethingLowFrequency)
+//	})
 func (tb *Toolbar) OverflowMenu() *Button {
 	if om, ok := tb.ChildByName("overflow-menu").(*Button); ok {
 		return om
 	}
-	NewStretch(tb, "overflow-menu-stretch")
+	NewSeparator(tb, "overflow-menu-separator")
 	ic := icons.MoreVert
 	if tb.Lay != LayoutHoriz {
 		ic = icons.MoreHoriz
