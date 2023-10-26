@@ -80,6 +80,92 @@ func (t *ManipPt) New() ki.Ki {
 	return &ManipPt{}
 }
 
+// SetMat sets the [ManipPt.Mat]
+func (t *ManipPt) SetMat(v Material) *ManipPt {
+	t.Mat = v
+	return t
+}
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi3d.Material",
+	ShortName: "gi3d.Material",
+	IDName:    "material",
+	Doc:       "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering", Directives: gti.Directives{}, Tag: ""}},
+		{"Emissive", &gti.Field{Name: "Emissive", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object", Directives: gti.Directives{}, Tag: ""}},
+		{"Shiny", &gti.Field{Name: "Shiny", Type: "float32", LocalType: "float32", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.", Directives: gti.Directives{}, Tag: ""}},
+		{"Reflective", &gti.Field{Name: "Reflective", Type: "float32", LocalType: "float32", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.", Directives: gti.Directives{}, Tag: ""}},
+		{"Bright", &gti.Field{Name: "Bright", Type: "float32", LocalType: "float32", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters", Directives: gti.Directives{}, Tag: ""}},
+		{"Texture", &gti.Field{Name: "Texture", Type: "goki.dev/gi3d.TexName", LocalType: "TexName", Doc: "prop: texture = texture to provide color for the surface", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Tiling", &gti.Field{Name: "Tiling", Type: "goki.dev/gi3d.Tiling", LocalType: "Tiling", Doc: "texture tiling parameters -- repeat and offset", Directives: gti.Directives{}, Tag: "view:\"inline\" viewif:\"Texture!=''\""}},
+		{"CullBack", &gti.Field{Name: "CullBack", Type: "bool", LocalType: "bool", Doc: "prop: cull-back = cull the back-facing surfaces", Directives: gti.Directives{}, Tag: ""}},
+		{"CullFront", &gti.Field{Name: "CullFront", Type: "bool", LocalType: "bool", Doc: "prop: cull-front = cull the front-facing surfaces", Directives: gti.Directives{}, Tag: ""}},
+		{"TexPtr", &gti.Field{Name: "TexPtr", Type: "goki.dev/gi3d.Texture", LocalType: "Texture", Doc: "pointer to texture", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+// SetColor sets the [Material.Color]:
+// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
+func (t *Material) SetColor(v color.RGBA) *Material {
+	t.Color = v
+	return t
+}
+
+// SetEmissive sets the [Material.Emissive]:
+// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
+func (t *Material) SetEmissive(v color.RGBA) *Material {
+	t.Emissive = v
+	return t
+}
+
+// SetShiny sets the [Material.Shiny]:
+// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
+func (t *Material) SetShiny(v float32) *Material {
+	t.Shiny = v
+	return t
+}
+
+// SetReflective sets the [Material.Reflective]:
+// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
+func (t *Material) SetReflective(v float32) *Material {
+	t.Reflective = v
+	return t
+}
+
+// SetBright sets the [Material.Bright]:
+// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
+func (t *Material) SetBright(v float32) *Material {
+	t.Bright = v
+	return t
+}
+
+// SetTiling sets the [Material.Tiling]:
+// texture tiling parameters -- repeat and offset
+func (t *Material) SetTiling(v Tiling) *Material {
+	t.Tiling = v
+	return t
+}
+
+// SetCullBack sets the [Material.CullBack]:
+// prop: cull-back = cull the back-facing surfaces
+func (t *Material) SetCullBack(v bool) *Material {
+	t.CullBack = v
+	return t
+}
+
+// SetCullFront sets the [Material.CullFront]:
+// prop: cull-front = cull the front-facing surfaces
+func (t *Material) SetCullFront(v bool) *Material {
+	t.CullFront = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi3d.MeshBase",
 	ShortName: "gi3d.MeshBase",
@@ -159,13 +245,14 @@ var NodeBaseType = gti.AddType(&gti.Type{
 	Doc:        "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pose", &gti.Field{Name: "Pose", Type: "goki.dev/gi3d.Pose", LocalType: "Pose", Doc: "complete specification of position and orientation", Directives: gti.Directives{}, Tag: ""}},
-		{"PoseMu", &gti.Field{Name: "PoseMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on pose access -- needed for parallel updating", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Pose", &gti.Field{Name: "Pose", Type: "goki.dev/gi3d.Pose", LocalType: "Pose", Doc: "complete specification of position and orientation", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi3d.Scene", LocalType: "*Scene", Doc: "Sc is the cached Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"PoseMu", &gti.Field{Name: "PoseMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on pose access -- needed for parallel updating", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\"  set:\"-\""}},
 		{"MeshBBox", &gti.Field{Name: "MeshBBox", Type: "goki.dev/gi3d.BBox", LocalType: "BBox", Doc: "mesh-based local bounding box (aggregated for groups)", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"WorldBBox", &gti.Field{Name: "WorldBBox", Type: "goki.dev/gi3d.BBox", LocalType: "BBox", Doc: "world coordinates bounding box", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"NDCBBox", &gti.Field{Name: "NDCBBox", Type: "goki.dev/mat32/v2.Box3", LocalType: "mat32.Box3", Doc: "normalized display coordinates bounding box, used for frustrum clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds.", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds.", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -192,27 +279,15 @@ func (t *NodeBase) New() ki.Ki {
 	return &NodeBase{}
 }
 
-// SetPose sets the [NodeBase.Pose]:
-// complete specification of position and orientation
-func (t *NodeBase) SetPose(v Pose) *NodeBase {
-	t.Pose = v
-	return t
-}
-
-// SetPoseMu sets the [NodeBase.PoseMu]:
-// mutex on pose access -- needed for parallel updating
-func (t *NodeBase) SetPoseMu(v sync.RWMutex) *NodeBase {
-	t.PoseMu = v
-	return t
-}
-
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi3d.Scene",
-	ShortName:  "gi3d.Scene",
-	IDName:     "scene",
-	Doc:        "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame, the Image of which is then copied\ninto the window vgpu.Drawer images for subsequent compositing into the\nwindow directly, as a DurectWinUpload element.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi3d.Scene",
+	ShortName: "gi3d.Scene",
+	IDName:    "scene",
+	Doc:       "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via gi3v.Scene3D,\nwhere it is copied into an overall gi.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Viewport-level viewbox within any parent Viewport2D", Directives: gti.Directives{}, Tag: ""}},
 		{"MultiSample", &gti.Field{Name: "MultiSample", Type: "int", LocalType: "int", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame", Directives: gti.Directives{}, Tag: "def:\"4\""}},
@@ -434,6 +509,48 @@ func (t *Plane) SetOffset(v float32) *Plane {
 	return t
 }
 
+// SetNVtx sets the [Plane.NVtx]
+func (t *Plane) SetNVtx(v int) *Plane {
+	t.NVtx = v
+	return t
+}
+
+// SetNIdx sets the [Plane.NIdx]
+func (t *Plane) SetNIdx(v int) *Plane {
+	t.NIdx = v
+	return t
+}
+
+// SetColor sets the [Plane.Color]
+func (t *Plane) SetColor(v bool) *Plane {
+	t.Color = v
+	return t
+}
+
+// SetDynamic sets the [Plane.Dynamic]
+func (t *Plane) SetDynamic(v bool) *Plane {
+	t.Dynamic = v
+	return t
+}
+
+// SetTrans sets the [Plane.Trans]
+func (t *Plane) SetTrans(v bool) *Plane {
+	t.Trans = v
+	return t
+}
+
+// SetBBox sets the [Plane.BBox]
+func (t *Plane) SetBBox(v BBox) *Plane {
+	t.BBox = v
+	return t
+}
+
+// SetBBoxMu sets the [Plane.BBoxMu]
+func (t *Plane) SetBBoxMu(v sync.RWMutex) *Plane {
+	t.BBoxMu = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi3d.Box",
 	ShortName: "gi3d.Box",
@@ -463,6 +580,48 @@ func (t *Box) SetSize(v mat32.Vec3) *Box {
 // number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
 func (t *Box) SetSegs(v mat32.Vec3i) *Box {
 	t.Segs = v
+	return t
+}
+
+// SetNVtx sets the [Box.NVtx]
+func (t *Box) SetNVtx(v int) *Box {
+	t.NVtx = v
+	return t
+}
+
+// SetNIdx sets the [Box.NIdx]
+func (t *Box) SetNIdx(v int) *Box {
+	t.NIdx = v
+	return t
+}
+
+// SetColor sets the [Box.Color]
+func (t *Box) SetColor(v bool) *Box {
+	t.Color = v
+	return t
+}
+
+// SetDynamic sets the [Box.Dynamic]
+func (t *Box) SetDynamic(v bool) *Box {
+	t.Dynamic = v
+	return t
+}
+
+// SetTrans sets the [Box.Trans]
+func (t *Box) SetTrans(v bool) *Box {
+	t.Trans = v
+	return t
+}
+
+// SetBBox sets the [Box.BBox]
+func (t *Box) SetBBox(v BBox) *Box {
+	t.BBox = v
+	return t
+}
+
+// SetBBoxMu sets the [Box.BBoxMu]
+func (t *Box) SetBBoxMu(v sync.RWMutex) *Box {
+	t.BBoxMu = v
 	return t
 }
 
@@ -535,6 +694,48 @@ func (t *Sphere) SetElevStart(v float32) *Sphere {
 // total angle to generate in degrees (max = 180)
 func (t *Sphere) SetElevLen(v float32) *Sphere {
 	t.ElevLen = v
+	return t
+}
+
+// SetNVtx sets the [Sphere.NVtx]
+func (t *Sphere) SetNVtx(v int) *Sphere {
+	t.NVtx = v
+	return t
+}
+
+// SetNIdx sets the [Sphere.NIdx]
+func (t *Sphere) SetNIdx(v int) *Sphere {
+	t.NIdx = v
+	return t
+}
+
+// SetColor sets the [Sphere.Color]
+func (t *Sphere) SetColor(v bool) *Sphere {
+	t.Color = v
+	return t
+}
+
+// SetDynamic sets the [Sphere.Dynamic]
+func (t *Sphere) SetDynamic(v bool) *Sphere {
+	t.Dynamic = v
+	return t
+}
+
+// SetTrans sets the [Sphere.Trans]
+func (t *Sphere) SetTrans(v bool) *Sphere {
+	t.Trans = v
+	return t
+}
+
+// SetBBox sets the [Sphere.BBox]
+func (t *Sphere) SetBBox(v BBox) *Sphere {
+	t.BBox = v
+	return t
+}
+
+// SetBBoxMu sets the [Sphere.BBoxMu]
+func (t *Sphere) SetBBoxMu(v sync.RWMutex) *Sphere {
+	t.BBoxMu = v
 	return t
 }
 
@@ -626,6 +827,48 @@ func (t *Cylinder) SetAngLen(v float32) *Cylinder {
 	return t
 }
 
+// SetNVtx sets the [Cylinder.NVtx]
+func (t *Cylinder) SetNVtx(v int) *Cylinder {
+	t.NVtx = v
+	return t
+}
+
+// SetNIdx sets the [Cylinder.NIdx]
+func (t *Cylinder) SetNIdx(v int) *Cylinder {
+	t.NIdx = v
+	return t
+}
+
+// SetColor sets the [Cylinder.Color]
+func (t *Cylinder) SetColor(v bool) *Cylinder {
+	t.Color = v
+	return t
+}
+
+// SetDynamic sets the [Cylinder.Dynamic]
+func (t *Cylinder) SetDynamic(v bool) *Cylinder {
+	t.Dynamic = v
+	return t
+}
+
+// SetTrans sets the [Cylinder.Trans]
+func (t *Cylinder) SetTrans(v bool) *Cylinder {
+	t.Trans = v
+	return t
+}
+
+// SetBBox sets the [Cylinder.BBox]
+func (t *Cylinder) SetBBox(v BBox) *Cylinder {
+	t.BBox = v
+	return t
+}
+
+// SetBBoxMu sets the [Cylinder.BBoxMu]
+func (t *Cylinder) SetBBoxMu(v sync.RWMutex) *Cylinder {
+	t.BBoxMu = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi3d.Capsule",
 	ShortName: "gi3d.Capsule",
@@ -706,6 +949,48 @@ func (t *Capsule) SetAngLen(v float32) *Capsule {
 	return t
 }
 
+// SetNVtx sets the [Capsule.NVtx]
+func (t *Capsule) SetNVtx(v int) *Capsule {
+	t.NVtx = v
+	return t
+}
+
+// SetNIdx sets the [Capsule.NIdx]
+func (t *Capsule) SetNIdx(v int) *Capsule {
+	t.NIdx = v
+	return t
+}
+
+// SetColor sets the [Capsule.Color]
+func (t *Capsule) SetColor(v bool) *Capsule {
+	t.Color = v
+	return t
+}
+
+// SetDynamic sets the [Capsule.Dynamic]
+func (t *Capsule) SetDynamic(v bool) *Capsule {
+	t.Dynamic = v
+	return t
+}
+
+// SetTrans sets the [Capsule.Trans]
+func (t *Capsule) SetTrans(v bool) *Capsule {
+	t.Trans = v
+	return t
+}
+
+// SetBBox sets the [Capsule.BBox]
+func (t *Capsule) SetBBox(v BBox) *Capsule {
+	t.BBox = v
+	return t
+}
+
+// SetBBoxMu sets the [Capsule.BBoxMu]
+func (t *Capsule) SetBBoxMu(v sync.RWMutex) *Capsule {
+	t.BBoxMu = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi3d.Torus",
 	ShortName: "gi3d.Torus",
@@ -770,17 +1055,61 @@ func (t *Torus) SetAngLen(v float32) *Torus {
 	return t
 }
 
+// SetNVtx sets the [Torus.NVtx]
+func (t *Torus) SetNVtx(v int) *Torus {
+	t.NVtx = v
+	return t
+}
+
+// SetNIdx sets the [Torus.NIdx]
+func (t *Torus) SetNIdx(v int) *Torus {
+	t.NIdx = v
+	return t
+}
+
+// SetColor sets the [Torus.Color]
+func (t *Torus) SetColor(v bool) *Torus {
+	t.Color = v
+	return t
+}
+
+// SetDynamic sets the [Torus.Dynamic]
+func (t *Torus) SetDynamic(v bool) *Torus {
+	t.Dynamic = v
+	return t
+}
+
+// SetTrans sets the [Torus.Trans]
+func (t *Torus) SetTrans(v bool) *Torus {
+	t.Trans = v
+	return t
+}
+
+// SetBBox sets the [Torus.BBox]
+func (t *Torus) SetBBox(v BBox) *Torus {
+	t.BBox = v
+	return t
+}
+
+// SetBBoxMu sets the [Torus.BBoxMu]
+func (t *Torus) SetBBoxMu(v sync.RWMutex) *Torus {
+	t.BBoxMu = v
+	return t
+}
+
 // SolidType is the [gti.Type] for [Solid]
 var SolidType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi3d.Solid",
-	ShortName:  "gi3d.Solid",
-	IDName:     "solid",
-	Doc:        "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi3d.Solid",
+	ShortName: "gi3d.Solid",
+	IDName:    "solid",
+	Doc:       "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Mesh", &gti.Field{Name: "Mesh", Type: "goki.dev/gi3d.MeshName", LocalType: "MeshName", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Mat", &gti.Field{Name: "Mat", Type: "goki.dev/gi3d.Material", LocalType: "Material", Doc: "material properties of the surface (color, shininess, texture, etc)", Directives: gti.Directives{}, Tag: "view:\"add-fields\""}},
-		{"MeshPtr", &gti.Field{Name: "MeshPtr", Type: "goki.dev/gi3d.Mesh", LocalType: "Mesh", Doc: "cached pointer to mesh", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"MeshPtr", &gti.Field{Name: "MeshPtr", Type: "goki.dev/gi3d.Mesh", LocalType: "Mesh", Doc: "cached pointer to mesh", Directives: gti.Directives{}, Tag: "view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/gi3d.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -803,13 +1132,6 @@ func (t *Solid) New() ki.Ki {
 // material properties of the surface (color, shininess, texture, etc)
 func (t *Solid) SetMat(v Material) *Solid {
 	t.Mat = v
-	return t
-}
-
-// SetMeshPtr sets the [Solid.MeshPtr]:
-// cached pointer to mesh
-func (t *Solid) SetMeshPtr(v Mesh) *Solid {
-	t.MeshPtr = v
 	return t
 }
 
@@ -856,5 +1178,11 @@ func (t *Text2D) New() ki.Ki {
 // the text string to display
 func (t *Text2D) SetText(v string) *Text2D {
 	t.Text = v
+	return t
+}
+
+// SetMat sets the [Text2D.Mat]
+func (t *Text2D) SetMat(v Material) *Text2D {
+	t.Mat = v
 	return t
 }
