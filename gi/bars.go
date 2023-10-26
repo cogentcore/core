@@ -45,8 +45,7 @@ func (mb *MenuBar) MenuBarStyles() {
 		s.MaxWidth.SetDp(-1)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.Margin.Set(units.Dp(4))
-		s.Padding.SetHoriz(units.Dp(16))
+		s.Padding.SetHoriz(units.Dp(8))
 	})
 	mb.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
