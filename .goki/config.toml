@@ -6,7 +6,7 @@ Type = "Library"
 [Build]
   Package = "."
   Output = ""
-  ID = "com.org.todo.gi"
+  ID = "dev.goki.gi"
   Debug = false
   Rebuild = false
   Install = false
