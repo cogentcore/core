@@ -41,11 +41,12 @@ func app() {
 
 	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
-	tbar := gi.NewToolbar(sc, "tbar").SetStretchMaxWidth().(*gi.Toolbar)
-	gi.NewButton(tbar).SetText("Button 1").SetData(1).
+	tb := gi.NewToolbar(sc, "tbar")
+	tb.SetStretchMaxWidth()
+	gi.NewButton(tb).SetText("Button 1").SetData(1).
 		OnClick(func(e events.Event) {
 			fmt.Println("Toolbar Button 1")
-			gi.NewSnackbar(tbar, gi.SnackbarOpts{
+			gi.NewSnackbar(tb, gi.SnackbarOpts{
 				Text:   "Something went wrong!",
 				Button: "Try again",
 				ButtonOnClick: func(bt *gi.Button) {
@@ -57,7 +58,7 @@ func app() {
 				},
 			}).Run()
 		})
-	gi.NewButton(tbar).SetText("Button 2").SetData(2).
+	gi.NewButton(tb).SetText("Button 2").SetData(2).
 		OnClick(func(e events.Event) {
 			fmt.Println("Toolbar Button 2")
 		})
