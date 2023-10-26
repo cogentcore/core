@@ -66,24 +66,27 @@ func (t *Person) SetType(v *gti.Type) *Person {
 	return t
 }
 
-// SetName sets the [Person.Name]:
-// Name is the name of the person
-func (t *Person) SetName(v string) *Person {
-	t.Name = v
+// SetR sets the [Person.R]:
+func (t *Person) SetR(v uint8) *Person {
+	t.R = v
 	return t
 }
 
-// SetAge sets the [Person.Age]:
-// Age is the age of the person
-func (t *Person) SetAge(v int) *Person {
-	t.Age = v
+// SetG sets the [Person.G]:
+func (t *Person) SetG(v uint8) *Person {
+	t.G = v
 	return t
 }
 
-// SetType sets the [Person.Type]:
-// Type is the type of the person
-func (t *Person) SetType(v *gti.Type) *Person {
-	t.Type = v
+// SetB sets the [Person.B]:
+func (t *Person) SetB(v uint8) *Person {
+	t.B = v
+	return t
+}
+
+// SetA sets the [Person.A]:
+func (t *Person) SetA(v uint8) *Person {
+	t.A = v
 	return t
 }
 

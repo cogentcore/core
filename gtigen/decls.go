@@ -67,7 +67,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 func SetterFields(typ *Type) []*gti.Field {
 	res := []*gti.Field{}
 	do := func(fields *ordmap.Map[string, *gti.Field]) {
-		for _, kv := range typ.Fields.Order {
+		for _, kv := range fields.Order {
 			f := kv.Val
 			// unspecified indicates to add a set method; only "-" means no set
 			hasSetter := f.Tag.Get("set") != "-"

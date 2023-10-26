@@ -256,16 +256,17 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 
 			typ.EmbeddedFields = &gti.Fields{}
 			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
-			g.GetEmbeddedFields(typ.EmbeddedFields, tp)
+			g.GetEmbeddedFields(typ.EmbeddedFields, tp, tp)
 		}
 		g.Types = append(g.Types, typ)
 	}
 	return true, nil
 }
 
-// GetEmbeddedFields adds to the given set of embedded fields all of the embedded
-// fields for the given type.
-func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ types.Type) {
+// GetEmbeddedFields recursively adds to the given set of embedded fields all of the embedded
+// fields for the given type. It does not add the fields in the given starting type,
+// as those fields aren't embedded.
+func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ, startTyp types.Type) {
 	s, ok := typ.Underlying().(*types.Struct)
 	if !ok {
 		return
@@ -274,8 +275,12 @@ func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ types.Type) {
 	for i := 0; i < nf; i++ {
 		f := s.Field(i)
 		if f.Embedded() {
-			g.GetEmbeddedFields(efields, f.Type())
-			return
+			g.GetEmbeddedFields(efields, f.Type(), startTyp)
+			continue
+		}
+		// we don't add for start type, as field in that aren't embedded
+		if typ == startTyp {
+			continue
 		}
 		field := &gti.Field{
 			Name:      f.Name(),
