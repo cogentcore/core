@@ -192,7 +192,11 @@ func (bt *Button) ButtonStyles() {
 			})
 		case "parts/label":
 			label := w.(*Label)
-			label.Type = LabelLabelLarge
+			if bt.Type == ButtonMenu {
+				label.Type = LabelBodyMedium
+			} else {
+				label.Type = LabelLabelLarge
+			}
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None

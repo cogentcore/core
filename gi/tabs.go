@@ -568,7 +568,7 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/label":
 			label := w.(*Label)
-			label.Type = LabelTitleSmall
+			label.Type = LabelBodyMedium
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
