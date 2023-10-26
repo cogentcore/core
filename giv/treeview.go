@@ -1077,7 +1077,7 @@ func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Scene) {
 	}
 }
 
-func (tv *TreeView) MakeContextMenu(m *gi.Scene) {
+func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	// derived types put native menu code here
 	if tv.CustomContextMenu != nil {
 		tv.CustomContextMenu(m)

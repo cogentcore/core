@@ -103,7 +103,7 @@ func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *PopupStage {
 	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
 }
 
-func (wb *WidgetBase) MakeContextMenu(m *Scene) {
+func (wb *WidgetBase) ContextMenu(m *Scene) {
 	// derived types put native menu code here
 	if wb.CustomContextMenu != nil {
 		wb.CustomContextMenu(m)
@@ -132,5 +132,5 @@ func (wb *WidgetBase) HandleWidgetContextMenu() {
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	wi := wb.This().(Widget)
 	// TODO(kai/menu): how to handle empty context menus?
-	NewMenu(wi.MakeContextMenu, wi, wi.ContextMenuPos(e)).Run()
+	NewMenu(wi.ContextMenu, wi, wi.ContextMenuPos(e)).Run()
 }

@@ -528,8 +528,8 @@ func (ed *Editor) ShowContextMenu(e events.Event) {
 	ed.WidgetBase.ShowContextMenu(e)
 }
 
-// MakeContextMenu builds the text editor context menu
-func (ed *Editor) MakeContextMenu(m *gi.Scene) {
+// ContextMenu builds the text editor context menu
+func (ed *Editor) ContextMenu(m *gi.Scene) {
 	gi.NewButton(m).SetText("Copy").SetShortcutKey(gi.KeyFunCopy).SetState(!ed.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			ed.Copy(true)

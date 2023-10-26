@@ -846,7 +846,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.CursorForward(rsl)
 }
 
-func (tf *TextField) MakeContextMenu(m *Scene) {
+func (tf *TextField) ContextMenu(m *Scene) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
