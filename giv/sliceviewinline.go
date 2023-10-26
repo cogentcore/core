@@ -100,10 +100,10 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceViewInline) SetSlice(sl any) {
+func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	if laser.AnyIsNil(sl) {
 		sv.Slice = nil
-		return
+		return sv
 	}
 	newslc := false
 	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
@@ -120,6 +120,7 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 		}
 		sv.Update()
 	}
+	return sv
 }
 
 func (sv *SliceViewInline) ConfigWidget(sc *gi.Scene) {

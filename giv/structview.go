@@ -118,12 +118,13 @@ func (sv *StructView) OnInit() {
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
-func (sv *StructView) SetStruct(st any) {
+func (sv *StructView) SetStruct(st any) *StructView {
 	if sv.Struct != st {
 		sv.Changed = false
 		sv.Struct = st
 		sv.Update()
 	}
+	return sv
 }
 
 // UpdateFields updates each of the value-view widgets for the fields --

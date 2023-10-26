@@ -371,10 +371,10 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 // This ReConfigs the view for this slice if different.
 // Note: it is important to at least set an empty slice of
 // the desired type at the start to enable initial configuration.
-func (sv *SliceViewBase) SetSlice(sl any) {
+func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	if laser.AnyIsNil(sl) {
 		sv.Slice = nil
-		return
+		return sv
 	}
 	newslc := false
 	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
@@ -384,7 +384,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	}
 	if !newslc && sv.Is(SliceViewConfiged) {
 		sv.Update()
-		return
+		return sv
 	}
 	updt := sv.UpdateStart()
 	sv.StartIdx = 0
@@ -407,6 +407,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	sv.ResetSelectedIdxs()
 	sv.UpdateEnd(updt)
 	sv.Update()
+	return sv
 }
 
 // IsNil returns true if the Slice is nil

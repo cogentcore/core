@@ -30,8 +30,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 
-	tv := NewTableView(sc)
-	tv.SetSlice(km)
+	tv := NewTableView(sc).SetSlice(km)
 	tv.SetStretchMax()
 
 	gi.AvailKeyMapsChanged = false
@@ -40,11 +39,11 @@ func KeyMapsView(km *gi.KeyMaps) {
 	})
 
 	tb := tv.Toolbar()
-	sp := NewFuncButton(tb, km.SavePrefs).SetIcon(icons.Save).SetShortcutKey(gi.KeyFunMenuSave)
+	gi.NewSeparator(tb)
+	sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetShortcutKey(gi.KeyFunMenuSave)
 	sp.SetUpdateFunc(func() {
 		sp.SetEnabled(gi.AvailKeyMapsChanged && km == &gi.AvailKeyMaps)
 	})
-	gi.NewSeparator(tb)
 	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
 	oj.Args[0].SetTag("ext", ".json")
 	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(gi.KeyFunMenuSaveAs)
