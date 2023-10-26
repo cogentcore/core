@@ -57,14 +57,14 @@ func (sw *Switches) SwitchesStyles() {
 // See SelectItemAction for signal emitting version.
 // returns error if index is out of range.
 func (sw *Switches) SelectItem(idx int) error {
-	if idx >= sw.Parts.NumChildren() || idx < 0 {
+	if idx >= sw.NumChildren() || idx < 0 {
 		return fmt.Errorf("gi.Switches: SelectItem, index out of range: %v", idx)
 	}
 	updt := sw.UpdateStart()
 	if sw.Mutex {
 		sw.UnCheckAllBut(idx)
 	}
-	cb := sw.Parts.Child(idx).(*Switch)
+	cb := sw.Child(idx).(*Switch)
 	cb.SetState(true, states.Checked)
 	sw.UpdateEnd(updt)
 	return nil
@@ -81,7 +81,7 @@ func (sw *Switches) SelectItemAction(idx int) error {
 	if err != nil {
 		return err
 	}
-	// cb := sw.Parts.Child(idx).(*CheckBox)
+	// cb := sw.Child(idx).(*CheckBox)
 	// sw.ButtonSig.Emit(sw.This(), int64(idx), cb.Text)
 	return nil
 }
@@ -89,7 +89,7 @@ func (sw *Switches) SelectItemAction(idx int) error {
 // UnCheckAll unchecks all switches
 func (sw *Switches) UnCheckAll() {
 	updt := sw.UpdateStart()
-	for _, cbi := range *sw.Parts.Children() {
+	for _, cbi := range *sw.Children() {
 		cb := cbi.(*Switch)
 		cb.SetState(false, states.Checked)
 	}
@@ -99,7 +99,7 @@ func (sw *Switches) UnCheckAll() {
 // UnCheckAllBut unchecks all switches except given one
 func (sw *Switches) UnCheckAllBut(idx int) {
 	updt := sw.UpdateStart()
-	for i, cbi := range *sw.Parts.Children() {
+	for i, cbi := range *sw.Children() {
 		if i == idx {
 			continue
 		}
@@ -150,10 +150,10 @@ func (sw *Switches) ItemsFromEnum(enumtyp reflect.Type) {
 // BitFlag Enum type (see kit.EnumRegistry) with given value
 func (sw *Switches) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 	els := kit.Enums.TypeValues(enumtyp, true)
-	mx := max(len(els), sw.Parts.NumChildren())
+	mx := max(len(els), sw.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
-		cbi := sw.Parts.Child(i)
+		cbi := sw.Child(i)
 		cb := cbi.(*CheckBox)
 		on := bitflag.Has(val, int(ev.Value))
 		cb.SetState(on, states.Checked)
@@ -165,10 +165,10 @@ func (sw *Switches) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 func (sw *Switches) BitFlagsValue(enumtyp reflect.Type) int64 {
 	val := int64(0)
 	els := kit.Enums.TypeValues(enumtyp, true)
-	mx := max(len(els), sw.Parts.NumChildren())
+	mx := max(len(els), sw.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
-		cbi := sw.Parts.Child(i)
+		cbi := sw.Child(i)
 		cb := cbi.(*CheckBox)
 		if cb.StateIs(states.Checked) {
 			bitflag.Set(&val, int(ev.Value))
@@ -179,8 +179,9 @@ func (sw *Switches) BitFlagsValue(enumtyp reflect.Type) int64 {
 */
 
 func (sw *Switches) ConfigItems() {
-	for i, cbi := range *sw.Parts.Children() {
-		s := cbi.(*Switch)
+	for i, swi := range *sw.Children() {
+		s := swi.(*Switch)
+		updt := s.UpdateStart()
 		s.SetType(sw.Type)
 		lbl := sw.Items[i]
 		s.SetText(lbl)
@@ -188,6 +189,7 @@ func (sw *Switches) ConfigItems() {
 			s.Tooltip = sw.Tooltips[i]
 		}
 		s.SetProp("index", i)
+		s.UpdateEndRender(updt)
 		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
@@ -204,38 +206,31 @@ func (sw *Switches) ConfigItems() {
 	}
 }
 
-func (sw *Switches) ConfigParts(sc *Scene) {
-	parts := sw.NewParts(LayoutVert)
+func (sw *Switches) ConfigSwitches(sc *Scene) {
 	if len(sw.Items) == 0 {
-		parts.DeleteChildren(ki.DestroyKids)
+		sw.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := ki.Config{}
 	for _, lb := range sw.Items {
 		config.Add(SwitchType, lb)
 	}
-	mods, updt := parts.ConfigChildren(config)
+	mods, updt := sw.ConfigChildren(config)
 	if mods || sw.NeedsRebuild() {
 		sw.ConfigItems()
-		parts.UpdateEnd(updt)
+		sw.Update()
+		sw.UpdateEnd(updt)
 		sw.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 
 func (sw *Switches) ConfigWidget(sc *Scene) {
-	sw.ConfigParts(sc)
+	sw.ConfigSwitches(sc)
 }
 
-func (sw *Switches) ApplyStyle(sc *Scene) {
-	sw.StyMu.Lock()
-	sw.ApplyStyleWidget(sc)
-	sw.StyMu.Unlock()
-	// sw.ConfigParts(sc) // todo: no config in styling!?
-}
-
-func (sw *Switches) DoLayout(sc *Scene, parswox image.Rectangle, iter int) bool {
-	sw.DoLayoutBase(sc, parswox, iter)
-	sw.DoLayoutParts(sc, parswox, iter)
+func (sw *Switches) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sw.DoLayoutBase(sc, parBBox, iter)
+	sw.DoLayoutParts(sc, parBBox, iter)
 	return sw.DoLayoutChildren(sc, iter)
 }
 
@@ -248,7 +243,6 @@ func (sw *Switches) RenderSwitches(sc *Scene) {
 func (sw *Switches) Render(sc *Scene) {
 	if sw.PushBounds(sc) {
 		sw.RenderSwitches(sc)
-		sw.RenderParts(sc)
 		sw.RenderChildren(sc)
 		sw.PopBounds(sc)
 	}
