@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"reflect"
 	"strconv"
 	"strings"
@@ -165,14 +166,14 @@ func (tv *TableView) TableViewInit() {
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
-func (tv *TableView) SetSlice(sl any) {
+func (tv *TableView) SetSlice(sl any) *TableView {
 	if laser.AnyIsNil(sl) {
 		tv.Slice = nil
-		return
+		return tv
 	}
 	if tv.Slice == sl && tv.IsConfiged() {
 		tv.Update()
-		return
+		return tv
 	}
 	if !tv.IsReadOnly() {
 		tv.SelectedIdx = -1
@@ -182,19 +183,19 @@ func (tv *TableView) SetSlice(sl any) {
 	tv.SortDesc = false
 	slpTyp := reflect.TypeOf(sl)
 	if slpTyp.Kind() != reflect.Ptr {
-		log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- type is not a Ptr: %v\n", slpTyp.String())
-		return
+		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
+		return tv
 	}
 	if slpTyp.Elem().Kind() != reflect.Slice {
-		log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- ptr doesn't point to a slice: %v\n", slpTyp.Elem().String())
-		return
+		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
+		return tv
 	}
 	tv.Slice = sl
 	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
 	struTyp := tv.StructType()
 	if struTyp.Kind() != reflect.Struct {
-		log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
-		return
+		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", struTyp.String())
+		return tv
 	}
 	tv.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
 	updt := tv.UpdateStart()
@@ -202,6 +203,7 @@ func (tv *TableView) SetSlice(sl any) {
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.UpdateEnd(updt)
 	tv.Update()
+	return tv
 }
 
 // StructType sets the StruType and returns the type of the struct within the

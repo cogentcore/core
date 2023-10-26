@@ -100,11 +100,12 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
-func (mv *MapViewInline) SetMap(mp any) {
+func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.Update()
+	return mv
 }
 
 func (mv *MapViewInline) ConfigWidget(sc *gi.Scene) {

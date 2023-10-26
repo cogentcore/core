@@ -110,11 +110,12 @@ func (mv *MapView) MapViewStyles() {
 
 // SetMap sets the source map that we are viewing.
 // Rebuilds the children to represent this map
-func (mv *MapView) SetMap(mp any) {
+func (mv *MapView) SetMap(mp any) *MapView {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.Update()
+	return mv
 }
 
 // UpdateValues updates the widget display of slice values, assuming same slice config

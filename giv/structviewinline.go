@@ -73,11 +73,12 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
-func (sv *StructViewInline) SetStruct(st any) {
+func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 	if sv.Struct != st {
 		sv.Struct = st
 		sv.Update()
 	}
+	return sv
 }
 
 func (sv *StructViewInline) ConfigWidget(sc *gi.Scene) {
