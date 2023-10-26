@@ -62,7 +62,7 @@ func (sc *Scene) SetSel(nd Node) {
 	}
 	if nd == nil {
 		// if sc.CurSel != nil { // todo
-		// 	sc.CurSel.AsNode3D().ClearSelected()
+		// 	sc.CurSel.AsNode().ClearSelected()
 		// }
 		sc.CurManipPt = nil
 		sc.CurSel = nil
@@ -73,7 +73,7 @@ func (sc *Scene) SetSel(nd Node) {
 		return
 	}
 	sc.CurSel = nd
-	// nd.AsNode3D().SetSelected() // todo
+	// nd.AsNode().SetSelected() // todo
 	switch sc.SelMode {
 	case Selectable:
 		return
@@ -92,7 +92,7 @@ func (sc *Scene) SelectBox() {
 	updt := sc.UpdateStart()
 	defer sc.UpdateEnd(updt)
 
-	nb := sc.CurSel.AsNode3D()
+	nb := sc.CurSel.AsNode()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
 	clr := sc.SelParams.Color                        // grr.Log(colors.FromName(string(sc.SelParams.Color)))
 	NewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
@@ -113,7 +113,7 @@ func (sc *Scene) ManipBox() {
 
 	nm := ManipBoxName
 
-	nb := sc.CurSel.AsNode3D()
+	nb := sc.CurSel.AsNode()
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
 	clr := sc.SelParams.Color                // grr.Log(colors.FromName(string(sc.SelParams.Color)))
 
@@ -195,7 +195,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		if ssc.CurSel == nil {
 			return
 		}
-		sn := ssc.CurSel.AsNode3D()
+		sn := ssc.CurSel.AsNode()
 		if !mpt.IsDragging() {
 			if ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
@@ -276,3 +276,29 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 	})
 }
 */
+
+const (
+	// TrackCameraName is a reserved top-level Group name -- this group
+	// will have its Pose updated to match that of the camera automatically.
+	TrackCameraName = "TrackCamera"
+
+	// SelBoxName is the reserved top-level Group name for holding
+	// a bounding box or manipulator for currently selected object.
+	// also used for meshes representing the box.
+	SelBoxName = "__SelectedBox"
+
+	// ManipBoxName is the reserved top-level name for meshes
+	// representing the manipulation box.
+	ManipBoxName = "__ManipBox"
+
+	// Plane2DMeshName is the reserved name for the 2D plane mesh
+	// used for Text2D and Embed2D
+	Plane2DMeshName = "__Plane2D"
+
+	// LineMeshName is the reserved name for a unit-sized Line segment
+	LineMeshName = "__UnitLine"
+
+	// ConeMeshName is the reserved name for a unit-sized Cone segment.
+	// Has the number of segments appended.
+	ConeMeshName = "__UnitCone"
+)

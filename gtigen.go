@@ -242,14 +242,6 @@ var SceneType = gti.AddType(&gti.Type{
 	Instance: &Scene{},
 })
 
-// NewScene adds a new [Scene] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewScene(par ki.Ki, name ...string) *Scene {
-	return par.NewChild(SceneType, name...).(*Scene)
-}
-
 // KiType returns the [*gti.Type] of [Scene]
 func (t *Scene) KiType() *gti.Type {
 	return SceneType

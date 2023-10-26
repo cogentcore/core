@@ -100,7 +100,7 @@ func (em *Embed2D) SetDPISize() {
 	em.DPISize = sz
 }
 
-func (em *Embed2D) Init3D(sc *Scene) {
+func (em *Embed2D) Config(sc *Scene) {
 	if sc.Win != nil && em.Viewport.Win == nil {
 		em.Viewport.Win = sc.Win
 		em.SetDPISize()
@@ -119,7 +119,7 @@ func (em *Embed2D) Init3D(sc *Scene) {
 	if err != nil {
 		em.SetInvisible()
 	}
-	em.NodeBase.Init3D(sc)
+	em.NodeBase.Config(sc)
 }
 
 // UploadViewTex uploads the viewport image to the texture
@@ -147,7 +147,7 @@ func (em *Embed2D) UploadViewTex(sc *Scene) {
 }
 
 // Validate checks that text has valid mesh and texture settings, etc
-func (em *Embed2D) Validate(sc *Scene) error {
+func (em *Embed2D) Validate() error {
 	// todo: validate more stuff here
 	return em.Solid.Validate(sc)
 }

@@ -24,8 +24,10 @@ type Solid struct {
 	Mat Material `view:"add-fields"`
 
 	// cached pointer to mesh
-	MeshPtr Mesh `view:"-"`
+	MeshPtr Mesh `view:"-" set:"-"`
 }
+
+var _ Node = (*Solid)(nil)
 
 /*
 // NewSolid adds a new solid of given name and mesh to given parent
@@ -53,12 +55,6 @@ func (sld *Solid) AsSolid() *Solid {
 	return sld
 }
 
-// func (sld *Solid) Disconnect() {
-// 	sld.NodeBase.Disconnect()
-// 	sld.MeshPtr = nil
-// 	sld.Mat.Disconnect()
-// }
-
 // Defaults sets default initial settings for solid params -- important
 // to call this before setting specific values, as the initial zero
 // values for some parameters are degenerate
@@ -68,11 +64,11 @@ func (sld *Solid) Defaults() {
 }
 
 // SetMeshName sets mesh to given mesh name.
-func (sld *Solid) SetMeshName(sc *Scene, meshName string) error {
+func (sld *Solid) SetMeshName(meshName string) error {
 	if meshName == "" {
 		return nil
 	}
-	ms, err := sc.MeshByNameTry(meshName)
+	ms, err := sld.Sc.MeshByNameTry(meshName)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -83,21 +79,20 @@ func (sld *Solid) SetMeshName(sc *Scene, meshName string) error {
 }
 
 // SetMesh sets mesh
-func (sld *Solid) SetMesh(sc *Scene, ms Mesh) {
+func (sld *Solid) SetMesh(ms Mesh) *Solid {
 	sld.MeshPtr = ms
 	if sld.MeshPtr != nil {
 		sld.Mesh = MeshName(sld.MeshPtr.Name())
 	} else {
 		sld.Mesh = ""
 	}
+	return sld
 }
 
-func (sld *Solid) Init3D(sc *Scene) {
-	// err := sld.Validate(sc)
-	// if err != nil {
-	// 	sld.SetInvisible()
-	// }
-	// sld.NodeBase.Init3D(sc)
+func (sld *Solid) Config(sc *Scene) {
+	sld.Sc = sc
+	sld.Validate()
+	sld.NodeBase.Config(sc)
 }
 
 // ParentMaterial returns parent's material or nil if not avail
@@ -113,35 +108,20 @@ func (sld *Solid) ParentMaterial() *Material {
 	return nil
 }
 
-func (sld *Solid) Style3D(sc *Scene) {
-	// styprops := *sld.Properties()
-	// parMat := sld.ParentMaterial()
-	// sld.Mat.SetMatProps(parMat, styprops, sc.Viewport)
-	//
-	// pagg := sld.ParentCSSAgg()
-	// if pagg != nil {
-	// 	gi.AggCSS(&sld.CSSAgg, *pagg)
-	// } else {
-	// 	sld.CSSAgg = nil // restart
-	// }
-	// gi.AggCSS(&sld.CSSAgg, sld.CSS)
-	// sld.Mat.StyleCSS(sld.This().(Node), sld.CSSAgg, "", sc.Viewport)
-}
-
 // Validate checks that solid has valid mesh and texture settings, etc
-func (sld *Solid) Validate(sc *Scene) error {
+func (sld *Solid) Validate() error {
 	if sld.Mesh == "" {
 		err := fmt.Errorf("gi3d.Solid: %s Mesh name is empty", sld.Path())
 		log.Println(err)
 		return err
 	}
 	if sld.MeshPtr == nil || sld.MeshPtr.Name() != string(sld.Mesh) {
-		err := sld.SetMeshName(sc, string(sld.Mesh))
+		err := sld.SetMeshName(string(sld.Mesh))
 		if err != nil {
 			return err
 		}
 	}
-	return sld.Mat.Validate(sc)
+	return sld.Mat.Validate(sld.Sc)
 }
 
 func (sld *Solid) IsVisible() bool {
@@ -192,8 +172,8 @@ func (sld *Solid) RenderClass() RenderClasses {
 	}
 }
 
-// Render3D activates this solid for rendering
-func (sld *Solid) Render3D(sc *Scene) {
+// Render activates this solid for rendering
+func (sld *Solid) Render(sc *Scene) {
 	sc.Phong.UseMeshName(string(sld.Mesh))
 	sld.PoseMu.RLock()
 	sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)

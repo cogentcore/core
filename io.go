@@ -140,7 +140,7 @@ func (sc *Scene) OpenObjFS(fsys fs.FS, fname string, gp *Group) error {
 	}
 	updt := sc.UpdateStart()
 	dec.SetGroup(sc, gp)
-	sc.Init3D() // needed after loading
+	sc.Config() // needed after loading
 	sc.UpdateEnd(updt)
 	return nil
 }
@@ -175,7 +175,7 @@ func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent ki.Ki) (*Group, e
 	gp := NewGroup(parent, fn)
 	dec.SetGroup(sc, gp)
 	if sc.IsConfiged() { // has already been configed
-		sc.ConfigRender()
+		sc.Config()
 	}
 	sc.UpdateEnd(updt)
 	return gp, nil
@@ -251,7 +251,7 @@ func (sc *Scene) OpenSceneFS(fsys fs.FS, fname string) error {
 	}
 	updt := sc.UpdateStart()
 	dec.SetScene(sc)
-	sc.Init3D() // needed after loading
+	sc.Config() // needed after loading
 	sc.UpdateEnd(updt)
 	return nil
 }
@@ -279,7 +279,7 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 	}
 	updt := sc.UpdateStart()
 	dec.SetGroup(sc, gp)
-	sc.Init3D() // needed after loading
+	sc.Config() // needed after loading
 	sc.UpdateEnd(updt)
 	return nil
 }
@@ -308,7 +308,7 @@ func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 	}
 	updt := sc.UpdateStart()
 	dec.SetScene(sc)
-	sc.Init3D() // needed after loading
+	sc.Config() // needed after loading
 	sc.UpdateEnd(updt)
 	return nil
 }

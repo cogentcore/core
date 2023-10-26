@@ -10,51 +10,25 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"strings"
 	"sync"
 
+	vk "github.com/goki/vulkan"
 	"goki.dev/colors"
-	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
+	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 	"goki.dev/vgpu/v2/vphong"
-)
-
-const (
-	// TrackCameraName is a reserved top-level Group name -- this group
-	// will have its Pose updated to match that of the camera automatically.
-	TrackCameraName = "TrackCamera"
-
-	// SelBoxName is the reserved top-level Group name for holding
-	// a bounding box or manipulator for currently selected object.
-	// also used for meshes representing the box.
-	SelBoxName = "__SelectedBox"
-
-	// ManipBoxName is the reserved top-level name for meshes
-	// representing the manipulation box.
-	ManipBoxName = "__ManipBox"
-
-	// Plane2DMeshName is the reserved name for the 2D plane mesh
-	// used for Text2D and Embed2D
-	Plane2DMeshName = "__Plane2D"
-
-	// LineMeshName is the reserved name for a unit-sized Line segment
-	LineMeshName = "__UnitLine"
-
-	// ConeMeshName is the reserved name for a unit-sized Cone segment.
-	// Has the number of segments appended.
-	ConeMeshName = "__UnitCone"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating
 var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own vgpu.RenderFrame, the Image of which is then copied
-// into the window vgpu.Drawer images for subsequent compositing into the
-// window directly, as a DurectWinUpload element.
+// It renders to its own vgpu.RenderFrame.
+// The Image of this Frame is usable directly or, via gi3v.Scene3D,
+// where it is copied into an overall gi.Scene image.
 //
 // There is default navigation event processing (disabled by setting NoNav)
 // where mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)
@@ -66,6 +40,8 @@ var Update3DTrace = false
 // the camera (i.e., its Pose is copied) -- Solids in that group can
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
+//
+//goki:no-new
 type Scene struct {
 	ki.Node
 
@@ -138,10 +114,18 @@ func (sc *Scene) Defaults() {
 	sc.SelParams.Defaults()
 }
 
+// NewScene creates a new Scene to contain a 3D scenegraph.
+func NewScene(name string) *Scene {
+	sc := &Scene{}
+	sc.Defaults()
+	sc.InitName(sc, name)
+	return sc
+}
+
 // Update is a global update of everything: Init3D and re-render
 func (sc *Scene) Update() {
 	updt := sc.UpdateStart()
-	sc.Init3D()
+	sc.Config()
 	sc.UpdateEnd(updt)
 }
 
@@ -188,11 +172,11 @@ func (sc *Scene) Validate() error {
 		if k == sc.This() {
 			return ki.Continue
 		}
-		ni, _ := AsNode3D(k)
+		ni, _ := AsNode(k)
 		if !ni.IsVisible() {
 			return ki.Break
 		}
-		err := ni.Validate(sc)
+		err := ni.Validate()
 		if err != nil {
 			hasError = true
 		}
@@ -204,337 +188,108 @@ func (sc *Scene) Validate() error {
 	return nil
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-//  Library
+//////////////////////////////////////////////////////////////////
+//  Flags
 
-// AddToLibrary adds given Group to library, using group's name as unique key
-// in Library map.
-func (sc *Scene) AddToLibrary(gp *Group) {
-	if sc.Library == nil {
-		sc.Library = make(map[string]*Group)
-	}
-	sc.Library[gp.Name()] = gp
-}
+// ScFlags has critical state information signaling when rendering,
+// styling etc need to be done
+type ScFlags int64 //enums:bitflag -trim-prefix Sc
 
-// NewInLibrary makes a new Group in library, using given name as unique key
-// in Library map.
-func (sc *Scene) NewInLibrary(nm string) *Group {
-	gp := &Group{}
-	gp.InitName(gp, nm)
-	sc.AddToLibrary(gp)
-	return gp
-}
+const (
+	// ScUpdating means scene is in the process of updating:
+	// set for any kind of tree-level update.
+	// skip any further update passes until it goes off.
+	ScUpdating ScFlags = ScFlags(ki.FlagsN) + iota
 
-// AddFmLibrary adds a Clone of named item in the Library under given parent
-// in the scenegraph.  Returns an error if item not found.
-func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
-	gp, ok := sc.Library[nm]
-	if !ok {
-		return nil, fmt.Errorf("Scene AddFmLibrary: Library item: %s not found", nm)
-	}
-	updt := sc.UpdateStart()
-	nwgp := gp.Clone().(*Group)
-	parent.AddChild(nwgp)
-	sc.UpdateEnd(updt)
-	return nwgp, nil
-}
+	// ScNeedsRender means nodes have flagged that they need a Render
+	// update.
+	ScNeedsRender
+)
 
-/////////////////////////////////////////////////////////////////////////////////////
-//  Node2D Interface
-
-func (sc *Scene) IsInvisible() bool {
-	return false
-}
-
-func (sc *Scene) IsVisible() bool {
-	if sc == nil || sc.This() == nil || sc.IsInvisible() {
-		return false
-	}
-	if sc.Par == nil || sc.Par.This() == nil {
-		return false
-	}
-	return true
-	// return sc.Par.This().(gi.Node2D).IsVisible()
-}
-
-// set our window pointer to point to the current window we are under
-func (sc *Scene) SetCurWin() {
-	// pwin := sc.ParentWindow()
-	// if pwin != nil { // only update if non-nil -- otherwise we could be setting
-	// 	// temporarily to give access to DPI etc
-	// 	sc.Win = pwin
-	// }
-}
-
-func (sc *Scene) Resize(nwsz image.Point) {
-	if nwsz.X == 0 || nwsz.Y == 0 {
-		return
+func (sc *Scene) SetSize(sz image.Point) *Scene {
+	if sz.X == 0 || sz.Y == 0 {
+		return sc
 	}
 	if sc.Frame != nil {
 		csz := sc.Frame.Format.Size
-		if csz == nwsz {
-			sc.Geom.Size = nwsz // make sure
-			return              // already good
+		if csz == sz {
+			sc.Geom.Size = sz // make sure
+			return sc
 		}
 	}
 	if sc.Frame != nil {
-		sc.Frame.SetSize(nwsz)
+		sc.Frame.SetSize(sz)
 	}
-	sc.Geom.Size = nwsz // make sure
+	sc.Geom.Size = sz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
+	return sc
 }
 
-/*
-// NavEvents handles standard viewer navigation events
-func (sc *Scene) NavEvents() {
-	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
-		if ssc.IsDragging() {
-			cdist := mat32.Max(ssc.Camera.DistTo(ssc.Camera.Target), 1.0)
-			orbDel := 0.025 * cdist
-			panDel := 0.001 * cdist
+func (sc *Scene) Destroy() {
+	// todo: delete Phong, Frame
+}
 
-			if !ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Push(cursor.HandOpen)
-				ssc.SetDragCursor = true
-			}
-			del := me.Where.Sub(me.From)
-			dx := float32(del.X)
-			dy := float32(del.Y)
-			switch {
-			case key.HasAllModifierBits(me.Modifiers, key.Shift):
-				ssc.Camera.Pan(dx*panDel, -dy*panDel)
-			case key.HasAllModifierBits(me.Modifiers, key.Control):
-				ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
-			case key.HasAllModifierBits(me.Modifiers, key.Alt):
-				ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-			default:
-				if mat32.Abs(dx) > mat32.Abs(dy) {
-					dy = 0
-				} else {
-					dx = 0
-				}
-				ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-			}
-			ssc.UpdateSig()
+// ConfigFrameFromDrawer configures framebuffer for GPU rendering
+// Using GPU and Device from a vgpu vdraw.Drawer.
+func (sc *Scene) ConfigFrameFromDrawer(drw *vdraw.Drawer) {
+	sf := drw.Surf
+	sc.ConfigFrame(sf.GPU, &sf.Device)
+}
+
+// ConfigFrame configures framebuffer for GPU rendering,
+// using given gpu and device, and size set in Geom.Size.
+// Must be called on the main thread.
+// If Frame already exists, it ensures that the Size is correct.
+func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
+	sz := sc.Geom.Size
+	if sz == (image.Point{}) {
+		sz = image.Point{480, 320}
+	}
+	if sc.Frame == nil {
+		sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
+		sc.Frame.Format.SetMultisample(sc.MultiSample)
+		sy := &sc.Phong.Sys
+		sy.InitGraphics(gpu, "vphong.Phong", dev)
+		sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
+		sc.Frame.SetRender(&sy.Render)
+		sc.Phong.ConfigSys()
+		if sc.Wireframe {
+			sy.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 		} else {
-			if ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-				ssc.SetDragCursor = false
-			}
+			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 		}
-	})
-	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	me := d.(*mouse.MoveEvent)
-	// 	me.SetProcessed()
-	// 	ssc := recv.Embed(TypeScene).(*Scene)
-	// 	orbDel := float32(.2)
-	// 	panDel := float32(.05)
-	// 	del := me.Where.Sub(me.From)
-	// 	dx := float32(del.X)
-	// 	dy := float32(del.Y)
-	// 	switch {
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Shift):
-	// 		ssc.Camera.Pan(dx*panDel, -dy*panDel)
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Control):
-	// 		ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Alt):
-	// 		ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-	// 	default:
-	// 		if mat32.Abs(dx) > mat32.Abs(dy) {
-	// 			dy = 0
-	// 		} else {
-	// 			dx = 0
-	// 		}
-	// 		ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-	// 	}
-	// 	ssc.UpdateSig()
-	// })
-	sc.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		me := d.(*mouse.ScrollEvent)
-		me.SetProcessed()
-		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-			ssc.SetDragCursor = false
-		}
-		pt := me.Where.Sub(sc.ObjBBox.Min)
-		sz := ssc.Geom.Size
-		cdist := mat32.Max(ssc.Camera.DistTo(ssc.Camera.Target), 1.0)
-		zoom := float32(me.NonZeroDelta(false))
-		zoomDel := float32(.001) * cdist
-		switch {
-		case key.HasAllModifierBits(me.Modifiers, key.Alt):
-			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
-		default:
-			ssc.Camera.ZoomTo(pt, sz, zoom*zoomDel)
-		}
-		ssc.UpdateSig()
-	})
-	sc.ConnectEvent(oswin.MouseEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		me := d.(*mouse.Event)
-		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-			ssc.SetDragCursor = false
-		}
-		if me.Action != mouse.Press {
-			return
-		}
-		if !ssc.IsDisabled() && !ssc.HasFocus() {
-			ssc.GrabFocus()
-		}
-		// if ssc.CurManipPt == nil {
-		ssc.SetSel(nil) // clear any selection at this point
-		// }
-	})
-	sc.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		kt := d.(*key.ChordEvent)
-		ssc.NavKeyEvents(kt)
-	})
-}
-*/
-
-// NavKeyEvents handles standard viewer keyboard navigation events
-func (sc *Scene) NavKeyEvents(kt events.Event) {
-	ch := string(kt.KeyChord())
-	// fmt.Printf(ch)
-	orbDeg := float32(5)
-	panDel := float32(.2)
-	zoomPct := float32(.05)
-	switch ch {
-	case "UpArrow":
-		sc.Camera.Orbit(0, orbDeg)
-		kt.SetHandled()
-	case "Shift+UpArrow":
-		sc.Camera.Pan(0, panDel)
-		kt.SetHandled()
-	case "Control+UpArrow":
-		sc.Camera.PanAxis(0, panDel)
-		kt.SetHandled()
-	case "Alt+UpArrow":
-		sc.Camera.PanTarget(0, panDel, 0)
-		kt.SetHandled()
-	case "DownArrow":
-		sc.Camera.Orbit(0, -orbDeg)
-		kt.SetHandled()
-	case "Shift+DownArrow":
-		sc.Camera.Pan(0, -panDel)
-		kt.SetHandled()
-	case "Control+DownArrow":
-		sc.Camera.PanAxis(0, -panDel)
-		kt.SetHandled()
-	case "Alt+DownArrow":
-		sc.Camera.PanTarget(0, -panDel, 0)
-		kt.SetHandled()
-	case "LeftArrow":
-		sc.Camera.Orbit(orbDeg, 0)
-		kt.SetHandled()
-	case "Shift+LeftArrow":
-		sc.Camera.Pan(-panDel, 0)
-		kt.SetHandled()
-	case "Control+LeftArrow":
-		sc.Camera.PanAxis(-panDel, 0)
-		kt.SetHandled()
-	case "Alt+LeftArrow":
-		sc.Camera.PanTarget(-panDel, 0, 0)
-		kt.SetHandled()
-	case "RightArrow":
-		sc.Camera.Orbit(-orbDeg, 0)
-		kt.SetHandled()
-	case "Shift+RightArrow":
-		sc.Camera.Pan(panDel, 0)
-		kt.SetHandled()
-	case "Control+RightArrow":
-		sc.Camera.PanAxis(panDel, 0)
-		kt.SetHandled()
-	case "Alt+RightArrow":
-		sc.Camera.PanTarget(panDel, 0, 0)
-		kt.SetHandled()
-	case "Alt++", "Alt+=":
-		sc.Camera.PanTarget(0, 0, panDel)
-		kt.SetHandled()
-	case "Alt+-", "Alt+_":
-		sc.Camera.PanTarget(0, 0, -panDel)
-		kt.SetHandled()
-	case "+", "=", "Shift++":
-		sc.Camera.Zoom(-zoomPct)
-		kt.SetHandled()
-	case "-", "_", "Shift+_":
-		sc.Camera.Zoom(zoomPct)
-		kt.SetHandled()
-	case " ", "Escape":
-		err := sc.SetCamera("default")
-		if err != nil {
-			sc.Camera.DefaultPose()
-		}
-		kt.SetHandled()
-	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
-		err := sc.SetCamera(ch)
-		if err != nil {
-			sc.SaveCamera(ch)
-			fmt.Printf("Saved camera to: %v\n", ch)
-		} else {
-			fmt.Printf("Restored camera from: %v\n", ch)
-		}
-		kt.SetHandled()
-	case "Control+0", "Control+1", "Control+2", "Control+3", "Control+4", "Control+5", "Control+6", "Control+7", "Control+8", "Control+9":
-		cnm := strings.TrimPrefix(ch, "Control+")
-		sc.SaveCamera(cnm)
-		fmt.Printf("Saved camera to: %v\n", cnm)
-		kt.SetHandled()
-	case "t":
-		kt.SetHandled()
-		obj := sc.Child(0).(*Solid)
-		fmt.Printf("updated obj: %v\n", obj.Path())
-		// obj.UpdateSig()
-		return
+	} else {
+		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 	}
-	// sc.UpdateSig()
 }
 
-// TrackCamera -- a Group at the top-level named "TrackCamera"
-// will automatically track the camera (i.e., its Pose is copied).
-// Solids in that group can set their relative Pos etc to display
-// relative to the camera, to achieve "first person" effects.
-func (sc *Scene) TrackCamera() bool {
-	tci, err := sc.ChildByNameTry("TrackCamera", 0)
-	if err != nil {
-		return false
+// Image returns the current rendered image from RenderFrame
+func (sc *Scene) Image() (*image.RGBA, error) {
+	fr := sc.Frame
+	if fr == nil {
+		return nil, fmt.Errorf("gi3d.Scene Image: Scene does not have a Frame")
 	}
-	tc, ok := tci.(*Group)
-	if !ok {
-		return false
+	sy := &sc.Phong.Sys
+	tcmd := sy.MemCmdStart()
+	fr.GrabImage(tcmd, 0)
+	sy.MemCmdEndSubmitWaitFree()
+	img, err := fr.Render.Grab.DevGoImage()
+	if err == nil {
+		return img, err
 	}
-	tc.TrackCamera(sc)
-	return true
+	return nil, err
 }
 
 // SolidsIntersectingPoint finds all the solids that contain given 2D window coordinate
 func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 	var objs []Node
 	for _, kid := range sc.Kids {
-		kii, _ := AsNode3D(kid)
+		kii, _ := AsNode(kid)
 		if kii == nil {
 			continue
 		}
 		kii.WalkPre(func(k ki.Ki) bool {
-			ni, _ := AsNode3D(k)
+			ni, _ := AsNode(k)
 			if ni == nil {
 				return ki.Break // going into a different type of thing, bail
 			}

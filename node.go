@@ -25,20 +25,21 @@ type Node interface {
 	// AsNode3D returns a generic NodeBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
 	// interface methods.
-	AsNode3D() *NodeBase
+	AsNode() *NodeBase
 
 	// AsSolid returns a node as Solid (nil if not)
 	AsSolid() *Solid
 
 	// Validate checks that scene element is valid
-	Validate(sc *Scene) error
+	Validate() error
 
 	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
 	// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 	// routine can optionally do so.
 	UpdateWorldMatrix(parWorld *mat32.Mat4)
 
-	// UpdateMVPMatrix updates this node's MVP matrix based on given view and prjn matrix from camera
+	// UpdateMVPMatrix updates this node's MVP matrix based on
+	// given view and prjn matrix from camera.
 	// Called during rendering.
 	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
 
@@ -82,11 +83,8 @@ type Node interface {
 	// IsTransparent returns true if solid has transparent color
 	IsTransparent() bool
 
-	// Init3D does 3D intialization
-	Init3D(sc *Scene)
-
-	// Style3D does 3D styling using property values on nodes
-	Style3D(sc *Scene)
+	// Config performs
+	Config(sc *Scene)
 
 	// UpdateNode does arbitrary node updating during render process
 	UpdateNode(sc *Scene)
@@ -95,15 +93,9 @@ type Node interface {
 	// used for organizing the ordering of rendering
 	RenderClass() RenderClasses
 
-	// Render3D is called by Scene Render3D on main thread,
+	// Render is called by Scene Render on main thread,
 	// everything ready to go..
-	Render3D(sc *Scene)
-
-	// ConnectEvents3D: setup connections to window events -- called in
-	// Render3D if in bounds.  It can be useful to create modular methods for
-	// different event types that can then be mix-and-matched in any more
-	// specialized types.
-	// ConnectEvents3D(sc *Scene)
+	Render(sc *Scene)
 
 	// Convenience methods for external setting of Pose values with appropriate locking
 
@@ -124,10 +116,13 @@ type NodeBase struct {
 	ki.Node
 
 	// complete specification of position and orientation
-	Pose Pose
+	Pose Pose `set:"-"`
+
+	// Sc is the cached Scene
+	Sc *Scene `set:"-"`
 
 	// mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"`
+	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"  set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
 	MeshBBox BBox `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
@@ -138,10 +133,12 @@ type NodeBase struct {
 	// normalized display coordinates bounding box, used for frustrum clipping
 	NDCBBox mat32.Box3 `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
+	// raw original bounding box for the widget within its parent Scene.
+	// This is prior to intersecting with Frame bounds.
 	BBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
+	// 2D bounding box for region occupied within Scene Frame that we render onto.
+	// This is BBox intersected with Frame bounds.
 	ScBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
@@ -154,16 +151,19 @@ const (
 
 	// VectorsUpdated means that the rendering vectors information is updated
 	VectorsUpdated
+
+	// Invisible marks this node as invisible
+	Invisible
 )
 
 // AsNode converts Ki to a Node interface and a NodeBase obj -- nil if not.
-func AsNode3D(k ki.Ki) (Node, *NodeBase) {
+func AsNode(k ki.Ki) (Node, *NodeBase) {
 	if k == nil || k.This() == nil { // this also checks for destroyed
 		return nil, nil
 	}
 	ni, ok := k.(Node)
 	if ok {
-		return ni, ni.AsNode3D()
+		return ni, ni.AsNode()
 	}
 	return nil, nil
 }
@@ -171,7 +171,7 @@ func AsNode3D(k ki.Ki) (Node, *NodeBase) {
 // AsNodeBase converts Ki to a *NodeBase -- use when known to be at
 // least of this type, not-nil, etc
 func AsNodeBase(k ki.Ki) *NodeBase {
-	return k.(Node).AsNode3D()
+	return k.(Node).AsNode()
 }
 
 func (nb *NodeBase) CopyFieldsFrom(frm any) {
@@ -187,7 +187,7 @@ func (nb *NodeBase) CopyFieldsFrom(frm any) {
 // AsNode returns a generic NodeBase for our node -- gives generic
 // access to all the base-level data structures without requiring
 // interface methods.
-func (nb *NodeBase) AsNode3D() *NodeBase {
+func (nb *NodeBase) AsNode() *NodeBase {
 	return nb
 }
 
@@ -203,12 +203,12 @@ func (nb *NodeBase) AsSolid() *Solid {
 	return nil
 }
 
-func (nb *NodeBase) Validate(sc *Scene) error {
+func (nb *NodeBase) Validate() error {
 	return nil
 }
 
 func (nb *NodeBase) IsVisible() bool {
-	if nb == nil || nb.This() == nil { // || nb.Is(states.Invisible) { // todo need flag
+	if nb == nil || nb.This() == nil || nb.Is(Invisible) {
 		return false
 	}
 	return true
@@ -216,10 +216,6 @@ func (nb *NodeBase) IsVisible() bool {
 
 func (nb *NodeBase) IsTransparent() bool {
 	return false
-}
-
-func (nb *NodeBase) WorldMatrixUpdated() bool {
-	return nb.Is(WorldMatrixUpdated)
 }
 
 // UpdateWorldMatrix updates this node's world matrix based on parent's world matrix.
@@ -315,24 +311,14 @@ func (nb *NodeBase) NormDCBBox() mat32.Box3 {
 	return nb.NDCBBox
 }
 
-func (nb *NodeBase) Init3D(sc *Scene) {
+func (nb *NodeBase) Config(sc *Scene) {
 	// nop by default -- could connect to scene for update signals or something
-}
-
-func (nb *NodeBase) Style3D(sc *Scene) {
-	// pagg := nb.ParentCSSAgg()
-	// if pagg != nil {
-	// 	gi.AggCSS(&nb.CSSAgg, *pagg)
-	// } else {
-	// 	nb.CSSAgg = nil // restart
-	// }
-	// gi.AggCSS(&nb.CSSAgg, nb.CSS)
 }
 
 func (nb *NodeBase) UpdateNode(sc *Scene) {
 }
 
-func (nb *NodeBase) Render3D(sc *Scene) {
+func (nb *NodeBase) Render(sc *Scene) {
 	// nop
 }
 
@@ -356,62 +342,6 @@ func (nb *NodeBase) SetPoseQuat(quat mat32.Quat) {
 	nb.Pose.Quat = quat
 	nb.PoseMu.Unlock()
 }
-
-/////////////////////////////////////////////////////////////////
-// Events
-
-/*
-
-// Default node can be selected / manipulated per the Scene SelMode settings
-func (nb *NodeBase) ConnectEvents3D(sc *Scene) {
-	nb.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
-		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsDisabled() {
-			return
-		}
-		sci, err := recv.ParentByTypeTry(TypeScene, ki.Embeds)
-		if err != nil {
-			return
-		}
-		ssc := sci.Embed(TypeScene).(*Scene)
-		ni := nb.This().(Node)
-		if ssc.CurSel != ni {
-			ssc.SetSel(ni)
-			me.SetProcessed()
-		}
-	})
-}
-
-// ConnectEvent connects this node to receive a given type of GUI event
-// signal from the parent window -- typically connect only visible nodes, and
-// disconnect when not visible
-func (nb *NodeBase) ConnectEvent(win *gi.Window, et oswin.EventType, pri gi.EventPris, fun ki.RecvFunc) {
-	win.EventMgr.ConnectEvent(nb.This(), et, pri, fun)
-}
-
-// DisconnectEvent disconnects this receiver from receiving given event
-// type -- pri is priority -- pass AllPris for all priorities -- see also
-// DisconnectAllEvents
-func (nb *NodeBase) DisconnectEvent(win *gi.Window, et oswin.EventType, pri gi.EventPris) {
-	win.EventMgr.DisconnectEvent(nb.This(), et, pri)
-}
-
-// DisconnectAllEvents disconnects node from all window events -- typically
-// disconnect when not visible -- pri is priority -- pass AllPris for all priorities.
-// This goes down the entire tree from this node on down, as typically everything under
-// will not get an explicit disconnect call because no further updating will happen
-func (nb *NodeBase) DisconnectAllEvents(win *gi.Window, pri gi.EventPris) {
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
-		_, ni := AsNode3D(k)
-		if ni == nil {
-			return ki.Break // going into a different type of thing, bail
-		}
-		win.EventMgr.DisconnectAllEvents(ni.This(), pri)
-		return ki.Continue
-	})
-}
-
-*/
 
 // TrackCamera moves this node to pose of camera
 func (nb *NodeBase) TrackCamera(sc *Scene) {

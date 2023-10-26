@@ -298,11 +298,11 @@ func (i *SelModes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _NodeFlagsValues = []NodeFlags{7, 8}
+var _NodeFlagsValues = []NodeFlags{7, 8, 9}
 
 // NodeFlagsN is the highest valid value
 // for type NodeFlags, plus one.
-const NodeFlagsN NodeFlags = 9
+const NodeFlagsN NodeFlags = 10
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -310,6 +310,7 @@ func _NodeFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[WorldMatrixUpdated-(7)]
 	_ = x[VectorsUpdated-(8)]
+	_ = x[Invisible-(9)]
 }
 
 var _NodeFlagsNameToValueMap = map[string]NodeFlags{
@@ -317,16 +318,20 @@ var _NodeFlagsNameToValueMap = map[string]NodeFlags{
 	`worldmatrixupdated`: 7,
 	`VectorsUpdated`:     8,
 	`vectorsupdated`:     8,
+	`Invisible`:          9,
+	`invisible`:          9,
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
 	7: `WorldMatrixUpdated means that the Pose.WorldMatrix has been updated`,
 	8: `VectorsUpdated means that the rendering vectors information is updated`,
+	9: `Invisible marks this node as invisible`,
 }
 
 var _NodeFlagsMap = map[NodeFlags]string{
 	7: `WorldMatrixUpdated`,
 	8: `VectorsUpdated`,
+	9: `Invisible`,
 }
 
 // String returns the string representation
@@ -586,5 +591,165 @@ func (i RenderClasses) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RenderClasses) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _ScFlagsValues = []ScFlags{7, 8}
+
+// ScFlagsN is the highest valid value
+// for type ScFlags, plus one.
+const ScFlagsN ScFlags = 9
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ScFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[ScUpdating-(7)]
+	_ = x[ScNeedsRender-(8)]
+}
+
+var _ScFlagsNameToValueMap = map[string]ScFlags{
+	`Updating`:    7,
+	`updating`:    7,
+	`NeedsRender`: 8,
+	`needsrender`: 8,
+}
+
+var _ScFlagsDescMap = map[ScFlags]string{
+	7: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	8: `ScNeedsRender means nodes have flagged that they need a Render update.`,
+}
+
+var _ScFlagsMap = map[ScFlags]string{
+	7: `Updating`,
+	8: `NeedsRender`,
+}
+
+// String returns the string representation
+// of this ScFlags value.
+func (i ScFlags) String() string {
+	str := ""
+	for _, ie := range _ScFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this ScFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i ScFlags) BitIndexString() string {
+	if str, ok := _ScFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the ScFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *ScFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the ScFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *ScFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type ScFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the ScFlags value as an int64.
+func (i ScFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the ScFlags value from an int64.
+func (i *ScFlags) SetInt64(in int64) {
+	*i = ScFlags(in)
+}
+
+// Desc returns the description of the ScFlags value.
+func (i ScFlags) Desc() string {
+	if str, ok := _ScFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ScFlagsValues returns all possible values
+// for the type ScFlags.
+func ScFlagsValues() []ScFlags {
+	return _ScFlagsValues
+}
+
+// Values returns all possible values
+// for the type ScFlags.
+func (i ScFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ScFlagsValues))
+	for i, d := range _ScFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type ScFlags.
+func (i ScFlags) IsValid() bool {
+	_, ok := _ScFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i ScFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i ScFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *ScFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

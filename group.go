@@ -28,7 +28,7 @@ func (gp *Group) UpdateMeshBBox() {
 	// todo: radial, etc
 	gp.MeshBBox.BBox.SetEmpty()
 	for _, kid := range gp.Kids {
-		nii, ni := AsNode3D(kid)
+		nii, ni := AsNode(kid)
 		if nii == nil {
 			continue
 		}
@@ -61,7 +61,7 @@ type SolidPoint struct {
 func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
 	gp.WalkPre(func(k ki.Ki) bool {
-		ni, nb := AsNode3D(k)
+		ni, nb := AsNode(k)
 		if ni == nil {
 			return ki.Break // going into a different type of thing, bail
 		}

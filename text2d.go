@@ -60,7 +60,7 @@ func NewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
 
 func (txt *Text2D) Defaults(sc *Scene) {
 	tm := sc.PlaneMesh2D()
-	txt.SetMesh(sc, tm)
+	txt.SetMesh(tm)
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
 	txt.SetProp("font-size", units.Pt(36))
@@ -94,38 +94,31 @@ func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 	return sz, true
 }
 
-func (txt *Text2D) Init3D(sc *Scene) {
-	// txt.RenderText(sc)
-	// err := txt.Validate(sc)
-	// if err != nil {
-	// 	txt.SetInvisible()
-	// }
-	// txt.NodeBase.Init3D(sc)
+func (txt *Text2D) Config(sc *Scene) {
+	txt.Sc = sc
+	txt.RenderText(sc)
+	txt.Validate()
+	txt.NodeBase.Config(sc)
 }
 
 // StyleText does basic 2D styling
 func (txt *Text2D) StyleText(sc *Scene) {
 	txt.Sty.Defaults()
-	// css stuff only works for node2d
-	// gi.AggCSS(&txt.CSSAgg, txt.CSS)
-	// txt.Sty.StyleCSS(txt.This().(gi.Node2D), txt.CSSAgg, "", sc.Viewport)
 	// gi.SetUnitContext(&txt.Sty, sc.Viewport, mat32.Vec2{}, mat32.Vec2{})
 }
 
 func (txt *Text2D) RenderText(sc *Scene) {
 	txt.StyleText(sc)
-	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, nil) // txt.CSSAgg)
+	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, nil)
 	sz := txt.TxtRender.Size
-	/*
+	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
+	if txt.TxtRender.Size != sz {
+		sz = txt.TxtRender.Size
 		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
-			txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
-			if txt.TxtRender.Size != sz {
-				sz = txt.TxtRender.Size
-			}
 		}
-	*/
+	}
 	marg := txt.Sty.TotalMargin()
 	sz.SetAdd(marg.Size())
 	txt.TxtPos = marg.Pos()
@@ -173,9 +166,9 @@ func (txt *Text2D) RenderText(sc *Scene) {
 }
 
 // Validate checks that text has valid mesh and texture settings, etc
-func (txt *Text2D) Validate(sc *Scene) error {
+func (txt *Text2D) Validate() error {
 	// todo: validate more stuff here
-	return txt.Solid.Validate(sc)
+	return txt.Solid.Validate()
 }
 
 func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
@@ -206,9 +199,9 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	// if txt.Sty.BackgroundColor.Color.A < 255 {
-	// 	return true
-	// }
+	if txt.Sty.BackgroundColor.Solid.A < 255 {
+		return true
+	}
 	return false
 }
 
