@@ -25,7 +25,7 @@ func PrefsView(pf *gi.Preferences) {
 	tb := gi.NewToolbar(sc)
 	NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 	gi.NewSeparator(tb)
-	save := NewFuncButton(tb, pf.Save)
+	save := NewFuncButton(tb, pf.Save).SetShortcutKey(gi.KeyFunMenuSave)
 	save.SetUpdateFunc(func() {
 		save.SetEnabledUpdt(pf.Changed)
 	})
@@ -43,6 +43,7 @@ func PrefsView(pf *gi.Preferences) {
 	NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
 	NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
 		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 	})
 

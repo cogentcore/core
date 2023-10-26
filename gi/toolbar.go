@@ -101,8 +101,8 @@ func (tb *Toolbar) SetShortcuts() {
 	}
 	for _, mi := range tb.Kids {
 		if mi.KiType().HasEmbed(ButtonType) {
-			ac := AsButton(mi)
-			em.AddShortcut(ac.Shortcut, ac)
+			bt := AsButton(mi)
+			em.AddShortcut(bt.Shortcut, bt)
 		}
 	}
 }
