@@ -246,7 +246,7 @@ func (ge *GiEditor) ConfigToolbar() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	ToolbarView(ge, tb)
+	gi.ToolbarFor(ge, tb)
 }
 
 // ConfigSplits configures the Splits.
