@@ -71,7 +71,7 @@ type Ki interface {
 	This() Ki
 
 	// AsNode returns the *ki.Node base type for this node.
-	AsNode() *Node
+	AsKi() *Node
 
 	// BaseType returns the base node type for all elements within this tree.
 	// Used e.g., for determining what types of children can be created.
@@ -598,7 +598,7 @@ func AsKi(v any) (Ki, *Node) {
 	if !ok {
 		return nil, nil
 	}
-	return k, k.AsNode()
+	return k, k.AsKi()
 }
 
 // NewOfType makes a new Ki struct of given type -- must be a Ki type -- will

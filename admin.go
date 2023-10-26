@@ -25,7 +25,7 @@ import (
 // within struct, sets their names to the field name, and sets us as their
 // parent.
 func InitNode(this Ki) {
-	n := this.AsNode()
+	n := this.AsKi()
 	this.ClearUpdateFlags()
 	if n.Ths != this {
 		n.Ths = this
@@ -49,10 +49,10 @@ func ThisCheck(k Ki) error {
 // parent, to keep consistent).
 // Assumes not already in a tree or anything.
 func SetParent(kid Ki, parent Ki) {
-	n := kid.AsNode()
+	n := kid.AsKi()
 	n.Par = parent
 	if parent != nil {
-		pn := parent.AsNode()
+		pn := parent.AsKi()
 		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
 		if kid.Name() == "" {
 			kid.SetName(kid.KiType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
@@ -90,7 +90,7 @@ func DeleteFromParent(kid Ki) {
 	if kid.Parent() == nil {
 		return
 	}
-	n := kid.AsNode()
+	n := kid.AsKi()
 	n.WalkUpParent(func(k Ki) bool {
 		k.This().OnChildDeleting(kid)
 		return Continue
@@ -105,7 +105,7 @@ func DeleteFromParent(kid Ki) {
 // Call this *before* deleting the children.
 func DeletingChildren(k Ki) {
 	k.This().OnChildrenDeleting()
-	n := k.AsNode()
+	n := k.AsKi()
 	n.WalkUpParent(func(k Ki) bool {
 		k.This().OnChildrenDeleting()
 		return Continue
@@ -154,12 +154,12 @@ func Root(k Ki) Ki {
 // This is only valid in a given context, not a stable
 // property of the node (e.g., used in WalkBreadth).
 func Depth(kn Ki) int {
-	return kn.AsNode().depth
+	return kn.AsKi().depth
 }
 
 // SetDepth sets the current depth of the node to given value.
 func SetDepth(kn Ki, depth int) {
-	kn.AsNode().depth = depth
+	kn.AsKi().depth = depth
 }
 
 // UpdateReset resets Updating flag for this node and all children -- in

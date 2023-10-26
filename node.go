@@ -89,7 +89,7 @@ func (n *Node) This() Ki {
 }
 
 // AsNode returns the *ki.Node base type for this node.
-func (n *Node) AsNode() *Node {
+func (n *Node) AsKi() *Node {
 	return n
 }
 
@@ -1284,7 +1284,7 @@ func (n *Node) Clone() Ki {
 // bits and doesn't do anything with pointers.
 func CopyFromRaw(kn, frm Ki) error {
 	kn.Children().ConfigCopy(kn.This(), *frm.Children())
-	n := kn.AsNode()
+	n := kn.AsKi()
 	fmp := *frm.Properties()
 	n.Props = make(Props, len(fmp))
 	n.Props.CopyFrom(fmp, DeepCopy)

@@ -261,7 +261,7 @@ func OpenNewJSON(filename string) (Ki, error) {
 func ParentAllChildren(kn Ki) {
 	for _, child := range *kn.Children() {
 		if child != nil {
-			child.AsNode().Par = kn
+			child.AsKi().Par = kn
 			ParentAllChildren(child)
 		}
 	}
