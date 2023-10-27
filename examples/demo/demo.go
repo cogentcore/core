@@ -306,6 +306,9 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSwitches(inputs).SetItems([]string{"Switch 1", "Switch 2", "Switch 3"}).
 		SetTooltips([]string{"A description for Switch 1", "A description for Switch 2", "A description for Switch 3"})
 
+	gi.NewSwitches(inputs).SetType(gi.SwitchChip).SetItems([]string{"Chip 1", "Chip 2", "Chip 3"}).
+		SetTooltips([]string{"A description for Chip 1", "A description for Chip 2", "A description for Chip 3"})
+
 	gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}).
 		SetTooltips([]string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"})
 

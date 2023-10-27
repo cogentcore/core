@@ -43,6 +43,8 @@ type SwitchTypes int32 //enums:enum -trimprefix Switch
 const (
 	// SwitchSwitch indicates to display a switch as a switch (toggle slider)
 	SwitchSwitch SwitchTypes = iota
+	// SwitchChip indicates to display a switch as chip (like Material Design's filter chip)
+	SwitchChip
 	// SwitchCheckbox indicates to display a switch as a checkbox
 	SwitchCheckbox
 	// SwitchRadioButton indicates to display a switch as a radio button
@@ -105,10 +107,19 @@ func (sw *Switch) SwitchStyles() {
 			s.Cursor = cursors.Pointer
 		}
 		s.Text.Align = styles.AlignLeft
-		s.Color = colors.Scheme.OnBackground
-		s.Margin.Set(units.Dp(1))
-		s.Padding.Set(units.Dp(1))
-		s.Border.Radius = styles.BorderRadiusExtraSmall
+		s.Margin.Set(units.Dp(2))
+		s.Padding.Set(units.Dp(4))
+		s.Border.Radius = styles.BorderRadiusSmall
+
+		if sw.Type == SwitchChip {
+			if s.Is(states.Checked) {
+				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+				s.Color = colors.Scheme.OnSurfaceVariant
+			} else {
+				s.Border.Color.Set(colors.Scheme.Outline)
+				s.Border.Width.Set(units.Dp(1))
+			}
+		}
 
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
@@ -118,7 +129,11 @@ func (sw *Switch) SwitchStyles() {
 		switch w.PathFrom(sw.This()) {
 		case "parts/stack/icon0": // on
 			w.Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.Primary.Base
+				if sw.Type == SwitchChip {
+					s.Color = colors.Scheme.OnSurfaceVariant
+				} else {
+					s.Color = colors.Scheme.Primary.Base
+				}
 				// switches need to be bigger
 				if sw.Type == SwitchSwitch {
 					s.Width.SetEm(3)
@@ -167,6 +182,9 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		// if they are turned on; we could implement that at some point
 		sw.IconOn = icons.ToggleOn.Fill()
 		sw.IconOff = icons.ToggleOff
+	case SwitchChip:
+		sw.IconOn = icons.Check
+		sw.IconOff = icons.Blank
 	case SwitchCheckbox:
 		sw.IconOn = icons.CheckBox.Fill()
 		sw.IconOff = icons.CheckBoxOutlineBlank
@@ -203,10 +221,10 @@ func (sw *Switch) ConfigWidget(sc *Scene) {
 
 func (sw *Switch) ConfigParts(sc *Scene) {
 	parts := sw.NewParts(LayoutHoriz)
-	if !sw.IconOn.IsValid() {
+	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}
-	if !sw.IconOff.IsValid() {
+	if sw.IconOff == "" {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
 	config := ki.Config{}
