@@ -4,6 +4,8 @@
 
 package keyfun
 
+//go:generate goki generate
+
 import (
 	"encoding/json"
 	"log"
