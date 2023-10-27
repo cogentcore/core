@@ -347,33 +347,26 @@ func makeLayouts(ts *gi.Tabs) {
 		s.MaxHeight.SetDp(-1)
 	})
 
-	vw := gi.NewLabel(layouts, "vw", "50vw")
-	vw.Style(func(s *styles.Style) {
-		s.Width = units.Vw(50)
-		s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-		s.Color = colors.Scheme.Primary.On
-	})
+	// vw := gi.NewLabel(layouts, "vw", "50vw")
+	// vw.Style(func(s *styles.Style) {
+	// 	s.Width = units.Vw(50)
+	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+	// 	s.Color = colors.Scheme.Primary.On
+	// })
 
-	pw := gi.NewLabel(layouts, "pw", "50pw")
-	pw.Style(func(s *styles.Style) {
-		s.Width = units.Pw(50)
-		s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
-		s.Color = colors.Scheme.Primary.OnContainer
-	})
+	// pw := gi.NewLabel(layouts, "pw", "50pw")
+	// pw.Style(func(s *styles.Style) {
+	// 	s.Width = units.Pw(50)
+	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
+	// 	s.Color = colors.Scheme.Primary.OnContainer
+	// })
 
-	// sv := gi.NewSplits(layouts, "sv")
-	// sv.Dim = mat32.X
+	sv := gi.NewSplits(layouts).SetDim(mat32.X)
 
-	// left := gi.NewFrame(sv, "left", gi.LayoutVert)
-
-	// leftTitle := gi.NewLabel(left, "leftTitle", "Left")
-	// leftTitle.Type = gi.LabelHeadlineMedium
-
-	// right := gi.NewFrame(sv, "right", gi.LayoutVert)
-
-	// rightTitle := gi.NewLabel(right, "rightTitle", "Right")
-	// rightTitle.Type = gi.LabelHeadlineMedium
-
+	left := gi.NewFrame(sv).SetLayout(gi.LayoutVert)
+	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
+	right := gi.NewFrame(sv).SetLayout(gi.LayoutVert)
+	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }
 
 // func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
