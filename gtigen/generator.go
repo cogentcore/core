@@ -200,7 +200,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 					iface := g.Interfaces.ValByKey(in)
 					if iface == nil {
 						slog.Info("missing interface object", "interface", in)
-						return true, nil
+						continue
 					}
 					if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
 						continue
