@@ -26,7 +26,7 @@ func PrefsView(pf *gi.Preferences) {
 	tb := gi.NewToolbar(sc)
 	NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 	gi.NewSeparator(tb)
-	save := NewFuncButton(tb, pf.Save).SetShortcutKey(keyfun.MenuSave)
+	save := NewFuncButton(tb, pf.Save).SetShortcutKey(keyfun.Save)
 	save.SetUpdateFunc(func() {
 		save.SetEnabledUpdt(pf.Changed)
 	})
@@ -44,7 +44,7 @@ func PrefsView(pf *gi.Preferences) {
 	NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
 	NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpen)
+		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.Open)
 		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 	})
 
@@ -107,12 +107,12 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	tb := gi.NewToolbar(sc)
 	NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 	gi.NewSeparator(tb)
-	save := NewFuncButton(tb, pf.Save).SetShortcutKey(keyfun.MenuSave)
+	save := NewFuncButton(tb, pf.Save).SetShortcutKey(keyfun.Save)
 	save.SetUpdateFunc(func() {
 		save.SetEnabledUpdt(pf.Changed)
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpen)
+		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.Open)
 	})
 
 	sv := NewStructView(sc, "sv")

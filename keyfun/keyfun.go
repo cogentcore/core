@@ -87,17 +87,17 @@ const (
 	GoGiEditor
 	// Below are menu specific functions -- use these as shortcuts for menu buttons
 	// allows uniqueness of mapping and easy customization of all key buttons
-	MenuNew
-	MenuNewAlt1 // alternative version (e.g., shift)
-	MenuNewAlt2 // alternative version (e.g., alt)
-	MenuOpen
-	MenuOpenAlt1 // alternative version (e.g., shift)
-	MenuOpenAlt2 // alternative version (e.g., alt)
-	MenuSave
-	MenuSaveAs
-	MenuSaveAlt   // another alt (e.g., alt)
-	MenuCloseAlt1 // alternative version (e.g., shift)
-	MenuCloseAlt2 // alternative version (e.g., alt)
+	New
+	NewAlt1 // alternative version (e.g., shift)
+	NewAlt2 // alternative version (e.g., alt)
+	Open
+	OpenAlt1 // alternative version (e.g., shift)
+	OpenAlt2 // alternative version (e.g., alt)
+	Save
+	SaveAs
+	SaveAlt   // another alt (e.g., alt)
+	CloseAlt1 // alternative version (e.g., shift)
+	CloseAlt2 // alternative version (e.g., alt)
 )
 
 // Map is a map between a key sequence (chord) and a specific KeyFun
@@ -512,17 +512,17 @@ var StdMaps = Maps{
 		"Shift+Control+G":         WinSnapshot,
 		"Control+Alt+I":           GoGiEditor,
 		"Shift+Control+I":         GoGiEditor,
-		"Meta+N":                  MenuNew,
-		"Shift+Meta+N":            MenuNewAlt1,
-		"Alt+Meta+N":              MenuNewAlt2,
-		"Meta+O":                  MenuOpen,
-		"Shift+Meta+O":            MenuOpenAlt1,
-		"Alt+Meta+O":              MenuOpenAlt2,
-		"Meta+S":                  MenuSave,
-		"Shift+Meta+S":            MenuSaveAs,
-		"Alt+Meta+S":              MenuSaveAlt,
-		"Shift+Meta+W":            MenuCloseAlt1,
-		"Alt+Meta+W":              MenuCloseAlt2,
+		"Meta+N":                  New,
+		"Shift+Meta+N":            NewAlt1,
+		"Alt+Meta+N":              NewAlt2,
+		"Meta+O":                  Open,
+		"Shift+Meta+O":            OpenAlt1,
+		"Alt+Meta+O":              OpenAlt2,
+		"Meta+S":                  Save,
+		"Shift+Meta+S":            SaveAs,
+		"Alt+Meta+S":              SaveAlt,
+		"Shift+Meta+W":            CloseAlt1,
+		"Alt+Meta+W":              CloseAlt2,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", Map{
 		"UpArrow":                 MoveUp,
@@ -646,17 +646,17 @@ var StdMaps = Maps{
 		"Shift+Control+G":         WinSnapshot,
 		"Control+Alt+I":           GoGiEditor,
 		"Shift+Control+I":         GoGiEditor,
-		"Meta+N":                  MenuNew,
-		"Shift+Meta+N":            MenuNewAlt1,
-		"Alt+Meta+N":              MenuNewAlt2,
-		"Meta+O":                  MenuOpen,
-		"Shift+Meta+O":            MenuOpenAlt1,
-		"Alt+Meta+O":              MenuOpenAlt2,
-		"Meta+S":                  MenuSave,
-		"Shift+Meta+S":            MenuSaveAs,
-		"Alt+Meta+S":              MenuSaveAlt,
-		"Shift+Meta+W":            MenuCloseAlt1,
-		"Alt+Meta+W":              MenuCloseAlt2,
+		"Meta+N":                  New,
+		"Shift+Meta+N":            NewAlt1,
+		"Alt+Meta+N":              NewAlt2,
+		"Meta+O":                  Open,
+		"Shift+Meta+O":            OpenAlt1,
+		"Alt+Meta+O":              OpenAlt2,
+		"Meta+S":                  Save,
+		"Shift+Meta+S":            SaveAs,
+		"Alt+Meta+S":              SaveAlt,
+		"Shift+Meta+W":            CloseAlt1,
+		"Alt+Meta+W":              CloseAlt2,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", Map{
 		"UpArrow":                 MoveUp,
@@ -765,17 +765,17 @@ var StdMaps = Maps{
 		"Shift+Control+G":         WinSnapshot,
 		"Control+Alt+I":           GoGiEditor,
 		"Shift+Control+I":         GoGiEditor,
-		"Alt+N":                   MenuNew, // ctrl keys conflict..
-		"Shift+Alt+N":             MenuNewAlt1,
-		"Control+Alt+N":           MenuNewAlt2,
-		"Alt+O":                   MenuOpen,
-		"Shift+Alt+O":             MenuOpenAlt1,
-		"Control+Alt+O":           MenuOpenAlt2,
-		"Alt+S":                   MenuSave,
-		"Shift+Alt+S":             MenuSaveAs,
-		"Control+Alt+S":           MenuSaveAlt,
-		"Shift+Alt+W":             MenuCloseAlt1,
-		"Control+Alt+W":           MenuCloseAlt2,
+		"Alt+N":                   New, // ctrl keys conflict..
+		"Shift+Alt+N":             NewAlt1,
+		"Control+Alt+N":           NewAlt2,
+		"Alt+O":                   Open,
+		"Shift+Alt+O":             OpenAlt1,
+		"Control+Alt+O":           OpenAlt2,
+		"Alt+S":                   Save,
+		"Shift+Alt+S":             SaveAs,
+		"Control+Alt+S":           SaveAlt,
+		"Shift+Alt+W":             CloseAlt1,
+		"Control+Alt+W":           CloseAlt2,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", Map{
 		"UpArrow":                 MoveUp,
@@ -847,23 +847,23 @@ var StdMaps = Maps{
 		"Control+J":               Jump,
 		"Control+[":               HistPrev,
 		"Control+]":               HistNext,
-		"Control+N":               MenuNew,
+		"Control+N":               New,
 		"F10":                     Menu,
 		"Alt+F6":                  WinFocusNext,
 		"Control+W":               WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
 		"Shift+Control+I":         GoGiEditor,
-		"Shift+Control+N":         MenuNewAlt1,
-		"Control+Alt+N":           MenuNewAlt2,
-		"Control+O":               MenuOpen,
-		"Shift+Control+O":         MenuOpenAlt1,
-		"Shift+Alt+O":             MenuOpenAlt2,
-		"Control+S":               MenuSave,
-		"Shift+Control+S":         MenuSaveAs,
-		"Control+Alt+S":           MenuSaveAlt,
-		"Shift+Control+W":         MenuCloseAlt1,
-		"Control+Alt+W":           MenuCloseAlt2,
+		"Shift+Control+N":         NewAlt1,
+		"Control+Alt+N":           NewAlt2,
+		"Control+O":               Open,
+		"Shift+Control+O":         OpenAlt1,
+		"Shift+Alt+O":             OpenAlt2,
+		"Control+S":               Save,
+		"Shift+Control+S":         SaveAs,
+		"Control+Alt+S":           SaveAlt,
+		"Shift+Control+W":         CloseAlt1,
+		"Control+Alt+W":           CloseAlt2,
 	}},
 	{"WindowsStd", "Standard Windows KeyMap", Map{
 		"UpArrow":                 MoveUp,
@@ -941,17 +941,17 @@ var StdMaps = Maps{
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
 		"Shift+Control+I":         GoGiEditor,
-		"Control+N":               MenuNew,
-		"Shift+Control+N":         MenuNewAlt1,
-		"Control+Alt+N":           MenuNewAlt2,
-		"Control+O":               MenuOpen,
-		"Shift+Control+O":         MenuOpenAlt1,
-		"Shift+Alt+O":             MenuOpenAlt2,
-		"Control+S":               MenuSave,
-		"Shift+Control+S":         MenuSaveAs,
-		"Control+Alt+S":           MenuSaveAlt,
-		"Shift+Control+W":         MenuCloseAlt1,
-		"Control+Alt+W":           MenuCloseAlt2,
+		"Control+N":               New,
+		"Shift+Control+N":         NewAlt1,
+		"Control+Alt+N":           NewAlt2,
+		"Control+O":               Open,
+		"Shift+Control+O":         OpenAlt1,
+		"Shift+Alt+O":             OpenAlt2,
+		"Control+S":               Save,
+		"Shift+Control+S":         SaveAs,
+		"Control+Alt+S":           SaveAlt,
+		"Shift+Control+W":         CloseAlt1,
+		"Control+Alt+W":           CloseAlt2,
 	}},
 	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", Map{
 		"UpArrow":                 MoveUp,
@@ -1029,16 +1029,16 @@ var StdMaps = Maps{
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
 		"Shift+Control+I":         GoGiEditor,
-		"Control+N":               MenuNew,
-		"Shift+Control+N":         MenuNewAlt1,
-		"Control+Alt+N":           MenuNewAlt2,
-		"Control+O":               MenuOpen,
-		"Shift+Control+O":         MenuOpenAlt1,
-		"Shift+Alt+O":             MenuOpenAlt2,
-		"Control+S":               MenuSave,
-		"Shift+Control+S":         MenuSaveAs,
-		"Control+Alt+S":           MenuSaveAlt,
-		"Shift+Control+W":         MenuCloseAlt1,
-		"Control+Alt+W":           MenuCloseAlt2,
+		"Control+N":               New,
+		"Shift+Control+N":         NewAlt1,
+		"Control+Alt+N":           NewAlt2,
+		"Control+O":               Open,
+		"Shift+Control+O":         OpenAlt1,
+		"Shift+Alt+O":             OpenAlt2,
+		"Control+S":               Save,
+		"Shift+Control+S":         SaveAs,
+		"Control+Alt+S":           SaveAlt,
+		"Shift+Control+W":         CloseAlt1,
+		"Control+Alt+W":           CloseAlt2,
 	}},
 }

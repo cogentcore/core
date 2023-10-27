@@ -75,17 +75,17 @@ func _FunsNoOp() {
 	_ = x[WinClose-(52)]
 	_ = x[WinSnapshot-(53)]
 	_ = x[GoGiEditor-(54)]
-	_ = x[MenuNew-(55)]
-	_ = x[MenuNewAlt1-(56)]
-	_ = x[MenuNewAlt2-(57)]
-	_ = x[MenuOpen-(58)]
-	_ = x[MenuOpenAlt1-(59)]
-	_ = x[MenuOpenAlt2-(60)]
-	_ = x[MenuSave-(61)]
-	_ = x[MenuSaveAs-(62)]
-	_ = x[MenuSaveAlt-(63)]
-	_ = x[MenuCloseAlt1-(64)]
-	_ = x[MenuCloseAlt2-(65)]
+	_ = x[New-(55)]
+	_ = x[NewAlt1-(56)]
+	_ = x[NewAlt2-(57)]
+	_ = x[Open-(58)]
+	_ = x[OpenAlt1-(59)]
+	_ = x[OpenAlt2-(60)]
+	_ = x[Save-(61)]
+	_ = x[SaveAs-(62)]
+	_ = x[SaveAlt-(63)]
+	_ = x[CloseAlt1-(64)]
+	_ = x[CloseAlt2-(65)]
 }
 
 var _FunsNameToValueMap = map[string]Funs{
@@ -199,28 +199,28 @@ var _FunsNameToValueMap = map[string]Funs{
 	`winsnapshot`:   53,
 	`GoGiEditor`:    54,
 	`gogieditor`:    54,
-	`MenuNew`:       55,
-	`menunew`:       55,
-	`MenuNewAlt1`:   56,
-	`menunewalt1`:   56,
-	`MenuNewAlt2`:   57,
-	`menunewalt2`:   57,
-	`MenuOpen`:      58,
-	`menuopen`:      58,
-	`MenuOpenAlt1`:  59,
-	`menuopenalt1`:  59,
-	`MenuOpenAlt2`:  60,
-	`menuopenalt2`:  60,
-	`MenuSave`:      61,
-	`menusave`:      61,
-	`MenuSaveAs`:    62,
-	`menusaveas`:    62,
-	`MenuSaveAlt`:   63,
-	`menusavealt`:   63,
-	`MenuCloseAlt1`: 64,
-	`menuclosealt1`: 64,
-	`MenuCloseAlt2`: 65,
-	`menuclosealt2`: 65,
+	`New`:           55,
+	`new`:           55,
+	`NewAlt1`:       56,
+	`newalt1`:       56,
+	`NewAlt2`:       57,
+	`newalt2`:       57,
+	`Open`:          58,
+	`open`:          58,
+	`OpenAlt1`:      59,
+	`openalt1`:      59,
+	`OpenAlt2`:      60,
+	`openalt2`:      60,
+	`Save`:          61,
+	`save`:          61,
+	`SaveAs`:        62,
+	`saveas`:        62,
+	`SaveAlt`:       63,
+	`savealt`:       63,
+	`CloseAlt1`:     64,
+	`closealt1`:     64,
+	`CloseAlt2`:     65,
+	`closealt2`:     65,
 }
 
 var _FunsDescMap = map[Funs]string{
@@ -348,17 +348,17 @@ var _FunsMap = map[Funs]string{
 	52: `WinClose`,
 	53: `WinSnapshot`,
 	54: `GoGiEditor`,
-	55: `MenuNew`,
-	56: `MenuNewAlt1`,
-	57: `MenuNewAlt2`,
-	58: `MenuOpen`,
-	59: `MenuOpenAlt1`,
-	60: `MenuOpenAlt2`,
-	61: `MenuSave`,
-	62: `MenuSaveAs`,
-	63: `MenuSaveAlt`,
-	64: `MenuCloseAlt1`,
-	65: `MenuCloseAlt2`,
+	55: `New`,
+	56: `NewAlt1`,
+	57: `NewAlt2`,
+	58: `Open`,
+	59: `OpenAlt1`,
+	60: `OpenAlt2`,
+	61: `Save`,
+	62: `SaveAs`,
+	63: `SaveAlt`,
+	64: `CloseAlt1`,
+	65: `CloseAlt2`,
 }
 
 // String returns the string representation

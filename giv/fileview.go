@@ -388,7 +388,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", keyfun.ShortcutFor(keyfun.WordLeft), keyfun.ShortcutFor(keyfun.Jump), keyfun.ShortcutFor(keyfun.SelectMode), keyfun.ShortcutFor(keyfun.Insert), keyfun.ShortcutFor(keyfun.InsertAfter), keyfun.ShortcutFor(keyfun.MenuOpen), keyfun.ShortcutFor(keyfun.HistPrev), keyfun.ShortcutFor(keyfun.HistNext), keyfun.ShortcutFor(keyfun.Search))
+	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", keyfun.ShortcutFor(keyfun.WordLeft), keyfun.ShortcutFor(keyfun.Jump), keyfun.ShortcutFor(keyfun.SelectMode), keyfun.ShortcutFor(keyfun.Insert), keyfun.ShortcutFor(keyfun.InsertAfter), keyfun.ShortcutFor(keyfun.Open), keyfun.ShortcutFor(keyfun.HistPrev), keyfun.ShortcutFor(keyfun.HistNext), keyfun.ShortcutFor(keyfun.Search))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetText(fv.SelFile)
 	sf.OnChange(func(e events.Event) {
@@ -791,7 +791,7 @@ func (fv *FileView) KeyInput(kt events.Event) {
 	case keyfun.HistNext:
 		kt.SetHandled()
 		fv.PathFieldHistNext()
-	case keyfun.Insert, keyfun.InsertAfter, keyfun.MenuOpen, keyfun.SelectMode:
+	case keyfun.Insert, keyfun.InsertAfter, keyfun.Open, keyfun.SelectMode:
 		kt.SetHandled()
 		if fv.SelectFile() {
 			fv.Send(events.DoubleClick, kt) // will close dialog
