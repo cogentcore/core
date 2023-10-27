@@ -6,6 +6,7 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 )
