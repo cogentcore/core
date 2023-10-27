@@ -1579,20 +1579,20 @@ func _ScFlagsNoOp() {
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
-	`Updating`:     9,
-	`updating`:     9,
-	`NeedsRender`:  10,
-	`needsrender`:  10,
-	`NeedsLayout`:  11,
-	`needslayout`:  11,
-	`NeedsRebuild`: 12,
-	`needsrebuild`: 12,
-	`ImageUpdated`: 13,
-	`imageupdated`: 13,
-	`PrefSizing`:   14,
-	`prefsizing`:   14,
-	`Preserve`:     15,
-	`preserve`:     15,
+	`ScUpdating`:     9,
+	`scupdating`:     9,
+	`ScNeedsRender`:  10,
+	`scneedsrender`:  10,
+	`ScNeedsLayout`:  11,
+	`scneedslayout`:  11,
+	`ScNeedsRebuild`: 12,
+	`scneedsrebuild`: 12,
+	`ScImageUpdated`: 13,
+	`scimageupdated`: 13,
+	`ScPrefSizing`:   14,
+	`scprefsizing`:   14,
+	`ScPreserve`:     15,
+	`scpreserve`:     15,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -1606,13 +1606,13 @@ var _ScFlagsDescMap = map[ScFlags]string{
 }
 
 var _ScFlagsMap = map[ScFlags]string{
-	9:  `Updating`,
-	10: `NeedsRender`,
-	11: `NeedsLayout`,
-	12: `NeedsRebuild`,
-	13: `ImageUpdated`,
-	14: `PrefSizing`,
-	15: `Preserve`,
+	9:  `ScUpdating`,
+	10: `ScNeedsRender`,
+	11: `ScNeedsLayout`,
+	12: `ScNeedsRebuild`,
+	13: `ScImageUpdated`,
+	14: `ScPrefSizing`,
+	15: `ScPreserve`,
 }
 
 // String returns the string representation
