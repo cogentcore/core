@@ -440,7 +440,6 @@ func (sc *Scene) DoUpdate() bool {
 		// fmt.Println("rebuild")
 		sc.DoRebuild()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
 		// fmt.Println("scene restyle")
