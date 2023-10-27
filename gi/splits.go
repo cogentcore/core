@@ -264,29 +264,6 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 	sz := len(sl.Kids)
 	fmt.Println(sz, sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
-	odim := mat32.OtherDim(sl.Dim)
-	spc := sl.BoxSpace()
-	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
-	handsz := sl.HandleSize.Dots
-	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	fmt.Println(parts.Kids)
-	for i, hlk := range *parts.Children() {
-		hl := hlk.(*Handle)
-		// hl.SplitterNo = i
-		// hl.Icon = spicon
-		hl.Dim = sl.Dim
-		fmt.Println(size, handsz*2)
-		hl.LayState.Alloc.Size.SetDim(sl.Dim, size)
-		hl.LayState.Alloc.Size.SetDim(odim, handsz*2)
-		hl.LayState.Alloc.SizeOrig = hl.LayState.Alloc.Size
-		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
-		hl.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
-		hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
-		hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
-		hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
-		// hl.Snap = false
-		// hl.ThumbSize = sl.HandleSize
-	}
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
@@ -361,6 +338,7 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
 	osz := sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
+	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
 	pos := float32(0.0)
 
 	spsum := float32(0)
@@ -385,6 +363,23 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 			hl.Pos = spsum
 			// hl.UpdatePosFromValue(hl.Value)
 		}
+	}
+	for i, hlk := range *sl.Parts.Children() {
+		hl := hlk.(*Handle)
+		// hl.SplitterNo = i
+		// hl.Icon = spicon
+		hl.Dim = sl.Dim
+		fmt.Println(size, handsz*2)
+		hl.LayState.Alloc.Size.SetDim(sl.Dim, size)
+		hl.LayState.Alloc.Size.SetDim(odim, handsz*2)
+		hl.LayState.Alloc.SizeOrig = hl.LayState.Alloc.Size
+		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
+		hl.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
+		hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
+		hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
+		hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
+		// hl.Snap = false
+		// hl.ThumbSize = sl.HandleSize
 	}
 
 	return sl.DoLayoutChildren(sc, iter)
