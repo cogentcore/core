@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"fmt"
 	"image"
+	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
@@ -142,4 +143,12 @@ func Write(im image.Image, w io.Writer, f Formats) error {
 	default:
 		return fmt.Errorf("grows/images.Save: format %q not valid", f)
 	}
+}
+
+// CloneAsRGBA returns an RGBA copy of the supplied image.
+func CloneAsRGBA(src image.Image) *image.RGBA {
+	bounds := src.Bounds()
+	img := image.NewRGBA(bounds)
+	draw.Draw(img, bounds, src, bounds.Min, draw.Src)
+	return img
 }
