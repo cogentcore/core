@@ -167,7 +167,7 @@ func ToValue(it any, tags string) Value {
 	}
 
 	if _, ok := it.(enums.BitFlag); ok {
-		return &BitFlagView{}
+		return &BitFlagValue{}
 	}
 	if _, ok := it.(enums.Enum); ok {
 		return &EnumValue{}
@@ -1071,18 +1071,17 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  BitFlagView
 
-// BitFlagView presents a ButtonBox for bitflags
-type BitFlagView struct {
+// BitFlagValue presents chip [gi.Switches] for editing bitflags
+type BitFlagValue struct {
 	ValueBase
-	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-func (vv *BitFlagView) WidgetType() *gti.Type {
+func (vv *BitFlagValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.SwitchesType
 	return vv.WidgetTyp
 }
 
-func (vv *BitFlagView) EnumValue() enums.BitFlag {
+func (vv *BitFlagValue) EnumValue() enums.BitFlag {
 	ev, ok := vv.Value.Interface().(enums.BitFlag)
 	if ok {
 		return ev
@@ -1091,14 +1090,14 @@ func (vv *BitFlagView) EnumValue() enums.BitFlag {
 	return nil
 }
 
-func (vv *BitFlagView) SetEnumValueFromInt(ival int64) bool {
+func (vv *BitFlagValue) SetEnumValueFromInt(ival int64) bool {
 	// todo: needs to set flags?
 	// typ := vv.EnumType()
 	// eval := laser.EnumIfaceFromInt64(ival, typ)
 	return vv.SetValue(ival)
 }
 
-func (vv *BitFlagView) UpdateWidget() {
+func (vv *BitFlagValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -1107,7 +1106,7 @@ func (vv *BitFlagView) UpdateWidget() {
 	sw.UpdateFromBitFlag(npv.Interface().(enums.BitFlag))
 }
 
-func (vv *BitFlagView) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+func (vv *BitFlagValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	sw := vv.Widget.(*gi.Switches)
 	sw.SetType(gi.SwitchChip)
