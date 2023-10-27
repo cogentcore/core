@@ -134,7 +134,7 @@ func (em *Mgr) MouseMove(where image.Point) {
 	ev.Init()
 	em.Last.MouseMoveTime = ev.GenTime
 	// if em.Win.IsCursorEnabled() {
-	// 	em.Last.MousePos = where
+	em.Last.MousePos = where
 	// }
 	if TraceWindowPaint {
 		fmt.Printf("*")
