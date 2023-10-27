@@ -15,7 +15,7 @@ import (
 )
 
 // KeyMapsView opens a view of a key maps table
-func KeyMapsView(km *gi.KeyMaps) {
+func KeyMapsView(km *keyfun.Maps) {
 	if gi.ActivateExistingMainWindow(km) {
 		return
 	}
@@ -34,16 +34,16 @@ func KeyMapsView(km *gi.KeyMaps) {
 	tv := NewTableView(sc).SetSlice(km)
 	tv.SetStretchMax()
 
-	gi.AvailKeyMapsChanged = false
+	keyfun.AvailMapsChanged = false
 	tv.OnChange(func(e events.Event) {
-		gi.AvailKeyMapsChanged = true
+		keyfun.AvailMapsChanged = true
 	})
 
 	tb := tv.Toolbar()
 	gi.NewSeparator(tb)
 	sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetShortcutKey(keyfun.MenuSave)
 	sp.SetUpdateFunc(func() {
-		sp.SetEnabled(gi.AvailKeyMapsChanged && km == &gi.AvailKeyMaps)
+		sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
 	})
 	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpen)
 	oj.Args[0].SetTag("ext", ".json")
@@ -52,11 +52,11 @@ func KeyMapsView(km *gi.KeyMaps) {
 	gi.NewSeparator(tb)
 	vs := NewFuncButton(tb, km.ViewStd).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
 	vs.SetUpdateFunc(func() {
-		vs.SetEnabledUpdt(km != &gi.StdKeyMaps)
+		vs.SetEnabledUpdt(km != &keyfun.StdMaps)
 	})
 	rs := NewFuncButton(tb, km.RevertToStd).SetConfirm(true).SetText("Revert to standard").SetIcon(icons.DeviceReset)
 	rs.SetUpdateFunc(func() {
-		rs.SetEnabledUpdt(km != &gi.StdKeyMaps)
+		rs.SetEnabledUpdt(km != &keyfun.StdMaps)
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
 		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpenAlt1)
@@ -67,7 +67,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	MainMenuView(km, win, mmen)
 	inClosePrompt := false
 	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-		if !gi.AvailKeyMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
+		if !keyfun.AvailMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
 			win.Close()
 			return
 		}
@@ -144,13 +144,13 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
-	_, curRow, _ := gi.AvailKeyMaps.MapByName(keyfun.MapName(cur))
+	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
 	desc, _ := vv.Desc()
-	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, &gi.AvailKeyMaps, curRow, nil, func(dlg *gi.Dialog) {
+	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, &keyfun.AvailMaps, curRow, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
 			if si >= 0 {
-				km := gi.AvailKeyMaps[si]
+				km := keyfun.AvailMaps[si]
 				vv.SetValue(km.Name)
 				vv.UpdateWidget()
 			}

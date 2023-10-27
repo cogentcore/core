@@ -198,6 +198,12 @@ func (km *Map) ChordForFun(kf Funs) key.Chord {
 	return ""
 }
 
+// ChordForFun returns first key chord trigger for given KeyFun in the
+// current active map
+func ChordFor(kf Funs) key.Chord {
+	return ActiveMap.ChordForFun(kf)
+}
+
 // ShortcutForFun returns OS-specific formatted shortcut for first key chord
 // trigger for given KeyFun in map
 func (km *Map) ShortcutForFun(kf Funs) key.Chord {
@@ -286,7 +292,7 @@ type Maps []MapsItem //gti:add
 var AvailMaps Maps
 
 func init() {
-	AvailMaps.CopyFrom(StdKeyMaps)
+	AvailMaps.CopyFrom(StdMaps)
 }
 
 // MapByName returns a keymap and index by name -- returns false and emits a
@@ -340,7 +346,7 @@ func (km *Maps) SaveJSON(filename string) error { //gti:add
 func (km *Maps) OpenPrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
-	AvailKeyMapsChanged = false
+	AvailMapsChanged = false
 	return km.OpenJSON(pnm)
 }
 
@@ -350,7 +356,7 @@ func (km *Maps) OpenPrefs() error { //gti:add
 func (km *Maps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
-	AvailKeyMapsChanged = false
+	AvailMapsChanged = false
 	return km.SaveJSON(pnm)
 }
 
@@ -366,8 +372,8 @@ func (km *Maps) CopyFrom(cp Maps) {
 // things not working, it is a good idea to save your current maps and try this, or at least do
 // ViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!
 func (km *Maps) RevertToStd() { //gti:add
-	km.CopyFrom(StdKeyMaps)
-	AvailKeyMapsChanged = true
+	km.CopyFrom(StdMaps)
+	AvailMapsChanged = true
 }
 
 // ViewStd shows the standard maps that are compiled into the program and have
@@ -377,10 +383,10 @@ func (km *Maps) ViewStd() { //gti:add
 	// TheViewIFace.KeyMapsView(&StdKeyMaps)
 }
 
-// AvailKeyMapsChanged is used to update giv.KeyMapsView toolbars via
+// AvailMapsChanged is used to update giv.KeyMapsView toolbars via
 // following menu, toolbar props update methods -- not accurate if editing any
 // other map but works for now..
-var AvailKeyMapsChanged = false
+var AvailMapsChanged = false
 
 // order is: Shift, Control, Alt, Meta
 // note: shift and meta modifiers for navigation keys do select + move
@@ -389,9 +395,9 @@ var AvailKeyMapsChanged = false
 // display of such items in menus will randomly display one of the
 // options. This can be considered a feature, not a bug!
 
-// StdKeyMaps is the original compiled-in set of standard keymaps that have
+// StdMaps is the original compiled-in set of standard keymaps that have
 // the lastest key functions bound to standard key chords.
-var StdKeyMaps = Maps{
+var StdMaps = Maps{
 	{"MacStd", "Standard Mac KeyMap", Map{
 		"UpArrow":                 MoveUp,
 		"Shift+UpArrow":           MoveUp,

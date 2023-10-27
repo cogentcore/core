@@ -14,6 +14,7 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -821,7 +822,7 @@ func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {
 	PrefsView(prefs)
 }
 
-func (vi *ViewIFace) KeyMapsView(maps *gi.KeyMaps) {
+func (vi *ViewIFace) KeyMapsView(maps *keyfun.Maps) {
 	KeyMapsView(maps)
 }
 

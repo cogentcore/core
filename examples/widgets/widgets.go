@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -66,8 +67,8 @@ func app() {
 	trow := gi.NewLayout(sc, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 
-	giedsc := gi.ActiveKeyMap.ChordForFun(keyfun.GoGiEditor)
-	prsc := gi.ActiveKeyMap.ChordForFun(keyfun.Prefs)
+	giedsc := keyfun.ActiveMap.ChordForFun(keyfun.GoGiEditor)
+	prsc := keyfun.ActiveMap.ChordForFun(keyfun.Prefs)
 
 	gi.NewLabel(trow, "title").SetText(
 		`This is a <b>demonstration</b> of the

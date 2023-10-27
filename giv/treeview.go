@@ -1055,14 +1055,14 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 }
 
 func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Scene) {
-	cpsc := gi.ActiveKeyMap.ChordForFun(keyfun.Copy)
+	cpsc := keyfun.ActiveMap.ChordForFun(keyfun.Copy)
 	gi.NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
 		})
 	if !tv.IsDisabled() {
-		ctsc := gi.ActiveKeyMap.ChordForFun(keyfun.Cut)
-		ptsc := gi.ActiveKeyMap.ChordForFun(keyfun.Paste)
+		ctsc := keyfun.ActiveMap.ChordForFun(keyfun.Cut)
+		ptsc := keyfun.ActiveMap.ChordForFun(keyfun.Paste)
 		gi.NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(!tv.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tv.This().(gi.Clipper).Cut()
