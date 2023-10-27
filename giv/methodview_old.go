@@ -446,7 +446,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 	for pk, pv := range props {
 		switch pk {
 		case "shortcut":
-			if kf, ok := pv.(gi.KeyFuns); ok {
+			if kf, ok := pv.(keyfun.Funs); ok {
 				ac.Shortcut = gi.ShortcutForFun(kf)
 			} else {
 				ac.Shortcut = key.Chord(laser.ToString(pv)).OSShortcut()
@@ -460,7 +460,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
 			}
 		case "keyfun":
-			if kf, ok := pv.(gi.KeyFuns); ok {
+			if kf, ok := pv.(keyfun.Funs); ok {
 				ac.Shortcut = gi.ShortcutForFun(kf)
 				md.KeyFun = kf
 				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewKeyFun))
@@ -661,7 +661,7 @@ type MethodViewData struct {
 	SubMenuVal any
 
 	// key function that we emit, if MethodViewKeyFun type
-	KeyFun gi.KeyFuns
+	KeyFun keyfun.Funs
 	Flags  MethodViewFlags
 }
 
