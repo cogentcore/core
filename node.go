@@ -385,12 +385,16 @@ func (n *Node) Path() string {
 // Path is only valid for finding items when child names are unique
 // (see Unique* functions). The paths that it returns exclude the
 // name of the parent and the leading slash; for example, in the tree
-// a/b/c/d/e, the result of d.PathFrom(b) would be c/d
+// a/b/c/d/e, the result of d.PathFrom(b) would be c/d. PathFrom
+// automatically gets the [Ki.This] version of the given parent,
+// so a base type can be passed in without manually calling [Ki.This].
 func (n *Node) PathFrom(par Ki) string {
 	// we bail a level below the parent so it isn't in the path
 	if n.Par == nil || n.Par == par {
 		return n.Nm
 	}
+	// critical to get "This"
+	par = par.This()
 	ppath := ""
 	if n.Par == par {
 		ppath = "/" + EscapePathName(par.Name())

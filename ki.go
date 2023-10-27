@@ -208,7 +208,9 @@ type Ki interface {
 	// Path is only valid for finding items when child names are unique
 	// (see Unique* functions). The paths that it returns exclude the
 	// name of the parent and the leading slash; for example, in the tree
-	// a/b/c/d/e, the result of d.PathFrom(b) would be c/d
+	// a/b/c/d/e, the result of d.PathFrom(b) would be c/d. PathFrom
+	// automatically gets the [Ki.This] version of the given parent,
+	// so a base type can be passed in without manually calling [Ki.This].
 	PathFrom(par Ki) string
 
 	// FindPath returns Ki object at given path, starting from this node
