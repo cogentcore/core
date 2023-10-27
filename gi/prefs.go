@@ -6,7 +6,6 @@ package gi
 
 import (
 	"encoding/json"
-	"fmt"
 	"image/color"
 	"io/ioutil"
 	"log"
@@ -21,6 +20,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -237,7 +237,7 @@ func (pf *Preferences) Save() error { //gti:add
 func (pf *Preferences) LightMode() { //gti:add
 	pf.Theme = ThemeLight
 	colors.SetScheme(false)
-	pf.Save()
+	grr.Log0(pf.Save())
 	pf.UpdateAll()
 }
 
@@ -318,7 +318,6 @@ func (pf *Preferences) ApplyDPI() {
 // default or specific to the current screen.
 //   - forCurrentScreen: if true, saves only for current screen
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
-	fmt.Println("SaveZoom: forCurrentScreen =", forCurrentScreen)
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
 		sp, ok := pf.ScreenPrefs[sc.Name]
@@ -333,21 +332,17 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
 	} else {
 		pf.LogicalDPIScale = mat32.Truncate(sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
-	pf.Save()
+	grr.Log0(pf.Save())
 }
 
 // ScreenInfo returns screen info for all screens on the device
-func (pf *Preferences) ScreenInfo() string { //gti:add
+func (pf *Preferences) ScreenInfo() []*goosi.Screen { //gti:add
 	ns := goosi.TheApp.NScreens()
-	scinfo := ""
+	res := make([]*goosi.Screen, ns)
 	for i := 0; i < ns; i++ {
-		sc := goosi.TheApp.Screen(i)
-		if i > 0 {
-			scinfo += "\n"
-		}
-		scinfo += fmt.Sprintf("Screen number: %v Name: %v\n    Geom: %v, DevPixRatio: %v\n    Pixels: %v, Physical size: %v mm\n    Logical DPI: %v, Physical DPI: %v, Logical DPI scale: %v\n    Depth: %v, Refresh rate: %v\n    Orientation: %v, Native orientation: %v, Primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.DevicePixelRatio, sc.PixSize, sc.PhysicalSize, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.Depth, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
+		res = append(res, goosi.TheApp.Screen(i))
 	}
-	return scinfo
+	return res
 }
 
 // VersionInfo returns GoGi version information
