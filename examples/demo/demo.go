@@ -81,6 +81,8 @@ func makeHome(ts *gi.Tabs) {
 
 	giv.NewFuncButton(home, gi.Prefs.LightMode).SetShowReturnAsDialog(true)
 
+	gi.NewHandle(home)
+
 	img := gi.NewImage(home)
 	err := img.OpenImage("gopher.png", 300, 300)
 	if err != nil {

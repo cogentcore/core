@@ -507,6 +507,75 @@ func (t *Frame) SetStackTop(v int) *Frame {
 	return t
 }
 
+// HandleType is the [gti.Type] for [Handle]
+var HandleType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Handle",
+	ShortName:  "gi.Handle",
+	IDName:     "handle",
+	Doc:        "Handle represents a draggable handle that can be\nused to control the size of an element.",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Handle{},
+})
+
+// NewHandle adds a new [Handle] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewHandle(par ki.Ki, name ...string) *Handle {
+	return par.NewChild(HandleType, name...).(*Handle)
+}
+
+// KiType returns the [*gti.Type] of [Handle]
+func (t *Handle) KiType() *gti.Type {
+	return HandleType
+}
+
+// New returns a new [*Handle] value
+func (t *Handle) New() ki.Ki {
+	return &Handle{}
+}
+
+// SetTooltip sets the [Handle.Tooltip]
+func (t *Handle) SetTooltip(v string) *Handle {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Handle.Class]
+func (t *Handle) SetClass(v string) *Handle {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Handle.CustomContextMenu]
+func (t *Handle) SetCustomContextMenu(v func(m *Scene)) *Handle {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Handle.Spacing]
+func (t *Handle) SetSpacing(v units.Value) *Handle {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Handle.StackTop]
+func (t *Handle) SetStackTop(v int) *Handle {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Handle.Stripes]
+func (t *Handle) SetStripes(v Stripes) *Handle {
+	t.Stripes = v
+	return t
+}
+
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Icon",
