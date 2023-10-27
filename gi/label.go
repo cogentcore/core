@@ -314,8 +314,8 @@ func (lb *Label) HandleLabelKeys() {
 		if !lb.StateIs(states.Selected) {
 			return
 		}
-		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunCopy {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Copy {
 			e.SetHandled()
 			md := mimedata.NewText(lb.Text)
 			lb.This().(Clipper).MimeData(&md)

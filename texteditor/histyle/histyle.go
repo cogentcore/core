@@ -339,7 +339,7 @@ var StyleProps = ki.Props{
 			{"OpenJSON", ki.Props{
 				"label":    "Open from file",
 				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": gi.KeyFunMenuOpen,
+				"shortcut": keyfun.MenuOpen,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".histy",
@@ -349,7 +349,7 @@ var StyleProps = ki.Props{
 			{"SaveJSON", ki.Props{
 				"label":    "Save to file",
 				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": gi.KeyFunMenuSaveAs,
+				"shortcut": keyfun.MenuSaveAs,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".histy",

@@ -847,14 +847,14 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
+	cpsc := ActiveKeyMap.ChordForFun(keyfun.Copy)
 	NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tf.This().(Clipper).Copy(true)
 		})
 	if !tf.IsReadOnly() {
-		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
-		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
+		ctsc := ActiveKeyMap.ChordForFun(keyfun.Cut)
+		ptsc := ActiveKeyMap.ChordForFun(keyfun.Paste)
 		NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tf.This().(Clipper).Cut()
@@ -1406,7 +1406,7 @@ func (tf *TextField) HandleTextFieldKeys() {
 		if KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 		}
-		kf := KeyFun(e.KeyChord())
+		kf := keyfun.Of(e.KeyChord())
 		// todo:
 		// win := tf.ParentRenderWin()
 		// if tf.Complete != nil {
@@ -1416,55 +1416,55 @@ func (tf *TextField) HandleTextFieldKeys() {
 		// 	}
 		// }
 
-		if !tf.StateIs(states.Focused) && kf == KeyFunAbort {
+		if !tf.StateIs(states.Focused) && kf == keyfun.Abort {
 			return
 		}
 
 		// first all the keys that work for both inactive and active
 		switch kf {
-		case KeyFunMoveRight:
+		case keyfun.MoveRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorForward(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunWordRight:
+		case keyfun.WordRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorForwardWord(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunMoveLeft:
+		case keyfun.MoveLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorBackward(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunWordLeft:
+		case keyfun.WordLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CursorBackwardWord(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunHome:
+		case keyfun.Home:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CancelComplete()
 			tf.CursorStart()
-		case KeyFunEnd:
+		case keyfun.End:
 			e.SetHandled()
 			tf.ShiftSelect(e)
 			tf.CancelComplete()
 			tf.CursorEnd()
-		case KeyFunSelectMode:
+		case keyfun.SelectMode:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.SelectModeToggle()
-		case KeyFunCancelSelect:
+		case keyfun.CancelSelect:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.SelectReset()
-		case KeyFunSelectAll:
+		case keyfun.SelectAll:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.SelectAll()
-		case KeyFunCopy:
+		case keyfun.Copy:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.This().(Clipper).Copy(true) // reset
@@ -1473,57 +1473,57 @@ func (tf *TextField) HandleTextFieldKeys() {
 			return
 		}
 		switch kf {
-		case KeyFunEnter:
+		case keyfun.Enter:
 			fallthrough
-		case KeyFunFocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
+		case keyfun.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
 			fallthrough
-		case KeyFunAccept: // ctrl+enter
+		case keyfun.Accept: // ctrl+enter
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
 			tf.FocusNext()
-		case KeyFunFocusPrev:
+		case keyfun.FocusPrev:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
 			tf.FocusPrev()
-		case KeyFunAbort: // esc
+		case keyfun.Abort: // esc
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.Revert()
 			// tf.FocusChanged(FocusInactive)
-		case KeyFunBackspace:
+		case keyfun.Backspace:
 			e.SetHandled()
 			tf.CursorBackspace(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunKill:
+		case keyfun.Kill:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.CursorKill()
-		case KeyFunDelete:
+		case keyfun.Delete:
 			e.SetHandled()
 			tf.CursorDelete(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunBackspaceWord:
+		case keyfun.BackspaceWord:
 			e.SetHandled()
 			tf.CursorBackspaceWord(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunDeleteWord:
+		case keyfun.DeleteWord:
 			e.SetHandled()
 			tf.CursorDeleteWord(1)
 			tf.OfferComplete(dontForce)
-		case KeyFunCut:
+		case keyfun.Cut:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.This().(Clipper).Cut()
-		case KeyFunPaste:
+		case keyfun.Paste:
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.This().(Clipper).Paste()
-		case KeyFunComplete:
+		case keyfun.Complete:
 			e.SetHandled()
 			tf.OfferComplete(force)
-		case KeyFunNil:
+		case keyfun.Nil:
 			if unicode.IsPrint(e.KeyRune()) {
 				if !e.HasAnyModifier(key.Control, key.Meta) {
 					e.SetHandled()

@@ -441,7 +441,7 @@ var FileBrowseProps = ki.Props{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
 			{"OpenPath", ki.Props{
-				"shortcut":        gi.KeyFunMenuOpen,
+				"shortcut":        keyfun.MenuOpen,
 				"no-update-after": true,
 				"Args": ki.PropSlice{
 					{"Path", ki.Props{

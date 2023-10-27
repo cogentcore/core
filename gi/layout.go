@@ -1005,8 +1005,8 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 	if KeyEventTrace {
 		fmt.Println("Layout KeyInput:", ly)
 	}
-	kf := KeyFun(e.KeyChord())
-	if kf == KeyFunAbort {
+	kf := keyfun.Of(e.KeyChord())
+	if kf == keyfun.Abort {
 		if ly.ClosePopup() {
 			e.SetHandled()
 		}
@@ -1017,13 +1017,13 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 		return
 	}
 	switch kf {
-	case KeyFunFocusNext: // tab
+	case keyfun.FocusNext: // tab
 		if em.FocusNext() {
 			// fmt.Println("foc next", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
 		return
-	case KeyFunFocusPrev: // shift-tab
+	case keyfun.FocusPrev: // shift-tab
 		if em.FocusPrev() {
 			// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
 			e.SetHandled()
@@ -1032,12 +1032,12 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 	}
 	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
 		switch kf {
-		case KeyFunMoveRight:
+		case keyfun.MoveRight:
 			if ly.FocusNextChild(false) {
 				e.SetHandled()
 			}
 			return
-		case KeyFunMoveLeft:
+		case keyfun.MoveLeft:
 			if ly.FocusPrevChild(false) {
 				e.SetHandled()
 			}
@@ -1046,17 +1046,17 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 	}
 	if ly.Lay == LayoutVert || ly.Lay == LayoutGrid || ly.Lay == LayoutVertFlow {
 		switch kf {
-		case KeyFunMoveDown:
+		case keyfun.MoveDown:
 			if ly.FocusNextChild(true) {
 				e.SetHandled()
 			}
 			return
-		case KeyFunMoveUp:
+		case keyfun.MoveUp:
 			if ly.FocusPrevChild(true) {
 				e.SetHandled()
 			}
 			return
-		case KeyFunPageDown:
+		case keyfun.PageDown:
 			proc := false
 			for st := 0; st < LayoutPageSteps; st++ {
 				if !ly.FocusNextChild(true) {
@@ -1068,7 +1068,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 				e.SetHandled()
 			}
 			return
-		case KeyFunPageUp:
+		case keyfun.PageUp:
 			proc := false
 			for st := 0; st < LayoutPageSteps; st++ {
 				if !ly.FocusPrevChild(true) {
@@ -1090,10 +1090,10 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	if KeyEventTrace {
 		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
 	}
-	kf := KeyFun(e.KeyChord())
+	kf := keyfun.Of(e.KeyChord())
 	delayMs := int(e.Time().Sub(ly.FocusNameTime) / time.Millisecond)
 	ly.FocusNameTime = e.Time()
-	if kf == KeyFunFocusNext { // tab means go to next match -- don't worry about time
+	if kf == keyfun.FocusNext { // tab means go to next match -- don't worry about time
 		if ly.FocusName == "" || delayMs > LayoutFocusNameTabMSec {
 			ly.FocusName = ""
 			ly.FocusNameLast = nil

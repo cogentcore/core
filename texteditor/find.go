@@ -475,7 +475,7 @@ func (ed *Editor) QReplaceCancel() {
 	ed.QReplaceSig()
 }
 
-// EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
+// EscPressed emitted for keyfun.Abort or keyfun.CancelSelect -- effect depends on state..
 func (ed *Editor) EscPressed() {
 	updt := ed.UpdateStart()
 	defer ed.UpdateEndRender(updt)

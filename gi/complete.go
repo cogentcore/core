@@ -243,7 +243,7 @@ func (c *Complete) On(etype events.Types, fun func(e events.Event)) {
 func (c *Complete) KeyInput(kf keyfun.Funs) bool {
 	count := len(c.Completions)
 	switch kf {
-	case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items
+	case keyfun.FocusNext: // tab will complete if single item or try to extend if multiple items
 		if count > 0 {
 			if count == 1 { // just complete
 				c.Complete(c.Completions[0].Text)
@@ -253,11 +253,11 @@ func (c *Complete) KeyInput(kf keyfun.Funs) bool {
 			}
 			return true
 		}
-	case KeyFunMoveDown:
+	case keyfun.MoveDown:
 		if count == 1 {
 			return true
 		}
-	case KeyFunMoveUp:
+	case keyfun.MoveUp:
 		if count == 1 {
 			return true
 		}

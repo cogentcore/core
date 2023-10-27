@@ -340,18 +340,18 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		if KeyEventTrace {
 			fmt.Printf("Spinner KeyChordEvent: %v\n", sp.Path())
 		}
-		kf := KeyFun(e.KeyChord())
+		kf := keyfun.Of(e.KeyChord())
 		switch {
-		case kf == KeyFunMoveUp:
+		case kf == keyfun.MoveUp:
 			e.SetHandled()
 			sp.IncrValue(1)
-		case kf == KeyFunMoveDown:
+		case kf == keyfun.MoveDown:
 			e.SetHandled()
 			sp.IncrValue(-1)
-		case kf == KeyFunPageUp:
+		case kf == keyfun.PageUp:
 			e.SetHandled()
 			sp.PageIncrValue(1)
-		case kf == KeyFunPageDown:
+		case kf == keyfun.PageDown:
 			e.SetHandled()
 			sp.PageIncrValue(-1)
 		}

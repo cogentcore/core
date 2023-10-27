@@ -145,8 +145,8 @@ func (dlg *Dialog) Ok() *Dialog {
 		dlg.AcceptDialog()
 	})
 	sc.OnKeyChord(func(e events.Event) {
-		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunAccept {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Accept {
 			e.SetHandled()
 			dlg.AcceptDialog()
 		}
@@ -165,8 +165,8 @@ func (dlg *Dialog) Cancel() *Dialog {
 		dlg.CancelDialog()
 	})
 	sc.OnKeyChord(func(e events.Event) {
-		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunAbort {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Abort {
 			e.SetHandled()
 			dlg.CancelDialog()
 		}
@@ -341,14 +341,14 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 		})
 		b.OnKeyChord(func(e events.Event) {
 			dlg.Data = chidx
-			kf := KeyFun(e.KeyChord())
+			kf := keyfun.Of(e.KeyChord())
 			if chnm == "cancel" {
-				if kf == KeyFunAbort {
+				if kf == keyfun.Abort {
 					e.SetHandled()
 					dlg.CancelDialog()
 				}
 			} else {
-				if kf == KeyFunAccept {
+				if kf == keyfun.Accept {
 					e.SetHandled()
 					dlg.AcceptDialog()
 				}

@@ -154,9 +154,9 @@ func SetActiveMapName(mapnm MapName) {
 	}
 }
 
-// KeyFun translates chord into keyboard function -- use oswin key.Chord
+// Of translates chord into keyboard function -- use oswin key.Chord
 // to get chord
-func KeyFun(chord key.Chord) Funs {
+func Of(chord key.Chord) Funs {
 	kf := Nil
 	if chord != "" {
 		kf = (*ActiveMap)[chord]
