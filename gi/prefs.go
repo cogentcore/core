@@ -10,7 +10,6 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
-	"log/slog"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -187,10 +186,14 @@ func (pf *Preferences) Open() error { //gti:add
 		err = keyfun.AvailMaps.OpenPrefs()
 		if err != nil {
 			pf.SaveKeyMaps = false
+			return err
 		}
 	}
 	if pf.SaveDetailed {
-		PrefsDet.Open()
+		err := PrefsDet.Open()
+		if err != nil {
+			return err
+		}
 	}
 	if pf.User.Username == "" {
 		pf.UpdateUser()
@@ -205,18 +208,23 @@ func (pf *Preferences) Save() error { //gti:add
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
-		slog.Error(err.Error())
 		return err
 	}
 	err = os.WriteFile(pnm, b, 0644)
 	if err != nil {
-		slog.Error(err.Error())
+		return err
 	}
 	if pf.SaveKeyMaps {
-		keyfun.AvailMaps.SavePrefs()
+		err := keyfun.AvailMaps.SavePrefs()
+		if err != nil {
+			return err
+		}
 	}
 	if pf.SaveDetailed {
-		PrefsDet.Save()
+		err := PrefsDet.Save()
+		if err != nil {
+			return err
+		}
 	}
 	pf.Changed = false
 	return err
