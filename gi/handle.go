@@ -19,7 +19,7 @@ import (
 type Handle struct {
 	Frame
 
-	// dimension along which the handle slides
+	// dimension along which the handle slides (opposite of the dimension it is longest on)
 	Dim mat32.Dims
 }
 
@@ -35,11 +35,11 @@ func (hl *Handle) HandleStyles() {
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 
 		if hl.Dim == mat32.X {
-			s.SetFixedWidth(units.Em(3))
-			s.SetFixedHeight(units.Dp(4))
-		} else {
 			s.SetFixedWidth(units.Dp(4))
 			s.SetFixedHeight(units.Em(3))
+		} else {
+			s.SetFixedWidth(units.Em(3))
+			s.SetFixedHeight(units.Dp(4))
 		}
 
 		if !hl.IsReadOnly() {
