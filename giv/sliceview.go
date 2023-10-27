@@ -2052,7 +2052,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 
 // KeyInputNav supports multiple selection navigation keys
 func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 	if selMode == events.SelectOne {
 		if sv.Is(SliceViewSelectMode) {
@@ -2060,26 +2060,26 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 		}
 	}
 	switch kf {
-	case gi.KeyFunCancelSelect:
+	case keyfun.CancelSelect:
 		sv.UnselectAllIdxs()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
-	case gi.KeyFunMoveDown:
+	case keyfun.MoveDown:
 		sv.MoveDownAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunMoveUp:
+	case keyfun.MoveUp:
 		sv.MoveUpAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunPageDown:
+	case keyfun.PageDown:
 		sv.MovePageDownAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunPageUp:
+	case keyfun.PageUp:
 		sv.MovePageUpAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunSelectMode:
+	case keyfun.SelectMode:
 		sv.SetFlag(!sv.Is(SliceViewSelectMode), SliceViewSelectMode)
 		kt.SetHandled()
-	case gi.KeyFunSelectAll:
+	case keyfun.SelectAll:
 		sv.SelectAllIdxs()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
@@ -2095,40 +2095,40 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 		return
 	}
 	idx := sv.SelectedIdx
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	switch kf {
-	// case gi.KeyFunDelete: // too dangerous
+	// case keyfun.Delete: // too dangerous
 	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx)
 	// 	sv.SelectMode = false
 	// 	sv.SelectIdxAction(idx, events.SelectOne)
 	// 	kt.SetHandled()
-	case gi.KeyFunDuplicate:
+	case keyfun.Duplicate:
 		nidx := sv.Duplicate()
 		sv.SetFlag(false, SliceViewSelectMode)
 		if nidx >= 0 {
 			sv.SelectIdxAction(nidx, events.SelectOne)
 		}
 		kt.SetHandled()
-	case gi.KeyFunInsert:
+	case keyfun.Insert:
 		sv.This().(SliceViewer).SliceNewAt(idx)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIdxAction(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
-	case gi.KeyFunInsertAfter:
+	case keyfun.InsertAfter:
 		sv.This().(SliceViewer).SliceNewAt(idx + 1)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIdxAction(idx+1, events.SelectOne)
 		kt.SetHandled()
-	case gi.KeyFunCopy:
+	case keyfun.Copy:
 		sv.CopyIdxs(true)
 		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIdxAction(idx, events.SelectOne)
 		kt.SetHandled()
-	case gi.KeyFunCut:
+	case keyfun.Cut:
 		sv.CutIdxs()
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
-	case gi.KeyFunPaste:
+	case keyfun.Paste:
 		sv.PasteIdx(sv.SelectedIdx)
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
@@ -2145,34 +2145,34 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 			return
 		}
 	}
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	idx := sv.SelectedIdx
 	switch {
-	case kf == gi.KeyFunMoveDown:
+	case kf == keyfun.MoveDown:
 		ni := idx + 1
 		if ni < sv.SliceSize {
 			sv.ScrollToIdx(ni)
 			sv.UpdateSelectIdx(ni, true)
 			kt.SetHandled()
 		}
-	case kf == gi.KeyFunMoveUp:
+	case kf == keyfun.MoveUp:
 		ni := idx - 1
 		if ni >= 0 {
 			sv.ScrollToIdx(ni)
 			sv.UpdateSelectIdx(ni, true)
 			kt.SetHandled()
 		}
-	case kf == gi.KeyFunPageDown:
+	case kf == keyfun.PageDown:
 		ni := min(idx+sv.VisRows-1, sv.SliceSize-1)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetHandled()
-	case kf == gi.KeyFunPageUp:
+	case kf == keyfun.PageUp:
 		ni := max(idx-(sv.VisRows-1), 0)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetHandled()
-	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.KeyRune() == ' ':
+	case kf == keyfun.Enter || kf == keyfun.Accept || kt.KeyRune() == ' ':
 		sv.Send(events.DoubleClick, kt)
 		kt.SetHandled()
 	}

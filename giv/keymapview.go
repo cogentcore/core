@@ -6,7 +6,7 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfuns"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -41,13 +41,13 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	tb := tv.Toolbar()
 	gi.NewSeparator(tb)
-	sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetShortcutKey(gi.KeyFunMenuSave)
+	sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetShortcutKey(keyfun.MenuSave)
 	sp.SetUpdateFunc(func() {
 		sp.SetEnabled(gi.AvailKeyMapsChanged && km == &gi.AvailKeyMaps)
 	})
-	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
+	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpen)
 	oj.Args[0].SetTag("ext", ".json")
-	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(gi.KeyFunMenuSaveAs)
+	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(keyfun.MenuSaveAs)
 	sj.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
 	vs := NewFuncButton(tb, km.ViewStd).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
@@ -59,7 +59,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		rs.SetEnabledUpdt(km != &gi.StdKeyMaps)
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpenAlt1)
+		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpenAlt1)
 	})
 
 	/* todo: menu, close
@@ -144,7 +144,7 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
-	_, curRow, _ := gi.AvailKeyMaps.MapByName(keyfuns.MapName(cur))
+	_, curRow, _ := gi.AvailKeyMaps.MapByName(keyfun.MapName(cur))
 	desc, _ := vv.Desc()
 	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, &gi.AvailKeyMaps, curRow, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {

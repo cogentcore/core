@@ -1878,7 +1878,7 @@ func (ftv *FileTreeView) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", ftv.Path())
 	}
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 
 	if selMode == events.SelectOne {
@@ -1890,20 +1890,20 @@ func (ftv *FileTreeView) KeyInput(kt events.Event) {
 	// first all the keys that work for ReadOnly and active
 	if !ftv.IsReadOnly() && !kt.IsHandled() {
 		switch kf {
-		case gi.KeyFunDelete:
+		case keyfun.Delete:
 			ftv.DeleteFiles()
 			kt.SetHandled()
 			// todo: remove when gi issue 237 is resolved
-		case gi.KeyFunBackspace:
+		case keyfun.Backspace:
 			ftv.DeleteFiles()
 			kt.SetHandled()
-		case gi.KeyFunDuplicate:
+		case keyfun.Duplicate:
 			ftv.DuplicateFiles()
 			kt.SetHandled()
-		case gi.KeyFunInsert: // New File
+		case keyfun.Insert: // New File
 			CallFunc(ftv, ftv.NewFile)
 			kt.SetHandled()
-		case gi.KeyFunInsertAfter: // New Folder
+		case keyfun.InsertAfter: // New Folder
 			CallFunc(ftv, ftv.NewFolder)
 			kt.SetHandled()
 		}
@@ -2640,13 +2640,13 @@ var FileTreeViewProps = ki.Props{
 		{"DuplicateFiles", ki.Props{
 			"label":    "Duplicate",
 			"updtfunc": FileTreeInactiveDirFunc,
-			"shortcut": gi.KeyFunDuplicate,
+			"shortcut": keyfun.Duplicate,
 		}},
 		{"DeleteFiles", ki.Props{
 			"label":    "Delete",
 			"desc":     "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
 			"updtfunc": FileTreeInactiveExternFunc,
-			"shortcut": gi.KeyFunDelete,
+			"shortcut": keyfun.Delete,
 		}},
 		{"RenameFiles", ki.Props{
 			"label":    "Rename",
@@ -2671,7 +2671,7 @@ var FileTreeViewProps = ki.Props{
 		{"NewFile", ki.Props{
 			"label":    "New File...",
 			"desc":     "make a new file in this folder",
-			"shortcut": gi.KeyFunInsert,
+			"shortcut": keyfun.Insert,
 			"updtfunc": FileTreeActiveDirFunc,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -2683,7 +2683,7 @@ var FileTreeViewProps = ki.Props{
 		{"NewFolder", ki.Props{
 			"label":    "New Folder...",
 			"desc":     "make a new folder within this folder",
-			"shortcut": gi.KeyFunInsertAfter,
+			"shortcut": keyfun.InsertAfter,
 			"updtfunc": FileTreeActiveDirFunc,
 			"Args": ki.PropSlice{
 				{"Folder Name", ki.Props{

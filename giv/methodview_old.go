@@ -402,7 +402,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 	// special action names
 	switch ac.Nm {
 	case "Close RenderWin":
-		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunWinClose)
+		ac.Shortcut = gi.ShortcutForFun(keyfun.WinClose)
 		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			vp.Win.CloseReq()
 		})
@@ -462,8 +462,8 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 		case "keyfun":
 			if kf, ok := pv.(keyfun.Funs); ok {
 				ac.Shortcut = gi.ShortcutForFun(kf)
-				md.KeyFun = kf
-				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewKeyFun))
+				md.keyfun. = kf
+				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewkeyfun.))
 			}
 		case "label":
 			ac.Text = laser.ToString(pv)
@@ -595,8 +595,8 @@ const (
 	// and the SubMenuVal has the selected value
 	MethodViewHasSubMenuVal
 
-	// MethodViewKeyFun means this action's only function is to emit the key fun
-	MethodViewKeyFun
+	// MethodViewkeyfun. means this action's only function is to emit the key fun
+	MethodViewkeyfun.
 )
 
 // SubMenuFunc is a function that returns a string slice of submenu items
@@ -660,8 +660,8 @@ type MethodViewData struct {
 	// value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method
 	SubMenuVal any
 
-	// key function that we emit, if MethodViewKeyFun type
-	KeyFun keyfun.Funs
+	// key function that we emit, if MethodViewkeyfun. type
+	keyfun. keyfun.Funs
 	Flags  MethodViewFlags
 }
 
@@ -722,9 +722,9 @@ func MethodViewCall(recv, send ki.Ki, sig int64, data any) {
 // prompting otherwise of the user for arg values -- checks for Confirm case
 // or otherwise directly calls method
 func MethodViewCallNoArgPrompt(ac *gi.Button, md *MethodViewData, args []reflect.Value) {
-	// if bitflag.Has32(int32(md.Flags), int(MethodViewKeyFun)) {
+	// if bitflag.Has32(int32(md.Flags), int(MethodViewkeyfun.)) {
 	// 	if md.Sc != nil && md.Sc.Win != nil {
-	// 		md.Sc.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
+	// 		md.Sc.Win.EventMgr.Sendkeyfun.Event(md.keyfun., false)
 	// 	}
 	// 	return
 	// }

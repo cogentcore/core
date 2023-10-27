@@ -1054,14 +1054,14 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 }
 
 func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Scene) {
-	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
+	cpsc := gi.ActiveKeyMap.ChordForFun(keyfun.Copy)
 	gi.NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
 		})
 	if !tv.IsDisabled() {
-		ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
-		ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
+		ctsc := gi.ActiveKeyMap.ChordForFun(keyfun.Cut)
+		ptsc := gi.ActiveKeyMap.ChordForFun(keyfun.Paste)
 		gi.NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(!tv.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tv.This().(gi.Clipper).Cut()
@@ -1541,7 +1541,7 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
 	}
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 
 	if selMode == events.SelectOne {
@@ -1552,65 +1552,65 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 
 	// first all the keys that work for ReadOnly and active
 	switch kf {
-	case gi.KeyFunCancelSelect:
+	case keyfun.CancelSelect:
 		tv.UnselectAll()
 		tv.SetSelectMode(false)
 		kt.SetHandled()
-	case gi.KeyFunMoveRight:
+	case keyfun.MoveRight:
 		tv.Open()
 		kt.SetHandled()
-	case gi.KeyFunMoveLeft:
+	case keyfun.MoveLeft:
 		tv.Close()
 		kt.SetHandled()
-	case gi.KeyFunMoveDown:
+	case keyfun.MoveDown:
 		tv.MoveDownAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunMoveUp:
+	case keyfun.MoveUp:
 		tv.MoveUpAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunPageUp:
+	case keyfun.PageUp:
 		tv.MovePageUpAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunPageDown:
+	case keyfun.PageDown:
 		tv.MovePageDownAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunHome:
+	case keyfun.Home:
 		tv.MoveHomeAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunEnd:
+	case keyfun.End:
 		tv.MoveEndAction(selMode)
 		kt.SetHandled()
-	case gi.KeyFunSelectMode:
+	case keyfun.SelectMode:
 		tv.SelectModeToggle()
 		kt.SetHandled()
-	case gi.KeyFunSelectAll:
+	case keyfun.SelectAll:
 		tv.SelectAll()
 		kt.SetHandled()
-	case gi.KeyFunEnter:
+	case keyfun.Enter:
 		tv.ToggleClose()
 		kt.SetHandled()
-	case gi.KeyFunCopy:
+	case keyfun.Copy:
 		tv.This().(gi.Clipper).Copy(true)
 		kt.SetHandled()
 	}
 	if !tv.RootIsReadOnly() && !kt.IsHandled() {
 		switch kf {
-		case gi.KeyFunDelete:
+		case keyfun.Delete:
 			tv.SrcDelete()
 			kt.SetHandled()
-		case gi.KeyFunDuplicate:
+		case keyfun.Duplicate:
 			tv.SrcDuplicate()
 			kt.SetHandled()
-		case gi.KeyFunInsert:
+		case keyfun.Insert:
 			tv.SrcInsertBefore()
 			kt.SetHandled()
-		case gi.KeyFunInsertAfter:
+		case keyfun.InsertAfter:
 			tv.SrcInsertAfter()
 			kt.SetHandled()
-		case gi.KeyFunCut:
+		case keyfun.Cut:
 			tv.This().(gi.Clipper).Cut()
 			kt.SetHandled()
-		case gi.KeyFunPaste:
+		case keyfun.Paste:
 			tv.This().(gi.Clipper).Paste()
 			kt.SetHandled()
 		}
@@ -1685,7 +1685,7 @@ var TreeViewProps = ki.Props{
 		}},
 		{"SrcInsertBefore", ki.Props{
 			"label":    "Insert Before",
-			"shortcut": gi.KeyFunInsert,
+			"shortcut": keyfun.Insert,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
 				// act.SetState(tv.IsRoot(""), states.Disabled)
@@ -1693,7 +1693,7 @@ var TreeViewProps = ki.Props{
 		}},
 		{"SrcInsertAfter", ki.Props{
 			"label":    "Insert After",
-			"shortcut": gi.KeyFunInsertAfter,
+			"shortcut": keyfun.InsertAfter,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
 				// act.SetState(tv.IsRoot(""), states.Disabled)
@@ -1701,7 +1701,7 @@ var TreeViewProps = ki.Props{
 		}},
 		{"SrcDuplicate", ki.Props{
 			"label":    "Duplicate",
-			"shortcut": gi.KeyFunDuplicate,
+			"shortcut": keyfun.Duplicate,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
 				// act.SetState(tv.IsRoot(""), states.Disabled)
@@ -1709,7 +1709,7 @@ var TreeViewProps = ki.Props{
 		}},
 		{"SrcDelete", ki.Props{
 			"label":    "Delete",
-			"shortcut": gi.KeyFunDelete,
+			"shortcut": keyfun.Delete,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
 				// act.SetState(tv.IsRoot(""), states.Disabled)
@@ -1717,7 +1717,7 @@ var TreeViewProps = ki.Props{
 		}},
 		{"sep-edit", ki.BlankProp{}},
 		{"Copy", ki.Props{
-			"shortcut": gi.KeyFunCopy,
+			"shortcut": keyfun.Copy,
 			"Args": ki.PropSlice{
 				{"reset", ki.Props{
 					"value": true,
@@ -1725,14 +1725,14 @@ var TreeViewProps = ki.Props{
 			},
 		}},
 		{"Cut", ki.Props{
-			"shortcut": gi.KeyFunCut,
+			"shortcut": keyfun.Cut,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
 				// act.SetState(tv.IsRoot(""), states.Disabled)
 			}),
 		}},
 		{"Paste", ki.Props{
-			"shortcut": gi.KeyFunPaste,
+			"shortcut": keyfun.Paste,
 		}},
 		{"sep-win", ki.BlankProp{}},
 		{"SrcEdit", ki.Props{
@@ -1747,7 +1747,7 @@ var TreeViewProps = ki.Props{
 	},
 	"CtxtMenuReadOnly": ki.PropSlice{
 		{"Copy", ki.Props{
-			"shortcut": gi.KeyFunCopy,
+			"shortcut": keyfun.Copy,
 			"Args": ki.PropSlice{
 				{"reset", ki.Props{
 					"value": true,

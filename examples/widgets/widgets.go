@@ -66,8 +66,8 @@ func app() {
 	trow := gi.NewLayout(sc, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 
-	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
-	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
+	giedsc := gi.ActiveKeyMap.ChordForFun(keyfun.GoGiEditor)
+	prsc := gi.ActiveKeyMap.ChordForFun(keyfun.Prefs)
 
 	gi.NewLabel(trow, "title").SetText(
 		`This is a <b>demonstration</b> of the
@@ -279,28 +279,28 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu.AddAppMenu(win)
 
-	// note: use KeyFunMenu* for standard shortcuts
+	// note: use keyfun.Menu* for standard shortcuts
 	// Command in shortcuts is automatically translated into Control for
 	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-	fmen.Menu.AddButton(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "New", ShortcutKey: keyfun.MenuNew},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:New menu button triggered\n")
 		})
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", ShortcutKey: keyfun.MenuOpen},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:Open menu button triggered\n")
 		})
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Save", ShortcutKey: keyfun.MenuSave},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:Save menu button triggered\n")
 		})
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Save As..", ShortcutKey: keyfun.MenuSaveAs},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("File:SaveAs menu button triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: gi.KeyFunWinClose},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: keyfun.WinClose},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.CloseReq()
 		})

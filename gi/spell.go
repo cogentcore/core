@@ -240,9 +240,9 @@ func (sp *Spell) Spell(s string) {
 // KeyInput is the opportunity for the spelling correction popup to act on specific key inputs
 func (sp *Spell) KeyInput(kf keyfun.Funs) bool { // true - caller should set key processed
 	switch kf {
-	case KeyFunMoveDown:
+	case keyfun.MoveDown:
 		return true
-	case KeyFunMoveUp:
+	case keyfun.MoveUp:
 		return true
 	}
 	return false

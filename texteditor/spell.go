@@ -8,7 +8,6 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/goosi/events"
 	"goki.dev/pi/v2/filecat"
@@ -123,17 +122,17 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 	isDoc := ed.Buf.Info.Cat == filecat.Doc
 	tp := ed.CursorPos
 
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	switch kf {
-	case gi.KeyFunMoveUp:
+	case keyfun.MoveUp:
 		if isDoc {
 			ed.Buf.SpellCheckLineTag(tp.Ln)
 		}
-	case gi.KeyFunMoveDown:
+	case keyfun.MoveDown:
 		if isDoc {
 			ed.Buf.SpellCheckLineTag(tp.Ln)
 		}
-	case gi.KeyFunMoveRight:
+	case keyfun.MoveRight:
 		if ed.IsWordEnd(tp) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
@@ -163,7 +162,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 		}
-	case gi.KeyFunEnter:
+	case keyfun.Enter:
 		tp.Ln--
 		if isDoc {
 			ed.Buf.SpellCheckLineTag(tp.Ln) // redo prior line
@@ -171,11 +170,11 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		tp.Ch = ed.Buf.LineLen(tp.Ln)
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
-	case gi.KeyFunFocusNext:
+	case keyfun.FocusNext:
 		tp.Ch-- // we are one past the end of word
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
-	case gi.KeyFunBackspace, gi.KeyFunDelete:
+	case keyfun.Backspace, keyfun.Delete:
 		if ed.IsWordMiddle(ed.CursorPos) {
 			reg := ed.WordAt()
 			ed.SpellCheck(ed.Buf.Region(reg.Start, reg.End))
@@ -183,7 +182,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 		}
-	case gi.KeyFunNil:
+	case keyfun.Nil:
 		if unicode.IsSpace(kt.KeyRune()) || unicode.IsPunct(kt.KeyRune()) && kt.KeyRune() != '\'' { // contractions!
 			tp.Ch-- // we are one past the end of word
 			reg := ed.WordBefore(tp)

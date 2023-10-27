@@ -556,10 +556,10 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 // 	// em.HandleEvent(ke)
 // }
 
-// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
+// Sendkeyfun.Event sends a KeyChord event with params from the given keyfun..
 // If popup is true, then only items on popup are in scope, otherwise items
 // NOT on popup are in scope (if no popup, everything is in scope).
-// func (em *EventMgr) SendKeyFunEvent(kf keyfun.Funs, popup bool) {
+// func (em *EventMgr) Sendkeyfun.Event(kf keyfun.Funs, popup bool) {
 // 	chord := ActiveKeyMap.ChordForFun(kf)
 // 	if chord == "" {
 // 		return
@@ -895,36 +895,36 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	}
 	sc := em.Scene
 	cs := e.KeyChord()
-	kf := KeyFun(cs)
+	kf := keyfun.Of(cs)
 	// fmt.Println(kf, cs)
 	switch kf {
-	case KeyFunGoGiEditor:
+	case keyfun.GoGiEditor:
 		TheViewIFace.GoGiEditor(em.Scene)
 		e.SetHandled()
-	case KeyFunPrefs:
+	case keyfun.Prefs:
 		TheViewIFace.PrefsView(&Prefs)
 		e.SetHandled()
-	case KeyFunWinClose:
+	case keyfun.WinClose:
 		win.CloseReq()
 		e.SetHandled()
-	case KeyFunMenu:
+	case keyfun.Menu:
 		if win.MainMenu != nil {
 			win.MainMenu.GrabFocus()
 			e.SetHandled()
 		}
-	case KeyFunWinSnapshot:
+	case keyfun.WinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
 		images.Save(sc.Pixels, fnm)
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
-	case KeyFunZoomIn:
+	case keyfun.ZoomIn:
 		win.ZoomDPI(1)
 		e.SetHandled()
-	case KeyFunZoomOut:
+	case keyfun.ZoomOut:
 		win.ZoomDPI(-1)
 		e.SetHandled()
-	case KeyFunRefresh:
+	case keyfun.Refresh:
 		e.SetHandled()
 		fmt.Printf("Win: %v display refreshed\n", sc.Name())
 		goosi.TheApp.GetScreens()
@@ -934,7 +934,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		// w.FullReRender()
 		// sz := w.GoosiWin.Size()
 		// w.SetSize(sz)
-	case KeyFunWinFocusNext:
+	case keyfun.WinFocusNext:
 		e.SetHandled()
 		AllRenderWins.FocusNext()
 	}

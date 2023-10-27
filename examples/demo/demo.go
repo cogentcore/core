@@ -382,24 +382,24 @@ func makeLayouts(ts *gi.Tabs) {
 // 	amen.Menu.AddAppMenu(win)
 
 // 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: keyfun.MenuNew},
 // 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			fmt.Println("File:New menu action triggered")
 // 		})
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: keyfun.MenuOpen},
 // 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			fmt.Println("File:Open menu action triggered")
 // 		})
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: keyfun.MenuSave},
 // 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			fmt.Println("File:Save menu action triggered")
 // 		})
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: keyfun.MenuSaveAs},
 // 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			fmt.Println("File:SaveAs menu action triggered")
 // 		})
 // 	fmen.Menu.AddSeparator("csep")
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: gi.KeyFunWinClose},
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: keyfun.WinClose},
 // 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			win.CloseReq()
 // 		})

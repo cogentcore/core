@@ -321,7 +321,7 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetShortcutKey(gi.KeyFunJump).SetTooltip("go up one level into the parent folder").
+	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetShortcutKey(keyfun.Jump).SetTooltip("go up one level into the parent folder").
 		OnClick(func(e events.Event) {
 			fv.DirPathUp()
 		})
@@ -387,7 +387,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunSelectMode), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
+	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(keyfun.WordLeft), gi.ShortcutForFun(keyfun.Jump), gi.ShortcutForFun(keyfun.SelectMode), gi.ShortcutForFun(keyfun.Insert), gi.ShortcutForFun(keyfun.InsertAfter), gi.ShortcutForFun(keyfun.MenuOpen), gi.ShortcutForFun(keyfun.HistPrev), gi.ShortcutForFun(keyfun.HistNext), gi.ShortcutForFun(keyfun.Search))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetText(fv.SelFile)
 	sf.OnChange(func(e events.Event) {
@@ -779,23 +779,23 @@ func (fv *FileView) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
 	}
-	kf := gi.KeyFun(kt.KeyChord())
+	kf := keyfun.Of(kt.KeyChord())
 	switch kf {
-	case gi.KeyFunJump, gi.KeyFunWordLeft:
+	case keyfun.Jump, keyfun.WordLeft:
 		kt.SetHandled()
 		fv.DirPathUp()
-	case gi.KeyFunHistPrev:
+	case keyfun.HistPrev:
 		kt.SetHandled()
 		fv.PathFieldHistPrev()
-	case gi.KeyFunHistNext:
+	case keyfun.HistNext:
 		kt.SetHandled()
 		fv.PathFieldHistNext()
-	case gi.KeyFunInsert, gi.KeyFunInsertAfter, gi.KeyFunMenuOpen, gi.KeyFunSelectMode:
+	case keyfun.Insert, keyfun.InsertAfter, keyfun.MenuOpen, keyfun.SelectMode:
 		kt.SetHandled()
 		if fv.SelectFile() {
 			fv.Send(events.DoubleClick, kt) // will close dialog
 		}
-	case gi.KeyFunSearch:
+	case keyfun.Search:
 		kt.SetHandled()
 		sf := fv.SelField()
 		sf.GrabFocus()

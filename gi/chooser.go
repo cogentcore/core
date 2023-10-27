@@ -584,9 +584,9 @@ func (ch *Chooser) HandleChooserKeys() {
 		if KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
 		}
-		kf := KeyFun(e.KeyChord())
+		kf := keyfun.Of(e.KeyChord())
 		switch {
-		case kf == KeyFunMoveUp:
+		case kf == keyfun.MoveUp:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
 				idx := ch.CurIndex - 1
@@ -595,7 +595,7 @@ func (ch *Chooser) HandleChooserKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == KeyFunMoveDown:
+		case kf == keyfun.MoveDown:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
 				idx := ch.CurIndex + 1
@@ -604,7 +604,7 @@ func (ch *Chooser) HandleChooserKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == KeyFunPageUp:
+		case kf == keyfun.PageUp:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
 				idx := ch.CurIndex - 10
@@ -613,7 +613,7 @@ func (ch *Chooser) HandleChooserKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == KeyFunPageDown:
+		case kf == keyfun.PageDown:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
 				idx := ch.CurIndex + 10
@@ -622,7 +622,7 @@ func (ch *Chooser) HandleChooserKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
-		case kf == KeyFunEnter || (!ch.Editable && e.KeyRune() == ' '):
+		case kf == keyfun.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
 			e.SetHandled()
 			ch.Send(events.Click, e)

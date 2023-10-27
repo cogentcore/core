@@ -435,36 +435,36 @@ func (sr *Slider) HandleSliderKeys() {
 		if KeyEventTrace {
 			fmt.Printf("SliderBase KeyInput: %v\n", sr.Path())
 		}
-		kf := KeyFun(e.KeyChord())
+		kf := keyfun.Of(e.KeyChord())
 		switch kf {
-		case KeyFunMoveUp:
+		case keyfun.MoveUp:
 			sr.SetValueAction(sr.Value - sr.Step)
 			e.SetHandled()
-		case KeyFunMoveLeft:
+		case keyfun.MoveLeft:
 			sr.SetValueAction(sr.Value - sr.Step)
 			e.SetHandled()
-		case KeyFunMoveDown:
+		case keyfun.MoveDown:
 			sr.SetValueAction(sr.Value + sr.Step)
 			e.SetHandled()
-		case KeyFunMoveRight:
+		case keyfun.MoveRight:
 			sr.SetValueAction(sr.Value + sr.Step)
 			e.SetHandled()
-		case KeyFunPageUp:
+		case keyfun.PageUp:
 			sr.SetValueAction(sr.Value - sr.PageStep)
 			e.SetHandled()
-		// case KeyFunPageLeft:
+		// case keyfun.PageLeft:
 		// 	sr.SetValueAction(sr.Value - sr.PageStep)
 		// 	kt.SetHandled()
-		case KeyFunPageDown:
+		case keyfun.PageDown:
 			sr.SetValueAction(sr.Value + sr.PageStep)
 			e.SetHandled()
-		// case KeyFunPageRight:
+		// case keyfun.PageRight:
 		// 	sr.SetValueAction(sr.Value + sr.PageStep)
 		// 	kt.SetHandled()
-		case KeyFunHome:
+		case keyfun.Home:
 			sr.SetValueAction(sr.Min)
 			e.SetHandled()
-		case KeyFunEnd:
+		case keyfun.End:
 			sr.SetValueAction(sr.Max)
 			e.SetHandled()
 		}

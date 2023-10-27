@@ -49,7 +49,7 @@ func (m *Menu) SetButton(bt *Button, opts ActOpts, fun func(bt *Button)) {
 	bt.Tooltip = opts.Tooltip
 	bt.Icon = icons.Icon(opts.Icon)
 	bt.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
-	if opts.ShortcutKey != KeyFunNil {
+	if opts.ShortcutKey != keyfun.Nil {
 		bt.Shortcut = ShortcutForFun(opts.ShortcutKey)
 		// todo: need a flag for menu-based?
 	}
@@ -202,19 +202,19 @@ func (m *Menu) FindButtonByName(name string) (*Button, bool) {
 // corresponding keyboard shortcut.  Paste is automatically enabled by
 // clipboard having something in it.
 func (m *Menu) AddCopyCutPaste(win *RenderWin) {
-	m.AddButton(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
+	m.AddButton(ActOpts{Label: "Copy", ShortcutKey: keyfun.Copy},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			win.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
+			win.EventMgr.Sendkeyfun.Event(keyfun.Copy, false) // false = ignore popups -- don't send to menu
 		})
-	m.AddButton(ActOpts{Label: "Cut", ShortcutKey: KeyFunCut},
+	m.AddButton(ActOpts{Label: "Cut", ShortcutKey: keyfun.Cut},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			win.EventMgr.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
+			win.EventMgr.Sendkeyfun.Event(keyfun.Cut, false) // false = ignore popups -- don't send to menu
 		})
-	m.AddButton(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
+	m.AddButton(ActOpts{Label: "Paste", ShortcutKey: keyfun.Paste,
 		UpdateFunc: func(bt *Button) {
 			bt.SetEnabledState(!goosi.TheApp.ClipBoard(win.RenderWin).IsEmpty())
 		}}, nil, func(recv, send ki.Ki, sig int64, data any) {
-		win.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
+		win.EventMgr.Sendkeyfun.Event(keyfun.Paste, false) // false = ignore popups -- don't send to menu
 	})
 }
 
@@ -223,10 +223,10 @@ func (m *Menu) AddCopyCutPaste(win *RenderWin) {
 // enabled by clipboard having something in it.
 func (m *Menu) AddCopyCutPasteDupe(win *RenderWin) {
 	m.AddCopyCutPaste(win)
-	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
+	dpsc := ActiveKeyMap.ChordForFun(keyfun.Duplicate)
 	m.AddButton(ActOpts{Label: "Duplicate", Shortcut: dpsc},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			win.EventMgr.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
+			win.EventMgr.Sendkeyfun.Event(keyfun.Duplicate, false) // false = ignore popups -- don't send to menu
 		})
 }
 
@@ -272,7 +272,7 @@ func (m *Menu) AddRenderWinsMenu(win *RenderWin) {
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.GoosiWin.Minimize()
 		})
-	m.AddButton(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
+	m.AddButton(ActOpts{Label: "Focus Next", ShortcutKey: keyfun.WinFocusNext},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			AllRenderWins.FocusNext()
 		})

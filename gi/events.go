@@ -281,8 +281,8 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 		if KeyEventTrace {
 			slog.Info("WidgetBase KeyChordEvent", "widget", wb)
 		}
-		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunEnter || e.KeyRune() == ' ' {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Enter || e.KeyRune() == ' ' {
 			// TODO: do we need this?
 			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
 			e.SetHandled()
