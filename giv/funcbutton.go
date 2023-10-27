@@ -66,7 +66,8 @@ type FuncButton struct { //goki:no-new
 	// ShowReturn is whether to display the return values of
 	// the function (and a success message if there are none).
 	// The way that the return values are shown is determined
-	// by ShowReturnAsDialog. ShowReturn is on by default.
+	// by ShowReturnAsDialog. ShowReturn is on by default, unless
+	// the function has no return values.
 	ShowReturn bool `def:"true"`
 
 	// ShowReturnAsDialog, if and only if ShowReturn is true,
@@ -87,7 +88,6 @@ func NewFuncButton(par ki.Ki, fun any) *FuncButton {
 
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
-	fb.ShowReturn = true
 }
 
 // SetFunc sets the function associated with the FuncButton to the
@@ -341,6 +341,7 @@ func (fb *FuncButton) SetReturns() {
 		view.SetTag("doc", doc)
 		fb.Returns[i] = view
 	}
+	fb.ShowReturn = nret > 0
 	if nret > 1 || hasComplex {
 		fb.ShowReturnAsDialog = true
 	}
