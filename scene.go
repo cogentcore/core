@@ -12,12 +12,10 @@ import (
 	"image/color"
 	"sync"
 
-	vk "github.com/goki/vulkan"
 	"goki.dev/colors"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
-	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 	"goki.dev/vgpu/v2/vphong"
 )
@@ -99,6 +97,12 @@ type Scene struct {
 	// the vgpu render frame holding the rendered scene
 	Frame *vgpu.RenderFrame `set:"-"`
 
+	// image used to hold a copy of the Frame image, for ImageCopy() call.
+	// This is re-used across calls to avoid large memory allocations,
+	// so it will automatically update after every ImageCopy call.
+	// If a persistent image is required, call [glop/images.CloneAsRGBA].
+	ImgCopy image.RGBA `set:"-"`
+
 	// index in list of window direct uploading images
 	DirUpIdx int `set:"-"`
 
@@ -122,7 +126,7 @@ func NewScene(name string) *Scene {
 	return sc
 }
 
-// Update is a global update of everything: Init3D and re-render
+// Update is a global update of everything: Config and re-render
 func (sc *Scene) Update() {
 	updt := sc.UpdateStart()
 	sc.Config()
@@ -192,8 +196,8 @@ func (sc *Scene) Validate() error {
 //  Flags
 
 // ScFlags has critical state information signaling when rendering,
-// styling etc need to be done
-type ScFlags int64 //enums:bitflag
+// updating, or config needs to be done
+type ScFlags ki.Flags //enums:bitflag
 
 const (
 	// ScUpdating means scene is in the process of updating:
@@ -201,8 +205,17 @@ const (
 	// skip any further update passes until it goes off.
 	ScUpdating ScFlags = ScFlags(ki.FlagsN) + iota
 
-	// ScNeedsRender means nodes have flagged that they need a Render
-	// update.
+	// ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes,
+	// or more complex Nodes that require ConfigNodes) has been changed
+	// and a Config call is required.
+	ScNeedsConfig
+
+	// ScNeedsUpdate means that Node Pose has changed and an update pass
+	// is required to update matrix and bounding boxes.
+	ScNeedsUpdate
+
+	// ScNeedsRender means that something has been updated (minimally the
+	// Camera pose) and a new Render is required.
 	ScNeedsRender
 )
 
@@ -232,57 +245,6 @@ func (sc *Scene) Destroy() {
 		sc.Frame = nil
 		fmt.Println("Phong, Frame destroyed")
 	}
-}
-
-// ConfigFrameFromDrawer configures framebuffer for GPU rendering
-// Using GPU and Device from a vgpu vdraw.Drawer.
-func (sc *Scene) ConfigFrameFromDrawer(drw *vdraw.Drawer) {
-	sf := drw.Surf
-	sc.ConfigFrame(sf.GPU, &sf.Device)
-}
-
-// ConfigFrame configures framebuffer for GPU rendering,
-// using given gpu and device, and size set in Geom.Size.
-// Must be called on the main thread.
-// If Frame already exists, it ensures that the Size is correct.
-func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
-	sz := sc.Geom.Size
-	if sz == (image.Point{}) {
-		sz = image.Point{480, 320}
-	}
-	if sc.Frame == nil {
-		sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
-		sc.Frame.Format.SetMultisample(sc.MultiSample)
-		sy := &sc.Phong.Sys
-		sy.InitGraphics(gpu, "vphong.Phong", dev)
-		sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
-		sc.Frame.SetRender(&sy.Render)
-		sc.Phong.ConfigSys()
-		if sc.Wireframe {
-			sy.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-		} else {
-			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
-		}
-	} else {
-		sc.Frame.SetSize(sc.Geom.Size) // nop if same
-	}
-}
-
-// Image returns the current rendered image from RenderFrame
-func (sc *Scene) Image() (*image.RGBA, error) {
-	fr := sc.Frame
-	if fr == nil {
-		return nil, fmt.Errorf("gi3d.Scene Image: Scene does not have a Frame")
-	}
-	sy := &sc.Phong.Sys
-	tcmd := sy.MemCmdStart()
-	fr.GrabImage(tcmd, 0)
-	sy.MemCmdEndSubmitWaitFree()
-	img, err := fr.Render.Grab.DevGoImage()
-	if err == nil {
-		return img, err
-	}
-	return nil, err
 }
 
 // SolidsIntersectingPoint finds all the solids that contain given 2D window coordinate

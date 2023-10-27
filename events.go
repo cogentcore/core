@@ -13,12 +13,17 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+var (
+	OrbitFactor = float32(0.025)
+	PanFactor   = float32(0.001)
+)
+
 func (sc *Scene) SlideMoveEvent(e events.Event) {
 	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
-	orbDel := 0.025 * cdist
-	panDel := 0.001 * cdist
+	orbDel := OrbitFactor * cdist
+	panDel := PanFactor * cdist
 
-	del := e.StartDelta()
+	del := e.PrevDelta()
 	dx := float32(del.X)
 	dy := float32(del.Y)
 	switch {
@@ -36,58 +41,14 @@ func (sc *Scene) SlideMoveEvent(e events.Event) {
 		}
 		sc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
 	}
+	sc.SetFlag(true, ScNeedsRender)
 }
-
-// if !ssc.SetDragCursor {
-// 	oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Push(cursor.HandOpen)
-// 	ssc.SetDragCursor = true
-// }
-//
-// }  else {
-// if ssc.SetDragCursor {
-// 	oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-// 	ssc.SetDragCursor = false
-// }
-// }
-
-func (sc *Scene) MouseMoveEvent(e events.Event) {
-	orbDel := float32(.2)
-	panDel := float32(.05)
-	del := e.StartDelta()
-	dx := float32(del.X)
-	dy := float32(del.Y)
-	switch {
-	case key.HasAllModifiers(key.Shift):
-		sc.Camera.Pan(dx*panDel, -dy*panDel)
-	case key.HasAllModifiers(key.Control):
-		sc.Camera.PanAxis(dx*panDel, -dy*panDel)
-	case key.HasAllModifiers(key.Alt):
-		sc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-	default:
-		if mat32.Abs(dx) > mat32.Abs(dy) {
-			dy = 0
-		} else {
-			dx = 0
-		}
-		sc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-	}
-	// sc.UpdateSig()
-}
-
-// if sc.SetDragCursor {
-// 	oswin.TheApp.Cursor(sc.ParentWindow().OSWin).Pop()
-// 	sc.SetDragCursor = false
-// }
-// if sc.SetDragCursor {
-// 	oswin.TheApp.Cursor(sc.ParentWindow().OSWin).Pop()
-// 	sc.SetDragCursor = false
-// }
 
 func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	if sc.NoNav {
 		return
 	}
-	pt := e.Pos() // e.Where.Sub(sc.ScBBox.Min)
+	pt := e.LocalPos() // e.Where.Sub(sc.ScBBox.Min)
 	sz := sc.Geom.Size
 	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
 	zoom := float32(e.DimDelta(mat32.Y)) // float32(e.ScrollNonZeroDelta(false))
@@ -98,19 +59,17 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	default:
 		sc.Camera.ZoomTo(pt, sz, zoom*zoomDel)
 	}
-	// sc.UpdateSig()
+	sc.SetFlag(true, ScNeedsRender)
 }
 
 func (sc *Scene) MouseDownEvent(e events.Event) {
 	if sc.NoNav {
 		return
 	}
-	// if !sc.IsDisabled() && !sc.HasFocus() {
-	// 	sc.GrabFocus()
-	// }
 	// if ssc.CurManipPt == nil {
 	sc.SetSel(nil) // clear any selection at this point
 	// }
+	sc.SetFlag(true, ScNeedsRender)
 }
 
 func (sc *Scene) KeyChordEvent(e events.Event) {
@@ -118,6 +77,7 @@ func (sc *Scene) KeyChordEvent(e events.Event) {
 		return
 	}
 	sc.NavKeyEvents(e)
+	sc.SetFlag(true, ScNeedsRender)
 }
 
 // NavKeyEvents handles standard viewer keyboard navigation events

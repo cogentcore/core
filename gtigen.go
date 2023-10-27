@@ -276,6 +276,7 @@ var SceneType = gti.AddType(&gti.Type{
 		{"SelParams", &gti.Field{Name: "SelParams", Type: "goki.dev/gi3d.SelParams", LocalType: "SelParams", Doc: "parameters for selection / manipulation box", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
 		{"Phong", &gti.Field{Name: "Phong", Type: "goki.dev/vgpu/v2/vphong.Phong", LocalType: "vphong.Phong", Doc: "the vphong rendering system", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Frame", &gti.Field{Name: "Frame", Type: "*goki.dev/vgpu/v2/vgpu.RenderFrame", LocalType: "*vgpu.RenderFrame", Doc: "the vgpu render frame holding the rendered scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ImgCopy", &gti.Field{Name: "ImgCopy", Type: "image.RGBA", LocalType: "image.RGBA", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [glop/images.CloneAsRGBA].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DirUpIdx", &gti.Field{Name: "DirUpIdx", Type: "int", LocalType: "int", Doc: "index in list of window direct uploading images", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"RenderMu", &gti.Field{Name: "RenderMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex on rendering", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),

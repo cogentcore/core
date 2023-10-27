@@ -15,6 +15,7 @@ import (
 	"goki.dev/gi3d/examples/assets"
 	"goki.dev/gi3d/gi3dv"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi"
 	"goki.dev/vgpu/v2/vgpu"
 
 	"goki.dev/mat32/v2"
@@ -141,11 +142,13 @@ func app() {
 	// gi.Update2DTrace = true
 	vgpu.Debug = true
 
+	goosi.ZoomFactor = 1.5
+
 	gi.SetAppName("gi3d")
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
 
-	sc := gi.NewScene("gi3d-demo").SetTitle("GoGi 3D Demo")
+	sc := gi.NewScene("gi3d-demo").SetTitle("Gi3D Demo")
 
 	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz).
 		Style(func(s *styles.Style) {
@@ -202,7 +205,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	// wdtx := gi3d.NewTextureFile(sc, "wood", "wood.png")
 
 	cbm := gi3d.NewBox(se, "cube1", 1, 1, 1)
-	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
+	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
 	rbgp := gi3d.NewGroup(se, "r-b-group")
 
@@ -217,7 +220,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 
 	gcb := gi3d.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.Color = color.RGBA{0, 255, 0, 230} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	gcb.Mat.SetColor(color.RGBA{0, 255, 0, 230}).SetShiny(30) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	// fmt.Println(gcb.Mat)
 
 	floorp := gi3d.NewPlane(se, "floor-plane", 100, 100)
 	floor := gi3d.NewSolid(se, "floor").SetMesh(floorp)

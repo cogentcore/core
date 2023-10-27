@@ -44,7 +44,7 @@ type Node interface {
 	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
 
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
-	// groups aggregate over elements.  called from FuncDownMeLast traversal
+	// groups aggregate over elements.  called from WalkPost traversal
 	UpdateMeshBBox()
 
 	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
@@ -142,8 +142,8 @@ type NodeBase struct {
 	ScBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
-// NodeFlags extend gi.NodeFlags to hold 3D node state
-type NodeFlags int64 //enums:bitflag
+// NodeFlags extend ki.Flags to hold 3D node state
+type NodeFlags ki.Flags //enums:bitflag
 
 const (
 	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated
@@ -189,6 +189,24 @@ func (nb *NodeBase) CopyFieldsFrom(frm any) {
 // interface methods.
 func (nb *NodeBase) AsNode() *NodeBase {
 	return nb
+}
+
+// UpdateStart sets the scene ScUpdating flag to prevent
+// render updates during construction on a scene.
+func (nb *NodeBase) UpdateStart() bool {
+	updt := nb.Node.UpdateStart()
+	if updt && nb.Sc != nil {
+		nb.Sc.SetFlag(true, ScUpdating)
+	}
+	return updt
+}
+
+// UpdateEnd resets the scene ScUpdating flag
+func (nb *NodeBase) UpdateEnd(updt bool) {
+	if updt && nb.Sc != nil {
+		nb.Sc.SetFlag(false, ScUpdating)
+	}
+	nb.Node.UpdateEnd(updt)
 }
 
 func (nb *NodeBase) BaseIface() reflect.Type {

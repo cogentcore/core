@@ -64,9 +64,9 @@ There are standard Render types that manage the relevant GPU programs /
 Pipelines to do the actual rendering, depending on Material and Mesh properties
 (e.g., uniform vs per-vertex color vs. texture).
 
-Any change to the Mesh after first initialization (Init3D) must be activated
+Any change to the Mesh after first initialization (Config) must be activated
 by calling Scene.InitMesh(nm) or Scene.InitMeshes() to redo all.  The Update
-method on the Scene does Init3D and re-renders.
+method on the Scene does Config and re-renders.
 
 Mouse events are handled by the standard GoGi Window event dispatching
 methods, based on bounding boxes which are always updated -- this greatly

@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"goki.dev/enums"
+	"goki.dev/ki/v2"
 )
 
 var _LightColorsValues = []LightColors{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
@@ -594,41 +595,61 @@ func (i *RenderClasses) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ScFlagsValues = []ScFlags{7, 8}
+var _ScFlagsValues = []ScFlags{7, 8, 9, 10}
 
 // ScFlagsN is the highest valid value
 // for type ScFlags, plus one.
-const ScFlagsN ScFlags = 9
+const ScFlagsN ScFlags = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ScFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[ScUpdating-(7)]
-	_ = x[ScNeedsRender-(8)]
+	_ = x[ScNeedsConfig-(8)]
+	_ = x[ScNeedsUpdate-(9)]
+	_ = x[ScNeedsRender-(10)]
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
 	`ScUpdating`:    7,
 	`scupdating`:    7,
-	`ScNeedsRender`: 8,
-	`scneedsrender`: 8,
+	`ScNeedsConfig`: 8,
+	`scneedsconfig`: 8,
+	`ScNeedsUpdate`: 9,
+	`scneedsupdate`: 9,
+	`ScNeedsRender`: 10,
+	`scneedsrender`: 10,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
-	7: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
-	8: `ScNeedsRender means nodes have flagged that they need a Render update.`,
+	7:  `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	8:  `ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes, or more complex Nodes that require ConfigNodes) has been changed and a Config call is required.`,
+	9:  `ScNeedsUpdate means that Node Pose has changed and an update pass is required to update matrix and bounding boxes.`,
+	10: `ScNeedsRender means that something has been updated (minimally the Camera pose) and a new Render is required.`,
 }
 
 var _ScFlagsMap = map[ScFlags]string{
-	7: `ScUpdating`,
-	8: `ScNeedsRender`,
+	7:  `ScUpdating`,
+	8:  `ScNeedsConfig`,
+	9:  `ScNeedsUpdate`,
+	10: `ScNeedsRender`,
 }
 
 // String returns the string representation
 // of this ScFlags value.
 func (i ScFlags) String() string {
 	str := ""
+	for _, ie := range ki.FlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _ScFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -651,7 +672,7 @@ func (i ScFlags) BitIndexString() string {
 	if str, ok := _ScFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return ki.Flags(i).BitIndexString()
 }
 
 // SetString sets the ScFlags value from its
@@ -674,7 +695,10 @@ func (i *ScFlags) SetStringOr(s string) error {
 		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type ScFlags")
+			err := (*ki.Flags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -695,21 +719,32 @@ func (i ScFlags) Desc() string {
 	if str, ok := _ScFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return ki.Flags(i).Desc()
 }
 
 // ScFlagsValues returns all possible values
 // for the type ScFlags.
 func ScFlagsValues() []ScFlags {
-	return _ScFlagsValues
+	es := ki.FlagsValues()
+	res := make([]ScFlags, len(es))
+	for i, e := range es {
+		res[i] = ScFlags(e)
+	}
+	res = append(res, _ScFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type ScFlags.
 func (i ScFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ScFlagsValues))
-	for i, d := range _ScFlagsValues {
+	es := ki.FlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_ScFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _ScFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -718,6 +753,9 @@ func (i ScFlags) Values() []enums.Enum {
 // valid option for type ScFlags.
 func (i ScFlags) IsValid() bool {
 	_, ok := _ScFlagsMap[i]
+	if !ok {
+		return ki.Flags(i).IsValid()
+	}
 	return ok
 }
 

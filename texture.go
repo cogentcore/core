@@ -177,13 +177,13 @@ func (sc *Scene) TextureList() []string {
 }
 
 // DeleteTexture deletes texture of given name -- returns error if not found
-// must call ConfigTextures or Init3D to reset after deleting
+// must call ConfigTextures or Config to reset after deleting
 func (sc *Scene) DeleteTexture(nm string) {
 	sc.Textures.DeleteKey(nm)
 }
 
 // DeleteTextures removes all textures
-// must call ConfigTextures or Init3D to reset after deleting
+// must call ConfigTextures or Config to reset after deleting
 func (sc *Scene) DeleteTextures() {
 	sc.Textures.Reset()
 }
@@ -202,7 +202,7 @@ func (sc *Scene) ConfigTextures() {
 
 // ReconfigTextures reconfigures textures on the Phong renderer
 // if there has been a change to the mesh structure
-// Init3D does a full configure of everything -- this is optimized
+// Config does a full configure of everything -- this is optimized
 // just for texture changes.
 func (sc *Scene) ReconfigTextures() {
 	sc.ConfigTextures()

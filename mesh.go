@@ -131,6 +131,7 @@ func (ms *MeshBase) ComputeNorms(pos, norm mat32.ArrayF32) {
 // see NewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes.Add(ms.Name(), ms)
+	sc.SetFlag(true, ScNeedsConfig)
 }
 
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
@@ -143,6 +144,7 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 		ms.SetName(nm)
 	}
 	sc.Meshes.Add(ms.Name(), ms)
+	sc.SetFlag(true, ScNeedsConfig)
 }
 
 // MeshByName looks for mesh by name -- returns nil if not found
@@ -237,7 +239,7 @@ func (sc *Scene) UpdateMeshes() {
 
 // ReconfigMeshes reconfigures meshes on the Phong renderer
 // if there has been any change to the mesh structure.
-// Init3D does a full configure of everything -- this is optimized
+// Config does a full configure of everything -- this is optimized
 // just for mesh changes.
 func (sc *Scene) ReconfigMeshes() {
 	sc.ConfigMeshes()

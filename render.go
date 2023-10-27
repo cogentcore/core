@@ -5,28 +5,152 @@
 package gi3d
 
 import (
+	"fmt"
+	"image"
 	"sort"
 
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
+	"goki.dev/vgpu/v2/vdraw"
+	"goki.dev/vgpu/v2/vgpu"
+
+	vk "github.com/goki/vulkan"
 )
 
-// RenderClasses define the different classes of rendering
-type RenderClasses int32 //enums:enum -trimprefix RClass
+// render notes:
+//
+// # Config:
+//
+// Unlike gi, gi3d Config can only be successfully done after the
+// GPU framework has been initialized, because it is all about allocating
+// GPU resources.
+// The Scene ScNeedsConfig flag indicates if any of these resources
+// have been changed and a new Config is required.
+// * ConfigFrame -- allocates the renderframe -- based on Geom.Size
+// * Lights, Meshes, Textures
+// * ConfigNodes to update and validate node-specific settings.
+//   Most nodes do not require this, but Text2D and Embed2D do.
+//
+// # Update:
+//
+// Update involves updating Pose
 
-const (
-	RClassNone          RenderClasses = iota
-	RClassOpaqueTexture               // textures tend to be in background
-	RClassOpaqueUniform
-	RClassOpaqueVertex
-	RClassTransTexture
-	RClassTransUniform
-	RClassTransVertex
-)
+// DoUpdate handles needed updates based on Scene Flags.
+// if ScUpdating is set, then an update is in progress and false is returned.
+// If no updates are required, then false is also returned, else true.
+// ScNeedsConfig is NOT handled here because it must be done on main thread,
+// so this must be checked separately (e.g., in gi3dv.Scene3D, it is requires
+// a separate RunOnMainThread call).
+func (sc *Scene) DoUpdate() bool {
+	if sc.Is(ScUpdating) {
+		return false
+	}
+	sc.SetFlag(true, ScUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScUpdating)
+
+	switch {
+	case sc.Is(ScNeedsUpdate):
+		sc.UpdateNodes()
+		sc.Render()
+		sc.SetFlag(false, ScNeedsUpdate, ScNeedsRender)
+	case sc.Is(ScNeedsRender):
+		sc.Render()
+		sc.SetFlag(false, ScNeedsRender)
+	default:
+		return false
+	}
+	return true
+}
 
 // IsConfiged Returns true if the scene has already been configured
 func (sc *Scene) IsConfiged() bool {
 	return sc.Frame != nil
+}
+
+// ConfigFrameFromDrawer configures framebuffer for GPU rendering
+// Using GPU and Device from a vgpu vdraw.Drawer.
+func (sc *Scene) ConfigFrameFromDrawer(drw *vdraw.Drawer) {
+	sf := drw.Surf
+	sc.ConfigFrame(sf.GPU, &sf.Device)
+}
+
+// ConfigFrame configures framebuffer for GPU rendering,
+// using given gpu and device, and size set in Geom.Size.
+// Must be called on the main thread.
+// If Frame already exists, it ensures that the Size is correct.
+func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
+	sz := sc.Geom.Size
+	if sz == (image.Point{}) {
+		sz = image.Point{480, 320}
+	}
+	if sc.Frame == nil {
+		sc.Frame = vgpu.NewRenderFrame(gpu, dev, sz)
+		sc.Frame.Format.SetMultisample(sc.MultiSample)
+		sy := &sc.Phong.Sys
+		sy.InitGraphics(gpu, "vphong.Phong", dev)
+		sy.ConfigRenderNonSurface(&sc.Frame.Format, vgpu.Depth32)
+		sc.Frame.SetRender(&sy.Render)
+		sc.Phong.ConfigSys()
+		if sc.Wireframe {
+			sy.SetRasterization(vk.PolygonModeLine, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+		} else {
+			sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
+		}
+	} else {
+		sc.Frame.SetSize(sc.Geom.Size) // nop if same
+	}
+}
+
+// Image returns the current rendered image from the Frame RenderFrame.
+// This version returns a direct pointer to the underlying host version of
+// the GPU image, and should only be used immediately (for saving or writing
+// to another image).  You must call ImageDone() when done with the image.
+// See [ImageCopy] for a version that returns a copy of the image, which
+// will be usable until the next call to ImageCopy.
+func (sc *Scene) Image() (*image.RGBA, error) {
+	fr := sc.Frame
+	if fr == nil {
+		return nil, fmt.Errorf("gi3d.Scene Image: Scene does not have a Frame")
+	}
+	sy := &sc.Phong.Sys
+	tcmd := sy.MemCmdStart()
+	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
+	sy.MemCmdEndSubmitWaitFree()
+	img, err := fr.Render.Grab.DevGoImage()
+	if err == nil {
+		return img, err
+	}
+	return nil, err
+}
+
+// ImageDone must be called when done using the image returned by [Image].
+func (sc *Scene) ImageDone() {
+	if sc.Frame == nil {
+		return
+	}
+	sc.Frame.Render.Grab.UnmapDev()
+}
+
+// ImageCopy returns a copy of the current rendered image
+// from the Frame RenderFrame. A re-used image.RGBA is returned.
+// This same image is used across calls to avoid large memory allocations,
+// so it will automatically update after the next ImageCopy call.
+// The underlying image is in the [ImgCopy] field.
+// If a persistent image is required, call [glop/images.CloneAsRGBA].
+func (sc *Scene) ImageCopy() (*image.RGBA, error) {
+	fr := sc.Frame
+	if fr == nil {
+		return nil, fmt.Errorf("gi3d.Scene ImageCopy: Scene does not have a Frame")
+	}
+	sy := &sc.Phong.Sys
+	tcmd := sy.MemCmdStart()
+	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
+	sy.MemCmdEndSubmitWaitFree()
+	err := fr.Render.Grab.DevGoImageCopy(&sc.ImgCopy)
+	if err == nil {
+		return &sc.ImgCopy, err
+	}
+	return nil, err
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
@@ -40,14 +164,14 @@ func (sc *Scene) UpdateMeshBBox() {
 		kii.WalkPost(func(k ki.Ki) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
-				return ki.Break // going into a different type of thing, bail
+				return ki.Break
 			}
 			return ki.Continue
 		},
 			func(k ki.Ki) bool {
 				ni, _ := AsNode(k)
 				if ni == nil {
-					return ki.Break // going into a different type of thing, bail
+					return ki.Break
 				}
 				ni.UpdateMeshBBox()
 				return ki.Continue
@@ -55,11 +179,10 @@ func (sc *Scene) UpdateMeshBBox() {
 	}
 }
 
-// UpdateWorldMatrix updates the world matrix for all scene elements
-// called during Init3D and rendering
+// UpdateWorldMatrix updates the world matrix for all scene elements.
 func (sc *Scene) UpdateWorldMatrix() {
 	idmtx := mat32.NewMat4()
-	for _, kid := range sc.Kids {
+	for _, kid := range sc.Kids { //
 		kii, _ := AsNode(kid)
 		if kii == nil {
 			continue
@@ -145,6 +268,7 @@ func (sc *Scene) Config() {
 	sc.ConfigLights()
 	sc.ConfigMeshesTextures()
 	sc.ConfigNodes()
+	sc.SetFlag(false, ScNeedsConfig)
 }
 
 // ConfigMeshesTextures configures the meshes and the textures to the Phong
@@ -162,7 +286,6 @@ func (sc *Scene) ConfigMeshesTextures() {
 func (sc *Scene) UpdateNodes() {
 	sc.UpdateWorldMatrix()
 	sc.UpdateMeshBBox()
-	sc.UpdateMVPMatrix()
 }
 
 // TrackCamera -- a Group at the top-level named "TrackCamera"
@@ -183,9 +306,12 @@ func (sc *Scene) TrackCamera() bool {
 }
 
 // Render renders the scene to the Frame framebuffer.
+// Only the Camera pose view matrix is updated here.
+// If nodes require their own pose etc updates, UpdateNodes
+// must be called prior to render.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
-	if sc.Is(ScUpdating) || sc.Frame == nil {
+	if sc.Frame == nil {
 		return false
 	}
 	if len(sc.SavedCams) == 0 {
@@ -194,10 +320,27 @@ func (sc *Scene) Render() bool {
 	sc.SetFlag(true, ScUpdating)
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
+	sc.UpdateMVPMatrix()
 	sc.RenderImpl()
 	sc.SetFlag(false, ScUpdating)
 	return true
 }
+
+////////////////////////////////////////////////////////////////////
+// 	RenderImpl
+
+// RenderClasses define the different classes of rendering
+type RenderClasses int32 //enums:enum -trimprefix RClass
+
+const (
+	RClassNone          RenderClasses = iota
+	RClassOpaqueTexture               // textures tend to be in background
+	RClassOpaqueUniform
+	RClassOpaqueVertex
+	RClassTransTexture
+	RClassTransUniform
+	RClassTransVertex
+)
 
 // RenderImpl renders the scene to the framebuffer.
 // all scene-level resources must be initialized and activated at this point

@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"goki.dev/colors"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -82,6 +83,10 @@ func (mt *Material) Defaults() {
 // Disconnect resets pointers etc
 func (mt *Material) Disconnect() {
 	mt.TexPtr = nil
+}
+
+func (mt Material) String() string {
+	return laser.StringJSON(mt)
 }
 
 // IsTransparent returns true if texture says it is, or if color has alpha < 255

@@ -45,7 +45,7 @@ func (se *Scene3D) OnInit() {
 func (se *Scene3D) Scene3DStyles() {
 
 	se.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Slideable)
+		s.SetAbilities(true, abilities.Focusable, abilities.Activatable, abilities.Slideable)
 		s.SetStretchMax()
 	})
 }
@@ -53,27 +53,26 @@ func (se *Scene3D) Scene3DStyles() {
 func (se *Scene3D) HandleScene3DEvents() {
 	se.On(events.MouseDown, func(e events.Event) {
 		se.Scene.MouseDownEvent(e)
+		se.SetNeedsRender()
 	})
 	se.On(events.SlideMove, func(e events.Event) {
 		se.Scene.SlideMoveEvent(e)
+		se.SetNeedsRender()
 	})
 	se.On(events.Scroll, func(e events.Event) {
 		se.Scene.MouseScrollEvent(e.(*events.MouseScroll))
+		se.SetNeedsRender()
 	})
 	se.On(events.KeyChord, func(e events.Event) {
 		se.Scene.KeyChordEvent(e)
+		se.SetNeedsRender()
 	})
 	se.HandleWidgetEvents()
 }
 
 func (se *Scene3D) GetSize(sc *gi.Scene, iter int) {
 	se.InitLayout(sc)
-	zp := image.Point{}
-	if se.Scene.Geom.Size != zp {
-		se.GetSizeFromWH(float32(se.Scene.Geom.Size.X), float32(se.Scene.Geom.Size.Y))
-	} else {
-		se.GetSizeFromWH(640, 480)
-	}
+	se.GetSizeFromWH(16, 16) // minimal size
 }
 
 func (se *Scene3D) ConfigWidget(sc *gi.Scene) {
@@ -85,23 +84,25 @@ func (se *Scene3D) ConfigWidget(sc *gi.Scene) {
 // using the RenderWin GPU and Device.
 func (se *Scene3D) ConfigFrame(sc *gi.Scene) {
 	zp := image.Point{}
-	sz := se.LayState.Alloc.Size.ToPoint()
+	sz := se.LayState.Alloc.Size.ToPointFloor()
 	if sz == zp {
 		return
 	}
+	// requires 4-wise alignment apparently?
+	sz.X -= sz.X % 4
+	// sz.Y -= sz.Y%4
 	se.Scene.Geom.Size = sz
-	fmt.Println("sz", sz)
 
 	doConfig := false
 	if se.Scene.Frame != nil {
 		cursz := se.Scene.Frame.Format.Size
 		if cursz == sz {
-			fmt.Println("cursz == sz")
 			return
 		}
 	} else {
 		doConfig = true
 	}
+	fmt.Println("new frame sz", sz)
 
 	win := sc.EventMgr.RenderWin()
 	if win == nil {
@@ -114,6 +115,8 @@ func (se *Scene3D) ConfigFrame(sc *gi.Scene) {
 			se.Scene.Config()
 		}
 	})
+	se.Scene.SetFlag(true, gi3d.ScNeedsRender)
+	se.SetNeedsRender()
 }
 
 func (se *Scene3D) ApplyStyle(sc *gi.Scene) {
@@ -132,8 +135,10 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 	if se.Scene.Frame == nil {
 		return
 	}
-	pos := se.LayState.Alloc.Pos.ToPointCeil()
-	max := pos.Add(se.LayState.Alloc.Size.ToPointCeil())
+	pos := se.LayState.Alloc.Pos.ToPointFloor()
+	sz := se.LayState.Alloc.Size.ToPointCeil()
+	// sz := se.Scene.Geom.Size
+	max := pos.Add(sz)
 	r := image.Rectangle{Min: pos, Max: max}
 	sp := image.Point{}
 	if se.Par != nil { // use parents children bbox to determine where we can draw
@@ -142,35 +147,40 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			fmt.Printf("Scene3D aberrant sp: %v\n", sp)
+			fmt.Println("Scene3D aberrant sp:", sp, "r:", r, "pbb:", pbb)
 			return
 		}
 		r = nr
 	}
-	img, err := se.Scene.Image()
+	img, err := se.Scene.Image() // note: Copy is unacceptably slow
 	if err != nil {
 		log.Println("frame image err:", err)
 		return
 	}
 	// fmt.Println("r", r, "bnd", img.Bounds())
 	draw.Draw(sc.Pixels, r, img, sp, draw.Over)
+	se.Scene.ImageDone()
 }
 
 // Render3D renders the Frame Image
 func (se *Scene3D) Render3D(sc *gi.Scene) {
-	se.ConfigFrame(sc)
+	se.ConfigFrame(sc) // nop if all good
 	if se.Scene.Frame == nil {
 		return
 	}
-	se.Scene.UpdateNodes()
-	se.Scene.Render()
+	if se.Scene.Is(gi3d.ScNeedsConfig) {
+		goosi.TheApp.RunOnMain(func() {
+			se.Scene.Config()
+		})
+	}
+	se.Scene.DoUpdate()
 }
 
 func (se *Scene3D) Render(sc *gi.Scene) {
 	if se.PushBounds(sc) {
-		se.RenderChildren(sc)
 		se.Render3D(sc)
 		se.DrawIntoScene(sc)
+		se.RenderChildren(sc)
 		se.PopBounds(sc)
 	}
 }

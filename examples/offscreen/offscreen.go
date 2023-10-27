@@ -100,10 +100,11 @@ func main() {
 		log.Println("no render")
 	}
 
-	img, err := sc.Image()
+	img, err := sc.ImageCopy() // copy needed because it is linear colorspace
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	images.Save(img, "render.png")
+	// sc.ImageDone()
 }
