@@ -145,10 +145,6 @@ func (dv *DiffView) DiffViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Font.Family = string(gi.Prefs.MonoFont)
 			})
-		case "toolbar":
-			w.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-			})
 		case "diff-lay":
 			df := w.(*gi.Layout)
 			df.Lay = gi.LayoutHoriz
