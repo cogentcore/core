@@ -79,7 +79,7 @@ func (mv *MapView) MapViewStyles() {
 		s.SetStretchMax()
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(mv.This()) {
+		switch w.PathFrom(mv) {
 		case "map-grid":
 			mg := w.(*gi.Frame)
 			mg.Lay = gi.LayoutGrid

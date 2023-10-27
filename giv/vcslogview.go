@@ -46,7 +46,7 @@ func (lv *VCSLogView) OnInit() {
 		s.SetStretchMax()
 	})
 	lv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(lv.This()) {
+		switch w.PathFrom(lv) {
 		case "a-tf", "b-tf":
 			w.Style(func(s *styles.Style) {
 				s.Width.SetEm(12)

@@ -52,7 +52,7 @@ func (cv *ColorView) OnInit() {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
 	cv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(cv.This()) {
+		switch w.PathFrom(cv) {
 		case "value":
 			w.Style(func(s *styles.Style) {
 				s.MinWidth.SetEm(6)

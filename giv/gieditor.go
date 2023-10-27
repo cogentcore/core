@@ -45,7 +45,7 @@ func (ge *GiEditor) OnInit() {
 		s.Margin.Set(units.Dp(8))
 	})
 	ge.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(ge.This()) {
+		switch w.PathFrom(ge) {
 		case "title":
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall

@@ -60,7 +60,7 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(mv.This()) {
+		switch w.PathFrom(mv) {
 		case "add-action":
 			ab := w.(*gi.Button)
 			w.Style(func(s *styles.Style) {

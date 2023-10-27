@@ -41,7 +41,7 @@ func (fb *FileBrowse) OnInit() {
 		s.Margin.Set(units.Dp(8))
 	})
 	fb.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(fb.This()) {
+		switch w.PathFrom(fb) {
 		case "title":
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall

@@ -61,7 +61,7 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 		s.MinWidth.SetCh(20)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
-		path := w.PathFrom(sv.This())
+		path := w.PathFrom(sv)
 		if strings.HasPrefix(path, "label-") {
 			w.Style(func(s *styles.Style) {
 				s.AlignH = styles.AlignLeft

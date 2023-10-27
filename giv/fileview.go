@@ -92,7 +92,7 @@ func (fv *FileView) FileViewStyles() {
 		s.SetStretchMax()
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(fv.This()) {
+		switch w.PathFrom(fv) {
 		case "files-row":
 			fr := w.(*gi.Layout)
 			fr.Lay = gi.LayoutHoriz

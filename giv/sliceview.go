@@ -307,7 +307,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 		s.SetStretchMax()
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(sv.This()) {
+		switch w.PathFrom(sv) {
 		case "grid-lay": // grid layout
 			gl := w.(*gi.Layout)
 			gl.Lay = gi.LayoutHoriz

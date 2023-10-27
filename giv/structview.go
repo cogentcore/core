@@ -85,7 +85,7 @@ func (sv *StructView) OnInit() {
 		s.SetStretchMax()
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(sv.This()) {
+		switch w.PathFrom(sv) {
 		case "struct-grid":
 			sg := w.(*gi.Frame)
 			sg.Lay = gi.LayoutGrid
