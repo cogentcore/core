@@ -260,7 +260,7 @@ func (sc *Scene) EncodePNG(w io.Writer) error {
 
 // ScFlags has critical state information signaling when rendering,
 // styling etc need to be done
-type ScFlags WidgetFlags //enums:bitflag -trim-prefix Sc
+type ScFlags WidgetFlags //enums:bitflag
 
 const (
 	// ScUpdating means scene is in the process of updating:
