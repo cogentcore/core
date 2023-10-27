@@ -86,10 +86,6 @@ func (sv *StructView) OnInit() {
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv.This()) {
-		case "toolbar":
-			w.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-			})
 		case "struct-grid":
 			sg := w.(*gi.Frame)
 			sg.Lay = gi.LayoutGrid
