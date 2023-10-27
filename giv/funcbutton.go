@@ -110,12 +110,12 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		gtyp := gti.TypeByName(typnm)
 		var met *gti.Method
 		if gtyp == nil {
-			slog.Warn("potential programmer error: giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+			slog.Info("warning: potential programmer error: giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
 			met = &gti.Method{Name: metnm}
 		} else {
 			met = gtyp.Methods.ValByKey(metnm)
 			if met == nil {
-				slog.Warn("potential programmer error: giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself), meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+				slog.Info("warning: potential programmer error: giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself), meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
 				met = &gti.Method{Name: metnm}
 			}
 		}
@@ -135,7 +135,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 
 	f := gti.FuncByName(fnm)
 	if f == nil {
-		slog.Warn("potential programmer error: giv.FuncButton.SetFunc called with a function that has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+		slog.Info("warning: potential programmer error: giv.FuncButton.SetFunc called with a function that has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
 		f = &gti.Func{Name: fnm}
 	}
 	return fb.SetFuncImpl(f, reflect.ValueOf(fun))
