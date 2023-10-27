@@ -151,9 +151,7 @@ func (pf *Preferences) Defaults() {
 
 // UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
-//
-//gi:toolbar -icon refresh
-func (pf *Preferences) UpdateAll() {
+func (pf *Preferences) UpdateAll() { //gti:add
 	goosi.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 
@@ -202,8 +200,6 @@ func (pf *Preferences) Open() error { //gti:add
 }
 
 // Save saves the preferences to the GoGi standard prefs directory
-//
-//gi:toolbar -sep-before -confirm -show-result
 func (pf *Preferences) Save() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
@@ -230,9 +226,7 @@ func (pf *Preferences) Save() error { //gti:add
 
 // LightMode sets the color theme to light mode. It automatically
 // saves the preferences and updates all of the windows.
-//
-//gi:toolbar -sep-before -show-result
-func (pf *Preferences) LightMode() {
+func (pf *Preferences) LightMode() { //gti:add
 	pf.Theme = ThemeLight
 	colors.SetScheme(false)
 	pf.Save()
@@ -241,9 +235,7 @@ func (pf *Preferences) LightMode() {
 
 // DarkMode sets the color theme to dark mode. It automatically
 // saves the preferences and updates all of the windows.
-//
-//gi:toolbar
-func (pf *Preferences) DarkMode() {
+func (pf *Preferences) DarkMode() { //gti:add
 	pf.Theme = ThemeDark
 	colors.SetScheme(true)
 	pf.Save()
@@ -351,9 +343,7 @@ func (pf *Preferences) ScreenInfo() string { //gti:add
 }
 
 // VersionInfo returns GoGi version information
-//
-//gi:toolbar -icon info -show-result
-func (pf *Preferences) VersionInfo() string {
+func (pf *Preferences) VersionInfo() string { //gti:add
 	vinfo := "Version: " + Version + "\nDate: " + VersionDate + " UTC\nGit commit: " + GitCommit
 	return vinfo
 }
@@ -369,18 +359,14 @@ func (pf *Preferences) DeleteSavedWindowGeoms() { //gti:add
 // EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /
 // load from other files, etc.  Current avail keymaps are saved and loaded
 // with preferences automatically.
-//
-//gi:toolbar -sep-before -icon keyboard
-func (pf *Preferences) EditKeyMaps() {
+func (pf *Preferences) EditKeyMaps() { //gti:add
 	pf.SaveKeyMaps = true
 	pf.Changed = true
 	TheViewIFace.KeyMapsView(&keyfun.AvailMaps)
 }
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
-//
-//gi:toolbar -icon ink_highlighter
-func (pf *Preferences) EditHiStyles() {
+func (pf *Preferences) EditHiStyles() { //gti:add
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
@@ -389,9 +375,7 @@ func (pf *Preferences) EditHiStyles() {
 // really care. Turns on the SaveDetailed flag so these will be
 // saved and loaded automatically; you can toggle that back off
 // if you don't actually want to.
-//
-//gi:toolbar -icon description
-func (pf *Preferences) EditDetailed() {
+func (pf *Preferences) EditDetailed() { //gti:add
 	pf.SaveDetailed = true
 	pf.Changed = true
 	TheViewIFace.PrefsDetView(&PrefsDet)
@@ -400,9 +384,7 @@ func (pf *Preferences) EditDetailed() {
 // EditDebug opens the PrefsDbgView editor to control debugging
 // parameters. These are not saved; they are only set dynamically
 // during running.
-//
-//gi:toolbar -icon bug_report
-func (pf *Preferences) EditDebug() {
+func (pf *Preferences) EditDebug() { //gti:add
 	TheViewIFace.PrefsDbgView(&PrefsDbg)
 }
 
