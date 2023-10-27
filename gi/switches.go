@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"slices"
 
+	"goki.dev/enums"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -121,12 +122,8 @@ func (sw *Switches) ItemsFromStringList(el []string) {
 	copy(sw.Items, el)
 }
 
-// todo:
-
-// ItemsFromEnumList sets the Items list from a list of enum values (see
-// kit.EnumRegistry)
-/*
-func (sw *Switches) ItemsFromEnumList(el []kit.EnumValue) {
+// ItemsFromEnumList sets the Items list from a list of enum values
+func (sw *Switches) ItemsFromEnumList(el []enums.Enum) {
 	sz := len(el)
 	if sz == 0 {
 		return
@@ -134,48 +131,48 @@ func (sw *Switches) ItemsFromEnumList(el []kit.EnumValue) {
 	sw.Items = make([]string, sz)
 	sw.Tooltips = make([]string, sz)
 	for i, enum := range el {
-		sw.Items[i] = enum.Name
-		sw.Tooltips[i] = enum.Desc
+		if bf, ok := enum.(enums.BitFlag); ok {
+			sw.Items[i] = bf.BitIndexString()
+		} else {
+			sw.Items[i] = enum.String()
+		}
+		sw.Tooltips[i] = enum.Desc()
 	}
 }
 
-// ItemsFromEnum sets the Items list from an enum type, which must be
-// registered on kit.EnumRegistry.
-func (sw *Switches) ItemsFromEnum(enumtyp reflect.Type) {
-	sw.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true))
+// ItemsFromEnum sets the Items list from an enum value
+func (sw *Switches) ItemsFromEnum(enum enums.Enum) {
+	sw.ItemsFromEnumList(enum.Values())
 }
 
-// UpdateFromBitFlags sets the button checked state from a registered
-// BitFlag Enum type (see kit.EnumRegistry) with given value
-func (sw *Switches) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
-	els := kit.Enums.TypeValues(enumtyp, true)
+// UpdateFromBitFlags sets the checked state of the switches from the
+// given bit flag enum value.
+func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
+	els := bitflag.Values()
 	mx := max(len(els), sw.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
-		cbi := sw.Child(i)
-		cb := cbi.(*CheckBox)
-		on := bitflag.Has(val, int(ev.Value))
-		cb.SetState(on, states.Checked)
+		swi := sw.Child(i)
+		sw := swi.(*Switch)
+		on := bitflag.HasFlag(ev.(enums.BitFlag))
+		sw.SetState(on, states.Checked)
 	}
 }
 
-// BitFlagsValue returns the int64 value for all checkboxes from given
-// BitFlag Enum type (see kit.EnumRegistry) with given value
-func (sw *Switches) BitFlagsValue(enumtyp reflect.Type) int64 {
-	val := int64(0)
-	els := kit.Enums.TypeValues(enumtyp, true)
+// BitFlagsValue sets the given bitflag value to the value specified
+// by the switches.
+func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
+	els := bitflag.Values()
 	mx := max(len(els), sw.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
-		cbi := sw.Child(i)
-		cb := cbi.(*CheckBox)
-		if cb.StateIs(states.Checked) {
-			bitflag.Set(&val, int(ev.Value))
+		swi := sw.Child(i)
+		sw := swi.(*Switch)
+		if sw.StateIs(states.Checked) {
+			bitflag.SetFlag(true, ev.(enums.BitFlag))
 		}
 	}
-	return val
 }
-*/
 
 func (sw *Switches) ConfigItems() {
 	for i, swi := range *sw.Children() {

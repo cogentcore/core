@@ -1102,31 +1102,22 @@ func (vv *BitFlagView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	bb := vv.Widget.(*gi.Switches)
-	_ = bb
+	sw := vv.Widget.(*gi.Switches)
 	npv := laser.NonPtrValue(vv.Value)
-	iv, err := laser.ToInt(npv.Interface())
-	_ = iv
-	if err == nil {
-		// ev := vv.EnumValue() // todo:
-		// bb.UpdateFromBitFlags(typ, int64(iv))
-	} else {
-		slog.Error("BitFlag Value:", "error:", err)
-	}
+	sw.UpdateFromBitFlag(npv.Interface().(enums.BitFlag))
 }
 
 func (vv *BitFlagView) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
-	cb := vv.Widget.(*gi.Switches)
+	sw := vv.Widget.(*gi.Switches)
+	sw.SetType(gi.SwitchChip)
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
-	cb.Tooltip, _ = vv.Desc()
+	sw.Tooltip, _ = vv.Desc()
 
-	// todo!
 	ev := vv.EnumValue()
-	_ = ev
-	// cb.ItemsFromEnum(ev)
-	cb.Config(sc)
+	sw.ItemsFromEnum(ev)
+	sw.Config(sc)
 	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
 	// 	cbb := vvv.Widget.(*gi.Switches)
