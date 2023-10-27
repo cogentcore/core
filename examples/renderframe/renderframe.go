@@ -17,6 +17,7 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
+	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -201,7 +202,8 @@ func main() {
 			sy.MemCmdEndSubmitWaitFree()
 			gimg, err := fr.Render.Grab.DevGoImage()
 			if err == nil {
-				vgpu.SaveImage("render.png", gimg)
+				images.Save(gimg, "render.png")
+				fr.Render.Grab.UnmapDev() // essential to call after DevGoImage
 			} else {
 				fmt.Printf("image grab err: %s\n", err)
 			}

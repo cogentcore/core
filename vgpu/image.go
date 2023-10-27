@@ -13,9 +13,9 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/anthonynsimon/bild/clone"
 	vk "github.com/goki/vulkan"
 	"goki.dev/enums"
+	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 )
 
@@ -103,12 +103,50 @@ func ImageSRGBToLinear(img *image.RGBA) *image.RGBA {
 	return out
 }
 
+// SetImageSRGBFmLinear sets in place the pixel values to sRGB colorspace
+// version of given linear colorspace image.
+// This directly modifies the given image!
+func SetImageSRGBFmLinear(img *image.RGBA) {
+	sz := len(img.Pix)
+	tof := 1.0 / float32(0xff)
+	for i := 0; i < sz; i += 4 {
+		r := float32(img.Pix[i]) * tof
+		g := float32(img.Pix[i+1]) * tof
+		b := float32(img.Pix[i+2]) * tof
+		a := img.Pix[i+3]
+		rs, gs, bs := SRGBFmLinear(r, g, b)
+		img.Pix[i] = ImgCompToUint8(rs)
+		img.Pix[i+1] = ImgCompToUint8(gs)
+		img.Pix[i+2] = ImgCompToUint8(bs)
+		img.Pix[i+3] = a
+	}
+}
+
+// SetImageSRGBToLinear sets in place the pixel values to linear colorspace
+// version of sRGB colorspace image.
+// This directly modifies the given image!
+func SetImageSRGBToLinear(img *image.RGBA) {
+	sz := len(img.Pix)
+	tof := 1.0 / float32(0xff)
+	for i := 0; i < sz; i += 4 {
+		r := float32(img.Pix[i]) * tof
+		g := float32(img.Pix[i+1]) * tof
+		b := float32(img.Pix[i+2]) * tof
+		a := img.Pix[i+3]
+		rs, gs, bs := SRGBToLinear(r, g, b)
+		img.Pix[i] = ImgCompToUint8(rs)
+		img.Pix[i+1] = ImgCompToUint8(gs)
+		img.Pix[i+2] = ImgCompToUint8(bs)
+		img.Pix[i+3] = a
+	}
+}
+
 // ImageToRGBA returns image.RGBA version of given image
 // either because it already is one, or by converting it.
 func ImageToRGBA(img image.Image) *image.RGBA {
 	rimg, ok := img.(*image.RGBA)
 	if !ok {
-		rimg = clone.AsRGBA(img)
+		rimg = images.CloneAsRGBA(img)
 	}
 	return rimg
 }
@@ -376,36 +414,84 @@ func (im *Image) GoImage(layer int) (*image.RGBA, error) {
 	return rgba, nil
 }
 
-// DevGoImage returns an *image.RGBA standard Go image, of the Device
-// memory representation.  Only works if ImageOnHostOnly and Format
-// is default vk.FormatR8g8b8a8Srgb (strongly recommended in any case)
+// DevGoImage returns an image.RGBA standard Go image version of the HostOnly Device
+// memory representation, directly pointing to the source memory.
+// This will be valid only as long as that memory is valid, and modifications
+// will directly write into the source memory.  You MUST call UnmapDev once
+// done using that image memory, at which point it will become invalid.
+// This is only for immediate, transitory use of the image
+// (e.g., saving or then drawing it into another image).
+// See [DevGoImageCopy] for a version that copies into an image.RGBA.
+// Only works if ImageOnHostOnly and Format is default
+// vk.FormatR8g8b8a8Srgb.
 func (im *Image) DevGoImage() (*image.RGBA, error) {
 	if !im.HasFlag(ImageOnHostOnly) || im.Mem == vk.NullDeviceMemory {
-		return nil, fmt.Errorf("vgpu.Image: Go image not available because device Image is not HostOnly, or Mem is nil: %s", im.Name)
+		return nil, fmt.Errorf("vgpu.Image DevGoImage: Image not available because device Image is not HostOnly, or Mem is nil: %s", im.Name)
 	}
 	if !im.Format.IsStdRGBA() && !im.Format.IsRGBAUnorm() {
-		return nil, fmt.Errorf("vgpu.Image: Go image not standard RGBA format: %s", im.Format.String())
+		return nil, fmt.Errorf("vgpu.Image DevGoImage: Device image is not standard RGBA format: %s", im.Format.String())
 	}
 	size := im.Format.LayerByteSize()
-	rgba := &image.RGBA{}
 
 	subrec := vk.ImageSubresource{}
 	subrec.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
 	sublay := vk.SubresourceLayout{}
 	vk.GetImageSubresourceLayout(im.Dev, im.Image, &subrec, &sublay)
 	offset := int(sublay.Offset)
-
 	ptr := MapMemoryAll(im.Dev, im.Mem)
 	pix := (*[ByteCopyMemoryLimit]byte)(ptr)[offset : size+offset]
-	rgba.Pix = make([]byte, size)
-	copy(rgba.Pix, pix)
-	vk.UnmapMemory(im.Dev, im.Mem)
+
+	rgba := &image.RGBA{}
+	rgba.Pix = pix
 	rgba.Stride = im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
-	if im.Format.IsRGBAUnorm() {
-		return ImageSRGBFmLinear(rgba), nil
-	}
 	return rgba, nil
+}
+
+// DevGoImageCopy sets the given image.RGBA standard Go image to
+// a copy of the HostOnly Device memory representation,
+// re-sizing the pixel memory as needed.
+// If the image pixels are sufficiently sized, no memory allocation occurs.
+// Only works if ImageOnHostOnly, and works best if Format is default
+// vk.FormatR8g8b8a8Srgb (strongly recommended in any case).
+// If format is vk.FormatR8g8b8a8Unorm, it will be converted to srgb.
+func (im *Image) DevGoImageCopy(rgba *image.RGBA) error {
+	if !im.HasFlag(ImageOnHostOnly) || im.Mem == vk.NullDeviceMemory {
+		return fmt.Errorf("vgpu.Image DevGoImage: Image not available because device Image is not HostOnly, or Mem is nil: %s", im.Name)
+	}
+	if !im.Format.IsStdRGBA() && !im.Format.IsRGBAUnorm() {
+		return fmt.Errorf("vgpu.Image DevGoImage: Device image is not standard RGBA or Unorm format: %s", im.Format.String())
+	}
+
+	size := im.Format.LayerByteSize()
+	subrec := vk.ImageSubresource{}
+	subrec.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
+	sublay := vk.SubresourceLayout{}
+	vk.GetImageSubresourceLayout(im.Dev, im.Image, &subrec, &sublay)
+	offset := int(sublay.Offset)
+	ptr := MapMemoryAll(im.Dev, im.Mem)
+	pix := (*[ByteCopyMemoryLimit]byte)(ptr)[offset : size+offset]
+
+	if cap(rgba.Pix) < size {
+		rgba.Pix = make([]byte, size)
+	} else {
+		rgba.Pix = rgba.Pix[:size]
+	}
+	copy(rgba.Pix, pix)
+	vk.UnmapMemory(im.Dev, im.Mem)
+	if im.Format.IsRGBAUnorm() {
+		SetImageSRGBFmLinear(rgba)
+	}
+	rgba.Stride = im.Format.Stride()
+	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
+	return nil
+}
+
+// UnmapDev calls UnmapMemory on the mapped memory for this image,
+// set by MapMemoryAll.  This must be called after image is used in
+// DevGoImage (only if you use it immediately!)
+func (im *Image) UnmapDev() {
+	vk.UnmapMemory(im.Dev, im.Mem)
 }
 
 // ConfigGoImage configures the image for storing an image

@@ -54,9 +54,10 @@ func main() {
 
 	// note: for graphics, require these instance extensions before init gpu!
 	winext := window.GetRequiredInstanceExtensions()
+	fmt.Println(winext)
 	gp := vgpu.NewGPU()
 	gp.AddInstanceExt(winext...)
-	// vgpu.Debug = true
+	vgpu.Debug = true
 	gp.Config("vPhong test")
 
 	// gp.PropsString(true) // print

@@ -7,12 +7,7 @@ package vgpu
 import (
 	"fmt"
 	"image"
-	"image/jpeg"
-	"image/png"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
@@ -210,24 +205,6 @@ func (vl *Val) CopyToBytes(srcPtr unsafe.Pointer) {
 	copy(src, dst)
 }
 
-// SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
-// supported by default.
-func SaveImage(path string, im image.Image) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	ext := strings.ToLower(filepath.Ext(path))
-	if ext == ".png" {
-		return png.Encode(file, im)
-	} else if ext == ".jpg" || ext == ".jpeg" {
-		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
-	} else {
-		return fmt.Errorf("vgpu.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
-	}
-}
-
 // SetGoImage sets Texture image data from an *image.RGBA standard Go image,
 // at given layer, and sets the Mod flag, so it will be sync'd by Memory
 // or if TextureOwns is set for the var, it allocates Host memory.
@@ -252,7 +229,7 @@ func (vl *Val) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if vl.HasFlag(ValTextureOwns) {
 		vl.Texture.AllocTexture()
 		// svimg, _ := vl.Texture.GoImage()
-		// SaveImage(fmt.Sprintf("dimg_%d.png", vl.Idx), svimg)
+		// images.Save(svimg, fmt.Sprintf("dimg_%d.png", vl.Idx))
 	}
 	return err
 }
