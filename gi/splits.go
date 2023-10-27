@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"strconv"
 	"strings"
@@ -253,24 +254,28 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 }
 
 func (sl *Splits) ConfigWidget(sc *Scene) {
-	sl.NewParts(LayoutNil)
 	sl.UpdateSplits()
 	sl.ConfigSplitters(sc)
 }
 
 func (sl *Splits) ConfigSplitters(sc *Scene) {
+	fmt.Println("cfg sl")
+	parts := sl.NewParts(LayoutNil)
 	sz := len(sl.Kids)
-	mods, updt := sl.Parts.SetNChildren(sz-1, HandleType, "Handle")
+	fmt.Println(sz, sl.Kids)
+	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
 	odim := mat32.OtherDim(sl.Dim)
 	spc := sl.BoxSpace()
 	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
 	handsz := sl.HandleSize.Dots
 	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	for i, hlk := range *sl.Parts.Children() {
+	fmt.Println(parts.Kids)
+	for i, hlk := range *parts.Children() {
 		hl := hlk.(*Handle)
 		// hl.SplitterNo = i
 		// hl.Icon = spicon
 		hl.Dim = sl.Dim
+		fmt.Println(size, handsz*2)
 		hl.LayState.Alloc.Size.SetDim(sl.Dim, size)
 		hl.LayState.Alloc.Size.SetDim(odim, handsz*2)
 		hl.LayState.Alloc.SizeOrig = hl.LayState.Alloc.Size
@@ -283,7 +288,8 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 		// hl.ThumbSize = sl.HandleSize
 	}
 	if mods {
-		sl.Parts.UpdateEnd(updt)
+		parts.Update()
+		parts.UpdateEnd(updt)
 	}
 }
 
@@ -325,9 +331,7 @@ func (sl *Splits) HandleSplitsEvents() {
 
 func (sl *Splits) StyleSplits(sc *Scene) {
 	sl.ApplyStyleWidget(sc)
-	// todo: props?
-	// sl.HandleSize.SetFmInheritProp("handle-size", sl.This(), ki.NoInherit, ki.TypeProps)
-	// sl.HandleSize.ToDots(&sl.Style.UnContext)
+	sl.HandleSize.ToDots(&sl.Styles.UnContext)
 }
 
 func (sl *Splits) ApplyStyle(sc *Scene) {
@@ -398,7 +402,8 @@ func (sl *Splits) Render(sc *Scene) {
 			}
 			wi.Render(sc) // needs to disconnect using invisible
 		}
-		sl.Parts.Render(sc)
+		fmt.Println(sl.Parts.Kids)
+		sl.RenderParts(sc)
 		sl.PopBounds(sc)
 	}
 }
