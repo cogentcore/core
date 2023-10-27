@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"goki.dev/enums"
+	"goki.dev/gi/v2/gi"
 )
 
 var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5, 6}
@@ -187,6 +188,16 @@ var _BufFlagsMap = map[BufFlags]string{
 // of this BufFlags value.
 func (i BufFlags) String() string {
 	str := ""
+	for _, ie := range gi.WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _BufFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -209,7 +220,7 @@ func (i BufFlags) BitIndexString() string {
 	if str, ok := _BufFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return gi.WidgetFlags(i).BitIndexString()
 }
 
 // SetString sets the BufFlags value from its
@@ -232,7 +243,10 @@ func (i *BufFlags) SetStringOr(s string) error {
 		} else if val, ok := _BufFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type BufFlags")
+			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -253,21 +267,32 @@ func (i BufFlags) Desc() string {
 	if str, ok := _BufFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return gi.WidgetFlags(i).Desc()
 }
 
 // BufFlagsValues returns all possible values
 // for the type BufFlags.
 func BufFlagsValues() []BufFlags {
-	return _BufFlagsValues
+	es := gi.WidgetFlagsValues()
+	res := make([]BufFlags, len(es))
+	for i, e := range es {
+		res[i] = BufFlags(e)
+	}
+	res = append(res, _BufFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type BufFlags.
 func (i BufFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_BufFlagsValues))
-	for i, d := range _BufFlagsValues {
+	es := gi.WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_BufFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _BufFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -276,6 +301,9 @@ func (i BufFlags) Values() []enums.Enum {
 // valid option for type BufFlags.
 func (i BufFlags) IsValid() bool {
 	_, ok := _BufFlagsMap[i]
+	if !ok {
+		return gi.WidgetFlags(i).IsValid()
+	}
 	return ok
 }
 
@@ -312,47 +340,57 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ViewFlagsValues = []ViewFlags{9, 10, 11}
+var _EditorFlagsValues = []EditorFlags{9, 10, 11}
 
-// ViewFlagsN is the highest valid value
-// for type ViewFlags, plus one.
-const ViewFlagsN ViewFlags = 12
+// EditorFlagsN is the highest valid value
+// for type EditorFlags, plus one.
+const EditorFlagsN EditorFlags = 12
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _ViewFlagsNoOp() {
+func _EditorFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ViewHasLineNos-(9)]
-	_ = x[ViewLastWasTabAI-(10)]
-	_ = x[ViewLastWasUndo-(11)]
+	_ = x[EditorHasLineNos-(9)]
+	_ = x[EditorLastWasTabAI-(10)]
+	_ = x[EditorLastWasUndo-(11)]
 }
 
-var _ViewFlagsNameToValueMap = map[string]ViewFlags{
-	`HasLineNos`:   9,
-	`haslinenos`:   9,
-	`LastWasTabAI`: 10,
-	`lastwastabai`: 10,
-	`LastWasUndo`:  11,
-	`lastwasundo`:  11,
+var _EditorFlagsNameToValueMap = map[string]EditorFlags{
+	`EditorHasLineNos`:   9,
+	`editorhaslinenos`:   9,
+	`EditorLastWasTabAI`: 10,
+	`editorlastwastabai`: 10,
+	`EditorLastWasUndo`:  11,
+	`editorlastwasundo`:  11,
 }
 
-var _ViewFlagsDescMap = map[ViewFlags]string{
-	9:  `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
-	10: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	11: `ViewLastWasUndo indicates that last key was an undo`,
+var _EditorFlagsDescMap = map[EditorFlags]string{
+	9:  `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`,
+	10: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`,
+	11: `EditorLastWasUndo indicates that last key was an undo`,
 }
 
-var _ViewFlagsMap = map[ViewFlags]string{
-	9:  `HasLineNos`,
-	10: `LastWasTabAI`,
-	11: `LastWasUndo`,
+var _EditorFlagsMap = map[EditorFlags]string{
+	9:  `EditorHasLineNos`,
+	10: `EditorLastWasTabAI`,
+	11: `EditorLastWasUndo`,
 }
 
 // String returns the string representation
-// of this ViewFlags value.
-func (i ViewFlags) String() string {
+// of this EditorFlags value.
+func (i EditorFlags) String() string {
 	str := ""
-	for _, ie := range _ViewFlagsValues {
+	for _, ie := range gi.WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	for _, ie := range _EditorFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -366,93 +404,110 @@ func (i ViewFlags) String() string {
 }
 
 // BitIndexString returns the string
-// representation of this ViewFlags value
+// representation of this EditorFlags value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.
-func (i ViewFlags) BitIndexString() string {
-	if str, ok := _ViewFlagsMap[i]; ok {
+func (i EditorFlags) BitIndexString() string {
+	if str, ok := _EditorFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return gi.WidgetFlags(i).BitIndexString()
 }
 
-// SetString sets the ViewFlags value from its
+// SetString sets the EditorFlags value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *ViewFlags) SetString(s string) error {
+func (i *EditorFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the ViewFlags value from its
+// SetStringOr sets the EditorFlags value from its
 // string representation while preserving any
 // bit flags already set, and returns an
 // error if the string is invalid.
-func (i *ViewFlags) SetStringOr(s string) error {
+func (i *EditorFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _ViewFlagsNameToValueMap[flg]; ok {
+		if val, ok := _EditorFlagsNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _ViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _EditorFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type ViewFlags")
+			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-// Int64 returns the ViewFlags value as an int64.
-func (i ViewFlags) Int64() int64 {
+// Int64 returns the EditorFlags value as an int64.
+func (i EditorFlags) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the ViewFlags value from an int64.
-func (i *ViewFlags) SetInt64(in int64) {
-	*i = ViewFlags(in)
+// SetInt64 sets the EditorFlags value from an int64.
+func (i *EditorFlags) SetInt64(in int64) {
+	*i = EditorFlags(in)
 }
 
-// Desc returns the description of the ViewFlags value.
-func (i ViewFlags) Desc() string {
-	if str, ok := _ViewFlagsDescMap[i]; ok {
+// Desc returns the description of the EditorFlags value.
+func (i EditorFlags) Desc() string {
+	if str, ok := _EditorFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return gi.WidgetFlags(i).Desc()
 }
 
-// ViewFlagsValues returns all possible values
-// for the type ViewFlags.
-func ViewFlagsValues() []ViewFlags {
-	return _ViewFlagsValues
+// EditorFlagsValues returns all possible values
+// for the type EditorFlags.
+func EditorFlagsValues() []EditorFlags {
+	es := gi.WidgetFlagsValues()
+	res := make([]EditorFlags, len(es))
+	for i, e := range es {
+		res[i] = EditorFlags(e)
+	}
+	res = append(res, _EditorFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
-// for the type ViewFlags.
-func (i ViewFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ViewFlagsValues))
-	for i, d := range _ViewFlagsValues {
+// for the type EditorFlags.
+func (i EditorFlags) Values() []enums.Enum {
+	es := gi.WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_EditorFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _EditorFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type ViewFlags.
-func (i ViewFlags) IsValid() bool {
-	_, ok := _ViewFlagsMap[i]
+// valid option for type EditorFlags.
+func (i EditorFlags) IsValid() bool {
+	_, ok := _EditorFlagsMap[i]
+	if !ok {
+		return gi.WidgetFlags(i).IsValid()
+	}
 	return ok
 }
 
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i ViewFlags) HasFlag(f enums.BitFlag) bool {
+func (i EditorFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *ViewFlags) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *EditorFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -468,11 +523,11 @@ func (i *ViewFlags) SetFlag(on bool, f ...enums.BitFlag) {
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ViewFlags) MarshalText() ([]byte, error) {
+func (i EditorFlags) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ViewFlags) UnmarshalText(text []byte) error {
+func (i *EditorFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

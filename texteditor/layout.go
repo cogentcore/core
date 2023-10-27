@@ -25,11 +25,11 @@ func (ed *Editor) StyleSizes() {
 		lno = ed.Buf.Opts.LineNos
 	}
 	if lno {
-		ed.SetFlag(true, ViewHasLineNos)
+		ed.SetFlag(true, EditorHasLineNos)
 		// SidesTODO: this is sketchy
 		ed.LineNoOff = float32(ed.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
-		ed.SetFlag(false, ViewHasLineNos)
+		ed.SetFlag(false, EditorHasLineNos)
 		ed.LineNoOff = 0
 	}
 }

@@ -19,6 +19,7 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/fsnotify/fsnotify"
+	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/gi/v2/texteditor/histyle"
@@ -424,6 +425,10 @@ type FileNode struct { //goki:embedder
 
 	// version control system repository file status -- only valid during ReadDir
 	RepoFiles vci.Files `json:"-" xml:"-" copy:"-"`
+}
+
+func (fn *FileNode) FlagType() enums.BitFlag {
+	return FileNodeFlags(fn.Flags)
 }
 
 func (fn *FileNode) CopyFieldsFrom(frm any) {

@@ -13,6 +13,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
@@ -85,7 +86,11 @@ type TreeView struct { //goki:embedder
 	// the reason that it exists is so that the children of the tree view
 	// (other tree views) do not inherit its stateful background color, as
 	// that does not look good.
-	actStateLayer float32
+	actStateLayer float32 `set:"-"`
+}
+
+func (tv *TreeView) FlagType() enums.BitFlag {
+	return TreeViewFlags(tv.Flags)
 }
 
 func (tv *TreeView) CopyFieldsFrom(frm any) {
@@ -246,7 +251,7 @@ func (tv *TreeView) TreeViewStyles() {
 }
 
 // TreeViewFlags extend WidgetFlags to hold TreeView state
-type TreeViewFlags int64 //enums:bitflag -trim-prefix TreeViewFlag
+type TreeViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix TreeViewFlag
 
 const (
 	// TreeViewFlagClosed means node is toggled closed

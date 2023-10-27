@@ -163,6 +163,10 @@ func NewBuf() *Buf {
 	return tb
 }
 
+func (tb *Buf) FlagType() enums.BitFlag {
+	return BufFlags(tb.Flags)
+}
+
 // BufSignals are signals that text buffer can send to View
 type BufSignals int32 //enums:enum
 
@@ -217,7 +221,7 @@ func (tb *Buf) OnChange(fun func(e events.Event)) {
 }
 
 // BufFlags hold key Buf state
-type BufFlags int64 //enums:bitflag -trim-prefix Buf
+type BufFlags gi.WidgetFlags //enums:bitflag -trim-prefix Buf
 
 const (
 	// BufAutoSaving is used in atomically safe way to protect autosaving
