@@ -316,6 +316,10 @@ type WidgetBase struct {
 	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" set:"-"`
 }
 
+func (wb *WidgetBase) FlagType() enums.BitFlag {
+	return WidgetFlagsN
+}
+
 func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	if w == nil {
