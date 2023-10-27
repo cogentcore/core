@@ -2166,40 +2166,45 @@ func (i *StageSides) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _SwitchTypesValues = []SwitchTypes{0, 1, 2}
+var _SwitchTypesValues = []SwitchTypes{0, 1, 2, 3}
 
 // SwitchTypesN is the highest valid value
 // for type SwitchTypes, plus one.
-const SwitchTypesN SwitchTypes = 3
+const SwitchTypesN SwitchTypes = 4
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _SwitchTypesNoOp() {
 	var x [1]struct{}
 	_ = x[SwitchSwitch-(0)]
-	_ = x[SwitchCheckbox-(1)]
-	_ = x[SwitchRadioButton-(2)]
+	_ = x[SwitchChip-(1)]
+	_ = x[SwitchCheckbox-(2)]
+	_ = x[SwitchRadioButton-(3)]
 }
 
 var _SwitchTypesNameToValueMap = map[string]SwitchTypes{
 	`Switch`:      0,
 	`switch`:      0,
-	`Checkbox`:    1,
-	`checkbox`:    1,
-	`RadioButton`: 2,
-	`radiobutton`: 2,
+	`Chip`:        1,
+	`chip`:        1,
+	`Checkbox`:    2,
+	`checkbox`:    2,
+	`RadioButton`: 3,
+	`radiobutton`: 3,
 }
 
 var _SwitchTypesDescMap = map[SwitchTypes]string{
 	0: `SwitchSwitch indicates to display a switch as a switch (toggle slider)`,
-	1: `SwitchCheckbox indicates to display a switch as a checkbox`,
-	2: `SwitchRadioButton indicates to display a switch as a radio button`,
+	1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip)`,
+	2: `SwitchCheckbox indicates to display a switch as a checkbox`,
+	3: `SwitchRadioButton indicates to display a switch as a radio button`,
 }
 
 var _SwitchTypesMap = map[SwitchTypes]string{
 	0: `Switch`,
-	1: `Checkbox`,
-	2: `RadioButton`,
+	1: `Chip`,
+	2: `Checkbox`,
+	3: `RadioButton`,
 }
 
 // String returns the string representation
