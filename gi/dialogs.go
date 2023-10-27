@@ -9,6 +9,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/colors"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"

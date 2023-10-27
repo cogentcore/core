@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -847,19 +848,16 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	cpsc := ActiveKeyMap.ChordForFun(keyfun.Copy)
-	NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+	NewButton(m, "copy").SetText("Copy").SetShortcutKey(keyfun.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tf.This().(Clipper).Copy(true)
 		})
 	if !tf.IsReadOnly() {
-		ctsc := ActiveKeyMap.ChordForFun(keyfun.Cut)
-		ptsc := ActiveKeyMap.ChordForFun(keyfun.Paste)
-		NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+		NewButton(m, "cut").SetText("Cut").SetShortcutKey(keyfun.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tf.This().(Clipper).Cut()
 			})
-		pbt := NewButton(m, "paste").SetText("Paste").SetShortcut(ptsc).
+		pbt := NewButton(m, "paste").SetText("Paste").SetShortcutKey(keyfun.Paste).
 			OnClick(func(e events.Event) {
 				tf.This().(Clipper).Paste()
 			})

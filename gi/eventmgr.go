@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"goki.dev/cursors"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/goosi"

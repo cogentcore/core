@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"goki.dev/colors"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
@@ -75,7 +76,7 @@ type Preferences struct { //gti:add
 	Editor EditorPrefs `view:"inline"`
 
 	// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
-	KeyMap KeyMapName
+	KeyMap keyfun.MapName
 
 	// if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords
 	SaveKeyMaps bool
@@ -144,7 +145,7 @@ func (pf *Preferences) Defaults() {
 	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Go"
 	pf.MonoFont = "Go Mono"
-	pf.KeyMap = DefaultKeyMap
+	pf.KeyMap = keyfun.DefaultMap
 	pf.UpdateUser()
 }
 
@@ -185,7 +186,7 @@ func (pf *Preferences) Open() error { //gti:add
 	}
 	err = json.Unmarshal(b, pf)
 	if pf.SaveKeyMaps {
-		err = AvailKeyMaps.OpenPrefs()
+		err = keyfun.AvailMaps.OpenPrefs()
 		if err != nil {
 			pf.SaveKeyMaps = false
 		}
@@ -216,7 +217,7 @@ func (pf *Preferences) Save() error { //gti:add
 		slog.Error(err.Error())
 	}
 	if pf.SaveKeyMaps {
-		AvailKeyMaps.SavePrefs()
+		keyfun.AvailMaps.SavePrefs()
 	}
 	if pf.SaveDetailed {
 		PrefsDet.Save()
@@ -280,7 +281,7 @@ func (pf *Preferences) Apply() {
 	LocalMainMenu = pf.Params.LocalMainMenu
 
 	if pf.KeyMap != "" {
-		SetActiveKeyMapName(pf.KeyMap) // fills in missing pieces
+		keyfun.SetActiveMapName(pf.KeyMap) // fills in missing pieces
 	}
 	if pf.SaveDetailed {
 		PrefsDet.Apply()
@@ -373,7 +374,7 @@ func (pf *Preferences) DeleteSavedWindowGeoms() { //gti:add
 func (pf *Preferences) EditKeyMaps() {
 	pf.SaveKeyMaps = true
 	pf.Changed = true
-	TheViewIFace.KeyMapsView(&AvailKeyMaps)
+	TheViewIFace.KeyMapsView(&keyfun.AvailMaps)
 }
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles

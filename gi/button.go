@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -223,7 +224,7 @@ func (bt *Button) ButtonStyles() {
 
 // SetShortcut sets the shortcut of the button from the given [keyfun.Funs]
 func (bt *Button) SetShortcutKey(kf keyfun.Funs) *Button {
-	bt.SetShortcut(ShortcutForFun(kf))
+	bt.SetShortcutKey(kf)
 	return bt
 }
 
