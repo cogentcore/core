@@ -23,8 +23,14 @@ type Handle struct {
 	// dimension along which the handle slides (opposite of the dimension it is longest on)
 	Dim mat32.Dims
 
+	// Min is the minimum value that the handle can go to
+	// (typically the lower bound of the dialog/splits)
 	Min float32
+	// Max is the maximum value that the handle can go to
+	// (typically the upper bound of the dialog/splits)
 	Max float32
+	// Pos is the current position of the handle on the
+	// scale of [Handle.Min] to [Handle.Max]
 	Pos float32
 }
 
@@ -41,11 +47,11 @@ func (hl *Handle) HandleStyles() {
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 
 		if hl.Dim == mat32.X {
-			s.SetFixedWidth(units.Dp(4))
+			s.SetFixedWidth(units.Dp(6))
 			s.SetFixedHeight(units.Em(3))
 		} else {
 			s.SetFixedWidth(units.Em(3))
-			s.SetFixedHeight(units.Dp(4))
+			s.SetFixedHeight(units.Dp(6))
 		}
 
 		if !hl.IsReadOnly() {
@@ -67,6 +73,8 @@ func (hl *Handle) HandleEvents() {
 	})
 }
 
+// Value returns the value on a normalized scale of 0-1,
+// based on [Handle.Pos], [Handle.Min], and [Handle.Max].
 func (hl *Handle) Value() float32 {
 	return hl.Pos / (hl.Max - hl.Min)
 }
