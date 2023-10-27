@@ -365,12 +365,11 @@ type Ki interface {
 	// automatically called on StartUpdate to reset any old state.
 	ClearUpdateFlags()
 
-	// FlagType returns a bit flag value with the type that represents
-	// the true flag type of the node, which may be a type that extends
-	// the standard [Node.Flags]. Each node type that extends the flag type
-	// should define this method; for example:
+	// FlagType returns the flags of the node as the true flag type of the node,
+	// which may be a type that extends the standard [Flags]. Each node type
+	// that extends the flag type should define this method; for example:
 	//	func (wb *WidgetBase) FlagType() enums.BitFlag {
-	//		return WidgetFlagsN
+	//		return WidgetFlags(wb.Flags)
 	//	}
 	FlagType() enums.BitFlag
 

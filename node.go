@@ -796,7 +796,7 @@ func (n *Node) ClearUpdateFlags() {
 // FlagType is the base implementation of [Ki.FlagType] that returns a
 // value of type [Flags].
 func (n *Node) FlagType() enums.BitFlag {
-	return FlagsN
+	return n.Flags
 }
 
 //////////////////////////////////////////////////////////////////////////
