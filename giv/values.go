@@ -744,18 +744,15 @@ func (vv *KiPtrValue) KiStruct() ki.Ki {
 	if vv.Value.IsNil() {
 		return nil
 	}
-	npv := vv.Value
-	if vv.Value.Kind() == reflect.Ptr {
-		npv = vv.Value.Elem()
+	fmt.Println(vv.Value, vv.Value.Type())
+	opv := laser.OnePtrValue(vv.Value)
+	fmt.Println(opv, opv.Type())
+	if opv.IsNil() {
+		return nil
 	}
-	if npv.Kind() == reflect.Struct {
-		npv = vv.Value // go back up
-	}
-	if !npv.IsNil() {
-		k, ok := npv.Interface().(ki.Ki)
-		if ok && k != nil {
-			return k
-		}
+	k, ok := opv.Interface().(ki.Ki)
+	if ok && k != nil {
+		return k
 	}
 	return nil
 }
@@ -790,6 +787,7 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 		})
 		gi.NewButton(m, "gogi-editor").SetText("GoGi editor").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
+			fmt.Println(k, vv.IsReadOnly())
 			if k != nil && !vv.IsReadOnly() {
 				GoGiEditorDialog(k)
 			}
