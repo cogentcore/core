@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"goki.dev/enums"
+	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2"
 )
 
@@ -454,6 +455,16 @@ var _SliceViewFlagsMap = map[SliceViewFlags]string{
 // of this SliceViewFlags value.
 func (i SliceViewFlags) String() string {
 	str := ""
+	for _, ie := range gi.WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _SliceViewFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -476,7 +487,7 @@ func (i SliceViewFlags) BitIndexString() string {
 	if str, ok := _SliceViewFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return gi.WidgetFlags(i).BitIndexString()
 }
 
 // SetString sets the SliceViewFlags value from its
@@ -499,7 +510,10 @@ func (i *SliceViewFlags) SetStringOr(s string) error {
 		} else if val, ok := _SliceViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type SliceViewFlags")
+			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -520,21 +534,32 @@ func (i SliceViewFlags) Desc() string {
 	if str, ok := _SliceViewFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return gi.WidgetFlags(i).Desc()
 }
 
 // SliceViewFlagsValues returns all possible values
 // for the type SliceViewFlags.
 func SliceViewFlagsValues() []SliceViewFlags {
-	return _SliceViewFlagsValues
+	es := gi.WidgetFlagsValues()
+	res := make([]SliceViewFlags, len(es))
+	for i, e := range es {
+		res[i] = SliceViewFlags(e)
+	}
+	res = append(res, _SliceViewFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type SliceViewFlags.
 func (i SliceViewFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SliceViewFlagsValues))
-	for i, d := range _SliceViewFlagsValues {
+	es := gi.WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_SliceViewFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _SliceViewFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -543,6 +568,9 @@ func (i SliceViewFlags) Values() []enums.Enum {
 // valid option for type SliceViewFlags.
 func (i SliceViewFlags) IsValid() bool {
 	_, ok := _SliceViewFlagsMap[i]
+	if !ok {
+		return gi.WidgetFlags(i).IsValid()
+	}
 	return ok
 }
 
@@ -614,6 +642,16 @@ var _TreeViewFlagsMap = map[TreeViewFlags]string{
 // of this TreeViewFlags value.
 func (i TreeViewFlags) String() string {
 	str := ""
+	for _, ie := range gi.WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _TreeViewFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -636,7 +674,7 @@ func (i TreeViewFlags) BitIndexString() string {
 	if str, ok := _TreeViewFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return gi.WidgetFlags(i).BitIndexString()
 }
 
 // SetString sets the TreeViewFlags value from its
@@ -659,7 +697,10 @@ func (i *TreeViewFlags) SetStringOr(s string) error {
 		} else if val, ok := _TreeViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type TreeViewFlags")
+			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -680,21 +721,32 @@ func (i TreeViewFlags) Desc() string {
 	if str, ok := _TreeViewFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return gi.WidgetFlags(i).Desc()
 }
 
 // TreeViewFlagsValues returns all possible values
 // for the type TreeViewFlags.
 func TreeViewFlagsValues() []TreeViewFlags {
-	return _TreeViewFlagsValues
+	es := gi.WidgetFlagsValues()
+	res := make([]TreeViewFlags, len(es))
+	for i, e := range es {
+		res[i] = TreeViewFlags(e)
+	}
+	res = append(res, _TreeViewFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type TreeViewFlags.
 func (i TreeViewFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TreeViewFlagsValues))
-	for i, d := range _TreeViewFlagsValues {
+	es := gi.WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_TreeViewFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _TreeViewFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -703,6 +755,9 @@ func (i TreeViewFlags) Values() []enums.Enum {
 // valid option for type TreeViewFlags.
 func (i TreeViewFlags) IsValid() bool {
 	_, ok := _TreeViewFlagsMap[i]
+	if !ok {
+		return gi.WidgetFlags(i).IsValid()
+	}
 	return ok
 }
 

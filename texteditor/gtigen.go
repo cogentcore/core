@@ -8,6 +8,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 )
 
@@ -108,13 +109,6 @@ func (t *Editor) AsEditor() *Editor {
 	return t
 }
 
-// SetTooltip sets the [Editor.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Editor) SetTooltip(v string) *Editor {
-	t.Tooltip = v
-	return t
-}
-
 // SetPlaceholder sets the [Editor.Placeholder]:
 // text that is displayed when the field is empty, in a lower-contrast manner
 func (t *Editor) SetPlaceholder(v string) *Editor {
@@ -157,21 +151,51 @@ func (t *Editor) SetCursorColor(v colors.Full) *Editor {
 	return t
 }
 
-// SetlastRecenter sets the [Editor.lastRecenter]:
+// SetlastRecenter sets the [Editor.lastRecenter]
 func (t *Editor) SetlastRecenter(v int) *Editor {
 	t.lastRecenter = v
 	return t
 }
 
-// SetlastAutoInsert sets the [Editor.lastAutoInsert]:
+// SetlastAutoInsert sets the [Editor.lastAutoInsert]
 func (t *Editor) SetlastAutoInsert(v rune) *Editor {
 	t.lastAutoInsert = v
 	return t
 }
 
-// SetlastFilename sets the [Editor.lastFilename]:
+// SetlastFilename sets the [Editor.lastFilename]
 func (t *Editor) SetlastFilename(v gi.FileName) *Editor {
 	t.lastFilename = v
+	return t
+}
+
+// SetTooltip sets the [Editor.Tooltip]
+func (t *Editor) SetTooltip(v string) *Editor {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Editor.Class]
+func (t *Editor) SetClass(v string) *Editor {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Editor.CustomContextMenu]
+func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSpacing sets the [Editor.Spacing]
+func (t *Editor) SetSpacing(v units.Value) *Editor {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Editor.StackTop]
+func (t *Editor) SetStackTop(v int) *Editor {
+	t.StackTop = v
 	return t
 }
 
@@ -211,13 +235,6 @@ func (t *TwinEditors) New() ki.Ki {
 	return &TwinEditors{}
 }
 
-// SetTooltip sets the [TwinEditors.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *TwinEditors) SetTooltip(v string) *TwinEditors {
-	t.Tooltip = v
-	return t
-}
-
 // SetBufA sets the [TwinEditors.BufA]:
 // textbuf for A
 func (t *TwinEditors) SetBufA(v *Buf) *TwinEditors {
@@ -229,5 +246,35 @@ func (t *TwinEditors) SetBufA(v *Buf) *TwinEditors {
 // textbuf for B
 func (t *TwinEditors) SetBufB(v *Buf) *TwinEditors {
 	t.BufB = v
+	return t
+}
+
+// SetTooltip sets the [TwinEditors.Tooltip]
+func (t *TwinEditors) SetTooltip(v string) *TwinEditors {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [TwinEditors.Class]
+func (t *TwinEditors) SetClass(v string) *TwinEditors {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [TwinEditors.CustomContextMenu]
+func (t *TwinEditors) SetCustomContextMenu(v func(m *gi.Scene)) *TwinEditors {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetHandleSize sets the [TwinEditors.HandleSize]
+func (t *TwinEditors) SetHandleSize(v units.Value) *TwinEditors {
+	t.HandleSize = v
+	return t
+}
+
+// SetDim sets the [TwinEditors.Dim]
+func (t *TwinEditors) SetDim(v mat32.Dims) *TwinEditors {
+	t.Dim = v
 	return t
 }

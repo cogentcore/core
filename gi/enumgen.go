@@ -377,7 +377,7 @@ var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
-	7: `NeedsRender needs to be rendered on next render itration`,
+	7: `NeedsRender needs to be rendered on next render iteration`,
 	8: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
 }
 
@@ -869,6 +869,16 @@ var _LayoutFlagsMap = map[LayoutFlags]string{
 // of this LayoutFlags value.
 func (i LayoutFlags) String() string {
 	str := ""
+	for _, ie := range WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _LayoutFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -891,7 +901,7 @@ func (i LayoutFlags) BitIndexString() string {
 	if str, ok := _LayoutFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return WidgetFlags(i).BitIndexString()
 }
 
 // SetString sets the LayoutFlags value from its
@@ -914,7 +924,10 @@ func (i *LayoutFlags) SetStringOr(s string) error {
 		} else if val, ok := _LayoutFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type LayoutFlags")
+			err := (*WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -935,21 +948,32 @@ func (i LayoutFlags) Desc() string {
 	if str, ok := _LayoutFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return WidgetFlags(i).Desc()
 }
 
 // LayoutFlagsValues returns all possible values
 // for the type LayoutFlags.
 func LayoutFlagsValues() []LayoutFlags {
-	return _LayoutFlagsValues
+	es := WidgetFlagsValues()
+	res := make([]LayoutFlags, len(es))
+	for i, e := range es {
+		res[i] = LayoutFlags(e)
+	}
+	res = append(res, _LayoutFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type LayoutFlags.
 func (i LayoutFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_LayoutFlagsValues))
-	for i, d := range _LayoutFlagsValues {
+	es := WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_LayoutFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _LayoutFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -958,6 +982,9 @@ func (i LayoutFlags) Values() []enums.Enum {
 // valid option for type LayoutFlags.
 func (i LayoutFlags) IsValid() bool {
 	_, ok := _LayoutFlagsMap[i]
+	if !ok {
+		return WidgetFlags(i).IsValid()
+	}
 	return ok
 }
 
@@ -1592,6 +1619,16 @@ var _ScFlagsMap = map[ScFlags]string{
 // of this ScFlags value.
 func (i ScFlags) String() string {
 	str := ""
+	for _, ie := range WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _ScFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -1614,7 +1651,7 @@ func (i ScFlags) BitIndexString() string {
 	if str, ok := _ScFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return WidgetFlags(i).BitIndexString()
 }
 
 // SetString sets the ScFlags value from its
@@ -1637,7 +1674,10 @@ func (i *ScFlags) SetStringOr(s string) error {
 		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type ScFlags")
+			err := (*WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -1658,21 +1698,32 @@ func (i ScFlags) Desc() string {
 	if str, ok := _ScFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return WidgetFlags(i).Desc()
 }
 
 // ScFlagsValues returns all possible values
 // for the type ScFlags.
 func ScFlagsValues() []ScFlags {
-	return _ScFlagsValues
+	es := WidgetFlagsValues()
+	res := make([]ScFlags, len(es))
+	for i, e := range es {
+		res[i] = ScFlags(e)
+	}
+	res = append(res, _ScFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type ScFlags.
 func (i ScFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ScFlagsValues))
-	for i, d := range _ScFlagsValues {
+	es := WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_ScFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _ScFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -1681,6 +1732,9 @@ func (i ScFlags) Values() []enums.Enum {
 // valid option for type ScFlags.
 func (i ScFlags) IsValid() bool {
 	_, ok := _ScFlagsMap[i]
+	if !ok {
+		return WidgetFlags(i).IsValid()
+	}
 	return ok
 }
 

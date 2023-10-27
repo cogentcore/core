@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/gi/v2/texteditor/textbuf"
@@ -152,6 +153,10 @@ type Editor struct { //goki:embedder
 	lastFilename   gi.FileName
 }
 
+func (ed *Editor) FlagType() enums.BitFlag {
+	return EditorFlags(ed.Flags)
+}
+
 // NewViewLayout adds a new layout with text editor
 // to given parent node, with given name.  Layout adds "-lay" suffix.
 // Texediew should always have a parent Layout to manage
@@ -199,18 +204,18 @@ func (ed *Editor) ViewStyles() {
 	})
 }
 
-// ViewFlags extend WidgetFlags to hold text editor.View state
-type ViewFlags int64 //enums:bitflag -trim-prefix View
+// EditorFlags extend WidgetFlags to hold [Editor] state
+type EditorFlags gi.WidgetFlags //enums:bitflag -trim-prefix View
 
 const (
-	// ViewHasLineNos indicates that this view has line numbers (per Buf option)
-	ViewHasLineNos ViewFlags = ViewFlags(gi.WidgetFlagsN) + iota
+	// EditorHasLineNos indicates that this editor has line numbers (per Buf option)
+	EditorHasLineNos EditorFlags = EditorFlags(gi.WidgetFlagsN) + iota
 
-	// ViewLastWasTabAI indicates that last key was a Tab auto-indent
-	ViewLastWasTabAI
+	// EditorLastWasTabAI indicates that last key was a Tab auto-indent
+	EditorLastWasTabAI
 
-	// ViewLastWasUndo indicates that last key was an undo
-	ViewLastWasUndo
+	// EditorLastWasUndo indicates that last key was an undo
+	EditorLastWasUndo
 )
 
 // EditDone completes editing and copies the active edited text to the text --
@@ -242,7 +247,7 @@ func (ed *Editor) IsChanged() bool {
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
 func (ed *Editor) HasLineNos() bool {
-	return ed.Is(ViewHasLineNos)
+	return ed.Is(EditorHasLineNos)
 }
 
 // Clear resets all the text in the buffer for this view

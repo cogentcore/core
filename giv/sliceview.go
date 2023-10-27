@@ -16,6 +16,7 @@ import (
 	"sync"
 
 	"goki.dev/colors"
+	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
@@ -85,7 +86,7 @@ func (sv *SliceView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int,
 //   manages these iterations to get it to work.
 
 // SliceViewFlags extend WidgetFlags to hold SliceView state
-type SliceViewFlags int64 //enums:bitflag -trim-prefix SliceView
+type SliceViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
 	// flagged after first configuration
@@ -286,6 +287,10 @@ type SliceViewBase struct {
 	// ElVal is a Value representation of the underlying element type
 	// which is used whenever there are no slice elements available
 	ElVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-"`
+}
+
+func (sv *SliceViewBase) FlagType() enums.BitFlag {
+	return SliceViewFlags(sv.Flags)
 }
 
 func (sv *SliceViewBase) OnInit() {

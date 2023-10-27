@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"goki.dev/colors"
+	"goki.dev/enums"
 	"goki.dev/girl/paint"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -75,6 +76,10 @@ type Scene struct {
 	// ShowLayoutIter counts up at start of showing a Scene
 	// for a sequence of Layout passes to ensure proper initial sizing.
 	ShowLayoutIter int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+}
+
+func (sc *Scene) FlagType() enums.BitFlag {
+	return ScFlags(sc.Flags)
 }
 
 // NewScene creates a new Scene that will serve as the content of a Stage
@@ -255,7 +260,7 @@ func (sc *Scene) EncodePNG(w io.Writer) error {
 
 // ScFlags has critical state information signaling when rendering,
 // styling etc need to be done
-type ScFlags int64 //enums:bitflag -trim-prefix Sc
+type ScFlags WidgetFlags //enums:bitflag -trim-prefix Sc
 
 const (
 	// ScUpdating means scene is in the process of updating:

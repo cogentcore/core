@@ -12,6 +12,7 @@ import (
 	"time"
 	"unicode"
 
+	"goki.dev/enums"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
@@ -34,7 +35,7 @@ var (
 )
 
 // Layoutlags has bool flags for Layout
-type LayoutFlags int64 //enums:bitflag -trim-prefix Layout
+type LayoutFlags WidgetFlags //enums:bitflag -trim-prefix Layout
 
 const (
 	// for stacked layout, only layout the top widget.
@@ -218,6 +219,10 @@ type Layout struct { //goki:embedder
 
 	// last element focused on -- used as a starting point if name is the same
 	FocusNameLast ki.Ki `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+}
+
+func (ly *Layout) FlagType() enums.BitFlag {
+	return LayoutFlags(ly.Flags)
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {

@@ -661,12 +661,6 @@ func (t *FileTreeView) SetSelectedNodes(v []*TreeView) *FileTreeView {
 	return t
 }
 
-// SetactStateLayer sets the [FileTreeView.actStateLayer]
-func (t *FileTreeView) SetactStateLayer(v float32) *FileTreeView {
-	t.actStateLayer = v
-	return t
-}
-
 // FileViewType is the [gti.Type] for [FileView]
 var FileViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FileView",
@@ -798,7 +792,7 @@ var FuncButtonType = gti.AddType(&gti.Type{
 		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Args are the [Value] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Returns", &gti.Field{Name: "Returns", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Returns are the [Value] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\ndefault values and other options. The [reflect.Value]s of\nthe [Value] objects are not set until the function is\ncalled, and are thus not typically applicable to access.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", LocalType: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}, Tag: ""}},
-		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
+		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default, unless\nthe function has no return values.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -830,7 +824,8 @@ func (t *FuncButton) SetConfirm(v bool) *FuncButton {
 // ShowReturn is whether to display the return values of
 // the function (and a success message if there are none).
 // The way that the return values are shown is determined
-// by ShowReturnAsDialog. ShowReturn is on by default.
+// by ShowReturnAsDialog. ShowReturn is on by default, unless
+// the function has no return values.
 func (t *FuncButton) SetShowReturn(v bool) *FuncButton {
 	t.ShowReturn = v
 	return t
@@ -2541,7 +2536,7 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
 		{"RootView", &gti.Field{Name: "RootView", Type: "*goki.dev/gi/v2/giv.TreeView", LocalType: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
 		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*goki.dev/gi/v2/giv.TreeView", LocalType: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", LocalType: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}, Tag: ""}},
+		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", LocalType: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2641,17 +2636,6 @@ func (t *TreeView) SetRootView(v *TreeView) *TreeView {
 // RootView node only.
 func (t *TreeView) SetSelectedNodes(v []*TreeView) *TreeView {
 	t.SelectedNodes = v
-	return t
-}
-
-// SetactStateLayer sets the [TreeView.actStateLayer]:
-// actStateLayer is the actual state layer of the tree view, which
-// should be used when rendering it and its parts (but not its children).
-// the reason that it exists is so that the children of the tree view
-// (other tree views) do not inherit its stateful background color, as
-// that does not look good.
-func (t *TreeView) SetactStateLayer(v float32) *TreeView {
-	t.actStateLayer = v
 	return t
 }
 
