@@ -609,10 +609,10 @@ func _ScFlagsNoOp() {
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
-	`Updating`:    7,
-	`updating`:    7,
-	`NeedsRender`: 8,
-	`needsrender`: 8,
+	`ScUpdating`:    7,
+	`scupdating`:    7,
+	`ScNeedsRender`: 8,
+	`scneedsrender`: 8,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -621,8 +621,8 @@ var _ScFlagsDescMap = map[ScFlags]string{
 }
 
 var _ScFlagsMap = map[ScFlags]string{
-	7: `Updating`,
-	8: `NeedsRender`,
+	7: `ScUpdating`,
+	8: `ScNeedsRender`,
 }
 
 // String returns the string representation

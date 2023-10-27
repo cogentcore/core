@@ -43,7 +43,7 @@ func main() {
 
 	// options - must be set here
 	// sc.MultiSample = 1
-	sc.Wireframe = true
+	// sc.Wireframe = true
 	// sc.NoNav = true
 
 	// first, add lights, set camera

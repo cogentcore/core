@@ -165,6 +165,23 @@ func (sc *Scene) UpdateNodes() {
 	sc.UpdateMVPMatrix()
 }
 
+// TrackCamera -- a Group at the top-level named "TrackCamera"
+// will automatically track the camera (i.e., its Pose is copied).
+// Solids in that group can set their relative Pos etc to display
+// relative to the camera, to achieve "first person" effects.
+func (sc *Scene) TrackCamera() bool {
+	tci, err := sc.ChildByNameTry("TrackCamera", 0)
+	if err != nil {
+		return false
+	}
+	tc, ok := tci.(*Group)
+	if !ok {
+		return false
+	}
+	tc.TrackCamera(sc)
+	return true
+}
+
 // Render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
@@ -176,7 +193,7 @@ func (sc *Scene) Render() bool {
 	}
 	sc.SetFlag(true, ScUpdating)
 	sc.Camera.UpdateMatrix()
-	// sc.TrackCamera()
+	sc.TrackCamera()
 	sc.RenderImpl()
 	sc.SetFlag(false, ScUpdating)
 	return true

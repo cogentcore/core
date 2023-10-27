@@ -193,7 +193,7 @@ func (sc *Scene) Validate() error {
 
 // ScFlags has critical state information signaling when rendering,
 // styling etc need to be done
-type ScFlags int64 //enums:bitflag -trim-prefix Sc
+type ScFlags int64 //enums:bitflag
 
 const (
 	// ScUpdating means scene is in the process of updating:
@@ -226,7 +226,12 @@ func (sc *Scene) SetSize(sz image.Point) *Scene {
 }
 
 func (sc *Scene) Destroy() {
-	// todo: delete Phong, Frame
+	sc.Phong.Destroy()
+	if sc.Frame != nil {
+		sc.Frame.Destroy()
+		sc.Frame = nil
+		fmt.Println("Phong, Frame destroyed")
+	}
 }
 
 // ConfigFrameFromDrawer configures framebuffer for GPU rendering

@@ -2,36 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build notyet
-
 package main
 
 import (
-	"embed"
 	"image/color"
 	"log"
-	"math"
-	"time"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gi3d"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
+	"goki.dev/gi3d"
+	"goki.dev/gi3d/examples/assets"
+	"goki.dev/gi3d/gi3dv"
 	"goki.dev/girl/styles"
 	"goki.dev/vgpu/v2/vgpu"
 
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
 
-//go:embed ../assets/*.png ../assets/*.obj ../assets/*.mtl ../assets/*.blend
-var content embed.FS
-
+/*
 // Anim has control for animating
 type Anim struct {
 
@@ -139,11 +130,9 @@ func (an *Anim) Animate() {
 		an.Ang += an.Speed
 	}
 }
+*/
 
 func app() {
-	width := 1024
-	height := 768
-
 	// turn these on to see a traces of various stages of processing..
 	// ki.SignalTrace = true
 	// gi.EventTrace = true
@@ -152,57 +141,54 @@ func app() {
 	// gi.Update2DTrace = true
 	vgpu.Debug = true
 
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
-
 	gi.SetAppName("gi3d")
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
 
-	win := gi.NewMainWindow("gogi-gi3d-demo", "GoGi 3D Demo", width, height)
+	sc := gi.NewScene("gi3d-demo").SetTitle("GoGi 3D Demo")
 
-	vp := win.WinViewport2D()
-	updt := vp.UpdateStart()
+	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz).
+		Style(func(s *styles.Style) {
+			s.SetStretchMaxWidth()
+		})
 
-	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.Ex(1))
-
-	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
-	trow.SetStretchMaxWidth()
-
-	title := gi.NewLabel(trow, "title", `This is a demonstration of the
+	title := gi.NewLabel(trow, "title")
+	title.SetText(`This is a demonstration of the
 <a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
-	title.SetProp("white-space", styles.WhiteSpaceNormal) // wrap
-	title.SetProp("text-align", styles.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
-	title.SetProp("vertical-align", styles.AlignCenter)
-	title.SetProp("font-size", "x-large")
-	title.SetProp("line-height", 1.5)
-	title.SetStretchMax()
+	title.SetType(gi.LabelHeadlineSmall).
+		SetStretchMax().
+		Style(func(s *styles.Style) {
+			s.Text.WhiteSpace = styles.WhiteSpaceNormal
+			s.Text.Align = styles.AlignCenter
+			s.Text.AlignV = styles.AlignCenter
+			s.Font.Family = "Times New Roman, serif"
+			// s.Font.Size = units.Dp(24) // todo: "x-large"?
+			// s.Text.LineHeight = units.Em(1.5)
+		})
 
-	//////////////////////////////////////////
-	//    Scene
+	gi.NewSpace(sc, "scspc")
+	scrow := gi.NewLayout(sc, "scrow").SetLayout(gi.LayoutHoriz)
+	scrow.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
 
-	gi.NewSpace(mfr, "scspc")
-	scrow := gi.NewLayout(mfr, "scrow", gi.LayoutHoriz)
-	scrow.SetStretchMax()
+	s3 := gi3dv.NewScene3D(scrow, "scene")
+	se := &s3.Scene
 
-	// gi.NewLabel(scrow, "tmp", "This is test text")
-
-	scvw := gi3d.NewSceneView(scrow, "sceneview")
-	scvw.SetStretchMax()
-	scvw.Config()
-	sc := scvw.Scene()
 	// options - must be set here
 	// sc.MultiSample = 1
-	// sc.Wireframe = true
+	// se.Wireframe = true
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
-	gi3d.NewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
+	se.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
+	gi3d.NewAmbientLight(se, "ambient", 0.3, gi3d.DirectSun)
 
-	dir := gi3d.NewDirLight(sc, "dir", 1, gi3d.DirectSun)
+	se.Camera.Pose.Pos.Set(3, 5, 10)              // default position
+	se.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+
+	dir := gi3d.NewDirLight(se, "dir", 1, gi3d.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// point := gi3d.NewPointLight(sc, "point", 1, gi3d.DirectSun)
@@ -211,39 +197,49 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	// spot := gi3d.NewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	cbm := gi3d.NewBox(sc, "cube1", 1, 1, 1)
+	grtx := gi3d.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
+	// _ = grtx
+	// wdtx := gi3d.NewTextureFile(sc, "wood", "wood.png")
+
+	cbm := gi3d.NewBox(se, "cube1", 1, 1, 1)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rbgp := gi3d.NewGroup(sc, sc, "r-b-group")
+	rbgp := gi3d.NewGroup(se, "r-b-group")
 
-	// style sheet
-	var css = ki.Props{
-		".cube": ki.Props{
-			"shiny": 20,
-		},
-	}
-	sc.CSS = css
-
-	rcb := gi3d.NewSolid(sc, rbgp, "red-cube", cbm.Name())
-	rcb.Class = "cube"
+	rcb := gi3d.NewSolid(rbgp, "red-cube").SetMesh(cbm)
 	rcb.Pose.Pos.Set(-1, 0, 0)
-	rcb.SetProp("color", "red")
-	rcb.SetProp("shiny", 500) // note: this will be overridden by the css sheet
-	rcb.Mat.Color = colors.Red
+	rcb.Mat.SetColor(colors.Red).SetShiny(500)
 
-	bcb := gi3d.NewSolid(sc, rbgp, "blue-cube", cbm.Name())
-	bcb.Class = "cube"
+	bcb := gi3d.NewSolid(rbgp, "blue-cube").SetMesh(cbm)
 	bcb.Pose.Pos.Set(1, 1, 0)
-	bcb.Pose.Scale.X = 2
-	bcb.Mat.Color = colors.Blue
-	bcb.Mat.Shiny = 10       // note: this will be overridden by the css sheet
-	bcb.Mat.Reflective = 0.2 // not very shiny
+	bcb.Pose.Scale.X = 2 // somehow causing to not render
+	bcb.Mat.SetColor(colors.Blue).SetShiny(10).SetReflective(0.2)
 
-	gcb := gi3d.NewSolid(sc, sc, "green-trans-cube", cbm.Name())
+	gcb := gi3d.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.Color = color.RGBA{0, 255, 0, 128} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
-	gcb.Class = "cube"
+	gcb.Mat.Color = color.RGBA{0, 255, 0, 230} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 
+	floorp := gi3d.NewPlane(se, "floor-plane", 100, 100)
+	floor := gi3d.NewSolid(se, "floor").SetMesh(floorp)
+	floor.Pose.Pos.Set(0, -5, 0)
+	floor.Mat.Color = colors.Tan
+	// floor.Mat.Emissive.SetName("brown")
+	floor.Mat.Bright = 2 // .5 for wood / brown
+	floor.Mat.SetTexture(grtx)
+	floor.Mat.Tiling.Repeat.Set(40, 40)
+	// floor.SetDisabled() // not selectable
+
+	// sc.Config()
+	// sc.UpdateNodes()
+	if !se.Render() {
+		log.Println("no render")
+	}
+
+	gi.NewWindow(sc).Run().Wait()
+
+}
+
+/*
 	lnsm := gi3d.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
 	lns := gi3d.NewSolid(sc, sc, "hi-line", lnsm.Name())
 	lns.Pose.Pos.Set(0, 0, 1)
@@ -399,17 +395,4 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 		}
 	})
 
-	//	menu config etc
-
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu.AddAppMenu(win)
-	win.MainMenuUpdated()
-
-	vp.UpdateEndNoSig(updt)
-	anim.Start(sc, true) // start with animation running
-	win.StartEventLoop()
-}
+*/

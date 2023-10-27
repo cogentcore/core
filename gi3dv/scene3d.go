@@ -2,269 +2,181 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build notyet
-
 package gi3dv
+
+//go:generate goki generate
 
 import (
 	"fmt"
-	"strings"
+	"image"
+	"image/draw"
+	"log"
 
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi3d"
+	"goki.dev/girl/abilities"
+	"goki.dev/girl/styles"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 )
 
-// ConfigFrame configures framebuffer for GPU rendering,
-// using given gpu and device.
-// returns true if the frame was nil and thus configured.
-func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) bool {
-	wasConfig := false
-		wasConfig = true
-		goosi.TheApp.RunOnMain(func() {
-			sc.ConfigFrame(gpu, dev)
-		})
+// Scene3D contains a svg.SVG element.
+// The rendered version is cached for a given size.
+type Scene3D struct {
+	gi.WidgetBase
+
+	// Scene is the 3D Scene
+	Scene gi3d.Scene
+}
+
+func (se *Scene3D) CopyFieldsFrom(frm any) {
+	fr := frm.(*Scene3D)
+	se.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	se.Scene.CopyFrom(&fr.Scene)
+}
+
+func (se *Scene3D) OnInit() {
+	se.Scene.InitName(&se.Scene, "Scene")
+	se.Scene.Defaults()
+	se.HandleScene3DEvents()
+	se.Scene3DStyles()
+}
+
+func (se *Scene3D) Scene3DStyles() {
+
+	se.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Activatable, abilities.Slideable)
+		s.SetStretchMax()
+	})
+}
+
+func (se *Scene3D) HandleScene3DEvents() {
+	se.On(events.MouseDown, func(e events.Event) {
+		se.Scene.MouseDownEvent(e)
+	})
+	se.On(events.SlideMove, func(e events.Event) {
+		se.Scene.SlideMoveEvent(e)
+	})
+	se.On(events.Scroll, func(e events.Event) {
+		se.Scene.MouseScrollEvent(e.(*events.MouseScroll))
+	})
+	se.On(events.KeyChord, func(e events.Event) {
+		se.Scene.KeyChordEvent(e)
+	})
+	se.HandleWidgetEvents()
+}
+
+func (se *Scene3D) GetSize(sc *gi.Scene, iter int) {
+	se.InitLayout(sc)
+	zp := image.Point{}
+	if se.Scene.Geom.Size != zp {
+		se.GetSizeFromWH(float32(se.Scene.Geom.Size.X), float32(se.Scene.Geom.Size.Y))
 	} else {
+		se.GetSizeFromWH(640, 480)
 	}
-	return wasConfig
 }
 
-/*
-// NavEvents handles standard viewer navigation events
-func (sc *Scene) NavEvents() {
-	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
-		if ssc.IsDragging() {
-			cdist := mat32.Max(ssc.Camera.DistTo(ssc.Camera.Target), 1.0)
-			orbDel := 0.025 * cdist
-			panDel := 0.001 * cdist
-
-			if !ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Push(cursor.HandOpen)
-				ssc.SetDragCursor = true
-			}
-			del := me.Where.Sub(me.From)
-			dx := float32(del.X)
-			dy := float32(del.Y)
-			switch {
-			case key.HasAllModifierBits(me.Modifiers, key.Shift):
-				ssc.Camera.Pan(dx*panDel, -dy*panDel)
-			case key.HasAllModifierBits(me.Modifiers, key.Control):
-				ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
-			case key.HasAllModifierBits(me.Modifiers, key.Alt):
-				ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-			default:
-				if mat32.Abs(dx) > mat32.Abs(dy) {
-					dy = 0
-				} else {
-					dx = 0
-				}
-				ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-			}
-			ssc.UpdateSig()
-		} else {
-			if ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-				ssc.SetDragCursor = false
-			}
-		}
-	})
-	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	me := d.(*mouse.MoveEvent)
-	// 	me.SetProcessed()
-	// 	ssc := recv.Embed(TypeScene).(*Scene)
-	// 	orbDel := float32(.2)
-	// 	panDel := float32(.05)
-	// 	del := me.Where.Sub(me.From)
-	// 	dx := float32(del.X)
-	// 	dy := float32(del.Y)
-	// 	switch {
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Shift):
-	// 		ssc.Camera.Pan(dx*panDel, -dy*panDel)
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Control):
-	// 		ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Alt):
-	// 		ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-	// 	default:
-	// 		if mat32.Abs(dx) > mat32.Abs(dy) {
-	// 			dy = 0
-	// 		} else {
-	// 			dx = 0
-	// 		}
-	// 		ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-	// 	}
-	// 	ssc.UpdateSig()
-	// })
-	sc.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		me := d.(*mouse.ScrollEvent)
-		me.SetProcessed()
-		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-			ssc.SetDragCursor = false
-		}
-		pt := me.Where.Sub(sc.ObjBBox.Min)
-		sz := ssc.Geom.Size
-		cdist := mat32.Max(ssc.Camera.DistTo(ssc.Camera.Target), 1.0)
-		zoom := float32(me.NonZeroDelta(false))
-		zoomDel := float32(.001) * cdist
-		switch {
-		case key.HasAllModifierBits(me.Modifiers, key.Alt):
-			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
-		default:
-			ssc.Camera.ZoomTo(pt, sz, zoom*zoomDel)
-		}
-		ssc.UpdateSig()
-	})
-	sc.ConnectEvent(oswin.MouseEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		me := d.(*mouse.Event)
-		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
-			ssc.SetDragCursor = false
-		}
-		if me.Action != mouse.Press {
-			return
-		}
-		if !ssc.IsDisabled() && !ssc.HasFocus() {
-			ssc.GrabFocus()
-		}
-		// if ssc.CurManipPt == nil {
-		ssc.SetSel(nil) // clear any selection at this point
-		// }
-	})
-	sc.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		ssc := recv.Embed(TypeScene).(*Scene)
-		if ssc.NoNav {
-			return
-		}
-		kt := d.(*key.ChordEvent)
-		ssc.NavKeyEvents(kt)
-	})
+func (se *Scene3D) ConfigWidget(sc *gi.Scene) {
+	se.Sc = sc
+	se.ConfigFrame(sc)
 }
-*/
 
-// NavKeyEvents handles standard viewer keyboard navigation events
-func (sc *Scene) NavKeyEvents(kt events.Event) {
-	ch := string(kt.KeyChord())
-	// fmt.Printf(ch)
-	orbDeg := float32(5)
-	panDel := float32(.2)
-	zoomPct := float32(.05)
-	switch ch {
-	case "UpArrow":
-		sc.Camera.Orbit(0, orbDeg)
-		kt.SetHandled()
-	case "Shift+UpArrow":
-		sc.Camera.Pan(0, panDel)
-		kt.SetHandled()
-	case "Control+UpArrow":
-		sc.Camera.PanAxis(0, panDel)
-		kt.SetHandled()
-	case "Alt+UpArrow":
-		sc.Camera.PanTarget(0, panDel, 0)
-		kt.SetHandled()
-	case "DownArrow":
-		sc.Camera.Orbit(0, -orbDeg)
-		kt.SetHandled()
-	case "Shift+DownArrow":
-		sc.Camera.Pan(0, -panDel)
-		kt.SetHandled()
-	case "Control+DownArrow":
-		sc.Camera.PanAxis(0, -panDel)
-		kt.SetHandled()
-	case "Alt+DownArrow":
-		sc.Camera.PanTarget(0, -panDel, 0)
-		kt.SetHandled()
-	case "LeftArrow":
-		sc.Camera.Orbit(orbDeg, 0)
-		kt.SetHandled()
-	case "Shift+LeftArrow":
-		sc.Camera.Pan(-panDel, 0)
-		kt.SetHandled()
-	case "Control+LeftArrow":
-		sc.Camera.PanAxis(-panDel, 0)
-		kt.SetHandled()
-	case "Alt+LeftArrow":
-		sc.Camera.PanTarget(-panDel, 0, 0)
-		kt.SetHandled()
-	case "RightArrow":
-		sc.Camera.Orbit(-orbDeg, 0)
-		kt.SetHandled()
-	case "Shift+RightArrow":
-		sc.Camera.Pan(panDel, 0)
-		kt.SetHandled()
-	case "Control+RightArrow":
-		sc.Camera.PanAxis(panDel, 0)
-		kt.SetHandled()
-	case "Alt+RightArrow":
-		sc.Camera.PanTarget(panDel, 0, 0)
-		kt.SetHandled()
-	case "Alt++", "Alt+=":
-		sc.Camera.PanTarget(0, 0, panDel)
-		kt.SetHandled()
-	case "Alt+-", "Alt+_":
-		sc.Camera.PanTarget(0, 0, -panDel)
-		kt.SetHandled()
-	case "+", "=", "Shift++":
-		sc.Camera.Zoom(-zoomPct)
-		kt.SetHandled()
-	case "-", "_", "Shift+_":
-		sc.Camera.Zoom(zoomPct)
-		kt.SetHandled()
-	case " ", "Escape":
-		err := sc.SetCamera("default")
-		if err != nil {
-			sc.Camera.DefaultPose()
-		}
-		kt.SetHandled()
-	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
-		err := sc.SetCamera(ch)
-		if err != nil {
-			sc.SaveCamera(ch)
-			fmt.Printf("Saved camera to: %v\n", ch)
-		} else {
-			fmt.Printf("Restored camera from: %v\n", ch)
-		}
-		kt.SetHandled()
-	case "Control+0", "Control+1", "Control+2", "Control+3", "Control+4", "Control+5", "Control+6", "Control+7", "Control+8", "Control+9":
-		cnm := strings.TrimPrefix(ch, "Control+")
-		sc.SaveCamera(cnm)
-		fmt.Printf("Saved camera to: %v\n", cnm)
-		kt.SetHandled()
-	case "t":
-		kt.SetHandled()
-		obj := sc.Child(0).(*Solid)
-		fmt.Printf("updated obj: %v\n", obj.Path())
-		// obj.UpdateSig()
+// ConfigFrame configures the framebuffer for GPU rendering,
+// using the RenderWin GPU and Device.
+func (se *Scene3D) ConfigFrame(sc *gi.Scene) {
+	zp := image.Point{}
+	sz := se.LayState.Alloc.Size.ToPoint()
+	if sz == zp {
 		return
 	}
-	// sc.UpdateSig()
+	se.Scene.Geom.Size = sz
+	fmt.Println("sz", sz)
+
+	doConfig := false
+	if se.Scene.Frame != nil {
+		cursz := se.Scene.Frame.Format.Size
+		if cursz == sz {
+			fmt.Println("cursz == sz")
+			return
+		}
+	} else {
+		doConfig = true
+	}
+
+	win := sc.EventMgr.RenderWin()
+	if win == nil {
+		return
+	}
+	drw := win.GoosiWin.Drawer()
+	goosi.TheApp.RunOnMain(func() {
+		se.Scene.ConfigFrameFromDrawer(drw)
+		if doConfig {
+			se.Scene.Config()
+		}
+	})
 }
 
-// TrackCamera -- a Group at the top-level named "TrackCamera"
-// will automatically track the camera (i.e., its Pose is copied).
-// Solids in that group can set their relative Pos etc to display
-// relative to the camera, to achieve "first person" effects.
-func (sc *Scene) TrackCamera() bool {
-	tci, err := sc.ChildByNameTry("TrackCamera", 0)
+func (se *Scene3D) ApplyStyle(sc *gi.Scene) {
+	se.StyMu.Lock()
+	defer se.StyMu.Unlock()
+
+	se.ApplyStyleWidget(sc)
+}
+
+func (se *Scene3D) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	se.DoLayoutBase(sc, parBBox, iter)
+	return se.DoLayoutChildren(sc, iter)
+}
+
+func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
+	if se.Scene.Frame == nil {
+		return
+	}
+	pos := se.LayState.Alloc.Pos.ToPointCeil()
+	max := pos.Add(se.LayState.Alloc.Size.ToPointCeil())
+	r := image.Rectangle{Min: pos, Max: max}
+	sp := image.Point{}
+	if se.Par != nil { // use parents children bbox to determine where we can draw
+		pni, _ := gi.AsWidget(se.Par)
+		pbb := pni.ChildrenBBoxes(sc)
+		nr := r.Intersect(pbb)
+		sp = nr.Min.Sub(r.Min)
+		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
+			fmt.Printf("Scene3D aberrant sp: %v\n", sp)
+			return
+		}
+		r = nr
+	}
+	img, err := se.Scene.Image()
 	if err != nil {
-		return false
+		log.Println("frame image err:", err)
+		return
 	}
-	tc, ok := tci.(*Group)
-	if !ok {
-		return false
-	}
-	tc.TrackCamera(sc)
-	return true
+	// fmt.Println("r", r, "bnd", img.Bounds())
+	draw.Draw(sc.Pixels, r, img, sp, draw.Over)
 }
 
+// Render3D renders the Frame Image
+func (se *Scene3D) Render3D(sc *gi.Scene) {
+	se.ConfigFrame(sc)
+	if se.Scene.Frame == nil {
+		return
+	}
+	se.Scene.UpdateNodes()
+	se.Scene.Render()
+}
+
+func (se *Scene3D) Render(sc *gi.Scene) {
+	if se.PushBounds(sc) {
+		se.RenderChildren(sc)
+		se.Render3D(sc)
+		se.DrawIntoScene(sc)
+		se.PopBounds(sc)
+	}
+}
+
+// Direct render to Drawer frame
+// drw := sc.Win.OSWin.Drawer()
+// drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
+// sc.Win.DirDraws.SetWinBBox(sc.DirUpIdx, sc.WinBBox)
+// drw.SyncImages()
