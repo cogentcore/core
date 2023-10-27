@@ -240,7 +240,7 @@ func (c *Complete) On(etype events.Types, fun func(e events.Event)) {
 
 // KeyInput is the opportunity for completion to act on specific key inputs
 // The return value indicates whether the caller should set the event as handled
-func (c *Complete) KeyInput(kf KeyFuns) bool {
+func (c *Complete) KeyInput(kf keyfun.Funs) bool {
 	count := len(c.Completions)
 	switch kf {
 	case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items

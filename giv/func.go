@@ -57,7 +57,7 @@ type FuncConfig struct { //gti:add
 	// Shortcut is the keyboard shortcut that triggers the function button
 	Shortcut key.Chord
 	// ShortcutKey is the keyboard shortcut function that triggers the function button
-	ShortcutKey gi.KeyFuns
+	ShortcutKey keyfun.Funs
 	// UpdateMethod, when specified on a method, is the name of a method on the same
 	// type this method is on to call with the function button whenever it is updated.
 	// See [FuncConfig.UpdateFunc] for more information.

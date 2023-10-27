@@ -559,7 +559,7 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 // SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
 // If popup is true, then only items on popup are in scope, otherwise items
 // NOT on popup are in scope (if no popup, everything is in scope).
-// func (em *EventMgr) SendKeyFunEvent(kf KeyFuns, popup bool) {
+// func (em *EventMgr) SendKeyFunEvent(kf keyfun.Funs, popup bool) {
 // 	chord := ActiveKeyMap.ChordForFun(kf)
 // 	if chord == "" {
 // 		return
