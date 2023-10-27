@@ -10,6 +10,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"

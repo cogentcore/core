@@ -204,9 +204,9 @@ func (km *Map) ShortcutForFun(kf Funs) key.Chord {
 	return km.ChordForFun(kf).OSShortcut()
 }
 
-// ShortcutForFun returns OS-specific formatted shortcut for first key chord
+// ShortcutFor returns OS-specific formatted shortcut for first key chord
 // trigger for given KeyFun in the current active map
-func ShortcutForFun(kf Funs) key.Chord {
+func ShortcutFor(kf Funs) key.Chord {
 	return ActiveMap.ShortcutForFun(kf)
 }
 

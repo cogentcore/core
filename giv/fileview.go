@@ -18,6 +18,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"

@@ -13,6 +13,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -357,6 +358,6 @@ func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
 
 // SetShortcut sets the shortcut of the button from the given [keyfun.Funs]
 func (fb *FuncButton) SetShortcutKey(kf keyfun.Funs) *FuncButton {
-	fb.SetShortcut(gi.ShortcutForFun(kf))
+	fb.SetShortcut(keyfun.ShortcutFor(kf))
 	return fb
 }

@@ -19,6 +19,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"

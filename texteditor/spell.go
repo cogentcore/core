@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode"
 
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/goosi/events"
 	"goki.dev/pi/v2/filecat"

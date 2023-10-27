@@ -14,6 +14,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"

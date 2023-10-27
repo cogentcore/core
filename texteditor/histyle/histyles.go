@@ -15,6 +15,7 @@ import (
 	"sort"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/goosi"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"

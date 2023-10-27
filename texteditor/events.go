@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
