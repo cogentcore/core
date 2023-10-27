@@ -134,7 +134,7 @@ func (dv *DiffView) DiffViewStyles() {
 		s.SetStretchMax()
 	})
 	dv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(dv.This()) {
+		switch w.PathFrom(dv) {
 		case "text-a-lay", "text-b-lay":
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMax()

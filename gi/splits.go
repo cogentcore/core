@@ -463,7 +463,7 @@ func (sr *Splitter) SplitterStyles() {
 		}
 	})
 	sr.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sr.This()) {
+		switch w.PathFrom(sr) {
 		case "parts/icon":
 			// w.Style(func(s *styles.Style) {
 			// 	s.MaxWidth.SetEm(1)

@@ -142,7 +142,7 @@ func (tv *TreeView) TreeViewStyles() {
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(tv.This()) {
+		switch w.PathFrom(tv) {
 		case "parts":
 			parts := w.(*gi.Layout)
 			parts.Style(func(s *styles.Style) {

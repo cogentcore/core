@@ -39,7 +39,7 @@ func (av *ArgView) OnInit() {
 		s.MaxHeight.SetDp(-1)
 	})
 	av.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(av.This()) {
+		switch w.PathFrom(av) {
 		case "title":
 			title := w.(*gi.Label)
 			title.Type = gi.LabelTitleLarge

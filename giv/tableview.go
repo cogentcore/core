@@ -86,7 +86,7 @@ func (tv *TableView) TableViewInit() {
 		s.SetStretchMax()
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(tv.This()) {
+		switch w.PathFrom(tv) {
 		case "frame": // slice frame
 			sf := w.(*gi.Frame)
 			sf.Lay = gi.LayoutVert
@@ -140,7 +140,7 @@ func (tv *TableView) TableViewInit() {
 			})
 
 		}
-		if w.Parent().PathFrom(tv.This()) == "frame/grid-lay/grid" {
+		if w.Parent().PathFrom(tv) == "frame/grid-lay/grid" {
 			if strings.HasPrefix(w.Name(), "index-") {
 				w.Style(func(s *styles.Style) {
 					s.MinWidth.SetEm(1.5)

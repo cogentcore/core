@@ -92,7 +92,7 @@ func (sp *Spinner) SpinnerStyles() {
 		s.StateLayer = 0
 	})
 	sp.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sp.This()) {
+		switch w.PathFrom(sp) {
 		case "parts/parts":
 			w.Style(func(s *styles.Style) {
 				s.AlignV = styles.AlignMiddle

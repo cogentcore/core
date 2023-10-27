@@ -73,7 +73,7 @@ func (ts *Tabs) TabsStyles() {
 		s.MaxHeight.SetDp(-1)
 	})
 	ts.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(ts.This()) {
+		switch w.PathFrom(ts) {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
@@ -554,7 +554,7 @@ func (tb *Tab) TabStyles() {
 		// }
 	})
 	tb.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(tb.This()) {
+		switch w.PathFrom(tb) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!

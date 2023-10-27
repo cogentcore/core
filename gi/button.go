@@ -178,7 +178,7 @@ func (bt *Button) ButtonStyles() {
 		}
 	})
 	bt.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(bt.This()) {
+		switch w.PathFrom(bt) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Width.SetEm(1.125)
