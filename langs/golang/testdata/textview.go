@@ -2509,20 +2509,20 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 
 // MakeContextMenu builds the textview context menu
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
-	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy},
+	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: keyfun.Copy},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			txf := recv.Embed(KiT_TextView).(*TextView)
 			txf.Copy(true)
 		})
 	ac.SetActiveState(tv.HasSelection())
 	if !tv.IsInactive() {
-		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
+		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: keyfun.Cut},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Cut()
 			})
 		ac.SetActiveState(tv.HasSelection())
-		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
+		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: keyfun.Paste},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Paste()
@@ -2617,9 +2617,9 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		return
 	}
 
-	kf := gi.KeyFun(kt.Chord())
+	kf := keyfun.(kt.Chord())
 	switch kf {
-	case gi.KeyFunMoveRight:
+	case keyfun.MoveRight:
 		tp := tv.CursorPos
 		if tv.IsWordEnd(tp) {
 			region := tv.WordBefore(tp)
@@ -2646,18 +2646,18 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
 		}
-	case gi.KeyFunEnter:
+	case keyfun.Enter:
 		cp := tv.CursorPos
 		cp.Ln--
 		cp.Ch = tv.Buf.LineLen(cp.Ln)
 		region := tv.WordBefore(cp)
 		tv.SpellCheck(region)
-	case gi.KeyFunFocusNext:
+	case keyfun.FocusNext:
 		cp := tv.CursorPos
 		cp.Ch-- // we are one past the end of word
 		region := tv.WordBefore(cp)
 		tv.SpellCheck(region)
-	case gi.KeyFunNil:
+	case keyfun.Nil:
 		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) && kt.Rune != '\'' { // contractions!
 			cp := tv.CursorPos
 			cp.Ch-- // we are one past the end of word
@@ -3885,7 +3885,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TextView KeyInput: %v\n", tv.PathUnique())
 	}
-	kf := gi.KeyFun(kt.Chord())
+	kf := keyfun.(kt.Chord())
 	win := tv.ParentWindow()
 	tv.ClearScopelights()
 
@@ -3922,11 +3922,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.lastAutoInsert = 0
 	}
 
-	if kf != gi.KeyFunRecenter { // always start at centering
+	if kf != keyfun.Recenter { // always start at centering
 		tv.lastRecenter = 0
 	}
 
-	if kf != gi.KeyFunUndo && tv.HasFlag(int(TextViewLastWasUndo)) {
+	if kf != keyfun.Undo && tv.HasFlag(int(TextViewLastWasUndo)) {
 		tv.Buf.EmacsUndoSave()
 		tv.ClearFlag(int(TextViewLastWasUndo))
 	}
@@ -3935,7 +3935,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	// first all the keys that work for both inactive and active
 	switch kf {
-	case gi.KeyFunMoveRight:
+	case keyfun.MoveRight:
 		tv.ISearchCancel() // note: may need to generalize to cancel more stuff
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
@@ -3943,132 +3943,132 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
 		tv.ISpellKeyInput(kt)
-	case gi.KeyFunWordRight:
+	case keyfun.WordRight:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForwardWord(1)
 		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
-	case gi.KeyFunMoveLeft:
+	case keyfun.MoveLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
 		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
-	case gi.KeyFunWordLeft:
+	case keyfun.WordLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackwardWord(1)
 		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
-	case gi.KeyFunMoveUp:
+	case keyfun.MoveUp:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorUp(1)
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunMoveDown:
+	case keyfun.MoveDown:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunPageUp:
+	case keyfun.PageUp:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageUp(1)
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunPageDown:
+	case keyfun.PageDown:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunHome:
+	case keyfun.Home:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartLine()
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunEnd:
+	case keyfun.End:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndLine()
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunDocHome:
+	case keyfun.DocHome:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartDoc()
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunDocEnd:
+	case keyfun.DocEnd:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndDoc()
 		tv.ShiftSelectExtend(kt)
-	case gi.KeyFunRecenter:
+	case keyfun.Recenter:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ReMarkup()
 		tv.CursorRecenter()
-	case gi.KeyFunSelectMode:
+	case keyfun.SelectMode:
 		cancelAll()
 		kt.SetProcessed()
 		tv.SelectModeToggle()
-	case gi.KeyFunCancelSelect:
+	case keyfun.CancelSelect:
 		tv.CancelComplete()
 		kt.SetProcessed()
 		tv.EscPressed() // generic cancel
-	case gi.KeyFunSelectAll:
+	case keyfun.SelectAll:
 		cancelAll()
 		kt.SetProcessed()
 		tv.SelectAll()
-	case gi.KeyFunCopy:
+	case keyfun.Copy:
 		cancelAll()
 		kt.SetProcessed()
 		tv.Copy(true) // reset
-	case gi.KeyFunSearch:
+	case keyfun.Search:
 		kt.SetProcessed()
 		tv.QReplaceCancel()
 		tv.CancelComplete()
 		tv.ISearchStart()
-	case gi.KeyFunReplace:
+	case keyfun.Replace:
 		kt.SetProcessed()
 		tv.CancelComplete()
 		tv.ISearchCancel()
 		tv.QReplacePrompt()
-	case gi.KeyFunAbort:
+	case keyfun.Abort:
 		kt.SetProcessed()
 		tv.CancelComplete()
 		tv.EscPressed()
-	case gi.KeyFunJump:
+	case keyfun.Jump:
 		kt.SetProcessed()
 		cancelAll()
 		tv.JumpToLinePrompt()
-	case gi.KeyFunHistPrev:
+	case keyfun.HistPrev:
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorToHistPrev()
-	case gi.KeyFunHistNext:
+	case keyfun.HistNext:
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorToHistNext()
 	}
 	if tv.IsInactive() {
 		switch {
-		case kf == gi.KeyFunFocusNext: // tab
+		case kf == keyfun.FocusNext: // tab
 			kt.SetProcessed()
 			tv.CursorNextLink(true)
-		case kf == gi.KeyFunFocusPrev: // tab
+		case kf == keyfun.FocusPrev: // tab
 			kt.SetProcessed()
 			tv.CursorPrevLink(true)
-		case kt.Rune == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
+		case kt.Rune == ' ' || kf == keyfun.Accept || kf == keyfun.Enter:
 			kt.SetProcessed()
 			tv.CursorPos.Ch--
 			tv.CursorNextLink(true) // todo: cursorcurlink
@@ -4081,12 +4081,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	switch kf {
-	// case gi.KeyFunAccept: // ctrl+enter
+	// case keyfun.Accept: // ctrl+enter
 	// 	tv.ISearchCancel()
 	// 	tv.QReplaceCancel()
 	// 	kt.SetProcessed()
 	// 	tv.FocusNext()
-	case gi.KeyFunBackspace:
+	case keyfun.Backspace:
 		// todo: previous item in qreplace
 		if tv.ISearch.On {
 			tv.ISearchBackspace()
@@ -4095,45 +4095,45 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.CursorBackspace(1)
 			tv.OfferComplete()
 		}
-	case gi.KeyFunKill:
+	case keyfun.Kill:
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorKill()
-	case gi.KeyFunDelete:
+	case keyfun.Delete:
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorDelete(1)
-	case gi.KeyFunBackspaceWord:
+	case keyfun.BackspaceWord:
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorBackspaceWord(1)
 		tv.OfferComplete()
-	case gi.KeyFunDeleteWord:
+	case keyfun.DeleteWord:
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorDeleteWord(1)
-	case gi.KeyFunCut:
+	case keyfun.Cut:
 		cancelAll()
 		kt.SetProcessed()
 		tv.Cut()
-	case gi.KeyFunPaste:
+	case keyfun.Paste:
 		cancelAll()
 		kt.SetProcessed()
 		tv.Paste()
-	case gi.KeyFunPasteHist:
+	case keyfun.PasteHist:
 		cancelAll()
 		kt.SetProcessed()
 		tv.PasteHist()
-	case gi.KeyFunUndo:
+	case keyfun.Undo:
 		cancelAll()
 		kt.SetProcessed()
 		tv.Undo()
 		tv.SetFlag(int(TextViewLastWasUndo))
-	case gi.KeyFunRedo:
+	case keyfun.Redo:
 		cancelAll()
 		kt.SetProcessed()
 		tv.Redo()
-	case gi.KeyFunComplete:
+	case keyfun.Complete:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		if tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
@@ -4143,11 +4143,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.OfferComplete()
 			tv.ForceComplete = false // ROR: I definitely don't like this option!  want it just when I want it!
 		}
-	case gi.KeyFunLookup:
+	case keyfun.Lookup:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.Lookup()
-	case gi.KeyFunEnter:
+	case keyfun.Enter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
@@ -4166,7 +4166,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.ISpellKeyInput(kt)
 		}
 		// todo: KeFunFocusPrev -- unindent
-	case gi.KeyFunFocusNext: // tab
+	case keyfun.FocusNext: // tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
@@ -4185,7 +4185,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.TopUpdateEnd(wupdt)
 			tv.ISpellKeyInput(kt)
 		}
-	case gi.KeyFunNil:
+	case keyfun.Nil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				tv.KeyInputInsertRune(kt)
