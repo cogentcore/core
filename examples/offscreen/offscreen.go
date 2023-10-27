@@ -19,6 +19,20 @@ import (
 )
 
 func main() {
+	// if err := vgpu.InitNoDisplay(); err != nil {
+	// 	return
+	// }
+	// gp := vgpu.NewGPU()
+	// gp.AddInstanceExt("VK_KHR_surface", "VK_EXT_metal_surface")
+	// if err := gp.Config("offscreen", nil); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+	// dev, err := vgpu.NewGraphicsDevice(gp)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 	gp, dev, err := vgpu.NoDisplayGPU("offscreen")
 	if err != nil {
 		log.Println(err)
@@ -36,7 +50,7 @@ func main() {
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
 	gi3d.NewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
-	sc.Camera.Pose.Pos.Set(0, 5, 10)              // default position
+	sc.Camera.Pose.Pos.Set(3, 5, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	dir := gi3d.NewDirLight(sc, "dir", 1, gi3d.DirectSun)
@@ -59,19 +73,16 @@ func main() {
 
 	rcb := gi3d.NewSolid(rbgp, "red-cube").SetMesh(cbm)
 	rcb.Pose.Pos.Set(-1, 0, 0)
-	rcb.Mat.Color = colors.Red
-	rcb.Mat.Shiny = 500
+	rcb.Mat.SetColor(colors.Red).SetShiny(500)
 
 	bcb := gi3d.NewSolid(rbgp, "blue-cube").SetMesh(cbm)
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2 // somehow causing to not render
-	bcb.Mat.Color = colors.Blue
-	bcb.Mat.Shiny = 10
-	// bcb.Mat.Reflective = 0.2
+	bcb.Mat.SetColor(colors.Blue).SetShiny(10).SetReflective(0.2)
 
 	gcb := gi3d.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.Color = color.RGBA{0, 255, 0, 128} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	gcb.Mat.Color = color.RGBA{0, 255, 0, 230} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 
 	floorp := gi3d.NewPlane(sc, "floor-plane", 100, 100)
 	floor := gi3d.NewSolid(sc, "floor").SetMesh(floorp)
