@@ -317,7 +317,7 @@ type WidgetBase struct {
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlag {
-	return WidgetFlagsN
+	return WidgetFlags(wb.Flags)
 }
 
 func (wb *WidgetBase) OnChildAdded(child ki.Ki) {

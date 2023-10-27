@@ -1087,10 +1087,11 @@ func (vv *BitFlagValue) EnumValue() enums.BitFlag {
 		slog.Error("giv.BitFlagView: type must be enums.BitFlag")
 		return nil
 	}
-	if k, ok := vv.Owner.(ki.Ki); ok {
-		bf := k.FlagType()
-		bf = ev
-		return bf
+	// special case to use [ki.Ki.FlagType] if we are the Flags field
+	if vv.Field != nil && vv.Field.Name == "Flags" {
+		if k, ok := vv.Owner.(ki.Ki); ok {
+			return k.FlagType()
+		}
 	}
 	return ev
 }
@@ -1107,8 +1108,7 @@ func (vv *BitFlagValue) UpdateWidget() {
 		return
 	}
 	sw := vv.Widget.(*gi.Switches)
-	npv := laser.NonPtrValue(vv.Value)
-	sw.UpdateFromBitFlag(npv.Interface().(enums.BitFlag))
+	sw.UpdateFromBitFlag(vv.EnumValue())
 }
 
 func (vv *BitFlagValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
