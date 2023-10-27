@@ -50,7 +50,7 @@ func (m *Menu) SetButton(bt *Button, opts ActOpts, fun func(bt *Button)) {
 	bt.Icon = icons.Icon(opts.Icon)
 	bt.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != keyfun.Nil {
-		bt.Shortcut = ShortcutForFun(opts.ShortcutKey)
+		bt.Shortcut = ShortcutFor(opts.ShortcutKey)
 		// todo: need a flag for menu-based?
 	}
 	bt.Data = opts.Data
@@ -223,7 +223,7 @@ func (m *Menu) AddCopyCutPaste(win *RenderWin) {
 // enabled by clipboard having something in it.
 func (m *Menu) AddCopyCutPasteDupe(win *RenderWin) {
 	m.AddCopyCutPaste(win)
-	dpsc := ActiveKeyMap.ChordForFun(keyfun.Duplicate)
+	dpsc := ActiveKeyMap.ChordFor(keyfun.Duplicate)
 	m.AddButton(ActOpts{Label: "Duplicate", Shortcut: dpsc},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.EventMgr.Sendkeyfun.Event(keyfun.Duplicate, false) // false = ignore popups -- don't send to menu

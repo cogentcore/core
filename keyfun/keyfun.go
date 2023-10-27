@@ -167,8 +167,8 @@ func Of(chord key.Chord) Funs {
 	return kf
 }
 
-// KeyMapItem records one element of the key map -- used for organizing the map.
-type KeyMapItem struct {
+// MapItem records one element of the key map -- used for organizing the map.
+type MapItem struct {
 
 	// the key chord that activates a function
 	Key key.Chord
@@ -178,18 +178,18 @@ type KeyMapItem struct {
 }
 
 // ToSlice copies this keymap to a slice of KeyMapItem's
-func (km *Map) ToSlice() []KeyMapItem {
-	kms := make([]KeyMapItem, len(*km))
+func (km *Map) ToSlice() []MapItem {
+	kms := make([]MapItem, len(*km))
 	idx := 0
 	for key, fun := range *km {
-		kms[idx] = KeyMapItem{key, fun}
+		kms[idx] = MapItem{key, fun}
 		idx++
 	}
 	return kms
 }
 
 // ChordForFun returns first key chord trigger for given KeyFun in map
-func (km *Map) ChordForFun(kf Funs) key.Chord {
+func (km *Map) ChordFor(kf Funs) key.Chord {
 	for key, fun := range *km {
 		if fun == kf {
 			return key
@@ -201,19 +201,19 @@ func (km *Map) ChordForFun(kf Funs) key.Chord {
 // ChordForFun returns first key chord trigger for given KeyFun in the
 // current active map
 func ChordFor(kf Funs) key.Chord {
-	return ActiveMap.ChordForFun(kf)
+	return ActiveMap.ChordFor(kf)
 }
 
 // ShortcutForFun returns OS-specific formatted shortcut for first key chord
 // trigger for given KeyFun in map
-func (km *Map) ShortcutForFun(kf Funs) key.Chord {
-	return km.ChordForFun(kf).OSShortcut()
+func (km *Map) ShortcutFor(kf Funs) key.Chord {
+	return km.ChordFor(kf).OSShortcut()
 }
 
 // ShortcutFor returns OS-specific formatted shortcut for first key chord
 // trigger for given KeyFun in the current active map
 func ShortcutFor(kf Funs) key.Chord {
-	return ActiveMap.ShortcutForFun(kf)
+	return ActiveMap.ShortcutFor(kf)
 }
 
 // Update ensures that the given keymap has at least one entry for every
@@ -227,7 +227,7 @@ func (km *Map) Update(kmName MapName) {
 		}
 	}
 	kms := km.ToSlice()
-	addkm := make([]KeyMapItem, 0)
+	addkm := make([]MapItem, 0)
 
 	sort.Slice(kms, func(i, j int) bool {
 		return kms[i].Fun < kms[j].Fun
@@ -244,7 +244,7 @@ func (km *Map) Update(kmName MapName) {
 					s := mi.String()
 					s = strings.TrimPrefix(s, "KeyFun")
 					s = "- Not Set - " + s
-					nski := KeyMapItem{Key: key.Chord(s), Fun: mi}
+					nski := MapItem{Key: key.Chord(s), Fun: mi}
 					addkm = append(addkm, nski)
 				}
 			}
@@ -307,9 +307,9 @@ func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 	return nil, -1, false
 }
 
-// PrefsKeyMapsFileName is the name of the preferences file in GoGi prefs
-// directory for saving / loading the default AvailKeyMaps key maps list
-var PrefsKeyMapsFileName = "key_maps_prefs.json"
+// PrefsMapsFileName is the name of the preferences file in GoGi prefs
+// directory for saving / loading the default AvailMaps key maps list
+var PrefsMapsFileName = "key_maps_prefs.json"
 
 // OpenJSON opens keymaps from a JSON-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
@@ -345,7 +345,7 @@ func (km *Maps) SaveJSON(filename string) error { //gti:add
 // This is called automatically, so calling it manually should not be necessary in most cases.
 func (km *Maps) OpenPrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
+	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
 	return km.OpenJSON(pnm)
 }
@@ -355,7 +355,7 @@ func (km *Maps) OpenPrefs() error { //gti:add
 // (should be if you're using custom keymaps)
 func (km *Maps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
+	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
 	return km.SaveJSON(pnm)
 }

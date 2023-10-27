@@ -561,7 +561,7 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 // If popup is true, then only items on popup are in scope, otherwise items
 // NOT on popup are in scope (if no popup, everything is in scope).
 // func (em *EventMgr) Sendkeyfun.Event(kf keyfun.Funs, popup bool) {
-// 	chord := ActiveKeyMap.ChordForFun(kf)
+// 	chord := ActiveKeyMap.ChordFor(kf)
 // 	if chord == "" {
 // 		return
 // 	}

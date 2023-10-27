@@ -67,8 +67,8 @@ func app() {
 	trow := gi.NewLayout(sc, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 
-	giedsc := keyfun.ActiveMap.ChordForFun(keyfun.GoGiEditor)
-	prsc := keyfun.ActiveMap.ChordForFun(keyfun.Prefs)
+	giedsc := keyfun.ActiveMap.ChordFor(keyfun.GoGiEditor)
+	prsc := keyfun.ActiveMap.ChordFor(keyfun.Prefs)
 
 	gi.NewLabel(trow, "title").SetText(
 		`This is a <b>demonstration</b> of the
