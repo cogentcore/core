@@ -514,7 +514,12 @@ var HandleType = gti.AddType(&gti.Type{
 	IDName:     "handle",
 	Doc:        "Handle represents a draggable handle that can be\nused to control the size of an element.",
 	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the handle slides (opposite of the dimension it is longest on)", Directives: gti.Directives{}, Tag: ""}},
+		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -538,6 +543,31 @@ func (t *Handle) KiType() *gti.Type {
 // New returns a new [*Handle] value
 func (t *Handle) New() ki.Ki {
 	return &Handle{}
+}
+
+// SetDim sets the [Handle.Dim]:
+// dimension along which the handle slides (opposite of the dimension it is longest on)
+func (t *Handle) SetDim(v mat32.Dims) *Handle {
+	t.Dim = v
+	return t
+}
+
+// SetMin sets the [Handle.Min]
+func (t *Handle) SetMin(v float32) *Handle {
+	t.Min = v
+	return t
+}
+
+// SetMax sets the [Handle.Max]
+func (t *Handle) SetMax(v float32) *Handle {
+	t.Max = v
+	return t
+}
+
+// SetPos sets the [Handle.Pos]
+func (t *Handle) SetPos(v float32) *Handle {
+	t.Pos = v
+	return t
 }
 
 // SetTooltip sets the [Handle.Tooltip]
@@ -2147,163 +2177,6 @@ func (t *Splits) SetClass(v string) *Splits {
 // SetCustomContextMenu sets the [Splits.CustomContextMenu]
 func (t *Splits) SetCustomContextMenu(v func(m *Scene)) *Splits {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SplitterType is the [gti.Type] for [Splitter]
-var SplitterType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Splitter",
-	ShortName:  "gi.Splitter",
-	IDName:     "splitter",
-	Doc:        "Splitter provides the splitter handle and line separating two elements in a\nSplits, with draggable resizing of the splitter -- parent is Parts\nlayout of the Splits -- based on Slider",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SplitterNo", &gti.Field{Name: "SplitterNo", Type: "int", LocalType: "int", Doc: "splitter number this one is", Directives: gti.Directives{}, Tag: ""}},
-		{"OrigWinBBox", &gti.Field{Name: "OrigWinBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Slider", &gti.Field{Name: "Slider", Type: "goki.dev/gi/v2/gi.Slider", LocalType: "Slider", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Splitter{},
-})
-
-// NewSplitter adds a new [Splitter] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSplitter(par ki.Ki, name ...string) *Splitter {
-	return par.NewChild(SplitterType, name...).(*Splitter)
-}
-
-// KiType returns the [*gti.Type] of [Splitter]
-func (t *Splitter) KiType() *gti.Type {
-	return SplitterType
-}
-
-// New returns a new [*Splitter] value
-func (t *Splitter) New() ki.Ki {
-	return &Splitter{}
-}
-
-// SetSplitterNo sets the [Splitter.SplitterNo]:
-// splitter number this one is
-func (t *Splitter) SetSplitterNo(v int) *Splitter {
-	t.SplitterNo = v
-	return t
-}
-
-// SetTooltip sets the [Splitter.Tooltip]
-func (t *Splitter) SetTooltip(v string) *Splitter {
-	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Splitter.Class]
-func (t *Splitter) SetClass(v string) *Splitter {
-	t.Class = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Splitter.CustomContextMenu]
-func (t *Splitter) SetCustomContextMenu(v func(m *Scene)) *Splitter {
-	t.CustomContextMenu = v
-	return t
-}
-
-// SetDim sets the [Splitter.Dim]
-func (t *Splitter) SetDim(v mat32.Dims) *Splitter {
-	t.Dim = v
-	return t
-}
-
-// SetMin sets the [Splitter.Min]
-func (t *Splitter) SetMin(v float32) *Splitter {
-	t.Min = v
-	return t
-}
-
-// SetMax sets the [Splitter.Max]
-func (t *Splitter) SetMax(v float32) *Splitter {
-	t.Max = v
-	return t
-}
-
-// SetStep sets the [Splitter.Step]
-func (t *Splitter) SetStep(v float32) *Splitter {
-	t.Step = v
-	return t
-}
-
-// SetPageStep sets the [Splitter.PageStep]
-func (t *Splitter) SetPageStep(v float32) *Splitter {
-	t.PageStep = v
-	return t
-}
-
-// SetValThumb sets the [Splitter.ValThumb]
-func (t *Splitter) SetValThumb(v bool) *Splitter {
-	t.ValThumb = v
-	return t
-}
-
-// SetThumbVal sets the [Splitter.ThumbVal]
-func (t *Splitter) SetThumbVal(v float32) *Splitter {
-	t.ThumbVal = v
-	return t
-}
-
-// SetThumbSize sets the [Splitter.ThumbSize]
-func (t *Splitter) SetThumbSize(v units.Value) *Splitter {
-	t.ThumbSize = v
-	return t
-}
-
-// SetIcon sets the [Splitter.Icon]
-func (t *Splitter) SetIcon(v icons.Icon) *Splitter {
-	t.Icon = v
-	return t
-}
-
-// SetTracking sets the [Splitter.Tracking]
-func (t *Splitter) SetTracking(v bool) *Splitter {
-	t.Tracking = v
-	return t
-}
-
-// SetTrackThr sets the [Splitter.TrackThr]
-func (t *Splitter) SetTrackThr(v float32) *Splitter {
-	t.TrackThr = v
-	return t
-}
-
-// SetSnap sets the [Splitter.Snap]
-func (t *Splitter) SetSnap(v bool) *Splitter {
-	t.Snap = v
-	return t
-}
-
-// SetOff sets the [Splitter.Off]
-func (t *Splitter) SetOff(v bool) *Splitter {
-	t.Off = v
-	return t
-}
-
-// SetPrec sets the [Splitter.Prec]
-func (t *Splitter) SetPrec(v int) *Splitter {
-	t.Prec = v
-	return t
-}
-
-// SetValueColor sets the [Splitter.ValueColor]
-func (t *Splitter) SetValueColor(v colors.Full) *Splitter {
-	t.ValueColor = v
-	return t
-}
-
-// SetThumbColor sets the [Splitter.ThumbColor]
-func (t *Splitter) SetThumbColor(v colors.Full) *Splitter {
-	t.ThumbColor = v
 	return t
 }
 

@@ -11,6 +11,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
@@ -21,9 +22,14 @@ type Handle struct {
 
 	// dimension along which the handle slides (opposite of the dimension it is longest on)
 	Dim mat32.Dims
+
+	Min float32
+	Max float32
+	Pos float32
 }
 
 func (hl *Handle) OnInit() {
+	hl.HandleEvents()
 	hl.HandleStyles()
 }
 
@@ -52,4 +58,15 @@ func (hl *Handle) HandleStyles() {
 			}
 		}
 	})
+}
+
+func (hl *Handle) HandleEvents() {
+	hl.On(events.SlideMove, func(e events.Event) {
+		hl.Pos = mat32.NewVec2FmPoint(e.Pos()).Dim(hl.Dim)
+		hl.Send(events.Change, e)
+	})
+}
+
+func (hl *Handle) Value() float32 {
+	return hl.Pos / (hl.Max - hl.Min)
 }
