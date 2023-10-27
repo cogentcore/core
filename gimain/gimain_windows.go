@@ -8,11 +8,10 @@
 package gimain
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfuns"
+	"goki.dev/gi/v2/keyfun"
 )
 
 func init() {
-	gi.DefaultKeyMap = keyfuns.MapName("WindowsStd")
-	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
+	keyfun.DefaultMap = keyfun.MapName("WindowsStd")
+	keyfun.SetActiveMapName(keyfun.DefaultMap)
 }

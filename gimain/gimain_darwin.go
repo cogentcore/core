@@ -7,11 +7,9 @@
 
 package gimain
 
-import (
-	"goki.dev/gi/v2/gi"
-)
+import "goki.dev/gi/v2/keyfun"
 
 func init() {
-	gi.DefaultKeyMap = keyfun.KeyMapName("MacStd")
-	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
+	keyfun.DefaultMap = keyfun.MapName("MacStd")
+	keyfun.SetActiveMapName(keyfun.DefaultMap)
 }

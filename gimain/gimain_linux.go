@@ -9,10 +9,11 @@ package gimain
 
 import (
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/keyfun"
 )
 
 func init() {
-	gi.DefaultKeyMap = keyfun.KeyMapName("LinuxStd")
-	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
+	keyfun.DefaultMap = keyfun.MapName("LinuxStd")
+	keyfun.SetActiveMapName(keyfun.DefaultMap)
 	gi.Prefs.FontFamily = "Liberation Sans"
 }
