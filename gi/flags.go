@@ -19,7 +19,7 @@ import (
 type WidgetFlags ki.Flags //enums:bitflag
 
 const (
-	// NeedsRender needs to be rendered on next render itration
+	// NeedsRender needs to be rendered on next render iteration
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
 	// InstaDrag indicates this node should start dragging immediately when
