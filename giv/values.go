@@ -541,7 +541,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Desc()
 	vvp := laser.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
-		slog.Error("giv.SliceValue: Cannot view slices with non-pointer struct elements")
+		slog.Error("giv.SliceValue: Cannot view unadressable (non-pointer) slices", "type", vv.Value.Type())
 		return
 	}
 	readOnly := vv.IsReadOnly()
