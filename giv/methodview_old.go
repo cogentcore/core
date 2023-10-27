@@ -402,7 +402,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 	// special action names
 	switch ac.Nm {
 	case "Close RenderWin":
-		ac.Shortcut = gi.ShortcutForFun(keyfun.WinClose)
+		ac.Shortcut = gi.ShortcutFor(keyfun.WinClose)
 		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			vp.Win.CloseReq()
 		})
@@ -447,7 +447,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 		switch pk {
 		case "shortcut":
 			if kf, ok := pv.(keyfun.Funs); ok {
-				ac.Shortcut = gi.ShortcutForFun(kf)
+				ac.Shortcut = gi.ShortcutFor(kf)
 			} else {
 				ac.Shortcut = key.Chord(laser.ToString(pv)).OSShortcut()
 			}
@@ -461,7 +461,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 			}
 		case "keyfun":
 			if kf, ok := pv.(keyfun.Funs); ok {
-				ac.Shortcut = gi.ShortcutForFun(kf)
+				ac.Shortcut = gi.ShortcutFor(kf)
 				md.keyfun. = kf
 				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewkeyfun.))
 			}
