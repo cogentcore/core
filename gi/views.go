@@ -4,7 +4,10 @@
 
 package gi
 
-import "goki.dev/ki/v2"
+import (
+	"goki.dev/gi/v2/keyfun"
+	"goki.dev/ki/v2"
+)
 
 // ViewIFace is an interface into the View GUI types in giv subpackage,
 // allowing it to be a sub-package with just this narrow set of dependencies
@@ -30,7 +33,7 @@ type ViewIFace interface {
 	PrefsView(prefs *Preferences)
 
 	// KeyMapsView opens an interactive view of KeyMaps object
-	KeyMapsView(maps *KeyMaps)
+	KeyMapsView(maps *keyfun.Maps)
 
 	// PrefsDetView opens an interactive view of given detailed preferences object
 	PrefsDetView(prefs *PrefsDetailed)

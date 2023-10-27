@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"

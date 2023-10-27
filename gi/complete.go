@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/pi/v2/complete"
