@@ -1108,7 +1108,10 @@ func (vv *BitFlagValue) UpdateWidget() {
 		return
 	}
 	sw := vv.Widget.(*gi.Switches)
-	sw.UpdateFromBitFlag(vv.EnumValue())
+	ev := vv.EnumValue()
+	updt := sw.UpdateStart()
+	sw.UpdateFromBitFlag(ev)
+	sw.UpdateEnd(updt)
 }
 
 func (vv *BitFlagValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
@@ -1120,8 +1123,10 @@ func (vv *BitFlagValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sw.Tooltip, _ = vv.Desc()
 
 	ev := vv.EnumValue()
+	updt := sw.UpdateStart()
 	sw.ItemsFromEnum(ev)
 	sw.Config(sc)
+	sw.UpdateEnd(updt)
 	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
 	// 	cbb := vvv.Widget.(*gi.Switches)
