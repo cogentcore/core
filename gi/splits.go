@@ -291,6 +291,7 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 		parts.Update()
 		parts.UpdateEnd(updt)
 	}
+	fmt.Println("cfg: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 }
 
 func (sl *Splits) HandleSplitsKeys() {
@@ -345,9 +346,11 @@ func (sl *Splits) ApplyStyle(sc *Scene) {
 }
 
 func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	fmt.Println("pre: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 	sl.DoLayoutBase(sc, parBBox, iter)
 	sl.DoLayoutParts(sc, parBBox, iter)
 	sl.UpdateSplits()
+	fmt.Println("post: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 
 	handsz := sl.HandleSize.Dots
 	// fmt.Printf("handsz: %v\n", handsz)
@@ -403,6 +406,7 @@ func (sl *Splits) Render(sc *Scene) {
 			wi.Render(sc) // needs to disconnect using invisible
 		}
 		fmt.Println(sl.Parts.Kids)
+		fmt.Println(sl.Parts.Lay)
 		sl.RenderParts(sc)
 		sl.PopBounds(sc)
 	}

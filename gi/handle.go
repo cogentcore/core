@@ -49,11 +49,11 @@ func (hl *Handle) HandleStyles() {
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 
 		if hl.Dim == mat32.X {
-			s.SetFixedWidth(units.Dp(6))
-			s.SetFixedHeight(units.Em(3))
+			s.SetFixedWidth(units.Dp(60))
+			s.SetFixedHeight(units.Em(30))
 		} else {
-			s.SetFixedWidth(units.Em(3))
-			s.SetFixedHeight(units.Dp(6))
+			s.SetFixedWidth(units.Em(30))
+			s.SetFixedHeight(units.Dp(60))
 		}
 
 		if !hl.IsReadOnly() {
