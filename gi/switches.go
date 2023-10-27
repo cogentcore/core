@@ -149,8 +149,8 @@ func (sw *Switches) ItemsFromEnum(enum enums.Enum) {
 // given bit flag enum value.
 func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 	els := bitflag.Values()
-	mx := max(len(els), sw.NumChildren())
-	for i := 0; i < mx; i++ {
+	mn := min(len(els), sw.NumChildren())
+	for i := 0; i < mn; i++ {
 		ev := els[i]
 		swi := sw.Child(i)
 		sw := swi.(*Switch)
@@ -163,8 +163,8 @@ func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 // by the switches.
 func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
 	els := bitflag.Values()
-	mx := max(len(els), sw.NumChildren())
-	for i := 0; i < mx; i++ {
+	mn := min(len(els), sw.NumChildren())
+	for i := 0; i < mn; i++ {
 		ev := els[i]
 		swi := sw.Child(i)
 		sw := swi.(*Switch)
