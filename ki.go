@@ -365,6 +365,15 @@ type Ki interface {
 	// automatically called on StartUpdate to reset any old state.
 	ClearUpdateFlags()
 
+	// FlagType returns a bit flag value with the type that represents
+	// the true flag type of the node, which may be a type that extends
+	// the standard [Node.Flags]. Each node type that extends the flag type
+	// should define this method; for example:
+	//	func (wb *WidgetBase) FlagType() enums.BitFlag {
+	//		return WidgetFlagsN
+	//	}
+	FlagType() enums.BitFlag
+
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
 

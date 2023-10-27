@@ -793,6 +793,12 @@ func (n *Node) ClearUpdateFlags() {
 	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, Deleted)
 }
 
+// FlagType is the base implementation of [Ki.FlagType] that returns a
+// value of type [Flags].
+func (n *Node) FlagType() enums.BitFlag {
+	return FlagsN
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Property interface with inheritance -- nodes can inherit props from parents
 
