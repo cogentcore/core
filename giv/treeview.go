@@ -1054,7 +1054,7 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Scene) {
+func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
 	gi.NewButton(m, "copy").SetText("Copy").SetShortcutKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
@@ -1087,7 +1087,7 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	// 		CtxtMenuView(tv.This(), tv.RootIsReadOnly(), tv.Scene, m)
 	// 	}
 	// } else {
-	tv.MakeTreeViewContextMenu(m)
+	tv.TreeViewContextMenu(m)
 }
 
 // IsRoot returns true if given node is the root of the tree.
