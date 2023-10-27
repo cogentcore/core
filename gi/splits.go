@@ -277,8 +277,8 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
 		hl.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
 		hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
-		hl.Min = 0.0
-		hl.Max = 1.0
+		hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
+		hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
 		// hl.Snap = false
 		// hl.ThumbSize = sl.HandleSize
 	}
