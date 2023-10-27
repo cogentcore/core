@@ -363,9 +363,13 @@ func makeLayouts(ts *gi.Tabs) {
 
 	sv := gi.NewSplits(layouts).SetDim(mat32.X)
 
-	left := gi.NewFrame(sv).SetLayout(gi.LayoutVert)
+	left := gi.NewFrame(sv).SetLayout(gi.LayoutVert).Style(func(s *styles.Style) {
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+	})
 	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
-	right := gi.NewFrame(sv).SetLayout(gi.LayoutVert)
+	right := gi.NewFrame(sv).SetLayout(gi.LayoutVert).Style(func(s *styles.Style) {
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+	})
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }
 

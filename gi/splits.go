@@ -260,7 +260,7 @@ func (sl *Splits) ConfigWidget(sc *Scene) {
 
 func (sl *Splits) ConfigSplitters(sc *Scene) {
 	fmt.Println("cfg sl")
-	parts := sl.NewParts(LayoutNil)
+	parts := sl.NewParts(LayoutHoriz)
 	sz := len(sl.Kids)
 	fmt.Println(sz, sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
