@@ -11,12 +11,16 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/mat32/v2"
 )
 
 // Handle represents a draggable handle that can be
 // used to control the size of an element.
 type Handle struct {
 	Frame
+
+	// dimension along which the handle slides
+	Dim mat32.Dims
 }
 
 func (hl *Handle) OnInit() {
@@ -27,10 +31,16 @@ func (hl *Handle) HandleStyles() {
 	hl.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
-		s.SetFixedWidth(units.Em(2))
-		s.SetFixedHeight(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+
+		if hl.Dim == mat32.X {
+			s.SetFixedWidth(units.Em(3))
+			s.SetFixedHeight(units.Dp(4))
+		} else {
+			s.SetFixedWidth(units.Dp(4))
+			s.SetFixedHeight(units.Em(3))
+		}
 
 		if !hl.IsReadOnly() {
 			s.Cursor = cursors.Grab
