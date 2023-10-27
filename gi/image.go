@@ -13,7 +13,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
@@ -203,7 +202,7 @@ func ImageToRGBA(img image.Image) *image.RGBA {
 	if rg, ok := img.(*image.RGBA); ok {
 		return rg
 	}
-	return clone.AsRGBA(img)
+	return images.CloneAsRGBA(img)
 }
 
 // OpenPNG opens an image encoded in the PNG format
