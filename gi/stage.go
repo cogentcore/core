@@ -18,7 +18,7 @@ import (
 // MainStage are Window, Dialog, Sheet: large and potentially
 // complex Scenes that persist until dismissed, and can have
 // Decor widgets that control display.
-// PopupStage are Menu, Tooltip, Snakbar, Chooser that are transitory
+// PopupStage are Menu, Tooltip, Snackbar, Chooser that are transitory
 // and simple, without additional decor.
 // MainStages live in a StageMgr associated with a RenderWin window,
 // and manage their own set of PopupStages via a PopupStageMgr.
