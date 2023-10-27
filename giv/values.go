@@ -273,6 +273,9 @@ func ToValue(it any, tags string) Value {
 			return &StructValue{}
 		}
 	case vk == reflect.Func:
+		if laser.AnyIsNil(it) {
+			return &NilValue{}
+		}
 		return &FuncValue{}
 	case vk == reflect.Interface:
 		// note: we never get here -- all interfaces are captured by pointer kind above
@@ -744,9 +747,7 @@ func (vv *KiPtrValue) KiStruct() ki.Ki {
 	if vv.Value.IsNil() {
 		return nil
 	}
-	fmt.Println(vv.Value, vv.Value.Type())
 	opv := laser.OnePtrValue(vv.Value)
-	fmt.Println(opv, opv.Type())
 	if opv.IsNil() {
 		return nil
 	}
@@ -787,7 +788,6 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 		})
 		gi.NewButton(m, "gogi-editor").SetText("GoGi editor").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
-			fmt.Println(k, vv.IsReadOnly())
 			if k != nil && !vv.IsReadOnly() {
 				GoGiEditorDialog(k)
 			}
@@ -821,7 +821,7 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1710,12 +1710,7 @@ func (vv *FuncValue) UpdateWidget() {
 	}
 	fbt := vv.Widget.(*FuncButton)
 	fun := laser.NonPtrValue(vv.Value).Interface()
-	if fun != nil {
-		fbt.SetFunc(fun)
-		return
-	}
-	fbt.SetText("nil")
-	fbt.Update()
+	fbt.SetFunc(fun)
 }
 
 func (vv *FuncValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
