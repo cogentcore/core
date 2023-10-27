@@ -194,7 +194,7 @@ var StylesProps = ki.Props{
 		{"File", ki.PropSlice{
 			{"OpenPrefs", ki.Props{}},
 			{"SavePrefs", ki.Props{
-				"shortcut": keyfun.MenuSave,
+				"shortcut": keyfun.Save,
 				"updtfunc": func(sti any, act *gi.Button) {
 					act.SetEnabledUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
 				},
@@ -203,7 +203,7 @@ var StylesProps = ki.Props{
 			{"OpenJSON", ki.Props{
 				"label":    "Open...",
 				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": keyfun.MenuOpen,
+				"shortcut": keyfun.Open,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".json",
@@ -213,7 +213,7 @@ var StylesProps = ki.Props{
 			{"SaveJSON", ki.Props{
 				"label":    "Save As...",
 				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": keyfun.MenuSaveAs,
+				"shortcut": keyfun.SaveAs,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".json",

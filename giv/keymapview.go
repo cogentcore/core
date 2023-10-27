@@ -41,13 +41,13 @@ func KeyMapsView(km *keyfun.Maps) {
 
 	tb := tv.Toolbar()
 	gi.NewSeparator(tb)
-	sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetShortcutKey(keyfun.MenuSave)
+	sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetShortcutKey(keyfun.Save)
 	sp.SetUpdateFunc(func() {
 		sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
 	})
-	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpen)
+	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetShortcutKey(keyfun.Open)
 	oj.Args[0].SetTag("ext", ".json")
-	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(keyfun.MenuSaveAs)
+	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(keyfun.SaveAs)
 	sj.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
 	vs := NewFuncButton(tb, km.ViewStd).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
@@ -59,7 +59,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		rs.SetEnabledUpdt(km != &keyfun.StdMaps)
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.MenuOpenAlt1)
+		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.OpenAlt1)
 	})
 
 	/* todo: menu, close
