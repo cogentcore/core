@@ -9,14 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
 
@@ -72,10 +69,11 @@ func (sl *Splits) SplitsStyles() {
 		s.Padding.Set()
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if sp, ok := w.(*Splitter); ok {
-			sp.ThumbSize = sl.HandleSize
-			sp.On(events.SlideStop, func(e events.Event) {
-				sl.SetSplitAction(sp.SplitterNo, sp.Value)
+		if hl, ok := w.(*Handle); ok {
+			// hl.ThumbSize = sl.HandleSize
+			hl.On(events.Change, func(e events.Event) {
+				ip, _ := hl.IndexInParent()
+				sl.SetSplitAction(ip, hl.Value())
 			})
 		}
 	})
@@ -262,31 +260,27 @@ func (sl *Splits) ConfigWidget(sc *Scene) {
 
 func (sl *Splits) ConfigSplitters(sc *Scene) {
 	sz := len(sl.Kids)
-	mods, updt := sl.Parts.SetNChildren(sz-1, SplitterType, "Splitter")
+	mods, updt := sl.Parts.SetNChildren(sz-1, HandleType, "Handle")
 	odim := mat32.OtherDim(sl.Dim)
 	spc := sl.BoxSpace()
 	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
 	handsz := sl.HandleSize.Dots
 	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	spicon := icons.DragHandle
-	if sl.Dim == mat32.X {
-		spicon = icons.DragIndicator
-	}
-	for i, spk := range *sl.Parts.Children() {
-		sp := spk.(*Splitter)
-		sp.SplitterNo = i
-		sp.Icon = spicon
-		sp.Dim = sl.Dim
-		sp.LayState.Alloc.Size.SetDim(sl.Dim, size)
-		sp.LayState.Alloc.Size.SetDim(odim, handsz*2)
-		sp.LayState.Alloc.SizeOrig = sp.LayState.Alloc.Size
-		sp.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
-		sp.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
-		sp.LayState.Alloc.PosOrig = sp.LayState.Alloc.PosRel
-		sp.Min = 0.0
-		sp.Max = 1.0
-		sp.Snap = false
-		sp.ThumbSize = sl.HandleSize
+	for i, hlk := range *sl.Parts.Children() {
+		hl := hlk.(*Handle)
+		// hl.SplitterNo = i
+		// hl.Icon = spicon
+		hl.Dim = sl.Dim
+		hl.LayState.Alloc.Size.SetDim(sl.Dim, size)
+		hl.LayState.Alloc.Size.SetDim(odim, handsz*2)
+		hl.LayState.Alloc.SizeOrig = hl.LayState.Alloc.Size
+		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
+		hl.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
+		hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
+		hl.Min = 0.0
+		hl.Max = 1.0
+		// hl.Snap = false
+		// hl.ThumbSize = sl.HandleSize
 	}
 	if mods {
 		sl.Parts.UpdateEnd(updt)
@@ -380,9 +374,9 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 		spsum += sp
 		if i < sz-1 {
-			spl := sl.Parts.Child(i).(*Splitter)
-			spl.Value = spsum
-			spl.UpdatePosFromValue(spl.Value)
+			hl := sl.Parts.Child(i).(*Handle)
+			hl.Pos = spsum
+			// hl.UpdatePosFromValue(hl.Value)
 		}
 	}
 
@@ -412,265 +406,3 @@ func (sl *Splits) Render(sc *Scene) {
 // func (sl *Splits) StateIs(states.Focused) bool {
 // 	return sl.ContainsFocus() // anyone within us gives us focus..
 // }
-
-////////////////////////////////////////////////////////////////////////////////////////
-//    Splitter
-
-// TODO(kai): decide on splitter structure
-
-// Splitter provides the splitter handle and line separating two elements in a
-// Splits, with draggable resizing of the splitter -- parent is Parts
-// layout of the Splits -- based on Slider
-type Splitter struct {
-	Slider
-
-	// splitter number this one is
-	SplitterNo int
-
-	// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
-	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
-}
-
-func (sr *Splitter) OnInit() {
-	sr.HandleSplitterEvents()
-	sr.SplitterStyles()
-}
-
-func (sr *Splitter) SplitterStyles() {
-	// STYTODO: fix splitter styles
-	sr.ValThumb = false
-	sr.ThumbSize = units.Dp(10) // will be replaced by parent HandleSize
-	sr.Step = 0.01
-	sr.PageStep = 0.1
-	sr.Max = 1.0
-	sr.Snap = false
-	sr.Prec = 4
-	sr.SetFlag(true, InstaDrag)
-
-	sr.Style(func(s *styles.Style) {
-		s.Margin.Set()
-		s.Padding.Set(units.Dp(6))
-		s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		s.Color = colors.Scheme.OnBackground
-		if sr.Dim == mat32.X {
-			s.MinWidth.SetDp(2)
-			s.MinHeight.SetDp(100)
-			s.Height.SetDp(100)
-			s.MaxHeight.SetDp(100)
-		} else {
-			s.MinHeight.SetDp(2)
-			s.MinWidth.SetDp(100)
-		}
-	})
-	sr.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sr) {
-		case "parts/icon":
-			// w.Style(func(s *styles.Style) {
-			// 	s.MaxWidth.SetEm(1)
-			// 	s.MaxHeight.SetEm(5)
-			// 	s.MinWidth.SetEm(1)
-			// 	s.MinHeight.SetEm(5)
-			// 	s.Margin.Set()
-			// 	s.Padding.Set()
-			// 	s.AlignV = styles.AlignMiddle
-			// })
-		}
-	})
-}
-
-func (sr *Splitter) ConfigWidget(sc *Scene) {
-	sr.ConfigSlider(sc)
-	sr.ConfigParts(sc)
-}
-
-func (sr *Splitter) ApplyStyle(sc *Scene) {
-	sr.SetState(false, abilities.Focusable)
-	sr.StyleSlider(sc)
-}
-
-func (sr *Splitter) GetSize(sc *Scene, iter int) {
-	sr.InitLayout(sc)
-}
-
-func (sr *Splitter) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(sc, parBBox, iter)
-	sr.DoLayoutParts(sc, parBBox, iter)
-	// sr.SizeFromAlloc()
-	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
-	sr.UpdatePosFromValue(sr.Value)
-	sr.SlideStartPos = sr.Pos
-	sr.BBoxMu.RLock()
-	sr.OrigWinBBox = sr.ScBBox
-	sr.BBoxMu.RUnlock()
-	return sr.DoLayoutChildren(sc, iter)
-}
-
-func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
-	// this updates the SliderPositioner interface to use OrigWinBBox
-	return pt.Sub(sr.OrigWinBBox.Min)
-}
-
-func (sr *Splitter) UpdateSplitterPos() {
-	/*
-		spc := sr.BoxSpace()
-		handsz := sr.ThumbSize.Dots
-		off := 0
-		if sr.Dim == mat32.X {
-			off = sr.OrigWinBBox.Min.X
-		} else {
-			off = sr.OrigWinBBox.Min.Y
-		}
-		sz := handsz
-		if !sr.HasFlag(NodeDragging) {
-			sz += spc.Size().Dim(sr.Dim)
-		}
-		pos := off + int(sr.Pos-0.5*sz)
-		mxpos := off + int(sr.Pos+0.5*sz)
-
-		// SidesTODO: this is all sketchy
-
-		if sr.HasFlag(NodeDragging) {
-			win := sr.ParentRenderWin()
-			spnm := "gi.Splitter:" + sr.Name()
-			spr, ok := win.SpriteByName(spnm)
-			if ok {
-				spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + int(spc.Top)}
-			}
-		} else {
-			sr.BBoxMu.Lock()
-
-			if sr.Dim == mat32.X {
-				sr.ScBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
-				sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
-			} else {
-				sr.ScBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
-				sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
-			}
-			sr.BBoxMu.Unlock()
-		}
-	*/
-}
-
-// Splits returns our parent splits
-func (sr *Splitter) Splits() *Splits {
-	if sr.Par == nil || sr.Par.Parent() == nil {
-		return nil
-	}
-	sli := AsSplits(sr.Par.Parent())
-	if sli == nil {
-		return nil
-	}
-	return sli
-}
-
-func (sr *Splitter) HandleSplitterMouse() {
-	sr.On(events.MouseDown, func(e events.Event) {
-		// if srr.IsDisabled() {
-		// 	me.SetHandled()
-		// 	srr.SetSelected(!srr.StateIs(states.Selected))
-		// 	srr.EmitSelectedSignal()
-		// 	srr.SetNeedsRender()
-		// } else {
-		if e.MouseButton() != events.Left {
-			return
-		}
-		e.SetHandled()
-		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
-		st := &sr.Styles
-		// SidesTODO: unsure about dim
-		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize
-		if sr.Dim == mat32.X {
-			sr.SetSliderPos(float32(ed.X) - spc)
-		} else {
-			sr.SetSliderPos(float32(ed.Y) - spc)
-		}
-	})
-	sr.On(events.DoubleClick, func(e events.Event) {
-		e.SetHandled()
-		sl := sr.Splits()
-		if sl != nil {
-			if sl.IsCollapsed(sr.SplitterNo) {
-				sl.RestoreSplits()
-			} else {
-				sl.CollapseChild(true, sr.SplitterNo)
-			}
-		}
-	})
-	// todo: just disabling at this point to prevent bad side-effects
-	// sr.On(events.Scroll, func(e events.Event) {
-	// 	if srr.IsReadOnly() {
-	// 		return
-	// 	}
-	// 	e := d.(*events.Scroll)
-	// 	e.SetHandled()
-	// 	cur := float32(srr.Pos)
-	// 	if srr.Dim == mat32.X {
-	// 		srr.SliderMove(cur, cur+float32(e.NonZeroDelta(true))) // preferX
-	// 	} else {
-	// 		srr.SliderMove(cur, cur-float32(e.NonZeroDelta(false))) // preferY
-	// 	}
-	// })
-}
-
-func (sr *Splitter) HandleSplitterEvents() {
-	sr.HandleSliderMouse()
-	sr.HandleSliderKeys()
-	sr.HandleSplitterMouse()
-}
-
-func (sr *Splitter) Render(sc *Scene) {
-	/*
-		win := sr.ParentRenderWin()
-		spnm := "gi.Splitter:" + sr.Name()
-		if sr.HasFlag(NodeDragging) {
-			ick := sr.Parts.ChildByType(IconType, ki.Embeds, 0)
-			if ick == nil {
-				return
-			}
-			ic := ick.(*Icon)
-			spr, ok := win.SpriteByName(spnm)
-			if !ok {
-				// spr = NewSprite(spnm, image.Point{}, sr.ScBBox.Min)
-				// spr.GrabRenderFrom(ic)
-				// win.AddSprite(spr)
-				// win.ActivateSprite(spnm)
-			}
-			sr.UpdateSplitterPos()
-			win.SetNeedsRender()
-		} else {
-			if win.DeleteSprite(spnm) {
-				win.SetNeedsRender()
-			}
-			sr.UpdateSplitterPos()
-			if sr.PushBounds(sc) {
-				sr.RenderSplitter(sc)
-				sr.RenderChildren(sc)
-				sr.PopBounds(sc)
-			}
-		}
-	*/
-}
-
-// RenderSplitter does the default splitter rendering
-func (sr *Splitter) RenderSplitter(sc *Scene) {
-	sr.UpdateSplitterPos()
-
-	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
-		sr.Parts.Render(sc)
-	}
-	// else {
-	rs, pc, st := sr.RenderLock(sc)
-
-	pc.StrokeStyle.SetColor(nil)
-	pc.FillStyle.SetFullColor(&st.BackgroundColor)
-
-	// pos := mat32.NewVec2FmPoint(sr.ScBBox.Min)
-	// pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
-	// sz := mat32.NewVec2FmPoint(sr.ScBBox.Size())
-	// sr.RenderBoxImpl(pos, sz, st.Border)
-
-	sr.RenderStdBox(sc, st)
-
-	sr.RenderUnlock(rs)
-	// }
-}
