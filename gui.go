@@ -68,24 +68,24 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 
 		// TODO: finish these functions
 		fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-		fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
+		fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: keyfun.MenuNew},
 			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 
 			})
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: keyfun.MenuOpen},
 			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			})
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: keyfun.MenuSave},
 			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if grease.ConfigFile != "" {
 					grease.Save(cfg, grease.ConfigFile)
 				}
 			})
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: keyfun.MenuSaveAs},
 			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			})
 		fmen.Menu.AddSeparator("csep")
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: keyfun.WinClose},
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				win.CloseReq()
 			})
