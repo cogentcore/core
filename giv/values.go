@@ -1083,11 +1083,16 @@ func (vv *BitFlagValue) WidgetType() *gti.Type {
 
 func (vv *BitFlagValue) EnumValue() enums.BitFlag {
 	ev, ok := vv.Value.Interface().(enums.BitFlag)
-	if ok {
-		return ev
+	if !ok {
+		slog.Error("giv.BitFlagView: type must be enums.BitFlag")
+		return nil
 	}
-	slog.Error("giv.BitFlagView: type must be enums.BitFlag")
-	return nil
+	if k, ok := vv.Owner.(ki.Ki); ok {
+		bf := k.FlagType()
+		bf = ev
+		return bf
+	}
+	return ev
 }
 
 func (vv *BitFlagValue) SetEnumValueFromInt(ival int64) bool {
