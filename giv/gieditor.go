@@ -299,10 +299,11 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	sel := NewFuncButton(tb, ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
 	sel.SetUpdateFunc(func() {
 		sc, ok := ge.KiRoot.(*gi.Scene)
-		sc.SetEnabled(ok)
+		sel.SetEnabled(ok)
 		if !ok {
 			return
 		}
+		_ = sc
 		// TODO(kai/sel): check if has flag
 	})
 	gi.NewSeparator(tb)
