@@ -516,9 +516,9 @@ var HandleType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the handle slides (opposite of the dimension it is longest on)", Directives: gti.Directives{}, Tag: ""}},
-		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)", Directives: gti.Directives{}, Tag: ""}},
+		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)", Directives: gti.Directives{}, Tag: ""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -552,19 +552,25 @@ func (t *Handle) SetDim(v mat32.Dims) *Handle {
 	return t
 }
 
-// SetMin sets the [Handle.Min]
+// SetMin sets the [Handle.Min]:
+// Min is the minimum value that the handle can go to
+// (typically the lower bound of the dialog/splits)
 func (t *Handle) SetMin(v float32) *Handle {
 	t.Min = v
 	return t
 }
 
-// SetMax sets the [Handle.Max]
+// SetMax sets the [Handle.Max]:
+// Max is the maximum value that the handle can go to
+// (typically the upper bound of the dialog/splits)
 func (t *Handle) SetMax(v float32) *Handle {
 	t.Max = v
 	return t
 }
 
-// SetPos sets the [Handle.Pos]
+// SetPos sets the [Handle.Pos]:
+// Pos is the current position of the handle on the
+// scale of [Handle.Min] to [Handle.Max]
 func (t *Handle) SetPos(v float32) *Handle {
 	t.Pos = v
 	return t
@@ -2096,10 +2102,9 @@ var SplitsType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"HandleSize", &gti.Field{Name: "HandleSize", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this", Directives: gti.Directives{}, Tag: "xml:\"handle-size\""}},
+		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which to split the space", Directives: gti.Directives{}, Tag: ""}},
 		{"Splits", &gti.Field{Name: "Splits", Type: "[]float32", LocalType: "[]float32", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"SavedSplits", &gti.Field{Name: "SavedSplits", Type: "[]float32", LocalType: "[]float32", Doc: "A saved version of the splits which can be restored -- for dynamic collapse / expand operations", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which to split the space", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2145,13 +2150,6 @@ func AsSplits(k ki.Ki) *Splits {
 
 // AsSplits satisfies the [SplitsEmbedder] interface
 func (t *Splits) AsSplits() *Splits {
-	return t
-}
-
-// SetHandleSize sets the [Splits.HandleSize]:
-// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
-func (t *Splits) SetHandleSize(v units.Value) *Splits {
-	t.HandleSize = v
 	return t
 }
 

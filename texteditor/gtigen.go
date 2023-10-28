@@ -267,12 +267,6 @@ func (t *TwinEditors) SetCustomContextMenu(v func(m *gi.Scene)) *TwinEditors {
 	return t
 }
 
-// SetHandleSize sets the [TwinEditors.HandleSize]
-func (t *TwinEditors) SetHandleSize(v units.Value) *TwinEditors {
-	t.HandleSize = v
-	return t
-}
-
 // SetDim sets the [TwinEditors.Dim]
 func (t *TwinEditors) SetDim(v mat32.Dims) *TwinEditors {
 	t.Dim = v
