@@ -4,18 +4,17 @@
 
 package mat32
 
+//go:generate enumgen
+
 // Dims is a list of vector dimension (component) names
-type Dims int
+type Dims int32 //enums:enum
 
 const (
 	X Dims = iota
 	Y
 	Z
 	W
-	DimsN
 )
-
-//go:generate stringer -type=Dims
 
 // OtherDim returns the other dimension for 2D X,Y
 func OtherDim(d Dims) Dims {
