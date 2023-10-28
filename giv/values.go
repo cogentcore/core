@@ -782,8 +782,11 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Indicator = icons.KeyboardArrowDown
 	bt.Tooltip, _ = vv.Desc()
+	fmt.Println("KPV CW OW", vv.Owner, vv.Widget)
 	bt.Menu = func(m *gi.Scene) {
+		fmt.Println("KPV CW M OW", vv.Owner, vv.Widget)
 		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
+			fmt.Println("KPV CW OC OW", vv.Owner, vv.Widget)
 			k := vv.KiStruct()
 			if k != nil {
 				bt := vv.Widget.(*gi.Button)

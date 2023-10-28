@@ -286,6 +286,7 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			})
 			return true
 		}
+		fmt.Println("SV FTV", sv.Struct, field.Name, fval)
 		vv := FieldToValue(sv.Struct, field.Name, fval)
 		if vv == nil { // shouldn't happen
 			return true
@@ -296,7 +297,9 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			dupeFields[field.Name] = true
 		}
 		vvp := fieldVal.Addr()
+		fmt.Println("SV SSV", vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
 		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
+		fmt.Println("SV DSO", field.Name, vv.AsValueBase().Owner)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
@@ -325,12 +328,16 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			break
 		}
 		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
-			vv.AsValueBase().Widget = widg
+			fmt.Println("SV ACS", lbl.Text, vvb.Owner)
+			vvb := vv.AsValueBase()
+			vvb.Widget = widg
+			vvb.Owner = sv.Struct
 			// fmt.Println("skip and update:", vv)
 			vv.UpdateWidget()
 			continue
 		}
 		sv.WidgetConfiged[widg] = true
+		fmt.Println("SV CW2L", lbl.Text, vvb.Owner)
 		vv.ConfigWidget(widg, sc)
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
