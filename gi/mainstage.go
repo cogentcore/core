@@ -127,34 +127,45 @@ func (st *MainStage) SetWindowInsets() {
 
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
-	if st.History {
-		sc := st.Scene
-		parts := sc.NewParts(LayoutHoriz)
-		updt := parts.UpdateStart()
-		NewButton(parts).SetText("Back").SetIcon(icons.ArrowBack)
-		parts.Update()
-		parts.UpdateEndLayout(updt)
-		sc.SetNeedsLayoutUpdate(sc, updt)
-	}
+	st.AddMainToolbar()
+	// if st.History {
+	// 	sc := st.Scene
+	// 	updt := sc.UpdateStart()
+	// 	NewButton(sc).SetText("Back").SetIcon(icons.ArrowBack)
+	// 	// parts.Update()
+	// 	sc.UpdateEndLayout(updt)
+	// 	// sc.SetNeedsLayoutUpdate(sc, updt)
+	// }
 	return st
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
 	if st.History {
-		sc := st.Scene
-		parts := sc.NewParts(LayoutHoriz)
-		updt := parts.UpdateStart()
-		NewButton(parts).SetText("Back").SetIcon(icons.ArrowBack)
-		parts.Update()
-		parts.UpdateEndLayout(updt)
-		sc.SetNeedsLayoutUpdate(sc, updt)
+		st.AddMainToolbar()
 	}
+	// if st.History {
+	// 	sc := st.Scene
+	// 	updt := sc.UpdateStart()
+	// 	sc.InsertNewChild(ButtonType, 0).(*Button).SetText("Back").SetIcon(icons.ArrowBack)
+	// 	// parts.Update()
+	// 	sc.UpdateEndLayout(updt)
+	// 	// sc.SetNeedsLayoutUpdate(sc, updt)
+	// }
 	// todo: moveable, resizable
 	return st
 }
 
 func (st *MainStage) AddSheetDecor() *MainStage {
 	// todo: handle based on side
+	return st
+}
+
+func (st *MainStage) AddMainToolbar() *MainStage {
+	// updt := st.Scene.UpdateStart()
+	tb := st.Scene.InsertNewChild(ToolbarType, 0).(*Toolbar)
+	NewButton(tb).SetIcon(icons.ArrowBack)
+	st.Scene.Update()
+	// st.Scene.UpdateEndLayout(updt)
 	return st
 }
 
