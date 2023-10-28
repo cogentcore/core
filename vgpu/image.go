@@ -433,17 +433,19 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	}
 	size := im.Format.LayerByteSize()
 
+	ptr := MapMemoryAll(im.Dev, im.Mem)
 	subrec := vk.ImageSubresource{}
 	subrec.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
+	subrec.ArrayLayer = 0
 	sublay := vk.SubresourceLayout{}
 	vk.GetImageSubresourceLayout(im.Dev, im.Image, &subrec, &sublay)
 	offset := int(sublay.Offset)
-	ptr := MapMemoryAll(im.Dev, im.Mem)
 	pix := (*[ByteCopyMemoryLimit]byte)(ptr)[offset : size+offset]
 
 	rgba := &image.RGBA{}
 	rgba.Pix = pix
-	rgba.Stride = im.Format.Stride()
+	rgba.Stride = im.Format.Stride() // int(sublay.RowPitch)
+	fmt.Printf("%#v\n", sublay)
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
 	return rgba, nil
 }

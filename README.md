@@ -165,6 +165,16 @@ Here's how it works:
 
 * Thus, you should create named events in your compute `System`, and inject calls to set and wait on those events in your command stream.
 
+# Gamma Correction (sRGB vs Linear) and Headless / Offscreen Rendering
+
+It is hard to find this info very clearly stated:
+
+* All internal computation in shaders is done in a *linear* color space.
+* Image textures are assumed to be sRGB and are automatically converted to linear on upload.
+* Other colors that are passed in should be converted from sRGB to linear (the Phong shaders do this).
+* The `Surface` automatically converts from Linear to sRGB for actual rendering.
+* A `RenderFrame` for offscreen / headless rendering *must* use `vk.FormatR8g8b8a8Srgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
+
 # Mac Platform
 
 To have the mac use the `libMoltenVK.dylib` installed by `brew install molten-vk`, you need to change the LDFLAGS here:
