@@ -77,9 +77,10 @@ func NewRenderFrame(gp *GPU, dev *Device, size image.Point) *RenderFrame {
 func (rf *RenderFrame) Defaults() {
 	rf.NFrames = 1
 	rf.Format.Defaults()
-	// note: fast access to rendered image requires srgb format
-	rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Unorm)
-	// rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
+	// note: screen-correct results obtained by using Srgb here, which forces
+	// this format in the final output.  Looks like what comes out from direct rendering.
+	rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Srgb)
+	// rf.Format.Set(1024, 768, vk.FormatR8g8b8a8Unorm)
 	rf.Format.SetMultisample(4)
 }
 
