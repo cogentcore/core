@@ -334,7 +334,7 @@ func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(d
 	ics := icons.All()
 	dlg := SliceViewSelectDialog(ctx, opts, &ics, curIc,
 		func(w gi.Widget, s *styles.Style, row int) {
-			// w.(*gi.Button).SetText(string(ics[row]))
+			w.(*gi.Button).SetText(string(ics[row]))
 			s.SetStretchMaxWidth()
 		}, fun)
 	return dlg
