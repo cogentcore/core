@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -162,7 +161,7 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 
 func (st *MainStage) AddMainToolbar() *MainStage {
 	tb := st.Scene.InsertNewChild(ToolbarType, 0).(*Toolbar)
-	NewButton(tb).SetIcon(icons.ArrowBack)
+	MainToolbar(tb)
 	return st
 }
 

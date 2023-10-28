@@ -11,6 +11,25 @@ import (
 	"goki.dev/icons"
 )
 
+// MainToolbar is the function called to construct the main
+// [Toolbar] located at the top of every [WindowStage] and
+// full window [DialogStage]. By default, it is set to
+// [DefaultMainToolbar], so anyone defining a custom [MainToolbar]
+// should typically call that function at the start of theirs.
+var MainToolbar = DefaultMainToolbar
+
+// DefaultMainToolbar is the default value for [MainToolbar].
+// It adds navigation buttons and an editable chooser bar.
+func DefaultMainToolbar(tb *Toolbar) {
+	NewButton(tb).SetIcon(icons.ArrowBack)
+	NewButton(tb).SetIcon(icons.ArrowForward)
+	NewChooser(tb).SetEditable(true)
+	tb.OverflowMenu().SetMenu(func(m *Scene) {
+		NewButton(m).SetText("Edit")
+		NewButton(m).SetText("Window")
+	})
+}
+
 // TODO(kai): support AutoOverflowMenu for Toolbar
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
