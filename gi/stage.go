@@ -118,8 +118,8 @@ type StageBase struct {
 	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	NewWindow bool
 
-	// for Windows: add a back button
-	Back bool
+	// whether to use history-based navigation instead of dialogs and windows
+	History bool
 
 	// for Dialogs: if true includes a close button for closing
 	Closeable bool
@@ -175,7 +175,7 @@ type Stage interface {
 	// SetSharedWin sets NewWindow off to override default NewWindow for Desktop Window
 	SetSharedWin() Stage
 
-	SetBack() Stage
+	SetHistory() Stage
 
 	SetMovable() Stage
 
@@ -365,8 +365,8 @@ func (st *StageBase) SetSharedWin() Stage {
 	return st.This
 }
 
-func (st *StageBase) SetBack() Stage {
-	st.Back = true
+func (st *StageBase) SetHistory() Stage {
+	st.History = true
 	return st.This
 }
 

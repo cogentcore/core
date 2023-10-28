@@ -126,7 +126,7 @@ func (st *MainStage) SetWindowInsets() {
 
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
-	if st.Back {
+	if st.History {
 		// sc := st.Scene
 		// parts := sc.NewParts()
 		// but := NewButton(parts, "win-back")
