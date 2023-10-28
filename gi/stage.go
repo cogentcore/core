@@ -301,7 +301,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.ClickOff = true
 		st.Movable = true
 		st.Resizable = true
-		st.History = true
+		// st.History = true
 	case SheetStage:
 		st.Modal = true
 		st.Scrim = true
