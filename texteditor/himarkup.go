@@ -6,7 +6,6 @@ package texteditor
 
 import (
 	stdhtml "html"
-	"log"
 	"log/slog"
 	"strings"
 
@@ -193,7 +192,7 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 	txtstr := string(txt) // expensive!
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return nil, err
 	}
 	lines := chroma.SplitTokensIntoLines(iterator.Tokens())
@@ -211,7 +210,7 @@ func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lex.Line, error) {
 	txtstr := string(txt) + "\n"
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return nil, err
 	}
 	var tags lex.Line

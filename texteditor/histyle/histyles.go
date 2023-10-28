@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"log/slog"
 	"path/filepath"
 	"sort"
@@ -86,7 +85,7 @@ func (hs *Styles) OpenJSON(filename gi.FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
-		// log.Println(err)
+		// slog.Error(err.Error())
 		return err
 	}
 	return json.Unmarshal(b, hs)
@@ -96,13 +95,13 @@ func (hs *Styles) OpenJSON(filename gi.FileName) error {
 func (hs *Styles) SaveJSON(filename gi.FileName) error {
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
-		log.Println(err) // unlikely
+		slog.Error(err.Error()) // unlikely
 		return err
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		// PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return err
 }

@@ -30,7 +30,7 @@ func InitSpell() error {
 	if err != nil {
 		err = spell.OpenDefault()
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 		}
 	}
 	return nil

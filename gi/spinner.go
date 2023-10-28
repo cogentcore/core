@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
 	"log/slog"
 	"strconv"
 
@@ -285,7 +284,7 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 		fval = float32(fv)
 	}
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return fval, err
 }

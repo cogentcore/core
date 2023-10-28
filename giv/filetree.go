@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -219,7 +220,7 @@ func (ft *FileTree) WatchUpdt(path string) {
 	}
 	fn, err := ft.FindDirNode(rp)
 	if err != nil {
-		// log.Println(err)
+		// slog.Error(err.Error())
 		return
 	}
 	ft.LastWatchUpdt = rp
@@ -250,7 +251,7 @@ func (ft *FileTree) WatchPath(path gi.FileName) error {
 		ft.WatchedPaths[rp] = true
 		ft.WatchWatcher()
 	} else {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return err
 }
@@ -571,7 +572,7 @@ func (fn *FileNode) DetectVcsRepo(updateFiles bool) bool {
 	var err error
 	repo, err = vci.NewRepo("origin", path)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return false
 	}
 	fn.DirRepo = repo
@@ -891,7 +892,7 @@ func (fn *FileNode) DirsTo(path string) (*FileNode, error) {
 				return cfn, nil
 			} else {
 				err = fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
-				// log.Println(err)
+				// slog.Error(err.Error())
 				return nil, err
 			}
 		}
@@ -905,7 +906,7 @@ func (fn *FileNode) DirsTo(path string) (*FileNode, error) {
 			}
 		} else {
 			err := fmt.Errorf("giv.FileNode non-terminal node %v is not a directory in: %v", dr, cfn.FPath)
-			log.Println(err)
+			slog.Error(err.Error())
 			return nil, err
 		}
 		cfn = sfn
@@ -1100,7 +1101,7 @@ func (fn *FileNode) OpenFileWith(command string) error {
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 		}
 	}()
 	return err
@@ -2256,12 +2257,12 @@ func (ftv *FileTreeView) MimeData(md *mimedata.Mimes) {
 	if int(fn.Info.Size) < gi.Prefs.Params.BigFileSize {
 		in, err := os.Open(path)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			return
 		}
 		b, err := ioutil.ReadAll(in)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			return
 		}
 		fd := &mimedata.Data{fn.Info.Mime, b}

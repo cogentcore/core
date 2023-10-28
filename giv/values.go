@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -1369,7 +1368,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf.OnChange(func(e events.Event) {
 		nt, err := time.Parse(DefaultTimeFormat, tf.Text())
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 		} else {
 			tm := vv.TimeVal()
 			*tm = nt

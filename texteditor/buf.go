@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -488,7 +489,7 @@ func (tb *Buf) Open(filename gi.FileName) error {
 	if err != nil {
 		// vp := tb.SceneFromView()
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	tb.InitialMarkup()
@@ -530,7 +531,7 @@ func (tb *Buf) Revert() bool {
 			if vp != nil { // only if viewing
 				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 			}
-			log.Println(err)
+			slog.Error(err.Error())
 			return false
 		}
 		tb.Stat() // "own" the new file..
@@ -594,7 +595,7 @@ func (tb *Buf) SaveFile(filename gi.FileName) error {
 	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
-		log.Println(err)
+		slog.Error(err.Error())
 	} else {
 		tb.Filename = filename
 		tb.Stat()

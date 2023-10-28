@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
+	"log/slog"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -605,7 +606,7 @@ func (pf *FilePaths) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), AddOk, NoCancel, nil, nil, nil)
-		// log.Println(err)
+		// slog.Error(err.Error())
 		return err
 	}
 	return json.Unmarshal(b, pf)
@@ -615,13 +616,13 @@ func (pf *FilePaths) OpenJSON(filename string) error {
 func (pf *FilePaths) SaveJSON(filename string) error {
 	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
-		log.Println(err) // unlikely
+		slog.Error(err.Error()) // unlikely
 		return err
 	}
 	err = ioutil.WriteFile(filename, b, 0644)
 	if err != nil {
 		// PromptDialog(nil, "Could not Save to File", err.Error(), AddOk, NoCancel, nil, nil, nil)
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return err
 }
@@ -759,7 +760,7 @@ func (pf *PrefsDetailed) Open() error { //gti:add
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	b, err := os.ReadFile(pnm)
 	if err != nil {
-		// log.Println(err) // ok to be non-existent
+		// slog.Error(err.Error()) // ok to be non-existent
 		return err
 	}
 	err = json.Unmarshal(b, pf)
@@ -773,12 +774,12 @@ func (pf *PrefsDetailed) Save() error { //gti:add
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	err = os.WriteFile(pnm, b, 0644)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	pf.Changed = false
 	return err
