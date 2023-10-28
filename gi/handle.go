@@ -8,7 +8,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -55,12 +54,10 @@ func (hl *Handle) HandleStyles() {
 		}
 
 		if !hl.IsReadOnly() {
-			s.Cursor = cursors.Grab
-			switch {
-			case s.Is(states.Sliding):
-				s.Cursor = cursors.Grabbing
-			case s.Is(states.Active):
-				s.Cursor = cursors.Grabbing
+			if hl.Dim == mat32.X {
+				s.Cursor = cursors.ResizeEW
+			} else {
+				s.Cursor = cursors.ResizeNS
 			}
 		}
 	})
