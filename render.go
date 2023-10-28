@@ -99,6 +99,7 @@ func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 	}
+	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 }
 
 // Image returns the current rendered image from the Frame RenderFrame.
@@ -318,6 +319,7 @@ func (sc *Scene) Render() bool {
 		sc.SaveCamera("default")
 	}
 	sc.SetFlag(true, ScUpdating)
+	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
 	sc.UpdateMVPMatrix()
