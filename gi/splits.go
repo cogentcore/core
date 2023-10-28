@@ -264,6 +264,12 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 	sz := len(sl.Kids)
 	fmt.Println(sz, sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
+	for _, hlk := range *sl.Parts.Children() {
+		hl := hlk.(*Handle)
+		// hl.SplitterNo = i
+		// hl.Icon = spicon
+		hl.Dim = sl.Dim
+	}
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
@@ -366,9 +372,6 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	}
 	for i, hlk := range *sl.Parts.Children() {
 		hl := hlk.(*Handle)
-		// hl.SplitterNo = i
-		// hl.Icon = spicon
-		hl.Dim = sl.Dim
 		fmt.Println(size, handsz*2)
 		hl.LayState.Alloc.Size.SetDim(sl.Dim, size)
 		hl.LayState.Alloc.Size.SetDim(odim, handsz*2)
