@@ -250,7 +250,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sl.Splits)
 	sl.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sl.Splits)
-	sl.UpdateEndRender(updt)
+	sl.UpdateEndLayout(updt)
 }
 
 func (sl *Splits) ConfigWidget(sc *Scene) {
