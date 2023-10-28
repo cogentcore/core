@@ -188,7 +188,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	se.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
 	gi3d.NewAmbientLight(se, "ambient", 0.3, gi3d.DirectSun)
 
-	se.Camera.Pose.Pos.Set(3, 5, 10)              // default position
+	// se.Camera.Pose.Pos.Set(-2, 9, 3)
+	se.Camera.Pose.Pos.Set(-2, 2, 10)
+	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	se.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	dir := gi3d.NewDirLight(se, "dir", 1, gi3d.DirectSun)
@@ -220,7 +222,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 
 	gcb := gi3d.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.SetColor(color.RGBA{0, 255, 0, 230}).SetShiny(30) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	gcb.Mat.SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	// fmt.Println(gcb.Mat)
 
 	floorp := gi3d.NewPlane(se, "floor-plane", 100, 100)
@@ -228,7 +230,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color = colors.Tan
 	// floor.Mat.Emissive.SetName("brown")
-	floor.Mat.Bright = 2 // .5 for wood / brown
+	// floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 	// floor.SetDisabled() // not selectable

@@ -38,7 +38,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	sc := gi3d.NewScene("scene").SetSize(image.Point{640, 480})
+	sc := gi3d.NewScene("scene").SetSize(image.Point{1280, 960})
 	sc.ConfigFrame(gp, dev)
 
 	// options - must be set here
@@ -50,7 +50,8 @@ func main() {
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
 	gi3d.NewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
-	sc.Camera.Pose.Pos.Set(3, 5, 10)              // default position
+	// sc.Camera.Pose.Pos.Set(-2, 9, 3)
+	sc.Camera.Pose.Pos.Set(-2, 2, 10)
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	dir := gi3d.NewDirLight(sc, "dir", 1, gi3d.DirectSun)
@@ -67,7 +68,7 @@ func main() {
 	// wdtx := gi3d.NewTextureFile(sc, "wood", "wood.png")
 
 	cbm := gi3d.NewBox(sc, "cube1", 1, 1, 1)
-	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
+	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
 	rbgp := gi3d.NewGroup(sc, "r-b-group")
 
@@ -82,14 +83,14 @@ func main() {
 
 	gcb := gi3d.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.Color = color.RGBA{0, 255, 0, 230} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+	gcb.Mat.SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 
 	floorp := gi3d.NewPlane(sc, "floor-plane", 100, 100)
 	floor := gi3d.NewSolid(sc, "floor").SetMesh(floorp)
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color = colors.Tan
 	// floor.Mat.Emissive.SetName("brown")
-	floor.Mat.Bright = 2 // .5 for wood / brown
+	// floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 	// floor.SetDisabled() // not selectable
@@ -100,7 +101,7 @@ func main() {
 		log.Println("no render")
 	}
 
-	img, err := sc.ImageCopy() // copy needed because it is linear colorspace
+	img, err := sc.Image() // Copy() // copy needed because it is linear colorspace
 	if err != nil {
 		fmt.Println(err)
 		return
