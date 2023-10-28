@@ -23,7 +23,15 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
-	tb := gi.NewToolbar(sc)
+	sv := NewStructView(sc)
+	sv.SetStruct(pf)
+	sv.SetStretchMax()
+	sv.OnChange(func(e events.Event) {
+		pf.Apply()
+		pf.Save()
+	})
+
+	tb := sv.Toolbar()
 	NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 	gi.NewSeparator(tb)
 	save := NewFuncButton(tb, pf.Save).SetShortcutKey(keyfun.Save)
@@ -46,14 +54,6 @@ func PrefsView(pf *gi.Preferences) {
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
 		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.Open)
 		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-	})
-
-	sv := NewStructView(sc)
-	sv.SetStruct(pf)
-	sv.SetStretchMax()
-	sv.OnChange(func(e events.Event) {
-		pf.Apply()
-		pf.Save()
 	})
 
 	/*
@@ -104,7 +104,11 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	sc := gi.NewScene("gogi-prefs-det").SetTitle("GoGi Detailed Preferences").SetData(pf)
 	sc.Lay = gi.LayoutVert
 
-	tb := gi.NewToolbar(sc)
+	sv := NewStructView(sc, "sv")
+	sv.SetStruct(pf)
+	sv.SetStretchMax()
+
+	tb := sv.Toolbar()
 	NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 	gi.NewSeparator(tb)
 	save := NewFuncButton(tb, pf.Save).SetShortcutKey(keyfun.Save)
@@ -114,10 +118,6 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
 		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(keyfun.Open)
 	})
-
-	sv := NewStructView(sc, "sv")
-	sv.SetStruct(pf)
-	sv.SetStretchMax()
 
 	/*
 		mmen := win.MainMenu
@@ -167,12 +167,12 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
-	tb := gi.NewToolbar(sc)
-	NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
-
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
+
+	tb := sv.Toolbar()
+	NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
 
 	// mmen := win.MainMenu
 	// MainMenuView(pf, win, mmen)
