@@ -11,6 +11,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/laser"
 )
 
@@ -84,7 +85,7 @@ func HiStylesView(st *histyle.Styles) {
 	}
 
 	sc := gi.NewScene("hi-styles")
-	sc.Title = "Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards."
+	sc.Title = "Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards."
 	sc.Lay = gi.LayoutVert
 	sc.Data = st
 
@@ -105,6 +106,12 @@ func HiStylesView(st *histyle.Styles) {
 	tv.OnChange(func(e events.Event) {
 		histyle.StylesChanged = true
 	})
+
+	tb := tv.Toolbar()
+	oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen)
+	oj.Args[0].SetTag(".ext", ".histy")
+	sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+	sj.Args[0].SetTag(".ext", ".histy")
 
 	// mmen := win.MainMenu
 	// MainMenuView(st, win, mmen)
