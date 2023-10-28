@@ -216,16 +216,15 @@ func (dlg *Dialog) DefaultStyle() {
 	st := dlg.Stage
 	sc := st.Scene
 	sc.Style(func(s *styles.Style) {
-		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
 		sc.Spacing = StdDialogVSpaceUnits
-		s.Border.Style.Set(styles.BorderNone)
 		s.Padding.Set(units.Dp(24))
-		if !st.NewWindow {
+		if !st.NewWindow && !st.History {
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()
+			// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		}
 	})
 }
