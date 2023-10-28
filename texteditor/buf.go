@@ -592,7 +592,7 @@ func (tb *Buf) SaveAs(filename gi.FileName) {
 
 // SaveFile writes current buffer to file, with no prompting, etc
 func (tb *Buf) SaveFile(filename gi.FileName) error {
-	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
+	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 		slog.Error(err.Error())
@@ -720,7 +720,7 @@ func (tb *Buf) AutoSave() error {
 	tb.SetFlag(true, BufAutoSaving)
 	asfn := tb.AutoSaveFilename()
 	b := tb.LinesToBytesCopy()
-	err := ioutil.WriteFile(asfn, b, 0644)
+	err := os.WriteFile(asfn, b, 0644)
 	if err != nil {
 		log.Printf("giv.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}

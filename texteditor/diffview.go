@@ -9,12 +9,12 @@ package texteditor
 // in a DiffViewDialog
 
 	func DiffFiles(afile, bfile string) (*DiffView, error) {
-		ab, err := ioutil.ReadFile(afile)
+		ab, err := os.ReadFile(afile)
 		if err != nil {
 			slog.Error(err.Error())
 			return nil, err
 		}
-		bb, err := ioutil.ReadFile(bfile)
+		bb, err := os.ReadFile(bfile)
 		if err != nil {
 			slog.Error(err.Error())
 			return nil, err

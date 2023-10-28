@@ -13,8 +13,8 @@ package histyle
 import (
 	"encoding/json"
 	"image/color"
-	"io/ioutil"
 	"log/slog"
+	"os"
 	"strings"
 
 	"goki.dev/colors"
@@ -300,7 +300,7 @@ func (hs Style) ToProps() ki.Props {
 
 // Open hi style from a JSON-formatted file.
 func (hs Style) OpenJSON(filename gi.FileName) error {
-	b, err := ioutil.ReadFile(string(filename))
+	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
 		slog.Error(err.Error())
@@ -316,7 +316,7 @@ func (hs Style) SaveJSON(filename gi.FileName) error {
 		slog.Error(err.Error()) // unlikely
 		return err
 	}
-	err = ioutil.WriteFile(string(filename), b, 0644)
+	err = os.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		// PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
 		slog.Error(err.Error())

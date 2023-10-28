@@ -82,7 +82,7 @@ func (gr *Graph) Defaults() {
 
 // OpenJSON open from JSON file
 func (gr *Graph) OpenJSON(filename gi.FileName) error {
-	b, err := ioutil.ReadFile(string(filename))
+	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (gr *Graph) SaveJSON(filename gi.FileName) error {
 		slog.Error(err.Error())
 		return err
 	}
-	err = ioutil.WriteFile(string(filename), b, 0644)
+	err = os.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -221,7 +221,7 @@ func (ls *Lines) Defaults() {
 
 // OpenJSON open from JSON file
 func (ls *Lines) OpenJSON(filename gi.FileName) error {
-	b, err := ioutil.ReadFile(string(filename))
+	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		return err
 	}
@@ -236,7 +236,7 @@ func (ls *Lines) SaveJSON(filename gi.FileName) error {
 		slog.Error(err.Error())
 		return err
 	}
-	err = ioutil.WriteFile(string(filename), b, 0644)
+	err = os.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		slog.Error(err.Error())
 	}

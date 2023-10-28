@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"image"
-	"io/ioutil"
 	"log"
 	"log/slog"
 	"os"
@@ -89,12 +88,12 @@ func (mgr *WinGeomPrefsMgr) LockFile() error {
 	for rep := 0; rep < 10; rep++ {
 		if _, err := os.Stat(pnm); os.IsNotExist(err) {
 			b, _ := time.Now().MarshalJSON()
-			err = ioutil.WriteFile(pnm, b, 0644)
+			err = os.WriteFile(pnm, b, 0644)
 			if err == nil {
 				return nil
 			}
 		}
-		b, err := ioutil.ReadFile(pnm)
+		b, err := os.ReadFile(pnm)
 		if err != nil {
 			time.Sleep(mgr.LockSleep)
 			continue
@@ -133,7 +132,7 @@ func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
 		return false
 	}
 	var lts time.Time
-	b, err := ioutil.ReadFile(pnm)
+	b, err := os.ReadFile(pnm)
 	if err != nil {
 		return false
 	}
@@ -156,7 +155,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 	pnm := filepath.Join(pdir, mgr.FileName+".lst")
 	mgr.LastSave = time.Now()
 	b, _ := mgr.LastSave.MarshalJSON()
-	ioutil.WriteFile(pnm, b, 0644)
+	os.WriteFile(pnm, b, 0644)
 }
 
 // Open RenderWin Geom preferences from GoGi standard prefs directory
@@ -165,7 +164,7 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, mgr.FileName+".json")
-	b, err := ioutil.ReadFile(pnm)
+	b, err := os.ReadFile(pnm)
 	if err != nil {
 		// slog.Error(err.Error())rror())
 		return err
@@ -205,7 +204,7 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 		slog.Error(err.Error())
 		return err
 	}
-	err = ioutil.WriteFile(pnm, b, 0644)
+	err = os.WriteFile(pnm, b, 0644)
 	if err != nil {
 		slog.Error(err.Error())
 	} else {
