@@ -152,14 +152,14 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 		}
 		r = nr
 	}
-	img, err := se.Scene.Image() // Copy() // note: Copy is unacceptably slow
+	img, err := se.Scene.Image() // direct access
 	if err != nil {
 		log.Println("frame image err:", err)
 		return
 	}
 	// fmt.Println("r", r, "bnd", img.Bounds())
 	draw.Draw(sc.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
-	// se.Scene.ImageDone()
+	se.Scene.ImageDone()
 }
 
 // Render3D renders the Frame Image
