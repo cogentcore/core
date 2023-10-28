@@ -260,7 +260,7 @@ func (sl *Splits) ConfigWidget(sc *Scene) {
 
 func (sl *Splits) ConfigSplitters(sc *Scene) {
 	fmt.Println("cfg sl")
-	parts := sl.NewParts(LayoutHoriz)
+	parts := sl.NewParts(LayoutNil)
 	sz := len(sl.Kids)
 	fmt.Println(sz, sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
@@ -331,7 +331,6 @@ func (sl *Splits) ApplyStyle(sc *Scene) {
 func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	fmt.Println("pre: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 	sl.DoLayoutBase(sc, parBBox, iter)
-	sl.DoLayoutParts(sc, parBBox, iter)
 	sl.UpdateSplits()
 	fmt.Println("post: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 
@@ -347,7 +346,6 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
 	pos := float32(0.0)
 
-	spsum := float32(0)
 	for i, sp := range sl.Splits {
 		_, wb := AsWidget(sl.Kids[i])
 		if wb == nil {
@@ -363,27 +361,24 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 		pos += isz + handsz
 
-		spsum += sp
-		if i < sz-1 {
-			hl := sl.Parts.Child(i).(*Handle)
-			hl.Pos = spsum
-			// hl.UpdatePosFromValue(hl.Value)
+		if i >= sz-1 {
+			continue
 		}
-	}
-	for i, hlk := range *sl.Parts.Children() {
-		hl := hlk.(*Handle)
-		fmt.Println(size, handsz*2)
-		hl.LayState.Alloc.Size.SetDim(sl.Dim, size)
-		hl.LayState.Alloc.Size.SetDim(odim, handsz*2)
-		hl.LayState.Alloc.SizeOrig = hl.LayState.Alloc.Size
-		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
+		hl := sl.Parts.Child(i).(*Handle)
+		hl.Pos = pos
+
+		hl.LayState.Alloc.Size = hl.LayState.Size.Pref
+		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
 		hl.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
 		hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
 		hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
 		hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
 		// hl.Snap = false
 		// hl.ThumbSize = sl.HandleSize
+
 	}
+
+	sl.DoLayoutParts(sc, parBBox, iter)
 
 	return sl.DoLayoutChildren(sc, iter)
 }
