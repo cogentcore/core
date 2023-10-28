@@ -118,8 +118,8 @@ type StageBase struct {
 	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	NewWindow bool
 
-	// whether to use history-based navigation instead of dialogs and windows
-	History bool
+	// if NewWindow is false, then this makes Dialogs take up the entire window they are created in
+	FullWindow bool
 
 	// for Dialogs: if true includes a close button for closing
 	Closeable bool
@@ -175,7 +175,7 @@ type Stage interface {
 	// SetSharedWin sets NewWindow off to override default NewWindow for Desktop Window
 	SetSharedWin() Stage
 
-	SetHistory() Stage
+	SetFullWindow() Stage
 
 	SetMovable() Stage
 
@@ -301,7 +301,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.ClickOff = true
 		st.Movable = true
 		st.Resizable = true
-		st.History = true
+		st.FullWindow = true
 	case SheetStage:
 		st.Modal = true
 		st.Scrim = true
@@ -366,8 +366,8 @@ func (st *StageBase) SetSharedWin() Stage {
 	return st.This
 }
 
-func (st *StageBase) SetHistory() Stage {
-	st.History = true
+func (st *StageBase) SetFullWindow() Stage {
+	st.FullWindow = true
 	return st.This
 }
 
