@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"strconv"
 	"strings"
@@ -259,10 +258,8 @@ func (sl *Splits) ConfigWidget(sc *Scene) {
 }
 
 func (sl *Splits) ConfigSplitters(sc *Scene) {
-	fmt.Println("cfg sl")
 	parts := sl.NewParts(LayoutNil)
 	sz := len(sl.Kids)
-	fmt.Println(sz, sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
 	for _, hlk := range *sl.Parts.Children() {
 		hl := hlk.(*Handle)
@@ -274,7 +271,6 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 		parts.Update()
 		parts.UpdateEnd(updt)
 	}
-	fmt.Println("cfg: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 }
 
 func (sl *Splits) HandleSplitsKeys() {
@@ -329,10 +325,8 @@ func (sl *Splits) ApplyStyle(sc *Scene) {
 }
 
 func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	fmt.Println("pre: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 	sl.DoLayoutBase(sc, parBBox, iter)
 	sl.UpdateSplits()
-	fmt.Println("post: hl size alloc:", sl.Parts.Child(0).(Widget).AsWidget().LayState.Alloc.Size)
 
 	handsz := sl.HandleSize.Dots
 	// fmt.Printf("handsz: %v\n", handsz)
@@ -398,8 +392,6 @@ func (sl *Splits) Render(sc *Scene) {
 			}
 			wi.Render(sc) // needs to disconnect using invisible
 		}
-		fmt.Println(sl.Parts.Kids)
-		fmt.Println(sl.Parts.Lay)
 		sl.RenderParts(sc)
 		sl.PopBounds(sc)
 	}
