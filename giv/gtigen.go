@@ -2762,3 +2762,13 @@ func (t *VCSLogView) SetStackTop(v int) *VCSLogView {
 	t.StackTop = v
 	return t
 }
+
+var _ = gti.AddFunc(&gti.Func{
+	Name: "goki.dev/gi/v2/giv.ViewStdKeyMaps",
+	Doc:  "ViewStdKeyMaps shows the standard maps that are compiled into the program and have\nall the lastest key functions bound to standard values.  Useful for\ncomparing against custom maps.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args:    ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+})

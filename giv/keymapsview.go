@@ -50,7 +50,7 @@ func KeyMapsView(km *keyfun.Maps) {
 	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetShortcutKey(keyfun.SaveAs)
 	sj.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
-	vs := NewFuncButton(tb, km.ViewStd).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
+	vs := NewFuncButton(tb, ViewStdKeyMaps).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
 	vs.SetUpdateFunc(func() {
 		vs.SetEnabledUpdt(km != &keyfun.StdMaps)
 	})
@@ -98,6 +98,13 @@ func KeyMapsView(km *keyfun.Maps) {
 	*/
 
 	gi.NewWindow(sc).Run()
+}
+
+// ViewStdKeyMaps shows the standard maps that are compiled into the program and have
+// all the lastest key functions bound to standard values.  Useful for
+// comparing against custom maps.
+func ViewStdKeyMaps() { //gti:add
+	KeyMapsView(&keyfun.StdMaps)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
