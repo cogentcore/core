@@ -24,9 +24,10 @@ func DefaultTopAppBar(tb *Toolbar) {
 			OnClick(func(e events.Event) {
 				TheViewIFace.PrefsView(&Prefs)
 			})
-		NewButton(m).SetText("Inspect").OnClick(func(e events.Event) {
-			TheViewIFace.GoGiEditor(tb.Sc)
-		})
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.GoGiEditor).
+			OnClick(func(e events.Event) {
+				TheViewIFace.GoGiEditor(tb.Sc)
+			})
 		NewButton(m).SetText("Edit")
 		NewButton(m).SetText("Window")
 	})
