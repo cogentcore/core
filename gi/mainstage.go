@@ -131,9 +131,9 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 		sc := st.Scene
 		parts := sc.NewParts(LayoutHoriz)
 		updt := parts.UpdateStart()
-		NewButton(parts).SetIcon(icons.ArrowBack)
+		NewButton(parts).SetText("Back").SetIcon(icons.ArrowBack)
 		parts.Update()
-		parts.UpdateEnd(updt)
+		parts.UpdateEndLayout(updt)
 		sc.SetNeedsLayoutUpdate(sc, updt)
 	}
 	return st
@@ -144,9 +144,9 @@ func (st *MainStage) AddDialogDecor() *MainStage {
 		sc := st.Scene
 		parts := sc.NewParts(LayoutHoriz)
 		updt := parts.UpdateStart()
-		NewButton(parts).SetIcon(icons.ArrowBack)
+		NewButton(parts).SetText("Back").SetIcon(icons.ArrowBack)
 		parts.Update()
-		parts.UpdateEnd(updt)
+		parts.UpdateEndLayout(updt)
 		sc.SetNeedsLayoutUpdate(sc, updt)
 	}
 	// todo: moveable, resizable
@@ -230,9 +230,13 @@ func (st *MainStage) RunDialog() *MainStage {
 
 	sc := st.Scene
 	st.StageMgr = ms // temporary
-	sz := sc.PrefSize(winsz)
+	sz := winsz
+	// history-based stages always take up the whole window
+	if !st.History {
+		sz = sc.PrefSize(winsz)
+	}
 	if WinRenderTrace {
-		slog.Info("MainStage.RunDialog: Size:", sz)
+		slog.Info("MainStage.RunDialog", "size", sz)
 	}
 
 	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {

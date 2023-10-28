@@ -1201,12 +1201,11 @@ func (ly *Layout) HandleLayoutScrollEvents() {
 //   Standard Widget interface
 
 func (ly *Layout) BBoxes() image.Rectangle {
-	bb := ly.BBoxFromAlloc()
-	return bb
+	return ly.BBoxFromAlloc()
 }
 
 func (ly *Layout) ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point) {
-	ly.ComputeBBoxesBase(sc, parBBox, delta)
+	ly.ComputeBBoxesParts(sc, parBBox, delta)
 }
 
 func (ly *Layout) ChildrenBBoxes(sc *Scene) image.Rectangle {
@@ -1248,7 +1247,6 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.Is(LayoutNeedsRedo))
 	}
 	ly.DoLayoutBase(sc, parBBox, iter)
-	ly.DoLayoutParts(sc, parBBox, iter)
 	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:
@@ -1286,6 +1284,10 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 			ly.LayoutScrollChildren(sc, delta) // move is a separate step
 		}
 	}
+	// if ly.Parts != nil && ly.Parts.String() == "/std-dialog.parts" {
+	// 	fmt.Println("lyp")
+	// }
+	ly.DoLayoutParts(sc, parBBox, iter)
 	return ly.Is(LayoutNeedsRedo)
 }
 
