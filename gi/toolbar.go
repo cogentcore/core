@@ -20,7 +20,7 @@ func DefaultTopAppBar(tb *Toolbar) {
 	NewButton(tb).SetIcon(icons.ArrowForward)
 	NewChooser(tb).SetEditable(true)
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
-		NewButton(m).SetText("System Preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
+		NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 			OnClick(func(e events.Event) {
 				TheViewIFace.PrefsView(&Prefs)
 			})
@@ -28,8 +28,15 @@ func DefaultTopAppBar(tb *Toolbar) {
 			OnClick(func(e events.Event) {
 				TheViewIFace.GoGiEditor(tb.Sc)
 			})
-		NewButton(m).SetText("Edit")
-		NewButton(m).SetText("Window")
+		NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
+			NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)
+			NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut)
+			NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
+		})
+		NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
+			NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong)
+			NewButton(m).SetText("Minimize").SetIcon(icons.Minimize)
+		})
 	})
 }
 
