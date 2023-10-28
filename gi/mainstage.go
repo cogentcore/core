@@ -139,7 +139,7 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
-	if st.History {
+	if st.FullWindow {
 		st.AddMainToolbar()
 	}
 	// if st.History {
@@ -241,7 +241,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	st.StageMgr = ms // temporary
 	sz := winsz
 	// history-based stages always take up the whole window
-	if !st.History {
+	if !st.FullWindow {
 		sz = sc.PrefSize(winsz)
 	}
 	if WinRenderTrace {

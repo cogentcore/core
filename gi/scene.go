@@ -43,6 +43,11 @@ type Scene struct { //goki:no-new
 	// Used e.g., for recycling views of a given item instead of creating new one.
 	Data any
 
+	// TopAppBar is a function used to construct a top app bar at the top of the
+	// scene when it is set up. It is copied by default to all FullWindow [DialogStage]s
+	// created in the context of this scene.
+	TopAppBar func(tb *Toolbar)
+
 	// Size and position relative to overall rendering context.
 	Geom mat32.Geom2DInt `readonly:"+" set:"-"`
 
