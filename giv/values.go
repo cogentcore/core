@@ -749,6 +749,9 @@ func (vv *KiPtrValue) KiStruct() ki.Ki {
 	}
 	opv := laser.OnePtrValue(vv.Value)
 	if opv.IsNil() {
+		if _, wb := gi.AsWidget(vv.Owner.(ki.Ki)); wb != nil {
+			fmt.Println("OWNER WIDGET", wb, "OWNER WIDGET PARTS", wb.Parts)
+		}
 		return nil
 	}
 	k, ok := opv.Interface().(ki.Ki)
@@ -766,6 +769,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	path := "nil"
 	k := vv.KiStruct()
 	if k != nil {
+		fmt.Println("NON-NIL KI: SETTING PATH", k, vv.Owner)
 		path = k.Path()
 	}
 	bt.SetText(path)
