@@ -592,7 +592,13 @@ func (vv *SliceInlineValue) UpdateWidget() {
 	}
 	sv := vv.Widget.(*SliceViewInline)
 	csl := vv.Value.Interface()
-	if sv.Slice != csl {
+	newslc := false
+	if reflect.TypeOf(vv.Value).Kind() != reflect.Pointer { // prevent crash on non-comparable
+		newslc = true
+	} else {
+		newslc = (sv.Slice != csl)
+	}
+	if newslc {
 		sv.SetSlice(csl)
 	} else {
 		sv.UpdateValues()
