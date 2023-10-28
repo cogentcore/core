@@ -95,12 +95,12 @@ func (gr *Graph) OpenJSON(filename gi.FileName) error {
 func (gr *Graph) SaveJSON(filename gi.FileName) error {
 	b, err := json.MarshalIndent(gr, "", "  ")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return err
 }
@@ -233,12 +233,12 @@ func (ls *Lines) OpenJSON(filename gi.FileName) error {
 func (ls *Lines) SaveJSON(filename gi.FileName) error {
 	b, err := json.MarshalIndent(ls, "", "  ")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return err
 }
@@ -278,7 +278,7 @@ func (ln *Line) Graph(lidx int) {
 	ln.expr, err = govaluate.NewEvaluableExpressionWithFunctions(ln.Eq, functions)
 	if err != nil {
 		ln.expr = nil
-		log.Println(err)
+		slog.Error(err.Error())
 		return
 	}
 

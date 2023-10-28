@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -36,13 +36,13 @@ func BytesToLineStrings(txt []byte, addNewLn bool) []string {
 func FileBytes(fpath string) ([]byte, error) {
 	fp, err := os.Open(fpath)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return nil, err
 	}
 	txt, err := ioutil.ReadAll(fp)
 	fp.Close()
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return nil, err
 	}
 	return txt, nil

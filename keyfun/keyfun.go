@@ -8,7 +8,6 @@ package keyfun
 
 import (
 	"encoding/json"
-	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -320,7 +319,7 @@ func (km *Maps) OpenJSON(filename string) error { //gti:add
 	if err != nil {
 		// Note: keymaps are opened at startup, and this can cause crash if called then
 		// PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	*km = make(Maps, 0, 10) // reset
@@ -332,13 +331,13 @@ func (km *Maps) OpenJSON(filename string) error { //gti:add
 func (km *Maps) SaveJSON(filename string) error { //gti:add
 	b, err := json.MarshalIndent(km, "", "  ")
 	if err != nil {
-		log.Println(err) // unlikely
+		slog.Error(err.Error()) // unlikely
 		return err
 	}
 	err = os.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		// PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	return err
 }

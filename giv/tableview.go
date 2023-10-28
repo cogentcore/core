@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"image"
-	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -1045,7 +1044,7 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 	fld, ok := struTyp.FieldByName(fldName)
 	if !ok {
 		err := fmt.Errorf("gi.StructSliceRowByValue: field name: %v not found\n", fldName)
-		log.Println(err)
+		slog.Error(err.Error())
 		return -1, err
 	}
 	fldIdx := fld.Index

@@ -10,6 +10,7 @@ import (
 	"image"
 	"io/ioutil"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -166,12 +167,12 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
-		// log.Println(err)
+		// slog.Error(err.Error())rror())
 		return err
 	}
 	err = json.Unmarshal(b, &mgr.Geoms)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	oldFmt := false
 	for _, wps := range mgr.Geoms {
@@ -201,12 +202,12 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	b, err := json.MarshalIndent(mgr.Geoms, "", "\t")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	err = ioutil.WriteFile(pnm, b, 0644)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	} else {
 		mgr.SaveLastSave()
 	}

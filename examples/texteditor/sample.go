@@ -68,7 +68,7 @@ gimain.Run(app)
 
 	fp, err := os.Open("sample.in")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		// return err
 	}
 	b, err := ioutil.ReadAll(fp)

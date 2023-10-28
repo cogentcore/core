@@ -11,12 +11,12 @@ package texteditor
 	func DiffFiles(afile, bfile string) (*DiffView, error) {
 		ab, err := ioutil.ReadFile(afile)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			return nil, err
 		}
 		bb, err := ioutil.ReadFile(bfile)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			return nil, err
 		}
 		astr := strings.Split(strings.Replace(string(ab), "\r\n", "\n", -1), "\n") // windows safe
