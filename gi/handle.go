@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"fmt"
-
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -79,10 +77,4 @@ func (hl *Handle) HandleEvents() {
 // based on [Handle.Pos], [Handle.Min], and [Handle.Max].
 func (hl *Handle) Value() float32 {
 	return hl.Pos / (hl.Max - hl.Min)
-}
-
-func (hl *Handle) Render(sc *Scene) {
-	fmt.Println("hl render", hl)
-	fmt.Printf("hl render LS %#v\n", hl.LayState)
-	hl.Frame.Render(sc)
 }
