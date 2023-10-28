@@ -378,13 +378,6 @@ func (km *Maps) RevertToStd() { //gti:add
 	AvailMapsChanged = true
 }
 
-// ViewStd shows the standard maps that are compiled into the program and have
-// all the lastest key functions bound to standard values.  Useful for
-// comparing against custom maps.
-func (km *Maps) ViewStd() { //gti:add
-	// TheViewIFace.KeyMapsView(&StdKeyMaps)
-}
-
 // AvailMapsChanged is used to update giv.KeyMapsView toolbars via
 // following menu, toolbar props update methods -- not accurate if editing any
 // other map but works for now..
