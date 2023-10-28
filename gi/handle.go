@@ -45,12 +45,17 @@ func (hl *Handle) HandleStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 
+		// TODO(kai/margin): this is intentionally designed to work with the
+		// current way margin is handled, but will break after it is fixed.
+		// Width/height should actually be 6dp, not 14dp.
 		if hl.Dim == mat32.X {
-			s.SetFixedWidth(units.Dp(6))
+			s.SetFixedWidth(units.Dp(14))
 			s.SetFixedHeight(units.Em(3))
+			s.Margin.SetHoriz(units.Dp(4))
 		} else {
 			s.SetFixedWidth(units.Em(3))
-			s.SetFixedHeight(units.Dp(6))
+			s.SetFixedHeight(units.Dp(14))
+			s.Margin.SetVert(units.Dp(4))
 		}
 
 		if !hl.IsReadOnly() {
