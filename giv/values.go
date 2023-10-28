@@ -755,9 +755,6 @@ func (vv *KiPtrValue) KiStruct() ki.Ki {
 	}
 	opv := laser.OnePtrValue(vv.Value)
 	if opv.IsNil() {
-		if _, wb := gi.AsWidget(vv.Owner.(ki.Ki)); wb != nil {
-			fmt.Println("OWNER WIDGET", wb, "OWNER WIDGET PARTS", wb.Parts)
-		}
 		return nil
 	}
 	k, ok := opv.Interface().(ki.Ki)
@@ -775,7 +772,6 @@ func (vv *KiPtrValue) UpdateWidget() {
 	path := "nil"
 	k := vv.KiStruct()
 	if k != nil {
-		fmt.Println("NON-NIL KI: SETTING PATH", k, vv.Owner)
 		path = k.Path()
 	}
 	bt.SetText(path)
@@ -788,11 +784,8 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Indicator = icons.KeyboardArrowDown
 	bt.Tooltip, _ = vv.Desc()
-	fmt.Println("KPV CW OW", vv.Owner, vv.Widget)
 	bt.Menu = func(m *gi.Scene) {
-		fmt.Println("KPV CW M OW", vv.Owner, vv.Widget)
 		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
-			fmt.Println("KPV CW OC OW", vv.Owner, vv.Widget)
 			k := vv.KiStruct()
 			if k != nil {
 				bt := vv.Widget.(*gi.Button)
