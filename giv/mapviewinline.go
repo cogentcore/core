@@ -104,6 +104,9 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
+	// very critical to clear so that we re-config
+	// all of the widgets; otherwise some pointers persist
+	clear(mv.WidgetConfiged)
 	mv.Update()
 	return mv
 }
