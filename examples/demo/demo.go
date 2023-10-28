@@ -78,7 +78,7 @@ func makeHome(ts *gi.Tabs) {
 	cvvw := home.NewChild(colorvv.WidgetType()).(gi.Widget)
 	colorvv.ConfigWidget(cvvw, cvvw.AsWidget().Sc)
 
-	giv.NewFuncButton(home, gi.Prefs.LightMode).SetShowReturnAsDialog(true)
+	giv.NewFuncButton(home, hello)
 
 	img := gi.NewImage(home)
 	err := img.OpenImage("gopher.png", 300, 300)
