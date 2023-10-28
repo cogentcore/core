@@ -118,6 +118,9 @@ func (sv *StructView) SetStruct(st any) *StructView {
 	if sv.Struct != st {
 		sv.Changed = false
 		sv.Struct = st
+		// very critical to clear so that we re-config
+		// all of the widgets; otherwise some pointers persist
+		clear(sv.WidgetConfiged)
 		sv.Update()
 	}
 	return sv
@@ -331,7 +334,6 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			fmt.Println("SV ACS", lbl.Text, vvb.Owner)
 			vvb := vv.AsValueBase()
 			vvb.Widget = widg
-			vvb.Owner = sv.Struct
 			// fmt.Println("skip and update:", vv)
 			vv.UpdateWidget()
 			continue

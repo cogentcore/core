@@ -76,6 +76,9 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 	if sv.Struct != st {
 		sv.Struct = st
+		// very critical to clear so that we re-config
+		// all of the widgets; otherwise some pointers persist
+		clear(sv.WidgetConfiged)
 		sv.Update()
 	}
 	return sv
