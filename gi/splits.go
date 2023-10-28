@@ -11,7 +11,6 @@ import (
 
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
@@ -33,23 +32,19 @@ import (
 type Splits struct { //goki:embedder
 	WidgetBase
 
-	// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
-	HandleSize units.Value `xml:"handle-size"`
+	// dimension along which to split the space
+	Dim mat32.Dims
 
 	// proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
 	Splits []float32 `set:"-"`
 
 	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
 	SavedSplits []float32 `set:"-"`
-
-	// dimension along which to split the space
-	Dim mat32.Dims
 }
 
 func (sl *Splits) CopyFieldsFrom(frm any) {
 	fr := frm.(*Splits)
 	sl.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sl.HandleSize = fr.HandleSize
 	mat32.CopyFloat32s(&sl.Splits, fr.Splits)
 	mat32.CopyFloat32s(&sl.SavedSplits, fr.SavedSplits)
 	sl.Dim = fr.Dim
@@ -62,7 +57,6 @@ func (sl *Splits) OnInit() {
 
 func (sl *Splits) SplitsStyles() {
 	sl.Style(func(s *styles.Style) {
-		sl.HandleSize.SetDp(10)
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
 		s.Margin.Set()
@@ -309,15 +303,10 @@ func (sl *Splits) HandleSplitsEvents() {
 	sl.HandleSplitsKeys()
 }
 
-func (sl *Splits) StyleSplits(sc *Scene) {
-	sl.ApplyStyleWidget(sc)
-	sl.HandleSize.ToDots(&sl.Styles.UnContext)
-}
-
 func (sl *Splits) ApplyStyle(sc *Scene) {
 	sl.StyMu.Lock()
 
-	sl.StyleSplits(sc)
+	sl.ApplyStyleWidget(sc)
 	sl.UpdateSplits()
 	sl.StyMu.Unlock()
 
@@ -328,48 +317,59 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	sl.DoLayoutBase(sc, parBBox, iter)
 	sl.UpdateSplits()
 
-	handsz := sl.HandleSize.Dots
-	// fmt.Printf("handsz: %v\n", handsz)
 	sz := len(sl.Kids)
+
+	// need to get total handle size first
+	thandsz := float32(0)
+	for i := range sl.Splits {
+		if i >= sz-1 {
+			continue
+		}
+		hl := sl.Parts.Child(i).(*Handle)
+		thandsz += hl.LayState.Size.Pref.Dim(sl.Dim)
+	}
+
+	// fmt.Printf("handsz: %v\n", handsz)
 	odim := mat32.OtherDim(sl.Dim)
 	spc := sl.BoxSpace()
 	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
-	avail := size - handsz*float32(sz-1)
+	avail := size - thandsz
 	// fmt.Printf("avail: %v\n", avail)
 	osz := sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
 	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
 	pos := float32(0.0)
+
+	phandsz := float32(0)
 
 	for i, sp := range sl.Splits {
 		_, wb := AsWidget(sl.Kids[i])
 		if wb == nil {
 			continue
 		}
+
 		isz := sp * avail
 		wb.LayState.Alloc.Size.SetDim(sl.Dim, isz)
 		wb.LayState.Alloc.Size.SetDim(odim, osz)
 		wb.LayState.Alloc.SizeOrig = wb.LayState.Alloc.Size
 		wb.LayState.Alloc.PosRel.SetDim(sl.Dim, pos)
 		wb.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
-		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, wb.LayState.Alloc.SizeOrig, wb.LayState.Alloc.PosRel)
 
-		pos += isz + handsz
+		pos += isz
 
-		if i >= sz-1 {
-			continue
+		if i < sz-1 {
+			hl := sl.Parts.Child(i).(*Handle)
+			phandsz = hl.LayState.Size.Pref.Dim(sl.Dim)
+
+			hl.Pos = pos
+			hl.LayState.Alloc.Size = hl.LayState.Size.Pref
+			hl.LayState.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
+			hl.LayState.Alloc.PosRel.SetDim(odim, mid-phandsz+float32(i)*phandsz*4)
+			hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
+			hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
+			hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
 		}
-		hl := sl.Parts.Child(i).(*Handle)
-		hl.Pos = pos - handsz
 
-		hl.LayState.Alloc.Size = hl.LayState.Size.Pref
-		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
-		hl.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
-		hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
-		hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
-		hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
-		// hl.Snap = false
-		// hl.ThumbSize = sl.HandleSize
-
+		pos += phandsz
 	}
 
 	sl.DoLayoutParts(sc, parBBox, iter)
