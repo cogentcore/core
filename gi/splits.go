@@ -365,7 +365,7 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 			continue
 		}
 		hl := sl.Parts.Child(i).(*Handle)
-		hl.Pos = pos
+		hl.Pos = pos - handsz
 
 		hl.LayState.Alloc.Size = hl.LayState.Size.Pref
 		hl.LayState.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
