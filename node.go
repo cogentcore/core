@@ -389,12 +389,12 @@ func (n *Node) Path() string {
 // automatically gets the [Ki.This] version of the given parent,
 // so a base type can be passed in without manually calling [Ki.This].
 func (n *Node) PathFrom(par Ki) string {
+	// critical to get "This"
+	par = par.This()
 	// we bail a level below the parent so it isn't in the path
 	if n.Par == nil || n.Par == par {
 		return n.Nm
 	}
-	// critical to get "This"
-	par = par.This()
 	ppath := ""
 	if n.Par == par {
 		ppath = "/" + EscapePathName(par.Name())
