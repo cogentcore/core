@@ -254,7 +254,10 @@ type DlgOpts struct {
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
 func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
-	dlg := NewDialog(NewScene("std-dialog"), ctx)
+	// TOOD(kai/stage): need to have a unique name, so we use title, but that
+	// is user-facing (has spaces and special characters), so ideally we could
+	// use something else
+	dlg := NewDialog(NewScene(opts.Title), ctx)
 	if opts.Title != "" {
 		dlg.Title(opts.Title)
 	}
