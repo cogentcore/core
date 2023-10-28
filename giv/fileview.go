@@ -17,6 +17,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
@@ -24,6 +25,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
@@ -221,37 +223,6 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value) {
-	// STYTODO: get rid of this and move to OnChildAdded
-	finf, ok := slice.([]*filecat.FileInfo)
-	if ok {
-		wi := widg.AsWidget()
-		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
-			if _, err := wi.PropTry("color"); err != nil {
-				// wi.SetFullReRender()
-			}
-			wi.SetProp("color", clr)
-			return
-		}
-		if fvv := tv.ParentByType(FileViewType, ki.Embeds); fvv != nil {
-			fv := fvv.(*FileView)
-			fn := finf[row].Name
-			ext := strings.ToLower(filepath.Ext(fn))
-			if _, has := fv.ExtMap[ext]; has {
-				if _, err := wi.PropTry("color"); err != nil {
-					// wi.SetFullReRender()
-				}
-				wi.SetProp("color", "pref(link)")
-				return
-			}
-		}
-		if _, err := wi.PropTry("color"); err == nil {
-			// wi.SetFullReRender()
-		}
-		wi.DeleteProp("color")
-	}
-}
-
 func (fv *FileView) ConfigWidget(sc *gi.Scene) {
 	fv.ConfigFileView(sc)
 }
@@ -358,17 +329,29 @@ func (fv *FileView) ConfigFilesRow() {
 		fv.FavSelect(sv.SelectedIdx)
 	})
 
-	sv = fv.FilesView()
-	sv.StyleFunc = FileViewStyleFunc
-	sv.SetState(true, states.ReadOnly)
-	sv.SetSlice(&fv.Files)
-	if gi.Prefs.FileViewSort != "" {
-		sv.SetSortFieldName(gi.Prefs.FileViewSort)
+	fsv := fv.FilesView()
+	fsv.SetState(true, states.ReadOnly)
+	fsv.SetSlice(&fv.Files)
+	fsv.StyleFunc = func(w gi.Widget, s *styles.Style, row, col int) {
+		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
+			s.Color = grr.Log(colors.FromName(clr))
+			return
+		}
+		fn := fv.Files[row].Name
+		ext := strings.ToLower(filepath.Ext(fn))
+		if _, has := fv.ExtMap[ext]; has {
+			s.Color = colors.Scheme.Primary.Base
+		} else {
+			s.Color = colors.Scheme.OnSurface
+		}
 	}
-	sv.OnSelect(func(e events.Event) {
-		fv.FileSelectAction(sv.SelectedIdx)
+	if gi.Prefs.FileViewSort != "" {
+		fsv.SetSortFieldName(gi.Prefs.FileViewSort)
+	}
+	fsv.OnSelect(func(e events.Event) {
+		fv.FileSelectAction(fsv.SelectedIdx)
 	})
-	sv.OnDoubleClick(func(e events.Event) {
+	fsv.OnDoubleClick(func(e events.Event) {
 		if !fv.SelectFile() {
 			e.SetHandled() // don't pass along; keep dialog open
 		}

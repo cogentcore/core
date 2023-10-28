@@ -126,7 +126,7 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 	mv.Values = make([]Value, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := laser.NonPtrValue(mpv)
+	mpvnp := laser.NonPtrValue(laser.OnePtrUnderlyingValue(mpv))
 
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
 	laser.ValueSliceSort(keys, true)

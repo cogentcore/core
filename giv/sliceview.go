@@ -26,6 +26,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -56,11 +57,11 @@ var _ SliceViewer = (*SliceView)(nil)
 // configuration of elements in the view.  If style properties are set
 // then you must call widg.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
-type SliceViewStyleFunc func(sv *SliceView, slice any, widg gi.Widget, row int, vv Value)
+type SliceViewStyleFunc func(w gi.Widget, s *styles.Style, row int)
 
-func (sv *SliceView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value) {
+func (sv *SliceView) StyleRow(w gi.Widget, idx, fidx int) {
 	if sv.StyleFunc != nil {
-		sv.StyleFunc(sv, svnp.Interface(), widg, idx, vv)
+		sv.StyleFunc(w, &w.AsWidget().Styles, idx)
 	}
 }
 
@@ -168,7 +169,7 @@ type SliceViewer interface {
 	ConfigOneRow(sc *gi.Scene)
 
 	// StyleRow calls a custom style function on given row (and field)
-	StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value)
+	StyleRow(w gi.Widget, idx, fidx int)
 
 	// RowFirstWidget returns the first widget for given row
 	// (could be index or not) -- false if out of range
@@ -317,7 +318,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			gl := w.(*gi.Layout)
 			gl.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				gl.SetStretchMax() // for this to work, ALL layers above need it too
+				s.SetStretchMax() // for this to work, ALL layers above need it too
 			})
 		case "grid-lay/grid": // slice grid
 			sg := w.(*gi.Frame)
@@ -345,24 +346,31 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			})
 
 		}
-		if w.Parent().Name() == "grid" {
-			if strings.HasPrefix(w.Name(), "index-") {
+		if w.Parent().PathFrom(sv) == "grid-lay/grid" {
+			switch {
+			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
 					s.MinWidth.SetEm(1.5)
 					s.Padding.Right.SetDp(4)
 					s.Text.Align = styles.AlignRight
 				})
-			}
-			if strings.HasPrefix(w.Name(), "add-") {
+			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
 					s.Color = colors.Scheme.Success.Base
 				})
-			}
-			if strings.HasPrefix(w.Name(), "del-") {
+			case strings.HasPrefix(w.Name(), "del-"):
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
 					s.Color = colors.Scheme.Error.Base
+				})
+			case strings.HasPrefix(w.Name(), "value-"):
+				w.Style(func(s *styles.Style) {
+					idx := grr.Log(strconv.Atoi(strings.TrimPrefix(w.Name(), "value-")))
+					si := sv.StartIdx + idx
+					if si < sv.SliceSize {
+						sv.This().(SliceViewer).StyleRow(w, si, 0)
+					}
 				})
 			}
 		}
@@ -812,7 +820,6 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 				}
 			}
 		}
-		sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 	}
 	sv.This().(SliceViewer).UpdateWidgets()
 }
@@ -861,7 +868,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			}
 			issel := sv.IdxIsSelected(si)
 			widg.AsWidget().SetSelected(issel)
-			sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 			if sv.Is(SliceViewShowIndex) {
 				idxlab.SetState(false, states.Invisible)
 				idxlab.SetSelected(issel)

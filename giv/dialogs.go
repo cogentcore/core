@@ -312,22 +312,19 @@ func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *g
 	wb := ctx.AsWidget()
 	FontChooserSizeDots = int(wb.Styles.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
-	dlg := TableViewSelectDialog(ctx, opts, &paint.FontLibrary.FontInfo, -1, FontInfoStyleFunc, fun)
+	fi := paint.FontLibrary.FontInfo
+	dlg := TableViewSelectDialog(ctx, opts, &fi, -1,
+		func(w gi.Widget, s *styles.Style, row, col int) {
+			if col != 4 {
+				return
+			}
+			s.Font.Family = fi[row].Name
+			s.Font.Stretch = fi[row].Stretch
+			s.Font.Weight = fi[row].Weight
+			s.Font.Style = fi[row].Style
+			s.Font.Size.SetPt(float32(FontChooserSize))
+		}, fun)
 	return dlg
-}
-
-func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value) {
-	if col != 4 {
-		return
-	}
-	finf, ok := slice.([]paint.FontInfo)
-	if ok {
-		widg.SetProp("font-family", (finf)[row].Name)
-		widg.SetProp("font-stretch", (finf)[row].Stretch)
-		widg.SetProp("font-weight", (finf)[row].Weight)
-		widg.SetProp("font-style", (finf)[row].Style)
-		widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
-	}
 }
 
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
@@ -335,16 +332,12 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 // the dialog signal.
 func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	ics := icons.All()
-	dlg := SliceViewSelectDialog(ctx, opts, &ics, curIc, IconChooserStyleFunc, fun)
+	dlg := SliceViewSelectDialog(ctx, opts, &ics, curIc,
+		func(w gi.Widget, s *styles.Style, row int) {
+			// w.(*gi.Button).SetText(string(ics[row]))
+			s.SetStretchMaxWidth()
+		}, fun)
 	return dlg
-}
-
-func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv Value) {
-	ic, ok := slice.([]icons.Icon)
-	if ok {
-		widg.(*gi.Button).SetText(string(ic[row]))
-		widg.SetStretchMaxWidth()
-	}
 }
 
 // ColorViewDialog for editing a color using a ColorView -- optionally
