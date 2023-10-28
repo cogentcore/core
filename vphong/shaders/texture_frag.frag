@@ -22,7 +22,7 @@ layout(location = 1) in vec3 Norm;
 layout(location = 2) in vec3 CamDir;
 layout(location = 3) in vec2 TexCoord;
 
-layout(location = 0) out vec4 outputColor;
+layout(location = 0) out vec4 outColor;
 
 #include "phong_frag.frag"
 
@@ -46,10 +46,6 @@ void main() {
 	float Reflect = ShinyBright.y;
 	float Bright = ShinyBright.z;
 	vec3 Specular = vec3(1,1,1);
-	vec3 Ambdiff, Spec;
-	PhongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Reflect, Ambdiff, Spec);
-
-	// Final fragment color -- premultiplied alpha
-	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
+	PhongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Reflect, Bright, opacity, outColor);
 }
 

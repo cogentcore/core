@@ -54,7 +54,7 @@ layout(set = 2, binding = 3) uniform SpotLightsU {
 // 	clr = vec4(0.5 + 0.5 * val, 1.0);
 // }
 
-void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, float reflct, out vec3 ambdiff, out vec3 spec) {
+void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, float reflct, float bright, float opacity, out vec4 outColor) {
 
 	vec3 ambientTotal  = vec3(0.0);
 	vec3 diffuseTotal  = vec3(0.0);
@@ -155,7 +155,28 @@ void PhongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		}
 	}
 
-	ambdiff = ambientTotal + Emissive.rgb + diffuseTotal;
-	spec = specularTotal;
+	vec3 ambdiff = ambientTotal + Emissive.rgb + diffuseTotal;
+	outColor = min(vec4((bright * ambdiff + specularTotal) * opacity, opacity), vec4(1.0));
+}
+
+float SRGBToLinearComp(float value) {
+    const float inv_12_92 = 0.0773993808;
+    return value <= 0.04045
+       ? value * inv_12_92 
+       : pow((value + 0.055) / 1.055, 2.4);
+}
+
+float LinearToSRGBComp(float value) {
+    return value <= 0.0031308
+       ? value * 12.92
+       : 1.055 * (pow(value, 1.0/2.4)) + 0.055;
+}
+
+vec3 LinearToSRGB(vec3 lin) {
+    return vec3(LinearToSRGBComp(lin.x), LinearToSRGBComp(lin.y), LinearToSRGBComp(lin.z));
+}
+
+vec3 SRGBToLinear(vec3 srgb) {
+    return vec3(SRGBToLinearComp(srgb.x), SRGBToLinearComp(srgb.y), SRGBToLinearComp(srgb.z));
 }
 

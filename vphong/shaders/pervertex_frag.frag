@@ -21,13 +21,13 @@ layout(location = 2) in vec3 CamDir;
 // layout(location = 3) in vec2 TexCoord;
 layout(location = 3) in vec4 VtxColor;
 
-layout(location = 0) out vec4 outputColor;
+layout(location = 0) out vec4 outColor;
 
 #include "phong_frag.frag"
 			
 void main() {
 	float opacity = VtxColor.a;
-	vec3 clr = pow(VtxColor.rgb, vec3(2.2));	// we need to undo gamma on incoming texture colors
+	vec3 clr = SRGBToLinear(VtxColor.rgb);	// we need to undo gamma on incoming colors
 	// vec3 clr = VtxColor.rgb;
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
@@ -35,10 +35,6 @@ void main() {
 	float Reflect = 0; // ShinyBright.y;
 	float Bright = ShinyBright.z;
 	vec3 Specular = vec3(1,1,1);
-	vec3 Ambdiff, Spec;
-	PhongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Reflect, Ambdiff, Spec);
-
-	// Final fragment color -- premultiplied alpha
-	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
+	PhongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Reflect, Bright, opacity, outColor);
 }
 

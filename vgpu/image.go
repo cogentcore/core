@@ -480,6 +480,7 @@ func (im *Image) DevGoImageCopy(rgba *image.RGBA) error {
 	copy(rgba.Pix, pix)
 	vk.UnmapMemory(im.Dev, im.Mem)
 	if im.Format.IsRGBAUnorm() {
+		fmt.Println("converting to linear")
 		SetImageSRGBFmLinear(rgba)
 	}
 	rgba.Stride = im.Format.Stride()

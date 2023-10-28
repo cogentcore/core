@@ -302,6 +302,7 @@ func (rp *Render) ConfigGrab(dev vk.Device) {
 	}
 	rp.Grab.Format.Defaults()
 	rp.Grab.Format = rp.Format
+	rp.Grab.Format.SetFormat(ImageRGBA32)
 	rp.Grab.Format.SetMultisample(1) // can't have for grabs
 	rp.Grab.SetFlag(true, ImageOnHostOnly)
 	rp.Grab.Dev = dev
