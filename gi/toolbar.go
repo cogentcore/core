@@ -6,6 +6,7 @@ package gi
 
 import (
 	"goki.dev/colors"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -19,9 +20,10 @@ func DefaultTopAppBar(tb *Toolbar) {
 	NewButton(tb).SetIcon(icons.ArrowForward)
 	NewChooser(tb).SetEditable(true)
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
-		NewButton(m).SetText("System Preferences").OnClick(func(e events.Event) {
-			TheViewIFace.PrefsView(&Prefs)
-		})
+		NewButton(m).SetText("System Preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
+			OnClick(func(e events.Event) {
+				TheViewIFace.PrefsView(&Prefs)
+			})
 		NewButton(m).SetText("Inspect").OnClick(func(e events.Event) {
 			TheViewIFace.GoGiEditor(tb.Sc)
 		})

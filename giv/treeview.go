@@ -1060,16 +1060,16 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 }
 
 func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
-	gi.NewButton(m, "copy").SetText("Copy").SetShortcutKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m, "copy").SetText("Copy").SetKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
 		})
 	if !tv.IsDisabled() {
-		gi.NewButton(m, "cut").SetText("Cut").SetShortcutKey(keyfun.Cut).SetState(!tv.HasSelection(), states.Disabled).
+		gi.NewButton(m, "cut").SetText("Cut").SetKey(keyfun.Cut).SetState(!tv.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tv.This().(gi.Clipper).Cut()
 			})
-		pbt := gi.NewButton(m, "paste").SetText("Paste").SetShortcutKey(keyfun.Paste).
+		pbt := gi.NewButton(m, "paste").SetText("Paste").SetKey(keyfun.Paste).
 			OnClick(func(e events.Event) {
 				tv.This().(gi.Clipper).Paste()
 			})

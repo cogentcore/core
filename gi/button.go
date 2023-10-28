@@ -222,8 +222,8 @@ func (bt *Button) ButtonStyles() {
 	})
 }
 
-// SetShortcut sets the shortcut of the button from the given [keyfun.Funs]
-func (bt *Button) SetShortcutKey(kf keyfun.Funs) *Button {
+// SetKey sets the shortcut of the button from the given [keyfun.Funs]
+func (bt *Button) SetKey(kf keyfun.Funs) *Button {
 	bt.SetShortcut(keyfun.ShortcutFor(kf))
 	return bt
 }
