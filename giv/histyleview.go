@@ -96,18 +96,15 @@ func HiStylesView(st *histyle.Styles) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 
-	tv := NewMapView(sc, "tv")
-	tv.SetMap(st)
-	tv.Style(func(s *styles.Style) {
-		tv.SetStretchMax()
-	})
+	mv := NewMapView(sc).SetMap(st)
+	mv.SetStretchMax()
 
 	histyle.StylesChanged = false
-	tv.OnChange(func(e events.Event) {
+	mv.OnChange(func(e events.Event) {
 		histyle.StylesChanged = true
 	})
 
-	tb := tv.Toolbar()
+	tb := mv.Toolbar()
 	oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen)
 	oj.Args[0].SetTag(".ext", ".histy")
 	sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)

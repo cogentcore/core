@@ -387,13 +387,13 @@ func (mv *MapView) ConfigToolbar() {
 	if mv.IsReadOnly() {
 		ndef = 1
 	}
-	if len(*tb.Children()) == 0 {
+	if len(*tb.Children()) < ndef {
 		gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
 			OnClick(func(e events.Event) {
 				mv.ToggleSort()
 			})
 		if ndef > 1 {
-			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the map").
+			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
 					mv.MapAdd()
 				})
