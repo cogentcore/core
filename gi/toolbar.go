@@ -8,6 +8,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 )
 
@@ -25,6 +26,12 @@ func DefaultMainToolbar(tb *Toolbar) {
 	NewButton(tb).SetIcon(icons.ArrowForward)
 	NewChooser(tb).SetEditable(true)
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
+		NewButton(m).SetText("System Preferences").OnClick(func(e events.Event) {
+			TheViewIFace.PrefsView(&Prefs)
+		})
+		NewButton(m).SetText("Inspect").OnClick(func(e events.Event) {
+			TheViewIFace.GoGiEditor(tb.Sc)
+		})
 		NewButton(m).SetText("Edit")
 		NewButton(m).SetText("Window")
 	})
