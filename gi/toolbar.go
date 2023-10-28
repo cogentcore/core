@@ -12,16 +12,9 @@ import (
 	"goki.dev/icons"
 )
 
-// MainToolbar is the function called to construct the main
-// [Toolbar] located at the top of every [WindowStage] and
-// full window [DialogStage]. By default, it is set to
-// [DefaultMainToolbar], so anyone defining a custom [MainToolbar]
-// should typically call that function at the start of theirs.
-var MainToolbar = DefaultMainToolbar
-
-// DefaultMainToolbar is the default value for [MainToolbar].
+// DefaultTopAppBar is the default value for [Scene.TopAppBar].
 // It adds navigation buttons and an editable chooser bar.
-func DefaultMainToolbar(tb *Toolbar) {
+func DefaultTopAppBar(tb *Toolbar) {
 	NewButton(tb).SetIcon(icons.ArrowBack)
 	NewButton(tb).SetIcon(icons.ArrowForward)
 	NewChooser(tb).SetEditable(true)

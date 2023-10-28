@@ -126,7 +126,7 @@ func (st *MainStage) SetWindowInsets() {
 
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
-	st.AddMainToolbar()
+	st.AddTopAppBar()
 	// if st.History {
 	// 	sc := st.Scene
 	// 	updt := sc.UpdateStart()
@@ -140,7 +140,7 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 
 func (st *MainStage) AddDialogDecor() *MainStage {
 	if st.FullWindow {
-		st.AddMainToolbar()
+		st.AddTopAppBar()
 	}
 	// if st.History {
 	// 	sc := st.Scene
@@ -159,9 +159,12 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 	return st
 }
 
-func (st *MainStage) AddMainToolbar() *MainStage {
+func (st *MainStage) AddTopAppBar() *MainStage {
+	if st.Scene.TopAppBar == nil {
+		return st
+	}
 	tb := st.Scene.InsertNewChild(ToolbarType, 0).(*Toolbar)
-	MainToolbar(tb)
+	st.Scene.TopAppBar(tb)
 	return st
 }
 
