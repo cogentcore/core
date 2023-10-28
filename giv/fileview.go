@@ -293,7 +293,7 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetShortcutKey(keyfun.Jump).SetTooltip("go up one level into the parent folder").
+	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetKey(keyfun.Jump).SetTooltip("go up one level into the parent folder").
 		OnClick(func(e events.Event) {
 			fv.DirPathUp()
 		})

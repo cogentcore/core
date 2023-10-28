@@ -848,16 +848,16 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	NewButton(m, "copy").SetText("Copy").SetShortcutKey(keyfun.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+	NewButton(m, "copy").SetText("Copy").SetKey(keyfun.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tf.This().(Clipper).Copy(true)
 		})
 	if !tf.IsReadOnly() {
-		NewButton(m, "cut").SetText("Cut").SetShortcutKey(keyfun.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+		NewButton(m, "cut").SetText("Cut").SetKey(keyfun.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				tf.This().(Clipper).Cut()
 			})
-		pbt := NewButton(m, "paste").SetText("Paste").SetShortcutKey(keyfun.Paste).
+		pbt := NewButton(m, "paste").SetText("Paste").SetKey(keyfun.Paste).
 			OnClick(func(e events.Event) {
 				tf.This().(Clipper).Paste()
 			})
