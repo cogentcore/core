@@ -1248,6 +1248,7 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.Is(LayoutNeedsRedo))
 	}
 	ly.DoLayoutBase(sc, parBBox, iter)
+	ly.DoLayoutParts(sc, parBBox, iter)
 	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:

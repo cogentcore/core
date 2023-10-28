@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -127,17 +128,27 @@ func (st *MainStage) SetWindowInsets() {
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
 	if st.History {
-		// sc := st.Scene
-		// parts := sc.NewParts()
-		// but := NewButton(parts, "win-back")
-		// _ = but
-		// todo: do more button config
+		sc := st.Scene
+		parts := sc.NewParts(LayoutHoriz)
+		updt := parts.UpdateStart()
+		NewButton(parts).SetIcon(icons.ArrowBack)
+		parts.Update()
+		parts.UpdateEnd(updt)
+		sc.SetNeedsLayoutUpdate(sc, updt)
 	}
-
 	return st
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
+	if st.History {
+		sc := st.Scene
+		parts := sc.NewParts(LayoutHoriz)
+		updt := parts.UpdateStart()
+		NewButton(parts).SetIcon(icons.ArrowBack)
+		parts.Update()
+		parts.UpdateEnd(updt)
+		sc.SetNeedsLayoutUpdate(sc, updt)
+	}
 	// todo: moveable, resizable
 	return st
 }
