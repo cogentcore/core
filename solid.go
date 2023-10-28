@@ -16,9 +16,7 @@ import (
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-//
-//goki:no-new
-type Solid struct {
+type Solid struct { //goki:no-new
 	NodeBase
 
 	// name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
