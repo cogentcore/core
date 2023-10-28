@@ -396,7 +396,6 @@ func (st *StageBase) Run() Stage {
 	if st.Scene == nil {
 		slog.Error("stage has nil scene")
 	}
-	st.Scene.ConfigScene() // always config prior to running
 	// st.This.InitialFocus() // not working
 	switch st.Type {
 	case WindowStage:

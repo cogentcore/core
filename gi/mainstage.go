@@ -161,11 +161,8 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 }
 
 func (st *MainStage) AddMainToolbar() *MainStage {
-	// updt := st.Scene.UpdateStart()
 	tb := st.Scene.InsertNewChild(ToolbarType, 0).(*Toolbar)
 	NewButton(tb).SetIcon(icons.ArrowBack)
-	st.Scene.Update()
-	// st.Scene.UpdateEndLayout(updt)
 	return st
 }
 
@@ -188,6 +185,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 // RunWindow runs a Window with current settings.
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
+	st.Scene.ConfigScene()
 
 	// note: need a StageMgr to get initial pref size
 	if CurRenderWin == nil {
@@ -230,6 +228,7 @@ func (st *MainStage) RunWindow() *MainStage {
 // RenderWin field will be set to the parent RenderWin window.
 func (st *MainStage) RunDialog() *MainStage {
 	st.AddDialogDecor()
+	st.Scene.ConfigScene()
 
 	ctx := st.CtxWidget.AsWidget()
 	ms := ctx.Sc.MainStageMgr()
@@ -272,6 +271,7 @@ func (st *MainStage) RunDialog() *MainStage {
 // RenderWin field will be set to the parent RenderWin window.
 func (st *MainStage) RunSheet() *MainStage {
 	st.AddSheetDecor()
+	st.Scene.ConfigScene()
 	if CurRenderWin == nil {
 		// todo: error here -- must have main window!
 		return nil
