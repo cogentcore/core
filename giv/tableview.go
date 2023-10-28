@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -64,7 +65,7 @@ var _ SliceViewer = (*TableView)(nil)
 // configuration of elements in the view.  If style properties are set
 // then you must call widg.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
-type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value)
+type TableViewStyleFunc func(w gi.Widget, s *styles.Style, row, col int)
 
 func (tv *TableView) OnInit() {
 	tv.TableViewInit()
@@ -102,6 +103,7 @@ func (tv *TableView) TableViewInit() {
 			sh.Lay = gi.LayoutHoriz
 			sh.Style(func(s *styles.Style) {
 				sh.Spacing.SetDp(0)
+				s.MaxWidth.SetDp(0)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "frame/grid-lay": // grid layout
@@ -140,25 +142,42 @@ func (tv *TableView) TableViewInit() {
 
 		}
 		if w.Parent().PathFrom(tv) == "frame/grid-lay/grid" {
-			if strings.HasPrefix(w.Name(), "index-") {
+			switch {
+			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
 					s.MinWidth.SetEm(1.5)
 					s.Padding.Right.SetDp(4)
 					s.Text.Align = styles.AlignRight
 				})
-			}
-			if strings.HasPrefix(w.Name(), "add-") {
+			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
 					s.Color = colors.Scheme.Success.Base
 				})
-			}
-			if strings.HasPrefix(w.Name(), "del-") {
+			case strings.HasPrefix(w.Name(), "del-"):
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
 					s.Color = colors.Scheme.Error.Base
 				})
+			case strings.HasPrefix(w.Name(), "value-"):
+				w.Style(func(s *styles.Style) {
+					fstr := strings.TrimPrefix(w.Name(), "value-")
+					dp := strings.Index(fstr, ".")
+					istr := fstr[dp+1:] // index is after .
+					fstr = fstr[:dp]    // field idx is -X.
+					idx := grr.Log(strconv.Atoi(istr))
+					fli := grr.Log(strconv.Atoi(fstr))
+					si := tv.StartIdx + idx
+					if si < tv.SliceSize {
+						tv.This().(SliceViewer).StyleRow(w, si, fli)
+					}
+				})
 			}
+		}
+		if w.Parent().PathFrom(tv) == "frame/header" {
+			w.Style(func(s *styles.Style) {
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+			})
 		}
 	})
 }
@@ -629,7 +648,6 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 					tv.SetChanged()
 				})
 			}
-			tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
 		}
 
 		if !tv.IsReadOnly() {
@@ -733,7 +751,6 @@ func (tv *TableView) UpdateWidgets() {
 					widg.AsWidget().SetState(true, states.ReadOnly)
 				}
 				widg.AsWidget().SetSelected(issel)
-				tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
 			} else {
 				widg.SetState(true, states.Invisible)
 				widg.AsWidget().SetSelected(false)
@@ -772,11 +789,10 @@ func (tv *TableView) UpdateWidgets() {
 	tv.UpdateScroll()
 }
 
-func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value) {
-	// todo: replace with direct styling
-	// if tv.StyleFunc != nil {
-	// 	tv.StyleFunc(tv, svnp.Interface(), widg, idx, fidx, vv)
-	// }
+func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
+	if tv.StyleFunc != nil {
+		tv.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
+	}
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
