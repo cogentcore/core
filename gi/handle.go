@@ -83,6 +83,6 @@ func (hl *Handle) Value() float32 {
 
 func (hl *Handle) Render(sc *Scene) {
 	fmt.Println("hl render", hl)
-	fmt.Printf("%#v\n", hl.LayState)
+	fmt.Printf("hl render LS %#v\n", hl.LayState)
 	hl.Frame.Render(sc)
 }
