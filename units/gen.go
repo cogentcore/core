@@ -68,4 +68,10 @@ func (v *Value) Set{{.Camel}}(val float32) {
 	v.Val = val
 	v.Un = Unit{{.Camel}}
 }
+
+// {{.Camel}} returns the given {{.Lower}} value in terms of dots:
+// {{.Desc}}
+func (uc *Context) {{.Camel}}(val float32) float32 {
+	return uc.ToDots(val, Unit{{.Camel}})
+}
 `))

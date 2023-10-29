@@ -97,6 +97,6 @@ const (
 	// UnitPt = points -- 1pt = 1/72th of 1in
 	UnitPt
 
-	// UnitDot = actual real display pixels -- generally only use internally
+	// UnitDot = actual real display pixels, which are generally only used internally
 	UnitDot
 )
