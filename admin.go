@@ -155,6 +155,21 @@ func ParentByTypeTry[T Ki](k Ki, embeds bool) (T, error) {
 	return v, err
 }
 
+// ChildByType is a generic helper function for [Ki.ChildByType]
+func ChildByType[T Ki](k Ki, embeds bool, startIdx ...int) T {
+	var n T
+	v, _ := k.ChildByType(n.KiType(), embeds, startIdx...).(T)
+	return v
+}
+
+// ChildByTypeTry is a generic helper function for [Ki.ChildByTypeTry]
+func ChildByTypeTry[T Ki](k Ki, embeds bool, startIdx ...int) (T, error) {
+	var n T
+	vi, err := k.ChildByTypeTry(n.KiType(), embeds, startIdx...)
+	v, _ := vi.(T)
+	return v, err
+}
+
 // IsRoot tests if this node is the root node -- checks Parent = nil.
 func IsRoot(k Ki) bool {
 	if k.This() == nil || k.Parent() == nil || k.Parent().This() == nil {
