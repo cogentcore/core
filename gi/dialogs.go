@@ -37,6 +37,10 @@ type Dialog struct {
 	// RdOnly is whether the dialog is read only
 	RdOnly bool
 
+	// a record of parent View names that have led up to this dialog,
+	// which is displayed as extra contextual information in view dialog windows
+	VwPath string
+
 	// Accepted means that the dialog was accepted -- else canceled
 	Accepted bool
 
@@ -166,6 +170,11 @@ func (dlg *Dialog) Cancel(text ...string) *Dialog {
 
 func (dlg *Dialog) ReadOnly(readOnly bool) *Dialog {
 	dlg.RdOnly = readOnly
+	return dlg
+}
+
+func (dlg *Dialog) ViewPath(viewPath string) *Dialog {
+	dlg.VwPath = viewPath
 	return dlg
 }
 

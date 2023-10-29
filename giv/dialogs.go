@@ -114,13 +114,13 @@ func TextEditorDialogTextEditor(dlg *gi.Dialog) *texteditor.Editor {
 // a structure using a StructView.
 //
 //gopy:interface=handle
-func StructViewDialog(dlg *gi.Dialog, stru any, viewPath string, tmpSave Value) *gi.Dialog {
+func StructViewDialog(dlg *gi.Dialog, stru any, tmpSave Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetStruct(stru)
 	return dlg
@@ -130,12 +130,12 @@ func StructViewDialog(dlg *gi.Dialog, stru any, viewPath string, tmpSave Value) 
 // of a map using a MapView.
 //
 //gopy:interface=handle
-func MapViewDialog(dlg *gi.Dialog, mp any, viewPath string, tmpSave Value) *gi.Dialog {
+func MapViewDialog(dlg *gi.Dialog, mp any, tmpSave Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 	sv := frame.InsertNewChild(MapViewType, prIdx+1, "map-view").(*MapView)
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetMap(mp)
 	return dlg
@@ -145,7 +145,7 @@ func MapViewDialog(dlg *gi.Dialog, mp any, viewPath string, tmpSave Value) *gi.D
 // It also takes an optional styling function for styling elements of the slice.
 //
 //gopy:interface=handle
-func SliceViewDialog(dlg *gi.Dialog, slice any, viewPath string, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
+func SliceViewDialog(dlg *gi.Dialog, slice any, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
@@ -156,7 +156,7 @@ func SliceViewDialog(dlg *gi.Dialog, slice any, viewPath string, tmpSave Value, 
 	}
 	sv.SetFlag(noAdd, SliceViewNoAdd)
 	sv.SetFlag(noDelete, SliceViewNoDelete)
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetSlice(slice)
 	return dlg
@@ -166,7 +166,7 @@ func SliceViewDialog(dlg *gi.Dialog, slice any, viewPath string, tmpSave Value, 
 // slice using a SliceView. It also takes an optional styling function for styling elements of the slice.
 //
 //gopy:interface=handle
-func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, viewPath string, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
+func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
@@ -176,7 +176,7 @@ func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, viewPath string, s
 		sv.StyleFunc = styleFunc[0]
 	}
 	sv.SelVal = curVal
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.SetSlice(slice)
 	sv.OnSelect(func(e events.Event) {
 		dlg.Data = sv.SelectedIdx
@@ -192,7 +192,7 @@ func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, viewPath string, s
 // TableView. It also takes an optional styling function for styling elements of the table.
 //
 //gopy:interface=handle
-func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...TableViewStyleFunc) *gi.Dialog {
+func TableViewDialog(dlg *gi.Dialog, slcOfStru any, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...TableViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
@@ -202,7 +202,7 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Val
 	}
 	sv.SetFlag(noAdd, SliceViewNoAdd)
 	sv.SetFlag(noDelete, SliceViewNoDelete)
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.SetSlice(slcOfStru)
@@ -213,7 +213,7 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Val
 // TableView. It also takes an optional styling function for styling elements of the table.
 //
 //gopy:interface=handle
-func TableViewSelectDialog(dlg *gi.Dialog, slcOfStru any, initRow int, viewPath string, styleFunc ...TableViewStyleFunc) *gi.Dialog {
+func TableViewSelectDialog(dlg *gi.Dialog, slcOfStru any, initRow int, styleFunc ...TableViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
@@ -223,7 +223,7 @@ func TableViewSelectDialog(dlg *gi.Dialog, slcOfStru any, initRow int, viewPath 
 		sv.StyleFunc = styleFunc[0]
 	}
 	sv.SelectedIdx = initRow
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.SetSlice(slcOfStru)
 	sv.OnSelect(func(e events.Event) {
 		dlg.Data = sv.SelectedIdx
@@ -240,12 +240,12 @@ var FontChooserSize = 18
 var FontChooserSizeDots = 18
 
 // FontChooserDialog adds to the given dialog a display for choosing a font.
-func FontChooserDialog(dlg *gi.Dialog, viewPath string) *gi.Dialog {
+func FontChooserDialog(dlg *gi.Dialog) *gi.Dialog {
 	wb := dlg.Stage.CtxWidget.AsWidget()
 	FontChooserSizeDots = int(wb.Styles.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	fi := paint.FontLibrary.FontInfo
-	return TableViewSelectDialog(dlg, &fi, -1, viewPath,
+	return TableViewSelectDialog(dlg, &fi, -1,
 		func(w gi.Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
@@ -259,9 +259,9 @@ func FontChooserDialog(dlg *gi.Dialog, viewPath string) *gi.Dialog {
 }
 
 // IconChooserDialog adds to the given dialog a display for choosing an icon.
-func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon, viewPath string) *gi.Dialog {
+func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon) *gi.Dialog {
 	ics := icons.All()
-	return SliceViewSelectDialog(dlg, &ics, curIc, viewPath,
+	return SliceViewSelectDialog(dlg, &ics, curIc,
 		func(w gi.Widget, s *styles.Style, row int) {
 			w.(*gi.Button).SetText(string(ics[row]))
 			s.SetStretchMaxWidth()
@@ -269,14 +269,14 @@ func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon, viewPath string) *gi.Di
 }
 
 // ColorViewDialog adds to the given dialog a display for editing a color using a ColorView.
-func ColorViewDialog(dlg *gi.Dialog, clr color.RGBA, viewPath string, tmpSave Value) *gi.Dialog {
+func ColorViewDialog(dlg *gi.Dialog, clr color.RGBA, tmpSave Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 	dlg.Stage.ClickOff = true
 
 	sv := frame.InsertNewChild(ColorViewType, prIdx+1, "color-view").(*ColorView)
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
-	sv.ViewPath = viewPath
+	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetColor(clr)
 	sv.OnChange(func(e events.Event) {
