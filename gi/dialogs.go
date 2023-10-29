@@ -335,22 +335,24 @@ func (dlg *Dialog) CancelDialog() {
 
 // OnAccept adds an event listener for when the dialog is accepted
 // (closed in a positive or neutral way)
-func (dlg *Dialog) OnAccept(fun func(e events.Event)) {
+func (dlg *Dialog) OnAccept(fun func(e events.Event)) *Dialog {
 	dlg.Scene.OnChange(func(e events.Event) {
 		if dlg.Accepted {
 			fun(e)
 		}
 	})
+	return dlg
 }
 
 // OnCancel adds an event listener for when the dialog is canceled
 // (closed in a negative way)
-func (dlg *Dialog) OnCancel(fun func(e events.Event)) {
+func (dlg *Dialog) OnCancel(fun func(e events.Event)) *Dialog {
 	dlg.Scene.OnChange(func(e events.Event) {
 		if !dlg.Accepted {
 			fun(e)
 		}
 	})
+	return dlg
 }
 
 // Close closes the stage associated with this dialog
