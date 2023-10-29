@@ -125,15 +125,23 @@ func (sc *Scene) SceneStyles() {
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
 
-		insets := styles.NewSideFloats()
+		// insets
+
+		ms := sc.Stage.AsMain()
+		if ms == nil || (ms.Type == DialogStage && !ms.FullWindow) {
+			return
+		}
 
 		mm := sc.Stage.MainMgr()
-		if mm != nil {
-			rw := mm.RenderWin
-			if rw != nil {
-				insets = rw.GoosiWin.Insets()
-			}
+		if mm == nil {
+			return
 		}
+		rw := mm.RenderWin
+		if rw == nil {
+			return
+		}
+
+		insets := rw.GoosiWin.Insets()
 
 		s.Padding.Set(
 			units.Dot(insets.Top),
