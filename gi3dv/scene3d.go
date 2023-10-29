@@ -11,6 +11,7 @@ import (
 	"image"
 	"image/draw"
 	"log"
+	"log/slog"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi3d"
@@ -135,11 +136,7 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 	if se.Scene.Frame == nil {
 		return
 	}
-	pos := se.LayState.Alloc.Pos.ToPointFloor()
-	sz := se.LayState.Alloc.Size.ToPointCeil()
-	// sz := se.Scene.Geom.Size
-	max := pos.Add(sz)
-	r := image.Rectangle{Min: pos, Max: max}
+	r := se.ScBBox
 	sp := image.Point{}
 	if se.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := gi.AsWidget(se.Par)
@@ -147,7 +144,7 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			fmt.Println("Scene3D aberrant sp:", sp, "r:", r, "pbb:", pbb)
+			slog.Error("gi3dv.Scene3D bad bounding box", "path", se, "startPos", sp, "bbox", r, "parBBox", pbb)
 			return
 		}
 		r = nr
@@ -157,7 +154,6 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 		log.Println("frame image err:", err)
 		return
 	}
-	// fmt.Println("r", r, "bnd", img.Bounds())
 	draw.Draw(sc.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
 	se.Scene.ImageDone()
 }
