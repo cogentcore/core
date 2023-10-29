@@ -171,7 +171,7 @@ func (ch *Chooser) ChooserStyles() {
 			} else {
 				text.Type = TextFieldOutlined
 			}
-			ch.TextFieldHandlers(text)
+			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
 				// parent handles everything
 				s.Padding.Set()
@@ -651,7 +651,7 @@ func (ch *Chooser) HandleChooserKeys() {
 	})
 }
 
-func (ch *Chooser) TextFieldHandlers(tf *TextField) {
+func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	tf.OnChange(func(e events.Event) {
 		text := tf.Text()
 		for idx, item := range ch.Items {
@@ -675,6 +675,9 @@ func (ch *Chooser) TextFieldHandlers(tf *TextField) {
 // CompleteMatch is the [complete.MatchFunc] used for the
 // editable textfield part of the Chooser (if it exists).
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
+	if ch.ItemsFunc != nil {
+		ch.ItemsFunc()
+	}
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
 	for idx, item := range ch.Items {
