@@ -181,14 +181,14 @@ func (ch *Chooser) ChooserStyles() {
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
 				if ch.Editable {
-					s.Width.SetDp(0)
+					s.Width.Dp(0)
 				} else {
-					s.Width.SetDp(16)
+					s.Width.Dp(16)
 				}
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
-				s.Font.Size.SetDp(16)
+				s.Font.Size.Dp(16)
 				s.AlignV = styles.AlignMiddle
 			})
 		}

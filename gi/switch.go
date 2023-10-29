@@ -136,28 +136,28 @@ func (sw *Switch) SwitchStyles() {
 				}
 				// switches need to be bigger
 				if sw.Type == SwitchSwitch {
-					s.Width.SetEm(3)
-					s.Height.SetEm(3)
+					s.Width.Em(3)
+					s.Height.Em(3)
 				} else {
-					s.Width.SetEm(1.5)
-					s.Height.SetEm(1.5)
+					s.Width.Em(1.5)
+					s.Height.Em(1.5)
 				}
 			})
 		case "parts/stack/icon1": // off
 			w.Style(func(s *styles.Style) {
 				// switches need to be bigger
 				if sw.Type == SwitchSwitch {
-					s.Width.SetEm(3)
-					s.Height.SetEm(3)
+					s.Width.Em(3)
+					s.Height.Em(3)
 				} else {
-					s.Width.SetEm(1.5)
-					s.Height.SetEm(1.5)
+					s.Width.Em(1.5)
+					s.Height.Em(1.5)
 				}
 			})
 		// todo: disabled?
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetCh(0.1)
+				s.Width.Ch(0.1)
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {

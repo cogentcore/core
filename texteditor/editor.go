@@ -175,7 +175,7 @@ func (ed *Editor) OnInit() {
 func (ed *Editor) ViewStyles() {
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		ed.CursorWidth.SetDp(1)
+		ed.CursorWidth.Dp(1)
 		ed.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
 		ed.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		ed.HighlightColor.SetSolid(colors.Orange)

@@ -1227,8 +1227,8 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf.Tooltip, _ = vv.Desc()
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
-		s.MinWidth.SetCh(16)
-		s.MaxWidth.SetDp(-1)
+		s.MinWidth.Ch(16)
+		s.MaxWidth.Dp(-1)
 	})
 	tf.Config(sc)
 
@@ -1270,8 +1270,8 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
 	tf.Style(func(s *styles.Style) {
-		s.MinWidth.SetCh(16)
-		s.MaxWidth.SetDp(-1)
+		s.MinWidth.Ch(16)
+		s.MaxWidth.Dp(-1)
 	})
 	tf.Config(sc)
 
@@ -1362,7 +1362,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
 	tf.Style(func(s *styles.Style) {
-		tf.Styles.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
+		tf.Styles.MinWidth.Ch(float32(len(DefaultTimeFormat) + 2))
 	})
 	tf.Config(sc)
 	tf.OnChange(func(e events.Event) {

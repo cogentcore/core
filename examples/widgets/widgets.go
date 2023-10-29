@@ -212,7 +212,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetSnap(true).
 		SetTracking(true)
 	scroll0.Style(func(s *styles.Style) {
-		s.MaxHeight.SetDp(12)
+		s.MaxHeight.Dp(12)
 	})
 	scroll0.OnChange(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)

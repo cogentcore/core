@@ -123,7 +123,7 @@ func (sp *Spinner) SpinnerStyles() {
 			})
 			up.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
-				s.Font.Size.SetDp(18)
+				s.Font.Size.Dp(18)
 				s.Padding.Set(units.Dp(1))
 			})
 		case "parts/down":
@@ -142,7 +142,7 @@ func (sp *Spinner) SpinnerStyles() {
 			})
 			down.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
-				s.Font.Size.SetDp(18)
+				s.Font.Size.Dp(18)
 				s.Padding.Set(units.Dp(1))
 			})
 		}

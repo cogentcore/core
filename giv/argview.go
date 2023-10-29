@@ -35,8 +35,8 @@ func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
-		s.MaxWidth.SetDp(-1)
-		s.MaxHeight.SetDp(-1)
+		s.MaxWidth.Dp(-1)
+		s.MaxHeight.Dp(-1)
 	})
 	av.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(av) {
@@ -44,19 +44,19 @@ func (av *ArgView) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelTitleLarge
 			title.Style(func(s *styles.Style) {
-				s.MaxWidth.SetDp(-1)
+				s.MaxWidth.Dp(-1)
 				s.Text.Align = styles.AlignCenter
 				s.AlignV = styles.AlignTop
 			})
 		case "args-grid":
 			w.Style(func(s *styles.Style) {
 				// setting a pref here is key for giving it a scrollbar in larger context
-				s.MinWidth.SetEm(1.5)
-				s.Width.SetEm(1.5)
-				s.MaxWidth.SetDp(-1) // for this to work, ALL layers above need it too
-				s.MinHeight.SetEm(10)
-				s.Height.SetEm(10)
-				s.MaxHeight.SetDp(-1)              // for this to work, ALL layers above need it too
+				s.MinWidth.Em(1.5)
+				s.Width.Em(1.5)
+				s.MaxWidth.Dp(-1) // for this to work, ALL layers above need it too
+				s.MinHeight.Em(10)
+				s.Height.Em(10)
+				s.MaxHeight.Dp(-1)                 // for this to work, ALL layers above need it too
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.Columns = 2
 			})

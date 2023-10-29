@@ -136,10 +136,10 @@ func (bt *Button) ButtonStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Em(0.625), units.Em(1.5))
 		if !bt.Icon.IsNil() {
-			s.Padding.Left.SetEm(1)
+			s.Padding.Left.Em(1)
 		}
 		if bt.Text == "" {
-			s.Padding.Right.SetEm(1)
+			s.Padding.Right.Em(1)
 		}
 		s.Text.Align = styles.AlignCenter
 		s.MaxBoxShadow = styles.BoxShadow1()
@@ -181,15 +181,15 @@ func (bt *Button) ButtonStyles() {
 		switch w.PathFrom(bt) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(1.125)
-				s.Height.SetEm(1.125)
+				s.Width.Em(1.125)
+				s.Height.Em(1.125)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(0.5)
-				s.MinWidth.SetEm(0.5)
+				s.Width.Em(0.5)
+				s.MinWidth.Em(0.5)
 			})
 		case "parts/label":
 			label := w.(*Label)
@@ -208,12 +208,12 @@ func (bt *Button) ButtonStyles() {
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(0.5)
+				s.Width.Em(0.5)
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(1.125)
-				s.Height.SetEm(1.125)
+				s.Width.Em(1.125)
+				s.Height.Em(1.125)
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignBottom

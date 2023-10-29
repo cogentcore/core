@@ -64,7 +64,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
 		s.AlignV = styles.AlignMiddle
-		sc.Spacing.SetDp(12)
+		sc.Spacing.Dp(12)
 		s.SetStretchMaxWidth()
 		s.Height = units.Dp(48)
 	})

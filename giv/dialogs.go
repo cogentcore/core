@@ -91,8 +91,8 @@ func TextEditorDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi
 
 	tlv := frame.InsertNewChild(gi.LayoutType, prIdx+1, "text-lay").(*gi.Layout)
 	tlv.Style(func(s *styles.Style) {
-		s.Width.SetCh(80)
-		s.Height.SetEm(40)
+		s.Width.Ch(80)
+		s.Height.Em(40)
 		s.SetStretchMax()
 	})
 	tv := texteditor.NewEditor(tlv, "text-editor")
@@ -322,7 +322,7 @@ func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *g
 			s.Font.Stretch = fi[row].Stretch
 			s.Font.Weight = fi[row].Weight
 			s.Font.Style = fi[row].Style
-			s.Font.Size.SetPt(float32(FontChooserSize))
+			s.Font.Size.Pt(float32(FontChooserSize))
 		}, fun)
 	return dlg
 }

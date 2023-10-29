@@ -49,7 +49,7 @@ func (lv *VCSLogView) OnInit() {
 		switch w.PathFrom(lv) {
 		case "a-tf", "b-tf":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(12)
+				s.Width.Em(12)
 			})
 		}
 	})

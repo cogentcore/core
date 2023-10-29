@@ -155,7 +155,7 @@ func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		tf.CursorWidth.SetDp(1)
+		tf.CursorWidth.Dp(1)
 		tf.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
@@ -167,10 +167,10 @@ func (tf *TextField) TextFieldStyles() {
 		s.Margin.Set(units.Dp(1))
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		if !tf.LeadingIcon.IsNil() {
-			s.Padding.Left.SetDp(12)
+			s.Padding.Left.Dp(12)
 		}
 		if !tf.TrailingIcon.IsNil() {
-			s.Padding.Right.SetDp(12)
+			s.Padding.Right.Dp(12)
 		}
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnSurface
@@ -216,8 +216,8 @@ func (tf *TextField) TextFieldStyles() {
 			lead := w.(*Button)
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
-				s.Font.Size.SetDp(20)
-				s.Margin.Right.SetDp(16)
+				s.Font.Size.Dp(20)
+				s.Margin.Right.Dp(16)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
@@ -225,8 +225,8 @@ func (tf *TextField) TextFieldStyles() {
 			trail := w.(*Button)
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
-				s.Font.Size.SetDp(20)
-				s.Margin.Left.SetDp(16)
+				s.Font.Size.Dp(20)
+				s.Margin.Left.Dp(16)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})

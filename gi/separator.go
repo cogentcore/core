@@ -30,13 +30,13 @@ func (sp *Separator) OnInit() {
 		s.AlignH = styles.AlignCenter
 		s.Border.Style.Top = styles.BorderSolid
 		s.Border.Color.Top = colors.Scheme.OutlineVariant
-		s.Border.Width.Top.SetDp(1)
+		s.Border.Width.Top.Dp(1)
 		if sp.Horiz {
-			s.MaxWidth.SetDp(-1)
-			s.MinHeight.SetDp(1)
+			s.MaxWidth.Dp(-1)
+			s.MinHeight.Dp(1)
 		} else {
-			s.MaxHeight.SetDp(-1)
-			s.MinWidth.SetDp(1)
+			s.MaxHeight.Dp(-1)
+			s.MinWidth.Dp(1)
 		}
 	})
 }

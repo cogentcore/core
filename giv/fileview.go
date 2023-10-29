@@ -123,7 +123,7 @@ func (fv *FileView) FileViewStyles() {
 			sr := w.(*gi.Layout)
 			sr.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				sr.Spacing.SetDp(4)
+				sr.Spacing.Dp(4)
 				s.SetStretchMaxWidth()
 			})
 		case "sel-row/sel": // sel field

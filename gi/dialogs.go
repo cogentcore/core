@@ -66,7 +66,7 @@ func (dlg *Dialog) Title(title ...string) *Dialog {
 	}
 	NewLabel(dlg.Stage.Scene, "title").SetText(dlg.Stage.Title).
 		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
-		s.MaxWidth.SetDp(-1)
+		s.MaxWidth.Dp(-1)
 		s.AlignH = styles.AlignCenter
 		s.AlignV = styles.AlignTop
 		s.BackgroundColor.SetSolid(colors.Transparent)
@@ -79,8 +79,8 @@ func (dlg *Dialog) Prompt(prompt string) *Dialog {
 	NewLabel(dlg.Stage.Scene, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		s.MaxWidth.SetDp(-1)
-		s.Width.SetCh(30)
+		s.MaxWidth.Dp(-1)
+		s.Width.Ch(30)
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 		s.Color = colors.Scheme.OnSurfaceVariant
@@ -128,7 +128,7 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 	bb := NewLayout(dlg.Stage.Scene, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.Style(func(s *styles.Style) {
-		bb.Spacing.SetDp(8)
+		bb.Spacing.Dp(8)
 		s.SetStretchMaxWidth()
 	})
 	dlg.ButtonBox = bb

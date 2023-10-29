@@ -197,11 +197,11 @@ func (sr *Slider) SliderStyles() {
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		if sr.Dim == mat32.X {
-			s.Width.SetEm(20)
-			s.Height.SetDp(4)
+			s.Width.Em(20)
+			s.Height.Dp(4)
 		} else {
-			s.Height.SetEm(20)
-			s.Width.SetDp(4)
+			s.Height.Em(20)
+			s.Width.Dp(4)
 		}
 
 		s.Border.Style.Set(styles.BorderNone)
@@ -220,8 +220,8 @@ func (sr *Slider) SliderStyles() {
 		switch w.PathFrom(sr) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
+				s.Width.Em(1)
+				s.Height.Em(1)
 				s.Margin.Set()
 				s.Padding.Set()
 			})

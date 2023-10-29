@@ -49,8 +49,8 @@ func (ic *Icon) OnInit() {
 
 func (ic *Icon) IconStyles() {
 	ic.Style(func(s *styles.Style) {
-		s.Width.SetEm(1)
-		s.Height.SetEm(1)
+		s.Width.Em(1)
+		s.Height.Em(1)
 	})
 }
 
