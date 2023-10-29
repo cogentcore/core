@@ -10,6 +10,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
@@ -19,7 +20,7 @@ import (
 // It should be called on menu frames when they are created.
 func MenuSceneConfigStyles(msc *Scene) {
 	msc.Style(func(s *styles.Style) {
-		s.Border.Style.Set(styles.BorderNone)
+		s.Padding.Set(units.Dp(2))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = styles.BoxShadow2()
