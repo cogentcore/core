@@ -24,21 +24,29 @@ func main() {
 // license that can be found in the LICENSE file.
 
 package units
-
 	`)
 	for _, v := range units.UnitsValues() {
-		d := data{Camel: strcase.ToCamel(v.String())}
+		s := v.String()
+		d := data{
+			Lower: s,
+			Camel: strcase.ToCamel(s),
+			Desc:  v.Desc(),
+		}
 		grr.Must0(newFuncs.Execute(buf, d))
 	}
 	grr.Must0(os.WriteFile("unitgen.go", buf.Bytes(), 0666))
 }
 
 type data struct {
+	Lower string
 	Camel string
+	Desc  string
 }
 
 var newFuncs = template.Must(template.New("newFuncs").Parse(
 	`
+// {{.Camel}} returns a new {{.Lower}} value:
+// {{.Desc}}
 func {{.Camel}}(val float32) Value {
 	return Value{Val: val, Un: Unit{{.Camel}}}
 }
