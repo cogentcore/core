@@ -135,17 +135,11 @@ func (sc *Scene) SceneStyles() {
 			}
 		}
 
-		uv := func(val float32) units.Value {
-			return units.Custom(func(uc *units.Context) float32 {
-				return max(val, uc.Dp(12))
-			})
-		}
-
 		s.Padding.Set(
-			uv(insets.Top),
-			uv(insets.Right),
-			uv(insets.Bottom),
-			uv(insets.Left),
+			units.Dot(insets.Top),
+			units.Dot(insets.Right),
+			units.Dot(insets.Bottom),
+			units.Dot(insets.Left),
 		)
 	})
 }
