@@ -84,11 +84,6 @@ func (v *Value) ToDots(uc *Context) float32 {
 	return v.Dots
 }
 
-// example todots func
-// v.DotsFunc = func(uc *Context) float32 {
-// 	return uc.Vw(50) - uc.Em(4)
-// }
-
 // ToDotsFixed converts value to raw display pixels (dots in DPI) in
 // fixed-point 26.6 format for rendering
 func (v *Value) ToDotsFixed(uc *Context) fixed.Int26_6 {
