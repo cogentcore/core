@@ -61,9 +61,9 @@ var ScrollBarWidthDefault = float32(10)
 
 func (s *Style) LayoutDefaults() {
 	s.AlignV = AlignMiddle
-	s.MinWidth.SetDp(2)
-	s.MinHeight.SetDp(2)
-	s.ScrollBarWidth.SetDp(ScrollBarWidthDefault)
+	s.MinWidth.Dp(2)
+	s.MinHeight.Dp(2)
+	s.ScrollBarWidth.Dp(ScrollBarWidthDefault)
 }
 
 // return the alignment for given dimension
@@ -128,20 +128,20 @@ func (s *Style) SetMinPrefHeight(val units.Value) {
 // SetStretchMaxWidth sets stretchy max width (-1);
 // can grow to take up avail room.
 func (s *Style) SetStretchMaxWidth() {
-	s.MaxWidth.SetDp(-1)
+	s.MaxWidth.Dp(-1)
 }
 
 // SetStretchMaxHeight sets stretchy max height (-1);
 // can grow to take up avail room.
 func (s *Style) SetStretchMaxHeight() {
-	s.MaxHeight.SetDp(-1)
+	s.MaxHeight.Dp(-1)
 }
 
 // SetStretchMax sets stretchy max width and height (-1);
 // can grow to take up avail room.
 func (s *Style) SetStretchMax() {
-	s.MaxWidth.SetDp(-1)
-	s.MaxHeight.SetDp(-1)
+	s.MaxWidth.Dp(-1)
+	s.MaxHeight.Dp(-1)
 }
 
 // SetFixedWidth sets all width style options

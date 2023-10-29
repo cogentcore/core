@@ -74,7 +74,7 @@ func (fs *Font) InheritFields(par *Font) {
 func (fs *Font) ToDots(uc *units.Context) {
 	if fs.Size.Un == units.UnitEm || fs.Size.Un == units.UnitEx || fs.Size.Un == units.UnitCh {
 		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", fs.Size.Un)
-		fs.Size.SetDp(12)
+		fs.Size.Dp(12)
 	}
 	fs.Size.ToDots(uc)
 }
