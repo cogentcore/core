@@ -806,7 +806,7 @@ func _ValueFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[ValueReadOnly-(0)]
 	_ = x[ValueMapKey-(1)]
-	_ = x[ValueHasSavedDesc-(2)]
+	_ = x[ValueHasSavedDoc-(2)]
 }
 
 var _ValueFlagsNameToValueMap = map[string]ValueFlags{

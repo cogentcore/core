@@ -387,7 +387,7 @@ func (vv *StructValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip, _ = vv.Desc()
+	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
@@ -406,12 +406,8 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
-	desc, _ := vv.Desc()
-	if desc == "list" { // todo: not sure where this comes from but it is uninformative
-		desc = ""
-	}
 	readOnly := vv.IsReadOnly()
-	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
+	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
@@ -453,7 +449,7 @@ func (vv *StructInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
 	sv.Sc = sc
-	sv.Tooltip, _ = vv.Desc()
+	sv.Tooltip = vv.Doc()
 	sv.StructValView = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -522,7 +518,7 @@ func (vv *SliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip, _ = vv.Desc()
+	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
@@ -540,7 +536,6 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	desc, _ := vv.Desc()
 	vvp := laser.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
 		slog.Error("giv.SliceValue: Cannot view unadressable (non-pointer) slices", "type", vv.Value.Type())
@@ -549,7 +544,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
+		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
 			if dlg.Accepted {
 				vv.UpdateWidget()
 				vv.SendChange()
@@ -560,7 +555,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 
 		}).Run()
 	} else {
-		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
+		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
 			if dlg.Accepted {
 				vv.UpdateWidget()
 				vv.SendChange()
@@ -609,7 +604,7 @@ func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Sc = sc
-	sv.Tooltip, _ = vv.Desc()
+	sv.Tooltip = vv.Doc()
 	sv.SliceValView = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -657,7 +652,7 @@ func (vv *MapValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip, _ = vv.Desc()
+	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
@@ -675,10 +670,9 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	desc, _ := vv.Desc()
 	mpi := vv.Value.Interface()
 	readOnly := vv.IsReadOnly()
-	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
+	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
@@ -720,7 +714,7 @@ func (vv *MapInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*MapViewInline)
 	sv.Sc = sc
-	sv.Tooltip, _ = vv.Desc()
+	sv.Tooltip = vv.Doc()
 	sv.MapValView = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -782,7 +776,7 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Indicator = icons.KeyboardArrowDown
-	bt.Tooltip, _ = vv.Desc()
+	bt.Tooltip = vv.Doc()
 	bt.Menu = func(m *gi.Scene) {
 		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
@@ -816,9 +810,8 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	desc, _ := vv.Desc()
 	readOnly := vv.IsReadOnly()
-	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
+	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
@@ -856,7 +849,7 @@ func (vv *BoolValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
-	cb.Tooltip, _ = vv.Desc()
+	cb.Tooltip = vv.Doc()
 	cb.Config(sc)
 	cb.OnChange(func(e events.Event) {
 		vv.SetValue(cb.StateIs(states.Checked))
@@ -895,7 +888,7 @@ func (vv *IntValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
-	sb.Tooltip, _ = vv.Desc()
+	sb.Tooltip = vv.Doc()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
@@ -971,7 +964,7 @@ func (vv *FloatValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
-	sb.Tooltip, _ = vv.Desc()
+	sb.Tooltip = vv.Doc()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
@@ -1058,7 +1051,7 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
-	ch.Tooltip, _ = vv.Desc()
+	ch.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
 	ch.ItemsFromEnum(ev, false, 50)
@@ -1121,7 +1114,7 @@ func (vv *BitFlagValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sw.SetType(gi.SwitchChip)
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
-	sw.Tooltip, _ = vv.Desc()
+	sw.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
 	sw.ItemsFromEnum(ev)
@@ -1166,7 +1159,7 @@ func (vv *TypeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
-	cb.Tooltip, _ = vv.Desc()
+	cb.Tooltip = vv.Doc()
 
 	typEmbeds := ki.NodeType
 	// if kiv, ok := vv.Owner.(ki.Ki); ok {
@@ -1224,7 +1217,7 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
-	tf.Tooltip, _ = vv.Desc()
+	tf.Tooltip = vv.Doc()
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.Ch(16)
@@ -1268,7 +1261,7 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
-	tf.Tooltip, _ = vv.Desc()
+	tf.Tooltip = vv.Doc()
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.Ch(16)
 		s.MaxWidth.Dp(-1)
@@ -1313,7 +1306,7 @@ func (vv *NilValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Label)
-	sb.Tooltip, _ = vv.Desc()
+	sb.Tooltip = vv.Doc()
 	sb.Config(sc)
 	vv.UpdateWidget()
 }
@@ -1360,7 +1353,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
-	tf.Tooltip, _ = vv.Desc()
+	tf.Tooltip = vv.Doc()
 	tf.Style(func(s *styles.Style) {
 		tf.Styles.MinWidth.Ch(float32(len(DefaultTimeFormat) + 2))
 	})
@@ -1436,8 +1429,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	desc, _ := vv.Desc()
-	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: desc}, cur, func(dlg *gi.Dialog) {
+	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: vv.Doc()}, cur, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
 			if si >= 0 {
@@ -1498,8 +1490,7 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
-	desc, _ := vv.Desc()
-	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: desc}, func(dlg *gi.Dialog) {
+	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: vv.Doc()}, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
 			if si >= 0 {
@@ -1564,8 +1555,7 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	desc, _ := vv.Desc()
-	FileViewDialog(ctx, DlgOpts{Title: vv.Name(), Prompt: desc}, cur, ext, nil, func(dlg *gi.Dialog) {
+	FileViewDialog(ctx, DlgOpts{Title: vv.Name(), Prompt: vv.Doc()}, cur, ext, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			fn := dlg.Data.(string)
 			vv.SetValue(fn)

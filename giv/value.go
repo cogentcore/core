@@ -35,8 +35,9 @@ const (
 	// for OwnKind = Map, this value represents the Key -- otherwise the Value
 	ValueMapKey
 
-	// whether there is a SavedDesc available
-	ValueHasSavedDesc
+	// ValueHasSavedDoc is whether the value has a saved version of its
+	// documentation, which can be set either automatically or explicitly
+	ValueHasSavedDoc
 )
 
 // Value is an interface for managing the GUI representation of values
@@ -203,8 +204,9 @@ type ValueBase struct {
 	// Lbl is the label for the Value
 	Lbl string
 
-	// Dc is the documentation for the Value
-	Dc string
+	// SavedDoc is the saved documentation for the Value, if any
+	// (only valid if [ValueHasSaveDoc] is true)
+	SavedDoc string
 
 	// Flags are atomic bit flags for Value state
 	Flags ValueFlags
@@ -226,9 +228,6 @@ type ValueBase struct {
 
 	// set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
 	Tags map[string]string `set:"-"`
-
-	// a saved version of the description for the value, if HasSavedDesc is true
-	SavedDesc string `set:"-" readonly:"-"`
 
 	// if Owner is a map, and this is a value, this is the key for this value in the map
 	Key any `set:"-" readonly:"-"`
@@ -274,11 +273,36 @@ func (vv *ValueBase) SetLabel(label string) {
 }
 
 func (vv *ValueBase) Doc() string {
-	return vv.Dc
+	if vv.Is(ValueHasSavedDoc) {
+		return vv.SavedDoc
+	}
+
+	// if we are not part of a struct, we just get the documentation for our type
+	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+		typ := gti.TypeByName(gti.TypeName(vv.Value.Type()))
+		if typ == nil {
+			return ""
+		}
+		vv.SetFlag(true, ValueHasSavedDoc)
+		vv.SavedDoc = typ.Doc
+		return typ.Doc
+	}
+	// otherwise, we get our field documentation in our parent
+	otyp := gti.TypeByValue(vv.Owner)
+	if otyp == nil {
+		return ""
+	}
+	f := gti.GetField(otyp, vv.Field.Name)
+	if f == nil {
+		return ""
+	}
+	vv.SetFlag(true, ValueHasSavedDoc)
+	vv.SavedDoc = f.Doc
+	return f.Doc
 }
 
 func (vv *ValueBase) SetDoc(doc string) {
-	vv.Dc = doc
+	vv.SavedDoc = doc
 }
 
 func (vv *ValueBase) String() string {
@@ -607,38 +631,6 @@ func (vv *ValueBase) AllTags() map[string]string {
 	return rvt
 }
 
-// Desc returns the string description for this value, gotten from the code
-// documentation of the value through gti. If this value's type/field has not
-// been added to gti, Desc returns "", false.
-func (vv *ValueBase) Desc() (string, bool) {
-	if vv.Is(ValueHasSavedDesc) {
-		return vv.SavedDesc, true
-	}
-
-	// if we are not part of a struct, we just get the documentation for our type
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
-		typ := gti.TypeByName(gti.TypeName(vv.Value.Type()))
-		if typ == nil {
-			return "", false
-		}
-		vv.SetFlag(true, ValueHasSavedDesc)
-		vv.SavedDesc = typ.Doc
-		return typ.Doc, true
-	}
-	// otherwise, we get our field documentation in our parent
-	otyp := gti.TypeByValue(vv.Owner)
-	if otyp == nil {
-		return "", false
-	}
-	f := gti.GetField(otyp, vv.Field.Name)
-	if f == nil {
-		return "", false
-	}
-	vv.SetFlag(true, ValueHasSavedDesc)
-	vv.SavedDesc = f.Doc
-	return f.Doc, true
-}
-
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
 func (vv *ValueBase) OwnerLabel() string {
@@ -741,7 +733,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 		return
 	}
 	tf.SetStretchMaxWidth()
-	tf.Tooltip, _ = vv.Desc()
+	tf.Tooltip = vv.Doc()
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.Ch(16)
