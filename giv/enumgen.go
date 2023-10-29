@@ -794,11 +794,11 @@ func (i *TreeViewFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ValueFlagsValues = []ValueFlags{0, 1, 2}
+var _ValueFlagsValues = []ValueFlags{0, 1, 2, 3}
 
 // ValueFlagsN is the highest valid value
 // for type ValueFlags, plus one.
-const ValueFlagsN ValueFlags = 3
+const ValueFlagsN ValueFlags = 4
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -806,28 +806,33 @@ func _ValueFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[ValueReadOnly-(0)]
 	_ = x[ValueMapKey-(1)]
-	_ = x[ValueHasSavedDoc-(2)]
+	_ = x[ValueHasSavedLabel-(2)]
+	_ = x[ValueHasSavedDoc-(3)]
 }
 
 var _ValueFlagsNameToValueMap = map[string]ValueFlags{
-	`ReadOnly`:     0,
-	`readonly`:     0,
-	`MapKey`:       1,
-	`mapkey`:       1,
-	`HasSavedDesc`: 2,
-	`hassaveddesc`: 2,
+	`ReadOnly`:      0,
+	`readonly`:      0,
+	`MapKey`:        1,
+	`mapkey`:        1,
+	`HasSavedLabel`: 2,
+	`hassavedlabel`: 2,
+	`HasSavedDoc`:   3,
+	`hassaveddoc`:   3,
 }
 
 var _ValueFlagsDescMap = map[ValueFlags]string{
 	0: `flagged after first configuration`,
 	1: `for OwnKind = Map, this value represents the Key -- otherwise the Value`,
-	2: `whether there is a SavedDesc available`,
+	2: `ValueHasSavedLabel is whether the value has a saved version of its label, which can be set either automatically or explicitly`,
+	3: `ValueHasSavedDoc is whether the value has a saved version of its documentation, which can be set either automatically or explicitly`,
 }
 
 var _ValueFlagsMap = map[ValueFlags]string{
 	0: `ReadOnly`,
 	1: `MapKey`,
-	2: `HasSavedDesc`,
+	2: `HasSavedLabel`,
+	3: `HasSavedDoc`,
 }
 
 // String returns the string representation

@@ -142,11 +142,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		// 	// note: updating here is redundant -- relevant field will have already updated
 		// 	avv.ViewSig.Emit(avv.This(), 0, nil)
 		// })
-		lbl.Text = arg.Name()
-		if label, ok := arg.Tag("label"); ok {
-			lbl.Text = label
-		}
-		lbl.Tooltip, _ = arg.Tag("doc")
+		lbl.Text = arg.Label()
+		lbl.Tooltip = arg.Doc()
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
 		arg.ConfigWidget(widg, av.Sc)
 	}
