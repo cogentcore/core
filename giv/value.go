@@ -419,7 +419,7 @@ func (vv *ValueBase) IsReadOnly() bool {
 		return true
 	}
 	if vv.OwnKind == reflect.Struct {
-		if _, ok := vv.Tag("readonly"); ok {
+		if et, has := vv.Tag("edit"); has && et == "-" {
 			vv.SetReadOnly(true) // cache
 			return true
 		}
