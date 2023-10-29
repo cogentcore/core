@@ -62,9 +62,9 @@ func {{.Camel}}(val float32) Value {
 	return Value{Val: val, Un: Unit{{.Camel}}}
 }
 
-// Set{{.Camel}} sets the value in terms of {{.Lower}}.
+// {{.Camel}} sets the value in terms of {{.Lower}}.
 // {{.Camel}} is {{.Desc}}.
-func (v *Value) Set{{.Camel}}(val float32) {
+func (v *Value) {{.Camel}}(val float32) {
 	v.Val = val
 	v.Un = Unit{{.Camel}}
 }
