@@ -67,9 +67,8 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 }
 */
 
-// TextEditorDialog adds to the given dialog a display of multi-line text in a
-// non-editable TextView -- user can copy contents to clipboard etc.
-// there is no input from the user.
+// TextEditorDialog adds to the given dialog a display of multi-line text in a TextView,
+// in which the user can copy contents to clipboard etc.
 func TextEditorDialog(dlg *gi.Dialog, text []byte, filename gi.FileName, lineNumbers bool) *gi.Dialog {
 	frame := dlg.Scene
 	prIdx := dlg.PromptWidgetIdx()
@@ -87,7 +86,7 @@ func TextEditorDialog(dlg *gi.Dialog, text []byte, filename gi.FileName, lineNum
 	})
 	tv := texteditor.NewEditor(tlv, "text-editor")
 	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
-	tv.SetState(true, states.ReadOnly)
+	tv.SetState(dlg.RdOnly, states.ReadOnly)
 	tv.SetBuf(tb)
 	tv.Style(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
@@ -120,9 +119,7 @@ func StructViewDialog(dlg *gi.Dialog, stru any, viewPath string, tmpSave Value) 
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
-	if dlg.RdOnly {
-		sv.SetState(true, states.ReadOnly)
-	}
+	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.ViewPath = viewPath
 	sv.TmpSave = tmpSave
 	sv.SetStruct(stru)
@@ -137,9 +134,7 @@ func MapViewDialog(dlg *gi.Dialog, mp any, viewPath string, tmpSave Value) *gi.D
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 	sv := frame.InsertNewChild(MapViewType, prIdx+1, "map-view").(*MapView)
-	if dlg.RdOnly {
-		sv.SetState(true, states.ReadOnly)
-	}
+	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.ViewPath = viewPath
 	sv.TmpSave = tmpSave
 	sv.SetMap(mp)
@@ -155,9 +150,7 @@ func SliceViewDialog(dlg *gi.Dialog, slice any, viewPath string, tmpSave Value, 
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	if dlg.RdOnly {
-		sv.SetState(true, states.ReadOnly)
-	}
+	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	if len(styleFunc) > 0 {
 		sv.StyleFunc = styleFunc[0]
 	}
@@ -211,9 +204,7 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Val
 	sv.SetFlag(noDelete, SliceViewNoDelete)
 	sv.ViewPath = viewPath
 	sv.TmpSave = tmpSave
-	if dlg.RdOnly {
-		sv.SetState(true, states.ReadOnly)
-	}
+	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.SetSlice(slcOfStru)
 	return dlg
 }
@@ -277,22 +268,16 @@ func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon, viewPath string) *gi.Di
 		})
 }
 
-// ColorViewDialog for editing a color using a ColorView -- optionally
-// connects to given signal receiving object and function for dialog signals
-// (nil to ignore)
-func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), clr, fun)
-	if recyc {
-		return dlg
-	}
-
+// ColorViewDialog adds to the given dialog a display for editing a color using a ColorView.
+func ColorViewDialog(dlg *gi.Dialog, clr color.RGBA, viewPath string, tmpSave Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 	dlg.Stage.ClickOff = true
 
 	sv := frame.InsertNewChild(ColorViewType, prIdx+1, "color-view").(*ColorView)
-	sv.ViewPath = opts.ViewPath
-	sv.TmpSave = opts.TmpSave
+	sv.SetState(dlg.RdOnly, states.ReadOnly)
+	sv.ViewPath = viewPath
+	sv.TmpSave = tmpSave
 	sv.SetColor(clr)
 	sv.OnChange(func(e events.Event) {
 		dlg.Data = sv.Color
@@ -300,33 +285,23 @@ func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *
 	return dlg
 }
 
-// FileViewDialog is for selecting / manipulating files -- ext is one or more
-// (comma separated) extensions -- files with those will be highlighted
-// (include the . at the start of the extension).  recv and dlgFunc connect to the
-// dialog signal: if signal value is gi.DialogAccepted use FileViewDialogValue
-// to get the resulting selected file.  The optional filterFunc can filter
+// FileViewDialog adds to the given dialog a display for selecting / manipulating files.
+// Ext is one or more (comma separated) extensions; files with those will be highlighted
+// (include the . at the start of the extension). The optional filterFunc can filter
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
-// directories) and FileViewExtOnlyFilter (for only showing directories).
-func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFunc FileViewFilterFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	gopts := opts.ToGiOpts()
-	gopts.Ok = true
-	gopts.Cancel = true
-
-	var fv *FileView
-	// we need to wrap the function to ensure the data has the selected file
-	f := func(dlg *gi.Dialog) {
-		dlg.Data = fv.SelectedFile()
-		fun(dlg)
-	}
-	dlg := gi.NewStdDialog(ctx, gopts, f)
-	dlg.Stage.Scene.SetName("file-view") // use a consistent name for consistent sizing / placement
+// directories) and FileViewExtOnlyFilter (for only showing files with certain extensions).
+func FileViewDialog(dlg *gi.Dialog, filename, ext string, filterFunc ...FileViewFilterFunc) *gi.Dialog {
+	dlg.Data = filename
+	dlg.Scene.SetName("file-view") // use a consistent name for consistent sizing / placement
 	dlg.NewWindow(true)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	fv = frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
-	fv.FilterFunc = filterFunc
+	fv := frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
+	if len(filterFunc) > 0 {
+		fv.FilterFunc = filterFunc[0]
+	}
 	fv.SetFilename(filename, ext)
 	fv.OnSelect(func(e events.Event) {
 		dlg.Data = fv.SelectedFile()
@@ -335,18 +310,19 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 		dlg.Data = fv.SelectedFile()
 		dlg.AcceptDialog()
 	})
+
+	dlg.Cancel().Ok("Open")
 	return dlg
 }
 
-// ArgViewDialog for editing args for a method call in the MethodView system
-func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []Value, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
-
+// ArgViewDialog adds to the given dialog a display for editing args for a method call
+// in the FuncButton system.
+func ArgViewDialog(dlg *gi.Dialog, args []Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(ArgViewType, prIdx+1, "arg-view").(*ArgView)
-	sv.SetState(false, states.ReadOnly)
+	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.SetArgs(args)
 
 	return dlg
