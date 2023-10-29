@@ -45,10 +45,12 @@ func DefaultTopAppBar(tb *Toolbar) {
 			slog.Error("Top app bar has no MainMgr")
 			return
 		}
-		keys := mm.Stack.Keys()
-		ch.Items = make([]any, len(keys))
-		for i, key := range keys {
-			ch.Items[i] = key
+		ch.Items = make([]any, mm.Stack.Len())
+		for i, kv := range mm.Stack.Order {
+			ch.Items[i] = kv.Key
+			if kv.Val == stg {
+				ch.SetCurIndex(i)
+			}
 		}
 	})
 	ch.OnChange(func(e events.Event) {
@@ -62,7 +64,6 @@ func DefaultTopAppBar(tb *Toolbar) {
 		kv := mm.Stack.Order[ch.CurIndex]
 		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
-		kv.Val.AsBase().Scene.SetNeedsLayout()
 	})
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
 		NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
