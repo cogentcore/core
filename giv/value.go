@@ -744,7 +744,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf.Tooltip, _ = vv.Desc()
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
-		s.MinWidth.SetCh(16)
+		s.MinWidth.Ch(16)
 	})
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..

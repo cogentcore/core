@@ -85,7 +85,7 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 		s.AlignV = styles.AlignTop
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Width.SetCh(20)
+		s.Width.Ch(20)
 		s.Padding.Set(units.Dp(8))
 		s.SetStretchMaxWidth()
 		if s.Is(states.Selected) {

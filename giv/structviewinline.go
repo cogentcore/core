@@ -58,7 +58,7 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 	sv.WidgetConfiged = make(map[gi.Widget]bool)
 	sv.Lay = gi.LayoutHoriz
 	sv.Style(func(s *styles.Style) {
-		s.MinWidth.SetCh(20)
+		s.MinWidth.Ch(20)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		path := w.PathFrom(sv)

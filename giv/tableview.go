@@ -102,8 +102,8 @@ func (tv *TableView) TableViewInit() {
 			sh := w.(*gi.Toolbar)
 			sh.Lay = gi.LayoutHoriz
 			sh.Style(func(s *styles.Style) {
-				sh.Spacing.SetDp(0)
-				s.MaxWidth.SetDp(0)
+				sh.Spacing.Dp(0)
+				s.MaxWidth.Dp(0)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "frame/grid-lay": // grid layout
@@ -145,8 +145,8 @@ func (tv *TableView) TableViewInit() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
-					s.MinWidth.SetEm(1.5)
-					s.Padding.Right.SetDp(4)
+					s.MinWidth.Em(1.5)
+					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.AlignRight
 				})
 			case strings.HasPrefix(w.Name(), "add-"):

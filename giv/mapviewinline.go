@@ -56,7 +56,7 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 	mv.WidgetConfiged = make(map[gi.Widget]bool)
 	mv.Lay = gi.LayoutHoriz
 	mv.Style(func(s *styles.Style) {
-		s.MinWidth.SetEx(60)
+		s.MinWidth.Ex(60)
 		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {

@@ -1342,8 +1342,8 @@ func (st *Stretch) OnInit() {
 	st.Style(func(s *styles.Style) {
 		s.SetMinPrefHeight(units.Ch(1))
 		s.SetMinPrefWidth(units.Em(1))
-		s.MaxWidth.SetDp(-1)
-		s.MaxHeight.SetDp(-1)
+		s.MaxWidth.Dp(-1)
+		s.MaxHeight.Dp(-1)
 	})
 }
 
@@ -1370,8 +1370,8 @@ var _ Widget = (*Space)(nil)
 
 func (sp *Space) OnInit() {
 	sp.Style(func(s *styles.Style) {
-		s.Width.SetCh(1)
-		s.Height.SetEm(1)
+		s.Width.Ch(1)
+		s.Height.Em(1)
 	})
 }
 

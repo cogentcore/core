@@ -26,7 +26,7 @@ func KeyMapsView(km *keyfun.Maps) {
 
 	title := gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)
 	title.Style(func(s *styles.Style) {
-		s.Width.SetCh(30) // need for wrap
+		s.Width.Ch(30) // need for wrap
 		s.SetStretchMaxWidth()
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})

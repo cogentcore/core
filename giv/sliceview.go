@@ -350,8 +350,8 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
-					s.MinWidth.SetEm(1.5)
-					s.Padding.Right.SetDp(4)
+					s.MinWidth.Em(1.5)
+					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.AlignRight
 				})
 			case strings.HasPrefix(w.Name(), "add-"):

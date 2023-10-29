@@ -129,7 +129,7 @@ func (tv *TreeView) OnInit() {
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
-		tv.Indent.SetEm(1)
+		tv.Indent.Em(1)
 		tv.OpenDepth = 4
 		s.Border.Style.Set(styles.BorderNone)
 		// s.Border.Width.Left.SetDp(1)
@@ -153,7 +153,7 @@ func (tv *TreeView) TreeViewStyles() {
 			parts.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
-				parts.Spacing.SetCh(0.5)
+				parts.Spacing.Ch(0.5)
 				s.Padding.Set(units.Dp(4))
 			})
 			// we let the parts handle our state
@@ -193,8 +193,8 @@ func (tv *TreeView) TreeViewStyles() {
 			parts.On(events.ContextMenu, tv.ShowContextMenu)
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
+				s.Width.Em(1)
+				s.Height.Em(1)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
@@ -210,8 +210,8 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Color = colors.Scheme.Primary.Base
 				s.Margin.Set()
 				s.Padding.Set()
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
+				s.Width.Em(1)
+				s.Height.Em(1)
 				s.AlignV = styles.AlignMiddle
 				// we don't need to visibly tell the user that we are disabled;
 				// the lack of an icon accomplishes that
@@ -232,7 +232,7 @@ func (tv *TreeView) TreeViewStyles() {
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(0.5)
+				s.Width.Em(0.5)
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
@@ -240,7 +240,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Cursor = cursors.None
 				s.Margin.Set()
 				s.Padding.Set()
-				s.MinWidth.SetCh(16)
+				s.MinWidth.Ch(16)
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			})
 		case "parts/menu":

@@ -55,8 +55,8 @@ func (cv *ColorView) OnInit() {
 		switch w.PathFrom(cv) {
 		case "value":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.SetEm(6)
-				s.MinHeight.SetEm(6)
+				s.MinWidth.Em(6)
+				s.MinHeight.Em(6)
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
@@ -74,7 +74,7 @@ func (cv *ColorView) OnInit() {
 			})
 		case "nums-hex":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.SetCh(20)
+				s.MinWidth.Ch(20)
 			})
 		case "num-lay":
 			vl := w.(*gi.Layout)
@@ -84,10 +84,10 @@ func (cv *ColorView) OnInit() {
 		}
 		if sl, ok := w.(*gi.Slider); ok {
 			sl.Style(func(s *styles.Style) {
-				s.MinWidth.SetCh(20)
-				s.Width.SetCh(20)
-				s.MinHeight.SetEm(1)
-				s.Height.SetEm(1)
+				s.MinWidth.Ch(20)
+				s.Width.Ch(20)
+				s.MinHeight.Em(1)
+				s.Height.Em(1)
 				s.Margin.Set(units.Dp(6))
 			})
 		}
@@ -97,8 +97,8 @@ func (cv *ColorView) OnInit() {
 					c := colornames.Map[cbt.Name()]
 
 					s.BackgroundColor.SetSolid(c)
-					s.MaxHeight.SetEm(1.3)
-					s.MaxWidth.SetEm(1.3)
+					s.MaxHeight.Em(1.3)
+					s.MaxWidth.Em(1.3)
 					s.Margin.Set()
 				})
 			}

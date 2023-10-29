@@ -69,15 +69,15 @@ func (ts *Tabs) TabsStyles() {
 		s.Border.Width.Set(units.Dp(1))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.Color = colors.Scheme.OnBackground
-		s.MaxWidth.SetDp(-1)
-		s.MaxHeight.SetDp(-1)
+		s.MaxWidth.Dp(-1)
+		s.MaxHeight.Dp(-1)
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ts) {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
-				s.Height.SetEm(1.8)
+				s.Height.Em(1.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Set()
 				s.Padding.Set()
@@ -534,9 +534,9 @@ func (tb *Tab) TabStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.MinWidth.SetCh(8)
-		s.MaxWidth.SetDp(500)
-		s.MinHeight.SetEm(1.6)
+		s.MinWidth.Ch(8)
+		s.MaxWidth.Dp(500)
+		s.MinHeight.Em(1.6)
 
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
@@ -561,8 +561,8 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
+				s.Width.Em(1)
+				s.Height.Em(1)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
@@ -577,12 +577,12 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/close-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetCh(1)
+				s.Width.Ch(1)
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
-				s.Width.SetEx(0.5)
-				s.Height.SetEx(0.5)
+				s.Width.Ex(0.5)
+				s.Height.Ex(0.5)
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
@@ -597,7 +597,7 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/sc-stretch":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.SetCh(2)
+				s.MinWidth.Ch(2)
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {
