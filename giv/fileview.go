@@ -329,6 +329,7 @@ func (fv *FileView) ConfigFilesRow() {
 		fv.FavSelect(sv.SelectedIdx)
 	})
 
+	fv.ReadFiles()
 	fsv := fv.FilesView()
 	fsv.SetState(true, states.ReadOnly)
 	fsv.SetSlice(&fv.Files)
@@ -473,45 +474,12 @@ func (fv *FileView) UpdatePath() {
 // UpdateFilesAction updates list of files and other views for current path,
 // emitting FileSig signals around it -- this is for gui-generated actions only.
 func (fv *FileView) UpdateFilesAction() {
-	// fv.FileSig.Emit(fv.This(), int64(FileViewWillUpdate), fv.DirPath)
 	fv.UpdateFiles()
 	sf := fv.SelField()
 	sf.GrabFocus()
-	// fv.FileSig.Emit(fv.This(), int64(FileViewUpdated), fv.DirPath)
 }
 
-// UpdateFiles updates list of files and other views for current path
-func (fv *FileView) UpdateFiles() {
-	fv.UpdtMu.Lock()
-	defer fv.UpdtMu.Unlock()
-
-	updt := fv.UpdateStart()
-	defer fv.UpdateEnd(updt)
-
-	// var owin goosi.RenderWin
-	// win := fv.ParentRenderWin()
-	// if win != nil {
-	// 	owin = fv.Scene.Win.RenderWin
-	// } else {
-	// 	owin = goosi.TheApp.RenderWinInFocus()
-	// }
-
-	fv.UpdatePath()
-	pf := fv.PathField()
-	if len(gi.SavedPaths) == 0 {
-		gi.OpenPaths()
-	}
-	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.Params.SavedPathsMax)
-	gi.SavePaths()
-	sp := []string(gi.SavedPaths)
-	pf.ItemsFromStringList(sp, true, 0)
-	pf.ShowCurVal(fv.DirPath)
-	sf := fv.SelField()
-	sf.SetText(fv.SelFile)
-
-	// goosi.TheApp.Cursor(owin).Push(cursor.Wait)
-	// defer goosi.TheApp.Cursor(owin).Pop()
-
+func (fv *FileView) ReadFiles() {
 	effpath, err := filepath.EvalSymlinks(fv.DirPath)
 	if err != nil {
 		log.Printf("gi.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
@@ -550,6 +518,34 @@ func (fv *FileView) UpdateFiles() {
 		}
 		return nil
 	})
+}
+
+// UpdateFiles updates list of files and other views for current path
+func (fv *FileView) UpdateFiles() {
+	fv.UpdtMu.Lock()
+	defer fv.UpdtMu.Unlock()
+
+	updt := fv.UpdateStart()
+	defer fv.UpdateEnd(updt)
+
+	fv.UpdatePath()
+	pf := fv.PathField()
+	if len(gi.SavedPaths) == 0 {
+		gi.OpenPaths()
+	}
+	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.Params.SavedPathsMax)
+	gi.SavePaths()
+	sp := []string(gi.SavedPaths)
+	pf.ItemsFromStringList(sp, true, 0)
+	pf.ShowCurVal(fv.DirPath)
+	sf := fv.SelField()
+	sf.SetText(fv.SelFile)
+
+	// todo: wait cursor
+	// goosi.TheApp.Cursor(owin).Push(cursor.Wait)
+	// defer goosi.TheApp.Cursor(owin).Pop()
+
+	fv.ReadFiles()
 
 	fvv := fv.FavsView()
 	fvv.ResetSelectedIdxs()
@@ -559,14 +555,8 @@ func (fv *FileView) UpdateFiles() {
 	sv.SelField = "Name"
 	sv.SelVal = fv.SelFile
 	sv.SortSlice()
-	if !sv.IsConfiged() {
-		sv.Config(fv.Sc)
-		// sv.LayoutSliceGrid()
-	}
 	sv.Update()
 
-	// sv.UpdateSliceGrid()
-	// sv.LayoutHeader()
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
 		sv.ScrollToIdx(sv.SelectedIdx)
@@ -591,8 +581,8 @@ func (fv *FileView) UpdateFiles() {
 
 // UpdateFavs updates list of files and other views for current path
 func (fv *FileView) UpdateFavs() {
-	// sv := fv.FavsView()
-	// sv.UpdateSliceGrid()
+	sv := fv.FavsView()
+	sv.Update()
 }
 
 // AddPathToFavs adds the current path to favorites

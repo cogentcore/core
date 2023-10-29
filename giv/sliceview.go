@@ -611,11 +611,12 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 }
 
 func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	redo := sv.Frame.DoLayout(sc, parBBox, iter)
 	if sv.This().(SliceViewer).NeedsConfigRows() {
 		sv.Update() // does applystyle
 		return true // needs redo
 	}
-	return sv.Frame.DoLayout(sc, parBBox, iter)
+	return redo
 }
 
 // UpdateStartIdx updates StartIdx to fit current view
