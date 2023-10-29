@@ -340,7 +340,7 @@ func (pf *Preferences) ScreenInfo() []*goosi.Screen { //gti:add
 	ns := goosi.TheApp.NScreens()
 	res := make([]*goosi.Screen, ns)
 	for i := 0; i < ns; i++ {
-		res = append(res, goosi.TheApp.Screen(i))
+		res[i] = goosi.TheApp.Screen(i)
 	}
 	return res
 }
