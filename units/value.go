@@ -30,8 +30,10 @@ type Value struct { //gti:add
 	// the computed value in raw pixels (dots in DPI)
 	Dots float32 `view:"-"`
 
-	// function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used
-	DotsFunc func(uc *Context) float32 `view:"-"`
+	// custom function that returns the dots of the value;
+	// if non-nil, it overrides all other fields;
+	// if nil, standard ToDots with the other fields is used
+	Custom func(uc *Context) float32 `view:"-"`
 }
 
 // New creates a new value with the given unit type
@@ -45,25 +47,37 @@ func (v *Value) Set(val float32, un Units) {
 	v.Un = un
 }
 
-// Dot returns a new dots value:
-// actual real display pixels, which are generally only used internally
+// Dot returns a new dots value.
+// Dots are actual real display pixels, which are generally only used internally.
 func Dot(val float32) Value {
 	return Value{Val: val, Un: UnitDot, Dots: val}
 }
 
-// SetDot sets the value directly in terms of dots:
-// actual real display pixels, which are generally only used internally
+// SetDot sets the value directly in terms of dots.
+// Dots are actual real display pixels, which are generally only used internally.
 func (v *Value) SetDot(val float32) {
 	v.Val = val
 	v.Un = UnitDot
 	v.Dots = val
 }
 
+// Custom returns a new custom value that has the dots
+// of the value returned by the given function.
+func Custom(fun func(uc *Context) float32) Value {
+	return Value{Custom: fun}
+}
+
+// SetCustom sets the value to be a custom value that has
+// the dots of the value returned by the given function.
+func (v *Value) SetCustom(fun func(uc *Context) float32) {
+	v.Custom = fun
+}
+
 // ToDots converts value to raw display pixels (dots as in DPI), setting also
 // the Dots field
 func (v *Value) ToDots(uc *Context) float32 {
-	if v.DotsFunc != nil {
-		v.Dots = v.DotsFunc(uc)
+	if v.Custom != nil {
+		v.Dots = v.Custom(uc)
 	} else {
 		v.Dots = uc.ToDots(v.Val, v.Un)
 	}
