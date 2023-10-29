@@ -866,5 +866,5 @@ func (fv *FileView) EditPaths() {
 		gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
 		gi.SavePaths()
 		fv.UpdateFiles()
-	})
+	}).Run()
 }

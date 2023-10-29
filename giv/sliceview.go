@@ -972,7 +972,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 					}
 					sv.SetChanged()
 					ownki.UpdateEnd(updt)
-				})
+				}).Run()
 			}
 		}
 	} else {

@@ -94,7 +94,7 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 				MapViewDialog(gi.NewDialog(mv).Title(title).Prompt(mv.Tooltip).ViewPath(vpath), mv.Map, mv.TmpSave).
 					OnAccept(func(e events.Event) {
 						mv.SendChange()
-					})
+					}).Run()
 			})
 		}
 	})
