@@ -204,7 +204,6 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Val
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
-	sv.SetState(false, states.ReadOnly)
 	if len(styleFunc) > 0 {
 		sv.StyleFunc = styleFunc[0]
 	}
@@ -219,26 +218,21 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Val
 	return dlg
 }
 
-// TableViewSelectDialog is for selecting a row from a slice-of-struct using a
-// TableView -- optionally connects to given signal receiving object and
-// functions for signals (nil to ignore): selFunc for the widget signal
-// reporting selection events, and dlgFunc for the overall dialog signals.
-// Also has an optional styling function for styling elements of the table.
-// gopy:interface=handle
-func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow int, styleFunc TableViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slcOfStru, fun)
-	if recyc {
-		return dlg
-	}
-
+// TableViewSelectDialog adds to the given dialog a display for selecting a row from a slice-of-structs using a
+// TableView. It also takes an optional styling function for styling elements of the table.
+//
+//gopy:interface=handle
+func TableViewSelectDialog(dlg *gi.Dialog, slcOfStru any, initRow int, viewPath string, styleFunc ...TableViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
 	sv.SetState(true, states.ReadOnly)
-	sv.StyleFunc = styleFunc
+	if len(styleFunc) > 0 {
+		sv.StyleFunc = styleFunc[0]
+	}
 	sv.SelectedIdx = initRow
-	sv.ViewPath = opts.ViewPath
+	sv.ViewPath = viewPath
 	sv.SetSlice(slcOfStru)
 	sv.OnSelect(func(e events.Event) {
 		dlg.Data = sv.SelectedIdx
@@ -254,15 +248,13 @@ func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow i
 var FontChooserSize = 18
 var FontChooserSizeDots = 18
 
-// FontChooserDialog for choosing a font -- the recv and func signal receivers
-// if non-nil are connected to the selection signal for the struct table view,
-// so they are updated with that
-func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	wb := ctx.AsWidget()
+// FontChooserDialog adds to the given dialog a display for choosing a font.
+func FontChooserDialog(dlg *gi.Dialog, viewPath string) *gi.Dialog {
+	wb := dlg.Stage.CtxWidget.AsWidget()
 	FontChooserSizeDots = int(wb.Styles.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	fi := paint.FontLibrary.FontInfo
-	dlg := TableViewSelectDialog(ctx, opts, &fi, -1,
+	return TableViewSelectDialog(dlg, &fi, -1, viewPath,
 		func(w gi.Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
@@ -272,21 +264,17 @@ func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *g
 			s.Font.Weight = fi[row].Weight
 			s.Font.Style = fi[row].Style
 			s.Font.Size.Pt(float32(FontChooserSize))
-		}, fun)
-	return dlg
+		})
 }
 
-// IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
-// if non-nil are connected to the selection signal for the slice view, and
-// the dialog signal.
-func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(dlg *gi.Dialog)) *gi.Dialog {
+// IconChooserDialog adds to the given dialog a display for choosing an icon.
+func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon, viewPath string) *gi.Dialog {
 	ics := icons.All()
-	dlg := SliceViewSelectDialog(ctx, opts, &ics, curIc,
+	return SliceViewSelectDialog(dlg, &ics, curIc, viewPath,
 		func(w gi.Widget, s *styles.Style, row int) {
 			w.(*gi.Button).SetText(string(ics[row]))
 			s.SetStretchMaxWidth()
-		}, fun)
-	return dlg
+		})
 }
 
 // ColorViewDialog for editing a color using a ColorView -- optionally
