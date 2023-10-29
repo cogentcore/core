@@ -82,6 +82,11 @@ func (sw *Switch) SetIconFromState() {
 	case sw.StateIs(states.Checked):
 		st.StackTop = 0
 	default:
+		if sw.Type == SwitchChip {
+			// chips render no icon when off
+			st.StackTop = 2
+			return
+		}
 		st.StackTop = 1
 	}
 }
@@ -145,11 +150,16 @@ func (sw *Switch) SwitchStyles() {
 			})
 		case "parts/stack/icon1": // off
 			w.Style(func(s *styles.Style) {
-				// switches need to be bigger
-				if sw.Type == SwitchSwitch {
+				switch sw.Type {
+				case SwitchSwitch:
+					// switches need to be bigger
 					s.Width.Em(3)
 					s.Height.Em(3)
-				} else {
+				case SwitchChip:
+					// chips render no icon when off
+					s.Width.Dp(0)
+					s.Height.Dp(0)
+				default:
 					s.Width.Em(1.5)
 					s.Height.Em(1.5)
 				}
