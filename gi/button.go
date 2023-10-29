@@ -218,6 +218,11 @@ func (bt *Button) ButtonStyles() {
 				s.Padding.Set()
 				s.AlignV = styles.AlignBottom
 			})
+		case "parts/shortcut":
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+			})
 		}
 	})
 }
