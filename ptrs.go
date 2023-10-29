@@ -76,7 +76,11 @@ func PtrValue(v reflect.Value) reflect.Value {
 func OnePtrValue(v reflect.Value) reflect.Value {
 	if v.Kind() != reflect.Ptr {
 		if v.CanAddr() {
-			v = v.Addr()
+			return v.Addr()
+		} else {
+			pv := reflect.New(v.Type())
+			pv.Elem().Set(v)
+			return pv
 		}
 	} else {
 		for v.Elem().Kind() == reflect.Ptr {
@@ -108,6 +112,7 @@ func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 // of indirection, and then removing that indirection, resulting in something
 // that is now addressable / assignable -- this is necessary for enums..
 func MakePtrValue(v reflect.Value) reflect.Value {
+	// TODO(kai): MakePtrValue doesn't seem do be doing the right thing
 	np := reflect.New(PtrType(v.Type()))
 	pi := np.Interface()
 	pi = v.Interface()       // assign pointer using interface assignment instead of set..
