@@ -31,7 +31,7 @@ import (
 // -- automatically called when new window opened, but can be called before
 // then if pref info needed.
 func Init() {
-	if Prefs.LogicalDPIScale == 0 {
+	if Prefs.Zoom == 0 {
 		Prefs.Defaults()
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
@@ -56,17 +56,17 @@ type Preferences struct { //gti:add
 	// the primary color used to generate the color scheme
 	Color color.RGBA
 
-	// text highilighting style / theme
-	HiStyle HiStyleName
+	// overall zoom factor as a percentage of the default zoom
+	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 
 	// the density (compactness) of content
 	Density Densities
 
-	// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
-	LogicalDPIScale float32 `min:"0.1" def:"1" step:"0.1"`
-
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs
+
+	// text highlighting style / theme
+	HiStyle HiStyleName
 
 	// parameters controlling GUI behavior
 	Params ParamPrefs `view:"inline"`
@@ -138,7 +138,7 @@ func (pf *Preferences) Defaults() {
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
 	pf.Density = DensityMedium
-	pf.LogicalDPIScale = 1.0
+	pf.Zoom = 100
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
@@ -298,7 +298,8 @@ func (pf *Preferences) Apply() {
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
 func (pf *Preferences) ApplyDPI() {
-	goosi.LogicalDPIScale = pf.LogicalDPIScale
+	// zoom is percentage, but LogicalDPIScale is multiplier
+	goosi.LogicalDPIScale = pf.Zoom / 100
 	n := goosi.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := goosi.TheApp.Screen(i)
@@ -306,7 +307,8 @@ func (pf *Preferences) ApplyDPI() {
 			continue
 		}
 		if scp, ok := pf.ScreenPrefs[sc.Name]; ok {
-			goosi.SetLogicalDPIScale(sc.Name, scp.LogicalDPIScale)
+			// zoom is percentage, but LogicalDPIScale is multiplier
+			goosi.SetLogicalDPIScale(sc.Name, scp.Zoom/100)
 		}
 		sc.UpdateLogicalDPI()
 	}
@@ -325,13 +327,13 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
 		if !ok {
 			sp = ScreenPrefs{}
 		}
-		sp.LogicalDPIScale = mat32.Truncate(sc.LogicalDPI/sc.PhysicalDPI, 2)
+		sp.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
 		if pf.ScreenPrefs == nil {
 			pf.ScreenPrefs = make(map[string]ScreenPrefs)
 		}
 		pf.ScreenPrefs[sc.Name] = sp
 	} else {
-		pf.LogicalDPIScale = mat32.Truncate(sc.LogicalDPI/sc.PhysicalDPI, 2)
+		pf.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
 	grr.Log0(pf.Save())
 }
@@ -446,8 +448,8 @@ func (pf *Preferences) DensityMul() float32 {
 // -- settings here override those in the global preferences.
 type ScreenPrefs struct { //gti:add
 
-	// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
-	LogicalDPIScale float32 `min:"0.1" step:"0.1"`
+	// overall zoom factor as a percentage of the default zoom
+	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 }
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
