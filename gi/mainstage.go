@@ -9,8 +9,6 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -112,21 +110,21 @@ func (st *MainStage) SetWindowInsets() {
 	if st.StageMgr.RenderWin == nil {
 		return
 	}
-	insets := st.StageMgr.RenderWin.GoosiWin.Insets()
-	// fmt.Println(insets)
-	uv := func(val float32) units.Value {
-		return units.Custom(func(uc *units.Context) float32 {
-			return max(val, uc.Dp(12))
-		})
-	}
-	st.Scene.Style(func(s *styles.Style) {
-		s.Padding.Set(
-			uv(insets.Top),
-			uv(insets.Right),
-			uv(insets.Bottom),
-			uv(insets.Left),
-		)
-	})
+	// insets := st.StageMgr.RenderWin.GoosiWin.Insets()
+	// // fmt.Println(insets)
+	// uv := func(val float32) units.Value {
+	// 	return units.Custom(func(uc *units.Context) float32 {
+	// 		return max(val, uc.Dp(12))
+	// 	})
+	// }
+	// st.Scene.Style(func(s *styles.Style) {
+	// 	s.Padding.Set(
+	// 		uv(insets.Top),
+	// 		uv(insets.Right),
+	// 		uv(insets.Bottom),
+	// 		uv(insets.Left),
+	// 	)
+	// })
 }
 
 // only called when !NewWindow

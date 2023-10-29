@@ -887,7 +887,7 @@ func (vv *IntValue) UpdateWidget() {
 	if err == nil {
 		sb.SetValue(fv)
 	} else {
-		slog.Error("Int Value set", "error:", err)
+		slog.Error("IntValue set", "error", err)
 	}
 }
 

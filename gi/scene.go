@@ -17,6 +17,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -121,6 +122,31 @@ func (sc *Scene) SceneStyles() {
 		s.Cursor = cursors.Arrow
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
+		// we never want borders on scenes
+		s.MaxBorder = styles.Border{}
+
+		insets := styles.NewSideFloats()
+
+		mm := sc.Stage.MainMgr()
+		if mm != nil {
+			rw := mm.RenderWin
+			if rw != nil {
+				insets = rw.GoosiWin.Insets()
+			}
+		}
+
+		uv := func(val float32) units.Value {
+			return units.Custom(func(uc *units.Context) float32 {
+				return max(val, uc.Dp(12))
+			})
+		}
+
+		s.Padding.Set(
+			uv(insets.Top),
+			uv(insets.Right),
+			uv(insets.Bottom),
+			uv(insets.Left),
+		)
 	})
 }
 
