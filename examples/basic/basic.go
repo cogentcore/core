@@ -1,33 +1,32 @@
 package main
 
 import (
-	"fmt"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/goosi/events"
-	"goki.dev/icons"
 )
 
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.WinEventTrace = true
-	gi.EventTrace = true
-	gi.LayoutTrace = true
-	gi.RenderTrace = true
+	// gi.WinEventTrace = true
+	// gi.EventTrace = true
+	// gi.LayoutTrace = true
+	// gi.RenderTrace = true
 
-	scene := gi.NewScene().SetTitle("Basic")
-	gi.NewLabel(scene).SetText("Hello, World!")
+	sc := gi.NewScene().SetTitle("Basic")
+	sc.TopAppBar = func(*gi.Toolbar) {}
+	// gi.NewLabel(scene).SetText("Hello, World!")
 
-	gi.NewButton(scene).
-		SetText("Open Dialog").SetIcon(icons.OpenInNew).
-		OnClick(func(e events.Event) {
-			fmt.Println("button clicked")
-			// dialog := gi.NewScene("dialog")
-			// gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
-			// gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
-		})
+	// gi.NewButton(scene).
+	// 	SetText("Open Dialog").SetIcon(icons.OpenInNew).
+	// 	OnClick(func(e events.Event) {
+	// 		fmt.Println("button clicked")
+	// 		// dialog := gi.NewScene("dialog")
+	// 		// gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
+	// 		// gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
+	// 	})
 
-	gi.NewWindow(scene).Run().Wait()
+	gi.NewSwitch(sc)
+
+	gi.NewWindow(sc).Run().Wait()
 }
