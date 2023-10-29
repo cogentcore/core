@@ -179,24 +179,15 @@ func (fb *FuncButton) CallFunc() {
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		gi.NewStdDialog(fb.This().(gi.Widget), gi.DlgOpts{Title: fb.Text + "?", Prompt: "Are you sure you want to run " + fb.Text + "? " + fb.Tooltip, Ok: true, Cancel: true},
-			func(dlg *gi.Dialog) {
-				if !dlg.Accepted {
-					return
-				}
+		gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+			OnAccept(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(nil)
 				fb.ShowReturnsDialog(rets)
 			}).Run()
 		return
 	}
-	ArgViewDialog(
-		fb.This().(gi.Widget),
-		DlgOpts{Title: fb.Text, Prompt: fb.Tooltip, Ok: true, Cancel: true},
-		fb.Args,
-		func(dlg *gi.Dialog) {
-			if !dlg.Accepted {
-				return
-			}
+	ArgViewDialog(gi.NewDialog(fb).Title(fb.Text).Prompt(fb.Tooltip), fb.Args).Cancel().Ok().
+		OnAccept(func(e events.Event) {
 			rargs := make([]reflect.Value, len(fb.Args))
 			for i, arg := range fb.Args {
 				rargs[i] = laser.NonPtrValue(arg.Val())
@@ -206,16 +197,12 @@ func (fb *FuncButton) CallFunc() {
 				rets := fb.ReflectFunc.Call(rargs)
 				fb.ShowReturnsDialog(rets)
 			}
-			gi.NewStdDialog(fb.This().(gi.Widget), gi.DlgOpts{Title: fb.Text + "?", Prompt: "Are you sure you want to run " + fb.Text + "? " + fb.Tooltip, Ok: true, Cancel: true},
-				func(dlg *gi.Dialog) {
-					if !dlg.Accepted {
-						return
-					}
+			gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+				OnAccept(func(e events.Event) {
 					rets := fb.ReflectFunc.Call(rargs)
 					fb.ShowReturnsDialog(rets)
 				}).Run()
-		},
-	).Run()
+		}).Run()
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
@@ -254,10 +241,10 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: txt}).Run()
+		gi.NewSnackbar(fb, gi.SnackbarOpts{Text: txt}).Run()
 		return
 	}
-	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: main, Prompt: fb.Tooltip, Ok: true}, fb.Returns, nil).Run()
+	ArgViewDialog(gi.NewDialog(fb).Title(main).Prompt(fb.Tooltip).ReadOnly(true), fb.Returns).Ok().Run()
 }
 
 // SetArgs sets the appropriate [Value] objects for the
