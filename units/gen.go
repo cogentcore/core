@@ -56,21 +56,21 @@ type data struct {
 
 var funcs = template.Must(template.New("funcs").Parse(
 	`
-// {{.Camel}} returns a new {{.Lower}} value:
-// {{.Desc}}
+// {{.Camel}} returns a new {{.Lower}} value.
+// {{.Camel}} is {{.Desc}}.
 func {{.Camel}}(val float32) Value {
 	return Value{Val: val, Un: Unit{{.Camel}}}
 }
 
-// Set{{.Camel}} sets the value in terms of {{.Lower}}:
-// {{.Desc}}
+// Set{{.Camel}} sets the value in terms of {{.Lower}}.
+// {{.Camel}} is {{.Desc}}.
 func (v *Value) Set{{.Camel}}(val float32) {
 	v.Val = val
 	v.Un = Unit{{.Camel}}
 }
 
-// {{.Camel}} returns the given {{.Lower}} value in terms of dots:
-// {{.Desc}}
+// {{.Camel}} converts the given {{.Lower}} value to dots.
+// {{.Camel}} is {{.Desc}}.
 func (uc *Context) {{.Camel}}(val float32) float32 {
 	return uc.ToDots(val, Unit{{.Camel}})
 }
