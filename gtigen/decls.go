@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
 	"goki.dev/ordmap"
 )
@@ -48,14 +49,15 @@ var FuncTmpl = template.Must(template.New("Func").Parse(
 var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	Funcs(template.FuncMap{
 		"SetterFields": SetterFields,
+		"SetterName":   SetterName,
 		"DocToComment": DocToComment,
 	}).Parse(
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
-	// Set{{.Name}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
+	// Set{{SetterName .}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.LocalType}}) *{{$typ.Name}} {
+	func (t *{{$typ.Name}}) Set{{SetterName .}}(v {{.LocalType}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
 		return t
 	}
@@ -79,6 +81,17 @@ func SetterFields(typ *Type) []*gti.Field {
 	do(typ.Fields)
 	do(typ.EmbeddedFields)
 	return res
+}
+
+// SetterName returns the name that should be used for the setter function
+// for the given field. It first checks the 'set' struct tag and falls back on
+// the name of the field.
+func SetterName(field *gti.Field) string {
+	if tag, ok := field.Tag.Lookup("set"); ok {
+		return tag
+	}
+	// could be lowercase so need to make camel
+	return strcase.ToCamel(field.Name)
 }
 
 // DocToComment converts the given doc string to an appropriate comment string.
