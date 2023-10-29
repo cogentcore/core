@@ -670,14 +670,16 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SetCurIndex(len(ch.Items) - 1)
 		ch.SendChange(e)
 	})
+	tf.OnFocus(func(e events.Event) {
+		if ch.ItemsFunc != nil {
+			ch.ItemsFunc()
+		}
+	})
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the
 // editable textfield part of the Chooser (if it exists).
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
-	if ch.ItemsFunc != nil {
-		ch.ItemsFunc()
-	}
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
 	for idx, item := range ch.Items {

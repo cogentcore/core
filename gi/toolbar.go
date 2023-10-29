@@ -51,6 +51,19 @@ func DefaultTopAppBar(tb *Toolbar) {
 			ch.Items[i] = key
 		}
 	})
+	ch.OnChange(func(e events.Event) {
+		stg := tb.Sc.MainStage()
+		mm := stg.StageMgr
+		if mm == nil {
+			slog.Error("Top app bar has no MainMgr")
+			return
+		}
+		// TODO: optimize this?
+		kv := mm.Stack.Order[ch.CurIndex]
+		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
+		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
+		kv.Val.AsBase().Scene.SetNeedsLayout()
+	})
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
 		NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 			OnClick(func(e events.Event) {
