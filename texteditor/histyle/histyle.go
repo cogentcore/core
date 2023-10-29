@@ -364,7 +364,7 @@ var StyleProps = ki.Props{
 	"Toolbar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  icons.FileOpen,
+			"icon":  icons.Open,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{

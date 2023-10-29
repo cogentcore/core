@@ -52,7 +52,7 @@ func PrefsView(pf *gi.Preferences) {
 	NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
 	NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetKey(keyfun.Open)
+		NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 	})
 
@@ -116,7 +116,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		save.SetEnabledUpdt(pf.Changed)
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetKey(keyfun.Open)
+		NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 	})
 
 	/*

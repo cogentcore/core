@@ -250,7 +250,7 @@ var StylesProps = ki.Props{
 		{"sep-file", ki.BlankProp{}},
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  icons.FileOpen,
+			"icon":  icons.Open,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
