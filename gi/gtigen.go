@@ -1120,8 +1120,8 @@ var _ = gti.AddType(&gti.Type{
 		{"Density", &gti.Field{Name: "Density", Type: "goki.dev/gi/v2/gi.Densities", LocalType: "Densities", Doc: "the density (compactness) of content", Directives: gti.Directives{}, Tag: ""}},
 		{"ScreenPrefs", &gti.Field{Name: "ScreenPrefs", Type: "map[string]goki.dev/gi/v2/gi.ScreenPrefs", LocalType: "map[string]ScreenPrefs", Doc: "screen-specific preferences -- will override overall defaults if set", Directives: gti.Directives{}, Tag: ""}},
 		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/gi/v2/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highlighting style / theme", Directives: gti.Directives{}, Tag: ""}},
-		{"Params", &gti.Field{Name: "Params", Type: "goki.dev/gi/v2/gi.ParamPrefs", LocalType: "ParamPrefs", Doc: "parameters controlling GUI behavior", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
-		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/gi/v2/gi.EditorPrefs", LocalType: "EditorPrefs", Doc: "editor preferences -- for TextView etc", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
+		{"Params", &gti.Field{Name: "Params", Type: "goki.dev/gi/v2/gi.ParamPrefs", LocalType: "ParamPrefs", Doc: "parameters controlling GUI behavior", Directives: gti.Directives{}, Tag: ""}},
+		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/gi/v2/gi.EditorPrefs", LocalType: "EditorPrefs", Doc: "editor preferences -- for TextView etc", Directives: gti.Directives{}, Tag: ""}},
 		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/gi/v2/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list", Directives: gti.Directives{}, Tag: ""}},
 		{"SaveKeyMaps", &gti.Field{Name: "SaveKeyMaps", Type: "bool", LocalType: "bool", Doc: "if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords", Directives: gti.Directives{}, Tag: ""}},
 		{"SaveDetailed", &gti.Field{Name: "SaveDetailed", Type: "bool", LocalType: "bool", Doc: "if set, the detailed preferences are saved and loaded at startup -- only", Directives: gti.Directives{}, Tag: ""}},
@@ -1313,9 +1313,9 @@ var _ = gti.AddType(&gti.Type{
 		{"TextBufDiffRevertLines", &gti.Field{Name: "TextBufDiffRevertLines", Type: "int", LocalType: "int", Doc: "text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted", Directives: gti.Directives{}, Tag: "def:\"10000\" min:\"0\" step:\"1000\""}},
 		{"TextBufDiffRevertDiffs", &gti.Field{Name: "TextBufDiffRevertDiffs", Type: "int", LocalType: "int", Doc: "text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" step:\"1\""}},
 		{"TextBufMarkupDelayMSec", &gti.Field{Name: "TextBufMarkupDelayMSec", Type: "int", LocalType: "int", Doc: "number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)", Directives: gti.Directives{}, Tag: "def:\"1000\" min:\"100\" step:\"100\""}},
-		{"MapInlineLen", &gti.Field{Name: "MapInlineLen", Type: "int", LocalType: "int", Doc: "the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props", Directives: gti.Directives{}, Tag: "def:\"3\" min:\"2\" step:\"1\""}},
-		{"StructInlineLen", &gti.Field{Name: "StructInlineLen", Type: "int", LocalType: "int", Doc: "the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs", Directives: gti.Directives{}, Tag: "def:\"6\" min:\"2\" step:\"1\""}},
-		{"SliceInlineLen", &gti.Field{Name: "SliceInlineLen", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"6\" min:\"2\" step:\"1\""}},
+		{"MapInlineLen", &gti.Field{Name: "MapInlineLen", Type: "int", LocalType: "int", Doc: "the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props", Directives: gti.Directives{}, Tag: "def:\"2\" min:\"1\" step:\"1\""}},
+		{"StructInlineLen", &gti.Field{Name: "StructInlineLen", Type: "int", LocalType: "int", Doc: "the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
+		{"SliceInlineLen", &gti.Field{Name: "SliceInlineLen", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -2985,3 +2985,15 @@ func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 	t.CustomContextMenu = v
 	return t
 }
+
+var _ = gti.AddFunc(&gti.Func{
+	Name: "goki.dev/gi/v2/gi.DefaultTopAppBar",
+	Doc:  "DefaultTopAppBar is the default value for [Scene.TopAppBar].\nIt adds navigation buttons and an editable chooser bar.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"tb", &gti.Field{Name: "tb", Type: "*goki.dev/gi/v2/gi.Toolbar", LocalType: "*Toolbar", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+})
