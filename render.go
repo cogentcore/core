@@ -62,6 +62,62 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
+// UpdateStart sets the scene ScUpdating flag to prevent
+// render updates during construction on a scene.
+// if already updating, returns false.
+// Pass the result to UpdateEnd* methods.
+func (sc *Scene) UpdateStart() bool {
+	updt := sc.Node.UpdateStart()
+	if updt {
+		sc.SetFlag(true, ScUpdating)
+		return true
+	}
+	return false
+}
+
+// UpdateEnd resets the scene ScUpdating flag if updt = true
+func (sc *Scene) UpdateEnd(updt bool) {
+	if updt {
+		sc.Node.UpdateEnd(updt)
+		sc.SetFlag(false, ScUpdating)
+	}
+}
+
+// UpdateEndRender resets the scene ScUpdating flag if updt = true
+// and sets the ScNeedsRender flag; updt is from UpdateStart().
+// Render only updates based on camera changes, not any node-level
+// changes. See [UpdateEndUpdate].
+func (sc *Scene) UpdateEndRender(updt bool) {
+	if updt {
+		sc.Node.UpdateEnd(updt)
+		sc.SetFlag(false, ScUpdating)
+		sc.SetFlag(true, ScNeedsRender)
+	}
+}
+
+// UpdateEndUpdate resets the scene ScUpdating flag if updt = true
+// and sets the ScNeedsUpdate flag; updt is from UpdateStart().
+// Update is for when any node Pose or material changes happen.
+// See [UpdateEndConfig] for major changes.
+func (sc *Scene) UpdateEndUpdate(updt bool) {
+	if updt {
+		sc.Node.UpdateEnd(updt)
+		sc.SetFlag(false, ScUpdating)
+		sc.SetFlag(true, ScNeedsUpdate)
+	}
+}
+
+// UpdateEndConfig resets the scene ScUpdating flag if updt = true
+// and sets the ScNeedsConfig flag; updt is from UpdateStart().
+// Config is for Texture, Lighting Meshes or more complex nodes).
+func (sc *Scene) UpdateEndConfig(updt bool) {
+	if updt {
+		sc.Node.UpdateEnd(updt)
+		sc.SetFlag(false, ScUpdating)
+		sc.SetFlag(true, ScNeedsConfig)
+	}
+}
+
 // IsConfiged Returns true if the scene has already been configured
 func (sc *Scene) IsConfiged() bool {
 	return sc.Frame != nil

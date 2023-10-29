@@ -7,6 +7,8 @@ package main
 import (
 	"image/color"
 	"log"
+	"math"
+	"time"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -17,6 +19,7 @@ import (
 	_ "goki.dev/gi3d/io/obj"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/ki/v2"
 	"goki.dev/vgpu/v2/vgpu"
 
 	"goki.dev/mat32/v2"
@@ -24,7 +27,6 @@ import (
 
 func main() { gimain.Run(app) }
 
-/*
 // Anim has control for animating
 type Anim struct {
 
@@ -47,7 +49,7 @@ type Anim struct {
 	Ticker *time.Ticker `view:"-"`
 
 	// the scene
-	Scene *gi3d.Scene
+	Scene *gi3dv.Scene3D
 
 	// the torus
 	Torus *gi3d.Solid
@@ -64,8 +66,8 @@ type Anim struct {
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(sc *gi3d.Scene, on bool) {
-	an.Scene = sc
+func (an *Anim) Start(se *gi3dv.Scene3D, on bool) {
+	an.Scene = se
 	an.On = on
 	an.DoTorus = true
 	an.DoGopher = true
@@ -77,14 +79,15 @@ func (an *Anim) Start(sc *gi3d.Scene, on bool) {
 
 // GetObjs gets the objects to animate
 func (an *Anim) GetObjs() {
-	torusi := an.Scene.ChildByName("torus", 0)
+	se := &an.Scene.Scene
+	torusi := se.ChildByName("torus", 0)
 	if torusi == nil {
 		return
 	}
 	an.Torus = torusi.(*gi3d.Solid)
 	an.TorusPosOrig = an.Torus.Pose.Pos
 
-	ggp := an.Scene.ChildByName("go-group", 0)
+	ggp := se.ChildByName("go-group", 0)
 	if ggp == nil {
 		return
 	}
@@ -99,15 +102,15 @@ func (an *Anim) GetObjs() {
 // Animate
 func (an *Anim) Animate() {
 	for {
-		if an.Ticker == nil || an.Scene == nil {
+		if an.Ticker == nil || an.Scene.This() == nil {
 			return
 		}
 		<-an.Ticker.C // wait for tick
-		if !an.On || an.Scene == nil || an.Torus == nil || an.Gopher == nil {
+		if !an.On || an.Scene.This() == nil || an.Scene.Is(ki.Deleted) || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
 
-		updt := an.Scene.UpdateStart()
+		updt := an.Scene.UpdateStart3D()
 		radius := float32(0.3)
 
 		if an.DoTorus {
@@ -128,11 +131,10 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		an.Scene.UpdateEnd(updt) // triggers re-render -- don't need a full Update() which updates meshes
+		an.Scene.UpdateEndUpdate3D(updt)
 		an.Ang += an.Speed
 	}
 }
-*/
 
 func app() {
 	// turn these on to see a traces of various stages of processing..
@@ -296,13 +298,14 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 		fpgun.Pose.Pos.Set(.5, -.5, -2.5)              // in front of camera
 		fpgun.Mat.Color = color.RGBA{255, 0, 255, 128} // alpha = .5
 
-		sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-		sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+	*/
 
-		///////////////////////////////////////////////////
-		//  Animation & Embedded controls
+	///////////////////////////////////////////////////
+	//  Animation & Embedded controls
 
-		anim := &Anim{}
+	anim := &Anim{}
+	anim.Start(s3, true) // start without animation running
+	/*
 
 		emb := gi3d.NewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 		emb.Pose.Pos.Set(-2, 2, 0)

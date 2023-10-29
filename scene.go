@@ -128,7 +128,7 @@ func NewScene(name string) *Scene {
 func (sc *Scene) Update() {
 	updt := sc.UpdateStart()
 	sc.Config()
-	sc.UpdateEnd(updt)
+	sc.UpdateEndUpdate(updt)
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.

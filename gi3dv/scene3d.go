@@ -181,6 +181,59 @@ func (se *Scene3D) Render(sc *gi.Scene) {
 	}
 }
 
+// UpdateStart3D calls UpdateStart on the 3D Scene:
+// sets the scene ScUpdating flag to prevent
+// render updates during construction on a scene.
+// if already updating, returns false.
+// Pass the result to UpdateEnd* methods.
+func (se *Scene3D) UpdateStart3D() bool {
+	return se.Scene.UpdateStart()
+}
+
+// UpdateEnd3D calls UpdateEnd on the 3D Scene:
+// resets the scene ScUpdating flag if updt = true
+func (se *Scene3D) UpdateEnd3D(updt bool) {
+	se.Scene.UpdateEnd(updt)
+}
+
+// UpdateEndRender3D calls UpdateEndRender on the 3D Scene
+// and calls gi SetNeedsRender.
+// resets the scene ScUpdating flag if updt = true
+// and sets the ScNeedsRender flag; updt is from UpdateStart().
+// Render only updates based on camera changes, not any node-level
+// changes. See [UpdateEndUpdate].
+func (se *Scene3D) UpdateEndRender3D(updt bool) {
+	if updt {
+		se.Scene.UpdateEndRender(updt)
+		se.SetNeedsRender()
+	}
+}
+
+// UpdateEndUpdate3D calls UpdateEndUpdate on the 3D Scene
+// and calls gi SetNeedsRender.
+// UpdateEndUpdate resets the scene ScUpdating flag if updt = true
+// and sets the ScNeedsUpdate flag; updt is from UpdateStart().
+// Update is for when any node Pose or material changes happen.
+// See [UpdateEndConfig] for major changes.
+func (se *Scene3D) UpdateEndUpdate3D(updt bool) {
+	if updt {
+		se.Scene.UpdateEndUpdate(updt)
+		se.SetNeedsRender()
+	}
+}
+
+// UpdateEndConfig3D calls UpdateEndConfig on the 3D Scene
+// and calls gi SetNeedsRender.
+// UpdateEndConfig resets the scene ScUpdating flag if updt = true
+// and sets the ScNeedsConfig flag; updt is from UpdateStart().
+// Config is for Texture, Lighting Meshes or more complex nodes).
+func (se *Scene3D) UpdateEndConfig3D(updt bool) {
+	if updt {
+		se.Scene.UpdateEndConfig(updt)
+		se.SetNeedsRender()
+	}
+}
+
 // Direct render to Drawer frame
 // drw := sc.Win.OSWin.Drawer()
 // drw.SetFrameImage(sc.DirUpIdx, sc.Frame.Frames[0])
