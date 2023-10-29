@@ -339,6 +339,16 @@ var _NodeFlagsMap = map[NodeFlags]string{
 // of this NodeFlags value.
 func (i NodeFlags) String() string {
 	str := ""
+	for _, ie := range ki.FlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
 	for _, ie := range _NodeFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -361,7 +371,7 @@ func (i NodeFlags) BitIndexString() string {
 	if str, ok := _NodeFlagsMap[i]; ok {
 		return str
 	}
-	return strconv.FormatInt(int64(i), 10)
+	return ki.Flags(i).BitIndexString()
 }
 
 // SetString sets the NodeFlags value from its
@@ -384,7 +394,10 @@ func (i *NodeFlags) SetStringOr(s string) error {
 		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type NodeFlags")
+			err := (*ki.Flags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -405,21 +418,32 @@ func (i NodeFlags) Desc() string {
 	if str, ok := _NodeFlagsDescMap[i]; ok {
 		return str
 	}
-	return i.String()
+	return ki.Flags(i).Desc()
 }
 
 // NodeFlagsValues returns all possible values
 // for the type NodeFlags.
 func NodeFlagsValues() []NodeFlags {
-	return _NodeFlagsValues
+	es := ki.FlagsValues()
+	res := make([]NodeFlags, len(es))
+	for i, e := range es {
+		res[i] = NodeFlags(e)
+	}
+	res = append(res, _NodeFlagsValues...)
+	return res
 }
 
 // Values returns all possible values
 // for the type NodeFlags.
 func (i NodeFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_NodeFlagsValues))
-	for i, d := range _NodeFlagsValues {
+	es := ki.FlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_NodeFlagsValues))
+	for i, d := range es {
 		res[i] = d
+	}
+	for i, d := range _NodeFlagsValues {
+		res[i+les] = d
 	}
 	return res
 }
@@ -428,6 +452,9 @@ func (i NodeFlags) Values() []enums.Enum {
 // valid option for type NodeFlags.
 func (i NodeFlags) IsValid() bool {
 	_, ok := _NodeFlagsMap[i]
+	if !ok {
+		return ki.Flags(i).IsValid()
+	}
 	return ok
 }
 

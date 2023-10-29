@@ -879,14 +879,16 @@ func (t *Solid) SetMat(v Material) *Solid {
 
 // Text2DType is the [gti.Type] for [Text2D]
 var Text2DType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi3d.Text2D",
-	ShortName:  "gi3d.Text2D",
-	IDName:     "text-2-d",
-	Doc:        "Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi3d.Text2D",
+	ShortName: "gi3d.Text2D",
+	IDName:    "text-2-d",
+	Doc:       "Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "the text string to display", Directives: gti.Directives{}, Tag: ""}},
-		{"Sty", &gti.Field{Name: "Sty", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for the text", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for the text", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"TxtPos", &gti.Field{Name: "TxtPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position offset of start of text rendering relative to upper-left corner", Directives: gti.Directives{}, Tag: "set:\"-\" xml:\"-\" json:\"-\""}},
 		{"TxtRender", &gti.Field{Name: "TxtRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" xml:\"-\" json:\"-\""}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering text", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
@@ -897,14 +899,6 @@ var Text2DType = gti.AddType(&gti.Type{
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Text2D{},
 })
-
-// NewText2D adds a new [Text2D] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewText2D(par ki.Ki, name ...string) *Text2D {
-	return par.NewChild(Text2DType, name...).(*Text2D)
-}
 
 // KiType returns the [*gti.Type] of [Text2D]
 func (t *Text2D) KiType() *gti.Type {

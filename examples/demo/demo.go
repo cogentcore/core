@@ -19,6 +19,7 @@ import (
 	_ "goki.dev/gi3d/io/obj"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/vgpu/v2/vgpu"
 
@@ -73,7 +74,7 @@ func (an *Anim) Start(se *gi3dv.Scene3D, on bool) {
 	an.DoGopher = true
 	an.Speed = .1
 	an.GetObjs()
-	an.Ticker = time.NewTicker(time.Second / 60) // 60 fps
+	an.Ticker = time.NewTicker(time.Second / 30) // 30 fps probably smoother
 	go an.Animate()
 }
 
@@ -280,31 +281,28 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 		SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
 	trs.Mat.Color.A = 200
 
-	/*
+	txt := gi3d.NewText2D(se, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	// txt.Styles.BackgroundColor.SetSolid(colors.White)
+	txt.Styles.Color = colors.Black
+	txt.Styles.Text.Align = styles.AlignLeft // styles.AlignCenter)
+	txt.Pose.Scale.SetScalar(0.2)
+	txt.SetPos(0, 2.2, 0)
 
-		txt := gi3d.NewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-		// 	txt.SetProp("background-color", styles.Color{0, 0, 0, 0}) // transparent -- default
-		// txt.SetProp("background-color", "white")
-		txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
-		// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
-		// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
-		txt.SetProp("text-align", styles.AlignLeft) // gi.AlignCenter)
-		txt.Pose.Scale.SetScalar(0.2)
-		txt.Pose.Pos.Set(0, 2.2, 0)
-
-		tcg := gi3d.NewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
-		fpgun := gi3d.NewSolid(sc, tcg, "first-person-gun", cbm.Name())
-		fpgun.Pose.Scale.Set(.1, .1, 1)
-		fpgun.Pose.Pos.Set(.5, -.5, -2.5)              // in front of camera
-		fpgun.Mat.Color = color.RGBA{255, 0, 255, 128} // alpha = .5
-
-	*/
+	tcg := gi3d.NewGroup(se, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
+	gi3d.NewSolid(tcg, "first-person-gun").SetMesh(cbm).
+		SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5). // in front of camera
+		SetColor(color.RGBA{255, 0, 255, 128})
 
 	///////////////////////////////////////////////////
 	//  Animation & Embedded controls
 
 	anim := &Anim{}
-	anim.Start(s3, true) // start without animation running
+	anim.Start(s3, false) // start without animation running
+
+	gi.NewButton(trow).SetText("Toggle Anim").OnClick(func(e events.Event) {
+		anim.On = !anim.On
+	})
+
 	/*
 
 		emb := gi3d.NewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)

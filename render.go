@@ -62,6 +62,18 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
+func (sc *Scene) SetNeedsRender() {
+	sc.SetFlag(true, ScNeedsRender)
+}
+
+func (sc *Scene) SetNeedsUpdate() {
+	sc.SetFlag(true, ScNeedsUpdate)
+}
+
+func (sc *Scene) SetNeedsConfig() {
+	sc.SetFlag(true, ScNeedsConfig)
+}
+
 // UpdateStart sets the scene ScUpdating flag to prevent
 // render updates during construction on a scene.
 // if already updating, returns false.
@@ -321,11 +333,12 @@ func (sc *Scene) Config() {
 	clr := mat32.NewVec3Color(sc.BackgroundColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
+	sc.ConfigNodes()
 	sc.UpdateWorldMatrix()
 	sc.ConfigLights()
 	sc.ConfigMeshesTextures()
-	sc.ConfigNodes()
 	sc.SetFlag(false, ScNeedsConfig)
+	sc.SetFlag(true, ScNeedsUpdate)
 }
 
 // ConfigMeshesTextures configures the meshes and the textures to the Phong
@@ -359,6 +372,7 @@ func (sc *Scene) TrackCamera() bool {
 		return false
 	}
 	tc.TrackCamera(sc)
+	sc.SetNeedsUpdate() // need to update world model for nodes
 	return true
 }
 
