@@ -117,7 +117,7 @@ func (st *MainStage) SetWindowInsets() {
 	// TODO(kai): cleaner approach here
 	uf := func(val float32) units.Value {
 		return units.Value{
-			DotsFunc: func(uc *units.Context) float32 {
+			Custom: func(uc *units.Context) float32 {
 				dp := uc.ToDots(12, units.UnitDp)
 				return max(val, dp)
 			},
