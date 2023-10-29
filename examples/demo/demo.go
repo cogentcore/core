@@ -18,7 +18,6 @@ import (
 	"goki.dev/gi3d/gi3dv"
 	_ "goki.dev/gi3d/io/obj"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -145,8 +144,6 @@ func app() {
 	// gi3d.Update3DTrace = true
 	// gi.Update2DTrace = true
 	vgpu.Debug = true
-
-	goosi.ZoomFactor = 1.5
 
 	gi.SetAppName("gi3d")
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
