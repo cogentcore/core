@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
@@ -31,7 +30,7 @@ import (
 // The margin property creates blank margin of the background color around the text
 // (2 px default) and the background-color defaults to transparent
 // but can be set to any color.
-type Text2D struct { //goki:no-new
+type Text2D struct {
 	Solid
 
 	// the text string to display
@@ -50,11 +49,8 @@ type Text2D struct { //goki:no-new
 	RenderState paint.State `set:"-" copy:"-" json:"-" xml:"-" view:"-"`
 }
 
-// NewText2D adds a new text of given name and text string to given parent
-func NewText2D(parent ki.Ki, name string) *Text2D {
-	txt := parent.NewChild(Text2DType, name).(*Text2D)
+func (txt *Text2D) OnInit() {
 	txt.Defaults()
-	return txt
 }
 
 func (txt *Text2D) Defaults() {
