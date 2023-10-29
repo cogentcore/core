@@ -30,6 +30,11 @@ func main() {
 package units
 	`)
 	for _, v := range units.UnitsValues() {
+		// we ignore dots because they also set the dots field
+		// as a special case
+		if v == units.UnitDot {
+			continue
+		}
 		s := v.String()
 		d := data{
 			Lower: s,
@@ -38,7 +43,7 @@ package units
 		// actual desc after =
 		_, d.Desc, _ = strings.Cut(v.Desc(), " = ")
 		d.Desc = html.UnescapeString(d.Desc)
-		grr.Must0(newFuncs.Execute(buf, d))
+		grr.Must0(funcs.Execute(buf, d))
 	}
 	grr.Must0(os.WriteFile("unitgen.go", buf.Bytes(), 0666))
 }
@@ -49,11 +54,18 @@ type data struct {
 	Desc  string
 }
 
-var newFuncs = template.Must(template.New("newFuncs").Parse(
+var funcs = template.Must(template.New("funcs").Parse(
 	`
 // {{.Camel}} returns a new {{.Lower}} value:
 // {{.Desc}}
 func {{.Camel}}(val float32) Value {
 	return Value{Val: val, Un: Unit{{.Camel}}}
+}
+
+// Set{{.Camel}} sets the value in terms of {{.Lower}}:
+// {{.Desc}}
+func (v *Value) Set{{.Camel}}(val float32) {
+	v.Val = val
+	v.Un = Unit{{.Camel}}
 }
 `))

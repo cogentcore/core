@@ -12,10 +12,24 @@ func Px(val float32) Value {
 	return Value{Val: val, Un: UnitPx}
 }
 
+// SetPx sets the value in terms of px:
+// pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
+func (v *Value) SetPx(val float32) {
+	v.Val = val
+	v.Un = UnitPx
+}
+
 // Dp returns a new dp value:
 // density-independent pixels -- 1dp = 1/160th of 1in
 func Dp(val float32) Value {
 	return Value{Val: val, Un: UnitDp}
+}
+
+// SetDp sets the value in terms of dp:
+// density-independent pixels -- 1dp = 1/160th of 1in
+func (v *Value) SetDp(val float32) {
+	v.Val = val
+	v.Un = UnitDp
 }
 
 // Ew returns a new ew value:
@@ -24,10 +38,24 @@ func Ew(val float32) Value {
 	return Value{Val: val, Un: UnitEw}
 }
 
+// SetEw sets the value in terms of ew:
+// percentage of element width (equivalent to CSS % in some contexts)
+func (v *Value) SetEw(val float32) {
+	v.Val = val
+	v.Un = UnitEw
+}
+
 // Eh returns a new eh value:
 // percentage of element height (equivalent to CSS % in some contexts)
 func Eh(val float32) Value {
 	return Value{Val: val, Un: UnitEh}
+}
+
+// SetEh sets the value in terms of eh:
+// percentage of element height (equivalent to CSS % in some contexts)
+func (v *Value) SetEh(val float32) {
+	v.Val = val
+	v.Un = UnitEh
 }
 
 // Pw returns a new pw value:
@@ -36,10 +64,24 @@ func Pw(val float32) Value {
 	return Value{Val: val, Un: UnitPw}
 }
 
+// SetPw sets the value in terms of pw:
+// percentage of parent width (equivalent to CSS % in some contexts)
+func (v *Value) SetPw(val float32) {
+	v.Val = val
+	v.Un = UnitPw
+}
+
 // Ph returns a new ph value:
 // percentage of parent height (equivalent to CSS % in some contexts)
 func Ph(val float32) Value {
 	return Value{Val: val, Un: UnitPh}
+}
+
+// SetPh sets the value in terms of ph:
+// percentage of parent height (equivalent to CSS % in some contexts)
+func (v *Value) SetPh(val float32) {
+	v.Val = val
+	v.Un = UnitPh
 }
 
 // Rem returns a new rem value:
@@ -48,10 +90,24 @@ func Rem(val float32) Value {
 	return Value{Val: val, Un: UnitRem}
 }
 
+// SetRem sets the value in terms of rem:
+// font size of the root element -- defaults to 12pt scaled by DPI factor
+func (v *Value) SetRem(val float32) {
+	v.Val = val
+	v.Un = UnitRem
+}
+
 // Em returns a new em value:
 // font size of the element -- fallback to 12pt by default
 func Em(val float32) Value {
 	return Value{Val: val, Un: UnitEm}
+}
+
+// SetEm sets the value in terms of em:
+// font size of the element -- fallback to 12pt by default
+func (v *Value) SetEm(val float32) {
+	v.Val = val
+	v.Un = UnitEm
 }
 
 // Ex returns a new ex value:
@@ -60,10 +116,24 @@ func Ex(val float32) Value {
 	return Value{Val: val, Un: UnitEx}
 }
 
+// SetEx sets the value in terms of ex:
+// x-height of the element's font (size of 'x' glyph) -- fallback to 0.5em by default
+func (v *Value) SetEx(val float32) {
+	v.Val = val
+	v.Un = UnitEx
+}
+
 // Ch returns a new ch value:
 // width of the '0' glyph in the element's font -- fallback to 0.5em by default
 func Ch(val float32) Value {
 	return Value{Val: val, Un: UnitCh}
+}
+
+// SetCh sets the value in terms of ch:
+// width of the '0' glyph in the element's font -- fallback to 0.5em by default
+func (v *Value) SetCh(val float32) {
+	v.Val = val
+	v.Un = UnitCh
 }
 
 // Vw returns a new vw value:
@@ -72,10 +142,24 @@ func Vw(val float32) Value {
 	return Value{Val: val, Un: UnitVw}
 }
 
+// SetVw sets the value in terms of vw:
+// 1% of the viewport's width
+func (v *Value) SetVw(val float32) {
+	v.Val = val
+	v.Un = UnitVw
+}
+
 // Vh returns a new vh value:
 // 1% of the viewport's height
 func Vh(val float32) Value {
 	return Value{Val: val, Un: UnitVh}
+}
+
+// SetVh sets the value in terms of vh:
+// 1% of the viewport's height
+func (v *Value) SetVh(val float32) {
+	v.Val = val
+	v.Un = UnitVh
 }
 
 // Vmin returns a new vmin value:
@@ -84,10 +168,24 @@ func Vmin(val float32) Value {
 	return Value{Val: val, Un: UnitVmin}
 }
 
+// SetVmin sets the value in terms of vmin:
+// 1% of the viewport's smaller dimension
+func (v *Value) SetVmin(val float32) {
+	v.Val = val
+	v.Un = UnitVmin
+}
+
 // Vmax returns a new vmax value:
 // 1% of the viewport's larger dimension
 func Vmax(val float32) Value {
 	return Value{Val: val, Un: UnitVmax}
+}
+
+// SetVmax sets the value in terms of vmax:
+// 1% of the viewport's larger dimension
+func (v *Value) SetVmax(val float32) {
+	v.Val = val
+	v.Un = UnitVmax
 }
 
 // Cm returns a new cm value:
@@ -96,10 +194,24 @@ func Cm(val float32) Value {
 	return Value{Val: val, Un: UnitCm}
 }
 
+// SetCm sets the value in terms of cm:
+// centimeters -- 1cm = 96px/2.54
+func (v *Value) SetCm(val float32) {
+	v.Val = val
+	v.Un = UnitCm
+}
+
 // Mm returns a new mm value:
 // millimeters -- 1mm = 1/10th of cm
 func Mm(val float32) Value {
 	return Value{Val: val, Un: UnitMm}
+}
+
+// SetMm sets the value in terms of mm:
+// millimeters -- 1mm = 1/10th of cm
+func (v *Value) SetMm(val float32) {
+	v.Val = val
+	v.Un = UnitMm
 }
 
 // Q returns a new q value:
@@ -108,10 +220,24 @@ func Q(val float32) Value {
 	return Value{Val: val, Un: UnitQ}
 }
 
+// SetQ sets the value in terms of q:
+// quarter-millimeters -- 1q = 1/40th of cm
+func (v *Value) SetQ(val float32) {
+	v.Val = val
+	v.Un = UnitQ
+}
+
 // In returns a new in value:
 // inches -- 1in = 2.54cm = 96px
 func In(val float32) Value {
 	return Value{Val: val, Un: UnitIn}
+}
+
+// SetIn sets the value in terms of in:
+// inches -- 1in = 2.54cm = 96px
+func (v *Value) SetIn(val float32) {
+	v.Val = val
+	v.Un = UnitIn
 }
 
 // Pc returns a new pc value:
@@ -120,14 +246,22 @@ func Pc(val float32) Value {
 	return Value{Val: val, Un: UnitPc}
 }
 
+// SetPc sets the value in terms of pc:
+// picas -- 1pc = 1/6th of 1in
+func (v *Value) SetPc(val float32) {
+	v.Val = val
+	v.Un = UnitPc
+}
+
 // Pt returns a new pt value:
 // points -- 1pt = 1/72th of 1in
 func Pt(val float32) Value {
 	return Value{Val: val, Un: UnitPt}
 }
 
-// Dot returns a new dot value:
-// actual real display pixels -- generally only use internally
-func Dot(val float32) Value {
-	return Value{Val: val, Un: UnitDot}
+// SetPt sets the value in terms of pt:
+// points -- 1pt = 1/72th of 1in
+func (v *Value) SetPt(val float32) {
+	v.Val = val
+	v.Un = UnitPt
 }
