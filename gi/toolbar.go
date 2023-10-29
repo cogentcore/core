@@ -47,7 +47,7 @@ func DefaultTopAppBar(tb *Toolbar) {
 		}
 		ch.Items = make([]any, mm.Stack.Len())
 		for i, kv := range mm.Stack.Order {
-			ch.Items[i] = kv.Key
+			ch.Items[i] = kv.Val.AsBase().Scene.Name()
 			if kv.Val == stg {
 				ch.SetCurIndex(i)
 			}
