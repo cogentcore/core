@@ -89,7 +89,7 @@ func (se *Scene3D) ConfigFrame(sc *gi.Scene) {
 		return
 	}
 	// requires 4-wise alignment apparently?
-	sz.X -= sz.X % 8
+	// sz.X -= sz.X % 8
 	// sz.Y -= sz.Y%4
 	se.Scene.Geom.Size = sz
 
