@@ -152,7 +152,7 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	dlg := TableViewSelectDialog(gi.NewDialog(ctx).Title("Select a KeyMap").Prompt(vv.Doc()), &keyfun.AvailMaps, curRow)
+	dlg := TableViewSelectDialog(gi.NewDialog(ctx).Title("Select a key map").Prompt(vv.Doc()), &keyfun.AvailMaps, curRow)
 	dlg.OnAccept(func(e events.Event) {
 		si := dlg.Data.(int)
 		if si >= 0 {
