@@ -209,7 +209,7 @@ var ImageProps = ki.Props{
 	"Toolbar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",
-			"icon": icons.FileOpen,
+			"icon": icons.Open,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",

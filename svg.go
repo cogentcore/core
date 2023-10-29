@@ -290,7 +290,7 @@ var SVGProps = ki.Props{
 		{"OpenXML", ki.Props{
 			"label": "Open...",
 			"desc":  "Open SVG XML-formatted file",
-			"icon":  icons.FileOpen,
+			"icon":  icons.Open,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".svg",
