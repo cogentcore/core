@@ -431,21 +431,20 @@ func (im *Image) DevGoImage() (*image.RGBA, error) {
 	if !im.Format.IsStdRGBA() && !im.Format.IsRGBAUnorm() {
 		return nil, fmt.Errorf("vgpu.Image DevGoImage: Device image is not standard RGBA format: %s", im.Format.String())
 	}
-	size := im.Format.LayerByteSize()
-
 	ptr := MapMemoryAll(im.Dev, im.Mem)
 	subrec := vk.ImageSubresource{}
 	subrec.AspectMask = vk.ImageAspectFlags(vk.ImageAspectColorBit)
 	subrec.ArrayLayer = 0
 	sublay := vk.SubresourceLayout{}
 	vk.GetImageSubresourceLayout(im.Dev, im.Image, &subrec, &sublay)
+	sublay.Deref()
 	offset := int(sublay.Offset)
+	size := int(sublay.Size) // im.Format.LayerByteSize()
 	pix := (*[ByteCopyMemoryLimit]byte)(ptr)[offset : size+offset]
 
 	rgba := &image.RGBA{}
 	rgba.Pix = pix
-	rgba.Stride = im.Format.Stride() // int(sublay.RowPitch)
-	fmt.Printf("%#v\n", sublay)
+	rgba.Stride = int(sublay.RowPitch) // im.Format.Stride()
 	rgba.Rect = image.Rect(0, 0, im.Format.Size.X, im.Format.Size.Y)
 	return rgba, nil
 }
@@ -832,13 +831,14 @@ func (im *Image) AllocImage() {
 	var memReqs vk.MemoryRequirements
 	vk.GetImageMemoryRequirements(im.Dev, im.Image, &memReqs)
 	memReqs.Deref()
+	sz := memReqs.Size
 
 	memProps := im.GPU.MemoryProps
 	memTypeIndex, _ := FindRequiredMemoryTypeFallback(memProps,
 		vk.MemoryPropertyFlagBits(memReqs.MemoryTypeBits), props)
 	ma := &vk.MemoryAllocateInfo{
 		SType:           vk.StructureTypeMemoryAllocateInfo,
-		AllocationSize:  memReqs.Size,
+		AllocationSize:  sz,
 		MemoryTypeIndex: memTypeIndex,
 	}
 	var mem vk.DeviceMemory
