@@ -5,15 +5,7 @@
 package gi
 
 import (
-	"log/slog"
-
-	"github.com/iancoleman/strcase"
-	"goki.dev/colors"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
 )
 
 var (
@@ -23,8 +15,11 @@ var (
 	StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
 )
 
-// Dialog is a MainStage with methods for configuring a dialog
+// Dialog is a scene with methods for configuring a dialog
 type Dialog struct {
+	Scene
+
+	// Stage is the main stage associated with the dialog
 	Stage *MainStage
 
 	// Data has arbitrary data for this dialog
@@ -37,6 +32,7 @@ type Dialog struct {
 	ButtonBox *Layout
 }
 
+/*
 // NewDialog returns a new DialogStage stage with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which
@@ -88,15 +84,15 @@ func (dlg *Dialog) Prompt(prompt string) *Dialog {
 	})
 	return dlg
 }
-
+*/
 // PromptWidgetIdx returns the prompt label widget index,
 // for adding additional elements below the prompt. If it
 // is not found, it returns the title label widget index.
 // If neither are found, it returns -1.
 func (dlg *Dialog) PromptWidgetIdx() int {
-	idx, ok := dlg.Stage.Scene.Children().IndexByName("prompt", 1)
+	idx, ok := dlg.Children().IndexByName("prompt", 1)
 	if !ok {
-		idx, ok := dlg.Stage.Scene.Children().IndexByName("title", 0)
+		idx, ok := dlg.Children().IndexByName("title", 0)
 		if !ok {
 			return -1
 		}
@@ -119,6 +115,7 @@ func (dlg *Dialog) NewWindow(newWindow bool) *Dialog {
 	return dlg
 }
 
+/*
 // ConfigButtonBox adds layout for holding buttons at bottom of dialog
 // and saves as ButtonBox field, if not already done.
 func (dlg *Dialog) ConfigButtonBox() *Layout {
@@ -417,6 +414,7 @@ func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog))
 	})
 	return dlg
 }
+*/
 
 /////////////////////////////////////////////
 //  	Proposed new model
