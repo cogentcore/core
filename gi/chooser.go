@@ -71,6 +71,11 @@ type Chooser struct {
 
 	// maximum label length (in runes)
 	MaxLength int
+
+	// ItemsFunc, if non-nil, is a function to call before showing the items
+	// of the chooser, which is typically used to configure them (eg: if they
+	// are based on dynamic data)
+	ItemsFunc func()
 }
 
 func (ch *Chooser) CopyFieldsFrom(frm any) {
@@ -527,6 +532,9 @@ func (ch *Chooser) SelectItemAction(idx int) {
 // MakeItemsMenu constructs a menu of all the items.
 // It is automatically set as the [Button.Menu] for the Chooser.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
+	if ch.ItemsFunc != nil {
+		ch.ItemsFunc()
+	}
 	if len(ch.Items) == 0 {
 		return
 	}
