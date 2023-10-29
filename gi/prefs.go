@@ -69,10 +69,10 @@ type Preferences struct { //gti:add
 	HiStyle HiStyleName
 
 	// parameters controlling GUI behavior
-	Params ParamPrefs `view:"inline"`
+	Params ParamPrefs
 
 	// editor preferences -- for TextView etc
-	Editor EditorPrefs `view:"inline"`
+	Editor EditorPrefs
 
 	// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
 	KeyMap keyfun.MapName
@@ -738,13 +738,13 @@ type PrefsDetailed struct { //gti:add
 	TextBufMarkupDelayMSec int `def:"1000" min:"100" step:"100"`
 
 	// the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
-	MapInlineLen int `def:"3" min:"2" step:"1"`
+	MapInlineLen int `def:"2" min:"1" step:"1"`
 
 	// the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
-	StructInlineLen int `def:"6" min:"2" step:"1"`
+	StructInlineLen int `def:"4" min:"2" step:"1"`
 
 	// the number of slice elements below which inline will be used
-	SliceInlineLen int `def:"6" min:"2" step:"1"`
+	SliceInlineLen int `def:"4" min:"2" step:"1"`
 
 	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-"`
