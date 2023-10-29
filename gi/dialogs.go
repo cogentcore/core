@@ -96,15 +96,22 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 		s.SetStretchMaxWidth()
 	})
 	dlg.ButtonBox = bb
+	NewStretch(bb)
 	return bb
 }
 
-// Ok adds Ok button to the ButtonBox at bottom of dialog,
+// Ok adds an OK button to the ButtonBox at bottom of dialog,
 // connecting to Accept method the Ctrl+Enter keychord event.
 // Also sends a Change event to the dialog for listeners there.
-func (dlg *Dialog) Ok() *Dialog {
+// If text is passed, that text is used for the text of the button
+// instead of the standard "OK".
+func (dlg *Dialog) Ok(text ...string) *Dialog {
 	bb := dlg.ConfigButtonBox()
-	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").OnClick(func(e events.Event) {
+	txt := "OK"
+	if len(text) > 0 {
+		txt = text[0]
+	}
+	NewButton(bb, "ok").SetType(ButtonText).SetText(txt).OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.AcceptDialog()
 	})
@@ -120,10 +127,16 @@ func (dlg *Dialog) Ok() *Dialog {
 
 // Cancel adds Cancel button to the ButtonBox at bottom of dialog,
 // connecting to Cancel method and the Esc keychord event.
-// Also sends a Change event to the dialog scene for listeners there
-func (dlg *Dialog) Cancel() *Dialog {
+// Also sends a Change event to the dialog scene for listeners there.
+// If text is passed, that text is used for the text of the button
+// instead of the standard "Cancel".
+func (dlg *Dialog) Cancel(text ...string) *Dialog {
 	bb := dlg.ConfigButtonBox()
-	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").OnClick(func(e events.Event) {
+	txt := "Cancel"
+	if len(text) > 0 {
+		txt = text[0]
+	}
+	NewButton(bb, "cancel").SetType(ButtonText).SetText(txt).OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.CancelDialog()
 	})
