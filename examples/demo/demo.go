@@ -73,7 +73,7 @@ func (an *Anim) Start(se *gi3dv.Scene3D, on bool) {
 	an.DoGopher = true
 	an.Speed = .1
 	an.GetObjs()
-	an.Ticker = time.NewTicker(10 * time.Millisecond) // 100 fps max
+	an.Ticker = time.NewTicker(time.Second / 60) // 60 fps
 	go an.Animate()
 }
 
