@@ -64,15 +64,15 @@ func init() {
 var (
 	// MapInlineLen is the number of map elements at or below which an inline
 	// representation of the map will be presented -- more convenient for small
-	// #'s of props
-	MapInlineLen = 3
+	// numbers of properties
+	MapInlineLen = 2
 
 	// StructInlineLen is the number of elemental struct fields at or below which an inline
 	// representation of the struct will be presented -- more convenient for small structs
-	StructInlineLen = 6
+	StructInlineLen = 4
 
-	// SliceInlineLen is the number of slice elements below which inline will be used
-	SliceInlineLen = 6
+	// SliceInlineLen is the number of slice elements at or below which inline will be used
+	SliceInlineLen = 4
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
