@@ -19,6 +19,7 @@ import (
 	"goki.dev/icons"
 )
 
+/*
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
 // provides a named, optional way to specify these args
 type DlgOpts struct {
@@ -65,28 +66,18 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 	// todo: temporarily enable ok, cancel until click-off etc all working
 	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, Ok: true, Cancel: true} // d.Ok, Cancel: d.Cancel}
 }
+*/
 
-// TextEditorDialog opens a dialog for displaying multi-line text in a
+// TextEditorDialog adds to the given dialog a display of multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextEditorDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *texteditor.Editor {
-	var dlg *gi.Dialog
-	if opts.Data != nil {
-		recyc := false
-		dlg, recyc = gi.RecycleStdDialog(ctx, opts.ToGiOpts(), opts.Data, fun)
-		if recyc {
-			return TextEditorDialogTextEditor(dlg)
-		}
-	} else {
-		dlg = gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
-	}
-
-	frame := dlg.Stage.Scene
+func TextEditorDialog(dlg *gi.Dialog, text []byte, filename gi.FileName, lineNumbers bool) *gi.Dialog {
+	frame := dlg.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	tb := texteditor.NewBuf()
-	tb.Filename = gi.FileName(opts.Filename)
-	tb.Opts.LineNos = opts.LineNos
+	tb.Filename = filename
+	tb.Opts.LineNos = lineNumbers
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.LayoutType, prIdx+1, "text-lay").(*gi.Layout)
@@ -110,7 +101,7 @@ func TextEditorDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi
 		OnClick(func(e events.Event) {
 			dlg.Stage.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
 		})
-	return tv
+	return dlg
 }
 
 // TextEditorDialogTextEditor returns the text view from a TextViewDialog
