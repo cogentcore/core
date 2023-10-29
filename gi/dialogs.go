@@ -417,3 +417,142 @@ func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog))
 	})
 	return dlg
 }
+
+/////////////////////////////////////////////
+//  	Proposed new model
+
+/*
+type Dialog struct {
+	Scene
+
+	Stage *Stage
+
+	ButtonBox *Layout
+}
+
+// Title adds title to dialog.  If title string is passed
+// then a new title is set -- otherwise the existing Title is used.
+func (dlg *Dialog) Title(title string) *Dialog {
+	dlg.Scene.Title = title
+	NewLabel(dlg, "title").SetText(title).
+		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
+		s.MaxWidth.Dp(-1)
+		s.AlignH = styles.AlignCenter
+		s.AlignV = styles.AlignTop
+		s.BackgroundColor.SetSolid(colors.Transparent)
+	})
+	return dlg
+}
+
+// Prompt adds given prompt to dialog.
+func (dlg *Dialog) Prompt(prompt string) *Dialog {
+	NewLabel(dlg, "prompt").SetText(prompt).
+		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpaceNormal
+		s.MaxWidth.Dp(-1)
+		s.Width.Ch(30)
+		s.Text.Align = styles.AlignLeft
+		s.AlignV = styles.AlignTop
+		s.Color = colors.Scheme.OnSurfaceVariant
+		s.BackgroundColor.SetSolid(colors.Transparent)
+	})
+	return dlg
+}
+
+// ConfigButtonBox adds layout for holding buttons at bottom of dialog
+// and saves as ButtonBox field, if not already done.
+func (dlg *Dialog) ConfigButtonBox() *Layout {
+	if dlg.ButtonBox != nil {
+		return dlg.ButtonBox
+	}
+	bb := NewLayout(dlg.Stage.Scene, "buttons").
+		SetLayout(LayoutHoriz)
+	bb.Style(func(s *styles.Style) {
+		bb.Spacing.Dp(8)
+		s.SetStretchMaxWidth()
+	})
+	dlg.ButtonBox = bb
+	return bb
+}
+
+// Ok adds Ok button to the ButtonBox at bottom of dialog,
+// connecting to Accept method the Ctrl+Enter keychord event.
+// Also sends a Change event to the dialog scene for listeners there.
+func (dlg *Dialog) Ok() *Dialog {
+	bb := dlg.ConfigButtonBox()
+	sc := dlg.Stage.Scene
+	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").OnClick(func(e events.Event) {
+		e.SetHandled() // otherwise propagates to dead elements
+		dlg.AcceptDialog()
+	})
+	sc.OnKeyChord(func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Accept {
+			e.SetHandled()
+			dlg.AcceptDialog()
+		}
+	})
+	return dlg
+}
+
+// Cancel adds Cancel button to the ButtonBox at bottom of dialog,
+// connecting to Cancel method and the Esc keychord event.
+// Also sends a Change event to the dialog scene for listeners there
+func (dlg *Dialog) Cancel() *Dialog {
+	bb := dlg.ConfigButtonBox()
+	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").OnClick(func(e events.Event) {
+		e.SetHandled() // otherwise propagates to dead elements
+		dlg.CancelDialog()
+	})
+	dlg.OnKeyChord(func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Abort {
+			e.SetHandled()
+			dlg.CancelDialog()
+		}
+	})
+	return dlg
+}
+
+func (dlg *Dialog) GetStage() *Stage {
+	if dlg.Stage != nil {
+		return dlg.Stage
+	}
+	dlg.Stage = NewMainStage(DialogStage, sc, ctx)
+}
+
+func (dlg *Dialog) Modal(modal bool) {
+	dlg.GetStage().SetModal(modal)
+}
+
+func (dlg *Dialog) Run() {
+	dlg.GetStage().Run()
+}
+
+// StringPrompt adds a prompts the user for a string value.
+// The string is set as the Data field in the Dialog.
+// Call Run() to run the returned dialog (can be further configed).
+// Context provides the relevant source context opening the dialog,
+// for positioning and constructing the dialog.
+func (dlg *Dialog) StringPrompt() *Dialog {
+	tf := NewTextField(dlg).SetPlaceholder(placeholder).
+		SetText(strval).
+		SetStretchMaxWidth().
+		SetMinPrefWidth(units.Ch(40))
+
+	tf.OnChange(func(e events.Event) {
+		dlg.Data = tf.Text()
+	})
+	return dlg
+}
+
+func Do() {
+	dlg := gi.NewDialog().Title("hello").Prompt("Enter your name").
+		StringPrompt("", "Enter name..").Ok().Cancel()
+	dlg.OnChange(func(e events.Event) { // OnChange is only emitted when accepted
+		fmt.Println("Hello,", dlg.Data.(string))
+	})
+	dlg.Modal(true).Run(ctx)
+}
+
+*/
