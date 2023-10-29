@@ -17,7 +17,7 @@ import (
 
 // DefaultTopAppBar is the default value for [Scene.TopAppBar].
 // It adds navigation buttons and an editable chooser bar.
-func DefaultTopAppBar(tb *Toolbar) {
+func DefaultTopAppBar(tb *Toolbar) { //gti:add
 	NewButton(tb).SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
