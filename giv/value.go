@@ -681,12 +681,12 @@ func (vv *ValueBase) OwnerLabel() string {
 	return olbl
 }
 
-// Label returns a label for this item suitable for a window title etc,
+// GetTitle returns a title for this item suitable for a window title etc,
 // based on the underlying value type name, owner label, and ViewPath.
 // newPath returns just what should be added to a ViewPath
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
-func (vv *ValueBase) GetLabel() (label, newPath string, isZero bool) {
+func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
 	lbl := ""
 	var npt reflect.Type
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {

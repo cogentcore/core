@@ -400,7 +400,7 @@ func (vv *StructValue) HasButton() bool {
 }
 
 func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	title, newPath, isZero := vv.GetLabel()
+	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
 	}
@@ -535,7 +535,7 @@ func (vv *SliceValue) HasButton() bool {
 }
 
 func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	title, newPath, isZero := vv.GetLabel()
+	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
 	}
@@ -670,7 +670,7 @@ func (vv *MapValue) HasButton() bool {
 }
 
 func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	title, newPath, isZero := vv.GetLabel()
+	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
 	}
@@ -807,7 +807,7 @@ func (vv *KiPtrValue) HasButton() bool {
 }
 
 func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	title, newPath, isZero := vv.GetLabel()
+	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
 	}
