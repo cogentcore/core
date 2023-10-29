@@ -13,8 +13,10 @@ import (
 	"sync"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/enums"
 	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -96,7 +98,6 @@ func NewScene(name ...string) *Scene {
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert
-	sc.SetDefaultStyle()
 	return sc
 }
 
@@ -108,8 +109,19 @@ func NewSubScene(par ki.Ki, name ...string) *Scene {
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert
-	sc.SetDefaultStyle()
 	return sc
+}
+
+func (sc *Scene) OnInit() {
+	sc.SceneStyles()
+}
+
+func (sc *Scene) SceneStyles() {
+	sc.Style(func(s *styles.Style) {
+		s.Cursor = cursors.Arrow
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		s.Color = colors.Scheme.OnBackground
+	})
 }
 
 // RenderCtx returns the current render context.
