@@ -134,6 +134,27 @@ func NewRoot[T Ki](name ...string) T {
 	return n
 }
 
+// InsertNewChild is a generic helper function for [Ki.InsertNewChild]
+func InsertNewChild[T Ki](par Ki, at int, name ...string) T {
+	var n T
+	return par.InsertNewChild(n.KiType(), at, name...).(T)
+}
+
+// ParentByType is a generic helper function for [Ki.ParentByType]
+func ParentByType[T Ki](k Ki, embeds bool) T {
+	var n T
+	v, _ := k.ParentByType(n.KiType(), embeds).(T)
+	return v
+}
+
+// ParentByTypeTry is a generic helper function for [Ki.ParentByTypeTry]
+func ParentByTypeTry[T Ki](k Ki, embeds bool) (T, error) {
+	var n T
+	vi, err := k.ParentByTypeTry(n.KiType(), embeds)
+	v, _ := vi.(T)
+	return v, err
+}
+
 // IsRoot tests if this node is the root node -- checks Parent = nil.
 func IsRoot(k Ki) bool {
 	if k.This() == nil || k.Parent() == nil || k.Parent().This() == nil {
