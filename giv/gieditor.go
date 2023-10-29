@@ -203,7 +203,6 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
 	ge.ConfigSplits()
-	ge.ConfigToolbar()
 	if mods {
 		ge.UpdateEnd(updt)
 	}
@@ -238,16 +237,6 @@ func (ge *GiEditor) StructView() *StructView {
 // ToolbarWidget returns the toolbar widget
 func (ge *GiEditor) ToolbarWidget() *gi.Toolbar {
 	return ge.ChildByName("toolbar", 1).(*gi.Toolbar)
-}
-
-// ConfigToolbar adds a GiEditor toolbar.
-func (ge *GiEditor) ConfigToolbar() {
-	tb := ge.ToolbarWidget()
-	if tb != nil && tb.HasChildren() {
-		return
-	}
-	tb.SetStretchMaxWidth()
-	gi.ToolbarFor(ge, tb)
 }
 
 // ConfigSplits configures the Splits.
@@ -292,6 +281,8 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
+	gi.DefaultTopAppBar(tb)
+
 	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(ge.Changed)
@@ -337,10 +328,11 @@ func GoGiEditorDialog(obj ki.Ki) {
 		sc.Nm += "-" + obj.Name()
 		sc.Title += ": " + obj.Name()
 	}
-	sc.Lay = gi.LayoutVert
 
 	ge := NewGiEditor(sc, "editor")
 	ge.SetRoot(obj)
+
+	sc.TopAppBar = ge.Toolbar
 
 	// mmen := win.MainMenu
 	// MainMenuView(ge, win, mmen)
