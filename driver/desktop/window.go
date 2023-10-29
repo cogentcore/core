@@ -362,11 +362,11 @@ func (w *windowImpl) Raise() {
 		if w.glw == nil { // by time we got to main, could be diff
 			return
 		}
-		// if bitflag.HasAtomic(&w.Flag, int(goosi.Minimized)) {
-		// 	w.glw.Restore()
-		// } else {
-		// 	w.glw.Focus()
-		// }
+		if w.Flag.HasFlag(goosi.Minimized) {
+			w.glw.Restore()
+		} else {
+			w.glw.Focus()
+		}
 	})
 }
 
