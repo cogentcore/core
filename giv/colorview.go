@@ -537,12 +537,11 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	ColorViewDialog(ctx, DlgOpts{Title: "Color Value View", Prompt: vv.Doc(), TmpSave: vv.TmpSave}, dclr, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			cclr := dlg.Data.(color.RGBA)
-			vv.SetColor(cclr)
-			vv.UpdateWidget()
-		}
+	dlg := ColorViewDialog(gi.NewDialog(ctx).Title("Color Value View").Prompt(vv.Doc()), dclr, "", vv.TmpSave)
+	dlg.OnAccept(func(e events.Event) {
+		cclr := dlg.Data.(color.RGBA)
+		vv.SetColor(cclr)
+		vv.UpdateWidget()
 		if fun != nil {
 			fun(dlg)
 		}
