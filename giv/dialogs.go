@@ -6,7 +6,6 @@ package giv
 
 import (
 	"image/color"
-	"reflect"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor"
@@ -112,45 +111,37 @@ func TextEditorDialogTextEditor(dlg *gi.Dialog) *texteditor.Editor {
 	return tv.(*texteditor.Editor)
 }
 
-// StructViewDialog is for editing fields of a structure using a StructView.
-// Optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore)
-// gopy:interface=handle
-func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), stru, fun)
-	if recyc {
-		return dlg
-	}
-
+// StructViewDialog adds to the given dialog a display for editing fields of
+// a structure using a StructView.
+//
+//gopy:interface=handle
+func StructViewDialog(dlg *gi.Dialog, stru any, viewPath string, tmpSave Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
-	// if opts.ReadOnly {
-	// 	sv.SetState(true, states.ReadOnly)
-	// }
-	sv.ViewPath = opts.ViewPath
-	sv.TmpSave = opts.TmpSave
+	if dlg.RdOnly {
+		sv.SetState(true, states.ReadOnly)
+	}
+	sv.ViewPath = viewPath
+	sv.TmpSave = tmpSave
 	sv.SetStruct(stru)
 	return dlg
 }
 
-// MapViewDialog is for editing elements of a map using a MapView.
-// Optionally connects to given signal receiving object and function for dialog signals
-// (nil to ignore)
-// gopy:interface=handle
-func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	// note: map is not directly comparable, so we have to use the pointer here..
-	mptr := reflect.ValueOf(mp).Pointer()
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), mptr, fun)
-	if recyc {
-		return dlg
-	}
+// MapViewDialog adds to the given dialog a display for editing elements
+// of a map using a MapView.
+//
+//gopy:interface=handle
+func MapViewDialog(dlg *gi.Dialog, mp any, viewPath string, tmpSave Value) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 	sv := frame.InsertNewChild(MapViewType, prIdx+1, "map-view").(*MapView)
-	sv.ViewPath = opts.ViewPath
-	sv.TmpSave = opts.TmpSave
+	if dlg.RdOnly {
+		sv.SetState(true, states.ReadOnly)
+	}
+	sv.ViewPath = viewPath
+	sv.TmpSave = tmpSave
 	sv.SetMap(mp)
 	return dlg
 }

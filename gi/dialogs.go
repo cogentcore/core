@@ -34,6 +34,9 @@ type Dialog struct {
 	// Data has arbitrary data for this dialog
 	Data any
 
+	// RdOnly is whether the dialog is read only
+	RdOnly bool
+
 	// Accepted means that the dialog was accepted -- else canceled
 	Accepted bool
 
@@ -55,6 +58,17 @@ func NewDialog(ctx Widget, name ...string) *Dialog {
 	dlg.Stage = NewMainStage(DialogStage, dlg.Scene, ctx)
 	dlg.Modal(true)
 	return dlg
+}
+
+// RecycleDialog looks for a dialog with the given data. If it
+// finds it, it shows it and returns true. Otherwise, it returns false.
+func RecycleDialog(data any) bool {
+	rw, got := DialogRenderWins.FindData(data)
+	if !got {
+		return false
+	}
+	rw.Raise()
+	return true
 }
 
 // Title adds the given title to the dialog
@@ -147,6 +161,11 @@ func (dlg *Dialog) Cancel(text ...string) *Dialog {
 			dlg.CancelDialog()
 		}
 	})
+	return dlg
+}
+
+func (dlg *Dialog) ReadOnly(readOnly bool) *Dialog {
+	dlg.RdOnly = readOnly
 	return dlg
 }
 
