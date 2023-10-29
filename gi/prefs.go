@@ -63,7 +63,7 @@ type Preferences struct { //gti:add
 	Density Densities
 
 	// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
-	LogicalDPIScale float32 `min:"0.1" step:"0.1"`
+	LogicalDPIScale float32 `min:"0.1" def:"1" step:"0.1"`
 
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs
@@ -298,6 +298,7 @@ func (pf *Preferences) Apply() {
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
 func (pf *Preferences) ApplyDPI() {
+	goosi.LogicalDPIScale = pf.LogicalDPIScale
 	n := goosi.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := goosi.TheApp.Screen(i)
