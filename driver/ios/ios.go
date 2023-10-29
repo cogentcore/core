@@ -179,13 +179,17 @@ func lifecycleAlive() {
 //export lifecycleVisible
 func lifecycleVisible() {
 	fmt.Println("lifecycle visible")
-	theApp.window.EvMgr.Window(events.WinShow)
+	if theApp.window != nil {
+		theApp.window.EvMgr.Window(events.WinShow)
+	}
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
 	fmt.Println("lifecycle focused")
-	theApp.window.EvMgr.Window(events.WinFocus)
+	if theApp.window != nil {
+		theApp.window.EvMgr.Window(events.WinFocus)
+	}
 }
 
 //export drawloop

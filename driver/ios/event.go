@@ -19,6 +19,7 @@ package ios
 */
 import "C"
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/goosi/events"
@@ -77,6 +78,7 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := getCodeFromRune(r)
+		fmt.Println("kt", r, code)
 		theApp.window.EvMgr.Key(events.KeyDown, r, code, 0) // TODO: modifiers
 		theApp.window.EvMgr.Key(events.KeyUp, r, code, 0)   // TODO: modifiers
 	}
@@ -84,6 +86,7 @@ func keyboardTyped(str *C.char) {
 
 //export keyboardDelete
 func keyboardDelete() {
+	fmt.Println("kd")
 	theApp.window.EvMgr.Key(events.KeyDown, 0, key.CodeDeleteBackspace, 0) // TODO: modifiers
 	theApp.window.EvMgr.Key(events.KeyUp, 0, key.CodeDeleteBackspace, 0)   // TODO: modifiers
 }
