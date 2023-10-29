@@ -114,21 +114,17 @@ func (st *MainStage) SetWindowInsets() {
 	}
 	insets := st.StageMgr.RenderWin.GoosiWin.Insets()
 	// fmt.Println(insets)
-	// TODO(kai): cleaner approach here
-	uf := func(val float32) units.Value {
-		return units.Value{
-			Custom: func(uc *units.Context) float32 {
-				dp := uc.ToDots(12, units.UnitDp)
-				return max(val, dp)
-			},
-		}
+	uv := func(val float32) units.Value {
+		return units.Custom(func(uc *units.Context) float32 {
+			return max(val, uc.Dp(12))
+		})
 	}
 	st.Scene.Style(func(s *styles.Style) {
 		s.Padding.Set(
-			uf(insets.Top),
-			uf(insets.Right),
-			uf(insets.Bottom),
-			uf(insets.Left),
+			uv(insets.Top),
+			uv(insets.Right),
+			uv(insets.Bottom),
+			uv(insets.Left),
 		)
 	})
 }
