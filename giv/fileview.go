@@ -64,7 +64,7 @@ type FileView struct {
 	Files []*filecat.FileInfo
 
 	// index of currently-selected file in Files list (-1 if none)
-	SelectedIdx int `set:"-" readonly:"+"`
+	SelectedIdx int `set:"-" edit:"-"`
 
 	// signal for file actions
 	// FileSig ki.Signal `desc:"signal for file actions"`

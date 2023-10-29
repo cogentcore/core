@@ -52,7 +52,7 @@ type Scene struct { //goki:no-new
 	TopAppBar func(tb *Toolbar)
 
 	// Size and position relative to overall rendering context.
-	Geom mat32.Geom2DInt `readonly:"+" set:"-"`
+	Geom mat32.Geom2DInt `edit:"-" set:"-"`
 
 	// render state for rendering
 	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -74,7 +74,7 @@ type Scene struct { //goki:no-new
 
 	// LastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
-	LastRender RenderParams `readonly:"+" set:"-"`
+	LastRender RenderParams `edit:"-" set:"-"`
 
 	// StyleMu is RW mutex protecting access to Style-related global vars
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
