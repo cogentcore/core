@@ -10,7 +10,6 @@ import (
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
 )
 
 // var samplefile gi.FileName = "sample.go"
@@ -23,8 +22,6 @@ func main() { gimain.Run(app) }
 func app() {
 	// gi.LayoutTrace = true
 	// gi.EventTrace = true
-
-	goosi.ZoomFactor = 2
 
 	gi.SetAppName("texteditor")
 	gi.SetAppAbout(`This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)

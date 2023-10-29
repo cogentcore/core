@@ -28,9 +28,6 @@ func app() {
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
 
-	// goosi.ZoomFactor = 1.5
-	// gi.Prefs.Density = gi.DensityCompact
-
 	sc := gi.NewScene("gogi-demo").SetTitle("GoGi Demo")
 
 	ts := gi.NewTabs(sc)
