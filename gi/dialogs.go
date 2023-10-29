@@ -219,7 +219,6 @@ func (dlg *Dialog) DefaultStyle() {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
 		sc.Spacing = StdDialogVSpaceUnits
-		s.Padding.Set(units.Dp(12))
 		if !st.NewWindow && !st.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			s.Border.Radius = styles.BorderRadiusLarge
