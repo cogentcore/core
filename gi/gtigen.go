@@ -1116,10 +1116,10 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Theme", &gti.Field{Name: "Theme", Type: "goki.dev/gi/v2/gi.Themes", LocalType: "Themes", Doc: "the color theme", Directives: gti.Directives{}, Tag: ""}},
 		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the primary color used to generate the color scheme", Directives: gti.Directives{}, Tag: ""}},
-		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/gi/v2/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highilighting style / theme", Directives: gti.Directives{}, Tag: ""}},
+		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\""}},
 		{"Density", &gti.Field{Name: "Density", Type: "goki.dev/gi/v2/gi.Densities", LocalType: "Densities", Doc: "the density (compactness) of content", Directives: gti.Directives{}, Tag: ""}},
-		{"LogicalDPIScale", &gti.Field{Name: "LogicalDPIScale", Type: "float32", LocalType: "float32", Doc: "overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc", Directives: gti.Directives{}, Tag: "min:\"0.1\" step:\"0.1\""}},
 		{"ScreenPrefs", &gti.Field{Name: "ScreenPrefs", Type: "map[string]goki.dev/gi/v2/gi.ScreenPrefs", LocalType: "map[string]ScreenPrefs", Doc: "screen-specific preferences -- will override overall defaults if set", Directives: gti.Directives{}, Tag: ""}},
+		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/gi/v2/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highlighting style / theme", Directives: gti.Directives{}, Tag: ""}},
 		{"Params", &gti.Field{Name: "Params", Type: "goki.dev/gi/v2/gi.ParamPrefs", LocalType: "ParamPrefs", Doc: "parameters controlling GUI behavior", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
 		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/gi/v2/gi.EditorPrefs", LocalType: "EditorPrefs", Doc: "editor preferences -- for TextView etc", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
 		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/gi/v2/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list", Directives: gti.Directives{}, Tag: ""}},
@@ -1199,7 +1199,7 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"LogicalDPIScale", &gti.Field{Name: "LogicalDPIScale", Type: "float32", LocalType: "float32", Doc: "overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.", Directives: gti.Directives{}, Tag: "min:\"0.1\" step:\"0.1\""}},
+		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
