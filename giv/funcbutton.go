@@ -293,7 +293,7 @@ func (fb *FuncButton) SetArgs() {
 		view.SetSoloValue(val)
 		view.SetName(name)
 		view.SetTag("label", label)
-		view.SetTag("doc", doc)
+		view.SetDoc(doc)
 		fb.Args[i] = view
 	}
 }
@@ -338,7 +338,7 @@ func (fb *FuncButton) SetReturns() {
 		view.SetSoloValue(val)
 		view.SetName(name)
 		view.SetTag("label", label)
-		view.SetTag("doc", doc)
+		view.SetDoc(doc)
 		fb.Returns[i] = view
 	}
 	fb.ShowReturn = nret > 0
