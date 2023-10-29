@@ -68,18 +68,18 @@ type TreeView struct { //goki:embedder
 	// linear index of this node within the entire tree.
 	// updated on full rebuilds and may sometimes be off,
 	// but close enough for expected uses
-	ViewIdx int `copy:"-" json:"-" xml:"-" readonly:"+"`
+	ViewIdx int `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
-	WidgetSize mat32.Vec2 `copy:"-" json:"-" xml:"-" readonly:"+"`
+	WidgetSize mat32.Vec2 `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// cached root of the view
-	RootView *TreeView `copy:"-" json:"-" xml:"-" readonly:"+"`
+	RootView *TreeView `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
-	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" readonly:"+"`
+	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// actStateLayer is the actual state layer of the tree view, which
 	// should be used when rendering it and its parts (but not its children).

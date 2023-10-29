@@ -191,34 +191,34 @@ type Layout struct { //goki:embedder
 	StackTop int
 
 	// total max size of children as laid out
-	ChildSize mat32.Vec2 `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	ChildSize mat32.Vec2 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// extra size in each dim due to scrollbars we add
-	ExtraSize mat32.Vec2 `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	ExtraSize mat32.Vec2 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// whether scrollbar is used for given dim
-	HasScroll [2]bool `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	HasScroll [2]bool `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// scroll bars -- we fully manage them as needed
-	Scrolls [2]*Slider `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	Scrolls [2]*Slider `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// computed size of a grid layout based on all the constraints -- computed during GetSize pass
-	GridSize image.Point `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	GridSize image.Point `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// grid data for rows in and cols in
-	GridData [RowColN][]GridData `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	GridData [RowColN][]GridData `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// line breaks for flow layout
-	FlowBreaks []int `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	FlowBreaks []int `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// accumulated name to search for when keys are typed
-	FocusName string `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	FocusName string `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// time of last focus name event -- for timeout
-	FocusNameTime time.Time `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	FocusNameTime time.Time `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast ki.Ki `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
+	FocusNameLast ki.Ki `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ly *Layout) FlagType() enums.BitFlag {

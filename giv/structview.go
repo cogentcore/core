@@ -67,13 +67,13 @@ type StructView struct {
 	ToolbarStru any
 
 	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" readonly:"+"`
+	HasDefs bool `json:"-" xml:"-" edit:"-"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" readonly:"+"`
+	HasViewIfs bool `json:"-" xml:"-" edit:"-"`
 
 	// extra tags by field name -- from type properties
-	TypeFieldTags map[string]string `json:"-" xml:"-" readonly:"+"`
+	TypeFieldTags map[string]string `json:"-" xml:"-" edit:"-"`
 }
 
 func (sv *StructView) OnInit() {

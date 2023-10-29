@@ -265,22 +265,22 @@ type SliceViewBase struct {
 	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// height of a single row
-	RowHeight float32 `readonly:"+" copy:"-" json:"-" xml:"-"`
+	RowHeight float32 `edit:"-" copy:"-" json:"-" xml:"-"`
 
 	// the height of grid from last layout -- determines when update needed
 	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
-	VisRows int `readonly:"+" copy:"-" json:"-" xml:"-"`
+	VisRows int `edit:"-" copy:"-" json:"-" xml:"-"`
 
 	// starting slice index of visible rows
-	StartIdx int `readonly:"+" copy:"-" json:"-" xml:"-"`
+	StartIdx int `edit:"-" copy:"-" json:"-" xml:"-"`
 
 	// the number of rows rendered -- determines update
 	RenderedRows int `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// size of slice
-	SliceSize int `readonly:"+" copy:"-" json:"-" xml:"-"`
+	SliceSize int `edit:"-" copy:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
 	CurIdx int `copy:"-" view:"-" json:"-" xml:"-"`

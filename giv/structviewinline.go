@@ -44,10 +44,10 @@ type StructViewInline struct {
 	ViewPath string
 
 	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" readonly:"+"`
+	HasDefs bool `json:"-" xml:"-" edit:"-"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" readonly:"+"`
+	HasViewIfs bool `json:"-" xml:"-" edit:"-"`
 }
 
 func (sv *StructViewInline) OnInit() {
