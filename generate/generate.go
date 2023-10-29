@@ -107,8 +107,6 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 // given config info. It overrides the
 // [config.Config.Generate.Gtigen.InterfaceConfigs] info.
 func Generate(cfg *config.Config) error { //gti:add
-	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
-
 	cfg.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
 	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/ki/v2.Ki", &gtigen.Config{
