@@ -191,10 +191,6 @@ func (s *Style) Defaults() {
 
 // transition -- animation of hover, etc
 
-// RebuildDefaultStyles is a global state var used by Prefs to trigger rebuild
-// of all the default styles, which are otherwise compiled and not updated
-var RebuildDefaultStyles bool
-
 // ActiveStyler defines an interface for anything
 // that can report its active style
 type ActiveStyler interface {
