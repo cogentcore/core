@@ -532,13 +532,12 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}
-	desc, _ := vv.Desc()
 	dclr := color.RGBA{}
 	clr, ok := vv.Color()
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	ColorViewDialog(ctx, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave}, dclr, func(dlg *gi.Dialog) {
+	ColorViewDialog(ctx, DlgOpts{Title: "Color Value View", Prompt: vv.Doc(), TmpSave: vv.TmpSave}, dclr, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			cclr := dlg.Data.(color.RGBA)
 			vv.SetColor(cclr)
@@ -616,8 +615,7 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 			curRow = i
 		}
 	}
-	desc, _ := vv.Desc()
-	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a Color Name", Prompt: desc}, &sl, curRow, nil, func(dlg *gi.Dialog) {
+	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a Color Name", Prompt: vv.Doc()}, &sl, curRow, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
 			if si >= 0 {
