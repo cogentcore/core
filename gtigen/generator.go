@@ -484,10 +484,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, has
 		if dir == nil {
 			continue
 		}
-		hasAddAlias := slices.ContainsFunc(AddDirectives, func(d *gti.Directive) bool {
-			return d.Tool == dir.Tool && d.Directive == dir.Directive
-		})
-		if (dir.Tool == "gti" && dir.Directive == "add") || hasAddAlias {
+		if dir.Tool == "gti" && dir.Directive == "add" {
 			hasAdd = true
 		}
 		if dir.Tool == "gti" {

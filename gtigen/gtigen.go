@@ -12,17 +12,8 @@ import (
 	"fmt"
 
 	"goki.dev/gengo"
-	"goki.dev/gti"
 	"golang.org/x/tools/go/packages"
 )
-
-// AddDirectives contains all of the directives that act as
-// aliases to `gti:add`. By default there are none, but this
-// can be used by other generators wrapping gtigen to simplify
-// end-user code. For example, `goki generate` uses this to make
-// `gi:toolbar` directives automatically add the method to gti.
-// The [gti.Directive.Args] field is ignored on these directives.
-var AddDirectives []*gti.Directive
 
 // ParsePackages parses the package(s) located in the configuration source directory.
 func ParsePackages(cfg *Config) ([]*packages.Package, error) {
