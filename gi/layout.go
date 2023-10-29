@@ -182,7 +182,7 @@ type Layout struct { //goki:embedder
 	WidgetBase
 
 	// type of layout to use
-	Lay Layouts `xml:"lay" set:"-"`
+	Lay Layouts `xml:"lay" set:"Layout"`
 
 	// extra space to add between elements in the layout
 	Spacing units.Value `xml:"spacing"`
@@ -303,12 +303,6 @@ const (
 
 // LayoutDefault is default obj that can be used when property specifies "default"
 var LayoutDefault Layout
-
-// SetLayout sets the layout type of the Layout.
-func (ly *Layout) SetLayout(lay Layouts) *Layout {
-	ly.Lay = lay
-	return ly
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //     Overflow: Scrolling mainly
