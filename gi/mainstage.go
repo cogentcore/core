@@ -161,7 +161,13 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 
 func (st *MainStage) AddTopAppBar() *MainStage {
 	if st.Scene.TopAppBar == nil {
-		return st
+		// first fall back on context widget scene top app bar if we are a dialog
+		if st.Type == DialogStage {
+			st.Scene.TopAppBar = st.CtxWidget.AsWidget().Sc.TopAppBar
+		}
+		if st.Scene.TopAppBar == nil {
+			st.Scene.TopAppBar = DefaultTopAppBar
+		}
 	}
 	tb := st.Scene.InsertNewChild(ToolbarType, 0).(*Toolbar)
 	st.Scene.TopAppBar(tb)
