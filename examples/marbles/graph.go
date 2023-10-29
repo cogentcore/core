@@ -31,7 +31,7 @@ var GraphProps = ki.Props{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
 			"desc":  "Opens line equations and params from a .json file.",
-			"icon":  icons.FileOpen,
+			"icon":  icons.Open,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".json",

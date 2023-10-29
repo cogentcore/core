@@ -285,7 +285,7 @@ var ImageProps = ki.Props{
 	"Toolbar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
-			"icon": icons.FileOpen,
+			"icon": icons.Open,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",

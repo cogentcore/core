@@ -152,7 +152,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 				fmt.Println("Received menu action with data", m1.Data)
 			})
 
-		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.FileOpen).SetData(2)
+		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.Open).SetData(2)
 		m2.SetTooltip("A menu item with an icon and a sub menu")
 
 		m2.Menu = func(m *gi.Scene) {

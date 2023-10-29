@@ -81,7 +81,7 @@ func app() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddButton(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, func(act *gi.Button) {
+	loads := tbar.AddButton(gi.ActOpts{Label: "Open SVG", Icon: icons.Open}, func(act *gi.Button) {
 		FileViewOpenSVG(act)
 	})
 	loads.StartFocus()

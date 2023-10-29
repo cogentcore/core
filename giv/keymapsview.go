@@ -45,7 +45,7 @@ func KeyMapsView(km *keyfun.Maps) {
 	sp.SetUpdateFunc(func() {
 		sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
 	})
-	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen).SetKey(keyfun.Open)
+	oj := NewFuncButton(tb, km.OpenJSON).SetText("Open from file").SetIcon(icons.Open).SetKey(keyfun.Open)
 	oj.Args[0].SetTag("ext", ".json")
 	sj := NewFuncButton(tb, km.SaveJSON).SetText("Save to file").SetIcon(icons.SaveAs).SetKey(keyfun.SaveAs)
 	sj.Args[0].SetTag("ext", ".json")
@@ -59,7 +59,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		rs.SetEnabledUpdt(km != &keyfun.StdMaps)
 	})
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.FileOpen).SetKey(keyfun.OpenAlt1)
+		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.Open).SetKey(keyfun.OpenAlt1)
 	})
 
 	/* todo: menu, close

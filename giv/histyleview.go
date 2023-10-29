@@ -105,7 +105,7 @@ func HiStylesView(st *histyle.Styles) {
 	})
 
 	tb := mv.Toolbar()
-	oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.FileOpen)
+	oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 	oj.Args[0].SetTag(".ext", ".histy")
 	sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 	sj.Args[0].SetTag(".ext", ".histy")
