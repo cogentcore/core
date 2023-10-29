@@ -53,6 +53,7 @@ func PrefsView(pf *gi.Preferences) {
 	NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
 	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
 		NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
+		NewFuncButton(m, pf.Delete).SetConfirm(true)
 		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 	})
 

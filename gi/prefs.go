@@ -230,6 +230,16 @@ func (pf *Preferences) Save() error { //gti:add
 	return err
 }
 
+// Delete deletes the preferences from the GoGi standard prefs directory.
+// This is an unrecoverable action, and you should only do this if you
+// are absolutely sure you want to. You may want to consider making a copy
+// of your preferences through "Save as" before doing this.
+func (pf *Preferences) Delete() error { //gti:add
+	pdir := goosi.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, PrefsFileName)
+	return os.Remove(pnm)
+}
+
 // TODO: need to handle auto theme and set things correctly
 
 // LightMode sets the color theme to light mode. It automatically
@@ -805,7 +815,7 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
 	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
 	pf.MenuMaxHeight = MenuMaxHeight
-	// TheViewIFace.PrefsDetDefaults(pf) // todo:
+	TheViewIFace.PrefsDetDefaults(pf)
 	// in giv:
 	// TextViewClipHistMax
 	// TextBuf*
