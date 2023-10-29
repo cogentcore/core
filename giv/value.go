@@ -303,6 +303,7 @@ func (vv *ValueBase) Doc() string {
 
 func (vv *ValueBase) SetDoc(doc string) {
 	vv.SavedDoc = doc
+	vv.SetFlag(true, ValueHasSavedDoc)
 }
 
 func (vv *ValueBase) String() string {
