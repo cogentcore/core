@@ -184,7 +184,8 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		sw.IconOff = icons.ToggleOff
 	case SwitchChip:
 		sw.IconOn = icons.Check
-		sw.IconOff = icons.Blank
+		sw.IconOff = icons.None
+		sw.IconDisab = icons.None
 	case SwitchCheckbox:
 		sw.IconOn = icons.CheckBox.Fill()
 		sw.IconOff = icons.CheckBoxOutlineBlank
