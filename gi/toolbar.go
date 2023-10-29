@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"log/slog"
+
 	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
@@ -16,8 +18,20 @@ import (
 // DefaultTopAppBar is the default value for [Scene.TopAppBar].
 // It adds navigation buttons and an editable chooser bar.
 func DefaultTopAppBar(tb *Toolbar) {
-	NewButton(tb).SetIcon(icons.ArrowBack)
-	NewButton(tb).SetIcon(icons.ArrowForward)
+	NewButton(tb).SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
+		stg := tb.Sc.MainStage()
+		mm := stg.StageMgr
+		if mm == nil {
+			slog.Error("dialog has no MainMgr")
+			return
+		}
+		if stg.NewWindow {
+			mm.RenderWin.CloseReq()
+			return
+		}
+		mm.PopDeleteType(stg.Type)
+	})
+	// NewButton(tb).SetIcon(icons.ArrowForward)
 	NewChooser(tb).SetEditable(true)
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
 		NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
