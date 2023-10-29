@@ -397,13 +397,13 @@ func (sv *StructView) Render(sc *gi.Scene) {
 // returns true if there were any "def" default tags -- if so, needs updating
 func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
 	lbl.Text = vv.Label()
-	if _, has := vv.Tag("readonly"); has {
+	if et, has := vv.Tag("edit"); has && et == "-" {
 		readOnlyTag = true
 		widg.AsWidget().SetState(true, states.ReadOnly)
 	} else {
 		if isReadOnly {
 			widg.AsWidget().SetState(true, states.ReadOnly)
-			vv.SetTag("readonly", "true")
+			vv.SetTag("edit", "-")
 		}
 	}
 	defStr := ""
