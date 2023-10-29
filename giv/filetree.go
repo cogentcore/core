@@ -1192,7 +1192,8 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err), Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err), Ok: true, Cancel: false}, nil)
 		return
 	}
 	fn.FRoot.UpdateNewFile(np)
@@ -1216,8 +1217,9 @@ func (fn *FileNode) NewFolder(foldername string) {
 	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", ppath, err)
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg, Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", ppath, err)
+		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg, Ok: true, Cancel: false}, nil)
 		return
 	}
 	fn.FRoot.UpdateNewFile(ppath)
@@ -1409,7 +1411,7 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 // blame is the annotated blame code, while fbytes is the original file contents.
 func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
-	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title, Ok: true, Cancel: false}, nil)
+	dlg := gi.NewDialog(ctx).Title(title).Ok()
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
