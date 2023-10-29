@@ -235,19 +235,19 @@ type ValueBase struct {
 	Tags map[string]string `set:"-"`
 
 	// if Owner is a map, and this is a value, this is the key for this value in the map
-	Key any `set:"-" readonly:"-"`
+	Key any `set:"-" edit:"-"`
 
 	// if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
-	KeyView Value `set:"-" readonly:"-"`
+	KeyView Value `set:"-" edit:"-"`
 
 	// if Owner is a slice, this is the index for the value in the slice
-	Idx int `set:"-" readonly:"-"`
+	Idx int `set:"-" edit:"-"`
 
 	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface
-	WidgetTyp *gti.Type `set:"-" readonly:"-"`
+	WidgetTyp *gti.Type `set:"-" edit:"-"`
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
-	Widget gi.Widget `set:"-" readonly:"-"`
+	Widget gi.Widget `set:"-" edit:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.

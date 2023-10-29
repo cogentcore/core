@@ -78,75 +78,75 @@ type Editor struct { //goki:embedder
 	LineNoRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
 	// current cursor position
-	CursorPos lex.Pos `set:"-" readonly:"-" json:"-" xml:"-"`
+	CursorPos lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
-	CursorCol int `set:"-" readonly:"-" json:"-" xml:"-"`
+	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// if true, scroll screen to cursor on next render
-	ScrollToCursorOnRender bool `set:"-" readonly:"-" json:"-" xml:"-"`
+	ScrollToCursorOnRender bool `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// cursor position to scroll to
-	ScrollToCursorPos lex.Pos `set:"-" readonly:"-" json:"-" xml:"-"`
+	ScrollToCursorPos lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current index within PosHistory
-	PosHistIdx int `set:"-" readonly:"-" json:"-" xml:"-"`
+	PosHistIdx int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
-	SelectStart lex.Pos `set:"-" readonly:"-" json:"-" xml:"-"`
+	SelectStart lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current selection region
-	SelectReg textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
+	SelectReg textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// previous selection region, that was actually rendered -- needed to update render
-	PrevSelectReg textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
+	PrevSelectReg textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// highlighted regions, e.g., for search results
-	Highlights []textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
+	Highlights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// highlighted regions, specific to scope markers
-	Scopelights []textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
+	Scopelights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// if true, select text as cursor moves
-	SelectMode bool `set:"-" readonly:"-" json:"-" xml:"-"`
+	SelectMode bool `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// if true, complete regardless of any disqualifying reasons
-	ForceComplete bool `set:"-" readonly:"-" json:"-" xml:"-"`
+	ForceComplete bool `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// interactive search data
-	ISearch ISearch `set:"-" readonly:"-" json:"-" xml:"-"`
+	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// query replace data
-	QReplace QReplace `set:"-" readonly:"-" json:"-" xml:"-"`
+	QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// font height, cached during styling
-	FontHeight float32 `set:"-" readonly:"-" json:"-" xml:"-"`
+	FontHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// line height, cached during styling
-	LineHeight float32 `set:"-" readonly:"-" json:"-" xml:"-"`
+	LineHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// height in lines and width in chars of the visible area
-	NLinesChars image.Point `set:"-" readonly:"-" json:"-" xml:"-"`
+	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// total size of all lines as rendered
-	LinesSize mat32.Vec2 `set:"-" readonly:"-" json:"-" xml:"-"`
+	LinesSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// TotalSize = LinesSize plus extra space and line numbers etc
-	TotalSize mat32.Vec2 `set:"-" readonly:"-" json:"-" xml:"-"`
+	TotalSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// LineLayoutSize is LayState.Alloc.Size subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
-	LineLayoutSize mat32.Vec2 `set:"-" readonly:"-" json:"-" xml:"-"`
+	LineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
-	BlinkOn bool `set:"-" readonly:"-" json:"-" xml:"-"`
+	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// mutex protecting cursor rendering -- shared between blink and main code
 	CursorMu sync.Mutex `set:"-" json:"-" xml:"-" view:"-"`
 
 	// at least one of the renders has links -- determines if we set the cursor for hand movements
-	HasLinks bool `set:"-" readonly:"-" json:"-" xml:"-"`
+	HasLinks bool `set:"-" edit:"-" json:"-" xml:"-"`
 
 	lastRecenter   int
 	lastAutoInsert rune

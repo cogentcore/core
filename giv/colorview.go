@@ -37,7 +37,7 @@ type ColorView struct {
 	Color color.RGBA `set:"-"`
 
 	// the color that we view, in HSLA form
-	ColorHSLA hsl.HSL `readonly:"-"`
+	ColorHSLA hsl.HSL `edit:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
