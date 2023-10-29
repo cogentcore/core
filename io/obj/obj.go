@@ -238,7 +238,7 @@ func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, ob *Object) {
 			ms = &gi3d.GenMesh{}
 			ms.Nm = sldnm
 			sc.AddMeshUnique(ms)
-			sld = gi3d.NewSolid(objgp, sldnm, ms.Nm)
+			sld = gi3d.NewSolid(objgp, sldnm).SetMesh(ms)
 			matName = face.Material
 			dec.SetMat(sc, sld, matName)
 			sldidx++
@@ -356,7 +356,7 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *
 	if err != nil {
 		tf = gi3d.NewTextureFile(sc, tfn, texPath)
 	}
-	sld.Mat.SetTexture(sc, tf)
+	sld.Mat.SetTexture(tf)
 	if mat.Tiling.Repeat.X > 0 {
 		sld.Mat.Tiling.Repeat = mat.Tiling.Repeat
 	}

@@ -6,6 +6,7 @@ package gi3d
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 
 	"goki.dev/ki/v2"
@@ -88,6 +89,81 @@ func (sld *Solid) SetMesh(ms Mesh) *Solid {
 	return sld
 }
 
+// SetColor sets the [Material.Color]:
+// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
+func (sld *Solid) SetColor(v color.RGBA) *Solid {
+	sld.Mat.Color = v
+	return sld
+}
+
+// SetEmissive sets the [Material.Emissive]:
+// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
+func (sld *Solid) SetEmissive(v color.RGBA) *Solid {
+	sld.Mat.Emissive = v
+	return sld
+}
+
+// SetShiny sets the [Material.Shiny]:
+// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
+func (sld *Solid) SetShiny(v float32) *Solid {
+	sld.Mat.Shiny = v
+	return sld
+}
+
+// SetReflective sets the [Material.Reflective]:
+// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
+func (sld *Solid) SetReflective(v float32) *Solid {
+	sld.Mat.Reflective = v
+	return sld
+}
+
+// SetBright sets the [Material.Bright]:
+// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
+func (sld *Solid) SetBright(v float32) *Solid {
+	sld.Mat.Bright = v
+	return sld
+}
+
+// SetTextureName sets material to use given texture name
+// (textures are accessed by name on Scene).
+// If name is empty, then texture is reset
+func (sld *Solid) SetTextureName(texName string) *Solid {
+	sld.Mat.SetTextureName(sld.Sc, texName)
+	return sld
+}
+
+// SetTexture sets material to use given texture
+func (sld *Solid) SetTexture(tex Texture) *Solid {
+	sld.Mat.SetTexture(tex)
+	return sld
+}
+
+// SetPos sets the [Pose.Pos] position of the solid
+func (sld *Solid) SetPos(x, y, z float32) *Solid {
+	sld.Pose.Pos.Set(x, y, z)
+	return sld
+}
+
+// SetScale sets the [Pose.Scale] scale of the solid
+func (sld *Solid) SetScale(x, y, z float32) *Solid {
+	sld.Pose.Scale.Set(x, y, z)
+	return sld
+}
+
+// SetAxisRotation sets the [Pose.Quat] rotation of the solid,
+// from local axis and angle in degrees.
+func (sld *Solid) SetAxisRotation(x, y, z, angle float32) *Solid {
+	sld.Pose.SetAxisRotation(x, y, z, angle)
+	return sld
+}
+
+// SetEulerRotation sets the [Pose.Quat] rotation of the solid,
+// from euler angles in degrees
+func (sld *Solid) SetEulerRotation(x, y, z float32) *Solid {
+	sld.Pose.SetEulerRotation(x, y, z)
+	return sld
+}
+
 func (sld *Solid) Config(sc *Scene) {
 	sld.Sc = sc
 	sld.Validate()
@@ -96,15 +172,14 @@ func (sld *Solid) Config(sc *Scene) {
 
 // ParentMaterial returns parent's material or nil if not avail
 func (sld *Solid) ParentMaterial() *Material {
-	if sld.Par == nil {
+	if sld.Par == nil || sld.Par.This() != nil {
 		return nil
 	}
-	// psi := sld.Par.Embed(TypeSolid)
-	// if psi == nil {
-	// 	return nil
-	// }
-	// return &(psi.(*Solid).Mat)
-	return nil
+	psi := sld.Par.(Node).AsSolid()
+	if psi == nil {
+		return nil
+	}
+	return &(psi.Mat)
 }
 
 // Validate checks that solid has valid mesh and texture settings, etc

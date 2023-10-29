@@ -49,6 +49,32 @@ func (gp *Group) RenderClass() RenderClasses {
 	return RClassNone
 }
 
+// SetPos sets the [Pose.Pos] position of the solid
+func (gp *Group) SetPos(x, y, z float32) *Group {
+	gp.Pose.Pos.Set(x, y, z)
+	return gp
+}
+
+// SetScale sets the [Pose.Scale] scale of the solid
+func (gp *Group) SetScale(x, y, z float32) *Group {
+	gp.Pose.Scale.Set(x, y, z)
+	return gp
+}
+
+// SetAxisRotation sets the [Pose.Quat] rotation of the solid,
+// from local axis and angle in degrees.
+func (gp *Group) SetAxisRotation(x, y, z, angle float32) *Group {
+	gp.Pose.SetAxisRotation(x, y, z, angle)
+	return gp
+}
+
+// SetEulerRotation sets the [Pose.Quat] rotation of the solid,
+// from euler angles in degrees
+func (gp *Group) SetEulerRotation(x, y, z float32) *Group {
+	gp.Pose.SetEulerRotation(x, y, z)
+	return gp
+}
+
 // SolidPoint contains a Solid and a Point on that solid
 type SolidPoint struct {
 	Solid *Solid
