@@ -17,7 +17,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -153,9 +152,11 @@ func (pf *Preferences) Defaults() {
 func (pf *Preferences) UpdateAll() { //gti:add
 	goosi.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
-
-	styles.RebuildDefaultStyles = true
 	colors.FullCache = nil
+	for _, w := range AllRenderWins {
+		rctx := w.StageMgr.RenderCtx
+		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
+	}
 	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
 	// 	w.SetSize(w.RenderWin.Size())
 	// }
@@ -163,11 +164,7 @@ func (pf *Preferences) UpdateAll() { //gti:add
 	// for _, w := range AllRenderWins {
 	// 	w.FullReRender()
 	// }
-	styles.RebuildDefaultStyles = false
 	// and another without rebuilding?  yep all are required
-	// for _, w := range AllRenderWins {
-	// 	w.FullReRender()
-	// }
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
