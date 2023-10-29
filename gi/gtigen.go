@@ -505,6 +505,12 @@ func (t *Frame) SetCustomContextMenu(v func(m *Scene)) *Frame {
 	return t
 }
 
+// SetLayout sets the [Frame.Lay]
+func (t *Frame) SetLayout(v Layouts) *Frame {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [Frame.Spacing]
 func (t *Frame) SetSpacing(v units.Value) *Frame {
 	t.Spacing = v
@@ -601,6 +607,12 @@ func (t *Handle) SetClass(v string) *Handle {
 // SetCustomContextMenu sets the [Handle.CustomContextMenu]
 func (t *Handle) SetCustomContextMenu(v func(m *Scene)) *Handle {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Handle.Lay]
+func (t *Handle) SetLayout(v Layouts) *Handle {
+	t.Lay = v
 	return t
 }
 
@@ -837,7 +849,7 @@ var LayoutType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Lay", &gti.Field{Name: "Lay", Type: "goki.dev/gi/v2/gi.Layouts", LocalType: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}, Tag: "xml:\"lay\" set:\"-\""}},
+		{"Lay", &gti.Field{Name: "Lay", Type: "goki.dev/gi/v2/gi.Layouts", LocalType: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}, Tag: "xml:\"lay\" set:\"Layout\""}},
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "extra space to add between elements in the layout", Directives: gti.Directives{}, Tag: "xml:\"spacing\""}},
 		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered", Directives: gti.Directives{}, Tag: ""}},
 		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -895,6 +907,13 @@ func AsLayout(k ki.Ki) *Layout {
 
 // AsLayout satisfies the [LayoutEmbedder] interface
 func (t *Layout) AsLayout() *Layout {
+	return t
+}
+
+// SetLayout sets the [Layout.Lay]:
+// type of layout to use
+func (t *Layout) SetLayout(v Layouts) *Layout {
+	t.Lay = v
 	return t
 }
 
@@ -1090,6 +1109,12 @@ func (t *MenuBar) SetClass(v string) *MenuBar {
 // SetCustomContextMenu sets the [MenuBar.CustomContextMenu]
 func (t *MenuBar) SetCustomContextMenu(v func(m *Scene)) *MenuBar {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [MenuBar.Lay]
+func (t *MenuBar) SetLayout(v Layouts) *MenuBar {
+	t.Lay = v
 	return t
 }
 
@@ -1627,6 +1652,12 @@ func (t *Scene) SetClass(v string) *Scene {
 // SetCustomContextMenu sets the [Scene.CustomContextMenu]
 func (t *Scene) SetCustomContextMenu(v func(m *Scene)) *Scene {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Scene.Lay]
+func (t *Scene) SetLayout(v Layouts) *Scene {
+	t.Lay = v
 	return t
 }
 
@@ -2391,6 +2422,12 @@ func (t *Switches) SetCustomContextMenu(v func(m *Scene)) *Switches {
 	return t
 }
 
+// SetLayout sets the [Switches.Lay]
+func (t *Switches) SetLayout(v Layouts) *Switches {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [Switches.Spacing]
 func (t *Switches) SetSpacing(v units.Value) *Switches {
 	t.Spacing = v
@@ -2507,6 +2544,12 @@ func (t *Tabs) SetClass(v string) *Tabs {
 // SetCustomContextMenu sets the [Tabs.CustomContextMenu]
 func (t *Tabs) SetCustomContextMenu(v func(m *Scene)) *Tabs {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Tabs.Lay]
+func (t *Tabs) SetLayout(v Layouts) *Tabs {
+	t.Lay = v
 	return t
 }
 
@@ -2891,6 +2934,12 @@ func (t *Toolbar) SetClass(v string) *Toolbar {
 // SetCustomContextMenu sets the [Toolbar.CustomContextMenu]
 func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Toolbar.Lay]
+func (t *Toolbar) SetLayout(v Layouts) *Toolbar {
+	t.Lay = v
 	return t
 }
 
