@@ -39,14 +39,6 @@ import (
 // should look at https://goki.dev/docs/gi/styling.
 var CustomConfigStyles func(w Widget)
 
-func (sc *Scene) SetDefaultStyle() {
-	sc.Style(func(s *styles.Style) {
-		s.Cursor = cursors.Arrow
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		s.Color = colors.Scheme.OnBackground
-	})
-}
-
 ////////////////////////////////////////////////////////////////////
 // 	Widget Styling functions
 
