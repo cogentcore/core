@@ -178,6 +178,7 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", LocalType: "[]string", Doc: "an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", LocalType: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}, Tag: ""}},
+		{"ItemsFunc", &gti.Field{Name: "ItemsFunc", Type: "func()", LocalType: "func()", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -257,6 +258,15 @@ func (t *Chooser) SetTooltips(v []string) *Chooser {
 // maximum label length (in runes)
 func (t *Chooser) SetMaxLength(v int) *Chooser {
 	t.MaxLength = v
+	return t
+}
+
+// SetItemsFunc sets the [Chooser.ItemsFunc]:
+// ItemsFunc, if non-nil, is a function to call before showing the items
+// of the chooser, which is typically used to configure them (eg: if they
+// are based on dynamic data)
+func (t *Chooser) SetItemsFunc(v func()) *Chooser {
+	t.ItemsFunc = v
 	return t
 }
 
@@ -1542,6 +1552,7 @@ var SceneType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Scene", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
+		{"TopAppBar", &gti.Field{Name: "TopAppBar", Type: "func(tb *goki.dev/gi/v2/gi.Toolbar)", LocalType: "func(tb *Toolbar)", Doc: "TopAppBar is a function used to construct a top app bar at the top of the\nscene when it is set up. It is copied by default to all FullWindow [DialogStage]s\ncreated in the context of this scene.", Directives: gti.Directives{}, Tag: ""}},
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
@@ -1582,6 +1593,15 @@ func (t *Scene) SetTitle(v string) *Scene {
 // Used e.g., for recycling views of a given item instead of creating new one.
 func (t *Scene) SetData(v any) *Scene {
 	t.Data = v
+	return t
+}
+
+// SetTopAppBar sets the [Scene.TopAppBar]:
+// TopAppBar is a function used to construct a top app bar at the top of the
+// scene when it is set up. It is copied by default to all FullWindow [DialogStage]s
+// created in the context of this scene.
+func (t *Scene) SetTopAppBar(v func(tb *Toolbar)) *Scene {
+	t.TopAppBar = v
 	return t
 }
 

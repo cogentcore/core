@@ -22,7 +22,12 @@ func DefaultTopAppBar(tb *Toolbar) {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
 		if mm == nil {
-			slog.Error("dialog has no MainMgr")
+			slog.Error("Top app bar has no MainMgr")
+			return
+		}
+		// if we are down to the last window, we don't
+		// let people close it with the back button
+		if mm.Stack.Len() <= 1 {
 			return
 		}
 		if stg.NewWindow {
@@ -32,7 +37,20 @@ func DefaultTopAppBar(tb *Toolbar) {
 		mm.PopDeleteType(stg.Type)
 	})
 	// NewButton(tb).SetIcon(icons.ArrowForward)
-	NewChooser(tb).SetEditable(true)
+	ch := NewChooser(tb).SetEditable(true)
+	ch.SetItemsFunc(func() {
+		stg := tb.Sc.MainStage()
+		mm := stg.StageMgr
+		if mm == nil {
+			slog.Error("Top app bar has no MainMgr")
+			return
+		}
+		keys := mm.Stack.Keys()
+		ch.Items = make([]any, len(keys))
+		for i, key := range keys {
+			ch.Items[i] = key
+		}
+	})
 	tb.OverflowMenu().SetMenu(func(m *Scene) {
 		NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 			OnClick(func(e events.Event) {
