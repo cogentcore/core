@@ -15,6 +15,7 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/laser"
 )
 
@@ -99,7 +100,7 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 }
 
 func (kc *KeyChordEdit) ContextMenu(m *gi.Scene) {
-	gi.NewButton(m, "clear").SetText("Clear").OnClick(func(e events.Event) {
+	gi.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
 		kc.SetText("")
 		kc.SendChange()
 	})

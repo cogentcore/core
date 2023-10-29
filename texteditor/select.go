@@ -11,6 +11,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/icons"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 )
@@ -531,21 +532,21 @@ func (ed *Editor) ShowContextMenu(e events.Event) {
 
 // ContextMenu builds the text editor context menu
 func (ed *Editor) ContextMenu(m *gi.Scene) {
-	gi.NewButton(m).SetText("Copy").SetKey(keyfun.Copy).SetState(!ed.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!ed.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			ed.Copy(true)
 		})
 	if !ed.IsReadOnly() {
-		gi.NewButton(m).SetText("Cut").SetKey(keyfun.Cut).SetState(!ed.HasSelection(), states.Disabled).
+		gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).SetKey(keyfun.Cut).SetState(!ed.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Cut()
 			})
-		gi.NewButton(m).SetText("Paste").SetKey(keyfun.Paste).SetState(ed.EventMgr().ClipBoard().IsEmpty(), states.Disabled).
+		gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).SetState(ed.EventMgr().ClipBoard().IsEmpty(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Paste()
 			})
 	} else {
-		gi.NewButton(m).SetText("Clear").
+		gi.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
 			OnClick(func(e events.Event) {
 				ed.Clear()
 			})
