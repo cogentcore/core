@@ -5574,6 +5574,9 @@ const (
 	// Opacity is https://github.com/goki/icons/blob/main/svg/opacity.svg
 	Opacity Icon = "opacity"
 
+	// Open is https://github.com/goki/icons/blob/main/svg/open.svg
+	Open Icon = "open"
+
 	// OpenInBrowser is https://github.com/goki/icons/blob/main/svg/open_in_browser.svg
 	OpenInBrowser Icon = "open_in_browser"
 
