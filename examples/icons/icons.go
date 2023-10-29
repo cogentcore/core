@@ -30,7 +30,7 @@ func app() {
 
 	grid := gi.NewFrame(sc, "grid").SetLayout(gi.LayoutGrid)
 	grid.Style(func(s *styles.Style) {
-		s.Columns = int(s.UnContext.Ew / (17 * s.UnContext.FontEm))
+		s.Columns = int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
 		s.AlignH = styles.AlignCenter
 		s.Margin.Set(units.Dp(1))
 		s.SetStretchMax()
