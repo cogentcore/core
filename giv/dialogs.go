@@ -146,73 +146,44 @@ func MapViewDialog(dlg *gi.Dialog, mp any, viewPath string, tmpSave Value) *gi.D
 	return dlg
 }
 
-// SliceViewDialog for editing elements of a slice using a SliceView --
-// optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore).    Also has an optional styling
-// function for styling elements of the table.
-// gopy:interface=handle
-func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
-	if recyc {
-		return dlg
-	}
-
+// SliceViewDialog adds to the given dialog a display for editing elements of a slice using a SliceView.
+// It also takes an optional styling function for styling elements of the slice.
+//
+//gopy:interface=handle
+func SliceViewDialog(dlg *gi.Dialog, slice any, viewPath string, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	sv.SetState(false, states.ReadOnly)
-	sv.StyleFunc = styleFunc
-	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
-	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
-	sv.ViewPath = opts.ViewPath
-	sv.TmpSave = opts.TmpSave
+	if dlg.RdOnly {
+		sv.SetState(true, states.ReadOnly)
+	}
+	if len(styleFunc) > 0 {
+		sv.StyleFunc = styleFunc[0]
+	}
+	sv.SetFlag(noAdd, SliceViewNoAdd)
+	sv.SetFlag(noDelete, SliceViewNoDelete)
+	sv.ViewPath = viewPath
+	sv.TmpSave = tmpSave
 	sv.SetSlice(slice)
 	return dlg
 }
 
-// SliceViewDialogNoStyle for editing elements of a slice using a SliceView --
-// optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore).  This version does not have the style function.
-// gopy:interface=handle
-func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
-	if recyc {
-		return dlg
-	}
-
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	sv.SetState(false, states.ReadOnly)
-	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
-	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
-	sv.ViewPath = opts.ViewPath
-	sv.TmpSave = opts.TmpSave
-	sv.SetSlice(slice)
-	return dlg
-}
-
-// SliceViewSelectDialog for selecting one row from given slice -- connections
-// functions available for both the widget signal reporting selection events,
-// and the overall dialog signal.  Also has an optional styling function for
-// styling elements of the table.
-// gopy:interface=handle
-func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
-	if recyc {
-		return dlg
-	}
-
+// SliceViewSelectDialog adds to the given dialog a display for selecting one row from the given
+// slice using a SliceView. It also takes an optional styling function for styling elements of the slice.
+//
+//gopy:interface=handle
+func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, viewPath string, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
 	sv.SetState(true, states.ReadOnly)
-	sv.StyleFunc = styleFunc
+	if len(styleFunc) > 0 {
+		sv.StyleFunc = styleFunc[0]
+	}
 	sv.SelVal = curVal
-	sv.ViewPath = opts.ViewPath
+	sv.ViewPath = viewPath
 	sv.SetSlice(slice)
 	sv.OnSelect(func(e events.Event) {
 		dlg.Data = sv.SelectedIdx
@@ -224,28 +195,24 @@ func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, style
 	return dlg
 }
 
-// TableViewDialog is for editing fields of a slice-of-struct using a
-// TableView -- optionally connects to given signal receiving object and
-// function for dialog signals (nil to ignore).  Also has an optional styling
-// function for styling elements of the table.
-// gopy:interface=handle
-func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc TableViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slcOfStru, fun)
-	if recyc {
-		return dlg
-	}
-
+// TableViewDialog adds to the given dialog a display for editing fields of a slice-of-structs using a
+// TableView. It also takes an optional styling function for styling elements of the table.
+//
+//gopy:interface=handle
+func TableViewDialog(dlg *gi.Dialog, slcOfStru any, viewPath string, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...TableViewStyleFunc) *gi.Dialog {
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
 	sv.SetState(false, states.ReadOnly)
-	sv.StyleFunc = styleFunc
-	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
-	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
-	sv.ViewPath = opts.ViewPath
-	sv.TmpSave = opts.TmpSave
-	if opts.ReadOnly {
+	if len(styleFunc) > 0 {
+		sv.StyleFunc = styleFunc[0]
+	}
+	sv.SetFlag(noAdd, SliceViewNoAdd)
+	sv.SetFlag(noDelete, SliceViewNoDelete)
+	sv.ViewPath = viewPath
+	sv.TmpSave = tmpSave
+	if dlg.RdOnly {
 		sv.SetState(true, states.ReadOnly)
 	}
 	sv.SetSlice(slcOfStru)
