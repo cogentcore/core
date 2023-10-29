@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/png"
 	"io/fs"
@@ -150,9 +149,7 @@ func (im *Image) DrawIntoScene(sc *Scene) {
 	if im.Pixels == nil {
 		return
 	}
-	pos := im.LayState.Alloc.Pos.ToPointCeil()
-	max := pos.Add(im.Size)
-	r := image.Rectangle{Min: pos, Max: max}
+	r := im.ScBBox
 	sp := image.Point{}
 	if im.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := AsWidget(im.Par)
@@ -160,7 +157,7 @@ func (im *Image) DrawIntoScene(sc *Scene) {
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			fmt.Printf("aberrant sp: %v\n", sp)
+			slog.Error("gi.Image bad bounding box", "path", im, "startPos", sp, "bbox", r, "parBBox", pbb)
 			return
 		}
 		r = nr

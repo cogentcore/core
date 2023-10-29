@@ -602,27 +602,26 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 
 func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 	cbb := ly.ChildrenBBoxes(sc)
-	// todo: we need a flag for this for tab frame to not do this -- thought this was there already!
-	// if ly.Lay == LayoutStacked {
-	// 	sn, err := ly.ChildTry(ly.StackTop)
-	// 	if err != nil {
-	// 		return false
-	// 	}
-	// 	nii, _ := AsWidget(sn)
-	// 	return nii.DoLayout(sc, cbb, iter)
-	// } else {
-	redo := false
-	for _, kid := range ly.Kids {
-		wi, _ := AsWidget(kid)
-		if wi == nil || wi.This() == nil {
-			continue
+	if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) {
+		sn, err := ly.ChildTry(ly.StackTop)
+		if err != nil {
+			return false
 		}
-		if wi.DoLayout(sc, cbb, iter) {
-			redo = true
+		nii, _ := AsWidget(sn)
+		return nii.DoLayout(sc, cbb, iter)
+	} else {
+		redo := false
+		for _, kid := range ly.Kids {
+			wi, _ := AsWidget(kid)
+			if wi == nil || wi.This() == nil {
+				continue
+			}
+			if wi.DoLayout(sc, cbb, iter) {
+				redo = true
+			}
 		}
+		return redo
 	}
-	return redo
-	// }
 }
 
 // render the children
@@ -648,7 +647,7 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 func (ly *Layout) LayoutScrollChildren(sc *Scene, delta image.Point) {
 	wi := ly.This().(Widget)
 	cbb := wi.ChildrenBBoxes(sc)
-	if ly.Lay == LayoutStacked {
+	if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
 			return
