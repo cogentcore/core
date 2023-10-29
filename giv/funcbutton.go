@@ -292,7 +292,7 @@ func (fb *FuncButton) SetArgs() {
 		view := ToValue(val.Interface(), "")
 		view.SetSoloValue(val)
 		view.SetName(name)
-		view.SetTag("label", label)
+		view.SetLabel(label)
 		view.SetDoc(doc)
 		fb.Args[i] = view
 	}
@@ -337,7 +337,7 @@ func (fb *FuncButton) SetReturns() {
 		view := ToValue(val.Interface(), "")
 		view.SetSoloValue(val)
 		view.SetName(name)
-		view.SetTag("label", label)
+		view.SetLabel(label)
 		view.SetDoc(doc)
 		fb.Returns[i] = view
 	}

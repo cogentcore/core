@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -34,6 +35,10 @@ const (
 
 	// for OwnKind = Map, this value represents the Key -- otherwise the Value
 	ValueMapKey
+
+	// ValueHasSavedLabel is whether the value has a saved version of its
+	// label, which can be set either automatically or explicitly
+	ValueHasSavedLabel
 
 	// ValueHasSavedDoc is whether the value has a saved version of its
 	// documentation, which can be set either automatically or explicitly
@@ -201,8 +206,8 @@ type ValueBase struct {
 	// Nm is locally-unique name of Value
 	Nm string
 
-	// Lbl is the label for the Value
-	Lbl string
+	// SavedLabel is the label for the Value
+	SavedLabel string
 
 	// SavedDoc is the saved documentation for the Value, if any
 	// (only valid if [ValueHasSaveDoc] is true)
@@ -265,11 +270,22 @@ func (vv *ValueBase) SetName(name string) {
 }
 
 func (vv *ValueBase) Label() string {
-	return vv.Lbl
+	if vv.Is(ValueHasSavedLabel) {
+		return vv.SavedLabel
+	}
+
+	if lbltag, has := vv.Tag("label"); has {
+		return lbltag
+	}
+	if vv.Field != nil {
+		return sentencecase.Of(vv.Field.Name)
+	}
+	return sentencecase.Of(vv.Nm)
 }
 
 func (vv *ValueBase) SetLabel(label string) {
-	vv.Lbl = label
+	vv.SavedLabel = label
+	vv.SetFlag(true, ValueHasSavedLabel)
 }
 
 func (vv *ValueBase) Doc() string {

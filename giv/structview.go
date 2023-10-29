@@ -279,7 +279,8 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 				} else {
 					dupeFields[fnm] = true
 				}
-				svv.SetTag("label", fnm)
+				// TODO(kai): how should we format this label?
+				svv.SetLabel(sentencecase.Of(fnm))
 				labnm := fmt.Sprintf("label-%v", fnm)
 				valnm := fmt.Sprintf("value-%v", fnm)
 				config.Add(gi.LabelType, labnm)
@@ -395,12 +396,7 @@ func (sv *StructView) Render(sc *gi.Scene) {
 // the properties on the label or widget appropriately
 // returns true if there were any "def" default tags -- if so, needs updating
 func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
-	vvb := vv.AsValueBase()
-	if lbltag, has := vv.Tag("label"); has {
-		lbl.Text = lbltag
-	} else {
-		lbl.Text = sentencecase.Of(vvb.Field.Name)
-	}
+	lbl.Text = vv.Label()
 	if _, has := vv.Tag("readonly"); has {
 		readOnlyTag = true
 		widg.AsWidget().SetState(true, states.ReadOnly)
