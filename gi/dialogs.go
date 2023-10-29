@@ -7,11 +7,13 @@ package gi
 import (
 	"log/slog"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 )
 
 var (
@@ -51,6 +53,7 @@ func NewDialog(ctx Widget, name ...string) *Dialog {
 	}
 	dlg.Scene = NewScene(nm)
 	dlg.Stage = NewMainStage(DialogStage, dlg.Scene, ctx)
+	dlg.Modal(true)
 	return dlg
 }
 
@@ -134,19 +137,28 @@ func (dlg *Dialog) Cancel() *Dialog {
 	return dlg
 }
 
-func (dlg *Dialog) Modal(modal bool) {
+func (dlg *Dialog) Modal(modal bool) *Dialog {
 	dlg.Stage.Modal = modal
+	return dlg
 }
 
+func (dlg *Dialog) NewWindow(newWindow bool) *Dialog {
+	dlg.Stage.NewWindow = newWindow
+	return dlg
+}
+
+func (dlg *Dialog) FullWindow(fullWindow bool) *Dialog {
+	dlg.Stage.FullWindow = fullWindow
+	return dlg
+}
+
+// Run runs (shows) the dialog.
 func (dlg *Dialog) Run() {
 	dlg.Stage.Run()
 }
 
-// StringPrompt adds a prompts the user for a string value.
+// StringPrompt adds to the dialog a prompt for a string value.
 // The string is set as the Data field in the Dialog.
-// Call Run() to run the returned dialog (can be further configured).
-// Context provides the relevant source context opening the dialog,
-// for positioning and constructing the dialog.
 func (dlg *Dialog) StringPrompt(strval, placeholder string) *Dialog {
 	tf := NewTextField(dlg.Scene).SetPlaceholder(placeholder).
 		SetText(strval)
@@ -460,15 +472,12 @@ func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 	return dlg
 }
 
-// ChoiceDialog presents any number of buttons with labels as given,
-// for the user to choose among.
-// The clicked button number (starting at 0) is the dlg.Data.
-// Call Run() to run the returned dialog (can be further configed).
-// Context provides the relevant source context opening the dialog,
-// for positioning and constructing the dialog.
-func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dialog)) *Dialog {
-	dlg := NewStdDialog(ctx, opts, fun)
+*/
 
+// Choice adds to the dialog any number of buttons with the given labels
+// for the user to choose among. The clicked button index (starting at 0)
+// is the [Dialog.Data].
+func (dlg *Dialog) Choice(choices ...string) *Dialog {
 	sc := dlg.Stage.Scene
 	bb := dlg.ConfigButtonBox()
 	NewStretch(bb, "stretch")
@@ -506,32 +515,9 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 	return dlg
 }
 
-// StringPromptDialog prompts the user for a string value.
-// The string is set as the Data field in the Dialog.
-// Call Run() to run the returned dialog (can be further configed).
-// Context provides the relevant source context opening the dialog,
-// for positioning and constructing the dialog.
-func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fun func(dlg *Dialog)) *Dialog {
-	dlg := NewStdDialog(ctx, opts, fun)
-	dlg.Data = strval
-	prIdx := dlg.PromptWidgetIdx()
-	tf := dlg.Stage.Scene.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
-	tf.Placeholder = placeholder
-	tf.SetText(strval)
-	tf.SetStretchMaxWidth()
-	tf.SetMinPrefWidth(units.Ch(40))
-	tf.OnChange(func(e events.Event) {
-		dlg.Data = tf.Text()
-	})
-	return dlg
-}
-
-// NewKiDialog prompts for creating new item(s) of a given type,
+// NewItems adds to the dialog a prompt for creating new item(s) of the given type,
 // showing registered gti types that embed given type.
-func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog)) *Dialog {
-	dlg := NewStdDialog(ctx, opts, fun)
-	dlg.Stage.Modal = true
-
+func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
 	prIdx := dlg.PromptWidgetIdx()
 
 	sc := dlg.Stage.Scene
@@ -561,7 +547,8 @@ func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog))
 	})
 	return dlg
 }
-*/
+
+/*
 
 /////////////////////////////////////////////
 //  	Proposed new model
