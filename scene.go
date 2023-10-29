@@ -117,10 +117,10 @@ func (sc *Scene) Defaults() {
 }
 
 // NewScene creates a new Scene to contain a 3D scenegraph.
-func NewScene(name string) *Scene {
+func NewScene(name ...string) *Scene {
 	sc := &Scene{}
 	sc.Defaults()
-	sc.InitName(sc, name)
+	sc.InitName(sc, name...)
 	return sc
 }
 

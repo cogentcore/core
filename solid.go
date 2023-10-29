@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-
-	"goki.dev/ki/v2"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
@@ -17,7 +15,7 @@ import (
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-type Solid struct { //goki:no-new
+type Solid struct {
 	NodeBase
 
 	// name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
@@ -32,11 +30,8 @@ type Solid struct { //goki:no-new
 
 var _ Node = (*Solid)(nil)
 
-// NewSolid adds a new solid of given name and mesh to given parent
-func NewSolid(parent ki.Ki, name ...string) *Solid {
-	sld := parent.NewChild(SolidType, name...).(*Solid)
+func (sld *Solid) OnInit() {
 	sld.Defaults()
-	return sld
 }
 
 func (sld *Solid) CopyFieldsFrom(frm any) {
@@ -55,9 +50,8 @@ func (sld *Solid) AsSolid() *Solid {
 	return sld
 }
 
-// Defaults sets default initial settings for solid params -- important
-// to call this before setting specific values, as the initial zero
-// values for some parameters are degenerate
+// Defaults sets default initial settings for solid params.
+// This is called automatically OnInit.
 func (sld *Solid) Defaults() {
 	sld.Pose.Defaults()
 	sld.Mat.Defaults()

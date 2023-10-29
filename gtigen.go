@@ -841,13 +841,11 @@ func (t *Torus) SetTrans(v bool) *Torus {
 
 // SolidType is the [gti.Type] for [Solid]
 var SolidType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi3d.Solid",
-	ShortName: "gi3d.Solid",
-	IDName:    "solid",
-	Doc:       "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
-	},
+	Name:       "goki.dev/gi3d.Solid",
+	ShortName:  "gi3d.Solid",
+	IDName:     "solid",
+	Doc:        "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.",
+	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Mesh", &gti.Field{Name: "Mesh", Type: "goki.dev/gi3d.MeshName", LocalType: "MeshName", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Mat", &gti.Field{Name: "Mat", Type: "goki.dev/gi3d.Material", LocalType: "Material", Doc: "material properties of the surface (color, shininess, texture, etc)", Directives: gti.Directives{}, Tag: "view:\"add-fields\""}},
@@ -859,6 +857,14 @@ var SolidType = gti.AddType(&gti.Type{
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Solid{},
 })
+
+// NewSolid adds a new [Solid] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSolid(par ki.Ki, name ...string) *Solid {
+	return par.NewChild(SolidType, name...).(*Solid)
+}
 
 // KiType returns the [*gti.Type] of [Solid]
 func (t *Solid) KiType() *gti.Type {
