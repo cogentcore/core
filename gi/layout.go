@@ -1280,7 +1280,6 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	// if ly.Parts != nil && ly.Parts.String() == "/std-dialog.parts" {
 	// 	fmt.Println("lyp")
 	// }
-	ly.DoLayoutParts(sc, parBBox, iter)
 	return ly.Is(LayoutNeedsRedo)
 }
 
