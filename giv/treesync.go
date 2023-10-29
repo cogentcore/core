@@ -207,10 +207,8 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 		return
 	}
 	myidx += rel
-	gi.NewKiDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Number and Type of Items to Insert:"}, sk.BaseType(), func(dlg *gi.Dialog) {
-		if !dlg.Accepted {
-			return
-		}
+	dlg := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:").NewItems(sk.BaseType())
+	dlg.OnAccept(func(e events.Event) {
 		par := tv.SyncNode
 		typ := dlg.Data.(*gti.Type)
 		n := 1 // todo
@@ -232,7 +230,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				stv.SelectAction(events.SelectOne)
 			}
 		}
-	})
+	}).Run()
 }
 
 // SrcAddChild adds a new child node to this one in the source tree,
