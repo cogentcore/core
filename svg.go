@@ -137,6 +137,9 @@ func (sv *SVG) CopyFrom(fr *SVG) {
 
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
+	if sv.Root.This() == nil {
+		return
+	}
 	updt := sv.Root.UpdateStart() // don't really need update logic here
 	sv.Root.Paint.Defaults()
 	sv.Root.DeleteChildren(ki.DestroyKids)
