@@ -313,7 +313,7 @@ func (w *RenderWin) SetName(name string) {
 		}
 	}
 	if isdif && w.RenderWin != nil {
-		wgp := WinGeomMgr.Pref(name, w.RenderWin.Screen())
+		wgp := WinGeomMgr.Pref(w.Title, w.RenderWin.Screen())
 		if wgp != nil {
 			WinGeomMgr.SettingStart()
 			if w.RenderWin.Size() != wgp.Size() || w.RenderWin.Position() != wgp.Pos() {

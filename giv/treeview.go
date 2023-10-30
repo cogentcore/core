@@ -1100,10 +1100,10 @@ func (tv *TreeView) OpenAll() {
 	tv.WalkPre(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
-			tvki.SetClosed(false)
-			tvki.SetState(false, states.Invisible)
+			tvki.Open()
+			return ki.Continue
 		}
-		return ki.Continue
+		return ki.Break
 	})
 	tv.SendChangeEvent(nil)
 	tv.UpdateEndLayout(updt)
@@ -1115,8 +1115,7 @@ func (tv *TreeView) CloseAll() {
 	tv.WalkPre(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
-			tvki.SetClosed(true)
-			tvki.SetState(true, states.Invisible)
+			tvki.Close()
 			return ki.Continue
 		}
 		return ki.Break
@@ -1335,12 +1334,15 @@ func (tv *TreeView) Cut() {
 	}
 	tv.Copy(false)
 	sels := tv.SelectedViews()
-	updt := tv.UpdateStart()
+	root := tv.RootView
+	updt := root.UpdateStart()
 	tv.UnselectAll()
 	for _, sn := range sels {
 		sn.Delete(true)
 	}
-	tv.UpdateEndLayout(updt)
+	root.Update()
+	root.RootSetViewIdx()
+	root.UpdateEndLayout(updt)
 	tv.SendChangeEvent(nil)
 }
 
