@@ -35,15 +35,13 @@ import (
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := convAndroidKeyCode(r)
-		theApp.window.EvMgr.Key(events.KeyDown, r, code, 0) // TODO: modifiers
-		theApp.window.EvMgr.Key(events.KeyUp, r, code, 0)   // TODO: modifiers
+		theApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.window.EvMgr.Key(events.KeyDown, 0, key.CodeDeleteBackspace, 0) // TODO: modifiers
-	theApp.window.EvMgr.Key(events.KeyUp, 0, key.CodeDeleteBackspace, 0)   // TODO: modifiers
+	theApp.window.EvMgr.KeyChord(0, key.CodeDeleteBackspace, 0) // TODO: modifiers
 }
 
 func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
