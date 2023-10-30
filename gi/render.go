@@ -555,6 +555,7 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
+	wb.SetFlag(false, NeedsRender) // done!
 	if !wb.This().(Widget).IsVisible() {
 		return false
 	}

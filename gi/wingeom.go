@@ -267,7 +267,7 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 	}
 	mgr.Init()
 
-	winName := mgr.WinName(win.Name)
+	winName := mgr.WinName(win.Title)
 	sc := win.GoosiWin.Screen()
 	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
 	wgr.SetPos(pos)
@@ -397,7 +397,7 @@ func (mgr *WinGeomPrefsMgr) RestoreAll() {
 	}
 	mgr.SettingStart()
 	for _, w := range AllRenderWins {
-		wgp := mgr.Pref(w.Name, w.GoosiWin.Screen())
+		wgp := mgr.Pref(w.Title, w.GoosiWin.Screen())
 		if wgp != nil {
 			if WinGeomTrace {
 				log.Printf("WinGeomPrefs: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())

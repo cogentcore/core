@@ -302,7 +302,7 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 	opts := &goosi.NewWindowOptions{
 		Title: title, Size: st.Scene.Geom.Size, StdPixels: false,
 	}
-	wgp := WinGeomMgr.Pref(name, nil)
+	wgp := WinGeomMgr.Pref(title, nil)
 	if wgp != nil {
 		WinGeomMgr.SettingStart()
 		opts.Size = wgp.Size()

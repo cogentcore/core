@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"fmt"
-
 	"goki.dev/goosi/events"
 )
 
@@ -55,7 +53,6 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 		}
 		if tb.ClickOff {
 			if evi.Type() == events.MouseUp {
-				fmt.Println("del pop:", ts.Name())
 				pm.PopDelete()
 				// todo: could mark as Handled to absorb
 				if tb.Modal {

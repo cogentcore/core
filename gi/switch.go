@@ -67,6 +67,13 @@ func (sw *Switch) OnInit() {
 	sw.SwitchStyles()
 }
 
+// SetChecked sets the checked state and updates the icon accordingly
+func (sw *Switch) SetChecked(on bool) {
+	sw.SetState(on, states.Checked)
+	sw.SetIconFromState()
+}
+
+// SetIconFromState updates icon state based on checked status
 func (sw *Switch) SetIconFromState() {
 	if sw.Parts == nil {
 		return
@@ -97,10 +104,7 @@ func (sw *Switch) HandleSwitchEvents() {
 	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
 		e.SetHandled()
-		sw.SetState(!sw.StateIs(states.Checked), states.Checked)
-		if sw.Parts != nil && sw.Parts.HasChildren() {
-			sw.SetIconFromState()
-		}
+		sw.SetChecked(!sw.StateIs(states.Checked))
 		sw.Send(events.Change, e)
 	})
 }

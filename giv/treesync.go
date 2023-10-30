@@ -310,6 +310,7 @@ func (tv *TreeView) DeleteNode() {
 		updt := par.UpdateStart()
 		tv.Delete(true)
 		par.Update()
+		par.RootView.RootSetViewIdx()
 		par.UpdateEndLayout(updt)
 		tv.SendChangeEvent(nil)
 	}

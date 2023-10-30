@@ -42,7 +42,7 @@ var MenuMaxHeight = 30
 
 // NewMenuScene constructs a [Scene] for displaying a menu, using the
 // given menu constructor function. If no name is provided, it defaults
-// to "menu".
+// to "menu".  If no menu items added, returns nil.
 func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	nm := "menu"
 	if len(name) > 0 {
@@ -51,6 +51,9 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	msc := NewScene(nm)
 	MenuSceneConfigStyles(msc)
 	menu(msc)
+	if !msc.HasChildren() {
+		return nil
+	}
 
 	hasSelected := false
 	msc.WalkPre(func(k ki.Ki) bool {
@@ -89,6 +92,9 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
+	if sc == nil {
+		return nil
+	}
 	sc.Geom.Pos = pos
 	return NewPopupStage(MenuStage, sc, ctx)
 }
@@ -109,8 +115,7 @@ func (wb *WidgetBase) ContextMenu(m *Scene) {
 	if wb.CustomContextMenu != nil {
 		wb.CustomContextMenu(m)
 	}
-	mvp := wb.Sc
-	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
+	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), wb.Sc, m)
 }
 
 // ContextMenuPos returns the default position for the context menu
@@ -131,7 +136,11 @@ func (wb *WidgetBase) HandleWidgetContextMenu() {
 }
 
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
+	e.SetHandled() // always
 	wi := wb.This().(Widget)
-	// TODO(kai/menu): how to handle empty context menus?
-	NewMenu(wi.ContextMenu, wi, wi.ContextMenuPos(e)).Run()
+	nm := NewMenu(wi.ContextMenu, wi, wi.ContextMenuPos(e))
+	if nm == nil { // no items
+		return
+	}
+	nm.Run()
 }

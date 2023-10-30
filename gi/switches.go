@@ -64,9 +64,9 @@ func (sw *Switches) SelectItem(idx int) error {
 	if sw.Mutex {
 		sw.UnCheckAllBut(idx)
 	}
-	cb := sw.Child(idx).(*Switch)
-	cb.SetState(true, states.Checked)
-	sw.UpdateEnd(updt)
+	cs := sw.Child(idx).(*Switch)
+	cs.SetChecked(true)
+	sw.UpdateEndRender(updt)
 	return nil
 }
 
@@ -90,10 +90,10 @@ func (sw *Switches) SelectItemAction(idx int) error {
 func (sw *Switches) UnCheckAll() {
 	updt := sw.UpdateStart()
 	for _, cbi := range *sw.Children() {
-		cb := cbi.(*Switch)
-		cb.SetState(false, states.Checked)
+		cs := cbi.(*Switch)
+		cs.SetChecked(false)
 	}
-	sw.UpdateEnd(updt)
+	sw.UpdateEndRender(updt)
 }
 
 // UnCheckAllBut unchecks all switches except given one
@@ -103,10 +103,10 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 		if i == idx {
 			continue
 		}
-		cb := cbi.(*Switch)
-		cb.SetState(false, states.Checked)
+		cs := cbi.(*Switch)
+		cs.SetChecked(false)
 	}
-	sw.UpdateEnd(updt)
+	sw.UpdateEndRender(updt)
 }
 
 // ItemsFromStringList sets the Items list from a list of string values -- if
@@ -150,13 +150,15 @@ func (sw *Switches) ItemsFromEnum(enum enums.Enum) {
 func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 	els := bitflag.Values()
 	mn := min(len(els), sw.NumChildren())
+	updt := sw.UpdateStart()
 	for i := 0; i < mn; i++ {
 		ev := els[i]
 		swi := sw.Child(i)
 		sw := swi.(*Switch)
 		on := bitflag.HasFlag(ev.(enums.BitFlag))
-		sw.SetState(on, states.Checked)
+		sw.SetChecked(on)
 	}
+	sw.UpdateEndRender(updt)
 }
 
 // BitFlagsValue sets the given bitflag value to the value specified
