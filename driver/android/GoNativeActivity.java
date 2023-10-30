@@ -8,7 +8,8 @@
 // license that can be found in the LICENSE file.
 
 // VERY IMPORTANT: after making any changes to this file, you need
-// to run go generate in github.com/goki/goki/mobile 
+// to run go generate in github.com/goki/goki/mobile and then
+// reinstall the goki tool.
 
 package org.golang.app;
 
@@ -67,6 +68,7 @@ public class GoNativeActivity extends NativeActivity {
 	public GoNativeActivity() {
 		super();
 		goNativeActivity = this;
+		Log.e("GoLog", "GoNativeActivity");
 	}
 
 	String getTmpdir() {
@@ -97,6 +99,7 @@ public class GoNativeActivity extends NativeActivity {
 	}
 
 	void doShowKeyboard(final int keyboardType) {
+		Log.e("GoLog", "doShowKeyboard");
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -181,6 +184,7 @@ public class GoNativeActivity extends NativeActivity {
 	}
 
 	private void load() {
+		Log.e("GoLog", "LOAD");
 		// Interestingly, NativeActivity uses a different method
 		// to find native code to execute, avoiding
 		// System.loadLibrary. The result is Java methods

@@ -13,5 +13,5 @@ The `Platform` type enumerates these supported platforms and should be used to c
 
 
 ## IMPORTANT
-After making any changes to `GoNativeActivity.java` in the Android driver, you **need** to run go generate in github.com/goki/goki/mobile
+After making any changes to `GoNativeActivity.java` in the Android driver, you **need** to run go generate in github.com/goki/goki/mobile and then reinstall the goki tool.
 
