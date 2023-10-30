@@ -496,6 +496,10 @@ func (vv *ColorValue) UpdateWidget() {
 }
 
 func (vv *ColorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -575,6 +579,10 @@ func (vv *ColorNameValue) UpdateWidget() {
 }
 
 func (vv *ColorNameValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)

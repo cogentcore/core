@@ -28,8 +28,8 @@ var ArgViewType = gti.AddType(&gti.Type{
 	Doc:        "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "the args that we are a view onto", Directives: gti.Directives{}, Tag: ""}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title / prompt to show above the editor fields", Directives: gti.Directives{}, Tag: ""}},
+		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "the args that we are a view onto", Directives: gti.Directives{}, Tag: ""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -57,17 +57,17 @@ func (t *ArgView) New() ki.Ki {
 	return &ArgView{}
 }
 
-// SetArgs sets the [ArgView.Args]:
-// the args that we are a view onto
-func (t *ArgView) SetArgs(v []Value) *ArgView {
-	t.Args = v
-	return t
-}
-
 // SetTitle sets the [ArgView.Title]:
 // title / prompt to show above the editor fields
 func (t *ArgView) SetTitle(v string) *ArgView {
 	t.Title = v
+	return t
+}
+
+// SetArgs sets the [ArgView.Args]:
+// the args that we are a view onto
+func (t *ArgView) SetArgs(v []Value) *ArgView {
+	t.Args = v
 	return t
 }
 
@@ -748,7 +748,6 @@ var MapViewType = gti.AddType(&gti.Type{
 		{"SortVals", &gti.Field{Name: "SortVals", Type: "bool", LocalType: "bool", Doc: "sort by values instead of keys", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", LocalType: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}, Tag: ""}},
 		{"NCols", &gti.Field{Name: "NCols", Type: "int", LocalType: "int", Doc: "the number of columns in the map; do not set externally; generally only access internally", Directives: gti.Directives{}, Tag: ""}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 		{"ToolbarMap", &gti.Field{Name: "ToolbarMap", Type: "any", LocalType: "any", Doc: "the map that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: ""}},
@@ -817,15 +816,6 @@ func (t *MapView) SetShowToolbar(v bool) *MapView {
 // the number of columns in the map; do not set externally; generally only access internally
 func (t *MapView) SetNcols(v int) *MapView {
 	t.NCols = v
-	return t
-}
-
-// SetWidgetConfiged sets the [MapView.WidgetConfiged]:
-// WidgetConfiged tracks if the given Widget has been configured.
-// Widgets can only be configured once -- otherwise duplicate event
-// functions are registered.
-func (t *MapView) SetWidgetConfiged(v map[gi.Widget]bool) *MapView {
-	t.WidgetConfiged = v
 	return t
 }
 
@@ -905,7 +895,6 @@ var MapViewInlineType = gti.AddType(&gti.Type{
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Keys", &gti.Field{Name: "Keys", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -952,15 +941,6 @@ func (t *MapViewInline) SetKeys(v []Value) *MapViewInline {
 // Value representations of the fields
 func (t *MapViewInline) SetValues(v []Value) *MapViewInline {
 	t.Values = v
-	return t
-}
-
-// SetWidgetConfiged sets the [MapViewInline.WidgetConfiged]:
-// WidgetConfiged tracks if the given Widget has been configured.
-// Widgets can only be configured once -- otherwise duplicate event
-// functions are registered.
-func (t *MapViewInline) SetWidgetConfiged(v map[gi.Widget]bool) *MapViewInline {
-	t.WidgetConfiged = v
 	return t
 }
 
@@ -1457,7 +1437,6 @@ var SliceViewInlineType = gti.AddType(&gti.Type{
 		{"IsFixedLen", &gti.Field{Name: "IsFixedLen", Type: "bool", LocalType: "bool", Doc: "whether the slice has a fixed-len flag on it", Directives: gti.Directives{}, Tag: ""}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the slice been edited?", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -1511,15 +1490,6 @@ func (t *SliceViewInline) SetIsFixedLen(v bool) *SliceViewInline {
 // Value representations of the fields
 func (t *SliceViewInline) SetValues(v []Value) *SliceViewInline {
 	t.Values = v
-	return t
-}
-
-// SetWidgetConfiged sets the [SliceViewInline.WidgetConfiged]:
-// WidgetConfiged tracks if the given Widget has been configured.
-// Widgets can only be configured once -- otherwise duplicate event
-// functions are registered.
-func (t *SliceViewInline) SetWidgetConfiged(v map[gi.Widget]bool) *SliceViewInline {
-	t.WidgetConfiged = v
 	return t
 }
 
@@ -1586,7 +1556,6 @@ var StructViewType = gti.AddType(&gti.Type{
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", LocalType: "*reflect.Value", Doc: "Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks whether the given Widget has been configured yet\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", LocalType: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}, Tag: ""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
@@ -1638,15 +1607,6 @@ func (t *StructView) SetChangeFlag(v *reflect.Value) *StructView {
 // Value representations of the fields
 func (t *StructView) SetFieldViews(v []Value) *StructView {
 	t.FieldViews = v
-	return t
-}
-
-// SetWidgetConfiged sets the [StructView.WidgetConfiged]:
-// WidgetConfiged tracks whether the given Widget has been configured yet
-// Widgets can only be configured once -- otherwise duplicate event
-// functions are registered.
-func (t *StructView) SetWidgetConfiged(v map[gi.Widget]bool) *StructView {
-	t.WidgetConfiged = v
 	return t
 }
 
@@ -1753,7 +1713,6 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 		{"StructValView", &gti.Field{Name: "StructValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
 		{"AddButton", &gti.Field{Name: "AddButton", Type: "bool", LocalType: "bool", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'", Directives: gti.Directives{}, Tag: ""}},
 		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
@@ -1802,15 +1761,6 @@ func (t *StructViewInline) SetAddButton(v bool) *StructViewInline {
 // Value representations of the fields
 func (t *StructViewInline) SetFieldViews(v []Value) *StructViewInline {
 	t.FieldViews = v
-	return t
-}
-
-// SetWidgetConfiged sets the [StructViewInline.WidgetConfiged]:
-// WidgetConfiged tracks if the given Widget has been configured.
-// Widgets can only be configured once -- otherwise duplicate event
-// functions are registered.
-func (t *StructViewInline) SetWidgetConfiged(v map[gi.Widget]bool) *StructViewInline {
-	t.WidgetConfiged = v
 	return t
 }
 

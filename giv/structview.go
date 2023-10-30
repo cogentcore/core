@@ -49,11 +49,6 @@ type StructView struct {
 	// Value representations of the fields
 	FieldViews []Value `json:"-" xml:"-"`
 
-	// WidgetConfiged tracks whether the given Widget has been configured yet
-	// Widgets can only be configured once -- otherwise duplicate event
-	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool
-
 	// whether to show the toolbar or not
 	ShowToolbar bool
 
@@ -77,7 +72,6 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
-	sv.WidgetConfiged = make(map[gi.Widget]bool)
 	sv.ShowToolbar = true
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
@@ -118,9 +112,6 @@ func (sv *StructView) SetStruct(st any) *StructView {
 	if sv.Struct != st {
 		sv.Changed = false
 		sv.Struct = st
-		// very critical to clear so that we re-config
-		// all of the widgets; otherwise some pointers persist
-		clear(sv.WidgetConfiged)
 		sv.Update()
 	}
 	return sv
@@ -328,14 +319,6 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", widg.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
-		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
-			vvb := vv.AsValueBase()
-			vvb.Widget = widg
-			// fmt.Println("skip and update:", vv)
-			vv.UpdateWidget()
-			continue
-		}
-		sv.WidgetConfiged[widg] = true
 		vv.ConfigWidget(widg, sc)
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {

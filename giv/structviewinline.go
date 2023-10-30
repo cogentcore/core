@@ -32,11 +32,6 @@ type StructViewInline struct {
 	// Value representations of the fields
 	FieldViews []Value `json:"-" xml:"-"`
 
-	// WidgetConfiged tracks if the given Widget has been configured.
-	// Widgets can only be configured once -- otherwise duplicate event
-	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
-
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-" view:"-"`
 
@@ -55,7 +50,6 @@ func (sv *StructViewInline) OnInit() {
 }
 
 func (sv *StructViewInline) StructViewInlineStyles() {
-	sv.WidgetConfiged = make(map[gi.Widget]bool)
 	sv.Lay = gi.LayoutHoriz
 	sv.Style(func(s *styles.Style) {
 		s.MinWidth.Ch(20)
@@ -76,9 +70,6 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 	if sv.Struct != st {
 		sv.Struct = st
-		// very critical to clear so that we re-config
-		// all of the widgets; otherwise some pointers persist
-		clear(sv.WidgetConfiged)
 		sv.Update()
 	}
 	return sv
@@ -137,12 +128,6 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		widg := sv.Child((i * 2) + 1).(gi.Widget)
-		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
-			vv.AsValueBase().Widget = widg
-			vv.UpdateWidget()
-			continue
-		}
-		sv.WidgetConfiged[widg] = true
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, widg, sv.IsReadOnly()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true

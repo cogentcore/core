@@ -76,6 +76,10 @@ func (vv *DurationValue) UpdateWidget() {
 }
 
 func (vv *DurationValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	fr := vv.Widget.(*gi.Frame)

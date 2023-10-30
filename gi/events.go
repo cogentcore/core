@@ -29,7 +29,6 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 	wb.Listeners.Add(etype, func(e events.Event) {
 		if wb.This() == nil || wb.Is(ki.Deleted) {
-			fmt.Println("not sending to deleted widget")
 			return
 		}
 		fun(e)
@@ -43,7 +42,6 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 func (wb *WidgetBase) OnLast(etype events.Types, fun func(e events.Event)) Widget {
 	wb.Listeners.AddLastCall(etype, func(e events.Event) {
 		if wb.This() == nil || wb.Is(ki.Deleted) {
-			fmt.Println("not sending to deleted widget")
 			return
 		}
 		fun(e)

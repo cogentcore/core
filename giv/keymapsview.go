@@ -131,6 +131,10 @@ func (vv *KeyMapValue) UpdateWidget() {
 }
 
 func (vv *KeyMapValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
