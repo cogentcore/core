@@ -900,21 +900,6 @@ func (tb *Buf) BatchUpdateEnd(autoSave bool) {
 	tb.AutoSaveRestore(autoSave)
 }
 
-// AddFileNode adds the FileNode to the list or receivers of changes to buffer
-// func (tb *Buf) AddFileNode(fn *FileNode) {
-// tb.BufSig.Connect(fn.This(), // FileNodeBufSigRecv receives a signal from the buffer and updates view accordingly
-// func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data any) {
-// fn := AsFileNode(rvwki)
-// fn := rvwki.Embed(FileNodeType).(*FileNode)
-// switch BufSignals(sig) {
-// case BufDone, BufInsert, BufDelete:
-// 	if fn.Info.Vcs == vci.Stored {
-// 		fn.Info.Vcs = vci.Modified
-// 	}
-// }
-// }
-// }
-
 /////////////////////////////////////////////////////////////////////////////
 //   Accessing Text
 
