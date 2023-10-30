@@ -89,17 +89,17 @@ func gendex() error {
 	if err != nil {
 		return err
 	}
+
 	cmd = exec.Command(
-		buildTools+"/dx",
-		"--dex",
-		"--output="+tmpdir+"/classes.dex",
-		tmpdir+"/work",
+		buildTools+"/d8",
+		tmpdir+"/work/org/golang/app/GoNativeActivity.class",
+		"--output", tmpdir,
 	)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		os.Stderr.Write(out)
 		return err
 	}
-	src, err := ioutil.ReadFile(tmpdir + "/classes.dex")
+	src, err := os.ReadFile(tmpdir + "/classes.dex")
 	if err != nil {
 		return err
 	}
