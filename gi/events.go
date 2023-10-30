@@ -23,9 +23,31 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
 }
 
-// On adds an event listener function for the given event type
+// On adds an event listener function for the given event type,
+// to the end of the current stack, so that it will be called
+// before everything else already on the stack.
 func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
-	wb.Listeners.Add(etype, fun)
+	wb.Listeners.Add(etype, func(e events.Event) {
+		if wb.This() == nil || wb.Is(ki.Deleted) {
+			fmt.Println("not sending to deleted widget")
+			return
+		}
+		fun(e)
+	})
+	return wb.This().(Widget)
+}
+
+// OnLast adds an event listener function for the given event type,
+// to the start of the current stack, so that it will be called
+// after everything else already on the stack.
+func (wb *WidgetBase) OnLast(etype events.Types, fun func(e events.Event)) Widget {
+	wb.Listeners.AddLastCall(etype, func(e events.Event) {
+		if wb.This() == nil || wb.Is(ki.Deleted) {
+			fmt.Println("not sending to deleted widget")
+			return
+		}
+		fun(e)
+	})
 	return wb.This().(Widget)
 }
 
@@ -73,6 +95,9 @@ func (wb *WidgetBase) OnSelect(fun func(e events.Event)) Widget {
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
 func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
+	if wb.This() == nil || wb.Is(ki.Deleted) {
+		return
+	}
 	var e events.Event
 	if len(orig) > 0 && orig[0] != nil {
 		e = orig[0].Clone()
@@ -104,6 +129,9 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 		if ev.Type() != events.MouseMove {
 			fmt.Println("Event to Widget:", wb.Path(), ev.String())
 		}
+	}
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
+		return
 	}
 	s := &wb.Styles
 	state := s.State

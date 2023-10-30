@@ -380,7 +380,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 				break
 			}
 		}
-		if !stillIn {
+		if !stillIn && prv.This() != nil && !prv.Is(ki.Deleted) {
 			prv.Send(events.MouseLeave, evi)
 		}
 	}

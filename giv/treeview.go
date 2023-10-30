@@ -204,34 +204,52 @@ func (tv *TreeView) TreeViewStyles() {
 			// something with this treeview specifically,
 			// not with any of our children (see HandleTreeViewMouse)
 			parts.On(events.MouseEnter, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				tv.SetState(true, states.Hovered)
 				tv.ApplyStyle(tv.Sc)
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
 			parts.On(events.MouseLeave, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				tv.SetState(false, states.Hovered)
 				tv.ApplyStyle(tv.Sc)
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
 			parts.On(events.MouseDown, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				tv.SetState(true, states.Active)
 				tv.ApplyStyle(tv.Sc)
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
 			parts.On(events.MouseUp, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				tv.SetState(false, states.Active)
 				tv.ApplyStyle(tv.Sc)
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
 			parts.OnClick(func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				tv.SelectAction(e.SelectMode())
 				e.SetHandled()
 			})
 			parts.OnDoubleClick(func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				if tv.HasChildren() {
 					tv.ToggleClose()
 				}
@@ -268,6 +286,9 @@ func (tv *TreeView) TreeViewStyles() {
 				}
 			})
 			sw.OnClick(func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
 				if sw.StateIs(states.Checked) {
 					if !tv.IsClosed() {
 						tv.Close()
