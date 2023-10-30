@@ -45,14 +45,14 @@ func keyboardDelete() {
 }
 
 //export scrolled
-func scrolled(posX, posY, distanceX, distanceY *C.float) {
+func scrolled(posX, posY, distanceX, distanceY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	delta := image.Pt(int(distanceX), int(distanceY))
 	theApp.window.EvMgr.Scroll(where, delta) // TODO
 }
 
 //export scaled
-func scaled(scaleFactor, posX, posY *C.float) {
+func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
 }
