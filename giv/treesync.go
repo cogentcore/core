@@ -213,6 +213,7 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 	if stv != nil {
 		stv.SelectAction(events.SelectOne)
 	}
+	tv.SendChangeEvent(nil)
 }
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
@@ -289,7 +290,7 @@ func (tv *TreeView) AddChildNode() {
 	}).Run()
 }
 
-// DeleteNode deletes the sync node corresponding
+// DeleteNode deletes the tree node or sync node corresponding
 // to this view node in the sync tree.
 // If SyncNode is set, operates on Sync Tree.
 func (tv *TreeView) DeleteNode() {
@@ -297,6 +298,7 @@ func (tv *TreeView) DeleteNode() {
 	if tv.IsRoot(ttl) {
 		return
 	}
+	tv.Close()
 	if tv.MoveDown(events.SelectOne) == nil {
 		tv.MoveUp(events.SelectOne)
 	}
@@ -304,7 +306,12 @@ func (tv *TreeView) DeleteNode() {
 		tv.SyncNode.Delete(true)
 		tv.SendChangeEventReSync(nil)
 	} else {
+		par := AsTreeView(tv.Par)
+		updt := par.UpdateStart()
 		tv.Delete(true)
+		par.Update()
+		par.UpdateEndLayout(updt)
+		tv.SendChangeEvent(nil)
 	}
 }
 
@@ -342,6 +349,7 @@ func (tv *TreeView) Duplicate() {
 	par.Update()
 	par.UpdateEndLayout(updt)
 	ntv.SelectAction(events.SelectOne)
+	tv.SendChangeEvent(nil)
 }
 
 func (tv *TreeView) DuplicateSync() {

@@ -105,7 +105,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
 		gi.NewDialog(b1).Title("Test Dialog").Prompt("This is a prompt").
-			Modal(true).NewWindow(true).Ok().Cancel().Run()
+			Modal(true).NewWindow(true).Cancel().Ok().Run()
 
 		// gi.StringPromptDialog(vp, "", "Enter value here..",
 		// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
