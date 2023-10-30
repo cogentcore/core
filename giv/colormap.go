@@ -158,13 +158,13 @@ func (vv *ColorMapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorMapValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	if vv.Widget == widg {
+func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.Widget = w
+	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)

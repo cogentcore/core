@@ -135,8 +135,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
-		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		arg.ConfigWidget(widg, av.Sc)
+		w := sg.Child((i * 2) + 1).(gi.Widget)
+		arg.ConfigWidget(w, av.Sc)
 	}
 	sg.UpdateEnd(updt)
 }

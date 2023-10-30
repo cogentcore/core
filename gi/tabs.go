@@ -121,8 +121,8 @@ func (ts *Tabs) CurTab() (Widget, int, bool) {
 	if fr.StackTop < 0 {
 		return nil, -1, false
 	}
-	widg := fr.Child(fr.StackTop).(Widget)
-	return widg, fr.StackTop, true
+	w := fr.Child(fr.StackTop).(Widget)
+	return w, fr.StackTop, true
 }
 
 // TODO(kai): once subscenes are working, we should make tabs be subscenes

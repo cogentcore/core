@@ -129,7 +129,7 @@ type Value interface {
 	// value, including setting up the signal connections to set the value
 	// when the user edits it (values are always set immediately when the
 	// widget is updated).
-	ConfigWidget(widg gi.Widget, sc *gi.Scene)
+	ConfigWidget(w gi.Widget, sc *gi.Scene)
 
 	// HasAction returns true if this value has an associated action, such as
 	// pulling up a dialog or chooser for this value.  Activate method will
@@ -741,13 +741,13 @@ func (vv *ValueBase) UpdateWidget() {
 	}
 }
 
-func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	if vv.Widget == widg {
+func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.Widget = w
+	vv.StdConfigWidget(w)
 	tf, ok := vv.Widget.(*gi.TextField)
 	if !ok {
 		return
@@ -780,9 +780,9 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 }
 
 // StdConfigWidget does all of the standard widget configuration tag options
-func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
-	widg.SetState(vv.IsReadOnly(), states.ReadOnly)
-	widg.Style(func(s *styles.Style) {
+func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
+	w.SetState(vv.IsReadOnly(), states.ReadOnly)
+	w.Style(func(s *styles.Style) {
 		if widthtag, ok := vv.Tag("width"); ok {
 			width, err := laser.ToFloat32(widthtag)
 			if err == nil {
@@ -808,7 +808,7 @@ func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
 			}
 		}
 		if vv.IsReadOnly() {
-			widg.SetState(true, states.ReadOnly)
+			w.SetState(true, states.ReadOnly)
 		}
 	})
 }

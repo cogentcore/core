@@ -164,11 +164,11 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 			mv.Update()
 		})
 		keyw := mv.Child(i * 2).(gi.Widget)
-		widg := mv.Child((i * 2) + 1).(gi.Widget)
+		w := mv.Child((i * 2) + 1).(gi.Widget)
 		kv.ConfigWidget(keyw, sc)
-		vv.ConfigWidget(widg, sc)
+		vv.ConfigWidget(w, sc)
 		if mv.IsReadOnly() {
-			widg.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetState(true, states.ReadOnly)
 			keyw.AsWidget().SetState(true, states.ReadOnly)
 		}
 	}

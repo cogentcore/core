@@ -310,16 +310,16 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
-		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, widg, sv.IsReadOnly())
+		w := sg.Child((i * 2) + 1).(gi.Widget)
+		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
 		if hasDef {
 			sv.HasDefs = true
 		}
-		if widg.KiType() != vv.WidgetType() {
-			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", widg.KiType().Name, "should be:", vv.WidgetType().Name)
+		if w.KiType() != vv.WidgetType() {
+			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
-		vv.ConfigWidget(widg, sc)
+		vv.ConfigWidget(w, sc)
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
@@ -378,14 +378,14 @@ func (sv *StructView) Render(sc *gi.Scene) {
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
 // returns true if there were any "def" default tags -- if so, needs updating
-func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
+func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
 	lbl.Text = vv.Label()
 	if et, has := vv.Tag("edit"); has && et == "-" {
 		readOnlyTag = true
-		widg.AsWidget().SetState(true, states.ReadOnly)
+		w.AsWidget().SetState(true, states.ReadOnly)
 	} else {
 		if isReadOnly {
-			widg.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetState(true, states.ReadOnly)
 			vv.SetTag("edit", "-")
 		}
 	}

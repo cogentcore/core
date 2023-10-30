@@ -41,13 +41,13 @@ func (vv *KeyChordValue) UpdateWidget() {
 	kc.SetText(txt)
 }
 
-func (vv *KeyChordValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	if vv.Widget == widg {
+func (vv *KeyChordValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.Widget = w
+	vv.StdConfigWidget(w)
 	kc := vv.Widget.(*KeyChordEdit)
 	kc.Config(sc)
 	kc.OnChange(func(e events.Event) {

@@ -55,7 +55,7 @@ var _ SliceViewer = (*SliceView)(nil)
 
 // SliceViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view.  If style properties are set
-// then you must call widg.AsNode2dD().SetFullReRender() to trigger
+// then you must call w.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
 type SliceViewStyleFunc func(w gi.Widget, s *styles.Style, row int)
 
@@ -504,9 +504,9 @@ func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
 		idxlab.Text = itxt
 	}
 
-	widg := ki.NewOfType(vtyp).(gi.Widget)
-	sg.SetChild(widg, idxOff, valnm)
-	vv.ConfigWidget(widg, sc)
+	w := ki.NewOfType(vtyp).(gi.Widget)
+	sg.SetChild(w, idxOff, valnm)
+	vv.ConfigWidget(w, sc)
 	vv.UpdateWidget()
 
 	if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
@@ -774,17 +774,17 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 			idxlab.SetText(sitxt)
 		}
 
-		widg := ki.NewOfType(vtyp).(gi.Widget)
-		sg.SetChild(widg, ridx+idxOff, valnm)
-		vv.ConfigWidget(widg, sc)
-		wb := widg.AsWidget()
+		w := ki.NewOfType(vtyp).(gi.Widget)
+		sg.SetChild(w, ridx+idxOff, valnm)
+		vv.ConfigWidget(w, sc)
+		wb := w.AsWidget()
 		wb.OnSelect(func(e events.Event) {
 			e.SetHandled()
 			sv.UpdateSelectRow(i)
 		})
 
 		if sv.IsReadOnly() {
-			widg.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetState(true, states.ReadOnly)
 		} else {
 			vvb := vv.AsValueBase()
 			vvb.OnChange(func(e events.Event) {
@@ -848,7 +848,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	for i := 0; i < sv.VisRows; i++ {
 		i := i
 		ridx := i * nWidgPerRow
-		widg := sg.Kids[ridx+idxOff].(gi.Widget)
+		w := sg.Kids[ridx+idxOff].(gi.Widget)
 		vv := sv.Values[i]
 		si := sv.StartIdx + i // slice idx
 		var idxlab *gi.Label
@@ -858,17 +858,17 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			idxlab.SetNeedsRender()
 		}
 		if si < sv.SliceSize {
-			widg.SetState(false, states.Invisible)
+			w.SetState(false, states.Invisible)
 			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 			vv.SetReadOnly(sv.IsReadOnly())
 			vv.UpdateWidget()
 
 			if sv.IsReadOnly() {
-				widg.AsWidget().SetState(true, states.ReadOnly)
+				w.AsWidget().SetState(true, states.ReadOnly)
 			}
 			issel := sv.IdxIsSelected(si)
-			widg.AsWidget().SetSelected(issel)
+			w.AsWidget().SetSelected(issel)
 			if sv.Is(SliceViewShowIndex) {
 				idxlab.SetState(false, states.Invisible)
 				idxlab.SetSelected(issel)
@@ -887,10 +887,10 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				}
 			}
 		} else {
-			widg.SetState(true, states.Invisible)
+			w.SetState(true, states.Invisible)
 			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
 			vv.UpdateWidget()
-			widg.AsWidget().SetSelected(false)
+			w.AsWidget().SetSelected(false)
 			if sv.Is(SliceViewShowIndex) {
 				idxlab.SetState(true, states.Invisible)
 				idxlab.SetSelected(false)
@@ -1145,8 +1145,8 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	}
 	nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 	sg := sv.This().(SliceViewer).SliceGrid()
-	widg := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
-	return widg, true
+	w := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
+	return w, true
 }
 
 // RowGrabFocus grabs the focus for the first focusable widget
@@ -1159,14 +1159,14 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
 	ridx := nWidgPerRow * row
 	sg := sv.This().(SliceViewer).SliceGrid()
-	widg := sg.Child(ridx + idxOff).(gi.Widget).AsWidget()
-	if widg.StateIs(states.Focused) {
-		return widg
+	w := sg.Child(ridx + idxOff).(gi.Widget).AsWidget()
+	if w.StateIs(states.Focused) {
+		return w
 	}
 	sv.SetFlag(true, SliceViewInFocusGrab)
-	widg.GrabFocus()
+	w.GrabFocus()
 	sv.SetFlag(false, SliceViewInFocusGrab)
-	return widg
+	return w
 }
 
 // IdxGrabFocus grabs the focus for the first focusable widget
@@ -1186,9 +1186,9 @@ func (sv *SliceViewBase) IdxPos(idx int) image.Point {
 		row = sv.VisRows - 1
 	}
 	var pos image.Point
-	widg, ok := sv.This().(SliceViewer).RowFirstWidget(row)
+	w, ok := sv.This().(SliceViewer).RowFirstWidget(row)
 	if ok {
-		pos = widg.ContextMenuPos(nil)
+		pos = w.ContextMenuPos(nil)
 	}
 	return pos
 }
@@ -1197,9 +1197,9 @@ func (sv *SliceViewBase) IdxPos(idx int) image.Point {
 func (sv *SliceViewBase) RowFromPos(posY int) (int, bool) {
 	// todo: could optimize search to approx loc, and search up / down from there
 	for rw := 0; rw < sv.VisRows; rw++ {
-		widg, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
+		w, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
 		if ok {
-			if widg.ScBBox.Min.Y < posY && posY < widg.ScBBox.Max.Y {
+			if w.ScBBox.Min.Y < posY && posY < w.ScBBox.Max.Y {
 				return rw, true
 			}
 		}
@@ -1394,13 +1394,13 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	rowidx := row * nWidgPerRow
 	if sv.Is(SliceViewShowIndex) {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
-			widg := sg.Child(rowidx).(gi.Widget).AsWidget()
-			widg.SetSelected(sel)
+			w := sg.Child(rowidx).(gi.Widget).AsWidget()
+			w.SetSelected(sel)
 		}
 	}
 	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
-		widg := sg.Child(rowidx + idxOff).(gi.Widget).AsWidget()
-		widg.SetSelected(sel)
+		w := sg.Child(rowidx + idxOff).(gi.Widget).AsWidget()
+		w.SetSelected(sel)
 	}
 }
 
@@ -1867,10 +1867,10 @@ func (sv *SliceViewBase) DragNDropStart() {
 	md := sv.This().(SliceViewer).CopySelToMime()
 	_ = md
 	ixs := sv.SelectedIdxsList(false) // ascending
-	widg, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
+	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
 	if ok {
 		sp := &gi.Sprite{}
-		sp.GrabRenderFrom(widg)
+		sp.GrabRenderFrom(w)
 		gi.ImageClearer(sp.Pixels, 50.0)
 		// todo:
 		// sv.ParentRenderWin().StartDragNDrop(sv.This(), md, sp)
