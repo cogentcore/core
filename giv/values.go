@@ -407,11 +407,10 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
 	readOnly := vv.IsReadOnly()
-	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			vv.UpdateWidget()
-			vv.SendChange()
-		}
+	dlg := StructViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), opv.Interface(), vv.TmpSave)
+	dlg.OnAccept(func(e events.Event) {
+		vv.UpdateWidget()
+		vv.SendChange()
 		if fun != nil {
 			fun(dlg)
 		}
@@ -544,22 +543,19 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				vv.UpdateWidget()
-				vv.SendChange()
-			}
+		dlg := TableViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), slci, vv.TmpSave, false, false)
+		dlg.OnAccept(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
 			if fun != nil {
 				fun(dlg)
 			}
-
 		}).Run()
 	} else {
-		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				vv.UpdateWidget()
-				vv.SendChange()
-			}
+		dlg := SliceViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), slci, vv.TmpSave, false, false)
+		dlg.OnAccept(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
 			if fun != nil {
 				fun(dlg)
 			}
