@@ -407,11 +407,10 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
 	readOnly := vv.IsReadOnly()
-	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			vv.UpdateWidget()
-			vv.SendChange()
-		}
+	dlg := StructViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), opv.Interface(), vv.TmpSave)
+	dlg.OnAccept(func(e events.Event) {
+		vv.UpdateWidget()
+		vv.SendChange()
 		if fun != nil {
 			fun(dlg)
 		}
@@ -544,22 +543,19 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				vv.UpdateWidget()
-				vv.SendChange()
-			}
+		dlg := TableViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), slci, vv.TmpSave, false, false)
+		dlg.OnAccept(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
 			if fun != nil {
 				fun(dlg)
 			}
-
 		}).Run()
 	} else {
-		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				vv.UpdateWidget()
-				vv.SendChange()
-			}
+		dlg := SliceViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), slci, vv.TmpSave, false, false)
+		dlg.OnAccept(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
 			if fun != nil {
 				fun(dlg)
 			}
@@ -672,11 +668,10 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	mpi := vv.Value.Interface()
 	readOnly := vv.IsReadOnly()
-	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			vv.UpdateWidget()
-			vv.SendChange()
-		}
+	dlg := MapViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), mpi, vv.TmpSave)
+	dlg.OnAccept(func(e events.Event) {
+		vv.UpdateWidget()
+		vv.SendChange()
 		if fun != nil {
 			fun(dlg)
 		}
@@ -811,11 +806,10 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	readOnly := vv.IsReadOnly()
-	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: vv.Doc(), TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			vv.UpdateWidget()
-			vv.SendChange()
-		}
+	dlg := StructViewDialog(gi.NewDialog(ctx).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), k, vv.TmpSave)
+	dlg.OnAccept(func(e events.Event) {
+		vv.UpdateWidget()
+		vv.SendChange()
 		if fun != nil {
 			fun(dlg)
 		}
@@ -1429,14 +1423,13 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: vv.Doc()}, cur, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			si := dlg.Data.(int)
-			if si >= 0 {
-				ic := icons.AllIcons[si]
-				vv.SetValue(ic)
-				vv.UpdateWidget()
-			}
+	dlg := IconChooserDialog(gi.NewDialog(ctx).Title("Select an Icon").Prompt(vv.Doc()), cur)
+	dlg.OnAccept(func(e events.Event) {
+		si := dlg.Data.(int)
+		if si >= 0 {
+			ic := icons.AllIcons[si]
+			vv.SetValue(ic)
+			vv.UpdateWidget()
 		}
 		if fun != nil {
 			fun(dlg)
@@ -1490,14 +1483,13 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
-	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: vv.Doc()}, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			si := dlg.Data.(int)
-			if si >= 0 {
-				fi := paint.FontLibrary.FontInfo[si]
-				vv.SetValue(fi.Name)
-				vv.UpdateWidget()
-			}
+	dlg := FontChooserDialog(gi.NewDialog(ctx).Title("Select a Font").Prompt(vv.Doc()))
+	dlg.OnAccept(func(e events.Event) {
+		si := dlg.Data.(int)
+		if si >= 0 {
+			fi := paint.FontLibrary.FontInfo[si]
+			vv.SetValue(fi.Name)
+			vv.UpdateWidget()
 		}
 		if fun != nil {
 			fun(dlg)
@@ -1555,12 +1547,11 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	FileViewDialog(ctx, DlgOpts{Title: vv.Name(), Prompt: vv.Doc()}, cur, ext, nil, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			fn := dlg.Data.(string)
-			vv.SetValue(fn)
-			vv.UpdateWidget()
-		}
+	dlg := FileViewDialog(gi.NewDialog(ctx).Title(vv.Name()).Prompt(vv.Doc()), cur, ext)
+	dlg.OnAccept(func(e events.Event) {
+		fn := dlg.Data.(string)
+		vv.SetValue(fn)
+		vv.UpdateWidget()
 		if fun != nil {
 			fun(dlg)
 		}

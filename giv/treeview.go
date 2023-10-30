@@ -1146,7 +1146,8 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 func (tv *TreeView) IsRoot(op string) bool {
 	if tv.This() == tv.RootView.This() {
 		if op != "" {
-			gi.PromptDialog(tv, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op), Ok: true, Cancel: false}, nil)
+			// TODO(kai/snack)
+			// gi.PromptDialog(tv, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op), Ok: true, Cancel: false}, nil)
 		}
 		return true
 	}
@@ -1324,7 +1325,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	par := AsTreeView(tv.Par)
 	if par == nil {
-		gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
 		return
 	}
 	if tv.SyncNode != nil {
