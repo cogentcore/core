@@ -125,21 +125,21 @@ type NodeBase struct {
 	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"  set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
-	MeshBBox BBox `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	MeshBBox BBox `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// world coordinates bounding box
-	WorldBBox BBox `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	WorldBBox BBox `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// normalized display coordinates bounding box, used for frustrum clipping
-	NDCBBox mat32.Box3 `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	NDCBBox mat32.Box3 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// raw original bounding box for the widget within its parent Scene.
 	// This is prior to intersecting with Frame bounds.
-	BBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	BBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for region occupied within Scene Frame that we render onto.
 	// This is BBox intersected with Frame bounds.
-	ScBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	ScBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 // NodeFlags extend ki.Flags to hold 3D node state
