@@ -380,22 +380,6 @@ func (fb *FileBrowse) ConfigSplits() {
 				}
 			}
 		})
-		// ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	if data == nil {
-		// 		return
-		// 	}
-		// 	tvn, _ := data.(ki.Ki).Embed(giv.TypeFileTreeView).(*giv.FileTreeView)
-		// 	fbb, _ := recv.Embed(TypeFileBrowse).(*FileBrowse)
-		// 	fn := tvn.SrcNode.Embed(filetree.NodeType).(*filetree.Node)
-		// 	switch sig {
-		// 	case int64(giv.TreeViewSelected):
-		// 		fbb.FileNodeSelected(fn, tvn)
-		// 	case int64(giv.TreeViewOpened):
-		// 		fbb.FileNodeOpened(fn, tvn)
-		// 	case int64(giv.TreeViewClosed):
-		// 		fbb.FileNodeClosed(fn, tvn)
-		// 	}
-		// })
 		split.SetSplits(.2, .4, .4)
 		split.UpdateEnd(updt)
 	}

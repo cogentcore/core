@@ -61,8 +61,14 @@ func (fn *Node) FileNodeStyles() {
 	fn.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(fn) {
 		case "parts":
+			parts := w.(*gi.Layout)
 			w.OnClick(func(e events.Event) {
 				fn.OpenEmptyDir()
+			})
+			parts.OnDoubleClick(func(e events.Event) {
+				if fn.OpenEmptyDir() {
+					e.SetHandled()
+				}
 			})
 		case "parts/branch":
 			sw := w.(*gi.Switch)
