@@ -195,6 +195,7 @@ func (dlg *Dialog) FullWindow(fullWindow bool) *Dialog {
 
 // Run runs (shows) the dialog.
 func (dlg *Dialog) Run() {
+	dlg.DialogStyles()
 	dlg.Stage.Run()
 }
 
