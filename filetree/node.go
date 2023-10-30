@@ -22,6 +22,7 @@ import (
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
@@ -73,15 +74,23 @@ func (fn *Node) FlagType() enums.BitFlag {
 type NodeFlags giv.TreeViewFlags //enums:bitflag -trim-prefix Node
 
 const (
-	// NodeOpen means file is open -- for directories, this means that
-	// sub-files should be / have been loaded -- for files, means that they
-	// have been opened e.g., for editing
+	// NodeOpen means file is open. For directories, this means that
+	// sub-files should be / have been loaded. For files, means that they
+	// have been opened e.g., for editing.
 	NodeOpen NodeFlags = NodeFlags(giv.TreeViewFlagsN) + iota
 
-	// NodeSymLink indicates that file is a symbolic link -- file info is
-	// all for the target of the symlink
+	// NodeSymLink indicates that file is a symbolic link.
+	// File info is all for the target of the symlink.
 	NodeSymLink
+
+	// TreeIsUpdated indicates that the tree has done an update
+	// pass during rendering.
+	TreeIsUpdated
 )
+
+func (fn *Node) BaseType() *gti.Type {
+	return fn.KiType()
+}
 
 // IsDir returns true if file is a directory (folder)
 func (fn *Node) IsDir() bool {
@@ -372,6 +381,10 @@ func (fn *Node) UpdateNode() error {
 		fn.SetNeedsRender()
 	}
 	return nil
+}
+
+func (fn *Node) UpdateBranchIcons() {
+	fn.SetFileIcon()
 }
 
 // OpenDirs opens directories for selected views
