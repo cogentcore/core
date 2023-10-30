@@ -4,9 +4,6 @@
 
 package main
 
-// TODO: fix
-/*
-
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
@@ -23,10 +20,7 @@ type FileBrowse struct {
 	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
 
 	// all the files in the project directory and subdirectories
-	Files giv.FileTree `desc:"all the files in the project directory and subdirectories"`
-
-	// treeview of all the files in the project directory and subdirectories
-	FilesView *giv.FileTreeView `desc:"treeview of all the files in the project directory and subdirectories"`
+	Files *filegree.Tree `desc:"all the files in the project directory and subdirectories"`
 
 	// number of textviews available for editing files (default 2) -- configurable with n-text-views property
 	NTextViews int `xml:"n-text-views" desc:"number of textviews available for editing files (default 2) -- configurable with n-text-views property"`
@@ -70,14 +64,12 @@ func (fb *FileBrowse) OnInit() {
 
 // UpdateFiles updates the list of files saved in project
 func (fb *FileBrowse) UpdateFiles() {
-	if fb.FilesView == nil {
-		fb.Files.OpenPath(string(fb.ProjRoot))
-	} else {
-		updt := fb.FilesView.UpdateStart()
-		fb.FilesView.SetFullReRender()
-		fb.Files.OpenPath(string(fb.ProjRoot))
-		fb.FilesView.UpdateEnd(updt)
+	if fb.Files == nil {
+		return
 	}
+		updt := fb.Files.UpdateStart()
+		fb.Files.OpenPath(string(fb.ProjRoot))
+		fb.Files.UpdateEndLayout(updt)
 }
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
@@ -96,21 +88,22 @@ func (fb *FileBrowse) OpenPath(path gi.FileName) {
 	}
 	fb.Defaults()
 	root, pnm, fnm, ok := ProjPathParse(string(path))
-	if ok {
+	if !ok {
+		return
+	}
 		fb.ProjRoot = gi.FileName(root)
 		fb.SetName(pnm)
 		fb.UpdateProj()
-		win := fb.ParentRenderWin()
-		if win != nil {
-			winm := "browser-" + pnm
-			win.SetName(winm)
-			win.SetTitle(winm)
-		}
+		// win := fb.ParentRenderWin()
+		// if win != nil {
+		// 	winm := "browser-" + pnm
+		// 	win.SetName(winm)
+		// 	win.SetTitle(winm)
+		// }
 		if fnm != "" {
 			fb.ViewFile(fnm)
 		}
 		fb.UpdateFiles()
-	}
 }
 
 // UpdateProj does full update to current proj
@@ -250,7 +243,7 @@ func (fb *FileBrowse) StdFrameConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.ToolbarType, "toolbar")
-	config.Add(gi.TypeSplits, "splits")
+	config.Add(gi.SplitsType, "splits")
 	return config
 }
 
@@ -300,7 +293,7 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *textview.View {
 	split, _ := fb.Splits()
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
-		svk := split.Child(stidx + idx).Child(0)
+		svk := split.Child(stidx + idx)
 		if !ki.TypeEmbeds(svk, giv.TypeTextView) {
 			log.Printf("FileBrowse: text view not at index: %v\n", idx)
 			return nil
@@ -334,7 +327,7 @@ func (fb *FileBrowse) SplitsConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
-		config.Add(gi.LayoutType, fmt.Sprintf("textview-lay-%v", i))
+		config.Add(texteditor.EditorType, fmt.Sprintf("textview-lay-%v", i))
 	}
 	// todo: tab view
 	return config
@@ -352,15 +345,13 @@ func (fb *FileBrowse) ConfigSplits() {
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
 		ft := giv.NewFileTreeView(ftfr, "filetree")
-		fb.FilesView = ft
+		fb.Files = ft
 		ft.SetRootNode(&fb.Files)
-
-		for i := 0; i < fb.NTextViews; i++ {
-			txly := split.Child(1 + i).(*gi.Layout)
-
-			txed := giv.NewTextView(txly, "textview-"+strconv.Itoa(i))
-			txed.Scene = fb.Scene
-		}
+// 
+// 		for i := 0; i < fb.NTextViews; i++ {
+// 			txed := split.Child(1 + i).(*texteditor.Edit)
+// 			txed.Scene = fb.Scene
+// 		}
 
 		ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if data == nil {
