@@ -264,21 +264,6 @@ func (dlg *Dialog) Prompt(prompt string) *Dialog {
 	return dlg
 }
 */
-// PromptWidgetIdx returns the prompt label widget index,
-// for adding additional elements below the prompt. If it
-// is not found, it returns the title label widget index.
-// If neither are found, it returns -1.
-func (dlg *Dialog) PromptWidgetIdx() int {
-	idx, ok := dlg.Scene.Children().IndexByName("prompt", 1)
-	if !ok {
-		idx, ok := dlg.Scene.Children().IndexByName("title", 0)
-		if !ok {
-			return -1
-		}
-		return idx
-	}
-	return idx
-}
 
 // // Modal sets the modal behavior of the dialog:
 // // true = blocks all other input, false = allows other input
@@ -561,10 +546,8 @@ func (dlg *Dialog) Choice(choices ...string) *Dialog {
 // NewItems adds to the dialog a prompt for creating new item(s) of the given type,
 // showing registered gti types that embed given type.
 func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
-	prIdx := dlg.PromptWidgetIdx()
-
 	sc := dlg.Stage.Scene
-	nrow := sc.InsertNewChild(LayoutType, prIdx+1, "n-row").(*Layout)
+	nrow := NewLayout(sc, "n-row")
 	nrow.Lay = LayoutHoriz
 
 	NewLabel(nrow, "n-label").SetText("Number:  ")
@@ -574,10 +557,10 @@ func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := sc.InsertNewChild(SpaceType, prIdx+2, "type-space").(*Space)
+	tspc := NewSpace(sc, "type-space")
 	tspc.SetFixedHeight(units.Em(0.5))
 
-	trow := sc.InsertNewChild(LayoutType, prIdx+3, "t-row").(*Layout)
+	trow := NewLayout(sc, "t-row")
 	trow.Lay = LayoutHoriz
 
 	NewLabel(trow, "t-label").SetText("Type:    ")
