@@ -70,15 +70,12 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // TextEditorDialog adds to the given dialog a display of multi-line text in a TextView,
 // in which the user can copy contents to clipboard etc.
 func TextEditorDialog(dlg *gi.Dialog, text []byte, filename gi.FileName, lineNumbers bool) *gi.Dialog {
-	frame := dlg.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
 	tb := texteditor.NewBuf()
 	tb.Filename = filename
 	tb.Opts.LineNos = lineNumbers
 	tb.Stat() // update markup
 
-	tlv := frame.InsertNewChild(gi.LayoutType, prIdx+1, "text-lay").(*gi.Layout)
+	tlv := gi.NewLayout(dlg.Scene, "text-lay")
 	tlv.Style(func(s *styles.Style) {
 		s.Width.Ch(80)
 		s.Height.Em(40)
@@ -97,15 +94,14 @@ func TextEditorDialog(dlg *gi.Dialog, text []byte, filename gi.FileName, lineNum
 	bbox := dlg.ConfigButtonBox()
 	gi.NewButton(bbox, "copy-to-clip").SetText("Copy To Clipboard").SetIcon(icons.ContentCopy).
 		OnClick(func(e events.Event) {
-			dlg.Stage.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
+			dlg.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
 		})
 	return dlg
 }
 
 // TextEditorDialogTextEditor returns the text view from a TextViewDialog
 func TextEditorDialogTextEditor(dlg *gi.Dialog) *texteditor.Editor {
-	frame := dlg.Stage.Scene
-	tlv := frame.ChildByName("text-lay", 2)
+	tlv := dlg.Scene.ChildByName("text-lay", 2)
 	tv := tlv.ChildByName("text-editor", 0)
 	return tv.(*texteditor.Editor)
 }
@@ -115,10 +111,7 @@ func TextEditorDialogTextEditor(dlg *gi.Dialog) *texteditor.Editor {
 //
 //gopy:interface=handle
 func StructViewDialog(dlg *gi.Dialog, stru any, tmpSave Value) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
+	sv := NewStructView(dlg.Scene, "struct-view")
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
@@ -131,9 +124,7 @@ func StructViewDialog(dlg *gi.Dialog, stru any, tmpSave Value) *gi.Dialog {
 //
 //gopy:interface=handle
 func MapViewDialog(dlg *gi.Dialog, mp any, tmpSave Value) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-	sv := frame.InsertNewChild(MapViewType, prIdx+1, "map-view").(*MapView)
+	sv := NewMapView(dlg.Scene, "map-view")
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
@@ -146,10 +137,7 @@ func MapViewDialog(dlg *gi.Dialog, mp any, tmpSave Value) *gi.Dialog {
 //
 //gopy:interface=handle
 func SliceViewDialog(dlg *gi.Dialog, slice any, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
+	sv := NewSliceView(dlg.Scene, "slice-view")
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	if len(styleFunc) > 0 {
 		sv.StyleFunc = styleFunc[0]
@@ -167,10 +155,7 @@ func SliceViewDialog(dlg *gi.Dialog, slice any, tmpSave Value, noAdd bool, noDel
 //
 //gopy:interface=handle
 func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, styleFunc ...SliceViewStyleFunc) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
+	sv := NewSliceView(dlg.Scene, "slice-view")
 	sv.SetState(true, states.ReadOnly)
 	if len(styleFunc) > 0 {
 		sv.StyleFunc = styleFunc[0]
@@ -193,10 +178,7 @@ func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, styleFunc ...Slice
 //
 //gopy:interface=handle
 func TableViewDialog(dlg *gi.Dialog, slcOfStru any, tmpSave Value, noAdd bool, noDelete bool, styleFunc ...TableViewStyleFunc) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
+	sv := NewTableView(dlg.Scene, "tableview")
 	if len(styleFunc) > 0 {
 		sv.StyleFunc = styleFunc[0]
 	}
@@ -214,10 +196,7 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, tmpSave Value, noAdd bool, n
 //
 //gopy:interface=handle
 func TableViewSelectDialog(dlg *gi.Dialog, slcOfStru any, initRow int, styleFunc ...TableViewStyleFunc) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
+	sv := NewTableView(dlg.Scene, "tableview")
 	sv.SetState(true, states.ReadOnly)
 	if len(styleFunc) > 0 {
 		sv.StyleFunc = styleFunc[0]
@@ -270,11 +249,9 @@ func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon) *gi.Dialog {
 
 // ColorViewDialog adds to the given dialog a display for editing a color using a ColorView.
 func ColorViewDialog(dlg *gi.Dialog, clr color.RGBA, tmpSave Value) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
 	dlg.Stage.ClickOff = true
 
-	sv := frame.InsertNewChild(ColorViewType, prIdx+1, "color-view").(*ColorView)
+	sv := NewColorView(dlg.Scene, "color-view")
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
@@ -295,10 +272,7 @@ func FileViewDialog(dlg *gi.Dialog, filename, ext string, filterFunc ...FileView
 	dlg.Scene.SetName("file-view") // use a consistent name for consistent sizing / placement
 	dlg.NewWindow(true)
 
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	fv := frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
+	fv := NewFileView(dlg.Scene, "file-view")
 	if len(filterFunc) > 0 {
 		fv.FilterFunc = filterFunc[0]
 	}
@@ -318,10 +292,7 @@ func FileViewDialog(dlg *gi.Dialog, filename, ext string, filterFunc ...FileView
 // ArgViewDialog adds to the given dialog a display for editing args for a method call
 // in the FuncButton system.
 func ArgViewDialog(dlg *gi.Dialog, args []Value) *gi.Dialog {
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	sv := frame.InsertNewChild(ArgViewType, prIdx+1, "arg-view").(*ArgView)
+	sv := NewArgView(dlg.Scene, "arg-view")
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.SetArgs(args)
 
