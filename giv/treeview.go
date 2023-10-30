@@ -326,6 +326,9 @@ func (tv *TreeView) RootIsReadOnly() bool {
 
 // BranchPart returns the branch in parts, if it exists
 func (tv *TreeView) BranchPart() (*gi.Switch, bool) {
+	if tv.Parts == nil {
+		return nil, false
+	}
 	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
 		return icc.(*gi.Switch), true
 	}
@@ -334,6 +337,9 @@ func (tv *TreeView) BranchPart() (*gi.Switch, bool) {
 
 // IconPart returns the icon in parts, if it exists
 func (tv *TreeView) IconPart() (*gi.Icon, bool) {
+	if tv.Parts == nil {
+		return nil, false
+	}
 	if icc := tv.Parts.ChildByName("icon", 1); icc != nil {
 		return icc.(*gi.Icon), true
 	}
@@ -342,6 +348,9 @@ func (tv *TreeView) IconPart() (*gi.Icon, bool) {
 
 // LabelPart returns the label in parts, if it exists
 func (tv *TreeView) LabelPart() (*gi.Label, bool) {
+	if tv.Parts == nil {
+		return nil, false
+	}
 	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
 		return lbl.(*gi.Label), true
 	}
@@ -459,7 +468,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 	rn := tv.RootView
 	if rn == nil {
-		slog.Error("giv.TreeView: RootView is ni", "in node:", tv)
+		slog.Error("giv.TreeView: RootView is nil", "in node:", tv)
 		return false
 	}
 	tv.SetBranchState()
@@ -1671,8 +1680,9 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 
 func (tv *TreeView) HandleTreeViewMouse() {
 	tv.OnDoubleClick(func(e events.Event) {
-		e.SetHandled()
-		tv.ToggleClose()
+		if tv.HasChildren() {
+			tv.ToggleClose()
+		}
 	})
 
 	// we let the parts handle our state

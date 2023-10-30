@@ -22,6 +22,7 @@ import (
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
@@ -210,6 +211,7 @@ func (fn *Node) UpdateDir() {
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
+		sf.RootView = fn.FRoot.AsTreeView()
 		if hasExtFiles && sf.Nm == ExternalFilesName {
 			fn.FRoot.UpdateExtFiles(sf)
 			continue
@@ -286,6 +288,20 @@ func (fn *Node) SortConfigByModTime(confg ki.Config) {
 	})
 }
 
+func (fn *Node) SetFileIcon() {
+	ic, hasic := fn.Info.FindIcon()
+	if !hasic {
+		ic = icons.Blank
+	}
+	if bp, ok := fn.BranchPart(); ok {
+		if bp.IconDisab != ic {
+			bp.IconDisab = ic
+			bp.Update()
+			fn.SetNeedsRender()
+		}
+	}
+}
+
 // SetNodePath sets the path for given node and updates it based on associated file
 func (fn *Node) SetNodePath(path string) error {
 	pth, err := filepath.Abs(path)
@@ -303,6 +319,7 @@ func (fn *Node) SetNodePath(path string) error {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
 	}
+	fn.SetFileIcon()
 	return nil
 }
 
@@ -351,6 +368,7 @@ func (fn *Node) UpdateNode() error {
 		if repo != nil {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
+		fn.SetFileIcon()
 		fn.SetNeedsRender()
 	}
 	return nil
@@ -385,6 +403,21 @@ func (fn *Node) CloseDir() {
 	// fmt.Printf("fn: %s closed\n", fn.FPath)
 	fn.FRoot.SetDirClosed(fn.FPath)
 	// note: not doing anything with open files within directory..
+}
+
+// OpenEmptyDir will attempt to open a directory that has no children
+// which presumably was not processed originally
+func (fn *Node) OpenEmptyDir() bool {
+	if fn.IsDir() && !fn.HasChildren() {
+		updt := fn.UpdateStart()
+		fn.OpenDir()
+		fn.Open()
+		fn.Update()
+		fn.UpdateNode() // needs a second pass
+		fn.UpdateEndLayout(updt)
+		return true
+	}
+	return false
 }
 
 // SortBys determines how to sort the selected files in the directory.

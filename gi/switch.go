@@ -164,7 +164,22 @@ func (sw *Switch) SwitchStyles() {
 					s.Height.Em(1.5)
 				}
 			})
-		// todo: disabled?
+		case "parts/stack/icon2": // disab
+			w.Style(func(s *styles.Style) {
+				switch sw.Type {
+				case SwitchSwitch:
+					// switches need to be bigger
+					s.Width.Em(3)
+					s.Height.Em(3)
+				case SwitchChip:
+					// chips render no icon when off
+					s.Width.Dp(0)
+					s.Height.Dp(0)
+				default:
+					s.Width.Em(1.5)
+					s.Height.Em(1.5)
+				}
+			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
 				s.Width.Ch(0.1)
