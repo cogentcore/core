@@ -4,9 +4,15 @@
 
 package events
 
+import "slices"
+
 // Listeners registers lists of event listener functions
 // to receive different event types.
 // Listeners are closure methods with all context captured.
+// Functions are called in *reverse* order of when they are added:
+// First In, Last Called, so that "base" functions are typically
+// added first, and then can be overridden by later-added ones.
+// Call SetHandled() on the event to stop further propagation.
 type Listeners map[Types][]func(ev Event)
 
 // Init ensures that map is constructed
@@ -17,11 +23,21 @@ func (ls *Listeners) Init() {
 	*ls = make(map[Types][]func(Event))
 }
 
-// Add adds a function for given type
+// Add adds a function for given type, to the end of the current stack,
+// so that it will be called before everything else already on the stack.
 func (ls *Listeners) Add(typ Types, fun func(Event)) {
 	ls.Init()
 	ets := (*ls)[typ]
 	ets = append(ets, fun)
+	(*ls)[typ] = ets
+}
+
+// AddLastCall adds a function for given type, to the start of the current
+// stack, so that it will be called *after* everything else on the stack.
+func (ls *Listeners) AddLastCall(typ Types, fun func(Event)) {
+	ls.Init()
+	ets := (*ls)[typ]
+	ets = slices.Insert(ets, 0, fun)
 	(*ls)[typ] = ets
 }
 
@@ -37,9 +53,6 @@ func (ls *Listeners) Call(ev Event) {
 	typ := ev.Type()
 	ets := (*ls)[typ]
 	n := len(ets)
-	if n == 0 {
-		return
-	}
 	for i := n - 1; i >= 0; i-- {
 		fun := ets[i]
 		fun(ev)
