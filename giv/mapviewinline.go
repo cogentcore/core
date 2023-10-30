@@ -36,11 +36,6 @@ type MapViewInline struct {
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-"`
 
-	// WidgetConfiged tracks if the given Widget has been configured.
-	// Widgets can only be configured once -- otherwise duplicate event
-	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
-
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `view:"-" json:"-" xml:"-"`
 
@@ -53,7 +48,6 @@ func (mv *MapViewInline) OnInit() {
 }
 
 func (mv *MapViewInline) MapViewInlineStyles() {
-	mv.WidgetConfiged = make(map[gi.Widget]bool)
 	mv.Lay = gi.LayoutHoriz
 	mv.Style(func(s *styles.Style) {
 		s.MinWidth.Ex(60)
@@ -105,9 +99,6 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	// very critical to clear so that we re-config
-	// all of the widgets; otherwise some pointers persist
-	clear(mv.WidgetConfiged)
 	mv.Update()
 	return mv
 }
@@ -174,14 +165,6 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		})
 		keyw := mv.Child(i * 2).(gi.Widget)
 		widg := mv.Child((i * 2) + 1).(gi.Widget)
-		if _, cfg := mv.WidgetConfiged[widg]; cfg { // already configured
-			vvb.Widget = widg
-			vv.UpdateWidget()
-			kvb.Widget = keyw
-			kv.UpdateWidget()
-			continue
-		}
-		mv.WidgetConfiged[widg] = true
 		kv.ConfigWidget(keyw, sc)
 		vv.ConfigWidget(widg, sc)
 		if mv.IsReadOnly() {

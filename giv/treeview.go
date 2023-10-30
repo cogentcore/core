@@ -775,6 +775,15 @@ func (tv *TreeView) SendChangeEvent(ctx events.Event) {
 	tv.RootView.Send(events.Change, nil)
 }
 
+// TreeViewChanged must be called after any structural
+// change to the TreeView (adding or deleting nodes).
+// It calls: RootSetViewIdx() to update indexes and
+// SendChangeEvent to notify of changes.
+func (tv *TreeView) TreeViewChanged(ctx events.Event) {
+	tv.RootView.RootSetViewIdx()
+	tv.SendChangeEvent(ctx)
+}
+
 // SendChangeEventReSync sends the events.Change event on the
 // RootView node, using context event if avail (else nil).
 // If SyncNode != nil, also does a re-sync from root.
@@ -1105,7 +1114,6 @@ func (tv *TreeView) OpenAll() {
 		}
 		return ki.Break
 	})
-	tv.SendChangeEvent(nil)
 	tv.UpdateEndLayout(updt)
 }
 
@@ -1120,7 +1128,6 @@ func (tv *TreeView) CloseAll() {
 		}
 		return ki.Break
 	})
-	tv.SendChangeEvent(nil)
 	tv.UpdateEndLayout(updt)
 }
 
@@ -1136,7 +1143,6 @@ func (tv *TreeView) OpenParents() {
 		}
 		return ki.Break
 	})
-	tv.SendChangeEvent(nil)
 	tv.UpdateEndLayout(updt)
 }
 
@@ -1341,9 +1347,8 @@ func (tv *TreeView) Cut() {
 		sn.Delete(true)
 	}
 	root.Update()
-	root.RootSetViewIdx()
+	root.TreeViewChanged(nil)
 	root.UpdateEndLayout(updt)
-	tv.SendChangeEvent(nil)
 }
 
 // Paste pastes clipboard at given node.
@@ -1402,8 +1407,10 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	}
 	updt := tv.UpdateStart()
 	tv.This().CopyFrom(sl[0]) // nodes with data copy here
+	tv.Update()               // could have children
+	tv.Open()
+	tv.TreeViewChanged(nil)
 	tv.UpdateEndLayout(updt)
-	tv.SendChangeEvent(nil)
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
@@ -1476,9 +1483,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 			selTv = ntv
 		}
 	}
-	tv.RootView.RootSetViewIdx()
+	tv.TreeViewChanged(nil)
 	par.UpdateEndLayout(updt)
-	tv.SendChangeEvent(nil)
 	if selTv != nil {
 		selTv.SelectAction(events.SelectOne)
 	}
@@ -1498,8 +1504,10 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	for _, ns := range sl {
 		tv.AddChild(ns)
 	}
+	tv.Update()
+	tv.Open()
+	tv.TreeViewChanged(nil)
 	tv.UpdateEndLayout(updt)
-	tv.SendChangeEvent(nil)
 }
 
 //////////////////////////////////////////////////////////////////////////////

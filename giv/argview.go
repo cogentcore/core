@@ -24,17 +24,11 @@ type ArgView struct {
 	// the args that we are a view onto
 	Args []Value
 
-	// WidgetConfiged tracks whether the given Widget has been configured yet
-	// Widgets can only be configured once -- otherwise duplicate event
-	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 }
 
 func (av *ArgView) OnInit() {
-	av.WidgetConfiged = make(map[gi.Widget]bool)
 	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
@@ -142,14 +136,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		if _, cfg := av.WidgetConfiged[widg]; cfg { // already configured
-			vvb := arg.AsValueBase()
-			vvb.Widget = widg
-			// fmt.Println("skip and update:", vv)
-			arg.UpdateWidget()
-			continue
-		}
-		av.WidgetConfiged[widg] = true
 		arg.ConfigWidget(widg, av.Sc)
 	}
 	sg.UpdateEnd(updt)

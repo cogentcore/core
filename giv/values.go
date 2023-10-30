@@ -383,6 +383,10 @@ func (vv *StructValue) UpdateWidget() {
 }
 
 func (vv *StructValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
@@ -446,6 +450,10 @@ func (vv *StructInlineValue) UpdateWidget() {
 }
 
 func (vv *StructInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
@@ -513,6 +521,10 @@ func (vv *SliceValue) GetTypeInfo() {
 }
 
 func (vv *SliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.GetTypeInfo()
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
@@ -598,6 +610,10 @@ func (vv *SliceInlineValue) UpdateWidget() {
 }
 
 func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*SliceViewInline)
@@ -645,6 +661,10 @@ func (vv *MapValue) UpdateWidget() {
 }
 
 func (vv *MapValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -707,6 +727,10 @@ func (vv *MapInlineValue) UpdateWidget() {
 }
 
 func (vv *MapInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*MapViewInline)
@@ -768,6 +792,10 @@ func (vv *KiPtrValue) UpdateWidget() {
 }
 
 func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -842,6 +870,10 @@ func (vv *BoolValue) UpdateWidget() {
 }
 
 func (vv *BoolValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
@@ -881,6 +913,10 @@ func (vv *IntValue) UpdateWidget() {
 }
 
 func (vv *IntValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
@@ -957,6 +993,10 @@ func (vv *FloatValue) UpdateWidget() {
 }
 
 func (vv *FloatValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
@@ -1044,6 +1084,10 @@ func (vv *EnumValue) UpdateWidget() {
 }
 
 func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
@@ -1105,6 +1149,10 @@ func (vv *BitFlagValue) UpdateWidget() {
 }
 
 func (vv *BitFlagValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	sw := vv.Widget.(*gi.Switches)
 	sw.SetType(gi.SwitchChip)
@@ -1152,6 +1200,10 @@ func (vv *TypeValue) UpdateWidget() {
 }
 
 func (vv *TypeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
@@ -1210,6 +1262,10 @@ func (vv *ByteSliceValue) UpdateWidget() {
 }
 
 func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -1254,6 +1310,10 @@ func (vv *RuneSliceValue) UpdateWidget() {
 }
 
 func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -1299,6 +1359,10 @@ func (vv *NilValue) UpdateWidget() {
 }
 
 func (vv *NilValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Label)
@@ -1345,6 +1409,10 @@ func (vv *TimeValue) UpdateWidget() {
 }
 
 func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -1405,6 +1473,10 @@ func (vv *IconValue) UpdateWidget() {
 }
 
 func (vv *IconValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -1465,6 +1537,10 @@ func (vv *FontValue) UpdateWidget() {
 }
 
 func (vv *FontValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -1527,6 +1603,10 @@ func (vv *FileValue) UpdateWidget() {
 }
 
 func (vv *FileValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -1625,6 +1705,10 @@ func (vv *VersCtrlValue) UpdateWidget() {
 }
 
 func (vv *VersCtrlValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
@@ -1671,6 +1755,10 @@ func (vv *TextEditorValue) UpdateWidget() {
 }
 
 func (vv *TextEditorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 
@@ -1703,6 +1791,10 @@ func (vv *FuncValue) UpdateWidget() {
 }
 
 func (vv *FuncValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 

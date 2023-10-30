@@ -204,8 +204,8 @@ var _NodeFlagsNameToValueMap = map[string]NodeFlags{
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
-	11: `NodeOpen means file is open -- for directories, this means that sub-files should be / have been loaded -- for files, means that they have been opened e.g., for editing`,
-	12: `NodeSymLink indicates that file is a symbolic link -- file info is all for the target of the symlink`,
+	11: `NodeOpen means file is open. For directories, this means that sub-files should be / have been loaded. For files, means that they have been opened e.g., for editing.`,
+	12: `NodeSymLink indicates that file is a symbolic link. File info is all for the target of the symlink.`,
 }
 
 var _NodeFlagsMap = map[NodeFlags]string{

@@ -206,14 +206,13 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 			stv = ntv
 		}
 	}
-	tv.RootView.RootSetViewIdx()
 	tv.Update()
 	tv.Open()
+	tv.TreeViewChanged(nil)
 	tv.UpdateEndLayout(updt)
 	if stv != nil {
 		stv.SelectAction(events.SelectOne)
 	}
-	tv.SendChangeEvent(nil)
 }
 
 func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
@@ -310,9 +309,8 @@ func (tv *TreeView) DeleteNode() {
 		updt := par.UpdateStart()
 		tv.Delete(true)
 		par.Update()
-		par.RootView.RootSetViewIdx()
+		par.TreeViewChanged(nil)
 		par.UpdateEndLayout(updt)
-		tv.SendChangeEvent(nil)
 	}
 }
 
@@ -345,12 +343,11 @@ func (tv *TreeView) Duplicate() {
 	par.InsertChild(nwkid, myidx+1)
 	ntv := AsTreeView(nwkid)
 	ntv.RootView = par.RootView
-	par.RootView.RootSetViewIdx()
 	ntv.Update()
 	par.Update()
+	par.TreeViewChanged(nil)
 	par.UpdateEndLayout(updt)
 	ntv.SelectAction(events.SelectOne)
-	tv.SendChangeEvent(nil)
 }
 
 func (tv *TreeView) DuplicateSync() {

@@ -82,10 +82,6 @@ const (
 	// NodeSymLink indicates that file is a symbolic link.
 	// File info is all for the target of the symlink.
 	NodeSymLink
-
-	// TreeIsUpdated indicates that the tree has done an update
-	// pass during rendering.
-	TreeIsUpdated
 )
 
 func (fn *Node) BaseType() *gti.Type {

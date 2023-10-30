@@ -41,11 +41,6 @@ type SliceViewInline struct {
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-"`
 
-	// WidgetConfiged tracks if the given Widget has been configured.
-	// Widgets can only be configured once -- otherwise duplicate event
-	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
-
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `view:"-" json:"-" xml:"-"`
 
@@ -58,7 +53,6 @@ func (sv *SliceViewInline) OnInit() {
 }
 
 func (sv *SliceViewInline) SliceViewInlineStyles() {
-	sv.WidgetConfiged = make(map[gi.Widget]bool)
 	sv.Lay = gi.LayoutHoriz
 	sv.Style(func(s *styles.Style) {
 		s.MinWidth.Ch(20)
@@ -166,12 +160,6 @@ func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		widg := sv.Child(i).(gi.Widget)
-		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
-			vv.AsValueBase().Widget = widg
-			vv.UpdateWidget()
-			continue
-		}
-		sv.WidgetConfiged[widg] = true
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}

@@ -51,11 +51,6 @@ type MapView struct {
 	// the number of columns in the map; do not set externally; generally only access internally
 	NCols int
 
-	// WidgetConfiged tracks if the given Widget has been configured.
-	// Widgets can only be configured once -- otherwise duplicate event
-	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
-
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
 
@@ -71,7 +66,6 @@ func (mv *MapView) OnInit() {
 }
 
 func (mv *MapView) MapViewStyles() {
-	mv.WidgetConfiged = make(map[gi.Widget]bool)
 	mv.ShowToolbar = true
 	mv.Lay = gi.LayoutVert
 	mv.Style(func(s *styles.Style) {
@@ -114,9 +108,6 @@ func (mv *MapView) SetMap(mp any) *MapView {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	// very critical to clear so that we re-config
-	// all of the widgets; otherwise some pointers persist
-	clear(mv.WidgetConfiged)
 	mv.Update()
 	return mv
 }
@@ -259,14 +250,6 @@ func (mv *MapView) ConfigMapGrid() {
 		})
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		widg := sg.Child(i*ncol + 1).(gi.Widget)
-		if _, cfg := mv.WidgetConfiged[widg]; cfg { // already configured
-			vvb.Widget = widg
-			vv.UpdateWidget()
-			kvb.Widget = keyw
-			kv.UpdateWidget()
-			continue
-		}
-		mv.WidgetConfiged[widg] = true
 		kv.ConfigWidget(keyw, sc)
 		vv.ConfigWidget(widg, sc)
 		if ifaceType {

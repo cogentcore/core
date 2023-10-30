@@ -42,6 +42,10 @@ func (vv *KeyChordValue) UpdateWidget() {
 }
 
 func (vv *KeyChordValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	kc := vv.Widget.(*KeyChordEdit)

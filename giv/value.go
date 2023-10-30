@@ -742,6 +742,10 @@ func (vv *ValueBase) UpdateWidget() {
 }
 
 func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	if vv.Widget == widg {
+		vv.UpdateWidget()
+		return
+	}
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf, ok := vv.Widget.(*gi.TextField)
