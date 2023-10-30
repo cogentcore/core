@@ -92,6 +92,7 @@ func (ed *Editor) LayoutAllLines() {
 	}
 	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
 		ed.NLines = 0
+		return
 	}
 	ed.lastFilename = ed.Buf.Filename
 

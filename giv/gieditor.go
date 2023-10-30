@@ -198,7 +198,6 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.SplitsType, "splits")
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
@@ -232,11 +231,6 @@ func (ge *GiEditor) TreeView() *TreeView {
 // StructView returns the main StructView
 func (ge *GiEditor) StructView() *StructView {
 	return ge.Splits().Child(1).(*StructView)
-}
-
-// ToolbarWidget returns the toolbar widget
-func (ge *GiEditor) ToolbarWidget() *gi.Toolbar {
-	return ge.ChildByName("toolbar", 1).(*gi.Toolbar)
 }
 
 // ConfigSplits configures the Splits.
@@ -336,9 +330,6 @@ func GoGiEditorDialog(obj ki.Ki) {
 
 	// mmen := win.MainMenu
 	// MainMenuView(ge, win, mmen)
-
-	tb := ge.ToolbarWidget()
-	tb.UpdateButtons()
 
 	// ge.SelectionLoop()
 

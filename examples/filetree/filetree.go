@@ -4,6 +4,29 @@
 
 package main
 
+//go:generate goki generate
+
+import (
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
+	"goki.dev/gi/v2/filetree"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/keyfun"
+	"goki.dev/gi/v2/texteditor"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
+	"goki.dev/icons"
+	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
+)
+
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
@@ -13,23 +36,28 @@ type FileBrowse struct {
 	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
 	ProjRoot gi.FileName `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
 
-	// filename of the currently-active textview
-	ActiveFilename gi.FileName `desc:"filename of the currently-active textview"`
+	// filename of the currently-active texteditor
+	ActiveFilename gi.FileName `desc:"filename of the currently-active texteditor"`
 
 	// has the root changed?  we receive update signals from root for changes
 	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
 
 	// all the files in the project directory and subdirectories
-	Files *filegree.Tree `desc:"all the files in the project directory and subdirectories"`
+	Files *filetree.Tree `desc:"all the files in the project directory and subdirectories"`
 
-	// number of textviews available for editing files (default 2) -- configurable with n-text-views property
-	NTextViews int `xml:"n-text-views" desc:"number of textviews available for editing files (default 2) -- configurable with n-text-views property"`
+	// number of texteditors available for editing files (default 2) -- configurable with n-text-views property
+	NTextEditors int `xml:"n-text-views" desc:"number of texteditors available for editing files (default 2) -- configurable with n-text-views property"`
 
-	// index of the currently-active textview -- new files will be viewed in other views if available
-	ActiveTextViewIdx int `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`
+	// index of the currently-active texteditor -- new files will be viewed in other views if available
+	ActiveTextEditorIdx int `json:"-" desc:"index of the currently-active texteditor -- new files will be viewed in other views if available"`
+}
+
+func (fb *FileBrowse) Defaults() {
+	fb.NTextEditors = 2
 }
 
 func (fb *FileBrowse) OnInit() {
+	fb.Defaults()
 	fb.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.Margin.Set(units.Dp(8))
@@ -48,28 +76,34 @@ func (fb *FileBrowse) OnInit() {
 			split := w.(*gi.Splits)
 			split.Dim = mat32.X
 		}
-		ip, _ := w.IndexInParent()
-		if w.Parent().Name() == "splits" && ip > 0 {
-			w.Style(func(s *styles.Style) {
-				s.SetStretchMax()
-				s.SetMinPrefWidth(units.Ch(20))
-				s.SetMinPrefHeight(units.Ch(10))
-				s.Font.Family = string(gi.Prefs.MonoFont)
-				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-				s.Text.TabSize = 4
-			})
+		if w.Parent().PathFrom(fb) == "splits" {
+			ip, _ := w.IndexInParent()
+			if ip == 0 {
+				w.Style(func(s *styles.Style) {
+					s.SetStretchMax()
+				})
+			} else {
+				w.Style(func(s *styles.Style) {
+					s.SetStretchMax()
+					s.SetMinPrefWidth(units.Ch(20))
+					s.SetMinPrefHeight(units.Ch(10))
+					s.Font.Family = string(gi.Prefs.MonoFont)
+					s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+					s.Text.TabSize = 4
+				})
+			}
 		}
 	})
 }
 
 // UpdateFiles updates the list of files saved in project
-func (fb *FileBrowse) UpdateFiles() {
+func (fb *FileBrowse) UpdateFiles() { //gti:add
 	if fb.Files == nil {
 		return
 	}
-		updt := fb.Files.UpdateStart()
-		fb.Files.OpenPath(string(fb.ProjRoot))
-		fb.Files.UpdateEndLayout(updt)
+	updt := fb.Files.UpdateStart()
+	fb.Files.OpenPath(string(fb.ProjRoot))
+	fb.Files.UpdateEndLayout(updt)
 }
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
@@ -81,7 +115,7 @@ func (fb *FileBrowse) IsEmpty() bool {
 // specific file or a directory containing multiple files of interest -- opens
 // in current FileBrowse object if it is empty, or otherwise opens a new
 // window.
-func (fb *FileBrowse) OpenPath(path gi.FileName) {
+func (fb *FileBrowse) OpenPath(path gi.FileName) { //gti:add
 	if !fb.IsEmpty() {
 		NewFileBrowser(string(path))
 		return
@@ -91,19 +125,19 @@ func (fb *FileBrowse) OpenPath(path gi.FileName) {
 	if !ok {
 		return
 	}
-		fb.ProjRoot = gi.FileName(root)
-		fb.SetName(pnm)
-		fb.UpdateProj()
-		// win := fb.ParentRenderWin()
-		// if win != nil {
-		// 	winm := "browser-" + pnm
-		// 	win.SetName(winm)
-		// 	win.SetTitle(winm)
-		// }
-		if fnm != "" {
-			fb.ViewFile(fnm)
-		}
-		fb.UpdateFiles()
+	fb.ProjRoot = gi.FileName(root)
+	fb.SetName(pnm)
+	fb.UpdateProj()
+	// win := fb.ParentRenderWin()
+	// if win != nil {
+	// 	winm := "browser-" + pnm
+	// 	win.SetName(winm)
+	// 	win.SetTitle(winm)
+	// }
+	if fnm != "" {
+		fb.ViewFile(fnm)
+	}
+	fb.UpdateFiles()
 }
 
 // UpdateProj does full update to current proj
@@ -112,7 +146,6 @@ func (fb *FileBrowse) UpdateProj() {
 	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
-	fb.ConfigToolbar()
 	if mods {
 		fb.UpdateEnd(updt)
 	}
@@ -146,22 +179,22 @@ func ProjPathParse(path string) (root, projnm, fnm string, ok bool) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-//   TextViews
+//   TextEditors
 
-// ActiveTextView returns the currently-active TextView
-func (fb *FileBrowse) ActiveTextView() *textview.View {
-	return fb.TextViewByIndex(fb.ActiveTextViewIdx)
+// ActiveTextEditor returns the currently-active TextEditor
+func (fb *FileBrowse) ActiveTextEditor() *texteditor.Editor {
+	return fb.TextEditorByIndex(fb.ActiveTextEditorIdx)
 }
 
-// SetActiveTextView sets the given view index as the currently-active
-// TextView -- returns that textview
-func (fb *FileBrowse) SetActiveTextView(idx int) *textview.View {
-	if idx < 0 || idx >= fb.NTextViews {
-		log.Printf("FileBrowse SetActiveTextView: text view index out of range: %v\n", idx)
+// SetActiveTextEditor sets the given view index as the currently-active
+// TextEditor -- returns that texteditor
+func (fb *FileBrowse) SetActiveTextEditor(idx int) *texteditor.Editor {
+	if idx < 0 || idx >= fb.NTextEditors {
+		log.Printf("FileBrowse SetActiveTextEditor: text view index out of range: %v\n", idx)
 		return nil
 	}
-	fb.ActiveTextViewIdx = idx
-	av := fb.ActiveTextView()
+	fb.ActiveTextEditorIdx = idx
+	av := fb.ActiveTextEditor()
 	if av.Buf != nil {
 		fb.ActiveFilename = av.Buf.Filename
 	}
@@ -169,21 +202,21 @@ func (fb *FileBrowse) SetActiveTextView(idx int) *textview.View {
 	return av
 }
 
-// NextTextView returns the next text view available for viewing a file and
+// NextTextEditor returns the next text view available for viewing a file and
 // its index -- if the active text view is empty, then it is used, otherwise
 // it is the next one
-func (fb *FileBrowse) NextTextView() (*textview.View, int) {
-	av := fb.TextViewByIndex(fb.ActiveTextViewIdx)
+func (fb *FileBrowse) NextTextEditor() (*texteditor.Editor, int) {
+	av := fb.TextEditorByIndex(fb.ActiveTextEditorIdx)
 	if av.Buf == nil {
-		return av, fb.ActiveTextViewIdx
+		return av, fb.ActiveTextEditorIdx
 	}
-	nxt := (fb.ActiveTextViewIdx + 1) % fb.NTextViews
-	return fb.TextViewByIndex(nxt), nxt
+	nxt := (fb.ActiveTextEditorIdx + 1) % fb.NTextEditors
+	return fb.TextEditorByIndex(nxt), nxt
 }
 
-// SaveActiveView saves the contents of the currently-active textview
-func (fb *FileBrowse) SaveActiveView() {
-	tv := fb.ActiveTextView()
+// SaveActiveView saves the contents of the currently-active texteditor
+func (fb *FileBrowse) SaveActiveView() { //gti:add
+	tv := fb.ActiveTextEditor()
 	if tv.Buf != nil {
 		tv.Buf.Save() // todo: errs..
 		fb.UpdateFiles()
@@ -191,9 +224,9 @@ func (fb *FileBrowse) SaveActiveView() {
 }
 
 // SaveActiveViewAs save with specified filename the contents of the
-// currently-active textview
-func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
-	tv := fb.ActiveTextView()
+// currently-active texteditor
+func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) { //gti:add
+	tv := fb.ActiveTextEditor()
 	if tv.Buf != nil {
 		tv.Buf.SaveAs(filename)
 	}
@@ -201,15 +234,15 @@ func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
 
 // ViewFileNode sets the next text view to view file in given node (opens
 // buffer if not already opened)
-func (fb *FileBrowse) ViewFileNode(fn *giv.FileNode) {
+func (fb *FileBrowse) ViewFileNode(fn *filetree.Node) {
 	if _, err := fn.OpenBuf(); err == nil {
-		nv, nidx := fb.NextTextView()
+		nv, nidx := fb.NextTextEditor()
 		if nv.Buf != nil && nv.Buf.IsChanged() { // todo: save current changes?
 			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buf.Filename)
 		}
 		nv.SetBuf(fn.Buf)
 		fn.Buf.Hi.Style = "emacs" // todo prefs
-		fb.SetActiveTextView(nidx)
+		fb.SetActiveTextEditor(nidx)
 		fb.UpdateFiles()
 	}
 }
@@ -227,14 +260,6 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-//    Defaults, Prefs
-
-func (fb *FileBrowse) Defaults() {
-	fb.NTextViews = 2
-	fb.Files.DirsOnTop = true
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
 //   GUI configs
 
 // StdFrameConfig returns a Config for configuring a standard Frame
@@ -242,7 +267,6 @@ func (fb *FileBrowse) Defaults() {
 func (fb *FileBrowse) StdFrameConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.SplitsType, "splits")
 	return config
 }
@@ -284,9 +308,9 @@ func (fb *FileBrowse) Splits() (*gi.Splits, int) {
 	return fb.Child(idx).(*gi.Splits), idx
 }
 
-// TextViewByIndex returns the TextView by index, nil if not found
-func (fb *FileBrowse) TextViewByIndex(idx int) *textview.View {
-	if idx < 0 || idx >= fb.NTextViews {
+// TextEditorByIndex returns the TextEditor by index, nil if not found
+func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
+	if idx < 0 || idx >= fb.NTextEditors {
 		log.Printf("FileBrowse: text view index out of range: %v\n", idx)
 		return nil
 	}
@@ -294,40 +318,33 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *textview.View {
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
 		svk := split.Child(stidx + idx)
-		if !ki.TypeEmbeds(svk, giv.TypeTextView) {
-			log.Printf("FileBrowse: text view not at index: %v\n", idx)
-			return nil
-		}
-		return svk.(*textview.View)
+		return svk.(*texteditor.Editor)
 	}
 	return nil
 }
 
-// Toolbar returns the toolbar widget
-func (fb *FileBrowse) Toolbar() *gi.Toolbar {
-	idx, ok := fb.Children().IndexByName("toolbar", 1)
-	if !ok {
-		return nil
-	}
-	return fb.Child(idx).(*gi.Toolbar)
-}
+func (fb *FileBrowse) Toolbar(tb *gi.Toolbar) {
+	gi.DefaultTopAppBar(tb)
 
-// ConfigToolbar adds a FileBrowse toolbar.
-func (fb *FileBrowse) ConfigToolbar() {
-	tb := fb.Toolbar()
-	if tb.HasChildren() {
-		return
-	}
-	tb.SetStretchMaxWidth()
-	giv.ToolbarView(fb, fb.Scene, tb)
+	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
+	op := giv.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
+	op.Args[0].SetValue(fb.ActiveFilename)
+	// op.Args[0].SetTag("ext", ".json")
+	giv.NewFuncButton(tb, fb.SaveActiveView).SetKey(keyfun.Save)
+	// save.SetUpdateFunc(func() {
+	// 	save.SetEnabledUpdt(fb.Changed && ge.Filename != "")
+	// })
+	sa := giv.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
+	sa.Args[0].SetValue(fb.ActiveFilename)
+	// sa.Args[0].SetTag("ext", ".json")
 }
 
 // SplitsConfig returns a Config for configuring the Splits
 func (fb *FileBrowse) SplitsConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.FrameType, "filetree-fr")
-	for i := 0; i < fb.NTextViews; i++ {
-		config.Add(texteditor.EditorType, fmt.Sprintf("textview-lay-%v", i))
+	for i := 0; i < fb.NTextEditors; i++ {
+		config.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
 	}
 	// todo: tab view
 	return config
@@ -344,108 +361,55 @@ func (fb *FileBrowse) ConfigSplits() {
 	mods, updt := split.ConfigChildren(config)
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
-		ft := giv.NewFileTreeView(ftfr, "filetree")
-		fb.Files = ft
-		ft.SetRootNode(&fb.Files)
-// 
-// 		for i := 0; i < fb.NTextViews; i++ {
-// 			txed := split.Child(1 + i).(*texteditor.Edit)
-// 			txed.Scene = fb.Scene
-// 		}
-
-		ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if data == nil {
-				return
-			}
-			tvn, _ := data.(ki.Ki).Embed(giv.TypeFileTreeView).(*giv.FileTreeView)
-			fbb, _ := recv.Embed(TypeFileBrowse).(*FileBrowse)
-			fn := tvn.SrcNode.Embed(giv.FileNodeType).(*giv.FileNode)
-			switch sig {
-			case int64(giv.TreeViewSelected):
-				fbb.FileNodeSelected(fn, tvn)
-			case int64(giv.TreeViewOpened):
-				fbb.FileNodeOpened(fn, tvn)
-			case int64(giv.TreeViewClosed):
-				fbb.FileNodeClosed(fn, tvn)
+		fb.Files = filetree.NewTree(ftfr, "filetree")
+		fb.Files.OnSelect(func(e events.Event) {
+			e.SetHandled()
+			if len(fb.Files.SelectedNodes) > 0 {
+				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
+				if ok {
+					fb.FileNodeSelected(sn)
+				}
 			}
 		})
+		fb.Files.OnDoubleClick(func(e events.Event) {
+			e.SetHandled()
+			if len(fb.Files.SelectedNodes) > 0 {
+				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
+				if ok {
+					fb.FileNodeOpened(sn)
+				}
+			}
+		})
+		// ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	if data == nil {
+		// 		return
+		// 	}
+		// 	tvn, _ := data.(ki.Ki).Embed(giv.TypeFileTreeView).(*giv.FileTreeView)
+		// 	fbb, _ := recv.Embed(TypeFileBrowse).(*FileBrowse)
+		// 	fn := tvn.SrcNode.Embed(filetree.NodeType).(*filetree.Node)
+		// 	switch sig {
+		// 	case int64(giv.TreeViewSelected):
+		// 		fbb.FileNodeSelected(fn, tvn)
+		// 	case int64(giv.TreeViewOpened):
+		// 		fbb.FileNodeOpened(fn, tvn)
+		// 	case int64(giv.TreeViewClosed):
+		// 		fbb.FileNodeClosed(fn, tvn)
+		// 	}
+		// })
 		split.SetSplits(.2, .4, .4)
 		split.UpdateEnd(updt)
 	}
 }
 
-func (fb *FileBrowse) FileNodeSelected(fn *giv.FileNode, tvn *giv.FileTreeView) {
+func (fb *FileBrowse) FileNodeSelected(fn *filetree.Node) {
+	fmt.Println("selected:", fn.FPath)
 }
 
-func (fb *FileBrowse) FileNodeOpened(fn *giv.FileNode, tvn *giv.FileTreeView) {
-	if fn.IsDir() {
-		if !fn.IsOpen() {
-			tvn.SetOpen()
-			fn.OpenDir()
-		}
-	} else {
+func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
+	if !fn.IsDir() {
 		fb.ViewFileNode(fn)
-		fn.SetOpen()
 		fn.UpdateNode()
 	}
-}
-
-func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
-	if fn.IsDir() {
-		if fn.IsOpen() {
-			fn.CloseDir()
-		}
-	}
-}
-
-func (fb *FileBrowse) Render(vp *Scene) {
-	fb.Toolbar().UpdateButtons()
-	if win := fb.ParentRenderWin(); win != nil {
-		if !win.Is(WinResizing) {
-			win.MainMenuUpdateActives()
-		}
-	}
-	fb.Frame.Render()
-}
-
-var FileBrowseProps = ki.Props{
-	"Toolbar": ki.PropSlice{
-		{"UpdateFiles", ki.Props{
-			"shortcut": "Command+U",
-			"icon":     icons.Refresh,
-		}},
-		{"SaveActiveView", ki.Props{
-			"label": "Save",
-			"icon":  icons.Save,
-		}},
-		{"SaveActiveViewAs", ki.Props{
-			"label": "Save As...",
-			"icon":  icons.SaveAs,
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"default-field": "ActiveFilename",
-				}},
-			},
-		}},
-	},
-	"MainMenu": ki.PropSlice{
-		{"AppMenu", ki.BlankProp{}},
-		{"File", ki.PropSlice{
-			{"OpenPath", ki.Props{
-				"shortcut":        keyfun.MenuOpen,
-				"no-update-after": true,
-				"Args": ki.PropSlice{
-					{"Path", ki.Props{
-						"dirs-only": true, // todo: support
-					}},
-				},
-			}},
-			{"sep-close", ki.BlankProp{}},
-			{"Close RenderWin", ki.BlankProp{}},
-		}},
-		{"Edit", "Copy Cut Paste"},
-		{"RenderWin", "RenderWins"},
-	},
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -453,81 +417,18 @@ var FileBrowseProps = ki.Props{
 
 // NewFileBrowser creates a new FileBrowse window with a new FileBrowse project for given
 // path, returning the window and the path
-func NewFileBrowser(path string) (*gi.RenderWin, *FileBrowse) {
+func NewFileBrowser(path string) (*FileBrowse, gi.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
-	winm := "browser-" + projnm
+	nm := "browser-" + projnm
 
-	width := 1280
-	height := 720
+	sc := gi.NewScene(nm)
+	fb := NewFileBrowse(sc, "browser")
 
-	win := gi.NewMainRenderWin(winm, winm, width, height)
-
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
-
-	mfr := win.SetMainFrame()
-
-	fb := NewFileBrowse(mfr, "browser")
-	fb.Scene = vp
+	sc.TopAppBar = fb.Toolbar
 
 	fb.OpenPath(gi.FileName(path))
 
-	mmen := win.MainMenu
-	giv.MainMenuView(fb, win, mmen)
-
-	inClosePrompt := false
-	win.SetCloseReqFunc(func(w *gi.RenderWin) {
-		if !inClosePrompt {
-			inClosePrompt = true
-			// if fb.Changed {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
-				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
-				[]string{"Close Without Saving", "Cancel"},
-				func(dlg *gi.Dialog) {
-					switch dlg.Data {
-					case 0:
-						w.Close()
-					case 1:
-						// default is to do nothing, i.e., cancel
-					}
-				})
-			// } else {
-			// 	w.Close()
-			// }
-		}
-	})
-
-	inQuitPrompt := false
-	gi.SetQuitReqFunc(func() {
-		if !inQuitPrompt {
-			inQuitPrompt = true
-			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-				Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
-				if dlg.Accepted {
-					gi.Quit()
-				} else {
-					inQuitPrompt = false
-				}
-			})
-		}
-	})
-
-	// win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-	// 	fmt.Printf("Doing final Close cleanup here..\n")
-	// })
-
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		if gi.MainRenderWins.Len() <= 1 {
-			go gi.Quit() // once main window is closed, quit
-		}
-	})
-
-	win.MainMenuUpdated()
-
-	vp.UpdateEndNoSig(updt)
-
-	win.GoStartEventLoop()
-	return win, fb
+	return fb, gi.NewWindow(sc).Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -536,18 +437,11 @@ func NewFileBrowser(path string) (*gi.RenderWin, *FileBrowse) {
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.SetAppName("file-browser")
-	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/gi/v2de">gide on GitHub</a>`)
-
-	// gi.SetQuitCleanFunc(func() {
-	// 	fmt.Printf("Doing final Quit cleanup here..\n")
-	// })
-
 	var path string
 
 	// process command args
 	if len(os.Args) > 1 {
-		flag.StringVar(&path, "path", "./", "path to open -- can be to a directory or a filename within the directory")
+		flag.StringVar(&path, "path", "", "path to open -- can be to a directory or a filename within the directory")
 		// todo: other args?
 		flag.Parse()
 		if path == "" {
@@ -556,12 +450,13 @@ func app() {
 			}
 		}
 	}
-
+	if path == "" {
+		path = "./"
+	}
 	if path != "" {
 		path, _ = filepath.Abs(path)
 	}
-	NewFileBrowser(path)
-	// above calls will have added to WinWait..
-	gi.WinWait.Wait()
+	fmt.Println("path:", path)
+	_, st := NewFileBrowser(path)
+	st.Wait()
 }
-*/

@@ -7,11 +7,23 @@ package filetree
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/vci/v2"
 )
+
+func (ft *Tree) OnInit() {
+	ft.RootView = ft.AsTreeView()
+	ft.FRoot = ft
+	ft.NodeType = NodeType
+	ft.OpenDepth = 4
+	// fn.Indent.SetEm(1)
+	ft.HandleFileNodeEvents()
+	ft.FileNodeStyles()
+}
 
 func (fn *Node) OnInit() {
 	fn.OpenDepth = 4
@@ -48,6 +60,10 @@ func (fn *Node) FileNodeStyles() {
 	})
 	fn.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(fn) {
+		case "parts":
+			w.OnClick(func(e events.Event) {
+				fn.OpenEmptyDir()
+			})
 		case "parts/branch":
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
@@ -58,6 +74,11 @@ func (fn *Node) FileNodeStyles() {
 			// 	s.MaxWidth.SetEm(1.5)
 			// 	s.MaxHeight.SetEm(1.5)
 			// })
+			sw.OnClick(func(e events.Event) {
+				if sw.StateIs(states.Disabled) {
+					fn.OpenEmptyDir()
+				}
+			})
 		}
 	})
 }
