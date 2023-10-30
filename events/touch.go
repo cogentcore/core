@@ -48,15 +48,23 @@ func (ev *Touch) String() string {
 
 // todo: what about these higher-level abstractions of touch-like events?
 
-// // MagnifyEvent is used to represent a magnification gesture.
-// type MagnifyEvent struct {
-// 	GestureEvent
-// 	Magnification float64 // the multiplicative scale factor
-// }
+// TouchMagnify is a touch magnification (scaling) gesture event.
+// It is the event struct corresponding to events of type [Magnify].
+type TouchMagnify struct {
+	Touch
+	// the multiplicative scale factor relative to the previous
+	// zoom of the screen
+	ScaleFactor float32
+}
 
-// func (ev *MagnifyEvent) EventTypes() EventTypes {
-// 	return MagnifyEventTypes
-// }
+// NewTouchMagnify constructs a new [TouchMagnify] event based on
+// the given multiplicative scale factor.
+func NewTouchMagnify(scaleFactor float32) *TouchMagnify {
+	ev := &TouchMagnify{}
+	ev.Typ = Magnify
+	ev.SetUnique()
+	return ev
+}
 
 // // check for interface implementation
 // var _ Event = &MagnifyEvent{}
