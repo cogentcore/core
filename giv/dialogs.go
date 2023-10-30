@@ -96,7 +96,7 @@ func TextEditorDialog(dlg *gi.Dialog, text []byte, filename gi.FileName, lineNum
 		OnClick(func(e events.Event) {
 			dlg.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
 		})
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // TextEditorDialogTextEditor returns the text view from a TextViewDialog
@@ -116,7 +116,7 @@ func StructViewDialog(dlg *gi.Dialog, stru any, tmpSave Value) *gi.Dialog {
 	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetStruct(stru)
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // MapViewDialog adds to the given dialog a display for editing elements
@@ -129,7 +129,7 @@ func MapViewDialog(dlg *gi.Dialog, mp any, tmpSave Value) *gi.Dialog {
 	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetMap(mp)
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // SliceViewDialog adds to the given dialog a display for editing elements of a slice using a SliceView.
@@ -147,7 +147,7 @@ func SliceViewDialog(dlg *gi.Dialog, slice any, tmpSave Value, noAdd bool, noDel
 	sv.ViewPath = dlg.VwPath
 	sv.TmpSave = tmpSave
 	sv.SetSlice(slice)
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // SliceViewSelectDialog adds to the given dialog a display for selecting one row from the given
@@ -170,7 +170,7 @@ func SliceViewSelectDialog(dlg *gi.Dialog, slice, curVal any, styleFunc ...Slice
 		dlg.Data = sv.SelectedIdx
 		dlg.AcceptDialog()
 	})
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // TableViewDialog adds to the given dialog a display for editing fields of a slice-of-structs using a
@@ -188,7 +188,7 @@ func TableViewDialog(dlg *gi.Dialog, slcOfStru any, tmpSave Value, noAdd bool, n
 	sv.TmpSave = tmpSave
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.SetSlice(slcOfStru)
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // TableViewSelectDialog adds to the given dialog a display for selecting a row from a slice-of-structs using a
@@ -211,7 +211,7 @@ func TableViewSelectDialog(dlg *gi.Dialog, slcOfStru any, initRow int, styleFunc
 		dlg.Data = sv.SelectedIdx
 		dlg.AcceptDialog()
 	})
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // show fonts in a bigger size so you can actually see the differences
@@ -234,7 +234,7 @@ func FontChooserDialog(dlg *gi.Dialog) *gi.Dialog {
 			s.Font.Weight = fi[row].Weight
 			s.Font.Style = fi[row].Style
 			s.Font.Size.Pt(float32(FontChooserSize))
-		})
+		}).FullWindow(true)
 }
 
 // IconChooserDialog adds to the given dialog a display for choosing an icon.
@@ -244,7 +244,7 @@ func IconChooserDialog(dlg *gi.Dialog, curIc icons.Icon) *gi.Dialog {
 		func(w gi.Widget, s *styles.Style, row int) {
 			w.(*gi.Button).SetText(string(ics[row]))
 			s.SetStretchMaxWidth()
-		})
+		}).FullWindow(true)
 }
 
 // ColorViewDialog adds to the given dialog a display for editing a color using a ColorView.
@@ -259,7 +259,7 @@ func ColorViewDialog(dlg *gi.Dialog, clr color.RGBA, tmpSave Value) *gi.Dialog {
 	sv.OnChange(func(e events.Event) {
 		dlg.Data = sv.Color
 	})
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // FileViewDialog adds to the given dialog a display for selecting / manipulating files.
@@ -286,7 +286,7 @@ func FileViewDialog(dlg *gi.Dialog, filename, ext string, filterFunc ...FileView
 	})
 
 	dlg.Cancel().Ok("Open")
-	return dlg
+	return dlg.FullWindow(true)
 }
 
 // ArgViewDialog adds to the given dialog a display for editing args for a method call
@@ -295,6 +295,5 @@ func ArgViewDialog(dlg *gi.Dialog, args []Value) *gi.Dialog {
 	sv := NewArgView(dlg.Scene, "arg-view")
 	sv.SetState(dlg.RdOnly, states.ReadOnly)
 	sv.SetArgs(args)
-
 	return dlg
 }
