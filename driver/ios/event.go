@@ -19,7 +19,6 @@ package ios
 */
 import "C"
 import (
-	"fmt"
 	"image"
 
 	"goki.dev/goosi/events"
@@ -54,7 +53,6 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 			panic("out of touchIDs")
 		}
 	}
-	fmt.Println("cTouchType", cTouchType)
 	t := events.TouchStart
 	switch cTouchType {
 	case 0:
