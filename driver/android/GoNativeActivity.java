@@ -334,31 +334,8 @@ public class GoNativeActivity extends NativeActivity {
 		}
 
 		@Override
-		public void onShowPress(MotionEvent event) {
-			Log.d("Go", "onShowPress: " + event.toString());
-		}
-
-		@Override
-		public boolean onSingleTapUp(MotionEvent event) {
-			Log.d("Go", "onSingleTapUp: " + event.toString());
-			return true;
-		}
-
-		@Override
 		public boolean onDoubleTap(MotionEvent event) {
 			Log.d("Go", "onDoubleTap: " + event.toString());
-			return true;
-		}
-
-		@Override
-		public boolean onDoubleTapEvent(MotionEvent event) {
-			Log.d("Go", "onDoubleTapEvent: " + event.toString());
-			return true;
-		}
-
-		@Override
-		public boolean onSingleTapConfirmed(MotionEvent event) {
-			Log.d("Go", "onSingleTapConfirmed: " + event.toString());
 			return true;
 		}
 	}
