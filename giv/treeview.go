@@ -28,6 +28,35 @@ import (
 	"goki.dev/pi/v2/filecat"
 )
 
+// TreeViewer is an interface for TreeView types
+// providing access to the base TreeView and
+// overridable method hooks for actions taken on the TreeView,
+// including OnOpen, OnClose, etc.
+type TreeViewer interface {
+	// AsTreeView returns the base *TreeView for this node
+	AsTreeView() *TreeView
+
+	// OnOpen is called when a node is opened.
+	// The base version does nothing.
+	OnOpen()
+
+	// OnClose is called when a node is closed
+	// The base version does nothing.
+	OnClose()
+}
+
+// AsTreeView returns the given value as a value of type TreeView if the type
+// of the given value embeds TreeView, or nil otherwise
+func AsTreeView(k ki.Ki) *TreeView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(TreeViewer); ok {
+		return t.AsTreeView()
+	}
+	return nil
+}
+
 // note: see treesync.go for all the SyncNode mode specific
 // functions.
 
@@ -46,7 +75,7 @@ import (
 // Standard events.Event are sent to any listeners, including
 // Select, Change, and DoubleClick.  The selected nodes
 // are in the root SelectedNodes list.
-type TreeView struct { //goki:embedder
+type TreeView struct {
 	gi.WidgetBase
 
 	// If non-Ki Node that this widget is viewing in the tree -- the source
@@ -101,6 +130,11 @@ func (tv *TreeView) CopyFieldsFrom(frm any) {
 	}
 	tv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	// note: can't actually copy anything here
+}
+
+// AsTreeView satisfies the [TreeViewEmbedder] interface
+func (t *TreeView) AsTreeView() *TreeView {
+	return t
 }
 
 // RootSetViewIdx sets the RootView and ViewIdx for all nodes.
@@ -957,8 +991,14 @@ func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
 	}
 }
 
+// OnClose is called when a node is closed.
+// The base version does nothing.
+func (tv *TreeView) OnClose() {
+}
+
 // Close closes the given node and updates the view accordingly
 // (if it is not already closed).
+// Calls OnClose in TreeViewer interface for extensible actions.
 func (tv *TreeView) Close() {
 	if tv.IsClosed() {
 		return
@@ -969,13 +1009,19 @@ func (tv *TreeView) Close() {
 	}
 	tv.SetClosed(true)
 	tv.SetBranchState()
+	tv.This().(TreeViewer).OnClose()
 	tv.SetKidsVisibility(true) // parent closed
 	tv.UpdateEndRender(updt)
 }
 
+// OnOpen is called when a node is opened.
+// The base version does nothing.
+func (tv *TreeView) OnOpen() {
+}
+
 // Open opens the given node and updates the view accordingly
 // (if it is not already opened)
-// Sends Change event on RootView.
+// Calls OnOpen in TreeViewer interface for extensible actions.
 func (tv *TreeView) Open() {
 	if !tv.IsClosed() {
 		return
@@ -985,6 +1031,7 @@ func (tv *TreeView) Open() {
 		tv.SetNeedsLayout()
 		tv.SetClosed(false)
 		tv.SetBranchState()
+		tv.This().(TreeViewer).OnOpen()
 		tv.SetKidsVisibility(false)
 	}
 	tv.UpdateEndRender(updt)

@@ -5,13 +5,10 @@ package giv
 import (
 	"reflect"
 	"sync"
-	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"goki.dev/cam/hsl"
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
@@ -96,6 +93,12 @@ func (t *ArgView) SetClass(v string) *ArgView {
 // SetCustomContextMenu sets the [ArgView.CustomContextMenu]
 func (t *ArgView) SetCustomContextMenu(v func(m *gi.Scene)) *ArgView {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [ArgView.Lay]
+func (t *ArgView) SetLayout(v gi.Layouts) *ArgView {
+	t.Lay = v
 	return t
 }
 
@@ -194,7 +197,7 @@ var ColorViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "goki.dev/cam/hsl.HSL", LocalType: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}, Tag: "readonly:\"-\""}},
+		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "goki.dev/cam/hsl.HSL", LocalType: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}, Tag: "edit:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -223,9 +226,9 @@ func (t *ColorView) New() ki.Ki {
 	return &ColorView{}
 }
 
-// SetColorHSLA sets the [ColorView.ColorHSLA]:
+// SetColorHsla sets the [ColorView.ColorHSLA]:
 // the color that we view, in HSLA form
-func (t *ColorView) SetColorHSLA(v hsl.HSL) *ColorView {
+func (t *ColorView) SetColorHsla(v hsl.HSL) *ColorView {
 	t.ColorHSLA = v
 	return t
 }
@@ -262,6 +265,12 @@ func (t *ColorView) SetCustomContextMenu(v func(m *gi.Scene)) *ColorView {
 	return t
 }
 
+// SetLayout sets the [ColorView.Lay]
+func (t *ColorView) SetLayout(v gi.Layouts) *ColorView {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [ColorView.Spacing]
 func (t *ColorView) SetSpacing(v units.Value) *ColorView {
 	t.Spacing = v
@@ -280,387 +289,6 @@ func (t *ColorView) SetStripes(v gi.Stripes) *ColorView {
 	return t
 }
 
-// FileTreeType is the [gti.Type] for [FileTree]
-var FileTreeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FileTree",
-	ShortName:  "giv.FileTree",
-	IDName:     "file-tree",
-	Doc:        "FileTree is the root of a tree representing files in a given directory (and\nsubdirectories thereof), and has some overall management state for how to\nview things.  The FileTree can be viewed by a TreeView to provide a GUI\ninterface into it.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", LocalType: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}, Tag: ""}},
-		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/gi/v2/giv.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: ""}},
-		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", LocalType: "bool", Doc: "if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed", Directives: gti.Directives{}, Tag: ""}},
-		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
-		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", LocalType: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}, Tag: ""}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", LocalType: "map[string]bool", Doc: "map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", LocalType: "string", Doc: "last path updated by watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", LocalType: "time.Time", Doc: "timestamp of last update", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FileNode", &gti.Field{Name: "FileNode", Type: "goki.dev/gi/v2/giv.FileNode", LocalType: "FileNode", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FileTree{},
-})
-
-// NewFileTree adds a new [FileTree] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFileTree(par ki.Ki, name ...string) *FileTree {
-	return par.NewChild(FileTreeType, name...).(*FileTree)
-}
-
-// KiType returns the [*gti.Type] of [FileTree]
-func (t *FileTree) KiType() *gti.Type {
-	return FileTreeType
-}
-
-// New returns a new [*FileTree] value
-func (t *FileTree) New() ki.Ki {
-	return &FileTree{}
-}
-
-// SetExtFiles sets the [FileTree.ExtFiles]:
-// external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update
-func (t *FileTree) SetExtFiles(v []string) *FileTree {
-	t.ExtFiles = v
-	return t
-}
-
-// SetDirs sets the [FileTree.Dirs]:
-// records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
-func (t *FileTree) SetDirs(v DirFlagMap) *FileTree {
-	t.Dirs = v
-	return t
-}
-
-// SetDirsOnTop sets the [FileTree.DirsOnTop]:
-// if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed
-func (t *FileTree) SetDirsOnTop(v bool) *FileTree {
-	t.DirsOnTop = v
-	return t
-}
-
-// SetNodeType sets the [FileTree.NodeType]:
-// type of node to create -- defaults to giv.FileNode but can use custom node types
-func (t *FileTree) SetNodeType(v *gti.Type) *FileTree {
-	t.NodeType = v
-	return t
-}
-
-// SetInOpenAll sets the [FileTree.InOpenAll]:
-// if true, we are in midst of an OpenAll call -- nodes should open all dirs
-func (t *FileTree) SetInOpenAll(v bool) *FileTree {
-	t.InOpenAll = v
-	return t
-}
-
-// SetWatcher sets the [FileTree.Watcher]:
-// change notify for all dirs
-func (t *FileTree) SetWatcher(v *fsnotify.Watcher) *FileTree {
-	t.Watcher = v
-	return t
-}
-
-// SetDoneWatcher sets the [FileTree.DoneWatcher]:
-// channel to close watcher watcher
-func (t *FileTree) SetDoneWatcher(v chan bool) *FileTree {
-	t.DoneWatcher = v
-	return t
-}
-
-// SetWatchedPaths sets the [FileTree.WatchedPaths]:
-// map of paths that have been added to watcher -- only active if bool = true
-func (t *FileTree) SetWatchedPaths(v map[string]bool) *FileTree {
-	t.WatchedPaths = v
-	return t
-}
-
-// SetLastWatchUpdt sets the [FileTree.LastWatchUpdt]:
-// last path updated by watcher
-func (t *FileTree) SetLastWatchUpdt(v string) *FileTree {
-	t.LastWatchUpdt = v
-	return t
-}
-
-// SetLastWatchTime sets the [FileTree.LastWatchTime]:
-// timestamp of last update
-func (t *FileTree) SetLastWatchTime(v time.Time) *FileTree {
-	t.LastWatchTime = v
-	return t
-}
-
-// SetUpdtMu sets the [FileTree.UpdtMu]:
-// Update mutex
-func (t *FileTree) SetUpdtMu(v sync.Mutex) *FileTree {
-	t.UpdtMu = v
-	return t
-}
-
-// SetFPath sets the [FileTree.FPath]
-func (t *FileTree) SetFPath(v gi.FileName) *FileTree {
-	t.FPath = v
-	return t
-}
-
-// SetInfo sets the [FileTree.Info]
-func (t *FileTree) SetInfo(v filecat.FileInfo) *FileTree {
-	t.Info = v
-	return t
-}
-
-// SetBuf sets the [FileTree.Buf]
-func (t *FileTree) SetBuf(v *texteditor.Buf) *FileTree {
-	t.Buf = v
-	return t
-}
-
-// SetFRoot sets the [FileTree.FRoot]
-func (t *FileTree) SetFRoot(v *FileTree) *FileTree {
-	t.FRoot = v
-	return t
-}
-
-// SetDirRepo sets the [FileTree.DirRepo]
-func (t *FileTree) SetDirRepo(v vci.Repo) *FileTree {
-	t.DirRepo = v
-	return t
-}
-
-// SetRepoFiles sets the [FileTree.RepoFiles]
-func (t *FileTree) SetRepoFiles(v vci.Files) *FileTree {
-	t.RepoFiles = v
-	return t
-}
-
-// FileNodeType is the [gti.Type] for [FileNode]
-var FileNodeType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/giv.FileNode",
-	ShortName: "giv.FileNode",
-	IDName:    "file-node",
-	Doc:       "FileNode represents a file in the file system -- the name of the node is\nthe name of the file.  Folders have children containing further nodes.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FPath", &gti.Field{Name: "FPath", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/pi/v2/filecat.FileInfo", LocalType: "filecat.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"FRoot", &gti.Field{Name: "FRoot", Type: "*goki.dev/gi/v2/giv.FileTree", LocalType: "*FileTree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "goki.dev/vci/v2.Repo", LocalType: "vci.Repo", Doc: "version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "goki.dev/vci/v2.Files", LocalType: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FileNode{},
-})
-
-// NewFileNode adds a new [FileNode] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFileNode(par ki.Ki, name ...string) *FileNode {
-	return par.NewChild(FileNodeType, name...).(*FileNode)
-}
-
-// KiType returns the [*gti.Type] of [FileNode]
-func (t *FileNode) KiType() *gti.Type {
-	return FileNodeType
-}
-
-// New returns a new [*FileNode] value
-func (t *FileNode) New() ki.Ki {
-	return &FileNode{}
-}
-
-// FileNodeEmbedder is an interface that all types that embed FileNode satisfy
-type FileNodeEmbedder interface {
-	AsFileNode() *FileNode
-}
-
-// AsFileNode returns the given value as a value of type FileNode if the type
-// of the given value embeds FileNode, or nil otherwise
-func AsFileNode(k ki.Ki) *FileNode {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(FileNodeEmbedder); ok {
-		return t.AsFileNode()
-	}
-	return nil
-}
-
-// AsFileNode satisfies the [FileNodeEmbedder] interface
-func (t *FileNode) AsFileNode() *FileNode {
-	return t
-}
-
-// SetFPath sets the [FileNode.FPath]:
-// full path to this file
-func (t *FileNode) SetFPath(v gi.FileName) *FileNode {
-	t.FPath = v
-	return t
-}
-
-// SetInfo sets the [FileNode.Info]:
-// full standard file info about this file
-func (t *FileNode) SetInfo(v filecat.FileInfo) *FileNode {
-	t.Info = v
-	return t
-}
-
-// SetBuf sets the [FileNode.Buf]:
-// file buffer for editing this file
-func (t *FileNode) SetBuf(v *texteditor.Buf) *FileNode {
-	t.Buf = v
-	return t
-}
-
-// SetFRoot sets the [FileNode.FRoot]:
-// root of the tree -- has global state
-func (t *FileNode) SetFRoot(v *FileTree) *FileNode {
-	t.FRoot = v
-	return t
-}
-
-// SetDirRepo sets the [FileNode.DirRepo]:
-// version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control
-func (t *FileNode) SetDirRepo(v vci.Repo) *FileNode {
-	t.DirRepo = v
-	return t
-}
-
-// SetRepoFiles sets the [FileNode.RepoFiles]:
-// version control system repository file status -- only valid during ReadDir
-func (t *FileNode) SetRepoFiles(v vci.Files) *FileNode {
-	t.RepoFiles = v
-	return t
-}
-
-// FileTreeViewType is the [gti.Type] for [FileTreeView]
-var FileTreeViewType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/giv.FileTreeView",
-	ShortName: "giv.FileTreeView",
-	IDName:    "file-tree-view",
-	Doc:       "FileTreeView is a TreeView that knows how to operate on FileNode nodes",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TreeView", &gti.Field{Name: "TreeView", Type: "goki.dev/gi/v2/giv.TreeView", LocalType: "TreeView", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FileTreeView{},
-})
-
-// NewFileTreeView adds a new [FileTreeView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFileTreeView(par ki.Ki, name ...string) *FileTreeView {
-	return par.NewChild(FileTreeViewType, name...).(*FileTreeView)
-}
-
-// KiType returns the [*gti.Type] of [FileTreeView]
-func (t *FileTreeView) KiType() *gti.Type {
-	return FileTreeViewType
-}
-
-// New returns a new [*FileTreeView] value
-func (t *FileTreeView) New() ki.Ki {
-	return &FileTreeView{}
-}
-
-// FileTreeViewEmbedder is an interface that all types that embed FileTreeView satisfy
-type FileTreeViewEmbedder interface {
-	AsFileTreeView() *FileTreeView
-}
-
-// AsFileTreeView returns the given value as a value of type FileTreeView if the type
-// of the given value embeds FileTreeView, or nil otherwise
-func AsFileTreeView(k ki.Ki) *FileTreeView {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(FileTreeViewEmbedder); ok {
-		return t.AsFileTreeView()
-	}
-	return nil
-}
-
-// AsFileTreeView satisfies the [FileTreeViewEmbedder] interface
-func (t *FileTreeView) AsFileTreeView() *FileTreeView {
-	return t
-}
-
-// SetTooltip sets the [FileTreeView.Tooltip]
-func (t *FileTreeView) SetTooltip(v string) *FileTreeView {
-	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [FileTreeView.Class]
-func (t *FileTreeView) SetClass(v string) *FileTreeView {
-	t.Class = v
-	return t
-}
-
-// SetCustomContextMenu sets the [FileTreeView.CustomContextMenu]
-func (t *FileTreeView) SetCustomContextMenu(v func(m *gi.Scene)) *FileTreeView {
-	t.CustomContextMenu = v
-	return t
-}
-
-// SetIcon sets the [FileTreeView.Icon]
-func (t *FileTreeView) SetIcon(v icons.Icon) *FileTreeView {
-	t.Icon = v
-	return t
-}
-
-// SetIndent sets the [FileTreeView.Indent]
-func (t *FileTreeView) SetIndent(v units.Value) *FileTreeView {
-	t.Indent = v
-	return t
-}
-
-// SetOpenDepth sets the [FileTreeView.OpenDepth]
-func (t *FileTreeView) SetOpenDepth(v int) *FileTreeView {
-	t.OpenDepth = v
-	return t
-}
-
-// SetViewIdx sets the [FileTreeView.ViewIdx]
-func (t *FileTreeView) SetViewIdx(v int) *FileTreeView {
-	t.ViewIdx = v
-	return t
-}
-
-// SetWidgetSize sets the [FileTreeView.WidgetSize]
-func (t *FileTreeView) SetWidgetSize(v mat32.Vec2) *FileTreeView {
-	t.WidgetSize = v
-	return t
-}
-
-// SetRootView sets the [FileTreeView.RootView]
-func (t *FileTreeView) SetRootView(v *TreeView) *FileTreeView {
-	t.RootView = v
-	return t
-}
-
-// SetSelectedNodes sets the [FileTreeView.SelectedNodes]
-func (t *FileTreeView) SetSelectedNodes(v []*TreeView) *FileTreeView {
-	t.SelectedNodes = v
-	return t
-}
-
 // FileViewType is the [gti.Type] for [FileView]
 var FileViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FileView",
@@ -675,7 +303,7 @@ var FileViewType = gti.AddType(&gti.Type{
 		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "goki.dev/gi/v2/giv.FileViewFilterFunc", LocalType: "FileViewFilterFunc", Doc: "optional styling function", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", LocalType: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}, Tag: ""}},
 		{"Files", &gti.Field{Name: "Files", Type: "[]*goki.dev/pi/v2/filecat.FileInfo", LocalType: "[]*filecat.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}, Tag: ""}},
-		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"+\""}},
+		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\""}},
 		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
@@ -756,6 +384,12 @@ func (t *FileView) SetClass(v string) *FileView {
 // SetCustomContextMenu sets the [FileView.CustomContextMenu]
 func (t *FileView) SetCustomContextMenu(v func(m *gi.Scene)) *FileView {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [FileView.Lay]
+func (t *FileView) SetLayout(v gi.Layouts) *FileView {
+	t.Lay = v
 	return t
 }
 
@@ -1002,6 +636,12 @@ func (t *GiEditor) SetCustomContextMenu(v func(m *gi.Scene)) *GiEditor {
 	return t
 }
 
+// SetLayout sets the [GiEditor.Lay]
+func (t *GiEditor) SetLayout(v gi.Layouts) *GiEditor {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [GiEditor.Spacing]
 func (t *GiEditor) SetSpacing(v units.Value) *GiEditor {
 	t.Spacing = v
@@ -1173,9 +813,9 @@ func (t *MapView) SetShowToolbar(v bool) *MapView {
 	return t
 }
 
-// SetNCols sets the [MapView.NCols]:
+// SetNcols sets the [MapView.NCols]:
 // the number of columns in the map; do not set externally; generally only access internally
-func (t *MapView) SetNCols(v int) *MapView {
+func (t *MapView) SetNcols(v int) *MapView {
 	t.NCols = v
 	return t
 }
@@ -1225,6 +865,12 @@ func (t *MapView) SetClass(v string) *MapView {
 // SetCustomContextMenu sets the [MapView.CustomContextMenu]
 func (t *MapView) SetCustomContextMenu(v func(m *gi.Scene)) *MapView {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [MapView.Lay]
+func (t *MapView) SetLayout(v gi.Layouts) *MapView {
+	t.Lay = v
 	return t
 }
 
@@ -1350,6 +996,12 @@ func (t *MapViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *MapViewInline
 	return t
 }
 
+// SetLayout sets the [MapViewInline.Lay]
+func (t *MapViewInline) SetLayout(v gi.Layouts) *MapViewInline {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [MapViewInline.Spacing]
 func (t *MapViewInline) SetSpacing(v units.Value) *MapViewInline {
 	t.Spacing = v
@@ -1422,6 +1074,12 @@ func (t *SliceView) SetCustomContextMenu(v func(m *gi.Scene)) *SliceView {
 	return t
 }
 
+// SetLayout sets the [SliceView.Lay]
+func (t *SliceView) SetLayout(v gi.Layouts) *SliceView {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [SliceView.Spacing]
 func (t *SliceView) SetSpacing(v units.Value) *SliceView {
 	t.Spacing = v
@@ -1446,8 +1104,8 @@ func (t *SliceView) SetViewMu(v *sync.Mutex) *SliceView {
 	return t
 }
 
-// SetSliceNPVal sets the [SliceView.SliceNPVal]
-func (t *SliceView) SetSliceNPVal(v reflect.Value) *SliceView {
+// SetSliceNpval sets the [SliceView.SliceNPVal]
+func (t *SliceView) SetSliceNpval(v reflect.Value) *SliceView {
 	t.SliceNPVal = v
 	return t
 }
@@ -1575,12 +1233,12 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", LocalType: "any", Doc: "the slice that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"RowHeight", &gti.Field{Name: "RowHeight", Type: "float32", LocalType: "float32", Doc: "height of a single row", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"RowHeight", &gti.Field{Name: "RowHeight", Type: "float32", LocalType: "float32", Doc: "height of a single row", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"LayoutHeight", &gti.Field{Name: "LayoutHeight", Type: "float32", LocalType: "float32", Doc: "the height of grid from last layout -- determines when update needed", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", LocalType: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", LocalType: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", LocalType: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", LocalType: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"RenderedRows", &gti.Field{Name: "RenderedRows", Type: "int", LocalType: "int", Doc: "the number of rows rendered -- determines update", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", LocalType: "int", Doc: "size of slice", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", LocalType: "int", Doc: "size of slice", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"CurIdx", &gti.Field{Name: "CurIdx", Type: "int", LocalType: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ElVal", &gti.Field{Name: "ElVal", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
@@ -1616,9 +1274,9 @@ func (t *SliceViewBase) SetViewMu(v *sync.Mutex) *SliceViewBase {
 	return t
 }
 
-// SetSliceNPVal sets the [SliceViewBase.SliceNPVal]:
+// SetSliceNpval sets the [SliceViewBase.SliceNPVal]:
 // non-ptr reflect.Value of the slice
-func (t *SliceViewBase) SetSliceNPVal(v reflect.Value) *SliceViewBase {
+func (t *SliceViewBase) SetSliceNpval(v reflect.Value) *SliceViewBase {
 	t.SliceNPVal = v
 	return t
 }
@@ -1761,6 +1419,12 @@ func (t *SliceViewBase) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewBase
 	return t
 }
 
+// SetLayout sets the [SliceViewBase.Lay]
+func (t *SliceViewBase) SetLayout(v gi.Layouts) *SliceViewBase {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [SliceViewBase.Spacing]
 func (t *SliceViewBase) SetSpacing(v units.Value) *SliceViewBase {
 	t.Spacing = v
@@ -1891,6 +1555,12 @@ func (t *SliceViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewIn
 	return t
 }
 
+// SetLayout sets the [SliceViewInline.Lay]
+func (t *SliceViewInline) SetLayout(v gi.Layouts) *SliceViewInline {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [SliceViewInline.Spacing]
 func (t *SliceViewInline) SetSpacing(v units.Value) *SliceViewInline {
 	t.Spacing = v
@@ -1921,9 +1591,9 @@ var StructViewType = gti.AddType(&gti.Type{
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 		{"ToolbarStru", &gti.Field{Name: "ToolbarStru", Type: "any", LocalType: "any", Doc: "the struct that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: ""}},
-		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2047,6 +1717,12 @@ func (t *StructView) SetCustomContextMenu(v func(m *gi.Scene)) *StructView {
 	return t
 }
 
+// SetLayout sets the [StructView.Lay]
+func (t *StructView) SetLayout(v gi.Layouts) *StructView {
+	t.Lay = v
+	return t
+}
+
 // SetSpacing sets the [StructView.Spacing]
 func (t *StructView) SetSpacing(v units.Value) *StructView {
 	t.Spacing = v
@@ -2080,8 +1756,8 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
-		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2181,6 +1857,12 @@ func (t *StructViewInline) SetClass(v string) *StructViewInline {
 // SetCustomContextMenu sets the [StructViewInline.CustomContextMenu]
 func (t *StructViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *StructViewInline {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [StructViewInline.Lay]
+func (t *StructViewInline) SetLayout(v gi.Layouts) *StructViewInline {
+	t.Lay = v
 	return t
 }
 
@@ -2361,9 +2043,9 @@ func (t *TableView) SetVisFields(v []reflect.StructField) *TableView {
 	return t
 }
 
-// SetNVisFields sets the [TableView.NVisFields]:
+// SetNvisFields sets the [TableView.NVisFields]:
 // number of visible fields
-func (t *TableView) SetNVisFields(v int) *TableView {
+func (t *TableView) SetNvisFields(v int) *TableView {
 	t.NVisFields = v
 	return t
 }
@@ -2383,6 +2065,12 @@ func (t *TableView) SetClass(v string) *TableView {
 // SetCustomContextMenu sets the [TableView.CustomContextMenu]
 func (t *TableView) SetCustomContextMenu(v func(m *gi.Scene)) *TableView {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [TableView.Lay]
+func (t *TableView) SetLayout(v gi.Layouts) *TableView {
+	t.Lay = v
 	return t
 }
 
@@ -2410,8 +2098,8 @@ func (t *TableView) SetViewMu(v *sync.Mutex) *TableView {
 	return t
 }
 
-// SetSliceNPVal sets the [TableView.SliceNPVal]
-func (t *TableView) SetSliceNPVal(v reflect.Value) *TableView {
+// SetSliceNpval sets the [TableView.SliceNPVal]
+func (t *TableView) SetSliceNpval(v reflect.Value) *TableView {
 	t.SliceNPVal = v
 	return t
 }
@@ -2520,22 +2208,20 @@ func (t *TableView) SetElVal(v reflect.Value) *TableView {
 
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/giv.TreeView",
-	ShortName: "giv.TreeView",
-	IDName:    "tree-view",
-	Doc:       "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
+	Name:       "goki.dev/gi/v2/giv.TreeView",
+	ShortName:  "giv.TreeView",
+	IDName:     "tree-view",
+	Doc:        "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.",
+	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SyncNode", &gti.Field{Name: "SyncNode", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "If non-Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon, displayed to the the left of the text label", Directives: gti.Directives{}, Tag: ""}},
 		{"Indent", &gti.Field{Name: "Indent", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "amount to indent children relative to this node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"OpenDepth", &gti.Field{Name: "OpenDepth", Type: "int", LocalType: "int", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"ViewIdx", &gti.Field{Name: "ViewIdx", Type: "int", LocalType: "int", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"RootView", &gti.Field{Name: "RootView", Type: "*goki.dev/gi/v2/giv.TreeView", LocalType: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
-		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*goki.dev/gi/v2/giv.TreeView", LocalType: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"ViewIdx", &gti.Field{Name: "ViewIdx", Type: "int", LocalType: "int", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"RootView", &gti.Field{Name: "RootView", Type: "*goki.dev/gi/v2/giv.TreeView", LocalType: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*goki.dev/gi/v2/giv.TreeView", LocalType: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
 		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", LocalType: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2561,28 +2247,6 @@ func (t *TreeView) KiType() *gti.Type {
 // New returns a new [*TreeView] value
 func (t *TreeView) New() ki.Ki {
 	return &TreeView{}
-}
-
-// TreeViewEmbedder is an interface that all types that embed TreeView satisfy
-type TreeViewEmbedder interface {
-	AsTreeView() *TreeView
-}
-
-// AsTreeView returns the given value as a value of type TreeView if the type
-// of the given value embeds TreeView, or nil otherwise
-func AsTreeView(k ki.Ki) *TreeView {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TreeViewEmbedder); ok {
-		return t.AsTreeView()
-	}
-	return nil
-}
-
-// AsTreeView satisfies the [TreeViewEmbedder] interface
-func (t *TreeView) AsTreeView() *TreeView {
-	return t
 }
 
 // SetIcon sets the [TreeView.Icon]:
@@ -2748,6 +2412,12 @@ func (t *VCSLogView) SetClass(v string) *VCSLogView {
 // SetCustomContextMenu sets the [VCSLogView.CustomContextMenu]
 func (t *VCSLogView) SetCustomContextMenu(v func(m *gi.Scene)) *VCSLogView {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [VCSLogView.Lay]
+func (t *VCSLogView) SetLayout(v gi.Layouts) *VCSLogView {
+	t.Lay = v
 	return t
 }
 
