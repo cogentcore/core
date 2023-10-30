@@ -1413,10 +1413,7 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 	dlg := gi.NewDialog(ctx).Title(title).Ok()
 
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	tv := frame.InsertNewChild(texteditor.TwinEditorsType, prIdx+1, "twin-view").(*texteditor.TwinEditors)
+	tv := texteditor.NewTwinEditors(dlg.Scene, "twin-view")
 	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))

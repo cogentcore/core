@@ -195,10 +195,8 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 		title += " since: " + since
 	}
 	dlg := gi.NewDialog(ctx).Title(title)
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
 
-	lv := frame.InsertNewChild(VCSLogViewType, prIdx+1, "vcslog").(*VCSLogView)
+	lv := NewVCSLogView(dlg.Scene, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
 
 	return dlg
