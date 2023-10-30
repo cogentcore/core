@@ -1534,6 +1534,7 @@ func (vv *FileValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		bt := vv.Widget.(*gi.Button)
+		// e.SetHandled()
 		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()

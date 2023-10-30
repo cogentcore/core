@@ -18,20 +18,23 @@ import (
 type ArgView struct {
 	gi.Frame
 
-	// the args that we are a view onto
-	Args []Value
-
 	// title / prompt to show above the editor fields
 	Title string
 
-	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	// ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	// the args that we are a view onto
+	Args []Value
+
+	// WidgetConfiged tracks whether the given Widget has been configured yet
+	// Widgets can only be configured once -- otherwise duplicate event
+	// functions are registered.
+	WidgetConfiged map[gi.Widget]bool
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 }
 
 func (av *ArgView) OnInit() {
+	av.WidgetConfiged = make(map[gi.Widget]bool)
 	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
@@ -136,15 +139,17 @@ func (av *ArgView) ConfigArgsGrid() {
 			continue
 		}
 		lbl := sg.Child(i * 2).(*gi.Label)
-		// vvb := ad.View.AsValueBase()
-		// vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	avv, _ := recv.Embed(TypeArgView).(*ArgView)
-		// 	// note: updating here is redundant -- relevant field will have already updated
-		// 	avv.ViewSig.Emit(avv.This(), 0, nil)
-		// })
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
+		if _, cfg := av.WidgetConfiged[widg]; cfg { // already configured
+			vvb := arg.AsValueBase()
+			vvb.Widget = widg
+			// fmt.Println("skip and update:", vv)
+			arg.UpdateWidget()
+			continue
+		}
+		av.WidgetConfiged[widg] = true
 		arg.ConfigWidget(widg, av.Sc)
 	}
 	sg.UpdateEnd(updt)
