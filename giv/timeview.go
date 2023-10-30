@@ -100,7 +100,10 @@ func (vv *DurationValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 
 	ch = gi.NewChooser(fr, "unit").SetTooltip("The unit of time").SetItems(units)
 	ch.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(timeUnitsMap[ch.CurLabel]))
+		// we update the value to fit the unit
+		npv := laser.NonPtrValue(vv.Value)
+		dur := npv.Interface().(time.Duration)
+		sp.SetValue(float32(dur) / float32(timeUnitsMap[ch.CurLabel]))
 	})
 
 	vv.UpdateWidget()
