@@ -127,12 +127,12 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 		lbl := sv.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
-		widg := sv.Child((i * 2) + 1).(gi.Widget)
-		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, widg, sv.IsReadOnly()) // in structview.go
+		w := sv.Child((i * 2) + 1).(gi.Widget)
+		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true
 		}
-		vv.ConfigWidget(widg, sc)
+		vv.ConfigWidget(w, sc)
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()

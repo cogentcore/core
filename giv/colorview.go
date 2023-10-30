@@ -495,13 +495,13 @@ func (vv *ColorValue) UpdateWidget() {
 	bt.SetNeedsRender()
 }
 
-func (vv *ColorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	if vv.Widget == widg {
+func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.Widget = w
+	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
@@ -578,13 +578,13 @@ func (vv *ColorNameValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorNameValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	if vv.Widget == widg {
+func (vv *ColorNameValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.Widget = w
+	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)

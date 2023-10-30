@@ -159,13 +159,13 @@ func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
-		widg := sv.Child(i).(gi.Widget)
+		w := sv.Child(i).(gi.Widget)
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
-		vv.ConfigWidget(widg, sc)
+		vv.ConfigWidget(w, sc)
 		if sv.IsReadOnly() {
-			widg.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetState(true, states.ReadOnly)
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {

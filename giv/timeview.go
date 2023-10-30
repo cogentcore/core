@@ -75,13 +75,13 @@ func (vv *DurationValue) UpdateWidget() {
 	fr.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
 }
 
-func (vv *DurationValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	if vv.Widget == widg {
+func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
 	}
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+	vv.Widget = w
+	vv.StdConfigWidget(w)
 	fr := vv.Widget.(*gi.Frame)
 	fr.SetLayout(gi.LayoutHoriz)
 
