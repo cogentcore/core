@@ -29,6 +29,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"goki.dev/goki/mobile/sdkpath"
 )
@@ -90,11 +91,12 @@ func gendex() error {
 		return err
 	}
 
-	cmd = exec.Command(
-		buildTools+"/d8",
-		tmpdir+"/work/org/golang/app/GoNativeActivity.class",
+	// need to use bash so that the * glob pattern gets handled correctly
+	cmd = exec.Command("bash", "-c", strings.Join([]string{
+		buildTools + "/d8",
+		tmpdir + "/work/org/golang/app/*.class",
 		"--output", tmpdir,
-	)
+	}, " "))
 	if out, err := cmd.CombinedOutput(); err != nil {
 		os.Stderr.Write(out)
 		return err
