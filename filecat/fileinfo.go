@@ -296,6 +296,9 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 		if icn := icons.Icon("file-" + snm); icn.IsValid() {
 			return icn, true
 		}
+		if icn := icons.Icon(snm + "_file"); icn.IsValid() {
+			return icn, true
+		}
 	}
 	subt := strings.ToLower(MimeSub(fi.Mime))
 	if subt != "" {
@@ -309,6 +312,9 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 			return icn, true
 		}
 		if icn := icons.Icon("file-" + cat); icn.IsValid() {
+			return icn, true
+		}
+		if icn := icons.Icon(cat + "_file"); icn.IsValid() {
 			return icn, true
 		}
 	}
