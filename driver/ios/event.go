@@ -54,6 +54,7 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 			panic("out of touchIDs")
 		}
 	}
+	fmt.Println("cTouchType", cTouchType)
 	t := events.TouchStart
 	switch cTouchType {
 	case 0:
@@ -78,7 +79,6 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := getCodeFromRune(r)
-		fmt.Println("kt", r, code)
 		theApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }

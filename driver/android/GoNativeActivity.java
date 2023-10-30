@@ -7,7 +7,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IMPORTANT: after making any changes to this file, you need
+// VERY IMPORTANT: after making any changes to this file, you need
 // to run go generate in github.com/goki/goki/mobile 
 
 package org.golang.app;
@@ -34,6 +34,8 @@ import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -203,6 +205,7 @@ public class GoNativeActivity extends NativeActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.e("GoLog", "onCreate");
 		load();
 		super.onCreate(savedInstanceState);
 		setupEntry();
@@ -215,6 +218,9 @@ public class GoNativeActivity extends NativeActivity {
 				GoNativeActivity.this.updateLayout();
 			}
 		});
+
+		Log.e("GoLog", "making GestureListener");
+		mDetector = new GestureDetector(this, new MyGestureListener());
 	}
 
 	private void setupEntry() {
@@ -283,5 +289,33 @@ public class GoNativeActivity extends NativeActivity {
 	protected void updateTheme(Configuration config) {
 		boolean dark = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 		setDarkMode(dark);
+	}
+
+	private GestureDetector mDetector;
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (this.mDetector.onTouchEvent(event)) {
+			return true;
+		}
+		return super.onTouchEvent(event);
+	}
+
+	class MyGestureListener extends GestureDetector.SimpleOnGestureListener
+
+	{
+
+		@Override
+		public boolean onDown(MotionEvent event) {
+			Log.i("Go", "onDown: " + event.toString());
+			return true;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent event1, MotionEvent event2,
+				float velocityX, float velocityY) {
+			Log.i("Go", "onFling: " + event1.toString() + event2.toString());
+			return true;
+		}
 	}
 }

@@ -26,6 +26,7 @@ import "C"
 import (
 	"image"
 	"log"
+	"log/slog"
 
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
@@ -62,6 +63,7 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 	case C.AINPUT_EVENT_TYPE_MOTION:
 		// At most one of the events in this batch is an up or down event; get its index and change.
 		upDownIndex := C.size_t(C.AMotionEvent_getAction(e)&C.AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> C.AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT
+		slog.Info("got motion event", "action", C.AMotionEvent_getAction(e)&C.AMOTION_EVENT_ACTION_MASK, "index", upDownIndex)
 		upDownType := events.TouchMove
 		switch C.AMotionEvent_getAction(e) & C.AMOTION_EVENT_ACTION_MASK {
 		case C.AMOTION_EVENT_ACTION_DOWN, C.AMOTION_EVENT_ACTION_POINTER_DOWN:

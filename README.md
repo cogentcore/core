@@ -11,3 +11,7 @@ The following implementations of the higher-level goosi interfaces are supported
 
 The `Platform` type enumerates these supported platforms and should be used to conditionalize behavior, instead of the GOOS value typically used in Go.
 
+
+## IMPORTANT
+After making any changes to `GoNativeActivity.java` in the Android driver, you **need** to run go generate in github.com/goki/goki/mobile
+
