@@ -3021,6 +3021,12 @@ const (
 	// FiberSmartRecord is https://github.com/goki/icons/blob/main/svg/fiber_smart_record.svg
 	FiberSmartRecord Icon = "fiber_smart_record"
 
+	// FileExe is https://github.com/goki/icons/blob/main/svg/file-exe.svg
+	FileExe Icon = "file-exe"
+
+	// FileMarkdown is https://github.com/goki/icons/blob/main/svg/file-markdown.svg
+	FileMarkdown Icon = "file-markdown"
+
 	// FileCopy is https://github.com/goki/icons/blob/main/svg/file_copy.svg
 	FileCopy Icon = "file_copy"
 
@@ -3606,6 +3612,9 @@ const (
 	// Glyphs is https://github.com/goki/icons/blob/main/svg/glyphs.svg
 	Glyphs Icon = "glyphs"
 
+	// Go is https://github.com/goki/icons/blob/main/svg/go.svg
+	Go Icon = "go"
+
 	// GoToLine is https://github.com/goki/icons/blob/main/svg/go_to_line.svg
 	GoToLine Icon = "go_to_line"
 
@@ -4188,6 +4197,9 @@ const (
 	// Joystick is https://github.com/goki/icons/blob/main/svg/joystick.svg
 	Joystick Icon = "joystick"
 
+	// Json is https://github.com/goki/icons/blob/main/svg/json.svg
+	Json Icon = "json"
+
 	// JumpToElement is https://github.com/goki/icons/blob/main/svg/jump_to_element.svg
 	JumpToElement Icon = "jump_to_element"
 
@@ -4748,6 +4760,9 @@ const (
 
 	// MailLock is https://github.com/goki/icons/blob/main/svg/mail_lock.svg
 	MailLock Icon = "mail_lock"
+
+	// Makefile is https://github.com/goki/icons/blob/main/svg/makefile.svg
+	Makefile Icon = "makefile"
 
 	// Male is https://github.com/goki/icons/blob/main/svg/male.svg
 	Male Icon = "male"
@@ -7727,6 +7742,9 @@ const (
 
 	// SurroundSound is https://github.com/goki/icons/blob/main/svg/surround_sound.svg
 	SurroundSound Icon = "surround_sound"
+
+	// Svg is https://github.com/goki/icons/blob/main/svg/svg.svg
+	Svg Icon = "svg"
 
 	// SwapCalls is https://github.com/goki/icons/blob/main/svg/swap_calls.svg
 	SwapCalls Icon = "swap_calls"
