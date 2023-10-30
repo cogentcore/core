@@ -14,6 +14,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
 )
@@ -98,16 +99,12 @@ func (fn *Node) DuplicateFile() error {
 // DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
 // all files and subdirectories are also deleted.
 func (fn *Node) DeleteFiles() {
-	gi.ChoiceDialog(fn, gi.DlgOpts{Title: "Delete Files?",
-		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
-		[]string{"Delete Files", "Cancel"}, func(dlg *gi.Dialog) {
-			switch dlg.Data.(int) {
-			case 0:
-				fn.DeleteFilesImpl()
-			case 1:
-				// do nothing
-			}
-		})
+	gi.NewDialog(fn).Title("Delete Files?").
+		Prompt("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.").
+		Cancel().Ok("Delete Files").
+		OnAccept(func(e events.Event) {
+			fn.DeleteFilesImpl()
+		}).Run()
 }
 
 // DeleteFilesImpl does the actual deletion, no prompts
@@ -309,6 +306,6 @@ func (fn *Node) ShowFileInfo() {
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
-		giv.StructViewDialog(fn, giv.DlgOpts{Title: "File Info", ReadOnly: true}, &fn.Info, nil)
+		giv.StructViewDialog(gi.NewDialog(fn).Title("File info").ReadOnly(true), &fn.Info, nil).Run()
 	}
 }
