@@ -104,9 +104,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
-		gi.NewDialog(gi.NewScene("dlg"), b1).
-			Title("Test Dialog").Prompt("This is a prompt").
-			Modal(true).NewWindow(true).OkCancel().Run()
+		gi.NewDialog(b1).Title("Test Dialog").Prompt("This is a prompt").
+			Modal(true).NewWindow(true).Ok().Cancel().Run()
 
 		// gi.StringPromptDialog(vp, "", "Enter value here..",
 		// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
@@ -129,8 +128,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(dlg *gi.DialogStage) {
 		// 	fmt.Println("choice option:", dlg.Data.(int), "accepted:", dlg.Accepted)
 		// }).Run()
-		gi.StringPromptDialog(button2, gi.DlgOpts{Title: "What is it?", Prompt: "Please enter your response:", Ok: true, Cancel: true}, "", "Enter string here...", func(dlg *gi.Dialog) {
-			fmt.Println("string entered:", dlg.Data.(string), "accepted:", dlg.Accepted)
+		dlg := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:").StringPrompt("", "Enter string here...").Ok().Cancel()
+		dlg.OnAccept(func(e events.Event) {
+			fmt.Println("dialog accepted; string entered:", dlg.Data.(string))
 		}).Run()
 	})
 

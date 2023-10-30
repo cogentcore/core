@@ -601,7 +601,8 @@ func (fv *FileView) AddPathToFavs() {
 		fnm = dp
 	}
 	if _, found := gi.Prefs.FavPaths.FindPath(dp); found {
-		gi.PromptDialog(fv, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp), Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// gi.PromptDialog(fv, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp), Ok: true, Cancel: false}, nil)
 		return
 	}
 	fi := gi.FavPathItem{"folder", fnm, dp}
@@ -642,8 +643,9 @@ func (fv *FileView) NewFolder() {
 	np := filepath.Join(dp, "NewFolder")
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
-		gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView Error", Prompt: emsg, Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
+		// gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView Error", Prompt: emsg, Ok: true, Cancel: false}, nil)
 	}
 	// fv.FileSig.Emit(fv.This(), int64(FileViewNewFolder), fv.DirPath)
 	fv.UpdateFilesAction()
@@ -856,16 +858,13 @@ func (fv *FileView) EditPaths() {
 	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, NoAdd: true}
-	SliceViewDialog(fv, opts, &tmp, nil, func(dlg *gi.Dialog) {
-		if !dlg.Accepted {
-			return
-		}
+	dlg := SliceViewDialog(gi.NewDialog(fv).Title("Recent File Paths").Prompt("Delete paths you no longer use"), &tmp, nil, true, false).Ok().Cancel()
+	dlg.OnAccept(func(e events.Event) {
 		gi.SavedPaths = nil
 		gi.SavedPaths = append(gi.SavedPaths, tmp...)
 		// add back the reset/edit menu items
 		gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
 		gi.SavePaths()
 		fv.UpdateFiles()
-	})
+	}).Run()
 }

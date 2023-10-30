@@ -207,10 +207,8 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 		return
 	}
 	myidx += rel
-	gi.NewKiDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Number and Type of Items to Insert:"}, sk.BaseType(), func(dlg *gi.Dialog) {
-		if !dlg.Accepted {
-			return
-		}
+	dlg := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:").NewItems(sk.BaseType())
+	dlg.OnAccept(func(e events.Event) {
 		par := tv.SyncNode
 		typ := dlg.Data.(*gti.Type)
 		n := 1 // todo
@@ -232,7 +230,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				stv.SelectAction(events.SelectOne)
 			}
 		}
-	})
+	}).Run()
 }
 
 // SrcAddChild adds a new child node to this one in the source tree,
@@ -244,35 +242,32 @@ func (tv *TreeView) SrcAddChild() {
 		log.Printf("TreeView %v nil SyncNode in: %v\n", ttl, tv.Path())
 		return
 	}
-	gi.NewKiDialog(tv, gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"}, sk.BaseType(),
-		func(dlg *gi.Dialog) {
-			if !dlg.Accepted {
-				return
+	dlg := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:").NewItems(sk.BaseType())
+	dlg.OnAccept(func(e events.Event) {
+		sk := tv.SyncNode
+		typ := dlg.Data.(*gti.Type)
+		n := 1 // todo
+		updt := sk.UpdateStart()
+		sk.SetChildAdded()
+		var ski ki.Ki
+		for i := 0; i < n; i++ {
+			nm := fmt.Sprintf("New%v%v", typ.Name, i)
+			nki := sk.NewChild(typ, nm)
+			if i == n-1 {
+				ski = nki
 			}
-			sk := tv.SyncNode
-			typ := dlg.Data.(*gti.Type)
-			n := 1 // todo
-			updt := sk.UpdateStart()
-			sk.SetChildAdded()
-			var ski ki.Ki
-			for i := 0; i < n; i++ {
-				nm := fmt.Sprintf("New%v%v", typ.Name, i)
-				nki := sk.NewChild(typ, nm)
-				if i == n-1 {
-					ski = nki
-				}
-				// tv.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), nki.This())
+			// tv.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), nki.This())
+		}
+		tv.SendChangeEventReSync(nil)
+		sk.UpdateEnd(updt)
+		if ski != nil {
+			tv.Open()
+			if tvk := tv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
+				stv := AsTreeView(tvk)
+				stv.SelectAction(events.SelectOne)
 			}
-			tv.SendChangeEventReSync(nil)
-			sk.UpdateEnd(updt)
-			if ski != nil {
-				tv.Open()
-				if tvk := tv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
-					stv := AsTreeView(tvk)
-					stv.SelectAction(events.SelectOne)
-				}
-			}
-		})
+		}
+	}).Run()
 }
 
 // SrcDelete deletes the source node corresponding
@@ -344,7 +339,7 @@ func (tv *TreeView) SrcEdit() {
 		return
 	}
 	// tynm := laser.NonPtrType(tv.SyncNode.KiType()).Name()
-	StructViewDialog(tv, DlgOpts{Title: "type"}, tv.SyncNode, nil)
+	StructViewDialog(gi.NewDialog(tv).Title("type"), tv.SyncNode, nil).Run()
 }
 
 // SrcGoGiEditor pulls up a new GoGiEditor window on the source

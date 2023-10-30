@@ -465,19 +465,20 @@ func (tb *Buf) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + dirs.DirAndFile(string(tb.Filename)),
-			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)},
-			[]string{"Save As to diff File", "Revert from Disk", "Ignore and Proceed"},
-			func(dlg *gi.Dialog) {
-				switch dlg.Data.(int) {
-				case 0:
-					// CallMethod(tb, "SaveAs", vp)
-				case 1:
-					tb.Revert()
-				case 2:
-					tb.SetFlag(true, BufFileModOk)
-				}
-			})
+		dlg := gi.NewDialog(vp).Title("File Changed on Disk: "+dirs.DirAndFile(string(tb.Filename))).
+			Prompt(fmt.Sprintf("File has changed on Disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)).
+			Choice("Save As to diff File", "Revert from Disk", "Ignore and Proceed")
+		dlg.OnAccept(func(e events.Event) {
+			switch dlg.Data.(int) {
+			case 0:
+				// TODO(kai/dialog): add this back
+				// CallMethod(tb, "SaveAs", vp)
+			case 1:
+				tb.Revert()
+			case 2:
+				tb.SetFlag(true, BufFileModOk)
+			}
+		}).Run()
 		return true
 	}
 	return false
@@ -488,7 +489,8 @@ func (tb *Buf) Open(filename gi.FileName) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		// vp := tb.SceneFromView()
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// gi.PromptDialog(nil, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 		slog.Error(err.Error())
 		return err
 	}
@@ -529,7 +531,8 @@ func (tb *Buf) Revert() bool {
 		if err != nil {
 			vp := tb.SceneFromView()
 			if vp != nil { // only if viewing
-				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
+				// TODO(kai/snack)
+				// gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 			}
 			slog.Error(err.Error())
 			return false
@@ -566,21 +569,19 @@ func (tb *Buf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
 		}
 	} else {
 		vp := tb.SceneFromView()
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
-			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
-			[]string{"Cancel", "Overwrite"},
-			func(dlg *gi.Dialog) {
-				cancel := false
-				switch dlg.Data.(int) {
-				case 0:
-					cancel = true
-				case 1:
-					tb.SaveFile(filename)
-				}
-				if afterFunc != nil {
-					afterFunc(cancel)
-				}
-			})
+		dlg := gi.NewDialog(vp).Title("File Exists, Overwrite?").
+			Prompt(fmt.Sprintf("File already exists, overwrite?  File: %v", filename)).
+			Cancel().Ok("Overwrite")
+		dlg.OnAccept(func(e events.Event) {
+			tb.SaveFile(filename)
+			if afterFunc != nil {
+				afterFunc(false)
+			}
+		}).OnCancel(func(e events.Event) {
+			if afterFunc != nil {
+				afterFunc(true)
+			}
+		}).Run()
 	}
 }
 
@@ -594,7 +595,8 @@ func (tb *Buf) SaveAs(filename gi.FileName) {
 func (tb *Buf) SaveFile(filename gi.FileName) error {
 	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 		slog.Error(err.Error())
 	} else {
 		tb.Filename = filename
@@ -613,19 +615,19 @@ func (tb *Buf) Save() error {
 	info, err := os.Stat(string(tb.Filename))
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
-			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
-			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
-			func(dlg *gi.Dialog) {
-				switch dlg.Data.(int) {
-				case 0:
-					// CallMethod(tb, "SaveAs", vp)
-				case 1:
-					tb.Revert()
-				case 2:
-					tb.SaveFile(tb.Filename)
-				}
-			})
+		dlg := gi.NewDialog(vp).Title("File Changed on Disk").
+			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)).
+			Choice("Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting")
+		dlg.OnAccept(func(e events.Event) {
+			switch dlg.Data.(int) {
+			case 0:
+				// CallMethod(tb, "SaveAs", vp)
+			case 1:
+				tb.Revert()
+			case 2:
+				tb.SaveFile(tb.Filename)
+			}
+		}).Run()
 	}
 	return tb.SaveFile(tb.Filename)
 }
@@ -636,40 +638,40 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
 		vp := tb.SceneFromView()
 		if tb.Filename != "" {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
-				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
-				[]string{"Save", "Close Without Saving", "Cancel"},
-				func(dlg *gi.Dialog) {
-					switch dlg.Data.(int) {
-					case 0:
-						tb.Save()
-						tb.Close(afterFun) // 2nd time through won't prompt
-					case 1:
-						tb.ClearChanged()
-						tb.AutoSaveDelete()
-						tb.Close(afterFun)
-					case 2:
-						if afterFun != nil {
-							afterFun(true)
-						}
+			dlg := gi.NewDialog(vp).Title("Close Without Saving?").
+				Prompt(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)).
+				Choice("Save", "Close Without Saving", "Cancel")
+			dlg.OnAccept(func(e events.Event) {
+				switch dlg.Data.(int) {
+				case 0:
+					tb.Save()
+					tb.Close(afterFun) // 2nd time through won't prompt
+				case 1:
+					tb.ClearChanged()
+					tb.AutoSaveDelete()
+					tb.Close(afterFun)
+				case 2:
+					if afterFun != nil {
+						afterFun(true)
 					}
-				})
+				}
+			}).Run()
 		} else {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
-				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
-				[]string{"Close Without Saving", "Cancel"},
-				func(dlg *gi.Dialog) {
-					switch dlg.Data.(int) {
-					case 0:
-						tb.ClearChanged()
-						tb.AutoSaveDelete()
-						tb.Close(afterFun)
-					case 1:
-						if afterFun != nil {
-							afterFun(true)
-						}
+			dlg := gi.NewDialog(vp).Title("Close Without Saving?").
+				Prompt("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As").
+				Choice("Close Without Saving", "Cancel")
+			dlg.OnAccept(func(e events.Event) {
+				switch dlg.Data.(int) {
+				case 0:
+					tb.ClearChanged()
+					tb.AutoSaveDelete()
+					tb.Close(afterFun)
+				case 1:
+					if afterFun != nil {
+						afterFun(true)
 					}
-				})
+				}
+			}).Run()
 		}
 		return false // awaiting decisions..
 	}

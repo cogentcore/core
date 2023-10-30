@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
+	"goki.dev/goosi/events"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/lex"
@@ -712,16 +713,14 @@ func (ed *Editor) CursorTransposeWord() {
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (ed *Editor) JumpToLinePrompt() {
-	gi.StringPromptDialog(ed, gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
-		"", "Line no..", func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				val := dlg.Data.(string)
-				ln, err := laser.ToInt(val)
-				if err == nil {
-					ed.JumpToLine(int(ln))
-				}
-			}
-		})
+	dlg := gi.NewDialog(ed).Title("Jump To Line").Prompt("Line Number to jump to").StringPrompt("", "Line no..")
+	dlg.OnAccept(func(e events.Event) {
+		val := dlg.Data.(string)
+		ln, err := laser.ToInt(val)
+		if err == nil {
+			ed.JumpToLine(int(ln))
+		}
+	}).Run()
 
 }
 

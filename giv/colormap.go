@@ -57,10 +57,8 @@ func (cv *ColorMapView) ChooseColorMap() {
 	if cv.Map != nil {
 		cur = cv.Map.Name
 	}
-	SliceViewSelectDialog(cv, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, &sl, cur, nil, func(dlg *gi.Dialog) {
-		if !dlg.Accepted {
-			return
-		}
+	dlg := SliceViewSelectDialog(gi.NewDialog(cv).Title("Select a color map").Prompt("Choose color map to use from among available list"), &sl, cur)
+	dlg.OnAccept(func(e events.Event) {
 		si := dlg.Data.(int)
 		if si >= 0 {
 			nmap, ok := colormap.AvailMaps[sl[si]]
@@ -182,14 +180,16 @@ func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
-	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a ColorMap", Prompt: vv.Doc()}, &sl, cur, nil, func(dlg *gi.Dialog) {
-		if !dlg.Accepted {
-			si := dlg.Data.(int)
-			if si >= 0 {
-				vv.SetValue(sl[si])
-				vv.UpdateWidget()
-			}
+	dlg := SliceViewSelectDialog(gi.NewDialog(ctx).Title("Select a color map").Prompt(vv.Doc()), &sl, cur)
+	dlg.OnAccept(func(e events.Event) {
+		// TODO(kai/dialog): this used to be here, but it's unclear if that was correct
+		// if !dlg.Accepted {
+		si := dlg.Data.(int)
+		if si >= 0 {
+			vv.SetValue(sl[si])
+			vv.UpdateWidget()
 		}
+		// }
 		if fun != nil {
 			fun(dlg)
 		}

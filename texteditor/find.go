@@ -284,31 +284,27 @@ func (ed *Editor) QReplaceSig() {
 	// ed.ViewSig.Emit(ed.This(), int64(ViewQReplace), ed.CursorPos)
 }
 
-// QReplaceDialog prompts the user for a query-replace items, with choosers with history
-func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	dlg := gi.NewStdDialog(ctx, opts, fun)
-
-	sc := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
-
-	tff := sc.InsertNewChild(gi.ChooserType, prIdx+1, "find").(*gi.Chooser)
+// QReplaceDialog adds to the given dialog a display prompting the user for
+// query-replace items, with choosers with history
+func QReplaceDialog(dlg *gi.Dialog, find string, lexitems bool) *gi.Dialog {
+	tff := gi.NewChooser(dlg.Scene, "find")
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
-	tff.ConfigParts(sc)
+	tff.ConfigParts(dlg.Scene)
 	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
 	if find != "" {
 		tff.SetCurVal(find)
 	}
 
-	tfr := sc.InsertNewChild(gi.ChooserType, prIdx+2, "repl").(*gi.Chooser)
+	tfr := gi.NewChooser(dlg.Scene, "repl")
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
-	tfr.ConfigParts(sc)
+	tfr.ConfigParts(dlg.Scene)
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
-	lb := sc.InsertNewChild(gi.SwitchType, prIdx+3, "lexb").(*gi.Switch)
+	lb := gi.NewSwitch(dlg.Scene, "lexb")
 	lb.SetText("Lexical Items")
 	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
@@ -339,12 +335,13 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	QReplaceDialog(ed, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, find, ed.QReplace.LexItems, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			find, repl, lexItems := QReplaceDialogValues(dlg)
-			ed.QReplaceStart(find, repl, lexItems)
-		}
-	})
+	dlg := QReplaceDialog(gi.NewDialog(ed).Title("Query-Replace").
+		Prompt("Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"),
+		find, ed.QReplace.LexItems)
+	dlg.OnAccept(func(e events.Event) {
+		find, repl, lexItems := QReplaceDialogValues(dlg)
+		ed.QReplaceStart(find, repl, lexItems)
+	}).Run()
 }
 
 // QReplaceStart starts query-replace using given find, replace strings

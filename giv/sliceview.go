@@ -961,20 +961,18 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vvb := sv.SliceValView.AsValueBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				gi.NewKiDialog(sv, gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:", Ok: true, Cancel: true},
-					ownki.BaseType(), func(dlg *gi.Dialog) {
-						if dlg.Accepted {
-							typ := dlg.Data.(*gti.Type) // todo: n!
-							n := 1
-							updt := ownki.UpdateStart()
-							for i := 0; i < n; i++ {
-								nm := fmt.Sprintf("New%v%v", typ.Name, idx+1+i)
-								ownki.InsertNewChild(typ, idx+1+i, nm)
-							}
-							sv.SetChanged()
-							ownki.UpdateEnd(updt)
-						}
-					})
+				dlg := gi.NewDialog(sv).Title("Slice New").Prompt("Number and Type of Items to Insert:").NewItems(ownki.BaseType()).Cancel().Ok()
+				dlg.OnAccept(func(e events.Event) {
+					typ := dlg.Data.(*gti.Type) // todo: n!
+					n := 1
+					updt := ownki.UpdateStart()
+					for i := 0; i < n; i++ {
+						nm := fmt.Sprintf("New%v%v", typ.Name, idx+1+i)
+						ownki.InsertNewChild(typ, idx+1+i, nm)
+					}
+					sv.SetChanged()
+					ownki.UpdateEnd(updt)
+				}).Run()
 			}
 		}
 	} else {
