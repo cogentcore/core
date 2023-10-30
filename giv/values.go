@@ -212,11 +212,13 @@ func ToValue(it any, tags string) Value {
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
+		if _, ok := it.(time.Duration); ok {
+			return &DurationValue{}
+		}
 		if _, ok := it.(fmt.Stringer); ok { // use stringer
 			return &ValueBase{}
-		} else {
-			return &IntValue{}
 		}
+		return &IntValue{}
 	case vk == reflect.Bool:
 		return &BoolValue{}
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
