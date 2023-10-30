@@ -63,6 +63,8 @@ public class GoNativeActivity extends NativeActivity {
 
 	private native void setDarkMode(boolean dark);
 
+	private native void scrolled(MotionEvent e);
+
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 

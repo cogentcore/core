@@ -44,6 +44,11 @@ func keyboardDelete() {
 	theApp.window.EvMgr.KeyChord(0, key.CodeDeleteBackspace, 0) // TODO: modifiers
 }
 
+//export scrolled
+func scrolled(e *C.MotionEvent) {
+	theApp.window.EvMgr.Scroll(image.Point{}, image.Point{}) // TODO
+}
+
 func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
 	var e *C.AInputEvent
 	for C.AInputQueue_getEvent(q, &e) >= 0 {
