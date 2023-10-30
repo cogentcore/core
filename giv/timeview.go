@@ -13,7 +13,20 @@ import (
 	"goki.dev/laser"
 )
 
-var timeUnits = map[string]time.Duration{
+var timeUnits = []string{
+	"nanoseconds",
+	"microseconds",
+	"milliseconds",
+	"seconds",
+	"minutes",
+	"hours",
+	"days",
+	"weeks",
+	"months",
+	"years",
+}
+
+var timeUnitsMap = map[string]time.Duration{
 	"nanoseconds":  time.Nanosecond,
 	"microseconds": time.Microsecond,
 	"milliseconds": time.Millisecond,
@@ -44,11 +57,12 @@ func (vv *DurationValue) UpdateWidget() {
 	dur := npv.Interface().(time.Duration)
 	un := "seconds"
 	undur := time.Duration(0)
-	for k, v := range timeUnits {
+	for _, u := range timeUnits {
+		v := timeUnitsMap[u]
 		if v > dur {
 			break
 		}
-		un = k
+		un = u
 		undur = v
 	}
 	adur := dur
@@ -75,18 +89,18 @@ func (vv *DurationValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 
 	sp := gi.NewSpinner(fr, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(timeUnits[ch.CurLabel]))
+		vv.SetValue(sp.Value * float32(timeUnitsMap[ch.CurLabel]))
 	})
 	sp.Config(sc)
 
 	units := []any{}
-	for k := range timeUnits {
-		units = append(units, k)
+	for _, u := range timeUnits {
+		units = append(units, u)
 	}
 
 	ch = gi.NewChooser(fr, "unit").SetTooltip("The unit of time").SetItems(units)
 	ch.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(timeUnits[ch.CurLabel]))
+		vv.SetValue(sp.Value * float32(timeUnitsMap[ch.CurLabel]))
 	})
 
 	vv.UpdateWidget()
