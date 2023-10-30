@@ -63,7 +63,7 @@ public class GoNativeActivity extends NativeActivity {
 
 	private native void setDarkMode(boolean dark);
 
-	private native void scrolled(MotionEvent e);
+	private native void scrolled(float posX, float posY, float distanceX, float distanceY);
 
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
@@ -327,6 +327,7 @@ public class GoNativeActivity extends NativeActivity {
 		public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
 				float distanceY) {
 			Log.d("Go", "onScroll: " + event1.toString() + event2.toString());
+			scrolled(event2.getX(), event2.getY(), distanceX, distanceY);
 			return true;
 		}
 

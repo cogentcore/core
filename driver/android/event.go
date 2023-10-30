@@ -45,8 +45,10 @@ func keyboardDelete() {
 }
 
 //export scrolled
-func scrolled(e *C.MotionEvent) {
-	theApp.window.EvMgr.Scroll(image.Point{}, image.Point{}) // TODO
+func scrolled(posX, posY, distanceX, distanceY *C.float) {
+	where := image.Pt(int(posX), int(posY))
+	delta := image.Pt(int(distanceX), int(distanceY))
+	theApp.window.EvMgr.Scroll(where, delta) // TODO
 }
 
 func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
