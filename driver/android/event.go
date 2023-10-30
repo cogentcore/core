@@ -51,6 +51,12 @@ func scrolled(posX, posY, distanceX, distanceY *C.float) {
 	theApp.window.EvMgr.Scroll(where, delta) // TODO
 }
 
+//export scaled
+func scaled(scaleFactor, posX, posY *C.float) {
+	where := image.Pt(int(posX), int(posY))
+	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+}
+
 func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
 	var e *C.AInputEvent
 	for C.AInputQueue_getEvent(q, &e) >= 0 {
