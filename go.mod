@@ -34,6 +34,7 @@ require (
 	goki.dev/vci/v2 v2.0.0-dev0.0.11
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.9
 	golang.org/x/image v0.13.0
+	gopkg.in/fsnotify.v1 v1.4.7
 )
 
 require (
@@ -64,5 +65,4 @@ require (
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
-	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 )
