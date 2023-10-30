@@ -155,12 +155,12 @@ func app() {
 	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
 	but.OnClick(func(e events.Event) {
 		sl := make([]float32, 2880)
-		giv.SliceViewDialog(but, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, &sl, nil, nil).Run()
+		giv.SliceViewDialog(gi.NewDialog(but).Title("SliceView Test").Prompt("It should open quickly."), &sl, nil, false, false).Run()
 	})
 	but = gi.NewButton(trow, "table-test").SetText("TableDialog")
 	but.Tooltip = "open a TableViewDialog view "
 	but.OnClick(func(e events.Event) {
-		giv.TableViewDialog(but, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, &tsttable, nil, nil).Run()
+		giv.TableViewDialog(gi.NewDialog(but).Title("TableView Test").Prompt("how does it resize."), &tsttable, nil, false, false).Run()
 	})
 
 	lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
