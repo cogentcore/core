@@ -43,8 +43,8 @@ type Dialog struct {
 	// Accepted means that the dialog was accepted -- else canceled
 	Accepted bool
 
-	// ButtonBox goes here when added
-	ButtonBox *Layout
+	// Buttons go here when added
+	Buttons *Layout
 }
 
 // NewDialog returns a new [Dialog] in the context of the given widget,
@@ -105,11 +105,11 @@ func (dlg *Dialog) Prompt(prompt string) *Dialog {
 	return dlg
 }
 
-// ConfigButtonBox adds layout for holding buttons at bottom of dialog
-// and saves as ButtonBox field, if not already done.
-func (dlg *Dialog) ConfigButtonBox() *Layout {
-	if dlg.ButtonBox != nil {
-		return dlg.ButtonBox
+// ConfigButtons adds layout for holding buttons at bottom of dialog
+// and saves as Buttons field, if not already done.
+func (dlg *Dialog) ConfigButtons() *Layout {
+	if dlg.Buttons != nil {
+		return dlg.Buttons
 	}
 	bb := NewLayout(dlg, "buttons").
 		SetLayout(LayoutHoriz)
@@ -117,18 +117,18 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 		bb.Spacing.Dp(8)
 		s.SetStretchMaxWidth()
 	})
-	dlg.ButtonBox = bb
+	dlg.Buttons = bb
 	NewStretch(bb)
 	return bb
 }
 
-// Ok adds an OK button to the ButtonBox at bottom of dialog,
+// Ok adds an OK button to the Buttons at bottom of dialog,
 // connecting to Accept method the Ctrl+Enter keychord event.
 // Also sends a Change event to the dialog for listeners there.
 // If text is passed, that text is used for the text of the button
 // instead of the standard "OK".
 func (dlg *Dialog) Ok(text ...string) *Dialog {
-	bb := dlg.ConfigButtonBox()
+	bb := dlg.ConfigButtons()
 	txt := "OK"
 	if len(text) > 0 {
 		txt = text[0]
@@ -137,7 +137,7 @@ func (dlg *Dialog) Ok(text ...string) *Dialog {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.AcceptDialog()
 	})
-	dlg.Scene.OnKeyChord(func(e events.Event) {
+	dlg.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Accept {
 			e.SetHandled()
@@ -147,13 +147,13 @@ func (dlg *Dialog) Ok(text ...string) *Dialog {
 	return dlg
 }
 
-// Cancel adds Cancel button to the ButtonBox at bottom of dialog,
+// Cancel adds Cancel button to the Buttons at bottom of dialog,
 // connecting to Cancel method and the Esc keychord event.
 // Also sends a Change event to the dialog scene for listeners there.
 // If text is passed, that text is used for the text of the button
 // instead of the standard "Cancel".
 func (dlg *Dialog) Cancel(text ...string) *Dialog {
-	bb := dlg.ConfigButtonBox()
+	bb := dlg.ConfigButtons()
 	txt := "Cancel"
 	if len(text) > 0 {
 		txt = text[0]
@@ -162,7 +162,7 @@ func (dlg *Dialog) Cancel(text ...string) *Dialog {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.CancelDialog()
 	})
-	dlg.Scene.OnKeyChord(func(e events.Event) {
+	dlg.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Abort {
 			e.SetHandled()
@@ -245,7 +245,7 @@ func (dlg *Dialog) Title(title ...string) *Dialog {
 	if len(title) > 0 {
 		dlg.Stage.Title = title[0]
 	}
-	NewLabel(dlg.Stage.Scene, "title").SetText(dlg.Stage.Title).
+	NewLabel(dlg.Stage, "title").SetText(dlg.Stage.Title).
 		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
 		s.MaxWidth.Dp(-1)
 		s.AlignH = styles.AlignCenter
@@ -257,7 +257,7 @@ func (dlg *Dialog) Title(title ...string) *Dialog {
 
 // Prompt adds given prompt to dialog.
 func (dlg *Dialog) Prompt(prompt string) *Dialog {
-	NewLabel(dlg.Stage.Scene, "prompt").SetText(prompt).
+	NewLabel(dlg.Stage, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.MaxWidth.Dp(-1)
@@ -286,28 +286,28 @@ func (dlg *Dialog) Prompt(prompt string) *Dialog {
 // }
 
 /*
-// ConfigButtonBox adds layout for holding buttons at bottom of dialog
-// and saves as ButtonBox field, if not already done.
-func (dlg *Dialog) ConfigButtonBox() *Layout {
-	if dlg.ButtonBox != nil {
-		return dlg.ButtonBox
+// ConfigButtons adds layout for holding buttons at bottom of dialog
+// and saves as Buttons field, if not already done.
+func (dlg *Dialog) ConfigButtons() *Layout {
+	if dlg.Buttons != nil {
+		return dlg.Buttons
 	}
-	bb := NewLayout(dlg.Stage.Scene, "buttons").
+	bb := NewLayout(dlg.Stage, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.Style(func(s *styles.Style) {
 		bb.Spacing.Dp(8)
 		s.SetStretchMaxWidth()
 	})
-	dlg.ButtonBox = bb
+	dlg.Buttons = bb
 	return bb
 }
 
-// Ok adds Ok button to the ButtonBox at bottom of dialog,
+// Ok adds Ok button to the Buttons at bottom of dialog,
 // connecting to Accept method the Ctrl+Enter keychord event.
 // Also sends a Change event to the dialog scene for listeners there.
 func (dlg *Dialog) Ok() *Dialog {
-	bb := dlg.ConfigButtonBox()
-	sc := dlg.Stage.Scene
+	bb := dlg.ConfigButtons()
+	sc := dlg.Stage
 	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.AcceptDialog()
@@ -322,12 +322,12 @@ func (dlg *Dialog) Ok() *Dialog {
 	return dlg
 }
 
-// Cancel adds Cancel button to the ButtonBox at bottom of dialog,
+// Cancel adds Cancel button to the Buttons at bottom of dialog,
 // connecting to Cancel method and the Esc keychord event.
 // Also sends a Change event to the dialog scene for listeners there
 func (dlg *Dialog) Cancel() *Dialog {
-	bb := dlg.ConfigButtonBox()
-	sc := dlg.Stage.Scene
+	bb := dlg.ConfigButtons()
+	sc := dlg.Stage
 	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.CancelDialog()
@@ -354,21 +354,21 @@ func (dlg *Dialog) OkCancel() *Dialog {
 // AcceptDialog accepts the dialog, activated by the default Ok button
 func (dlg *Dialog) AcceptDialog() {
 	dlg.Accepted = true
-	dlg.Scene.Send(events.Change)
+	dlg.Send(events.Change)
 	dlg.Close()
 }
 
 // CancelDialog cancels the dialog, activated by the default Cancel button
 func (dlg *Dialog) CancelDialog() {
 	dlg.Accepted = false
-	dlg.Scene.Send(events.Change)
+	dlg.Send(events.Change)
 	dlg.Close()
 }
 
 // OnAccept adds an event listener for when the dialog is accepted
 // (closed in a positive or neutral way)
 func (dlg *Dialog) OnAccept(fun func(e events.Event)) *Dialog {
-	dlg.Scene.OnChange(func(e events.Event) {
+	dlg.OnChange(func(e events.Event) {
 		if dlg.Accepted {
 			fun(e)
 		}
@@ -379,7 +379,7 @@ func (dlg *Dialog) OnAccept(fun func(e events.Event)) *Dialog {
 // OnCancel adds an event listener for when the dialog is canceled
 // (closed in a negative way)
 func (dlg *Dialog) OnCancel(fun func(e events.Event)) *Dialog {
-	dlg.Scene.OnChange(func(e events.Event) {
+	dlg.OnChange(func(e events.Event) {
 		if !dlg.Accepted {
 			fun(e)
 		}
@@ -403,10 +403,10 @@ func (dlg *Dialog) Close() {
 
 // DefaultStyle sets default style functions for dialog Scene
 func (dlg *Dialog) DialogStyles() {
-	dlg.Scene.Style(func(s *styles.Style) {
+	dlg.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
-		dlg.Scene.Spacing = StdDialogVSpaceUnits
+		dlg.Spacing = StdDialogVSpaceUnits
 		s.Padding.Left.Dp(8)
 		if !dlg.Stage.NewWindow && !dlg.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
@@ -464,7 +464,7 @@ func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 	dlg.Modal(true).NewWindow(false)
 	dlg.Stage.ClickOff = true // by default
 	if fun != nil {
-		dlg.Stage.Scene.OnChange(func(e events.Event) {
+		dlg.Stage.OnChange(func(e events.Event) {
 			fun(dlg)
 		})
 	}
@@ -512,8 +512,7 @@ func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 // for the user to choose among. The clicked button index (starting at 0)
 // is the [Dialog.Data].
 func (dlg *Dialog) Choice(choices ...string) *Dialog {
-	sc := dlg.Stage.Scene
-	bb := dlg.ConfigButtonBox()
+	bb := dlg.ConfigButtons()
 	NewStretch(bb, "stretch")
 	for i, ch := range choices {
 		chnm := strcase.ToKebab(ch)
@@ -528,7 +527,7 @@ func (dlg *Dialog) Choice(choices ...string) *Dialog {
 			} else {
 				dlg.AcceptDialog()
 			}
-			sc.Send(events.Change, e)
+			dlg.Send(events.Change, e)
 		})
 		b.OnKeyChord(func(e events.Event) {
 			dlg.Data = chidx
@@ -552,8 +551,7 @@ func (dlg *Dialog) Choice(choices ...string) *Dialog {
 // NewItems adds to the dialog a prompt for creating new item(s) of the given type,
 // showing registered gti types that embed given type.
 func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
-	sc := dlg.Stage.Scene
-	nrow := NewLayout(sc, "n-row")
+	nrow := NewLayout(dlg, "n-row")
 	nrow.Lay = LayoutHoriz
 
 	NewLabel(nrow, "n-label").SetText("Number:  ")
@@ -563,10 +561,10 @@ func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := NewSpace(sc, "type-space")
+	tspc := NewSpace(dlg, "type-space")
 	tspc.SetFixedHeight(units.Em(0.5))
 
-	trow := NewLayout(sc, "t-row")
+	trow := NewLayout(dlg, "t-row")
 	trow.Lay = LayoutHoriz
 
 	NewLabel(trow, "t-label").SetText("Type:    ")
@@ -593,7 +591,7 @@ type Dialog struct {
 
 	Stage *Stage
 
-	ButtonBox *Layout
+	Buttons *Layout
 }
 
 func Do() {
