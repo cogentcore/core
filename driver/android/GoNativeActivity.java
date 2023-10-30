@@ -35,6 +35,8 @@ import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -216,6 +218,8 @@ public class GoNativeActivity extends NativeActivity {
 				GoNativeActivity.this.updateLayout();
 			}
 		});
+
+		mDetector = new GestureDetector(this, new MyGestureListener());
 	}
 
 	private void setupEntry() {
@@ -284,5 +288,71 @@ public class GoNativeActivity extends NativeActivity {
 	protected void updateTheme(Configuration config) {
 		boolean dark = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 		setDarkMode(dark);
+	}
+
+	private GestureDetector mDetector;
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (this.mDetector.onTouchEvent(event)) {
+			return true;
+		}
+		return super.onTouchEvent(event);
+	}
+
+	class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+		@Override
+		public boolean onDown(MotionEvent event) {
+			Log.d("Go", "onDown: " + event.toString());
+			return true;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent event1, MotionEvent event2,
+				float velocityX, float velocityY) {
+			Log.d("Go", "onFling: " + event1.toString() + event2.toString());
+			return true;
+		}
+
+		@Override
+		public void onLongPress(MotionEvent event) {
+			Log.d("Go", "onLongPress: " + event.toString());
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+				float distanceY) {
+			Log.d("Go", "onScroll: " + event1.toString() + event2.toString());
+			return true;
+		}
+
+		@Override
+		public void onShowPress(MotionEvent event) {
+			Log.d("Go", "onShowPress: " + event.toString());
+		}
+
+		@Override
+		public boolean onSingleTapUp(MotionEvent event) {
+			Log.d("Go", "onSingleTapUp: " + event.toString());
+			return true;
+		}
+
+		@Override
+		public boolean onDoubleTap(MotionEvent event) {
+			Log.d("Go", "onDoubleTap: " + event.toString());
+			return true;
+		}
+
+		@Override
+		public boolean onDoubleTapEvent(MotionEvent event) {
+			Log.d("Go", "onDoubleTapEvent: " + event.toString());
+			return true;
+		}
+
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent event) {
+			Log.d("Go", "onSingleTapConfirmed: " + event.toString());
+			return true;
+		}
 	}
 }
