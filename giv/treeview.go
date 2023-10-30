@@ -22,6 +22,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -43,6 +44,10 @@ type TreeViewer interface {
 	// OnClose is called when a node is closed
 	// The base version does nothing.
 	OnClose()
+
+	// UpdateBranchIcons is called during DoLayout to update branch icons
+	// when everything should be configured, prior to rendering.
+	UpdateBranchIcons()
 }
 
 // AsTreeView returns the given value as a value of type TreeView if the type
@@ -133,8 +138,12 @@ func (tv *TreeView) CopyFieldsFrom(frm any) {
 }
 
 // AsTreeView satisfies the [TreeViewEmbedder] interface
-func (t *TreeView) AsTreeView() *TreeView {
-	return t
+func (tv *TreeView) AsTreeView() *TreeView {
+	return tv
+}
+
+func (tv *TreeView) BaseType() *gti.Type {
+	return tv.KiType()
 }
 
 // RootSetViewIdx sets the RootView and ViewIdx for all nodes.
@@ -438,6 +447,9 @@ func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 	tv.WidgetSize.X = w // stretch
 }
 
+func (tv *TreeView) UpdateBranchIcons() {
+}
+
 func (tv *TreeView) SetBranchState() {
 	br, ok := tv.BranchPart()
 	if !ok {
@@ -477,6 +489,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 		return false
 	}
 	tv.SetBranchState()
+	tv.This().(TreeViewer).UpdateBranchIcons()
 
 	wi := tv.This().(gi.Widget)
 	// our alloc size is root's size minus our total indentation
@@ -1120,25 +1133,81 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
+func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
 		})
-	if !tv.IsDisabled() {
-		gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(!tv.HasSelection(), states.Disabled).
-			OnClick(func(e events.Event) {
-				tv.This().(gi.Clipper).Cut()
-			})
-		pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
-			OnClick(func(e events.Event) {
-				tv.This().(gi.Clipper).Paste()
-			})
-		cb := tv.Sc.EventMgr.ClipBoard()
-		if cb != nil {
-			pbt.SetState(cb.IsEmpty(), states.Disabled)
-		}
+	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.EditNode()
+		})
+	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.GoGiEditNode()
+		})
+}
+
+func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
+	gi.NewButton(m).SetText("Add Child").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.AddChildNode()
+		})
+	gi.NewButton(m).SetText("Insert Before").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.InsertBefore()
+		})
+	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.InsertAfter()
+		})
+	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.TabDuplicate).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.Duplicate()
+		})
+	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.InsertAfter()
+		})
+	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keyfun.Delete).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.DeleteNode()
+		})
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.This().(gi.Clipper).Copy(true)
+		})
+	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.This().(gi.Clipper).Cut()
+		})
+	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+		OnClick(func(e events.Event) {
+			tv.This().(gi.Clipper).Paste()
+		})
+	cb := tv.Sc.EventMgr.ClipBoard()
+	if cb != nil {
+		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.EditNode()
+		})
+	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.GoGiEditNode()
+		})
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Open All").SetIcon(icons.Open).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.OpenAll()
+		})
+	gi.NewButton(m).SetText("Close All").SetIcon(icons.Close).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.CloseAll()
+		})
 }
 
 func (tv *TreeView) ContextMenu(m *gi.Scene) {
@@ -1153,7 +1222,11 @@ func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	// 		CtxtMenuView(tv.This(), tv.RootIsReadOnly(), tv.Scene, m)
 	// 	}
 	// } else {
-	tv.TreeViewContextMenu(m)
+	if tv.IsReadOnly() {
+		tv.TreeViewContextMenuReadOnly(m)
+	} else {
+		tv.TreeViewContextMenu(m)
+	}
 }
 
 // IsRoot returns true if given node is the root of the tree.
@@ -1479,7 +1552,7 @@ func (tv *TreeView) Dragged(de events.Event) {
 	if de.Mod != events.DropMove {
 		return
 	}
-	sroot := tv.RootView.SrcNode
+	sroot := tv.RootView.SyncNode
 	md := de.Data
 	for _, d := range md {
 		if d.Type == filecat.TextPlain { // link
@@ -1662,16 +1735,16 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 	if !tv.RootIsReadOnly() && !kt.IsHandled() {
 		switch kf {
 		case keyfun.Delete:
-			tv.SrcDelete()
+			tv.DeleteNode()
 			kt.SetHandled()
 		case keyfun.Duplicate:
-			tv.SrcDuplicate()
+			tv.Duplicate()
 			kt.SetHandled()
 		case keyfun.Insert:
-			tv.SrcInsertBefore()
+			tv.InsertBefore()
 			kt.SetHandled()
 		case keyfun.InsertAfter:
-			tv.SrcInsertAfter()
+			tv.InsertAfter()
 			kt.SetHandled()
 		case keyfun.Cut:
 			tv.This().(gi.Clipper).Cut()
@@ -1823,27 +1896,3 @@ var TreeViewProps = ki.Props{
 		}},
 	},
 }
-
-//
-// func (tv *TreeView) FocusChanged(change gi.FocusChanges) {
-// 	switch change {
-// 	case gi.FocusLost:
-// 		tv.SetNeedsRender()
-// 	case gi.FocusGot:
-// 		if tv.This() == tv.RootView.This() {
-// 			sl := tv.SelectedViews()
-// 			if len(sl) > 0 {
-// 				fsl := sl[0]
-// 				if fsl != tv {
-// 					fsl.GrabFocus()
-// 					return
-// 				}
-// 			}
-// 		}
-// 		tv.ScrollToMe()
-// 		tv.EmitFocusedSignal()
-// 		tv.SetNeedsRender()
-// 	case gi.FocusReadOnly: // don't care..
-// 	case gi.FocusActive:
-// 	}
-// }

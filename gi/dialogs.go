@@ -206,6 +206,7 @@ func (dlg *Dialog) StringPrompt(strval, placeholder string) *Dialog {
 		SetText(strval)
 	tf.SetStretchMaxWidth().
 		SetMinPrefWidth(units.Ch(40))
+	dlg.Data = strval
 	tf.OnChange(func(e events.Event) {
 		dlg.Data = tf.Text()
 	})
@@ -568,6 +569,8 @@ func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
 
 	typs := NewChooser(trow, "types")
 	typs.ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+
+	dlg.Data = typ
 
 	typs.OnChange(func(e events.Event) {
 		dlg.Data = typs.CurVal
