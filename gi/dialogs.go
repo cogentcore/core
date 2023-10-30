@@ -25,8 +25,7 @@ var (
 
 // Dialog is a scene with methods for configuring a dialog
 type Dialog struct {
-	// Scene is the scene associated with dialog
-	Scene *Scene
+	Scene
 
 	// Stage is the main stage associated with the dialog
 	Stage *MainStage
@@ -58,8 +57,13 @@ func NewDialog(ctx Widget, name ...string) *Dialog {
 	} else {
 		nm = ctx.Name() + "-dialog"
 	}
-	dlg.Scene = NewScene(nm)
-	dlg.Stage = NewMainStage(DialogStage, dlg.Scene, ctx)
+
+	dlg.InitName(dlg, nm)
+	dlg.EventMgr.Scene = &dlg.Scene
+	dlg.BgColor.SetSolid(colors.Transparent)
+	dlg.Lay = LayoutVert
+
+	dlg.Stage = NewMainStage(DialogStage, &dlg.Scene, ctx)
 	dlg.Modal(true)
 	return dlg
 }
@@ -78,7 +82,7 @@ func RecycleDialog(data any) bool {
 // Title adds the given title to the dialog
 func (dlg *Dialog) Title(title string) *Dialog {
 	dlg.Scene.Title = title
-	NewLabel(dlg.Scene, "title").SetText(title).
+	NewLabel(dlg, "title").SetText(title).
 		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.AlignH = styles.AlignCenter
@@ -89,7 +93,7 @@ func (dlg *Dialog) Title(title string) *Dialog {
 
 // Prompt adds the given prompt to the dialog
 func (dlg *Dialog) Prompt(prompt string) *Dialog {
-	NewLabel(dlg.Scene, "prompt").SetText(prompt).
+	NewLabel(dlg, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.SetStretchMaxWidth()
@@ -107,7 +111,7 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 	if dlg.ButtonBox != nil {
 		return dlg.ButtonBox
 	}
-	bb := NewLayout(dlg.Scene, "buttons").
+	bb := NewLayout(dlg, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.Style(func(s *styles.Style) {
 		bb.Spacing.Dp(8)
@@ -202,7 +206,7 @@ func (dlg *Dialog) Run() {
 // StringPrompt adds to the dialog a prompt for a string value.
 // The string is set as the Data field in the Dialog.
 func (dlg *Dialog) StringPrompt(strval, placeholder string) *Dialog {
-	tf := NewTextField(dlg.Scene).SetPlaceholder(placeholder).
+	tf := NewTextField(dlg).SetPlaceholder(placeholder).
 		SetText(strval)
 	tf.SetStretchMaxWidth().
 		SetMinPrefWidth(units.Ch(40))
