@@ -36,6 +36,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
 import android.view.GestureDetector;
+import android.view.ScaleGestureDetector;
 import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -219,7 +220,8 @@ public class GoNativeActivity extends NativeActivity {
 			}
 		});
 
-		mDetector = new GestureDetector(this, new MyGestureListener());
+		mDetector = new GestureDetector(this, new GestureListener());
+		mScaleDetector = new ScaleGestureDetector(this, new ScaleGestureListener());
 	}
 
 	private void setupEntry() {
@@ -291,16 +293,16 @@ public class GoNativeActivity extends NativeActivity {
 	}
 
 	private GestureDetector mDetector;
+	private ScaleGestureDetector mScaleDetector;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (this.mDetector.onTouchEvent(event)) {
-			return true;
-		}
+		this.mScaleDetector.onTouchEvent(event);
+		this.mDetector.onTouchEvent(event);
 		return super.onTouchEvent(event);
 	}
 
-	class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+	class GestureListener extends GestureDetector.SimpleOnGestureListener {
 		@Override
 		public boolean onDown(MotionEvent event) {
 			Log.d("Go", "onDown: " + event.toString());
@@ -352,6 +354,14 @@ public class GoNativeActivity extends NativeActivity {
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent event) {
 			Log.d("Go", "onSingleTapConfirmed: " + event.toString());
+			return true;
+		}
+	}
+
+	class ScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+		@Override
+		public boolean onScale(ScaleGestureDetector detector) {
+			Log.d("Go", "onScale: " + detector.getScaleFactor());
 			return true;
 		}
 	}
