@@ -79,16 +79,13 @@ func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := getCodeFromRune(r)
 		fmt.Println("kt", r, code)
-		theApp.window.EvMgr.Key(events.KeyDown, r, code, 0) // TODO: modifiers
-		theApp.window.EvMgr.Key(events.KeyUp, r, code, 0)   // TODO: modifiers
+		theApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	fmt.Println("kd")
-	theApp.window.EvMgr.Key(events.KeyDown, 0, key.CodeDeleteBackspace, 0) // TODO: modifiers
-	theApp.window.EvMgr.Key(events.KeyUp, 0, key.CodeDeleteBackspace, 0)   // TODO: modifiers
+	theApp.window.EvMgr.KeyChord(0, key.CodeDeleteBackspace, 0) // TODO: modifiers
 }
 
 var codeRune = map[rune]key.Codes{
