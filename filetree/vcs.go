@@ -42,7 +42,6 @@ func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 // a VCS repository.  if updateFiles is true, gets the files in the dir.
 // returns true if a repository was newly found here.
 func (fn *Node) DetectVcsRepo(updateFiles bool) bool {
-	return false
 	repo, _ := fn.Repo()
 	if repo != nil {
 		if updateFiles {
@@ -72,7 +71,6 @@ func (fn *Node) DetectVcsRepo(updateFiles bool) bool {
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
 func (fn *Node) Repo() (vci.Repo, *Node) {
-	return nil, nil
 	if fn.IsExternal() {
 		return nil, nil
 	}
@@ -82,7 +80,13 @@ func (fn *Node) Repo() (vci.Repo, *Node) {
 	var repo vci.Repo
 	var rnode *Node
 	fn.WalkUpParent(func(k ki.Ki) bool {
+		if k == nil || k.This() == nil {
+			return ki.Break
+		}
 		sfn := AsNode(k)
+		if sfn == nil {
+			return ki.Break
+		}
 		if sfn.IsIrregular() {
 			return ki.Break
 		}

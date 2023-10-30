@@ -186,7 +186,7 @@ func (tv *TreeView) TreeViewStyles() {
 			parts := w.(*gi.Layout)
 			parts.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
-				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
+				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 				parts.Spacing.Ch(0.5)
 				s.Padding.Set(units.Dp(4))
 			})
@@ -221,6 +221,11 @@ func (tv *TreeView) TreeViewStyles() {
 			parts.OnClick(func(e events.Event) {
 				tv.SelectAction(e.SelectMode())
 				e.SetHandled()
+			})
+			parts.OnDoubleClick(func(e events.Event) {
+				if tv.HasChildren() {
+					tv.ToggleClose()
+				}
 			})
 			// the context menu events will get sent to the parts, so it
 			// needs to intercept them and send them up
@@ -1679,12 +1684,6 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 }
 
 func (tv *TreeView) HandleTreeViewMouse() {
-	tv.OnDoubleClick(func(e events.Event) {
-		if tv.HasChildren() {
-			tv.ToggleClose()
-		}
-	})
-
 	// we let the parts handle our state
 	// so that we only get it when we are doing
 	// something with this treeview specifically,

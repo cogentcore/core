@@ -14,9 +14,7 @@ import (
 )
 
 func (fn *Node) HandleFileNodeEvents() {
-	fn.OnDoubleClick(func(e events.Event) {
-		fn.OpenEmptyDir()
-	})
+	// note: put all mouse events in parts!
 	// note: OnClick is grabbed by the parts first -- we don't see it
 	/*
 		fn.On(events.KeyChord, func(e events.Event) {
