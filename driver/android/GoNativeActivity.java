@@ -367,7 +367,7 @@ public class GoNativeActivity extends NativeActivity {
 		@Override
 		public boolean onScale(ScaleGestureDetector detector) {
 			Log.d("Go", "onScale: " + detector.getScaleFactor());
-			scaled(detector.getScaleFactor(), detector.focusX(), detector.focusY());
+			scaled(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY());
 			return true;
 		}
 	}
