@@ -86,7 +86,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 				}
 				cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 				if err == nil {
-					TextEditorDialog(lv, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true}, cinfo, nil)
+					TextEditorDialog(gi.NewDialog(lv).Title("Commit Info: "+cmt.Rev), cinfo, gi.FileName(lv.File), true).Ok().Run()
 				}
 			}
 		})
@@ -183,7 +183,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 
 }
 
-// VCSLogViewDialog opens a VCS Log View for given repo, log and file (file could be empty)
+// VCSLogViewDialog returns a VCS Log View for given repo, log and file (file could be empty)
 func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog {
 	title := "VCS Log: "
 	if file == "" {
@@ -194,7 +194,7 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	if since != "" {
 		title += " since: " + since
 	}
-	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title}, nil)
+	dlg := gi.NewDialog(ctx).Title(title)
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 

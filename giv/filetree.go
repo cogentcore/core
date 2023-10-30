@@ -1403,7 +1403,7 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	if err != nil {
 		return lg, err
 	}
-	VCSLogViewDialog(nil, repo, lg, fnm, since)
+	VCSLogViewDialog(nil, repo, lg, fnm, since).Run()
 	return lg, nil
 }
 
