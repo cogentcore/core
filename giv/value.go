@@ -490,18 +490,17 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && !laser.ValueIsZero(curnv) {
 			// actually new key and current exists
-			gi.ChoiceDialog(vv.Widget, gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
-				[]string{"Cancel Change", "Overwrite"}, func(dlg *gi.Dialog) {
-					switch dlg.Data.(int) {
-					case 1:
-						cv := ov.MapIndex(kv)               // get current value
-						ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-						ov.SetMapIndex(nv, cv)              // set new key to current value
-						vv.Value = nv                       // update value to new key
-						vv.SaveTmp()
-						vv.SendChange()
-					}
-				})
+			gi.NewDialog(vv.Widget).Title("Map Key Conflict").
+				Prompt(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val)).
+				Cancel("Cancel change").Ok("Overwrite").
+				OnAccept(func(e events.Event) {
+					cv := ov.MapIndex(kv)               // get current value
+					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+					ov.SetMapIndex(nv, cv)              // set new key to current value
+					vv.Value = nv                       // update value to new key
+					vv.SaveTmp()
+					vv.SendChange()
+				}).Run()
 			return false, nil // abort this action right now
 		}
 		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
