@@ -165,6 +165,13 @@ func (em *Mgr) Touch(typ Types, seq Sequence, where image.Point) {
 	}
 }
 
+// Magnify creates and sends a [TouchMagnify] event with the given values.
+func (em *Mgr) Magnify(scaleFactor float32, where image.Point) {
+	ev := NewMagnify(scaleFactor, where)
+	ev.Init()
+	em.Deque.Send(ev)
+}
+
 //	func (em *Mgr) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
 //		ev := dnd.NewEvent(act, where, em.Last.Mods)
 //		ev.Data = data

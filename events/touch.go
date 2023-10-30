@@ -57,12 +57,13 @@ type TouchMagnify struct {
 	ScaleFactor float32
 }
 
-// NewTouchMagnify constructs a new [TouchMagnify] event based on
+// NewMagnify creates a new [TouchMagnify] event based on
 // the given multiplicative scale factor.
-func NewTouchMagnify(scaleFactor float32) *TouchMagnify {
+func NewMagnify(scaleFactor float32, where image.Point) *TouchMagnify {
 	ev := &TouchMagnify{}
 	ev.Typ = Magnify
 	ev.SetUnique()
+	ev.Where = where
 	return ev
 }
 
