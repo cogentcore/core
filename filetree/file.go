@@ -239,7 +239,8 @@ func (fn *Node) NewFile(filename string, addToVcs bool) {
 	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err), Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err), Ok: true, Cancel: false}, nil)
 		return
 	}
 	fn.FRoot.UpdateNewFile(np)
@@ -274,8 +275,9 @@ func (fn *Node) NewFolder(foldername string) {
 	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		emsg := fmt.Sprintf("giv.Node at: %q: Error: %v", ppath, err)
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg, Ok: true, Cancel: false}, nil)
+		// TODO(kai/snack)
+		// emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", ppath, err)
+		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg, Ok: true, Cancel: false}, nil)
 		return
 	}
 	fn.FRoot.UpdateNewFile(ppath)
