@@ -64,7 +64,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 		if wi == nil {
 			return ki.Continue
 		}
-		if bt, ok := wi.(*Button); ok {
+		if bt := AsButton(wi); bt != nil {
 			bt.Type = ButtonMenu
 			if bt.Menu == nil {
 				bt.HandleClickDismissMenu()
