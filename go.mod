@@ -15,7 +15,7 @@ require (
 	goki.dev/cam v0.9.31
 	goki.dev/colors v0.8.25
 	goki.dev/cursors v0.0.13
-	goki.dev/enums v0.9.33
+	goki.dev/enums v0.9.34
 	goki.dev/girl v0.0.14
 	goki.dev/glop v0.1.4
 	goki.dev/goosi v0.0.6
