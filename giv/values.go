@@ -265,8 +265,11 @@ func ToValue(it any, tags string) Value {
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == laser.TypeFor[color.RGBA]() {
+		switch nptyp {
+		case laser.TypeFor[color.RGBA]():
 			return &ColorValue{}
+		case laser.TypeFor[gti.Type]():
+			return &TypeValue{}
 		}
 		nfld := laser.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
@@ -283,10 +286,6 @@ func ToValue(it any, tags string) Value {
 		// note: we never get here -- all interfaces are captured by pointer kind above
 		// apparently (because the non-ptr vk indirection does that I guess?)
 		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
-		switch {
-		case nptyp == laser.TypeFor[reflect.Type]():
-			return &TypeValue{}
-		}
 	case vk == reflect.String:
 		v := reflect.ValueOf(it)
 		str := v.String()
@@ -1203,7 +1202,7 @@ func (vv *TypeValue) UpdateWidget() {
 	}
 	sb := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
-	typ, ok := npv.Interface().(*gti.Type)
+	typ, ok := npv.Interface().(gti.Type)
 	if ok {
 		sb.SetCurVal(typ)
 	}
