@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
@@ -1572,21 +1573,38 @@ func (vv *FontValue) HasDialog() bool {
 	return true
 }
 
+// show fonts in a bigger size so you can actually see the differences
+var FontChooserSize = units.Pt(18)
+
 func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}
-	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
-	dlg := FontChooserDialog(gi.NewDialog(ctx).Title("Select a Font").Prompt(vv.Doc()))
-	dlg.OnAccept(func(e events.Event) {
-		si := dlg.Data.(int)
+	si := 0
+	wb := ctx.AsWidget()
+	FontChooserSize.ToDots(&wb.Styles.UnContext)
+	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
+	fi := paint.FontLibrary.FontInfo
+	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
+	d := gi.NewDialog(ctx).Title("Select a Font").Prompt(vv.Doc()).FullWindow(true)
+	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
+		if col != 4 {
+			return
+		}
+		s.Font.Family = fi[row].Name
+		s.Font.Stretch = fi[row].Stretch
+		s.Font.Weight = fi[row].Weight
+		s.Font.Style = fi[row].Style
+		s.Font.Size = FontChooserSize
+	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(d, &si)
+	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
 			fi := paint.FontLibrary.FontInfo[si]
 			vv.SetValue(fi.Name)
 			vv.UpdateWidget()
 		}
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
