@@ -6,6 +6,7 @@ package filetree
 
 import (
 	"fmt"
+	"strings"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -13,6 +14,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
+	"goki.dev/ki/v2"
 )
 
 func (fn *Node) HandleFileNodeEvents() {
@@ -100,32 +102,57 @@ func (fn *Node) KeyInput(kt events.Event) {
 	}
 }
 
+// VCSLabelFunc gets the appropriate label for removing from version control
+func VCSLabelFunc(fn *Node, label string) string {
+		repo, _ := fn.Repo()
+		if repo != nil {
+			label = strings.Replace(label, "VCS", string(repo.Vcs()), 1)
+		}
+	return label
+})
+
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
-	gi.NewButton(m).SetText("Show file info").SetIcon(icons.Info).
-		SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.ShowFileInfo()
-		})
-	gi.NewButton(m).SetText("Insert Before").SetIcon(icons.Add).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.InsertBefore()
-		})
-	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.InsertAfter()
-		})
-	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.TabDuplicate).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.Duplicate()
-		})
-	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.InsertAfter()
-		})
-	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keyfun.Delete).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.DeleteNode()
-		})
+	giv.NewFuncButton(m, fn.ShowFileInfo).SetIcon(icons.Info).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.OpenFilesDefault).SetText("Open (w/default app)").SetIcon(icons.Open).
+		SetState(!fn.HasSelection(), states.Disabled)
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, fn.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).
+		SetState(!fn.HasSelection(), states.Disabled).SetKey(keyfun.Duplicate)
+	giv.NewFuncButton(m, fn.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).
+		SetState(!fn.HasSelection(), states.Disabled).SetKey(kefun.Delete)
+	giv.NewFuncButton(m, fn.RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).
+		SetState(!fn.HasSelection(), states.Disabled)
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetState(!tv.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetState(!tv.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
+		SetState(!fn.HasSelection(), states.Disabled)
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).
+		SetState(!fn.HasSelection(), states.Disabled)
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, fn.AddToVcsSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.DeleteFromVcsSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.CommitToVcsSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.RevertVcsSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
+		SetState(!fn.HasSelection(), states.Disabled)
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, fn.DiffVcsSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
+		SetState(!fn.HasSelection(), states.Disabled)
+
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!fn.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
@@ -143,24 +170,6 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
-	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.EditNode()
-		})
-	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.GoGiEditNode()
-		})
-	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Open All").SetIcon(icons.Open).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.OpenAll()
-		})
-	gi.NewButton(m).SetText("Close All").SetIcon(icons.Close).SetState(!fn.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			fn.CloseAll()
-		})
 }
 
 func (fn *Node) ContextMenu(m *gi.Scene) {
@@ -181,3 +190,4 @@ func (fn *Node) ContextMenu(m *gi.Scene) {
 		fn.TreeViewContextMenu(m)
 	}
 }
+
