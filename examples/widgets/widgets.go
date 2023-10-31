@@ -120,15 +120,15 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetText("Open GoGiEditor")
 	button2.SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
-		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(dlg *gi.DialogStage) {
-		// 	fmt.Println("dialog looks OK:", dlg.Accepted)
+		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(d *gi.DialogStage) {
+		// 	fmt.Println("dialog looks OK:", d.Accepted)
 		// }).Run()
-		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(dlg *gi.DialogStage) {
-		// 	fmt.Println("choice option:", dlg.Data.(int), "accepted:", dlg.Accepted)
+		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(d *gi.DialogStage) {
+		// 	fmt.Println("choice option:", d.Data.(int), "accepted:", d.Accepted)
 		// }).Run()
-		dlg := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:").StringPrompt("", "Enter string here...").Ok().Cancel()
-		dlg.OnAccept(func(e events.Event) {
-			fmt.Println("dialog accepted; string entered:", dlg.Data.(string))
+		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:").StringPrompt("", "Enter string here...").Ok().Cancel()
+		d.OnAccept(func(e events.Event) {
+			fmt.Println("dialog accepted; string entered:", d.Data.(string))
 		}).Run()
 	})
 
