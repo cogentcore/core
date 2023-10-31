@@ -276,9 +276,9 @@ func (ed *Editor) ResetState() {
 }
 
 // SetBuf sets the Buf that this is a view of, and interconnects their signals
-func (ed *Editor) SetBuf(buf *Buf) {
+func (ed *Editor) SetBuf(buf *Buf) *Editor {
 	if buf != nil && ed.Buf == buf {
-		return
+		return ed
 	}
 	// had := false
 	if ed.Buf != nil {
@@ -296,6 +296,7 @@ func (ed *Editor) SetBuf(buf *Buf) {
 		}
 	}
 	ed.SetNeedsLayout()
+	return ed
 }
 
 // LinesInserted inserts new lines of text and reformats them
