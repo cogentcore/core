@@ -282,14 +282,14 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:").NewItems(typ).Cancel().Ok()
-	d.OnAccept(func(e events.Event) {
-		typ := d.Data.(*gti.Type)
-		n := 1 // todo
+	d := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:")
+	nd := &gi.NewItemsData{}
+	NewValue(d, nd).AsWidget().FindPath("struct-grid/value-Type").(*gi.Chooser).ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		if tv.SyncNode != nil {
-			tv.AddSyncNodes(0, 0, typ, n)
+			tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
 		} else {
-			tv.AddTreeNodes(0, 0, typ, n)
+			tv.AddTreeNodes(0, 0, nd.Type, nd.Number)
 		}
 	}).Run()
 }

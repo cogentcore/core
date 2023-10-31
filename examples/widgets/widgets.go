@@ -121,17 +121,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetText("Open GoGiEditor")
 	button2.SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
-		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(d *gi.DialogStage) {
-		// 	fmt.Println("dialog looks OK:", d.Accepted)
-		// }).Run()
-		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(d *gi.DialogStage) {
-		// 	fmt.Println("choice option:", d.Data.(int), "accepted:", d.Accepted)
-		// }).Run()
 		txt := ""
 		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:")
 		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
 		d.Cancel().Ok().OnAccept(func(e events.Event) {
-			fmt.Println("dialog accepted; string entered:", d.Data.(string))
+			fmt.Println("dialog accepted; string entered:", txt)
 		}).Run()
 	})
 
