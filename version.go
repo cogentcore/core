@@ -4,9 +4,9 @@ package gti
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.1.12"
+	Version = "v0.1.13"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "9e3af78"
+	GitCommit = "7f701a7"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-31 23:04"
+	VersionDate = "2023-10-31 23:08"
 )
