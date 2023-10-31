@@ -1929,6 +1929,9 @@ const (
 	// CoolToDry is https://github.com/goki/icons/blob/main/svg/cool_to_dry.svg
 	CoolToDry Icon = "cool_to_dry"
 
+	// Copy is https://github.com/goki/icons/blob/main/svg/copy.svg
+	Copy Icon = "copy"
+
 	// CopyAll is https://github.com/goki/icons/blob/main/svg/copy_all.svg
 	CopyAll Icon = "copy_all"
 
@@ -5765,6 +5768,9 @@ const (
 
 	// Password is https://github.com/goki/icons/blob/main/svg/password.svg
 	Password Icon = "password"
+
+	// Paste is https://github.com/goki/icons/blob/main/svg/paste.svg
+	Paste Icon = "paste"
 
 	// PatientList is https://github.com/goki/icons/blob/main/svg/patient_list.svg
 	PatientList Icon = "patient_list"
