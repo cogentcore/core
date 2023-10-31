@@ -1,6 +1,6 @@
 Name = "gi3d"
 Desc = ""
-Version = "v0.5.0"
+Version = "v0.5.2"
 Type = "Library"
 
 [Build]
@@ -29,13 +29,12 @@ Type = "Library"
   All = "F"
 
 [Release]
-  VersionFile = "gi3d/version.go"
+  VersionFile = "version.go"
   Package = "gi3d"
 
 [Generate]
   Dir = "."
   Output = "gokigen.go"
-  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -57,3 +56,4 @@ Type = "Library"
     AddFuncs = false
     Instance = false
     TypeVar = false
+    Setters = false
