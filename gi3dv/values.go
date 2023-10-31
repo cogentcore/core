@@ -86,19 +86,19 @@ func (vv *MeshValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	sl := sc.MeshList()
 	sort.Strings(sl)
 
+	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	giv.SliceViewSelectDialog(ctx, giv.DlgOpts{Title: "Select a Mesh", Prompt: desc}, &sl, cur, nil, func(dlg *gi.Dialog) {
-		if dlg.Accepted {
-			si := dlg.Data.(int)
-			if si >= 0 {
-				ms := sl[si]
-				vv.SetValue(ms)
-				vv.UpdateWidget()
-			}
+	d := gi.NewDialog(ctx).Title("Select a mesh").Prompt(desc)
+	giv.NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d, &si)
+	d.OnAccept(func(e events.Event) {
+		if si >= 0 {
+			ms := sl[si]
+			vv.SetValue(ms)
+			vv.UpdateWidget()
 		}
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
