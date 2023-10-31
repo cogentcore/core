@@ -444,10 +444,11 @@ type FontRender struct {
 // styles of the style object as a FontRender
 func (s *Style) FontRender() *FontRender {
 	return &FontRender{
-		Font:            s.Font,
-		Color:           s.Color,
-		BackgroundColor: s.BackgroundColor,
-		Opacity:         s.Opacity,
+		Font:  s.Font,
+		Color: s.Color,
+		// we do NOT set the BackgroundColor because the label renders its own background color
+		// STYTODO(kai): this might cause problems with inline span styles
+		Opacity: s.Opacity,
 	}
 }
 

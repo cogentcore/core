@@ -7,6 +7,7 @@ package paint
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"html"
 	"image"
 	"io"
@@ -101,6 +102,7 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 
 		// todo: cache flags if these are actually needed
 		if sr.HasDeco.HasFlag(styles.DecoBackgroundColor) {
+			fmt.Println("rendering background color for span", rs)
 			sr.RenderBg(rs, tpos)
 		}
 		if sr.HasDeco.HasFlag(styles.DecoUnderline) || sr.HasDeco.HasFlag(styles.DecoDottedUnderline) {
