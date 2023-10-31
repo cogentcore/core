@@ -254,6 +254,11 @@ func (d *Dialog) DialogStyles() {
 	})
 }
 
+type NewItemsData struct {
+	Number int
+	Type   *gti.Type
+}
+
 // NewItems adds to the dialog a prompt for creating new item(s) of the given type,
 // showing registered gti types that embed given type.
 func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
