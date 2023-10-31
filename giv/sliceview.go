@@ -429,6 +429,20 @@ func (sv *SliceViewBase) IsNil() bool {
 	return laser.AnyIsNil(sv.Slice)
 }
 
+// BindSelectDialog makes the slice view a read-only selection slice view and then
+// binds its events to the given dialog and its current selection index to the given value.
+func (sv *SliceViewBase) BindSelectDialog(d *gi.Dialog, val *int) *SliceViewBase {
+	sv.SetState(true, states.ReadOnly)
+	sv.OnSelect(func(e events.Event) {
+		*val = sv.CurIdx
+	})
+	sv.OnDoubleClick(func(e events.Event) {
+		*val = sv.CurIdx
+		d.AcceptDialog()
+	})
+	return sv
+}
+
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
 	sv.ConfigSliceView(sc)
