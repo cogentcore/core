@@ -60,6 +60,9 @@ type Value interface {
 	// interface doesn't need to provide accessors for them.
 	AsValueBase() *ValueBase
 
+	// AsWidget returns the widget associated with the value
+	AsWidget() gi.Widget
+
 	// Name returns the name of the value
 	Name() string
 
@@ -275,6 +278,10 @@ type ValueBase struct {
 
 func (vv *ValueBase) AsValueBase() *ValueBase {
 	return vv
+}
+
+func (vv *ValueBase) AsWidget() gi.Widget {
+	return vv.Widget
 }
 
 func (vv *ValueBase) Name() string {
