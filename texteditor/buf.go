@@ -467,14 +467,17 @@ func (tb *Buf) FileModCheck() bool {
 		vp := tb.SceneFromView()
 		d := gi.NewDialog(vp).Title("File Changed on Disk: " + dirs.DirAndFile(string(tb.Filename))).
 			Prompt(fmt.Sprintf("File has changed on Disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
-		gi.NewButton(d.Btns).SetText("Save as to different file").OnClick(func(e events.Event) {
+		gi.NewButton(d.Buttons()).SetText("Save as to different file").OnClick(func(e events.Event) {
+			d.AcceptDialog()
 			// TODO(kai/dialog): add this back
 			// CallMethod(tb, "SaveAs", vp)
 		})
-		gi.NewButton(d.Btns).SetText("Revert from disk").OnClick(func(e events.Event) {
+		gi.NewButton(d.Buttons()).SetText("Revert from disk").OnClick(func(e events.Event) {
+			d.AcceptDialog()
 			tb.Revert()
 		})
-		gi.NewButton(d.Btns).SetText("Ignore and proceed").OnClick(func(e events.Event) {
+		gi.NewButton(d.Buttons()).SetText("Ignore and proceed").OnClick(func(e events.Event) {
+			d.AcceptDialog()
 			tb.SetFlag(true, BufFileModOk)
 		})
 		d.Run()
@@ -616,15 +619,15 @@ func (tb *Buf) Save() error {
 		vp := tb.SceneFromView()
 		d := gi.NewDialog(vp).Title("File Changed on Disk").
 			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename))
-		gi.NewButton(d.Btns).SetText("Save to different file").OnClick(func(e events.Event) {
+		gi.NewButton(d.Buttons()).SetText("Save to different file").OnClick(func(e events.Event) {
 			d.AcceptDialog()
 			// CallMethod(tb, "SaveAs", vp)
 		})
-		gi.NewButton(d.Btns).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
+		gi.NewButton(d.Buttons()).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
 			d.AcceptDialog()
 			tb.Revert()
 		})
-		gi.NewButton(d.Btns).SetText("Save file, overwriting").OnClick(func(e events.Event) {
+		gi.NewButton(d.Buttons()).SetText("Save file, overwriting").OnClick(func(e events.Event) {
 			d.AcceptDialog()
 			tb.SaveFile(tb.Filename)
 		})
@@ -641,13 +644,13 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 		if tb.Filename != "" {
 			d := gi.NewDialog(vp).Title("Close without saving?").
 				Prompt(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)).Cancel()
-			gi.NewButton(d.Btns).SetText("Close without saving").OnClick(func(e events.Event) {
+			gi.NewButton(d.Buttons()).SetText("Close without saving").OnClick(func(e events.Event) {
 				d.AcceptDialog()
 				tb.ClearChanged()
 				tb.AutoSaveDelete()
 				tb.Close(afterFun)
 			})
-			gi.NewButton(d.Btns).SetText("Save").OnClick(func(e events.Event) {
+			gi.NewButton(d.Buttons()).SetText("Save").OnClick(func(e events.Event) {
 				d.AcceptDialog()
 				tb.Save()
 				tb.Close(afterFun) // 2nd time through won't prompt
