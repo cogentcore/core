@@ -4,9 +4,9 @@ package video
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.6"
+	Version = "v0.0.7"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "28b1776"
+	GitCommit = "33f5659"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-31 23:06"
+	VersionDate = "2023-10-31 23:10"
 )
