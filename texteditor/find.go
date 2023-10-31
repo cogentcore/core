@@ -333,11 +333,11 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	dlg := QReplaceDialog(gi.NewDialog(ed).Title("Query-Replace").
+	d := QReplaceDialog(gi.NewDialog(ed).Title("Query-Replace").
 		Prompt("Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"),
 		find, ed.QReplace.LexItems)
-	dlg.OnAccept(func(e events.Event) {
-		find, repl, lexItems := QReplaceDialogValues(dlg)
+	d.OnAccept(func(e events.Event) {
+		find, repl, lexItems := QReplaceDialogValues(d)
 		ed.QReplaceStart(find, repl, lexItems)
 	}).Run()
 }

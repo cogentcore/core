@@ -207,10 +207,10 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	if since != "" {
 		title += " since: " + since
 	}
-	dlg := gi.NewDialog(ctx).Title(title).NewWindow(true)
+	d := gi.NewDialog(ctx).Title(title).NewWindow(true)
 
-	lv := NewVCSLogView(dlg, "vcslog")
+	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
 
-	return dlg
+	return d
 }

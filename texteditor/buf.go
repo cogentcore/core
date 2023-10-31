@@ -465,11 +465,11 @@ func (tb *Buf) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		dlg := gi.NewDialog(vp).Title("File Changed on Disk: "+dirs.DirAndFile(string(tb.Filename))).
+		d := gi.NewDialog(vp).Title("File Changed on Disk: "+dirs.DirAndFile(string(tb.Filename))).
 			Prompt(fmt.Sprintf("File has changed on Disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)).
 			Choice("Save As to diff File", "Revert from Disk", "Ignore and Proceed")
-		dlg.OnAccept(func(e events.Event) {
-			switch dlg.Data.(int) {
+		d.OnAccept(func(e events.Event) {
+			switch d.Data.(int) {
 			case 0:
 				// TODO(kai/dialog): add this back
 				// CallMethod(tb, "SaveAs", vp)
@@ -569,10 +569,10 @@ func (tb *Buf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
 		}
 	} else {
 		vp := tb.SceneFromView()
-		dlg := gi.NewDialog(vp).Title("File Exists, Overwrite?").
+		d := gi.NewDialog(vp).Title("File Exists, Overwrite?").
 			Prompt(fmt.Sprintf("File already exists, overwrite?  File: %v", filename)).
 			Cancel().Ok("Overwrite")
-		dlg.OnAccept(func(e events.Event) {
+		d.OnAccept(func(e events.Event) {
 			tb.SaveFile(filename)
 			if afterFunc != nil {
 				afterFunc(false)
@@ -615,11 +615,11 @@ func (tb *Buf) Save() error {
 	info, err := os.Stat(string(tb.Filename))
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		dlg := gi.NewDialog(vp).Title("File Changed on Disk").
+		d := gi.NewDialog(vp).Title("File Changed on Disk").
 			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)).
 			Choice("Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting")
-		dlg.OnAccept(func(e events.Event) {
-			switch dlg.Data.(int) {
+		d.OnAccept(func(e events.Event) {
+			switch d.Data.(int) {
 			case 0:
 				// CallMethod(tb, "SaveAs", vp)
 			case 1:
@@ -638,11 +638,11 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
 		vp := tb.SceneFromView()
 		if tb.Filename != "" {
-			dlg := gi.NewDialog(vp).Title("Close Without Saving?").
+			d := gi.NewDialog(vp).Title("Close Without Saving?").
 				Prompt(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)).
 				Choice("Save", "Close Without Saving", "Cancel")
-			dlg.OnAccept(func(e events.Event) {
-				switch dlg.Data.(int) {
+			d.OnAccept(func(e events.Event) {
+				switch d.Data.(int) {
 				case 0:
 					tb.Save()
 					tb.Close(afterFun) // 2nd time through won't prompt
@@ -657,11 +657,11 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 				}
 			}).Run()
 		} else {
-			dlg := gi.NewDialog(vp).Title("Close Without Saving?").
+			d := gi.NewDialog(vp).Title("Close Without Saving?").
 				Prompt("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As").
 				Choice("Close Without Saving", "Cancel")
-			dlg.OnAccept(func(e events.Event) {
-				switch dlg.Data.(int) {
+			d.OnAccept(func(e events.Event) {
+				switch d.Data.(int) {
 				case 0:
 					tb.ClearChanged()
 					tb.AutoSaveDelete()
