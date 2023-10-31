@@ -858,8 +858,9 @@ func (fv *FileView) EditPaths() {
 	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	dlg := SliceViewDialog(gi.NewDialog(fv).Title("Recent File Paths").Prompt("Delete paths you no longer use"), &tmp, nil, true, false).Ok().Cancel()
-	dlg.OnAccept(func(e events.Event) {
+	d := gi.NewDialog(fv).Title("Recent File Paths").Prompt("Delete paths you no longer use")
+	NewSliceView(d).SetSlice(&tmp).SetFlag(true, SliceViewNoAdd)
+	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		gi.SavedPaths = nil
 		gi.SavedPaths = append(gi.SavedPaths, tmp...)
 		// add back the reset/edit menu items
