@@ -4,10 +4,10 @@ go 1.21.0
 
 require (
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/gi/v2 v2.0.0-dev0.0.6
+	goki.dev/gi/v2 v2.0.0-dev0.0.7
 	goki.dev/glop v0.1.4
-	goki.dev/goosi v0.0.6
-	goki.dev/grease v0.8.23
+	goki.dev/goosi v0.0.7
+	goki.dev/grease v0.8.24
 	goki.dev/grog v0.0.8
 	goki.dev/gti v0.1.11
 	goki.dev/ordmap v0.5.6
@@ -49,8 +49,8 @@ require (
 	goki.dev/cam v0.9.31 // indirect
 	goki.dev/colors v0.8.25 // indirect
 	goki.dev/cursors v0.0.13 // indirect
-	goki.dev/enums v0.9.33 // indirect
-	goki.dev/girl v0.0.14 // indirect
+	goki.dev/enums v0.9.34 // indirect
+	goki.dev/girl v0.0.15 // indirect
 	goki.dev/grows v0.3.10 // indirect
 	goki.dev/grr v0.0.4 // indirect
 	goki.dev/icons v0.0.6 // indirect
