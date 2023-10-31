@@ -5,14 +5,14 @@ go 1.21.0
 require (
 	github.com/aymerick/douceur v0.2.0
 	goki.dev/colors v0.8.25
-	goki.dev/enums v0.9.33
-	goki.dev/girl v0.0.14
+	goki.dev/enums v0.9.34
+	goki.dev/girl v0.0.15
 	goki.dev/glop v0.1.4
-	goki.dev/grows v0.3.10
-	goki.dev/gti v0.1.11
-	goki.dev/ki/v2 v2.0.0-dev0.0.14
-	goki.dev/laser v0.1.13
-	goki.dev/mat32/v2 v2.0.0-dev0.0.8
+	goki.dev/grows v0.3.11
+	goki.dev/gti v0.1.12
+	goki.dev/ki/v2 v2.0.0-dev0.0.15
+	goki.dev/laser v0.1.14
+	goki.dev/mat32/v2 v2.0.0-dev0.0.9
 	goki.dev/ordmap v0.5.6
 	golang.org/x/image v0.13.0
 	golang.org/x/net v0.17.0
