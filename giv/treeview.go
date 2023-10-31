@@ -268,10 +268,6 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Height.Em(1)
 				s.Margin.Set()
 				s.Padding.Set()
-
-				// we manually inherit our state layer from the treeview state
-				// layer so that the parts get it but not the other tree views
-				s.StateLayer = tv.actStateLayer
 			})
 		case "parts/branch":
 			sw := w.(*gi.Switch)
@@ -289,9 +285,10 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Height.Em(0.5)
 				s.AlignV = styles.AlignMiddle
 				// we don't need to visibly tell the user that we are disabled;
-				// the lack of an icon accomplishes that
+				// the lack of an icon accomplishes that; instead, we just inherit
+				// our state layer from the actual tree view state layer
 				if s.Is(states.Disabled) {
-					s.StateLayer = 0
+					s.StateLayer = tv.actStateLayer
 				}
 			})
 			sw.OnClick(func(e events.Event) {

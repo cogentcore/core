@@ -84,14 +84,14 @@ func (sw *Switch) SetIconFromState() {
 	}
 	st := ist.(*Layout)
 	switch {
-	case sw.IsReadOnly():
+	case sw.IsDisabled():
 		st.StackTop = 2
 	case sw.StateIs(states.Checked):
 		st.StackTop = 0
 	default:
 		if sw.Type == SwitchChip {
 			// chips render no icon when off
-			st.StackTop = 2
+			st.StackTop = -1
 			return
 		}
 		st.StackTop = 1
