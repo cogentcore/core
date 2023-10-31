@@ -381,10 +381,14 @@ func (tv *TreeView) DuplicateSync() {
 func (tv *TreeView) EditNode() {
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.KiType().Name
-		StructViewDialog(gi.NewDialog(tv).Title(tynm), tv.SyncNode, nil).Run()
+		d := gi.NewDialog(tv).Title(tynm)
+		NewStructView(d).SetStruct(tv.SyncNode)
+		d.Run()
 	} else {
 		tynm := tv.KiType().Name
-		StructViewDialog(gi.NewDialog(tv).Title(tynm), tv.This(), nil).Run()
+		d := gi.NewDialog(tv).Title(tynm)
+		NewStructView(d).SetStruct(tv.This())
+		d.Run()
 	}
 }
 
