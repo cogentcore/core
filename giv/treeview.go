@@ -290,6 +290,18 @@ func (tv *TreeView) TreeViewStyles() {
 				if s.Is(states.Disabled) {
 					s.StateLayer = tv.actStateLayer
 				}
+				// If we are responsible for a positive (non-disabled) state layer
+				// (instead of our parent), then we amplify it so that it is clear
+				// that we ourself are receiving a state layer amplifying event.
+				// Otherwise, we set our state color to that of our parent (OnSurface)
+				// so that it does not appear as if we are getting interaction ourself;
+				// instead, we are a part of our parent and render a background color no
+				// different than them.
+				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+					s.StateLayer *= 2
+				} else {
+					s.StateColor = colors.Scheme.OnSurface
+				}
 			})
 			sw.OnClick(func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
