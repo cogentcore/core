@@ -298,7 +298,7 @@ func (tv *TreeView) TreeViewStyles() {
 				// instead, we are a part of our parent and render a background color no
 				// different than them.
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-					s.StateLayer *= 2
+					s.StateLayer *= 3
 				} else {
 					s.StateColor = colors.Scheme.OnSurface
 				}
