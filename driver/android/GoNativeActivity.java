@@ -8,8 +8,8 @@
 // license that can be found in the LICENSE file.
 
 // VERY IMPORTANT: after making any changes to this file, you need
-// to run go generate in github.com/goki/goki/mobile and then
-// reinstall the goki tool.
+// to run gsm gendex in your base goki directory, or run go generate
+// in github.com/goki/goki/mobile and reinstall the goki tool.
 
 package org.golang.app;
 
