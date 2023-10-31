@@ -199,6 +199,10 @@ func (tv *TreeView) TreeViewStyles() {
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 				parts.Spacing.Ch(0.1)
 				s.Padding.Set(units.Dp(0))
+
+				// we manually inherit our state layer from the treeview state
+				// layer so that the parts get it but not the other tree views
+				s.StateLayer = tv.actStateLayer
 			})
 			// we let the parts handle our state
 			// so that we only get it when we are doing
@@ -264,6 +268,10 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Height.Em(1)
 				s.Margin.Set()
 				s.Padding.Set()
+
+				// we manually inherit our state layer from the treeview state
+				// layer so that the parts get it but not the other tree views
+				s.StateLayer = tv.actStateLayer
 			})
 		case "parts/branch":
 			sw := w.(*gi.Switch)
@@ -571,8 +579,8 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	if st.Is(states.Selected) {
 		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 	}
-	pbc, _ := tv.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &pbc, st.StateLayer)
+	pbc, psl := tv.ParentBackgroundColor()
+	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &pbc, psl)
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)
