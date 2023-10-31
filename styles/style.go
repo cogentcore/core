@@ -121,8 +121,13 @@ type Style struct {
 	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
 	Opacity float32 `xml:"opacity"`
 
-	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the color . It is automatically set based on , but can be overridden in stylers.
+	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the
+	// color Color (or StateColor if it defined). It is automatically set based on State, but can be overridden in stylers.
 	StateLayer float32
+
+	// StateColor, if not the zero color, is the color to use for the StateLayer instead of Color. If you want to disable state layers
+	// for an element, do not use this; instead, set StateLayer to 0.
+	StateColor color.RGBA
 
 	// border around the box element
 	Border Border `xml:"border"`
@@ -359,15 +364,19 @@ var StyleDefault Style
 
 // StateBackgroundColor returns the stateful, effective version of
 // the given background color by applying [Style.StateLayer] based on
-// [Style.Color]. It also applies [Style.Opacity] to the color. It
-// does not modify the underlying style object.
+// [Style.Color] and [Style.StateColor]. It also applies [Style.Opacity]
+// to the color. It does not modify the underlying style object.
 func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 	if s.StateLayer <= 0 && s.Opacity >= 1 {
 		return bg
 	}
 	if bg.Gradient == nil {
 		if s.StateLayer > 0 {
-			bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(s.Color, s.StateLayer))
+			clr := s.Color
+			if !colors.IsNil(s.StateColor) {
+				clr = s.StateColor
+			}
+			bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(clr, s.StateLayer))
 		}
 		if s.Opacity < 1 {
 			bg.Solid = colors.SetA(bg.Solid, uint8(s.Opacity*255)*bg.Solid.A)
@@ -379,7 +388,11 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 	res.CopyFrom(&bg)
 	for i, stop := range res.Gradient.Stops {
 		if s.StateLayer > 0 {
-			res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(s.Color, s.StateLayer))
+			clr := s.Color
+			if !colors.IsNil(s.StateColor) {
+				clr = s.StateColor
+			}
+			res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(clr, s.StateLayer))
 		}
 		if s.Opacity < 1 {
 			res.Gradient.Stops[i].Color = colors.SetA(stop.Color, uint8(s.Opacity*255)*stop.Color.A)
