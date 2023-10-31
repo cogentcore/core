@@ -107,13 +107,14 @@ func (cv *ColorView) OnInit() {
 }
 
 // SetColor sets the source color
-func (cv *ColorView) SetColor(clr color.Color) {
+func (cv *ColorView) SetColor(clr color.Color) *ColorView {
 	updt := cv.UpdateStart()
 	cv.Color = colors.AsRGBA(clr)
 	cv.ColorHSLA = hsl.FromColor(clr)
 	cv.ColorHSLA.Round()
 	cv.UpdateEndRender(updt)
 	cv.SendChange()
+	return cv
 }
 
 // Config configures a standard setup of entire view
@@ -541,13 +542,14 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	dlg := ColorViewDialog(gi.NewDialog(ctx).Title("Color Value View").Prompt(vv.Doc()), dclr, vv.TmpSave)
-	dlg.OnAccept(func(e events.Event) {
-		cclr := dlg.Data.(color.RGBA)
+	d := gi.NewDialog(ctx).Title("Color Value View").Prompt(vv.Doc())
+	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
+	d.OnAccept(func(e events.Event) {
+		cclr := vv.TmpSave.Val().Interface().(color.RGBA)
 		vv.SetColor(cclr)
 		vv.UpdateWidget()
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
@@ -622,15 +624,16 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 			curRow = i
 		}
 	}
-	dlg := TableViewSelectDialog(gi.NewDialog(ctx).Title("Select a Color Name").Prompt(vv.Doc()), &sl, curRow)
-	dlg.OnAccept(func(e events.Event) {
-		si := dlg.Data.(int)
+	si := 0
+	d := gi.NewDialog(ctx).Title("Select a Color Name").Prompt(vv.Doc())
+	NewTableView(d).SetSlice(&sl).SetSelectedIdx(curRow).BindSelectDialog(d, &si)
+	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
 			vv.SetValue(sl[si].Name)
 			vv.UpdateWidget()
 		}
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
