@@ -14,7 +14,6 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 func (fn *Node) HandleFileNodeEvents() {
@@ -104,12 +103,12 @@ func (fn *Node) KeyInput(kt events.Event) {
 
 // VCSLabelFunc gets the appropriate label for removing from version control
 func VCSLabelFunc(fn *Node, label string) string {
-		repo, _ := fn.Repo()
-		if repo != nil {
-			label = strings.Replace(label, "VCS", string(repo.Vcs()), 1)
-		}
+	repo, _ := fn.Repo()
+	if repo != nil {
+		label = strings.Replace(label, "VCS", string(repo.Vcs()), 1)
+	}
 	return label
-})
+}
 
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	giv.NewFuncButton(m, fn.ShowFileInfo).SetIcon(icons.Info).
@@ -119,17 +118,17 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).
-		SetState(!fn.HasSelection(), states.Disabled).SetKey(keyfun.Duplicate)
+		SetKey(keyfun.Duplicate).SetState(!fn.HasSelection(), states.Disabled)
 	giv.NewFuncButton(m, fn.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).
-		SetState(!fn.HasSelection(), states.Disabled).SetKey(kefun.Delete)
+		SetKey(keyfun.Delete).SetState(!fn.HasSelection(), states.Disabled)
 	giv.NewFuncButton(m, fn.RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).
 		SetState(!fn.HasSelection(), states.Disabled)
 	gi.NewSeparator(m)
 
-	giv.NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetState(!tv.HasSelection(), states.Disabled)
-	giv.NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetState(!tv.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetState(!fn.HasSelection(), states.Disabled)
 	giv.NewFuncButton(m, fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
 		SetState(!fn.HasSelection(), states.Disabled)
 	gi.NewSeparator(m)
@@ -190,4 +189,3 @@ func (fn *Node) ContextMenu(m *gi.Scene) {
 		fn.TreeViewContextMenu(m)
 	}
 }
-
