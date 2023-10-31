@@ -89,7 +89,7 @@ func (vv *MeshValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	d := gi.NewDialog(ctx).Title("Select a mesh").Prompt(desc)
+	d := gi.NewDialog(ctx).Title("Select a mesh").Prompt(desc).FullWindow(true)
 	giv.NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
