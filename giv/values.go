@@ -1204,7 +1204,7 @@ func (vv *TypeValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	typ, ok := npv.Interface().(gti.Type)
 	if ok {
-		sb.SetCurVal(typ)
+		sb.SetCurVal(&typ)
 	}
 }
 
