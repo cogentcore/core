@@ -11,7 +11,7 @@ require (
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	goki.dev/colors v0.8.25
 	goki.dev/cursors v0.0.13
-	goki.dev/enums v0.9.33
+	goki.dev/enums v0.9.34
 	goki.dev/glop v0.1.4
 	goki.dev/grr v0.0.4
 	goki.dev/gti v0.1.11
