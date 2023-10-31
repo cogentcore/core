@@ -60,6 +60,9 @@ type Value interface {
 	// interface doesn't need to provide accessors for them.
 	AsValueBase() *ValueBase
 
+	// AsWidget returns the widget associated with the value
+	AsWidget() gi.Widget
+
 	// Name returns the name of the value
 	Name() string
 
@@ -190,6 +193,22 @@ type Value interface {
 	SaveTmp()
 }
 
+// NewValue makes and returns a new [Value] from the given value and creates
+// the widget for it with the given parent and optional name. It is the main
+// way that end-user code should interact with giv. The given value needs to
+// be a pointer for it to be settable.
+//
+// NewValue is not appropriate for internal code configuring
+// non-solo values (for example, in StructView), but it should be fine for
+// most end-user code.
+func NewValue(par ki.Ki, val any, name ...string) Value {
+	v := ToValue(val, "")
+	v.SetSoloValue(reflect.ValueOf(val))
+	w := par.NewChild(v.WidgetType()).(gi.Widget)
+	v.ConfigWidget(w, w.AsWidget().Sc)
+	return v
+}
+
 // note: could have a more efficient way to represent the different owner type
 // data (Key vs. Field vs. Idx), instead of just having everything for
 // everything.  However, Value itself gets customized for different target
@@ -259,6 +278,10 @@ type ValueBase struct {
 
 func (vv *ValueBase) AsValueBase() *ValueBase {
 	return vv
+}
+
+func (vv *ValueBase) AsWidget() gi.Widget {
+	return vv.Widget
 }
 
 func (vv *ValueBase) Name() string {

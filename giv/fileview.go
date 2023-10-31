@@ -173,16 +173,16 @@ func FileViewExtOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
 
 // SetFilename sets the initial filename (splitting out path and filename) and
 // initializes the view
-func (fv *FileView) SetFilename(filename, ext string) {
+func (fv *FileView) SetFilename(filename, ext string) *FileView {
 	fv.DirPath, fv.SelFile = filepath.Split(filename)
-	fv.SetExt(ext)
+	return fv.SetExt(ext)
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
-func (fv *FileView) SetPathFile(path, file, ext string) {
+func (fv *FileView) SetPathFile(path, file, ext string) *FileView {
 	fv.DirPath = path
 	fv.SelFile = file
-	fv.SetExt(ext)
+	return fv.SetExt(ext)
 }
 
 // SelectedFile returns the full path to selected file
@@ -322,11 +322,11 @@ func (fv *FileView) ConfigFilesRow() {
 	fr.ConfigChildren(config) // already covered by parent update
 
 	sv := fv.FavsView()
-	sv.SelectedIdx = -1
+	sv.SelIdx = -1
 	sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.OnSelect(func(e events.Event) {
-		fv.FavSelect(sv.SelectedIdx)
+		fv.FavSelect(sv.SelIdx)
 	})
 
 	fv.ReadFiles()
@@ -350,7 +350,7 @@ func (fv *FileView) ConfigFilesRow() {
 		fsv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
 	fsv.OnSelect(func(e events.Event) {
-		fv.FileSelectAction(fsv.SelectedIdx)
+		fv.FileSelectAction(fsv.SelIdx)
 	})
 	fsv.OnDoubleClick(func(e events.Event) {
 		if !fv.SelectFile() {
@@ -557,9 +557,9 @@ func (fv *FileView) UpdateFiles() {
 	sv.SortSlice()
 	sv.Update()
 
-	fv.SelectedIdx = sv.SelectedIdx
-	if sv.SelectedIdx >= 0 {
-		sv.ScrollToIdx(sv.SelectedIdx)
+	fv.SelectedIdx = sv.SelIdx
+	if sv.SelIdx >= 0 {
+		sv.ScrollToIdx(sv.SelIdx)
 	}
 
 	if fv.PrevPath != fv.DirPath {
@@ -667,7 +667,7 @@ func (fv *FileView) SetSelFileAction(sel string) {
 			}
 		}
 	}
-	fv.SelectedIdx = sv.SelectedIdx
+	fv.SelectedIdx = sv.SelIdx
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 	fv.Send(events.Select) // receiver needs to get selectedFile
@@ -691,7 +691,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 }
 
 // SetExt updates the ext to given (list of, comma separated) extensions
-func (fv *FileView) SetExt(ext string) {
+func (fv *FileView) SetExt(ext string) *FileView {
 	if ext == "" {
 		if fv.SelFile != "" {
 			ext = strings.ToLower(filepath.Ext(fv.SelFile))
@@ -710,12 +710,14 @@ func (fv *FileView) SetExt(ext string) {
 		}
 		fv.ExtMap[strings.ToLower(ex)] = ex
 	}
+	return fv
 }
 
 // SetExtAction sets the current extension to highlight, and redisplays files
-func (fv *FileView) SetExtAction(ext string) {
+func (fv *FileView) SetExtAction(ext string) *FileView {
 	fv.SetExt(ext)
 	fv.UpdateFiles()
+	return fv
 }
 
 // FavSelect selects a favorite path and goes there
@@ -858,8 +860,9 @@ func (fv *FileView) EditPaths() {
 	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	dlg := SliceViewDialog(gi.NewDialog(fv).Title("Recent File Paths").Prompt("Delete paths you no longer use"), &tmp, nil, true, false).Ok().Cancel()
-	dlg.OnAccept(func(e events.Event) {
+	d := gi.NewDialog(fv).Title("Recent file paths").Prompt("Delete paths you no longer use").FullWindow(true)
+	NewSliceView(d).SetSlice(&tmp).SetFlag(true, SliceViewNoAdd)
+	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		gi.SavedPaths = nil
 		gi.SavedPaths = append(gi.SavedPaths, tmp...)
 		// add back the reset/edit menu items

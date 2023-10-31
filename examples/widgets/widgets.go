@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -94,13 +95,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	brow := gi.NewLayout(sc, "brow").
 		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
 
-	b1 := gi.NewButton(brow, "button1").
-		SetIcon(icons.OpenInNew).
-		SetTooltip("press this <i>button</i> to pop up a dialog box").
+	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box").
 		Style(func(s *styles.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
-		}).(*gi.Button)
+		})
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
@@ -122,15 +121,17 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetText("Open GoGiEditor")
 	button2.SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
-		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(dlg *gi.DialogStage) {
-		// 	fmt.Println("dialog looks OK:", dlg.Accepted)
+		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(d *gi.DialogStage) {
+		// 	fmt.Println("dialog looks OK:", d.Accepted)
 		// }).Run()
-		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(dlg *gi.DialogStage) {
-		// 	fmt.Println("choice option:", dlg.Data.(int), "accepted:", dlg.Accepted)
+		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(d *gi.DialogStage) {
+		// 	fmt.Println("choice option:", d.Data.(int), "accepted:", d.Accepted)
 		// }).Run()
-		dlg := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:").StringPrompt("", "Enter string here...").Ok().Cancel()
-		dlg.OnAccept(func(e events.Event) {
-			fmt.Println("dialog accepted; string entered:", dlg.Data.(string))
+		txt := ""
+		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:")
+		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
+		d.Cancel().Ok().OnAccept(func(e events.Event) {
+			fmt.Println("dialog accepted; string entered:", d.Data.(string))
 		}).Run()
 	})
 
@@ -242,13 +243,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth()
 
-	edit1 := gi.NewTextField(txrow, "edit1").
-		SetPlaceholder("Enter text here...").
-		AddClearButton().
-		// SetTypePassword().
-		Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Em(20))
-		}).(*gi.TextField)
+	edit1 := gi.NewTextField(txrow, "edit1").SetPlaceholder("Enter text here...").AddClearButton()
 	edit1.OnChange(func(e events.Event) {
 		fmt.Println("Text:", edit1.Text())
 	})

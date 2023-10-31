@@ -1108,15 +1108,15 @@ func (t *SliceView) SetSelVal(v any) *SliceView {
 	return t
 }
 
-// SetSelectedIdx sets the [SliceView.SelectedIdx]
-func (t *SliceView) SetSelectedIdx(v int) *SliceView {
-	t.SelectedIdx = v
+// SetSelIdx sets the [SliceView.SelIdx]
+func (t *SliceView) SetSelIdx(v int) *SliceView {
+	t.SelIdx = v
 	return t
 }
 
-// SetSelectedIdxs sets the [SliceView.SelectedIdxs]
-func (t *SliceView) SetSelectedIdxs(v map[int]struct{}) *SliceView {
-	t.SelectedIdxs = v
+// SetSelIdxs sets the [SliceView.SelIdxs]
+func (t *SliceView) SetSelIdxs(v map[int]struct{}) *SliceView {
+	t.SelIdxs = v
 	return t
 }
 
@@ -1207,8 +1207,8 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the slice values", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"SelVal", &gti.Field{Name: "SelVal", Type: "any", LocalType: "any", Doc: "current selection value -- initially select this value if set", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected item, in ReadOnly mode only", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectedIdxs", &gti.Field{Name: "SelectedIdxs", Type: "map[int]struct{}", LocalType: "map[int]struct{}", Doc: "list of currently-selected slice indexes", Directives: gti.Directives{}, Tag: "copy:\"-\""}},
+		{"SelIdx", &gti.Field{Name: "SelIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected item, in ReadOnly mode only", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelIdxs", &gti.Field{Name: "SelIdxs", Type: "map[int]struct{}", LocalType: "map[int]struct{}", Doc: "list of currently-selected slice indexes", Directives: gti.Directives{}, Tag: "copy:\"-\""}},
 		{"DraggedIdxs", &gti.Field{Name: "DraggedIdxs", Type: "[]int", LocalType: "[]int", Doc: "list of currently-dragged indexes", Directives: gti.Directives{}, Tag: "copy:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
@@ -1282,17 +1282,17 @@ func (t *SliceViewBase) SetSelVal(v any) *SliceViewBase {
 	return t
 }
 
-// SetSelectedIdx sets the [SliceViewBase.SelectedIdx]:
+// SetSelIdx sets the [SliceViewBase.SelIdx]:
 // index of currently-selected item, in ReadOnly mode only
-func (t *SliceViewBase) SetSelectedIdx(v int) *SliceViewBase {
-	t.SelectedIdx = v
+func (t *SliceViewBase) SetSelIdx(v int) *SliceViewBase {
+	t.SelIdx = v
 	return t
 }
 
-// SetSelectedIdxs sets the [SliceViewBase.SelectedIdxs]:
+// SetSelIdxs sets the [SliceViewBase.SelIdxs]:
 // list of currently-selected slice indexes
-func (t *SliceViewBase) SetSelectedIdxs(v map[int]struct{}) *SliceViewBase {
-	t.SelectedIdxs = v
+func (t *SliceViewBase) SetSelIdxs(v map[int]struct{}) *SliceViewBase {
+	t.SelIdxs = v
 	return t
 }
 
@@ -2072,15 +2072,15 @@ func (t *TableView) SetSelVal(v any) *TableView {
 	return t
 }
 
-// SetSelectedIdx sets the [TableView.SelectedIdx]
-func (t *TableView) SetSelectedIdx(v int) *TableView {
-	t.SelectedIdx = v
+// SetSelIdx sets the [TableView.SelIdx]
+func (t *TableView) SetSelIdx(v int) *TableView {
+	t.SelIdx = v
 	return t
 }
 
-// SetSelectedIdxs sets the [TableView.SelectedIdxs]
-func (t *TableView) SetSelectedIdxs(v map[int]struct{}) *TableView {
-	t.SelectedIdxs = v
+// SetSelIdxs sets the [TableView.SelIdxs]
+func (t *TableView) SetSelIdxs(v map[int]struct{}) *TableView {
+	t.SelIdxs = v
 	return t
 }
 

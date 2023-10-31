@@ -4,20 +4,6 @@
 
 package giv
 
-import (
-	"image/color"
-
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/texteditor"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/icons"
-)
-
 /*
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
 // provides a named, optional way to specify these args
@@ -65,7 +51,6 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 	// todo: temporarily enable ok, cancel until click-off etc all working
 	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, Ok: true, Cancel: true} // d.Ok, Cancel: d.Cancel}
 }
-*/
 
 // TextEditorDialog adds to the given dialog a display of multi-line text in a TextView,
 // in which the user can copy contents to clipboard etc.
@@ -297,3 +282,5 @@ func ArgViewDialog(dlg *gi.Dialog, args []Value) *gi.Dialog {
 	sv.SetArgs(args)
 	return dlg
 }
+
+*/
