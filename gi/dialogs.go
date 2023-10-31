@@ -254,9 +254,14 @@ func (d *Dialog) DialogStyles() {
 	})
 }
 
+// NewItemsData contains the data necessary to make a certain
+// number of items of a certain type, which can be used with a
+// StructView in new item dialogs.
 type NewItemsData struct {
+	// Number is the number of elements to create
 	Number int
-	Type   *gti.Type
+	// Type is the type of elements to create
+	Type gti.Type
 }
 
 // NewItems adds to the dialog a prompt for creating new item(s) of the given type,
