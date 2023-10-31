@@ -38,9 +38,9 @@ func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
 }
 
 // SetState sets the given [styles.Style.State] flags
-func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) Widget {
+func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) *WidgetBase {
 	wb.Styles.State.SetFlag(on, state...)
-	return wb.This().(Widget)
+	return wb
 }
 
 // SetStateTree sets the given [styles.Style.State] flags for tree starting
@@ -64,9 +64,9 @@ func (wb *WidgetBase) SetStateWidget(on bool, state ...enums.BitFlag) {
 }
 
 // SetAbilities sets the [styles.Style.Abilities] flags
-func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) Widget {
+func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase {
 	wb.Styles.Abilities.SetFlag(on, able...)
-	return wb.This().(Widget)
+	return wb
 }
 
 // SetSelected sets the Selected flag to given value for the entire Widget
