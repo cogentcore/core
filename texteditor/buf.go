@@ -465,20 +465,19 @@ func (tb *Buf) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		d := gi.NewDialog(vp).Title("File Changed on Disk: "+dirs.DirAndFile(string(tb.Filename))).
-			Prompt(fmt.Sprintf("File has changed on Disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)).
-			Choice("Save As to diff File", "Revert from Disk", "Ignore and Proceed")
-		d.OnAccept(func(e events.Event) {
-			switch d.Data.(int) {
-			case 0:
-				// TODO(kai/dialog): add this back
-				// CallMethod(tb, "SaveAs", vp)
-			case 1:
-				tb.Revert()
-			case 2:
-				tb.SetFlag(true, BufFileModOk)
-			}
-		}).Run()
+		d := gi.NewDialog(vp).Title("File Changed on Disk: " + dirs.DirAndFile(string(tb.Filename))).
+			Prompt(fmt.Sprintf("File has changed on Disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
+		gi.NewButton(d.Buttons).SetText("Save as to different file").OnClick(func(e events.Event) {
+			// TODO(kai/dialog): add this back
+			// CallMethod(tb, "SaveAs", vp)
+		})
+		gi.NewButton(d.Buttons).SetText("Revert from disk").OnClick(func(e events.Event) {
+			tb.Revert()
+		})
+		gi.NewButton(d.Buttons).SetText("Ignore and proceed").OnClick(func(e events.Event) {
+			tb.SetFlag(true, BufFileModOk)
+		})
+		d.Run()
 		return true
 	}
 	return false
