@@ -43,7 +43,7 @@ type Dialog struct {
 	Accepted bool
 
 	// Buttons go here when added
-	Buttons *Layout
+	Btns *Layout
 }
 
 // NewDialog returns a new [Dialog] in the context of the given widget,
@@ -104,11 +104,11 @@ func (d *Dialog) Prompt(prompt string) *Dialog {
 	return d
 }
 
-// ConfigButtons adds layout for holding buttons at bottom of dialog
-// and saves as Buttons field, if not already done.
-func (d *Dialog) ConfigButtons() *Layout {
-	if d.Buttons != nil {
-		return d.Buttons
+// Buttons returns the layout for holding the buttons at bottom
+// of the dialog, creating it if it does not already exist.
+func (d *Dialog) Buttons() *Layout {
+	if d.Btns != nil {
+		return d.Btns
 	}
 	bb := NewLayout(d, "buttons").
 		SetLayout(LayoutHoriz)
@@ -121,7 +121,7 @@ func (d *Dialog) ConfigButtons() *Layout {
 			bt.Type = ButtonText
 		}
 	})
-	d.Buttons = bb
+	d.Btns = bb
 	NewStretch(bb)
 	return bb
 }
@@ -132,7 +132,7 @@ func (d *Dialog) ConfigButtons() *Layout {
 // If text is passed, that text is used for the text of the button
 // instead of the standard "OK".
 func (d *Dialog) Ok(text ...string) *Dialog {
-	bb := d.ConfigButtons()
+	bb := d.Buttons()
 	txt := "OK"
 	if len(text) > 0 {
 		txt = text[0]
@@ -157,7 +157,7 @@ func (d *Dialog) Ok(text ...string) *Dialog {
 // If text is passed, that text is used for the text of the button
 // instead of the standard "Cancel".
 func (d *Dialog) Cancel(text ...string) *Dialog {
-	bb := d.ConfigButtons()
+	bb := d.Buttons()
 	txt := "Cancel"
 	if len(text) > 0 {
 		txt = text[0]
