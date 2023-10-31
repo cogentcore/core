@@ -326,7 +326,6 @@ public class GoNativeActivity extends NativeActivity {
 		public void onLongPress(MotionEvent event) {
 			Log.d("Go", "onLongPress: " + event.toString());
 			longPressed(event.getX(), event.getY());
-			return true;
 		}
 
 		@Override
