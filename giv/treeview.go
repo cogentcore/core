@@ -190,14 +190,15 @@ func (tv *TreeView) TreeViewStyles() {
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
+		// fmt.Println(w.PathFrom(tv))
 		switch w.PathFrom(tv) {
 		case "parts":
 			parts := w.(*gi.Layout)
 			parts.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-				parts.Spacing.Ch(0.5)
-				s.Padding.Set(units.Dp(4))
+				parts.Spacing.Ch(0.1)
+				s.Padding.Set(units.Dp(0))
 			})
 			// we let the parts handle our state
 			// so that we only get it when we are doing
@@ -276,8 +277,8 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Color = colors.Scheme.Primary.Base
 				s.Margin.Set()
 				s.Padding.Set()
-				s.Width.Em(1)
-				s.Height.Em(1)
+				s.Width.Em(0.5)
+				s.Height.Em(0.5)
 				s.AlignV = styles.AlignMiddle
 				// we don't need to visibly tell the user that we are disabled;
 				// the lack of an icon accomplishes that
@@ -298,6 +299,21 @@ func (tv *TreeView) TreeViewStyles() {
 						tv.Open()
 					}
 				}
+			})
+		case "parts/branch.parts/stack/icon0":
+			w.Style(func(s *styles.Style) {
+				s.Width.Em(1.0)
+				s.Height.Em(1.0)
+			})
+		case "parts/branch.parts/stack/icon1":
+			w.Style(func(s *styles.Style) {
+				s.Width.Em(1.0)
+				s.Height.Em(1.0)
+			})
+		case "parts/branch.parts/stack/icon2":
+			w.Style(func(s *styles.Style) {
+				s.Width.Em(1.0)
+				s.Height.Em(1.0)
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
@@ -1104,7 +1120,7 @@ func (tv *TreeView) ToggleClose() {
 }
 
 // OpenAll opens the given node and all of its sub-nodes
-func (tv *TreeView) OpenAll() {
+func (tv *TreeView) OpenAll() { //gti:add
 	updt := tv.UpdateStart()
 	tv.WalkPre(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
@@ -1118,7 +1134,7 @@ func (tv *TreeView) OpenAll() {
 }
 
 // CloseAll closes the given node and all of its sub-nodes.
-func (tv *TreeView) CloseAll() {
+func (tv *TreeView) CloseAll() { //gti:add
 	updt := tv.UpdateStart()
 	tv.WalkPre(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
@@ -1160,51 +1176,42 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 }
 
 func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
-	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
 		})
-	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
+		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.EditNode()
 		})
-	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).
+		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.GoGiEditNode()
 		})
 }
 
 func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
-	gi.NewButton(m).SetText("Add Child").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.AddChildNode()
-		})
-	gi.NewButton(m).SetText("Insert Before").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.InsertBefore()
-		})
-	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.InsertAfter()
-		})
-	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.TabDuplicate).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.Duplicate()
-		})
-	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.InsertAfter()
-		})
-	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keyfun.Delete).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.DeleteNode()
-		})
+	NewFuncButton(m, tv.AddChildNode).SetText("Add child").SetIcon(icons.Add).
+		SetState(!tv.HasSelection(), states.Disabled)
+	NewFuncButton(m, tv.InsertBefore).SetIcon(icons.Add).
+		SetState(!tv.HasSelection(), states.Disabled)
+	NewFuncButton(m, tv.InsertAfter).SetIcon(icons.Add).
+		SetState(!tv.HasSelection(), states.Disabled)
+	NewFuncButton(m, tv.Duplicate).SetIcon(icons.ContentCopy).
+		SetState(!tv.HasSelection(), states.Disabled)
+	NewFuncButton(m, tv.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
+		SetState(!tv.HasSelection(), states.Disabled)
 	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Copy(true)
 		})
-	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(!tv.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
+		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tv.This().(gi.Clipper).Cut()
 		})
@@ -1217,23 +1224,17 @@ func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
 	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.EditNode()
-		})
-	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.GoGiEditNode()
-		})
+	NewFuncButton(m, tv.EditNode).SetText("Edit").SetIcon(icons.Edit).
+		SetState(!tv.HasSelection(), states.Disabled)
+	NewFuncButton(m, tv.GoGiEditNode).SetText("GoGiEditor").SetIcon(icons.EditDocument).
+		SetState(!tv.HasSelection(), states.Disabled)
 	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Open All").SetIcon(icons.Open).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.OpenAll()
-		})
-	gi.NewButton(m).SetText("Close All").SetIcon(icons.Close).SetState(!tv.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tv.CloseAll()
-		})
+
+	// icons.Open, Close
+	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetState(!tv.HasSelection(), states.Disabled)
+	NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetState(!tv.HasSelection(), states.Disabled)
 }
 
 func (tv *TreeView) ContextMenu(m *gi.Scene) {
@@ -1310,7 +1311,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 
 // Copy copies to clip.Board, optionally resetting the selection.
 // satisfies gi.Clipper interface and can be overridden by subtypes
-func (tv *TreeView) Copy(reset bool) {
+func (tv *TreeView) Copy(reset bool) { //gti:add
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
@@ -1330,7 +1331,7 @@ func (tv *TreeView) Copy(reset bool) {
 
 // Cut copies to clip.Board and deletes selected items.
 // satisfies gi.Clipper interface and can be overridden by subtypes
-func (tv *TreeView) Cut() {
+func (tv *TreeView) Cut() { //gti:add
 	if tv.IsRoot("Cut") {
 		return
 	}
@@ -1353,7 +1354,7 @@ func (tv *TreeView) Cut() {
 
 // Paste pastes clipboard at given node.
 // satisfies gi.Clipper interface and can be overridden by subtypes
-func (tv *TreeView) Paste() {
+func (tv *TreeView) Paste() { //gti:add
 	md := tv.EventMgr().ClipBoard().Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)

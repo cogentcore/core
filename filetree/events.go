@@ -10,7 +10,9 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
+	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 )
 
 func (fn *Node) HandleFileNodeEvents() {
@@ -95,5 +97,87 @@ func (fn *Node) KeyInput(kt events.Event) {
 	}
 	if !kt.IsHandled() {
 		fn.HandleTreeViewKeyChord(kt)
+	}
+}
+
+func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
+	gi.NewButton(m).SetText("Show file info").SetIcon(icons.Info).
+		SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.ShowFileInfo()
+		})
+	gi.NewButton(m).SetText("Insert Before").SetIcon(icons.Add).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.InsertBefore()
+		})
+	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.InsertAfter()
+		})
+	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.TabDuplicate).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.Duplicate()
+		})
+	gi.NewButton(m).SetText("Insert After").SetIcon(icons.Add).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.InsertAfter()
+		})
+	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keyfun.Delete).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.DeleteNode()
+		})
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.This().(gi.Clipper).Copy(true)
+		})
+	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.This().(gi.Clipper).Cut()
+		})
+	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+		OnClick(func(e events.Event) {
+			fn.This().(gi.Clipper).Paste()
+		})
+	cb := fn.Sc.EventMgr.ClipBoard()
+	if cb != nil {
+		pbt.SetState(cb.IsEmpty(), states.Disabled)
+	}
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.EditNode()
+		})
+	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.GoGiEditNode()
+		})
+	gi.NewSeparator(m)
+	gi.NewButton(m).SetText("Open All").SetIcon(icons.Open).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.OpenAll()
+		})
+	gi.NewButton(m).SetText("Close All").SetIcon(icons.Close).SetState(!fn.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			fn.CloseAll()
+		})
+}
+
+func (fn *Node) ContextMenu(m *gi.Scene) {
+	// derived types put native menu code here
+	if fn.CustomContextMenu != nil {
+		fn.CustomContextMenu(m)
+	}
+	// TODO(kai/menu): need a replacement for this:
+	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsReadOnly(), tv.Scene, m) { // our viewed obj's menu
+	// 	if tv.ShowViewCtxtMenu {
+	// 		m.AddSeparator("sep-tvmenu")
+	// 		CtxtMenuView(tv.This(), tv.RootIsReadOnly(), tv.Scene, m)
+	// 	}
+	// } else {
+	if fn.IsReadOnly() {
+		fn.TreeViewContextMenuReadOnly(m)
+	} else {
+		fn.TreeViewContextMenu(m)
 	}
 }

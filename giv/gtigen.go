@@ -2177,7 +2177,46 @@ var TreeViewType = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"InsertAfter", &gti.Method{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"InsertBefore", &gti.Method{Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"AddChildNode", &gti.Method{Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"DeleteNode", &gti.Method{Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Duplicate", &gti.Method{Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditNode", &gti.Method{Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"GoGiEditNode", &gti.Method{Name: "GoGiEditNode", Doc: "GoGiEditNode pulls up a new GoGiEditor window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"OpenAll", &gti.Method{Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"CloseAll", &gti.Method{Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Copy", &gti.Method{Name: "Copy", Doc: "Copy copies to clip.Board, optionally resetting the selection.\nsatisfies gi.Clipper interface and can be overridden by subtypes", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"reset", &gti.Field{Name: "reset", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Cut", &gti.Method{Name: "Cut", Doc: "Cut copies to clip.Board and deletes selected items.\nsatisfies gi.Clipper interface and can be overridden by subtypes", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Paste", &gti.Method{Name: "Paste", Doc: "Paste pastes clipboard at given node.\nsatisfies gi.Clipper interface and can be overridden by subtypes", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &TreeView{},
 })
 

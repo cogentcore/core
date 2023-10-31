@@ -180,7 +180,7 @@ func (tv *TreeView) FindSyncNode(kn ki.Ki) *TreeView {
 // after this node, at the same (sibling) level,
 // prompting for the type of node to insert.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) InsertAfter() {
+func (tv *TreeView) InsertAfter() { //gti:add
 	tv.InsertAt(1, "Insert After")
 }
 
@@ -188,7 +188,7 @@ func (tv *TreeView) InsertAfter() {
 // before this node, at the same (sibling) level,
 // prompting for the type of node to insert
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) InsertBefore() {
+func (tv *TreeView) InsertBefore() { //gti:add
 	tv.InsertAt(0, "Insert Before")
 }
 
@@ -196,7 +196,7 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 	updt := tv.UpdateStart()
 	var stv *TreeView
 	for i := 0; i < n; i++ {
-		nm := fmt.Sprintf("New%v%v", typ.ShortName, myidx+rel+i)
+		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
 		tv.SetChildAdded()
 		nki := tv.InsertNewChild(typ, myidx+i, nm)
 		ntv := AsTreeView(nki)
@@ -220,7 +220,7 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *gti.Type, n int) {
 	updt := par.UpdateStart()
 	var ski ki.Ki
 	for i := 0; i < n; i++ {
-		nm := fmt.Sprintf("New%v%v", typ.ShortName, myidx+rel+i)
+		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
 		par.SetChildAdded()
 		nki := par.InsertNewChild(typ, myidx+i, nm)
 		if i == n-1 {
@@ -271,7 +271,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 // AddChildNode adds a new child node to this one in the tree,
 // prompting the user for the type of node to add
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) AddChildNode() {
+func (tv *TreeView) AddChildNode() { //gti:add
 	ttl := "Add Child"
 	typ := tv.This().BaseType()
 	if tv.SyncNode != nil {
@@ -292,7 +292,7 @@ func (tv *TreeView) AddChildNode() {
 // DeleteNode deletes the tree node or sync node corresponding
 // to this view node in the sync tree.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) DeleteNode() {
+func (tv *TreeView) DeleteNode() { //gti:add
 	ttl := "Delete"
 	if tv.IsRoot(ttl) {
 		return
@@ -317,7 +317,7 @@ func (tv *TreeView) DeleteNode() {
 // Duplicate duplicates the sync node corresponding to this view node in
 // the tree, and inserts the duplicate after this node (as a new sibling).
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) Duplicate() {
+func (tv *TreeView) Duplicate() { //gti:add
 	ttl := "TreeView Duplicate"
 	if tv.IsRoot(ttl) {
 		return
@@ -378,7 +378,7 @@ func (tv *TreeView) DuplicateSync() {
 
 // EditNode pulls up a StructViewDialog window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) EditNode() {
+func (tv *TreeView) EditNode() { //gti:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.KiType().Name
 		d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
@@ -394,7 +394,7 @@ func (tv *TreeView) EditNode() {
 
 // GoGiEditNode pulls up a new GoGiEditor window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) GoGiEditNode() {
+func (tv *TreeView) GoGiEditNode() { //gti:add
 	if tv.SyncNode != nil {
 		GoGiEditorDialog(tv.SyncNode)
 	} else {
