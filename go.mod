@@ -5,8 +5,8 @@ go 1.21.0
 require (
 	github.com/goki/vulkan v1.0.7
 	goki.dev/colors v0.8.25
-	goki.dev/enums v0.9.33
-	goki.dev/gi/v2 v2.0.0-dev0.0.6
+	goki.dev/enums v0.9.34
+	goki.dev/gi/v2 v2.0.0-dev0.0.7
 	goki.dev/girl v0.0.14
 	goki.dev/glop v0.1.4
 	goki.dev/goosi v0.0.6
