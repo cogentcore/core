@@ -1085,7 +1085,9 @@ func (tv *TableView) EditIdx(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	StructViewDialog(gi.NewDialog(tv).Title(tynm), stru, nil).Run()
+	d := gi.NewDialog(tv).Title(tynm)
+	NewStructView(d).SetStruct(stru)
+	d.Run()
 }
 
 func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
