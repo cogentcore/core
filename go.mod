@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-	goki.dev/enums v0.9.33
+	goki.dev/enums v0.9.34
 	goki.dev/gengo v0.3.6
 	goki.dev/grease v0.8.23
 	goki.dev/greasi v0.8.6
@@ -54,8 +54,8 @@ require (
 	goki.dev/cam v0.9.31 // indirect
 	goki.dev/colors v0.8.25 // indirect
 	goki.dev/cursors v0.0.13 // indirect
-	goki.dev/gi/v2 v2.0.0-dev0.0.6 // indirect
-	goki.dev/girl v0.0.14 // indirect
+	goki.dev/gi/v2 v2.0.0-dev0.0.7 // indirect
+	goki.dev/girl v0.0.15 // indirect
 	goki.dev/glop v0.1.4 // indirect
 	goki.dev/goosi v0.0.6 // indirect
 	goki.dev/grr v0.0.4 // indirect
