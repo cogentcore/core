@@ -26,14 +26,14 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 // On adds an event listener function for the given event type,
 // to the end of the current stack, so that it will be called
 // before everything else already on the stack.
-func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
+func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) *WidgetBase {
 	wb.Listeners.Add(etype, func(e events.Event) {
 		if wb.This() == nil || wb.Is(ki.Deleted) {
 			return
 		}
 		fun(e)
 	})
-	return wb.This().(Widget)
+	return wb
 }
 
 // OnLast adds an event listener function for the given event type,
@@ -52,37 +52,37 @@ func (wb *WidgetBase) OnLast(etype events.Types, fun func(e events.Event)) Widge
 // Helper functions for common event types
 
 // OnClick adds an event listener function for [events.Click] events
-func (wb *WidgetBase) OnClick(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnClick(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Click, fun)
 }
 
 // OnDoubleClick adds an event listener function for [events.DoubleClick] events
-func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.DoubleClick, fun)
 }
 
 // OnChange adds an event listener function for [events.Change] events
-func (wb *WidgetBase) OnChange(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnChange(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Change, fun)
 }
 
 // OnKeyChord adds an event listener function for [events.KeyChord] events
-func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.KeyChord, fun)
 }
 
 // OnFocus adds an event listener function for [events.Focus] events
-func (wb *WidgetBase) OnFocus(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnFocus(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Focus, fun)
 }
 
 // OnFocusLost adds an event listener function for [events.FocusLost] events
-func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.FocusLost, fun)
 }
 
 // OnSelect adds an event listener function for [events.Select] events
-func (wb *WidgetBase) OnSelect(fun func(e events.Event)) Widget {
+func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Select, fun)
 }
 

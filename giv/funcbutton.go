@@ -14,6 +14,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
+	"goki.dev/girl/states"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -186,23 +187,24 @@ func (fb *FuncButton) CallFunc() {
 			}).Run()
 		return
 	}
-	ArgViewDialog(gi.NewDialog(fb).Title(fb.Text).Prompt(fb.Tooltip), fb.Args).Cancel().Ok().
-		OnAccept(func(e events.Event) {
-			rargs := make([]reflect.Value, len(fb.Args))
-			for i, arg := range fb.Args {
-				rargs[i] = laser.NonPtrValue(arg.Val())
-			}
+	d := gi.NewDialog(fb).Title(fb.Text).Prompt(fb.Tooltip)
+	NewArgView(d).SetArgs(fb.Args)
+	d.Cancel().Ok().OnAccept(func(e events.Event) {
+		rargs := make([]reflect.Value, len(fb.Args))
+		for i, arg := range fb.Args {
+			rargs[i] = laser.NonPtrValue(arg.Val())
+		}
 
-			if !fb.Confirm {
+		if !fb.Confirm {
+			rets := fb.ReflectFunc.Call(rargs)
+			fb.ShowReturnsDialog(rets)
+		}
+		gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+			OnAccept(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(rargs)
 				fb.ShowReturnsDialog(rets)
-			}
-			gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
-				OnAccept(func(e events.Event) {
-					rets := fb.ReflectFunc.Call(rargs)
-					fb.ShowReturnsDialog(rets)
-				}).Run()
-		}).Run()
+			}).Run()
+	}).Run()
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
@@ -244,7 +246,9 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		gi.NewSnackbar(fb, gi.SnackbarOpts{Text: txt}).Run()
 		return
 	}
-	ArgViewDialog(gi.NewDialog(fb).Title(main).Prompt(fb.Tooltip).ReadOnly(true), fb.Returns).Ok().Run()
+	d := gi.NewDialog(fb).Title(main).Prompt(fb.Tooltip)
+	NewArgView(d).SetArgs(fb.Returns).SetState(true, states.ReadOnly)
+	d.Ok().Run()
 }
 
 // SetArgs sets the appropriate [Value] objects for the

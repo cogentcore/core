@@ -255,10 +255,10 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	dlg := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:").NewItems(typ).Cancel().Ok()
-	dlg.OnAccept(func(e events.Event) {
+	d := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:").NewItems(typ).Cancel().Ok()
+	d.OnAccept(func(e events.Event) {
 		n := 1 // todo
-		typ := dlg.Data.(*gti.Type)
+		typ := d.Data.(*gti.Type)
 		par := AsTreeView(tv.Par)
 		if tv.SyncNode != nil {
 			par.AddSyncNodes(rel, myidx, typ, n)
@@ -277,9 +277,9 @@ func (tv *TreeView) AddChildNode() {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	dlg := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:").NewItems(typ).Cancel().Ok()
-	dlg.OnAccept(func(e events.Event) {
-		typ := dlg.Data.(*gti.Type)
+	d := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:").NewItems(typ).Cancel().Ok()
+	d.OnAccept(func(e events.Event) {
+		typ := d.Data.(*gti.Type)
 		n := 1 // todo
 		if tv.SyncNode != nil {
 			tv.AddSyncNodes(0, 0, typ, n)
@@ -381,10 +381,14 @@ func (tv *TreeView) DuplicateSync() {
 func (tv *TreeView) EditNode() {
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.KiType().Name
-		StructViewDialog(gi.NewDialog(tv).Title(tynm), tv.SyncNode, nil).Run()
+		d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
+		NewStructView(d).SetStruct(tv.SyncNode)
+		d.Run()
 	} else {
 		tynm := tv.KiType().Name
-		StructViewDialog(gi.NewDialog(tv).Title(tynm), tv.This(), nil).Run()
+		d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
+		NewStructView(d).SetStruct(tv.This())
+		d.Run()
 	}
 }
 

@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
@@ -69,11 +68,7 @@ func makeHome(ts *gi.Tabs) {
 	}()
 
 	clr := colors.Tan
-
-	colorvv := giv.ToValue(&clr, "")
-	colorvv.SetSoloValue(reflect.ValueOf(&clr))
-	cvvw := home.NewChild(colorvv.WidgetType()).(gi.Widget)
-	colorvv.ConfigWidget(cvvw, cvvw.AsWidget().Sc)
+	giv.NewValue(home, &clr)
 
 	giv.NewFuncButton(home, hello)
 

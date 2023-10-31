@@ -6,10 +6,12 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
@@ -86,7 +88,18 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 				}
 				cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 				if err == nil {
-					TextEditorDialog(gi.NewDialog(lv).Title("Commit Info: "+cmt.Rev), cinfo, gi.FileName(lv.File), true).Ok().Run()
+					d := gi.NewDialog(lv).Title("Commit Info: " + cmt.Rev).FullWindow(true)
+					buf := texteditor.NewBuf()
+					buf.Filename = gi.FileName(lv.File)
+					buf.Opts.LineNos = true
+					buf.Stat()
+					texteditor.NewEditor(d).SetBuf(buf)
+					buf.SetText(cinfo)
+					gi.NewButton(d.ConfigButtons()).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+						OnClick(func(e events.Event) {
+							d.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(cinfo))
+						})
+					d.Ok().Run()
 				}
 			}
 		})
@@ -194,10 +207,10 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	if since != "" {
 		title += " since: " + since
 	}
-	dlg := gi.NewDialog(ctx).Title(title).NewWindow(true)
+	d := gi.NewDialog(ctx).Title(title).NewWindow(true)
 
-	lv := NewVCSLogView(dlg.Scene, "vcslog")
+	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
 
-	return dlg
+	return d
 }

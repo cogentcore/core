@@ -27,10 +27,10 @@ type Widget interface {
 
 	// OnWidgetAdded adds a function to call when a widget is added
 	// as a child to the widget or any of its children.
-	OnWidgetAdded(f func(w Widget)) Widget
+	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
 	// Style sets the styling of the widget by adding a Styler function
-	Style(s func(s *styles.Style)) Widget
+	Style(s func(s *styles.Style)) *WidgetBase
 
 	// AsWidget returns the WidgetBase embedded field for any Widget node.
 	// The Widget interface defines only methods that can be overridden
@@ -72,10 +72,10 @@ type Widget interface {
 	AbilityIs(flag enums.BitFlag) bool
 
 	// SetState sets the given [styles.Style.State] flags
-	SetState(on bool, state ...enums.BitFlag) Widget
+	SetState(on bool, state ...enums.BitFlag) *WidgetBase
 
 	// SetAbilities sets the given [styles.Style.Abilities] flags
-	SetAbilities(on bool, able ...enums.BitFlag) Widget
+	SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase
 
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden -- set style funcs to apply custom styling.
@@ -131,14 +131,14 @@ type Widget interface {
 	Render(sc *Scene)
 
 	// On adds an event listener function for the given event type
-	On(etype events.Types, fun func(e events.Event)) Widget
+	On(etype events.Types, fun func(e events.Event)) *WidgetBase
 
 	// Helper functions for common event types
 	// TODO(kai/menu): should we have these in the Widget interface?
-	// we need them for better formatting when making inline buttons
+	// we need them for OnWidgetAdded functions
 
 	// OnClick adds an event listener function for [events.Click] events
-	OnClick(fun func(e events.Event)) Widget
+	OnClick(fun func(e events.Event)) *WidgetBase
 
 	// HandleEvent sends the given event to all Listeners for that event type.
 	// It also checks if the State has changed and calls ApplyStyle if so.
@@ -192,39 +192,39 @@ type Widget interface {
 	// SetMinPrefWidth sets minimum and preferred width;
 	// will get at least this amount; max unspecified.
 	// This adds a styler that calls [styles.Style.SetMinPrefWidth].
-	SetMinPrefWidth(val units.Value) Widget
+	SetMinPrefWidth(val units.Value) *WidgetBase
 
 	// SetMinPrefHeight sets minimum and preferred height;
 	// will get at least this amount; max unspecified.
 	// This adds a styler that calls [styles.Style.SetMinPrefHeight].
-	SetMinPrefHeight(val units.Value) Widget
+	SetMinPrefHeight(val units.Value) *WidgetBase
 
 	// SetStretchMaxWidth sets stretchy max width (-1);
 	// can grow to take up avail room.
 	// This adds a styler that calls [styles.Style.SetStretchMaxWidth].
-	SetStretchMaxWidth() Widget
+	SetStretchMaxWidth() *WidgetBase
 
 	// SetStretchMaxHeight sets stretchy max height (-1);
 	// can grow to take up avail room.
 	// This adds a styler that calls [styles.Style.SetStretchMaxHeight].
-	SetStretchMaxHeight() Widget
+	SetStretchMaxHeight() *WidgetBase
 
 	// SetStretchMax sets stretchy max width and height (-1);
 	// can grow to take up avail room.
 	// This adds a styler that calls [styles.Style.SetStretchMax].
-	SetStretchMax() Widget
+	SetStretchMax() *WidgetBase
 
 	// SetFixedWidth sets all width style options
 	// (Width, MinWidth, and MaxWidth) to
 	// the given fixed width unit value.
 	// This adds a styler that calls [styles.Style.SetFixedWidth].
-	SetFixedWidth(val units.Value) Widget
+	SetFixedWidth(val units.Value) *WidgetBase
 
 	// SetFixedHeight sets all height style options
 	// (Height, MinHeight, and MaxHeight) to
 	// the given fixed height unit value.
 	// This adds a styler that calls [styles.Style.SetFixedHeight].
-	SetFixedHeight(val units.Value) Widget
+	SetFixedHeight(val units.Value) *WidgetBase
 
 	// todo: revisit this -- in general anything with a largish image (including svg,
 	// SubScene, but not Icon) should get put on a list so the RenderWin Drawer just
@@ -332,9 +332,9 @@ func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
 
 // OnWidgetAdded adds a function to call when a widget is added
 // as a child to the widget or any of its children.
-func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) Widget {
+func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) *WidgetBase {
 	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
-	return wb.This().(Widget)
+	return wb
 }
 
 // AsWidget returns the given Ki object

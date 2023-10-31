@@ -194,7 +194,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		return tv
 	}
 	if !tv.IsReadOnly() {
-		tv.SelectedIdx = -1
+		tv.SelIdx = -1
 	}
 	tv.StartIdx = 0
 	tv.SortIdx = -1
@@ -781,10 +781,10 @@ func (tv *TableView) UpdateWidgets() {
 	}
 
 	if tv.SelField != "" && tv.SelVal != nil {
-		tv.SelectedIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
+		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 	}
-	if tv.IsReadOnly() && tv.SelectedIdx >= 0 {
-		tv.SelectIdx(tv.SelectedIdx)
+	if tv.IsReadOnly() && tv.SelIdx >= 0 {
+		tv.SelectIdx(tv.SelIdx)
 	}
 	tv.UpdateScroll()
 }
@@ -1085,7 +1085,9 @@ func (tv *TableView) EditIdx(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	StructViewDialog(gi.NewDialog(tv).Title(tynm), stru, nil).Run()
+	d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
+	NewStructView(d).SetStruct(stru)
+	d.Run()
 }
 
 func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
