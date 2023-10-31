@@ -64,7 +64,7 @@ func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
-	d := gi.NewDialog(ctx).Title("Select a HiStyle Highlighting Style").Prompt(vv.Doc())
+	d := gi.NewDialog(ctx).Title("Select a HiStyle Highlighting Style").Prompt(vv.Doc()).FullWindow(true)
 	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {

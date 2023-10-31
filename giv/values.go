@@ -573,7 +573,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 			}
 		}).Run()
 	} else {
-		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc())
+		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 		NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.OnAccept(func(e events.Event) {
 			vv.UpdateWidget()
@@ -845,7 +845,7 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	readOnly := vv.IsReadOnly()
-	d := gi.NewDialog(ctx).Title(title).Prompt(vv.Doc())
+	d := gi.NewDialog(ctx).Title(title).Prompt(vv.Doc()).FullWindow(true)
 	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
@@ -1509,12 +1509,11 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	si := 0
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	d := gi.NewDialog(ctx).Title("Select an Icon").Prompt(vv.Doc())
-	NewSliceView(d).
-		SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
-			w.(*gi.Button).SetText(string(ics[row]))
-			s.SetStretchMaxWidth()
-		}).
+	d := gi.NewDialog(ctx).Title("Select an icon").Prompt(vv.Doc()).FullWindow(true)
+	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
+		w.(*gi.Button).SetText(string(ics[row]))
+		s.SetStretchMaxWidth()
+	}).
 		SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
