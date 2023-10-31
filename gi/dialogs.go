@@ -29,16 +29,6 @@ type Dialog struct {
 	// Stage is the main stage associated with the dialog
 	Stage *MainStage
 
-	// Data has arbitrary data for this dialog
-	// Data any
-
-	// RdOnly is whether the dialog is read only
-	// RdOnly bool
-
-	// a record of parent View names that have led up to this dialog,
-	// which is displayed as extra contextual information in view dialog windows
-	// VwPath string
-
 	// Accepted means that the dialog was accepted -- else canceled
 	Accepted bool
 
