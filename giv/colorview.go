@@ -626,7 +626,7 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	si := 0
 	d := gi.NewDialog(ctx).Title("Select a Color Name").Prompt(vv.Doc())
-	NewTableView(d).SetSlice(&sl).SetSelectedIdx(curRow).BindSelectDialog(d, &si)
+	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
 			vv.SetValue(sl[si].Name)

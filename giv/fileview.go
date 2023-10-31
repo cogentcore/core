@@ -322,11 +322,11 @@ func (fv *FileView) ConfigFilesRow() {
 	fr.ConfigChildren(config) // already covered by parent update
 
 	sv := fv.FavsView()
-	sv.SelectedIdx = -1
+	sv.SelIdx = -1
 	sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.OnSelect(func(e events.Event) {
-		fv.FavSelect(sv.SelectedIdx)
+		fv.FavSelect(sv.SelIdx)
 	})
 
 	fv.ReadFiles()
@@ -350,7 +350,7 @@ func (fv *FileView) ConfigFilesRow() {
 		fsv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
 	fsv.OnSelect(func(e events.Event) {
-		fv.FileSelectAction(fsv.SelectedIdx)
+		fv.FileSelectAction(fsv.SelIdx)
 	})
 	fsv.OnDoubleClick(func(e events.Event) {
 		if !fv.SelectFile() {
@@ -557,9 +557,9 @@ func (fv *FileView) UpdateFiles() {
 	sv.SortSlice()
 	sv.Update()
 
-	fv.SelectedIdx = sv.SelectedIdx
-	if sv.SelectedIdx >= 0 {
-		sv.ScrollToIdx(sv.SelectedIdx)
+	fv.SelectedIdx = sv.SelIdx
+	if sv.SelIdx >= 0 {
+		sv.ScrollToIdx(sv.SelIdx)
 	}
 
 	if fv.PrevPath != fv.DirPath {
@@ -667,7 +667,7 @@ func (fv *FileView) SetSelFileAction(sel string) {
 			}
 		}
 	}
-	fv.SelectedIdx = sv.SelectedIdx
+	fv.SelectedIdx = sv.SelIdx
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 	fv.Send(events.Select) // receiver needs to get selectedFile
