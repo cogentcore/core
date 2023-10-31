@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/cursors/cursorimg"
 	"goki.dev/enums"
 	"goki.dev/goosi/cursor"
 )
@@ -40,14 +39,15 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 		return nil
 	}
 
-	ci, err := cursorimg.Get(cursor, c.Size)
-	if err != nil {
-		return err
-	}
-	h := ci.Hotspot
-	gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
-	sm[c.Size] = gc
-	theApp.ctxtwin.glw.SetCursor(gc)
+	// TODO(kai): add this back once glfw panic is fixed
+	// ci, err := cursorimg.Get(cursor, c.Size)
+	// if err != nil {
+	// 	return err
+	// }
+	// h := ci.Hotspot
+	// gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
+	// sm[c.Size] = gc
+	// theApp.ctxtwin.glw.SetCursor(gc)
 	c.prevSize = c.Size
 	c.Cur = cursor
 	return nil
