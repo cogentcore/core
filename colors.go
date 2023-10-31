@@ -18,7 +18,7 @@ import (
 
 // IsNil returns whether the color is the nil initial default color
 func IsNil(c color.Color) bool {
-	return c == color.RGBA{}
+	return AsRGBA(c) == color.RGBA{}
 }
 
 // SetToNil sets the given color to a nil initial default color
