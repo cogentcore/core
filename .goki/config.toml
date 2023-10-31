@@ -1,6 +1,6 @@
 Name = "grog"
 Desc = ""
-Version = "v0.0.7"
+Version = "v0.0.8"
 Type = "Library"
 
 [Build]
@@ -35,7 +35,6 @@ Type = "Library"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
-  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -57,3 +56,4 @@ Type = "Library"
     AddFuncs = false
     Instance = false
     TypeVar = false
+    Setters = false
