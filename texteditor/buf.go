@@ -616,18 +616,20 @@ func (tb *Buf) Save() error {
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
 		d := gi.NewDialog(vp).Title("File Changed on Disk").
-			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)).
-			Choice("Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting")
-		d.OnAccept(func(e events.Event) {
-			switch d.Data.(int) {
-			case 0:
-				// CallMethod(tb, "SaveAs", vp)
-			case 1:
-				tb.Revert()
-			case 2:
-				tb.SaveFile(tb.Filename)
-			}
-		}).Run()
+			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename))
+		gi.NewButton(d.Buttons).SetText("Save to different file").OnClick(func(e events.Event) {
+			d.AcceptDialog()
+			// CallMethod(tb, "SaveAs", vp)
+		})
+		gi.NewButton(d.Buttons).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
+			d.AcceptDialog()
+			tb.Revert()
+		})
+		gi.NewButton(d.Buttons).SetText("Save file, overwriting").OnClick(func(e events.Event) {
+			d.AcceptDialog()
+			tb.SaveFile(tb.Filename)
+		})
+		d.Run()
 	}
 	return tb.SaveFile(tb.Filename)
 }
@@ -638,40 +640,38 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
 		vp := tb.SceneFromView()
 		if tb.Filename != "" {
-			d := gi.NewDialog(vp).Title("Close Without Saving?").
-				Prompt(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)).
-				Choice("Save", "Close Without Saving", "Cancel")
-			d.OnAccept(func(e events.Event) {
-				switch d.Data.(int) {
-				case 0:
-					tb.Save()
-					tb.Close(afterFun) // 2nd time through won't prompt
-				case 1:
-					tb.ClearChanged()
-					tb.AutoSaveDelete()
-					tb.Close(afterFun)
-				case 2:
-					if afterFun != nil {
-						afterFun(true)
-					}
+			d := gi.NewDialog(vp).Title("Close without saving?").
+				Prompt(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)).Cancel()
+			gi.NewButton(d.Buttons).SetText("Close without saving").OnClick(func(e events.Event) {
+				d.AcceptDialog()
+				tb.ClearChanged()
+				tb.AutoSaveDelete()
+				tb.Close(afterFun)
+			})
+			gi.NewButton(d.Buttons).SetText("Save").OnClick(func(e events.Event) {
+				d.AcceptDialog()
+				tb.Save()
+				tb.Close(afterFun) // 2nd time through won't prompt
+			})
+			d.OnCancel(func(e events.Event) {
+				if afterFun != nil {
+					afterFun(true)
 				}
 			}).Run()
 		} else {
-			d := gi.NewDialog(vp).Title("Close Without Saving?").
+			gi.NewDialog(vp).Title("Close without saving?").
 				Prompt("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As").
-				Choice("Close Without Saving", "Cancel")
-			d.OnAccept(func(e events.Event) {
-				switch d.Data.(int) {
-				case 0:
+				Cancel().Ok("Close without saving").
+				OnAccept(func(e events.Event) {
 					tb.ClearChanged()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
-				case 1:
+				}).
+				OnCancel(func(e events.Event) {
 					if afterFun != nil {
 						afterFun(true)
 					}
-				}
-			}).Run()
+				}).Run()
 		}
 		return false // awaiting decisions..
 	}
