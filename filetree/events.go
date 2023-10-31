@@ -151,6 +151,14 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 
 	giv.NewFuncButton(m, fn.DiffVcsSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
 		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.LogVcsSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
+		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.BlameVcsSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
+		SetState(!fn.HasSelection(), states.Disabled)
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, fn.RemoveFromExterns).SetText(VCSLabelFunc(fn, "Remove from externs")).SetIcon(icons.Delete).
+		SetState(!fn.HasSelection(), states.Disabled)
 
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!fn.HasSelection(), states.Disabled).
@@ -186,6 +194,6 @@ func (fn *Node) ContextMenu(m *gi.Scene) {
 	if fn.IsReadOnly() {
 		fn.TreeViewContextMenuReadOnly(m)
 	} else {
-		fn.TreeViewContextMenu(m)
+		fn.FileNodeContextMenu(m)
 	}
 }

@@ -36,7 +36,7 @@ func OSOpenCommand() string {
 
 // OpenFilesDefault opens selected files with default app for that file type (os defined).
 // runs open on Mac, xdg-open on Linux, and start on Windows
-func (fn *Node) OpenFilesDefault() {
+func (fn *Node) OpenFilesDefault() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -77,8 +77,8 @@ func (fn *Node) OpenFileWith(command string) error {
 	return err
 }
 
-// DuplicateFiles calls DuplicateFile on any selected nodes
-func (fn *Node) DuplicateFiles() {
+// makes a copy of selected files
+func (fn *Node) DuplicateFiles() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -97,9 +97,9 @@ func (fn *Node) DuplicateFile() error {
 	return err
 }
 
-// DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
-// all files and subdirectories are also deleted.
-func (fn *Node) DeleteFiles() {
+// deletes any selected files or directories. If any directory is selected,
+// all files and subdirectories in that directory are also deleted.
+func (fn *Node) DeleteFiles() { //gti:add
 	gi.NewDialog(fn).Title("Delete Files?").
 		Prompt("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.").
 		Cancel().Ok("Delete Files").
@@ -110,6 +110,7 @@ func (fn *Node) DeleteFiles() {
 
 // DeleteFilesImpl does the actual deletion, no prompts
 func (fn *Node) DeleteFilesImpl() {
+	root := fn.FRoot
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
@@ -138,6 +139,7 @@ func (fn *Node) DeleteFilesImpl() {
 		}
 		fn.DeleteFile()
 	}
+	root.UpdateDir()
 }
 
 // DeleteFile deletes this file
@@ -160,8 +162,8 @@ func (fn *Node) DeleteFile() (err error) {
 	return err
 }
 
-// RenameFiles calls RenameFile on any selected nodes
-func (fn *Node) RenameFiles() {
+// renames any selected files
+func (fn *Node) RenameFiles() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -173,7 +175,7 @@ func (fn *Node) RenameFiles() {
 }
 
 // RenameFile renames file to new name
-func (fn *Node) RenameFile(newpath string) (err error) {
+func (fn *Node) RenameFile(newpath string) (err error) { //gti:add
 	if fn.IsExternal() {
 		return nil
 	}
@@ -214,8 +216,8 @@ func (fn *Node) RenameFile(newpath string) (err error) {
 	return err
 }
 
-// NewFiles makes a new file in selected directory node
-func (fn *Node) NewFiles(filename string, addToVcs bool) {
+// makes a new file in selected directory
+func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
 	sels := fn.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -250,8 +252,8 @@ func (fn *Node) NewFile(filename string, addToVcs bool) {
 	}
 }
 
-// NewFolders makes a new file in given selected directory node
-func (fn *Node) NewFolders(foldername string) {
+// makes a new folder in the given selected directory
+func (fn *Node) NewFolders(foldername string) { //gti:add
 	sels := fn.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -262,7 +264,7 @@ func (fn *Node) NewFolders(foldername string) {
 }
 
 // NewFolder makes a new folder (directory) in this directory node
-func (fn *Node) NewFolder(foldername string) {
+func (fn *Node) NewFolder(foldername string) { //gti:add
 	if fn.IsExternal() {
 		return
 	}
@@ -302,8 +304,8 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	}
 }
 
-// ShowFileInfo calls ViewFile on selected files
-func (fn *Node) ShowFileInfo() {
+// Shows file information about selected file(s)
+func (fn *Node) ShowFileInfo() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())

@@ -108,7 +108,7 @@ func (fn *Node) UpdateRepoFiles() {
 }
 
 // AddToVcsSel adds selected files to version control system
-func (fn *Node) AddToVcsSel() {
+func (fn *Node) AddToVcsSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -134,7 +134,7 @@ func (fn *Node) AddToVcs() {
 }
 
 // DeleteFromVcsSel removes selected files from version control system
-func (fn *Node) DeleteFromVcsSel() {
+func (fn *Node) DeleteFromVcsSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -160,7 +160,7 @@ func (fn *Node) DeleteFromVcs() {
 }
 
 // CommitToVcsSel commits to version control system based on last selected file
-func (fn *Node) CommitToVcsSel() {
+func (fn *Node) CommitToVcsSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	if n == 0 { // shouldn't happen
@@ -189,7 +189,7 @@ func (fn *Node) CommitToVcs(message string) (err error) {
 }
 
 // RevertVcsSel removes selected files from version control system
-func (fn *Node) RevertVcsSel() {
+func (fn *Node) RevertVcsSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -227,7 +227,7 @@ func (fn *Node) RevertVcs() (err error) {
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffViewDialog.
-func (fn *Node) DiffVcsSel(rev_a, rev_b string) {
+func (fn *Node) DiffVcsSel(rev_a, rev_b string) { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -261,7 +261,7 @@ func (fn *Node) DiffVcs(rev_a, rev_b string) error {
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
-func (fn *Node) LogVcsSel(allFiles bool, since string) {
+func (fn *Node) LogVcsSel(allFiles bool, since string) { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -300,7 +300,7 @@ func (fn *Node) LogVcs(allFiles bool, since string) (vci.Log, error) {
 
 // BlameVcsSel shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
-func (fn *Node) BlameVcsSel() {
+func (fn *Node) BlameVcsSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
