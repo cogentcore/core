@@ -87,7 +87,9 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 					title = "Slice of " + laser.NonPtrType(elType).Name()
 				}
-				SliceViewDialog(gi.NewDialog(sv).Title(title).ViewPath(vpath), sv.Slice, sv.TmpSave, false, false).Run()
+				d := gi.NewDialog(sv).Title(title)
+				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice).SetTmpSave(sv.TmpSave)
+				d.Run()
 			})
 		}
 	})
