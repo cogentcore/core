@@ -7,8 +7,8 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231031140856-0d7f346fb12e
 	github.com/goki/vulkan v1.0.7
 	goki.dev/cursors v0.0.13
-	goki.dev/enums v0.9.33
-	goki.dev/girl v0.0.14
+	goki.dev/enums v0.9.34
+	goki.dev/girl v0.0.15
 	goki.dev/glop v0.1.4
 	goki.dev/laser v0.1.13
 	goki.dev/mat32/v2 v2.0.0-dev0.0.8
