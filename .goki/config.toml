@@ -1,6 +1,6 @@
 Name = "cam"
 Desc = ""
-Version = "v0.9.30"
+Version = "v0.9.31"
 Type = "Library"
 
 [Build]
@@ -35,7 +35,6 @@ Type = "Library"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
-  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -57,3 +56,4 @@ Type = "Library"
     AddFuncs = false
     Instance = false
     TypeVar = false
+    Setters = false

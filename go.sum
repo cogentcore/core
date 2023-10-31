@@ -1,6 +1,6 @@
-goki.dev/enums v0.9.32 h1:PxOf5ZfrdmO887YnARl6xdPjB3JPUREKWPOLYWF1eJc=
-goki.dev/enums v0.9.32/go.mod h1:LY28X2e9VVLMHYDHfze+T2bIuaWVR7VYmF5DVEKDEzk=
-goki.dev/mat32/v2 v2.0.0-dev0.0.7 h1:5SLSCRU1/axEkJ+MWEMuxCTMYc+/C1F/z62ojAE9ePE=
-goki.dev/mat32/v2 v2.0.0-dev0.0.7/go.mod h1:heGirfS2nYEqghT3xu3u+0c5JFRYcqKEeuCZ5cGYCSE=
+goki.dev/enums v0.9.33 h1:Ut/0ePiLhNYkrsnU9jW9iBb7qNUt/mdiOAb9NL0zKDg=
+goki.dev/enums v0.9.33/go.mod h1:RnLPaDjQrM0vABi47Z/xhYE9CUvGRZg5up++uClU368=
+goki.dev/mat32/v2 v2.0.0-dev0.0.8 h1:/+YxLyOAC7WKsxa/bWUR75JaLmuivlOGlTyucR3zoO0=
+goki.dev/mat32/v2 v2.0.0-dev0.0.8/go.mod h1:BvGUlTT1doWw8xk8UZ9InNitaYq5V5kQJlwA+vo0/DU=
 golang.org/x/image v0.13.0 h1:3cge/F/QTkNLauhf2QoE9zp+7sr+ZcL4HnoZmdwg9sg=
 golang.org/x/image v0.13.0/go.mod h1:6mmbMOeV28HuMTgA6OSRkdXKYw/t5W9Uwn2Yv1r3Yxk=
