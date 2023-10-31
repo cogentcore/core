@@ -1,2 +1,4 @@
+goki.dev/enums v0.9.32 h1:PxOf5ZfrdmO887YnARl6xdPjB3JPUREKWPOLYWF1eJc=
+goki.dev/enums v0.9.32/go.mod h1:LY28X2e9VVLMHYDHfze+T2bIuaWVR7VYmF5DVEKDEzk=
 golang.org/x/image v0.13.0 h1:3cge/F/QTkNLauhf2QoE9zp+7sr+ZcL4HnoZmdwg9sg=
 golang.org/x/image v0.13.0/go.mod h1:6mmbMOeV28HuMTgA6OSRkdXKYw/t5W9Uwn2Yv1r3Yxk=
