@@ -724,7 +724,7 @@ func (ed *Editor) JumpToLinePrompt() {
 		if err == nil {
 			ed.JumpToLine(int(ln))
 		}
-	}).Run()
+	}).Cancel().Ok("Jump").Run()
 
 }
 
