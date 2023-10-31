@@ -983,7 +983,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 					updt := ownki.UpdateStart()
 					for i := 0; i < nd.Number; i++ {
 						nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
-						ownki.InsertNewChild(&nd.Type, idx+1+i, nm)
+						ownki.InsertNewChild(nd.Type, idx+1+i, nm)
 					}
 					sv.SetChanged()
 					ownki.UpdateEnd(updt)

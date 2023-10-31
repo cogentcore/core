@@ -261,7 +261,7 @@ type NewItemsData struct {
 	// Number is the number of elements to create
 	Number int
 	// Type is the type of elements to create
-	Type gti.Type
+	Type *gti.Type
 }
 
 // NewItems adds to the dialog a prompt for creating new item(s) of the given type,
