@@ -334,12 +334,12 @@ func (ed *Editor) QReplacePrompt() {
 		find = string(ed.Selection().ToBytes())
 	}
 	d := QReplaceDialog(gi.NewDialog(ed).Title("Query-Replace").
-		Prompt("Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"),
+		Prompt("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"),
 		find, ed.QReplace.LexItems)
 	d.OnAccept(func(e events.Event) {
 		find, repl, lexItems := QReplaceDialogValues(d)
 		ed.QReplaceStart(find, repl, lexItems)
-	}).Run()
+	}).Cancel().Ok("Query-Replace").Run()
 }
 
 // QReplaceStart starts query-replace using given find, replace strings
