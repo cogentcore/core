@@ -117,6 +117,11 @@ func (wb *WidgetBase) SetEnabledUpdt(enabled bool) {
 	wb.ApplyStyleUpdate(wb.Sc)
 }
 
+// SetReadOnly sets the widget as [states.ReadOnly]
+func (wb *WidgetBase) SetReadOnly() {
+	wb.SetState(true, states.ReadOnly)
+}
+
 // IsDisabled tests if this node is flagged as [Disabled].
 // If so, behave and style appropriately.
 func (wb *WidgetBase) IsDisabled() bool {
