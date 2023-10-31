@@ -198,6 +198,7 @@ func (fb *FuncButton) CallFunc() {
 		if !fb.Confirm {
 			rets := fb.ReflectFunc.Call(rargs)
 			fb.ShowReturnsDialog(rets)
+			return
 		}
 		gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
 			OnAccept(func(e events.Event) {
@@ -263,7 +264,7 @@ func (fb *FuncButton) SetArgs() {
 
 		name := ""
 		doc := ""
-		if fb.Func.Args != nil {
+		if fb.Func.Args != nil && len(fb.Func.Args.Order) > i {
 			ga := fb.Func.Args.ValByIdx(i)
 			if ga != nil {
 				name = ga.Name
