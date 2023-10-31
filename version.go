@@ -4,9 +4,9 @@ package vci
 
 const (
 	// Version is the version of this package being used
-	Version = "v2.0.0-dev0.0.12"
+	Version = "v2.0.0-dev0.0.13"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "2379a40"
+	GitCommit = "7a03dea"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-31 19:48"
+	VersionDate = "2023-10-31 23:05"
 )
