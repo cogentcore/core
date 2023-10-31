@@ -247,10 +247,10 @@ type SliceViewBase struct {
 	SelVal any `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently-selected item, in ReadOnly mode only
-	SelectedIdx int `copy:"-" json:"-" xml:"-"`
+	SelIdx int `copy:"-" json:"-" xml:"-"`
 
 	// list of currently-selected slice indexes
-	SelectedIdxs map[int]struct{} `copy:"-"`
+	SelIdxs map[int]struct{} `copy:"-"`
 
 	// list of currently-dragged indexes
 	DraggedIdxs []int `copy:"-"`
@@ -416,7 +416,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	}
 	sv.ElVal = laser.SliceElValue(sl)
 	if !sv.IsReadOnly() {
-		sv.SelectedIdx = -1
+		sv.SelIdx = -1
 	}
 	sv.ResetSelectedIdxs()
 	sv.UpdateEnd(updt)
@@ -925,10 +925,10 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		}
 	}
 	if sv.SelVal != nil {
-		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
+		sv.SelIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 	}
-	if sv.IsReadOnly() && sv.SelectedIdx >= 0 {
-		sv.SelectIdx(sv.SelectedIdx)
+	if sv.IsReadOnly() && sv.SelIdx >= 0 {
+		sv.SelectIdx(sv.SelIdx)
 	}
 	sv.UpdateScroll()
 }
@@ -1033,7 +1033,7 @@ func (sv *SliceViewBase) SliceNewAtSel(idx int) {
 		if ix >= idx {
 			ix++
 		}
-		sv.SelectedIdxs[ix] = struct{}{}
+		sv.SelIdxs[ix] = struct{}{}
 	}
 }
 
@@ -1050,7 +1050,7 @@ func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
 		case ix > idx:
 			ix--
 		}
-		sv.SelectedIdxs[ix] = struct{}{}
+		sv.SelIdxs[ix] = struct{}{}
 	}
 }
 
@@ -1300,13 +1300,13 @@ func SliceIdxByValue(slc any, fldVal any) (int, bool) {
 // MoveDown moves the selection down to next row, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (sv *SliceViewBase) MoveDown(selMode events.SelectModes) int {
-	if sv.SelectedIdx >= sv.SliceSize-1 {
-		sv.SelectedIdx = sv.SliceSize - 1
+	if sv.SelIdx >= sv.SliceSize-1 {
+		sv.SelIdx = sv.SliceSize - 1
 		return -1
 	}
-	sv.SelectedIdx++
-	sv.SelectIdxAction(sv.SelectedIdx, selMode)
-	return sv.SelectedIdx
+	sv.SelIdx++
+	sv.SelectIdxAction(sv.SelIdx, selMode)
+	return sv.SelIdx
 }
 
 // MoveDownAction moves the selection down to next row, using given select
@@ -1324,13 +1324,13 @@ func (sv *SliceViewBase) MoveDownAction(selMode events.SelectModes) int {
 // MoveUp moves the selection up to previous idx, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceViewBase) MoveUp(selMode events.SelectModes) int {
-	if sv.SelectedIdx <= 0 {
-		sv.SelectedIdx = 0
+	if sv.SelIdx <= 0 {
+		sv.SelIdx = 0
 		return -1
 	}
-	sv.SelectedIdx--
-	sv.SelectIdxAction(sv.SelectedIdx, selMode)
-	return sv.SelectedIdx
+	sv.SelIdx--
+	sv.SelectIdxAction(sv.SelIdx, selMode)
+	return sv.SelIdx
 }
 
 // MoveUpAction moves the selection up to previous idx, using given select
@@ -1347,14 +1347,14 @@ func (sv *SliceViewBase) MoveUpAction(selMode events.SelectModes) int {
 // MovePageDown moves the selection down to next page, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceViewBase) MovePageDown(selMode events.SelectModes) int {
-	if sv.SelectedIdx >= sv.SliceSize-1 {
-		sv.SelectedIdx = sv.SliceSize - 1
+	if sv.SelIdx >= sv.SliceSize-1 {
+		sv.SelIdx = sv.SliceSize - 1
 		return -1
 	}
-	sv.SelectedIdx += sv.VisRows
-	sv.SelectedIdx = min(sv.SelectedIdx, sv.SliceSize-1)
-	sv.SelectIdxAction(sv.SelectedIdx, selMode)
-	return sv.SelectedIdx
+	sv.SelIdx += sv.VisRows
+	sv.SelIdx = min(sv.SelIdx, sv.SliceSize-1)
+	sv.SelectIdxAction(sv.SelIdx, selMode)
+	return sv.SelIdx
 }
 
 // MovePageDownAction moves the selection down to next page, using given select
@@ -1371,14 +1371,14 @@ func (sv *SliceViewBase) MovePageDownAction(selMode events.SelectModes) int {
 // MovePageUp moves the selection up to previous page, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceViewBase) MovePageUp(selMode events.SelectModes) int {
-	if sv.SelectedIdx <= 0 {
-		sv.SelectedIdx = 0
+	if sv.SelIdx <= 0 {
+		sv.SelIdx = 0
 		return -1
 	}
-	sv.SelectedIdx -= sv.VisRows
-	sv.SelectedIdx = max(0, sv.SelectedIdx)
-	sv.SelectIdxAction(sv.SelectedIdx, selMode)
-	return sv.SelectedIdx
+	sv.SelIdx -= sv.VisRows
+	sv.SelIdx = max(0, sv.SelIdx)
+	sv.SelectIdxAction(sv.SelIdx, selMode)
+	return sv.SelIdx
 }
 
 // MovePageUpAction moves the selection up to previous page, using given select
@@ -1443,8 +1443,8 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 		defer sv.UpdateEndRender(updt)
 
 		sv.UnselectAllIdxs()
-		if sel || sv.SelectedIdx == idx {
-			sv.SelectedIdx = idx
+		if sel || sv.SelIdx == idx {
+			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 		}
 		// sv.This().(SliceViewer).UpdateWidgets()
@@ -1462,24 +1462,24 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 
 // IdxIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IdxIsSelected(idx int) bool {
-	if _, ok := sv.SelectedIdxs[idx]; ok {
+	if _, ok := sv.SelIdxs[idx]; ok {
 		return true
 	}
 	return false
 }
 
 func (sv *SliceViewBase) ResetSelectedIdxs() {
-	sv.SelectedIdxs = make(map[int]struct{})
+	sv.SelIdxs = make(map[int]struct{})
 }
 
 // SelectedIdxsList returns list of selected indexes,
 // sorted either ascending or descending
 func (sv *SliceViewBase) SelectedIdxsList(descendingSort bool) []int {
-	rws := make([]int, len(sv.SelectedIdxs))
+	rws := make([]int, len(sv.SelIdxs))
 	i := 0
-	for r := range sv.SelectedIdxs {
+	for r := range sv.SelIdxs {
 		if r >= sv.SliceSize { // double safety check at this point
-			delete(sv.SelectedIdxs, r)
+			delete(sv.SelIdxs, r)
 			rws = rws[:len(rws)-1]
 			continue
 		}
@@ -1501,21 +1501,21 @@ func (sv *SliceViewBase) SelectedIdxsList(descendingSort bool) []int {
 // SelectIdx selects given idx (if not already selected) -- updates select
 // status of index label
 func (sv *SliceViewBase) SelectIdx(idx int) {
-	sv.SelectedIdxs[idx] = struct{}{}
+	sv.SelIdxs[idx] = struct{}{}
 	sv.SelectIdxWidgets(idx, true)
 }
 
 // UnselectIdx unselects given idx (if selected)
 func (sv *SliceViewBase) UnselectIdx(idx int) {
 	if sv.IdxIsSelected(idx) {
-		delete(sv.SelectedIdxs, idx)
+		delete(sv.SelIdxs, idx)
 	}
 	sv.SelectIdxWidgets(idx, false)
 }
 
 // UnselectAllIdxs unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIdxs() {
-	for r := range sv.SelectedIdxs {
+	for r := range sv.SelIdxs {
 		sv.SelectIdxWidgets(r, false)
 	}
 	sv.ResetSelectedIdxs()
@@ -1527,9 +1527,9 @@ func (sv *SliceViewBase) SelectAllIdxs() {
 	defer sv.UpdateEndRender(updt)
 
 	sv.UnselectAllIdxs()
-	sv.SelectedIdxs = make(map[int]struct{}, sv.SliceSize)
+	sv.SelIdxs = make(map[int]struct{}, sv.SliceSize)
 	for idx := 0; idx < sv.SliceSize; idx++ {
-		sv.SelectedIdxs[idx] = struct{}{}
+		sv.SelIdxs[idx] = struct{}{}
 		sv.SelectIdxWidgets(idx, true)
 	}
 }
@@ -1553,29 +1553,29 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 	switch mode {
 	case events.SelectOne:
 		if sv.IdxIsSelected(idx) {
-			if len(sv.SelectedIdxs) > 1 {
+			if len(sv.SelIdxs) > 1 {
 				sv.UnselectAllIdxs()
 			}
-			sv.SelectedIdx = idx
+			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 		} else {
 			sv.UnselectAllIdxs()
-			sv.SelectedIdx = idx
+			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 		}
 		sv.Send(events.Select) //  sv.SelectedIdx)
 	case events.ExtendContinuous:
-		if len(sv.SelectedIdxs) == 0 {
-			sv.SelectedIdx = idx
+		if len(sv.SelIdxs) == 0 {
+			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 			sv.Send(events.Select) //  sv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
-			for r := range sv.SelectedIdxs {
+			for r := range sv.SelIdxs {
 				if minIdx < 0 {
 					minIdx = r
 				} else {
@@ -1584,7 +1584,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 				maxIdx = max(maxIdx, r)
 			}
 			cidx := idx
-			sv.SelectedIdx = idx
+			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 			if idx < minIdx {
 				for cidx < minIdx {
@@ -1605,19 +1605,19 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 			sv.UnselectIdxAction(idx)
 			sv.Send(events.Select) //  sv.SelectedIdx)
 		} else {
-			sv.SelectedIdx = idx
+			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 			sv.Send(events.Select) //  sv.SelectedIdx)
 		}
 	case events.Unselect:
-		sv.SelectedIdx = idx
+		sv.SelIdx = idx
 		sv.UnselectIdxAction(idx)
 	case events.SelectQuiet:
-		sv.SelectedIdx = idx
+		sv.SelIdx = idx
 		sv.SelectIdx(idx)
 	case events.UnselectQuiet:
-		sv.SelectedIdx = idx
+		sv.SelIdx = idx
 		sv.UnselectIdx(idx)
 	}
 	sv.This().(SliceViewer).UpdateWidgets()
@@ -1673,7 +1673,7 @@ func (sv *SliceViewBase) MimeDataType() string {
 
 // CopySelToMime copies selected rows to mime data
 func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
-	nitms := len(sv.SelectedIdxs)
+	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return nil
 	}
@@ -1688,7 +1688,7 @@ func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
 // Copy copies selected rows to clip.Board, optionally resetting the selection
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Copy(reset bool) {
-	nitms := len(sv.SelectedIdxs)
+	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return
 	}
@@ -1712,7 +1712,7 @@ func (sv *SliceViewBase) CopyIdxs(reset bool) {
 
 // DeleteIdxs deletes all selected indexes
 func (sv *SliceViewBase) DeleteIdxs() {
-	if len(sv.SelectedIdxs) == 0 {
+	if len(sv.SelIdxs) == 0 {
 		return
 	}
 	updt := sv.UpdateStart()
@@ -1729,7 +1729,7 @@ func (sv *SliceViewBase) DeleteIdxs() {
 // Cut copies selected indexes to clip.Board and deletes selected indexes
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Cut() {
-	if len(sv.SelectedIdxs) == 0 {
+	if len(sv.SelIdxs) == 0 {
 		return
 	}
 	updt := sv.UpdateStart()
@@ -1856,7 +1856,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 // Duplicate copies selected items and inserts them after current selection --
 // return idx of start of duplicates if successful, else -1
 func (sv *SliceViewBase) Duplicate() int {
-	nitms := len(sv.SelectedIdxs)
+	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return -1
 	}
@@ -1874,7 +1874,7 @@ func (sv *SliceViewBase) Duplicate() int {
 
 // DragNDropStart starts a drag-n-drop
 func (sv *SliceViewBase) DragNDropStart() {
-	nitms := len(sv.SelectedIdxs)
+	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return
 	}
@@ -1986,7 +1986,7 @@ func (sv *SliceViewBase) DragNDropSource(de events.Event) {
 // SaveDraggedIdxs saves selectedindexes into dragged indexes
 // taking into account insertion at idx
 func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
-	sz := len(sv.SelectedIdxs)
+	sz := len(sv.SelIdxs)
 	if sz == 0 {
 		sv.DraggedIdxs = nil
 		return
@@ -2119,7 +2119,7 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 	if kt.IsHandled() {
 		return
 	}
-	idx := sv.SelectedIdx
+	idx := sv.SelIdx
 	kf := keyfun.Of(kt.KeyChord())
 	switch kf {
 	// case keyfun.Delete: // too dangerous
@@ -2154,7 +2154,7 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	case keyfun.Paste:
-		sv.PasteIdx(sv.SelectedIdx)
+		sv.PasteIdx(sv.SelIdx)
 		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	}
@@ -2171,7 +2171,7 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 		}
 	}
 	kf := keyfun.Of(kt.KeyChord())
-	idx := sv.SelectedIdx
+	idx := sv.SelIdx
 	switch {
 	case kf == keyfun.MoveDown:
 		ni := idx + 1
