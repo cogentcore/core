@@ -67,6 +67,8 @@ public class GoNativeActivity extends NativeActivity {
 
 	private native void scaled(float scaleFactor, float posX, float posY);
 
+	private native void longPressed(float posX, float posY);
+
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 
@@ -323,6 +325,7 @@ public class GoNativeActivity extends NativeActivity {
 		@Override
 		public void onLongPress(MotionEvent event) {
 			Log.d("Go", "onLongPress: " + event.toString());
+			longPressed(event.getX(), event.getY());
 			return true;
 		}
 

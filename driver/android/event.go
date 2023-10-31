@@ -48,13 +48,18 @@ func keyboardDelete() {
 func scrolled(posX, posY, distanceX, distanceY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	delta := image.Pt(int(distanceX), int(distanceY))
-	theApp.window.EvMgr.Scroll(where, delta) // TODO
+	theApp.window.EvMgr.Scroll(where, delta)
 }
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+}
+
+func longPressed(posX, posY C.float) {
+	where := image.Pt(int(posX), int(posY))
+	theApp.window.EvMgr.MouseButton(events.ContextMenu, events.Right, where, 0) // TODO: modifiers
 }
 
 func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
