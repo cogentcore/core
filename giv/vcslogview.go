@@ -95,7 +95,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 					buf.Stat()
 					texteditor.NewEditor(d).SetBuf(buf)
 					buf.SetText(cinfo)
-					gi.NewButton(d.ConfigButtons()).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+					gi.NewButton(d.Buttons()).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 						OnClick(func(e events.Event) {
 							d.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(cinfo))
 						})
