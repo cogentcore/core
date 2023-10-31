@@ -4,15 +4,15 @@ go 1.21.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-	goki.dev/enums v0.9.34
+	goki.dev/enums v0.9.35
 	goki.dev/gengo v0.3.6
-	goki.dev/grease v0.8.23
-	goki.dev/greasi v0.8.6
-	goki.dev/grog v0.0.8
-	goki.dev/grows v0.3.10
-	goki.dev/gti v0.1.11
+	goki.dev/grease v0.8.25
+	goki.dev/greasi v0.8.8
+	goki.dev/grog v0.0.10
+	goki.dev/grows v0.3.12
+	goki.dev/gti v0.1.13
 	goki.dev/ordmap v0.5.6
-	goki.dev/xe v0.0.9
+	goki.dev/xe v0.0.11
 	golang.org/x/mod v0.13.0
 	golang.org/x/tools v0.14.0
 )
@@ -35,7 +35,7 @@ require (
 	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231031140856-0d7f346fb12e // indirect
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231031225837-d1c54e5847d0 // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/goki/go-difflib v1.2.1 // indirect
 	github.com/goki/vulkan v1.0.7 // indirect
@@ -51,23 +51,23 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
-	goki.dev/cam v0.9.31 // indirect
-	goki.dev/colors v0.8.25 // indirect
-	goki.dev/cursors v0.0.13 // indirect
-	goki.dev/gi/v2 v2.0.0-dev0.0.7 // indirect
-	goki.dev/girl v0.0.15 // indirect
+	goki.dev/cam v0.9.32 // indirect
+	goki.dev/colors v0.8.26 // indirect
+	goki.dev/cursors v0.0.14 // indirect
+	goki.dev/gi/v2 v2.0.0-dev0.0.8 // indirect
+	goki.dev/girl v0.0.16 // indirect
 	goki.dev/glop v0.1.4 // indirect
-	goki.dev/goosi v0.0.6 // indirect
+	goki.dev/goosi v0.0.8 // indirect
 	goki.dev/grr v0.0.4 // indirect
 	goki.dev/icons v0.0.6 // indirect
-	goki.dev/ki/v2 v2.0.0-dev0.0.14 // indirect
-	goki.dev/laser v0.1.13 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.8 // indirect
-	goki.dev/pi/v2 v2.0.0-dev0.0.7 // indirect
+	goki.dev/ki/v2 v2.0.0-dev0.0.16 // indirect
+	goki.dev/laser v0.1.15 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.10 // indirect
+	goki.dev/pi/v2 v2.0.0-dev0.0.9 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.4 // indirect
-	goki.dev/svg v0.1.9 // indirect
-	goki.dev/vci/v2 v2.0.0-dev0.0.12 // indirect
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.10 // indirect
+	goki.dev/svg v0.1.11 // indirect
+	goki.dev/vci/v2 v2.0.0-dev0.0.14 // indirect
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.12 // indirect
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
