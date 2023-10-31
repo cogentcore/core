@@ -116,6 +116,11 @@ func (d *Dialog) ConfigButtons() *Layout {
 		bb.Spacing.Dp(8)
 		s.SetStretchMaxWidth()
 	})
+	bb.OnWidgetAdded(func(w Widget) {
+		if bt := AsButton(w); bt != nil {
+			bt.Type = ButtonText
+		}
+	})
 	d.Buttons = bb
 	NewStretch(bb)
 	return bb
@@ -132,7 +137,7 @@ func (d *Dialog) Ok(text ...string) *Dialog {
 	if len(text) > 0 {
 		txt = text[0]
 	}
-	NewButton(bb, "ok").SetType(ButtonText).SetText(txt).OnClick(func(e events.Event) {
+	NewButton(bb, "ok").SetText(txt).OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		d.AcceptDialog()
 	})
@@ -157,7 +162,7 @@ func (d *Dialog) Cancel(text ...string) *Dialog {
 	if len(text) > 0 {
 		txt = text[0]
 	}
-	NewButton(bb, "cancel").SetType(ButtonText).SetText(txt).OnClick(func(e events.Event) {
+	NewButton(bb, "cancel").SetText(txt).OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		d.CancelDialog()
 	})
