@@ -563,7 +563,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc())
+		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 		NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.OnAccept(func(e events.Event) {
 			vv.UpdateWidget()
@@ -698,7 +698,7 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	mpi := vv.Value.Interface()
 	readOnly := vv.IsReadOnly()
-	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc())
+	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 	NewMapView(d).SetMap(mpi).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
