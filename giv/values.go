@@ -697,12 +697,13 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	mpi := vv.Value.Interface()
 	readOnly := vv.IsReadOnly()
-	dlg := MapViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), mpi, vv.TmpSave)
-	dlg.OnAccept(func(e events.Event) {
+	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc())
+	NewMapView(d).SetMap(mpi).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
+	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
 		vv.SendChange()
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
@@ -843,12 +844,13 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	readOnly := vv.IsReadOnly()
-	dlg := StructViewDialog(gi.NewDialog(ctx).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), k, vv.TmpSave)
-	dlg.OnAccept(func(e events.Event) {
+	d := gi.NewDialog(ctx).Title(title).Prompt(vv.Doc())
+	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
+	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
 		vv.SendChange()
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
@@ -1503,17 +1505,24 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}
+	si := 0
+	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	dlg := IconChooserDialog(gi.NewDialog(ctx).Title("Select an Icon").Prompt(vv.Doc()), cur)
-	dlg.OnAccept(func(e events.Event) {
-		si := dlg.Data.(int)
+	d := gi.NewDialog(ctx).Title("Select an Icon").Prompt(vv.Doc())
+	NewSliceView(d).
+		SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
+			w.(*gi.Button).SetText(string(ics[row]))
+			s.SetStretchMaxWidth()
+		}).
+		SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d, &si)
+	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
 			ic := icons.AllIcons[si]
 			vv.SetValue(ic)
 			vv.UpdateWidget()
 		}
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
