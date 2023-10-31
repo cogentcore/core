@@ -413,21 +413,17 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
 	readOnly := vv.IsReadOnly()
-	_ = readOnly
 	stru := opv.Interface()
 	if gi.RecycleDialog(stru) {
 		return
 	}
-	// dlg := StructViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).
-	// 	ReadOnly(readOnly).ViewPath(vpath), stru, vv.TmpSave)
-	dlg := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
-	NewStructView(dlg.Scene).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru)
-	// SetReadOnly(readOnly).
-	dlg.OnAccept(func(e events.Event) {
+	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
+	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
+	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
 		vv.SendChange()
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }
@@ -566,21 +562,23 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		dlg := TableViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), slci, vv.TmpSave, false, false)
-		dlg.OnAccept(func(e events.Event) {
+		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc())
+		NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
+		d.OnAccept(func(e events.Event) {
 			vv.UpdateWidget()
 			vv.SendChange()
 			if fun != nil {
-				fun(dlg)
+				fun(d)
 			}
 		}).Run()
 	} else {
-		dlg := SliceViewDialog(gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).ReadOnly(readOnly).ViewPath(vpath), slci, vv.TmpSave, false, false)
-		dlg.OnAccept(func(e events.Event) {
+		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc())
+		NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
+		d.OnAccept(func(e events.Event) {
 			vv.UpdateWidget()
 			vv.SendChange()
 			if fun != nil {
-				fun(dlg)
+				fun(d)
 			}
 		}).Run()
 	}
