@@ -287,24 +287,22 @@ func (ed *Editor) QReplaceSig() {
 // QReplaceDialog adds to the given dialog a display prompting the user for
 // query-replace items, with choosers with history
 func QReplaceDialog(dlg *gi.Dialog, find string, lexitems bool) *gi.Dialog {
-	tff := gi.NewChooser(dlg.Scene, "find")
+	tff := gi.NewChooser(dlg, "find")
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
-	tff.ConfigParts(dlg.Scene)
 	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
 	if find != "" {
 		tff.SetCurVal(find)
 	}
 
-	tfr := gi.NewChooser(dlg.Scene, "repl")
+	tfr := gi.NewChooser(dlg, "repl")
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
-	tfr.ConfigParts(dlg.Scene)
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
-	lb := gi.NewSwitch(dlg.Scene, "lexb")
+	lb := gi.NewSwitch(dlg, "lexb")
 	lb.SetText("Lexical Items")
 	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
