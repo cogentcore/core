@@ -1664,13 +1664,19 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	dlg := FileViewDialog(gi.NewDialog(ctx).Title(vv.Name()).Prompt(vv.Doc()), cur, ext)
-	dlg.OnAccept(func(e events.Event) {
-		fn := dlg.Data.(string)
-		vv.SetValue(fn)
+	d := gi.NewDialog(ctx).Title(vv.Name()).Prompt(vv.Doc()).FullWindow(true)
+	fv := NewFileView(d).SetFilename(cur, ext)
+	fv.OnSelect(func(e events.Event) {
+		cur = fv.SelectedFile()
+	}).OnDoubleClick(func(e events.Event) {
+		cur = fv.SelectedFile()
+		d.AcceptDialog()
+	})
+	d.OnAccept(func(e events.Event) {
+		vv.SetValue(cur)
 		vv.UpdateWidget()
 		if fun != nil {
-			fun(dlg)
+			fun(d)
 		}
 	}).Run()
 }

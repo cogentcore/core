@@ -173,16 +173,16 @@ func FileViewExtOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
 
 // SetFilename sets the initial filename (splitting out path and filename) and
 // initializes the view
-func (fv *FileView) SetFilename(filename, ext string) {
+func (fv *FileView) SetFilename(filename, ext string) *FileView {
 	fv.DirPath, fv.SelFile = filepath.Split(filename)
-	fv.SetExt(ext)
+	return fv.SetExt(ext)
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
-func (fv *FileView) SetPathFile(path, file, ext string) {
+func (fv *FileView) SetPathFile(path, file, ext string) *FileView {
 	fv.DirPath = path
 	fv.SelFile = file
-	fv.SetExt(ext)
+	return fv.SetExt(ext)
 }
 
 // SelectedFile returns the full path to selected file
@@ -691,7 +691,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 }
 
 // SetExt updates the ext to given (list of, comma separated) extensions
-func (fv *FileView) SetExt(ext string) {
+func (fv *FileView) SetExt(ext string) *FileView {
 	if ext == "" {
 		if fv.SelFile != "" {
 			ext = strings.ToLower(filepath.Ext(fv.SelFile))
@@ -710,12 +710,14 @@ func (fv *FileView) SetExt(ext string) {
 		}
 		fv.ExtMap[strings.ToLower(ex)] = ex
 	}
+	return fv
 }
 
 // SetExtAction sets the current extension to highlight, and redisplays files
-func (fv *FileView) SetExtAction(ext string) {
+func (fv *FileView) SetExtAction(ext string) *FileView {
 	fv.SetExt(ext)
 	fv.UpdateFiles()
+	return fv
 }
 
 // FavSelect selects a favorite path and goes there
