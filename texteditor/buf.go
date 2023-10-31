@@ -465,8 +465,8 @@ func (tb *Buf) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		d := gi.NewDialog(vp).Title("File Changed on Disk: " + dirs.DirAndFile(string(tb.Filename))).
-			Prompt(fmt.Sprintf("File has changed on Disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
+		d := gi.NewDialog(vp).Title("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
+			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
 		gi.NewButton(d.Buttons()).SetText("Save as to different file").OnClick(func(e events.Event) {
 			d.AcceptDialog()
 			// TODO(kai/dialog): add this back
