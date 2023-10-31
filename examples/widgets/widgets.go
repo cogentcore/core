@@ -94,13 +94,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	brow := gi.NewLayout(sc, "brow").
 		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
 
-	b1 := gi.NewButton(brow, "button1").
-		SetIcon(icons.OpenInNew).
-		SetTooltip("press this <i>button</i> to pop up a dialog box").
+	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box").
 		Style(func(s *styles.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
-		}).(*gi.Button)
+		})
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
@@ -242,13 +240,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth()
 
-	edit1 := gi.NewTextField(txrow, "edit1").
-		SetPlaceholder("Enter text here...").
-		AddClearButton().
-		// SetTypePassword().
-		Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Em(20))
-		}).(*gi.TextField)
+	edit1 := gi.NewTextField(txrow, "edit1").SetPlaceholder("Enter text here...").AddClearButton()
 	edit1.OnChange(func(e events.Event) {
 		fmt.Println("Text:", edit1.Text())
 	})
