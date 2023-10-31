@@ -713,9 +713,9 @@ func (ed *Editor) CursorTransposeWord() {
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (ed *Editor) JumpToLinePrompt() {
-	dlg := gi.NewDialog(ed).Title("Jump To Line").Prompt("Line Number to jump to").StringPrompt("", "Line no..")
-	dlg.OnAccept(func(e events.Event) {
-		val := dlg.Data.(string)
+	d := gi.NewDialog(ed).Title("Jump To Line").Prompt("Line Number to jump to").StringPrompt("", "Line no..")
+	d.OnAccept(func(e events.Event) {
+		val := d.Data.(string)
 		ln, err := laser.ToInt(val)
 		if err == nil {
 			ed.JumpToLine(int(ln))
