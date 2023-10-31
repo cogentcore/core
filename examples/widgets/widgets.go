@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -126,8 +127,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(d *gi.DialogStage) {
 		// 	fmt.Println("choice option:", d.Data.(int), "accepted:", d.Accepted)
 		// }).Run()
-		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:").StringPrompt("", "Enter string here...").Ok().Cancel()
-		d.OnAccept(func(e events.Event) {
+		txt := ""
+		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:")
+		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
+		d.Cancel().Ok().OnAccept(func(e events.Event) {
 			fmt.Println("dialog accepted; string entered:", d.Data.(string))
 		}).Run()
 	})
