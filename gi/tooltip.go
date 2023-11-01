@@ -53,7 +53,8 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	})
 	NewLabel(sc, "text").SetType(LabelBodyMedium).SetText(tooltip).
 		Style(func(s *styles.Style) {
-			s.MaxWidth = units.Em(30)
+			s.MaxWidth.Em(30)
+			s.SetStretchMaxHeight()
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
