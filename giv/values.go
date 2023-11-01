@@ -405,7 +405,7 @@ func (vv *StructValue) HasButton() bool {
 	return true
 }
 
-func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -548,7 +548,7 @@ func (vv *SliceValue) HasButton() bool {
 	return true
 }
 
-func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -689,7 +689,7 @@ func (vv *MapValue) HasButton() bool {
 	return true
 }
 
-func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -833,7 +833,7 @@ func (vv *KiPtrValue) HasButton() bool {
 	return true
 }
 
-func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -1503,7 +1503,7 @@ func (vv *IconValue) HasDialog() bool {
 	return true
 }
 
-func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}
@@ -1576,7 +1576,7 @@ func (vv *FontValue) HasDialog() bool {
 // show fonts in a bigger size so you can actually see the differences
 var FontChooserSize = units.Pt(18)
 
-func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}
@@ -1658,7 +1658,7 @@ func (vv *FileValue) HasDialog() bool {
 	return true
 }
 
-func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}
@@ -1763,7 +1763,7 @@ func (vv *VersCtrlValue) HasDialog() bool {
 	return true
 }
 
-func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}

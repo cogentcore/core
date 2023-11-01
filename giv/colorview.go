@@ -530,7 +530,7 @@ func (vv *ColorValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -600,7 +600,7 @@ func (vv *ColorNameValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}

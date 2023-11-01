@@ -118,6 +118,9 @@ func (ft *Tree) UpdateAll() {
 	ft.ReadDir(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
+	ft.Update()
+	ft.TreeViewChanged(nil)
+	ft.SetNeedsLayout()
 	ft.UpdtMu.Unlock()
 }
 
