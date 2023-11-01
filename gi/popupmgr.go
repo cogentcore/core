@@ -18,7 +18,7 @@ type PopupStageMgr struct {
 	Main *MainStage
 }
 
-// AsPopupMgr returns underlying PopupStageMgr or nil if a MainStageMgr
+// AsPopupMgr returns underlying PopupStageMgr
 func (pm *PopupStageMgr) AsPopupMgr() *PopupStageMgr {
 	return pm
 }
@@ -45,7 +45,7 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 	// we must get the top stage that does not ignore events
 	if tb.IgnoreEvents {
 		var ntop Stage
-		for i := pm.Stack.Len(); i >= 0; i-- {
+		for i := pm.Stack.Len() - 1; i >= 0; i-- {
 			s := pm.Stack.ValByIdx(i)
 			if !s.AsBase().IgnoreEvents {
 				ntop = s
@@ -68,20 +68,26 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 			evi.SetHandled()
 			return
 		}
-		if tb.ClickOff {
-			if evi.Type() == events.MouseUp {
-				pm.PopDelete()
-				if tb.Modal {
-					evi.SetHandled()
-				}
-			}
-			return
+		if tb.ClickOff && evi.Type() == events.MouseUp {
+			pm.PopDelete()
 		}
 		if tb.Modal { // absorb any other events!
 			evi.SetHandled()
+			return
 		}
-		// else not Handled, will pass on
-	} else { // either focus or other, send it down
-		top.HandleEvent(evi) // either will be handled or not..
+		// otherwise not Handled, so pass on to first lower stage
+		// that accepts events and is in bounds
+		for i := pm.Stack.Len() - 1; i >= 0; i-- {
+			s := pm.Stack.ValByIdx(i)
+			sb := s.AsBase()
+			ss := sb.Scene
+			if !sb.IgnoreEvents && pos.In(ss.Geom.Bounds()) {
+				s.HandleEvent(evi)
+				evi.SetHandled()
+				return
+			}
+		}
+	} else { // typically focus, so handle even if not in bounds
+		top.HandleEvent(evi) // could be set as Handled or not
 	}
 }
