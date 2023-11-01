@@ -416,7 +416,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 // This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
 	if sc.Is(ScUpdating) {
-		fmt.Println("scene bail on updt")
+		// fmt.Println("scene bail on updt")
 		return false
 	}
 	sc.SetFlag(true, ScUpdating) // prevent rendering
