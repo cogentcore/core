@@ -1670,7 +1670,7 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		cur = fv.SelectedFile()
 		d.AcceptDialog()
 	})
-	d.OnAccept(func(e events.Event) {
+	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		vv.SetValue(cur)
 		vv.UpdateWidget()
 		if fun != nil {
