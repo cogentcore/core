@@ -62,41 +62,6 @@ func KeyMapsView(km *keyfun.Maps) {
 		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.Open).SetKey(keyfun.OpenAlt1)
 	})
 
-	/* todo: menu, close
-	mmen := win.MainMenu
-	MainMenuView(km, win, mmen)
-	inClosePrompt := false
-	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-		if !keyfun.AvailMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
-			win.Close()
-			return
-		}
-		if inClosePrompt {
-			return
-		}
-		inClosePrompt = true
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
-			Prompt: "Do you want to save any changes to std preferences keymaps file before closing, or Cancel the close and do a Save to a different file?"},
-			[]string{"Save and Close", "Discard and Close", "Cancel"}, func(dlg *gi.Dialog) {
-				switch sig {
-				case 0:
-					km.SavePrefs()
-					fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
-					win.Close()
-				case 1:
-					if km == &gi.AvailKeyMaps {
-						km.OpenPrefs() // revert
-					}
-					win.Close()
-				case 2:
-					inClosePrompt = false
-					// default is to do nothing, i.e., cancel
-				}
-			})
-	})
-	win.MainMenuUpdated()
-	*/
-
 	gi.NewWindow(sc).Run()
 }
 
