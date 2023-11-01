@@ -170,6 +170,13 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		sc.Geom.Pos.X = (b.Max.X - b.Min.X - sz.X) / 2
 		// get enough space to fit plus 10 extra pixels of margin
 		sc.Geom.Pos.Y = b.Max.Y - sz.Y - 10
+	case TooltipStage:
+		// on x axis, we center on the widget widget
+		// on y axis, we put our bottom 10 above the top of the widget
+		wb := st.CtxWidget.AsWidget()
+		wc := wb.ScBBox.Min.X + wb.ScBBox.Size().X/2
+		sc.Geom.Pos.X = wc - sz.X/2
+		sc.Geom.Pos.Y -= sz.Y + 10
 	}
 
 	sc.Geom.Size = sz
