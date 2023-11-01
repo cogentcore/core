@@ -689,14 +689,23 @@ func (em *EventMgr) FocusWithins() bool {
 	return true
 }
 
+// todo: rewrite below to use ki walki functions
+// and make FocusPrevFrom actually work
+
 // FocusNext sets the focus on the next item
 // that can accept focus after the current Focus item.
 // returns true if a focus item found.
 func (em *EventMgr) FocusNext() bool {
-	foc := em.Focus
+	return em.FocusNextFrom(em.Focus)
+}
+
+// FocusNextFrom sets the focus on the next item
+// that can accept focus after the given item.
+// returns true if a focus item found.
+func (em *EventMgr) FocusNextFrom(from Widget) bool {
 	gotFocus := false
 	focusNext := false // get the next guy
-	if foc == nil {
+	if from == nil {
 		focusNext = true
 	}
 
@@ -711,7 +720,7 @@ func (em *EventMgr) FocusNext() bool {
 			if !wb.IsVisible() {
 				return ki.Continue
 			}
-			if foc == wi { // current focus can be a non-can-focus item
+			if from == wi { // current focus can be a non-can-focus item
 				focusNext = true
 				return ki.Continue
 			}
@@ -748,8 +757,7 @@ func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 		em.SetFocus(foc)
 		return true
 	}
-	em.Focus = foc
-	return em.FocusNext()
+	return em.FocusNextFrom(foc)
 }
 
 // FocusOnOrPrev sets the focus on the given item, or the previous one that can
@@ -771,11 +779,18 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 	return em.FocusPrev()
 }
 
-// FocusPrev sets the focus on the previous item before the given item (can be nil)
+// FocusPrev sets the focus on the previous item before the
+// current focus item.
 func (em *EventMgr) FocusPrev() bool {
-	foc := em.Focus
-	if foc == nil { // must have a current item here
+	return em.FocusPrevFrom(em.Focus)
+}
+
+// FocusPrevFrom sets the focus on the previous item before the given item
+// (can be nil).
+func (em *EventMgr) FocusPrevFrom(from Widget) bool {
+	if from == nil { // must have a current item here
 		em.FocusLast()
+		// gotFocus = false
 		return false
 	}
 
@@ -792,7 +807,7 @@ func (em *EventMgr) FocusPrev() bool {
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
-		if foc == wi {
+		if from == wi {
 			gotFocus = true
 			return ki.Break
 		}
