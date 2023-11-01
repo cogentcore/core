@@ -170,7 +170,8 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		// on x axis, we center on the widget widget
 		// on y axis, we put our bottom 10 above the top of the widget
 		wb := st.CtxWidget.AsWidget()
-		wc := wb.ScBBox.Min.X + wb.ScBBox.Size().X/2
+		bb := wb.WinBBox()
+		wc := bb.Min.X + bb.Size().X/2
 		sc.Geom.Pos.X = wc - sz.X/2
 		sc.Geom.Pos.Y -= sz.Y + 10
 	}
