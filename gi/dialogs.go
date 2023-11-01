@@ -263,35 +263,3 @@ type NewItemsData struct {
 	// Type is the type of elements to create
 	Type *gti.Type
 }
-
-// NewItems adds to the dialog a prompt for creating new item(s) of the given type,
-// showing registered gti types that embed given type.
-func (dlg *Dialog) NewItems(typ *gti.Type) *Dialog {
-	nrow := NewLayout(dlg, "n-row")
-	nrow.Lay = LayoutHoriz
-
-	NewLabel(nrow, "n-label").SetText("Number:  ")
-
-	nsb := NewSpinner(nrow, "n-field")
-	nsb.SetMin(1)
-	nsb.Value = 1
-	nsb.Step = 1
-
-	tspc := NewSpace(dlg, "type-space")
-	tspc.SetFixedHeight(units.Em(0.5))
-
-	trow := NewLayout(dlg, "t-row")
-	trow.Lay = LayoutHoriz
-
-	NewLabel(trow, "t-label").SetText("Type:    ")
-
-	typs := NewChooser(trow, "types")
-	typs.ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
-
-	dlg.Data = typ
-
-	typs.OnChange(func(e events.Event) {
-		dlg.Data = typs.CurVal
-	})
-	return dlg
-}

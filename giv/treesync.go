@@ -260,15 +260,16 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:").NewItems(typ).Cancel().Ok()
-	d.OnAccept(func(e events.Event) {
-		n := 1 // todo
-		typ := d.Data.(*gti.Type)
+	d := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:")
+	nd := &gi.NewItemsData{Number: 1, Type: typ}
+	sg := NewStructView(d).SetStruct(nd).StructGrid()
+	ki.ChildByType[*gi.Chooser](sg, true).ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		par := AsTreeView(tv.Par)
 		if tv.SyncNode != nil {
-			par.AddSyncNodes(rel, myidx, typ, n)
+			par.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
 		} else {
-			par.AddTreeNodes(rel, myidx, typ, n)
+			par.AddTreeNodes(rel, myidx, nd.Type, nd.Number)
 		}
 	}).Run()
 }
