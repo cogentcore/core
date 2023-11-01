@@ -303,7 +303,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		if press != nil {
 			em.Press = press
 		}
-		em.HandleLongPress(evi, em.TopLongHover())
+		em.HandleLongPress(evi)
 	case events.MouseMove:
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
@@ -313,8 +313,8 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
-		em.HandleLongHover(evi, em.TopLongHover())
-		em.HandleLongPress(evi, em.TopLongHover())
+		em.HandleLongHover(evi)
+		em.HandleLongPress(evi)
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
@@ -430,7 +430,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 	return hov
 }
 
-// TopLongHover returns the top-most LongHoverable among the Hovers
+// TopLongHover returns the top-most LongHoverable widget among the Hovers
 func (em *EventMgr) TopLongHover() Widget {
 	var deep Widget
 	for i := len(em.Hovers) - 1; i >= 0; i-- {
@@ -443,14 +443,28 @@ func (em *EventMgr) TopLongHover() Widget {
 	return deep
 }
 
+// TopLongPress returns the top-most LongPressable widget among the Hovers
+func (em *EventMgr) TopLongPress() Widget {
+	var deep Widget
+	for i := len(em.Hovers) - 1; i >= 0; i-- {
+		h := em.Hovers[i]
+		// TODO(kai): LongPressable
+		// if h.AbilityIs(abilities.LongPressable) {
+		deep = h
+		break
+		// }
+	}
+	return deep
+}
+
 // HandleLongHover handles long hover events
-func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
-	em.HandleLong(evi, deep, &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
+func (em *EventMgr) HandleLongHover(evi events.Event) {
+	em.HandleLong(evi, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
 }
 
 // HandleLongPress handles long press events
-func (em *EventMgr) HandleLongPress(evi events.Event, deep Widget) {
-	em.HandleLong(evi, deep, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
+func (em *EventMgr) HandleLongPress(evi events.Event) {
+	em.HandleLong(evi, em.TopLongPress(), &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
 }
 
 // HandleLong is the implementation of [EventMgr.HandleLongHover] and
