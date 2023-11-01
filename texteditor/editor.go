@@ -148,9 +148,9 @@ type Editor struct { //goki:embedder
 	// at least one of the renders has links -- determines if we set the cursor for hand movements
 	HasLinks bool `set:"-" edit:"-" json:"-" xml:"-"`
 
-	lastRecenter   int
-	lastAutoInsert rune
-	lastFilename   gi.FileName
+	lastRecenter   int         `set:"-"`
+	lastAutoInsert rune        `set:"-"`
+	lastFilename   gi.FileName `set:"-"`
 }
 
 func (ed *Editor) FlagType() enums.BitFlag {

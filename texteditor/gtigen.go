@@ -35,32 +35,32 @@ var EditorType = gti.AddType(&gti.Type{
 		{"LineNoDigs", &gti.Field{Name: "LineNoDigs", Type: "int", LocalType: "int", Doc: "number of line number digits needed", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"LineNoOff", &gti.Field{Name: "LineNoOff", Type: "float32", LocalType: "float32", Doc: "horizontal offset for start of text after line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"LineNoRender", &gti.Field{Name: "LineNoRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render for line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"CursorCol", &gti.Field{Name: "CursorCol", Type: "int", LocalType: "int", Doc: "desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"ScrollToCursorOnRender", &gti.Field{Name: "ScrollToCursorOnRender", Type: "bool", LocalType: "bool", Doc: "if true, scroll screen to cursor on next render", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"ScrollToCursorPos", &gti.Field{Name: "ScrollToCursorPos", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "cursor position to scroll to", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"PosHistIdx", &gti.Field{Name: "PosHistIdx", Type: "int", LocalType: "int", Doc: "current index within PosHistory", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "starting point for selection -- will either be the start or end of selected region depending on subsequent selection.", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectReg", &gti.Field{Name: "SelectReg", Type: "goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "current selection region", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"PrevSelectReg", &gti.Field{Name: "PrevSelectReg", Type: "goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "previous selection region, that was actually rendered -- needed to update render", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"Highlights", &gti.Field{Name: "Highlights", Type: "[]goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, e.g., for search results", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"Scopelights", &gti.Field{Name: "Scopelights", Type: "[]goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, specific to scope markers", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", LocalType: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"ForceComplete", &gti.Field{Name: "ForceComplete", Type: "bool", LocalType: "bool", Doc: "if true, complete regardless of any disqualifying reasons", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"ISearch", &gti.Field{Name: "ISearch", Type: "goki.dev/gi/v2/texteditor.ISearch", LocalType: "ISearch", Doc: "interactive search data", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"QReplace", &gti.Field{Name: "QReplace", Type: "goki.dev/gi/v2/texteditor.QReplace", LocalType: "QReplace", Doc: "query replace data", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"LineHeight", &gti.Field{Name: "LineHeight", Type: "float32", LocalType: "float32", Doc: "line height, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"NLinesChars", &gti.Field{Name: "NLinesChars", Type: "image.Point", LocalType: "image.Point", Doc: "height in lines and width in chars of the visible area", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"LinesSize", &gti.Field{Name: "LinesSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total size of all lines as rendered", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"TotalSize", &gti.Field{Name: "TotalSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "TotalSize = LinesSize plus extra space and line numbers etc", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"LineLayoutSize", &gti.Field{Name: "LineLayoutSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "LineLayoutSize is LayState.Alloc.Size subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
+		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"CursorCol", &gti.Field{Name: "CursorCol", Type: "int", LocalType: "int", Doc: "desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"ScrollToCursorOnRender", &gti.Field{Name: "ScrollToCursorOnRender", Type: "bool", LocalType: "bool", Doc: "if true, scroll screen to cursor on next render", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"ScrollToCursorPos", &gti.Field{Name: "ScrollToCursorPos", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "cursor position to scroll to", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"PosHistIdx", &gti.Field{Name: "PosHistIdx", Type: "int", LocalType: "int", Doc: "current index within PosHistory", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "starting point for selection -- will either be the start or end of selected region depending on subsequent selection.", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectReg", &gti.Field{Name: "SelectReg", Type: "goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "current selection region", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"PrevSelectReg", &gti.Field{Name: "PrevSelectReg", Type: "goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "previous selection region, that was actually rendered -- needed to update render", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"Highlights", &gti.Field{Name: "Highlights", Type: "[]goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, e.g., for search results", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"Scopelights", &gti.Field{Name: "Scopelights", Type: "[]goki.dev/gi/v2/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, specific to scope markers", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", LocalType: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"ForceComplete", &gti.Field{Name: "ForceComplete", Type: "bool", LocalType: "bool", Doc: "if true, complete regardless of any disqualifying reasons", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"ISearch", &gti.Field{Name: "ISearch", Type: "goki.dev/gi/v2/texteditor.ISearch", LocalType: "ISearch", Doc: "interactive search data", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"QReplace", &gti.Field{Name: "QReplace", Type: "goki.dev/gi/v2/texteditor.QReplace", LocalType: "QReplace", Doc: "query replace data", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LineHeight", &gti.Field{Name: "LineHeight", Type: "float32", LocalType: "float32", Doc: "line height, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"NLinesChars", &gti.Field{Name: "NLinesChars", Type: "image.Point", LocalType: "image.Point", Doc: "height in lines and width in chars of the visible area", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LinesSize", &gti.Field{Name: "LinesSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total size of all lines as rendered", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"TotalSize", &gti.Field{Name: "TotalSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "TotalSize = LinesSize plus extra space and line numbers etc", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LineLayoutSize", &gti.Field{Name: "LineLayoutSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "LineLayoutSize is LayState.Alloc.Size subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting cursor rendering -- shared between blink and main code", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"HasLinks", &gti.Field{Name: "HasLinks", Type: "bool", LocalType: "bool", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\" json:\"-\" xml:\"-\""}},
-		{"lastRecenter", &gti.Field{Name: "lastRecenter", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"lastAutoInsert", &gti.Field{Name: "lastAutoInsert", Type: "rune", LocalType: "rune", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"lastFilename", &gti.Field{Name: "lastFilename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"HasLinks", &gti.Field{Name: "HasLinks", Type: "bool", LocalType: "bool", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"lastRecenter", &gti.Field{Name: "lastRecenter", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"lastAutoInsert", &gti.Field{Name: "lastAutoInsert", Type: "rune", LocalType: "rune", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"lastFilename", &gti.Field{Name: "lastFilename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -151,24 +151,6 @@ func (t *Editor) SetCursorColor(v colors.Full) *Editor {
 	return t
 }
 
-// SetlastRecenter sets the [Editor.lastRecenter]
-func (t *Editor) SetlastRecenter(v int) *Editor {
-	t.lastRecenter = v
-	return t
-}
-
-// SetlastAutoInsert sets the [Editor.lastAutoInsert]
-func (t *Editor) SetlastAutoInsert(v rune) *Editor {
-	t.lastAutoInsert = v
-	return t
-}
-
-// SetlastFilename sets the [Editor.lastFilename]
-func (t *Editor) SetlastFilename(v gi.FileName) *Editor {
-	t.lastFilename = v
-	return t
-}
-
 // SetTooltip sets the [Editor.Tooltip]
 func (t *Editor) SetTooltip(v string) *Editor {
 	t.Tooltip = v
@@ -184,6 +166,12 @@ func (t *Editor) SetClass(v string) *Editor {
 // SetCustomContextMenu sets the [Editor.CustomContextMenu]
 func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Editor.Lay]
+func (t *Editor) SetLayout(v gi.Layouts) *Editor {
+	t.Lay = v
 	return t
 }
 
