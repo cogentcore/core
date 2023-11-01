@@ -150,6 +150,7 @@ func (wb *WidgetBase) HandleWidgetEvents() {
 	wb.HandleLongHoverTooltip()
 	wb.HandleWidgetStateFromFocus()
 	wb.HandleWidgetContextMenu()
+	wb.HandleWidgetMagnify()
 }
 
 // PosInScBBox returns true if given position is within
@@ -298,6 +299,15 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.SetState(false, states.Focused)
 		}
+	})
+}
+
+// HandleWidgetMagnifyEvent updates [Prefs.Zoom] on [events.Magnify]
+func (wb *WidgetBase) HandleWidgetMagnify() {
+	wb.On(events.Magnify, func(e events.Event) {
+		ev := e.(*events.TouchMagnify)
+		Prefs.Zoom *= ev.ScaleFactor
+		Prefs.Apply()
 	})
 }
 
