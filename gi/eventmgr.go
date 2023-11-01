@@ -45,6 +45,9 @@ var (
 	// LongHoverStopDist is the pixel distance beyond which the LongHoverEnd
 	// event is sent
 	LongHoverStopDist = 50
+
+	// LongPressTime is the time to wait before sending a LongPress event
+	LongPressTime = 500 * time.Millisecond
 )
 
 // note: EventMgr should be in _exclusive_ control of its own state
@@ -76,6 +79,12 @@ type EventMgr struct {
 
 	// the timer for the LongHover event, started with time.AfterFunc
 	LongHoverTimer *time.Timer
+
+	// LongPressWIdget is the current candidate for a long press event
+	LongPressWidget Widget
+
+	// LongPressTimer is the timer for the LongPress event, started with time.AfterFunc
+	LongPressTimer *time.Timer
 
 	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
 	DragHovers []Widget
