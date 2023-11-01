@@ -41,20 +41,36 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 	}
 	tb := top.AsBase()
 	ts := tb.Scene
+
+	// we must get the top stage that does not ignore events
+	if tb.IgnoreEvents {
+		var ntop Stage
+		for i := pm.Stack.Len(); i >= 0; i-- {
+			s := pm.Stack.ValByIdx(i)
+			if !s.AsBase().IgnoreEvents {
+				ntop = s
+				break
+			}
+		}
+		if ntop == nil {
+			return
+		}
+		top = ntop
+		tb = top.AsBase()
+		ts = tb.Scene
+	}
+
 	if evi.HasPos() {
 		pos := evi.Pos()
 		// fmt.Println("pos:", pos, "top geom:", ts.Geom)
 		if pos.In(ts.Geom.Bounds()) {
-			top.HandleEvent(evi) // either will be handled or not..
-			if tb.Modal {
-				evi.SetHandled()
-			}
+			top.HandleEvent(evi)
+			evi.SetHandled()
 			return
 		}
 		if tb.ClickOff {
 			if evi.Type() == events.MouseUp {
 				pm.PopDelete()
-				// todo: could mark as Handled to absorb
 				if tb.Modal {
 					evi.SetHandled()
 				}
