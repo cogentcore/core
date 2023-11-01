@@ -197,3 +197,8 @@ void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz,
 {
 	setDarkMode((bool)dark);
 }
+
+void Java_org_golang_app_GoNativeActivity_scrolled(JNIEnv *env, jclass clazz, jfloat posX, jfloat posY, jfloat distanceX, jfloat distanceY)
+{
+	scrolled((float)posX, (float)posY, (float)distanceX, (float)distanceY);
+}

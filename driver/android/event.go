@@ -57,6 +57,7 @@ func scaled(scaleFactor, posX, posY C.float) {
 	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
+//export longPressed
 func longPressed(posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	theApp.window.EvMgr.MouseButton(events.ContextMenu, events.Right, where, 0) // TODO: modifiers
