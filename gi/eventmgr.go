@@ -346,7 +346,8 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		case em.Drag != nil:
 			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
 			em.Drag = nil
-		case em.Press == up && up != nil:
+		// if we are in a long press event, we don't send click events
+		case em.Press == up && up != nil && em.LongPressWidget == nil:
 			switch evi.MouseButton() {
 			case events.Left:
 				up.Send(events.Click, evi)
