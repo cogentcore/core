@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
@@ -225,6 +226,9 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	})
 	wb.On(events.LongPressStart, func(e events.Event) {
 		fmt.Println("long press start", wb)
+		if goosi.TheApp.Platform().IsMobile() {
+			NewTooltip(wb, e.Pos())
+		}
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
 		fmt.Println("long press end", wb)
