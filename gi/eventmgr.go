@@ -357,16 +357,16 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		}
 		em.Press = nil
 
-		if em.LongHoverTimer != nil {
-			em.LongPressTimer.Stop()
-			em.LongPressTimer = nil
-		}
 		// if we have sent a long press start event, we send an end
 		// event (non-nil widget plus nil timer means we already sent)
-		if em.LongHoverTimer != nil && em.LongPressTimer == nil {
-			em.LongPressWidget = nil
-			em.LongHoverPos = image.Point{}
+		if em.LongPressWidget != nil && em.LongPressTimer == nil {
 			up.Send(events.LongPressEnd, evi)
+		}
+		em.LongPressWidget = nil
+		em.LongPressPos = image.Point{}
+		if em.LongPressTimer != nil {
+			em.LongPressTimer.Stop()
+			em.LongPressTimer = nil
 		}
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
