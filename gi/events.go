@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
@@ -214,6 +215,13 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	wb.On(events.MouseUp, func(e events.Event) {
 		if wb.AbilityIs(abilities.Activatable) {
 			wb.SetState(false, states.Active)
+		}
+		// a mouse up event acts also acts as a mouse leave
+		// and long hover end event on mobile, as those events
+		// are needed to clear any hovered state and tooltip
+		if goosi.TheApp.Platform().IsMobile() {
+			wb.Send(events.MouseLeave, e)
+			wb.Send(events.LongHoverEnd, e)
 		}
 	})
 	wb.On(events.DoubleClick, func(e events.Event) {
