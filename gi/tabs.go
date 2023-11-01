@@ -17,6 +17,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -336,6 +337,23 @@ func (ts *Tabs) RecycleTab(label string, sel bool, name ...string) *Frame {
 		ts.SelectTabByName(label)
 	}
 	return frame
+}
+
+// RecycleTabWidget returns a tab with given widget type in the tab frame,
+// first by looking for an existing one, with given name, and if not found,
+// making and configuring a new one.
+// If sel, then select it. It returns the Widget item for the tab.
+// If a name is also passed, the internal name (ID) of any new tab
+// will be set to that; otherwise, it will default to the kebab-case version of the label.
+func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type, name ...string) Widget {
+	fr := ts.RecycleTab(label, sel, name...)
+	if fr.HasChildren() {
+		wi, _ := AsWidget(fr.Child(0))
+		return wi
+	}
+	wi, _ := AsWidget(fr.NewChild(typ, fr.Nm))
+	wi.Config(ts.Sc)
+	return wi
 }
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
