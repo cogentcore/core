@@ -14,7 +14,6 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/states"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -248,7 +247,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		return
 	}
 	d := gi.NewDialog(fb).Title(main).Prompt(fb.Tooltip)
-	NewArgView(d).SetArgs(fb.Returns).SetState(true, states.ReadOnly)
+	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
 	d.Ok().Run()
 }
 

@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
@@ -52,7 +51,7 @@ func (pb *ProgressBar) OnInit() {
 	pb.ThumbSize = units.Dp(4)
 	pb.ThSize = 25.0
 	pb.ThSizeReal = pb.ThSize
-	pb.SetState(true, states.ReadOnly)
+	pb.SetReadOnly(true)
 
 	pb.HandleWidgetEvents()
 	pb.ProgressBarStyles()

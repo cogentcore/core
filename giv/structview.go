@@ -16,7 +16,6 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/glop/bools"
@@ -382,10 +381,10 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, w gi.Widget, isReadOnly bool) 
 	lbl.Text = vv.Label()
 	if et, has := vv.Tag("edit"); has && et == "-" {
 		readOnlyTag = true
-		w.AsWidget().SetState(true, states.ReadOnly)
+		w.AsWidget().SetReadOnly(true)
 	} else {
 		if isReadOnly {
-			w.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetReadOnly(true)
 			vv.SetTag("edit", "-")
 		}
 	}

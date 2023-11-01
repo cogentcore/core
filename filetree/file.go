@@ -13,7 +13,6 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/states"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/pi/v2/filecat"
@@ -310,7 +309,7 @@ func (fn *Node) ShowFileInfo() { //gti:add
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
 		d := gi.NewDialog(fn).Title("File info").FullWindow(true)
-		giv.NewStructView(d).SetStruct(&fn.Info).SetState(true, states.ReadOnly)
+		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
 		d.Run()
 	}
 }

@@ -811,8 +811,9 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 // StdConfigWidget does all of the standard widget configuration tag options
 func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
-	w.SetState(vv.IsReadOnly(), states.ReadOnly)
+	w.SetState(vv.IsReadOnly(), states.ReadOnly) // do right away
 	w.Style(func(s *styles.Style) {
+		w.SetState(vv.IsReadOnly(), states.ReadOnly) // and in style
 		if widthtag, ok := vv.Tag("width"); ok {
 			width, err := laser.ToFloat32(widthtag)
 			if err == nil {
@@ -838,7 +839,7 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 			}
 		}
 		if vv.IsReadOnly() {
-			w.SetState(true, states.ReadOnly)
+			w.AsWidget().SetReadOnly(true)
 		}
 	})
 }

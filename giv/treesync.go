@@ -146,7 +146,7 @@ func (tv *TreeView) UpdateReadOnly() bool {
 	tv.SetState(false, states.Disabled)
 	if inact, err := tv.SyncNode.PropTry("ReadOnly"); err == nil {
 		if bo, err := laser.ToBool(inact); bo && err == nil {
-			tv.SetState(true, states.ReadOnly)
+			tv.SetReadOnly(true)
 		}
 	}
 	return tv.IsReadOnly()

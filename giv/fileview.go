@@ -20,7 +20,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -106,7 +105,7 @@ func (fv *FileView) FileViewStyles() {
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
 			fv.SetFlag(false, SliceViewShowToolbar)
-			fv.SetState(true, states.ReadOnly)
+			fv.SetReadOnly(true)
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxHeight()
 				s.SetFixedWidth(units.Ch(25))
@@ -115,7 +114,7 @@ func (fv *FileView) FileViewStyles() {
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetFlag(false, SliceViewShowToolbar)
-			fv.SetState(true, states.ReadOnly)
+			fv.SetReadOnly(true)
 			fv.Style(func(s *styles.Style) {
 				s.SetStretchMax()
 			})
@@ -323,7 +322,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 	sv := fv.FavsView()
 	sv.SelIdx = -1
-	sv.SetState(true, states.ReadOnly)
+	sv.SetReadOnly(true)
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.OnSelect(func(e events.Event) {
 		fv.FavSelect(sv.SelIdx)
@@ -331,7 +330,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 	fv.ReadFiles()
 	fsv := fv.FilesView()
-	fsv.SetState(true, states.ReadOnly)
+	fsv.SetReadOnly(true)
 	fsv.SetSlice(&fv.Files)
 	fsv.StyleFunc = func(w gi.Widget, s *styles.Style, row, col int) {
 		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {

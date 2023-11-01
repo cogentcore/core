@@ -150,3 +150,20 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	}
 	nm.Run()
 }
+
+// NewMenuFromStrings constructs a new menu from given list of strings,
+// calling the given function with the index of the selected string.
+// if string == sel, that menu item is selected initially.
+func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
+	m := NewScene()
+	for i, s := range strs {
+		i := i
+		b := NewButton(m).SetText(s).OnClick(func(e events.Event) {
+			fun(i)
+		})
+		if s == sel {
+			b.SetSelected(true)
+		}
+	}
+	return m
+}

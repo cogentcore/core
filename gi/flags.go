@@ -130,6 +130,11 @@ func (wb *WidgetBase) IsReadOnly() bool {
 	return wb.StateIs(states.ReadOnly) || wb.StateIs(states.Disabled)
 }
 
+// SetReadOnly sets the ReadOnly state flag to given value
+func (wb *WidgetBase) SetReadOnly(ro bool) {
+	wb.SetState(ro, states.ReadOnly)
+}
+
 // HasFlagWithin returns whether the current node or any
 // of its children have the given flag.
 func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {

@@ -106,7 +106,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	} else {
 		updt = lv.UpdateStart()
 	}
-	tv.SetState(true, states.ReadOnly)
+	tv.SetReadOnly(true)
 	tv.SetSlice(&lv.Log)
 	lv.UpdateEndLayout(updt)
 }
