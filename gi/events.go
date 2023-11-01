@@ -306,8 +306,9 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)
+		fmt.Println("magnify event", ev.ScaleFactor)
 		Prefs.Zoom *= ev.ScaleFactor
-		Prefs.Apply()
+		Prefs.UpdateAll()
 	})
 }
 
