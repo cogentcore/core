@@ -183,6 +183,18 @@ static void sendTouches(int change, NSSet* touches) {
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
 
+- (void) onPinch: (UIPinchGestureRecognizer *)pinchRecognizer {
+	// if (gestureRecognizer.state == .began) {
+		[self becomeFirstResponder];
+		// self.viewForReset = gestureRecognizer.view;
+		printf("GoLog: onPinch");
+		CGFloat scale = pinchRecognizer.scale;
+		CGPoint location = [pinchRecognizer locationInView:pinchRecognizer.view];
+		scaled(scale, location.x, location.y);
+	// }
+}
+
+
 - (void) onLongPress: (UILongPressGestureRecognizer *)gestureRecognizer {
 	// if (gestureRecognizer.state == .began) {
 		[self becomeFirstResponder];
