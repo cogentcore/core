@@ -148,7 +148,7 @@ type Value interface {
 	// for opening the dialog, and function is called with the the relevant dialog,
 	// so that the caller can execute its own actions based on the user
 	// hitting Ok or Cancel.
-	OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog))
+	OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog))
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -466,7 +466,7 @@ func (vv *ValueBase) HasDialog() bool {
 	return false
 }
 
-func (vv *ValueBase) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ValueBase) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 }
 
 func (vv *ValueBase) Val() reflect.Value {

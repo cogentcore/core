@@ -58,7 +58,7 @@ func (vv *HiStyleValue) HasDialog() bool {
 	return true
 }
 
-func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}

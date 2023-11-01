@@ -104,6 +104,7 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -114,7 +115,7 @@ func (vv *KeyMapValue) HasDialog() bool {
 	return true
 }
 
-func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if vv.IsReadOnly() {
 		return
 	}

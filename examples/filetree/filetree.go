@@ -101,9 +101,7 @@ func (fb *FileBrowse) UpdateFiles() { //gti:add
 	if fb.Files == nil {
 		return
 	}
-	updt := fb.Files.UpdateStart()
-	fb.Files.OpenPath(string(fb.ProjRoot))
-	fb.Files.UpdateEndLayout(updt)
+	fb.Files.UpdateAll()
 }
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
@@ -128,6 +126,7 @@ func (fb *FileBrowse) OpenPath(path gi.FileName) { //gti:add
 	fb.ProjRoot = gi.FileName(root)
 	fb.SetName(pnm)
 	fb.UpdateProj()
+	fb.Files.OpenPath(root)
 	// win := fb.ParentRenderWin()
 	// if win != nil {
 	// 	winm := "browser-" + pnm

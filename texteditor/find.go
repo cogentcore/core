@@ -286,8 +286,8 @@ func (ed *Editor) QReplaceSig() {
 
 // QReplaceDialog adds to the given dialog a display prompting the user for
 // query-replace items, with choosers with history
-func QReplaceDialog(dlg *gi.Dialog, find string, lexitems bool) *gi.Dialog {
-	tff := gi.NewChooser(dlg, "find")
+func QReplaceDialog(d *gi.Dialog, find string, lexitems bool) *gi.Dialog {
+	tff := gi.NewChooser(d, "find")
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
@@ -296,23 +296,23 @@ func QReplaceDialog(dlg *gi.Dialog, find string, lexitems bool) *gi.Dialog {
 		tff.SetCurVal(find)
 	}
 
-	tfr := gi.NewChooser(dlg, "repl")
+	tfr := gi.NewChooser(d, "repl")
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
-	lb := gi.NewSwitch(dlg, "lexb")
+	lb := gi.NewSwitch(d, "lexb")
 	lb.SetText("Lexical Items")
 	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
 
-	return dlg
+	return d
 }
 
 // QReplaceDialogValues gets the string values
-func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
-	sc := dlg.Stage.Scene
+func QReplaceDialogValues(d *gi.Dialog) (find, repl string, lexItems bool) {
+	sc := d.Stage.Scene
 	tff := sc.ChildByName("find", 1).(*gi.Chooser)
 	if tf, found := tff.TextField(); found {
 		find = tf.Text()
