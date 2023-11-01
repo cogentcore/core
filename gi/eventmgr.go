@@ -345,8 +345,8 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		case em.Drag != nil:
 			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
 			em.Drag = nil
-		// if we have sent a long press event, we don't send click events
-		// (non-nil widget plus nil timer means we already sent)
+		// if we have sent a long press start event, we don't send click
+		// events (non-nil widget plus nil timer means we already sent)
 		case em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil):
 			switch evi.MouseButton() {
 			case events.Left:
@@ -356,19 +356,23 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Press = nil
-		em.LongPressWidget = nil
+
 		if em.LongHoverTimer != nil {
 			em.LongPressTimer.Stop()
 			em.LongPressTimer = nil
 		}
-		em.LongHoverPos = image.Point{}
-		up.Send(events.LongPressEnd, evi)
+		// if we have sent a long press start event, we send an end
+		// event (non-nil widget plus nil timer means we already sent)
+		if em.LongHoverTimer != nil && em.LongPressTimer == nil {
+			em.LongPressWidget = nil
+			em.LongHoverPos = image.Point{}
+			up.Send(events.LongPressEnd, evi)
+		}
 		// a mouse up event acts also acts as a mouse leave
-		// and long hover end event on mobile, as those events
-		// are needed to clear any hovered state and tooltip
+		// event on mobile, as that is needed to clear any
+		// hovered state
 		if goosi.TheApp.Platform().IsMobile() {
 			up.Send(events.MouseLeave, evi)
-			up.Send(events.LongHoverEnd, evi)
 		}
 	case events.Scroll:
 		switch {
