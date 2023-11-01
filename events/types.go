@@ -65,6 +65,12 @@ const (
 	// Control key + Left Click).
 	ContextMenu
 
+	// LongPress represents an event wherein a MouseDown event is
+	// sent and no MouseUp event is sent within a specified duration.
+	// LongPress events end on MouseUp, just like MouseDown events,
+	// so there is no LongPressEnd event type.
+	LongPress
+
 	// MouseEnter is when the mouse enters the bounding box
 	// of a new element.  It is used for setting the Hover state,
 	// and can trigger cursor changes.
