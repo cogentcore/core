@@ -314,7 +314,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
 		em.HandleLongHover(evi)
-		em.HandleLongPress(evi)
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
@@ -443,20 +442,6 @@ func (em *EventMgr) TopLongHover() Widget {
 	return deep
 }
 
-// TopLongPress returns the top-most LongPressable widget among the Hovers
-func (em *EventMgr) TopLongPress() Widget {
-	var deep Widget
-	for i := len(em.Hovers) - 1; i >= 0; i-- {
-		h := em.Hovers[i]
-		// TODO(kai): LongPressable
-		// if h.AbilityIs(abilities.LongPressable) {
-		deep = h
-		break
-		// }
-	}
-	return deep
-}
-
 // HandleLongHover handles long hover events
 func (em *EventMgr) HandleLongHover(evi events.Event) {
 	em.HandleLong(evi, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
@@ -464,7 +449,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 
 // HandleLongPress handles long press events
 func (em *EventMgr) HandleLongPress(evi events.Event) {
-	em.HandleLong(evi, em.TopLongPress(), &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
+	em.HandleLong(evi, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
 }
 
 // HandleLong is the implementation of [EventMgr.HandleLongHover] and
@@ -478,7 +463,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 
 	// fmt.Println("em:", em.Scene.Name())
 
-	clearLongHover := func() {
+	clearLong := func() {
 		if *t != nil {
 			(*t).Stop() // TODO: do we need to close this?
 			*t = nil
@@ -504,7 +489,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 		if *t == nil {
 			(*w).Send(etyp, evi)
 		}
-		clearLongHover()
+		clearLong()
 		// fmt.Println("cleared")
 		return
 	}
@@ -524,14 +509,14 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 		// element with no tooltip, which is a bug. Not returning here is
 		// the solution to https://github.com/goki/gi/issues/553
 		(*w).Send(etyp, evi)
-		clearLongHover()
+		clearLong()
 		// fmt.Println("fallthrough after clear")
 	}
 
 	// if we have changed and still have the timer, we never
 	// sent a start event, so we just bail
 	if *t != nil {
-		clearLongHover()
+		clearLong()
 		// fmt.Println("timer non-nil, cleared")
 		return
 	}
@@ -540,7 +525,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 	// event already, so we need to send a end event
 	if *w != nil {
 		(*w).Send(etyp, evi)
-		clearLongHover()
+		clearLong()
 		// fmt.Println("lhw, send end, cleared")
 		return
 	}
