@@ -44,7 +44,7 @@ var (
 
 	// LongHoverStopDist is the pixel distance beyond which the LongHoverEnd
 	// event is sent
-	LongHoverStopDist = 5
+	LongHoverStopDist = 50
 )
 
 // note: EventMgr should be in _exclusive_ control of its own state
