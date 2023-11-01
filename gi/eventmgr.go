@@ -432,36 +432,45 @@ func (em *EventMgr) TopLongHover() Widget {
 
 // HandleLongHover handles long hover events
 func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
+	em.HandleLong(evi, deep, &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
+}
+
+// HandleLong is the implementation of [EventMgr.HandleLongHover] and
+// [EventManger.HandleLongPress]. It handles the logic to do with tracking
+// long events using the given pointers to event manager fields and
+// constant type, time, and distance properties. It should not need to
+// be called by anything except for the aforementioned functions.
+func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *image.Point, t **time.Timer, styp, etyp events.Types, stime time.Duration, sdist int) {
 	em.TimerMu.Lock()
 	defer em.TimerMu.Unlock()
 
 	// fmt.Println("em:", em.Scene.Name())
 
 	clearLongHover := func() {
-		if em.LongHoverTimer != nil {
-			em.LongHoverTimer.Stop() // TODO: do we need to close this?
-			em.LongHoverTimer = nil
+		if *t != nil {
+			(*t).Stop() // TODO: do we need to close this?
+			*t = nil
 		}
-		em.LongHoverWidget = nil
-		em.LongHoverPos = image.Point{}
+		*w = nil
+		*pos = image.Point{}
 		// fmt.Println("cleared hover")
 	}
 
 	cpos := evi.Pos()
-	dst := int(mat32.Hypot(float32(em.LongHoverPos.X-cpos.X), float32(em.LongHoverPos.Y-cpos.Y)))
+	dst := int(mat32.Hypot(float32(pos.X-cpos.X), float32(pos.Y-cpos.Y)))
 	// fmt.Println("dist:", dst)
 
 	// we have no long hovers, so we must be done
 	if deep == nil {
 		// fmt.Println("no deep")
-		if em.LongHoverWidget == nil {
+		if *w == nil {
 			// fmt.Println("no lhw")
 			return
 		}
 		// if we have already finished the timer, then we have already
 		// sent the LongHoverStart event, so we have to send the end one
-		if em.LongHoverTimer == nil {
-			em.LongHoverWidget.Send(events.LongHoverEnd, evi)
+		if *t == nil {
+			(*w).Send(events.LongHoverEnd, evi)
 		}
 		clearLongHover()
 		// fmt.Println("cleared")
@@ -470,7 +479,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 
 	// we still have the current one, so there is nothing to do
 	// but make sure our position hasn't changed too much
-	if deep == em.LongHoverWidget {
+	if deep == *w {
 		// if we haven't gone too far, we have nothing to do
 		if dst <= LongHoverStopDist {
 			// fmt.Println("bail on dist:", dst)
@@ -482,14 +491,14 @@ func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 		// up not getting another mouse move event, so we will be on the
 		// element with no tooltip, which is a bug. Not returning here is
 		// the solution to https://github.com/goki/gi/issues/553
-		em.LongHoverWidget.Send(events.LongHoverEnd, evi)
+		(*w).Send(events.LongHoverEnd, evi)
 		clearLongHover()
 		// fmt.Println("fallthrough after clear")
 	}
 
 	// if we have changed and still have the timer, we never
 	// sent a start event, so we just bail
-	if em.LongHoverTimer != nil {
+	if *t != nil {
 		clearLongHover()
 		// fmt.Println("timer non-nil, cleared")
 		return
@@ -497,27 +506,27 @@ func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 
 	// we now know we don't have the timer and thus sent the start
 	// event already, so we need to send a end event
-	if em.LongHoverWidget != nil {
-		em.LongHoverWidget.Send(events.LongHoverEnd, evi)
+	if *w != nil {
+		(*w).Send(events.LongHoverEnd, evi)
 		clearLongHover()
 		// fmt.Println("lhw, send end, cleared")
 		return
 	}
 
 	// now we can set it to our new widget
-	em.LongHoverWidget = deep
+	*w = deep
 	// fmt.Println("setting new:", deep)
-	em.LongHoverPos = evi.Pos()
-	em.LongHoverTimer = time.AfterFunc(LongHoverTime, func() {
+	*pos = evi.Pos()
+	*t = time.AfterFunc(LongHoverTime, func() {
 		em.TimerMu.Lock()
 		defer em.TimerMu.Unlock()
-		if em.LongHoverWidget == nil {
+		if *w == nil {
 			return
 		}
-		em.LongHoverWidget.Send(events.LongHoverStart, evi)
+		(*w).Send(events.LongHoverStart, evi)
 		// we are done with the timer, and this indicates that
 		// we have sent a LongHoverStart event
-		em.LongHoverTimer = nil
+		*t = nil
 	})
 }
 
