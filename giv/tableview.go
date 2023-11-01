@@ -641,7 +641,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			})
 
 			if tv.IsReadOnly() {
-				w.AsWidget().SetState(true, states.ReadOnly)
+				w.AsWidget().SetReadOnly(true)
 			} else {
 				vvb := vv.AsValueBase()
 				vvb.OnChange(func(e events.Event) {
@@ -748,7 +748,7 @@ func (tv *TableView) UpdateWidgets() {
 				w.SetState(false, states.Invisible)
 				issel := tv.IdxIsSelected(si)
 				if tv.IsReadOnly() {
-					w.AsWidget().SetState(true, states.ReadOnly)
+					w.AsWidget().SetReadOnly(true)
 				}
 				w.AsWidget().SetSelected(issel)
 			} else {

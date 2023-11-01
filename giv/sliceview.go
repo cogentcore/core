@@ -432,7 +432,7 @@ func (sv *SliceViewBase) IsNil() bool {
 // BindSelectDialog makes the slice view a read-only selection slice view and then
 // binds its events to the given dialog and its current selection index to the given value.
 func (sv *SliceViewBase) BindSelectDialog(d *gi.Dialog, val *int) *SliceViewBase {
-	sv.SetState(true, states.ReadOnly)
+	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.CurIdx
 	})
@@ -798,7 +798,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		})
 
 		if sv.IsReadOnly() {
-			w.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetReadOnly(true)
 		} else {
 			vvb := vv.AsValueBase()
 			vvb.OnChange(func(e events.Event) {
@@ -879,7 +879,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			vv.UpdateWidget()
 
 			if sv.IsReadOnly() {
-				w.AsWidget().SetState(true, states.ReadOnly)
+				w.AsWidget().SetReadOnly(true)
 			}
 			issel := sv.IdxIsSelected(si)
 			w.AsWidget().SetSelected(issel)

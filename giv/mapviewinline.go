@@ -8,7 +8,6 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
@@ -169,8 +168,8 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		kv.ConfigWidget(keyw, sc)
 		vv.ConfigWidget(w, sc)
 		if mv.IsReadOnly() {
-			w.AsWidget().SetState(true, states.ReadOnly)
-			keyw.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetReadOnly(true)
+			keyw.AsWidget().SetReadOnly(true)
 		}
 	}
 	adack, err := mv.Children().ElemFromEndTry(1)

@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
@@ -167,7 +166,7 @@ func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 		}
 		vv.ConfigWidget(w, sc)
 		if sv.IsReadOnly() {
-			w.AsWidget().SetState(true, states.ReadOnly)
+			w.AsWidget().SetReadOnly(true)
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {

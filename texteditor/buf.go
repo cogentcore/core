@@ -468,8 +468,8 @@ func (tb *Buf) FileModCheck() bool {
 		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
-		vp := tb.SceneFromView()
-		d := gi.NewDialog(vp).Title("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
+		sc := tb.SceneFromView()
+		d := gi.NewDialog(sc).Title("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
 			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
 		gi.NewButton(d.Buttons()).SetText("Save as to different file").OnClick(func(e events.Event) {
 			d.AcceptDialog()
@@ -535,8 +535,8 @@ func (tb *Buf) Revert() bool {
 		ob := NewBuf()
 		err := ob.OpenFile(tb.Filename)
 		if err != nil {
-			vp := tb.SceneFromView()
-			if vp != nil { // only if viewing
+			sc := tb.SceneFromView()
+			if sc != nil { // only if viewing
 				// TODO(kai/snack)
 				// gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 			}
@@ -574,8 +574,8 @@ func (tb *Buf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
 			afterFunc(false)
 		}
 	} else {
-		vp := tb.SceneFromView()
-		d := gi.NewDialog(vp).Title("File Exists, Overwrite?").
+		sc := tb.SceneFromView()
+		d := gi.NewDialog(sc).Title("File Exists, Overwrite?").
 			Prompt(fmt.Sprintf("File already exists, overwrite?  File: %v", filename)).
 			Cancel().Ok("Overwrite")
 		d.OnAccept(func(e events.Event) {
@@ -620,8 +620,8 @@ func (tb *Buf) Save() error {
 	tb.EditDone()
 	info, err := os.Stat(string(tb.Filename))
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
-		vp := tb.SceneFromView()
-		d := gi.NewDialog(vp).Title("File Changed on Disk").
+		sc := tb.SceneFromView()
+		d := gi.NewDialog(sc).Title("File Changed on Disk").
 			Prompt(fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename))
 		gi.NewButton(d.Buttons()).SetText("Save to different file").OnClick(func(e events.Event) {
 			d.AcceptDialog()
@@ -644,9 +644,9 @@ func (tb *Buf) Save() error {
 // if afterFun is non-nil, then it is called with the status of the user action
 func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
-		vp := tb.SceneFromView()
+		sc := tb.SceneFromView()
 		if tb.Filename != "" {
-			d := gi.NewDialog(vp).Title("Close without saving?").
+			d := gi.NewDialog(sc).Title("Close without saving?").
 				Prompt(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)).Cancel()
 			gi.NewButton(d.Buttons()).SetText("Close without saving").OnClick(func(e events.Event) {
 				d.AcceptDialog()
@@ -665,7 +665,7 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 				}
 			}).Run()
 		} else {
-			gi.NewDialog(vp).Title("Close without saving?").
+			gi.NewDialog(sc).Title("Close without saving?").
 				Prompt("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As").
 				Cancel().Ok("Close without saving").
 				OnAccept(func(e events.Event) {
@@ -1646,8 +1646,8 @@ func (tb *Buf) StartDelayedReMarkup() {
 		tb.MarkupDelayTimer.Stop()
 		tb.MarkupDelayTimer = nil
 	}
-	vp := tb.SceneFromView()
-	_ = vp
+	sc := tb.SceneFromView()
+	_ = sc
 	// if vp != nil {
 	// 	cpop := vp.Win.CurPopup()
 	// 	if gi.PopupIsCompleter(cpop) {

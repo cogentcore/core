@@ -101,7 +101,7 @@ func (sp *Spinner) SpinnerStyles() {
 			tf.SetText(sp.ValToString(sp.Value))
 			sp.TextFieldHandlers(tf)
 			tf.Style(func(s *styles.Style) {
-				tf.SetState(sp.IsReadOnly(), states.ReadOnly)
+				tf.SetReadOnly(sp.IsReadOnly())
 				s.SetMinPrefWidth(units.Em(3))
 			})
 			tf.OnSelect(func(e events.Event) {
