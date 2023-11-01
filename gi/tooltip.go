@@ -42,7 +42,7 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := NewScene(w.Name() + "-tooltip")
 	bb := w.AsWidget().ScBBox
 	sc.Geom.Pos.X = bb.Min.X
-	sc.Geom.Pos.Y = bb.Min.Y - 40
+	sc.Geom.Pos.Y = bb.Min.Y
 	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.SetStretchMaxHeight()
