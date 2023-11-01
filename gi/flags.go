@@ -150,6 +150,21 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	return got
 }
 
+// HasStateWithin returns whether the current node or any
+// of its children have the given state flag.
+func (wb *WidgetBase) HasStateWithin(flag enums.BitFlag) bool {
+	got := false
+	wb.WalkPre(func(k ki.Ki) bool {
+		_, wb := AsWidget(k)
+		if wb.StateIs(flag) {
+			got = true
+			return ki.Break
+		}
+		return ki.Continue
+	})
+	return got
+}
+
 // AddClass adds a CSS class name -- does proper space separation
 func (wb *WidgetBase) AddClass(cls string) {
 	if wb.Class == "" {
