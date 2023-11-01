@@ -182,6 +182,11 @@ static void sendTouches(int change, NSSet* touches) {
 	CGSize size = [UIScreen mainScreen].nativeBounds.size;
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
+
+- (void) onLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
+   printf("GoLog: onLongPress")
+}
+
 @end
 
 #pragma mark -
