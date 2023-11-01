@@ -183,6 +183,17 @@ static void sendTouches(int change, NSSet* touches) {
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
 
+ (void) onPan: (UIPanGestureRecognizer *)panRecognizer {
+	// if (gestureRecognizer.state == .began) {
+		[self becomeFirstResponder];
+		// self.viewForReset = gestureRecognizer.view;
+		printf("GoLog: onPan");
+		CGPoint location = [panRecognizer locationInView:panRecognizer.view];
+		CGPoint translation = [panRecognizer translationInView:panRecognizer.view];
+		scrolled(location.x, location.y, translation.X, translation.Y);
+	// }
+}
+
 - (void) onPinch: (UIPinchGestureRecognizer *)pinchRecognizer {
 	// if (gestureRecognizer.state == .began) {
 		[self becomeFirstResponder];
