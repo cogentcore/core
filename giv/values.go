@@ -1201,10 +1201,11 @@ func (vv *TypeValue) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.Chooser)
-	npv := laser.NonPtrValue(vv.Value)
-	typ, ok := npv.Interface().(gti.Type)
+	npv := laser.OnePtrValue(vv.Value)
+	fmt.Println(npv.Type().String())
+	typ, ok := npv.Interface().(*gti.Type)
 	if ok {
-		sb.SetCurVal(&typ)
+		sb.SetCurVal(typ)
 	}
 }
 
@@ -1218,7 +1219,8 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip = vv.Doc()
 
-	typEmbeds := ki.NodeType
+	// typEmbeds := ki.NodeType
+	typEmbeds := gi.WidgetBaseType
 	// if kiv, ok := vv.Owner.(ki.Ki); ok {
 	// 	if tep, ok := kiv.PropInherit("type-embeds", ki.Inherit, ki.TypeProps); ok {
 	// 		// todo:
