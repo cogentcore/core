@@ -48,6 +48,10 @@ var (
 
 	// LongPressTime is the time to wait before sending a LongPress event
 	LongPressTime = 500 * time.Millisecond
+
+	// LongPressStopDist is the pixel distance beyond which the LongPressEnd
+	// event is sent
+	LongPressStopDist = 50
 )
 
 // note: EventMgr should be in _exclusive_ control of its own state
@@ -80,10 +84,13 @@ type EventMgr struct {
 	// the timer for the LongHover event, started with time.AfterFunc
 	LongHoverTimer *time.Timer
 
-	// LongPressWIdget is the current candidate for a long press event
+	// the current candidate for a long press event
 	LongPressWidget Widget
 
-	// LongPressTimer is the timer for the LongPress event, started with time.AfterFunc
+	// the position of the mouse at the start of LongPressTimer
+	LongPressPos image.Point
+
+	// the timer for the LongPress event, started with time.AfterFunc
 	LongPressTimer *time.Timer
 
 	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
@@ -296,6 +303,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		if press != nil {
 			em.Press = press
 		}
+		em.HandleLongPress(evi, em.TopLongHover())
 	case events.MouseMove:
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
@@ -305,12 +313,8 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
-		if em.MainStageMgr() != nil && em.MainStageMgr().Top() != nil {
-			top := em.MainStageMgr().Top().AsMain()
-			if top != nil && top.Scene != nil {
-				top.Scene.EventMgr.HandleLongHover(evi, em.TopLongHover())
-			}
-		}
+		em.HandleLongHover(evi, em.TopLongHover())
+		em.HandleLongPress(evi, em.TopLongHover())
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
@@ -351,6 +355,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Press = nil
+		up.Send(events.LongPressEnd, evi)
 		// a mouse up event acts also acts as a mouse leave
 		// and long hover end event on mobile, as those events
 		// are needed to clear any hovered state and tooltip
@@ -433,6 +438,11 @@ func (em *EventMgr) TopLongHover() Widget {
 // HandleLongHover handles long hover events
 func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 	em.HandleLong(evi, deep, &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
+}
+
+// HandleLongPress handles long press events
+func (em *EventMgr) HandleLongPress(evi events.Event, deep Widget) {
+	em.HandleLong(evi, deep, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
 }
 
 // HandleLong is the implementation of [EventMgr.HandleLongHover] and
