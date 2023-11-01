@@ -150,7 +150,6 @@ func (pf *Preferences) Defaults() {
 // UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
 func (pf *Preferences) UpdateAll() { //gti:add
-	goosi.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 	colors.FullCache = nil
 	for _, w := range AllRenderWins {
