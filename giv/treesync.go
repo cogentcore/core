@@ -87,7 +87,6 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	skids := *sk.Children()
 	tnl := make(ki.Config, 0, len(skids))
 	typ := tv.This().KiType()
-	fmt.Println(typ.Name)
 	for _, skid := range skids {
 		tnl.Add(typ, "tv_"+skid.Name())
 	}
