@@ -468,9 +468,9 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 			return
 		}
 		// if we have already finished the timer, then we have already
-		// sent the LongHoverStart event, so we have to send the end one
+		// sent the start event, so we have to send the end one
 		if *t == nil {
-			(*w).Send(events.LongHoverEnd, evi)
+			(*w).Send(etyp, evi)
 		}
 		clearLongHover()
 		// fmt.Println("cleared")
@@ -481,7 +481,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 	// but make sure our position hasn't changed too much
 	if deep == *w {
 		// if we haven't gone too far, we have nothing to do
-		if dst <= LongHoverStopDist {
+		if dst <= sdist {
 			// fmt.Println("bail on dist:", dst)
 			return
 		}
@@ -491,7 +491,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 		// up not getting another mouse move event, so we will be on the
 		// element with no tooltip, which is a bug. Not returning here is
 		// the solution to https://github.com/goki/gi/issues/553
-		(*w).Send(events.LongHoverEnd, evi)
+		(*w).Send(etyp, evi)
 		clearLongHover()
 		// fmt.Println("fallthrough after clear")
 	}
@@ -507,7 +507,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 	// we now know we don't have the timer and thus sent the start
 	// event already, so we need to send a end event
 	if *w != nil {
-		(*w).Send(events.LongHoverEnd, evi)
+		(*w).Send(etyp, evi)
 		clearLongHover()
 		// fmt.Println("lhw, send end, cleared")
 		return
@@ -517,15 +517,15 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 	*w = deep
 	// fmt.Println("setting new:", deep)
 	*pos = evi.Pos()
-	*t = time.AfterFunc(LongHoverTime, func() {
+	*t = time.AfterFunc(stime, func() {
 		em.TimerMu.Lock()
 		defer em.TimerMu.Unlock()
 		if *w == nil {
 			return
 		}
-		(*w).Send(events.LongHoverStart, evi)
+		(*w).Send(styp, evi)
 		// we are done with the timer, and this indicates that
-		// we have sent a LongHoverStart event
+		// we have sent a start event
 		*t = nil
 	})
 }
