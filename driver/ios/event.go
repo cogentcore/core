@@ -101,8 +101,8 @@ func scaled(scaleFactor, posX, posY C.float) {
 
 //export longPressed
 func longPressed(posX, posY C.float) {
-	where := image.Pt(int(posX), int(posY))
-	theApp.window.EvMgr.MouseButton(events.ContextMenu, events.Right, where, 0) // TODO: modifiers
+	// where := image.Pt(int(posX), int(posY))
+	// theApp.window.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }
 
 var codeRune = map[rune]key.Codes{
