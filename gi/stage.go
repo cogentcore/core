@@ -115,6 +115,9 @@ type StageBase struct {
 	// if true dismisses the Stage if user clicks anywhere off the Stage
 	ClickOff bool
 
+	// whether to send no events to the stage and just pass them down to lower stages
+	IgnoreEvents bool
+
 	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	NewWindow bool
 

@@ -63,6 +63,9 @@ type Value interface {
 	// AsWidget returns the widget associated with the value
 	AsWidget() gi.Widget
 
+	// AsWidgetBase returns the widget base associated with the value
+	AsWidgetBase() *gi.WidgetBase
+
 	// Name returns the name of the value
 	Name() string
 
@@ -282,6 +285,10 @@ func (vv *ValueBase) AsValueBase() *ValueBase {
 
 func (vv *ValueBase) AsWidget() gi.Widget {
 	return vv.Widget
+}
+
+func (vv *ValueBase) AsWidgetBase() *gi.WidgetBase {
+	return vv.Widget.AsWidget()
 }
 
 func (vv *ValueBase) Name() string {
