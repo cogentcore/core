@@ -275,6 +275,10 @@ func (tb *Buf) SetText(txt []byte) {
 	tb.ReMarkup()
 }
 
+func (tb *Buf) Update() {
+	tb.SignalMods()
+}
+
 // SetTextLines sets the text to given lines of bytes
 // if cpy is true, make a copy of bytes -- otherwise use
 func (tb *Buf) SetTextLines(lns [][]byte, cpy bool) {
