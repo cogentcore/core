@@ -40,7 +40,7 @@ func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
 // given tooltip at the given position.
 func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := NewScene(w.Name() + "-tooltip")
-	bb := w.AsWidget().ScBBox
+	bb := w.AsWidget().WinBBox()
 	sc.Geom.Pos.X = bb.Min.X
 	sc.Geom.Pos.Y = bb.Min.Y
 	sc.Style(func(s *styles.Style) {
