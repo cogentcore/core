@@ -143,10 +143,6 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	sc := st.Scene
 	maxSz := msc.Geom.Size
 
-	if st.Type == TooltipStage {
-		maxSz.X /= 2
-	}
-
 	sc.Geom.Size = maxSz
 	sz := sc.PrefSize(maxSz)
 	// fmt.Println(sz, maxSz)
