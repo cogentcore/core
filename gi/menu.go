@@ -11,6 +11,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
@@ -140,6 +141,11 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	wi := wb.This().(Widget)
 	nm := NewMenu(wi.ContextMenu, wi, wi.ContextMenuPos(e))
 	if nm == nil { // no items
+		// we display tooltips on context menu (long press)
+		// events on mobile if there are no context menus
+		if goosi.TheApp.Platform().IsMobile() {
+			NewTooltip(wi, e.Pos())
+		}
 		return
 	}
 	nm.Run()
