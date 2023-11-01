@@ -86,6 +86,25 @@ func keyboardDelete() {
 	theApp.window.EvMgr.KeyChord(0, key.CodeDeleteBackspace, 0) // TODO: modifiers
 }
 
+//export scrolled
+func scrolled(posX, posY, distanceX, distanceY C.float) {
+	where := image.Pt(int(posX), int(posY))
+	delta := image.Pt(int(distanceX), int(distanceY))
+	theApp.window.EvMgr.Scroll(where, delta)
+}
+
+//export scaled
+func scaled(scaleFactor, posX, posY C.float) {
+	where := image.Pt(int(posX), int(posY))
+	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+}
+
+//export longPressed
+func longPressed(posX, posY C.float) {
+	where := image.Pt(int(posX), int(posY))
+	theApp.window.EvMgr.MouseButton(events.ContextMenu, events.Right, where, 0) // TODO: modifiers
+}
+
 var codeRune = map[rune]key.Codes{
 	'0':  key.Code0,
 	'1':  key.Code1,
