@@ -346,8 +346,9 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		case em.Drag != nil:
 			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
 			em.Drag = nil
-		// if we are in a long press event, we don't send click events
-		case em.Press == up && up != nil && em.LongPressWidget == nil:
+		// if we have sent a long press event, we don't send click events
+		// (non-nil widget plus nil timer means we already sent)
+		case em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil):
 			switch evi.MouseButton() {
 			case events.Left:
 				up.Send(events.Click, evi)
@@ -356,6 +357,12 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Press = nil
+		em.LongPressWidget = nil
+		if em.LongHoverTimer != nil {
+			em.LongPressTimer.Stop()
+			em.LongPressTimer = nil
+		}
+		em.LongHoverPos = image.Point{}
 		up.Send(events.LongPressEnd, evi)
 		// a mouse up event acts also acts as a mouse leave
 		// and long hover end event on mobile, as those events
