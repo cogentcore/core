@@ -183,14 +183,14 @@ static void sendTouches(int change, NSSet* touches) {
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
 
-- (void) onLongPress: (UILongPressGestureRecognizer gestureRecognizer) {
-	if (gestureRecognizer.state == .began) {
-      	self.becomeFirstResponder()
-      	self.viewForReset = gestureRecognizer.view
-   		printf("GoLog: onLongPress")
-		location = gestureRecognizer.location(in: gestureRecognizer.view)
-		longPressed(location.x, location.y)
-	}
+- (void) onLongPress: (UILongPressGestureRecognizer *)gestureRecognizer {
+	// if (gestureRecognizer.state == .began) {
+		[self becomeFirstResponder];
+		// self.viewForReset = gestureRecognizer.view;
+		printf("GoLog: onLongPress");
+		CGPoint location = [gestureRecognizer locationInView:gestureRecognizer.view];
+		longPressed(location.x, location.y);
+	// }
 }
 
 @end
