@@ -84,12 +84,13 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(sc, "blspc")
-	gi.NewLabel(sc, "blab").
-		SetText("Buttons:")
+	gi.NewSpace(sc)
+	gi.NewLabel(sc).SetText("Buttons:")
 
-	brow := gi.NewLayout(sc, "brow").
-		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
+	brow := gi.NewLayout(sc, "brow").SetLayout(gi.LayoutHoriz).
+		Style(func(s *styles.Style) {
+			s.Spacing.Em(1)
+		})
 
 	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box").
 		Style(func(s *styles.Style) {
@@ -113,9 +114,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		// 	})
 	})
 
-	button2 := gi.NewButton(brow, "button2").
-		SetText("Open GoGiEditor")
-	button2.SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
+	button2 := gi.NewButton(brow).SetText("Open GoGiEditor").
+		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		txt := ""
 		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:")
@@ -163,42 +163,30 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.NewSpace(sc, "slspc")
-	gi.NewLabel(gi.NewLayout(sc, "slrow").SetLayout(gi.LayoutHoriz), "slab").
-		SetText("Sliders:")
+	gi.NewSpace(sc)
+	gi.NewLabel(sc).SetText("Sliders:")
 
-	srow := gi.NewLayout(sc, "srow").SetLayout(gi.LayoutHoriz).
-		SetSpacing(units.Ex(2)).
-		SetStretchMaxWidth().
+	srow := gi.NewLayout(sc).SetLayout(gi.LayoutHoriz).
 		Style(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft
+			s.Spacing.Ex(2)
+			s.SetStretchMaxWidth()
 		})
 
-	slider0 := gi.NewSlider(srow).
-		SetDim(mat32.X).
-		SetValue(0.5).
-		SetSnap(true).
-		SetTracking(true).
-		SetIcon(icons.RadioButtonChecked)
+	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).
+		SetSnap(true).SetTracking(true).SetIcon(icons.RadioButtonChecked)
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
 
-	slider1 := gi.NewSlider(srow).
-		SetDim(mat32.Y).
-		SetTracking(true).
-		SetValue(0.5)
+	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).
+		SetTracking(true).SetValue(0.5)
 	slider1.OnChange(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
 
-	scroll0 := gi.NewSlider(srow).
-		SetType(gi.SliderScrollbar).
-		SetDim(mat32.X).
-		SetThumbValue(0.25).
-		SetValue(0.25).
-		SetSnap(true).
-		SetTracking(true)
+	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.X).
+		SetThumbValue(0.25).SetValue(0.25).SetSnap(true).SetTracking(true)
 	scroll0.Style(func(s *styles.Style) {
 		s.MaxHeight.Dp(12)
 	})
@@ -206,17 +194,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("scroll0", scroll0.Value)
 	})
 
-	scroll1 := gi.NewSlider(srow).
-		SetType(gi.SliderScrollbar).
-		SetDim(mat32.Y).
-		SetThumbValue(10).
-		SetValue(0).
-		SetMax(3000).
-		SetTracking(true).
-		SetStep(1).
-		SetPageStep(10)
+	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
+		SetThumbValue(10).SetValue(0).SetMax(3000).
+		SetTracking(true).SetStep(1).SetPageStep(10)
 	scroll1.Style(func(s *styles.Style) {
-		s.MaxWidth = units.Dp(16)
+		s.MaxWidth.Dp(16)
 	})
 	scroll1.OnChange(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
@@ -225,13 +207,14 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewSpace(sc, "tlspc")
-	gi.NewLabel(gi.NewLayout(sc, "txlrow").SetLayout(gi.LayoutHoriz), "txlab").
-		SetText("Text Widgets:")
+	gi.NewSpace(sc)
+	gi.NewLabel(sc).SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(sc, "txrow").SetLayout(gi.LayoutHoriz).
-		SetSpacing(units.Ex(2)).
-		SetStretchMaxWidth()
+	txrow := gi.NewLayout(sc).SetLayout(gi.LayoutHoriz).
+		Style(func(s *styles.Style) {
+			s.Spacing.Ex(2)
+			s.SetStretchMaxWidth()
+		})
 
 	edit1 := gi.NewTextField(txrow, "edit1").SetPlaceholder("Enter text here...").AddClearButton()
 	edit1.OnChange(func(e events.Event) {
