@@ -2978,6 +2978,75 @@ func (t *TextField) SetCustomContextMenu(v func(m *Scene)) *TextField {
 	return t
 }
 
+// ToolbarType is the [gti.Type] for [Toolbar]
+var ToolbarType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Toolbar",
+	ShortName:  "gi.Toolbar",
+	IDName:     "toolbar",
+	Doc:        "Toolbar is just a styled Frame layout for holding buttons\nand other widgets.  Use this for any toolbar embedded within\na window.  See TopAppBar for the main app-level toolbar,\nwith considerable additional functionality.",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Toolbar{},
+})
+
+// NewToolbar adds a new [Toolbar] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewToolbar(par ki.Ki, name ...string) *Toolbar {
+	return par.NewChild(ToolbarType, name...).(*Toolbar)
+}
+
+// KiType returns the [*gti.Type] of [Toolbar]
+func (t *Toolbar) KiType() *gti.Type {
+	return ToolbarType
+}
+
+// New returns a new [*Toolbar] value
+func (t *Toolbar) New() ki.Ki {
+	return &Toolbar{}
+}
+
+// SetTooltip sets the [Toolbar.Tooltip]
+func (t *Toolbar) SetTooltip(v string) *Toolbar {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Toolbar.Class]
+func (t *Toolbar) SetClass(v string) *Toolbar {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Toolbar.CustomContextMenu]
+func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Toolbar.Lay]
+func (t *Toolbar) SetLayout(v Layouts) *Toolbar {
+	t.Lay = v
+	return t
+}
+
+// SetStackTop sets the [Toolbar.StackTop]
+func (t *Toolbar) SetStackTop(v int) *Toolbar {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Toolbar.Stripes]
+func (t *Toolbar) SetStripes(v Stripes) *Toolbar {
+	t.Stripes = v
+	return t
+}
+
 // TopAppBarType is the [gti.Type] for [TopAppBar]
 var TopAppBarType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.TopAppBar",

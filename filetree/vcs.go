@@ -294,7 +294,7 @@ func (fn *Node) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	if err != nil {
 		return lg, err
 	}
-	giv.VCSLogViewDialog(nil, repo, lg, fnm, since)
+	VCSLogViewDialog(nil, repo, lg, fnm, since)
 	return lg, nil
 }
 

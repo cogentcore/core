@@ -7,10 +7,7 @@ package gi
 import (
 	"log/slog"
 
-	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -120,28 +117,6 @@ func (tb *TopAppBar) CopyFieldsFrom(frm any) {
 func (tb *TopAppBar) OnInit() {
 	tb.TopAppBarStyles()
 	tb.HandleLayoutEvents()
-}
-
-// ToolbarStyles can be applied to any layout (e.g., Frame) to achieve
-// standard toolbar styling.
-func ToolbarStyles(ly Layouter) {
-	lb := ly.AsLayout()
-	ly.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-		s.Border.Radius = styles.BorderRadiusFull
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.Margin.Set(units.Dp(4))
-		s.Padding.SetHoriz(units.Dp(16))
-	})
-	ly.OnWidgetAdded(func(w Widget) {
-		if bt := AsButton(w); bt != nil {
-			bt.Type = ButtonAction
-			return
-		}
-		if sp, ok := w.(*Separator); ok {
-			sp.Horiz = lb.Lay != LayoutHoriz
-		}
-	})
 }
 
 func (tb *TopAppBar) TopAppBarStyles() {
