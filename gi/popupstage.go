@@ -173,12 +173,19 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		bb := wb.WinBBox()
 		wc := bb.Min.X + bb.Size().X/2
 		sc.Geom.Pos.X = wc - sz.X/2
-		sc.Geom.Pos.Y -= sz.Y + 10
 
-		maxy := sc.Geom.Pos.Y + sz.Y
-		if maxy > bb.Max.Y {
-
+		// default to tooltip above element
+		ypos := bb.Min.Y - sz.Y - 10
+		if ypos < 0 {
+			ypos = 0
 		}
+		// however, if we are within 10 pixels of the element,
+		// we put the tooltip below it instead of above it
+		maxy := ypos + sz.Y
+		if maxy > bb.Min.Y-10 {
+			ypos = bb.Max.Y + 10
+		}
+		sc.Geom.Pos.Y = ypos
 	}
 
 	sc.Geom.Size = sz
