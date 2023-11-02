@@ -136,6 +136,11 @@ struct utsname sysInfo;
 	panGesture.delegate = self;
 	[panGesture addTarget:self action: @selector(onPan:)];
 	[self.view addGestureRecognizer:panGesture];
+
+	UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] init];
+	pinchGesture.delegate = self;
+	[pinchGesture addTarget:self action: @selector(onPinch:)];
+	[self.view addGestureRecognizer:pinchGesture];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
