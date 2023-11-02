@@ -29,9 +29,6 @@ struct utsname sysInfo;
 @interface GoInputView : UITextField<UITextFieldDelegate>
 @end
 
-@interface GoGestureRecognizer : UIGestureRecognizer
-@end
-
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
@@ -135,9 +132,10 @@ struct utsname sysInfo;
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 
-	// UIGestureRecognizer* gestureRecognizer = [[GoGestureRecognizer alloc] init];
-	// gestureRecognizer.delegate = self;
-	// [self.view addGestureRecognizer:gestureRecognizer];
+	UIPanGestureRecognizer* panGesture = [[UIPanGestureRecognizer alloc] init];
+	panGesture.delegate = self;
+	[panGesture addTarget:self action: @selector(onPan:)];
+	[self.view addGestureRecognizer:panGesture];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -190,10 +188,6 @@ static void sendTouches(int change, NSSet* touches) {
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
 
-@end
-
-@implementation GoGestureRecognizer
-
 - (void) onPan: (UIPanGestureRecognizer *)panRecognizer {
 	// if (gestureRecognizer.state == .began) {
 		[self becomeFirstResponder];
@@ -215,7 +209,6 @@ static void sendTouches(int change, NSSet* touches) {
 		scaled(scale, location.x, location.y);
 	// }
 }
-
 
 - (void) onLongPress: (UILongPressGestureRecognizer *)gestureRecognizer {
 	// if (gestureRecognizer.state == .began) {
