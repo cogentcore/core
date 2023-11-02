@@ -69,6 +69,7 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 	sb.SnackbarStyles()
 
 	sb.Stage = NewPopupStage(SnackbarStage, &sb.Scene, ctx)
+	sb.SetTimeout(SnackbarTimeout)
 	return sb
 }
 
@@ -132,6 +133,12 @@ func (sb *Snackbar) Icon(icon icons.Icon, onClick ...func(e events.Event)) *Snac
 		}
 		sb.DeletePopup()
 	})
+	return sb
+}
+
+// SetTimeout sets the timeout of the snackbar
+func (sb *Snackbar) SetTimeout(timeout time.Duration) *Snackbar {
+	sb.Stage.SetTimeout(timeout)
 	return sb
 }
 
