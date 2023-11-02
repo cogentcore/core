@@ -107,14 +107,14 @@ func HiStylesView(st *histyle.Styles) {
 		histyle.StylesChanged = true
 	})
 
-	sc.TopAppBar = func(tb *gi.Toolbar) {
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
 		oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")
 		sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 		sj.Args[0].SetTag(".ext", ".histy")
 		gi.NewSeparator(tb)
-		mv.MapDefaultToolbar(tb)
+		mv.MapDefaultTopAppBar(tb)
 	}
 
 	// mmen := win.MainMenu

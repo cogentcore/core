@@ -261,20 +261,9 @@ func (ge *GiEditor) ConfigSplits() {
 
 func (ge *GiEditor) SetChanged() {
 	ge.Changed = true
-	// ge.Toolbar().UpdateButtons() // nil safe
 }
 
-func (ge *GiEditor) Render(sc *gi.Scene) {
-	// ge.Toolbar().UpdateButtons()
-	// if win := ge.ParentRenderWin(); win != nil {
-	// 	if !win.Is(WinResizing) {
-	// 		win.MainMenuUpdateActives()
-	// 	}
-	// }
-	ge.Frame.Render(sc)
-}
-
-func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
+func (ge *GiEditor) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBar(tb)
 
 	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
@@ -326,7 +315,7 @@ func GoGiEditorDialog(obj ki.Ki) {
 	ge := NewGiEditor(sc, "editor")
 	ge.SetRoot(obj)
 
-	sc.TopAppBar = ge.Toolbar
+	sc.TopAppBar = ge.TopAppBar
 
 	// mmen := win.MainMenu
 	// MainMenuView(ge, win, mmen)

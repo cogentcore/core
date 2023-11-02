@@ -172,7 +172,7 @@ func (st *MainStage) AddTopAppBar() *MainStage {
 			st.Scene.TopAppBar = DefaultTopAppBar
 		}
 	}
-	tb := st.Scene.InsertNewChild(ToolbarType, 0).(*Toolbar)
+	tb := st.Scene.InsertNewChild(TopAppBarType, 0).(*TopAppBar)
 	st.Scene.TopAppBar(tb)
 	return st
 }

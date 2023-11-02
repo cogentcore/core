@@ -324,7 +324,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) Toolbar(tb *gi.Toolbar) { //gti:add
+func (fb *FileBrowse) TopAppBar(tb *gi.TopAppBar) { //gti:add
 	gi.DefaultTopAppBar(tb)
 
 	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
@@ -409,7 +409,7 @@ func NewFileBrowser(path string) (*FileBrowse, gi.Stage) {
 	sc := gi.NewScene(nm).SetTitle("Browser: " + projnm)
 	fb := NewFileBrowse(sc, "browser")
 
-	sc.TopAppBar = fb.Toolbar
+	sc.TopAppBar = fb.TopAppBar
 
 	fb.OpenPath(gi.FileName(path))
 

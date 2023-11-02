@@ -65,7 +65,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.Since = since
 	lv.Lay = gi.LayoutVert
 	config := ki.Config{}
-	config.Add(gi.ToolbarType, "toolbar")
+	config.Add(gi.FrameType, "toolbar")
 	config.Add(TableViewType, "log")
 	mods, updt := lv.ConfigChildren(config)
 	tv := lv.TableView()
@@ -146,8 +146,8 @@ func (lv *VCSLogView) ToggleRev() {
 }
 
 // Toolbar returns the toolbar
-func (lv *VCSLogView) Toolbar() *gi.Toolbar {
-	return lv.ChildByName("toolbar", 0).(*gi.Toolbar)
+func (lv *VCSLogView) Toolbar() *gi.Frame {
+	return lv.ChildByName("toolbar", 0).(*gi.Frame)
 }
 
 // TableView returns the tableview

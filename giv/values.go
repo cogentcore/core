@@ -419,7 +419,7 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	}
 	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
-	d.TopAppBar = gi.ToolbarFor(stru)
+	d.TopAppBar = gi.TopAppBarFor(stru)
 	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
 		vv.SendChange()
@@ -566,11 +566,11 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 		tv := NewTableView(d).SetSlice(slci)
 		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-		d.TopAppBar = gi.ToolbarFor(slci)
+		d.TopAppBar = gi.TopAppBarFor(slci)
 		if d.TopAppBar == nil {
-			d.TopAppBar = func(tb *gi.Toolbar) {
+			d.TopAppBar = func(tb *gi.TopAppBar) {
 				gi.DefaultTopAppBar(tb)
-				tv.SliceDefaultToolbar(tb)
+				tv.SliceDefaultTopAppBar(tb)
 			}
 		}
 		d.OnAccept(func(e events.Event) {
@@ -584,11 +584,11 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 		sv := NewSliceView(d).SetSlice(slci)
 		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-		d.TopAppBar = gi.ToolbarFor(slci)
+		d.TopAppBar = gi.TopAppBarFor(slci)
 		if d.TopAppBar == nil {
-			d.TopAppBar = func(tb *gi.Toolbar) {
+			d.TopAppBar = func(tb *gi.TopAppBar) {
 				gi.DefaultTopAppBar(tb)
-				sv.SliceDefaultToolbar(tb)
+				sv.SliceDefaultTopAppBar(tb)
 			}
 		}
 		d.OnAccept(func(e events.Event) {

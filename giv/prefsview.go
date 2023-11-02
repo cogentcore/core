@@ -5,8 +5,6 @@
 package giv
 
 import (
-	"fmt"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/goosi/events"
@@ -25,7 +23,7 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
-	sc.TopAppBar = func(tb *gi.Toolbar) {
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
 
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
@@ -43,9 +41,6 @@ func PrefsView(pf *gi.Preferences) {
 		NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
 		NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
 		gi.NewSeparator(tb)
-		gi.NewButton(tb).SetText("Test Menu").OnClick(func(e events.Event) {
-			fmt.Println("test menu")
-		})
 		NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
 		NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
 		NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
@@ -117,7 +112,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 
-	sc.TopAppBar = func(tb *gi.Toolbar) {
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
 
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
@@ -183,7 +178,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 
-	sc.TopAppBar = func(tb *gi.Toolbar) {
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
 
 		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
