@@ -4,9 +4,9 @@ package icons
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.6"
+	Version = "v0.0.7"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "d1e0b5c"
+	GitCommit = "33f023a"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-31 19:46"
+	VersionDate = "2023-11-02 14:56"
 )
