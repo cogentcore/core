@@ -2220,6 +2220,9 @@ const (
 	// Deskphone is https://github.com/goki/icons/blob/main/svg/deskphone.svg
 	Deskphone Icon = "deskphone"
 
+	// Desktop is https://github.com/goki/icons/blob/main/svg/desktop.svg
+	Desktop Icon = "desktop"
+
 	// DesktopAccessDisabled is https://github.com/goki/icons/blob/main/svg/desktop_access_disabled.svg
 	DesktopAccessDisabled Icon = "desktop_access_disabled"
 
@@ -2441,6 +2444,9 @@ const (
 
 	// DocsAppsScript is https://github.com/goki/icons/blob/main/svg/docs_apps_script.svg
 	DocsAppsScript Icon = "docs_apps_script"
+
+	// Document is https://github.com/goki/icons/blob/main/svg/document.svg
+	Document Icon = "document"
 
 	// DocumentScanner is https://github.com/goki/icons/blob/main/svg/document_scanner.svg
 	DocumentScanner Icon = "document_scanner"

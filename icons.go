@@ -89,7 +89,7 @@ func (i Icon) IsValid() bool {
 // AllIcons is a list of all icons
 var AllIcons []Icon
 
-// All returns a list of all the Icons
+// All returns a list of all the Icons (excluding "fill" versions)
 func All() []Icon {
 	if AllIcons != nil {
 		return AllIcons
@@ -98,8 +98,12 @@ func All() []Icon {
 	if err != nil {
 		return nil
 	}
-	ics := make([]Icon, 0, len(files))
+	ics := make([]Icon, 0, len(files)/2) // no fill
 	for _, fi := range files {
+		nm := fi.Name()
+		if strings.HasSuffix(nm, "-fill.svg") {
+			continue
+		}
 		ic := Icon(strings.TrimSuffix(fi.Name(), ".svg"))
 		ics = append(ics, ic)
 	}
