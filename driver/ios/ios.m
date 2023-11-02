@@ -135,7 +135,8 @@ struct utsname sysInfo;
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 
-	UIGestureRecognizer* gestureRecognizer = [GoGestureRecognizer init];
+	UIGestureRecognizer* gestureRecognizer = [[GoGestureRecognizer alloc] init];
+	gestureRecognizer.delegate = self;
 	[self.view addGestureRecognizer:gestureRecognizer];
 }
 
