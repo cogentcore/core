@@ -309,7 +309,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		sv.Spacing = gi.StdDialogVSpaceUnits
+		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
@@ -686,7 +686,7 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 		return
 	}
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Spacing.Dots
+		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Spacing.Dots
 	}
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
 		rowht = mat32.Max(rowht, sv.RowHeight)
