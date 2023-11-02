@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package giv
+package filetree
 
 import (
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -66,7 +67,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.Lay = gi.LayoutVert
 	config := ki.Config{}
 	config.Add(gi.FrameType, "toolbar")
-	config.Add(TableViewType, "log")
+	config.Add(giv.TableViewType, "log")
 	mods, updt := lv.ConfigChildren(config)
 	tv := lv.TableView()
 	if mods {
@@ -151,8 +152,8 @@ func (lv *VCSLogView) Toolbar() *gi.Frame {
 }
 
 // TableView returns the tableview
-func (lv *VCSLogView) TableView() *TableView {
-	return lv.ChildByName("log", 1).(*TableView)
+func (lv *VCSLogView) TableView() *giv.TableView {
+	return lv.ChildByName("log", 1).(*giv.TableView)
 }
 
 // ConfigToolbar
