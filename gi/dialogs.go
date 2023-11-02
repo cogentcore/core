@@ -23,7 +23,7 @@ var (
 )
 
 // Dialog is a scene with methods for configuring a dialog
-type Dialog struct {
+type Dialog struct { //goki:no-new
 	Scene
 
 	// Stage is the main stage associated with the dialog

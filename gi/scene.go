@@ -40,7 +40,7 @@ type Scene struct { //goki:no-new
 	Frame
 
 	// title of the Scene
-	Title string
+	Title string `set:"-"`
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
@@ -150,6 +150,12 @@ func (sc *Scene) SceneStyles() {
 			units.Dot(insets.Left),
 		)
 	})
+}
+
+// SetTitle sets the title
+func (sc *Scene) SetTitle(title string) *Scene {
+	sc.Title = title
+	return sc
 }
 
 // RenderCtx returns the current render context.
