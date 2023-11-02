@@ -118,17 +118,20 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 
-	tb := sv.Toolbar()
-	NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
-	gi.NewSeparator(tb)
-	save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
-	save.SetUpdateFunc(func() {
-		save.SetEnabledUpdt(pf.Changed)
-	})
-	tb.AddOverflowMenu(func(m *gi.Scene) {
-		NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
-	})
-	tb.AddDefaultOverflowMenu()
+	sc.TopAppBar = func(tb *gi.Toolbar) {
+		gi.DefaultTopAppBar(tb)
+
+		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
+		gi.NewSeparator(tb)
+		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
+		save.SetUpdateFunc(func() {
+			save.SetEnabledUpdt(pf.Changed)
+		})
+		tb.AddOverflowMenu(func(m *gi.Scene) {
+			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
+		})
+		tb.AddDefaultOverflowMenu()
+	}
 
 	/*
 		mmen := win.MainMenu

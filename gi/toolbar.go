@@ -67,6 +67,7 @@ func DefaultTopAppBar(tb *Toolbar) { //gti:add
 		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
 	})
+	NewSeparator(tb)
 }
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.

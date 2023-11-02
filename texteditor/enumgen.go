@@ -143,45 +143,45 @@ func (i *BufSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _BufFlagsValues = []BufFlags{10, 11, 12, 13}
+var _BufFlagsValues = []BufFlags{9, 10, 11, 12}
 
 // BufFlagsN is the highest valid value
 // for type BufFlags, plus one.
-const BufFlagsN BufFlags = 14
+const BufFlagsN BufFlags = 13
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _BufFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[BufAutoSaving-(10)]
-	_ = x[BufMarkingUp-(11)]
-	_ = x[BufChanged-(12)]
-	_ = x[BufFileModOk-(13)]
+	_ = x[BufAutoSaving-(9)]
+	_ = x[BufMarkingUp-(10)]
+	_ = x[BufChanged-(11)]
+	_ = x[BufFileModOk-(12)]
 }
 
 var _BufFlagsNameToValueMap = map[string]BufFlags{
-	`AutoSaving`: 10,
-	`autosaving`: 10,
-	`MarkingUp`:  11,
-	`markingup`:  11,
-	`Changed`:    12,
-	`changed`:    12,
-	`FileModOk`:  13,
-	`filemodok`:  13,
+	`AutoSaving`: 9,
+	`autosaving`: 9,
+	`MarkingUp`:  10,
+	`markingup`:  10,
+	`Changed`:    11,
+	`changed`:    11,
+	`FileModOk`:  12,
+	`filemodok`:  12,
 }
 
 var _BufFlagsDescMap = map[BufFlags]string{
-	10: `BufAutoSaving is used in atomically safe way to protect autosaving`,
-	11: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
-	12: `BufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
-	13: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
+	9:  `BufAutoSaving is used in atomically safe way to protect autosaving`,
+	10: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
+	11: `BufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
+	12: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
 }
 
 var _BufFlagsMap = map[BufFlags]string{
-	10: `AutoSaving`,
-	11: `MarkingUp`,
-	12: `Changed`,
-	13: `FileModOk`,
+	9:  `AutoSaving`,
+	10: `MarkingUp`,
+	11: `Changed`,
+	12: `FileModOk`,
 }
 
 // String returns the string representation
@@ -340,40 +340,40 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _EditorFlagsValues = []EditorFlags{10, 11, 12}
+var _EditorFlagsValues = []EditorFlags{9, 10, 11}
 
 // EditorFlagsN is the highest valid value
 // for type EditorFlags, plus one.
-const EditorFlagsN EditorFlags = 13
+const EditorFlagsN EditorFlags = 12
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _EditorFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[EditorHasLineNos-(10)]
-	_ = x[EditorLastWasTabAI-(11)]
-	_ = x[EditorLastWasUndo-(12)]
+	_ = x[EditorHasLineNos-(9)]
+	_ = x[EditorLastWasTabAI-(10)]
+	_ = x[EditorLastWasUndo-(11)]
 }
 
 var _EditorFlagsNameToValueMap = map[string]EditorFlags{
-	`EditorHasLineNos`:   10,
-	`editorhaslinenos`:   10,
-	`EditorLastWasTabAI`: 11,
-	`editorlastwastabai`: 11,
-	`EditorLastWasUndo`:  12,
-	`editorlastwasundo`:  12,
+	`EditorHasLineNos`:   9,
+	`editorhaslinenos`:   9,
+	`EditorLastWasTabAI`: 10,
+	`editorlastwastabai`: 10,
+	`EditorLastWasUndo`:  11,
+	`editorlastwasundo`:  11,
 }
 
 var _EditorFlagsDescMap = map[EditorFlags]string{
-	10: `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`,
-	11: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`,
-	12: `EditorLastWasUndo indicates that last key was an undo`,
+	9:  `EditorHasLineNos indicates that this editor has line numbers (per Buf option)`,
+	10: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`,
+	11: `EditorLastWasUndo indicates that last key was an undo`,
 }
 
 var _EditorFlagsMap = map[EditorFlags]string{
-	10: `EditorHasLineNos`,
-	11: `EditorLastWasTabAI`,
-	12: `EditorLastWasUndo`,
+	9:  `EditorHasLineNos`,
+	10: `EditorLastWasTabAI`,
+	11: `EditorLastWasUndo`,
 }
 
 // String returns the string representation

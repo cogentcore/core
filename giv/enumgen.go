@@ -12,85 +12,85 @@ import (
 	"goki.dev/gi/v2/gi"
 )
 
-var _SliceViewFlagsValues = []SliceViewFlags{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}
+var _SliceViewFlagsValues = []SliceViewFlags{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 // SliceViewFlagsN is the highest valid value
 // for type SliceViewFlags, plus one.
-const SliceViewFlagsN SliceViewFlags = 22
+const SliceViewFlagsN SliceViewFlags = 21
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _SliceViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[SliceViewConfiged-(10)]
-	_ = x[SliceViewNoAdd-(11)]
-	_ = x[SliceViewNoDelete-(12)]
-	_ = x[SliceViewShowViewCtxtMenu-(13)]
-	_ = x[SliceViewIsArray-(14)]
-	_ = x[SliceViewShowIndex-(15)]
-	_ = x[SliceViewShowToolbar-(16)]
-	_ = x[SliceViewReadOnlyKeyNav-(17)]
-	_ = x[SliceViewSelectMode-(18)]
-	_ = x[SliceViewReadOnlyMultiSel-(19)]
-	_ = x[SliceViewInFocusGrab-(20)]
-	_ = x[SliceViewInFullRebuild-(21)]
+	_ = x[SliceViewConfiged-(9)]
+	_ = x[SliceViewNoAdd-(10)]
+	_ = x[SliceViewNoDelete-(11)]
+	_ = x[SliceViewShowViewCtxtMenu-(12)]
+	_ = x[SliceViewIsArray-(13)]
+	_ = x[SliceViewShowIndex-(14)]
+	_ = x[SliceViewShowToolbar-(15)]
+	_ = x[SliceViewReadOnlyKeyNav-(16)]
+	_ = x[SliceViewSelectMode-(17)]
+	_ = x[SliceViewReadOnlyMultiSel-(18)]
+	_ = x[SliceViewInFocusGrab-(19)]
+	_ = x[SliceViewInFullRebuild-(20)]
 }
 
 var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
-	`Configed`:         10,
-	`configed`:         10,
-	`NoAdd`:            11,
-	`noadd`:            11,
-	`NoDelete`:         12,
-	`nodelete`:         12,
-	`ShowViewCtxtMenu`: 13,
-	`showviewctxtmenu`: 13,
-	`IsArray`:          14,
-	`isarray`:          14,
-	`ShowIndex`:        15,
-	`showindex`:        15,
-	`ShowToolbar`:      16,
-	`showtoolbar`:      16,
-	`ReadOnlyKeyNav`:   17,
-	`readonlykeynav`:   17,
-	`SelectMode`:       18,
-	`selectmode`:       18,
-	`ReadOnlyMultiSel`: 19,
-	`readonlymultisel`: 19,
-	`InFocusGrab`:      20,
-	`infocusgrab`:      20,
-	`InFullRebuild`:    21,
-	`infullrebuild`:    21,
+	`Configed`:         9,
+	`configed`:         9,
+	`NoAdd`:            10,
+	`noadd`:            10,
+	`NoDelete`:         11,
+	`nodelete`:         11,
+	`ShowViewCtxtMenu`: 12,
+	`showviewctxtmenu`: 12,
+	`IsArray`:          13,
+	`isarray`:          13,
+	`ShowIndex`:        14,
+	`showindex`:        14,
+	`ShowToolbar`:      15,
+	`showtoolbar`:      15,
+	`ReadOnlyKeyNav`:   16,
+	`readonlykeynav`:   16,
+	`SelectMode`:       17,
+	`selectmode`:       17,
+	`ReadOnlyMultiSel`: 18,
+	`readonlymultisel`: 18,
+	`InFocusGrab`:      19,
+	`infocusgrab`:      19,
+	`InFullRebuild`:    20,
+	`infullrebuild`:    20,
 }
 
 var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
-	10: `flagged after first configuration`,
-	11: `if true, user cannot add elements to the slice`,
-	12: `if true, user cannot delete elements from the slice`,
-	13: `if the type we&#39;re viewing has its own CtxtMenu property defined, should we also still show the view&#39;s standard context menu?`,
-	14: `whether the slice is actually an array -- no modifications -- set by SetSlice`,
-	15: `whether to show index or not`,
-	16: `whether to show the toolbar or not`,
-	17: `support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events`,
-	18: `editing-mode select rows mode`,
-	19: `if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
-	20: `guard for recursive focus grabbing`,
-	21: `guard for recursive rebuild`,
+	9:  `flagged after first configuration`,
+	10: `if true, user cannot add elements to the slice`,
+	11: `if true, user cannot delete elements from the slice`,
+	12: `if the type we&#39;re viewing has its own CtxtMenu property defined, should we also still show the view&#39;s standard context menu?`,
+	13: `whether the slice is actually an array -- no modifications -- set by SetSlice`,
+	14: `whether to show index or not`,
+	15: `whether to show the toolbar or not`,
+	16: `support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events`,
+	17: `editing-mode select rows mode`,
+	18: `if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
+	19: `guard for recursive focus grabbing`,
+	20: `guard for recursive rebuild`,
 }
 
 var _SliceViewFlagsMap = map[SliceViewFlags]string{
-	10: `Configed`,
-	11: `NoAdd`,
-	12: `NoDelete`,
-	13: `ShowViewCtxtMenu`,
-	14: `IsArray`,
-	15: `ShowIndex`,
-	16: `ShowToolbar`,
-	17: `ReadOnlyKeyNav`,
-	18: `SelectMode`,
-	19: `ReadOnlyMultiSel`,
-	20: `InFocusGrab`,
-	21: `InFullRebuild`,
+	9:  `Configed`,
+	10: `NoAdd`,
+	11: `NoDelete`,
+	12: `ShowViewCtxtMenu`,
+	13: `IsArray`,
+	14: `ShowIndex`,
+	15: `ShowToolbar`,
+	16: `ReadOnlyKeyNav`,
+	17: `SelectMode`,
+	18: `ReadOnlyMultiSel`,
+	19: `InFocusGrab`,
+	20: `InFullRebuild`,
 }
 
 // String returns the string representation
@@ -249,35 +249,35 @@ func (i *SliceViewFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TreeViewFlagsValues = []TreeViewFlags{10, 11}
+var _TreeViewFlagsValues = []TreeViewFlags{9, 10}
 
 // TreeViewFlagsN is the highest valid value
 // for type TreeViewFlags, plus one.
-const TreeViewFlagsN TreeViewFlags = 12
+const TreeViewFlagsN TreeViewFlags = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TreeViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TreeViewFlagClosed-(10)]
-	_ = x[TreeViewFlagSelectMode-(11)]
+	_ = x[TreeViewFlagClosed-(9)]
+	_ = x[TreeViewFlagSelectMode-(10)]
 }
 
 var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
-	`Closed`:     10,
-	`closed`:     10,
-	`SelectMode`: 11,
-	`selectmode`: 11,
+	`Closed`:     9,
+	`closed`:     9,
+	`SelectMode`: 10,
+	`selectmode`: 10,
 }
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
-	10: `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
-	11: `This flag on the Root node determines whether keyboard movements update selection or not.`,
+	9:  `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
+	10: `This flag on the Root node determines whether keyboard movements update selection or not.`,
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{
-	10: `Closed`,
-	11: `SelectMode`,
+	9:  `Closed`,
+	10: `SelectMode`,
 }
 
 // String returns the string representation

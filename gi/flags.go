@@ -27,10 +27,6 @@ const (
 	// start of dragging -- use this for controls that are small and are
 	// primarily about dragging (e.g., the Splitter handle)
 	InstaDrag
-
-	// InOverflow causes this widget to be automatically placed in an overflow
-	// menu, if it is placed in a [Toolbar].
-	InOverflow
 )
 
 func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
@@ -137,11 +133,6 @@ func (wb *WidgetBase) IsReadOnly() bool {
 // SetReadOnly sets the ReadOnly state flag to given value
 func (wb *WidgetBase) SetReadOnly(ro bool) {
 	wb.SetState(ro, states.ReadOnly)
-}
-
-// SetInOverflow sets the InOverflow flag to given value
-func (wb *WidgetBase) SetInOverflow(oflow bool) {
-	wb.SetFlag(oflow, InOverflow)
 }
 
 // HasFlagWithin returns whether the current node or any
