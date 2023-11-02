@@ -11,11 +11,14 @@ import (
 // Log0 takes the given error and logs it if it is non-nil.
 // The intended usage is:
 //
-//	grr.Log0(MyFunc(v))
-func Log0(err error) {
+// grr.Log0(MyFunc(v))
+// or
+// return grr.Log0(MyFunc(v))
+func Log0(err error) error {
 	if err != nil {
 		slog.Error(err.Error())
 	}
+	return err
 }
 
 // Log takes the given value and error and returns the value if
