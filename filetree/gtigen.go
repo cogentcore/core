@@ -14,6 +14,7 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
+	"goki.dev/vci/v2"
 	"gopkg.in/fsnotify.v1"
 )
 
@@ -401,5 +402,111 @@ func (t *Tree) SetRootView(v *giv.TreeView) *Tree {
 // SetSelectedNodes sets the [Tree.SelectedNodes]
 func (t *Tree) SetSelectedNodes(v []*giv.TreeView) *Tree {
 	t.SelectedNodes = v
+	return t
+}
+
+// VCSLogViewType is the [gti.Type] for [VCSLogView]
+var VCSLogViewType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/filetree.VCSLogView",
+	ShortName:  "filetree.VCSLogView",
+	IDName:     "vcs-log-view",
+	Doc:        "VCSLogView is a view of the variables",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/vci/v2.Log", LocalType: "vci.Log", Doc: "current log", Directives: gti.Directives{}, Tag: ""}},
+		{"File", &gti.Field{Name: "File", Type: "string", LocalType: "string", Doc: "file that this is a log of -- if blank then it is entire repository", Directives: gti.Directives{}, Tag: ""}},
+		{"Since", &gti.Field{Name: "Since", Type: "string", LocalType: "string", Doc: "date expression for how long ago to include log entries from", Directives: gti.Directives{}, Tag: ""}},
+		{"Repo", &gti.Field{Name: "Repo", Type: "goki.dev/vci/v2.Repo", LocalType: "vci.Repo", Doc: "version control system repository", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision A -- defaults to HEAD", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision B -- blank means current working copy", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SetA", &gti.Field{Name: "SetA", Type: "bool", LocalType: "bool", Doc: "double-click will set the A revision -- else B", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &VCSLogView{},
+})
+
+// NewVCSLogView adds a new [VCSLogView] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewVCSLogView(par ki.Ki, name ...string) *VCSLogView {
+	return par.NewChild(VCSLogViewType, name...).(*VCSLogView)
+}
+
+// KiType returns the [*gti.Type] of [VCSLogView]
+func (t *VCSLogView) KiType() *gti.Type {
+	return VCSLogViewType
+}
+
+// New returns a new [*VCSLogView] value
+func (t *VCSLogView) New() ki.Ki {
+	return &VCSLogView{}
+}
+
+// SetLog sets the [VCSLogView.Log]:
+// current log
+func (t *VCSLogView) SetLog(v vci.Log) *VCSLogView {
+	t.Log = v
+	return t
+}
+
+// SetFile sets the [VCSLogView.File]:
+// file that this is a log of -- if blank then it is entire repository
+func (t *VCSLogView) SetFile(v string) *VCSLogView {
+	t.File = v
+	return t
+}
+
+// SetSince sets the [VCSLogView.Since]:
+// date expression for how long ago to include log entries from
+func (t *VCSLogView) SetSince(v string) *VCSLogView {
+	t.Since = v
+	return t
+}
+
+// SetRepo sets the [VCSLogView.Repo]:
+// version control system repository
+func (t *VCSLogView) SetRepo(v vci.Repo) *VCSLogView {
+	t.Repo = v
+	return t
+}
+
+// SetSetA sets the [VCSLogView.SetA]:
+// double-click will set the A revision -- else B
+func (t *VCSLogView) SetSetA(v bool) *VCSLogView {
+	t.SetA = v
+	return t
+}
+
+// SetTooltip sets the [VCSLogView.Tooltip]
+func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [VCSLogView.Class]
+func (t *VCSLogView) SetClass(v string) *VCSLogView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [VCSLogView.CustomContextMenu]
+func (t *VCSLogView) SetCustomContextMenu(v func(m *gi.Scene)) *VCSLogView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [VCSLogView.Lay]
+func (t *VCSLogView) SetLayout(v gi.Layouts) *VCSLogView {
+	t.Lay = v
+	return t
+}
+
+// SetStackTop sets the [VCSLogView.StackTop]
+func (t *VCSLogView) SetStackTop(v int) *VCSLogView {
+	t.StackTop = v
 	return t
 }

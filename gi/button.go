@@ -531,13 +531,10 @@ func (bt *Button) UpdateButtons() {
 	if bt.UpdateFunc != nil {
 		bt.UpdateFunc()
 	}
-	// TODO(kai/menu): figure out how to handle menu updating
-	/*
-		if bt.Menu != nil {
-			bt.Menu.UpdateButtons()
-		}
-	*/
 }
+
+// NOTE: all menus are dynamic.  This obviates the need for updating them.
+// OTOH, it makes it impossible to find them..
 
 // TODO(kai/menu): figure out what to do about FindButtonMenu/NewButtonMenu
 /*
