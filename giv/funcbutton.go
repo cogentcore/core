@@ -260,7 +260,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		gi.NewSnackbar(fb, gi.SnackbarOpts{Text: txt}).Run()
+		gi.NewSnackbar(fb).Text(txt).Run()
 		return
 	}
 	d := gi.NewDialog(fb).Title(main).Prompt(fb.Tooltip)
