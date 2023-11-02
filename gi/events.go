@@ -224,9 +224,14 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 		}
 	})
 	wb.On(events.LongPressStart, func(e events.Event) {
-
+		if wb.AbilityIs(abilities.LongPressable) {
+			wb.SetState(true, states.LongPressed)
+		}
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
+		if wb.AbilityIs(abilities.LongPressable) {
+			wb.SetState(false, states.LongPressed)
+		}
 	})
 	wb.On(events.MouseEnter, func(e events.Event) {
 		if wb.AbilityIs(abilities.Hoverable) {
