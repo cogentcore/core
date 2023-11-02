@@ -355,11 +355,11 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WidgetFlagsValues = []WidgetFlags{7, 8}
+var _WidgetFlagsValues = []WidgetFlags{7, 8, 9}
 
 // WidgetFlagsN is the highest valid value
 // for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 9
+const WidgetFlagsN WidgetFlags = 10
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -367,6 +367,7 @@ func _WidgetFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[NeedsRender-(7)]
 	_ = x[InstaDrag-(8)]
+	_ = x[InOverflow-(9)]
 }
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
@@ -374,16 +375,20 @@ var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 	`needsrender`: 7,
 	`InstaDrag`:   8,
 	`instadrag`:   8,
+	`InOverflow`:  9,
+	`inoverflow`:  9,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
 	7: `NeedsRender needs to be rendered on next render iteration`,
 	8: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	9: `InOverflow causes this widget to be automatically placed in an overflow menu, if it is placed in a [Toolbar].`,
 }
 
 var _WidgetFlagsMap = map[WidgetFlags]string{
 	7: `NeedsRender`,
 	8: `InstaDrag`,
+	9: `InOverflow`,
 }
 
 // String returns the string representation
@@ -1559,6 +1564,166 @@ func (i *WinFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
+
+// RenderContextFlagsN is the highest valid value
+// for type RenderContextFlags, plus one.
+const RenderContextFlagsN RenderContextFlags = 2
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _RenderContextFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[RenderVisible-(0)]
+	_ = x[RenderRebuild-(1)]
+}
+
+var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{
+	`Visible`: 0,
+	`visible`: 0,
+	`Rebuild`: 1,
+	`rebuild`: 1,
+}
+
+var _RenderContextFlagsDescMap = map[RenderContextFlags]string{
+	0: `the window is visible and should be rendered to`,
+	1: `forces a rebuild of all scene elements`,
+}
+
+var _RenderContextFlagsMap = map[RenderContextFlags]string{
+	0: `Visible`,
+	1: `Rebuild`,
+}
+
+// String returns the string representation
+// of this RenderContextFlags value.
+func (i RenderContextFlags) String() string {
+	str := ""
+	for _, ie := range _RenderContextFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this RenderContextFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i RenderContextFlags) BitIndexString() string {
+	if str, ok := _RenderContextFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the RenderContextFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *RenderContextFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the RenderContextFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *RenderContextFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _RenderContextFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _RenderContextFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type RenderContextFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the RenderContextFlags value as an int64.
+func (i RenderContextFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the RenderContextFlags value from an int64.
+func (i *RenderContextFlags) SetInt64(in int64) {
+	*i = RenderContextFlags(in)
+}
+
+// Desc returns the description of the RenderContextFlags value.
+func (i RenderContextFlags) Desc() string {
+	if str, ok := _RenderContextFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// RenderContextFlagsValues returns all possible values
+// for the type RenderContextFlags.
+func RenderContextFlagsValues() []RenderContextFlags {
+	return _RenderContextFlagsValues
+}
+
+// Values returns all possible values
+// for the type RenderContextFlags.
+func (i RenderContextFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_RenderContextFlagsValues))
+	for i, d := range _RenderContextFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type RenderContextFlags.
+func (i RenderContextFlags) IsValid() bool {
+	_, ok := _RenderContextFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *RenderContextFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i RenderContextFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *RenderContextFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _ScFlagsValues = []ScFlags{9, 10, 11, 12, 13, 14, 15}
 
 // ScFlagsN is the highest valid value
@@ -2550,165 +2715,5 @@ func (i Themes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Themes) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
-
-// RenderContextFlagsN is the highest valid value
-// for type RenderContextFlags, plus one.
-const RenderContextFlagsN RenderContextFlags = 2
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _RenderContextFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[RenderVisible-(0)]
-	_ = x[RenderRebuild-(1)]
-}
-
-var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{
-	`Visible`: 0,
-	`visible`: 0,
-	`Rebuild`: 1,
-	`rebuild`: 1,
-}
-
-var _RenderContextFlagsDescMap = map[RenderContextFlags]string{
-	0: `the window is visible and should be rendered to`,
-	1: `forces a rebuild of all scene elements`,
-}
-
-var _RenderContextFlagsMap = map[RenderContextFlags]string{
-	0: `Visible`,
-	1: `Rebuild`,
-}
-
-// String returns the string representation
-// of this RenderContextFlags value.
-func (i RenderContextFlags) String() string {
-	str := ""
-	for _, ie := range _RenderContextFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-
-// BitIndexString returns the string
-// representation of this RenderContextFlags value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.
-func (i RenderContextFlags) BitIndexString() string {
-	if str, ok := _RenderContextFlagsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the RenderContextFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *RenderContextFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
-
-// SetStringOr sets the RenderContextFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
-// error if the string is invalid.
-func (i *RenderContextFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _RenderContextFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _RenderContextFlagsNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		} else {
-			return errors.New(flg + " is not a valid value for type RenderContextFlags")
-		}
-	}
-	return nil
-}
-
-// Int64 returns the RenderContextFlags value as an int64.
-func (i RenderContextFlags) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the RenderContextFlags value from an int64.
-func (i *RenderContextFlags) SetInt64(in int64) {
-	*i = RenderContextFlags(in)
-}
-
-// Desc returns the description of the RenderContextFlags value.
-func (i RenderContextFlags) Desc() string {
-	if str, ok := _RenderContextFlagsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// RenderContextFlagsValues returns all possible values
-// for the type RenderContextFlags.
-func RenderContextFlagsValues() []RenderContextFlags {
-	return _RenderContextFlagsValues
-}
-
-// Values returns all possible values
-// for the type RenderContextFlags.
-func (i RenderContextFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_RenderContextFlagsValues))
-	for i, d := range _RenderContextFlagsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type RenderContextFlags.
-func (i RenderContextFlags) IsValid() bool {
-	_, ok := _RenderContextFlagsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
-func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
-
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
-func (i *RenderContextFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i RenderContextFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
