@@ -91,7 +91,9 @@ func keyboardDelete() {
 func scrolled(posX, posY, distanceX, distanceY C.float) {
 	fmt.Println("scrolled")
 	where := image.Pt(int(posX), int(posY))
-	delta := image.Pt(int(distanceX), int(distanceY))
+	// make negative so that it goes in the opposite direction
+	// of finger movement (natural scrolling)
+	delta := image.Pt(int(-distanceX), int(-distanceY))
 	theApp.window.EvMgr.Scroll(where, delta)
 }
 
