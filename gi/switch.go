@@ -145,11 +145,11 @@ func (sw *Switch) SwitchStyles() {
 				}
 				// switches need to be bigger
 				if sw.Type == SwitchSwitch {
-					s.Width.Em(3)
-					s.Height.Em(3)
+					s.Width.Em(2)
+					s.Height.Em(1.2)
 				} else {
-					s.Width.Em(1.5)
-					s.Height.Em(1.5)
+					s.Width.Em(1.2)
+					s.Height.Em(1.2)
 				}
 			})
 		case "parts/stack/icon1": // off
@@ -157,15 +157,15 @@ func (sw *Switch) SwitchStyles() {
 				switch sw.Type {
 				case SwitchSwitch:
 					// switches need to be bigger
-					s.Width.Em(3)
-					s.Height.Em(3)
+					s.Width.Em(2)
+					s.Height.Em(1.2)
 				case SwitchChip:
 					// chips render no icon when off
 					s.Width.Dp(0)
 					s.Height.Dp(0)
 				default:
-					s.Width.Em(1.5)
-					s.Height.Em(1.5)
+					s.Width.Em(1.2)
+					s.Height.Em(1.2)
 				}
 			})
 		case "parts/stack/icon2": // disab
@@ -173,15 +173,15 @@ func (sw *Switch) SwitchStyles() {
 				switch sw.Type {
 				case SwitchSwitch:
 					// switches need to be bigger
-					s.Width.Em(3)
-					s.Height.Em(3)
+					s.Width.Em(2)
+					s.Height.Em(1.2)
 				case SwitchChip:
 					// chips render no icon when off
 					s.Width.Dp(0)
 					s.Height.Dp(0)
 				default:
-					s.Width.Em(1.5)
-					s.Height.Em(1.5)
+					s.Width.Em(1.2)
+					s.Height.Em(1.2)
 				}
 			})
 		case "parts/space":
