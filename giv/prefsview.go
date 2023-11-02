@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"fmt"
+
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/goosi/events"
@@ -41,6 +43,9 @@ func PrefsView(pf *gi.Preferences) {
 		NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
 		NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
 		gi.NewSeparator(tb)
+		gi.NewButton(tb).SetText("Test Menu").OnClick(func(e events.Event) {
+			fmt.Println("test menu")
+		})
 		NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
 		NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
 		NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)

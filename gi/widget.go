@@ -370,6 +370,16 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.CSS.CopyFrom(fr.CSS, true)
 	wb.Tooltip = fr.Tooltip
 	wb.Styles.CopyFrom(&fr.Styles)
+	wb.Listeners = fr.Listeners // direct copy -- functions..
+	wb.CustomContextMenu = fr.CustomContextMenu
+}
+
+func (wb *WidgetBase) Destroy() {
+	if wb.Parts != nil {
+		wb.Parts.DeleteChildren(true) // first delete all my children
+	}
+	wb.Parts = nil
+	wb.Node.Destroy()
 }
 
 func (wb *WidgetBase) BaseType() *gti.Type {
