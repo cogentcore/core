@@ -222,9 +222,6 @@ type Layout struct {
 	// type of layout to use
 	Lay Layouts `xml:"lay" set:"Layout"`
 
-	// extra space to add between elements in the layout
-	Spacing units.Value `xml:"spacing"`
-
 	// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
 	StackTop int
 
@@ -271,7 +268,6 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 	}
 	ly.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	ly.Lay = fr.Lay
-	ly.Spacing = fr.Spacing
 	ly.StackTop = fr.StackTop
 }
 
@@ -1242,21 +1238,6 @@ func (ly *Layout) ChildrenBBoxes(sc *Scene) image.Rectangle {
 	nb.Max.X -= int(ly.ExtraSize.X)
 	nb.Max.Y -= int(ly.ExtraSize.Y)
 	return nb
-}
-
-// ToDots runs ToDots on unit values, to compile down to raw pixels
-func (ly *Layout) StyleToDots(uc *units.Context) {
-	ly.Spacing.ToDots(uc)
-}
-
-// StyleLayout does layout styling -- it sets the StyMu Lock
-func (ly *Layout) StyleLayout(sc *Scene) {
-	ly.ApplyStyleWidget(sc)
-	ly.StyleToDots(&ly.Styles.UnContext)
-}
-
-func (ly *Layout) ApplyStyle(sc *Scene) {
-	ly.StyleLayout(sc)
 }
 
 func (ly *Layout) GetSize(sc *Scene, iter int) {
