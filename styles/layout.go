@@ -108,6 +108,7 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.MinHeight.ToDots(uc)
 	s.Margin.ToDots(uc)
 	s.Padding.ToDots(uc)
+	s.Spacing.ToDots(uc)
 	s.ScrollBarWidth.ToDots(uc)
 }
 
