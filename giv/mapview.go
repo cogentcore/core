@@ -22,8 +22,6 @@ import (
 // MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
-// Automatically has a toolbar with Map Toolbar props if defined
-// set prop toolbar = false to turn off
 type MapView struct {
 	gi.Frame
 
@@ -45,9 +43,6 @@ type MapView struct {
 	// sort by values instead of keys
 	SortVals bool
 
-	// whether to show the toolbar or not
-	ShowToolbar bool
-
 	// the number of columns in the map; do not set externally; generally only access internally
 	NCols int
 
@@ -56,9 +51,6 @@ type MapView struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
-
-	// the map that we successfully set a toolbar for
-	ToolbarMap any
 }
 
 func (mv *MapView) OnInit() {
@@ -66,7 +58,6 @@ func (mv *MapView) OnInit() {
 }
 
 func (mv *MapView) MapViewStyles() {
-	mv.ShowToolbar = true
 	mv.Lay = gi.LayoutVert
 	mv.Style(func(s *styles.Style) {
 		s.Spacing = gi.StdDialogVSpaceUnits
@@ -121,15 +112,8 @@ func (mv *MapView) UpdateValues() {
 // Config configures the view
 func (mv *MapView) ConfigWidget(sc *gi.Scene) {
 	mv.Sc = sc
-	config := ki.Config{}
-	config.Add(gi.ToolbarType, "toolbar")
-	config.Add(gi.FrameType, "map-grid")
-	mods, updt := mv.ConfigChildren(config)
+	gi.NewFrame(mv, "map-grid").SetLayout(gi.LayoutGrid)
 	mv.ConfigMapGrid()
-	mv.ConfigToolbar()
-	if mods {
-		mv.UpdateEnd(updt)
-	}
 }
 
 // IsConfiged returns true if the widget is fully configured
@@ -140,11 +124,6 @@ func (mv *MapView) IsConfiged() bool {
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values
 func (mv *MapView) MapGrid() *gi.Frame {
 	return mv.ChildByName("map-grid", 0).(*gi.Frame)
-}
-
-// Toolbar returns the toolbar widget
-func (mv *MapView) Toolbar() *gi.Toolbar {
-	return mv.ChildByName("toolbar", 0).(*gi.Toolbar)
 }
 
 // KiPropTag returns the PropTag value from Ki owner of this map, if it is..
@@ -282,7 +261,6 @@ func (mv *MapView) ConfigMapGrid() {
 func (mv *MapView) SetChanged() {
 	mv.Changed = true
 	mv.SendChange()
-	mv.Toolbar().UpdateButtons() // nil safe
 }
 
 // MapChangeValueType changes the type of the value for given map element at
@@ -353,48 +331,19 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	mv.Update()
 }
 
-// ConfigToolbar configures the toolbar actions
-func (mv *MapView) ConfigToolbar() {
+// MapDefaultToolbar is a TopAppBar function that adds "Sort", "Add" buttons for map
+func (mv *MapView) MapDefaultToolbar(tb *gi.Toolbar) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
-		return
-	}
-	if !mv.ShowToolbar {
-		mv.ToolbarMap = mv.Map
-		return
-	}
-	tb := mv.Toolbar()
-	ndef := 2 // number of default actions
-	if mv.IsReadOnly() {
-		ndef = 1
-	}
-	if len(*tb.Children()) < ndef {
-		gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+	gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+		OnClick(func(e events.Event) {
+			mv.ToggleSort()
+		})
+	if !mv.IsReadOnly() {
+		gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 			OnClick(func(e events.Event) {
-				mv.ToggleSort()
+				mv.MapAdd()
 			})
-		if ndef > 1 {
-			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
-				OnClick(func(e events.Event) {
-					mv.MapAdd()
-				})
-		}
 	}
-	sz := len(*tb.Children())
-	if sz > ndef {
-		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, ki.DestroyKids)
-		}
-	}
-	gi.ToolbarFor(mv.Map, tb)
-	mv.ToolbarMap = mv.Map
-}
-
-func (mv *MapView) Render(sc *gi.Scene) {
-	if mv.IsConfiged() {
-		mv.Toolbar().UpdateButtons() // nil safe..
-	}
-	mv.Frame.Render(sc)
 }

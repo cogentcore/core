@@ -2979,13 +2979,13 @@ var ToolbarType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Toolbar",
 	ShortName: "gi.Toolbar",
 	IDName:    "toolbar",
-	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.",
+	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nSet the Scene.TopAppBar to a toolbar function\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
-		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "menu functions for overflow", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/gi/v2/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -3154,7 +3154,7 @@ func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 
 var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/gi/v2/gi.DefaultTopAppBar",
-	Doc:  "DefaultTopAppBar is the default value for [Scene.TopAppBar].\nIt adds navigation buttons and an editable chooser bar.",
+	Doc:  "DefaultTopAppBar is the default value for [Scene.TopAppBar].\nIt adds navigation buttons and an editable chooser bar,\nand calls AddDefaultOverflowMenu to provide default menu items,\nwhich will appear below any other OverflowMenu items added.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},

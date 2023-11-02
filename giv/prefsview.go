@@ -55,7 +55,6 @@ func PrefsView(pf *gi.Preferences) {
 			NewFuncButton(m, pf.Delete).SetConfirm(true)
 			NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 		})
-		tb.AddDefaultOverflowMenu()
 	}
 
 	sv := NewStructView(sc)
@@ -130,7 +129,6 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		tb.AddOverflowMenu(func(m *gi.Scene) {
 			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 		})
-		tb.AddDefaultOverflowMenu()
 	}
 
 	/*
@@ -185,12 +183,11 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 
-	tb := sv.Toolbar()
-	NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
+	sc.TopAppBar = func(tb *gi.Toolbar) {
+		gi.DefaultTopAppBar(tb)
 
-	// mmen := win.MainMenu
-	// MainMenuView(pf, win, mmen)
-	// win.MainMenuUpdated()
+		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
+	}
 
 	gi.NewWindow(sc).Run()
 }

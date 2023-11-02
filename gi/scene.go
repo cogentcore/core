@@ -171,6 +171,20 @@ func (sc *Scene) RenderCtx() *RenderContext {
 	return sm.RenderCtx
 }
 
+// RenderWin returns the current render window for this scene.
+// In general it is best to go through RenderCtx instead of the window.
+// This will be nil prior to actual rendering.
+func (sc *Scene) RenderWin() *RenderWin {
+	if sc.Stage == nil {
+		return nil
+	}
+	sm := sc.MainStageMgr()
+	if sm == nil {
+		return nil
+	}
+	return sm.RenderWin
+}
+
 // MainStageMgr returns the MainStageMgr that typically lives in a RenderWin
 // and manages all of the MainStage elements (Windows, Dialogs etc),
 // which in turn manage their popups.  This Scene could be in a popup

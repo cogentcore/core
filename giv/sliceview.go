@@ -108,9 +108,6 @@ const (
 	// whether to show index or not
 	SliceViewShowIndex
 
-	// whether to show the toolbar or not
-	SliceViewShowToolbar
-
 	// support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events
 	SliceViewReadOnlyKeyNav
 
@@ -219,8 +216,6 @@ type SliceViewer interface {
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
-// Automatically has a toolbar with Slice Toolbar props if defined
-// set prop toolbar = false to turn off
 type SliceViewBase struct {
 	gi.Frame
 
@@ -261,9 +256,6 @@ type SliceViewBase struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `copy:"-" json:"-" xml:"-"`
 
-	// the slice that we successfully set a toolbar for
-	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-"`
-
 	// height of a single row
 	RowHeight float32 `edit:"-" copy:"-" json:"-" xml:"-"`
 
@@ -301,7 +293,6 @@ func (sv *SliceViewBase) OnInit() {
 func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
-	sv.SetFlag(true, SliceViewShowToolbar)
 	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
 
 	sv.HandleSliceViewEvents()
@@ -459,27 +450,21 @@ func (sv *SliceViewBase) ConfigSliceView(sc *gi.Scene) {
 		}
 		return
 	}
+	updt := sv.UpdateStart()
 	sv.ConfigFrame(sc)
 	sv.This().(SliceViewer).ConfigOneRow(sc)
-	sv.ConfigToolbar()
 	sv.ConfigScroll()
 	sv.ApplyStyleTree(sc)
+	sv.UpdateEndLayout(updt)
 }
 
 func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 	sv.SetFlag(true, SliceViewConfiged)
 	sv.VisRows = 0
-	config := ki.Config{}
-	config.Add(gi.ToolbarType, "toolbar")
-	config.Add(gi.LayoutType, "grid-lay")
-	_, updt := sv.ConfigChildren(config)
-	gl := sv.GridLayout()
+	gl := gi.NewLayout(sv, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gconfig := ki.Config{}
-	gconfig.Add(gi.FrameType, "grid")
-	gconfig.Add(gi.SliderType, "scrollbar")
-	gl.ConfigChildren(gconfig) // covered by above
-	sv.UpdateEndLayout(updt)
+	gi.NewFrame(gl, "grid").SetLayout(gi.LayoutGrid)
+	gi.NewSlider(gl, "scrollbar")
 }
 
 // ConfigOneRow configures one row for initial row height measurement
@@ -570,15 +555,6 @@ func (sv *SliceViewBase) SliceGrid() *gi.Frame {
 // ScrollBar returns the SliceGrid scrollbar
 func (sv *SliceViewBase) ScrollBar() *gi.Slider {
 	return sv.GridLayout().ChildByName("scrollbar", 1).(*gi.Slider)
-}
-
-// Toolbar returns the toolbar widget
-func (sv *SliceViewBase) Toolbar() *gi.Toolbar {
-	tbi := sv.ChildByName("toolbar", 1)
-	if tbi == nil {
-		return nil
-	}
-	return tbi.(*gi.Toolbar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -940,7 +916,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 func (sv *SliceViewBase) SetChanged() {
 	sv.Changed = true
 	sv.SendChange()
-	sv.Toolbar().UpdateButtons() // nil safe
 }
 
 // SliceNewAtRow inserts a new blank element at given display row
@@ -1082,44 +1057,18 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 	sv.Update()
 }
 
-// ConfigToolbar configures the toolbar actions
-func (sv *SliceViewBase) ConfigToolbar() {
+// SliceDefaultToolbar is a TopAppBar function that adds an "Add" button for slice
+func (sv *SliceViewBase) SliceDefaultToolbar(tb *gi.Toolbar) {
 	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
-	if sv.ToolbarSlice == sv.Slice {
-		return
-	}
-	if !sv.Is(SliceViewShowToolbar) {
-		sv.ToolbarSlice = sv.Slice
-		return
-	}
-	tb := sv.Toolbar()
-	ndef := 1 // number of default actions
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() || sv.Is(SliceViewNoAdd) {
-		ndef = 0
+		return
 	}
-	if len(*tb.Children()) < ndef {
-		if ndef > 0 {
-			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
-				OnClick(func(e events.Event) {
-					sv.This().(SliceViewer).SliceNewAt(-1)
-				})
-		}
-	}
-	sz := len(*tb.Children())
-	if sz > ndef {
-		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, ki.DestroyKids)
-		}
-	}
-	gi.ToolbarFor(sv.Slice, tb)
-	sv.ToolbarSlice = sv.Slice
-}
-
-func (sv *SliceViewBase) Render(sc *gi.Scene) {
-	// sv.Toolbar().UpdateButtons()
-	sv.Frame.Render(sc)
+	gi.NewButton(tb, "slice-add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
+		OnClick(func(e events.Event) {
+			sv.This().(SliceViewer).SliceNewAt(-1)
+		})
 }
 
 ////////////////////////////////////////////////////////////
