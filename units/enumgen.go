@@ -88,7 +88,7 @@ var _UnitsDescMap = map[Units]string{
 	17: `UnitIn = inches -- 1in = 2.54cm = 96px`,
 	18: `UnitPc = picas -- 1pc = 1/6th of 1in`,
 	19: `UnitPt = points -- 1pt = 1/72th of 1in`,
-	20: `UnitDot = actual real display pixels -- generally only use internally`,
+	20: `UnitDot = actual real display pixels, which are generally only used internally`,
 }
 
 var _UnitsMap = map[Units]string{

@@ -30,6 +30,9 @@ const (
 	// Active state otherwise associated with Activatable items.
 	Pressable
 
+	// LongPressable indicates that an element can be LongPressed
+	LongPressable
+
 	// DoubleClickable indicates that an element does something different
 	// when it is clicked on twice in a row. If this is not set, DoubleClick
 	// events are processed in the same way as Click events.

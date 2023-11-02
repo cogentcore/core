@@ -71,10 +71,15 @@ const (
 	// an element, but it is not Active (nor DragHovered).
 	Hovered
 
-	// LongHovered indicates a Hover that persists without significant
+	// LongHovered indicates a Hover event that persists without significant
 	// movement for a minimum period of time (e.g., 500 msec),
 	// which typically triggers a tooltip popup.
 	LongHovered
+
+	// LongPressed indicates a MouseDown event that persists without significant
+	// movement for a minimum period of time (e.g., 500 msec),
+	// which typically triggers a tooltip and/or context menu popup.
+	LongPressed
 
 	// DragHovered indicates that a mouse pointer has entered the space over
 	// an element, during a drag-n-drop sequence.  This makes it a candidate
@@ -116,11 +121,9 @@ func (st States) StateLayer() float32 {
 	switch {
 	case st.Is(Disabled):
 		return 0.20
-	case st.Is(Dragging):
+	case st.Is(Dragging), st.Is(LongPressed):
 		return 0.12
-	case st.Is(Active):
-		return 0.10
-	case st.Is(Focused):
+	case st.Is(Active), st.Is(Focused):
 		return 0.10
 	case st.Is(Hovered):
 		return 0.08
