@@ -4,9 +4,9 @@ package colors
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.8.26"
+	Version = "v0.8.27"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "d56a253"
+	GitCommit = "4be4bef"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-31 23:06"
+	VersionDate = "2023-11-02 14:54"
 )
