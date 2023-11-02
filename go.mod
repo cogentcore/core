@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231031225837-d1c54e5847d0
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231102141658-eca20e8abded
 	github.com/goki/vulkan v1.0.7
 	goki.dev/cursors v0.0.14
 	goki.dev/enums v0.9.35

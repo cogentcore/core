@@ -141,6 +141,9 @@ func mainrun(a goosi.App) {
 	stTime := time.Now()
 
 	renderFrame := func() {
+		if sf == nil {
+			make()
+		}
 		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
 		camo.Model.SetRotationY(.1 * float32(frameCount))
