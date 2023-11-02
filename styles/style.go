@@ -91,6 +91,9 @@ type Style struct {
 	// prop: padding = transparent space around central content of box
 	Padding SideValues `xml:"padding"`
 
+	// if this is a layout, extra space to add between elements in the layout
+	Spacing units.Value `xml:"spacing"`
+
 	// prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values
 	Overflow Overflow `xml:"overflow"`
 
