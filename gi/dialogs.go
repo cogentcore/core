@@ -108,7 +108,8 @@ func (d *Dialog) Buttons() *Layout {
 		s.SetStretchMaxWidth()
 	})
 	bb.OnWidgetAdded(func(w Widget) {
-		if bt := AsButton(w); bt != nil {
+		// new window and full window dialogs don't need text buttons
+		if bt := AsButton(w); bt != nil && !d.Stage.FullWindow && !d.Stage.NewWindow {
 			bt.Type = ButtonText
 		}
 	})
