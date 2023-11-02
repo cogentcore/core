@@ -174,6 +174,11 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		wc := bb.Min.X + bb.Size().X/2
 		sc.Geom.Pos.X = wc - sz.X/2
 		sc.Geom.Pos.Y -= sz.Y + 10
+
+		maxy := sc.Geom.Pos.Y + sz.Y
+		if maxy > bb.Max.Y {
+
+		}
 	}
 
 	sc.Geom.Size = sz
