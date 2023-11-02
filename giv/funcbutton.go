@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -84,6 +85,22 @@ type FuncButton struct { //goki:no-new
 // to the given parent.
 func NewFuncButton(par ki.Ki, fun any) *FuncButton {
 	return par.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
+}
+
+func (fb *FuncButton) CopyFieldsFrom(frm any) {
+	fr, ok := frm.(*FuncButton)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier one\n", fb.KiType().Name)
+		return
+	}
+	fb.Button.CopyFieldsFrom(&fr.Button)
+	fb.Func = fr.Func
+	fb.ReflectFunc = fr.ReflectFunc
+	fb.Args = fr.Args
+	fb.Returns = fr.Returns
+	fb.Confirm = fr.Confirm
+	fb.ShowReturn = fr.ShowReturn
+	fb.ShowReturnAsDialog = fr.ShowReturnAsDialog
 }
 
 func (fb *FuncButton) OnInit() {

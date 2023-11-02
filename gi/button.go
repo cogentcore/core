@@ -68,7 +68,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.Icon = fr.Icon
 	bt.Indicator = fr.Indicator
 	bt.Shortcut = fr.Shortcut
-	bt.Menu = fr.Menu // TODO(kai/menu): is it safe to copy this?
+	bt.Menu = fr.Menu // TODO(kai/menu): is it safe to copy this?  YES!  must be a lit copy
 	bt.Data = fr.Data
 }
 
@@ -271,7 +271,11 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	} else {
 		slog.Error("Button: parts nil", "button", bt)
 	}
-	NewMenu(bt.Menu, bt.This().(Widget), pos).Run()
+	m := NewMenu(bt.Menu, bt.This().(Widget), pos)
+	if m == nil {
+		return false
+	}
+	m.Run()
 	return true
 }
 

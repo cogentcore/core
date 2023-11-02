@@ -584,7 +584,11 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
 		}
 	}
-	NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos).Run()
+	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
+	if m == nil {
+		return false
+	}
+	m.Run()
 	return true
 }
 

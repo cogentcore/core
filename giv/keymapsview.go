@@ -58,9 +58,10 @@ func KeyMapsView(km *keyfun.Maps) {
 	rs.SetUpdateFunc(func() {
 		rs.SetEnabledUpdt(km != &keyfun.StdMaps)
 	})
-	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+	tb.AddOverflowMenu(func(m *gi.Scene) {
 		NewFuncButton(m, km.OpenPrefs).SetIcon(icons.Open).SetKey(keyfun.OpenAlt1)
 	})
+	tb.AddDefaultOverflowMenu()
 
 	gi.NewWindow(sc).Run()
 }

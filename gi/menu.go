@@ -92,7 +92,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
-	if sc == nil {
+	if sc == nil || !sc.HasChildren() {
 		return nil
 	}
 	sc.Geom.Pos = pos
