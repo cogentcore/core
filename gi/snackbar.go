@@ -54,7 +54,7 @@ type Snackbar struct { //goki:no-new
 // NewSnackbar returns a new [Snackbar] in the context of the given widget,
 // optionally with the given name.
 func NewSnackbar(ctx Widget, name ...string) *Snackbar {
-	s := &Snackbar{}
+	sb := &Snackbar{}
 	nm := ""
 	if len(name) > 0 {
 		nm = name[0]
@@ -62,14 +62,14 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 		nm = ctx.Name() + "-dialog"
 	}
 
-	s.InitName(s, nm)
-	s.EventMgr.Scene = &s.Scene
-	s.BgColor.SetSolid(colors.Transparent)
-	s.Lay = LayoutVert
-	s.SnackbarStyles()
+	sb.InitName(sb, nm)
+	sb.EventMgr.Scene = &sb.Scene
+	sb.BgColor.SetSolid(colors.Transparent)
+	sb.Lay = LayoutHoriz
+	sb.SnackbarStyles()
 
-	s.Scene.Stage = NewPopupStage(SnackbarStage, &s.Scene, ctx)
-	return s
+	sb.Stage = NewPopupStage(SnackbarStage, &sb.Scene, ctx)
+	return sb
 }
 
 func (sb *Snackbar) SnackbarStyles() {
@@ -112,7 +112,7 @@ func (sb *Snackbar) Button(text string, onClick ...func(e events.Event)) *Snackb
 		if len(onClick) > 0 {
 			onClick[0](e)
 		}
-		sb.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
+		sb.DeletePopup()
 	})
 	return sb
 }
@@ -130,7 +130,7 @@ func (sb *Snackbar) Icon(icon icons.Icon, onClick ...func(e events.Event)) *Snac
 		if len(onClick) > 0 {
 			onClick[0](e)
 		}
-		sb.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
+		sb.DeletePopup()
 	})
 	return sb
 }
@@ -138,4 +138,9 @@ func (sb *Snackbar) Icon(icon icons.Icon, onClick ...func(e events.Event)) *Snac
 // Run runs (shows) the snackbar.
 func (sb *Snackbar) Run() {
 	sb.Stage.Run()
+}
+
+// Delete deletes the popup associated with the snackbar.
+func (sb *Snackbar) DeletePopup() {
+	sb.Stage.CtxWidget.AsWidget().Sc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 }
