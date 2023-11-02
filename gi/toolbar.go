@@ -18,7 +18,9 @@ import (
 )
 
 // DefaultTopAppBar is the default value for [Scene.TopAppBar].
-// It adds navigation buttons and an editable chooser bar.
+// It adds navigation buttons and an editable chooser bar,
+// and calls AddDefaultOverflowMenu to provide default menu items,
+// which will appear below any other OverflowMenu items added.
 func DefaultTopAppBar(tb *Toolbar) { //gti:add
 	NewButton(tb).SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
 		stg := tb.Sc.MainStage()
@@ -67,17 +69,25 @@ func DefaultTopAppBar(tb *Toolbar) { //gti:add
 		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
 	})
-	NewSeparator(tb)
+	tb.AddDefaultOverflowMenu()
 }
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
+// It automatically moves items that do not fit into an overflow menu, and
+// manages additional items that are always placed onto this overflow menu.
+// Set the Scene.TopAppBar to a toolbar function
+// In general it should be possible to use a single toolbar + overflow to
+// manage all an app's functionality, in a way that is portable across
+// mobile and desktop environments.
 type Toolbar struct { //goki:embedder
 	Frame
 
-	// items moved from the main toolbar
+	// items moved from the main toolbar, will be shown in the overflow menu
 	OverflowItems ki.Slice `set:"-" json:"-" xml:"-"`
 
-	// menu functions for overflow
+	// functions for overflow menu: use AddOverflowMenu to add.
+	// These are processed in _reverse_ order (last in, first called)
+	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
 	// This is the overflow button
@@ -92,16 +102,14 @@ type Toolbarer interface {
 	Toolbar(tb *Toolbar)
 }
 
-// ToolbarFor calls the Toolbar function of the given value on the given toolbar,
-// if the given value is implements the [Toolbarer] interface. Otherwise, it does
-// nothing. It returns whether the given value implements that interface.
-func ToolbarFor(val any, tb *Toolbar) bool {
+// ToolbarFor returns the Toolbar function of the given value on the given toolbar,
+// if the given value is implements the [Toolbarer] interface, else nil.
+func ToolbarFor(val any) func(tb *Toolbar) {
 	tbr, ok := val.(Toolbarer)
 	if !ok {
-		return false
+		return nil
 	}
-	tbr.Toolbar(tb)
-	return true
+	return tbr.Toolbar
 }
 
 func (tb *Toolbar) CopyFieldsFrom(frm any) {
@@ -114,23 +122,30 @@ func (tb *Toolbar) OnInit() {
 	tb.HandleLayoutEvents()
 }
 
-func (tb *Toolbar) ToolbarStyles() {
-	tb.Style(func(s *styles.Style) {
+// ToolbarStyles can be applied to any layout (e.g., Frame) to achieve
+// standard toolbar styling.
+func ToolbarStyles(ly Layouter) {
+	lb := ly.AsLayout()
+	ly.Style(func(s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Margin.Set(units.Dp(4))
 		s.Padding.SetHoriz(units.Dp(16))
 	})
-	tb.OnWidgetAdded(func(w Widget) {
+	ly.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Horiz = tb.Lay != LayoutHoriz
+			sp.Horiz = lb.Lay != LayoutHoriz
 		}
 	})
+}
+
+func (tb *Toolbar) ToolbarStyles() {
+	ToolbarStyles(tb)
 }
 
 func (tb *Toolbar) IsVisible() bool {
@@ -138,33 +153,22 @@ func (tb *Toolbar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
-// DoLayoutAlloc moves overflow to the end of children for layout
-func (tb *Toolbar) DoLayoutAlloc(sc *Scene, iter int) bool {
-	if !tb.HasChildren() {
-		return tb.Frame.DoLayoutAlloc(sc, iter)
-	}
-	if iter == 0 {
-		tb.ToolbarLayoutIter0(sc)
-		tb.Frame.DoLayoutAlloc(sc, iter)
-		return true // needs another iter
-	} else {
-		tb.ToolbarLayoutIter1(sc)
-		tb.Frame.DoLayoutAlloc(sc, iter)
-		return false
-	}
-}
-
 func (tb *Toolbar) GetSize(sc *Scene, iter int) {
 	if iter == 0 {
-		if len(tb.OverflowItems) > 0 {
-			tb.Kids = append(tb.Kids, tb.OverflowItems...)
-			tb.OverflowItems = nil
-		}
+		tb.AllItemsToChildren(sc)
 	}
 	tb.Frame.GetSize(sc, iter)
 }
 
-func (tb *Toolbar) ToolbarLayoutIter0(sc *Scene) {
+// AllItemsToChildren moves the overflow items back to the children,
+// so the full set is considered for the next layout round,
+// and ensures the overflow button is made and moves it
+// to the end of the list.
+func (tb *Toolbar) AllItemsToChildren(sc *Scene) {
+	if len(tb.OverflowItems) > 0 {
+		tb.Kids = append(tb.Kids, tb.OverflowItems...)
+		tb.OverflowItems = nil
+	}
 	if tb.OverflowButton == nil {
 		ic := icons.MoreVert
 		if tb.Lay != LayoutHoriz {
@@ -189,8 +193,29 @@ func (tb *Toolbar) ToolbarLayoutIter0(sc *Scene) {
 	tb.Kids = append(tb.Kids, tb.OverflowButton.This())
 }
 
-func (tb *Toolbar) ToolbarLayoutIter1(sc *Scene) {
-	ldim := LaySummedDim(tb.Lay)
+// DoLayoutAlloc moves overflow to the end of children for layout
+func (tb *Toolbar) DoLayoutAlloc(sc *Scene, iter int) bool {
+	if !tb.HasChildren() {
+		return tb.Frame.DoLayoutAlloc(sc, iter)
+	}
+	if iter == 0 { // first do a normal layout to get everyone's target positions
+		tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
+		tb.BBox = tb.ScBBox
+		tb.ObjBBox = tb.ScBBox
+		tb.Frame.DoLayoutAlloc(sc, iter)
+		return true // needs another iter
+	}
+	// then move items to overflow
+	tb.MoveToOverflow(sc)
+	tb.Frame.DoLayoutAlloc(sc, iter)
+	return false
+}
+
+// MoveToOverflow moves overflow out of children to the OverflowItems list
+func (tb *Toolbar) MoveToOverflow(sc *Scene) {
+	ldim := LaySummedDim(tb.Lay) // X for horiz tbar, Y for vert
+	// note: the ScBBox is intersected with parents actual display size
+	// our own AvailSize is full width of all items
 	avail := tb.ScBBox.Max
 	ovsz := tb.OverflowButton.BBox.Size()
 	avsz := avail.Sub(ovsz)
@@ -198,6 +223,9 @@ func (tb *Toolbar) ToolbarLayoutIter1(sc *Scene) {
 	if ldim == mat32.Y {
 		dmx = float32(avsz.Y)
 	}
+	tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
+	tb.BBox = tb.ScBBox
+	tb.ObjBBox = tb.ScBBox
 
 	tb.OverflowItems = nil
 	n := len(tb.Kids)
@@ -235,6 +263,7 @@ func (tb *Toolbar) ManageOverflow(sc *Scene) {
 
 // OverflowMenu is the overflow menu function
 func (tb *Toolbar) OverflowMenu(m *Scene) {
+	nm := len(tb.OverflowMenus)
 	if len(tb.OverflowItems) > 0 {
 		for _, k := range tb.OverflowItems {
 			if k.This() == tb.OverflowButton.This() {
@@ -244,9 +273,13 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 			m.AddChild(cl)
 			cl.This().(Widget).Config(m)
 		}
-		NewSeparator(m)
+		if nm > 1 { // default includes sep
+			NewSeparator(m)
+		}
 	}
-	for _, fn := range tb.OverflowMenus {
+	// reverse order so defaults are last
+	for i := nm - 1; i >= 0; i-- {
+		fn := tb.OverflowMenus[i]
 		fn(m)
 	}
 }
@@ -278,8 +311,47 @@ func (tb *Toolbar) DefaultOverflowMenu(m *Scene) {
 		NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
 	})
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
-		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong)
-		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize)
+		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong).
+			OnClick(func(e events.Event) {
+				AllRenderWins.FocusNext()
+			})
+		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
+			OnClick(func(e events.Event) {
+				win := tb.Sc.RenderWin()
+				if win != nil {
+					win.Minimize()
+				}
+			})
+		NewSeparator(m)
+		NewButton(m).SetText("Close Window").SetIcon(icons.Close).SetKey(keyfun.WinClose).
+			OnClick(func(e events.Event) {
+				win := tb.Sc.RenderWin()
+				if win != nil {
+					win.CloseReq()
+				}
+			})
+		NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
+			OnClick(func(e events.Event) {
+				QuitReq()
+			})
+		NewSeparator(m)
+		for _, w := range MainRenderWins {
+			if w != nil {
+				NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
+					w.Raise()
+				})
+			}
+		}
+		if len(DialogRenderWins) > 0 {
+			NewSeparator(m)
+			for _, w := range DialogRenderWins {
+				if w != nil {
+					NewButton(m).SetText(w.Title).OnClick(func(e events.Event) {
+						w.Raise()
+					})
+				}
+			}
+		}
 	})
 }
 

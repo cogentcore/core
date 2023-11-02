@@ -324,7 +324,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) Toolbar(tb *gi.Toolbar) {
+func (fb *FileBrowse) Toolbar(tb *gi.Toolbar) { //gti:add
 	gi.DefaultTopAppBar(tb)
 
 	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
@@ -338,8 +338,6 @@ func (fb *FileBrowse) Toolbar(tb *gi.Toolbar) {
 	sa := giv.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
 	sa.Args[0].SetValue(fb.ActiveFilename)
 	// sa.Args[0].SetTag("ext", ".json")
-
-	tb.AddDefaultOverflowMenu()
 }
 
 // SplitsConfig returns a Config for configuring the Splits
@@ -408,7 +406,7 @@ func NewFileBrowser(path string) (*FileBrowse, gi.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
 	nm := "browser-" + projnm
 
-	sc := gi.NewScene(nm)
+	sc := gi.NewScene(nm).SetTitle("Browser: " + projnm)
 	fb := NewFileBrowse(sc, "browser")
 
 	sc.TopAppBar = fb.Toolbar

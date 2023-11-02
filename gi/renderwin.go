@@ -204,6 +204,11 @@ func Quit() {
 	}
 }
 
+// QuitReq requests to Quit -- calls QuitReqFunc if present
+func QuitReq() {
+	goosi.TheApp.QuitReq()
+}
+
 // PollEvents tells the main event loop to check for any gui events right now.
 // Call this periodically from longer-running functions to ensure
 // GUI responsiveness.
@@ -235,7 +240,6 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	}
 	win.GoosiWin.SetName(title)
 	win.GoosiWin.SetParent(win)
-	// win.GoosiWin.SetFPS(1) // todo: debug mode!
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = vgpu.MaxTexturesPerSet * 2 // reserve last for sprites

@@ -156,6 +156,7 @@ type GridData struct {
 // Layouter is the interface for layout functions, called by Layout
 // widget type.
 type Layouter interface {
+	Widget
 
 	// AsLayout returns the base Layout type
 	AsLayout() *Layout

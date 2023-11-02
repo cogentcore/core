@@ -12,11 +12,11 @@ import (
 	"goki.dev/gi/v2/gi"
 )
 
-var _SliceViewFlagsValues = []SliceViewFlags{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+var _SliceViewFlagsValues = []SliceViewFlags{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 
 // SliceViewFlagsN is the highest valid value
 // for type SliceViewFlags, plus one.
-const SliceViewFlagsN SliceViewFlags = 21
+const SliceViewFlagsN SliceViewFlags = 20
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -28,12 +28,11 @@ func _SliceViewFlagsNoOp() {
 	_ = x[SliceViewShowViewCtxtMenu-(12)]
 	_ = x[SliceViewIsArray-(13)]
 	_ = x[SliceViewShowIndex-(14)]
-	_ = x[SliceViewShowToolbar-(15)]
-	_ = x[SliceViewReadOnlyKeyNav-(16)]
-	_ = x[SliceViewSelectMode-(17)]
-	_ = x[SliceViewReadOnlyMultiSel-(18)]
-	_ = x[SliceViewInFocusGrab-(19)]
-	_ = x[SliceViewInFullRebuild-(20)]
+	_ = x[SliceViewReadOnlyKeyNav-(15)]
+	_ = x[SliceViewSelectMode-(16)]
+	_ = x[SliceViewReadOnlyMultiSel-(17)]
+	_ = x[SliceViewInFocusGrab-(18)]
+	_ = x[SliceViewInFullRebuild-(19)]
 }
 
 var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
@@ -49,18 +48,16 @@ var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
 	`isarray`:          13,
 	`ShowIndex`:        14,
 	`showindex`:        14,
-	`ShowToolbar`:      15,
-	`showtoolbar`:      15,
-	`ReadOnlyKeyNav`:   16,
-	`readonlykeynav`:   16,
-	`SelectMode`:       17,
-	`selectmode`:       17,
-	`ReadOnlyMultiSel`: 18,
-	`readonlymultisel`: 18,
-	`InFocusGrab`:      19,
-	`infocusgrab`:      19,
-	`InFullRebuild`:    20,
-	`infullrebuild`:    20,
+	`ReadOnlyKeyNav`:   15,
+	`readonlykeynav`:   15,
+	`SelectMode`:       16,
+	`selectmode`:       16,
+	`ReadOnlyMultiSel`: 17,
+	`readonlymultisel`: 17,
+	`InFocusGrab`:      18,
+	`infocusgrab`:      18,
+	`InFullRebuild`:    19,
+	`infullrebuild`:    19,
 }
 
 var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
@@ -70,12 +67,11 @@ var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
 	12: `if the type we&#39;re viewing has its own CtxtMenu property defined, should we also still show the view&#39;s standard context menu?`,
 	13: `whether the slice is actually an array -- no modifications -- set by SetSlice`,
 	14: `whether to show index or not`,
-	15: `whether to show the toolbar or not`,
-	16: `support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events`,
-	17: `editing-mode select rows mode`,
-	18: `if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
-	19: `guard for recursive focus grabbing`,
-	20: `guard for recursive rebuild`,
+	15: `support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events`,
+	16: `editing-mode select rows mode`,
+	17: `if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
+	18: `guard for recursive focus grabbing`,
+	19: `guard for recursive rebuild`,
 }
 
 var _SliceViewFlagsMap = map[SliceViewFlags]string{
@@ -85,12 +81,11 @@ var _SliceViewFlagsMap = map[SliceViewFlags]string{
 	12: `ShowViewCtxtMenu`,
 	13: `IsArray`,
 	14: `ShowIndex`,
-	15: `ShowToolbar`,
-	16: `ReadOnlyKeyNav`,
-	17: `SelectMode`,
-	18: `ReadOnlyMultiSel`,
-	19: `InFocusGrab`,
-	20: `InFullRebuild`,
+	15: `ReadOnlyKeyNav`,
+	16: `SelectMode`,
+	17: `ReadOnlyMultiSel`,
+	18: `InFocusGrab`,
+	19: `InFullRebuild`,
 }
 
 // String returns the string representation

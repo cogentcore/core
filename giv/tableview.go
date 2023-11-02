@@ -74,7 +74,6 @@ func (tv *TableView) OnInit() {
 func (tv *TableView) TableViewInit() {
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.SetFlag(true, SliceViewShowIndex)
-	tv.SetFlag(true, SliceViewShowToolbar)
 	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
 
 	tv.HandleSliceViewEvents()
@@ -99,8 +98,9 @@ func (tv *TableView) TableViewInit() {
 				s.Padding.Set()
 			})
 		case "frame/header": // slice header
-			sh := w.(*gi.Toolbar)
+			sh := w.(*gi.Frame)
 			sh.Lay = gi.LayoutHoriz
+			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
 				s.Spacing.Dp(0)
 				s.MaxWidth.Dp(0)
@@ -298,33 +298,24 @@ func (tv *TableView) ConfigTableView(sc *gi.Scene) {
 		}
 		return
 	}
+	updt := tv.UpdateStart()
 	tv.ConfigFrame(sc)
 	tv.This().(SliceViewer).ConfigOneRow(sc)
-	tv.ConfigToolbar()
 	tv.ConfigScroll()
 	tv.ApplyStyleTree(sc)
+	tv.UpdateEndLayout(updt)
 }
 
 func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	tv.SetFlag(true, SliceViewConfiged)
-	config := ki.Config{}
-	config.Add(gi.ToolbarType, "toolbar")
-	config.Add(gi.FrameType, "frame")
-	_, updt := tv.ConfigChildren(config)
-	sg := tv.SliceFrame()
-	sg.SetFlag(true, gi.LayoutNoKeys)
-	sgcfg := ki.Config{}
-	sgcfg.Add(gi.ToolbarType, "header")
-	sgcfg.Add(gi.LayoutType, "grid-lay")
-	sg.ConfigChildren(sgcfg)
-	gl := tv.GridLayout()
+	sf := gi.NewFrame(tv, "frame").SetLayout(gi.LayoutVert)
+	sf.SetFlag(true, gi.LayoutNoKeys)
+	gi.NewFrame(sf, "header").SetLayout(gi.LayoutHoriz)
+	gl := gi.NewLayout(sf, "grid-lay").SetLayout(gi.LayoutHoriz)
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gconfig := ki.Config{}
-	gconfig.Add(gi.FrameType, "grid")
-	gconfig.Add(gi.SliderType, "scrollbar")
-	gl.ConfigChildren(gconfig) // covered by above
+	gi.NewFrame(gl, "grid").SetLayout(gi.LayoutGrid)
+	gi.NewSlider(gl, "scrollbar")
 	tv.ConfigHeader(sc)
-	tv.UpdateEndLayout(updt)
 }
 
 // ConfigOneRow configures one row for initial row height measurement
@@ -415,8 +406,10 @@ func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc 
 		if gd == nil {
 			return
 		}
-		wd := gd[idx].AllocSize - spc
-		s.SetFixedWidth(units.Dot(wd))
+		if len(gd) > idx {
+			wd := gd[idx].AllocSize - spc
+			s.SetFixedWidth(units.Dot(wd))
+		}
 	})
 }
 
@@ -517,14 +510,9 @@ func (tv *TableView) ScrollBar() *gi.Slider {
 	return tv.GridLayout().ChildByName("scrollbar", 1).(*gi.Slider)
 }
 
-// SliceHeader returns the Toolbar header for slice grid
-func (tv *TableView) SliceHeader() *gi.Toolbar {
-	return tv.SliceFrame().Child(0).(*gi.Toolbar)
-}
-
-// Toolbar returns the toolbar widget
-func (tv *TableView) Toolbar() *gi.Toolbar {
-	return tv.ChildByName("toolbar", 0).(*gi.Toolbar)
+// SliceHeader returns the Frame header for slice grid
+func (tv *TableView) SliceHeader() *gi.Frame {
+	return tv.SliceFrame().Child(0).(*gi.Frame)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -883,41 +871,6 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	tv.SortIdx = fldIdx
 	tv.SortSlice()
 	tv.Update()
-}
-
-// ConfigToolbar configures the toolbar actions
-func (tv *TableView) ConfigToolbar() {
-	if laser.AnyIsNil(tv.Slice) {
-		return
-	}
-	if tv.ToolbarSlice == tv.Slice {
-		return
-	}
-	if !tv.Is(SliceViewShowToolbar) {
-		tv.ToolbarSlice = tv.Slice
-		return
-	}
-	tb := tv.Toolbar()
-	ndef := 1 // number of default actions
-	if tv.Is(SliceViewIsArray) || tv.IsReadOnly() || tv.Is(SliceViewNoAdd) {
-		ndef = 0
-	}
-	if len(*tb.Children()) < ndef {
-		if ndef > 0 {
-			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the table").
-				OnClick(func(e events.Event) {
-					tv.SliceNewAt(-1)
-				})
-		}
-	}
-	sz := len(*tb.Children())
-	if sz > ndef {
-		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, ki.DestroyKids)
-		}
-	}
-	gi.ToolbarFor(tv.Slice, tb)
-	tv.ToolbarSlice = tv.Slice
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or

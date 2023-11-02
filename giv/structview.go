@@ -28,8 +28,6 @@ import (
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
-// Automatically has a toolbar with Struct Toolbar props if defined
-// set prop toolbar = false to turn off
 type StructView struct {
 	gi.Frame
 
@@ -48,17 +46,11 @@ type StructView struct {
 	// Value representations of the fields
 	FieldViews []Value `json:"-" xml:"-"`
 
-	// whether to show the toolbar or not
-	ShowToolbar bool
-
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
-
-	// the struct that we successfully set a toolbar for
-	ToolbarStru any
 
 	// if true, some fields have default values -- update labels when values change
 	HasDefs bool `json:"-" xml:"-" edit:"-"`
@@ -71,7 +63,6 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
-	sv.ShowToolbar = true
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
 		s.Spacing = gi.StdDialogVSpaceUnits
@@ -145,15 +136,13 @@ func (sv *StructView) ConfigWidget(sc *gi.Scene) {
 			return
 		}
 	}
-	config := ki.Config{}
-	config.Add(gi.ToolbarType, "toolbar")
-	config.Add(gi.FrameType, "struct-grid")
-	mods, updt := sv.ConfigChildren(config)
-	sv.ConfigStructGrid(sc)
-	sv.ConfigToolbar()
-	if mods {
-		sv.UpdateEnd(updt)
+	if sv.HasChildren() {
+		return
 	}
+	updt := sv.UpdateStart()
+	gi.NewFrame(sv, "struct-grid")
+	sv.ConfigStructGrid(sc)
+	sv.UpdateEndLayout(updt)
 }
 
 // IsConfiged returns true if the widget is fully configured
@@ -164,37 +153,6 @@ func (sv *StructView) IsConfiged() bool {
 // StructGrid returns the grid layout widget, which contains all the fields and values
 func (sv *StructView) StructGrid() *gi.Frame {
 	return sv.ChildByName("struct-grid", 2).(*gi.Frame)
-}
-
-// Toolbar returns the toolbar widget
-func (sv *StructView) Toolbar() *gi.Toolbar {
-	return sv.ChildByName("toolbar", 1).(*gi.Toolbar)
-}
-
-// ConfigToolbar adds a toolbar based on the methodview ToolbarView function, if
-// one has been defined for this struct type through its registered type
-// properties.
-func (sv *StructView) ConfigToolbar() {
-	if laser.AnyIsNil(sv.Struct) {
-		return
-	}
-	if sv.ToolbarStru == sv.Struct {
-		return
-	}
-	if !sv.ShowToolbar {
-		sv.ToolbarStru = sv.Struct
-		return
-	}
-	tb := sv.Toolbar()
-	ndef := 0 // number of default actions
-	sz := len(*tb.Children())
-	if sz > ndef {
-		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, ki.DestroyKids)
-		}
-	}
-	gi.ToolbarFor(sv.Struct, tb)
-	sv.ToolbarStru = sv.Struct
 }
 
 // FieldTags returns the integrated tags for this field
@@ -333,10 +291,6 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 						updtr.Update()
 					}
 				}
-				tb := sv.Toolbar()
-				if tb != nil {
-					tb.UpdateButtons()
-				}
 				sv.SendChange(e)
 				// vvv, _ := send.Embed(TypeValueBase).(*ValueBase)
 				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
@@ -362,13 +316,6 @@ func (sv *StructView) UpdateFieldAction() {
 		}
 		sg.UpdateEndRender(updt)
 	}
-}
-
-func (sv *StructView) Render(sc *gi.Scene) {
-	if sv.IsConfiged() {
-		sv.Toolbar().UpdateButtons()
-	}
-	sv.Frame.Render(sc)
 }
 
 /////////////////////////////////////////////////////////////////////////

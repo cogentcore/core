@@ -713,7 +713,7 @@ var MapViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.MapView",
 	ShortName:  "giv.MapView",
 	IDName:     "map-view",
-	Doc:        "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.\nAutomatically has a toolbar with Map Toolbar props if defined\nset prop toolbar = false to turn off",
+	Doc:        "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Map", &gti.Field{Name: "Map", Type: "any", LocalType: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -722,11 +722,9 @@ var MapViewType = gti.AddType(&gti.Type{
 		{"Keys", &gti.Field{Name: "Keys", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the map values", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"SortVals", &gti.Field{Name: "SortVals", Type: "bool", LocalType: "bool", Doc: "sort by values instead of keys", Directives: gti.Directives{}, Tag: ""}},
-		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", LocalType: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}, Tag: ""}},
 		{"NCols", &gti.Field{Name: "NCols", Type: "int", LocalType: "int", Doc: "the number of columns in the map; do not set externally; generally only access internally", Directives: gti.Directives{}, Tag: ""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
-		{"ToolbarMap", &gti.Field{Name: "ToolbarMap", Type: "any", LocalType: "any", Doc: "the map that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -781,13 +779,6 @@ func (t *MapView) SetSortVals(v bool) *MapView {
 	return t
 }
 
-// SetShowToolbar sets the [MapView.ShowToolbar]:
-// whether to show the toolbar or not
-func (t *MapView) SetShowToolbar(v bool) *MapView {
-	t.ShowToolbar = v
-	return t
-}
-
 // SetNcols sets the [MapView.NCols]:
 // the number of columns in the map; do not set externally; generally only access internally
 func (t *MapView) SetNcols(v int) *MapView {
@@ -806,13 +797,6 @@ func (t *MapView) SetTmpSave(v Value) *MapView {
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 func (t *MapView) SetViewPath(v string) *MapView {
 	t.ViewPath = v
-	return t
-}
-
-// SetToolbarMap sets the [MapView.ToolbarMap]:
-// the map that we successfully set a toolbar for
-func (t *MapView) SetToolbarMap(v any) *MapView {
-	t.ToolbarMap = v
 	return t
 }
 
@@ -1096,12 +1080,6 @@ func (t *SliceView) SetTmpSave(v Value) *SliceView {
 	return t
 }
 
-// SetToolbarSlice sets the [SliceView.ToolbarSlice]
-func (t *SliceView) SetToolbarSlice(v any) *SliceView {
-	t.ToolbarSlice = v
-	return t
-}
-
 // SetRowHeight sets the [SliceView.RowHeight]
 func (t *SliceView) SetRowHeight(v float32) *SliceView {
 	t.RowHeight = v
@@ -1155,7 +1133,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceViewBase",
 	ShortName:  "giv.SliceViewBase",
 	IDName:     "slice-view-base",
-	Doc:        "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.\nAutomatically has a toolbar with Slice Toolbar props if defined\nset prop toolbar = false to turn off",
+	Doc:        "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Slice", &gti.Field{Name: "Slice", Type: "any", LocalType: "any", Doc: "the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
@@ -1170,7 +1148,6 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"DraggedIdxs", &gti.Field{Name: "DraggedIdxs", Type: "[]int", LocalType: "[]int", Doc: "list of currently-dragged indexes", Directives: gti.Directives{}, Tag: "copy:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", LocalType: "any", Doc: "the slice that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"RowHeight", &gti.Field{Name: "RowHeight", Type: "float32", LocalType: "float32", Doc: "height of a single row", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"LayoutHeight", &gti.Field{Name: "LayoutHeight", Type: "float32", LocalType: "float32", Doc: "the height of grid from last layout -- determines when update needed", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", LocalType: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
@@ -1272,13 +1249,6 @@ func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase {
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 func (t *SliceViewBase) SetTmpSave(v Value) *SliceViewBase {
 	t.TmpSave = v
-	return t
-}
-
-// SetToolbarSlice sets the [SliceViewBase.ToolbarSlice]:
-// the slice that we successfully set a toolbar for
-func (t *SliceViewBase) SetToolbarSlice(v any) *SliceViewBase {
-	t.ToolbarSlice = v
 	return t
 }
 
@@ -1494,7 +1464,7 @@ var StructViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.StructView",
 	ShortName:  "giv.StructView",
 	IDName:     "struct-view",
-	Doc:        "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.\nAutomatically has a toolbar with Struct Toolbar props if defined\nset prop toolbar = false to turn off",
+	Doc:        "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Struct", &gti.Field{Name: "Struct", Type: "any", LocalType: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -1502,10 +1472,8 @@ var StructViewType = gti.AddType(&gti.Type{
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", LocalType: "*reflect.Value", Doc: "Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", LocalType: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}, Tag: ""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
-		{"ToolbarStru", &gti.Field{Name: "ToolbarStru", Type: "any", LocalType: "any", Doc: "the struct that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: ""}},
 		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
 		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
 		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
@@ -1556,13 +1524,6 @@ func (t *StructView) SetFieldViews(v []Value) *StructView {
 	return t
 }
 
-// SetShowToolbar sets the [StructView.ShowToolbar]:
-// whether to show the toolbar or not
-func (t *StructView) SetShowToolbar(v bool) *StructView {
-	t.ShowToolbar = v
-	return t
-}
-
 // SetTmpSave sets the [StructView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 func (t *StructView) SetTmpSave(v Value) *StructView {
@@ -1574,13 +1535,6 @@ func (t *StructView) SetTmpSave(v Value) *StructView {
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 func (t *StructView) SetViewPath(v string) *StructView {
 	t.ViewPath = v
-	return t
-}
-
-// SetToolbarStru sets the [StructView.ToolbarStru]:
-// the struct that we successfully set a toolbar for
-func (t *StructView) SetToolbarStru(v any) *StructView {
-	t.ToolbarStru = v
 	return t
 }
 
@@ -2027,12 +1981,6 @@ func (t *TableView) SetViewPath(v string) *TableView {
 // SetTmpSave sets the [TableView.TmpSave]
 func (t *TableView) SetTmpSave(v Value) *TableView {
 	t.TmpSave = v
-	return t
-}
-
-// SetToolbarSlice sets the [TableView.ToolbarSlice]
-func (t *TableView) SetToolbarSlice(v any) *TableView {
-	t.ToolbarSlice = v
 	return t
 }
 

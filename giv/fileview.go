@@ -104,7 +104,6 @@ func (fv *FileView) FileViewStyles() {
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
-			fv.SetFlag(false, SliceViewShowToolbar)
 			fv.SetReadOnly(true)
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxHeight()
@@ -113,7 +112,6 @@ func (fv *FileView) FileViewStyles() {
 		case "files-row/files-view":
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
-			fv.SetFlag(false, SliceViewShowToolbar)
 			fv.SetReadOnly(true)
 			fv.Style(func(s *styles.Style) {
 				s.SetStretchMax()
