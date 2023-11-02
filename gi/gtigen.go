@@ -445,6 +445,130 @@ func (t *StyleSheet) SetCustomContextMenu(v func(m *Scene)) *StyleSheet {
 	return t
 }
 
+// DialogType is the [gti.Type] for [Dialog]
+var DialogType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Dialog",
+	ShortName:  "gi.Dialog",
+	IDName:     "dialog",
+	Doc:        "Dialog is a scene with methods for configuring a dialog",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.MainStage", LocalType: "*MainStage", Doc: "Stage is the main stage associated with the dialog", Directives: gti.Directives{}, Tag: ""}},
+		{"Accepted", &gti.Field{Name: "Accepted", Type: "bool", LocalType: "bool", Doc: "Accepted means that the dialog was accepted -- else canceled", Directives: gti.Directives{}, Tag: ""}},
+		{"Btns", &gti.Field{Name: "Btns", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "Buttons go here when added", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Scene", &gti.Field{Name: "Scene", Type: "goki.dev/gi/v2/gi.Scene", LocalType: "Scene", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Dialog{},
+})
+
+// NewDialog adds a new [Dialog] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewDialog(par ki.Ki, name ...string) *Dialog {
+	return par.NewChild(DialogType, name...).(*Dialog)
+}
+
+// KiType returns the [*gti.Type] of [Dialog]
+func (t *Dialog) KiType() *gti.Type {
+	return DialogType
+}
+
+// New returns a new [*Dialog] value
+func (t *Dialog) New() ki.Ki {
+	return &Dialog{}
+}
+
+// SetStage sets the [Dialog.Stage]:
+// Stage is the main stage associated with the dialog
+func (t *Dialog) SetStage(v *MainStage) *Dialog {
+	t.Stage = v
+	return t
+}
+
+// SetAccepted sets the [Dialog.Accepted]:
+// Accepted means that the dialog was accepted -- else canceled
+func (t *Dialog) SetAccepted(v bool) *Dialog {
+	t.Accepted = v
+	return t
+}
+
+// SetBtns sets the [Dialog.Btns]:
+// Buttons go here when added
+func (t *Dialog) SetBtns(v *Layout) *Dialog {
+	t.Btns = v
+	return t
+}
+
+// SetTooltip sets the [Dialog.Tooltip]
+func (t *Dialog) SetTooltip(v string) *Dialog {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Dialog.Class]
+func (t *Dialog) SetClass(v string) *Dialog {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Dialog.CustomContextMenu]
+func (t *Dialog) SetCustomContextMenu(v func(m *Scene)) *Dialog {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [Dialog.Lay]
+func (t *Dialog) SetLayout(v Layouts) *Dialog {
+	t.Lay = v
+	return t
+}
+
+// SetSpacing sets the [Dialog.Spacing]
+func (t *Dialog) SetSpacing(v units.Value) *Dialog {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the [Dialog.StackTop]
+func (t *Dialog) SetStackTop(v int) *Dialog {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Dialog.Stripes]
+func (t *Dialog) SetStripes(v Stripes) *Dialog {
+	t.Stripes = v
+	return t
+}
+
+// SetTitle sets the [Dialog.Title]
+func (t *Dialog) SetTitle(v string) *Dialog {
+	t.Title = v
+	return t
+}
+
+// SetData sets the [Dialog.Data]
+func (t *Dialog) SetData(v any) *Dialog {
+	t.Data = v
+	return t
+}
+
+// SetTopAppBar sets the [Dialog.TopAppBar]
+func (t *Dialog) SetTopAppBar(v func(tb *Toolbar)) *Dialog {
+	t.TopAppBar = v
+	return t
+}
+
+// SetBgColor sets the [Dialog.BgColor]
+func (t *Dialog) SetBgColor(v colors.Full) *Dialog {
+	t.BgColor = v
+	return t
+}
+
 // FrameType is the [gti.Type] for [Frame]
 var FrameType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Frame",
