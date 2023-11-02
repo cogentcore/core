@@ -45,7 +45,7 @@ func makeHome(ts *gi.Tabs) {
 	home := ts.NewTab("Home")
 	home.Lay = gi.LayoutVert
 	home.Style(func(s *styles.Style) {
-		home.Spacing.Ex(1)
+		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.Dp(-1)
 		s.MaxHeight.Dp(-1)
@@ -95,7 +95,7 @@ func makeText(ts *gi.Tabs) {
 	text := ts.NewTab("Text")
 	text.Lay = gi.LayoutVert
 	text.Style(func(s *styles.Style) {
-		text.Spacing.Ex(1)
+		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.Dp(-1)
 		s.MaxHeight.Dp(-1)
@@ -115,7 +115,7 @@ func makeButtons(ts *gi.Tabs) {
 	buttons := ts.NewTab("Buttons")
 	buttons.Lay = gi.LayoutVert
 	buttons.Style(func(s *styles.Style) {
-		buttons.Spacing.Ex(1)
+		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.Dp(-1)
 		s.MaxHeight.Dp(-1)
@@ -130,19 +130,19 @@ func makeButtons(ts *gi.Tabs) {
 
 	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
 	brow.Style(func(s *styles.Style) {
-		brow.Spacing.Em(1)
+		s.Spacing.Em(1)
 		s.MaxWidth.Dp(-1)
 	})
 
 	browt := gi.NewLayout(buttons, "browt").SetLayout(gi.LayoutHorizFlow)
 	browt.Style(func(s *styles.Style) {
-		browt.Spacing.Em(1)
+		s.Spacing.Em(1)
 		s.MaxWidth.Dp(-1)
 	})
 
 	browi := gi.NewLayout(buttons, "browi").SetLayout(gi.LayoutHorizFlow)
 	browi.Style(func(s *styles.Style) {
-		browi.Spacing.Em(1)
+		s.Spacing.Em(1)
 		s.MaxWidth.Dp(-1)
 	})
 
@@ -151,19 +151,19 @@ func makeButtons(ts *gi.Tabs) {
 
 	mbrow := gi.NewLayout(buttons, "mbrow").SetLayout(gi.LayoutHorizFlow)
 	mbrow.Style(func(s *styles.Style) {
-		mbrow.Spacing.Em(1)
+		s.Spacing.Em(1)
 		s.MaxWidth.Dp(-1)
 	})
 
 	mbrowt := gi.NewLayout(buttons, "mbrowt").SetLayout(gi.LayoutHorizFlow)
 	mbrowt.Style(func(s *styles.Style) {
-		mbrowt.Spacing.Em(1)
+		s.Spacing.Em(1)
 		s.MaxWidth.Dp(-1)
 	})
 
 	mbrowi := gi.NewLayout(buttons, "mbrowi").SetLayout(gi.LayoutHorizFlow)
 	mbrowi.Style(func(s *styles.Style) {
-		mbrowi.Spacing.Em(1)
+		s.Spacing.Em(1)
 		s.MaxWidth.Dp(-1)
 	})
 
@@ -247,7 +247,7 @@ func makeInputs(ts *gi.Tabs) {
 	inputs := ts.NewTab("Inputs")
 	inputs.Lay = gi.LayoutVert
 	inputs.Style(func(s *styles.Style) {
-		inputs.Spacing.Ex(1)
+		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.Dp(-1)
 		s.MaxHeight.Dp(-1)
@@ -274,7 +274,7 @@ func makeInputs(ts *gi.Tabs) {
 
 	choosers := gi.NewLayout(inputs, "choosers").SetLayout(gi.LayoutHoriz)
 	choosers.Style(func(s *styles.Style) {
-		choosers.Spacing.Em(0.5)
+		s.Spacing.Em(0.5)
 	})
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
@@ -330,7 +330,7 @@ func makeLayouts(ts *gi.Tabs) {
 	layouts := ts.NewTab("Layouts")
 	layouts.Lay = gi.LayoutVert
 	layouts.Style(func(s *styles.Style) {
-		layouts.Spacing.Ex(1)
+		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.Dp(-1)
 		s.MaxHeight.Dp(-1)
