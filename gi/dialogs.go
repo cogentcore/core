@@ -167,16 +167,19 @@ func (d *Dialog) Cancel(text ...string) *Dialog {
 	return d
 }
 
+// Modal sets whether the dialog is modal
 func (d *Dialog) Modal(modal bool) *Dialog {
 	d.Stage.Modal = modal
 	return d
 }
 
+// NewWindow sets whether the dialog takes up the full window
 func (d *Dialog) NewWindow(newWindow bool) *Dialog {
 	d.Stage.NewWindow = newWindow
 	return d
 }
 
+// FullWindow sets whether the dialog takes up the full window
 func (d *Dialog) FullWindow(fullWindow bool) *Dialog {
 	d.Stage.FullWindow = fullWindow
 	return d
