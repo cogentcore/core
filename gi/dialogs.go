@@ -51,6 +51,7 @@ func NewDialog(ctx Widget, name ...string) *Dialog {
 	d.EventMgr.Scene = &d.Scene
 	d.BgColor.SetSolid(colors.Transparent)
 	d.Lay = LayoutVert
+	d.DialogStyles()
 
 	d.Stage = NewMainStage(DialogStage, &d.Scene, ctx)
 	d.Modal(true)
@@ -183,7 +184,6 @@ func (d *Dialog) FullWindow(fullWindow bool) *Dialog {
 
 // Run runs (shows) the dialog.
 func (d *Dialog) Run() {
-	d.DialogStyles()
 	d.Stage.Run()
 }
 

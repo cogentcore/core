@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 )
 
 var (
@@ -65,61 +66,76 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 	s.EventMgr.Scene = &s.Scene
 	s.BgColor.SetSolid(colors.Transparent)
 	s.Lay = LayoutVert
+	s.SnackbarStyles()
 
 	s.Scene.Stage = NewPopupStage(SnackbarStage, &s.Scene, ctx)
 	return s
 }
 
-// NewSnackbarScene returns a new snackbar scene based on the given context widget
-// and options.
-func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
-	sc := NewScene(w.Name() + "-snackbar")
-	sc.SetLayout(LayoutHoriz)
-	wsc := w.AsWidget().Sc
-	sc.Style(func(s *styles.Style) {
+func (sb *Snackbar) SnackbarStyles() {
+	sb.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
 		s.AlignV = styles.AlignMiddle
-		sc.Spacing.Dp(12)
+		sb.Spacing.Dp(12)
 		s.SetStretchMaxWidth()
 		s.Height = units.Dp(48)
 	})
-	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium).
+}
+
+// Text adds a label with the given text to the snackbar
+func (sb *Snackbar) Text(text string) *Snackbar {
+	NewLabel(sb, "text").SetText(text).SetType(LabelBodyMedium).
 		Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
 			}
 		})
-	if opts.Button != "" || !opts.Icon.IsNil() {
-		NewStretch(sc, "stretch")
-	}
-	if opts.Button != "" {
-		bt := NewButton(sc, "button").SetType(ButtonText).SetText(opts.Button)
-		bt.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.InversePrimary
-		})
-		bt.OnClick(func(e events.Event) {
-			if opts.ButtonOnClick != nil {
-				opts.ButtonOnClick(bt)
-			}
-			wsc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
-		})
-	}
-	if !opts.Icon.IsNil() {
-		ic := NewButton(sc, "icon").SetType(ButtonAction).SetIcon(opts.Icon)
-		ic.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.InverseOnSurface
-		})
-		ic.OnClick(func(e events.Event) {
-			if opts.IconOnClick != nil {
-				opts.IconOnClick(ic)
-			}
-			wsc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
-		})
-	}
-	return sc
+	return sb
+}
+
+// Button adds a button with the given text and optional OnClick
+// event handler to the snackbar. Only the first of the given
+// event handlers is used, and the popup is dismissed automatically
+// regardless of whether there is an event handler passed.
+func (sb *Snackbar) Button(text string, onClick ...func(e events.Event)) *Snackbar {
+	NewStretch(sb, "stretch")
+	bt := NewButton(sb, "button").SetType(ButtonText).SetText(text)
+	bt.Style(func(s *styles.Style) {
+		s.Color = colors.Scheme.InversePrimary
+	})
+	bt.OnClick(func(e events.Event) {
+		if len(onClick) > 0 {
+			onClick[0](e)
+		}
+		sb.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
+	})
+	return sb
+}
+
+// Icon adds an icon button to the snackbar with the given icon and
+// given OnClick event handler to the snackbar. Only the first of the given
+// event handlers is used, and the popup is dismissed automatically
+// regardless of whether there is an event handler passed.
+func (sb *Snackbar) Icon(icon icons.Icon, onClick ...func(e events.Event)) *Snackbar {
+	ic := NewButton(sb, "icon").SetType(ButtonAction).SetIcon(icon)
+	ic.Style(func(s *styles.Style) {
+		s.Color = colors.Scheme.InverseOnSurface
+	})
+	ic.OnClick(func(e events.Event) {
+		if len(onClick) > 0 {
+			onClick[0](e)
+		}
+		sb.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
+	})
+	return sb
+}
+
+// Run runs (shows) the snackbar.
+func (sb *Snackbar) Run() {
+	sb.Stage.Run()
 }
