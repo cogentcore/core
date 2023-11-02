@@ -104,7 +104,7 @@ func (d *Dialog) Buttons() *Layout {
 	bb := NewLayout(d, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.Style(func(s *styles.Style) {
-		bb.Spacing.Dp(8)
+		s.Spacing.Dp(8)
 		s.SetStretchMaxWidth()
 	})
 	bb.OnWidgetAdded(func(w Widget) {
@@ -245,7 +245,7 @@ func (d *Dialog) DialogStyles() {
 	d.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
-		d.Spacing = StdDialogVSpaceUnits
+		s.Spacing = StdDialogVSpaceUnits
 		s.Padding.Left.Dp(8)
 		if !d.Stage.NewWindow && !d.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))

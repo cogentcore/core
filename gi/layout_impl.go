@@ -130,7 +130,7 @@ func GatherSizes(ly *Layout) {
 
 	elspc := float32(0.0)
 	if sz >= 2 {
-		elspc = float32(sz-1) * ly.Spacing.Dots
+		elspc = float32(sz-1) * ly.Styles.Spacing.Dots
 	}
 	if LaySumDim(ly.Lay, mat32.X) {
 		ly.LayState.Size.Need.X += elspc
@@ -237,7 +237,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 
 	elspc := float32(0.0)
 	if sz >= 2 {
-		elspc = float32(sz-1) * ly.Spacing.Dots
+		elspc = float32(sz-1) * ly.Styles.Spacing.Dots
 	}
 	if LaySumDim(ly.Lay, mat32.X) {
 		ly.LayState.Size.Need.X += elspc
@@ -437,10 +437,10 @@ func GatherSizesGrid(ly *Layout) {
 	ly.LayState.Size.Need.SetAdd(spc.Size())
 	ly.LayState.Size.Pref.SetAdd(spc.Size())
 
-	ly.LayState.Size.Need.X += float32(cols-1) * ly.Spacing.Dots
-	ly.LayState.Size.Pref.X += float32(cols-1) * ly.Spacing.Dots
-	ly.LayState.Size.Need.Y += float32(rows-1) * ly.Spacing.Dots
-	ly.LayState.Size.Pref.Y += float32(rows-1) * ly.Spacing.Dots
+	ly.LayState.Size.Need.X += float32(cols-1) * ly.Styles.Spacing.Dots
+	ly.LayState.Size.Pref.X += float32(cols-1) * ly.Styles.Spacing.Dots
+	ly.LayState.Size.Need.Y += float32(rows-1) * ly.Styles.Spacing.Dots
+	ly.LayState.Size.Pref.Y += float32(rows-1) * ly.Styles.Spacing.Dots
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if LayoutTrace {
@@ -540,7 +540,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 		return
 	}
 
-	elspc := float32(sz-1) * ly.Spacing.Dots
+	elspc := float32(sz-1) * ly.Styles.Spacing.Dots
 	al := ly.Styles.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
@@ -649,7 +649,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
-		pos += size + ly.Spacing.Dots
+		pos += size + ly.Styles.Spacing.Dots
 	}
 }
 
@@ -662,7 +662,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 		return false
 	}
 
-	elspc := float32(sz-1) * ly.Spacing.Dots
+	elspc := float32(sz-1) * ly.Styles.Spacing.Dots
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 
@@ -689,7 +689,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
-		pos += size + ly.Spacing.Dots
+		pos += size + ly.Styles.Spacing.Dots
 	}
 	ly.FlowBreaks = append(ly.FlowBreaks, len(ly.Kids))
 
@@ -723,7 +723,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 			nsz.X = mat32.Max(nsz.X, ni.LayState.Alloc.PosRel.X+ni.LayState.Alloc.Size.X)
 			nsz.Y = mat32.Max(nsz.Y, ni.LayState.Alloc.PosRel.Y+ni.LayState.Alloc.Size.Y)
 		}
-		rpos += rmax + ly.Spacing.Dots
+		rpos += rmax + ly.Styles.Spacing.Dots
 		ci = bi
 	}
 	ly.LayState.Size.Need = nsz
@@ -746,7 +746,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 	if sz == 0 {
 		return
 	}
-	elspc := float32(sz-1) * ly.Spacing.Dots
+	elspc := float32(sz-1) * ly.Styles.Spacing.Dots
 	al := ly.Styles.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
@@ -835,7 +835,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 		if LayoutTrace {
 			fmt.Printf("Grid %v pos: %v, size: %v\n", rowcol, pos, size)
 		}
-		pos += size + ly.Spacing.Dots
+		pos += size + ly.Styles.Spacing.Dots
 	}
 }
 
