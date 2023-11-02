@@ -150,7 +150,45 @@ type GridData struct {
 	AllocPosRel float32
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+// Layouter
+
+// Layouter is the interface for layout functions, called by Layout
+// widget type.
+type Layouter interface {
+
+	// AsLayout returns the base Layout type
+	AsLayout() *Layout
+
+	// DoLayoutAlloc allocates space to children.
+	// returns whether needs redo.
+	DoLayoutAlloc(sc *Scene, iter int) bool
+
+	// ManageOverflow processes any overflow according to overflow settings.
+	ManageOverflow(sc *Scene)
+
+	// DoLayoutChildren lays out the children after everything has been allocated
+	DoLayoutChildren(sc *Scene, iter int) bool
+}
+
+// AsLayout returns the given value as a value of type Layout if the type
+// of the given value embeds Layout, or nil otherwise
+func AsLayout(k ki.Ki) *Layout {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(Layouter); ok {
+		return t.AsLayout()
+	}
+	return nil
+}
+
+// AsLayout satisfies the [LayoutEmbedder] interface
+func (t *Layout) AsLayout() *Layout {
+	return t
+}
+
+///////////////////////////////////////////////////////////////////
 // Layout
 
 // LayoutFocusNameTimeoutMSec is the number of milliseconds between keypresses
@@ -178,7 +216,7 @@ var LayoutFocusNameTabMSec = 2000
 // to the desired number of columns, from which the number of rows
 // is computed -- otherwise it uses the square root of number of
 // elements.
-type Layout struct { //goki:embedder
+type Layout struct {
 	WidgetBase
 
 	// type of layout to use
@@ -345,9 +383,6 @@ func (ly *Layout) ManageOverflow(sc *Scene) {
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
-				// if wasscof {
-				// 	fmt.Printf("overflow, setting scb: %v\n", d)
-				// }
 				ly.HasScroll[d] = true
 				ly.ExtraSize.SetAddDim(odim, sbw)
 			}
@@ -594,6 +629,7 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	}
 }
 
+// DoLayoutChildren lays out the children after everything has been allocated
 func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 	cbb := ly.ChildrenBBoxes(sc)
 	if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) {
@@ -1239,7 +1275,30 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	if iter > 0 && LayoutTrace {
 		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.Is(LayoutNeedsRedo))
 	}
-	ly.DoLayoutBase(sc, parBBox, iter)
+	ly.DoLayoutBase(sc, parBBox, iter) // do us
+	redo := ly.This().(Layouter).DoLayoutAlloc(sc, iter)
+	if redo && iter == 0 {
+		ly.SetFlag(true, LayoutNeedsRedo)
+		ly.LayState.Alloc.Size = ly.ChildSize // this is what we actually need.
+		return true
+	}
+	ly.This().(Layouter).ManageOverflow(sc)
+	redo = ly.This().(Layouter).DoLayoutChildren(sc, iter) // layout done with canonical positions
+	if redo {
+		ly.SetFlag(true, LayoutNeedsRedo)
+	}
+	if !redo || iter == 1 {
+		delta := ly.LayoutScrollDelta((image.Point{}))
+		if delta != (image.Point{}) {
+			ly.LayoutScrollChildren(sc, delta) // move is a separate step
+		}
+	}
+	return ly.Is(LayoutNeedsRedo)
+}
+
+// DoLayoutAlloc allocates space to children.
+// returns whether needs redo.
+func (ly *Layout) DoLayoutAlloc(sc *Scene, iter int) bool {
 	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:
@@ -1261,26 +1320,7 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 		// nothing
 	}
 	ly.FinalizeLayout()
-	if redo && iter == 0 {
-		ly.SetFlag(true, LayoutNeedsRedo)
-		ly.LayState.Alloc.Size = ly.ChildSize // this is what we actually need.
-		return true
-	}
-	ly.ManageOverflow(sc)
-	redo = ly.DoLayoutChildren(sc, iter) // layout done with canonical positions
-	if redo {
-		ly.SetFlag(true, LayoutNeedsRedo)
-	}
-	if !redo || iter == 1 {
-		delta := ly.LayoutScrollDelta((image.Point{}))
-		if delta != (image.Point{}) {
-			ly.LayoutScrollChildren(sc, delta) // move is a separate step
-		}
-	}
-	// if ly.Parts != nil && ly.Parts.String() == "/std-dialog.parts" {
-	// 	fmt.Println("lyp")
-	// }
-	return ly.Is(LayoutNeedsRedo)
+	return redo
 }
 
 // we add our own offset here
