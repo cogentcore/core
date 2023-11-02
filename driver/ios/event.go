@@ -19,6 +19,7 @@ package ios
 */
 import "C"
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/goosi/events"
@@ -88,6 +89,7 @@ func keyboardDelete() {
 
 //export scrolled
 func scrolled(posX, posY, distanceX, distanceY C.float) {
+	fmt.Println("scrolled")
 	where := image.Pt(int(posX), int(posY))
 	delta := image.Pt(int(distanceX), int(distanceY))
 	theApp.window.EvMgr.Scroll(where, delta)
@@ -95,12 +97,14 @@ func scrolled(posX, posY, distanceX, distanceY C.float) {
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
+	fmt.Println("scaled")
 	where := image.Pt(int(posX), int(posY))
 	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
 //export longPressed
 func longPressed(posX, posY C.float) {
+	fmt.Println("longPressed")
 	// where := image.Pt(int(posX), int(posY))
 	// theApp.window.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }

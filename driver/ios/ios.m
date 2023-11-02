@@ -29,6 +29,9 @@ struct utsname sysInfo;
 @interface GoInputView : UITextField<UITextFieldDelegate>
 @end
 
+@interface GoGestureRecognizer : UIGestureRecognizer
+@end
+
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
@@ -95,7 +98,7 @@ struct utsname sysInfo;
 //	self.paused = YES;
 //}
 
--(void) loadView {
+- (void) loadView {
 	self.view = [[GoAppView alloc] initWithFrame:CGRectMake(0, 0, 400, 400)];
 }
 
@@ -131,6 +134,9 @@ struct utsname sysInfo;
 	
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+
+	UIGestureRecognizer* gestureRecognizer = [GoGestureRecognizer init];
+	[self.view addGestureRecognizer:gestureRecognizer];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -143,7 +149,7 @@ struct utsname sysInfo;
 	}];
 }
 
--(void) render:(CADisplayLink*)displayLink {
+- (void) render:(CADisplayLink*)displayLink {
    // [self.view display]; // todo: seems unnecessary?
 }
 
@@ -182,6 +188,10 @@ static void sendTouches(int change, NSSet* touches) {
 	CGSize size = [UIScreen mainScreen].nativeBounds.size;
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
+
+@end
+
+@implementation GoGestureRecognizer
 
 - (void) onPan: (UIPanGestureRecognizer *)panRecognizer {
 	// if (gestureRecognizer.state == .began) {
