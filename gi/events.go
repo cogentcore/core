@@ -12,7 +12,6 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
@@ -225,13 +224,9 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 		}
 	})
 	wb.On(events.LongPressStart, func(e events.Event) {
-		fmt.Println("long press start", wb)
-		if goosi.TheApp.Platform().IsMobile() {
-			NewTooltip(wb, e.Pos())
-		}
+
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
-		fmt.Println("long press end", wb)
 	})
 	wb.On(events.MouseEnter, func(e events.Event) {
 		if wb.AbilityIs(abilities.Hoverable) {
@@ -277,8 +272,9 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	})
 }
 
-// HandleLongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
-// Most widgets should call this as part of their event handler methods.
+// HandleLongHoverTooltip listens for LongHover and LongPress events and
+// pops up and deletes tooltips based on those. Most widgets should call
+// this as part of their event handler methods.
 func (wb *WidgetBase) HandleLongHoverTooltip() {
 	wb.On(events.LongHoverStart, func(e events.Event) {
 		if wb.Tooltip == "" {
@@ -288,6 +284,22 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wb, e.Pos()).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
+		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
+			top := wb.Sc.MainStageMgr().Top()
+			if top != nil && top.AsMain() != nil {
+				top.AsMain().PopupMgr.PopDeleteType(TooltipStage)
+			}
+		}
+	})
+
+	wb.On(events.LongPressStart, func(e events.Event) {
+		if wb.Tooltip == "" {
+			return
+		}
+		e.SetHandled()
+		NewTooltip(wb, e.Pos()).Run()
+	})
+	wb.On(events.LongPressEnd, func(e events.Event) {
 		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
 			top := wb.Sc.MainStageMgr().Top()
 			if top != nil && top.AsMain() != nil {
