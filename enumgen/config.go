@@ -31,7 +31,7 @@ type Config struct { //gti:add
 	AddPrefix string
 
 	// whether to use line comment text as printed text when present
-	LineComment bool
+	LineComment bool `def:"true"`
 
 	// whether to accept lowercase versions of enum names in SetString
 	AcceptLower bool `def:"true"`
