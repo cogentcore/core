@@ -56,6 +56,8 @@ func (fb *FileBrowse) Defaults() {
 	fb.NTextEditors = 2
 }
 
+// todo: rewrite with direct config, as a better example
+
 func (fb *FileBrowse) OnInit() {
 	fb.Defaults()
 	fb.Style(func(s *styles.Style) {
