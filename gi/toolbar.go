@@ -13,6 +13,8 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
+	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // DefaultTopAppBar is the default value for [Scene.TopAppBar].
@@ -65,25 +67,6 @@ func DefaultTopAppBar(tb *Toolbar) { //gti:add
 		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
 	})
-	tb.OverflowMenu().SetMenu(func(m *Scene) {
-		NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
-			OnClick(func(e events.Event) {
-				TheViewIFace.PrefsView(&Prefs)
-			})
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.GoGiEditor).
-			OnClick(func(e events.Event) {
-				TheViewIFace.GoGiEditor(tb.Sc)
-			})
-		NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
-			NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)
-			NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut)
-			NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
-		})
-		NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
-			NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong)
-			NewButton(m).SetText("Minimize").SetIcon(icons.Minimize)
-		})
-	})
 }
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
@@ -91,10 +74,13 @@ type Toolbar struct { //goki:embedder
 	Frame
 
 	// items moved from the main toolbar
-	OverflowItems []Widget `set:"-" json:"-" xml:"-"`
+	OverflowItems ki.Slice `set:"-" json:"-" xml:"-"`
 
 	// menu functions for overflow
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
+
+	// This is the overflow button
+	OverflowButton *Button
 }
 
 // Toolbarer is an interface that types can satisfy to add a toolbar when they
@@ -151,25 +137,144 @@ func (tb *Toolbar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
-// OverflowMenu returns the overflow menu element, a button on the end of the toolbar
-// that has a menu containing all of the toolbar buttons that either don't fit or are
-// too low-frequency to go in the main toolbar. If the overflow menu button doesn't
-// already exist, it makes it and a separator separating it from the rest of the toolbar.
-// OverflowMenu is designed to be used by end-user code; for example:
-//
-//	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-//		giv.NewFuncButton(m, me.SomethingLowFrequency)
-//	})
-func (tb *Toolbar) OverflowMenu() *Button {
-	if om, ok := tb.ChildByName("overflow-menu").(*Button); ok {
-		return om
+// DoLayoutAlloc moves overflow to the end of children for layout
+func (tb *Toolbar) DoLayoutAlloc(sc *Scene, iter int) bool {
+	if !tb.HasChildren() {
+		return tb.Frame.DoLayoutAlloc(sc, iter)
 	}
-	NewSeparator(tb, "overflow-menu-separator")
-	ic := icons.MoreVert
-	if tb.Lay != LayoutHoriz {
-		ic = icons.MoreHoriz
+	if iter == 0 {
+		tb.ToolbarLayoutIter0(sc)
+		tb.Frame.DoLayoutAlloc(sc, iter)
+		return true // needs another iter
+	} else {
+		tb.ToolbarLayoutIter1(sc)
+		tb.Frame.DoLayoutAlloc(sc, iter)
+		return false
 	}
-	return NewButton(tb, "overflow-menu").SetIcon(ic).SetTooltip("More")
+}
+
+func (tb *Toolbar) GetSize(sc *Scene, iter int) {
+	if iter == 0 {
+		if len(tb.OverflowItems) > 0 {
+			tb.Kids = append(tb.Kids, tb.OverflowItems...)
+			tb.OverflowItems = nil
+		}
+	}
+	tb.Frame.GetSize(sc, iter)
+}
+
+func (tb *Toolbar) ToolbarLayoutIter0(sc *Scene) {
+	if tb.OverflowButton == nil {
+		ic := icons.MoreVert
+		if tb.Lay != LayoutHoriz {
+			ic = icons.MoreHoriz
+		}
+		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
+			SetTooltip("Overflow toolbar items and additional menu items")
+		tb.OverflowButton.Menu = tb.OverflowMenu
+		tb.OverflowButton.Config(sc)
+	}
+	ovi := -1
+	for i, k := range tb.Kids {
+		_, wb := AsWidget(k)
+		if wb.This() == tb.OverflowButton.This() {
+			ovi = i
+			break
+		}
+	}
+	if ovi >= 0 {
+		tb.Kids.DeleteAtIndex(ovi)
+	}
+	tb.Kids = append(tb.Kids, tb.OverflowButton.This())
+}
+
+func (tb *Toolbar) ToolbarLayoutIter1(sc *Scene) {
+	ldim := LaySummedDim(tb.Lay)
+	avail := tb.ScBBox.Max
+	ovsz := tb.OverflowButton.BBox.Size()
+	avsz := avail.Sub(ovsz)
+	dmx := float32(avsz.X)
+	if ldim == mat32.Y {
+		dmx = float32(avsz.Y)
+	}
+
+	tb.OverflowItems = nil
+	n := len(tb.Kids)
+	ovidx := n - 1
+	hasOv := false
+	for i, k := range tb.Kids {
+		_, wb := AsWidget(k)
+		wbbm := mat32.NewVec2FmPoint(wb.BBox.Max)
+		wdmx := wbbm.Dim(ldim)
+		ov := wdmx > dmx
+		if ov {
+			if !hasOv {
+				ovidx = i
+				hasOv = true
+			}
+			tb.OverflowItems = append(tb.OverflowItems, k)
+		}
+	}
+	if ovidx != n-1 {
+		tb.Kids.Move(n-1, ovidx)
+		tb.Kids = tb.Kids[:ovidx+1]
+	}
+}
+
+// ManageOverflow processes any overflow according to overflow settings.
+func (tb *Toolbar) ManageOverflow(sc *Scene) {
+	tb.SetFlag(true, LayoutScrollsOff)
+	tb.ExtraSize.SetScalar(0)
+	for d := mat32.X; d <= mat32.Y; d++ {
+		tb.HasScroll[d] = false
+	}
+	// todo: move others out of range
+}
+
+// OverflowMenu is the overflow menu function
+func (tb *Toolbar) OverflowMenu(m *Scene) {
+	if len(tb.OverflowItems) > 0 {
+		for _, k := range tb.OverflowItems {
+			cl := k.This().Clone()
+			m.Kids = append(m.Kids, cl.This())
+		}
+		NewSeparator(m)
+	}
+	for _, fn := range tb.OverflowMenus {
+		fn(m)
+	}
+}
+
+// AddOverflowMenu adds given menu function to overflow menu list
+func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
+	tb.OverflowMenus = append(tb.OverflowMenus, fun)
+}
+
+// AddDefaultOverflowMenu adds the default menu function to overflow menu list,
+// typically at the end.
+func (tb *Toolbar) AddDefaultOverflowMenu() {
+	tb.OverflowMenus = append(tb.OverflowMenus, tb.DefaultOverflowMenu)
+}
+
+func (tb *Toolbar) DefaultOverflowMenu(m *Scene) {
+	NewSeparator(m)
+	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
+		OnClick(func(e events.Event) {
+			TheViewIFace.PrefsView(&Prefs)
+		})
+	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.GoGiEditor).
+		OnClick(func(e events.Event) {
+			TheViewIFace.GoGiEditor(tb.Sc)
+		})
+	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
+		NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)
+		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut)
+		NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste)
+	})
+	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
+		NewButton(m).SetText("Focus next").SetIcon(icons.CenterFocusStrong)
+		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize)
+	})
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar

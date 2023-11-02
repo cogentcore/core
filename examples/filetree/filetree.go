@@ -338,6 +338,8 @@ func (fb *FileBrowse) Toolbar(tb *gi.Toolbar) {
 	sa := giv.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
 	sa.Args[0].SetValue(fb.ActiveFilename)
 	// sa.Args[0].SetTag("ext", ".json")
+
+	tb.AddDefaultOverflowMenu()
 }
 
 // SplitsConfig returns a Config for configuring the Splits

@@ -23,38 +23,42 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
+	sc.TopAppBar = func(tb *gi.Toolbar) {
+		gi.DefaultTopAppBar(tb)
+
+		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
+		gi.NewSeparator(tb)
+		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
+		save.SetUpdateFunc(func() {
+			save.SetEnabledUpdt(pf.Changed)
+		})
+		gi.NewSeparator(tb)
+		NewFuncButton(tb, pf.LightMode)
+		NewFuncButton(tb, pf.DarkMode)
+		gi.NewSeparator(tb)
+		sz := NewFuncButton(tb, pf.SaveZoom).SetIcon(icons.ZoomIn)
+		sz.Args[0].SetValue(true)
+		NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
+		NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
+		gi.NewSeparator(tb)
+		NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
+		NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
+		NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
+		NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
+		tb.AddOverflowMenu(func(m *gi.Scene) {
+			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
+			NewFuncButton(m, pf.Delete).SetConfirm(true)
+			NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+		})
+		tb.AddDefaultOverflowMenu()
+	}
+
 	sv := NewStructView(sc)
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 	sv.OnChange(func(e events.Event) {
 		pf.Apply()
 		pf.Save()
-	})
-
-	tb := sv.Toolbar()
-	NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
-	gi.NewSeparator(tb)
-	save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
-	save.SetUpdateFunc(func() {
-		save.SetEnabledUpdt(pf.Changed)
-	})
-	gi.NewSeparator(tb)
-	NewFuncButton(tb, pf.LightMode)
-	NewFuncButton(tb, pf.DarkMode)
-	gi.NewSeparator(tb)
-	sz := NewFuncButton(tb, pf.SaveZoom).SetIcon(icons.ZoomIn)
-	sz.Args[0].SetValue(true)
-	NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
-	NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
-	gi.NewSeparator(tb)
-	NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
-	NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
-	NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
-	NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
-	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
-		NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
-		NewFuncButton(m, pf.Delete).SetConfirm(true)
-		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 	})
 
 	/*
@@ -116,9 +120,10 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	save.SetUpdateFunc(func() {
 		save.SetEnabledUpdt(pf.Changed)
 	})
-	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+	tb.AddOverflowMenu(func(m *gi.Scene) {
 		NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 	})
+	tb.AddDefaultOverflowMenu()
 
 	/*
 		mmen := win.MainMenu
