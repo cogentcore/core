@@ -21,7 +21,7 @@ import (
 // It adds navigation buttons and an editable chooser bar,
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
-func DefaultTopAppBar(tb *Toolbar) { //gti:add
+func DefaultTopAppBar(tb *TopAppBar) { //gti:add
 	NewButton(tb).SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
@@ -72,14 +72,14 @@ func DefaultTopAppBar(tb *Toolbar) { //gti:add
 	tb.AddDefaultOverflowMenu()
 }
 
-// Toolbar is a [Frame] that is useful for holding [Button]s that do things.
+// TopAppBar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
 // Set the Scene.TopAppBar to a toolbar function
 // In general it should be possible to use a single toolbar + overflow to
 // manage all an app's functionality, in a way that is portable across
 // mobile and desktop environments.
-type Toolbar struct { //goki:embedder
+type TopAppBar struct { //goki:embedder
 	Frame
 
 	// items moved from the main toolbar, will be shown in the overflow menu
@@ -94,31 +94,31 @@ type Toolbar struct { //goki:embedder
 	OverflowButton *Button
 }
 
-// Toolbarer is an interface that types can satisfy to add a toolbar when they
-// are displayed in the GUI. In the Toolbar method, types typically add [goki.dev/gi/v2/giv.FuncButton]
+// TopAppBarer is an interface that types can satisfy to add a toolbar when they
+// are displayed in the GUI. In the TopAppBar method, types typically add [goki.dev/gi/v2/giv.FuncButton]
 // and [gi.Separator] objects to the toolbar that they are passed, although they can
-// do anything they want. [ToolbarFor] checks for implementation of this interface.
-type Toolbarer interface {
-	Toolbar(tb *Toolbar)
+// do anything they want. [TopAppBarFor] checks for implementation of this interface.
+type TopAppBarer interface {
+	TopAppBar(tb *TopAppBar)
 }
 
-// ToolbarFor returns the Toolbar function of the given value on the given toolbar,
-// if the given value is implements the [Toolbarer] interface, else nil.
-func ToolbarFor(val any) func(tb *Toolbar) {
-	tbr, ok := val.(Toolbarer)
+// TopAppBarFor returns the TopAppBar function of the given value on the given toolbar,
+// if the given value is implements the [TopAppBarer] interface, else nil.
+func TopAppBarFor(val any) func(tb *TopAppBar) {
+	tbr, ok := val.(TopAppBarer)
 	if !ok {
 		return nil
 	}
-	return tbr.Toolbar
+	return tbr.TopAppBar
 }
 
-func (tb *Toolbar) CopyFieldsFrom(frm any) {
-	fr := frm.(*Toolbar)
+func (tb *TopAppBar) CopyFieldsFrom(frm any) {
+	fr := frm.(*TopAppBar)
 	tb.Frame.CopyFieldsFrom(&fr.Frame)
 }
 
-func (tb *Toolbar) OnInit() {
-	tb.ToolbarStyles()
+func (tb *TopAppBar) OnInit() {
+	tb.TopAppBarStyles()
 	tb.HandleLayoutEvents()
 }
 
@@ -144,16 +144,16 @@ func ToolbarStyles(ly Layouter) {
 	})
 }
 
-func (tb *Toolbar) ToolbarStyles() {
+func (tb *TopAppBar) TopAppBarStyles() {
 	ToolbarStyles(tb)
 }
 
-func (tb *Toolbar) IsVisible() bool {
+func (tb *TopAppBar) IsVisible() bool {
 	// do not render toolbars with no buttons
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
-func (tb *Toolbar) GetSize(sc *Scene, iter int) {
+func (tb *TopAppBar) GetSize(sc *Scene, iter int) {
 	if iter == 0 {
 		tb.AllItemsToChildren(sc)
 	}
@@ -164,7 +164,7 @@ func (tb *Toolbar) GetSize(sc *Scene, iter int) {
 // so the full set is considered for the next layout round,
 // and ensures the overflow button is made and moves it
 // to the end of the list.
-func (tb *Toolbar) AllItemsToChildren(sc *Scene) {
+func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 	if len(tb.OverflowItems) > 0 {
 		tb.Kids = append(tb.Kids, tb.OverflowItems...)
 		tb.OverflowItems = nil
@@ -194,7 +194,7 @@ func (tb *Toolbar) AllItemsToChildren(sc *Scene) {
 }
 
 // DoLayoutAlloc moves overflow to the end of children for layout
-func (tb *Toolbar) DoLayoutAlloc(sc *Scene, iter int) bool {
+func (tb *TopAppBar) DoLayoutAlloc(sc *Scene, iter int) bool {
 	if !tb.HasChildren() {
 		return tb.Frame.DoLayoutAlloc(sc, iter)
 	}
@@ -212,7 +212,7 @@ func (tb *Toolbar) DoLayoutAlloc(sc *Scene, iter int) bool {
 }
 
 // MoveToOverflow moves overflow out of children to the OverflowItems list
-func (tb *Toolbar) MoveToOverflow(sc *Scene) {
+func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 	ldim := LaySummedDim(tb.Lay) // X for horiz tbar, Y for vert
 	// note: the ScBBox is intersected with parents actual display size
 	// our own AvailSize is full width of all items
@@ -252,7 +252,7 @@ func (tb *Toolbar) MoveToOverflow(sc *Scene) {
 }
 
 // ManageOverflow processes any overflow according to overflow settings.
-func (tb *Toolbar) ManageOverflow(sc *Scene) {
+func (tb *TopAppBar) ManageOverflow(sc *Scene) {
 	tb.SetFlag(true, LayoutScrollsOff)
 	tb.ExtraSize.SetScalar(0)
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -262,7 +262,7 @@ func (tb *Toolbar) ManageOverflow(sc *Scene) {
 }
 
 // OverflowMenu is the overflow menu function
-func (tb *Toolbar) OverflowMenu(m *Scene) {
+func (tb *TopAppBar) OverflowMenu(m *Scene) {
 	nm := len(tb.OverflowMenus)
 	if len(tb.OverflowItems) > 0 {
 		for _, k := range tb.OverflowItems {
@@ -285,17 +285,17 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 }
 
 // AddOverflowMenu adds given menu function to overflow menu list
-func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
+func (tb *TopAppBar) AddOverflowMenu(fun func(m *Scene)) {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
 }
 
 // AddDefaultOverflowMenu adds the default menu function to overflow menu list,
 // typically at the end.
-func (tb *Toolbar) AddDefaultOverflowMenu() {
+func (tb *TopAppBar) AddDefaultOverflowMenu() {
 	tb.OverflowMenus = append(tb.OverflowMenus, tb.DefaultOverflowMenu)
 }
 
-func (tb *Toolbar) DefaultOverflowMenu(m *Scene) {
+func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) {
 	NewSeparator(m)
 	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
@@ -355,8 +355,8 @@ func (tb *Toolbar) DefaultOverflowMenu(m *Scene) {
 	})
 }
 
-// SetShortcuts sets the shortcuts to window associated with Toolbar
-func (tb *Toolbar) SetShortcuts() {
+// SetShortcuts sets the shortcuts to window associated with TopAppBar
+func (tb *TopAppBar) SetShortcuts() {
 	em := tb.EventMgr()
 	if em == nil {
 		return
@@ -369,13 +369,13 @@ func (tb *Toolbar) SetShortcuts() {
 	}
 }
 
-func (tb *Toolbar) Destroy() {
+func (tb *TopAppBar) Destroy() {
 	tb.DeleteShortcuts()
 	tb.Frame.Destroy()
 }
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
-func (tb *Toolbar) DeleteShortcuts() {
+func (tb *TopAppBar) DeleteShortcuts() {
 	em := tb.EventMgr()
 	if em == nil {
 		return
@@ -390,7 +390,7 @@ func (tb *Toolbar) DeleteShortcuts() {
 
 // UpdateButtons calls UpdateFunc on all buttons in toolbar -- individual
 // menus are automatically updated just prior to menu popup
-func (tb *Toolbar) UpdateButtons() {
+func (tb *TopAppBar) UpdateButtons() {
 	if tb == nil {
 		return
 	}
@@ -410,7 +410,7 @@ func (tb *Toolbar) UpdateButtons() {
 // given name (exact match) -- this is not the Text label but the Name of the
 // element (for AddButton items, this is the same as Label or Icon (if Label
 // is empty)) -- returns false if not found
-func (tb *Toolbar) FindButtonByName(name string) (*Button, bool) {
+func (tb *TopAppBar) FindButtonByName(name string) (*Button, bool) {
 	for _, mi := range tb.Kids {
 		if mi.KiType().HasEmbed(ButtonType) {
 			ac := AsButton(mi)

@@ -40,23 +40,24 @@ func app() {
 
 	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
-	tb := gi.NewToolbar(sc, "tbar")
-	tb.SetStretchMaxWidth()
-	gi.NewButton(tb).SetText("Button 1").SetData(1).
-		OnClick(func(e events.Event) {
-			fmt.Println("Toolbar Button 1")
-			gi.NewSnackbar(tb).Text("Something went wrong!").
-				Button("Try again", func(e events.Event) {
-					fmt.Println("got snackbar try again event")
-				}).
-				Icon(icons.Close, func(e events.Event) {
-					fmt.Println("got snackbar close icon event")
-				}).Run()
-		})
-	gi.NewButton(tb).SetText("Button 2").SetData(2).
-		OnClick(func(e events.Event) {
-			fmt.Println("Toolbar Button 2")
-		})
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
+		gi.DefaultTopAppBar(tb)
+		gi.NewButton(tb).SetText("Button 1").SetData(1).
+			OnClick(func(e events.Event) {
+				fmt.Println("TopAppBar Button 1")
+				gi.NewSnackbar(tb).Text("Something went wrong!").
+					Button("Try again", func(e events.Event) {
+						fmt.Println("got snackbar try again event")
+					}).
+					Icon(icons.Close, func(e events.Event) {
+						fmt.Println("got snackbar close icon event")
+					}).Run()
+			})
+		gi.NewButton(tb).SetText("Button 2").SetData(2).
+			OnClick(func(e events.Event) {
+				fmt.Println("TopAppBar Button 2")
+			})
+	}
 
 	trow := gi.NewLayout(sc, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
@@ -233,47 +234,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Printf("ComboBox selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
 	})
 
-	//////////////////////////////////////////
-	//      Main Menu
-
 	/*  todo:
-
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu.AddAppMenu(win)
-
-	// note: use keyfun.Menu* for standard shortcuts
-	// Command in shortcuts is automatically translated into Control for
-	// Linux, Windows or Meta for MacOS
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-	fmen.Menu.AddButton(gi.ActOpts{Label: "New", ShortcutKey: keyfun.MenuNew},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:New menu button triggered\n")
-		})
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", ShortcutKey: keyfun.MenuOpen},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:Open menu button triggered\n")
-		})
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Save", ShortcutKey: keyfun.MenuSave},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:Save menu button triggered\n")
-		})
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Save As..", ShortcutKey: keyfun.MenuSaveAs},
-		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:SaveAs menu button triggered\n")
-		})
-	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: keyfun.WinClose},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			win.CloseReq()
-		})
-
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu.AddCopyCutPaste(win)
-
 	inQuitPrompt := false
 	gi.SetQuitReqFunc(func() {
 		if inQuitPrompt {

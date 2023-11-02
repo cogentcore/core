@@ -1057,8 +1057,8 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 	sv.Update()
 }
 
-// SliceDefaultToolbar is a TopAppBar function that adds an "Add" button for slice
-func (sv *SliceViewBase) SliceDefaultToolbar(tb *gi.Toolbar) {
+// SliceDefaultTopAppBar is a TopAppBar function that adds an "Add" button for slice
+func (sv *SliceViewBase) SliceDefaultTopAppBar(tb *gi.TopAppBar) {
 	if laser.AnyIsNil(sv.Slice) {
 		return
 	}

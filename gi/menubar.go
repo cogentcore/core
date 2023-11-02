@@ -117,7 +117,7 @@ func (mb *MenuBar) UpdateButtons() {
 	}
 }
 
-// SetShortcuts sets the shortcuts to window associated with Toolbar
+// SetShortcuts sets the shortcuts to window associated with Menubar
 // Called in SetTypeHandlers()
 func (mb *MenuBar) SetShortcuts() {
 	em := mb.EventMgr()

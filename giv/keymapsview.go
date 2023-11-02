@@ -39,7 +39,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		keyfun.AvailMapsChanged = true
 	})
 
-	sc.TopAppBar = func(tb *gi.Toolbar) {
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
 
 		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)

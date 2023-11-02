@@ -94,6 +94,9 @@ func (fv *FileView) FileViewStyles() {
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(fv) {
+		case "path-tbar":
+			fr := w.(*gi.Frame)
+			gi.ToolbarStyles(fr)
 		case "files-row":
 			fr := w.(*gi.Layout)
 			fr.Lay = gi.LayoutHoriz
@@ -229,7 +232,7 @@ func (fv *FileView) ConfigFileView(sc *gi.Scene) {
 		return
 	}
 	config := ki.Config{}
-	config.Add(gi.ToolbarType, "path-tbar")
+	config.Add(gi.FrameType, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")
 	config.Add(gi.LayoutType, "sel-row")
 	mods, updt := fv.ConfigChildren(config)
@@ -244,7 +247,7 @@ func (fv *FileView) ConfigFileView(sc *gi.Scene) {
 }
 
 func (fv *FileView) ConfigPathBar() {
-	pr := fv.ChildByName("path-tbar", 0).(*gi.Toolbar)
+	pr := fv.ChildByName("path-tbar", 0).(*gi.Frame)
 	if pr.HasChildren() {
 		return
 	}
@@ -427,7 +430,7 @@ func (fv *FileView) WatchWatcher() {
 
 // PathField returns the chooser of the path
 func (fv *FileView) PathField() *gi.Chooser {
-	pr := fv.ChildByName("path-tbar", 0).(*gi.Toolbar)
+	pr := fv.ChildByName("path-tbar", 0).(*gi.Frame)
 	return pr.ChildByName("path", 1).(*gi.Chooser)
 }
 
