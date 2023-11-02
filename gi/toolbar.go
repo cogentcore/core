@@ -202,7 +202,8 @@ func (tb *Toolbar) ToolbarLayoutIter1(sc *Scene) {
 	n := len(tb.Kids)
 	ovidx := n - 1
 	hasOv := false
-	for i, k := range tb.Kids {
+	for i := 0; i < n-1; i++ {
+		k := tb.Kids[i]
 		_, wb := AsWidget(k)
 		wbbm := mat32.NewVec2FmPoint(wb.BBox.Max)
 		wdmx := wbbm.Dim(ldim)
@@ -235,8 +236,12 @@ func (tb *Toolbar) ManageOverflow(sc *Scene) {
 func (tb *Toolbar) OverflowMenu(m *Scene) {
 	if len(tb.OverflowItems) > 0 {
 		for _, k := range tb.OverflowItems {
+			if k.This() == tb.OverflowButton.This() {
+				continue
+			}
 			cl := k.This().Clone()
-			m.Kids = append(m.Kids, cl.This())
+			m.AddChild(cl)
+			cl.This().(Widget).Config(m)
 		}
 		NewSeparator(m)
 	}
