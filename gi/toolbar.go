@@ -86,11 +86,15 @@ func DefaultTopAppBar(tb *Toolbar) { //gti:add
 	})
 }
 
-// TODO(kai): support AutoOverflowMenu for Toolbar
-
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 type Toolbar struct { //goki:embedder
 	Frame
+
+	// items moved from the main toolbar
+	OverflowItems []Widget `set:"-" json:"-" xml:"-"`
+
+	// menu functions for overflow
+	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 }
 
 // Toolbarer is an interface that types can satisfy to add a toolbar when they
