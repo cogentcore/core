@@ -31,7 +31,7 @@ type ArgView struct {
 func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
-		av.Spacing = gi.StdDialogVSpaceUnits
+		s.Spacing = gi.StdDialogVSpaceUnits
 		s.MaxWidth.Dp(-1)
 		s.MaxHeight.Dp(-1)
 	})

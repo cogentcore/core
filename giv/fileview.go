@@ -89,7 +89,7 @@ func (fv *FileView) OnInit() {
 func (fv *FileView) FileViewStyles() {
 	fv.Lay = gi.LayoutVert
 	fv.Style(func(s *styles.Style) {
-		fv.Spacing = gi.StdDialogVSpaceUnits
+		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {
@@ -122,7 +122,7 @@ func (fv *FileView) FileViewStyles() {
 			sr := w.(*gi.Layout)
 			sr.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				sr.Spacing.Dp(4)
+				s.Spacing.Dp(4)
 				s.SetStretchMaxWidth()
 			})
 		case "sel-row/sel": // sel field

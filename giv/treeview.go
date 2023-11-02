@@ -193,11 +193,10 @@ func (tv *TreeView) TreeViewStyles() {
 		// fmt.Println(w.PathFrom(tv))
 		switch w.PathFrom(tv) {
 		case "parts":
-			parts := w.(*gi.Layout)
-			parts.Style(func(s *styles.Style) {
+			w.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-				parts.Spacing.Ch(0.1)
+				s.Spacing.Ch(0.1)
 				s.Padding.Set(units.Dp(0))
 
 				// we manually inherit our state layer from the treeview state
@@ -208,7 +207,7 @@ func (tv *TreeView) TreeViewStyles() {
 			// so that we only get it when we are doing
 			// something with this treeview specifically,
 			// not with any of our children (see HandleTreeViewMouse)
-			parts.On(events.MouseEnter, func(e events.Event) {
+			w.On(events.MouseEnter, func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
@@ -217,7 +216,7 @@ func (tv *TreeView) TreeViewStyles() {
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
-			parts.On(events.MouseLeave, func(e events.Event) {
+			w.On(events.MouseLeave, func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
@@ -226,7 +225,7 @@ func (tv *TreeView) TreeViewStyles() {
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
-			parts.On(events.MouseDown, func(e events.Event) {
+			w.On(events.MouseDown, func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
@@ -235,7 +234,7 @@ func (tv *TreeView) TreeViewStyles() {
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
-			parts.On(events.MouseUp, func(e events.Event) {
+			w.On(events.MouseUp, func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
@@ -244,14 +243,14 @@ func (tv *TreeView) TreeViewStyles() {
 				tv.SetNeedsRender()
 				e.SetHandled()
 			})
-			parts.OnClick(func(e events.Event) {
+			w.OnClick(func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
 				tv.SelectAction(e.SelectMode())
 				e.SetHandled()
 			})
-			parts.OnDoubleClick(func(e events.Event) {
+			w.AsWidget().OnDoubleClick(func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
@@ -261,7 +260,7 @@ func (tv *TreeView) TreeViewStyles() {
 			})
 			// the context menu events will get sent to the parts, so it
 			// needs to intercept them and send them up
-			parts.On(events.ContextMenu, tv.ShowContextMenu)
+			w.On(events.ContextMenu, tv.ShowContextMenu)
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Width.Em(1)

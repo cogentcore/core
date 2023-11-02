@@ -82,7 +82,7 @@ func (tv *TableView) TableViewInit() {
 	tv.Lay = gi.LayoutVert
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		tv.Spacing = gi.StdDialogVSpaceUnits
+		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -102,7 +102,7 @@ func (tv *TableView) TableViewInit() {
 			sh := w.(*gi.Toolbar)
 			sh.Lay = gi.LayoutHoriz
 			sh.Style(func(s *styles.Style) {
-				sh.Spacing.Dp(0)
+				s.Spacing.Dp(0)
 				s.MaxWidth.Dp(0)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
@@ -440,7 +440,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	sg := tv.SliceGrid()
-	spc := sgh.Spacing.Dots
+	spc := sgh.Styles.Spacing.Dots
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
 	if tv.Is(SliceViewShowIndex) {

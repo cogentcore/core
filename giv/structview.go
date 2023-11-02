@@ -74,7 +74,7 @@ func (sv *StructView) OnInit() {
 	sv.ShowToolbar = true
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
-		sv.Spacing = gi.StdDialogVSpaceUnits
+		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
