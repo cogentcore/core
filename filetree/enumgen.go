@@ -182,35 +182,35 @@ func (i *DirFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _NodeFlagsValues = []NodeFlags{12, 13}
+var _NodeFlagsValues = []NodeFlags{11, 12}
 
 // NodeFlagsN is the highest valid value
 // for type NodeFlags, plus one.
-const NodeFlagsN NodeFlags = 14
+const NodeFlagsN NodeFlags = 13
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _NodeFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[NodeOpen-(12)]
-	_ = x[NodeSymLink-(13)]
+	_ = x[NodeOpen-(11)]
+	_ = x[NodeSymLink-(12)]
 }
 
 var _NodeFlagsNameToValueMap = map[string]NodeFlags{
-	`Open`:    12,
-	`open`:    12,
-	`SymLink`: 13,
-	`symlink`: 13,
+	`Open`:    11,
+	`open`:    11,
+	`SymLink`: 12,
+	`symlink`: 12,
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
-	12: `NodeOpen means file is open. For directories, this means that sub-files should be / have been loaded. For files, means that they have been opened e.g., for editing.`,
-	13: `NodeSymLink indicates that file is a symbolic link. File info is all for the target of the symlink.`,
+	11: `NodeOpen means file is open. For directories, this means that sub-files should be / have been loaded. For files, means that they have been opened e.g., for editing.`,
+	12: `NodeSymLink indicates that file is a symbolic link. File info is all for the target of the symlink.`,
 }
 
 var _NodeFlagsMap = map[NodeFlags]string{
-	12: `Open`,
-	13: `SymLink`,
+	11: `Open`,
+	12: `SymLink`,
 }
 
 // String returns the string representation
