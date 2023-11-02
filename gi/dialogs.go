@@ -30,10 +30,10 @@ type Dialog struct { //goki:no-new
 	Stage *MainStage
 
 	// Accepted means that the dialog was accepted -- else canceled
-	Accepted bool
+	Accepted bool `set:"-"`
 
 	// Buttons go here when added
-	Btns *Layout
+	Btns *Layout `set:"-"`
 }
 
 // NewDialog returns a new [Dialog] in the context of the given widget,

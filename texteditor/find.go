@@ -312,16 +312,15 @@ func QReplaceDialog(d *gi.Dialog, find string, lexitems bool) *gi.Dialog {
 
 // QReplaceDialogValues gets the string values
 func QReplaceDialogValues(d *gi.Dialog) (find, repl string, lexItems bool) {
-	sc := d.Stage.Scene
-	tff := sc.ChildByName("find", 1).(*gi.Chooser)
+	tff := d.ChildByName("find", 1).(*gi.Chooser)
 	if tf, found := tff.TextField(); found {
 		find = tf.Text()
 	}
-	tfr := sc.ChildByName("repl", 2).(*gi.Chooser)
+	tfr := d.ChildByName("repl", 2).(*gi.Chooser)
 	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}
-	lb := sc.ChildByName("lexb", 3).(*gi.Switch)
+	lb := d.ChildByName("lexb", 3).(*gi.Switch)
 	lexItems = lb.StateIs(states.Checked)
 	return
 }
