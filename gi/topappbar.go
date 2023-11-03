@@ -7,7 +7,10 @@ package gi
 import (
 	"log/slog"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -45,7 +48,7 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 		mm.PopDeleteType(stg.Type)
 	})
 	// NewButton(tb).SetIcon(icons.ArrowForward)
-	ch := NewChooser(tb).SetEditable(true)
+	ch := NewChooser(tb, "nav-bar").SetEditable(true)
 	ch.SetItemsFunc(func() {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
@@ -72,6 +75,11 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 		kv := mm.Stack.Order[ch.CurIndex]
 		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
+	})
+	ch.Style(func(s *styles.Style) {
+		s.Border.Width.Set(units.Zero())
+		s.Border.Radius = styles.BorderRadiusFull
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 	})
 	tb.AddDefaultOverflowMenu()
 }
