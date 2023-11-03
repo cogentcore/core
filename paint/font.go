@@ -47,7 +47,6 @@ func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
 	} else {
 		fs.Face = face
 	}
-	fs.Rem = ctxt.ToDots(12, units.UnitPt)
 	fs.SetUnitContext(ctxt)
 	return fs.Font
 }

@@ -47,9 +47,6 @@ type Font struct {
 
 	// full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
 	Face *FontFace `view:"-"`
-
-	// Rem size of font -- 12pt converted to same effective DPI as above measurements
-	Rem float32
 }
 
 func (fs *Font) Defaults() {
@@ -74,7 +71,7 @@ func (fs *Font) InheritFields(par *Font) {
 func (fs *Font) ToDots(uc *units.Context) {
 	if fs.Size.Un == units.UnitEm || fs.Size.Un == units.UnitEx || fs.Size.Un == units.UnitCh {
 		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", fs.Size.Un)
-		fs.Size.Dp(12)
+		fs.Size.Dp(16)
 	}
 	fs.Size.ToDots(uc)
 }
@@ -88,7 +85,8 @@ func (fs *Font) SetDeco(deco TextDecorations) {
 // units.Context, based on the currently-loaded face.
 func (fs *Font) SetUnitContext(ctxt *units.Context) {
 	if fs.Face != nil {
-		ctxt.SetFont(fs.Face.Metrics.Em, fs.Face.Metrics.Ex, fs.Face.Metrics.Ch, fs.Rem)
+		// STYTODO(kai): implement rem
+		ctxt.SetFont(fs.Face.Metrics.Em, fs.Face.Metrics.Ex, fs.Face.Metrics.Ch, fs.Face.Metrics.Em)
 	}
 }
 

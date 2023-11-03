@@ -11,7 +11,7 @@ type Context struct {
 	// DPI is dots-per-inch of the display
 	DPI float32
 
-	// FontEm is the point size of the font in raw dots (not points)
+	// FontEm is the size of the font of the element in raw dots (not points)
 	FontEm float32
 
 	// FontEx is the height x-height of font in points (size of 'x' glyph)
@@ -20,7 +20,7 @@ type Context struct {
 	// FontCh is the ch-size character size of font in points (width of '0' glyph)
 	FontCh float32
 
-	// FontRem is rem-size of font in points -- root Em size -- typically 12 point
+	// FontRem is the size of the font of the root element in raw dots (not points)
 	FontRem float32
 
 	// Vpw is viewport width in dots
@@ -45,12 +45,12 @@ type Context struct {
 // Defaults are generic defaults
 func (uc *Context) Defaults() {
 	uc.DPI = PxPerInch
-	uc.FontEm = 12.0
-	uc.FontEx = 6.0
-	uc.FontCh = 6.0
-	uc.FontRem = 12.0
-	uc.Vpw = 800.0
-	uc.Vph = 600.0
+	uc.FontEm = 16
+	uc.FontEx = 8
+	uc.FontCh = 8
+	uc.FontRem = 16
+	uc.Vpw = 800
+	uc.Vph = 600
 	uc.Elw = uc.Vpw
 	uc.Elh = uc.Vph
 	uc.Paw = uc.Vpw
