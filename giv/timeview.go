@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
@@ -23,7 +22,7 @@ type TimeValue struct {
 }
 
 func (vv *TimeValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.FrameType
+	vv.WidgetTyp = gi.LayoutType
 	return vv.WidgetTyp
 }
 
@@ -43,7 +42,7 @@ func (vv *TimeValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	fr := vv.Widget.(*gi.Frame)
+	fr := vv.Widget.(*gi.Layout)
 	tm := vv.TimeVal()
 
 	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format(time.DateOnly))
@@ -57,18 +56,14 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	fr := vv.Widget.(*gi.Frame)
-	fr.SetLayout(gi.LayoutHoriz)
+	ly := vv.Widget.(*gi.Layout)
+	ly.SetLayout(gi.LayoutHoriz)
 
-	if len(fr.Kids) > 0 {
+	if len(ly.Kids) > 0 {
 		return
 	}
 
-	fr.Style(func(s *styles.Style) {
-		s.MaxHeight.Zero()
-	})
-
-	dt := gi.NewTextField(fr, "date").SetTooltip("The date")
+	dt := gi.NewTextField(ly, "date").SetTooltip("The date")
 	dt.OnChange(func(e events.Event) {
 		d, err := time.Parse(time.DateOnly, dt.Text())
 		if err != err {
@@ -82,7 +77,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	})
 	dt.Config(sc)
 
-	tm := gi.NewTextField(fr, "time").SetTooltip("The time")
+	tm := gi.NewTextField(ly, "time").SetTooltip("The time")
 	tm.OnChange(func(e events.Event) {
 		t, err := time.Parse(time.TimeOnly, tm.Text())
 		if err != err {
@@ -131,7 +126,7 @@ type DurationValue struct {
 }
 
 func (vv *DurationValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.FrameType
+	vv.WidgetTyp = gi.LayoutType
 	return vv.WidgetTyp
 }
 
@@ -156,9 +151,9 @@ func (vv *DurationValue) UpdateWidget() {
 		adur = dur / undur
 	}
 
-	fr := vv.Widget.(*gi.Frame)
-	fr.ChildByName("value").(*gi.Spinner).SetValue(float32(adur))
-	fr.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
+	ly := vv.Widget.(*gi.Layout)
+	ly.ChildByName("value").(*gi.Spinner).SetValue(float32(adur))
+	ly.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
 }
 
 func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -168,16 +163,12 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	fr := vv.Widget.(*gi.Frame)
+	fr := vv.Widget.(*gi.Layout)
 	fr.SetLayout(gi.LayoutHoriz)
 
 	if len(fr.Kids) > 0 {
 		return
 	}
-
-	fr.Style(func(s *styles.Style) {
-		s.MaxHeight.Zero()
-	})
 
 	var ch *gi.Chooser
 
