@@ -86,6 +86,7 @@ func (sp *Spinner) OnInit() {
 
 func (sp *Spinner) SpinnerStyles() {
 	sp.Style(func(s *styles.Style) {
+		// we take responsibility for the focus of our parts
 		s.SetAbilities(true, abilities.Focusable)
 		// our parts take responsibility for their own state layers
 		s.StateLayer = 0
@@ -315,14 +316,6 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		sp.SetSelected(!sp.StateIs(states.Selected))
 		sp.Send(events.Select, e)
 	})
-	// TODO(kai): improve spin box focus handling
-	// tf.OnClick(func(e events.Event) {
-	// 	if sp.IsReadOnly() {
-	// 		return
-	// 	}
-	// 	sp.SetState(true, states.Focused)
-	// 	sp.HandleEvent(e)
-	// })
 	tf.OnChange(func(e events.Event) {
 		text := tf.Text()
 		val, err := sp.StringToVal(text)
@@ -333,7 +326,8 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		}
 		sp.SetValueAction(val)
 	})
-	tf.OnKeyChord(func(e events.Event) {
+
+	sp.OnKeyChord(func(e events.Event) {
 		if sp.IsReadOnly() {
 			return
 		}
@@ -355,14 +349,24 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 			e.SetHandled()
 			sp.PageIncrValue(-1)
 		default:
+			// if we don't have anything special to do,
+			// we just give our key event to our textfield
 			sp.TextField().HandleEvent(e)
 		}
 	})
-	// // Spinner always gives its focus to textfield
-	// sp.OnFocus(func(e events.Event) {
-	// 	tf.GrabFocus()
-	// 	tf.Send(events.Focus, e) // sets focused flag
-	// })
+	tf.OnClick(func(e events.Event) {
+		if sp.IsReadOnly() {
+			return
+		}
+		sp.GrabFocus()
+	})
+	// Spinner gives its textfield focus styling but not actual focus
+	sp.OnFocus(func(e events.Event) {
+		tf.SetState(true, states.Focused)
+	})
+	sp.OnFocusLost(func(e events.Event) {
+		tf.SetState(false, states.Focused)
+	})
 }
 
 func (sp *Spinner) ConfigWidget(sc *Scene) {
