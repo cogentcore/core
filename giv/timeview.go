@@ -6,14 +6,56 @@ package giv
 
 import (
 	"log/slog"
+	"strconv"
 	"time"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
 	"goki.dev/pi/v2/filecat"
 )
+
+// TimeView is a view for selecting a time
+type TimeView struct {
+	gi.Frame
+
+	// the time that we are viewing
+	Time time.Time `set:"-"`
+}
+
+// SetTime sets the source time and updates the view
+func (tv *TimeView) SetTime(tim time.Time) *TimeView {
+	updt := tv.UpdateStart()
+	tv.Time = tim
+	tv.UpdateEndRender(updt)
+	tv.SendChange()
+	return tv
+}
+
+func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
+	if tv.HasChildren() {
+		return
+	}
+	updt := tv.UpdateStart()
+
+	tv.SetLayout(gi.LayoutHoriz)
+
+	gi.NewTextField(tv, "hour").SetType(gi.TextFieldOutlined).
+		SetText(strconv.Itoa(tv.Time.Hour())).
+		Style(func(s *styles.Style) {
+			s.Font.Size.Rem(2)
+		})
+
+	gi.NewTextField(tv, "minute").SetType(gi.TextFieldOutlined).
+		SetText(strconv.Itoa(tv.Time.Minute())).
+		Style(func(s *styles.Style) {
+			s.Font.Size.Rem(2)
+		})
+
+	tv.UpdateEnd(updt)
+}
 
 // TimeValue presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker view dialogs.
