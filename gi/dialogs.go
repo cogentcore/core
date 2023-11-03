@@ -147,7 +147,11 @@ func (d *Dialog) Cancel(text ...string) *Dialog {
 	if len(text) > 0 {
 		txt = text[0]
 	}
-	NewButton(bb, "cancel").SetText(txt).OnClick(func(e events.Event) {
+	bt := NewButton(bb, "cancel").SetText(txt)
+	if d.Stage.FullWindow || d.Stage.NewWindow {
+		bt.SetType(ButtonOutlined)
+	}
+	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		d.CancelDialog()
 	})
