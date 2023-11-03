@@ -32,11 +32,14 @@ type Dialog struct { //goki:no-new
 // NewDialog returns a new [Dialog] in the context of the given widget,
 // optionally with the given name.
 func NewDialog(ctx Widget, name ...string) *Dialog {
+	if ctx == nil {
+		ctx = CurRenderWin.MainScene()
+	}
 	d := &Dialog{}
 	nm := ""
 	if len(name) > 0 {
 		nm = name[0]
-	} else {
+	} else if ctx != nil {
 		nm = ctx.Name() + "-dialog"
 	}
 
