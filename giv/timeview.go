@@ -5,15 +5,96 @@
 package giv
 
 import (
+	"log/slog"
 	"time"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
+	"goki.dev/pi/v2/filecat"
 )
 
-var timeUnits = []string{
+// TimeValue presents two text fields for editing a date and time,
+// both of which can pull up corresponding picker view dialogs.
+type TimeValue struct {
+	ValueBase
+}
+
+func (vv *TimeValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.FrameType
+	return vv.WidgetTyp
+}
+
+// TimeVal decodes Value into a *time.Time value -- also handles FileTime case
+func (vv *TimeValue) TimeVal() *time.Time {
+	tmi := laser.PtrValue(vv.Value).Interface()
+	switch v := tmi.(type) {
+	case *time.Time:
+		return v
+	case *filecat.FileTime:
+		return (*time.Time)(v)
+	}
+	return nil
+}
+
+func (vv *TimeValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	fr := vv.Widget.(*gi.Frame)
+	tm := vv.TimeVal()
+
+	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format(time.DateOnly))
+	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(time.TimeOnly))
+}
+
+func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
+		vv.UpdateWidget()
+		return
+	}
+	vv.Widget = w
+	vv.StdConfigWidget(w)
+	fr := vv.Widget.(*gi.Frame)
+	fr.SetLayout(gi.LayoutHoriz)
+
+	if len(fr.Kids) > 0 {
+		return
+	}
+
+	dt := gi.NewTextField(fr, "date").SetTooltip("The date")
+	dt.OnChange(func(e events.Event) {
+		d, err := time.Parse(time.DateOnly, dt.Text())
+		if err != err {
+			// TODO(kai/snack)
+			slog.Error(err.Error())
+			return
+		}
+		tv := vv.TimeVal()
+		// new date and old time
+		*tv = time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location())
+	})
+	dt.Config(sc)
+
+	tm := gi.NewTextField(fr, "time").SetTooltip("The time")
+	tm.OnChange(func(e events.Event) {
+		t, err := time.Parse(time.TimeOnly, tm.Text())
+		if err != err {
+			// TODO(kai/snack)
+			slog.Error(err.Error())
+			return
+		}
+		tv := vv.TimeVal()
+		// old date and new time
+		*tv = time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location())
+	})
+	dt.Config(sc)
+
+	vv.UpdateWidget()
+}
+
+var durationUnits = []string{
 	"nanoseconds",
 	"microseconds",
 	"milliseconds",
@@ -26,7 +107,7 @@ var timeUnits = []string{
 	"years",
 }
 
-var timeUnitsMap = map[string]time.Duration{
+var durationUnitsMap = map[string]time.Duration{
 	"nanoseconds":  time.Nanosecond,
 	"microseconds": time.Microsecond,
 	"milliseconds": time.Millisecond,
@@ -57,8 +138,8 @@ func (vv *DurationValue) UpdateWidget() {
 	dur := npv.Interface().(time.Duration)
 	un := "seconds"
 	undur := time.Duration(0)
-	for _, u := range timeUnits {
-		v := timeUnitsMap[u]
+	for _, u := range durationUnits {
+		v := durationUnitsMap[u]
 		if v > dur {
 			break
 		}
@@ -93,12 +174,12 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 	sp := gi.NewSpinner(fr, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
-		vv.SetValue(sp.Value * float32(timeUnitsMap[ch.CurLabel]))
+		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurLabel]))
 	})
 	sp.Config(sc)
 
 	units := []any{}
-	for _, u := range timeUnits {
+	for _, u := range durationUnits {
 		units = append(units, u)
 	}
 
@@ -107,7 +188,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(vv.Value)
 		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(timeUnitsMap[ch.CurLabel]))
+		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurLabel]))
 	})
 
 	vv.UpdateWidget()
