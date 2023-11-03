@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
@@ -62,6 +63,10 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	if len(fr.Kids) > 0 {
 		return
 	}
+
+	fr.Style(func(s *styles.Style) {
+		s.MaxHeight.Zero()
+	})
 
 	dt := gi.NewTextField(fr, "date").SetTooltip("The date")
 	dt.OnChange(func(e events.Event) {
@@ -169,6 +174,10 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	if len(fr.Kids) > 0 {
 		return
 	}
+
+	fr.Style(func(s *styles.Style) {
+		s.MaxHeight.Zero()
+	})
 
 	var ch *gi.Chooser
 
