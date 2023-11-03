@@ -17,6 +17,10 @@ import (
 // type keys to set key chords.
 type Chord string
 
+func (ch Chord) String() string {
+	return string(ch)
+}
+
 // NewChord returns a string representation of the keyboard event suitable for
 // keyboard function maps, etc. Printable runes are sent directly, and
 // non-printable ones are converted to their corresponding code names without
