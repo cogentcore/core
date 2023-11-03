@@ -146,10 +146,6 @@ func (ch *Chooser) ChooserStyles() {
 	})
 	ch.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ch) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Spacing.Dp(0)
-			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Margin.Set()

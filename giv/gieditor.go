@@ -195,7 +195,6 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	ge.Lay = gi.LayoutVert
-	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")

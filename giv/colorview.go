@@ -48,9 +48,6 @@ type ColorView struct {
 
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
-	cv.Style(func(s *styles.Style) {
-		s.Spacing = gi.StdDialogVSpaceUnits
-	})
 	cv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
@@ -75,10 +72,6 @@ func (cv *ColorView) OnInit() {
 		case "nums-hex":
 			w.Style(func(s *styles.Style) {
 				s.MinWidth.Ch(20)
-			})
-		case "num-lay":
-			w.Style(func(s *styles.Style) {
-				s.Spacing = gi.StdDialogVSpaceUnits
 			})
 		}
 		if sl, ok := w.(*gi.Slider); ok {

@@ -60,7 +60,6 @@ func (mv *MapView) OnInit() {
 func (mv *MapView) MapViewStyles() {
 	mv.Lay = gi.LayoutVert
 	mv.Style(func(s *styles.Style) {
-		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {

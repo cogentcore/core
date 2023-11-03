@@ -300,7 +300,6 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {

@@ -89,7 +89,6 @@ func (fv *FileView) OnInit() {
 func (fv *FileView) FileViewStyles() {
 	fv.Lay = gi.LayoutVert
 	fv.Style(func(s *styles.Style) {
-		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {

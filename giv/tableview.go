@@ -81,7 +81,6 @@ func (tv *TableView) TableViewInit() {
 	tv.Lay = gi.LayoutVert
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
