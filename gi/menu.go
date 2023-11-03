@@ -24,6 +24,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = styles.BoxShadow2()
+		s.Spacing.Dp(0)
 	})
 	msc.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
