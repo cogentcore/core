@@ -351,7 +351,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		default:
 			// if we don't have anything special to do,
 			// we just give our key event to our textfield
-			sp.TextField().HandleEvent(e)
+			tf.HandleEvent(e)
 		}
 	})
 	tf.OnClick(func(e events.Event) {
