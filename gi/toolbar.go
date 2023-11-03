@@ -20,7 +20,7 @@ func ToolbarStyles(ly Layouter) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Padding.SetHoriz(units.Dp(16))
-		s.Spacing.Dp(0)
+		s.Spacing.Zero()
 	})
 	ly.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {

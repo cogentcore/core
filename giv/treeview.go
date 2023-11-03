@@ -197,7 +197,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 				s.Spacing.Ch(0.1)
-				s.Padding.Set(units.Dp(0))
+				s.Padding.Set(units.Zero())
 
 				// we manually inherit our state layer from the treeview state
 				// layer so that the parts get it but not the other tree views
