@@ -5,10 +5,8 @@
 package gi
 
 import (
-	"encoding/json"
 	"image/color"
 	"log"
-	"log/slog"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -19,6 +17,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grows/jsons"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -173,11 +172,10 @@ var PrefsFileName = "prefs.json"
 func (pf *Preferences) Open() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	b, err := os.ReadFile(pnm)
+	err := grr.Log0(jsons.Open(pf, pnm))
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(b, pf)
 	if pf.SaveKeyMaps {
 		err = keyfun.AvailMaps.OpenPrefs()
 		if err != nil {
@@ -188,6 +186,7 @@ func (pf *Preferences) Open() error { //gti:add
 	if pf.SaveDetailed {
 		err := PrefsDet.Open()
 		if err != nil {
+			pf.SaveDetailed = false
 			return err
 		}
 	}
@@ -202,23 +201,21 @@ func (pf *Preferences) Open() error { //gti:add
 func (pf *Preferences) Save() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	b, err := json.MarshalIndent(pf, "", "  ")
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(pnm, b, 0644)
+	err := grr.Log0(jsons.Save(pf, pnm))
 	if err != nil {
 		return err
 	}
 	if pf.SaveKeyMaps {
 		err := keyfun.AvailMaps.SavePrefs()
 		if err != nil {
+			pf.SaveKeyMaps = false
 			return err
 		}
 	}
 	if pf.SaveDetailed {
 		err := PrefsDet.Save()
 		if err != nil {
+			pf.SaveDetailed = false
 			return err
 		}
 	}
@@ -257,7 +254,7 @@ func (pf *Preferences) DarkMode() { //gti:add
 }
 
 // Apply preferences to all the relevant settings.
-func (pf *Preferences) Apply() {
+func (pf *Preferences) Apply() { //gti:add
 	np := len(pf.FavPaths)
 	for i := 0; i < np; i++ {
 		if pf.FavPaths[i].Ic == "" {
@@ -610,29 +607,13 @@ type FilePaths []string
 var SavedPaths FilePaths
 
 // Open file paths from a JSON-formatted file.
-func (pf *FilePaths) OpenJSON(filename string) error {
-	b, err := os.ReadFile(filename)
-	if err != nil {
-		// PromptDialog(nil, "File Not Found", err.Error(), AddOk, NoCancel, nil, nil, nil)
-		// slog.Error(err.Error())
-		return err
-	}
-	return json.Unmarshal(b, pf)
+func (pf *FilePaths) OpenJSON(filename string) error { //gti:add
+	return grr.Log0(jsons.Open(pf, filename))
 }
 
 // Save file paths to a JSON-formatted file.
-func (pf *FilePaths) SaveJSON(filename string) error {
-	b, err := json.MarshalIndent(pf, "", "  ")
-	if err != nil {
-		slog.Error(err.Error()) // unlikely
-		return err
-	}
-	err = os.WriteFile(filename, b, 0644)
-	if err != nil {
-		// PromptDialog(nil, "Could not Save to File", err.Error(), AddOk, NoCancel, nil, nil, nil)
-		slog.Error(err.Error())
-	}
-	return err
+func (pf *FilePaths) SaveJSON(filename string) error { //gti:add
+	return grr.Log0(jsons.Save(pf, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max
@@ -766,12 +747,7 @@ var PrefsDetailedFileName = "prefs_det.json"
 func (pf *PrefsDetailed) Open() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	b, err := os.ReadFile(pnm)
-	if err != nil {
-		// slog.Error(err.Error()) // ok to be non-existent
-		return err
-	}
-	err = json.Unmarshal(b, pf)
+	err := grr.Log0(jsons.Open(pf, pnm))
 	pf.Changed = false
 	return err
 }
@@ -780,15 +756,7 @@ func (pf *PrefsDetailed) Open() error { //gti:add
 func (pf *PrefsDetailed) Save() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	b, err := json.MarshalIndent(pf, "", "  ")
-	if err != nil {
-		slog.Error(err.Error())
-		return err
-	}
-	err = os.WriteFile(pnm, b, 0644)
-	if err != nil {
-		slog.Error(err.Error())
-	}
+	err := grr.Log0(jsons.Save(pf, pnm))
 	pf.Changed = false
 	return err
 }
