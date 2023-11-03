@@ -19,7 +19,6 @@ func ToolbarStyles(ly Layouter) {
 		s.SetStretchMaxWidth()
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.Margin.Set(units.Dp(4))
 		s.Padding.SetHoriz(units.Dp(16))
 	})
 	ly.OnWidgetAdded(func(w Widget) {
