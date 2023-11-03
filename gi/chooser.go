@@ -159,9 +159,10 @@ func (ch *Chooser) ChooserStyles() {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
-				if ch.MaxLength > 0 {
-					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
-				}
+				// TODO(kai): figure out what to do with MaxLength
+				// if ch.MaxLength > 0 {
+				// 	s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				// }
 			})
 		case "parts/text":
 			text := w.(*TextField)
@@ -181,9 +182,9 @@ func (ch *Chooser) ChooserStyles() {
 				s.StateLayer = ch.Styles.StateLayer
 				s.StateColor = ch.Styles.Color
 				s.BackgroundColor.SetSolid(colors.Transparent)
-				if ch.MaxLength > 0 {
-					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
-				}
+				// if ch.MaxLength > 0 {
+				// 	s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				// }
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
