@@ -78,6 +78,7 @@ func (ts *Tabs) TabsStyles() {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
+				s.MaxHeight.Dp(0)
 				s.Height.Em(1.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Set()
