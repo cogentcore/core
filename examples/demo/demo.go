@@ -42,13 +42,7 @@ func app() {
 }
 
 func makeHome(ts *gi.Tabs) {
-	home := ts.NewTab("Home")
-	home.Lay = gi.LayoutVert
-	home.Style(func(s *styles.Style) {
-		s.Spacing.Ex(1)
-		s.Padding.Set(units.Dp(8))
-		s.SetStretchMax()
-	})
+	home := ts.NewTab("Home").SetLayout(gi.LayoutVert)
 
 	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
 
