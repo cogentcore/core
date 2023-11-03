@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image/color"
-	"log/slog"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -57,8 +56,9 @@ type Preferences struct { //gti:add
 	// overall zoom factor as a percentage of the default zoom
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 
-	// the density (compactness) of content
-	Density Densities
+	// the overall density factor as a percentage of the default amount of spacing
+	// (smaller numbers lead to more density and larger numbers lead to more space)
+	Density float32 `def:"100" min:"10" max:"1000" step:"10"`
 
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs
@@ -135,7 +135,7 @@ func (pf *Preferences) Defaults() {
 	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
-	pf.Density = DensityMedium
+	pf.Density = 100
 	pf.Zoom = 100
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
@@ -427,20 +427,18 @@ const (
 	DensitySpread
 )
 
-// DensityMul returns a multiplier centered
-// around 1 representing the density set in the preferences.
-// It should be used for determining padding and margin values.
-func (pf *Preferences) DensityMul() float32 {
-	switch pf.Density {
-	case DensityCompact:
-		return 0.5
-	case DensityMedium:
-		return 1
-	case DensitySpread:
-		return 1.5
+// DensityMul returns an enum value representing the type
+// of density that the user has selected, based on a set of
+// fixed breakpoints.
+func (pf *Preferences) DensityType() Densities {
+	switch {
+	case pf.Density < 50:
+		return DensityCompact
+	case pf.Density > 150:
+		return DensitySpread
+	default:
+		return DensityMedium
 	}
-	slog.Error("got invalid preferences density", "value", pf.Density)
-	return 1
 }
 
 //////////////////////////////////////////////////////////////////
