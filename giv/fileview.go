@@ -125,14 +125,19 @@ func (fv *FileView) FileViewStyles() {
 				s.Spacing.Dp(4)
 				s.SetStretchMaxWidth()
 			})
+		case "sel-row/sel-lbl":
+			w.Style(func(s *styles.Style) {
+				s.MaxWidth.Zero()
+			})
 		case "sel-row/sel": // sel field
 			w.Style(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Ch(60))
 				s.SetStretchMaxWidth()
 			})
-		case "sel-row/ext-label":
+		case "sel-row/ext-lbl":
 			w.Style(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Ch(10))
+				s.MaxWidth.Zero()
 			})
 		}
 	})
@@ -380,8 +385,8 @@ func (fv *FileView) ConfigSelRow() {
 	sf.StartFocus()
 
 	el := sr.ChildByName("ext-lbl", 0).(*gi.Label)
-	el.Text = "Ext(s):"
-	el.Tooltip = "target extension(s) to highlight -- if multiple, separate with commas, and do include the . at the start"
+	el.Text = "Extension(s):"
+	el.Tooltip = "target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start"
 	ef := fv.ExtField()
 	ef.SetText(fv.Ext)
 	ef.OnChange(func(e events.Event) {
