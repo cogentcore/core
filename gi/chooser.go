@@ -189,7 +189,7 @@ func (ch *Chooser) ChooserStyles() {
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
 				if ch.Editable {
-					s.Width.Dp(0)
+					s.Width.Zero()
 				} else {
 					s.Width.Dp(16)
 				}

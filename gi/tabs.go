@@ -77,12 +77,12 @@ func (ts *Tabs) TabsStyles() {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
-				s.MaxHeight.Dp(0)
+				s.MaxHeight.Zero()
 				s.Height.Em(1.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Set()
 				s.Padding.Set()
-				s.Spacing.Dp(0)
+				s.Spacing.Zero()
 				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 				// s.Border.Style.Set(styles.BorderNone)
@@ -576,7 +576,7 @@ func (tb *Tab) TabStyles() {
 		switch w.PathFrom(tb) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Spacing.Dp(0)
+				s.Spacing.Zero()
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "parts/icon":

@@ -138,7 +138,7 @@ func (sw *Switch) SwitchStyles() {
 		switch w.PathFrom(sw) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Spacing.Dp(0)
+				s.Spacing.Zero()
 			})
 		case "parts/stack/icon0": // on
 			w.Style(func(s *styles.Style) {
@@ -165,8 +165,8 @@ func (sw *Switch) SwitchStyles() {
 					s.Height.Em(1.2)
 				case SwitchChip:
 					// chips render no icon when off
-					s.Width.Dp(0)
-					s.Height.Dp(0)
+					s.Width.Zero()
+					s.Height.Zero()
 				default:
 					s.Width.Em(1.2)
 					s.Height.Em(1.2)
@@ -181,8 +181,8 @@ func (sw *Switch) SwitchStyles() {
 					s.Height.Em(1.2)
 				case SwitchChip:
 					// chips render no icon when off
-					s.Width.Dp(0)
-					s.Height.Dp(0)
+					s.Width.Zero()
+					s.Height.Zero()
 				default:
 					s.Width.Em(1.2)
 					s.Height.Em(1.2)

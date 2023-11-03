@@ -101,8 +101,8 @@ func (tv *TableView) TableViewInit() {
 			sh.Lay = gi.LayoutHoriz
 			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
-				s.Spacing.Dp(0)
-				s.MaxWidth.Dp(0)
+				s.Spacing.Zero()
+				s.MaxWidth.Zero()
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "frame/grid-lay": // grid layout

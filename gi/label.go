@@ -157,7 +157,7 @@ func (lb *Label) LabelStyles() {
 		case LabelTitleLarge:
 			s.Text.LineHeight.Dp(28)
 			s.Font.Size.Dp(22)
-			s.Text.LetterSpacing.Dp(0)
+			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case LabelTitleMedium:
 			s.Text.LineHeight.Dp(24)
@@ -172,17 +172,17 @@ func (lb *Label) LabelStyles() {
 		case LabelHeadlineLarge:
 			s.Text.LineHeight.Dp(40)
 			s.Font.Size.Dp(32)
-			s.Text.LetterSpacing.Dp(0)
+			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case LabelHeadlineMedium:
 			s.Text.LineHeight.Dp(36)
 			s.Font.Size.Dp(28)
-			s.Text.LetterSpacing.Dp(0)
+			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case LabelHeadlineSmall:
 			s.Text.LineHeight.Dp(32)
 			s.Font.Size.Dp(24)
-			s.Text.LetterSpacing.Dp(0)
+			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case LabelDisplayLarge:
 			s.Text.LineHeight.Dp(64)
@@ -192,12 +192,12 @@ func (lb *Label) LabelStyles() {
 		case LabelDisplayMedium:
 			s.Text.LineHeight.Dp(52)
 			s.Font.Size.Dp(45)
-			s.Text.LetterSpacing.Dp(0)
+			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		case LabelDisplaySmall:
 			s.Text.LineHeight.Dp(44)
 			s.Font.Size.Dp(36)
-			s.Text.LetterSpacing.Dp(0)
+			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
 		}
 	})

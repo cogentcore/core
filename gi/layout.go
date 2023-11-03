@@ -413,8 +413,8 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sr.Tracking = true
 		sr.Min = 0.0
 		sr.Style(func(s *styles.Style) {
-			s.Padding.Set(units.Dp(0))
-			s.Margin.Set(units.Dp(0))
+			s.Padding.Set(units.Zero())
+			s.Margin.Set(units.Zero())
 		})
 		sr.OnChange(func(e events.Event) {
 			e.SetHandled()
