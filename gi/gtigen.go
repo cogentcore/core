@@ -1233,6 +1233,9 @@ var _ = gti.AddType(&gti.Type{
 		{"DarkMode", &gti.Method{Name: "DarkMode", Doc: "DarkMode sets the color theme to dark mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply preferences to all the relevant settings.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"SaveZoom", &gti.Method{Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen.\n  - forCurrentScreen: if true, saves only for current screen", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
