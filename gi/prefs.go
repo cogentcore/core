@@ -6,7 +6,7 @@ package gi
 
 import (
 	"image/color"
-	"log"
+	"log/slog"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -439,7 +439,7 @@ func (pf *Preferences) DensityMul() float32 {
 	case DensitySpread:
 		return 1.5
 	}
-	log.Println("got invalid preferences density value", pf.Density)
+	slog.Error("got invalid preferences density", "value", pf.Density)
 	return 1
 }
 

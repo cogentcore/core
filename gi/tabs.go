@@ -154,6 +154,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 		nm = strcase.ToKebab(label)
 	}
 	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
+	frame.SetLayout(LayoutVert)
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
 	ts.UpdateEndLayout(updt)
 	return frame

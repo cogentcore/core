@@ -15,7 +15,6 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -42,7 +41,7 @@ func app() {
 }
 
 func makeHome(ts *gi.Tabs) {
-	home := ts.NewTab("Home").SetLayout(gi.LayoutVert)
+	home := ts.NewTab("Home")
 
 	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
 
@@ -86,12 +85,6 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 
 func makeText(ts *gi.Tabs) {
 	text := ts.NewTab("Text")
-	text.Lay = gi.LayoutVert
-	text.Style(func(s *styles.Style) {
-		s.Spacing.Ex(1)
-		s.Padding.Set(units.Dp(8))
-		s.SetStretchMax()
-	})
 
 	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
 	gi.NewLabel(text).SetText(
@@ -105,12 +98,6 @@ func makeText(ts *gi.Tabs) {
 
 func makeButtons(ts *gi.Tabs) {
 	buttons := ts.NewTab("Buttons")
-	buttons.Lay = gi.LayoutVert
-	buttons.Style(func(s *styles.Style) {
-		s.Spacing.Ex(1)
-		s.Padding.Set(units.Dp(8))
-		s.SetStretchMax()
-	})
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
@@ -121,19 +108,16 @@ func makeButtons(ts *gi.Tabs) {
 
 	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
 	brow.Style(func(s *styles.Style) {
-		s.Spacing.Em(1)
 		s.SetStretchMaxWidth()
 	})
 
 	browt := gi.NewLayout(buttons, "browt").SetLayout(gi.LayoutHorizFlow)
 	browt.Style(func(s *styles.Style) {
-		s.Spacing.Em(1)
 		s.SetStretchMaxWidth()
 	})
 
 	browi := gi.NewLayout(buttons, "browi").SetLayout(gi.LayoutHorizFlow)
 	browi.Style(func(s *styles.Style) {
-		s.Spacing.Em(1)
 		s.SetStretchMaxWidth()
 	})
 
@@ -142,19 +126,16 @@ func makeButtons(ts *gi.Tabs) {
 
 	mbrow := gi.NewLayout(buttons, "mbrow").SetLayout(gi.LayoutHorizFlow)
 	mbrow.Style(func(s *styles.Style) {
-		s.Spacing.Em(1)
 		s.SetStretchMaxWidth()
 	})
 
 	mbrowt := gi.NewLayout(buttons, "mbrowt").SetLayout(gi.LayoutHorizFlow)
 	mbrowt.Style(func(s *styles.Style) {
-		s.Spacing.Em(1)
 		s.SetStretchMaxWidth()
 	})
 
 	mbrowi := gi.NewLayout(buttons, "mbrowi").SetLayout(gi.LayoutHorizFlow)
 	mbrowi.Style(func(s *styles.Style) {
-		s.Spacing.Em(1)
 		s.SetStretchMaxWidth()
 	})
 
@@ -236,12 +217,6 @@ func makeButtons(ts *gi.Tabs) {
 
 func makeInputs(ts *gi.Tabs) {
 	inputs := ts.NewTab("Inputs")
-	inputs.Lay = gi.LayoutVert
-	inputs.Style(func(s *styles.Style) {
-		s.Spacing.Ex(1)
-		s.Padding.Set(units.Dp(8))
-		s.SetStretchMax()
-	})
 
 	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
@@ -263,9 +238,6 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
 
 	choosers := gi.NewLayout(inputs, "choosers").SetLayout(gi.LayoutHoriz)
-	choosers.Style(func(s *styles.Style) {
-		s.Spacing.Em(0.5)
-	})
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
 	fruitDescs := []string{
@@ -318,12 +290,6 @@ func makeInputs(ts *gi.Tabs) {
 
 func makeLayouts(ts *gi.Tabs) {
 	layouts := ts.NewTab("Layouts")
-	layouts.Lay = gi.LayoutVert
-	layouts.Style(func(s *styles.Style) {
-		s.Spacing.Ex(1)
-		s.Padding.Set(units.Dp(8))
-		s.SetStretchMax()
-	})
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
 	// vw.Style(func(s *styles.Style) {
