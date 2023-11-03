@@ -120,6 +120,7 @@ func (lb *Label) LabelStyles() {
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
+		s.SetStretchMaxWidth() // critical for avoiding excessive word wrapping
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
