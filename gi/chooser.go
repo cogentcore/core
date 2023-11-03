@@ -648,12 +648,9 @@ func (ch *Chooser) HandleChooserKeys() {
 			if !ok {
 				break
 			}
-			// if we start typing, we focus the text field
-			if !tf.StateIs(states.Focused) {
-				tf.GrabFocus()
-				tf.Send(events.Focus, e)
-				tf.Send(events.KeyChord, e)
-			}
+			// if we don't have anything special to do,
+			// we just give our key event to our textfield
+			tf.HandleEvent(e)
 		}
 	})
 }
@@ -682,6 +679,15 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	// 		ch.ItemsFunc()
 	// 	}
 	// })
+	tf.OnClick(func(e events.Event) {
+		if ch.IsReadOnly() {
+			return
+		}
+		fmt.Println("tfoc")
+		tf.FocusClear()
+		ch.GrabFocus()
+		ch.Send(events.Focus, e)
+	})
 	// Chooser gives its textfield focus styling but not actual focus
 	ch.OnFocus(func(e events.Event) {
 		tf.SetState(true, states.Focused)

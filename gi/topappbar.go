@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -48,7 +49,7 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 		mm.PopDeleteType(stg.Type)
 	})
 	// NewButton(tb).SetIcon(icons.ArrowForward)
-	ch := NewChooser(tb, "nav-bar").SetEditable(true)
+	ch := NewChooser(tb, "nav-bar").SetEditable(true).SetType(ChooserOutlined)
 	ch.SetItemsFunc(func() {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
@@ -77,9 +78,11 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
 	})
 	ch.Style(func(s *styles.Style) {
-		s.Border.Width.Set(units.Zero())
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+		if !s.Is(states.Focused) {
+			s.Border.Width.Set(units.Zero())
+		}
 	})
 	tb.AddDefaultOverflowMenu()
 }
