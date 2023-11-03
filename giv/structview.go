@@ -136,6 +136,7 @@ func (sv *StructView) ConfigWidget(sc *gi.Scene) {
 		}
 	}
 	if sv.HasChildren() {
+		sv.ConfigStructGrid(sc)
 		return
 	}
 	updt := sv.UpdateStart()

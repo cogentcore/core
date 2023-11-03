@@ -360,7 +360,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		// if we have sent a long press start event, we send an end
 		// event (non-nil widget plus nil timer means we already sent)
 		if em.LongPressWidget != nil && em.LongPressTimer == nil {
-			up.Send(events.LongPressEnd, evi)
+			em.LongPressWidget.Send(events.LongPressEnd, evi)
 		}
 		em.LongPressWidget = nil
 		em.LongPressPos = image.Point{}

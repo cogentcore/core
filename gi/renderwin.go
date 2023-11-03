@@ -299,15 +299,14 @@ func ActivateExistingDialogWindow(data any) bool {
 	return true
 }
 
-/*
 // SetName sets name of this window and also the RenderWin, and applies any window
 // geometry settings associated with the new name if it is different from before
 func (w *RenderWin) SetName(name string) {
-	curnm := w.Name()
+	curnm := w.Name
 	isdif := curnm != name
-	w.NodeBase.SetName(name)
-	if w.RenderWin != nil {
-		w.RenderWin.SetName(name)
+	w.Name = name
+	if w.GoosiWin != nil {
+		w.GoosiWin.SetName(name)
 	}
 	if isdif {
 		for i, fw := range FocusRenderWins { // rename focus windows so we get focus later..
@@ -316,15 +315,15 @@ func (w *RenderWin) SetName(name string) {
 			}
 		}
 	}
-	if isdif && w.RenderWin != nil {
-		wgp := WinGeomMgr.Pref(w.Title, w.RenderWin.Screen())
+	if isdif && w.GoosiWin != nil {
+		wgp := WinGeomMgr.Pref(w.Title, w.GoosiWin.Screen())
 		if wgp != nil {
 			WinGeomMgr.SettingStart()
-			if w.RenderWin.Size() != wgp.Size() || w.RenderWin.Position() != wgp.Pos() {
+			if w.GoosiWin.Size() != wgp.Size() || w.GoosiWin.Position() != wgp.Pos() {
 				if WinGeomTrace {
-					log.Printf("WinGeomPrefs: SetName setting geom for window: %v pos: %v size: %v\n", w.Name(), wgp.Pos(), wgp.Size())
+					log.Printf("WinGeomPrefs: SetName setting geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 				}
-				w.RenderWin.SetGeom(wgp.Pos(), wgp.Size())
+				w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
 				goosi.TheApp.SendEmptyEvent()
 			}
 			WinGeomMgr.SettingEnd()
@@ -335,12 +334,11 @@ func (w *RenderWin) SetName(name string) {
 // SetTitle sets title of this window and also the RenderWin
 func (w *RenderWin) SetTitle(name string) {
 	w.Title = name
-	if w.RenderWin != nil {
-		w.RenderWin.SetTitle(name)
+	if w.GoosiWin != nil {
+		w.GoosiWin.SetTitle(name)
 	}
 	WinNewCloseStamp()
 }
-*/
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
