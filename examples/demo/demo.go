@@ -47,8 +47,7 @@ func makeHome(ts *gi.Tabs) {
 	home.Style(func(s *styles.Style) {
 		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 
 	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
@@ -97,8 +96,7 @@ func makeText(ts *gi.Tabs) {
 	text.Style(func(s *styles.Style) {
 		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 
 	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
@@ -117,8 +115,7 @@ func makeButtons(ts *gi.Tabs) {
 	buttons.Style(func(s *styles.Style) {
 		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
@@ -131,19 +128,19 @@ func makeButtons(ts *gi.Tabs) {
 	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
 	brow.Style(func(s *styles.Style) {
 		s.Spacing.Em(1)
-		s.MaxWidth.Dp(-1)
+		s.SetStretchMaxWidth()
 	})
 
 	browt := gi.NewLayout(buttons, "browt").SetLayout(gi.LayoutHorizFlow)
 	browt.Style(func(s *styles.Style) {
 		s.Spacing.Em(1)
-		s.MaxWidth.Dp(-1)
+		s.SetStretchMaxWidth()
 	})
 
 	browi := gi.NewLayout(buttons, "browi").SetLayout(gi.LayoutHorizFlow)
 	browi.Style(func(s *styles.Style) {
 		s.Spacing.Em(1)
-		s.MaxWidth.Dp(-1)
+		s.SetStretchMaxWidth()
 	})
 
 	mbtitle := gi.NewLabel(buttons, "mbtitle").SetText("Menu Buttons")
@@ -152,19 +149,19 @@ func makeButtons(ts *gi.Tabs) {
 	mbrow := gi.NewLayout(buttons, "mbrow").SetLayout(gi.LayoutHorizFlow)
 	mbrow.Style(func(s *styles.Style) {
 		s.Spacing.Em(1)
-		s.MaxWidth.Dp(-1)
+		s.SetStretchMaxWidth()
 	})
 
 	mbrowt := gi.NewLayout(buttons, "mbrowt").SetLayout(gi.LayoutHorizFlow)
 	mbrowt.Style(func(s *styles.Style) {
 		s.Spacing.Em(1)
-		s.MaxWidth.Dp(-1)
+		s.SetStretchMaxWidth()
 	})
 
 	mbrowi := gi.NewLayout(buttons, "mbrowi").SetLayout(gi.LayoutHorizFlow)
 	mbrowi.Style(func(s *styles.Style) {
 		s.Spacing.Em(1)
-		s.MaxWidth.Dp(-1)
+		s.SetStretchMaxWidth()
 	})
 
 	menu := func(m *gi.Scene) {
@@ -249,8 +246,7 @@ func makeInputs(ts *gi.Tabs) {
 	inputs.Style(func(s *styles.Style) {
 		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 
 	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
@@ -332,8 +328,7 @@ func makeLayouts(ts *gi.Tabs) {
 	layouts.Style(func(s *styles.Style) {
 		s.Spacing.Ex(1)
 		s.Padding.Set(units.Dp(8))
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")

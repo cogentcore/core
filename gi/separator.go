@@ -32,10 +32,10 @@ func (sp *Separator) OnInit() {
 		s.Border.Color.Top = colors.Scheme.OutlineVariant
 		s.Border.Width.Top.Dp(1)
 		if sp.Horiz {
-			s.MaxWidth.Dp(-1)
+			s.SetStretchMaxWidth()
 			s.MinHeight.Dp(1)
 		} else {
-			s.MaxHeight.Dp(-1)
+			s.SetStretchMaxHeight()
 			s.MinWidth.Dp(1)
 		}
 	})
