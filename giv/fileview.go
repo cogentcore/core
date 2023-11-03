@@ -96,6 +96,15 @@ func (fv *FileView) FileViewStyles() {
 		case "path-tbar":
 			fr := w.(*gi.Frame)
 			gi.ToolbarStyles(fr)
+		case "path-tbar/path-lbl":
+			w.Style(func(s *styles.Style) {
+				s.MaxWidth.Zero()
+			})
+		case "path-tbar/path":
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(60))
+				s.SetStretchMaxWidth()
+			})
 		case "files-row":
 			fr := w.(*gi.Layout)
 			fr.Lay = gi.LayoutHoriz
@@ -269,8 +278,6 @@ func (fv *FileView) ConfigPathBar() {
 	pl := gi.NewLabel(pr, "path-lbl").SetText("Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
 	pf := gi.NewChooser(pr, "path").SetEditable(true)
-	pf.SetMinPrefWidth(units.Ch(60))
-	pf.SetStretchMaxWidth()
 	pf.ConfigParts(fv.Sc)
 	pft, found := pf.TextField()
 	if found {
