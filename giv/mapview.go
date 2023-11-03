@@ -111,7 +111,9 @@ func (mv *MapView) UpdateValues() {
 // Config configures the view
 func (mv *MapView) ConfigWidget(sc *gi.Scene) {
 	mv.Sc = sc
-	gi.NewFrame(mv, "map-grid").SetLayout(gi.LayoutGrid)
+	if !mv.HasChildren() {
+		gi.NewFrame(mv, "map-grid").SetLayout(gi.LayoutGrid)
+	}
 	mv.ConfigMapGrid()
 }
 

@@ -599,12 +599,15 @@ func (tb *Tab) TabStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Width.Ch(1)
 			})
+		case "parts/close.parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ex(1))
+				s.SetMinPrefHeight(units.Ex(1))
+			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
-				s.Width.Ex(0.5)
-				s.Height.Ex(0.5)
-				s.Margin.Set()
-				s.Padding.Set()
+				// s.Margin.Set()
+				// s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(colors.Transparent)
