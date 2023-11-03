@@ -2148,6 +2148,9 @@ const (
 	// Deblur is https://github.com/goki/icons/blob/main/svg/deblur.svg
 	Deblur Icon = "deblur"
 
+	// Debug is https://github.com/goki/icons/blob/main/svg/debug.svg
+	Debug Icon = "debug"
+
 	// Deceased is https://github.com/goki/icons/blob/main/svg/deceased.svg
 	Deceased Icon = "deceased"
 
