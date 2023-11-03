@@ -183,6 +183,10 @@ func (bt *Button) ButtonStyles() {
 	})
 	bt.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(bt) {
+		case "parts":
+			w.Style(func(s *styles.Style) {
+				s.Spacing.Dp(0)
+			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Width.Em(1.125)

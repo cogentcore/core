@@ -82,7 +82,7 @@ func (ts *Tabs) TabsStyles() {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Set()
 				s.Padding.Set()
-				// tabs.Spacing.SetDp(4)
+				s.Spacing.Dp(0)
 				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 				// s.Border.Style.Set(styles.BorderNone)
@@ -575,6 +575,7 @@ func (tb *Tab) TabStyles() {
 		switch w.PathFrom(tb) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
+				s.Spacing.Dp(0)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "parts/icon":

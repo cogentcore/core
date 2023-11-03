@@ -136,6 +136,10 @@ func (sw *Switch) SwitchStyles() {
 	})
 	sw.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sw) {
+		case "parts":
+			w.Style(func(s *styles.Style) {
+				s.Spacing.Dp(0)
+			})
 		case "parts/stack/icon0": // on
 			w.Style(func(s *styles.Style) {
 				if sw.Type == SwitchChip {
