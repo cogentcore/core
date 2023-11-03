@@ -126,7 +126,7 @@ func (ch *Chooser) ChooserStyles() {
 				s.Border.Width.Set().SetBottom(units.Dp(1))
 				s.Border.Color.Set().SetBottom(colors.Scheme.OnSurfaceVariant)
 				s.Border.Radius = styles.BorderRadiusExtraSmallTop
-				if s.Is(states.FocusedWithin) {
+				if s.Is(states.Focused) {
 					s.Border.Width.Bottom = units.Dp(2)
 					s.Border.Color.Bottom = colors.Scheme.Primary.Base
 				}
@@ -137,7 +137,7 @@ func (ch *Chooser) ChooserStyles() {
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			if ch.Editable {
 				s.Border.Radius = styles.BorderRadiusExtraSmall
-				if s.Is(states.FocusedWithin) {
+				if s.Is(states.Focused) {
 					s.Border.Width.Set(units.Dp(2))
 					s.Border.Color.Set(colors.Scheme.Primary.Base)
 				}
@@ -677,10 +677,17 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SetCurIndex(len(ch.Items) - 1)
 		ch.SendChange(e)
 	})
-	tf.OnFocus(func(e events.Event) {
-		if ch.ItemsFunc != nil {
-			ch.ItemsFunc()
-		}
+	// tf.OnFocus(func(e events.Event) {
+	// 	if ch.ItemsFunc != nil {
+	// 		ch.ItemsFunc()
+	// 	}
+	// })
+	// Chooser gives its textfield focus styling but not actual focus
+	ch.OnFocus(func(e events.Event) {
+		tf.SetState(true, states.Focused)
+	})
+	ch.OnFocusLost(func(e events.Event) {
+		tf.SetState(false, states.Focused)
 	})
 }
 
