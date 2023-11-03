@@ -106,6 +106,12 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	}
 
 	dt := gi.NewTextField(ly, "date").SetTooltip("The date")
+	dt.SetReadOnly(vv.IsReadOnly())
+	dt.OnClick(func(e events.Event) {
+		d := gi.NewDialog(w).Title("Edit time")
+		NewTimeView(d).SetTime(*vv.TimeVal())
+		d.Cancel().Ok().Run()
+	})
 	dt.OnChange(func(e events.Event) {
 		d, err := time.Parse(time.DateOnly, dt.Text())
 		if err != err {
@@ -120,6 +126,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	dt.Config(sc)
 
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time")
+	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
 		t, err := time.Parse(time.TimeOnly, tm.Text())
 		if err != err {
