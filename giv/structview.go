@@ -65,7 +65,6 @@ type StructView struct {
 func (sv *StructView) OnInit() {
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
-		s.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {

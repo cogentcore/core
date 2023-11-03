@@ -15,13 +15,6 @@ import (
 	"goki.dev/gti"
 )
 
-var (
-	// standard vertical space between elements in a dialog, in Ex units
-	StdDialogVSpace = float32(1)
-
-	StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
-)
-
 // Dialog is a scene with methods for configuring a dialog
 type Dialog struct { //goki:no-new
 	Scene
@@ -246,7 +239,6 @@ func (d *Dialog) DialogStyles() {
 	d.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
-		s.Spacing = StdDialogVSpaceUnits
 		if !d.Stage.NewWindow && !d.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			s.Border.Radius = styles.BorderRadiusLarge
