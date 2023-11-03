@@ -370,6 +370,7 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.CSS.CopyFrom(fr.CSS, true)
 	wb.Tooltip = fr.Tooltip
 	wb.Styles.CopyFrom(&fr.Styles)
+	wb.Stylers = fr.Stylers
 	wb.Listeners = fr.Listeners // direct copy -- functions..
 	wb.CustomContextMenu = fr.CustomContextMenu
 }
