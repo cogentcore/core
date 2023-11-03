@@ -31,8 +31,7 @@ type ArgView struct {
 func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 	av.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(av) {
@@ -40,7 +39,7 @@ func (av *ArgView) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelTitleLarge
 			title.Style(func(s *styles.Style) {
-				s.MaxWidth.Dp(-1)
+				s.SetStretchMaxWidth()
 				s.Text.Align = styles.AlignCenter
 				s.AlignV = styles.AlignTop
 			})
@@ -49,10 +48,10 @@ func (av *ArgView) OnInit() {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.MinWidth.Em(1.5)
 				s.Width.Em(1.5)
-				s.MaxWidth.Dp(-1) // for this to work, ALL layers above need it too
+				s.SetStretchMaxWidth() // for this to work, ALL layers above need it too
 				s.MinHeight.Em(10)
 				s.Height.Em(10)
-				s.MaxHeight.Dp(-1)                 // for this to work, ALL layers above need it too
+				s.SetStretchMaxHeight()            // for this to work, ALL layers above need it too
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.Columns = 2
 			})

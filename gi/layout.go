@@ -1356,8 +1356,7 @@ func (st *Stretch) OnInit() {
 	st.Style(func(s *styles.Style) {
 		s.SetMinPrefHeight(units.Ch(1))
 		s.SetMinPrefWidth(units.Em(1))
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 }
 

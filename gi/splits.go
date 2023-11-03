@@ -57,8 +57,7 @@ func (sl *Splits) OnInit() {
 
 func (sl *Splits) SplitsStyles() {
 	sl.Style(func(s *styles.Style) {
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 		s.Margin.Set()
 		s.Padding.Set()
 	})

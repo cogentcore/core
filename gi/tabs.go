@@ -70,8 +70,7 @@ func (ts *Tabs) TabsStyles() {
 		s.Border.Width.Set(units.Dp(1))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.Color = colors.Scheme.OnBackground
-		s.MaxWidth.Dp(-1)
-		s.MaxHeight.Dp(-1)
+		s.SetStretchMax()
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ts) {

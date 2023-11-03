@@ -276,7 +276,6 @@ func (fb *FileBrowse) StdFrameConfig() ki.Config {
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (fb *FileBrowse) StdConfig() (mods, updt bool) {
 	fb.Lay = gi.LayoutVert
-	fb.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := fb.StdFrameConfig()
 	mods, updt = fb.ConfigChildren(config)
 	return
