@@ -354,13 +354,15 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		case kf == keyfun.PageDown:
 			e.SetHandled()
 			sp.PageIncrValue(-1)
+		default:
+			sp.TextField().HandleEvent(e)
 		}
 	})
-	// Spinner always gives its focus to textfield
-	sp.OnFocus(func(e events.Event) {
-		tf.GrabFocus()
-		tf.Send(events.Focus, e) // sets focused flag
-	})
+	// // Spinner always gives its focus to textfield
+	// sp.OnFocus(func(e events.Event) {
+	// 	tf.GrabFocus()
+	// 	tf.Send(events.Focus, e) // sets focused flag
+	// })
 }
 
 func (sp *Spinner) ConfigWidget(sc *Scene) {

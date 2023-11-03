@@ -106,38 +106,14 @@ func makeButtons(ts *gi.Tabs) {
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
-	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
-	brow.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-	})
+	brow := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
+	browt := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
+	browi := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
 
-	browt := gi.NewLayout(buttons, "browt").SetLayout(gi.LayoutHorizFlow)
-	browt.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-	})
-
-	browi := gi.NewLayout(buttons, "browi").SetLayout(gi.LayoutHorizFlow)
-	browi.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-	})
-
-	mbtitle := gi.NewLabel(buttons, "mbtitle").SetText("Menu Buttons")
-	mbtitle.Type = gi.LabelHeadlineSmall
-
-	mbrow := gi.NewLayout(buttons, "mbrow").SetLayout(gi.LayoutHorizFlow)
-	mbrow.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-	})
-
-	mbrowt := gi.NewLayout(buttons, "mbrowt").SetLayout(gi.LayoutHorizFlow)
-	mbrowt.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-	})
-
-	mbrowi := gi.NewLayout(buttons, "mbrowi").SetLayout(gi.LayoutHorizFlow)
-	mbrowi.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-	})
+	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu Buttons")
+	mbrow := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
+	mbrowt := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
+	mbrowi := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
 
 	menu := func(m *gi.Scene) {
 		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
