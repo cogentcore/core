@@ -217,7 +217,7 @@ func (bt *Button) ButtonStyles() {
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(0.5)
+				s.Width.Em(0.2)
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
