@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
@@ -46,12 +47,14 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		SetText(strconv.Itoa(tv.Time.Hour())).
 		Style(func(s *styles.Style) {
 			s.Font.Size.Rem(2)
+			s.SetFixedWidth(units.Em(3))
 		})
 
 	gi.NewTextField(tv, "minute").SetType(gi.TextFieldOutlined).
 		SetText(strconv.Itoa(tv.Time.Minute())).
 		Style(func(s *styles.Style) {
 			s.Font.Size.Rem(2)
+			s.SetFixedWidth(units.Em(3))
 		})
 
 	tv.UpdateEnd(updt)
