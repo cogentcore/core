@@ -247,7 +247,6 @@ func (d *Dialog) DialogStyles() {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
 		s.Spacing = StdDialogVSpaceUnits
-		s.Padding.Left.Dp(8)
 		if !d.Stage.NewWindow && !d.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			s.Border.Radius = styles.BorderRadiusLarge
