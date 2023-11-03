@@ -208,6 +208,7 @@ func (bt *Button) ButtonStyles() {
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 				s.Margin.Set()
 				s.Padding.Set()
+				s.MaxWidth.Dp(0)
 				s.AlignV = styles.AlignMiddle
 			})
 		case "parts/ind-stretch":
@@ -226,6 +227,7 @@ func (bt *Button) ButtonStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
+				s.MaxWidth.Dp(0)
 			})
 		}
 	})
