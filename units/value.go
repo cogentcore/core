@@ -47,6 +47,18 @@ func (v *Value) Set(val float32, un Units) {
 	v.Un = un
 }
 
+// Zero returns a new zero (0) value.
+func Zero() Value {
+	return Value{Un: UnitDot}
+}
+
+// Zero sets the value to zero (0).
+func (v *Value) Zero() {
+	v.Val = 0
+	v.Un = UnitDot
+	v.Dots = 0
+}
+
 // Dot returns a new dots value.
 // Dots are actual real display pixels, which are generally only used internally.
 func Dot(val float32) Value {
