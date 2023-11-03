@@ -130,14 +130,6 @@ func (st *MainStage) SetWindowInsets() {
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
 	st.AddTopAppBar()
-	// if st.History {
-	// 	sc := st.Scene
-	// 	updt := sc.UpdateStart()
-	// 	NewButton(sc).SetText("Back").SetIcon(icons.ArrowBack)
-	// 	// parts.Update()
-	// 	sc.UpdateEndLayout(updt)
-	// 	// sc.SetNeedsLayoutUpdate(sc, updt)
-	// }
 	return st
 }
 
@@ -145,15 +137,6 @@ func (st *MainStage) AddDialogDecor() *MainStage {
 	if st.FullWindow {
 		st.AddTopAppBar()
 	}
-	// if st.History {
-	// 	sc := st.Scene
-	// 	updt := sc.UpdateStart()
-	// 	sc.InsertNewChild(ButtonType, 0).(*Button).SetText("Back").SetIcon(icons.ArrowBack)
-	// 	// parts.Update()
-	// 	sc.UpdateEndLayout(updt)
-	// 	// sc.SetNeedsLayoutUpdate(sc, updt)
-	// }
-	// todo: moveable, resizable
 	return st
 }
 
@@ -171,6 +154,9 @@ func (st *MainStage) AddTopAppBar() *MainStage {
 		if st.Scene.TopAppBar == nil {
 			st.Scene.TopAppBar = DefaultTopAppBar
 		}
+	}
+	if st.Scene.TopAppBar == nil {
+		return st
 	}
 	tb := st.Scene.InsertNewChild(TopAppBarType, 0).(*TopAppBar)
 	st.Scene.TopAppBar(tb)

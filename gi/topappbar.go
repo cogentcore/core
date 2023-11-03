@@ -14,11 +14,18 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// DefaultTopAppBar is the default value for [Scene.TopAppBar].
+var (
+	// DefaultTopAppBar is the function that makes default elements for
+	// The TopAppBar, called by most code.  Set to your own function
+	// to customize, or set to nil to prevent any default.
+	DefaultTopAppBar = DefaultTopAppBarStd
+)
+
+// DefaultTopAppBarStd is the standard impl for a [Scene.TopAppBar].
 // It adds navigation buttons and an editable chooser bar,
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
-func DefaultTopAppBar(tb *TopAppBar) { //gti:add
+func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 	NewButton(tb).SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
@@ -140,6 +147,9 @@ func (tb *TopAppBar) GetSize(sc *Scene, iter int) {
 // and ensures the overflow button is made and moves it
 // to the end of the list.
 func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
+	if len(tb.OverflowItems) == 0 && !tb.HasChildren() {
+		return
+	}
 	if len(tb.OverflowItems) > 0 {
 		tb.Kids = append(tb.Kids, tb.OverflowItems...)
 		tb.OverflowItems = nil
@@ -270,8 +280,9 @@ func (tb *TopAppBar) AddDefaultOverflowMenu() {
 	tb.OverflowMenus = append(tb.OverflowMenus, tb.DefaultOverflowMenu)
 }
 
+// DefaultOverflowMenu adds standard default overflow menu items.
+// Typically you will want to add additional items and then call this function.
 func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) {
-	NewSeparator(m)
 	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
 			TheViewIFace.PrefsView(&Prefs)
