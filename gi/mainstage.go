@@ -75,6 +75,7 @@ func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
 	st.CtxWidget = ctx
 	st.PopupMgr.Main = st
 	st.PopupMgr.This = &st.PopupMgr
+	st.SetDefaultTopAppBar()
 	return st
 }
 
@@ -145,16 +146,19 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 	return st
 }
 
-func (st *MainStage) AddTopAppBar() *MainStage {
-	if st.Scene.TopAppBar == nil {
-		// first fall back on context widget scene top app bar if we are a dialog
-		if st.Type == DialogStage {
-			st.Scene.TopAppBar = st.CtxWidget.AsWidget().Sc.TopAppBar
-		}
-		if st.Scene.TopAppBar == nil {
-			st.Scene.TopAppBar = DefaultTopAppBar
-		}
+// SetDefaultTopAppbar sets the top app bar of the stage to its default value.
+// This should not be called by end-user code.
+func (st *StageBase) SetDefaultTopAppBar() {
+	// first fall back on context widget scene top app bar if we are a dialog
+	if st.Type == DialogStage {
+		st.Scene.TopAppBar = st.CtxWidget.AsWidget().Sc.TopAppBar
 	}
+	if st.Scene.TopAppBar == nil {
+		st.Scene.TopAppBar = DefaultTopAppBar
+	}
+}
+
+func (st *MainStage) AddTopAppBar() *MainStage {
 	if st.Scene.TopAppBar == nil {
 		return st
 	}
