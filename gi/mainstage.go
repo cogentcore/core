@@ -75,7 +75,6 @@ func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
 	st.CtxWidget = ctx
 	st.PopupMgr.Main = st
 	st.PopupMgr.This = &st.PopupMgr
-	st.SetDefaultTopAppBar()
 	return st
 }
 
@@ -160,7 +159,11 @@ func (st *StageBase) SetDefaultTopAppBar() {
 
 func (st *MainStage) AddTopAppBar() *MainStage {
 	if st.Scene.TopAppBar == nil {
-		return st
+		st.SetDefaultTopAppBar()
+		// if still nil, bail
+		if st.Scene.TopAppBar == nil {
+			return st
+		}
 	}
 	tb := st.Scene.InsertNewChild(TopAppBarType, 0).(*TopAppBar)
 	st.Scene.TopAppBar(tb)
