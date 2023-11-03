@@ -63,6 +63,7 @@ func (s *Style) LayoutDefaults() {
 	s.AlignV = AlignMiddle
 	s.MinWidth.Dp(2)
 	s.MinHeight.Dp(2)
+	s.Spacing.Em(0.5)
 	s.ScrollBarWidth.Dp(ScrollBarWidthDefault)
 }
 
