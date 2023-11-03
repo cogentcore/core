@@ -280,9 +280,17 @@ func (ly *Layout) OnInit() {
 func (ly *Layout) LayoutStyles() {
 	ly.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		// we never want state layers and borders on layouts
-		// s.StateLayer = 0
+		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
+
+		// automatically stretch in our primary direction
+		if ly.Lay == LayoutHoriz || ly.Lay == LayoutHorizFlow {
+			s.SetStretchMaxWidth()
+		} else if ly.Lay == LayoutVert || ly.Lay == LayoutVertFlow {
+			s.SetStretchMaxHeight()
+		} else if ly.Lay == LayoutGrid || ly.Lay == LayoutStacked {
+			s.SetStretchMax()
+		}
 	})
 }
 
