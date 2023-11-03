@@ -363,14 +363,15 @@ func (tb *TopAppBar) DeleteShortcuts() {
 	}
 }
 
-// UpdateButtons calls UpdateFunc on all buttons in toolbar -- individual
-// menus are automatically updated just prior to menu popup
+// UpdateButtons calls UpdateFunc on all buttons in toolbar.
+// individual menus are automatically generated at popup time.
 func (tb *TopAppBar) UpdateButtons() {
 	if tb == nil {
 		return
 	}
 	updt := tb.UpdateStart()
-	defer tb.UpdateEnd(updt)
+	defer tb.UpdateEndRender(updt)
+
 	for _, mi := range tb.Kids {
 		if mi.KiType().HasEmbed(ButtonType) {
 			ac := AsButton(mi)

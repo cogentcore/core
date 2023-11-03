@@ -9,13 +9,14 @@ package keyfun
 import (
 	"encoding/json"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events/key"
+	"goki.dev/grows/jsons"
+	"goki.dev/grr"
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
@@ -315,31 +316,14 @@ var PrefsMapsFileName = "key_maps_prefs.json"
 // OpenJSON opens keymaps from a JSON-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
 func (km *Maps) OpenJSON(filename string) error { //gti:add
-	b, err := os.ReadFile(string(filename))
-	if err != nil {
-		// Note: keymaps are opened at startup, and this can cause crash if called then
-		// PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
-		slog.Error(err.Error())
-		return err
-	}
 	*km = make(Maps, 0, 10) // reset
-	return json.Unmarshal(b, km)
+	return grr.Log0(jsons.Open(km, filename))
 }
 
 // SaveJSON saves keymaps to a JSON-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
 func (km *Maps) SaveJSON(filename string) error { //gti:add
-	b, err := json.MarshalIndent(km, "", "  ")
-	if err != nil {
-		slog.Error(err.Error()) // unlikely
-		return err
-	}
-	err = os.WriteFile(string(filename), b, 0644)
-	if err != nil {
-		// PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
-		slog.Error(err.Error())
-	}
-	return err
+	return grr.Log0(jsons.Save(km, filename))
 }
 
 // OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
