@@ -43,12 +43,21 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 
 	tv.SetLayout(gi.LayoutHoriz)
 
-	gi.NewTextField(tv, "hour").
-		SetText(strconv.Itoa(tv.Time.Hour())).
-		Style(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
-			s.SetFixedWidth(units.Dp(96))
-		})
+	hour := gi.NewTextField(tv, "hour").
+		SetText(strconv.Itoa(tv.Time.Hour()))
+	hour.Style(func(s *styles.Style) {
+		s.Font.Size.Dp(57)
+		s.SetFixedWidth(units.Dp(96))
+	})
+	hour.OnChange(func(e events.Event) {
+		hr, err := strconv.Atoi(hour.Text())
+		// TODO(kai/snack)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		// we take our hour and keep everything else
+		tv.Time = time.Date(tv.Time.Year(), tv.Time.Month(), tv.Time.Day(), hr, tv.Time.Minute(), tv.Time.Second(), tv.Time.Nanosecond(), tv.Time.Location())
+	})
 
 	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":")
 
