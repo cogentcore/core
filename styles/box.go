@@ -86,14 +86,14 @@ func (bs *Border) ToDots(uc *units.Context) {
 var (
 	// BorderRadiusNone indicates to use no border radius,
 	// which creates a fully rectangular element
-	BorderRadiusNone = NewSideValues(units.Dp(0))
+	BorderRadiusNone = NewSideValues(units.Zero())
 	// BorderRadiusExtraSmall indicates to use extra small
 	// 4dp rounded corners
 	BorderRadiusExtraSmall = NewSideValues(units.Dp(4))
 	// BorderRadiusExtraSmallTop indicates to use extra small
 	// 4dp rounded corners on the top of the element and no
 	// border radius on the bottom of the element
-	BorderRadiusExtraSmallTop = NewSideValues(units.Dp(4), units.Dp(4), units.Dp(0), units.Dp(0))
+	BorderRadiusExtraSmallTop = NewSideValues(units.Dp(4), units.Dp(4), units.Zero(), units.Zero())
 	// BorderRadiusSmall indicates to use small
 	// 8dp rounded corners
 	BorderRadiusSmall = NewSideValues(units.Dp(8))
@@ -106,18 +106,18 @@ var (
 	// BorderRadiusLargeEnd indicates to use large
 	// 16dp rounded corners on the end (right side)
 	// of the element and no border radius elsewhere
-	BorderRadiusLargeEnd = NewSideValues(units.Dp(0), units.Dp(16), units.Dp(16), units.Dp(0))
+	BorderRadiusLargeEnd = NewSideValues(units.Zero(), units.Dp(16), units.Dp(16), units.Zero())
 	// BorderRadiusLargeTop indicates to use large
 	// 16dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
-	BorderRadiusLargeTop = NewSideValues(units.Dp(16), units.Dp(16), units.Dp(0), units.Dp(0))
+	BorderRadiusLargeTop = NewSideValues(units.Dp(16), units.Dp(16), units.Zero(), units.Zero())
 	// BorderRadiusExtraLarge indicates to use extra large
 	// 28dp rounded corners
 	BorderRadiusExtraLarge = NewSideValues(units.Dp(28))
 	// BorderRadiusExtraLargeTop indicates to use extra large
 	// 28dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
-	BorderRadiusExtraLargeTop = NewSideValues(units.Dp(28), units.Dp(28), units.Dp(0), units.Dp(0))
+	BorderRadiusExtraLargeTop = NewSideValues(units.Dp(28), units.Dp(28), units.Zero(), units.Zero())
 	// BorderRadiusFull indicates to use a full border radius,
 	// which creates a circular/pill-shaped object.
 	// It is defined to be a value that the width/height of an object
@@ -299,24 +299,24 @@ func BoxShadow0() []Shadow {
 func BoxShadow1() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(3),
 			Blur:    units.Dp(1),
 			Spread:  units.Dp(-2),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(2),
 			Blur:    units.Dp(2),
-			Spread:  units.Dp(0),
+			Spread:  units.Zero(),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(1),
 			Blur:    units.Dp(5),
-			Spread:  units.Dp(0),
+			Spread:  units.Zero(),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
@@ -327,24 +327,24 @@ func BoxShadow1() []Shadow {
 func BoxShadow2() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(2),
 			Blur:    units.Dp(4),
 			Spread:  units.Dp(-1),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(4),
 			Blur:    units.Dp(5),
-			Spread:  units.Dp(0),
+			Spread:  units.Zero(),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(1),
 			Blur:    units.Dp(10),
-			Spread:  units.Dp(0),
+			Spread:  units.Zero(),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
@@ -357,21 +357,21 @@ func BoxShadow2() []Shadow {
 func BoxShadow3() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
@@ -385,21 +385,21 @@ func BoxShadow3() []Shadow {
 func BoxShadow4() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
@@ -413,21 +413,21 @@ func BoxShadow4() []Shadow {
 func BoxShadow5() []Shadow {
 	return []Shadow{
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(-6),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(16),
 			Blur:    units.Dp(24),
 			Spread:  units.Dp(2),
 			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
-			HOffset: units.Dp(0),
+			HOffset: units.Zero(),
 			VOffset: units.Dp(6),
 			Blur:    units.Dp(30),
 			Spread:  units.Dp(5),
