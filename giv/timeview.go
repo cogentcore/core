@@ -43,17 +43,19 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 
 	tv.SetLayout(gi.LayoutHoriz)
 
-	gi.NewTextField(tv, "hour").SetType(gi.TextFieldOutlined).
+	gi.NewTextField(tv, "hour").
 		SetText(strconv.Itoa(tv.Time.Hour())).
 		Style(func(s *styles.Style) {
-			s.Font.Size.Dp(64)
+			s.Font.Size.Dp(57)
 			s.SetFixedWidth(units.Dp(96))
 		})
 
-	gi.NewTextField(tv, "minute").SetType(gi.TextFieldOutlined).
+	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":")
+
+	gi.NewTextField(tv, "minute").
 		SetText(strconv.Itoa(tv.Time.Minute())).
 		Style(func(s *styles.Style) {
-			s.Font.Size.Dp(64)
+			s.Font.Size.Dp(57)
 			s.SetFixedWidth(units.Dp(96))
 		})
 
