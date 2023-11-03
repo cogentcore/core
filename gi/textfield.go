@@ -1615,7 +1615,6 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	}
 	config := ki.Config{}
 	leadIconIdx, trailIconIdx := -1, -1
-	_ = trailIconIdx
 	if !tf.LeadingIcon.IsNil() {
 		// config.Add(StretchType, "lead-icon-str")
 		config.Add(ButtonType, "lead-icon")
