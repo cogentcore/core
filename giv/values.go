@@ -420,6 +420,9 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
 	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
 	d.TopAppBar = gi.TopAppBarFor(stru)
+	if d.TopAppBar == nil {
+		d.TopAppBar = gi.DefaultTopAppBar
+	}
 	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
 		vv.SendChange()
