@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log/slog"
 	"strings"
 	"sync"
 	"time"
@@ -1702,6 +1703,9 @@ func (tf *TextField) GetSize(sc *Scene, iter int) {
 }
 
 func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	if !tf.TrailingIcon.IsNil() {
+		slog.Info("tf dl", "icon", tf.TrailingIcon, "parts", tf.Parts.Kids)
+	}
 	tf.DoLayoutBase(sc, parBBox, iter)
 	tf.DoLayoutParts(sc, parBBox, iter)
 	redo := tf.DoLayoutChildren(sc, iter)
@@ -1714,6 +1718,7 @@ func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 // and its icons or lack thereof
 func (tf *TextField) SetEffPosAndSize() {
 	if tf.Parts == nil {
+		fmt.Println("nil parts sepas")
 		tf.ConfigParts(tf.Sc)
 	}
 	sz := tf.LayState.Alloc.Size
