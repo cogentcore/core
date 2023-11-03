@@ -16,6 +16,10 @@ import (
 // ColorMapName provides a gui chooser of maps in AvailColorMaps
 type ColorMapName string
 
+func (cn ColorMapName) String() string {
+	return string(cn)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //  ColorMapView
 
