@@ -212,12 +212,20 @@ func (tf *TextField) TextFieldStyles() {
 	})
 	tf.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(tf) {
+		case "parts":
+			w.Style(func(s *styles.Style) {
+				// s.MaxWidth.Zero()
+			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(20)
-				s.Margin.Right.Dp(16)
+				s.Padding.Set(units.Zero())
+				s.SetFixedWidth(units.Em(1))
+				s.SetFixedHeight(units.Em(1))
+				// s.Font.Size.Dp(20)
+				// s.Margin.Right.Dp(16)
+				s.BackgroundColor.SetSolid(colors.Blue)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
@@ -225,8 +233,10 @@ func (tf *TextField) TextFieldStyles() {
 			trail := w.(*Button)
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(20)
-				s.Margin.Left.Dp(16)
+				s.Padding.Set(units.Zero())
+				// s.Font.Size.Dp(20)
+				// s.Margin.Left.Dp(16)
+				s.BackgroundColor.SetSolid(colors.Red)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
@@ -1636,10 +1646,12 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 		if leadIconIdx != -1 {
 			leadIcon := parts.Child(leadIconIdx).(*Button)
 			leadIcon.SetIcon(tf.LeadingIcon)
+			leadIcon.SetText("Lead")
 		}
 		if trailIconIdx != -1 {
 			trailIcon := parts.Child(trailIconIdx).(*Button)
 			trailIcon.SetIcon(tf.TrailingIcon)
+			trailIcon.SetText("Trail")
 		}
 		parts.UpdateEnd(updt)
 		tf.SetNeedsLayoutUpdate(sc, updt)
