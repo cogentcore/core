@@ -120,7 +120,6 @@ func (sw *Switch) SwitchStyles() {
 			s.Cursor = cursors.Pointer
 		}
 		s.Text.Align = styles.AlignLeft
-		s.Margin.Set(units.Dp(2))
 		s.Padding.Set(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusSmall
 
@@ -136,6 +135,10 @@ func (sw *Switch) SwitchStyles() {
 		if sw.Type == SwitchSegmentedButton {
 			s.Border.Color.Set(colors.Scheme.Outline)
 			s.Border.Width.Set(units.Dp(1))
+			if s.Is(states.Checked) {
+				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+				s.Color = colors.Scheme.OnSurfaceVariant
+			}
 		}
 
 		if s.Is(states.Selected) {
