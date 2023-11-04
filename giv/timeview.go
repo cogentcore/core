@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"log/slog"
 	"strconv"
 	"time"
@@ -57,12 +56,13 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 
 	tv.SetLayout(gi.LayoutHoriz)
 
-	tv.Hour = tv.Time.Hour()
 	hour := gi.NewTextField(tv, "hour")
 	if gi.Prefs.Clock24 {
+		tv.Hour = tv.Time.Hour()
 		hour.SetText(strconv.Itoa(tv.Hour))
 	} else {
-		hour.SetText(strconv.Itoa(tv.Hour % 12))
+		tv.Hour = tv.Time.Hour() % 12
+		hour.SetText(strconv.Itoa(tv.Hour))
 	}
 	hour.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
@@ -134,7 +134,6 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 				sw.SelectItem(0)
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			}
-			fmt.Println(tv.Time)
 			if tv.TmpSave != nil {
 				tv.TmpSave.SetValue(tv.Time)
 			}
