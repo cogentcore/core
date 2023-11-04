@@ -25,6 +25,9 @@ type TimeView struct {
 
 	// the time that we are viewing
 	Time time.Time `set:"-"`
+
+	// the raw input hour
+	Hour int `set:"-"`
 }
 
 // SetTime sets the source time and updates the view
@@ -60,6 +63,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		if err != nil {
 			slog.Error(err.Error())
 		}
+		tv.Hour = hr
 		// we take our hour and keep everything else
 		tv.Time = time.Date(tv.Time.Year(), tv.Time.Month(), tv.Time.Day(), hr, tv.Time.Minute(), tv.Time.Second(), tv.Time.Nanosecond(), tv.Time.Location())
 	})
@@ -75,11 +79,18 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 
 	if !gi.Prefs.Clock24 {
 		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
+		if tv.Time.Hour() < 12 {
+			sw.SelectItemAction(0)
+		} else {
+			sw.SelectItemAction(1)
+		}
 		sw.OnChange(func(e events.Event) {
 			si := sw.SelectedItem()
 			switch si {
 			case "AM":
+				tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(tv.Hour))
 			case "PM":
+				tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(tv.Hour+12))
 			default:
 				// must always have something valid selected
 				sw.SelectItem(0)
