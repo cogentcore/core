@@ -163,8 +163,8 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	wb.RunStylers()
 	prun.End()
 
-	// we automatically apply Prefs.DensityMul after we run all of the stylers
-	wb.ApplyPrefsDensityMul()
+	// we automatically apply prefs to style after we run all of the stylers
+	wb.ApplyStylePrefs()
 
 	// note: it is critical to do this styling here so that layout getsizes
 	// has the proper info for laying out items
@@ -237,22 +237,25 @@ func (wb *WidgetBase) RunStylers() {
 	}
 }
 
-// ApplyPrefsDensityMul multiplies all of the margin, padding, and spacing
-// values for the widget by the result of [Prefs.DensityMul]
-func (wb *WidgetBase) ApplyPrefsDensityMul() {
+// ApplyStylePrefs applies [Prefs.Spacing] and [Prefs.FontSize]
+// to the style values for the widget.
+func (wb *WidgetBase) ApplyStylePrefs() {
+	s := &wb.Styles
+
 	spc := Prefs.Spacing / 100
+	s.Margin.Top.Val *= spc
+	s.Margin.Right.Val *= spc
+	s.Margin.Bottom.Val *= spc
+	s.Margin.Left.Val *= spc
+	s.Padding.Top.Val *= spc
+	s.Padding.Right.Val *= spc
+	s.Padding.Bottom.Val *= spc
+	s.Padding.Left.Val *= spc
+	s.Spacing.Val *= spc
 
-	wb.Styles.Margin.Top.Val *= spc
-	wb.Styles.Margin.Right.Val *= spc
-	wb.Styles.Margin.Bottom.Val *= spc
-	wb.Styles.Margin.Left.Val *= spc
-
-	wb.Styles.Padding.Top.Val *= spc
-	wb.Styles.Padding.Right.Val *= spc
-	wb.Styles.Padding.Bottom.Val *= spc
-	wb.Styles.Padding.Left.Val *= spc
-
-	wb.Styles.Spacing.Val *= spc
+	fsz := Prefs.FontSize / 100
+	s.Font.Size.Val *= fsz
+	s.Text.LineHeight.Val *= fsz
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
