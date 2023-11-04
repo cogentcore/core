@@ -350,9 +350,10 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	case BufMods:
 		ed.SetNeedsLayout()
 	case BufInsert:
-		if ed.Renders == nil || !ed.This().(gi.Widget).IsVisible() {
+		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
 		}
+		ndup := ed.Renders == nil
 		// fmt.Printf("ed %v got %v\n", ed.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
@@ -360,14 +361,21 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 		} else {
 			ed.LayoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
 		}
+		if ndup {
+			ed.Update()
+		}
 	case BufDelete:
-		if ed.Renders == nil || !ed.This().(gi.Widget).IsVisible() {
+		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
 		}
+		ndup := ed.Renders == nil
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			ed.LinesDeleted(tbe) // triggers full layout
 		} else {
 			ed.LayoutLine(tbe.Reg.Start.Ln)
+		}
+		if ndup {
+			ed.Update()
 		}
 	case BufMarkUpdt:
 		ed.SetNeedsLayout() // comes from another goroutine
