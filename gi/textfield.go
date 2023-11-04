@@ -59,10 +59,16 @@ type TextField struct { //goki:embedder
 	NoEcho bool
 
 	// if specified, a button will be added at the start of the text field with this icon
-	LeadingIcon icons.Icon
+	LeadingIcon icons.Icon `set:"-"`
+
+	// if LeadingIcon is specified, the function to call when the leading icon is clicked
+	LeadingIconOnClick func(e events.Event)
 
 	// if specified, a button will be added at the end of the text field with this icon
-	TrailingIcon icons.Icon
+	TrailingIcon icons.Icon `set:"-"`
+
+	// if TrailingIcon is specified, the function to call when the trailing icon is clicked
+	TrailingIconOnClick func(e events.Event)
 
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width"`
@@ -302,6 +308,28 @@ func (tf *TextField) SetText(txt string) *TextField {
 	}
 	tf.Txt = txt
 	tf.Revert()
+	return tf
+}
+
+// SetLeadingIcon sets the leading icon of the text field to the given icon.
+// If an on click function is specified, it also sets the leading icon on click
+// function to that function.
+func (tf *TextField) SetLeadingIcon(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
+	tf.LeadingIcon = icon
+	if len(onClick) > 0 {
+		tf.LeadingIconOnClick = onClick[0]
+	}
+	return tf
+}
+
+// SetLeadingIcon sets the trailing icon of the text field to the given icon.
+// If an on click function is specified, it also sets the trailing icon on click
+// function to that function.
+func (tf *TextField) SetTrailingIcon(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
+	tf.TrailingIcon = icon
+	if len(onClick) > 0 {
+		tf.TrailingIconOnClick = onClick[0]
+	}
 	return tf
 }
 
