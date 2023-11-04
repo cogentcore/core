@@ -208,7 +208,10 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 
 	for i := somw.YearDay(); i <= eomw.YearDay(); i++ {
 		si := strconv.Itoa(i)
-		gi.NewLabel(grid, "day-"+si).SetText(si)
+		// actual time of this date
+		dt := somw.AddDate(0, 0, i-somw.YearDay())
+		ds := strconv.Itoa(dt.Day())
+		gi.NewLabel(grid, "day-"+si).SetText(ds)
 	}
 
 	tv.UpdateEnd(updt)
