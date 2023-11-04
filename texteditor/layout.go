@@ -57,16 +57,15 @@ func (ed *Editor) UpdateFromAlloc() {
 func (ed *Editor) GetSize(sc *gi.Scene, iter int) {
 	ed.InitLayout(sc)
 	ed.LayoutAllLines()
-	ed.LayState.Size.Need = ed.TotalSize
-	ed.LayState.Size.Pref = ed.LayState.Size.Need
+	ed.GetSizeFromWH(20, 20)
 	// fmt.Println("GetSize: need:", ed.LayState.Size.Need)
 }
 
 func (ed *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	ed.SetFlag(false, gi.LayoutNeedsRedo)
-	ed.DoLayoutBase(sc, parBBox, iter)
 	spc := ed.BoxSpace()
-	ed.ChildSize = ed.LayState.Size.Need.Sub(spc.Size()) // we are what we need
+	ed.DoLayoutBase(sc, parBBox, iter)
+	ed.ChildSize = ed.TotalSize.Sub(spc.Size()) // we are what we need
 
 	ed.ManageOverflow(sc)
 	redo := ed.DoLayoutChildren(sc, iter)
