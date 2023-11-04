@@ -189,7 +189,17 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	for i, sm := range shortMonths {
 		sms[i] = sm
 	}
-	gi.NewChooser(trow, "month").SetItems(sms).SetCurIndex(int(dv.Time.Month() - 1))
+	month := gi.NewChooser(trow, "month").SetItems(sms)
+	month.SetCurIndex(int(dv.Time.Month() - 1))
+	month.OnChange(func(e events.Event) {
+		updt := dv.UpdateStart()
+		dv.DeleteChildByName("grid", true)
+		// set our month
+		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
+		dv.ConfigDateGrid()
+		dv.Update()
+		dv.UpdateEnd(updt)
+	})
 
 	yr := dv.Time.Year()
 	yrs := []any{}
