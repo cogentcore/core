@@ -226,6 +226,12 @@ func (sv SideValues) Dots() SideFloats {
 	)
 }
 
+// Zero sets the values of all of the sides to zero.
+func (sv *SideValues) Zero() *SideValues {
+	sv.Set()
+	return sv
+}
+
 // SideFloats contains float32 values for each side/corner of a box
 type SideFloats struct {
 	Sides[float32]
@@ -305,13 +311,19 @@ func (sf SideFloats) ToValues() SideValues {
 }
 
 // AllSame returns whether all of the sides/corners are the same
-func (s SideFloats) AllSame() bool {
-	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
+func (sf SideFloats) AllSame() bool {
+	return sf.Right == sf.Top && sf.Bottom == sf.Top && sf.Left == sf.Top
 }
 
 // IsZero returns whether all of the sides/corners are equal to zero
-func (s SideFloats) IsZero() bool {
-	return s.Top == 0 && s.Right == 0 && s.Bottom == 0 && s.Left == 0
+func (sf SideFloats) IsZero() bool {
+	return sf.Top == 0 && sf.Right == 0 && sf.Bottom == 0 && sf.Left == 0
+}
+
+// Zero sets the values of all of the sides to zero.
+func (sf *SideFloats) Zero() *SideFloats {
+	sf.Set()
+	return sf
 }
 
 // SideColors contains color values for each side/corner of a box
@@ -376,4 +388,10 @@ func (s SideColors) AllSame() bool {
 // IsZero returns whether all of the sides/corners are equal to zero
 func (s SideColors) IsZero() bool {
 	return colors.IsNil(s.Top) && colors.IsNil(s.Right) && colors.IsNil(s.Bottom) && colors.IsNil(s.Left)
+}
+
+// Zero sets the values of all of the sides to zero.
+func (s *SideColors) Zero() *SideColors {
+	s.Set()
+	return s
 }

@@ -298,7 +298,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				s.Margin = par.(*Style).Margin
 			} else if init {
-				s.Margin.Set()
+				s.Margin.Zero()
 			}
 			return
 		}
@@ -310,7 +310,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				s.Padding = par.(*Style).Padding
 			} else if init {
-				s.Padding.Set()
+				s.Padding.Zero()
 			}
 			return
 		}
@@ -521,7 +521,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Width = par.(*Border).Width
 			} else if init {
-				bs.Width.Set()
+				bs.Width.Zero()
 			}
 			return
 		}
@@ -533,7 +533,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Radius = par.(*Border).Radius
 			} else if init {
-				bs.Radius.Set()
+				bs.Radius.Zero()
 			}
 			return
 		}
@@ -590,7 +590,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Width = par.(*Border).Width
 			} else if init {
-				bs.Width.Set()
+				bs.Width.Zero()
 			}
 			return
 		}
@@ -602,7 +602,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Radius = par.(*Border).Radius
 			} else if init {
-				bs.Radius.Set()
+				bs.Radius.Zero()
 			}
 			return
 		}
