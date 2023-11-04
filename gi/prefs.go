@@ -56,9 +56,9 @@ type Preferences struct { //gti:add
 	// overall zoom factor as a percentage of the default zoom
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 
-	// the overall density factor as a percentage of the default amount of spacing
-	// (smaller numbers lead to more density and larger numbers lead to more space)
-	Density float32 `def:"100" min:"10" max:"1000" step:"10"`
+	// the overall spacing factor as a percentage of the default amount of spacing
+	// (higher numbers lead to more space and lower numbers lead to higher density)
+	Spacing float32 `def:"100" min:"10" max:"1000" step:"10"`
 
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs
@@ -135,7 +135,7 @@ func (pf *Preferences) Defaults() {
 	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
-	pf.Density = 100
+	pf.Spacing = 100
 	pf.Zoom = 100
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
@@ -432,9 +432,9 @@ const (
 // fixed breakpoints.
 func (pf *Preferences) DensityType() Densities {
 	switch {
-	case pf.Density < 50:
+	case pf.Spacing < 50:
 		return DensityCompact
-	case pf.Density > 150:
+	case pf.Spacing > 150:
 		return DensitySpread
 	default:
 		return DensityMedium
