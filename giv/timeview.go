@@ -28,6 +28,9 @@ type TimeView struct {
 
 	// the raw input hour
 	Hour int `set:"-"`
+
+	// whether we are in PM mode (so we have to add 12h to everything)
+	PM bool `set:"-"`
 }
 
 // SetTime sets the source time and updates the view
@@ -64,8 +67,12 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 			slog.Error(err.Error())
 		}
 		tv.Hour = hr
+		if tv.PM {
+			// only add to local
+			hr += 12
+		}
 		// we take our hour and keep everything else
-		tv.Time = time.Date(tv.Time.Year(), tv.Time.Month(), tv.Time.Day(), hr, tv.Time.Minute(), tv.Time.Second(), tv.Time.Nanosecond(), tv.Time.Location())
+		tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(hr))
 	})
 
 	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":")
