@@ -260,12 +260,12 @@ func (dv *DateView) ConfigDateGrid() {
 			if dt.Month() != som.Month() {
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
-			if yd == time.Now().YearDay() {
+			if dt.Year() == time.Now().Year() && dt.YearDay() == time.Now().YearDay() {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
 				s.Color = colors.Scheme.Primary.Base
 			}
-			if yd == dv.Time.YearDay() {
+			if dt.Year() == dv.Time.Year() && dt.YearDay() == dv.Time.YearDay() {
 				s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 				s.Color = colors.Scheme.Primary.On
 			}
