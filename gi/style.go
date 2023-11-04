@@ -253,9 +253,9 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 	s.Padding.Left.Val *= spc
 	s.Spacing.Val *= spc
 
-	fsz := Prefs.FontSize / 100
-	s.Font.Size.Val *= fsz
-	s.Text.LineHeight.Val *= fsz
+	// fsz := Prefs.FontSize / 100
+	// s.Font.Size.Val *= fsz
+	// s.Text.LineHeight.Val *= fsz
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
