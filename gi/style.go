@@ -240,19 +240,19 @@ func (wb *WidgetBase) RunStylers() {
 // ApplyPrefsDensityMul multiplies all of the margin, padding, and spacing
 // values for the widget by the result of [Prefs.DensityMul]
 func (wb *WidgetBase) ApplyPrefsDensityMul() {
-	pdm := Prefs.Density / 100
+	spc := Prefs.Spacing / 100
 
-	wb.Styles.Margin.Top.Val *= pdm
-	wb.Styles.Margin.Right.Val *= pdm
-	wb.Styles.Margin.Bottom.Val *= pdm
-	wb.Styles.Margin.Left.Val *= pdm
+	wb.Styles.Margin.Top.Val *= spc
+	wb.Styles.Margin.Right.Val *= spc
+	wb.Styles.Margin.Bottom.Val *= spc
+	wb.Styles.Margin.Left.Val *= spc
 
-	wb.Styles.Padding.Top.Val *= pdm
-	wb.Styles.Padding.Right.Val *= pdm
-	wb.Styles.Padding.Bottom.Val *= pdm
-	wb.Styles.Padding.Left.Val *= pdm
+	wb.Styles.Padding.Top.Val *= spc
+	wb.Styles.Padding.Right.Val *= spc
+	wb.Styles.Padding.Bottom.Val *= spc
+	wb.Styles.Padding.Left.Val *= spc
 
-	wb.Styles.Spacing.Val *= pdm
+	wb.Styles.Spacing.Val *= spc
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
