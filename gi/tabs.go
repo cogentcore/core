@@ -590,8 +590,8 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Dp(16))
-				s.SetMinPrefHeight(units.Dp(16))
+				s.MaxWidth.Dp(16)
+				s.MaxHeight.Dp(16)
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
@@ -657,14 +657,15 @@ func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 		cls.Update()
 		cls.SetProp("no-focus", true)
 		cls.OnClick(func(e events.Event) {
-			tabIdx := tb.Data.(int)
 			ts := tb.Tabs()
-			if ts != nil {
-				if !Prefs.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
-					ts.DeleteTabIndex(tabIdx, true)
-				} else {
-					ts.SelectTabIndex(tabIdx) // otherwise select
-				}
+			if ts == nil {
+				return
+			}
+			idx, _ := ts.TabIndexByLabel(tb.Text)
+			if !Prefs.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
+				ts.DeleteTabIndex(idx, true)
+			} else {
+				ts.SelectTabIndex(idx) // otherwise select
 			}
 		})
 		tb.UpdateEnd(updt)
