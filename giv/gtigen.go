@@ -2048,6 +2048,10 @@ var TimeViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Time", &gti.Field{Name: "Time", Type: "time.Time", LocalType: "time.Time", Doc: "the time that we are viewing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"Hour", &gti.Field{Name: "Hour", Type: "int", LocalType: "int", Doc: "the raw input hour", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"PM", &gti.Field{Name: "PM", Type: "bool", LocalType: "bool", Doc: "whether we are in PM mode (so we have to add 12h to everything)", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2072,6 +2076,20 @@ func (t *TimeView) KiType() *gti.Type {
 // New returns a new [*TimeView] value
 func (t *TimeView) New() ki.Ki {
 	return &TimeView{}
+}
+
+// SetTmpSave sets the [TimeView.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *TimeView) SetTmpSave(v Value) *TimeView {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [TimeView.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *TimeView) SetViewPath(v string) *TimeView {
+	t.ViewPath = v
+	return t
 }
 
 // SetTooltip sets the [TimeView.Tooltip]
