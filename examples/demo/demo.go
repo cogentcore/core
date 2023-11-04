@@ -62,6 +62,9 @@ func makeHome(ts *gi.Tabs) {
 	clr := colors.Tan
 	giv.NewValue(home, &clr)
 
+	t := time.Now()
+	giv.NewValue(home, &t)
+
 	giv.NewFuncButton(home, hello)
 
 	img := gi.NewImage(home)
