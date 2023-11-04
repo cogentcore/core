@@ -50,12 +50,6 @@ type Spinner struct { //goki:embedder
 
 	// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
 	Format string `xml:"format"`
-
-	// icon to use for up button -- defaults to
-	UpIcon icons.Icon `view:"show-name"`
-
-	// icon to use for down button -- defaults to
-	DownIcon icons.Icon `view:"show-name"`
 }
 
 func (sp *Spinner) CopyFieldsFrom(frm any) {
@@ -69,8 +63,6 @@ func (sp *Spinner) CopyFieldsFrom(frm any) {
 	sp.Step = fr.Step
 	sp.PageStep = fr.PageStep
 	sp.Prec = fr.Prec
-	sp.UpIcon = fr.UpIcon
-	sp.DownIcon = fr.DownIcon
 }
 
 func (sp *Spinner) OnInit() {

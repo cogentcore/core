@@ -313,7 +313,8 @@ func (tf *TextField) SetText(txt string) *TextField {
 
 // SetLeadingIcon sets the leading icon of the text field to the given icon.
 // If an on click function is specified, it also sets the leading icon on click
-// function to that function.
+// function to that function. If no function is specified, it does not
+// override any already set function.
 func (tf *TextField) SetLeadingIcon(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
 	tf.LeadingIcon = icon
 	if len(onClick) > 0 {
@@ -324,7 +325,8 @@ func (tf *TextField) SetLeadingIcon(icon icons.Icon, onClick ...func(e events.Ev
 
 // SetLeadingIcon sets the trailing icon of the text field to the given icon.
 // If an on click function is specified, it also sets the trailing icon on click
-// function to that function.
+// function to that function. If no function is specified, it does not
+// override any already set function.
 func (tf *TextField) SetTrailingIcon(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
 	tf.TrailingIcon = icon
 	if len(onClick) > 0 {
