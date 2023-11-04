@@ -78,7 +78,7 @@ func (ts *Tabs) TabsStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
 				s.MaxHeight.Zero()
-				s.Height.Em(1.8)
+				s.Height.Dp(28.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Set()
 				s.Padding.Set()
@@ -94,8 +94,8 @@ func (ts *Tabs) TabsStyles() {
 			frame := w.(*Frame)
 			frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetMinPrefHeight(units.Em(6))
+				s.SetMinPrefWidth(units.Dp(160))
+				s.SetMinPrefHeight(units.Dp(96))
 				s.SetStretchMax()
 			})
 		}
@@ -555,7 +555,7 @@ func (tb *Tab) TabStyles() {
 		}
 		s.MinWidth.Ch(8)
 		s.MaxWidth.Dp(500)
-		s.MinHeight.Em(1.6)
+		s.MinHeight.Dp(26)
 
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
@@ -581,8 +581,6 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1)
-				s.Height.Em(1)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
@@ -601,8 +599,8 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ex(1))
-				s.SetMinPrefHeight(units.Ex(1))
+				s.SetMinPrefWidth(units.Dp(16))
+				s.SetMinPrefHeight(units.Dp(16))
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {

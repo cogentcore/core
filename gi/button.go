@@ -189,15 +189,15 @@ func (bt *Button) ButtonStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1.125)
-				s.Height.Em(1.125)
+				s.Width.Dp(18)
+				s.Height.Dp(18)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(0.5)
-				s.MinWidth.Em(0.5)
+				s.Width.Dp(8)
+				s.MinWidth.Dp(8)
 			})
 		case "parts/label":
 			label := w.(*Label)
@@ -217,12 +217,12 @@ func (bt *Button) ButtonStyles() {
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(0.2)
+				s.Width.Dp(3.2)
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1.125)
-				s.Height.Em(1.125)
+				s.Width.Dp(18)
+				s.Height.Dp(18)
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignBottom

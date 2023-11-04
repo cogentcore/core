@@ -103,10 +103,6 @@ func (fb *FuncButton) CopyFieldsFrom(frm any) {
 	fb.ShowReturnAsDialog = fr.ShowReturnAsDialog
 }
 
-func (fb *FuncButton) OnInit() {
-	fb.Button.OnInit()
-}
-
 // SetFunc sets the function associated with the FuncButton to the
 // given function or method value. For documentation information for
 // the function to be obtained, it must be added to gti. SetFunc is
