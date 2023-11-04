@@ -211,6 +211,12 @@ func (tf *TextField) TextFieldStyles() {
 				s.Border.Color.Set(colors.Scheme.Outline)
 			}
 		}
+		if tf.IsReadOnly() {
+			s.Border.Color.Zero()
+			s.Border.Width.Zero()
+			s.Border.Radius.Zero()
+			s.BackgroundColor.SetSolid(colors.Transparent)
+		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
