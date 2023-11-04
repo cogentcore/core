@@ -54,11 +54,15 @@ type Preferences struct { //gti:add
 	Color color.RGBA
 
 	// overall zoom factor as a percentage of the default zoom
-	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
+	Zoom float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
 
 	// the overall spacing factor as a percentage of the default amount of spacing
 	// (higher numbers lead to more space and lower numbers lead to higher density)
-	Spacing float32 `def:"100" min:"10" max:"1000" step:"10"`
+	Spacing float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
+
+	// the overall font size factor applied to all text as a percentage
+	// of the default font size (higher numbers lead to larger text)
+	FontSize float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
 
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs
@@ -135,8 +139,9 @@ func (pf *Preferences) Defaults() {
 	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
-	pf.Spacing = 100
 	pf.Zoom = 100
+	pf.Spacing = 100
+	pf.FontSize = 100
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
