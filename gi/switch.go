@@ -43,12 +43,16 @@ type SwitchTypes int32 //enums:enum -trimprefix Switch
 const (
 	// SwitchSwitch indicates to display a switch as a switch (toggle slider)
 	SwitchSwitch SwitchTypes = iota
-	// SwitchChip indicates to display a switch as chip (like Material Design's filter chip)
+	// SwitchChip indicates to display a switch as chip (like Material Design's filter chip),
+	// which is typically only used in the context of [Switches].
 	SwitchChip
 	// SwitchCheckbox indicates to display a switch as a checkbox
 	SwitchCheckbox
 	// SwitchRadioButton indicates to display a switch as a radio button
 	SwitchRadioButton
+	// SwitchSegmented indicates to display a segmented switch, which is typically only used in
+	// the context of [Switches].
+	SwitchSegmented
 )
 
 func (sw *Switch) CopyFieldsFrom(frm any) {
@@ -246,6 +250,14 @@ func (sw *Switch) SetIcons(on, off icons.Icon) *Switch {
 	sw.IconOn = on
 	sw.IconOff = off
 	sw.UpdateEndLayout(updt)
+	return sw
+}
+
+// ClearIcons sets all of the switch icons to [icons.None]
+func (sw *Switch) ClearIcons() *Switch {
+	sw.IconOn = icons.None
+	sw.IconOff = icons.None
+	sw.IconDisab = icons.None
 	return sw
 }
 
