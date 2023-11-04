@@ -296,7 +296,7 @@ func (tv *TreeView) TreeViewStyles() {
 				// so that it does not appear as if we are getting interaction ourself;
 				// instead, we are a part of our parent and render a background color no
 				// different than them.
-				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+				if !s.Is(states.Disabled) && (s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active)) {
 					s.StateLayer *= 3
 				} else {
 					s.StateColor = colors.Scheme.OnSurface
