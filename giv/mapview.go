@@ -234,7 +234,7 @@ func (mv *MapView) ConfigMapGrid() {
 		vv.ConfigWidget(w, sc)
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
-			typw.ItemsFromTypes(valtypes, false, true, 50)
+			typw.SetTypes(valtypes, false, true, 50)
 			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
 				vtyp = strtyp // default to string

@@ -952,7 +952,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 				d := gi.NewDialog(sv).Title("Slice New").Prompt("Number and Type of Items to Insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
-				ki.ChildByType[*gi.Chooser](w, true).ItemsFromTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true, 50)
+				ki.ChildByType[*gi.Chooser](w, true).SetTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true, 50)
 				d.Cancel().Ok().OnAccept(func(e events.Event) {
 					updt := ownki.UpdateStart()
 					for i := 0; i < nd.Number; i++ {

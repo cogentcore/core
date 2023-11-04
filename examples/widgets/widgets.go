@@ -228,7 +228,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	ch := gi.NewChooser(txrow).SetType(gi.ChooserOutlined).SetEditable(true).
-		ItemsFromTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
+		SetTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
 	ch.OnChange(func(e events.Event) {
 		fmt.Printf("ComboBox selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)

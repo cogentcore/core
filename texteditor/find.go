@@ -291,7 +291,7 @@ func QReplaceDialog(d *gi.Dialog, find string, lexitems bool) *gi.Dialog {
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
-	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
+	tff.SetStrings(PrevQReplaceFinds, true, 0)
 	if find != "" {
 		tff.SetCurVal(find)
 	}
@@ -300,7 +300,7 @@ func QReplaceDialog(d *gi.Dialog, find string, lexitems bool) *gi.Dialog {
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
-	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
+	tfr.SetStrings(PrevQReplaceRepls, true, 0)
 
 	lb := gi.NewSwitch(d, "lexb")
 	lb.SetText("Lexical Items")

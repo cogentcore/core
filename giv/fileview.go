@@ -292,12 +292,12 @@ func (fv *FileView) ConfigPathBar() {
 		if sp == gi.FileViewResetPaths {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.Params.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath
-			pf.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+			pf.SetStrings(([]string)(gi.SavedPaths), true, 0)
 			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
 			fv.UpdateFiles()
 		} else if sp == gi.FileViewEditPaths {
 			fv.EditPaths()
-			pf.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+			pf.SetStrings(([]string)(gi.SavedPaths), true, 0)
 		} else {
 			fv.DirPath = sp
 			fv.UpdateFilesAction()
@@ -547,7 +547,7 @@ func (fv *FileView) UpdateFiles() {
 	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.Params.SavedPathsMax)
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
-	pf.ItemsFromStringList(sp, true, 0)
+	pf.SetStrings(sp, true, 0)
 	pf.ShowCurVal(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
