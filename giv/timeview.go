@@ -196,7 +196,12 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		return
 	}
 
-	dt := gi.NewTextField(ly, "date").SetTooltip("The date")
+	dt := gi.NewTextField(ly, "date").SetTooltip("The date").
+		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
+			d := gi.NewDialog(w).Title("Select date")
+			d.Cancel().Ok().Run()
+		})
+	dt.SetMinPrefWidth(units.Em(8))
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
 		d, err := time.Parse(time.DateOnly, dt.Text())
@@ -221,6 +226,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 				vv.UpdateWidget()
 			}).Cancel().Ok().Run()
 		})
+	tm.SetMinPrefWidth(units.Em(8))
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
 		t, err := time.Parse(gi.Prefs.TimeFormat(), tm.Text())
