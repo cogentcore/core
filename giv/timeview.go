@@ -71,18 +71,27 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 			// only add to local
 			hr += 12
 		}
-		// we take our hour and keep everything else
-		tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(hr))
+		// we set our hour and keep everything else
+		tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(hr)).Add(time.Minute * time.Duration(tv.Time.Minute()))
 	})
 
 	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":")
 
-	gi.NewTextField(tv, "minute").
-		SetText(strconv.Itoa(tv.Time.Minute())).
-		Style(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
-			s.SetFixedWidth(units.Dp(96))
-		})
+	minute := gi.NewTextField(tv, "minute").
+		SetText(strconv.Itoa(tv.Time.Minute()))
+	minute.Style(func(s *styles.Style) {
+		s.Font.Size.Dp(57)
+		s.SetFixedWidth(units.Dp(96))
+	})
+	minute.OnChange(func(e events.Event) {
+		min, err := strconv.Atoi(minute.Text())
+		// TODO(kai/snack)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		// we set our minute and keep everything else
+		tv.Time = tv.Time.Truncate(time.Minute).Add(time.Minute * time.Duration(min))
+	})
 
 	if !gi.Prefs.Clock24 {
 		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
