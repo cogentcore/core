@@ -51,19 +51,22 @@ func (sw *Switches) SwitchesStyles() {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
 
-		if sw.Type == SwitchSegmented {
+		if sw.Type == SwitchSegmentedButton {
 			s.Spacing.Zero()
 		}
 	})
 	sw.OnWidgetAdded(func(w Widget) {
+		fmt.Println(w.Parent(), sw, w.Parent() == sw)
 		if w.Parent() != sw {
 			return
 		}
 		sw.Style(func(s *styles.Style) {
-			if sw.Type != SwitchSegmented {
+			fmt.Println(sw.Type)
+			if sw.Type != SwitchSegmentedButton {
 				return
 			}
-			ip, _ := sw.IndexInParent()
+			ip, _ := w.IndexInParent()
+			fmt.Println(ip)
 			if ip == 0 {
 				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
 					s.Border.Radius.Set(units.Dp(8), units.Zero(), units.Zero(), units.Dp(8))
