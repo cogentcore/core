@@ -1190,7 +1190,7 @@ func (vv *BitFlagValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sw.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
-	sw.ItemsFromEnum(ev)
+	sw.SetEnum(ev)
 	sw.Config(sc)
 	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
