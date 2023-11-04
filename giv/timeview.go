@@ -14,6 +14,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/laser"
 	"goki.dev/pi/v2/filecat"
 )
@@ -119,7 +120,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		return
 	}
 
-	dt := gi.NewTextField(ly, "date").SetTooltip("The date")
+	dt := gi.NewTextField(ly, "date").SetTooltip("The date").SetTrailingIcon(icons.Timer)
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnClick(func(e events.Event) {
 		d := gi.NewDialog(w).Title("Edit time")
