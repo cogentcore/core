@@ -200,8 +200,8 @@ func (sw *Switch) SwitchStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.AlignV = styles.AlignMiddle
 			})
 		}
@@ -219,7 +219,7 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		// if they are turned on; we could implement that at some point
 		sw.IconOn = icons.ToggleOn.Fill()
 		sw.IconOff = icons.ToggleOff
-	case SwitchChip:
+	case SwitchChip, SwitchSegmented:
 		sw.IconOn = icons.Check
 		sw.IconOff = icons.None
 		sw.IconDisab = icons.None

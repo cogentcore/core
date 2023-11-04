@@ -24,7 +24,7 @@ type Separator struct {
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.Style(func(s *styles.Style) {
-		s.Margin.Set()
+		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4), units.Zero())
 		s.AlignV = styles.AlignCenter
 		s.AlignH = styles.AlignCenter

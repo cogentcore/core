@@ -183,8 +183,8 @@ func (tf *TextField) TextFieldStyles() {
 		case TextFieldFilled:
 			s.Border.Style.Set(styles.BorderNone)
 			s.Border.Style.Bottom = styles.BorderSolid
-			s.Border.Width.Set()
-			s.Border.Color.Set()
+			s.Border.Width.Zero()
+			s.Border.Color.Zero()
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
@@ -225,7 +225,7 @@ func (tf *TextField) TextFieldStyles() {
 			lead := w.(*Button)
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
-				s.Padding.Set(units.Zero())
+				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 				// If we are responsible for a positive (non-disabled) state layer
@@ -250,7 +250,7 @@ func (tf *TextField) TextFieldStyles() {
 			trail := w.(*Button)
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
-				s.Padding.Set(units.Zero())
+				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 				// same reasoning as for leading icon

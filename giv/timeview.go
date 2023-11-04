@@ -74,7 +74,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		})
 
 	if !gi.Prefs.Clock24 {
-		gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchChip).SetItems([]string{"AM", "PM"})
+		gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmented).SetItems([]string{"AM", "PM"})
 	}
 
 	tv.UpdateEnd(updt)

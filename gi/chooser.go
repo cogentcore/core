@@ -123,8 +123,8 @@ func (ch *Chooser) ChooserStyles() {
 			s.Color = colors.Scheme.Secondary.OnContainer
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)
-				s.Border.Width.Set().SetBottom(units.Dp(1))
-				s.Border.Color.Set().SetBottom(colors.Scheme.OnSurfaceVariant)
+				s.Border.Width.Zero().SetBottom(units.Dp(1))
+				s.Border.Color.Zero().SetBottom(colors.Scheme.OnSurfaceVariant)
 				s.Border.Radius = styles.BorderRadiusExtraSmallTop
 				if s.Is(states.Focused) {
 					s.Border.Width.Bottom = units.Dp(2)
@@ -148,16 +148,16 @@ func (ch *Chooser) ChooserStyles() {
 		switch w.PathFrom(ch) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.AlignV = styles.AlignMiddle
 				// TODO(kai): figure out what to do with MaxLength
 				// if ch.MaxLength > 0 {
@@ -175,9 +175,9 @@ func (ch *Chooser) ChooserStyles() {
 			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
 				// parent handles everything
-				s.Padding.Set()
+				s.Padding.Zero()
 				s.Border.Style.Set(styles.BorderNone)
-				s.Border.Width.Set()
+				s.Border.Width.Zero()
 				// must stay consistent with parent
 				s.StateLayer = ch.Styles.StateLayer
 				s.StateColor = ch.Styles.Color

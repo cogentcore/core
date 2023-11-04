@@ -80,8 +80,8 @@ func (ts *Tabs) TabsStyles() {
 				s.MaxHeight.Zero()
 				s.Height.Dp(28.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.Spacing.Zero()
 				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
@@ -560,9 +560,9 @@ func (tb *Tab) TabStyles() {
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
 
-		s.Border.Radius.Set()
+		s.Border.Radius.Zero()
 		s.Text.Align = styles.AlignCenter
-		s.Margin.Set()
+		s.Margin.Zero()
 		s.Padding.Set(units.Dp(8))
 
 		// s.Border.Style.Set(styles.BorderNone)
@@ -581,8 +581,8 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		case "parts/label":
 			label := w.(*Label)
@@ -590,8 +590,8 @@ func (tb *Tab) TabStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		case "parts/close-stretch":
 			w.Style(func(s *styles.Style) {
@@ -604,8 +604,8 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
-				// s.Margin.Set()
-				// s.Padding.Set()
+				// s.Margin.Zero()
+				// s.Padding.Zero()
 				s.AlignV = styles.AlignMiddle
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(colors.Transparent)
@@ -622,8 +622,8 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		}
 	})

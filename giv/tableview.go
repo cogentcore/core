@@ -93,8 +93,8 @@ func (tv *TableView) TableViewInit() {
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.SetStretchMax()                  // for this to work, ALL layers above need it too
 				s.Border.Style.Set(styles.BorderNone)
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		case "frame/header": // slice header
 			sh := w.(*gi.Frame)

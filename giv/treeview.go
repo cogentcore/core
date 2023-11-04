@@ -177,7 +177,7 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
-		s.Margin.Set()
+		s.Margin.Zero()
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 
@@ -197,7 +197,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 				s.Spacing.Ch(0.1)
-				s.Padding.Set(units.Zero())
+				s.Padding.Zero()
 
 				// we manually inherit our state layer from the treeview state
 				// layer so that the parts get it but not the other tree views
@@ -265,8 +265,8 @@ func (tv *TreeView) TreeViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Width.Em(1)
 				s.Height.Em(1)
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		case "parts/branch":
 			sw := w.(*gi.Switch)
@@ -278,8 +278,8 @@ func (tv *TreeView) TreeViewStyles() {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
 				s.Color = colors.Scheme.Primary.Base
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.Width.Em(0.5)
 				s.Height.Em(0.5)
 				s.AlignV = styles.AlignMiddle
@@ -339,8 +339,8 @@ func (tv *TreeView) TreeViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.MinWidth.Ch(16)
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			})
