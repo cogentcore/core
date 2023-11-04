@@ -78,7 +78,7 @@ func (ts *Tabs) TabsStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
 				s.MaxHeight.Zero()
-				s.Height.Dp(28.8)
+				// s.SetMinPrefHeight(units.Em(1.5))
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
@@ -156,6 +156,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
 	frame.SetLayout(LayoutVert)
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
+	ts.Update()
 	ts.UpdateEndLayout(updt)
 	return frame
 }
@@ -252,42 +253,48 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	return frame, true
 }
 
-// TabByName returns tab with given name (nil if not found -- see TabByNameTry)
-func (ts *Tabs) TabByName(label string) *Frame {
-	t, _ := ts.TabByNameTry(label)
+// TabByLabel returns tab with given label (nil if not found -- see TabByLabelTry)
+func (ts *Tabs) TabByLabel(label string) *Frame {
+	t, _ := ts.TabByLabelTry(label)
 	return t
 }
 
-// TabByNameTry returns tab with given name, and an error if not found.
-func (ts *Tabs) TabByNameTry(label string) (*Frame, error) {
+// TabByLabelTry returns tab with given label, and an error if not found.
+func (ts *Tabs) TabByLabelTry(label string) (*Frame, error) {
+	idx, err := ts.TabIndexByLabel(label)
+	if err != nil {
+		return nil, err
+	}
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
-
-	tb := ts.Tabs()
-	idx, ok := tb.Children().IndexByName(label, 0)
-	if !ok {
-		return nil, fmt.Errorf("gi.Tabs: Tab named %v not found in %v", label, ts.Path())
-	}
 	fr := ts.Frame()
 	frame := fr.Child(idx).(*Frame)
 	return frame, nil
 }
 
-// TabIndexByName returns tab index for given tab name, and an error if not found.
-func (ts *Tabs) TabIndexByName(label string) (int, error) {
+// TabIndexByLabel returns tab index for given tab label, and an error if not found.
+func (ts *Tabs) TabIndexByLabel(label string) (int, error) {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
 	tb := ts.Tabs()
-	idx, ok := tb.Children().IndexByName(label, 0)
-	if !ok {
-		return -1, fmt.Errorf("gi.Tabs: Tab named %v not found in %v", label, ts.Path())
+	idx := -1
+	n := len(*tb.Children())
+	for i := 0; i < n; i++ {
+		ti := AsButton(tb.Child(i))
+		if ti.Text == label {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return -1, fmt.Errorf("gi.Tabs: Tab with label %v not found in %v", label, ts.Path())
 	}
 	return idx, nil
 }
 
-// TabName returns tab name at given index
-func (ts *Tabs) TabName(idx int) string {
+// TabLabel returns tab label at given index
+func (ts *Tabs) TabLabel(idx int) string {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
@@ -296,12 +303,12 @@ func (ts *Tabs) TabName(idx int) string {
 	if err != nil {
 		return ""
 	}
-	return tbut.Name()
+	return AsButton(tbut).Text
 }
 
-// SelectTabByName selects tab by name, returning it.
-func (ts *Tabs) SelectTabByName(label string) *Frame {
-	idx, err := ts.TabIndexByName(label)
+// SelectTabByLabel selects tab by label, returning it.
+func (ts *Tabs) SelectTabByLabel(label string) *Frame {
+	idx, err := ts.TabIndexByLabel(label)
 	if err == nil {
 		ts.SelectTabIndex(idx)
 		fr := ts.Frame()
@@ -310,9 +317,9 @@ func (ts *Tabs) SelectTabByName(label string) *Frame {
 	return nil
 }
 
-// SelectTabByNameTry selects tab by name, returning it.  Returns error if not found.
-func (ts *Tabs) SelectTabByNameTry(label string) (*Frame, error) {
-	idx, err := ts.TabIndexByName(label)
+// SelectTabByLabelTry selects tab by label, returning it.  Returns error if not found.
+func (ts *Tabs) SelectTabByLabelTry(label string) (*Frame, error) {
+	idx, err := ts.TabIndexByLabel(label)
 	if err == nil {
 		ts.SelectTabIndex(idx)
 		fr := ts.Frame()
@@ -321,30 +328,30 @@ func (ts *Tabs) SelectTabByNameTry(label string) (*Frame, error) {
 	return nil, err
 }
 
-// RecycleTab returns a tab with given name, first by looking for an existing one,
+// RecycleTab returns a tab with given label, first by looking for an existing one,
 // and if not found, making a new one. If sel, then select it. It returns the
-// frame for the tab. If a name is also passed, the internal name (ID) of any new tab
+// frame for the tab. If a label is also passed, the internal label (ID) of any new tab
 // will be set to that; otherwise, it will default to the kebab-case version of the label.
 func (ts *Tabs) RecycleTab(label string, sel bool, name ...string) *Frame {
-	frame, err := ts.TabByNameTry(label)
+	frame, err := ts.TabByLabelTry(label)
 	if err == nil {
 		if sel {
-			ts.SelectTabByName(label)
+			ts.SelectTabByLabel(label)
 		}
 		return frame
 	}
 	frame = ts.NewTab(label, name...)
 	if sel {
-		ts.SelectTabByName(label)
+		ts.SelectTabByLabel(label)
 	}
 	return frame
 }
 
 // RecycleTabWidget returns a tab with given widget type in the tab frame,
-// first by looking for an existing one, with given name, and if not found,
+// first by looking for an existing one, with given label, and if not found,
 // making and configuring a new one.
 // If sel, then select it. It returns the Widget item for the tab.
-// If a name is also passed, the internal name (ID) of any new tab
+// If a label is also passed, the internal label (ID) of any new tab
 // will be set to that; otherwise, it will default to the kebab-case version of the label.
 func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type, name ...string) Widget {
 	fr := ts.RecycleTab(label, sel, name...)
@@ -358,14 +365,14 @@ func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type, name ...
 }
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
-// tab contents -- returns frame if destroy == false, tab name, and bool success
+// tab contents -- returns frame if destroy == false, tab label, and bool success
 func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	frame, _, ok := ts.TabAtIndex(idx)
 	if !ok {
 		return nil, "", false
 	}
 
-	tnm := ts.TabName(idx)
+	tnm := ts.TabLabel(idx)
 	ts.Mu.Lock()
 	fr := ts.Frame()
 	sz := len(*fr.Children())
@@ -419,22 +426,6 @@ func (ts *Tabs) ConfigNewTabButton(sc *Scene) bool {
 		return true
 	}
 }
-
-// TabsSignals are signals that the Tabs can send
-type TabsSignals int64
-
-const (
-	// TabSelected indicates tab was selected -- data is the tab index
-	TabSelected TabsSignals = iota
-
-	// TabAdded indicates tab was added -- data is the tab index
-	TabAdded
-
-	// TabDeleted indicates tab was deleted -- data is the tab name
-	TabDeleted
-
-	TabsSignalsN
-)
 
 // ConfigWidget initializes the tab widget children if it hasn't been done yet.
 // only the 2 primary children (Frames) need to be configured.
@@ -563,7 +554,7 @@ func (tb *Tab) TabStyles() {
 		s.Border.Radius.Zero()
 		s.Text.Align = styles.AlignCenter
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(8))
+		s.Padding.SetHoriz(units.Dp(8))
 
 		// s.Border.Style.Set(styles.BorderNone)
 		// if tb.StateIs(states.Selected) {

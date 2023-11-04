@@ -2398,16 +2398,16 @@ func _SwitchTypesNoOp() {
 }
 
 var _SwitchTypesNameToValueMap = map[string]SwitchTypes{
-	`Switch`:      0,
-	`switch`:      0,
-	`Chip`:        1,
-	`chip`:        1,
-	`Checkbox`:    2,
-	`checkbox`:    2,
-	`RadioButton`: 3,
-	`radiobutton`: 3,
-	`Segmented`:   4,
-	`segmented`:   4,
+	`Switch`:          0,
+	`switch`:          0,
+	`Chip`:            1,
+	`chip`:            1,
+	`Checkbox`:        2,
+	`checkbox`:        2,
+	`RadioButton`:     3,
+	`radiobutton`:     3,
+	`SegmentedButton`: 4,
+	`segmentedbutton`: 4,
 }
 
 var _SwitchTypesDescMap = map[SwitchTypes]string{
@@ -2415,7 +2415,7 @@ var _SwitchTypesDescMap = map[SwitchTypes]string{
 	1: `SwitchChip indicates to display a switch as chip (like Material Design&#39;s filter chip), which is typically only used in the context of [Switches].`,
 	2: `SwitchCheckbox indicates to display a switch as a checkbox`,
 	3: `SwitchRadioButton indicates to display a switch as a radio button`,
-	4: `SwitchSegmented indicates to display a segmented switch, which is typically only used in the context of [Switches].`,
+	4: `SwitchSegmentedButton indicates to display a segmented button, which is typically only used in the context of [Switches].`,
 }
 
 var _SwitchTypesMap = map[SwitchTypes]string{
@@ -2423,7 +2423,7 @@ var _SwitchTypesMap = map[SwitchTypes]string{
 	1: `Chip`,
 	2: `Checkbox`,
 	3: `RadioButton`,
-	4: `Segmented`,
+	4: `SegmentedButton`,
 }
 
 // String returns the string representation

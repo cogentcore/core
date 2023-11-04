@@ -167,7 +167,7 @@ func (fn *Node) CommitToVcsSel() { //gti:add
 		return
 	}
 	sn := AsNode(sels[n-1])
-	giv.NewFuncButton(sn, fn.CommitToVcs).CallFunc()
+	giv.NewSoloFuncButton(sn, fn.CommitToVcs).CallFunc()
 }
 
 // CommitToVcs commits file changes to version control system

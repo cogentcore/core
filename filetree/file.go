@@ -58,7 +58,7 @@ func (fn *Node) OpenFilesWith() {
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		giv.NewFuncButton(sn, sn.OpenFileWith).CallFunc()
+		giv.NewSoloFuncButton(sn, sn.OpenFileWith).CallFunc()
 	}
 }
 
@@ -169,7 +169,7 @@ func (fn *Node) RenameFiles() { //gti:add
 		if sn.IsExternal() {
 			continue
 		}
-		giv.NewFuncButton(sn, sn.RenameFile).CallFunc()
+		giv.NewSoloFuncButton(sn, sn.RenameFile).CallFunc()
 	}
 }
 
