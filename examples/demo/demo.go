@@ -15,7 +15,6 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -211,8 +210,6 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
 	gi.NewTextField(inputs).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
-
-	gi.NewTextField(inputs).SetLeadingIcon(icons.Remove).SetTrailingIcon(icons.Add).SetText("15").SetMinPrefWidth(units.Em(6))
 
 	spinners := gi.NewLayout(inputs, "spinners").SetLayout(gi.LayoutHoriz)
 
