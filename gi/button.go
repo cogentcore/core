@@ -409,10 +409,18 @@ func (bt *Button) ConfigParts(sc *Scene) {
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
 	if bt.HasMenu() {
-		if bt.Type == ButtonMenu && bt.Indicator == "" {
-			bt.Indicator = icons.KeyboardArrowRight
-		} else if bt.Type != ButtonMenu && bt.Icon == "" && bt.Indicator == "" {
-			bt.Icon = icons.Menu
+		if bt.Type == ButtonMenu {
+			if bt.Indicator == "" {
+				bt.Indicator = icons.KeyboardArrowRight
+			}
+		} else if bt.Text != "" {
+			if bt.Indicator == "" {
+				bt.Indicator = icons.KeyboardArrowDown
+			}
+		} else {
+			if bt.Icon == "" {
+				bt.Icon = icons.Menu
+			}
 		}
 	}
 	config := ki.Config{}

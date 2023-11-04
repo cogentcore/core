@@ -409,6 +409,7 @@ var FuncButtonType = gti.AddType(&gti.Type{
 		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", LocalType: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default, unless\nthe function has no return values.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
+		{"Context", &gti.Field{Name: "Context", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "gi.Widget", Doc: "Context is used for opening Dialogs if non-nil.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Button", &gti.Field{Name: "Button", Type: "goki.dev/gi/v2/gi.Button", LocalType: "gi.Button", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -456,6 +457,13 @@ func (t *FuncButton) SetShowReturn(v bool) *FuncButton {
 // automatically be set to true.
 func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton {
 	t.ShowReturnAsDialog = v
+	return t
+}
+
+// SetContext sets the [FuncButton.Context]:
+// Context is used for opening Dialogs if non-nil.
+func (t *FuncButton) SetContext(v gi.Widget) *FuncButton {
+	t.Context = v
 	return t
 }
 

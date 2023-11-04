@@ -23,6 +23,16 @@ import (
 	"goki.dev/laser"
 )
 
+// NewSoloFuncButton returns a standalone FuncButton with the given context
+// for popping up any dialog elements.
+func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
+	w := &gi.WidgetBase{}
+	w.InitName(w, "solofunc")
+	fb := NewFuncButton(w, fun)
+	fb.SetContext(ctx)
+	return fb
+}
+
 // FuncButton is a button that is set up to call a function when it
 // is pressed, using a dialog to prompt the user for any arguments.
 // Also, it automatically sets various properties of the button like
@@ -79,6 +89,9 @@ type FuncButton struct { //goki:no-new
 	// array, map), then ShowReturnAsDialog will
 	// automatically be set to true.
 	ShowReturnAsDialog bool
+
+	// Context is used for opening Dialogs if non-nil.
+	Context gi.Widget
 }
 
 // NewFuncButton adds a new [FuncButton] with the given function
@@ -186,20 +199,24 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 // CallFunc calls the function or method associated with this button,
 // prompting the user for any arguments.
 func (fb *FuncButton) CallFunc() {
+	ctx := fb.Context
+	if fb.Context == nil {
+		ctx = fb.This().(gi.Widget)
+	}
 	if len(fb.Args) == 0 {
 		if !fb.Confirm {
 			rets := fb.ReflectFunc.Call(nil)
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+		gi.NewDialog(ctx).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
 			OnAccept(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(nil)
 				fb.ShowReturnsDialog(rets)
 			}).Run()
 		return
 	}
-	d := gi.NewDialog(fb).Title(fb.Text).Prompt(fb.Tooltip)
+	d := gi.NewDialog(ctx).Title(fb.Text).Prompt(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Args)
 	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		rargs := make([]reflect.Value, len(fb.Args))
@@ -212,7 +229,7 @@ func (fb *FuncButton) CallFunc() {
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		gi.NewDialog(fb).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+		gi.NewDialog(ctx).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
 			OnAccept(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(rargs)
 				fb.ShowReturnsDialog(rets)
@@ -259,7 +276,11 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		gi.NewSnackbar(fb).Text(txt).Run()
 		return
 	}
-	d := gi.NewDialog(fb).Title(main).Prompt(fb.Tooltip)
+	ctx := fb.Context
+	if fb.Context == nil {
+		ctx = fb.This().(gi.Widget)
+	}
+	d := gi.NewDialog(ctx).Title(main).Prompt(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
 	d.Ok().Run()
 }
