@@ -242,6 +242,11 @@ func (tf *TextField) TextFieldStyles() {
 					s.StateColor = tf.Styles.Color
 				}
 			})
+			lead.OnClick(func(e events.Event) {
+				if tf.LeadingIconOnClick != nil {
+					tf.LeadingIconOnClick(e)
+				}
+			})
 		case "parts/trail-icon":
 			trail := w.(*Button)
 			trail.Type = ButtonAction
@@ -256,24 +261,11 @@ func (tf *TextField) TextFieldStyles() {
 					s.StateColor = tf.Styles.Color
 				}
 			})
-			switch tf.TrailingIcon {
-			case icons.Close:
-				trail.OnClick(func(e events.Event) {
-					tf.Clear()
-				})
-			case icons.Visibility, icons.VisibilityOff:
-				trail.OnClick(func(e events.Event) {
-					tf.NoEcho = !tf.NoEcho
-					if tf.NoEcho {
-						tf.TrailingIcon = icons.Visibility
-					} else {
-						tf.TrailingIcon = icons.VisibilityOff
-					}
-					if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
-						icon.SetIcon(tf.TrailingIcon)
-					}
-				})
-			}
+			trail.OnClick(func(e events.Event) {
+				if tf.TrailingIconOnClick != nil {
+					tf.TrailingIconOnClick(e)
+				}
+			})
 		}
 	})
 }
@@ -336,16 +328,26 @@ func (tf *TextField) SetTrailingIcon(icon icons.Icon, onClick ...func(e events.E
 // AddClearButton adds a trailing icon button at the end
 // of the textfield that clears the text in the textfield when pressed
 func (tf *TextField) AddClearButton() *TextField {
-	tf.TrailingIcon = icons.Close
-	return tf
+	return tf.SetTrailingIcon(icons.Close, func(e events.Event) {
+		tf.Clear()
+	})
 }
 
 // SetTypePassword enables [TextField.NoEcho] and adds a trailing
 // icon button at the end of the textfield that toggles [TextField.NoEcho]
 func (tf *TextField) SetTypePassword() *TextField {
-	tf.NoEcho = true
-	tf.TrailingIcon = icons.Visibility
-	return tf
+	return tf.SetNoEcho(true).
+		SetTrailingIcon(icons.Visibility, func(e events.Event) {
+			tf.NoEcho = !tf.NoEcho
+			if tf.NoEcho {
+				tf.TrailingIcon = icons.Visibility
+			} else {
+				tf.TrailingIcon = icons.VisibilityOff
+			}
+			if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
+				icon.SetIcon(tf.TrailingIcon)
+			}
+		})
 }
 
 // EditDone completes editing and copies the active edited text to the text --
