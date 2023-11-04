@@ -66,19 +66,20 @@ func (sw *Switches) SwitchesStyles() {
 				return
 			}
 			ip, _ := w.IndexInParent()
+			brf := styles.BorderRadiusFull.Top
 			if ip == 0 {
 				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
-					s.Border.Radius.Set(units.Dp(8), units.Zero(), units.Zero(), units.Dp(8))
+					s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
 				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
-					s.Border.Radius.Set(units.Dp(8), units.Dp(8), units.Zero(), units.Zero())
+					s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
 				}
 			} else if ip == sw.NumChildren()-1 {
 				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
 					s.Border.Width.SetLeft(units.Zero())
-					s.Border.Radius.Set(units.Zero(), units.Dp(8), units.Dp(8), units.Zero())
+					s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
 				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
 					s.Border.Width.SetTop(units.Zero())
-					s.Border.Radius.Set(units.Zero(), units.Zero(), units.Dp(8), units.Dp(8))
+					s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
 				}
 			} else {
 				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {

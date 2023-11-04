@@ -143,6 +143,40 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	tv.UpdateEnd(updt)
 }
 
+// DateView is a view for selecting a date
+type DateView struct {
+	gi.Frame
+
+	// the time that we are viewing
+	Time time.Time `set:"-"`
+
+	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	TmpSave Value `json:"-" xml:"-"`
+
+	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ViewPath string
+}
+
+// SetTime sets the source time and updates the view
+func (tv *DateView) SetTime(tim time.Time) *DateView {
+	updt := tv.UpdateStart()
+	tv.Time = tim
+	tv.UpdateEndRender(updt)
+	tv.SendChange()
+	return tv
+}
+
+func (tv *DateView) ConfigWidget(sc *gi.Scene) {
+	if tv.HasChildren() {
+		return
+	}
+	updt := tv.UpdateStart()
+
+	tv.SetLayout(gi.LayoutHoriz)
+
+	tv.UpdateEnd(updt)
+}
+
 // TimeValue presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker view dialogs.
 type TimeValue struct {
@@ -173,7 +207,7 @@ func (vv *TimeValue) UpdateWidget() {
 	fr := vv.Widget.(*gi.Layout)
 	tm := vv.TimeVal()
 
-	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format(time.DateOnly))
+	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format("1/2/2006"))
 	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.Prefs.TimeFormat()))
 }
 
@@ -199,12 +233,17 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	dt := gi.NewTextField(ly, "date").SetTooltip("The date").
 		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 			d := gi.NewDialog(w).Title("Select date")
-			d.Cancel().Ok().Run()
+			NewDateView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
+			d.OnAccept(func(e events.Event) {
+				tt := vv.TmpSave.Val().Interface().(*time.Time)
+				vv.SetValue(tt)
+				vv.UpdateWidget()
+			}).Cancel().Ok().Run()
 		})
 	dt.SetMinPrefWidth(units.Em(8))
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
-		d, err := time.Parse(time.DateOnly, dt.Text())
+		d, err := time.Parse("01/02/2006", dt.Text())
 		if err != err {
 			// TODO(kai/snack)
 			slog.Error(err.Error())
