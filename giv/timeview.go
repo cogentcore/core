@@ -6,6 +6,7 @@ package giv
 
 import (
 	"log/slog"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -174,6 +175,12 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		vv.UpdateWidget()
 		return
 	}
+	// need TmpSave
+	if vv.TmpSave == nil {
+		tt := vv.TimeVal()
+		vv.TmpSave = ToValue(tt, "")
+		vv.TmpSave.SetSoloValue(reflect.ValueOf(tt))
+	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	ly := vv.Widget.(*gi.Layout)
@@ -203,7 +210,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			d := gi.NewDialog(w).Title("Edit time")
 			NewTimeView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
 			d.OnAccept(func(e events.Event) {
-				tt := vv.TmpSave.Val().Interface().(time.Time)
+				tt := vv.TmpSave.Val().Interface().(*time.Time)
 				vv.SetValue(tt)
 				vv.UpdateWidget()
 			}).Cancel().Ok().Run()
