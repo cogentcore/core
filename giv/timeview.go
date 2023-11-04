@@ -44,8 +44,12 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 
 	tv.SetLayout(gi.LayoutHoriz)
 
-	hour := gi.NewTextField(tv, "hour").
-		SetText(strconv.Itoa(tv.Time.Hour()))
+	hour := gi.NewTextField(tv, "hour")
+	if gi.Prefs.Clock24 {
+		hour.SetText(strconv.Itoa(tv.Time.Hour()))
+	} else {
+		hour.SetText(strconv.Itoa(tv.Time.Hour() % 12))
+	}
 	hour.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
 		s.SetFixedWidth(units.Dp(96))
@@ -68,6 +72,10 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 			s.Font.Size.Dp(57)
 			s.SetFixedWidth(units.Dp(96))
 		})
+
+	if !gi.Prefs.Clock24 {
+		gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchChip).SetItems([]string{"AM", "PM"})
+	}
 
 	tv.UpdateEnd(updt)
 }
