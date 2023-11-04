@@ -2128,6 +2128,93 @@ func (t *TimeView) SetStripes(v gi.Stripes) *TimeView {
 	return t
 }
 
+// DateViewType is the [gti.Type] for [DateView]
+var DateViewType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.DateView",
+	ShortName:  "giv.DateView",
+	IDName:     "date-view",
+	Doc:        "DateView is a view for selecting a date",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Time", &gti.Field{Name: "Time", Type: "time.Time", LocalType: "time.Time", Doc: "the time that we are viewing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &DateView{},
+})
+
+// NewDateView adds a new [DateView] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewDateView(par ki.Ki, name ...string) *DateView {
+	return par.NewChild(DateViewType, name...).(*DateView)
+}
+
+// KiType returns the [*gti.Type] of [DateView]
+func (t *DateView) KiType() *gti.Type {
+	return DateViewType
+}
+
+// New returns a new [*DateView] value
+func (t *DateView) New() ki.Ki {
+	return &DateView{}
+}
+
+// SetTmpSave sets the [DateView.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *DateView) SetTmpSave(v Value) *DateView {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [DateView.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *DateView) SetViewPath(v string) *DateView {
+	t.ViewPath = v
+	return t
+}
+
+// SetTooltip sets the [DateView.Tooltip]
+func (t *DateView) SetTooltip(v string) *DateView {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [DateView.Class]
+func (t *DateView) SetClass(v string) *DateView {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [DateView.CustomContextMenu]
+func (t *DateView) SetCustomContextMenu(v func(m *gi.Scene)) *DateView {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetLayout sets the [DateView.Lay]
+func (t *DateView) SetLayout(v gi.Layouts) *DateView {
+	t.Lay = v
+	return t
+}
+
+// SetStackTop sets the [DateView.StackTop]
+func (t *DateView) SetStackTop(v int) *DateView {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [DateView.Stripes]
+func (t *DateView) SetStripes(v gi.Stripes) *DateView {
+	t.Stripes = v
+	return t
+}
+
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TreeView",
