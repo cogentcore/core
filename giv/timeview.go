@@ -213,12 +213,14 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 		// actual time of this date
 		dt := somw.AddDate(0, 0, yd-somw.YearDay())
 		ds := strconv.Itoa(dt.Day())
-		lb := gi.NewLabel(grid, "day-"+yds).SetText(ds)
-		lb.Style(func(s *styles.Style) {
-			s.Padding.Set(units.Dp(4))
-			s.Border.Radius = styles.BorderRadiusFull
-			s.AlignV = styles.AlignCenter
+		bt := gi.NewButton(grid, "day-"+yds).SetType(gi.ButtonAction).SetText(ds)
+		bt.Style(func(s *styles.Style) {
+			s.SetMinPrefWidth(units.Dp(40))
+			s.SetMinPrefHeight(units.Dp(40))
+			s.AlignH = styles.AlignCenter
 			s.Text.Align = styles.AlignCenter
+			s.Padding.Zero()
+			// s.Spacing.Zero()
 			if dt.Month() != som.Month() {
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
@@ -229,6 +231,17 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 			if yd == tv.Time.YearDay() {
 				s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 				s.Color = colors.Scheme.Primary.On
+			}
+		})
+		bt.OnWidgetAdded(func(w gi.Widget) {
+			if w.PathFrom(bt) == "parts/label" {
+				lb := w.(*gi.Label)
+				lb.Type = gi.LabelBodyLarge
+				w.Style(func(s *styles.Style) {
+					s.AlignH = styles.AlignCenter
+					s.Text.Align = styles.AlignCenter
+					s.SetStretchMaxWidth()
+				})
 			}
 		})
 	}
