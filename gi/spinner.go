@@ -93,9 +93,14 @@ func (sp *Spinner) SpinnerStyles() {
 	})
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp) {
-		case "parts/parts":
+		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.AlignV = styles.AlignMiddle
+				if sp.IsReadOnly() {
+					s.Spacing.Zero()
+				} else {
+					s.Spacing.Em(0.25)
+				}
 			})
 		case "parts/text-field":
 			tf := w.(*TextField)
@@ -115,7 +120,7 @@ func (sp *Spinner) SpinnerStyles() {
 				sp.UpIcon = icons.Add
 			}
 			up.SetIcon(sp.UpIcon)
-			w.SetState(sp.IsReadOnly(), states.Disabled)
+			up.SetState(sp.IsReadOnly(), states.Invisible)
 			up.OnClick(func(e events.Event) {
 				sp.IncrValue(1)
 			})
@@ -134,7 +139,7 @@ func (sp *Spinner) SpinnerStyles() {
 				sp.DownIcon = icons.Remove
 			}
 			down.SetIcon(sp.DownIcon)
-			w.SetState(sp.IsReadOnly(), states.Disabled)
+			down.SetState(sp.IsReadOnly(), states.Invisible)
 			down.OnClick(func(e events.Event) {
 				sp.IncrValue(-1)
 			})
