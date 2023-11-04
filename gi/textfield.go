@@ -226,6 +226,7 @@ func (tf *TextField) TextFieldStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Overflow = styles.OverflowHidden
+				s.Spacing.Zero()
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
@@ -234,6 +235,7 @@ func (tf *TextField) TextFieldStyles() {
 				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
+				s.Margin.SetRight(units.Dp(8))
 				// If we are responsible for a positive (non-disabled) state layer
 				// (instead of our parent), then we amplify it so that it is clear
 				// that we ourself are receiving a state layer amplifying event.
@@ -259,6 +261,7 @@ func (tf *TextField) TextFieldStyles() {
 				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
+				s.Margin.SetLeft(units.Dp(8))
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
 					s.StateLayer *= 3
