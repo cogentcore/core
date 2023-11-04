@@ -6,26 +6,21 @@ package gi
 
 import (
 	"fmt"
-	"image"
 	"log/slog"
 	"strconv"
 
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
 // Spinner combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
 type Spinner struct { //goki:embedder
-	WidgetBase
+	TextField
 
 	// current value
 	Value float32 `xml:"value" set:"-"`
@@ -81,79 +76,17 @@ func (sp *Spinner) OnInit() {
 	sp.PageStep = 0.2
 	sp.Max = 1.0
 	sp.Prec = 6
+	sp.SetLeadingIcon(icons.Remove, func(e events.Event) {
+		sp.IncrValue(-1)
+	}).SetTrailingIcon(icons.Add, func(e events.Event) {
+		sp.IncrValue(1)
+	})
 	sp.HandleSpinnerEvents()
 	sp.SpinnerStyles()
 }
 
 func (sp *Spinner) SpinnerStyles() {
-	sp.Style(func(s *styles.Style) {
-		// we take responsibility for the focus of our parts
-		s.SetAbilities(true, abilities.Focusable)
-		// our parts take responsibility for their own state layers
-		s.StateLayer = 0
-	})
-	sp.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sp) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
-				if sp.IsReadOnly() {
-					s.Spacing.Zero()
-				} else {
-					s.Spacing.Em(0.25)
-				}
-			})
-		case "parts/text-field":
-			tf := w.(*TextField)
-			tf.SetText(sp.ValToString(sp.Value))
-			sp.TextFieldHandlers(tf)
-			tf.Style(func(s *styles.Style) {
-				tf.SetReadOnly(sp.IsReadOnly())
-				s.SetMinPrefWidth(units.Em(3))
-			})
-			tf.OnSelect(func(e events.Event) {
-				sp.HandleEvent(e) // pass up
-			})
-		case "parts/up":
-			up := w.(*Button)
-			up.Type = ButtonAction
-			if sp.UpIcon.IsNil() {
-				sp.UpIcon = icons.Add
-			}
-			up.SetIcon(sp.UpIcon)
-			up.SetState(sp.IsReadOnly(), states.Invisible)
-			up.OnClick(func(e events.Event) {
-				sp.IncrValue(1)
-			})
-			up.OnSelect(func(e events.Event) {
-				sp.HandleEvent(e) // pass up
-			})
-			up.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Focusable)
-				s.Font.Size.Dp(18)
-				s.Padding.Set(units.Dp(1))
-			})
-		case "parts/down":
-			down := w.(*Button)
-			down.Type = ButtonAction
-			if sp.DownIcon.IsNil() {
-				sp.DownIcon = icons.Remove
-			}
-			down.SetIcon(sp.DownIcon)
-			down.SetState(sp.IsReadOnly(), states.Invisible)
-			down.OnClick(func(e events.Event) {
-				sp.IncrValue(-1)
-			})
-			down.OnSelect(func(e events.Event) {
-				sp.HandleEvent(e) // pass up
-			})
-			down.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Focusable)
-				s.Font.Size.Dp(18)
-				s.Padding.Set(units.Dp(1))
-			})
-		}
-	})
+	sp.TextFieldStyles()
 }
 
 // SetMin sets the min limits on the value
@@ -196,10 +129,7 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 		sp.Value = mat32.Max(sp.Value, sp.Min)
 	}
 	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
-	tf := sp.TextField()
-	if tf != nil {
-		tf.SetText(sp.ValToString(sp.Value))
-	}
+	sp.SetText(sp.ValToString(sp.Value))
 	return sp
 }
 
@@ -232,25 +162,6 @@ func (sp *Spinner) PageIncrValue(steps float32) *Spinner {
 	val := sp.Value + steps*sp.PageStep
 	val = mat32.IntMultiple(val, sp.PageStep)
 	return sp.SetValueAction(val)
-}
-
-func (sp *Spinner) ConfigParts(sc *Scene) {
-	config := ki.Config{}
-	config.Add(ButtonType, "down")
-	config.Add(TextFieldType, "text-field")
-	config.Add(ButtonType, "up")
-	sp.ConfigPartsImpl(sc, config, LayoutHoriz)
-}
-
-func (sp *Spinner) TextField() *TextField {
-	if sp.Parts == nil {
-		return nil
-	}
-	tf, ok := sp.Parts.ChildByName("text-field", 1).(*TextField)
-	if !ok {
-		return nil
-	}
-	return tf
 }
 
 // FormatIsInt returns true if the format string requires an integer value
@@ -295,9 +206,9 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 }
 
 func (sp *Spinner) HandleSpinnerEvents() {
-	sp.HandleWidgetEvents()
-	sp.HandleSelectToggle()
+	sp.HandleTextFieldEvents()
 	sp.HandleSpinnerScroll()
+	sp.HandleSpinnerKeys()
 }
 
 func (sp *Spinner) HandleSpinnerScroll() {
@@ -311,17 +222,9 @@ func (sp *Spinner) HandleSpinnerScroll() {
 	})
 }
 
-// TextFieldHandlers adds the Spinner textfield handlers for the given textfield
-func (sp *Spinner) TextFieldHandlers(tf *TextField) {
-	tf.On(events.Select, func(e events.Event) {
-		if sp.IsReadOnly() {
-			return
-		}
-		sp.SetSelected(!sp.StateIs(states.Selected))
-		sp.Send(events.Select, e)
-	})
-	tf.OnChange(func(e events.Event) {
-		text := tf.Text()
+func (sp *Spinner) HandleSpinnerKeys() {
+	sp.OnChange(func(e events.Event) {
+		text := sp.Text()
 		val, err := sp.StringToVal(text)
 		if err != nil {
 			// TODO: use validation
@@ -330,7 +233,6 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		}
 		sp.SetValueAction(val)
 	})
-
 	sp.OnKeyChord(func(e events.Event) {
 		if sp.IsReadOnly() {
 			return
@@ -352,49 +254,6 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		case kf == keyfun.PageDown:
 			e.SetHandled()
 			sp.PageIncrValue(-1)
-		default:
-			// if we don't have anything special to do,
-			// we just give our key event to our textfield
-			tf.HandleEvent(e)
 		}
 	})
-	tf.OnClick(func(e events.Event) {
-		if sp.IsReadOnly() {
-			return
-		}
-		sp.GrabFocus()
-	})
-	// Spinner gives its textfield focus styling but not actual focus
-	sp.OnFocus(func(e events.Event) {
-		tf.SetState(true, states.Focused)
-	})
-	sp.OnFocusLost(func(e events.Event) {
-		tf.SetState(false, states.Focused)
-	})
-}
-
-func (sp *Spinner) ConfigWidget(sc *Scene) {
-	sp.ConfigParts(sc)
-}
-
-func (sp *Spinner) ApplyStyle(sc *Scene) {
-	sp.WidgetBase.ApplyStyle(sc)
-}
-
-func (sp *Spinner) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sp.DoLayoutBase(sc, parBBox, iter)
-	sp.DoLayoutParts(sc, parBBox, iter)
-	return sp.DoLayoutChildren(sc, iter)
-}
-
-func (sp *Spinner) Render(sc *Scene) {
-	if sp.PushBounds(sc) {
-		tf := sp.TextField()
-		if tf != nil {
-			tf.SetSelected(sp.StateIs(states.Selected))
-		}
-		sp.RenderChildren(sc)
-		sp.RenderParts(sc)
-		sp.PopBounds(sc)
-	}
 }
