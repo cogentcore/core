@@ -2167,8 +2167,6 @@ var SpinnerType = gti.AddType(&gti.Type{
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: "xml:\"pagestep\""}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: ""}},
 		{"Format", &gti.Field{Name: "Format", Type: "string", LocalType: "string", Doc: "prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing", Directives: gti.Directives{}, Tag: "xml:\"format\""}},
-		{"UpIcon", &gti.Field{Name: "UpIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for up button -- defaults to", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
-		{"DownIcon", &gti.Field{Name: "DownIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for down button -- defaults to", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/gi/v2/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2242,20 +2240,6 @@ func (t *Spinner) SetPrec(v int) *Spinner {
 // prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
 func (t *Spinner) SetFormat(v string) *Spinner {
 	t.Format = v
-	return t
-}
-
-// SetUpIcon sets the [Spinner.UpIcon]:
-// icon to use for up button -- defaults to
-func (t *Spinner) SetUpIcon(v icons.Icon) *Spinner {
-	t.UpIcon = v
-	return t
-}
-
-// SetDownIcon sets the [Spinner.DownIcon]:
-// icon to use for down button -- defaults to
-func (t *Spinner) SetDownIcon(v icons.Icon) *Spinner {
-	t.DownIcon = v
 	return t
 }
 
