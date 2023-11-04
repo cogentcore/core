@@ -214,7 +214,7 @@ func (tf *TextField) TextFieldStyles() {
 		switch w.PathFrom(tf) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				// s.MaxWidth.Zero()
+				s.Overflow = styles.OverflowHidden
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
