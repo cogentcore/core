@@ -143,6 +143,8 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	tv.UpdateEnd(updt)
 }
 
+var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+
 // DateView is a view for selecting a date
 type DateView struct {
 	gi.Frame
@@ -172,7 +174,15 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := tv.UpdateStart()
 
-	tv.SetLayout(gi.LayoutHoriz)
+	tv.SetLayout(gi.LayoutVert)
+
+	trow := gi.NewLayout(tv).SetLayout(gi.LayoutHoriz)
+
+	sms := make([]any, len(shortMonths))
+	for i, sm := range shortMonths {
+		sms[i] = sm
+	}
+	gi.NewChooser(trow, "month").SetItems(sms).SetCurIndex(int(tv.Time.Month() - 1))
 
 	tv.UpdateEnd(updt)
 }
