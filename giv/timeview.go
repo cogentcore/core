@@ -184,6 +184,14 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	gi.NewChooser(trow, "month").SetItems(sms).SetCurIndex(int(tv.Time.Month() - 1))
 
+	yr := tv.Time.Year()
+	yrs := []any{}
+	// we go 100 in each direction from the current year
+	for i := yr - 100; i <= yr+100; i++ {
+		yrs = append(yrs, i)
+	}
+	gi.NewChooser(trow, "year").SetItems(yrs).SetCurVal(yr)
+
 	tv.UpdateEnd(updt)
 }
 
