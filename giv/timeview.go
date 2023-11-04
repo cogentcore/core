@@ -74,7 +74,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		})
 
 	if !gi.Prefs.Clock24 {
-		gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems([]string{"AM", "PM"})
+		gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
 	}
 
 	tv.UpdateEnd(updt)
@@ -144,7 +144,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	dt.Config(sc)
 
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
-		SetTrailingIcon(icons.Timer, func(e events.Event) {
+		SetLeadingIcon(icons.Schedule, func(e events.Event) {
 			d := gi.NewDialog(w).Title("Edit time")
 			NewTimeView(d).SetTime(*vv.TimeVal())
 			d.Cancel().Ok().Run()
