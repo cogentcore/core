@@ -72,11 +72,18 @@ func (sw *Switches) SwitchesStyles() {
 				}
 			} else if ip == sw.NumChildren()-1 {
 				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+					s.Border.Width.SetLeft(units.Zero())
 					s.Border.Radius.Set(units.Zero(), units.Dp(8), units.Dp(8), units.Zero())
 				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
+					s.Border.Width.SetTop(units.Zero())
 					s.Border.Radius.Set(units.Zero(), units.Zero(), units.Dp(8), units.Dp(8))
 				}
 			} else {
+				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+					s.Border.Width.SetLeft(units.Zero())
+				} else {
+					s.Border.Width.SetTop(units.Zero())
+				}
 				s.Border.Radius.Zero()
 			}
 		})
