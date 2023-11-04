@@ -210,6 +210,7 @@ func (sw *Switch) SwitchStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.AlignV = styles.AlignMiddle
+				s.FillSurround = false
 			})
 		}
 	})
