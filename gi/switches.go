@@ -148,24 +148,25 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 	sw.UpdateEndRender(updt)
 }
 
-// ItemsFromStringList sets the Items list from a list of string values -- if
+// SetStrings sets the Items list from a list of string values -- if
 // setFirst then set current item to the first item in the list, and maxLen if
 // > 0 auto-sets the width of the button to the contents, with the given upper
 // limit
-func (sw *Switches) ItemsFromStringList(el []string) {
+func (sw *Switches) SetStrings(el []string) *Switches {
 	sz := len(el)
 	if sz == 0 {
-		return
+		return sw
 	}
 	sw.Items = make([]string, sz)
 	copy(sw.Items, el)
+	return sw
 }
 
-// ItemsFromEnumList sets the Items list from a list of enum values
-func (sw *Switches) ItemsFromEnumList(el []enums.Enum) {
+// SetEnums sets the Items list from a list of enum values
+func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 	sz := len(el)
 	if sz == 0 {
-		return
+		return sw
 	}
 	sw.Items = make([]string, sz)
 	sw.Tooltips = make([]string, sz)
@@ -177,11 +178,13 @@ func (sw *Switches) ItemsFromEnumList(el []enums.Enum) {
 		}
 		sw.Tooltips[i] = enum.Desc()
 	}
+	return sw
 }
 
-// ItemsFromEnum sets the Items list from an enum value
-func (sw *Switches) ItemsFromEnum(enum enums.Enum) {
-	sw.ItemsFromEnumList(enum.Values())
+// SetEnum sets the Items list from an enum value by calling [Switches.SetEnums]
+// using the result of [enums.Enum.Values] on the given value
+func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
+	return sw.SetEnums(enum.Values())
 }
 
 // UpdateFromBitFlags sets the checked state of the switches from the
