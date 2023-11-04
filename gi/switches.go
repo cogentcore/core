@@ -124,6 +124,19 @@ func (sw *Switches) SelectItemAction(idx int) error {
 	return nil
 }
 
+// SelectedItem returns the first selected (checked) switch. It is only
+// useful when [Switches.Mutex] is true. If no switches are selected,
+// it returns "".
+func (sw *Switches) SelectedItem() string {
+	for _, swi := range sw.Kids {
+		sw := swi.(*Switch)
+		if sw.StateIs(states.Checked) {
+			return sw.Text
+		}
+	}
+	return ""
+}
+
 // UnCheckAll unchecks all switches
 func (sw *Switches) UnCheckAll() {
 	updt := sw.UpdateStart()

@@ -74,7 +74,17 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		})
 
 	if !gi.Prefs.Clock24 {
-		gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
+		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
+		sw.OnChange(func(e events.Event) {
+			si := sw.SelectedItem()
+			switch si {
+			case "AM":
+			case "PM":
+			default:
+				// must always have something valid selected
+				sw.SelectItem(0)
+			}
+		})
 	}
 
 	tv.UpdateEnd(updt)
