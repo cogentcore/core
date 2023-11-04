@@ -454,9 +454,9 @@ func (pf *Preferences) DensityType() Densities {
 // [Prefs.Time24].
 func (pf *Preferences) TimeFormat() string {
 	if pf.Time24 {
-		return ""
+		return "15:04"
 	}
-	return ""
+	return "3:04 PM"
 }
 
 //////////////////////////////////////////////////////////////////

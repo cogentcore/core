@@ -103,7 +103,7 @@ func (vv *TimeValue) UpdateWidget() {
 	tm := vv.TimeVal()
 
 	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format(time.DateOnly))
-	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(time.TimeOnly))
+	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.Prefs.TimeFormat()))
 }
 
 func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -136,14 +136,14 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	dt.Config(sc)
 
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
-		SetLeadingIcon(icons.Timer, func(e events.Event) {
+		SetTrailingIcon(icons.Timer, func(e events.Event) {
 			d := gi.NewDialog(w).Title("Edit time")
 			NewTimeView(d).SetTime(*vv.TimeVal())
 			d.Cancel().Ok().Run()
 		})
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
-		t, err := time.Parse(time.TimeOnly, tm.Text())
+		t, err := time.Parse(gi.Prefs.TimeFormat(), tm.Text())
 		if err != err {
 			// TODO(kai/snack)
 			slog.Error(err.Error())
