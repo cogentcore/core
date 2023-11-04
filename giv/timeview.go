@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -206,12 +207,30 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 	// end of the week containing the end of the month
 	eomw := eom.AddDate(0, 0, int(7-eom.Weekday()))
 
-	for i := somw.YearDay(); i <= eomw.YearDay(); i++ {
-		si := strconv.Itoa(i)
+	for yd := somw.YearDay(); yd <= eomw.YearDay(); yd++ {
+		yd := yd
+		yds := strconv.Itoa(yd)
 		// actual time of this date
-		dt := somw.AddDate(0, 0, i-somw.YearDay())
+		dt := somw.AddDate(0, 0, yd-somw.YearDay())
 		ds := strconv.Itoa(dt.Day())
-		gi.NewLabel(grid, "day-"+si).SetText(ds)
+		lb := gi.NewLabel(grid, "day-"+yds).SetText(ds)
+		lb.Style(func(s *styles.Style) {
+			s.Padding.Set(units.Dp(4))
+			s.Border.Radius = styles.BorderRadiusFull
+			s.AlignV = styles.AlignCenter
+			s.Text.Align = styles.AlignCenter
+			if dt.Month() != som.Month() {
+				s.Color = colors.Scheme.OnSurfaceVariant
+			}
+			if yd == time.Now().YearDay() {
+				s.Border.Width.Set(units.Dp(1))
+				s.Border.Color.Set(colors.Scheme.Primary.Base)
+			}
+			if yd == tv.Time.YearDay() {
+				s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+				s.Color = colors.Scheme.Primary.On
+			}
+		})
 	}
 
 	tv.UpdateEnd(updt)
