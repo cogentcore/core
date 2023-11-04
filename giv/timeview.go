@@ -6,7 +6,6 @@ package giv
 
 import (
 	"log/slog"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -101,7 +100,8 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 			slog.Error(err.Error())
 		}
 		// we set our minute and keep everything else
-		tv.Time = tv.Time.Truncate(time.Minute).Add(time.Minute * time.Duration(min))
+		tt := tv.Time
+		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), min, tt.Second(), tt.Nanosecond(), tt.Location())
 		if tv.TmpSave != nil {
 			tv.TmpSave.SetValue(tv.Time)
 		}
@@ -178,8 +178,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	// need TmpSave
 	if vv.TmpSave == nil {
 		tt := vv.TimeVal()
-		vv.TmpSave = ToValue(tt, "")
-		vv.TmpSave.SetSoloValue(reflect.ValueOf(tt))
+		vv.TmpSave = NewSoloValue(tt)
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
