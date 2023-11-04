@@ -199,6 +199,12 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	gi.NewChooser(trow, "year").SetItems(yrs).SetCurVal(yr)
 
+	dv.ConfigDateGrid()
+
+	dv.UpdateEnd(updt)
+}
+
+func (dv *DateView) ConfigDateGrid() {
 	grid := gi.NewLayout(dv, "grid").SetLayout(gi.LayoutGrid)
 	grid.Style(func(s *styles.Style) {
 		s.Columns = 7
@@ -255,8 +261,6 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 			}
 		})
 	}
-
-	dv.UpdateEnd(updt)
 }
 
 // TimeValue presents two text fields for editing a date and time,
