@@ -2394,7 +2394,7 @@ func _SwitchTypesNoOp() {
 	_ = x[SwitchChip-(1)]
 	_ = x[SwitchCheckbox-(2)]
 	_ = x[SwitchRadioButton-(3)]
-	_ = x[SwitchSegmented-(4)]
+	_ = x[SwitchSegmentedButton-(4)]
 }
 
 var _SwitchTypesNameToValueMap = map[string]SwitchTypes{

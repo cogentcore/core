@@ -50,9 +50,9 @@ const (
 	SwitchCheckbox
 	// SwitchRadioButton indicates to display a switch as a radio button
 	SwitchRadioButton
-	// SwitchSegmented indicates to display a segmented switch, which is typically only used in
+	// SwitchSegmentedButton indicates to display a segmented button, which is typically only used in
 	// the context of [Switches].
-	SwitchSegmented
+	SwitchSegmentedButton
 )
 
 func (sw *Switch) CopyFieldsFrom(frm any) {
@@ -132,6 +132,10 @@ func (sw *Switch) SwitchStyles() {
 				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Width.Set(units.Dp(1))
 			}
+		}
+		if sw.Type == SwitchSegmentedButton {
+			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Width.Set(units.Dp(1))
 		}
 
 		if s.Is(states.Selected) {
@@ -219,7 +223,7 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		// if they are turned on; we could implement that at some point
 		sw.IconOn = icons.ToggleOn.Fill()
 		sw.IconOff = icons.ToggleOff
-	case SwitchChip, SwitchSegmented:
+	case SwitchChip, SwitchSegmentedButton:
 		sw.IconOn = icons.Check
 		sw.IconOff = icons.None
 		sw.IconDisab = icons.None
