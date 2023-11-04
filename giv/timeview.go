@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"log/slog"
 	"strconv"
 	"time"
@@ -56,11 +57,12 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 
 	tv.SetLayout(gi.LayoutHoriz)
 
+	tv.Hour = tv.Time.Hour()
 	hour := gi.NewTextField(tv, "hour")
 	if gi.Prefs.Clock24 {
-		hour.SetText(strconv.Itoa(tv.Time.Hour()))
+		hour.SetText(strconv.Itoa(tv.Hour))
 	} else {
-		hour.SetText(strconv.Itoa(tv.Time.Hour() % 12))
+		hour.SetText(strconv.Itoa(tv.Hour % 12))
 	}
 	hour.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
@@ -110,8 +112,10 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	if !gi.Prefs.Clock24 {
 		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
 		if tv.Time.Hour() < 12 {
+			tv.PM = false
 			sw.SelectItemAction(0)
 		} else {
+			tv.PM = true
 			sw.SelectItemAction(1)
 		}
 		sw.OnChange(func(e events.Event) {
@@ -119,14 +123,18 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 			tt := tv.Time
 			switch si {
 			case "AM":
+				tv.PM = false
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			case "PM":
+				tv.PM = true
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			default:
 				// must always have something valid selected
+				tv.PM = false
 				sw.SelectItem(0)
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			}
+			fmt.Println(tv.Time)
 			if tv.TmpSave != nil {
 				tv.TmpSave.SetValue(tv.Time)
 			}
