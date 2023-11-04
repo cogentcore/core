@@ -214,7 +214,7 @@ func (tf *TextField) TextFieldStyles() {
 		switch w.PathFrom(tf) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.MaxWidth.Zero()
+				// s.MaxWidth.Zero()
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
@@ -222,7 +222,7 @@ func (tf *TextField) TextFieldStyles() {
 			lead.Style(func(s *styles.Style) {
 				s.Padding.Set(units.Zero())
 				// s.Font.Size.Dp(20)
-				// s.Margin.Right.Dp(16)
+				s.Margin.Right.Dp(16)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
@@ -232,7 +232,7 @@ func (tf *TextField) TextFieldStyles() {
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Set(units.Zero())
 				// s.Font.Size.Dp(20)
-				// s.Margin.Left.Dp(16)
+				s.Margin.Left.Dp(16)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
