@@ -143,6 +143,7 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 		}
 		cs := cbi.(*Switch)
 		cs.SetChecked(false)
+		cs.Update()
 	}
 	sw.UpdateEndRender(updt)
 }
@@ -215,10 +216,10 @@ func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
 }
 
 // HandleSwitchEvents handles the events for the given switch.
-func (sw *Switches) HandleSwitchEvents(swt *Switch) {
-	swt.OnChange(func(e events.Event) {
-		if sw.Mutex && swt.StateIs(states.Checked) {
-			ip, _ := sw.IndexInParent()
+func (sw *Switches) HandleSwitchEvents(swi *Switch) {
+	swi.OnChange(func(e events.Event) {
+		if sw.Mutex && swi.StateIs(states.Checked) {
+			ip, _ := swi.IndexInParent()
 			sw.UnCheckAllBut(ip)
 		}
 		sw.Send(events.Change, e)
