@@ -26,6 +26,12 @@ type TimeView struct {
 	// the time that we are viewing
 	Time time.Time `set:"-"`
 
+	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	TmpSave Value `json:"-" xml:"-"`
+
+	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	ViewPath string
+
 	// the raw input hour
 	Hour int `set:"-"`
 
@@ -72,7 +78,11 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 			hr += 12
 		}
 		// we set our hour and keep everything else
-		tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(hr)).Add(time.Minute * time.Duration(tv.Time.Minute()))
+		tt := tv.Time
+		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+		if tv.TmpSave != nil {
+			tv.TmpSave.SetValue(tv.Time)
+		}
 	})
 
 	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":")
@@ -91,6 +101,9 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		}
 		// we set our minute and keep everything else
 		tv.Time = tv.Time.Truncate(time.Minute).Add(time.Minute * time.Duration(min))
+		if tv.TmpSave != nil {
+			tv.TmpSave.SetValue(tv.Time)
+		}
 	})
 
 	if !gi.Prefs.Clock24 {
@@ -102,14 +115,19 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		}
 		sw.OnChange(func(e events.Event) {
 			si := sw.SelectedItem()
+			tt := tv.Time
 			switch si {
 			case "AM":
-				tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(tv.Hour))
+				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			case "PM":
-				tv.Time = tv.Time.Truncate(time.Hour).Add(time.Hour * time.Duration(tv.Hour+12))
+				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 			default:
 				// must always have something valid selected
 				sw.SelectItem(0)
+				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+			}
+			if tv.TmpSave != nil {
+				tv.TmpSave.SetValue(tv.Time)
 			}
 		})
 	}
@@ -183,8 +201,12 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
 		SetLeadingIcon(icons.Schedule, func(e events.Event) {
 			d := gi.NewDialog(w).Title("Edit time")
-			NewTimeView(d).SetTime(*vv.TimeVal())
-			d.Cancel().Ok().Run()
+			NewTimeView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
+			d.OnAccept(func(e events.Event) {
+				tt := vv.TmpSave.Val().Interface().(time.Time)
+				vv.SetValue(tt)
+				vv.UpdateWidget()
+			}).Cancel().Ok().Run()
 		})
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
