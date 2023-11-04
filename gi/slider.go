@@ -222,8 +222,8 @@ func (sr *Slider) SliderStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Width.Em(1)
 				s.Height.Em(1)
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		}
 	})

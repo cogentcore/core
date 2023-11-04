@@ -58,8 +58,8 @@ func (sl *Splits) OnInit() {
 func (sl *Splits) SplitsStyles() {
 	sl.Style(func(s *styles.Style) {
 		s.SetStretchMax()
-		s.Margin.Set()
-		s.Padding.Set()
+		s.Margin.Zero()
+		s.Padding.Zero()
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok {

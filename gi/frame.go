@@ -43,7 +43,7 @@ func (fr *Frame) FrameStyles() {
 		// getting clicks allows us to clear focus on click.
 		s.SetAbilities(true, abilities.Pressable, abilities.FocusWithinable)
 		s.Border.Style.Set(styles.BorderNone)
-		s.Border.Radius.Set()
+		s.Border.Radius.Zero()
 		s.Padding.Set(units.Dp(2))
 		s.SetStretchMax()
 		// we never want borders on frames

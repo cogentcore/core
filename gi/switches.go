@@ -50,6 +50,36 @@ func (sw *Switches) SwitchesStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
+
+		if sw.Type == SwitchSegmented {
+			s.Spacing.Zero()
+		}
+	})
+	sw.OnWidgetAdded(func(w Widget) {
+		if w.Parent() != sw {
+			return
+		}
+		sw.Style(func(s *styles.Style) {
+			if sw.Type != SwitchSegmented {
+				return
+			}
+			ip, _ := sw.IndexInParent()
+			if ip == 0 {
+				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+					s.Border.Radius.Set(units.Dp(8), units.Zero(), units.Zero(), units.Dp(8))
+				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
+					s.Border.Radius.Set(units.Dp(8), units.Dp(8), units.Zero(), units.Zero())
+				}
+			} else if ip == sw.NumChildren()-1 {
+				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+					s.Border.Radius.Set(units.Zero(), units.Dp(8), units.Dp(8), units.Zero())
+				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
+					s.Border.Radius.Set(units.Zero(), units.Zero(), units.Dp(8), units.Dp(8))
+				}
+			} else {
+				s.Border.Radius.Zero()
+			}
+		})
 	})
 }
 

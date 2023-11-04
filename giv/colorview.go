@@ -91,7 +91,7 @@ func (cv *ColorView) OnInit() {
 					s.BackgroundColor.SetSolid(c)
 					s.MaxHeight.Em(1.3)
 					s.MaxWidth.Em(1.3)
-					s.Margin.Set()
+					s.Margin.Zero()
 				})
 			}
 		}

@@ -189,7 +189,7 @@ func (ed *Editor) ViewStyles() {
 		}
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
 		s.Border.Radius = styles.BorderRadiusLarge
-		s.Margin.Set()
+		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
 		s.AlignV = styles.AlignTop
 		s.Text.Align = styles.AlignLeft

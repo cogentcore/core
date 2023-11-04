@@ -191,8 +191,8 @@ func (bt *Button) ButtonStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Width.Dp(18)
 				s.Height.Dp(18)
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
@@ -210,8 +210,8 @@ func (bt *Button) ButtonStyles() {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.MaxWidth.Zero()
 				s.AlignV = styles.AlignMiddle
 			})
@@ -223,8 +223,8 @@ func (bt *Button) ButtonStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Width.Dp(18)
 				s.Height.Dp(18)
-				s.Margin.Set()
-				s.Padding.Set()
+				s.Margin.Zero()
+				s.Padding.Zero()
 				s.AlignV = styles.AlignBottom
 			})
 		case "parts/shortcut":
