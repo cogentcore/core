@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
 
@@ -59,6 +60,7 @@ func (sw *Switches) SwitchesStyles() {
 		if w.Parent() != sw {
 			return
 		}
+		sw.HandleSwitchEvents(w.(*Switch))
 		w.Style(func(s *styles.Style) {
 			if sw.Type != SwitchSegmentedButton {
 				return
@@ -90,8 +92,8 @@ func (sw *Switches) SwitchesStyles() {
 	})
 }
 
-// SelectItem activates a given item but does NOT emit the ButtonSig signal.
-// See SelectItemAction for signal emitting version.
+// SelectItem activates a given item but does NOT send a change event.
+// See SelectItemAction for event emitting version.
 // returns error if index is out of range.
 func (sw *Switches) SelectItem(idx int) error {
 	if idx >= sw.NumChildren() || idx < 0 {
@@ -107,7 +109,7 @@ func (sw *Switches) SelectItem(idx int) error {
 	return nil
 }
 
-// SelectItemAction activates a given item and emits the ButtonSig signal.
+// SelectItemAction activates a given item and emits a change event.
 // This is mainly for Mutex use.
 // returns error if index is out of range.
 func (sw *Switches) SelectItemAction(idx int) error {
@@ -118,8 +120,7 @@ func (sw *Switches) SelectItemAction(idx int) error {
 	if err != nil {
 		return err
 	}
-	// cb := sw.Child(idx).(*CheckBox)
-	// sw.ButtonSig.Emit(sw.This(), int64(idx), cb.Text)
+	sw.SendChange()
 	return nil
 }
 
@@ -213,6 +214,17 @@ func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
 	}
 }
 
+// HandleSwitchEvents handles the events for the given switch.
+func (sw *Switches) HandleSwitchEvents(swt *Switch) {
+	swt.OnChange(func(e events.Event) {
+		if sw.Mutex && swt.StateIs(states.Checked) {
+			ip, _ := sw.IndexInParent()
+			sw.UnCheckAllBut(ip)
+		}
+		sw.Send(events.Change, e)
+	})
+}
+
 func (sw *Switches) ConfigItems() {
 	for i, swi := range *sw.Children() {
 		s := swi.(*Switch)
@@ -222,20 +234,6 @@ func (sw *Switches) ConfigItems() {
 		if len(sw.Tooltips) > i {
 			s.Tooltip = sw.Tooltips[i]
 		}
-		s.SetProp("index", i)
-		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	if sig != int64(ButtonToggled) {
-		// 		return
-		// 	}
-		// 	swb := AsSwitches(recv)
-		// 	csw := send.(*CheckBox)
-		// 	idx := csw.Prop("index").(int)
-		// 	ischk := csw.StateIs(states.Checked)
-		// 	if swb.Mutex && ischk {
-		// 		swb.UnCheckAllBut(idx)
-		// 	}
-		// 	swb.ButtonSig.Emit(swb.This(), int64(idx), csw.Text)
-		// })
 	}
 }
 
