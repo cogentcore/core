@@ -192,6 +192,25 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	gi.NewChooser(trow, "year").SetItems(yrs).SetCurVal(yr)
 
+	grid := gi.NewLayout(tv, "grid").SetLayout(gi.LayoutGrid)
+	grid.Style(func(s *styles.Style) {
+		s.Columns = 7
+	})
+
+	// start of the month
+	som := tv.Time.AddDate(0, 0, -tv.Time.Day()+1)
+	// end of the month
+	eom := tv.Time.AddDate(0, 1, -tv.Time.Day())
+	// start of the week containing the start of the month
+	somw := som.AddDate(0, 0, -int(som.Weekday()))
+	// end of the week containing the end of the month
+	eomw := eom.AddDate(0, 0, int(7-eom.Weekday()))
+
+	for i := somw.YearDay(); i <= eomw.YearDay(); i++ {
+		si := strconv.Itoa(i)
+		gi.NewLabel(grid, "day-"+si).SetText(si)
+	}
+
 	tv.UpdateEnd(updt)
 }
 
