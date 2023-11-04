@@ -112,7 +112,7 @@ func (sp *Spinner) SpinnerStyles() {
 			up := w.(*Button)
 			up.Type = ButtonAction
 			if sp.UpIcon.IsNil() {
-				sp.UpIcon = icons.KeyboardArrowUp
+				sp.UpIcon = icons.Add
 			}
 			up.SetIcon(sp.UpIcon)
 			w.SetState(sp.IsReadOnly(), states.Disabled)
@@ -131,7 +131,7 @@ func (sp *Spinner) SpinnerStyles() {
 			down := w.(*Button)
 			down.Type = ButtonAction
 			if sp.DownIcon.IsNil() {
-				sp.DownIcon = icons.KeyboardArrowDown
+				sp.DownIcon = icons.Remove
 			}
 			down.SetIcon(sp.DownIcon)
 			w.SetState(sp.IsReadOnly(), states.Disabled)
