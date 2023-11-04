@@ -70,8 +70,8 @@ type Preferences struct { //gti:add
 	// text highlighting style / theme
 	HiStyle HiStyleName
 
-	// whether to use 24-hour time (instead of AM and PM)
-	Time24 bool
+	// whether to use a 24-hour clock (instead of AM and PM)
+	Clock24 bool `label:"24-hour clock"`
 
 	// parameters controlling GUI behavior
 	Params ParamPrefs
@@ -451,9 +451,9 @@ func (pf *Preferences) DensityType() Densities {
 
 // TimeFormat returns the Go time format layout string that should
 // be used for displaying times to the user, based on the value of
-// [Prefs.Time24].
+// [Prefs.Clock24].
 func (pf *Preferences) TimeFormat() string {
-	if pf.Time24 {
+	if pf.Clock24 {
 		return "15:04"
 	}
 	return "3:04 PM"
