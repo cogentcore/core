@@ -207,7 +207,19 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	for i := yr - 100; i <= yr+100; i++ {
 		yrs = append(yrs, i)
 	}
-	gi.NewChooser(trow, "year").SetItems(yrs).SetCurVal(yr)
+	year := gi.NewChooser(trow, "year").SetItems(yrs)
+	year.SetCurVal(yr)
+	year.OnChange(func(e events.Event) {
+		updt := dv.UpdateStart()
+		dv.DeleteChildByName("grid", true)
+		// we are centered at current year with 100 in each direction
+		nyr := year.CurIndex + yr - 100
+		// set our year
+		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+		dv.ConfigDateGrid()
+		dv.Update()
+		dv.UpdateEnd(updt)
+	})
 
 	dv.ConfigDateGrid()
 
