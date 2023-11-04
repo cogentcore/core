@@ -138,12 +138,12 @@ func (bt *Button) ButtonStyles() {
 			s.Cursor = cursors.Pointer
 		}
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Padding.Set(units.Em(0.625), units.Em(1.5))
+		s.Padding.Set(units.Dp(10), units.Dp(24))
 		if !bt.Icon.IsNil() {
-			s.Padding.Left.Em(1)
+			s.Padding.Left.Dp(16)
 		}
 		if bt.Text == "" {
-			s.Padding.Right.Em(1)
+			s.Padding.Right.Dp(16)
 		}
 		s.Text.Align = styles.AlignCenter
 		s.MaxBoxShadow = styles.BoxShadow1()
