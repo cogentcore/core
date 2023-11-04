@@ -89,10 +89,10 @@ func (fn *Node) KeyInput(kt events.Event) {
 			fn.DuplicateFiles()
 			kt.SetHandled()
 		case keyfun.Insert: // New File
-			giv.NewSoloFuncButton(fn, fn.NewFile).CallFunc()
+			giv.CallFunc(fn, fn.NewFile)
 			kt.SetHandled()
 		case keyfun.InsertAfter: // New Folder
-			giv.NewSoloFuncButton(fn, fn.NewFolder).CallFunc()
+			giv.CallFunc(fn, fn.NewFolder)
 			kt.SetHandled()
 		}
 	}

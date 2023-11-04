@@ -23,6 +23,14 @@ import (
 	"goki.dev/laser"
 )
 
+// CallFunc calls the given function in the context of the given widget,
+// popping up a dialog to prompt for any arguments and show the return
+// values of the function. It is a helper function that uses [NewSoloFuncButton]
+// under the hood.
+func CallFunc(ctx gi.Widget, fun any) {
+	NewSoloFuncButton(ctx, fun).CallFunc()
+}
+
 // NewSoloFuncButton returns a standalone FuncButton with the given context
 // for popping up any dialog elements.
 func NewSoloFuncButton(ctx gi.Widget, fun any) *FuncButton {
