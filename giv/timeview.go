@@ -44,6 +44,9 @@ type TimeView struct {
 func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	updt := tv.UpdateStart()
 	tv.Time = tim
+	if tv.TmpSave != nil {
+		tv.TmpSave.SetValue(tv.Time)
+	}
 	tv.UpdateEndRender(updt)
 	tv.SendChange()
 	return tv
@@ -161,31 +164,34 @@ type DateView struct {
 }
 
 // SetTime sets the source time and updates the view
-func (tv *DateView) SetTime(tim time.Time) *DateView {
-	updt := tv.UpdateStart()
-	tv.Time = tim
-	tv.UpdateEndRender(updt)
-	tv.SendChange()
-	return tv
+func (dv *DateView) SetTime(tim time.Time) *DateView {
+	updt := dv.UpdateStart()
+	dv.Time = tim
+	if dv.TmpSave != nil {
+		dv.TmpSave.SetValue(dv.Time)
+	}
+	dv.UpdateEndRender(updt)
+	dv.SendChange()
+	return dv
 }
 
-func (tv *DateView) ConfigWidget(sc *gi.Scene) {
-	if tv.HasChildren() {
+func (dv *DateView) ConfigWidget(sc *gi.Scene) {
+	if dv.HasChildren() {
 		return
 	}
-	updt := tv.UpdateStart()
+	updt := dv.UpdateStart()
 
-	tv.SetLayout(gi.LayoutVert)
+	dv.SetLayout(gi.LayoutVert)
 
-	trow := gi.NewLayout(tv).SetLayout(gi.LayoutHoriz)
+	trow := gi.NewLayout(dv).SetLayout(gi.LayoutHoriz)
 
 	sms := make([]any, len(shortMonths))
 	for i, sm := range shortMonths {
 		sms[i] = sm
 	}
-	gi.NewChooser(trow, "month").SetItems(sms).SetCurIndex(int(tv.Time.Month() - 1))
+	gi.NewChooser(trow, "month").SetItems(sms).SetCurIndex(int(dv.Time.Month() - 1))
 
-	yr := tv.Time.Year()
+	yr := dv.Time.Year()
 	yrs := []any{}
 	// we go 100 in each direction from the current year
 	for i := yr - 100; i <= yr+100; i++ {
@@ -193,19 +199,19 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	gi.NewChooser(trow, "year").SetItems(yrs).SetCurVal(yr)
 
-	grid := gi.NewLayout(tv, "grid").SetLayout(gi.LayoutGrid)
+	grid := gi.NewLayout(dv, "grid").SetLayout(gi.LayoutGrid)
 	grid.Style(func(s *styles.Style) {
 		s.Columns = 7
 	})
 
 	// start of the month
-	som := tv.Time.AddDate(0, 0, -tv.Time.Day()+1)
+	som := dv.Time.AddDate(0, 0, -dv.Time.Day()+1)
 	// end of the month
-	eom := tv.Time.AddDate(0, 1, -tv.Time.Day())
+	eom := dv.Time.AddDate(0, 1, -dv.Time.Day())
 	// start of the week containing the start of the month
 	somw := som.AddDate(0, 0, -int(som.Weekday()))
 	// end of the week containing the end of the month
-	eomw := eom.AddDate(0, 0, int(7-eom.Weekday()))
+	eomw := eom.AddDate(0, 0, int(6-eom.Weekday()))
 
 	for yd := somw.YearDay(); yd <= eomw.YearDay(); yd++ {
 		yd := yd
@@ -214,6 +220,9 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 		dt := somw.AddDate(0, 0, yd-somw.YearDay())
 		ds := strconv.Itoa(dt.Day())
 		bt := gi.NewButton(grid, "day-"+yds).SetType(gi.ButtonAction).SetText(ds)
+		bt.OnClick(func(e events.Event) {
+			dv.SetTime(dt)
+		})
 		bt.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Dp(40))
 			s.SetMinPrefHeight(units.Dp(40))
@@ -228,7 +237,7 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
 				s.Color = colors.Scheme.Primary.Base
 			}
-			if yd == tv.Time.YearDay() {
+			if yd == dv.Time.YearDay() {
 				s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 				s.Color = colors.Scheme.Primary.On
 			}
@@ -247,7 +256,7 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	tv.UpdateEnd(updt)
+	dv.UpdateEnd(updt)
 }
 
 // TimeValue presents two text fields for editing a date and time,
