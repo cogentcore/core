@@ -1698,15 +1698,9 @@ func (tf *TextField) GetSize(sc *Scene, iter int) {
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
 	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
+	tf.GetSizeParts(sc, iter)
 	tf.GetSizeFromWH(w, tf.FontHeight)
 	tf.EditTxt = tmptxt
-	if tf.Parts == nil {
-		for _, p := range tf.Parts.Kids {
-			if w, ok := p.(Widget); ok {
-				w.GetSize(sc, iter)
-			}
-		}
-	}
 }
 
 func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
