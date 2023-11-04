@@ -227,6 +227,18 @@ func (em *EventMgr) ResetOnMouseDown() {
 	em.Press = nil
 	em.Drag = nil
 	em.Slide = nil
+
+	// if we have sent a long hover start event, we send an end
+	// event (non-nil widget plus nil timer means we already sent)
+	if em.LongHoverWidget != nil && em.LongHoverTimer == nil {
+		em.LongHoverWidget.Send(events.LongHoverEnd)
+	}
+	em.LongHoverWidget = nil
+	em.LongHoverPos = image.Point{}
+	if em.LongHoverTimer != nil {
+		em.LongHoverTimer.Stop()
+		em.LongHoverTimer = nil
+	}
 }
 
 func (em *EventMgr) HandlePosEvent(evi events.Event) {
@@ -336,6 +348,10 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 				em.Drag = em.Press
 				em.Drag.Send(events.DragStart, evi)
 			}
+		}
+		// if we already have a long press widget, we update it based on our dragging movement
+		if em.LongPressWidget != nil {
+			em.HandleLongPress(evi)
 		}
 	case events.MouseUp:
 		switch {
