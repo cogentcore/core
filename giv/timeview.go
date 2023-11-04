@@ -220,13 +220,13 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 			s.AlignH = styles.AlignCenter
 			s.Text.Align = styles.AlignCenter
 			s.Padding.Zero()
-			// s.Spacing.Zero()
 			if dt.Month() != som.Month() {
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
 			if yd == time.Now().YearDay() {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
+				s.Color = colors.Scheme.Primary.Base
 			}
 			if yd == tv.Time.YearDay() {
 				s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
@@ -241,6 +241,7 @@ func (tv *DateView) ConfigWidget(sc *gi.Scene) {
 					s.AlignH = styles.AlignCenter
 					s.Text.Align = styles.AlignCenter
 					s.SetStretchMaxWidth()
+					s.Border.Radius = styles.BorderRadiusFull
 				})
 			}
 		})
