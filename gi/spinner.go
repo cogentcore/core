@@ -11,6 +11,8 @@ import (
 
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -87,6 +89,9 @@ func (sp *Spinner) OnInit() {
 
 func (sp *Spinner) SpinnerStyles() {
 	sp.TextFieldStyles()
+	sp.Style(func(s *styles.Style) {
+		s.SetMinPrefWidth(units.Em(6))
+	})
 }
 
 // SetMin sets the min limits on the value
@@ -231,7 +236,7 @@ func (sp *Spinner) HandleSpinnerKeys() {
 			slog.Error("invalid Spinner value", "value", text, "err", err)
 			return
 		}
-		sp.SetValueAction(val)
+		sp.SetValue(val)
 	})
 	sp.OnKeyChord(func(e events.Event) {
 		if sp.IsReadOnly() {
