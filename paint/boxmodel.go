@@ -37,24 +37,28 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// we need to apply the state layer after getting the
 	// surrounding background color
 	bg = st.StateBackgroundColor(bg)
-	// we apply the surrounding state layer to the surrounding background color
-	psl := st.StateLayer
-	st.StateLayer = surroundStateLayer
-	sbg := st.StateBackgroundColor(*surroundBgColor)
-	st.StateLayer = psl
 
-	// We need to fill the whole box where the
-	// box shadows / element can go to prevent growing
-	// box shadows and borders. We couldn't just
-	// do this when there are box shadows, as they
-	// may be removed and then need to be covered up.
-	// This also fixes https://github.com/goki/gi/issues/579.
-	// This isn't an ideal solution because of performance,
-	// so TODO: maybe come up with a better solution for this.
-	// We need to use raw LayState data because we need to clear
-	// any box shadow that may have gone in margin.
-	mspos, mssz := st.BoxShadowPosSize(pos, sz)
-	pc.FillBox(rs, mspos, mssz, &sbg)
+	// we only fill the surrounding background color if we are told to
+	if st.FillSurround {
+		// we apply the surrounding state layer to the surrounding background color
+		psl := st.StateLayer
+		st.StateLayer = surroundStateLayer
+		sbg := st.StateBackgroundColor(*surroundBgColor)
+		st.StateLayer = psl
+
+		// We need to fill the whole box where the
+		// box shadows / element can go to prevent growing
+		// box shadows and borders. We couldn't just
+		// do this when there are box shadows, as they
+		// may be removed and then need to be covered up.
+		// This also fixes https://github.com/goki/gi/issues/579.
+		// This isn't an ideal solution because of performance,
+		// so TODO: maybe come up with a better solution for this.
+		// We need to use raw LayState data because we need to clear
+		// any box shadow that may have gone in margin.
+		mspos, mssz := st.BoxShadowPosSize(pos, sz)
+		pc.FillBox(rs, mspos, mssz, &sbg)
+	}
 
 	// first do any shadow
 	if st.HasBoxShadow() {

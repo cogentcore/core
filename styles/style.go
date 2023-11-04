@@ -132,6 +132,15 @@ type Style struct {
 	// for an element, do not use this; instead, set StateLayer to 0.
 	StateColor color.RGBA
 
+	// FillSurround is whether to fill a box of the surrounding background
+	// color before rendering the element itself, which is typically
+	// necessary to prevent text, border, and box shadow from rendering
+	// over themselves. It should be kept at its default value of true
+	// in most circumstances, but it can be set to false when the element
+	// is fully managed by something that is guaranteed to render the
+	// appropriate background color for the element.
+	FillSurround bool
+
 	// border around the box element
 	Border Border `xml:"border"`
 
@@ -179,6 +188,7 @@ func (s *Style) Defaults() {
 	s.LayoutDefaults()
 	s.Color = colors.Black
 	s.Opacity = 1
+	s.FillSurround = true
 	s.Font.Defaults()
 	s.Text.Defaults()
 }
