@@ -1647,11 +1647,13 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 			leadIcon := parts.Child(leadIconIdx).(*Button)
 			leadIcon.SetIcon(tf.LeadingIcon)
 			leadIcon.SetText("Lead")
+			leadIcon.Config(sc)
 		}
 		if trailIconIdx != -1 {
 			trailIcon := parts.Child(trailIconIdx).(*Button)
 			trailIcon.SetIcon(tf.TrailingIcon)
 			trailIcon.SetText("Trail")
+			trailIcon.Config(sc)
 		}
 		parts.UpdateEnd(updt)
 		tf.SetNeedsLayoutUpdate(sc, updt)
