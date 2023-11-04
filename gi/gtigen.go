@@ -2171,7 +2171,7 @@ var SpinnerType = gti.AddType(&gti.Type{
 		{"DownIcon", &gti.Field{Name: "DownIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for down button -- defaults to", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/gi/v2/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Spinner{},
@@ -2274,6 +2274,78 @@ func (t *Spinner) SetClass(v string) *Spinner {
 // SetCustomContextMenu sets the [Spinner.CustomContextMenu]
 func (t *Spinner) SetCustomContextMenu(v func(m *Scene)) *Spinner {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetPlaceholder sets the [Spinner.Placeholder]
+func (t *Spinner) SetPlaceholder(v string) *Spinner {
+	t.Placeholder = v
+	return t
+}
+
+// SetComplete sets the [Spinner.Complete]
+func (t *Spinner) SetComplete(v *Complete) *Spinner {
+	t.Complete = v
+	return t
+}
+
+// SetNoEcho sets the [Spinner.NoEcho]
+func (t *Spinner) SetNoEcho(v bool) *Spinner {
+	t.NoEcho = v
+	return t
+}
+
+// SetLeadingIconOnClick sets the [Spinner.LeadingIconOnClick]
+func (t *Spinner) SetLeadingIconOnClick(v func(e events.Event)) *Spinner {
+	t.LeadingIconOnClick = v
+	return t
+}
+
+// SetTrailingIconOnClick sets the [Spinner.TrailingIconOnClick]
+func (t *Spinner) SetTrailingIconOnClick(v func(e events.Event)) *Spinner {
+	t.TrailingIconOnClick = v
+	return t
+}
+
+// SetCursorWidth sets the [Spinner.CursorWidth]
+func (t *Spinner) SetCursorWidth(v units.Value) *Spinner {
+	t.CursorWidth = v
+	return t
+}
+
+// SetType sets the [Spinner.Type]
+func (t *Spinner) SetType(v TextFieldTypes) *Spinner {
+	t.Type = v
+	return t
+}
+
+// SetPlaceholderColor sets the [Spinner.PlaceholderColor]
+func (t *Spinner) SetPlaceholderColor(v color.RGBA) *Spinner {
+	t.PlaceholderColor = v
+	return t
+}
+
+// SetSelectColor sets the [Spinner.SelectColor]
+func (t *Spinner) SetSelectColor(v colors.Full) *Spinner {
+	t.SelectColor = v
+	return t
+}
+
+// SetCursorColor sets the [Spinner.CursorColor]
+func (t *Spinner) SetCursorColor(v colors.Full) *Spinner {
+	t.CursorColor = v
+	return t
+}
+
+// SetMaxWidthReq sets the [Spinner.MaxWidthReq]
+func (t *Spinner) SetMaxWidthReq(v int) *Spinner {
+	t.MaxWidthReq = v
+	return t
+}
+
+// SetSelectMode sets the [Spinner.SelectMode]
+func (t *Spinner) SetSelectMode(v bool) *Spinner {
+	t.SelectMode = v
 	return t
 }
 
