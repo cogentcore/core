@@ -16,6 +16,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -278,21 +279,19 @@ func (sp *Spinner) ValToString(val float32) string {
 
 // StringToVal converts the string field back to float value
 func (sp *Spinner) StringToVal(str string) (float32, error) {
-	var fval float32
-	var err error
+	// TODO(kai/snack)
+	if sp.Format == "" {
+		f64, err := strconv.ParseFloat(str, 32)
+		return float32(f64), grr.Log0(err)
+	}
 	if sp.FormatIsInt() {
-		var iv int64
-		iv, err = strconv.ParseInt(str, 0, 64)
-		fval = float32(iv)
-	} else {
-		var fv float64
-		fv, err = strconv.ParseFloat(str, 32)
-		fval = float32(fv)
+		var ival int
+		_, err := fmt.Sscanf(str, sp.Format, &ival)
+		return float32(ival), grr.Log0(err)
 	}
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	return fval, err
+	var fval float32
+	_, err := fmt.Sscanf(str, sp.Format, &fval)
+	return fval, grr.Log0(err)
 }
 
 func (sp *Spinner) HandleSpinnerEvents() {
