@@ -15,6 +15,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -202,14 +203,16 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewLabel(inputs).SetType(gi.LabelBodyLarge).SetText(
 		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
-	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled")
+	gi.NewTextField(inputs).SetPlaceholder("Filled")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
-	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).AddClearButton()
+	gi.NewTextField(inputs).AddClearButton()
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton()
-	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).AddClearButton().SetLeadingIcon(icons.Search)
+	gi.NewTextField(inputs).AddClearButton().SetLeadingIcon(icons.Search)
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
-	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetTypePassword().SetPlaceholder("Password")
+	gi.NewTextField(inputs).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
+
+	gi.NewTextField(inputs).SetLeadingIcon(icons.Remove).SetTrailingIcon(icons.Add).SetText("15").SetMinPrefWidth(units.Em(6))
 
 	spinners := gi.NewLayout(inputs, "spinners").SetLayout(gi.LayoutHoriz)
 
