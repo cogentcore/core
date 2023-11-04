@@ -262,7 +262,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	d := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	ki.ChildByType[*gi.Chooser](sg, true).ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
 	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		par := AsTreeView(tv.Par)
 		if tv.SyncNode != nil {
@@ -285,7 +285,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	d := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	ki.ChildByType[*gi.Chooser](sg, true).ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
+	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
 	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		if tv.SyncNode != nil {
 			tv.AddSyncNodes(0, 0, nd.Type, nd.Number)

@@ -331,11 +331,11 @@ func (ch *Chooser) SetToMaxLength(maxLen int) {
 	ch.MaxLength = ml
 }
 
-// ItemsFromTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
+// SetTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
 // If setFirst then set current item to the first item in the list,
 // and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit.
-func (ch *Chooser) ItemsFromTypes(tl []*gti.Type, setFirst, sort bool, maxLen int) *Chooser {
+func (ch *Chooser) SetTypes(tl []*gti.Type, setFirst, sort bool, maxLen int) *Chooser {
 	n := len(tl)
 	if n == 0 {
 		return ch
@@ -356,11 +356,11 @@ func (ch *Chooser) ItemsFromTypes(tl []*gti.Type, setFirst, sort bool, maxLen in
 	return ch
 }
 
-// ItemsFromStringList sets the Items list from a list of string values.
+// SetStrings sets the Items list from a list of string values.
 // If setFirst then set current item to the first item in the list,
 // and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit.
-func (ch *Chooser) ItemsFromStringList(el []string, setFirst bool, maxLen int) *Chooser {
+func (ch *Chooser) SetStrings(el []string, setFirst bool, maxLen int) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
@@ -378,11 +378,11 @@ func (ch *Chooser) ItemsFromStringList(el []string, setFirst bool, maxLen int) *
 	return ch
 }
 
-// ItemsFromIconList sets the Items list from a list of icons.Icon values.
+// SetIcons sets the Items list from a list of icons.Icon values.
 // If setFirst then set current item to the first item in the list,
 // and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit.
-func (ch *Chooser) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int) *Chooser {
+func (ch *Chooser) SetIcons(el []icons.Icon, setFirst bool, maxLen int) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
@@ -400,11 +400,11 @@ func (ch *Chooser) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int)
 	return ch
 }
 
-// ItemsFromEnumListsets the Items list from a list of enums.Enum values.
+// SetEnums sets the Items list from a list of enums.Enum values.
 // If setFirst then set current item to the first item in the list,
 // and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit.
-func (ch *Chooser) ItemsFromEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser {
+func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
@@ -424,12 +424,12 @@ func (ch *Chooser) ItemsFromEnums(el []enums.Enum, setFirst bool, maxLen int) *C
 	return ch
 }
 
-// ItemsFromEnum sets the Items list from given enums.Enum Values().
+// SetEnum sets the Items list from given enums.Enum Values().
 // If setFirst then set current item to the first item in the list,
 // and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit.
-func (ch *Chooser) ItemsFromEnum(enum enums.Enum, setFirst bool, maxLen int) *Chooser {
-	return ch.ItemsFromEnums(enum.Values(), setFirst, maxLen)
+func (ch *Chooser) SetEnum(enum enums.Enum, setFirst bool, maxLen int) *Chooser {
+	return ch.SetEnums(enum.Values(), setFirst, maxLen)
 }
 
 // FindItem finds an item on list of items and returns its index
