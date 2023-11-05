@@ -240,7 +240,7 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 // are not already through [WidgetBase.NewParts], calls
 // [ki.Node.ConfigChildren] on those parts with the given config,
 // and then handles necessary updating logic with the given scene.
-func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config, lay Layouts) {
+func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config) {
 	parts := wb.NewParts(lay)
 	mods, updt := parts.ConfigChildren(config)
 	if !mods && !wb.NeedsRebuild() {
@@ -520,8 +520,8 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 
 	vpsz := sc.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
-	stw := int(sc.Styles.MinWidth.Dots)
-	sth := int(sc.Styles.MinHeight.Dots)
+	stw := int(sc.Styles.Min.X.Dots)
+	sth := int(sc.Styles.Min.Y.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = max(vpsz.X, stw)
 	vpsz.Y = max(vpsz.Y, sth)
@@ -543,13 +543,13 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	if !wb.This().(Widget).IsVisible() {
 		return false
 	}
-	if wb.ScBBox.Empty() {
+	if wb.Alloc.BBox.Empty() {
 		return false
 	}
 	rs := &sc.RenderState
-	rs.PushBounds(wb.ScBBox)
+	rs.PushBounds(wb.Alloc.BBox)
 	if RenderTrace {
-		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.ScBBox)
+		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Alloc.BBox)
 	}
 	return true
 }

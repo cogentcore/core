@@ -15,6 +15,7 @@ import (
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/vci/v2"
 )
 
@@ -46,13 +47,13 @@ type VCSLogView struct {
 
 func (lv *VCSLogView) OnInit() {
 	lv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 	lv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(lv) {
 		case "a-tf", "b-tf":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(12)
+				s.Min.X.Em(12)
 			})
 		}
 	})
@@ -64,7 +65,9 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.Log = lg
 	lv.File = file
 	lv.Since = since
-	lv.Lay = gi.LayoutVert
+	lv.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
 	config := ki.Config{}
 	config.Add(gi.FrameType, "toolbar")
 	config.Add(giv.TableViewType, "log")

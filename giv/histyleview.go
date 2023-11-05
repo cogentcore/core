@@ -8,7 +8,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -89,13 +88,12 @@ func HiStylesView(st *histyle.Styles) {
 
 	sc := gi.NewScene("hi-styles")
 	sc.Title = "Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards."
-	sc.Lay = gi.LayoutVert
 	sc.Data = st
 
 	title := gi.NewLabel(sc, "title").SetText(sc.Title)
 	title.Style(func(s *styles.Style) {
-		s.SetMinPrefWidth(units.Ch(30)) // need for wrap
-		s.SetStretchMaxWidth()
+		s.Min.X.Ch(30) // need for wrap
+		s.Grow.Set(1, 0)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 

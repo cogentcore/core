@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
 
@@ -27,6 +26,7 @@ func (wb *WidgetBase) HasSc() bool {
 	return true
 }
 
+/*
 ////////////////////////////////////////////////////////////////////
 // 	BBox bounding boxes
 
@@ -278,6 +278,8 @@ func (wb *WidgetBase) LayoutScrollChildren(sc *Scene, delta image.Point) {
 	}
 }
 
+*/
+
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Layout {
 	ly := wb.ParentByType(LayoutType, ki.Embeds)
@@ -317,9 +319,9 @@ func (wb *WidgetBase) ScrollToMe() bool {
 // by adding the Scene position to the ScBBox
 func (wb *WidgetBase) WinBBox() image.Rectangle {
 	if !wb.HasSc() {
-		return wb.ScBBox
+		return wb.Alloc.BBox
 	}
-	return wb.ScBBox.Add(wb.Sc.Geom.Pos)
+	return wb.Alloc.BBox.Add(wb.Sc.Geom.Pos)
 }
 
 // WinPos returns the RenderWin based position within the

@@ -98,7 +98,6 @@ func NewScene(name ...string) *Scene {
 	sc.InitName(sc, name...)
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
-	sc.Lay = LayoutVert
 	return sc
 }
 
@@ -109,7 +108,6 @@ func NewSubScene(par ki.Ki, name ...string) *Scene {
 	sc := par.NewChild(SceneType, name...).(*Scene)
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
-	sc.Lay = LayoutVert
 	return sc
 }
 
@@ -124,6 +122,7 @@ func (sc *Scene) SceneStyles() {
 		s.Color = colors.Scheme.OnBackground
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
+		s.SetMainAxis(mat32.Y)
 
 		// insets
 

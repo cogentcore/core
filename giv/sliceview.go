@@ -23,7 +23,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/grr"
@@ -297,18 +296,18 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 
 	sv.HandleSliceViewEvents()
 
-	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
 		case "grid-lay": // grid layout
 			gl := w.(*gi.Layout)
-			gl.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMax() // for this to work, ALL layers above need it too
+				s.SetMainAxis(mat32.X)
+				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
 			})
 		case "grid-lay/grid": // slice grid
 			sg := w.(*gi.Frame)
@@ -317,18 +316,17 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			sg.Style(func(s *styles.Style) {
 				nWidgPerRow, _ := sv.RowWidgetNs()
 				s.Columns = nWidgPerRow
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(6))
-				s.SetMinPrefWidth(units.Ch(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Min.X.Em(20)
+				s.Min.Y.Ch(10)
+				s.Grow.Set(1, 1)
+				s.Overflow = styles.OverflowAuto
 			})
 		case "grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
-				s.SetFixedWidth(sv.Styles.ScrollBarWidth)
-				s.SetStretchMaxHeight()
+				s.Min.X.Set(sv.Styles.ScrollBarWidth)
+				s.Grow.Set(0, 1)
 			})
 			sb.OnChange(func(e events.Event) {
 				sv.StartIdx = int(sb.Value)
@@ -340,9 +338,9 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
-					s.MinWidth.Em(1.5)
+					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
-					s.Text.Align = styles.AlignRight
+					s.Text.Align = styles.AlignEnd
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
@@ -462,7 +460,7 @@ func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 	sv.VisRows = 0
 	gl := gi.NewLayout(sv, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid").SetLayout(gi.LayoutGrid)
+	gi.NewFrame(gl, "grid").SetDisplay(styles.DisplayGrid)
 	gi.NewSlider(gl, "scrollbar")
 }
 
@@ -661,7 +659,7 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 		return
 	}
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Spacing.Dots
+		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Gap.Dots
 	}
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
 		rowht = mat32.Max(rowht, sv.RowHeight)
@@ -1162,7 +1160,7 @@ func (sv *SliceViewBase) RowFromPos(posY int) (int, bool) {
 	for rw := 0; rw < sv.VisRows; rw++ {
 		w, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
 		if ok {
-			if w.ScBBox.Min.Y < posY && posY < w.ScBBox.Max.Y {
+			if w.Alloc.BBox.Min.Y < posY && posY < w.Alloc.BBox.Max.Y {
 				return rw, true
 			}
 		}

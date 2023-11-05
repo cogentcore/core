@@ -276,7 +276,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	n := len(em.MouseInBBox)
 	if n == 0 {
 		if EventTrace && et != events.MouseMove {
-			log.Println("Nothing in bbox:", sc.ScBBox, "pos:", pos)
+			log.Println("Nothing in bbox:", sc.Alloc.BBox, "pos:", pos)
 		}
 		return
 	}
@@ -568,22 +568,23 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 }
 
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
-	w.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb := w.AsWidget()
+	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !wb.IsVisible() {
+		if !kwb.IsVisible() {
 			return ki.Break
 		}
-		if !wb.PosInScBBox(pos) {
+		if !kwb.PosInScBBox(pos) {
 			return ki.Break
 		}
-		// fmt.Println("in bb:", wi, wb.Styles.State)
-		em.MouseInBBox = append(em.MouseInBBox, wi)
-		if wb.Parts != nil {
-			em.GetMouseInBBox(wb.Parts, pos)
+		// fmt.Println("in bb:", kwi, kwb.Styles.State)
+		em.MouseInBBox = append(em.MouseInBBox, kwi)
+		if kwb.Parts != nil {
+			em.GetMouseInBBox(kwb.Parts, pos)
 		}
-		ly := AsLayout(k)
+		ly := AsLayout(kwi)
 		if ly != nil {
 			for d := mat32.X; d <= mat32.Y; d++ {
 				if ly.HasScroll[d] {

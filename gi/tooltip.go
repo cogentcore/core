@@ -45,7 +45,7 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc.Geom.Pos.Y = bb.Min.Y
 	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
-		s.SetStretchMaxHeight()
+		s.Grow.Set(0, 1)
 		s.Padding.Set(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
@@ -53,8 +53,8 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	})
 	NewLabel(sc, "text").SetType(LabelBodyMedium).SetText(tooltip).
 		Style(func(s *styles.Style) {
-			s.MaxWidth.Em(30)
-			s.SetStretchMaxHeight()
+			s.Max.X.Em(30)
+			s.Grow.Set(0, 1)
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer

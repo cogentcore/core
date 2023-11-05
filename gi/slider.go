@@ -206,11 +206,11 @@ func (sr *Slider) SliderStyles() {
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		if sr.Dim == mat32.X {
-			s.Width.Em(20)
-			s.Height.Dp(4)
+			s.Min.X.Em(20)
+			s.Min.Y.Dp(4)
 		} else {
-			s.Height.Em(20)
-			s.Width.Dp(4)
+			s.Min.Y.Em(20)
+			s.Min.X.Dp(4)
 		}
 
 		s.Border.Style.Set(styles.BorderNone)
@@ -229,8 +229,8 @@ func (sr *Slider) SliderStyles() {
 		switch w.PathFrom(sr) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1)
-				s.Height.Em(1)
+				s.Min.X.Em(1)
+				s.Min.Y.Em(1)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
@@ -395,7 +395,7 @@ func (sr *Slider) UpdateThumbValSize() {
 func (sr *Slider) PointToRelPos(pt image.Point) image.Point {
 	sr.BBoxMu.RLock()
 	defer sr.BBoxMu.RUnlock()
-	return pt.Sub(sr.ScBBox.Min)
+	return pt.Sub(sr.Alloc.BBox.Min)
 }
 
 func (sr *Slider) HandleSliderMouse() {

@@ -399,7 +399,6 @@ func (w *RenderWin) ConfigVLay() {
 	if !w.Scene.Frame.HasChildren() {
 		w.Scene.Frame.NewChild(TypeMenuBar, "main-menu")
 	}
-	w.Scene.Frame.Lay = LayoutVert
 	w.MainMenu = w.Scene.Frame.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()

@@ -344,13 +344,13 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
-		s.Width.Ch(30)
-		s.Height.Em(40)
+		s.Min.X.Ch(30)
+		s.Min.Y.Em(40)
 	})
 	tvb.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
-		s.Width.Ch(80)
-		s.Height.Em(40)
+		s.Min.X.Ch(80)
+		s.Min.Y.Em(40)
 	})
 
 	// dlg.UpdateEndNoSig(true) // going to be shown

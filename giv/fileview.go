@@ -21,12 +21,12 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
 )
@@ -87,9 +87,9 @@ func (fv *FileView) OnInit() {
 }
 
 func (fv *FileView) FileViewStyles() {
-	fv.Lay = gi.LayoutVert
 	fv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(fv) {
@@ -98,18 +98,18 @@ func (fv *FileView) FileViewStyles() {
 			gi.ToolbarStyles(fr)
 		case "path-tbar/path-lbl":
 			w.Style(func(s *styles.Style) {
-				s.MaxWidth.Zero()
+				s.Max.X.Zero()
 			})
 		case "path-tbar/path":
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ch(60))
-				s.SetStretchMaxWidth()
+				s.Min.X.Ch(60)
+				s.Grow.Set(1, 0)
 			})
 		case "files-row":
 			fr := w.(*gi.Layout)
-			fr.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMax()
+				s.SetMainAxis(mat32.X)
+				s.Grow.Set(1, 1)
 			})
 		case "files-row/favs-view":
 			fv := w.(*TableView)
@@ -117,36 +117,35 @@ func (fv *FileView) FileViewStyles() {
 			fv.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
 			fv.SetReadOnly(true)
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMaxHeight()
-				s.SetFixedWidth(units.Ch(25))
+				s.Grow.Set(0, 1)
+				s.Min.X.Ch(25)
 			})
 		case "files-row/files-view":
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetReadOnly(true)
 			fv.Style(func(s *styles.Style) {
-				s.SetStretchMax()
+				s.SetMainAxis(mat32.X)
+				s.Grow.Set(1, 1)
 			})
 		case "sel-row":
 			sr := w.(*gi.Layout)
-			sr.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				s.Spacing.Dp(4)
-				s.SetStretchMaxWidth()
+				s.SetMainAxis(mat32.X)
+				s.Gap.Dp(4)
 			})
 		case "sel-row/sel-lbl":
 			w.Style(func(s *styles.Style) {
-				s.MaxWidth.Zero()
+				s.Max.X.Zero()
 			})
 		case "sel-row/sel": // sel field
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ch(60))
-				s.SetStretchMaxWidth()
+				s.Min.X.Ch(60)
+				s.Grow.Set(1, 0)
 			})
 		case "sel-row/ext-lbl":
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ch(10))
-				s.MaxWidth.Zero()
+				s.Min.X.Ch(10)
 			})
 		}
 	})
@@ -264,8 +263,6 @@ func (fv *FileView) ConfigPathBar() {
 	if pr.HasChildren() {
 		return
 	}
-	pr.Lay = gi.LayoutHoriz
-	pr.SetStretchMaxWidth()
 
 	config := ki.Config{}
 	config.Add(gi.LabelType, "path-lbl")

@@ -57,8 +57,8 @@ func (im *Image) OnInit() {
 
 func (im *Image) ImageStyles() {
 	im.Style(func(s *styles.Style) {
-		s.MinWidth.Dp(float32(im.Size.X))
-		s.MinHeight.Dp(float32(im.Size.Y))
+		s.Min.X.Dp(float32(im.Size.X))
+		s.Min.Y.Dp(float32(im.Size.Y))
 	})
 }
 
@@ -149,11 +149,11 @@ func (im *Image) DrawIntoScene(sc *Scene) {
 	if im.Pixels == nil {
 		return
 	}
-	r := im.ScBBox
+	r := im.Alloc.BBox
 	sp := image.Point{}
 	if im.Par != nil { // use parents children bbox to determine where we can draw
-		pni, _ := AsWidget(im.Par)
-		pbb := pni.ChildrenBBoxes(sc)
+		_, pwb := AsWidget(im.Par)
+		pbb := pwb.Alloc.ContentBBox
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -185,12 +185,12 @@ func GrabRenderFrom(wi Widget) *image.RGBA {
 		log.Printf("gi.GrabRenderFrom could not grab from node, scene or pixels nil: %v\n", wb.Path())
 		return nil
 	}
-	if wb.ScBBox.Empty() {
+	if wb.Alloc.BBox.Empty() {
 		return nil // offscreen -- can happen -- no warning -- just check rval
 	}
-	sz := wb.ScBBox.Size()
+	sz := wb.Alloc.BBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), sc.Pixels, wb.ScBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), sc.Pixels, wb.Alloc.BBox.Min, draw.Src)
 	return img
 }
 

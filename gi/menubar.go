@@ -18,7 +18,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 // MenuBar
 
-// MenuBar is a Layout (typically LayoutHoriz) that renders a gradient
+// MenuBar is a Layout (typically horizontal) that renders a gradient
 // background and has convenience methods for adding menus.
 type MenuBar struct {
 	Layout
@@ -43,7 +43,7 @@ func (mb *MenuBar) OnInit() {
 
 func (mb *MenuBar) MenuBarStyles() {
 	mb.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
+		s.Grow.Set(1, 0)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Padding.SetHoriz(units.Dp(8))

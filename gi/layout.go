@@ -17,7 +17,6 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/ki/v2"
@@ -41,6 +40,10 @@ var (
 	// LayoutFocusNameTabMSec is the number of milliseconds since last focus name
 	// event to allow tab to focus on next element with same name.
 	LayoutFocusNameTabMSec = 2000
+
+	// LayoutAutoScrollDelayMSec is amount of time to wait (in Milliseconds) before
+	// trying to autoscroll again
+	LayoutAutoScrollDelayMSec = 25
 )
 
 // Layoutlags has bool flags for Layout
@@ -75,16 +78,6 @@ type Layouter interface {
 
 	// AsLayout returns the base Layout type
 	AsLayout() *Layout
-
-	// DoLayoutAlloc allocates space to children.
-	// returns whether needs redo.
-	DoLayoutAlloc(sc *Scene, iter int) bool
-
-	// ManageOverflow processes any overflow according to overflow settings.
-	ManageOverflow(sc *Scene)
-
-	// DoLayoutChildren lays out the children after everything has been allocated
-	DoLayoutChildren(sc *Scene, iter int) bool
 }
 
 // AsLayout returns the given value as a value of type Layout if the type
@@ -113,10 +106,6 @@ func (t *Layout) AsLayout() *Layout {
 // All arbitrary collections of widgets should generally be contained
 // within a layout -- otherwise the parent widget must take over
 // responsibility for positioning.
-// The alignment is NOT inherited by default so must be specified per
-// child, except that the parent alignment is used within the relevant
-// dimension (e.g., horizontal-align for a LayoutHoriz layout,
-// to determine left, right, center, justified).
 // Layouts can automatically add scrollbars depending on the Overflow
 // layout style.
 // For a Grid layout, the 'columns' property should generally be set
@@ -132,12 +121,6 @@ type Layout struct {
 
 	// LayImpl contains implementational state info for doing layout
 	LayImpl LayImplState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// total max size of children as laid out
-	ChildSize mat32.Vec2 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// extra size in each dim due to scrollbars we add
-	ExtraSize mat32.Vec2 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// whether scrollbar is used for given dim
 	HasScroll [2]bool `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
@@ -166,7 +149,6 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 		return
 	}
 	ly.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	ly.Lay = fr.Lay
 	ly.StackTop = fr.StackTop
 }
 
@@ -181,13 +163,18 @@ func (ly *Layout) LayoutStyles() {
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
 
-		// automatically stretch in our primary direction
-		if ly.Lay == LayoutHoriz || ly.Lay == LayoutHorizFlow {
-			s.SetStretchMaxWidth()
-		} else if ly.Lay == LayoutVert || ly.Lay == LayoutVertFlow {
-			s.SetStretchMaxHeight()
-		} else if ly.Lay == LayoutGrid || ly.Lay == LayoutStacked {
-			s.SetStretchMax()
+		switch {
+		case s.Display == styles.DisplayFlex:
+			if s.Wrap {
+				s.Grow.Set(1, 1)
+			} else {
+				s.SetDim(s.MainAxis, 1)
+				s.SetDim(s.MainAxis.OrthoDim(), 0)
+			}
+		case s.Display == styles.DisplayStacked:
+			s.Grow.Set(1, 1)
+		case s.Display == styles.DisplayGrid:
+			s.Grow.Set(1, 1)
 		}
 	})
 }
@@ -198,29 +185,7 @@ func (ly *Layout) HandleLayoutEvents() {
 	ly.HandleLayoutScrollEvents()
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//     Overflow: Scrolling mainly
-
-// AvailSize returns the total size avail to this layout -- typically
-// AllocSize except for top-level layout which uses ScBBox in case less is
-// avail
-func (ly *Layout) AvailSize() mat32.Vec2 {
-	spc := ly.BoxSpace()
-	// we only want to subtract pos, not size here
-	// because this is for right and bottom side space
-	avail := ly.LayState.Alloc.Size.Sub(spc.Pos())
-	parni, _ := AsWidget(ly.Par)
-	// SidesTODO: what is the story with this?
-	if parni != nil {
-		// if vp.Sc == nil {
-		// 	// SidesTODO: might not be right
-		// 	avail = mat32.NewVec2FmPoint(ly.ScBBox.Size()).SubScalar(spc.Right)
-		// 	// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
-		// }
-	}
-	return avail
-}
-
+/*
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow(sc *Scene) {
 	ly.SetFlag(false, LayoutScrollsOff)
@@ -362,6 +327,7 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 		}
 	}
 }
+*/
 
 // RenderScrolls draws the scrollbars
 func (ly *Layout) RenderScrolls(sc *Scene) {
@@ -485,6 +451,7 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	}
 }
 
+/*
 // DoLayoutChildren lays out the children after everything has been allocated
 func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 	cbb := ly.ChildrenBBoxes(sc)
@@ -509,27 +476,21 @@ func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 		return redo
 	}
 }
+*/
 
 // render the children
 func (ly *Layout) RenderChildren(sc *Scene) {
-	if ly.Lay == LayoutStacked {
-		for i, kid := range ly.Kids {
-			if _, wi := AsWidget(kid); wi != nil {
-				wi.SetState(i != ly.StackTop, states.Invisible)
-			}
-		}
+	if ly.Styles.Display == styles.DisplayStacked {
+		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			kwi.SetState(i != ly.StackTop, states.Invisible)
+		})
 	}
-	for _, kid := range ly.Kids {
-		if kid == nil {
-			continue
-		}
-		wi, _ := AsWidget(kid)
-		if wi != nil {
-			wi.Render(sc)
-		}
-	}
+	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwi.Render(sc)
+	})
 }
 
+/*
 func (ly *Layout) LayoutScrollChildren(sc *Scene, delta image.Point) {
 	wi := ly.This().(Widget)
 	cbb := wi.ChildrenBBoxes(sc)
@@ -549,6 +510,7 @@ func (ly *Layout) LayoutScrollChildren(sc *Scene, delta image.Point) {
 		}
 	}
 }
+*/
 
 // AutoScrollRate determines the rate of auto-scrolling of layouts
 var AutoScrollRate = float32(1.0)
@@ -588,10 +550,6 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 
 var LayoutLastAutoScroll time.Time
 
-// LayoutAutoScrollDelayMSec is amount of time to wait (in Milliseconds) before
-// trying to autoscroll again
-var LayoutAutoScrollDelayMSec = 25
-
 // AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
 func (ly *Layout) AutoScroll(pos image.Point) bool {
 	now := time.Now()
@@ -600,7 +558,7 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 		return false
 	}
 	ly.BBoxMu.RLock()
-	wbb := ly.ScBBox
+	wbb := ly.Alloc.BBox
 	ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
@@ -623,9 +581,9 @@ func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.ScBBox.Min.X
+	vpMin := ly.Alloc.BBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.ScBBox.Min.Y
+		vpMin = ly.Alloc.BBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
@@ -686,9 +644,9 @@ func (ly *Layout) ScrollDimToStart(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.ScBBox.Min.X
+	vpMin := ly.Alloc.BBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.ScBBox.Min.Y
+		vpMin = ly.Alloc.BBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	if pos == vpMin { // already at min
@@ -716,9 +674,9 @@ func (ly *Layout) ScrollDimToEnd(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.ScBBox.Min.X
+	vpMin := ly.Alloc.BBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.ScBBox.Min.Y
+		vpMin = ly.Alloc.BBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal                // amount that can be scrolled
@@ -747,9 +705,9 @@ func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.ScBBox.Min.X
+	vpMin := ly.Alloc.BBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.ScBBox.Min.Y
+		vpMin = ly.Alloc.BBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
@@ -1085,6 +1043,7 @@ func (ly *Layout) HandleLayoutScrollEvents() {
 ///////////////////////////////////////////////////
 //   Standard Widget interface
 
+/*
 func (ly *Layout) BBoxes() image.Rectangle {
 	return ly.BBoxFromAlloc()
 }
@@ -1191,6 +1150,8 @@ func (ly *Layout) LayoutScroll(sc *Scene, delta image.Point, parBBox image.Recta
 	ly.RenderScrolls(sc)
 }
 
+*/
+
 func (ly *Layout) Render(sc *Scene) {
 	if ly.PushBounds(sc) {
 		ly.RenderChildren(sc)
@@ -1213,9 +1174,9 @@ type Stretch struct {
 
 func (st *Stretch) OnInit() {
 	st.Style(func(s *styles.Style) {
-		s.SetMinPrefHeight(units.Ch(1))
-		s.SetMinPrefWidth(units.Em(1))
-		s.SetStretchMax()
+		s.Min.X.Ch(1)
+		s.Min.Y.Em(1)
+		s.Grow.Set(1, 1)
 	})
 }
 
@@ -1242,8 +1203,8 @@ var _ Widget = (*Space)(nil)
 
 func (sp *Space) OnInit() {
 	sp.Style(func(s *styles.Style) {
-		s.Width.Ch(1)
-		s.Height.Em(1)
+		s.Min.X.Ch(1)
+		s.Min.Y.Em(1)
 	})
 }
 
