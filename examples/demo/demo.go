@@ -254,6 +254,11 @@ func makeInputs(ts *gi.Tabs) {
 func makeLayouts(ts *gi.Tabs) {
 	layouts := ts.NewTab("Layouts")
 
+	gi.NewLabel(layouts).SetType(gi.LabelHeadlineLarge).SetText("Layout")
+
+	gi.NewLabel(layouts).SetType(gi.LabelBodyLarge).SetText(
+		`GoGi provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
+
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
 	// vw.Style(func(s *styles.Style) {
 	// 	s.Width = units.Vw(50)
@@ -282,6 +287,15 @@ func makeLayouts(ts *gi.Tabs) {
 
 func makeValues(ts *gi.Tabs) {
 	values := ts.NewTab("Values")
+
+	gi.NewLabel(values).SetType(gi.LabelHeadlineLarge).SetText("Values")
+
+	gi.NewLabel(values).SetType(gi.LabelBodyLarge).SetText(
+		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+
+	gi.NewButton(values).SetText("GoGi Editor").OnClick(func(e events.Event) {
+		giv.GoGiEditorDialog(ts.Sc)
+	})
 
 	giv.NewValue(values, colors.Blue)
 	giv.NewValue(values, time.Now())
