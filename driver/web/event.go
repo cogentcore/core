@@ -7,16 +7,30 @@
 package web
 
 import (
-	"fmt"
+	"image"
 	"syscall/js"
+
+	"goki.dev/goosi/events"
 )
 
 func (app *appImpl) addEventListeners() {
-	js.Global().Call("addEventListener", "click", js.FuncOf(app.onClick))
+	g := js.Global()
+	g.Call("addEventListener", "mousedown", js.FuncOf(app.onMouseDown))
 }
 
-func (app *appImpl) onClick(this js.Value, args []js.Value) any {
-	x, y := args[0].Get("pageX").Int(), args[0].Get("pageY").Int()
-	fmt.Printf("got click event at (%d, %d)\n", x, y)
+func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
+	e := args[0]
+	x, y := e.Get("clientX").Int(), args[0].Get("clientY").Int()
+	but := e.Get("button").Int()
+	var ebut events.Buttons
+	switch but {
+	case 0:
+		ebut = events.Left
+	case 1:
+		ebut = events.Middle
+	case 2:
+		ebut = events.Right
+	}
+	app.window.EvMgr.MouseButton(events.MouseDown, ebut, image.Pt(x, y), 0) // TODO(kai/web): modifiers
 	return nil
 }
