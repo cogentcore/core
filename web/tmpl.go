@@ -13,7 +13,7 @@ import (
 	"goki.dev/goki/config"
 )
 
-// AppJSTmpl is the template used to build the app.js file
+// AppJSTmpl is the template used in [MakeAppJS] to build the app.js file
 var AppJSTmpl = template.Must(template.New("app.js").Parse(appJS))
 
 // AppJSData is the data passed to AppJSTmpl
@@ -86,6 +86,45 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 
 	b := &bytes.Buffer{}
 	err = tmpl.Execute(b, d)
+	if err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+// ManifestJSONTmpl is the template used in [MakeManifestJSON] to build the mainfest.webmanifest file
+var ManifestJSONTmpl = template.Must(template.New("manifest.webmanifest").Parse(manifestJSON))
+
+// ManifestJSONData is the data passed to [ManifestJSONTmpl]
+type ManifestJSONData struct {
+	ShortName       string
+	Name            string
+	Description     string
+	DefaultIcon     string
+	LargeIcon       string
+	SVGIcon         string
+	BackgroundColor string
+	ThemeColor      string
+	Scope           string
+	StartURL        string
+}
+
+// MakeManifestJSON exectues [ManifestJSONTmpl] based on the given configuration information.
+func MakeManifestJSON(h *config.Config) ([]byte, error) {
+	d := ManifestJSONData{
+		ShortName:   h.Name,
+		Name:        h.Name,
+		Description: h.Desc,
+		// DefaultIcon:     h.Icon.Default,
+		// LargeIcon:       h.Icon.Large,
+		// SVGIcon:         h.Icon.SVG,
+		BackgroundColor: h.Web.BackgroundColor,
+		ThemeColor:      h.Web.ThemeColor,
+		Scope:           "/",
+		StartURL:        "/",
+	}
+	b := &bytes.Buffer{}
+	err := ManifestJSONTmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}
