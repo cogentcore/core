@@ -67,6 +67,14 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hue.OnChange(func(e events.Event) {
 		cv.Color.Hue = hue.Value
 	})
+	hue.Style(func(s *styles.Style) {
+		hue.ValueColor.SetSolid(colors.Transparent)
+		s.BackgroundColor.Gradient = colors.LinearGradient()
+		for h := float32(0); h <= 360; h += 15 {
+			gc := cv.Color.WithHue(h)
+			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), h/360, 1)
+		}
+	})
 
 	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
 	chroma.OnChange(func(e events.Event) {
