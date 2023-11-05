@@ -52,10 +52,10 @@ func (w *windowImpl) MainMenu() goosi.MainMenu {
 func (w *windowImpl) Lock() bool {
 	// we re-use app mu for window because the app actually controls the system window
 	w.app.mu.Lock()
-	if w.app.gpu == nil || w.app.Surface == nil {
-		w.app.mu.Unlock()
-		return false
-	}
+	// if w.app.gpu == nil || w.app.Surface == nil {
+	// 	w.app.mu.Unlock()
+	// 	return false
+	// }
 	return true
 }
 
@@ -68,13 +68,15 @@ func (w *windowImpl) Drawer() goosi.Drawer {
 }
 
 func (w *windowImpl) IsClosed() bool {
-	return w.app.gpu == nil || w.app.Surface == nil
+	return false
+	// return w.app.gpu == nil || w.app.Surface == nil
 }
 
 func (w *windowImpl) IsVisible() bool {
 	w.app.mu.Lock()
 	defer w.app.mu.Unlock()
-	return w.isVisible && w.app.Surface != nil
+	return false
+	// return w.isVisible && w.app.Surface != nil
 }
 
 func (w *windowImpl) Activate() bool {
@@ -110,29 +112,29 @@ outer:
 			winPaint.Stop() // todo: close channel too??
 			break outer
 		case <-winShow.C:
-			if w.app.gpu == nil {
-				break outer
-			}
+			// if w.app.gpu == nil {
+			// break outer
+			// }
 			w.EvMgr.Window(events.WinShow)
 		case f := <-w.runQueue:
-			if w.app.gpu == nil {
-				break outer
-			}
+			// if w.app.gpu == nil {
+			// break outer
+			// }
 			f.f()
 			if f.done != nil {
 				f.done <- true
 			}
 		case <-winPaint.C:
-			// the app is closed, so we are done
-			if w.app.gpu == nil {
-				break outer
-			}
-			// we don't have a surface, so we skip for
-			// now, but we don't break the outer loop,
-			// as we could come back later
-			if w.app.Surface == nil {
-				break
-			}
+			// // the app is closed, so we are done
+			// if w.app.gpu == nil {
+			// 	break outer
+			// }
+			// // we don't have a surface, so we skip for
+			// // now, but we don't break the outer loop,
+			// // as we could come back later
+			// if w.app.Surface == nil {
+			// 	break
+			// }
 			w.app.mu.Lock()
 			w.EvMgr.WindowPaint()
 			w.app.mu.Unlock()

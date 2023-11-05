@@ -4,8 +4,30 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"image"
+
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver"
+)
 
 func main() {
 	fmt.Println("Hello, web!")
+	driver.Main(mainrun)
+}
+
+func mainrun(a goosi.App) {
+	fmt.Println("mainrun")
+	opts := &goosi.NewWindowOptions{
+		Size:      image.Pt(1024, 768),
+		StdPixels: true,
+		Title:     "Goosi Test Window",
+	}
+	w, err := goosi.TheApp.NewWindow(opts)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("got new window", w)
 }

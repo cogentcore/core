@@ -21,7 +21,6 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/events"
-	"goki.dev/vgpu/v2/vgpu"
 )
 
 var theApp = &appImpl{
@@ -37,11 +36,8 @@ type appImpl struct {
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
 	winptr        uintptr
-	System        *vgpu.System
-	Surface       *vgpu.Surface
 	Draw          drawerImpl
 	window        *windowImpl
-	gpu           *vgpu.GPU
 	screen        *goosi.Screen
 	noScreens     bool // if all screens have been disconnected, don't do anything..
 	name          string
