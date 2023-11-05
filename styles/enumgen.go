@@ -1023,6 +1023,117 @@ func (i *FontVariants) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _DisplayValues = []Display{0, 1, 2}
+
+// DisplayN is the highest valid value
+// for type Display, plus one.
+const DisplayN Display = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _DisplayNoOp() {
+	var x [1]struct{}
+	_ = x[DisplayFlex-(0)]
+	_ = x[DisplayGrid-(1)]
+	_ = x[DisplayNone-(2)]
+}
+
+var _DisplayNameToValueMap = map[string]Display{
+	`Flex`: 0,
+	`flex`: 0,
+	`Grid`: 1,
+	`grid`: 1,
+	`None`: 2,
+	`none`: 2,
+}
+
+var _DisplayDescMap = map[Display]string{
+	0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`,
+	1: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`,
+	2: `None means the item is not displayed`,
+}
+
+var _DisplayMap = map[Display]string{
+	0: `Flex`,
+	1: `Grid`,
+	2: `None`,
+}
+
+// String returns the string representation
+// of this Display value.
+func (i Display) String() string {
+	if str, ok := _DisplayMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the Display value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *Display) SetString(s string) error {
+	if val, ok := _DisplayNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _DisplayNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type Display")
+}
+
+// Int64 returns the Display value as an int64.
+func (i Display) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the Display value from an int64.
+func (i *Display) SetInt64(in int64) {
+	*i = Display(in)
+}
+
+// Desc returns the description of the Display value.
+func (i Display) Desc() string {
+	if str, ok := _DisplayDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// DisplayValues returns all possible values
+// for the type Display.
+func DisplayValues() []Display {
+	return _DisplayValues
+}
+
+// Values returns all possible values
+// for the type Display.
+func (i Display) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_DisplayValues))
+	for i, d := range _DisplayValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type Display.
+func (i Display) IsValid() bool {
+	_, ok := _DisplayMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Display) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Display) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _AlignValues = []Align{0, 1, 2, 3, 4, 5, 6}
 
 // AlignN is the highest valid value

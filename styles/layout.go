@@ -47,6 +47,24 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.ScrollBarWidth.ToDots(uc)
 }
 
+// Display determines how items are displayed
+type Display int32 //enums:enum -trim-prefix Display
+
+const (
+	// Flex is the default layout model, based on a simplified version of the
+	// CSS flex layout: uses MainAxis to specify the direction, Wrap for
+	// wrapping of elements, and Min, Max, and Grow values on elements to
+	// determine sizing.
+	DisplayFlex Display = iota
+
+	// Grid is the X, Y grid layout, with Columns specifying the number
+	// of elements in the X axis.
+	DisplayGrid
+
+	// None means the item is not displayed: sets the Invisible state
+	DisplayNone
+)
+
 // Align has all different types of alignment -- only some are applicable to
 // different contexts, but there is also so much overlap that it makes sense
 // to have them all in one list -- some are not standard CSS and used by

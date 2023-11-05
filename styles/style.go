@@ -46,11 +46,8 @@ type Style struct { //gti:add
 	// to the State info makes it easy to configure and manage.
 	Abilities abilities.Abilities
 
-	// todo big enum of how to display item -- controls layout etc
-	Display bool
-
-	// is the item visible or not
-	Visible bool
+	// Display controls how items are displayed, in terms of layout
+	Display Display
 
 	// the cursor to switch to upon hovering over the element (inherited)
 	Cursor cursors.Cursor
@@ -185,8 +182,6 @@ type Style struct { //gti:add
 func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.UnContext.Defaults()
-	s.Display = true
-
 	s.LayoutDefaults()
 	s.Color = colors.Black
 	s.Opacity = 1
