@@ -671,7 +671,12 @@ func (w *RenderWin) EventLoop() {
 			log.Println("----- START OF STACK TRACE: -----")
 			log.Println(string(debug.Stack()))
 			log.Println("----- END OF STACK TRACE -----")
-			panic(r)
+			// if we are on mobile, panicking leads to crashing too quickly to get the log messages
+			if goosi.TheApp.Platform().IsMobile() {
+				log.Fatalln("Terminating app due to panic stated above")
+			} else {
+				panic(r)
+			}
 		}
 	}()
 	for {
