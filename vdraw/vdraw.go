@@ -79,6 +79,12 @@ func (dw *Drawer) SetMaxTextures(maxTextures int) {
 	vars.Config() // update after config changes
 }
 
+// MaxTextures returns the max number of textures for drawing, which
+// is [Drawer.Impl.MaxTextures].
+func (dw *Drawer) MaxTextures() int {
+	return dw.Impl.MaxTextures
+}
+
 func (dw *Drawer) Destroy() {
 	dw.Sys.Destroy()
 	if dw.Frame != nil {
