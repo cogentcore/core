@@ -1,11 +1,11 @@
 // -----------------------------------------------------------------------------
 // go-app
 // -----------------------------------------------------------------------------
-var goappNav = function () {};
-var goappOnUpdate = function () {};
-var goappOnAppInstallChange = function () {};
+var goappNav = function () { };
+var goappOnUpdate = function () { };
+var goappOnAppInstallChange = function () { };
 
-const goappEnv = {{.Env}};
+const goappEnv = {{.Env }};
 const goappLoadingLabel = "{{.LoadingLabel}}";
 const goappWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
 
@@ -158,6 +158,15 @@ function goappNewNotification(jsonNotification) {
 }
 
 // -----------------------------------------------------------------------------
+// Display Image
+// -----------------------------------------------------------------------------
+
+function displayImage(buf) {
+  let blob = new Blob([buf], { 'type': imageType });
+  document.getElementById('app').src = URL.createObjectURL(blob);
+}
+
+// -----------------------------------------------------------------------------
 // Keep Clean Body
 // -----------------------------------------------------------------------------
 function goappKeepBodyClean() {
@@ -243,7 +252,7 @@ async function fetchWithProgress(url, progess) {
   let contentLength;
   try {
     contentLength = response.headers.get(goappWasmContentLengthHeader);
-  } catch {}
+  } catch { }
   if (!goappWasmContentLengthHeader || !contentLength) {
     contentLength = response.headers.get("Content-Length");
   }
@@ -260,7 +269,7 @@ async function fetchWithProgress(url, progess) {
       {
         async start(controller) {
           var reader = response.body.getReader();
-          for (;;) {
+          for (; ;) {
             var { done, value } = await reader.read();
 
             if (done) {
