@@ -5,6 +5,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"strings"
 	"time"
@@ -41,6 +42,9 @@ func app() {
 	gi.NewWindow(sc).Run().Wait()
 }
 
+//go:embed gopher.png
+var gopherPng embed.FS
+
 func makeHome(ts *gi.Tabs) {
 	home := ts.NewTab("Home")
 
@@ -61,7 +65,7 @@ func makeHome(ts *gi.Tabs) {
 	}()
 
 	img := gi.NewImage(home)
-	err := img.OpenImage("gopher.png", 300, 300)
+	err := img.OpenImageFS(gopherPng, "gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
