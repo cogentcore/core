@@ -70,7 +70,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor.SetSolid(colors.Transparent)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
-		for h := float32(0); h <= 360; h += 15 {
+		for h := float32(0); h <= 360; h += 5 {
 			gc := cv.Color.WithHue(h)
 			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), h/360, 1)
 		}
@@ -80,10 +80,26 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	chroma.OnChange(func(e events.Event) {
 		cv.Color.Chroma = chroma.Value
 	})
+	chroma.Style(func(s *styles.Style) {
+		chroma.ValueColor.SetSolid(colors.Transparent)
+		s.BackgroundColor.Gradient = colors.LinearGradient()
+		for c := float32(0); c <= 150; c += 5 {
+			gc := cv.Color.WithChroma(c)
+			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), c/150, 1)
+		}
+	})
 
 	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
 	tone.OnChange(func(e events.Event) {
 		cv.Color.Tone = tone.Value
+	})
+	tone.Style(func(s *styles.Style) {
+		tone.ValueColor.SetSolid(colors.Transparent)
+		s.BackgroundColor.Gradient = colors.LinearGradient()
+		for c := float32(0); c <= 100; c += 5 {
+			gc := cv.Color.WithTone(c)
+			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), c/100, 1)
+		}
 	})
 
 	cv.UpdateEnd(updt)
