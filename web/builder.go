@@ -4,21 +4,7 @@
 
 package web
 
-import (
-	"bytes"
-	"crypto/sha1"
-	"encoding/json"
-	"fmt"
-	"html/template"
-	"log/slog"
-	"os"
-	"sort"
-	"strings"
-	"time"
-
-	"goki.dev/goki/config"
-)
-
+/*
 type builder struct {
 	config.Config
 
@@ -111,7 +97,7 @@ func (h *builder) initPWAResources() {
 	h.cachedResources.Set(cacheItem{
 		Path:        "/wasm_exec.js",
 		ContentType: "application/javascript",
-		Body:        []byte(wasmExecJS()),
+		Body:        []byte(WASMExecJS()),
 	})
 
 	h.cachedResources.Set(cacheItem{
@@ -818,3 +804,4 @@ func parseSrc(link string) (url, crossOrigin, loading string) {
 
 	return url, crossOrigin, loading
 }
+*/

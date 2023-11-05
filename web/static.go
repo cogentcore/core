@@ -4,13 +4,7 @@
 
 package web
 
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-)
-
+/*
 // GenerateStaticWebsite generates the files to run a PWA built with go-app as a
 // static website in the specified directory. Static websites can be used with
 // hosts such as Github Pages.
@@ -110,3 +104,4 @@ func createStaticPage(b *builder, path string) ([]byte, error) {
 	}
 	return item.Body, nil
 }
+*/

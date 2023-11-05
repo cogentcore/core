@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-func wasmExecJS() string {
+// WASMExecJS returns the wasm_exec.js file appropriate for the Go verison being used.
+func WASMExecJS() string {
 	version := strings.Split(runtime.Version(), ".")
 	if len(version) < 2 {
 		return wasmExecJSGoCurrent

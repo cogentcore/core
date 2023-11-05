@@ -14,7 +14,7 @@ import (
 )
 
 // AppJSTmpl is the template used in [MakeAppJS] to build the app.js file
-var AppJSTmpl = template.Must(template.New("app.js").Parse(appJS))
+var AppJSTmpl = template.Must(template.New("app.js").Parse(AppJS))
 
 // AppJSData is the data passed to AppJSTmpl
 type AppJSData struct {
@@ -32,7 +32,7 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 		c.Web.Env = make(map[string]string)
 	}
 	c.Web.Env["GOAPP_VERSION"] = c.Version
-	c.Web.Env["GOAPP_STATIC_RESOURCES_URL"] = staticPath
+	c.Web.Env["GOAPP_STATIC_RESOURCES_URL"] = "/"
 	c.Web.Env["GOAPP_ROOT_PREFIX"] = c.Build.Package
 
 	for k, v := range c.Web.Env {
@@ -93,7 +93,7 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 }
 
 // ManifestJSONTmpl is the template used in [MakeManifestJSON] to build the mainfest.webmanifest file
-var ManifestJSONTmpl = template.Must(template.New("manifest.webmanifest").Parse(manifestJSON))
+var ManifestJSONTmpl = template.Must(template.New("manifest.webmanifest").Parse(ManifestJSON))
 
 // ManifestJSONData is the data passed to [ManifestJSONTmpl]
 type ManifestJSONData struct {
