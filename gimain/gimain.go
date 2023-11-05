@@ -16,7 +16,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 	_ "goki.dev/grog"
-	_ "goki.dev/vgpu/v2/vphong"
+	// _ "goki.dev/vgpu/v2/vphong" // TODO(kai/web): do we need this bar import on other platforms?
 )
 
 // Main is run in a main package to start the GUI driver / event loop,
