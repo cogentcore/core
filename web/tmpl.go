@@ -7,9 +7,9 @@ package web
 import (
 	"bytes"
 	"encoding/json"
-	"html/template"
 	"log/slog"
 	"os"
+	"text/template"
 
 	"goki.dev/goki/config"
 )

@@ -5,17 +5,11 @@
 package web
 
 import (
-	"html/template"
 	"os"
 	"path/filepath"
 
 	"goki.dev/goki/config"
 	"goki.dev/xe"
-)
-
-// Templates for web files
-var (
-	DefaultAppWorkerJSTmpl = template.Must(template.New("DefaultAppWorkerJS").Parse(DefaultAppWorkerJS))
 )
 
 // Build builds an app for web using the given configuration information.
