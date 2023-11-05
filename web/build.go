@@ -27,5 +27,5 @@ func Build(c *config.Config) error {
 	c.Build.Package = filepath.Dir(c.Build.Output)
 	b := &builder{}
 	b.init()
-	return nil
+	return GenerateStaticWebsite(c.Build.Package, b)
 }
