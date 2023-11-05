@@ -5,8 +5,11 @@
 package web
 
 import (
+	"crypto/sha1"
+	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"goki.dev/goki/config"
 	"goki.dev/xe"
@@ -24,6 +27,11 @@ func Build(c *config.Config) error {
 // MakeFiles makes the necessary static web files based on the given configuration information.
 func MakeFiles(c *config.Config) error {
 	odir := filepath.Dir(c.Build.Output)
+
+	if c.Web.RandomVersion {
+		t := time.Now().UTC().String()
+		c.Version += "-" + fmt.Sprintf(`%x`, sha1.Sum([]byte(t)))
+	}
 
 	wej := []byte(WASMExecJS())
 	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
