@@ -9,7 +9,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
+	"goki.dev/mat32/v2"
 )
 
 // var samplefile gi.FileName = "sample.go"
@@ -28,7 +28,7 @@ func app() {
 
 	sc := gi.NewScene("gogi-texteditor-test").SetTitle("GoGi texteditor.Editor Test")
 
-	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
+	trow := gi.NewLayout(sc, "trow").SetMainAxis(mat32.X)
 	trow.SetStretchMaxWidth()
 
 	hdrText := `This is a <b>test</b> of the texteditor.Editor`
@@ -53,16 +53,16 @@ func app() {
 
 	txed1 := texteditor.NewEditor(splt, "texteditor-1")
 	txed1.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-		s.SetMinPrefWidth(units.Ch(20))
-		s.SetMinPrefHeight(units.Ch(10))
+		s.Grow.Set(1, 1)
+		s.Min.X.Ch(20)
+		s.Min.Y.Ch(10)
 	})
 
 	txed2 := texteditor.NewEditor(splt, "texteditor-2")
 	txed2.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-		s.SetMinPrefWidth(units.Ch(20))
-		s.SetMinPrefHeight(units.Ch(10))
+		s.Grow.Set(1, 1)
+		s.Min.X.Ch(20)
+		s.Min.Y.Ch(10)
 	})
 
 	txbuf := texteditor.NewBuf()

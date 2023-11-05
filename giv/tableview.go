@@ -17,12 +17,12 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 )
 
 // todo:
@@ -78,59 +78,59 @@ func (tv *TableView) TableViewInit() {
 
 	tv.HandleSliceViewEvents()
 
-	tv.Lay = gi.LayoutVert
 	tv.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(tv) {
 		case "frame": // slice frame
 			sf := w.(*gi.Frame)
-			sf.Lay = gi.LayoutVert
 			sf.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ch(20))
+				s.SetMainAxis(mat32.Y)
+				s.Min.X.Ch(20)
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Grow.Set(1, 1)                   // for this to work, ALL layers above need it too
 				s.Border.Style.Set(styles.BorderNone)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
 		case "frame/header": // slice header
 			sh := w.(*gi.Frame)
-			sh.Lay = gi.LayoutHoriz
 			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
-				s.Spacing.Zero()
-				s.MaxWidth.Zero()
+				s.SetMainAxis(mat32.X)
+				s.Gap.Zero()
+				s.Max.X.Zero()
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "frame/grid-lay": // grid layout
 			gl := w.(*gi.Layout)
-			gl.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				gl.SetStretchMax() // for this to work, ALL layers above need it too
+				s.SetMainAxis(mat32.X)
+				s.Grow.Set(1, 1)
 			})
 		case "frame/grid-lay/grid": // slice grid
 			sg := w.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				// this causes everything to get off, especially resizing: not taking it into account presumably:
 				// sg.Spacing = gi.StdDialogVSpaceUnits
-
+				s.SetDisplay(styles.DisplayGrid)
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
-				s.SetMinPrefHeight(units.Em(6))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Min.X.Em(20)
+				s.Min.Y.Em(10)
+				s.Grow.Set(1, 1)
+				s.Overflow = styles.OverflowAuto
 			})
 		case "frame/grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
-				s.SetFixedWidth(tv.Styles.ScrollBarWidth)
-				s.SetStretchMaxHeight()
+				s.Min.X.Set(tv.Styles.ScrollBarWidth)
+				s.Grow.Set(0, 1)
 			})
 			sb.OnChange(func(e events.Event) {
 				updt := tv.UpdateStart()
@@ -144,9 +144,9 @@ func (tv *TableView) TableViewInit() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
-					s.MinWidth.Em(1.5)
+					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
-					s.Text.Align = styles.AlignRight
+					s.Text.Align = styles.AlignEnd
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
@@ -307,12 +307,12 @@ func (tv *TableView) ConfigTableView(sc *gi.Scene) {
 
 func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	tv.SetFlag(true, SliceViewConfiged)
-	sf := gi.NewFrame(tv, "frame").SetLayout(gi.LayoutVert)
+	sf := gi.NewFrame(tv, "frame").SetMainAxis(mat32.Y)
 	sf.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(sf, "header").SetLayout(gi.LayoutHoriz)
-	gl := gi.NewLayout(sf, "grid-lay").SetLayout(gi.LayoutHoriz)
+	gi.NewFrame(sf, "header").SetMainAxis(mat32.X)
+	gl := gi.NewLayout(sf, "grid-lay").SetMainAxis(mat32.X)
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid").SetLayout(gi.LayoutGrid)
+	gi.NewFrame(gl, "grid").SetDisplay(styles.DisplayGrid)
 	gi.NewSlider(gl, "scrollbar")
 	tv.ConfigHeader(sc)
 }
@@ -407,7 +407,7 @@ func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc 
 		}
 		if len(gd) > idx {
 			wd := gd[idx].AllocSize - spc
-			s.SetFixedWidth(units.Dot(wd))
+			s.Min.X.Dot(wd)
 		}
 	})
 }
@@ -432,7 +432,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	sg := tv.SliceGrid()
-	spc := sgh.Styles.Spacing.Dots
+	spc := sgh.Styles.Gap.Dots
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
 	if tv.Is(SliceViewShowIndex) {
@@ -918,13 +918,13 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
 	w := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
-	if w.ScBBox != (image.Rectangle{}) {
+	if w.Alloc.BBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
-		if w.ScBBox != (image.Rectangle{}) {
+		if w.Alloc.BBox != (image.Rectangle{}) {
 			return w, true
 		}
 	}

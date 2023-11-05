@@ -187,8 +187,8 @@ func (tv *TreeView) TreeViewStyles() {
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Zero()
-		s.Text.Align = styles.AlignLeft
-		s.AlignV = styles.AlignTop
+		s.Text.Align = styles.AlignStart
+		s.Align.Y = styles.AlignStart
 
 		// need to copy over to actual and then clear styles one
 		tv.actStateLayer = s.StateLayer
@@ -205,7 +205,8 @@ func (tv *TreeView) TreeViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-				s.Spacing.Ch(0.1)
+				s.SetMainAxis(mat32.X)
+				s.Gap.Ch(0.1)
 				s.Padding.Zero()
 
 				// we manually inherit our state layer from the treeview state
@@ -272,8 +273,8 @@ func (tv *TreeView) TreeViewStyles() {
 			w.On(events.ContextMenu, tv.ShowContextMenu)
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1)
-				s.Height.Em(1)
+				s.Min.X.Em(1)
+				s.Min.Y.Em(1)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
@@ -289,9 +290,9 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Color = colors.Scheme.Primary.Base
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Width.Em(0.5)
-				s.Height.Em(0.5)
-				s.AlignV = styles.AlignMiddle
+				s.Min.X.Em(0.5)
+				s.Min.Y.Em(0.5)
+				s.Align.Y = styles.AlignCenter
 				// we don't need to visibly tell the user that we are disabled;
 				// the lack of an icon accomplishes that; instead, we just inherit
 				// our state layer from the actual tree view state layer
@@ -327,22 +328,22 @@ func (tv *TreeView) TreeViewStyles() {
 			})
 		case "parts/branch.parts/stack/icon0":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1.0)
-				s.Height.Em(1.0)
+				s.Min.X.Em(1.0)
+				s.Min.Y.Em(1.0)
 			})
 		case "parts/branch.parts/stack/icon1":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1.0)
-				s.Height.Em(1.0)
+				s.Min.X.Em(1.0)
+				s.Min.Y.Em(1.0)
 			})
 		case "parts/branch.parts/stack/icon2":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(1.0)
-				s.Height.Em(1.0)
+				s.Min.X.Em(1.0)
+				s.Min.Y.Em(1.0)
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.Em(0.5)
+				s.Min.X.Em(0.5)
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
@@ -350,7 +351,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Cursor = cursors.None
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.MinWidth.Ch(16)
+				s.Min.X.Ch(16)
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			})
 		case "parts/menu":
@@ -434,7 +435,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 }
 
 func (tv *TreeView) ConfigParts(sc *gi.Scene) {
-	parts := tv.NewParts(gi.LayoutHoriz)
+	parts := tv.NewParts()
 	config := ki.Config{}
 	config.Add(gi.SwitchType, "branch")
 	if tv.Icon.IsValid() {
@@ -539,7 +540,7 @@ func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter in
 }
 
 func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
-	return tv.ScBBox
+	return tv.Alloc.ContentBBox
 }
 
 func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
@@ -584,7 +585,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	tv.LayState.Alloc.Size = tv.WidgetSize
 	if gi.LayoutTrace {
 		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
-		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
+		// fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
 	}
 	return redo
 }

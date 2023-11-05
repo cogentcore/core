@@ -41,7 +41,7 @@ type GiEditor struct {
 func (ge *GiEditor) OnInit() {
 	ge.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnBackground
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
 	ge.OnWidgetAdded(func(w gi.Widget) {
@@ -50,9 +50,9 @@ func (ge *GiEditor) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall
 			title.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.AlignH = styles.AlignCenter
-				s.AlignV = styles.AlignTop
+				s.Grow.Set(1, 0)
+				s.Align.X = styles.AlignCenter
+				s.Align.Y = styles.AlignStart
 			})
 		}
 	})
@@ -110,7 +110,6 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 
 	sc := gi.NewScene("gogi-color-scheme")
 	sc.Title = "GoGi Color Scheme"
-	sc.Lay = gi.LayoutVert
 	sc.Data = &colors.Schemes
 
 	key := &matcolor.Key{
@@ -194,7 +193,9 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	if ge.KiRoot == nil {
 		return
 	}
-	ge.Lay = gi.LayoutVert
+	ge.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
@@ -242,7 +243,7 @@ func (ge *GiEditor) ConfigSplits() {
 	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
-		tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
+		tvfr := gi.NewFrame(split, "tvfr").SetMainAxis(mat32.X)
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
 		tv.OnSelect(func(e events.Event) {

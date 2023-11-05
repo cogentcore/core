@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"image"
 
 	"goki.dev/cursors"
 	"goki.dev/gi/v2/keyfun"
@@ -119,8 +118,8 @@ func (lb *Label) LabelStyles() {
 		}
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		s.AlignV = styles.AlignMiddle
-		s.SetStretchMaxWidth() // critical for avoiding excessive word wrapping
+		s.Align.Y = styles.AlignCenter
+		s.Grow.Set(1, 0) // critical for avoiding excessive word wrapping
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
@@ -336,19 +335,21 @@ func (lb *Label) StyleLabel(sc *Scene) {
 }
 
 func (lb *Label) LayoutLabel(sc *Scene) {
-	lb.StyMu.RLock()
-	defer lb.StyMu.RUnlock()
+	/*
+		lb.StyMu.RLock()
+		defer lb.StyMu.RUnlock()
 
-	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-	spc := lb.BoxSpace()
-	sz := lb.LayState.SizePrefOrMax()
-	if LayoutTrace {
-		fmt.Println("Label:", lb.Nm, "LayoutLabel Size:", sz)
-	}
-	if !sz.IsNil() {
-		sz.SetSub(spc.Size())
-	}
-	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
+		lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
+		spc := lb.BoxSpace()
+		sz := lb.LayState.SizePrefOrMax()
+		if LayoutTrace {
+			fmt.Println("Label:", lb.Nm, "LayoutLabel Size:", sz)
+		}
+		if !sz.IsNil() {
+			sz.SetSub(spc.Size())
+		}
+		lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
+	*/
 }
 
 func (lb *Label) ApplyStyle(sc *Scene) {
@@ -356,6 +357,7 @@ func (lb *Label) ApplyStyle(sc *Scene) {
 	lb.LayoutLabel(sc)
 }
 
+/*
 func (lb *Label) GetSize(sc *Scene, iter int) {
 	if iter > 0 && lb.Styles.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
@@ -385,10 +387,11 @@ func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	}
 	return false
 }
+*/
 
 func (lb *Label) TextPos() mat32.Vec2 {
 	lb.StyMu.RLock()
-	pos := lb.LayState.Alloc.Pos.Add(lb.Styles.BoxSpace().Pos())
+	pos := lb.Alloc.Pos.Add(lb.Styles.BoxSpace().Pos())
 	lb.StyMu.RUnlock()
 	return pos
 }

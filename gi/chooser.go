@@ -23,6 +23,7 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 )
 
@@ -146,6 +147,10 @@ func (ch *Chooser) ChooserStyles() {
 	})
 	ch.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ch) {
+		case "parts":
+			w.Style(func(s *styles.Style) {
+				s.SetMainAxis(mat32.X)
+			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Margin.Zero()
@@ -158,10 +163,10 @@ func (ch *Chooser) ChooserStyles() {
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 				// TODO(kai): figure out what to do with MaxLength
 				// if ch.MaxLength > 0 {
-				// 	s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				// 	s.Min.X.Ch(float32(ch.MaxLength))
 				// }
 			})
 		case "parts/text":
@@ -183,21 +188,21 @@ func (ch *Chooser) ChooserStyles() {
 				s.StateColor = ch.Styles.Color
 				s.BackgroundColor.SetSolid(colors.Transparent)
 				// if ch.MaxLength > 0 {
-				// 	s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				// 	s.Min.X.Ch(float32(ch.MaxLength))
 				// }
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
 				if ch.Editable {
-					s.Width.Zero()
+					s.Min.X.Zero()
 				} else {
-					s.Width.Dp(16)
+					s.Min.X.Dp(16)
 				}
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(16)
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 			})
 		}
 	})
@@ -208,7 +213,7 @@ func (ch *Chooser) ConfigWidget(sc *Scene) {
 }
 
 func (ch *Chooser) ConfigParts(sc *Scene) {
-	parts := ch.NewParts(LayoutHoriz)
+	parts := ch.NewParts()
 	config := ki.Config{}
 
 	icIdx := -1

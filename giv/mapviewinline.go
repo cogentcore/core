@@ -13,6 +13,7 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 )
 
 // MapViewInline represents a map as a single line widget,
@@ -47,9 +48,9 @@ func (mv *MapViewInline) OnInit() {
 }
 
 func (mv *MapViewInline) MapViewInlineStyles() {
-	mv.Lay = gi.LayoutHoriz
 	mv.Style(func(s *styles.Style) {
-		s.MinWidth.Ex(60)
+		s.SetMainAxis(mat32.X)
+		s.Min.X.Ex(60)
 		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {

@@ -14,6 +14,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // Switches is a widget for containing a set of switches.
@@ -53,7 +54,7 @@ func (sw *Switches) SwitchesStyles() {
 		s.Margin.Set(units.Dp(2))
 
 		if sw.Type == SwitchSegmentedButton {
-			s.Spacing.Zero()
+			s.Gap.Zero()
 		}
 	})
 	sw.OnWidgetAdded(func(w Widget) {
@@ -68,21 +69,21 @@ func (sw *Switches) SwitchesStyles() {
 			ip, _ := w.IndexInParent()
 			brf := styles.BorderRadiusFull.Top
 			if ip == 0 {
-				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+				if s.MainAxis == mat32.X {
 					s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
-				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
+				} else {
 					s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
 				}
 			} else if ip == sw.NumChildren()-1 {
-				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+				if s.MainAxis == mat32.X {
 					s.Border.Width.SetLeft(units.Zero())
 					s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
-				} else if sw.Lay == LayoutVert || sw.Lay == LayoutVertFlow {
+				} else {
 					s.Border.Width.SetTop(units.Zero())
 					s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
 				}
 			} else {
-				if sw.Lay == LayoutHoriz || sw.Lay == LayoutHorizFlow {
+				if s.MainAxis == mat32.X {
 					s.Border.Width.SetLeft(units.Zero())
 				} else {
 					s.Border.Width.SetTop(units.Zero())

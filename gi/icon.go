@@ -48,8 +48,8 @@ func (ic *Icon) OnInit() {
 
 func (ic *Icon) IconStyles() {
 	ic.Style(func(s *styles.Style) {
-		s.Width.Dp(16)
-		s.Height.Dp(16)
+		s.Min.X.Dp(16)
+		s.Min.Y.Dp(16)
 	})
 }
 
@@ -80,6 +80,7 @@ func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
 
 }
 
+/*
 func (ic *Icon) GetSize(sc *Scene, iter int) {
 	ic.InitLayout(sc)
 	if ic.SVG.Pixels != nil {
@@ -88,6 +89,7 @@ func (ic *Icon) GetSize(sc *Scene, iter int) {
 		ic.GetSizeFromWH(2, 2)
 	}
 }
+*/
 
 func (ic *Icon) ApplyStyle(sc *Scene) {
 	ic.StyMu.Lock()
@@ -98,20 +100,15 @@ func (ic *Icon) ApplyStyle(sc *Scene) {
 	ic.ApplyStyleWidget(sc)
 }
 
-func (ic *Icon) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	ic.DoLayoutBase(sc, parBBox, iter)
-	return ic.DoLayoutChildren(sc, iter)
-}
-
 func (ic *Icon) DrawIntoScene(sc *Scene) {
 	if ic.SVG.Pixels == nil {
 		return
 	}
-	r := ic.ScBBox
+	r := ic.Alloc.BBox
 	sp := image.Point{}
 	if ic.Par != nil { // use parents children bbox to determine where we can draw
-		pni, _ := AsWidget(ic.Par)
-		pbb := pni.ChildrenBBoxes(sc)
+		_, pwb := AsWidget(ic.Par)
+		pbb := pwb.Alloc.ContentBBox
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -136,7 +133,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	}
 	// todo: units context from us to SVG??
 	zp := image.Point{}
-	sz := ic.LayState.Alloc.Size.ToPoint()
+	sz := ic.Alloc.Size.Content.ToPoint()
 	if sz == zp {
 		ic.RendSize = zp
 		return

@@ -191,8 +191,8 @@ func (ed *Editor) ViewStyles() {
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
-		s.AlignV = styles.AlignTop
-		s.Text.Align = styles.AlignLeft
+		s.Align.Y = styles.AlignStart
+		s.Text.Align = styles.AlignStart
 		s.Text.TabSize = 4
 		s.Color = colors.Scheme.OnSurface
 

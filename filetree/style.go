@@ -77,8 +77,8 @@ func (fn *Node) FileNodeStyles() {
 			sw.IconOff = icons.Folder
 			sw.IconDisab = icons.Blank
 			// sw.Style(func(s *styles.Style) {
-			// 	s.MaxWidth.SetEm(1.5)
-			// 	s.MaxHeight.SetEm(1.5)
+			// 	s.Max.X.SetEm(1.5)
+			// 	s.Max.Y.SetEm(1.5)
 			// })
 			sw.OnClick(func(e events.Event) {
 				if sw.StateIs(states.Disabled) {

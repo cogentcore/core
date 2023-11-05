@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"image"
 	"log"
 
 	"goki.dev/girl/abilities"
@@ -45,7 +44,7 @@ func (fr *Frame) FrameStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Zero()
 		s.Padding.Set(units.Dp(2))
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 		// we never want borders on frames
 		s.MaxBorder = styles.Border{}
 	})
@@ -73,51 +72,53 @@ func (fr *Frame) FrameStdRender(sc *Scene) {
 }
 
 func (fr *Frame) RenderStripes(sc *Scene) {
-	st := &fr.Styles
-	rs := &sc.RenderState
-	pc := &rs.Paint
+	/*
+		st := &fr.Styles
+		rs := &sc.RenderState
+		pc := &rs.Paint
 
-	pos := fr.LayState.Alloc.Pos
-	sz := fr.LayState.Alloc.Size
+		pos := fr.Alloc.Pos
+		sz := fr.Alloc.Size.Content
 
-	delta := fr.LayoutScrollDelta(image.Point{})
+		delta := fr.LayoutScrollDelta(image.Point{})
 
-	// TODO: fix stripes
-	// hic := st.BackgroundColor.Solid.Highlight(Prefs.Params.ZebraStripeWeight)
-	hic := st.BackgroundColor.Solid
-	if fr.Stripes == RowStripes {
-		for r, gd := range fr.GridData[Row] {
-			if r%2 == 0 {
-				continue
+		// TODO: fix stripes
+		// hic := st.BackgroundColor.Solid.Highlight(Prefs.Params.ZebraStripeWeight)
+		hic := st.BackgroundColor.Solid
+		if fr.Stripes == RowStripes {
+			for r, gd := range fr.GridData[Row] {
+				if r%2 == 0 {
+					continue
+				}
+				pry := float32(delta.Y) + gd.AllocPosRel
+				szy := gd.AllocSize
+				if pry+szy < 0 || pry > sz.Y {
+					continue
+				}
+				pr := pos
+				pr.Y += pry
+				sr := sz
+				sr.Y = szy
+				pc.FillBoxColor(rs, pr, sr, hic)
 			}
-			pry := float32(delta.Y) + gd.AllocPosRel
-			szy := gd.AllocSize
-			if pry+szy < 0 || pry > sz.Y {
-				continue
+		} else if fr.Stripes == ColStripes {
+			for c, gd := range fr.GridData[Col] {
+				if c%2 == 0 {
+					continue
+				}
+				prx := float32(delta.X) + gd.AllocPosRel
+				szx := gd.AllocSize
+				if prx+szx < 0 || prx > sz.X {
+					continue
+				}
+				pr := pos
+				pr.X += prx
+				sr := sz
+				sr.X = szx
+				pc.FillBoxColor(rs, pr, sr, hic)
 			}
-			pr := pos
-			pr.Y += pry
-			sr := sz
-			sr.Y = szy
-			pc.FillBoxColor(rs, pr, sr, hic)
 		}
-	} else if fr.Stripes == ColStripes {
-		for c, gd := range fr.GridData[Col] {
-			if c%2 == 0 {
-				continue
-			}
-			prx := float32(delta.X) + gd.AllocPosRel
-			szx := gd.AllocSize
-			if prx+szx < 0 || prx > sz.X {
-				continue
-			}
-			pr := pos
-			pr.X += prx
-			sr := sz
-			sr.X = szx
-			pc.FillBoxColor(rs, pr, sr, hic)
-		}
-	}
+	*/
 }
 
 func (fr *Frame) Render(sc *Scene) {

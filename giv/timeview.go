@@ -17,6 +17,7 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
 )
 
@@ -58,7 +59,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := tv.UpdateStart()
 
-	tv.SetLayout(gi.LayoutHoriz)
+	tv.SetMainAxis(mat32.X)
 
 	hour := gi.NewTextField(tv, "hour")
 	if gi.Prefs.Clock24 {
@@ -70,7 +71,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	}
 	hour.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
-		s.SetFixedWidth(units.Dp(96))
+		s.Min.X.Dp(96)
 	})
 	hour.OnChange(func(e events.Event) {
 		hr, err := strconv.Atoi(hour.Text())
@@ -97,7 +98,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		SetText(strconv.Itoa(tv.Time.Minute()))
 	minute.Style(func(s *styles.Style) {
 		s.Font.Size.Dp(57)
-		s.SetFixedWidth(units.Dp(96))
+		s.Min.X.Dp(96)
 	})
 	minute.OnChange(func(e events.Event) {
 		min, err := strconv.Atoi(minute.Text())
@@ -114,7 +115,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	})
 
 	if !gi.Prefs.Clock24 {
-		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetLayout(gi.LayoutVert).SetItems([]string{"AM", "PM"})
+		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetMainAxis(mat32.Y).SetItems([]string{"AM", "PM"})
 		if tv.Time.Hour() < 12 {
 			tv.PM = false
 			sw.SelectItemAction(0)
@@ -182,9 +183,9 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := dv.UpdateStart()
 
-	dv.SetLayout(gi.LayoutVert)
+	dv.SetMainAxis(mat32.Y)
 
-	trow := gi.NewLayout(dv).SetLayout(gi.LayoutHoriz)
+	trow := gi.NewLayout(dv).SetMainAxis(mat32.X)
 
 	sms := make([]any, len(shortMonths))
 	for i, sm := range shortMonths {
@@ -228,7 +229,7 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 }
 
 func (dv *DateView) ConfigDateGrid() {
-	grid := gi.NewLayout(dv, "grid").SetLayout(gi.LayoutGrid)
+	grid := gi.NewLayout(dv, "grid").SetDisplay(styles.DisplayGrid)
 	grid.Style(func(s *styles.Style) {
 		s.Columns = 7
 	})
@@ -253,9 +254,9 @@ func (dv *DateView) ConfigDateGrid() {
 			dv.SetTime(dt)
 		})
 		bt.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Dp(40))
-			s.SetMinPrefHeight(units.Dp(40))
-			s.AlignH = styles.AlignCenter
+			s.Min.X.Dp(40)
+			s.Min.Y.Dp(40)
+			s.Align.X = styles.AlignCenter
 			s.Text.Align = styles.AlignCenter
 			s.Padding.Zero()
 			if dt.Month() != som.Month() {
@@ -276,9 +277,9 @@ func (dv *DateView) ConfigDateGrid() {
 				lb := w.(*gi.Label)
 				lb.Type = gi.LabelBodyLarge
 				w.Style(func(s *styles.Style) {
-					s.AlignH = styles.AlignCenter
+					s.Align.X = styles.AlignCenter
 					s.Text.Align = styles.AlignCenter
-					s.SetStretchMaxWidth()
+					s.Grow.Set(1, 0)
 					s.Border.Radius = styles.BorderRadiusFull
 				})
 			}
@@ -333,7 +334,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	ly := vv.Widget.(*gi.Layout)
-	ly.SetLayout(gi.LayoutHoriz)
+	ly.SetMainAxis(mat32.X)
 
 	if len(ly.Kids) > 0 {
 		return
@@ -462,7 +463,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	fr := vv.Widget.(*gi.Layout)
-	fr.SetLayout(gi.LayoutHoriz)
+	fr.SetMainAxis(mat32.X)
 
 	if len(fr.Kids) > 0 {
 		return

@@ -50,12 +50,12 @@ func app() {
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
-	svfr := gi.NewFrame(split, "svfr").SetLayout(gi.LayoutHoriz)
+	tvfr := gi.NewFrame(split, "tvfr").SetMainAxis(mat32.X)
+	svfr := gi.NewFrame(split, "svfr").SetMainAxis(mat32.X)
 	split.SetSplits(.3, .7)
 
 	tvfr.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 
 	tv := giv.NewTreeView(tvfr, "tv")
@@ -70,7 +70,7 @@ func app() {
 
 	sv := giv.NewStructView(svfr, "sv")
 	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 	sv.SetStruct(tv)
 

@@ -18,6 +18,7 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // Widget is the interface for all GoGi Widget Nodes
@@ -80,47 +81,28 @@ type Widget interface {
 	// It is typically not overridden -- set style funcs to apply custom styling.
 	ApplyStyle(sc *Scene)
 
-	// GetSize: MeLast downward pass, each node first calls
-	// g.Layout.Reset(), then sets their LayoutSize according to their own
-	// intrinsic size parameters, and/or those of its children if it is a
-	// Layout.
-	GetSize(sc *Scene, iter int)
+	// SizeUp (bottom-up): gathers sizes from our Children & Parts,
+	// based only on Min style sizes and actual content sizing.
+	// Flexible elements (e.g., Text, Flex Wrap, TopAppBar) allocate
+	// optimistically along their main axis, up to any optional Max size.
+	SizeUp(sc *Scene)
 
-	// DoLayout: MeFirst downward pass (each node calls on its children at
-	// appropriate point) with relevant parent BBox that the children are
-	// constrained to render within -- they then intersect this BBox with
-	// their own BBox (from BBoxes) -- typically just call DoLayoutBase for
-	// default behavior -- and add parent position to AllocPos, and then
-	// return call to DoLayoutChildren. Layout does all its sizing and
-	// positioning of children in this pass, based on the GetSize data gathered
-	// bottom-up and constraints applied top-down from higher levels.
-	// Typically only a single iteration is required (iter = 0) but multiple
-	// are supported (needed for word-wrapped text or flow layouts) -- return
-	// = true indicates another iteration required (pass this up the chain).
-	DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
+	//	SizeDown (top-down, multiple iterations possible): assigns sizes based
+	// on allocated parent avail size, giving extra space based on Grow factors,
+	// and flexible elements wrap / config to fit top-down constraint along main
+	// axis, producing a (new) top-down size expanding in cross axis as needed
+	// (or removing items that don't fit, etc).  Wrap & Grid layouts assign
+	// X,Y index coordinates to items during this pass.
+	SizeDown(sc *Scene, iter int, allocTotal mat32.Vec2) bool
 
-	// LayoutScroll: optional MeFirst downward pass to move all elements by given
-	// delta -- used for scrolling -- the layout pass assigns canonical
-	// positions, saved in AllocPosOrig and BBox, and this adds the given
-	// delta to that AllocPosOrig -- each node must call ComputeBBoxes to
-	// update its bounding box information given the new position.
-	LayoutScroll(sc *Scene, delta image.Point, parBBox image.Rectangle)
+	// Position: uses the final sizes to position everything within layouts
+	// according to alignment settings.
+	Position(sc *Scene)
 
-	// BBoxes: compute the raw bounding box of this node relative to its
-	// parent scene -- called during DoLayout to set node BBox field, which
-	// is then used in setting ScBBox.
-	BBoxes() image.Rectangle
-
-	// Compute ScBBox from BBox, given parent ScBBox -- most nodes
-	// call ComputeBBoxesBase but scenes require special code -- called
-	// during Layout and Move.
-	ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point)
-
-	// ChildrenBBoxes: compute the bbox available to my children (content),
-	// adjusting for margins, border, padding (BoxSpace) taken up by me --
-	// operates on the existing ScBBox for this node -- this is what is passed
-	// down as parBBox do the children's DoLayout.
-	ChildrenBBoxes(sc *Scene) image.Rectangle
+	// ScenePos: scene-based position and final BBox is computed based on
+	// parents accumulated position and scrollbar position.
+	// This step can be performed when scrolling after updating Scroll.
+	ScenePos(sc *Scene)
 
 	// Render: Actual rendering pass, each node is fully responsible for
 	// calling Render on its own children, to provide maximum flexibility
@@ -230,11 +212,6 @@ type WidgetBase struct {
 
 	// Alloc is layout allocation state: contains full size and position info
 	Alloc LayoutState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// 2D bounding box for region occupied within immediate parent Scene object that we render onto.
-	// These are the pixels we draw into, filtered through parent bounding boxes (empty for invisible).
-	// Used for render Bounds clipping
-	BBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called
@@ -348,13 +325,12 @@ func (wb *WidgetBase) BaseType() *gti.Type {
 
 // NewParts makes the Parts layout if not already there,
 // with given layout orientation
-func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
+func (wb *WidgetBase) NewParts() *Layout {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
 	parts := &Layout{}
 	parts.InitName(parts, "parts")
-	parts.Lay = lay
 	ki.SetParent(parts, wb.This())
 	parts.SetFlag(true, ki.Field)
 	parts.SetFlag(false, ki.Updating) // we inherit this from parent, but parent doesn't auto-clear us
@@ -423,13 +399,14 @@ func (wb *WidgetBase) DirectWinUpload() {
 
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
 // return false to terminate.
-func (wb *WidgetBase) WidgetKidsIter(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	for _, k := range wb.Kids {
+func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
+	for i, k := range wb.Kids {
+		i := i
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
 			break
 		}
-		cont := fun(kwi, kwb)
+		cont := fun(i, kwi, kwb)
 		if !cont {
 			break
 		}

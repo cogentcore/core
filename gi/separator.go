@@ -26,17 +26,17 @@ func (sp *Separator) OnInit() {
 	sp.Style(func(s *styles.Style) {
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4), units.Zero())
-		s.AlignV = styles.AlignCenter
-		s.AlignH = styles.AlignCenter
+		s.Align.Y = styles.AlignCenterAlignCenter
+		s.Align.X = styles.AlignCenter
 		s.Border.Style.Top = styles.BorderSolid
 		s.Border.Color.Top = colors.Scheme.OutlineVariant
 		s.Border.Width.Top.Dp(1)
 		if sp.Horiz {
-			s.SetStretchMaxWidth()
-			s.MinHeight.Dp(1)
+			s.Grow.Set(1, 0)
+			s.Min.Y.Dp(1)
 		} else {
-			s.SetStretchMaxHeight()
-			s.MinWidth.Dp(1)
+			s.Grow.Set(0, 1)
+			s.Min.X.Dp(1)
 		}
 	})
 }

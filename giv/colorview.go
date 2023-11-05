@@ -21,6 +21,7 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
 
@@ -71,7 +72,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	updt := cv.UpdateStart()
-	cv.SetLayout(gi.LayoutVert)
+	cv.SetMainAxis(mat32.Y)
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
 	hue.OnChange(func(e events.Event) {
@@ -132,13 +133,12 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 /*
 func (cv *ColorView) OnInit() {
-	cv.Lay = gi.LayoutVert
 	cv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.Em(6)
-				s.MinHeight.Em(6)
+				s.Min.X.Em(6)
+				s.Min.Y.Em(6)
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
@@ -148,7 +148,7 @@ func (cv *ColorView) OnInit() {
 			})
 		case "hexlbl":
 			w.Style(func(s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 			})
 		case "palette":
 			w.Style(func(s *styles.Style) {
@@ -156,15 +156,13 @@ func (cv *ColorView) OnInit() {
 			})
 		case "nums-hex":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.Ch(20)
+				s.Min.X.Ch(20)
 			})
 		}
 		if sl, ok := w.(*gi.Slider); ok {
 			sl.Style(func(s *styles.Style) {
-				s.MinWidth.Ch(20)
-				s.Width.Ch(20)
-				s.MinHeight.Em(1)
-				s.Height.Em(1)
+				s.Min.X.Ch(20)
+				s.Min.Y.Em(1)
 				s.Margin.Set(units.Dp(6))
 			})
 		}
@@ -174,8 +172,7 @@ func (cv *ColorView) OnInit() {
 					c := colornames.Map[cbt.Name()]
 
 					s.BackgroundColor.SetSolid(c)
-					s.MaxHeight.Em(1.3)
-					s.MaxWidth.Em(1.3)
+					s.Max.Set(units.Em(1.3))
 					s.Margin.Zero()
 				})
 			}
@@ -200,10 +197,10 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	updt := cv.UpdateStart()
-	vl := gi.NewLayout(cv, "slider-lay").SetLayout(gi.LayoutHoriz)
-	nl := gi.NewLayout(cv, "num-lay").SetLayout(gi.LayoutVert)
+	vl := gi.NewLayout(cv, "slider-lay").SetMainAxis(mat32.X)
+	nl := gi.NewLayout(cv, "num-lay").SetMainAxis(mat32.Y)
 
-	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetLayout(gi.LayoutHoriz)
+	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetMainAxis(mat32.X)
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
@@ -233,7 +230,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetLayout(gi.LayoutHoriz)
+	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetMainAxis(mat32.X)
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
@@ -263,7 +260,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetLayout(gi.LayoutHoriz)
+	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetMainAxis(mat32.X)
 
 	gi.NewLabel(hexlay, "hexlbl").SetText("Hex")
 
@@ -298,8 +295,8 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	gi.NewFrame(vl, "value").SetLayout(gi.LayoutHoriz)
-	sg := gi.NewLayout(vl, "slider-grid").SetLayout(gi.LayoutGrid)
+	gi.NewFrame(vl, "value").SetMainAxis(mat32.X)
+	sg := gi.NewLayout(vl, "slider-grid").SetDisplay(styles.DisplayGrid)
 
 	gi.NewLabel(sg, "rlab").SetText("Red:")
 	rs := gi.NewSlider(sg, "red")
@@ -439,7 +436,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := gi.NewLayout(cv, "palette").SetLayout(gi.LayoutGrid)
+	pg := gi.NewLayout(cv, "palette").SetDisplay(styles.DisplayGrid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
 	nms := colors.Names

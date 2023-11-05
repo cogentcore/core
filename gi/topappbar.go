@@ -166,7 +166,7 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 	}
 	if tb.OverflowButton == nil {
 		ic := icons.MoreVert
-		if tb.Lay != LayoutHoriz {
+		if tb.Styles.MainAxis != mat32.X {
 			ic = icons.MoreHoriz
 		}
 		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
@@ -190,22 +190,24 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 
 // DoLayoutAlloc moves overflow to the end of children for layout
 func (tb *TopAppBar) DoLayoutAlloc(sc *Scene, iter int) bool {
-	if !tb.HasChildren() {
-		return tb.Frame.DoLayoutAlloc(sc, iter)
-	}
-	if iter == 0 { // first do a normal layout to get everyone's target positions
-		tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
-		tb.BBox = tb.ScBBox
-		tb.ObjBBox = tb.ScBBox
+	/*	if !tb.HasChildren() {
+			return tb.Frame.DoLayoutAlloc(sc, iter)
+		}
+		if iter == 0 { // first do a normal layout to get everyone's target positions
+			tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
+			tb.BBox = tb.ScBBox
+			tb.ObjBBox = tb.ScBBox
+			tb.Frame.DoLayoutAlloc(sc, iter)
+			return true // needs another iter
+		}
+		// then move items to overflow
+		tb.MoveToOverflow(sc)
 		tb.Frame.DoLayoutAlloc(sc, iter)
-		return true // needs another iter
-	}
-	// then move items to overflow
-	tb.MoveToOverflow(sc)
-	tb.Frame.DoLayoutAlloc(sc, iter)
+	*/
 	return false
 }
 
+/*
 // MoveToOverflow moves overflow out of children to the OverflowItems list
 func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 	ldim := LaySummedDim(tb.Lay) // X for horiz tbar, Y for vert
@@ -255,6 +257,7 @@ func (tb *TopAppBar) ManageOverflow(sc *Scene) {
 	}
 	// todo: move others out of range
 }
+*/
 
 // OverflowMenu is the overflow menu function
 func (tb *TopAppBar) OverflowMenu(m *Scene) {

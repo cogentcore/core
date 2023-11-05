@@ -7,7 +7,6 @@ package texteditor
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -27,15 +26,15 @@ type TwinEditors struct {
 func (te *TwinEditors) OnInit() {
 	te.Dim = mat32.X
 	te.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 	te.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(te) {
 		case "text-a", "text-b":
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMax()
-				s.SetMinPrefWidth(units.Ch(80))
-				s.SetMinPrefHeight(units.Em(40))
+				s.Grow.Set(1, 1)
+				s.Min.X.Ch(80)
+				s.Min.Y.Em(40)
 				s.Font.Family = string(gi.Prefs.MonoFont)
 			})
 		}

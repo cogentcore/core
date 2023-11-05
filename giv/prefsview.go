@@ -20,7 +20,6 @@ func PrefsView(pf *gi.Preferences) {
 	}
 	sc := gi.NewScene("gogi-prefs")
 	sc.Title = "GoGi Preferences"
-	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
@@ -106,7 +105,6 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	}
 
 	sc := gi.NewScene("gogi-prefs-det").SetTitle("GoGi Detailed Preferences").SetData(pf)
-	sc.Lay = gi.LayoutVert
 
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
@@ -171,7 +169,6 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	}
 	sc := gi.NewScene("gogi-prefs-dbg")
 	sc.Title = "GoGi Debugging Preferences"
-	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
 	sv := NewStructView(sc, "sv")

@@ -141,12 +141,12 @@ func app() {
 
 	sc := gi.NewScene("gogi-views-test").SetTitle("GoGi Views Test")
 
-	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
+	trow := gi.NewLayout(sc, "trow").SetMainAxis(mat32.X)
 	trow.Style(func(s *styles.Style) {
-		s.AlignH = styles.AlignCenter
-		s.AlignV = styles.AlignTop
+		s.Align.X = styles.AlignCenter
+		s.Align.Y = styles.AlignStart
 		s.Margin.Set(units.Px(2))
-		s.SetStretchMaxWidth()
+		s.Grow.Set(1, 0)
 	})
 
 	gi.NewStretch(trow, "str1")
@@ -169,14 +169,14 @@ func app() {
 
 	lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
 	lab1.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
+		s.Grow.Set(1, 0)
 		s.Text.Align = styles.AlignCenter
 	})
 	gi.NewStretch(trow, "str2")
 
 	spc := gi.NewSpace(sc, "spc1")
 	spc.Style(func(s *styles.Style) {
-		s.SetFixedHeight(units.Em(2))
+		s.Min.Y.Set(units.Em(2))
 	})
 
 	split := gi.NewSplits(sc, "split")
@@ -186,27 +186,27 @@ func app() {
 	// strv.Sc = sc
 	// strv.SetStruct(&stru)
 	// strv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
+	// 	s.Grow.Set(1,1)
 	// })
 
 	// mv := giv.NewMapView(split, "mv")
 	// mv.SetMap(&tstmap)
 	// mv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
+	// 	s.Grow.Set(1,1)
 	// })
 
 	sv := giv.NewSliceView(split, "sv")
 	// sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&tstslice)
 	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 
 	tv := giv.NewTableView(split, "tv")
 	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 	tv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 
 	// split.SetSplits(.3, .2, .2, .3)

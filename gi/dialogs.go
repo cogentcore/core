@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
+	"goki.dev/mat32/v2"
 )
 
 // Dialog is a scene with methods for configuring a dialog
@@ -46,7 +47,6 @@ func NewDialog(ctx Widget, name ...string) *Dialog {
 	d.InitName(d, nm)
 	d.EventMgr.Scene = &d.Scene
 	d.BgColor.SetSolid(colors.Transparent)
-	d.Lay = LayoutVert
 	d.DialogStyles()
 
 	d.Stage = NewMainStage(DialogStage, &d.Scene, ctx)
@@ -70,9 +70,9 @@ func (d *Dialog) Title(title string) *Dialog {
 	d.Scene.Title = title
 	NewLabel(d, "title").SetText(title).
 		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-		s.AlignH = styles.AlignCenter
-		s.AlignV = styles.AlignTop
+		s.Grow.Set(1, 0)
+		s.Align.X = styles.AlignCenter
+		s.Align.Y = styles.AlignStart
 	})
 	return d
 }
@@ -82,10 +82,10 @@ func (d *Dialog) Prompt(prompt string) *Dialog {
 	NewLabel(d, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		s.SetStretchMaxWidth()
-		s.Width.Ch(30)
-		s.Text.Align = styles.AlignLeft
-		s.AlignV = styles.AlignTop
+		s.Grow.Set(1, 0)
+		s.Min.X.Ch(30)
+		s.Text.Align = styles.AlignStart
+		s.Align.Y = styles.AlignStart
 		s.Color = colors.Scheme.OnSurfaceVariant
 	})
 	return d
@@ -97,11 +97,10 @@ func (d *Dialog) Buttons() *Layout {
 	if d.Btns != nil {
 		return d.Btns
 	}
-	bb := NewLayout(d, "buttons").
-		SetLayout(LayoutHoriz)
+	bb := NewLayout(d, "buttons")
 	bb.Style(func(s *styles.Style) {
-		s.Spacing.Dp(8)
-		s.SetStretchMaxWidth()
+		s.SetMainAxis(mat32.X)
+		s.Gap.Set(units.Dp(8))
 	})
 	bb.OnWidgetAdded(func(w Widget) {
 		// new window and full window dialogs don't need text buttons
@@ -245,6 +244,7 @@ func (d *Dialog) Close() {
 func (d *Dialog) DialogStyles() {
 	d.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
+		s.SetMainAxis(mat32.Y)
 		s.Color = colors.Scheme.OnSurface
 		if !d.Stage.NewWindow && !d.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))

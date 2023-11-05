@@ -169,7 +169,7 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.SetMinPrefWidth(units.Em(10))
+		s.Min.X.Em(10)
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		if !tf.LeadingIcon.IsNil() {
 			s.Padding.Left.Dp(12)
@@ -177,7 +177,7 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.TrailingIcon.IsNil() {
 			s.Padding.Right.Dp(12)
 		}
-		s.Text.Align = styles.AlignLeft
+		s.Text.Align = styles.AlignStart
 		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
 		case TextFieldFilled:
@@ -225,8 +225,9 @@ func (tf *TextField) TextFieldStyles() {
 		switch w.PathFrom(tf) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
+				s.SetMainAxis(mat32.X)
 				s.Overflow = styles.OverflowHidden
-				s.Spacing.Zero()
+				s.Gap.Zero()
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
@@ -234,7 +235,7 @@ func (tf *TextField) TextFieldStyles() {
 			lead.Style(func(s *styles.Style) {
 				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 				s.Margin.SetRight(units.Dp(8))
 				// If we are responsible for a positive (non-disabled) state layer
 				// (instead of our parent), then we amplify it so that it is clear
@@ -260,7 +261,7 @@ func (tf *TextField) TextFieldStyles() {
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 				s.Margin.SetLeft(units.Dp(8))
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
@@ -1669,7 +1670,7 @@ func (tf *TextField) HandleTextFieldEvents() {
 }
 
 func (tf *TextField) ConfigParts(sc *Scene) {
-	parts := tf.NewParts(LayoutHoriz)
+	parts := tf.NewParts()
 	if tf.IsReadOnly() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		parts.DeleteChildren(ki.DestroyKids)
 		return

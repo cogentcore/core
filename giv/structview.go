@@ -17,12 +17,12 @@ import (
 	"github.com/antonmedv/expr/ast"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/glop/bools"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 )
 
 // StructView represents a struct, creating a property editor of the fields --
@@ -63,9 +63,9 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
-	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
@@ -74,17 +74,16 @@ func (sv *StructView) OnInit() {
 			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(1.5))
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Min.X.Em(20)
+				s.Min.Y.Em(10)
+				s.Grow.Set(1, 1)
+				s.Overflow = styles.OverflowAuto
 				s.Columns = 2
 			})
 		}
 		if w.Parent().Name() == "struct-grid" {
 			w.Style(func(s *styles.Style) {
-				s.AlignH = styles.AlignLeft
+				s.Align.X = styles.AlignStart
 			})
 			if strings.HasPrefix(w.Name(), "label-") {
 				w.Style(func(s *styles.Style) {

@@ -94,14 +94,14 @@ func makeButtons(ts *gi.Tabs) {
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
-	brow := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
-	browt := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
-	browi := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
+	brow := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
+	browt := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
+	browi := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu Buttons")
-	mbrow := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
-	mbrowt := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
-	mbrowi := gi.NewLayout(buttons).SetLayout(gi.LayoutHorizFlow)
+	mbrow := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
+	mbrowt := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
+	mbrowi := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
 
 	menu := func(m *gi.Scene) {
 		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
@@ -196,12 +196,12 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewTextField(inputs).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 
-	spinners := gi.NewLayout(inputs, "spinners").SetLayout(gi.LayoutHoriz)
+	spinners := gi.NewLayout(inputs, "spinners").SetMainAxis(mat32.X)
 
 	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
 	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
 
-	choosers := gi.NewLayout(inputs, "choosers").SetLayout(gi.LayoutHoriz)
+	choosers := gi.NewLayout(inputs, "choosers").SetMainAxis(mat32.X)
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
 	fruitDescs := []string{
@@ -238,7 +238,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5).SetTracking(true)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
 
-	sliderys := gi.NewLayout(inputs, "sliderys").SetLayout(gi.LayoutHorizFlow)
+	sliderys := gi.NewLayout(inputs, "sliderys").SetMainAxis(mat32.X).SetWrap(true)
 
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
@@ -250,8 +250,8 @@ func makeInputs(ts *gi.Tabs) {
 	// tview := giv.NewTextView(inputs, "tview")
 	// tview.SetBuf(tbuf)
 	// tview.Style(func(s *styles.Style) {
-	// 	s.MaxWidth.SetDp(500)
-	// 	s.MaxHeight.SetDp(300)
+	// 	s.Max.X.SetDp(500)
+	// 	s.Max.Y.SetDp(300)
 	// })
 }
 
@@ -265,25 +265,25 @@ func makeLayouts(ts *gi.Tabs) {
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
 	// vw.Style(func(s *styles.Style) {
-	// 	s.Width = units.Vw(50)
+	// 	s.Min.X.Vw(50)
 	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 	// 	s.Color = colors.Scheme.Primary.On
 	// })
 
 	// pw := gi.NewLabel(layouts, "pw", "50pw")
 	// pw.Style(func(s *styles.Style) {
-	// 	s.Width = units.Pw(50)
+	// 	s.Min.X.Pw(50)
 	// 	s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
 	// 	s.Color = colors.Scheme.Primary.OnContainer
 	// })
 
 	sv := gi.NewSplits(layouts).SetDim(mat32.X)
 
-	left := gi.NewFrame(sv).SetLayout(gi.LayoutVert).Style(func(s *styles.Style) {
+	left := gi.NewFrame(sv).SetMainAxis(mat32.Y).Style(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
-	right := gi.NewFrame(sv).SetLayout(gi.LayoutVert).Style(func(s *styles.Style) {
+	right := gi.NewFrame(sv).SetMainAxis(mat32.Y).Style(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")

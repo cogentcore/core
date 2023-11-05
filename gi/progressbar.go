@@ -72,11 +72,11 @@ func (pb *ProgressBar) ProgressBarStyles() {
 		s.Padding.Zero()
 
 		if pb.Dim == mat32.X {
-			s.Width.Em(20)
-			s.Height.Dp(4)
+			s.Min.X.Em(20)
+			s.Min.Y.Dp(4)
 		} else {
-			s.Height.Em(20)
-			s.Width.Dp(4)
+			s.Min.Y.Em(20)
+			s.Min.X.Dp(4)
 		}
 	})
 }
