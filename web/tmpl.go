@@ -128,12 +128,12 @@ type ManifestJSONData struct {
 // MakeManifestJSON exectues [ManifestJSONTmpl] based on the given configuration information.
 func MakeManifestJSON(c *config.Config) ([]byte, error) {
 	d := ManifestJSONData{
-		ShortName:   c.Name,
-		Name:        c.Name,
-		Description: c.Desc,
-		// DefaultIcon:     h.Icon.Default,
-		// LargeIcon:       h.Icon.Large,
-		// SVGIcon:         h.Icon.SVG,
+		ShortName:       c.Name,
+		Name:            c.Name,
+		Description:     c.Desc,
+		DefaultIcon:     "/icons/192.png",
+		LargeIcon:       "/icons/512.png",
+		SVGIcon:         "/icons/svg.svg",
 		BackgroundColor: c.Web.BackgroundColor,
 		ThemeColor:      c.Web.ThemeColor,
 		Scope:           "/",
