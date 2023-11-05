@@ -43,6 +43,13 @@ func (dw *Drawer) GetImageVal(idx int) *vgpu.Val {
 	return tx
 }
 
+// ConfigImageDefaultFormat configures the draw image at the given index
+// to fit the default image format specified by the given width, height,
+// and number of layers.
+func (dw *Drawer) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
+	dw.ConfigImage(idx, vgpu.NewImageFormat(width, height, layers))
+}
+
 // ConfigImage configures the draw image at given index
 // to fit the given image format and number of layers as a drawing source.
 func (dw *Drawer) ConfigImage(idx int, fmt *vgpu.ImageFormat) {
