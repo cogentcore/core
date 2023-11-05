@@ -30,10 +30,19 @@ type Drawer interface {
 	// to fit the given image format and number of layers as a drawing source.
 	// ConfigImage(idx int, fmt *vgpu.ImageFormat)
 
-	// UseTextureSet selects the descriptor set to use --
-	// choose this based on the bank of 16
-	// texture values if number of textures > MaxTexturesPerSet.
-	UseTextureSet(descIdx int)
+	// SyncImages must be called after images have been updated, to sync
+	// memory up to the GPU.
+	SyncImages()
+
+	// Scale copies texture at given index and layer to render target,
+	// scaling the region defined by src and sr to the destination
+	// such that sr in src-space is mapped to dr in dst-space.
+	// dr is the destination rectangle
+	// sr is the source region (set to image.ZR zero rect for all),
+	// op is the drawing operation: Src = copy source directly (blit),
+	// Over = alpha blend with existing
+	// flipY = flipY axis when drawing this image
+	Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error
 
 	// Copy copies texture at given index and layer to render target.
 	// dp is the destination point,
@@ -42,4 +51,18 @@ type Drawer interface {
 	// Over = alpha blend with existing
 	// flipY = flipY axis when drawing this image
 	Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error
+
+	// UseTextureSet selects the descriptor set to use --
+	// choose this based on the bank of 16
+	// texture values if number of textures > MaxTexturesPerSet.
+	UseTextureSet(descIdx int)
+
+	// StartDraw starts image drawing rendering process on render target
+	// No images can be added or set after this point.
+	// descIdx is the descriptor set to use -- choose this based on the bank of 16
+	// texture values if number of textures > MaxTexturesPerSet.
+	StartDraw(descIdx int)
+
+	// EndDraw ends image drawing rendering process on render target
+	EndDraw()
 }
