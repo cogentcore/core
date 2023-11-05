@@ -297,7 +297,7 @@ func makeValues(ts *gi.Tabs) {
 		giv.GoGiEditorDialog(ts.Sc)
 	})
 
-	giv.NewValue(values, colors.Blue)
+	giv.NewValue(values, colors.Orange)
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, gi.FileName("demo.go"))
 	giv.NewValue(values, hello)
