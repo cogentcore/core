@@ -41,7 +41,6 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 		}
 	}
 
-	b := &bytes.Buffer{}
 	d := AppJSData{
 		Env:                     jsonString(c.Web.Env),
 		LoadingLabel:            c.Web.LoadingLabel,
@@ -50,7 +49,43 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 		WorkerJS:                "/app-worker.js",
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
 	}
+	b := &bytes.Buffer{}
 	err := AppJSTmpl.Execute(b, d)
+	if err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+// AppWorkerJSData is the data passed to [config.Config.Web.ServiceWorkerTemplate]
+type AppWorkerJSData struct {
+	Version          string
+	ResourcesToCache string
+}
+
+// MakeWorkerJS executes [config.Config.Web.ServiceWorkerTemplate].
+func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
+	resources := []string{
+		"/app.css",
+		"/app.js",
+		"/app.wasm",
+		"/manifest.webmanifest",
+		"/wasm_exec.js",
+		"/",
+	}
+
+	tmpl, err := template.New("app-worker.js").Parse(c.Web.ServiceWorkerTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	d := AppWorkerJSData{
+		Version:          c.Version,
+		ResourcesToCache: jsonString(resources),
+	}
+
+	b := &bytes.Buffer{}
+	err = tmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}
