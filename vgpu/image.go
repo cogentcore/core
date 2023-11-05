@@ -518,7 +518,7 @@ const (
 	// FlipY used as named arg for flipping the Y axis of images, etc
 	FlipY = true
 
-	// NoFlipY uased as named arg for not flipping the Y axis of images
+	// NoFlipY used as named arg for not flipping the Y axis of images
 	NoFlipY = false
 )
 
