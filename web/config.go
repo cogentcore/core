@@ -138,7 +138,7 @@ func (h *builder) initPWAResources() {
 		Body:        []byte(appCSS),
 	})
 	h.cachedResources.Set(cacheItem{
-		Path:        "/index.html",
+		Path:        "/",
 		ContentType: "text/html",
 		Body:        []byte("<html><body>Hello, HTML!</body></html>"),
 	})

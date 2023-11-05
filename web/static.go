@@ -68,7 +68,7 @@ func GenerateStaticWebsite(dir string, b *builder, pages ...string) error {
 			}
 			defer f.Close()
 
-			page, err := createStaticPage(b, "/"+path)
+			page, err := createStaticPage(b, path)
 			if err != nil {
 				return fmt.Errorf("creating page failed: path=%v filename=%v: %w", path, filename, err)
 			}
