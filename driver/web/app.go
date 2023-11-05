@@ -10,11 +10,13 @@ package web
 import (
 	"fmt"
 	"go/build"
+	"image"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime/debug"
 	"sync"
+	"syscall/js"
 
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
@@ -188,6 +190,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	// }
 	// app.mu.Lock()
 	// defer app.mu.Unlock()
+	app.setSysWindow()
 	app.window = &windowImpl{
 		app:         app,
 		isVisible:   true,
@@ -209,36 +212,16 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	return app.window, nil
 }
 
-// setSysWindow sets the underlying system window pointer, surface, system, and drawer.
-// It should only be called when app.mu is already locked.
-func (app *appImpl) setSysWindow(winptr uintptr) error {
+// setSysWindow sets the underlying system window information.
+func (app *appImpl) setSysWindow() error {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
-	// var sf vk.Surface
-	// // we have to remake the surface, system, and drawer every time someone reopens the window
-	// // because the operating system changes the underlying window
-	// ret := vk.CreateWindowSurface(app.gpu.Instance, winptr, nil, &sf)
-	// if err := vk.Error(ret); err != nil {
-	// 	return err
-	// }
-	// app.Surface = vgpu.NewSurface(app.gpu, sf)
 
-	// fmt.Println("setting system")
-	// app.System = app.gpu.NewGraphicsSystem(app.name, &app.Surface.Device)
-	// app.System.ConfigRender(&app.Surface.Format, vgpu.UndefType)
-	// app.Surface.SetRender(&app.System.Render)
-	// // app.window.System.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
-	// app.System.Config()
-	// fmt.Println("making drawer")
-	// app.Draw = vdraw.Drawer{
-	// 	Sys:     *app.System,
-	// 	YIsDown: true,
-	// }
-	// // app.window.Draw.ConfigSys()
-	// app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
+	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
+	app.screen.Geometry = image.Rect(0, 0, w, h)
+	fmt.Println("screen geom", app.screen.Geometry)
 
-	app.winptr = winptr
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if app.window != nil {

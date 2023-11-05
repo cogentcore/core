@@ -7,6 +7,7 @@
 package web
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 )
@@ -92,7 +93,9 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // No images can be added or set after this point.
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *drawerImpl) StartDraw(descIdx int) {}
+func (dw *drawerImpl) StartDraw(descIdx int) {
+	fmt.Println("start draw", descIdx)
+}
 
 // EndDraw ends image drawing rendering process on render target
 func (dw *drawerImpl) EndDraw() {}
