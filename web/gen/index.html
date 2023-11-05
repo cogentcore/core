@@ -3,54 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="author" content="Maxence Charriere">
-    <meta name="description"
-        content="A package for building progressive web apps (PWA) with the Go programming language (Golang) and WebAssembly (Wasm). It uses a declarative syntax that allows creating and dealing with HTML elements only by using Go, and without writing any HTML markup.">
-    <meta name="keywords"
-        content="go-app, go, golang, app, pwa, progressive web app, webassembly, web assembly, webapp, web, gui, ui, user interface, graphical user interface, frontend, opensource, open source, github">
-    <meta name="theme-color" content="#2e343a">
+    <meta name="author" content="{{.Author}}">
+    <meta name="description" content="{{.Desc}}">
+    <meta name="keywords" content="{{.Keywords}}">
+    <meta name="theme-color" content="{{.ThemeColor}}">
     <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
     <meta property="og:url" content="http://127.0.0.1:60452/">
-    <meta property="og:title" content="A Go package for building Progressive Web Apps">
-    <meta property="og:description"
-        content="A package for building progressive web apps (PWA) with the Go programming language (Golang) and WebAssembly (Wasm). It uses a declarative syntax that allows creating and dealing with HTML elements only by using Go, and without writing any HTML markup.">
+    <meta property="og:title" content="{{.Title}}">
+    <meta property="og:description" content="{{.Desc}}">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://go-app.dev/web/images/go-app.png">
-    <title>A Go package for building Progressive Web Apps</title>
-    <link type="text/css" rel="preload" href="/app.css" as="style">
-    <link as="style" type="text/css" rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap">
-    <link type="text/css" rel="preload" href="/web/css/prism.css" as="style">
-    <link href="/web/css/docs.css" as="style" type="text/css" rel="preload">
+    <meta property="og:image" content="{{.Image}}">
+    <title>{{.Title}}</title>
+    <link type="text/css" rel="preload" href="app.css" as="style">
     <link rel="icon" href="https://raw.githubusercontent.com/maxence-charriere/go-app/master/docs/web/icon.svg">
     <link rel="apple-touch-icon" href="/web/icon.png">
-    <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="stylesheet" type="text/css" href="/app.css">
-    <link rel="stylesheet" type="text/css"
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap">
-    <link rel="stylesheet" type="text/css" href="/web/css/prism.css">
-    <link rel="stylesheet" type="text/css" href="/web/css/docs.css">
-    <script defer src="/wasm_exec.js"></script>
-    <script defer src="/app.js"></script>
-    <script src="/web/js/prism.js" defer></script>
-    <script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1013306768105236"
-        crossorigin="anonymous" async></script>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SW4FQEM9VM"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-SW4FQEM9VM', { 'send_page_view': false });
-    </script>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" type="text/css" href="app.css">
+    <script defer src="wasm_exec.js"></script>
+    <script defer src="app.js"></script>
 </head>
 
 <body>
     <aside id="app-wasm-loader" class="goapp-app-info">
         <img class="goapp-logo goapp-spin" src="/web/icon.png" id="app-wasm-loader-icon">
-        <p id="app-wasm-loader-label" class="goapp-label">go-app documentation 0%</p>
+        <p id="app-wasm-loader-label" class="goapp-label">Loading {{.Title}}...</p>
     </aside>
 </body>
 
