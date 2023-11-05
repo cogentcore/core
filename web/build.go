@@ -24,11 +24,15 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	return MakeFiles(c)
+}
 
+// MakeFiles makes the necessary static web files based on the given configuration information.
+func MakeFiles(c *config.Config) error {
 	odir := filepath.Dir(c.Build.Output)
 
 	wej := []byte(WASMExecJS())
-	err = os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
+	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
 	if err != nil {
 		return err
 	}
