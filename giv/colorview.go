@@ -80,6 +80,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor.SetSolid(colors.Transparent)
 		hue.ThumbColor.SetSolid(cv.Color)
+		hue.ThumbSize.Dp(32)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for h := float32(0); h <= 360; h += 5 {
 			gc := cv.Color.WithHue(h)
@@ -95,6 +96,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	chroma.Style(func(s *styles.Style) {
 		chroma.ValueColor.SetSolid(colors.Transparent)
 		chroma.ThumbColor.SetSolid(cv.Color)
+		chroma.ThumbSize.Dp(32)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 150; c += 5 {
 			gc := cv.Color.WithChroma(c)
@@ -110,6 +112,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	tone.Style(func(s *styles.Style) {
 		tone.ValueColor.SetSolid(colors.Transparent)
 		tone.ThumbColor.SetSolid(cv.Color)
+		tone.ThumbSize.Dp(32)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 100; c += 5 {
 			gc := cv.Color.WithTone(c)
@@ -614,8 +617,8 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	d := gi.NewDialog(ctx).Title("Edit color").Prompt(vv.Doc())
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
 	d.OnAccept(func(e events.Event) {
-		cclr := vv.TmpSave.Val().Interface().(color.RGBA)
-		vv.SetColor(cclr)
+		cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
+		vv.SetColor(*cclr)
 		vv.UpdateWidget()
 		if fun != nil {
 			fun(d)

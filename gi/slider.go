@@ -104,7 +104,7 @@ type Slider struct { //goki:embedder
 	ThumbColor colors.Full
 
 	// An additional style object that is used for styling the overall box around the slider.
-	// It should be set in the StyleFuncs, just the like the main style object is.
+	// It should be set in the Stylers, just the like the main style object is.
 	// It typically has no border and a white/black background. it needs a background
 	// to allow local re-rendering.
 	StyleBox styles.Style `set:"-"`
