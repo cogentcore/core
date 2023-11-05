@@ -20,6 +20,19 @@ var UseColor = true
 // It is set by [SetDefaultLogger] to [termenv.ColorProfile] if [UseColor] is true.
 var colorProfile termenv.Profile
 
+// InitColor sets up the terminal environment for color output. It is called automatically
+// in an init function if UseColor is set to true. However, if you call a system command
+// (ls, cp, etc), you need to call this function again.
+func InitColor() {
+	origMode, err := termenv.EnableWindowsANSIConsole()
+	if err != nil {
+		slog.Warn("error enabling virtual terminal processing for colored output on Windows: %w", err)
+	}
+	_ = origMode // TODO: figure out how to deal with this at the end of the program
+	colorProfile = termenv.ColorProfile()
+	colors.SetScheme(termenv.HasDarkBackground())
+}
+
 // ApplyColor applies the given color to the given string
 // and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
