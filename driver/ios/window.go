@@ -14,7 +14,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/vgpu/v2/vdraw"
 )
 
 type windowImpl struct {
@@ -64,7 +63,7 @@ func (w *windowImpl) Unlock() {
 	w.app.mu.Unlock()
 }
 
-func (w *windowImpl) Drawer() *vdraw.Drawer {
+func (w *windowImpl) Drawer() goosi.Drawer {
 	return &w.app.Draw
 }
 
