@@ -36,6 +36,7 @@ func app() {
 	makeButtons(ts)
 	makeInputs(ts)
 	makeLayouts(ts)
+	makeValues(ts)
 
 	gi.NewWindow(sc).Run().Wait()
 }
@@ -59,31 +60,11 @@ func makeHome(ts *gi.Tabs) {
 		}
 	}()
 
-	clr := colors.Tan
-	giv.NewValue(home, &clr)
-
-	t := time.Now()
-	giv.NewValue(home, &t)
-
-	giv.NewFuncButton(home, hello)
-
 	img := gi.NewImage(home)
 	err := img.OpenImage("gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
-}
-
-// Hello displays a greeting message and an age in weeks based on the given information.
-func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
-	weeksOld = age * 52
-	greeting = "Hello, " + firstName + " " + lastName + "! "
-	if likesGo {
-		greeting += "I'm glad to here that you like the best programming language!"
-	} else {
-		greeting += "You should reconsider what programming languages you like."
-	}
-	return
 }
 
 func makeText(ts *gi.Tabs) {
@@ -297,6 +278,27 @@ func makeLayouts(ts *gi.Tabs) {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
+}
+
+func makeValues(ts *gi.Tabs) {
+	values := ts.NewTab("Values")
+
+	giv.NewValue(values, colors.Blue)
+	giv.NewValue(values, time.Now())
+	giv.NewValue(values, gi.FileName("demo.go"))
+	giv.NewValue(values, hello)
+}
+
+// Hello displays a greeting message and an age in weeks based on the given information.
+func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
+	weeksOld = age * 52
+	greeting = "Hello, " + firstName + " " + lastName + "! "
+	if likesGo {
+		greeting += "I'm glad to here that you like the best programming language!"
+	} else {
+		greeting += "You should reconsider what programming languages you like."
+	}
+	return
 }
 
 // func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
