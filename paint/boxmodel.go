@@ -39,7 +39,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	bg = st.StateBackgroundColor(bg)
 
 	// we only fill the surrounding background color if we are told to
-	if st.FillSurround {
+	if st.FillMargin {
 		// we apply the surrounding state layer to the surrounding background color
 		psl := st.StateLayer
 		st.StateLayer = surroundStateLayer
