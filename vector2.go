@@ -101,6 +101,31 @@ func (v Vec2) Dim(dim Dims) float32 {
 	}
 }
 
+// SetPointDim is a helper function for image.Point for setting given dimension
+func SetPointDim(v *image.Point, dim Dims, value int) {
+	switch dim {
+	case X:
+		v.X = value
+	case Y:
+		v.Y = value
+	default:
+		panic("dim is out of range")
+	}
+}
+
+// Dim returns this vector component from given image.Point
+func PointDim(v image.Point, dim Dims) int {
+	switch dim {
+	case X:
+		return v.X
+	case Y:
+		return v.Y
+	default:
+		panic("dim is out of range")
+	}
+
+}
+
 // SetByName sets this vector component value by its case insensitive name: "x" or "y".
 func (v *Vec2) SetByName(name string, value float32) {
 	switch name {
