@@ -170,6 +170,7 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	if dv.TmpSave != nil {
 		dv.TmpSave.SetValue(dv.Time)
 	}
+	dv.Update()
 	dv.UpdateEndRender(updt)
 	dv.SendChange()
 	return dv
