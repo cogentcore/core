@@ -14,32 +14,44 @@ import (
 // drawerImpl is a TEMPORARY, low-performance implementation of [goosi.Drawer].
 // It will be replaced with a full WebGPU based drawer at some point.
 // TODO: replace drawerImpl with WebGPU
-type drawerImpl struct{}
+type drawerImpl struct {
+	maxTextures int
+	images      [][]image.Image
+}
 
 // SetMaxTextures updates the max number of textures for drawing
 // Must call this prior to doing any allocation of images.
-func (dw *drawerImpl) SetMaxTextures(maxTextures int) {}
+func (dw *drawerImpl) SetMaxTextures(maxTextures int) {
+	dw.maxTextures = maxTextures
+}
 
 // MaxTextures returns the max number of textures for drawing
 func (dw *drawerImpl) MaxTextures() int {
-	return 16
+	return dw.maxTextures
 }
 
 // DestBounds returns the bounds of the render destination
 func (dw *drawerImpl) DestBounds() image.Rectangle {
-	return image.Rect(0, 0, 500, 500)
+	return theApp.screen.Geometry
 }
 
 // SetGoImage sets given Go image as a drawing source to given image index,
 // and layer, used in subsequent Draw methods.
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
-func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {}
+func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
+	dw.images[idx][layer] = img
+}
 
 // ConfigImageDefaultFormat configures the draw image at the given index
 // to fit the default image format specified by the given width, height,
 // and number of layers.
-func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {}
+func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
+	for len(dw.images) <= idx {
+		dw.images = append(dw.images, nil)
+	}
+	dw.images[idx] = make([]image.Image, layers)
+}
 
 // ConfigImage configures the draw image at given index
 // to fit the given image format and number of layers as a drawing source.
