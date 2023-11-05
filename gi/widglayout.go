@@ -42,9 +42,8 @@ func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delt
 // BBoxReport reports on all the bboxes for everything in the tree
 func (wb *WidgetBase) BBoxReport() string {
 	rpt := ""
-	wb.WalkPre(func(k ki.Ki) bool {
-		_, w := AsWidget(k)
-		rpt += fmt.Sprintf("%v: vp: %v\n", w.Nm, w.ScBBox)
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		rpt += fmt.Sprintf("%v: vp: %v\n", wb.Nm, wb.ScBBox)
 		return ki.Continue
 	})
 	return rpt
@@ -137,7 +136,8 @@ func (wb *WidgetBase) GetSizeParts(sc *Scene, iter int) {
 	}
 }
 
-func (wb *WidgetBase) GetSize(sc *Scene, iter int) {
+func (wb *WidgetBase) LayoutSizeBottomUp(sc *Scene, iter int) {
+
 	wb.InitLayout(sc)
 	wb.GetSizeFromWH(2, 2)
 	wb.GetSizeParts(sc, iter)

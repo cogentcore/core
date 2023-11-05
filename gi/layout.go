@@ -32,6 +32,15 @@ var (
 	// LayoutPrefMaxCols is maximum number of columns to use in a grid layout
 	// when computing the preferred size (ScPrefSizing)
 	LayoutPrefMaxCols = 20
+
+	// LayoutFocusNameTimeoutMSec is the number of milliseconds between keypresses
+	// to combine characters into name to search for within layout -- starts over
+	// after this delay.
+	LayoutFocusNameTimeoutMSec = 500
+
+	// LayoutFocusNameTabMSec is the number of milliseconds since last focus name
+	// event to allow tab to focus on next element with same name.
+	LayoutFocusNameTabMSec = 2000
 )
 
 // Layoutlags has bool flags for Layout
@@ -55,100 +64,6 @@ const (
 	// outer Widget handles these instead, then this should be set.
 	LayoutNoKeys
 )
-
-// LayoutAllocs contains all the the layout allocations: size, position.
-// These are set by the parent Layout during the Layout process.
-type LayoutAllocs struct {
-
-	// allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes
-	Size mat32.Vec2
-
-	// position of this item, computed by adding in the PosRel to parent position
-	Pos mat32.Vec2
-
-	// allocated relative position of this item, computed by the parent layout
-	PosRel mat32.Vec2
-
-	// original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size
-	SizeOrig mat32.Vec2
-
-	// original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos
-	PosOrig mat32.Vec2
-}
-
-// Reset is called at start of layout process -- resets all values back to 0
-func (la *LayoutAllocs) Reset() {
-	la.Size = mat32.Vec2Zero
-	la.Pos = mat32.Vec2Zero
-	la.PosRel = mat32.Vec2Zero
-}
-
-func (la LayoutAllocs) String() string {
-	return fmt.Sprintf("Alloc: Size=%s; Pos=%s; PosRel=%s; SizeOrig=%s; PosOrig=%s", la.Size.String(), la.Pos.String(), la.PosRel.String(), la.SizeOrig.String(), la.PosOrig.String())
-}
-
-// LayoutState contains all the state needed to specify the layout of an item
-// within a Layout.  Is initialized with computed values of style prefs.
-type LayoutState struct {
-
-	// size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it
-	Size styles.SizePrefs
-
-	// allocated size and position -- set by parent Layout
-	Alloc LayoutAllocs
-}
-
-// todo: not using yet:
-// Margins Margins   `desc:"margins around this item"`
-// GridPos      image.Point `desc:"position within a grid"`
-// GridSpan     image.Point `desc:"number of grid elements that we take up in each direction"`
-
-func (ld *LayoutState) Defaults() {
-}
-
-func (ld *LayoutState) String() string {
-	return ld.Size.String() + "\n" + ld.Alloc.String() + "\n"
-}
-
-func (ld *LayoutState) SetFromStyle(ls *styles.Style) {
-	ld.Reset()
-	// these are layout hints:
-	ld.Size.Need = ls.MinSizeDots()
-	ld.Size.Pref = ls.SizeDots()
-	ld.Size.Max = ls.MaxSizeDots()
-
-	// this is an actual initial desired setting
-	ld.Alloc.Pos = ls.PosDots()
-	// not setting size, so we can keep that as a separate constraint
-}
-
-// SizePrefOrMax returns the pref size if non-zero, else the max-size -- use
-// for style-based constraints during initial sizing (e.g., word wrapping)
-func (ld *LayoutState) SizePrefOrMax() mat32.Vec2 {
-	return ld.Size.Pref.MinPos(ld.Size.Max)
-}
-
-// Reset is called at start of layout process -- resets all values back to 0
-func (ld *LayoutState) Reset() {
-	ld.Alloc.Reset()
-}
-
-// UpdateSizes updates our sizes based on AllocSize and Max constraints, etc
-func (ld *LayoutState) UpdateSizes() {
-	ld.Size.Need.SetMax(ld.Alloc.Size)  // min cannot be < alloc -- bare min
-	ld.Size.Pref.SetMax(ld.Size.Need)   // pref cannot be < min
-	ld.Size.Need.SetMinPos(ld.Size.Max) // min cannot be > max
-	ld.Size.Pref.SetMinPos(ld.Size.Max) // pref cannot be > max
-}
-
-// GridData contains data for grid layout -- only one value needed for relevant dim
-type GridData struct {
-	SizeNeed    float32
-	SizePref    float32
-	SizeMax     float32
-	AllocSize   float32
-	AllocPosRel float32
-}
 
 ///////////////////////////////////////////////////////////////////
 // Layouter
@@ -192,15 +107,6 @@ func (t *Layout) AsLayout() *Layout {
 ///////////////////////////////////////////////////////////////////
 // Layout
 
-// LayoutFocusNameTimeoutMSec is the number of milliseconds between keypresses
-// to combine characters into name to search for within layout -- starts over
-// after this delay.
-var LayoutFocusNameTimeoutMSec = 500
-
-// LayoutFocusNameTabMSec is the number of milliseconds since last focus name
-// event to allow tab to focus on next element with same name.
-var LayoutFocusNameTabMSec = 2000
-
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background color will have no effect.
@@ -220,11 +126,12 @@ var LayoutFocusNameTabMSec = 2000
 type Layout struct {
 	WidgetBase
 
-	// type of layout to use
-	Lay Layouts `xml:"lay" set:"Layout"`
-
-	// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
+	// for Stacked layout, index of node to use as the top of the stack.
+	// Only the node at this index is rendered -- if not a valid index, nothing is rendered.
 	StackTop int
+
+	// LayImpl contains implementational state info for doing layout
+	LayImpl LayImplState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// total max size of children as laid out
 	ChildSize mat32.Vec2 `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
@@ -237,15 +144,6 @@ type Layout struct {
 
 	// scroll bars -- we fully manage them as needed
 	Scrolls [2]*Slider `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// computed size of a grid layout based on all the constraints -- computed during GetSize pass
-	GridSize image.Point `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// grid data for rows in and cols in
-	GridData [RowColN][]GridData `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// line breaks for flow layout
-	FlowBreaks []int `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// accumulated name to search for when keys are typed
 	FocusName string `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
@@ -299,53 +197,6 @@ func (ly *Layout) HandleLayoutEvents() {
 	ly.HandleLayoutKeys()
 	ly.HandleLayoutScrollEvents()
 }
-
-// Layouts are the different types of layouts
-type Layouts int32 //enums:enum -trim-prefix Layout
-
-const (
-	// LayoutHoriz arranges items horizontally across a row
-	LayoutHoriz Layouts = iota
-
-	// LayoutVert arranges items vertically in a column
-	LayoutVert
-
-	// LayoutGrid arranges items according to a regular grid
-	LayoutGrid
-
-	// todo: add LayoutGridIrreg that deals with irregular grids with spans etc -- keep
-	// the basic grid for fully regular cases -- need high performance for large grids
-
-	// LayoutHorizFlow arranges items horizontally across a row, overflowing
-	// vertically as needed.  Ballpark target width or height props should be set
-	// to generate initial first-pass sizing estimates.
-	LayoutHorizFlow
-
-	// LayoutVertFlow arranges items vertically within a column, overflowing
-	// horizontally as needed.  Ballpark target width or height props should be set
-	// to generate initial first-pass sizing estimates.
-	LayoutVertFlow
-
-	// LayoutStacked arranges items stacked on top of each other -- Top index
-	// indicates which to show -- overall size accommodates largest in each
-	// dimension
-	LayoutStacked
-
-	// LayoutNil is a nil layout -- doesn't do anything -- for cases when a
-	// parent wants to take over the job of the layout
-	LayoutNil
-)
-
-// row / col for grid data
-type RowCol int32 //enums:enum
-
-const (
-	Row RowCol = iota
-	Col
-)
-
-// LayoutDefault is default obj that can be used when property specifies "default"
-var LayoutDefault Layout
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //     Overflow: Scrolling mainly

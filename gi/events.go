@@ -377,15 +377,11 @@ func (wb *WidgetBase) GrabFocus() {
 // FocusableInMe returns the first Focusable element within this widget
 func (wb *WidgetBase) FocusableInMe() Widget {
 	var foc Widget
-	wb.WalkPre(func(k ki.Ki) bool {
-		kwi, kwb := AsWidget(k)
-		if kwb == nil || kwb.This() == nil || kwb.Is(ki.Deleted) {
-			return ki.Break
-		}
-		if !kwb.AbilityIs(abilities.Focusable) {
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		if !wb.AbilityIs(abilities.Focusable) {
 			return ki.Continue
 		}
-		foc = kwi
+		foc = wi
 		return ki.Break // done
 	})
 	return foc

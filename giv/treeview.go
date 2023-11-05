@@ -157,8 +157,8 @@ func (tv *TreeView) BaseType() *gti.Type {
 // Returns the total number of leaves in the tree.
 func (tv *TreeView) RootSetViewIdx() int {
 	idx := 0
-	tv.WalkPre(func(k ki.Ki) bool {
-		tvki := AsTreeView(k)
+	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		tvki := AsTreeView(wi)
 		if tvki != nil {
 			tvki.ViewIdx = idx
 			tvki.RootView = tv
@@ -1147,8 +1147,8 @@ func (tv *TreeView) ToggleClose() {
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() { //gti:add
 	updt := tv.UpdateStart()
-	tv.WalkPre(func(k ki.Ki) bool {
-		tvki := AsTreeView(k)
+	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		tvki := AsTreeView(wi)
 		if tvki != nil {
 			tvki.Open()
 			return ki.Continue
@@ -1161,8 +1161,8 @@ func (tv *TreeView) OpenAll() { //gti:add
 // CloseAll closes the given node and all of its sub-nodes.
 func (tv *TreeView) CloseAll() { //gti:add
 	updt := tv.UpdateStart()
-	tv.WalkPre(func(k ki.Ki) bool {
-		tvki := AsTreeView(k)
+	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		tvki := AsTreeView(wi)
 		if tvki != nil {
 			tvki.Close()
 			return ki.Continue

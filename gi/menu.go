@@ -57,11 +57,10 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	}
 
 	hasSelected := false
-	msc.WalkPre(func(k ki.Ki) bool {
-		if k == msc {
+	msc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		if wi.This() == msc.This() {
 			return ki.Continue
 		}
-		wi, wb := AsWidget(k)
 		if wi == nil {
 			return ki.Continue
 		}
