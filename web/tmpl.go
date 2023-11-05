@@ -69,7 +69,8 @@ type AppWorkerJSData struct {
 	ResourcesToCache string
 }
 
-// MakeWorkerJS executes [config.Config.Web.ServiceWorkerTemplate].
+// MakeWorkerJS executes [config.Config.Web.ServiceWorkerTemplate]. If it empty, it
+// sets it to [DefaultAppWorkerJS].
 func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 	resources := []string{
 		"/app.css",
@@ -78,6 +79,10 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 		"/manifest.webmanifest",
 		"/wasm_exec.js",
 		"/",
+	}
+
+	if c.Web.ServiceWorkerTemplate == "" {
+		c.Web.ServiceWorkerTemplate = DefaultAppWorkerJS
 	}
 
 	tmpl, err := template.New("app-worker.js").Parse(c.Web.ServiceWorkerTemplate)
