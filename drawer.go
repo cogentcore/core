@@ -20,6 +20,9 @@ type Drawer interface {
 	// MaxTextures returns the max number of textures for drawing
 	MaxTextures() int
 
+	// DestBounds returns the bounds of the render destination
+	DestBounds() image.Rectangle
+
 	// SetGoImage sets given Go image as a drawing source to given image index,
 	// and layer, used in subsequent Draw methods.
 	// A standard Go image is rendered upright on a standard surface.
