@@ -7,9 +7,15 @@
 package web
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/draw"
+	"log/slog"
+	"strconv"
+	"syscall/js"
+
+	"github.com/anthonynsimon/bild/imgio"
 )
 
 // drawerImpl is a TEMPORARY, low-performance implementation of [goosi.Drawer].
@@ -107,6 +113,23 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
 	fmt.Println("start draw", descIdx)
+
+	imgs := dw.images[descIdx]
+	img := imgs[0]
+
+	buf := bytes.Buffer{}
+	enc := imgio.JPEGEncoder(90)
+	err := enc(&buf, img)
+	if err != nil {
+		slog.Error(err.Error())
+		return
+	}
+
+	dst := js.Global().Get("Uint8Array").New(len(buf.Bytes()))
+	n := js.CopyBytesToJS(dst, buf.Bytes())
+	fmt.Println("bytes copied:", strconv.Itoa(n))
+	js.Global().Call("displayImage", dst)
+	buf.Reset()
 }
 
 // EndDraw ends image drawing rendering process on render target
