@@ -8,4 +8,9 @@ package goosi
 // rendering to a window surface. It is implemented by [*goki.dev/vgpu/v2/vdraw.Drawer]
 // and an internal web driver.
 type Drawer interface {
+	// SetMaxTextures updates the max number of textures for drawing
+	// Must call this prior to doing any allocation of images.
+	SetMaxTextures(maxTextures int)
+	// MaxTextures returns the max number of textures for drawing
+	MaxTextures() int
 }
