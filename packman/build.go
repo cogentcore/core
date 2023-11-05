@@ -58,7 +58,7 @@ func Build(c *config.Config) error { //gti:add
 				fpkg = filepath.Base(dir)
 			}
 			if c.Build.Output == "" {
-				c.Build.Output = filepath.Join(".goki", "bin", "build", fpkg+".wasm")
+				c.Build.Output = filepath.Join(".goki", "bin", "web", fpkg+".wasm")
 			}
 			return web.Build(c)
 		}
