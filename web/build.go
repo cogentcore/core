@@ -70,5 +70,14 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
+	iht, err := MakeIndexHTML(c)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "index.html"), iht, 0666)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

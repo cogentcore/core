@@ -110,21 +110,40 @@ type ManifestJSONData struct {
 }
 
 // MakeManifestJSON exectues [ManifestJSONTmpl] based on the given configuration information.
-func MakeManifestJSON(h *config.Config) ([]byte, error) {
+func MakeManifestJSON(c *config.Config) ([]byte, error) {
 	d := ManifestJSONData{
-		ShortName:   h.Name,
-		Name:        h.Name,
-		Description: h.Desc,
+		ShortName:   c.Name,
+		Name:        c.Name,
+		Description: c.Desc,
 		// DefaultIcon:     h.Icon.Default,
 		// LargeIcon:       h.Icon.Large,
 		// SVGIcon:         h.Icon.SVG,
-		BackgroundColor: h.Web.BackgroundColor,
-		ThemeColor:      h.Web.ThemeColor,
+		BackgroundColor: c.Web.BackgroundColor,
+		ThemeColor:      c.Web.ThemeColor,
 		Scope:           "/",
 		StartURL:        "/",
 	}
+
 	b := &bytes.Buffer{}
 	err := ManifestJSONTmpl.Execute(b, d)
+	if err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+// IndexHTMLTmpl is the template used in [MakeIndexHTML] to build the index.html file
+var IndexHTMLTmpl = template.Must(template.New("index.html").Parse(IndexHTML))
+
+// IndexHTMLData is the data passed to [IndexHTMLTmpl]
+type IndexHTMLData struct{}
+
+// MakeIndexHTML exectues [IndexHTMLTmpl] based on the given configuration information.
+func MakeIndexHTML(c *config.Config) ([]byte, error) {
+	d := IndexHTMLData{}
+
+	b := &bytes.Buffer{}
+	err := IndexHTMLTmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}

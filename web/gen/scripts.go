@@ -60,7 +60,7 @@ func main() {
 		{
 			Var:           "IndexHTML",
 			Filename:      "gen/index.html",
-			Documentation: "IndexHTML is the string [IndexHTMLTmpl].",
+			Documentation: "IndexHTML is the string used for [IndexHTMLTmpl].",
 		},
 	}
 
