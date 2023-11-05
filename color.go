@@ -24,11 +24,11 @@ var colorProfile termenv.Profile
 // in an init function if UseColor is set to true. However, if you call a system command
 // (ls, cp, etc), you need to call this function again.
 func InitColor() {
-	origMode, err := termenv.EnableWindowsANSIConsole()
+	restoreFunc, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
 	if err != nil {
 		slog.Warn("error enabling virtual terminal processing for colored output on Windows: %w", err)
 	}
-	_ = origMode // TODO: figure out how to deal with this at the end of the program
+	_ = restoreFunc // TODO: figure out how to call this at the end of the program
 	colorProfile = termenv.ColorProfile()
 	colors.SetScheme(termenv.HasDarkBackground())
 }
