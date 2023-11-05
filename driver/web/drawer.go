@@ -45,7 +45,14 @@ func (dw *drawerImpl) DestBounds() image.Rectangle {
 // Set flipY to true to flip.
 func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	fmt.Println("sgi", idx, layer, img, flipY)
-	dw.images[idx][layer] = img
+	for len(dw.images) <= idx {
+		dw.images = append(dw.images, nil)
+	}
+	ii := &dw.images[idx]
+	for len(*ii) <= layer {
+		*ii = append(*ii, nil)
+	}
+	(*ii)[layer] = img
 }
 
 // ConfigImageDefaultFormat configures the draw image at the given index
