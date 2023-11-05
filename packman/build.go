@@ -48,17 +48,9 @@ func Build(c *config.Config) error { //gti:add
 			return mobile.Build(c)
 		}
 		if platform.OS == "js" {
-			// need to get real package and output location so that commands work
-			fpkg := c.Build.Package
-			if fpkg == "." {
-				dir, err := os.Getwd()
-				if err != nil {
-					return fmt.Errorf("error getting current working directory: %w", err)
-				}
-				fpkg = filepath.Base(dir)
-			}
+			// need to get real output location so that commands work
 			if c.Build.Output == "" {
-				c.Build.Output = filepath.Join(".goki", "bin", "web", fpkg+".wasm")
+				c.Build.Output = filepath.Join(".goki", "web", "app.wasm")
 			}
 			return web.Build(c)
 		}
