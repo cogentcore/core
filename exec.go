@@ -94,7 +94,10 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 		if sout != nil {
 			sout.Write(obuf.Bytes())
 		}
-		c.Stderr.Write([]byte(grog.ErrorColor(ebuf.String())))
+		estr := ebuf.String()
+		if estr != "" {
+			c.Stderr.Write([]byte(grog.ErrorColor(estr)))
+		}
 	}
 	return CmdRan(err), ExitStatus(err), err
 }
