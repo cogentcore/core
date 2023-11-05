@@ -190,7 +190,6 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	// }
 	// app.mu.Lock()
 	// defer app.mu.Unlock()
-	app.setSysWindow()
 	app.window = &windowImpl{
 		app:         app,
 		isVisible:   true,
@@ -204,8 +203,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		},
 	}
 	app.window.EvMgr.Deque = &app.window.Deque
-	app.window.EvMgr.Window(events.WinShow)
-	app.window.EvMgr.Window(events.WinFocus)
+	app.setSysWindow()
 
 	go app.window.winLoop()
 
@@ -219,15 +217,32 @@ func (app *appImpl) setSysWindow() error {
 	fmt.Println("setting sys window")
 
 	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
-	app.screen.Geometry = image.Rect(0, 0, w, h)
-	fmt.Println("screen geom", app.screen.Geometry)
 
-	// if the window already exists, we are coming back to it, so we need to show it
-	// again and send a screen update
-	if app.window != nil {
-		app.window.EvMgr.Window(events.WinShow)
-		app.window.EvMgr.Window(events.ScreenUpdate)
-	}
+	app.screen.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	app.screen.PixSize = image.Pt(w, h)
+	app.screen.Geometry.Max = app.screen.PixSize
+	dpi := float32(96)
+	app.screen.PhysicalDPI = dpi
+	app.screen.LogicalDPI = dpi
+
+	physX := 25.4 * float32(w) / dpi
+	physY := 25.4 * float32(h) / dpi
+	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+
+	app.window.PhysDPI = app.screen.PhysicalDPI
+	app.window.LogDPI = app.screen.LogicalDPI
+	app.window.PxSize = app.screen.PixSize
+	app.window.WnSize = app.screen.Geometry.Max
+	app.window.DevPixRatio = app.screen.DevicePixelRatio
+	app.window.RenderSize = app.screen.PixSize
+
+	fmt.Printf("screen %#v\n", app.screen)
+	fmt.Printf("window %#v\n", app.window)
+
+	app.window.EvMgr.WindowResize()
+	app.window.EvMgr.Window(events.WinShow)
+	app.window.EvMgr.Window(events.ScreenUpdate)
+	app.window.EvMgr.Window(events.WinFocus)
 	return nil
 }
 
