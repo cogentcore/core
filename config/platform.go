@@ -88,7 +88,7 @@ var SupportedOS = map[string]bool{
 	"hurd":      false,
 	"illumos":   false,
 	"ios":       true,
-	"js":        false,
+	"js":        true,
 	"linux":     true,
 	"nacl":      false,
 	"netbsd":    false,
@@ -125,5 +125,5 @@ var SupportedArch = map[string]bool{
 	"s390x":       false,
 	"sparc":       false,
 	"sparc64":     false,
-	"wasm":        false,
+	"wasm":        true,
 }
