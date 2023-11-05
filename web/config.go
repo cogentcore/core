@@ -106,7 +106,7 @@ func (h *builder) initPWA() {
 }
 
 func (h *builder) initPWAResources() {
-	h.cachedResources = newMemoryCache(5)
+	h.cachedResources = newMemoryCache(6)
 
 	h.cachedResources.Set(cacheItem{
 		Path:        "/wasm_exec.js",
@@ -136,6 +136,11 @@ func (h *builder) initPWAResources() {
 		Path:        "/app.css",
 		ContentType: "text/css",
 		Body:        []byte(appCSS),
+	})
+	h.cachedResources.Set(cacheItem{
+		Path:        "/index.html",
+		ContentType: "text/html",
+		Body:        []byte("<html><body>Hello, HTML!</body></html>"),
 	})
 }
 
@@ -268,7 +273,7 @@ func (h *builder) makeManifestJSON() []byte {
 }
 
 func (h *builder) initProxyResources() {
-	h.cachedResources = newMemoryCache(0)
+	// h.cachedResources = newMemoryCache(0)
 	resources := make(map[string]ProxyResource)
 
 	// for _, r := range h.ProxyResources {

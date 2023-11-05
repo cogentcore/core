@@ -32,9 +32,9 @@ func GenerateStaticWebsite(dir string, b *builder, pages ...string) error {
 		"/web":                  {},
 	}
 
-	// for path := range routes.routes {
-	// 	resources[path] = struct{}{}
-	// }
+	for _, path := range pages {
+		resources[path] = struct{}{}
+	}
 
 	for _, p := range pages {
 		if p == "" {
