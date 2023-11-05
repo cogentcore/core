@@ -6,7 +6,7 @@ package paint
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -139,7 +139,7 @@ func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 			if err == nil {
 				err = fmt.Errorf("gi.FontLib: nil face with no error for: %v", fontnm)
 			}
-			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
+			slog.Error("gi.FontLib: error loading font, removed from list", "fontName", fontnm)
 			loadFontMu.Unlock()
 			fl.DeleteFont(fontnm)
 			return nil, err
@@ -201,7 +201,7 @@ func (fl *FontLib) AddFontPaths(paths ...string) bool {
 // UpdateFontsAvail scans for all fonts we can use on the FontPaths
 func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontPaths) == 0 {
-		log.Print("gi.FontLib: no font paths -- need to add some\n")
+		slog.Error("gi.FontLib: no font paths; need to add some")
 		return false
 	}
 	loadFontMu.Lock()
@@ -225,7 +225,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 func (fl *FontLib) FontsAvailFromPath(path string) error {
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("gi.FontLib: error accessing path %q: %v\n", path, err)
+			slog.Error("gi.FontLib: error accessing path", "path", path, "err", err)
 			return err
 		}
 		ext := strings.ToLower(filepath.Ext(path))
@@ -278,7 +278,7 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 		return nil
 	})
 	if err != nil {
-		log.Printf("gi.FontLib: error walking the path %q: %v\n", path, err)
+		slog.Error("gi.FontLib: error walking the path", "path", path, "err", err)
 	}
 	return err
 }
