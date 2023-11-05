@@ -65,8 +65,13 @@ func NonPtrValue(v reflect.Value) reflect.Value {
 // PtrValue returns the pointer version (Addr()) of the underlying value if
 // the value is not already a Ptr
 func PtrValue(v reflect.Value) reflect.Value {
-	if v.CanAddr() && v.Kind() != reflect.Ptr {
-		v = v.Addr()
+	if v.Kind() != reflect.Ptr {
+		if v.CanAddr() {
+			return v.Addr()
+		}
+		pv := reflect.New(v.Type())
+		pv.Elem().Set(v)
+		return pv
 	}
 	return v
 }
@@ -77,11 +82,10 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 	if v.Kind() != reflect.Ptr {
 		if v.CanAddr() {
 			return v.Addr()
-		} else {
-			pv := reflect.New(v.Type())
-			pv.Elem().Set(v)
-			return pv
 		}
+		pv := reflect.New(v.Type())
+		pv.Elem().Set(v)
+		return pv
 	} else {
 		for v.Elem().Kind() == reflect.Ptr {
 			v = v.Elem()
@@ -106,18 +110,6 @@ func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 		opv = OnePtrValue(itv)
 	}
 	return opv
-}
-
-// MakePtrValue makes a new pointer to the given value, adding an extra level
-// of indirection, and then removing that indirection, resulting in something
-// that is now addressable / assignable -- this is necessary for enums..
-func MakePtrValue(v reflect.Value) reflect.Value {
-	// TODO(kai): MakePtrValue doesn't seem do be doing the right thing
-	np := reflect.New(PtrType(v.Type()))
-	pi := np.Interface()
-	pi = v.Interface()       // assign pointer using interface assignment instead of set..
-	p := reflect.ValueOf(pi) // has a double pointer, remove that last one
-	return p.Elem()
 }
 
 // UnhideAnyValue returns a reflect.Value for any of the Make* functions
