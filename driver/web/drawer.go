@@ -8,11 +8,9 @@ package web
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/draw"
 	"log/slog"
-	"strconv"
 	"syscall/js"
 
 	"github.com/anthonynsimon/bild/imgio"
@@ -29,19 +27,16 @@ type drawerImpl struct {
 // SetMaxTextures updates the max number of textures for drawing
 // Must call this prior to doing any allocation of images.
 func (dw *drawerImpl) SetMaxTextures(maxTextures int) {
-	fmt.Println("smt", maxTextures)
 	dw.maxTextures = maxTextures
 }
 
 // MaxTextures returns the max number of textures for drawing
 func (dw *drawerImpl) MaxTextures() int {
-	fmt.Println("mt", dw.maxTextures)
 	return dw.maxTextures
 }
 
 // DestBounds returns the bounds of the render destination
 func (dw *drawerImpl) DestBounds() image.Rectangle {
-	fmt.Println("db", theApp.screen.Geometry)
 	return theApp.screen.Geometry
 }
 
@@ -50,7 +45,6 @@ func (dw *drawerImpl) DestBounds() image.Rectangle {
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
 func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
-	fmt.Println("sgi", idx, layer, flipY)
 	for len(dw.images) <= idx {
 		dw.images = append(dw.images, nil)
 	}
@@ -65,7 +59,6 @@ func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 // to fit the default image format specified by the given width, height,
 // and number of layers.
 func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
-	fmt.Println("cidf", idx, width, height, layers)
 	for len(dw.images) <= idx {
 		dw.images = append(dw.images, nil)
 	}
@@ -112,8 +105,6 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
-	fmt.Println("start draw", descIdx)
-
 	imgs := dw.images[descIdx]
 	img := imgs[0]
 
@@ -126,8 +117,7 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 	}
 
 	dst := js.Global().Get("Uint8Array").New(len(buf.Bytes()))
-	n := js.CopyBytesToJS(dst, buf.Bytes())
-	fmt.Println("bytes copied:", strconv.Itoa(n))
+	js.CopyBytesToJS(dst, buf.Bytes())
 	js.Global().Call("displayImage", dst)
 	buf.Reset()
 }
