@@ -13,7 +13,6 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
-	"goki.dev/vgpu/v2/vgpu"
 	"golang.org/x/image/draw"
 )
 
@@ -157,7 +156,7 @@ func (ss *Sprites) AllocSizes() {
 	if idx != ns {
 		szs = szs[:idx]
 	}
-	ss.SzAlloc.SetSizes(image.Point{4, 4}, vgpu.MaxImageLayers, szs)
+	ss.SzAlloc.SetSizes(image.Point{4, 4}, goosi.MaxImageLayers, szs)
 	ss.SzAlloc.Alloc()
 }
 
@@ -258,7 +257,7 @@ func (ss *Sprites) ConfigSprites(drw goosi.Drawer) {
 				continue
 			}
 			sp := ss.Names.ValByIdx(spi)
-			drw.SetGoImage(imgidx, ii, sp.Pixels, vgpu.NoFlipY)
+			drw.SetGoImage(imgidx, ii, sp.Pixels, goosi.NoFlipY)
 		}
 	}
 	ss.Modified = false
@@ -278,7 +277,7 @@ func (ss *Sprites) DrawSprites(drw goosi.Drawer) {
 			if !sp.On {
 				continue
 			}
-			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, vgpu.NoFlipY)
+			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, goosi.NoFlipY)
 		}
 	}
 }
