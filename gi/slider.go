@@ -89,15 +89,24 @@ type Slider struct { //goki:embedder
 	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
 	Prec int `xml:"prec"`
 
-	// TODO: make value and thumb full style objects
+	// TODO: maybe make value and thumb full style objects
 
-	// the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is
+	// The background color that is used for styling the selected value section of the slider.
+	// It should be set in the StyleFuncs, just like the main style object is.
+	// If it is set to transparent, no value is rendered, so the value section of the slider
+	// just looks like the rest of the slider.
 	ValueColor colors.Full
 
-	// the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is
+	// The background color that is used for styling the thumb (handle) of the slider.
+	// It should be set in the StyleFuncs, just like the main style object is.
+	// If it is set to transparent, no thumb is rendered, so the thumb section of the slider
+	// just looks like the rest of the slider.
 	ThumbColor colors.Full
 
-	// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
+	// An additional style object that is used for styling the overall box around the slider.
+	// It should be set in the StyleFuncs, just the like the main style object is.
+	// It typically has no border and a white/black background. it needs a background
+	// to allow local re-rendering.
 	StyleBox styles.Style `set:"-"`
 
 	//////////////////////////////////////////////////////////////////
@@ -577,11 +586,13 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		pos := sr.LayState.Alloc.Pos.Add(spc.Pos())
 		sz := sr.LayState.Alloc.Size.Sub(spc.Size())
 
-		sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
-		pos.SetAddDim(sr.Dim, sr.Pos)            // start of thumb
-		sz.SetDim(sr.Dim, sr.ThSize)
-		pc.FillStyle.SetFullColor(&sr.ValueColor)
-		sr.RenderBoxImpl(sc, pos, sz, st.Border)
+		if !sr.ValueColor.IsNil() {
+			sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
+			pos.SetAddDim(sr.Dim, sr.Pos)            // start of thumb
+			sz.SetDim(sr.Dim, sr.ThSize)
+			pc.FillStyle.SetFullColor(&sr.ValueColor)
+			sr.RenderBoxImpl(sc, pos, sz, st.Border)
+		}
 
 		sr.RenderUnlock(rs)
 	} else {
@@ -616,13 +627,17 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
 		sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
 
-		bsz.SetDim(sr.Dim, sr.Pos)
-		pc.FillStyle.SetFullColor(&sr.ValueColor)
-		sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
+		if !sr.ValueColor.IsNil() {
+			bsz.SetDim(sr.Dim, sr.Pos)
+			pc.FillStyle.SetFullColor(&sr.ValueColor)
+			sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
+		}
 
-		tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
-		tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
-		pc.FillStyle.SetFullColor(&sr.ThumbColor)
+		if !sr.ThumbColor.IsNil() {
+			tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
+			tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
+			pc.FillStyle.SetFullColor(&sr.ThumbColor)
+		}
 
 		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 			sr.RenderUnlock(rs)
