@@ -50,7 +50,7 @@ func (dw *drawerImpl) DestBounds() image.Rectangle {
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
 func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
-	fmt.Println("sgi", idx, layer, img, flipY)
+	fmt.Println("sgi", idx, layer, flipY)
 	for len(dw.images) <= idx {
 		dw.images = append(dw.images, nil)
 	}
@@ -118,7 +118,7 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 	img := imgs[0]
 
 	buf := bytes.Buffer{}
-	enc := imgio.JPEGEncoder(90)
+	enc := imgio.PNGEncoder()
 	err := enc(&buf, img)
 	if err != nil {
 		slog.Error(err.Error())
