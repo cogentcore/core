@@ -430,7 +430,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 		return
 	}
 	drw := w.GoosiWin.Drawer()
-	if drw.Impl.MaxTextures != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
+	if drw.MaxTextures() != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
 		drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 	}
 	// w.FocusInactivate()
@@ -974,7 +974,7 @@ func (rs *RenderScenes) Add(sc *Scene) int {
 }
 
 // SetImages calls drw.SetGoImage on all updated Scene images
-func (rs *RenderScenes) SetImages(drw *vdraw.Drawer) {
+func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 	if len(rs.Scenes) == 0 {
 		if WinRenderTrace {
 			fmt.Println("RenderScene.SetImages: no scenes")
@@ -1002,7 +1002,7 @@ func (rs *RenderScenes) SetImages(drw *vdraw.Drawer) {
 
 // DrawAll does drw.Copy drawing call for all Scenes,
 // using proper TextureSet for each of vgpu.MaxTexturesPerSet Scenes.
-func (rs *RenderScenes) DrawAll(drw *vdraw.Drawer) {
+func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 	nPerSet := vgpu.MaxTexturesPerSet
 
 	for i, sc := range rs.Scenes {
