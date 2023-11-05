@@ -55,6 +55,10 @@ func main() {
 			Var:      "appCSS",
 			Filename: "gen/app.css",
 		},
+		{
+			Var:      "indexHTML",
+			Filename: "gen/index.html",
+		},
 	}
 
 	fmt.Fprintln(f, "const(")

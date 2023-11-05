@@ -140,7 +140,7 @@ func (h *builder) initPWAResources() {
 	h.cachedResources.Set(cacheItem{
 		Path:        "/",
 		ContentType: "text/html",
-		Body:        []byte("<html><body>Hello, HTML!</body></html>"),
+		Body:        h.makeIndexHTML(),
 	})
 }
 
@@ -268,6 +268,15 @@ func (h *builder) makeManifestJSON() []byte {
 			StartURL:        normalize(packagePath),
 		}); err != nil {
 		panic(fmt.Errorf("initializing manifest.webmanifest failed: %w", err))
+	}
+	return b.Bytes()
+}
+
+func (h *builder) makeIndexHTML() []byte {
+	b := &bytes.Buffer{}
+	err := template.Must(template.New("index.html").Parse(indexHTML)).Execute(b, nil)
+	if err != nil {
+		panic(fmt.Errorf("initializing index.html failed: %w", err))
 	}
 	return b.Bytes()
 }
@@ -711,7 +720,7 @@ func (h *builder) initProxyResources() {
 // }
 
 func (h *builder) resolvePackagePath(path string) string {
-	return path
+	return strings.Trim(path, "/")
 	// var b strings.Builder
 
 	// b.WriteByte('/')
@@ -728,7 +737,7 @@ func (h *builder) resolvePackagePath(path string) string {
 }
 
 func (h *builder) resolveStaticPath(path string) string {
-	return path
+	return strings.Trim(path, "/")
 	// if isRemoteLocation(path) || !isStaticResourcePath(path) {
 	// 	return path
 	// }
