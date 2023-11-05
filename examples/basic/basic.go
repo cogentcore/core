@@ -9,10 +9,10 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	// gi.WinEventTrace = true
-	// gi.EventTrace = true
-	// gi.LayoutTrace = true
-	// gi.RenderTrace = true
+	gi.WinEventTrace = true
+	gi.EventTrace = true
+	gi.LayoutTrace = true
+	gi.RenderTrace = true
 
 	sc := gi.NewScene().SetTitle("Basic").SetTopAppBar(func(tb *gi.TopAppBar) {})
 
