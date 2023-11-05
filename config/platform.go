@@ -51,26 +51,21 @@ func ArchSupported(arch string) error {
 // SetString sets the platform from the given string of format os[/arch]
 func (p *Platform) SetString(platform string) error {
 	before, after, found := strings.Cut(platform, "/")
+	p.OS = before
 	err := OSSupported(before)
 	if err != nil {
 		return fmt.Errorf("error parsing platform: %w", err)
 	}
 	if !found {
-		*p = Platform{OS: before, Arch: "*"}
+		p.Arch = "*"
 		return nil
 	}
+	p.Arch = after
 	err = ArchSupported(after)
 	if err != nil {
 		return fmt.Errorf("error parsing platform: %w", err)
 	}
-	*p = Platform{OS: before, Arch: after}
 	return nil
-}
-
-func (p *Platform) UnmarshalJSON(b []byte) error {
-	platform := string(b)
-	platform = strings.ReplaceAll(platform, `"`, "") // the quotes get passed in
-	return p.SetString(platform)
 }
 
 // ArchsForOS returns contains all of the architectures supported for

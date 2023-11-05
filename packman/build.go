@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile"
+	"goki.dev/goki/web"
 	"goki.dev/xe"
 )
 
@@ -47,7 +48,18 @@ func Build(c *config.Config) error { //gti:add
 			return mobile.Build(c)
 		}
 		if platform.OS == "js" {
-			return fmt.Errorf("TODO: implement web support")
+			// need to get real package and output location so that commands work later
+			if c.Build.Package == "." {
+				dir, err := os.Getwd()
+				if err != nil {
+					return fmt.Errorf("error getting current working directory: %w", err)
+				}
+				c.Build.Package = filepath.Base(dir)
+			}
+			if c.Build.Output == "" {
+				c.Build.Output = filepath.Join(".goki", "bin", "build", c.Build.Package+".wasm")
+			}
+			return web.Build(c)
 		}
 		err = BuildDesktop(c, platform)
 		if err != nil {
