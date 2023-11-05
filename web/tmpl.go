@@ -152,11 +152,25 @@ func MakeManifestJSON(c *config.Config) ([]byte, error) {
 var IndexHTMLTmpl = template.Must(template.New("index.html").Parse(IndexHTML))
 
 // IndexHTMLData is the data passed to [IndexHTMLTmpl]
-type IndexHTMLData struct{}
+type IndexHTMLData struct {
+	Author     string
+	Desc       string
+	Keywords   []string
+	ThemeColor string
+	Title      string
+	Image      string
+}
 
 // MakeIndexHTML exectues [IndexHTMLTmpl] based on the given configuration information.
 func MakeIndexHTML(c *config.Config) ([]byte, error) {
-	d := IndexHTMLData{}
+	d := IndexHTMLData{
+		Author:     c.Web.Author,
+		Desc:       c.Desc,
+		Keywords:   c.Web.Keywords,
+		ThemeColor: c.Web.ThemeColor,
+		Title:      c.Web.Title,
+		Image:      c.Web.Image,
+	}
 
 	b := &bytes.Buffer{}
 	err := IndexHTMLTmpl.Execute(b, d)
