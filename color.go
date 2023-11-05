@@ -34,6 +34,10 @@ func ApplyColor(clr color.Color, str string) string {
 // given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func LevelColor(level slog.Level, str string) string {
+	// need to set whether the scheme is dark every time so that,
+	// for example, a GUI application doesn't override it
+	colors.SetScheme(termenv.HasDarkBackground())
+
 	var clr color.RGBA
 	switch level {
 	case slog.LevelDebug:
