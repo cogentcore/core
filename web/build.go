@@ -5,7 +5,6 @@
 package web
 
 import (
-	"bytes"
 	"html/template"
 	"path/filepath"
 
@@ -26,7 +25,7 @@ func Build(c *config.Config) error {
 	}
 
 	c.Build.Package = filepath.Dir(c.Build.Output)
-
-	buf := &bytes.Buffer{}
-	err = DefaultAppWorkerJSTmpl.Execute(buf)
+	b := &builder{}
+	b.init()
+	return nil
 }
