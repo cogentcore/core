@@ -81,5 +81,11 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
+	ics := filepath.Join(filepath.Dir(odir), "icons")
+	err = xe.Run("cp", "-r", ics, odir)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
