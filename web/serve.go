@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"goki.dev/goki/config"
+	"goki.dev/grog"
 )
 
 // Serve serves the build output directory on the default network address at the config port.
@@ -16,5 +17,6 @@ func Serve(c *config.Config) error {
 	fs := http.FileServer(http.Dir(filepath.Dir(c.Build.Output)))
 	http.Handle("/", fs)
 
+	grog.PrintlnWarn("Serving at http://localhost:" + c.Web.Port)
 	return http.ListenAndServe(":"+c.Web.Port, nil)
 }
