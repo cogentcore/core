@@ -11,10 +11,10 @@ import (
 	"goki.dev/goki/config"
 )
 
-// Serve serves the build output directory on localhost:8080.
+// Serve serves the build output directory on the default network address at the config port.
 func Serve(c *config.Config) error {
 	fs := http.FileServer(http.Dir(filepath.Dir(c.Build.Output)))
 	http.Handle("/", fs)
 
-	return http.ListenAndServe(":8080", nil)
+	return http.ListenAndServe(":"+c.Web.Port, nil)
 }

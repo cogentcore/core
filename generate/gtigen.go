@@ -14,9 +14,9 @@ var _ = gti.AddFunc(&gti.Func{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"cfg", &gti.Field{Name: "cfg", Type: "*config.Config", Doc: "", Directives: gti.Directives{}}},
+		{"cfg", &gti.Field{Name: "cfg", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
+		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 })

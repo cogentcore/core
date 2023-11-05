@@ -19,5 +19,5 @@ func main() {
 	opts := grease.DefaultOptions("goki", "GoKi", "Command line and GUI tools for developing apps and libraries using the GoKi framework.")
 	opts.DefaultFiles = []string{".goki/config.toml"}
 	opts.SearchUp = true
-	greasi.Run(opts, &config.Config{}, packman.Build, packman.Install, packman.Run, generate.Generate, tools.Init, tools.Setup, packman.Log, packman.Release, packman.GetVersion, packman.SetVersion, packman.UpdateVersion)
+	greasi.Run(opts, &config.Config{}, packman.Build, packman.Install, packman.Run, packman.Serve, generate.Generate, tools.Init, tools.Setup, packman.Log, packman.Release, packman.GetVersion, packman.SetVersion, packman.UpdateVersion)
 }
