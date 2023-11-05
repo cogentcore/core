@@ -16,7 +16,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -57,7 +56,7 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 	updt := cv.UpdateStart()
 	cv.Color = hct
 	if cv.TmpSave != nil {
-		cv.TmpSave.SetValue(cv.Color)
+		cv.TmpSave.SetValue(cv.Color.AsRGBA())
 	}
 	cv.Update()
 	cv.UpdateEndRender(updt)
@@ -75,11 +74,12 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
 	hue.OnChange(func(e events.Event) {
-		cv.Color.Hue = hue.Value
+		cv.Color.SetHue(hue.Value)
 		cv.SetHCT(cv.Color)
 	})
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor.SetSolid(colors.Transparent)
+		hue.ThumbColor.SetSolid(cv.Color)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for h := float32(0); h <= 360; h += 5 {
 			gc := cv.Color.WithHue(h)
@@ -89,11 +89,12 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).SetTracking(true)
 	chroma.OnChange(func(e events.Event) {
-		cv.Color.Chroma = chroma.Value
+		cv.Color.SetChroma(chroma.Value)
 		cv.SetHCT(cv.Color)
 	})
 	chroma.Style(func(s *styles.Style) {
 		chroma.ValueColor.SetSolid(colors.Transparent)
+		chroma.ThumbColor.SetSolid(cv.Color)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 150; c += 5 {
 			gc := cv.Color.WithChroma(c)
@@ -103,24 +104,17 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone).SetTracking(true)
 	tone.OnChange(func(e events.Event) {
-		cv.Color.Tone = tone.Value
+		cv.Color.SetTone(tone.Value)
 		cv.SetHCT(cv.Color)
 	})
 	tone.Style(func(s *styles.Style) {
 		tone.ValueColor.SetSolid(colors.Transparent)
+		tone.ThumbColor.SetSolid(cv.Color)
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 100; c += 5 {
 			gc := cv.Color.WithTone(c)
 			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), c/100, 1)
 		}
-	})
-
-	gi.NewFrame(cv, "value").Style(func(s *styles.Style) {
-		s.SetFixedWidth(units.Dp(100))
-		s.SetFixedHeight(units.Dp(100))
-		s.BackgroundColor.SetSolid(cv.Color)
-		s.AlignH = styles.AlignCenter
-		s.Border.Radius = styles.BorderRadiusFull
 	})
 
 	cv.UpdateEnd(updt)
