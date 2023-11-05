@@ -251,7 +251,7 @@ func (ss *Sprites) ConfigSprites(drw goosi.Drawer) {
 	for gpi, ga := range sa.GpAllocs {
 		gsz := sa.GpSizes[gpi]
 		imgidx := SpriteStart + gpi
-		drw.ConfigImage(imgidx, vgpu.NewImageFormat(gsz.X, gsz.Y, len(ga)))
+		drw.ConfigImageDefaultFormat(imgidx, gsz.X, gsz.Y, len(ga))
 		for ii, spi := range ga {
 			if err := ss.Names.IdxIsValid(spi); err != nil {
 				fmt.Println(err)

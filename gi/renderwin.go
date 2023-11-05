@@ -1096,7 +1096,7 @@ func (w *RenderWin) DrawScenes() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
+	drw.Scale(0, 0, drw.DestBounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
 	rs.DrawAll(drw)
 
 	drw.UseTextureSet(2)
