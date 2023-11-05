@@ -25,8 +25,8 @@ func Build(c *config.Config) error {
 		return err
 	}
 
-	odir := filepath.Dir(c.Build.Output)
+	c.Build.Package = filepath.Dir(c.Build.Output)
 
 	buf := &bytes.Buffer{}
-	err = DefaultAppWorkerJSTmpl.Execute()
+	err = DefaultAppWorkerJSTmpl.Execute(buf)
 }

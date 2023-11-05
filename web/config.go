@@ -7,11 +7,11 @@ package web
 import (
 	"bytes"
 	"crypto/sha1"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -49,6 +49,9 @@ type ProxyResource struct {
 
 const (
 	defaultThemeColor = "#2d2c2c"
+	packagePath       = "/"
+	staticPath        = "/web"
+	appWASMPath       = "/app.wasm"
 )
 
 func (h *builder) init() {
@@ -57,7 +60,7 @@ func (h *builder) init() {
 	h.initImage()
 	// h.initLibraries()
 	// h.initLinks()
-	h.initScripts()
+	// h.initScripts()
 	h.initServiceWorker()
 	h.initCacheableResources()
 	h.initIcon()
@@ -142,18 +145,13 @@ func (h *builder) makeAppJS() []byte {
 	if h.Web.Env == nil {
 		h.Web.Env = make(map[string]string)
 	}
-	internalURLs, _ := json.Marshal(h.InternalURLs)
-	h.Env["GOAPP_INTERNAL_URLS"] = string(internalURLs)
-	h.Env["GOAPP_VERSION"] = h.Version
-	h.Env["GOAPP_STATIC_RESOURCES_URL"] = h.Resources.Static()
-	h.Env["GOAPP_ROOT_PREFIX"] = h.Resources.Package()
+	h.Web.Env["GOAPP_VERSION"] = h.Version
+	h.Web.Env["GOAPP_STATIC_RESOURCES_URL"] = staticPath
+	h.Web.Env["GOAPP_ROOT_PREFIX"] = h.Build.Package
 
-	for k, v := range h.Env {
+	for k, v := range h.Web.Env {
 		if err := os.Setenv(k, v); err != nil {
-			Log(errors.New("setting app env variable failed").
-				WithTag("name", k).
-				WithTag("value", v).
-				Wrap(err))
+			slog.Error("setting app env variable failed", "name", k, "value", "err", err)
 		}
 	}
 
@@ -168,14 +166,14 @@ func (h *builder) makeAppJS() []byte {
 			WorkerJS                string
 			AutoUpdateInterval      int64
 		}{
-			Env:                     jsonString(h.Env),
-			LoadingLabel:            h.LoadingLabel,
-			Wasm:                    h.Resources.AppWASM(),
-			WasmContentLengthHeader: h.WasmContentLengthHeader,
+			Env:                     jsonString(h.Web.Env),
+			LoadingLabel:            h.Web.LoadingLabel,
+			Wasm:                    appWASMPath,
+			WasmContentLengthHeader: h.Web.WasmContentLengthHeader,
 			WorkerJS:                h.resolvePackagePath("/app-worker.js"),
-			AutoUpdateInterval:      h.AutoUpdateInterval.Milliseconds(),
+			AutoUpdateInterval:      h.Web.AutoUpdateInterval.Milliseconds(),
 		}); err != nil {
-		panic(errors.New("initializing app.js failed").Wrap(err))
+		panic(fmt.Errorf("initializing app.js failed: %w", err))
 	}
 	return b.Bytes()
 }
@@ -198,13 +196,13 @@ func (h *builder) makeAppWorkerJS() []byte {
 		h.resolvePackagePath("/manifest.webmanifest"),
 		h.resolvePackagePath("/wasm_exec.js"),
 		h.resolvePackagePath("/"),
-		h.Resources.AppWASM(),
+		appWASMPath,
 	)
-	setResources(h.Icon.Default, h.Icon.Large, h.Icon.AppleTouch)
-	setResources(h.Styles...)
-	setResources(h.Fonts...)
-	setResources(h.Scripts...)
-	setResources(h.CacheableResources...)
+	// setResources(h.Icon.Default, h.Icon.Large, h.Icon.AppleTouch)
+	// setResources(h.Styles...)
+	// setResources(h.Fonts...)
+	// setResources(h.Scripts...)
+	// setResources(h.CacheableResources...)
 
 	resourcesTocache := make([]string, 0, len(resources))
 	for k := range resources {
@@ -216,7 +214,7 @@ func (h *builder) makeAppWorkerJS() []byte {
 
 	var b bytes.Buffer
 	if err := template.
-		Must(template.New("app-worker.js").Parse(h.ServiceWorkerTemplate)).
+		Must(template.New("app-worker.js").Parse(h.Web.ServiceWorkerTemplate)).
 		Execute(&b, struct {
 			Version          string
 			ResourcesToCache string
@@ -224,7 +222,7 @@ func (h *builder) makeAppWorkerJS() []byte {
 			Version:          h.Version,
 			ResourcesToCache: jsonString(resourcesTocache),
 		}); err != nil {
-		panic(errors.New("initializing app-worker.js failed").Wrap(err))
+		panic(fmt.Errorf("initializing app-worker.js failed: %w", err))
 	}
 	return b.Bytes()
 }
@@ -255,18 +253,18 @@ func (h *builder) makeManifestJSON() []byte {
 			Scope           string
 			StartURL        string
 		}{
-			ShortName:       h.ShortName,
-			Name:            h.Name,
-			Description:     h.Description,
-			DefaultIcon:     h.Icon.Default,
-			LargeIcon:       h.Icon.Large,
-			SVGIcon:         h.Icon.SVG,
-			BackgroundColor: h.BackgroundColor,
-			ThemeColor:      h.ThemeColor,
-			Scope:           normalize(h.Resources.Package()),
-			StartURL:        normalize(h.Resources.Package()),
+			// ShortName:       h.ShortName,
+			Name:        h.Name,
+			Description: h.Web.Description,
+			// DefaultIcon:     h.Icon.Default,
+			// LargeIcon:       h.Icon.Large,
+			// SVGIcon:         h.Icon.SVG,
+			BackgroundColor: h.Web.BackgroundColor,
+			ThemeColor:      h.Web.ThemeColor,
+			Scope:           normalize(packagePath),
+			StartURL:        normalize(packagePath),
 		}); err != nil {
-		panic(errors.New("initializing manifest.webmanifest failed").Wrap(err))
+		panic(fmt.Errorf("initializing manifest.webmanifest failed: %w", err))
 	}
 	return b.Bytes()
 }
