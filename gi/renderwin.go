@@ -18,8 +18,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vdraw"
-	"goki.dev/vgpu/v2/vgpu"
 	"golang.org/x/image/draw"
 )
 
@@ -241,8 +239,8 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	win.GoosiWin.SetName(title)
 	win.GoosiWin.SetParent(win)
 	drw := win.GoosiWin.Drawer()
-	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3)       // use 3 sets
-	win.RenderScenes.MaxIdx = vgpu.MaxTexturesPerSet * 2 // reserve last for sprites
+	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
+	win.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
 	win.StageMgr.Init(&win.StageMgr, win)
 
 	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
@@ -430,8 +428,8 @@ func (w *RenderWin) Resized(sz image.Point) {
 		return
 	}
 	drw := w.GoosiWin.Drawer()
-	if drw.MaxTextures() != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
-		drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
+	if drw.MaxTextures() != goosi.MaxTexturesPerSet*3 { // this is essential after hibernate
+		drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3) // use 3 sets
 	}
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
@@ -815,10 +813,10 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 const (
 	// Sprites are stored as arrays of same-sized textures,
 	// allocated by size in Set 2, starting at 32
-	SpriteStart = vgpu.MaxTexturesPerSet * 2
+	SpriteStart = goosi.MaxTexturesPerSet * 2
 
 	// Full set of sprite textures in set = 2
-	MaxSpriteTextures = vgpu.MaxTexturesPerSet
+	MaxSpriteTextures = goosi.MaxTexturesPerSet
 
 	// Allocate 128 layers within each sprite size
 	MaxSpritesPerTexture = 128
@@ -995,15 +993,15 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 		if WinRenderTrace {
 			fmt.Println("RenderScenes.SetImages:", sc.Name(), sc.Pixels.Bounds())
 		}
-		drw.SetGoImage(i, 0, sc.Pixels, vgpu.NoFlipY)
+		drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
 		sc.SetFlag(false, ScImageUpdated)
 	}
 }
 
 // DrawAll does drw.Copy drawing call for all Scenes,
-// using proper TextureSet for each of vgpu.MaxTexturesPerSet Scenes.
+// using proper TextureSet for each of goosi.MaxTexturesPerSet Scenes.
 func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
-	nPerSet := vgpu.MaxTexturesPerSet
+	nPerSet := goosi.MaxTexturesPerSet
 
 	for i, sc := range rs.Scenes {
 		set := i / nPerSet
@@ -1011,9 +1009,9 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 			drw.UseTextureSet(set)
 		}
 		bb := sc.Pixels.Bounds()
-		op := vdraw.Over
+		op := draw.Over
 		if i == 0 {
-			op = vdraw.Src
+			op = draw.Src
 		}
 		drw.Copy(i, 0, sc.Geom.Pos, bb, op, rs.FlipY)
 	}
@@ -1096,7 +1094,7 @@ func (w *RenderWin) DrawScenes() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.DestBounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
+	drw.Scale(0, 0, drw.DestBounds(), image.Rectangle{}, draw.Src, goosi.NoFlipY)
 	rs.DrawAll(drw)
 
 	drw.UseTextureSet(2)
