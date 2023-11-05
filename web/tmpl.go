@@ -6,6 +6,7 @@ package web
 
 import (
 	"bytes"
+	"encoding/json"
 	"html/template"
 	"log/slog"
 	"os"
@@ -41,8 +42,13 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 		}
 	}
 
+	wenv, err := json.Marshal(c.Web.Env)
+	if err != nil {
+		return nil, err
+	}
+
 	d := AppJSData{
-		Env:                     jsonString(c.Web.Env),
+		Env:                     string(wenv),
 		LoadingLabel:            c.Web.LoadingLabel,
 		Wasm:                    "/app.wasm",
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
@@ -50,7 +56,7 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
 	}
 	b := &bytes.Buffer{}
-	err := AppJSTmpl.Execute(b, d)
+	err = AppJSTmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}
@@ -79,9 +85,14 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 		return nil, err
 	}
 
+	rstr, err := json.Marshal(resources)
+	if err != nil {
+		return nil, err
+	}
+
 	d := AppWorkerJSData{
 		Version:          c.Version,
-		ResourcesToCache: jsonString(resources),
+		ResourcesToCache: string(rstr),
 	}
 
 	b := &bytes.Buffer{}
