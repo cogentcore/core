@@ -48,8 +48,17 @@ type ColorView struct {
 
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) *ColorView {
+	return cv.SetHCT(hct.FromColor(clr))
+}
+
+// SetHCT sets the source color in terms of HCT
+func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 	updt := cv.UpdateStart()
-	cv.Color = hct.FromColor(clr)
+	cv.Color = hct
+	if cv.TmpSave != nil {
+		cv.TmpSave.SetValue(cv.Color)
+	}
+	cv.Update()
 	cv.UpdateEndRender(updt)
 	cv.SendChange()
 	return cv
@@ -65,7 +74,9 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue)
 	hue.OnChange(func(e events.Event) {
+		fmt.Println("cv hue oc")
 		cv.Color.Hue = hue.Value
+		cv.SetHCT(cv.Color)
 	})
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor.SetSolid(colors.Transparent)
@@ -79,6 +90,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
 	chroma.OnChange(func(e events.Event) {
 		cv.Color.Chroma = chroma.Value
+		cv.SetHCT(cv.Color)
 	})
 	chroma.Style(func(s *styles.Style) {
 		chroma.ValueColor.SetSolid(colors.Transparent)
@@ -92,6 +104,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
 	tone.OnChange(func(e events.Event) {
 		cv.Color.Tone = tone.Value
+		cv.SetHCT(cv.Color)
 	})
 	tone.Style(func(s *styles.Style) {
 		tone.ValueColor.SetSolid(colors.Transparent)
