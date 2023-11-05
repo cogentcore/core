@@ -101,3 +101,12 @@ func (dw *Drawer) DestSize() image.Point {
 		return dw.Frame.Format.Size
 	}
 }
+
+// DestBounds returns the bounds of the render destination
+func (dw *Drawer) DestBounds() image.Rectangle {
+	if dw.Surf != nil {
+		return dw.Surf.Format.Bounds()
+	} else {
+		return dw.Frame.Format.Bounds()
+	}
+}
