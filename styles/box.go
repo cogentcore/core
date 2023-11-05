@@ -49,18 +49,8 @@ const (
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleBorderFuncs
 
-/* todo: add this in the future
 // Border contains style parameters for borders
-type Border struct {
-	Style  Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
-	Width  Sides[units.Value]  `xml:"width" desc:"prop: border-width = width of the border"`
-	Radius Sides[units.Value]  `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
-	Color  Sides[Color]        `xml:"color" desc:"prop: border-color = color of the border"`
-}
-*/
-
-// Border contains style parameters for borders
-type Border struct {
+type Border struct { //gti:add
 
 	// prop: border-style = how to draw the border
 	Style Sides[BorderStyles] `xml:"style"`
@@ -128,7 +118,7 @@ var (
 // IMPORTANT: any changes here must be updated in style_props.go StyleShadowFuncs
 
 // style parameters for shadows
-type Shadow struct {
+type Shadow struct { //gti:add
 
 	// prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side
 	HOffset units.Value `xml:".h-offset"`

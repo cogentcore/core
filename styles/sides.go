@@ -22,7 +22,7 @@ import (
 // If Sides contains corners, the struct field names correspond
 // to the corners as follows: Top = top left, Right = top right,
 // Bottom = bottom right, Left = bottom left.
-type Sides[T any] struct {
+type Sides[T any] struct { //gti:add
 
 	// top/top-left value
 	Top T `xml:"top"`
@@ -191,7 +191,7 @@ func (s *Sides[T]) SetString(str string) error {
 }
 
 // SideValues contains units.Value values for each side/corner of a box
-type SideValues struct {
+type SideValues struct { //gti:add
 	Sides[units.Value]
 }
 
@@ -233,7 +233,7 @@ func (sv *SideValues) Zero() *SideValues {
 }
 
 // SideFloats contains float32 values for each side/corner of a box
-type SideFloats struct {
+type SideFloats struct { //gti:add
 	Sides[float32]
 }
 
@@ -327,7 +327,7 @@ func (sf *SideFloats) Zero() *SideFloats {
 }
 
 // SideColors contains color values for each side/corner of a box
-type SideColors struct {
+type SideColors struct { //gti:add
 	Sides[color.RGBA]
 }
 

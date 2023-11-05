@@ -14,7 +14,7 @@ import (
 )
 
 // Paint provides the styling parameters for SVG-style rendering
-type Paint struct {
+type Paint struct { //gti:add
 
 	// prop: display:none -- node and everything below it are off, non-rendering
 	Off bool
@@ -46,7 +46,6 @@ type Paint struct {
 	// have the styles already been set?
 	StyleSet bool
 
-	// set to true if parent node has no props -- allows optimization of styling
 	PropsNil   bool
 	dotsSet    bool
 	lastUnCtxt units.Context

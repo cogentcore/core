@@ -11,7 +11,7 @@ import (
 
 // FontFace is our enhanced Font Face structure which contains the enhanced computed
 // metrics in addition to the font.Face face
-type FontFace struct {
+type FontFace struct { //gti:add
 
 	// The full FaceName that the font is accessed by
 	Name string
@@ -36,7 +36,7 @@ func NewFontFace(nm string, sz int, face font.Face) *FontFace {
 // FontMetrics are our enhanced dot-scale font metrics compared to what is available in
 // the standard font.Metrics lib, including Ex and Ch being defined in terms of
 // the actual letter x and 0
-type FontMetrics struct {
+type FontMetrics struct { //gti:add
 
 	// reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing
 	Height float32
