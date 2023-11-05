@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"image"
 
+	"goki.dev/goosi"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
-	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 	"golang.org/x/image/draw"
 )
@@ -244,7 +244,7 @@ func (ss *Sprites) InactivateAllSprites() {
 
 // ConfigSprites updates the Drawer configuration of sprites.
 // Does a new SzAlloc, and sets corresponding images.
-func (ss *Sprites) ConfigSprites(drw *vdraw.Drawer) {
+func (ss *Sprites) ConfigSprites(drw goosi.Drawer) {
 	// fmt.Println("config sprites")
 	ss.AllocSizes()
 	sa := &ss.SzAlloc
@@ -265,7 +265,7 @@ func (ss *Sprites) ConfigSprites(drw *vdraw.Drawer) {
 }
 
 // DrawSprites draws sprites
-func (ss *Sprites) DrawSprites(drw *vdraw.Drawer) {
+func (ss *Sprites) DrawSprites(drw goosi.Drawer) {
 	// fmt.Println("draw sprites")
 	sa := &ss.SzAlloc
 	for gpi, ga := range sa.GpAllocs {
