@@ -5,14 +5,12 @@
 package web
 
 import (
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/maxence-charriere/go-app/v9/pkg/errors"
 )
 
 // GenerateStaticWebsite generates the files to run a PWA built with go-app as a
@@ -50,14 +48,14 @@ func GenerateStaticWebsite(dir string, h *builder, pages ...string) error {
 		resources[p] = struct{}{}
 	}
 
-	server := httptest.NewServer(h)
-	defer server.Close()
+	// server := httptest.NewServer(h)
+	// defer server.Close()
 
 	for path := range resources {
 		switch path {
 		case "/web":
 			if err := createStaticDir(filepath.Join(dir, path), ""); err != nil {
-				return errors.New("creating web directory failed").Wrap(err)
+				return fmt.Errorf("creating web directory failed: %w", err)
 			}
 
 		default:
@@ -68,27 +66,17 @@ func GenerateStaticWebsite(dir string, h *builder, pages ...string) error {
 
 			f, err := createStaticFile(dir, filename)
 			if err != nil {
-				return errors.New("creating file failed").
-					WithTag("path", path).
-					WithTag("filename", filename).
-					Wrap(err)
+				return fmt.Errorf("creating file failed: path=%v filename=%v: %w", path, filename, err)
 			}
 			defer f.Close()
 
-			page, err := createStaticPage(server.URL + path)
+			page, err := createStaticPage("/" + path)
 			if err != nil {
-				return errors.New("creating page failed").
-					WithTag("path", path).
-					WithTag("filename", filename).
-					Wrap(err)
+				return fmt.Errorf("creating page failed: path=%v filename=%v: %w", path, filename, err)
 			}
 
 			if n, err := f.Write(page); err != nil {
-				return errors.New("writing page failed").
-					WithTag("path", path).
-					WithTag("filename", filename).
-					WithTag("bytes-written", n).
-					Wrap(err)
+				return fmt.Errorf("writing page failed: path=%v filename=%v bytes-written=%v: %w", path, filename, n, err)
 			}
 		}
 	}
@@ -106,7 +94,7 @@ func createStaticDir(dir, path string) error {
 
 func createStaticFile(dir, path string) (*os.File, error) {
 	if err := createStaticDir(dir, path); err != nil {
-		return nil, errors.New("creating file directory failed").Wrap(err)
+		return nil, fmt.Errorf("creating file directory failed: %w", err)
 	}
 
 	filename := filepath.Join(dir, path)
@@ -120,24 +108,18 @@ func createStaticFile(dir, path string) (*os.File, error) {
 func createStaticPage(path string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, path, nil)
 	if err != nil {
-		return nil, errors.New("creating http request failed").
-			WithTag("path", path).
-			Wrap(err)
+		return nil, fmt.Errorf("creating http request failed: path=%v: %w", path, err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, errors.New("http request failed").
-			WithTag("path", path).
-			Wrap(err)
+		return nil, fmt.Errorf("http request failed: path=%v: %w", path, err)
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.New("reading request body failed").
-			WithTag("path", path).
-			Wrap(err)
+		return nil, fmt.Errorf("reading request body failed: path=%v: %w", path, err)
 	}
 	return body, nil
 }
