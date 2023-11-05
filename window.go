@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/vgpu/v2/vdraw"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -219,7 +220,7 @@ type Window interface {
 	// Drawer returns the drawing system attached to this window surface.
 	// This is typically used for high-performance rendering to the surface.
 	// Wrap access in Lock() / Unlock() calls.
-	Drawer() Drawer
+	Drawer() *vdraw.Drawer
 
 	// Lock attempts to grab the overall window Mutex lock
 	// and returns true if the window is still open and ready for business.

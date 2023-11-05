@@ -67,7 +67,7 @@ func (w *windowImpl) Unlock() {
 	w.mu.Unlock()
 }
 
-func (w *windowImpl) Drawer() goosi.Drawer {
+func (w *windowImpl) Drawer() *vdraw.Drawer {
 	return &w.Draw
 }
 
