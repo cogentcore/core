@@ -11,18 +11,15 @@ import (
 	"log/slog"
 	"sort"
 
+	"goki.dev/cam/hct"
 	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
 
@@ -34,10 +31,13 @@ type ColorView struct {
 	gi.Frame
 
 	// the color that we view
-	Color color.RGBA `set:"-"`
+	Color hct.HCT `set:"-"`
 
-	// the color that we view, in HSLA form
-	ColorHSLA hsl.HSL `edit:"-"`
+	// // the color that we view
+	// Color color.RGBA `set:"-"`
+
+	// // the color that we view, in HSLA form
+	// ColorHSLA hsl.HSL `edit:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
@@ -46,6 +46,42 @@ type ColorView struct {
 	ViewPath string
 }
 
+// SetColor sets the source color
+func (cv *ColorView) SetColor(clr color.Color) *ColorView {
+	updt := cv.UpdateStart()
+	cv.Color = hct.FromColor(clr)
+	cv.UpdateEndRender(updt)
+	cv.SendChange()
+	return cv
+}
+
+// Config configures a standard setup of entire view
+func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
+	if cv.HasChildren() {
+		return
+	}
+	updt := cv.UpdateStart()
+	cv.SetLayout(gi.LayoutVert)
+
+	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue)
+	hue.OnChange(func(e events.Event) {
+		cv.Color.Hue = hue.Value
+	})
+
+	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
+	chroma.OnChange(func(e events.Event) {
+		cv.Color.Chroma = chroma.Value
+	})
+
+	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
+	tone.OnChange(func(e events.Event) {
+		cv.Color.Tone = tone.Value
+	})
+
+	cv.UpdateEnd(updt)
+}
+
+/*
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
 	cv.OnWidgetAdded(func(w gi.Widget) {
@@ -413,6 +449,8 @@ func (cv *ColorView) UpdateNums() {
 // 		cv.PopBounds(sc)
 // 	}
 // }
+
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ColorValue
