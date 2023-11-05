@@ -40,6 +40,9 @@ type Config struct { //gti:add
 	// the configuration options for the build, install, and run commands
 	Build Build `cmd:"build,install,run" view:"add-fields"`
 
+	// the configuration information for web
+	Web Web `cmd:"build,install,run" view:"add-fields"`
+
 	// the configuration options for the setup command
 	Setup Setup `cmd:"setup" view:"add-fields"`
 
