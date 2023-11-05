@@ -5,10 +5,7 @@
 package styles
 
 import (
-	"fmt"
-
 	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
 )
 
 // todo: for style
@@ -56,6 +53,9 @@ const (
 	// wrapping of elements, and Min, Max, and Grow values on elements to
 	// determine sizing.
 	DisplayFlex Display = iota
+
+	// Stacked is a stack of elements, with one on top that is visible
+	DisplayStacked
 
 	// Grid is the X, Y grid layout, with Columns specifying the number
 	// of elements in the X axis.
@@ -116,46 +116,3 @@ const (
 	// the actual content size is used -- otherwise it behaves just like Auto.
 	OverflowScroll
 )
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Layout Data for actually computing the layout
-
-// SizePrefs represents size preferences
-type SizePrefs struct { //gti:add
-
-	// minimum size needed -- set to at least computed allocsize
-	Need mat32.Vec2
-
-	// preferred size -- start here for layout
-	Pref mat32.Vec2
-
-	// maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch
-	Max mat32.Vec2
-}
-
-func (sp SizePrefs) String() string {
-	return fmt.Sprintf("Size Prefs: Need=%s; Pref=%s; Max=%s", sp.Need, sp.Pref, sp.Max)
-}
-
-// return true if Max < 0 meaning can stretch infinitely along given dimension
-func (sp SizePrefs) HasMaxStretch(d mat32.Dims) bool {
-	return (sp.Max.Dim(d) < 0.0)
-}
-
-// return true if Pref > Need meaning can stretch more along given dimension
-func (sp SizePrefs) CanStretchNeed(d mat32.Dims) bool {
-	return (sp.Pref.Dim(d) > sp.Need.Dim(d))
-}
-
-// // 2D margins
-// type Margins struct {
-// 	left, right, top, bottom float32
-// }
-
-// // set a single margin for all items
-// func (m *Margins) SetMargin(marg float32) {
-// 	m.left = marg
-// 	m.right = marg
-// 	m.top = marg
-// 	m.bottom = marg
-// }

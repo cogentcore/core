@@ -124,23 +124,6 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/girl/styles.SizePrefs",
-	ShortName: "styles.SizePrefs",
-	IDName:    "size-prefs",
-	Doc:       "SizePrefs represents size preferences",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Need", &gti.Field{Name: "Need", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "minimum size needed -- set to at least computed allocsize", Directives: gti.Directives{}, Tag: ""}},
-		{"Pref", &gti.Field{Name: "Pref", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "preferred size -- start here for layout", Directives: gti.Directives{}, Tag: ""}},
-		{"Max", &gti.Field{Name: "Max", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/girl/styles.Paint",
 	ShortName: "styles.Paint",
 	IDName:    "paint",
@@ -241,8 +224,7 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"State", &gti.Field{Name: "State", Type: "goki.dev/girl/states.States", LocalType: "states.States", Doc: "State holds style-relevant state flags, for convenient styling access,\ngiven that styles typically depend on element states.", Directives: gti.Directives{}, Tag: ""}},
 		{"Abilities", &gti.Field{Name: "Abilities", Type: "goki.dev/girl/abilities.Abilities", LocalType: "abilities.Abilities", Doc: "Abilities specifies the abilities of this element, which determine\nwhich kinds of states the element can express.\nThis is used by the goosi/events system.  Putting this info next\nto the State info makes it easy to configure and manage.", Directives: gti.Directives{}, Tag: ""}},
-		{"Display", &gti.Field{Name: "Display", Type: "bool", LocalType: "bool", Doc: "todo big enum of how to display item -- controls layout etc", Directives: gti.Directives{}, Tag: ""}},
-		{"Visible", &gti.Field{Name: "Visible", Type: "bool", LocalType: "bool", Doc: "is the item visible or not", Directives: gti.Directives{}, Tag: ""}},
+		{"Display", &gti.Field{Name: "Display", Type: "goki.dev/girl/styles.Display", LocalType: "Display", Doc: "Display controls how items are displayed, in terms of layout", Directives: gti.Directives{}, Tag: ""}},
 		{"Cursor", &gti.Field{Name: "Cursor", Type: "goki.dev/cursors.Cursor", LocalType: "cursors.Cursor", Doc: "the cursor to switch to upon hovering over the element (inherited)", Directives: gti.Directives{}, Tag: ""}},
 		{"ZIndex", &gti.Field{Name: "ZIndex", Type: "int", LocalType: "int", Doc: "ordering factor for rendering depth -- lower numbers rendered first.\nSort children according to this factor", Directives: gti.Directives{}, Tag: ""}},
 		{"Align", &gti.Field{Name: "Align", Type: "goki.dev/girl/styles.XY[goki.dev/girl/styles.Align]", LocalType: "XY[Align]", Doc: "Align specifies the X, Y alignment of widget elements within a container", Directives: gti.Directives{}, Tag: ""}},
