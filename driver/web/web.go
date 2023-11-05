@@ -7,8 +7,6 @@
 package web
 
 import (
-	"time"
-
 	"goki.dev/goosi"
 )
 
@@ -22,6 +20,14 @@ func (app *appImpl) HideVirtualKeyboard() {
 
 func (app *appImpl) mainLoop() {
 	for {
-		time.Sleep(time.Second)
+		select {
+		case <-app.mainDone:
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		}
 	}
 }

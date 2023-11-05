@@ -75,7 +75,7 @@ func (w *windowImpl) IsClosed() bool {
 func (w *windowImpl) IsVisible() bool {
 	w.app.mu.Lock()
 	defer w.app.mu.Unlock()
-	return false
+	return true
 	// return w.isVisible && w.app.Surface != nil
 }
 
