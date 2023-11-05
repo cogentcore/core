@@ -14,7 +14,7 @@ import (
 func WASMExecJS() string {
 	version := strings.Split(runtime.Version(), ".")
 	if len(version) < 2 {
-		return wasmExecJSGoCurrent
+		return WASMExecJSGoCurrent
 	}
 
 	major, _ := strconv.Atoi(strings.TrimPrefix(version[0], "go"))
@@ -25,7 +25,7 @@ func WASMExecJS() string {
 		return wasmExecJSGo120
 
 	default:
-		return wasmExecJSGoCurrent
+		return WASMExecJSGoCurrent
 	}
 }
 

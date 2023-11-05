@@ -6,6 +6,7 @@ package web
 
 import (
 	"html/template"
+	"os"
 	"path/filepath"
 
 	"goki.dev/goki/config"
@@ -24,8 +25,46 @@ func Build(c *config.Config) error {
 		return err
 	}
 
-	c.Build.Package = filepath.Dir(c.Build.Output)
-	b := &builder{}
-	b.init()
-	return GenerateStaticWebsite(c.Build.Package, b)
+	odir := filepath.Dir(c.Build.Output)
+
+	wej := []byte(WASMExecJS())
+	err = os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
+	if err != nil {
+		return err
+	}
+
+	ajs, err := MakeAppJS(c)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "app.js"), ajs, 0666)
+	if err != nil {
+		return err
+	}
+
+	awjs, err := MakeAppWorkerJS(c)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "app-worker.js"), awjs, 0666)
+	if err != nil {
+		return err
+	}
+
+	man, err := MakeManifestJSON(c)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "manifest.webmanifest"), man, 0666)
+	if err != nil {
+		return err
+	}
+
+	acs := []byte(AppCSS)
+	err = os.WriteFile(filepath.Join(odir, "app.css"), acs, 0666)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
