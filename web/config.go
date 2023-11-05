@@ -14,7 +14,6 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"goki.dev/goki/config"
@@ -23,12 +22,8 @@ import (
 type builder struct {
 	config.Config
 
-	once      sync.Once
-	etag      string
-	libraries map[string][]byte
-	// proxyResources       map[string]ProxyResource
-	cachedProxyResources *memoryCache
-	cachedPWAResources   *memoryCache
+	etag            string
+	cachedResources *memoryCache
 }
 
 // ProxyResource is a proxy descriptor that maps a given resource to an URL
@@ -111,33 +106,33 @@ func (h *builder) initPWA() {
 }
 
 func (h *builder) initPWAResources() {
-	h.cachedPWAResources = newMemoryCache(5)
+	h.cachedResources = newMemoryCache(5)
 
-	h.cachedPWAResources.Set(cacheItem{
+	h.cachedResources.Set(cacheItem{
 		Path:        "/wasm_exec.js",
 		ContentType: "application/javascript",
 		Body:        []byte(wasmExecJS()),
 	})
 
-	h.cachedPWAResources.Set(cacheItem{
+	h.cachedResources.Set(cacheItem{
 		Path:        "/app.js",
 		ContentType: "application/javascript",
 		Body:        h.makeAppJS(),
 	})
 
-	h.cachedPWAResources.Set(cacheItem{
+	h.cachedResources.Set(cacheItem{
 		Path:        "/app-worker.js",
 		ContentType: "application/javascript",
 		Body:        h.makeAppWorkerJS(),
 	})
 
-	h.cachedPWAResources.Set(cacheItem{
+	h.cachedResources.Set(cacheItem{
 		Path:        "/manifest.webmanifest",
 		ContentType: "application/manifest+json",
 		Body:        h.makeManifestJSON(),
 	})
 
-	h.cachedPWAResources.Set(cacheItem{
+	h.cachedResources.Set(cacheItem{
 		Path:        "/app.css",
 		ContentType: "text/css",
 		Body:        []byte(appCSS),
@@ -273,7 +268,7 @@ func (h *builder) makeManifestJSON() []byte {
 }
 
 func (h *builder) initProxyResources() {
-	h.cachedProxyResources = newMemoryCache(0)
+	h.cachedResources = newMemoryCache(0)
 	resources := make(map[string]ProxyResource)
 
 	// for _, r := range h.ProxyResources {

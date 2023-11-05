@@ -6,8 +6,6 @@ package web
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +17,7 @@ import (
 //
 // Note that app.wasm must still be built separately and put into the web
 // directory.
-func GenerateStaticWebsite(dir string, h *builder, pages ...string) error {
+func GenerateStaticWebsite(dir string, b *builder, pages ...string) error {
 	if dir == "" {
 		dir = "."
 	}
@@ -70,7 +68,7 @@ func GenerateStaticWebsite(dir string, h *builder, pages ...string) error {
 			}
 			defer f.Close()
 
-			page, err := createStaticPage("/" + path)
+			page, err := createStaticPage(b, "/"+path)
 			if err != nil {
 				return fmt.Errorf("creating page failed: path=%v filename=%v: %w", path, filename, err)
 			}
@@ -105,21 +103,10 @@ func createStaticFile(dir, path string) (*os.File, error) {
 	return os.Create(filename)
 }
 
-func createStaticPage(path string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, path, nil)
-	if err != nil {
-		return nil, fmt.Errorf("creating http request failed: path=%v: %w", path, err)
+func createStaticPage(b *builder, path string) ([]byte, error) {
+	item, ok := b.cachedResources.Get(path)
+	if !ok {
+		return nil, fmt.Errorf("path not in cache: %q", path)
 	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("http request failed: path=%v: %w", path, err)
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("reading request body failed: path=%v: %w", path, err)
-	}
-	return body, nil
+	return item.Body, nil
 }
