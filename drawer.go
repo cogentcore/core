@@ -29,6 +29,11 @@ type Drawer interface {
 	// Set flipY to true to flip.
 	SetGoImage(idx, layer int, img image.Image, flipY bool)
 
+	// ConfigImageDefaultFormat configures the draw image at the given index
+	// to fit the default image format specified by the given width, height,
+	// and number of layers.
+	ConfigImageDefaultFormat(idx int, width int, height int, layers int)
+
 	// ConfigImage configures the draw image at given index
 	// to fit the given image format and number of layers as a drawing source.
 	// ConfigImage(idx int, fmt *vgpu.ImageFormat)
