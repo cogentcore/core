@@ -573,6 +573,11 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		vv.UpdateWidget()
 		return
 	}
+	// need TmpSave
+	if vv.TmpSave == nil {
+		tt, _ := vv.Color()
+		vv.TmpSave = NewSoloValue(tt)
+	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
