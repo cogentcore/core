@@ -197,6 +197,33 @@ func (a *Vec2) SetFixed(pt fixed.Point26_6) {
 	a.Y = FromFixed(pt.Y)
 }
 
+func (a Vec2) ToCeil() Vec2 {
+	return Vec2{Ceil(a.X), Ceil(a.Y)}
+}
+
+func (a Vec2) ToFloor() Vec2 {
+	return Vec2{Floor(a.X), Floor(a.Y)}
+}
+
+func (a Vec2) ToRound() Vec2 {
+	return Vec2{Round(a.X), Round(a.Y)}
+}
+
+func (a Vec2) SetToCeil() {
+	a.X = Ceil(a.X)
+	a.Y = Ceil(a.Y)
+}
+
+func (a Vec2) SetToFloor() {
+	a.X = Floor(a.X)
+	a.Y = Floor(a.Y)
+}
+
+func (a Vec2) SetToRound() {
+	a.X = Round(a.X)
+	a.Y = Round(a.Y)
+}
+
 func (a Vec2) ToPoint() image.Point {
 	return image.Point{int(a.X), int(a.Y)}
 }
