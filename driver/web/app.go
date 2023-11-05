@@ -84,6 +84,10 @@ func Main(f func(goosi.App)) {
 	theApp.initVk()
 	fmt.Println("setting the app")
 	goosi.TheApp = theApp
+	go func() {
+		mainCallback(theApp)
+		theApp.stopMain()
+	}()
 	fmt.Println("running main loop")
 	theApp.mainLoop()
 }
@@ -163,26 +167,26 @@ func (app *appImpl) fullDestroyVk() {
 func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("in new window")
-	// the actual system window has to exist before we can create the window
-	var winptr uintptr
-	for {
-		// fmt.Println("locking in new window")
-		app.mu.Lock()
-		// fmt.Println("past lock in new window")
-		winptr = app.winptr
-		app.mu.Unlock()
+	// // the actual system window has to exist before we can create the window
+	// var winptr uintptr
+	// for {
+	// 	// fmt.Println("locking in new window")
+	// 	app.mu.Lock()
+	// 	// fmt.Println("past lock in new window")
+	// 	winptr = app.winptr
+	// 	app.mu.Unlock()
 
-		if winptr != 0 {
-			break
-		}
-	}
-	fmt.Println("making new window")
-	if goosi.InitScreenLogicalDPIFunc != nil {
-		log.Println("app first new window calling InitScreenLogicalDPIFunc")
-		goosi.InitScreenLogicalDPIFunc()
-	}
-	app.mu.Lock()
-	defer app.mu.Unlock()
+	// 	if winptr != 0 {
+	// 		break
+	// 	}
+	// }
+	// fmt.Println("making new window")
+	// if goosi.InitScreenLogicalDPIFunc != nil {
+	// 	log.Println("app first new window calling InitScreenLogicalDPIFunc")
+	// 	goosi.InitScreenLogicalDPIFunc()
+	// }
+	// app.mu.Lock()
+	// defer app.mu.Unlock()
 	app.window = &windowImpl{
 		app:         app,
 		isVisible:   true,
