@@ -39,7 +39,7 @@ type appImpl struct {
 	winptr        uintptr
 	System        *vgpu.System
 	Surface       *vgpu.Surface
-	Draw          struct{}
+	Draw          drawerImpl
 	window        *windowImpl
 	gpu           *vgpu.GPU
 	screen        *goosi.Screen
