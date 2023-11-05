@@ -9,6 +9,25 @@ import (
 	"image/draw"
 )
 
+const (
+	// MaxTexturesPerSet is the maximum number of image variables that can be used
+	// in one descriptor set.  This value is a lowest common denominator across
+	// platforms.  To overcome this limitation, when more Texture vals are allocated,
+	// multiple NDescs are used, setting the and switch
+	// across those -- each such Desc set can hold this many textures.
+	// NValsPer on a Texture var can be set higher and only this many will be
+	// allocated in the descriptor set, with bindings of values wrapping
+	// around across as many such sets as are vals, with a warning if insufficient
+	// numbers are present.
+	MaxTexturesPerSet = 16
+
+	// FlipY used as named arg for flipping the Y axis of images, etc
+	FlipY = true
+
+	// NoFlipY used as named arg for not flipping the Y axis of images
+	NoFlipY = false
+)
+
 // Drawer is an interface representing a type capable of high-performance
 // rendering to a window surface. It is implemented by [*goki.dev/vgpu/v2/vdraw.Drawer]
 // and an internal web driver.
