@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"sync"
 
-	"goki.dev/cam/hsl"
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
@@ -189,8 +188,7 @@ var ColorViewType = gti.AddType(&gti.Type{
 	Doc:        "ColorView shows a color, using sliders or numbers to set values.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "goki.dev/cam/hsl.HSL", LocalType: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}, Tag: "edit:\"-\""}},
+		{"Color", &gti.Field{Name: "Color", Type: "goki.dev/cam/hct.HCT", LocalType: "hct.HCT", Doc: "the color that we view", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -217,13 +215,6 @@ func (t *ColorView) KiType() *gti.Type {
 // New returns a new [*ColorView] value
 func (t *ColorView) New() ki.Ki {
 	return &ColorView{}
-}
-
-// SetColorHsla sets the [ColorView.ColorHSLA]:
-// the color that we view, in HSLA form
-func (t *ColorView) SetColorHsla(v hsl.HSL) *ColorView {
-	t.ColorHSLA = v
-	return t
 }
 
 // SetTmpSave sets the [ColorView.TmpSave]:
