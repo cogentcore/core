@@ -26,8 +26,8 @@ import (
 func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 	var repo vci.Repo
 	var rnode *Node
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -384,8 +384,8 @@ func (fn *Node) BlameVcs() ([]byte, error) {
 
 // UpdateAllVcs does an update on any repositories below this one in file tree
 func (fn *Node) UpdateAllVcs() {
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if !sfn.IsDir() {
 			return ki.Continue
 		}

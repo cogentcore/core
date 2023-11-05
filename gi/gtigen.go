@@ -506,12 +506,6 @@ func (t *Dialog) SetCustomContextMenu(v func(m *Scene)) *Dialog {
 	return t
 }
 
-// SetLayout sets the [Dialog.Lay]
-func (t *Dialog) SetLayout(v Layouts) *Dialog {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [Dialog.StackTop]
 func (t *Dialog) SetStackTop(v int) *Dialog {
 	t.StackTop = v
@@ -599,12 +593,6 @@ func (t *Frame) SetClass(v string) *Frame {
 // SetCustomContextMenu sets the [Frame.CustomContextMenu]
 func (t *Frame) SetCustomContextMenu(v func(m *Scene)) *Frame {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetLayout sets the [Frame.Lay]
-func (t *Frame) SetLayout(v Layouts) *Frame {
-	t.Lay = v
 	return t
 }
 
@@ -698,12 +686,6 @@ func (t *Handle) SetClass(v string) *Handle {
 // SetCustomContextMenu sets the [Handle.CustomContextMenu]
 func (t *Handle) SetCustomContextMenu(v func(m *Scene)) *Handle {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetLayout sets the [Handle.Lay]
-func (t *Handle) SetLayout(v Layouts) *Handle {
-	t.Lay = v
 	return t
 }
 
@@ -932,15 +914,12 @@ var LayoutType = gti.AddType(&gti.Type{
 	Doc:        "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nThe alignment is NOT inherited by default so must be specified per\nchild, except that the parent alignment is used within the relevant\ndimension (e.g., horizontal-align for a LayoutHoriz layout,\nto determine left, right, center, justified).\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Lay", &gti.Field{Name: "Lay", Type: "goki.dev/gi/v2/gi.Layouts", LocalType: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}, Tag: "xml:\"lay\" set:\"Layout\""}},
-		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered", Directives: gti.Directives{}, Tag: ""}},
+		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack.\nOnly the node at this index is rendered -- if not a valid index, nothing is rendered.", Directives: gti.Directives{}, Tag: ""}},
+		{"LayImpl", &gti.Field{Name: "LayImpl", Type: "goki.dev/gi/v2/gi.LayImplState", LocalType: "LayImplState", Doc: "LayImpl contains implementational state info for doing layout", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/gi/v2/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", LocalType: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"GridData", &gti.Field{Name: "GridData", Type: "[2][]goki.dev/gi/v2/gi.GridData", LocalType: "[RowColN][]GridData", Doc: "grid data for rows in and cols in", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", LocalType: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -970,15 +949,9 @@ func (t *Layout) New() ki.Ki {
 	return &Layout{}
 }
 
-// SetLayout sets the [Layout.Lay]:
-// type of layout to use
-func (t *Layout) SetLayout(v Layouts) *Layout {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [Layout.StackTop]:
-// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
+// for Stacked layout, index of node to use as the top of the stack.
+// Only the node at this index is rendered -- if not a valid index, nothing is rendered.
 func (t *Layout) SetStackTop(v int) *Layout {
 	t.StackTop = v
 	return t
@@ -1162,12 +1135,6 @@ func (t *MenuBar) SetClass(v string) *MenuBar {
 // SetCustomContextMenu sets the [MenuBar.CustomContextMenu]
 func (t *MenuBar) SetCustomContextMenu(v func(m *Scene)) *MenuBar {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetLayout sets the [MenuBar.Lay]
-func (t *MenuBar) SetLayout(v Layouts) *MenuBar {
-	t.Lay = v
 	return t
 }
 
@@ -1705,12 +1672,6 @@ func (t *Scene) SetCustomContextMenu(v func(m *Scene)) *Scene {
 	return t
 }
 
-// SetLayout sets the [Scene.Lay]
-func (t *Scene) SetLayout(v Layouts) *Scene {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [Scene.StackTop]
 func (t *Scene) SetStackTop(v int) *Scene {
 	t.StackTop = v
@@ -1809,9 +1770,9 @@ var SliderType = gti.AddType(&gti.Type{
 		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "snap the values to Step size increments", Directives: gti.Directives{}, Tag: ""}},
 		{"Off", &gti.Field{Name: "Off", Type: "bool", LocalType: "bool", Doc: "can turn off e.g., scrollbar rendering with this flag -- just prevents rendering", Directives: gti.Directives{}, Tag: ""}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: "xml:\"prec\""}},
-		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
-		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
-		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
+		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
+		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "An additional style object that is used for styling the overall box around the slider.\nIt should be set in the StyleFuncs, just the like the main style object is.\nIt typically has no border and a white/black background. it needs a background\nto allow local re-rendering.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
@@ -1965,14 +1926,20 @@ func (t *Slider) SetPrec(v int) *Slider {
 }
 
 // SetValueColor sets the [Slider.ValueColor]:
-// the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is
+// The background color that is used for styling the selected value section of the slider.
+// It should be set in the StyleFuncs, just like the main style object is.
+// If it is set to transparent, no value is rendered, so the value section of the slider
+// just looks like the rest of the slider.
 func (t *Slider) SetValueColor(v colors.Full) *Slider {
 	t.ValueColor = v
 	return t
 }
 
 // SetThumbColor sets the [Slider.ThumbColor]:
-// the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is
+// The background color that is used for styling the thumb (handle) of the slider.
+// It should be set in the StyleFuncs, just like the main style object is.
+// If it is set to transparent, no thumb is rendered, so the thumb section of the slider
+// just looks like the rest of the slider.
 func (t *Slider) SetThumbColor(v colors.Full) *Slider {
 	t.ThumbColor = v
 	return t
@@ -2047,12 +2014,6 @@ func (t *Snackbar) SetClass(v string) *Snackbar {
 // SetCustomContextMenu sets the [Snackbar.CustomContextMenu]
 func (t *Snackbar) SetCustomContextMenu(v func(m *Scene)) *Snackbar {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetLayout sets the [Snackbar.Lay]
-func (t *Snackbar) SetLayout(v Layouts) *Snackbar {
-	t.Lay = v
 	return t
 }
 
@@ -2612,12 +2573,6 @@ func (t *Switches) SetCustomContextMenu(v func(m *Scene)) *Switches {
 	return t
 }
 
-// SetLayout sets the [Switches.Lay]
-func (t *Switches) SetLayout(v Layouts) *Switches {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [Switches.StackTop]
 func (t *Switches) SetStackTop(v int) *Switches {
 	t.StackTop = v
@@ -2728,12 +2683,6 @@ func (t *Tabs) SetClass(v string) *Tabs {
 // SetCustomContextMenu sets the [Tabs.CustomContextMenu]
 func (t *Tabs) SetCustomContextMenu(v func(m *Scene)) *Tabs {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetLayout sets the [Tabs.Lay]
-func (t *Tabs) SetLayout(v Layouts) *Tabs {
-	t.Lay = v
 	return t
 }
 
@@ -3093,12 +3042,6 @@ func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
 	return t
 }
 
-// SetLayout sets the [Toolbar.Lay]
-func (t *Toolbar) SetLayout(v Layouts) *Toolbar {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [Toolbar.StackTop]
 func (t *Toolbar) SetStackTop(v int) *Toolbar {
 	t.StackTop = v
@@ -3197,12 +3140,6 @@ func (t *TopAppBar) SetCustomContextMenu(v func(m *Scene)) *TopAppBar {
 	return t
 }
 
-// SetLayout sets the [TopAppBar.Lay]
-func (t *TopAppBar) SetLayout(v Layouts) *TopAppBar {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [TopAppBar.StackTop]
 func (t *TopAppBar) SetStackTop(v int) *TopAppBar {
 	t.StackTop = v
@@ -3227,9 +3164,8 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
 		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\" set:\"-\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Alloc", &gti.Field{Name: "Alloc", Type: "goki.dev/gi/v2/gi.LayoutState", LocalType: "LayoutState", Doc: "Alloc is layout allocation state: contains full size and position info", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto.\nThese are the pixels we draw into, filtered through parent bounding boxes (empty for invisible).\nUsed for render Bounds clipping", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},

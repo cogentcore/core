@@ -168,8 +168,8 @@ func (tv *TreeView) SelectedSyncNodes() ki.Slice {
 // or nil if not found
 func (tv *TreeView) FindSyncNode(kn ki.Ki) *TreeView {
 	var ttv *TreeView
-	tv.WalkPre(func(k ki.Ki) bool {
-		tvki := AsTreeView(k)
+	tv.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		tvki := AsTreeView(wi)
 		if tvki != nil {
 			if tvki.SyncNode == kn {
 				ttv = tvki

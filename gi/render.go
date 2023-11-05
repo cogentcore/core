@@ -258,11 +258,7 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
-	wb.WalkPre(func(k ki.Ki) bool {
-		wi, _ := AsWidget(k)
-		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
-			return ki.Break
-		}
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config(sc)
 		return ki.Continue
 	})
@@ -282,11 +278,7 @@ func (wb *WidgetBase) Update() {
 	sc := wb.Sc
 	updt := wb.UpdateStart()
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
-	wb.WalkPre(func(k ki.Ki) bool {
-		wi, _ := AsWidget(k)
-		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
-			return ki.Break
-		}
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config(sc) // sets sc if not
 		wi.ApplyStyle(sc)
 		return ki.Continue
@@ -302,11 +294,7 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
-	wb.WalkPre(func(k ki.Ki) bool {
-		wi, _ := AsWidget(k)
-		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
-			return ki.Break
-		}
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle(sc)
 		return ki.Continue
 	})
@@ -393,11 +381,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
-	wb.WalkPre(func(k ki.Ki) bool {
-		wi, w := AsWidget(k)
-		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
-			return ki.Break
-		}
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if w.Is(NeedsRender) && !w.Is(ki.Updating) {
 			w.SetFlag(false, NeedsRender)
 			wi.Render(sc)
@@ -731,7 +715,7 @@ func EndTargProfile() {
 // ReportWinNodes reports the number of nodes in this scene
 func (sc *Scene) ReportWinNodes() {
 	nn := 0
-	sc.WalkPre(func(k ki.Ki) bool {
+	sc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		nn++
 		return ki.Continue
 	})

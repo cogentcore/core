@@ -568,8 +568,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 }
 
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
-	w.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	w.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
@@ -749,11 +748,10 @@ func (em *EventMgr) FocusNextFrom(from Widget) bool {
 	focRoot := em.Scene
 
 	for i := 0; i < 2; i++ {
-		focRoot.WalkPre(func(k ki.Ki) bool {
+		focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 			if gotFocus {
 				return ki.Break
 			}
-			wi, wb := AsWidget(k)
 			if !wb.IsVisible() {
 				return ki.Continue
 			}
@@ -836,11 +834,10 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 
 	focRoot := em.Scene
 
-	focRoot.WalkPre(func(k ki.Ki) bool {
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if gotFocus {
 			return ki.Break
 		}
-		wi, wb := AsWidget(k)
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
@@ -868,8 +865,7 @@ func (em *EventMgr) FocusFirst() bool {
 	var firstItem Widget
 	focRoot := em.Scene
 
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
@@ -890,8 +886,7 @@ func (em *EventMgr) FocusLast() bool {
 	focRoot := em.Scene
 
 	// todo: could use walking functions in ki
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
@@ -909,8 +904,7 @@ func (em *EventMgr) FocusLast() bool {
 func (em *EventMgr) ClearNonFocus(foc Widget) {
 	focRoot := em.Scene
 
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wi == focRoot { // skip top-level
 			return ki.Continue
 		}

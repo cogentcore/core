@@ -15,7 +15,6 @@ import (
 	"goki.dev/enums"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -189,43 +188,6 @@ type Widget interface {
 	// levels.
 	IsVisible() bool
 
-	// SetMinPrefWidth sets minimum and preferred width;
-	// will get at least this amount; max unspecified.
-	// This adds a styler that calls [styles.Style.SetMinPrefWidth].
-	SetMinPrefWidth(val units.Value) *WidgetBase
-
-	// SetMinPrefHeight sets minimum and preferred height;
-	// will get at least this amount; max unspecified.
-	// This adds a styler that calls [styles.Style.SetMinPrefHeight].
-	SetMinPrefHeight(val units.Value) *WidgetBase
-
-	// SetStretchMaxWidth sets stretchy max width (-1);
-	// can grow to take up avail room.
-	// This adds a styler that calls [styles.Style.SetStretchMaxWidth].
-	SetStretchMaxWidth() *WidgetBase
-
-	// SetStretchMaxHeight sets stretchy max height (-1);
-	// can grow to take up avail room.
-	// This adds a styler that calls [styles.Style.SetStretchMaxHeight].
-	SetStretchMaxHeight() *WidgetBase
-
-	// SetStretchMax sets stretchy max width and height (-1);
-	// can grow to take up avail room.
-	// This adds a styler that calls [styles.Style.SetStretchMax].
-	SetStretchMax() *WidgetBase
-
-	// SetFixedWidth sets all width style options
-	// (Width, MinWidth, and MaxWidth) to
-	// the given fixed width unit value.
-	// This adds a styler that calls [styles.Style.SetFixedWidth].
-	SetFixedWidth(val units.Value) *WidgetBase
-
-	// SetFixedHeight sets all height style options
-	// (Height, MinHeight, and MaxHeight) to
-	// the given fixed height unit value.
-	// This adds a styler that calls [styles.Style.SetFixedHeight].
-	SetFixedHeight(val units.Value) *WidgetBase
-
 	// todo: revisit this -- in general anything with a largish image (including svg,
 	// SubScene, but not Icon) should get put on a list so the RenderWin Drawer just
 	// directly uploads its image.
@@ -266,16 +228,13 @@ type WidgetBase struct {
 	// aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
 
-	// todo: need to fully revisit scrolling logic!
+	// Alloc is layout allocation state: contains full size and position info
+	Alloc LayoutState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
+	// 2D bounding box for region occupied within immediate parent Scene object that we render onto.
+	// These are the pixels we draw into, filtered through parent bounding boxes (empty for invisible).
+	// Used for render Bounds clipping
 	BBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-	ObjBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
-	ScBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called
@@ -460,4 +419,43 @@ func (wb *WidgetBase) IsDirectWinUpload() bool {
 }
 
 func (wb *WidgetBase) DirectWinUpload() {
+}
+
+// WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
+// return false to terminate.
+func (wb *WidgetBase) WidgetKidsIter(fun func(kwi Widget, kwb *WidgetBase) bool) {
+	for _, k := range wb.Kids {
+		kwi, kwb := AsWidget(k)
+		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+			break
+		}
+		cont := fun(kwi, kwb)
+		if !cont {
+			break
+		}
+	}
+}
+
+// WidgetWalkPre is a version of the ki WalkPre iterator that automatically filters
+// nil or deleted items and operates on Widget types.
+func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
+	wb.WalkPre(func(k ki.Ki) bool {
+		kwi, kwb := AsWidget(k)
+		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+			return ki.Break
+		}
+		return fun(kwi, kwb)
+	})
+}
+
+// WidgetWalkPost is a version of the ki WalkPost iterator that automatically filters
+// nil or deleted items and operates on Widget types.
+func (wb *WidgetBase) WidgetWalkPost(fun func(kwi Widget, kwb *WidgetBase) bool) {
+	wb.WalkPost(func(k ki.Ki) bool {
+		kwi, kwb := AsWidget(k)
+		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+			return ki.Break
+		}
+		return fun(kwi, kwb)
+	})
 }
