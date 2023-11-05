@@ -6,7 +6,11 @@
 
 package web
 
-import "goki.dev/goosi"
+import (
+	"time"
+
+	"goki.dev/goosi"
+)
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	// TODO(kai)
@@ -17,5 +21,7 @@ func (app *appImpl) HideVirtualKeyboard() {
 }
 
 func (app *appImpl) mainLoop() {
-
+	for {
+		time.Sleep(time.Second)
+	}
 }

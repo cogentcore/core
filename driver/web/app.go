@@ -82,7 +82,9 @@ func Main(f func(goosi.App)) {
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
 	theApp.initVk()
+	fmt.Println("setting the app")
 	goosi.TheApp = theApp
+	fmt.Println("running main loop")
 	theApp.mainLoop()
 }
 
