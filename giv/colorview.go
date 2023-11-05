@@ -16,6 +16,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -112,6 +113,14 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 			gc := cv.Color.WithTone(c)
 			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), c/100, 1)
 		}
+	})
+
+	gi.NewFrame(cv, "value").Style(func(s *styles.Style) {
+		s.SetFixedWidth(units.Dp(100))
+		s.SetFixedHeight(units.Dp(100))
+		s.BackgroundColor.SetSolid(cv.Color)
+		s.AlignH = styles.AlignCenter
+		s.Border.Radius = styles.BorderRadiusFull
 	})
 
 	cv.UpdateEnd(updt)
@@ -573,7 +582,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 
-	bt.SetText("Edit Color")
+	bt.SetText("Edit color")
 	bt.SetIcon(icons.Colors)
 	bt.Tooltip = "Open color picker dialog"
 	bt.OnClick(func(e events.Event) {
@@ -608,7 +617,7 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	d := gi.NewDialog(ctx).Title("Color Value View").Prompt(vv.Doc())
+	d := gi.NewDialog(ctx).Title("Edit color").Prompt(vv.Doc())
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
 	d.OnAccept(func(e events.Event) {
 		cclr := vv.TmpSave.Val().Interface().(color.RGBA)
@@ -617,7 +626,7 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		if fun != nil {
 			fun(d)
 		}
-	}).Run()
+	}).Cancel().Ok().Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
