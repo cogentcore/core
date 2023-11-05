@@ -162,7 +162,7 @@ function goappNewNotification(jsonNotification) {
 // -----------------------------------------------------------------------------
 
 function displayImage(buf) {
-  let blob = new Blob([buf], { 'type': imageType });
+  let blob = new Blob([buf], { 'type': 'image/png' });
   document.getElementById('app').src = URL.createObjectURL(blob);
 }
 
