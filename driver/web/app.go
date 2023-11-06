@@ -224,17 +224,25 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 }
 
 // setSysWindow sets the underlying system window information.
-func (app *appImpl) setSysWindow() error {
+func (app *appImpl) setSysWindow() {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
 
+	app.resize()
+	app.window.EvMgr.Window(events.WinShow)
+	app.window.EvMgr.Window(events.ScreenUpdate)
+	app.window.EvMgr.Window(events.WinFocus)
+}
+
+// resize updates the app sizing information and sends a resize event.
+func (app *appImpl) resize() {
 	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
 
 	app.screen.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
 	app.screen.PixSize = image.Pt(w, h)
 	app.screen.Geometry.Max = app.screen.PixSize
-	dpi := float32(96)
+	dpi := 96 * app.screen.DevicePixelRatio
 	app.screen.PhysicalDPI = dpi
 	app.screen.LogicalDPI = dpi
 
@@ -253,10 +261,6 @@ func (app *appImpl) setSysWindow() error {
 	fmt.Printf("window %#v\n", app.window)
 
 	app.window.EvMgr.WindowResize()
-	app.window.EvMgr.Window(events.WinShow)
-	app.window.EvMgr.Window(events.ScreenUpdate)
-	app.window.EvMgr.Window(events.WinFocus)
-	return nil
 }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
