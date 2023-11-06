@@ -180,7 +180,7 @@ function displayImage(pointer, length, w, h) {
     memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
   }
 
-  // using subarray instead of slice gives a 5x performance improvement due to reduced copying
+  // using subarray instead of slice gives a 5x performance improvement due to no copying
   let bytes = memoryBytes.subarray(pointer, pointer + length);
   let data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
@@ -227,7 +227,6 @@ async function goappInitWebAssembly() {
   let instantiateStreaming = WebAssembly.instantiateStreaming;
   if (!instantiateStreaming) {
     instantiateStreaming = async (resp, importObject) => {
-      console.log("is async", resp, importObject);
       const source = await (await resp).arrayBuffer();
       // memoryBytes = new Uint8Array(resp.instance.exports.mem.buffer);
       // console.log("got memory bytes", memoryBytes);
@@ -248,13 +247,9 @@ async function goappInitWebAssembly() {
     wasm = await instantiateStreaming(
       fetchWithProgress("{{.Wasm}}", showProgress),
       go.importObject,
-      console.log("is await"),
     );
-    console.log("done with await");
     go.run(wasm.instance);
-    console.log("done running go");
     loader.remove();
-    // console.log("done removing loader", memoryBytes.detached);
   } catch (err) {
     loaderIcon.className = "goapp-logo";
     loaderLabel.innerText = err;
