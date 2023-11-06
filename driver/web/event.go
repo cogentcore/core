@@ -86,6 +86,14 @@ func (app *appImpl) runeAndCodeFromKey(k string) (rune, key.Codes) {
 		return 0, key.CodeReturnEnter
 	case "Tab":
 		return 0, key.CodeTab
+	case "ArrowDown":
+		return 0, key.CodeDownArrow
+	case "ArrowLeft":
+		return 0, key.CodeLeftArrow
+	case "ArrowRight":
+		return 0, key.CodeRightArrow
+	case "ArrowUp":
+		return 0, key.CodeUpArrow
 	case "Spacebar":
 		return ' ', 0
 	default:
