@@ -172,20 +172,15 @@ let wasm;
 let memoryBytes;
 
 // displayImage takes the pointer to the target image in the wasm linear memory
-// and its length. Gets the resulting byte slice and creates an image data with
-// the given width and height.
+// and its length. Then, it gets the resulting byte slice and creates an image data
+// with the given width and height.
 function displayImage(pointer, length, w, h) {
-  // console.log("length", length, "pointer", pointer)
-
+  // if it doesn't exist or is detached, we have to make it
   if (!memoryBytes || memoryBytes.byteLength === 0) {
-    console.log("making memory bytes")
     memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
   }
 
   let bytes = memoryBytes.slice(pointer, pointer + length);
-  // console.log("memoryBytes", memoryBytes);
-  // console.log("bytes", bytes);
-  // memoryBytes.set(bytes, pointer);
   let data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
 }
