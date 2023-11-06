@@ -5,6 +5,8 @@
 package styles
 
 import (
+	"log/slog"
+
 	"goki.dev/girl/units"
 )
 
@@ -28,6 +30,25 @@ var ScrollBarWidthDefault = float32(10)
 func (s *Style) LayoutDefaults() {
 	s.Gap.Set(units.Em(0.5))
 	s.ScrollBarWidth.Dp(ScrollBarWidthDefault)
+}
+
+// LayoutHasParSizing returns true if the layout parameters use parent-relative
+// sizing units, which requires additional updating during layout
+func (s *Style) LayoutHasParSizing() bool {
+	if s.Min.X.Un == units.UnitEw || s.Min.X.Un == units.UnitEh ||
+		s.Min.Y.Un == units.UnitEw || s.Min.Y.Un == units.UnitEh ||
+		s.Max.X.Un == units.UnitEw || s.Max.X.Un == units.UnitEh ||
+		s.Max.Y.Un == units.UnitEw || s.Max.Y.Un == units.UnitEh {
+		slog.Error("styling error: cannot use Ew or Eh for Min size -- that is self-referential!")
+	}
+
+	if s.Min.X.Un == units.UnitPw || s.Min.X.Un == units.UnitPh ||
+		s.Min.Y.Un == units.UnitPw || s.Min.Y.Un == units.UnitPh ||
+		s.Max.X.Un == units.UnitPw || s.Max.X.Un == units.UnitPh ||
+		s.Max.Y.Un == units.UnitPw || s.Max.Y.Un == units.UnitPh {
+		return true
+	}
+	return false
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -90,6 +111,18 @@ const (
 	// Equal space at start, end, and between all items
 	AlignSpaceEvenly
 )
+
+func AlignFactor(al Align) float32 {
+	switch al {
+	case AlignStart:
+		return 0
+	case AlignEnd:
+		return 1
+	case AlignCenter:
+		return 0.5
+	}
+	return 0
+}
 
 // overflow type -- determines what happens when there is too much stuff in a layout
 type Overflow int32 //enums:enum -trim-prefix Overflow

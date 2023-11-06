@@ -65,9 +65,9 @@ func Dot(val float32) Value {
 	return Value{Val: val, Un: UnitDot, Dots: val}
 }
 
-// SetDot sets the value directly in terms of dots.
+// Dot sets the value directly in terms of dots.
 // Dots are actual real display pixels, which are generally only used internally.
-func (v *Value) SetDot(val float32) {
+func (v *Value) Dot(val float32) {
 	v.Val = val
 	v.Un = UnitDot
 	v.Dots = val

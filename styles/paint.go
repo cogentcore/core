@@ -298,7 +298,7 @@ func (ps *Stroke) Defaults() {
 	ps.On = false // svg says default is off
 	ps.SetColor(colors.Black)
 	ps.Width.Px(1)
-	ps.MinWidth.SetDot(.5)
+	ps.MinWidth.Dot(.5)
 	ps.Cap = LineCapButt
 	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
 	ps.MiterLimit = 10.0

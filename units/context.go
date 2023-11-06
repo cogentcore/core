@@ -4,6 +4,8 @@
 
 package units
 
+import "goki.dev/laser"
+
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels
 type Context struct {
@@ -63,27 +65,52 @@ func (uc *Context) Set(em, ex, ch, rem, vw, vh, ew, eh, pw, ph float32) {
 	uc.SetFont(em, ex, ch, rem)
 }
 
+func (uc *Context) String() string {
+	return laser.StringJSON(uc)
+}
+
 // SetSizes sets the context values for the non-font sizes
 // to the given values; the values are ignored if they are zero.
-func (uc *Context) SetSizes(vw, vh, ew, eh, pw, ph float32) {
+// returns true if any are different.
+func (uc *Context) SetSizes(vw, vh, ew, eh, pw, ph float32) bool {
+	diff := false
 	if vw != 0 {
+		if uc.Vpw != vw {
+			diff = true
+		}
 		uc.Vpw = vw
 	}
 	if vh != 0 {
+		if uc.Vph != vh {
+			diff = true
+		}
 		uc.Vph = vh
 	}
 	if ew != 0 {
+		if uc.Elw != ew {
+			diff = true
+		}
 		uc.Elw = ew
 	}
 	if eh != 0 {
+		if uc.Elh != eh {
+			diff = true
+		}
 		uc.Elh = eh
 	}
 	if pw != 0 {
+		if uc.Paw != pw {
+			diff = true
+		}
 		uc.Paw = pw
 	}
 	if ph != 0 {
+		if uc.Pah != ph {
+			diff = true
+		}
 		uc.Pah = ph
 	}
+	return diff
 }
 
 // SetFont sets the context values for fonts: note these are already in raw
