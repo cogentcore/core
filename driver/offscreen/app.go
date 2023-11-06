@@ -91,6 +91,20 @@ func Main(f func(goosi.App)) {
 	theApp.mainLoop()
 }
 
+func (app *appImpl) mainLoop() {
+	for {
+		select {
+		case <-app.mainDone:
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		}
+	}
+}
+
 type funcRun struct {
 	f    func()
 	done chan bool
@@ -406,18 +420,4 @@ func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 
 func (app *appImpl) HideVirtualKeyboard() {
 	// no-op
-}
-
-func (app *appImpl) mainLoop() {
-	for {
-		select {
-		case <-app.mainDone:
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		}
-	}
 }
