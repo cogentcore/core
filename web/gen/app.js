@@ -180,7 +180,7 @@ function displayImage(pointer, length, w, h) {
     memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
   }
 
-  let bytes = memoryBytes.slice(pointer, pointer + length);
+  let bytes = memoryBytes.subarray(pointer, pointer + length);
   let data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
 }
