@@ -1163,7 +1163,7 @@ func (ly *Layout) LayoutScroll(sc *Scene, delta image.Point, parBBox image.Recta
 func (ly *Layout) Render(sc *Scene) {
 	if ly.PushBounds(sc) {
 		ly.RenderChildren(sc)
-		ly.RenderScrolls(sc)
+		// ly.RenderScrolls(sc)
 		ly.PopBounds(sc)
 	} else {
 		ly.SetScrollsOff()
