@@ -20,6 +20,7 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "mousemove", js.FuncOf(app.onMouseMove))
 	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
+	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
 }
 
 func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
@@ -79,5 +80,10 @@ func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	key := e.Get("key")
 	app.window.EvMgr.Key(events.KeyUp, []rune(key.String())[0], 0, 0) // TODO(kai/web): modifiers
 	e.Call("preventDefault")
+	return nil
+}
+
+func (app *appImpl) onResize(this js.Value, args []js.Value) any {
+	app.resize()
 	return nil
 }
