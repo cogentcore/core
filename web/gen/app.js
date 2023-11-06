@@ -169,16 +169,22 @@ appCanvas.height = window.innerHeight;
 
 
 let wasm;
+let memoryBytes;
 
 // displayImage takes the pointer to the target image in the wasm linear memory
 // and its length. Gets the resulting byte slice and creates an image data with
 // the given width and height.
 function displayImage(pointer, length, w, h) {
-  console.log("wasm", wasm, "length", length, "pointer", pointer)
-  let memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
+  // console.log("length", length, "pointer", pointer)
+
+  if (!memoryBytes || memoryBytes.byteLength === 0) {
+    console.log("making memory bytes")
+    memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
+  }
+
   let bytes = memoryBytes.slice(pointer, pointer + length);
-  console.log("memoryBytes", memoryBytes);
-  console.log("bytes", bytes);
+  // console.log("memoryBytes", memoryBytes);
+  // console.log("bytes", bytes);
   // memoryBytes.set(bytes, pointer);
   let data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
@@ -225,6 +231,7 @@ async function goappInitWebAssembly() {
   let instantiateStreaming = WebAssembly.instantiateStreaming;
   if (!instantiateStreaming) {
     instantiateStreaming = async (resp, importObject) => {
+      console.log("is async", resp, importObject);
       const source = await (await resp).arrayBuffer();
       // memoryBytes = new Uint8Array(resp.instance.exports.mem.buffer);
       // console.log("got memory bytes", memoryBytes);
@@ -244,10 +251,14 @@ async function goappInitWebAssembly() {
     const go = new Go();
     wasm = await instantiateStreaming(
       fetchWithProgress("{{.Wasm}}", showProgress),
-      go.importObject
+      go.importObject,
+      console.log("is await"),
     );
+    console.log("done with await");
     go.run(wasm.instance);
+    console.log("done running go");
     loader.remove();
+    // console.log("done removing loader", memoryBytes.detached);
   } catch (err) {
     loaderIcon.className = "goapp-logo";
     loaderLabel.innerText = err;
