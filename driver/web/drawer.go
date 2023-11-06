@@ -9,7 +9,6 @@ package web
 import (
 	"image"
 	"image/draw"
-	"reflect"
 	"syscall/js"
 	"unsafe"
 )
@@ -109,10 +108,8 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
-	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&dw.image.Pix))
-	ptr := uintptr(unsafe.Pointer(hdr.Data))
-
 	sz := dw.image.Bounds().Size()
+	ptr := uintptr(unsafe.Pointer(&dw.image.Pix[0]))
 	js.Global().Call("displayImage", ptr, len(dw.image.Pix), sz.X, sz.Y)
 }
 
