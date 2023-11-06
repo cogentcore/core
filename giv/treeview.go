@@ -491,7 +491,7 @@ func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
 func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 	tv.InitLayout(sc)
 	tv.GetSizeParts(sc, iter) // get our size from parts
-	tv.WidgetSize = tv.LayState.Alloc.Size
+	tv.WidgetSize = tv.Alloc.Size.Total
 	h := mat32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X
 
@@ -502,11 +502,11 @@ func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 			if gis == nil || gis.This() == nil {
 				continue
 			}
-			h += mat32.Ceil(gis.LayState.Alloc.Size.Y)
-			w = mat32.Max(w, tv.Indent.Dots+gis.LayState.Alloc.Size.X)
+			h += mat32.Ceil(gis.Alloc.Size.Total.Y)
+			w = mat32.Max(w, tv.Indent.Dots+gis.Alloc.Size.Total.X)
 		}
 	}
-	tv.LayState.Alloc.Size = mat32.Vec2{w, h}
+	tv.Alloc.Size.Total = mat32.Vec2{w, h}
 	tv.WidgetSize.X = w // stretch
 }
 
@@ -534,8 +534,8 @@ func (tv *TreeView) SetBranchState() {
 
 func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
 	spc := tv.BoxSpace()
-	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
-	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size()) // key diff
+	tv.Parts.Alloc.Pos = tv.Alloc.Pos.Add(spc.Pos())
+	tv.Parts.Alloc.Size.Total = tv.WidgetSize.Sub(spc.Size()) // key diff
 	tv.Parts.DoLayout(sc, parBBox, iter)
 }
 
@@ -556,10 +556,10 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 	wi := tv.This().(gi.Widget)
 	// our alloc size is root's size minus our total indentation
-	tv.LayState.Alloc.Size.X = rn.LayState.Alloc.Size.X - (tv.LayState.Alloc.Pos.X - rn.LayState.Alloc.Pos.X)
-	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
+	tv.Alloc.Size.Total.X = rn.Alloc.Size.Total.X - (tv.Alloc.Pos.X - rn.Alloc.Pos.X)
+	tv.WidgetSize.X = tv.Alloc.Size.Total.X
 
-	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
+	tv.Alloc.PosOrig = tv.Alloc.Pos
 	gi.SetUnitContext(&tv.Styles, sc, tv.NodeSize(), psize) // update units with final layout
 	tv.BBox = wi.BBoxes()
 	wi.ComputeBBoxes(sc, parBBox, image.Point{})
@@ -575,17 +575,17 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 			if ni == nil {
 				continue
 			}
-			ni.LayState.Alloc.PosRel.Y = h
-			ni.LayState.Alloc.PosRel.X = tv.Indent.Dots
-			h += mat32.Ceil(ni.LayState.Alloc.Size.Y)
+			ni.Alloc.PosRel.Y = h
+			ni.Alloc.PosRel.X = tv.Indent.Dots
+			h += mat32.Ceil(ni.Alloc.Size.Total.Y)
 		}
 	}
 	redo := tv.DoLayoutChildren(sc, iter)
 	// once layout is done, we can get our reg size back
-	tv.LayState.Alloc.Size = tv.WidgetSize
+	tv.Alloc.Size.Total = tv.WidgetSize
 	if gi.LayoutTrace {
-		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
-		// fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
+		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.Alloc.Size.Total.X, tv.Alloc.Pos.X, rn.Alloc.Pos.X)
+		// fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.Alloc.Pos, tv.Alloc.Size.Total, tv.BBox, tv.ScBBox, tv.ScBBox)
 	}
 	return redo
 }
@@ -598,7 +598,7 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 	}
 	pbc, psl := tv.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &pbc, psl)
+	pc.DrawStdBox(rs, st, tv.Alloc.Pos, tv.Alloc.Size.Total, &pbc, psl)
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)

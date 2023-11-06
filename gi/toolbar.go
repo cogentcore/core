@@ -30,7 +30,7 @@ func ToolbarStyles(ly Layouter) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Horiz = lb.Style.MainAxis != mat32.X
+			sp.Horiz = lb.Styles.MainAxis != mat32.X
 		}
 	})
 }

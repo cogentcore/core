@@ -26,7 +26,7 @@ func (sp *Separator) OnInit() {
 	sp.Style(func(s *styles.Style) {
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4), units.Zero())
-		s.Align.Y = styles.AlignCenterAlignCenter
+		s.Align.Y = styles.AlignCenter
 		s.Align.X = styles.AlignCenter
 		s.Border.Style.Top = styles.BorderSolid
 		s.Border.Color.Top = colors.Scheme.OutlineVariant
@@ -51,8 +51,8 @@ func (sp *Separator) RenderSeparator(sc *Scene) {
 	rs, pc, st := sp.RenderLock(sc)
 	defer sp.RenderUnlock(rs)
 
-	pos := sp.LayState.Alloc.Pos.Add(st.TotalMargin().Pos())
-	sz := sp.LayState.Alloc.Size.Sub(st.TotalMargin().Size())
+	pos := sp.Alloc.Pos.Add(st.TotalMargin().Pos())
+	sz := sp.Alloc.Size.Total.Sub(st.TotalMargin().Size())
 
 	if !st.BackgroundColor.IsNil() {
 		pc.FillBox(rs, pos, sz, &st.BackgroundColor)

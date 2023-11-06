@@ -285,7 +285,7 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors
 func (ed *Editor) RenderStartPos() mat32.Vec2 {
 	st := &ed.Styles
 	spc := st.BoxSpace()
-	pos := ed.LayState.Alloc.Pos.Add(spc.Pos())
+	pos := ed.Alloc.Pos.Add(spc.Pos())
 	delta := mat32.NewVec2FmPoint(ed.LayoutScrollDelta((image.Point{})))
 	pos = pos.Add(delta)
 	return pos

@@ -82,9 +82,9 @@ func (sb *Snackbar) SnackbarStyles() {
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
 		s.Align.Y = styles.AlignCenter
-		s.Gap.Dp(12)
+		s.Gap.X.Dp(12)
 		s.Grow.Set(1, 0)
-		s.Min.Y.Set(units.Dp(48))
+		s.Min.Y.Dp(48)
 	})
 }
 

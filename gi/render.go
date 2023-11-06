@@ -241,7 +241,7 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 // [ki.Node.ConfigChildren] on those parts with the given config,
 // and then handles necessary updating logic with the given scene.
 func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config) {
-	parts := wb.NewParts(lay)
+	parts := wb.NewParts()
 	mods, updt := parts.ConfigChildren(config)
 	if !mods && !wb.NeedsRebuild() {
 		parts.UpdateEnd(updt)
@@ -301,70 +301,19 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 	pr.End()
 }
 
-// GetSizeTree does the sizing as a depth-first pass from me,
-// needed for Layout stack.
-func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
-	if wb.This() == nil {
-		return
-	}
-	pr := prof.Start("Widget.GetSizeTree." + wb.KiType().Name)
-	wb.WalkPost(func(k ki.Ki) bool { // tests whether to process node
-		wi, _ := AsWidget(k)
-		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
-			return ki.Break
-		}
-		return ki.Continue
-	},
-		func(k ki.Ki) bool { // this one does the work
-			wi, _ := AsWidget(k)
-			if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
-				return ki.Break
-			}
-			wi.GetSize(sc, iter)
-			return ki.Continue
-		})
-	pr.End()
-}
-
-// DoLayoutTree does layout pass for tree from me.
-// Each node iterates over children for maximum control,
-// Starting with parent ScBBox.
-// Handles multiple iterations if needed.
-func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
-	if wb.This() == nil {
-		return
-	}
-	pr := prof.Start("WidgetBase.DoLayoutTree." + wb.KiType().Name)
-	parBBox := image.Rectangle{}
-	pwi, _ := AsWidget(wb.Par)
-	if pwi != nil {
-		parBBox = pwi.ChildrenBBoxes(sc)
-	} else {
-		parBBox = image.Rectangle{Max: sc.Geom.Size} // sc.Pixels.Bounds()
-		// fmt.Println("parBBox:", parBBox)
-	}
-	wi := wb.This().(Widget)
-	if wi == nil {
-		return
-	}
-	redo := wi.DoLayout(sc, parBBox, 0) // important to use interface version to get interface!
-	if redo {
-		if LayoutTrace {
-			fmt.Printf("Layout: ----------  Redo: %v ----------- \n", wi.Path())
-		}
-		la := wb.LayState.Alloc
-		wb.GetSizeTree(sc, 1)
-		wb.LayState.Alloc = la
-		wi.DoLayout(sc, parBBox, 1) // todo: multiple iters?
-	}
-	pr.End()
-}
-
-// LayoutScene does a layout of the tree: GetSize, DoLayout.
+// LayoutScene does a layout of the scene: Size, Position
 func (sc *Scene) LayoutScene() {
-	sc.GetSizeTree(sc, 0)
-	sc.LayState.Alloc.Size = mat32.NewVec2FmPoint(sc.Geom.Size)
-	sc.DoLayoutTree(sc)
+	sc.SizeUp(sc)
+	for iter := 0; iter < 10; iter++ {
+		redo := sc.SizeDown(sc, iter, mat32.NewVec2FmPoint(sc.Geom.Size))
+		if redo {
+			fmt.Println("scene:", sc, "redoing, iter:", iter)
+		} else {
+			break
+		}
+	}
+	sc.Position(sc)
+	sc.ScenePos(sc)
 }
 
 // LayoutRenderScene does a layout and render of the tree:
@@ -381,10 +330,10 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		if w.Is(NeedsRender) && !w.Is(ki.Updating) {
-			w.SetFlag(false, NeedsRender)
-			wi.Render(sc)
+	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+		if kwi.Is(NeedsRender) && !kwi.Is(ki.Updating) {
+			kwi.SetFlag(false, NeedsRender)
+			kwi.Render(sc)
 			return ki.Break // done
 		}
 		return ki.Continue
@@ -478,11 +427,9 @@ func (sc *Scene) ApplyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
-	sc.Fill()         // full redraw
-	ld := sc.LayState // save our current layout data
+	sc.Fill() // full redraw
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
-	sc.LayState = ld
 	sc.LayoutRenderScene()
 }
 
@@ -505,27 +452,16 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	defer sc.SetFlag(false, ScUpdating)
 
 	sc.SetFlag(true, ScPrefSizing)
-	sc.ConfigScene()
-
 	sc.Geom.Size = initSz
-	for i := 0; i < 2; i++ {
-		sc.ApplyStyleTree(sc) // sufficient to get sizes
-		sc.LayState.Alloc.Size.SetPoint(initSz)
-		sc.GetSizeTree(sc, 0) // collect sizes
-		sc.LayState.Alloc.Size.SetPoint(initSz)
-		sc.DoLayoutTree(sc)
-	}
-
+	sc.ConfigScene()
+	sc.ApplyStyleScene()
+	sc.LayoutScene()
+	psz := sc.Alloc.Size.Content.ToPointCeil()
+	sc.Geom.Size = psz
+	fmt.Println("pref size:", psz)
+	sc.LayoutScene() // once more with set size
 	sc.SetFlag(false, ScPrefSizing)
-
-	vpsz := sc.LayState.Size.Pref.ToPoint()
-	// also take into account min size pref
-	stw := int(sc.Styles.Min.X.Dots)
-	sth := int(sc.Styles.Min.Y.Dots)
-	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
-	vpsz.X = max(vpsz.X, stw)
-	vpsz.Y = max(vpsz.Y, sth)
-	return vpsz
+	return psz
 }
 
 //////////////////////////////////////////////////////////////////
@@ -601,8 +537,8 @@ func (wb *WidgetBase) ReRenderTree() {
 	if pni != nil {
 		parBBox = pni.ChildrenBBoxes(vp)
 	}
-	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig)
-	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig
+	delta := wb.Alloc.Pos.Sub(wb.Alloc.PosOrig)
+	wb.Alloc.Pos = wb.Alloc.PosOrig
 	ld := wb.LayState // save our current layout data
 	updt := wb.UpdateStart()
 	wb.ConfigTree()
@@ -655,7 +591,7 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	pc := &rs.Paint
 
 	pbc, psl := wb.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &pbc, psl)
+	pc.DrawStdBox(rs, st, wb.Alloc.Pos, wb.Alloc.Size.Total, &pbc, psl)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -733,7 +669,7 @@ func (sc *Scene) BenchmarkFullRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		sc.DoLayoutTree(sc)
+		sc.LayoutScene()
 		sc.Render(sc)
 	}
 	td := time.Since(ts)

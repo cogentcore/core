@@ -168,8 +168,8 @@ func (ly *Layout) LayoutStyles() {
 			if s.Wrap {
 				s.Grow.Set(1, 1)
 			} else {
-				s.SetDim(s.MainAxis, 1)
-				s.SetDim(s.MainAxis.OrthoDim(), 0)
+				s.Grow.SetDim(s.MainAxis, 1)
+				s.Grow.SetDim(s.MainAxis.OtherDim(), 0)
 			}
 		case s.Display == styles.DisplayStacked:
 			s.Grow.Set(1, 1)
@@ -183,6 +183,11 @@ func (ly *Layout) HandleLayoutEvents() {
 	ly.HandleWidgetEvents()
 	ly.HandleLayoutKeys()
 	ly.HandleLayoutScrollEvents()
+}
+
+// HasAnyScroll returns true if layout has
+func (ly *Layout) HasAnyScroll() bool {
+	return ly.HasScroll[mat32.X] || ly.HasScroll[mat32.Y]
 }
 
 /*
@@ -215,11 +220,6 @@ func (ly *Layout) ManageOverflow(sc *Scene) {
 		}
 		ly.LayoutScrolls(sc)
 	}
-}
-
-// HasAnyScroll returns true if layout has
-func (ly *Layout) HasAnyScroll() bool {
-	return ly.HasScroll[mat32.X] || ly.HasScroll[mat32.Y]
 }
 
 // SetScroll sets a scrollbar along given dimension
@@ -277,57 +277,59 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 	sb.This().Destroy()
 	ly.Scrolls[d] = nil
 }
+*/
 
 // DeactivateScroll turns off given scrollbar, without deleting, so it can be easily re-used
 func (ly *Layout) DeactivateScroll(sb *Slider) {
 	sb.BBoxMu.Lock()
 	defer sb.BBoxMu.Unlock()
-	sb.LayState.Alloc.Pos = mat32.Vec2Zero
-	sb.LayState.Alloc.Size = mat32.Vec2Zero
-	sb.ScBBox = image.Rectangle{}
+	// sb.Alloc.Pos = mat32.Vec2Zero
+	// sb.Alloc.Size.Total = mat32.Vec2Zero
+	// sb.ScBBox = image.Rectangle{}
 }
 
 // LayoutScrolls arranges scrollbars
 func (ly *Layout) LayoutScrolls(sc *Scene) {
-	sbw := ly.Styles.ScrollBarWidth.Dots
+	/*
+		sbw := ly.Styles.ScrollBarWidth.Dots
 
-	spc := ly.BoxSpace()
-	pad := ly.Styles.Padding.Dots()
-	marg := ly.Styles.Margin.Dots()
-	avail := ly.AvailSize()
-	for d := mat32.X; d <= mat32.Y; d++ {
-		odim := mat32.OtherDim(d)
-		var opad float32
-		if odim == mat32.X {
-			opad = pad.Right + marg.Right
-		} else {
-			opad = pad.Bottom + marg.Bottom
-		}
-		// opad = 0// todo: temporary override until we get this fixed.
-		// if opad > 0 {
-		// 	fmt.Println(ly, "opad: ", odim, opad)
-		// }
-		if ly.HasScroll[d] {
-			sb := ly.Scrolls[d]
-			sb.GetSize(sc, 0)
-			sb.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
+		spc := ly.BoxSpace()
+		pad := ly.Styles.Padding.Dots()
+		marg := ly.Styles.Margin.Dots()
+		avail := ly.AvailSize()
+		for d := mat32.X; d <= mat32.Y; d++ {
+			odim := mat32.OtherDim(d)
+			var opad float32
+			if odim == mat32.X {
+				opad = pad.Right + marg.Right
+			} else {
+				opad = pad.Bottom + marg.Bottom
+			}
+			// opad = 0// todo: temporary override until we get this fixed.
+			// if opad > 0 {
+			// 	fmt.Println(ly, "opad: ", odim, opad)
+			// }
+			if ly.HasScroll[d] {
+				sb := ly.Scrolls[d]
+				sb.GetSize(sc, 0)
+				sb.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 
-			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw+2+opad)
-			// SidesTODO: not sure about this
-			sb.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
-			if ly.HasScroll[odim] { // make room for other
-				sb.LayState.Alloc.Size.SetSubDim(d, sbw)
-			}
-			sb.LayState.Alloc.Size.SetDim(odim, sbw)
-			sb.DoLayout(sc, ly.ScBBox, 0) // this will add parent position to above rel pos
-		} else {
-			if ly.Scrolls[d] != nil {
-				ly.DeactivateScroll(ly.Scrolls[d])
+				sb.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw+2+opad)
+				// SidesTODO: not sure about this
+				sb.Alloc.Size.Total.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
+				if ly.HasScroll[odim] { // make room for other
+					sb.Alloc.Size.Total.SetSubDim(d, sbw)
+				}
+				sb.Alloc.Size.Total.SetDim(odim, sbw)
+				sb.DoLayout(sc, ly.ScBBox, 0) // this will add parent position to above rel pos
+			} else {
+				if ly.Scrolls[d] != nil {
+					ly.DeactivateScroll(ly.Scrolls[d])
+				}
 			}
 		}
-	}
+	*/
 }
-*/
 
 // RenderScrolls draws the scrollbars
 func (ly *Layout) RenderScrolls(sc *Scene) {
@@ -366,9 +368,9 @@ func (ly *Layout) SetScrollsOff() {
 // generated from these very same scrollbars.
 func (ly *Layout) LayoutScrollScrolls(sc *Scene, delta image.Point, parBBox image.Rectangle) {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.HasScroll[d] {
-			ly.Scrolls[d].LayoutScroll(sc, delta, parBBox)
-		}
+		// if ly.HasScroll[d] {
+		// 	ly.Scrolls[d].LayoutScroll(sc, delta, parBBox)
+		// }
 	}
 }
 
@@ -483,10 +485,12 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 	if ly.Styles.Display == styles.DisplayStacked {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SetState(i != ly.StackTop, states.Invisible)
+			return ki.Continue
 		})
 	}
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.Render(sc)
+		return ki.Continue
 	})
 }
 
@@ -634,7 +638,8 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 // ScrollToItem scrolls the layout to ensure that given item is in view --
 // returns true if scrolling was needed
 func (ly *Layout) ScrollToItem(wi Widget) bool {
-	return ly.ScrollToBox(wi.AsWidget().ObjBBox)
+	// return ly.ScrollToBox(wi.AsWidget().ObjBBox)
+	return false
 }
 
 // ScrollDimToStart scrolls to put the given child coordinate position (eg.,
@@ -671,30 +676,32 @@ func (ly *Layout) ScrollDimToStart(dim mat32.Dims, pos int) bool {
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible -- returns true if scrolling was needed.
 func (ly *Layout) ScrollDimToEnd(dim mat32.Dims, pos int) bool {
-	if !ly.HasScroll[dim] {
-		return false
-	}
-	vpMin := ly.Alloc.BBox.Min.X
-	if dim == mat32.Y {
-		vpMin = ly.Alloc.BBox.Min.Y
-	}
-	sc := ly.Scrolls[dim]
-	scrange := sc.Max - sc.ThumbVal                // amount that can be scrolled
-	vissz := (sc.ThumbVal - ly.ExtraSize.Dim(dim)) // amount visible
-	vpMax := vpMin + int(vissz)
-	if pos == vpMax { // already at max
-		return false
-	}
-	trg := sc.Value + float32(pos-vpMax)
-	if trg < 0 {
-		trg = 0
-	} else if trg > scrange {
-		trg = scrange
-	}
-	if sc.Value == trg {
-		return false
-	}
-	sc.SetValueAction(trg)
+	/*
+		if !ly.HasScroll[dim] {
+			return false
+		}
+		vpMin := ly.Alloc.BBox.Min.X
+		if dim == mat32.Y {
+			vpMin = ly.Alloc.BBox.Min.Y
+		}
+		sc := ly.Scrolls[dim]
+		scrange := sc.Max - sc.ThumbVal                // amount that can be scrolled
+		vissz := (sc.ThumbVal - ly.ExtraSize.Dim(dim)) // amount visible
+		vpMax := vpMin + int(vissz)
+		if pos == vpMax { // already at max
+			return false
+		}
+		trg := sc.Value + float32(pos-vpMax)
+		if trg < 0 {
+			trg = 0
+		} else if trg > scrange {
+			trg = scrange
+		}
+		if sc.Value == trg {
+			return false
+		}
+		sc.SetValueAction(trg)
+	*/
 	return true
 }
 
@@ -771,7 +778,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	}
 	cur := em.Focus
 	nxti := idx + 1
-	if ly.Lay == LayoutGrid && updn {
+	if ly.Styles.Display == styles.DisplayGrid && updn {
 		nxti = idx + ly.Styles.Columns
 	}
 	did := false
@@ -807,7 +814,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	}
 	cur := em.Focus
 	nxti := idx - 1
-	if ly.Lay == LayoutGrid && updn {
+	if ly.Styles.Display == styles.DisplayGrid && updn {
 		nxti = idx - ly.Styles.Columns
 	}
 	did := false
@@ -879,7 +886,8 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 		}
 		return
 	}
-	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
+	grid := ly.Styles.Display == styles.DisplayGrid
+	if ly.Styles.MainAxis == mat32.X || grid {
 		switch kf {
 		case keyfun.MoveRight:
 			if ly.FocusNextChild(false) {
@@ -893,7 +901,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 			return
 		}
 	}
-	if ly.Lay == LayoutVert || ly.Lay == LayoutGrid || ly.Lay == LayoutVertFlow {
+	if ly.Styles.MainAxis == mat32.Y || grid {
 		switch kf {
 		case keyfun.MoveDown:
 			if ly.FocusNextChild(true) {
@@ -1079,7 +1087,7 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	redo := ly.This().(Layouter).DoLayoutAlloc(sc, iter)
 	if redo && iter == 0 {
 		ly.SetFlag(true, LayoutNeedsRedo)
-		ly.LayState.Alloc.Size = ly.ChildSize // this is what we actually need.
+		ly.Alloc.Size.Total = ly.ChildSize // this is what we actually need.
 		return true
 	}
 	ly.This().(Layouter).ManageOverflow(sc)

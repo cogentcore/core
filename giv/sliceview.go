@@ -642,11 +642,11 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sgHt := sg.LayState.Alloc.SizeOrig.Y
+	sgHt := sg.Alloc.Size.TotalOrig.Y
 	if sgHt == 0 {
 		return 0
 	}
-	// fmt.Println("sg:", sgHt, "sv:", sv.LayState.Alloc.SizeOrig.Y)
+	// fmt.Println("sg:", sgHt, "sv:", sv.Alloc.Size.TotalOrig.Y)
 	sgHt -= sg.ExtraSize.Y + sg.Styles.BoxSpace().Size().Y
 	return sgHt
 }

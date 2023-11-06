@@ -425,14 +425,16 @@ func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) 
 	})
 }
 
+// todo:
+
 // WidgetWalkPost is a version of the ki WalkPost iterator that automatically filters
 // nil or deleted items and operates on Widget types.
-func (wb *WidgetBase) WidgetWalkPost(fun func(kwi Widget, kwb *WidgetBase) bool) {
-	wb.WalkPost(func(k ki.Ki) bool {
-		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
-			return ki.Break
-		}
-		return fun(kwi, kwb)
-	})
-}
+// func (wb *WidgetBase) WidgetWalkPost(fun func(kwi Widget, kwb *WidgetBase) bool) {
+// 	wb.WalkPost(func(k ki.Ki) bool {
+// 		kwi, kwb := AsWidget(k)
+// 		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
+// 			return ki.Break
+// 		}
+// 		return fun(kwi, kwb)
+// 	})
+// }

@@ -226,7 +226,7 @@ func (tf *TextField) TextFieldStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
-				s.Overflow = styles.OverflowHidden
+				s.Overflow.X = styles.OverflowHidden
 				s.Gap.Zero()
 			})
 		case "parts/lead-icon":
@@ -1230,7 +1230,7 @@ func (tf *TextField) AutoScroll() {
 
 	sz := len(tf.EditTxt)
 
-	if sz == 0 || tf.LayState.Alloc.Size.X <= 0 {
+	if sz == 0 || tf.Alloc.Size.Total.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
@@ -1741,6 +1741,7 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
+/* todo
 func (tf *TextField) GetSize(sc *Scene, iter int) {
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
@@ -1772,6 +1773,7 @@ func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 	tf.SetEffPosAndSize()
 	return redo
 }
+*/
 
 // SetEffPosAndSize sets the effective position and size of
 // the textfield based on its base position and size
@@ -1781,14 +1783,14 @@ func (tf *TextField) SetEffPosAndSize() {
 		fmt.Println("nil parts sepas")
 		tf.ConfigParts(tf.Sc)
 	}
-	sz := tf.LayState.Alloc.Size
-	pos := tf.LayState.Alloc.Pos
+	sz := tf.Alloc.Size.Total
+	pos := tf.Alloc.Pos
 	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Button); ok {
-		pos.X += lead.LayState.Alloc.Size.X
-		sz.X -= lead.LayState.Alloc.Size.X
+		pos.X += lead.Alloc.Size.Total.X
+		sz.X -= lead.Alloc.Size.Total.X
 	}
 	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
-		sz.X -= trail.LayState.Alloc.Size.X
+		sz.X -= trail.Alloc.Size.Total.X
 	}
 	tf.EffSize = sz
 	tf.EffPos = pos

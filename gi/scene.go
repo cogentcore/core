@@ -123,6 +123,7 @@ func (sc *Scene) SceneStyles() {
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
 		s.SetMainAxis(mat32.Y)
+		s.Overflow.Set(styles.OverflowAuto) // screen is always scroller of last resort
 
 		// insets
 

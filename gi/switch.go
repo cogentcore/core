@@ -295,7 +295,7 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	mods, updt := parts.ConfigChildren(config)
 	ist := parts.Child(icIdx).(*Layout)
 	if mods || sw.NeedsRebuild() {
-		ist.Display = styles.DisplayStacked
+		ist.Styles.Display = styles.DisplayStacked
 		ist.SetNChildren(3, IconType, "icon")
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(sw.IconOn)

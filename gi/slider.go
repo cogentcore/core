@@ -202,6 +202,7 @@ func (sr *Slider) SliderStyles() {
 
 		s.Color = colors.Scheme.OnSurface
 
+		s.Display = styles.DisplayNone
 		sr.StyleBox.Defaults()
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
@@ -261,11 +262,11 @@ func (sr *Slider) SnapValue() {
 
 // SizeFromAlloc gets size from allocation
 func (sr *Slider) SizeFromAlloc() {
-	if sr.LayState.Alloc.Size.IsNil() {
+	if sr.Alloc.Size.Total.IsNil() {
 		return
 	}
 	spc := sr.BoxSpace()
-	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim) - spc.Size().Dim(sr.Dim)
+	sr.Size = sr.Alloc.Size.Total.Dim(sr.Dim) - spc.Size().Dim(sr.Dim)
 	if sr.Size <= 0 {
 		return
 	}
@@ -499,7 +500,7 @@ func (sr *Slider) ConfigSlider(sc *Scene) {
 }
 
 func (sr *Slider) ConfigParts(sc *Scene) {
-	parts := sr.NewParts(LayoutNil)
+	parts := sr.NewParts()
 	config := ki.Config{}
 	icIdx := -1
 	if sr.Icon.IsValid() {
@@ -538,21 +539,22 @@ func (sr *Slider) ApplyStyle(sc *Scene) {
 	sr.StyleSlider(sc)
 }
 
-func (sr *Slider) GetSize(sc *Scene, iter int) {
-	sr.InitLayout(sc)
-	st := &sr.Styles
-	odim := mat32.OtherDim(sr.Dim)
-	// get at least thumbsize + margin + border.size
-	sz := sr.ThSize + st.TotalMargin().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
-	sr.LayState.Alloc.Size.SetDim(odim, sz)
-}
-
-func (sr *Slider) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(sc, parBBox, iter)
-	sr.DoLayoutParts(sc, parBBox, iter)
-	sr.SizeFromAlloc()
-	return sr.DoLayoutChildren(sc, iter)
-}
+// todo:
+// func (sr *Slider) GetSize(sc *Scene, iter int) {
+// 	sr.InitLayout(sc)
+// 	st := &sr.Styles
+// 	odim := mat32.OtherDim(sr.Dim)
+// 	// get at least thumbsize + margin + border.size
+// 	sz := sr.ThSize + st.TotalMargin().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
+// 	sr.Alloc.Size.Total.SetDim(odim, sz)
+// }
+//
+// func (sr *Slider) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+// 	sr.DoLayoutBase(sc, parBBox, iter)
+// 	sr.DoLayoutParts(sc, parBBox, iter)
+// 	sr.SizeFromAlloc()
+// 	return sr.DoLayoutChildren(sc, iter)
+// }
 
 func (sr *Slider) Render(sc *Scene) {
 	if !sr.Off && sr.PushBounds(sc) {
@@ -583,8 +585,8 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 
 		// scrollbar is basic box in content size
 		spc := st.BoxSpace()
-		pos := sr.LayState.Alloc.Pos.Add(spc.Pos())
-		sz := sr.LayState.Alloc.Size.Sub(spc.Size())
+		pos := sr.Alloc.Pos.Add(spc.Pos())
+		sz := sr.Alloc.Size.Total.Sub(spc.Size())
 
 		if !sr.ValueColor.IsNil() {
 			sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
@@ -612,8 +614,8 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		// for length: | spc | ht | <-start of slider
 
 		spc := st.BoxSpace()
-		pos := sr.LayState.Alloc.Pos
-		sz := sr.LayState.Alloc.Size
+		pos := sr.Alloc.Pos
+		sz := sr.Alloc.Size.Total
 		bpos := pos // box pos
 		bsz := sz
 		tpos := pos // thumb pos

@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"image"
 	"strconv"
 	"strings"
 
@@ -58,6 +57,7 @@ func (sl *Splits) OnInit() {
 func (sl *Splits) SplitsStyles() {
 	sl.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
+		// todo: set grow for each element in proportion to splits -- should work automtically!
 		s.Margin.Zero()
 		s.Padding.Zero()
 	})
@@ -251,7 +251,7 @@ func (sl *Splits) ConfigWidget(sc *Scene) {
 }
 
 func (sl *Splits) ConfigSplitters(sc *Scene) {
-	parts := sl.NewParts(LayoutNil)
+	parts := sl.NewParts()
 	sz := len(sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
 	for _, hlk := range *sl.Parts.Children() {
@@ -312,6 +312,10 @@ func (sl *Splits) ApplyStyle(sc *Scene) {
 	sl.ConfigSplitters(sc)
 }
 
+/*
+
+todo: should be automatic with Grow factors!
+
 func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	sl.DoLayoutBase(sc, parBBox, iter)
 	sl.UpdateSplits()
@@ -331,11 +335,11 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	// fmt.Printf("handsz: %v\n", handsz)
 	odim := mat32.OtherDim(sl.Dim)
 	spc := sl.BoxSpace()
-	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
+	size := sl.Alloc.Size.Total.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
 	avail := size - thandsz
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
-	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
+	osz := sl.Alloc.Size.Total.Dim(odim) - spc.Size().Dim(odim)
+	mid := 0.5 * (sl.Alloc.Size.Total.Dim(odim) - spc.Size().Dim(odim))
 	pos := float32(0.0)
 
 	phandsz := float32(0)
@@ -347,11 +351,11 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 		}
 
 		isz := sp * avail
-		wb.LayState.Alloc.Size.SetDim(sl.Dim, isz)
-		wb.LayState.Alloc.Size.SetDim(odim, osz)
-		wb.LayState.Alloc.SizeOrig = wb.LayState.Alloc.Size
-		wb.LayState.Alloc.PosRel.SetDim(sl.Dim, pos)
-		wb.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
+		wb.Alloc.Size.Total.SetDim(sl.Dim, isz)
+		wb.Alloc.Size.Total.SetDim(odim, osz)
+		wb.Alloc.Size.TotalOrig = wb.Alloc.Size.Total
+		wb.Alloc.PosRel.SetDim(sl.Dim, pos)
+		wb.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
 
 		pos += isz
 
@@ -360,12 +364,12 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 			phandsz = hl.LayState.Size.Pref.Dim(sl.Dim)
 
 			hl.Pos = pos
-			hl.LayState.Alloc.Size = hl.LayState.Size.Pref
-			hl.LayState.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
-			hl.LayState.Alloc.PosRel.SetDim(odim, mid-phandsz+float32(i)*phandsz*4)
-			hl.LayState.Alloc.PosOrig = hl.LayState.Alloc.PosRel
-			hl.Min = sl.LayState.Alloc.Pos.Dim(sl.Dim)
-			hl.Max = sl.LayState.Alloc.Size.Sub(sl.LayState.Alloc.Pos).Dim(sl.Dim)
+			hl.Alloc.Size.Total = hl.LayState.Size.Pref
+			hl.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
+			hl.Alloc.PosRel.SetDim(odim, mid-phandsz+float32(i)*phandsz*4)
+			hl.Alloc.PosOrig = hl.Alloc.PosRel
+			hl.Min = sl.Alloc.Pos.Dim(sl.Dim)
+			hl.Max = sl.Alloc.Size.Total.Sub(sl.Alloc.Pos).Dim(sl.Dim)
 		}
 
 		pos += phandsz
@@ -375,6 +379,7 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 	return sl.DoLayoutChildren(sc, iter)
 }
+*/
 
 func (sl *Splits) Render(sc *Scene) {
 	if sl.PushBounds(sc) {

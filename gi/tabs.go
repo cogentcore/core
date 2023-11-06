@@ -78,7 +78,7 @@ func (ts *Tabs) TabsStyles() {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.Overflow.X = styles.OverflowHidden // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Gap.Zero()
@@ -445,7 +445,7 @@ func (ts *Tabs) ConfigWidget(sc *Scene) {
 
 	frame = NewFrame(ts, "frame")
 	frame.Style(func(s *styles.Style) {
-		frame.Display = styles.DisplayStacked
+		s.Display = styles.DisplayStacked
 	})
 
 	ts.ConfigNewTabButton(sc)
@@ -507,8 +507,8 @@ func (ts *Tabs) RenderTabSeps(sc *Scene) {
 		tb := tbs.Child(i).(Widget)
 		ni := tb.AsWidget()
 
-		pos := ni.LayState.Alloc.Pos
-		sz := ni.LayState.Alloc.Size.Sub(st.TotalMargin().Size())
+		pos := ni.Alloc.Pos
+		sz := ni.Alloc.Size.Total.Sub(st.TotalMargin().Size())
 		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)
@@ -574,7 +574,7 @@ func (tb *Tab) TabStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.Overflow.X = styles.OverflowHidden // no scrollbars!
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
