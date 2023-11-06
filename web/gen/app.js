@@ -165,8 +165,8 @@ const appCanvas = document.getElementById('app');
 const appCanvasCtx = appCanvas.getContext('2d');
 
 function displayImage(pix, w, h) {
-  let data = ImageData(pix, w, h);
-  appCanvasCtx.putImageData(pix, 0, 0);
+  let data = new ImageData(pix, w, h);
+  appCanvasCtx.putImageData(data, 0, 0);
 }
 
 // -----------------------------------------------------------------------------
