@@ -89,7 +89,7 @@ func (dw *drawerImpl) Scale(idx, layer int, dr image.Rectangle, sr image.Rectang
 // flipY = flipY axis when drawing this image
 func (dw *drawerImpl) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.images[idx]
-	draw.Draw(dw.image, dw.image.Bounds(), img, img.Bounds().Min, op)
+	draw.Draw(dw.image, image.Rectangle{dp, dp.Add(dw.image.Rect.Size())}, img, image.Point{}, op)
 	return nil
 }
 
