@@ -98,6 +98,7 @@ func (app *appImpl) mainLoop() {
 	for {
 		select {
 		case <-app.mainDone:
+			app.window.winClose <- struct{}{}
 			return
 		case f := <-app.mainQueue:
 			f.f()
