@@ -72,6 +72,22 @@ func (app *appImpl) runeAndCodeFromKey(k string) (rune, key.Codes) {
 	switch k {
 	case "Shift":
 		return 0, key.CodeLeftShift
+	case "Control":
+		return 0, key.CodeLeftControl
+	case "Meta":
+		return 0, key.CodeLeftMeta
+	case "Alt":
+		return 0, key.CodeLeftAlt
+	case "Backspace":
+		return 0, key.CodeDeleteBackspace
+	case "Delete":
+		return 0, key.CodeDeleteForward
+	case "Enter":
+		return 0, key.CodeReturnEnter
+	case "Tab":
+		return 0, key.CodeTab
+	case "Spacebar":
+		return ' ', 0
 	default:
 		return []rune(k)[0], 0
 	}
