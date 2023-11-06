@@ -94,7 +94,7 @@ type LayoutState struct {
 	// within its parent layout
 	Cell image.Point
 
-	// Pos is position, relative to parent Content size space
+	// Pos is top, left position relative to parent Content size space
 	Pos mat32.Vec2
 
 	// Scroll is additional scrolling offset within our parent layout
@@ -104,12 +104,20 @@ type LayoutState struct {
 	// including effects of scroll offset
 	ScPos mat32.Vec2
 
-	// 2D bounding box for Total size occupied within parent Scene object that we render onto.
-	// These are the pixels we draw into, filtered through parent bounding boxes
+	// ScContentPos is ScPos plus spacing offset for top, left of where
+	// content starts rendering.
+	ScContentPos mat32.Vec2
+
+	// 2D bounding box for Total size occupied within parent Scene object that we render onto,
+	// starting at ScPos and ending at ScPos + Size.Total.
+	// These are the pixels we can draw into, intersected with parent bounding boxes
 	// (empty for invisible). Used for render Bounds clipping.
+	// This includes all space (margin, padding etc).
 	BBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for our content, which excludes our padding, margin, etc.
+	// starting at ScContentPos and ending at ScPos + Size.Content.
+	// It is intersected with parent bounding boxes.
 	ContentBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
@@ -705,16 +713,20 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 	var parPos mat32.Vec2
 	var parBB image.Rectangle
 	if pwb != nil {
-		parPos = pwb.Alloc.ScPos
-		parBB = pwb.Alloc.BBox
+		parPos = pwb.Alloc.ScContentPos
+		parBB = pwb.Alloc.ContentBBox
 	} else {
 		parBB.Max = sc.Geom.Size
 	}
 	wb.Alloc.ScPos = wb.Alloc.Pos.Add(parPos).Add(wb.Alloc.Scroll)
 	wb.Alloc.BBox = mat32.RectFromPosSizeMax(wb.Alloc.ScPos, wb.Alloc.Size.Total)
 	wb.Alloc.BBox = parBB.Intersect(wb.Alloc.BBox)
-	wb.Alloc.ContentBBox = wb.Alloc.BBox // todo: fixme
-	// todo: do our bbox, pass content bbox which we compute
+
+	spc := wb.Styles.BoxSpace()
+	off := spc.Pos()
+	wb.Alloc.ScContentPos = wb.Alloc.ScPos.Add(off)
+	wb.Alloc.ContentBBox = mat32.RectFromPosSizeMax(wb.Alloc.ScPos.Add(off), wb.Alloc.Size.Content)
+	wb.Alloc.ContentBBox = parBB.Intersect(wb.Alloc.ContentBBox)
 	wb.ScenePosParts(sc)
 }
 
@@ -730,7 +742,7 @@ func (wb *WidgetBase) ScenePosParts(sc *Scene) {
 // This step can be performed when scrolling after updating Scroll.
 func (ly *Layout) ScenePos(sc *Scene) {
 	ly.ScenePosWidget(sc)
-	// do scrollbars here
+	// todo: do scrollbars here
 }
 
 /*
