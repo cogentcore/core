@@ -60,7 +60,7 @@ func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 // to fit the default image format specified by the given width, height,
 // and number of layers.
 func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
-	dw.image = image.NewRGBA(image.Rect(0, 0, width, height))
+	// no-op
 }
 
 // ConfigImage configures the draw image at given index
@@ -69,7 +69,9 @@ func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, l
 
 // SyncImages must be called after images have been updated, to sync
 // memory up to the GPU.
-func (dw *drawerImpl) SyncImages() {}
+func (dw *drawerImpl) SyncImages() {
+	// no-op
+}
 
 // Scale copies texture at given index and layer to render target,
 // scaling the region defined by src and sr to the destination
@@ -101,7 +103,9 @@ func (dw *drawerImpl) Copy(idx, layer int, dp image.Point, sr image.Rectangle, o
 // UseTextureSet selects the descriptor set to use --
 // choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *drawerImpl) UseTextureSet(descIdx int) {}
+func (dw *drawerImpl) UseTextureSet(descIdx int) {
+	// no-op
+}
 
 // StartDraw starts image drawing rendering process on render target
 // No images can be added or set after this point.
@@ -114,4 +118,6 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 }
 
 // EndDraw ends image drawing rendering process on render target
-func (dw *drawerImpl) EndDraw() {}
+func (dw *drawerImpl) EndDraw() {
+	// no-op
+}
