@@ -358,7 +358,7 @@ func (app *appImpl) GetScreens() {
 }
 
 func (app *appImpl) Platform() goosi.Platforms {
-	return goosi.Android
+	return goosi.Web
 }
 
 func (app *appImpl) OpenURL(url string) {
