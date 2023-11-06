@@ -10,6 +10,8 @@ import (
 	"image"
 	"image/draw"
 	"os"
+
+	"goki.dev/goosi"
 )
 
 type drawerImpl struct {
@@ -104,7 +106,10 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
-	os.WriteFile("test.png", dw.image.Pix, 0666)
+	if !goosi.NeedsCapture {
+		return
+	}
+	os.WriteFile(goosi.CaptureFilename, dw.image.Pix, 0666)
 }
 
 // EndDraw ends image drawing rendering process on render target

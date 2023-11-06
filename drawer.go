@@ -9,6 +9,20 @@ import (
 	"image/draw"
 )
 
+// Capture tells the app drawer to capture its next frame as an image and save it
+// to the given filename. It is currently only supported with the offscreen build tag.
+func Capture(filename string) {
+	NeedsCapture = true
+	CaptureFilename = filename
+}
+
+var (
+	// NeedsCapture is whether the app drawer needs to capture its next frame (see [Capture])
+	NeedsCapture bool
+	// CaptureFilename is the filename the app drawer should save its capture to (see [Capture])
+	CaptureFilename string
+)
+
 const (
 	// MaxTexturesPerSet is the maximum number of image variables that can be used
 	// in one descriptor set.  This value is a lowest common denominator across
