@@ -174,11 +174,12 @@ let wasm;
 // and its length. Gets the resulting byte slice and creates an image data with
 // the given width and height.
 function displayImage(pointer, length, w, h) {
-  console.log("wasm", wasm)
-  let bytes = new Uint8ClampedArray(length);
-  let memoryBytes = new Uint8Array(wasm.instance.exports.mem.buffer);
-  console.log("memoryBytes", memoryBytes)
-  memoryBytes.set(bytes, pointer);
+  console.log("wasm", wasm, "length", length, "pointer", pointer)
+  let memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
+  let bytes = memoryBytes.slice(pointer, pointer + length);
+  console.log("memoryBytes", memoryBytes);
+  console.log("bytes", bytes);
+  // memoryBytes.set(bytes, pointer);
   let data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
 }
