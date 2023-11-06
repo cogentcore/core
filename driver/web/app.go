@@ -406,7 +406,7 @@ func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
 }
 
 func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
-	return &cursor.CursorBase{} // no-op
+	return &theCursor
 }
 
 func (app *appImpl) SetQuitReqFunc(fun func()) {
