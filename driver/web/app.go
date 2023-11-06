@@ -41,7 +41,6 @@ type appImpl struct {
 	Draw          drawerImpl
 	window        *windowImpl
 	screen        *goosi.Screen
-	noScreens     bool // if all screens have been disconnected, don't do anything..
 	name          string
 	about         string
 	openFiles     []string
@@ -93,6 +92,20 @@ func Main(f func(goosi.App)) {
 	}()
 	fmt.Println("running main loop")
 	theApp.mainLoop()
+}
+
+func (app *appImpl) mainLoop() {
+	for {
+		select {
+		case <-app.mainDone:
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		}
+	}
 }
 
 type funcRun struct {
@@ -444,4 +457,12 @@ func (app *appImpl) Quit() {
 
 func (app *appImpl) IsDark() bool {
 	return app.isDark
+}
+
+func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+	// TODO(kai)
+}
+
+func (app *appImpl) HideVirtualKeyboard() {
+	// TODO(kai)
 }
