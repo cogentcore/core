@@ -71,14 +71,14 @@ func (sv *StructView) OnInit() {
 		switch w.PathFrom(sv) {
 		case "struct-grid":
 			sg := w.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
+				s.Display = styles.DisplayGrid
+				s.Columns = 2
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
 				s.Min.X.Em(20)
 				s.Min.Y.Em(10)
-				s.Grow.Set(1, 1)
-				s.Overflow = styles.OverflowAuto
-				s.Columns = 2
 			})
 		}
 		if w.Parent().Name() == "struct-grid" {

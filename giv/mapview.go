@@ -66,14 +66,14 @@ func (mv *MapView) MapViewStyles() {
 		switch w.PathFrom(mv) {
 		case "map-grid":
 			mg := w.(*gi.Frame)
-			mg.Lay = gi.LayoutGrid
 			mg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
+				s.Display = styles.DisplayGrid
+				s.Columns = mv.NCols
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
 				s.Min.X.Em(20)
 				s.Min.Y.Em(10)
-				s.Grow.Set(1, 1)
-				s.Overflow = styles.OverflowAuto
-				s.Columns = mv.NCols
 			})
 		}
 		if w.Parent().Name() == "map-grid" {
@@ -111,7 +111,7 @@ func (mv *MapView) UpdateValues() {
 func (mv *MapView) ConfigWidget(sc *gi.Scene) {
 	mv.Sc = sc
 	if !mv.HasChildren() {
-		gi.NewFrame(mv, "map-grid").SetDisplay(styles.DisplayGrid)
+		gi.NewFrame(mv, "map-grid")
 	}
 	mv.ConfigMapGrid()
 }

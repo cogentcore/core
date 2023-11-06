@@ -73,8 +73,8 @@ func app() {
 <kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</small><br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
-		SetStretchMax().
 		Style(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
@@ -89,9 +89,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Buttons:")
 
-	brow := gi.NewLayout(sc, "brow").SetMainAxis(mat32.X).
+	brow := gi.NewLayout(sc, "brow").
 		Style(func(s *styles.Style) {
-			s.Gap.Em(1)
+			s.SetMainAxis(mat32.X)
+			s.Gap.X.Em(1)
 		})
 
 	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box").
@@ -168,10 +169,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Sliders:")
 
-	srow := gi.NewLayout(sc).SetMainAxis(mat32.X).
+	srow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
+			s.SetMainAxis(mat32.X)
 			s.Align.X = styles.AlignStart
-			s.Gap.Ex(2)
+			s.Gap.X.Ex(2)
 			s.Grow.Set(1, 0)
 		})
 
@@ -212,9 +214,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(sc).SetMainAxis(mat32.X).
+	txrow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
-			s.Gap.Ex(2)
+			s.SetMainAxis(mat32.X)
+			s.Gap.X.Ex(2)
 			s.Grow.Set(1, 0)
 		})
 

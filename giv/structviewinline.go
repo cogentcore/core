@@ -172,10 +172,11 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructViewInline) GetSize(sc *gi.Scene, iter int) {
-	updt := sv.ConfigStruct(sc)
-	if updt {
-		sv.ApplyStyleTree(sc)
-	}
-	sv.Frame.GetSize(sc, iter)
-}
+// todo: remove
+// func (sv *StructViewInline) GetSize(sc *gi.Scene, iter int) {
+// 	updt := sv.ConfigStruct(sc)
+// 	if updt {
+// 		sv.ApplyStyleTree(sc)
+// 	}
+// 	sv.Frame.GetSize(sc, iter)
+// }

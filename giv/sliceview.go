@@ -304,28 +304,27 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
 		case "grid-lay": // grid layout
-			gl := w.(*gi.Layout)
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
 			})
 		case "grid-lay/grid": // slice grid
 			sg := w.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				nWidgPerRow, _ := sv.RowWidgetNs()
+				s.Display = styles.DisplayGrid
 				s.Columns = nWidgPerRow
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
 				s.Min.X.Em(20)
 				s.Min.Y.Ch(10)
-				s.Grow.Set(1, 1)
-				s.Overflow = styles.OverflowAuto
 			})
 		case "grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
-				s.Min.X.Set(sv.Styles.ScrollBarWidth)
+				s.Min.X = sv.Styles.ScrollBarWidth
 				s.Grow.Set(0, 1)
 			})
 			sb.OnChange(func(e events.Event) {
@@ -460,7 +459,7 @@ func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 	sv.VisRows = 0
 	gl := gi.NewLayout(sv, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid").SetDisplay(styles.DisplayGrid)
+	gi.NewFrame(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
 }
 
@@ -597,8 +596,8 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 	sv.ViewMu.Unlock()
 }
 
-func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	redo := sv.Frame.DoLayout(sc, parBBox, iter)
+func (sv *SliceViewBase) SizeDown(sc *gi.Scene, iter int, allocTotal mat32.Vec2) bool {
+	redo := sv.Frame.SizeDown(sc, iter, allocTotal)
 	if sv.This().(SliceViewer).NeedsConfigRows() {
 		sv.Update() // does applystyle
 		return true // needs redo
@@ -642,12 +641,8 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sgHt := sg.Alloc.Size.TotalOrig.Y
-	if sgHt == 0 {
-		return 0
-	}
+	sgHt := sg.Alloc.Size.Content.Y
 	// fmt.Println("sg:", sgHt, "sv:", sv.Alloc.Size.TotalOrig.Y)
-	sgHt -= sg.ExtraSize.Y + sg.Styles.BoxSpace().Size().Y
 	return sgHt
 }
 
@@ -658,9 +653,10 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 	if sg == nil {
 		return
 	}
-	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Gap.Dots
-	}
+	// todo: fixme!
+	// if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
+	// 	rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Gap.Dots
+	// }
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
 		rowht = mat32.Max(rowht, sv.RowHeight)
 	}

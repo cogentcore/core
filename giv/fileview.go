@@ -106,7 +106,6 @@ func (fv *FileView) FileViewStyles() {
 				s.Grow.Set(1, 0)
 			})
 		case "files-row":
-			fr := w.(*gi.Layout)
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
@@ -129,10 +128,9 @@ func (fv *FileView) FileViewStyles() {
 				s.Grow.Set(1, 1)
 			})
 		case "sel-row":
-			sr := w.(*gi.Layout)
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
-				s.Gap.Dp(4)
+				s.Gap.X.Dp(4)
 			})
 		case "sel-row/sel-lbl":
 			w.Style(func(s *styles.Style) {
