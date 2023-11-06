@@ -380,7 +380,7 @@ func (app *appImpl) Platform() goosi.Platforms {
 }
 
 func (app *appImpl) OpenURL(url string) {
-	// TODO: implement
+	js.Global().Call("open", url)
 }
 
 // SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
