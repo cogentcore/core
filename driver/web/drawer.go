@@ -104,18 +104,39 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
 	imgs := dw.images[descIdx]
-	img := imgs[0]
 
-	rgba := img.(*image.RGBA)
+	var rimg *image.RGBA
+
+	fmt.Println("limgs", len(imgs))
+
+	// if we only have one image, we can just render it directly.
+	// otherwise, we need to draw all of the images into one image
+	// and then pass that to the render function.
+	if len(imgs) <= 1 {
+		rimg = imgs[0].(*image.RGBA)
+	} else {
+		rimg = image.NewRGBA(imgs[0].Bounds())
+		for i, img := range imgs {
+			// we can get away with src for the first one,
+			// but we need to do over for everything else
+			op := draw.Over
+			if i == 0 {
+				op = draw.Src
+			}
+			fmt.Println("draw.Draw", i, rimg.Bounds(), img.Bounds(), op)
+			draw.Draw(rimg, rimg.Bounds(), img, img.Bounds().Min, op)
+		}
+	}
 
 	t1 := time.Now()
-	dst := js.Global().Get("Uint8ClampedArray").New(len(rgba.Pix))
+	dst := js.Global().Get("Uint8ClampedArray").New(len(rimg.Pix))
 	fmt.Println("time to make array", time.Since(t1))
 	t2 := time.Now()
-	js.CopyBytesToJS(dst, rgba.Pix)
+	js.CopyBytesToJS(dst, rimg.Pix)
 	fmt.Println("time to copy bytes to js", time.Since(t2))
 	t3 := time.Now()
-	sz := rgba.Bounds().Size()
+	sz := rimg.Bounds().Size()
+	fmt.Println("sz", sz)
 	js.Global().Call("displayImage", dst, sz.X, sz.Y)
 	fmt.Println("time to display image", time.Since(t3))
 	t4 := time.Now()
