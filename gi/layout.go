@@ -1193,15 +1193,8 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
-func (st *Stretch) ApplyStyle(sc *Scene) {
-	st.StyMu.Lock()
-	defer st.StyMu.Unlock()
-
-	st.ApplyStyleWidget(sc)
-}
-
-// Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
-// width / height property to change
+// Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.
+// Set width / height property to change.
 type Space struct {
 	WidgetBase
 }
@@ -1213,17 +1206,14 @@ func (sp *Space) OnInit() {
 	sp.Style(func(s *styles.Style) {
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
+		s.Padding.Zero()
+		s.Border.Width.Zero()
+		s.Margin.Zero()
+		s.MaxBorder.Width.Zero()
 	})
 }
 
 func (sp *Space) CopyFieldsFrom(frm any) {
 	fr := frm.(*Space)
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-}
-
-func (sp *Space) ApplyStyle(sc *Scene) {
-	sp.StyMu.Lock()
-	defer sp.StyMu.Unlock()
-
-	sp.ApplyStyleWidget(sc)
 }

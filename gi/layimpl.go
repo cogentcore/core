@@ -118,20 +118,17 @@ func (ls LayoutState) String() string {
 		"\tPos:" + ls.Pos.String() + "\tScPos:" + ls.ScPos.String()
 }
 
-// LayImplCell holds the layout implementation data for one cell
-type LayImplCell struct {
-	// Total size of cell
+// LayImplSizes holds the layout implementation sizing data for col, row dims
+type LayImplSizes struct {
 	Size mat32.Vec2
-
-	// Grow is the sum of grow factors along each dimension
 	Grow mat32.Vec2
 }
 
-func (ls *LayImplCell) String() string {
+func (ls *LayImplSizes) String() string {
 	return fmt.Sprintf("Sizet: %v, \tGrow: %g", ls.Size, ls.Grow)
 }
 
-func (ls *LayImplCell) Reset() {
+func (ls *LayImplSizes) Reset() {
 	ls.Size.SetZero()
 	ls.Grow.SetZero()
 }
@@ -148,14 +145,21 @@ type LayImplState struct {
 	// sizes has the data for the columns in [0] and rows in [1]:
 	// col Size.X = max(X over rows) (cross axis), .Y = sum(Y over rows) (main axis for col)
 	// row Size.X = sum(X over cols) (main axis for row), .Y = max(Y over cols) (cross axis)
-	Sizes [2][]LayImplCell `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	// see: https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
+	Sizes [2][]LayImplSizes `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds extra space.
+	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds extra space,
+	// that is subtracted from Total to get Content size.
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
 	ScrollSize mat32.Vec2
 
-	// GapSize has the extra gap sizing between elements for each dimension
+	// GapSize has the extra gap sizing between elements for each dimension,
+	// which is part of Content for computing rendering bbox, but is
+	// subtracted when allocating sizes to elements.
 	GapSize mat32.Vec2
+
+	// ContentMinusGap is the amount to allocate
+	ContentMinusGap mat32.Vec2
 }
 
 // InitSizes initializes the Sizes based on Cells geom
@@ -163,15 +167,13 @@ func (ls *LayImplState) InitSizes() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		n := mat32.PointDim(ls.Cells, d)
 		if len(ls.Sizes[d]) != n {
-			ls.Sizes[d] = make([]LayImplCell, n)
+			ls.Sizes[d] = make([]LayImplSizes, n)
 		}
 		for i := 0; i < n; i++ {
 			ls.Sizes[d][i].Reset()
 		}
 	}
 	ls.WrapBreaks = nil
-	ls.ScrollSize.SetZero()
-	ls.GapSize.SetZero()
 }
 
 func (ls *LayImplState) ContentSize() mat32.Vec2 {
@@ -203,12 +205,12 @@ func (ls *LayImplState) String() string {
 	n := ls.Cells.X
 	for i := 0; i < n; i++ {
 		col := ls.Sizes[mat32.X][i]
-		s += fmt.Sprintln("col:", i, "\tmax w:", col.Size.X, "\tsum h:", col.Size.Y, "\tmax grX:", col.Grow.X, "\tsum grY:", col.Grow.Y)
+		s += fmt.Sprintln("col:", i, "\tmax X:", col.Size.X, "\tsum Y:", col.Size.Y, "\tmax grX:", col.Grow.X, "\tsum grY:", col.Grow.Y)
 	}
 	n = ls.Cells.Y
 	for i := 0; i < n; i++ {
 		row := ls.Sizes[mat32.Y][i]
-		s += fmt.Sprintln("row:", i, "\tsum w:", row.Size.X, "\tmax h:", row.Size.Y, "\tsum grX:", row.Grow.X, "\tmax grY:", row.Grow.Y)
+		s += fmt.Sprintln("row:", i, "\tsum X:", row.Size.X, "\tmax Y:", row.Size.Y, "\tsum grX:", row.Grow.X, "\tmax grY:", row.Grow.Y)
 	}
 	return s
 }
@@ -279,6 +281,12 @@ func (ly *Layout) SetInitCells() {
 	}
 }
 
+func (ly *Layout) SetGapSizeFromCells() {
+	ly.LayImpl.GapSize.X = float32(ly.LayImpl.Cells.X-1) * ly.Styles.Gap.X.Dots
+	ly.LayImpl.GapSize.Y = float32(ly.LayImpl.Cells.Y-1) * ly.Styles.Gap.Y.Dots
+	fmt.Println("gapsize:", ly.LayImpl.GapSize, "dots:", ly.Styles.Gap.Dots())
+}
+
 func (ly *Layout) SetInitCellsFlex() {
 	ma := ly.Styles.MainAxis
 	ca := ma.OtherDim()
@@ -290,6 +298,7 @@ func (ly *Layout) SetInitCellsFlex() {
 	})
 	mat32.SetPointDim(&ly.LayImpl.Cells, ma, idx)
 	mat32.SetPointDim(&ly.LayImpl.Cells, ca, 1)
+	ly.SetGapSizeFromCells()
 }
 
 func (ly *Layout) SetInitCellsStacked() {
@@ -298,6 +307,7 @@ func (ly *Layout) SetInitCellsStacked() {
 		return ki.Continue
 	})
 	ly.LayImpl.Cells = image.Point{1, 1}
+	ly.SetGapSizeFromCells()
 }
 
 func (ly *Layout) SetInitCellsGrid() {
@@ -326,8 +336,7 @@ func (ly *Layout) SetInitCellsGrid() {
 		}
 		return ki.Continue
 	})
-	ly.LayImpl.GapSize.X = float32(cols-1) * ly.Styles.Gap.X.Dots
-	ly.LayImpl.GapSize.Y = float32(rows-1) * ly.Styles.Gap.Y.Dots
+	ly.SetGapSizeFromCells()
 }
 
 // todo: wrap requires a different non-grid logic -- no constraint of same sizes across rows
@@ -351,7 +360,7 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 		sz := kwb.Alloc.Size.Total
 		grw := kwb.Styles.Grow
 		if LayoutTrace {
-			fmt.Println("szup i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
+			fmt.Println("szup i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw, "csz:", kwb.Alloc.Size.Content)
 		}
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
 			ca := ma.OtherDim()             // cross axis = Y then X
@@ -459,13 +468,20 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
 		totSz.SetDim(ma, tsz)
 	}
 	prevContent := ly.Alloc.Size.Content
+	if iter > 0 {
+		prevContent = ly.LayImpl.ContentMinusGap
+	}
 	ly.Alloc.Size.Total = totSz
-	extot := ly.LayImpl.ScrollSize.Add(ly.LayImpl.GapSize).Add(ly.Styles.BoxSpace().Size())
+	extot := ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size())
 	ly.Alloc.Size.SetContentFromTotal(extot)
+	ly.LayImpl.ContentMinusGap = ly.Alloc.Size.Content.Sub(ly.LayImpl.GapSize)
 
-	conDiff := ly.Alloc.Size.Content.Sub(prevContent)
+	conDiff := ly.LayImpl.ContentMinusGap.Sub(prevContent)
 	redo := false
 	if conDiff.X > 0 || conDiff.Y > 0 {
+		if LayoutTrace {
+			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", prevContent, "now:", ly.LayImpl.ContentMinusGap, "gapsize:", ly.LayImpl.GapSize)
+		}
 		redo = ly.SizeDownGrow(sc, iter, conDiff)
 	}
 	return redo
@@ -518,6 +534,7 @@ func (ly *Layout) SizeDownGrowGrid(sc *Scene, iter int, diff mat32.Vec2) bool {
 			asz := mx + ex
 			kwb.Alloc.Size.Alloc.SetDim(ma, asz)
 		}
+		kwb.Alloc.Size.Alloc.SetFloor()
 		kwi.SizeDown(sc, iter, kwb.Alloc.Size.Alloc) // allocate new size
 		return ki.Continue
 	})
@@ -622,20 +639,26 @@ func (ly *Layout) PositionGrid(sc *Scene) {
 	contAvail := ly.Alloc.Size.Alloc.Sub(extot)
 	cdiff := contAvail.Sub(ly.Alloc.Size.Content)
 	if cdiff.X > 0 {
-		stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
+		if LayoutTrace {
+			stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
+			if LayoutTrace {
+				fmt.Println("pos grid:", ly, "extra X:", cdiff.X, "start X:", stspc.X, "align:", ly.Styles.Align.X, "factor:", styles.AlignFactor(ly.Styles.Align.X))
+			}
+		}
 	}
 	if cdiff.Y > 0 {
 		stspc.Y += styles.AlignFactor(ly.Styles.Align.Y) * cdiff.Y
+		if LayoutTrace {
+			fmt.Println("pos grid:", ly, "extra Y:", cdiff.Y, "start Y:", stspc.Y, "align:", ly.Styles.Align.Y, "factor:", styles.AlignFactor(ly.Styles.Align.Y))
+		}
 	}
 	pos = stspc
+	var maxs mat32.Vec2
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Alloc.Cell
 		sz := kwb.Alloc.Size.Total
 		asz := kwb.Alloc.Size.Alloc
-		// if LayoutTrace {
-		// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
-		// }
-		if cidx.X == 0 {
+		if cidx.X == 0 && i > 0 {
 			pos.X = stspc.X
 			pos.Y += lastAsz.Y + gap.Y
 		}
@@ -646,11 +669,19 @@ func (ly *Layout) PositionGrid(sc *Scene) {
 		if sz.Y < asz.Y {
 			ep.Y += styles.AlignFactor(kwb.Styles.Align.Y) * (asz.Y - sz.Y)
 		}
+		ep.SetRound()
+		if LayoutTrace {
+			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep)
+		}
 		kwb.Alloc.Pos = ep
+		maxs.SetMax(ep.Add(asz))
 		pos.X += asz.X + gap.X
 		lastAsz = asz
 		return ki.Continue
 	})
+	if LayoutTrace {
+		fmt.Println("pos:", ly, "max:", maxs)
+	}
 }
 
 func (ly *Layout) PositionWrap(sc *Scene) {
@@ -661,8 +692,6 @@ func (ly *Layout) PositionStacked(sc *Scene) {
 
 //////////////////////////////////////////////////////////////////////
 //		ScenePos
-
-// todo: scene overwrites this to start fresh, rest get info from parent
 
 // ScenePos: scene-based position and final BBox is computed based on
 // parents accumulated position and scrollbar position.
