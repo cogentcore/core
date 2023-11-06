@@ -8,11 +8,14 @@ package web
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/draw"
-	"image/png"
 	"log/slog"
 	"syscall/js"
+	"time"
+
+	"golang.org/x/image/bmp"
 )
 
 // drawerImpl is a TEMPORARY, low-performance implementation of [goosi.Drawer].
@@ -107,30 +110,27 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 	imgs := dw.images[descIdx]
 	img := imgs[0]
 
-	// t0 := time.Now()
+	t0 := time.Now()
 	buf := bytes.Buffer{}
-	enc := &png.Encoder{
-		CompressionLevel: png.NoCompression,
-	}
-	err := enc.Encode(&buf, img)
+	err := bmp.Encode(&buf, img)
 	if err != nil {
 		slog.Error(err.Error())
 		return
 	}
-	// fmt.Println("time to encode png", time.Since(t0))
+	fmt.Println("time to encode png", time.Since(t0))
 
-	// t1 := time.Now()
+	t1 := time.Now()
 	dst := js.Global().Get("Uint8Array").New(len(buf.Bytes()))
-	// fmt.Println("time to make array", time.Since(t1))
-	// t2 := time.Now()
+	fmt.Println("time to make array", time.Since(t1))
+	t2 := time.Now()
 	js.CopyBytesToJS(dst, buf.Bytes())
-	// fmt.Println("time to copy bytes to js", time.Since(t2))
-	// t3 := time.Now()
+	fmt.Println("time to copy bytes to js", time.Since(t2))
+	t3 := time.Now()
 	js.Global().Call("displayImage", dst)
-	// fmt.Println("time to display image", time.Since(t3))
-	// t4 := time.Now()
+	fmt.Println("time to display image", time.Since(t3))
+	t4 := time.Now()
 	buf.Reset()
-	// fmt.Println("time to reset buffer", t4)
+	fmt.Println("time to reset buffer", t4)
 }
 
 // EndDraw ends image drawing rendering process on render target
