@@ -125,7 +125,7 @@ func (fr *Frame) Render(sc *Scene) {
 	if fr.PushBounds(sc) {
 		fr.FrameStdRender(sc)
 		fr.RenderChildren(sc)
-		fr.RenderScrolls(sc)
+		// fr.RenderScrolls(sc)
 		fr.PopBounds(sc)
 	} else {
 		fr.SetScrollsOff()

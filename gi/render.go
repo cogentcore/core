@@ -304,8 +304,11 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 // LayoutScene does a layout of the scene: Size, Position
 func (sc *Scene) LayoutScene() {
 	sc.SizeUp(sc)
+	sc.Alloc.Size.Total.SetPoint(sc.Geom.Size)
+	sc.Alloc.Size.Alloc = sc.Alloc.Size.Total
+	sc.Alloc.Size.SetContentFromTotal()
 	for iter := 0; iter < 10; iter++ {
-		redo := sc.SizeDown(sc, iter, mat32.NewVec2FmPoint(sc.Geom.Size))
+		redo := sc.SizeDown(sc, iter, sc.Alloc.Size.Alloc)
 		if redo {
 			fmt.Println("scene:", sc, "redoing, iter:", iter)
 		} else {
@@ -314,6 +317,7 @@ func (sc *Scene) LayoutScene() {
 	}
 	sc.Position(sc)
 	sc.ScenePos(sc)
+	fmt.Println(sc.Alloc.BBox, sc.Alloc.ContentBBox)
 }
 
 // LayoutRenderScene does a layout and render of the tree:
@@ -480,6 +484,9 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 		return false
 	}
 	if wb.Alloc.BBox.Empty() {
+		if RenderTrace {
+			fmt.Printf("Render empty bbox: %v at %v\n", wb.Path(), wb.Alloc.BBox)
+		}
 		return false
 	}
 	rs := &sc.RenderState
@@ -518,13 +525,12 @@ func (wb *WidgetBase) RenderParts(sc *Scene) {
 // RenderChildren renders all of node's children,
 // This is the default call at end of Render()
 func (wb *WidgetBase) RenderChildren(sc *Scene) {
-	for _, kid := range wb.Kids {
-		wi, _ := AsWidget(kid)
-		if wi.This() == nil || wi.Is(ki.Deleted) || wi.Is(ki.Updating) {
-			continue
+	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		if !kwi.Is(ki.Updating) {
+			kwi.Render(sc)
 		}
-		wi.Render(sc)
-	}
+		return ki.Continue
+	})
 }
 
 /* todo: anything needed here?

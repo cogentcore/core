@@ -687,6 +687,8 @@ func (ly *Layout) PositionGrid(sc *Scene) {
 		}
 		kwb.Alloc.Pos = ep
 		maxs.SetMax(ep.Add(asz))
+		kwi.Position(sc)
+
 		pos.X += asz.X + gap.X
 		lastAsz = asz
 		return ki.Continue
@@ -723,14 +725,20 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 		parBB.Max = sc.Geom.Size
 	}
 	wb.Alloc.ScPos = wb.Alloc.Pos.Add(parPos).Add(wb.Alloc.Scroll)
-	wb.Alloc.BBox = mat32.RectFromPosSizeMax(wb.Alloc.ScPos, wb.Alloc.Size.Total)
-	wb.Alloc.BBox = parBB.Intersect(wb.Alloc.BBox)
+	bb := mat32.RectFromPosSizeMax(wb.Alloc.ScPos, wb.Alloc.Size.Total)
+	wb.Alloc.BBox = parBB.Intersect(bb)
+	if LayoutTrace {
+		fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.BBox)
+	}
 
 	spc := wb.Styles.BoxSpace()
 	off := spc.Pos()
 	wb.Alloc.ScContentPos = wb.Alloc.ScPos.Add(off)
-	wb.Alloc.ContentBBox = mat32.RectFromPosSizeMax(wb.Alloc.ScPos.Add(off), wb.Alloc.Size.Content)
-	wb.Alloc.ContentBBox = parBB.Intersect(wb.Alloc.ContentBBox)
+	cbb := mat32.RectFromPosSizeMax(wb.Alloc.ScPos.Add(off), wb.Alloc.Size.Content)
+	wb.Alloc.ContentBBox = parBB.Intersect(cbb)
+	if LayoutTrace {
+		fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Alloc.ContentBBox)
+	}
 	wb.ScenePosParts(sc)
 }
 
@@ -741,11 +749,20 @@ func (wb *WidgetBase) ScenePosParts(sc *Scene) {
 	wb.Parts.ScenePos(sc)
 }
 
+// ScenePosChildren runs ScenePos on the children
+func (wb *WidgetBase) ScenePosChildren(sc *Scene) {
+	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwi.ScenePos(sc)
+		return ki.Continue
+	})
+}
+
 // ScenePos: scene-based position and final BBox is computed based on
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
 func (ly *Layout) ScenePos(sc *Scene) {
 	ly.ScenePosWidget(sc)
+	ly.ScenePosChildren(sc)
 	// todo: do scrollbars here
 }
 
