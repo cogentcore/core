@@ -134,6 +134,8 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 	}
 	ed.Buf.MarkupMu.RLock() // needed for HiTags access
 	defer ed.Buf.MarkupMu.RUnlock()
+
+	bb := ed.Alloc.ContentBBox
 	sty := &ed.Styles
 	cspec := sty.BackgroundColor
 	bg := cspec.Solid
@@ -144,10 +146,10 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 	for ln := stln; ln <= edln; ln++ {
 		lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-		if int(mat32.Ceil(led)) < ed.ScBBox.Min.Y {
+		if int(mat32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > ed.ScBBox.Max.Y {
+		if int(mat32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
 		if ln >= len(ed.Buf.HiTags) { // may be out of sync
@@ -225,17 +227,18 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	spos := ed.CharStartPos(st)
 	epos := ed.CharStartPos(end)
 	epos.Y += ed.LineHeight
-	if int(mat32.Ceil(epos.Y)) < ed.ScBBox.Min.Y || int(mat32.Floor(spos.Y)) > ed.ScBBox.Max.Y {
+	bb := ed.Alloc.ContentBBox
+	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
 
 	rs := &ed.Sc.RenderState
 	pc := &rs.Paint
-	spc := sty.BoxSpace()
+	// spc := sty.BoxSpace()
 
 	rst := ed.RenderStartPos()
 	// SidesTODO: this is sketchy
-	ex := float32(ed.ScBBox.Max.X) - spc.Right
+	ex := float32(bb.Max.X) // - spc.Right
 	sx := rst.X + ed.LineNoOff
 
 	// fmt.Printf("select: %v -- %v\n", st, ed)
@@ -269,9 +272,10 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
 	spos := ed.CharStartPos(st)
 	epos := spos
+	bb := ed.Alloc.ContentBBox
 	epos.Y += ed.LineHeight
-	epos.X = float32(ed.ScBBox.Max.X)
-	if int(mat32.Ceil(epos.Y)) < ed.ScBBox.Min.Y || int(mat32.Floor(spos.Y)) > ed.ScBBox.Max.Y {
+	epos.X = float32(bb.Max.X)
+	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
 
@@ -283,12 +287,13 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors
 
 // RenderStartPos is absolute rendering start position from our allocpos
 func (ed *Editor) RenderStartPos() mat32.Vec2 {
-	st := &ed.Styles
-	spc := st.BoxSpace()
-	pos := ed.Alloc.Pos.Add(spc.Pos())
-	delta := mat32.NewVec2FmPoint(ed.LayoutScrollDelta((image.Point{})))
-	pos = pos.Add(delta)
-	return pos
+	return ed.Alloc.ScContentPos // todo
+	// st := &ed.Styles
+	// // spc := st.BoxSpace()
+	// pos := ed.Alloc.Pos.Add(spc.Pos())
+	// delta := mat32.NewVec2FmPoint(ed.LayoutScrollDelta((image.Point{})))
+	// pos = pos.Add(delta)
+	// return pos
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
@@ -298,8 +303,9 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	rs.Lock()
 	pc := &rs.Paint
 	sty := &ed.Styles
-	pos := mat32.NewVec2FmPoint(ed.ScBBox.Min)
-	epos := mat32.NewVec2FmPoint(ed.ScBBox.Max)
+	bb := ed.Alloc.ContentBBox
+	pos := mat32.NewVec2FmPoint(bb.Min)
+	epos := mat32.NewVec2FmPoint(bb.Max)
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
 	pos = ed.RenderStartPos()
 	stln := -1
@@ -307,10 +313,10 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	for ln := 0; ln < ed.NLines; ln++ {
 		lst := pos.Y + ed.Offs[ln]
 		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-		if int(mat32.Ceil(led)) < ed.ScBBox.Min.Y {
+		if int(mat32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > ed.ScBBox.Max.Y {
+		if int(mat32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
 		if stln < 0 {
@@ -336,7 +342,7 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	ed.RenderScopelights(stln, edln)
 	ed.RenderSelect()
 	if ed.HasLineNos() {
-		tbb := ed.ScBBox
+		tbb := bb
 		tbb.Min.X += int(ed.LineNoOff)
 		rs.Unlock()
 		rs.PushBounds(tbb)
@@ -362,12 +368,13 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	}
 	rs := &ed.Sc.RenderState
 	pc := &rs.Paint
-	sty := &ed.Styles
-	spc := sty.BoxSpace()
-	spos := mat32.NewVec2FmPoint(ed.ScBBox.Min)
-	epos := mat32.NewVec2FmPoint(ed.ScBBox.Max)
+	// sty := &ed.Styles
+	// spc := sty.BoxSpace()
+	bb := ed.Alloc.ContentBBox
+	spos := mat32.NewVec2FmPoint(bb.Min)
+	epos := mat32.NewVec2FmPoint(bb.Max)
 	// SidesTODO: this is sketchy
-	epos.X = spos.X + ed.LineNoOff - spc.Size().X/2
+	epos.X = spos.X + ed.LineNoOff // - spc.Size().X/2
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }
 
@@ -378,14 +385,15 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	}
 	rs := &ed.Sc.RenderState
 	pc := &rs.Paint
-	sty := &ed.Styles
-	spc := sty.BoxSpace()
+	// sty := &ed.Styles
+	// spc := sty.BoxSpace()
+	bb := ed.Alloc.ContentBBox
 	spos := ed.CharStartPos(lex.Pos{Ln: st})
-	spos.X = float32(ed.ScBBox.Min.X)
+	spos.X = float32(bb.Min.X)
 	epos := ed.CharEndPos(lex.Pos{Ln: end + 1})
 	epos.Y -= ed.LineHeight
 	// SidesTODO: this is sketchy
-	epos.X = spos.X + ed.LineNoOff - spc.Size().X/2
+	epos.X = spos.X + ed.LineNoOff //  - spc.Size().X/2
 	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }
@@ -401,20 +409,21 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 
 	sc := ed.Sc
 	sty := &ed.Styles
-	spc := sty.BoxSpace()
+	// spc := sty.BoxSpace()
 	fst := sty.FontRender()
 	rs := &sc.RenderState
 	pc := &rs.Paint
+	bb := ed.Alloc.ContentBBox
 
 	// render fillbox
 	sbox := ed.CharStartPos(lex.Pos{Ln: ln})
-	sbox.X = float32(ed.ScBBox.Min.X)
+	sbox.X = float32(bb.Min.X)
 	ebox := ed.CharEndPos(lex.Pos{Ln: ln + 1})
 	if ln < ed.NLines-1 {
 		ebox.Y -= ed.LineHeight
 	}
 	// SidesTODO: this is sketchy
-	ebox.X = sbox.X + ed.LineNoOff - spc.Size().X/2
+	ebox.X = sbox.X + ed.LineNoOff // - spc.Size().X/2
 	bsz := ebox.Sub(sbox)
 	lclr, hasLClr := ed.Buf.LineColors[ln]
 	if ed.CursorPos.Ln == ln {
@@ -442,7 +451,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	pos := mat32.Vec2{}
 	lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
-	pos.X = float32(ed.ScBBox.Min.X) + spc.Pos().X
+	pos.X = float32(bb.Min.X) // + spc.Pos().X
 
 	ed.LineNoRender.Render(rs, pos)
 	// todo: need an SvgRender interface that just takes an svg file or object
@@ -466,7 +475,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// }
 	// if vpUpload {
 	// 	tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
-	// 	winoff := ed.ScBBox.Min.Sub(ed.ScBBox.Min)
+	// 	winoff := bb.Min.Sub(bb.Min)
 	// 	tScBBox := tBBox.Add(winoff)
 	// 	sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
 	// }
@@ -496,18 +505,19 @@ func (ed *Editor) RenderLines(st, end int) bool {
 	rs := &sc.RenderState
 	pc := &rs.Paint
 	pos := ed.RenderStartPos()
+	bb := ed.Alloc.ContentBBox
 	var boxMin, boxMax mat32.Vec2
-	rs.PushBounds(ed.ScBBox)
+	rs.PushBounds(bb)
 	// first get the box to fill
 	visSt := -1
 	visEd := -1
 	for ln := st; ln <= end; ln++ {
 		lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-		if int(mat32.Ceil(led)) < ed.ScBBox.Min.Y {
+		if int(mat32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > ed.ScBBox.Max.Y {
+		if int(mat32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
 		lp := pos
@@ -522,8 +532,8 @@ func (ed *Editor) RenderLines(st, end int) bool {
 	}
 	if !(visSt < 0 && visEd < 0) {
 		rs.Lock()
-		boxMin.X = float32(ed.ScBBox.Min.X) // go all the way
-		boxMax.X = float32(ed.ScBBox.Max.X) // go all the way
+		boxMin.X = float32(bb.Min.X) // go all the way
+		boxMax.X = float32(bb.Max.X) // go all the way
 		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.BackgroundColor)
 		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
@@ -537,7 +547,7 @@ func (ed *Editor) RenderLines(st, end int) bool {
 			for ln := visSt; ln <= visEd; ln++ {
 				ed.RenderLineNo(ln, true, false)
 			}
-			tbb := ed.ScBBox
+			tbb := bb
 			tbb.Min.X += int(ed.LineNoOff)
 			rs.Unlock()
 			rs.PushBounds(tbb)
@@ -556,7 +566,7 @@ func (ed *Editor) RenderLines(st, end int) bool {
 		}
 
 		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-		winoff := ed.ScBBox.Min.Sub(ed.ScBBox.Min)
+		winoff := bb.Min.Sub(bb.Min)
 		tScBBox := tBBox.Add(winoff)
 		_ = tScBBox
 		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tScBBox)
@@ -571,15 +581,17 @@ func (ed *Editor) RenderLines(st, end int) bool {
 // (typically cursor -- if zero, a visible line is first found) -- returns
 // stln if nothing found above it.
 func (ed *Editor) FirstVisibleLine(stln int) int {
+	bb := ed.Alloc.ContentBBox
 	if stln == 0 {
 		perln := float32(ed.LinesSize.Y) / float32(ed.NLines)
-		stln = int(float32(ed.ScBBox.Min.Y-ed.ObjBBox.Min.Y)/perln) - 1
+		// stln = int(float32(bb.Min.Y-ed.ObjBBox.Min.Y)/perln) - 1 // todo: scroll
+		stln = int(ed.Alloc.Scroll.Y/perln) - 1
 		if stln < 0 {
 			stln = 0
 		}
 		for ln := stln; ln < ed.NLines; ln++ {
 			cpos := ed.CharStartPos(lex.Pos{Ln: ln})
-			if int(mat32.Floor(cpos.Y)) >= ed.ScBBox.Min.Y { // top definitely on screen
+			if int(mat32.Floor(cpos.Y)) >= bb.Min.Y { // top definitely on screen
 				stln = ln
 				break
 			}
@@ -588,7 +600,7 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 	lastln := stln
 	for ln := stln - 1; ln >= 0; ln-- {
 		cpos := ed.CharStartPos(lex.Pos{Ln: ln})
-		if int(mat32.Ceil(cpos.Y)) < ed.ScBBox.Min.Y { // top just offscreen
+		if int(mat32.Ceil(cpos.Y)) < bb.Min.Y { // top just offscreen
 			break
 		}
 		lastln = ln
@@ -599,11 +611,12 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 // LastVisibleLine finds the last visible line, starting at given line
 // (typically cursor) -- returns stln if nothing found beyond it.
 func (ed *Editor) LastVisibleLine(stln int) int {
+	bb := ed.Alloc.ContentBBox
 	lastln := stln
 	for ln := stln + 1; ln < ed.NLines; ln++ {
 		pos := lex.Pos{Ln: ln}
 		cpos := ed.CharStartPos(pos)
-		if int(mat32.Floor(cpos.Y)) > ed.ScBBox.Max.Y { // just offscreen
+		if int(mat32.Floor(cpos.Y)) > bb.Max.Y { // just offscreen
 			break
 		}
 		lastln = ln
@@ -618,14 +631,15 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	if ed.NLines == 0 {
 		return lex.PosZero
 	}
+	bb := ed.Alloc.ContentBBox
 	sty := &ed.Styles
-	yoff := float32(ed.ScBBox.Min.Y)
+	yoff := float32(bb.Min.Y)
 	stln := ed.FirstVisibleLine(0)
 	cln := stln
 	fls := ed.CharStartPos(lex.Pos{Ln: stln}).Y - yoff
 	if pt.Y < int(mat32.Floor(fls)) {
 		cln = stln
-	} else if pt.Y > ed.ScBBox.Max.Y {
+	} else if pt.Y > bb.Max.Y {
 		cln = ed.NLines - 1
 	} else {
 		got := false
@@ -648,10 +662,10 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	if lnsz == 0 {
 		return lex.Pos{Ln: cln, Ch: 0}
 	}
-	xoff := float32(ed.ScBBox.Min.X)
-	scrl := ed.ScBBox.Min.X - ed.ObjBBox.Min.X
-	nolno := pt.X - int(ed.LineNoOff)
-	sc := int(float32(nolno+scrl) / sty.Font.Face.Metrics.Ch)
+	xoff := float32(bb.Min.X)
+	scrl := ed.Alloc.Scroll.Y
+	nolno := float32(pt.X - int(ed.LineNoOff))
+	sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
 	sc = max(0, sc)
 	cch := sc

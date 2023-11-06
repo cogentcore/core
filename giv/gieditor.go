@@ -125,18 +125,21 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 
 	kv := NewStructView(sc, "kv")
 	kv.SetStruct(key)
-	kv.SetStretchMax()
+	// kv.Style(func(s *styles.Style) {
+	// 	kv.Grow.Set(1,1)
+	// })
 
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
 	svl := NewStructView(split, "svl")
 	svl.SetStruct(&schemes.Light)
-	svl.SetStretchMax()
+	// svl.Style(func(s *styles.Style) {
+	// 	svl.Grow.Set(1,1)
+	// })
 
 	svd := NewStructView(split, "svd")
 	svd.SetStruct(&schemes.Dark)
-	svd.SetStretchMax()
 
 	kv.OnChange(func(e events.Event) {
 		p = matcolor.NewPalette(key)
@@ -243,7 +246,10 @@ func (ge *GiEditor) ConfigSplits() {
 	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
-		tvfr := gi.NewFrame(split, "tvfr").SetMainAxis(mat32.X)
+		tvfr := gi.NewFrame(split, "tvfr")
+		tvfr.Style(func(s *styles.Style) {
+			s.MainAxis = mat32.X
+		})
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
 		tv.OnSelect(func(e events.Event) {

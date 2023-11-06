@@ -31,7 +31,6 @@ func KeyMapsView(km *keyfun.Maps) {
 	})
 
 	tv := NewTableView(sc).SetSlice(km)
-	tv.SetStretchMax()
 
 	keyfun.AvailMapsChanged = false
 	tv.OnChange(func(e events.Event) {

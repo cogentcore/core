@@ -16,7 +16,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -72,7 +71,9 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	updt := cv.UpdateStart()
-	cv.SetMainAxis(mat32.Y)
+	cv.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+	})
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
 	hue.OnChange(func(e events.Event) {
@@ -83,7 +84,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		hue.ValueColor.SetSolid(colors.Transparent)
 		hue.ThumbColor.SetSolid(cv.Color)
 		hue.ThumbSize.Dp(32)
-		s.SetMinPrefWidth(units.Em(40))
+		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for h := float32(0); h <= 360; h += 5 {
@@ -101,7 +102,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		chroma.ValueColor.SetSolid(colors.Transparent)
 		chroma.ThumbColor.SetSolid(cv.Color)
 		chroma.ThumbSize.Dp(32)
-		s.SetMinPrefWidth(units.Em(40))
+		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 150; c += 5 {
@@ -119,7 +120,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		tone.ValueColor.SetSolid(colors.Transparent)
 		tone.ThumbColor.SetSolid(cv.Color)
 		tone.ThumbSize.Dp(32)
-		s.SetMinPrefWidth(units.Em(40))
+		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 100; c += 5 {

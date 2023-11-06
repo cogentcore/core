@@ -98,7 +98,6 @@ func HiStylesView(st *histyle.Styles) {
 	})
 
 	mv := NewMapView(sc).SetMap(st)
-	mv.SetStretchMax()
 
 	histyle.StylesChanged = false
 	mv.OnChange(func(e events.Event) {

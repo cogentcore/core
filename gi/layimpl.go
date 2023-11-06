@@ -38,21 +38,24 @@ import (
 // LaySize has sizing information for content and total size, and grow factors
 type LaySize struct {
 	// Content is size of the contents (children, parts) of the widget,
-	// excluding all additional spacing (padding etc)
-	Content mat32.Vec2 `view:"inline"`
+	// excluding all additional Space (but including Gaps for Layouts)
+	Content mat32.Vec2
 
-	// Total is total size of the widget,
-	// including all additional spacing (padding, margin, scrollbars)
-	// but excluding gap, spacing managed by the layout.
-	Total mat32.Vec2 `view:"inline"`
+	// Space is total extra space that, when added to Content, results in the Total size
+	// This includes padding, total effective margin (border, shadow, etc), and scrollbars
+	// It does NOT include Gap for layout, which is part of Content.
+	Space mat32.Vec2
 
-	// Alloc is the top-down Total allocated size of the widget,
-	// Computed by the Layout
-	Alloc mat32.Vec2 `view:"inline"`
+	// Total is total size of the widget: Content + Space
+	Total mat32.Vec2
+
+	// Alloc is the top-down Total allocated size of the widget, computed by the Layout
+	// it can be larger than the Total in case of non-Grow (stretch) elements.
+	Alloc mat32.Vec2
 }
 
 func (ls *LaySize) String() string {
-	return fmt.Sprintf("Content: %v, \tTotal: %v, \tAlloc: %v", ls.Content, ls.Total, ls.Alloc)
+	return fmt.Sprintf("Content: %v, \tSpace: %v, \tTotal: %v, \tAlloc: %v", ls.Content, ls.Space, ls.Total, ls.Alloc)
 }
 
 // SetContentMax sets the Content size subject to given Max values
@@ -74,13 +77,13 @@ func (ls *LaySize) SetContentToFit(sz mat32.Vec2, mx mat32.Vec2) {
 }
 
 // SetTotalFromContent sets the Total size as Content plus given extra space
-func (ls *LaySize) SetTotalFromContent(spc mat32.Vec2) {
-	ls.Total = ls.Content.Add(spc)
+func (ls *LaySize) SetTotalFromContent() {
+	ls.Total = ls.Content.Add(ls.Space)
 }
 
-// SetContentFromTotal sets the Content from Total size subtracting extra
-func (ls *LaySize) SetContentFromTotal(spc mat32.Vec2) {
-	ls.Content = ls.Total.Sub(spc)
+// SetContentFromTotal sets the Content from Total size subtracting extra space
+func (ls *LaySize) SetContentFromTotal() {
+	ls.Content = ls.Total.Sub(ls.Space)
 }
 
 // LayoutState contains the the layout state for each widget,
@@ -234,13 +237,14 @@ func (wb *WidgetBase) SizeUp(sc *Scene) {
 func (wb *WidgetBase) SizeUpWidget(sc *Scene) {
 	wb.SizeFromStyle()
 	wb.SizeUpParts(sc)
-	wb.Alloc.Size.SetTotalFromContent(wb.Styles.BoxSpace().Size())
+	wb.Alloc.Size.SetTotalFromContent()
 }
 
 // SizeFromStyle sets the initial Content size from Min style size,
 // subject to Max constraints.
 func (wb *WidgetBase) SizeFromStyle() {
 	wb.Alloc.Size.SetContentMax(wb.Styles.Min.Dots(), wb.Styles.Max.Dots())
+	wb.Alloc.Size.Space = wb.Styles.BoxSpace().Size()
 }
 
 // SizeUpParts adjusts the Content size to hold the Parts layout if present
@@ -262,7 +266,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.SizeUpKids(sc)
 	ly.SetInitCells()
 	ly.SizeUpCells(sc)
-	ly.Alloc.Size.SetTotalFromContent(ly.Styles.BoxSpace().Size())
+	ly.Alloc.Size.SetTotalFromContent()
 }
 
 // SizeUpKids calls SizeUp on all the children of this node
@@ -292,7 +296,6 @@ func (ly *Layout) SetInitCells() {
 func (ly *Layout) SetGapSizeFromCells() {
 	ly.LayImpl.GapSize.X = float32(ly.LayImpl.Cells.X-1) * ly.Styles.Gap.X.Dots
 	ly.LayImpl.GapSize.Y = float32(ly.LayImpl.Cells.Y-1) * ly.Styles.Gap.Y.Dots
-	fmt.Println("gapsize:", ly.LayImpl.GapSize, "dots:", ly.Styles.Gap.Dots())
 }
 
 func (ly *Layout) SetInitCellsFlex() {
@@ -315,7 +318,7 @@ func (ly *Layout) SetInitCellsStacked() {
 		return ki.Continue
 	})
 	ly.LayImpl.Cells = image.Point{1, 1}
-	ly.SetGapSizeFromCells()
+	ly.SetGapSizeFromCells() // always 0
 }
 
 func (ly *Layout) SetInitCellsGrid() {
@@ -430,7 +433,7 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int, allocTotal mat32.Vec2) bool 
 // and giving that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
 	wb.Alloc.Size.Total = allocTotal
-	wb.Alloc.Size.SetContentFromTotal(wb.Styles.BoxSpace().Size())
+	wb.Alloc.Size.SetContentFromTotal()
 	if wb.Styles.LayoutHasParSizing() {
 		// todo: requires some additional logic to see if actually changes something
 	}
@@ -480,8 +483,9 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
 		prevContent = ly.LayImpl.ContentMinusGap
 	}
 	ly.Alloc.Size.Total = totSz
-	extot := ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size())
-	ly.Alloc.Size.SetContentFromTotal(extot)
+	spctot := ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size())
+	ly.Alloc.Size.Space = spctot
+	ly.Alloc.Size.SetContentFromTotal()
 	ly.LayImpl.ContentMinusGap = ly.Alloc.Size.Content.Sub(ly.LayImpl.GapSize)
 
 	conDiff := ly.LayImpl.ContentMinusGap.Sub(prevContent)

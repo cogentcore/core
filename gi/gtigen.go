@@ -1029,7 +1029,7 @@ var SpaceType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Space",
 	ShortName:  "gi.Space",
 	IDName:     "space",
-	Doc:        "Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set\nwidth / height property to change",
+	Doc:        "Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.\nSet width / height property to change.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

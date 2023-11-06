@@ -56,7 +56,7 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.SetMainAxis(mat32.X)
 		s.Min.X.Ch(20)
-		s.Overflow = styles.OverflowHidden // no scrollbars!
+		s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {

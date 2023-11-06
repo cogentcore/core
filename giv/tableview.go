@@ -90,8 +90,8 @@ func (tv *TableView) TableViewInit() {
 			sf.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.Y)
 				s.Min.X.Ch(20)
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-				s.Grow.Set(1, 1)                   // for this to work, ALL layers above need it too
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
 				s.Border.Style.Set(styles.BorderNone)
 				s.Margin.Zero()
 				s.Padding.Zero()
@@ -103,10 +103,9 @@ func (tv *TableView) TableViewInit() {
 				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 				s.Max.X.Zero()
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			})
 		case "frame/grid-lay": // grid layout
-			gl := w.(*gi.Layout)
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
@@ -123,13 +122,13 @@ func (tv *TableView) TableViewInit() {
 				s.Min.X.Em(20)
 				s.Min.Y.Em(10)
 				s.Grow.Set(1, 1)
-				s.Overflow = styles.OverflowAuto
+				s.Overflow.Set(styles.OverflowAuto)
 			})
 		case "frame/grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
-				s.Min.X.Set(tv.Styles.ScrollBarWidth)
+				s.Min.X = tv.Styles.ScrollBarWidth
 				s.Grow.Set(0, 1)
 			})
 			sb.OnChange(func(e events.Event) {
@@ -175,7 +174,7 @@ func (tv *TableView) TableViewInit() {
 		}
 		if w.Parent().PathFrom(tv) == "frame/header" {
 			w.Style(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			})
 		}
 	})
@@ -307,12 +306,12 @@ func (tv *TableView) ConfigTableView(sc *gi.Scene) {
 
 func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	tv.SetFlag(true, SliceViewConfiged)
-	sf := gi.NewFrame(tv, "frame").SetMainAxis(mat32.Y)
+	sf := gi.NewFrame(tv, "frame")
 	sf.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(sf, "header").SetMainAxis(mat32.X)
-	gl := gi.NewLayout(sf, "grid-lay").SetMainAxis(mat32.X)
+	gi.NewFrame(sf, "header")
+	gl := gi.NewLayout(sf, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid").SetDisplay(styles.DisplayGrid)
+	gi.NewFrame(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
 	tv.ConfigHeader(sc)
 }
@@ -396,19 +395,20 @@ func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc float32, idx int) {
 	if w.Parts != nil {
 		w.Parts.Style(func(s *styles.Style) {
-			s.Overflow = styles.OverflowHidden // no scrollbars!
+			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 		})
 	}
 	w.Style(func(s *styles.Style) {
-		s.Overflow = styles.OverflowHidden // no scrollbars!
-		gd := sg.GridData[gi.Col]
-		if gd == nil {
-			return
-		}
-		if len(gd) > idx {
-			wd := gd[idx].AllocSize - spc
-			s.Min.X.Dot(wd)
-		}
+		s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
+		// todo:
+		// gd := sg.GridData[gi.Col]
+		// if gd == nil {
+		// 	return
+		// }
+		// if len(gd) > idx {
+		// 	wd := gd[idx].AllocSize - spc
+		// 	s.Min.X.Dot(wd)
+		// }
 	})
 }
 
@@ -432,7 +432,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	sg := tv.SliceGrid()
-	spc := sgh.Styles.Gap.Dots
+	spc := sgh.Styles.Gap.Dots().X
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
 	if tv.Is(SliceViewShowIndex) {

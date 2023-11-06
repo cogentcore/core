@@ -53,7 +53,6 @@ func PrefsView(pf *gi.Preferences) {
 
 	sv := NewStructView(sc)
 	sv.SetStruct(pf)
-	sv.SetStretchMax()
 	sv.OnChange(func(e events.Event) {
 		pf.Apply()
 		pf.Save()
@@ -108,7 +107,6 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
-	sv.SetStretchMax()
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
@@ -173,7 +171,6 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
-	sv.SetStretchMax()
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)

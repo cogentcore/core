@@ -206,7 +206,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 				s.SetMainAxis(mat32.X)
-				s.Gap.Ch(0.1)
+				s.Gap.X.Ch(0.1)
 				s.Padding.Zero()
 
 				// we manually inherit our state layer from the treeview state
@@ -488,6 +488,7 @@ func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
 // TreeView is tricky for alloc because it is both a layout
 // of its children but has to maintain its own bbox for its own widget.
 
+/* todo:
 func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 	tv.InitLayout(sc)
 	tv.GetSizeParts(sc, iter) // get our size from parts
@@ -509,6 +510,7 @@ func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 	tv.Alloc.Size.Total = mat32.Vec2{w, h}
 	tv.WidgetSize.X = w // stretch
 }
+*/
 
 func (tv *TreeView) UpdateBranchIcons() {
 }
@@ -532,6 +534,7 @@ func (tv *TreeView) SetBranchState() {
 	}
 }
 
+/* todo:
 func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
 	spc := tv.BoxSpace()
 	tv.Parts.Alloc.Pos = tv.Alloc.Pos.Add(spc.Pos())
@@ -589,6 +592,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	}
 	return redo
 }
+*/
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
@@ -1196,8 +1200,8 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 		pos = e.Pos()
 		return
 	}
-	pos.X = tv.ScBBox.Min.X + int(tv.Indent.Dots)
-	pos.Y = (tv.ScBBox.Min.Y + tv.ScBBox.Max.Y) / 2
+	pos.X = tv.Alloc.BBox.Min.X + int(tv.Indent.Dots)
+	pos.Y = (tv.Alloc.BBox.Min.Y + tv.Alloc.BBox.Max.Y) / 2
 	return
 }
 

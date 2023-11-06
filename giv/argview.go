@@ -46,12 +46,12 @@ func (av *ArgView) OnInit() {
 			})
 		case "args-grid":
 			w.Style(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.Min.X.Em(1.5)
-				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
-				s.Min.Y.Em(10)
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Display = styles.DisplayGrid
 				s.Columns = 2
+				s.Min.X.Ch(20)
+				s.Min.Y.Em(10)
+				s.Grow.Set(1, 1)
+				s.Overflow.Set(styles.OverflowAuto)
 			})
 		}
 		if w.Parent().Name() == "args-grid" {
@@ -102,7 +102,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		return
 	}
 	sg := av.ArgsGrid()
-	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	config := ki.Config{}
 	for i := range av.Args {

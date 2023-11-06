@@ -59,7 +59,9 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := tv.UpdateStart()
 
-	tv.SetMainAxis(mat32.X)
+	tv.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+	})
 
 	hour := gi.NewTextField(tv, "hour")
 	if gi.Prefs.Clock24 {
@@ -115,7 +117,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	})
 
 	if !gi.Prefs.Clock24 {
-		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetMainAxis(mat32.Y).SetItems([]string{"AM", "PM"})
+		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems([]string{"AM", "PM"})
 		if tv.Time.Hour() < 12 {
 			tv.PM = false
 			sw.SelectItemAction(0)
@@ -183,9 +185,14 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := dv.UpdateStart()
 
-	dv.SetMainAxis(mat32.Y)
+	dv.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
 
-	trow := gi.NewLayout(dv).SetMainAxis(mat32.X)
+	trow := gi.NewLayout(dv)
+	trow.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+	})
 
 	sms := make([]any, len(shortMonths))
 	for i, sm := range shortMonths {
@@ -229,8 +236,9 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 }
 
 func (dv *DateView) ConfigDateGrid() {
-	grid := gi.NewLayout(dv, "grid").SetDisplay(styles.DisplayGrid)
+	grid := gi.NewLayout(dv, "grid")
 	grid.Style(func(s *styles.Style) {
+		s.SetDisplay(styles.DisplayGrid)
 		s.Columns = 7
 	})
 
@@ -334,7 +342,9 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	ly := vv.Widget.(*gi.Layout)
-	ly.SetMainAxis(mat32.X)
+	ly.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+	})
 
 	if len(ly.Kids) > 0 {
 		return
@@ -350,7 +360,9 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 				vv.UpdateWidget()
 			}).Cancel().Ok().Run()
 		})
-	dt.SetMinPrefWidth(units.Em(8))
+	dt.Style(func(s *styles.Style) {
+		s.Min.X.Em(8)
+	})
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
 		d, err := time.Parse("01/02/2006", dt.Text())
@@ -375,7 +387,9 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 				vv.UpdateWidget()
 			}).Cancel().Ok().Run()
 		})
-	tm.SetMinPrefWidth(units.Em(8))
+	tm.Style(func(s *styles.Style) {
+		s.Min.X.Em(8)
+	})
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
 		t, err := time.Parse(gi.Prefs.TimeFormat(), tm.Text())
@@ -463,7 +477,10 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	fr := vv.Widget.(*gi.Layout)
-	fr.SetMainAxis(mat32.X)
+
+	fr.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+	})
 
 	if len(fr.Kids) > 0 {
 		return
