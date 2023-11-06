@@ -7,6 +7,7 @@ package web
 import (
 	"syscall/js"
 
+	"goki.dev/cursors"
 	"goki.dev/enums"
 	"goki.dev/goosi/cursor"
 )
@@ -19,6 +20,10 @@ type cursorImpl struct {
 
 func (c *cursorImpl) Set(cursor enums.Enum) error {
 	s := cursor.String()
+	// css calls it default, not arrow
+	if cursor == cursors.Arrow {
+		s = "default"
+	}
 	js.Global().Get("document").Get("body").Get("style").Set("cursor", s)
 	return nil
 }
