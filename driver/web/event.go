@@ -18,6 +18,8 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "mousedown", js.FuncOf(app.onMouseDown))
 	g.Call("addEventListener", "mouseup", js.FuncOf(app.onMouseUp))
 	g.Call("addEventListener", "mousemove", js.FuncOf(app.onMouseMove))
+	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
+	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
 }
 
 func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
@@ -60,6 +62,22 @@ func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
 	e := args[0]
 	x, y := e.Get("clientX").Int(), args[0].Get("clientY").Int()
 	app.window.EvMgr.MouseMove(image.Pt(x, y))
+	e.Call("preventDefault")
+	return nil
+}
+
+func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
+	e := args[0]
+	key := e.Get("key")
+	app.window.EvMgr.Key(events.KeyDown, []rune(key.String())[0], 0, 0) // TODO(kai/web): modifiers
+	e.Call("preventDefault")
+	return nil
+}
+
+func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
+	e := args[0]
+	key := e.Get("key")
+	app.window.EvMgr.Key(events.KeyUp, []rune(key.String())[0], 0, 0) // TODO(kai/web): modifiers
 	e.Call("preventDefault")
 	return nil
 }
