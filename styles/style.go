@@ -389,3 +389,33 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 	}
 	return res
 }
+
+func (st *Style) SetDisplay(d Display) *Style {
+	st.Display = d
+	return st
+}
+
+func (st *Style) SetWrap(wrap bool) *Style {
+	st.Wrap = wrap
+	return st
+}
+
+func (st *Style) SetMainAxis(ma mat32.Dims) *Style {
+	st.MainAxis = ma
+	return st
+}
+
+func (st *Style) SetGrow(v ...float32) *Style {
+	switch len(v) {
+	case 0:
+		st.Grow.X = 0
+		st.Grow.Y = 0
+	case 1:
+		st.Grow.X = v[0]
+		st.Grow.Y = v[0]
+	default:
+		st.Grow.X = v[0]
+		st.Grow.Y = v[1]
+	}
+	return st
+}

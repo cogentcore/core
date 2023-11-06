@@ -29,6 +29,12 @@ func (xy *XY) String() string {
 	return "(" + xy.X.String() + ", " + xy.Y.String() + ")"
 }
 
+// Zero sets values to 0
+func (xy *XY) Zero() {
+	xy.X.Zero()
+	xy.Y.Zero()
+}
+
 // Set sets the X, Y values according to the given values.
 // no values: set to 0.
 // 1 value: set both to that value.

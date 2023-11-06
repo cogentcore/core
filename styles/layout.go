@@ -19,9 +19,6 @@ import (
 // to a flow layout) -- there is a presumed horizontal aspect to these, except
 // align-content, so they are subsumed in the AlignH parameter in this style.
 // Vertical-align works as expected, and Text.Align uses left/center/right
-//
-// LayoutHoriz, Vert both allow explicit Top/Left Center/Middle, Right/Bottom
-// alignment along with Justify and SpaceAround -- they use IsAlign functions
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleLayoutFuncs
 
