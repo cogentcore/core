@@ -39,7 +39,7 @@ func (ed *Editor) StyleSizes() {
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
-	asz := ed.LayState.Alloc.SizeOrig
+	asz := ed.Alloc.Size.TotalOrig
 	nv := mat32.Vec2{}
 	if asz == nv {
 		ed.NLinesChars.Y = 40

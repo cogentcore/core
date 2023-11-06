@@ -171,7 +171,7 @@ func (ls *LayImplState) InitSizes() {
 			ls.Sizes[d] = make([]LayImplCell, n)
 		}
 		for i := 0; i < n; i++ {
-			ls.Sizes[i].Reset()
+			ls.Sizes[d][i].Reset()
 		}
 	}
 	ls.WrapBreaks = nil
@@ -256,7 +256,7 @@ func (ly *Layout) SetInitCells() {
 
 func (ly *Layout) SetInitCellsFlex() {
 	ma := ly.Styles.MainAxis
-	ca := ma.OrthoDim()
+	ca := ma.OtherDim()
 	idx := 0
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		mat32.SetPointDim(&kwb.Alloc.Cell, ma, idx)
@@ -269,10 +269,10 @@ func (ly *Layout) SetInitCellsFlex() {
 
 func (ly *Layout) SetInitCellsStacked() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Alloc.Cell.Set(0, 0)
+		kwb.Alloc.Cell = image.Point{0, 0}
 		return ki.Continue
 	})
-	ly.LayImpl.Cells.Set(1, 1)
+	ly.LayImpl.Cells = image.Point{1, 1}
 }
 
 func (ly *Layout) SetInitCellsGrid() {
@@ -281,15 +281,15 @@ func (ly *Layout) SetInitCellsGrid() {
 	if cols == 0 {
 		cols = int(mat32.Sqrt(float32(n)))
 	}
-	rows = n / cols
+	rows := n / cols
 	for rows*cols < n {
 		rows++
 	}
-	ly.LayImpl.Cells.Set(cols, rows)
+	ly.LayImpl.Cells = image.Point{cols, rows}
 	ci := 0
 	ri := 0
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Alloc.Cell.Set(ci, ri)
+		kwb.Alloc.Cell = image.Point{ci, ri}
 		ci++
 		cs := kwb.Styles.ColSpan
 		if cs > 1 {
@@ -324,20 +324,20 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 		sz := kwb.Alloc.Size.Total
 		grw := kwb.Styles.Grow
 		for ma := mat32.X; ma < mat32.DimsN; ma++ { // main axis = X then Y
-			ca := ma.OrthoDim()          // cross axis = Y then X
-			mi := mat32.PointDim(ci, ma) // X, Y
-			ci := mat32.PointDim(ci, ca) // Y, X
-			md := &ly.LayImpl.Sizes[mi]  // X, Y
-			cd := &ly.LayImpl.Sizes[ci]  // Y, X
-			msz := sz.Dim(mi)            // main axis size dim: X, Y
-			mx := md.Size.Dim(mi)
+			ca := ma.OtherDim()             // cross axis = Y then X
+			mi := mat32.PointDim(ci, ma)    // X, Y
+			ci := mat32.PointDim(ci, ca)    // Y, X
+			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
+			cd := &ly.LayImpl.Sizes[ca][ci] // Y, X
+			msz := sz.Dim(ma)               // main axis size dim: X, Y
+			mx := md.Size.Dim(ma)
 			mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
-			md.Size.SetDim(mi, mx)
-			sm := cd.Size.Dim(ci)
+			md.Size.SetDim(ma, mx)
+			sm := cd.Size.Dim(ca)
 			sm += msz
-			cd.Size.SetDim(ci, sm)            // Row, sum widths of all elements; Col, sum heights of all elements
-			cd.GrowSum.Dim(mi) += grw.Dim(mi) // row.X = sum of col grows; col.Y = sum of row grows
-			md.GrowSum.Dim(mi) += grw.Dim(mi) // col.X = sum of row grows; row.Y = sum of col grows
+			cd.Size.SetDim(ca, sm)                                // Row, sum widths of all elements; Col, sum heights of all elements
+			cd.GrowSum.SetDim(ma, cd.GrowSum.Dim(ma)+grw.Dim(ma)) // row.X = sum of col grows; col.Y = sum of row grows
+			md.GrowSum.SetDim(ma, md.GrowSum.Dim(ma)+grw.Dim(ma)) // col.X = sum of row grows; row.Y = sum of col grows
 		}
 		return ki.Continue
 	})
@@ -348,12 +348,11 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 
 	var csz mat32.Vec2
 	for ma := mat32.X; ma < mat32.DimsN; ma++ { // main axis = X then Y
-		ca := ma.OrthoDim()       // cross axis = Y then X
-		n := ly.LayImpl.Cells[ma] // cols, rows
+		n := mat32.PointDim(ly.LayImpl.Cells, ma) // cols, rows
 		sum := float32(0)
-		for i := 0; i < n; i++ {
-			md := &ly.LayImpl.Sizes[mi] // X, Y
-			mx := md.Dim(mi)
+		for mi := 0; mi < n; mi++ {
+			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
+			mx := md.Size.Dim(ma)
 			sum += mx // sum of maxes
 		}
 		csz.SetDim(ma, sum)
@@ -366,15 +365,15 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 
 // SizeUpCellsStacked
 func (ly *Layout) SizeUpCellsStacked(sc *Scene) {
-	_, kwb := StackTopWidget()
+	_, kwb := ly.StackTopWidget()
 	if kwb == nil {
 		return
 	}
-	ly.LayImpl.Sizes[0].Size = kwb.Alloc.Size.Total
-	ly.LayImpl.Sizes[1].Size = kwb.Alloc.Size.Total
-	ly.LayImpl.Sizes[0].GrowSum = kwb.Styles.Grow
-	ly.LayImpl.Sizes[0].GrowSum = kwb.Styles.Grow
-	ly.Alloc.Size.SetContentToFit(ly.LayImpl.Sizes[0].Size, ly.Styles.Max.Dots())
+	ly.LayImpl.Sizes[0][0].Size = kwb.Alloc.Size.Total
+	ly.LayImpl.Sizes[1][0].Size = kwb.Alloc.Size.Total
+	ly.LayImpl.Sizes[0][0].GrowSum = kwb.Styles.Grow
+	ly.LayImpl.Sizes[0][0].GrowSum = kwb.Styles.Grow
+	ly.Alloc.Size.SetContentToFit(ly.LayImpl.Sizes[0][0].Size, ly.Styles.Max.Dots())
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -388,9 +387,9 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int, allocTotal mat32.Vec2) bool 
 // computing updated Content size from given total allocation
 // and giving that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
-	wb.Alloc.Total = allocTotal
-	wb.Alloc.SetContentFromTotal(wb.Styles.BoxSpace())
-	redo := wb.SizeDownParts(sc, iter, wb.Alloc.Content) // give our content to parts
+	wb.Alloc.Size.Total = allocTotal
+	wb.Alloc.Size.SetContentFromTotal(wb.Styles.BoxSpace().Size())
+	redo := wb.SizeDownParts(sc, iter, wb.Alloc.Size.Content) // give our content to parts
 	return redo
 }
 
@@ -412,29 +411,32 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
 	// todo: need to add gap sizes!
 	ourTotal := ly.Alloc.Size.Total
 	var totSz mat32.Vec2
-	switch ly.Styles.Overflow {
-	case styles.OverflowVisible:
-		totSz = ourTotal.Max(allocTotal) // get everything we need or are given
-		// no scrollbars
-	case styles.OverflowHidden:
-		totSz = allocTotal // get what we are given
-		// no scrollbars
-	case styles.OverflowAuto, styles.OverflowScroll:
-		totSz = ourTotal.Max(allocTotal) // get everything we need or are given
-		if ourTotal.X > allocTotal.X {
-			ly.LayImpl.ScrollSize.Y = ly.Styles.ScrollBarWidth.Dots()
+	for ma := mat32.X; ma < mat32.DimsN; ma++ { // main axis = X then Y
+		allTot := allocTotal.Dim(ma)
+		ourTot := ourTotal.Dim(ma)
+		var tsz float32
+		switch ly.Styles.Overflow.Dim(ma) {
+		case styles.OverflowVisible:
+			tsz = max(ourTot, allTot) // get everything we need or are given
+			// no scrollbars
+		case styles.OverflowHidden:
+			tsz = allTot // get what we are given
+			// no scrollbars
+		case styles.OverflowAuto, styles.OverflowScroll:
+			tsz = max(ourTot, allTot) // get everything we need or are given
+			if ourTot > allTot {
+				ly.LayImpl.ScrollSize.SetDim(ma.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
+			}
 		}
-		if ourTotal.Y > allocTotal.Y {
-			ly.LayImpl.ScrollSize.X = ly.Styles.ScrollBarWidth.Dots()
-		}
+		totSz.SetDim(ma, tsz)
 	}
 	prevContent := ly.Alloc.Size.Content
 	ly.Alloc.Size.Total = totSz
-	extot := ly.LayImpl.ScrollSize.Add(ly.LayImpl.GapSize).Add(ly.Styles.BoxSpace())
-	ly.Alloc.SetContentFromTotal(extot)
+	extot := ly.LayImpl.ScrollSize.Add(ly.LayImpl.GapSize).Add(ly.Styles.BoxSpace().Size())
+	ly.Alloc.Size.SetContentFromTotal(extot)
 
-	conDiff := ly.Alloc.size.Content.Sub(prevContent)
-	redo := conDiff.X != 0 || condDiff.Y != 0 // size changed
+	conDiff := ly.Alloc.Size.Content.Sub(prevContent)
+	redo := conDiff.X != 0 || conDiff.Y != 0 // size changed
 	if conDiff.X > 0 || conDiff.Y > 0 {
 		ly.SizeDownGrow(conDiff)
 		re := ly.SizeDownAlloc(sc, iter)
@@ -452,34 +454,38 @@ func (ly *Layout) SizeDownGrow(diff mat32.Vec2) {
 		// todo: use special version of grow
 	}
 	for ma := mat32.X; ma < mat32.DimsN; ma++ { // main axis = X then Y
-		ca := ma.OrthoDim()   // cross axis = Y then X
+		ca := ma.OtherDim()   // cross axis = Y then X
 		extra := diff.Dim(ca) // col.Y = extra height for rows in this col; row.X = extra width for cols
 		if extra <= 0 {
 			continue
 		}
-		md := &ly.LayImpl.Sizes[mi] // col data; row data
-		gsum := md.GrowSum.Dim(ci)  // col.Y = sum of row grows for col; row.X = sum of col grows for row
-		if gsum <= 0 {
-			continue
-		}
-		nca := mat32.Pointdim(ly.LayImpl.Cells, ca) // n rows; n cols
+		nca := mat32.PointDim(ly.LayImpl.Cells, ca) // n rows; n cols
 		for ci := 0; ci < nca; ci++ {
+			// todo: this is wrong:
+			md := &ly.LayImpl.Sizes[ma][ci] // col data; row data
+			gsum := md.GrowSum.Dim(ca)      // col.Y = sum of row grows for col; row.X = sum of col grows for row
+			if gsum <= 0 {
+				continue
+			}
 			cd := &ly.LayImpl.Sizes[ca][ci] // row; col
-			gr := cd.GrowSum.Dim(ci)        // row.Y = sum of row grows for row
+			gr := cd.GrowSum.Dim(ca)        // row.Y = sum of row grows for row
 			ex := extra * (gr / gsum)
 			fmt.Println(ly, "ma dim:", ma, "ca:", gr, "prop:", gr/gsum)
-			cur := cd.Size.Dim(ci)
-			cd.Size.SetDim(cur + ex)
+			cur := cd.Size.Dim(ca)
+			cd.Size.SetDim(ca, cur+ex)
 		}
 	}
+}
+
+func (ly *Layout) SizeDownWrap() {
+
 }
 
 // SizeDownAlloc calls size down on kids with newly allocated sizes.
 // returns true if any report needing a redo.
 func (ly *Layout) SizeDownAlloc(sc *Scene, iter int) bool {
 	if ly.Styles.Display == styles.DisplayStacked {
-		ly.SizeDownAllocStacked(sc)
-		return
+		return ly.SizeDownAllocStacked(sc, iter)
 	}
 	// todo: wrap needs special case
 	return ly.SizeDownAllocCells(sc, iter)
@@ -492,8 +498,8 @@ func (ly *Layout) SizeDownAllocCells(sc *Scene, iter int) bool {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ci := kwb.Alloc.Cell
 		sz := kwb.Alloc.Size.Total
-		xa := ly.LayImpl.Sizes[0][ci.X].X // column width
-		ya := ly.LayImpl.Sizes[1][ci.Y].Y // row height
+		xa := ly.LayImpl.Sizes[0][ci.X].Size.X // column width
+		ya := ly.LayImpl.Sizes[1][ci.Y].Size.Y // row height
 		asz := mat32.NewVec2(xa, ya)
 		if asz != sz {
 			fmt.Println(kwi, "td resize, was:", sz, "alloc:", asz)
@@ -504,6 +510,10 @@ func (ly *Layout) SizeDownAllocCells(sc *Scene, iter int) bool {
 		return ki.Continue
 	})
 	return redo
+}
+
+func (ly *Layout) SizeDownAllocStacked(sc *Scene, iter int) bool {
+	return false
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -629,7 +639,7 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc styles.
 // share the same space, e.g., Horiz for a Vert layout, and vice-versa.
 func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 	spc := ly.BoxSpace()
-	avail := ly.LayState.Alloc.Size.Dim(dim) - spc.Size().Dim(dim)
+	avail := ly.Alloc.Size.Total.Dim(dim) - spc.Size().Dim(dim)
 	for i, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -648,8 +658,8 @@ func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 		need := ni.LayState.Size.Need.Dim(dim)
 		max := ni.LayState.Size.Max.Dim(dim)
 		pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, spc, al)
-		ni.LayState.Alloc.Size.SetDim(dim, size)
-		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
+		ni.Alloc.Size.Total.SetDim(dim, size)
+		ni.Alloc.PosRel.SetDim(dim, pos)
 	}
 }
 
@@ -665,7 +675,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	al := ly.Styles.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
-	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
+	avail := ly.Alloc.Size.Total.Dim(dim) - exspc
 	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
 	need := ly.LayState.Size.Need.Dim(dim) - exspc
 
@@ -765,8 +775,8 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 			}
 		}
 
-		ni.LayState.Alloc.Size.SetDim(dim, size)
-		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
+		ni.Alloc.Size.Total.SetDim(dim, size)
+		ni.Alloc.PosRel.SetDim(dim, pos)
 		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
@@ -789,7 +799,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 		prv := ly.ChildSize
 		ly.LayState.Size.Need = prv
 		ly.LayState.Size.Pref = prv
-		ly.LayState.Alloc.Size = prv
+		ly.Alloc.Size.Total = prv
 		ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 		if LayoutTrace {
 			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.Path(), prv)
@@ -1074,7 +1084,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 
-	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
+	avail := ly.Alloc.Size.Total.Dim(dim) - exspc
 	odim := mat32.OtherDim(dim)
 
 	// SidesTODO: might be odim
@@ -1092,8 +1102,8 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 			ly.FlowBreaks = append(ly.FlowBreaks, i)
 			pos = spc.Pos().Dim(dim)
 		}
-		ni.LayState.Alloc.Size.SetDim(dim, size)
-		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
+		ni.Alloc.Size.Total.SetDim(dim, size)
+		ni.Alloc.PosRel.SetDim(dim, pos)
 		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
@@ -1102,7 +1112,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	ly.FlowBreaks = append(ly.FlowBreaks, len(ly.Kids))
 
 	nrows := len(ly.FlowBreaks)
-	oavail := ly.LayState.Alloc.Size.Dim(odim) - exspc
+	oavail := ly.Alloc.Size.Total.Dim(odim) - exspc
 	oavPerRow := oavail / float32(nrows)
 	ci := 0
 	rpos := float32(0)
@@ -1125,11 +1135,11 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 			need := ni.LayState.Size.Need.Dim(odim)
 			max := ni.LayState.Size.Max.Dim(odim)
 			pos, size := LayoutSharedDimImpl(ly, oavPerRow, need, pref, max, spc, al)
-			ni.LayState.Alloc.Size.SetDim(odim, size)
-			ni.LayState.Alloc.PosRel.SetDim(odim, rpos+pos)
+			ni.Alloc.Size.Total.SetDim(odim, size)
+			ni.Alloc.PosRel.SetDim(odim, rpos+pos)
 			rmax = mat32.Max(rmax, size)
-			nsz.X = mat32.Max(nsz.X, ni.LayState.Alloc.PosRel.X+ni.LayState.Alloc.Size.X)
-			nsz.Y = mat32.Max(nsz.Y, ni.LayState.Alloc.PosRel.Y+ni.LayState.Alloc.Size.Y)
+			nsz.X = mat32.Max(nsz.X, ni.Alloc.PosRel.X+ni.Alloc.Size.Total.X)
+			nsz.Y = mat32.Max(nsz.Y, ni.Alloc.PosRel.Y+ni.Alloc.Size.Total.Y)
 		}
 		rpos += rmax + ly.Styles.Gap.Dots
 		ci = bi
@@ -1158,7 +1168,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 	al := ly.Styles.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
-	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
+	avail := ly.Alloc.Size.Total.Dim(dim) - exspc
 	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
 	need := ly.LayState.Size.Need.Dim(dim) - exspc
 
@@ -1294,8 +1304,8 @@ func LayoutGridLay(ly *Layout) {
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
 			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, styles.SideFloats{}, al)
-			ni.LayState.Alloc.Size.SetDim(dim, size)
-			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
+			ni.Alloc.Size.Total.SetDim(dim, size)
+			ni.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 
 		}
 		{ // row, Y dim
@@ -1307,12 +1317,12 @@ func LayoutGridLay(ly *Layout) {
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
 			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, styles.SideFloats{}, al)
-			ni.LayState.Alloc.Size.SetDim(dim, size)
-			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
+			ni.Alloc.Size.Total.SetDim(dim, size)
+			ni.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}
 
 		if LayoutTrace {
-			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.Path(), col, row, ni.LayState.Alloc.PosRel, ni.LayState.Alloc.Size)
+			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.Path(), col, row, ni.Alloc.PosRel, ni.Alloc.Size.Total)
 		}
 
 		col++
@@ -1339,8 +1349,8 @@ func (ly *Layout) FinalizeLayout() {
 		if ni == nil {
 			return
 		}
-		ly.ChildSize.SetMax(ni.LayState.Alloc.PosRel.Add(ni.LayState.Alloc.Size))
-		ni.LayState.Alloc.SizeOrig = ni.LayState.Alloc.Size
+		ly.ChildSize.SetMax(ni.Alloc.PosRel.Add(ni.Alloc.Size.Total))
+		ni.Alloc.Size.TotalOrig = ni.Alloc.Size.Total
 		return
 	}
 	for _, c := range ly.Kids {
@@ -1351,8 +1361,8 @@ func (ly *Layout) FinalizeLayout() {
 		if ni == nil {
 			continue
 		}
-		ly.ChildSize.SetMax(ni.LayState.Alloc.PosRel.Add(ni.LayState.Alloc.Size))
-		ni.LayState.Alloc.SizeOrig = ni.LayState.Alloc.Size
+		ly.ChildSize.SetMax(ni.Alloc.PosRel.Add(ni.Alloc.Size.Total))
+		ni.Alloc.Size.TotalOrig = ni.Alloc.Size.Total
 	}
 }
 

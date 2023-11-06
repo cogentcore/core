@@ -251,7 +251,8 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 	s.Padding.Right.Val *= spc
 	s.Padding.Bottom.Val *= spc
 	s.Padding.Left.Val *= spc
-	s.Pad.Val *= spc
+	s.Gap.X.Val *= spc
+	s.Gap.Y.Val *= spc
 
 	// fsz := Prefs.FontSize / 100
 	// s.Font.Size.Val *= fsz

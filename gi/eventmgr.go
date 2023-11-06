@@ -1478,7 +1478,7 @@ const DNDSpriteName = "gi.RenderWin:DNDSprite"
 func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.EventMgr.DNDStart(src, data)
 	if _, sw := AsWidget(src); sw != nil {
-		sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPo)
+		sp.SetBottomPos(sw.Alloc.Pos.ToPo)
 	}
 	w.DeleteSprite(DNDSpriteName)
 	sp.Name = DNDSpriteName

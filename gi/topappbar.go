@@ -145,12 +145,14 @@ func (tb *TopAppBar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
+/* todo
 func (tb *TopAppBar) GetSize(sc *Scene, iter int) {
 	if iter == 0 {
 		tb.AllItemsToChildren(sc)
 	}
 	tb.Frame.GetSize(sc, iter)
 }
+*/
 
 // AllItemsToChildren moves the overflow items back to the children,
 // so the full set is considered for the next layout round,
@@ -194,7 +196,7 @@ func (tb *TopAppBar) DoLayoutAlloc(sc *Scene, iter int) bool {
 			return tb.Frame.DoLayoutAlloc(sc, iter)
 		}
 		if iter == 0 { // first do a normal layout to get everyone's target positions
-			tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
+			tb.Alloc.Size.Total = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
 			tb.BBox = tb.ScBBox
 			tb.ObjBBox = tb.ScBBox
 			tb.Frame.DoLayoutAlloc(sc, iter)
@@ -220,7 +222,7 @@ func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 	if ldim == mat32.Y {
 		dmx = float32(avsz.Y)
 	}
-	tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
+	tb.Alloc.Size.Total = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
 	tb.BBox = tb.ScBBox
 	tb.ObjBBox = tb.ScBBox
 

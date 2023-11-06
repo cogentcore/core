@@ -56,16 +56,16 @@ func (wb *WidgetBase) BBoxReport() string {
 func (wb *WidgetBase) AddParentPos() mat32.Vec2 {
 	if pwi, pwb := AsWidget(wb.Par); pwi != nil {
 		if !wb.Is(ki.Field) {
-			wb.LayState.Alloc.Pos = pwb.LayState.Alloc.PosOrig.Add(wb.LayState.Alloc.PosRel)
+			wb.Alloc.Pos = pwb.Alloc.PosOrig.Add(wb.Alloc.PosRel)
 		}
-		return pwb.LayState.Alloc.Size
+		return pwb.Alloc.Size.Total
 	}
 	return mat32.Vec2Zero
 }
 
 // BBoxFromAlloc gets our bbox from Layout allocation.
 func (wb *WidgetBase) BBoxFromAlloc() image.Rectangle {
-	return mat32.RectFromPosSizeMax(wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size)
+	return mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Total)
 }
 
 func (wb *WidgetBase) BBoxes() image.Rectangle {
@@ -84,19 +84,21 @@ func (wb *WidgetBase) ComputeBBoxesParts(sc *Scene, parBBox image.Rectangle, del
 func (wb *WidgetBase) ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBoxesParts(sc, parBBox, delta)
 }
+*/
 
 // PointToRelPos translates a point in Scene pixel coords
 // into relative position within node
 func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
-	return pt.Sub(wb.ScBBox.Min)
+	return pt.Sub(wb.Alloc.BBox.Min)
 }
 
+/*
 ////////////////////////////////////////////////////////////////////
 // 	GetSize
 
-// set our LayState.Alloc.Size from constraints
+// set our Alloc.Size.Total from constraints
 func (wb *WidgetBase) GetSizeFromWH(w, h float32) {
 	st := &wb.Styles
 	if st.Width.Dots > 0 {
@@ -108,19 +110,19 @@ func (wb *WidgetBase) GetSizeFromWH(w, h float32) {
 	spcsz := st.BoxSpace().Size()
 	w += spcsz.X
 	h += spcsz.Y
-	wb.LayState.Alloc.Size = mat32.Vec2{w, h}
+	wb.Alloc.Size.Total = mat32.Vec2{w, h}
 }
 
 // GetSizeAddSpace adds space to existing AllocSize
 func (wb *WidgetBase) GetSizeAddSpace() {
 	spc := wb.BoxSpace()
-	wb.LayState.Alloc.Size.SetAdd(spc.Size())
+	wb.Alloc.Size.Total.SetAdd(spc.Size())
 }
 
 // GetSizeSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
 func (wb *WidgetBase) GetSizeSubSpace() mat32.Vec2 {
 	spc := wb.BoxSpace()
-	return wb.LayState.Alloc.Size.Sub(spc.Size())
+	return wb.Alloc.Size.Total.Sub(spc.Size())
 }
 
 // GetSizeParts sets our size from those of our parts -- default..
@@ -129,10 +131,10 @@ func (wb *WidgetBase) GetSizeParts(sc *Scene, iter int) {
 		return
 	}
 	wb.Parts.GetSizeTree(sc, iter)
-	wb.LayState.Alloc.Size = wb.Parts.LayState.Size.Pref // get from parts
+	wb.Alloc.Size.Total = wb.Parts.LayState.Size.Pref // get from parts
 	wb.GetSizeAddSpace()
 	if LayoutTrace {
-		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.Path(), wb.LayState.Alloc.Size, wb.Parts.LayState.Size.Pref)
+		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.Path(), wb.Alloc.Size.Total, wb.Parts.LayState.Size.Pref)
 	}
 }
 
@@ -156,8 +158,8 @@ func (wb *WidgetBase) DoLayoutParts(sc *Scene, parBBox image.Rectangle, iter int
 		return
 	}
 	spc := wb.BoxSpace()
-	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.Add(spc.Pos())
-	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.Sub(spc.Size())
+	wb.Parts.Alloc.Pos = wb.Alloc.Pos.Add(spc.Pos())
+	wb.Parts.Alloc.Size.Total = wb.Alloc.Size.Total.Sub(spc.Size())
 	wb.Parts.DoLayout(sc, parBBox, iter)
 }
 
@@ -188,14 +190,14 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, iter int)
 	}
 	wi := wb.This().(Widget)
 	psize := wb.AddParentPos()
-	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
+	wb.Alloc.PosOrig = wb.Alloc.Pos
 	// this is the one point when Style Dots are actually computed!
 	SetUnitContext(&wb.Styles, sc, wb.NodeSize(), psize) // update units with final layout
 	wb.BBox = wi.BBoxes()                                // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBoxes(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v scbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ScBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v scbb: %v\n", wb.Path(), wb.Alloc.Pos, wb.Alloc.Size.Total, wb.ScBBox)
 	}
 	// typically DoLayoutChildren must be called after this!
 }
@@ -247,7 +249,7 @@ func (wb *WidgetBase) LayoutScroll(sc *Scene, delta image.Point, parBBox image.R
 
 // LayoutScrollBase does the basic move on this node
 func (wb *WidgetBase) LayoutScrollBase(sc *Scene, delta image.Point, parBBox image.Rectangle) {
-	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig.Add(mat32.NewVec2FmPoint(delta))
+	wb.Alloc.Pos = wb.Alloc.PosOrig.Add(mat32.NewVec2FmPoint(delta))
 	wb.This().(Widget).ComputeBBoxes(sc, parBBox, delta)
 }
 
@@ -262,7 +264,7 @@ func (wb *WidgetBase) LayoutScrollTree(sc *Scene) {
 	} else {
 		parBBox.Max = sc.RenderCtx().Size
 	}
-	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig).ToPoint()
+	delta := wb.Alloc.Pos.Sub(wb.Alloc.PosOrig).ToPoint()
 	wb.This().(Widget).LayoutScroll(sc, delta, parBBox) // important to use interface version to get interface!
 }
 
