@@ -437,6 +437,12 @@ func (v *Vec2) SetMinPos(b Vec2) {
 	v.Y = MinPos(v.Y, b.Y)
 }
 
+// set the value along a given dimension to min of current val and new val
+func (a *Vec2) SetMaxPos(o Vec2) {
+	a.X = MaxPos(o.X, a.X)
+	a.Y = MaxPos(o.Y, a.Y)
+}
+
 // SetMaxScalar sets to max of current value and scalar val
 func (v *Vec2) SetMaxScalar(val float32) {
 	v.X = Max(v.X, val)

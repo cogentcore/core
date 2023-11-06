@@ -378,6 +378,18 @@ func MinPos(a, b float32) float32 {
 	return a
 }
 
+// MaxPos returns the minimum of the two values, excluding any that are <= 0
+func MaxPos(a, b float32) float32 {
+	if a > 0 && b > 0 {
+		return Max(a, b)
+	} else if a > 0 {
+		return a
+	} else if b > 0 {
+		return b
+	}
+	return a
+}
+
 // IntMultiple returns the interger multiple of mod closest to given value:
 // int(Round(val / mod)) * mod
 func IntMultiple(val, mod float32) float32 {
