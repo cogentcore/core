@@ -17,9 +17,8 @@ import (
 // TODO: replace drawerImpl with WebGPU
 type drawerImpl struct {
 	maxTextures int
-	image       *image.RGBA   // target render image
-	images      []*image.RGBA // stack of images indexed by render scene index
-	sprites     []*image.RGBA
+	image       *image.RGBA     // target render image
+	images      [][]*image.RGBA // stack of images indexed by render scene index and then layer number
 }
 
 // SetMaxTextures updates the max number of textures for drawing
@@ -49,7 +48,11 @@ func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	for len(dw.images) <= idx {
 		dw.images = append(dw.images, nil)
 	}
-	dw.images[idx] = img.(*image.RGBA)
+	imgs := &dw.images[idx]
+	for len(*imgs) <= layer {
+		*imgs = append(*imgs, nil)
+	}
+	(*imgs)[layer] = img.(*image.RGBA)
 }
 
 // ConfigImageDefaultFormat configures the draw image at the given index
@@ -86,7 +89,7 @@ func (dw *drawerImpl) Scale(idx, layer int, dr image.Rectangle, sr image.Rectang
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *drawerImpl) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
-	img := dw.images[idx]
+	img := dw.images[idx][layer]
 	draw.Draw(dw.image, image.Rectangle{dp, dp.Add(dw.image.Rect.Size())}, img, image.Point{}, op)
 	return nil
 }
