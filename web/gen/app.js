@@ -161,9 +161,12 @@ function goappNewNotification(jsonNotification) {
 // Display Image
 // -----------------------------------------------------------------------------
 
-function displayImage(buf) {
-  let blob = new Blob([buf], { 'type': 'image/png' });
-  document.getElementById('app').src = URL.createObjectURL(blob);
+const appCanvas = document.getElementById('app');
+const appCanvasCtx = appCanvas.getContext('2d');
+
+function displayImage(pix, w, h) {
+  let data = ImageData(pix, w, h);
+  appCanvasCtx.putImageData(pix, 0, 0);
 }
 
 // -----------------------------------------------------------------------------
