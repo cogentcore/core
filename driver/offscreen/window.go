@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build js
+//go:build offscreen
 
-package web
+package offscreen
 
 import (
-	"fmt"
 	"image"
 	"time"
 
@@ -97,7 +96,6 @@ func (w *windowImpl) NextEvent() events.Event {
 // winLoop is the window's own locked processing loop.
 func (w *windowImpl) winLoop() {
 	defer func() { handleRecover(recover()) }()
-	fmt.Println("starting window loop")
 	var winPaint *time.Ticker
 	if w.FPS > 0 {
 		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))

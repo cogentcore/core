@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build js
+//go:build offscreen
 
-// Package web implements goosi interfaces on the web through WASM
-package web
+// Package offscreen provides placeholder implementations of goosi interfaces
+// to allow for offscreen testing and capturing of apps.
+package offscreen
 
 import (
 	"fmt"
@@ -16,7 +17,6 @@ import (
 	"path/filepath"
 	"runtime/debug"
 	"sync"
-	"syscall/js"
 
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
@@ -41,6 +41,7 @@ type appImpl struct {
 	Draw          drawerImpl
 	window        *windowImpl
 	screen        *goosi.Screen
+	noScreens     bool // if all screens have been disconnected, don't do anything..
 	name          string
 	about         string
 	openFiles     []string
@@ -82,15 +83,11 @@ func Main(f func(goosi.App)) {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
-	theApp.initVk()
-	theApp.addEventListeners()
-	fmt.Println("setting the app")
 	goosi.TheApp = theApp
 	go func() {
 		mainCallback(theApp)
 		theApp.stopMain()
 	}()
-	fmt.Println("running main loop")
 	theApp.mainLoop()
 }
 
@@ -156,24 +153,6 @@ func (app *appImpl) stopMain() {
 	app.mainDone <- struct{}{}
 }
 
-// initVk initializes vulkan things
-func (app *appImpl) initVk() {
-	fmt.Println("initializing vk")
-}
-
-// destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
-func (app *appImpl) destroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	fmt.Println("destroying vk")
-}
-
-// fullDestroyVk destroys all vulkan things for when the app is fully quit
-func (app *appImpl) fullDestroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-}
-
 ////////////////////////////////////////////////////////
 //  Window
 
@@ -182,27 +161,6 @@ func (app *appImpl) fullDestroyVk() {
 // Also, it hides all other windows and shows the new one.
 func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { handleRecover(recover()) }()
-	fmt.Println("in new window")
-	// // the actual system window has to exist before we can create the window
-	// var winptr uintptr
-	// for {
-	// 	// fmt.Println("locking in new window")
-	// 	app.mu.Lock()
-	// 	// fmt.Println("past lock in new window")
-	// 	winptr = app.winptr
-	// 	app.mu.Unlock()
-
-	// 	if winptr != 0 {
-	// 		break
-	// 	}
-	// }
-	// fmt.Println("making new window")
-	// if goosi.InitScreenLogicalDPIFunc != nil {
-	// 	log.Println("app first new window calling InitScreenLogicalDPIFunc")
-	// 	goosi.InitScreenLogicalDPIFunc()
-	// }
-	// app.mu.Lock()
-	// defer app.mu.Unlock()
 	app.window = &windowImpl{
 		app:         app,
 		isVisible:   true,
@@ -229,9 +187,9 @@ func (app *appImpl) setSysWindow() error {
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
 
-	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
+	w, h := 800, 600
 
-	app.screen.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	app.screen.DevicePixelRatio = 1
 	app.screen.PixSize = image.Pt(w, h)
 	app.screen.Geometry.Max = app.screen.PixSize
 	dpi := float32(96)
@@ -248,9 +206,6 @@ func (app *appImpl) setSysWindow() error {
 	app.window.WnSize = app.screen.Geometry.Max
 	app.window.DevPixRatio = app.screen.DevicePixelRatio
 	app.window.RenderSize = app.screen.PixSize
-
-	fmt.Printf("screen %#v\n", app.screen)
-	fmt.Printf("window %#v\n", app.window)
 
 	app.window.EvMgr.WindowResize()
 	app.window.EvMgr.Window(events.WinShow)
@@ -460,9 +415,9 @@ func (app *appImpl) IsDark() bool {
 }
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	// TODO(kai)
+	// no-op
 }
 
 func (app *appImpl) HideVirtualKeyboard() {
-	// TODO(kai)
+	// no-op
 }
