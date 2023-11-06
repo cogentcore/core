@@ -65,8 +65,8 @@ type Web struct { //gti:add
 	// The interval between each app auto-update while running in a web browser.
 	// Zero or negative values deactivates the auto-update mechanism.
 	//
-	// Default is 0.
-	AutoUpdateInterval time.Duration
+	// Default is 10 seconds.
+	AutoUpdateInterval time.Duration `def:"10000000000"`
 
 	// The environment variables that are passed to the progressive web app.
 	//
