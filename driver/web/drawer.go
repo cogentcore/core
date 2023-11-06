@@ -7,9 +7,13 @@
 package web
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
+	"reflect"
 	"syscall/js"
+	"time"
+	"unsafe"
 )
 
 // drawerImpl is a TEMPORARY, low-performance implementation of [goosi.Drawer].
@@ -108,15 +112,20 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
 	// t1 := time.Now()
-	dst := js.Global().Get("Uint8ClampedArray").New(len(dw.image.Pix))
+	// dst := js.Global().Get("Uint8ClampedArray").New(len(dw.image.Pix))
 	// fmt.Println("time to make array", time.Since(t1))
 	// t2 := time.Now()
-	js.CopyBytesToJS(dst, dw.image.Pix)
-	// fmt.Println("time to copy bytes to js", time.Since(t2))
-	// t3 := time.Now()
+
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&dw.image.Pix))
+	ptr := uintptr(unsafe.Pointer(hdr.Data))
+	// var goValue js.Value
+	// *(*uint64)(unsafe.Pointer(&goValue)) = 0x7FF8000100000006
+	// buf := goValue.Get("mem").Get("buffer")
+	// buf.Call("set", ptr)
+	t3 := time.Now()
 	sz := dw.image.Bounds().Size()
-	js.Global().Call("displayImage", dst, sz.X, sz.Y)
-	// fmt.Println("time to display image", time.Since(t3))
+	js.Global().Call("displayImage", ptr, len(dw.image.Pix), sz.X, sz.Y)
+	fmt.Println("time to display image", time.Since(t3))
 }
 
 // EndDraw ends image drawing rendering process on render target
