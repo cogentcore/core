@@ -126,7 +126,9 @@ func (sc *Scene) SceneStyles() {
 		s.Overflow.Set(styles.OverflowAuto) // screen is always scroller of last resort
 
 		// insets
-
+		if sc.Stage == nil {
+			return
+		}
 		ms := sc.Stage.AsMain()
 		if ms == nil || (ms.Type == DialogStage && !ms.FullWindow) {
 			return

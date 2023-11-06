@@ -166,18 +166,14 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	// we automatically apply prefs to style after we run all of the stylers
 	wb.ApplyStylePrefs()
 
-	// note: it is critical to do this styling here so that layout getsizes
-	// has the proper info for laying out items
-	puc := prof.Start("ApplyStyleWidget-SetUnitContext")
-	SetUnitContext(&wb.Styles, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
-	puc.End()
+	SetUnitContext(&wb.Styles, sc, mat32.Vec2{}, mat32.Vec2{})
 
+	// todo: do we need this any more?
 	psc := prof.Start("ApplyStyleWidget-SetCurrentColor")
 	sc.SetCurrentColor(wb.Styles.Color)
+	psc.End()
 
 	wb.ApplyStyleParts(sc)
-
-	psc.End()
 }
 
 // InitStyleWidget resets the widget styles and applies the basic
@@ -276,27 +272,27 @@ func (wb *WidgetBase) ApplyStyle(sc *Scene) {
 
 // SetUnitContext sets the unit context based on size of scene, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
-// dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
+// dots for rendering.
+// Zero values for element and parent size are ignored.
 func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	if sc != nil {
 		rc := sc.RenderCtx()
 		if rc != nil {
 			st.UnContext.DPI = rc.LogicalDPI
-			// } else {
-			// 	slog.Error("SetUnitContext RenderCtx is nil", "scene", sc.Name())
+		} else {
+			st.UnContext.DPI = 96
 		}
-		if sc.RenderState.Image != nil {
-			sz := sc.Geom.Size // Render.Image.Bounds().Size()
-			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
-		}
-		// } else {
-		// 	slog.Error("SetUnitContext Scene nil!")
+		sz := sc.Geom.Size
+		st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	}
-	pr := prof.Start("SetUnitContext-OpenFont")
-	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
-	pr.End()
+	if st.Font.Face == nil || sc.NeedsRebuild() {
+		pr := prof.Start("SetUnitContext-OpenFont")
+		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
+		pr.End()
+	}
 	ptd := prof.Start("SetUnitContext-ToDots")
 	st.ToDots()
+	// fmt.Println("uc:", st.UnContext.String())
 	ptd.End()
 }
 
