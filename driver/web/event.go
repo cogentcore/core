@@ -11,6 +11,7 @@ import (
 	"syscall/js"
 
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 )
 
 func (app *appImpl) addEventListeners() {
@@ -67,10 +68,20 @@ func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
 	return nil
 }
 
+func (app *appImpl) runeAndCodeFromKey(k string) (rune, key.Codes) {
+	switch k {
+	case "Shift":
+		return 0, key.CodeLeftShift
+	default:
+		return []rune(k)[0], 0
+	}
+}
+
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	key := e.Get("key")
-	app.window.EvMgr.Key(events.KeyDown, []rune(key.String())[0], 0, 0) // TODO(kai/web): modifiers
+	r, c := app.runeAndCodeFromKey(key.String())
+	app.window.EvMgr.Key(events.KeyDown, r, c, 0) // TODO(kai/web): modifiers
 	e.Call("preventDefault")
 	return nil
 }
@@ -78,7 +89,8 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	key := e.Get("key")
-	app.window.EvMgr.Key(events.KeyUp, []rune(key.String())[0], 0, 0) // TODO(kai/web): modifiers
+	r, c := app.runeAndCodeFromKey(key.String())
+	app.window.EvMgr.Key(events.KeyUp, r, c, 0) // TODO(kai/web): modifiers
 	e.Call("preventDefault")
 	return nil
 }
