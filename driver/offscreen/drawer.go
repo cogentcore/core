@@ -9,9 +9,10 @@ package offscreen
 import (
 	"image"
 	"image/draw"
-	"os"
 
 	"goki.dev/goosi"
+	"goki.dev/grows/images"
+	"goki.dev/grr"
 )
 
 type drawerImpl struct {
@@ -109,7 +110,7 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 	if !goosi.NeedsCapture {
 		return
 	}
-	os.WriteFile(goosi.CaptureFilename, dw.image.Pix, 0666)
+	grr.Log0(images.Save(dw.image, goosi.CaptureFilename))
 }
 
 // EndDraw ends image drawing rendering process on render target
