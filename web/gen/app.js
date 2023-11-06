@@ -164,6 +164,9 @@ function goappNewNotification(jsonNotification) {
 const appCanvas = document.getElementById('app');
 const appCanvasCtx = appCanvas.getContext('2d');
 
+appCanvas.width = window.innerWidth;
+appCanvas.height = window.innerHeight;
+
 function displayImage(pix, w, h) {
   let data = new ImageData(pix, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
