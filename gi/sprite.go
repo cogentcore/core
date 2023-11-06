@@ -277,6 +277,7 @@ func (ss *Sprites) DrawSprites(drw goosi.Drawer) {
 			if !sp.On {
 				continue
 			}
+			// fmt.Println("ds", imgidx, ii, sp.Geom.Pos)
 			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, goosi.NoFlipY)
 		}
 	}
