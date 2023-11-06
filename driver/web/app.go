@@ -21,7 +21,6 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/events"
-	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
@@ -40,7 +39,7 @@ type appImpl struct {
 	winptr        uintptr
 	System        *vgpu.System
 	Surface       *vgpu.Surface
-	Draw          vdraw.Drawer
+	Draw          struct{}
 	window        *windowImpl
 	gpu           *vgpu.GPU
 	screen        *goosi.Screen
