@@ -19,7 +19,9 @@ import (
 // TODO: replace drawerImpl with WebGPU
 type drawerImpl struct {
 	maxTextures int
-	images      [][]image.Image
+	image       *image.RGBA   // target render image
+	images      []*image.RGBA // stack of images indexed by render scene index
+	sprites     []*image.RGBA
 }
 
 // SetMaxTextures updates the max number of textures for drawing
@@ -43,24 +45,20 @@ func (dw *drawerImpl) DestBounds() image.Rectangle {
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
 func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
+	if dw.image == nil {
+		dw.image = image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+	}
 	for len(dw.images) <= idx {
 		dw.images = append(dw.images, nil)
 	}
-	ii := &dw.images[idx]
-	for len(*ii) <= layer {
-		*ii = append(*ii, nil)
-	}
-	(*ii)[layer] = img
+	dw.images[idx] = img.(*image.RGBA)
 }
 
 // ConfigImageDefaultFormat configures the draw image at the given index
 // to fit the default image format specified by the given width, height,
 // and number of layers.
 func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
-	for len(dw.images) <= idx {
-		dw.images = append(dw.images, nil)
-	}
-	dw.images[idx] = make([]image.Image, layers)
+	dw.image = image.NewRGBA(image.Rect(0, 0, width, height))
 }
 
 // ConfigImage configures the draw image at given index
@@ -90,6 +88,8 @@ func (dw *drawerImpl) Scale(idx, layer int, dr image.Rectangle, sr image.Rectang
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *drawerImpl) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
+	img := dw.images[idx]
+	draw.Draw(dw.image, dw.image.Bounds(), img, img.Bounds().Min, op)
 	return nil
 }
 
@@ -103,39 +103,14 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
-	imgs := dw.images[descIdx]
-
-	var rimg *image.RGBA
-
-	fmt.Println("limgs", len(imgs))
-
-	// if we only have one image, we can just render it directly.
-	// otherwise, we need to draw all of the images into one image
-	// and then pass that to the render function.
-	if len(imgs) <= 1 {
-		rimg = imgs[0].(*image.RGBA)
-	} else {
-		rimg = image.NewRGBA(imgs[0].Bounds())
-		for i, img := range imgs {
-			// we can get away with src for the first one,
-			// but we need to do over for everything else
-			op := draw.Over
-			if i == 0 {
-				op = draw.Src
-			}
-			fmt.Println("draw.Draw", i, rimg.Bounds(), img.Bounds(), op)
-			draw.Draw(rimg, rimg.Bounds(), img, img.Bounds().Min, op)
-		}
-	}
-
 	t1 := time.Now()
-	dst := js.Global().Get("Uint8ClampedArray").New(len(rimg.Pix))
+	dst := js.Global().Get("Uint8ClampedArray").New(len(dw.image.Pix))
 	fmt.Println("time to make array", time.Since(t1))
 	t2 := time.Now()
-	js.CopyBytesToJS(dst, rimg.Pix)
+	js.CopyBytesToJS(dst, dw.image.Pix)
 	fmt.Println("time to copy bytes to js", time.Since(t2))
 	t3 := time.Now()
-	sz := rimg.Bounds().Size()
+	sz := dw.image.Bounds().Size()
 	fmt.Println("sz", sz)
 	js.Global().Call("displayImage", dst, sz.X, sz.Y)
 	fmt.Println("time to display image", time.Since(t3))
