@@ -167,8 +167,19 @@ const appCanvasCtx = appCanvas.getContext('2d');
 appCanvas.width = window.innerWidth;
 appCanvas.height = window.innerHeight;
 
-function displayImage(pix, w, h) {
-  let data = new ImageData(pix, w, h);
+
+let wasm;
+
+// displayImage takes the pointer to the target image in the wasm linear memory
+// and its length. Gets the resulting byte slice and creates an image data with
+// the given width and height.
+function displayImage(pointer, length, w, h) {
+  console.log("wasm", wasm)
+  let bytes = new Uint8ClampedArray(length);
+  let memoryBytes = new Uint8Array(wasm.instance.exports.mem.buffer);
+  console.log("memoryBytes", memoryBytes)
+  memoryBytes.set(bytes, pointer);
+  let data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
 }
 
@@ -201,6 +212,7 @@ function goappKeepBodyClean() {
 // -----------------------------------------------------------------------------
 // Web Assembly
 // -----------------------------------------------------------------------------
+
 async function goappInitWebAssembly() {
   const loader = document.getElementById("app-wasm-loader");
 
@@ -213,6 +225,8 @@ async function goappInitWebAssembly() {
   if (!instantiateStreaming) {
     instantiateStreaming = async (resp, importObject) => {
       const source = await (await resp).arrayBuffer();
+      // memoryBytes = new Uint8Array(resp.instance.exports.mem.buffer);
+      // console.log("got memory bytes", memoryBytes);
       return await WebAssembly.instantiate(source, importObject);
     };
   }
@@ -227,11 +241,10 @@ async function goappInitWebAssembly() {
     showProgress(0);
 
     const go = new Go();
-    const wasm = await instantiateStreaming(
+    wasm = await instantiateStreaming(
       fetchWithProgress("{{.Wasm}}", showProgress),
       go.importObject
     );
-
     go.run(wasm.instance);
     loader.remove();
   } catch (err) {
