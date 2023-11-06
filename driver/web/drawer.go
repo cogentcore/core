@@ -7,12 +7,10 @@
 package web
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"reflect"
 	"syscall/js"
-	"time"
 	"unsafe"
 )
 
@@ -111,15 +109,11 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {}
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
 func (dw *drawerImpl) StartDraw(descIdx int) {
-	t := time.Now()
-
 	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&dw.image.Pix))
 	ptr := uintptr(unsafe.Pointer(hdr.Data))
 
 	sz := dw.image.Bounds().Size()
 	js.Global().Call("displayImage", ptr, len(dw.image.Pix), sz.X, sz.Y)
-
-	fmt.Println("time to display image", time.Since(t))
 }
 
 // EndDraw ends image drawing rendering process on render target
