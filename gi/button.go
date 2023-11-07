@@ -211,11 +211,11 @@ func (bt *Button) ButtonStyles() {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // nowrap
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Max.X.Zero()
-				s.Align.Y = styles.AlignCenter
-				s.Align.Y = styles.AlignCenter
+				s.Align.Set(styles.AlignCenter)
 				s.FillMargin = false
 			})
 		case "parts/ind-stretch":

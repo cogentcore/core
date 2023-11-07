@@ -62,7 +62,7 @@ func app() {
 
 	trow := gi.NewLayout(sc, "trow")
 	trow.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X).SetGrow(1, 1)
+		s.SetMainAxis(mat32.X)
 	})
 
 	giedsc := keyfun.ChordFor(keyfun.GoGiEditor)
