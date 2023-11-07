@@ -22,7 +22,7 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.RemoveAll(c.Build.Output + ".gz")
+	err = xe.RemoveAll(c.Build.Output + ".orig.gz")
 	if err != nil {
 		return err
 	}
