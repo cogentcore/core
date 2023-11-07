@@ -402,12 +402,7 @@ func SrcDir(dir string) (absDir string, err error) {
 }
 
 func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
-	// TODO: implement clipboard
-	// app.mu.Lock()
-	// app.ctxtwin = win.(*windowImpl)
-	// app.mu.Unlock()
-	return nil
-	// return &theClip
+	return &theClip
 }
 
 func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
