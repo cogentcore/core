@@ -164,10 +164,6 @@ function goappNewNotification(jsonNotification) {
 const appCanvas = document.getElementById('app');
 const appCanvasCtx = appCanvas.getContext('2d');
 
-appCanvas.width = window.innerWidth;
-appCanvas.height = window.innerHeight;
-
-
 let wasm;
 let memoryBytes;
 
