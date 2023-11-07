@@ -26,7 +26,10 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "contextmenu", js.FuncOf(app.onContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
+	g.Call("addEventListener", "input", js.FuncOf(app.onBeforeInput))
 	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
+
+	// canvas := g.Get("document").Call("getElementById", "app")
 }
 
 // eventPos returns the appropriate position for the given event,
@@ -182,6 +185,9 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
+	if e.Get("key").String() == "Unidentified" {
+		return nil
+	}
 	r, c := app.runeAndCodeFromKeyEvent(e, true)
 	fmt.Println("r", r, "c", c)
 	app.window.EvMgr.Key(events.KeyDown, r, c, app.keyMods)
@@ -191,9 +197,25 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
+	if e.Get("key").String() == "Unidentified" {
+		return nil
+	}
 	r, c := app.runeAndCodeFromKeyEvent(e, true)
 	app.window.EvMgr.Key(events.KeyUp, r, c, app.keyMods)
 	e.Call("preventDefault")
+	return nil
+}
+
+func (app *appImpl) onBeforeInput(this js.Value, args []js.Value) any {
+	e := args[0]
+	data := e.Get("data").String()
+	fmt.Println("beforeinput", data)
+	if data == "" {
+		return nil
+	}
+	for _, r := range data {
+		app.window.EvMgr.KeyChord(r, 0, app.keyMods)
+	}
 	return nil
 }
 
