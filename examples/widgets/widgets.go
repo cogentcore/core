@@ -62,7 +62,7 @@ func app() {
 
 	trow := gi.NewLayout(sc, "trow")
 	trow.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X).SetGrow(1, 0)
+		s.SetMainAxis(mat32.X).SetGrow(1, 1)
 	})
 
 	giedsc := keyfun.ChordFor(keyfun.GoGiEditor)
@@ -76,7 +76,9 @@ func app() {
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
-			s.Grow.Set(1, 0)
+			s.Grow.Set(1, 1)
+			s.Max.Y.Em(6)
+			s.Align.Y = styles.AlignStart
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
@@ -88,7 +90,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(sc)
+	// gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Buttons:")
 
 	brow := gi.NewLayout(sc, "brow").

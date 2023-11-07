@@ -834,9 +834,10 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 
 	spc := wb.Styles.BoxSpace()
 	off := spc.Pos()
-	off.SetFloor()
+	fmt.Println(wb, "off", off)
+	// off.SetFloor()
 	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
-	cbb := mat32.RectFromPosSizeMax(wb.Alloc.Pos.Add(off), wb.Alloc.Size.Content)
+	cbb := mat32.RectFromPosSizeMax(wb.Alloc.ContentPos, wb.Alloc.Size.Content)
 	wb.Alloc.ContentBBox = parBB.Intersect(cbb)
 	if LayoutTrace {
 		fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Alloc.ContentBBox)
