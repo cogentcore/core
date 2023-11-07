@@ -133,7 +133,8 @@ func (app *appImpl) runeAndCodeFromKeyEvent(e js.Value, down bool) (rune, key.Co
 	k := e.Get("key").String()
 	fmt.Println("k", k)
 	if k == "Unidentified" {
-		k = js.Global().Get("String").Call("fromCharCode", e.Get("code")).String()
+		fmt.Println("code", e.Get("which"))
+		k = js.Global().Get("String").Call("fromCharCode", e.Get("which")).String()
 		fmt.Println("new k", k)
 		return []rune(k)[0], 0
 	}
