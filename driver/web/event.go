@@ -7,6 +7,7 @@
 package web
 
 import (
+	"fmt"
 	"image"
 	"syscall/js"
 
@@ -130,8 +131,10 @@ func (app *appImpl) onContextMenu(this js.Value, args []js.Value) any {
 // down is whether this is a keyDown event (as opposed to a keyUp one)
 func (app *appImpl) runeAndCodeFromKeyEvent(e js.Value, down bool) (rune, key.Codes) {
 	k := e.Get("key").String()
+	fmt.Println("k", k)
 	if k == "Unidentified" {
 		k = js.Global().Get("String").Call("fromCharCode", e.Get("code")).String()
+		fmt.Println("new k", k)
 		return []rune(k)[0], 0
 	}
 	return app.runeAndCodeFromKey(k, down)
@@ -179,6 +182,7 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	r, c := app.runeAndCodeFromKeyEvent(e, true)
+	fmt.Println("r", r, "c", c)
 	app.window.EvMgr.Key(events.KeyDown, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
