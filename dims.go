@@ -25,3 +25,7 @@ func OtherDim(d Dims) Dims {
 		return X
 	}
 }
+
+func (d Dims) OtherDim() Dims {
+	return OtherDim(d)
+}
