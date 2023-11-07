@@ -7,7 +7,6 @@
 package web
 
 import (
-	"fmt"
 	"image"
 	"syscall/js"
 
@@ -26,7 +25,7 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "contextmenu", js.FuncOf(app.onContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
-	g.Call("addEventListener", "input", js.FuncOf(app.onBeforeInput))
+	g.Call("addEventListener", "beforeinput", js.FuncOf(app.onBeforeInput))
 	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
 
 	// canvas := g.Get("document").Call("getElementById", "app")
@@ -130,20 +129,6 @@ func (app *appImpl) onContextMenu(this js.Value, args []js.Value) any {
 	return nil
 }
 
-// runeAndCodeFromKeyEvent returns the rune and key code corresponding to the given key event.
-// down is whether this is a keyDown event (as opposed to a keyUp one)
-func (app *appImpl) runeAndCodeFromKeyEvent(e js.Value, down bool) (rune, key.Codes) {
-	k := e.Get("key").String()
-	fmt.Println("k", k)
-	if k == "Unidentified" {
-		fmt.Println("code", e.Get("which"))
-		k = js.Global().Get("String").Call("fromCharCode", e.Get("which")).String()
-		fmt.Println("new k", k)
-		return []rune(k)[0], 0
-	}
-	return app.runeAndCodeFromKey(k, down)
-}
-
 // runeAndCodeFromKey returns the rune and key code corresponding to the given key string.
 // down is whether this is from a keyDown event (as opposed to a keyUp one)
 func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
@@ -185,11 +170,11 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
-	if e.Get("key").String() == "Unidentified" {
+	k := e.Get("key").String()
+	if k == "Unidentified" {
 		return nil
 	}
-	r, c := app.runeAndCodeFromKeyEvent(e, true)
-	fmt.Println("r", r, "c", c)
+	r, c := app.runeAndCodeFromKey(k, true)
 	app.window.EvMgr.Key(events.KeyDown, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
@@ -197,10 +182,11 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
-	if e.Get("key").String() == "Unidentified" {
+	k := e.Get("key").String()
+	if k == "Unidentified" {
 		return nil
 	}
-	r, c := app.runeAndCodeFromKeyEvent(e, true)
+	r, c := app.runeAndCodeFromKey(k, true)
 	app.window.EvMgr.Key(events.KeyUp, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
@@ -208,8 +194,9 @@ func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onBeforeInput(this js.Value, args []js.Value) any {
 	e := args[0]
+	e.Call("preventDefault")
+
 	data := e.Get("data").String()
-	fmt.Println("beforeinput", data)
 	if data == "" {
 		return nil
 	}

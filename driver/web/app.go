@@ -467,11 +467,11 @@ func (app *appImpl) IsDark() bool {
 }
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Call("focus")
+	tf := js.Global().Get("document").Call("getElementById", "text-field")
+	tf.Call("focus")
 }
 
 func (app *appImpl) HideVirtualKeyboard() {
-	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Call("blur")
+	tf := js.Global().Get("document").Call("getElementById", "text-field")
+	tf.Call("blur")
 }
