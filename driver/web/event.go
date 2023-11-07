@@ -194,8 +194,6 @@ func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onBeforeInput(this js.Value, args []js.Value) any {
 	e := args[0]
-	e.Call("preventDefault")
-
 	data := e.Get("data").String()
 	if data == "" {
 		return nil
@@ -203,6 +201,7 @@ func (app *appImpl) onBeforeInput(this js.Value, args []js.Value) any {
 	for _, r := range data {
 		app.window.EvMgr.KeyChord(r, 0, app.keyMods)
 	}
+	e.Call("preventDefault")
 	return nil
 }
 
