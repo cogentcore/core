@@ -20,6 +20,7 @@ import (
 // It should be called on menu frames when they are created.
 func MenuSceneConfigStyles(msc *Scene) {
 	msc.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
 		s.Padding.Set(units.Dp(2))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)

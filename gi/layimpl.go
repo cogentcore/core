@@ -691,8 +691,10 @@ func (ly *Layout) SizeDownAllocStacked(sc *Scene, iter int) {
 //////////////////////////////////////////////////////////////////////
 //		Position
 
-// Position: uses the final sizes to position everything within layouts
-// according to alignment settings.
+// Position uses the final sizes to position everything within layouts
+// according to alignment settings.  It only sets the PosRel relative positions.
+// The final layout step of ScenePos computes scene-relative positions, and
+// is called separately whenever scrolling happens.
 func (wb *WidgetBase) Position(sc *Scene) {
 	wb.PositionWidget(sc)
 }
@@ -712,7 +714,11 @@ func (wb *WidgetBase) StyleSizeUpdate(sc *Scene) bool {
 		par = pwb.Alloc.Size.Content
 	}
 	sz := sc.Geom.Size
-	return wb.Styles.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+	chg := wb.Styles.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+	if chg {
+		wb.Styles.ToDots()
+	}
+	return chg
 }
 
 func (wb *WidgetBase) PositionParts(sc *Scene) {

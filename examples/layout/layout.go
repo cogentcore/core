@@ -88,8 +88,7 @@ func app() {
 
 		lb := gi.NewLabel(fr).SetText("This is a test")
 		lb.Style(func(s *styles.Style) {
-			s.Min.X.Ch(10)
-			s.Max.X.Ch(20)
+			s.Min.X.Ch(10) // this is critical for enabling word wrapping
 		})
 	}
 
