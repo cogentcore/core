@@ -7,6 +7,7 @@
 package offscreen
 
 import (
+	"fmt"
 	"image"
 	"time"
 
@@ -107,6 +108,7 @@ outer:
 	for {
 		select {
 		case <-w.winClose:
+			fmt.Println("done with win loop")
 			winPaint.Stop() // todo: close channel too??
 			break outer
 		case <-winShow.C:
