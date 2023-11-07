@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
 
@@ -20,6 +21,7 @@ func main() { gimain.Run(app) }
 func app() {
 	// turn on tracing in preferences, Debug
 	gi.LayoutTrace = true
+	gi.LayoutTraceDetail = true
 
 	frsz := [5]mat32.Vec2{
 		{20, 100},
@@ -46,10 +48,9 @@ func app() {
 
 	row1.Style(func(s *styles.Style) {
 		s.MainAxis = mat32.X
-		s.Min.X.Px(2000)
-		s.Grow.Set(0, 1)
-		s.Gap.X.Em(0)
-		s.Margin.Set(units.Em(6))
+		s.Grow.Set(1, 1)
+		s.Gap.X.Em(2)
+		// s.Margin.Set(units.Em(6))
 		s.Align.X = styles.AlignCenter
 	})
 
@@ -60,8 +61,9 @@ func app() {
 		fr := gi.NewFrame(row1, nm)
 		fr.Style(func(s *styles.Style) {
 			s.MainAxis = mat32.X
-			s.Align.X = styles.AlignCenter
-			s.Grow.Set(1, 0)
+			s.Align.X = styles.AlignEnd
+			s.Align.Y = styles.AlignCenter
+			s.Grow.Set(1, 1)
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			// s.Padding.Set(units.Dp(6))
@@ -77,6 +79,14 @@ func app() {
 			// } else {
 			// 	fr.SetProp("max-width", -1) // spacer
 			// }
+		})
+
+		ic := gi.NewIcon(fr)
+		ic.SetIcon(icons.Add)
+		ic.Style(func(s *styles.Style) {
+			s.Min.Set(units.Em(3))
+			s.Align.X = styles.AlignStart
+			s.Align.Y = styles.AlignCenter
 		})
 	}
 
