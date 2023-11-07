@@ -12,43 +12,26 @@ import (
 	"goki.dev/goosi/mimedata"
 )
 
+// TODO(kai/web): support copying images and other mime formats, etc
+
 type clipImpl struct {
-	lastWrite mimedata.Mimes
 }
 
 var theClip = clipImpl{}
 
 func (ci *clipImpl) IsEmpty() bool {
-	// str := glfw.GetClipboardString()
-	// if len(str) == 0 {
-	// 	return true
-	// }
+	// no-op
 	return false
 }
 
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
-	// str := glfw.GetClipboardString()
-	// if len(str) == 0 {
-	// 	return nil
-	// }
-	// wantText := mimedata.IsText(types[0])
-	// if wantText {
-	// 	bstr := []byte(str)
-	// 	isMulti, mediaType, boundary, body := mimedata.IsMultipart(bstr)
-	// 	if isMulti {
-	// 		return mimedata.FromMultipart(body, boundary)
-	// 	} else {
-	// 		if mediaType != "" { // found a mime type encoding
-	// 			return mimedata.NewMime(mediaType, bstr)
-	// 		} else {
-	// 			// we can't really figure out type, so just assume..
-	// 			return mimedata.NewMime(types[0], bstr)
-	// 		}
-	// 	}
-	// } else {
-	// 	// todo: deal with image formats etc
-	// }
-	return nil
+	str := make(chan string)
+	js.Global().Get("navigator").Get("clipboard").Call("readText").
+		Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
+			str <- args[0].String()
+			return nil
+		}))
+	return mimedata.NewText(<-str)
 }
 
 func (ci *clipImpl) Write(data mimedata.Mimes) error {
