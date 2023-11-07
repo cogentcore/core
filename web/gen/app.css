@@ -20,7 +20,9 @@ body {
 
 #text-field {
   position: fixed;
-  visibility: hidden;
+  opacity: 0;
+  top: 0;
+  left: 0;
 }
 
 /*------------------------------------------------------------------------------
