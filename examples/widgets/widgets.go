@@ -24,8 +24,8 @@ func main() { gimain.Run(app) }
 func app() {
 	// turn these on to see a traces of various stages of processing..
 	// gi.UpdateTrace = true
-	gi.RenderTrace = true
-	// gi.LayoutTrace = true
+	// gi.RenderTrace = true
+	gi.LayoutTrace = true
 	// gi.WinEventTrace = true
 	// gi.WinRenderTrace = true
 	// gi.EventTrace = true
@@ -39,24 +39,26 @@ func app() {
 
 	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
-		gi.NewButton(tb).SetText("Button 1").SetData(1).
-			OnClick(func(e events.Event) {
-				fmt.Println("TopAppBar Button 1")
-				gi.NewSnackbar(tb).Text("Something went wrong!").
-					Button("Try again", func(e events.Event) {
-						fmt.Println("got snackbar try again event")
-					}).
-					Icon(icons.Close, func(e events.Event) {
-						fmt.Println("got snackbar close icon event")
-					}).Run()
-			})
-		gi.NewButton(tb).SetText("Button 2").SetData(2).
-			OnClick(func(e events.Event) {
-				fmt.Println("TopAppBar Button 2")
-			})
-	}
+	gi.DefaultTopAppBar = nil
+
+	// sc.TopAppBar = func(tb *gi.TopAppBar) {
+	// 	gi.DefaultTopAppBar(tb)
+	// 	gi.NewButton(tb).SetText("Button 1").SetData(1).
+	// 		OnClick(func(e events.Event) {
+	// 			fmt.Println("TopAppBar Button 1")
+	// 			gi.NewSnackbar(tb).Text("Something went wrong!").
+	// 				Button("Try again", func(e events.Event) {
+	// 					fmt.Println("got snackbar try again event")
+	// 				}).
+	// 				Icon(icons.Close, func(e events.Event) {
+	// 					fmt.Println("got snackbar close icon event")
+	// 				}).Run()
+	// 		})
+	// 	gi.NewButton(tb).SetText("Button 2").SetData(2).
+	// 		OnClick(func(e events.Event) {
+	// 			fmt.Println("TopAppBar Button 2")
+	// 		})
+	// }
 
 	trow := gi.NewLayout(sc, "trow")
 	trow.Style(func(s *styles.Style) {

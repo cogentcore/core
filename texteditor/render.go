@@ -287,7 +287,7 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors
 
 // RenderStartPos is absolute rendering start position from our allocpos
 func (ed *Editor) RenderStartPos() mat32.Vec2 {
-	return ed.Alloc.ScContentPos // todo
+	return ed.Alloc.ContentPos // todo
 	// st := &ed.Styles
 	// // spc := st.BoxSpace()
 	// pos := ed.Alloc.Pos.Add(spc.Pos())
