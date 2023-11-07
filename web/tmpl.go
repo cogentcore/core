@@ -50,9 +50,9 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 	d := AppJSData{
 		Env:                     string(wenv),
 		LoadingLabel:            c.Web.LoadingLabel,
-		Wasm:                    "/app.wasm.gz",
+		Wasm:                    "app.wasm.gz",
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
-		WorkerJS:                "/app-worker.js",
+		WorkerJS:                "app-worker.js",
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
 	}
 	b := &bytes.Buffer{}
@@ -73,12 +73,12 @@ type AppWorkerJSData struct {
 // sets it to [DefaultAppWorkerJS].
 func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 	resources := []string{
-		"/app.css",
-		"/app.js",
-		"/app.wasm.gz",
-		"/manifest.webmanifest",
-		"/wasm_exec.js",
-		"/",
+		"app.css",
+		"app.js",
+		"app.wasm.gz",
+		"manifest.webmanifest",
+		"wasm_exec.js",
+		"index.html",
 	}
 
 	if c.Web.ServiceWorkerTemplate == "" {
@@ -131,13 +131,13 @@ func MakeManifestJSON(c *config.Config) ([]byte, error) {
 		ShortName:       c.Name,
 		Name:            c.Name,
 		Description:     c.Desc,
-		DefaultIcon:     "/icons/192.png",
-		LargeIcon:       "/icons/512.png",
-		SVGIcon:         "/icons/svg.svg",
+		DefaultIcon:     "icons/192.png",
+		LargeIcon:       "icons/512.png",
+		SVGIcon:         "icons/svg.svg",
 		BackgroundColor: c.Web.BackgroundColor,
 		ThemeColor:      c.Web.ThemeColor,
-		Scope:           "/",
-		StartURL:        "/",
+		Scope:           "",
+		StartURL:        "",
 	}
 
 	b := &bytes.Buffer{}
