@@ -467,7 +467,10 @@ func (app *appImpl) IsDark() bool {
 }
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	// TODO(kai)
+	canvas := js.Global().Get("document").Call("getElementById", "app")
+	canvas.Set("contenteditable", "true")
+	canvas.Call("focus")
+	fmt.Println("focused canvas")
 }
 
 func (app *appImpl) HideVirtualKeyboard() {
