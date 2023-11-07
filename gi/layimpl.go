@@ -281,14 +281,14 @@ func (ly *Layout) SizeUp(sc *Scene) {
 // SizeUpLay is the Layout standard SizeUp pass
 func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.SizeFromStyle()
-	ly.SizeUpKids(sc)
+	ly.SizeUpChildren(sc)
 	ly.SetInitCells()
 	ly.SizeUpCells(sc)
 	ly.Alloc.Size.SetTotalFromContent()
 }
 
-// SizeUpKids calls SizeUp on all the children of this node
-func (ly *Layout) SizeUpKids(sc *Scene) {
+// SizeUpChildren calls SizeUp on all the children of this node
+func (ly *Layout) SizeUpChildren(sc *Scene) {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.SizeUp(sc)
 		return ki.Continue
@@ -496,6 +496,20 @@ func (wb *WidgetBase) SizeDownParts(sc *Scene, iter int) bool {
 	return wb.Parts.SizeDown(sc, iter)
 }
 
+// SizeDownChildren calls SizeDown on the Children.  The kids
+// need to have their Alloc.Size.Alloc set prior to this, which
+// is what Layout type does.  Other special widget types can
+// do custom layout and call this too.
+func (wb *WidgetBase) SizeDownChildren(sc *Scene, iter int) bool {
+	redo := false
+	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		re := kwi.SizeDown(sc, iter)
+		redo = redo || re
+		return ki.Continue
+	})
+	return redo
+}
+
 func (ly *Layout) SizeDown(sc *Scene, iter int) bool {
 	redo := ly.SizeDownLay(sc, iter)
 	if redo && LayoutTrace {
@@ -647,16 +661,6 @@ func (ly *Layout) SizeDownGrowWrap(sc *Scene, iter int, diff mat32.Vec2) bool {
 func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, diff mat32.Vec2) bool {
 	// todo
 	return false
-}
-
-func (ly *Layout) SizeDownChildren(sc *Scene, iter int) bool {
-	redo := false
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		re := kwi.SizeDown(sc, iter)
-		redo = redo || re
-		return ki.Continue
-	})
-	return redo
 }
 
 // SizeDownAlloc calls size down on kids with newly allocated sizes.
@@ -832,7 +836,7 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 		parBB.Max = sc.Geom.Size
 	}
 	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos).Add(wb.Alloc.Scroll)
-	bb := mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Alloc)
+	bb := mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Total) // todo: alloc fixes widgets..
 	wb.Alloc.BBox = parBB.Intersect(bb)
 	if LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Alloc.Pos, "parPos:", parPos, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.BBox)

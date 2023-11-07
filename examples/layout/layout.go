@@ -43,8 +43,24 @@ func app() {
 
 	gi.DefaultTopAppBar = nil
 
-	row1 := gi.NewLayout(sc, "row1")
+	trow := gi.NewLayout(sc, "trow")
+	trow.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+		s.Align.X = styles.AlignCenter
+	})
 
+	gi.NewLabel(trow, "title").SetText("This is a test of the layout logic,<br>which is pretty complex and requires some experimenting to understand how it all works.<br>The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink").
+		SetType(gi.LabelHeadlineSmall).
+		Style(func(s *styles.Style) {
+			s.Grow.Set(0, 0) // this is needed to allow the trow aligncenter to work
+			// because otherwise this takes up the whole space.
+			s.Text.WhiteSpace = styles.WhiteSpaceNormal
+			s.Text.Align = styles.AlignCenter
+			s.Text.AlignV = styles.AlignCenter
+			s.Font.Family = "Times New Roman, serif"
+		})
+
+	row1 := gi.NewLayout(sc, "row1")
 	row1.Style(func(s *styles.Style) {
 		s.MainAxis = mat32.X
 		s.Grow.Set(1, 1)

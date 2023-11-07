@@ -80,13 +80,13 @@ type Widget interface {
 	// It is typically not overridden -- set style funcs to apply custom styling.
 	ApplyStyle(sc *Scene)
 
-	// SizeUp (bottom-up): gathers sizes from our Children & Parts,
+	// SizeUp (bottom-up) gathers sizes from our Children & Parts,
 	// based only on Min style sizes and actual content sizing (eg., text).
 	// Flexible elements (e.g., Text, Flex Wrap, TopAppBar) allocate
 	// optimistically along their main axis, up to any optional Max size.
 	SizeUp(sc *Scene)
 
-	//	SizeDown (top-down, multiple iterations possible): assigns sizes based
+	//	SizeDown (top-down, multiple iterations possible) assigns sizes based
 	// on Alloc.Size.Alloc allocated size (set by parent prior to calling).
 	// This step is where layouts can give extra space based on Grow factors,
 	// and flexible elements wrap / config to fit top-down constraint along main
@@ -94,20 +94,22 @@ type Widget interface {
 	// (or removing items that don't fit, etc).
 	SizeDown(sc *Scene, iter int) bool
 
-	// Position: uses the final sizes to position everything within layouts
-	// according to alignment settings.
+	// Position uses the final sizes to position everything within layouts
+	// according to alignment settings.  It only sets the PosRel relative positions.
+	// The final layout step of ScenePos computes scene-relative positions, and
+	// is called separately whenever scrolling happens.
 	Position(sc *Scene)
 
-	// ScenePos: scene-based position and final BBox is computed based on
+	// ScenePos scene-based position and final BBox is computed based on
 	// parents accumulated position and scrollbar position.
 	// This step can be performed when scrolling after updating Scroll.
 	ScenePos(sc *Scene)
 
-	// Render: Actual rendering pass, each node is fully responsible for
-	// calling Render on its own children, to provide maximum flexibility
-	// (see RenderChildren for default impl) -- bracket the render calls in
+	// Render performs actual rendering pass.  Bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// ScBBox is empty and no rendering should occur.
+	// the node is invisible and should not be rendered.
+	// If Parts are present, RenderParts is called by default.
+	// Layouts or other widgets that manage children should call RenderChildren.
 	Render(sc *Scene)
 
 	// On adds an event listener function for the given event type
