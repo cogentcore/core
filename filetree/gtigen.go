@@ -499,12 +499,6 @@ func (t *VCSLogView) SetCustomContextMenu(v func(m *gi.Scene)) *VCSLogView {
 	return t
 }
 
-// SetLayout sets the [VCSLogView.Lay]
-func (t *VCSLogView) SetLayout(v gi.Layouts) *VCSLogView {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [VCSLogView.StackTop]
 func (t *VCSLogView) SetStackTop(v int) *VCSLogView {
 	t.StackTop = v
