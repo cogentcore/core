@@ -27,8 +27,6 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
 	g.Call("addEventListener", "beforeinput", js.FuncOf(app.onBeforeInput))
 	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
-
-	// canvas := g.Get("document").Call("getElementById", "app")
 }
 
 // eventPos returns the appropriate position for the given event,
@@ -186,7 +184,7 @@ func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	if k == "Unidentified" {
 		return nil
 	}
-	r, c := app.runeAndCodeFromKey(k, true)
+	r, c := app.runeAndCodeFromKey(k, false)
 	app.window.EvMgr.Key(events.KeyUp, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
