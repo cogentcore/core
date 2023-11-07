@@ -1741,8 +1741,8 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
-/* todo
-func (tf *TextField) GetSize(sc *Scene, iter int) {
+func (tf *TextField) SizeUp(sc *Scene) {
+	tf.WidgetBase.SizeUp(sc)
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1760,31 +1760,27 @@ func (tf *TextField) GetSize(sc *Scene, iter int) {
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
+	nsz := mat32.NewVec2(w, tf.FontHeight)
 	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
-	tf.GetSizeParts(sc, iter)
-	tf.GetSizeFromWH(w, tf.FontHeight)
+	tf.Alloc.Size.SetContentToFit(nsz, tf.Styles.Max.Dots())
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	tf.DoLayoutBase(sc, parBBox, iter)
-	tf.DoLayoutParts(sc, parBBox, iter)
-	redo := tf.DoLayoutChildren(sc, iter)
+func (tf *TextField) ScenePos(sc *Scene) {
+	tf.WidgetBase.ScenePos(sc)
 	tf.SetEffPosAndSize()
-	return redo
 }
-*/
 
 // SetEffPosAndSize sets the effective position and size of
 // the textfield based on its base position and size
 // and its icons or lack thereof
 func (tf *TextField) SetEffPosAndSize() {
-	if tf.Parts == nil {
-		fmt.Println("nil parts sepas")
-		tf.ConfigParts(tf.Sc)
-	}
-	sz := tf.Alloc.Size.Total
-	pos := tf.Alloc.Pos
+	// if tf.Parts == nil {
+	// 	fmt.Println("nil parts sepas")
+	// 	tf.ConfigParts(tf.Sc)
+	// }
+	sz := tf.Alloc.Size.Content
+	pos := tf.Alloc.ContentPos
 	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Button); ok {
 		pos.X += lead.Alloc.Size.Total.X
 		sz.X -= lead.Alloc.Size.Total.X
@@ -1799,8 +1795,6 @@ func (tf *TextField) SetEffPosAndSize() {
 func (tf *TextField) RenderTextField(sc *Scene) {
 	rs, _, _ := tf.RenderLock(sc)
 	defer tf.RenderUnlock(rs)
-
-	tf.SetEffPosAndSize()
 
 	tf.AutoScroll() // inits paint with our style
 	st := &tf.Styles

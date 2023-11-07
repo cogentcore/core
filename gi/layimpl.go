@@ -832,7 +832,7 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 		parBB.Max = sc.Geom.Size
 	}
 	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos).Add(wb.Alloc.Scroll)
-	bb := mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Total)
+	bb := mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Alloc)
 	wb.Alloc.BBox = parBB.Intersect(bb)
 	if LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Alloc.Pos, "parPos:", parPos, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.BBox)
