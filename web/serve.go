@@ -16,6 +16,11 @@ import (
 func Serve(c *config.Config) error {
 	fs := http.FileServer(http.Dir(filepath.Dir(c.Build.Output)))
 	http.Handle("/", fs)
+	http.HandleFunc("/app.wasm.gz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/wasm")
+		w.Header().Set("Content-Encoding", "gzip")
+		fs.ServeHTTP(w, r)
+	})
 
 	grog.PrintlnWarn("Serving at http://localhost:" + c.Web.Port)
 	return http.ListenAndServe(":"+c.Web.Port, nil)
