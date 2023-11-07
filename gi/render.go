@@ -316,7 +316,9 @@ func (sc *Scene) LayoutScene() {
 	for iter := 0; iter < 10; iter++ {
 		redo := sc.SizeDown(sc, iter)
 		if redo {
-			fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
+			if LayoutTrace {
+				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
+			}
 		} else {
 			break
 		}

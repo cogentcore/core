@@ -116,10 +116,12 @@ func (lb *Label) LabelStyles() {
 		if !lb.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.Align.Y = styles.AlignCenter
-		s.Grow.Set(1, 0) // critical for avoiding excessive word wrapping
+		s.Grow.Set(1, 1) // critical for avoiding excessive word wrapping
+		s.Min.Y.Em(1)
+		s.Min.X.Ch(10)
+
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
@@ -335,59 +337,49 @@ func (lb *Label) StyleLabel(sc *Scene) {
 }
 
 func (lb *Label) LayoutLabel(sc *Scene) {
-	/*
-		lb.StyMu.RLock()
-		defer lb.StyMu.RUnlock()
+	lb.StyMu.RLock()
+	defer lb.StyMu.RUnlock()
 
-		lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-		spc := lb.BoxSpace()
-		sz := lb.LayState.SizePrefOrMax()
-		if LayoutTrace {
-			fmt.Println("Label:", lb.Nm, "LayoutLabel Size:", sz)
-		}
-		if !sz.IsNil() {
-			sz.SetSub(spc.Size())
-		}
-		lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
-	*/
+	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
+	sz := lb.Alloc.Size.Content
+	if LayoutTrace {
+		fmt.Println("Label:", lb, "LayoutLabel Size:", sz)
+	}
+	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
 }
 
 func (lb *Label) ApplyStyle(sc *Scene) {
 	lb.StyleLabel(sc)
+}
+
+func (lb *Label) SizeUp(sc *Scene) {
+	lb.WidgetBase.SizeUp(sc)
 	lb.LayoutLabel(sc)
+	rsz := lb.TextRender.Size
+	sz := &lb.Alloc.Size
+	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
+	sz.SetTotalFromContent()
+	if LayoutTrace {
+		fmt.Println("Label:", lb, "GetSize:", rsz)
+	}
 }
 
-/*
-func (lb *Label) GetSize(sc *Scene, iter int) {
-	if iter > 0 && lb.Styles.Text.HasWordWrap() {
-		return // already updated in previous iter, don't redo!
-	} else {
-		lb.InitLayout(sc)
-		sz := lb.LayState.Size.Pref // SizePrefOrMax()
-		sz = sz.Max(lb.TextRender.Size)
-		lb.GetSizeFromWH(sz.X, sz.Y)
+func (lb *Label) SizeDown(sc *Scene, iter int) bool {
+	redo := lb.WidgetBase.SizeDown(sc, iter)
+	sz := &lb.Alloc.Size
+	lb.LayoutLabel(sc)
+	rsz := lb.TextRender.Size
+	csz := sz.Content
+	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
+	sz.SetTotalFromContent()
+	re := csz != lb.Alloc.Size.Content
+	if re {
 		if LayoutTrace {
-			fmt.Println("Label:", lb.Nm, "GetSize:", sz)
+			fmt.Println("Label:", lb, "Size Changed:", lb.Alloc.Size.Content, "was:", csz)
 		}
 	}
+	return re || redo
 }
-
-func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	lb.DoLayoutBase(sc, parBBox, iter)
-	lb.DoLayoutChildren(sc, iter) // todo: maybe shouldn't call this on known terminals?
-	sz := lb.GetSizeSubSpace()
-	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
-	if lb.Styles.Text.HasWordWrap() {
-		if lb.TextRender.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			lb.LayState.SetFromStyle(&lb.Styles) // todo: revisit!!
-			lb.GetSizeFromWH(lb.TextRender.Size.X, lb.TextRender.Size.Y)
-			return true // needs a redo!
-		}
-	}
-	return false
-}
-*/
 
 func (lb *Label) TextPos() mat32.Vec2 {
 	lb.StyMu.RLock()
