@@ -66,7 +66,7 @@ func (ls *LaySize) String() string {
 func (ls *LaySize) SetContentMax(sz mat32.Vec2, mx mat32.Vec2) {
 	ls.Content = sz
 	ls.Content.SetMinPos(mx)
-	ls.Content.SetToCeil()
+	ls.Content.SetCeil()
 }
 
 // SetContentToFit sets the Content size subject to given Max values
@@ -75,7 +75,13 @@ func (ls *LaySize) SetContentMax(sz mat32.Vec2, mx mat32.Vec2) {
 func (ls *LaySize) SetContentToFit(sz mat32.Vec2, mx mat32.Vec2) {
 	ls.Content.SetMaxPos(sz)
 	ls.Content.SetMinPos(mx)
-	ls.Content.SetToCeil()
+	ls.Content.SetCeil()
+}
+
+// SetSpace sets the space and rounds up to Ceil ints
+func (ls *LaySize) SetSpace(spc mat32.Vec2) {
+	ls.Space = spc
+	ls.Space.SetCeil()
 }
 
 // SetTotalFromContent sets the Total size as Content plus given extra space
@@ -163,6 +169,10 @@ type LayImplState struct {
 
 	// todo: Flex has slice of sizes, one for each line
 
+	// KidsSize is the actual size of the Children in this layout.
+	// Drives ContentSize.
+	KidsSize mat32.Vec2
+
 	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds extra space,
 	// that is subtracted from Total to get Content size.
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
@@ -173,7 +183,7 @@ type LayImplState struct {
 	// subtracted when allocating sizes to elements.
 	GapSize mat32.Vec2
 
-	// ContentMinusGap is the amount to allocate
+	// ContentMinusGap is the amount to allocate to the Kids
 	ContentMinusGap mat32.Vec2
 }
 
@@ -188,7 +198,6 @@ func (ls *LayImplState) InitSizes() {
 			ls.Sizes[d][i].Reset()
 		}
 	}
-	ls.WrapBreaks = nil
 }
 
 func (ls *LayImplState) ContentSize() mat32.Vec2 {
@@ -247,8 +256,13 @@ func (wb *WidgetBase) SizeUpWidget(sc *Scene) {
 // SizeFromStyle sets the initial Content size from Min style size,
 // subject to Max constraints.
 func (wb *WidgetBase) SizeFromStyle() {
-	wb.Alloc.Size.SetContentMax(wb.Styles.Min.Dots(), wb.Styles.Max.Dots())
-	wb.Alloc.Size.Space = wb.Styles.BoxSpace().Size()
+	sz := &wb.Alloc.Size
+	sz.SetContentMax(wb.Styles.Min.Dots(), wb.Styles.Max.Dots())
+	sz.SetSpace(wb.Styles.BoxSpace().Size())
+	sz.SetTotalFromContent()
+	if LayoutTrace && (wb.Alloc.Size.Content.X > 0 || wb.Alloc.Size.Content.Y > 0) {
+		fmt.Println(wb, "SizeUp from style:", wb.Alloc.Size.String())
+	}
 }
 
 // SizeUpParts adjusts the Content size to hold the Parts layout if present
@@ -298,8 +312,8 @@ func (ly *Layout) SetInitCells() {
 }
 
 func (ly *Layout) SetGapSizeFromCells() {
-	ly.LayImpl.GapSize.X = float32(ly.LayImpl.Cells.X-1) * ly.Styles.Gap.X.Dots
-	ly.LayImpl.GapSize.Y = float32(ly.LayImpl.Cells.Y-1) * ly.Styles.Gap.Y.Dots
+	ly.LayImpl.GapSize.X = max(float32(ly.LayImpl.Cells.X-1)*ly.Styles.Gap.X.Dots, 0)
+	ly.LayImpl.GapSize.Y = max(float32(ly.LayImpl.Cells.Y-1)*ly.Styles.Gap.Y.Dots, 0)
 }
 
 func (ly *Layout) SetInitCellsFlex() {
@@ -401,13 +415,16 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 		return ki.Continue
 	})
 	if LayoutTraceDetail {
-		fmt.Println("szup:", ly, "\n", ly.LayImpl.String())
+		fmt.Println(ly, "SizeUp")
+		fmt.Println(ly.LayImpl.String())
 	}
 
 	csz := ly.LayImpl.ContentSize()
+	csz.SetCeil()
 	if LayoutTrace {
-		fmt.Println("szup Content Size:", csz)
+		fmt.Println(ly, "SizeUp Content Size:", csz)
 	}
+	ly.LayImpl.KidsSize = csz
 	ly.Alloc.Size.SetContentToFit(csz, ly.Styles.Max.Dots())
 
 }
@@ -433,9 +450,8 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
 }
 
 // SizeDownWidget is the standard widget implementation of SizeDown.
-// it
-// computing updated Content size from given total allocation
-// and giving that content to its parts if they exist.
+// Computes updated Content size from given total allocation
+// and gives that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
 	redo := wb.SizeDownGrowToAlloc(sc, iter)
 	re := wb.SizeDownParts(sc, iter) // give our content to parts
@@ -451,6 +467,7 @@ func (wb *WidgetBase) SizeDownGrowToAlloc(sc *Scene, iter int) bool {
 	change := false
 	s := &wb.Styles
 	sz := &wb.Alloc.Size
+	totWas := sz.Total
 	if s.Grow.X > 0 && sz.Alloc.X > sz.Total.X {
 		change = true
 		sz.Total.X = sz.Alloc.X
@@ -459,11 +476,14 @@ func (wb *WidgetBase) SizeDownGrowToAlloc(sc *Scene, iter int) bool {
 		change = true
 		sz.Total.Y = sz.Alloc.Y
 	}
-	if change && wb.Styles.LayoutHasParSizing() {
-		// todo: requires some additional logic to see if actually changes something
-	}
-	if change && LayoutTrace {
-		fmt.Println(wb, "changed Total size based on Alloc:", sz.Total, sz.Alloc)
+	if change {
+		sz.SetContentFromTotal()
+		if wb.Styles.LayoutHasParSizing() {
+			// todo: requires some additional logic to see if actually changes something
+		}
+		if LayoutTrace {
+			fmt.Println(wb, "changed Total size based on Alloc.  Was:", totWas, "Alloc:", sz.Alloc)
+		}
 	}
 	return change
 }
@@ -489,34 +509,21 @@ func (ly *Layout) SizeDown(sc *Scene, iter int) bool {
 // total size.
 func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	totalChanged := ly.SizeDownGrowToAlloc(sc, iter)
-	if !totalChanged && iter > 0 { // we're done
-		return false
-	}
 	chg := ly.ManageOverflow(sc, iter)
-	if !chg {
-		ly.SizeDownAlloc(sc, iter) // set allocations as is
-		return ly.SizeDownChildren(sc, iter)
-	}
 	sz := &ly.Alloc.Size
-	prevContent := sz.Content
-	if iter > 0 {
-		prevContent = ly.LayImpl.ContentMinusGap
-	}
 	ly.LayImpl.ContentMinusGap = sz.Content.Sub(ly.LayImpl.GapSize)
 
-	conDiff := ly.LayImpl.ContentMinusGap.Sub(prevContent)
-	redo := false
+	conDiff := ly.LayImpl.ContentMinusGap.Sub(ly.LayImpl.KidsSize) // vs. actual kids
 	if conDiff.X > 0 || conDiff.Y > 0 {
 		if LayoutTrace {
-			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", prevContent, "now:", ly.LayImpl.ContentMinusGap, "gapsize:", ly.LayImpl.GapSize)
+			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", ly.LayImpl.KidsSize, "now:", ly.LayImpl.ContentMinusGap, "gapsize:", ly.LayImpl.GapSize)
 		}
-		redo = true
 		ly.SizeDownGrow(sc, iter, conDiff)
 	} else {
 		ly.SizeDownAlloc(sc, iter) // set allocations as is
 	}
 	re := ly.SizeDownChildren(sc, iter)
-	return re || redo
+	return chg || totalChanged || re
 }
 
 // ManageOverflow uses overflow settings to determine if scrollbars
@@ -535,7 +542,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 		total := sz.Total.Dim(d)
 		switch ly.Styles.Overflow.Dim(d) {
 		case styles.OverflowVisible:
-			if total > alloc { // should not happen
+			if (total - alloc) > 1 { // should not happen
 				fmt.Println("Layout ERROR:", ly, "total > alloc:", d, total, ">", alloc)
 			}
 			// no scrollbars, no change
@@ -567,7 +574,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
 		}
 	}
-	sz.Space = ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size())
+	sz.SetSpace(ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size()))
 	oldCon := sz.Content
 	sz.SetContentFromTotal()
 	if oldCon != sz.Content {
@@ -627,7 +634,7 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, diff mat32.Vec2) bool {
 		return ki.Continue
 	})
 	if redo {
-		ly.SizeUpCells(sc)
+		ly.SizeUpCells(sc) // updates kids size with new grown sizes
 	}
 	return redo
 }
@@ -746,14 +753,12 @@ func (ly *Layout) PositionCells(sc *Scene) {
 
 	sz := &ly.Alloc.Size
 	var stspc mat32.Vec2
-	contAvail := sz.Alloc.Sub(sz.Space)
-	cdiff := contAvail.Sub(sz.Content)
+	contAvail := sz.Alloc.Sub(sz.Space).Sub(ly.LayImpl.GapSize)
+	cdiff := contAvail.Sub(ly.LayImpl.KidsSize)
 	if cdiff.X > 0 {
+		stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
 		if LayoutTrace {
-			stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
-			if LayoutTrace {
-				fmt.Println("pos grid:", ly, "extra X:", cdiff.X, "start X:", stspc.X, "align:", ly.Styles.Align.X, "factor:", styles.AlignFactor(ly.Styles.Align.X))
-			}
+			fmt.Println("pos grid:", ly, "extra X:", cdiff.X, "start X:", stspc.X, "align:", ly.Styles.Align.X, "factor:", styles.AlignFactor(ly.Styles.Align.X))
 		}
 	}
 	if cdiff.Y > 0 {
@@ -829,6 +834,7 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 
 	spc := wb.Styles.BoxSpace()
 	off := spc.Pos()
+	off.SetFloor()
 	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
 	cbb := mat32.RectFromPosSizeMax(wb.Alloc.Pos.Add(off), wb.Alloc.Size.Content)
 	wb.Alloc.ContentBBox = parBB.Intersect(cbb)

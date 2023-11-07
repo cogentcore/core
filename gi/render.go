@@ -303,21 +303,32 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 
 // LayoutScene does a layout of the scene: Size, Position
 func (sc *Scene) LayoutScene() {
+	if LayoutTrace {
+		fmt.Println("\n############################\nLayoutScene start:", sc)
+	}
 	sc.SizeUp(sc)
 	sc.Alloc.Size.Alloc.SetPoint(sc.Geom.Size)
 	sc.Alloc.Size.Total = sc.Alloc.Size.Alloc
 	sc.Alloc.Size.SetContentFromTotal()
+	if LayoutTrace {
+		fmt.Println("\n############################\nSizeDown start:", sc)
+	}
 	for iter := 0; iter < 10; iter++ {
 		redo := sc.SizeDown(sc, iter)
 		if redo {
-			fmt.Println("############################\nscene:", sc, "redoing, iter:", iter)
+			fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
 		} else {
 			break
 		}
 	}
+	if LayoutTrace {
+		fmt.Println("\n############################\nPosition start:", sc)
+	}
 	sc.Position(sc)
+	if LayoutTrace {
+		fmt.Println("\n############################\nScenePos start:", sc)
+	}
 	sc.ScenePos(sc)
-	fmt.Println(sc.Alloc.BBox, sc.Alloc.ContentBBox)
 }
 
 // LayoutRenderScene does a layout and render of the tree:
