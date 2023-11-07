@@ -30,7 +30,7 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = os.Rename(c.Build.Output+".gz", c.Build.Output)
+	err = os.Rename(c.Build.Output+".orig.gz", c.Build.Output)
 	if err != nil {
 		return err
 	}
