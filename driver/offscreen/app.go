@@ -97,7 +97,6 @@ func (app *appImpl) mainLoop() {
 	for {
 		select {
 		case <-app.mainDone:
-			app.window.winClose <- struct{}{}
 			return
 		case f := <-app.mainQueue:
 			f.f()
@@ -153,9 +152,7 @@ func (app *appImpl) PollEvents() {
 
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
-	fmt.Printf("stop main %p\n", app)
 	app.mainDone <- struct{}{}
-	fmt.Println("sent stop main")
 }
 
 ////////////////////////////////////////////////////////
@@ -190,7 +187,6 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 func (app *appImpl) setSysWindow() error {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
-	fmt.Println("setting sys window")
 
 	w, h := 800, 600
 
