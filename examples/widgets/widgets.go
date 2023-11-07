@@ -63,6 +63,7 @@ func app() {
 	trow := gi.NewLayout(sc, "trow")
 	trow.Style(func(s *styles.Style) {
 		s.SetMainAxis(mat32.X)
+		s.Align.X = styles.AlignCenter
 	})
 
 	giedsc := keyfun.ChordFor(keyfun.GoGiEditor)
@@ -76,21 +77,16 @@ func app() {
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
-			s.Grow.Set(1, 1)
-			s.Max.Y.Em(6)
-			s.Align.Y = styles.AlignStart
-			s.Text.WhiteSpace = styles.WhiteSpaceNormal
+			s.Grow.Set(0, 0)
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
-			// s.Font.Size = units.Dp(24) // todo: "x-large"?
-			// s.Text.LineHeight = units.Em(1.5)
 		})
 
 	//////////////////////////////////////////
 	//      Buttons
 
-	// gi.NewSpace(sc)
+	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Buttons:")
 
 	brow := gi.NewLayout(sc, "brow").
@@ -178,7 +174,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			s.SetMainAxis(mat32.X)
 			s.Align.X = styles.AlignStart
 			s.Gap.X.Ex(2)
-			s.Grow.Set(1, 0)
 		})
 
 	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).
@@ -222,7 +217,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		Style(func(s *styles.Style) {
 			s.SetMainAxis(mat32.X)
 			s.Gap.X.Ex(2)
-			s.Grow.Set(1, 0)
 		})
 
 	edit1 := gi.NewTextField(txrow, "edit1").SetPlaceholder("Enter text here...").AddClearButton()

@@ -361,7 +361,10 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	rsz := lb.TextRender.Size
 	sz.Content = prevContent
 	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
-	sz.SetTotalFromContent()
+	// if sc.Is(ScPrefSizing) {
+	// todo: do NOT set Total here -- our total is based on Alloc, but Content can be smaller
+	// sz.SetTotalFromContent()
+	// }
 	re := prevContent != lb.Alloc.Size.Content
 	if re {
 		if LayoutTrace {

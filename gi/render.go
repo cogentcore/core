@@ -520,10 +520,11 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 	rs.PopBounds()
 }
 
+// Render performs rendering on widget and parts, but not Children
+// for the base type, which does not manage children (see Layout).
 func (wb *WidgetBase) Render(sc *Scene) {
 	if wb.PushBounds(sc) {
 		wb.RenderParts(sc)
-		wb.RenderChildren(sc)
 		wb.PopBounds(sc)
 	}
 }
@@ -535,8 +536,7 @@ func (wb *WidgetBase) RenderParts(sc *Scene) {
 	wb.Parts.Render(sc) // is a layout, will do all
 }
 
-// RenderChildren renders all of node's children,
-// This is the default call at end of Render()
+// RenderChildren renders all of node's children.
 func (wb *WidgetBase) RenderChildren(sc *Scene) {
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if !kwi.Is(ki.Updating) {
