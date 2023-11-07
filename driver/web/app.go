@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"syscall/js"
 
@@ -49,6 +50,7 @@ type appImpl struct {
 	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
+	platform      goosi.Platforms // the underlying system platform (Android, iOS, etc)
 	isDark        bool
 	insets        styles.SideFloats
 	keyMods       key.Modifiers // current key mods
@@ -84,7 +86,6 @@ func Main(f func(goosi.App)) {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
-	theApp.initVk()
 	theApp.addEventListeners()
 	fmt.Println("setting the app")
 	goosi.TheApp = theApp
@@ -159,24 +160,6 @@ func (app *appImpl) stopMain() {
 	app.mainDone <- struct{}{}
 }
 
-// initVk initializes vulkan things
-func (app *appImpl) initVk() {
-	fmt.Println("initializing vk")
-}
-
-// destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
-func (app *appImpl) destroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	fmt.Println("destroying vk")
-}
-
-// fullDestroyVk destroys all vulkan things for when the app is fully quit
-func (app *appImpl) fullDestroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-}
-
 ////////////////////////////////////////////////////////
 //  Window
 
@@ -231,6 +214,17 @@ func (app *appImpl) setSysWindow() {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
+
+	ua := js.Global().Get("navigator").Get("userAgent").String()
+	lua := strings.ToLower(ua)
+	if strings.Contains(lua, "android") {
+		app.platform = goosi.Android
+	} else if strings.Contains(lua, "ipad") || strings.Contains(lua, "iphone") || strings.Contains(lua, "ipod") {
+		app.platform = goosi.IOS
+	} else {
+		// TODO(kai/web): more specific desktop platform
+		app.platform = goosi.Windows
+	}
 
 	app.resize()
 	app.window.EvMgr.Window(events.WinShow)
@@ -467,11 +461,19 @@ func (app *appImpl) IsDark() bool {
 }
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	tf := js.Global().Get("document").Call("getElementById", "text-field")
-	tf.Call("focus")
+	switch app.platform {
+	case goosi.Android:
+		js.Global().Get("document").Call("getElementById", "text-field").Call("focus")
+	case goosi.IOS:
+		js.Global().Get("document").Call("getElementById", "app").Call("focus")
+	}
 }
 
 func (app *appImpl) HideVirtualKeyboard() {
-	tf := js.Global().Get("document").Call("getElementById", "text-field")
-	tf.Call("blur")
+	switch app.platform {
+	case goosi.Android:
+		js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
+	case goosi.IOS:
+		js.Global().Get("document").Call("getElementById", "app").Call("blur")
+	}
 }
