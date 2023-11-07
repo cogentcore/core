@@ -221,6 +221,8 @@ func startloop() {
 func (app *appImpl) loop() {
 	runtime.LockOSThread()
 
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
 	for {
 		select {
 		case <-app.mainDone:

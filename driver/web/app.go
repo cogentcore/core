@@ -98,6 +98,8 @@ func Main(f func(goosi.App)) {
 }
 
 func (app *appImpl) mainLoop() {
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
 	for {
 		select {
 		case <-app.mainDone:

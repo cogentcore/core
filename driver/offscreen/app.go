@@ -92,23 +92,20 @@ func Main(f func(goosi.App)) {
 }
 
 func (app *appImpl) mainLoop() {
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
 	for {
-		fmt.Printf("main loop iter %p\n", app)
 		select {
 		case <-app.mainDone:
-			fmt.Println("done with main loop")
 			app.window.winClose <- struct{}{}
 			return
 		case f := <-app.mainQueue:
-			fmt.Println("main queue")
 			f.f()
 			if f.done != nil {
 				f.done <- true
 			}
 		}
-		fmt.Println("past select")
 	}
-	fmt.Println("done with main loop")
 }
 
 type funcRun struct {
@@ -411,7 +408,6 @@ func (app *appImpl) QuitClean() {
 }
 
 func (app *appImpl) Quit() {
-	fmt.Println("app quit")
 	if app.quitting {
 		return
 	}
