@@ -28,11 +28,11 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
 }
 
-// eventPos returns the appropriate position for an event occuring at the given
-// x and y coordinates, multiplying the values by the device pixel ratio so that they
-// line up correctly with the canvas.
-func (app *appImpl) eventPos(x, y js.Value) image.Point {
-	xi, yi := x.Int(), y.Int()
+// eventPos returns the appropriate position for the given event,
+// multiplying the x and y components by the device pixel ratio
+// so that they line up correctly with the canvas.
+func (app *appImpl) eventPos(e js.Value) image.Point {
+	xi, yi := e.Get("clientX").Int(), e.Get("clientY").Int()
 	xi = int(float32(xi) * app.screen.DevicePixelRatio)
 	yi = int(float32(yi) * app.screen.DevicePixelRatio)
 	return image.Pt(xi, yi)
@@ -50,7 +50,7 @@ func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
 	case 2:
 		ebut = events.Right
 	}
-	where := app.eventPos(e.Get("clientX"), e.Get("clientY"))
+	where := app.eventPos(e)
 	app.window.EvMgr.MouseButton(events.MouseDown, ebut, where, app.keyMods)
 	e.Call("preventDefault")
 	return nil
@@ -61,7 +61,7 @@ func (app *appImpl) onTouchStart(this js.Value, args []js.Value) any {
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
-		where := app.eventPos(touch.Get("clientX"), touch.Get("clientY"))
+		where := app.eventPos(touch)
 		app.window.EvMgr.MouseButton(events.MouseDown, events.Left, where, 0)
 	}
 	e.Call("preventDefault")
@@ -80,7 +80,7 @@ func (app *appImpl) onMouseUp(this js.Value, args []js.Value) any {
 	case 2:
 		ebut = events.Right
 	}
-	where := app.eventPos(e.Get("clientX"), e.Get("clientY"))
+	where := app.eventPos(e)
 	app.window.EvMgr.MouseButton(events.MouseUp, ebut, where, app.keyMods)
 	e.Call("preventDefault")
 	return nil
@@ -91,7 +91,7 @@ func (app *appImpl) onTouchEnd(this js.Value, args []js.Value) any {
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
-		where := app.eventPos(touch.Get("clientX"), touch.Get("clientY"))
+		where := app.eventPos(touch)
 		app.window.EvMgr.MouseButton(events.MouseUp, events.Left, where, 0)
 	}
 	e.Call("preventDefault")
@@ -100,7 +100,7 @@ func (app *appImpl) onTouchEnd(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
 	e := args[0]
-	where := app.eventPos(e.Get("clientX"), e.Get("clientY"))
+	where := app.eventPos(e)
 	app.window.EvMgr.MouseMove(where)
 	e.Call("preventDefault")
 	return nil
@@ -111,7 +111,7 @@ func (app *appImpl) onTouchMove(this js.Value, args []js.Value) any {
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
-		where := app.eventPos(touch.Get("clientX"), touch.Get("clientY"))
+		where := app.eventPos(touch)
 		app.window.EvMgr.MouseMove(where)
 	}
 	e.Call("preventDefault")
