@@ -126,7 +126,8 @@ func (app *appImpl) onContextMenu(this js.Value, args []js.Value) any {
 	return nil
 }
 
-// down is whether this is a keyDown event (instead of a keyUp one)
+// runeAndCodeFromKeyEvent return the rune and key code corresponding to the given key string.
+// down is whether this is a keyDown event (as opposed to a keyUp one)
 func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	switch k {
 	case "Shift":
@@ -166,8 +167,11 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
-	key := e.Get("key")
-	r, c := app.runeAndCodeFromKey(key.String(), true)
+	k := e.Get("key").String()
+	if k == "Undefined" {
+		k = js.Global().Get("String").Call("fromCharCode", e.Get("code")).String()
+	}
+	r, c := app.runeAndCodeFromKey(k, true)
 	app.window.EvMgr.Key(events.KeyDown, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
@@ -175,8 +179,11 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
-	key := e.Get("key")
-	r, c := app.runeAndCodeFromKey(key.String(), false)
+	k := e.Get("key").String()
+	if k == "Undefined" {
+		k = js.Global().Get("String").Call("fromCharCode", e.Get("code")).String()
+	}
+	r, c := app.runeAndCodeFromKey(k, false)
 	app.window.EvMgr.Key(events.KeyUp, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
