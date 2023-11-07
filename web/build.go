@@ -18,7 +18,7 @@ import (
 
 // Build builds an app for web using the given configuration information.
 func Build(c *config.Config) error {
-	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", c.Build.Output, c.Build.Package)
+	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", c.Build.Output+".orig", c.Build.Package)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,11 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("gzip", c.Build.Output)
+	err = xe.Run("gzip", c.Build.Output+".orig")
+	if err != nil {
+		return err
+	}
+	err = os.Rename(c.Build.Output+".gz", c.Build.Output)
 	if err != nil {
 		return err
 	}
