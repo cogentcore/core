@@ -37,7 +37,7 @@ func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
 	case 2:
 		ebut = events.Right
 	}
-	app.window.EvMgr.MouseButton(events.MouseDown, ebut, image.Pt(x, y), 0) // TODO(kai/web): modifiers
+	app.window.EvMgr.MouseButton(events.MouseDown, ebut, image.Pt(x, y), app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -55,7 +55,7 @@ func (app *appImpl) onMouseUp(this js.Value, args []js.Value) any {
 	case 2:
 		ebut = events.Right
 	}
-	app.window.EvMgr.MouseButton(events.MouseUp, ebut, image.Pt(x, y), 0) // TODO(kai/web): modifiers
+	app.window.EvMgr.MouseButton(events.MouseUp, ebut, image.Pt(x, y), app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -68,16 +68,21 @@ func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) runeAndCodeFromKey(k string) (rune, key.Codes) {
+// down is whether this is a keyDown event (instead of a keyUp one)
+func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	switch k {
 	case "Shift":
+		app.keyMods.SetFlag(down, key.Shift)
 		return 0, key.CodeLeftShift
 	case "Control":
+		app.keyMods.SetFlag(down, key.Control)
 		return 0, key.CodeLeftControl
-	case "Meta":
-		return 0, key.CodeLeftMeta
 	case "Alt":
+		app.keyMods.SetFlag(down, key.Alt)
 		return 0, key.CodeLeftAlt
+	case "Meta":
+		app.keyMods.SetFlag(down, key.Meta)
+		return 0, key.CodeLeftMeta
 	case "Backspace":
 		return 0, key.CodeDeleteBackspace
 	case "Delete":
@@ -104,8 +109,8 @@ func (app *appImpl) runeAndCodeFromKey(k string) (rune, key.Codes) {
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	key := e.Get("key")
-	r, c := app.runeAndCodeFromKey(key.String())
-	app.window.EvMgr.Key(events.KeyDown, r, c, 0) // TODO(kai/web): modifiers
+	r, c := app.runeAndCodeFromKey(key.String(), true)
+	app.window.EvMgr.Key(events.KeyDown, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -113,8 +118,8 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	key := e.Get("key")
-	r, c := app.runeAndCodeFromKey(key.String())
-	app.window.EvMgr.Key(events.KeyUp, r, c, 0) // TODO(kai/web): modifiers
+	r, c := app.runeAndCodeFromKey(key.String(), false)
+	app.window.EvMgr.Key(events.KeyUp, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }

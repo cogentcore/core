@@ -23,6 +23,7 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 )
 
 var theApp = &appImpl{
@@ -50,6 +51,7 @@ type appImpl struct {
 	quitCleanFunc func()
 	isDark        bool
 	insets        styles.SideFloats
+	keyMods       key.Modifiers // current key mods
 }
 
 var mainCallback func(goosi.App)
