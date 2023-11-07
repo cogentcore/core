@@ -473,7 +473,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
-	psz := sc.Alloc.Size.Content.ToPointCeil()
+	psz := sc.LayImpl.KidsSize.ToPointCeil()
 	sc.Geom.Size = psz
 	fmt.Println("pref size:", psz)
 	sc.LayoutScene() // once more with set size
