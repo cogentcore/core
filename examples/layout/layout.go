@@ -46,9 +46,11 @@ func app() {
 
 	row1.Style(func(s *styles.Style) {
 		s.MainAxis = mat32.X
-		s.Grow.Set(1, 1)
+		s.Min.X.Px(2000)
+		s.Grow.Set(0, 1)
 		s.Gap.X.Em(0)
 		s.Margin.Set(units.Em(6))
+		s.Align.X = styles.AlignCenter
 	})
 
 	for i, sz := range frsz {
@@ -58,7 +60,8 @@ func app() {
 		fr := gi.NewFrame(row1, nm)
 		fr.Style(func(s *styles.Style) {
 			s.MainAxis = mat32.X
-			s.Grow.Set(0, 0)
+			s.Align.X = styles.AlignCenter
+			s.Grow.Set(1, 0)
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			// s.Padding.Set(units.Dp(6))

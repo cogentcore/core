@@ -596,8 +596,8 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 	sv.ViewMu.Unlock()
 }
 
-func (sv *SliceViewBase) SizeDown(sc *gi.Scene, iter int, allocTotal mat32.Vec2) bool {
-	redo := sv.Frame.SizeDown(sc, iter, allocTotal)
+func (sv *SliceViewBase) SizeDown(sc *gi.Scene, iter int) bool {
+	redo := sv.Frame.SizeDown(sc, iter)
 	if sv.This().(SliceViewer).NeedsConfigRows() {
 		sv.Update() // does applystyle
 		return true // needs redo

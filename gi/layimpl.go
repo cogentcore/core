@@ -49,8 +49,10 @@ type LaySize struct {
 	// Total is total size of the widget: Content + Space
 	Total mat32.Vec2
 
-	// Alloc is the top-down Total allocated size of the widget, computed by the Layout
-	// it can be larger than the Total in case of non-Grow (stretch) elements.
+	// Alloc is the top-down Total allocated size of the widget, computed by the Layout.
+	// If we are not stretchy (Grow factor == 0), then our Total size can be less than
+	// this allocation, in which case our alignment factors determine positioning within
+	// the allocated space.
 	Alloc mat32.Vec2
 }
 
@@ -372,7 +374,7 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 		cidx := kwb.Alloc.Cell
 		sz := kwb.Alloc.Size.Total
 		grw := kwb.Styles.Grow
-		if LayoutTrace {
+		if LayoutTraceDetail {
 			fmt.Println("szup i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw, "csz:", kwb.Alloc.Size.Content)
 		}
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
@@ -398,7 +400,7 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 		}
 		return ki.Continue
 	})
-	if LayoutTrace {
+	if LayoutTraceDetail {
 		fmt.Println("szup:", ly, "\n", ly.LayImpl.String())
 	}
 
@@ -426,71 +428,81 @@ func (ly *Layout) SizeUpCellsStacked(sc *Scene) {
 //////////////////////////////////////////////////////////////////////
 //		SizeDown
 
-func (wb *WidgetBase) SizeDown(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
-	return wb.SizeDownWidget(sc, iter, allocTotal)
+func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
+	return wb.SizeDownWidget(sc, iter)
 }
 
-// SizeDownWidget is the standard widget implementation of SizeDown,
+// SizeDownWidget is the standard widget implementation of SizeDown.
+// it
 // computing updated Content size from given total allocation
 // and giving that content to its parts if they exist.
-func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
-	wb.Alloc.Size.Total = allocTotal
-	wb.Alloc.Size.SetContentFromTotal()
-	if wb.Styles.LayoutHasParSizing() {
-		// todo: requires some additional logic to see if actually changes something
-	}
-	redo := wb.SizeDownParts(sc, iter, wb.Alloc.Size.Content) // give our content to parts
-	return redo
+func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
+	redo := wb.SizeDownGrowToAlloc(sc, iter)
+	re := wb.SizeDownParts(sc, iter) // give our content to parts
+	return redo || re
 }
 
-func (wb *WidgetBase) SizeDownParts(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
+// SizeDownGrowToAlloc grows our Total size up to current Alloc size
+// for any dimension with a non-zero Grow factor.
+// The parent Layout uses the proportional nature of Grow to determine
+// relative size of Alloc, but here we use all of Alloc if non-zero.
+// Returns true if this resulted in a change in our Total size.
+func (wb *WidgetBase) SizeDownGrowToAlloc(sc *Scene, iter int) bool {
+	change := false
+	s := &wb.Styles
+	sz := &wb.Alloc.Size
+	if s.Grow.X > 0 && sz.Alloc.X > sz.Total.X {
+		change = true
+		sz.Total.X = sz.Alloc.X
+	}
+	if s.Grow.Y > 0 && sz.Alloc.Y > sz.Total.Y {
+		change = true
+		sz.Total.Y = sz.Alloc.Y
+	}
+	if change && wb.Styles.LayoutHasParSizing() {
+		// todo: requires some additional logic to see if actually changes something
+	}
+	if change && LayoutTrace {
+		fmt.Println(wb, "changed Total size based on Alloc:", sz.Total, sz.Alloc)
+	}
+	return change
+}
+
+func (wb *WidgetBase) SizeDownParts(sc *Scene, iter int) bool {
 	if wb.Parts == nil {
 		return false
 	}
-	return wb.Parts.SizeDown(sc, iter, allocTotal)
+	wb.Parts.Alloc.Size.Alloc = wb.Alloc.Size.Content // parts are our content
+	return wb.Parts.SizeDown(sc, iter)
 }
 
-func (ly *Layout) SizeDown(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
-	redo := ly.SizeDownLay(sc, iter, allocTotal)
-	re := ly.SizeDownChildren(sc, iter)
-	return redo || re
+func (ly *Layout) SizeDown(sc *Scene, iter int) bool {
+	redo := ly.SizeDownLay(sc, iter)
+	if redo && LayoutTrace {
+		fmt.Println(ly, "SizeDown redo")
+	}
+	return redo
 }
 
 // SizeDownLay is the Layout standard SizeDown pass, returning true if another
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
-func (ly *Layout) SizeDownLay(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
-	// todo: need to add gap sizes!
-	ourTotal := ly.Alloc.Size.Total
-	var totSz mat32.Vec2
-	for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-		allTot := allocTotal.Dim(ma)
-		ourTot := ourTotal.Dim(ma)
-		var tsz float32
-		switch ly.Styles.Overflow.Dim(ma) {
-		case styles.OverflowVisible:
-			tsz = max(ourTot, allTot) // get everything we need or are given
-			// no scrollbars
-		case styles.OverflowHidden:
-			tsz = allTot // get what we are given
-			// no scrollbars
-		case styles.OverflowAuto, styles.OverflowScroll:
-			tsz = max(ourTot, allTot) // get everything we need or are given
-			if ourTot > allTot {
-				ly.LayImpl.ScrollSize.SetDim(ma.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
-			}
-		}
-		totSz.SetDim(ma, tsz)
+func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
+	totalChanged := ly.SizeDownGrowToAlloc(sc, iter)
+	if !totalChanged && iter > 0 { // we're done
+		return false
 	}
-	prevContent := ly.Alloc.Size.Content
+	chg := ly.ManageOverflow(sc, iter)
+	if !chg {
+		ly.SizeDownAlloc(sc, iter) // set allocations as is
+		return ly.SizeDownChildren(sc, iter)
+	}
+	sz := &ly.Alloc.Size
+	prevContent := sz.Content
 	if iter > 0 {
 		prevContent = ly.LayImpl.ContentMinusGap
 	}
-	ly.Alloc.Size.Total = totSz
-	spctot := ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size())
-	ly.Alloc.Size.Space = spctot
-	ly.Alloc.Size.SetContentFromTotal()
-	ly.LayImpl.ContentMinusGap = ly.Alloc.Size.Content.Sub(ly.LayImpl.GapSize)
+	ly.LayImpl.ContentMinusGap = sz.Content.Sub(ly.LayImpl.GapSize)
 
 	conDiff := ly.LayImpl.ContentMinusGap.Sub(prevContent)
 	redo := false
@@ -498,29 +510,89 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int, allocTotal mat32.Vec2) bool {
 		if LayoutTrace {
 			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", prevContent, "now:", ly.LayImpl.ContentMinusGap, "gapsize:", ly.LayImpl.GapSize)
 		}
-		redo = ly.SizeDownGrow(sc, iter, conDiff)
+		redo = true
+		ly.SizeDownGrow(sc, iter, conDiff)
 	} else {
 		ly.SizeDownAlloc(sc, iter) // set allocations as is
 	}
-	return redo
+	re := ly.SizeDownChildren(sc, iter)
+	return re || redo
+}
+
+// ManageOverflow uses overflow settings to determine if scrollbars
+// are needed, etc.  Returns true if size changes as a result.
+func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
+	sz := &ly.Alloc.Size
+	change := false
+	if iter == 0 {
+		ly.LayImpl.ScrollSize.SetZero()
+	}
+	for d := mat32.X; d <= mat32.Y; d++ { // main axis = X then Y
+		if iter == 0 {
+			ly.HasScroll[d] = false
+		}
+		alloc := sz.Alloc.Dim(d)
+		total := sz.Total.Dim(d)
+		switch ly.Styles.Overflow.Dim(d) {
+		case styles.OverflowVisible:
+			if total > alloc { // should not happen
+				fmt.Println("Layout ERROR:", ly, "total > alloc:", d, total, ">", alloc)
+			}
+			// no scrollbars, no change
+		case styles.OverflowHidden:
+			if alloc < total {
+				change = true
+				sz.Total.SetDim(d, alloc) // get it
+				if LayoutTrace {
+					fmt.Println(ly, "OverflowHidden actually hid, alloc < total", d, alloc, "<", total)
+				}
+			}
+			// no scrollbars
+		case styles.OverflowAuto:
+			if total > alloc {
+				if !ly.HasScroll[d] {
+					change = true
+				}
+				ly.HasScroll[d] = true
+				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
+				if LayoutTrace {
+					fmt.Println(ly, "OverflowAuto enabling scrollbars, total > alloc:", d, total, ">", alloc)
+				}
+			}
+		case styles.OverflowScroll:
+			if !ly.HasScroll[d] {
+				change = true
+			}
+			ly.HasScroll[d] = true
+			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
+		}
+	}
+	sz.Space = ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size())
+	oldCon := sz.Content
+	sz.SetContentFromTotal()
+	if oldCon != sz.Content {
+		change = true
+	}
+	return change
 }
 
 // SizeDownGrow grows the element sizes based on total extra and Grow
 // factors
 func (ly *Layout) SizeDownGrow(sc *Scene, iter int, diff mat32.Vec2) bool {
 	redo := false
-	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
-		redo = ly.SizeDownGrowWrap(sc, iter, diff) // first recompute wrap
-		// todo: use special version of grow
-	} else if ly.Styles.Display == styles.DisplayStacked {
+	// if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
+	// 	redo = ly.SizeDownGrowWrap(sc, iter, diff) // first recompute wrap
+	// todo: use special version of grow
+	// } else
+	if ly.Styles.Display == styles.DisplayStacked {
 		redo = ly.SizeDownGrowStacked(sc, iter, diff)
 	} else {
-		redo = ly.SizeDownGrowGrid(sc, iter, diff)
+		redo = ly.SizeDownGrowCells(sc, iter, diff)
 	}
 	return redo
 }
 
-func (ly *Layout) SizeDownGrowGrid(sc *Scene, iter int, diff mat32.Vec2) bool {
+func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, diff mat32.Vec2) bool {
 	redo := false
 	// todo: use max growth values instead of individual ones to ensure consistency!
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
@@ -573,8 +645,7 @@ func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, diff mat32.Vec2) bool
 func (ly *Layout) SizeDownChildren(sc *Scene, iter int) bool {
 	redo := false
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		asz := kwb.Alloc.Size.Alloc
-		re := kwi.SizeDown(sc, iter, asz)
+		re := kwi.SizeDown(sc, iter)
 		redo = redo || re
 		return ki.Continue
 	})
@@ -660,25 +731,23 @@ func (ly *Layout) Position(sc *Scene) {
 
 func (ly *Layout) PositionLay(sc *Scene) {
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
-	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
-		ly.PositionWrap(sc)
-	} else if ly.Styles.Display == styles.DisplayStacked {
+	if ly.Styles.Display == styles.DisplayStacked {
 		ly.PositionStacked(sc)
 	} else {
-		ly.PositionGrid(sc)
+		ly.PositionCells(sc)
 	}
 	ly.PositionChildren(sc)
 }
 
-func (ly *Layout) PositionGrid(sc *Scene) {
+func (ly *Layout) PositionCells(sc *Scene) {
 	var pos mat32.Vec2
 	var lastAsz mat32.Vec2
 	gap := ly.Styles.Gap.Dots()
 
+	sz := &ly.Alloc.Size
 	var stspc mat32.Vec2
-	extot := ly.LayImpl.ScrollSize.Add(ly.LayImpl.GapSize).Add(ly.Styles.BoxSpace().Size())
-	contAvail := ly.Alloc.Size.Alloc.Sub(extot)
-	cdiff := contAvail.Sub(ly.Alloc.Size.Content)
+	contAvail := sz.Alloc.Sub(sz.Space)
+	cdiff := contAvail.Sub(sz.Content)
 	if cdiff.X > 0 {
 		if LayoutTrace {
 			stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
@@ -711,7 +780,7 @@ func (ly *Layout) PositionGrid(sc *Scene) {
 			ep.Y += styles.AlignFactor(kwb.Styles.Align.Y) * (asz.Y - sz.Y)
 		}
 		ep.SetRound()
-		if LayoutTrace {
+		if LayoutTraceDetail {
 			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep)
 		}
 		kwb.Alloc.RelPos = ep

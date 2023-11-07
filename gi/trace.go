@@ -19,6 +19,10 @@ var (
 	// Can be set in PrefsDebug from prefs gui
 	LayoutTrace bool
 
+	// LayoutTraceDetail provides more detailed info for Layout
+	// about the underlying layout computations
+	LayoutTraceDetail bool
+
 	// WinEventTrace reports a trace of window events to stdout
 	// can be set in PrefsDebug from prefs gui
 	// excludes mouse move events

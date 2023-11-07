@@ -49,8 +49,8 @@ func (ed *Editor) UpdateFromAlloc() {
 	ed.LineLayoutSize.X -= ed.LineNoOff
 }
 
-func (ed *Editor) SizeDown(sc *gi.Scene, iter int, allocTotal mat32.Vec2) bool {
-	redo := ed.Layout.SizeDown(sc, iter, allocTotal)
+func (ed *Editor) SizeDown(sc *gi.Scene, iter int) bool {
+	redo := ed.Layout.SizeDown(sc, iter)
 	ed.UpdateFromAlloc()
 	return redo
 }
