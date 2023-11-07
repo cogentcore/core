@@ -19,6 +19,7 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "mousedown", js.FuncOf(app.onMouseDown))
 	g.Call("addEventListener", "mouseup", js.FuncOf(app.onMouseUp))
 	g.Call("addEventListener", "mousemove", js.FuncOf(app.onMouseMove))
+	g.Call("addEventListener", "contextmenu", js.FuncOf(app.onContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
 	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
@@ -64,6 +65,14 @@ func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
 	e := args[0]
 	x, y := e.Get("clientX").Int(), args[0].Get("clientY").Int()
 	app.window.EvMgr.MouseMove(image.Pt(x, y))
+	e.Call("preventDefault")
+	return nil
+}
+
+func (app *appImpl) onContextMenu(this js.Value, args []js.Value) any {
+	// no-op (we handle elsewhere), but needed to prevent browser
+	// from making its own context menus on right clicks
+	e := args[0]
 	e.Call("preventDefault")
 	return nil
 }
