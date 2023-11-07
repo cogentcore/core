@@ -18,7 +18,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // Widget is the interface for all GoGi Widget Nodes
@@ -82,18 +81,18 @@ type Widget interface {
 	ApplyStyle(sc *Scene)
 
 	// SizeUp (bottom-up): gathers sizes from our Children & Parts,
-	// based only on Min style sizes and actual content sizing.
+	// based only on Min style sizes and actual content sizing (eg., text).
 	// Flexible elements (e.g., Text, Flex Wrap, TopAppBar) allocate
 	// optimistically along their main axis, up to any optional Max size.
 	SizeUp(sc *Scene)
 
 	//	SizeDown (top-down, multiple iterations possible): assigns sizes based
-	// on allocated parent avail size, giving extra space based on Grow factors,
+	// on Alloc.Size.Alloc allocated size (set by parent prior to calling).
+	// This step is where layouts can give extra space based on Grow factors,
 	// and flexible elements wrap / config to fit top-down constraint along main
 	// axis, producing a (new) top-down size expanding in cross axis as needed
-	// (or removing items that don't fit, etc).  Wrap & Grid layouts assign
-	// X,Y index coordinates to items during this pass.
-	SizeDown(sc *Scene, iter int, allocTotal mat32.Vec2) bool
+	// (or removing items that don't fit, etc).
+	SizeDown(sc *Scene, iter int) bool
 
 	// Position: uses the final sizes to position everything within layouts
 	// according to alignment settings.
