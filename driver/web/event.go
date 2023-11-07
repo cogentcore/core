@@ -168,7 +168,7 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
-	if k == "Undefined" {
+	if k == "Unidentified" {
 		k = js.Global().Get("String").Call("fromCharCode", e.Get("code")).String()
 	}
 	r, c := app.runeAndCodeFromKey(k, true)
@@ -180,7 +180,7 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
-	if k == "Undefined" {
+	if k == "Unidentified" {
 		k = js.Global().Get("String").Call("fromCharCode", e.Get("code")).String()
 	}
 	r, c := app.runeAndCodeFromKey(k, false)
