@@ -4,16 +4,22 @@
 
 package main
 
-// TODO: fix
-/*
+import (
+	"fmt"
+
+	"goki.dev/colors"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/mat32/v2"
+)
+
 func main() { gimain.Run(app) }
 
 func app() {
-	width := 1024
-	height := 768
-
 	// turn on tracing in preferences, Debug
-	// gi.LayoutTrace = true
+	gi.LayoutTrace = true
 
 	frsz := [5]mat32.Vec2{
 		{20, 100},
@@ -32,128 +38,113 @@ func app() {
 	gi.SetAppName("layout")
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewMainRenderWin("gogi-layout-test", "GoGi Layout Test", width, height)
+	sc := gi.NewScene("gogi-layout-test").SetTitle("GoGi Layout Test")
 
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
+	gi.DefaultTopAppBar = nil
 
-	mfr := win.SetMainFrame()
+	row1 := gi.NewLayout(sc, "row1")
 
-	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
-
-	row1.SetProp("vertical-align", "top")
-	// row1.SetProp("horizontal-align", "justify")
-	row1.SetProp("horizontal-align", "left")
-	row1.SetProp("margin", 4.0)
-	row1.SetProp("max-width", -1) // always stretch width
-	row1.SetProp("spacing", 6.0)
-
-	for i, sz := range frsz {
-		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.NewFrame(row1, nm, gi.LayoutHoriz)
-		fr.SetProp("width", sz.X)
-		fr.SetProp("height", sz.Y)
-		fr.SetProp("vertical-align", "inherit")
-		// fr.SetProp("horizontal-align", "inherit")
-		fr.SetProp("margin", "inherit")
-		if i == 2 {
-			fr.SetFixedWidth(units.Em(20))
-			spc := row1.NewChild(gi.SpaceType, "spc").(*gi.Space)
-			spc.SetFixedWidth(units.Em(4))
-		} else {
-			fr.SetProp("max-width", -1) // spacer
-		}
-	}
-
-	row2 := gi.NewLayout(mfr, "row2", gi.LayoutHoriz)
-	row2.SetProp("text-align", "center")
-	row2.SetProp("max-width", -1) // always stretch width
-
-	row2.SetProp("vertical-align", "center")
-	// row2.SetProp("horizontal-align", "justify")
-	row2.SetProp("horizontal-align", "left")
-	row2.SetProp("margin", 4.0)
-	row2.SetProp("spacing", 6.0)
-
-	for i, sz := range frsz {
-		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.NewFrame(row2, nm, gi.LayoutHoriz)
-		fr.SetProp("width", sz.X)
-		fr.SetProp("height", sz.Y)
-		fr.SetProp("vertical-align", "inherit")
-		// fr.SetProp("horizontal-align", "inherit")
-		fr.SetProp("margin", "inherit")
-		// if i == 2 {
-		// 	gi.NewStretch(row2, "str")
-		// }
-	}
-
-	row3 := gi.NewLayout(mfr, "row3", gi.LayoutHorizFlow)
-	// row3.SetProp("text-align", "center")
-	row3.SetProp("max-width", -1) // always stretch width
-
-	// row3.SetProp("vertical-align", "bottom")
-	// row3.SetProp("horizontal-align", "justify")
-	// row3.SetProp("horizontal-align", "left")
-	row3.SetProp("margin", 4.0)
-	row3.SetProp("spacing", 6.0)
-	row3.SetProp("width", units.Pt(200)) // needs default to set
-
-	for i, sz := range frsz {
-		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.NewFrame(row3, nm, gi.LayoutHoriz)
-		fr.SetProp("width", 5*sz.X)
-		fr.SetProp("height", sz.Y)
-		fr.SetProp("min-height", sz.Y)
-		fr.SetProp("min-width", 5*sz.X)
-		// fr.SetProp("vertical-align", "inherit")
-		// fr.SetProp("horizontal-align", "inherit")
-		fr.SetProp("margin", "inherit")
-		// fr.SetProp("max-width", -1) // spacer
-	}
-
-	row4 := gi.NewLayout(mfr, "row4", gi.LayoutGrid)
-	row4.SetProp("columns", 2)
-	// row4.SetProp("max-width", -1)
-
-	row4.SetProp("vertical-align", "top")
-	// row4.SetProp("horizontal-align", "justify")
-	row4.SetProp("horizontal-align", "left")
-	row4.SetProp("margin", 6.0)
-
-	for i, sz := range frsz {
-		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.NewFrame(row4, nm, gi.LayoutHoriz)
-		fr.SetProp("width", sz.X)
-		fr.SetProp("height", sz.Y)
-		// fr.SetProp("min-height", sz.Y)
-		fr.SetProp("vertical-align", "inherit")
-		fr.SetProp("horizontal-align", "inherit")
-		fr.SetProp("margin", 2.0)
-		// fr.SetProp("max-width", -1) // spacer
-	}
-
-	// main menu
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu = make(gi.MenuStage, 0, 10)
-	amen.Menu.AddAppMenu(win)
-
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu = make(gi.MenuStage, 0, 10)
-	emen.Menu.AddCopyCutPaste(win)
-
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		go gi.Quit() // once main window is closed, quit
+	row1.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.X
+		s.Grow.Set(1, 1)
+		s.Gap.X.Em(0)
+		s.Margin.Set(units.Em(6))
 	})
 
-	win.MainMenuUpdated()
+	for i, sz := range frsz {
+		i := i
+		sz := sz
+		nm := fmt.Sprintf("fr%v", i)
+		fr := gi.NewFrame(row1, nm)
+		fr.Style(func(s *styles.Style) {
+			s.MainAxis = mat32.X
+			s.Grow.Set(0, 0)
+			s.Min.X.Px(sz.X)
+			s.Min.Y.Px(sz.Y)
+			// s.Padding.Set(units.Dp(6))
+			s.MaxBorder.Color.Set(colors.Black)
+			s.MaxBorder.Width.Set(units.Dp(2))
+			s.Border = s.MaxBorder
+			// s.Margin.Set(units.Dp(6))
 
-	vp.UpdateEndNoSig(updt)
+			// if i == 2 {
+			// 	fr.SetFixedWidth(units.Em(20))
+			// 	spc := row1.NewChild(gi.SpaceType, "spc").(*gi.Space)
+			// 	spc.SetFixedWidth(units.Em(4))
+			// } else {
+			// 	fr.SetProp("max-width", -1) // spacer
+			// }
+		})
+	}
 
-	win.StartEventLoop()
+	// row2 := gi.NewLayout(mfr, "row2", gi.LayoutHoriz)
+	// row2.SetProp("text-align", "center")
+	// row2.SetProp("max-width", -1) // always stretch width
+	//
+	// row2.SetProp("vertical-align", "center")
+	// // row2.SetProp("horizontal-align", "justify")
+	// row2.SetProp("horizontal-align", "left")
+	// row2.SetProp("margin", 4.0)
+	// row2.SetProp("spacing", 6.0)
+	//
+	// for i, sz := range frsz {
+	// 	nm := fmt.Sprintf("fr%v", i)
+	// 	fr := gi.NewFrame(row2, nm, gi.LayoutHoriz)
+	// 	fr.SetProp("width", sz.X)
+	// 	fr.SetProp("height", sz.Y)
+	// 	fr.SetProp("vertical-align", "inherit")
+	// 	// fr.SetProp("horizontal-align", "inherit")
+	// 	fr.SetProp("margin", "inherit")
+	// 	// if i == 2 {
+	// 	// 	gi.NewStretch(row2, "str")
+	// 	// }
+	// }
+	//
+	// row3 := gi.NewLayout(mfr, "row3", gi.LayoutHorizFlow)
+	// // row3.SetProp("text-align", "center")
+	// row3.SetProp("max-width", -1) // always stretch width
+	//
+	// // row3.SetProp("vertical-align", "bottom")
+	// // row3.SetProp("horizontal-align", "justify")
+	// // row3.SetProp("horizontal-align", "left")
+	// row3.SetProp("margin", 4.0)
+	// row3.SetProp("spacing", 6.0)
+	// row3.SetProp("width", units.Pt(200)) // needs default to set
+	//
+	// for i, sz := range frsz {
+	// 	nm := fmt.Sprintf("fr%v", i)
+	// 	fr := gi.NewFrame(row3, nm, gi.LayoutHoriz)
+	// 	fr.SetProp("width", 5*sz.X)
+	// 	fr.SetProp("height", sz.Y)
+	// 	fr.SetProp("min-height", sz.Y)
+	// 	fr.SetProp("min-width", 5*sz.X)
+	// 	// fr.SetProp("vertical-align", "inherit")
+	// 	// fr.SetProp("horizontal-align", "inherit")
+	// 	fr.SetProp("margin", "inherit")
+	// 	// fr.SetProp("max-width", -1) // spacer
+	// }
+	//
+	// row4 := gi.NewLayout(mfr, "row4", gi.LayoutGrid)
+	// row4.SetProp("columns", 2)
+	// // row4.SetProp("max-width", -1)
+	//
+	// row4.SetProp("vertical-align", "top")
+	// // row4.SetProp("horizontal-align", "justify")
+	// row4.SetProp("horizontal-align", "left")
+	// row4.SetProp("margin", 6.0)
+	//
+	// for i, sz := range frsz {
+	// 	nm := fmt.Sprintf("fr%v", i)
+	// 	fr := gi.NewFrame(row4, nm, gi.LayoutHoriz)
+	// 	fr.SetProp("width", sz.X)
+	// 	fr.SetProp("height", sz.Y)
+	// 	// fr.SetProp("min-height", sz.Y)
+	// 	fr.SetProp("vertical-align", "inherit")
+	// 	fr.SetProp("horizontal-align", "inherit")
+	// 	fr.SetProp("margin", 2.0)
+	// 	// fr.SetProp("max-width", -1) // spacer
+	// }
+	//
+
+	gi.NewWindow(sc).Run().Wait()
 }
-*/
