@@ -50,7 +50,7 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 	d := AppJSData{
 		Env:                     string(wenv),
 		LoadingLabel:            c.Web.LoadingLabel,
-		Wasm:                    "/app.wasm",
+		Wasm:                    "/app.wasm.gz",
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
 		WorkerJS:                "/app-worker.js",
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),

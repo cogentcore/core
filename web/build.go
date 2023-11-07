@@ -22,6 +22,14 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	err = xe.RemoveAll(c.Build.Output + ".gz")
+	if err != nil {
+		return err
+	}
+	err = xe.Run("gzip", c.Build.Output)
+	if err != nil {
+		return err
+	}
 	return MakeFiles(c)
 }
 
