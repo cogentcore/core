@@ -9,18 +9,22 @@ import (
 	"image/draw"
 )
 
-// Capture tells the app drawer to capture its next frame as an image and save it
-// to the given filename. It is currently only supported with the offscreen build tag.
-func Capture(filename string) {
+// Capture tells the app drawer to capture its next frame as an image.
+// Once it gets that image, it returns it. It is currently only supported
+// with the offscreen build tag.
+func Capture() *image.RGBA {
 	NeedsCapture = true
-	CaptureFilename = filename
+	return <-CaptureImage
 }
 
 var (
-	// NeedsCapture is whether the app drawer needs to capture its next frame (see [Capture])
+	// NeedsCapture is whether the app drawer needs to capture its next
+	// frame. End-user code should just use [Capture].
 	NeedsCapture bool
-	// CaptureFilename is the filename the app drawer should save its capture to (see [Capture])
-	CaptureFilename string
+	// CaptureImage is a channel that sends the image captured after
+	// setting [NeedsCapture] to true. End-user code should just use
+	// [Capture].
+	CaptureImage = make(chan *image.RGBA)
 )
 
 const (

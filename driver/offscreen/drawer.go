@@ -11,8 +11,6 @@ import (
 	"image/draw"
 
 	"goki.dev/goosi"
-	"goki.dev/grows/images"
-	"goki.dev/grr"
 )
 
 type drawerImpl struct {
@@ -110,7 +108,7 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 	if !goosi.NeedsCapture {
 		return
 	}
-	grr.Log0(images.Save(dw.image, goosi.CaptureFilename))
+	goosi.CaptureImage <- dw.image
 }
 
 // EndDraw ends image drawing rendering process on render target
