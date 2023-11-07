@@ -26,6 +26,7 @@ func (app *appImpl) addEventListeners() {
 	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
 	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
+	g.Call("addEventListener", "selectstart", js.FuncOf(app.onSelectStart))
 }
 
 // eventPos returns the appropriate position for the given event,
@@ -184,5 +185,13 @@ func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 
 func (app *appImpl) onResize(this js.Value, args []js.Value) any {
 	app.resize()
+	return nil
+}
+
+func (app *appImpl) onSelectStart(this js.Value, args []js.Value) any {
+	// no-op (we handle elsewhere), but needed to prevent browser
+	// from selecting canvas and making it blue
+	e := args[0]
+	e.Call("preventDefault")
 	return nil
 }
