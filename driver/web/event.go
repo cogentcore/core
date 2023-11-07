@@ -17,8 +17,11 @@ import (
 func (app *appImpl) addEventListeners() {
 	g := js.Global()
 	g.Call("addEventListener", "mousedown", js.FuncOf(app.onMouseDown))
+	g.Call("addEventListener", "touchstart", js.FuncOf(app.onMouseDown))
 	g.Call("addEventListener", "mouseup", js.FuncOf(app.onMouseUp))
+	g.Call("addEventListener", "touchend", js.FuncOf(app.onMouseUp))
 	g.Call("addEventListener", "mousemove", js.FuncOf(app.onMouseMove))
+	g.Call("addEventListener", "touchmove", js.FuncOf(app.onMouseMove))
 	g.Call("addEventListener", "contextmenu", js.FuncOf(app.onContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
