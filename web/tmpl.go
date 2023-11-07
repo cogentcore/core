@@ -75,7 +75,7 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 	resources := []string{
 		"/app.css",
 		"/app.js",
-		"/app.wasm",
+		"/app.wasm.gz",
 		"/manifest.webmanifest",
 		"/wasm_exec.js",
 		"/",
