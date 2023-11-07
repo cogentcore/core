@@ -246,7 +246,7 @@ func (app *appImpl) resize() {
 	sz := image.Pt(w, h)
 	app.screen.Geometry.Max = sz
 	app.screen.PixSize = image.Pt(int(float32(sz.X)*app.screen.DevicePixelRatio), int(float32(sz.Y)*app.screen.DevicePixelRatio))
-	dpi := 96 * app.screen.DevicePixelRatio * app.screen.DevicePixelRatio
+	dpi := 96 * app.screen.DevicePixelRatio
 	app.screen.PhysicalDPI = dpi
 	app.screen.LogicalDPI = dpi
 
