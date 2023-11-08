@@ -59,8 +59,22 @@ func (xy *XY) Dim(d mat32.Dims) Value {
 	switch d {
 	case mat32.X:
 		return xy.X
-	default:
+	case mat32.Y:
 		return xy.Y
+	default:
+		panic("units.XY dimension invalid")
+	}
+}
+
+// SetDim sets the value for given dimension
+func (xy *XY) SetDim(d mat32.Dims, val Value) {
+	switch d {
+	case mat32.X:
+		xy.X = val
+	case mat32.Y:
+		xy.Y = val
+	default:
+		panic("units.XY dimension invalid")
 	}
 }
 
