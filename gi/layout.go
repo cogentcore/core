@@ -216,10 +216,11 @@ func (ly *Layout) HasAnyScroll() bool {
 // ScrollGeom returns the target position and size for scrollbars
 func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
 	od := d.OtherDim()
+	bbmin := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Min)
 	bbmax := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Max)
-	pos.SetDim(d, ly.Alloc.ContentPos.Dim(d))
+	pos.SetDim(d, bbmin.Dim(d))
 	pos.SetDim(od, bbmax.Dim(od))
-	bbsz := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Size())
+	bbsz := bbmax.Sub(bbmin)
 	sz.SetDim(d, bbsz.Dim(d)-4)
 	sz.SetDim(od, ly.Styles.ScrollBarWidth.Dots)
 	sz.SetCeil()
@@ -261,8 +262,13 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 		s.Border.Width.Zero()
 		od := d.OtherDim()
 		_, sz := ly.ScrollGeom(d)
-		s.Min.SetDim(d, units.Dot(sz.Dim(d)))
-		s.Min.SetDim(od, units.Dot(sz.Dim(od)))
+		if sz.X > 0 && sz.Y > 0 {
+			s.State.SetFlag(false, states.Invisible)
+			s.Min.SetDim(d, units.Dot(sz.Dim(d)))
+			s.Min.SetDim(od, units.Dot(sz.Dim(od)))
+		} else {
+			s.State.SetFlag(true, states.Invisible)
+		}
 		s.Max = s.Min
 	})
 	sr.OnChange(func(e events.Event) {
@@ -281,7 +287,6 @@ func (ly *Layout) GetScrollPosition(sc *Scene) {
 		ly.Alloc.Scroll.SetDim(d, 0)
 		if ly.HasScroll[d] {
 			sb := ly.Scrolls[d]
-			fmt.Println("scroll val:", d, sb.Value)
 			ly.Alloc.Scroll.SetDim(d, -sb.Value)
 		}
 	}
@@ -302,7 +307,11 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	if sb.Alloc.Pos == pos && sb.Alloc.Size.Content == sz {
 		return
 	}
-	fmt.Println(pos, sb.Alloc.Pos, sz, sb.Alloc.Size.Content)
+	if sz.X <= 0 || sz.Y <= 0 {
+		sb.SetState(true, states.Invisible)
+		return
+	}
+	sb.SetState(false, states.Invisible)
 	csz := ly.LayImpl.ContentSubGap.Dim(d)
 	ksz := ly.LayImpl.KidsSize.Dim(d)
 	sb.Min = 0
