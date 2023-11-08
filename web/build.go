@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"goki.dev/glop/dirs"
 	"goki.dev/goki/config"
 	"goki.dev/grog"
 	"goki.dev/xe"
@@ -94,11 +95,17 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	ics := filepath.Join(filepath.Dir(odir), "icons")
-	err = xe.Run("cp", "-r", ics, odir)
-	grog.InitColor()
+	ics := filepath.Join(c.Build.Package, ".goki", "icons")
+	hasIcs, err := dirs.FileExists(ics)
 	if err != nil {
 		return err
+	}
+	if hasIcs {
+		err = xe.Run("cp", "-r", ics, odir)
+		grog.InitColor()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
