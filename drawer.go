@@ -7,6 +7,9 @@ package goosi
 import (
 	"image"
 	"image/draw"
+
+	"goki.dev/grows/images"
+	"goki.dev/grr"
 )
 
 // Capture tells the app drawer to capture its next frame as an image.
@@ -15,6 +18,12 @@ import (
 func Capture() *image.RGBA {
 	NeedsCapture = true
 	return <-CaptureImage
+}
+
+// CaptureAs is a helper function that saves the result of [Capture] to the given filename.
+// It automatically logs any error in addition to returning it.
+func CaptureAs(filename string) error {
+	return grr.Log0(images.Save(Capture(), filename))
 }
 
 var (

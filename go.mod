@@ -10,6 +10,8 @@ require (
 	goki.dev/enums v0.9.36
 	goki.dev/girl v0.0.17
 	goki.dev/glop v0.1.4
+	goki.dev/grows v0.3.13
+	goki.dev/grr v0.0.4
 	goki.dev/laser v0.1.16
 	goki.dev/mat32/v2 v2.0.0-dev0.0.11
 	goki.dev/pi/v2 v2.0.0-dev0.0.10
@@ -28,8 +30,6 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	goki.dev/cam v0.9.33 // indirect
 	goki.dev/colors v0.8.27 // indirect
-	goki.dev/grows v0.3.13 // indirect
-	goki.dev/grr v0.0.4 // indirect
 	goki.dev/gti v0.1.14 // indirect
 	goki.dev/icons v0.0.7 // indirect
 	goki.dev/ki/v2 v2.0.0-dev0.0.17 // indirect
