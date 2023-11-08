@@ -51,7 +51,6 @@ type appImpl struct {
 	quitReqFunc   func()
 	quitCleanFunc func()
 	platform      goosi.Platforms // the underlying system platform (Android, iOS, etc)
-	isDark        bool
 	insets        styles.SideFloats
 	keyMods       key.Modifiers // current key mods
 }
@@ -459,7 +458,8 @@ func (app *appImpl) Quit() {
 }
 
 func (app *appImpl) IsDark() bool {
-	return app.isDark
+	return js.Global().Get("matchMedia").Truthy() &&
+		js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Get("matches").Truthy()
 }
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
