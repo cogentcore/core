@@ -170,7 +170,8 @@ type LayImplState struct {
 	// todo: Flex has slice of sizes, one for each line
 
 	// KidsSize is the actual size of the Children in this layout.
-	// Drives ContentSize.
+	// Drives ContentSize, and also the need for scrollbars when
+	// greater than ContentSubGap (kids don't fit in avail space).
 	KidsSize mat32.Vec2
 
 	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds extra space,
@@ -183,8 +184,8 @@ type LayImplState struct {
 	// subtracted when allocating sizes to elements.
 	GapSize mat32.Vec2
 
-	// ContentMinusGap is the amount to allocate to the Kids
-	ContentMinusGap mat32.Vec2
+	// ContentSubGap is the amount to allocate to the Kids
+	ContentSubGap mat32.Vec2
 }
 
 // InitSizes initializes the Sizes based on Cells geom
@@ -213,6 +214,12 @@ func (ls *LayImplState) ContentSize() mat32.Vec2 {
 		csz.SetDim(ma, sum)
 	}
 	return csz
+}
+
+// Overflow is the difference between KidsSize - ContentSubGap,
+// which drives the need for scrollbars.
+func (ls *LayImplState) Overflow() mat32.Vec2 {
+	return ls.KidsSize.Sub(ls.ContentSubGap)
 }
 
 // StackTopWidget returns the StackTop element as a widget
@@ -525,12 +532,12 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	totalChanged := ly.SizeDownGrowToAlloc(sc, iter)
 	chg := ly.ManageOverflow(sc, iter)
 	sz := &ly.Alloc.Size
-	ly.LayImpl.ContentMinusGap = sz.Content.Sub(ly.LayImpl.GapSize)
+	ly.LayImpl.ContentSubGap = sz.Content.Sub(ly.LayImpl.GapSize)
 
-	conDiff := ly.LayImpl.ContentMinusGap.Sub(ly.LayImpl.KidsSize) // vs. actual kids
+	conDiff := ly.LayImpl.ContentSubGap.Sub(ly.LayImpl.KidsSize) // vs. actual kids
 	if conDiff.X > 0 || conDiff.Y > 0 {
 		if LayoutTrace {
-			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", ly.LayImpl.KidsSize, "now:", ly.LayImpl.ContentMinusGap, "gapsize:", ly.LayImpl.GapSize)
+			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", ly.LayImpl.KidsSize, "now:", ly.LayImpl.ContentSubGap, "gapsize:", ly.LayImpl.GapSize)
 		}
 		ly.SizeDownGrow(sc, iter, conDiff)
 	} else {
@@ -542,50 +549,43 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 
 // ManageOverflow uses overflow settings to determine if scrollbars
 // are needed, etc.  Returns true if size changes as a result.
+// Based on the allocation mechanisms, our Total never exceeds Alloc
+// but KidsSize represents the true actual needs of the child elements,
+// so that is what drives scrolling.
 func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	sz := &ly.Alloc.Size
 	change := false
 	if iter == 0 {
 		ly.LayImpl.ScrollSize.SetZero()
+		ly.SetScrollsOff()
 	}
-	for d := mat32.X; d <= mat32.Y; d++ { // main axis = X then Y
-		if iter == 0 {
-			ly.HasScroll[d] = false
-		}
-		alloc := sz.Alloc.Dim(d)
-		total := sz.Total.Dim(d)
-		switch ly.Styles.Overflow.Dim(d) {
-		case styles.OverflowVisible:
-			if (total - alloc) > 1 { // should not happen
-				fmt.Println("Layout ERROR:", ly, "total > alloc:", d, total, ">", alloc)
-			}
-			// no scrollbars, no change
-		case styles.OverflowHidden:
-			if alloc < total {
-				change = true
-				sz.Total.SetDim(d, alloc) // get it
-				if LayoutTrace {
-					fmt.Println(ly, "OverflowHidden actually hid, alloc < total", d, alloc, "<", total)
-				}
-			}
-			// no scrollbars
-		case styles.OverflowAuto:
-			if total > alloc {
-				if !ly.HasScroll[d] {
-					change = true
-				}
-				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
-				if LayoutTrace {
-					fmt.Println(ly, "OverflowAuto enabling scrollbars, total > alloc:", d, total, ">", alloc)
-				}
-			}
-		case styles.OverflowScroll:
+	for d := mat32.X; d <= mat32.Y; d++ {
+		if ly.Styles.Overflow.Dim(d) == styles.OverflowScroll {
 			if !ly.HasScroll[d] {
 				change = true
 			}
 			ly.HasScroll[d] = true
 			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
+		}
+	}
+	oflow := ly.LayImpl.Overflow() // KidsSize - ContentSubGap
+	for d := mat32.X; d <= mat32.Y; d++ {
+		ofd := oflow.Dim(d)
+		if ofd > 0 {
+			switch ly.Styles.Overflow.Dim(d) {
+			// case styles.OverflowVisible:
+			// note: this shouldn't happen -- just have this in here for monitoring
+			// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
+			case styles.OverflowAuto:
+				if !ly.HasScroll[d] {
+					change = true
+				}
+				ly.HasScroll[d] = true
+				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
+				// if LayoutTrace {
+				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
+				// }
+			}
 		}
 	}
 	sz.SetSpace(ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size()))
@@ -748,6 +748,7 @@ func (ly *Layout) Position(sc *Scene) {
 
 func (ly *Layout) PositionLay(sc *Scene) {
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
+	ly.ConfigScrolls(sc)   // and configure the scrolls
 	if ly.Styles.Display == styles.DisplayStacked {
 		ly.PositionStacked(sc)
 	} else {
@@ -826,26 +827,39 @@ func (wb *WidgetBase) ScenePos(sc *Scene) {
 }
 
 func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
+	wb.SetPosFromParent(sc)
+	wb.SetBBoxes(sc)
+}
+
+func (wb *WidgetBase) SetPosFromParent(sc *Scene) {
 	_, pwb := wb.ParentWidget()
 	var parPos mat32.Vec2
-	var parBB image.Rectangle
 	if pwb != nil {
 		parPos = pwb.Alloc.ContentPos
+	}
+	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos).Add(wb.Alloc.Scroll)
+	if LayoutTrace {
+		fmt.Println(wb, "pos:", wb.Alloc.Pos, "parPos:", parPos)
+	}
+}
+
+func (wb *WidgetBase) SetBBoxes(sc *Scene) {
+	_, pwb := wb.ParentWidget()
+	var parBB image.Rectangle
+	if pwb != nil {
 		parBB = pwb.Alloc.ContentBBox
 	} else {
 		parBB.Max = sc.Geom.Size
 	}
-	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos).Add(wb.Alloc.Scroll)
 	bb := mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Total) // todo: alloc fixes widgets..
 	wb.Alloc.BBox = parBB.Intersect(bb)
 	if LayoutTrace {
-		fmt.Println(wb, "pos:", wb.Alloc.Pos, "parPos:", parPos, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.BBox)
+		fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.BBox)
 	}
 
 	spc := wb.Styles.BoxSpace()
 	off := spc.Pos()
-	fmt.Println(wb, "off", off)
-	// off.SetFloor()
+	off.SetFloor()
 	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
 	cbb := mat32.RectFromPosSizeMax(wb.Alloc.ContentPos, wb.Alloc.Size.Content)
 	wb.Alloc.ContentBBox = parBB.Intersect(cbb)
@@ -874,9 +888,10 @@ func (wb *WidgetBase) ScenePosChildren(sc *Scene) {
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
 func (ly *Layout) ScenePos(sc *Scene) {
+	ly.SetPosFromScrolls(sc)
 	ly.ScenePosWidget(sc)
 	ly.ScenePosChildren(sc)
-	// todo: do scrollbars here
+	ly.PositionScrolls(sc)
 }
 
 /*
