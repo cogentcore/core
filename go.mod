@@ -7,21 +7,21 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231102141658-eca20e8abded
 	github.com/goki/vulkan v1.0.7
 	github.com/zergon321/reisen v0.1.9
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.13
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.14
 )
 
 require (
 	github.com/hajimehoshi/oto v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	goki.dev/enums v0.9.36 // indirect
+	goki.dev/enums v0.9.37 // indirect
 	goki.dev/glop v0.1.4 // indirect
-	goki.dev/grows v0.3.13 // indirect
-	goki.dev/gti v0.1.14 // indirect
-	goki.dev/laser v0.1.16 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.11 // indirect
+	goki.dev/grows v0.3.14 // indirect
+	goki.dev/gti v0.1.15 // indirect
+	goki.dev/laser v0.1.17 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.12 // indirect
 	goki.dev/ordmap v0.5.6 // indirect
 	golang.org/x/exp/shiny v0.0.0-20231006140011-7918f672742d // indirect
-	golang.org/x/image v0.13.0 // indirect
+	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/mobile v0.0.0-20231006135142-2b44d11868fe // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 )
