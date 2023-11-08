@@ -12,28 +12,28 @@ require (
 	github.com/goki/go-difflib v1.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	goki.dev/cam v0.9.33
-	goki.dev/colors v0.8.27
-	goki.dev/cursors v0.0.15
-	goki.dev/enums v0.9.36
-	goki.dev/girl v0.0.17
+	goki.dev/cam v0.9.34
+	goki.dev/colors v0.8.28
+	goki.dev/cursors v0.0.16
+	goki.dev/enums v0.9.37
+	goki.dev/girl v0.0.18
 	goki.dev/glop v0.1.4
-	goki.dev/goosi v0.0.9
-	goki.dev/grog v0.0.11
-	goki.dev/grows v0.3.13
-	goki.dev/grr v0.0.4
-	goki.dev/gti v0.1.14
-	goki.dev/icons v0.0.7
-	goki.dev/ki/v2 v2.0.0-dev0.0.17
-	goki.dev/laser v0.1.16
-	goki.dev/mat32/v2 v2.0.0-dev0.0.11
+	goki.dev/goosi v0.0.10
+	goki.dev/grog v0.0.12
+	goki.dev/grows v0.3.14
+	goki.dev/grr v0.0.5
+	goki.dev/gti v0.1.15
+	goki.dev/icons v0.0.8
+	goki.dev/ki/v2 v2.0.0-dev0.0.18
+	goki.dev/laser v0.1.17
+	goki.dev/mat32/v2 v2.0.0-dev0.0.12
 	goki.dev/ordmap v0.5.6
-	goki.dev/pi/v2 v2.0.0-dev0.0.10
+	goki.dev/pi/v2 v2.0.0-dev0.0.11
 	goki.dev/prof/v2 v2.0.0-dev0.0.4
-	goki.dev/svg v0.1.12
-	goki.dev/vci/v2 v2.0.0-dev0.0.15
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.13
-	golang.org/x/image v0.13.0
+	goki.dev/svg v0.1.13
+	goki.dev/vci/v2 v2.0.0-dev0.0.16
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.14
+	golang.org/x/image v0.14.0
 	gopkg.in/fsnotify.v1 v1.4.7
 )
 
@@ -51,7 +51,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231102141658-eca20e8abded // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/goki/vulkan v1.0.7 // indirect
-	github.com/gorilla/css v1.0.0 // indirect
+	github.com/gorilla/css v1.0.1 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -60,9 +60,9 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
-	golang.org/x/mod v0.13.0 // indirect
+	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 )
