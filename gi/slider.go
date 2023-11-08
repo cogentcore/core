@@ -302,6 +302,7 @@ func (sr *Slider) SetSliderPos(pos float32) {
 	prel := (sr.Pos - thszh) / (sz - thsz)
 	val := mat32.Truncate(sr.Min+prel*(sr.Max-sr.Min), sr.Prec)
 	val = mat32.Clamp(val, sr.Min, sr.Max)
+	// fmt.Println(pos, thsz, prel, val)
 	sr.Value = val
 	if sr.Snap {
 		sr.SnapValue()
@@ -537,7 +538,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		pos := sr.Alloc.ContentPos
 		bg, _ := sr.ParentBackgroundColor()
 		pc.FillStyle.SetFullColor(&bg)
-		fmt.Println(bg)
+		// fmt.Println(bg)
 		sr.RenderBoxImpl(sc, pos, sz, st.Border) // todo: why is this not clearing?
 
 		// need to apply state layer

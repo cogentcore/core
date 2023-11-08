@@ -565,7 +565,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
+			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
 		}
 	}
 	oflow := ly.LayImpl.Overflow() // KidsSize - ContentSubGap
@@ -581,18 +581,22 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 					change = true
 				}
 				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots)
-				// if LayoutTrace {
-				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
-				// }
+				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
+				if LayoutTrace {
+					fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
+				}
 			}
 		}
 	}
 	sz.SetSpace(ly.LayImpl.ScrollSize.Add(ly.Styles.BoxSpace().Size()))
-	oldCon := sz.Content
-	sz.SetContentFromTotal()
-	if oldCon != sz.Content {
-		change = true
+	if ly.Par == nil { // nowhere to go
+		sz.SetContentFromTotal()
+	} else {
+		oldTot := sz.Total
+		sz.SetTotalFromContent()
+		if oldTot != sz.Total {
+			change = true
+		}
 	}
 	return change
 }
@@ -835,9 +839,13 @@ func (wb *WidgetBase) SetPosFromParent(sc *Scene) {
 	_, pwb := wb.ParentWidget()
 	var parPos mat32.Vec2
 	if pwb != nil {
-		parPos = pwb.Alloc.ContentPos
+		parPos = pwb.Alloc.ContentPos.Add(pwb.Alloc.Scroll) // critical that parent adds here but not to self
 	}
-	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos).Add(wb.Alloc.Scroll)
+	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos)
+	spc := wb.Styles.BoxSpace()
+	off := spc.Pos()
+	off.SetFloor()
+	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
 	if LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Alloc.Pos, "parPos:", parPos)
 	}
@@ -857,10 +865,6 @@ func (wb *WidgetBase) SetBBoxes(sc *Scene) {
 		fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.BBox)
 	}
 
-	spc := wb.Styles.BoxSpace()
-	off := spc.Pos()
-	off.SetFloor()
-	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
 	cbb := mat32.RectFromPosSizeMax(wb.Alloc.ContentPos, wb.Alloc.Size.Content)
 	wb.Alloc.ContentBBox = parBB.Intersect(cbb)
 	if LayoutTrace {
