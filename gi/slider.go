@@ -33,16 +33,22 @@ type SliderPositioner interface {
 	PointToRelPos(pt image.Point) image.Point
 }
 
-// Slider is a slideable widget that provides slider functionality for two major modes.
-// ValThumb = false is a slider with a fixed-size thumb knob, while = true has a thumb
-// that represents a value, as in a scrollbar, and the scrolling range is size - thumbsize
+// Slider is a slideable widget that provides slider functionality for two major Types
+// Slider type provides a movable thumb that represents a value.
+// Scrollbar type uses the VisiblePct factor that specifies what percent
+// of the content is currently visible, which determines the size of the thumb, and the
+// range of motion remaining for the thumb Value.
+// The Content size (inside the margin and padding) determines the outer bounds of
+// the rendered area.
 type Slider struct { //goki:embedder
 	WidgetBase
 
-	// the type of the slider
+	// the type of the slider, which determines the visual and functional properties
 	Type SliderTypes `set:"-"`
 
-	// current value
+	// Current value, represented by the position of the thumb.
+	// For Slider type, this is the center of the thumb.
+	// For Scrollbar, this is the top of the thumb.
 	Value float32 `set:"-"`
 
 	// dimension along which the slider slides
@@ -60,21 +66,19 @@ type Slider struct { //goki:embedder
 	// larger PageUp / Dn step size
 	PageStep float32
 
-	// todo: shouldn't this be a units guy:?
+	// For Scrollbar type only: percent (100 max) of the full range
+	// that is visible, which determines the thumb size and range of motion.
+	VisiblePct float32
 
-	// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
-	ValThumb bool
-
-	// value that the thumb represents, in the same units
-	ThumbVal float32
-
-	// styled fixed size of the thumb -- only if not doing ValThumb
-	ThumbSize units.Value
+	// size of the thumb as a proportion of the slider thickness, which is
+	// Content size (inside the padding).
+	ThumbSize mat32.Vec2
 
 	// optional icon for the dragging knob
 	Icon icons.Icon `view:"show-name"`
 
-	// if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change
+	// if true, will send continuous updates of value changes as user moves the slider.
+	// otherwise only at the end. See TrackThr for a threshold on amount of change
 	Tracking bool
 
 	// threshold for amount of change in scroll value before emitting a signal in Tracking mode
@@ -83,13 +87,10 @@ type Slider struct { //goki:embedder
 	// snap the values to Step size increments
 	Snap bool
 
-	// can turn off e.g., scrollbar rendering with this flag -- just prevents rendering
-	Off bool
-
-	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
-	Prec int `xml:"prec"`
-
-	// TODO: maybe make value and thumb full style objects
+	// specifies the precision of decimal places (total, not after the decimal point)
+	// to use in representing the number. This helps to truncate small weird floating
+	// point values in the nether regions.
+	Prec int
 
 	// The background color that is used for styling the selected value section of the slider.
 	// It should be set in the StyleFuncs, just like the main style object is.
@@ -103,12 +104,6 @@ type Slider struct { //goki:embedder
 	// just looks like the rest of the slider.
 	ThumbColor colors.Full
 
-	// An additional style object that is used for styling the overall box around the slider.
-	// It should be set in the Stylers, just the like the main style object is.
-	// It typically has no border and a white/black background. it needs a background
-	// to allow local re-rendering.
-	StyleBox styles.Style `set:"-"`
-
 	//////////////////////////////////////////////////////////////////
 	// 	Computed values below
 
@@ -118,14 +113,9 @@ type Slider struct { //goki:embedder
 	// previous emitted value - don't re-emit if it is the same
 	LastValue float32 `edit:"-" copy:"-" xml:"-" json:"-" set:"-"`
 
-	// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
+	// Computed size of the slide box in the relevant dimension
+	// range of motion, exclusive of spacing, based on layout allocation.
 	Size float32 `edit:"-" set:"-"`
-
-	// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
-	ThSize float32 `edit:"-" set:"-"`
-
-	// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
-	ThSizeReal float32 `edit:"-" set:"-"`
 
 	// underlying drag position of slider -- not subject to snapping
 	SlideStartPos float32 `edit:"-" set:"-"`
@@ -138,7 +128,9 @@ const (
 	// SliderSlider indicates a standard, user-controllable slider
 	// for setting a numeric value
 	SliderSlider SliderTypes = iota
+
 	// SliderScrollbar indicates a slider acting as a scrollbar for content
+	// This sets the
 	SliderScrollbar
 )
 
@@ -150,29 +142,23 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 	sr.Max = fr.Max
 	sr.Step = fr.Step
 	sr.PageStep = fr.PageStep
-	sr.Size = fr.Size
-	sr.ThSize = fr.ThSize
-	sr.ThSizeReal = fr.ThSizeReal
+	sr.VisiblePct = fr.VisiblePct
 	sr.ThumbSize = fr.ThumbSize
-	sr.Prec = fr.Prec
 	sr.Icon = fr.Icon
-	sr.ValThumb = fr.ValThumb
-	sr.Pos = fr.Pos
-	sr.SlideStartPos = fr.SlideStartPos
 	sr.Tracking = fr.Tracking
 	sr.TrackThr = fr.TrackThr
 	sr.Snap = fr.Snap
-	sr.Off = fr.Off
+	sr.Prec = fr.Prec
+	sr.ValueColor = fr.ValueColor
+	sr.ThumbColor = fr.ThumbColor
 }
 
 func (sr *Slider) OnInit() {
+	sr.Max = 1.0
 	sr.Step = 0.1
 	sr.PageStep = 0.2
-	sr.Max = 1.0
 	sr.Prec = 9
-	sr.ThumbSize = units.Em(1.5)
-	sr.ThSize = 25.0
-	sr.ThSizeReal = sr.ThSize
+	sr.ThumbSize.Set(1, 1)
 	sr.HandleSliderEvents()
 	sr.SliderStyles()
 }
@@ -574,6 +560,15 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	// SidesTODO: look here if slider borders break
 
 	if sr.Type == SliderScrollbar {
+		// render entire slider inside the ContentBBox!
+		// Size of thumb is implicit in size of BBox = s.Min.Y for a horiz slider
+		// s.Min.X is length of track
+		// TrackThickness = proportion of content thickness (height for horiz) = 1 default
+		// ThumbSize mat32.Vec2 1,1 default.  only orthogonal one is used here
+
+		// track = content + padding
+		// thumb = content
+
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
 		bg := st.BackgroundColor
@@ -584,13 +579,14 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		pc.FillStyle.SetFullColor(&bg)
 
 		// scrollbar is basic box in content size
-		spc := st.BoxSpace()
-		pos := sr.Alloc.Pos.Add(spc.Pos())
-		sz := sr.Alloc.Size.Total.Sub(spc.Size())
+		// spc := st.BoxSpace()
+		// pos := sr.Alloc.Pos.Add(spc.Pos())
+		sz := sr.Alloc.Size.Content
+		pos := sr.Alloc.ContentPos
 
 		if !sr.ValueColor.IsNil() {
-			sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
-			pos.SetAddDim(sr.Dim, sr.Pos)            // start of thumb
+			sr.RenderBoxImpl(sc, sr.Alloc.Pos, sr.Alloc.Size.Total, st.Border) // surround box
+			pos.SetAddDim(sr.Dim, sr.Pos)                                      // start of thumb
 			sz.SetDim(sr.Dim, sr.ThSize)
 			pc.FillStyle.SetFullColor(&sr.ValueColor)
 			sr.RenderBoxImpl(sc, pos, sz, st.Border)
@@ -600,6 +596,12 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	} else {
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
+
+		// render entire slider inside the ContentBBox!
+		// Size of thumb is implicit in size of BBox = s.Min.Y for a horiz slider
+		// s.Min.X is length of track
+		// TrackThickness = proportion of content thickness (height for horiz)
+		// ThumbSize mat32.Vec2 1,1 default.
 
 		// need to apply state layer
 		ebg := st.StateBackgroundColor(st.BackgroundColor)
@@ -614,7 +616,7 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		// for length: | spc | ht | <-start of slider
 
 		spc := st.BoxSpace()
-		pos := sr.Alloc.Pos
+		pos := sr.Alloc.ContentPos
 		sz := sr.Alloc.Size.Total
 		bpos := pos // box pos
 		bsz := sz

@@ -523,19 +523,18 @@ func (bt *Button) Render(sc *Scene) {
 	if bt.PushBounds(sc) {
 		bt.RenderButton(sc)
 		bt.RenderParts(sc)
-		bt.RenderChildren(sc)
 		bt.PopBounds(sc)
 	}
 }
 
-func (bt *Button) Destroy() {
-	// TODO(kai/menu): figure out how to handle menu shortcuts
-	/*
-		if bt.Menu != nil {
-			bt.Menu.DeleteShortcuts(bt.EventMgr())
-		}
-	*/
-}
+// func (bt *Button) Destroy() {
+// 	// TODO(kai/menu): figure out how to handle menu shortcuts
+// 	/*
+// 		if bt.Menu != nil {
+// 			bt.Menu.DeleteShortcuts(bt.EventMgr())
+// 		}
+// 	*/
+// }
 
 // UpdateButtons calls UpdateFunc on me and any of my menu items
 func (bt *Button) UpdateButtons() {

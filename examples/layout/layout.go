@@ -19,8 +19,8 @@ func main() { gimain.Run(app) }
 
 func app() {
 	// turn on tracing in preferences, Debug
-	gi.LayoutTrace = true
-	gi.LayoutTraceDetail = true
+	// gi.LayoutTrace = true
+	// gi.LayoutTraceDetail = true
 
 	frsz := [5]mat32.Vec2{
 		{20, 100},
