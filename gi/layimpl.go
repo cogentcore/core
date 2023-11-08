@@ -835,6 +835,15 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 	wb.SetBBoxes(sc)
 }
 
+// SetContentPosFromPos sets the ContentPos position based on current Pos
+// plus the BoxSpace position offset.
+func (wb *WidgetBase) SetContentPosFromPos() {
+	spc := wb.Styles.BoxSpace()
+	off := spc.Pos()
+	off.SetFloor()
+	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
+}
+
 func (wb *WidgetBase) SetPosFromParent(sc *Scene) {
 	_, pwb := wb.ParentWidget()
 	var parPos mat32.Vec2
@@ -842,13 +851,18 @@ func (wb *WidgetBase) SetPosFromParent(sc *Scene) {
 		parPos = pwb.Alloc.ContentPos.Add(pwb.Alloc.Scroll) // critical that parent adds here but not to self
 	}
 	wb.Alloc.Pos = wb.Alloc.RelPos.Add(parPos)
-	spc := wb.Styles.BoxSpace()
-	off := spc.Pos()
-	off.SetFloor()
-	wb.Alloc.ContentPos = wb.Alloc.Pos.Add(off)
+	wb.SetContentPosFromPos()
 	if LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Alloc.Pos, "parPos:", parPos)
 	}
+}
+
+// SetBBoxesFromAllocs sets BBox and ContentBBox from Alloc.Pos and .Size
+// This does NOT intersect with parent content BBox, which is done in SetBBoxes.
+// Use this for elements that are dynamically positioned outside of parent BBox.
+func (wb *WidgetBase) SetBBoxesFromAllocs() {
+	wb.Alloc.BBox = mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Total)
+	wb.Alloc.ContentBBox = mat32.RectFromPosSizeMax(wb.Alloc.ContentPos, wb.Alloc.Size.Content)
 }
 
 func (wb *WidgetBase) SetBBoxes(sc *Scene) {
@@ -892,7 +906,7 @@ func (wb *WidgetBase) ScenePosChildren(sc *Scene) {
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
 func (ly *Layout) ScenePos(sc *Scene) {
-	ly.SetPosFromScrolls(sc)
+	ly.GetScrollPosition(sc)
 	ly.ScenePosWidget(sc)
 	ly.ScenePosChildren(sc)
 	ly.PositionScrolls(sc)
