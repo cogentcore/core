@@ -154,6 +154,7 @@ func (sr *Slider) OnInit() {
 	sr.PageStep = 0.2
 	sr.Prec = 9
 	sr.ThumbSize.Set(1, 1)
+	sr.Tracking = true
 	sr.TrackSize = 0.5
 	sr.HandleSliderEvents()
 	sr.SliderStyles()
@@ -410,6 +411,9 @@ func (sr *Slider) HandleSliderMouse() {
 	sr.On(events.SlideStop, func(e events.Event) {
 		pos := sr.PointToRelPos(e.LocalPos())
 		sr.SetSliderPosAction(pos)
+		if !sr.Tracking {
+			sr.SendChanged()
+		}
 	})
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
@@ -419,6 +423,9 @@ func (sr *Slider) HandleSliderMouse() {
 			del = -del // invert for "natural" scroll
 		}
 		sr.SetSliderPosAction(sr.Pos - del)
+		if !sr.Tracking {
+			sr.SendChanged()
+		}
 	})
 }
 
@@ -515,9 +522,8 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 
 		sr.RenderStdBox(sc, st)
 
-		bg := st.BackgroundColor
+		bg := st.StateBackgroundColor(st.BackgroundColor)
 		if bg.IsNil() {
-			// STYTODO: should we handle parent state layer here?
 			bg, _ = sr.ParentBackgroundColor()
 		}
 		sz := sr.Alloc.Size.Content
@@ -552,6 +558,9 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		// need to apply state layer
 		ebg := st.StateBackgroundColor(st.BackgroundColor)
 		pc.FillStyle.SetFullColor(&ebg)
+		if ebg.IsNil() {
+			ebg, _ = sr.ParentBackgroundColor()
+		}
 
 		trsz := sz.Dim(od) * sr.TrackSize
 		bsz := sz

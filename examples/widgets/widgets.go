@@ -177,7 +177,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		})
 
 	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).
-		SetSnap(true).SetTracking(true).SetIcon(icons.RadioButtonChecked)
+		SetSnap(true).SetTracking(false).SetIcon(icons.RadioButtonChecked)
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
