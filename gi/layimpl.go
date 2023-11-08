@@ -460,9 +460,9 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
 // Computes updated Content size from given total allocation
 // and gives that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
-	redo := wb.SizeDownGrowToAlloc(sc, iter)
-	re := wb.SizeDownParts(sc, iter) // give our content to parts
-	return redo || re
+	// re := wb.SizeDownGrowToAlloc(sc, iter) // prevents word wrapping but also prevents super wide labels
+	redo := wb.SizeDownParts(sc, iter) // give our content to parts
+	return redo
 }
 
 // SizeDownGrowToAlloc grows our Total size up to current Alloc size
@@ -472,9 +472,10 @@ func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) SizeDownGrowToAlloc(sc *Scene, iter int) bool {
 	change := false
-	s := &wb.Styles
 	sz := &wb.Alloc.Size
+	s := &wb.Styles
 	totWas := sz.Total
+	sz.Total.Clamp(mat32.Vec2Zero, sz.Alloc)
 	if s.Grow.X > 0 && sz.Alloc.X > sz.Total.X {
 		change = true
 		sz.Total.X = sz.Alloc.X
@@ -568,22 +569,24 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
 		}
 	}
-	oflow := ly.LayImpl.Overflow() // KidsSize - ContentSubGap
-	for d := mat32.X; d <= mat32.Y; d++ {
-		ofd := oflow.Dim(d)
-		if ofd > 0 {
-			switch ly.Styles.Overflow.Dim(d) {
-			// case styles.OverflowVisible:
-			// note: this shouldn't happen -- just have this in here for monitoring
-			// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
-			case styles.OverflowAuto:
-				if !ly.HasScroll[d] {
-					change = true
-				}
-				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
-				if LayoutTrace {
-					fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
+	if !sc.Is(ScPrefSizing) {
+		oflow := ly.LayImpl.Overflow() // KidsSize - ContentSubGap
+		for d := mat32.X; d <= mat32.Y; d++ {
+			ofd := oflow.Dim(d)
+			if ofd > 0 {
+				switch ly.Styles.Overflow.Dim(d) {
+				// case styles.OverflowVisible:
+				// note: this shouldn't happen -- just have this in here for monitoring
+				// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
+				case styles.OverflowAuto:
+					if !ly.HasScroll[d] {
+						change = true
+					}
+					ly.HasScroll[d] = true
+					ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
+					if LayoutTrace {
+						fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
+					}
 				}
 			}
 		}
