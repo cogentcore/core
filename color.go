@@ -10,11 +10,29 @@ import (
 
 	"github.com/muesli/termenv"
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 )
 
-// UseColor is whether to use color in log messages.
-// It is on by default.
-var UseColor = true
+var (
+
+	// UseColor is whether to use color in log messages. It is on by default.
+	UseColor = true
+
+	// ColorSchemeIsDark is whether the color scheme of the current terminal is dark-themed.
+	// Its primary use is in [ColorScheme], and it should typically only be accessed via that.
+	ColorSchemeIsDark = true
+)
+
+// ColorScheme returns the appropriate appropriate color scheme
+// for terminal colors. It should be used instead of [colors.Scheme]
+// for terminal colors because the theme (dark vs light) of the terminal
+// could be different than that of the main app.
+func ColorScheme() *matcolor.Scheme {
+	if ColorSchemeIsDark {
+		return &colors.Schemes.Dark
+	}
+	return &colors.Schemes.Light
+}
 
 // colorProfile is the termenv color profile, stored globally for convenience.
 // It is set by [SetDefaultLogger] to [termenv.ColorProfile] if [UseColor] is true.
@@ -30,7 +48,7 @@ func InitColor() {
 	}
 	_ = restoreFunc // TODO: figure out how to call this at the end of the program
 	colorProfile = termenv.ColorProfile()
-	colors.SetScheme(termenv.HasDarkBackground())
+	ColorSchemeIsDark = termenv.HasDarkBackground()
 }
 
 // ApplyColor applies the given color to the given string
@@ -47,10 +65,6 @@ func ApplyColor(clr color.Color, str string) string {
 // given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func LevelColor(level slog.Level, str string) string {
-	// need to set whether the scheme is dark every time so that,
-	// for example, a GUI application doesn't override it
-	colors.SetScheme(termenv.HasDarkBackground())
-
 	var clr color.RGBA
 	switch level {
 	case slog.LevelDebug:
@@ -69,7 +83,7 @@ func LevelColor(level slog.Level, str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func DebugColor(str string) string {
-	return ApplyColor(colors.Scheme.Tertiary.Base, str)
+	return ApplyColor(ColorScheme().Tertiary.Base, str)
 }
 
 // InfoColor applies the color associated with the info level to
@@ -84,33 +98,33 @@ func InfoColor(str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func WarnColor(str string) string {
-	return ApplyColor(colors.Scheme.Warn.Base, str)
+	return ApplyColor(ColorScheme().Warn.Base, str)
 }
 
 // ErrorColor applies the color associated with the error level to
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func ErrorColor(str string) string {
-	return ApplyColor(colors.Scheme.Error.Base, str)
+	return ApplyColor(ColorScheme().Error.Base, str)
 }
 
 // SuccessColor applies the color associated with success to the
 // given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func SuccessColor(str string) string {
-	return ApplyColor(colors.Scheme.Success.Base, str)
+	return ApplyColor(ColorScheme().Success.Base, str)
 }
 
 // CmdColor applies the color associated with terminal commands and arguments
 // to the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func CmdColor(str string) string {
-	return ApplyColor(colors.Scheme.Primary.Base, str)
+	return ApplyColor(ColorScheme().Primary.Base, str)
 }
 
 // TitleColor applies the color associated with titles and section headers
 // to the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func TitleColor(str string) string {
-	return ApplyColor(colors.Scheme.Warn.Base, str)
+	return ApplyColor(ColorScheme().Warn.Base, str)
 }
