@@ -23,6 +23,10 @@ type Web struct { //gti:add
 	// by default otherwise.
 	RandomVersion bool
 
+	// Gzip is whether to gzip the app.wasm file that is built in the build command
+	// and serve it as a gzip-encoded file in the run command.
+	Gzip bool
+
 	// A placeholder background color for the application page to display before
 	// its stylesheets are loaded.
 	//

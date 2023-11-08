@@ -19,21 +19,27 @@ import (
 
 // Build builds an app for web using the given configuration information.
 func Build(c *config.Config) error {
-	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", c.Build.Output+".orig", c.Build.Package)
+	opath := c.Build.Output
+	if c.Web.Gzip {
+		opath += ".orig"
+	}
+	err := xe.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, c.Build.Package)
 	if err != nil {
 		return err
 	}
-	err = xe.RemoveAll(c.Build.Output + ".orig.gz")
-	if err != nil {
-		return err
-	}
-	err = xe.Run("gzip", c.Build.Output+".orig")
-	if err != nil {
-		return err
-	}
-	err = os.Rename(c.Build.Output+".orig.gz", c.Build.Output)
-	if err != nil {
-		return err
+	if c.Web.Gzip {
+		err = xe.RemoveAll(c.Build.Output + ".orig.gz")
+		if err != nil {
+			return err
+		}
+		err = xe.Run("gzip", c.Build.Output+".orig")
+		if err != nil {
+			return err
+		}
+		err = os.Rename(c.Build.Output+".orig.gz", c.Build.Output)
+		if err != nil {
+			return err
+		}
 	}
 	return MakeFiles(c)
 }

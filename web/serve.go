@@ -18,7 +18,9 @@ func Serve(c *config.Config) error {
 	http.Handle("/", fs)
 	http.HandleFunc("/app.wasm", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/wasm")
-		w.Header().Set("Content-Encoding", "gzip")
+		if c.Web.Gzip {
+			w.Header().Set("Content-Encoding", "gzip")
+		}
 		fs.ServeHTTP(w, r)
 	})
 

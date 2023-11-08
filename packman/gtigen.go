@@ -78,20 +78,6 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/packman.Serve",
-	Doc:  "Serve builds the package into static web files and then\nserves them on localhost at the config port.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-})
-
-var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.GetVersion",
 	Doc:  "GetVersion prints the version of the project.",
 	Directives: gti.Directives{
