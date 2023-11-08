@@ -181,26 +181,27 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
+	slider0.Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
 
 	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).
-		SetTracking(true).SetValue(0.5)
+		SetTracking(true).SetValue(0.5).SetThumbSize(mat32.NewVec2(1, 4))
 	slider1.OnChange(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
 
 	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.X).
-		SetVisiblePct(0.25).SetValue(0.25).SetTracking(true)
-	// scroll0.SetSnap(true)
+		SetVisiblePct(0.25).SetValue(0.25).SetTracking(true).SetStep(0.05).SetSnap(true)
 	scroll0.OnChange(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
-
 	scroll0.Style(func(s *styles.Style) {
 		s.Align.Y = styles.AlignCenter
 	})
 
 	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
-		SetVisiblePct(.1).SetValue(0).SetMax(300).
+		SetVisiblePct(.01).SetValue(0).SetMax(3000).
 		SetTracking(true).SetStep(1).SetPageStep(10)
 	scroll1.OnChange(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)

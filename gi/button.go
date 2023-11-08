@@ -194,6 +194,7 @@ func (bt *Button) ButtonStyles() {
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
+				s.Align.Set(styles.AlignCenter)
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {

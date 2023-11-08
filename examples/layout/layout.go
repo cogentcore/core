@@ -5,6 +5,8 @@
 package main
 
 import (
+	"fmt"
+
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
@@ -74,46 +76,44 @@ func app() {
 		s.Align.X = styles.AlignStart
 	})
 
-	/*
-		for i, sz := range frsz {
-			i := i
-			sz := sz
-			nm := fmt.Sprintf("fr%v", i)
-			fr := gi.NewFrame(row1, nm)
-			fr.Style(func(s *styles.Style) {
-				s.MainAxis = mat32.X
-				s.Align.X = styles.AlignStart
-				s.Align.Y = styles.AlignCenter
-				s.Grow.Set(0, 1)
-				s.Min.X.Px(sz.X)
-				s.Min.Y.Px(sz.Y)
-				s.Padding.Set(units.Dp(200)) // todo: something weird about these units -- shouldn't be so high
-				s.MaxBorder.Color.Set(colors.Black)
-				s.MaxBorder.Width.Set(units.Dp(2))
-				s.Border = s.MaxBorder
-				// s.Margin.Set(units.Dp(6))
+	for i, sz := range frsz {
+		i := i
+		sz := sz
+		nm := fmt.Sprintf("fr%v", i)
+		fr := gi.NewFrame(row1, nm)
+		fr.Style(func(s *styles.Style) {
+			s.MainAxis = mat32.X
+			s.Align.X = styles.AlignStart
+			s.Align.Y = styles.AlignCenter
+			s.Grow.Set(0, 1)
+			s.Min.X.Px(sz.X)
+			s.Min.Y.Px(sz.Y)
+			s.Padding.Set(units.Dp(2))
+			s.MaxBorder.Color.Set(colors.Black)
+			s.MaxBorder.Width.Set(units.Dp(2))
+			s.Border = s.MaxBorder
+			// s.Margin.Set(units.Dp(6))
 
-				// if i == 2 {
-				// 	fr.SetFixedWidth(units.Em(20))
-				// 	spc := row1.NewChild(gi.SpaceType, "spc").(*gi.Space)
-				// 	spc.SetFixedWidth(units.Em(4))
-				// } else {
-				// 	fr.SetProp("max-width", -1) // spacer
-				// }
-			})
+			// if i == 2 {
+			// 	fr.SetFixedWidth(units.Em(20))
+			// 	spc := row1.NewChild(gi.SpaceType, "spc").(*gi.Space)
+			// 	spc.SetFixedWidth(units.Em(4))
+			// } else {
+			// 	fr.SetProp("max-width", -1) // spacer
+			// }
+		})
 
-			// ic := gi.NewIcon(fr)
-			// ic.SetIcon(icons.Add)
-			// ic.Style(func(s *styles.Style) {
-			// 	s.Min.Set(units.Em(3))
-			// })
+		// ic := gi.NewIcon(fr)
+		// ic.SetIcon(icons.Add)
+		// ic.Style(func(s *styles.Style) {
+		// 	s.Min.Set(units.Em(3))
+		// })
 
-			lb := gi.NewLabel(fr).SetText("This is a test")
-			lb.Style(func(s *styles.Style) {
-				s.Min.X.Ch(10) // this is critical for enabling word wrapping
-			})
-		}
-	*/
+		lb := gi.NewLabel(fr).SetText("This is a test")
+		lb.Style(func(s *styles.Style) {
+			s.Min.X.Ch(10) // this is critical for enabling word wrapping
+		})
+	}
 
 	// row2 := gi.NewLayout(mfr, "row2", gi.LayoutHoriz)
 	// row2.SetProp("text-align", "center")

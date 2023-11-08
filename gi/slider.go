@@ -20,10 +20,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// ScollbarMinThumbSize is the minimum thumb size (in dots) displayed for a
-// Scrollbar type Slider, even if VisiblePct would make it smaller.
-var SliderMinThumbSize = float32(8)
-
 // Slider is a slideable widget that provides slider functionality for two Types:
 // Slider type provides a movable thumb that represents Value as the center of thumb
 // Pos position, with room reserved at ends for 1/2 of the thumb size.
@@ -253,8 +249,8 @@ func (sr *Slider) SendChanged(e ...events.Event) bool {
 	return true
 }
 
-// SlideSize returns the size available for sliding, based on allocation
-func (sr *Slider) SlideSize() float32 {
+// SliderSize returns the size available for sliding, based on allocation
+func (sr *Slider) SliderSize() float32 {
 	sz := sr.Alloc.Size.Content.Dim(sr.Dim)
 	if sr.Type != SliderScrollbar {
 		thsz := sr.ThumbSizeDots()
@@ -263,17 +259,22 @@ func (sr *Slider) SlideSize() float32 {
 	return sz
 }
 
+// SliderThickness returns the thickness of the slider: Content size in other dim.
+func (sr *Slider) SliderThickness() float32 {
+	return sr.Alloc.Size.Content.Dim(sr.Dim.OtherDim())
+}
+
 // ThumbSizeDots returns the thumb size in dots, based on ThumbSize
 // and the content thickness
 func (sr *Slider) ThumbSizeDots() mat32.Vec2 {
-	thick := sr.Alloc.Size.Content.Dim(sr.Dim.OtherDim())
-	return sr.ThumbSize.MulScalar(thick)
+	return sr.ThumbSize.MulScalar(sr.SliderThickness())
 }
 
 // SlideThumbSize returns thumb size, based on type
 func (sr *Slider) SlideThumbSize() float32 {
 	if sr.Type == SliderScrollbar {
-		return mat32.Clamp(sr.VisiblePct, 0, 1) * sr.SlideSize()
+		minsz := sr.SliderThickness()
+		return max(mat32.Clamp(sr.VisiblePct, 0, 1)*sr.SliderSize(), minsz)
 	}
 	return sr.ThumbSizeDots().Dim(sr.Dim)
 }
@@ -518,7 +519,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		pc.FillStyle.SetFullColor(&bg)
 		sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
 		if !sr.ValueColor.IsNil() {
-			thsz := max(sr.SlideThumbSize(), SliderMinThumbSize)
+			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
 			tpos := pos
 			tpos.SetAddDim(sr.Dim, sr.Pos)
@@ -540,8 +541,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		pos := sr.Alloc.ContentPos
 		bg, _ := sr.ParentBackgroundColor()
 		pc.FillStyle.SetFullColor(&bg)
-		// fmt.Println(bg)
-		sr.RenderBoxImpl(sc, pos, sz, st.Border) // todo: why is this not clearing?
+		sr.RenderBoxImpl(sc, pos, sz, st.Border)
 
 		// need to apply state layer
 		ebg := st.StateBackgroundColor(st.BackgroundColor)
@@ -552,7 +552,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		sr.RenderBoxImpl(sc, bpos, bsz, st.Border) // surround box
+		sr.RenderBoxImpl(sc, bpos, bsz, st.Border) // track
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
@@ -565,6 +565,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		tpos.SetDim(sr.Dim, pos.Dim(sr.Dim)+sr.Pos)
 		tpos.SetAddDim(od, 0.5*sz.Dim(od)) // ctr
 
+		// render thumb as icon or box
 		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 			sr.RenderUnlock(rs)
 			ic := sr.Parts.Child(0).(*Icon)
@@ -576,8 +577,8 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 			sr.Parts.Render(sc)
 		} else {
 			pc.FillStyle.SetFullColor(&sr.ThumbColor)
-			pc.DrawCircle(rs, tpos.X, tpos.Y, thsz.Dim(od)) // todo: do renderboximpl to get both sizes
-			pc.FillStrokeClear(rs)
+			tpos.SetSub(thsz.MulScalar(0.5))
+			sr.RenderBoxImpl(sc, tpos, thsz, st.Border)
 			sr.RenderUnlock(rs)
 		}
 	}
