@@ -1,6 +1,6 @@
 Name = "gengo"
 Desc = ""
-Version = "v0.3.6"
+Version = "v0.3.7"
 Type = "Library"
 
 [Build]
@@ -17,6 +17,21 @@ Type = "Library"
   IOSVersion = "13.0"
   AndroidMinSDK = 23
   AndroidTargetSDK = 29
+
+[Web]
+  Port = "8080"
+  RandomVersion = false
+  BackgroundColor = "#2d2c2c"
+  ThemeColor = "#2d2c2c"
+  LoadingLabel = ""
+  Lang = "en"
+  Title = ""
+  Description = ""
+  Author = ""
+  Image = ""
+  AutoUpdateInterval = "10s"
+  WasmContentLengthHeader = ""
+  ServiceWorkerTemplate = ""
 
 [Setup]
   [Setup.Platform]
@@ -35,7 +50,6 @@ Type = "Library"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
-  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -57,3 +71,4 @@ Type = "Library"
     AddFuncs = false
     Instance = false
     TypeVar = false
+    Setters = false
