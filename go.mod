@@ -3,8 +3,8 @@ module goki.dev/cursors
 go 1.21.0
 
 require (
-	goki.dev/enums v0.9.35
-	goki.dev/grows v0.3.12
+	goki.dev/enums v0.9.37
+	goki.dev/grows v0.3.14
 )
 
-require golang.org/x/image v0.13.0 // indirect
+require golang.org/x/image v0.14.0 // indirect
