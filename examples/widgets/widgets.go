@@ -25,7 +25,7 @@ func app() {
 	// turn these on to see a traces of various stages of processing..
 	// gi.UpdateTrace = true
 	// gi.RenderTrace = true
-	gi.LayoutTrace = true
+	// gi.LayoutTrace = true
 	// gi.WinEventTrace = true
 	// gi.WinRenderTrace = true
 	// gi.EventTrace = true
@@ -172,7 +172,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	srow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
 			s.SetMainAxis(mat32.X)
-			s.Align.X = styles.AlignStart
+			s.Align.Y = styles.AlignCenter
 			s.Gap.X.Ex(2)
 		})
 
@@ -189,20 +189,19 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.X).
-		SetThumbValue(0.25).SetValue(0.25).SetSnap(true).SetTracking(true)
-	scroll0.Style(func(s *styles.Style) {
-		s.Max.Y.Dp(12)
-	})
+		SetVisiblePct(0.25).SetValue(0.25).SetTracking(true)
+	// scroll0.SetSnap(true)
 	scroll0.OnChange(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
 
-	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
-		SetThumbValue(10).SetValue(0).SetMax(3000).
-		SetTracking(true).SetStep(1).SetPageStep(10)
-	scroll1.Style(func(s *styles.Style) {
-		s.Max.X.Dp(16)
+	scroll0.Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
 	})
+
+	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
+		SetVisiblePct(.1).SetValue(0).SetMax(300).
+		SetTracking(true).SetStep(1).SetPageStep(10)
 	scroll1.OnChange(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
 	})

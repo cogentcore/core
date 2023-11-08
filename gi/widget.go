@@ -313,11 +313,15 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 }
 
 func (wb *WidgetBase) Destroy() {
+	wb.DeleteParts()
+	wb.Node.Destroy()
+}
+
+func (wb *WidgetBase) DeleteParts() {
 	if wb.Parts != nil {
 		wb.Parts.DeleteChildren(true) // first delete all my children
 	}
 	wb.Parts = nil
-	wb.Node.Destroy()
 }
 
 func (wb *WidgetBase) BaseType() *gti.Type {

@@ -287,13 +287,14 @@ func (ly *Layout) PositionScrolls(sc *Scene) {
 
 func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb := ly.Scrolls[d]
-	sb.ApplyStyle(sc)
+	sb.Sc = sc
+	sb.Update()
 	sb.Max = ly.LayImpl.KidsSize.Dim(d) // only scrollbar
 	sb.Step = ly.Styles.Font.Size.Dots  // step by lines
 	sb.PageStep = 10.0 * sb.Step        // todo: more dynamic
-	sb.ThumbVal = ly.LayImpl.ContentSubGap.Dim(d)
+	sb.VisiblePct = mat32.Clamp(ly.LayImpl.ContentSubGap.Dim(d)/sb.Max, 0, 1)
 	sb.TrackThr = 1
-	sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal) // keep in range
+	sb.SetValue(sb.Value) // keep in range
 	od := d.OtherDim()
 	bbmax := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Max)
 	sb.Alloc.Pos.SetDim(d, ly.Alloc.ContentPos.Dim(d))
@@ -490,31 +491,33 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	sc := ly.Scrolls[dim]
-	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-	vissz := sc.ThumbVal            // amount visible
+	/*
+		sc := ly.Scrolls[dim]
+		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+		vissz := sc.ThumbVal            // amount visible
 
-	h := ly.Styles.Font.Size.Dots
-	dst := h * AutoScrollRate
+		h := ly.Styles.Font.Size.Dots
+		dst := h * AutoScrollRate
 
-	mind := max(0, pos-st)
-	maxd := max(0, (st+int(vissz))-pos)
+		mind := max(0, pos-st)
+		maxd := max(0, (st+int(vissz))-pos)
 
-	if mind <= maxd {
-		pct := float32(mind) / float32(vissz)
-		if pct < .1 && sc.Value > 0 {
-			dst = mat32.Min(dst, sc.Value)
-			sc.SetValueAction(sc.Value - dst)
-			return true
+		if mind <= maxd {
+			pct := float32(mind) / float32(vissz)
+			if pct < .1 && sc.Value > 0 {
+				dst = mat32.Min(dst, sc.Value)
+				sc.SetValueAction(sc.Value - dst)
+				return true
+			}
+		} else {
+			pct := float32(maxd) / float32(vissz)
+			if pct < .1 && sc.Value < scrange {
+				dst = mat32.Min(dst, (scrange - sc.Value))
+				ly.ScrollActionDelta(dim, dst)
+				return true
+			}
 		}
-	} else {
-		pct := float32(maxd) / float32(vissz)
-		if pct < .1 && sc.Value < scrange {
-			dst = mat32.Min(dst, (scrange - sc.Value))
-			ly.ScrollActionDelta(dim, dst)
-			return true
-		}
-	}
+	*/
 	return false
 }
 
@@ -551,38 +554,40 @@ func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.Alloc.BBox.Min.X
-	if dim == mat32.Y {
-		vpMin = ly.Alloc.BBox.Min.Y
-	}
-	sc := ly.Scrolls[dim]
-	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-	vissz := sc.ThumbVal            // amount visible
-	vpMax := vpMin + int(vissz)
-
-	if minBox >= vpMin && maxBox <= vpMax {
-		return false
-	}
-
-	h := ly.Styles.Font.Size.Dots
-
-	if minBox < vpMin { // favors scrolling to start
-		trg := sc.Value + float32(minBox-vpMin) - h
-		if trg < 0 {
-			trg = 0
+	/*
+		vpMin := ly.Alloc.BBox.Min.X
+		if dim == mat32.Y {
+			vpMin = ly.Alloc.BBox.Min.Y
 		}
-		sc.SetValueAction(trg)
-		return true
-	} else {
-		if (maxBox - minBox) < int(vissz) {
-			trg := sc.Value + float32(maxBox-vpMax) + h
-			if trg > scrange {
-				trg = scrange
+		sc := ly.Scrolls[dim]
+		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+		vissz := sc.ThumbVal            // amount visible
+		vpMax := vpMin + int(vissz)
+
+		if minBox >= vpMin && maxBox <= vpMax {
+			return false
+		}
+
+		h := ly.Styles.Font.Size.Dots
+
+		if minBox < vpMin { // favors scrolling to start
+			trg := sc.Value + float32(minBox-vpMin) - h
+			if trg < 0 {
+				trg = 0
 			}
 			sc.SetValueAction(trg)
 			return true
+		} else {
+			if (maxBox - minBox) < int(vissz) {
+				trg := sc.Value + float32(maxBox-vpMax) + h
+				if trg > scrange {
+					trg = scrange
+				}
+				sc.SetValueAction(trg)
+				return true
+			}
 		}
-	}
+	*/
 	return false
 }
 
@@ -615,26 +620,28 @@ func (ly *Layout) ScrollDimToStart(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.Alloc.BBox.Min.X
-	if dim == mat32.Y {
-		vpMin = ly.Alloc.BBox.Min.Y
-	}
-	sc := ly.Scrolls[dim]
-	if pos == vpMin { // already at min
-		return false
-	}
-	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+	/*
+		vpMin := ly.Alloc.BBox.Min.X
+		if dim == mat32.Y {
+			vpMin = ly.Alloc.BBox.Min.Y
+		}
+		sc := ly.Scrolls[dim]
+		if pos == vpMin { // already at min
+			return false
+		}
+		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 
-	trg := sc.Value + float32(pos-vpMin)
-	if trg < 0 {
-		trg = 0
-	} else if trg > scrange {
-		trg = scrange
-	}
-	if sc.Value == trg {
-		return false
-	}
-	sc.SetValueAction(trg)
+		trg := sc.Value + float32(pos-vpMin)
+		if trg < 0 {
+			trg = 0
+		} else if trg > scrange {
+			trg = scrange
+		}
+		if sc.Value == trg {
+			return false
+		}
+		sc.SetValueAction(trg)
+	*/
 	return true
 }
 
@@ -645,27 +652,29 @@ func (ly *Layout) ScrollDimToEnd(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.Alloc.BBox.Min.X
-	if dim == mat32.Y {
-		vpMin = ly.Alloc.BBox.Min.Y
-	}
-	sc := ly.Scrolls[dim]
-	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-	vissz := (sc.ThumbVal)          // todo: - ly.ExtraSize.Dim(dim)) // amount visible
-	vpMax := vpMin + int(vissz)
-	if pos == vpMax { // already at max
-		return false
-	}
-	trg := sc.Value + float32(pos-vpMax)
-	if trg < 0 {
-		trg = 0
-	} else if trg > scrange {
-		trg = scrange
-	}
-	if sc.Value == trg {
-		return false
-	}
-	sc.SetValueAction(trg)
+	/*
+		vpMin := ly.Alloc.BBox.Min.X
+		if dim == mat32.Y {
+			vpMin = ly.Alloc.BBox.Min.Y
+		}
+		sc := ly.Scrolls[dim]
+		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+		vissz := (sc.ThumbVal)          // todo: - ly.ExtraSize.Dim(dim)) // amount visible
+		vpMax := vpMin + int(vissz)
+		if pos == vpMax { // already at max
+			return false
+		}
+		trg := sc.Value + float32(pos-vpMax)
+		if trg < 0 {
+			trg = 0
+		} else if trg > scrange {
+			trg = scrange
+		}
+		if sc.Value == trg {
+			return false
+		}
+		sc.SetValueAction(trg)
+	*/
 	return true
 }
 
@@ -676,27 +685,29 @@ func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.Alloc.BBox.Min.X
-	if dim == mat32.Y {
-		vpMin = ly.Alloc.BBox.Min.Y
-	}
-	sc := ly.Scrolls[dim]
-	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-	vissz := sc.ThumbVal            // amount visible
-	vpMid := vpMin + int(0.5*vissz)
-	if pos == vpMid { // already at mid
-		return false
-	}
-	trg := sc.Value + float32(pos-vpMid)
-	if trg < 0 {
-		trg = 0
-	} else if trg > scrange {
-		trg = scrange
-	}
-	if sc.Value == trg {
-		return false
-	}
-	sc.SetValueAction(trg)
+	/*
+		vpMin := ly.Alloc.BBox.Min.X
+		if dim == mat32.Y {
+			vpMin = ly.Alloc.BBox.Min.Y
+		}
+		sc := ly.Scrolls[dim]
+		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
+		vissz := sc.ThumbVal            // amount visible
+		vpMid := vpMin + int(0.5*vissz)
+		if pos == vpMid { // already at mid
+			return false
+		}
+		trg := sc.Value + float32(pos-vpMid)
+		if trg < 0 {
+			trg = 0
+		} else if trg > scrange {
+			trg = scrange
+		}
+		if sc.Value == trg {
+			return false
+		}
+		sc.SetValueAction(trg)
+	*/
 	return true
 }
 

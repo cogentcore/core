@@ -1520,21 +1520,15 @@ func (t *ProgressBar) SetPageStep(v float32) *ProgressBar {
 	return t
 }
 
-// SetValThumb sets the [ProgressBar.ValThumb]
-func (t *ProgressBar) SetValThumb(v bool) *ProgressBar {
-	t.ValThumb = v
-	return t
-}
-
-// SetThumbVal sets the [ProgressBar.ThumbVal]
-func (t *ProgressBar) SetThumbVal(v float32) *ProgressBar {
-	t.ThumbVal = v
-	return t
-}
-
 // SetThumbSize sets the [ProgressBar.ThumbSize]
-func (t *ProgressBar) SetThumbSize(v units.Value) *ProgressBar {
+func (t *ProgressBar) SetThumbSize(v mat32.Vec2) *ProgressBar {
 	t.ThumbSize = v
+	return t
+}
+
+// SetTrackSize sets the [ProgressBar.TrackSize]
+func (t *ProgressBar) SetTrackSize(v float32) *ProgressBar {
+	t.TrackSize = v
 	return t
 }
 
@@ -1559,12 +1553,6 @@ func (t *ProgressBar) SetTrackThr(v float32) *ProgressBar {
 // SetSnap sets the [ProgressBar.Snap]
 func (t *ProgressBar) SetSnap(v bool) *ProgressBar {
 	t.Snap = v
-	return t
-}
-
-// SetOff sets the [ProgressBar.Off]
-func (t *ProgressBar) SetOff(v bool) *ProgressBar {
-	t.Off = v
 	return t
 }
 
@@ -1746,35 +1734,31 @@ var SliderType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Slider",
 	ShortName: "gi.Slider",
 	IDName:    "slider",
-	Doc:       "Slider is a slideable widget that provides slider functionality for two major modes.\nValThumb = false is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size - thumbsize",
+	Doc:       "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar type Value and Pos position are based on the _top_ of the thumb;\nVisiblePct factor specifies the percent of the content that is currently visible,\nwhich determines the size of the thumb, and thus the range of motion remaining\nfor the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider, which determines the visual and functional properties", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "Current value, represented by the position of the thumb.\nFor Slider type, this is the center of the thumb.\nFor Scrollbar, this is the top of the thumb.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the slider slides", Directives: gti.Directives{}, Tag: ""}},
 		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: ""}},
 		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: ""}},
 		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}, Tag: ""}},
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: ""}},
-		{"ValThumb", &gti.Field{Name: "ValThumb", Type: "bool", LocalType: "bool", Doc: "if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed", Directives: gti.Directives{}, Tag: ""}},
-		{"ThumbVal", &gti.Field{Name: "ThumbVal", Type: "float32", LocalType: "float32", Doc: "value that the thumb represents, in the same units", Directives: gti.Directives{}, Tag: ""}},
-		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "styled fixed size of the thumb -- only if not doing ValThumb", Directives: gti.Directives{}, Tag: ""}},
+		{"VisiblePct", &gti.Field{Name: "VisiblePct", Type: "float32", LocalType: "float32", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment.", Directives: gti.Directives{}, Tag: ""}},
+		{"TrackSize", &gti.Field{Name: "TrackSize", Type: "float32", LocalType: "float32", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the dragging knob", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
-		{"Tracking", &gti.Field{Name: "Tracking", Type: "bool", LocalType: "bool", Doc: "if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change", Directives: gti.Directives{}, Tag: ""}},
+		{"Tracking", &gti.Field{Name: "Tracking", Type: "bool", LocalType: "bool", Doc: "if true, will send continuous updates of value changes as user moves the slider.\notherwise only at the end. See TrackThr for a threshold on amount of change", Directives: gti.Directives{}, Tag: ""}},
 		{"TrackThr", &gti.Field{Name: "TrackThr", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting a signal in Tracking mode", Directives: gti.Directives{}, Tag: ""}},
 		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "snap the values to Step size increments", Directives: gti.Directives{}, Tag: ""}},
-		{"Off", &gti.Field{Name: "Off", Type: "bool", LocalType: "bool", Doc: "can turn off e.g., scrollbar rendering with this flag -- just prevents rendering", Directives: gti.Directives{}, Tag: ""}},
-		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: "xml:\"prec\""}},
+		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions.", Directives: gti.Directives{}, Tag: ""}},
 		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
 		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
-		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "An additional style object that is used for styling the overall box around the slider.\nIt should be set in the Stylers, just the like the main style object is.\nIt typically has no border and a white/black background. it needs a background\nto allow local re-rendering.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
-		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
-		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1859,24 +1843,21 @@ func (t *Slider) SetPageStep(v float32) *Slider {
 	return t
 }
 
-// SetValThumb sets the [Slider.ValThumb]:
-// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
-func (t *Slider) SetValThumb(v bool) *Slider {
-	t.ValThumb = v
-	return t
-}
-
-// SetThumbVal sets the [Slider.ThumbVal]:
-// value that the thumb represents, in the same units
-func (t *Slider) SetThumbVal(v float32) *Slider {
-	t.ThumbVal = v
-	return t
-}
-
 // SetThumbSize sets the [Slider.ThumbSize]:
-// styled fixed size of the thumb -- only if not doing ValThumb
-func (t *Slider) SetThumbSize(v units.Value) *Slider {
+// Size of the thumb as a proportion of the slider thickness, which is
+// Content size (inside the padding).  This is for actual X,Y dimensions,
+// so must be sensitive to Dim dimension alignment.
+func (t *Slider) SetThumbSize(v mat32.Vec2) *Slider {
 	t.ThumbSize = v
+	return t
+}
+
+// SetTrackSize sets the [Slider.TrackSize]:
+// TrackSize is the proportion of slider thickness for the visible track
+// for the Slider type.  It is often thinner than the thumb, achieved by
+// values < 1 (.5 default)
+func (t *Slider) SetTrackSize(v float32) *Slider {
+	t.TrackSize = v
 	return t
 }
 
@@ -1888,7 +1869,8 @@ func (t *Slider) SetIcon(v icons.Icon) *Slider {
 }
 
 // SetTracking sets the [Slider.Tracking]:
-// if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change
+// if true, will send continuous updates of value changes as user moves the slider.
+// otherwise only at the end. See TrackThr for a threshold on amount of change
 func (t *Slider) SetTracking(v bool) *Slider {
 	t.Tracking = v
 	return t
@@ -1908,15 +1890,10 @@ func (t *Slider) SetSnap(v bool) *Slider {
 	return t
 }
 
-// SetOff sets the [Slider.Off]:
-// can turn off e.g., scrollbar rendering with this flag -- just prevents rendering
-func (t *Slider) SetOff(v bool) *Slider {
-	t.Off = v
-	return t
-}
-
 // SetPrec sets the [Slider.Prec]:
-// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
+// specifies the precision of decimal places (total, not after the decimal point)
+// to use in representing the number. This helps to truncate small weird floating
+// point values in the nether regions.
 func (t *Slider) SetPrec(v int) *Slider {
 	t.Prec = v
 	return t
