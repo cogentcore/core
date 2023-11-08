@@ -81,6 +81,13 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 
 	if !c.PrintOnly {
 		err = cm.Run()
+
+		// we must call InitColor after calling a system command
+		// TODO(kai): maybe figure out a better solution to this
+		// or expand this list
+		if cmd == "cp" || cmd == "ls" || cmd == "mv" {
+			grog.InitColor()
+		}
 	}
 
 	if c.Buffer {
