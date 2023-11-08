@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile"
@@ -51,6 +52,10 @@ func Build(c *config.Config) error { //gti:add
 			// need to get real output location so that commands work
 			if c.Build.Output == "" {
 				c.Build.Output = filepath.Join(".goki", "web", "app.wasm")
+			}
+			// we must end with a wasm file
+			if !strings.Contains(filepath.Base(c.Build.Output), ".wasm") {
+				c.Build.Output = filepath.Join(c.Build.Output, "app.wasm")
 			}
 			return web.Build(c)
 		}
