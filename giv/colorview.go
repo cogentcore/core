@@ -83,7 +83,6 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor.SetSolid(colors.Transparent)
 		hue.ThumbColor.SetSolid(cv.Color)
-		hue.ThumbSize.Dp(32)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
@@ -101,7 +100,6 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	chroma.Style(func(s *styles.Style) {
 		chroma.ValueColor.SetSolid(colors.Transparent)
 		chroma.ThumbColor.SetSolid(cv.Color)
-		chroma.ThumbSize.Dp(32)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
@@ -119,7 +117,6 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	tone.Style(func(s *styles.Style) {
 		tone.ValueColor.SetSolid(colors.Transparent)
 		tone.ThumbColor.SetSolid(cv.Color)
-		tone.ThumbSize.Dp(32)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()

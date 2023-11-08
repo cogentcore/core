@@ -529,7 +529,6 @@ func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	sb.Type = gi.SliderScrollbar
-	sb.ValThumb = true
 	sb.Dim = mat32.Y
 	sb.Tracking = true
 	sb.Min = 0
@@ -624,18 +623,14 @@ func (sv *SliceViewBase) UpdateScroll() {
 	sb.Max = float32(sv.SliceSize) + 0.01 // bit of extra to ensure last line always shows up
 	if sv.VisRows > 0 {
 		sb.PageStep = float32(sv.VisRows) * sb.Step
-		sb.ThumbVal = float32(sv.VisRows)
+		sb.SetVisiblePct(float32(sv.VisRows) / float32(sv.SliceSize))
 	} else {
 		sb.PageStep = 10 * sb.Step
-		sb.ThumbVal = 10
+		sb.SetVisiblePct(1)
 	}
 	sb.TrackThr = sb.Step
 	sb.SetValue(float32(sv.StartIdx)) // essential for updating pos from value
-	if sv.VisRows == sv.SliceSize {
-		sb.Off = true
-	} else {
-		sb.Off = false
-	}
+	sb.SetState(sv.VisRows == sv.SliceSize, states.Invisible)
 	sb.UpdateEnd(updt)
 }
 

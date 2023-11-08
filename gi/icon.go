@@ -80,17 +80,6 @@ func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
 
 }
 
-/*
-func (ic *Icon) GetSize(sc *Scene, iter int) {
-	ic.InitLayout(sc)
-	if ic.SVG.Pixels != nil {
-		ic.GetSizeFromWH(float32(ic.SVG.Geom.Size.X), float32(ic.SVG.Geom.Size.Y))
-	} else {
-		ic.GetSizeFromWH(2, 2)
-	}
-}
-*/
-
 func (ic *Icon) ApplyStyle(sc *Scene) {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
@@ -104,7 +93,7 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 	if ic.SVG.Pixels == nil {
 		return
 	}
-	r := ic.Alloc.BBox
+	r := ic.Alloc.ContentBBox
 	sp := image.Point{}
 	if ic.Par != nil { // use parents children bbox to determine where we can draw
 		_, pwb := AsWidget(ic.Par)

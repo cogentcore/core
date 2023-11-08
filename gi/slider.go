@@ -17,27 +17,20 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
-// SliderMinThumbSize is the minimum thumb size, even if computed value would make it smaller
+// ScollbarMinThumbSize is the minimum thumb size (in dots) displayed for a
+// Scrollbar type Slider, even if VisiblePct would make it smaller.
 var SliderMinThumbSize = float32(8)
 
-// SliderPositioner is a minor interface for functions related to
-// computing slider positions.  Needed for more complex sliders
-// such as Splitters that do this computation in a different way.
-type SliderPositioner interface {
-	// PointToRelPos translates a point in global pixel coords into relative
-	// position within node
-	PointToRelPos(pt image.Point) image.Point
-}
-
-// Slider is a slideable widget that provides slider functionality for two major Types
-// Slider type provides a movable thumb that represents a value.
-// Scrollbar type uses the VisiblePct factor that specifies what percent
-// of the content is currently visible, which determines the size of the thumb, and the
-// range of motion remaining for the thumb Value.
+// Slider is a slideable widget that provides slider functionality for two Types:
+// Slider type provides a movable thumb that represents Value as the center of thumb
+// Pos position, with room reserved at ends for 1/2 of the thumb size.
+// Scrollbar has a VisiblePct factor that specifies the percent of the content
+// currently visible, which determines the size of the thumb, and thus the range of motion
+// remaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining
+// range of motion).
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
 type Slider struct { //goki:embedder
@@ -47,8 +40,6 @@ type Slider struct { //goki:embedder
 	Type SliderTypes `set:"-"`
 
 	// Current value, represented by the position of the thumb.
-	// For Slider type, this is the center of the thumb.
-	// For Scrollbar, this is the top of the thumb.
 	Value float32 `set:"-"`
 
 	// dimension along which the slider slides
@@ -66,13 +57,20 @@ type Slider struct { //goki:embedder
 	// larger PageUp / Dn step size
 	PageStep float32
 
-	// For Scrollbar type only: percent (100 max) of the full range
-	// that is visible, which determines the thumb size and range of motion.
-	VisiblePct float32
+	// For Scrollbar type only: proportion (1 max) of the full range of scrolled data
+	// that is currently visible.  This determines the thumb size and range of motion:
+	// if 1, full slider is the thumb and no motion is possible.
+	VisiblePct float32 `set:"-"`
 
-	// size of the thumb as a proportion of the slider thickness, which is
-	// Content size (inside the padding).
+	// Size of the thumb as a proportion of the slider thickness, which is
+	// Content size (inside the padding).  This is for actual X,Y dimensions,
+	// so must be sensitive to Dim dimension alignment.
 	ThumbSize mat32.Vec2
+
+	// TrackSize is the proportion of slider thickness for the visible track
+	// for the Slider type.  It is often thinner than the thumb, achieved by
+	// values < 1 (.5 default)
+	TrackSize float32
 
 	// optional icon for the dragging knob
 	Icon icons.Icon `view:"show-name"`
@@ -155,10 +153,12 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 
 func (sr *Slider) OnInit() {
 	sr.Max = 1.0
+	sr.VisiblePct = 1
 	sr.Step = 0.1
 	sr.PageStep = 0.2
 	sr.Prec = 9
 	sr.ThumbSize.Set(1, 1)
+	sr.TrackSize = 0.5
 	sr.HandleSliderEvents()
 	sr.SliderStyles()
 }
@@ -172,12 +172,24 @@ func (sr *Slider) SliderStyles() {
 		// correct state layer
 		s.Color = colors.Scheme.Primary.On
 
+		if sr.Dim == mat32.X {
+			s.Min.X.Em(20)
+			s.Min.Y.Em(1)
+		} else {
+			s.Min.Y.Em(20)
+			s.Min.X.Em(1)
+		}
 		if sr.Type == SliderSlider {
 			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		} else {
+			if sr.Dim == mat32.X {
+				s.Min.Y = s.ScrollBarWidth
+			} else {
+				s.Min.X = s.ScrollBarWidth
+			}
 			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
 			sr.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
@@ -185,20 +197,8 @@ func (sr *Slider) SliderStyles() {
 
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
 		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
-
 		s.Color = colors.Scheme.OnSurface
-
 		s.Display = styles.DisplayNone
-		sr.StyleBox.Defaults()
-		sr.StyleBox.Border.Style.Set(styles.BorderNone)
-
-		if sr.Dim == mat32.X {
-			s.Min.X.Em(20)
-			s.Min.Y.Dp(4)
-		} else {
-			s.Min.Y.Em(20)
-			s.Min.X.Dp(4)
-		}
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
@@ -216,8 +216,8 @@ func (sr *Slider) SliderStyles() {
 		switch w.PathFrom(sr) {
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1)
-				s.Min.Y.Em(1)
+				s.Min.X.Em(1.5)
+				s.Min.Y.Em(1.5)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
@@ -229,10 +229,6 @@ func (sr *Slider) SliderStyles() {
 func (sr *Slider) SetType(typ SliderTypes) *Slider {
 	updt := sr.UpdateStart()
 	sr.Type = typ
-	if typ == SliderScrollbar {
-		sr.ValThumb = true
-		sr.ThumbSize = units.Ex(1)
-	}
 	sr.UpdateEndLayout(updt)
 	return sr
 }
@@ -246,22 +242,6 @@ func (sr *Slider) SnapValue() {
 	sr.Value = mat32.Truncate(sr.Value, sr.Prec)
 }
 
-// SizeFromAlloc gets size from allocation
-func (sr *Slider) SizeFromAlloc() {
-	if sr.Alloc.Size.Total.IsNil() {
-		return
-	}
-	spc := sr.BoxSpace()
-	sr.Size = sr.Alloc.Size.Total.Dim(sr.Dim) - spc.Size().Dim(sr.Dim)
-	if sr.Size <= 0 {
-		return
-	}
-	if !sr.ValThumb {
-		sr.Size -= sr.ThSize // half on each side
-	}
-	sr.UpdatePosFromValue(sr.Value)
-}
-
 // SendChanged sends a Changed message if given new value is
 // different from the existing Value.
 func (sr *Slider) SendChanged(e ...events.Event) bool {
@@ -273,32 +253,60 @@ func (sr *Slider) SendChanged(e ...events.Event) bool {
 	return true
 }
 
-// SetSliderPos sets the position of the slider at the given position in pixels,
-// and updates the corresponding Value based on that position.
+// SlideSize returns the size available for sliding, based on allocation
+func (sr *Slider) SlideSize() float32 {
+	sz := sr.Alloc.Size.Content.Dim(sr.Dim)
+	if sr.Type != SliderScrollbar {
+		thsz := sr.ThumbSizeDots()
+		sz -= thsz.Dim(sr.Dim) // half on each size
+	}
+	return sz
+}
+
+// ThumbSizeDots returns the thumb size in dots, based on ThumbSize
+// and the content thickness
+func (sr *Slider) ThumbSizeDots() mat32.Vec2 {
+	thick := sr.Alloc.Size.Content.Dim(sr.Dim.OtherDim())
+	return sr.ThumbSize.MulScalar(thick)
+}
+
+// SlideThumbSize returns thumb size, based on type
+func (sr *Slider) SlideThumbSize() float32 {
+	if sr.Type == SliderScrollbar {
+		return mat32.Clamp(sr.VisiblePct, 0, 1) * sr.SlideSize()
+	}
+	return sr.ThumbSizeDots().Dim(sr.Dim)
+}
+
+// ScrollThumbValue returns thumb value for scrollbar type,
+// based on VisiblePct level.
+func (sr *Slider) ScrollThumbValue() float32 {
+	return sr.Min + mat32.Clamp(sr.VisiblePct, 0, 1)*(sr.Max-sr.Min)
+}
+
+// SetSliderPos sets the position of the slider at the given
+// relative position within the usable Content sliding range,
+// in pixels, and updates the corresponding
+// Value based on that position.
 func (sr *Slider) SetSliderPos(pos float32) {
+	sz := sr.Alloc.Size.Content.Dim(sr.Dim)
+	if sz <= 0 {
+		return
+	}
 	updt := sr.UpdateStart()
-	sr.Pos = pos
-	sr.Pos = mat32.Min(sr.Size, sr.Pos)
-	effSz := sr.Size
-	if sr.ValThumb {
-		sr.UpdateThumbValSize()
-		sr.Pos = mat32.Min(sr.Size-sr.ThSize, sr.Pos)
-		if sr.ThSize != sr.ThSizeReal {
-			effSz -= sr.ThSize - sr.ThSizeReal
-			effSz -= .5 // rounding errors
-		}
-	}
-	sr.Pos = mat32.Max(0, sr.Pos)
-	sr.Value = mat32.Truncate(sr.Min+(sr.Max-sr.Min)*(sr.Pos/effSz), sr.Prec)
-	sr.Value = mat32.Clamp(sr.Value, sr.Min, sr.Max)
-	if sr.ValThumb {
-		sr.Value = mat32.Min(sr.Value, sr.Max-sr.ThumbVal)
-	}
+	defer sr.UpdateEndRender(updt)
+
+	thsz := sr.SlideThumbSize()
+	thszh := .5 * thsz
+	sr.Pos = mat32.Clamp(pos, thszh, sz-thszh)
+	prel := (sr.Pos - thszh) / (sz - thsz)
+	val := mat32.Truncate(sr.Min+prel*(sr.Max-sr.Min), sr.Prec)
+	val = mat32.Clamp(val, sr.Min, sr.Max)
+	sr.Value = val
 	if sr.Snap {
 		sr.SnapValue()
 	}
-	sr.UpdatePosFromValue(sr.Value)
-	sr.UpdateEndRender(updt)
+	sr.SetPosFromValue(sr.Value) // go back the other way to be fully consistent
 }
 
 // SetSliderPosAction sets the position of the slider at the given position in pixels,
@@ -311,36 +319,45 @@ func (sr *Slider) SetSliderPosAction(pos float32) {
 	}
 }
 
-// UpdatePosFromValue updates the slider position based on the current Value
-func (sr *Slider) UpdatePosFromValue(val float32) {
-	if sr.Size == 0.0 {
+// SetPosFromValue sets the slider position based on the given value
+// (typically rs.Value)
+func (sr *Slider) SetPosFromValue(val float32) {
+	sz := sr.Alloc.Size.Content.Dim(sr.Dim)
+	if sz <= 0 {
 		return
 	}
-	effSz := sr.Size
-	if sr.ValThumb {
-		sr.UpdateThumbValSize()
-		if sr.ThSize != sr.ThSizeReal {
-			effSz -= sr.ThSize - sr.ThSizeReal
-			effSz -= 0.5 // rounding errors
-		}
-	}
-	sr.Pos = effSz * (val - sr.Min) / (sr.Max - sr.Min)
+	updt := sr.UpdateStart()
+	defer sr.UpdateEndRender(updt)
+
+	val = mat32.Clamp(val, sr.Min, sr.Max)
+	prel := (val - sr.Min) / (sr.Max - sr.Min) // relative position 0-1
+	thsz := sr.SlideThumbSize()
+	thszh := .5 * thsz
+	sr.Pos = 0.5*thsz + prel*(sz-thsz)
+	sr.Pos = mat32.Clamp(sr.Pos, thszh, sz-thszh)
+}
+
+// SetVisiblePct sets the visible pct value for Scrollbar type.
+func (sr *Slider) SetVisiblePct(val float32) *Slider {
+	sr.VisiblePct = mat32.Clamp(val, 0, 1)
+	return sr
 }
 
 // SetValue sets the value and updates the slider position,
 // but does not send a Change event (see Action version)
 func (sr *Slider) SetValue(val float32) *Slider {
 	updt := sr.UpdateStart()
-	val = mat32.Min(val, sr.Max)
-	if sr.ValThumb {
-		val = mat32.Min(val, sr.Max-sr.ThumbVal)
+	defer sr.UpdateEndRender(updt)
+
+	val = mat32.Clamp(val, sr.Min, sr.Max)
+	if sr.Type == SliderScrollbar {
+		thval := sr.ScrollThumbValue()
+		val = mat32.Clamp(val, sr.Min, sr.Max-thval)
 	}
-	val = mat32.Max(val, sr.Min)
 	if sr.Value != val {
 		sr.Value = val
-		sr.UpdatePosFromValue(val)
+		sr.SetPosFromValue(val)
 	}
-	sr.UpdateEndRender(updt)
 	return sr
 }
 
@@ -353,48 +370,22 @@ func (sr *Slider) SetValueAction(val float32) {
 	sr.SetValue(val)
 }
 
-// SetThumbValue sets the thumb value to given value and updates the thumb size.
-// For scrollbar-style sliders where the thumb size represents visible range.
-func (sr *Slider) SetThumbValue(val float32) *Slider {
-	updt := sr.UpdateStart()
-	sr.ThumbVal = mat32.Min(val, sr.Max)
-	sr.ThumbVal = mat32.Max(sr.ThumbVal, sr.Min)
-	sr.UpdateThumbValSize()
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-// UpdateThumbValSize sets thumb size as proportion of min / max (e.sr., amount
-// visible in scrollbar) -- max's out to full size
-func (sr *Slider) UpdateThumbValSize() {
-	sr.ThSizeReal = ((sr.ThumbVal - sr.Min) / (sr.Max - sr.Min))
-	sr.ThSizeReal = mat32.Min(sr.ThSizeReal, 1.0)
-	sr.ThSizeReal = mat32.Max(sr.ThSizeReal, 0.0)
-	sr.ThSizeReal *= sr.Size
-	sr.ThSize = mat32.Max(sr.ThSizeReal, SliderMinThumbSize)
-}
-
 ///////////////////////////////////////////////////////////
 // 	Events
 
-// PointToRelPos translates a point in global pixel coords into relative
-// position within node.  This satisfies the SliderPositioner interface.
-func (sr *Slider) PointToRelPos(pt image.Point) image.Point {
+// PointToRelPos translates a point in scene local pixel coords into relative
+// position within the slider content range
+func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	sr.BBoxMu.RLock()
 	defer sr.BBoxMu.RUnlock()
-	return pt.Sub(sr.Alloc.BBox.Min)
+	ptf := mat32.NewVec2FmPoint(pt).Dim(sr.Dim)
+	return ptf - sr.Alloc.ContentPos.Dim(sr.Dim)
 }
 
 func (sr *Slider) HandleSliderMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
-		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
-		st := &sr.Styles
-		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSizeReal
-		if sr.Dim == mat32.X {
-			sr.SetSliderPosAction(float32(ed.X) - spc)
-		} else {
-			sr.SetSliderPosAction(float32(ed.Y) - spc)
-		}
+		pos := sr.PointToRelPos(e.LocalPos())
+		sr.SetSliderPosAction(pos)
 		sr.SlideStartPos = sr.Pos
 	})
 	// note: not doing anything in particular on SlideStart
@@ -407,14 +398,8 @@ func (sr *Slider) HandleSliderMouse() {
 		}
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
-		st := &sr.Styles
-		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSizeReal
-		if sr.Dim == mat32.X {
-			sr.SetSliderPosAction(float32(ed.X) - spc)
-		} else {
-			sr.SetSliderPosAction(float32(ed.Y) - spc)
-		}
+		pos := sr.PointToRelPos(e.LocalPos())
+		sr.SetSliderPosAction(pos)
 	})
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
@@ -486,150 +471,85 @@ func (sr *Slider) ConfigSlider(sc *Scene) {
 }
 
 func (sr *Slider) ConfigParts(sc *Scene) {
+	if !sr.Icon.IsValid() {
+		if sr.Parts != nil {
+			sr.DeleteParts()
+		}
+		return
+	}
 	parts := sr.NewParts()
-	config := ki.Config{}
-	icIdx := -1
-	if sr.Icon.IsValid() {
-		icIdx = len(config)
-		config.Add(IconType, "icon")
+	if !parts.HasChildren() {
+		NewIcon(parts, "icon")
 	}
-	mods, updt := parts.ConfigChildren(config)
-	if icIdx >= 0 {
-		ic := sr.Parts.Child(icIdx).(*Icon)
-		ic.SetIcon(sr.Icon)
-	}
-	if mods {
-		parts.UpdateEndLayout(updt)
-		sr.SetNeedsLayoutUpdate(sc, updt)
-	}
+	ic := sr.Parts.Child(0).(*Icon)
+	ic.SetIcon(sr.Icon)
+	ic.Update()
 }
-
-// ToDots runs ToDots on unit values, to compile down to raw pixels
-func (sr *Slider) StyleToDots(uc *units.Context) {
-	sr.ThumbSize.ToDots(uc)
-}
-
-func (sr *Slider) StyleSlider(sc *Scene) {
-	sr.StyMu.Lock()
-	defer sr.StyMu.Unlock()
-
-	sr.ApplyStyleWidget(sc)
-	sr.StyleToDots(&sr.Styles.UnContext)
-	if !sr.ValThumb {
-		sr.ThSize = sr.ThumbSize.Dots
-	}
-}
-
-func (sr *Slider) ApplyStyle(sc *Scene) {
-	sr.SetCanFocusIfActive()
-	sr.StyleSlider(sc)
-}
-
-// todo:
-// func (sr *Slider) GetSize(sc *Scene, iter int) {
-// 	sr.InitLayout(sc)
-// 	st := &sr.Styles
-// 	odim := mat32.OtherDim(sr.Dim)
-// 	// get at least thumbsize + margin + border.size
-// 	sz := sr.ThSize + st.TotalMargin().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
-// 	sr.Alloc.Size.Total.SetDim(odim, sz)
-// }
-//
-// func (sr *Slider) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-// 	sr.DoLayoutBase(sc, parBBox, iter)
-// 	sr.DoLayoutParts(sc, parBBox, iter)
-// 	sr.SizeFromAlloc()
-// 	return sr.DoLayoutChildren(sc, iter)
-// }
 
 func (sr *Slider) Render(sc *Scene) {
-	if !sr.Off && sr.PushBounds(sc) {
-		sr.RenderDefaultStyle(sc)
-		sr.RenderChildren(sc)
+	if sr.PushBounds(sc) {
+		sr.RenderSlider(sc)
 		sr.PopBounds(sc)
 	}
 }
 
-// render using a default style if not otherwise styled
-func (sr *Slider) RenderDefaultStyle(sc *Scene) {
+func (sr *Slider) RenderSlider(sc *Scene) {
 	rs, pc, st := sr.RenderLock(sc)
 
-	// overall fill box
-	sr.RenderStdBox(sc, &sr.StyleBox)
+	sr.SetPosFromValue(sr.Value)
 
-	// SidesTODO: look here if slider borders break
-
+	od := sr.Dim.OtherDim()
 	if sr.Type == SliderScrollbar {
-		// render entire slider inside the ContentBBox!
-		// Size of thumb is implicit in size of BBox = s.Min.Y for a horiz slider
-		// s.Min.X is length of track
-		// TrackThickness = proportion of content thickness (height for horiz) = 1 default
-		// ThumbSize mat32.Vec2 1,1 default.  only orthogonal one is used here
-
-		// track = content + padding
-		// thumb = content
-
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
+
+		sr.RenderStdBox(sc, st)
+
 		bg := st.BackgroundColor
 		if bg.IsNil() {
 			// STYTODO: should we handle parent state layer here?
 			bg, _ = sr.ParentBackgroundColor()
 		}
-		pc.FillStyle.SetFullColor(&bg)
-
-		// scrollbar is basic box in content size
-		// spc := st.BoxSpace()
-		// pos := sr.Alloc.Pos.Add(spc.Pos())
 		sz := sr.Alloc.Size.Content
 		pos := sr.Alloc.ContentPos
-
+		pc.FillStyle.SetFullColor(&bg)
+		sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
 		if !sr.ValueColor.IsNil() {
-			sr.RenderBoxImpl(sc, sr.Alloc.Pos, sr.Alloc.Size.Total, st.Border) // surround box
-			pos.SetAddDim(sr.Dim, sr.Pos)                                      // start of thumb
-			sz.SetDim(sr.Dim, sr.ThSize)
+			thsz := max(sr.SlideThumbSize(), SliderMinThumbSize)
+			osz := sr.ThumbSizeDots().Dim(od)
+			tpos := pos
+			tpos.SetAddDim(sr.Dim, sr.Pos)
+			tpos.SetSubDim(sr.Dim, thsz*.5)
+			tsz := sz
+			tsz.SetDim(sr.Dim, thsz)
+			origsz := sz.Dim(od)
+			tsz.SetDim(od, osz)
+			tpos.SetAddDim(od, 0.5*(osz-origsz))
 			pc.FillStyle.SetFullColor(&sr.ValueColor)
-			sr.RenderBoxImpl(sc, pos, sz, st.Border)
+			sr.RenderBoxImpl(sc, tpos, tsz, st.Border)
 		}
-
 		sr.RenderUnlock(rs)
 	} else {
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
 
-		// render entire slider inside the ContentBBox!
-		// Size of thumb is implicit in size of BBox = s.Min.Y for a horiz slider
-		// s.Min.X is length of track
-		// TrackThickness = proportion of content thickness (height for horiz)
-		// ThumbSize mat32.Vec2 1,1 default.
+		sz := sr.Alloc.Size.Content
+		pos := sr.Alloc.ContentPos
+		bg, _ := sr.ParentBackgroundColor()
+		pc.FillStyle.SetFullColor(&bg)
+		fmt.Println(bg)
+		sr.RenderBoxImpl(sc, pos, sz, st.Border) // todo: why is this not clearing?
 
 		// need to apply state layer
 		ebg := st.StateBackgroundColor(st.BackgroundColor)
 		pc.FillStyle.SetFullColor(&ebg)
 
-		// layout is as follows, for width dimension
-		// |      bw             bw     |
-		// |      | pad |  | pad |      |
-		// |  |        thumb         |  |
-		// |    spc    | | <- ctr
-		//
-		// for length: | spc | ht | <-start of slider
-
-		spc := st.BoxSpace()
-		pos := sr.Alloc.ContentPos
-		sz := sr.Alloc.Size.Total
-		bpos := pos // box pos
+		trsz := sz.Dim(od) * sr.TrackSize
 		bsz := sz
-		tpos := pos // thumb pos
-
-		ht := 0.5 * sr.ThSize
-
-		odim := mat32.OtherDim(sr.Dim)
-		bpos.SetAddDim(odim, spc.Pos().Dim(odim))
-		bsz.SetSubDim(odim, spc.Size().Dim(odim))
-		bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
-		bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
-		sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
+		bsz.SetDim(od, trsz)
+		bpos := pos
+		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
+		sr.RenderBoxImpl(sc, bpos, bsz, st.Border) // surround box
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
@@ -637,17 +557,22 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 			sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
 		}
 
-		if !sr.ThumbColor.IsNil() {
-			tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
-			tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
-			pc.FillStyle.SetFullColor(&sr.ThumbColor)
-		}
+		thsz := sr.ThumbSizeDots()
+		tpos := pos
+		tpos.SetDim(sr.Dim, pos.Dim(sr.Dim)+sr.Pos)
+		tpos.SetAddDim(od, 0.5*sz.Dim(od)) // ctr
 
 		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 			sr.RenderUnlock(rs)
+			ic := sr.Parts.Child(0).(*Icon)
+			icsz := ic.Alloc.Size.Content
+			tpos.SetSub(icsz.MulScalar(.5))
+			ic.Alloc.Pos = tpos
+			ic.SetBBoxes(sc)
 			sr.Parts.Render(sc)
 		} else {
-			pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
+			pc.FillStyle.SetFullColor(&sr.ThumbColor)
+			pc.DrawCircle(rs, tpos.X, tpos.Y, thsz.Dim(od)) // todo: do renderboximpl to get both sizes
 			pc.FillStrokeClear(rs)
 			sr.RenderUnlock(rs)
 		}

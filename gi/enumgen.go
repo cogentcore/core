@@ -1712,7 +1712,7 @@ var _SliderTypesNameToValueMap = map[string]SliderTypes{
 
 var _SliderTypesDescMap = map[SliderTypes]string{
 	0: `SliderSlider indicates a standard, user-controllable slider for setting a numeric value`,
-	1: `SliderScrollbar indicates a slider acting as a scrollbar for content`,
+	1: `SliderScrollbar indicates a slider acting as a scrollbar for content This sets the`,
 }
 
 var _SliderTypesMap = map[SliderTypes]string{
