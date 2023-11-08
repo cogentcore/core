@@ -35,6 +35,9 @@ import (
 // 4. ScenePos: scene-based position and final BBox is computed based on scrollbar
 //    position.  This step can be performed when scrolling.
 
+//////////////////////////////////////////////////////////////
+//  LaySize
+
 // LaySize has sizing information for content and total size, and grow factors
 type LaySize struct {
 	// Content is size of the contents (children, parts) of the widget,
@@ -94,9 +97,12 @@ func (ls *LaySize) SetContentFromTotal() {
 	ls.Content = ls.Total.Sub(ls.Space)
 }
 
-// LayoutState contains the the layout state for each widget,
+//////////////////////////////////////////////////////////////
+//  LayState
+
+// LayState contains the the layout state for each widget,
 // Set by the parent Layout during the Layout process.
-type LayoutState struct {
+type LayState struct {
 	// Size is the size of the element (updated during different passes,
 	// and holding the final computed size).
 	Size LaySize `view:"inline"`
@@ -132,10 +138,21 @@ type LayoutState struct {
 	ContentBBox image.Rectangle `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ls LayoutState) String() string {
+func (ls *LayState) String() string {
 	return "Size:" + ls.Size.String() + "\tCell:" + ls.Cell.String() +
 		"\tRelPos:" + ls.RelPos.String() + "\tPos:" + ls.Pos.String()
 }
+
+// ContentRangeDim returns the Content bounding box min, max
+// along given dimension
+func (ls *LayState) ContentRangeDim(d mat32.Dims) (cmin, cmax float32) {
+	cmin = float32(mat32.PointDim(ls.ContentBBox.Min, d))
+	cmax = float32(mat32.PointDim(ls.ContentBBox.Max, d))
+	return
+}
+
+//////////////////////////////////////////////////////////////
+//  LayImplState -- for Layout only
 
 // LayImplSizes holds the layout implementation sizing data for col, row dims
 type LayImplSizes struct {

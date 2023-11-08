@@ -204,7 +204,7 @@ func (em *EventMgr) HandleFocusEvent(evi events.Event) {
 			em.SetFocus(em.PrevFocus)
 			em.PrevFocus = nil
 		case em.StartFocus != nil:
-			em.SetFocus(em.PrevFocus)
+			em.SetFocus(em.StartFocus)
 		default:
 			em.FocusFirst()
 		}
@@ -670,7 +670,9 @@ func (em *EventMgr) FocusClear() bool {
 // If item is nil, then nothing has focus.
 // This does NOT send the events.Focus event to the widget.
 func (em *EventMgr) GrabFocus(w Widget) bool {
-	return em.SetFocusImpl(w, false) // no event
+	got := em.SetFocusImpl(w, false) // no event
+	w.AsWidget().ScrollToMe()
+	return got
 }
 
 // SetFocus sets focus to given item -- returns true if focus changed.
@@ -678,7 +680,10 @@ func (em *EventMgr) GrabFocus(w Widget) bool {
 // This sends the events.Focus event to the widget -- see GrabFocus
 // for a version that does not.
 func (em *EventMgr) SetFocus(w Widget) bool {
-	return em.SetFocusImpl(w, true) // sends event
+	got := em.SetFocusImpl(w, true) // sends event
+	fmt.Println(w, "scroll to me")
+	w.AsWidget().ScrollToMe()
+	return got
 }
 
 // SetFocusImpl sets focus to given item -- returns true if focus changed.
@@ -937,6 +942,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 		return false
 	}
 	sf := em.StartFocus
+	fmt.Println("start foc:", sf)
 	em.StartFocus = nil
 	em.GrabFocus(sf)
 	return true
@@ -945,6 +951,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 // InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (em *EventMgr) InitialFocus() {
+	fmt.Println("init foc")
 	if em.Focus == nil {
 		if !em.ActivateStartFocus() {
 			em.FocusNext()
