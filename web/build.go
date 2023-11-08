@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"goki.dev/goki/config"
-	"goki.dev/grog"
 	"goki.dev/xe"
 )
 
@@ -103,7 +102,6 @@ func MakeFiles(c *config.Config) error {
 
 	ics := filepath.Join(c.Build.Package, ".goki", "icons")
 	err = xe.Run("cp", "-r", ics, odir)
-	grog.InitColor()
 	if err != nil {
 		// an error copying icons is unfortunate but shouldn't sink the whole build
 		// for example, building without icons should at least be possible
