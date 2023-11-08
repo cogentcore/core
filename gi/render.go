@@ -613,8 +613,51 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	pc.DrawStdBox(rs, st, wb.Alloc.Pos, wb.Alloc.Size.Total, &pbc, psl)
 }
 
+//////////////////////////////////////////////////////////////////
+//		Widget position functions
+
+// HasSc checks that the Sc Scene has been set.
+// Called prior to using -- logs an error if not.
+func (wb *WidgetBase) HasSc() bool {
+	if wb.This() == nil || wb.Sc == nil {
+		slog.Debug("gi.WidgetBase: object or scene is nil\n")
+		return false
+	}
+	return true
+}
+
+// PointToRelPos translates a point in Scene pixel coords
+// into relative position within node, based on the Content BBox
+func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
+	wb.BBoxMu.RLock()
+	defer wb.BBoxMu.RUnlock()
+	return pt.Sub(wb.Alloc.ContentBBox.Min)
+}
+
+// WinBBox returns the RenderWin based bounding box for the widget
+// by adding the Scene position to the ScBBox
+func (wb *WidgetBase) WinBBox() image.Rectangle {
+	if !wb.HasSc() {
+		return wb.Alloc.BBox
+	}
+	return wb.Alloc.BBox.Add(wb.Sc.Geom.Pos)
+}
+
+// WinPos returns the RenderWin based position within the
+// bounding box of the widget, where the x, y coordinates
+// are the proportion across the bounding box to use:
+// 0 = left / top, 1 = right / bottom
+func (wb *WidgetBase) WinPos(x, y float32) image.Point {
+	bb := wb.WinBBox()
+	sz := bb.Size()
+	var pt image.Point
+	pt.X = bb.Min.X + int(mat32.Round(float32(sz.X)*x))
+	pt.Y = bb.Min.Y + int(mat32.Round(float32(sz.Y)*y))
+	return pt
+}
+
 /////////////////////////////////////////////////////////////////////////////
-//                   Profiling and Benchmarking, controlled by hot-keys
+//	Profiling and Benchmarking, controlled by hot-keys
 
 // ProfileToggle turns profiling on or off
 func ProfileToggle() {
