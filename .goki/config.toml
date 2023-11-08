@@ -1,6 +1,6 @@
 Name = "goki"
 Desc = "Command line and GUI tools for developing apps and libraries using the GoKi framework."
-Version = "v0.1.29"
+Version = "v0.1.30"
 Type = "App"
 
 [Build]
@@ -21,6 +21,7 @@ Type = "App"
 [Web]
   Port = "8080"
   RandomVersion = false
+  Gzip = false
   BackgroundColor = "#2d2c2c"
   ThemeColor = "#2d2c2c"
   LoadingLabel = ""
