@@ -278,16 +278,19 @@ func (sr *Slider) SlideThumbSize() float32 {
 	return sr.ThumbSizeDots().Dim(sr.Dim)
 }
 
-// ScrollThumbValue returns thumb value for scrollbar type,
-// based on VisiblePct level.
-func (sr *Slider) ScrollThumbValue() float32 {
-	return sr.Min + mat32.Clamp(sr.VisiblePct, 0, 1)*(sr.Max-sr.Min)
+// EffectiveMax returns the effective maximum value represented.
+// For the Slider type, it it is just Max.
+// for the Scrollbar type, it is Max - Value of thumb size
+func (sr *Slider) EffectiveMax() float32 {
+	if sr.Type == SliderScrollbar {
+		return sr.Max - mat32.Clamp(sr.VisiblePct, 0, 1)*(sr.Max-sr.Min)
+	}
+	return sr.Max
 }
 
 // SetSliderPos sets the position of the slider at the given
 // relative position within the usable Content sliding range,
-// in pixels, and updates the corresponding
-// Value based on that position.
+// in pixels, and updates the corresponding Value based on that position.
 func (sr *Slider) SetSliderPos(pos float32) {
 	sz := sr.Alloc.Size.Content.Dim(sr.Dim)
 	if sz <= 0 {
@@ -300,8 +303,9 @@ func (sr *Slider) SetSliderPos(pos float32) {
 	thszh := .5 * thsz
 	sr.Pos = mat32.Clamp(pos, thszh, sz-thszh)
 	prel := (sr.Pos - thszh) / (sz - thsz)
-	val := mat32.Truncate(sr.Min+prel*(sr.Max-sr.Min), sr.Prec)
-	val = mat32.Clamp(val, sr.Min, sr.Max)
+	effmax := sr.EffectiveMax()
+	val := mat32.Truncate(sr.Min+prel*(effmax-sr.Min), sr.Prec)
+	val = mat32.Clamp(val, sr.Min, effmax)
 	// fmt.Println(pos, thsz, prel, val)
 	sr.Value = val
 	if sr.Snap {
@@ -330,8 +334,9 @@ func (sr *Slider) SetPosFromValue(val float32) {
 	updt := sr.UpdateStart()
 	defer sr.UpdateEndRender(updt)
 
-	val = mat32.Clamp(val, sr.Min, sr.Max)
-	prel := (val - sr.Min) / (sr.Max - sr.Min) // relative position 0-1
+	effmax := sr.EffectiveMax()
+	val = mat32.Clamp(val, sr.Min, effmax)
+	prel := (val - sr.Min) / (effmax - sr.Min) // relative position 0-1
 	thsz := sr.SlideThumbSize()
 	thszh := .5 * thsz
 	sr.Pos = 0.5*thsz + prel*(sz-thsz)
@@ -350,11 +355,8 @@ func (sr *Slider) SetValue(val float32) *Slider {
 	updt := sr.UpdateStart()
 	defer sr.UpdateEndRender(updt)
 
-	val = mat32.Clamp(val, sr.Min, sr.Max)
-	if sr.Type == SliderScrollbar {
-		thval := sr.ScrollThumbValue()
-		val = mat32.Clamp(val, sr.Min, sr.Max-thval)
-	}
+	effmax := sr.EffectiveMax()
+	val = mat32.Clamp(val, sr.Min, effmax)
 	if sr.Value != val {
 		sr.Value = val
 		sr.SetPosFromValue(val)
@@ -569,6 +571,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 			icsz := ic.Alloc.Size.Content
 			tpos.SetSub(icsz.MulScalar(.5))
 			ic.Alloc.Pos = tpos
+			ic.SetContentPosFromPos()
 			ic.SetBBoxes(sc)
 			sr.Parts.Render(sc)
 		} else {

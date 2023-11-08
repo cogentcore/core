@@ -45,6 +45,13 @@ var (
 	// LayoutAutoScrollDelayMSec is amount of time to wait (in Milliseconds) before
 	// trying to autoscroll again
 	LayoutAutoScrollDelayMSec = 25
+
+	// AutoScrollRate determines the rate of auto-scrolling of layouts
+	AutoScrollRate = float32(1.0)
+
+	// LayoutPageSteps is the number of steps to take in PageUp / Down events
+	// in terms of number of items.
+	LayoutPageSteps = 10
 )
 
 // Layoutlags has bool flags for Layout
@@ -176,12 +183,6 @@ func (ly *Layout) LayoutStyles() {
 	})
 }
 
-func (ly *Layout) HandleLayoutEvents() {
-	ly.HandleWidgetEvents()
-	ly.HandleLayoutKeys()
-	ly.HandleLayoutScrollEvents()
-}
-
 func (ly *Layout) Destroy() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		ly.DeleteScroll(d)
@@ -210,6 +211,19 @@ func (ly *Layout) Render(sc *Scene) {
 // HasAnyScroll returns true if layout has
 func (ly *Layout) HasAnyScroll() bool {
 	return ly.HasScroll[mat32.X] || ly.HasScroll[mat32.Y]
+}
+
+// ScrollGeom returns the target position and size for scrollbars
+func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
+	od := d.OtherDim()
+	bbmax := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Max)
+	pos.SetDim(d, ly.Alloc.ContentPos.Dim(d))
+	pos.SetDim(od, bbmax.Dim(od))
+	bbsz := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Size())
+	sz.SetDim(d, bbsz.Dim(d)-4)
+	sz.SetDim(od, ly.Styles.ScrollBarWidth.Dots)
+	sz.SetCeil()
+	return
 }
 
 // ConfigScrolls configures any scrollbars that have been enabled
@@ -243,15 +257,13 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 	sr.Style(func(s *styles.Style) {
 		s.Padding.Zero()
 		s.Margin.Zero()
-		bbsz := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Size())
-		if d == mat32.X {
-			s.Min.Y = ly.Styles.ScrollBarWidth
-			s.Min.X = units.Dot(bbsz.X - 4)
-			s.Max.X = s.Min.X
-		} else {
-			s.Min.X = ly.Styles.ScrollBarWidth
-			s.Min.Y = units.Dot(bbsz.Y - 4)
-		}
+		s.MaxBorder.Width.Zero()
+		s.Border.Width.Zero()
+		od := d.OtherDim()
+		_, sz := ly.ScrollGeom(d)
+		s.Min.SetDim(d, units.Dot(sz.Dim(d)))
+		s.Min.SetDim(od, units.Dot(sz.Dim(od)))
+		s.Max = s.Min
 	})
 	sr.OnChange(func(e events.Event) {
 		e.SetHandled()
@@ -263,12 +275,13 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 	sr.Update()
 }
 
-// SetPosFromScrolls sets the Scroll position from scrollbars
-func (ly *Layout) SetPosFromScrolls(sc *Scene) {
+// GetScrollPosition sets our layout Scroll position from scrollbars
+func (ly *Layout) GetScrollPosition(sc *Scene) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		ly.Alloc.Scroll.SetDim(d, 0)
 		if ly.HasScroll[d] {
 			sb := ly.Scrolls[d]
+			fmt.Println("scroll val:", d, sb.Value)
 			ly.Alloc.Scroll.SetDim(d, -sb.Value)
 		}
 	}
@@ -285,9 +298,14 @@ func (ly *Layout) PositionScrolls(sc *Scene) {
 
 func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb := ly.Scrolls[d]
-	sb.Sc = sc
+	pos, sz := ly.ScrollGeom(d)
+	if sb.Alloc.Pos == pos && sb.Alloc.Size.Content == sz {
+		return
+	}
+	fmt.Println(pos, sb.Alloc.Pos, sz, sb.Alloc.Size.Content)
 	csz := ly.LayImpl.ContentSubGap.Dim(d)
 	ksz := ly.LayImpl.KidsSize.Dim(d)
+	sb.Min = 0
 	sb.Max = ksz                       // only scrollbar
 	sb.Step = ly.Styles.Font.Size.Dots // step by lines
 	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
@@ -295,21 +313,16 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb.SetValue(sb.Value) // keep in range
 	sb.TrackThr = 1
 
-	sb.Update()
+	sb.Update() // applies style
 	sb.SizeUp(sc)
 	sb.Alloc.Size.Alloc = ly.Alloc.Size.Content
 	sb.SizeDown(sc, 0)
 
-	od := d.OtherDim()
-	bbmax := mat32.NewVec2FmPoint(ly.Alloc.ContentBBox.Max)
-	sb.Alloc.Pos.SetDim(d, ly.Alloc.ContentPos.Dim(d))
-	sb.Alloc.Pos.SetDim(od, bbmax.Dim(od))
-	sb.Alloc.ContentPos = sb.Alloc.Pos.Add(sb.BoxSpace().Pos().Floor())
-	// fmt.Println(sb.Alloc.Size.Content.Dim(od))
-
-	sb.Alloc.BBox = mat32.RectFromPosSizeMax(sb.Alloc.Pos, sb.Alloc.Size.Total)
-	// fmt.Println(sb.Alloc.BBox, ly.Alloc.ContentBBox, ly.Alloc.BBox)
-	sb.Alloc.ContentBBox = mat32.RectFromPosSizeMax(sb.Alloc.ContentPos, sb.Alloc.Size.Content)
+	sb.Alloc.Pos = pos
+	sb.SetContentPosFromPos()
+	// note: usually these are intersected with parent *content* bbox,
+	// but scrolls are specifically outside of that.
+	sb.SetBBoxesFromAllocs()
 }
 
 // RenderScrolls draws the scrollbars
@@ -327,17 +340,6 @@ func (ly *Layout) SetScrollsOff() {
 		ly.HasScroll[d] = false
 	}
 }
-
-// LayoutScrollScrolls moves scrollbars based on scrolling taking place in parent
-// layouts -- critical to call this BEFORE we add our own delta, which is
-// generated from these very same scrollbars.
-// func (ly *Layout) LayoutScrollScrolls(sc *Scene, delta image.Point, parBBox image.Rectangle) {
-// 	for d := mat32.X; d <= mat32.Y; d++ {
-// 		// if ly.HasScroll[d] {
-// 		// 	ly.Scrolls[d].LayoutScroll(sc, delta, parBBox)
-// 		// }
-// 	}
-// }
 
 // ScrollActionDelta moves the scrollbar in given dimension by given delta
 // and emits a ScrollSig signal.
@@ -430,9 +432,6 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 		return ki.Continue
 	})
 }
-
-// AutoScrollRate determines the rate of auto-scrolling of layouts
-var AutoScrollRate = float32(1.0)
 
 // AutoScrollDim auto-scrolls along one dimension
 func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
@@ -763,9 +762,11 @@ func (ly *Layout) ClosePopup() bool {
 	return true
 }
 
-// LayoutPageSteps is the number of steps to take in PageUp / Down events
-// in terms of number of items.
-var LayoutPageSteps = 10
+func (ly *Layout) HandleLayoutEvents() {
+	ly.HandleWidgetEvents()
+	ly.HandleLayoutKeys()
+	ly.HandleLayoutScrollEvents()
+}
 
 // HandleLayoutKeys handles all key events for navigating focus within a Layout
 // Typically this is done by the parent Scene level layout, but can be
@@ -1000,17 +1001,14 @@ type Space struct {
 	WidgetBase
 }
 
-// check for interface impl
-var _ Widget = (*Space)(nil)
-
 func (sp *Space) OnInit() {
 	sp.Style(func(s *styles.Style) {
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
 		s.Padding.Zero()
-		s.Border.Width.Zero()
 		s.Margin.Zero()
 		s.MaxBorder.Width.Zero()
+		s.Border.Width.Zero()
 	})
 }
 
