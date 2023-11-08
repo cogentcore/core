@@ -161,9 +161,9 @@ func (ly *Layout) SetScrollsOff() {
 
 // ScrollActionDelta moves the scrollbar in given dimension by given delta
 // and emits a ScrollSig signal.
-func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
-	if ly.HasScroll[dim] {
-		sb := ly.Scrolls[dim]
+func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
+	if ly.HasScroll[d] {
+		sb := ly.Scrolls[d]
 		nval := sb.Value + delta
 		sb.SetValue(nval)
 		ly.SetNeedsLayout()
@@ -172,9 +172,9 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 
 // ScrollActionPos moves the scrollbar in given dimension to given
 // position and emits a ScrollSig signal.
-func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
-	if ly.HasScroll[dim] {
-		sb := ly.Scrolls[dim]
+func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
+	if ly.HasScroll[d] {
+		sb := ly.Scrolls[d]
 		sb.SetValue(pos)
 		ly.SetNeedsLayout()
 	}
@@ -182,9 +182,9 @@ func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 
 // ScrollToPos moves the scrollbar in given dimension to given
 // position and DOES NOT emit a ScrollSig signal.
-func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
-	if ly.HasScroll[dim] {
-		sb := ly.Scrolls[dim]
+func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
+	if ly.HasScroll[d] {
+		sb := ly.Scrolls[d]
 		sb.SetValue(pos)
 		ly.SetNeedsLayout()
 	}
@@ -270,38 +270,41 @@ func (wb *WidgetBase) ScrollToMe() bool {
 	return ly.ScrollToItem(wb.This().(Widget))
 }
 
+// ScrollToItem scrolls the layout to ensure that given item is in view.
+// Returns true if scrolling was needed
+func (ly *Layout) ScrollToItem(wi Widget) bool {
+	return ly.ScrollToBox(wi.AsWidget().Alloc.BBox)
+}
+
 // AutoScrollDim auto-scrolls along one dimension
-func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
-	if !ly.HasScroll[dim] {
+func (ly *Layout) AutoScrollDim(d mat32.Dims, sti, posi int) bool {
+	if !ly.HasScroll[d] {
 		return false
 	}
-	/*
-		sc := ly.Scrolls[dim]
-		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-		vissz := sc.ThumbVal            // amount visible
+	sb := ly.Scrolls[d]
+	smax := sb.EffectiveMax()
+	ssz := sb.ScrollThumbValue()
+	dst := ly.Styles.Font.Size.Dots * AutoScrollRate
 
-		h := ly.Styles.Font.Size.Dots
-		dst := h * AutoScrollRate
+	st, pos := float32(sti), float32(posi)
+	mind := max(0, pos-st)
+	maxd := max(0, (st+ssz)-pos)
 
-		mind := max(0, pos-st)
-		maxd := max(0, (st+int(vissz))-pos)
-
-		if mind <= maxd {
-			pct := float32(mind) / float32(vissz)
-			if pct < .1 && sc.Value > 0 {
-				dst = mat32.Min(dst, sc.Value)
-				sc.SetValueAction(sc.Value - dst)
-				return true
-			}
-		} else {
-			pct := float32(maxd) / float32(vissz)
-			if pct < .1 && sc.Value < scrange {
-				dst = mat32.Min(dst, (scrange - sc.Value))
-				ly.ScrollActionDelta(dim, dst)
-				return true
-			}
+	if mind <= maxd {
+		pct := mind / ssz
+		if pct < .1 && sb.Value > 0 {
+			dst = min(dst, sb.Value)
+			sb.SetValueAction(sb.Value - dst)
+			return true
 		}
-	*/
+	} else {
+		pct := maxd / ssz
+		if pct < .1 && sb.Value < smax {
+			dst = min(dst, (smax - sb.Value))
+			ly.ScrollActionDelta(d, dst)
+			return true
+		}
+	}
 	return false
 }
 
@@ -310,8 +313,8 @@ var LayoutLastAutoScroll time.Time
 // AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
 func (ly *Layout) AutoScroll(pos image.Point) bool {
 	now := time.Now()
-	lagMs := int(now.Sub(LayoutLastAutoScroll) / time.Millisecond)
-	if lagMs < LayoutAutoScrollDelayMSec {
+	lag := now.Sub(LayoutLastAutoScroll)
+	if lag < LayoutAutoScrollDelay {
 		return false
 	}
 	ly.BBoxMu.RLock()
@@ -332,51 +335,39 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 	return did
 }
 
-// ScrollToBoxDim scrolls to ensure that given rect box along one dimension is
-// in view -- returns true if scrolling was needed
-func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
-	if !ly.HasScroll[dim] {
+// ScrollToBoxDim scrolls to ensure that given target [min..max] range
+// along one dimension is in view. Returns true if scrolling was needed
+func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
+	if !ly.HasScroll[d] {
 		return false
 	}
-	/*
-		vpMin := ly.Alloc.BBox.Min.X
-		if dim == mat32.Y {
-			vpMin = ly.Alloc.BBox.Min.Y
+	fmt.Println(ly, "stb")
+	sb := ly.Scrolls[d]
+	tmin, tmax := float32(tmini), float32(tmaxi)
+	cmin, cmax := ly.Alloc.ContentRangeDim(d)
+	if tmin >= cmin && tmax <= cmax {
+		return false
+	}
+	h := ly.Styles.Font.Size.Dots
+	if tmin < cmin { // favors scrolling to start
+		trg := sb.Value + tmin - cmin - h
+		if trg < 0 {
+			trg = 0
 		}
-		sc := ly.Scrolls[dim]
-		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-		vissz := sc.ThumbVal            // amount visible
-		vpMax := vpMin + int(vissz)
-
-		if minBox >= vpMin && maxBox <= vpMax {
-			return false
-		}
-
-		h := ly.Styles.Font.Size.Dots
-
-		if minBox < vpMin { // favors scrolling to start
-			trg := sc.Value + float32(minBox-vpMin) - h
-			if trg < 0 {
-				trg = 0
-			}
-			sc.SetValueAction(trg)
+		sb.SetValueAction(trg)
+		return true
+	} else {
+		if (tmax - tmin) < sb.ScrollThumbValue() { // only if whole thing fits
+			trg := sb.Value + float32(tmax-cmax) + h
+			sb.SetValueAction(trg)
 			return true
-		} else {
-			if (maxBox - minBox) < int(vissz) {
-				trg := sc.Value + float32(maxBox-vpMax) + h
-				if trg > scrange {
-					trg = scrange
-				}
-				sc.SetValueAction(trg)
-				return true
-			}
 		}
-	*/
+	}
 	return false
 }
 
-// ScrollToBox scrolls the layout to ensure that given rect box is in view --
-// returns true if scrolling was needed
+// ScrollToBox scrolls the layout to ensure that given rect box is in view.
+// Returns true if scrolling was needed
 func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
@@ -390,107 +381,57 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 	return did
 }
 
-// ScrollToItem scrolls the layout to ensure that given item is in view --
-// returns true if scrolling was needed
-func (ly *Layout) ScrollToItem(wi Widget) bool {
-	// return ly.ScrollToBox(wi.AsWidget().ObjBBox)
-	return false
-}
-
 // ScrollDimToStart scrolls to put the given child coordinate position (eg.,
 // top / left of a view box) at the start (top / left) of our scroll area, to
-// the extent possible -- returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToStart(dim mat32.Dims, pos int) bool {
-	if !ly.HasScroll[dim] {
+// the extent possible. Returns true if scrolling was needed.
+func (ly *Layout) ScrollDimToStart(d mat32.Dims, posi int) bool {
+	if !ly.HasScroll[d] {
 		return false
 	}
-	/*
-		vpMin := ly.Alloc.BBox.Min.X
-		if dim == mat32.Y {
-			vpMin = ly.Alloc.BBox.Min.Y
-		}
-		sc := ly.Scrolls[dim]
-		if pos == vpMin { // already at min
-			return false
-		}
-		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-
-		trg := sc.Value + float32(pos-vpMin)
-		if trg < 0 {
-			trg = 0
-		} else if trg > scrange {
-			trg = scrange
-		}
-		if sc.Value == trg {
-			return false
-		}
-		sc.SetValueAction(trg)
-	*/
+	pos := float32(posi)
+	cmin, _ := ly.Alloc.ContentRangeDim(d)
+	if pos == cmin {
+		return false
+	}
+	sb := ly.Scrolls[d]
+	trg := mat32.Clamp(sb.Value+(pos-cmin), 0, sb.EffectiveMax())
+	sb.SetValueAction(trg)
 	return true
 }
 
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
 // bottom / right of a view box) at the end (bottom / right) of our scroll
-// area, to the extent possible -- returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToEnd(dim mat32.Dims, pos int) bool {
-	if !ly.HasScroll[dim] {
+// area, to the extent possible. Returns true if scrolling was needed.
+func (ly *Layout) ScrollDimToEnd(d mat32.Dims, posi int) bool {
+	if !ly.HasScroll[d] {
 		return false
 	}
-	/*
-		vpMin := ly.Alloc.BBox.Min.X
-		if dim == mat32.Y {
-			vpMin = ly.Alloc.BBox.Min.Y
-		}
-		sc := ly.Scrolls[dim]
-		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-		vissz := (sc.ThumbVal)          // todo: - ly.ExtraSize.Dim(dim)) // amount visible
-		vpMax := vpMin + int(vissz)
-		if pos == vpMax { // already at max
-			return false
-		}
-		trg := sc.Value + float32(pos-vpMax)
-		if trg < 0 {
-			trg = 0
-		} else if trg > scrange {
-			trg = scrange
-		}
-		if sc.Value == trg {
-			return false
-		}
-		sc.SetValueAction(trg)
-	*/
+	pos := float32(posi)
+	_, cmax := ly.Alloc.ContentRangeDim(d)
+	if pos == cmax {
+		return false
+	}
+	sb := ly.Scrolls[d]
+	trg := mat32.Clamp(sb.Value+(pos-cmax), 0, sb.EffectiveMax())
+	sb.SetValueAction(trg)
 	return true
 }
 
 // ScrollDimToCenter scrolls to put the given child coordinate position (eg.,
 // middle of a view box) at the center of our scroll area, to the extent
-// possible -- returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
-	if !ly.HasScroll[dim] {
+// possible. Returns true if scrolling was needed.
+func (ly *Layout) ScrollDimToCenter(d mat32.Dims, posi int) bool {
+	if !ly.HasScroll[d] {
 		return false
 	}
-	/*
-		vpMin := ly.Alloc.BBox.Min.X
-		if dim == mat32.Y {
-			vpMin = ly.Alloc.BBox.Min.Y
-		}
-		sc := ly.Scrolls[dim]
-		scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-		vissz := sc.ThumbVal            // amount visible
-		vpMid := vpMin + int(0.5*vissz)
-		if pos == vpMid { // already at mid
-			return false
-		}
-		trg := sc.Value + float32(pos-vpMid)
-		if trg < 0 {
-			trg = 0
-		} else if trg > scrange {
-			trg = scrange
-		}
-		if sc.Value == trg {
-			return false
-		}
-		sc.SetValueAction(trg)
-	*/
+	pos := float32(posi)
+	cmin, cmax := ly.Alloc.ContentRangeDim(d)
+	mid := 0.5 * (cmin + cmax)
+	if pos == mid {
+		return false
+	}
+	sb := ly.Scrolls[d]
+	trg := mat32.Clamp(sb.Value+(pos-mid), 0, sb.EffectiveMax())
+	sb.SetValueAction(trg)
 	return true
 }

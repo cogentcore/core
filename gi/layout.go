@@ -39,9 +39,8 @@ var (
 	// event to allow tab to focus on next element with same name.
 	LayoutFocusNameTabMSec = 2000
 
-	// LayoutAutoScrollDelayMSec is amount of time to wait (in Milliseconds) before
-	// trying to autoscroll again
-	LayoutAutoScrollDelayMSec = 25
+	// LayoutAutoScrollDelay is amount of time to wait before trying to autoscroll again
+	LayoutAutoScrollDelay = 25 * time.Millisecond
 
 	// AutoScrollRate determines the rate of auto-scrolling of layouts
 	AutoScrollRate = float32(1.0)
@@ -514,7 +513,7 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 // Layout -- most subclasses of Layout will want these..
 func (ly *Layout) HandleLayoutScrollEvents() {
 	ly.On(events.Scroll, func(e events.Event) {
-		// fmt.Println("event")
+		// fmt.Println(ly, "scroll event", e)
 		ly.ScrollDelta(e)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!

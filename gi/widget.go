@@ -212,7 +212,7 @@ type WidgetBase struct {
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
 
 	// Alloc is layout allocation state: contains full size and position info
-	Alloc LayoutState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Alloc LayState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called
@@ -237,7 +237,7 @@ type WidgetBase struct {
 	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true" set:"-"`
 
 	// all the layout state information for this widget
-	LayState LayoutState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	LayState LayState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
 	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.

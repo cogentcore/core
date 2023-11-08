@@ -289,6 +289,12 @@ func (sr *Slider) EffectiveMax() float32 {
 	return sr.Max
 }
 
+// ScrollThumbValue returns the current scroll VisiblePct
+// in terms of the Min - Max range of values.
+func (sr *Slider) ScrollThumbValue() float32 {
+	return mat32.Clamp(sr.VisiblePct, 0, 1) * (sr.Max - sr.Min)
+}
+
 // SetSliderPos sets the position of the slider at the given
 // relative position within the usable Content sliding range,
 // in pixels, and updates the corresponding Value based on that position.
