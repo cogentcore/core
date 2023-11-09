@@ -57,33 +57,33 @@ type Style struct { //gti:add
 	ZIndex int
 
 	// Align specifies the X, Y alignment of widget elements within a container
-	Align XY[Align]
+	Align XY[Align] `view:"inline"`
 
 	// position is only used for Layout = Nil cases
-	Pos units.XY
+	Pos units.XY `view:"inline"`
 
 	// Min is the minimum size of the actual content, exclusive of additional space
 	// from padding, border, margin; 0 = default is sum of Min for all content
 	// (which _includes_ space for all sub-elements).
 	// This is equivalent to the Basis for the CSS flex styling model.
-	Min units.XY
+	Min units.XY `view:"inline"`
 
 	// Max is the maximum size of the actual content, exclusive of additional space
 	// from padding, border, margin; 0 = default provides no Max size constraint
-	Max units.XY
+	Max units.XY `view:"inline"`
 
 	// Grow is the proportional amount that the element can grow (stretch)
 	// if there is more space available.  0 = default = no growth.
 	// Extra available space is allocated as: Grow / sum (all Grow)
-	Grow mat32.Vec2
+	Grow mat32.Vec2 `view:"inline"`
 
 	// Padding is the transparent space around central content of box,
 	// which is _included_ in the size of the standard box rendering.
-	Padding SideValues
+	Padding SideValues `view:"inline"`
 
 	// Margin is the outer-most transparent space around box element,
 	// which is _excluded_ from standard box rendering.
-	Margin SideValues
+	Margin SideValues `view:"inline"`
 
 	// FillMargin determines is whether to fill the margin with
 	// the surrounding background color before rendering the element itself.
