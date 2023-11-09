@@ -169,8 +169,9 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
+		s.Min.Y.Em(1.0)
 		s.Min.X.Em(10)
-		s.Padding.Set(units.Dp(8), units.Dp(16))
+		s.Padding.Set(units.Dp(8), units.Dp(8))
 		if !tf.LeadingIcon.IsNil() {
 			s.Padding.Left.Dp(12)
 		}
@@ -226,6 +227,7 @@ func (tf *TextField) TextFieldStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
+				s.Align.Y = styles.AlignCenter
 				s.Overflow.X = styles.OverflowHidden
 				s.Gap.Zero()
 			})
@@ -234,6 +236,7 @@ func (tf *TextField) TextFieldStyles() {
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
 				s.Padding.Zero()
+				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Align.Y = styles.AlignCenter
 				s.Margin.SetRight(units.Dp(8))
@@ -260,6 +263,7 @@ func (tf *TextField) TextFieldStyles() {
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
+				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Align.Y = styles.AlignCenter
 				s.Margin.SetLeft(units.Dp(8))
@@ -1033,9 +1037,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 // not in visible range, position will be out of range too).
 // if wincoords is true, then adds window box offset -- for cursor, popups
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
-	st := &tf.Styles
-	spc := st.BoxSpace()
-	pos := tf.EffPos.Add(spc.Pos())
+	pos := tf.EffPos
 	if wincoords {
 		mvp := tf.Sc
 		pos = pos.Add(mat32.NewVec2FmPoint(mvp.Geom.Pos))
@@ -1236,8 +1238,7 @@ func (tf *TextField) AutoScroll() {
 		tf.StartPos = 0
 		return
 	}
-	spc := st.BoxSpace()
-	maxw := tf.EffSize.X - spc.Size().X
+	maxw := tf.EffSize.X
 	if maxw < 0 {
 		return
 	}
@@ -1323,10 +1324,7 @@ func (tf *TextField) AutoScroll() {
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pixOff float32) int {
 	st := &tf.Styles
-
-	spc := st.BoxSpace()
-	px := pixOff - spc.Pos().X
-
+	px := pixOff
 	if px <= 0 {
 		return tf.StartPos
 	}
@@ -1801,7 +1799,7 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 	tf.RenderStdBox(sc, st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect(sc)
-	pos := tf.EffPos.Add(st.BoxSpace().Pos())
+	pos := tf.EffPos
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		prevColor := st.Color
 		st.Color = tf.PlaceholderColor
