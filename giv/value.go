@@ -794,7 +794,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
-		s.Grow.Set(1, 0)
+		s.Grow.Set(0, 0) // todo
 	})
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..

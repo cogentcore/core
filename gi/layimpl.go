@@ -330,6 +330,9 @@ func (ly *Layout) SizeUp(sc *Scene) {
 
 // SizeUpLay is the Layout standard SizeUp pass
 func (ly *Layout) SizeUpLay(sc *Scene) {
+	if !ly.HasChildren() {
+		return
+	}
 	ly.SizeFromStyle()
 	ly.SizeUpChildren(sc)
 	ly.SetInitCells()
@@ -376,7 +379,10 @@ func (ly *Layout) SetInitCellsFlex() {
 		idx++
 		return ki.Continue
 	})
-	mat32.SetPointDim(&ly.LayImpl.Cells, ma, idx)
+	if idx == 0 {
+		fmt.Println(ly, "no items:", idx)
+	}
+	mat32.SetPointDim(&ly.LayImpl.Cells, ma, max(idx, 1)) // must be at least 1
 	mat32.SetPointDim(&ly.LayImpl.Cells, ca, 1)
 	ly.SetGapSizeFromCells()
 }
@@ -400,7 +406,10 @@ func (ly *Layout) SetInitCellsGrid() {
 	for rows*cols < n {
 		rows++
 	}
-	ly.LayImpl.Cells = image.Point{cols, rows}
+	if rows == 0 || cols == 0 {
+		fmt.Println(ly, "no rows or cols:", rows, cols)
+	}
+	ly.LayImpl.Cells = image.Point{max(cols, 1), max(rows, 1)}
 	ci := 0
 	ri := 0
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
@@ -585,6 +594,9 @@ func (ly *Layout) SizeDown(sc *Scene, iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
+	if !ly.HasChildren() {
+		return false
+	}
 	totalChanged := ly.SizeDownGrowToAlloc(sc, iter)
 	chg := ly.ManageOverflow(sc, iter)
 	sz := &ly.Alloc.Size
@@ -826,6 +838,9 @@ func (ly *Layout) Position(sc *Scene) {
 }
 
 func (ly *Layout) PositionLay(sc *Scene) {
+	if !ly.HasChildren() {
+		return
+	}
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 	ly.ConfigScrolls(sc)   // and configure the scrolls
 	if ly.Styles.Display == styles.DisplayStacked {

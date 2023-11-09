@@ -249,6 +249,7 @@ func (ge *GiEditor) ConfigSplits() {
 		tvfr := gi.NewFrame(split, "tvfr")
 		tvfr.Style(func(s *styles.Style) {
 			s.MainAxis = mat32.X
+			s.Overflow.Y = styles.OverflowAuto
 		})
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
@@ -270,6 +271,9 @@ func (ge *GiEditor) SetChanged() {
 }
 
 func (ge *GiEditor) TopAppBar(tb *gi.TopAppBar) {
+	if gi.DefaultTopAppBar == nil {
+		return
+	}
 	gi.DefaultTopAppBar(tb)
 
 	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
