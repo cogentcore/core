@@ -243,6 +243,12 @@ func (t *TwinEditors) SetCustomContextMenu(v func(m *gi.Scene)) *TwinEditors {
 	return t
 }
 
+// SetStackTop sets the [TwinEditors.StackTop]
+func (t *TwinEditors) SetStackTop(v int) *TwinEditors {
+	t.StackTop = v
+	return t
+}
+
 // SetDim sets the [TwinEditors.Dim]
 func (t *TwinEditors) SetDim(v mat32.Dims) *TwinEditors {
 	t.Dim = v

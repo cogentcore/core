@@ -566,6 +566,7 @@ func (vv *ColorValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.CreateTempIfNotPtr()
 	bt := vv.Widget.(*gi.Button)
 	bt.SetNeedsRender()
 }

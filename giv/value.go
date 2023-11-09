@@ -629,6 +629,9 @@ func (vv *ValueBase) SaveTmp() {
 
 func (vv *ValueBase) CreateTempIfNotPtr() bool {
 	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
+		// if vv.TmpSave == vv {
+		// 	return true
+		// }
 		vv.TmpSave = vv // we are it!  note: this is saving the ValueBase rep ONLY, not the full iface
 		vtyp := reflect.TypeOf(vv.Value.Interface())
 		vtp := reflect.New(vtyp)

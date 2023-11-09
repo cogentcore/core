@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -86,7 +87,8 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 		return false
 	}
 	config := ki.Config{}
-	// always start fresh!
+	// note: widget re-use does not work due to all the closures
+	sv.DeleteChildren(ki.DestroyKids)
 	sv.FieldViews = make([]Value, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
@@ -128,12 +130,18 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 		lbl := sv.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
-		w := sv.Child((i * 2) + 1).(gi.Widget)
+		w, wb := gi.AsWidget(sv.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true
 		}
-		vv.ConfigWidget(w, sc)
+		if wb.Class == "" {
+			wb.Class = "configed"
+			vv.ConfigWidget(w, sc)
+		} else {
+			vvb.Widget = w
+			vv.UpdateWidget()
+		}
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
@@ -156,11 +164,13 @@ func (sv *StructViewInline) UpdateFields() {
 	for _, vv := range sv.FieldViews {
 		vv.UpdateWidget()
 	}
-	sv.UpdateEndRender(updt)
+	sv.UpdateEndLayout(updt)
 }
 
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
+		fmt.Println("did view if update")
+		sv.Update()
 		sv.SetNeedsLayout()
 	} else if sv.HasDefs {
 		updt := sv.UpdateStart()
@@ -172,11 +182,10 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	}
 }
 
-// todo: remove
-// func (sv *StructViewInline) GetSize(sc *gi.Scene, iter int) {
+// func (sv *StructViewInline) SizeUp(sc *gi.Scene) {
 // 	updt := sv.ConfigStruct(sc)
 // 	if updt {
 // 		sv.ApplyStyleTree(sc)
 // 	}
-// 	sv.Frame.GetSize(sc, iter)
+// 	sv.Frame.SizeUp(sc)
 // }

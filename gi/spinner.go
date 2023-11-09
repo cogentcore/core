@@ -85,6 +85,11 @@ func (sp *Spinner) SpinnerStyles() {
 	})
 }
 
+func (sp *Spinner) SizeUp(sc *Scene) {
+	sp.SetText(sp.ValToString(sp.Value))
+	sp.TextField.SizeUp(sc)
+}
+
 // SetMin sets the min limits on the value
 func (sp *Spinner) SetMin(min float32) *Spinner {
 	sp.HasMin = true

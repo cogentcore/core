@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"strings"
 
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -539,6 +540,9 @@ func (wb *WidgetBase) SizeDownGrowToAlloc(sc *Scene, iter int) bool {
 	sz := &wb.Alloc.Size
 	s := &wb.Styles
 	totWas := sz.Total
+	if wb.Nm == "trow" || strings.HasPrefix(wb.Nm, "scrollbar") {
+		fmt.Println(wb, s.Grow)
+	}
 	sz.Total.Clamp(mat32.Vec2Zero, sz.Alloc)
 	if s.Grow.X > 0 && sz.Alloc.X > sz.Total.X {
 		change = true

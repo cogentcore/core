@@ -25,18 +25,24 @@ func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.Style(func(s *styles.Style) {
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(4), units.Zero())
 		s.Align.Y = styles.AlignCenter
 		s.Align.X = styles.AlignCenter
-		s.Border.Style.Top = styles.BorderSolid
-		s.Border.Color.Top = colors.Scheme.OutlineVariant
-		s.Border.Width.Top.Dp(1)
 		if sp.Horiz {
+			s.Border.Style.Top = styles.BorderSolid
+			s.Border.Color.Top = colors.Scheme.OutlineVariant
+			s.Border.Width.Top.Dp(2)
 			s.Grow.Set(1, 0)
-			s.Min.Y.Dp(1)
+			s.Padding.Set(units.Dp(4), units.Zero())
+			s.Min.Y.Dp(2)
+			s.Min.X.Em(1)
 		} else {
+			s.Border.Style.Left = styles.BorderSolid
+			s.Border.Color.Left = colors.Scheme.OutlineVariant
+			s.Border.Width.Left.Dp(2)
+			s.Padding.Set(units.Zero(), units.Dp(4))
 			s.Grow.Set(0, 1)
-			s.Min.X.Dp(1)
+			s.Min.X.Dp(2)
+			s.Min.Y.Em(1)
 		}
 	})
 }
