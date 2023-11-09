@@ -40,6 +40,7 @@ func (pb *ProgressBar) CopyFieldsFrom(frm any) {
 func (pb *ProgressBar) OnInit() {
 	pb.Type = SliderScrollbar
 	pb.Dim = mat32.X
+	pb.ThumbSize.Set(1, 1)
 	pb.Value = 0
 	pb.Step = 0.1
 	pb.PageStep = 0.2
@@ -64,10 +65,10 @@ func (pb *ProgressBar) ProgressBarStyles() {
 
 		if pb.Dim == mat32.X {
 			s.Min.X.Em(20)
-			s.Min.Y.Dp(4)
+			s.Min.Y.Dp(10)
 		} else {
 			s.Min.Y.Em(20)
-			s.Min.X.Dp(4)
+			s.Min.X.Dp(10)
 		}
 	})
 }

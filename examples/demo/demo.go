@@ -29,6 +29,8 @@ func app() {
 
 	sc := gi.NewScene("gogi-demo").SetTitle("GoGi Demo")
 
+	gi.DefaultTopAppBar = nil
+
 	ts := gi.NewTabs(sc)
 	ts.NewTabButton = true
 
@@ -76,7 +78,7 @@ func makeText(ts *gi.Tabs) {
 
 	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
 	gi.NewLabel(text).SetText(
-		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
+		`GoGi provides fully customizable text elements that can be styled in any way you want.<br>Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := strings.TrimPrefix(typ.String(), "Label")
@@ -90,18 +92,19 @@ func makeButtons(ts *gi.Tabs) {
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
 	gi.NewLabel(buttons, "bdesc").SetText(
-		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
+		`GoGi provides customizable buttons that support various events and can be styled in any way you want.<br>Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease.<br>All buttons support any combination of a label, icon, and indicator.`)
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
-	brow := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
-	browt := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
-	browi := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
+	// note: all of these were setwrap:
+	brow := gi.NewLayout(buttons)
+	browt := gi.NewLayout(buttons)
+	browi := gi.NewLayout(buttons)
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu Buttons")
-	mbrow := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
-	mbrowt := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
-	mbrowi := gi.NewLayout(buttons).SetMainAxis(mat32.X).SetWrap(true)
+	mbrow := gi.NewLayout(buttons)
+	mbrowt := gi.NewLayout(buttons)
+	mbrowi := gi.NewLayout(buttons)
 
 	menu := func(m *gi.Scene) {
 		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
@@ -185,7 +188,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
 	gi.NewLabel(inputs).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
+		`GoGi provides various customizable input widgets that cover all common uses.<br>Various events can be bound to inputs, and their data can easily be fetched and used wherever needed.<br>There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(inputs).SetPlaceholder("Filled")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
@@ -196,12 +199,12 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewTextField(inputs).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 
-	spinners := gi.NewLayout(inputs, "spinners").SetMainAxis(mat32.X)
+	spinners := gi.NewLayout(inputs, "spinners")
 
 	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
 	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
 
-	choosers := gi.NewLayout(inputs, "choosers").SetMainAxis(mat32.X)
+	choosers := gi.NewLayout(inputs, "choosers")
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
 	fruitDescs := []string{
@@ -238,7 +241,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5).SetTracking(true)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
 
-	sliderys := gi.NewLayout(inputs, "sliderys").SetMainAxis(mat32.X).SetWrap(true)
+	sliderys := gi.NewLayout(inputs, "sliderys")
 
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
@@ -279,11 +282,13 @@ func makeLayouts(ts *gi.Tabs) {
 
 	sv := gi.NewSplits(layouts).SetDim(mat32.X)
 
-	left := gi.NewFrame(sv).SetMainAxis(mat32.Y).Style(func(s *styles.Style) {
+	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
-	right := gi.NewFrame(sv).SetMainAxis(mat32.Y).Style(func(s *styles.Style) {
+	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
@@ -295,7 +300,7 @@ func makeValues(ts *gi.Tabs) {
 	gi.NewLabel(values).SetType(gi.LabelHeadlineLarge).SetText("Values")
 
 	gi.NewLabel(values).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values.<br>This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code.<br>For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(values).SetText("GoGi Editor").OnClick(func(e events.Event) {
 		giv.GoGiEditorDialog(ts.Sc)
