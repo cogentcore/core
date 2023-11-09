@@ -363,6 +363,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	lb.ConfigLabel(sc)
 	rsz := lb.TextRender.Size
 	sz.Content = prevContent
+	lb.Alloc.Size.SetContentMax(lb.Styles.Min.Dots(), lb.Styles.Max.Dots()) // start over..
 	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
 	sz.SetTotalFromContent()
 	re := prevContent != lb.Alloc.Size.Content
