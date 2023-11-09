@@ -15,6 +15,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/enums"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -118,6 +119,7 @@ func (sc *Scene) OnInit() {
 
 func (sc *Scene) SceneStyles() {
 	sc.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.FocusWithinable)
 		s.Cursor = cursors.Arrow
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
