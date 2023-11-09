@@ -48,7 +48,7 @@ func app() {
 
 	sc := gi.NewScene("treeview-test").SetTitle("TreeView Test")
 
-	gi.DefaultTopAppBar = nil
+	// gi.DefaultTopAppBar = nil
 
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X

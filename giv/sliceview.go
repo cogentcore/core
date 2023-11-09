@@ -319,13 +319,16 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.Grow.Set(1, 1)
 				s.Min.X.Em(20)
 				s.Min.Y.Ch(10)
+				// s.Gap.Zero()
 			})
 		case "grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
+				// s.Min.Y.Zero()
 				s.Min.X = sv.Styles.ScrollBarWidth
 				s.Grow.Set(0, 1)
+				fmt.Println(sb, "set grow:", s.Grow)
 			})
 			sb.OnChange(func(e events.Event) {
 				sv.StartIdx = int(sb.Value)
@@ -340,6 +343,8 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.AlignEnd
+					s.Min.Y.Em(1)
+					s.Grow.Set(0, 0)
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
@@ -597,9 +602,11 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 
 func (sv *SliceViewBase) SizeDown(sc *gi.Scene, iter int) bool {
 	redo := sv.Frame.SizeDown(sc, iter)
-	if sv.This().(SliceViewer).NeedsConfigRows() {
-		sv.Update() // does applystyle
-		return true // needs redo
+	if iter == 0 && sv.This().(SliceViewer).NeedsConfigRows() {
+		// fmt.Println("redo, iter:", iter)
+		sv.Update()   // does applystyle
+		sv.SizeUp(sc) // re-init everything
+		redo = true
 	}
 	return redo
 }
@@ -636,7 +643,8 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sgHt := sg.Alloc.Size.Content.Y
+	// sgHt := sg.Alloc.Size.Content.Y
+	sgHt := sg.LayImpl.ContentSubGap.Y
 	// fmt.Println("sg:", sgHt, "sv:", sv.Alloc.Size.TotalOrig.Y)
 	return sgHt
 }
@@ -648,12 +656,14 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 	if sg == nil {
 		return
 	}
-	// todo: fixme!
-	// if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-	// 	rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Gap.Dots
-	// }
+	if sg.HasChildren() {
+		_, kwb := gi.AsWidget(sg.Child(0))
+		rowht = kwb.Alloc.Size.Alloc.Y
+		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Alloc.Size.Total.Y)
+	}
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
-		rowht = mat32.Max(rowht, sv.RowHeight)
+		rowht = max(rowht, sv.RowHeight)
+		// fmt.Println("rowht:", rowht, "svrh:", sv.RowHeight)
 	}
 	if sv.Styles.Font.Face == nil {
 		sv.Styles.Font = paint.OpenFont(sv.Styles.FontRender(), &sv.Styles.UnContext)
@@ -665,13 +675,14 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 		rows = gi.LayoutPrefMaxRows
 		layht = float32(rows) * rowht
 	} else {
+		sv.RowHeight = max(sv.RowHeight, rowht)
 		sgHt := sv.AvailHeight()
-		// fmt.Println(sgHt)
 		layht = sgHt
 		if sgHt == 0 {
 			return
 		}
 		rows = int(mat32.Floor(sgHt / rowht))
+		// fmt.Println("rows:", rows, "sght:", sgHt, "rowht:", rowht, "sc ht:", sc.Geom.Size.Y)
 	}
 	return
 }

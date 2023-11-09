@@ -381,6 +381,7 @@ func (sc *Scene) DoUpdate() bool {
 	// Do sequence of layout updates at start to deal with dynanmically
 	// sized elements that require iterative passes of layout.
 	if sc.ShowLayoutIter < 3 { // 4 needed for SliceViewBase
+		// fmt.Println("scene layout iter:", sc.ShowLayoutIter)
 		sc.ShowLayoutIter++
 		sc.SetFlag(true, ScNeedsLayout)
 	}
@@ -482,12 +483,8 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	bspc := sc.BoxSpace().Size().Add(sc.LayImpl.ScrollSize)
 	psz := sc.LayImpl.KidsSize.Add(bspc).ToPointCeil()
 	sc.Geom.Size = psz
-	fmt.Println("\npref size:", psz, "csz:", sc.Alloc.Size.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
-	// sc.LayoutScene() // once more with set size
-	// bspc = sc.BoxSpace().Size().Add(sc.LayImpl.ScrollSize)
-	// psz = sc.LayImpl.KidsSize.Add(bspc).ToPointCeil()
-	// fmt.Println("pref size:", psz, "csz:", sc.Alloc.Size.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
-	// sc.Geom.Size = psz
+	// fmt.Println("\npref size:", psz, "csz:", sc.Alloc.Size.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
+
 	sc.SetFlag(false, ScPrefSizing)
 	return psz
 }

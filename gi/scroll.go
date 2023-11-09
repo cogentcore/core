@@ -98,6 +98,10 @@ func (ly *Layout) GetScrollPosition(sc *Scene) {
 		ly.Alloc.Scroll.SetDim(d, 0)
 		if ly.HasScroll[d] {
 			sb := ly.Scrolls[d]
+			if sb == nil {
+				ly.HasScroll[d] = false
+				continue
+			}
 			ly.Alloc.Scroll.SetDim(d, -sb.Value)
 		}
 	}
