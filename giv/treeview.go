@@ -352,7 +352,8 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Min.X.Ch(16)
-				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				// s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // ?
 			})
 		case "parts/menu":
 			menu := w.(*gi.Button)
@@ -485,33 +486,6 @@ func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
 	tv.StyleTreeView(sc)
 }
 
-// TreeView is tricky for alloc because it is both a layout
-// of its children but has to maintain its own bbox for its own widget.
-
-/* todo:
-func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
-	tv.InitLayout(sc)
-	tv.GetSizeParts(sc, iter) // get our size from parts
-	tv.WidgetSize = tv.Alloc.Size.Total
-	h := mat32.Ceil(tv.WidgetSize.Y)
-	w := tv.WidgetSize.X
-
-	if !tv.IsClosed() {
-		// we layout children under us
-		for _, kid := range tv.Kids {
-			gis := kid.(gi.Widget).AsWidget()
-			if gis == nil || gis.This() == nil {
-				continue
-			}
-			h += mat32.Ceil(gis.Alloc.Size.Total.Y)
-			w = mat32.Max(w, tv.Indent.Dots+gis.Alloc.Size.Total.X)
-		}
-	}
-	tv.Alloc.Size.Total = mat32.Vec2{w, h}
-	tv.WidgetSize.X = w // stretch
-}
-*/
-
 func (tv *TreeView) UpdateBranchIcons() {
 }
 
@@ -534,18 +508,76 @@ func (tv *TreeView) SetBranchState() {
 	}
 }
 
-/* todo:
-func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
-	spc := tv.BoxSpace()
-	tv.Parts.Alloc.Pos = tv.Alloc.Pos.Add(spc.Pos())
-	tv.Parts.Alloc.Size.Total = tv.WidgetSize.Sub(spc.Size()) // key diff
-	tv.Parts.DoLayout(sc, parBBox, iter)
+// TreeView is tricky for alloc because it is both a layout
+// of its children but has to maintain its own bbox for its own widget.
+
+func (tv *TreeView) SizeUp(sc *gi.Scene) {
+	tv.WidgetBase.SizeUp(sc)
+	tv.WidgetSize = tv.Alloc.Size.Total
+	h := tv.WidgetSize.Y
+	w := tv.WidgetSize.X
+
+	if !tv.IsClosed() {
+		// we layout children under us
+		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
+			kwi.SizeUp(sc)
+			h += kwb.Alloc.Size.Total.Y
+			w = max(w, tv.Indent.Dots+kwb.Alloc.Size.Total.X)
+			// fmt.Println(kwb, w, h)
+			return ki.Continue
+		})
+	}
+	tv.Alloc.Size.Content = mat32.Vec2{w, h}
+	tv.Alloc.Size.SetTotalFromContent()
+	tv.WidgetSize.X = w // stretch
 }
 
-func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
-	return tv.Alloc.ContentBBox
+// func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
+// 	spc := tv.BoxSpace()
+// 	tv.Parts.Alloc.Pos = tv.Alloc.Pos.Add(spc.Pos())
+// 	tv.Parts.Alloc.Size.Total = tv.WidgetSize.Sub(spc.Size()) // key diff
+// 	tv.Parts.DoLayout(sc, parBBox, iter)
+// }
+
+func (tv *TreeView) SizeDown(sc *gi.Scene, iter int) bool {
+	tv.WidgetBase.SizeDown(sc, iter)
+	redo := tv.SizeDownChildren(sc, iter)
+	return redo
 }
 
+func (tv *TreeView) Position(sc *gi.Scene) {
+	rn := tv.RootView
+	if rn == nil {
+		slog.Error("giv.TreeView: RootView is nil", "in node:", tv)
+		return
+	}
+	tv.SetBranchState()
+	tv.This().(TreeViewer).UpdateBranchIcons()
+
+	tv.Alloc.Size.Total.X = rn.Alloc.Size.Total.X - (tv.Alloc.Pos.X - rn.Alloc.Pos.X)
+	tv.WidgetSize.X = tv.Alloc.Size.Total.X
+
+	tv.WidgetBase.Position(sc)
+
+	if !tv.IsClosed() {
+		h := tv.WidgetSize.Y
+		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
+			kwb.Alloc.RelPos.Y = h
+			kwb.Alloc.RelPos.X = tv.Indent.Dots
+			h += kwb.Alloc.Size.Total.Y
+			kwi.Position(sc)
+			return ki.Continue
+		})
+	}
+}
+
+func (tv *TreeView) ScenePos(sc *gi.Scene) {
+	tv.WidgetBase.ScenePos(sc)
+	tv.ScenePosChildren(sc)
+	tv.Alloc.Size.Total = tv.WidgetSize
+}
+
+/*
 func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	psize := tv.AddParentPos() // have to add our pos first before computing below:
 

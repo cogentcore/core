@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
@@ -47,21 +48,33 @@ func app() {
 
 	sc := gi.NewScene("treeview-test").SetTitle("TreeView Test")
 
+	gi.DefaultTopAppBar = nil
+
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	tvfr := gi.NewFrame(split, "tvfr").SetMainAxis(mat32.X)
-	svfr := gi.NewFrame(split, "svfr").SetMainAxis(mat32.X)
+	tvfr := gi.NewFrame(split, "tvfr")
+	svfr := gi.NewFrame(split, "svfr")
 	split.SetSplits(.3, .7)
 
+	svfr.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+		// s.Border.Color.Set(colors.Black)
+		// s.Border.Width.Set(units.Dp(2))
+		s.BackgroundColor.SetSolid(colors.Transparent)
+	})
+
 	tvfr.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
+		s.MainAxis = mat32.Y
+		// s.Border.Color.Set(colors.Black)
+		// s.Border.Width.Set(units.Dp(2))
+		s.BackgroundColor.SetSolid(colors.Transparent)
 	})
 
 	tv := giv.NewTreeView(tvfr, "tv")
 	tv.RootView = tv
 
-	depth := 3 // 1 = small tree for testing
+	depth := 1 // 1 = small tree for testing
 	// depth := 10 // big tree
 	MakeTree(tv, 0, depth, 5)
 
