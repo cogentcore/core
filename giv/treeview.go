@@ -170,9 +170,12 @@ func (tv *TreeView) RootSetViewIdx() int {
 }
 
 func (tv *TreeView) OnInit() {
-	tv.Text = tv.Nm
 	tv.HandleTreeViewEvents()
 	tv.TreeViewStyles()
+}
+
+func (tv *TreeView) OnAdd() {
+	tv.Text = tv.Nm
 }
 
 func (tv *TreeView) TreeViewStyles() {
