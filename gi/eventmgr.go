@@ -671,7 +671,9 @@ func (em *EventMgr) FocusClear() bool {
 // This does NOT send the events.Focus event to the widget.
 func (em *EventMgr) GrabFocus(w Widget) bool {
 	got := em.SetFocusImpl(w, false) // no event
-	w.AsWidget().ScrollToMe()
+	if w != nil {
+		w.AsWidget().ScrollToMe()
+	}
 	return got
 }
 
@@ -681,7 +683,9 @@ func (em *EventMgr) GrabFocus(w Widget) bool {
 // for a version that does not.
 func (em *EventMgr) SetFocus(w Widget) bool {
 	got := em.SetFocusImpl(w, true) // sends event
-	w.AsWidget().ScrollToMe()
+	if w != nil {
+		w.AsWidget().ScrollToMe()
+	}
 	return got
 }
 

@@ -180,6 +180,11 @@ func (ch *Chooser) ChooserStyles() {
 			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
 				// parent handles everything
+				s.Min.Y.Em(1.2) // note: this is essential
+				// TODO(kai): figure out what to do with MaxLength
+				// if ch.MaxLength > 0 {
+				// 	s.Min.X.Ch(float32(ch.MaxLength))
+				// }
 				s.Padding.Zero()
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Zero()
@@ -688,7 +693,6 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		if ch.IsReadOnly() {
 			return
 		}
-		fmt.Println("tfoc")
 		tf.FocusClear()
 		ch.GrabFocus()
 		ch.Send(events.Focus, e)

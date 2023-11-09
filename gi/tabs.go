@@ -550,8 +550,8 @@ func (tb *Tab) TabStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Max.X.Dp(500)
-		s.Min.Y.Dp(26)
+		// s.Max.X.Dp(500)
+		s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
@@ -586,6 +586,8 @@ func (tb *Tab) TabStyles() {
 			label.Type = LabelBodyMedium
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // nowrap
 				s.Cursor = cursors.None
 				s.Margin.Zero()
 				s.Padding.Zero()
