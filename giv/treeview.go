@@ -83,8 +83,13 @@ func AsTreeView(k ki.Ki) *TreeView {
 type TreeView struct {
 	gi.WidgetBase
 
-	// If non-Ki Node that this widget is viewing in the tree -- the source
+	// If non-nil, the Ki Node that this widget is viewing in the tree (the source)
 	SyncNode ki.Ki `set:"-" copy:"-" json:"-" xml:"-"`
+
+	// The text to display for the tree view item label, which automatically
+	// defaults to the [ki.Node.Name] of the tree view node. It has no effect
+	// if [TreeView.SyncNode] is non-nil.
+	Text string
 
 	// optional icon, displayed to the the left of the text label
 	Icon icons.Icon
@@ -165,6 +170,7 @@ func (tv *TreeView) RootSetViewIdx() int {
 }
 
 func (tv *TreeView) OnInit() {
+	tv.Text = tv.Nm
 	tv.HandleTreeViewEvents()
 	tv.TreeViewStyles()
 }
