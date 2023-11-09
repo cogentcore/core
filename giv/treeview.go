@@ -290,8 +290,8 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Color = colors.Scheme.Primary.Base
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Min.X.Em(0.5)
-				s.Min.Y.Em(0.5)
+				s.Min.X.Em(0.8)
+				s.Min.Y.Em(0.8)
 				s.Align.Y = styles.AlignCenter
 				// we don't need to visibly tell the user that we are disabled;
 				// the lack of an icon accomplishes that; instead, we just inherit
@@ -352,6 +352,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Min.X.Ch(16)
+				s.Min.Y.Em(1.2)
 				// s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 				s.Grow.Set(0, 0) // ?
 			})
@@ -532,13 +533,6 @@ func (tv *TreeView) SizeUp(sc *gi.Scene) {
 	tv.WidgetSize.X = w // stretch
 }
 
-// func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
-// 	spc := tv.BoxSpace()
-// 	tv.Parts.Alloc.Pos = tv.Alloc.Pos.Add(spc.Pos())
-// 	tv.Parts.Alloc.Size.Total = tv.WidgetSize.Sub(spc.Size()) // key diff
-// 	tv.Parts.DoLayout(sc, parBBox, iter)
-// }
-
 func (tv *TreeView) SizeDown(sc *gi.Scene, iter int) bool {
 	tv.WidgetBase.SizeDown(sc, iter)
 	redo := tv.SizeDownChildren(sc, iter)
@@ -576,55 +570,6 @@ func (tv *TreeView) ScenePos(sc *gi.Scene) {
 	tv.ScenePosChildren(sc)
 	tv.Alloc.Size.Total = tv.WidgetSize
 }
-
-/*
-func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	psize := tv.AddParentPos() // have to add our pos first before computing below:
-
-	rn := tv.RootView
-	if rn == nil {
-		slog.Error("giv.TreeView: RootView is nil", "in node:", tv)
-		return false
-	}
-	tv.SetBranchState()
-	tv.This().(TreeViewer).UpdateBranchIcons()
-
-	wi := tv.This().(gi.Widget)
-	// our alloc size is root's size minus our total indentation
-	tv.Alloc.Size.Total.X = rn.Alloc.Size.Total.X - (tv.Alloc.Pos.X - rn.Alloc.Pos.X)
-	tv.WidgetSize.X = tv.Alloc.Size.Total.X
-
-	tv.Alloc.PosOrig = tv.Alloc.Pos
-	gi.SetUnitContext(&tv.Styles, sc, tv.NodeSize(), psize) // update units with final layout
-	tv.BBox = wi.BBoxes()
-	wi.ComputeBBoxes(sc, parBBox, image.Point{})
-
-	tv.DoLayoutParts(sc, parBBox, iter) // use OUR version
-	h := mat32.Ceil(tv.WidgetSize.Y)
-	if !tv.IsClosed() {
-		for _, kid := range tv.Kids {
-			if kid == nil || kid.This() == nil {
-				continue
-			}
-			ni := kid.(gi.Widget).AsWidget()
-			if ni == nil {
-				continue
-			}
-			ni.Alloc.PosRel.Y = h
-			ni.Alloc.PosRel.X = tv.Indent.Dots
-			h += mat32.Ceil(ni.Alloc.Size.Total.Y)
-		}
-	}
-	redo := tv.DoLayoutChildren(sc, iter)
-	// once layout is done, we can get our reg size back
-	tv.Alloc.Size.Total = tv.WidgetSize
-	if gi.LayoutTrace {
-		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.Alloc.Size.Total.X, tv.Alloc.Pos.X, rn.Alloc.Pos.X)
-		// fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.Alloc.Pos, tv.Alloc.Size.Total, tv.BBox, tv.ScBBox, tv.ScBBox)
-	}
-	return redo
-}
-*/
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)

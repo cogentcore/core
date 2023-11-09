@@ -76,7 +76,7 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 
 	var ffn *Node
 	found := false
-	fn.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
@@ -161,7 +161,7 @@ func (fn *Node) FileExtCounts(cat filecat.Cat) []NodeNameCount {
 // (e.g., filecat.Code to find any code files)
 func (fn *Node) LatestFileMod(cat filecat.Cat) time.Time {
 	tmod := time.Time{}
-	fn.WWidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {

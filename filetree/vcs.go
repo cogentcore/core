@@ -316,7 +316,6 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	d := gi.NewDialog(ctx).Title(title).Ok()
 
 	tv := texteditor.NewTwinEditors(d, "twin-view")
-	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
 	lns := bytes.Split(blame, []byte("\n"))

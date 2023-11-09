@@ -77,8 +77,8 @@ func (sv *StructView) OnInit() {
 				s.Columns = 2
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
-				s.Min.X.Em(20)
-				s.Min.Y.Em(10)
+				// s.Min.X.Em(20)
+				// s.Min.Y.Em(10)
 			})
 		}
 		if w.Parent().Name() == "struct-grid" {

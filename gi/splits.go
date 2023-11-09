@@ -62,7 +62,6 @@ func (sl *Splits) OnInit() {
 func (sl *Splits) SplitsStyles() {
 	sl.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
-		// todo: set grow for each element in proportion to splits -- should work automtically!
 		s.Margin.Zero()
 		s.Padding.Zero()
 	})
