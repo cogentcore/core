@@ -681,7 +681,6 @@ func (em *EventMgr) GrabFocus(w Widget) bool {
 // for a version that does not.
 func (em *EventMgr) SetFocus(w Widget) bool {
 	got := em.SetFocusImpl(w, true) // sends event
-	fmt.Println(w, "scroll to me")
 	w.AsWidget().ScrollToMe()
 	return got
 }
@@ -943,7 +942,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	}
 	sf := em.StartFocus
 	em.StartFocus = nil
-	em.GrabFocus(sf)
+	em.SetFocus(sf)
 	return true
 }
 
