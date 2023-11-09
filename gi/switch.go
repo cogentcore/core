@@ -153,6 +153,11 @@ func (sw *Switch) SwitchStyles() {
 				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 			})
+		case "parts/stack":
+			w.Style(func(s *styles.Style) {
+				s.Display = styles.DisplayStacked
+				s.Gap.Zero()
+			})
 		case "parts/stack/icon0": // on
 			w.Style(func(s *styles.Style) {
 				if sw.Type == SwitchChip {
@@ -295,7 +300,6 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	mods, updt := parts.ConfigChildren(config)
 	ist := parts.Child(icIdx).(*Layout)
 	if mods || sw.NeedsRebuild() {
-		ist.Styles.Display = styles.DisplayStacked
 		ist.SetNChildren(3, IconType, "icon")
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(sw.IconOn)
