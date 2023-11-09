@@ -1230,7 +1230,7 @@ func (tf *TextField) AutoScroll() {
 
 	sz := len(tf.EditTxt)
 
-	if sz == 0 || tf.Alloc.Size.Total.X <= 0 {
+	if sz == 0 || tf.Alloc.Size.Content.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
@@ -1761,7 +1761,6 @@ func (tf *TextField) SizeUp(sc *Scene) {
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
 	nsz := mat32.NewVec2(w, tf.FontHeight)
-	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
 	tf.Alloc.Size.SetContentToFit(nsz, tf.Styles.Max.Dots())
 	tf.EditTxt = tmptxt
 }

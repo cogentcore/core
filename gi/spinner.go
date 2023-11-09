@@ -53,7 +53,7 @@ type Spinner struct { //goki:embedder
 
 func (sp *Spinner) CopyFieldsFrom(frm any) {
 	fr := frm.(*Spinner)
-	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sp.TextField.CopyFieldsFrom(&fr.TextField)
 	sp.Value = fr.Value
 	sp.HasMin = fr.HasMin
 	sp.Min = fr.Min
@@ -81,7 +81,7 @@ func (sp *Spinner) OnInit() {
 func (sp *Spinner) SpinnerStyles() {
 	sp.TextFieldStyles()
 	sp.Style(func(s *styles.Style) {
-		s.Min.X.Em(6)
+		s.Min.X.Em(8)
 	})
 }
 
