@@ -161,6 +161,7 @@ func (ch *Chooser) ChooserStyles() {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Align.Y = styles.AlignCenter

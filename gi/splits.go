@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -21,23 +22,27 @@ import (
 // Splits allocates a fixed proportion of space to each child, along given
 // dimension, always using only the available space given to it by its parent
 // (i.e., it will force its children, which should be layouts (typically
-// Frame's), to have their own scroll bars as necessary).  It should
-// generally be used as a main outer-level structure within a window,
+// Frame's), to have their own scroll bars as necessary).
+// Do not set the Grow factor on these children of the splits, because
+// it uses this to set the split proportions.
+// It should generally be used as a main outer-level structure within a window,
 // providing a framework for inner elements -- it allows individual child
 // elements to update independently and thus is important for speeding update
 // performance.  It uses the Widget Parts to hold the splitter widgets
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
 type Splits struct { //goki:embedder
-	WidgetBase
+	Layout
 
 	// dimension along which to split the space
 	Dim mat32.Dims
 
-	// proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
+	// proportion (0-1 normalized, enforced) of space allocated to each element.
+	// Enter 0 to collapse a given element
 	Splits []float32 `set:"-"`
 
-	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
+	// A saved version of the splits which can be restored.
+	// For dynamic collapse / expand operations
 	SavedSplits []float32 `set:"-"`
 }
 
@@ -67,6 +72,19 @@ func (sl *Splits) SplitsStyles() {
 			hl.On(events.Change, func(e events.Event) {
 				ip, _ := hl.IndexInParent()
 				sl.SetSplitAction(ip, hl.Value())
+			})
+			w.Style(func(s *styles.Style) {
+
+			})
+		} else if w.Parent() == sl.This() {
+			wb := w.AsWidget()
+			wb.Style(func(s *styles.Style) {
+				idx, ok := w.IndexInParent()
+				if ok && len(sl.Splits) > idx {
+					sp := sl.Splits[idx]
+					s.Grow.SetDim(sl.Dim, sp)
+					s.Grow.SetDim(sl.Dim.OtherDim(), 1)
+				}
 			})
 		}
 	})
@@ -305,11 +323,34 @@ func (sl *Splits) HandleSplitsEvents() {
 func (sl *Splits) ApplyStyle(sc *Scene) {
 	sl.StyMu.Lock()
 
-	sl.ApplyStyleWidget(sc)
 	sl.UpdateSplits()
+	sl.ApplyStyleWidget(sc)
 	sl.StyMu.Unlock()
 
 	sl.ConfigSplitters(sc)
+}
+
+func (sl *Splits) Position(sc *Scene) {
+	sl.UpdateSplits()
+	sl.Layout.Position(sc)
+	sl.PositionHandles(sc)
+}
+
+func (sl *Splits) PositionHandles(sc *Scene) {
+	od := sl.Dim.OtherDim()
+	csz := sl.Alloc.Size.Content.Dim(od)
+	spos := 0.5 * csz
+	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		if i == 0 {
+			return ki.Continue
+		}
+		hand := sl.Parts.Child(i - 1).(*Handle)
+		hand.Alloc.RelPos = kwb.Alloc.RelPos
+		kwb.Alloc.RelPos.SetSubDim(sl.Dim, hand.Alloc.Size.Total.Dim(sl.Dim))
+		hand.Alloc.RelPos.SetDim(od, spos)
+		// fmt.Println(hand, hand.Alloc.RelPos)
+		return ki.Continue
+	})
 }
 
 /*
@@ -383,19 +424,16 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 func (sl *Splits) Render(sc *Scene) {
 	if sl.PushBounds(sc) {
-		for i, kid := range sl.Kids {
-			wi, wb := AsWidget(kid)
-			if wb == nil {
-				continue
-			}
+		sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			sp := sl.Splits[i]
 			if sp <= 0.01 {
-				wb.SetState(true, states.Invisible)
+				kwb.SetState(true, states.Invisible)
 			} else {
-				wb.SetState(false, states.Invisible)
+				kwb.SetState(false, states.Invisible)
 			}
-			wi.Render(sc) // needs to disconnect using invisible
-		}
+			kwi.Render(sc)
+			return ki.Continue
+		})
 		sl.RenderParts(sc)
 		sl.PopBounds(sc)
 	}

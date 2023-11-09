@@ -59,8 +59,8 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 		path := w.PathFrom(sv)
 		if strings.HasPrefix(path, "label-") {
 			w.Style(func(s *styles.Style) {
-				s.Align.X = styles.AlignStart
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0)
 			})
 		}
 	})
