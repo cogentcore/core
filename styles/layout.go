@@ -79,6 +79,10 @@ const (
 	// of elements in the X axis.
 	DisplayGrid
 
+	// NoLayout means that no automatic layout will be applied to elements,
+	// which can then be managed via custom code.
+	DisplayNoLayout
+
 	// None means the item is not displayed: sets the Invisible state
 	DisplayNone
 )

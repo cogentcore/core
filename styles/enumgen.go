@@ -1023,11 +1023,11 @@ func (i *FontVariants) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _DisplayValues = []Display{0, 1, 2, 3}
+var _DisplayValues = []Display{0, 1, 2, 3, 4}
 
 // DisplayN is the highest valid value
 // for type Display, plus one.
-const DisplayN Display = 4
+const DisplayN Display = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -1036,32 +1036,37 @@ func _DisplayNoOp() {
 	_ = x[DisplayFlex-(0)]
 	_ = x[DisplayStacked-(1)]
 	_ = x[DisplayGrid-(2)]
-	_ = x[DisplayNone-(3)]
+	_ = x[DisplayNoLayout-(3)]
+	_ = x[DisplayNone-(4)]
 }
 
 var _DisplayNameToValueMap = map[string]Display{
-	`Flex`:    0,
-	`flex`:    0,
-	`Stacked`: 1,
-	`stacked`: 1,
-	`Grid`:    2,
-	`grid`:    2,
-	`None`:    3,
-	`none`:    3,
+	`Flex`:     0,
+	`flex`:     0,
+	`Stacked`:  1,
+	`stacked`:  1,
+	`Grid`:     2,
+	`grid`:     2,
+	`NoLayout`: 3,
+	`nolayout`: 3,
+	`None`:     4,
+	`none`:     4,
 }
 
 var _DisplayDescMap = map[Display]string{
 	0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`,
 	1: `Stacked is a stack of elements, with one on top that is visible`,
 	2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`,
-	3: `None means the item is not displayed: sets the Invisible state`,
+	3: `NoLayout means that no automatic layout will be applied to elements, which can then be managed via custom code.`,
+	4: `None means the item is not displayed: sets the Invisible state`,
 }
 
 var _DisplayMap = map[Display]string{
 	0: `Flex`,
 	1: `Stacked`,
 	2: `Grid`,
-	3: `None`,
+	3: `NoLayout`,
+	4: `None`,
 }
 
 // String returns the string representation
