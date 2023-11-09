@@ -151,6 +151,18 @@ func (ls *LayState) ContentRangeDim(d mat32.Dims) (cmin, cmax float32) {
 	return
 }
 
+// TotalRect returns the Pos, Size.Total geom
+// as an image.Rectangle, e.g., for bounding box
+func (ls *LayState) TotalRect() image.Rectangle {
+	return mat32.RectFromPosSizeMax(ls.Pos, ls.Size.Total)
+}
+
+// ContentRect returns the ContentPos, Size.Content geom
+// as an image.Rectangle, e.g., for bounding box
+func (ls *LayState) ContentRect() image.Rectangle {
+	return mat32.RectFromPosSizeMax(ls.ContentPos, ls.Size.Content)
+}
+
 //////////////////////////////////////////////////////////////
 //  LayImplState -- for Layout only
 
@@ -881,8 +893,8 @@ func (wb *WidgetBase) SetPosFromParent(sc *Scene) {
 // This does NOT intersect with parent content BBox, which is done in SetBBoxes.
 // Use this for elements that are dynamically positioned outside of parent BBox.
 func (wb *WidgetBase) SetBBoxesFromAllocs() {
-	wb.Alloc.BBox = mat32.RectFromPosSizeMax(wb.Alloc.Pos, wb.Alloc.Size.Total)
-	wb.Alloc.ContentBBox = mat32.RectFromPosSizeMax(wb.Alloc.ContentPos, wb.Alloc.Size.Content)
+	wb.Alloc.BBox = wb.Alloc.TotalRect()
+	wb.Alloc.ContentBBox = wb.Alloc.ContentRect()
 }
 
 func (wb *WidgetBase) SetBBoxes(sc *Scene) {
