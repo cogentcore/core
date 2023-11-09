@@ -17,184 +17,130 @@ import (
 
 func main() { gimain.Run(app) }
 
-func app() {
-	// turn on tracing in preferences, Debug
-	gi.LayoutTrace = true
-	// gi.LayoutTraceDetail = true
+var (
+	ShortText = "This is a test of layout."
 
-	frsz := [5]mat32.Vec2{
+	LongText = "This is a test of the layout logic, which is pretty complex and requires some experimenting to understand how it all works.  The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink. "
+
+	VeryLongText = LongText + LongText + LongText
+
+	FrameSizes = [5]mat32.Vec2{
 		{20, 100},
 		{80, 20},
 		{60, 80},
 		{40, 120},
 		{150, 100},
 	}
-	_ = frsz
-	// frsz := [4]mat32.Vec2{
-	// 	{100, 100},
-	// 	{100, 100},
-	// 	{100, 100},
-	// 	{100, 100},
-	// }
+)
+
+func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
+	fr := gi.NewFrame(par, nm...)
+	fr.Style(func(s *styles.Style) {
+		s.Border.Color.Set(colors.Black)
+		s.Border.Width.Set(units.Dp(2))
+	})
+	return fr
+}
+
+func HorizRow(par gi.Widget) *gi.Frame {
+	row := BoxFrame(par)
+	row.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.X
+		s.Grow.Set(1, 0)
+	})
+	return row
+}
+
+func Splits2(par gi.Widget) (*gi.Splits, *gi.Frame, *gi.Frame) {
+	sp := gi.NewSplits(par)
+	f1 := BoxFrame(sp)
+	f2 := BoxFrame(sp)
+	return sp, f1, f2
+}
+
+func WrapText(par gi.Widget, txt string) *gi.Label {
+	lbl := gi.NewLabel(par, "wrap-text").SetText(txt)
+	return lbl
+}
+
+func app() {
+	// turn on tracing in preferences, Debug
+	gi.LayoutTrace = true
+	// gi.LayoutTraceDetail = true
 
 	gi.SetAppName("layout")
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	sc := gi.NewScene("gogi-layout-test").SetTitle("GoGi Layout Test")
-
+	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	/*
-		trow := gi.NewFrame(sc, "trow")
-		trow.Style(func(s *styles.Style) {
-			s.SetMainAxis(mat32.X)
-			s.Grow.Set(1, 0)
+	doCase := 5
+
+	switch doCase {
+	case 0: // just text
+		WrapText(sc, VeryLongText)
+	case 1: // text in box -- failing to adjust to full height
+		row := HorizRow(sc)
+		lbl := WrapText(row, VeryLongText)
+		row.Style(func(s *styles.Style) {
+			// s.Align.X = styles.AlignEnd
+		})
+		lbl.Style(func(s *styles.Style) {
 			s.Align.X = styles.AlignCenter
-			s.Max.X.Em(30) // this is key for making it overflow
+		})
+		fr := BoxFrame(sc) // this takes up slack
+		sm := WrapText(fr, ShortText)
+		_ = sm
+	case 2: // text in constrained box
+		row := HorizRow(sc)
+		lbl := WrapText(row, VeryLongText)
+		row.Style(func(s *styles.Style) {
+			// s.Align.X = styles.AlignEnd
+			s.Max.X.Ch(100) // todo: this is failing to constrain max
 			s.Overflow.X = styles.OverflowAuto
-			s.MaxBorder.Color.Set(colors.Black)
-			s.MaxBorder.Width.Set(units.Dp(2))
-			s.Border = s.MaxBorder
 		})
-	*/
-
-	gi.NewLabel(sc, "title").SetText("This is a test of the layout logic, which is pretty complex and requires some experimenting to understand how it all works.  The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink").
-		SetType(gi.LabelHeadlineSmall).
-		Style(func(s *styles.Style) {
-			s.Grow.Set(1, 0) // this is needed to allow the trow aligncenter to work
-			// because otherwise this takes up the whole space.
-			s.Text.WhiteSpace = styles.WhiteSpaceNormal
-			// s.Text.Align = styles.AlignCenter
-			// s.Text.AlignV = styles.AlignCenter
-			s.Font.Family = "Times New Roman, serif"
+		lbl.Style(func(s *styles.Style) {
+			// s.Align.X = styles.AlignCenter
 		})
-
-	brow := gi.NewFrame(sc, "brow")
-	brow.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-		s.Grow.Set(1, 0)
-		// s.Align.X = styles.AlignCenter
-		// s.Overflow.X = styles.OverflowAuto
-		s.Border.Color.Set(colors.Black)
-		s.Border.Width.Set(units.Dp(2))
-	})
-
-	row1 := gi.NewLayout(sc, "row1")
-	row1.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.X
-		s.Grow.Set(1, 1)
-		s.Gap.X.Em(2)
-		// s.Margin.Set(units.Em(6))
-		s.Align.X = styles.AlignStart
-	})
-
-	for i, sz := range frsz {
-		i := i
-		sz := sz
-		nm := fmt.Sprintf("fr%v", i)
-		fr := gi.NewFrame(row1, nm)
-		fr.Style(func(s *styles.Style) {
-			s.MainAxis = mat32.X
-			s.Align.X = styles.AlignStart
-			s.Align.Y = styles.AlignCenter
-			s.Grow.Set(0, 1)
-			s.Min.X.Px(sz.X)
-			s.Min.Y.Px(sz.Y)
-			s.Padding.Set(units.Dp(2))
-			s.MaxBorder.Color.Set(colors.Black)
-			s.MaxBorder.Width.Set(units.Dp(2))
-			s.Border = s.MaxBorder
-			// s.Margin.Set(units.Dp(6))
-
-			// if i == 2 {
-			// 	fr.SetFixedWidth(units.Em(20))
-			// 	spc := row1.NewChild(gi.SpaceType, "spc").(*gi.Space)
-			// 	spc.SetFixedWidth(units.Em(4))
-			// } else {
-			// 	fr.SetProp("max-width", -1) // spacer
-			// }
+		fr := BoxFrame(sc) // this takes up slack
+		sm := WrapText(fr, ShortText)
+		_ = sm
+	case 3:
+		PlainFrames(sc, mat32.Vec2{0, 1})
+	case 4:
+		row := HorizRow(sc)
+		PlainFrames(row, mat32.Vec2{1, 0})
+	case 5:
+		sp, f1, f2 := Splits2(sc)
+		_ = sp
+		gi.NewSpace(f1).Style(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			s.Min.Y.Em(100)
+			s.Overflow.X = styles.OverflowAuto // this should absorb the size
 		})
-
-		// ic := gi.NewIcon(fr)
-		// ic.SetIcon(icons.Add)
-		// ic.Style(func(s *styles.Style) {
-		// 	s.Min.Set(units.Em(3))
-		// })
-
-		lb := gi.NewLabel(fr).SetText("This is a test")
-		lb.Style(func(s *styles.Style) {
-			s.Min.X.Ch(10) // this is critical for enabling word wrapping
+		f2.Style(func(s *styles.Style) {
+			s.Grow.Set(0, 0)
+		})
+		gi.NewSpace(f2).Style(func(s *styles.Style) {
+			s.Min.X.Ch(20)
+			s.Min.Y.Em(20)
 		})
 	}
 
-	// row2 := gi.NewLayout(mfr, "row2", gi.LayoutHoriz)
-	// row2.SetProp("text-align", "center")
-	// row2.SetProp("max-width", -1) // always stretch width
-	//
-	// row2.SetProp("vertical-align", "center")
-	// // row2.SetProp("horizontal-align", "justify")
-	// row2.SetProp("horizontal-align", "left")
-	// row2.SetProp("margin", 4.0)
-	// row2.SetProp("spacing", 6.0)
-	//
-	// for i, sz := range frsz {
-	// 	nm := fmt.Sprintf("fr%v", i)
-	// 	fr := gi.NewFrame(row2, nm, gi.LayoutHoriz)
-	// 	fr.SetProp("width", sz.X)
-	// 	fr.SetProp("height", sz.Y)
-	// 	fr.SetProp("vertical-align", "inherit")
-	// 	// fr.SetProp("horizontal-align", "inherit")
-	// 	fr.SetProp("margin", "inherit")
-	// 	// if i == 2 {
-	// 	// 	gi.NewStretch(row2, "str")
-	// 	// }
-	// }
-	//
-	// row3 := gi.NewLayout(mfr, "row3", gi.LayoutHorizFlow)
-	// // row3.SetProp("text-align", "center")
-	// row3.SetProp("max-width", -1) // always stretch width
-	//
-	// // row3.SetProp("vertical-align", "bottom")
-	// // row3.SetProp("horizontal-align", "justify")
-	// // row3.SetProp("horizontal-align", "left")
-	// row3.SetProp("margin", 4.0)
-	// row3.SetProp("spacing", 6.0)
-	// row3.SetProp("width", units.Pt(200)) // needs default to set
-	//
-	// for i, sz := range frsz {
-	// 	nm := fmt.Sprintf("fr%v", i)
-	// 	fr := gi.NewFrame(row3, nm, gi.LayoutHoriz)
-	// 	fr.SetProp("width", 5*sz.X)
-	// 	fr.SetProp("height", sz.Y)
-	// 	fr.SetProp("min-height", sz.Y)
-	// 	fr.SetProp("min-width", 5*sz.X)
-	// 	// fr.SetProp("vertical-align", "inherit")
-	// 	// fr.SetProp("horizontal-align", "inherit")
-	// 	fr.SetProp("margin", "inherit")
-	// 	// fr.SetProp("max-width", -1) // spacer
-	// }
-	//
-	// row4 := gi.NewLayout(mfr, "row4", gi.LayoutGrid)
-	// row4.SetProp("columns", 2)
-	// // row4.SetProp("max-width", -1)
-	//
-	// row4.SetProp("vertical-align", "top")
-	// // row4.SetProp("horizontal-align", "justify")
-	// row4.SetProp("horizontal-align", "left")
-	// row4.SetProp("margin", 6.0)
-	//
-	// for i, sz := range frsz {
-	// 	nm := fmt.Sprintf("fr%v", i)
-	// 	fr := gi.NewFrame(row4, nm, gi.LayoutHoriz)
-	// 	fr.SetProp("width", sz.X)
-	// 	fr.SetProp("height", sz.Y)
-	// 	// fr.SetProp("min-height", sz.Y)
-	// 	fr.SetProp("vertical-align", "inherit")
-	// 	fr.SetProp("horizontal-align", "inherit")
-	// 	fr.SetProp("margin", 2.0)
-	// 	// fr.SetProp("max-width", -1) // spacer
-	// }
-	//
-
 	gi.NewWindow(sc).Run().Wait()
+}
+
+func PlainFrames(par gi.Widget, grow mat32.Vec2) {
+	for i, sz := range FrameSizes {
+		i := i
+		sz := sz
+		nm := fmt.Sprintf("fr%v", i)
+		fr := BoxFrame(par, nm)
+		fr.Style(func(s *styles.Style) {
+			s.Min.X.Px(sz.X)
+			s.Min.Y.Px(sz.Y)
+			s.Grow = grow
+		})
+		gi.NewSpace(fr) // empty frames don't render
+	}
 }

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
@@ -61,20 +60,20 @@ func app() {
 		s.MainAxis = mat32.Y
 		// s.Border.Color.Set(colors.Black)
 		// s.Border.Width.Set(units.Dp(2))
-		s.BackgroundColor.SetSolid(colors.Transparent)
+		s.Grow.Set(1, 0)
 	})
 
 	tvfr.Style(func(s *styles.Style) {
 		s.MainAxis = mat32.Y
 		// s.Border.Color.Set(colors.Black)
 		// s.Border.Width.Set(units.Dp(2))
-		s.BackgroundColor.SetSolid(colors.Transparent)
+		s.Overflow.Y = styles.OverflowAuto
 	})
 
 	tv := giv.NewTreeView(tvfr, "tv")
 	tv.RootView = tv
 
-	depth := 1 // 1 = small tree for testing
+	depth := 3 // 1 = small tree for testing
 	// depth := 10 // big tree
 	MakeTree(tv, 0, depth, 5)
 

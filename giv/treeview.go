@@ -568,7 +568,7 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 func (tv *TreeView) ScenePos(sc *gi.Scene) {
 	tv.WidgetBase.ScenePos(sc)
 	tv.ScenePosChildren(sc)
-	tv.Alloc.Size.Total = tv.WidgetSize
+	// tv.Alloc.Size.Total = tv.WidgetSize
 }
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
