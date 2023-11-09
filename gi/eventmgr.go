@@ -942,21 +942,9 @@ func (em *EventMgr) ActivateStartFocus() bool {
 		return false
 	}
 	sf := em.StartFocus
-	fmt.Println("start foc:", sf)
 	em.StartFocus = nil
 	em.GrabFocus(sf)
 	return true
-}
-
-// InitialFocus establishes the initial focus for the window if no focus
-// is set -- uses ActivateStartFocus or FocusNext as backup.
-func (em *EventMgr) InitialFocus() {
-	fmt.Println("init foc")
-	if em.Focus == nil {
-		if !em.ActivateStartFocus() {
-			em.FocusNext()
-		}
-	}
 }
 
 // MangerKeyChordEvents handles lower-priority manager-level key events.

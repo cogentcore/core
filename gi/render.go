@@ -415,6 +415,12 @@ func (sc *Scene) DoUpdate() bool {
 	default:
 		return false
 	}
+
+	if sc.ShowLayoutIter == 3 {
+		sc.ShowLayoutIter++
+		sc.EventMgr.ActivateStartFocus()
+	}
+
 	return true
 }
 

@@ -210,9 +210,6 @@ type Stage interface {
 	// HandleEvent handles given event within this stage
 	HandleEvent(evi events.Event)
 
-	// InitialFocus sets initial focus on widget when scene is first shown
-	InitialFocus()
-
 	// DoUpdate calls DoUpdate on the Scene,
 	// performing any Widget-level updates and rendering.
 	// returns stageMods = true if any Stages have been modified
@@ -397,7 +394,6 @@ func (st *StageBase) Run() Stage {
 	if st.Scene == nil {
 		slog.Error("stage has nil scene")
 	}
-	// st.This.InitialFocus() // not working
 	switch st.Type {
 	case WindowStage:
 		return st.This.AsMain().RunWindow()
@@ -415,13 +411,6 @@ func (st *StageBase) Run() Stage {
 func (st *StageBase) Wait() Stage {
 	Wait()
 	return st.This
-}
-
-func (st *StageBase) InitialFocus() {
-	if st.Scene == nil {
-		return
-	}
-	st.Scene.EventMgr.InitialFocus()
 }
 
 // DoUpdate for base just calls DoUpdate on scene

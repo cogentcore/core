@@ -192,8 +192,6 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	sc.FitInWindow(msc.Geom) // does resize
 	sc.ShowLayoutIter = 0
 
-	sc.EventMgr.InitialFocus()
-
 	if st.Timeout > 0 {
 		time.AfterFunc(st.Timeout, func() {
 			if st.Main == nil {

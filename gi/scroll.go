@@ -273,7 +273,8 @@ func (wb *WidgetBase) ScrollToMe() bool {
 // ScrollToItem scrolls the layout to ensure that given item is in view.
 // Returns true if scrolling was needed
 func (ly *Layout) ScrollToItem(wi Widget) bool {
-	return ly.ScrollToBox(wi.AsWidget().Alloc.BBox)
+	// note: critical to NOT use BBox b/c it is zero for invisible items!
+	return ly.ScrollToBox(wi.AsWidget().Alloc.TotalRect())
 }
 
 // AutoScrollDim auto-scrolls along one dimension
@@ -318,7 +319,7 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 		return false
 	}
 	ly.BBoxMu.RLock()
-	wbb := ly.Alloc.BBox
+	wbb := ly.Alloc.ContentBBox
 	ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
@@ -341,7 +342,6 @@ func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
 	if !ly.HasScroll[d] {
 		return false
 	}
-	fmt.Println(ly, "stb")
 	sb := ly.Scrolls[d]
 	tmin, tmax := float32(tmini), float32(tmaxi)
 	cmin, cmax := ly.Alloc.ContentRangeDim(d)
@@ -377,6 +377,9 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 		did = ly.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
 	} else if ly.HasScroll[mat32.X] {
 		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
+	}
+	if did {
+		ly.SetNeedsLayout()
 	}
 	return did
 }
