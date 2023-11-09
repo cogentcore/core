@@ -467,6 +467,7 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 
 // SizeUpCellsStacked
 func (ly *Layout) SizeUpCellsStacked(sc *Scene) {
+	ly.LayImpl.InitSizes()
 	_, kwb := ly.StackTopWidget()
 	if kwb == nil {
 		return
@@ -474,8 +475,12 @@ func (ly *Layout) SizeUpCellsStacked(sc *Scene) {
 	ly.LayImpl.Sizes[0][0].Size = kwb.Alloc.Size.Total
 	ly.LayImpl.Sizes[1][0].Size = kwb.Alloc.Size.Total
 	ly.LayImpl.Sizes[0][0].Grow = kwb.Styles.Grow
-	ly.LayImpl.Sizes[0][0].Grow = kwb.Styles.Grow
+	ly.LayImpl.Sizes[1][0].Grow = kwb.Styles.Grow
 	ly.Alloc.Size.SetContentToFit(ly.LayImpl.Sizes[0][0].Size, ly.Styles.Max.Dots())
+	ly.LayImpl.KidsSize = ly.Alloc.Size.Content
+	if LayoutTrace {
+		fmt.Println(ly, "SizeUp Stacked Content Size:", ly.Alloc.Size.Content)
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -695,7 +700,7 @@ func (ly *Layout) SizeDownGrowWrap(sc *Scene, iter int, diff mat32.Vec2) bool {
 }
 
 func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, diff mat32.Vec2) bool {
-	// todo
+	// note: not much we can do here
 	return false
 }
 
@@ -704,6 +709,7 @@ func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, diff mat32.Vec2) bool
 func (ly *Layout) SizeDownAlloc(sc *Scene, iter int) {
 	if ly.Styles.Display == styles.DisplayStacked {
 		ly.SizeDownAllocStacked(sc, iter)
+		return
 	}
 	// todo: wrap needs special case
 	ly.SizeDownAllocCells(sc, iter)
@@ -726,6 +732,12 @@ func (ly *Layout) SizeDownAllocCells(sc *Scene, iter int) {
 }
 
 func (ly *Layout) SizeDownAllocStacked(sc *Scene, iter int) {
+	// note: allocate everyone in case they are flipped to top
+	// need a new layout if size is actually different
+	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwb.Alloc.Size.Alloc = ly.Alloc.Size.Content
+		return ki.Continue
+	})
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -850,6 +862,10 @@ func (ly *Layout) PositionWrap(sc *Scene) {
 }
 
 func (ly *Layout) PositionStacked(sc *Scene) {
+	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwb.Alloc.RelPos.SetZero()
+		return ki.Continue
+	})
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -945,208 +961,6 @@ func (ly *Layout) ScenePos(sc *Scene) {
 }
 
 /*
-// LayoutSharedDim implements calculations to layout for the shared dimension
-// (i.e., Vertical for Horizontal layout). Returns pos and size.
-func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc styles.SideFloats, al styles.Align) (pos, size float32) {
-	usePref := true
-	targ := pref
-	extra := avail - targ
-	if extra < -0.1 { // not fitting in pref, go with min
-		usePref = false
-		targ = need
-		extra = avail - targ
-	}
-	extra = mat32.Max(extra, 0.0) // no negatives
-
-	stretchNeed := false // stretch relative to need
-	stretchMax := false  // only stretch Max = neg
-
-	if usePref && extra > 0.0 { // have some stretch extra
-		if max < 0.0 {
-			stretchMax = true // only stretch those marked as infinitely stretchy
-		}
-	} else if extra > 0.0 { // extra relative to Need
-		stretchNeed = true // stretch relative to need
-	}
-
-	if ly.Lay == LayoutHoriz || ly.Lay == LayoutHorizFlow {
-		pos = spc.Pos().Dim(mat32.Y)
-	} else {
-		pos = spc.Pos().Dim(mat32.X)
-	}
-
-	size = need
-	if usePref {
-		size = pref
-	}
-	if stretchMax || stretchNeed {
-		size += extra
-	} else {
-		if styles.IsAlignMiddle(al) {
-			pos += 0.5 * extra
-		} else if styles.IsAlignEnd(al) {
-			pos += extra
-		} else if al == styles.AlignJustify { // treat justify as stretch
-			size += extra
-		}
-	}
-
-	// if LayoutTrace {
-	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, pos: %v size: %v spc: %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, pos, size, spc)
-	// }
-
-	return
-}
-
-// LayoutSharedDim lays out items along a shared dimension, where all elements
-// share the same space, e.g., Horiz for a Vert layout, and vice-versa.
-func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
-	spc := ly.BoxSpace()
-	avail := ly.Alloc.Size.Total.Dim(dim) - spc.Size().Dim(dim)
-	for i, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-		if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) && i != ly.StackTop {
-			continue
-		}
-		ni.StyMu.RLock()
-		al := ni.Styles.AlignDim(dim)
-		ni.StyMu.RUnlock()
-		pref := ni.LayState.Size.Pref.Dim(dim)
-		need := ni.LayState.Size.Need.Dim(dim)
-		max := ni.LayState.Size.Max.Dim(dim)
-		pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, spc, al)
-		ni.Alloc.Size.Total.SetDim(dim, size)
-		ni.Alloc.PosRel.SetDim(dim, pos)
-	}
-}
-
-// LayoutAlongDim lays out all children along given dim -- only affects that dim --
-// e.g., use LayoutSharedDim for other dim.
-func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
-	sz := len(ly.Kids)
-	if sz == 0 {
-		return
-	}
-
-	elspc := float32(sz-1) * ly.Styles.Gap.Dots
-	al := ly.Styles.AlignDim(dim)
-	spc := ly.BoxSpace()
-	exspc := spc.Size().Dim(dim) + elspc
-	avail := ly.Alloc.Size.Total.Dim(dim) - exspc
-	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
-	need := ly.LayState.Size.Need.Dim(dim) - exspc
-
-	targ := pref
-	usePref := true
-	extra := avail - targ
-	if extra < -0.1 { // not fitting in pref, go with need
-		usePref = false
-		targ = need
-		extra = avail - targ
-	}
-	extra = mat32.Max(extra, 0.0) // no negatives
-
-	nstretch := 0
-	stretchTot := float32(0.0)
-	stretchNeed := false        // stretch relative to need
-	stretchMax := false         // only stretch Max = neg
-	addSpace := false           // apply extra toward spacing -- for justify
-	if usePref && extra > 0.0 { // have some stretch extra
-		for _, c := range ly.Kids {
-			if c == nil {
-				continue
-			}
-			ni := c.(Widget).AsWidget()
-			if ni == nil {
-				continue
-			}
-			if ni.LayState.Size.HasMaxStretch(dim) { // negative = stretch
-				nstretch++
-				stretchTot += ni.LayState.Size.Pref.Dim(dim)
-			}
-		}
-		if nstretch > 0 {
-			stretchMax = true // only stretch those marked as infinitely stretchy
-		}
-	} else if extra > 0.0 { // extra relative to Need
-		for _, c := range ly.Kids {
-			if c == nil {
-				continue
-			}
-			ni := c.(Widget).AsWidget()
-			if ni == nil {
-				continue
-			}
-			if ni.LayState.Size.HasMaxStretch(dim) || ni.LayState.Size.CanStretchNeed(dim) {
-				nstretch++
-				stretchTot += ni.LayState.Size.Pref.Dim(dim)
-			}
-		}
-		if nstretch > 0 {
-			stretchNeed = true // stretch relative to need
-		}
-	}
-
-	extraSpace := float32(0.0)
-	if sz > 1 && extra > 0.0 && al == styles.AlignJustify && !stretchNeed && !stretchMax {
-		addSpace = true
-		// if neither, then just distribute as spacing for justify
-		extraSpace = extra / float32(sz-1)
-	}
-
-	// now arrange everyone
-	pos := spc.Pos().Dim(dim)
-
-	// todo: need a direction setting too
-	if styles.IsAlignEnd(al) && !stretchNeed && !stretchMax {
-		pos += extra
-	}
-
-	if LayoutTrace {
-		fmt.Printf("Layout: %v Along dim %v, avail: %v elspc: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Path(), dim, avail, elspc, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
-	}
-
-	for i, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-		size := ni.LayState.Size.Need.Dim(dim)
-		if usePref {
-			size = ni.LayState.Size.Pref.Dim(dim)
-		}
-		if stretchMax { // negative = stretch
-			if ni.LayState.Size.HasMaxStretch(dim) { // in proportion to pref
-				size += extra * (ni.LayState.Size.Pref.Dim(dim) / stretchTot)
-			}
-		} else if stretchNeed {
-			if ni.LayState.Size.HasMaxStretch(dim) || ni.LayState.Size.CanStretchNeed(dim) {
-				size += extra * (ni.LayState.Size.Pref.Dim(dim) / stretchTot)
-			}
-		} else if addSpace { // implies align justify
-			if i > 0 {
-				pos += extraSpace
-			}
-		}
-
-		ni.Alloc.Size.Total.SetDim(dim, size)
-		ni.Alloc.PosRel.SetDim(dim, pos)
-		if LayoutTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
-		}
-		pos += size + ly.Styles.Gap.Dots
-	}
-}
-
 //////////////////////////////////////////////////////
 //  Wrap
 
@@ -1243,193 +1057,6 @@ func GatherSizesFlow(ly *Layout, iter int) {
 	}
 }
 
-// todo: grid does not process spans at all yet -- assumes = 1
-
-// GatherSizesGrid is size first pass: gather the size information from the
-// children, grid version
-func GatherSizesGrid(ly *Layout) {
-	if len(ly.Kids) == 0 {
-		return
-	}
-
-	cols := ly.Styles.Columns
-	rows := 0
-
-	sz := len(ly.Kids)
-	// collect overall size
-	for _, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-		ni.StyMu.RLock()
-		st := &ni.Styles
-		ni.StyMu.RUnlock()
-		if st.Col > 0 {
-			cols = max(cols, st.Col+st.ColSpan)
-		}
-		if st.Row > 0 {
-			rows = max(rows, st.Row+st.RowSpan)
-		}
-	}
-
-	if cols == 0 {
-		cols = int(mat32.Sqrt(float32(sz))) // whatever -- not well defined
-	}
-	if rows == 0 {
-		rows = sz / cols
-	}
-	for rows*cols < sz { // not defined to have multiple items per cell -- make room for everyone
-		rows++
-	}
-
-	ly.GridSize.X = cols
-	ly.GridSize.Y = rows
-
-	if len(ly.GridData[Row]) != rows {
-		ly.GridData[Row] = make([]GridData, rows)
-	}
-	if len(ly.GridData[Col]) != cols {
-		ly.GridData[Col] = make([]GridData, cols)
-	}
-
-	for i := range ly.GridData[Row] {
-		gd := &ly.GridData[Row][i]
-		gd.SizeNeed = 0
-		gd.SizePref = 0
-	}
-	for i := range ly.GridData[Col] {
-		gd := &ly.GridData[Col][i]
-		gd.SizeNeed = 0
-		gd.SizePref = 0
-	}
-
-	col := 0
-	row := 0
-	for _, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-		ni.LayState.UpdateSizes()
-		ni.StyMu.RLock()
-		st := &ni.Styles
-		ni.StyMu.RUnlock()
-		if st.Col > 0 {
-			col = st.Col
-		}
-		if st.Row > 0 {
-			row = st.Row
-		}
-
-		rgd := &(ly.GridData[Row][row])
-		cgd := &(ly.GridData[Col][col])
-
-		// todo: need to deal with span in sums..
-		mat32.SetMax(&(rgd.SizeNeed), ni.LayState.Size.Need.Y)
-		mat32.SetMax(&(rgd.SizePref), ni.LayState.Size.Pref.Y)
-		mat32.SetMax(&(cgd.SizeNeed), ni.LayState.Size.Need.X)
-		mat32.SetMax(&(cgd.SizePref), ni.LayState.Size.Pref.X)
-
-		// for max: any -1 stretch dominates, else accumulate any max
-		if rgd.SizeMax >= 0 {
-			if ni.LayState.Size.Max.Y < 0 { // stretch
-				rgd.SizeMax = -1
-			} else {
-				mat32.SetMax(&(rgd.SizeMax), ni.LayState.Size.Max.Y)
-			}
-		}
-		if cgd.SizeMax >= 0 {
-			if ni.LayState.Size.Max.Y < 0 { // stretch
-				cgd.SizeMax = -1
-			} else {
-				mat32.SetMax(&(cgd.SizeMax), ni.LayState.Size.Max.X)
-			}
-		}
-
-		col++
-		if col >= cols { // todo: really only works if NO items specify row,col or ALL do..
-			col = 0
-			row++
-			if row >= rows { // wrap-around.. no other good option
-				row = 0
-			}
-		}
-	}
-
-	prefSizing := false
-	sc := ly.Sc
-	if sc != nil && sc.Is(ScPrefSizing) {
-		prefSizing = ly.Styles.Overflow == styles.OverflowScroll // special case
-	}
-
-	// if there aren't existing prefs, we need to compute size
-	if prefSizing || ly.LayState.Size.Pref.X == 0 || ly.LayState.Size.Pref.Y == 0 {
-		sbw := ly.Styles.ScrollBarWidth.Dots
-		maxRow := len(ly.GridData[Row])
-		maxCol := len(ly.GridData[Col])
-		if prefSizing {
-			maxRow = min(LayoutPrefMaxRows, maxRow)
-			maxCol = min(LayoutPrefMaxCols, maxCol)
-		}
-
-		// Y = sum across rows which have max's
-		var sumPref, sumNeed mat32.Vec2
-		for i := 0; i < maxRow; i++ {
-			gd := ly.GridData[Row][i]
-			sumNeed.SetAddDim(mat32.Y, gd.SizeNeed)
-			sumPref.SetAddDim(mat32.Y, gd.SizePref)
-		}
-		// X = sum across cols which have max's
-		for i := 0; i < maxCol; i++ {
-			gd := ly.GridData[Col][i]
-			sumNeed.SetAddDim(mat32.X, gd.SizeNeed)
-			sumPref.SetAddDim(mat32.X, gd.SizePref)
-		}
-
-		if prefSizing {
-			sumNeed.X += sbw
-			sumNeed.Y += sbw
-			sumPref.X += sbw
-			sumPref.Y += sbw
-		}
-
-		if ly.LayState.Size.Pref.X == 0 || prefSizing {
-			ly.LayState.Size.Need.X = mat32.Max(ly.LayState.Size.Need.X, sumNeed.X)
-			ly.LayState.Size.Pref.X = mat32.Max(ly.LayState.Size.Pref.X, sumPref.X)
-		} else { // use target size from style otherwise
-			ly.LayState.Size.Need.X = ly.LayState.Size.Pref.X
-		}
-		if ly.LayState.Size.Pref.Y == 0 || prefSizing {
-			ly.LayState.Size.Need.Y = mat32.Max(ly.LayState.Size.Need.Y, sumNeed.Y)
-			ly.LayState.Size.Pref.Y = mat32.Max(ly.LayState.Size.Pref.Y, sumPref.Y)
-		} else { // use target size from style otherwise
-			ly.LayState.Size.Need.Y = ly.LayState.Size.Pref.Y
-		}
-	} else { // neither are zero so we use those directly
-		ly.LayState.Size.Need = ly.LayState.Size.Pref
-	}
-
-	spc := ly.BoxSpace()
-	ly.LayState.Size.Need.SetAdd(spc.Size())
-	ly.LayState.Size.Pref.SetAdd(spc.Size())
-
-	ly.LayState.Size.Need.X += float32(cols-1) * ly.Styles.Gap.Dots
-	ly.LayState.Size.Pref.X += float32(cols-1) * ly.Styles.Gap.Dots
-	ly.LayState.Size.Need.Y += float32(rows-1) * ly.Styles.Gap.Dots
-	ly.LayState.Size.Pref.Y += float32(rows-1) * ly.Styles.Gap.Dots
-
-	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-	if LayoutTrace {
-		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref)
-	}
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //     Layout children
@@ -1516,217 +1143,6 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	// 	return false
 	// }
 	return true
-}
-
-// LayoutGridDim lays out grid data along each dimension (row, Y; col, X),
-// same as LayoutAlongDim.  For cols, X has width prefs of each -- turn that
-// into an actual allocated width for each column, and likewise for rows.
-func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
-	gds := ly.GridData[rowcol]
-	sz := len(gds)
-	if sz == 0 {
-		return
-	}
-	elspc := float32(sz-1) * ly.Styles.Gap.Dots
-	al := ly.Styles.AlignDim(dim)
-	spc := ly.BoxSpace()
-	exspc := spc.Size().Dim(dim) + elspc
-	avail := ly.Alloc.Size.Total.Dim(dim) - exspc
-	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
-	need := ly.LayState.Size.Need.Dim(dim) - exspc
-
-	targ := pref
-	usePref := true
-	extra := avail - targ
-	if extra < -0.1 { // not fitting in pref, go with need
-		usePref = false
-		targ = need
-		extra = avail - targ
-	}
-	extra = mat32.Max(extra, 0.0) // no negatives
-
-	nstretch := 0
-	stretchTot := float32(0.0)
-	stretchNeed := false        // stretch relative to need
-	stretchMax := false         // only stretch Max = neg
-	addSpace := false           // apply extra toward spacing -- for justify
-	if usePref && extra > 0.0 { // have some stretch extra
-		for _, gd := range gds {
-			if gd.SizeMax < 0 { // stretch
-				nstretch++
-				stretchTot += gd.SizePref
-			}
-		}
-		if nstretch > 0 {
-			stretchMax = true // only stretch those marked as infinitely stretchy
-		}
-	} else if extra > 0.0 { // extra relative to Need
-		for _, gd := range gds {
-			if gd.SizeMax < 0 || gd.SizePref > gd.SizeNeed {
-				nstretch++
-				stretchTot += gd.SizePref
-			}
-		}
-		if nstretch > 0 {
-			stretchNeed = true // stretch relative to need
-		}
-	}
-
-	extraSpace := float32(0.0)
-	if sz > 1 && extra > 0.0 && al == styles.AlignJustify && !stretchNeed && !stretchMax {
-		addSpace = true
-		// if neither, then just distribute as spacing for justify
-		extraSpace = extra / float32(sz-1)
-	}
-
-	// now arrange everyone
-	pos := spc.Pos().Dim(dim)
-
-	// todo: need a direction setting too
-	if styles.IsAlignEnd(al) && !stretchNeed && !stretchMax {
-		pos += extra
-	}
-
-	if LayoutTrace {
-		fmt.Printf("Layout Grid Dim: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Path(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
-	}
-
-	for i := range gds {
-		gd := &gds[i]
-		size := gd.SizeNeed
-		if usePref {
-			size = gd.SizePref
-		}
-		if stretchMax { // negative = stretch
-			if gd.SizeMax < 0 { // in proportion to pref
-				size += extra * (gd.SizePref / stretchTot)
-			}
-		} else if stretchNeed {
-			if gd.SizeMax < 0 || gd.SizePref > gd.SizeNeed {
-				size += extra * (gd.SizePref / stretchTot)
-			}
-		} else if addSpace { // implies align justify
-			if i > 0 {
-				pos += extraSpace
-			}
-		}
-
-		gd.AllocSize = size
-		gd.AllocPosRel = pos
-		if LayoutTrace {
-			fmt.Printf("Grid %v pos: %v, size: %v\n", rowcol, pos, size)
-		}
-		pos += size + ly.Styles.Gap.Dots
-	}
-}
-
-// LayoutGridLay manages overall grid layout of children
-func LayoutGridLay(ly *Layout) {
-	sz := len(ly.Kids)
-	if sz == 0 {
-		return
-	}
-
-	LayoutGridDim(ly, Row, mat32.Y)
-	LayoutGridDim(ly, Col, mat32.X)
-
-	col := 0
-	row := 0
-	cols := ly.GridSize.X
-	rows := ly.GridSize.Y
-
-	if cols*rows != ly.NumChildren() {
-		GatherSizesGrid(ly)
-	}
-
-	for _, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-
-		ni.StyMu.RLock()
-		st := &ni.Styles
-		ni.StyMu.RUnlock()
-		if st.Col > 0 {
-			col = st.Col
-		}
-		if st.Row > 0 {
-			row = st.Row
-		}
-
-		{ // col, X dim
-			dim := mat32.X
-			gd := ly.GridData[Col][col]
-			avail := gd.AllocSize
-			al := st.AlignDim(dim)
-			pref := ni.LayState.Size.Pref.Dim(dim)
-			need := ni.LayState.Size.Need.Dim(dim)
-			max := ni.LayState.Size.Max.Dim(dim)
-			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, styles.SideFloats{}, al)
-			ni.Alloc.Size.Total.SetDim(dim, size)
-			ni.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
-
-		}
-		{ // row, Y dim
-			dim := mat32.Y
-			gd := ly.GridData[Row][row]
-			avail := gd.AllocSize
-			al := st.AlignDim(dim)
-			pref := ni.LayState.Size.Pref.Dim(dim)
-			need := ni.LayState.Size.Need.Dim(dim)
-			max := ni.LayState.Size.Max.Dim(dim)
-			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, styles.SideFloats{}, al)
-			ni.Alloc.Size.Total.SetDim(dim, size)
-			ni.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
-		}
-
-		if LayoutTrace {
-			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.Path(), col, row, ni.Alloc.PosRel, ni.Alloc.Size.Total)
-		}
-
-		col++
-		if col >= cols { // todo: really only works if NO items specify row,col or ALL do..
-			col = 0
-			row++
-			if row >= rows { // wrap-around.. no other good option
-				row = 0
-			}
-		}
-	}
-}
-
-// FinalizeLayout is final pass through children to finalize the layout,
-// computing summary size stats
-func (ly *Layout) FinalizeLayout() {
-	ly.ChildSize = mat32.Vec2Zero
-	if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) {
-		sn, err := ly.ChildTry(ly.StackTop)
-		if err != nil {
-			return
-		}
-		ni := sn.(Widget).AsWidget()
-		if ni == nil {
-			return
-		}
-		ly.ChildSize.SetMax(ni.Alloc.PosRel.Add(ni.Alloc.Size.Total))
-		ni.Alloc.Size.TotalOrig = ni.Alloc.Size.Total
-		return
-	}
-	for _, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-		ly.ChildSize.SetMax(ni.Alloc.PosRel.Add(ni.Alloc.Size.Total))
-		ni.Alloc.Size.TotalOrig = ni.Alloc.Size.Total
-	}
 }
 
 */

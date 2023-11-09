@@ -202,6 +202,11 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 			kwi.SetState(i != ly.StackTop, states.Invisible)
 			return ki.Continue
 		})
+		kwi, _ := ly.StackTopWidget()
+		if kwi != nil {
+			kwi.Render(sc)
+		}
+		return
 	}
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.Render(sc)
