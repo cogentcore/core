@@ -364,6 +364,7 @@ func (vv *StructValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
@@ -449,13 +450,10 @@ func (vv *StructInlineValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.CreateTempIfNotPtr() // essential to always have this set
 	sv := vv.Widget.(*StructViewInline)
 	cst := vv.Value.Interface()
-	if sv.Struct != cst {
-		sv.SetStruct(cst)
-	} else {
-		sv.UpdateFields()
-	}
+	sv.SetStruct(cst)
 }
 
 func (vv *StructInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {

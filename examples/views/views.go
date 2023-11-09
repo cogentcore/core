@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/icons"
+	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
@@ -88,6 +89,8 @@ type Struct struct { //gti:add
 	// a value
 	Val float32
 
+	Vec mat32.Vec2
+
 	Things []*TableStruct
 
 	Stuff []float32
@@ -117,6 +120,8 @@ func app() {
 	stru.Name = "happy"
 	stru.Cond = 2
 	stru.Val = 3.1415
+	stru.Vec.Set(5, 7)
+	stru.Inline.Val = 3
 	stru.Cond2.IntField = 22
 	stru.Cond2.FloatField = 44.4
 	stru.Cond2.StrField = "fi"
@@ -183,8 +188,7 @@ func app() {
 	// split := gi.NewSplits(sc, "split")
 	// split.Dim = mat32.X
 
-	// strv := giv.NewStructView(split, "strv")
-	// strv.Sc = sc
+	// strv := giv.NewStructView(sc, "strv")
 	// strv.SetStruct(&stru)
 
 	// mv := giv.NewMapView(split, "mv")
@@ -197,7 +201,7 @@ func app() {
 	tv := giv.NewTableView(sc, "tv")
 	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
-
+	//
 	// split.SetSplits(.3, .2, .2, .3)
 	// split.SetSplits(.5, .5)
 

@@ -103,6 +103,7 @@ func (tv *TableView) TableViewInit() {
 				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 				s.Max.X.Zero()
+				s.Grow.Set(0, 0)
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			})
 		case "frame/grid-lay": // grid layout
@@ -146,6 +147,8 @@ func (tv *TableView) TableViewInit() {
 					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.AlignEnd
+					s.Min.Y.Em(1)
+					s.Grow.Set(0, 0)
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
@@ -400,15 +403,12 @@ func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc 
 	}
 	w.Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-		// todo:
-		// gd := sg.GridData[gi.Col]
-		// if gd == nil {
-		// 	return
-		// }
-		// if len(gd) > idx {
-		// 	wd := gd[idx].AllocSize - spc
-		// 	s.Min.X.Dot(wd)
-		// }
+		if len(*sg.Children()) > idx {
+			_, cwb := gi.AsWidget(sg.Child(idx))
+			wd := cwb.Alloc.Size.Total.X - 16 // todo: don't know our spacing at this point
+			s.Min.X.Dot(wd)
+			s.Max.X.Dot(wd)
+		}
 	})
 }
 
@@ -444,7 +444,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 		fli := fli
 		field := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
-		hdr.SetType(gi.ButtonAction)
+		hdr.SetType(gi.ButtonMenu)
 		hdr.SetText(field.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {

@@ -114,7 +114,7 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		return false
 	}
 	config := ki.Config{}
-	// always start fresh!
+	mv.DeleteChildren(ki.DestroyKids)
 	mv.Keys = make([]Value, 0)
 	mv.Values = make([]Value, 0)
 
@@ -164,13 +164,23 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 			mv.SendChange()
 			mv.Update()
 		})
-		keyw := mv.Child(i * 2).(gi.Widget)
-		w := mv.Child((i * 2) + 1).(gi.Widget)
-		kv.ConfigWidget(keyw, sc)
-		vv.ConfigWidget(w, sc)
+		// note: values are always new, but widgets persist!
+		w, wb := gi.AsWidget(mv.Child((i * 2) + 1))
+		kw, kwb := gi.AsWidget(mv.Child(i * 2))
+		if wb.Class == "" {
+			vv.ConfigWidget(w, sc)
+			kv.ConfigWidget(kw, sc)
+		} else {
+			wb.Class = "configed"
+			kwb.Class = "configed"
+			vvb.Widget = w
+			kvb.Widget = kw
+			vv.UpdateWidget()
+			kv.UpdateWidget()
+		}
 		if mv.IsReadOnly() {
-			w.AsWidget().SetReadOnly(true)
-			keyw.AsWidget().SetReadOnly(true)
+			wb.SetReadOnly(true)
+			kwb.SetReadOnly(true)
 		}
 	}
 	adack, err := mv.Children().ElemFromEndTry(1)

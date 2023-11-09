@@ -293,7 +293,7 @@ func (tb *TopAppBar) AddDefaultOverflowMenu() {
 
 // DefaultOverflowMenu adds standard default overflow menu items.
 // Typically you will want to add additional items and then call this function.
-func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) {
+func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) { //gti:add
 	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
 			TheViewIFace.PrefsView(&Prefs)
