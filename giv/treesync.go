@@ -131,7 +131,7 @@ func (tv *TreeView) Label() string {
 		}
 		return tv.SyncNode.Name()
 	}
-	return tv.Name()
+	return tv.Text
 }
 
 // UpdateReadOnly updates the ReadOnly state based on SyncNode.

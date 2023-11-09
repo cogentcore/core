@@ -2214,7 +2214,8 @@ var TreeViewType = gti.AddType(&gti.Type{
 	Doc:        "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SyncNode", &gti.Field{Name: "SyncNode", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "If non-Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"SyncNode", &gti.Field{Name: "SyncNode", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "If non-nil, the Ki Node that this widget is viewing in the tree (the source)", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [ki.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil.", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon, displayed to the the left of the text label", Directives: gti.Directives{}, Tag: ""}},
 		{"Indent", &gti.Field{Name: "Indent", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "amount to indent children relative to this node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"OpenDepth", &gti.Field{Name: "OpenDepth", Type: "int", LocalType: "int", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
@@ -2286,6 +2287,15 @@ func (t *TreeView) KiType() *gti.Type {
 // New returns a new [*TreeView] value
 func (t *TreeView) New() ki.Ki {
 	return &TreeView{}
+}
+
+// SetText sets the [TreeView.Text]:
+// The text to display for the tree view item label, which automatically
+// defaults to the [ki.Node.Name] of the tree view node. It has no effect
+// if [TreeView.SyncNode] is non-nil.
+func (t *TreeView) SetText(v string) *TreeView {
+	t.Text = v
+	return t
 }
 
 // SetIcon sets the [TreeView.Icon]:
