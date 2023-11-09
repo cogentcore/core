@@ -91,8 +91,9 @@ func (ts *Tabs) TabsStyles() {
 			})
 		case "frame":
 			frame := w.(*Frame)
-			frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
 			w.Style(func(s *styles.Style) {
+				s.Display = styles.DisplayStacked
+				frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
 				s.Min.X.Dp(160)
 				s.Min.Y.Dp(96)
 				s.Grow.Set(1, 1)
@@ -438,16 +439,8 @@ func (ts *Tabs) ConfigWidget(sc *Scene) {
 	ts.Style(func(s *styles.Style) {
 		s.SetMainAxis(mat32.Y)
 	})
-	frame := NewFrame(ts, "tabs")
-	frame.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X).SetWrap(true)
-	})
-
-	frame = NewFrame(ts, "frame")
-	frame.Style(func(s *styles.Style) {
-		s.Display = styles.DisplayStacked
-	})
-
+	NewFrame(ts, "tabs")
+	NewFrame(ts, "frame")
 	ts.ConfigNewTabButton(sc)
 }
 

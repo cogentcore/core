@@ -207,6 +207,8 @@ func (ch *Chooser) ChooserStyles() {
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(16)
+				s.Min.X.Em(1)
+				s.Min.Y.Em(1)
 				s.Align.Y = styles.AlignCenter
 			})
 		}

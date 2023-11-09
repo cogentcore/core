@@ -78,7 +78,7 @@ func makeText(ts *gi.Tabs) {
 
 	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
 	gi.NewLabel(text).SetText(
-		`GoGi provides fully customizable text elements that can be styled in any way you want.<br>Also, there are pre-configured style types for text that allow you to easily create common text types.`)
+		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := strings.TrimPrefix(typ.String(), "Label")
@@ -92,7 +92,7 @@ func makeButtons(ts *gi.Tabs) {
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
 	gi.NewLabel(buttons, "bdesc").SetText(
-		`GoGi provides customizable buttons that support various events and can be styled in any way you want.<br>Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease.<br>All buttons support any combination of a label, icon, and indicator.`)
+		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
@@ -188,7 +188,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
 	gi.NewLabel(inputs).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides various customizable input widgets that cover all common uses.<br>Various events can be bound to inputs, and their data can easily be fetched and used wherever needed.<br>There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
+		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(inputs).SetPlaceholder("Filled")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
@@ -300,7 +300,7 @@ func makeValues(ts *gi.Tabs) {
 	gi.NewLabel(values).SetType(gi.LabelHeadlineLarge).SetText("Values")
 
 	gi.NewLabel(values).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values.<br>This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code.<br>For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(values).SetText("GoGi Editor").OnClick(func(e events.Event) {
 		giv.GoGiEditorDialog(ts.Sc)

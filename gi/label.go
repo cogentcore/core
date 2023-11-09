@@ -109,6 +109,7 @@ func (lb *Label) LabelStyles() {
 		if !lb.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
+		s.Min.Y.Em(1)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.Align.Y = styles.AlignCenter
 		s.Grow.Set(1, 0) // critical to enable text to expand / contract for wrapping
@@ -333,7 +334,7 @@ func (lb *Label) ConfigLabel(sc *Scene) {
 	defer lb.StyMu.RUnlock()
 
 	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-	sz := lb.Alloc.Size.Content
+	sz := lb.Alloc.Size.Content.Max(lb.Alloc.Size.Alloc)
 	if LayoutTrace {
 		fmt.Println("Label:", lb, "LayoutLabel Starting Content Size:", sz)
 	}
@@ -342,13 +343,15 @@ func (lb *Label) ConfigLabel(sc *Scene) {
 
 func (lb *Label) SizeUp(sc *Scene) {
 	lb.WidgetBase.SizeUp(sc)
-	lb.ConfigLabel(sc)
-	rsz := lb.TextRender.Size
-	sz := &lb.Alloc.Size
-	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
-	sz.SetTotalFromContent()
-	if LayoutTrace {
-		fmt.Println("Label:", lb, "GetSize:", rsz)
+	if !lb.Styles.Text.HasWordWrap() {
+		lb.ConfigLabel(sc)
+		rsz := lb.TextRender.Size
+		sz := &lb.Alloc.Size
+		sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
+		sz.SetTotalFromContent()
+		if LayoutTrace {
+			fmt.Println("Label:", lb, "SizeUp:", rsz)
+		}
 	}
 }
 
@@ -361,10 +364,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	rsz := lb.TextRender.Size
 	sz.Content = prevContent
 	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
-	// if sc.Is(ScPrefSizing) {
-	// todo: do NOT set Total here -- our total is based on Alloc, but Content can be smaller
-	// sz.SetTotalFromContent()
-	// }
+	sz.SetTotalFromContent()
 	re := prevContent != lb.Alloc.Size.Content
 	if re {
 		if LayoutTrace {
