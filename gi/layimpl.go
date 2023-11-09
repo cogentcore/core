@@ -714,9 +714,6 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, diff mat32.Vec2) bool {
 		kwb.Alloc.Size.Alloc.SetFloor()
 		return ki.Continue
 	})
-	// if redo {
-	// 	ly.SizeUpCells(sc) // updates kids size with new grown sizes
-	// }
 	return redo
 }
 
