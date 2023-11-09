@@ -42,7 +42,7 @@ type Text struct {
 	// prop: direction (inherited) = direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements
 	Direction TextDirections `xml:"direction" inherit:"true"`
 
-	// prop: writing-mode (inherited) = overall writing mode -- only for text elements, not tspan
+	// prop: writing-mode (inherited) = overall writing mode -- only for text elements, not span
 	WritingMode TextDirections `xml:"writing-mode" inherit:"true"`
 
 	// prop: glyph-orientation-vertical (inherited) = for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright
