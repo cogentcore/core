@@ -77,7 +77,7 @@ func app() {
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0)
+			s.Grow.Set(1, 0)
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"

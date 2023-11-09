@@ -19,7 +19,7 @@ func main() { gimain.Run(app) }
 
 func app() {
 	// turn on tracing in preferences, Debug
-	// gi.LayoutTrace = true
+	gi.LayoutTrace = true
 	// gi.LayoutTraceDetail = true
 
 	frsz := [5]mat32.Vec2{
@@ -44,28 +44,40 @@ func app() {
 
 	gi.DefaultTopAppBar = nil
 
-	trow := gi.NewFrame(sc, "trow")
-	trow.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-		s.Grow.Set(1, 0)
-		s.Align.X = styles.AlignCenter
-		s.Max.X.Em(30) // this is key for making it overflow
-		s.Overflow.X = styles.OverflowAuto
-		s.MaxBorder.Color.Set(colors.Black)
-		s.MaxBorder.Width.Set(units.Dp(2))
-		s.Border = s.MaxBorder
-	})
+	/*
+		trow := gi.NewFrame(sc, "trow")
+		trow.Style(func(s *styles.Style) {
+			s.SetMainAxis(mat32.X)
+			s.Grow.Set(1, 0)
+			s.Align.X = styles.AlignCenter
+			s.Max.X.Em(30) // this is key for making it overflow
+			s.Overflow.X = styles.OverflowAuto
+			s.MaxBorder.Color.Set(colors.Black)
+			s.MaxBorder.Width.Set(units.Dp(2))
+			s.Border = s.MaxBorder
+		})
+	*/
 
-	gi.NewLabel(trow, "title").SetText("This is a test of the layout logic,<br>which is pretty complex and requires some experimenting to understand how it all works.<br>The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink").
+	gi.NewLabel(sc, "title").SetText("This is a test of the layout logic, which is pretty complex and requires some experimenting to understand how it all works.  The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink").
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0) // this is needed to allow the trow aligncenter to work
+			s.Grow.Set(1, 0) // this is needed to allow the trow aligncenter to work
 			// because otherwise this takes up the whole space.
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
-			s.Text.Align = styles.AlignCenter
-			s.Text.AlignV = styles.AlignCenter
+			// s.Text.Align = styles.AlignCenter
+			// s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
 		})
+
+	brow := gi.NewFrame(sc, "brow")
+	brow.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+		s.Grow.Set(1, 0)
+		// s.Align.X = styles.AlignCenter
+		// s.Overflow.X = styles.OverflowAuto
+		s.Border.Color.Set(colors.Black)
+		s.Border.Width.Set(units.Dp(2))
+	})
 
 	row1 := gi.NewLayout(sc, "row1")
 	row1.Style(func(s *styles.Style) {

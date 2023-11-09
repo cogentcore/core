@@ -293,6 +293,7 @@ func (wb *WidgetBase) SizeUpWidget(sc *Scene) {
 // subject to Max constraints.
 func (wb *WidgetBase) SizeFromStyle() {
 	sz := &wb.Alloc.Size
+	sz.Alloc.SetZero()
 	sz.SetContentMax(wb.Styles.Min.Dots(), wb.Styles.Max.Dots())
 	sz.SetSpace(wb.Styles.BoxSpace().Size())
 	sz.SetTotalFromContent()
@@ -496,7 +497,7 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
 	// re := wb.SizeDownGrowToAlloc(sc, iter) // prevents word wrapping but also prevents super wide labels
 	redo := wb.SizeDownParts(sc, iter) // give our content to parts
-	return redo
+	return redo                        // || re
 }
 
 // SizeDownGrowToAlloc grows our Total size up to current Alloc size
@@ -579,6 +580,8 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 		ly.SizeDownAlloc(sc, iter) // set allocations as is
 	}
 	re := ly.SizeDownChildren(sc, iter)
+	ly.SizeUpCells(sc) // updates kids size with new grown sizes
+	ly.Alloc.Size.SetTotalFromContent()
 	return chg || totalChanged || re
 }
 
@@ -688,9 +691,9 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, diff mat32.Vec2) bool {
 		kwb.Alloc.Size.Alloc.SetFloor()
 		return ki.Continue
 	})
-	if redo {
-		ly.SizeUpCells(sc) // updates kids size with new grown sizes
-	}
+	// if redo {
+	// 	ly.SizeUpCells(sc) // updates kids size with new grown sizes
+	// }
 	return redo
 }
 
@@ -732,6 +735,14 @@ func (ly *Layout) SizeDownAllocCells(sc *Scene, iter int) {
 }
 
 func (ly *Layout) SizeDownAllocStacked(sc *Scene, iter int) {
+	if ly.Is(LayoutStackTopOnly) {
+		_, kwb := ly.StackTopWidget()
+		if kwb != nil {
+			kwb.Alloc.Size.Alloc = ly.Alloc.Size.Content
+		}
+		return
+	}
+
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {

@@ -111,6 +111,9 @@ func (sw *Switch) HandleSwitchEvents() {
 		e.SetHandled()
 		sw.SetChecked(!sw.StateIs(states.Checked))
 		sw.Send(events.Change, e)
+		if sw.Type == SwitchChip {
+			sw.SetNeedsLayout()
+		}
 	})
 }
 
@@ -217,6 +220,8 @@ func (sw *Switch) SwitchStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Align.Y = styles.AlignCenter
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // nowrap
 				s.FillMargin = false
 			})
 		}
