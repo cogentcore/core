@@ -35,6 +35,13 @@ import (
 // 4. ScenePos: scene-based position and final BBox is computed based on scrollbar
 //    position.  This step can be performed when scrolling.
 
+// (Text) Wrapping key principles:
+// * start with nothing (except styled) for SizeUp (non-wrap asserts needs)
+// * use full Alloc for SizeDown
+// * set content + total to what you actually use (key: start with only styled
+//   so you don't get hysterisis)
+// * Layout always re-gets the actuals for accurate KidsSize
+
 //////////////////////////////////////////////////////////////
 //  LaySize
 
@@ -90,6 +97,11 @@ func (ls *LaySize) SetSpace(spc mat32.Vec2) {
 // SetTotalFromContent sets the Total size as Content plus given extra space
 func (ls *LaySize) SetTotalFromContent() {
 	ls.Total = ls.Content.Add(ls.Space)
+}
+
+// SetTotalToFitContent increases the Total size to fit current content
+func (ls *LaySize) SetTotalToFitContent() {
+	ls.Total.SetMaxPos(ls.Content.Add(ls.Space))
 }
 
 // SetContentFromTotal sets the Content from Total size subtracting extra space
@@ -230,8 +242,9 @@ func (ls *LayImplState) InitSizes() {
 	}
 }
 
-func (ls *LayImplState) ContentSize() mat32.Vec2 {
-	var csz mat32.Vec2
+// GetKidsSize returns the actual sizes of our kids, using Cells
+func (ls *LayImplState) GetKidsSize() mat32.Vec2 {
+	var ksz mat32.Vec2
 	for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
 		n := mat32.PointDim(ls.Cells, ma) // cols, rows
 		sum := float32(0)
@@ -240,9 +253,9 @@ func (ls *LayImplState) ContentSize() mat32.Vec2 {
 			mx := md.Size.Dim(ma)
 			sum += mx // sum of maxes
 		}
-		csz.SetDim(ma, sum)
+		ksz.SetDim(ma, sum)
 	}
-	return csz
+	return ksz
 }
 
 // Overflow is the difference between KidsSize - ContentSubGap,
@@ -320,7 +333,8 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.SizeFromStyle()
 	ly.SizeUpChildren(sc)
 	ly.SetInitCells()
-	ly.SizeUpCells(sc)
+	ly.SizeUpKids(sc)
+	ly.Alloc.Size.SetContentToFit(ly.LayImpl.KidsSize, ly.Styles.Max.Dots())
 	ly.Alloc.Size.SetTotalFromContent()
 }
 
@@ -407,19 +421,27 @@ func (ly *Layout) SetInitCellsGrid() {
 
 // todo: wrap requires a different non-grid logic -- no constraint of same sizes across rows
 
-// SizeUpCells gathers sizing data for cells
-func (ly *Layout) SizeUpCells(sc *Scene) {
+//////////////////////////////////////////////////////////////////////
+//		SizeUpKids
+
+// SizeUpKids gathers actual size values from kids, puts in KidsSize
+func (ly *Layout) SizeUpKids(sc *Scene) {
+	// todo: flex
 	if ly.Styles.Display == styles.DisplayStacked {
-		ly.SizeUpCellsStacked(sc)
+		ly.SizeUpKidsStacked(sc)
 		return
 	}
+	ly.SizeUpKidsCells(sc)
+}
+
+// SizeUpKidsCells for Flex, Grid
+func (ly *Layout) SizeUpKidsCells(sc *Scene) {
 	// r   0   1   col X = max(X over rows), Y = sum(Y over rows)
 	//   +--+--+
 	// 0 |  |  |   row X = sum(X over cols), Y = max(Y over cols)
 	//   +--+--+
 	// 1 |  |  |
 	//   +--+--+
-
 	ly.LayImpl.InitSizes()
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Alloc.Cell
@@ -456,32 +478,30 @@ func (ly *Layout) SizeUpCells(sc *Scene) {
 		fmt.Println(ly.LayImpl.String())
 	}
 
-	csz := ly.LayImpl.ContentSize()
-	csz.SetCeil()
+	ksz := ly.LayImpl.GetKidsSize()
+	ksz.SetCeil()
 	if LayoutTrace {
-		fmt.Println(ly, "SizeUp Content Size:", csz)
+		fmt.Println(ly, "SizeUpKids Cells KidsSize:", ksz)
 	}
-	ly.LayImpl.KidsSize = csz
-	ly.Alloc.Size.SetContentToFit(csz, ly.Styles.Max.Dots())
-
+	ly.LayImpl.KidsSize = ksz
 }
 
-// SizeUpCellsStacked
-func (ly *Layout) SizeUpCellsStacked(sc *Scene) {
+// SizeUpKidsStacked
+func (ly *Layout) SizeUpKidsStacked(sc *Scene) {
 	ly.LayImpl.InitSizes()
 	_, kwb := ly.StackTopWidget()
-	if kwb == nil {
-		return
+	if kwb != nil {
+		ly.LayImpl.Sizes[0][0].Size = kwb.Alloc.Size.Total
+		ly.LayImpl.Sizes[1][0].Size = kwb.Alloc.Size.Total
+		ly.LayImpl.Sizes[0][0].Grow = kwb.Styles.Grow
+		ly.LayImpl.Sizes[1][0].Grow = kwb.Styles.Grow
 	}
-	ly.LayImpl.Sizes[0][0].Size = kwb.Alloc.Size.Total
-	ly.LayImpl.Sizes[1][0].Size = kwb.Alloc.Size.Total
-	ly.LayImpl.Sizes[0][0].Grow = kwb.Styles.Grow
-	ly.LayImpl.Sizes[1][0].Grow = kwb.Styles.Grow
-	ly.Alloc.Size.SetContentToFit(ly.LayImpl.Sizes[0][0].Size, ly.Styles.Max.Dots())
-	ly.LayImpl.KidsSize = ly.Alloc.Size.Content
+	ksz := ly.LayImpl.Sizes[0][0].Size // all the same
+	ksz.SetCeil()
 	if LayoutTrace {
-		fmt.Println(ly, "SizeUp Stacked Content Size:", ly.Alloc.Size.Content)
+		fmt.Println(ly, "SizeUpKids Stacked KidsSize:", ksz)
 	}
+	ly.LayImpl.KidsSize = ksz
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -580,8 +600,11 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 		ly.SizeDownAlloc(sc, iter) // set allocations as is
 	}
 	re := ly.SizeDownChildren(sc, iter)
-	ly.SizeUpCells(sc) // updates kids size with new grown sizes
-	ly.Alloc.Size.SetTotalFromContent()
+	ly.SizeUpKids(sc)  // always update KidsSize
+	if ly.Par != nil { // cannot change the scene content size
+		ly.Alloc.Size.SetContentToFit(ly.LayImpl.KidsSize, ly.Styles.Max.Dots())
+		ly.Alloc.Size.SetTotalToFitContent()
+	}
 	return chg || totalChanged || re
 }
 

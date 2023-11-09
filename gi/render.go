@@ -482,10 +482,12 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	bspc := sc.BoxSpace().Size().Add(sc.LayImpl.ScrollSize)
 	psz := sc.LayImpl.KidsSize.Add(bspc).ToPointCeil()
 	sc.Geom.Size = psz
+	fmt.Println("\npref size:", psz, "csz:", sc.Alloc.Size.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
+	// sc.LayoutScene() // once more with set size
+	// bspc = sc.BoxSpace().Size().Add(sc.LayImpl.ScrollSize)
+	// psz = sc.LayImpl.KidsSize.Add(bspc).ToPointCeil()
 	// fmt.Println("pref size:", psz, "csz:", sc.Alloc.Size.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
-	sc.LayoutScene() // once more with set size
-	psz = sc.LayImpl.KidsSize.Add(bspc).ToPointCeil()
-	sc.Geom.Size = psz
+	// sc.Geom.Size = psz
 	sc.SetFlag(false, ScPrefSizing)
 	return psz
 }
