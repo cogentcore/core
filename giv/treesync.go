@@ -29,7 +29,7 @@ import (
 // Calls ki.UniquifyNamesAll on source tree to
 // ensure that node names are unique
 // which is essential for proper viewing!
-func (tv *TreeView) SyncRootNode(sk ki.Ki) {
+func (tv *TreeView) SyncRootNode(sk ki.Ki) *TreeView {
 	updt := false
 	ki.UniquifyNamesAll(sk)
 	if tv.SyncNode != sk {
@@ -40,6 +40,7 @@ func (tv *TreeView) SyncRootNode(sk ki.Ki) {
 	tvIdx := 0
 	tv.SyncToSrc(&tvIdx, true, 0)
 	tv.UpdateEndLayout(updt)
+	return tv
 }
 
 // SetSyncNode sets the sync source node that we are viewing,
