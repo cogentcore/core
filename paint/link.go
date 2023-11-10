@@ -7,6 +7,7 @@ package paint
 import (
 	"image"
 
+	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 )
 
@@ -19,7 +20,10 @@ type TextLink struct {
 	// full URL for the link
 	URL string
 
-	// properties defined for the link
+	// Style for rendering this link, set by the controlling widget
+	Style styles.FontRender
+
+	// additional properties defined for the link, from the parsed HTML attributes
 	Props map[string]any
 
 	// span index where link starts
@@ -33,9 +37,6 @@ type TextLink struct {
 
 	// index in EndSpan where link ends (index of last rune in label)
 	EndIdx int
-
-	// the widget that owns this text link -- only set prior to passing off to handler function
-	// Widget ki.Ki `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
 }
 
 // Bounds returns the bounds of the link
@@ -56,34 +57,4 @@ func (tl *TextLink) Bounds(tr *Text, pos mat32.Vec2) image.Rectangle {
 		ep.X += er.Size.X
 	}
 	return image.Rectangle{Min: sp.ToPointFloor(), Max: ep.ToPointCeil()}
-}
-
-// TextLinkHandlerFunc is a function that handles TextLink links -- returns
-// true if the link was handled, false if not (in which case it might be
-// passed along to someone else)
-type TextLinkHandlerFunc func(tl TextLink) bool
-
-// TextLinkHandler is used to handle TextLink links, if non-nil -- set this to
-// your own handler to get first crack at all the text link clicks -- if this
-// function returns false (or is nil) then the URL is sent to URLHandler (the
-// default one just calls oswin.TheApp.OpenURL)
-var TextLinkHandler TextLinkHandlerFunc
-
-// URLHandlerFunc is a function that handles URL links -- returns
-// true if the link was handled, false if not (in which case it might be
-// passed along to someone else).
-type URLHandlerFunc func(url string) bool
-
-// URLHandler is used to handle URL links, if non-nil -- set this to your own
-// handler to process URL's, depending on TextLinkHandler -- the default
-// version of this function just calls oswin.TheApp.OpenURL -- setting this to
-// nil will prevent any links from being open that way, and your own function
-// will have full responsibility for links if set (i.e., the return value is ignored)
-var URLHandler = func(url string) bool {
-	// todo: oswin
-	// if oswin.TheApp != nil {
-	// 	oswin.TheApp.OpenURL(url)
-	// 	return true
-	// }
-	return false
 }

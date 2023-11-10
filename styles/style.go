@@ -75,7 +75,7 @@ type Style struct { //gti:add
 	// Grow is the proportional amount that the element can grow (stretch)
 	// if there is more space available.  0 = default = no growth.
 	// Extra available space is allocated as: Grow / sum (all Grow)
-	Grow mat32.Vec2 `view:"inline"`
+	Grow mat32.Vec2
 
 	// Padding is the transparent space around central content of box,
 	// which is _included_ in the size of the standard box rendering.
