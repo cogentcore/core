@@ -45,8 +45,9 @@ func (v *Video) Open(fpath string) error {
 	return nil
 }
 
-// Play starts playing the video.
-func (v *Video) Play() error {
+// Play starts playing the video at the specified size. Values of 0
+// indicate to use the inherent size of the video for that dimension.
+func (v *Video) Play(width, height float32) error {
 	videoFPS, _ := v.Media.Streams()[0].FrameRate()
 
 	// seconds per frame for frame ticker
@@ -77,7 +78,7 @@ func (v *Video) Play() error {
 
 		frame, ok := <-frameBuffer
 		if ok {
-			v.SetImage(frame, 0, 0)
+			v.SetImage(frame, width, height)
 			v.Update()
 		}
 	}

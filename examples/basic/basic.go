@@ -18,6 +18,6 @@ func app() {
 	v := video.NewVideo(sc)
 	grr.Log0(v.Open("../videos/deer.mp4"))
 	w := gi.NewWindow(sc).Run()
-	grr.Log0(v.Play())
+	grr.Log0(v.Play(2000, 1000))
 	w.Wait()
 }
