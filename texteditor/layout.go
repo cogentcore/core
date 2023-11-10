@@ -50,6 +50,7 @@ func (ed *Editor) UpdateFromAlloc() {
 }
 
 func (ed *Editor) SizeDown(sc *gi.Scene, iter int) bool {
+	// todo: layout takes entire allocation -- not sure this is the best..
 	redo := ed.Layout.SizeDown(sc, iter)
 	ed.UpdateFromAlloc()
 	return redo

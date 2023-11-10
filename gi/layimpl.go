@@ -525,9 +525,11 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
 // Computes updated Content size from given total allocation
 // and gives that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
-	re := wb.SizeDownGrowToAlloc(sc, iter) // override for any that don't need this
-	redo := wb.SizeDownParts(sc, iter)     // give our content to parts
-	return redo || re
+	// note: most widgets do NOT fully grow like this
+	// but some do (sliders) -- override the SizeDown method to add
+	// re := wb.SizeDownGrowToAlloc(sc, iter)
+	redo := wb.SizeDownParts(sc, iter) // give our content to parts
+	return redo
 }
 
 // SizeDownGrowToAlloc grows our Total size up to current Alloc size
