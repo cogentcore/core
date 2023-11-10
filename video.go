@@ -15,6 +15,7 @@ import (
 	"github.com/faiface/beep/speaker"
 	"github.com/zergon321/reisen"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/ki/v2"
 )
 
 // Video represents a video playback widget without any controls.
@@ -26,8 +27,16 @@ type Video struct {
 	Media *reisen.Media
 }
 
+var _ ki.Ki = (*Video)(nil)
+
 // Open opens the video specified by the given filepath.
 func (v *Video) Open(fpath string) error {
+	// Initialize the audio speaker.
+	err := speaker.Init(sampleRate, SpeakerSampleRate.N(time.Second/10))
+	if err != nil {
+		return err
+	}
+
 	media, err := reisen.NewMedia(fpath)
 	if err != nil {
 		return err
@@ -42,7 +51,7 @@ func (v *Video) Play() error {
 
 	// seconds per frame for frame ticker
 	spf := 1.0 / float64(videoFPS)
-	frameDuration := time.Second * time.Duration(spf)
+	frameDuration := time.Duration(float64(time.Second) * spf)
 
 	// Start decoding streams.
 	var sampleSource <-chan [2]float64
@@ -54,6 +63,24 @@ func (v *Video) Play() error {
 
 	// Start playing audio samples.
 	speaker.Play(v.StreamSamples(sampleSource))
+
+	tick := time.NewTicker(frameDuration)
+	for range tick.C {
+		// Check for incoming errors.
+		select {
+		case err, ok := <-errChan:
+			if ok {
+				return err
+			}
+		default:
+		}
+
+		frame, ok := <-frameBuffer
+		if ok {
+			v.SetImage(frame, 0, 0)
+		}
+	}
+	return nil
 }
 
 const (
