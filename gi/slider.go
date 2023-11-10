@@ -379,6 +379,7 @@ func (sr *Slider) SetValueAction(val float32) {
 		return
 	}
 	sr.SetValue(val)
+	sr.Send(events.Change)
 }
 
 ///////////////////////////////////////////////////////////

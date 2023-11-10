@@ -36,16 +36,15 @@ import (
 //    position.  This step can be performed when scrolling.
 
 // (Text) Wrapping key principles:
-// * start with nothing (except styled) for SizeUp (non-wrap asserts needs)
+// * start small (just styled hard constraints) for SizeUp (non-wrap asserts needs)
 // * use full Alloc for SizeDown
 // * set content + total to what you actually use (key: start with only styled
 //   so you don't get hysterisis)
 // * Layout always re-gets the actuals for accurate KidsSize
+// * for wrap flex, initial min size includes max over els -- must fit at least that
 
-// TODO:
-// * style flag for whether element itself grows??
-// * scene needs different logic for main window vs. popup:
-//   popup it sizes to what it needs?  Maybe just prefs sizing issue actually..
+// * same principles apply for areas under scrollbar support -- basically identical
+//   to flex!
 
 //////////////////////////////////////////////////////////////
 //  LaySize
@@ -89,6 +88,23 @@ func (ls *LaySize) SetContentMax(sz mat32.Vec2, mx mat32.Vec2) {
 // rounded up to Ceil ints
 func (ls *LaySize) SetContentToFit(sz mat32.Vec2, mx mat32.Vec2) {
 	ls.Content.SetMaxPos(sz)
+	ls.Content.SetMinPos(mx)
+	ls.Content.SetCeil()
+}
+
+// SetContentToFitOverflow sets the Content size subject to given Max values
+// which only apply if they are > 0.  If Overflow is >= Auto then we _don't_
+// expand.  Values are automatically rounded up to Ceil ints.
+func (ls *LaySize) SetContentToFitOverflow(sz mat32.Vec2, mx mat32.Vec2, oflow styles.XY[styles.Overflow]) {
+	// todo: potentially the diff between Visible & Hidden is
+	// that Hidden also does Not expand beyond Alloc?
+	// can expt with that.
+	if oflow.X < styles.OverflowAuto {
+		ls.Content.X = mat32.MaxPos(ls.Content.X, sz.X)
+	}
+	if oflow.Y < styles.OverflowAuto {
+		ls.Content.Y = mat32.MaxPos(ls.Content.Y, sz.Y)
+	}
 	ls.Content.SetMinPos(mx)
 	ls.Content.SetCeil()
 }
@@ -343,7 +359,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.SizeUpChildren(sc)
 	ly.SetInitCells()
 	ly.SizeUpKids(sc)
-	ly.Alloc.Size.SetContentToFit(ly.LayImpl.KidsSize, ly.Styles.Max.Dots())
+	ly.Alloc.Size.SetContentToFitOverflow(ly.LayImpl.KidsSize, ly.Styles.Max.Dots(), ly.Styles.Overflow)
 	ly.Alloc.Size.SetTotalFromContent()
 }
 
@@ -496,7 +512,7 @@ func (ly *Layout) SizeUpKidsCells(sc *Scene) {
 	ksz := ly.LayImpl.GetKidsSize()
 	ksz.SetCeil()
 	if LayoutTrace {
-		fmt.Println(ly, "SizeUpKids Cells KidsSize:", ksz)
+		fmt.Println(ly, "SizeUpKids Cells KidsSize:", ksz, "sizes:", ly.Alloc.Size.String())
 	}
 	ly.LayImpl.KidsSize = ksz
 }
@@ -606,6 +622,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if !ly.HasChildren() {
 		return ly.SizeDownWidget(sc, iter) // behave like a widget
 	}
+
 	totalChanged := ly.SizeDownGrowToAlloc(sc, iter)
 	chg := ly.ManageOverflow(sc, iter)
 	sz := &ly.Alloc.Size
@@ -623,7 +640,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	re := ly.SizeDownChildren(sc, iter)
 	ly.SizeUpKids(sc)  // always update KidsSize
 	if ly.Par != nil { // cannot change the scene content size
-		ly.Alloc.Size.SetContentToFit(ly.LayImpl.KidsSize, ly.Styles.Max.Dots())
+		ly.Alloc.Size.SetContentToFitOverflow(ly.LayImpl.KidsSize, ly.Styles.Max.Dots(), ly.Styles.Overflow)
 		ly.Alloc.Size.SetTotalToFitContent()
 	}
 	return chg || totalChanged || re

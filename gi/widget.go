@@ -236,9 +236,6 @@ type WidgetBase struct {
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true" set:"-"`
 
-	// all the layout state information for this widget
-	LayState LayState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
 	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
 	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
 	CustomContextMenu func(m *Scene) `copy:"-" json:"-" xml:"-"`

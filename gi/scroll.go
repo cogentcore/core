@@ -87,7 +87,7 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 		// fmt.Println("change event")
 		updt := ly.UpdateStart()
 		ly.ScenePos(ly.Sc) // gets pos from scrolls, positions scrollbars
-		ly.UpdateEndLayout(updt)
+		ly.UpdateEndRender(updt)
 	})
 	sb.Update()
 }
@@ -169,8 +169,8 @@ func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 	if ly.HasScroll[d] {
 		sb := ly.Scrolls[d]
 		nval := sb.Value + delta
-		sb.SetValue(nval)
-		ly.SetNeedsLayout()
+		sb.SetValueAction(nval)
+		ly.SetNeedsRender() // only render needed -- scroll updates pos
 	}
 }
 
@@ -179,8 +179,8 @@ func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] {
 		sb := ly.Scrolls[d]
-		sb.SetValue(pos)
-		ly.SetNeedsLayout()
+		sb.SetValueAction(pos)
+		ly.SetNeedsRender()
 	}
 }
 
@@ -189,8 +189,8 @@ func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
 func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] {
 		sb := ly.Scrolls[d]
-		sb.SetValue(pos)
-		ly.SetNeedsLayout()
+		sb.SetValueAction(pos)
+		ly.SetNeedsRender()
 	}
 }
 
@@ -383,7 +383,7 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
 	}
 	if did {
-		ly.SetNeedsLayout()
+		ly.SetNeedsRender()
 	}
 	return did
 }

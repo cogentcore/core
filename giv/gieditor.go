@@ -271,10 +271,11 @@ func (ge *GiEditor) SetChanged() {
 }
 
 func (ge *GiEditor) TopAppBar(tb *gi.TopAppBar) {
-	if gi.DefaultTopAppBar == nil {
-		return
+	if gi.DefaultTopAppBar != nil {
+		gi.DefaultTopAppBar(tb)
+	} else {
+		gi.DefaultTopAppBarStd(tb)
 	}
-	gi.DefaultTopAppBar(tb)
 
 	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
