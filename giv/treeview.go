@@ -567,6 +567,9 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 }
 
 func (tv *TreeView) ScenePos(sc *gi.Scene) {
+	if tv.Alloc.Size.Total == tv.WidgetSize {
+		tv.Alloc.Size.SetTotalFromContent() // restore after scrolling
+	}
 	tv.WidgetBase.ScenePos(sc)
 	tv.ScenePosChildren(sc)
 	tv.Alloc.Size.Total = tv.WidgetSize // key: we revert to just ourselves
@@ -585,6 +588,9 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)
 	tv.RenderUnlock(rs)
+	if tv.Parts.HasAnyScroll() {
+		fmt.Println(tv, "tv scroll")
+	}
 }
 
 func (tv *TreeView) Render(sc *gi.Scene) {

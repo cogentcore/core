@@ -23,7 +23,9 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Data = pf
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
@@ -109,7 +111,9 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	sv.SetStruct(pf)
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
@@ -173,7 +177,9 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	sv.SetStruct(pf)
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
 	}

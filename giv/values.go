@@ -568,7 +568,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		tv := NewTableView(d).SetSlice(slci)
 		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.TopAppBar = gi.TopAppBarFor(slci)
-		if d.TopAppBar == nil {
+		if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
 			d.TopAppBar = func(tb *gi.TopAppBar) {
 				gi.DefaultTopAppBar(tb)
 				tv.SliceDefaultTopAppBar(tb)
@@ -586,7 +586,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		sv := NewSliceView(d).SetSlice(slci)
 		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.TopAppBar = gi.TopAppBarFor(slci)
-		if d.TopAppBar == nil {
+		if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
 			d.TopAppBar = func(tb *gi.TopAppBar) {
 				gi.DefaultTopAppBar(tb)
 				sv.SliceDefaultTopAppBar(tb)

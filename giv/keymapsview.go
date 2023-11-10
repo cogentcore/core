@@ -38,7 +38,9 @@ func KeyMapsView(km *keyfun.Maps) {
 	})
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)
 		sp.SetUpdateFunc(func() {

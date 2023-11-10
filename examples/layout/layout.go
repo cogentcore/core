@@ -88,8 +88,9 @@ func WrapText(par gi.Widget, txt string) *gi.Label {
 
 func app() {
 	// turn on tracing in preferences, Debug
-	gi.LayoutTrace = true
+	// gi.LayoutTrace = true
 	// gi.LayoutTraceDetail = true
+	// gi.UpdateTrace = true
 
 	gi.SetAppName("layout")
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
@@ -97,7 +98,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 6
+	doCase := 5
 
 	switch doCase {
 	case 0: // just text
@@ -133,13 +134,15 @@ func app() {
 	case 4:
 		row := HorizRow(sc)
 		PlainFrames(row, mat32.Vec2{1, 0})
-	case 5:
+	case 5: // Auto scroll should absorb extra size
 		sp, f1, f2 := Splits2(sc)
 		_ = sp
+		f1.Style(func(s *styles.Style) {
+			s.Overflow.Y = styles.OverflowAuto // this should absorb the size
+		})
 		gi.NewSpace(f1).Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 			s.Min.Y.Em(100)
-			s.Overflow.X = styles.OverflowAuto // this should absorb the size
 		})
 		f2.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
