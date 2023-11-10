@@ -88,7 +88,7 @@ func WrapText(par gi.Widget, txt string) *gi.Label {
 
 func app() {
 	// turn on tracing in preferences, Debug
-	// gi.LayoutTrace = true
+	gi.LayoutTrace = true
 	// gi.LayoutTraceDetail = true
 	// gi.UpdateTrace = true
 
@@ -98,7 +98,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 5
+	doCase := 1
 
 	switch doCase {
 	case 0: // just text

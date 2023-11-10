@@ -320,7 +320,9 @@ func (sc *Scene) LayoutScene() {
 				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
 			}
 		} else {
+			// if iter > 0 { // at least 2
 			break
+			// }
 		}
 	}
 	if LayoutTrace {
