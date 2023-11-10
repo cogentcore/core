@@ -187,6 +187,7 @@ func (ed *Editor) ViewStyles() {
 		} else {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
+		s.Grow.Set(1, 1)
 		s.Overflow.Set(styles.OverflowHidden) // key: we just get what we get, and manage our own scrollbars
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
 		s.Border.Radius = styles.BorderRadiusLarge

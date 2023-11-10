@@ -534,9 +534,10 @@ func (tv *TreeView) SizeUp(sc *gi.Scene) {
 }
 
 func (tv *TreeView) SizeDown(sc *gi.Scene, iter int) bool {
-	tv.WidgetBase.SizeDown(sc, iter)
-	redo := tv.SizeDownChildren(sc, iter)
-	return redo
+	// note: key to not grab the whole allocation, as widget default does
+	redo := tv.SizeDownParts(sc, iter) // give our content to parts
+	re := tv.SizeDownChildren(sc, iter)
+	return redo || re
 }
 
 func (tv *TreeView) Position(sc *gi.Scene) {
@@ -568,7 +569,7 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 func (tv *TreeView) ScenePos(sc *gi.Scene) {
 	tv.WidgetBase.ScenePos(sc)
 	tv.ScenePosChildren(sc)
-	// tv.Alloc.Size.Total = tv.WidgetSize
+	tv.Alloc.Size.Total = tv.WidgetSize // key: we revert to just ourselves
 }
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
