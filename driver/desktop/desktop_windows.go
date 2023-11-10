@@ -26,7 +26,7 @@ func (app *appImpl) Platform() goosi.Platforms {
 }
 
 func (app *appImpl) OpenURL(url string) {
-	cmd := exec.Command("explorer", url)
+	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
 	cmd.Run()
 }
 
