@@ -1763,12 +1763,6 @@ func (tf *TextField) SizeUp(sc *Scene) {
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) SizeDown(sc *Scene, iter int) bool {
-	re := tf.SizeDownGrowToAlloc(sc, iter) // good for tf
-	redo := tf.SizeDownParts(sc, iter)     // give our content to parts
-	return redo || re
-}
-
 func (tf *TextField) ScenePos(sc *Scene) {
 	tf.WidgetBase.ScenePos(sc)
 	tf.SetEffPosAndSize()

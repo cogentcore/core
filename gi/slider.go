@@ -503,12 +503,6 @@ func (sr *Slider) ConfigParts(sc *Scene) {
 	ic.Update()
 }
 
-func (sr *Slider) SizeDown(sc *Scene, iter int) bool {
-	re := sr.SizeDownGrowToAlloc(sc, iter) // good for sliders
-	redo := sr.SizeDownParts(sc, iter)     // give our content to parts
-	return redo || re
-}
-
 func (sr *Slider) Render(sc *Scene) {
 	if sr.PushBounds(sc) {
 		sr.RenderSlider(sc)
