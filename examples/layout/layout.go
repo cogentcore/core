@@ -42,6 +42,16 @@ func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 	return fr
 }
 
+func SpaceFrame(par gi.Widget, nm ...string) (*gi.Frame, *gi.Space) {
+	fr := gi.NewFrame(par, nm...)
+	fr.Style(func(s *styles.Style) {
+		s.Border.Color.Set(colors.Black)
+		s.Border.Width.Set(units.Dp(2))
+	})
+	sp := gi.NewSpace(fr)
+	return fr, sp
+}
+
 func HorizRow(par gi.Widget) *gi.Frame {
 	row := BoxFrame(par)
 	row.Style(func(s *styles.Style) {
@@ -56,6 +66,19 @@ func Splits2(par gi.Widget) (*gi.Splits, *gi.Frame, *gi.Frame) {
 	f1 := BoxFrame(sp)
 	f2 := BoxFrame(sp)
 	return sp, f1, f2
+}
+
+func TabFrame(par gi.Widget) (*gi.Frame, *gi.Frame) {
+	tab := BoxFrame(par)
+	tab.Style(func(s *styles.Style) {
+		s.Display = styles.DisplayStacked
+		tab.StackTop = 0
+	})
+	tfr := BoxFrame(tab)
+	tfr.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+	})
+	return tab, tfr
 }
 
 func WrapText(par gi.Widget, txt string) *gi.Label {
@@ -74,7 +97,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 5
+	doCase := 6
 
 	switch doCase {
 	case 0: // just text
@@ -124,6 +147,24 @@ func app() {
 		gi.NewSpace(f2).Style(func(s *styles.Style) {
 			s.Min.X.Ch(20)
 			s.Min.Y.Em(20)
+		})
+	case 6: // recreates the issue with demo tabs
+		// does not grow -- stacked not doing the right thing
+		tab, tfr := TabFrame(sc)
+		_ = tab
+		par := tfr // or sc
+		row := HorizRow(par)
+
+		sp := gi.NewSpace(row)
+		_ = sp
+		WrapText(par, LongText)
+		fr, sp2 := SpaceFrame(par)
+		_ = fr
+		_ = sp2
+		fr.Style(func(s *styles.Style) {
+			s.Grow.Set(0, 1)
+			s.Min.X.Em(20)
+			s.Min.Y.Em(10)
 		})
 	}
 

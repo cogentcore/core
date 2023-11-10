@@ -29,7 +29,7 @@ func app() {
 
 	sc := gi.NewScene("gogi-demo").SetTitle("GoGi Demo")
 
-	gi.DefaultTopAppBar = nil
+	// gi.DefaultTopAppBar = nil
 
 	ts := gi.NewTabs(sc)
 	ts.NewTabButton = true
