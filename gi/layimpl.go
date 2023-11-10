@@ -42,6 +42,11 @@ import (
 //   so you don't get hysterisis)
 // * Layout always re-gets the actuals for accurate KidsSize
 
+// TODO:
+// * style flag for whether element itself grows??
+// * scene needs different logic for main window vs. popup:
+//   popup it sizes to what it needs?  Maybe just prefs sizing issue actually..
+
 //////////////////////////////////////////////////////////////
 //  LaySize
 
@@ -525,11 +530,12 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
 // Computes updated Content size from given total allocation
 // and gives that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
-	// note: most widgets do NOT fully grow like this
-	// but some do (sliders) -- override the SizeDown method to add
-	// re := wb.SizeDownGrowToAlloc(sc, iter)
-	redo := wb.SizeDownParts(sc, iter) // give our content to parts
-	return redo
+	redo := false
+	if !sc.Is(ScPrefSizing) {
+		redo = wb.SizeDownGrowToAlloc(sc, iter) // key to not do during prefs
+	}
+	re := wb.SizeDownParts(sc, iter) // give our content to parts
+	return redo || re
 }
 
 // SizeDownGrowToAlloc grows our Total size up to current Alloc size
