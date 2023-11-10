@@ -46,6 +46,24 @@ import (
 // * same principles apply for areas under scrollbar support -- basically identical
 //   to flex!
 
+// new: keep content and alloc separate until the end.
+// separate Size struct: Content, Total for Actual and Alloc.
+// Actual is set ONCE during SizeUp, and feeds an initial
+// Alloc that is updated during the top-down process.
+// Actual is updated only whenever a wrap element (label) changes its size based on alloc.
+// Grow is based on alloc changes *relative to actual*
+// (add a special flag to ignore actual for Splits?)
+// resulting in a new alloc for kids.
+//
+// Wrap will update a new actual based on wrapped content just like text
+// but keep its alloc separate just the same.
+//
+// Then in position, we can use the resulting values and alignment should be possible too.
+
+// this is similar in top-down / bottom-up design:
+// https://docs.flutter.dev/resources/architectural-overview#rendering-and-layout
+// https://stackoverflow.com/questions/53911631/gui-layout-algorithms-overview
+
 //////////////////////////////////////////////////////////////
 //  LaySize
 
@@ -631,7 +649,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	conDiff := ly.LayImpl.ContentSubGap.Sub(ly.LayImpl.KidsSize) // vs. actual kids
 	if conDiff.X > 0 || conDiff.Y > 0 {
 		if LayoutTrace {
-			fmt.Println("szdn growing:", ly, "diff:", conDiff, "was:", ly.LayImpl.KidsSize, "now:", ly.LayImpl.ContentSubGap, "gapsize:", ly.LayImpl.GapSize)
+			fmt.Println(ly, "szdn growing, diff:", conDiff, "was:", ly.LayImpl.KidsSize, "now:", ly.LayImpl.ContentSubGap, "gapsize:", ly.LayImpl.GapSize)
 		}
 		ly.SizeDownGrow(sc, iter, conDiff)
 	} else {
