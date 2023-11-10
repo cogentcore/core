@@ -223,6 +223,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	edit1.OnChange(func(e events.Event) {
 		fmt.Println("Text:", edit1.Text())
 	})
+	edit1.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+	})
 
 	sb := gi.NewSpinner(txrow).SetMax(1000).SetMin(-1000).SetStep(5)
 	sb.OnChange(func(e events.Event) {

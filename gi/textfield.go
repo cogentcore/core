@@ -169,7 +169,7 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.Min.Y.Em(1.0)
+		s.Min.Y.Em(1.1)
 		s.Min.X.Em(10)
 		s.Padding.Set(units.Dp(8), units.Dp(8))
 		if !tf.LeadingIcon.IsNil() {
@@ -1761,6 +1761,12 @@ func (tf *TextField) SizeUp(sc *Scene) {
 	nsz := mat32.NewVec2(w, tf.FontHeight)
 	tf.Alloc.Size.SetContentToFit(nsz, tf.Styles.Max.Dots())
 	tf.EditTxt = tmptxt
+}
+
+func (tf *TextField) SizeDown(sc *Scene, iter int) bool {
+	re := tf.SizeDownGrowToAlloc(sc, iter) // good for tf
+	redo := tf.SizeDownParts(sc, iter)     // give our content to parts
+	return redo || re
 }
 
 func (tf *TextField) ScenePos(sc *Scene) {
