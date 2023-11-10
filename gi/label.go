@@ -358,8 +358,7 @@ func (lb *Label) SizeUp(sc *Scene) {
 func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	sz := &lb.Alloc.Size
 	prevContent := sz.Content
-	redo := lb.WidgetBase.SizeDown(sc, iter) // gets total, content size from alloc
-	_ = redo
+	lb.SizeDownParts(sc, iter) // just in case
 	lb.ConfigLabel(sc)
 	rsz := lb.TextRender.Size
 	sz.Content = prevContent

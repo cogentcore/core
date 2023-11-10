@@ -9,7 +9,6 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
-	"goki.dev/mat32/v2"
 )
 
 // var samplefile gi.FileName = "sample.go"
@@ -26,18 +25,15 @@ func app() {
 	gi.SetAppName("texteditor")
 	gi.SetAppAbout(`This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	sc := gi.NewScene("gogi-texteditor-test").SetTitle("GoGi texteditor.Editor Test")
+	sc := gi.NewScene("texteditor-test").SetTitle("GoGi texteditor.Editor Test")
 
-	trow := gi.NewLayout(sc, "trow").SetMainAxis(mat32.X)
-	trow.SetStretchMaxWidth()
-
-	hdrText := `This is a <b>test</b> of the texteditor.Editor`
-	title := gi.NewLabel(trow, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
-	title.Style(func(s *styles.Style) {
-		s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-		s.Text.Align = styles.AlignCenter
-		s.Text.AlignV = styles.AlignTop
-	})
+	// hdrText := `This is a <b>test</b> of the texteditor.Editor`
+	// title := gi.NewLabel(sc, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
+	// title.Style(func(s *styles.Style) {
+	// 	s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+	// 	s.Text.Align = styles.AlignCenter
+	// 	s.Text.AlignV = styles.AlignStart
+	// })
 
 	splt := gi.NewSplits(sc, "split-view")
 	splt.SetSplits(.5, .5)

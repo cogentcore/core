@@ -55,6 +55,11 @@ func (ed *Editor) SizeDown(sc *gi.Scene, iter int) bool {
 	return redo
 }
 
+func (ed *Editor) Position(sc *gi.Scene) {
+	ed.Layout.Position(sc)
+	ed.LayoutAllLines()
+}
+
 // LayoutAllLines generates TextRenders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.

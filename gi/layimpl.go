@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"strings"
 
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -332,6 +331,7 @@ func (ly *Layout) SizeUp(sc *Scene) {
 // SizeUpLay is the Layout standard SizeUp pass
 func (ly *Layout) SizeUpLay(sc *Scene) {
 	if !ly.HasChildren() {
+		ly.SizeUpWidget(sc) // behave like a widget
 		return
 	}
 	ly.SizeFromStyle()
@@ -525,9 +525,9 @@ func (wb *WidgetBase) SizeDown(sc *Scene, iter int) bool {
 // Computes updated Content size from given total allocation
 // and gives that content to its parts if they exist.
 func (wb *WidgetBase) SizeDownWidget(sc *Scene, iter int) bool {
-	// re := wb.SizeDownGrowToAlloc(sc, iter) // prevents word wrapping but also prevents super wide labels
-	redo := wb.SizeDownParts(sc, iter) // give our content to parts
-	return redo                        // || re
+	re := wb.SizeDownGrowToAlloc(sc, iter) // override for any that don't need this
+	redo := wb.SizeDownParts(sc, iter)     // give our content to parts
+	return redo || re
 }
 
 // SizeDownGrowToAlloc grows our Total size up to current Alloc size
@@ -540,9 +540,6 @@ func (wb *WidgetBase) SizeDownGrowToAlloc(sc *Scene, iter int) bool {
 	sz := &wb.Alloc.Size
 	s := &wb.Styles
 	totWas := sz.Total
-	if wb.Nm == "trow" || strings.HasPrefix(wb.Nm, "scrollbar") {
-		fmt.Println(wb, s.Grow)
-	}
 	sz.Total.Clamp(mat32.Vec2Zero, sz.Alloc)
 	if s.Grow.X > 0 && sz.Alloc.X > sz.Total.X {
 		change = true
@@ -599,7 +596,7 @@ func (ly *Layout) SizeDown(sc *Scene, iter int) bool {
 // total size.
 func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if !ly.HasChildren() {
-		return false
+		return ly.SizeDownWidget(sc, iter) // behave like a widget
 	}
 	totalChanged := ly.SizeDownGrowToAlloc(sc, iter)
 	chg := ly.ManageOverflow(sc, iter)
@@ -843,6 +840,7 @@ func (ly *Layout) Position(sc *Scene) {
 
 func (ly *Layout) PositionLay(sc *Scene) {
 	if !ly.HasChildren() {
+		ly.PositionWidget(sc) // behave like a widget
 		return
 	}
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
@@ -1004,6 +1002,10 @@ func (wb *WidgetBase) ScenePosChildren(sc *Scene) {
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
 func (ly *Layout) ScenePos(sc *Scene) {
+	if !ly.HasChildren() {
+		ly.ScenePosWidget(sc) // behave like a widget
+		return
+	}
 	ly.GetScrollPosition(sc)
 	ly.ScenePosWidget(sc)
 	ly.ScenePosChildren(sc)

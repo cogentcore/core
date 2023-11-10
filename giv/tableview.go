@@ -102,9 +102,13 @@ func (tv *TableView) TableViewInit() {
 			sh.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
-				s.Max.X.Zero()
 				s.Grow.Set(0, 0)
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
+				// note: this does not work:
+				// sg := tv.SliceGrid()
+				// if sg != nil {
+				// 	s.Min.X.Dot(sg.Alloc.Size.Content.X)
+				// }
 			})
 		case "frame/grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
