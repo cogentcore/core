@@ -78,6 +78,7 @@ func (v *Video) Play() error {
 		frame, ok := <-frameBuffer
 		if ok {
 			v.SetImage(frame, 0, 0)
+			v.Update()
 		}
 	}
 	return nil
