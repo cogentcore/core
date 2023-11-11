@@ -13,7 +13,9 @@ import (
 
 // flagRegexp matches flags.
 // The second submatch is the name of the flag.
-var flagRegexp = regexp.MustCompile(`\W\-+([\w\-]+)`)
+var flagRegexp = regexp.MustCompile(
+	`\W\-{1,2}` + // prefix and dashes
+		`([\w\-]+)`) // flag name
 
 // type parsing for flagRegexp:
 // \W\-+([\w\-]+)([= ]<(\w+)>)?
@@ -21,7 +23,12 @@ var flagRegexp = regexp.MustCompile(`\W\-+([\w\-]+)`)
 // cmdRegexp matches commands.
 // The second submatch is the name of the command.
 // The third submatch, if it exists, is the description of the command.
-var cmdRegexp = regexp.MustCompile(`(?m)^\s{2,}(?:[\w\-\.]+)(\s{2,}([^\n]+))?`)
+var cmdRegexp = regexp.MustCompile(
+	`(?m)` + // multi line
+		`^\s{2,}` + // starting space
+		`([\w\-\.]+)` + // command
+		`(?:\s{2,}` + // space between command and doc
+		`([^\n]+))?`) // doc
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
