@@ -26,6 +26,7 @@ func (cm *Cmd) Parse() error {
 
 // SetFromBlocks sets the information of the command from the given [ParseBlock] objects.
 func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
+	cmdsDone := map[string]bool{}
 	for _, block := range blocks {
 		// a - indicates a flag
 		if strings.HasPrefix(block.Name, "-") {
@@ -65,14 +66,28 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 		// version of our block name, it is probably just referencing
 		// the old command somewhere (not specifying a new command that is the exact same),
 		// which leads to infinite recursion, so we just skip it.
-		if strings.Contains(strcase.ToKebab(cm.Cmd), strcase.ToKebab(block.Name)) {
+		kbnm := strcase.ToKebab(block.Name)
+		if strings.Contains(strcase.ToKebab(cm.Cmd), kbnm) {
+			continue
+		}
+		cmdsContains := slices.ContainsFunc(cm.Cmds, func(c *Cmd) bool {
+			return strings.Contains(strcase.ToKebab(c.Cmd), kbnm)
+		})
+		if cmdsContains {
 			continue
 		}
 
 		cmd := NewCmd(cm.Cmd + " " + block.Name)
 
+		if cmdsDone[cmd.Cmd] {
+			continue
+		}
+		cmdsDone[cmd.Cmd] = true
+
 		cmd.Doc = block.Doc
 		fmt.Println(cmd.Cmd)
+
+		cm.Cmds = append(cm.Cmds, cmd)
 
 		// now we must recursively parse the subcommand and any of its subcommands
 		err := cmd.Parse()
