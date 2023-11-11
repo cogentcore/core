@@ -20,8 +20,8 @@ var flagRegexp = regexp.MustCompile(`\W\-+([\w\-]+)`)
 
 // cmdRegexp matches commands.
 // The second submatch is the name of the command.
-// The fourth submatch, if it exists, is the description of the command.
-var cmdRegexp = regexp.MustCompile(`\n\s{2,}(\w+)(\s{2,}([^\n]+))?`)
+// The third submatch, if it exists, is the description of the command.
+var cmdRegexp = regexp.MustCompile(`(?m)^\s{2,}(?:[\w\-\.]+)(\s{2,}([^\n]+))?`)
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
@@ -39,8 +39,8 @@ func (a *App) Parse() error {
 	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
 	for _, cmd := range cmds {
 		c := NewApp(cmd[1])
-		if len(cmd) >= 4 {
-			c.Doc = cmd[3]
+		if len(cmd) >= 3 {
+			c.Doc = cmd[2]
 		}
 		fmt.Println(c.Command, c.Doc)
 		a.Commands = append(a.Commands, c)
