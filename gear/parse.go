@@ -26,9 +26,9 @@ var flagRegexp = regexp.MustCompile(
 var cmdRegexp = regexp.MustCompile(
 	`(?m)` + // multi line
 		`^(?:\s{2,}|\t)` + // starting space
-		`([\w\-\.]+)` + // command
-		`(?:\s{2,}` + // space between command and doc
-		`([^\n]+))?`) // doc
+		`(\w[\w\-\.]*)` + // command
+		`\s{2,}` + // space between command and doc
+		`([^\n]*)`) // doc
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
