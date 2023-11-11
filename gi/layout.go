@@ -69,35 +69,6 @@ const (
 )
 
 ///////////////////////////////////////////////////////////////////
-// Layouter
-
-// Layouter is the interface for layout functions, called by Layout
-// widget type.
-type Layouter interface {
-	Widget
-
-	// AsLayout returns the base Layout type
-	AsLayout() *Layout
-}
-
-// AsLayout returns the given value as a value of type Layout if the type
-// of the given value embeds Layout, or nil otherwise
-func AsLayout(k ki.Ki) *Layout {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(Layouter); ok {
-		return t.AsLayout()
-	}
-	return nil
-}
-
-// AsLayout satisfies the [LayoutEmbedder] interface
-func (t *Layout) AsLayout() *Layout {
-	return t
-}
-
-///////////////////////////////////////////////////////////////////
 // Layout
 
 // Layout is the primary node type responsible for organizing the sizes

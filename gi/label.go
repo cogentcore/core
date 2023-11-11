@@ -15,6 +15,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/mat32/v2"
 )
 
 // Label is a widget for rendering text labels -- supports full widget model
@@ -110,6 +111,7 @@ func (lb *Label) LabelStyles() {
 			s.Cursor = cursors.Text
 		}
 		s.Min.Y.Em(1)
+		s.Min.X.Ch(3)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.Align.Y = styles.AlignCenter
 		s.Grow.Set(1, 0) // critical to enable text to expand / contract for wrapping
@@ -235,7 +237,7 @@ func (lb *Label) HandleLabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
 		// hasLinks := len(lb.TextRender.Links) > 0
 		// if hasLinks {
-		// 	pos := llb.Alloc.ContentPos
+		// 	pos := llb.Alloc.Pos.Content
 		// 	for ti := range llb.TextRender.Links {
 		// 		tl := &llb.TextRender.Links[ti]
 		// 		tlb := tl.Bounds(&llb.TextRender, pos)
@@ -266,7 +268,7 @@ func (lb *Label) HandleLabelClick() {
 		if !hasLinks {
 			return
 		}
-		pos := lb.Alloc.ContentPos
+		pos := lb.Alloc.Pos.Content
 		for ti := range lb.TextRender.Links {
 			tl := &lb.TextRender.Links[ti]
 			tlb := tl.Bounds(&lb.TextRender, pos)
@@ -281,7 +283,7 @@ func (lb *Label) HandleLabelClick() {
 
 func (lb *Label) HandleLabelMouseMove() {
 	lb.On(events.MouseMove, func(e events.Event) {
-		pos := lb.Alloc.ContentPos
+		pos := lb.Alloc.Pos.Content
 		inLink := false
 		for _, tl := range lb.TextRender.Links {
 			tlb := tl.Bounds(&lb.TextRender, pos)
@@ -321,7 +323,7 @@ func (lb *Label) HandleLabelKeys() {
 }
 
 func (lb *Label) ConfigWidget(sc *Scene) {
-	lb.ConfigLabel(sc)
+	lb.ConfigLabel(sc, lb.Alloc.Size.Actual.Content)
 }
 
 // todo: ideally it would be possible to only call SetHTML once during config
@@ -329,56 +331,83 @@ func (lb *Label) ConfigWidget(sc *Scene) {
 // existing line breaks (which could come from <br> and <p> in HTML),
 // so that is never able to undo initial word wrapping from constrained sizes.
 
-func (lb *Label) ConfigLabel(sc *Scene) {
+// ConfigLabel does the HTML and Layout in TextRender for label text,
+// using current Actual.Content size to constrain layout.
+func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
 	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-	sz := lb.Alloc.Size.Content.Max(lb.Alloc.Size.Alloc)
-	if LayoutTrace {
-		fmt.Println("Label:", lb, "LayoutLabel Starting Content Size:", sz)
-	}
 	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
 }
 
+// SizeUpWrapSize is the size to use for layout during the SizeUp pass,
+// for word wrap case, where the sizing actually matters.
+// this is based on the existing styled Actual.Content aspect ratio and
+// very rough estimate of total rendered size.
+func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
+	csz := lb.Alloc.Size.Actual.Content
+	chars := float32(len(lb.Text))
+	fm := lb.Styles.Font.Face.Metrics
+	area := chars * fm.Height * fm.Ch
+	ratio := float32(1.618) // default to golden
+	if csz.X > 0 && csz.Y > 0 {
+		ratio = csz.X / csz.Y
+		fmt.Println(lb, "content size ratio:", ratio)
+	}
+	// w = ratio * h
+	// w^2 + h^2 = a
+	// (ratio*h)^2 + h^2 = a
+
+	h := mat32.Sqrt(area) + mat32.Sqrt(ratio+1)
+	w := ratio * h
+	sz := mat32.NewVec2(w, h)
+	fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
+	return sz
+}
+
 func (lb *Label) SizeUp(sc *Scene) {
-	lb.WidgetBase.SizeUp(sc)
-	if !lb.Styles.Text.HasWordWrap() {
-		lb.ConfigLabel(sc)
-		rsz := lb.TextRender.Size
-		sz := &lb.Alloc.Size
-		sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
-		sz.SetTotalFromContent()
-		if LayoutTrace {
-			fmt.Println("Label:", lb, "SizeUp:", rsz)
-		}
+	lb.WidgetBase.SizeUp(sc) // sets Actual size based on styles
+	sz := &lb.Alloc.Size
+	if lb.Styles.Text.HasWordWrap() {
+		lb.ConfigLabel(sc, lb.SizeUpWrapSize(sc))
+	} else {
+		lb.ConfigLabel(sc, sz.Actual.Content)
+	}
+	rsz := lb.TextRender.Size
+	sz.FitSizeMax(&sz.Actual.Content, rsz)
+	sz.SetTotalFromContent(&sz.Actual)
+	if LayoutTrace {
+		fmt.Println(lb, "Label SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }
 
 func (lb *Label) SizeDown(sc *Scene, iter int) bool {
+	if !lb.Styles.Text.HasWordWrap() {
+		return false
+	}
 	sz := &lb.Alloc.Size
-	prevContent := sz.Content
-	lb.SizeDownParts(sc, iter) // just in case
-	lb.ConfigLabel(sc)
+	lb.ConfigLabel(sc, sz.Alloc.Content) // use allocation
 	rsz := lb.TextRender.Size
-	sz.Content = prevContent
-	lb.Alloc.Size.SetContentMax(lb.Styles.Min.Dots(), lb.Styles.Max.Dots()) // start over..
-	sz.SetContentToFit(rsz, lb.Styles.Max.Dots())
-	sz.SetTotalFromContent()
-	re := prevContent != lb.Alloc.Size.Content
-	if re {
+	prevContent := sz.Actual.Content
+	// start over so we don't reflect hysteresis of prior guess
+	sz.SetSizeMax(&sz.Actual.Content, lb.Styles.Min.Dots().Ceil())
+	sz.FitSizeMax(&sz.Actual.Content, rsz)
+	sz.SetTotalFromContent(&sz.Actual)
+	chg := prevContent != sz.Actual.Content
+	if chg {
 		if LayoutTrace {
-			fmt.Println("Label:", lb, "Size Changed:", lb.Alloc.Size.Content, "was:", prevContent)
+			fmt.Println(lb, "Label Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
-	return re
+	return chg
 }
 
 func (lb *Label) RenderLabel(sc *Scene) {
 	rs, _, st := lb.RenderLock(sc)
 	defer lb.RenderUnlock(rs)
 	lb.RenderStdBox(sc, st)
-	lb.TextRender.Render(rs, lb.Alloc.ContentPos)
+	lb.TextRender.Render(rs, lb.Alloc.Pos.Content)
 }
 
 func (lb *Label) Render(sc *Scene) {

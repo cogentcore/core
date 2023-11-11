@@ -149,9 +149,9 @@ func (tb *TopAppBar) SizeUp(sc *Scene) {
 	tb.AllItemsToChildren(sc)
 	tb.Frame.SizeUp(sc)
 	ma := tb.Styles.MainAxis
-	sz := &tb.Alloc.Size                    // reset for others
-	sz.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
-	sz.SetTotalFromContent()
+	sz := &tb.Alloc.Size                           // reset for others
+	sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
+	sz.SetTotalFromContent(&sz.Actual)
 }
 
 // don't report any size at sizeup, etc
@@ -197,8 +197,8 @@ func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
 		tb.Frame.SizeDown(sc, iter)
 		ma := tb.Styles.MainAxis
 		sz := &tb.Alloc.Size
-		sz.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
-		sz.SetTotalFromContent()
+		sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
+		sz.SetTotalFromContent(&sz.Actual)
 		return true // needs another iter
 	}
 	if iter == 1 {
@@ -213,12 +213,12 @@ func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
 func (tb *TopAppBar) ParentSize() float32 {
 	ma := tb.Styles.MainAxis
 	_, pwb := tb.ParentWidget()
-	psz := pwb.Alloc.Size.Content.Sub(tb.Alloc.Size.Space)
+	psz := pwb.Alloc.Size.Actual.Content.Sub(tb.Alloc.Size.Space)
 	avail := psz.Dim(ma) - 4
 	// fmt.Println(pwb, pwb.Alloc.Size)
-	tb.Alloc.Size.Alloc.SetDim(ma, avail)
-	tb.Alloc.Size.Total.SetDim(ma, avail)
-	tb.Alloc.Size.Content.SetDim(ma, avail)
+	sz := &tb.Alloc.Size
+	sz.Alloc.Total.SetDim(ma, avail)
+	sz.SetContentFromTotal(&sz.Alloc)
 	return avail
 }
 
@@ -226,11 +226,11 @@ func (tb *TopAppBar) ParentSize() float32 {
 func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 	ma := tb.Styles.MainAxis
 	avail := tb.ParentSize()
-	ovsz := tb.OverflowButton.Alloc.Size.Total.Dim(ma)
+	ovsz := tb.OverflowButton.Alloc.Size.Actual.Total.Dim(ma)
 	avsz := avail - ovsz
-	tb.Alloc.Size.Alloc.SetDim(ma, avail)
-	tb.Alloc.Size.Total.SetDim(ma, avail)
-	tb.Alloc.Size.Content.SetDim(ma, avail)
+	sz := &tb.Alloc.Size
+	sz.Alloc.Total.SetDim(ma, avail)
+	sz.SetContentFromTotal(&sz.Alloc)
 	tb.OverflowItems = nil
 	n := len(tb.Kids)
 	ovidx := n - 1
@@ -240,7 +240,7 @@ func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 		if i >= n-1 {
 			return ki.Break
 		}
-		ksz := kwb.Alloc.Size.Total.Dim(ma)
+		ksz := kwb.Alloc.Size.Actual.Total.Dim(ma)
 		szsum += ksz
 		if szsum > avsz {
 			if !hasOv {

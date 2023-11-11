@@ -122,7 +122,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	}
 	// todo: units context from us to SVG??
 	zp := image.Point{}
-	sz := ic.Alloc.Size.Content.ToPoint()
+	sz := ic.Alloc.Size.Actual.Content.ToPoint()
 	if sz == zp {
 		ic.RendSize = zp
 		return

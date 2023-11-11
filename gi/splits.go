@@ -337,7 +337,7 @@ func (sl *Splits) Position(sc *Scene) {
 
 func (sl *Splits) PositionHandles(sc *Scene) {
 	od := sl.Dim.OtherDim()
-	csz := sl.Alloc.Size.Content.Dim(od)
+	csz := sl.Alloc.Size.Actual.Content.Dim(od)
 	spos := 0.5 * csz
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if i == 0 {
@@ -345,7 +345,7 @@ func (sl *Splits) PositionHandles(sc *Scene) {
 		}
 		hand := sl.Parts.Child(i - 1).(*Handle)
 		hand.Alloc.RelPos = kwb.Alloc.RelPos
-		kwb.Alloc.RelPos.SetSubDim(sl.Dim, hand.Alloc.Size.Total.Dim(sl.Dim))
+		kwb.Alloc.RelPos.SetSubDim(sl.Dim, hand.Alloc.Size.Actual.Total.Dim(sl.Dim))
 		hand.Alloc.RelPos.SetDim(od, spos)
 		// fmt.Println(hand, hand.Alloc.RelPos)
 		return ki.Continue

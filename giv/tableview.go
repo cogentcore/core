@@ -107,7 +107,7 @@ func (tv *TableView) TableViewInit() {
 				// note: this does not work:
 				// sg := tv.SliceGrid()
 				// if sg != nil {
-				// 	s.Min.X.Dot(sg.Alloc.Size.Content.X)
+				// 	s.Min.X.Dot(sg.Alloc.Size.Actual.Content.X)
 				// }
 			})
 		case "frame/grid-lay": // grid layout
@@ -409,7 +409,7 @@ func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc 
 		s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 		if len(*sg.Children()) > idx {
 			_, cwb := gi.AsWidget(sg.Child(idx))
-			wd := cwb.Alloc.Size.Total.X - 16 // todo: don't know our spacing at this point
+			wd := cwb.Alloc.Size.Actual.Total.X - 16 // todo: don't know our spacing at this point
 			s.Min.X.Dot(wd)
 			s.Max.X.Dot(wd)
 		}
@@ -922,13 +922,13 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
 	w := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
-	if w.Alloc.BBox != (image.Rectangle{}) {
+	if w.Alloc.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
-		if w.Alloc.BBox != (image.Rectangle{}) {
+		if w.Alloc.TotalBBox != (image.Rectangle{}) {
 			return w, true
 		}
 	}

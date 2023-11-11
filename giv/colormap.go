@@ -91,7 +91,7 @@ func (cv *ColorMapView) RenderColorMap(sc *gi.Scene) {
 	pc := &rs.Paint
 
 	pos := cv.Alloc.Pos
-	sz := cv.Alloc.Size.Total
+	sz := cv.Alloc.Size.Actual.Total
 	pr := pos
 	sr := sz
 	sp := pr.Dim(cv.Orient)

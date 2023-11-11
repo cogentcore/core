@@ -1232,7 +1232,7 @@ func (tf *TextField) AutoScroll() {
 
 	sz := len(tf.EditTxt)
 
-	if sz == 0 || tf.Alloc.Size.Content.X <= 0 {
+	if sz == 0 || tf.Alloc.Size.Actual.Content.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
@@ -1759,7 +1759,9 @@ func (tf *TextField) SizeUp(sc *Scene) {
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
 	nsz := mat32.NewVec2(w, tf.FontHeight)
-	tf.Alloc.Size.SetContentToFit(nsz, tf.Styles.Max.Dots())
+	sz := &tf.Alloc.Size
+	sz.FitSizeMax(&sz.Actual.Content, nsz)
+	sz.SetTotalFromContent(&sz.Actual)
 	tf.EditTxt = tmptxt
 }
 
@@ -1776,14 +1778,14 @@ func (tf *TextField) SetEffPosAndSize() {
 	// 	fmt.Println("nil parts sepas")
 	// 	tf.ConfigParts(tf.Sc)
 	// }
-	sz := tf.Alloc.Size.Content
-	pos := tf.Alloc.ContentPos
+	sz := tf.Alloc.Size.Actual.Content
+	pos := tf.Alloc.Pos.Content
 	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Button); ok {
-		pos.X += lead.Alloc.Size.Total.X
-		sz.X -= lead.Alloc.Size.Total.X
+		pos.X += lead.Alloc.Size.Actual.Total.X
+		sz.X -= lead.Alloc.Size.Actual.Total.X
 	}
 	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
-		sz.X -= trail.Alloc.Size.Total.X
+		sz.X -= trail.Alloc.Size.Actual.Total.X
 	}
 	tf.EffSize = sz
 	tf.EffPos = pos
