@@ -378,6 +378,7 @@ func (wb *WidgetBase) SetContentFitOverflow(sz mat32.Vec2) {
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
 	csz := &wb.Geom.Size.Actual.Content
+	wb.Geom.Size.SetSizeMax(csz, wb.Styles.Min.Dots().Ceil()) // start with style
 	mx := wb.Geom.Size.Max
 	oflow := &wb.Styles.Overflow
 	if oflow.X < styles.OverflowAuto || wb.Par == nil {
@@ -730,6 +731,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 		if LayoutTrace {
 			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content)
 		}
+		ly.ManageOverflow(sc, iter)
 		sz.SetTotalFromContent(&sz.Actual)
 	}
 	return chg || redo
@@ -741,10 +743,8 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	sz := &ly.Geom.Size
 	oflow := sz.Actual.Content.Sub(sz.Alloc.Content)
 	change := false
-	if iter == 0 {
-		ly.LayImpl.ScrollSize.SetZero()
-		ly.SetScrollsOff()
-	}
+	ly.LayImpl.ScrollSize.SetZero()
+	ly.SetScrollsOff()
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.Styles.Overflow.Dim(d) == styles.OverflowScroll {
 			if !ly.HasScroll[d] {
