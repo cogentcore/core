@@ -13,7 +13,7 @@ import (
 // Text is used for layout-level (widget, html-style) text styling --
 // FontStyle contains all the lower-level text rendering info used in SVG --
 // most of these are inherited
-type Text struct {
+type Text struct { //gti:add
 
 	// prop: text-align (inherited) = how to align text, horizontally. This *only* applies to the text within its containing element, and is typically relevant only for multi-line text: for single-line text, if element does not have a specified size that is different from the text size, then this has *no effect*.
 	Align Align `xml:"text-align" inherit:"true"`
@@ -67,7 +67,7 @@ var LineHeightNormal = units.Dp(-1)
 
 func (ts *Text) Defaults() {
 	ts.LineHeight = LineHeightNormal
-	ts.Align = AlignLeft
+	ts.Align = AlignStart
 	ts.AlignV = AlignBaseline
 	ts.Direction = LTR
 	ts.OrientationVert = 90
@@ -120,23 +120,19 @@ func (ts *Text) AlignFactors() (ax, ay float32) {
 	ax = 0.0
 	ay = 0.0
 	hal := ts.Align
-	switch {
-	case IsAlignMiddle(hal):
+	switch hal {
+	case AlignCenter:
 		ax = 0.5 // todo: determine if font is horiz or vert..
-	case IsAlignEnd(hal):
+	case AlignEnd:
 		ax = 1.0
 	}
 	val := ts.AlignV
-	switch {
-	case val == AlignSub:
-		ay = -0.15 // todo: fixme -- need actual font metrics
-	case val == AlignSuper:
-		ay = 0.65 // todo: fixme
-	case IsAlignStart(val):
+	switch val {
+	case AlignStart:
 		ay = 0.9 // todo: need to find out actual baseline
-	case IsAlignMiddle(val):
+	case AlignCenter:
 		ay = 0.45 // todo: determine if font is horiz or vert..
-	case IsAlignEnd(val):
+	case AlignEnd:
 		ay = -0.1 // todo: need actual baseline
 	}
 	return

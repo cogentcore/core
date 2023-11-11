@@ -954,10 +954,10 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 	vpad := float32(0) // padding at top to achieve vertical alignment
 	vextra := size.Y - vht
 	if vextra > 0 {
-		switch {
-		case styles.IsAlignMiddle(txtSty.AlignV):
+		switch txtSty.AlignV {
+		case styles.AlignCenter:
 			vpad = vextra / 2
-		case styles.IsAlignEnd(txtSty.AlignV):
+		case styles.AlignEnd:
 			vpad = vextra
 		}
 	}
@@ -976,10 +976,10 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 		ssz.X += sr.RelPos.X
 		hextra := size.X - ssz.X
 		if hextra > 0 {
-			switch {
-			case styles.IsAlignMiddle(txtSty.Align):
+			switch txtSty.Align {
+			case styles.AlignCenter:
 				sr.RelPos.X += hextra / 2
-			case styles.IsAlignEnd(txtSty.Align):
+			case styles.AlignEnd:
 				sr.RelPos.X += hextra
 			}
 		}
