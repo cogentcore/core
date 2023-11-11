@@ -84,10 +84,11 @@ func (cm *Cmd) Parse() error {
 
 	lines := strings.Split(h, "\n")
 
-	blocks := []block{}
+	blocks := []ParseBlock{}
 	prevNspc := 0
-	prevBlock := block{}
+	curBlock := ParseBlock{}
 	for _, line := range lines {
+		// get the effective number of spaces at the start of this line
 		nspc := 0
 		for _, r := range line {
 			if r == '\t' {
@@ -98,31 +99,40 @@ func (cm *Cmd) Parse() error {
 				break
 			}
 		}
+		// fmt.Println(nspc, prevNspc, line)
+		// If we have more than one space and previously had nothing,
+		// we are the start of a new block
 		if nspc > 1 && prevNspc == 0 {
 			prevNspc = nspc
-			prevBlock.name = strings.TrimSpace(line)
-		} else if nspc >= prevNspc {
-			prevBlock.doc += strings.TrimSpace(line)
-		} else {
-			blocks = append(blocks, prevBlock)
+			curBlock.Name = strings.TrimSpace(line)
+		} else if nspc > 1 && nspc >= prevNspc {
+			// If we are at the same or higher level relative to the start
+			// of this block, we are part of its documentation
+			curBlock.Doc += strings.TrimSpace(line)
+		} else if nspc < prevNspc {
+			// If we have moved backward from a block, we are done with it
+			// and push it onto the stack of blocks.
+			blocks = append(blocks, curBlock)
 			if nspc > 1 {
 				prevNspc = nspc
-				prevBlock = block{name: strings.TrimSpace(line)}
+				curBlock = ParseBlock{Name: strings.TrimSpace(line)}
 			} else {
 				prevNspc = 0
-				prevBlock = block{}
+				curBlock = ParseBlock{}
 			}
 		}
 	}
 	for _, block := range blocks {
-		fmt.Println("BLOCK", block.name, ":", block.doc)
+		fmt.Println("BLOCK", block.Name, ":", block.Doc)
 	}
 	return nil
 }
 
-type block struct {
-	name string
-	doc  string
+// ParseBlock is a block of parsed content containing the name of something and
+// the documentation for it.
+type ParseBlock struct {
+	Name string
+	Doc  string
 }
 
 // GetHelp gets the help information for the command. It tries various different
