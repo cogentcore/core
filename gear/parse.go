@@ -6,9 +6,13 @@ package gear
 
 import (
 	"fmt"
+	"regexp"
 
 	"goki.dev/xe"
 )
+
+// flagRegexp matches flags
+var flagRegexp = regexp.MustCompile(`\W\-+([\w|\-]+)`)
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
@@ -16,7 +20,23 @@ func (a *App) Parse() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(rh)
+
+	opts := flagRegexp.FindAllString(rh, -1)
+	fmt.Println(opts)
+
+	// lines := strings.Split(rh, "\n")
+	// for _, line := range lines {
+	// 	for i, r := range line {
+	// 		ispc := unicode.IsSpace(r)
+	// 		if i == 0 && !ispc {
+	// 			break
+	// 		}
+	// 		if !ispc {
+
+	// 		}
+
+	// 	}
+	// }
 	return nil
 }
 

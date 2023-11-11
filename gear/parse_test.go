@@ -7,7 +7,7 @@ package gear
 import "testing"
 
 func TestParse(t *testing.T) {
-	cmds := []string{"git"}
+	cmds := []string{"git", "goki"}
 	for _, cmd := range cmds {
 		a := NewApp(cmd)
 		err := a.Parse()
