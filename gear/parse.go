@@ -57,7 +57,7 @@ func (cm *Cmd) Parse() error {
 		slices.SortFunc(f.Names, func(a, b string) int {
 			return cmp.Compare(len(a), len(b))
 		})
-		fmt.Println(f.Names)
+		// fmt.Println(f.Names)
 		f.Name = f.Names[len(f.Names)-1]
 		cm.Flags = append(cm.Flags, f)
 	}
@@ -70,7 +70,16 @@ func (cm *Cmd) Parse() error {
 		if len(cmd) >= 3 {
 			c.Doc = cmd[2]
 		}
+
 		cm.Cmds = append(cm.Cmds, c)
+
+		// we don't want to parse the help info for help commands
+		if c.Name != "Help" {
+			err := c.Parse()
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// lines := strings.Split(rh, "\n")
