@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/xe"
 )
 
@@ -57,6 +58,16 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 			continue
 		}
 		cmd := NewCmd(cm.Cmd + " " + block.Name)
+
+		// if the normalized version of our new command is the same as the normalized
+		// version of our old command, it is probably just referencing the old command
+		// somewhere (not specifying a new command that is the exact same), which leads
+		// to infinite recursion, so we just skip it.
+		cmk := strcase.ToKebab(cm.Cmd)
+		if strcase.ToKebab(cmd.Cmd) == cmk {
+			continue
+		}
+
 		cmd.Doc = block.Doc
 		fmt.Println(cmd.Cmd)
 
