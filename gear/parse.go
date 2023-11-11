@@ -6,81 +6,35 @@ package gear
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"unicode"
 
 	"goki.dev/xe"
 )
 
-// flagRegexp matches flags.
-// The second submatch contains the flag name(s) with any dashes, commas, and spaces still included.
-var flagRegexp = regexp.MustCompile(
-	`(?m)` + // multi line
-		`(?:\s{1,16}|\t)` + // starting space
-		`((?:[ |[,(]+\-[\w-]+)+)`) // flag(s)
-
-// type parsing for flagRegexp:
-// \W\-+([\w\-]+)([= ]<(\w+)>)?
-
-// cmdRegexp matches commands.
-// The second submatch is the name of the command.
-// The third submatch, if it exists, is the description of the command.
-var cmdRegexp = regexp.MustCompile(
-	`(?m)` + // multi line
-		`^(?:\s{2,16}|\t)` + // starting space
-		`(\w[\w\-\.]*)` + // command
-		`\s{2,}` + // space between command and doc
-		`([^\n]*)`) // doc
-
 // Parse uses the help messages of the app to fill in its data fields.
 func (cm *Cmd) Parse() error {
-	h, err := cm.GetHelp()
+	blocks, err := cm.GetBlocks()
 	if err != nil {
 		return err
 	}
+	fmt.Println(blocks)
+	return nil
+}
 
-	// flags := flagRegexp.FindAllStringSubmatch(h, -1)
-	// for _, flag := range flags {
-	// 	names := flag[1]
-	// 	fields := strings.Fields(names)
+// ParseBlock is a block of parsed content containing the name of something and
+// the documentation for it.
+type ParseBlock struct {
+	Name string
+	Doc  string
+}
 
-	// 	f := &Flag{}
-	// 	for _, field := range fields {
-	// 		name := strings.Trim(field, "-,[(| \t")
-	// 		if name != "" {
-	// 			f.Names = append(f.Names, name)
-	// 		}
-	// 	}
-	// 	if len(f.Names) == 0 {
-	// 		continue
-	// 	}
-	// 	slices.SortFunc(f.Names, func(a, b string) int {
-	// 		return cmp.Compare(len(a), len(b))
-	// 	})
-	// 	f.Name = f.Names[len(f.Names)-1]
-	// 	cm.Flags = append(cm.Flags, f)
-	// }
-
-	// cmds := cmdRegexp.FindAllStringSubmatch(h, -1)
-	// for _, cmd := range cmds {
-	// 	c := NewCmd(cm.Cmd + " " + cmd[1])
-	// 	// remove first part of command for name (the app name)
-	// 	c.Name = sentencecase.Of(strings.Join(strings.Fields(c.Name)[1:], " "))
-	// 	if len(cmd) >= 3 {
-	// 		c.Doc = cmd[2]
-	// 	}
-
-	// 	cm.Cmds = append(cm.Cmds, c)
-
-	// 	// we don't want to parse the help info for help commands
-	// 	if c.Name != "Help" {
-	// 		err := c.Parse()
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 	}
-	// }
+// GetBlocks gets the [ParseBlock] objects for this command.
+func (cm *Cmd) GetBlocks() ([]ParseBlock, error) {
+	h, err := cm.GetHelp()
+	if err != nil {
+		return nil, err
+	}
 
 	lines := strings.Split(h, "\n")
 
@@ -165,17 +119,7 @@ func (cm *Cmd) Parse() error {
 			}
 		}
 	}
-	for _, block := range blocks {
-		fmt.Println(block.Name, "|", block.Doc)
-	}
-	return nil
-}
-
-// ParseBlock is a block of parsed content containing the name of something and
-// the documentation for it.
-type ParseBlock struct {
-	Name string
-	Doc  string
+	return blocks, nil
 }
 
 // GetHelp gets the help information for the command. It tries various different
