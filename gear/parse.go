@@ -20,12 +20,11 @@ func (cm *Cmd) Parse() error {
 	if err != nil {
 		return err
 	}
-	cm.SetFromBlocks(blocks)
-	return nil
+	return cm.SetFromBlocks(blocks)
 }
 
 // SetFromBlocks sets the information of the command from the given [ParseBlock] objects.
-func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
+func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 	for _, block := range blocks {
 		// a - indicates a flag
 		if strings.HasPrefix(block.Name, "-") {
@@ -59,8 +58,15 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
 		}
 		cmd := NewCmd(cm.Cmd + " " + block.Name)
 		cmd.Doc = block.Doc
-		fmt.Println(cmd)
+		fmt.Println(cmd.Cmd)
+
+		// now we must recursively parse the subcommand and any of its subcommands
+		err := cmd.Parse()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // ParseBlock is a block of parsed content containing the name of something and
