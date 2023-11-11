@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/ki/v2"
@@ -32,9 +33,10 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBarStd(tb)
 	for _, cmd := range a.Cmd.Cmds {
 		cmd := cmd
-		gi.NewButton(tb).SetText(cmd.Name).SetTooltip(cmd.Doc).
+		fields := strings.Fields(cmd.Cmd)
+		text := sentencecase.Of(strcase.ToCamel(strings.Join(fields[1:], " ")))
+		gi.NewButton(tb).SetText(text).SetTooltip(cmd.Doc).
 			OnClick(func(e events.Event) {
-				fields := strings.Fields(cmd.Cmd)
 				grr.Log0(xe.Verbose().Run(fields[0], fields[1:]...))
 			})
 	}
