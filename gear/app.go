@@ -17,7 +17,7 @@ type App struct {
 	gi.Frame
 
 	// Cmd is the root command associated with this app.
-	Cmd Cmd
+	Cmd *Cmd
 }
 
 var _ ki.Ki = (*App)(nil)

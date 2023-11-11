@@ -17,7 +17,7 @@ var AppType = gti.AddType(&gti.Type{
 	Doc:        "App is a GUI view of a gear command.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Cmd", &gti.Field{Name: "Cmd", Type: "goki.dev/gear/gear.Cmd", LocalType: "Cmd", Doc: "Cmd is the root command associated with this app.", Directives: gti.Directives{}, Tag: ""}},
+		{"Cmd", &gti.Field{Name: "Cmd", Type: "*goki.dev/gear/gear.Cmd", LocalType: "*Cmd", Doc: "Cmd is the root command associated with this app.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -46,7 +46,7 @@ func (t *App) New() ki.Ki {
 
 // SetCmd sets the [App.Cmd]:
 // Cmd is the root command associated with this app.
-func (t *App) SetCmd(v Cmd) *App {
+func (t *App) SetCmd(v *Cmd) *App {
 	t.Cmd = v
 	return t
 }
