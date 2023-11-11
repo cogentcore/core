@@ -5,7 +5,6 @@
 package gear
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -17,7 +16,6 @@ func TestParse(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		fmt.Println(a.Flags)
 	}
 }
 

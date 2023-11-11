@@ -11,11 +11,17 @@ import (
 	"goki.dev/xe"
 )
 
-// flagRegexp matches flags
+// flagRegexp matches flags.
+// The second match is the name of the flag.
 var flagRegexp = regexp.MustCompile(`\W\-+([\w\-]+)`)
 
-// type parsing:
+// type parsing for flagRegexp:
 // \W\-+([\w\-]+)([= ]<(\w+)>)?
+
+// cmdRegexp matches commands.
+// The second match is the name of the command.
+// The fourth match, if it exists, is the description of the command.
+var cmdRegexp = regexp.MustCompile(`\n\s{2,}(\w+)(\s{2,}([^\n]+))?`)
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
@@ -28,6 +34,16 @@ func (a *App) Parse() error {
 	for _, flag := range flags {
 		// second item has the submatch
 		a.Flags = append(a.Flags, flag[1])
+	}
+
+	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
+	for _, cmd := range cmds {
+		c := NewApp(cmd[1])
+		if len(cmd) >= 4 {
+			c.Doc = cmd[3]
+		}
+		fmt.Println(c.Command)
+		a.Commands = append(a.Commands, c)
 	}
 
 	// lines := strings.Split(rh, "\n")

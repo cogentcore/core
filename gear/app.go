@@ -15,8 +15,12 @@ type App struct {
 	Command string
 	// Name is the formatted name of the app (eg: "Git")
 	Name string
+	// Doc is the documentation for the app
+	Doc string
 	// Flags contains the flags of the app
 	Flags []string
+	// Commands contains the subcommands of the app
+	Commands []*App
 }
 
 // NewApp makes a new [App] object from the given command name.
