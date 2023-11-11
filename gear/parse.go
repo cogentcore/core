@@ -25,7 +25,7 @@ var flagRegexp = regexp.MustCompile(
 // The third submatch, if it exists, is the description of the command.
 var cmdRegexp = regexp.MustCompile(
 	`(?m)` + // multi line
-		`^(?:\s{2,}|\t)` + // starting space
+		`^(?:\s{2,16}|\t)` + // starting space
 		`(\w[\w\-\.]*)` + // command
 		`\s{2,}` + // space between command and doc
 		`([^\n]*)`) // doc
