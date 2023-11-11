@@ -202,58 +202,30 @@ func (lb *Label) LabelStyles() {
 	})
 }
 
-// OpenLink opens given link, either by sending LinkSig signal if there are
-// receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
-// non-nil (which by default opens user's default browser via
-// oswin/App.OpenURL())
-func (lb *Label) OpenLink(tl *paint.TextLink) {
-	goosi.TheApp.OpenURL(tl.URL)
-	// tl.Widget = lb.This() // todo: needs this
-	// if len(lb.LinkSig.Cons) == 0 {
-	// 	if paint.TextLinkHandler != nil {
-	// 		if paint.TextLinkHandler(*tl) {
-	// 			return
-	// 		}
-	// 	}
-	// 	if paint.URLHandler != nil {
-	// 		paint.URLHandler(tl.URL)
-	// 	}
-	// 	return
-	// }
-	// lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
-}
-
-// func (lb *Label) HandleEvent(ev events.Event) {
-// 	// hasLinks := len(lb.TextRender.Links) > 0
-// 	// if !hasLinks {
-// 	// 	lb.Events.Ex(events.MouseMove)
-// 	// }
-// }
-
 func (lb *Label) HandleLabelEvents() {
 	lb.HandleWidgetEvents()
-	lb.HandleLabelLongHover()
+	// lb.HandleLabelLongHover()
 	lb.HandleLabelClick()
 	lb.HandleLabelMouseMove()
 	lb.HandleLabelKeys()
 }
 
-func (lb *Label) HandleLabelLongHover() {
-	lb.On(events.LongHoverStart, func(e events.Event) {
-		fmt.Println("lb lhs")
-		pos := lb.Geom.Pos.Content
-		for _, tl := range lb.TextRender.Links {
-			tlb := tl.Bounds(&lb.TextRender, pos)
-			fmt.Println(pos, tlb, e.LocalPos(), e.Pos())
-			if e.LocalPos().In(tlb) {
-				fmt.Println("ntt")
-				NewTooltipText(lb, tl.URL, tlb.Min).Run()
-				e.SetHandled()
-				return
-			}
-		}
-	})
-}
+// func (lb *Label) HandleLabelLongHover() {
+// 	lb.On(events.LongHoverStart, func(e events.Event) {
+// 		fmt.Println("lb lhs")
+// 		pos := lb.Geom.Pos.Content
+// 		for _, tl := range lb.TextRender.Links {
+// 			tlb := tl.Bounds(&lb.TextRender, pos)
+// 			fmt.Println(pos, tlb, e.LocalPos(), e.Pos())
+// 			if e.LocalPos().In(tlb) {
+// 				fmt.Println("ntt")
+// 				NewTooltipText(lb, tl.URL, tlb.Min).Run()
+// 				e.SetHandled()
+// 				return
+// 			}
+// 		}
+// 	})
+// }
 
 func (lb *Label) HandleLabelClick() {
 	lb.OnClick(func(e events.Event) {
@@ -262,7 +234,7 @@ func (lb *Label) HandleLabelClick() {
 			tl := &lb.TextRender.Links[ti]
 			tlb := tl.Bounds(&lb.TextRender, pos)
 			if e.LocalPos().In(tlb) {
-				lb.OpenLink(tl)
+				goosi.TheApp.OpenURL(tl.URL)
 				e.SetHandled()
 				return
 			}
@@ -278,6 +250,10 @@ func (lb *Label) HandleLabelMouseMove() {
 			tlb := tl.Bounds(&lb.TextRender, pos)
 			if e.LocalPos().In(tlb) {
 				inLink = true
+				if lb.StateIs(states.LongHovered) || lb.StateIs(states.LongPressed) {
+					NewTooltipText(lb, tl.URL, tlb.Min).Run()
+					e.SetHandled()
+				}
 				break
 			}
 		}
