@@ -55,6 +55,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 			Name: strcase.ToCamel(flag.Name),
 			// TODO(kai/gear): support type determination
 			Type: reflect.TypeOf(""),
+			Tag:  reflect.StructTag(`desc:"` + flag.Doc + `"`),
 		}
 		if used[sf.Name] {
 			// TODO(kai/gear): consider better approach to unique names
