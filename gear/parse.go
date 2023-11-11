@@ -80,6 +80,10 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 
 		cmd := NewCmd(cm.Cmd + " " + block.Name)
 
+		if len(strings.Fields(cmd.Cmd)) > 2 {
+			continue
+		}
+
 		if cmdsDone[cmd.Cmd] {
 			continue
 		}
