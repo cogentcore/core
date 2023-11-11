@@ -25,7 +25,7 @@ import (
 
 // see:
 //	- render.go for scene-based rendering code
-//	- widglayout for layout
+//	- layimpl.go for layout
 //	- style.go for style
 
 // Scene contains a Widget tree, rooted in an embedded Frame layout,
