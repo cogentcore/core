@@ -349,9 +349,6 @@ func (wb *WidgetBase) NewParts() *Layout {
 	parts.SetFlag(true, ki.Field)
 	parts.SetFlag(false, ki.Updating) // we inherit this from parent, but parent doesn't auto-clear us
 	wb.Parts = parts
-	parts.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
 	return parts
 }
 

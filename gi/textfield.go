@@ -228,9 +228,7 @@ func (tf *TextField) TextFieldStyles() {
 		switch w.PathFrom(tf) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Align.Y = styles.AlignCenter
-				s.Overflow.X = styles.OverflowHidden
 				s.Gap.Zero()
 			})
 		case "parts/lead-icon":
@@ -268,6 +266,7 @@ func (tf *TextField) TextFieldStyles() {
 				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Align.Y = styles.AlignCenter
+				// s.Align.X = styles.AlignEnd
 				s.Margin.SetLeft(units.Dp(8))
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
@@ -1678,7 +1677,6 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	config := ki.Config{}
 	leadIconIdx, trailIconIdx := -1, -1
 	if !tf.LeadingIcon.IsNil() {
-		// config.Add(StretchType, "lead-icon-str")
 		config.Add(ButtonType, "lead-icon")
 		leadIconIdx = 0
 	}
@@ -1759,7 +1757,7 @@ func (tf *TextField) SizeUp(sc *Scene) {
 	tf.UpdateRenderAll()
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
-	w += 2.0 // give some extra buffer
+	// w += 2.0 // give some extra buffer
 	nsz := mat32.NewVec2(w, tf.FontHeight)
 	sz := &tf.Geom.Size
 	sz.FitSizeMax(&sz.Actual.Content, nsz)

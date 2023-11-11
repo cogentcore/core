@@ -81,7 +81,13 @@ func (sp *Spinner) OnInit() {
 func (sp *Spinner) SpinnerStyles() {
 	sp.TextFieldStyles()
 	sp.Style(func(s *styles.Style) {
-		s.Min.X.Em(8)
+		if sp.IsReadOnly() {
+			s.Min.X.Ch(4)
+			s.Max.X.Ch(8)
+		} else {
+			s.Min.X.Ch(10)
+			s.Max.X.Ch(16)
+		}
 	})
 }
 

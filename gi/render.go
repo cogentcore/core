@@ -314,9 +314,10 @@ func (sc *Scene) LayoutScene() {
 	if LayoutTrace {
 		fmt.Println("\n############################\nSizeDown start:", sc)
 	}
-	for iter := 0; iter < 3; iter++ { // 3  > 2; 4 same as 3
+	maxIter := 3
+	for iter := 0; iter < maxIter; iter++ { // 3  > 2; 4 same as 3
 		redo := sc.SizeDown(sc, iter)
-		if redo {
+		if redo && iter < maxIter-1 {
 			if LayoutTrace {
 				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
 			}

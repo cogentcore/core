@@ -3,7 +3,6 @@ package main
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/icons"
 )
 
 func main() { gimain.Run(app) }
@@ -12,11 +11,16 @@ func app() {
 	// gi.WinEventTrace = true
 	// gi.EventTrace = true
 	gi.LayoutTrace = true
-	gi.RenderTrace = true
+	gi.LayoutTraceDetail = true
+	// gi.RenderTrace = true
 
-	sc := gi.NewScene().SetTitle("Basic").SetTopAppBar(func(tb *gi.TopAppBar) {})
+	sc := gi.NewScene().SetTitle("Basic")
 
-	gi.NewIcon(sc).SetIcon(icons.Add)
+	gi.DefaultTopAppBar = nil
+
+	gi.NewTextField(sc).AddClearButton()
+
+	// gi.NewIcon(sc).SetIcon(icons.Add)
 
 	// gi.NewLabel(sc).SetText("Hello, World!")
 

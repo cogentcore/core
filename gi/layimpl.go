@@ -681,10 +681,16 @@ func (wb *WidgetBase) SizeDownParts(sc *Scene, iter int) bool {
 	if wb.Parts == nil {
 		return false
 	}
+	sz := &wb.Geom.Size
 	psz := &wb.Parts.Geom.Size
-	psz.Alloc.Total = wb.Geom.Size.Alloc.Content // parts = content
+	pgrow, _ := wb.GrowToAllocSize(sc, sz.Actual.Content, sz.Alloc.Content)
+	psz.Alloc.Total = pgrow // parts = content
 	psz.SetContentFromTotal(&psz.Alloc)
-	return wb.Parts.SizeDown(sc, iter)
+	redo := wb.Parts.SizeDown(sc, iter)
+	if redo && LayoutTrace {
+		fmt.Println(wb, "Parts triggered redo")
+	}
+	return redo
 }
 
 // SizeDownChildren calls SizeDown on the Children.
@@ -695,10 +701,40 @@ func (wb *WidgetBase) SizeDownChildren(sc *Scene, iter int) bool {
 	redo := false
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		re := kwi.SizeDown(sc, iter)
+		if re && LayoutTrace {
+			fmt.Println(wb, "SizeDownChildren child:", kwb.Nm, "triggered redo")
+		}
 		redo = redo || re
 		return ki.Continue
 	})
 	return redo
+}
+
+// GrowToAllocSize returns the potential size that widget could grow,
+// for any dimension with a non-zero Grow factor.
+// If Grow is < 1, then the size is increased in proportion, but
+// any factor > 1 produces a full fill along that dimension.
+// Returns true if this resulted in a change.
+func (wb *WidgetBase) GrowToAllocSize(sc *Scene, act, alloc mat32.Vec2) (mat32.Vec2, bool) {
+	if sc.Is(ScPrefSizing) {
+		return act, false
+	}
+	change := false
+	for d := mat32.X; d <= mat32.Y; d++ {
+		grw := wb.Styles.Grow.Dim(d)
+		allocd := alloc.Dim(d)
+		actd := act.Dim(d)
+		if grw > 0 && allocd > actd {
+			grw := min(1, grw)
+			nsz := mat32.Ceil(actd + grw*(allocd-actd))
+			nsz = mat32.MinPos(nsz, wb.Geom.Size.Max.Dim(d))
+			if nsz != actd {
+				change = true
+			}
+			act.SetDim(d, nsz)
+		}
+	}
+	return act, change
 }
 
 /////////////// Layout
@@ -786,6 +822,9 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	ly.This().(Layouter).LayoutSpace() // adds the scroll space
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
+	if change && LayoutTrace {
+		fmt.Println(ly, "ManageOverflow changed")
+	}
 	return change
 }
 
@@ -942,12 +981,12 @@ func (wb *WidgetBase) SizeFinal(sc *Scene) {
 
 // SizeFinalWidget is the standard Widget SizeFinal pass
 func (wb *WidgetBase) SizeFinalWidget(sc *Scene) {
-	wb.SizeFinalParts(sc)
 	sz := &wb.Geom.Size
-	sz.SetTotalFromContent(&sz.Actual)
 	sz.FinalUp = sz.Actual // keep it before we grow
 	wb.GrowToAlloc(sc)
 	wb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
+	wb.SizeFinalParts(sc)
+	sz.SetTotalFromContent(&sz.Actual)
 }
 
 // GrowToAlloc grows our Actual size up to current Alloc size
@@ -959,27 +998,16 @@ func (wb *WidgetBase) GrowToAlloc(sc *Scene) bool {
 	if sc.Is(ScPrefSizing) {
 		return false
 	}
-	change := false
 	sz := &wb.Geom.Size
-	act := sz.Actual.Total
-	for d := mat32.X; d <= mat32.Y; d++ {
-		grw := wb.Styles.Grow.Dim(d)
-		alloc := sz.Alloc.Total.Dim(d)
-		actd := act.Dim(d)
-		if grw > 0 && alloc > actd {
-			change = true
-			grw := min(1, grw)
-			act.SetDim(d, mat32.Ceil(actd+grw*(alloc-actd)))
-		}
-	}
+	act, change := wb.GrowToAllocSize(sc, sz.Actual.Total, sz.Alloc.Total)
 	if change {
-		sz.FitSizeMax(&sz.Actual.Total, act)
+		sz.Actual.Total = act // already has max constraint
 		sz.SetContentFromTotal(&sz.Actual)
 		if wb.Styles.LayoutHasParSizing() {
 			// todo: requires some additional logic to see if actually changes something
 		}
 		if LayoutTrace {
-			fmt.Println(wb, "GrowToAlloc:", sz.Alloc.Total)
+			fmt.Println(wb, "GrowToAlloc:", sz.Alloc.Total, "actual:", sz.Actual.Total)
 		}
 	}
 	return change

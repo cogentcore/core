@@ -567,6 +567,7 @@ func (tb *Tab) TabStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
+				s.Align.Y = styles.AlignCenter
 				s.Overflow.X = styles.OverflowHidden // no scrollbars!
 			})
 		case "parts/icon":
