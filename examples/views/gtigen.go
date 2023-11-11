@@ -64,6 +64,7 @@ var _ = gti.AddType(&gti.Type{
 		{"Cond1", &gti.Field{Name: "Cond1", Type: "string", LocalType: "string", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond==0\""}},
 		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/gi/v2/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond>=0\""}},
 		{"Val", &gti.Field{Name: "Val", Type: "float32", LocalType: "float32", Doc: "a value", Directives: gti.Directives{}, Tag: ""}},
+		{"Vec", &gti.Field{Name: "Vec", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		{"Things", &gti.Field{Name: "Things", Type: "[]*goki.dev/gi/v2/examples/views.TableStruct", LocalType: "[]*TableStruct", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		{"Stuff", &gti.Field{Name: "Stuff", Type: "[]float32", LocalType: "[]float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
