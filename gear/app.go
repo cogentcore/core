@@ -24,6 +24,7 @@ type App struct {
 var _ ki.Ki = (*App)(nil)
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
+	gi.DefaultTopAppBarStd(tb)
 	for _, cmd := range a.Cmd.Cmds {
 		gi.NewButton(tb).SetText(cmd.Name).SetTooltip(cmd.Doc)
 	}
@@ -55,7 +56,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	stt := reflect.StructOf(sfs)
 	st := reflect.New(stt)
 
-	giv.NewStructView(a).SetStruct(st)
+	giv.NewStructView(a).SetStruct(st.Interface())
 
-	a.UpdateEndLayout(updt)
+	a.UpdateEnd(updt)
 }
