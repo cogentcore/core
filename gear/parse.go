@@ -99,16 +99,22 @@ func (cm *Cmd) Parse() error {
 				break
 			}
 		}
-		// fmt.Println(nspc, prevNspc, line)
+		fmt.Println(nspc, prevNspc, line)
 		// If we have more than one space and previously had nothing,
 		// we are the start of a new block
 		if nspc > 1 && prevNspc == 0 {
-			prevNspc = nspc
 			curBlock.Name = strings.TrimSpace(line)
+			prevNspc = nspc
 		} else if nspc > 1 && nspc >= prevNspc {
 			// If we are at the same or higher level relative to the start
 			// of this block, we are part of its documentation
+
+			// we add a space to separate lines
+			if curBlock.Doc != "" {
+				curBlock.Doc += " "
+			}
 			curBlock.Doc += strings.TrimSpace(line)
+			prevNspc = nspc
 		} else if nspc < prevNspc {
 			// If we have moved backward from a block, we are done with it
 			// and push it onto the stack of blocks.
