@@ -239,11 +239,14 @@ func (lb *Label) HandleLabelClickStd() {
 func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 	lb.OnClick(func(e events.Event) {
 		pos := lb.Geom.Pos.Content
-		for ti := range lb.TextRender.Links {
-			tl := &lb.TextRender.Links[ti]
+		for _, tl := range lb.TextRender.Links {
+			// TODO(kai/link): is there a better way to be safe here?
+			if tl.Label == "" {
+				continue
+			}
 			tlb := tl.Bounds(&lb.TextRender, pos)
 			if e.LocalPos().In(tlb) {
-				openLink(tl)
+				openLink(&tl)
 				e.SetHandled()
 				return
 			}
@@ -256,6 +259,10 @@ func (lb *Label) HandleLabelMouseMove() {
 		pos := lb.Geom.Pos.Content
 		inLink := false
 		for _, tl := range lb.TextRender.Links {
+			// TODO(kai/link): is there a better way to be safe here?
+			if tl.Label == "" {
+				continue
+			}
 			tlb := tl.Bounds(&lb.TextRender, pos)
 			if e.LocalPos().In(tlb) {
 				inLink = true
