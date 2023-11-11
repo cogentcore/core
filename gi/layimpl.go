@@ -89,7 +89,7 @@ const (
 // Layouter
 
 // Layouter is the interface for layout functions, called by Layout
-// widget type during the SizeUp, SizeDown and Position Layout passes.
+// widget type during the various Layout passes.
 type Layouter interface {
 	Widget
 
@@ -144,9 +144,12 @@ func (ct GeomCT) String() string {
 // GeomSize has Layout sizes for Actual and Alloc, and Space for the difference
 // between Content and Total
 type GeomSize struct {
-	// Actual is the actual size required by the element based on its content
-	// This is the bottom-up constraint computed by SizeUp.
-	// For flexible elements, it can change based on resizing from Alloc.
+	// Actual is the actual size required by the element based on its content.
+	// This is initially the bottom-up constraint computed by SizeUp.
+	// For flexible elements, it can change based on resizing from Alloc
+	// during SizeDown.  For SizeFinal, widgets can grow to take up the
+	// full final Alloc size -- their size prior to that is recorded
+	// in FinalUp which is used for alignment positioning.
 	Actual GeomCT `view:"inline"`
 
 	// Alloc is the top-down allocated size, based on available visible space,
@@ -155,6 +158,11 @@ type GeomSize struct {
 	// Grow factors.  When Actual < Alloc, alignment factors determine positioning
 	// within the allocated space.
 	Alloc GeomCT
+
+	// FinalUp is the final bottom-up Actual size, prior to the Grow step during
+	// SizeFinal.  This is the true bottom-up content size, and is used for alignment
+	// positioning within the full allocated layout size.
+	FinalUp GeomCT
 
 	// Space is total extra space that, when added to Content, results in the Total size.
 	// This includes padding, total effective margin (border, shadow, etc), scrollbars, Gap
@@ -927,10 +935,11 @@ func (wb *WidgetBase) SizeFinal(sc *Scene) {
 
 // SizeFinalWidget is the standard Widget SizeFinal pass
 func (wb *WidgetBase) SizeFinalWidget(sc *Scene) {
-	wb.GrowToAlloc()
 	wb.SizeFinalParts(sc)
 	sz := &wb.Geom.Size
 	sz.SetTotalFromContent(&sz.Actual)
+	sz.FinalUp = sz.Actual // keep it before we grow
+	wb.GrowToAlloc(sc)
 	wb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 }
 
@@ -939,7 +948,10 @@ func (wb *WidgetBase) SizeFinalWidget(sc *Scene) {
 // If Grow is < 1, then the size is increased in proportion, but
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
-func (wb *WidgetBase) GrowToAlloc() bool {
+func (wb *WidgetBase) GrowToAlloc(sc *Scene) bool {
+	if sc.Is(ScPrefSizing) {
+		return false
+	}
 	change := false
 	sz := &wb.Geom.Size
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -991,6 +1003,8 @@ func (ly *Layout) SizeFinalLay(sc *Scene) {
 	sz := &ly.Geom.Size
 	sz.FitSizeMax(&sz.Actual.Content, ksz) // note: get full amount here, regardless of overflow
 	sz.SetTotalFromContent(&sz.Actual)
+	sz.FinalUp = sz.Actual // keep it before we grow
+	ly.GrowToAlloc(sc)
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 }
 
@@ -1024,8 +1038,7 @@ func (wb *WidgetBase) StyleSizeUpdate(sc *Scene) bool {
 //		Position
 
 // Position uses the final sizes to set relative positions within layouts
-// according to alignment settings, and Grow elements to their actual
-// Alloc size per Styles settings and widget-specific behavior.
+// according to alignment settings.
 func (wb *WidgetBase) Position(sc *Scene) {
 	wb.PositionWidget(sc)
 }
@@ -1076,7 +1089,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 
 	sz := &ly.Geom.Size
 	var stspc mat32.Vec2
-	cdiff := sz.Alloc.Content.Sub(sz.Actual.Content)
+	cdiff := sz.Actual.Content.Sub(sz.FinalUp.Content)
 	if cdiff.X > 0 {
 		stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
 		if LayoutTrace {
@@ -1117,8 +1130,12 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		lastAsz = asz
 		return ki.Continue
 	})
+	if maxs.X > sz.Actual.Content.X || maxs.Y > sz.Actual.Content.Y {
+		fmt.Println(ly, "Layout Position error: max position exceeds actual content size:", maxs, "content:", sz.Actual.Content)
+	}
+
 	if LayoutTrace {
-		fmt.Println("pos:", ly, "max:", maxs)
+		fmt.Println(ly, "Position max:", maxs)
 	}
 }
 
@@ -1181,21 +1198,28 @@ func (wb *WidgetBase) SetBBoxesFromAllocs() {
 func (wb *WidgetBase) SetBBoxes(sc *Scene) {
 	_, pwb := wb.ParentWidget()
 	var parBB image.Rectangle
-	if pwb != nil {
-		parBB = pwb.Geom.ContentBBox
+	if pwb == nil { // scene
+		sz := &wb.Geom.Size
+		wb.Geom.TotalBBox = mat32.RectFromPosSizeMax(mat32.Vec2{}, sz.Alloc.Total)
+		csz := sz.Alloc.Total.Sub(sz.Space).Add(sz.InnerSpace)
+		wb.Geom.ContentBBox = mat32.RectFromPosSizeMax(wb.Geom.Pos.Content, csz)
+		if LayoutTrace {
+			fmt.Println(wb, "Total BBox:", wb.Geom.TotalBBox)
+			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)
+		}
 	} else {
-		parBB.Max = sc.SceneGeom.Size
-	}
-	bb := wb.Geom.TotalRect()
-	wb.Geom.TotalBBox = parBB.Intersect(bb)
-	if LayoutTrace {
-		fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Geom.TotalBBox)
-	}
+		parBB = pwb.Geom.ContentBBox
+		bb := wb.Geom.TotalRect()
+		wb.Geom.TotalBBox = parBB.Intersect(bb)
+		if LayoutTrace {
+			fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Geom.TotalBBox)
+		}
 
-	cbb := wb.Geom.ContentRect()
-	wb.Geom.ContentBBox = parBB.Intersect(cbb)
-	if LayoutTrace {
-		fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Geom.ContentBBox)
+		cbb := wb.Geom.ContentRect()
+		wb.Geom.ContentBBox = parBB.Intersect(cbb)
+		if LayoutTrace {
+			fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Geom.ContentBBox)
+		}
 	}
 	wb.ScenePosParts(sc)
 }
