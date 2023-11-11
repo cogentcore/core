@@ -120,8 +120,8 @@ func (cm *Cmd) Parse() error {
 			// Therefore, we make a block with this info, push it onto the stack, clear any
 			// previous info, and then continue to the next line.
 			if nspc > 1 {
-				before := string(rtsline[:i])
-				after := string(rtsline[i:])
+				before := strings.TrimSpace(string(rtsline[:i]))
+				after := strings.TrimSpace(string(rtsline[i:]))
 				block := ParseBlock{Name: before, Doc: after}
 				blocks = append(blocks, block)
 				curBlock = ParseBlock{}
@@ -166,7 +166,7 @@ func (cm *Cmd) Parse() error {
 		}
 	}
 	for _, block := range blocks {
-		fmt.Println("BLOCK", block.Name, ":", block.Doc)
+		fmt.Println(block.Name, "|", block.Doc)
 	}
 	return nil
 }
