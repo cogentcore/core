@@ -281,15 +281,13 @@ func (lb *Label) HandleLabelMouseMove() {
 				break
 			}
 		}
-		_ = inLink
-		/*
-			// TODO: figure out how to get links to work with new cursor setup
-			if inLink {
-				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
-			} else {
-				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
-			}
-		*/
+		if inLink {
+			lb.Styles.Cursor = cursors.Pointer
+		} else if lb.AbilityIs(abilities.Selectable) {
+			lb.Styles.Cursor = cursors.Text
+		} else {
+			lb.Styles.Cursor = cursors.None
+		}
 	})
 }
 
