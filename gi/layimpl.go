@@ -341,7 +341,7 @@ func (ls *LayImplState) CellsSize() mat32.Vec2 {
 		}
 		ksz.SetDim(ma, sum)
 	}
-	return ksz
+	return ksz.Ceil()
 }
 
 // StackTopWidget returns the StackTop element as a widget
@@ -713,7 +713,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	// need scrollbars?  adds to Space and Actual.Total if so.
 	// Alloc.Content is *reduced* by any extra space at this point --
 	// next iteration will increase this if possible.
-	chg := ly.ManageOverflow(sc, iter)
+	// chg := ly.ManageOverflow(sc, iter)
 
 	extra := sz.Alloc.Content.Sub(sz.Actual.Content)
 	if extra.X > 0 || extra.Y > 0 {
@@ -731,9 +731,9 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 		if LayoutTrace {
 			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content)
 		}
-		ly.ManageOverflow(sc, iter)
 		sz.SetTotalFromContent(&sz.Actual)
 	}
+	chg := ly.ManageOverflow(sc, iter)
 	return chg || redo
 }
 
@@ -757,7 +757,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	if !sc.Is(ScPrefSizing) {
 		for d := mat32.X; d <= mat32.Y; d++ {
 			ofd := oflow.Dim(d)
-			if ofd <= 0 {
+			if ofd <= -1 {
 				continue
 			}
 			switch ly.Styles.Overflow.Dim(d) {
@@ -1005,6 +1005,7 @@ func (ly *Layout) SizeFinalLay(sc *Scene) {
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.FinalUp = sz.Actual // keep it before we grow
 	ly.GrowToAlloc(sc)
+	// ly.ManageOverflow(sc, 0)
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 }
 
@@ -1130,11 +1131,10 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		lastAsz = asz
 		return ki.Continue
 	})
-	if maxs.X > sz.Actual.Content.X || maxs.Y > sz.Actual.Content.Y {
-		fmt.Println(ly, "Layout Position error: max position exceeds actual content size:", maxs, "content:", sz.Actual.Content)
-	}
-
 	if LayoutTrace {
+		if maxs.X > sz.Actual.Content.X+2 || maxs.Y > sz.Actual.Content.Y+2 {
+			fmt.Println(ly, "Layout Position error: max position exceeds actual content size:", maxs, "content:", sz.Actual.Content)
+		}
 		fmt.Println(ly, "Position max:", maxs)
 	}
 }
