@@ -29,7 +29,7 @@ var (
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
 func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
-	NewButton(tb).SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
+	NewButton(tb, "back").SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
 		stg := tb.Sc.MainStage()
 		mm := stg.StageMgr
 		if mm == nil {
