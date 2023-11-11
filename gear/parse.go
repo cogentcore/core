@@ -54,10 +54,12 @@ func (cm *Cmd) Parse() error {
 				f.Names = append(f.Names, name)
 			}
 		}
+		if len(f.Names) == 0 {
+			continue
+		}
 		slices.SortFunc(f.Names, func(a, b string) int {
 			return cmp.Compare(len(a), len(b))
 		})
-		// fmt.Println(f.Names)
 		f.Name = f.Names[len(f.Names)-1]
 		cm.Flags = append(cm.Flags, f)
 	}
