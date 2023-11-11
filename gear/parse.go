@@ -14,6 +14,9 @@ import (
 // flagRegexp matches flags
 var flagRegexp = regexp.MustCompile(`\W\-+([\w\-]+)`)
 
+// type parsing:
+// \W\-+([\w\-]+)([= ]<(\w+)>)?
+
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
 	rh, err := a.GetHelp("")
