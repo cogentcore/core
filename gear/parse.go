@@ -99,7 +99,41 @@ func (cm *Cmd) Parse() error {
 				break
 			}
 		}
-		fmt.Println(nspc, prevNspc, line)
+
+		tsline := strings.TrimSpace(line)
+		rtsline := []rune(tsline)
+		nspc = 0
+		gotMiddleSpace := false
+		for i, r := range rtsline {
+			if r == '\t' {
+				nspc += 4
+			} else if unicode.IsSpace(r) {
+				nspc += 1
+			}
+			// if we have already had spaces and now have a non-space,
+			// then we have broken the space sequence and do not have a middle space.
+			if nspc > 0 && !unicode.IsSpace(r) {
+				break
+			}
+			// If we have more than one effective space in the middle of the line, we
+			// interpret that as a separator between the name and doc of a standalone block.
+			// Therefore, we make a block with this info, push it onto the stack, clear any
+			// previous info, and then continue to the next line.
+			if nspc > 1 {
+				before := string(rtsline[:i])
+				after := string(rtsline[i:])
+				block := ParseBlock{Name: before, Doc: after}
+				blocks = append(blocks, block)
+				curBlock = ParseBlock{}
+				prevNspc = nspc
+				gotMiddleSpace = true
+				break
+			}
+		}
+		if gotMiddleSpace {
+			continue
+		}
+
 		// If we have more than one space and previously had nothing,
 		// we are the start of a new block
 		if nspc > 1 && prevNspc == 0 {

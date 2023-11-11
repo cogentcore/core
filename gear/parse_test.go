@@ -9,7 +9,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	cmds := []string{"goki"}
+	cmds := []string{"git"}
 	for _, cmd := range cmds {
 		a := NewCmd(cmd)
 		err := a.Parse()
