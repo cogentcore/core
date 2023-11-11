@@ -59,9 +59,9 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := tv.UpdateStart()
 
-	tv.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
+	// tv.Style(func(s *styles.Style) {
+	//
+	// })
 
 	hour := gi.NewTextField(tv, "hour")
 	if gi.Prefs.Clock24 {
@@ -187,6 +187,7 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 
 	dv.Style(func(s *styles.Style) {
 		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(0, 0)
 	})
 
 	trow := gi.NewLayout(dv)
@@ -207,7 +208,7 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
 		dv.ConfigDateGrid()
 		dv.Update()
-		dv.UpdateEnd(updt)
+		dv.UpdateEndLayout(updt)
 	})
 
 	yr := dv.Time.Year()
@@ -227,12 +228,12 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
 		dv.ConfigDateGrid()
 		dv.Update()
-		dv.UpdateEnd(updt)
+		dv.UpdateEndLayout(updt)
 	})
 
 	dv.ConfigDateGrid()
 
-	dv.UpdateEnd(updt)
+	dv.UpdateEndLayout(updt)
 }
 
 func (dv *DateView) ConfigDateGrid() {
@@ -342,13 +343,12 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	ly := vv.Widget.(*gi.Layout)
-	ly.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-	})
-
 	if len(ly.Kids) > 0 {
 		return
 	}
+	ly.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
 
 	dt := gi.NewTextField(ly, "date").SetTooltip("The date").
 		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
@@ -362,6 +362,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		})
 	dt.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
+		s.Max.X.Em(12)
 	})
 	dt.SetReadOnly(vv.IsReadOnly())
 	dt.OnChange(func(e events.Event) {
@@ -389,6 +390,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		})
 	tm.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
+		// s.Max.X.Em(12)
 	})
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
@@ -476,19 +478,19 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	fr := vv.Widget.(*gi.Layout)
+	ly := vv.Widget.(*gi.Layout)
 
-	fr.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-	})
-
-	if len(fr.Kids) > 0 {
+	if len(ly.Kids) > 0 {
 		return
 	}
 
+	ly.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
+
 	var ch *gi.Chooser
 
-	sp := gi.NewSpinner(fr, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
+	sp := gi.NewSpinner(ly, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
 		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurLabel]))
 	})
@@ -499,7 +501,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		units = append(units, u)
 	}
 
-	ch = gi.NewChooser(fr, "unit").SetTooltip("The unit of time").SetItems(units)
+	ch = gi.NewChooser(ly, "unit").SetTooltip("The unit of time").SetItems(units)
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(vv.Value)

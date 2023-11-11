@@ -115,6 +115,7 @@ func NewFuncButton(par ki.Ki, fun any) *FuncButton {
 }
 
 func (fb *FuncButton) OnInit() {
+	fb.Button.OnInit()
 	fb.WarnUnadded = true
 }
 

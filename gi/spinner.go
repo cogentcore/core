@@ -85,8 +85,8 @@ func (sp *Spinner) SpinnerStyles() {
 			s.Min.X.Ch(4)
 			s.Max.X.Ch(8)
 		} else {
-			s.Min.X.Ch(10)
-			s.Max.X.Ch(16)
+			s.Min.X.Ch(14)
+			s.Max.X.Ch(18)
 		}
 	})
 }
