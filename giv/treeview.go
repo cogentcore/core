@@ -514,7 +514,7 @@ func (tv *TreeView) SetBranchState() {
 
 func (tv *TreeView) SizeUp(sc *gi.Scene) {
 	tv.WidgetBase.SizeUp(sc)
-	tv.WidgetSize = tv.Alloc.Size.Actual.Total
+	tv.WidgetSize = tv.Geom.Size.Actual.Total
 	h := tv.WidgetSize.Y
 	w := tv.WidgetSize.X
 
@@ -522,14 +522,15 @@ func (tv *TreeView) SizeUp(sc *gi.Scene) {
 		// we layout children under us
 		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
 			kwi.SizeUp(sc)
-			h += kwb.Alloc.Size.Actual.Total.Y
-			w = max(w, tv.Indent.Dots+kwb.Alloc.Size.Actual.Total.X)
+			h += kwb.Geom.Size.Actual.Total.Y
+			w = max(w, tv.Indent.Dots+kwb.Geom.Size.Actual.Total.X)
 			// fmt.Println(kwb, w, h)
 			return ki.Continue
 		})
 	}
-	tv.Alloc.Size.Actual.Content = mat32.Vec2{w, h}
-	tv.Alloc.Size.SetTotalFromContent()
+	sz := &tv.Geom.Size
+	sz.Actual.Content = mat32.Vec2{w, h}
+	sz.SetTotalFromContent(&sz.Actual)
 	tv.WidgetSize.X = w // stretch
 }
 
@@ -549,17 +550,17 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 	tv.SetBranchState()
 	tv.This().(TreeViewer).UpdateBranchIcons()
 
-	tv.Alloc.Size.Actual.Total.X = rn.Alloc.Size.Actual.Total.X - (tv.Alloc.Pos.X - rn.Alloc.Pos.X)
-	tv.WidgetSize.X = tv.Alloc.Size.Actual.Total.X
+	tv.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tv.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
+	tv.WidgetSize.X = tv.Geom.Size.Actual.Total.X
 
 	tv.WidgetBase.Position(sc)
 
 	if !tv.IsClosed() {
 		h := tv.WidgetSize.Y
 		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
-			kwb.Alloc.RelPos.Y = h
-			kwb.Alloc.RelPos.X = tv.Indent.Dots
-			h += kwb.Alloc.Size.Actual.Total.Y
+			kwb.Geom.RelPos.Y = h
+			kwb.Geom.RelPos.X = tv.Indent.Dots
+			h += kwb.Geom.Size.Actual.Total.Y
 			kwi.Position(sc)
 			return ki.Continue
 		})
@@ -567,12 +568,13 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 }
 
 func (tv *TreeView) ScenePos(sc *gi.Scene) {
-	if tv.Alloc.Size.Actual.Total == tv.WidgetSize {
-		tv.Alloc.Size.SetTotalFromContent() // restore after scrolling
+	sz := &tv.Geom.Size
+	if sz.Actual.Total == tv.WidgetSize {
+		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
 	}
 	tv.WidgetBase.ScenePos(sc)
 	tv.ScenePosChildren(sc)
-	tv.Alloc.Size.Actual.Total = tv.WidgetSize // key: we revert to just ourselves
+	tv.Geom.Size.Actual.Total = tv.WidgetSize // key: we revert to just ourselves
 }
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
@@ -583,7 +585,7 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 	}
 	pbc, psl := tv.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, tv.Alloc.Pos, tv.Alloc.Size.Actual.Total, &pbc, psl)
+	pc.DrawStdBox(rs, st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, &pbc, psl)
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)
@@ -1184,8 +1186,8 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 		pos = e.Pos()
 		return
 	}
-	pos.X = tv.Alloc.TotalBBox.Min.X + int(tv.Indent.Dots)
-	pos.Y = (tv.Alloc.TotalBBox.Min.Y + tv.Alloc.TotalBBox.Max.Y) / 2
+	pos.X = tv.Geom.TotalBBox.Min.X + int(tv.Indent.Dots)
+	pos.Y = (tv.Geom.TotalBBox.Min.Y + tv.Geom.TotalBBox.Max.Y) / 2
 	return
 }
 

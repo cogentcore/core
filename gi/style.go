@@ -282,7 +282,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		} else {
 			st.UnContext.DPI = 96
 		}
-		sz := sc.Geom.Size
+		sz := sc.SceneGeom.Size
 		st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	}
 	if st.Font.Face == nil || sc.NeedsRebuild() {

@@ -146,6 +146,11 @@ type GeomSize struct {
 	// spacing -- everything that doesn't go into child content.
 	Space mat32.Vec2
 
+	// InnerSpace is total extra space that is included within the Content Size region
+	// and must be included for Bounding Box and other such computations, but
+	// excluded from child sizing computations.  Gap size is the main example in std Styling.
+	InnerSpace mat32.Vec2
+
 	// Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size
 	Max mat32.Vec2
 }
@@ -235,9 +240,9 @@ func (ls *GeomState) TotalRect() image.Rectangle {
 }
 
 // ContentRect returns the Pos.Content, Size.Actual.Content geom
-// as an image.Rectangle, e.g., for bounding box
+// as an image.Rectangle, e.g., for bounding box.
 func (ls *GeomState) ContentRect() image.Rectangle {
-	return mat32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
+	return mat32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content.Add(ls.Size.InnerSpace))
 }
 
 //////////////////////////////////////////////////////////////
@@ -281,6 +286,9 @@ type LayImplState struct {
 
 	// GapSize has the extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
+	// For SizeUp / Down Gap contributes to Space like other cases,
+	// but for BoundingBox rendering and Alignment, it does NOT, and must be
+	// subtracted.  This happens in the Position phase.
 	GapSize mat32.Vec2
 }
 
@@ -353,19 +361,19 @@ func (wb *WidgetBase) SizeUp(sc *Scene) {
 func (wb *WidgetBase) SizeUpWidget(sc *Scene) {
 	wb.SizeFromStyle()
 	wb.SizeUpParts(sc)
-	sz := &wb.Alloc.Size
+	sz := &wb.Geom.Size
 	sz.SetTotalFromContent(&sz.Actual)
 }
 
 // SpaceFromStyle sets the Space based on Style BoxSpace().Size()
 func (wb *WidgetBase) SpaceFromStyle() {
-	wb.Alloc.Size.Space = wb.Styles.BoxSpace().Size().Ceil()
+	wb.Geom.Size.Space = wb.Styles.BoxSpace().Size().Ceil()
 }
 
 // SizeFromStyle sets the initial Actual Sizes from Style.Min, Max.
 // Required first call in SizeUp.
 func (wb *WidgetBase) SizeFromStyle() {
-	sz := &wb.Alloc.Size
+	sz := &wb.Geom.Size
 	wb.SpaceFromStyle()
 	sz.Max = wb.Styles.Max.Dots().Ceil()
 	sz.SetSizeMax(&sz.Actual.Content, wb.Styles.Min.Dots().Ceil())
@@ -381,8 +389,8 @@ func (wb *WidgetBase) SizeUpParts(sc *Scene) {
 		return
 	}
 	wb.Parts.SizeUp(sc)
-	sz := &wb.Alloc.Size
-	sz.FitSizeMax(&sz.Actual.Content, wb.Parts.Alloc.Size.Actual.Total)
+	sz := &wb.Geom.Size
+	sz.FitSizeMax(&sz.Actual.Content, wb.Parts.Geom.Size.Actual.Total)
 }
 
 /////////////// Layout
@@ -403,7 +411,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.This().(Layouter).LayoutSpace()          // now includes initial GapSize from Cells
 	ly.SizeUpChildren(sc)                       // kids do their own thing
 	ly.This().(Layouter).SizeUpFromChildren(sc) // we get our Actual.Content from kids
-	sz := &ly.Alloc.Size
+	sz := &ly.Geom.Size
 	sz.SetTotalFromContent(&sz.Actual)
 }
 
@@ -411,7 +419,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 // Other layout types can change this if they want to.
 func (ly *Layout) LayoutSpace() {
 	ly.SpaceFromStyle()
-	ly.Alloc.Size.Space.SetAdd(ly.LayImpl.ScrollSize.Add(ly.LayImpl.GapSize))
+	ly.Geom.Size.Space.SetAdd(ly.LayImpl.ScrollSize.Add(ly.LayImpl.GapSize))
 }
 
 // SizeUpChildren calls SizeUp on all the children of this node
@@ -442,6 +450,8 @@ func (ly *Layout) SetInitCells() {
 func (ly *Layout) SetGapSizeFromCells() {
 	ly.LayImpl.GapSize.X = max(float32(ly.LayImpl.Shape.X-1)*ly.Styles.Gap.X.Dots, 0)
 	ly.LayImpl.GapSize.Y = max(float32(ly.LayImpl.Shape.Y-1)*ly.Styles.Gap.Y.Dots, 0)
+	ly.LayImpl.GapSize.SetCeil()
+	ly.Geom.Size.InnerSpace = ly.LayImpl.GapSize
 }
 
 func (ly *Layout) SetInitCellsFlex() {
@@ -449,7 +459,7 @@ func (ly *Layout) SetInitCellsFlex() {
 	ca := ma.OtherDim()
 	idx := 0
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		mat32.SetPointDim(&kwb.Alloc.Cell, ma, idx)
+		mat32.SetPointDim(&kwb.Geom.Cell, ma, idx)
 		idx++
 		return ki.Continue
 	})
@@ -463,7 +473,7 @@ func (ly *Layout) SetInitCellsFlex() {
 
 func (ly *Layout) SetInitCellsStacked() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Alloc.Cell = image.Point{0, 0}
+		kwb.Geom.Cell = image.Point{0, 0}
 		return ki.Continue
 	})
 	ly.LayImpl.Shape = image.Point{1, 1}
@@ -487,7 +497,7 @@ func (ly *Layout) SetInitCellsGrid() {
 	ci := 0
 	ri := 0
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Alloc.Cell = image.Point{ci, ri}
+		kwb.Geom.Cell = image.Point{ci, ri}
 		ci++
 		cs := kwb.Styles.ColSpan
 		if cs > 1 {
@@ -515,14 +525,14 @@ func (ly *Layout) SetContentFitOverflow(sz mat32.Vec2) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
-	csz := &ly.Alloc.Size.Actual.Content
-	mx := ly.Alloc.Size.Max
+	csz := &ly.Geom.Size.Actual.Content
+	mx := ly.Geom.Size.Max
 	oflow := &ly.Styles.Overflow
-	if oflow.X < styles.OverflowAuto {
+	if oflow.X < styles.OverflowAuto || ly.Par == nil {
 		csz.X = mat32.MaxPos(csz.X, sz.X)
 		csz.X = mat32.MinPos(csz.X, mx.X)
 	}
-	if oflow.Y < styles.OverflowAuto {
+	if oflow.Y < styles.OverflowAuto || ly.Par == nil {
 		csz.Y = mat32.MaxPos(csz.Y, sz.Y)
 		csz.Y = mat32.MinPos(csz.Y, mx.Y)
 	}
@@ -548,8 +558,8 @@ func (ly *Layout) SizeUpFromChildrenCells(sc *Scene) {
 	//   +--+--+
 	ly.LayImpl.InitSizes()
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		cidx := kwb.Alloc.Cell
-		sz := kwb.Alloc.Size.Actual.Total
+		cidx := kwb.Geom.Cell
+		sz := kwb.Geom.Size.Actual.Total
 		grw := kwb.Styles.Grow
 		if LayoutTraceDetail {
 			fmt.Println("SzUp i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
@@ -584,7 +594,7 @@ func (ly *Layout) SizeUpFromChildrenCells(sc *Scene) {
 	ksz := ly.LayImpl.CellsSize()
 	ly.SetContentFitOverflow(ksz)
 	if LayoutTrace {
-		fmt.Println(ly, "SizeUpFromChildrenCells:", ksz, "Content:", ly.Alloc.Size.Actual.Content)
+		fmt.Println(ly, "SizeUpFromChildrenCells:", ksz, "Content:", ly.Geom.Size.Actual.Content)
 	}
 }
 
@@ -595,7 +605,7 @@ func (ly *Layout) SizeUpFromChildrenStacked(sc *Scene) {
 	li := &ly.LayImpl
 	var ksz mat32.Vec2
 	if kwb != nil {
-		ksz = kwb.Alloc.Size.Actual.Total
+		ksz = kwb.Geom.Size.Actual.Total
 		kgrw := kwb.Styles.Grow
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
 			li.Sizes[ma][0].Size = ksz
@@ -604,7 +614,7 @@ func (ly *Layout) SizeUpFromChildrenStacked(sc *Scene) {
 	}
 	ly.SetContentFitOverflow(ksz)
 	if LayoutTrace {
-		fmt.Println(ly, "SizeUpFromChildrenCells:", ksz, "Content:", ly.Alloc.Size.Actual.Content)
+		fmt.Println(ly, "SizeUpFromChildrenCells:", ksz, "Content:", ly.Geom.Size.Actual.Content)
 	}
 }
 
@@ -635,8 +645,8 @@ func (wb *WidgetBase) SizeDownParts(sc *Scene, iter int) bool {
 	if wb.Parts == nil {
 		return false
 	}
-	psz := &wb.Parts.Alloc.Size
-	psz.Alloc.Total = wb.Alloc.Size.Alloc.Content // parts = content
+	psz := &wb.Parts.Geom.Size
+	psz.Alloc.Total = wb.Geom.Size.Alloc.Content // parts = content
 	psz.SetContentFromTotal(&psz.Alloc)
 	return wb.Parts.SizeDown(sc, iter)
 }
@@ -672,14 +682,14 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if !ly.HasChildren() {
 		return ly.SizeDownWidget(sc, iter) // behave like a widget
 	}
-	sz := &ly.Alloc.Size
-	extra := sz.Alloc.Content.Sub(sz.Actual.Content)
+	sz := &ly.Geom.Size
 
 	// need scrollbars?  adds to Space and Actual.Total if so.
 	// Alloc.Content is *reduced* by any extra space at this point --
 	// next iteration will increase this if possible.
-	chg := ly.ManageOverflow(sc, iter, extra)
+	chg := ly.ManageOverflow(sc, iter)
 
+	extra := sz.Alloc.Content.Sub(sz.Actual.Content)
 	if extra.X > 0 || extra.Y > 0 {
 		if LayoutTrace {
 			fmt.Println(ly, "SizeDown extra:", extra, "actual:", sz.Actual.Content, "alloc:", sz.Alloc.Content)
@@ -698,8 +708,9 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 
 // ManageOverflow uses overflow settings to determine if scrollbars
 // are needed, etc.  Returns true if size changes as a result.
-func (ly *Layout) ManageOverflow(sc *Scene, iter int, extra mat32.Vec2) bool {
-	sz := &ly.Alloc.Size
+func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
+	sz := &ly.Geom.Size
+	oflow := sz.Actual.Content.Sub(sz.Alloc.Content)
 	change := false
 	if iter == 0 {
 		ly.LayImpl.ScrollSize.SetZero()
@@ -716,14 +727,14 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int, extra mat32.Vec2) bool {
 	}
 	if !sc.Is(ScPrefSizing) {
 		for d := mat32.X; d <= mat32.Y; d++ {
-			exd := extra.Dim(d)
-			if exd <= 0 {
+			ofd := oflow.Dim(d)
+			if ofd <= 0 {
 				continue
 			}
 			switch ly.Styles.Overflow.Dim(d) {
 			// case styles.OverflowVisible:
 			// note: this shouldn't happen -- just have this in here for monitoring
-			// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, exd)
+			// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 			case styles.OverflowAuto:
 				if !ly.HasScroll[d] {
 					change = true
@@ -731,7 +742,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int, extra mat32.Vec2) bool {
 				ly.HasScroll[d] = true
 				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
 				if LayoutTrace {
-					fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, exd)
+					fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
 				}
 			}
 		}
@@ -761,8 +772,8 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 	redo := false
 	// todo: use max growth values instead of individual ones to ensure consistency!
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		cidx := kwb.Alloc.Cell
-		ksz := &kwb.Alloc.Size
+		cidx := kwb.Geom.Cell
+		ksz := &kwb.Geom.Size
 		grw := kwb.Styles.Grow
 		// if LayoutTrace {
 		// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
@@ -801,12 +812,12 @@ func (ly *Layout) SizeDownGrowWrap(sc *Scene, iter int, extra mat32.Vec2) bool {
 func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, extra mat32.Vec2) bool {
 	// stack just gets everything from us
 	chg := false
-	asz := ly.Alloc.Size.Alloc.Content
+	asz := ly.Geom.Size.Alloc.Content
 	// todo: could actually use the grow factors to decide if growing here?
 	if ly.Is(LayoutStackTopOnly) {
 		_, kwb := ly.StackTopWidget()
 		if kwb != nil {
-			ksz := &kwb.Alloc.Size
+			ksz := &kwb.Geom.Size
 			if ksz.Alloc.Total != asz {
 				chg = true
 			}
@@ -818,7 +829,7 @@ func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, extra mat32.Vec2) boo
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		ksz := &kwb.Alloc.Size
+		ksz := &kwb.Geom.Size
 		if ksz.Alloc.Total != asz {
 			chg = true
 		}
@@ -844,8 +855,8 @@ func (ly *Layout) SizeDownAllocActual(sc *Scene, iter int) {
 // this size can actually be different than original actual.
 func (ly *Layout) SizeDownAllocActualCells(sc *Scene, iter int) {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		ksz := &kwb.Alloc.Size
-		cidx := kwb.Alloc.Cell
+		ksz := &kwb.Geom.Size
+		cidx := kwb.Geom.Cell
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
 			mi := mat32.PointDim(cidx, ma)  // X, Y
 			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
@@ -859,12 +870,12 @@ func (ly *Layout) SizeDownAllocActualCells(sc *Scene, iter int) {
 
 func (ly *Layout) SizeDownAllocActualStacked(sc *Scene, iter int) {
 	// stack just gets everything from us
-	asz := ly.Alloc.Size.Actual.Content
+	asz := ly.Geom.Size.Actual.Content
 	// todo: could actually use the grow factors to decide if growing here?
 	if ly.Is(LayoutStackTopOnly) {
 		_, kwb := ly.StackTopWidget()
 		if kwb != nil {
-			ksz := &kwb.Alloc.Size
+			ksz := &kwb.Geom.Size
 			ksz.Alloc.Total = asz
 			ksz.SetContentFromTotal(&ksz.Alloc)
 		}
@@ -873,7 +884,7 @@ func (ly *Layout) SizeDownAllocActualStacked(sc *Scene, iter int) {
 	// note: allocate everyone in case they are flipped to top
 	// need a new layout if size is actually different
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		ksz := &kwb.Alloc.Size
+		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total = asz
 		ksz.SetContentFromTotal(&ksz.Alloc)
 		return ki.Continue
@@ -890,7 +901,7 @@ func (ly *Layout) SizeDownAllocActualStacked(sc *Scene, iter int) {
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) GrowToAlloc() bool {
 	change := false
-	sz := &wb.Alloc.Size
+	sz := &wb.Geom.Size
 	for d := mat32.X; d <= mat32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
 		alloc := sz.Alloc.Total.Dim(d)
@@ -929,13 +940,13 @@ func (wb *WidgetBase) PositionWidget(sc *Scene) {
 // StyleSizeUpdate updates styling size values for widget and its parent,
 // which should be called after these are updated.  Returns true if any changed.
 func (wb *WidgetBase) StyleSizeUpdate(sc *Scene) bool {
-	el := wb.Alloc.Size.Actual.Content
+	el := wb.Geom.Size.Actual.Content
 	var par mat32.Vec2
 	_, pwb := wb.ParentWidget()
 	if pwb != nil {
-		par = pwb.Alloc.Size.Actual.Content
+		par = pwb.Geom.Size.Actual.Content
 	}
-	sz := sc.Geom.Size
+	sz := sc.SceneGeom.Size
 	chg := wb.Styles.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	if chg {
 		wb.Styles.ToDots()
@@ -985,7 +996,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	var lastAsz mat32.Vec2
 	gap := ly.Styles.Gap.Dots()
 
-	sz := &ly.Alloc.Size
+	sz := &ly.Geom.Size
 	var stspc mat32.Vec2
 	cdiff := sz.Alloc.Content.Sub(sz.Actual.Content)
 	if cdiff.X > 0 {
@@ -1003,8 +1014,8 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	pos = stspc
 	var maxs mat32.Vec2
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		cidx := kwb.Alloc.Cell
-		ksz := &kwb.Alloc.Size
+		cidx := kwb.Geom.Cell
+		ksz := &kwb.Geom.Size
 		sz := ksz.Actual.Total
 		asz := ksz.Alloc.Total
 		if cidx.X == 0 && i > 0 {
@@ -1022,7 +1033,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		if LayoutTraceDetail {
 			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep)
 		}
-		kwb.Alloc.RelPos = ep
+		kwb.Geom.RelPos = ep
 		maxs.SetMax(ep.Add(asz))
 		pos.X += asz.X + gap.X
 		lastAsz = asz
@@ -1038,7 +1049,7 @@ func (ly *Layout) PositionWrap(sc *Scene) {
 
 func (ly *Layout) PositionStacked(sc *Scene) {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwb.Alloc.RelPos.SetZero()
+		kwb.Geom.RelPos.SetZero()
 		return ki.Continue
 	})
 }
@@ -1065,48 +1076,48 @@ func (wb *WidgetBase) SetContentPosFromPos() {
 	spc := wb.Styles.BoxSpace()
 	off := spc.Pos()
 	off.SetFloor()
-	wb.Alloc.Pos.Content = wb.Alloc.Pos.Total.Add(off)
+	wb.Geom.Pos.Content = wb.Geom.Pos.Total.Add(off)
 }
 
 func (wb *WidgetBase) SetPosFromParent(sc *Scene) {
 	_, pwb := wb.ParentWidget()
 	var parPos mat32.Vec2
 	if pwb != nil {
-		parPos = pwb.Alloc.Pos.Content.Add(pwb.Alloc.Scroll) // critical that parent adds here but not to self
+		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll) // critical that parent adds here but not to self
 	}
-	wb.Alloc.Pos.Total = wb.Alloc.RelPos.Add(parPos)
+	wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
 	wb.SetContentPosFromPos()
 	if LayoutTrace {
-		fmt.Println(wb, "pos:", wb.Alloc.Pos.Total, "parPos:", parPos)
+		fmt.Println(wb, "pos:", wb.Geom.Pos.Total, "parPos:", parPos)
 	}
 }
 
-// SetBBoxesFromAllocs sets BBox and ContentBBox from Alloc.Pos and .Size
+// SetBBoxesFromAllocs sets BBox and ContentBBox from Geom.Pos and .Size
 // This does NOT intersect with parent content BBox, which is done in SetBBoxes.
 // Use this for elements that are dynamically positioned outside of parent BBox.
 func (wb *WidgetBase) SetBBoxesFromAllocs() {
-	wb.Alloc.TotalBBox = wb.Alloc.TotalRect()
-	wb.Alloc.ContentBBox = wb.Alloc.ContentRect()
+	wb.Geom.TotalBBox = wb.Geom.TotalRect()
+	wb.Geom.ContentBBox = wb.Geom.ContentRect()
 }
 
 func (wb *WidgetBase) SetBBoxes(sc *Scene) {
 	_, pwb := wb.ParentWidget()
 	var parBB image.Rectangle
 	if pwb != nil {
-		parBB = pwb.Alloc.ContentBBox
+		parBB = pwb.Geom.ContentBBox
 	} else {
-		parBB.Max = sc.Geom.Size
+		parBB.Max = sc.SceneGeom.Size
 	}
-	bb := wb.Alloc.TotalRect()
-	wb.Alloc.TotalBBox = parBB.Intersect(bb)
+	bb := wb.Geom.TotalRect()
+	wb.Geom.TotalBBox = parBB.Intersect(bb)
 	if LayoutTrace {
-		fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Alloc.TotalBBox)
+		fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Geom.TotalBBox)
 	}
 
-	cbb := wb.Alloc.ContentRect()
-	wb.Alloc.ContentBBox = parBB.Intersect(cbb)
+	cbb := wb.Geom.ContentRect()
+	wb.Geom.ContentBBox = parBB.Intersect(cbb)
 	if LayoutTrace {
-		fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Alloc.ContentBBox)
+		fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Geom.ContentBBox)
 	}
 	wb.ScenePosParts(sc)
 }
@@ -1156,7 +1167,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 		prv := ly.ChildSize
 		ly.LayState.Size.Need = prv
 		ly.LayState.Size.Pref = prv
-		ly.Alloc.Size.Total = prv
+		ly.Geom.Size.Total = prv
 		ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 		if LayoutTrace {
 			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.Path(), prv)
@@ -1254,7 +1265,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 
-	avail := ly.Alloc.Size.Total.Dim(dim) - exspc
+	avail := ly.Geom.Size.Total.Dim(dim) - exspc
 	odim := mat32.OtherDim(dim)
 
 	// SidesTODO: might be odim
@@ -1272,8 +1283,8 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 			ly.FlowBreaks = append(ly.FlowBreaks, i)
 			pos = spc.Pos().Dim(dim)
 		}
-		ni.Alloc.Size.Total.SetDim(dim, size)
-		ni.Alloc.PosRel.SetDim(dim, pos)
+		ni.Geom.Size.Total.SetDim(dim, size)
+		ni.Geom.PosRel.SetDim(dim, pos)
 		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
@@ -1282,7 +1293,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	ly.FlowBreaks = append(ly.FlowBreaks, len(ly.Kids))
 
 	nrows := len(ly.FlowBreaks)
-	oavail := ly.Alloc.Size.Total.Dim(odim) - exspc
+	oavail := ly.Geom.Size.Total.Dim(odim) - exspc
 	oavPerRow := oavail / float32(nrows)
 	ci := 0
 	rpos := float32(0)
@@ -1305,11 +1316,11 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 			need := ni.LayState.Size.Need.Dim(odim)
 			max := ni.LayState.Size.Max.Dim(odim)
 			pos, size := LayoutSharedDimImpl(ly, oavPerRow, need, pref, max, spc, al)
-			ni.Alloc.Size.Total.SetDim(odim, size)
-			ni.Alloc.PosRel.SetDim(odim, rpos+pos)
+			ni.Geom.Size.Total.SetDim(odim, size)
+			ni.Geom.PosRel.SetDim(odim, rpos+pos)
 			rmax = mat32.Max(rmax, size)
-			nsz.X = mat32.Max(nsz.X, ni.Alloc.PosRel.X+ni.Alloc.Size.Total.X)
-			nsz.Y = mat32.Max(nsz.Y, ni.Alloc.PosRel.Y+ni.Alloc.Size.Total.Y)
+			nsz.X = mat32.Max(nsz.X, ni.Geom.PosRel.X+ni.Geom.Size.Total.X)
+			nsz.Y = mat32.Max(nsz.Y, ni.Geom.PosRel.Y+ni.Geom.Size.Total.Y)
 		}
 		rpos += rmax + ly.Styles.Gap.Dots
 		ci = bi

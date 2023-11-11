@@ -53,7 +53,7 @@ type Scene struct { //goki:no-new
 	TopAppBar func(tb *TopAppBar)
 
 	// Size and position relative to overall rendering context.
-	Geom mat32.Geom2DInt `edit:"-" set:"-"`
+	SceneGeom mat32.Geom2DInt `edit:"-" set:"-"`
 
 	// render state for rendering
 	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -226,9 +226,9 @@ func (sc *Scene) MainStage() *MainStage {
 // FitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
 func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
-	geom := sc.Geom.FitInWindow(winGeom)
+	geom := sc.SceneGeom.FitInWindow(winGeom)
 	sc.Resize(geom.Size)
-	sc.Geom.Pos = geom.Pos
+	sc.SceneGeom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)
 }
 
@@ -240,8 +240,8 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	if sc.Pixels != nil {
 		ib := sc.Pixels.Bounds().Size()
 		if ib == nwsz {
-			sc.Geom.Size = nwsz // make sure
-			return              // already good
+			sc.SceneGeom.Size = nwsz // make sure
+			return                   // already good
 		}
 	}
 	if sc.Pixels != nil {
@@ -249,7 +249,7 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	}
 	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 	sc.RenderState.Init(nwsz.X, nwsz.Y, sc.Pixels)
-	sc.Geom.Size = nwsz // make sure
+	sc.SceneGeom.Size = nwsz // make sure
 	sc.SetFlag(true, ScNeedsLayout)
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }

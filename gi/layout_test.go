@@ -27,7 +27,7 @@ func TestLayoutFlex(t *testing.T) {
 
 		Init()
 		sc := NewScene("testflex")
-		sc.Geom.Size = image.Point{600, 400}
+		sc.SceneGeom.Size = image.Point{600, 400}
 
 		sc.Style(func(s *styles.Style) {
 			s.Display = styles.DisplayGrid

@@ -36,7 +36,7 @@ func (ed *Editor) StyleSizes() {
 // NLinesChars, LineNoOff, LineLayoutSize
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
-	asz := ed.Alloc.Size.Actual.Content
+	asz := ed.Geom.Size.Actual.Content
 	ed.LineLayoutSize = asz
 	nv := mat32.Vec2{}
 	if asz == nv {

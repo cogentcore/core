@@ -57,8 +57,8 @@ func (mb *MenuBar) MenuBarStyles() {
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender(sc *Scene) {
 	rs, pc, st := mb.RenderLock(sc)
-	pos := mb.Alloc.Pos.Total
-	sz := mb.Alloc.Size.Actual.Total
+	pos := mb.Geom.Pos.Total
+	sz := mb.Geom.Size.Actual.Total
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	mb.RenderUnlock(rs)
 }

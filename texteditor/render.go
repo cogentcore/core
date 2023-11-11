@@ -135,7 +135,7 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 	ed.Buf.MarkupMu.RLock() // needed for HiTags access
 	defer ed.Buf.MarkupMu.RUnlock()
 
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	sty := &ed.Styles
 	cspec := sty.BackgroundColor
 	bg := cspec.Solid
@@ -227,7 +227,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	spos := ed.CharStartPos(st)
 	epos := ed.CharStartPos(end)
 	epos.Y += ed.LineHeight
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
@@ -272,7 +272,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
 	spos := ed.CharStartPos(st)
 	epos := spos
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	epos.Y += ed.LineHeight
 	epos.X = float32(bb.Max.X)
 	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
@@ -287,10 +287,10 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors
 
 // RenderStartPos is absolute rendering start position from our allocpos
 func (ed *Editor) RenderStartPos() mat32.Vec2 {
-	return ed.Alloc.Pos.Content // todo
+	return ed.Geom.Pos.Content // todo
 	// st := &ed.Styles
 	// // spc := st.BoxSpace()
-	// pos := ed.Alloc.Pos.Add(spc.Pos())
+	// pos := ed.Geom.Pos.Add(spc.Pos())
 	// delta := mat32.NewVec2FmPoint(ed.LayoutScrollDelta((image.Point{})))
 	// pos = pos.Add(delta)
 	// return pos
@@ -303,7 +303,7 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	rs.Lock()
 	pc := &rs.Paint
 	sty := &ed.Styles
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	pos := mat32.NewVec2FmPoint(bb.Min)
 	epos := mat32.NewVec2FmPoint(bb.Max)
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
@@ -370,7 +370,7 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	pc := &rs.Paint
 	// sty := &ed.Styles
 	// spc := sty.BoxSpace()
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	spos := mat32.NewVec2FmPoint(bb.Min)
 	epos := mat32.NewVec2FmPoint(bb.Max)
 	// SidesTODO: this is sketchy
@@ -387,7 +387,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	pc := &rs.Paint
 	// sty := &ed.Styles
 	// spc := sty.BoxSpace()
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	spos := ed.CharStartPos(lex.Pos{Ln: st})
 	spos.X = float32(bb.Min.X)
 	epos := ed.CharEndPos(lex.Pos{Ln: end + 1})
@@ -413,7 +413,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	fst := sty.FontRender()
 	rs := &sc.RenderState
 	pc := &rs.Paint
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 
 	// render fillbox
 	sbox := ed.CharStartPos(lex.Pos{Ln: ln})
@@ -505,7 +505,7 @@ func (ed *Editor) RenderLines(st, end int) bool {
 	rs := &sc.RenderState
 	pc := &rs.Paint
 	pos := ed.RenderStartPos()
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	var boxMin, boxMax mat32.Vec2
 	rs.PushBounds(bb)
 	// first get the box to fill
@@ -581,11 +581,11 @@ func (ed *Editor) RenderLines(st, end int) bool {
 // (typically cursor -- if zero, a visible line is first found) -- returns
 // stln if nothing found above it.
 func (ed *Editor) FirstVisibleLine(stln int) int {
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	if stln == 0 {
 		perln := float32(ed.LinesSize.Y) / float32(ed.NLines)
 		// stln = int(float32(bb.Min.Y-ed.ObjBBox.Min.Y)/perln) - 1 // todo: scroll
-		stln = int(ed.Alloc.Scroll.Y/perln) - 1
+		stln = int(ed.Geom.Scroll.Y/perln) - 1
 		if stln < 0 {
 			stln = 0
 		}
@@ -611,7 +611,7 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 // LastVisibleLine finds the last visible line, starting at given line
 // (typically cursor) -- returns stln if nothing found beyond it.
 func (ed *Editor) LastVisibleLine(stln int) int {
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	lastln := stln
 	for ln := stln + 1; ln < ed.NLines; ln++ {
 		pos := lex.Pos{Ln: ln}
@@ -631,7 +631,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	if ed.NLines == 0 {
 		return lex.PosZero
 	}
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	sty := &ed.Styles
 	yoff := float32(bb.Min.Y)
 	stln := ed.FirstVisibleLine(0)
@@ -663,7 +663,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 		return lex.Pos{Ln: cln, Ch: 0}
 	}
 	xoff := float32(bb.Min.X)
-	scrl := ed.Alloc.Scroll.Y
+	scrl := ed.Geom.Scroll.Y
 	nolno := float32(pt.X - int(ed.LineNoOff))
 	sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4

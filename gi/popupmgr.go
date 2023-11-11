@@ -62,8 +62,8 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 
 	if evi.HasPos() {
 		pos := evi.Pos()
-		// fmt.Println("pos:", pos, "top geom:", ts.Geom)
-		if pos.In(ts.Geom.Bounds()) {
+		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
+		if pos.In(ts.SceneGeom.Bounds()) {
 			top.HandleEvent(evi)
 			evi.SetHandled()
 			return
@@ -81,7 +81,7 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 			s := pm.Stack.ValByIdx(i)
 			sb := s.AsBase()
 			ss := sb.Scene
-			if !sb.IgnoreEvents && pos.In(ss.Geom.Bounds()) {
+			if !sb.IgnoreEvents && pos.In(ss.SceneGeom.Bounds()) {
 				s.HandleEvent(evi)
 				evi.SetHandled()
 				return

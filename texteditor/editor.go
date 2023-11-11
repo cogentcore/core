@@ -134,7 +134,7 @@ type Editor struct { //goki:embedder
 	// TotalSize = LinesSize plus extra space and line numbers etc
 	TotalSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// LineLayoutSize is Alloc.Size.Actual.Total subtracting
+	// LineLayoutSize is Geom.Size.Actual.Total subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
 	LineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
