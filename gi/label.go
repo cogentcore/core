@@ -353,7 +353,7 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 	ratio := float32(1.618) // default to golden
 	if csz.X > 0 && csz.Y > 0 {
 		ratio = csz.X / csz.Y
-		fmt.Println(lb, "content size ratio:", ratio)
+		// fmt.Println(lb, "content size ratio:", ratio)
 	}
 	// w = ratio * h
 	// w^2 + h^2 = a
@@ -367,7 +367,9 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 		h = max(h, csz.Y)
 	}
 	sz := mat32.NewVec2(w, h)
-	fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
+	if LayoutTrace {
+		fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
+	}
 	return sz
 }
 

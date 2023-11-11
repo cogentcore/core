@@ -98,7 +98,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 0
+	doCase := 6
 
 	switch doCase {
 	case 0: // just text
@@ -120,7 +120,7 @@ func app() {
 		lbl := WrapText(row, VeryLongText)
 		row.Style(func(s *styles.Style) {
 			// s.Align.X = styles.AlignEnd
-			s.Max.X.Ch(100) // todo: this is failing to constrain max
+			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
 			s.Overflow.X = styles.OverflowAuto
 		})
 		lbl.Style(func(s *styles.Style) {
