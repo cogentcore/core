@@ -18,7 +18,7 @@ type Cmd struct {
 	// Doc is the documentation for the command (eg: "compile packages and dependencies")
 	Doc string
 	// Flags contains the flags for the command
-	Flags []string
+	Flags []*Flag
 	// Cmds contains the subcommands of the command
 	Cmds []*Cmd
 }
@@ -30,4 +30,12 @@ func NewCmd(cmd string) *Cmd {
 		Cmd:  cmd,
 		Name: sentencecase.Of(cmd),
 	}
+}
+
+// Flag contains the information for a parsed command line flag.
+type Flag struct {
+	// Name is the canonical (longest) name of the flag.
+	Name string
+	// Names are the different names the flag can go by.
+	Names []string
 }

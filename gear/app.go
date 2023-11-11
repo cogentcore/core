@@ -52,7 +52,7 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	used := map[string]bool{}
 	for i, flag := range a.Cmd.Flags {
 		sf := reflect.StructField{
-			Name: strcase.ToCamel(flag),
+			Name: strcase.ToCamel(flag.Name),
 			// TODO(kai/gear): support type determination
 			Type: reflect.TypeOf(""),
 		}

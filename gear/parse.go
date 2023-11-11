@@ -7,6 +7,7 @@ package gear
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"goki.dev/glop/sentencecase"
@@ -18,7 +19,7 @@ import (
 var flagRegexp = regexp.MustCompile(
 	`(?m)` + // multi line
 		`^(?:\s{2,16}|\t)` + // starting space
-		`((?:\W+\-[\w-]+)+)`) // flag
+		`((?:\W+\-[\w-]+)+)`) // flag(s)
 
 // type parsing for flagRegexp:
 // \W\-+([\w\-]+)([= ]<(\w+)>)?
@@ -44,12 +45,15 @@ func (cm *Cmd) Parse() error {
 	for _, flag := range flags {
 		names := flag[1]
 		fields := strings.Fields(names)
-		nnames := make([]string, len(fields))
+
+		f := &Flag{}
+		f.Names = make([]string, len(fields))
 		for i, field := range fields {
-			nnames[i] = strings.Trim(field, "-, \t")
+			f.Names[i] = strings.Trim(field, "-, \t")
 		}
-		fmt.Println(nnames)
-		cm.Flags = append(cm.Flags, names)
+		slices.Sort(f.Names)
+		f.Name = f.Names[len(f.Names)-1]
+		cm.Flags = append(cm.Flags, f)
 	}
 
 	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
