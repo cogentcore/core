@@ -4,16 +4,20 @@
 
 package gear
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestParse(t *testing.T) {
-	cmds := []string{"git", "goki"}
+	cmds := []string{"git", "goki", "ls", "mv", "cp"}
 	for _, cmd := range cmds {
 		a := NewApp(cmd)
 		err := a.Parse()
 		if err != nil {
 			t.Error(err)
 		}
+		fmt.Println(a.Flags)
 	}
 }
 
