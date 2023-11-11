@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/mat32/v2"
@@ -107,6 +108,9 @@ func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
 	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
+		if len(lb.TextRender.Links) > 0 {
+			s.SetAbilities(true, abilities.LongHoverable, abilities.LongPressable)
+		}
 		if !lb.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
@@ -203,6 +207,7 @@ func (lb *Label) LabelStyles() {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (lb *Label) OpenLink(tl *paint.TextLink) {
+	goosi.TheApp.OpenURL(tl.URL)
 	// tl.Widget = lb.This() // todo: needs this
 	// if len(lb.LinkSig.Cons) == 0 {
 	// 	if paint.TextLinkHandler != nil {
@@ -235,39 +240,22 @@ func (lb *Label) HandleLabelEvents() {
 
 func (lb *Label) HandleLabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
-		// hasLinks := len(lb.TextRender.Links) > 0
-		// if hasLinks {
-		// 	pos := llb.Geom.Pos.Content
-		// 	for ti := range llb.TextRender.Links {
-		// 		tl := &llb.TextRender.Links[ti]
-		// 		tlb := tl.Bounds(&llb.TextRender, pos)
-		// 		if me.LocalPos().In(tlb) {
-		// 			PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
-		// 			me.SetHandled()
-		// 			return
-		// 		}
-		// 	}
-		// }
-		/*
-			todo:
-			if llb.Tooltip != "" {
-				me.SetHandled()
-				llb.BBoxMu.RLock()
-				pos := llb.WinBBox.Max
-				llb.BBoxMu.RUnlock()
-				pos.X -= 20
-				PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Sc, llb.Nm)
+		fmt.Println("lb lhs")
+		pos := lb.Geom.Pos.Content
+		for ti := range lb.TextRender.Links {
+			tl := &lb.TextRender.Links[ti]
+			tlb := tl.Bounds(&lb.TextRender, pos)
+			if e.LocalPos().In(tlb) {
+				NewTooltipText(lb, tl.URL, tlb.Max)
+				e.SetHandled()
+				return
 			}
-		*/
+		}
 	})
 }
 
 func (lb *Label) HandleLabelClick() {
 	lb.OnClick(func(e events.Event) {
-		hasLinks := len(lb.TextRender.Links) > 0
-		if !hasLinks {
-			return
-		}
 		pos := lb.Geom.Pos.Content
 		for ti := range lb.TextRender.Links {
 			tl := &lb.TextRender.Links[ti]

@@ -52,7 +52,7 @@ func makeHome(ts *gi.Tabs) {
 
 	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
 
-	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText("A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
+	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">GoGi</a> 2D and 3D Go GUI <u>framework.</u>`)
 
 	pbar := gi.NewProgressBar(home)
 	pbar.Start(100)
