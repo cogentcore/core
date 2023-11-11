@@ -205,7 +205,7 @@ func (lb *Label) LabelStyles() {
 func (lb *Label) HandleLabelEvents() {
 	lb.HandleWidgetEvents()
 	// lb.HandleLabelLongHover()
-	lb.HandleLabelClick()
+	lb.HandleLabelClickStd()
 	lb.HandleLabelMouseMove()
 	lb.HandleLabelKeys()
 }
@@ -227,14 +227,23 @@ func (lb *Label) HandleLabelEvents() {
 // 	})
 // }
 
-func (lb *Label) HandleLabelClick() {
+// HandleLabelClickStd calls [HandleLabelClick] with [goosi.TheApp.OpenURL].
+func (lb *Label) HandleLabelClickStd() {
+	lb.HandleLabelClick(func(tl *paint.TextLink) {
+		goosi.TheApp.OpenURL(tl.URL)
+	})
+}
+
+// HandleLabelClick handles click events such that the given function will be called
+// on any links that are clicked on.
+func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 	lb.OnClick(func(e events.Event) {
 		pos := lb.Geom.Pos.Content
 		for ti := range lb.TextRender.Links {
 			tl := &lb.TextRender.Links[ti]
 			tlb := tl.Bounds(&lb.TextRender, pos)
 			if e.LocalPos().In(tlb) {
-				goosi.TheApp.OpenURL(tl.URL)
+				openLink(tl)
 				e.SetHandled()
 				return
 			}
