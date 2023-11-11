@@ -6,6 +6,7 @@
 package gear
 
 import (
+	"github.com/iancoleman/strcase"
 	"goki.dev/glop/sentencecase"
 )
 
@@ -28,7 +29,7 @@ type Cmd struct {
 func NewCmd(cmd string) *Cmd {
 	return &Cmd{
 		Cmd:  cmd,
-		Name: sentencecase.Of(cmd),
+		Name: sentencecase.Of(strcase.ToCamel(cmd)),
 	}
 }
 

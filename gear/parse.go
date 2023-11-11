@@ -58,7 +58,8 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
 			continue
 		}
 		cmd := NewCmd(cm.Cmd + " " + block.Name)
-		fmt.Println(cmd.Cmd)
+		cmd.Doc = block.Doc
+		fmt.Println(cmd)
 	}
 }
 
