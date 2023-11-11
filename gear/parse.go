@@ -18,7 +18,7 @@ import (
 // The second submatch contains the flag name(s) with any dashes, commas, and spaces still included.
 var flagRegexp = regexp.MustCompile(
 	`(?m)` + // multi line
-		`^(?:\s{2,16}|\t)` + // starting space
+		`(?:\s{1,16}|\t)` + // starting space
 		`((?:[ |[,(]+\-[\w-]+)+)`) // flag(s)
 
 // type parsing for flagRegexp:
