@@ -19,17 +19,23 @@ func (a *App) Parse() error {
 // if the command is unspecified. It tries various different commands and flags
 // to get the help information and only returns an error if all of them fail.
 func (a *App) GetHelp(cmd string) (string, error) {
-	out, err := xe.Output(a.Command, "help", cmd)
-	if err != nil {
-		return out, nil
-	}
-	out, err = xe.Output(a.Command, "--help", cmd)
-	if err != nil {
-		return out, nil
-	}
-	out, err = xe.Output(a.Command, "-h", cmd)
-	if err != nil {
-		return out, nil
+	hcmds := []string{"help", "--help", "-h"}
+	for _, hcmd := range hcmds {
+		args := []string{hcmd}
+		if cmd != "" {
+			args = append(args, cmd)
+		}
+		out, err := xe.Silent().Output(a.Command, args...)
+		if err == nil {
+			return out, nil
+		}
+		if cmd != "" {
+			// try both orders
+			out, err = xe.Silent().Output(a.Command, cmd, hcmd)
+			if err == nil {
+				return out, nil
+			}
+		}
 	}
 	return "", fmt.Errorf("unable to get help information for command %q of app %q (%q)", cmd, a.Name, a.Command+" "+cmd)
 }
