@@ -35,10 +35,15 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 		cmd := cmd
 		fields := strings.Fields(cmd.Cmd)
 		text := sentencecase.Of(strcase.ToCamel(strings.Join(fields[1:], " ")))
-		gi.NewButton(tb).SetText(text).SetTooltip(cmd.Doc).
-			OnClick(func(e events.Event) {
+		bt := gi.NewButton(tb).SetText(text).SetTooltip(cmd.Doc)
+		bt.OnClick(func(e events.Event) {
+			d := gi.NewDialog(bt).Title(text).Prompt(cmd.Doc).FullWindow(true)
+			st := StructForFlags(cmd.Flags)
+			giv.NewStructView(d).SetStruct(st)
+			d.OnAccept(func(e events.Event) {
 				grr.Log0(xe.Verbose().Run(fields[0], fields[1:]...))
-			})
+			}).Cancel().Ok().Run()
+		})
 	}
 }
 
@@ -49,12 +54,22 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	updt := a.UpdateStart()
 
-	sfs := make([]reflect.StructField, len(a.Cmd.Flags))
+	st := StructForFlags(a.Cmd.Flags)
+	giv.NewStructView(a).SetStruct(st)
+
+	a.UpdateEnd(updt)
+}
+
+// StructForFlags returns a new struct object for the given flags.
+func StructForFlags(flags []*Flag) any {
+	sfs := make([]reflect.StructField, len(flags))
 
 	used := map[string]bool{}
-	for i, flag := range a.Cmd.Flags {
+	for i, flag := range flags {
+		nm := strings.Trim(flag.Name, "-[]")
+		nm = strcase.ToCamel(nm)
 		sf := reflect.StructField{
-			Name: strcase.ToCamel(flag.Name),
+			Name: nm,
 			// TODO(kai/gear): support type determination
 			Type: reflect.TypeOf(""),
 			Tag:  reflect.StructTag(`desc:"` + flag.Doc + `"`),
@@ -72,8 +87,5 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	}
 	stt := reflect.StructOf(sfs)
 	st := reflect.New(stt)
-
-	giv.NewStructView(a).SetStruct(st.Interface())
-
-	a.UpdateEnd(updt)
+	return st.Interface()
 }

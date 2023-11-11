@@ -37,6 +37,13 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 			for _, field := range fields {
 				if strings.HasPrefix(field, "-") {
 					name := strings.Trim(field, ",")
+					hasNonDashCharcters := strings.ContainsFunc(name, func(r rune) bool {
+						return r != '-'
+					})
+					// if we have no non-dash characters, we aren't actually a flag
+					if !hasNonDashCharcters {
+						continue
+					}
 					flag.Names = append(flag.Names, name)
 					continue
 				}
@@ -90,7 +97,6 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 		cmdsDone[cmd.Cmd] = true
 
 		cmd.Doc = block.Doc
-		fmt.Println(cmd.Cmd)
 
 		cm.Cmds = append(cm.Cmds, cmd)
 
