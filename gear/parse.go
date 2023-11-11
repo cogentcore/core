@@ -54,22 +54,22 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 
 		// however, if we have something other than letters, -, and _,
 		// we aren't a command, so we probably got included in here by mistake
-		if strings.ContainsFunc(block.Name, func(r rune) bool {
+		hasUnallowedRunes := strings.ContainsFunc(block.Name, func(r rune) bool {
 			return !(unicode.IsLetter(r) || r == '-' || r == '_')
-		}) {
+		})
+		if hasUnallowedRunes {
 			continue
 		}
-		fmt.Println(block.Doc)
-		cmd := NewCmd(cm.Cmd + " " + block.Name)
 
-		// if the normalized version of our new command is the same as the normalized
-		// version of our old command, it is probably just referencing the old command
-		// somewhere (not specifying a new command that is the exact same), which leads
-		// to infinite recursion, so we just skip it.
-		cmk := strcase.ToKebab(cm.Cmd)
-		if strcase.ToKebab(cmd.Cmd) == cmk {
+		// if the normalized version of our old command contains the normalized
+		// version of our block name, it is probably just referencing
+		// the old command somewhere (not specifying a new command that is the exact same),
+		// which leads to infinite recursion, so we just skip it.
+		if strings.Contains(strcase.ToKebab(cm.Cmd), strcase.ToKebab(block.Name)) {
 			continue
 		}
+
+		cmd := NewCmd(cm.Cmd + " " + block.Name)
 
 		cmd.Doc = block.Doc
 		fmt.Println(cmd.Cmd)
