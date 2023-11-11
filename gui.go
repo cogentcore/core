@@ -32,21 +32,24 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 
 	sc := gi.NewScene(opts.AppName).SetTitle(opts.AppTitle)
 
-	tb := gi.NewToolbar(sc)
-	for _, cmd := range cmds {
-		cmd := cmd
-		if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
-			continue
+	gi.DefaultTopAppBar = func(tb *gi.TopAppBar) {
+		gi.DefaultTopAppBarStd(tb)
+
+		for _, cmd := range cmds {
+			cmd := cmd
+			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
+				continue
+			}
+			// need to go to camel first (it is mostly in kebab)
+			gi.NewButton(tb, cmd.Name).SetText(sentencecase.Of(strcase.ToCamel(cmd.Name))).SetTooltip(cmd.Doc).
+				OnClick(func(e events.Event) {
+					err := cmd.Func(cfg)
+					if err != nil {
+						// TODO: snackbar
+						grog.PrintlnError(err)
+					}
+				})
 		}
-		// need to go to camel first (it is mostly in kebab)
-		gi.NewButton(tb, cmd.Name).SetText(sentencecase.Of(strcase.ToCamel(cmd.Name))).SetTooltip(cmd.Doc).
-			OnClick(func(e events.Event) {
-				err := cmd.Func(cfg)
-				if err != nil {
-					// TODO: snackbar
-					grog.PrintlnError(err)
-				}
-			})
 	}
 
 	sv := giv.NewStructView(sc)
