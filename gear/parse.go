@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"goki.dev/glop/sentencecase"
 	"goki.dev/xe"
 )
 
@@ -46,7 +47,9 @@ func (cm *Cmd) Parse() error {
 
 	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
 	for _, cmd := range cmds {
-		c := NewCmd(cmd[1])
+		c := NewCmd(cm.Cmd + " " + cmd[1])
+		// remove first part of command for name (the app name)
+		c.Name = sentencecase.Of(strings.Join(strings.Fields(c.Name)[1:], " "))
 		if len(cmd) >= 3 {
 			c.Doc = cmd[2]
 		}
