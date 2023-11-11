@@ -286,7 +286,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		NewTooltip(wb, e.Pos()).Run()
+		NewTooltip(wb, wb.WinBBox().Min).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
 		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
@@ -302,7 +302,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		NewTooltip(wb, e.Pos()).Run()
+		NewTooltip(wb, wb.WinBBox().Min).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
 		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {

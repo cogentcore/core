@@ -385,7 +385,7 @@ func (bt *Button) HandleLongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		NewTooltipText(bt, tt, e.Pos()).Run()
+		NewTooltipText(bt, tt, bt.WinBBox().Min).Run()
 	})
 	bt.On(events.LongPressStart, func(e events.Event) {
 		tt := bt.ShortcutTooltip()
@@ -393,7 +393,7 @@ func (bt *Button) HandleLongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		NewTooltipText(bt, tt, e.Pos()).Run()
+		NewTooltipText(bt, tt, bt.WinBBox().Min).Run()
 	})
 }
 

@@ -37,12 +37,11 @@ func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
 }
 
 // NewTooltipScene returns a new tooltip scene for the given widget with the
-// given tooltip at the given position.
+// given tooltip based on the given position.
 func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := NewScene(w.Name() + "-tooltip")
-	bb := w.AsWidget().WinBBox()
-	sc.SceneGeom.Pos.X = bb.Min.X
-	sc.SceneGeom.Pos.Y = bb.Min.Y
+	sc.SceneGeom.Pos.X = pos.X
+	sc.SceneGeom.Pos.Y = pos.Y
 	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)

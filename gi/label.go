@@ -242,11 +242,12 @@ func (lb *Label) HandleLabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
 		fmt.Println("lb lhs")
 		pos := lb.Geom.Pos.Content
-		for ti := range lb.TextRender.Links {
-			tl := &lb.TextRender.Links[ti]
+		for _, tl := range lb.TextRender.Links {
 			tlb := tl.Bounds(&lb.TextRender, pos)
+			fmt.Println(pos, tlb, e.LocalPos(), e.Pos())
 			if e.LocalPos().In(tlb) {
-				NewTooltipText(lb, tl.URL, tlb.Max)
+				fmt.Println("ntt")
+				NewTooltipText(lb, tl.URL, tlb.Min).Run()
 				e.SetHandled()
 				return
 			}
