@@ -60,7 +60,7 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 	updt := tv.UpdateStart()
 
 	tv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
+		s.Grow.Set(0, 0)
 	})
 
 	hour := gi.NewTextField(tv, "hour")

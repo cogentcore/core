@@ -189,7 +189,8 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 // RunWindow runs a Window with current settings.
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
-	st.Scene.ConfigScene()
+	sc := st.Scene
+	sc.ConfigScene()
 
 	// note: need a StageMgr to get initial pref size
 	if CurRenderWin == nil {
@@ -197,14 +198,13 @@ func (st *MainStage) RunWindow() *MainStage {
 	} else {
 		st.StageMgr = &CurRenderWin.StageMgr
 	}
-	sz := st.Scene.PrefSize(st.RenderCtx().Size)
+	sz := sc.PrefSize(st.RenderCtx().Size)
 	if WinRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
-	st.Scene.Resize(sz)
-	st.Scene.ShowLayoutIter = 0
 
 	if st.NewWindow {
+		sc.Resize(sz)
 		win := st.NewRenderWin()
 		if CurRenderWin == nil {
 			CurRenderWin = win
@@ -214,6 +214,7 @@ func (st *MainStage) RunWindow() *MainStage {
 		return st
 	}
 	if CurRenderWin == nil {
+		sc.Resize(sz)
 		CurRenderWin = st.NewRenderWin()
 		st.SetWindowInsets()
 		CurRenderWin.GoStartEventLoop()
@@ -221,8 +222,14 @@ func (st *MainStage) RunWindow() *MainStage {
 	}
 	if st.CtxWidget != nil {
 		ms := st.CtxWidget.AsWidget().Sc.MainStageMgr()
+		msc := ms.Top().AsMain().Scene
+		sc.SceneGeom.Size = sz
+		sc.FitInWindow(msc.SceneGeom) // does resize
 		ms.Push(st)
 	} else {
+		msc := st.StageMgr.Top().AsMain().Scene
+		sc.SceneGeom.Size = sz
+		sc.FitInWindow(msc.SceneGeom) // does resize
 		CurRenderWin.StageMgr.Push(st)
 	}
 	return st

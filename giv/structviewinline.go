@@ -14,7 +14,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // StructViewInline represents a struct as a single line widget,
@@ -53,8 +52,8 @@ func (sv *StructViewInline) OnInit() {
 
 func (sv *StructViewInline) StructViewInlineStyles() {
 	sv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-		s.Min.X.Ch(20)
+		// s.Min.X.Ch(20)
+		s.Align.Y = styles.AlignCenter
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		path := w.PathFrom(sv)
@@ -62,6 +61,7 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 				s.Grow.Set(0, 0)
+				s.Min.X.Em(2)
 			})
 		}
 	})
