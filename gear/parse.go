@@ -5,7 +5,9 @@
 package gear
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -18,8 +20,38 @@ func (cm *Cmd) Parse() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(blocks)
+	cm.SetFromBlocks(blocks)
 	return nil
+}
+
+// SetFromBlocks sets the information of the command from the given [ParseBlock] objects.
+func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
+	for _, block := range blocks {
+		if strings.HasPrefix(block.Name, "-") {
+			flag := &Flag{}
+			flag.Doc = block.Doc
+			fields := strings.Fields(block.Name)
+			for _, field := range fields {
+				if strings.HasPrefix(field, "-") {
+					name := strings.Trim(field, ",")
+					flag.Names = append(flag.Names, name)
+				} else {
+					flag.Type = field
+				}
+			}
+			if len(flag.Names) == 0 {
+				continue
+			}
+			slices.SortFunc(flag.Names, func(a, b string) int {
+				return cmp.Compare(len(a), len(b))
+			})
+			flag.Name = flag.Names[len(flag.Names)-1]
+			cm.Flags = append(cm.Flags, flag)
+		}
+	}
+	for _, flag := range cm.Flags {
+		fmt.Println(flag)
+	}
 }
 
 // ParseBlock is a block of parsed content containing the name of something and

@@ -38,4 +38,8 @@ type Flag struct {
 	Name string
 	// Names are the different names the flag can go by.
 	Names []string
+	// Type is the type or value hint for the flag.
+	Type string
+	// Doc is the documentation for the flag.
+	Doc string
 }
