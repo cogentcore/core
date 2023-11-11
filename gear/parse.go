@@ -14,10 +14,11 @@ import (
 )
 
 // flagRegexp matches flags.
-// The second submatch is the name of the flag.
+// The second submatch contains the flag name(s) with any dashes, commas, and spaces still included.
 var flagRegexp = regexp.MustCompile(
-	`\W\-{1,2}` + // prefix and dashes
-		`([\w\-]+)`) // flag name
+	`(?m)` + // multi line
+		`^(?:\s{2,16}|\t)` + // starting space
+		`((?:\W+\-[\w-]+)+)`) // flag
 
 // type parsing for flagRegexp:
 // \W\-+([\w\-]+)([= ]<(\w+)>)?
@@ -41,8 +42,14 @@ func (cm *Cmd) Parse() error {
 
 	flags := flagRegexp.FindAllStringSubmatch(rh, -1)
 	for _, flag := range flags {
-		// second item has the submatch
-		cm.Flags = append(cm.Flags, flag[1])
+		names := flag[1]
+		fields := strings.Fields(names)
+		nnames := make([]string, len(fields))
+		for i, field := range fields {
+			nnames[i] = strings.Trim(field, "-, \t")
+		}
+		fmt.Println(nnames)
+		cm.Flags = append(cm.Flags, names)
 	}
 
 	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
