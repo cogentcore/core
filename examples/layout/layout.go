@@ -185,6 +185,6 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 			s.Min.Y.Px(sz.Y)
 			s.Grow = grow
 		})
-		gi.NewSpace(fr) // empty frames don't render
+		gi.NewSpace(fr) // if here, prevents frame from growing on its own
 	}
 }
