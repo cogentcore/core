@@ -2155,8 +2155,8 @@ func (tb *Buf) SetLineIcon(ln int, icon icons.Icon) {
 		ic.InitName(ic, string(icon))
 		ic.SetIcon(icon)
 		ic.Style(func(s *styles.Style) {
-			s.Width.Em(1)
-			s.Height.Em(1)
+			s.Min.X.Em(1)
+			s.Min.Y.Em(1)
 		})
 		tb.Icons[icon] = ic
 	}

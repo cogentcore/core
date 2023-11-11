@@ -18,7 +18,6 @@ import (
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -630,6 +629,9 @@ func (vv *ValueBase) SaveTmp() {
 
 func (vv *ValueBase) CreateTempIfNotPtr() bool {
 	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
+		// if vv.TmpSave == vv {
+		// 	return true
+		// }
 		vv.TmpSave = vv // we are it!  note: this is saving the ValueBase rep ONLY, not the full iface
 		vtyp := reflect.TypeOf(vv.Value.Interface())
 		vtp := reflect.New(vtyp)
@@ -791,11 +793,11 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	if !ok {
 		return
 	}
-	tf.SetStretchMaxWidth()
 	tf.Tooltip = vv.Doc()
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
-		s.MinWidth.Ch(16)
+		s.Min.X.Ch(16)
+		s.Grow.Set(0, 0) // todo
 	})
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..
@@ -826,25 +828,25 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 		if widthtag, ok := vv.Tag("width"); ok {
 			width, err := laser.ToFloat32(widthtag)
 			if err == nil {
-				s.SetMinPrefWidth(units.Ch(width))
+				s.Min.Y.Ch(width)
 			}
 		}
 		if maxwidthtag, ok := vv.Tag("max-width"); ok {
 			width, err := laser.ToFloat32(maxwidthtag)
 			if err == nil {
-				s.MaxWidth = units.Ch(width)
+				s.Max.X.Ch(width)
 			}
 		}
 		if heighttag, ok := vv.Tag("height"); ok {
 			height, err := laser.ToFloat32(heighttag)
 			if err == nil {
-				s.SetMinPrefHeight(units.Em(height))
+				s.Min.Y.Em(height)
 			}
 		}
 		if maxheighttag, ok := vv.Tag("max-height"); ok {
 			height, err := laser.ToFloat32(maxheighttag)
 			if err == nil {
-				s.SetMinPrefHeight(units.Em(height))
+				s.Min.Y.Em(height)
 			}
 		}
 		if vv.IsReadOnly() {

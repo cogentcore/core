@@ -49,12 +49,12 @@ func (hl *Handle) HandleStyles() {
 		// current way margin is handled, but will break after it is fixed.
 		// Width/height should actually be 6dp, not 14dp.
 		if hl.Dim == mat32.X {
-			s.SetFixedWidth(units.Dp(14))
-			s.SetFixedHeight(units.Em(3))
+			s.Min.X.Dp(14)
+			s.Min.Y.Em(3)
 			s.Margin.SetHoriz(units.Dp(4))
 		} else {
-			s.SetFixedWidth(units.Em(3))
-			s.SetFixedHeight(units.Dp(14))
+			s.Min.X.Em(3)
+			s.Min.Y.Dp(14)
 			s.Margin.SetVert(units.Dp(4))
 		}
 

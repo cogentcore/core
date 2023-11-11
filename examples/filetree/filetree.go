@@ -61,7 +61,7 @@ func (fb *FileBrowse) Defaults() {
 func (fb *FileBrowse) OnInit() {
 	fb.Defaults()
 	fb.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
 	fb.OnWidgetAdded(func(w gi.Widget) {
@@ -70,9 +70,9 @@ func (fb *FileBrowse) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.AlignH = styles.AlignCenter
-				s.AlignV = styles.AlignTop
+				s.Grow.Set(1, 0)
+				s.Align.X = styles.AlignCenter
+				s.Align.Y = styles.AlignStart
 			})
 		case "splits":
 			split := w.(*gi.Splits)
@@ -82,13 +82,13 @@ func (fb *FileBrowse) OnInit() {
 			ip, _ := w.IndexInParent()
 			if ip == 0 {
 				w.Style(func(s *styles.Style) {
-					s.SetStretchMax()
+					s.Grow.Set(1, 1)
 				})
 			} else {
 				w.Style(func(s *styles.Style) {
-					s.SetStretchMax()
-					s.SetMinPrefWidth(units.Ch(20))
-					s.SetMinPrefHeight(units.Ch(10))
+					s.Grow.Set(1, 1)
+					s.Min.X.Ch(20)
+					s.Min.Y.Ch(10)
 					s.Font.Family = string(gi.Prefs.MonoFont)
 					s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 					s.Text.TabSize = 4
@@ -275,7 +275,9 @@ func (fb *FileBrowse) StdFrameConfig() ki.Config {
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (fb *FileBrowse) StdConfig() (mods, updt bool) {
-	fb.Lay = gi.LayoutVert
+	fb.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
 	config := fb.StdFrameConfig()
 	mods, updt = fb.ConfigChildren(config)
 	return

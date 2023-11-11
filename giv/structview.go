@@ -17,12 +17,12 @@ import (
 	"github.com/antonmedv/expr/ast"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/glop/bools"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 )
 
 // StructView represents a struct, creating a property editor of the fields --
@@ -63,32 +63,32 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
-	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(sv) {
-		case "struct-grid":
+		pfrom := w.PathFrom(sv)
+		switch {
+		case pfrom == "struct-grid":
 			sg := w.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(1.5))
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Display = styles.DisplayGrid
 				s.Columns = 2
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
+				// s.Min.X.Em(20)
+				// s.Min.Y.Em(10)
 			})
-		}
-		if w.Parent().Name() == "struct-grid" {
+		case strings.HasPrefix(pfrom, "struct-grid/"):
 			w.Style(func(s *styles.Style) {
-				s.AlignH = styles.AlignLeft
+				s.Align.X = styles.AlignStart
 			})
 			if strings.HasPrefix(w.Name(), "label-") {
 				w.Style(func(s *styles.Style) {
 					s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+					s.Grow.Set(0, 0)
 				})
 			}
 		}
@@ -100,9 +100,9 @@ func (sv *StructView) OnInit() {
 func (sv *StructView) SetStruct(st any) *StructView {
 	if sv.Struct != st {
 		sv.Changed = false
-		sv.Struct = st
-		sv.Update()
 	}
+	sv.Struct = st
+	sv.Update()
 	return sv
 }
 
@@ -174,8 +174,9 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 		return false
 	}
 	sg := sv.StructGrid()
+	// note: widget re-use does not work due to all the closures
+	sg.DeleteChildren(ki.DestroyKids)
 	config := ki.Config{}
-	// always start fresh!
 	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]Value, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
@@ -267,7 +268,7 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
-		w := sg.Child((i * 2) + 1).(gi.Widget)
+		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
 		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
 		if hasDef {
 			sv.HasDefs = true
@@ -276,7 +277,13 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
-		vv.ConfigWidget(w, sc)
+		if wb.Class == "" {
+			wb.Class = "configed"
+			vv.ConfigWidget(w, sc)
+		} else {
+			vvb.Widget = w
+			vv.UpdateWidget()
+		}
 		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()

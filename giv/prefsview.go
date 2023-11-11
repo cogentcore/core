@@ -20,11 +20,12 @@ func PrefsView(pf *gi.Preferences) {
 	}
 	sc := gi.NewScene("gogi-prefs")
 	sc.Title = "GoGi Preferences"
-	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
@@ -54,7 +55,6 @@ func PrefsView(pf *gi.Preferences) {
 
 	sv := NewStructView(sc)
 	sv.SetStruct(pf)
-	sv.SetStretchMax()
 	sv.OnChange(func(e events.Event) {
 		pf.Apply()
 		pf.Save()
@@ -106,14 +106,14 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	}
 
 	sc := gi.NewScene("gogi-prefs-det").SetTitle("GoGi Detailed Preferences").SetData(pf)
-	sc.Lay = gi.LayoutVert
 
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
-	sv.SetStretchMax()
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
@@ -171,15 +171,15 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	}
 	sc := gi.NewScene("gogi-prefs-dbg")
 	sc.Title = "GoGi Debugging Preferences"
-	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
-	sv.SetStretchMax()
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
 	}

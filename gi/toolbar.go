@@ -8,6 +8,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/mat32/v2"
 )
 
 // ToolbarStyles can be applied to any layout (e.g., Frame) to achieve
@@ -16,12 +17,12 @@ import (
 func ToolbarStyles(ly Layouter) {
 	lb := ly.AsLayout()
 	ly.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-		s.MaxHeight.Zero()
+		s.SetMainAxis(mat32.X)
+		s.Grow.Set(1, 0)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Padding.SetHoriz(units.Dp(16))
-		s.Spacing.Zero()
+		s.Gap.Zero()
 	})
 	ly.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
@@ -29,7 +30,7 @@ func ToolbarStyles(ly Layouter) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Horiz = lb.Lay != LayoutHoriz
+			sp.Horiz = lb.Styles.MainAxis != mat32.X
 		}
 	})
 }

@@ -10,6 +10,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -29,9 +30,9 @@ type ArgView struct {
 }
 
 func (av *ArgView) OnInit() {
-	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	av.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(av) {
@@ -39,26 +40,23 @@ func (av *ArgView) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelTitleLarge
 			title.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
+				s.Grow.Set(1, 0)
 				s.Text.Align = styles.AlignCenter
-				s.AlignV = styles.AlignTop
+				s.Align.Y = styles.AlignStart
 			})
 		case "args-grid":
 			w.Style(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.MinWidth.Em(1.5)
-				s.Width.Em(1.5)
-				s.SetStretchMaxWidth() // for this to work, ALL layers above need it too
-				s.MinHeight.Em(10)
-				s.Height.Em(10)
-				s.SetStretchMaxHeight()            // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Display = styles.DisplayGrid
 				s.Columns = 2
+				s.Min.X.Ch(20)
+				s.Min.Y.Em(10)
+				s.Grow.Set(1, 1)
+				s.Overflow.Set(styles.OverflowAuto)
 			})
 		}
 		if w.Parent().Name() == "args-grid" {
 			w.Style(func(s *styles.Style) {
-				s.AlignH = styles.AlignCenter
+				s.Align.X = styles.AlignCenter
 			})
 		}
 	})
@@ -104,7 +102,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		return
 	}
 	sg := av.ArgsGrid()
-	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	config := ki.Config{}
 	for i := range av.Args {
@@ -133,8 +130,14 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
-		w := sg.Child((i * 2) + 1).(gi.Widget)
-		arg.ConfigWidget(w, av.Sc)
+		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
+		if wb.Class == "" {
+			wb.Class = "configed"
+			arg.ConfigWidget(w, av.Sc)
+		} else {
+			arg.AsValueBase().Widget = w
+			arg.UpdateWidget()
+		}
 	}
 	sg.UpdateEnd(updt)
 }

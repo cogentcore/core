@@ -169,15 +169,16 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.SetMinPrefWidth(units.Em(10))
-		s.Padding.Set(units.Dp(8), units.Dp(16))
+		s.Min.Y.Em(1.1)
+		s.Min.X.Em(10)
+		s.Padding.Set(units.Dp(8), units.Dp(8))
 		if !tf.LeadingIcon.IsNil() {
 			s.Padding.Left.Dp(12)
 		}
 		if !tf.TrailingIcon.IsNil() {
 			s.Padding.Right.Dp(12)
 		}
-		s.Text.Align = styles.AlignLeft
+		s.Text.Align = styles.AlignStart
 		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
 		case TextFieldFilled:
@@ -225,16 +226,19 @@ func (tf *TextField) TextFieldStyles() {
 		switch w.PathFrom(tf) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden
-				s.Spacing.Zero()
+				s.SetMainAxis(mat32.X)
+				s.Align.Y = styles.AlignCenter
+				s.Overflow.X = styles.OverflowHidden
+				s.Gap.Zero()
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
 			lead.Type = ButtonAction
 			lead.Style(func(s *styles.Style) {
 				s.Padding.Zero()
+				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 				s.Margin.SetRight(units.Dp(8))
 				// If we are responsible for a positive (non-disabled) state layer
 				// (instead of our parent), then we amplify it so that it is clear
@@ -259,8 +263,9 @@ func (tf *TextField) TextFieldStyles() {
 			trail.Type = ButtonAction
 			trail.Style(func(s *styles.Style) {
 				s.Padding.Zero()
+				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 				s.Margin.SetLeft(units.Dp(8))
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
@@ -1032,12 +1037,10 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 // not in visible range, position will be out of range too).
 // if wincoords is true, then adds window box offset -- for cursor, popups
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
-	st := &tf.Styles
-	spc := st.BoxSpace()
-	pos := tf.EffPos.Add(spc.Pos())
+	pos := tf.EffPos
 	if wincoords {
-		mvp := tf.Sc
-		pos = pos.Add(mat32.NewVec2FmPoint(mvp.Geom.Pos))
+		sc := tf.Sc
+		pos = pos.Add(mat32.NewVec2FmPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
 	return mat32.Vec2{pos.X + cpos, pos.Y}
@@ -1229,14 +1232,13 @@ func (tf *TextField) AutoScroll() {
 
 	sz := len(tf.EditTxt)
 
-	if sz == 0 || tf.LayState.Alloc.Size.X <= 0 {
+	if sz == 0 || tf.Geom.Size.Actual.Content.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
 		return
 	}
-	spc := st.BoxSpace()
-	maxw := tf.EffSize.X - spc.Size().X
+	maxw := tf.EffSize.X
 	if maxw < 0 {
 		return
 	}
@@ -1322,10 +1324,7 @@ func (tf *TextField) AutoScroll() {
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pixOff float32) int {
 	st := &tf.Styles
-
-	spc := st.BoxSpace()
-	px := pixOff - spc.Pos().X
-
+	px := pixOff
 	if px <= 0 {
 		return tf.StartPos
 	}
@@ -1669,7 +1668,7 @@ func (tf *TextField) HandleTextFieldEvents() {
 }
 
 func (tf *TextField) ConfigParts(sc *Scene) {
-	parts := tf.NewParts(LayoutHoriz)
+	parts := tf.NewParts()
 	if tf.IsReadOnly() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		parts.DeleteChildren(ki.DestroyKids)
 		return
@@ -1740,7 +1739,8 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
-func (tf *TextField) GetSize(sc *Scene, iter int) {
+func (tf *TextField) SizeUp(sc *Scene) {
+	tf.WidgetBase.SizeUp(sc)
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1758,36 +1758,34 @@ func (tf *TextField) GetSize(sc *Scene, iter int) {
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
-	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
-	tf.GetSizeParts(sc, iter)
-	tf.GetSizeFromWH(w, tf.FontHeight)
+	nsz := mat32.NewVec2(w, tf.FontHeight)
+	sz := &tf.Geom.Size
+	sz.FitSizeMax(&sz.Actual.Content, nsz)
+	sz.SetTotalFromContent(&sz.Actual)
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	tf.DoLayoutBase(sc, parBBox, iter)
-	tf.DoLayoutParts(sc, parBBox, iter)
-	redo := tf.DoLayoutChildren(sc, iter)
+func (tf *TextField) ScenePos(sc *Scene) {
+	tf.WidgetBase.ScenePos(sc)
 	tf.SetEffPosAndSize()
-	return redo
 }
 
 // SetEffPosAndSize sets the effective position and size of
 // the textfield based on its base position and size
 // and its icons or lack thereof
 func (tf *TextField) SetEffPosAndSize() {
-	if tf.Parts == nil {
-		fmt.Println("nil parts sepas")
-		tf.ConfigParts(tf.Sc)
-	}
-	sz := tf.LayState.Alloc.Size
-	pos := tf.LayState.Alloc.Pos
+	// if tf.Parts == nil {
+	// 	fmt.Println("nil parts sepas")
+	// 	tf.ConfigParts(tf.Sc)
+	// }
+	sz := tf.Geom.Size.Actual.Content
+	pos := tf.Geom.Pos.Content
 	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Button); ok {
-		pos.X += lead.LayState.Alloc.Size.X
-		sz.X -= lead.LayState.Alloc.Size.X
+		pos.X += lead.Geom.Size.Actual.Total.X
+		sz.X -= lead.Geom.Size.Actual.Total.X
 	}
 	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
-		sz.X -= trail.LayState.Alloc.Size.X
+		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
 	tf.EffSize = sz
 	tf.EffPos = pos
@@ -1797,15 +1795,13 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 	rs, _, _ := tf.RenderLock(sc)
 	defer tf.RenderUnlock(rs)
 
-	tf.SetEffPosAndSize()
-
 	tf.AutoScroll() // inits paint with our style
 	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(sc, st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect(sc)
-	pos := tf.EffPos.Add(st.BoxSpace().Pos())
+	pos := tf.EffPos
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		prevColor := st.Color
 		st.Color = tf.PlaceholderColor

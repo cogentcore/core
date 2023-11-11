@@ -255,16 +255,16 @@ func (st *MainStage) RunDialog() *MainStage {
 
 	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		sc.Resize(sz)
-		st.Type = WindowStage       // critical: now is its own window!
-		sc.Geom.Pos = image.Point{} // ignore pos
+		st.Type = WindowStage            // critical: now is its own window!
+		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
 		DialogRenderWins.Add(win)
 		win.GoStartEventLoop()
 		return st
 	}
 	winGeom := mat32.Geom2DInt{Size: winsz}
-	sc.Geom.Size = sz
-	// fmt.Println("dlg:", sc.Geom, "win:", winGeom)
+	sc.SceneGeom.Size = sz
+	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
 	sc.FitInWindow(winGeom) // does resize
 
 	ms.Push(st)
@@ -293,7 +293,7 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 	name := st.Name
 	title := st.Title
 	opts := &goosi.NewWindowOptions{
-		Title: title, Size: st.Scene.Geom.Size, StdPixels: false,
+		Title: title, Size: st.Scene.SceneGeom.Size, StdPixels: false,
 	}
 	wgp := WinGeomMgr.Pref(title, nil)
 	if wgp != nil {
@@ -378,7 +378,7 @@ func (st *MainStage) HandleEvent(evi events.Event) {
 		}
 		return
 	}
-	evi.SetLocalOff(st.Scene.Geom.Pos)
+	evi.SetLocalOff(st.Scene.SceneGeom.Pos)
 	st.Scene.EventMgr.HandleEvent(evi)
 }
 
@@ -399,7 +399,6 @@ func (w *RenderWin) ConfigVLay() {
 	if !w.Scene.Frame.HasChildren() {
 		w.Scene.Frame.NewChild(TypeMenuBar, "main-menu")
 	}
-	w.Scene.Frame.Lay = LayoutVert
 	w.MainMenu = w.Scene.Frame.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()

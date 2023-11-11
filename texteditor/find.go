@@ -10,7 +10,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/states"
-	"goki.dev/girl/units"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/pi/v2/lex"
 )
@@ -273,56 +273,17 @@ type QReplace struct {
 	StartPos lex.Pos `json:"-" xml:"-"`
 }
 
-// PrevQReplaceFinds are the previous QReplace strings
-var PrevQReplaceFinds []string
+var (
+	// PrevQReplaceFinds are the previous QReplace strings
+	PrevQReplaceFinds []string
 
-// PrevQReplaceRepls are the previous QReplace strings
-var PrevQReplaceRepls []string
+	// PrevQReplaceRepls are the previous QReplace strings
+	PrevQReplaceRepls []string
+)
 
 // QReplaceSig sends the signal that QReplace is updated
 func (ed *Editor) QReplaceSig() {
 	// ed.ViewSig.Emit(ed.This(), int64(ViewQReplace), ed.CursorPos)
-}
-
-// QReplaceDialog adds to the given dialog a display prompting the user for
-// query-replace items, with choosers with history
-func QReplaceDialog(d *gi.Dialog, find string, lexitems bool) *gi.Dialog {
-	tff := gi.NewChooser(d, "find")
-	tff.Editable = true
-	tff.SetStretchMaxWidth()
-	tff.SetMinPrefWidth(units.Ch(60))
-	tff.SetStrings(PrevQReplaceFinds, true, 0)
-	if find != "" {
-		tff.SetCurVal(find)
-	}
-
-	tfr := gi.NewChooser(d, "repl")
-	tfr.Editable = true
-	tfr.SetStretchMaxWidth()
-	tfr.SetMinPrefWidth(units.Ch(60))
-	tfr.SetStrings(PrevQReplaceRepls, true, 0)
-
-	lb := gi.NewSwitch(d, "lexb")
-	lb.SetText("Lexical Items")
-	lb.SetState(lexitems, states.Checked)
-	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
-
-	return d
-}
-
-// QReplaceDialogValues gets the string values
-func QReplaceDialogValues(d *gi.Dialog) (find, repl string, lexItems bool) {
-	tff := d.ChildByName("find", 1).(*gi.Chooser)
-	if tf, found := tff.TextField(); found {
-		find = tf.Text()
-	}
-	tfr := d.ChildByName("repl", 2).(*gi.Chooser)
-	if tf, found := tfr.TextField(); found {
-		repl = tf.Text()
-	}
-	lb := d.ChildByName("lexb", 3).(*gi.Switch)
-	lexItems = lb.StateIs(states.Checked)
-	return
 }
 
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
@@ -332,11 +293,33 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	d := QReplaceDialog(gi.NewDialog(ed).Title("Query-Replace").
-		Prompt("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"),
-		find, ed.QReplace.LexItems)
+	d := gi.NewDialog(ed).Title("Query-Replace").
+		Prompt("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
+	fc := gi.NewChooser(d, "find").SetEditable(true)
+	fc.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Min.X.Ch(60)
+	})
+	fc.SetStrings(PrevQReplaceFinds, true, 0)
+	if find != "" {
+		fc.SetCurVal(find)
+	}
+
+	rc := gi.NewChooser(d, "repl").SetEditable(true)
+	rc.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Min.X.Ch(60)
+	})
+	rc.SetStrings(PrevQReplaceRepls, true, 0)
+
+	lexitems := ed.QReplace.LexItems
+	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetState(lexitems, states.Checked).
+		SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
+
 	d.OnAccept(func(e events.Event) {
-		find, repl, lexItems := QReplaceDialogValues(d)
+		find := fc.CurVal.(string)
+		repl := rc.CurVal.(string)
+		lexItems := lxi.StateIs(states.Checked)
 		ed.QReplaceStart(find, repl, lexItems)
 	}).Cancel().Ok("Query-Replace").Run()
 }

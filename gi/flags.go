@@ -46,8 +46,7 @@ func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) *WidgetBase {
 // SetStateTree sets the given [styles.Style.State] flags for tree starting
 // at receiving widget.
 func (wb *WidgetBase) SetStateTree(on bool, state ...enums.BitFlag) {
-	wb.WalkPre(func(k ki.Ki) bool {
-		_, wb := AsWidget(k)
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wb.SetState(on, state...)
 		return ki.Continue
 	})
@@ -139,8 +138,7 @@ func (wb *WidgetBase) SetReadOnly(ro bool) {
 // of its children have the given flag.
 func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
-	wb.WalkPre(func(k ki.Ki) bool {
-		_, wb := AsWidget(k)
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wb.Is(flag) {
 			got = true
 			return ki.Break
@@ -154,8 +152,7 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 // of its children have the given state flag.
 func (wb *WidgetBase) HasStateWithin(flag enums.BitFlag) bool {
 	got := false
-	wb.WalkPre(func(k ki.Ki) bool {
-		_, wb := AsWidget(k)
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wb.StateIs(flag) {
 			got = true
 			return ki.Break

@@ -9,7 +9,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
 
@@ -41,16 +40,12 @@ func (pb *ProgressBar) CopyFieldsFrom(frm any) {
 func (pb *ProgressBar) OnInit() {
 	pb.Type = SliderScrollbar
 	pb.Dim = mat32.X
-	pb.ValThumb = true
-	pb.ThumbVal = 1
+	pb.ThumbSize.Set(1, 1)
 	pb.Value = 0
 	pb.Step = 0.1
 	pb.PageStep = 0.2
 	pb.Max = 1.0
 	pb.Prec = 9
-	pb.ThumbSize = units.Dp(4)
-	pb.ThSize = 25.0
-	pb.ThSizeReal = pb.ThSize
 	pb.SetReadOnly(true)
 
 	pb.HandleWidgetEvents()
@@ -66,17 +61,14 @@ func (pb *ProgressBar) ProgressBarStyles() {
 
 		s.Color = colors.Scheme.OnSurface
 
-		pb.StyleBox.Defaults()
-		pb.StyleBox.Border.Style.Set(styles.BorderNone)
-
 		s.Padding.Zero()
 
 		if pb.Dim == mat32.X {
-			s.Width.Em(20)
-			s.Height.Dp(4)
+			s.Min.X.Em(20)
+			s.Min.Y.Dp(10)
 		} else {
-			s.Height.Em(20)
-			s.Width.Dp(4)
+			s.Min.Y.Em(20)
+			s.Min.X.Dp(10)
 		}
 	})
 }
@@ -103,7 +95,7 @@ func (pb *ProgressBar) Start(mx int) {
 
 func (pb *ProgressBar) UpdtBar() {
 	updt := pb.UpdateStart()
-	pb.SetThumbValue(float32(pb.ProgCur) / float32(pb.ProgMax))
+	pb.SetVisiblePct(float32(pb.ProgCur) / float32(pb.ProgMax))
 	pb.UpdateEndRender(updt)
 }
 

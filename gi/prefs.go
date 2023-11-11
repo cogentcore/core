@@ -35,7 +35,9 @@ func Init() {
 		Prefs.Open()
 		Prefs.Apply()
 		goosi.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
-		TheViewIFace.HiStyleInit()
+		if TheViewIFace != nil {
+			TheViewIFace.HiStyleInit()
+		}
 		WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
 		WinGeomMgr.Open()
 	}
@@ -286,7 +288,9 @@ func (pf *Preferences) Apply() { //gti:add
 		pf.HiStyle = "emacs" // todo: need light / dark versions
 	}
 
-	TheViewIFace.SetHiStyleDefault(pf.HiStyle)
+	if TheViewIFace != nil {
+		TheViewIFace.SetHiStyleDefault(pf.HiStyle)
+	}
 	events.DoubleClickInterval = pf.Params.DoubleClickInterval
 	events.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
@@ -710,8 +714,8 @@ type PrefsDetailed struct { //gti:add
 	// time interval for cursor blinking on and off -- set to 0 to disable blinking
 	CursorBlinkTime time.Duration `def:"500" min:"0" max:"1000" step:"5"`
 
-	// is amount of time to wait (in Milliseconds) before trying to autoscroll again
-	LayoutAutoScrollDelayMSec int `def:"25" min:"1" step:"5"`
+	// is amount of time to wait before trying to autoscroll again
+	LayoutAutoScrollDelay time.Duration `def:"25" min:"1" step:"5"`
 
 	// number of steps to take in PageUp / Down events in terms of number of items
 	LayoutPageSteps int `def:"10" min:"1" step:"1"`
@@ -790,12 +794,14 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.CompleteWaitDuration = CompleteWaitDuration
 	pf.CompleteMaxItems = CompleteMaxItems
 	pf.CursorBlinkTime = CursorBlinkTime
-	pf.LayoutAutoScrollDelayMSec = LayoutAutoScrollDelayMSec
+	pf.LayoutAutoScrollDelay = LayoutAutoScrollDelay
 	pf.LayoutPageSteps = LayoutPageSteps
 	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
 	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
 	pf.MenuMaxHeight = MenuMaxHeight
-	TheViewIFace.PrefsDetDefaults(pf)
+	if TheViewIFace != nil {
+		TheViewIFace.PrefsDetDefaults(pf)
+	}
 	// in giv:
 	// TextViewClipHistMax
 	// TextBuf*
@@ -819,7 +825,9 @@ func (pf *PrefsDetailed) Apply() { //gti:add
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
 	MenuMaxHeight = pf.MenuMaxHeight
-	TheViewIFace.PrefsDetApply(pf)
+	if TheViewIFace != nil {
+		TheViewIFace.PrefsDetApply(pf)
+	}
 	// in giv:
 	// TextViewClipHistMax = pf.TextViewClipHistMax
 	// TextBuf*

@@ -17,7 +17,6 @@ import (
 	"goki.dev/enums"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 )
 
@@ -367,18 +366,18 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	if nldpinet < 6 {
 		nldpinet = 6
 	}
-	oldzoom := goosi.ZoomFactor
+	// oldzoom := goosi.ZoomFactor
 	goosi.ZoomFactor = nldpinet / cldpi
 	Prefs.ApplyDPI()
 	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, goosi.ZoomFactor)
 
 	// actually resize window in proportion:
-	zr := goosi.ZoomFactor / oldzoom
-	curSz := rctx.Size
-	nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
-	rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
+	// zr := goosi.ZoomFactor / oldzoom
+	// curSz := rctx.Size
+	// nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
+	// rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	rctx.Mu.RUnlock()
-	w.GoosiWin.SetSize(nsz)
+	// w.GoosiWin.SetSize(nsz)
 }
 
 // SetWinSize requests that the window be resized to the given size
@@ -1013,7 +1012,7 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 		if i == 0 {
 			op = draw.Src
 		}
-		drw.Copy(i, 0, sc.Geom.Pos, bb, op, rs.FlipY)
+		drw.Copy(i, 0, sc.SceneGeom.Pos, bb, op, rs.FlipY)
 	}
 }
 

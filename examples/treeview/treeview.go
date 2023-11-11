@@ -47,15 +47,27 @@ func app() {
 
 	sc := gi.NewScene("treeview-test").SetTitle("TreeView Test")
 
+	// gi.DefaultTopAppBar = nil
+
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
-	svfr := gi.NewFrame(split, "svfr").SetLayout(gi.LayoutHoriz)
+	tvfr := gi.NewFrame(split, "tvfr")
+	svfr := gi.NewFrame(split, "svfr")
 	split.SetSplits(.3, .7)
 
+	svfr.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+		// s.Border.Color.Set(colors.Black)
+		// s.Border.Width.Set(units.Dp(2))
+		s.Grow.Set(1, 0)
+	})
+
 	tvfr.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.MainAxis = mat32.Y
+		// s.Border.Color.Set(colors.Black)
+		// s.Border.Width.Set(units.Dp(2))
+		s.Overflow.Y = styles.OverflowAuto
 	})
 
 	tv := giv.NewTreeView(tvfr, "tv")
@@ -70,7 +82,7 @@ func app() {
 
 	sv := giv.NewStructView(svfr, "sv")
 	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 	sv.SetStruct(tv)
 

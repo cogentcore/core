@@ -21,18 +21,16 @@ func KeyMapsView(km *keyfun.Maps) {
 	}
 	sc := gi.NewScene("gogi-key-maps")
 	sc.Title = "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map"
-	sc.Lay = gi.LayoutVert
 	sc.Data = km
 
 	title := gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)
 	title.Style(func(s *styles.Style) {
-		s.Width.Ch(30) // need for wrap
-		s.SetStretchMaxWidth()
+		s.Min.X.Ch(30) // need for wrap
+		s.Grow.Set(1, 0)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 
 	tv := NewTableView(sc).SetSlice(km)
-	tv.SetStretchMax()
 
 	keyfun.AvailMapsChanged = false
 	tv.OnChange(func(e events.Event) {
@@ -40,7 +38,9 @@ func KeyMapsView(km *keyfun.Maps) {
 	})
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 
 		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)
 		sp.SetUpdateFunc(func() {

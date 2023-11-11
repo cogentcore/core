@@ -23,7 +23,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/grr"
@@ -297,38 +296,39 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 
 	sv.HandleSliceViewEvents()
 
-	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
 		case "grid-lay": // grid layout
-			gl := w.(*gi.Layout)
-			gl.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMax() // for this to work, ALL layers above need it too
+				s.SetMainAxis(mat32.X)
+				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
 			})
 		case "grid-lay/grid": // slice grid
 			sg := w.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				nWidgPerRow, _ := sv.RowWidgetNs()
+				s.Display = styles.DisplayGrid
 				s.Columns = nWidgPerRow
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(6))
-				s.SetMinPrefWidth(units.Ch(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
+				s.Min.X.Em(20)
+				s.Min.Y.Ch(10)
+				// s.Gap.Zero()
 			})
 		case "grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
-				s.SetFixedWidth(sv.Styles.ScrollBarWidth)
-				s.SetStretchMaxHeight()
+				// s.Min.Y.Zero()
+				s.Min.X = sv.Styles.ScrollBarWidth
+				s.Grow.Set(0, 1)
+				fmt.Println(sb, "set grow:", s.Grow)
 			})
 			sb.OnChange(func(e events.Event) {
 				sv.StartIdx = int(sb.Value)
@@ -340,9 +340,11 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
-					s.MinWidth.Em(1.5)
+					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
-					s.Text.Align = styles.AlignRight
+					s.Text.Align = styles.AlignEnd
+					s.Min.Y.Em(1)
+					s.Grow.Set(0, 0)
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
@@ -462,7 +464,7 @@ func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 	sv.VisRows = 0
 	gl := gi.NewLayout(sv, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid").SetLayout(gi.LayoutGrid)
+	gi.NewFrame(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
 }
 
@@ -532,7 +534,6 @@ func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	sb.Type = gi.SliderScrollbar
-	sb.ValThumb = true
 	sb.Dim = mat32.Y
 	sb.Tracking = true
 	sb.Min = 0
@@ -599,11 +600,13 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 	sv.ViewMu.Unlock()
 }
 
-func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	redo := sv.Frame.DoLayout(sc, parBBox, iter)
-	if sv.This().(SliceViewer).NeedsConfigRows() {
-		sv.Update() // does applystyle
-		return true // needs redo
+func (sv *SliceViewBase) SizeDown(sc *gi.Scene, iter int) bool {
+	redo := sv.Frame.SizeDown(sc, iter)
+	if iter == 0 && sv.This().(SliceViewer).NeedsConfigRows() {
+		// fmt.Println("redo, iter:", iter)
+		sv.Update()   // does applystyle
+		sv.SizeUp(sc) // re-init everything
+		redo = true
 	}
 	return redo
 }
@@ -627,29 +630,22 @@ func (sv *SliceViewBase) UpdateScroll() {
 	sb.Max = float32(sv.SliceSize) + 0.01 // bit of extra to ensure last line always shows up
 	if sv.VisRows > 0 {
 		sb.PageStep = float32(sv.VisRows) * sb.Step
-		sb.ThumbVal = float32(sv.VisRows)
+		sb.SetVisiblePct(float32(sv.VisRows) / float32(sv.SliceSize))
 	} else {
 		sb.PageStep = 10 * sb.Step
-		sb.ThumbVal = 10
+		sb.SetVisiblePct(1)
 	}
 	sb.TrackThr = sb.Step
 	sb.SetValue(float32(sv.StartIdx)) // essential for updating pos from value
-	if sv.VisRows == sv.SliceSize {
-		sb.Off = true
-	} else {
-		sb.Off = false
-	}
+	sb.SetState(sv.VisRows == sv.SliceSize, states.Invisible)
 	sb.UpdateEnd(updt)
 }
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sgHt := sg.LayState.Alloc.SizeOrig.Y
-	if sgHt == 0 {
-		return 0
-	}
-	// fmt.Println("sg:", sgHt, "sv:", sv.LayState.Alloc.SizeOrig.Y)
-	sgHt -= sg.ExtraSize.Y + sg.Styles.BoxSpace().Size().Y
+	// sgHt := sg.Geom.Size.Actual.Content.Y
+	sgHt := sg.Geom.Size.Actual.Content.Y
+	// fmt.Println("sg:", sgHt, "sv:", sv.Geom.Size.Actual.TotalOrig.Y)
 	return sgHt
 }
 
@@ -660,11 +656,14 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 	if sg == nil {
 		return
 	}
-	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Styles.Spacing.Dots
+	if sg.HasChildren() {
+		_, kwb := gi.AsWidget(sg.Child(0))
+		rowht = kwb.Geom.Size.Alloc.Total.Y
+		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Geom.Size.Actual.Total.Y)
 	}
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
-		rowht = mat32.Max(rowht, sv.RowHeight)
+		rowht = max(rowht, sv.RowHeight)
+		// fmt.Println("rowht:", rowht, "svrh:", sv.RowHeight)
 	}
 	if sv.Styles.Font.Face == nil {
 		sv.Styles.Font = paint.OpenFont(sv.Styles.FontRender(), &sv.Styles.UnContext)
@@ -676,13 +675,14 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 		rows = gi.LayoutPrefMaxRows
 		layht = float32(rows) * rowht
 	} else {
+		sv.RowHeight = max(sv.RowHeight, rowht)
 		sgHt := sv.AvailHeight()
-		// fmt.Println(sgHt)
 		layht = sgHt
 		if sgHt == 0 {
 			return
 		}
 		rows = int(mat32.Floor(sgHt / rowht))
+		// fmt.Println("rows:", rows, "sght:", sgHt, "rowht:", rowht, "sc ht:", sc.SceneGeom.Size.Y)
 	}
 	return
 }
@@ -1162,7 +1162,7 @@ func (sv *SliceViewBase) RowFromPos(posY int) (int, bool) {
 	for rw := 0; rw < sv.VisRows; rw++ {
 		w, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
 		if ok {
-			if w.ScBBox.Min.Y < posY && posY < w.ScBBox.Max.Y {
+			if w.Geom.TotalBBox.Min.Y < posY && posY < w.Geom.TotalBBox.Max.Y {
 				return rw, true
 			}
 		}

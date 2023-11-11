@@ -145,12 +145,16 @@ func (tb *TopAppBar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
-func (tb *TopAppBar) GetSize(sc *Scene, iter int) {
-	if iter == 0 {
-		tb.AllItemsToChildren(sc)
-	}
-	tb.Frame.GetSize(sc, iter)
+func (tb *TopAppBar) SizeUp(sc *Scene) {
+	tb.AllItemsToChildren(sc)
+	tb.Frame.SizeUp(sc)
+	ma := tb.Styles.MainAxis
+	sz := &tb.Geom.Size                            // reset for others
+	sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
+	sz.SetTotalFromContent(&sz.Actual)
 }
+
+// don't report any size at sizeup, etc
 
 // AllItemsToChildren moves the overflow items back to the children,
 // so the full set is considered for the next layout round,
@@ -166,7 +170,7 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 	}
 	if tb.OverflowButton == nil {
 		ic := icons.MoreVert
-		if tb.Lay != LayoutHoriz {
+		if tb.Styles.MainAxis != mat32.X {
 			ic = icons.MoreHoriz
 		}
 		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
@@ -188,72 +192,69 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 	tb.Kids = append(tb.Kids, tb.OverflowButton.This())
 }
 
-// DoLayoutAlloc moves overflow to the end of children for layout
-func (tb *TopAppBar) DoLayoutAlloc(sc *Scene, iter int) bool {
-	if !tb.HasChildren() {
-		return tb.Frame.DoLayoutAlloc(sc, iter)
-	}
-	if iter == 0 { // first do a normal layout to get everyone's target positions
-		tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
-		tb.BBox = tb.ScBBox
-		tb.ObjBBox = tb.ScBBox
-		tb.Frame.DoLayoutAlloc(sc, iter)
+func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
+	if iter == 0 || !tb.HasChildren() { // first do a normal layout to get everyone's target positions
+		tb.Frame.SizeDown(sc, iter)
+		ma := tb.Styles.MainAxis
+		sz := &tb.Geom.Size
+		sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
+		sz.SetTotalFromContent(&sz.Actual)
 		return true // needs another iter
 	}
-	// then move items to overflow
-	tb.MoveToOverflow(sc)
-	tb.Frame.DoLayoutAlloc(sc, iter)
-	return false
+	if iter == 1 {
+		tb.MoveToOverflow(sc)
+		tb.Frame.SizeDown(sc, iter)
+		return true
+	}
+	tb.ParentSize() // minimize it
+	return tb.Frame.SizeDown(sc, iter)
+}
+
+func (tb *TopAppBar) ParentSize() float32 {
+	ma := tb.Styles.MainAxis
+	_, pwb := tb.ParentWidget()
+	psz := pwb.Geom.Size.Actual.Content.Sub(tb.Geom.Size.Space)
+	avail := psz.Dim(ma) - 4
+	// fmt.Println(pwb, pwb.Geom.Size)
+	sz := &tb.Geom.Size
+	sz.Alloc.Total.SetDim(ma, avail)
+	sz.SetContentFromTotal(&sz.Alloc)
+	return avail
 }
 
 // MoveToOverflow moves overflow out of children to the OverflowItems list
 func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
-	ldim := LaySummedDim(tb.Lay) // X for horiz tbar, Y for vert
-	// note: the ScBBox is intersected with parents actual display size
-	// our own AvailSize is full width of all items
-	avail := tb.ScBBox.Max
-	ovsz := tb.OverflowButton.BBox.Size()
-	avsz := avail.Sub(ovsz)
-	dmx := float32(avsz.X)
-	if ldim == mat32.Y {
-		dmx = float32(avsz.Y)
-	}
-	tb.LayState.Alloc.Size = mat32.NewVec2FmPoint(tb.ScBBox.Size()) // we only show vis
-	tb.BBox = tb.ScBBox
-	tb.ObjBBox = tb.ScBBox
-
+	ma := tb.Styles.MainAxis
+	avail := tb.ParentSize()
+	ovsz := tb.OverflowButton.Geom.Size.Actual.Total.Dim(ma)
+	avsz := avail - ovsz
+	sz := &tb.Geom.Size
+	sz.Alloc.Total.SetDim(ma, avail)
+	sz.SetContentFromTotal(&sz.Alloc)
 	tb.OverflowItems = nil
 	n := len(tb.Kids)
 	ovidx := n - 1
 	hasOv := false
-	for i := 0; i < n-1; i++ {
-		k := tb.Kids[i]
-		_, wb := AsWidget(k)
-		wbbm := mat32.NewVec2FmPoint(wb.BBox.Max)
-		wdmx := wbbm.Dim(ldim)
-		ov := wdmx > dmx
-		if ov {
+	szsum := float32(0)
+	tb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		if i >= n-1 {
+			return ki.Break
+		}
+		ksz := kwb.Geom.Size.Actual.Total.Dim(ma)
+		szsum += ksz
+		if szsum > avsz {
 			if !hasOv {
 				ovidx = i
 				hasOv = true
 			}
-			tb.OverflowItems = append(tb.OverflowItems, k)
+			tb.OverflowItems = append(tb.OverflowItems, kwi)
 		}
-	}
+		return ki.Continue
+	})
 	if ovidx != n-1 {
 		tb.Kids.Move(n-1, ovidx)
 		tb.Kids = tb.Kids[:ovidx+1]
 	}
-}
-
-// ManageOverflow processes any overflow according to overflow settings.
-func (tb *TopAppBar) ManageOverflow(sc *Scene) {
-	tb.SetFlag(true, LayoutScrollsOff)
-	tb.ExtraSize.SetScalar(0)
-	for d := mat32.X; d <= mat32.Y; d++ {
-		tb.HasScroll[d] = false
-	}
-	// todo: move others out of range
 }
 
 // OverflowMenu is the overflow menu function
@@ -292,7 +293,7 @@ func (tb *TopAppBar) AddDefaultOverflowMenu() {
 
 // DefaultOverflowMenu adds standard default overflow menu items.
 // Typically you will want to add additional items and then call this function.
-func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) {
+func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) { //gti:add
 	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
 			TheViewIFace.PrefsView(&Prefs)

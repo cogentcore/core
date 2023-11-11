@@ -25,18 +25,24 @@ func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.Style(func(s *styles.Style) {
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(4), units.Zero())
-		s.AlignV = styles.AlignCenter
-		s.AlignH = styles.AlignCenter
-		s.Border.Style.Top = styles.BorderSolid
-		s.Border.Color.Top = colors.Scheme.OutlineVariant
-		s.Border.Width.Top.Dp(1)
+		s.Align.Y = styles.AlignCenter
+		s.Align.X = styles.AlignCenter
 		if sp.Horiz {
-			s.SetStretchMaxWidth()
-			s.MinHeight.Dp(1)
+			s.Border.Style.Top = styles.BorderSolid
+			s.Border.Color.Top = colors.Scheme.OutlineVariant
+			s.Border.Width.Top.Dp(2)
+			s.Grow.Set(1, 0)
+			s.Padding.Set(units.Dp(4), units.Zero())
+			s.Min.Y.Dp(2)
+			s.Min.X.Em(1)
 		} else {
-			s.SetStretchMaxHeight()
-			s.MinWidth.Dp(1)
+			s.Border.Style.Left = styles.BorderSolid
+			s.Border.Color.Left = colors.Scheme.OutlineVariant
+			s.Border.Width.Left.Dp(2)
+			s.Padding.Set(units.Zero(), units.Dp(4))
+			s.Grow.Set(0, 1)
+			s.Min.X.Dp(2)
+			s.Min.Y.Em(1)
 		}
 	})
 }
@@ -51,8 +57,8 @@ func (sp *Separator) RenderSeparator(sc *Scene) {
 	rs, pc, st := sp.RenderLock(sc)
 	defer sp.RenderUnlock(rs)
 
-	pos := sp.LayState.Alloc.Pos.Add(st.TotalMargin().Pos())
-	sz := sp.LayState.Alloc.Size.Sub(st.TotalMargin().Size())
+	pos := sp.Geom.Pos.Total.Add(st.TotalMargin().Pos())
+	sz := sp.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
 
 	if !st.BackgroundColor.IsNil() {
 		pc.FillBox(rs, pos, sz, &st.BackgroundColor)

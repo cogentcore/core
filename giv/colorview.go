@@ -16,11 +16,11 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
 
@@ -71,7 +71,9 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	updt := cv.UpdateStart()
-	cv.SetLayout(gi.LayoutVert)
+	cv.Style(func(s *styles.Style) {
+		s.MainAxis = mat32.Y
+	})
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
 	hue.OnChange(func(e events.Event) {
@@ -81,8 +83,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor.SetSolid(colors.Transparent)
 		hue.ThumbColor.SetSolid(cv.Color)
-		hue.ThumbSize.Dp(32)
-		s.SetMinPrefWidth(units.Em(40))
+		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for h := float32(0); h <= 360; h += 5 {
@@ -99,8 +100,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	chroma.Style(func(s *styles.Style) {
 		chroma.ValueColor.SetSolid(colors.Transparent)
 		chroma.ThumbColor.SetSolid(cv.Color)
-		chroma.ThumbSize.Dp(32)
-		s.SetMinPrefWidth(units.Em(40))
+		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 150; c += 5 {
@@ -117,8 +117,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	tone.Style(func(s *styles.Style) {
 		tone.ValueColor.SetSolid(colors.Transparent)
 		tone.ThumbColor.SetSolid(cv.Color)
-		tone.ThumbSize.Dp(32)
-		s.SetMinPrefWidth(units.Em(40))
+		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		s.BackgroundColor.Gradient = colors.LinearGradient()
 		for c := float32(0); c <= 100; c += 5 {
@@ -132,13 +131,12 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 /*
 func (cv *ColorView) OnInit() {
-	cv.Lay = gi.LayoutVert
 	cv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.Em(6)
-				s.MinHeight.Em(6)
+				s.Min.X.Em(6)
+				s.Min.Y.Em(6)
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
@@ -148,7 +146,7 @@ func (cv *ColorView) OnInit() {
 			})
 		case "hexlbl":
 			w.Style(func(s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 			})
 		case "palette":
 			w.Style(func(s *styles.Style) {
@@ -156,15 +154,13 @@ func (cv *ColorView) OnInit() {
 			})
 		case "nums-hex":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.Ch(20)
+				s.Min.X.Ch(20)
 			})
 		}
 		if sl, ok := w.(*gi.Slider); ok {
 			sl.Style(func(s *styles.Style) {
-				s.MinWidth.Ch(20)
-				s.Width.Ch(20)
-				s.MinHeight.Em(1)
-				s.Height.Em(1)
+				s.Min.X.Ch(20)
+				s.Min.Y.Em(1)
 				s.Margin.Set(units.Dp(6))
 			})
 		}
@@ -174,8 +170,7 @@ func (cv *ColorView) OnInit() {
 					c := colornames.Map[cbt.Name()]
 
 					s.BackgroundColor.SetSolid(c)
-					s.MaxHeight.Em(1.3)
-					s.MaxWidth.Em(1.3)
+					s.Max.Set(units.Em(1.3))
 					s.Margin.Zero()
 				})
 			}
@@ -200,10 +195,10 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	updt := cv.UpdateStart()
-	vl := gi.NewLayout(cv, "slider-lay").SetLayout(gi.LayoutHoriz)
-	nl := gi.NewLayout(cv, "num-lay").SetLayout(gi.LayoutVert)
+	vl := gi.NewLayout(cv, "slider-lay").SetMainAxis(mat32.X)
+	nl := gi.NewLayout(cv, "num-lay").SetMainAxis(mat32.Y)
 
-	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetLayout(gi.LayoutHoriz)
+	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetMainAxis(mat32.X)
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
@@ -233,7 +228,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetLayout(gi.LayoutHoriz)
+	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetMainAxis(mat32.X)
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
@@ -263,7 +258,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetLayout(gi.LayoutHoriz)
+	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetMainAxis(mat32.X)
 
 	gi.NewLabel(hexlay, "hexlbl").SetText("Hex")
 
@@ -298,8 +293,8 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	gi.NewFrame(vl, "value").SetLayout(gi.LayoutHoriz)
-	sg := gi.NewLayout(vl, "slider-grid").SetLayout(gi.LayoutGrid)
+	gi.NewFrame(vl, "value").SetMainAxis(mat32.X)
+	sg := gi.NewLayout(vl, "slider-grid").SetDisplay(styles.DisplayGrid)
 
 	gi.NewLabel(sg, "rlab").SetText("Red:")
 	rs := gi.NewSlider(sg, "red")
@@ -439,7 +434,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := gi.NewLayout(cv, "palette").SetLayout(gi.LayoutGrid)
+	pg := gi.NewLayout(cv, "palette").SetDisplay(styles.DisplayGrid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
 	nms := colors.Names
@@ -571,6 +566,7 @@ func (vv *ColorValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.CreateTempIfNotPtr()
 	bt := vv.Widget.(*gi.Button)
 	bt.SetNeedsRender()
 }

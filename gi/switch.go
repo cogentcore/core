@@ -14,6 +14,7 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // Switch is a widget that can toggle between an on and off state.
@@ -110,6 +111,9 @@ func (sw *Switch) HandleSwitchEvents() {
 		e.SetHandled()
 		sw.SetChecked(!sw.StateIs(states.Checked))
 		sw.Send(events.Change, e)
+		if sw.Type == SwitchChip {
+			sw.SetNeedsLayout()
+		}
 	})
 }
 
@@ -119,7 +123,7 @@ func (sw *Switch) SwitchStyles() {
 		if !sw.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Text.Align = styles.AlignLeft
+		s.Text.Align = styles.AlignStart
 		s.Padding.Set(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusSmall
 
@@ -149,7 +153,13 @@ func (sw *Switch) SwitchStyles() {
 		switch w.PathFrom(sw) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Spacing.Zero()
+				s.SetMainAxis(mat32.X)
+				s.Gap.Zero()
+			})
+		case "parts/stack":
+			w.Style(func(s *styles.Style) {
+				s.Display = styles.DisplayStacked
+				s.Gap.Zero()
 			})
 		case "parts/stack/icon0": // on
 			w.Style(func(s *styles.Style) {
@@ -160,11 +170,11 @@ func (sw *Switch) SwitchStyles() {
 				}
 				// switches need to be bigger
 				if sw.Type == SwitchSwitch {
-					s.Width.Em(2)
-					s.Height.Em(1.5)
+					s.Min.X.Em(2)
+					s.Min.Y.Em(1.5)
 				} else {
-					s.Width.Em(1.5)
-					s.Height.Em(1.5)
+					s.Min.X.Em(1.5)
+					s.Min.Y.Em(1.5)
 				}
 			})
 		case "parts/stack/icon1": // off
@@ -172,15 +182,15 @@ func (sw *Switch) SwitchStyles() {
 				switch sw.Type {
 				case SwitchSwitch:
 					// switches need to be bigger
-					s.Width.Em(2)
-					s.Height.Em(1.5)
+					s.Min.X.Em(2)
+					s.Min.Y.Em(1.5)
 				case SwitchChip:
 					// chips render no icon when off
-					s.Width.Zero()
-					s.Height.Zero()
+					s.Min.X.Zero()
+					s.Min.Y.Zero()
 				default:
-					s.Width.Em(1.5)
-					s.Height.Em(1.5)
+					s.Min.X.Em(1.5)
+					s.Min.Y.Em(1.5)
 				}
 			})
 		case "parts/stack/icon2": // disab
@@ -188,20 +198,20 @@ func (sw *Switch) SwitchStyles() {
 				switch sw.Type {
 				case SwitchSwitch:
 					// switches need to be bigger
-					s.Width.Em(2)
-					s.Height.Em(1.5)
+					s.Min.X.Em(2)
+					s.Min.Y.Em(1.5)
 				case SwitchChip:
 					// chips render no icon when off
-					s.Width.Zero()
-					s.Height.Zero()
+					s.Min.X.Zero()
+					s.Min.Y.Zero()
 				default:
-					s.Width.Em(1.5)
-					s.Height.Em(1.5)
+					s.Min.X.Em(1.5)
+					s.Min.Y.Em(1.5)
 				}
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.Ch(0.1)
+				s.Min.X.Ch(0.1)
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
@@ -209,8 +219,10 @@ func (sw *Switch) SwitchStyles() {
 				s.Cursor = cursors.None
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.AlignV = styles.AlignMiddle
-				s.FillSurround = false
+				s.Align.Y = styles.AlignCenter
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // nowrap
+				s.FillMargin = false
 			})
 		}
 	})
@@ -274,7 +286,7 @@ func (sw *Switch) ConfigWidget(sc *Scene) {
 }
 
 func (sw *Switch) ConfigParts(sc *Scene) {
-	parts := sw.NewParts(LayoutHoriz)
+	parts := sw.NewParts()
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}
@@ -293,7 +305,6 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	mods, updt := parts.ConfigChildren(config)
 	ist := parts.Child(icIdx).(*Layout)
 	if mods || sw.NeedsRebuild() {
-		ist.Lay = LayoutStacked
 		ist.SetNChildren(3, IconType, "icon")
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(sw.IconOn)

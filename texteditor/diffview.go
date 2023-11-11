@@ -131,15 +131,15 @@ func (dv *DiffView) OnInit() {
 
 func (dv *DiffView) DiffViewStyles() {
 	dv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.Grow.Set(1,1)
 	})
 	dv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(dv) {
 		case "text-a-lay", "text-b-lay":
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMax()
-				s.SetMinPrefWidth(units.Ch(80))
-				s.SetMinPrefHeight(units.Em(40))
+				s.Grow.Set(1,1)
+				s.Min.X.Ch(80)
+				s.Min.Y.Em(40)
 			})
 		case "text-a", "text-b":
 			w.Style(func(s *styles.Style) {
@@ -147,9 +147,9 @@ func (dv *DiffView) DiffViewStyles() {
 			})
 		case "diff-lay":
 			df := w.(*gi.Layout)
-			df.Lay = gi.LayoutHoriz
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMax()
+				s.SetMainAxis(mat32.X)
+				s.Grow.Set(1,1)
 			})
 		}
 	})

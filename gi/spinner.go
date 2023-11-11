@@ -12,7 +12,6 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -54,7 +53,7 @@ type Spinner struct { //goki:embedder
 
 func (sp *Spinner) CopyFieldsFrom(frm any) {
 	fr := frm.(*Spinner)
-	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sp.TextField.CopyFieldsFrom(&fr.TextField)
 	sp.Value = fr.Value
 	sp.HasMin = fr.HasMin
 	sp.Min = fr.Min
@@ -82,8 +81,13 @@ func (sp *Spinner) OnInit() {
 func (sp *Spinner) SpinnerStyles() {
 	sp.TextFieldStyles()
 	sp.Style(func(s *styles.Style) {
-		s.SetMinPrefWidth(units.Em(6))
+		s.Min.X.Em(8)
 	})
+}
+
+func (sp *Spinner) SizeUp(sc *Scene) {
+	sp.SetText(sp.ValToString(sp.Value))
+	sp.TextField.SizeUp(sc)
 }
 
 // SetMin sets the min limits on the value

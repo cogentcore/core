@@ -26,8 +26,8 @@ import (
 func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 	var repo vci.Repo
 	var rnode *Node
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -316,7 +316,6 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	d := gi.NewDialog(ctx).Title(title).Ok()
 
 	tv := texteditor.NewTwinEditors(d, "twin-view")
-	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
 	lns := bytes.Split(blame, []byte("\n"))
@@ -344,13 +343,13 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
-		s.Width.Ch(30)
-		s.Height.Em(40)
+		s.Min.X.Ch(30)
+		s.Min.Y.Em(40)
 	})
 	tvb.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
-		s.Width.Ch(80)
-		s.Height.Em(40)
+		s.Min.X.Ch(80)
+		s.Min.Y.Em(40)
 	})
 
 	// dlg.UpdateEndNoSig(true) // going to be shown
@@ -384,8 +383,8 @@ func (fn *Node) BlameVcs() ([]byte, error) {
 
 // UpdateAllVcs does an update on any repositories below this one in file tree
 func (fn *Node) UpdateAllVcs() {
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if !sfn.IsDir() {
 			return ki.Continue
 		}

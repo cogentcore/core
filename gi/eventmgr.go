@@ -204,7 +204,7 @@ func (em *EventMgr) HandleFocusEvent(evi events.Event) {
 			em.SetFocus(em.PrevFocus)
 			em.PrevFocus = nil
 		case em.StartFocus != nil:
-			em.SetFocus(em.PrevFocus)
+			em.SetFocus(em.StartFocus)
 		default:
 			em.FocusFirst()
 		}
@@ -276,7 +276,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	n := len(em.MouseInBBox)
 	if n == 0 {
 		if EventTrace && et != events.MouseMove {
-			log.Println("Nothing in bbox:", sc.ScBBox, "pos:", pos)
+			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
 		return
 	}
@@ -568,23 +568,23 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 }
 
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
-	w.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	wb := w.AsWidget()
+	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !wb.IsVisible() {
+		if !kwb.IsVisible() {
 			return ki.Break
 		}
-		if !wb.PosInScBBox(pos) {
+		if !kwb.PosInScBBox(pos) {
 			return ki.Break
 		}
-		// fmt.Println("in bb:", wi, wb.Styles.State)
-		em.MouseInBBox = append(em.MouseInBBox, wi)
-		if wb.Parts != nil {
-			em.GetMouseInBBox(wb.Parts, pos)
+		// fmt.Println("in bb:", kwi, kwb.Styles.State)
+		em.MouseInBBox = append(em.MouseInBBox, kwi)
+		if kwb.Parts != nil {
+			em.GetMouseInBBox(kwb.Parts, pos)
 		}
-		ly := AsLayout(k)
+		ly := AsLayout(kwi)
 		if ly != nil {
 			for d := mat32.X; d <= mat32.Y; d++ {
 				if ly.HasScroll[d] {
@@ -670,7 +670,11 @@ func (em *EventMgr) FocusClear() bool {
 // If item is nil, then nothing has focus.
 // This does NOT send the events.Focus event to the widget.
 func (em *EventMgr) GrabFocus(w Widget) bool {
-	return em.SetFocusImpl(w, false) // no event
+	got := em.SetFocusImpl(w, false) // no event
+	if w != nil {
+		w.AsWidget().ScrollToMe()
+	}
+	return got
 }
 
 // SetFocus sets focus to given item -- returns true if focus changed.
@@ -678,7 +682,11 @@ func (em *EventMgr) GrabFocus(w Widget) bool {
 // This sends the events.Focus event to the widget -- see GrabFocus
 // for a version that does not.
 func (em *EventMgr) SetFocus(w Widget) bool {
-	return em.SetFocusImpl(w, true) // sends event
+	got := em.SetFocusImpl(w, true) // sends event
+	if w != nil {
+		w.AsWidget().ScrollToMe()
+	}
+	return got
 }
 
 // SetFocusImpl sets focus to given item -- returns true if focus changed.
@@ -749,11 +757,10 @@ func (em *EventMgr) FocusNextFrom(from Widget) bool {
 	focRoot := em.Scene
 
 	for i := 0; i < 2; i++ {
-		focRoot.WalkPre(func(k ki.Ki) bool {
+		focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 			if gotFocus {
 				return ki.Break
 			}
-			wi, wb := AsWidget(k)
 			if !wb.IsVisible() {
 				return ki.Continue
 			}
@@ -836,11 +843,10 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 
 	focRoot := em.Scene
 
-	focRoot.WalkPre(func(k ki.Ki) bool {
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if gotFocus {
 			return ki.Break
 		}
-		wi, wb := AsWidget(k)
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
@@ -868,8 +874,7 @@ func (em *EventMgr) FocusFirst() bool {
 	var firstItem Widget
 	focRoot := em.Scene
 
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
@@ -890,8 +895,7 @@ func (em *EventMgr) FocusLast() bool {
 	focRoot := em.Scene
 
 	// todo: could use walking functions in ki
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.IsVisible() {
 			return ki.Continue
 		}
@@ -909,8 +913,7 @@ func (em *EventMgr) FocusLast() bool {
 func (em *EventMgr) ClearNonFocus(foc Widget) {
 	focRoot := em.Scene
 
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
+	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		if wi == focRoot { // skip top-level
 			return ki.Continue
 		}
@@ -943,18 +946,8 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	}
 	sf := em.StartFocus
 	em.StartFocus = nil
-	em.GrabFocus(sf)
+	em.SetFocus(sf)
 	return true
-}
-
-// InitialFocus establishes the initial focus for the window if no focus
-// is set -- uses ActivateStartFocus or FocusNext as backup.
-func (em *EventMgr) InitialFocus() {
-	if em.Focus == nil {
-		if !em.ActivateStartFocus() {
-			em.FocusNext()
-		}
-	}
 }
 
 // MangerKeyChordEvents handles lower-priority manager-level key events.
@@ -1483,7 +1476,7 @@ const DNDSpriteName = "gi.RenderWin:DNDSprite"
 func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.EventMgr.DNDStart(src, data)
 	if _, sw := AsWidget(src); sw != nil {
-		sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPo)
+		sp.SetBottomPos(sw.Geom.Pos.ToPo)
 	}
 	w.DeleteSprite(DNDSpriteName)
 	sp.Name = DNDSpriteName

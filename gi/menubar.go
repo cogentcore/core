@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"image"
-
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -18,7 +16,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 // MenuBar
 
-// MenuBar is a Layout (typically LayoutHoriz) that renders a gradient
+// MenuBar is a Layout (typically horizontal) that renders a gradient
 // background and has convenience methods for adding menus.
 type MenuBar struct {
 	Layout
@@ -43,7 +41,7 @@ func (mb *MenuBar) OnInit() {
 
 func (mb *MenuBar) MenuBarStyles() {
 	mb.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
+		s.Grow.Set(1, 0)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Padding.SetHoriz(units.Dp(8))
@@ -59,8 +57,8 @@ func (mb *MenuBar) MenuBarStyles() {
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender(sc *Scene) {
 	rs, pc, st := mb.RenderLock(sc)
-	pos := mb.LayState.Alloc.Pos
-	sz := mb.LayState.Alloc.Size
+	pos := mb.Geom.Pos.Total
+	sz := mb.Geom.Size.Actual.Total
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
 	mb.RenderUnlock(rs)
 }
@@ -77,19 +75,19 @@ func (mb *MenuBar) ShowMenuBar() bool {
 	return true
 }
 
-func (mb *MenuBar) GetSize(sc *Scene, iter int) {
-	if !mb.ShowMenuBar() {
-		return
-	}
-	mb.Layout.GetSize(sc, iter)
-}
-
-func (mb *MenuBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	if !mb.ShowMenuBar() {
-		return false
-	}
-	return mb.Layout.DoLayout(sc, parBBox, iter)
-}
+// func (mb *MenuBar) GetSize(sc *Scene, iter int) {
+// 	if !mb.ShowMenuBar() {
+// 		return
+// 	}
+// 	mb.Layout.GetSize(sc, iter)
+// }
+//
+// func (mb *MenuBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+// 	if !mb.ShowMenuBar() {
+// 		return false
+// 	}
+// 	return mb.Layout.DoLayout(sc, parBBox, iter)
+// }
 
 func (mb *MenuBar) Render(sc *Scene) {
 	if !mb.ShowMenuBar() {

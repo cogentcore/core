@@ -86,12 +86,12 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 		if !kc.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.AlignV = styles.AlignTop
+		s.Align.Y = styles.AlignStart
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Width.Ch(20)
+		s.Min.X.Ch(20)
 		s.Padding.Set(units.Dp(8))
-		s.SetStretchMaxWidth()
+		s.Grow.Set(1, 0)
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 			s.Color = colors.Scheme.Select.OnContainer

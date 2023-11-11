@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
+	"goki.dev/mat32/v2"
 )
 
 var (
@@ -65,7 +66,6 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 	sb.InitName(sb, nm)
 	sb.EventMgr.Scene = &sb.Scene
 	sb.BgColor.SetSolid(colors.Transparent)
-	sb.Lay = LayoutHoriz
 	sb.SnackbarStyles()
 
 	sb.Stage = NewPopupStage(SnackbarStage, &sb.Scene, ctx)
@@ -75,15 +75,16 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 
 func (sb *Snackbar) SnackbarStyles() {
 	sb.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
-		s.AlignV = styles.AlignMiddle
-		s.Spacing.Dp(12)
-		s.SetStretchMaxWidth()
-		s.Height = units.Dp(48)
+		s.Align.Y = styles.AlignCenter
+		s.Gap.X.Dp(12)
+		s.Grow.Set(1, 0)
+		s.Min.Y.Dp(48)
 	})
 }
 
@@ -92,6 +93,7 @@ func (sb *Snackbar) Text(text string) *Snackbar {
 	NewLabel(sb, "text").SetText(text).SetType(LabelBodyMedium).
 		Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+			s.Grow.Set(0, 0)
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
 			}

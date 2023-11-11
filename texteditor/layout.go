@@ -5,8 +5,6 @@
 package texteditor
 
 import (
-	"image"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/mat32/v2"
@@ -38,8 +36,8 @@ func (ed *Editor) StyleSizes() {
 // NLinesChars, LineNoOff, LineLayoutSize
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
-	spc := sty.BoxSpace()
-	asz := ed.LayState.Alloc.SizeOrig
+	asz := ed.Geom.Size.Actual.Content
+	ed.LineLayoutSize = asz
 	nv := mat32.Vec2{}
 	if asz == nv {
 		ed.NLinesChars.Y = 40
@@ -48,39 +46,19 @@ func (ed *Editor) UpdateFromAlloc() {
 		ed.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / ed.LineHeight))
 		ed.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
 	}
-	ed.LineLayoutSize = asz.Sub(ed.ExtraSize).Sub(spc.Size())
 	ed.LineLayoutSize.X -= ed.LineNoOff
-	// SidesTODO: this is sketchy
-	// ed.LineLayoutSize.X -= spc.Size().X / 2 // extra space for word wrap
 }
 
-func (ed *Editor) GetSize(sc *gi.Scene, iter int) {
-	ed.InitLayout(sc)
-	ed.LayoutAllLines()
-	ed.LayState.Size.Need = ed.TotalSize
-	ed.LayState.Size.Pref = ed.LayState.Size.Need
-	// fmt.Println("GetSize: need:", ed.LayState.Size.Need)
-}
-
-func (ed *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	ed.SetFlag(false, gi.LayoutNeedsRedo)
-	ed.DoLayoutBase(sc, parBBox, iter)
-	spc := ed.BoxSpace()
-	ed.ChildSize = ed.LayState.Size.Need.Sub(spc.Size()) // we are what we need
-
-	ed.ManageOverflow(sc)
-	redo := ed.DoLayoutChildren(sc, iter)
-	if redo {
-		ed.SetFlag(true, gi.LayoutNeedsRedo)
-	}
-	if !redo || iter == 1 {
-		delta := ed.LayoutScrollDelta((image.Point{}))
-		if delta != (image.Point{}) {
-			ed.LayoutScrollChildren(sc, delta) // move is a separate step
-		}
-	}
+func (ed *Editor) SizeDown(sc *gi.Scene, iter int) bool {
+	// todo: layout takes entire allocation -- not sure this is the best..
+	redo := ed.Layout.SizeDown(sc, iter)
 	ed.UpdateFromAlloc()
-	return ed.Is(gi.LayoutNeedsRedo)
+	return redo
+}
+
+func (ed *Editor) Position(sc *gi.Scene) {
+	ed.Layout.Position(sc)
+	ed.LayoutAllLines()
 }
 
 // LayoutAllLines generates TextRenders of lines

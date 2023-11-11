@@ -20,6 +20,7 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // Tabs switches among child widgets via tabs.  The selected widget gets
@@ -70,19 +71,17 @@ func (ts *Tabs) TabsStyles() {
 		s.Border.Width.Set(units.Dp(1))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.Color = colors.Scheme.OnBackground
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ts) {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.MaxHeight.Zero()
-				// s.SetMinPrefHeight(units.Em(1.5))
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.Grow.Set(1, 0)
+				s.Overflow.X = styles.OverflowHidden // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Spacing.Zero()
+				s.Gap.Zero()
 				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 				// s.Border.Style.Set(styles.BorderNone)
@@ -92,11 +91,12 @@ func (ts *Tabs) TabsStyles() {
 			})
 		case "frame":
 			frame := w.(*Frame)
-			frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
 			w.Style(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Dp(160))
-				s.SetMinPrefHeight(units.Dp(96))
-				s.SetStretchMax()
+				s.Display = styles.DisplayStacked
+				frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
+				s.Min.X.Dp(160)
+				s.Min.Y.Dp(96)
+				s.Grow.Set(1, 1)
 			})
 		}
 	})
@@ -154,7 +154,9 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 		nm = strcase.ToKebab(label)
 	}
 	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
-	frame.SetLayout(LayoutVert)
+	frame.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
 	ts.Update()
 	ts.UpdateEndLayout(updt)
@@ -434,14 +436,11 @@ func (ts *Tabs) ConfigWidget(sc *Scene) {
 	if len(ts.Kids) != 0 {
 		return
 	}
-	ts.Lay = LayoutVert
-
-	frame := NewFrame(ts, "tabs")
-	frame.Lay = LayoutHorizFlow
-
-	frame = NewFrame(ts, "frame")
-	frame.Lay = LayoutStacked
-
+	ts.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
+	NewFrame(ts, "tabs")
+	NewFrame(ts, "frame")
 	ts.ConfigNewTabButton(sc)
 }
 
@@ -501,8 +500,8 @@ func (ts *Tabs) RenderTabSeps(sc *Scene) {
 		tb := tbs.Child(i).(Widget)
 		ni := tb.AsWidget()
 
-		pos := ni.LayState.Alloc.Pos
-		sz := ni.LayState.Alloc.Size.Sub(st.TotalMargin().Size())
+		pos := ni.Geom.Pos.Total
+		sz := ni.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
 		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)
@@ -544,9 +543,8 @@ func (tb *Tab) TabStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.MinWidth.Ch(8)
-		s.MaxWidth.Dp(500)
-		s.MinHeight.Dp(26)
+		// s.Max.X.Dp(500)
+		s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
@@ -567,8 +565,9 @@ func (tb *Tab) TabStyles() {
 		switch w.PathFrom(tb) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Spacing.Zero()
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.SetMainAxis(mat32.X)
+				s.Gap.Zero()
+				s.Overflow.X = styles.OverflowHidden // no scrollbars!
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
@@ -580,24 +579,26 @@ func (tb *Tab) TabStyles() {
 			label.Type = LabelBodyMedium
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // nowrap
 				s.Cursor = cursors.None
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
 		case "parts/close-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Width.Ch(1)
+				s.Min.X.Ch(1)
 			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.MaxWidth.Dp(16)
-				s.MaxHeight.Dp(16)
+				s.Max.X.Dp(16)
+				s.Max.Y.Dp(16)
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
 				// s.Margin.Zero()
 				// s.Padding.Zero()
-				s.AlignV = styles.AlignMiddle
+				s.Align.Y = styles.AlignCenter
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(colors.Transparent)
 				// if we have some state, we amplify it so we
@@ -609,7 +610,7 @@ func (tb *Tab) TabStyles() {
 			})
 		case "parts/sc-stretch":
 			w.Style(func(s *styles.Style) {
-				s.MinWidth.Ch(2)
+				s.Min.X.Ch(2)
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {
@@ -637,7 +638,7 @@ func (tb *Tab) ConfigParts(sc *Scene) {
 }
 
 func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
-	parts := tb.NewParts(LayoutHoriz)
+	parts := tb.NewParts()
 	config := ki.Config{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")

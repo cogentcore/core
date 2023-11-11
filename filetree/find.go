@@ -76,8 +76,8 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 
 	var ffn *Node
 	found := false
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
 			found = true
@@ -95,8 +95,8 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 	if ignoreCase {
 		match = strings.ToLower(match)
 	}
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if ignoreCase {
 			nm := strings.ToLower(sfn.Nm)
 			if strings.Contains(nm, match) {
@@ -131,8 +131,8 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 // (e.g., filecat.Code to find any code files)
 func (fn *Node) FileExtCounts(cat filecat.Cat) []NodeNameCount {
 	cmap := make(map[string]int, 20)
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
 				return ki.Continue
@@ -161,8 +161,8 @@ func (fn *Node) FileExtCounts(cat filecat.Cat) []NodeNameCount {
 // (e.g., filecat.Code to find any code files)
 func (fn *Node) LatestFileMod(cat filecat.Cat) time.Time {
 	tmod := time.Time{}
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
 				return ki.Continue

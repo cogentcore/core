@@ -20,11 +20,12 @@ import (
 // It should be called on menu frames when they are created.
 func MenuSceneConfigStyles(msc *Scene) {
 	msc.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
 		s.Padding.Set(units.Dp(2))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = styles.BoxShadow2()
-		s.Spacing.Zero()
+		s.Gap.Zero()
 	})
 	msc.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
@@ -57,11 +58,10 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	}
 
 	hasSelected := false
-	msc.WalkPre(func(k ki.Ki) bool {
-		if k == msc {
+	msc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		if wi.This() == msc.This() {
 			return ki.Continue
 		}
-		wi, wb := AsWidget(k)
 		if wi == nil {
 			return ki.Continue
 		}
@@ -96,7 +96,7 @@ func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 	if sc == nil || !sc.HasChildren() {
 		return nil
 	}
-	sc.Geom.Pos = pos
+	sc.SceneGeom.Pos = pos
 	return NewPopupStage(MenuStage, sc, ctx)
 }
 

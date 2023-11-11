@@ -41,7 +41,7 @@ type GiEditor struct {
 func (ge *GiEditor) OnInit() {
 	ge.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnBackground
-		s.SetStretchMax()
+		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
 	ge.OnWidgetAdded(func(w gi.Widget) {
@@ -50,9 +50,9 @@ func (ge *GiEditor) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall
 			title.Style(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.AlignH = styles.AlignCenter
-				s.AlignV = styles.AlignTop
+				s.Grow.Set(1, 0)
+				s.Align.X = styles.AlignCenter
+				s.Align.Y = styles.AlignStart
 			})
 		}
 	})
@@ -110,7 +110,6 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 
 	sc := gi.NewScene("gogi-color-scheme")
 	sc.Title = "GoGi Color Scheme"
-	sc.Lay = gi.LayoutVert
 	sc.Data = &colors.Schemes
 
 	key := &matcolor.Key{
@@ -126,18 +125,21 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 
 	kv := NewStructView(sc, "kv")
 	kv.SetStruct(key)
-	kv.SetStretchMax()
+	// kv.Style(func(s *styles.Style) {
+	// 	kv.Grow.Set(1,1)
+	// })
 
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
 	svl := NewStructView(split, "svl")
 	svl.SetStruct(&schemes.Light)
-	svl.SetStretchMax()
+	// svl.Style(func(s *styles.Style) {
+	// 	svl.Grow.Set(1,1)
+	// })
 
 	svd := NewStructView(split, "svd")
 	svd.SetStruct(&schemes.Dark)
-	svd.SetStretchMax()
 
 	kv.OnChange(func(e events.Event) {
 		p = matcolor.NewPalette(key)
@@ -194,7 +196,9 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	if ge.KiRoot == nil {
 		return
 	}
-	ge.Lay = gi.LayoutVert
+	ge.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.Y)
+	})
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
@@ -242,7 +246,11 @@ func (ge *GiEditor) ConfigSplits() {
 	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
-		tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
+		tvfr := gi.NewFrame(split, "tvfr")
+		tvfr.Style(func(s *styles.Style) {
+			s.MainAxis = mat32.X
+			s.Overflow.Y = styles.OverflowAuto
+		})
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
 		tv.OnSelect(func(e events.Event) {
@@ -263,7 +271,11 @@ func (ge *GiEditor) SetChanged() {
 }
 
 func (ge *GiEditor) TopAppBar(tb *gi.TopAppBar) {
-	gi.DefaultTopAppBar(tb)
+	if gi.DefaultTopAppBar != nil {
+		gi.DefaultTopAppBar(tb)
+	} else {
+		gi.DefaultTopAppBarStd(tb)
+	}
 
 	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {

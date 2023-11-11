@@ -457,8 +457,8 @@ func (fn *Node) OpenAll() { //gti:add
 
 // CloseAll closes all directories under this one, this included
 func (fn *Node) CloseAll() { //gti:add
-	fn.WalkPre(func(k ki.Ki) bool {
-		sfn := AsNode(k)
+	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+		sfn := AsNode(wi)
 		if sfn.IsDir() {
 			sfn.Close()
 		}

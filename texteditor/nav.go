@@ -877,10 +877,11 @@ func (ed *Editor) ScrollCursorInView() bool {
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	did := false
-	if (curBBox.Min.Y-int(ed.LineHeight)) < ed.ScBBox.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > ed.ScBBox.Max.Y {
+	bb := ed.Geom.ContentBBox
+	if (curBBox.Min.Y-int(ed.LineHeight)) < bb.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > bb.Max.Y {
 		did = ed.ScrollCursorToVertCenter()
 	}
-	if curBBox.Max.X < ed.ScBBox.Min.X || curBBox.Min.X > ed.ScBBox.Max.X {
+	if curBBox.Max.X < bb.Min.X || curBBox.Min.X > bb.Max.X {
 		did = did || ed.ScrollCursorToHorizCenter()
 	}
 	return did
@@ -947,7 +948,8 @@ func (ed *Editor) ScrollToLeft(pos int) bool {
 func (ed *Editor) ScrollCursorToLeft() bool {
 	_, ri, _ := ed.WrappedLineNo(ed.CursorPos)
 	if ri <= 0 {
-		return ed.ScrollToLeft(ed.ObjBBox.Min.X - int(ed.Styles.BoxSpace().Left) - 2)
+		// todo: what is right thing here?
+		// return ed.ScrollToLeft(ed.ObjBBox.Min.X - int(ed.Styles.BoxSpace().Left) - 2)
 	}
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	return ed.ScrollToLeft(curBBox.Min.X)

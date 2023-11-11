@@ -11,12 +11,12 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/mat32/v2"
 )
 
 // MapView represents a map, creating a property editor of the values --
@@ -58,23 +58,22 @@ func (mv *MapView) OnInit() {
 }
 
 func (mv *MapView) MapViewStyles() {
-	mv.Lay = gi.LayoutVert
 	mv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
+		s.SetMainAxis(mat32.Y)
+		s.Grow.Set(1, 1)
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(mv) {
 		case "map-grid":
 			mg := w.(*gi.Frame)
-			mg.Lay = gi.LayoutGrid
 			mg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(1.5))
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Display = styles.DisplayGrid
 				s.Columns = mv.NCols
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
+				s.Min.X.Em(20)
+				s.Min.Y.Em(10)
 			})
 		}
 		if w.Parent().Name() == "map-grid" {
@@ -112,7 +111,7 @@ func (mv *MapView) UpdateValues() {
 func (mv *MapView) ConfigWidget(sc *gi.Scene) {
 	mv.Sc = sc
 	if !mv.HasChildren() {
-		gi.NewFrame(mv, "map-grid").SetLayout(gi.LayoutGrid)
+		gi.NewFrame(mv, "map-grid")
 	}
 	mv.ConfigMapGrid()
 }

@@ -12,9 +12,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
@@ -92,13 +89,15 @@ type Struct struct { //gti:add
 	// a value
 	Val float32
 
+	Vec mat32.Vec2
+
 	Things []*TableStruct
 
 	Stuff []float32
 }
 
 func app() {
-	tstslice := make([]string, 40)
+	tstslice := make([]string, 20)
 
 	for i := 0; i < len(tstslice); i++ {
 		tstslice[i] = fmt.Sprintf("el: %v", i)
@@ -121,6 +120,8 @@ func app() {
 	stru.Name = "happy"
 	stru.Cond = 2
 	stru.Val = 3.1415
+	stru.Vec.Set(5, 7)
+	stru.Inline.Val = 3
 	stru.Cond2.IntField = 22
 	stru.Cond2.FloatField = 44.4
 	stru.Cond2.StrField = "fi"
@@ -141,76 +142,68 @@ func app() {
 
 	sc := gi.NewScene("gogi-views-test").SetTitle("GoGi Views Test")
 
-	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
-	trow.Style(func(s *styles.Style) {
-		s.AlignH = styles.AlignCenter
-		s.AlignV = styles.AlignTop
-		s.Margin.Set(units.Px(2))
-		s.SetStretchMaxWidth()
-	})
+	// gi.DefaultTopAppBar = nil
 
-	gi.NewStretch(trow, "str1")
+	/*
+		trow := gi.NewLayout(sc, "trow")
+		trow.Style(func(s *styles.Style) {
+			s.SetMainAxis(mat32.X)
+			s.Align.X = styles.AlignCenter
+			s.Align.Y = styles.AlignStart
+			s.Margin.Set(units.Px(2))
+			s.Grow.Set(1, 0)
+		})
 
-	but := gi.NewButton(trow, "slice-test").SetText("SliceDialog")
-	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
-	but.OnClick(func(e events.Event) {
-		sl := make([]float32, 2880)
-		d := gi.NewDialog(but).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
-		giv.NewSliceView(d).SetSlice(&sl)
-		d.Run()
-	})
-	but = gi.NewButton(trow, "table-test").SetText("TableDialog")
-	but.Tooltip = "open a TableViewDialog view "
-	but.OnClick(func(e events.Event) {
-		d := gi.NewDialog(but).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
-		giv.NewTableView(d).SetSlice(&tsttable)
-		d.Run()
-	})
+		gi.NewStretch(trow, "str1")
 
-	lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
-	lab1.Style(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-		s.Text.Align = styles.AlignCenter
-	})
-	gi.NewStretch(trow, "str2")
+		but := gi.NewButton(trow, "slice-test").SetText("SliceDialog")
+		but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
+		but.OnClick(func(e events.Event) {
+			sl := make([]float32, 2880)
+			d := gi.NewDialog(but).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
+			giv.NewSliceView(d).SetSlice(&sl)
+			d.Run()
+		})
+		but = gi.NewButton(trow, "table-test").SetText("TableDialog")
+		but.Tooltip = "open a TableViewDialog view "
+		but.OnClick(func(e events.Event) {
+			d := gi.NewDialog(but).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
+			giv.NewTableView(d).SetSlice(&tsttable)
+			d.Run()
+		})
 
-	spc := gi.NewSpace(sc, "spc1")
-	spc.Style(func(s *styles.Style) {
-		s.SetFixedHeight(units.Em(2))
-	})
+		lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
+		lab1.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
+			s.Text.Align = styles.AlignCenter
+		})
+		gi.NewStretch(trow, "str2")
 
-	split := gi.NewSplits(sc, "split")
-	split.Dim = mat32.X
+		spc := gi.NewSpace(sc, "spc1")
+		spc.Style(func(s *styles.Style) {
+			s.Min.Y.Set(units.Em(2))
+		})
+	*/
 
-	// strv := giv.NewStructView(split, "strv")
-	// strv.Sc = sc
+	// split := gi.NewSplits(sc, "split")
+	// split.Dim = mat32.X
+
+	// strv := giv.NewStructView(sc, "strv")
 	// strv.SetStruct(&stru)
-	// strv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
-	// })
 
 	// mv := giv.NewMapView(split, "mv")
 	// mv.SetMap(&tstmap)
-	// mv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
-	// })
 
-	sv := giv.NewSliceView(split, "sv")
+	// sv := giv.NewSliceView(sc, "sv")
 	// sv.SetState(true, states.ReadOnly)
-	sv.SetSlice(&tstslice)
-	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-	})
+	// sv.SetSlice(&tstslice)
 
-	tv := giv.NewTableView(split, "tv")
+	tv := giv.NewTableView(sc, "tv")
 	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
-	tv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-	})
-
+	//
 	// split.SetSplits(.3, .2, .2, .3)
-	split.SetSplits(.5, .5)
+	// split.SetSplits(.5, .5)
 
 	gi.NewWindow(sc).Run().Wait()
 }

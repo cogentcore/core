@@ -132,12 +132,6 @@ func (t *FileBrowse) SetCustomContextMenu(v func(m *gi.Scene)) *FileBrowse {
 	return t
 }
 
-// SetLayout sets the [FileBrowse.Lay]
-func (t *FileBrowse) SetLayout(v gi.Layouts) *FileBrowse {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [FileBrowse.StackTop]
 func (t *FileBrowse) SetStackTop(v int) *FileBrowse {
 	t.StackTop = v

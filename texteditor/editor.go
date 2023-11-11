@@ -134,7 +134,7 @@ type Editor struct { //goki:embedder
 	// TotalSize = LinesSize plus extra space and line numbers etc
 	TotalSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// LineLayoutSize is LayState.Alloc.Size subtracting
+	// LineLayoutSize is Geom.Size.Actual.Total subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
 	LineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
@@ -175,7 +175,7 @@ func (ed *Editor) OnInit() {
 func (ed *Editor) ViewStyles() {
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		ed.CursorWidth.Dp(1)
+		ed.CursorWidth.Dp(2)
 		ed.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
 		ed.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		ed.HighlightColor.SetSolid(colors.Orange)
@@ -187,12 +187,14 @@ func (ed *Editor) ViewStyles() {
 		} else {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
+		s.Grow.Set(1, 1)
+		s.Overflow.Set(styles.OverflowHidden) // key: we just get what we get, and manage our own scrollbars
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
-		s.AlignV = styles.AlignTop
-		s.Text.Align = styles.AlignLeft
+		s.Align.Y = styles.AlignStart
+		s.Text.Align = styles.AlignStart
 		s.Text.TabSize = 4
 		s.Color = colors.Scheme.OnSurface
 

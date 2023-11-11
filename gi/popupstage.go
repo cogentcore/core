@@ -74,7 +74,7 @@ func (st *PopupStage) HandleEvent(evi events.Event) {
 	if evi.IsHandled() {
 		return
 	}
-	evi.SetLocalOff(st.Scene.Geom.Pos)
+	evi.SetLocalOff(st.Scene.SceneGeom.Pos)
 	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
 	st.Scene.EventMgr.HandleEvent(evi)
 }
@@ -141,9 +141,9 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	cmgr := &ms.PopupMgr
 	cmgr.Push(st)
 	sc := st.Scene
-	maxSz := msc.Geom.Size
+	maxSz := msc.SceneGeom.Size
 
-	sc.Geom.Size = maxSz
+	sc.SceneGeom.Size = maxSz
 	sz := sc.PrefSize(maxSz)
 	// fmt.Println(sz, maxSz)
 	scrollWd := int(sc.Styles.ScrollBarWidth.Dots)
@@ -158,21 +158,25 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		maxht := int(MenuMaxHeight * fontHt)
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
-		b := msc.Geom.Bounds()
+		b := msc.SceneGeom.Bounds()
+		sz.Y += fontHt / 2
 		sz.X = max(int(0.8*float32(maxSz.X)), sz.X)
 		// Go in the middle [(max - min) / 2], and then subtract
 		// half of the size because we are specifying starting point,
 		// not the center. This results in us being centered.
-		sc.Geom.Pos.X = (b.Max.X - b.Min.X - sz.X) / 2
+		sc.SceneGeom.Pos.X = (b.Max.X - b.Min.X - sz.X) / 2
 		// get enough space to fit plus 10 extra pixels of margin
-		sc.Geom.Pos.Y = b.Max.Y - sz.Y - 10
+		sc.SceneGeom.Pos.Y = b.Max.Y - sz.Y - 10
 	case TooltipStage:
 		// on x axis, we center on the widget widget
 		// on y axis, we put our bottom 10 above the top of the widget
+		// sz.Y += fontHt
+		sz.X += 2 * fontHt
+		sz.Y += fontHt / 2
 		wb := st.CtxWidget.AsWidget()
 		bb := wb.WinBBox()
 		wc := bb.Min.X + bb.Size().X/2
-		sc.Geom.Pos.X = wc - sz.X/2
+		sc.SceneGeom.Pos.X = wc - sz.X/2
 
 		// default to tooltip above element
 		ypos := bb.Min.Y - sz.Y - 10
@@ -185,14 +189,12 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		if maxy > bb.Min.Y-10 {
 			ypos = bb.Max.Y + 10
 		}
-		sc.Geom.Pos.Y = ypos
+		sc.SceneGeom.Pos.Y = ypos
 	}
 
-	sc.Geom.Size = sz
-	sc.FitInWindow(msc.Geom) // does resize
+	sc.SceneGeom.Size = sz
+	sc.FitInWindow(msc.SceneGeom) // does resize
 	sc.ShowLayoutIter = 0
-
-	sc.EventMgr.InitialFocus()
 
 	if st.Timeout > 0 {
 		time.AfterFunc(st.Timeout, func() {

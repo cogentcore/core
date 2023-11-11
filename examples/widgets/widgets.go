@@ -13,7 +13,6 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -40,6 +39,8 @@ func app() {
 
 	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
+	// gi.DefaultTopAppBar = nil // turns it off
+
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBar(tb)
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
@@ -59,8 +60,11 @@ func app() {
 			})
 	}
 
-	trow := gi.NewLayout(sc, "trow").
-		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
+	trow := gi.NewLayout(sc, "trow")
+	trow.Style(func(s *styles.Style) {
+		s.SetMainAxis(mat32.X)
+		s.Align.X = styles.AlignCenter
+	})
 
 	giedsc := keyfun.ChordFor(keyfun.GoGiEditor)
 	prsc := keyfun.ChordFor(keyfun.Prefs)
@@ -72,14 +76,11 @@ func app() {
 <kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</small><br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
-		SetStretchMax().
 		Style(func(s *styles.Style) {
-			s.Text.WhiteSpace = styles.WhiteSpaceNormal
+			s.Grow.Set(1, 0)
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
-			// s.Font.Size = units.Dp(24) // todo: "x-large"?
-			// s.Text.LineHeight = units.Em(1.5)
 		})
 
 	//////////////////////////////////////////
@@ -88,15 +89,16 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Buttons:")
 
-	brow := gi.NewLayout(sc, "brow").SetLayout(gi.LayoutHoriz).
+	brow := gi.NewLayout(sc, "brow").
 		Style(func(s *styles.Style) {
-			s.Spacing.Em(1)
+			s.SetMainAxis(mat32.X)
+			s.Gap.X.Em(1)
 		})
 
 	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box").
 		Style(func(s *styles.Style) {
-			s.Width = units.Em(1.5)
-			s.Height = units.Em(1.5)
+			s.Min.X.Em(1.5)
+			s.Min.Y.Em(1.5)
 		})
 
 	b1.OnClick(func(e events.Event) {
@@ -167,40 +169,40 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Sliders:")
 
-	srow := gi.NewLayout(sc).SetLayout(gi.LayoutHoriz).
+	srow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
-			s.AlignH = styles.AlignLeft
-			s.Spacing.Ex(2)
-			s.SetStretchMaxWidth()
+			s.SetMainAxis(mat32.X)
+			s.Align.Y = styles.AlignCenter
+			s.Gap.X.Ex(2)
 		})
 
 	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).
-		SetSnap(true).SetTracking(true).SetIcon(icons.RadioButtonChecked)
+		SetSnap(true).SetTracking(false).SetIcon(icons.RadioButtonChecked)
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
+	slider0.Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
 
 	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).
-		SetTracking(true).SetValue(0.5)
+		SetTracking(true).SetValue(0.5).SetThumbSize(mat32.NewVec2(1, 4))
 	slider1.OnChange(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
 
 	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.X).
-		SetThumbValue(0.25).SetValue(0.25).SetSnap(true).SetTracking(true)
-	scroll0.Style(func(s *styles.Style) {
-		s.MaxHeight.Dp(12)
-	})
+		SetVisiblePct(0.25).SetValue(0.25).SetTracking(true).SetStep(0.05).SetSnap(true)
 	scroll0.OnChange(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
+	scroll0.Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
 
 	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
-		SetThumbValue(10).SetValue(0).SetMax(3000).
+		SetVisiblePct(.01).SetValue(0).SetMax(3000).
 		SetTracking(true).SetStep(1).SetPageStep(10)
-	scroll1.Style(func(s *styles.Style) {
-		s.MaxWidth.Dp(16)
-	})
 	scroll1.OnChange(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
 	})
@@ -211,15 +213,18 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(sc).SetLayout(gi.LayoutHoriz).
+	txrow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
-			s.Spacing.Ex(2)
-			s.SetStretchMaxWidth()
+			s.SetMainAxis(mat32.X)
+			s.Gap.X.Ex(2)
 		})
 
 	edit1 := gi.NewTextField(txrow, "edit1").SetPlaceholder("Enter text here...").AddClearButton()
 	edit1.OnChange(func(e events.Event) {
 		fmt.Println("Text:", edit1.Text())
+	})
+	edit1.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
 	})
 
 	sb := gi.NewSpinner(txrow).SetMax(1000).SetMin(-1000).SetStep(5)
@@ -231,7 +236,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
 	ch.OnChange(func(e events.Event) {
-		fmt.Printf("ComboBox selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
+		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
 	})
 
 	/*  todo:

@@ -364,6 +364,7 @@ func (vv *StructValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
@@ -449,13 +450,10 @@ func (vv *StructInlineValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.CreateTempIfNotPtr() // essential to always have this set
 	sv := vv.Widget.(*StructViewInline)
 	cst := vv.Value.Interface()
-	if sv.Struct != cst {
-		sv.SetStruct(cst)
-	} else {
-		sv.UpdateFields()
-	}
+	sv.SetStruct(cst)
 }
 
 func (vv *StructInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -570,7 +568,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		tv := NewTableView(d).SetSlice(slci)
 		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.TopAppBar = gi.TopAppBarFor(slci)
-		if d.TopAppBar == nil {
+		if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
 			d.TopAppBar = func(tb *gi.TopAppBar) {
 				gi.DefaultTopAppBar(tb)
 				tv.SliceDefaultTopAppBar(tb)
@@ -588,7 +586,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		sv := NewSliceView(d).SetSlice(slci)
 		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.TopAppBar = gi.TopAppBarFor(slci)
-		if d.TopAppBar == nil {
+		if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
 			d.TopAppBar = func(tb *gi.TopAppBar) {
 				gi.DefaultTopAppBar(tb)
 				sv.SliceDefaultTopAppBar(tb)
@@ -954,7 +952,7 @@ func (vv *IntValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
 	// sb.Parts.AddChildStyler("textfield", 0, gi.StylerParent(vv), func(tf *gi.WidgetBase) {
-	// 	s.Width.SetCh(5)
+	// 	s.Min.X.SetCh(5)
 	// })
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
@@ -1186,20 +1184,11 @@ func (vv *BitFlagValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sw := vv.Widget.(*gi.Switches)
 	sw.SetType(gi.SwitchChip)
 	// vv.StdConfigWidget(cb.Parts)
-	// cb.Parts.Lay = gi.LayoutHoriz
 	sw.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
 	sw.SetEnum(ev)
 	sw.Config(sc)
-	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
-	// 	cbb := vvv.Widget.(*gi.Switches)
-	// 	etyp := vvv.EnumType()
-	// 	val := cbb.BitFlagsValue(etyp)
-	// 	vvv.SetEnumValueFromInt(val)
-	// 	// vvv.UpdateWidget()
-	// })
 	vv.UpdateWidget()
 }
 
@@ -1303,8 +1292,8 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	tf.Tooltip = vv.Doc()
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
-		s.MinWidth.Ch(16)
-		s.SetStretchMaxWidth()
+		s.Min.X.Ch(16)
+		s.Grow.Set(1, 0)
 	})
 	tf.Config(sc)
 
@@ -1350,8 +1339,8 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip = vv.Doc()
 	tf.Style(func(s *styles.Style) {
-		s.MinWidth.Ch(16)
-		s.SetStretchMaxWidth()
+		s.Min.X.Ch(16)
+		s.Grow.Set(1, 0)
 	})
 	tf.Config(sc)
 
@@ -1468,7 +1457,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	d := gi.NewDialog(ctx).Title("Select an icon").Prompt(vv.Doc()).FullWindow(true)
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(string(ics[row]))
-		s.SetStretchMaxWidth()
+		s.Grow.Set(1, 0)
 	}).
 		SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {

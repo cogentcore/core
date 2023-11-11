@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"image"
 	"log"
 
 	"log/slog"
@@ -21,6 +20,7 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
@@ -172,7 +172,7 @@ func (bt *Button) ButtonStyles() {
 		case ButtonAction:
 			s.MaxBoxShadow = styles.BoxShadow0()
 		case ButtonMenu:
-			s.SetStretchMaxWidth() // need to go to edge of menu
+			s.Grow.Set(1, 0) // need to go to edge of menu
 			s.Border.Radius = styles.BorderRadiusNone
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
@@ -185,19 +185,21 @@ func (bt *Button) ButtonStyles() {
 		switch w.PathFrom(bt) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Spacing.Zero()
+				s.SetMainAxis(mat32.X)
+				s.Gap.Zero()
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
-				s.Width.Dp(18)
-				s.Height.Dp(18)
+				s.Min.X.Dp(18)
+				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
+				s.Align.Set(styles.AlignCenter)
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
-				s.Width.Dp(8)
-				s.MinWidth.Dp(8)
+				s.Min.X.Dp(8)
+				s.Min.X.Dp(8)
 			})
 		case "parts/label":
 			label := w.(*Label)
@@ -210,29 +212,30 @@ func (bt *Button) ButtonStyles() {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
 				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Grow.Set(0, 0) // nowrap
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.MaxWidth.Zero()
-				s.AlignV = styles.AlignMiddle
-				s.FillSurround = false
+				s.Max.X.Zero()
+				s.Align.Set(styles.AlignCenter)
+				s.FillMargin = false
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Width.Dp(3.2)
+				s.Min.X.Dp(3.2)
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
-				s.Width.Dp(18)
-				s.Height.Dp(18)
+				s.Min.X.Dp(18)
+				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.AlignV = styles.AlignBottom
+				s.Align.Y = styles.AlignEnd
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
-				s.MaxWidth.Zero()
+				s.Max.X.Zero()
 			})
 		}
 	})
@@ -406,7 +409,7 @@ func (bt *Button) ConfigWidget(sc *Scene) {
 }
 
 func (bt *Button) ConfigParts(sc *Scene) {
-	parts := bt.NewParts(LayoutHoriz)
+	parts := bt.NewParts()
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
 	if bt.HasMenu() {
@@ -511,12 +514,6 @@ func (bt *Button) ApplyStyle(sc *Scene) {
 	*/
 }
 
-func (bt *Button) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	bt.DoLayoutBase(sc, parBBox, iter)
-	bt.DoLayoutParts(sc, parBBox, iter)
-	return bt.DoLayoutChildren(sc, iter)
-}
-
 func (bt *Button) RenderButton(sc *Scene) {
 	rs, _, st := bt.RenderLock(sc)
 	bt.RenderStdBox(sc, st)
@@ -527,19 +524,18 @@ func (bt *Button) Render(sc *Scene) {
 	if bt.PushBounds(sc) {
 		bt.RenderButton(sc)
 		bt.RenderParts(sc)
-		bt.RenderChildren(sc)
 		bt.PopBounds(sc)
 	}
 }
 
-func (bt *Button) Destroy() {
-	// TODO(kai/menu): figure out how to handle menu shortcuts
-	/*
-		if bt.Menu != nil {
-			bt.Menu.DeleteShortcuts(bt.EventMgr())
-		}
-	*/
-}
+// func (bt *Button) Destroy() {
+// 	// TODO(kai/menu): figure out how to handle menu shortcuts
+// 	/*
+// 		if bt.Menu != nil {
+// 			bt.Menu.DeleteShortcuts(bt.EventMgr())
+// 		}
+// 	*/
+// }
 
 // UpdateButtons calls UpdateFunc on me and any of my menu items
 func (bt *Button) UpdateButtons() {

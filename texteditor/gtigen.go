@@ -54,7 +54,7 @@ var EditorType = gti.AddType(&gti.Type{
 		{"NLinesChars", &gti.Field{Name: "NLinesChars", Type: "image.Point", LocalType: "image.Point", Doc: "height in lines and width in chars of the visible area", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"LinesSize", &gti.Field{Name: "LinesSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total size of all lines as rendered", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"TotalSize", &gti.Field{Name: "TotalSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "TotalSize = LinesSize plus extra space and line numbers etc", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"LineLayoutSize", &gti.Field{Name: "LineLayoutSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "LineLayoutSize is LayState.Alloc.Size subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LineLayoutSize", &gti.Field{Name: "LineLayoutSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "LineLayoutSize is Geom.Size.Actual.Total subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting cursor rendering -- shared between blink and main code", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
 		{"HasLinks", &gti.Field{Name: "HasLinks", Type: "bool", LocalType: "bool", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
@@ -169,12 +169,6 @@ func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
 	return t
 }
 
-// SetLayout sets the [Editor.Lay]
-func (t *Editor) SetLayout(v gi.Layouts) *Editor {
-	t.Lay = v
-	return t
-}
-
 // SetStackTop sets the [Editor.StackTop]
 func (t *Editor) SetStackTop(v int) *Editor {
 	t.StackTop = v
@@ -246,6 +240,12 @@ func (t *TwinEditors) SetClass(v string) *TwinEditors {
 // SetCustomContextMenu sets the [TwinEditors.CustomContextMenu]
 func (t *TwinEditors) SetCustomContextMenu(v func(m *gi.Scene)) *TwinEditors {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetStackTop sets the [TwinEditors.StackTop]
+func (t *TwinEditors) SetStackTop(v int) *TwinEditors {
+	t.StackTop = v
 	return t
 }
 
