@@ -12,15 +12,15 @@ import (
 )
 
 // flagRegexp matches flags.
-// The second match is the name of the flag.
+// The second submatch is the name of the flag.
 var flagRegexp = regexp.MustCompile(`\W\-+([\w\-]+)`)
 
 // type parsing for flagRegexp:
 // \W\-+([\w\-]+)([= ]<(\w+)>)?
 
 // cmdRegexp matches commands.
-// The second match is the name of the command.
-// The fourth match, if it exists, is the description of the command.
+// The second submatch is the name of the command.
+// The fourth submatch, if it exists, is the description of the command.
 var cmdRegexp = regexp.MustCompile(`\n\s{2,}(\w+)(\s{2,}([^\n]+))?`)
 
 // Parse uses the help messages of the app to fill in its data fields.
@@ -42,7 +42,7 @@ func (a *App) Parse() error {
 		if len(cmd) >= 4 {
 			c.Doc = cmd[3]
 		}
-		fmt.Println(c.Command)
+		fmt.Println(c.Command, c.Doc)
 		a.Commands = append(a.Commands, c)
 	}
 
