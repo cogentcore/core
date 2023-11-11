@@ -19,7 +19,7 @@ import (
 var flagRegexp = regexp.MustCompile(
 	`(?m)` + // multi line
 		`^(?:\s{2,16}|\t)` + // starting space
-		`((?:\W+\-[\w-]+)+)`) // flag(s)
+		`((?:[ |[,(]+\-[\w-]+)+)`) // flag(s)
 
 // type parsing for flagRegexp:
 // \W\-+([\w\-]+)([= ]<(\w+)>)?
@@ -47,11 +47,14 @@ func (cm *Cmd) Parse() error {
 		fields := strings.Fields(names)
 
 		f := &Flag{}
-		f.Names = make([]string, len(fields))
-		for i, field := range fields {
-			f.Names[i] = strings.Trim(field, "-, \t")
+		for _, field := range fields {
+			name := strings.Trim(field, "-,[(| \t")
+			if name != "" {
+				f.Names = append(f.Names, name)
+			}
 		}
 		slices.Sort(f.Names)
+		fmt.Println(f.Names)
 		f.Name = f.Names[len(f.Names)-1]
 		cm.Flags = append(cm.Flags, f)
 	}
