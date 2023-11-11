@@ -824,6 +824,117 @@ func (i *LabelTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _LayoutPassesValues = []LayoutPasses{0, 1, 2}
+
+// LayoutPassesN is the highest valid value
+// for type LayoutPasses, plus one.
+const LayoutPassesN LayoutPasses = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _LayoutPassesNoOp() {
+	var x [1]struct{}
+	_ = x[SizeUpPass-(0)]
+	_ = x[SizeDownPass-(1)]
+	_ = x[SizeFinalPass-(2)]
+}
+
+var _LayoutPassesNameToValueMap = map[string]LayoutPasses{
+	`SizeUpPass`:    0,
+	`sizeuppass`:    0,
+	`SizeDownPass`:  1,
+	`sizedownpass`:  1,
+	`SizeFinalPass`: 2,
+	`sizefinalpass`: 2,
+}
+
+var _LayoutPassesDescMap = map[LayoutPasses]string{
+	0: ``,
+	1: ``,
+	2: ``,
+}
+
+var _LayoutPassesMap = map[LayoutPasses]string{
+	0: `SizeUpPass`,
+	1: `SizeDownPass`,
+	2: `SizeFinalPass`,
+}
+
+// String returns the string representation
+// of this LayoutPasses value.
+func (i LayoutPasses) String() string {
+	if str, ok := _LayoutPassesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the LayoutPasses value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *LayoutPasses) SetString(s string) error {
+	if val, ok := _LayoutPassesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _LayoutPassesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type LayoutPasses")
+}
+
+// Int64 returns the LayoutPasses value as an int64.
+func (i LayoutPasses) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the LayoutPasses value from an int64.
+func (i *LayoutPasses) SetInt64(in int64) {
+	*i = LayoutPasses(in)
+}
+
+// Desc returns the description of the LayoutPasses value.
+func (i LayoutPasses) Desc() string {
+	if str, ok := _LayoutPassesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// LayoutPassesValues returns all possible values
+// for the type LayoutPasses.
+func LayoutPassesValues() []LayoutPasses {
+	return _LayoutPassesValues
+}
+
+// Values returns all possible values
+// for the type LayoutPasses.
+func (i LayoutPasses) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_LayoutPassesValues))
+	for i, d := range _LayoutPassesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type LayoutPasses.
+func (i LayoutPasses) IsValid() bool {
+	_, ok := _LayoutPassesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i LayoutPasses) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *LayoutPasses) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _LayoutFlagsValues = []LayoutFlags{9, 10, 11}
 
 // LayoutFlagsN is the highest valid value

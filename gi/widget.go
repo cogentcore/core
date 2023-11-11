@@ -99,6 +99,14 @@ type Widget interface {
 	// Returns true if any change in Actual size occurred.
 	SizeDown(sc *Scene, iter int) bool
 
+	// SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
+	// Sizing phase: first grows widget Actual sizes based on their Grow
+	// factors, up to their Alloc sizes.  Then gathers this updated final
+	// actual Size information for layouts to register their actual sizes
+	// prior to positioning, which requires accurate Actual vs. Alloc
+	// sizes to perform correct alignment calculations.
+	SizeFinal(sc *Scene)
+
 	// Position uses the final sizes to set relative positions within layouts
 	// according to alignment settings, and Grow elements to their actual
 	// Alloc size per Styles settings and widget-specific behavior.

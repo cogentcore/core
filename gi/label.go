@@ -27,7 +27,7 @@ type Label struct { //goki:embedder
 	WidgetBase
 
 	// label to display
-	Text string `xml:"text"`
+	Text string
 
 	// the type of label
 	Type LabelTypes
@@ -359,8 +359,13 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 	// w^2 + h^2 = a
 	// (ratio*h)^2 + h^2 = a
 
-	h := mat32.Sqrt(area) + mat32.Sqrt(ratio+1)
+	h := mat32.Sqrt(area) / mat32.Sqrt(ratio+1)
 	w := ratio * h
+	if w < csz.X { // must be at least this
+		w = csz.X
+		h = area / w
+		h = max(h, csz.Y)
+	}
 	sz := mat32.NewVec2(w, h)
 	fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
 	return sz

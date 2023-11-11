@@ -44,9 +44,9 @@ import (
 // Three main steps:
 // * Config: (re)configures widgets based on current params
 //   typically by making Parts.  Always calls ApplyStyle.
-// * Layout: does GetSize, DoLayout on tree, arranging widgets.
+// * Layout: does sizing and positioning on tree, arranging widgets.
 //   Needed for whole tree after any Config changes anywhere
-//   (could contain at RenderAnchor nodes).
+//   See layimpl.go for full details and code.
 // * Render: just draws with current config, layout.
 //
 // ApplyStyle is always called after Config, and after any
@@ -304,7 +304,7 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 // LayoutScene does a layout of the scene: Size, Position
 func (sc *Scene) LayoutScene() {
 	if LayoutTrace {
-		fmt.Println("\n############################\nLayoutScene start:", sc)
+		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
 	sc.SizeUp(sc)
 	sz := &sc.Geom.Size
@@ -321,11 +321,13 @@ func (sc *Scene) LayoutScene() {
 				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
 			}
 		} else {
-			// if iter > 0 { // at least 2
 			break
-			// }
 		}
 	}
+	if LayoutTrace {
+		fmt.Println("\n############################\nSizeFinal start:", sc)
+	}
+	sc.SizeFinal(sc)
 	if LayoutTrace {
 		fmt.Println("\n############################\nPosition start:", sc)
 	}

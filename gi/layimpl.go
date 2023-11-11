@@ -13,7 +13,7 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// Layout uses 2 Size passes, 2 Position passes:
+// Layout uses 3 Size passes, 2 Position passes:
 //
 // SizeUp: (bottom-up) gathers Actual sizes from our Children & Parts,
 // based on Styles.Min / Max sizes and actual content sizing
@@ -32,6 +32,13 @@ import (
 // as Actual sizes must always represent the minimums (see Position).
 // Returns true if any change in Actual size occurred.
 
+// SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
+// Sizing phase: first grows widget Actual sizes based on their Grow
+// factors, up to their Alloc sizes.  Then gathers this updated final
+// actual Size information for layouts to register their actual sizes
+// prior to positioning, which requires accurate Actual vs. Alloc
+// sizes to perform correct alignment calculations.
+
 // Position: uses the final sizes to set relative positions within layouts
 // according to alignment settings, and Grow elements to their actual
 // Alloc size per Styles settings and widget-specific behavior.
@@ -42,33 +49,41 @@ import (
 // This is the only step needed when scrolling (very fast).
 
 // (Text) Wrapping key principles:
-// * start small (just styled hard constraints) for SizeUp (non-wrap asserts needs)
-// * use full Alloc for SizeDown
-// * set content + total to what you actually use (key: start with only styled
+// * Using a heuristic initial box based on expected text area from length
+//   of Text and aspect ratio based on styled size to get initial layout size.
+//   This avoids extremes of all horizontal or all vertical initial layouts.
+// * Use full Alloc for SizeDown to allocate for what has been reserved.
+// * Set Actual to what you actually use (key: start with only styled
 //   so you don't get hysterisis)
-// * Layout always re-gets the actuals for accurate KidsSize
-// * for wrap flex, initial min size includes max over els -- must fit at least that
+// * Layout always re-gets the actuals for accurate Actual sizing
 
-// * same principles apply for areas under scrollbar support -- basically identical
-//   to flex!
+// Scroll areas are similar: don't request anything more than Min reservation
+// and then expand to Alloc in Final.
 
-// new: keep content and alloc separate until the end.
-// separate Size struct: Content, Total for Actual and Alloc.
-// Actual is set ONCE during SizeUp, and feeds an initial
-// Alloc that is updated during the top-down process.
-// Actual is updated only whenever a wrap element (label) changes its size based on alloc.
-// Grow is based on alloc changes *relative to actual*
-// (add a special flag to ignore actual for Splits?)
-// resulting in a new alloc for kids.
+// Note that it is critical to not actually change any bottom-up Actual
+// sizing based on the Alloc, during the SizeDown process, as this will
+// introduce false constraints on the process: only work with minimum
+// Actual "hard" constraints to make sure those are satisfied.  Text
+// and Wrap elements resize only enough to fit within the Alloc space
+// to the extent possible, but do not Grow.
 //
-// Wrap will update a new actual based on wrapped content just like text
-// but keep its alloc separate just the same.
+// The separate SizeFinal step then finally allows elements to grow
+// into their final Alloc space, once all the constraints are satisfied.
 //
-// Then in position, we can use the resulting values and alignment should be possible too.
-
-// this is similar in top-down / bottom-up design:
+// This overall top-down / bottom-up logic is used in Flutter:
 // https://docs.flutter.dev/resources/architectural-overview#rendering-and-layout
+// Here's more links to other layout algorithms:
 // https://stackoverflow.com/questions/53911631/gui-layout-algorithms-overview
+
+// LayoutPasses is used for the SizeFromChildren method,
+// which can potentially compute different sizes for different passes.
+type LayoutPasses int32 //enums:enum
+
+const (
+	SizeUpPass LayoutPasses = iota
+	SizeDownPass
+	SizeFinalPass
+)
 
 ///////////////////////////////////////////////////////////////////
 // Layouter
@@ -85,11 +100,11 @@ type Layouter interface {
 	// Other layout types can change this if they want to.
 	LayoutSpace()
 
-	// SizeUpFromChildren gathers Actual size from kids into our Actual.Content size.
-	// Different Layout types can alter this to present different bottom-up Content
-	// sizes for the layout process (e.g., if Content is sized to fit allocation,
-	// as in the TopAppBar, so a minimal )
-	SizeUpFromChildren(sc *Scene)
+	// SizeFromChildren gathers Actual size from kids into our Actual.Content size.
+	// Different Layout types can alter this to present different Content
+	// sizes for the layout process, e.g., if Content is sized to fit allocation,
+	// as in the TopAppBar and Sliceview types.
+	SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2
 }
 
 // AsLayout returns the given value as a value of type Layout if the type
@@ -345,6 +360,28 @@ func (ls *LayImplState) String() string {
 	return s
 }
 
+// SetContentFitOverflow sets Actual.Content size to fit given new actual size
+// depending on the Styles Overflow: Auto and Scroll types do NOT expand and
+// remain at their current styled actual values, absorbing the extra content size
+// within their own scrolling zone.  Scene root (parent == nil) always
+// updates because the buck stops there..
+func (wb *WidgetBase) SetContentFitOverflow(sz mat32.Vec2) {
+	// todo: potentially the diff between Visible & Hidden is
+	// that Hidden also does Not expand beyond Alloc?
+	// can expt with that.
+	csz := &wb.Geom.Size.Actual.Content
+	mx := wb.Geom.Size.Max
+	oflow := &wb.Styles.Overflow
+	if oflow.X < styles.OverflowAuto || wb.Par == nil {
+		csz.X = mat32.MaxPos(csz.X, sz.X)
+		csz.X = mat32.MinPos(csz.X, mx.X)
+	}
+	if oflow.Y < styles.OverflowAuto || wb.Par == nil {
+		csz.Y = mat32.MaxPos(csz.Y, sz.Y)
+		csz.Y = mat32.MinPos(csz.Y, mx.Y)
+	}
+}
+
 //////////////////////////////////////////////////////////////////////
 //		SizeUp
 
@@ -375,6 +412,7 @@ func (wb *WidgetBase) SpaceFromStyle() {
 func (wb *WidgetBase) SizeFromStyle() {
 	sz := &wb.Geom.Size
 	wb.SpaceFromStyle()
+	wb.Geom.Size.InnerSpace.SetZero()
 	sz.Max = wb.Styles.Max.Dots().Ceil()
 	sz.SetSizeMax(&sz.Actual.Content, wb.Styles.Min.Dots().Ceil())
 	sz.SetTotalFromContent(&sz.Actual)
@@ -408,10 +446,14 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.SizeFromStyle()
 	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
 	ly.SetInitCells()
-	ly.This().(Layouter).LayoutSpace()          // now includes initial GapSize from Cells
-	ly.SizeUpChildren(sc)                       // kids do their own thing
-	ly.This().(Layouter).SizeUpFromChildren(sc) // we get our Actual.Content from kids
+	ly.This().(Layouter).LayoutSpace() // now includes initial GapSize from Cells
+	ly.SizeUpChildren(sc)              // kids do their own thing
+	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeUpPass)
 	sz := &ly.Geom.Size
+	ly.SetContentFitOverflow(ksz)
+	if LayoutTrace {
+		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content)
+	}
 	sz.SetTotalFromContent(&sz.Actual)
 }
 
@@ -515,41 +557,22 @@ func (ly *Layout) SetInitCellsGrid() {
 // todo: wrap requires a different non-grid logic -- no constraint of same sizes across rows
 
 //////////////////////////////////////////////////////////////////////
-//		SizeUpFromChildren
+//		SizeFromChildren
 
-// SetContentFitOverflow sets Actual.Content size to fit given new actual size
-// depending on the Styles Overflow: Auto and Scroll types do NOT expand and
-// remain at their current styled actual values, absorbing the extra content size
-// within their own scrolling zone.
-func (ly *Layout) SetContentFitOverflow(sz mat32.Vec2) {
-	// todo: potentially the diff between Visible & Hidden is
-	// that Hidden also does Not expand beyond Alloc?
-	// can expt with that.
-	csz := &ly.Geom.Size.Actual.Content
-	mx := ly.Geom.Size.Max
-	oflow := &ly.Styles.Overflow
-	if oflow.X < styles.OverflowAuto || ly.Par == nil {
-		csz.X = mat32.MaxPos(csz.X, sz.X)
-		csz.X = mat32.MinPos(csz.X, mx.X)
-	}
-	if oflow.Y < styles.OverflowAuto || ly.Par == nil {
-		csz.Y = mat32.MaxPos(csz.Y, sz.Y)
-		csz.Y = mat32.MinPos(csz.Y, mx.Y)
-	}
-}
-
-// SizeUpFromChildren gathers Actual size from kids into our Actual.Content size
-func (ly *Layout) SizeUpFromChildren(sc *Scene) {
+// SizeFromChildren gathers Actual size from kids into our Actual.Content size.
+// Different Layout types can alter this to present different Content
+// sizes for the layout process, e.g., if Content is sized to fit allocation,
+// as in the TopAppBar and Sliceview types.
+func (ly *Layout) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
 	// todo: flex
 	if ly.Styles.Display == styles.DisplayStacked {
-		ly.SizeUpFromChildrenStacked(sc)
-		return
+		return ly.SizeFromChildrenStacked(sc)
 	}
-	ly.SizeUpFromChildrenCells(sc)
+	return ly.SizeFromChildrenCells(sc)
 }
 
-// SizeUpFromChildrenCells for Flex, Grid
-func (ly *Layout) SizeUpFromChildrenCells(sc *Scene) {
+// SizeFromChildrenCells for Flex, Grid
+func (ly *Layout) SizeFromChildrenCells(sc *Scene) mat32.Vec2 {
 	// r   0   1   col X = max(X over rows), Y = sum(Y over rows)
 	//   +--+--+
 	// 0 |  |  |   row X = sum(X over cols), Y = max(Y over cols)
@@ -588,18 +611,15 @@ func (ly *Layout) SizeUpFromChildrenCells(sc *Scene) {
 		return ki.Continue
 	})
 	if LayoutTraceDetail {
-		fmt.Println(ly, "SizeUp")
+		fmt.Println(ly, "SizeFromChildren")
 		fmt.Println(ly.LayImpl.String())
 	}
 	ksz := ly.LayImpl.CellsSize()
-	ly.SetContentFitOverflow(ksz)
-	if LayoutTrace {
-		fmt.Println(ly, "SizeUpFromChildrenCells:", ksz, "Content:", ly.Geom.Size.Actual.Content)
-	}
+	return ksz
 }
 
-// SizeUpFromChildrenStacked for stacked case
-func (ly *Layout) SizeUpFromChildrenStacked(sc *Scene) {
+// SizeFromChildrenStacked for stacked case
+func (ly *Layout) SizeFromChildrenStacked(sc *Scene) mat32.Vec2 {
 	ly.LayImpl.InitSizes()
 	_, kwb := ly.StackTopWidget()
 	li := &ly.LayImpl
@@ -612,10 +632,7 @@ func (ly *Layout) SizeUpFromChildrenStacked(sc *Scene) {
 			li.Sizes[ma][0].Grow = kgrw
 		}
 	}
-	ly.SetContentFitOverflow(ksz)
-	if LayoutTrace {
-		fmt.Println(ly, "SizeUpFromChildrenCells:", ksz, "Content:", ly.Geom.Size.Actual.Content)
-	}
+	return ksz
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -700,7 +717,11 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	}
 	redo := ly.SizeDownChildren(sc, iter)
 	if redo {
-		ly.This().(Layouter).SizeUpFromChildren(sc) // we get our Actual.Content from kids
+		ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
+		ly.SetContentFitOverflow(ksz)
+		if LayoutTrace {
+			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content)
+		}
 		sz.SetTotalFromContent(&sz.Actual)
 	}
 	return chg || redo
@@ -892,7 +913,26 @@ func (ly *Layout) SizeDownAllocActualStacked(sc *Scene, iter int) {
 }
 
 //////////////////////////////////////////////////////////////////////
-//		Position
+//		SizeFinal
+
+// SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
+// Sizing phase: first grows widget Actual sizes based on their Grow
+// factors, up to their Alloc sizes.  Then gathers this updated final
+// actual Size information for layouts to register their actual sizes
+// prior to positioning, which requires accurate Actual vs. Alloc
+// sizes to perform correct alignment calculations.
+func (wb *WidgetBase) SizeFinal(sc *Scene) {
+	wb.SizeFinalWidget(sc)
+}
+
+// SizeFinalWidget is the standard Widget SizeFinal pass
+func (wb *WidgetBase) SizeFinalWidget(sc *Scene) {
+	wb.GrowToAlloc()
+	wb.SizeFinalParts(sc)
+	sz := &wb.Geom.Size
+	sz.SetTotalFromContent(&sz.Actual)
+	wb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
+}
 
 // GrowToAlloc grows our Actual size up to current Alloc size
 // for any dimension with a non-zero Grow factor.
@@ -924,17 +964,43 @@ func (wb *WidgetBase) GrowToAlloc() bool {
 	return change
 }
 
-// Position uses the final sizes to set relative positions within layouts
-// according to alignment settings, and Grow elements to their actual
-// Alloc size per Styles settings and widget-specific behavior.
-func (wb *WidgetBase) Position(sc *Scene) {
-	wb.PositionWidget(sc)
+// SizeFinalParts adjusts the Content size to hold the Parts Final sizes
+func (wb *WidgetBase) SizeFinalParts(sc *Scene) {
+	if wb.Parts == nil {
+		return
+	}
+	wb.Parts.SizeFinal(sc)
+	sz := &wb.Geom.Size
+	sz.FitSizeMax(&sz.Actual.Content, wb.Parts.Geom.Size.Actual.Total)
 }
 
-func (wb *WidgetBase) PositionWidget(sc *Scene) {
-	wb.GrowToAlloc()
-	wb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
-	wb.PositionParts(sc)
+/////////////// Layout
+
+func (ly *Layout) SizeFinal(sc *Scene) {
+	ly.SizeFinalLay(sc)
+}
+
+// SizeFinalLay is the Layout standard SizeFinal pass
+func (ly *Layout) SizeFinalLay(sc *Scene) {
+	if !ly.HasChildren() {
+		ly.SizeFinalWidget(sc) // behave like a widget
+		return
+	}
+	ly.SizeFinalChildren(sc) // kids do their own thing
+	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeFinalPass)
+	sz := &ly.Geom.Size
+	sz.FitSizeMax(&sz.Actual.Content, ksz) // note: get full amount here, regardless of overflow
+	sz.SetTotalFromContent(&sz.Actual)
+	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
+}
+
+// SizeFinalChildren calls SizeFinal on all the children of this node
+func (wb *WidgetBase) SizeFinalChildren(sc *Scene) {
+	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwi.SizeFinal(sc)
+		return ki.Continue
+	})
+	return
 }
 
 // StyleSizeUpdate updates styling size values for widget and its parent,
@@ -952,6 +1018,20 @@ func (wb *WidgetBase) StyleSizeUpdate(sc *Scene) bool {
 		wb.Styles.ToDots()
 	}
 	return chg
+}
+
+//////////////////////////////////////////////////////////////////////
+//		Position
+
+// Position uses the final sizes to set relative positions within layouts
+// according to alignment settings, and Grow elements to their actual
+// Alloc size per Styles settings and widget-specific behavior.
+func (wb *WidgetBase) Position(sc *Scene) {
+	wb.PositionWidget(sc)
+}
+
+func (wb *WidgetBase) PositionWidget(sc *Scene) {
+	wb.PositionParts(sc)
 }
 
 func (wb *WidgetBase) PositionParts(sc *Scene) {
@@ -980,9 +1060,7 @@ func (ly *Layout) PositionLay(sc *Scene) {
 		ly.PositionWidget(sc) // behave like a widget
 		return
 	}
-	ly.GrowToAlloc()
-	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
-	ly.ConfigScrolls(sc)   // and configure the scrolls
+	ly.ConfigScrolls(sc) // and configure the scrolls
 	if ly.Styles.Display == styles.DisplayStacked {
 		ly.PositionStacked(sc)
 	} else {
