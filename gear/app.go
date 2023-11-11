@@ -7,6 +7,7 @@ package gear
 import (
 	"reflect"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/ki/v2"
@@ -24,7 +25,7 @@ var _ ki.Ki = (*App)(nil)
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	for _, cmd := range a.Cmd.Cmds {
-		gi.NewButton(tb).SetText(cmd.Name)
+		gi.NewButton(tb).SetText(cmd.Name).SetTooltip(cmd.Doc)
 	}
 }
 
@@ -37,12 +38,18 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	sfs := make([]reflect.StructField, len(a.Cmd.Flags))
 
+	used := map[string]bool{}
 	for i, flag := range a.Cmd.Flags {
 		sf := reflect.StructField{
-			Name: flag,
+			Name: strcase.ToCamel(flag),
 			// TODO(kai/gear): support type determination
 			Type: reflect.TypeOf(""),
 		}
+		for used[sf.Name] {
+			// TODO(kai/gear): consider better approach to unique names
+			sf.Name += "_"
+		}
+		used[sf.Name] = true
 		sfs[i] = sf
 	}
 	stt := reflect.StructOf(sfs)
@@ -50,5 +57,5 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	giv.NewStructView(a).SetStruct(st)
 
-	a.UpdateEnd(updt)
+	a.UpdateEndLayout(updt)
 }

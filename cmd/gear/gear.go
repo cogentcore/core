@@ -40,7 +40,8 @@ func app(c *config) error {
 	if err != nil {
 		return err
 	}
-	gear.NewApp(sc).SetCmd(cmd)
+	app := gear.NewApp(sc).SetCmd(cmd)
+	gi.DefaultTopAppBar = app.TopAppBar
 	gi.NewWindow(sc).Run().Wait()
 	return nil
 }
