@@ -89,10 +89,13 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 
 		cm.Cmds = append(cm.Cmds, cmd)
 
-		// now we must recursively parse the subcommand and any of its subcommands
-		err := cmd.Parse()
-		if err != nil {
-			return err
+		// there is no helpful information to extract from help commands
+		if kbnm != "help" {
+			// now we must recursively parse the subcommand and any of its subcommands
+			err := cmd.Parse()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
