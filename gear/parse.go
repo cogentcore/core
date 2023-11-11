@@ -5,13 +5,11 @@
 package gear
 
 import (
-	"cmp"
 	"fmt"
 	"regexp"
-	"slices"
 	"strings"
+	"unicode"
 
-	"goki.dev/glop/sentencecase"
 	"goki.dev/xe"
 )
 
@@ -37,67 +35,94 @@ var cmdRegexp = regexp.MustCompile(
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (cm *Cmd) Parse() error {
-	rh, err := cm.GetHelp()
+	h, err := cm.GetHelp()
 	if err != nil {
 		return err
 	}
 
-	flags := flagRegexp.FindAllStringSubmatch(rh, -1)
-	for _, flag := range flags {
-		names := flag[1]
-		fields := strings.Fields(names)
+	// flags := flagRegexp.FindAllStringSubmatch(h, -1)
+	// for _, flag := range flags {
+	// 	names := flag[1]
+	// 	fields := strings.Fields(names)
 
-		f := &Flag{}
-		for _, field := range fields {
-			name := strings.Trim(field, "-,[(| \t")
-			if name != "" {
-				f.Names = append(f.Names, name)
-			}
-		}
-		if len(f.Names) == 0 {
-			continue
-		}
-		slices.SortFunc(f.Names, func(a, b string) int {
-			return cmp.Compare(len(a), len(b))
-		})
-		f.Name = f.Names[len(f.Names)-1]
-		cm.Flags = append(cm.Flags, f)
-	}
-
-	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
-	for _, cmd := range cmds {
-		c := NewCmd(cm.Cmd + " " + cmd[1])
-		// remove first part of command for name (the app name)
-		c.Name = sentencecase.Of(strings.Join(strings.Fields(c.Name)[1:], " "))
-		if len(cmd) >= 3 {
-			c.Doc = cmd[2]
-		}
-
-		cm.Cmds = append(cm.Cmds, c)
-
-		// we don't want to parse the help info for help commands
-		if c.Name != "Help" {
-			err := c.Parse()
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// lines := strings.Split(rh, "\n")
-	// for _, line := range lines {
-	// 	for i, r := range line {
-	// 		ispc := unicode.IsSpace(r)
-	// 		if i == 0 && !ispc {
-	// 			break
+	// 	f := &Flag{}
+	// 	for _, field := range fields {
+	// 		name := strings.Trim(field, "-,[(| \t")
+	// 		if name != "" {
+	// 			f.Names = append(f.Names, name)
 	// 		}
-	// 		if !ispc {
+	// 	}
+	// 	if len(f.Names) == 0 {
+	// 		continue
+	// 	}
+	// 	slices.SortFunc(f.Names, func(a, b string) int {
+	// 		return cmp.Compare(len(a), len(b))
+	// 	})
+	// 	f.Name = f.Names[len(f.Names)-1]
+	// 	cm.Flags = append(cm.Flags, f)
+	// }
 
+	// cmds := cmdRegexp.FindAllStringSubmatch(h, -1)
+	// for _, cmd := range cmds {
+	// 	c := NewCmd(cm.Cmd + " " + cmd[1])
+	// 	// remove first part of command for name (the app name)
+	// 	c.Name = sentencecase.Of(strings.Join(strings.Fields(c.Name)[1:], " "))
+	// 	if len(cmd) >= 3 {
+	// 		c.Doc = cmd[2]
+	// 	}
+
+	// 	cm.Cmds = append(cm.Cmds, c)
+
+	// 	// we don't want to parse the help info for help commands
+	// 	if c.Name != "Help" {
+	// 		err := c.Parse()
+	// 		if err != nil {
+	// 			return err
 	// 		}
-
 	// 	}
 	// }
+
+	lines := strings.Split(h, "\n")
+
+	blocks := []block{}
+	prevNspc := 0
+	prevBlock := block{}
+	for _, line := range lines {
+		nspc := 0
+		for _, r := range line {
+			if r == '\t' {
+				nspc += 4
+			} else if unicode.IsSpace(r) {
+				nspc += 1
+			} else {
+				break
+			}
+		}
+		if nspc > 1 && prevNspc == 0 {
+			prevNspc = nspc
+			prevBlock.name = strings.TrimSpace(line)
+		} else if nspc >= prevNspc {
+			prevBlock.doc += strings.TrimSpace(line)
+		} else {
+			blocks = append(blocks, prevBlock)
+			if nspc > 1 {
+				prevNspc = nspc
+				prevBlock = block{name: strings.TrimSpace(line)}
+			} else {
+				prevNspc = 0
+				prevBlock = block{}
+			}
+		}
+	}
+	for _, block := range blocks {
+		fmt.Println("BLOCK", block.name, ":", block.doc)
+	}
 	return nil
+}
+
+type block struct {
+	name string
+	doc  string
 }
 
 // GetHelp gets the help information for the command. It tries various different
