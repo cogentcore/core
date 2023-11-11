@@ -381,7 +381,7 @@ func (lb *Label) SizeUp(sc *Scene) {
 	} else {
 		lb.ConfigLabel(sc, sz.Actual.Content)
 	}
-	rsz := lb.TextRender.Size
+	rsz := lb.TextRender.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	if LayoutTrace {
@@ -395,7 +395,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	}
 	sz := &lb.Geom.Size
 	lb.ConfigLabel(sc, sz.Alloc.Content) // use allocation
-	rsz := lb.TextRender.Size
+	rsz := lb.TextRender.Size.Ceil()
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.SetSizeMax(&sz.Actual.Content, lb.Styles.Min.Dots().Ceil())

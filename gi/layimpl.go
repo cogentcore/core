@@ -307,6 +307,11 @@ type LayImplState struct {
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
 	ScrollSize mat32.Vec2
 
+	// ActualOverflow is the actual size without absorbing the overflow in
+	// scroll elements -- this is needed for overflow computation to see if
+	// scrollbars are required.
+	ActualOverflow GeomCT
+
 	// GapSize has the extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
 	// For SizeUp / Down Gap contributes to Space like other cases,
@@ -372,23 +377,29 @@ func (ls *LayImplState) String() string {
 // depending on the Styles Overflow: Auto and Scroll types do NOT expand and
 // remain at their current styled actual values, absorbing the extra content size
 // within their own scrolling zone.  Scene root (parent == nil) always
-// updates because the buck stops there..
-func (wb *WidgetBase) SetContentFitOverflow(sz mat32.Vec2) {
+// updates because the buck stops there.
+// Full overflow actual is maintained for overflow computation in ActualOverflow.
+func (ly *Layout) SetContentFitOverflow(nsz mat32.Vec2) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
-	csz := &wb.Geom.Size.Actual.Content
-	wb.Geom.Size.SetSizeMax(csz, wb.Styles.Min.Dots().Ceil()) // start with style
-	mx := wb.Geom.Size.Max
-	oflow := &wb.Styles.Overflow
-	if oflow.X < styles.OverflowAuto || wb.Par == nil {
-		csz.X = mat32.MaxPos(csz.X, sz.X)
-		csz.X = mat32.MinPos(csz.X, mx.X)
+	sz := &ly.Geom.Size
+	asz := &sz.Actual
+	osz := &ly.LayImpl.ActualOverflow
+	ly.Geom.Size.SetSizeMax(&asz.Content, ly.Styles.Min.Dots().Ceil()) // start with style
+	*osz = *asz
+	mx := ly.Geom.Size.Max
+	oflow := &ly.Styles.Overflow
+	for d := mat32.X; d <= mat32.Y; d++ {
+		osz.Content.SetDim(d, mat32.MaxPos(osz.Content.Dim(d), nsz.Dim(d)))
+		if oflow.Dim(d) < styles.OverflowAuto || ly.Par == nil {
+			asz.Content.SetDim(d, mat32.MaxPos(asz.Content.Dim(d), nsz.Dim(d)))
+		}
 	}
-	if oflow.Y < styles.OverflowAuto || wb.Par == nil {
-		csz.Y = mat32.MaxPos(csz.Y, sz.Y)
-		csz.Y = mat32.MinPos(csz.Y, mx.Y)
-	}
+	osz.Content.SetMinPos(mx)
+	asz.Content.SetMinPos(mx)
+	sz.SetTotalFromContent(asz)
+	sz.SetTotalFromContent(osz)
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -463,7 +474,6 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	if LayoutTrace {
 		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content)
 	}
-	sz.SetTotalFromContent(&sz.Actual)
 }
 
 // LayoutSpace sets our Space based on Styles, Scroll, and Gap Spacing.
@@ -731,7 +741,6 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 		if LayoutTrace {
 			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content)
 		}
-		sz.SetTotalFromContent(&sz.Actual)
 	}
 	chg := ly.ManageOverflow(sc, iter)
 	return chg || redo
@@ -741,7 +750,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 // are needed, etc.  Returns true if size changes as a result.
 func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	sz := &ly.Geom.Size
-	oflow := sz.Actual.Content.Sub(sz.Alloc.Content)
+	oflow := ly.LayImpl.ActualOverflow.Content.Sub(sz.Alloc.Content)
 	change := false
 	ly.LayImpl.ScrollSize.SetZero()
 	ly.SetScrollsOff()
@@ -754,25 +763,23 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
 		}
 	}
-	if !sc.Is(ScPrefSizing) {
-		for d := mat32.X; d <= mat32.Y; d++ {
-			ofd := oflow.Dim(d)
-			if ofd <= -1 {
-				continue
+	for d := mat32.X; d <= mat32.Y; d++ {
+		ofd := oflow.Dim(d)
+		if ofd <= -1 {
+			continue
+		}
+		switch ly.Styles.Overflow.Dim(d) {
+		// case styles.OverflowVisible:
+		// note: this shouldn't happen -- just have this in here for monitoring
+		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
+		case styles.OverflowAuto:
+			if !ly.HasScroll[d] {
+				change = true
 			}
-			switch ly.Styles.Overflow.Dim(d) {
-			// case styles.OverflowVisible:
-			// note: this shouldn't happen -- just have this in here for monitoring
-			// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
-			case styles.OverflowAuto:
-				if !ly.HasScroll[d] {
-					change = true
-				}
-				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
-				if LayoutTrace {
-					fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
-				}
+			ly.HasScroll[d] = true
+			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
+			if LayoutTrace {
+				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
 			}
 		}
 	}
@@ -1005,7 +1012,6 @@ func (ly *Layout) SizeFinalLay(sc *Scene) {
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.FinalUp = sz.Actual // keep it before we grow
 	ly.GrowToAlloc(sc)
-	// ly.ManageOverflow(sc, 0)
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 }
 
