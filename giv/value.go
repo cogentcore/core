@@ -344,7 +344,14 @@ func (vv *ValueBase) Doc() string {
 	// otherwise, we get our field documentation in our parent
 	otyp := gti.TypeByValue(vv.Owner)
 	if otyp == nil {
-		return ""
+		// if we aren't in gti, we fall back on struct tag
+		desc, ok := vv.Field.Tag.Lookup("desc")
+		if !ok {
+			return ""
+		}
+		vv.SetFlag(true, ValueHasSavedDoc)
+		vv.SavedDoc = desc
+		return desc
 	}
 	f := gti.GetField(otyp, vv.Field.Name)
 	if f == nil {
