@@ -1775,6 +1775,10 @@ func (vv *FuncValue) UpdateWidget() {
 	}
 	fbt := vv.Widget.(*FuncButton)
 	fun := laser.NonPtrValue(vv.Value).Interface()
+	// if someone is viewing an arbitrary function, there is a good chance
+	// that it is not added to gti (and that is out of their control)
+	// (eg: in the inspector).
+	fbt.SetWarnUnadded(false)
 	fbt.SetFunc(fun)
 }
 
