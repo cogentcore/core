@@ -98,7 +98,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 1
+	doCase := 3
 
 	switch doCase {
 	case 0: // just text

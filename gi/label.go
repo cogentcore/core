@@ -237,7 +237,7 @@ func (lb *Label) HandleLabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
 		// hasLinks := len(lb.TextRender.Links) > 0
 		// if hasLinks {
-		// 	pos := llb.Alloc.Pos.Content
+		// 	pos := llb.Geom.Pos.Content
 		// 	for ti := range llb.TextRender.Links {
 		// 		tl := &llb.TextRender.Links[ti]
 		// 		tlb := tl.Bounds(&llb.TextRender, pos)
@@ -268,7 +268,7 @@ func (lb *Label) HandleLabelClick() {
 		if !hasLinks {
 			return
 		}
-		pos := lb.Alloc.Pos.Content
+		pos := lb.Geom.Pos.Content
 		for ti := range lb.TextRender.Links {
 			tl := &lb.TextRender.Links[ti]
 			tlb := tl.Bounds(&lb.TextRender, pos)
@@ -283,7 +283,7 @@ func (lb *Label) HandleLabelClick() {
 
 func (lb *Label) HandleLabelMouseMove() {
 	lb.On(events.MouseMove, func(e events.Event) {
-		pos := lb.Alloc.Pos.Content
+		pos := lb.Geom.Pos.Content
 		inLink := false
 		for _, tl := range lb.TextRender.Links {
 			tlb := tl.Bounds(&lb.TextRender, pos)
@@ -323,7 +323,7 @@ func (lb *Label) HandleLabelKeys() {
 }
 
 func (lb *Label) ConfigWidget(sc *Scene) {
-	lb.ConfigLabel(sc, lb.Alloc.Size.Actual.Content)
+	lb.ConfigLabel(sc, lb.Geom.Size.Actual.Content)
 }
 
 // todo: ideally it would be possible to only call SetHTML once during config
@@ -346,7 +346,7 @@ func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 // this is based on the existing styled Actual.Content aspect ratio and
 // very rough estimate of total rendered size.
 func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
-	csz := lb.Alloc.Size.Actual.Content
+	csz := lb.Geom.Size.Actual.Content
 	chars := float32(len(lb.Text))
 	fm := lb.Styles.Font.Face.Metrics
 	area := chars * fm.Height * fm.Ch
@@ -368,7 +368,7 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 
 func (lb *Label) SizeUp(sc *Scene) {
 	lb.WidgetBase.SizeUp(sc) // sets Actual size based on styles
-	sz := &lb.Alloc.Size
+	sz := &lb.Geom.Size
 	if lb.Styles.Text.HasWordWrap() {
 		lb.ConfigLabel(sc, lb.SizeUpWrapSize(sc))
 	} else {
@@ -386,7 +386,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	if !lb.Styles.Text.HasWordWrap() {
 		return false
 	}
-	sz := &lb.Alloc.Size
+	sz := &lb.Geom.Size
 	lb.ConfigLabel(sc, sz.Alloc.Content) // use allocation
 	rsz := lb.TextRender.Size
 	prevContent := sz.Actual.Content
@@ -407,7 +407,7 @@ func (lb *Label) RenderLabel(sc *Scene) {
 	rs, _, st := lb.RenderLock(sc)
 	defer lb.RenderUnlock(rs)
 	lb.RenderStdBox(sc, st)
-	lb.TextRender.Render(rs, lb.Alloc.Pos.Content)
+	lb.TextRender.Render(rs, lb.Geom.Pos.Content)
 }
 
 func (lb *Label) Render(sc *Scene) {

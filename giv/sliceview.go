@@ -643,9 +643,9 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	// sgHt := sg.Alloc.Size.Actual.Content.Y
-	sgHt := sg.LayImpl.ContentSubGap.Y
-	// fmt.Println("sg:", sgHt, "sv:", sv.Alloc.Size.Actual.TotalOrig.Y)
+	// sgHt := sg.Geom.Size.Actual.Content.Y
+	sgHt := sg.Geom.Size.Actual.Content.Y
+	// fmt.Println("sg:", sgHt, "sv:", sv.Geom.Size.Actual.TotalOrig.Y)
 	return sgHt
 }
 
@@ -658,8 +658,8 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 	}
 	if sg.HasChildren() {
 		_, kwb := gi.AsWidget(sg.Child(0))
-		rowht = kwb.Alloc.Size.Alloc.Y
-		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Alloc.Size.Actual.Total.Y)
+		rowht = kwb.Geom.Size.Alloc.Total.Y
+		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Geom.Size.Actual.Total.Y)
 	}
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
 		rowht = max(rowht, sv.RowHeight)
@@ -682,7 +682,7 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 			return
 		}
 		rows = int(mat32.Floor(sgHt / rowht))
-		// fmt.Println("rows:", rows, "sght:", sgHt, "rowht:", rowht, "sc ht:", sc.Geom.Size.Y)
+		// fmt.Println("rows:", rows, "sght:", sgHt, "rowht:", rowht, "sc ht:", sc.SceneGeom.Size.Y)
 	}
 	return
 }
@@ -1162,7 +1162,7 @@ func (sv *SliceViewBase) RowFromPos(posY int) (int, bool) {
 	for rw := 0; rw < sv.VisRows; rw++ {
 		w, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
 		if ok {
-			if w.Alloc.TotalBBox.Min.Y < posY && posY < w.Alloc.TotalBBox.Max.Y {
+			if w.Geom.TotalBBox.Min.Y < posY && posY < w.Geom.TotalBBox.Max.Y {
 				return rw, true
 			}
 		}

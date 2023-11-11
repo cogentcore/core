@@ -877,7 +877,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	did := false
-	bb := ed.Alloc.ContentBBox
+	bb := ed.Geom.ContentBBox
 	if (curBBox.Min.Y-int(ed.LineHeight)) < bb.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > bb.Max.Y {
 		did = ed.ScrollCursorToVertCenter()
 	}

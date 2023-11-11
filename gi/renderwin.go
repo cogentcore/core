@@ -1012,7 +1012,7 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 		if i == 0 {
 			op = draw.Src
 		}
-		drw.Copy(i, 0, sc.Geom.Pos, bb, op, rs.FlipY)
+		drw.Copy(i, 0, sc.SceneGeom.Pos, bb, op, rs.FlipY)
 	}
 }
 

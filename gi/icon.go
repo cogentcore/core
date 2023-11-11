@@ -93,11 +93,11 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 	if ic.SVG.Pixels == nil {
 		return
 	}
-	r := ic.Alloc.ContentBBox
+	r := ic.Geom.ContentBBox
 	sp := image.Point{}
 	if ic.Par != nil { // use parents children bbox to determine where we can draw
 		_, pwb := AsWidget(ic.Par)
-		pbb := pwb.Alloc.ContentBBox
+		pbb := pwb.Geom.ContentBBox
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -122,7 +122,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	}
 	// todo: units context from us to SVG??
 	zp := image.Point{}
-	sz := ic.Alloc.Size.Actual.Content.ToPoint()
+	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	if sz == zp {
 		ic.RendSize = zp
 		return

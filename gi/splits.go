@@ -337,17 +337,17 @@ func (sl *Splits) Position(sc *Scene) {
 
 func (sl *Splits) PositionHandles(sc *Scene) {
 	od := sl.Dim.OtherDim()
-	csz := sl.Alloc.Size.Actual.Content.Dim(od)
+	csz := sl.Geom.Size.Actual.Content.Dim(od)
 	spos := 0.5 * csz
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if i == 0 {
 			return ki.Continue
 		}
 		hand := sl.Parts.Child(i - 1).(*Handle)
-		hand.Alloc.RelPos = kwb.Alloc.RelPos
-		kwb.Alloc.RelPos.SetSubDim(sl.Dim, hand.Alloc.Size.Actual.Total.Dim(sl.Dim))
-		hand.Alloc.RelPos.SetDim(od, spos)
-		// fmt.Println(hand, hand.Alloc.RelPos)
+		hand.Geom.RelPos = kwb.Geom.RelPos
+		kwb.Geom.RelPos.SetSubDim(sl.Dim, hand.Geom.Size.Actual.Total.Dim(sl.Dim))
+		hand.Geom.RelPos.SetDim(od, spos)
+		// fmt.Println(hand, hand.Geom.RelPos)
 		return ki.Continue
 	})
 }
@@ -375,11 +375,11 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	// fmt.Printf("handsz: %v\n", handsz)
 	odim := mat32.OtherDim(sl.Dim)
 	spc := sl.BoxSpace()
-	size := sl.Alloc.Size.Total.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
+	size := sl.Geom.Size.Total.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
 	avail := size - thandsz
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sl.Alloc.Size.Total.Dim(odim) - spc.Size().Dim(odim)
-	mid := 0.5 * (sl.Alloc.Size.Total.Dim(odim) - spc.Size().Dim(odim))
+	osz := sl.Geom.Size.Total.Dim(odim) - spc.Size().Dim(odim)
+	mid := 0.5 * (sl.Geom.Size.Total.Dim(odim) - spc.Size().Dim(odim))
 	pos := float32(0.0)
 
 	phandsz := float32(0)
@@ -391,11 +391,11 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 		}
 
 		isz := sp * avail
-		wb.Alloc.Size.Total.SetDim(sl.Dim, isz)
-		wb.Alloc.Size.Total.SetDim(odim, osz)
-		wb.Alloc.Size.TotalOrig = wb.Alloc.Size.Total
-		wb.Alloc.PosRel.SetDim(sl.Dim, pos)
-		wb.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
+		wb.Geom.Size.Total.SetDim(sl.Dim, isz)
+		wb.Geom.Size.Total.SetDim(odim, osz)
+		wb.Geom.Size.TotalOrig = wb.Geom.Size.Total
+		wb.Geom.PosRel.SetDim(sl.Dim, pos)
+		wb.Geom.PosRel.SetDim(odim, spc.Pos().Dim(odim))
 
 		pos += isz
 
@@ -404,12 +404,12 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 			phandsz = hl.LayState.Size.Pref.Dim(sl.Dim)
 
 			hl.Pos = pos
-			hl.Alloc.Size.Total = hl.LayState.Size.Pref
-			hl.Alloc.PosRel.SetDim(sl.Dim, hl.Pos)
-			hl.Alloc.PosRel.SetDim(odim, mid-phandsz+float32(i)*phandsz*4)
-			hl.Alloc.PosOrig = hl.Alloc.PosRel
-			hl.Min = sl.Alloc.Pos.Dim(sl.Dim)
-			hl.Max = sl.Alloc.Size.Total.Sub(sl.Alloc.Pos).Dim(sl.Dim)
+			hl.Geom.Size.Total = hl.LayState.Size.Pref
+			hl.Geom.PosRel.SetDim(sl.Dim, hl.Pos)
+			hl.Geom.PosRel.SetDim(odim, mid-phandsz+float32(i)*phandsz*4)
+			hl.Geom.PosOrig = hl.Geom.PosRel
+			hl.Min = sl.Geom.Pos.Dim(sl.Dim)
+			hl.Max = sl.Geom.Size.Total.Sub(sl.Geom.Pos).Dim(sl.Dim)
 		}
 
 		pos += phandsz

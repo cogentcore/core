@@ -276,7 +276,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	n := len(em.MouseInBBox)
 	if n == 0 {
 		if EventTrace && et != events.MouseMove {
-			log.Println("Nothing in bbox:", sc.Alloc.TotalBBox, "pos:", pos)
+			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
 		return
 	}
@@ -1476,7 +1476,7 @@ const DNDSpriteName = "gi.RenderWin:DNDSprite"
 func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.EventMgr.DNDStart(src, data)
 	if _, sw := AsWidget(src); sw != nil {
-		sp.SetBottomPos(sw.Alloc.Pos.ToPo)
+		sp.SetBottomPos(sw.Geom.Pos.ToPo)
 	}
 	w.DeleteSprite(DNDSpriteName)
 	sp.Name = DNDSpriteName

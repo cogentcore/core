@@ -96,7 +96,7 @@ func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 	if sc == nil || !sc.HasChildren() {
 		return nil
 	}
-	sc.Geom.Pos = pos
+	sc.SceneGeom.Pos = pos
 	return NewPopupStage(MenuStage, sc, ctx)
 }
 

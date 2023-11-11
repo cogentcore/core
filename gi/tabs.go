@@ -500,8 +500,8 @@ func (ts *Tabs) RenderTabSeps(sc *Scene) {
 		tb := tbs.Child(i).(Widget)
 		ni := tb.AsWidget()
 
-		pos := ni.Alloc.Pos.Total
-		sz := ni.Alloc.Size.Actual.Total.Sub(st.TotalMargin().Size())
+		pos := ni.Geom.Pos.Total
+		sz := ni.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
 		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)

@@ -252,7 +252,7 @@ func (sr *Slider) SendChanged(e ...events.Event) bool {
 
 // SliderSize returns the size available for sliding, based on allocation
 func (sr *Slider) SliderSize() float32 {
-	sz := sr.Alloc.Size.Actual.Content.Dim(sr.Dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(sr.Dim)
 	if sr.Type != SliderScrollbar {
 		thsz := sr.ThumbSizeDots()
 		sz -= thsz.Dim(sr.Dim) // half on each size
@@ -262,7 +262,7 @@ func (sr *Slider) SliderSize() float32 {
 
 // SliderThickness returns the thickness of the slider: Content size in other dim.
 func (sr *Slider) SliderThickness() float32 {
-	return sr.Alloc.Size.Actual.Content.Dim(sr.Dim.OtherDim())
+	return sr.Geom.Size.Actual.Content.Dim(sr.Dim.OtherDim())
 }
 
 // ThumbSizeDots returns the thumb size in dots, based on ThumbSize
@@ -300,7 +300,7 @@ func (sr *Slider) ScrollThumbValue() float32 {
 // relative position within the usable Content sliding range,
 // in pixels, and updates the corresponding Value based on that position.
 func (sr *Slider) SetSliderPos(pos float32) {
-	sz := sr.Alloc.Size.Actual.Content.Dim(sr.Dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(sr.Dim)
 	if sz <= 0 {
 		return
 	}
@@ -335,7 +335,7 @@ func (sr *Slider) SetSliderPosAction(pos float32) {
 // SetPosFromValue sets the slider position based on the given value
 // (typically rs.Value)
 func (sr *Slider) SetPosFromValue(val float32) {
-	sz := sr.Alloc.Size.Actual.Content.Dim(sr.Dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(sr.Dim)
 	if sz <= 0 {
 		return
 	}
@@ -391,7 +391,7 @@ func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	sr.BBoxMu.RLock()
 	defer sr.BBoxMu.RUnlock()
 	ptf := mat32.NewVec2FmPoint(pt).Dim(sr.Dim)
-	return ptf - sr.Alloc.Pos.Content.Dim(sr.Dim)
+	return ptf - sr.Geom.Pos.Content.Dim(sr.Dim)
 }
 
 func (sr *Slider) HandleSliderMouse() {
@@ -527,8 +527,8 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		if bg.IsNil() {
 			bg, _ = sr.ParentBackgroundColor()
 		}
-		sz := sr.Alloc.Size.Actual.Content
-		pos := sr.Alloc.Pos.Content
+		sz := sr.Geom.Size.Actual.Content
+		pos := sr.Geom.Pos.Content
 		pc.FillStyle.SetFullColor(&bg)
 		sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
 		if !sr.ValueColor.IsNil() {
@@ -550,8 +550,8 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
 
-		sz := sr.Alloc.Size.Actual.Content
-		pos := sr.Alloc.Pos.Content
+		sz := sr.Geom.Size.Actual.Content
+		pos := sr.Geom.Pos.Content
 		bg, _ := sr.ParentBackgroundColor()
 		pc.FillStyle.SetFullColor(&bg)
 		sr.RenderBoxImpl(sc, pos, sz, st.Border)
@@ -585,9 +585,9 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 			sr.RenderUnlock(rs)
 			ic := sr.Parts.Child(0).(*Icon)
-			icsz := ic.Alloc.Size.Actual.Content
+			icsz := ic.Geom.Size.Actual.Content
 			tpos.SetSub(icsz.MulScalar(.5))
-			ic.Alloc.Pos.Total = tpos
+			ic.Geom.Pos.Total = tpos
 			ic.SetContentPosFromPos()
 			ic.SetBBoxes(sc)
 			sr.Parts.Render(sc)

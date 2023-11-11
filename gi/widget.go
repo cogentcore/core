@@ -216,11 +216,8 @@ type WidgetBase struct {
 	// aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
 
-	// todo: rename Alloc -> Geom when done with everything, and rename
-	// Scene.Geom -> SceneGeom
-
 	// Alloc is layout allocation state: contains full size and position info
-	Alloc GeomState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Geom GeomState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called

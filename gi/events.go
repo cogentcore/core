@@ -158,7 +158,7 @@ func (wb *WidgetBase) HandleWidgetEvents() {
 func (wb *WidgetBase) PosInScBBox(pos image.Point) bool {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
-	return pos.In(wb.Alloc.TotalBBox)
+	return pos.In(wb.Geom.TotalBBox)
 }
 
 // HandleWidgetClick handles the Click event for basic Widget behavior.

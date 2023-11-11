@@ -149,7 +149,7 @@ func (tb *TopAppBar) SizeUp(sc *Scene) {
 	tb.AllItemsToChildren(sc)
 	tb.Frame.SizeUp(sc)
 	ma := tb.Styles.MainAxis
-	sz := &tb.Alloc.Size                           // reset for others
+	sz := &tb.Geom.Size                            // reset for others
 	sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
 	sz.SetTotalFromContent(&sz.Actual)
 }
@@ -196,7 +196,7 @@ func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
 	if iter == 0 || !tb.HasChildren() { // first do a normal layout to get everyone's target positions
 		tb.Frame.SizeDown(sc, iter)
 		ma := tb.Styles.MainAxis
-		sz := &tb.Alloc.Size
+		sz := &tb.Geom.Size
 		sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
 		sz.SetTotalFromContent(&sz.Actual)
 		return true // needs another iter
@@ -213,10 +213,10 @@ func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
 func (tb *TopAppBar) ParentSize() float32 {
 	ma := tb.Styles.MainAxis
 	_, pwb := tb.ParentWidget()
-	psz := pwb.Alloc.Size.Actual.Content.Sub(tb.Alloc.Size.Space)
+	psz := pwb.Geom.Size.Actual.Content.Sub(tb.Geom.Size.Space)
 	avail := psz.Dim(ma) - 4
-	// fmt.Println(pwb, pwb.Alloc.Size)
-	sz := &tb.Alloc.Size
+	// fmt.Println(pwb, pwb.Geom.Size)
+	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
 	sz.SetContentFromTotal(&sz.Alloc)
 	return avail
@@ -226,9 +226,9 @@ func (tb *TopAppBar) ParentSize() float32 {
 func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 	ma := tb.Styles.MainAxis
 	avail := tb.ParentSize()
-	ovsz := tb.OverflowButton.Alloc.Size.Actual.Total.Dim(ma)
+	ovsz := tb.OverflowButton.Geom.Size.Actual.Total.Dim(ma)
 	avsz := avail - ovsz
-	sz := &tb.Alloc.Size
+	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
 	sz.SetContentFromTotal(&sz.Alloc)
 	tb.OverflowItems = nil
@@ -240,7 +240,7 @@ func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 		if i >= n-1 {
 			return ki.Break
 		}
-		ksz := kwb.Alloc.Size.Actual.Total.Dim(ma)
+		ksz := kwb.Geom.Size.Actual.Total.Dim(ma)
 		szsum += ksz
 		if szsum > avsz {
 			if !hasOv {
