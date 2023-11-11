@@ -104,10 +104,17 @@ func (cm *Cmd) Parse() error {
 // commands and flags to get the help information and only returns an error if all
 // of them fail.
 func (cm *Cmd) GetHelp() (string, error) {
+	fields := strings.Fields(cm.Cmd)
+	root := fields[0]
+
+	// try man first
+	out, err := xe.Silent().Output("man", fields...)
+	if err == nil {
+		return out, nil
+	}
+
 	hcmds := []string{"help", "--help", "-h"}
 	for _, hcmd := range hcmds {
-		fields := strings.Fields(cm.Cmd)
-		root := fields[0]
 		args := append([]string{hcmd}, fields[1:]...)
 		out, err := xe.Silent().Output(root, args...)
 		if err == nil {
