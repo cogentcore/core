@@ -134,9 +134,9 @@ func (g *Text) TextBBox() mat32.Box2 {
 
 	pos := g.Pos
 
-	if styles.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorMiddle {
+	if pc.TextStyle.Align == styles.AlignCenter || pc.TextStyle.Anchor == styles.AnchorMiddle {
 		pos.X -= g.TextRender.Size.X * .5
-	} else if styles.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorEnd {
+	} else if pc.TextStyle.Align == styles.AlignEnd || pc.TextStyle.Anchor == styles.AnchorEnd {
 		pos.X -= g.TextRender.Size.X
 	}
 	if len(g.CharPosX) > 0 {
@@ -214,9 +214,9 @@ func (g *Text) RenderText(sv *SVG) {
 	// todo: align styling only affects multi-line text and is about how tspan is arranged within
 	// the overall text block.
 
-	if styles.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorMiddle {
+	if pc.TextStyle.Align == styles.AlignCenter || pc.TextStyle.Anchor == styles.AnchorMiddle {
 		pos.X -= g.TextRender.Size.X * .5
-	} else if styles.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorEnd {
+	} else if pc.TextStyle.Align == styles.AlignEnd || pc.TextStyle.Anchor == styles.AnchorEnd {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {
