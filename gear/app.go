@@ -6,6 +6,7 @@ package gear
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/iancoleman/strcase"
@@ -55,9 +56,13 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 			// TODO(kai/gear): support type determination
 			Type: reflect.TypeOf(""),
 		}
-		for used[sf.Name] {
+		if used[sf.Name] {
 			// TODO(kai/gear): consider better approach to unique names
-			sf.Name += "_"
+			nm := sf.Name + "1"
+			for i := 2; used[nm]; i++ {
+				nm = sf.Name + strconv.Itoa(i)
+			}
+			sf.Name = nm
 		}
 		used[sf.Name] = true
 		sfs[i] = sf
