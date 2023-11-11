@@ -12,6 +12,7 @@ import (
 	"unicode"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/grr"
 	"goki.dev/xe"
 )
 
@@ -53,10 +54,10 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 		}
 		// if we have no -, we are probably a command
 
-		// however, if we have something other than letters, -, and _,
-		// we aren't a command, so we probably got included in here by mistake
+		// however, if we have something other than lowercase letters, -, and _,
+		// we probably aren't a command, so we probably got included in here by mistake
 		hasUnallowedRunes := strings.ContainsFunc(block.Name, func(r rune) bool {
-			return !(unicode.IsLetter(r) || r == '-' || r == '_')
+			return !(unicode.IsLower(r) || r == '-' || r == '_')
 		})
 		if hasUnallowedRunes {
 			continue
@@ -91,11 +92,10 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 
 		// there is no helpful information to extract from help commands
 		if kbnm != "help" {
-			// now we must recursively parse the subcommand and any of its subcommands
-			err := cmd.Parse()
-			if err != nil {
-				return err
-			}
+			// Now we must recursively parse the subcommand and any of its subcommands.
+			// Errors here are not fatal, as various subcommands could be mistakes, so
+			// we just log them and move on.
+			grr.Log0(cmd.Parse())
 		}
 	}
 	return nil
