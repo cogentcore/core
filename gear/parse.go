@@ -27,6 +27,7 @@ func (cm *Cmd) Parse() error {
 // SetFromBlocks sets the information of the command from the given [ParseBlock] objects.
 func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
 	for _, block := range blocks {
+		// a - indicates a flag
 		if strings.HasPrefix(block.Name, "-") {
 			flag := &Flag{}
 			flag.Doc = block.Doc
@@ -35,9 +36,9 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
 				if strings.HasPrefix(field, "-") {
 					name := strings.Trim(field, ",")
 					flag.Names = append(flag.Names, name)
-				} else {
-					flag.Type = field
+					continue
 				}
+				flag.Type = field
 			}
 			if len(flag.Names) == 0 {
 				continue
@@ -47,10 +48,17 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) {
 			})
 			flag.Name = flag.Names[len(flag.Names)-1]
 			cm.Flags = append(cm.Flags, flag)
+			continue
 		}
-	}
-	for _, flag := range cm.Flags {
-		fmt.Println(flag)
+		// if we have no -, we are probably a command
+
+		// however, if we have spaces, we aren't a command,
+		// so we probably got included in here by mistake
+		if strings.ContainsFunc(block.Name, unicode.IsSpace) {
+			continue
+		}
+		cmd := NewCmd(cm.Cmd + " " + block.Name)
+		fmt.Println(cmd.Cmd)
 	}
 }
 

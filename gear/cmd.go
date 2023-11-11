@@ -35,8 +35,10 @@ func NewCmd(cmd string) *Cmd {
 // Flag contains the information for a parsed command line flag.
 type Flag struct {
 	// Name is the canonical (longest) name of the flag.
+	// It includes the leading dashes of the flag.
 	Name string
 	// Names are the different names the flag can go by.
+	// They include the leading dashes of the flag.
 	Names []string
 	// Type is the type or value hint for the flag.
 	Type string
