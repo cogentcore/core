@@ -961,17 +961,19 @@ func (wb *WidgetBase) GrowToAlloc(sc *Scene) bool {
 	}
 	change := false
 	sz := &wb.Geom.Size
+	act := sz.Actual.Total
 	for d := mat32.X; d <= mat32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
 		alloc := sz.Alloc.Total.Dim(d)
-		act := sz.Actual.Total.Dim(d)
-		if grw > 0 && alloc > act {
+		actd := act.Dim(d)
+		if grw > 0 && alloc > actd {
 			change = true
 			grw := min(1, grw)
-			sz.Actual.Total.SetDim(d, mat32.Ceil(act+grw*(alloc-act)))
+			act.SetDim(d, mat32.Ceil(actd+grw*(alloc-actd)))
 		}
 	}
 	if change {
+		sz.FitSizeMax(&sz.Actual.Total, act)
 		sz.SetContentFromTotal(&sz.Actual)
 		if wb.Styles.LayoutHasParSizing() {
 			// todo: requires some additional logic to see if actually changes something

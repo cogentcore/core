@@ -97,14 +97,26 @@ func makeButtons(ts *gi.Tabs) {
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
 	// note: all of these were setwrap:
-	brow := gi.NewLayout(buttons)
-	browt := gi.NewLayout(buttons)
-	browi := gi.NewLayout(buttons)
+	brow := gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
+	browt := gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
+	browi := gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu Buttons")
-	mbrow := gi.NewLayout(buttons)
-	mbrowt := gi.NewLayout(buttons)
-	mbrowi := gi.NewLayout(buttons)
+	mbrow := gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
+	mbrowt := gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
+	mbrowi := gi.NewLayout(buttons).Style(func(s *styles.Style) {
+		s.Align.Y = styles.AlignCenter
+	})
 
 	menu := func(m *gi.Scene) {
 		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
