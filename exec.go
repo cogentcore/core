@@ -102,7 +102,7 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 			sout.Write(obuf.Bytes())
 		}
 		estr := ebuf.String()
-		if estr != "" {
+		if estr != "" && c.Stderr != nil {
 			c.Stderr.Write([]byte(grog.ErrorColor(estr)))
 		}
 	}
