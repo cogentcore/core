@@ -12,6 +12,11 @@ import (
 
 // Parse uses the help messages of the app to fill in its data fields.
 func (a *App) Parse() error {
+	rh, err := a.GetHelp("")
+	if err != nil {
+		return err
+	}
+	fmt.Println(rh)
 	return nil
 }
 

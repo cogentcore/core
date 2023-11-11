@@ -6,8 +6,19 @@ package gear
 
 import "testing"
 
+func TestParse(t *testing.T) {
+	cmds := []string{"git"}
+	for _, cmd := range cmds {
+		a := NewApp(cmd)
+		err := a.Parse()
+		if err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestGetHelp(t *testing.T) {
-	cmds := []string{"git", "go", "goki"}
+	cmds := []string{"git", "go", "goki", "ls", "mv", "cp"}
 	for _, cmd := range cmds {
 		a := NewApp(cmd)
 		h, err := a.GetHelp("")
