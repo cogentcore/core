@@ -710,7 +710,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 			ed.SelectRegUpdate(ed.CursorPos)
 		}
 		if ed.StateIs(states.Sliding) {
-			ed.AutoScroll(pt.Add(ed.Alloc.BBox.Min))
+			ed.AutoScroll(pt.Add(ed.Alloc.TotalBBox.Min))
 		} else {
 			ed.ScrollCursorToCenterIfHidden()
 		}

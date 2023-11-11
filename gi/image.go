@@ -149,7 +149,7 @@ func (im *Image) DrawIntoScene(sc *Scene) {
 	if im.Pixels == nil {
 		return
 	}
-	r := im.Alloc.BBox
+	r := im.Alloc.TotalBBox
 	sp := image.Point{}
 	if im.Par != nil { // use parents children bbox to determine where we can draw
 		_, pwb := AsWidget(im.Par)
@@ -185,12 +185,12 @@ func GrabRenderFrom(wi Widget) *image.RGBA {
 		log.Printf("gi.GrabRenderFrom could not grab from node, scene or pixels nil: %v\n", wb.Path())
 		return nil
 	}
-	if wb.Alloc.BBox.Empty() {
+	if wb.Alloc.TotalBBox.Empty() {
 		return nil // offscreen -- can happen -- no warning -- just check rval
 	}
-	sz := wb.Alloc.BBox.Size()
+	sz := wb.Alloc.TotalBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), sc.Pixels, wb.Alloc.BBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), sc.Pixels, wb.Alloc.TotalBBox.Min, draw.Src)
 	return img
 }
 

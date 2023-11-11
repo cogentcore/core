@@ -643,9 +643,9 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	// sgHt := sg.Alloc.Size.Content.Y
+	// sgHt := sg.Alloc.Size.Actual.Content.Y
 	sgHt := sg.LayImpl.ContentSubGap.Y
-	// fmt.Println("sg:", sgHt, "sv:", sv.Alloc.Size.TotalOrig.Y)
+	// fmt.Println("sg:", sgHt, "sv:", sv.Alloc.Size.Actual.TotalOrig.Y)
 	return sgHt
 }
 
@@ -659,7 +659,7 @@ func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 	if sg.HasChildren() {
 		_, kwb := gi.AsWidget(sg.Child(0))
 		rowht = kwb.Alloc.Size.Alloc.Y
-		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Alloc.Size.Total.Y)
+		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Alloc.Size.Actual.Total.Y)
 	}
 	if !sv.NeedsRebuild() { // use existing unless rebuilding
 		rowht = max(rowht, sv.RowHeight)
@@ -1162,7 +1162,7 @@ func (sv *SliceViewBase) RowFromPos(posY int) (int, bool) {
 	for rw := 0; rw < sv.VisRows; rw++ {
 		w, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
 		if ok {
-			if w.Alloc.BBox.Min.Y < posY && posY < w.Alloc.BBox.Max.Y {
+			if w.Alloc.TotalBBox.Min.Y < posY && posY < w.Alloc.TotalBBox.Max.Y {
 				return rw, true
 			}
 		}

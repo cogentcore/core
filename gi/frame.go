@@ -77,7 +77,7 @@ func (fr *Frame) RenderStripes(sc *Scene) {
 		pc := &rs.Paint
 
 		pos := fr.Alloc.Pos
-		sz := fr.Alloc.Size.Content
+		sz := fr.Alloc.Size.Actual.Content
 
 		delta := fr.LayoutScrollDelta(image.Point{})
 

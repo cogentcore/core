@@ -57,8 +57,8 @@ func (sp *Separator) RenderSeparator(sc *Scene) {
 	rs, pc, st := sp.RenderLock(sc)
 	defer sp.RenderUnlock(rs)
 
-	pos := sp.Alloc.Pos.Add(st.TotalMargin().Pos())
-	sz := sp.Alloc.Size.Total.Sub(st.TotalMargin().Size())
+	pos := sp.Alloc.Pos.Total.Add(st.TotalMargin().Pos())
+	sz := sp.Alloc.Size.Actual.Total.Sub(st.TotalMargin().Size())
 
 	if !st.BackgroundColor.IsNil() {
 		pc.FillBox(rs, pos, sz, &st.BackgroundColor)

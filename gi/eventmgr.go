@@ -276,7 +276,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	n := len(em.MouseInBBox)
 	if n == 0 {
 		if EventTrace && et != events.MouseMove {
-			log.Println("Nothing in bbox:", sc.Alloc.BBox, "pos:", pos)
+			log.Println("Nothing in bbox:", sc.Alloc.TotalBBox, "pos:", pos)
 		}
 		return
 	}

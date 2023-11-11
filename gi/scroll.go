@@ -118,29 +118,30 @@ func (ly *Layout) PositionScrolls(sc *Scene) {
 
 func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb := ly.Scrolls[d]
-	pos, sz := ly.ScrollGeom(d)
-	if sb.Alloc.Pos == pos && sb.Alloc.Size.Content == sz {
+	pos, ssz := ly.ScrollGeom(d)
+	if sb.Alloc.Pos.Total == pos && sb.Alloc.Size.Actual.Content == ssz {
 		return
 	}
-	if sz.X <= 0 || sz.Y <= 0 {
+	if ssz.X <= 0 || ssz.Y <= 0 {
 		sb.SetState(true, states.Invisible)
 		return
 	}
 	sb.SetState(false, states.Invisible)
-	csz := ly.LayImpl.ContentSubGap.Dim(d)
-	ksz := ly.LayImpl.KidsSize.Dim(d)
-	sb.Max = ksz                       // only scrollbar
+	sz := &ly.Alloc.Size
+	csz := sz.Actual.Content.Dim(d)
+	asz := sz.Alloc.Content.Dim(d)
+	sb.Max = csz                       // only scrollbar
 	sb.Step = ly.Styles.Font.Size.Dots // step by lines
 	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
-	sb.SetVisiblePct(csz / ksz)
+	sb.SetVisiblePct(asz / csz)
 	sb.SetValue(sb.Value) // keep in range
 
 	sb.Update() // applies style
 	sb.SizeUp(sc)
-	sb.Alloc.Size.Alloc = ly.Alloc.Size.Content
+	sb.Alloc.Size.Alloc = ly.Alloc.Size.Actual
 	sb.SizeDown(sc, 0)
 
-	sb.Alloc.Pos = pos
+	sb.Alloc.Pos.Total = pos
 	sb.SetContentPosFromPos()
 	// note: usually these are intersected with parent *content* bbox,
 	// but scrolls are specifically outside of that.

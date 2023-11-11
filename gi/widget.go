@@ -80,29 +80,34 @@ type Widget interface {
 	// It is typically not overridden -- set style funcs to apply custom styling.
 	ApplyStyle(sc *Scene)
 
-	// SizeUp (bottom-up) gathers sizes from our Children & Parts,
-	// based only on Min style sizes and actual content sizing (eg., text).
-	// Flexible elements (e.g., Text, Flex Wrap, TopAppBar) allocate
-	// optimistically along their main axis, up to any optional Max size.
+	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
+	// based on Styles.Min / Max sizes and actual content sizing
+	// (e.g., text size).  Flexible elements (e.g., Label, Flex Wrap,
+	// TopAppBar) should reserve the _minimum_ size possible at this stage,
+	// and then Grow based on SizeDown allocation.
 	SizeUp(sc *Scene)
 
-	//	SizeDown (top-down, multiple iterations possible) assigns sizes based
-	// on Alloc.Size.Alloc allocated size (set by parent prior to calling).
-	// This step is where layouts can give extra space based on Grow factors,
-	// and flexible elements wrap / config to fit top-down constraint along main
-	// axis, producing a (new) top-down size expanding in cross axis as needed
-	// (or removing items that don't fit, etc).
+	// SizeDown (top-down, multiple iterations possible) provides top-down
+	// size allocations based initially on Scene available size and
+	// the SizeUp Actual sizes.  If there is extra space available, it is
+	// allocated according to the Grow factors.
+	// Flexible elements (e.g., Flex Wrap layouts and Label with word wrap)
+	// update their Actual size based on available Alloc size (re-wrap),
+	// to fit the allocated shape vs. the initial bottom-up guess.
+	// However, do NOT grow the Actual size to match Alloc at this stage,
+	// as Actual sizes must always represent the minimums (see Position).
+	// Returns true if any change in Actual size occurred.
 	SizeDown(sc *Scene, iter int) bool
 
-	// Position uses the final sizes to position everything within layouts
-	// according to alignment settings.  It only sets the PosRel relative positions.
-	// The final layout step of ScenePos computes scene-relative positions, and
-	// is called separately whenever scrolling happens.
+	// Position uses the final sizes to set relative positions within layouts
+	// according to alignment settings, and Grow elements to their actual
+	// Alloc size per Styles settings and widget-specific behavior.
 	Position(sc *Scene)
 
-	// ScenePos scene-based position and final BBox is computed based on
-	// parents accumulated position and scrollbar position.
-	// This step can be performed when scrolling after updating Scroll.
+	// ScenePos computes scene-based absolute positions and final BBox
+	// bounding boxes for rendering, based on relative positions from
+	// Position step and parents accumulated position and scroll offset.
+	// This is the only step needed when scrolling (very fast).
 	ScenePos(sc *Scene)
 
 	// Render performs actual rendering pass.  Bracket the render calls in
@@ -211,8 +216,11 @@ type WidgetBase struct {
 	// aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
 
+	// todo: rename Alloc -> Geom when done with everything, and rename
+	// Scene.Geom -> SceneGeom
+
 	// Alloc is layout allocation state: contains full size and position info
-	Alloc LayState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Alloc GeomState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called

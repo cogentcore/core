@@ -307,9 +307,10 @@ func (sc *Scene) LayoutScene() {
 		fmt.Println("\n############################\nLayoutScene start:", sc)
 	}
 	sc.SizeUp(sc)
-	sc.Alloc.Size.Alloc.SetPoint(sc.Geom.Size)
-	sc.Alloc.Size.Total = sc.Alloc.Size.Alloc
-	sc.Alloc.Size.SetContentFromTotal()
+	sz := &sc.Alloc.Size
+	sz.Alloc.Total.SetPoint(sc.Geom.Size)
+	sz.SetContentFromTotal(&sz.Alloc)
+	// sz.Actual = sz.Alloc // todo: is this needed??
 	if LayoutTrace {
 		fmt.Println("\n############################\nSizeDown start:", sc)
 	}
@@ -482,13 +483,12 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
-	bspc := sc.BoxSpace().Size().Add(sc.LayImpl.ScrollSize)
-	psz := sc.LayImpl.KidsSize.Add(bspc).ToPointCeil()
-	sc.Geom.Size = psz
-	// fmt.Println("\npref size:", psz, "csz:", sc.Alloc.Size.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
+	psz := sc.Alloc.Size.Actual.Total
+	sc.Geom.Size = psz.ToPointFloor()
+	// fmt.Println("\npref size:", psz, "csz:", sc.Alloc.Size.Actual.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
 
 	sc.SetFlag(false, ScPrefSizing)
-	return psz
+	return sc.Geom.Size
 }
 
 //////////////////////////////////////////////////////////////////
@@ -506,16 +506,16 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	if !wb.This().(Widget).IsVisible() {
 		return false
 	}
-	if wb.Alloc.BBox.Empty() {
+	if wb.Alloc.TotalBBox.Empty() {
 		if RenderTrace {
-			fmt.Printf("Render empty bbox: %v at %v\n", wb.Path(), wb.Alloc.BBox)
+			fmt.Printf("Render empty bbox: %v at %v\n", wb.Path(), wb.Alloc.TotalBBox)
 		}
 		return false
 	}
 	rs := &sc.RenderState
-	rs.PushBounds(wb.Alloc.BBox)
+	rs.PushBounds(wb.Alloc.TotalBBox)
 	if RenderTrace {
-		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Alloc.BBox)
+		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Alloc.TotalBBox)
 	}
 	return true
 }
@@ -620,7 +620,7 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	pc := &rs.Paint
 
 	pbc, psl := wb.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, wb.Alloc.Pos, wb.Alloc.Size.Total, &pbc, psl)
+	pc.DrawStdBox(rs, st, wb.Alloc.Pos.Total, wb.Alloc.Size.Actual.Total, &pbc, psl)
 }
 
 //////////////////////////////////////////////////////////////////
@@ -648,9 +648,9 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 // by adding the Scene position to the ScBBox
 func (wb *WidgetBase) WinBBox() image.Rectangle {
 	if !wb.HasSc() {
-		return wb.Alloc.BBox
+		return wb.Alloc.TotalBBox
 	}
-	return wb.Alloc.BBox.Add(wb.Sc.Geom.Pos)
+	return wb.Alloc.TotalBBox.Add(wb.Sc.Geom.Pos)
 }
 
 // WinPos returns the RenderWin based position within the
