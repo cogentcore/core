@@ -103,6 +103,7 @@ func (cm *Cmd) Parse() error {
 		tsline := strings.TrimSpace(line)
 		rtsline := []rune(tsline)
 		nspc = 0
+		gotNonSpace := false
 		gotMiddleSpace := false
 		for i, r := range rtsline {
 			if r == '\t' {
@@ -110,16 +111,21 @@ func (cm *Cmd) Parse() error {
 			} else if unicode.IsSpace(r) {
 				nspc += 1
 			}
-			// if we have already had spaces and now have a non-space,
-			// then we have broken the space sequence and do not have a middle space.
-			if nspc > 0 && !unicode.IsSpace(r) {
-				break
+			if !unicode.IsSpace(r) {
+				gotNonSpace = true
+				// if we have already had spaces and now have a non-space,
+				// then we have broken the space sequence and do not have a middle space.
+				if nspc > 0 {
+					break
+				}
 			}
 			// If we have more than one effective space in the middle of the line, we
 			// interpret that as a separator between the name and doc of a standalone block.
 			// Therefore, we make a block with this info, push it onto the stack, clear any
-			// previous info, and then continue to the next line.
-			if nspc > 1 {
+			// previous info, and then continue to the next line. Note that this does not
+			// apply if we have not gotten any non-space character, as a whitespace-only
+			// line is not a block.
+			if nspc > 1 && gotNonSpace {
 				before := string(rtsline[:i])
 				after := string(rtsline[i:])
 				block := ParseBlock{Name: before, Doc: after}
@@ -137,7 +143,7 @@ func (cm *Cmd) Parse() error {
 		// If we have more than one space and previously had nothing,
 		// we are the start of a new block
 		if nspc > 1 && prevNspc == 0 {
-			curBlock.Name = strings.TrimSpace(line)
+			curBlock.Name = tsline
 			prevNspc = nspc
 		} else if nspc > 1 && nspc >= prevNspc {
 			// If we are at the same or higher level relative to the start
@@ -147,15 +153,18 @@ func (cm *Cmd) Parse() error {
 			if curBlock.Doc != "" {
 				curBlock.Doc += " "
 			}
-			curBlock.Doc += strings.TrimSpace(line)
+			curBlock.Doc += tsline
 			prevNspc = nspc
 		} else if nspc < prevNspc {
 			// If we have moved backward from a block, we are done with it
-			// and push it onto the stack of blocks.
-			blocks = append(blocks, curBlock)
+			// and push it onto the stack of blocks. We do not add the block
+			// if it empty.
+			if curBlock.Name != "" {
+				blocks = append(blocks, curBlock)
+			}
 			if nspc > 1 {
 				prevNspc = nspc
-				curBlock = ParseBlock{Name: strings.TrimSpace(line)}
+				curBlock = ParseBlock{Name: tsline}
 			} else {
 				prevNspc = 0
 				curBlock = ParseBlock{}
