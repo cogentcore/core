@@ -6,11 +6,15 @@ package gear
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/ki/v2"
+	"goki.dev/xe"
 )
 
 // App is a GUI view of a gear command.
@@ -26,7 +30,12 @@ var _ ki.Ki = (*App)(nil)
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBarStd(tb)
 	for _, cmd := range a.Cmd.Cmds {
-		gi.NewButton(tb).SetText(cmd.Name).SetTooltip(cmd.Doc)
+		cmd := cmd
+		gi.NewButton(tb).SetText(cmd.Name).SetTooltip(cmd.Doc).
+			OnClick(func(e events.Event) {
+				fields := strings.Fields(cmd.Cmd)
+				grr.Log0(xe.Verbose().Run(fields[0], fields[1:]...))
+			})
 	}
 }
 

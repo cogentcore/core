@@ -50,7 +50,6 @@ func (cm *Cmd) Parse() error {
 		if len(cmd) >= 3 {
 			c.Doc = cmd[2]
 		}
-		fmt.Println(c.Cmd, c.Doc)
 		cm.Cmds = append(cm.Cmds, c)
 	}
 
