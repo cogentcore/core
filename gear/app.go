@@ -66,14 +66,23 @@ func StructForFlags(flags []*Flag) any {
 
 	used := map[string]bool{}
 	for i, flag := range flags {
-		nm := strings.Trim(flag.Name, "-[]")
-		nm = strcase.ToCamel(nm)
-		sf := reflect.StructField{
-			Name: nm,
-			// TODO(kai/gear): support type determination
-			Type: reflect.TypeOf(""),
-			Tag:  reflect.StructTag(`desc:"` + flag.Doc + `"`),
+		sf := reflect.StructField{}
+		sf.Name = strings.Trim(flag.Name, "-[]")
+		sf.Name = strcase.ToCamel(sf.Name)
+
+		// TODO(kai/gear): better type determination
+		if flag.Type == "bool" {
+			sf.Type = reflect.TypeOf(false)
+		} else if flag.Type == "int" {
+			sf.Type = reflect.TypeOf(0)
+		} else if flag.Type == "float" || flag.Type == "float32" || flag.Type == "float64" || flag.Type == "number" {
+			sf.Type = reflect.TypeOf(0.0)
+		} else {
+			sf.Type = reflect.TypeOf("")
 		}
+
+		sf.Tag = reflect.StructTag(`desc:"` + flag.Doc + `"`)
+
 		if used[sf.Name] {
 			// TODO(kai/gear): consider better approach to unique names
 			nm := sf.Name + "1"
