@@ -52,11 +52,14 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 		}
 		// if we have no -, we are probably a command
 
-		// however, if we have spaces, we aren't a command,
-		// so we probably got included in here by mistake
-		if strings.ContainsFunc(block.Name, unicode.IsSpace) {
+		// however, if we have something other than letters, -, and _,
+		// we aren't a command, so we probably got included in here by mistake
+		if strings.ContainsFunc(block.Name, func(r rune) bool {
+			return !(unicode.IsLetter(r) || r == '-' || r == '_')
+		}) {
 			continue
 		}
+		fmt.Println(block.Doc)
 		cmd := NewCmd(cm.Cmd + " " + block.Name)
 
 		// if the normalized version of our new command is the same as the normalized
