@@ -14,7 +14,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // Switch is a widget that can toggle between an on and off state.
@@ -153,12 +152,12 @@ func (sw *Switch) SwitchStyles() {
 		switch w.PathFrom(sw) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 			})
 		case "parts/stack":
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.DisplayStacked
+				s.Grow.Set(0, 0)
 				s.Gap.Zero()
 			})
 		case "parts/stack/icon0": // on

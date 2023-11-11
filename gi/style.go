@@ -176,7 +176,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	wb.ApplyStyleParts(sc)
 }
 
-// InitStyleWidget resets the widget styles and applies the basic
+// ResetStyleWidget resets the widget styles and applies the basic
 // default styles specified in [styles.Style.Defaults]. It is called
 // automatically in [ApplyStyleWidget]
 // and should not need to be called by end-user code.

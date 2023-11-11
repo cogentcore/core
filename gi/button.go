@@ -20,7 +20,6 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
@@ -185,7 +184,6 @@ func (bt *Button) ButtonStyles() {
 		switch w.PathFrom(bt) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 			})
 		case "parts/icon":
