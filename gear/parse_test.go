@@ -11,7 +11,7 @@ import (
 func TestParse(t *testing.T) {
 	cmds := []string{"git", "go", "goki", "ls", "mv", "cp"}
 	for _, cmd := range cmds {
-		a := NewApp(cmd)
+		a := NewCmd(cmd)
 		err := a.Parse()
 		if err != nil {
 			t.Error(err)
@@ -22,8 +22,8 @@ func TestParse(t *testing.T) {
 func TestGetHelp(t *testing.T) {
 	cmds := []string{"git", "go", "goki", "ls", "mv", "cp"}
 	for _, cmd := range cmds {
-		a := NewApp(cmd)
-		h, err := a.GetHelp("")
+		a := NewCmd(cmd)
+		h, err := a.GetHelp()
 		if err != nil {
 			t.Error(err)
 		}

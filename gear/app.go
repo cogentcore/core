@@ -9,25 +9,25 @@ import (
 	"goki.dev/glop/sentencecase"
 )
 
-// App contains all of the data for a parsed command line application.
-type App struct {
-	// Command is the actual name of the executable for the app (eg: "git")
-	Command string
-	// Name is the formatted name of the app (eg: "Git")
+// Cmd contains all of the data for a parsed command line command.
+type Cmd struct {
+	// Cmd is the actual name of the command (eg: "git", "go build")
+	Cmd string
+	// Name is the formatted name of the command (eg: "Git", "Go build")
 	Name string
-	// Doc is the documentation for the app
+	// Doc is the documentation for the command (eg: "compile packages and dependencies")
 	Doc string
-	// Flags contains the flags of the app
+	// Flags contains the flags for the command
 	Flags []string
-	// Commands contains the subcommands of the app
-	Commands []*App
+	// Cmds contains the subcommands of the command
+	Cmds []*Cmd
 }
 
-// NewApp makes a new [App] object from the given command name.
+// NewCmd makes a new [App] object from the given command name.
 // It does not parse it; see [App.Parse].
-func NewApp(cmd string) *App {
-	return &App{
-		Command: cmd,
-		Name:    sentencecase.Of(cmd),
+func NewCmd(cmd string) *Cmd {
+	return &Cmd{
+		Cmd:  cmd,
+		Name: sentencecase.Of(cmd),
 	}
 }

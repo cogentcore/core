@@ -7,6 +7,7 @@ package gear
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"goki.dev/xe"
 )
@@ -31,8 +32,8 @@ var cmdRegexp = regexp.MustCompile(
 		`([^\n]*)`) // doc
 
 // Parse uses the help messages of the app to fill in its data fields.
-func (a *App) Parse() error {
-	rh, err := a.GetHelp("")
+func (cm *Cmd) Parse() error {
+	rh, err := cm.GetHelp()
 	if err != nil {
 		return err
 	}
@@ -40,17 +41,17 @@ func (a *App) Parse() error {
 	flags := flagRegexp.FindAllStringSubmatch(rh, -1)
 	for _, flag := range flags {
 		// second item has the submatch
-		a.Flags = append(a.Flags, flag[1])
+		cm.Flags = append(cm.Flags, flag[1])
 	}
 
 	cmds := cmdRegexp.FindAllStringSubmatch(rh, -1)
 	for _, cmd := range cmds {
-		c := NewApp(cmd[1])
+		c := NewCmd(cmd[1])
 		if len(cmd) >= 3 {
 			c.Doc = cmd[2]
 		}
-		fmt.Println(c.Command, c.Doc)
-		a.Commands = append(a.Commands, c)
+		fmt.Println(c.Cmd, c.Doc)
+		cm.Cmds = append(cm.Cmds, c)
 	}
 
 	// lines := strings.Split(rh, "\n")
@@ -69,27 +70,27 @@ func (a *App) Parse() error {
 	return nil
 }
 
-// GetHelp gets the help information for the given command, or the root command
-// if the command is unspecified. It tries various different commands and flags
-// to get the help information and only returns an error if all of them fail.
-func (a *App) GetHelp(cmd string) (string, error) {
+// GetHelp gets the help information for the command. It tries various different
+// commands and flags to get the help information and only returns an error if all
+// of them fail.
+func (cm *Cmd) GetHelp() (string, error) {
 	hcmds := []string{"help", "--help", "-h"}
 	for _, hcmd := range hcmds {
-		args := []string{hcmd}
-		if cmd != "" {
-			args = append(args, cmd)
-		}
-		out, err := xe.Silent().Output(a.Command, args...)
+		fields := strings.Fields(cm.Cmd)
+		root := fields[0]
+		args := append([]string{hcmd}, fields[1:]...)
+		out, err := xe.Silent().Output(root, args...)
 		if err == nil {
 			return out, nil
 		}
-		if cmd != "" {
+		if len(fields) > 1 {
 			// try both orders
-			out, err = xe.Silent().Output(a.Command, cmd, hcmd)
+			args := append(fields[1:], hcmd)
+			out, err = xe.Silent().Output(root, args...)
 			if err == nil {
 				return out, nil
 			}
 		}
 	}
-	return "", fmt.Errorf("unable to get help information for command %q of app %q (%q)", cmd, a.Name, a.Command+" "+cmd)
+	return "", fmt.Errorf("unable to get help information for %q (command %q)", cm.Name, cm.Cmd)
 }
