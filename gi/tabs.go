@@ -585,6 +585,7 @@ func (tb *Tab) TabStyles() {
 				s.Cursor = cursors.None
 				s.Margin.Zero()
 				s.Padding.Zero()
+				s.Align.Set(styles.AlignCenter)
 			})
 		case "parts/close-stretch":
 			w.Style(func(s *styles.Style) {
