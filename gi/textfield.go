@@ -1718,7 +1718,7 @@ func (tf *TextField) ConfigWidget(sc *Scene) {
 // StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField(sc *Scene) {
 	tf.StyMu.Lock()
-	tf.SetCanFocusIfActive()
+	tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	tf.ApplyStyleWidget(sc)
 	tf.CursorWidth.ToDots(&tf.Styles.UnContext)
 	tf.StyMu.Unlock()

@@ -94,26 +94,16 @@ func (wb *WidgetBase) CanFocus() bool {
 	return wb.Styles.Abilities.HasFlag(abilities.Focusable)
 }
 
-// SetCanFocusIfActive sets CanFocus flag only if node is active
-// (ReadOnly nodes don't need focus typically)
-func (wb *WidgetBase) SetCanFocusIfActive() {
-	wb.SetAbilities(!wb.IsReadOnly(), abilities.Focusable)
-}
-
-// SetFocusState sets the HasFocus flag
-func (wb *WidgetBase) SetFocusState(focus bool) {
-	wb.SetState(focus, states.Focused)
-}
-
 // SetEnabled sets the Disabled flag
-func (wb *WidgetBase) SetEnabled(enabled bool) {
-	wb.SetState(!enabled, states.Disabled)
+func (wb *WidgetBase) SetEnabled(enabled bool) *WidgetBase {
+	return wb.SetState(!enabled, states.Disabled)
 }
 
 // SetEnabledUpdt sets the Disabled flag
-func (wb *WidgetBase) SetEnabledUpdt(enabled bool) {
+func (wb *WidgetBase) SetEnabledUpdt(enabled bool) *WidgetBase {
 	wb.SetState(!enabled, states.Disabled)
 	wb.ApplyStyleUpdate(wb.Sc)
+	return wb
 }
 
 // IsDisabled tests if this node is flagged as [Disabled].
@@ -130,8 +120,8 @@ func (wb *WidgetBase) IsReadOnly() bool {
 }
 
 // SetReadOnly sets the ReadOnly state flag to given value
-func (wb *WidgetBase) SetReadOnly(ro bool) {
-	wb.SetState(ro, states.ReadOnly)
+func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
+	return wb.SetState(ro, states.ReadOnly)
 }
 
 // HasFlagWithin returns whether the current node or any
@@ -163,12 +153,13 @@ func (wb *WidgetBase) HasStateWithin(flag enums.BitFlag) bool {
 }
 
 // AddClass adds a CSS class name -- does proper space separation
-func (wb *WidgetBase) AddClass(cls string) {
+func (wb *WidgetBase) AddClass(cls string) *WidgetBase {
 	if wb.Class == "" {
 		wb.Class = cls
 	} else {
 		wb.Class += " " + cls
 	}
+	return wb
 }
 
 // HasClass returns whether the node has the given class name
