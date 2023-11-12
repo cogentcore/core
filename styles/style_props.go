@@ -196,8 +196,6 @@ func (s *Style) StyleFromProp(par *Style, key string, val any, ctxt colors.Conte
 
 // StyleStyleFuncs are functions for styling the Style object itself
 var StyleStyleFuncs = map[string]StyleFunc{
-	"display": StyleFuncEnum(DisplayFlex,
-		func(obj *Style) enums.EnumSetter { return &obj.Display }),
 	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
@@ -233,6 +231,8 @@ var StyleStyleFuncs = map[string]StyleFunc{
 // style properties; they are still stored on the main style object,
 // but they are done separately to improve clarity
 var StyleLayoutFuncs = map[string]StyleFunc{
+	"display": StyleFuncEnum(DisplayFlex,
+		func(obj *Style) enums.EnumSetter { return &obj.Display }),
 	"z-index": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &obj.ZIndex }),
 	"horizontal-align": StyleFuncEnum(AlignStart,
