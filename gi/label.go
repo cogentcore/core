@@ -117,7 +117,7 @@ func (lb *Label) LabelStyles() {
 		s.Min.Y.Em(1)
 		s.Min.X.Ch(3)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		// s.Align.Y = styles.AlignCenter
+		s.Align.Y = styles.AlignCenter
 		s.Grow.Set(1, 0) // critical to enable text to expand / contract for wrapping
 
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
@@ -316,7 +316,8 @@ func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
+	// todo: last arg is CSSAgg.  Can synthesize that some other way?
+	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, nil)
 	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
 }
 

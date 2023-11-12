@@ -116,7 +116,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 10
+	doCase := 7
 
 	switch doCase {
 	case 0: // just text
@@ -191,7 +191,7 @@ func app() {
 		sp, f1, f2 := Splits2(sc)
 		_ = f1
 		_ = f2
-		sp.SetSplits(.5, .5)
+		sp.SetSplits(.3, .7)
 	case 8: // textfield parts alignment
 		gi.NewTextField(sc).AddClearButton()
 	case 9: // structview

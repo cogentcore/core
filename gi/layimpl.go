@@ -105,6 +105,17 @@ type Layouter interface {
 	// sizes for the layout process, e.g., if Content is sized to fit allocation,
 	// as in the TopAppBar and Sliceview types.
 	SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2
+
+	// SizeDownSetAllocs is the key SizeDown step that sets the allocations
+	// in the children, based on our allocation.  In the default implementation
+	// this calls SizeDownGrow if there is extra space to grow, or
+	// SizeDownAllocActual to set the allocations as they currrently are.
+	SizeDownSetAllocs(sc *Scene, iter int)
+
+	// ManageOverflow uses overflow settings to determine if scrollbars
+	// are needed, based on difference between ActualOverflow (full actual size)
+	// and Alloc allocation.  Returns true if size changes as a result.
+	ManageOverflow(sc *Scene, iter int) bool
 }
 
 // AsLayout returns the given value as a value of type Layout if the type
@@ -474,6 +485,9 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	if LayoutTrace {
 		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content)
 	}
+	if ly.Parts != nil {
+		ly.Parts.SizeUp(sc) // just to get sizes -- no std role in layout
+	}
 }
 
 // LayoutSpace sets our Space based on Styles, Scroll, and Gap Spacing.
@@ -517,7 +531,7 @@ func (ly *Layout) SetGapSizeFromCells() {
 
 func (ly *Layout) SetInitCellsFlex() {
 	ma := ly.Styles.MainAxis
-	ca := ma.OtherDim()
+	ca := ma.Other()
 	idx := 0
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		mat32.SetPointDim(&kwb.Geom.Cell, ma, idx)
@@ -607,7 +621,7 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene) mat32.Vec2 {
 			fmt.Println("SzUp i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		}
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-			ca := ma.OtherDim()             // cross axis = Y then X
+			ca := ma.Other()                // cross axis = Y then X
 			mi := mat32.PointDim(cidx, ma)  // X, Y
 			ci := mat32.PointDim(cidx, ca)  // Y, X
 			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
@@ -754,13 +768,26 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if !ly.HasChildren() {
 		return ly.SizeDownWidget(sc, iter) // behave like a widget
 	}
+	ly.This().(Layouter).SizeDownSetAllocs(sc, iter)
+	redo := ly.SizeDownChildren(sc, iter)
+	if redo {
+		ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
+		ly.SetContentFitOverflow(ksz)
+		if LayoutTrace {
+			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", ly.Geom.Size.Actual.Content)
+		}
+	}
+	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
+	ly.SizeDownParts(sc, iter) // no std role, just get sizes
+	return chg || redo
+}
+
+// SizeDownSetAllocs is the key SizeDown step that sets the allocations
+// in the children, based on our allocation.  In the default implementation
+// this calls SizeDownGrow if there is extra space to grow, or
+// SizeDownAllocActual to set the allocations as they currrently are.
+func (ly *Layout) SizeDownSetAllocs(sc *Scene, iter int) {
 	sz := &ly.Geom.Size
-
-	// need scrollbars?  adds to Space and Actual.Total if so.
-	// Alloc.Content is *reduced* by any extra space at this point --
-	// next iteration will increase this if possible.
-	// chg := ly.ManageOverflow(sc, iter)
-
 	extra := sz.Alloc.Content.Sub(sz.Actual.Content)
 	if extra.X > 0 || extra.Y > 0 {
 		if LayoutTrace {
@@ -770,16 +797,6 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	} else {
 		ly.SizeDownAllocActual(sc, iter) // set allocations as is
 	}
-	redo := ly.SizeDownChildren(sc, iter)
-	if redo {
-		ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
-		ly.SetContentFitOverflow(ksz)
-		if LayoutTrace {
-			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content)
-		}
-	}
-	chg := ly.ManageOverflow(sc, iter)
-	return chg || redo
 }
 
 // ManageOverflow uses overflow settings to determine if scrollbars
@@ -796,7 +813,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
+			ly.LayImpl.ScrollSize.SetDim(d.Other(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
 		}
 	}
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -813,7 +830,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
+			ly.LayImpl.ScrollSize.SetDim(d.Other(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
 			if LayoutTrace {
 				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
 			}
@@ -855,7 +872,7 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 		// }
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
 			gr := grw.Dim(ma)
-			ca := ma.OtherDim()  // cross axis = Y then X
+			ca := ma.Other()     // cross axis = Y then X
 			exd := extra.Dim(ma) // row.X = extra width for cols; col.Y = extra height for rows in this col
 			if exd < 0 {
 				exd = 0
@@ -1294,6 +1311,8 @@ func (ly *Layout) ScenePos(sc *Scene) {
 	ly.ScenePosWidget(sc)
 	ly.ScenePosChildren(sc)
 	ly.PositionScrolls(sc)
+	ly.ScenePosParts(sc) // in case they fit inside parent
+	// otherwise handle separately like scrolls on layout
 }
 
 /*

@@ -140,7 +140,7 @@ func (ly *Layout) LayoutStyles() {
 			// 	s.Grow.Set(1, 1)
 			// } else {
 			s.Grow.SetDim(s.MainAxis, 1)
-			s.Grow.SetDim(s.MainAxis.OtherDim(), 0)
+			s.Grow.SetDim(s.MainAxis.Other(), 0)
 			// }
 		case s.Display == styles.DisplayStacked:
 			s.Grow.Set(1, 1)

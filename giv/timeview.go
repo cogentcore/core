@@ -265,7 +265,8 @@ func (dv *DateView) ConfigDateGrid() {
 		bt.Style(func(s *styles.Style) {
 			s.Min.X.Dp(40)
 			s.Min.Y.Dp(40)
-			// s.Align.X = styles.AlignCenter
+			s.Align.X = styles.AlignCenter
+			s.Align.Y = styles.AlignCenter
 			// s.Text.Align = styles.AlignCenter
 			s.Padding.Zero()
 			if dt.Month() != som.Month() {
@@ -286,9 +287,9 @@ func (dv *DateView) ConfigDateGrid() {
 				lb := w.(*gi.Label)
 				lb.Type = gi.LabelBodyLarge
 				w.Style(func(s *styles.Style) {
-					s.Align.X = styles.AlignCenter
 					s.Text.Align = styles.AlignCenter
-					s.Grow.Set(1, 0)
+					s.Text.AlignV = styles.AlignCenter
+					s.Grow.Set(0, 0)
 					s.Border.Radius = styles.BorderRadiusFull
 				})
 			}

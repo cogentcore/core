@@ -5,12 +5,12 @@
 package gi
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -65,6 +65,8 @@ func (sl *Splits) SplitsStyles() {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
 		s.Padding.Zero()
+		s.Gap.SetDim(sl.Dim, units.Dp(14))
+		s.Gap.SetDim(sl.Dim.Other(), units.Dp(0))
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok {
@@ -210,10 +212,11 @@ func (sl *Splits) IsCollapsed(idx int) bool {
 	return false
 }
 
-// SetSplitAction sets the new splitter value, for given splitter -- new
-// value is 0..1 value of position of that splitter -- it is a sum of all the
-// positions up to that point.  Splitters are updated to ensure that selected
-// position is achieved, while dividing remainder appropriately.
+// SetSplitAction sets the new splitter value, for given splitter.
+// New value is 0..1 value of position of that splitter.
+// It is a sum of all the positions up to that point.
+// Splitters are updated to ensure that selected position is achieved,
+// while dividing remainder appropriately.
 func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	updt := sl.UpdateStart()
 	sz := len(sl.Splits)
@@ -320,15 +323,21 @@ func (sl *Splits) ApplyStyle(sc *Scene) {
 	sl.ConfigSplitters(sc)
 }
 
-func (sl *Splits) SizeUp(sc *Scene) {
-	sl.Layout.SizeUp(sc)
-	sl.Parts.SizeUp(sc) // just get sizes of handles
-}
-
-func (sl *Splits) SizeDown(sc *Scene, iter int) bool {
-	redo := sl.Layout.SizeDown(sc, iter)
-	sl.SizeDownParts(sc, iter)
-	return redo
+func (sl *Splits) SizeDownSetAllocs(sc *Scene, iter int) {
+	sz := &sl.Geom.Size
+	csz := sz.Alloc.Content
+	// fmt.Println(sl, sz.String())
+	od := sl.Dim.Other()
+	cszd := csz.Dim(sl.Dim)
+	cszod := csz.Dim(od)
+	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		sw := mat32.Floor(sl.Splits[i] * cszd)
+		ksz := &kwb.Geom.Size
+		ksz.Alloc.Total.SetDim(sl.Dim, sw)
+		ksz.Alloc.Total.SetDim(od, cszod)
+		ksz.SetContentFromTotal(&ksz.Alloc)
+		return ki.Continue
+	})
 }
 
 func (sl *Splits) Position(sc *Scene) {
@@ -339,95 +348,45 @@ func (sl *Splits) Position(sc *Scene) {
 }
 
 func (sl *Splits) PositionSplits(sc *Scene) {
-	od := sl.Dim.OtherDim()
-	csz := sl.Geom.Size.Actual.Content
-	mid := .5 * csz.Dim(od)
+	if sl.Parts != nil {
+		sl.Parts.Geom.Size = sl.Geom.Size // inherit: allows bbox to include handle
+	}
+	od := sl.Dim.Other()
+	csz := sl.Geom.Size.Actual.Content // excludes gaps
+	cszd := csz.Dim(sl.Dim)
 	pos := float32(0)
+	gap := mat32.Floor(sl.Styles.Gap.Dim(sl.Dim).Dots)
+
+	mid := .5 * csz.Dim(od)
+	hand := sl.Parts.Child(0).(*Handle)
+	hwd := hand.Geom.Size.Actual.Total.Dim(sl.Dim)
+	hmrg := hand.Styles.Margin.Dots()
+	if sl.Dim == mat32.X {
+		hwd -= hmrg.Left
+	} else {
+		hwd -= hmrg.Top
+	}
+	hht := hand.Geom.Size.Actual.Total.Dim(od)
+	nhand := float32(len(*sl.Parts.Children()))
+	sod := mid - .5*nhand*hht
+
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
 		if i == 0 {
 			return ki.Continue
 		}
-		sw := mat32.Floor(sl.Splits[i-1] * csz.Dim(sl.Dim))
-		pos += sw
+		sw := mat32.Floor(sl.Splits[i-1] * cszd)
+		pos += sw + gap
 		kwb.Geom.RelPos.SetDim(sl.Dim, pos)
-		hand := sl.Parts.Child(i - 1).(*Handle)
-		handwd := hand.Geom.Size.Actual.Total.Dim(sl.Dim)
-		handht := hand.Geom.Size.Actual.Total.Dim(od)
-		hand.Geom.RelPos.SetDim(sl.Dim, pos-handwd)
-		hand.Geom.RelPos.SetDim(od, mid-handht+float32(i)*handht*4)
-		fmt.Println(hand, hand.Geom.RelPos)
+		hl := sl.Parts.Child(i - 1).(*Handle)
+		hl.Geom.RelPos.SetDim(sl.Dim, pos-hwd-2) // todo: Kai -- -2 is needed but not sure why..
+		hl.Geom.RelPos.SetDim(od, sod+float32(i-1)*hht)
+		hl.Min = 0
+		hl.Max = cszd
+		hl.Pos = pos
 		return ki.Continue
 	})
 }
-
-/*
-
-todo: should be automatic with Grow factors!
-
-func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sl.DoLayoutBase(sc, parBBox, iter)
-	sl.UpdateSplits()
-
-	sz := len(sl.Kids)
-
-	// need to get total handle size first
-	thandsz := float32(0)
-	for i := range sl.Splits {
-		if i >= sz-1 {
-			continue
-		}
-		hl := sl.Parts.Child(i).(*Handle)
-		thandsz += hl.LayState.Size.Pref.Dim(sl.Dim)
-	}
-
-	// fmt.Printf("handsz: %v\n", handsz)
-	odim := mat32.OtherDim(sl.Dim)
-	spc := sl.BoxSpace()
-	size := sl.Geom.Size.Total.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
-	avail := size - thandsz
-	// fmt.Printf("avail: %v\n", avail)
-	osz := sl.Geom.Size.Total.Dim(odim) - spc.Size().Dim(odim)
-	mid := 0.5 * (sl.Geom.Size.Total.Dim(odim) - spc.Size().Dim(odim))
-	pos := float32(0.0)
-
-	phandsz := float32(0)
-
-	for i, sp := range sl.Splits {
-		_, wb := AsWidget(sl.Kids[i])
-		if wb == nil {
-			continue
-		}
-
-		isz := sp * avail
-		wb.Geom.Size.Total.SetDim(sl.Dim, isz)
-		wb.Geom.Size.Total.SetDim(odim, osz)
-		wb.Geom.Size.TotalOrig = wb.Geom.Size.Total
-		wb.Geom.PosRel.SetDim(sl.Dim, pos)
-		wb.Geom.PosRel.SetDim(odim, spc.Pos().Dim(odim))
-
-		pos += isz
-
-		if i < sz-1 {
-			hl := sl.Parts.Child(i).(*Handle)
-			phandsz = hl.LayState.Size.Pref.Dim(sl.Dim)
-
-			hl.Pos = pos
-			hl.Geom.Size.Total = hl.LayState.Size.Pref
-			hl.Geom.PosRel.SetDim(sl.Dim, hl.Pos)
-			hl.Geom.PosOrig = hl.Geom.PosRel
-			hl.Min = sl.Geom.Pos.Dim(sl.Dim)
-			hl.Max = sl.Geom.Size.Total.Sub(sl.Geom.Pos).Dim(sl.Dim)
-		}
-
-		pos += phandsz
-	}
-
-	sl.DoLayoutParts(sc, parBBox, iter)
-
-	return sl.DoLayoutChildren(sc, iter)
-}
-*/
 
 func (sl *Splits) Render(sc *Scene) {
 	if sl.PushBounds(sc) {

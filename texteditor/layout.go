@@ -75,7 +75,6 @@ func (ed *Editor) LayoutAllLines() {
 	ed.lastFilename = ed.Buf.Filename
 
 	ed.Buf.Hi.TabSize = ed.Styles.Text.TabSize
-	ed.HiStyle()
 	// fmt.Printf("layout all: %v\n", ed.Nm)
 
 	ed.NLines = ed.Buf.NumLines()
@@ -103,7 +102,7 @@ func (ed *Editor) LayoutAllLines() {
 	ed.Buf.MarkupMu.RLock()
 	ed.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
-		ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.CSS)
+		ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
 		ed.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
 		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 			ed.HasLinks = true
@@ -140,7 +139,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 
 	ed.Buf.MarkupMu.RLock()
 	curspans := len(ed.Renders[ln].Spans)
-	ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.CSS)
+	ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
 	ed.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, ed.LineLayoutSize)
 	if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 		ed.HasLinks = true

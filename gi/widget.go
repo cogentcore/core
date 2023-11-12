@@ -213,47 +213,56 @@ type WidgetBase struct {
 	// text for the tooltip for this widget, which can use HTML formatting
 	Tooltip string
 
-	// todo: remove CSS stuff from here??
-
-	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
+	// Class has user-defined class name(s) used for user-dependent styling or
+	// other misc functions.  Multiple class names can be used to combine
+	// properties: use spaces to separate per css standard
 	Class string
 
-	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-	CSS ki.Props `set:"-"`
+	// Parts are a separate tree of sub-widgets that implement discrete parts
+	// of a widget.  Positions are relative to the parent widget.
+	// These are fully managed by the parent widget
+	Parts *Layout `copy:"-" json:"-" xml:"-" set:"-"`
 
-	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
-
-	// Alloc is layout allocation state: contains full size and position info
+	// Geom has the full layout geometry for size and position of this Widget
 	Geom GeomState `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// A slice of functions to call on all widgets that are added as children to this widget or its children.
-	// These functions are called in sequential ascending order, so the last added one is called
-	// last and thus can override anything set by the other ones. These should be set using
-	// OnWidgetAdded, which can be called by both end-user and internal code.
-	OnWidgetAdders []func(w Widget) `copy:"-" json:"-" xml:"-" set:"-"`
-
-	// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
-	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
-
-	// override the computed styles and allow directly editing Style
+	// If true, Override the computed styles and allow directly editing Style
 	OverrideStyle bool `copy:"-" json:"-" xml:"-" set:"-"`
 
-	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
+	// Styles are styling settings for this widget.
+	// These are set in SetApplyStyle which should be called after any Config
+	// change (e.g., as done by the Update method).  See Stylers for functions
+	// that set all of the styles, ordered from initial base defaults to later
+	// added overrides.
 	Styles styles.Style `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// Stylers are a slice of functions that are called in sequential
+	// ascending order (so the last added styler is called last and
+	// thus overrides all other functions) to style the element.
+	// These should be set using Style function, which can be called
+	// by end-user and internal code.
+	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// A slice of functions to call on all widgets that are added as children
+	// to this widget or its children.  These functions are called in sequential
+	// ascending order, so the last added one is called last and thus can
+	// override anything set by the other ones. These should be set using
+	// OnWidgetAdded, which can be called by both end-user and internal code.
+	OnWidgetAdders []func(w Widget) `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
 	Listeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
 
-	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
-	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true" set:"-"`
-
-	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
-	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
+	// CustomContextMenu is an optional context menu constructor function
+	// called by [Widget.MakeContextMenu] after any type-specified items are added.
+	// This function can decide where to insert new elements, and it should
+	// typically add a separator to disambiguate.
 	CustomContextMenu func(m *Scene) `copy:"-" json:"-" xml:"-"`
 
-	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
+	// Sc is the overall Scene to which we belong.
+	// This is set during Config, and also passed to most Config, Layout,
+	// and Render functions as a convenience.
 	Sc *Scene `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field
@@ -314,7 +323,6 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 		return
 	}
 	wb.Class = fr.Class
-	wb.CSS.CopyFrom(fr.CSS, true)
 	wb.Tooltip = fr.Tooltip
 	wb.Styles.CopyFrom(&fr.Styles)
 	wb.Stylers = fr.Stylers

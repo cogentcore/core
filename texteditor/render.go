@@ -44,18 +44,12 @@ func (ed *Editor) Render(sc *gi.Scene) {
 	}
 }
 
-// HiStyle applies the highlighting styles from buffer markup style
-func (ed *Editor) HiStyle() {
-	// STYTODO: need to figure out what to do with histyle
-	if !ed.Buf.Hi.HasHi() {
-		return
+// TextStyleProps returns the styling properties for text based on HiStyle Markup
+func (ed *Editor) TextStyleProps() ki.Props {
+	if ed.Buf == nil || !ed.Buf.Hi.HasHi() {
+		return nil
 	}
-	ed.CSS = ed.Buf.Hi.CSSProps
-	if chp, ok := ki.SubProps(ed.CSS, ".chroma"); ok {
-		for ky, vl := range chp { // apply to top level
-			ed.SetProp(ky, vl)
-		}
-	}
+	return ed.Buf.Hi.CSSProps
 }
 
 // CharStartPos returns the starting (top left) render coords for the given

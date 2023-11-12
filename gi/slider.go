@@ -262,7 +262,7 @@ func (sr *Slider) SliderSize() float32 {
 
 // SliderThickness returns the thickness of the slider: Content size in other dim.
 func (sr *Slider) SliderThickness() float32 {
-	return sr.Geom.Size.Actual.Content.Dim(sr.Dim.OtherDim())
+	return sr.Geom.Size.Actual.Content.Dim(sr.Dim.Other())
 }
 
 // ThumbSizeDots returns the thumb size in dots, based on ThumbSize
@@ -516,7 +516,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 
 	sr.SetPosFromValue(sr.Value)
 
-	od := sr.Dim.OtherDim()
+	od := sr.Dim.Other()
 	if sr.Type == SliderScrollbar {
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
