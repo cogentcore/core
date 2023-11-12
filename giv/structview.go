@@ -179,86 +179,117 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 	config := ki.Config{}
 	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]Value, 0)
-	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		// todo: check tags, skip various etc
-		ftags := sv.FieldTags(field)
-		_, got := ftags.Lookup("changeflag")
-		if got {
-			if field.Type.Kind() == reflect.Bool {
-				sv.ChangeFlag = &fieldVal
+	laser.FlatFieldsValueFuncIf(sv.Struct,
+		func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+			ftags := sv.FieldTags(field)
+			vwtag := ftags.Get("view")
+			if vwtag == "-" {
+				return false
 			}
-		}
-		vwtag := ftags.Get("view")
-		if vwtag == "-" {
+			viewif := field.Tag.Get("viewif")
+			if viewif != "" {
+				sv.HasViewIfs = true
+				if !StructViewIf(viewif, field, sv.Struct) {
+					return false
+				}
+			}
 			return true
-		}
-		viewif := field.Tag.Get("viewif")
-		if viewif != "" {
-			sv.HasViewIfs = true
-			if !StructViewIf(viewif, field, sv.Struct) {
+		},
+		func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+			// todo: check tags, skip various etc
+			ftags := sv.FieldTags(field)
+			_, got := ftags.Lookup("changeflag")
+			if got {
+				if field.Type.Kind() == reflect.Bool {
+					sv.ChangeFlag = &fieldVal
+				}
+			}
+			vwtag := ftags.Get("view")
+			if vwtag == "-" {
 				return true
 			}
-		}
-		if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
-			fvalp := fieldVal.Addr().Interface()
-			laser.FlatFieldsValueFunc(fvalp, func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
-				svwtag := sfield.Tag.Get("view")
-				if svwtag == "-" {
+			viewif := field.Tag.Get("viewif")
+			if viewif != "" {
+				sv.HasViewIfs = true
+				if !StructViewIf(viewif, field, sv.Struct) {
 					return true
 				}
-				viewif := sfield.Tag.Get("viewif")
-				if viewif != "" {
-					sv.HasViewIfs = true
-					if !StructViewIf(viewif, sfield, fvalp) {
+			}
+			if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
+				fvalp := fieldVal.Addr().Interface()
+				laser.FlatFieldsValueFuncIf(fvalp,
+					func(stru any, typ reflect.Type, sfield reflect.StructField, fieldVal reflect.Value) bool {
+						svwtag := sfield.Tag.Get("view")
+						if svwtag == "-" {
+							return false
+						}
+						viewif := sfield.Tag.Get("viewif")
+						if viewif != "" {
+							sv.HasViewIfs = true
+							if !StructViewIf(viewif, sfield, fvalp) {
+								return false
+							}
+						}
 						return true
-					}
-				}
-				svv := FieldToValue(fvalp, sfield.Name, sfval)
-				if svv == nil { // shouldn't happen
-					return true
-				}
-				svvp := sfieldVal.Addr()
-				svv.SetStructValue(svvp, fvalp, &sfield, sv.TmpSave, sv.ViewPath)
+					},
+					func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
+						svwtag := sfield.Tag.Get("view")
+						if svwtag == "-" {
+							return true
+						}
+						viewif := sfield.Tag.Get("viewif")
+						if viewif != "" {
+							sv.HasViewIfs = true
+							if !StructViewIf(viewif, sfield, fvalp) {
+								return true
+							}
+						}
+						svv := FieldToValue(fvalp, sfield.Name, sfval)
+						if svv == nil { // shouldn't happen
+							return true
+						}
+						svvp := sfieldVal.Addr()
+						svv.SetStructValue(svvp, fvalp, &sfield, sv.TmpSave, sv.ViewPath)
 
-				svtyp := svv.WidgetType()
-				// todo: other things with view tag..
-				fnm := field.Name + sfield.Name
-				if _, exists := dupeFields[fnm]; exists {
-					slog.Error("StructView: duplicate field name:", "name:", fnm)
-				} else {
-					dupeFields[fnm] = true
-				}
-				// TODO(kai): how should we format this label?
-				svv.SetLabel(sentencecase.Of(fnm))
-				labnm := fmt.Sprintf("label-%v", fnm)
-				valnm := fmt.Sprintf("value-%v", fnm)
-				config.Add(gi.LabelType, labnm)
-				config.Add(svtyp, valnm) // todo: extend to diff types using interface..
-				sv.FieldViews = append(sv.FieldViews, svv)
+						svtyp := svv.WidgetType()
+						// todo: other things with view tag..
+						fnm := field.Name + sfield.Name
+						if _, exists := dupeFields[fnm]; exists {
+							slog.Error("StructView: duplicate field name:", "name:", fnm)
+						} else {
+							dupeFields[fnm] = true
+						}
+						// TODO(kai): how should we format this label?
+						svv.SetLabel(sentencecase.Of(fnm))
+						labnm := fmt.Sprintf("label-%v", fnm)
+						valnm := fmt.Sprintf("value-%v", fnm)
+						config.Add(gi.LabelType, labnm)
+						config.Add(svtyp, valnm) // todo: extend to diff types using interface..
+						sv.FieldViews = append(sv.FieldViews, svv)
+						return true
+					})
 				return true
-			})
+			}
+			vv := FieldToValue(sv.Struct, field.Name, fval)
+			if vv == nil { // shouldn't happen
+				return true
+			}
+			if _, exists := dupeFields[field.Name]; exists {
+				slog.Error("StructView: duplicate field name:", "name:", field.Name)
+			} else {
+				dupeFields[field.Name] = true
+			}
+			vvp := fieldVal.Addr()
+			vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
+			vtyp := vv.WidgetType()
+			// todo: other things with view tag..
+			labnm := fmt.Sprintf("label-%v", field.Name)
+			valnm := fmt.Sprintf("value-%v", field.Name)
+			config.Add(gi.LabelType, labnm)
+			config.Add(vtyp, valnm) // todo: extend to diff types using interface..
+			sv.FieldViews = append(sv.FieldViews, vv)
 			return true
-		}
-		vv := FieldToValue(sv.Struct, field.Name, fval)
-		if vv == nil { // shouldn't happen
-			return true
-		}
-		if _, exists := dupeFields[field.Name]; exists {
-			slog.Error("StructView: duplicate field name:", "name:", field.Name)
-		} else {
-			dupeFields[field.Name] = true
-		}
-		vvp := fieldVal.Addr()
-		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
-		vtyp := vv.WidgetType()
-		// todo: other things with view tag..
-		labnm := fmt.Sprintf("label-%v", field.Name)
-		valnm := fmt.Sprintf("value-%v", field.Name)
-		config.Add(gi.LabelType, labnm)
-		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
-		sv.FieldViews = append(sv.FieldViews, vv)
-		return true
-	})
+		})
 	mods, updt := sg.ConfigChildren(config) // fields could be non-unique with labels..
 	if !mods {
 		updt = sg.UpdateStart()
