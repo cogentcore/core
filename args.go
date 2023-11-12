@@ -241,7 +241,7 @@ func ParseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 			continue
 		}
 		// if the thing after we ran out of (sub)commands on our base isn't our next arg, this isn't the right command
-		if gotTo <= len(cmdStrs) || arg != cmdStrs[gotTo] {
+		if gotTo >= len(cmdStrs) || arg != cmdStrs[gotTo] {
 			continue
 		}
 		// otherwise, it is the right command, and our new command is our base plus our next arg
