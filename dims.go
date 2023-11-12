@@ -26,6 +26,6 @@ func OtherDim(d Dims) Dims {
 	}
 }
 
-func (d Dims) OtherDim() Dims {
+func (d Dims) Other() Dims {
 	return OtherDim(d)
 }
