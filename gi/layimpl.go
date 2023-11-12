@@ -796,12 +796,12 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
+			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
 		}
 	}
 	for d := mat32.X; d <= mat32.Y; d++ {
 		ofd := oflow.Dim(d)
-		if ofd <= -1 {
+		if ofd <= 1 {
 			continue
 		}
 		switch ly.Styles.Overflow.Dim(d) {
@@ -813,7 +813,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), ly.Styles.ScrollBarWidth.Dots+4)
+			ly.LayImpl.ScrollSize.SetDim(d.OtherDim(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
 			if LayoutTrace {
 				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd)
 			}
@@ -1159,7 +1159,6 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		if sz.X < asz.X {
 			ex := styles.AlignFactor(kwb.Styles.Align.X) * (asz.X - sz.X)
 			ep.X += ex
-			fmt.Println("pos i:", i, kwb, "ex:", ex)
 		}
 		if sz.Y < asz.Y {
 			ep.Y += styles.AlignFactor(kwb.Styles.Align.Y) * (asz.Y - sz.Y)

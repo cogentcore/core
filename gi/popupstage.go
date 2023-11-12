@@ -159,8 +159,6 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
 		b := msc.SceneGeom.Bounds()
-		sz.Y += fontHt / 2
-		sz.X = max(int(0.8*float32(maxSz.X)), sz.X)
 		// Go in the middle [(max - min) / 2], and then subtract
 		// half of the size because we are specifying starting point,
 		// not the center. This results in us being centered.
@@ -170,9 +168,6 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	case TooltipStage:
 		// on x axis, we center on the widget widget
 		// on y axis, we put our bottom 10 above the top of the widget
-		// sz.Y += fontHt
-		sz.X += 2 * fontHt
-		sz.Y += fontHt / 2
 		wb := st.CtxWidget.AsWidget()
 		bb := wb.WinBBox()
 		wc := bb.Min.X + bb.Size().X/2

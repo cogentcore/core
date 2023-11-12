@@ -6,16 +6,34 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
+
+type Wide struct {
+	Name  string
+	Title string
+	F2    string
+	F3    string
+}
+
+type Test struct {
+	Wide Wide `view:"inline"`
+	Vec  mat32.Vec2
+}
+
+type TestTime struct {
+	Date time.Time
+}
 
 var (
 	ShortText = "This is a test of layout."
@@ -88,7 +106,7 @@ func WrapText(par gi.Widget, txt string) *gi.Label {
 
 func app() {
 	// turn on tracing in preferences, Debug
-	gi.LayoutTrace = true
+	// gi.LayoutTrace = true
 	// gi.LayoutTraceDetail = true
 	// gi.UpdateTrace = true
 
@@ -98,7 +116,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 7
+	doCase := 10
 
 	switch doCase {
 	case 0: // just text
@@ -174,6 +192,15 @@ func app() {
 		_ = f1
 		_ = f2
 		sp.SetSplits(.5, .5)
+	case 8: // textfield parts alignment
+		gi.NewTextField(sc).AddClearButton()
+	case 9: // structview
+		ts := &Test{}
+		giv.NewStructView(sc).SetStruct(ts)
+	case 10: // time view
+		ts := &TestTime{}
+		ts.Date = time.Now()
+		giv.NewStructView(sc).SetStruct(ts)
 	}
 
 	gi.NewWindow(sc).Run().Wait()
