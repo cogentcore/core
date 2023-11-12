@@ -167,6 +167,13 @@ func ToBool(v any) (bool, error) {
 			return false, fmt.Errorf("got nil *int16")
 		}
 		return *vt != 0, nil
+	case uint:
+		return vt != 0, nil
+	case *uint:
+		if vt == nil {
+			return false, fmt.Errorf("got nil *uint")
+		}
+		return *vt != 0, nil
 	case uint16:
 		return vt != 0, nil
 	case *uint16:
@@ -293,6 +300,13 @@ func ToInt(v any) (int64, error) {
 			return 0, fmt.Errorf("got nil *int16")
 		}
 		return int64(*vt), nil
+	case uint:
+		return int64(vt), nil
+	case *uint:
+		if vt == nil {
+			return 0, fmt.Errorf("got nil *uint")
+		}
+		return int64(*vt), nil
 	case uint16:
 		return int64(vt), nil
 	case *uint16:
@@ -416,6 +430,13 @@ func ToFloat(v any) (float64, error) {
 			return 0, fmt.Errorf("got nil *int16")
 		}
 		return float64(*vt), nil
+	case uint:
+		return float64(vt), nil
+	case *uint:
+		if vt == nil {
+			return 0, fmt.Errorf("got nil *uint")
+		}
+		return float64(*vt), nil
 	case uint16:
 		return float64(vt), nil
 	case *uint16:
@@ -537,6 +558,13 @@ func ToFloat32(v any) (float32, error) {
 	case *int16:
 		if vt == nil {
 			return 0, fmt.Errorf("got nil *int8")
+		}
+		return float32(*vt), nil
+	case uint:
+		return float32(vt), nil
+	case *uint:
+		if vt == nil {
+			return 0, fmt.Errorf("got nil *uint")
 		}
 		return float32(*vt), nil
 	case uint16:
@@ -679,6 +707,13 @@ func ToString(v any) string {
 	case int16:
 		return strconv.FormatInt(int64(vt), 10)
 	case *int16:
+		if vt == nil {
+			return nilstr
+		}
+		return strconv.FormatInt(int64(*vt), 10)
+	case uint:
+		return strconv.FormatInt(int64(vt), 10)
+	case *uint:
 		if vt == nil {
 			return nilstr
 		}
