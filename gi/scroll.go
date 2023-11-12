@@ -25,14 +25,19 @@ func (ly *Layout) HasAnyScroll() bool {
 
 // ScrollGeom returns the target position and size for scrollbars
 func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
+	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	od := d.Other()
 	bbmin := mat32.NewVec2FmPoint(ly.Geom.ContentBBox.Min)
 	bbmax := mat32.NewVec2FmPoint(ly.Geom.ContentBBox.Max)
+	if ly.This() != ly.Sc.This() { // if not the scene, keep inside the scene
+		bbmin.SetMax(mat32.NewVec2FmPoint(ly.Sc.Geom.ContentBBox.Min))
+		bbmax.SetMin(mat32.NewVec2FmPoint(ly.Sc.Geom.ContentBBox.Max).SubScalar(sbw))
+	}
 	pos.SetDim(d, bbmin.Dim(d))
 	pos.SetDim(od, bbmax.Dim(od))
 	bbsz := bbmax.Sub(bbmin)
 	sz.SetDim(d, bbsz.Dim(d)-4)
-	sz.SetDim(od, ly.Styles.ScrollBarWidth.Dots)
+	sz.SetDim(od, sbw)
 	sz.SetCeil()
 	return
 }

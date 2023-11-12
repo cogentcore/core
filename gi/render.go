@@ -614,7 +614,6 @@ func (wb *WidgetBase) RenderBoxImpl(sc *Scene, pos mat32.Vec2, sz mat32.Vec2, bs
 // RenderStdBox draws standard box using given style.
 // paint.State and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
-	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
@@ -622,7 +621,9 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	pc := &rs.Paint
 
 	pbc, psl := wb.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, &pbc, psl)
+	pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
+	sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
+	pc.DrawStdBox(rs, st, pos, sz, &pbc, psl)
 }
 
 //////////////////////////////////////////////////////////////////

@@ -207,11 +207,7 @@ func (tb *TopAppBar) ParentSize() float32 {
 	ma := tb.Styles.MainAxis
 	_, pwb := tb.ParentWidget()
 	psz := pwb.Geom.Size.Alloc.Content.Sub(tb.Geom.Size.Space)
-	avail := psz.Dim(ma) - 4
-	// // fmt.Println(pwb, pwb.Geom.Size)
-	// sz := &tb.Geom.Size
-	// sz.Alloc.Total.SetDim(ma, avail)
-	// sz.SetContentFromTotal(&sz.Alloc)
+	avail := psz.Dim(ma)
 	return avail
 }
 
