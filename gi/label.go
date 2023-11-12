@@ -117,7 +117,7 @@ func (lb *Label) LabelStyles() {
 		s.Min.Y.Em(1)
 		s.Min.X.Ch(3)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		s.Align.Y = styles.AlignCenter
+		// s.Align.Y = styles.AlignCenter
 		s.Grow.Set(1, 0) // critical to enable text to expand / contract for wrapping
 
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens

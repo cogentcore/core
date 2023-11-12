@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -74,16 +75,6 @@ func (sl *Splits) SplitsStyles() {
 			})
 			w.Style(func(s *styles.Style) {
 
-			})
-		} else if w.Parent() == sl.This() {
-			wb := w.AsWidget()
-			wb.Style(func(s *styles.Style) {
-				idx, ok := w.IndexInParent()
-				if ok && len(sl.Splits) > idx {
-					sp := sl.Splits[idx]
-					s.Grow.SetDim(sl.Dim, sp)
-					s.Grow.SetDim(sl.Dim.OtherDim(), 1)
-				}
 			})
 		}
 	})
@@ -329,25 +320,43 @@ func (sl *Splits) ApplyStyle(sc *Scene) {
 	sl.ConfigSplitters(sc)
 }
 
-func (sl *Splits) Position(sc *Scene) {
-	sl.UpdateSplits()
-	sl.Layout.Position(sc)
-	sl.PositionHandles(sc)
+func (sl *Splits) SizeUp(sc *Scene) {
+	sl.Layout.SizeUp(sc)
+	sl.Parts.SizeUp(sc) // just get sizes of handles
 }
 
-func (sl *Splits) PositionHandles(sc *Scene) {
+func (sl *Splits) SizeDown(sc *Scene, iter int) bool {
+	redo := sl.Layout.SizeDown(sc, iter)
+	sl.SizeDownParts(sc, iter)
+	return redo
+}
+
+func (sl *Splits) Position(sc *Scene) {
+	sl.UpdateSplits()
+	sl.ConfigScrolls(sc)
+	sl.PositionSplits(sc)
+	sl.PositionChildren(sc)
+}
+
+func (sl *Splits) PositionSplits(sc *Scene) {
 	od := sl.Dim.OtherDim()
-	csz := sl.Geom.Size.Actual.Content.Dim(od)
-	spos := 0.5 * csz
+	csz := sl.Geom.Size.Actual.Content
+	mid := .5 * csz.Dim(od)
+	pos := float32(0)
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwb.Geom.RelPos.SetZero()
 		if i == 0 {
 			return ki.Continue
 		}
+		sw := mat32.Floor(sl.Splits[i-1] * csz.Dim(sl.Dim))
+		pos += sw
+		kwb.Geom.RelPos.SetDim(sl.Dim, pos)
 		hand := sl.Parts.Child(i - 1).(*Handle)
-		hand.Geom.RelPos = kwb.Geom.RelPos
-		kwb.Geom.RelPos.SetSubDim(sl.Dim, hand.Geom.Size.Actual.Total.Dim(sl.Dim))
-		hand.Geom.RelPos.SetDim(od, spos)
-		// fmt.Println(hand, hand.Geom.RelPos)
+		handwd := hand.Geom.Size.Actual.Total.Dim(sl.Dim)
+		handht := hand.Geom.Size.Actual.Total.Dim(od)
+		hand.Geom.RelPos.SetDim(sl.Dim, pos-handwd)
+		hand.Geom.RelPos.SetDim(od, mid-handht+float32(i)*handht*4)
+		fmt.Println(hand, hand.Geom.RelPos)
 		return ki.Continue
 	})
 }
@@ -406,7 +415,6 @@ func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 			hl.Pos = pos
 			hl.Geom.Size.Total = hl.LayState.Size.Pref
 			hl.Geom.PosRel.SetDim(sl.Dim, hl.Pos)
-			hl.Geom.PosRel.SetDim(odim, mid-phandsz+float32(i)*phandsz*4)
 			hl.Geom.PosOrig = hl.Geom.PosRel
 			hl.Min = sl.Geom.Pos.Dim(sl.Dim)
 			hl.Max = sl.Geom.Size.Total.Sub(sl.Geom.Pos).Dim(sl.Dim)

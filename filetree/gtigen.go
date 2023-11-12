@@ -179,6 +179,12 @@ func (t *Node) SetCustomContextMenu(v func(m *gi.Scene)) *Node {
 	return t
 }
 
+// SetText sets the [Node.Text]
+func (t *Node) SetText(v string) *Node {
+	t.Text = v
+	return t
+}
+
 // SetIcon sets the [Node.Icon]
 func (t *Node) SetIcon(v icons.Icon) *Node {
 	t.Icon = v
@@ -360,6 +366,12 @@ func (t *Tree) SetClass(v string) *Tree {
 // SetCustomContextMenu sets the [Tree.CustomContextMenu]
 func (t *Tree) SetCustomContextMenu(v func(m *gi.Scene)) *Tree {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetText sets the [Tree.Text]
+func (t *Tree) SetText(v string) *Tree {
+	t.Text = v
 	return t
 }
 

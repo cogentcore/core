@@ -3,9 +3,23 @@ package main
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
+
+type Wide struct {
+	Name  string
+	Title string
+	F2    string
+	F3    string
+}
+
+type Test struct {
+	Wide Wide `view:"inline"`
+	Vec  mat32.Vec2
+}
 
 func app() {
 	// gi.WinEventTrace = true
@@ -18,7 +32,10 @@ func app() {
 
 	gi.DefaultTopAppBar = nil
 
-	gi.NewTextField(sc).AddClearButton()
+	ts := &Test{}
+	giv.NewStructView(sc).SetStruct(ts)
+
+	// gi.NewTextField(sc).AddClearButton()
 
 	// gi.NewIcon(sc).SetIcon(icons.Add)
 

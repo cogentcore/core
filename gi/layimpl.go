@@ -1123,8 +1123,13 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	var pos mat32.Vec2
 	var lastAsz mat32.Vec2
 	gap := ly.Styles.Gap.Dots().Floor()
-
 	sz := &ly.Geom.Size
+	csz := sz.Actual.Content.Add(sz.InnerSpace)
+
+	if LayoutTraceDetail {
+		fmt.Println(ly, "PositionCells, actual + inner:", csz, "alloc:", sz.Alloc.Content.Add(sz.InnerSpace), "finalup:", sz.FinalUp.Content.Add(sz.InnerSpace))
+	}
+
 	var stspc mat32.Vec2
 	cdiff := sz.Actual.Content.Sub(sz.FinalUp.Content).Floor()
 	if cdiff.X > 0 {
@@ -1152,23 +1157,26 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		}
 		ep := pos
 		if sz.X < asz.X {
-			ep.X += styles.AlignFactor(kwb.Styles.Align.X) * (asz.X - sz.X)
+			ex := styles.AlignFactor(kwb.Styles.Align.X) * (asz.X - sz.X)
+			ep.X += ex
+			fmt.Println("pos i:", i, kwb, "ex:", ex)
 		}
 		if sz.Y < asz.Y {
 			ep.Y += styles.AlignFactor(kwb.Styles.Align.Y) * (asz.Y - sz.Y)
 		}
 		ep.SetFloor()
+		endsz := ep.Add(asz)
 		if LayoutTraceDetail {
-			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep)
+			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep, "end:", endsz)
 		}
 		kwb.Geom.RelPos = ep
-		maxs.SetMax(ep.Add(asz))
+		maxs.SetMax(endsz)
 		pos.X += asz.X + gap.X
 		lastAsz = asz
 		return ki.Continue
 	})
 	if LayoutTrace {
-		if maxs.X > sz.Actual.Content.X+2 || maxs.Y > sz.Actual.Content.Y+2 {
+		if maxs.X > csz.X+1 || maxs.Y > csz.Y+2 {
 			fmt.Println(ly, "Layout Position error: max position exceeds actual content size:", maxs, "content:", sz.Actual.Content)
 		}
 		fmt.Println(ly, "Position max:", maxs)

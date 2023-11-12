@@ -169,7 +169,7 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.Grow.Set(1, 0)
+		s.Grow.Set(0, 0)
 		s.Min.Y.Em(1.1)
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(60)

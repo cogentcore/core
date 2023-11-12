@@ -98,7 +98,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 5
+	doCase := 7
 
 	switch doCase {
 	case 0: // just text
@@ -169,6 +169,11 @@ func app() {
 			s.Min.X.Em(20)
 			s.Min.Y.Em(10)
 		})
+	case 7: // splits
+		sp, f1, f2 := Splits2(sc)
+		_ = f1
+		_ = f2
+		sp.SetSplits(.5, .5)
 	}
 
 	gi.NewWindow(sc).Run().Wait()
