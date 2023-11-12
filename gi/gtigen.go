@@ -2273,7 +2273,7 @@ var SplitsType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Splits",
 	ShortName: "gi.Splits",
 	IDName:    "splits",
-	Doc:       "Splits allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).\nDo not set the Grow factor on these children of the splits, because\nit uses this to set the split proportions.\nIt should generally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
+	Doc:       "Splits allocates a fixed proportion of space to each child, along given\ndimension.  It uses the Widget Parts to hold the Handle widgets\nseparately from the children that contain the rest of the scene to be\ndisplayed within each panel.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -3147,18 +3147,16 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for the tooltip for this widget, which can use HTML formatting", Directives: gti.Directives{}, Tag: ""}},
-		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
-		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\" set:\"-\""}},
-		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/gi/v2/gi.GeomState", LocalType: "GeomState", Doc: "Alloc is layout allocation state: contains full size and position info", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "Class has user-defined class name(s) used for user-dependent styling or\nother misc functions.  Multiple class names can be used to combine\nproperties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
+		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/gi/v2/gi.GeomState", LocalType: "GeomState", Doc: "Geom has the full layout geometry for size and position of this Widget", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "If true, Override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view-closed:\"true\" set:\"-\""}},
-		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should typically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "CustomContextMenu is an optional context menu constructor function\ncalled by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should\ntypically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "Sc is the overall Scene to which we belong.\nThis is set during Config, and also passed to most Config, Layout,\nand Render functions as a convenience.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
@@ -3195,15 +3193,19 @@ func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 }
 
 // SetClass sets the [WidgetBase.Class]:
-// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
+// Class has user-defined class name(s) used for user-dependent styling or
+// other misc functions.  Multiple class names can be used to combine
+// properties: use spaces to separate per css standard
 func (t *WidgetBase) SetClass(v string) *WidgetBase {
 	t.Class = v
 	return t
 }
 
 // SetCustomContextMenu sets the [WidgetBase.CustomContextMenu]:
-// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
-// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
+// CustomContextMenu is an optional context menu constructor function
+// called by [Widget.MakeContextMenu] after any type-specified items are added.
+// This function can decide where to insert new elements, and it should
+// typically add a separator to disambiguate.
 func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 	t.CustomContextMenu = v
 	return t

@@ -21,17 +21,9 @@ import (
 // otherwise just needs new layout
 
 // Splits allocates a fixed proportion of space to each child, along given
-// dimension, always using only the available space given to it by its parent
-// (i.e., it will force its children, which should be layouts (typically
-// Frame's), to have their own scroll bars as necessary).
-// Do not set the Grow factor on these children of the splits, because
-// it uses this to set the split proportions.
-// It should generally be used as a main outer-level structure within a window,
-// providing a framework for inner elements -- it allows individual child
-// elements to update independently and thus is important for speeding update
-// performance.  It uses the Widget Parts to hold the splitter widgets
-// separately from the children that contain the rest of the scenegraph to be
-// displayed within each region.
+// dimension.  It uses the Widget Parts to hold the Handle widgets
+// separately from the children that contain the rest of the scene to be
+// displayed within each panel.
 type Splits struct { //goki:embedder
 	Layout
 
@@ -75,9 +67,9 @@ func (sl *Splits) SplitsStyles() {
 				ip, _ := hl.IndexInParent()
 				sl.SetSplitAction(ip, hl.Value())
 			})
-			w.Style(func(s *styles.Style) {
-
-			})
+			// could enforce our own styles here..
+			// w.Style(func(s *styles.Style) {
+			// })
 		}
 	})
 }
@@ -336,6 +328,7 @@ func (sl *Splits) SizeDownSetAllocs(sc *Scene, iter int) {
 		ksz.Alloc.Total.SetDim(sl.Dim, sw)
 		ksz.Alloc.Total.SetDim(od, cszod)
 		ksz.SetContentFromTotal(&ksz.Alloc)
+		// ksz.Actual = ksz.Alloc
 		return ki.Continue
 	})
 }
@@ -352,7 +345,7 @@ func (sl *Splits) PositionSplits(sc *Scene) {
 		sl.Parts.Geom.Size = sl.Geom.Size // inherit: allows bbox to include handle
 	}
 	od := sl.Dim.Other()
-	csz := sl.Geom.Size.Actual.Content // excludes gaps
+	csz := sl.Geom.Size.Alloc.Content // key to use Alloc here!  excludes gaps
 	cszd := csz.Dim(sl.Dim)
 	pos := float32(0)
 	gap := mat32.Floor(sl.Styles.Gap.Dim(sl.Dim).Dots)
