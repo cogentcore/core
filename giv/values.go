@@ -289,10 +289,18 @@ func ToValue(it any, tags string) Value {
 	case vk == reflect.String:
 		v := reflect.ValueOf(it)
 		str := v.String()
-		if strings.Contains(str, "\n") {
+		vtag := stag.Get("view")
+		switch vtag {
+		case "text-field", "password":
+			return &ValueBase{}
+		case "text-editor":
 			return &TextEditorValue{}
+		default:
+			if strings.Contains(str, "\n") {
+				return &TextEditorValue{}
+			}
+			return &ValueBase{}
 		}
-		return &ValueBase{}
 	}
 	// fallback.
 	return &ValueBase{}

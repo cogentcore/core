@@ -817,6 +817,9 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			cmpfv.Call(in)
 		}
 	}
+	if vtag, _ := vv.Tag("view"); vtag == "password" {
+		tf.SetTypePassword()
+	}
 
 	tf.Config(sc)
 	tf.OnChange(func(e events.Event) {
