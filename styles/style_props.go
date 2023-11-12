@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -141,38 +141,158 @@ func StyleSetError(key string, val any, err error) {
 
 type StyleFunc func(obj any, key string, val any, par any, ctxt colors.Context)
 
-// StyleTextFuncs are functions for styling the Text object
-var StyleTextFuncs = map[string]StyleFunc{
-	"text-align": StyleFuncEnum(AlignStart,
-		func(obj *Text) enums.EnumSetter { return &obj.Align }),
-	"text-vertical-align": StyleFuncEnum(AlignStart,
-		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
-	"text-anchor": StyleFuncEnum(AnchorStart,
-		func(obj *Text) enums.EnumSetter { return &obj.Anchor }),
-	"letter-spacing": StyleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.LetterSpacing }),
-	"word-spacing": StyleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.WordSpacing }),
-	"line-height": StyleFuncUnits(LineHeightNormal,
-		func(obj *Text) *units.Value { return &obj.LineHeight }),
-	"white-space": StyleFuncEnum(WhiteSpaceNormal,
-		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
-	"unicode-bidi": StyleFuncEnum(BidiNormal,
-		func(obj *Text) enums.EnumSetter { return &obj.UnicodeBidi }),
-	"direction": StyleFuncEnum(LRTB,
-		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
-	"writing-mode": StyleFuncEnum(LRTB,
-		func(obj *Text) enums.EnumSetter { return &obj.WritingMode }),
-	"glyph-orientation-vertical": StyleFuncFloat(float32(1),
-		func(obj *Text) *float32 { return &obj.OrientationVert }),
-	"glyph-orientation-horizontal": StyleFuncFloat(float32(1),
-		func(obj *Text) *float32 { return &obj.OrientationHoriz }),
-	"text-indent": StyleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.Indent }),
-	"para-spacing": StyleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.ParaSpacing }),
-	"tab-size": StyleFuncInt(int(4),
-		func(obj *Text) *int { return &obj.TabSize }),
+// StyleFromProp sets style field values based on the given property key and value
+func (s *Style) StyleFromProp(par *Style, key string, val any, ctxt colors.Context) {
+	if sfunc, ok := StyleLayoutFuncs[key]; ok {
+		if par != nil {
+			sfunc(s, key, val, par, ctxt)
+		} else {
+			sfunc(s, key, val, nil, ctxt)
+		}
+		return
+	}
+	if sfunc, ok := StyleFontFuncs[key]; ok {
+		if par != nil {
+			sfunc(&s.Font, key, val, &par.Font, ctxt)
+		} else {
+			sfunc(&s.Font, key, val, nil, ctxt)
+		}
+		return
+	}
+	if sfunc, ok := StyleTextFuncs[key]; ok {
+		if par != nil {
+			sfunc(&s.Text, key, val, &par.Text, ctxt)
+		} else {
+			sfunc(&s.Text, key, val, nil, ctxt)
+		}
+		return
+	}
+	if sfunc, ok := StyleBorderFuncs[key]; ok {
+		if par != nil {
+			sfunc(&s.Border, key, val, &par.Border, ctxt)
+		} else {
+			sfunc(&s.Border, key, val, nil, ctxt)
+		}
+		return
+	}
+	if sfunc, ok := StyleStyleFuncs[key]; ok {
+		sfunc(s, key, val, par, ctxt)
+		return
+	}
+	// doesn't work with multiple shadows
+	// if sfunc, ok := StyleShadowFuncs[key]; ok {
+	// 	if par != nil {
+	// 		sfunc(&s.BoxShadow, key, val, &par.BoxShadow, ctxt)
+	// 	} else {
+	// 		sfunc(&s.BoxShadow, key, val, nil, ctxt)
+	// 	}
+	// 	return
+	// }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//  Style
+
+// StyleStyleFuncs are functions for styling the Style object itself
+var StyleStyleFuncs = map[string]StyleFunc{
+	"display": StyleFuncEnum(DisplayFlex,
+		func(obj *Style) enums.EnumSetter { return &obj.Display }),
+	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
+		fs := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.Color = par.(*Style).Color
+			} else if init {
+				fs.Color = colors.Black
+			}
+			return
+		}
+		fs.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
+	},
+	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
+		fs := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.BackgroundColor = par.(*Style).BackgroundColor
+			} else if init {
+				fs.BackgroundColor = colors.Full{}
+			}
+			return
+		}
+		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
+	},
+	"opacity": StyleFuncFloat(float32(1),
+		func(obj *Style) *float32 { return &obj.Opacity }),
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//  Layout
+
+// StyleLayoutFuncs are functions for styling the layout
+// style properties; they are still stored on the main style object,
+// but they are done separately to improve clarity
+var StyleLayoutFuncs = map[string]StyleFunc{
+	"z-index": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.ZIndex }),
+	"horizontal-align": StyleFuncEnum(AlignStart,
+		func(obj *Style) enums.EnumSetter { return &obj.Align.X }),
+	"vertical-align": StyleFuncEnum(AlignCenter,
+		func(obj *Style) enums.EnumSetter { return &obj.Align.Y }),
+	"x": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.Pos.X }),
+	"y": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.Pos.Y }),
+	"width": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.Min.X }),
+	"height": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.Min.Y }),
+	"max-width": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.Max.X }),
+	"max-height": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.Max.Y }),
+	"min-width": StyleFuncUnits(units.Dp(2),
+		func(obj *Style) *units.Value { return &obj.Min.X }),
+	"min-height": StyleFuncUnits(units.Dp(2),
+		func(obj *Style) *units.Value { return &obj.Min.Y }),
+	"margin": func(obj any, key string, val any, par any, ctxt colors.Context) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				s.Margin = par.(*Style).Margin
+			} else if init {
+				s.Margin.Zero()
+			}
+			return
+		}
+		s.Margin.SetAny(val)
+	},
+	"padding": func(obj any, key string, val any, par any, ctxt colors.Context) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				s.Padding = par.(*Style).Padding
+			} else if init {
+				s.Padding.Zero()
+			}
+			return
+		}
+		s.Padding.SetAny(val)
+	},
+	// TODO(kai/styprops): mutli-dim overflow
+	"overflow": StyleFuncEnum(OverflowAuto,
+		func(obj *Style) enums.EnumSetter { return &obj.Overflow.X }),
+	"columns": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.Columns }),
+	"row": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.Row }),
+	"col": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.Col }),
+	"row-span": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.RowSpan }),
+	"col-span": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.ColSpan }),
+	"scrollbar-width": StyleFuncUnits(units.Value{},
+		func(obj *Style) *units.Value { return &obj.ScrollBarWidth }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -286,6 +406,43 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *FontRender) *float32 { return &obj.Opacity }),
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//  Text
+
+// StyleTextFuncs are functions for styling the Text object
+var StyleTextFuncs = map[string]StyleFunc{
+	"text-align": StyleFuncEnum(AlignStart,
+		func(obj *Text) enums.EnumSetter { return &obj.Align }),
+	"text-vertical-align": StyleFuncEnum(AlignStart,
+		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
+	"text-anchor": StyleFuncEnum(AnchorStart,
+		func(obj *Text) enums.EnumSetter { return &obj.Anchor }),
+	"letter-spacing": StyleFuncUnits(units.Value{},
+		func(obj *Text) *units.Value { return &obj.LetterSpacing }),
+	"word-spacing": StyleFuncUnits(units.Value{},
+		func(obj *Text) *units.Value { return &obj.WordSpacing }),
+	"line-height": StyleFuncUnits(LineHeightNormal,
+		func(obj *Text) *units.Value { return &obj.LineHeight }),
+	"white-space": StyleFuncEnum(WhiteSpaceNormal,
+		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
+	"unicode-bidi": StyleFuncEnum(BidiNormal,
+		func(obj *Text) enums.EnumSetter { return &obj.UnicodeBidi }),
+	"direction": StyleFuncEnum(LRTB,
+		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
+	"writing-mode": StyleFuncEnum(LRTB,
+		func(obj *Text) enums.EnumSetter { return &obj.WritingMode }),
+	"glyph-orientation-vertical": StyleFuncFloat(float32(1),
+		func(obj *Text) *float32 { return &obj.OrientationVert }),
+	"glyph-orientation-horizontal": StyleFuncFloat(float32(1),
+		func(obj *Text) *float32 { return &obj.OrientationHoriz }),
+	"text-indent": StyleFuncUnits(units.Value{},
+		func(obj *Text) *units.Value { return &obj.Indent }),
+	"para-spacing": StyleFuncUnits(units.Value{},
+		func(obj *Text) *units.Value { return &obj.ParaSpacing }),
+	"tab-size": StyleFuncInt(int(4),
+		func(obj *Text) *int { return &obj.TabSize }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
