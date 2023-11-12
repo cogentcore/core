@@ -509,8 +509,8 @@ func (ly *Layout) SetInitCells() {
 }
 
 func (ly *Layout) SetGapSizeFromCells() {
-	ly.LayImpl.GapSize.X = max(float32(ly.LayImpl.Shape.X-1)*ly.Styles.Gap.X.Dots, 0)
-	ly.LayImpl.GapSize.Y = max(float32(ly.LayImpl.Shape.Y-1)*ly.Styles.Gap.Y.Dots, 0)
+	ly.LayImpl.GapSize.X = max(float32(ly.LayImpl.Shape.X-1)*mat32.Ceil(ly.Styles.Gap.X.Dots), 0)
+	ly.LayImpl.GapSize.Y = max(float32(ly.LayImpl.Shape.Y-1)*mat32.Ceil(ly.Styles.Gap.Y.Dots), 0)
 	ly.LayImpl.GapSize.SetCeil()
 	ly.Geom.Size.InnerSpace = ly.LayImpl.GapSize
 }
@@ -1122,19 +1122,19 @@ func (ly *Layout) PositionLay(sc *Scene) {
 func (ly *Layout) PositionCells(sc *Scene) {
 	var pos mat32.Vec2
 	var lastAsz mat32.Vec2
-	gap := ly.Styles.Gap.Dots()
+	gap := ly.Styles.Gap.Dots().Floor()
 
 	sz := &ly.Geom.Size
 	var stspc mat32.Vec2
-	cdiff := sz.Actual.Content.Sub(sz.FinalUp.Content)
+	cdiff := sz.Actual.Content.Sub(sz.FinalUp.Content).Floor()
 	if cdiff.X > 0 {
-		stspc.X += styles.AlignFactor(ly.Styles.Align.X) * cdiff.X
+		stspc.X += mat32.Floor(styles.AlignFactor(ly.Styles.Align.X) * cdiff.X)
 		if LayoutTrace {
 			fmt.Println("pos grid:", ly, "extra X:", cdiff.X, "start X:", stspc.X, "align:", ly.Styles.Align.X, "factor:", styles.AlignFactor(ly.Styles.Align.X))
 		}
 	}
 	if cdiff.Y > 0 {
-		stspc.Y += styles.AlignFactor(ly.Styles.Align.Y) * cdiff.Y
+		stspc.Y += mat32.Floor(styles.AlignFactor(ly.Styles.Align.Y) * cdiff.Y)
 		if LayoutTrace {
 			fmt.Println("pos grid:", ly, "extra Y:", cdiff.Y, "start Y:", stspc.Y, "align:", ly.Styles.Align.Y, "factor:", styles.AlignFactor(ly.Styles.Align.Y))
 		}
@@ -1157,7 +1157,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		if sz.Y < asz.Y {
 			ep.Y += styles.AlignFactor(kwb.Styles.Align.Y) * (asz.Y - sz.Y)
 		}
-		ep.SetRound()
+		ep.SetFloor()
 		if LayoutTraceDetail {
 			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep)
 		}

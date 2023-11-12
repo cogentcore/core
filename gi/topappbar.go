@@ -148,26 +148,33 @@ func (tb *TopAppBar) IsVisible() bool {
 func (tb *TopAppBar) SizeUp(sc *Scene) {
 	tb.AllItemsToChildren(sc)
 	tb.Frame.SizeUp(sc)
-	ma := tb.Styles.MainAxis
-	sz := &tb.Geom.Size                            // reset for others
-	sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
-	sz.SetTotalFromContent(&sz.Actual)
 }
 
-// don't report any size at sizeup, etc
+func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
+	redo := tb.Frame.SizeDown(sc, iter)
+	if iter == 0 {
+		return true
+	}
+	tb.MoveToOverflow(sc)
+	return redo
+}
+
+func (tb *TopAppBar) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
+	if pass == SizeUpPass || (pass == SizeDownPass && iter == 0) {
+		csz := tb.Frame.SizeFromChildren(sc, iter, pass)
+		ovsz := tb.OverflowButton.Geom.Size.Actual.Total.X
+		csz.X = ovsz
+		return csz
+	}
+	csz := tb.Frame.SizeFromChildren(sc, iter, pass)
+	return csz
+}
 
 // AllItemsToChildren moves the overflow items back to the children,
 // so the full set is considered for the next layout round,
 // and ensures the overflow button is made and moves it
 // to the end of the list.
 func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
-	if len(tb.OverflowItems) == 0 && !tb.HasChildren() {
-		return
-	}
-	if len(tb.OverflowItems) > 0 {
-		tb.Kids = append(tb.Kids, tb.OverflowItems...)
-		tb.OverflowItems = nil
-	}
 	if tb.OverflowButton == nil {
 		ic := icons.MoreVert
 		if tb.Styles.MainAxis != mat32.X {
@@ -177,6 +184,10 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 			SetTooltip("Overflow toolbar items and additional menu items")
 		tb.OverflowButton.Menu = tb.OverflowMenu
 		tb.OverflowButton.Config(sc)
+	}
+	if len(tb.OverflowItems) > 0 {
+		tb.Kids = append(tb.Kids, tb.OverflowItems...)
+		tb.OverflowItems = nil
 	}
 	ovi := -1
 	for i, k := range tb.Kids {
@@ -192,33 +203,15 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 	tb.Kids = append(tb.Kids, tb.OverflowButton.This())
 }
 
-func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
-	if iter == 0 || !tb.HasChildren() { // first do a normal layout to get everyone's target positions
-		tb.Frame.SizeDown(sc, iter)
-		ma := tb.Styles.MainAxis
-		sz := &tb.Geom.Size
-		sz.Actual.Content.SetDim(ma, sz.Space.Dim(ma)) // reset for others still
-		sz.SetTotalFromContent(&sz.Actual)
-		return true // needs another iter
-	}
-	if iter == 1 {
-		tb.MoveToOverflow(sc)
-		tb.Frame.SizeDown(sc, iter)
-		return true
-	}
-	tb.ParentSize() // minimize it
-	return tb.Frame.SizeDown(sc, iter)
-}
-
 func (tb *TopAppBar) ParentSize() float32 {
 	ma := tb.Styles.MainAxis
 	_, pwb := tb.ParentWidget()
-	psz := pwb.Geom.Size.Actual.Content.Sub(tb.Geom.Size.Space)
+	psz := pwb.Geom.Size.Alloc.Content.Sub(tb.Geom.Size.Space)
 	avail := psz.Dim(ma) - 4
-	// fmt.Println(pwb, pwb.Geom.Size)
-	sz := &tb.Geom.Size
-	sz.Alloc.Total.SetDim(ma, avail)
-	sz.SetContentFromTotal(&sz.Alloc)
+	// // fmt.Println(pwb, pwb.Geom.Size)
+	// sz := &tb.Geom.Size
+	// sz.Alloc.Total.SetDim(ma, avail)
+	// sz.SetContentFromTotal(&sz.Alloc)
 	return avail
 }
 
@@ -231,7 +224,6 @@ func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
 	sz.SetContentFromTotal(&sz.Alloc)
-	tb.OverflowItems = nil
 	n := len(tb.Kids)
 	ovidx := n - 1
 	hasOv := false
@@ -240,7 +232,7 @@ func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
 		if i >= n-1 {
 			return ki.Break
 		}
-		ksz := kwb.Geom.Size.Actual.Total.Dim(ma)
+		ksz := kwb.Geom.Size.Alloc.Total.Dim(ma)
 		szsum += ksz
 		if szsum > avsz {
 			if !hasOv {
