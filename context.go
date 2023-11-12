@@ -15,3 +15,20 @@ type Context interface {
 	// is the name of a node with a [Full] color in it.
 	FullByURL(url string) *Full
 }
+
+// BaseContext returns a basic [Context] based on the given base color.
+func BaseContext(base color.RGBA) Context {
+	return &baseContext{base}
+}
+
+type baseContext struct {
+	base color.RGBA
+}
+
+func (bc *baseContext) Base() color.RGBA {
+	return bc.base
+}
+
+func (bc *baseContext) FullByURL(url string) *Full {
+	return nil
+}
