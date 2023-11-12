@@ -57,6 +57,9 @@ func init() {
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() Value {
 		return &TimeValue{}
 	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Duration(0))), func() Value {
+		return &DurationValue{}
+	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() Value {
 		return &TimeValue{}
 	})
@@ -199,8 +202,8 @@ func ToValue(it any, tags string) Value {
 		}
 	*/
 
-	if tags != "" {
-		stag := reflect.StructTag(tags)
+	stag := reflect.StructTag(tags)
+	if stag != "" {
 		if vwtag, ok := stag.Lookup("view"); ok {
 			switch vwtag {
 			case "inline":
@@ -213,9 +216,6 @@ func ToValue(it any, tags string) Value {
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
-		if _, ok := it.(time.Duration); ok {
-			return &DurationValue{}
-		}
 		if _, ok := it.(fmt.Stringer); ok { // use stringer
 			return &ValueBase{}
 		}
