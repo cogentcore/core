@@ -295,6 +295,8 @@ func ToValue(it any, tags string) Value {
 			return &ValueBase{}
 		case "text-editor":
 			return &TextEditorValue{}
+		case "filename":
+			return &FileValue{}
 		default:
 			if strings.Contains(str, "\n") {
 				return &TextEditorValue{}
