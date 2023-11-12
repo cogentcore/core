@@ -73,9 +73,19 @@ func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflec
 // FlatFieldsValueFunc calls a function on all the primary fields of a
 // given struct value (must pass a pointer to the struct) including those on
 // anonymous embedded structs that this struct has, passing the current
-// (embedded) type and StructField -- effectively flattens the reflect field
-// list
+// (embedded) type and StructField, which effectively flattens the reflect field list.
 func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
+	return FlatFieldsValueFuncIf(stru, nil, fun)
+}
+
+// FlatFieldsValueFunc calls a function on all the primary fields of a
+// given struct value (must pass a pointer to the struct) including those on
+// anonymous embedded structs that this struct has, passing the current
+// (embedded) type and StructField, which effectively flattens the reflect field
+// list. If the given ifFun is non-nil, it is called on every embedded struct field to
+// determine whether the fields of that embedded field should be handled (a return value
+// of true indicates to continue down and a value of false indicates to not).
+func FlatFieldsValueFuncIf(stru any, ifFun, fun func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	vv := reflect.ValueOf(stru)
 	if stru == nil || vv.Kind() != reflect.Ptr {
 		log.Printf("laser.FlatFieldsValueFunc: must pass a non-nil pointer to the struct: %v\n", stru)
@@ -102,6 +112,11 @@ func FlatFieldsValueFunc(stru any, fun func(stru any, typ reflect.Type, field re
 			continue
 		}
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
+			if ifFun != nil {
+				if !ifFun(vfi, typ, f, vf) {
+					continue
+				}
+			}
 			// key to take addr here so next level is addressable
 			rval = FlatFieldsValueFunc(PtrValue(vf).Interface(), fun)
 			if !rval {
