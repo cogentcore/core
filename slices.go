@@ -70,6 +70,13 @@ func SliceDeleteAt(sl any, idx int) {
 	svl.Elem().Set(svnp.Slice(0, sz-1))
 }
 
+// todo: this is kind of a hack but needed for pi/filecat/FileTime
+
+// SortInter looks for Int() method for sorting
+type SortInter interface {
+	Int() int64
+}
+
 // SliceSort sorts a slice of basic values (see StructSliceSort for sorting a
 // slice-of-struct using a specific field), using float, int, string conversions
 // (first fmt.Stringer String()) and supporting time.Time directly as well.
@@ -84,6 +91,18 @@ func SliceSort(sl any, ascending bool) error {
 	vk := elnptyp.Kind()
 	elval := OnePtrValue(svnp.Index(0))
 	elif := elval.Interface()
+
+	if _, ok := elif.(SortInter); ok {
+		sort.Slice(svnp.Interface(), func(i, j int) bool {
+			iv := NonPtrValue(svnp.Index(i)).Interface().(SortInter).Int()
+			jv := NonPtrValue(svnp.Index(j)).Interface().(SortInter).Int()
+			if ascending {
+				return iv < jv
+			}
+			return jv < iv
+		})
+		return nil
+	}
 
 	// try all the numeric types first!
 	switch {
@@ -179,6 +198,20 @@ func StructSliceSort(struSlice any, fldIdx []int, ascending bool) error {
 	struVal := OnePtrValue(svnp.Index(0))
 	fldVal := struVal.Elem().FieldByIndex(fldIdx)
 	fldIf := fldVal.Interface()
+
+	if _, ok := fldIf.(SortInter); ok {
+		sort.Slice(svnp.Interface(), func(i, j int) bool {
+			ival := OnePtrValue(svnp.Index(i))
+			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(SortInter).Int()
+			jval := OnePtrValue(svnp.Index(j))
+			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(SortInter).Int()
+			if ascending {
+				return iv < jv
+			}
+			return jv < iv
+		})
+		return nil
+	}
 
 	// try all the numeric types first!
 	switch {
