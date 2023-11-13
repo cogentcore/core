@@ -75,9 +75,10 @@ func ValueIsZero(v reflect.Value) bool {
 }
 
 // ToBool robustly converts to a bool any basic elemental type
-// (including pointers to such)
-// using a big type switch organized for greatest efficiency.
-// tries the [goki.dev/glop/bools.Booler] interface if not a bool type.
+// (including pointers to such) using a big type switch organized
+// for greatest efficiency. It tries the [goki.dev/glop/bools.Booler]
+// interface if not a bool type. It falls back on reflection when all
+// else fails.
 //
 //gopy:interface=handle
 func ToBool(v any) (bool, error) {
@@ -204,12 +205,38 @@ func ToBool(v any) (bool, error) {
 		return *vt != 0, nil
 	}
 
-	return false, fmt.Errorf("got value %v of unsupported type %T", v, v)
+	// then fall back on reflection
+	if AnyIsNil(v) {
+		return false, fmt.Errorf("got nil value of type %T", v)
+	}
+	npv := NonPtrValue(reflect.ValueOf(v))
+	vk := npv.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return (npv.Int() != 0), nil
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return (npv.Uint() != 0), nil
+	case vk == reflect.Bool:
+		return npv.Bool(), nil
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return (npv.Float() != 0.0), nil
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return (real(npv.Complex()) != 0.0), nil
+	case vk == reflect.String:
+		r, err := strconv.ParseBool(npv.String())
+		if err != nil {
+			return false, err
+		}
+		return r, nil
+	default:
+		return false, fmt.Errorf("got value %v of unsupported type %T", v, v)
+	}
 }
 
 // ToInt robustly converts to an int64 any basic elemental type
-// (including pointers to such)
-// using a big type switch organized for greatest efficiency.
+// (including pointers to such) using a big type switch organized
+// for greatest efficiency, only falling back on reflection when all
+// else fails.
 //
 //gopy:interface=handle
 func ToInt(v any) (int64, error) {
@@ -336,12 +363,41 @@ func ToInt(v any) (int64, error) {
 		}
 		return int64(*vt), nil
 	}
-	return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
+
+	// then fall back on reflection
+	if AnyIsNil(v) {
+		return 0, fmt.Errorf("got nil value of type %T", v)
+	}
+	npv := NonPtrValue(reflect.ValueOf(v))
+	vk := npv.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return npv.Int(), nil
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return int64(npv.Uint()), nil
+	case vk == reflect.Bool:
+		if npv.Bool() {
+			return 1, nil
+		}
+		return 0, nil
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return int64(npv.Float()), nil
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return int64(real(npv.Complex())), nil
+	case vk == reflect.String:
+		r, err := strconv.ParseInt(npv.String(), 0, 64)
+		if err != nil {
+			return 0, err
+		}
+		return r, nil
+	default:
+		return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
+	}
 }
 
 // ToFloat robustly converts to a float64 any basic elemental type
-// (including pointers to such)
-// using a big type switch organized for greatest efficiency.
+// (including pointers to such) using a big type switch organized for
+// greatest efficiency, only falling back on reflection when all else fails.
 //
 //gopy:interface=handle
 func ToFloat(v any) (float64, error) {
@@ -466,12 +522,41 @@ func ToFloat(v any) (float64, error) {
 		}
 		return float64(*vt), nil
 	}
-	return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
+
+	// then fall back on reflection
+	if AnyIsNil(v) {
+		return 0, fmt.Errorf("got nil value of type %T", v)
+	}
+	npv := NonPtrValue(reflect.ValueOf(v))
+	vk := npv.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return float64(npv.Int()), nil
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return float64(npv.Uint()), nil
+	case vk == reflect.Bool:
+		if npv.Bool() {
+			return 1, nil
+		}
+		return 0, nil
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return npv.Float(), nil
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return real(npv.Complex()), nil
+	case vk == reflect.String:
+		r, err := strconv.ParseFloat(npv.String(), 64)
+		if err != nil {
+			return 0, err
+		}
+		return r, nil
+	default:
+		return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
+	}
 }
 
 // ToFloat32 robustly converts to a float32 any basic elemental type
-// (including pointers to such)
-// using a big type switch organized for greatest efficiency.
+// (including pointers to such) using a big type switch organized for
+// greatest efficiency, only falling back on reflection when all else fails.
 //
 //gopy:interface=handle
 func ToFloat32(v any) (float32, error) {
@@ -596,7 +681,36 @@ func ToFloat32(v any) (float32, error) {
 		}
 		return float32(*vt), nil
 	}
-	return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
+
+	// then fall back on reflection
+	if AnyIsNil(v) {
+		return 0, fmt.Errorf("got nil value of type %T", v)
+	}
+	npv := NonPtrValue(reflect.ValueOf(v))
+	vk := npv.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return float32(npv.Int()), nil
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return float32(npv.Uint()), nil
+	case vk == reflect.Bool:
+		if npv.Bool() {
+			return 1, nil
+		}
+		return 0, nil
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return float32(npv.Float()), nil
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		return float32(real(npv.Complex())), nil
+	case vk == reflect.String:
+		r, err := strconv.ParseFloat(npv.String(), 32)
+		if err != nil {
+			return 0, err
+		}
+		return float32(r), nil
+	default:
+		return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
+	}
 }
 
 // ToString robustly converts anything to a String
@@ -605,7 +719,7 @@ func ToFloat32(v any) (float32, error) {
 // then checks for the Stringer interface as the preferred conversion
 // (e.g., for enums), and then falls back on strconv calls for numeric types.
 // If everything else fails, it uses Sprintf("%v") which always works,
-// so there is no need for a bool = false return.
+// so there is no need for an error return value.
 //   - returns "nil" for any nil pointers
 //   - byte is converted as string(byte) not the decimal representation
 //
@@ -755,10 +869,36 @@ func ToString(v any) string {
 		return strconv.FormatFloat(real(*vt), 'G', -1, 64) + "," + strconv.FormatFloat(imag(*vt), 'G', -1, 64)
 	}
 
+	// then fall back on reflection
 	if AnyIsNil(v) {
 		return nilstr
 	}
-	return fmt.Sprintf("%v", v)
+	npv := NonPtrValue(reflect.ValueOf(v))
+	vk := npv.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return strconv.FormatInt(npv.Int(), 10)
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return strconv.FormatUint(npv.Uint(), 10)
+	case vk == reflect.Bool:
+		return strconv.FormatBool(npv.Bool())
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return strconv.FormatFloat(npv.Float(), 'G', -1, 64)
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		cv := npv.Complex()
+		rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
+		return rv
+	case vk == reflect.String:
+		return npv.String()
+	case vk == reflect.Slice:
+		eltyp := SliceElType(v)
+		if eltyp.Kind() == reflect.Uint8 { // []byte
+			return string(v.([]byte))
+		}
+		fallthrough
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
 
 // ToStringPrec robustly converts anything to a String using given precision
