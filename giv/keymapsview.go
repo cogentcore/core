@@ -7,7 +7,6 @@ package giv
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -23,12 +22,7 @@ func KeyMapsView(km *keyfun.Maps) {
 	sc.Title = "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map"
 	sc.Data = km
 
-	title := gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)
-	title.Style(func(s *styles.Style) {
-		s.Min.X.Ch(30) // need for wrap
-		s.Grow.Set(1, 0)
-		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
-	})
+	gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)
 
 	tv := NewTableView(sc).SetSlice(km)
 

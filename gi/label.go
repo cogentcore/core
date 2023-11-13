@@ -127,7 +127,7 @@ func (lb *Label) LabelStyles() {
 			s.Text.LineHeight.Dp(20)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.1)
-			s.Font.Weight = styles.WeightMedium
+			s.Font.Weight = styles.WeightMedium // note: excludes all fonts except Go!
 		case LabelLabelMedium:
 			s.Text.LineHeight.Dp(16)
 			s.Font.Size.Dp(12)

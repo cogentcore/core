@@ -165,14 +165,6 @@ func (pf *Preferences) UpdateAll() { //gti:add
 		rctx := w.StageMgr.RenderCtx
 		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	}
-	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
-	// 	w.SetSize(w.RenderWin.Size())
-	// }
-	// needs another pass through to get it right..
-	// for _, w := range AllRenderWins {
-	// 	w.FullReRender()
-	// }
-	// and another without rebuilding?  yep all are required
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory

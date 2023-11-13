@@ -91,7 +91,7 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Min.X.Ch(20)
 		s.Padding.Set(units.Dp(8))
-		s.Grow.Set(1, 0)
+		s.SetTextWrap(false)
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 			s.Color = colors.Scheme.Select.OnContainer

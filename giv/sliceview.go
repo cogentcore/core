@@ -419,10 +419,10 @@ func (sv *SliceViewBase) IsNil() bool {
 func (sv *SliceViewBase) BindSelectDialog(d *gi.Dialog, val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
-		*val = sv.CurIdx
+		*val = sv.SelIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {
-		*val = sv.CurIdx
+		*val = sv.SelIdx
 		d.AcceptDialog()
 	})
 	return sv

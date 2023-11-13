@@ -1462,7 +1462,6 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	d := gi.NewDialog(ctx).Title("Select an icon").Prompt(vv.Doc()).FullWindow(true)
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(string(ics[row]))
-		s.Grow.Set(1, 0)
 	}).
 		SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {

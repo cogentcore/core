@@ -206,6 +206,11 @@ func (wb *WidgetBase) ResetStyleWidget() {
 func (wb *WidgetBase) DefaultStyleWidget() {
 	s := &wb.Styles
 
+	s.Font.Family = string(Prefs.FontFamily)
+	fsz := Prefs.FontSize / 100
+	s.Font.Size.Val *= fsz
+	s.Text.LineHeight.Val *= fsz
+
 	s.MaxBorder.Style.Set(styles.BorderSolid)
 	s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
 	s.MaxBorder.Width.Set(units.Dp(1))
@@ -254,10 +259,6 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 	s.Padding.Left.Val *= spc
 	s.Gap.X.Val *= spc
 	s.Gap.Y.Val *= spc
-
-	// fsz := Prefs.FontSize / 100
-	// s.Font.Size.Val *= fsz
-	// s.Text.LineHeight.Val *= fsz
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
