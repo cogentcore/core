@@ -65,8 +65,9 @@ type FileView struct {
 	// index of currently-selected file in Files list (-1 if none)
 	SelectedIdx int `set:"-" edit:"-"`
 
-	// signal for file actions
-	// FileSig ki.Signal `desc:"signal for file actions"`
+	// set to true if a file was selected via double-click,
+	// which can then be a signal to dialogs to accept.
+	SelectedDoubleClick bool
 
 	// change notify for current dir
 	Watcher *fsnotify.Watcher `set:"-" view:"-"`
@@ -92,7 +93,13 @@ func (fv *FileView) FileViewStyles() {
 		s.Grow.Set(1, 1)
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(fv) {
+		pfrom := w.PathFrom(fv)
+		if strings.HasPrefix(pfrom, "files-row/favs-view/") {
+			w.Style(func(s *styles.Style) {
+				s.Overflow.X = styles.OverflowHidden
+			})
+		}
+		switch pfrom {
 		case "path-tbar":
 			fr := w.(*gi.Frame)
 			gi.ToolbarStyles(fr)
@@ -122,6 +129,7 @@ func (fv *FileView) FileViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(0, 1)
 				s.Min.X.Ch(25)
+				s.Overflow.X = styles.OverflowHidden
 			})
 		case "files-row/files-view":
 			fv := w.(*TableView)
@@ -366,6 +374,8 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.OnDoubleClick(func(e events.Event) {
 		if !fv.SelectFile() {
 			e.SetHandled() // don't pass along; keep dialog open
+		} else {
+			fv.SelectedDoubleClick = true
 		}
 	})
 }

@@ -1623,8 +1623,10 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	fv.OnSelect(func(e events.Event) {
 		cur = fv.SelectedFile()
 	}).OnDoubleClick(func(e events.Event) {
-		cur = fv.SelectedFile()
-		d.AcceptDialog()
+		if fv.SelectedDoubleClick {
+			cur = fv.SelectedFile()
+			d.AcceptDialog()
+		}
 	})
 	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		vv.SetValue(cur)

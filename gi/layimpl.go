@@ -267,16 +267,18 @@ func (ls *GeomState) ContentRangeDim(d mat32.Dims) (cmin, cmax float32) {
 	return
 }
 
-// TotalRect returns the Pos.Total, Size.Actual.Total geom
+// TotalRect returns Pos.Total, Min(Size.Actual.Total, Size.Alloc.Total)
 // as an image.Rectangle, e.g., for bounding box
 func (ls *GeomState) TotalRect() image.Rectangle {
-	return mat32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
+	return mat32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total.Min(ls.Size.Alloc.Total))
 }
 
-// ContentRect returns the Pos.Content, Size.Actual.Content geom
-// as an image.Rectangle, e.g., for bounding box.
+// ContentRect returns Pos.Content, Min(Size.Actual.Content, Size.Alloc.Content)
+// with InnerSpace added to Size, as an image.Rectangle, e.g., for bounding box.
 func (ls *GeomState) ContentRect() image.Rectangle {
-	return mat32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content.Add(ls.Size.InnerSpace))
+	act := ls.Size.Actual.Content.Add(ls.Size.InnerSpace)
+	alloc := ls.Size.Alloc.Content.Add(ls.Size.InnerSpace)
+	return mat32.RectFromPosSizeMax(ls.Pos.Content, act.Min(alloc))
 }
 
 //////////////////////////////////////////////////////////////
