@@ -143,6 +143,7 @@ func (sc *Screen) UpdateLogicalDPI() {
 		}
 	}
 	sc.LogicalDPI = LogicalFmPhysicalDPI(ZoomFactor*dpisc, sc.PhysicalDPI)
+	// fmt.Println("log dpi:", sc.LogicalDPI, "zoom:", ZoomFactor, "dpisc:", dpisc)
 }
 
 // UpdatePhysicalDPI updates the value of [Screen.PhysicalDPI] based on
