@@ -547,7 +547,7 @@ func (fv *FileView) UpdateFiles() {
 	defer fv.UpdtMu.Unlock()
 
 	updt := fv.UpdateStart()
-	defer fv.UpdateEnd(updt)
+	defer fv.UpdateEndLayout(updt)
 
 	fv.UpdatePath()
 	pf := fv.PathField()
@@ -800,6 +800,30 @@ func (fv *FileView) KeyInput(kt events.Event) {
 		sf.GrabFocus()
 	}
 }
+
+// todo: context menu for fileinfo
+/*
+var FileInfoProps = ki.Props{
+	"CtxtMenu": ki.PropSlice{
+		{"Duplicate", ki.Props{
+			"desc":    "Duplicate this file or folder",
+			"confirm": true,
+		}},
+		{"Delete", ki.Props{
+			"desc":    "Ok to delete this file or folder?  This is not undoable and is not moving to trash / recycle bin",
+			"confirm": true,
+		}},
+		{"Rename", ki.Props{
+			"desc": "Rename file to new file name",
+			"Args": ki.PropSlice{
+				{"New Name", ki.Props{
+					"default-field": "Name",
+				}},
+			},
+		}},
+	},
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion

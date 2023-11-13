@@ -72,6 +72,7 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) TableViewInit() {
+	tv.SortIdx = -1
 	tv.MinRows = 4
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.SetFlag(true, SliceViewShowIndex)
@@ -101,14 +102,8 @@ func (tv *TableView) TableViewInit() {
 			sh := w.(*gi.Frame)
 			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
-				s.Gap.Zero()
 				s.Grow.Set(0, 0)
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-				// note: this does not work:
-				// sg := tv.SliceGrid()
-				// if sg != nil {
-				// 	s.Max.X.Dot(sg.Geom.Size.Actual.Content.X)
-				// }
 			})
 		case "frame/grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
@@ -182,6 +177,16 @@ func (tv *TableView) TableViewInit() {
 		if w.Parent().PathFrom(tv) == "frame/header" {
 			w.Style(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
+				if hdr, ok := w.(*gi.Button); ok {
+					fli := hdr.Data.(int)
+					if fli == tv.SortIdx {
+						if tv.SortDesc {
+							hdr.SetIcon(icons.KeyboardArrowDown)
+						} else {
+							hdr.SetIcon(icons.KeyboardArrowUp)
+						}
+					}
+				}
 			})
 		}
 	})
@@ -204,8 +209,6 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	tv.SetFlag(false, SliceViewConfiged)
 	tv.StartIdx = 0
 	tv.VisRows = tv.MinRows
-	tv.SortIdx = -1
-	tv.SortDesc = false
 	slpTyp := reflect.TypeOf(sl)
 	if slpTyp.Kind() != reflect.Ptr {
 		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
@@ -292,6 +295,7 @@ func (tv *TableView) ConfigTableView(sc *gi.Scene) {
 		return
 	}
 	updt := tv.UpdateStart()
+	tv.SortSlice()
 	tv.ConfigFrame(sc)
 	tv.This().(SliceViewer).ConfigRows(sc)
 	tv.This().(SliceViewer).UpdateWidgets()
@@ -315,23 +319,6 @@ func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	tv.ConfigHeader(sc)
 }
 
-func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *SliceViewGrid, spc float32, idx int) {
-	if w.Parts != nil {
-		w.Parts.Style(func(s *styles.Style) {
-			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-		})
-	}
-	w.Style(func(s *styles.Style) {
-		s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-		if len(*sg.Children()) > idx {
-			_, cwb := gi.AsWidget(sg.Child(idx))
-			wd := cwb.Geom.Size.Actual.Total.X - 16 // todo: don't know our spacing at this point
-			s.Min.X.Dot(wd)
-			s.Max.X.Dot(wd)
-		}
-	})
-}
-
 func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 	sgh := tv.SliceHeader()
 	if sgh.HasChildren() || tv.NVisFields == 0 {
@@ -351,14 +338,11 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 		hcfg.Add(gi.LabelType, "head-del")
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
-	sg := tv.SliceGrid()
-	spc := sgh.Styles.Gap.Dots().X
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
 	if tv.Is(SliceViewShowIndex) {
 		lbl := sgh.Child(0).(*gi.Label)
 		lbl.Text = "Index"
-		tv.ConfigHeaderStyleWidth(lbl.AsWidget(), sg, spc, 0)
 	}
 	for fli := 0; fli < nfld; fli++ {
 		fli := fli
@@ -366,6 +350,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonMenu)
 		hdr.SetText(field.Name)
+		hdr.Data = fli
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
 				hdr.SetIcon(icons.KeyboardArrowDown)
@@ -381,7 +366,6 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 		hdr.OnClick(func(e events.Event) {
 			tv.SortSliceAction(fli)
 		})
-		tv.ConfigHeaderStyleWidth(hdr.AsWidget(), sg, spc, fli+idxOff)
 	}
 	if !tv.IsReadOnly() {
 		cidx := tv.NVisFields + idxOff
@@ -389,14 +373,12 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
-			tv.ConfigHeaderStyleWidth(lbl.AsWidget(), sg, spc, cidx)
 			cidx++
 		}
 		if !tv.Is(SliceViewNoDelete) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
-			tv.ConfigHeaderStyleWidth(lbl.AsWidget(), sg, spc, cidx)
 		}
 	}
 }
@@ -679,6 +661,8 @@ func (tv *TableView) UpdateWidgets() {
 
 	if tv.SelField != "" && tv.SelVal != nil {
 		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
+		tv.SelField = ""
+		tv.SelVal = nil
 	}
 	if tv.IsReadOnly() && tv.SelIdx >= 0 {
 		tv.SelectIdx(tv.SelIdx)
@@ -750,7 +734,7 @@ func (tv *TableView) SortSlice() {
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
 	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	defer tv.UpdateEndLayout(updt)
 
 	sgh := tv.SliceHeader()
 	_, idxOff := tv.RowWidgetNs()
@@ -779,7 +763,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 	tv.SortIdx = fldIdx
 	tv.SortSlice()
-	tv.This().(SliceViewer).UpdateWidgets()
+	tv.Update() // requires full update due to sort button icon
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or
@@ -804,9 +788,12 @@ func (tv *TableView) SetSortFieldName(nm string) {
 		return
 	}
 	spnm := strings.Split(nm, ":")
+	got := false
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		if fld.Name == spnm[0] {
+			got = true
+			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
 			tv.SortIdx = fli
 		}
 	}
@@ -816,6 +803,9 @@ func (tv *TableView) SetSortFieldName(nm string) {
 		} else {
 			tv.SortDesc = false
 		}
+	}
+	if got {
+		tv.SortSlice()
 	}
 }
 
@@ -962,4 +952,29 @@ func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
 		OnClick(func(e events.Event) {
 			tv.EditIdx(idx)
 		})
+}
+
+//////////////////////////////////////////////////////
+// 	Header layout
+
+func (tv *TableView) SizeFinal(sc *gi.Scene) {
+	tv.SliceViewBase.SizeFinal(sc)
+	sg := tv.This().(SliceViewer).SliceGrid()
+	sh := tv.SliceHeader()
+	sh.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
+		_, sgb := gi.AsWidget(sg.Child(i))
+		gsz := &sgb.Geom.Size
+		ksz := &kwb.Geom.Size
+		ksz.Actual.Total.X = gsz.Actual.Total.X
+		ksz.Actual.Content.X = gsz.Actual.Content.X
+		ksz.Alloc.Total.X = gsz.Alloc.Total.X
+		ksz.Alloc.Content.X = gsz.Alloc.Content.X
+		return ki.Continue
+	})
+	gsz := &sg.Geom.Size
+	ksz := &sh.Geom.Size
+	ksz.Actual.Total.X = gsz.Actual.Total.X
+	ksz.Actual.Content.X = gsz.Actual.Content.X
+	ksz.Alloc.Total.X = gsz.Alloc.Total.X
+	ksz.Alloc.Content.X = gsz.Alloc.Content.X
 }

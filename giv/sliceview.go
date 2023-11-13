@@ -756,6 +756,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	}
 	if sv.SelVal != nil {
 		sv.SelIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
+		sv.SelVal = nil
 	}
 	if sv.IsReadOnly() && sv.SelIdx >= 0 {
 		sv.SelectIdx(sv.SelIdx)
