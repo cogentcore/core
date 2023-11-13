@@ -481,8 +481,7 @@ func (vv *StructInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
-	sv.OnChange(func(e events.Event) {
-		// vv.UpdateWidget() // not needed?
+	sv.OnLast(events.Change, func(e events.Event) {
 		vv.SendChange()
 	})
 	vv.UpdateWidget()
@@ -659,7 +658,7 @@ func (vv *SliceInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetSlice(vv.Value.Interface())
-	sv.OnChange(func(e events.Event) {
+	sv.OnLast(events.Change, func(e events.Event) {
 		vv.SendChange()
 	})
 }
@@ -777,7 +776,7 @@ func (vv *MapInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetMap(vv.Value.Interface())
-	sv.OnChange(func(e events.Event) {
+	sv.OnLast(events.Change, func(e events.Event) {
 		vv.SendChange()
 	})
 }
@@ -916,7 +915,7 @@ func (vv *BoolValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip = vv.Doc()
 	cb.Config(sc)
-	cb.OnChange(func(e events.Event) {
+	cb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(cb.StateIs(states.Checked))
 	})
 	vv.UpdateWidget()
@@ -996,7 +995,7 @@ func (vv *IntValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		sb.Format = fmttag
 	}
 	sb.Config(sc)
-	sb.OnChange(func(e events.Event) {
+	sb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
@@ -1071,7 +1070,7 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		sb.Format = fmttag
 	}
 	sb.Config(sc)
-	sb.OnChange(func(e events.Event) {
+	sb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
@@ -1134,10 +1133,8 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	ev := vv.EnumValue()
 	ch.SetEnum(ev, false, 50)
 	ch.Config(sc)
-	ch.OnChange(func(e events.Event) {
+	ch.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(ch.CurVal)
-		// cval := ch.CurVal.(enums.Enum)
-		// vv.SetEnumValueFromInt(cval.Int64()) // todo: using index
 	})
 	vv.UpdateWidget()
 }
@@ -1259,7 +1256,7 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.SetTypes(tl, false, true, 50)
 	cb.Config(sc)
-	cb.OnChange(func(e events.Event) {
+	cb.OnLast(events.Change, func(e events.Event) {
 		tval := cb.CurVal.(*gti.Type)
 		vv.SetValue(tval)
 	})
@@ -1307,7 +1304,7 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	})
 	tf.Config(sc)
 
-	tf.OnChange(func(e events.Event) {
+	tf.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
@@ -1353,7 +1350,7 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	})
 	tf.Config(sc)
 
-	tf.OnChange(func(e events.Event) {
+	tf.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()

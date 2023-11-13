@@ -91,8 +91,12 @@ func (sp *Spinner) SpinnerStyles() {
 	})
 }
 
+func (sp *Spinner) SetTextToValue() {
+	sp.SetTextUpdate(sp.ValToString(sp.Value))
+}
+
 func (sp *Spinner) SizeUp(sc *Scene) {
-	sp.SetText(sp.ValToString(sp.Value))
+	sp.SetTextToValue()
 	sp.TextField.SizeUp(sc)
 }
 
@@ -136,7 +140,7 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 		sp.Value = mat32.Max(sp.Value, sp.Min)
 	}
 	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
-	sp.SetText(sp.ValToString(sp.Value))
+	sp.SetTextToValue()
 	return sp
 }
 
