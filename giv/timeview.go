@@ -94,7 +94,11 @@ func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
 		}
 	})
 
-	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":")
+	gi.NewLabel(tv, "colon").SetType(gi.LabelDisplayLarge).SetText(":").
+		Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+			s.Min.X.Ch(1)
+		})
 
 	minute := gi.NewTextField(tv, "minute").
 		SetText(strconv.Itoa(tv.Time.Minute()))
