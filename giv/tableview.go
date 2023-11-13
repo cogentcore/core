@@ -72,6 +72,7 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) TableViewInit() {
+	tv.MinRows = 4
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.SetFlag(true, SliceViewShowIndex)
 	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
@@ -79,8 +80,8 @@ func (tv *TableView) TableViewInit() {
 	tv.HandleSliceViewEvents()
 
 	tv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
 		s.SetAbilities(true, abilities.FocusWithinable)
+		s.SetMainAxis(mat32.Y)
 		s.Grow.Set(1, 1)
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -116,18 +117,19 @@ func (tv *TableView) TableViewInit() {
 				s.Grow.Set(1, 1)
 			})
 		case "frame/grid-lay/grid": // slice grid
-			sg := w.(*gi.Frame)
+			sg := w.(*SliceViewGrid)
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
-				// this causes everything to get off, especially resizing: not taking it into account presumably:
-				// sg.Spacing = gi.StdDialogVSpaceUnits
+				sg.MinRows = tv.MinRows
 				s.SetDisplay(styles.DisplayGrid)
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
-				s.Min.X.Em(20)
-				s.Min.Y.Em(10)
+				s.Gap.Zero()
+				s.Overflow.Set(styles.OverflowAuto) // scrollbars
 				s.Grow.Set(1, 1)
-				s.Overflow.Set(styles.OverflowAuto)
+				// baseline mins:
+				s.Min.X.Ch(20)
+				s.Min.Y.Em(6)
 			})
 		case "frame/grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
@@ -194,14 +196,16 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		tv.Slice = nil
 		return tv
 	}
-	if tv.Slice == sl && tv.IsConfiged() {
+	if tv.Slice == sl && tv.Is(SliceViewConfiged) {
 		tv.Update()
 		return tv
 	}
-	if !tv.IsReadOnly() {
-		tv.SelIdx = -1
-	}
+	updt := tv.UpdateStart()
+	defer tv.UpdateEndLayout(updt)
+
+	tv.SetFlag(false, SliceViewConfiged)
 	tv.StartIdx = 0
+	tv.VisRows = tv.MinRows
 	tv.SortIdx = -1
 	tv.SortDesc = false
 	slpTyp := reflect.TypeOf(sl)
@@ -221,10 +225,12 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		return tv
 	}
 	tv.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
-	updt := tv.UpdateStart()
+	tv.CacheVisFields()
+	if !tv.IsReadOnly() {
+		tv.SelIdx = -1
+	}
 	tv.ResetSelectedIdxs()
 	tv.SetFlag(false, SliceViewSelectMode)
-	tv.UpdateEnd(updt)
 	tv.Update()
 	return tv
 }
@@ -277,18 +283,6 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
-// IsConfiged returns true if the widget is fully configured
-func (tv *TableView) IsConfiged() bool {
-	if len(tv.Kids) == 0 {
-		return false
-	}
-	sf := tv.SliceFrame()
-	if len(sf.Kids) == 0 {
-		return false
-	}
-	return true
-}
-
 // Config configures the view
 func (tv *TableView) ConfigWidget(sc *gi.Scene) {
 	tv.ConfigTableView(sc)
@@ -296,110 +290,34 @@ func (tv *TableView) ConfigWidget(sc *gi.Scene) {
 
 func (tv *TableView) ConfigTableView(sc *gi.Scene) {
 	if tv.Is(SliceViewConfiged) {
-		if tv.NeedsConfigRows() {
-			tv.This().(SliceViewer).ConfigRows(sc)
-		} else {
-			tv.This().(SliceViewer).UpdateWidgets()
-		}
+		tv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
 	updt := tv.UpdateStart()
 	tv.ConfigFrame(sc)
-	tv.This().(SliceViewer).ConfigOneRow(sc)
+	tv.This().(SliceViewer).ConfigRows(sc)
+	tv.This().(SliceViewer).UpdateWidgets()
 	tv.ConfigScroll()
 	tv.ApplyStyleTree(sc)
 	tv.UpdateEndLayout(updt)
 }
 
 func (tv *TableView) ConfigFrame(sc *gi.Scene) {
+	if tv.HasChildren() {
+		return
+	}
 	tv.SetFlag(true, SliceViewConfiged)
 	sf := gi.NewFrame(tv, "frame")
 	sf.SetFlag(true, gi.LayoutNoKeys)
 	gi.NewFrame(sf, "header")
 	gl := gi.NewLayout(sf, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid")
+	NewSliceViewGrid(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
 	tv.ConfigHeader(sc)
 }
 
-// ConfigOneRow configures one row for initial row height measurement
-func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
-	sg := tv.This().(SliceViewer).SliceGrid()
-	sg.SetFlag(true, gi.LayoutNoKeys)
-	if sg.HasChildren() {
-		return
-	}
-	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
-
-	tv.VisRows = 0
-	if tv.IsNil() {
-		return
-	}
-
-	tv.CacheVisFields()
-
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg.Kids = make(ki.Slice, nWidgPerRow)
-
-	tv.ConfigHeader(sc)
-
-	itxt := "0"
-	if tv.Is(SliceViewShowIndex) {
-		labnm := "index-" + itxt
-		idxlab := &gi.Label{}
-		sg.SetChild(idxlab, 0, labnm)
-		idxlab.Text = itxt
-	}
-
-	val := tv.ElVal
-	stru := val.Interface()
-
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		field := tv.VisFields[fli]
-		fval := val.Elem().FieldByIndex(field.Index)
-		vv := ToValue(fval.Interface(), "")
-		if vv == nil { // shouldn't happen
-			continue
-		}
-		vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, tv.ViewPath)
-		vtyp := vv.WidgetType()
-		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
-		cidx := idxOff + fli
-		w := ki.NewOfType(vtyp).(gi.Widget)
-		sg.SetChild(w, cidx, valnm)
-		vv.ConfigWidget(w, sc)
-	}
-
-	if !tv.IsReadOnly() {
-		cidx := tv.NVisFields + idxOff
-		if !tv.Is(SliceViewNoAdd) {
-			addnm := "add-" + itxt
-			addbt := gi.Button{}
-			sg.SetChild(&addbt, cidx, addnm)
-			addbt.SetType(gi.ButtonAction)
-			addbt.SetIcon(icons.Add)
-			cidx++
-		}
-		if !tv.Is(SliceViewNoDelete) {
-			delnm := "del-" + itxt
-			delbt := gi.Button{}
-			sg.SetChild(&delbt, cidx, delnm)
-			delbt.SetType(gi.ButtonAction)
-			delbt.SetIcon(icons.Delete)
-			delbt.Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.Error.Base
-			})
-			cidx++
-		}
-	}
-	if tv.SortIdx >= 0 {
-		tv.SortSlice()
-	}
-}
-
-func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc float32, idx int) {
+func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *SliceViewGrid, spc float32, idx int) {
 	if w.Parts != nil {
 		w.Parts.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
@@ -493,19 +411,13 @@ func (tv *TableView) SliceFrame() *gi.Frame {
 
 // GridLayout returns the SliceGrid grid-layout widget, with grid and scrollbar
 func (tv *TableView) GridLayout() *gi.Layout {
-	if !tv.IsConfiged() {
-		return nil
-	}
 	return tv.SliceFrame().ChildByName("grid-lay", 0).(*gi.Layout)
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, within SliceFrame
-func (tv *TableView) SliceGrid() *gi.Frame {
-	if !tv.IsConfiged() {
-		return nil
-	}
-	return tv.GridLayout().ChildByName("grid", 0).(*gi.Frame)
+func (tv *TableView) SliceGrid() *SliceViewGrid {
+	return tv.GridLayout().ChildByName("grid", 0).(*SliceViewGrid)
 }
 
 // ScrollBar returns the SliceGrid scrollbar
@@ -545,6 +457,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 	if sg == nil {
 		return
 	}
+	tv.SetFlag(true, SliceViewConfiged)
 	sg.SetFlag(true, gi.LayoutNoKeys)
 
 	updt := sg.UpdateStart()
@@ -555,16 +468,14 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 
 	sg.DeleteChildren(ki.DestroyKids)
 	tv.Values = nil
-	tv.VisRows = 0
 
 	if tv.IsNil() {
 		return
 	}
 
-	tv.VisRows, tv.RowHeight, tv.LayoutHeight = tv.VisRowsAvail()
-
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	nWidg := nWidgPerRow * tv.VisRows
+	sg.Styles.Columns = nWidgPerRow
 
 	tv.Values = make([]Value, tv.NVisFields*tv.VisRows)
 	sg.Kids = make(ki.Slice, nWidg)
@@ -669,7 +580,8 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			}
 		}
 	}
-	tv.This().(SliceViewer).UpdateWidgets()
+	tv.ConfigTree(sc)
+	tv.ApplyStyleTree(sc)
 }
 
 // UpdateWidgets updates the row widget display to

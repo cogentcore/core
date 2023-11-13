@@ -142,48 +142,28 @@ func app() {
 
 	sc := gi.NewScene("gogi-views-test").SetTitle("GoGi Views Test")
 
-	// gi.DefaultTopAppBar = nil
+	gi.DefaultTopAppBar = nil
 
-	/*
-		trow := gi.NewLayout(sc, "trow")
-		trow.Style(func(s *styles.Style) {
-			s.SetMainAxis(mat32.X)
-			s.Align.X = styles.AlignCenter
-			s.Align.Y = styles.AlignStart
-			s.Margin.Set(units.Px(2))
-			s.Grow.Set(1, 0)
-		})
-
-		gi.NewStretch(trow, "str1")
-
-		but := gi.NewButton(trow, "slice-test").SetText("SliceDialog")
-		but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
-		but.OnClick(func(e events.Event) {
-			sl := make([]float32, 2880)
-			d := gi.NewDialog(but).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
-			giv.NewSliceView(d).SetSlice(&sl)
-			d.Run()
-		})
-		but = gi.NewButton(trow, "table-test").SetText("TableDialog")
-		but.Tooltip = "open a TableViewDialog view "
-		but.OnClick(func(e events.Event) {
-			d := gi.NewDialog(but).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
-			giv.NewTableView(d).SetSlice(&tsttable)
-			d.Run()
-		})
-
-		lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
-		lab1.Style(func(s *styles.Style) {
-			s.Grow.Set(1, 0)
-			s.Text.Align = styles.AlignCenter
-		})
-		gi.NewStretch(trow, "str2")
-
-		spc := gi.NewSpace(sc, "spc1")
-		spc.Style(func(s *styles.Style) {
-			s.Min.Y.Set(units.Em(2))
-		})
-	*/
+	// sc.TopAppBar = func(tb *gi.TopAppBar) {
+	// 	if gi.DefaultTopAppBar != nil {
+	// 		gi.DefaultTopAppBar(tb)
+	// 	}
+	// 	gi.NewButton(tb, "slice-test").SetText("SliceDialog").
+	// 		SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
+	// 		OnClick(func(e events.Event) {
+	// 			sl := make([]float32, 2880)
+	// 			d := gi.NewDialog(tb).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
+	// 			giv.NewSliceView(d).SetSlice(&sl)
+	// 			d.Run()
+	// 		})
+	// 	gi.NewButton(tb, "table-test").SetText("TableDialog").
+	// 		SetTooltip("open a TableViewDialog view").
+	// 		OnClick(func(e events.Event) {
+	// 			d := gi.NewDialog(tb).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
+	// 			giv.NewTableView(d).SetSlice(&tsttable)
+	// 			d.Run()
+	// 		})
+	// }
 
 	// split := gi.NewSplits(sc, "split")
 	// split.Dim = mat32.X

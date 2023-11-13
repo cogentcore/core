@@ -42,7 +42,9 @@ func app() {
 	// gi.DefaultTopAppBar = nil // turns it off
 
 	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBar(tb)
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
 			OnClick(func(e events.Event) {
 				fmt.Println("TopAppBar Button 1")

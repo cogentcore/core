@@ -195,7 +195,6 @@ func (sr *Slider) SliderStyles() {
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
 		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 		s.Color = colors.Scheme.OnSurface
-		s.Display = styles.DisplayNone
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull

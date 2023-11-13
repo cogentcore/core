@@ -344,7 +344,8 @@ func (ls *LayImplState) InitSizes() {
 	}
 }
 
-// CellsSize returns the current Sizes values
+// CellsSize returns the total Size represented by the current Cells,
+// which is the Sum of the Max values along each dimension.
 func (ls *LayImplState) CellsSize() mat32.Vec2 {
 	var ksz mat32.Vec2
 	for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
@@ -358,6 +359,24 @@ func (ls *LayImplState) CellsSize() mat32.Vec2 {
 		ksz.SetDim(ma, sum)
 	}
 	return ksz.Ceil()
+}
+
+// ColWidth returns the width of given column.  Returns false if doesn't exist.
+func (ls *LayImplState) ColWidth(col int) (float32, bool) {
+	n := mat32.PointDim(ls.Shape, mat32.X)
+	if col >= n {
+		return 0, false
+	}
+	return ls.Sizes[mat32.X][col].Size.X, true
+}
+
+// RowHeight returns the height of given row.  Returns false if doesn't exist.
+func (ls *LayImplState) RowHeight(row int) (float32, bool) {
+	n := mat32.PointDim(ls.Shape, mat32.Y)
+	if row >= n {
+		return 0, false
+	}
+	return ls.Sizes[mat32.Y][row].Size.Y, true
 }
 
 // StackTopWidget returns the StackTop element as a widget
@@ -985,6 +1004,17 @@ func (ly *Layout) SizeDownAllocActualStacked(sc *Scene, iter int) {
 
 //////////////////////////////////////////////////////////////////////
 //		SizeFinal
+
+// SizeFinalUpdateChildrenSizes can optionally be called for layouts
+// that dynamically create child elements based on final layout size.
+// It ensures that the children are properly sized.
+func (ly *Layout) SizeFinalUpdateChildrenSizes(sc *Scene) {
+	ly.SizeUpLay(sc)
+	iter := 3 // late stage..
+	ly.This().(Layouter).SizeDownSetAllocs(sc, iter)
+	ly.SizeDownChildren(sc, iter)
+	ly.SizeDownParts(sc, iter) // no std role, just get sizes
+}
 
 // SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
 // Sizing phase: first grows widget Actual sizes based on their Grow

@@ -20,7 +20,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
-	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
@@ -68,28 +67,29 @@ func (sv *SliceView) StyleRow(w gi.Widget, idx, fidx int) {
 //  SliceViewBase
 
 // note on implementation:
-// * Use ReConfig whenever elements added or deleted.
-//   Value-only changes use Updatewidgets.
-// * ConfigRows creates VisRows number of Values and associated Widgets
-//   to represent the slice values.
-// * UpdateWidgets goes through the existing values and widgets and updates
-//   them based on the current starting index and state.
-// * It is tricky to compute VisRows: depends on how big each row is, which
-//   means you need to render it out and measure, then divide the available
-//   layout space by that size.  ConfigSliceView starts by allocating a single
-//   "test case" row, and then VisRowsAvail uses that first row size to do the
-//   the math.
-// * ConfigWidget (ReConfig) calls ConfigSliceView which decides what level of
-//   config to perform: first ConfigOneRow, then if needs diff # of rows, ConfigRows,
-//   else UpdateWidgets.
-// * Multiple iterations are required to get this to work: ShowLayoutIter on Scene
-//   manages these iterations to get it to work.
+// * For a given slice type, the full set of widgets for VisRows is created
+//   during the Layout process (Initially MinRows are created to get row height,
+//   then the full set of visible rows is created during SizeFinal).  The
+//   SliceViewConfiged flag indicates that this has been done -- when the slice
+//   type changes (SetSlice), this flag is reset and a new layout is triggered.
+//   Other externally-driven layout changes just update VisRows accordingly.
+//
+// * UpdateWidgets updates the view based on any changes in the slice data,
+//   scrolling, etc.
+//
+// * The standard Update call will do the right thing: Config does UpdateWidgets
+//   whenever SliceViewConfiged is set, and layout makes widgets as needed.
+//   ApplyStyle is generally neeed after UpdateWidgets (state flag changes)
+//   followed by Render.
+//
+// * SliceViewGrid handles all the layout logic to start with a minimum number of
+//   rows and then computes the total number visible based on allocated size.
 
 // SliceViewFlags extend WidgetFlags to hold SliceView state
 type SliceViewFlags gi.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
-	// flagged after first configuration
+	// indicates that the widgets have been configured and
 	SliceViewConfiged SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
 
 	// if true, user cannot add elements to the slice
@@ -129,9 +129,9 @@ type SliceViewer interface {
 	// AsSliceViewBase returns the base for direct access to relevant fields etc
 	AsSliceViewBase() *SliceViewBase
 
-	// SliceGrid returns the SliceGrid grid frame widget,
+	// SliceGrid returns the SliceViewGrid grid Layout widget,
 	// which contains all the fields and values
-	SliceGrid() *gi.Frame
+	SliceGrid() *SliceViewGrid
 
 	// ScrollBar returns the SliceGrid scrollbar
 	ScrollBar() *gi.Slider
@@ -144,14 +144,8 @@ type SliceViewer interface {
 	// and sets SliceSize if changed.
 	UpdtSliceSize() int
 
-	// NeedsConfigRows returns true if a call to ConfigRows is needed,
-	// whenever the current layout allocation requires a different
-	// number of rows than currently configured.
-	NeedsConfigRows() bool
-
 	// ConfigRows configures VisRows worth of widgets
-	// to display slice data.  It should only be called
-	// when NeedsConfigRows is true: when VisRows changes.
+	// to display slice data.
 	ConfigRows(sc *gi.Scene)
 
 	// UpdateWidgets updates the row widget display to
@@ -159,10 +153,6 @@ type SliceViewer interface {
 	// including which range of data is being displayed.
 	// This is called for scrolling, navigation etc.
 	UpdateWidgets()
-
-	// ConfigOneRow configures one row, just to get sizing,
-	// only called at the start.
-	ConfigOneRow(sc *gi.Scene)
 
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(w gi.Widget, idx, fidx int)
@@ -219,9 +209,16 @@ type SliceViewBase struct {
 	gi.Frame
 
 	// the slice that we are a view onto -- must be a pointer to that slice
-	Slice any `set:"-" copy:"-" view:"-" json:"-" xml:"-"`
+	Slice any `set:"-" json:"-" xml:"-"`
 
-	// optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
+	// MinRows specifies the minimum number of rows to display, to ensure
+	// at least this amount is displayed.
+	MinRows int `def:"4"`
+
+	// optional mutex that, if non-nil, will be used around any updates that
+	// read / modify the underlying Slice data.
+	// Can be used to protect against random updating if your code has specific
+	// update points that can be likewise protected with this same mutex.
 	ViewMu *sync.Mutex `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// Changed indicates whether the underlying slice
@@ -255,20 +252,11 @@ type SliceViewBase struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `copy:"-" json:"-" xml:"-"`
 
-	// height of a single row
-	RowHeight float32 `edit:"-" copy:"-" json:"-" xml:"-"`
-
-	// the height of grid from last layout -- determines when update needed
-	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-"`
-
 	// total number of rows visible in allocated display size
 	VisRows int `edit:"-" copy:"-" json:"-" xml:"-"`
 
 	// starting slice index of visible rows
 	StartIdx int `edit:"-" copy:"-" json:"-" xml:"-"`
-
-	// the number of rows rendered -- determines update
-	RenderedRows int `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// size of slice
 	SliceSize int `edit:"-" copy:"-" json:"-" xml:"-"`
@@ -290,6 +278,7 @@ func (sv *SliceViewBase) OnInit() {
 }
 
 func (sv *SliceViewBase) SliceViewBaseInit() {
+	sv.MinRows = 4
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
 	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
@@ -309,16 +298,18 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
 			})
 		case "grid-lay/grid": // slice grid
-			sg := w.(*gi.Frame)
+			sg := w.(*SliceViewGrid)
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
+				sg.MinRows = sv.MinRows
+				s.SetDisplay(styles.DisplayGrid)
 				nWidgPerRow, _ := sv.RowWidgetNs()
-				s.Display = styles.DisplayGrid
 				s.Columns = nWidgPerRow
-				s.Overflow.Set(styles.OverflowAuto)
+				s.Overflow.Set(styles.OverflowAuto) // scrollbars
 				s.Grow.Set(1, 1)
-				s.Min.X.Em(20)
-				s.Min.Y.Ch(10)
+				// baseline mins:
+				s.Min.X.Ch(20)
+				s.Min.Y.Em(6)
 				// s.Gap.Zero()
 			})
 		case "grid-lay/scrollbar":
@@ -328,7 +319,6 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				// s.Min.Y.Zero()
 				s.Min.X = sv.Styles.ScrollBarWidth
 				s.Grow.Set(0, 1)
-				fmt.Println(sb, "set grow:", s.Grow)
 			})
 			sb.OnChange(func(e events.Event) {
 				sv.StartIdx = int(sb.Value)
@@ -393,7 +383,11 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 		return sv
 	}
 	updt := sv.UpdateStart()
+	defer sv.UpdateEndLayout(updt)
+
+	sv.SetFlag(false, SliceViewConfiged)
 	sv.StartIdx = 0
+	sv.VisRows = sv.MinRows
 	sv.Slice = sl
 	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice))
 	isArray := laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
@@ -411,7 +405,6 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 		sv.SelIdx = -1
 	}
 	sv.ResetSelectedIdxs()
-	sv.UpdateEnd(updt)
 	sv.Update()
 	return sv
 }
@@ -444,90 +437,27 @@ func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
 // ReConfig calls this, followed by ApplyStyleTree so we don't need to call that.
 func (sv *SliceViewBase) ConfigSliceView(sc *gi.Scene) {
 	if sv.Is(SliceViewConfiged) {
-		if sv.NeedsConfigRows() {
-			sv.This().(SliceViewer).ConfigRows(sc)
-		} else {
-			sv.This().(SliceViewer).UpdateWidgets()
-		}
+		sv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
 	updt := sv.UpdateStart()
 	sv.ConfigFrame(sc)
-	sv.This().(SliceViewer).ConfigOneRow(sc)
+	sv.This().(SliceViewer).ConfigRows(sc)
+	sv.This().(SliceViewer).UpdateWidgets()
 	sv.ConfigScroll()
 	sv.ApplyStyleTree(sc)
 	sv.UpdateEndLayout(updt)
 }
 
 func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
-	sv.SetFlag(true, SliceViewConfiged)
-	sv.VisRows = 0
+	if sv.HasChildren() {
+		return
+	}
+	sv.VisRows = sv.MinRows
 	gl := gi.NewLayout(sv, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(gl, "grid")
+	NewSliceViewGrid(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
-}
-
-// ConfigOneRow configures one row for initial row height measurement
-func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
-	sg := sv.This().(SliceViewer).SliceGrid()
-	sg.SetFlag(true, gi.LayoutNoKeys)
-	if sg.HasChildren() {
-		return
-	}
-	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
-
-	sv.VisRows = 0
-	if sv.IsNil() {
-		return
-	}
-
-	nWidgPerRow, idxOff := sv.RowWidgetNs()
-	sg.Kids = make(ki.Slice, nWidgPerRow)
-
-	// at this point, we make one dummy row to get size of widgets
-	val := sv.ElVal
-	vv := ToValue(sv.ElVal.Interface(), "")
-	if vv == nil { // shouldn't happen
-		return
-	}
-	vv.SetSliceValue(val, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
-	vtyp := vv.WidgetType()
-	itxt := fmt.Sprintf("%05d", 0)
-	labnm := fmt.Sprintf("index-%v", itxt)
-	valnm := fmt.Sprintf("value-%v", itxt)
-
-	if sv.Is(SliceViewShowIndex) {
-		idxlab := &gi.Label{}
-		sg.SetChild(idxlab, 0, labnm)
-		idxlab.Text = itxt
-	}
-
-	w := ki.NewOfType(vtyp).(gi.Widget)
-	sg.SetChild(w, idxOff, valnm)
-	vv.ConfigWidget(w, sc)
-	vv.UpdateWidget()
-
-	if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
-		cidx := idxOff
-		if !sv.Is(SliceViewNoAdd) {
-			cidx++
-			addnm := fmt.Sprintf("add-%v", itxt)
-			addbt := gi.Button{}
-			sg.SetChild(&addbt, cidx, addnm)
-			addbt.SetType(gi.ButtonAction)
-			addbt.SetIcon(icons.Add)
-		}
-		if !sv.Is(SliceViewNoDelete) {
-			cidx++
-			delnm := fmt.Sprintf("del-%v", itxt)
-			delbt := gi.Button{}
-			sg.SetChild(&delbt, cidx, delnm)
-			delbt.SetType(gi.ButtonAction)
-			delbt.SetIcon(icons.Delete)
-		}
-	}
 }
 
 // ConfigScroll configures the scrollbar
@@ -548,8 +478,8 @@ func (sv *SliceViewBase) GridLayout() *gi.Layout {
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values
-func (sv *SliceViewBase) SliceGrid() *gi.Frame {
-	return sv.GridLayout().ChildByName("grid", 0).(*gi.Frame)
+func (sv *SliceViewBase) SliceGrid() *SliceViewGrid {
+	return sv.GridLayout().ChildByName("grid", 0).(*SliceViewGrid)
 }
 
 // ScrollBar returns the SliceGrid scrollbar
@@ -600,17 +530,6 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 	sv.ViewMu.Unlock()
 }
 
-func (sv *SliceViewBase) SizeDown(sc *gi.Scene, iter int) bool {
-	redo := sv.Frame.SizeDown(sc, iter)
-	if iter == 0 && sv.This().(SliceViewer).NeedsConfigRows() {
-		// fmt.Println("redo, iter:", iter)
-		sv.Update()   // does applystyle
-		sv.SizeUp(sc) // re-init everything
-		redo = true
-	}
-	return redo
-}
-
 // UpdateStartIdx updates StartIdx to fit current view
 func (sv *SliceViewBase) UpdateStartIdx() {
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
@@ -641,93 +560,29 @@ func (sv *SliceViewBase) UpdateScroll() {
 	sb.UpdateEnd(updt)
 }
 
-func (sv *SliceViewBase) AvailHeight() float32 {
-	sg := sv.This().(SliceViewer).SliceGrid()
-	// sgHt := sg.Geom.Size.Actual.Content.Y
-	sgHt := sg.Geom.Size.Actual.Content.Y
-	// fmt.Println("sg:", sgHt, "sv:", sv.Geom.Size.Actual.TotalOrig.Y)
-	return sgHt
-}
-
-// VisRowsAvail returns the number of visible rows available
-// to display given the current layout parameters.
-func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
-	sg := sv.This().(SliceViewer).SliceGrid()
-	if sg == nil {
-		return
-	}
-	if sg.HasChildren() {
-		_, kwb := gi.AsWidget(sg.Child(0))
-		rowht = kwb.Geom.Size.Alloc.Total.Y
-		// fmt.Println(kwb, "row ht alloc:", rowht, "total:", kwb.Geom.Size.Actual.Total.Y)
-	}
-	if !sv.NeedsRebuild() { // use existing unless rebuilding
-		rowht = max(rowht, sv.RowHeight)
-		// fmt.Println("rowht:", rowht, "svrh:", sv.RowHeight)
-	}
-	if sv.Styles.Font.Face == nil {
-		sv.Styles.Font = paint.OpenFont(sv.Styles.FontRender(), &sv.Styles.UnContext)
-	}
-	rowht = mat32.Max(rowht, 2*sv.Styles.Font.Face.Metrics.Height)
-
-	sc := sv.Sc
-	if sc != nil && sc.Is(gi.ScPrefSizing) {
-		rows = gi.LayoutPrefMaxRows
-		layht = float32(rows) * rowht
-	} else {
-		sv.RowHeight = max(sv.RowHeight, rowht)
-		sgHt := sv.AvailHeight()
-		layht = sgHt
-		if sgHt == 0 {
-			return
-		}
-		rows = int(mat32.Floor(sgHt / rowht))
-		// fmt.Println("rows:", rows, "sght:", sgHt, "rowht:", rowht, "sc ht:", sc.SceneGeom.Size.Y)
-	}
-	return
-}
-
-// NeedsConfigRows returns true if layout size needs diff # of rows
-func (sv *SliceViewBase) NeedsConfigRows() bool {
-	if sv.IsNil() {
-		sv.VisRows = 0
-		return false
-	}
-	rows, _, _ := sv.VisRowsAvail()
-	return rows != sv.VisRows || rows == 0
-}
-
 // ConfigRows configures VisRows worth of widgets
-// to display slice data.  It should only be called
-// when NeedsConfigRows is true: when VisRows changes.
+// to display slice data.
 func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
 	}
+	sv.SetFlag(true, SliceViewConfiged)
 	sg.SetFlag(true, gi.LayoutNoKeys)
-
-	updt := sg.UpdateStart()
-	defer sg.UpdateEndLayout(updt)
 
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
 
 	sg.DeleteChildren(ki.DestroyKids)
 	sv.Values = nil
-	sv.VisRows = 0
 
 	if sv.IsNil() {
 		return
 	}
 
-	sv.VisRows, sv.RowHeight, sv.LayoutHeight = sv.VisRowsAvail()
-
-	// fmt.Println("vis:", sv.VisRows, "rowht:", sv.RowHeight, "layht:", sv.LayoutHeight)
-	// fmt.Println("sg:", sg.LayState.String())
-
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	nWidg := nWidgPerRow * sv.VisRows
+	sg.Styles.Columns = nWidgPerRow
 
 	sv.Values = make([]Value, sv.VisRows)
 	sg.Kids = make(ki.Slice, nWidg)
@@ -811,7 +666,8 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 			}
 		}
 	}
-	sv.This().(SliceViewer).UpdateWidgets()
+	sv.ConfigTree(sc)
+	sv.ApplyStyleTree(sc)
 }
 
 // UpdateWidgets updates the row widget display to
@@ -2221,4 +2077,73 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 	// 		}
 	// 	})
 	// }
+}
+
+//////////////////////////////////////////////////////
+// 	SliceViewGrid and Layout
+
+// SliceViewGrid handles the resizing logic for SliceView, TableView.
+type SliceViewGrid struct {
+	gi.Frame // note: must be a frame to support stripes!
+
+	// MinRows is set from parent SV
+	MinRows int `edit:"-"`
+
+	// height of a single row, computed during layout
+	RowHeight float32 `edit:"-" copy:"-" json:"-" xml:"-"`
+
+	// total number of rows visible in allocated display size
+	VisRows int `edit:"-" copy:"-" json:"-" xml:"-"`
+}
+
+func (sg *SliceViewGrid) OnInit() {
+	sg.Frame.OnInit()
+	sg.Styles.Display = styles.DisplayGrid
+}
+
+func (sg *SliceViewGrid) SizeFromChildren(sc *gi.Scene, iter int, pass gi.LayoutPasses) mat32.Vec2 {
+	csz := sg.Frame.SizeFromChildren(sc, iter, pass)
+	rht, ok := sg.LayImpl.RowHeight(0)
+	if !ok {
+		fmt.Println("SliceViewGrid Sizing Error: No rows!", sg)
+		sg.RowHeight = 42
+	}
+	if sg.NeedsRebuild() { // rebuilding = reset
+		sg.RowHeight = rht
+	} else {
+		sg.RowHeight = max(sg.RowHeight, rht)
+	}
+	if sg.RowHeight == 0 {
+		fmt.Println("SliceViewGrid Sizing Error: RowHeight should not be 0!", sg)
+		sg.RowHeight = 42
+	}
+	allocHt := sg.Geom.Size.Alloc.Content.Y
+	if allocHt > sg.RowHeight {
+		sg.VisRows = int(mat32.Floor(allocHt / sg.RowHeight))
+	}
+	sg.VisRows = max(sg.VisRows, sg.MinRows)
+	minHt := sg.RowHeight * float32(sg.MinRows)
+	visHt := sg.RowHeight * float32(sg.VisRows)
+	_ = visHt
+	// _, pwd := sg.ParentWidget()
+	// _, ppwd := pwd.ParentWidget()
+	// fmt.Println("par:", pwd.Geom.Size.String())
+	// fmt.Println("parpar:", ppwd.Geom.Size.String())
+	// _, sb := gi.AsWidget(pwd.Child(1))
+	// fmt.Println("scroll", sb.Geom.Size.String())
+	// fmt.Println("sg sz:", sg.Geom.Size.String())
+	// fmt.Println("csz:", csz, "rh:", sg.RowHeight, "alloc:", allocHt, "vr:", sg.VisRows, "mr:", sg.MinRows, "minht:", minHt)
+	csz.Y = minHt
+	return csz
+}
+
+func (sv *SliceViewBase) SizeFinal(sc *gi.Scene) {
+	sg := sv.This().(SliceViewer).SliceGrid()
+	if sv.VisRows != sg.VisRows {
+		sv.VisRows = sg.VisRows
+		// fmt.Println("vis rows:", sg.VisRows)
+		sv.This().(SliceViewer).ConfigRows(sc)
+		sg.SizeFinalUpdateChildrenSizes(sc)
+	}
+	sv.Frame.SizeFinal(sc)
 }

@@ -165,6 +165,11 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 
 	// we automatically apply prefs to style after we run all of the stylers
 	wb.ApplyStylePrefs()
+	// note: this does not un-set the Invisible if not None, because all kinds of things
+	// can turn invisible to off.
+	if wb.Styles.Display == styles.DisplayNone {
+		wb.SetState(true, states.Invisible)
+	}
 
 	SetUnitContext(&wb.Styles, sc, mat32.Vec2{}, mat32.Vec2{})
 

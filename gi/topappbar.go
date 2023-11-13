@@ -150,23 +150,24 @@ func (tb *TopAppBar) SizeUp(sc *Scene) {
 	tb.Frame.SizeUp(sc)
 }
 
+// todo: try doing move to overflow in Final
+
 func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
 	redo := tb.Frame.SizeDown(sc, iter)
 	if iter == 0 {
-		return true
+		return true // ensure a second pass
 	}
 	tb.MoveToOverflow(sc)
 	return redo
 }
 
 func (tb *TopAppBar) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
+	csz := tb.Frame.SizeFromChildren(sc, iter, pass)
 	if pass == SizeUpPass || (pass == SizeDownPass && iter == 0) {
-		csz := tb.Frame.SizeFromChildren(sc, iter, pass)
 		ovsz := tb.OverflowButton.Geom.Size.Actual.Total.X
-		csz.X = ovsz
+		csz.X = ovsz // present the minimum size initially
 		return csz
 	}
-	csz := tb.Frame.SizeFromChildren(sc, iter, pass)
 	return csz
 }
 

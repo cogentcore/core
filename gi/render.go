@@ -386,7 +386,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	// Do sequence of layout updates at start to deal with dynanmically
 	// sized elements that require iterative passes of layout.
-	if sc.ShowLayoutIter < 3 { // 4 needed for SliceViewBase
+	if sc.ShowLayoutIter < 3 { // 3 needed for SliceViewBase
 		// fmt.Println("scene layout iter:", sc.ShowLayoutIter)
 		sc.ShowLayoutIter++
 		sc.SetFlag(true, ScNeedsLayout)
