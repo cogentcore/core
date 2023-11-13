@@ -17,7 +17,6 @@ import (
 
 	"github.com/c2h5oh/datasize"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
 )
 
@@ -327,27 +326,6 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 
 	icn := icons.None
 	return icn, false
-}
-
-var FileInfoProps = ki.Props{
-	"CtxtMenu": ki.PropSlice{
-		{"Duplicate", ki.Props{
-			"desc":    "Duplicate this file or folder",
-			"confirm": true,
-		}},
-		{"Delete", ki.Props{
-			"desc":    "Ok to delete this file or folder?  This is not undoable and is not moving to trash / recycle bin",
-			"confirm": true,
-		}},
-		{"Rename", ki.Props{
-			"desc": "Rename file to new file name",
-			"Args": ki.PropSlice{
-				{"New Name", ki.Props{
-					"default-field": "Name",
-				}},
-			},
-		}},
-	},
 }
 
 //////////////////////////////////////////////////////////////////////////////
