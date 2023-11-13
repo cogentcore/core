@@ -2239,8 +2239,8 @@ var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{
 }
 
 var _WhiteSpacesDescMap = map[WhiteSpaces]string{
-	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary`,
-	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line. The text continues on the same line until a &lt;br&gt; tag is encountered`,
+	0: `WhiteSpaceNormal means that all white space is collapsed to a single space, and text wraps when necessary. To get full word wrapping to expand to all available space, you also need to set Grow.X = 1. Use the SetTextWrap convenience method to set both.`,
+	1: `WhiteSpaceNowrap means that sequences of whitespace will collapse into a single whitespace. Text will never wrap to the next line except if there is an explicit line break via a &lt;br&gt; tag. In general you also don&#39;t want simple non-wrapping text labels to Grow (Grow.X = 0). Use the SetTextWrap method to set both.`,
 	2: `WhiteSpacePre means that whitespace is preserved by the browser. Text will only wrap on line breaks. Acts like the &lt;pre&gt; tag in HTML. This invokes a different hand-written parser because the default golang parser automatically throws away whitespace`,
 	3: `WhiteSpacePreLine means that sequences of whitespace will collapse into a single whitespace. Text will wrap when necessary, and on line breaks`,
 	4: `WhiteSpacePreWrap means that whitespace is preserved by the browser. Text will wrap when necessary, and on line breaks`,

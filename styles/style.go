@@ -114,12 +114,12 @@ type Style struct { //gti:add
 	//  Layout
 
 	// MainAxis is the main axis along which elements are arranged by a layout.
-	// X = horizontal axis, Y = vertical axis.
+	// X = horizontal axis (default), Y = vertical axis.
 	// See also [Wrap]
 	MainAxis mat32.Dims
 
 	// Wrap causes elements to wrap around in the CrossAxis dimension
-	// to fit within sizing constraints.
+	// to fit within sizing constraints (on by default).
 	Wrap bool
 
 	// Overflow determines how to handle overflowing content in a layout.
@@ -418,4 +418,25 @@ func (st *Style) SetGrow(v ...float32) *Style {
 		st.Grow.Y = v[1]
 	}
 	return st
+}
+
+// SetTextWrap sets the Text.WhiteSpace and Grow.X properties in
+// a coordinated manner.  If wrap == true, then WhiteSpaceNormal
+// and Grow.X = 1; else WhiteSpaceNowrap and Grow.X = 0, which
+// are typically the two desired stylings.
+func (st *Style) SetTextWrap(wrap bool) {
+	if wrap {
+		st.Text.WhiteSpace = WhiteSpaceNormal
+		st.Grow.X = 1
+	} else {
+		st.Text.WhiteSpace = WhiteSpaceNowrap
+		st.Grow.X = 0
+	}
+}
+
+// SetNonSelectable turns off the Selectable and DoubleClicable
+// abilities and sets the Cursor to None.
+func (st *Style) SetNonSelectable() {
+	st.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+	st.Cursor = cursors.None
 }

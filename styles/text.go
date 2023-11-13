@@ -15,13 +15,23 @@ import (
 // most of these are inherited
 type Text struct { //gti:add
 
-	// prop: text-align (inherited) = how to align text, horizontally. This *only* applies to the text within its containing element, and is typically relevant only for multi-line text: for single-line text, if element does not have a specified size that is different from the text size, then this has *no effect*.
+	// prop: text-align (inherited) = how to align text, horizontally.
+	// This *only* applies to the text within its containing element,
+	// and is typically relevant only for multi-line text:
+	// for single-line text, if element does not have a specified size
+	// that is different from the text size, then this has *no effect*.
 	Align Align `xml:"text-align" inherit:"true"`
 
-	// prop: text-vertical-align (inherited) = vertical alignment of text. This *only* applies to the text within its containing element -- if that element does not have a specified size that is different from the text size, then this has *no effect*.
+	// prop: text-vertical-align (inherited) = vertical alignment of text.
+	// This is only applicable for SVG styling, not regular CSS / GoGi,
+	// which uses the global Align.Y.  It *only* applies to the text within
+	// its containing element: if that element does not have a specified size
+	// that is different from the text size, then this has *no effect*.
 	AlignV Align `xml:"text-vertical-align" inherit:"true"`
 
-	// prop: text-anchor (inherited) = for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB
+	// prop: text-anchor (inherited) = for svg rendering only:
+	// determines the alignment relative to text position coordinate.
+	// For RTL start is right, not left, and start is top for TB
 	Anchor TextAnchors `xml:"text-anchor" inherit:"true"`
 
 	// prop: letter-spacing = spacing between characters and lines
@@ -33,7 +43,9 @@ type Text struct { //gti:add
 	// prop: line-height (inherited) = specified height of a line of text; text is centered within the overall lineheight; the standard way to specify line height is in terms of em
 	LineHeight units.Value `xml:"line-height" inherit:"true"`
 
-	// prop: white-space (*not* inherited) = specifies how white space is processed, and how lines are wrapped
+	// prop: white-space (*not* inherited) specifies how white space is processed,
+	// and how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.
+	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace WhiteSpaces `xml:"white-space"`
 
 	// prop: unicode-bidi (inherited) = determines how to treat unicode bidirectional information
@@ -176,12 +188,16 @@ type WhiteSpaces int32 //enums:enum -trim-prefix WhiteSpace
 
 const (
 	// WhiteSpaceNormal means that all white space is collapsed to a single
-	// space, and text wraps when necessary
+	// space, and text wraps when necessary.  To get full word wrapping to
+	// expand to all available space, you also need to set Grow.X = 1.
+	// Use the SetTextWrap convenience method to set both.
 	WhiteSpaceNormal WhiteSpaces = iota
 
 	// WhiteSpaceNowrap means that sequences of whitespace will collapse into
-	// a single whitespace. Text will never wrap to the next line. The text
-	// continues on the same line until a <br> tag is encountered
+	// a single whitespace. Text will never wrap to the next line except
+	// if there is an explicit line break via a <br> tag.  In general you
+	// also don't want simple non-wrapping text labels to Grow (Grow.X = 0).
+	// Use the SetTextWrap method to set both.
 	WhiteSpaceNowrap
 
 	// WhiteSpacePre means that whitespace is preserved by the browser. Text
