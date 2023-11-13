@@ -52,7 +52,6 @@ func (sv *StructViewInline) OnInit() {
 
 func (sv *StructViewInline) StructViewInlineStyles() {
 	sv.Style(func(s *styles.Style) {
-		// s.Min.X.Ch(20)
 		s.Align.Y = styles.AlignCenter
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {

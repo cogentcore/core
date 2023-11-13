@@ -15,7 +15,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // SliceViewInline represents a slice as a single line widget,
@@ -54,9 +53,7 @@ func (sv *SliceViewInline) OnInit() {
 
 func (sv *SliceViewInline) SliceViewInlineStyles() {
 	sv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-		s.Min.X.Ch(20)
-		s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
+		s.Align.Y = styles.AlignCenter
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
