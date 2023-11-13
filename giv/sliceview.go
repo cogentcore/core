@@ -262,7 +262,7 @@ type SliceViewBase struct {
 	SliceSize int `edit:"-" copy:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
-	CurIdx int `copy:"-" view:"-" json:"-" xml:"-"`
+	TmpIdx int `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// ElVal is a Value representation of the underlying element type
 	// which is used whenever there are no slice elements available
@@ -1561,19 +1561,19 @@ func (sv *SliceViewBase) CutIdxs() {
 	}
 }
 
-// Paste pastes clipboard at CurIdx
+// Paste pastes clipboard at TmpIdx
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
 	dt := sv.This().(SliceViewer).MimeDataType()
 	md := sv.EventMgr().ClipBoard().Read([]string{dt})
 	if md != nil {
-		sv.PasteMenu(md, sv.CurIdx)
+		sv.PasteMenu(md, sv.TmpIdx)
 	}
 }
 
 // PasteIdx pastes clipboard at given idx
 func (sv *SliceViewBase) PasteIdx(idx int) {
-	sv.CurIdx = idx
+	sv.TmpIdx = idx
 	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Paste()
 	} else {
@@ -1705,7 +1705,7 @@ func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
 	// idx, ok := sv.IdxFromPos(de.LocalPos().Y)
 	// if ok {
 	// 	de.SetHandled()
-	// 	sv.CurIdx = idx
+	// 	sv.TmpIdx = idx
 	// 	if dpr, ok := sv.This().(gi.DragNDropper); ok {
 	// 		dpr.Drop(de.Data, de.Mod)
 	// 	} else {
@@ -1746,9 +1746,9 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Scene, data any, mod events.DropMods
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
 	mf := func(m *gi.Scene) {
-		sv.MakeDropMenu(m, md, mod, sv.CurIdx)
+		sv.MakeDropMenu(m, md, mod, sv.TmpIdx)
 	}
-	pos := sv.IdxPos(sv.CurIdx)
+	pos := sv.IdxPos(sv.TmpIdx)
 	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
 }
 

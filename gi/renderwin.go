@@ -375,8 +375,8 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	// zr := goosi.ZoomFactor / oldzoom
 	// curSz := rctx.Size
 	// nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
-	// rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	rctx.Mu.RUnlock()
+	Prefs.UpdateAll()
 	// w.GoosiWin.SetSize(nsz)
 }
 

@@ -270,6 +270,7 @@ var FileViewType = gti.AddType(&gti.Type{
 		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", LocalType: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}, Tag: ""}},
 		{"Files", &gti.Field{Name: "Files", Type: "[]*goki.dev/pi/v2/filecat.FileInfo", LocalType: "[]*filecat.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}, Tag: ""}},
 		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\""}},
+		{"SelectedDoubleClick", &gti.Field{Name: "SelectedDoubleClick", Type: "bool", LocalType: "bool", Doc: "set to true if a file was selected via double-click,\nwhich can then be a signal to dialogs to accept.", Directives: gti.Directives{}, Tag: ""}},
 		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
@@ -332,6 +333,14 @@ func (t *FileView) SetExtMap(v map[string]string) *FileView {
 // files for current directory
 func (t *FileView) SetFiles(v []*filecat.FileInfo) *FileView {
 	t.Files = v
+	return t
+}
+
+// SetSelectedDoubleClick sets the [FileView.SelectedDoubleClick]:
+// set to true if a file was selected via double-click,
+// which can then be a signal to dialogs to accept.
+func (t *FileView) SetSelectedDoubleClick(v bool) *FileView {
+	t.SelectedDoubleClick = v
 	return t
 }
 
@@ -1071,9 +1080,9 @@ func (t *SliceView) SetSliceSize(v int) *SliceView {
 	return t
 }
 
-// SetCurIdx sets the [SliceView.CurIdx]
-func (t *SliceView) SetCurIdx(v int) *SliceView {
-	t.CurIdx = v
+// SetTmpIdx sets the [SliceView.TmpIdx]
+func (t *SliceView) SetTmpIdx(v int) *SliceView {
+	t.TmpIdx = v
 	return t
 }
 
@@ -1107,7 +1116,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", LocalType: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", LocalType: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", LocalType: "int", Doc: "size of slice", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"CurIdx", &gti.Field{Name: "CurIdx", Type: "int", LocalType: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"TmpIdx", &gti.Field{Name: "TmpIdx", Type: "int", LocalType: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ElVal", &gti.Field{Name: "ElVal", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1237,10 +1246,10 @@ func (t *SliceViewBase) SetSliceSize(v int) *SliceViewBase {
 	return t
 }
 
-// SetCurIdx sets the [SliceViewBase.CurIdx]:
+// SetTmpIdx sets the [SliceViewBase.TmpIdx]:
 // temp idx state for e.g., dnd
-func (t *SliceViewBase) SetCurIdx(v int) *SliceViewBase {
-	t.CurIdx = v
+func (t *SliceViewBase) SetTmpIdx(v int) *SliceViewBase {
+	t.TmpIdx = v
 	return t
 }
 
@@ -2009,9 +2018,9 @@ func (t *TableView) SetSliceSize(v int) *TableView {
 	return t
 }
 
-// SetCurIdx sets the [TableView.CurIdx]
-func (t *TableView) SetCurIdx(v int) *TableView {
-	t.CurIdx = v
+// SetTmpIdx sets the [TableView.TmpIdx]
+func (t *TableView) SetTmpIdx(v int) *TableView {
+	t.TmpIdx = v
 	return t
 }
 

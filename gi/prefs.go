@@ -33,8 +33,8 @@ func Init() {
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
 		Prefs.Open()
-		Prefs.Apply()
 		goosi.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
+		Prefs.Apply()
 		if TheViewIFace != nil {
 			TheViewIFace.HiStyleInit()
 		}
@@ -163,6 +163,7 @@ func (pf *Preferences) UpdateAll() { //gti:add
 	colors.FullCache = nil
 	for _, w := range AllRenderWins {
 		rctx := w.StageMgr.RenderCtx
+		rctx.LogicalDPI = w.LogicalDPI()
 		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	}
 }
@@ -307,6 +308,7 @@ func (pf *Preferences) Apply() { //gti:add
 func (pf *Preferences) ApplyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
 	goosi.LogicalDPIScale = pf.Zoom / 100
+	// fmt.Println("goosi ldpi:", goosi.LogicalDPIScale)
 	n := goosi.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := goosi.TheApp.Screen(i)
@@ -328,6 +330,7 @@ func (pf *Preferences) ApplyDPI() {
 // default or specific to the current screen.
 //   - forCurrentScreen: if true, saves only for current screen
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
+	goosi.ZoomFactor = 1 // reset -- otherwise has 2x effect
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
 		sp, ok := pf.ScreenPrefs[sc.Name]
