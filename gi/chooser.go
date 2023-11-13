@@ -178,6 +178,7 @@ func (ch *Chooser) ChooserStyles() {
 			}
 			ch.HandleChooserTextFieldEvents(text)
 			text.Style(func(s *styles.Style) {
+				s.Grow = ch.Styles.Grow // we grow like our parent
 				// parent handles everything
 				s.Min.Y.Em(1.2) // note: this is essential
 				// TODO(kai): figure out what to do with MaxLength
