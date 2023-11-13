@@ -543,7 +543,7 @@ func (tb *Tab) TabStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		// s.Max.X.Dp(500)
+		s.Max.X.Ch(20)
 		s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
@@ -565,7 +565,6 @@ func (tb *Tab) TabStyles() {
 		switch w.PathFrom(tb) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 				s.Align.Y = styles.AlignCenter
 				s.Overflow.X = styles.OverflowHidden // no scrollbars!

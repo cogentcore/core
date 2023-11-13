@@ -530,7 +530,8 @@ func (tv *TreeView) SizeUp(sc *gi.Scene) {
 	sz := &tv.Geom.Size
 	sz.Actual.Content = mat32.Vec2{w, h}
 	sz.SetTotalFromContent(&sz.Actual)
-	tv.WidgetSize.X = w // stretch
+	sz.Alloc = sz.Actual // need allocation to match!
+	tv.WidgetSize.X = w  // stretch
 }
 
 func (tv *TreeView) SizeDown(sc *gi.Scene, iter int) bool {
