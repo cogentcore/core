@@ -312,10 +312,8 @@ func (lb *Label) ConfigWidget(sc *Scene) {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using given size to constrain layout.  Styles.Text align factors
-// operate only within the space needed for the text itself,
-// and not in any broader allocation of space -- this is done by
-// first doing layout top-left aligned and doing a second layout pass
-// within the space required for left-aligned.
+// operate only within the space allocated for the text,
+// and not in any broader allocation of space.
 func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
@@ -324,14 +322,25 @@ func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
 	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
+	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
+}
+
+// ConfigLabelAlloc is used for determining how much space the label
+// takes.  In this case, alignment factors are turned off,
+// because they otherwise can absorb much more space, which should
+// instead be controlled by the base Align X,Y factors.
+func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) {
+	lb.StyMu.RLock()
+	defer lb.StyMu.RUnlock()
+
+	// todo: last arg is CSSAgg.  Can synthesize that some other way?
+	fs := lb.Styles.FontRender()
+	txs := &lb.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.AlignStart, styles.AlignStart
+	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
 	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
 	txs.Align, txs.AlignV = align, alignV
-	if align != styles.AlignStart || alignV != styles.AlignStart {
-		rsz := lb.TextRender.Size.Ceil()
-		lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, rsz)
-	}
 }
 
 // SizeUpWrapSize is the size to use for layout during the SizeUp pass,
@@ -386,7 +395,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 		return false
 	}
 	sz := &lb.Geom.Size
-	lb.ConfigLabel(sc, sz.Alloc.Content) // use allocation
+	lb.ConfigLabelAlloc(sc, sz.Alloc.Content) // use allocation
 	rsz := lb.TextRender.Size.Ceil()
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess

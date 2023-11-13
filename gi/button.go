@@ -207,10 +207,8 @@ func (bt *Button) ButtonStyles() {
 				label.Type = LabelLabelLarge
 			}
 			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
-				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Grow.Set(0, 0) // nowrap
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Max.X.Zero()
@@ -231,9 +229,8 @@ func (bt *Button) ButtonStyles() {
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
-				s.Max.X.Zero()
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 			})
 		}
 	})

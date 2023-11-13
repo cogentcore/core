@@ -347,14 +347,13 @@ func (tv *TreeView) TreeViewStyles() {
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
+				// todo: (Kai) need to change these for clickable links in glide
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Min.X.Ch(16)
 				s.Min.Y.Em(1.2)
-				// s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Grow.Set(0, 0) // ?
 			})
 		case "parts/menu":
 			menu := w.(*gi.Button)

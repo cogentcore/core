@@ -905,21 +905,21 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 			mx := md.Size.Dim(ma)
 			asz := mx
 			gsum := cd.Grow.Dim(ma)
-			if gsum > 0 {
+			if gsum > 0 && exd > 0 {
 				if gr > gsum {
 					fmt.Println(ly, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
 					gr = gsum
 				}
 				redo = true
 				asz = mat32.Round(mx + exd*(gr/gsum)) // todo: could use Floor
+				if asz > alloc.Dim(ma) {              // bug!
+					fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
+					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "act:", sz.Actual.Content.Dim(ma))
+					fmt.Println(ly.LayImpl.String())
+					fmt.Println(ly.LayImpl.CellsSize())
+				}
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)
-			if asz > alloc.Dim(ma) { // bug!
-				fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
-				fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "act:", sz.Actual.Content.Dim(ma))
-				fmt.Println(ly.LayImpl.String())
-				fmt.Println(ly.LayImpl.CellsSize())
-			}
 		}
 		ksz.SetContentFromTotal(&ksz.Alloc)
 		return ki.Continue

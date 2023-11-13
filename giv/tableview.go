@@ -101,19 +101,17 @@ func (tv *TableView) TableViewInit() {
 			sh := w.(*gi.Frame)
 			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Gap.Zero()
 				s.Grow.Set(0, 0)
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				// note: this does not work:
 				// sg := tv.SliceGrid()
 				// if sg != nil {
-				// 	s.Min.X.Dot(sg.Geom.Size.Actual.Content.X)
+				// 	s.Max.X.Dot(sg.Geom.Size.Actual.Content.X)
 				// }
 			})
 		case "frame/grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
 			})
 		case "frame/grid-lay/grid": // slice grid
@@ -124,7 +122,7 @@ func (tv *TableView) TableViewInit() {
 				s.SetDisplay(styles.DisplayGrid)
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
-				s.Gap.Zero()
+				// s.Gap.Zero()
 				s.Overflow.Set(styles.OverflowAuto) // scrollbars
 				s.Grow.Set(1, 1)
 				// baseline mins:

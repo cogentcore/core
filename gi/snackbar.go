@@ -92,8 +92,8 @@ func (sb *Snackbar) SnackbarStyles() {
 func (sb *Snackbar) Text(text string) *Snackbar {
 	NewLabel(sb, "text").SetText(text).SetType(LabelBodyMedium).
 		Style(func(s *styles.Style) {
-			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-			s.Grow.Set(0, 0)
+			// s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+			// s.Grow.Set(0, 0)
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
 			}

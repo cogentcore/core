@@ -96,13 +96,17 @@ func (fv *FileView) FileViewStyles() {
 		case "path-tbar":
 			fr := w.(*gi.Frame)
 			gi.ToolbarStyles(fr)
+			w.Style(func(s *styles.Style) {
+				s.Gap.X.Dp(4)
+			})
 		case "path-tbar/path-lbl":
 			w.Style(func(s *styles.Style) {
-				s.Max.X.Zero()
+				s.SetTextWrap(false)
 			})
 		case "path-tbar/path":
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(60)
+				s.Max.X.Zero()
 				s.Grow.Set(1, 0)
 			})
 		case "files-row":
@@ -134,16 +138,17 @@ func (fv *FileView) FileViewStyles() {
 			})
 		case "sel-row/sel-lbl":
 			w.Style(func(s *styles.Style) {
-				s.Max.X.Zero()
+				s.SetTextWrap(false)
 			})
 		case "sel-row/sel": // sel field
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(60)
+				s.Max.X.Zero()
 				s.Grow.Set(1, 0)
 			})
 		case "sel-row/ext-lbl":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(10)
+				s.SetTextWrap(false)
 			})
 		}
 	})

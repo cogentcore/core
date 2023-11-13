@@ -214,13 +214,11 @@ func (sw *Switch) SwitchStyles() {
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Align.Y = styles.AlignCenter
-				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Grow.Set(0, 0) // nowrap
 				s.FillMargin = false
 			})
 		}

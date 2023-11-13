@@ -158,10 +158,8 @@ func (ch *Chooser) ChooserStyles() {
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Cursor = cursors.None
-				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Grow.Set(0, 0)
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Align.Y = styles.AlignCenter

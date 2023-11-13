@@ -579,10 +579,8 @@ func (tb *Tab) TabStyles() {
 			label := w.(*Label)
 			label.Type = LabelBodyMedium
 			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-				s.Grow.Set(0, 0) // nowrap
-				s.Cursor = cursors.None
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Align.Set(styles.AlignCenter)

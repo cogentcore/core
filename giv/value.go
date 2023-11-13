@@ -838,7 +838,7 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 		if widthtag, ok := vv.Tag("width"); ok {
 			width, err := laser.ToFloat32(widthtag)
 			if err == nil {
-				s.Min.Y.Ch(width)
+				s.Min.X.Ch(width)
 			}
 		}
 		if maxwidthtag, ok := vv.Tag("max-width"); ok {

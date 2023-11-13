@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
@@ -142,28 +143,28 @@ func app() {
 
 	sc := gi.NewScene("gogi-views-test").SetTitle("GoGi Views Test")
 
-	gi.DefaultTopAppBar = nil
+	// gi.DefaultTopAppBar = nil
 
-	// sc.TopAppBar = func(tb *gi.TopAppBar) {
-	// 	if gi.DefaultTopAppBar != nil {
-	// 		gi.DefaultTopAppBar(tb)
-	// 	}
-	// 	gi.NewButton(tb, "slice-test").SetText("SliceDialog").
-	// 		SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
-	// 		OnClick(func(e events.Event) {
-	// 			sl := make([]float32, 2880)
-	// 			d := gi.NewDialog(tb).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
-	// 			giv.NewSliceView(d).SetSlice(&sl)
-	// 			d.Run()
-	// 		})
-	// 	gi.NewButton(tb, "table-test").SetText("TableDialog").
-	// 		SetTooltip("open a TableViewDialog view").
-	// 		OnClick(func(e events.Event) {
-	// 			d := gi.NewDialog(tb).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
-	// 			giv.NewTableView(d).SetSlice(&tsttable)
-	// 			d.Run()
-	// 		})
-	// }
+	sc.TopAppBar = func(tb *gi.TopAppBar) {
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
+		gi.NewButton(tb, "slice-test").SetText("SliceDialog").
+			SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
+			OnClick(func(e events.Event) {
+				sl := make([]float32, 2880)
+				d := gi.NewDialog(tb).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
+				giv.NewSliceView(d).SetSlice(&sl)
+				d.Run()
+			})
+		gi.NewButton(tb, "table-test").SetText("TableDialog").
+			SetTooltip("open a TableViewDialog view").
+			OnClick(func(e events.Event) {
+				d := gi.NewDialog(tb).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
+				giv.NewTableView(d).SetSlice(&tsttable)
+				d.Run()
+			})
+	}
 
 	// split := gi.NewSplits(sc, "split")
 	// split.Dim = mat32.X

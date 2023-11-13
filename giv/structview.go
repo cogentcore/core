@@ -87,8 +87,7 @@ func (sv *StructView) OnInit() {
 			})
 			if strings.HasPrefix(w.Name(), "label-") {
 				w.Style(func(s *styles.Style) {
-					s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-					s.Grow.Set(0, 0)
+					s.SetTextWrap(false)
 				})
 			}
 		}
