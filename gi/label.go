@@ -202,6 +202,17 @@ func (lb *Label) LabelStyles() {
 	})
 }
 
+// SetTextUpdate sets the text and updates the underlying render
+// (i.e., ConfigLabel) so it will actually show on next render.
+// (including an UpdateRender flag)
+func (lb *Label) SetTextUpdate(text string) *Label {
+	updt := lb.UpdateStart()
+	lb.Text = text
+	lb.ConfigLabel(lb.Sc)
+	lb.UpdateEndRender(updt)
+	return lb
+}
+
 func (lb *Label) HandleLabelEvents() {
 	lb.HandleWidgetEvents()
 	// lb.HandleLabelLongHover()
@@ -302,7 +313,7 @@ func (lb *Label) HandleLabelKeys() {
 }
 
 func (lb *Label) ConfigWidget(sc *Scene) {
-	lb.ConfigLabel(sc, lb.Geom.Size.Actual.Content)
+	lb.ConfigLabel(sc)
 }
 
 // todo: ideally it would be possible to only call SetHTML once during config
@@ -311,10 +322,14 @@ func (lb *Label) ConfigWidget(sc *Scene) {
 // so that is never able to undo initial word wrapping from constrained sizes.
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
-// using given size to constrain layout.  Styles.Text align factors
-// operate only within the space allocated for the text,
-// and not in any broader allocation of space.
-func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
+// using actual content size to constrain layout.
+func (lb *Label) ConfigLabel(sc *Scene) {
+	lb.ConfigLabelSize(sc, lb.Geom.Size.Actual.Content)
+}
+
+// ConfigLabel does the HTML and Layout in TextRender for label text,
+// using given size to constrain layout.
+func (lb *Label) ConfigLabelSize(sc *Scene, sz mat32.Vec2) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
@@ -326,7 +341,8 @@ func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 }
 
 // ConfigLabelAlloc is used for determining how much space the label
-// takes.  In this case, alignment factors are turned off,
+// takes, using given size (typically Alloc).
+// In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) {
@@ -378,9 +394,9 @@ func (lb *Label) SizeUp(sc *Scene) {
 	lb.WidgetBase.SizeUp(sc) // sets Actual size based on styles
 	sz := &lb.Geom.Size
 	if lb.Styles.Text.HasWordWrap() {
-		lb.ConfigLabel(sc, lb.SizeUpWrapSize(sc))
+		lb.ConfigLabelSize(sc, lb.SizeUpWrapSize(sc))
 	} else {
-		lb.ConfigLabel(sc, sz.Actual.Content)
+		lb.ConfigLabelSize(sc, sz.Actual.Content)
 	}
 	rsz := lb.TextRender.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)

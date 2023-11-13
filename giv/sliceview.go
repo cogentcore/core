@@ -676,11 +676,11 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 // This is called for scrolling, navigation etc.
 func (sv *SliceViewBase) UpdateWidgets() {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	if sg == nil || sv.VisRows == 0 || !sg.HasChildren() {
+	if sg == nil || sv.VisRows == 0 || sg.VisRows == 0 || !sg.HasChildren() {
 		return
 	}
 	updt := sg.UpdateStart()
-	defer sg.UpdateEndLayout(updt)
+	defer sg.UpdateEndRender(updt)
 	// fmt.Println("updtw:", updt)
 
 	sv.ViewMuLock()
@@ -699,8 +699,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		var idxlab *gi.Label
 		if sv.Is(SliceViewShowIndex) {
 			idxlab = sg.Kids[ridx].(*gi.Label)
-			idxlab.SetText(strconv.Itoa(si))
-			idxlab.SetNeedsRender()
+			idxlab.SetTextUpdate(strconv.Itoa(si))
 		}
 		if si < sv.SliceSize {
 			w.SetState(false, states.Invisible)
@@ -788,7 +787,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.ViewMuLock() // no return!  must unlock before return below
 
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
+	defer sv.UpdateEndRender(updt)
 
 	sv.SliceNewAtSel(idx)
 
@@ -845,7 +844,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	}
 	sv.ViewMuUnlock()
 	sv.SetChanged()
-	sv.Update()
+	sv.This().(SliceViewer).UpdateWidgets()
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -895,7 +894,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 	}
 	sv.ViewMuLock()
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
+	defer sv.UpdateEndRender(updt)
 
 	sv.SliceDeleteAtSel(idx)
 
@@ -909,7 +908,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 
 	sv.ViewMuUnlock()
 	sv.SetChanged()
-	sv.Update()
+	sv.This().(SliceViewer).UpdateWidgets()
 }
 
 // SliceDefaultTopAppBar is a TopAppBar function that adds an "Add" button for slice
@@ -1252,8 +1251,8 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 		}
-		// sv.This().(SliceViewer).UpdateWidgets()
 		sv.ApplyStyleTree(sv.Sc)
+		sv.This().(SliceViewer).UpdateWidgets()
 		sv.Send(events.Select)
 	} else {
 		selMode := events.SelectOne
@@ -1521,14 +1520,14 @@ func (sv *SliceViewBase) DeleteIdxs() {
 		return
 	}
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
+	defer sv.UpdateEndRender(updt)
 
 	ixs := sv.SelectedIdxsList(true) // descending sort
 	for _, i := range ixs {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
 	sv.SetChanged()
-	sv.Update()
+	sv.This().(SliceViewer).UpdateWidgets()
 }
 
 // Cut copies selected indexes to clip.Board and deletes selected indexes
@@ -1538,7 +1537,7 @@ func (sv *SliceViewBase) Cut() {
 		return
 	}
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
+	defer sv.UpdateEndRender(updt)
 
 	sv.CopyIdxs(false)
 	ixs := sv.SelectedIdxsList(true) // descending sort
@@ -1549,7 +1548,7 @@ func (sv *SliceViewBase) Cut() {
 	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
-	sv.Update()
+	sv.This().(SliceViewer).UpdateWidgets()
 }
 
 // CutIdxs copies selected indexes to clip.Board and deletes selected indexes
@@ -1634,7 +1633,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := sv.SliceNPVal
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
+	defer sv.UpdateEndRender(updt)
 
 	for _, ns := range sl {
 		sz := svnp.Len()
@@ -1655,7 +1654,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
-	sv.Update()
+	sv.This().(SliceViewer).UpdateWidgets()
 }
 
 // Duplicate copies selected items and inserts them after current selection --
@@ -2146,4 +2145,5 @@ func (sv *SliceViewBase) SizeFinal(sc *gi.Scene) {
 		sg.SizeFinalUpdateChildrenSizes(sc)
 	}
 	sv.Frame.SizeFinal(sc)
+	// fmt.Println(sv, "layout")
 }

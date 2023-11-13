@@ -75,7 +75,6 @@ func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
 		return false, err
 	}
 	ic.IconName = icon
-	ic.Config(ic.Sc)
 	return true, nil
 
 }

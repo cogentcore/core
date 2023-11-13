@@ -508,7 +508,7 @@ func (ch *Chooser) ShowCurVal(label string) {
 	if ch.Editable {
 		tf, ok := ch.TextField()
 		if ok {
-			tf.SetText(ch.CurLabel)
+			tf.SetTextUpdate(ch.CurLabel)
 		}
 	} else {
 		if icnm, isic := ch.CurVal.(icons.Icon); isic {
@@ -516,7 +516,7 @@ func (ch *Chooser) ShowCurVal(label string) {
 		} else {
 			lbl := ch.LabelWidget()
 			if lbl != nil {
-				lbl.SetText(ch.CurLabel)
+				lbl.SetTextUpdate(ch.CurLabel)
 			}
 		}
 	}

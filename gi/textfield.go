@@ -307,7 +307,8 @@ func (tf *TextField) Text() string {
 	return tf.Txt
 }
 
-// SetText sets the text to be edited and reverts any current edit to reflect this new text
+// SetText sets the text to be edited and reverts any current edit
+// to reflect this new text.
 func (tf *TextField) SetText(txt string) *TextField {
 	if tf.Txt == txt && !tf.Edited {
 		return tf
@@ -315,6 +316,12 @@ func (tf *TextField) SetText(txt string) *TextField {
 	tf.Txt = txt
 	tf.Revert()
 	return tf
+}
+
+// SetTextUpdate sets the text to be edited and reverts any current edit
+// to reflect this new text, and triggers a Render update
+func (tf *TextField) SetTextUpdate(txt string) *TextField {
+	return tf.SetText(txt) // already does everything
 }
 
 // SetLeadingIcon sets the leading icon of the text field to the given icon.

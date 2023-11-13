@@ -166,8 +166,8 @@ func app() {
 			})
 	}
 
-	// split := gi.NewSplits(sc, "split")
-	// split.Dim = mat32.X
+	split := gi.NewSplits(sc, "split")
+	split.Dim = mat32.X
 
 	// strv := giv.NewStructView(sc, "strv")
 	// strv.SetStruct(&stru)
@@ -175,16 +175,16 @@ func app() {
 	// mv := giv.NewMapView(split, "mv")
 	// mv.SetMap(&tstmap)
 
-	// sv := giv.NewSliceView(sc, "sv")
+	sv := giv.NewSliceView(split, "sv")
 	// sv.SetState(true, states.ReadOnly)
-	// sv.SetSlice(&tstslice)
+	sv.SetSlice(&tstslice)
 
-	tv := giv.NewTableView(sc, "tv")
+	tv := giv.NewTableView(split, "tv")
 	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 	//
 	// split.SetSplits(.3, .2, .2, .3)
-	// split.SetSplits(.5, .5)
+	split.SetSplits(.5, .5)
 
 	gi.NewWindow(sc).Run().Wait()
 }

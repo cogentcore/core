@@ -378,17 +378,17 @@ func (vv *StructValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
-		bt.SetText("nil")
+		bt.SetTextUpdate("nil")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		if lbler, ok := opv.Interface().(gi.Labeler); ok {
-			bt.SetText(lbler.Label())
+			bt.SetTextUpdate(lbler.Label())
 		} else {
 			txt := fmt.Sprintf("%T", npv.Interface())
 			if txt == "" {
 				fmt.Printf("no label for struct!")
 			}
-			bt.SetText(txt)
+			bt.SetTextUpdate(txt)
 		}
 	}
 }
@@ -525,7 +525,7 @@ func (vv *SliceValue) UpdateWidget() {
 			txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
 		}
 	}
-	ac.SetText(txt)
+	ac.SetTextUpdate(txt)
 }
 
 func (vv *SliceValue) GetTypeInfo() {
@@ -692,7 +692,7 @@ func (vv *MapValue) UpdateWidget() {
 	} else {
 		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), laser.MapKeyType(mpi).String(), laser.MapValueType(mpi).String())
 	}
-	bt.SetText(txt)
+	bt.SetTextUpdate(txt)
 }
 
 func (vv *MapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -824,7 +824,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	if k != nil {
 		path = k.Path()
 	}
-	bt.SetText(path)
+	bt.SetTextUpdate(path)
 }
 
 func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -1112,6 +1112,7 @@ func (vv *EnumValue) UpdateWidget() {
 	ch := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
 	ch.SetCurVal(npv.Interface())
+
 	// iv, err := laser.ToInt(npv.Interface())
 	// if err == nil {
 	// 	ch.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
@@ -1286,8 +1287,7 @@ func (vv *ByteSliceValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	bv, ok := npv.Interface().([]byte)
 	if ok {
-		tf.SetText(string(bv))
-		tf.Update()
+		tf.SetTextUpdate(string(bv))
 	}
 }
 
@@ -1334,8 +1334,7 @@ func (vv *RuneSliceValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	rv, ok := npv.Interface().([]rune)
 	if ok {
-		tf.SetText(string(rv))
-		tf.Update()
+		tf.SetTextUpdate(string(rv))
 	}
 }
 
@@ -1385,7 +1384,7 @@ func (vv *NilValue) UpdateWidget() {
 	} else if !laser.ValueIsZero(vv.Value) {
 		tstr = vv.Value.String() // vv.Value.Type().String()
 	}
-	sb.SetText("nil " + tstr)
+	sb.SetTextUpdate("nil " + tstr)
 }
 
 func (vv *NilValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -1422,19 +1421,18 @@ func (vv *IconValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if icons.Icon(txt).IsNil() {
-		bt.SetIcon(icons.Blank)
+		bt.SetIconUpdate(icons.Blank)
 	} else {
-		bt.SetIcon(icons.Icon(txt))
+		bt.SetIconUpdate(icons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
 			if txt == "" {
 				txt = "none"
 			}
-			bt.SetText(txt)
+			bt.SetTextUpdate(txt)
 		}
 	}
-	bt.Update() // icon always requires redraw in case changed
 }
 
 func (vv *IconValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -1503,8 +1501,7 @@ func (vv *FontValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	bt.SetProp("font-family", txt)
-	bt.SetText(txt)
-	bt.Update()
+	bt.SetTextUpdate(txt)
 }
 
 func (vv *FontValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -1586,8 +1583,7 @@ func (vv *FileValue) UpdateWidget() {
 	if txt == "" {
 		txt = "(click to open file chooser)"
 	}
-	bt.SetText(txt)
-	bt.Update()
+	bt.SetTextUpdate(txt)
 }
 
 func (vv *FileValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -1700,8 +1696,7 @@ func (vv *VersCtrlValue) UpdateWidget() {
 	if txt == "" {
 		txt = "(none)"
 	}
-	bt.SetText(txt)
-	bt.Update()
+	bt.SetTextUpdate(txt)
 }
 
 func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {

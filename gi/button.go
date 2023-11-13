@@ -242,6 +242,34 @@ func (bt *Button) SetKey(kf keyfun.Funs) *Button {
 	return bt
 }
 
+// SetTextUpdate sets the Label text and does a Config and updates
+// the actual button label render, so it will render next time
+// with the updated text value, without flagging any unnecessary layouts.
+// This is used for more efficient large-scale updating in views.
+func (bt *Button) SetTextUpdate(text string) *Button {
+	bt.Text = text
+	bt.ConfigWidget(bt.Sc)
+	lb := bt.LabelWidget()
+	if lb != nil {
+		lb.SetTextUpdate(text)
+	}
+	return bt
+}
+
+// SetIconUpdate sets the Icon and does a Config and updates
+// the actual icon render, so it will render next time
+// with the updated text value, without flagging any unnecessary layouts.
+// This is used for more efficient large-scale updating in views.
+func (bt *Button) SetIconUpdate(icon icons.Icon) *Button {
+	bt.Icon = icon
+	bt.ConfigWidget(bt.Sc)
+	ic := bt.IconWidget()
+	if ic != nil {
+		ic.SetIcon(icon)
+	}
+	return bt
+}
+
 // LabelWidget returns the label widget if present
 func (bt *Button) LabelWidget() *Label {
 	lbi := bt.Parts.ChildByName("label")

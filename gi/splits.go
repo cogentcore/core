@@ -335,6 +335,10 @@ func (sl *Splits) SizeDownSetAllocs(sc *Scene, iter int) {
 }
 
 func (sl *Splits) Position(sc *Scene) {
+	if !sl.HasChildren() {
+		sl.Layout.Position(sc)
+		return
+	}
 	sl.UpdateSplits()
 	sl.ConfigScrolls(sc)
 	sl.PositionSplits(sc)
