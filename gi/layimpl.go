@@ -319,8 +319,8 @@ type LayImplState struct {
 	ScrollSize mat32.Vec2
 
 	// ActualOverflow is the actual size without absorbing the overflow in
-	// scroll elements -- this is needed for overflow computation to see if
-	// scrollbars are required.
+	// scroll elements -- this is needed for grow calculation and overflow computation
+	// to see if scrollbars are required.
 	ActualOverflow GeomCT
 
 	// GapSize has the extra gap sizing between elements, which adds to Space.
@@ -502,7 +502,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	sz := &ly.Geom.Size
 	ly.SetContentFitOverflow(ksz)
 	if LayoutTrace {
-		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content)
+		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content, "Overflow:", ly.LayImpl.ActualOverflow)
 	}
 	if ly.Parts != nil {
 		ly.Parts.SizeUp(sc) // just to get sizes -- no std role in layout
@@ -807,7 +807,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 // SizeDownAllocActual to set the allocations as they currrently are.
 func (ly *Layout) SizeDownSetAllocs(sc *Scene, iter int) {
 	sz := &ly.Geom.Size
-	extra := sz.Alloc.Content.Sub(sz.Actual.Content)
+	extra := sz.Alloc.Content.Sub(ly.LayImpl.ActualOverflow.Content) // note: critical to use oflow
 	if extra.X > 0 || extra.Y > 0 {
 		if LayoutTrace {
 			fmt.Println(ly, "SizeDown extra:", extra, "actual:", sz.Actual.Content, "alloc:", sz.Alloc.Content)
@@ -881,6 +881,8 @@ func (ly *Layout) SizeDownGrow(sc *Scene, iter int, extra mat32.Vec2) bool {
 
 func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool {
 	redo := false
+	sz := &ly.Geom.Size
+	alloc := sz.Alloc.Content
 	// todo: use max growth values instead of individual ones to ensure consistency!
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
@@ -904,10 +906,20 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 			asz := mx
 			gsum := cd.Grow.Dim(ma)
 			if gsum > 0 {
+				if gr > gsum {
+					fmt.Println(ly, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
+					gr = gsum
+				}
 				redo = true
 				asz = mat32.Round(mx + exd*(gr/gsum)) // todo: could use Floor
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)
+			if asz > alloc.Dim(ma) { // bug!
+				fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
+				fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "act:", sz.Actual.Content.Dim(ma))
+				fmt.Println(ly.LayImpl.String())
+				fmt.Println(ly.LayImpl.CellsSize())
+			}
 		}
 		ksz.SetContentFromTotal(&ksz.Alloc)
 		return ki.Continue

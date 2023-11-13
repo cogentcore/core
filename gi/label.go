@@ -311,14 +311,27 @@ func (lb *Label) ConfigWidget(sc *Scene) {
 // so that is never able to undo initial word wrapping from constrained sizes.
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
-// using current Actual.Content size to constrain layout.
+// using given size to constrain layout.  Styles.Text align factors
+// operate only within the space needed for the text itself,
+// and not in any broader allocation of space -- this is done by
+// first doing layout top-left aligned and doing a second layout pass
+// within the space required for left-aligned.
 func (lb *Label) ConfigLabel(sc *Scene, sz mat32.Vec2) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
-	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, nil)
-	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
+	fs := lb.Styles.FontRender()
+	txs := &lb.Styles.Text
+	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
+	align, alignV := txs.Align, txs.AlignV
+	txs.Align, txs.AlignV = styles.AlignStart, styles.AlignStart
+	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
+	txs.Align, txs.AlignV = align, alignV
+	if align != styles.AlignStart || alignV != styles.AlignStart {
+		rsz := lb.TextRender.Size.Ceil()
+		lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, rsz)
+	}
 }
 
 // SizeUpWrapSize is the size to use for layout during the SizeUp pass,
@@ -338,7 +351,6 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 	// w = ratio * h
 	// w^2 + h^2 = a
 	// (ratio*h)^2 + h^2 = a
-
 	h := mat32.Sqrt(area) / mat32.Sqrt(ratio+1)
 	w := ratio * h
 	if w < csz.X { // must be at least this
