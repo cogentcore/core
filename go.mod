@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/Masterminds/vcs v1.13.3
-	github.com/alecthomas/chroma/v2 v2.10.0
+	github.com/alecthomas/chroma/v2 v2.11.1
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/antonmedv/expr v1.15.3
 	github.com/aymerick/douceur v0.2.0
@@ -12,27 +12,27 @@ require (
 	github.com/goki/go-difflib v1.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	goki.dev/cam v0.9.34
-	goki.dev/colors v0.8.28
-	goki.dev/cursors v0.0.16
-	goki.dev/enums v0.9.37
-	goki.dev/girl v0.0.18
+	goki.dev/cam v0.9.35
+	goki.dev/colors v0.8.29
+	goki.dev/cursors v0.0.17
+	goki.dev/enums v0.9.38
+	goki.dev/girl v0.0.19
 	goki.dev/glop v0.1.4
-	goki.dev/goosi v0.0.10
-	goki.dev/grog v0.0.12
-	goki.dev/grows v0.3.14
-	goki.dev/grr v0.0.5
-	goki.dev/gti v0.1.15
-	goki.dev/icons v0.0.8
-	goki.dev/ki/v2 v2.0.0-dev0.0.18
-	goki.dev/laser v0.1.17
-	goki.dev/mat32/v2 v2.0.0-dev0.0.12
-	goki.dev/ordmap v0.5.6
-	goki.dev/pi/v2 v2.0.0-dev0.0.11
+	goki.dev/goosi v0.0.11
+	goki.dev/grog v0.0.13
+	goki.dev/grows v0.3.15
+	goki.dev/grr v0.0.6
+	goki.dev/gti v0.1.16
+	goki.dev/icons v0.0.9
+	goki.dev/ki/v2 v2.0.0-dev0.0.19
+	goki.dev/laser v0.1.18
+	goki.dev/mat32/v2 v2.0.0-dev0.0.13
+	goki.dev/ordmap v0.5.7
+	goki.dev/pi/v2 v2.0.0-dev0.0.12
 	goki.dev/prof/v2 v2.0.0-dev0.0.4
-	goki.dev/svg v0.1.13
-	goki.dev/vci/v2 v2.0.0-dev0.0.16
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.14
+	goki.dev/svg v0.1.14
+	goki.dev/vci/v2 v2.0.0-dev0.0.17
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.15
 	golang.org/x/image v0.14.0
 	gopkg.in/fsnotify.v1 v1.4.7
 )
@@ -61,8 +61,8 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.14.0 // indirect
+	golang.org/x/tools v0.15.0 // indirect
 )
