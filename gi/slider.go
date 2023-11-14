@@ -98,6 +98,12 @@ type Slider struct { //goki:embedder
 	// just looks like the rest of the slider.
 	ThumbColor colors.Full
 
+	// If true, keep the slider (typically a Scrollbar) within the parent Scene
+	// bounding box, if the parent is in view.  This is the default behavior
+	// for Layout scrollbars, and setting this flag replicates that behavior
+	// in other scrollbars.
+	StayInView bool
+
 	//////////////////////////////////////////////////////////////////
 	// 	Computed values below
 
@@ -597,4 +603,18 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 			sr.RenderUnlock(rs)
 		}
 	}
+}
+
+func (sr *Slider) ScenePos(sc *Scene) {
+	sr.WidgetBase.ScenePos(sc)
+	_, pwb := sr.ParentWidget()
+	zr := image.Rectangle{}
+	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {
+		return
+	}
+	sbw := mat32.Ceil(sr.Styles.ScrollBarWidth.Dots)
+	scmax := mat32.NewVec2FmPoint(sc.Geom.ContentBBox.Max).SubScalar(sbw)
+	sr.Geom.Pos.Total.SetMin(scmax)
+	sr.SetContentPosFromPos()
+	sr.SetBBoxesFromAllocs()
 }

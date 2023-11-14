@@ -464,6 +464,7 @@ func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	sb.Type = gi.SliderScrollbar
+	sb.StayInView = true
 	sb.Dim = mat32.Y
 	sb.Tracking = true
 	sb.Min = 0
@@ -2139,15 +2140,4 @@ func (sv *SliceViewBase) SizeFinal(sc *gi.Scene) {
 	}
 	sv.Frame.SizeFinal(sc)
 	// fmt.Println(sv, "layout")
-}
-
-func (sv *SliceViewBase) ScenePos(sc *gi.Scene) {
-	sv.Frame.ScenePos(sc)
-	sb := sv.ScrollBar()
-	sbw := mat32.Ceil(sv.Styles.ScrollBarWidth.Dots)
-	scmax := mat32.NewVec2FmPoint(sv.Sc.Geom.ContentBBox.Max).SubScalar(sbw)
-	sb.Geom.Pos.Total.X = min(sb.Geom.Pos.Total.X, scmax.X)
-	sb.SetContentPosFromPos()
-	sb.SetBBoxesFromAllocs()
-	sb.SetNeedsRender()
 }
