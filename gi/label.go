@@ -367,7 +367,7 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 	csz := lb.Geom.Size.Actual.Content
 	chars := float32(len(lb.Text))
 	fm := lb.Styles.Font.Face.Metrics
-	area := chars * fm.Height * fm.Ch
+	area := chars * fm.Height * fm.Height
 	ratio := float32(1.618) // default to golden
 	if csz.X > 0 && csz.Y > 0 {
 		ratio = csz.X / csz.Y
@@ -415,7 +415,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	rsz := lb.TextRender.Size.Ceil()
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
-	sz.SetSizeMax(&sz.Actual.Content, lb.Styles.Min.Dots().Ceil())
+	sz.SetInitContentMin(lb.Styles.Min.Dots().Ceil())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content

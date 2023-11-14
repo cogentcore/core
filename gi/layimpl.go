@@ -193,10 +193,22 @@ func (ls GeomSize) String() string {
 	return fmt.Sprintf("Actual: %v, \tAlloc: %v", ls.Actual, ls.Alloc)
 }
 
-// SetSizeMax sets given size to given fm value, subject to Max constraints
-func (ls *GeomSize) SetSizeMax(to *mat32.Vec2, fm mat32.Vec2) {
-	*to = fm
-	to.SetMinPos(ls.Max)
+// SetInitContentMin sets initial Actual.Content size from given Styles.Min
+// value, ensuring a further min constraint of 3,3, which is critical due to
+// the logic of the [mat32.MinPos] and [mat32.MaxPos] values which are used
+// extensively.  If any value is 0, it is ignored, which works great for
+// the constraints, but not for the actual values.  Furthermore, it
+// doesn't make sense to have 0 size for anything anyway.
+func (ls *GeomSize) SetInitContentMin(styMin mat32.Vec2) {
+	csz := &ls.Actual.Content
+	*csz = styMin
+	if csz.X == 0 {
+		csz.X = 3
+	}
+	if csz.Y == 0 {
+		csz.Y = 3
+	}
+	csz.SetMinPos(ls.Max) // now it works
 }
 
 // FitSizeMax increases given size to fit given fm value, subject to Max constraints
@@ -418,7 +430,7 @@ func (ly *Layout) SetContentFitOverflow(nsz mat32.Vec2) {
 	sz := &ly.Geom.Size
 	asz := &sz.Actual
 	osz := &ly.LayImpl.ActualOverflow
-	ly.Geom.Size.SetSizeMax(&asz.Content, ly.Styles.Min.Dots().Ceil()) // start with style
+	ly.Geom.Size.SetInitContentMin(ly.Styles.Min.Dots().Ceil()) // start with style
 	*osz = *asz
 	mx := ly.Geom.Size.Max
 	oflow := &ly.Styles.Overflow
@@ -466,7 +478,7 @@ func (wb *WidgetBase) SizeFromStyle() {
 	wb.SpaceFromStyle()
 	wb.Geom.Size.InnerSpace.SetZero()
 	sz.Max = wb.Styles.Max.Dots().Ceil()
-	sz.SetSizeMax(&sz.Actual.Content, wb.Styles.Min.Dots().Ceil())
+	sz.SetInitContentMin(wb.Styles.Min.Dots().Ceil())
 	sz.SetTotalFromContent(&sz.Actual)
 	if LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
 		fmt.Println(wb, "SizeUp from Style:", sz.Actual.Content.String())
@@ -789,6 +801,9 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if !ly.HasChildren() {
 		return ly.SizeDownWidget(sc, iter) // behave like a widget
 	}
+	sz := &ly.Geom.Size
+	sz.Alloc.Content.SetMinPos(sz.Max) // can't be more than max..
+	sz.SetTotalFromContent(&sz.Alloc)
 	ly.This().(Layouter).SizeDownSetAllocs(sc, iter)
 	redo := ly.SizeDownChildren(sc, iter)
 	if redo {

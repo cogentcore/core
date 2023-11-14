@@ -347,7 +347,9 @@ func (st *MainStage) Resize(sz image.Point) {
 		st.SetWindowInsets()
 		st.Scene.Resize(sz)
 	case DialogStage:
-		st.Scene.Resize(sz)
+		if st.FullWindow {
+			st.Scene.Resize(sz)
+		}
 		// todo: other types fit in constraints
 	}
 }

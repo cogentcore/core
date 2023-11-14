@@ -106,8 +106,8 @@ func WrapText(par gi.Widget, txt string) *gi.Label {
 
 func app() {
 	// turn on tracing in preferences, Debug
-	// gi.LayoutTrace = true
-	// gi.LayoutTraceDetail = true
+	gi.LayoutTrace = true
+	gi.LayoutTraceDetail = true
 	// gi.UpdateTrace = true
 
 	gi.SetAppName("layout")
@@ -116,7 +116,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 7
+	doCase := 2
 
 	switch doCase {
 	case 0: // just text
@@ -139,14 +139,15 @@ func app() {
 		row.Style(func(s *styles.Style) {
 			// s.Align.X = styles.AlignEnd
 			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
-			s.Overflow.X = styles.OverflowAuto
+			// s.Overflow.X = styles.OverflowAuto
 		})
 		lbl.Style(func(s *styles.Style) {
+			// s.Grow.Set(1, 0)
 			// s.Align.X = styles.AlignCenter
 		})
-		fr := BoxFrame(sc) // this takes up slack
-		sm := WrapText(fr, ShortText)
-		_ = sm
+		// fr := BoxFrame(sc) // this takes up slack
+		// sm := WrapText(fr, ShortText)
+		// _ = sm
 	case 3:
 		PlainFrames(sc, mat32.Vec2{0, 1})
 	case 4:
@@ -201,6 +202,7 @@ func app() {
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
+
 	}
 
 	gi.NewWindow(sc).Run().Wait()

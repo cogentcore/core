@@ -47,6 +47,7 @@ func (ic *Icon) OnInit() {
 }
 
 func (ic *Icon) IconStyles() {
+	ic.SVG.Norm = true
 	ic.Style(func(s *styles.Style) {
 		s.Min.X.Dp(16)
 		s.Min.Y.Dp(16)
@@ -77,15 +78,6 @@ func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
 	ic.IconName = icon
 	return true, nil
 
-}
-
-func (ic *Icon) ApplyStyle(sc *Scene) {
-	ic.StyMu.Lock()
-	defer ic.StyMu.Unlock()
-
-	ic.SVG.Norm = true
-	// ic.SVG.Fill = true
-	ic.ApplyStyleWidget(sc)
 }
 
 func (ic *Icon) DrawIntoScene(sc *Scene) {
