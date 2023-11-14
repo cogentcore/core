@@ -4,9 +4,9 @@ package enums
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.9.37"
+	Version = "v0.9.38"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "19897f3"
+	GitCommit = "9499232"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-11-08 00:27"
+	VersionDate = "2023-11-14 15:52"
 )
