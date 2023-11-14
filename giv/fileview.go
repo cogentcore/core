@@ -94,11 +94,6 @@ func (fv *FileView) FileViewStyles() {
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {
 		pfrom := w.PathFrom(fv)
-		if strings.HasPrefix(pfrom, "files-row/favs-view/") {
-			w.Style(func(s *styles.Style) {
-				s.Overflow.X = styles.OverflowHidden
-			})
-		}
 		switch pfrom {
 		case "path-tbar":
 			fr := w.(*gi.Frame)
@@ -136,7 +131,6 @@ func (fv *FileView) FileViewStyles() {
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetReadOnly(true)
 			fv.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
 			})
 		case "sel-row":

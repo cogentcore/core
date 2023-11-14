@@ -288,6 +288,8 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		s.SetMainAxis(mat32.Y)
+		// absorb horizontal here, vertical in view
+		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
@@ -305,12 +307,10 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.SetDisplay(styles.DisplayGrid)
 				nWidgPerRow, _ := sv.RowWidgetNs()
 				s.Columns = nWidgPerRow
-				s.Overflow.Set(styles.OverflowAuto) // scrollbars
 				s.Grow.Set(1, 1)
 				// baseline mins:
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
-				// s.Gap.Zero()
 			})
 		case "grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
@@ -557,7 +557,7 @@ func (sv *SliceViewBase) UpdateScroll() {
 	sb.TrackThr = sb.Step
 	sb.SetValue(float32(sv.StartIdx)) // essential for updating pos from value
 	sb.SetState(sv.VisRows == sv.SliceSize, states.Invisible)
-	sb.UpdateEnd(updt)
+	sb.UpdateEndRender(updt)
 }
 
 // ConfigRows configures VisRows worth of widgets
@@ -2125,14 +2125,6 @@ func (sg *SliceViewGrid) SizeFromChildren(sc *gi.Scene, iter int, pass gi.Layout
 	minHt := sg.RowHeight * float32(sg.MinRows)
 	visHt := sg.RowHeight * float32(sg.VisRows)
 	_ = visHt
-	// _, pwd := sg.ParentWidget()
-	// _, ppwd := pwd.ParentWidget()
-	// fmt.Println("par:", pwd.Geom.Size.String())
-	// fmt.Println("parpar:", ppwd.Geom.Size.String())
-	// _, sb := gi.AsWidget(pwd.Child(1))
-	// fmt.Println("scroll", sb.Geom.Size.String())
-	// fmt.Println("sg sz:", sg.Geom.Size.String())
-	// fmt.Println("csz:", csz, "rh:", sg.RowHeight, "alloc:", allocHt, "vr:", sg.VisRows, "mr:", sg.MinRows, "minht:", minHt)
 	csz.Y = minHt
 	return csz
 }
@@ -2147,4 +2139,15 @@ func (sv *SliceViewBase) SizeFinal(sc *gi.Scene) {
 	}
 	sv.Frame.SizeFinal(sc)
 	// fmt.Println(sv, "layout")
+}
+
+func (sv *SliceViewBase) ScenePos(sc *gi.Scene) {
+	sv.Frame.ScenePos(sc)
+	sb := sv.ScrollBar()
+	sbw := mat32.Ceil(sv.Styles.ScrollBarWidth.Dots)
+	scmax := mat32.NewVec2FmPoint(sv.Sc.Geom.ContentBBox.Max).SubScalar(sbw)
+	sb.Geom.Pos.Total.X = min(sb.Geom.Pos.Total.X, scmax.X)
+	sb.SetContentPosFromPos()
+	sb.SetBBoxesFromAllocs()
+	sb.SetNeedsRender()
 }

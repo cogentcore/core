@@ -46,7 +46,7 @@ func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
 // during the Layout process. This is called during Position, once
 // the sizing and need for scrollbars has been established.
 // The final position of the scrollbars is set during ScenePos in
-// PositionScrolls.  Scrolls are kept around
+// PositionScrolls.  Scrolls are kept around in general.
 func (ly *Layout) ConfigScrolls(sc *Scene) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {

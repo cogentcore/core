@@ -83,33 +83,24 @@ func (tv *TableView) TableViewInit() {
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		s.SetMainAxis(mat32.Y)
+		// absorb horizontal here, vertical in view
+		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(tv) {
-		case "frame": // slice frame
-			sf := w.(*gi.Frame)
-			sf.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.Y)
-				s.Min.X.Ch(20)
-				s.Overflow.Set(styles.OverflowAuto)
-				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
-				s.Border.Style.Set(styles.BorderNone)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "frame/header": // slice header
+		case "header": // slice header
 			sh := w.(*gi.Frame)
 			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
 				s.Grow.Set(0, 0)
-				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			})
-		case "frame/grid-lay": // grid layout
+		case "grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
+				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
 			})
-		case "frame/grid-lay/grid": // slice grid
+		case "grid-lay/grid": // slice grid
 			sg := w.(*SliceViewGrid)
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
@@ -117,14 +108,12 @@ func (tv *TableView) TableViewInit() {
 				s.SetDisplay(styles.DisplayGrid)
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
-				// s.Gap.Zero()
-				s.Overflow.Set(styles.OverflowAuto) // scrollbars
 				s.Grow.Set(1, 1)
 				// baseline mins:
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
 			})
-		case "frame/grid-lay/scrollbar":
+		case "grid-lay/scrollbar":
 			sb := w.(*gi.Slider)
 			sb.Style(func(s *styles.Style) {
 				sb.Type = gi.SliderScrollbar
@@ -139,7 +128,7 @@ func (tv *TableView) TableViewInit() {
 			})
 
 		}
-		if w.Parent().PathFrom(tv) == "frame/grid-lay/grid" {
+		if w.Parent().PathFrom(tv) == "grid-lay/grid" {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
@@ -174,9 +163,8 @@ func (tv *TableView) TableViewInit() {
 				})
 			}
 		}
-		if w.Parent().PathFrom(tv) == "frame/header" {
+		if w.Parent().PathFrom(tv) == "header" {
 			w.Style(func(s *styles.Style) {
-				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				if hdr, ok := w.(*gi.Button); ok {
 					fli := hdr.Data.(int)
 					if fli == tv.SortIdx {
@@ -309,10 +297,8 @@ func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 		return
 	}
 	tv.SetFlag(true, SliceViewConfiged)
-	sf := gi.NewFrame(tv, "frame")
-	sf.SetFlag(true, gi.LayoutNoKeys)
-	gi.NewFrame(sf, "header")
-	gl := gi.NewLayout(sf, "grid-lay")
+	gi.NewFrame(tv, "header")
+	gl := gi.NewLayout(tv, "grid-lay")
 	gl.SetFlag(true, gi.LayoutNoKeys)
 	NewSliceViewGrid(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
@@ -383,15 +369,9 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 	}
 }
 
-// SliceFrame returns the outer frame widget, which contains all the header,
-// fields and values
-func (tv *TableView) SliceFrame() *gi.Frame {
-	return tv.ChildByName("frame", 0).(*gi.Frame)
-}
-
 // GridLayout returns the SliceGrid grid-layout widget, with grid and scrollbar
 func (tv *TableView) GridLayout() *gi.Layout {
-	return tv.SliceFrame().ChildByName("grid-lay", 0).(*gi.Layout)
+	return tv.ChildByName("grid-lay", 0).(*gi.Layout)
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
@@ -407,7 +387,7 @@ func (tv *TableView) ScrollBar() *gi.Slider {
 
 // SliceHeader returns the Frame header for slice grid
 func (tv *TableView) SliceHeader() *gi.Frame {
-	return tv.SliceFrame().Child(0).(*gi.Frame)
+	return tv.Child(0).(*gi.Frame)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
