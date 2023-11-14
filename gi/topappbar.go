@@ -45,6 +45,12 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 			mm.RenderWin.CloseReq()
 			return
 		}
+		if stg.Type == DialogStage {
+			st := mm.PopType(stg.Type)
+			if dlg, ok := st.AsBase().Scene.This().(*Dialog); ok {
+				dlg.AcceptDialog()
+			}
+		}
 		mm.PopDeleteType(stg.Type)
 	})
 	// NewButton(tb).SetIcon(icons.ArrowForward)

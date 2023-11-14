@@ -345,7 +345,7 @@ func (lb *Label) ConfigLabelSize(sc *Scene, sz mat32.Vec2) {
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) {
+func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) mat32.Vec2 {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
@@ -356,7 +356,10 @@ func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) {
 	txs.Align, txs.AlignV = styles.AlignStart, styles.AlignStart
 	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
 	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
+	rsz := lb.TextRender.Size.Ceil()
 	txs.Align, txs.AlignV = align, alignV
+	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, rsz)
+	return rsz
 }
 
 // SizeUpWrapSize is the size to use for layout during the SizeUp pass,
@@ -411,8 +414,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 		return false
 	}
 	sz := &lb.Geom.Size
-	lb.ConfigLabelAlloc(sc, sz.Alloc.Content) // use allocation
-	rsz := lb.TextRender.Size.Ceil()
+	rsz := lb.ConfigLabelAlloc(sc, sz.Alloc.Content) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.SetInitContentMin(lb.Styles.Min.Dots().Ceil())
@@ -425,6 +427,15 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 		}
 	}
 	return chg
+}
+
+func (lb *Label) SizeFinal(sc *Scene) {
+	sz := &lb.Geom.Size
+	sz.FinalUp = sz.Actual // keep it before we grow
+	// lb.GrowToAlloc(sc) // we already grew as much as we could..
+	lb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
+	lb.SizeFinalParts(sc)
+	sz.SetTotalFromContent(&sz.Actual)
 }
 
 func (lb *Label) RenderLabel(sc *Scene) {

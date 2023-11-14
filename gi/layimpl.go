@@ -1207,7 +1207,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	}
 
 	var stspc mat32.Vec2
-	cdiff := sz.Actual.Content.Sub(sz.FinalUp.Content).Floor()
+	cdiff := sz.Alloc.Content.Sub(sz.FinalUp.Content).Floor()
 	if cdiff.X > 0 {
 		stspc.X += mat32.Floor(styles.AlignFactor(ly.Styles.Align.X) * cdiff.X)
 		if LayoutTrace {

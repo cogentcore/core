@@ -639,7 +639,7 @@ func (vv *SliceInlineValue) UpdateWidget() {
 	if newslc {
 		sv.SetSlice(csl)
 	} else {
-		sv.UpdateValues()
+		sv.Update()
 	}
 }
 

@@ -86,7 +86,11 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 				}
 				d := gi.NewDialog(sv).Title(title).FullWindow(true)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice).SetTmpSave(sv.TmpSave)
-				d.Run()
+				d.OnAccept(func(e events.Event) {
+					if sv.SliceValView != nil { // todo: this is not updating
+						sv.SliceValView.UpdateWidget()
+					}
+				}).Run()
 			})
 		}
 	})

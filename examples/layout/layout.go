@@ -42,6 +42,8 @@ var (
 
 	VeryLongText = LongText + LongText + LongText
 
+	AlignText = "This is text to test for text align<br>This line is short<br>This is text to test for text align, this one is longer"
+
 	FrameSizes = [5]mat32.Vec2{
 		{20, 100},
 		{80, 20},
@@ -116,7 +118,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := 2
+	doCase := 11
 
 	switch doCase {
 	case 0: // just text
@@ -135,21 +137,23 @@ func app() {
 		_ = sm
 	case 2: // text in constrained box
 		row := HorizRow(sc)
-		lbl := WrapText(row, VeryLongText)
+		lbl := WrapText(row, ShortText) // VeryLongText)
 		row.Style(func(s *styles.Style) {
 			// s.Align.X = styles.AlignEnd
 			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
 			// s.Overflow.X = styles.OverflowAuto
 		})
 		lbl.Style(func(s *styles.Style) {
-			// s.Grow.Set(1, 0)
-			// s.Align.X = styles.AlignCenter
+			s.Text.Align = styles.AlignCenter
 		})
 		// fr := BoxFrame(sc) // this takes up slack
 		// sm := WrapText(fr, ShortText)
 		// _ = sm
 	case 3:
-		PlainFrames(sc, mat32.Vec2{0, 1})
+		PlainFrames(sc, mat32.Vec2{0, 0})
+		sc.Style(func(s *styles.Style) {
+			s.Align.X = styles.AlignCenter
+		})
 	case 4:
 		row := HorizRow(sc)
 		PlainFrames(row, mat32.Vec2{1, 0})
@@ -202,7 +206,14 @@ func app() {
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
-
+	case 11: // text align
+		row := HorizRow(sc)
+		row.Style(func(s *styles.Style) {
+			s.Align.X = styles.AlignCenter
+		})
+		gi.NewLabel(row, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
+			s.Text.Align = styles.AlignCenter
+		})
 	}
 
 	gi.NewWindow(sc).Run().Wait()
@@ -218,6 +229,7 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			s.Grow = grow
+			s.Align.X = styles.AlignEnd // Center
 		})
 		gi.NewSpace(fr) // if here, prevents frame from growing on its own
 	}
