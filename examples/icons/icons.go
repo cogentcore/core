@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
+	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
@@ -25,12 +26,13 @@ func app() {
 
 	sc := gi.NewScene("gogi-icons-demo").SetTitle("GoGi Icons")
 
-	grid := gi.NewFrame(sc, "grid").SetLayout(gi.LayoutGrid)
+	grid := gi.NewFrame(sc, "grid")
 	grid.Style(func(s *styles.Style) {
-		s.Columns = int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
-		s.AlignH = styles.AlignCenter
+		s.Display = styles.DisplayGrid
+		s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
+		s.Align.Set(styles.AlignCenter)
 		s.Margin.Set(units.Dp(1))
-		s.SetStretchMax()
+		s.Overflow.Y = styles.OverflowAuto
 	})
 
 	icnms := icons.All()
@@ -39,14 +41,16 @@ func app() {
 		if strings.HasSuffix(icnm, "-fill") {
 			continue
 		}
-
-		vb := gi.NewLayout(grid, icnm).SetLayout(gi.LayoutVert)
-		vb.Style(func(s *styles.Style) {
-			s.MaxWidth = units.Em(15)
+		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
+			s.MainAxis = mat32.Y
+			s.Max.X.Em(15)
 		})
-
-		gi.NewLabel(vb, icnm).SetText(icnm)
-		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm))
+		gi.NewLabel(vb, icnm).SetText(icnm).Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+		})
+		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
+			s.Min.Set(units.Em(4))
+		})
 	}
 
 	gi.NewWindow(sc).Run().Wait()

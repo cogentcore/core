@@ -169,19 +169,14 @@ type Widget interface {
 	// ContextMenuPos.
 	ShowContextMenu(e events.Event)
 
-	// IsVisible provides the definitive answer as to whether a given node
-	// is currently visible.  It is only entirely valid after a render pass
-	// for widgets in a visible window, but it checks the window and scene
-	// for their visibility status as well, which is available always.
-	// This does *not* check for ScBBox level visibility, which is a further check.
+	// IsVisible returns true if a node is visible for rendering according
+	// to the [states.Invisible] flag on it or any of its parents.
+	// This flag is also set by [styles.DisplayNone] during [ApplyStyle].
+	// This does *not* check for an empty TotalBBox, indicating that the widget
+	// is out of render range -- that is done by [PushBounds] prior to rendering.
 	// Non-visible nodes are automatically not rendered and do not get
-	// window events.  The Invisible states flag is a key element of the IsVisible
-	// calculus -- it is set by e.g., Tabs for invisible tabs, and is also
-	// set if a widget is entirely out of render range.
-	// For robustness, it recursively calls the parent -- this is typically
-	// a short path -- propagating the Invisible flag properly can be
-	// very challenging without mistakenly overwriting invisibility at various
-	// levels.
+	// window events.
+	// This call recursively calls the parent, which is typically a short path.
 	IsVisible() bool
 
 	// todo: revisit this -- in general anything with a largish image (including svg,
@@ -402,6 +397,14 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	}
 }
 
+// IsVisible returns true if a node is visible for rendering according
+// to the [states.Invisible] flag on it or any of its parents.
+// This flag is also set by [styles.DisplayNone] during [ApplyStyle].
+// This does *not* check for an empty TotalBBox, indicating that the widget
+// is out of render range -- that is done by [PushBounds] prior to rendering.
+// Non-visible nodes are automatically not rendered and do not get
+// window events.
+// This call recursively calls the parent, which is typically a short path.
 func (wb *WidgetBase) IsVisible() bool {
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.StateIs(states.Invisible) || wb.Sc == nil {
 		return false
@@ -420,7 +423,7 @@ func (wb *WidgetBase) DirectWinUpload() {
 }
 
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
-// return false to terminate.
+// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
 	for i, k := range wb.Kids {
 		i := i
@@ -435,8 +438,27 @@ func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase
 	}
 }
 
+// VisibleKidsIter iterates through the Kids, as widgets, calling the given function,
+// excluding any with the *local* states.Invisible flag set (does not check parents).
+// This is used e.g., for layout functions to exclude non-visible direct children.
+// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
+	for i, k := range wb.Kids {
+		i := i
+		kwi, kwb := AsWidget(k)
+		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) { // || kwb.StateIs(states.Invisible) {
+			break
+		}
+		cont := fun(i, kwi, kwb)
+		if !cont {
+			break
+		}
+	}
+}
+
 // WidgetWalkPre is a version of the ki WalkPre iterator that automatically filters
 // nil or deleted items and operates on Widget types.
+// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkPre(func(k ki.Ki) bool {
 		kwi, kwb := AsWidget(k)
@@ -446,17 +468,3 @@ func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) 
 		return fun(kwi, kwb)
 	})
 }
-
-// todo:
-
-// WidgetWalkPost is a version of the ki WalkPost iterator that automatically filters
-// nil or deleted items and operates on Widget types.
-// func (wb *WidgetBase) WidgetWalkPost(fun func(kwi Widget, kwb *WidgetBase) bool) {
-// 	wb.WalkPost(func(k ki.Ki) bool {
-// 		kwi, kwb := AsWidget(k)
-// 		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
-// 			return ki.Break
-// 		}
-// 		return fun(kwi, kwb)
-// 	})
-// }

@@ -431,7 +431,7 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 
 func (lb *Label) SizeFinal(sc *Scene) {
 	sz := &lb.Geom.Size
-	sz.FinalUp = sz.Actual // keep it before we grow
+	sz.Internal = sz.Actual.Content // keep it before we grow
 	// lb.GrowToAlloc(sc) // we already grew as much as we could..
 	lb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 	lb.SizeFinalParts(sc)

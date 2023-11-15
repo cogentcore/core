@@ -133,7 +133,7 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	}
 	sb.SetState(false, states.Invisible)
 	sz := &ly.Geom.Size
-	csz := sz.Actual.Content.Dim(d)
+	csz := sz.Internal.Dim(d)
 	asz := sz.Alloc.Content.Dim(d)
 	sb.Max = csz                       // only scrollbar
 	sb.Step = ly.Styles.Font.Size.Dots // step by lines

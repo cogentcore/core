@@ -54,11 +54,21 @@ func (ic *Icon) IconStyles() {
 	})
 }
 
-// SetIcon sets the icon by name into given Icon wrapper, returning error
-// message if not found etc, and returning true if a new icon was actually set
-// -- does nothing if IconName is already == icon name and has children, and deletes
-// children if name is nil / none (both cases return false for new icon)
-func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
+// SetIcon sets the icon by name into given Icon wrapper, logging error
+// message if not found etc.
+// Does nothing if IconName is already == icon name.
+func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
+	_, err := ic.SetIconTry(icon)
+	if err != nil {
+		slog.Error("error opening icon named", "name", icon, "err", err)
+	}
+	return ic
+}
+
+// SetIconTry sets the icon by name into given Icon wrapper, returning error
+// message if not found etc, and returning true if a new icon was actually set.
+// Does nothing and returns false if IconName is already == icon name.
+func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
 		ic.Config(ic.Sc)
@@ -71,7 +81,6 @@ func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.OpenFS(icons.Icons, fnm)
 	if err != nil {
-		slog.Error("error opening icon named", "name", fnm, "err", err)
 		ic.Config(ic.Sc)
 		return false, err
 	}

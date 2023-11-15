@@ -504,8 +504,8 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
-	wb.SetFlag(false, NeedsRender) // done!
-	if !wb.This().(Widget).IsVisible() {
+	wb.SetFlag(false, NeedsRender)       // done!
+	if !wb.This().(Widget).IsVisible() { // checks deleted etc
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {
