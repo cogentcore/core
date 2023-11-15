@@ -76,6 +76,7 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 func (sb *Snackbar) SnackbarStyles() {
 	sb.Style(func(s *styles.Style) {
 		s.SetMainAxis(mat32.X)
+		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
@@ -92,8 +93,7 @@ func (sb *Snackbar) SnackbarStyles() {
 func (sb *Snackbar) Text(text string) *Snackbar {
 	NewLabel(sb, "text").SetText(text).SetType(LabelBodyMedium).
 		Style(func(s *styles.Style) {
-			// s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-			// s.Grow.Set(0, 0)
+			s.SetTextWrap(false)
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
 			}

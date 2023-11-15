@@ -750,9 +750,6 @@ func (wb *WidgetBase) SizeDownChildren(sc *Scene, iter int) bool {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change.
 func (wb *WidgetBase) GrowToAllocSize(sc *Scene, act, alloc mat32.Vec2) (mat32.Vec2, bool) {
-	// if sc.Is(ScPrefSizing) {
-	// 	return act, false
-	// }
 	change := false
 	for d := mat32.X; d <= mat32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
@@ -830,6 +827,7 @@ func (ly *Layout) SizeDownSetAllocs(sc *Scene, iter int) {
 func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	sz := &ly.Geom.Size
 	oflow := sz.Internal.Sub(sz.Alloc.Content)
+	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	change := false
 	if iter == 0 {
 		ly.LayImpl.ScrollSize.SetZero()
@@ -840,7 +838,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 					change = true
 				}
 				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.Other(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
+				ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
 			}
 		}
 	}
@@ -853,8 +851,12 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 		case styles.OverflowAuto:
 			if ofd <= 1 {
 				if ly.HasScroll[d] {
+					if LayoutTrace {
+						fmt.Println(ly, "turned off scroll", d)
+					}
 					change = true
 					ly.HasScroll[d] = false
+					ly.LayImpl.ScrollSize.SetDim(d.Other(), 0)
 				}
 				continue
 			}
@@ -862,7 +864,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.Other(), mat32.Ceil(ly.Styles.ScrollBarWidth.Dots))
+			ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
 			if change && LayoutTrace {
 				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd, "alloc:", sz.Alloc.Content.Dim(d), "internal:", sz.Internal.Dim(d))
 			}

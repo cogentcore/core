@@ -486,8 +486,9 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
-	psz := sc.Geom.Size.Actual.Total
-	// fmt.Println("\npref size:", psz, "csz:", sc.SceneGeom.Size.Actual.Content, "bspc:", sc.BoxSpace().Size(), "ssz:", sc.LayImpl.ScrollSize)
+	sz := &sc.Geom.Size
+	psz := sz.Actual.Total
+	// fmt.Println("\npref size:", psz, "csz:", sz.Actual.Content, "internal:", sz.Internal, "space:", sc.Geom.Size.Space)
 	sc.SetFlag(false, ScPrefSizing)
 	sc.ShowLayoutIter = 0
 	return psz.ToPointFloor()
