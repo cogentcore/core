@@ -1087,15 +1087,11 @@ func SetRobust(to, frm any) error {
 		return CopyMapRobust(to, frm)
 	}
 
-	fv := reflect.ValueOf(frm)
+	fv := NonPtrValue(reflect.ValueOf(frm))
 	// Just set it if possible to assign
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)
 		return nil
-	}
-	npfv := NonPtrValue(fv)
-	if npfv.Type().AssignableTo(typ) {
-		vp.Elem().Set(npfv)
 	}
 	return fmt.Errorf("unable to set value %v of type %T from value %v of type %T (not a supported type pair and direct assigning is not possible)", to, to, frm, frm)
 }
