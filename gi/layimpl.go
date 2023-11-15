@@ -1271,9 +1271,7 @@ func (wb *WidgetBase) ScenePosWidget(sc *Scene) {
 // SetContentPosFromPos sets the Pos.Content position based on current Pos
 // plus the BoxSpace position offset.
 func (wb *WidgetBase) SetContentPosFromPos() {
-	spc := wb.Styles.BoxSpace()
-	off := spc.Pos()
-	off.SetFloor()
+	off := wb.Styles.BoxSpace().Pos().Floor()
 	wb.Geom.Pos.Content = wb.Geom.Pos.Total.Add(off)
 }
 
@@ -1304,7 +1302,8 @@ func (wb *WidgetBase) SetBBoxes(sc *Scene) {
 	if pwb == nil { // scene
 		sz := &wb.Geom.Size
 		wb.Geom.TotalBBox = mat32.RectFromPosSizeMax(mat32.Vec2{}, sz.Alloc.Total)
-		wb.Geom.ContentBBox = mat32.RectFromPosSizeMax(wb.Geom.Pos.Content, sz.Alloc.Content)
+		off := wb.Styles.BoxSpace().Pos().Floor()
+		wb.Geom.ContentBBox = mat32.RectFromPosSizeMax(off, sz.Alloc.Content)
 		if LayoutTrace {
 			fmt.Println(wb, "Total BBox:", wb.Geom.TotalBBox)
 			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)
