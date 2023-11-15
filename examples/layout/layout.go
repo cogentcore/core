@@ -65,7 +65,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "scroll-absorb"
+	doCase := "long-text-wrap"
 
 	switch doCase {
 	case "text-align":

@@ -419,7 +419,8 @@ func (ly *Layout) SetContentFitOverflow(nsz mat32.Vec2) {
 	sz := &ly.Geom.Size
 	asz := &sz.Actual.Content
 	isz := &sz.Internal
-	styles.SetClampMinVec(isz, nsz) // internal always reflects content
+	*isz = nsz
+	sz.SetInitContentMin(ly.Styles.Min.Dots().Ceil()) // start from style
 	oflow := &ly.Styles.Overflow
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if oflow.Dim(d) < styles.OverflowAuto || ly.Par == nil { // overflow hides from actual
