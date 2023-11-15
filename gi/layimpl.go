@@ -274,18 +274,16 @@ func (ls *GeomState) ContentRangeDim(d mat32.Dims) (cmin, cmax float32) {
 	return
 }
 
-// TotalRect returns Pos.Total, Min(Size.Actual.Total, Size.Alloc.Total)
+// TotalRect returns Pos.Total -- Size.Actual.Total
 // as an image.Rectangle, e.g., for bounding box
 func (ls *GeomState) TotalRect() image.Rectangle {
-	return mat32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total.Min(ls.Size.Alloc.Total))
+	return mat32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
 }
 
-// ContentRect returns Pos.Content, Min(Size.Actual.Content, Size.Alloc.Content)
+// ContentRect returns Pos.Content, Size.Actual.Content
 // as an image.Rectangle, e.g., for bounding box.
 func (ls *GeomState) ContentRect() image.Rectangle {
-	act := ls.Size.Actual.Content
-	alloc := ls.Size.Alloc.Content
-	return mat32.RectFromPosSizeMax(ls.Pos.Content, act.Min(alloc))
+	return mat32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
 }
 
 //////////////////////////////////////////////////////////////
@@ -419,8 +417,9 @@ func (ly *Layout) SetContentFitOverflow(nsz mat32.Vec2) {
 	sz := &ly.Geom.Size
 	asz := &sz.Actual.Content
 	isz := &sz.Internal
-	*isz = nsz
 	sz.SetInitContentMin(ly.Styles.Min.Dots().Ceil()) // start from style
+	*isz = *asz
+	styles.SetClampMinVec(isz, nsz)
 	oflow := &ly.Styles.Overflow
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if oflow.Dim(d) < styles.OverflowAuto || ly.Par == nil { // overflow hides from actual
@@ -751,9 +750,9 @@ func (wb *WidgetBase) SizeDownChildren(sc *Scene, iter int) bool {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change.
 func (wb *WidgetBase) GrowToAllocSize(sc *Scene, act, alloc mat32.Vec2) (mat32.Vec2, bool) {
-	if sc.Is(ScPrefSizing) {
-		return act, false
-	}
+	// if sc.Is(ScPrefSizing) {
+	// 	return act, false
+	// }
 	change := false
 	for d := mat32.X; d <= mat32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
@@ -847,14 +846,18 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 	}
 	for d := mat32.X; d <= mat32.Y; d++ {
 		ofd := oflow.Dim(d)
-		if ofd <= 1 {
-			continue
-		}
 		switch ly.Styles.Overflow.Dim(d) {
 		// case styles.OverflowVisible:
 		// note: this shouldn't happen -- just have this in here for monitoring
 		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 		case styles.OverflowAuto:
+			if ofd <= 1 {
+				if ly.HasScroll[d] {
+					change = true
+					ly.HasScroll[d] = false
+				}
+				continue
+			}
 			if !ly.HasScroll[d] {
 				change = true
 			}
@@ -1154,6 +1157,27 @@ func (wb *WidgetBase) PositionWidget(sc *Scene) {
 	wb.PositionParts(sc)
 }
 
+func (wb *WidgetBase) PositionWithinAlloc(sc *Scene, allocPos mat32.Vec2) {
+	sz := &wb.Geom.Size
+	act := sz.Actual.Total
+	alloc := sz.Alloc.Total
+	extra := alloc.Sub(act)
+	pos := allocPos
+	if extra.X > 0 {
+		off := styles.AlignFactor(wb.Styles.Align.X) * extra.X
+		pos.X += off
+	}
+	if extra.Y > 0 {
+		off := styles.AlignFactor(wb.Styles.Align.Y) * extra.Y
+		pos.Y += off
+	}
+	pos.SetFloor()
+	wb.Geom.RelPos = pos
+	if LayoutTrace {
+		fmt.Println(wb, "allocPos:", allocPos, "pos:", pos, "alloc:", alloc, "act:", act, "extra:", extra)
+	}
+}
+
 func (wb *WidgetBase) PositionParts(sc *Scene) {
 	if wb.Parts == nil {
 		return
@@ -1180,6 +1204,9 @@ func (ly *Layout) PositionLay(sc *Scene) {
 		ly.PositionWidget(sc) // behave like a widget
 		return
 	}
+	if ly.Par == nil {
+		ly.PositionWithinAlloc(sc, mat32.Vec2{})
+	}
 	ly.ConfigScrolls(sc) // and configure the scrolls
 	if ly.Styles.Display == styles.DisplayStacked {
 		ly.PositionStacked(sc)
@@ -1190,66 +1217,27 @@ func (ly *Layout) PositionLay(sc *Scene) {
 }
 
 func (ly *Layout) PositionCells(sc *Scene) {
-	var pos mat32.Vec2
-	var lastAsz mat32.Vec2
 	gap := ly.Styles.Gap.Dots().Floor()
 	sz := &ly.Geom.Size
-	csz := sz.Actual.Content
-
 	if LayoutTraceDetail {
-		fmt.Println(ly, "PositionCells, actual:", csz, "alloc:", sz.Alloc.Content, "internal:", sz.Internal)
+		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
-
-	var stspc mat32.Vec2
-	cdiff := sz.Alloc.Content.Sub(sz.Internal).Floor()
-	if cdiff.X > 0 {
-		stspc.X += mat32.Floor(styles.AlignFactor(ly.Styles.Align.X) * cdiff.X)
-		if LayoutTrace {
-			fmt.Println("pos grid:", ly, "extra X:", cdiff.X, "start X:", stspc.X, "align:", ly.Styles.Align.X, "factor:", styles.AlignFactor(ly.Styles.Align.X))
-		}
-	}
-	if cdiff.Y > 0 {
-		stspc.Y += mat32.Floor(styles.AlignFactor(ly.Styles.Align.Y) * cdiff.Y)
-		if LayoutTrace {
-			fmt.Println("pos grid:", ly, "extra Y:", cdiff.Y, "start Y:", stspc.Y, "align:", ly.Styles.Align.Y, "factor:", styles.AlignFactor(ly.Styles.Align.Y))
-		}
-	}
-	pos = stspc
-	var maxs mat32.Vec2
+	var pos mat32.Vec2
+	var lastSz mat32.Vec2
+	idx := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
-		ksz := &kwb.Geom.Size
-		sz := ksz.Actual.Total
-		asz := ksz.Alloc.Total
-		if cidx.X == 0 && i > 0 {
-			pos.X = stspc.X
-			pos.Y += lastAsz.Y + gap.Y
+		if cidx.X == 0 && idx > 0 {
+			pos.X = 0
+			pos.Y += lastSz.Y + gap.Y
 		}
-		ep := pos
-		if sz.X < asz.X {
-			ex := styles.AlignFactor(kwb.Styles.Align.X) * (asz.X - sz.X)
-			ep.X += ex
-		}
-		if sz.Y < asz.Y {
-			ep.Y += styles.AlignFactor(kwb.Styles.Align.Y) * (asz.Y - sz.Y)
-		}
-		ep.SetFloor()
-		endsz := ep.Add(asz)
-		if LayoutTraceDetail {
-			fmt.Println("pos i:", i, kwb, "cidx:", cidx, "sz:", sz, "asz:", asz, "pos:", ep, "end:", endsz)
-		}
-		kwb.Geom.RelPos = ep
-		maxs.SetMax(endsz)
-		pos.X += asz.X + gap.X
-		lastAsz = asz
+		kwb.PositionWithinAlloc(sc, pos)
+		alloc := kwb.Geom.Size.Alloc.Total
+		pos.X += alloc.X + gap.X
+		lastSz = alloc
+		idx++
 		return ki.Continue
 	})
-	if LayoutTrace {
-		if maxs.X > csz.X+1 || maxs.Y > csz.Y+2 {
-			fmt.Println(ly, "Layout Position error: max position exceeds actual content size:", maxs, "content:", sz.Actual.Content)
-		}
-		fmt.Println(ly, "Position max:", maxs)
-	}
 }
 
 func (ly *Layout) PositionWrap(sc *Scene) {

@@ -607,6 +607,9 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 
 func (sr *Slider) ScenePos(sc *Scene) {
 	sr.WidgetBase.ScenePos(sc)
+	if !sr.StayInView {
+		return
+	}
 	_, pwb := sr.ParentWidget()
 	zr := image.Rectangle{}
 	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {

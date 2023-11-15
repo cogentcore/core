@@ -56,7 +56,7 @@ var (
 func app() {
 	// turn on tracing in preferences, Debug
 	gi.LayoutTrace = true
-	// gi.LayoutTraceDetail = true
+	gi.LayoutTraceDetail = true
 	// gi.UpdateTrace = true
 
 	gi.SetAppName("layout")
@@ -65,7 +65,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "long-text-wrap"
+	doCase := "frames-vert"
 
 	switch doCase {
 	case "text-align":
@@ -74,6 +74,7 @@ func app() {
 			s.Align.X = styles.AlignCenter
 		})
 		gi.NewLabel(row, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
+			s.Align.X = styles.AlignCenter
 			s.Text.Align = styles.AlignCenter
 		})
 	case "long-text-wrap": // just text
@@ -92,7 +93,7 @@ func app() {
 		_ = sm
 	case "long-text-wrap-max-box": // text in constrained box
 		row := HorizRow(sc)
-		lbl := WrapText(row, ShortText) // VeryLongText)
+		lbl := WrapText(row, VeryLongText) // VeryLongText)
 		row.Style(func(s *styles.Style) {
 			// s.Align.X = styles.AlignEnd
 			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
@@ -174,6 +175,8 @@ func app() {
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
+	default:
+		fmt.Println("error: case didn't match:", doCase)
 	}
 
 	gi.NewWindow(sc).Run().Wait()
@@ -242,7 +245,7 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			s.Grow = grow
-			s.Align.X = styles.AlignEnd // Center
+			s.Align.X = styles.AlignCenter // Center
 		})
 		gi.NewSpace(fr) // if here, prevents frame from growing on its own
 	}

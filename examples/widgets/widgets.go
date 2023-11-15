@@ -73,15 +73,15 @@ func app() {
 
 	gi.NewLabel(trow, "title").SetText(
 		`This is a <b>demonstration</b> of the
-<span style="color:red">various</span> <a href="https://goki.dev/gi/v2">GoGi</a> <i>Widgets</i><br>
-<small>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
-<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</small><br>
-See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
+		<span style="color:red">various</span> <a href="https://goki.dev/gi/v2">GoGi</a> <i>Widgets</i><br>
+		<small>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
+		<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</small><br>
+		See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Text.Align = styles.AlignCenter
-			s.Text.AlignV = styles.AlignCenter
+			// s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
 		})
 
