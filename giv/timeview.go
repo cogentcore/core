@@ -342,8 +342,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	}
 	// need TmpSave
 	if vv.TmpSave == nil {
-		tt := vv.TimeVal()
-		vv.TmpSave = NewSoloValue(tt)
+		vv.TmpSave = vv
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
@@ -360,7 +359,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			d := gi.NewDialog(w).Title("Select date")
 			NewDateView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
 			d.OnAccept(func(e events.Event) {
-				tt := vv.TmpSave.Val().Interface().(*time.Time)
+				tt := vv.TmpSave.Val().Interface().(time.Time)
 				vv.SetValue(tt)
 				vv.UpdateWidget()
 			}).Cancel().Ok().Run()
@@ -388,7 +387,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			d := gi.NewDialog(w).Title("Edit time")
 			NewTimeView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
 			d.OnAccept(func(e events.Event) {
-				tt := vv.TmpSave.Val().Interface().(*time.Time)
+				tt := vv.TmpSave.Val().Interface().(time.Time)
 				vv.SetValue(tt)
 				vv.UpdateWidget()
 			}).Cancel().Ok().Run()
