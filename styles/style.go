@@ -74,8 +74,17 @@ type Style struct { //gti:add
 
 	// Grow is the proportional amount that the element can grow (stretch)
 	// if there is more space available.  0 = default = no growth.
-	// Extra available space is allocated as: Grow / sum (all Grow)
+	// Extra available space is allocated as: Grow / sum (all Grow).
+	// Important: grow elements absorb available space and thus are not
+	// subject to alignment (Center, End).
 	Grow mat32.Vec2
+
+	// GrowWrap is a special case for Text elements where it grows initially
+	// in the horizontal axis to allow for longer, word wrapped text to fill
+	// the available space, but then it does not grow thereafter, so that alignment
+	// operations still work (Grow elements do not align because they absorb all
+	// available space).
+	GrowWrap bool
 
 	// Padding is the transparent space around central content of box,
 	// which is _included_ in the size of the standard box rendering.
@@ -205,18 +214,6 @@ func (s *Style) Defaults() {
 // visibility -- support more than just hidden  inherit:"true"
 
 // transition -- animation of hover, etc
-
-// ActiveStyler defines an interface for anything
-// that can report its active style
-type ActiveStyler interface {
-	ActiveStyle() *Style
-
-	// StyleRLock does a read-lock for reading the style
-	StyleRLock()
-
-	// StyleRUnlock unlocks the read-lock
-	StyleRUnlock()
-}
 
 // SetStylePropsXML sets style props from XML style string, which contains ';'
 // separated name: value pairs
