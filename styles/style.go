@@ -417,17 +417,17 @@ func (st *Style) SetGrow(v ...float32) *Style {
 	return st
 }
 
-// SetTextWrap sets the Text.WhiteSpace and Grow.X properties in
+// SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
 // a coordinated manner.  If wrap == true, then WhiteSpaceNormal
-// and Grow.X = 1; else WhiteSpaceNowrap and Grow.X = 0, which
+// and GrowWrap = true; else WhiteSpaceNowrap and GrowWrap = false, which
 // are typically the two desired stylings.
 func (st *Style) SetTextWrap(wrap bool) {
 	if wrap {
 		st.Text.WhiteSpace = WhiteSpaceNormal
-		st.Grow.X = 1
+		st.GrowWrap = true
 	} else {
 		st.Text.WhiteSpace = WhiteSpaceNowrap
-		st.Grow.X = 0
+		st.GrowWrap = false
 	}
 }
 
