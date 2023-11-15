@@ -621,11 +621,11 @@ func (ly *Layout) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32
 	if ly.Styles.Display == styles.DisplayStacked {
 		return ly.SizeFromChildrenStacked(sc)
 	}
-	return ly.SizeFromChildrenCells(sc)
+	return ly.SizeFromChildrenCells(sc, iter, pass)
 }
 
 // SizeFromChildrenCells for Flex, Grid
-func (ly *Layout) SizeFromChildrenCells(sc *Scene) mat32.Vec2 {
+func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
 	// r   0   1   col X = max(X over rows), Y = sum(Y over rows)
 	//   +--+--+
 	// 0 |  |  |   row X = sum(X over cols), Y = max(Y over cols)
@@ -637,6 +637,9 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene) mat32.Vec2 {
 		cidx := kwb.Geom.Cell
 		sz := kwb.Geom.Size.Actual.Total
 		grw := kwb.Styles.Grow
+		if pass <= SizeDownPass && iter == 0 && kwb.Styles.GrowWrap {
+			grw.Set(1, 0)
+		}
 		if LayoutTraceDetail {
 			fmt.Println("SzUp i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		}
@@ -903,6 +906,9 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 		cidx := kwb.Geom.Cell
 		ksz := &kwb.Geom.Size
 		grw := kwb.Styles.Grow
+		if iter == 0 && kwb.Styles.GrowWrap {
+			grw.Set(1, 0)
+		}
 		// if LayoutTrace {
 		// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		// }
@@ -929,10 +935,13 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 				asz = mat32.Round(mx + exd*(gr/gsum))  // todo: could use Floor
 				if asz > mat32.Ceil(alloc.Dim(ma))+1 { // bug!
 					fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
-					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "act:", sz.Actual.Content.Dim(ma))
+					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
 					fmt.Println(ly.LayImpl.String())
 					fmt.Println(ly.LayImpl.CellsSize())
 				}
+			}
+			if LayoutTraceDetail {
+				fmt.Println(kwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
@@ -1069,7 +1078,7 @@ func (wb *WidgetBase) SizeFinalWidget(sc *Scene) {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) GrowToAlloc(sc *Scene) bool {
-	if sc.Is(ScPrefSizing) {
+	if sc.Is(ScPrefSizing) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size

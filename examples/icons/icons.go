@@ -46,7 +46,7 @@ func app() {
 			s.Max.X.Em(15)
 		})
 		gi.NewLabel(vb, icnm).SetText(icnm).Style(func(s *styles.Style) {
-			s.SetTextWrap(false)
+			// s.SetTextWrap(false)
 		})
 		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
 			s.Min.Set(units.Em(4))

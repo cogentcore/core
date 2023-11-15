@@ -113,6 +113,7 @@ func NewSubScene(par ki.Ki, name ...string) *Scene {
 }
 
 func (sc *Scene) OnInit() {
+	sc.Sc = sc
 	sc.SceneStyles()
 	sc.HandleLayoutEvents()
 }

@@ -64,7 +64,6 @@ func app() {
 
 	trow := gi.NewLayout(sc, "trow")
 	trow.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
 		s.Align.X = styles.AlignCenter
 	})
 
@@ -79,7 +78,7 @@ func app() {
 		See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
-			s.Grow.Set(1, 0)
+			s.Align.X = styles.AlignCenter
 			s.Text.Align = styles.AlignCenter
 			// s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
@@ -93,7 +92,6 @@ func app() {
 
 	brow := gi.NewLayout(sc, "brow").
 		Style(func(s *styles.Style) {
-			s.SetMainAxis(mat32.X)
 			s.Gap.X.Em(1)
 		})
 
@@ -173,7 +171,6 @@ func app() {
 
 	srow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
-			s.SetMainAxis(mat32.X)
 			s.Align.Y = styles.AlignCenter
 			s.Gap.X.Ex(2)
 		})
@@ -212,12 +209,10 @@ func app() {
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewSpace(sc)
 	gi.NewLabel(sc).SetText("Text Widgets:")
 
 	txrow := gi.NewLayout(sc).
 		Style(func(s *styles.Style) {
-			s.SetMainAxis(mat32.X)
 			s.Gap.X.Ex(2)
 		})
 
@@ -240,52 +235,6 @@ func app() {
 	ch.OnChange(func(e events.Event) {
 		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
 	})
-
-	/*  todo:
-	inQuitPrompt := false
-	gi.SetQuitReqFunc(func() {
-		if inQuitPrompt {
-			return
-		}
-		inQuitPrompt = true
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-			Prompt: "Are you <i>sure</i> you want to quit?"}, Ok: true, Cancel: true,
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
-					gi.Quit()
-				} else {
-					inQuitPrompt = false
-				}
-			})
-	})
-
-	gi.SetQuitCleanFunc(func() {
-		fmt.Printf("Doing final Quit cleanup here..\n")
-	})
-
-	inClosePrompt := false
-	win.SetCloseReqFunc(func(w *gi.RenderWin) {
-		if inClosePrompt {
-			return
-		}
-		inClosePrompt = true
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
-			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, Ok: true, Cancel: true,
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
-					gi.Quit()
-				} else {
-					inClosePrompt = false
-				}
-			})
-	})
-
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		fmt.Printf("Doing final Close cleanup here..\n")
-	})
-
-	win.MainMenuUpdated()
-	*/
 
 	gi.NewWindow(sc).Run().Wait()
 }

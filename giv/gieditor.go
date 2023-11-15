@@ -248,8 +248,8 @@ func (ge *GiEditor) ConfigSplits() {
 	if len(split.Kids) == 0 {
 		tvfr := gi.NewFrame(split, "tvfr")
 		tvfr.Style(func(s *styles.Style) {
-			s.MainAxis = mat32.X
-			s.Overflow.Y = styles.OverflowAuto
+			s.MainAxis = mat32.Y
+			s.Overflow.Set(styles.OverflowAuto)
 		})
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")

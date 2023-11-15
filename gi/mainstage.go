@@ -150,7 +150,10 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 func (st *StageBase) SetDefaultTopAppBar() {
 	// first fall back on context widget scene top app bar if we are a dialog
 	if st.Type == DialogStage {
-		st.Scene.TopAppBar = st.CtxWidget.AsWidget().Sc.TopAppBar
+		cw := st.CtxWidget.AsWidget()
+		if cw != nil && cw.Sc != nil {
+			st.Scene.TopAppBar = cw.Sc.TopAppBar
+		}
 	}
 	if st.Scene.TopAppBar == nil {
 		st.Scene.TopAppBar = DefaultTopAppBar

@@ -65,15 +65,15 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "frames-vert"
+	doCase := "long-text-wrap-max-box"
 
 	switch doCase {
 	case "text-align":
-		row := HorizRow(sc)
-		row.Style(func(s *styles.Style) {
+		// 	row := HorizRow(sc)
+		sc.Style(func(s *styles.Style) {
 			s.Align.X = styles.AlignCenter
 		})
-		gi.NewLabel(row, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
+		gi.NewLabel(sc, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
 			s.Align.X = styles.AlignCenter
 			s.Text.Align = styles.AlignCenter
 		})
@@ -175,6 +175,27 @@ func app() {
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
+	case "center-dialog":
+		sc.Style(func(s *styles.Style) {
+			s.Align.Set(styles.AlignCenter)
+		})
+		gi.NewLabel(sc).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
+			Style(func(s *styles.Style) {
+				// s.SetTextWrap(false)
+				s.Align.Set(styles.AlignCenter)
+				// s.Text.Align = styles.AlignCenter
+			})
+		gi.NewLabel(sc).SetType(gi.LabelBodyLarge).
+			SetText("Thank you for reporting your issue!").
+			Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Align.Set(styles.AlignCenter)
+			})
+		gi.NewButton(sc).SetType(gi.ButtonTonal).SetText("Return home").
+			Style(func(s *styles.Style) {
+				// s.Grow.Set(1, 0)
+				s.Align.Set(styles.AlignCenter)
+			})
 	default:
 		fmt.Println("error: case didn't match:", doCase)
 	}

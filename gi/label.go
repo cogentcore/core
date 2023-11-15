@@ -118,7 +118,8 @@ func (lb *Label) LabelStyles() {
 		s.Min.X.Ch(3)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.Align.Y = styles.AlignCenter
-		s.Grow.Set(1, 0) // critical to enable text to expand / contract for wrapping
+		s.Grow.Set(0, 0)
+		s.GrowWrap = true
 
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
@@ -410,7 +411,7 @@ func (lb *Label) SizeUp(sc *Scene) {
 }
 
 func (lb *Label) SizeDown(sc *Scene, iter int) bool {
-	if !lb.Styles.Text.HasWordWrap() {
+	if !lb.Styles.Text.HasWordWrap() || iter > 1 {
 		return false
 	}
 	sz := &lb.Geom.Size
@@ -429,14 +430,14 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	return chg
 }
 
-func (lb *Label) SizeFinal(sc *Scene) {
-	sz := &lb.Geom.Size
-	sz.Internal = sz.Actual.Content // keep it before we grow
-	// lb.GrowToAlloc(sc) // we already grew as much as we could..
-	lb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
-	lb.SizeFinalParts(sc)
-	sz.SetTotalFromContent(&sz.Actual)
-}
+// func (lb *Label) SizeFinal(sc *Scene) {
+// 	sz := &lb.Geom.Size
+// 	sz.Internal = sz.Actual.Content // keep it before we grow
+// 	// lb.GrowToAlloc(sc)     // we already grew as much as we could..
+// 	lb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
+// 	lb.SizeFinalParts(sc)
+// 	sz.SetTotalFromContent(&sz.Actual)
+// }
 
 func (lb *Label) RenderLabel(sc *Scene) {
 	rs, _, st := lb.RenderLock(sc)

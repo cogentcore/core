@@ -113,7 +113,6 @@ func (fv *FileView) FileViewStyles() {
 			})
 		case "files-row":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
 			})
 		case "files-row/favs-view":
@@ -131,11 +130,10 @@ func (fv *FileView) FileViewStyles() {
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetReadOnly(true)
 			fv.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 1)
+				// s.Grow.Set(1, 1)
 			})
 		case "sel-row":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Gap.X.Dp(4)
 			})
 		case "sel-row/sel-lbl":

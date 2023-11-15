@@ -53,30 +53,6 @@ func (wb *WidgetBase) Style(s func(s *styles.Style)) *WidgetBase {
 	return wb
 }
 
-// STYTODO: figure out what to do with this
-// // AddChildStyler is a helper function that adds the
-// // given styler to the child of the given name
-// // if it exists, starting searching at the given start index.
-// func (wb *WidgetBase) AddChildStyler(childName string, startIdx int, s Styler) {
-// 	child := wb.ChildByName(childName, startIdx)
-// 	if child != nil {
-// 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
-// 		if ok {
-// 			wb.Style(func(s *styles.Style) {
-// 				f(wb)
-// 			})
-// 		}
-// 	}
-// }
-
-// TODO: get rid of this!?
-
-// ActiveStyle satisfies the ActiveStyler interface
-// and returns the active style of the widget
-func (wb *WidgetBase) ActiveStyle() *styles.Style {
-	return &wb.Styles
-}
-
 // StyleRLock does a read-lock for reading the style
 func (wb *WidgetBase) StyleRLock() {
 	wb.StyMu.RLock()
@@ -95,29 +71,6 @@ func (wb *WidgetBase) BoxSpace() styles.SideFloats {
 	return bs
 }
 
-// ParentActiveStyle returns parent's active style or nil if not avail.
-// Calls StyleRLock so must call ParentStyleRUnlock when done.
-func (wb *WidgetBase) ParentActiveStyle() *styles.Style {
-	if wb.Par == nil {
-		return nil
-	}
-	if ps, ok := wb.Par.(styles.ActiveStyler); ok {
-		st := ps.ActiveStyle()
-		return st
-	}
-	return nil
-}
-
-// ParentStyleRUnlock unlocks the parent's style
-func (wb *WidgetBase) ParentStyleRUnlock() {
-	if wb.Par == nil {
-		return
-	}
-	if ps, ok := wb.Par.(styles.ActiveStyler); ok {
-		ps.StyleRUnlock()
-	}
-}
-
 // ApplyStyleParts styles the parts.
 // Automatically called by the default ApplyStyleWidget function.
 func (wb *WidgetBase) ApplyStyleParts(sc *Scene) {
@@ -131,53 +84,32 @@ func (wb *WidgetBase) ApplyStyleParts(sc *Scene) {
 // Handles inheritance and runs the Styler functions.
 // Must be called under a StyMu Lock
 func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
-	pr := prof.Start("ApplyStyleWidget")
-	defer pr.End()
-
 	if wb.Sc == nil && sc != nil {
 		wb.Sc = sc
 	}
 	if wb.Sc == nil {
 		return
-		// slog.Error("Scene is nil", "widget", wb)
 	}
-
 	if wb.OverrideStyle {
 		return
 	}
-
 	wb.ResetStyleWidget()
 
-	// todo: remove all these prof steps -- should be much less now..
-	pin := prof.Start("ApplyStyleWidget-Inherit")
-
-	if parSty := wb.ParentActiveStyle(); parSty != nil {
-		wb.Styles.InheritFields(parSty)
-		// wb.ParentStyleRUnlock()
+	_, pwb := wb.ParentWidget()
+	if pwb != nil {
+		wb.Styles.InheritFields(&pwb.Styles)
 	}
-	pin.End()
-
 	wb.DefaultStyleWidget()
-
-	prun := prof.Start("ApplyStyleWidget-RunStylers")
 	wb.RunStylers()
-	prun.End()
-
-	// we automatically apply prefs to style after we run all of the stylers
 	wb.ApplyStylePrefs()
+
 	// note: this does not un-set the Invisible if not None, because all kinds of things
 	// can turn invisible to off.
 	if wb.Styles.Display == styles.DisplayNone {
 		wb.SetState(true, states.Invisible)
 	}
-
 	SetUnitContext(&wb.Styles, sc, mat32.Vec2{}, mat32.Vec2{})
-
-	// todo: do we need this any more?
-	psc := prof.Start("ApplyStyleWidget-SetCurrentColor")
-	sc.SetCurrentColor(wb.Styles.Color)
-	psc.End()
-
+	sc.SetCurrentColor(wb.Styles.Color) // todo: do we need this anymore?
 	wb.ApplyStyleParts(sc)
 }
 
