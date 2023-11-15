@@ -446,8 +446,11 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 	for i, k := range wb.Kids {
 		i := i
 		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) { // || kwb.StateIs(states.Invisible) {
+		if kwi == nil || kwi.This() == nil || kwi.Is(ki.Deleted) {
 			break
+		}
+		if kwb.StateIs(states.Invisible) {
+			continue
 		}
 		cont := fun(i, kwi, kwb)
 		if !cont {

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -568,6 +569,7 @@ func (ly *Layout) SetInitCellsFlex() {
 
 func (ly *Layout) SetInitCellsStacked() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwb.SetState(i != ly.StackTop, states.Invisible)
 		kwb.Geom.Cell = image.Point{0, 0}
 		return ki.Continue
 	})

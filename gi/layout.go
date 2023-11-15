@@ -14,7 +14,6 @@ import (
 	"goki.dev/enums"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -169,10 +168,6 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 
 func (ly *Layout) RenderChildren(sc *Scene) {
 	if ly.Styles.Display == styles.DisplayStacked {
-		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			kwi.SetState(i != ly.StackTop, states.Invisible)
-			return ki.Continue
-		})
 		kwi, _ := ly.StackTopWidget()
 		if kwi != nil {
 			kwi.Render(sc)

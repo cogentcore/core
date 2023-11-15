@@ -197,8 +197,8 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 	if len(fr.Kids) == 1 {
 		fr.StackTop = 0
 		tab.SetSelected(true)
-	} else {
-		frame.SetState(true, states.Invisible) // new tab is invisible until selected
+		// } else {
+		// 	frame.SetState(true, states.Invisible) // new tab is invisible until selected
 	}
 }
 
