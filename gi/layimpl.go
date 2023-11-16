@@ -667,7 +667,6 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
 	ly.LaySetInitCells()
 	ly.This().(Layouter).LayoutSpace()
-	fmt.Println(ly.LayImpl.String())
 	ly.SizeUpChildren(sc) // kids do their own thing
 	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeUpPass)
 	sz := &ly.Geom.Size
@@ -702,7 +701,6 @@ func (ly *Layout) LaySetInitCells() {
 	switch {
 	case ly.Styles.Display == styles.DisplayFlex:
 		if ly.Styles.Wrap {
-			fmt.Println(ly, "wrap!")
 			ly.LaySetInitCellsWrap()
 		} else {
 			ly.LaySetInitCellsFlex()
@@ -790,7 +788,6 @@ func (ly *Layout) LaySetWrapIdxs() {
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ic := li.WrapIdxToCoord(idx)
 		kwb.Geom.Cell = ic
-		fmt.Println(ly, i, idx, ic)
 		if ic.X > maxc.X {
 			maxc.X = ic.X
 		}
@@ -871,7 +868,6 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 	li.InitCells()
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
-		fmt.Println(ly, i, cidx)
 		sz := kwb.Geom.Size.Actual.Total
 		grw := kwb.Styles.Grow
 		if pass <= SizeDownPass && iter == 0 && kwb.Styles.GrowWrap {
@@ -1033,7 +1029,10 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
+	wrapped := false
+	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
+		wrapped = ly.SizeDownWrap(sc, iter) // first recompute wrap
+	}
 	ly.This().(Layouter).SizeDownSetAllocs(sc, iter)
 	redo := ly.SizeDownChildren(sc, iter)
 	if redo {
@@ -1043,8 +1042,9 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
 		}
 	}
+	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
 	ly.SizeDownParts(sc, iter) // no std role, just get sizes
-	return chg || redo
+	return chg || wrapped || redo
 }
 
 // SizeDownSetAllocs is the key SizeDown step that sets the allocations
@@ -1124,10 +1124,6 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 // SizeDownGrow grows the element sizes based on total extra and Grow
 func (ly *Layout) SizeDownGrow(sc *Scene, iter int, extra mat32.Vec2) bool {
 	redo := false
-	// if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
-	// 	redo = ly.SizeDownGrowWrap(sc, iter, extra) // first recompute wrap
-	// todo: use special version of grow
-	// } else
 	if ly.Styles.Display == styles.DisplayStacked {
 		redo = ly.SizeDownGrowStacked(sc, iter, extra)
 	} else {
@@ -1191,9 +1187,71 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 	return redo
 }
 
-func (ly *Layout) SizeDownGrowWrap(sc *Scene, iter int, extra mat32.Vec2) bool {
-	// todo
-	return false
+func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
+	wrapped := false
+	sz := &ly.Geom.Size
+	alloc := sz.Alloc.Content
+	gap := ly.Styles.Gap.Dots().Floor()
+	fit := alloc.X
+	if LayoutTrace {
+		fmt.Println(ly, "SizeDownWrap fitting into:", fit)
+	}
+	first := true
+	var sum float32
+	var n int
+	var wraps []int
+	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		ksz := kwb.Geom.Size.Actual.Total
+		if first {
+			n = 1
+			sum = ksz.X
+			first = false
+			return ki.Continue
+		}
+		if sum+ksz.X+gap.X > fit {
+			if LayoutTraceDetail {
+				fmt.Println(ly, "wrapped:", i, sum, ksz.X, fit)
+			}
+			wraps = append(wraps, n)
+			sum = ksz.X
+			n = 1 // this guy is on next line
+		} else {
+			sum += ksz.X + gap.X
+			n++
+		}
+		return ki.Continue
+	})
+	if n > 0 {
+		wraps = append(wraps, n)
+	}
+	wrapped = false
+	li := &ly.LayImpl
+	if len(wraps) != len(li.Wraps) {
+		wrapped = true
+	} else {
+		for i := range wraps {
+			if wraps[i] != li.Wraps[i] {
+				wrapped = true
+				break
+			}
+		}
+	}
+	if !wrapped {
+		return false
+	}
+	if LayoutTrace {
+		fmt.Println(ly, "wrapped:", wraps)
+	}
+	li.Wraps = wraps
+	ly.LaySetWrapIdxs()
+	li.InitCells()
+	ly.LaySetGapSizeFromCells()
+	ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
+	ly.LaySetContentFitOverflow(ksz)
+	if LayoutTrace {
+		fmt.Println(ly, "SizeDownWrap FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
+	}
+	return wrapped
 }
 
 func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, extra mat32.Vec2) bool {
@@ -1478,19 +1536,35 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	var pos mat32.Vec2
 	var lastSz mat32.Vec2
 	idx := 0
-	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		cidx := kwb.Geom.Cell
-		if cidx.X == 0 && idx > 0 {
-			pos.X = 0
-			pos.Y += lastSz.Y + gap.Y
-		}
-		kwb.PositionWithinAlloc(sc, pos)
-		alloc := kwb.Geom.Size.Alloc.Total
-		pos.X += alloc.X + gap.X
-		lastSz = alloc
-		idx++
-		return ki.Continue
-	})
+	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.MainAxis == mat32.Y {
+		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			cidx := kwb.Geom.Cell
+			if cidx.Y == 0 && idx > 0 {
+				pos.Y = 0
+				pos.X += lastSz.X + gap.X
+			}
+			kwb.PositionWithinAlloc(sc, pos)
+			alloc := kwb.Geom.Size.Alloc.Total
+			pos.Y += alloc.Y + gap.Y
+			lastSz = alloc
+			idx++
+			return ki.Continue
+		})
+	} else {
+		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			cidx := kwb.Geom.Cell
+			if cidx.X == 0 && idx > 0 {
+				pos.X = 0
+				pos.Y += lastSz.Y + gap.Y
+			}
+			kwb.PositionWithinAlloc(sc, pos)
+			alloc := kwb.Geom.Size.Alloc.Total
+			pos.X += alloc.X + gap.X
+			lastSz = alloc
+			idx++
+			return ki.Continue
+		})
+	}
 }
 
 func (ly *Layout) PositionWrap(sc *Scene) {

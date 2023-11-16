@@ -65,9 +65,28 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "frames-vert"
+	doCase := "frames-horiz"
 
 	switch doCase {
+	case "frames-vert":
+		PlainFrames(sc, mat32.Vec2{0, 0})
+		sc.Style(func(s *styles.Style) {
+			s.MainAxis = mat32.X
+			s.Wrap = true
+			s.Align.X = styles.AlignCenter
+		})
+	case "frames-horiz":
+		row := HorizRow(sc)
+		row.Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Grow.Set(1, 1)
+		})
+		PlainFrames(row, mat32.Vec2{0, 0})
+		// gi.NewLabel(sc, "lbl").SetText(ShortText).Style(func(s *styles.Style) {
+		// })
+		HorizRow(sc).Style(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+		})
 	case "text-align":
 		// 	row := HorizRow(sc)
 		sc.Style(func(s *styles.Style) {
@@ -105,15 +124,6 @@ func app() {
 		// fr := BoxFrame(sc) // this takes up slack
 		// sm := WrapText(fr, ShortText)
 		// _ = sm
-	case "frames-vert":
-		PlainFrames(sc, mat32.Vec2{0, 0})
-		sc.Style(func(s *styles.Style) {
-			s.Wrap = true
-			s.Align.X = styles.AlignCenter
-		})
-	case "frames-horiz":
-		row := HorizRow(sc)
-		PlainFrames(row, mat32.Vec2{1, 0})
 	case "scroll-absorb": // Auto scroll should absorb extra size
 		row := HorizRow(sc, "row")
 		f1, sp := SpaceFrame(row)
@@ -267,8 +277,7 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			s.Grow = grow
-			s.Align.X = styles.AlignCenter // Center
+			// s.Align.X = styles.AlignCenter
 		})
-		gi.NewSpace(fr) // if here, prevents frame from growing on its own
 	}
 }

@@ -1300,7 +1300,6 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
-		s.Grow.Set(1, 0)
 	})
 	tf.Config(sc)
 
@@ -1346,7 +1345,6 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	tf.Tooltip = vv.Doc()
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
-		s.Grow.Set(1, 0)
 	})
 	tf.Config(sc)
 
