@@ -9,6 +9,9 @@ const goappEnv = {{.Env }};
 const goappLoadingLabel = "{{.LoadingLabel}}";
 const goappWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
 
+let wasm;
+let memoryBytes;
+
 let goappServiceWorkerRegistration;
 let deferredPrompt = null;
 
@@ -163,9 +166,6 @@ function goappNewNotification(jsonNotification) {
 
 const appCanvas = document.getElementById('app');
 const appCanvasCtx = appCanvas.getContext('2d');
-
-let wasm;
-let memoryBytes;
 
 // displayImage takes the pointer to the target image in the wasm linear memory
 // and its length. Then, it gets the resulting byte slice and creates an image data
