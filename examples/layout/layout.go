@@ -65,7 +65,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "text-align"
+	doCase := "frames-vert"
 
 	switch doCase {
 	case "text-align":
@@ -108,6 +108,7 @@ func app() {
 	case "frames-vert":
 		PlainFrames(sc, mat32.Vec2{0, 0})
 		sc.Style(func(s *styles.Style) {
+			s.Wrap = true
 			s.Align.X = styles.AlignCenter
 		})
 	case "frames-horiz":

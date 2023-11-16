@@ -444,7 +444,7 @@ func (ls *LayImplState) Cell(d mat32.Dims, dIdx, odIdx int) *LayCell {
 	if ls.MainAxis == d {
 		return ls.Cells[odIdx].Cell(d, dIdx)
 	}
-	return ls.Cells[dIdx].Cell(d, odIdx)
+	return ls.Cells[dIdx].Cell(d, 0)
 }
 
 // WrapIdxToCoord returns the X,Y coordinates in Wrap case for given sequential idx
@@ -454,7 +454,7 @@ func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
 	sum := 0
 	if ls.MainAxis == mat32.X {
 		for _, nx := range ls.Wraps {
-			if idx > sum && idx < sum+nx {
+			if idx >= sum && idx < sum+nx {
 				x = idx - sum
 				break
 			}
@@ -463,7 +463,7 @@ func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
 		}
 	} else {
 		for _, ny := range ls.Wraps {
-			if idx > sum && idx < sum+ny {
+			if idx >= sum && idx < sum+ny {
 				y = idx - sum
 				break
 			}
@@ -560,7 +560,7 @@ func (ls *LayImplState) String() string {
 	s := ""
 	ods := ls.MainAxis.Other().String()
 	for wi := range ls.Wraps {
-		s += fmt.Sprintf("%s: %d\n", ods, wi) + ls.Cells[wi].String()
+		s += fmt.Sprintf("%s: %d Shape: %v\n", ods, wi, ls.Cells[wi].Shape) + ls.Cells[wi].String()
 	}
 	return s
 }
@@ -667,6 +667,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
 	ly.LaySetInitCells()
 	ly.This().(Layouter).LayoutSpace()
+	fmt.Println(ly.LayImpl.String())
 	ly.SizeUpChildren(sc) // kids do their own thing
 	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeUpPass)
 	sz := &ly.Geom.Size
@@ -713,6 +714,7 @@ func (ly *Layout) LaySetInitCells() {
 	default:
 		ly.LaySetInitCellsStacked() // whatever
 	}
+	ly.LayImpl.InitCells()
 	ly.LaySetGapSizeFromCells()
 }
 
@@ -788,6 +790,7 @@ func (ly *Layout) LaySetWrapIdxs() {
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ic := li.WrapIdxToCoord(idx)
 		kwb.Geom.Cell = ic
+		fmt.Println(ly, i, idx, ic)
 		if ic.X > maxc.X {
 			maxc.X = ic.X
 		}
@@ -868,6 +871,7 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 	li.InitCells()
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
+		fmt.Println(ly, i, cidx)
 		sz := kwb.Geom.Size.Actual.Total
 		grw := kwb.Styles.Grow
 		if pass <= SizeDownPass && iter == 0 && kwb.Styles.GrowWrap {
