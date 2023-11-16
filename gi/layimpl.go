@@ -239,7 +239,7 @@ type GeomState struct {
 	// and inner Content dimension.
 	Pos GeomCT `view:"inline" edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// Cell is the logical X, Y index coordinates (row, col) of element
+	// Cell is the logical X, Y index coordinates (col, row) of element
 	// within its parent layout
 	Cell image.Point
 
@@ -308,19 +308,95 @@ func (ls *LayCell) Reset() {
 	ls.Grow.SetZero()
 }
 
-// LayImplState has internal state for implementing layout
-type LayImplState struct {
-	// todo: Shape, Sizes needs to be an array of that substructure, for Wrap
-
-	// Shape is number of cells along each dimension,
-	// computed for each layout type.
+// LayCells holds one set of LayCell cell elements for rows, cols.
+// There can be multiple of these for Wrap case.
+type LayCells struct {
+	// Shape is number of cells along each dimension for our ColRow cells,
 	Shape image.Point `edit:"-"`
 
-	// sizes has the data for the columns in [0] and rows in [1]:
+	// ColRow has the data for the columns in [0] and rows in [1]:
 	// col Size.X = max(X over rows) (cross axis), .Y = sum(Y over rows) (main axis for col)
 	// row Size.X = sum(X over cols) (main axis for row), .Y = max(Y over cols) (cross axis)
 	// see: https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
-	Sizes [2][]LayCell `edit:"-"`
+	ColRow [2][]LayCell `edit:"-"`
+}
+
+// Cell returns the cell for given dimension and index along that
+// dimension (X = Cols, idx = col, Y = Rows, idx = row)
+func (lc *LayCells) Cell(d mat32.Dims, idx int) *LayCell {
+	return &(lc.ColRow[d][idx])
+}
+
+// Init initializes Cells for given shape
+func (lc *LayCells) Init(shape image.Point) {
+	lc.Shape = shape
+	for d := mat32.X; d <= mat32.Y; d++ {
+		n := mat32.PointDim(lc.Shape, d)
+		if len(lc.ColRow[d]) != n {
+			lc.ColRow[d] = make([]LayCell, n)
+		}
+		for i := 0; i < n; i++ {
+			lc.ColRow[d][i].Reset()
+		}
+	}
+}
+
+// CellsSize returns the total Size represented by the current Cells,
+// which is the Sum of the Max values along each dimension.
+func (lc *LayCells) CellsSize() mat32.Vec2 {
+	var ksz mat32.Vec2
+	for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
+		n := mat32.PointDim(lc.Shape, ma) // cols, rows
+		sum := float32(0)
+		for mi := 0; mi < n; mi++ {
+			md := lc.Cell(ma, mi) // X, Y
+			mx := md.Size.Dim(ma)
+			sum += mx // sum of maxes
+		}
+		ksz.SetDim(ma, sum)
+	}
+	return ksz.Ceil()
+}
+
+func (lc *LayCells) String() string {
+	s := ""
+	n := lc.Shape.X
+	for i := 0; i < n; i++ {
+		col := lc.Cell(mat32.X, i)
+		s += fmt.Sprintln("col:", i, "\tmax X:", col.Size.X, "\tsum Y:", col.Size.Y, "\tmax grX:", col.Grow.X, "\tsum grY:", col.Grow.Y)
+	}
+	n = lc.Shape.Y
+	for i := 0; i < n; i++ {
+		row := lc.Cell(mat32.Y, i)
+		s += fmt.Sprintln("row:", i, "\tsum X:", row.Size.X, "\tmax Y:", row.Size.Y, "\tsum grX:", row.Grow.X, "\tmax grY:", row.Grow.Y)
+	}
+	return s
+}
+
+// LayImplState has internal state for implementing layout
+type LayImplState struct {
+	// Shape is number of cells along each dimension,
+	// computed for each layout type:
+	// For Grid: Max Col, Row.
+	// For Flex no Wrap: Cols,1 (X) or 1,Rows (Y).
+	// For Flex Wrap: Cols,Max(Rows) or Max(Cols),Rows
+	// For Stacked: 1,1
+	Shape image.Point `edit:"-"`
+
+	// MainAxis cached here from Styles, to enable Wrap-based access.
+	MainAxis mat32.Dims
+
+	// Wraps is the number of actual items in each Wrap for Wrap case:
+	// MainAxis X: Len = Rows, Val = Cols; MainAxis Y: Len = Cols, Val = Rows.
+	// This should be nil for non-Wrap case.
+	Wraps []int
+
+	// Cells has the Actual size and Grow factor data for each of the child elements,
+	// organized according to the Shape and Display type.
+	// For non-Wrap, has one element in slice, with cells based on Shape.
+	// For Wrap, slice is number of CrossAxis wraps allocated:
+	// MainAxis X = Rows; MainAxis Y = Cols, and Cells are MainAxis layout x 1 CrossAxis.
+	Cells []LayCells `edit:"-"`
 
 	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds to Space.
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
@@ -334,52 +410,159 @@ type LayImplState struct {
 	GapSize mat32.Vec2
 }
 
-// InitSizes initializes the Sizes based on Shape geom
-func (ls *LayImplState) InitSizes() {
-	for d := mat32.X; d <= mat32.Y; d++ {
-		n := mat32.PointDim(ls.Shape, d)
-		if len(ls.Sizes[d]) != n {
-			ls.Sizes[d] = make([]LayCell, n)
+// InitCells initializes the Cells based on Shape, MainAxis, and Wraps
+// which must be set before calling.
+func (ls *LayImplState) InitCells() {
+	if ls.Wraps == nil {
+		if len(ls.Cells) != 1 {
+			ls.Cells = make([]LayCells, 1)
 		}
-		for i := 0; i < n; i++ {
-			ls.Sizes[d][i].Reset()
-		}
+		ls.Cells[0].Init(ls.Shape)
+		return
+	}
+	ma := ls.MainAxis
+	ca := ma.Other()
+	nw := len(ls.Wraps)
+	if len(ls.Cells) != nw {
+		ls.Cells = make([]LayCells, nw)
+	}
+	for wi, wn := range ls.Wraps {
+		var shp image.Point
+		mat32.SetPointDim(&shp, ma, wn)
+		mat32.SetPointDim(&shp, ca, 1)
+		ls.Cells[wi].Init(shp)
 	}
 }
 
-// CellsSize returns the total Size represented by the current Cells,
-// which is the Sum of the Max values along each dimension.
-func (ls *LayImplState) CellsSize() mat32.Vec2 {
-	var ksz mat32.Vec2
-	for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-		n := mat32.PointDim(ls.Shape, ma) // cols, rows
-		sum := float32(0)
-		for mi := 0; mi < n; mi++ {
-			md := &ls.Sizes[ma][mi] // X, Y
-			mx := md.Size.Dim(ma)
-			sum += mx // sum of maxes
+// Cell returns the cell for given dimension and index along that
+// dimension, and given other-dimension axis which is ignored for non-Wrap cases.
+// Does no range checking and will crash if out of bounds.
+func (ls *LayImplState) Cell(d mat32.Dims, dIdx, odIdx int) *LayCell {
+	if ls.Wraps == nil {
+		return ls.Cells[0].Cell(d, dIdx)
+	}
+	if ls.MainAxis == d {
+		return ls.Cells[odIdx].Cell(d, dIdx)
+	}
+	return ls.Cells[dIdx].Cell(d, odIdx)
+}
+
+// WrapIdxToCoord returns the X,Y coordinates in Wrap case for given sequential idx
+func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
+	y := 0
+	x := 0
+	sum := 0
+	if ls.MainAxis == mat32.X {
+		for _, nx := range ls.Wraps {
+			if idx > sum && idx < sum+nx {
+				x = idx - sum
+				break
+			}
+			sum += nx
+			y++
 		}
-		ksz.SetDim(ma, sum)
+	} else {
+		for _, ny := range ls.Wraps {
+			if idx > sum && idx < sum+ny {
+				y = idx - sum
+				break
+			}
+			sum += ny
+			x++
+		}
+	}
+	return image.Point{x, y}
+}
+
+// CellsSize returns the total Size represented by the current Cells,
+// which is the Sum of the Max values along each dimension within each Cell,
+// Maxed over cross-axis dimension for Wrap case.
+func (ls *LayImplState) CellsSize() mat32.Vec2 {
+	if ls.Wraps == nil {
+		return ls.Cells[0].CellsSize()
+	}
+	var ksz mat32.Vec2
+	for wi := range ls.Wraps {
+		wsz := ls.Cells[wi].CellsSize()
+		ksz.SetMax(wsz)
 	}
 	return ksz.Ceil()
 }
 
-// ColWidth returns the width of given column.  Returns false if doesn't exist.
-func (ls *LayImplState) ColWidth(col int) (float32, bool) {
-	n := mat32.PointDim(ls.Shape, mat32.X)
-	if col >= n {
-		return 0, false
+// ColWidth returns the width of given column for given row index
+// (ignored for non-Wrap), with full bounds checking.
+// Returns error if out of range.
+func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
+	if ls.Wraps == nil {
+		n := mat32.PointDim(ls.Shape, mat32.X)
+		if col >= n {
+			return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, n)
+		}
+		return ls.Cell(mat32.X, 0, col).Size.X, nil
 	}
-	return ls.Sizes[mat32.X][col].Size.X, true
+	nw := len(ls.Wraps)
+	if ls.MainAxis == mat32.X {
+		if row >= nw {
+			return 0, fmt.Errorf("Layout.ColWidth: row: %d > number of rows: %d", row, nw)
+		}
+		wn := ls.Wraps[row]
+		if col >= wn {
+			return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, wn)
+		}
+		return ls.Cell(mat32.X, row, col).Size.X, nil
+	}
+	if col >= nw {
+		return 0, fmt.Errorf("Layout.ColWidth: col: %d > number of columns: %d", col, nw)
+	}
+	wn := ls.Wraps[col]
+	if row >= wn {
+		return 0, fmt.Errorf("Layout.ColWidth: row: %d > number of rows: %d", row, wn)
+	}
+	return ls.Cell(mat32.X, col, row).Size.X, nil
 }
 
-// RowHeight returns the height of given row.  Returns false if doesn't exist.
-func (ls *LayImplState) RowHeight(row int) (float32, bool) {
-	n := mat32.PointDim(ls.Shape, mat32.Y)
-	if row >= n {
-		return 0, false
+// RowHeight returns the height of given row for given
+// column (ignored for non-Wrap), with full bounds checking.
+// Returns error if out of range.
+func (ls *LayImplState) RowHeight(row, col int) (float32, error) {
+	if ls.Wraps == nil {
+		n := mat32.PointDim(ls.Shape, mat32.Y)
+		if row >= n {
+			return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, n)
+		}
+		return ls.Cell(mat32.Y, 0, row).Size.Y, nil
 	}
-	return ls.Sizes[mat32.Y][row].Size.Y, true
+	nw := len(ls.Wraps)
+	if ls.MainAxis == mat32.Y {
+		if col >= nw {
+			return 0, fmt.Errorf("Layout.RowHeight: col: %d > number of columns: %d", col, nw)
+		}
+		wn := ls.Wraps[row]
+		if col >= wn {
+			return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, wn)
+		}
+		return ls.Cell(mat32.Y, col, row).Size.Y, nil
+	}
+	if row >= nw {
+		return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, nw)
+	}
+	wn := ls.Wraps[col]
+	if col >= wn {
+		return 0, fmt.Errorf("Layout.RowHeight: col: %d > number of columns: %d", col, wn)
+	}
+	return ls.Cell(mat32.Y, row, col).Size.Y, nil
+}
+
+func (ls *LayImplState) String() string {
+	if ls.Wraps == nil {
+		return ls.Cells[0].String()
+	}
+	s := ""
+	ods := ls.MainAxis.Other().String()
+	for wi := range ls.Wraps {
+		s += fmt.Sprintf("%s: %d\n", ods, wi) + ls.Cells[wi].String()
+	}
+	return s
 }
 
 // StackTopWidget returns the StackTop element as a widget
@@ -391,27 +574,12 @@ func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
 	return AsWidget(sn)
 }
 
-func (ls *LayImplState) String() string {
-	s := ""
-	n := ls.Shape.X
-	for i := 0; i < n; i++ {
-		col := ls.Sizes[mat32.X][i]
-		s += fmt.Sprintln("col:", i, "\tmax X:", col.Size.X, "\tsum Y:", col.Size.Y, "\tmax grX:", col.Grow.X, "\tsum grY:", col.Grow.Y)
-	}
-	n = ls.Shape.Y
-	for i := 0; i < n; i++ {
-		row := ls.Sizes[mat32.Y][i]
-		s += fmt.Sprintln("row:", i, "\tsum X:", row.Size.X, "\tmax Y:", row.Size.Y, "\tsum grX:", row.Grow.X, "\tmax grY:", row.Grow.Y)
-	}
-	return s
-}
-
-// SetContentFitOverflow sets Internal and Actual.Content size to fit given
+// LaySetContentFitOverflow sets Internal and Actual.Content size to fit given
 // new content size, depending on the Styles Overflow: Auto and Scroll types do NOT
 // expand Actual and remain at their current styled actual values,
 // absorbing the extra content size within their own scrolling zone
 // (full size recorded in Internal).
-func (ly *Layout) SetContentFitOverflow(nsz mat32.Vec2) {
+func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
@@ -497,12 +665,12 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	}
 	ly.SizeFromStyle()
 	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
-	ly.SetInitCells()
+	ly.LaySetInitCells()
 	ly.This().(Layouter).LayoutSpace()
 	ly.SizeUpChildren(sc) // kids do their own thing
 	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeUpPass)
 	sz := &ly.Geom.Size
-	ly.SetContentFitOverflow(ksz)
+	ly.LaySetContentFitOverflow(ksz)
 	if LayoutTrace {
 		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
 	}
@@ -529,55 +697,121 @@ func (wb *WidgetBase) SizeUpChildren(sc *Scene) {
 
 // SetInitCells sets the initial default assignment of cell indexes
 // to each widget, based on layout type.
-func (ly *Layout) SetInitCells() {
+func (ly *Layout) LaySetInitCells() {
 	switch {
 	case ly.Styles.Display == styles.DisplayFlex:
-		// todo: if wrap..
-		ly.SetInitCellsFlex()
+		if ly.Styles.Wrap {
+			fmt.Println(ly, "wrap!")
+			ly.LaySetInitCellsWrap()
+		} else {
+			ly.LaySetInitCellsFlex()
+		}
 	case ly.Styles.Display == styles.DisplayStacked:
-		ly.SetInitCellsStacked()
+		ly.LaySetInitCellsStacked()
 	case ly.Styles.Display == styles.DisplayGrid:
-		ly.SetInitCellsGrid()
+		ly.LaySetInitCellsGrid()
 	default:
-		ly.SetInitCellsStacked() // whatever
+		ly.LaySetInitCellsStacked() // whatever
 	}
+	ly.LaySetGapSizeFromCells()
 }
 
-func (ly *Layout) SetGapSizeFromCells() {
+func (ly *Layout) LaySetGapSizeFromCells() {
+	// note: this may not be correct for wrap
 	ly.LayImpl.GapSize.X = max(float32(ly.LayImpl.Shape.X-1)*mat32.Ceil(ly.Styles.Gap.X.Dots), 0)
 	ly.LayImpl.GapSize.Y = max(float32(ly.LayImpl.Shape.Y-1)*mat32.Ceil(ly.Styles.Gap.Y.Dots), 0)
 	ly.LayImpl.GapSize.SetCeil()
 	ly.Geom.Size.InnerSpace = ly.LayImpl.GapSize
 }
 
-func (ly *Layout) SetInitCellsFlex() {
+func (ly *Layout) LaySetInitCellsFlex() {
+	li := &ly.LayImpl
 	ma := ly.Styles.MainAxis
 	ca := ma.Other()
+	li.MainAxis = ma
+	li.Wraps = nil
 	idx := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		mat32.SetPointDim(&kwb.Geom.Cell, ma, idx)
+		mat32.SetPointDim(&kwb.Geom.Cell, ca, 0)
 		idx++
 		return ki.Continue
 	})
 	if idx == 0 {
-		fmt.Println(ly, "no items:", idx)
+		if LayoutTrace {
+			fmt.Println(ly, "no items:", idx)
+		}
 	}
-	mat32.SetPointDim(&ly.LayImpl.Shape, ma, max(idx, 1)) // must be at least 1
-	mat32.SetPointDim(&ly.LayImpl.Shape, ca, 1)
-	ly.SetGapSizeFromCells()
+	mat32.SetPointDim(&li.Shape, ma, max(idx, 1)) // must be at least 1
+	mat32.SetPointDim(&li.Shape, ca, 1)
 }
 
-func (ly *Layout) SetInitCellsStacked() {
+func (ly *Layout) LaySetInitCellsWrap() {
+	li := &ly.LayImpl
+	ma := ly.Styles.MainAxis
+	li.MainAxis = ma
+	ni := 0
+	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		ni++
+		return ki.Continue
+	})
+	if ni == 0 {
+		li.Shape = image.Point{1, 1}
+		li.Wraps = nil
+		li.GapSize.SetZero()
+		ly.Geom.Size.InnerSpace.SetZero()
+		if LayoutTrace {
+			fmt.Println(ly, "no items:", ni)
+		}
+		return
+	}
+	nm := max(int(mat32.Sqrt(float32(ni))), 1)
+	nc := max(ni/nm, 1)
+	for nm*nc < ni {
+		nm++
+	}
+	li.Wraps = make([]int, nc)
+	sum := 0
+	for i := range li.Wraps {
+		n := min(ni-sum, nm)
+		li.Wraps[i] = n
+		sum += n
+	}
+	ly.LaySetWrapIdxs()
+}
+
+// LaySetWrapIdxs sets indexes for Wrap case
+func (ly *Layout) LaySetWrapIdxs() {
+	li := &ly.LayImpl
+	idx := 0
+	var maxc image.Point
+	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		ic := li.WrapIdxToCoord(idx)
+		kwb.Geom.Cell = ic
+		if ic.X > maxc.X {
+			maxc.X = ic.X
+		}
+		if ic.Y > maxc.Y {
+			maxc.Y = ic.Y
+		}
+		idx++
+		return ki.Continue
+	})
+	maxc.X++
+	maxc.Y++
+	li.Shape = maxc
+}
+
+func (ly *Layout) LaySetInitCellsStacked() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.SetState(i != ly.StackTop, states.Invisible)
 		kwb.Geom.Cell = image.Point{0, 0}
 		return ki.Continue
 	})
 	ly.LayImpl.Shape = image.Point{1, 1}
-	ly.SetGapSizeFromCells() // always 0
 }
 
-func (ly *Layout) SetInitCellsGrid() {
+func (ly *Layout) LaySetInitCellsGrid() {
 	n := len(*ly.Children())
 	cols := ly.Styles.Columns
 	if cols == 0 {
@@ -606,10 +840,7 @@ func (ly *Layout) SetInitCellsGrid() {
 		}
 		return ki.Continue
 	})
-	ly.SetGapSizeFromCells()
 }
-
-// todo: wrap requires a different non-grid logic -- no constraint of same sizes across rows
 
 //////////////////////////////////////////////////////////////////////
 //		SizeFromChildren
@@ -619,7 +850,6 @@ func (ly *Layout) SetInitCellsGrid() {
 // sizes for the layout process, e.g., if Content is sized to fit allocation,
 // as in the TopAppBar and Sliceview types.
 func (ly *Layout) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
-	// todo: flex
 	if ly.Styles.Display == styles.DisplayStacked {
 		return ly.SizeFromChildrenStacked(sc)
 	}
@@ -634,7 +864,8 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 	//   +--+--+
 	// 1 |  |  |
 	//   +--+--+
-	ly.LayImpl.InitSizes()
+	li := &ly.LayImpl
+	li.InitCells()
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		sz := kwb.Geom.Size.Actual.Total
@@ -646,12 +877,13 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 			fmt.Println("SzUp i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		}
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-			ca := ma.Other()                // cross axis = Y then X
-			mi := mat32.PointDim(cidx, ma)  // X, Y
-			ci := mat32.PointDim(cidx, ca)  // Y, X
-			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
-			cd := &ly.LayImpl.Sizes[ca][ci] // Y, X
-			msz := sz.Dim(ma)               // main axis size dim: X, Y
+			ca := ma.Other()               // cross axis = Y then X
+			mi := mat32.PointDim(cidx, ma) // X, Y
+			ci := mat32.PointDim(cidx, ca) // Y, X
+
+			md := li.Cell(ma, mi, ci) // X, Y
+			cd := li.Cell(ca, ci, mi) // Y, X
+			msz := sz.Dim(ma)         // main axis size dim: X, Y
 			mx := md.Size.Dim(ma)
 			mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
 			md.Size.SetDim(ma, mx)
@@ -670,15 +902,15 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 	})
 	if LayoutTraceDetail {
 		fmt.Println(ly, "SizeFromChildren")
-		fmt.Println(ly.LayImpl.String())
+		fmt.Println(li.String())
 	}
-	ksz := ly.LayImpl.CellsSize().Add(ly.Geom.Size.InnerSpace)
+	ksz := li.CellsSize().Add(ly.Geom.Size.InnerSpace)
 	return ksz
 }
 
 // SizeFromChildrenStacked for stacked case
 func (ly *Layout) SizeFromChildrenStacked(sc *Scene) mat32.Vec2 {
-	ly.LayImpl.InitSizes()
+	ly.LayImpl.InitCells()
 	_, kwb := ly.StackTopWidget()
 	li := &ly.LayImpl
 	var ksz mat32.Vec2
@@ -686,8 +918,9 @@ func (ly *Layout) SizeFromChildrenStacked(sc *Scene) mat32.Vec2 {
 		ksz = kwb.Geom.Size.Actual.Total
 		kgrw := kwb.Styles.Grow
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-			li.Sizes[ma][0].Size = ksz
-			li.Sizes[ma][0].Grow = kgrw
+			md := li.Cell(ma, 0, 0)
+			md.Size = ksz
+			md.Grow = kgrw
 		}
 	}
 	return ksz
@@ -801,7 +1034,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	redo := ly.SizeDownChildren(sc, iter)
 	if redo {
 		ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
-		ly.SetContentFitOverflow(ksz)
+		ly.LaySetContentFitOverflow(ksz)
 		if LayoutTrace {
 			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
 		}
@@ -904,6 +1137,7 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 	sz := &ly.Geom.Size
 	alloc := sz.Alloc.Content.Sub(sz.InnerSpace) // inner is fixed
 	// todo: use max growth values instead of individual ones to ensure consistency!
+	li := &ly.LayImpl
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		ksz := &kwb.Geom.Size
@@ -921,10 +1155,10 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 			if exd < 0 {
 				exd = 0
 			}
-			mi := mat32.PointDim(cidx, ma)  // X, Y
-			ci := mat32.PointDim(cidx, ca)  // Y, X
-			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
-			cd := &ly.LayImpl.Sizes[ca][ci] // Y, X
+			mi := mat32.PointDim(cidx, ma) // X, Y
+			ci := mat32.PointDim(cidx, ca) // Y, X
+			md := li.Cell(ma, mi, ci)      // X, Y
+			cd := li.Cell(ca, ci, mi)      // Y, X
 			mx := md.Size.Dim(ma)
 			asz := mx
 			gsum := cd.Grow.Dim(ma)
@@ -1007,8 +1241,10 @@ func (ly *Layout) SizeDownAllocActualCells(sc *Scene, iter int) {
 		ksz := &kwb.Geom.Size
 		cidx := kwb.Geom.Cell
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
-			mi := mat32.PointDim(cidx, ma)  // X, Y
-			md := &ly.LayImpl.Sizes[ma][mi] // X, Y
+			ca := ma.Other()                  // cross axis = Y then X
+			mi := mat32.PointDim(cidx, ma)    // X, Y
+			ci := mat32.PointDim(cidx, ca)    // Y, X
+			md := ly.LayImpl.Cell(ma, mi, ci) // X, Y
 			asz := md.Size.Dim(ma)
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
@@ -1122,7 +1358,7 @@ func (ly *Layout) SizeFinalLay(sc *Scene) {
 	}
 	ly.SizeFinalChildren(sc) // kids do their own thing
 	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeFinalPass)
-	ly.SetContentFitOverflow(ksz)
+	ly.LaySetContentFitOverflow(ksz)
 	ly.GrowToAlloc(sc)
 	if LayoutTrace {
 		sz := &ly.Geom.Size

@@ -2104,9 +2104,9 @@ func (sg *SliceViewGrid) OnInit() {
 
 func (sg *SliceViewGrid) SizeFromChildren(sc *gi.Scene, iter int, pass gi.LayoutPasses) mat32.Vec2 {
 	csz := sg.Frame.SizeFromChildren(sc, iter, pass)
-	rht, ok := sg.LayImpl.RowHeight(0)
-	if !ok {
-		fmt.Println("SliceViewGrid Sizing Error: No rows!", sg)
+	rht, err := sg.LayImpl.RowHeight(0, 0)
+	if err != nil {
+		fmt.Println("SliceViewGrid Sizing Error:", err)
 		sg.RowHeight = 42
 	}
 	if sg.NeedsRebuild() { // rebuilding = reset
