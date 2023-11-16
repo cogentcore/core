@@ -32,7 +32,7 @@ func app() {
 	// gi.DefaultTopAppBar = nil
 
 	ts := gi.NewTabs(sc)
-	ts.NewTabButton = true
+	ts.DeleteTabButtons = false
 
 	makeHome(ts)
 	makeText(ts)

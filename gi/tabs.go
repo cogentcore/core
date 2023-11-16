@@ -544,7 +544,7 @@ func (tb *Tab) TabStyles() {
 			s.Cursor = cursors.Pointer
 		}
 		s.Max.X.Ch(20)
-		s.Min.Y.Ch(6)
+		// s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
@@ -552,7 +552,7 @@ func (tb *Tab) TabStyles() {
 		s.Border.Radius.Zero()
 		s.Text.Align = styles.AlignCenter
 		s.Margin.Zero()
-		s.Padding.SetHoriz(units.Dp(8))
+		s.Padding.Set(units.Dp(10), units.Dp(24))
 
 		// s.Border.Style.Set(styles.BorderNone)
 		// if tb.StateIs(states.Selected) {
