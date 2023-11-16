@@ -4,9 +4,9 @@ package girl
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.20"
+	Version = "v0.0.21"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "e4893a4"
+	GitCommit = "09f4ba1"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-11-15 04:51"
+	VersionDate = "2023-11-16 04:23"
 )
