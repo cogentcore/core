@@ -16,10 +16,18 @@ import (
 
 //go:generate go run gen.go
 
-// Icons contains all of the default embedded svg icons
+// Icons contains all of the embedded svg icons. It is initialized
+// to contain of the default icons located in the svg directory
+// (https://github.com/goki/icons/tree/main/svg), but it can be extended
+// by any packages by using a merged fs package.
+var Icons fs.FS = icons
+
+// icons contains the default icons.
+// It must be separate from Icons because Icons has to be a generic fs.FS
+// for compatability with merged fs's and go:embed can only be used on embed.FS.
 //
 //go:embed svg/*.svg
-var Icons embed.FS
+var icons embed.FS
 
 const (
 	// None is an icon that indicates to not use an icon.
