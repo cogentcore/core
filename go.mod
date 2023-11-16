@@ -54,8 +54,8 @@ require (
 	goki.dev/cam v0.9.35 // indirect
 	goki.dev/colors v0.8.29 // indirect
 	goki.dev/cursors v0.0.17 // indirect
-	goki.dev/gi/v2 v2.0.0-dev0.0.11 // indirect
-	goki.dev/girl v0.0.19 // indirect
+	goki.dev/gi/v2 v2.0.0-dev0.0.13 // indirect
+	goki.dev/girl v0.0.21 // indirect
 	goki.dev/glop v0.1.4 // indirect
 	goki.dev/goosi v0.0.11 // indirect
 	goki.dev/grr v0.0.6 // indirect
