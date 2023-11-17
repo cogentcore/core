@@ -417,6 +417,10 @@ func (st *Style) SetGrow(v ...float32) *Style {
 	return st
 }
 
+func (st *Style) IsFlexWrap() bool {
+	return st.Wrap && st.Display == DisplayFlex
+}
+
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
 // a coordinated manner.  If wrap == true, then WhiteSpaceNormal
 // and GrowWrap = true; else WhiteSpaceNowrap and GrowWrap = false, which
