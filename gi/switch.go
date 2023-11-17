@@ -153,6 +153,7 @@ func (sw *Switch) SwitchStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
+				s.Align.Y = styles.AlignCenter
 			})
 		case "parts/stack":
 			w.Style(func(s *styles.Style) {

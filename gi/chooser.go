@@ -23,7 +23,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 )
 
@@ -149,7 +148,7 @@ func (ch *Chooser) ChooserStyles() {
 		switch w.PathFrom(ch) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
+				s.Align.Y = styles.AlignCenter
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {

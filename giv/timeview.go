@@ -195,9 +195,6 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	})
 
 	trow := gi.NewLayout(dv)
-	trow.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
-	})
 
 	sms := make([]any, len(shortMonths))
 	for i, sm := range shortMonths {
@@ -269,8 +266,6 @@ func (dv *DateView) ConfigDateGrid() {
 		bt.Style(func(s *styles.Style) {
 			s.Min.X.Dp(40)
 			s.Min.Y.Dp(40)
-			s.Align.X = styles.AlignCenter
-			s.Align.Y = styles.AlignCenter
 			// s.Text.Align = styles.AlignCenter
 			s.Padding.Zero()
 			if dt.Month() != som.Month() {
@@ -287,14 +282,18 @@ func (dv *DateView) ConfigDateGrid() {
 			}
 		})
 		bt.OnWidgetAdded(func(w gi.Widget) {
-			if w.PathFrom(bt) == "parts/label" {
+			switch w.PathFrom(bt) {
+			case "parts":
+				w.Style(func(s *styles.Style) {
+					s.Align.Set(styles.AlignCenter)
+				})
+			case "parts/label":
 				lb := w.(*gi.Label)
 				lb.Type = gi.LabelBodyLarge
 				w.Style(func(s *styles.Style) {
+					s.Border.Radius = styles.BorderRadiusFull
 					s.Text.Align = styles.AlignCenter
 					s.Text.AlignV = styles.AlignCenter
-					s.Grow.Set(0, 0)
-					s.Border.Radius = styles.BorderRadiusFull
 				})
 			}
 		})

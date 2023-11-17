@@ -1571,6 +1571,21 @@ func (wb *WidgetBase) PositionParts(sc *Scene) {
 	if wb.Parts == nil {
 		return
 	}
+	sz := &wb.Geom.Size
+	act := sz.Actual.Content
+	psz := wb.Parts.Geom.Size.Actual.Total
+	extra := act.Sub(psz)
+	var pos mat32.Vec2
+	if extra.X > 0 {
+		off := styles.AlignFactor(wb.Parts.Styles.Align.X) * extra.X
+		pos.X += off
+	}
+	if extra.Y > 0 {
+		off := styles.AlignFactor(wb.Parts.Styles.Align.Y) * extra.Y
+		pos.Y += off
+	}
+	pos.SetFloor()
+	wb.Parts.Geom.RelPos = pos
 	wb.Parts.Position(sc)
 }
 

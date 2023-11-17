@@ -230,6 +230,7 @@ func (tf *TextField) TextFieldStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Align.Y = styles.AlignCenter
 				s.Gap.Zero()
+				s.Grow.Set(1, 0)
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)
