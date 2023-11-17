@@ -20,9 +20,6 @@ import (
 type Dialog struct { //goki:no-new
 	Scene
 
-	// Stage is the main stage associated with the dialog
-	Stage *MainStage
-
 	// Accepted means that the dialog was accepted -- else canceled
 	Accepted bool `set:"-"`
 
@@ -104,7 +101,7 @@ func (d *Dialog) Buttons() *Layout {
 	})
 	bb.OnWidgetAdded(func(w Widget) {
 		// new window and full window dialogs don't need text buttons
-		if bt := AsButton(w); bt != nil && !d.Stage.FullWindow && !d.Stage.NewWindow {
+		if bt := AsButton(w); bt != nil && !d.MainStage().FullWindow && !d.MainStage().NewWindow {
 			bt.Type = ButtonText
 		}
 	})
@@ -150,7 +147,7 @@ func (d *Dialog) Cancel(text ...string) *Dialog {
 		txt = text[0]
 	}
 	bt := NewButton(bb, "cancel").SetText(txt)
-	if d.Stage.FullWindow || d.Stage.NewWindow {
+	if d.MainStage().FullWindow || d.MainStage().NewWindow {
 		bt.SetType(ButtonOutlined)
 	}
 	bt.OnClick(func(e events.Event) {
@@ -169,25 +166,25 @@ func (d *Dialog) Cancel(text ...string) *Dialog {
 
 // Modal sets whether the dialog is modal
 func (d *Dialog) Modal(modal bool) *Dialog {
-	d.Stage.Modal = modal
+	d.Stage.AsBase().Modal = modal
 	return d
 }
 
 // NewWindow sets whether the dialog takes up the full window
 func (d *Dialog) NewWindow(newWindow bool) *Dialog {
-	d.Stage.NewWindow = newWindow
+	d.Stage.AsBase().NewWindow = newWindow
 	return d
 }
 
 // FullWindow sets whether the dialog takes up the full window
 func (d *Dialog) FullWindow(fullWindow bool) *Dialog {
-	d.Stage.FullWindow = fullWindow
+	d.Stage.AsBase().FullWindow = fullWindow
 	return d
 }
 
 // Run runs (shows) the dialog.
 func (d *Dialog) Run() {
-	d.Stage.Run()
+	d.Stage.AsMain().Run()
 }
 
 // AcceptDialog accepts the dialog, activated by the default Ok button
@@ -228,12 +225,12 @@ func (d *Dialog) OnCancel(fun func(e events.Event)) *Dialog {
 
 // Close closes the stage associated with this dialog
 func (d *Dialog) Close() {
-	mm := d.Stage.StageMgr
+	mm := d.Stage.AsMain().StageMgr
 	if mm == nil {
 		slog.Error("dialog has no MainMgr")
 		return
 	}
-	if d.Stage.NewWindow {
+	if d.Stage.AsBase().NewWindow {
 		mm.RenderWin.CloseReq()
 		return
 	}
@@ -246,7 +243,7 @@ func (d *Dialog) DialogStyles() {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.SetMainAxis(mat32.Y)
 		s.Color = colors.Scheme.OnSurface
-		if !d.Stage.NewWindow && !d.Stage.FullWindow {
+		if !d.Stage.AsBase().NewWindow && !d.Stage.AsBase().FullWindow {
 			s.Padding.Set(units.Dp(24))
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()

@@ -65,9 +65,31 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "frames-vert"
+	doCase := "center-dialog"
 
 	switch doCase {
+	case "center-dialog":
+		dlg := gi.NewDialog(sc)
+		sc.Style(func(s *styles.Style) {
+			s.Align.Set(styles.AlignCenter)
+		})
+		gi.NewLabel(sc).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
+			Style(func(s *styles.Style) {
+				// s.SetTextWrap(false)
+				s.Align.Set(styles.AlignCenter)
+				// s.Text.Align = styles.AlignCenter
+			})
+		gi.NewLabel(sc).SetType(gi.LabelBodyLarge).
+			SetText("Thank you for reporting your issue!").
+			Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Align.Set(styles.AlignCenter)
+			})
+		gi.NewButton(sc).SetType(gi.ButtonTonal).SetText("Return home").
+			Style(func(s *styles.Style) {
+				// s.Grow.Set(1, 0)
+				s.Align.Set(styles.AlignCenter)
+			})
 	case "frames-vert":
 		PlainFrames(sc, mat32.Vec2{0, 0})
 		sc.Style(func(s *styles.Style) {
@@ -185,27 +207,6 @@ func app() {
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
-	case "center-dialog":
-		sc.Style(func(s *styles.Style) {
-			s.Align.Set(styles.AlignCenter)
-		})
-		gi.NewLabel(sc).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
-			Style(func(s *styles.Style) {
-				// s.SetTextWrap(false)
-				s.Align.Set(styles.AlignCenter)
-				// s.Text.Align = styles.AlignCenter
-			})
-		gi.NewLabel(sc).SetType(gi.LabelBodyLarge).
-			SetText("Thank you for reporting your issue!").
-			Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.OnSurfaceVariant
-				s.Align.Set(styles.AlignCenter)
-			})
-		gi.NewButton(sc).SetType(gi.ButtonTonal).SetText("Return home").
-			Style(func(s *styles.Style) {
-				// s.Grow.Set(1, 0)
-				s.Align.Set(styles.AlignCenter)
-			})
 	default:
 		fmt.Println("error: case didn't match:", doCase)
 	}

@@ -1064,7 +1064,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
+	chg := ly.This().(Layouter).ManageOverflow(sc, iter) // this must go first.
 	wrapped := false
 	if iter <= 1 && ly.Styles.IsFlexWrap() {
 		wrapped = ly.SizeDownWrap(sc, iter) // first recompute wrap
