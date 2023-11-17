@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
@@ -53,15 +52,6 @@ func (sv *StructViewInline) OnInit() {
 func (sv *StructViewInline) StructViewInlineStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Align.Y = styles.AlignCenter
-	})
-	sv.OnWidgetAdded(func(w gi.Widget) {
-		path := w.PathFrom(sv)
-		if strings.HasPrefix(path, "label-") {
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-				s.Min.X.Em(2)
-			})
-		}
 	})
 }
 
@@ -126,6 +116,11 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Child(i * 2).(*gi.Label)
+		lbl.Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+			s.Align.Y = styles.AlignCenter
+			s.Min.X.Em(2)
+		})
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		w, wb := gi.AsWidget(sv.Child((i * 2) + 1))

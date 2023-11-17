@@ -134,6 +134,7 @@ func (sw *Switch) SwitchStyles() {
 			} else {
 				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Width.Set(units.Dp(1))
+				s.Padding.Left.Dp(14)
 			}
 		}
 		if sw.Type == SwitchSegmentedButton {
@@ -222,6 +223,7 @@ func (sw *Switch) SwitchStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Align.Y = styles.AlignCenter
+				s.Text.AlignV = styles.AlignCenter
 				s.FillMargin = false
 			})
 		}

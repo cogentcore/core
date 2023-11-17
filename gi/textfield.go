@@ -218,6 +218,7 @@ func (tf *TextField) TextFieldStyles() {
 			s.Border.Color.Zero()
 			s.Border.Width.Zero()
 			s.Border.Radius.Zero()
+			s.MaxBorder = s.Border
 			s.BackgroundColor.SetSolid(colors.Transparent)
 		}
 		if s.Is(states.Selected) {
@@ -1796,8 +1797,8 @@ func (tf *TextField) SetEffPosAndSize() {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
 	pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
-	tf.EffSize = sz
-	tf.EffPos = pos
+	tf.EffSize = sz.Ceil()
+	tf.EffPos = pos.Ceil()
 }
 
 func (tf *TextField) RenderTextField(sc *Scene) {

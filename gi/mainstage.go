@@ -258,6 +258,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	// history-based stages always take up the whole window
 	if !st.FullWindow {
 		sz = sc.PrefSize(winsz)
+		sz = sz.Add(image.Point{50, 50})
 	}
 	if WinRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)

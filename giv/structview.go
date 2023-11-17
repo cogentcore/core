@@ -81,15 +81,6 @@ func (sv *StructView) OnInit() {
 				// s.Min.X.Em(20)
 				// s.Min.Y.Em(10)
 			})
-		case strings.HasPrefix(pfrom, "struct-grid/"):
-			w.Style(func(s *styles.Style) {
-				s.Align.X = styles.AlignStart
-			})
-			if strings.HasPrefix(w.Name(), "label-") {
-				w.Style(func(s *styles.Style) {
-					s.SetTextWrap(false)
-				})
-			}
 		}
 	})
 }
@@ -296,6 +287,9 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*gi.Label)
+		lbl.Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+		})
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))

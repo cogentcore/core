@@ -1079,7 +1079,7 @@ func (wb *WidgetBase) GrowToAllocSize(sc *Scene, act, alloc mat32.Vec2) (mat32.V
 			act.SetDim(d, nsz)
 		}
 	}
-	return act, change
+	return act.Ceil(), change
 }
 
 /////////////// Layout
