@@ -98,18 +98,14 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 // from a non-pointer type, and also goes through an interface to find the
 // actual underlying type behind the interface.
 func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
-	opv := OnePtrValue(v)
-	npv := NonPtrValue(opv)
+	npv := NonPtrValue(v)
 	if ValueIsZero(npv) {
 		return npv
 	}
-	itv := reflect.ValueOf(npv.Interface())
-	if itv.Kind() == reflect.Ptr {
-		// for this to still be a ptr, means that orig Value is
-		// an interface, so this is the underlying value of that interface
-		opv = OnePtrValue(itv)
+	for npv.Type().Kind() == reflect.Interface || npv.Type().Kind() == reflect.Pointer {
+		npv = npv.Elem()
 	}
-	return opv
+	return OnePtrValue(npv)
 }
 
 // UnhideAnyValue returns a reflect.Value for any of the Make* functions
