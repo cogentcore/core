@@ -78,6 +78,7 @@ func (ts *Tabs) TabsStyles() {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
+				s.Wrap = true
 				s.Overflow.X = styles.OverflowHidden // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
@@ -543,7 +544,7 @@ func (tb *Tab) TabStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Max.X.Ch(20)
+		s.Max.X.Ch(16)
 		// s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
@@ -552,7 +553,7 @@ func (tb *Tab) TabStyles() {
 		s.Border.Radius.Zero()
 		s.Text.Align = styles.AlignCenter
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(10), units.Dp(24))
+		s.Padding.Set(units.Dp(10))
 
 		// s.Border.Style.Set(styles.BorderNone)
 		// if tb.StateIs(states.Selected) {
@@ -587,6 +588,7 @@ func (tb *Tab) TabStyles() {
 		case "parts/close-stretch":
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(1)
+				s.Grow.Set(1, 0)
 			})
 		case "parts/close.parts/icon":
 			w.Style(func(s *styles.Style) {
@@ -596,7 +598,8 @@ func (tb *Tab) TabStyles() {
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
 				// s.Margin.Zero()
-				// s.Padding.Zero()
+				s.Padding.Set(units.Dp(0))
+				s.Padding.Left.Dp(16)
 				s.Align.Y = styles.AlignCenter
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(colors.Transparent)
@@ -610,6 +613,7 @@ func (tb *Tab) TabStyles() {
 		case "parts/sc-stretch":
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(2)
+				s.Grow.Set(1, 0)
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {
@@ -640,7 +644,7 @@ func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 	parts := tb.NewParts()
 	config := ki.Config{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
-	config.Add(StretchType, "close-stretch")
+	// config.Add(StretchType, "close-stretch")
 	clsIdx := len(config)
 	config.Add(ButtonType, "close")
 	mods, updt := parts.ConfigChildren(config)

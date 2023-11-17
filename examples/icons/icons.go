@@ -28,10 +28,12 @@ func app() {
 
 	grid := gi.NewFrame(sc, "grid")
 	grid.Style(func(s *styles.Style) {
-		s.Display = styles.DisplayGrid
-		s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
-		s.Align.Set(styles.AlignCenter)
-		s.Margin.Set(units.Dp(1))
+		// s.Display = styles.DisplayGrid
+		// s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
+		s.Wrap = true
+		s.Grow.Set(1, 1)
+		// s.Align.Set(styles.AlignCenter)
+		s.Margin.Set(units.Dp(8))
 		s.Overflow.Y = styles.OverflowAuto
 	})
 
@@ -43,10 +45,11 @@ func app() {
 		}
 		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
 			s.MainAxis = mat32.Y
-			s.Max.X.Em(15)
+			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
+			s.Min.X.Em(15)
 		})
 		gi.NewLabel(vb, icnm).SetText(icnm).Style(func(s *styles.Style) {
-			// s.SetTextWrap(false)
+			s.SetTextWrap(false)
 		})
 		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
 			s.Min.Set(units.Em(4))

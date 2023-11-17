@@ -55,8 +55,8 @@ func (sw *Switches) SwitchesStyles() {
 		if sw.Type == SwitchSegmentedButton {
 			s.Gap.Zero()
 		} else {
+			s.Grow.Set(1, 0)
 			s.Wrap = true
-			s.Grow.Set(1, 1)
 		}
 	})
 	sw.OnWidgetAdded(func(w Widget) {

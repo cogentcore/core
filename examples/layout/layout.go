@@ -65,13 +65,13 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil
 
-	doCase := "frames-horiz"
+	doCase := "frames-vert"
 
 	switch doCase {
 	case "frames-vert":
 		PlainFrames(sc, mat32.Vec2{0, 0})
 		sc.Style(func(s *styles.Style) {
-			s.MainAxis = mat32.X
+			s.MainAxis = mat32.Y
 			s.Wrap = true
 			s.Align.X = styles.AlignCenter
 		})
@@ -79,7 +79,6 @@ func app() {
 		row := HorizRow(sc)
 		row.Style(func(s *styles.Style) {
 			s.Wrap = true
-			s.Grow.Set(1, 1)
 		})
 		PlainFrames(row, mat32.Vec2{0, 0})
 		// gi.NewLabel(sc, "lbl").SetText(ShortText).Style(func(s *styles.Style) {

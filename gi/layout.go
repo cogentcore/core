@@ -136,7 +136,7 @@ func (ly *Layout) LayoutStyles() {
 		switch {
 		case s.Display == styles.DisplayFlex:
 			if s.Wrap {
-				s.Grow.Set(1, 1)
+				s.Grow.Set(1, 0)
 			} else {
 				s.Grow.SetDim(s.MainAxis, 1)
 				s.Grow.SetDim(s.MainAxis.Other(), 0)

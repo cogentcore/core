@@ -482,9 +482,16 @@ func (ls *LayImplState) CellsSize() mat32.Vec2 {
 		return ls.Cells[0].CellsSize()
 	}
 	var ksz mat32.Vec2
+	d := ls.MainAxis
+	od := d.Other()
 	for wi := range ls.Wraps {
 		wsz := ls.Cells[wi].CellsSize()
-		ksz.SetMax(wsz)
+		if wi == 0 {
+			ksz = wsz
+		} else {
+			ksz.SetDim(d, max(ksz.Dim(d), wsz.Dim(d)))
+			ksz.SetDim(od, ksz.Dim(od)+wsz.Dim(od))
+		}
 	}
 	return ksz.Ceil()
 }
@@ -579,7 +586,7 @@ func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
 // expand Actual and remain at their current styled actual values,
 // absorbing the extra content size within their own scrolling zone
 // (full size recorded in Internal).
-func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2) {
+func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
@@ -590,10 +597,12 @@ func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2) {
 	*isz = *asz
 	styles.SetClampMinVec(isz, nsz)
 	oflow := &ly.Styles.Overflow
+	nosz := pass == SizeUpPass && ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if oflow.Dim(d) < styles.OverflowAuto || ly.Par == nil { // overflow hides from actual
-			asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
+		if (nosz || oflow.Dim(d) >= styles.OverflowAuto) && ly.Par != nil {
+			continue
 		}
+		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
 	}
 	mx := ly.Geom.Size.Max
 	styles.SetClampMaxVec(isz, mx)
@@ -668,12 +677,7 @@ func (ly *Layout) SizeUpLay(sc *Scene) {
 	ly.LaySetInitCells()
 	ly.This().(Layouter).LayoutSpace()
 	ly.SizeUpChildren(sc) // kids do their own thing
-	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeUpPass)
-	sz := &ly.Geom.Size
-	ly.LaySetContentFitOverflow(ksz)
-	if LayoutTrace {
-		fmt.Println(ly, "SizeUp FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
-	}
+	ly.SizeFromChildrenFit(sc, 0, SizeUpPass)
 	if ly.Parts != nil {
 		ly.Parts.SizeUp(sc) // just to get sizes -- no std role in layout
 	}
@@ -845,15 +849,29 @@ func (ly *Layout) LaySetInitCellsGrid() {
 //////////////////////////////////////////////////////////////////////
 //		SizeFromChildren
 
-// SizeFromChildren gathers Actual size from kids into our Actual.Content size.
+// SizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
+// to update Actual and Internal size based on this.
+func (ly *Layout) SizeFromChildrenFit(sc *Scene, iter int, pass LayoutPasses) {
+	ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
+	ly.LaySetContentFitOverflow(ksz, pass)
+	if LayoutTrace {
+		sz := &ly.Geom.Size
+		fmt.Println(ly, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
+	}
+}
+
+// SizeFromChildren gathers Actual size from kids.
 // Different Layout types can alter this to present different Content
 // sizes for the layout process, e.g., if Content is sized to fit allocation,
 // as in the TopAppBar and Sliceview types.
 func (ly *Layout) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
+	var ksz mat32.Vec2
 	if ly.Styles.Display == styles.DisplayStacked {
-		return ly.SizeFromChildrenStacked(sc)
+		ksz = ly.SizeFromChildrenStacked(sc)
+	} else {
+		ksz = ly.SizeFromChildrenCells(sc, iter, pass)
 	}
-	return ly.SizeFromChildrenCells(sc, iter, pass)
+	return ksz
 }
 
 // SizeFromChildrenCells for Flex, Grid
@@ -1032,15 +1050,14 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	wrapped := false
 	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
 		wrapped = ly.SizeDownWrap(sc, iter) // first recompute wrap
+		if iter == 0 {
+			wrapped = true // always update
+		}
 	}
 	ly.This().(Layouter).SizeDownSetAllocs(sc, iter)
 	redo := ly.SizeDownChildren(sc, iter)
-	if redo {
-		ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
-		ly.LaySetContentFitOverflow(ksz)
-		if LayoutTrace {
-			fmt.Println(ly, "SizeDown FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
-		}
+	if redo || wrapped {
+		ly.SizeFromChildrenFit(sc, iter, SizeDownPass)
 	}
 	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
 	ly.SizeDownParts(sc, iter) // no std role, just get sizes
@@ -1192,9 +1209,10 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 	sz := &ly.Geom.Size
 	alloc := sz.Alloc.Content
 	gap := ly.Styles.Gap.Dots().Floor()
-	fit := alloc.X
+	d := ly.Styles.MainAxis
+	fit := alloc.Dim(d)
 	if LayoutTrace {
-		fmt.Println(ly, "SizeDownWrap fitting into:", fit)
+		fmt.Println(ly, "SizeDownWrap fitting into:", d, fit)
 	}
 	first := true
 	var sum float32
@@ -1204,19 +1222,19 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 		ksz := kwb.Geom.Size.Actual.Total
 		if first {
 			n = 1
-			sum = ksz.X
+			sum = ksz.Dim(d)
 			first = false
 			return ki.Continue
 		}
-		if sum+ksz.X+gap.X > fit {
+		if sum+ksz.Dim(d)+gap.Dim(d) > fit {
 			if LayoutTraceDetail {
-				fmt.Println(ly, "wrapped:", i, sum, ksz.X, fit)
+				fmt.Println(ly, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}
 			wraps = append(wraps, n)
-			sum = ksz.X
+			sum = ksz.Dim(d)
 			n = 1 // this guy is on next line
 		} else {
-			sum += ksz.X + gap.X
+			sum += ksz.Dim(d) + gap.Dim(d)
 			n++
 		}
 		return ki.Continue
@@ -1246,11 +1264,7 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 	ly.LaySetWrapIdxs()
 	li.InitCells()
 	ly.LaySetGapSizeFromCells()
-	ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
-	ly.LaySetContentFitOverflow(ksz)
-	if LayoutTrace {
-		fmt.Println(ly, "SizeDownWrap FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
-	}
+	ly.SizeFromChildrenCells(sc, iter, SizeDownPass)
 	return wrapped
 }
 
@@ -1419,13 +1433,8 @@ func (ly *Layout) SizeFinalLay(sc *Scene) {
 		return
 	}
 	ly.SizeFinalChildren(sc) // kids do their own thing
-	ksz := ly.This().(Layouter).SizeFromChildren(sc, 0, SizeFinalPass)
-	ly.LaySetContentFitOverflow(ksz)
+	ly.SizeFromChildrenFit(sc, 0, SizeFinalPass)
 	ly.GrowToAlloc(sc)
-	if LayoutTrace {
-		sz := &ly.Geom.Size
-		fmt.Println(ly, "Final Content: Alloc:", sz.Alloc.Content, "Actual:", sz.Actual.Content, "Internal:", sz.Internal)
-	}
 	ly.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
 }
 
