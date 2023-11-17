@@ -191,6 +191,9 @@ type GeomSize struct {
 	// and must be subtracted from Content when passing sizes down to children.
 	InnerSpace mat32.Vec2
 
+	// Min is the Styles.Min.Dots() (Ceil int) that constrains the Actual.Content size
+	Min mat32.Vec2
+
 	// Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size
 	Max mat32.Vec2
 }
@@ -358,6 +361,12 @@ func (lc *LayCells) CellsSize() mat32.Vec2 {
 	return ksz.Ceil()
 }
 
+// GapSizeDim returns the gap size for given dimension, based on Shape and given gap size
+func (lc *LayCells) GapSizeDim(d mat32.Dims, gap float32) float32 {
+	n := mat32.PointDim(lc.Shape, d)
+	return float32(n-1) * gap
+}
+
 func (lc *LayCells) String() string {
 	s := ""
 	n := lc.Shape.X
@@ -402,7 +411,10 @@ type LayImplState struct {
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
 	ScrollSize mat32.Vec2
 
-	// GapSize has the extra gap sizing between elements, which adds to Space.
+	// Gap is the Styles.Gap size
+	Gap mat32.Vec2
+
+	// GapSize has the total extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
 	// For SizeUp / Down Gap contributes to Space like other cases,
 	// but for BoundingBox rendering and Alignment, it does NOT, and must be
@@ -476,16 +488,18 @@ func (ls *LayImplState) WrapIdxToCoord(idx int) image.Point {
 
 // CellsSize returns the total Size represented by the current Cells,
 // which is the Sum of the Max values along each dimension within each Cell,
-// Maxed over cross-axis dimension for Wrap case.
+// Maxed over cross-axis dimension for Wrap case, plus GapSize.
 func (ls *LayImplState) CellsSize() mat32.Vec2 {
 	if ls.Wraps == nil {
-		return ls.Cells[0].CellsSize()
+		return ls.Cells[0].CellsSize().Add(ls.GapSize)
 	}
 	var ksz mat32.Vec2
 	d := ls.MainAxis
 	od := d.Other()
+	gap := ls.Gap.Dim(d)
 	for wi := range ls.Wraps {
 		wsz := ls.Cells[wi].CellsSize()
+		wsz.SetDim(d, wsz.Dim(d)+ls.Cells[wi].GapSizeDim(d, gap))
 		if wi == 0 {
 			ksz = wsz
 		} else {
@@ -493,6 +507,7 @@ func (ls *LayImplState) CellsSize() mat32.Vec2 {
 			ksz.SetDim(od, ksz.Dim(od)+wsz.Dim(od))
 		}
 	}
+	ksz.SetDim(od, ksz.Dim(od)+ls.GapSize.Dim(od))
 	return ksz.Ceil()
 }
 
@@ -593,18 +608,18 @@ func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	sz := &ly.Geom.Size
 	asz := &sz.Actual.Content
 	isz := &sz.Internal
-	sz.SetInitContentMin(ly.Styles.Min.Dots().Ceil()) // start from style
+	sz.SetInitContentMin(sz.Min) // start from style
 	*isz = *asz
 	styles.SetClampMinVec(isz, nsz)
 	oflow := &ly.Styles.Overflow
-	nosz := pass == SizeUpPass && ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap
+	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if (nosz || oflow.Dim(d) >= styles.OverflowAuto) && ly.Par != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
 	}
-	mx := ly.Geom.Size.Max
+	mx := sz.Max
 	styles.SetClampMaxVec(isz, mx)
 	styles.SetClampMaxVec(asz, mx)
 	sz.SetTotalFromContent(&sz.Actual)
@@ -641,9 +656,10 @@ func (wb *WidgetBase) SizeFromStyle() {
 	sz := &wb.Geom.Size
 	wb.SpaceFromStyle()
 	wb.Geom.Size.InnerSpace.SetZero()
+	sz.Min = wb.Styles.Min.Dots().Ceil()
 	sz.Max = wb.Styles.Max.Dots().Ceil()
 	sz.Internal.SetZero()
-	sz.SetInitContentMin(wb.Styles.Min.Dots().Ceil())
+	sz.SetInitContentMin(sz.Min)
 	sz.SetTotalFromContent(&sz.Actual)
 	if LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
 		fmt.Println(wb, "SizeUp from Style:", sz.Actual.Content.String())
@@ -721,11 +737,12 @@ func (ly *Layout) LaySetInitCells() {
 }
 
 func (ly *Layout) LaySetGapSizeFromCells() {
-	// note: this may not be correct for wrap
-	ly.LayImpl.GapSize.X = max(float32(ly.LayImpl.Shape.X-1)*mat32.Ceil(ly.Styles.Gap.X.Dots), 0)
-	ly.LayImpl.GapSize.Y = max(float32(ly.LayImpl.Shape.Y-1)*mat32.Ceil(ly.Styles.Gap.Y.Dots), 0)
-	ly.LayImpl.GapSize.SetCeil()
-	ly.Geom.Size.InnerSpace = ly.LayImpl.GapSize
+	li := &ly.LayImpl
+	li.Gap = ly.Styles.Gap.Dots().Floor()
+	// note: this is not accurate for flex
+	li.GapSize.X = max(float32(li.Shape.X-1)*li.Gap.X, 0)
+	li.GapSize.Y = max(float32(li.Shape.Y-1)*li.Gap.Y, 0)
+	ly.Geom.Size.InnerSpace = li.GapSize
 }
 
 func (ly *Layout) LaySetInitCellsFlex() {
@@ -922,7 +939,7 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 		fmt.Println(ly, "SizeFromChildren")
 		fmt.Println(li.String())
 	}
-	ksz := li.CellsSize().Add(ly.Geom.Size.InnerSpace)
+	ksz := li.CellsSize()
 	return ksz
 }
 
@@ -1047,8 +1064,9 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
+	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
 	wrapped := false
-	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Wrap {
+	if iter <= 1 && ly.Styles.IsFlexWrap() {
 		wrapped = ly.SizeDownWrap(sc, iter) // first recompute wrap
 		if iter == 0 {
 			wrapped = true // always update
@@ -1059,7 +1077,6 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if redo || wrapped {
 		ly.SizeFromChildrenFit(sc, iter, SizeDownPass)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(sc, iter)
 	ly.SizeDownParts(sc, iter) // no std role, just get sizes
 	return chg || wrapped || redo
 }
@@ -1206,10 +1223,11 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 
 func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 	wrapped := false
+	li := &ly.LayImpl
 	sz := &ly.Geom.Size
-	alloc := sz.Alloc.Content
-	gap := ly.Styles.Gap.Dots().Floor()
 	d := ly.Styles.MainAxis
+	alloc := sz.Alloc.Content
+	gap := li.Gap.Dim(d)
 	fit := alloc.Dim(d)
 	if LayoutTrace {
 		fmt.Println(ly, "SizeDownWrap fitting into:", d, fit)
@@ -1222,11 +1240,11 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 		ksz := kwb.Geom.Size.Actual.Total
 		if first {
 			n = 1
-			sum = ksz.Dim(d)
+			sum = ksz.Dim(d) + gap
 			first = false
 			return ki.Continue
 		}
-		if sum+ksz.Dim(d)+gap.Dim(d) > fit {
+		if sum+ksz.Dim(d)+gap >= fit {
 			if LayoutTraceDetail {
 				fmt.Println(ly, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}
@@ -1234,7 +1252,7 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 			sum = ksz.Dim(d)
 			n = 1 // this guy is on next line
 		} else {
-			sum += ksz.Dim(d) + gap.Dim(d)
+			sum += ksz.Dim(d) + gap
 			n++
 		}
 		return ki.Continue
@@ -1243,7 +1261,6 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 		wraps = append(wraps, n)
 	}
 	wrapped = false
-	li := &ly.LayImpl
 	if len(wraps) != len(li.Wraps) {
 		wrapped = true
 	} else {
@@ -1537,7 +1554,7 @@ func (ly *Layout) PositionLay(sc *Scene) {
 }
 
 func (ly *Layout) PositionCells(sc *Scene) {
-	gap := ly.Styles.Gap.Dots().Floor()
+	gap := ly.LayImpl.Gap
 	sz := &ly.Geom.Size
 	if LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
@@ -1689,190 +1706,3 @@ func (ly *Layout) ScenePos(sc *Scene) {
 	ly.ScenePosParts(sc) // in case they fit inside parent
 	// otherwise handle separately like scrolls on layout
 }
-
-/*
-//////////////////////////////////////////////////////
-//  Wrap
-
-// GatherSizesFlow is size first pass: gather the size information from the children
-func GatherSizesFlow(ly *Layout, iter int) {
-	sz := len(ly.Kids)
-	if sz == 0 {
-		return
-	}
-
-	if iter > 0 {
-		ly.ChildrenUpdateSizes() // essential to call this
-		prv := ly.ChildSize
-		ly.LayState.Size.Need = prv
-		ly.LayState.Size.Pref = prv
-		ly.Geom.Size.Total = prv
-		ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-		if LayoutTrace {
-			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.Path(), prv)
-		}
-		return
-	}
-
-	sumPref, sumNeed, maxPref, maxNeed := GatherSizesSumMax(ly)
-
-	// for flow, the need is always *maxNeed* (i.e., a single item)
-	// and the pref is based on styled pref estimate
-
-	sdim := LaySummedDim(ly.Lay)
-	odim := mat32.OtherDim(sdim)
-	pref := ly.LayState.Size.Pref.Dim(sdim)
-	// opref := ly.LayState.Size.Pref.Dim(odim) // not using
-
-	if pref == 0 {
-		pref = 6 * maxNeed.Dim(sdim) // 6 items preferred backup default
-	}
-	if pref == 0 {
-		pref = 200 // final backstop
-	}
-
-	if LayoutTrace {
-		fmt.Printf("Size:   %v flow pref start: %v\n", ly.Path(), pref)
-	}
-
-	sNeed := sumNeed.Dim(sdim)
-	nNeed := float32(1)
-	tNeed := sNeed
-	oNeed := maxNeed.Dim(odim)
-	if sNeed > pref {
-		tNeed = pref
-		nNeed = mat32.Ceil(sNeed / tNeed)
-		oNeed *= nNeed
-	}
-
-	sPref := sumPref.Dim(sdim)
-	nPref := float32(1)
-	tPref := sPref
-	oPref := maxPref.Dim(odim)
-	if sPref > pref {
-		if sNeed > pref {
-			tPref = pref
-			nPref = mat32.Ceil(sPref / tPref)
-			oPref *= nPref
-		} else {
-			tPref = sNeed // go with need
-		}
-	}
-
-	ly.LayState.Size.Need.SetMaxDim(sdim, maxNeed.Dim(sdim)) // Need min = max of single item
-	ly.LayState.Size.Pref.SetMaxDim(sdim, tPref)
-	ly.LayState.Size.Need.SetMaxDim(odim, oNeed)
-	ly.LayState.Size.Pref.SetMaxDim(odim, oPref)
-
-	spc := ly.BoxSpace()
-	ly.LayState.Size.Need.SetAdd(spc.Size())
-	ly.LayState.Size.Pref.SetAdd(spc.Size())
-
-	elspc := float32(0.0)
-	if sz >= 2 {
-		elspc = float32(sz-1) * ly.Styles.Gap.Dots
-	}
-	if LaySumDim(ly.Lay, mat32.X) {
-		ly.LayState.Size.Need.X += elspc
-		ly.LayState.Size.Pref.X += elspc
-	}
-	if LaySumDim(ly.Lay, mat32.Y) {
-		ly.LayState.Size.Need.Y += elspc
-		ly.LayState.Size.Pref.Y += elspc
-	}
-
-	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-	if LayoutTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
-	}
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-//     Layout children
-
-// LayoutFlow manages the flow layout along given dimension
-// returns true if needs another iteration (only if iter == 0)
-func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
-	ly.FlowBreaks = nil
-	sz := len(ly.Kids)
-	if sz == 0 {
-		return false
-	}
-
-	elspc := float32(sz-1) * ly.Styles.Gap.Dots
-	spc := ly.BoxSpace()
-	exspc := spc.Size().Dim(dim) + elspc
-
-	avail := ly.Geom.Size.Total.Dim(dim) - exspc
-	odim := mat32.OtherDim(dim)
-
-	// SidesTODO: might be odim
-	pos := spc.Pos().Dim(dim)
-	for i, c := range ly.Kids {
-		if c == nil {
-			continue
-		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
-			continue
-		}
-		size := ni.LayState.Size.Need.Dim(dim)
-		if pos+size > avail {
-			ly.FlowBreaks = append(ly.FlowBreaks, i)
-			pos = spc.Pos().Dim(dim)
-		}
-		ni.Geom.Size.Total.SetDim(dim, size)
-		ni.Geom.PosRel.SetDim(dim, pos)
-		if LayoutTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
-		}
-		pos += size + ly.Styles.Gap.Dots
-	}
-	ly.FlowBreaks = append(ly.FlowBreaks, len(ly.Kids))
-
-	nrows := len(ly.FlowBreaks)
-	oavail := ly.Geom.Size.Total.Dim(odim) - exspc
-	oavPerRow := oavail / float32(nrows)
-	ci := 0
-	rpos := float32(0)
-	var nsz mat32.Vec2
-	for _, bi := range ly.FlowBreaks {
-		rmax := float32(0)
-		for i := ci; i < bi; i++ {
-			c := ly.Kids[i]
-			if c == nil {
-				continue
-			}
-			ni := c.(Widget).AsWidget()
-			if ni == nil {
-				continue
-			}
-			ni.StyMu.RLock()
-			al := ni.Styles.AlignDim(odim)
-			ni.StyMu.RUnlock()
-			pref := ni.LayState.Size.Pref.Dim(odim)
-			need := ni.LayState.Size.Need.Dim(odim)
-			max := ni.LayState.Size.Max.Dim(odim)
-			pos, size := LayoutSharedDimImpl(ly, oavPerRow, need, pref, max, spc, al)
-			ni.Geom.Size.Total.SetDim(odim, size)
-			ni.Geom.PosRel.SetDim(odim, rpos+pos)
-			rmax = mat32.Max(rmax, size)
-			nsz.X = mat32.Max(nsz.X, ni.Geom.PosRel.X+ni.Geom.Size.Total.X)
-			nsz.Y = mat32.Max(nsz.Y, ni.Geom.PosRel.Y+ni.Geom.Size.Total.Y)
-		}
-		rpos += rmax + ly.Styles.Gap.Dots
-		ci = bi
-	}
-	ly.LayState.Size.Need = nsz
-	ly.LayState.Size.Pref = nsz
-	if LayoutTrace {
-		fmt.Printf("Layout: %v Flow final size: %v\n", ly.Path(), nsz)
-	}
-	// if nrows == 1 {
-	// 	return false
-	// }
-	return true
-}
-
-*/

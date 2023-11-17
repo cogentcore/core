@@ -26,14 +26,22 @@ func app() {
 
 	sc := gi.NewScene("gogi-icons-demo").SetTitle("GoGi Icons")
 
+	sc.Style(func(s *styles.Style) {
+		s.Align.X = styles.AlignStart
+	})
+
 	grid := gi.NewFrame(sc, "grid")
 	grid.Style(func(s *styles.Style) {
 		// s.Display = styles.DisplayGrid
 		// s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
 		s.Wrap = true
 		s.Grow.Set(1, 1)
+		// s.Gap.Zero() // overflow issue is gap driven
+		s.Align.X = styles.AlignStart
 		// s.Align.Set(styles.AlignCenter)
-		s.Margin.Set(units.Dp(8))
+		// s.Margin.Set(units.Dp(8))
+		s.Margin.Zero()
+		s.Padding.Zero()
 		s.Overflow.Y = styles.OverflowAuto
 	})
 
@@ -46,7 +54,10 @@ func app() {
 		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
 			s.MainAxis = mat32.Y
 			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
-			s.Min.X.Em(15)
+			s.Gap.Zero()
+			s.Padding.Zero()
+			s.Margin.Zero()
+			// s.Min.X.Em(15)
 		})
 		gi.NewLabel(vb, icnm).SetText(icnm).Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
