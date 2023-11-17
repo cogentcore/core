@@ -715,6 +715,22 @@ func (wb *WidgetBase) SizeUpChildren(sc *Scene) {
 	return
 }
 
+// SizeUpChildren calls SizeUp on all the children of this node
+func (ly *Layout) SizeUpChildren(sc *Scene) {
+	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			kwi.SizeUp(sc)
+			return ki.Continue
+		})
+		return
+	}
+	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		kwi.SizeUp(sc)
+		return ki.Continue
+	})
+	return
+}
+
 // SetInitCells sets the initial default assignment of cell indexes
 // to each widget, based on layout type.
 func (ly *Layout) LaySetInitCells() {
@@ -823,12 +839,18 @@ func (ly *Layout) LaySetWrapIdxs() {
 	li.Shape = maxc
 }
 
-func (ly *Layout) LaySetInitCellsStacked() {
+// UpdateStackedVisbility updates the visibility for Stacked layouts
+// so the StackTop widget is visible, and others are Invisible.
+func (ly *Layout) UpdateStackedVisibility() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.SetState(i != ly.StackTop, states.Invisible)
 		kwb.Geom.Cell = image.Point{0, 0}
 		return ki.Continue
 	})
+}
+
+func (ly *Layout) LaySetInitCellsStacked() {
+	ly.UpdateStackedVisibility()
 	ly.LayImpl.Shape = image.Point{1, 1}
 }
 
@@ -1015,6 +1037,25 @@ func (wb *WidgetBase) SizeDownChildren(sc *Scene, iter int) bool {
 		return ki.Continue
 	})
 	return redo
+}
+
+// SizeDownChildren calls SizeDown on the Children.
+// The kids must have their Size.Alloc set prior to this, which
+// is what Layout type does.  Other special widget types can
+// do custom layout and call this too.
+func (ly *Layout) SizeDownChildren(sc *Scene, iter int) bool {
+	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+		redo := false
+		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			re := kwi.SizeDown(sc, iter)
+			if i == ly.StackTop {
+				redo = redo || re
+			}
+			return ki.Continue
+		})
+		return redo
+	}
+	return ly.WidgetBase.SizeDownChildren(sc, iter)
 }
 
 // GrowToAllocSize returns the potential size that widget could grow,
@@ -1461,7 +1502,18 @@ func (wb *WidgetBase) SizeFinalChildren(sc *Scene) {
 		kwi.SizeFinal(sc)
 		return ki.Continue
 	})
-	return
+}
+
+// SizeFinalChildren calls SizeFinal on all the children of this node
+func (ly *Layout) SizeFinalChildren(sc *Scene) {
+	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			kwi.SizeFinal(sc)
+			return ki.Continue
+		})
+		return
+	}
+	ly.WidgetBase.SizeFinalChildren(sc)
 }
 
 // StyleSizeUpdate updates styling size values for widget and its parent,
@@ -1549,8 +1601,8 @@ func (ly *Layout) PositionLay(sc *Scene) {
 		ly.PositionStacked(sc)
 	} else {
 		ly.PositionCells(sc)
+		ly.PositionChildren(sc)
 	}
-	ly.PositionChildren(sc)
 }
 
 func (ly *Layout) PositionCells(sc *Scene) {
@@ -1612,6 +1664,9 @@ func (ly *Layout) PositionWrap(sc *Scene) {
 func (ly *Layout) PositionStacked(sc *Scene) {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
+		if !ly.Is(LayoutStackTopOnly) || i == ly.StackTop {
+			kwi.Position(sc)
+		}
 		return ki.Continue
 	})
 }
@@ -1702,6 +1757,18 @@ func (wb *WidgetBase) ScenePosChildren(sc *Scene) {
 		kwi.ScenePos(sc)
 		return ki.Continue
 	})
+}
+
+// ScenePosChildren runs ScenePos on the children
+func (ly *Layout) ScenePosChildren(sc *Scene) {
+	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+			kwi.ScenePos(sc)
+			return ki.Continue
+		})
+		return
+	}
+	ly.WidgetBase.ScenePosChildren(sc)
 }
 
 // ScenePos: scene-based position and final BBox is computed based on

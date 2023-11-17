@@ -332,6 +332,12 @@ func (sw *Switch) RenderSwitch(sc *Scene) {
 
 func (sw *Switch) Render(sc *Scene) {
 	sw.SetIconFromState() // make sure we're always up-to-date on render
+	if sw.Parts != nil {
+		ist := sw.Parts.ChildByName("stack", 0)
+		if ist != nil {
+			ist.(*Layout).UpdateStackedVisibility()
+		}
+	}
 	if sw.PushBounds(sc) {
 		sw.RenderSwitch(sc)
 		sw.RenderParts(sc)

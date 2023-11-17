@@ -59,6 +59,7 @@ func app() {
 	gi.LayoutTrace = true
 	gi.LayoutTraceDetail = true
 	// gi.UpdateTrace = true
+	gi.RenderTrace = true
 
 	gi.SetAppName("layout")
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
@@ -66,7 +67,7 @@ func app() {
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
 	gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
 
-	doCase := "scroll-absorb"
+	doCase := "switch"
 
 	switch doCase {
 	case "frames-vert":
@@ -180,6 +181,8 @@ func app() {
 		sp.SetSplits(.3, .7)
 	case "textfield-parts": // textfield parts alignment
 		gi.NewTextField(sc).AddClearButton()
+	case "switch":
+		gi.NewSwitch(sc)
 	case "structview": // structview
 		ts := &Test{}
 		giv.NewStructView(sc).SetStruct(ts)
