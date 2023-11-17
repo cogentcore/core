@@ -1548,22 +1548,11 @@ func (wb *WidgetBase) PositionWidget(sc *Scene) {
 
 func (wb *WidgetBase) PositionWithinAlloc(sc *Scene, allocPos mat32.Vec2) {
 	sz := &wb.Geom.Size
-	act := sz.Actual.Total
-	alloc := sz.Alloc.Total
-	extra := alloc.Sub(act)
-	pos := allocPos
-	if extra.X > 0 {
-		off := styles.AlignFactor(wb.Styles.Align.X) * extra.X
-		pos.X += off
-	}
-	if extra.Y > 0 {
-		off := styles.AlignFactor(wb.Styles.Align.Y) * extra.Y
-		pos.Y += off
-	}
-	pos.SetFloor()
+	pos := wb.Styles.AlignPosInBox(sz.Actual.Total, sz.Alloc.Total).Floor()
+	pos.SetAdd(allocPos)
 	wb.Geom.RelPos = pos
 	if LayoutTrace {
-		fmt.Println(wb, "allocPos:", allocPos, "pos:", pos, "alloc:", alloc, "act:", act, "extra:", extra)
+		fmt.Println(wb, "allocPos:", allocPos, "pos:", pos)
 	}
 }
 
@@ -1572,20 +1561,12 @@ func (wb *WidgetBase) PositionParts(sc *Scene) {
 		return
 	}
 	sz := &wb.Geom.Size
-	act := sz.Actual.Content
-	psz := wb.Parts.Geom.Size.Actual.Total
-	extra := act.Sub(psz)
-	var pos mat32.Vec2
-	if extra.X > 0 {
-		off := styles.AlignFactor(wb.Parts.Styles.Align.X) * extra.X
-		pos.X += off
+	pgm := &wb.Parts.Geom
+	pos := wb.Parts.Styles.AlignPosInBox(pgm.Size.Actual.Total, sz.Actual.Content).Floor()
+	pgm.RelPos = pos
+	if LayoutTrace {
+		fmt.Println(wb.Parts, "pos:", pos)
 	}
-	if extra.Y > 0 {
-		off := styles.AlignFactor(wb.Parts.Styles.Align.Y) * extra.Y
-		pos.Y += off
-	}
-	pos.SetFloor()
-	wb.Parts.Geom.RelPos = pos
 	wb.Parts.Position(sc)
 }
 
@@ -1627,19 +1608,8 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
 	var lastSz mat32.Vec2
-	var stPos mat32.Vec2
-	extra := sz.Alloc.Content.Sub(sz.Internal)
-	if extra.X > 0 {
-		off := styles.AlignFactor(ly.Styles.Align.X) * extra.X
-		stPos.X += off
-	}
-	if extra.Y > 0 {
-		off := styles.AlignFactor(ly.Styles.Align.Y) * extra.Y
-		stPos.Y += off
-	}
-	stPos.SetFloor()
-	stPos.SetSub(ly.Geom.RelPos)
-	stPos.SetMax(mat32.Vec2{}) // avoid neg
+	stPos := ly.Styles.AlignPosInBox(sz.Internal, sz.Alloc.Content).Floor()
+	stPos = stPos.Sub(ly.Geom.RelPos).Max(mat32.Vec2{}) // redundant with any existing
 	pos := stPos
 	idx := 0
 	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.MainAxis == mat32.Y {
