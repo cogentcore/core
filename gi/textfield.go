@@ -229,8 +229,8 @@ func (tf *TextField) TextFieldStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Align.Y = styles.AlignCenter
+				s.Text.AlignV = styles.AlignCenter
 				s.Gap.Zero()
-				s.Grow.Set(1, 0)
 			})
 		case "parts/lead-icon":
 			lead := w.(*Button)

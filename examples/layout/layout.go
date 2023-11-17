@@ -189,17 +189,17 @@ func app() {
 		bt := gi.NewButton(sc).SetType(gi.ButtonAction).SetText("22").Style(func(s *styles.Style) {
 			s.Min.X.Dp(40)
 			s.Min.Y.Dp(40)
-			s.Align.Set(styles.AlignCenter)
-			// s.Text.Align = styles.AlignCenter
 			s.Padding.Zero()
 			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Color = colors.Scheme.Primary.On
 		})
 		bt.Config(sc)
 		bt.Parts.Style(func(s *styles.Style) {
+			s.Text.Align = styles.AlignCenter
+			s.Text.AlignV = styles.AlignCenter
+			s.Align.Set(styles.AlignCenter)
 			s.Padding.Zero()
 			s.Margin.Zero()
-			// s.Grow.Set(0, 0)
 		})
 	case "structview": // structview
 		ts := &Test{}

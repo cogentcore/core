@@ -285,6 +285,8 @@ func (dv *DateView) ConfigDateGrid() {
 			switch w.PathFrom(bt) {
 			case "parts":
 				w.Style(func(s *styles.Style) {
+					s.Text.Align = styles.AlignCenter
+					s.Text.AlignV = styles.AlignCenter
 					s.Align.Set(styles.AlignCenter)
 				})
 			case "parts/label":
@@ -292,8 +294,6 @@ func (dv *DateView) ConfigDateGrid() {
 				lb.Type = gi.LabelBodyLarge
 				w.Style(func(s *styles.Style) {
 					s.Border.Radius = styles.BorderRadiusFull
-					s.Text.Align = styles.AlignCenter
-					s.Text.AlignV = styles.AlignCenter
 				})
 			}
 		})

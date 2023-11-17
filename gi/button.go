@@ -186,8 +186,8 @@ func (bt *Button) ButtonStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
-				s.Grow.Set(0, 0)
 				s.Align.Set(styles.AlignCenter)
+				s.Text.AlignV = styles.AlignCenter
 				if bt.Type == ButtonMenu || bt.Type == ButtonAction {
 					s.Align.X = styles.AlignStart
 				}
