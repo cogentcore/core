@@ -67,7 +67,6 @@ func (d *Dialog) Title(title string) *Dialog {
 	d.Scene.Title = title
 	NewLabel(d, "title").SetText(title).
 		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
-		s.Grow.Set(1, 0)
 		s.Align.X = styles.AlignCenter
 		s.Align.Y = styles.AlignStart
 	})
@@ -78,8 +77,6 @@ func (d *Dialog) Title(title string) *Dialog {
 func (d *Dialog) Prompt(prompt string) *Dialog {
 	NewLabel(d, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
-		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		s.Grow.Set(1, 0)
 		s.Min.X.Ch(30)
 		s.Text.Align = styles.AlignStart
 		s.Align.Y = styles.AlignStart

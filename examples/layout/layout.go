@@ -14,6 +14,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
@@ -63,33 +64,11 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
-	gi.DefaultTopAppBar = nil
+	gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
 
-	doCase := "center-dialog"
+	doCase := "scroll-absorb"
 
 	switch doCase {
-	case "center-dialog":
-		dlg := gi.NewDialog(sc)
-		sc.Style(func(s *styles.Style) {
-			s.Align.Set(styles.AlignCenter)
-		})
-		gi.NewLabel(sc).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
-			Style(func(s *styles.Style) {
-				// s.SetTextWrap(false)
-				s.Align.Set(styles.AlignCenter)
-				// s.Text.Align = styles.AlignCenter
-			})
-		gi.NewLabel(sc).SetType(gi.LabelBodyLarge).
-			SetText("Thank you for reporting your issue!").
-			Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.OnSurfaceVariant
-				s.Align.Set(styles.AlignCenter)
-			})
-		gi.NewButton(sc).SetType(gi.ButtonTonal).SetText("Return home").
-			Style(func(s *styles.Style) {
-				// s.Grow.Set(1, 0)
-				s.Align.Set(styles.AlignCenter)
-			})
 	case "frames-vert":
 		PlainFrames(sc, mat32.Vec2{0, 0})
 		sc.Style(func(s *styles.Style) {
@@ -100,6 +79,7 @@ func app() {
 	case "frames-horiz":
 		row := HorizRow(sc)
 		row.Style(func(s *styles.Style) {
+			// s.Align.X = styles.AlignEnd
 			s.Wrap = true
 		})
 		PlainFrames(row, mat32.Vec2{0, 0})
@@ -207,6 +187,34 @@ func app() {
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
+	case "center-dialog":
+		d := gi.NewDialog(sc).FullWindow(true)
+		d.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			s.Align.Set(styles.AlignCenter)
+		})
+		fr := gi.NewFrame(d).Style(func(s *styles.Style) { // note: this is critical for separating from topbar
+			s.MainAxis = mat32.Y
+			s.Grow.Set(1, 1)
+			s.Align.Set(styles.AlignCenter)
+		})
+		gi.NewLabel(fr).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
+			Style(func(s *styles.Style) {
+				s.Align.Set(styles.AlignCenter)
+			})
+		gi.NewLabel(fr).SetType(gi.LabelBodyLarge).
+			SetText("Thank you for reporting your issue!").
+			Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.OnSurfaceVariant
+				s.Align.Set(styles.AlignCenter)
+			})
+		gi.NewButton(fr).SetType(gi.ButtonTonal).SetText("Return home").
+			Style(func(s *styles.Style) {
+				s.Align.Set(styles.AlignCenter)
+			})
+		gi.NewButton(sc).SetText("Click Me").OnClick(func(e events.Event) {
+			d.Run()
+		})
 	default:
 		fmt.Println("error: case didn't match:", doCase)
 	}

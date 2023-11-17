@@ -1559,14 +1559,27 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	if LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
-	var pos mat32.Vec2
 	var lastSz mat32.Vec2
+	var stPos mat32.Vec2
+	extra := sz.Alloc.Content.Sub(sz.Internal)
+	if extra.X > 0 {
+		off := styles.AlignFactor(ly.Styles.Align.X) * extra.X
+		stPos.X += off
+	}
+	if extra.Y > 0 {
+		off := styles.AlignFactor(ly.Styles.Align.Y) * extra.Y
+		stPos.Y += off
+	}
+	stPos.SetFloor()
+	stPos.SetSub(ly.Geom.RelPos)
+	stPos.SetMax(mat32.Vec2{}) // avoid neg
+	pos := stPos
 	idx := 0
 	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.MainAxis == mat32.Y {
 		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			cidx := kwb.Geom.Cell
 			if cidx.Y == 0 && idx > 0 {
-				pos.Y = 0
+				pos.Y = stPos.Y
 				pos.X += lastSz.X + gap.X
 			}
 			kwb.PositionWithinAlloc(sc, pos)
@@ -1580,7 +1593,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			cidx := kwb.Geom.Cell
 			if cidx.X == 0 && idx > 0 {
-				pos.X = 0
+				pos.X = stPos.X
 				pos.Y += lastSz.Y + gap.Y
 			}
 			kwb.PositionWithinAlloc(sc, pos)
