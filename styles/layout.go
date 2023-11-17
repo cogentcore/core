@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"goki.dev/girl/units"
+	"goki.dev/mat32/v2"
 )
 
 // todo: for style
@@ -61,6 +62,22 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Gap.ToDots(uc)
 	s.ScrollBarWidth.ToDots(uc)
 }
+
+// AlignPosInBox returns the position offset based on Align.X,Y settings
+// for given inner-sized box within given outer-sized container box.
+func (s *Style) AlignPosInBox(inner, outer mat32.Vec2) mat32.Vec2 {
+	extra := outer.Sub(inner)
+	var pos mat32.Vec2
+	if extra.X > 0 {
+		pos.X += AlignFactor(s.Align.X) * extra.X
+	}
+	if extra.Y > 0 {
+		pos.Y += AlignFactor(s.Align.Y) * extra.Y
+	}
+	return pos
+}
+
+/////////////////////////////////////////////////////////////////
 
 // Display determines how items are displayed
 type Display int32 //enums:enum -trim-prefix Display
