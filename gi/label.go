@@ -370,8 +370,11 @@ func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) mat32.Vec2 {
 func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 	csz := lb.Geom.Size.Actual.Content
 	chars := float32(len(lb.Text))
-	fm := lb.Styles.Font.Face.Metrics
-	area := chars * fm.Height * fm.Height
+	fht := float32(16)
+	if lb.Styles.Font.Face != nil {
+		fht = lb.Styles.Font.Face.Metrics.Height
+	}
+	area := chars * fht * fht
 	ratio := float32(1.618) // default to golden
 	if csz.X > 0 && csz.Y > 0 {
 		ratio = csz.X / csz.Y

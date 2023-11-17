@@ -1795,6 +1795,7 @@ func (tf *TextField) SetEffPosAndSize() {
 	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
 		sz.X -= trail.Geom.Size.Actual.Total.X
 	}
+	pos.Y += 0.5 * (sz.Y - tf.FontHeight) // center
 	tf.EffSize = sz
 	tf.EffPos = pos
 }
