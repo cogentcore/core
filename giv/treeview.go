@@ -187,6 +187,7 @@ func (tv *TreeView) TreeViewStyles() {
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Zero()
+		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignStart
 		s.Align.Y = styles.AlignStart
 

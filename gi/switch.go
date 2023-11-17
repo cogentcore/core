@@ -123,6 +123,7 @@ func (sw *Switch) SwitchStyles() {
 			s.Cursor = cursors.Pointer
 		}
 		s.Text.Align = styles.AlignStart
+		s.Text.AlignV = styles.AlignCenter
 		s.Padding.Set(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusSmall
 
@@ -154,6 +155,7 @@ func (sw *Switch) SwitchStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
 				s.Align.Y = styles.AlignCenter
+				s.Text.AlignV = styles.AlignCenter
 			})
 		case "parts/stack":
 			w.Style(func(s *styles.Style) {

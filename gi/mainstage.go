@@ -95,7 +95,7 @@ func NewWindow(sc *Scene) *MainStage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewSheet(sc *Scene, side StageSides, ctx Widget) *MainStage {
-	return NewMainStage(SheetStage, sc, ctx).SetSide(side).(*MainStage)
+	return NewMainStage(SheetStage, sc, ctx).SetSide(side).AsMain()
 }
 
 /////////////////////////////////////////////////////

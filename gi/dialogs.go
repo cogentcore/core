@@ -163,25 +163,26 @@ func (d *Dialog) Cancel(text ...string) *Dialog {
 
 // Modal sets whether the dialog is modal
 func (d *Dialog) Modal(modal bool) *Dialog {
-	d.Stage.AsBase().Modal = modal
+	d.Stage.SetModal(modal)
 	return d
 }
 
 // NewWindow sets whether the dialog takes up the full window
 func (d *Dialog) NewWindow(newWindow bool) *Dialog {
-	d.Stage.AsBase().NewWindow = newWindow
+	d.Stage.SetNewWindow(newWindow)
 	return d
 }
 
 // FullWindow sets whether the dialog takes up the full window
 func (d *Dialog) FullWindow(fullWindow bool) *Dialog {
-	d.Stage.AsBase().FullWindow = fullWindow
+	d.Stage.SetFullWindow(fullWindow)
 	return d
 }
 
 // Run runs (shows) the dialog.
-func (d *Dialog) Run() {
+func (d *Dialog) Run() *Dialog {
 	d.Stage.AsMain().Run()
+	return d
 }
 
 // AcceptDialog accepts the dialog, activated by the default Ok button

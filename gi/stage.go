@@ -84,16 +84,16 @@ const (
 // (Window, Dialog, Sheet) and PopupStage supports
 // Popup types (Menu, Tooltip, Snakbar, Chooser).
 // MainStage has an EventMgr for managing events including for Popups.
-type StageBase struct {
+type StageBase struct { //gti:add -setters
 	// This is the Stage as a Stage interface -- preserves actual identity
 	// when calling interface methods in StageBase.  Also use for chain return values.
 	This Stage
 
 	// type of Stage: determines behavior and Styling
-	Type StageTypes
+	Type StageTypes `set:"-"`
 
 	// Scene contents of this Stage -- what it displays
-	Scene *Scene
+	Scene *Scene `set:"-"`
 
 	// widget in another scene that requested this stage to be created
 	// and provides context (stage)
@@ -157,36 +157,31 @@ type Stage interface {
 	// Scene and Type settings.
 	SetNameFromScene() Stage
 
-	SetScene(sc *Scene) Stage
+	SetScene(sc *Scene) *StageBase
 
-	SetType(typ StageTypes) Stage
+	SetType(typ StageTypes) *StageBase
 
-	SetName(name string) Stage
+	SetName(name string) *StageBase
 
-	SetTitle(title string) Stage
+	SetTitle(title string) *StageBase
 
-	SetModal() Stage
+	SetModal(bool) *StageBase
 
-	SetModeless() Stage
+	SetScrim(bool) *StageBase
 
-	SetScrim() Stage
+	SetClickOff(bool) *StageBase
 
-	SetClickOff() Stage
+	SetNewWindow(bool) *StageBase
 
-	SetNewWindow() Stage
+	SetFullWindow(bool) *StageBase
 
-	// SetSharedWin sets NewWindow off to override default NewWindow for Desktop Window
-	SetSharedWin() Stage
+	SetCloseable(bool) *StageBase
 
-	SetFullWindow() Stage
+	SetMovable(bool) *StageBase
 
-	SetMovable() Stage
+	SetResizable(bool) *StageBase
 
-	SetCloseable() Stage
-
-	SetResizable() Stage
-
-	SetSide(side StageSides) Stage
+	SetSide(side StageSides) *StageBase
 
 	// Run does the default run behavior based on the type of stage
 	Run() Stage
@@ -278,16 +273,16 @@ func (st *StageBase) SetNameFromScene() Stage {
 	return st.This
 }
 
-func (st *StageBase) SetScene(sc *Scene) Stage {
+func (st *StageBase) SetScene(sc *Scene) *StageBase {
 	st.Scene = sc
 	if sc != nil {
 		sc.Stage = st.This
 		st.SetNameFromScene()
 	}
-	return st.This
+	return st
 }
 
-func (st *StageBase) SetType(typ StageTypes) Stage {
+func (st *StageBase) SetType(typ StageTypes) *StageBase {
 	st.Type = typ
 	switch st.Type {
 	case WindowStage:
@@ -320,73 +315,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Scrim = false
 		st.ClickOff = true
 	}
-	return st.This
-}
-
-func (st *StageBase) SetName(name string) Stage {
-	st.Name = name
-	return st.This
-}
-
-func (st *StageBase) SetTitle(title string) Stage {
-	st.Title = title
-	return st.This
-}
-
-func (st *StageBase) SetModal() Stage {
-	st.Modal = true
-	return st.This
-}
-
-func (st *StageBase) SetModeless() Stage {
-	st.Modal = false
-	return st.This
-}
-
-func (st *StageBase) SetScrim() Stage {
-	st.Scrim = true
-	return st.This
-}
-
-func (st *StageBase) SetClickOff() Stage {
-	st.ClickOff = true
-	return st.This
-}
-
-func (st *StageBase) SetNewWindow() Stage {
-	st.NewWindow = true
-	return st.This
-}
-
-// SetSharedWin sets NewWindow off to override default NewWindow for Desktop Window
-func (st *StageBase) SetSharedWin() Stage {
-	st.NewWindow = false
-	return st.This
-}
-
-func (st *StageBase) SetFullWindow() Stage {
-	st.FullWindow = true
-	return st.This
-}
-
-func (st *StageBase) SetCloseable() Stage {
-	st.Closeable = true
-	return st.This
-}
-
-func (st *StageBase) SetMovable() Stage {
-	st.Movable = true
-	return st.This
-}
-
-func (st *StageBase) SetResizable() Stage {
-	st.Resizable = true
-	return st.This
-}
-
-func (st *StageBase) SetSide(side StageSides) Stage {
-	st.Side = side
-	return st.This
+	return st
 }
 
 // Run does the default run behavior based on the type of stage

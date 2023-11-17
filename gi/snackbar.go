@@ -25,9 +25,6 @@ var (
 type Snackbar struct { //goki:no-new
 	Scene
 
-	// Stage is the popup stage associated with the dialog
-	Stage *PopupStage
-
 	// // The main text message to display in the snackbar
 	// Text string
 	// // If not "", the text of an button to display in the snackbar
@@ -140,16 +137,17 @@ func (sb *Snackbar) Icon(icon icons.Icon, onClick ...func(e events.Event)) *Snac
 
 // SetTimeout sets the timeout of the snackbar
 func (sb *Snackbar) SetTimeout(timeout time.Duration) *Snackbar {
-	sb.Stage.SetTimeout(timeout)
+	sb.Stage.AsPopup().SetTimeout(timeout)
 	return sb
 }
 
 // Run runs (shows) the snackbar.
-func (sb *Snackbar) Run() {
+func (sb *Snackbar) Run() *Snackbar {
 	sb.Stage.Run()
+	return sb
 }
 
 // Delete deletes the popup associated with the snackbar.
 func (sb *Snackbar) DeletePopup() {
-	sb.Stage.CtxWidget.AsWidget().Sc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
+	sb.Stage.AsPopup().CtxWidget.AsWidget().Sc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 }
