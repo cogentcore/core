@@ -561,7 +561,7 @@ var GiEditorType = gti.AddType(&gti.Type{
 		{"EditColorScheme", &gti.Method{Name: "EditColorScheme", Doc: "EditColorScheme pulls up a window to edit the current color scheme", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not", Directives: gti.Directives{
+		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicks", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),

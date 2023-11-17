@@ -35,9 +35,9 @@ import (
 // (Menus and Dialogs, etc).
 //
 // Each Scene and Widget tree contains state specific to its particular usage
-// within a given Stage and overall rendering context (e.g., bounding boxes
-// and pointer to current parent Stage), so [TODO(rcoreilly): you need to finish this]
-type Scene struct { //goki:no-new
+// within a given Stage and overall rendering context, representing the unit
+// of rendering in the GoGi framework.
+type Scene struct { //goki:no-new -embedder
 	Frame
 
 	// title of the Scene
@@ -61,7 +61,8 @@ type Scene struct { //goki:no-new
 	// live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
+	// background color for filling scene.
+	// Defaults to transparent so that popups can have rounded corners
 	BgColor colors.Full
 
 	// event manager for this scene
@@ -72,6 +73,16 @@ type Scene struct { //goki:no-new
 
 	// Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+
+	// RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
+	RenderBBoxHue float32 `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+
+	// the currently selected widget through the inspect editor selection mode
+	SelectedWidget Widget
+
+	// the channel on which the selected widget through the inspect editor
+	// selection mode is transmitted to the inspect editor after the user is done selecting
+	SelectedWidgetChan chan Widget
 
 	// LastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
@@ -372,4 +383,7 @@ const (
 	// when it is no longer needed.
 	// Set if added to SceneLibrary for example.
 	ScPreserve
+
+	// ScRenderBBoxes renders the bounding boxes for all objects in scene
+	ScRenderBBoxes
 )

@@ -51,7 +51,7 @@ func (sv *StructViewInline) OnInit() {
 
 func (sv *StructViewInline) StructViewInlineStyles() {
 	sv.Style(func(s *styles.Style) {
-		s.Align.Y = styles.AlignCenter
+		s.Align.Y = styles.AlignStart
 	})
 }
 
@@ -118,7 +118,7 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 		lbl := sv.Child(i * 2).(*gi.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
-			s.Align.Y = styles.AlignCenter
+			s.Align.Y = styles.AlignStart
 			s.Min.X.Em(2)
 		})
 		vvb := vv.AsValueBase()

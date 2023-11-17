@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"log"
 
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
@@ -153,16 +154,61 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 	gi.NewWindow(sc).Run()
 }
 
-// ToggleSelectionMode toggles the editor between selection mode or not
+// ToggleSelectionMode toggles the editor between selection mode or not.
+// In selection mode, bounding boxes are rendered around each Widget,
+// and clicks
 func (ge *GiEditor) ToggleSelectionMode() { //gti:add
-	return
-	// TODO(kai/sel): implement
-	// if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
-	// 	if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {
-	// 		win.SelectedWidgetChan = make(chan *gi.WidgetBase)
-	// 	}
-	// 	win.SetFlag(!win.HasFlag(WinSelectionMode), WinSelectionMode)
-	// }
+	// sc := gi.AsScene(ge.KiRoot)
+	sc, ok := ge.KiRoot.(*gi.Scene)
+	if !ok {
+		gi.NewSnackbar(ge).Text("SelectionMode is only available on Scene objects").Run()
+		return
+	}
+	updt := sc.UpdateStart()
+	sc.SelectedWidget = nil
+	sc.SetFlag(!sc.Is(gi.ScRenderBBoxes), gi.ScRenderBBoxes)
+	if sc.Is(gi.ScRenderBBoxes) {
+		sc.SelectedWidgetChan = make(chan gi.Widget)
+		go ge.SelectionMonitor()
+	} else {
+		if sc.SelectedWidgetChan != nil {
+			close(sc.SelectedWidgetChan)
+		}
+		sc.SelectedWidgetChan = nil
+	}
+	sc.UpdateEndLayout(updt)
+}
+
+// SelectionMonitor
+func (ge *GiEditor) SelectionMonitor() {
+	for {
+		sc, ok := ge.KiRoot.(*gi.Scene)
+		if !ok {
+			break
+		}
+		if sc.SelectedWidgetChan == nil {
+			sc.SelectedWidget = nil
+			break
+		}
+		sw := <-sc.SelectedWidgetChan
+		tv := ge.TreeView().FindSyncNode(sw.This())
+		if tv == nil {
+			log.Printf("GiEditor on %v: tree view source node missing for", sw)
+		} else {
+			gi.UpdateTrace = true
+			updt := ge.UpdateStart()
+			fmt.Println("updt", updt)
+			tv.OpenParents()
+			tv.ScrollToMe()
+			tv.SelectAction(events.SelectOne)
+			ge.UpdateEndLayout(updt)
+			updt = sc.UpdateStart()
+			sc.SelectedWidget = sw
+			sw.AsWidget().SetNeedsRenderUpdate(sc, updt)
+			sc.UpdateEndRender(updt)
+			gi.UpdateTrace = false
+		}
+	}
 }
 
 // SetRoot sets the source root and ensures everything is configured
@@ -176,20 +222,6 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 	ge.Config(ge.Sc)
 	ge.UpdateEnd(updt)
 }
-
-// // GetAllUpdates connects to all nodes in the tree to receive notification of changes
-// func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
-// 	ge.KiRoot.WalkPre(func(k ki.Ki) bool {
-// 		k.NodeSignal().Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			gee := recv.Embed(TypeGiEditor).(*GiEditor)
-// 			if !gee.Changed {
-// 				fmt.Printf("GiEditor: Tree changed with signal: %v\n", ki.NodeSignals(sig))
-// 				gee.Changed = true
-// 			}
-// 		})
-// 		return ki.Continue
-// 	})
-// }
 
 // Config configures the widget
 func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
@@ -257,6 +289,7 @@ func (ge *GiEditor) ConfigSplits() {
 		tv.OnSelect(func(e events.Event) {
 			if len(tv.SelectedNodes) > 0 {
 				sv.SetStruct(tv.SelectedNodes[0].SyncNode)
+				// todo: connect
 			}
 		})
 		split.SetSplits(.3, .7)
@@ -329,69 +362,5 @@ func GoGiEditorDialog(obj ki.Ki) {
 
 	sc.TopAppBar = ge.TopAppBar
 
-	// mmen := win.MainMenu
-	// MainMenuView(ge, win, mmen)
-
-	// ge.SelectionLoop()
-
-	/*
-		inClosePrompt := false
-		win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-			if !ge.Changed {
-				win.Close()
-				return
-			}
-			if inClosePrompt {
-				return
-			}
-			inClosePrompt = true
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
-				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
-				[]string{"Close Without Saving", "Cancel"}, func(dlg *gi.Dialog) {
-					switch sig {
-					case 0:
-						win.Close()
-					case 1:
-						// default is to do nothing, i.e., cancel
-						inClosePrompt = false
-					}
-				})
-		})
-	*/
-
 	gi.NewWindow(sc).Run()
-}
-
-// SelectionLoop, if [KiRoot] is a [gi.RenderWin], runs a loop in a separate goroutine
-// that listens to the [RenderWin.SelectedWidgetChan] channel and selects selected elements.
-func (ge *GiEditor) SelectionLoop() {
-	/*
-		if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
-			go func() {
-				if win.SelectedWidgetChan == nil {
-					win.SelectedWidgetChan = make(chan *gi.WidgetBase)
-				}
-				for {
-					sw := <-win.SelectedWidgetChan
-					tv := ge.TreeView().FindSrcNode(sw.This())
-					if tv == nil {
-						log.Printf("GiEditor on %v: tree view source node missing for", sw)
-					} else {
-						// TODO: make quicker
-						wupdt := tv.RootView.UpdateStart()
-						updt := tv.RootView.UpdateStart()
-
-						tv.RootView.CloseAll()
-						tv.RootView.UnselectAll()
-						tv.OpenParents()
-						tv.SelectAction(events.SelectOne)
-						tv.ScrollToMe()
-
-						tv.RootView.UpdateEnd(updt)
-						tv.RootView.UpdateEnd(wupdt)
-					}
-				}
-			}()
-		}
-	*/
 }

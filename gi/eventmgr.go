@@ -366,6 +366,9 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		case em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil):
 			switch evi.MouseButton() {
 			case events.Left:
+				if sc.SelectedWidgetChan != nil {
+					sc.SelectedWidgetChan <- up
+				}
 				up.Send(events.Click, evi)
 			case events.Right: // note: automatically gets Control+Left
 				up.Send(events.ContextMenu, evi)

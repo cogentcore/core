@@ -98,14 +98,6 @@ type RenderWin struct {
 
 	lastWinMenuUpdate time.Time
 
-	// todo: these are bad:
-
-	// the currently selected widget through the inspect editor selection mode
-	SelectedWidget *WidgetBase
-
-	// the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting
-	SelectedWidgetChan chan *WidgetBase
-
 	// todo: need some other way of freeing GPU resources -- this is not clean:
 	// // the phongs for the window
 	// Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
@@ -1214,23 +1206,3 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	w.MainMenuUpdated()
 }
 */
-
-// RenderWinSelectionSpriteName is the sprite name used for the semi-transparent
-// blue box rendered above elements selected in selection mode
-var RenderWinSelectionSpriteName = "gi.RenderWin.SelectionBox"
-
-// SelectionSprite deletes any existing selection box sprite
-// and returns a new one for the given widget base. This should
-// only be used in inspect editor Selection Mode.
-func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
-	/*
-		w.DeleteSprite(RenderWinSelectionSpriteName)
-		sp := NewSprite(RenderWinSelectionSpriteName, wb.WinBBox.Size(), image.Point{})
-		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{colors.SetAF32(colors.Scheme.Primary, 0.5)}, image.Point{}, draw.Src)
-		sp.Geom.Pos = wb.WinBBox.Min
-		w.AddSprite(sp)
-		w.ActivateSprite(RenderWinSelectionSpriteName)
-		return sp
-	*/
-	return nil
-}

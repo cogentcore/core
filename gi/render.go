@@ -14,6 +14,7 @@ import (
 	"runtime/pprof"
 	"time"
 
+	"goki.dev/cam/hct"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -91,25 +92,27 @@ import (
 // because they are read by the event manager (and potentially inside
 // event handler code) which does not have any flag protection,
 // and are also read in rendering and written in Layout.
-//
-// ki Signals in general should not be used
-
-// note: SetNeedsRender() is now SetNeedsRender()
 
 // UpdateStart sets the scene ScUpdating flag to prevent
 // render updates during construction on a scene.
 func (wb *WidgetBase) UpdateStart() bool {
 	updt := wb.Node.UpdateStart()
-	if updt && wb.Sc != nil {
+	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
 		wb.Sc.SetFlag(true, ScUpdating)
+		if UpdateTrace {
+			fmt.Println("UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
+		}
 	}
 	return updt
 }
 
 // UpdateEnd resets the scene ScUpdating flag
 func (wb *WidgetBase) UpdateEnd(updt bool) {
-	if updt && wb.Sc != nil {
+	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
 		wb.Sc.SetFlag(false, ScUpdating)
+		if UpdateTrace {
+			fmt.Println("UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
+		}
 	}
 	wb.Node.UpdateEnd(updt)
 }
@@ -277,13 +280,14 @@ func (wb *WidgetBase) Update() {
 	}
 	sc := wb.Sc
 	updt := wb.UpdateStart()
-	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
+	if UpdateTrace {
+		fmt.Println("UpdateTrace Update:", wb, "updt:", updt)
+	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config(sc) // sets sc if not
 		wi.ApplyStyle(sc)
 		return ki.Continue
 	})
-	pr.End()
 	wb.UpdateEndLayout(updt)
 }
 
@@ -530,6 +534,30 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 		return
 	}
 	rs := &sc.RenderState
+
+	if sc.Is(ScRenderBBoxes) {
+		pc := &rs.Paint
+		pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
+		sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
+		pc.StrokeStyle.Width.Dot(1)
+		pc.StrokeStyle.SetColor(hct.New(sc.RenderBBoxHue, 100, 50).AsRGBA())
+		pc.FillStyle.SetColor(nil)
+		if sc.SelectedWidget != nil && sc.SelectedWidget.This() == wb.This() {
+			fc := pc.StrokeStyle.Color.Solid
+			pc.FillStyle.SetColor(fc)
+			pc.FillStyle.Opacity = .1
+		}
+		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
+		pc.FillStrokeClear(rs)
+		pc.FillStyle.SetColor(nil)
+		pc.FillStyle.Opacity = 1
+		sc.RenderBBoxHue += 10
+		if sc.RenderBBoxHue > 360 {
+			rmdr := (int(sc.RenderBBoxHue-360) + 1) % 9
+			sc.RenderBBoxHue = float32(rmdr)
+		}
+	}
+
 	rs.PopBounds()
 }
 
@@ -558,33 +586,6 @@ func (wb *WidgetBase) RenderChildren(sc *Scene) {
 		return ki.Continue
 	})
 }
-
-/* todo: anything needed here?
-
-// ReRenderTree does a re-render of the tree -- after it has already been
-// initialized and styled -- redoes the full stack
-func (wb *WidgetBase) ReRenderTree() {
-	parBBox := image.Rectangle{}
-	pni, _ := KiToWidget(wb.Par)
-	if pni != nil {
-		parBBox = pni.ChildrenBBoxes(vp)
-	}
-	delta := wb.Geom.Pos.Sub(wb.Geom.PosOrig)
-	wb.Geom.Pos = wb.Geom.PosOrig
-	ld := wb.LayState // save our current layout data
-	updt := wb.UpdateStart()
-	wb.ConfigTree()
-	wb.ApplyStyleTree()
-	wb.GetSizeTree(0)
-	wb.LayState = ld // restore
-	wb.DoLayoutTree()
-	if !delta.IsNil() {
-		wb.LayoutScroll(delta.ToPointFloor(), parBBox)
-	}
-	wb.RenderTree()
-	wb.UpdateEndNoSig(updt)
-}
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard Box Model rendering

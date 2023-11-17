@@ -1588,11 +1588,11 @@ func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ScFlagsValues = []ScFlags{9, 10, 11, 12, 13, 14, 15}
+var _ScFlagsValues = []ScFlags{9, 10, 11, 12, 13, 14, 15, 16}
 
 // ScFlagsN is the highest valid value
 // for type ScFlags, plus one.
-const ScFlagsN ScFlags = 16
+const ScFlagsN ScFlags = 17
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -1605,6 +1605,7 @@ func _ScFlagsNoOp() {
 	_ = x[ScImageUpdated-(13)]
 	_ = x[ScPrefSizing-(14)]
 	_ = x[ScPreserve-(15)]
+	_ = x[ScRenderBBoxes-(16)]
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
@@ -1622,6 +1623,8 @@ var _ScFlagsNameToValueMap = map[string]ScFlags{
 	`scprefsizing`:   14,
 	`ScPreserve`:     15,
 	`scpreserve`:     15,
+	`ScRenderBBoxes`: 16,
+	`screnderbboxes`: 16,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -1632,6 +1635,7 @@ var _ScFlagsDescMap = map[ScFlags]string{
 	13: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
 	14: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
 	15: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
+	16: `ScRenderBBoxes renders the bounding boxes for all objects in scene`,
 }
 
 var _ScFlagsMap = map[ScFlags]string{
@@ -1642,6 +1646,7 @@ var _ScFlagsMap = map[ScFlags]string{
 	13: `ScImageUpdated`,
 	14: `ScPrefSizing`,
 	15: `ScPreserve`,
+	16: `ScRenderBBoxes`,
 }
 
 // String returns the string representation

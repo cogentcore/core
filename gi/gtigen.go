@@ -528,6 +528,18 @@ func (t *Dialog) SetBgColor(v colors.Full) *Dialog {
 	return t
 }
 
+// SetSelectedWidget sets the [Dialog.SelectedWidget]
+func (t *Dialog) SetSelectedWidget(v Widget) *Dialog {
+	t.SelectedWidget = v
+	return t
+}
+
+// SetSelectedWidgetChan sets the [Dialog.SelectedWidgetChan]
+func (t *Dialog) SetSelectedWidgetChan(v chan Widget) *Dialog {
+	t.SelectedWidgetChan = v
+	return t
+}
+
 // FrameType is the [gti.Type] for [Frame]
 var FrameType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Frame",
@@ -1577,9 +1589,9 @@ var SceneType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Scene",
 	ShortName: "gi.Scene",
 	IDName:    "scene",
-	Doc:       "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context (e.g., bounding boxes\nand pointer to current parent Stage), so [TODO(rcoreilly): you need to finish this]",
+	Doc:       "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context, representing the unit\nof rendering in the GoGi framework.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{"-embedder"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -1588,10 +1600,13 @@ var SceneType = gti.AddType(&gti.Type{
 		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: ""}},
+		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene.\nDefaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: ""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stage", &gti.Field{Name: "Stage", Type: "goki.dev/gi/v2/gi.Stage", LocalType: "Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CurColor", &gti.Field{Name: "CurColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Current color in styling -- used for relative color names", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"RenderBBoxHue", &gti.Field{Name: "RenderBBoxHue", Type: "float32", LocalType: "float32", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"SelectedWidget", &gti.Field{Name: "SelectedWidget", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "Widget", Doc: "the currently selected widget through the inspect editor selection mode", Directives: gti.Directives{}, Tag: ""}},
+		{"SelectedWidgetChan", &gti.Field{Name: "SelectedWidgetChan", Type: "chan goki.dev/gi/v2/gi.Widget", LocalType: "chan Widget", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting", Directives: gti.Directives{}, Tag: ""}},
 		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"ShowLayoutIter", &gti.Field{Name: "ShowLayoutIter", Type: "int", LocalType: "int", Doc: "ShowLayoutIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
@@ -1631,9 +1646,25 @@ func (t *Scene) SetTopAppBar(v func(tb *TopAppBar)) *Scene {
 }
 
 // SetBgColor sets the [Scene.BgColor]:
-// background color for filling scene -- defaults to transparent so that popups can have rounded corners
+// background color for filling scene.
+// Defaults to transparent so that popups can have rounded corners
 func (t *Scene) SetBgColor(v colors.Full) *Scene {
 	t.BgColor = v
+	return t
+}
+
+// SetSelectedWidget sets the [Scene.SelectedWidget]:
+// the currently selected widget through the inspect editor selection mode
+func (t *Scene) SetSelectedWidget(v Widget) *Scene {
+	t.SelectedWidget = v
+	return t
+}
+
+// SetSelectedWidgetChan sets the [Scene.SelectedWidgetChan]:
+// the channel on which the selected widget through the inspect editor
+// selection mode is transmitted to the inspect editor after the user is done selecting
+func (t *Scene) SetSelectedWidgetChan(v chan Widget) *Scene {
+	t.SelectedWidgetChan = v
 	return t
 }
 
@@ -2018,6 +2049,18 @@ func (t *Snackbar) SetTopAppBar(v func(tb *TopAppBar)) *Snackbar {
 // SetBgColor sets the [Snackbar.BgColor]
 func (t *Snackbar) SetBgColor(v colors.Full) *Snackbar {
 	t.BgColor = v
+	return t
+}
+
+// SetSelectedWidget sets the [Snackbar.SelectedWidget]
+func (t *Snackbar) SetSelectedWidget(v Widget) *Snackbar {
+	t.SelectedWidget = v
+	return t
+}
+
+// SetSelectedWidgetChan sets the [Snackbar.SelectedWidgetChan]
+func (t *Snackbar) SetSelectedWidgetChan(v chan Widget) *Snackbar {
+	t.SelectedWidgetChan = v
 	return t
 }
 
