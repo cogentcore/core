@@ -203,19 +203,20 @@ func ToValue(it any, tags string) Value {
 	*/
 
 	stag := reflect.StructTag(tags)
-	if stag != "" {
-		if vwtag, ok := stag.Lookup("view"); ok {
-			switch vwtag {
-			case "inline":
-				forceInline = true
-			case "no-inline":
-				forceNoInline = true
-			}
-		}
+	vtag := stag.Get("view")
+
+	switch vtag {
+	case "inline":
+		forceInline = true
+	case "no-inline":
+		forceNoInline = true
 	}
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
+		if vtag == "slider" {
+			return &SliderValue{}
+		}
 		if _, ok := it.(fmt.Stringer); ok { // use stringer
 			return &ValueBase{}
 		}
@@ -223,6 +224,9 @@ func ToValue(it any, tags string) Value {
 	case vk == reflect.Bool:
 		return &BoolValue{}
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		if vtag == "slider" {
+			return &SliderValue{}
+		}
 		return &FloatValue{} // handles step, min / max etc
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// todo: special edit with 2 fields..
@@ -289,7 +293,6 @@ func ToValue(it any, tags string) Value {
 	case vk == reflect.String:
 		v := reflect.ValueOf(it)
 		str := v.String()
-		vtag := stag.Get("view")
 		switch vtag {
 		case "text-field", "password":
 			return &ValueBase{}
@@ -1072,6 +1075,74 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sb.Config(sc)
 	sb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
+	})
+	vv.UpdateWidget()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  SliderValue
+
+// SliderValue presents a slider
+type SliderValue struct {
+	ValueBase
+}
+
+func (vv *SliderValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.SliderType
+	return vv.WidgetTyp
+}
+
+func (vv *SliderValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	sl := vv.Widget.(*gi.Slider)
+	npv := laser.NonPtrValue(vv.Value)
+	fv, err := laser.ToFloat32(npv.Interface())
+	if err == nil {
+		sl.SetValue(fv)
+	} else {
+		slog.Error("Float Value set", "error:", err)
+	}
+}
+
+func (vv *SliderValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
+		vv.UpdateWidget()
+		return
+	}
+	vv.Widget = w
+	vv.StdConfigWidget(w)
+	sl := vv.Widget.(*gi.Slider)
+	sl.Tooltip = vv.Doc()
+
+	if mintag, ok := vv.Tag("min"); ok {
+		minv, err := laser.ToFloat32(mintag)
+		if err == nil {
+			sl.Min = minv
+		} else {
+			slog.Error("Float Min Value:", "error:", err)
+		}
+	}
+	if maxtag, ok := vv.Tag("max"); ok {
+		maxv, err := laser.ToFloat32(maxtag)
+		if err == nil {
+			sl.Max = maxv
+		} else {
+			slog.Error("Float Max Value:", "error:", err)
+		}
+	}
+	if steptag, ok := vv.Tag("step"); ok {
+		step, err := laser.ToFloat32(steptag)
+		if err == nil {
+			sl.Step = step
+		} else {
+			slog.Error("Float Step Value:", "error:", err)
+		}
+	}
+	sl.Config(sc)
+	sl.OnLast(events.Change, func(e events.Event) {
+		vv.SetValue(sl.Value)
 	})
 	vv.UpdateWidget()
 }
