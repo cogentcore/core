@@ -37,7 +37,10 @@ import (
 // Each Scene and Widget tree contains state specific to its particular usage
 // within a given Stage and overall rendering context, representing the unit
 // of rendering in the GoGi framework.
-type Scene struct { //goki:no-new -embedder
+//
+//goki:no-new
+//goki:embedder
+type Scene struct {
 	Frame
 
 	// title of the Scene

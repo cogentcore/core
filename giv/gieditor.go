@@ -6,7 +6,6 @@ package giv
 
 import (
 	"fmt"
-	"log"
 
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
@@ -158,9 +157,8 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicks
 func (ge *GiEditor) ToggleSelectionMode() { //gti:add
-	// sc := gi.AsScene(ge.KiRoot)
-	sc, ok := ge.KiRoot.(*gi.Scene)
-	if !ok {
+	sc := gi.AsScene(ge.KiRoot)
+	if sc == nil {
 		gi.NewSnackbar(ge).Text("SelectionMode is only available on Scene objects").Run()
 		return
 	}
@@ -182,8 +180,8 @@ func (ge *GiEditor) ToggleSelectionMode() { //gti:add
 // SelectionMonitor
 func (ge *GiEditor) SelectionMonitor() {
 	for {
-		sc, ok := ge.KiRoot.(*gi.Scene)
-		if !ok {
+		sc := gi.AsScene(ge.KiRoot)
+		if sc == nil {
 			break
 		}
 		if sc.SelectedWidgetChan == nil {
@@ -191,9 +189,12 @@ func (ge *GiEditor) SelectionMonitor() {
 			break
 		}
 		sw := <-sc.SelectedWidgetChan
+		if sw == nil {
+			break
+		}
 		tv := ge.TreeView().FindSyncNode(sw.This())
 		if tv == nil {
-			log.Printf("GiEditor on %v: tree view source node missing for", sw)
+			gi.NewSnackbar(ge).Text(fmt.Sprintf("GiEditor: tree view node missing: %v", sw)).Run()
 		} else {
 			gi.UpdateTrace = true
 			updt := ge.UpdateStart()

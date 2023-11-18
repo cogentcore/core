@@ -1591,7 +1591,8 @@ var SceneType = gti.AddType(&gti.Type{
 	IDName:    "scene",
 	Doc:       "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context, representing the unit\nof rendering in the GoGi framework.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{"-embedder"}},
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -1626,6 +1627,28 @@ func (t *Scene) KiType() *gti.Type {
 // New returns a new [*Scene] value
 func (t *Scene) New() ki.Ki {
 	return &Scene{}
+}
+
+// SceneEmbedder is an interface that all types that embed Scene satisfy
+type SceneEmbedder interface {
+	AsScene() *Scene
+}
+
+// AsScene returns the given value as a value of type Scene if the type
+// of the given value embeds Scene, or nil otherwise
+func AsScene(k ki.Ki) *Scene {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SceneEmbedder); ok {
+		return t.AsScene()
+	}
+	return nil
+}
+
+// AsScene satisfies the [SceneEmbedder] interface
+func (t *Scene) AsScene() *Scene {
+	return t
 }
 
 // SetData sets the [Scene.Data]:

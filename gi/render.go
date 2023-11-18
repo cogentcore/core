@@ -521,6 +521,8 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	}
 	rs := &sc.RenderState
 	rs.PushBounds(wb.Geom.TotalBBox)
+	rs.Paint.StrokeStyle.Defaults() // start with default values
+	rs.Paint.FillStyle.Defaults()
 	if RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}
@@ -539,18 +541,27 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 		pc := &rs.Paint
 		pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
 		sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
+		// node: we won't necc. get a push prior to next update, so saving these.
+		pcsw := pc.StrokeStyle.Width
+		pcsc := pc.StrokeStyle.Color
+		pcfc := pc.FillStyle.Color
+		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
 		pc.StrokeStyle.SetColor(hct.New(sc.RenderBBoxHue, 100, 50).AsRGBA())
 		pc.FillStyle.SetColor(nil)
 		if sc.SelectedWidget != nil && sc.SelectedWidget.This() == wb.This() {
 			fc := pc.StrokeStyle.Color.Solid
 			pc.FillStyle.SetColor(fc)
-			pc.FillStyle.Opacity = .1
+			pc.FillStyle.Opacity = 0.2
 		}
 		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
 		pc.FillStrokeClear(rs)
-		pc.FillStyle.SetColor(nil)
-		pc.FillStyle.Opacity = 1
+		// restore
+		pc.FillStyle.Opacity = pcop
+		pc.FillStyle.Color = pcfc
+		pc.StrokeStyle.Width = pcsw
+		pc.StrokeStyle.Color = pcsc
+
 		sc.RenderBBoxHue += 10
 		if sc.RenderBBoxHue > 360 {
 			rmdr := (int(sc.RenderBBoxHue-360) + 1) % 9
