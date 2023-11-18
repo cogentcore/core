@@ -368,10 +368,10 @@ type Ki interface {
 	// FlagType returns the flags of the node as the true flag type of the node,
 	// which may be a type that extends the standard [Flags]. Each node type
 	// that extends the flag type should define this method; for example:
-	//	func (wb *WidgetBase) FlagType() enums.BitFlag {
-	//		return WidgetFlags(wb.Flags)
+	//	func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
+	//		return (*WidgetFlags)(&wb.Flags)
 	//	}
-	FlagType() enums.BitFlag
+	FlagType() enums.BitFlagSetter
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Property interface with inheritance -- nodes can inherit props from parents
