@@ -223,6 +223,8 @@ func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
 // BitFlagsValue sets the given bitflag value to the value specified
 // by the switches.
 func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
+	bitflag.SetInt64(0)
+
 	els := bitflag.Values()
 	mn := min(len(els), sw.NumChildren())
 	for i := 0; i < mn; i++ {
