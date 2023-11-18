@@ -125,6 +125,9 @@ type Editor struct { //goki:embedder
 	// line height, cached during styling
 	LineHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
+	// fontdescent, cached during styling
+	FontDescent float32 `set:"-" edit:"-" json:"-" xml:"-"`
+
 	// height in lines and width in chars of the visible area
 	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
 
@@ -188,7 +191,7 @@ func (ed *Editor) ViewStyles() {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
 		s.Grow.Set(1, 1)
-		s.Overflow.Set(styles.OverflowHidden) // key: we just get what we get, and manage our own scrollbars
+		s.Overflow.Set(styles.OverflowAuto)   // absorbs all
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()

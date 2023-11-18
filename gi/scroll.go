@@ -91,7 +91,7 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 		e.SetHandled()
 		// fmt.Println("change event")
 		updt := ly.UpdateStart()
-		ly.ScenePos(ly.Sc) // gets pos from scrolls, positions scrollbars
+		ly.This().(Widget).ScenePos(ly.Sc) // gets pos from scrolls, positions scrollbars
 		ly.UpdateEndRender(updt)
 	})
 	sb.Update()

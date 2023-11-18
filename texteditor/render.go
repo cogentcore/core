@@ -20,8 +20,7 @@ import (
 )
 
 // Rendering Notes: all rendering is done in Render call.
-// Layout must be called whenever content changes across
-// lines.
+// Layout must be called whenever content changes across lines.
 
 func (ed *Editor) Render(sc *gi.Scene) {
 	if ed.PushBounds(sc) {
@@ -37,8 +36,8 @@ func (ed *Editor) Render(sc *gi.Scene) {
 			ed.StopCursor()
 		}
 		ed.RenderChildren(sc)
-		ed.RenderScrolls(sc)
 		ed.PopBounds(sc)
+		ed.RenderScrolls(sc)
 	} else {
 		ed.StopCursor()
 	}
@@ -65,7 +64,7 @@ func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 			return spos
 		}
 	} else {
-		spos.Y += ed.Offs[pos.Ln] + mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
+		spos.Y += ed.Offs[pos.Ln] + ed.FontDescent
 	}
 	if len(ed.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -281,13 +280,8 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors
 
 // RenderStartPos is absolute rendering start position from our allocpos
 func (ed *Editor) RenderStartPos() mat32.Vec2 {
-	return ed.Geom.Pos.Content // todo
-	// st := &ed.Styles
-	// // spc := st.BoxSpace()
-	// pos := ed.Geom.Pos.Add(spc.Pos())
-	// delta := mat32.NewVec2FmPoint(ed.LayoutScrollDelta((image.Point{})))
-	// pos = pos.Add(delta)
-	// return pos
+	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
+	return pos
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
@@ -298,10 +292,13 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	pc := &rs.Paint
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
-	pos := mat32.NewVec2FmPoint(bb.Min)
-	epos := mat32.NewVec2FmPoint(bb.Max)
-	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
-	pos = ed.RenderStartPos()
+	bbmin := mat32.NewVec2FmPoint(bb.Min)
+	bbmax := mat32.NewVec2FmPoint(bb.Max)
+	pc.FillBox(rs, bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
+	pos := ed.RenderStartPos()
+	if bbmin.X > pos.X {
+		pos.X = bbmin.X
+	}
 	stln := -1
 	edln := -1
 	for ln := 0; ln < ed.NLines; ln++ {

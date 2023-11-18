@@ -1570,7 +1570,7 @@ func (wb *WidgetBase) PositionParts(sc *Scene) {
 	if LayoutTrace {
 		fmt.Println(wb.Parts, "pos:", pos)
 	}
-	wb.Parts.Position(sc)
+	wb.Parts.This().(Widget).Position(sc)
 }
 
 // PositionChildren runs Position on the children

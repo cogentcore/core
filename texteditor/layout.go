@@ -17,6 +17,7 @@ func (ed *Editor) StyleSizes() {
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
 	ed.FontHeight = sty.Font.Face.Metrics.Height
 	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
+	ed.FontDescent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
 	ed.LineNoDigs = max(1+int(mat32.Log10(float32(ed.NLines))), 3)
 	lno := true
 	if ed.Buf != nil {
@@ -49,16 +50,40 @@ func (ed *Editor) UpdateFromAlloc() {
 	ed.LineLayoutSize.X -= ed.LineNoOff
 }
 
-func (ed *Editor) SizeDown(sc *gi.Scene, iter int) bool {
-	// todo: layout takes entire allocation -- not sure this is the best..
-	redo := ed.Layout.SizeDown(sc, iter)
+// note: Layout reverts to basic Widget behavior for layout if no kids, like us..
+
+func (ed *Editor) SizeFinal(sc *gi.Scene) {
+	sz := &ed.Geom.Size
+	ed.ManageOverflow(sc, 0)
+	ed.Layout.SizeFinal(sc)
+	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
+	sz.Actual.Content.X -= sbw // anticipate scroll
 	ed.UpdateFromAlloc()
-	return redo
+	ed.LayoutAllLines()
+	// fmt.Println("final pre manage, actual:", sz.Actual, "space:", sz.Space)
+	if ed.ManageOverflow(sc, 3) {
+		if ed.HasScroll[mat32.X] {
+			sz.Actual.Total.Y -= sbw
+		}
+		if ed.HasScroll[mat32.Y] {
+			sz.Actual.Total.X -= sbw
+		}
+		sz.SetContentFromTotal(&sz.Actual) // reduce content
+		// fmt.Println("adding scrolls, actual:", sz.Actual, "space:", sz.Space)
+		ed.UpdateFromAlloc()
+		ed.LayoutAllLines()
+	}
 }
 
 func (ed *Editor) Position(sc *gi.Scene) {
 	ed.Layout.Position(sc)
-	ed.LayoutAllLines()
+	ed.ConfigScrolls(sc)
+}
+
+func (ed *Editor) ScenePos(sc *gi.Scene) {
+	ed.Layout.ScenePos(sc)
+	ed.GetScrollPosition(sc)
+	ed.PositionScrolls(sc)
 }
 
 // LayoutAllLines generates TextRenders of lines
@@ -119,6 +144,8 @@ func (ed *Editor) LayoutAllLines() {
 	spc := sty.BoxSpace()
 	ed.TotalSize = ed.LinesSize.Add(spc.Size())
 	ed.TotalSize.X += ed.LineNoOff
+	ed.Geom.Size.Internal = ed.TotalSize
+	// fmt.Println(ed, "internal:", ed.TotalSize)
 	// extraHalf := ed.LineHeight * 0.5 * float32(ed.NLinesChars.Y)
 	// todo: add extra half to bottom of size?
 }

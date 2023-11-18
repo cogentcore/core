@@ -25,6 +25,8 @@ func app() {
 	gi.SetAppName("texteditor")
 	gi.SetAppAbout(`This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
+	gi.DefaultTopAppBar = nil
+
 	sc := gi.NewScene("texteditor-test").SetTitle("GoGi texteditor.Editor Test")
 
 	// hdrText := `This is a <b>test</b> of the texteditor.Editor`
@@ -34,7 +36,7 @@ func app() {
 	// 	s.Text.Align = styles.AlignCenter
 	// 	s.Text.AlignV = styles.AlignStart
 	// })
-
+	//
 	splt := gi.NewSplits(sc, "split-view")
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
@@ -49,14 +51,12 @@ func app() {
 
 	txed1 := texteditor.NewEditor(splt, "texteditor-1")
 	txed1.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
 		s.Min.X.Ch(20)
 		s.Min.Y.Ch(10)
 	})
 
 	txed2 := texteditor.NewEditor(splt, "texteditor-2")
 	txed2.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
 		s.Min.X.Ch(20)
 		s.Min.Y.Ch(10)
 	})
@@ -66,9 +66,9 @@ func app() {
 	txed2.SetBuf(txbuf)
 
 	// txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
-	txbuf.Hi.Lang = "Makefile" // "Go" // "Markdown"
+	txbuf.Hi.Lang = "Makefile"
 	txbuf.Open(samplefile)
-	// giv.InspectorDialog(&txbuf.Hi.PiLang.Parser().Lexer)
+	// giv.InspectorDialog(&txbuf.Hi.PiLang.Parser().Parser) .Lexer //
 
 	gi.NewWindow(sc).Run().Wait()
 }
