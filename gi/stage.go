@@ -121,7 +121,7 @@ type StageBase struct { //gti:add -setters
 	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	NewWindow bool
 
-	// if NewWindow is false, then this makes Dialogs take up the entire window they are created in
+	// if NewWindow is false, then this makes Dialogs and Windows take up the entire window they are created in
 	FullWindow bool
 
 	// for Dialogs: if true includes a close button for closing
@@ -289,6 +289,7 @@ func (st *StageBase) SetType(typ StageTypes) *StageBase {
 		if !goosi.TheApp.Platform().IsMobile() {
 			st.NewWindow = true
 		}
+		st.FullWindow = true
 		st.Modal = true // note: there is no global modal option between RenderWin windows
 	case DialogStage:
 		st.Modal = true
