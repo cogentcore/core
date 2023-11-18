@@ -136,7 +136,7 @@ func (wb *WidgetBase) SetNeedsRenderUpdate(sc *Scene, updt bool) {
 		return
 	}
 	if UpdateTrace {
-		fmt.Println("UpdateTrace: NeedsRender:", wb)
+		fmt.Println("\tUpdateTrace: NeedsRender:", wb)
 	}
 	wb.SetFlag(true, NeedsRender)
 	if sc != nil {
@@ -181,7 +181,7 @@ func (wb *WidgetBase) SetNeedsLayoutUpdate(sc *Scene, updt bool) {
 		return
 	}
 	if updt && UpdateTrace {
-		fmt.Println("UpdateTrace: NeedsLayout:", wb)
+		fmt.Println("\tUpdateTrace: NeedsLayout:", wb)
 	}
 	sc.SetFlag(true, ScNeedsLayout)
 }
@@ -281,7 +281,7 @@ func (wb *WidgetBase) Update() {
 	sc := wb.Sc
 	updt := wb.UpdateStart()
 	if UpdateTrace {
-		fmt.Println("UpdateTrace Update:", wb, "updt:", updt)
+		fmt.Println("\tUpdateTrace Update:", wb, "updt:", updt)
 	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config(sc) // sets sc if not

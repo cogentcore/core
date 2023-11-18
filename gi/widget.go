@@ -422,6 +422,14 @@ func (wb *WidgetBase) IsDirectWinUpload() bool {
 func (wb *WidgetBase) DirectWinUpload() {
 }
 
+// WalkPreNode extends WalkPre to Parts -- key for getting full Update protection!
+func (wb *WidgetBase) WalkPreNode(fun func(ki.Ki) bool) {
+	if wb.Parts == nil {
+		return
+	}
+	wb.Parts.WalkPre(fun)
+}
+
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
 // Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
 func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
