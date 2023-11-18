@@ -56,13 +56,13 @@ type Border struct { //gti:add
 	Style Sides[BorderStyles] `xml:"style"`
 
 	// prop: border-width = width of the border
-	Width SideValues `xml:"width"`
+	Width SideValues `xml:"width" view:"inline"`
 
 	// prop: border-radius = rounding of the corners
-	Radius SideValues `xml:"radius"`
+	Radius SideValues `xml:"radius" view:"inline"`
 
 	// prop: border-color = color of the border
-	Color SideColors `xml:"color"`
+	Color SideColors `xml:"color" view:"inline"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
