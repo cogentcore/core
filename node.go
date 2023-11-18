@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"goki.dev/enums"
+	"goki.dev/glop/elide"
 	"goki.dev/gti"
 )
 
@@ -71,7 +72,7 @@ const EnumTypeFlag string = "EnumType:Flag"
 
 // String implements the fmt.stringer interface -- returns the Path of the node
 func (n *Node) String() string {
-	return n.This().Path()
+	return elide.Middle(n.This().Path(), 30)
 }
 
 //////////////////////////////////////////////////////////////////////////
