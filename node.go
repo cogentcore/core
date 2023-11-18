@@ -20,6 +20,9 @@ import (
 	"goki.dev/gti"
 )
 
+// StringElideMax is the Max width for String() path printout of Ki nodes.
+var StringElideMax = 38
+
 // The Node implements the Ki interface and provides the core functionality
 // for the GoKi tree -- use the Node as an embedded struct or as a struct
 // field -- the embedded version supports full JSON save / load.
@@ -72,7 +75,7 @@ const EnumTypeFlag string = "EnumType:Flag"
 
 // String implements the fmt.stringer interface -- returns the Path of the node
 func (n *Node) String() string {
-	return elide.Middle(n.This().Path(), 30)
+	return elide.Middle(n.This().Path(), StringElideMax)
 }
 
 //////////////////////////////////////////////////////////////////////////
