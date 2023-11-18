@@ -954,8 +954,12 @@ func (tm TravMap) Get(k Ki) int {
 // strategy -- same as used in TreeView:
 // https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
-// WalkPre calls function on this node (Pre version) and then iterates
+// WalkPre calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
+// The [WalkPreNode] method is called for every node, after the given function,
+// which e.g., enables nodes to also traverse additional Ki Trees (e.g., Fields),
+// including for the basic UpdateStart / End and other such infrastructure calls
+// which use WalkPre (otherwise it could just be done in the given fun).
 // The node traversal is non-recursive and uses locally-allocated state -- safe
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
@@ -973,6 +977,7 @@ func (n *Node) WalkPre(fun func(Ki) bool) {
 outer:
 	for {
 		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means stop
+			n.This().WalkPreNode(fun)
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
@@ -1014,15 +1019,21 @@ outer:
 	}
 }
 
-// WalkPreLevel calls function on this node (Pre version) and then iterates
+// WalkPreNode is called for every node during WalkPre with the function
+// passed to WalkPre.  This e.g., enables nodes to also traverse additional
+// Ki Trees (e.g., Fields), including for the basic UpdateStart / End and
+// other such infrastructure calls.
+func (n *Node) WalkPreNode(fun func(Ki) bool) {
+}
+
+// WalkPreLevel calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children.
-// The node traversal is non-recursive and uses locally-allocated state -- safe
-// for concurrent calling (modulo conflict management in function call itself).
-// Function calls are sequential all in current go routine.
-// The level var tracks overall depth in the tree.
+// This version has a level var that tracks overall depth in the tree.
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
+// Because WalkPreLevel is not used within Ki itself, it does not have its
+// own version of WalkPreNode -- that can be handled within the closure.
 func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
 	if n.This() == nil || n.Is(Deleted) {
 		return
