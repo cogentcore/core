@@ -65,7 +65,7 @@ func RecycleDialog(data any) bool {
 // ErrorDialog returns a new [Dialog] displaying the given error
 // in the context of the given widget.
 func ErrorDialog(ctx Widget, err error) *Dialog {
-	return NewDialog(ctx, ctx.Name()+"-error-dialog").Title("There was an error").Prompt(err.Error())
+	return NewDialog(ctx, ctx.Name()+"-error-dialog").Title("There was an error").Prompt(err.Error()).Ok()
 }
 
 // Title adds the given title to the dialog
