@@ -399,13 +399,13 @@ func (tv *TreeView) EditNode() { //gti:add
 	}
 }
 
-// GoGiEditNode pulls up a new GoGiEditor window on the node.
+// InspectNode pulls up a new Inspector window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *TreeView) GoGiEditNode() { //gti:add
+func (tv *TreeView) InspectNode() { //gti:add
 	if tv.SyncNode != nil {
-		GoGiEditorDialog(tv.SyncNode)
+		InspectorDialog(tv.SyncNode)
 	} else {
-		GoGiEditorDialog(tv)
+		InspectorDialog(tv)
 	}
 }
 

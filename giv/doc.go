@@ -27,7 +27,7 @@ The Value provides a common API for representing values (int, string, etc)
 in the GUI, and are used by more complex views (StructView, MapView,
 SliceView, etc) to represents the elements of those data structures.
 
-Do Ctrl+Alt+I in any window to pull up the GoGiEditor which will show you ample
+Do Ctrl+Alt+I in any window to pull up the Inspector which will show you ample
 examples of the Value interface in action, and also allow you to customize
 your GUI.
 

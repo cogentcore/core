@@ -2430,7 +2430,7 @@ var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.StageBase",
 	ShortName: "gi.StageBase",
 	IDName:    "stage-base",
-	Doc:       "StageBase is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes.\nMainStage extends to implement support for Main types\n(Window, Dialog, Sheet) and PopupStage supports\nPopup types (Menu, Tooltip, Snakbar, Chooser).\nMainStage has an EventMgr for managing events including for Popups.",
+	Doc:       "StageBase is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes.\nMainStage extends to implement support for Main types\n(Window, Dialog, Sheet) and PopupStage supports\nPopup types (Menu, Tooltip, Snackbar, Chooser).\nMainStage has an EventMgr for managing events including for Popups.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
@@ -2772,10 +2772,10 @@ var TabsType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "maximum number of characters to include in tab label -- elides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
+		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
 		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (true by default)", Directives: gti.Directives{}, Tag: ""}},
-		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs.\nTabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2825,7 +2825,8 @@ func (t *Tabs) AsTabs() *Tabs {
 }
 
 // SetMaxChars sets the [Tabs.MaxChars]:
-// maximum number of characters to include in tab label -- elides labels that are longer than that
+// Maximum number of characters to include in tab label.
+// Elides labels that are longer than that
 func (t *Tabs) SetMaxChars(v int) *Tabs {
 	t.MaxChars = v
 	return t
@@ -2877,6 +2878,7 @@ var TabType = gti.AddType(&gti.Type{
 	Doc:        "Tab is a tab button that contains a larger select button\nand a smaller close button. The Indicator icon is used for\nthe close icon.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"DeleteButton", &gti.Field{Name: "DeleteButton", Type: "bool", LocalType: "bool", Doc: "if true, this tab has a delete button (true by default)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2902,6 +2904,14 @@ func (t *Tab) KiType() *gti.Type {
 // New returns a new [*Tab] value
 func (t *Tab) New() ki.Ki {
 	return &Tab{}
+}
+
+// SetMaxChars sets the [Tab.MaxChars]:
+// Maximum number of characters to include in tab label.
+// Elides labels that are longer than that
+func (t *Tab) SetMaxChars(v int) *Tab {
+	t.MaxChars = v
+	return t
 }
 
 // SetDeleteButton sets the [Tab.DeleteButton]:

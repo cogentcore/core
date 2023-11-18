@@ -67,7 +67,7 @@ func app() {
 		s.Align.X = styles.AlignCenter
 	})
 
-	giedsc := keyfun.ChordFor(keyfun.GoGiEditor)
+	giedsc := keyfun.ChordFor(keyfun.Inspector)
 	prsc := keyfun.ChordFor(keyfun.Prefs)
 
 	gi.NewLabel(trow, "title").SetText(
@@ -117,7 +117,7 @@ func app() {
 		// 	})
 	})
 
-	button2 := gi.NewButton(brow).SetText("Open GoGiEditor").
+	button2 := gi.NewButton(brow).SetText("Open Inspector").
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		txt := ""

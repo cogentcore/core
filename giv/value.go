@@ -878,8 +878,8 @@ func (vi *ViewIFace) CtxtMenuView(val any, readOnly bool, sc *gi.Scene, m *gi.Sc
 	return false
 }
 
-func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
-	GoGiEditorDialog(obj)
+func (vi *ViewIFace) Inspector(obj ki.Ki) {
+	InspectorDialog(obj)
 }
 
 func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {

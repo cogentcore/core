@@ -293,9 +293,9 @@ func (tb *TopAppBar) DefaultOverflowMenu(m *Scene) { //gti:add
 		OnClick(func(e events.Event) {
 			TheViewIFace.PrefsView(&Prefs)
 		})
-	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.GoGiEditor).
+	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
 		OnClick(func(e events.Event) {
-			TheViewIFace.GoGiEditor(tb.Sc)
+			TheViewIFace.Inspector(tb.Sc)
 		})
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)

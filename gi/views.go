@@ -26,8 +26,8 @@ type ViewIFace interface {
 	// to log).
 	CtxtMenuView(val any, readOnly bool, sc *Scene, m *Scene) bool
 
-	// GoGiEditor opens an interactive editor of given Ki tree, at its root
-	GoGiEditor(obj ki.Ki)
+	// Inspector opens an interactive editor of given Ki tree, at its root
+	Inspector(obj ki.Ki)
 
 	// PrefsView opens an interactive view of given preferences object
 	PrefsView(prefs *Preferences)

@@ -1213,6 +1213,9 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 	alloc := sz.Alloc.Content.Sub(sz.InnerSpace) // inner is fixed
 	// todo: use max growth values instead of individual ones to ensure consistency!
 	li := &ly.LayImpl
+	if len(li.Cells) == 0 {
+		panic(fmt.Sprintf("%v Has not been initialized -- UpdateStart / End error!", ly.String()))
+	}
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
 		ksz := &kwb.Geom.Size

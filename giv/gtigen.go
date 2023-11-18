@@ -526,12 +526,12 @@ func (t *FuncButton) SetUpdateFunc(v func()) *FuncButton {
 	return t
 }
 
-// GiEditorType is the [gti.Type] for [GiEditor]
-var GiEditorType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.GiEditor",
-	ShortName:  "giv.GiEditor",
-	IDName:     "gi-editor",
-	Doc:        "GiEditor represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked",
+// InspectorType is the [gti.Type] for [Inspector]
+var InspectorType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.Inspector",
+	ShortName:  "giv.Inspector",
+	IDName:     "inspector",
+	Doc:        "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"KiRoot", &gti.Field{Name: "KiRoot", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "root of tree being edited", Directives: gti.Directives{}, Tag: ""}},
@@ -565,67 +565,67 @@ var GiEditorType = gti.AddType(&gti.Type{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
-	Instance: &GiEditor{},
+	Instance: &Inspector{},
 })
 
-// NewGiEditor adds a new [GiEditor] with the given name
+// NewInspector adds a new [Inspector] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewGiEditor(par ki.Ki, name ...string) *GiEditor {
-	return par.NewChild(GiEditorType, name...).(*GiEditor)
+func NewInspector(par ki.Ki, name ...string) *Inspector {
+	return par.NewChild(InspectorType, name...).(*Inspector)
 }
 
-// KiType returns the [*gti.Type] of [GiEditor]
-func (t *GiEditor) KiType() *gti.Type {
-	return GiEditorType
+// KiType returns the [*gti.Type] of [Inspector]
+func (t *Inspector) KiType() *gti.Type {
+	return InspectorType
 }
 
-// New returns a new [*GiEditor] value
-func (t *GiEditor) New() ki.Ki {
-	return &GiEditor{}
+// New returns a new [*Inspector] value
+func (t *Inspector) New() ki.Ki {
+	return &Inspector{}
 }
 
-// SetKiRoot sets the [GiEditor.KiRoot]:
+// SetKiRoot sets the [Inspector.KiRoot]:
 // root of tree being edited
-func (t *GiEditor) SetKiRoot(v ki.Ki) *GiEditor {
+func (t *Inspector) SetKiRoot(v ki.Ki) *Inspector {
 	t.KiRoot = v
 	return t
 }
 
-// SetFilename sets the [GiEditor.Filename]:
+// SetFilename sets the [Inspector.Filename]:
 // current filename for saving / loading
-func (t *GiEditor) SetFilename(v gi.FileName) *GiEditor {
+func (t *Inspector) SetFilename(v gi.FileName) *Inspector {
 	t.Filename = v
 	return t
 }
 
-// SetTooltip sets the [GiEditor.Tooltip]
-func (t *GiEditor) SetTooltip(v string) *GiEditor {
+// SetTooltip sets the [Inspector.Tooltip]
+func (t *Inspector) SetTooltip(v string) *Inspector {
 	t.Tooltip = v
 	return t
 }
 
-// SetClass sets the [GiEditor.Class]
-func (t *GiEditor) SetClass(v string) *GiEditor {
+// SetClass sets the [Inspector.Class]
+func (t *Inspector) SetClass(v string) *Inspector {
 	t.Class = v
 	return t
 }
 
-// SetCustomContextMenu sets the [GiEditor.CustomContextMenu]
-func (t *GiEditor) SetCustomContextMenu(v func(m *gi.Scene)) *GiEditor {
+// SetCustomContextMenu sets the [Inspector.CustomContextMenu]
+func (t *Inspector) SetCustomContextMenu(v func(m *gi.Scene)) *Inspector {
 	t.CustomContextMenu = v
 	return t
 }
 
-// SetStackTop sets the [GiEditor.StackTop]
-func (t *GiEditor) SetStackTop(v int) *GiEditor {
+// SetStackTop sets the [Inspector.StackTop]
+func (t *Inspector) SetStackTop(v int) *Inspector {
 	t.StackTop = v
 	return t
 }
 
-// SetStripes sets the [GiEditor.Stripes]
-func (t *GiEditor) SetStripes(v gi.Stripes) *GiEditor {
+// SetStripes sets the [Inspector.Stripes]
+func (t *Inspector) SetStripes(v gi.Stripes) *Inspector {
 	t.Stripes = v
 	return t
 }
@@ -2235,7 +2235,7 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"EditNode", &gti.Method{Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"GoGiEditNode", &gti.Method{Name: "GoGiEditNode", Doc: "GoGiEditNode pulls up a new GoGiEditor window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
+		{"InspectNode", &gti.Method{Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"OpenAll", &gti.Method{Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: gti.Directives{

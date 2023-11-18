@@ -16,6 +16,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/glop/elide"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -33,7 +34,8 @@ import (
 type Tabs struct { //goki:embedder
 	Layout
 
-	// maximum number of characters to include in tab label -- elides labels that are longer than that
+	// Maximum number of characters to include in tab label.
+	// Elides labels that are longer than that
 	MaxChars int
 
 	// show a new tab button at right of list of tabs
@@ -42,7 +44,8 @@ type Tabs struct { //goki:embedder
 	// if true, tabs are user-deleteable (true by default)
 	DeleteTabButtons bool
 
-	// mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
+	// mutex protecting updates to tabs.
+	// Tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
@@ -190,6 +193,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.DeleteButton = ts.DeleteTabButtons
+	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabIndex(idx)
@@ -526,11 +530,16 @@ func (ts *Tabs) Render(sc *Scene) {
 type Tab struct {
 	Button
 
+	// Maximum number of characters to include in tab label.
+	// Elides labels that are longer than that
+	MaxChars int
+
 	// if true, this tab has a delete button (true by default)
 	DeleteButton bool
 }
 
 func (tb *Tab) OnInit() {
+	tb.MaxChars = 16
 	tb.DeleteButton = true
 	tb.HandleButtonEvents()
 	tb.TabStyles()
@@ -544,7 +553,7 @@ func (tb *Tab) TabStyles() {
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Max.X.Ch(16)
+		s.Max.X.Ch(float32(tb.MaxChars))
 		// s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
@@ -633,6 +642,9 @@ func (tb *Tab) Tabs() *Tabs {
 }
 
 func (tb *Tab) ConfigParts(sc *Scene) {
+	if tb.MaxChars > 0 {
+		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
+	}
 	if tb.DeleteButton {
 		tb.ConfigPartsDeleteButton(sc)
 		return

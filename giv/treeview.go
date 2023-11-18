@@ -1203,10 +1203,10 @@ func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
 		OnClick(func(e events.Event) {
 			tv.EditNode()
 		})
-	gi.NewButton(m).SetText("GoGiEditor").SetIcon(icons.EditDocument).
+	gi.NewButton(m).SetText("Inspector").SetIcon(icons.EditDocument).
 		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
-			tv.GoGiEditNode()
+			tv.InspectNode()
 		})
 }
 
@@ -1243,7 +1243,7 @@ func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
 	gi.NewSeparator(m)
 	NewFuncButton(m, tv.EditNode).SetText("Edit").SetIcon(icons.Edit).
 		SetState(!tv.HasSelection(), states.Disabled)
-	NewFuncButton(m, tv.GoGiEditNode).SetText("GoGiEditor").SetIcon(icons.EditDocument).
+	NewFuncButton(m, tv.InspectNode).SetText("Inspector").SetIcon(icons.EditDocument).
 		SetState(!tv.HasSelection(), states.Disabled)
 	gi.NewSeparator(m)
 
@@ -1921,8 +1921,8 @@ var TreeViewProps = ki.Props{
 		{"SrcEdit", ki.Props{
 			"label": "Edit",
 		}},
-		{"SrcGoGiEditor", ki.Props{
-			"label": "GoGi Editor",
+		{"SrcInspector", ki.Props{
+			"label": "Inspector",
 		}},
 		{"sep-open", ki.BlankProp{}},
 		{"OpenAll", ki.Props{}},
@@ -1940,8 +1940,8 @@ var TreeViewProps = ki.Props{
 		{"SrcEdit", ki.Props{
 			"label": "Edit",
 		}},
-		{"SrcGoGiEditor", ki.Props{
-			"label": "GoGi Editor",
+		{"SrcInspector", ki.Props{
+			"label": "Inspector",
 		}},
 	},
 }

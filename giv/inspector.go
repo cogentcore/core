@@ -21,11 +21,11 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// GiEditor represents a struct, creating a property editor of the fields --
+// Inspector represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
-type GiEditor struct {
+type Inspector struct {
 	gi.Frame
 
 	// root of tree being edited
@@ -38,14 +38,14 @@ type GiEditor struct {
 	Filename gi.FileName
 }
 
-func (ge *GiEditor) OnInit() {
-	ge.Style(func(s *styles.Style) {
+func (is *Inspector) OnInit() {
+	is.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
-	ge.OnWidgetAdded(func(w gi.Widget) {
-		switch w.PathFrom(ge) {
+	is.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(is) {
 		case "title":
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall
@@ -59,51 +59,51 @@ func (ge *GiEditor) OnInit() {
 }
 
 // Update updates the objects being edited (e.g., updating display changes)
-func (ge *GiEditor) Update() { //gti:add
-	if ge.KiRoot == nil {
+func (is *Inspector) Update() { //gti:add
+	if is.KiRoot == nil {
 		return
 	}
-	if w, ok := ge.KiRoot.(gi.Widget); ok {
+	if w, ok := is.KiRoot.(gi.Widget); ok {
 		w.AsWidget().SetNeedsRender()
 	}
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
-func (ge *GiEditor) Save() { //gti:add
-	if ge.KiRoot == nil {
+func (is *Inspector) Save() { //gti:add
+	if is.KiRoot == nil {
 		return
 	}
-	if ge.Filename == "" {
+	if is.Filename == "" {
 		return
 	}
 
-	grr.Log0(jsons.Save(ge.KiRoot, string(ge.Filename)))
-	ge.Changed = false
+	grr.Log0(jsons.Save(is.KiRoot, string(is.Filename)))
+	is.Changed = false
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
-func (ge *GiEditor) SaveAs(filename gi.FileName) { //gti:add
-	if ge.KiRoot == nil {
+func (is *Inspector) SaveAs(filename gi.FileName) { //gti:add
+	if is.KiRoot == nil {
 		return
 	}
-	grr.Log0(jsons.Save(ge.KiRoot, string(filename)))
-	ge.Changed = false
-	ge.Filename = filename
-	ge.SetNeedsRender() // notify our editor
+	grr.Log0(jsons.Save(is.KiRoot, string(filename)))
+	is.Changed = false
+	is.Filename = filename
+	is.SetNeedsRender() // notify our editor
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-func (ge *GiEditor) Open(filename gi.FileName) { //gti:add
-	if ge.KiRoot == nil {
+func (is *Inspector) Open(filename gi.FileName) { //gti:add
+	if is.KiRoot == nil {
 		return
 	}
-	grr.Log0(jsons.Open(ge.KiRoot, string(filename)))
-	ge.Filename = filename
-	ge.SetNeedsRender() // notify our editor
+	grr.Log0(jsons.Open(is.KiRoot, string(filename)))
+	is.Filename = filename
+	is.SetNeedsRender() // notify our editor
 }
 
 // EditColorScheme pulls up a window to edit the current color scheme
-func (ge *GiEditor) EditColorScheme() { //gti:add
+func (is *Inspector) EditColorScheme() { //gti:add
 	if gi.ActivateExistingMainWindow(&colors.Schemes) {
 		return
 	}
@@ -156,10 +156,10 @@ func (ge *GiEditor) EditColorScheme() { //gti:add
 // ToggleSelectionMode toggles the editor between selection mode or not.
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicks
-func (ge *GiEditor) ToggleSelectionMode() { //gti:add
-	sc := gi.AsScene(ge.KiRoot)
+func (is *Inspector) ToggleSelectionMode() { //gti:add
+	sc := gi.AsScene(is.KiRoot)
 	if sc == nil {
-		gi.NewSnackbar(ge).Text("SelectionMode is only available on Scene objects").Run()
+		gi.NewSnackbar(is).Text("SelectionMode is only available on Scene objects").Run()
 		return
 	}
 	updt := sc.UpdateStart()
@@ -167,7 +167,7 @@ func (ge *GiEditor) ToggleSelectionMode() { //gti:add
 	sc.SetFlag(!sc.Is(gi.ScRenderBBoxes), gi.ScRenderBBoxes)
 	if sc.Is(gi.ScRenderBBoxes) {
 		sc.SelectedWidgetChan = make(chan gi.Widget)
-		go ge.SelectionMonitor()
+		go is.SelectionMonitor()
 	} else {
 		if sc.SelectedWidgetChan != nil {
 			close(sc.SelectedWidgetChan)
@@ -178,9 +178,9 @@ func (ge *GiEditor) ToggleSelectionMode() { //gti:add
 }
 
 // SelectionMonitor
-func (ge *GiEditor) SelectionMonitor() {
+func (is *Inspector) SelectionMonitor() {
 	for {
-		sc := gi.AsScene(ge.KiRoot)
+		sc := gi.AsScene(is.KiRoot)
 		if sc == nil {
 			break
 		}
@@ -192,17 +192,16 @@ func (ge *GiEditor) SelectionMonitor() {
 		if sw == nil {
 			break
 		}
-		tv := ge.TreeView().FindSyncNode(sw.This())
+		tv := is.TreeView().FindSyncNode(sw.This())
 		if tv == nil {
-			gi.NewSnackbar(ge).Text(fmt.Sprintf("GiEditor: tree view node missing: %v", sw)).Run()
+			gi.NewSnackbar(is).Text(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).Run()
 		} else {
 			gi.UpdateTrace = true
-			updt := ge.UpdateStart()
-			fmt.Println("updt", updt)
+			updt := is.UpdateStart()
 			tv.OpenParents()
 			tv.ScrollToMe()
 			tv.SelectAction(events.SelectOne)
-			ge.UpdateEndLayout(updt)
+			is.UpdateEndLayout(updt)
 			updt = sc.UpdateStart()
 			sc.SelectedWidget = sw
 			sw.AsWidget().SetNeedsRenderUpdate(sc, updt)
@@ -213,68 +212,68 @@ func (ge *GiEditor) SelectionMonitor() {
 }
 
 // SetRoot sets the source root and ensures everything is configured
-func (ge *GiEditor) SetRoot(root ki.Ki) {
+func (is *Inspector) SetRoot(root ki.Ki) {
 	updt := false
-	if ge.KiRoot != root {
-		updt = ge.UpdateStart()
-		ge.KiRoot = root
+	if is.KiRoot != root {
+		updt = is.UpdateStart()
+		is.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	ge.Config(ge.Sc)
-	ge.UpdateEnd(updt)
+	is.Config(is.Sc)
+	is.UpdateEnd(updt)
 }
 
 // Config configures the widget
-func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
-	if ge.KiRoot == nil {
+func (is *Inspector) ConfigWidget(sc *gi.Scene) {
+	if is.KiRoot == nil {
 		return
 	}
-	ge.Style(func(s *styles.Style) {
+	is.Style(func(s *styles.Style) {
 		s.SetMainAxis(mat32.Y)
 	})
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.SplitsType, "splits")
-	mods, updt := ge.ConfigChildren(config)
-	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
-	ge.ConfigSplits()
+	mods, updt := is.ConfigChildren(config)
+	is.SetTitle(fmt.Sprintf("Inspector of Ki Node Tree: %v", is.KiRoot.Name()))
+	is.ConfigSplits()
 	if mods {
-		ge.UpdateEnd(updt)
+		is.UpdateEnd(updt)
 	}
 }
 
 // SetTitle sets the optional title and updates the Title label
-func (ge *GiEditor) SetTitle(title string) {
-	lab := ge.TitleWidget()
+func (is *Inspector) SetTitle(title string) {
+	lab := is.TitleWidget()
 	lab.Text = title
 }
 
 // Title returns the title label widget, and its index, within frame
-func (ge *GiEditor) TitleWidget() *gi.Label {
-	return ge.ChildByName("title", 0).(*gi.Label)
+func (is *Inspector) TitleWidget() *gi.Label {
+	return is.ChildByName("title", 0).(*gi.Label)
 }
 
 // Splits returns the main Splits
-func (ge *GiEditor) Splits() *gi.Splits {
-	return ge.ChildByName("splits", 2).(*gi.Splits)
+func (is *Inspector) Splits() *gi.Splits {
+	return is.ChildByName("splits", 2).(*gi.Splits)
 }
 
 // TreeView returns the main TreeSyncView
-func (ge *GiEditor) TreeView() *TreeView {
-	return ge.Splits().Child(0).Child(0).(*TreeView)
+func (is *Inspector) TreeView() *TreeView {
+	return is.Splits().Child(0).Child(0).(*TreeView)
 }
 
 // StructView returns the main StructView
-func (ge *GiEditor) StructView() *StructView {
-	return ge.Splits().Child(1).(*StructView)
+func (is *Inspector) StructView() *StructView {
+	return is.Splits().Child(1).(*StructView)
 }
 
 // ConfigSplits configures the Splits.
-func (ge *GiEditor) ConfigSplits() {
-	if ge.KiRoot == nil {
+func (is *Inspector) ConfigSplits() {
+	if is.KiRoot == nil {
 		return
 	}
-	split := ge.Splits()
+	split := is.Splits()
 	// split.Dim = mat32.Y
 	split.Dim = mat32.X
 
@@ -295,30 +294,30 @@ func (ge *GiEditor) ConfigSplits() {
 		})
 		split.SetSplits(.3, .7)
 	}
-	tv := ge.TreeView()
-	tv.SyncRootNode(ge.KiRoot)
-	sv := ge.StructView()
-	sv.SetStruct(ge.KiRoot)
+	tv := is.TreeView()
+	tv.SyncRootNode(is.KiRoot)
+	sv := is.StructView()
+	sv.SetStruct(is.KiRoot)
 }
 
-func (ge *GiEditor) SetChanged() {
-	ge.Changed = true
+func (is *Inspector) SetChanged() {
+	is.Changed = true
 }
 
-func (ge *GiEditor) TopAppBar(tb *gi.TopAppBar) {
+func (is *Inspector) TopAppBar(tb *gi.TopAppBar) {
 	if gi.DefaultTopAppBar != nil {
 		gi.DefaultTopAppBar(tb)
 	} else {
 		gi.DefaultTopAppBarStd(tb)
 	}
 
-	up := NewFuncButton(tb, ge.Update).SetIcon(icons.Refresh)
+	up := NewFuncButton(tb, is.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
-		up.SetEnabled(ge.Changed)
+		up.SetEnabled(is.Changed)
 	})
-	sel := NewFuncButton(tb, ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
+	sel := NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
 	sel.SetUpdateFunc(func() {
-		sc, ok := ge.KiRoot.(*gi.Scene)
+		sc, ok := is.KiRoot.(*gi.Scene)
 		sel.SetEnabled(ok)
 		if !ok {
 			return
@@ -327,41 +326,41 @@ func (ge *GiEditor) TopAppBar(tb *gi.TopAppBar) {
 		// TODO(kai/sel): check if has flag
 	})
 	gi.NewSeparator(tb)
-	op := NewFuncButton(tb, ge.Open).SetKey(keyfun.Open)
-	op.Args[0].SetValue(ge.Filename)
+	op := NewFuncButton(tb, is.Open).SetKey(keyfun.Open)
+	op.Args[0].SetValue(is.Filename)
 	op.Args[0].SetTag("ext", ".json")
-	save := NewFuncButton(tb, ge.Save).SetKey(keyfun.Save)
+	save := NewFuncButton(tb, is.Save).SetKey(keyfun.Save)
 	save.SetUpdateFunc(func() {
-		save.SetEnabledUpdt(ge.Changed && ge.Filename != "")
+		save.SetEnabledUpdt(is.Changed && is.Filename != "")
 	})
-	sa := NewFuncButton(tb, ge.SaveAs).SetKey(keyfun.SaveAs)
-	sa.Args[0].SetValue(ge.Filename)
+	sa := NewFuncButton(tb, is.SaveAs).SetKey(keyfun.SaveAs)
+	sa.Args[0].SetValue(is.Filename)
 	sa.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
-	NewFuncButton(tb, ge.EditColorScheme).SetIcon(icons.Colors)
+	NewFuncButton(tb, is.EditColorScheme).SetIcon(icons.Colors)
 }
 
-func (ge *GiEditor) MenuBar(mb *gi.MenuBar) {
-	NewFuncButton(mb, ge.Update)
+func (is *Inspector) MenuBar(mb *gi.MenuBar) {
+	NewFuncButton(mb, is.Update)
 }
 
-// GoGiEditorDialog opens an interactive editor of the given Ki tree, at its
-// root, returns GiEditor and window
-func GoGiEditorDialog(obj ki.Ki) {
+// InspectorDialog opens an interactive editor of the given Ki tree, at its
+// root, returns Inspector and window
+func InspectorDialog(obj ki.Ki) {
 	if gi.ActivateExistingMainWindow(obj) {
 		return
 	}
-	sc := gi.NewScene("gogi-editor")
-	sc.Title = "GoGi Editor"
+	sc := gi.NewScene("inspector")
+	sc.Title = "Inspector"
 	if obj != nil {
 		sc.Nm += "-" + obj.Name()
 		sc.Title += ": " + obj.Name()
 	}
 
-	ge := NewGiEditor(sc, "editor")
-	ge.SetRoot(obj)
+	is := NewInspector(sc, "inspector")
+	is.SetRoot(obj)
 
-	sc.TopAppBar = ge.TopAppBar
+	sc.TopAppBar = is.TopAppBar
 
 	gi.NewWindow(sc).Run()
 }

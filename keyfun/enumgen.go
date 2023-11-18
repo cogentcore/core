@@ -74,7 +74,7 @@ func _FunsNoOp() {
 	_ = x[WinFocusNext-(51)]
 	_ = x[WinClose-(52)]
 	_ = x[WinSnapshot-(53)]
-	_ = x[GoGiEditor-(54)]
+	_ = x[Inspector-(54)]
 	_ = x[New-(55)]
 	_ = x[NewAlt1-(56)]
 	_ = x[NewAlt2-(57)]
@@ -197,8 +197,8 @@ var _FunsNameToValueMap = map[string]Funs{
 	`winclose`:      52,
 	`WinSnapshot`:   53,
 	`winsnapshot`:   53,
-	`GoGiEditor`:    54,
-	`gogieditor`:    54,
+	`Inspector`:     54,
+	`inspector`:     54,
 	`New`:           55,
 	`new`:           55,
 	`NewAlt1`:       56,
@@ -347,7 +347,7 @@ var _FunsMap = map[Funs]string{
 	51: `WinFocusNext`,
 	52: `WinClose`,
 	53: `WinSnapshot`,
-	54: `GoGiEditor`,
+	54: `Inspector`,
 	55: `New`,
 	56: `NewAlt1`,
 	57: `NewAlt2`,

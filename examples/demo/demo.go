@@ -319,8 +319,8 @@ func makeValues(ts *gi.Tabs) {
 	gi.NewLabel(values).SetType(gi.LabelBodyLarge).SetText(
 		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
-	gi.NewButton(values).SetText("GoGi Editor").OnClick(func(e events.Event) {
-		giv.GoGiEditorDialog(ts.Sc)
+	gi.NewButton(values).SetText("Inspector").OnClick(func(e events.Event) {
+		giv.InspectorDialog(ts.Sc)
 	})
 
 	giv.NewValue(values, colors.Red)

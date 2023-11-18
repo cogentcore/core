@@ -845,10 +845,10 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 				vv.OpenDialog(bt, nil)
 			}
 		})
-		gi.NewButton(m, "gogi-editor").SetText("GoGi editor").OnClick(func(e events.Event) {
+		gi.NewButton(m, "gogi-editor").SetText("Inspector").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
 			if k != nil && !vv.IsReadOnly() {
-				GoGiEditorDialog(k)
+				InspectorDialog(k)
 			}
 		})
 	}

@@ -954,7 +954,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 }
 
 // MangerKeyChordEvents handles lower-priority manager-level key events.
-// Mainly tab, shift-tab, and GoGiEditor and Prefs.
+// Mainly tab, shift-tab, and Inspector and Prefs.
 // event will be marked as processed if handled here.
 func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.IsHandled() {
@@ -972,8 +972,8 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	kf := keyfun.Of(cs)
 	// fmt.Println(kf, cs)
 	switch kf {
-	case keyfun.GoGiEditor:
-		TheViewIFace.GoGiEditor(em.Scene)
+	case keyfun.Inspector:
+		TheViewIFace.Inspector(em.Scene)
 		e.SetHandled()
 	case keyfun.Prefs:
 		TheViewIFace.PrefsView(&Prefs)

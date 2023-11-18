@@ -68,7 +68,7 @@ func app() {
 	// txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
 	txbuf.Hi.Lang = "Makefile" // "Go" // "Markdown"
 	txbuf.Open(samplefile)
-	// giv.GoGiEditorDialog(&txbuf.Hi.PiLang.Parser().Lexer)
+	// giv.InspectorDialog(&txbuf.Hi.PiLang.Parser().Lexer)
 
 	gi.NewWindow(sc).Run().Wait()
 }

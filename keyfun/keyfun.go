@@ -86,7 +86,7 @@ const (
 	WinFocusNext
 	WinClose
 	WinSnapshot
-	GoGiEditor
+	Inspector
 	// Below are menu specific functions -- use these as shortcuts for menu buttons
 	// allows uniqueness of mapping and easy customization of all key buttons
 	New
@@ -488,8 +488,8 @@ var StdMaps = Maps{
 		"Meta+W":                  WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
-		"Control+Alt+I":           GoGiEditor,
-		"Shift+Control+I":         GoGiEditor,
+		"Control+Alt+I":           Inspector,
+		"Shift+Control+I":         Inspector,
 		"Meta+N":                  New,
 		"Shift+Meta+N":            NewAlt1,
 		"Alt+Meta+N":              NewAlt2,
@@ -622,8 +622,8 @@ var StdMaps = Maps{
 		"Meta+W":                  WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
-		"Control+Alt+I":           GoGiEditor,
-		"Shift+Control+I":         GoGiEditor,
+		"Control+Alt+I":           Inspector,
+		"Shift+Control+I":         Inspector,
 		"Meta+N":                  New,
 		"Shift+Meta+N":            NewAlt1,
 		"Alt+Meta+N":              NewAlt2,
@@ -741,8 +741,8 @@ var StdMaps = Maps{
 		"Shift+Control+W":         WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
-		"Control+Alt+I":           GoGiEditor,
-		"Shift+Control+I":         GoGiEditor,
+		"Control+Alt+I":           Inspector,
+		"Shift+Control+I":         Inspector,
 		"Alt+N":                   New, // ctrl keys conflict..
 		"Shift+Alt+N":             NewAlt1,
 		"Control+Alt+N":           NewAlt2,
@@ -831,7 +831,7 @@ var StdMaps = Maps{
 		"Control+W":               WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
-		"Shift+Control+I":         GoGiEditor,
+		"Shift+Control+I":         Inspector,
 		"Shift+Control+N":         NewAlt1,
 		"Control+Alt+N":           NewAlt2,
 		"Control+O":               Open,
@@ -918,7 +918,7 @@ var StdMaps = Maps{
 		"Control+W":               WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
-		"Shift+Control+I":         GoGiEditor,
+		"Shift+Control+I":         Inspector,
 		"Control+N":               New,
 		"Shift+Control+N":         NewAlt1,
 		"Control+Alt+N":           NewAlt2,
@@ -1006,7 +1006,7 @@ var StdMaps = Maps{
 		"Control+W":               WinClose,
 		"Control+Alt+G":           WinSnapshot,
 		"Shift+Control+G":         WinSnapshot,
-		"Shift+Control+I":         GoGiEditor,
+		"Shift+Control+I":         Inspector,
 		"Control+N":               New,
 		"Shift+Control+N":         NewAlt1,
 		"Control+Alt+N":           NewAlt2,
