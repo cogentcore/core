@@ -99,8 +99,10 @@ func (i *{{.Name}}) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		{{if .Config.AcceptLower}} } else if val, ok := _{{.Name}}NameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
-		{{end}} } else { {{if eq .Extends ""}}
-			return errors.New(flg+" is not a valid value for type {{.Name}}"){{else}}
+		{{end}} } else if flg == "" {
+			continue
+		} else { {{if eq .Extends ""}}
+			return fmt.Errorf("%q is not a valid value for type {{.Name}}", flg){{else}}
 			err := (*{{.Extends}})(i).SetStringOr(flg)
 			if err != nil {
 				return err

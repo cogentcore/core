@@ -535,8 +535,10 @@ func (i *States) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _StatesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type States")
+			return fmt.Errorf("%q is not a valid value for type States", flg)
 		}
 	}
 	return nil
@@ -780,8 +782,10 @@ func (i *Languages) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _LanguagesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type Languages")
+			return fmt.Errorf("%q is not a valid value for type Languages", flg)
 		}
 	}
 	return nil
@@ -904,7 +908,7 @@ var _MoreLanguagesMap = map[MoreLanguages]string{
 // of this MoreLanguages value.
 func (i MoreLanguages) String() string {
 	str := ""
-	for _, ie := range _LanguagesValues {
+	for _, ie := range LanguagesValues() {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -956,6 +960,8 @@ func (i *MoreLanguages) SetStringOr(s string) error {
 	for _, flg := range flgs {
 		if val, ok := _MoreLanguagesNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*Languages)(i).SetStringOr(flg)
 			if err != nil {
