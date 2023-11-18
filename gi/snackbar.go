@@ -24,30 +24,7 @@ var (
 // Snackbar is a scene with methods for configuring a snackbar
 type Snackbar struct { //goki:no-new
 	Scene
-
-	// // The main text message to display in the snackbar
-	// Text string
-	// // If not "", the text of an button to display in the snackbar
-	// Button string
-	// // If non-nil, the function to call when the main text button
-	// // in the snackbar is clicked
-	// ButtonOnClick func(bt *Button)
-	// // If not [icons.None], the icon to display as a button
-	// // on the right side of the snack bar
-	// Icon icons.Icon
-	// // If non-nil, the function to call when the icon button in the
-	// // snackabr is clicked
-	// IconOnClick func(bt *Button)
 }
-
-// // NewSnackbarFromScene returns a new Snackbar stage with given scene contents,
-// // in connection with given widget (which provides key context).
-// // Make further configuration choices using Set* methods, which
-// // can be chained directly after the New call.
-// // Use an appropriate Run call at the end to start the Stage running.
-// func NewSnackbarFromScene(sc *Scene, ctx Widget) *PopupStage {
-// 	return NewPopupStage(SnackbarStage, sc, ctx).SetTimeout(SnackbarTimeout)
-// }
 
 // NewSnackbar returns a new [Snackbar] in the context of the given widget,
 // optionally with the given name.
@@ -57,7 +34,7 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 	if len(name) > 0 {
 		nm = name[0]
 	} else {
-		nm = ctx.Name() + "-dialog"
+		nm = ctx.Name() + "-snackbar"
 	}
 
 	sb.InitName(sb, nm)
@@ -68,6 +45,12 @@ func NewSnackbar(ctx Widget, name ...string) *Snackbar {
 	sb.Stage = NewPopupStage(SnackbarStage, &sb.Scene, ctx)
 	sb.SetTimeout(SnackbarTimeout)
 	return sb
+}
+
+// ErrorSnackbar returns a new [Snackbar] displaying the given error
+// in the context of the given widget.
+func ErrorSnackbar(ctx Widget, err error) *Snackbar {
+	return NewSnackbar(ctx, ctx.Name()+"-error-snackbar").Text("Error: " + err.Error())
 }
 
 func (sb *Snackbar) SnackbarStyles() {
