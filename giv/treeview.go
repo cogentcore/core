@@ -128,8 +128,8 @@ type TreeView struct {
 	actStateLayer float32 `set:"-"`
 }
 
-func (tv *TreeView) FlagType() enums.BitFlag {
-	return TreeViewFlags(tv.Flags)
+func (tv *TreeView) FlagType() enums.BitFlagSetter {
+	return (*TreeViewFlags)(&tv.Flags)
 }
 
 func (tv *TreeView) CopyFieldsFrom(frm any) {

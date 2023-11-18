@@ -267,8 +267,8 @@ type WidgetBase struct {
 	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (wb *WidgetBase) FlagType() enums.BitFlag {
-	return WidgetFlags(wb.Flags)
+func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
+	return (*WidgetFlags)(&wb.Flags)
 }
 
 func (wb *WidgetBase) OnChildAdded(child ki.Ki) {

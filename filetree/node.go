@@ -59,8 +59,8 @@ type Node struct { //goki:embedder
 	RepoFiles vci.Files `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
 }
 
-func (fn *Node) FlagType() enums.BitFlag {
-	return NodeFlags(fn.Flags)
+func (fn *Node) FlagType() enums.BitFlagSetter {
+	return (*NodeFlags)(&fn.Flags)
 }
 
 //	func (fn *Node) CopyFieldsFrom(frm any) {

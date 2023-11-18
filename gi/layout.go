@@ -108,8 +108,8 @@ type Layout struct {
 	FocusNameLast ki.Ki `edit:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ly *Layout) FlagType() enums.BitFlag {
-	return LayoutFlags(ly.Flags)
+func (ly *Layout) FlagType() enums.BitFlagSetter {
+	return (*LayoutFlags)(&ly.Flags)
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {

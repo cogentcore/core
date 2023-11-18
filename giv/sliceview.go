@@ -269,8 +269,8 @@ type SliceViewBase struct {
 	ElVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
-func (sv *SliceViewBase) FlagType() enums.BitFlag {
-	return SliceViewFlags(sv.Flags)
+func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
+	return (*SliceViewFlags)(&sv.Flags)
 }
 
 func (sv *SliceViewBase) OnInit() {

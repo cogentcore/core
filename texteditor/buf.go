@@ -164,8 +164,8 @@ func NewBuf() *Buf {
 	return tb
 }
 
-func (tb *Buf) FlagType() enums.BitFlag {
-	return BufFlags(tb.Flags)
+func (tb *Buf) FlagType() enums.BitFlagSetter {
+	return (*BufFlags)(&tb.Flags)
 }
 
 // BufSignals are signals that text buffer can send to View

@@ -1152,8 +1152,8 @@ func (vv *BitFlagValue) WidgetType() *gti.Type {
 	return vv.WidgetTyp
 }
 
-func (vv *BitFlagValue) EnumValue() enums.BitFlag {
-	ev, ok := vv.Value.Interface().(enums.BitFlag)
+func (vv *BitFlagValue) EnumValue() enums.BitFlagSetter {
+	ev, ok := vv.Value.Interface().(enums.BitFlagSetter)
 	if !ok {
 		slog.Error("giv.BitFlagView: type must be enums.BitFlag")
 		return nil
@@ -1168,9 +1168,6 @@ func (vv *BitFlagValue) EnumValue() enums.BitFlag {
 }
 
 func (vv *BitFlagValue) SetEnumValueFromInt(ival int64) bool {
-	// todo: needs to set flags?
-	// typ := vv.EnumType()
-	// eval := laser.EnumIfaceFromInt64(ival, typ)
 	return vv.SetValue(ival)
 }
 
@@ -1191,11 +1188,13 @@ func (vv *BitFlagValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	sw := vv.Widget.(*gi.Switches)
 	sw.SetType(gi.SwitchChip)
-	// vv.StdConfigWidget(cb.Parts)
 	sw.Tooltip = vv.Doc()
 
 	ev := vv.EnumValue()
 	sw.SetEnum(ev)
+	sw.OnChange(func(e events.Event) {
+		sw.BitFlagValue(vv.EnumValue())
+	})
 	sw.Config(sc)
 	vv.UpdateWidget()
 }

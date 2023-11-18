@@ -153,8 +153,8 @@ type Editor struct { //goki:embedder
 	lastFilename   gi.FileName `set:"-"`
 }
 
-func (ed *Editor) FlagType() enums.BitFlag {
-	return EditorFlags(ed.Flags)
+func (ed *Editor) FlagType() enums.BitFlagSetter {
+	return (*EditorFlags)(&ed.Flags)
 }
 
 // NewViewLayout adds a new layout with text editor

@@ -82,7 +82,7 @@ const (
 // in different functional ways, defined by StageTypes.
 // MainStage extends to implement support for Main types
 // (Window, Dialog, Sheet) and PopupStage supports
-// Popup types (Menu, Tooltip, Snakbar, Chooser).
+// Popup types (Menu, Tooltip, Snackbar, Chooser).
 // MainStage has an EventMgr for managing events including for Popups.
 type StageBase struct { //gti:add -setters
 	// This is the Stage as a Stage interface -- preserves actual identity

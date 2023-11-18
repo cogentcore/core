@@ -99,8 +99,8 @@ type Scene struct {
 	ShowLayoutIter int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
-func (sc *Scene) FlagType() enums.BitFlag {
-	return ScFlags(sc.Flags)
+func (sc *Scene) FlagType() enums.BitFlagSetter {
+	return (*ScFlags)(&sc.Flags)
 }
 
 // NewScene creates a new Scene that will serve as the content of a Stage
