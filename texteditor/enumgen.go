@@ -242,6 +242,8 @@ func (i *BufFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _BufFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
 			if err != nil {
@@ -434,6 +436,8 @@ func (i *EditorFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _EditorFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
 			if err != nil {

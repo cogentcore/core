@@ -79,7 +79,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		lv.SetA = true
 		lv.ConfigToolbar()
 		tv.OnDoubleClick(func(e events.Event) {
-			idx := tv.CurIdx
+			idx := tv.TmpIdx
 			if idx >= 0 && idx < len(lv.Log) {
 				cmt := lv.Log[idx]
 				if lv.File != "" {

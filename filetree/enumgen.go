@@ -3,7 +3,7 @@
 package filetree
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -101,8 +101,10 @@ func (i *DirFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _DirFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type DirFlags")
+			return fmt.Errorf("%q is not a valid value for type DirFlags", flg)
 		}
 	}
 	return nil
@@ -271,6 +273,8 @@ func (i *NodeFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*giv.TreeViewFlags)(i).SetStringOr(flg)
 			if err != nil {

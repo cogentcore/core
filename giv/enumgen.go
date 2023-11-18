@@ -3,7 +3,7 @@
 package giv
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -146,6 +146,8 @@ func (i *SliceViewFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _SliceViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
 			if err != nil {
@@ -333,6 +335,8 @@ func (i *TreeViewFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _TreeViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*gi.WidgetFlags)(i).SetStringOr(flg)
 			if err != nil {
@@ -520,8 +524,10 @@ func (i *ValueFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _ValueFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type ValueFlags")
+			return fmt.Errorf("%q is not a valid value for type ValueFlags", flg)
 		}
 	}
 	return nil

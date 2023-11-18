@@ -4,6 +4,7 @@ package gi
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -444,6 +445,8 @@ func (i *WidgetFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _WidgetFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*ki.Flags)(i).SetStringOr(flg)
 			if err != nil {
@@ -1029,6 +1032,8 @@ func (i *LayoutFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _LayoutFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*WidgetFlags)(i).SetStringOr(flg)
 			if err != nil {
@@ -1347,8 +1352,10 @@ func (i *WinFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _WinFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type WinFlags")
+			return fmt.Errorf("%q is not a valid value for type WinFlags", flg)
 		}
 	}
 	return nil
@@ -1507,8 +1514,10 @@ func (i *RenderContextFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _RenderContextFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type RenderContextFlags")
+			return fmt.Errorf("%q is not a valid value for type RenderContextFlags", flg)
 		}
 	}
 	return nil
@@ -1707,6 +1716,8 @@ func (i *ScFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*WidgetFlags)(i).SetStringOr(flg)
 			if err != nil {
