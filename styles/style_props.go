@@ -230,7 +230,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 // style properties; they are still stored on the main style object,
 // but they are done separately to improve clarity
 var StyleLayoutFuncs = map[string]StyleFunc{
-	"display": StyleFuncEnum(DisplayFlex,
+	"display": StyleFuncEnum(Flex,
 		func(obj *Style) enums.EnumSetter { return &obj.Display }),
 	"z-index": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &obj.ZIndex }),
@@ -284,7 +284,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 			if inh {
 				s.Direction = par.(*Style).Direction
 			} else if init {
-				s.Direction = Col
+				s.Direction = Row
 			}
 			return
 		}
@@ -292,7 +292,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		if str == "row" || str == "row-reverse" {
 			s.Direction = Row
 		} else {
-			s.Direction = Col
+			s.Direction = Column
 		}
 	},
 	// TODO(kai/styprops): mutli-dim overflow

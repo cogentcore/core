@@ -47,7 +47,7 @@ type Style struct { //gti:add
 	Abilities abilities.Abilities
 
 	// Display controls how items are displayed, in terms of layout
-	Display Display
+	Display Displays
 
 	// the cursor to switch to upon hovering over the element (inherited)
 	Cursor cursors.Cursor
@@ -125,7 +125,7 @@ type Style struct { //gti:add
 	// Direction specifies the order elements are organized:
 	// Row is horizontal, Col is vertical.
 	// See also [Wrap]
-	Direction Direction
+	Direction Directions
 
 	// Wrap causes elements to wrap around in the CrossAxis dimension
 	// to fit within sizing constraints (on by default).
@@ -387,38 +387,8 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 	return res
 }
 
-func (st *Style) SetDisplay(d Display) *Style {
-	st.Display = d
-	return st
-}
-
-func (st *Style) SetWrap(wrap bool) *Style {
-	st.Wrap = wrap
-	return st
-}
-
-func (st *Style) SetDirection(dir Direction) *Style {
-	st.Direction = dir
-	return st
-}
-
-func (st *Style) SetGrow(v ...float32) *Style {
-	switch len(v) {
-	case 0:
-		st.Grow.X = 0
-		st.Grow.Y = 0
-	case 1:
-		st.Grow.X = v[0]
-		st.Grow.Y = v[0]
-	default:
-		st.Grow.X = v[0]
-		st.Grow.Y = v[1]
-	}
-	return st
-}
-
 func (st *Style) IsFlexWrap() bool {
-	return st.Wrap && st.Display == DisplayFlex
+	return st.Wrap && st.Display == Flex
 }
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in

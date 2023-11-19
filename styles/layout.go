@@ -80,37 +80,37 @@ func (s *Style) AlignPosInBox(inner, outer mat32.Vec2) mat32.Vec2 {
 /////////////////////////////////////////////////////////////////
 
 // Direction specifies which way items are laid out.
-type Direction int32 //enums:enum
+type Directions int32 //enums:enum
 
 const (
-	Row Direction = iota
-	Col
+	Row Directions = iota
+	Column
 )
 
-func (d Direction) Dim() mat32.Dims {
+func (d Directions) Dim() mat32.Dims {
 	return mat32.Dims(d)
 }
 
-// Display determines how items are displayed
-type Display int32 //enums:enum -trim-prefix Display
+// Displays determines how items are displayed
+type Displays int32 //enums:enum -trim-prefix Display
 
 const (
 	// Flex is the default layout model, based on a simplified version of the
 	// CSS flex layout: uses MainAxis to specify the direction, Wrap for
 	// wrapping of elements, and Min, Max, and Grow values on elements to
 	// determine sizing.
-	DisplayFlex Display = iota
+	Flex Displays = iota
 
 	// Stacked is a stack of elements, with one on top that is visible
-	DisplayStacked
+	Stacked
 
 	// Grid is the X, Y grid layout, with Columns specifying the number
 	// of elements in the X axis.
-	DisplayGrid
+	Grid
 
 	// NoLayout means that no automatic layout will be applied to elements,
 	// which can then be managed via custom code.
-	DisplayNoLayout
+	NoLayout
 
 	// None means the item is not displayed: sets the Invisible state
 	DisplayNone

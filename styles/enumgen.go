@@ -1026,130 +1026,130 @@ func (i *FontVariants) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _DirectionValues = []Direction{0, 1}
+var _DirectionsValues = []Directions{0, 1}
 
-// DirectionN is the highest valid value
-// for type Direction, plus one.
-const DirectionN Direction = 2
+// DirectionsN is the highest valid value
+// for type Directions, plus one.
+const DirectionsN Directions = 2
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _DirectionNoOp() {
+func _DirectionsNoOp() {
 	var x [1]struct{}
 	_ = x[Row-(0)]
-	_ = x[Col-(1)]
+	_ = x[Column-(1)]
 }
 
-var _DirectionNameToValueMap = map[string]Direction{
-	`Row`: 0,
-	`row`: 0,
-	`Col`: 1,
-	`col`: 1,
+var _DirectionsNameToValueMap = map[string]Directions{
+	`Row`:    0,
+	`row`:    0,
+	`Column`: 1,
+	`column`: 1,
 }
 
-var _DirectionDescMap = map[Direction]string{
+var _DirectionsDescMap = map[Directions]string{
 	0: ``,
 	1: ``,
 }
 
-var _DirectionMap = map[Direction]string{
+var _DirectionsMap = map[Directions]string{
 	0: `Row`,
-	1: `Col`,
+	1: `Column`,
 }
 
 // String returns the string representation
-// of this Direction value.
-func (i Direction) String() string {
-	if str, ok := _DirectionMap[i]; ok {
+// of this Directions value.
+func (i Directions) String() string {
+	if str, ok := _DirectionsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Direction value from its
+// SetString sets the Directions value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *Direction) SetString(s string) error {
-	if val, ok := _DirectionNameToValueMap[s]; ok {
+func (i *Directions) SetString(s string) error {
+	if val, ok := _DirectionsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _DirectionNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _DirectionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type Direction")
+	return errors.New(s + " is not a valid value for type Directions")
 }
 
-// Int64 returns the Direction value as an int64.
-func (i Direction) Int64() int64 {
+// Int64 returns the Directions value as an int64.
+func (i Directions) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the Direction value from an int64.
-func (i *Direction) SetInt64(in int64) {
-	*i = Direction(in)
+// SetInt64 sets the Directions value from an int64.
+func (i *Directions) SetInt64(in int64) {
+	*i = Directions(in)
 }
 
-// Desc returns the description of the Direction value.
-func (i Direction) Desc() string {
-	if str, ok := _DirectionDescMap[i]; ok {
+// Desc returns the description of the Directions value.
+func (i Directions) Desc() string {
+	if str, ok := _DirectionsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// DirectionValues returns all possible values
-// for the type Direction.
-func DirectionValues() []Direction {
-	return _DirectionValues
+// DirectionsValues returns all possible values
+// for the type Directions.
+func DirectionsValues() []Directions {
+	return _DirectionsValues
 }
 
 // Values returns all possible values
-// for the type Direction.
-func (i Direction) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_DirectionValues))
-	for i, d := range _DirectionValues {
+// for the type Directions.
+func (i Directions) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_DirectionsValues))
+	for i, d := range _DirectionsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type Direction.
-func (i Direction) IsValid() bool {
-	_, ok := _DirectionMap[i]
+// valid option for type Directions.
+func (i Directions) IsValid() bool {
+	_, ok := _DirectionsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Direction) MarshalText() ([]byte, error) {
+func (i Directions) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Direction) UnmarshalText(text []byte) error {
+func (i *Directions) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _DisplayValues = []Display{0, 1, 2, 3, 4}
+var _DisplaysValues = []Displays{0, 1, 2, 3, 4}
 
-// DisplayN is the highest valid value
-// for type Display, plus one.
-const DisplayN Display = 5
+// DisplaysN is the highest valid value
+// for type Displays, plus one.
+const DisplaysN Displays = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _DisplayNoOp() {
+func _DisplaysNoOp() {
 	var x [1]struct{}
-	_ = x[DisplayFlex-(0)]
-	_ = x[DisplayStacked-(1)]
-	_ = x[DisplayGrid-(2)]
-	_ = x[DisplayNoLayout-(3)]
+	_ = x[Flex-(0)]
+	_ = x[Stacked-(1)]
+	_ = x[Grid-(2)]
+	_ = x[NoLayout-(3)]
 	_ = x[DisplayNone-(4)]
 }
 
-var _DisplayNameToValueMap = map[string]Display{
+var _DisplaysNameToValueMap = map[string]Displays{
 	`Flex`:     0,
 	`flex`:     0,
 	`Stacked`:  1,
@@ -1162,7 +1162,7 @@ var _DisplayNameToValueMap = map[string]Display{
 	`none`:     4,
 }
 
-var _DisplayDescMap = map[Display]string{
+var _DisplaysDescMap = map[Displays]string{
 	0: `Flex is the default layout model, based on a simplified version of the CSS flex layout: uses MainAxis to specify the direction, Wrap for wrapping of elements, and Min, Max, and Grow values on elements to determine sizing.`,
 	1: `Stacked is a stack of elements, with one on top that is visible`,
 	2: `Grid is the X, Y grid layout, with Columns specifying the number of elements in the X axis.`,
@@ -1170,7 +1170,7 @@ var _DisplayDescMap = map[Display]string{
 	4: `None means the item is not displayed: sets the Invisible state`,
 }
 
-var _DisplayMap = map[Display]string{
+var _DisplaysMap = map[Displays]string{
 	0: `Flex`,
 	1: `Stacked`,
 	2: `Grid`,
@@ -1179,77 +1179,77 @@ var _DisplayMap = map[Display]string{
 }
 
 // String returns the string representation
-// of this Display value.
-func (i Display) String() string {
-	if str, ok := _DisplayMap[i]; ok {
+// of this Displays value.
+func (i Displays) String() string {
+	if str, ok := _DisplaysMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Display value from its
+// SetString sets the Displays value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *Display) SetString(s string) error {
-	if val, ok := _DisplayNameToValueMap[s]; ok {
+func (i *Displays) SetString(s string) error {
+	if val, ok := _DisplaysNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _DisplayNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _DisplaysNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type Display")
+	return errors.New(s + " is not a valid value for type Displays")
 }
 
-// Int64 returns the Display value as an int64.
-func (i Display) Int64() int64 {
+// Int64 returns the Displays value as an int64.
+func (i Displays) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the Display value from an int64.
-func (i *Display) SetInt64(in int64) {
-	*i = Display(in)
+// SetInt64 sets the Displays value from an int64.
+func (i *Displays) SetInt64(in int64) {
+	*i = Displays(in)
 }
 
-// Desc returns the description of the Display value.
-func (i Display) Desc() string {
-	if str, ok := _DisplayDescMap[i]; ok {
+// Desc returns the description of the Displays value.
+func (i Displays) Desc() string {
+	if str, ok := _DisplaysDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// DisplayValues returns all possible values
-// for the type Display.
-func DisplayValues() []Display {
-	return _DisplayValues
+// DisplaysValues returns all possible values
+// for the type Displays.
+func DisplaysValues() []Displays {
+	return _DisplaysValues
 }
 
 // Values returns all possible values
-// for the type Display.
-func (i Display) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_DisplayValues))
-	for i, d := range _DisplayValues {
+// for the type Displays.
+func (i Displays) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_DisplaysValues))
+	for i, d := range _DisplaysValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type Display.
-func (i Display) IsValid() bool {
-	_, ok := _DisplayMap[i]
+// valid option for type Displays.
+func (i Displays) IsValid() bool {
+	_, ok := _DisplaysMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Display) MarshalText() ([]byte, error) {
+func (i Displays) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Display) UnmarshalText(text []byte) error {
+func (i *Displays) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
