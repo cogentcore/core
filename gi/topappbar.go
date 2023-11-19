@@ -11,6 +11,7 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -85,8 +86,12 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 	ch.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
-		if !s.Is(states.Focused) {
+		if s.Is(states.Focused) {
+			s.Border.Width.Set(units.Dp(2))
+			s.Border.Color.Set(colors.Scheme.Primary.Base)
+		} else {
 			s.Border.Width.Zero()
+			s.Border.Color.Zero()
 		}
 	})
 	tb.AddDefaultOverflowMenu()
