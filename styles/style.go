@@ -122,10 +122,10 @@ type Style struct { //gti:add
 	/////////////////////////////
 	//  Layout
 
-	// MainAxis is the main axis along which elements are arranged by a layout.
-	// X = horizontal axis (default), Y = vertical axis.
+	// Direction specifies the order elements are organized:
+	// Row is horizontal, Col is vertical.
 	// See also [Wrap]
-	MainAxis mat32.Dims
+	Direction Direction
 
 	// Wrap causes elements to wrap around in the CrossAxis dimension
 	// to fit within sizing constraints (on by default).
@@ -136,7 +136,7 @@ type Style struct { //gti:add
 	Overflow XY[Overflow]
 
 	// For layout, extra space added between elements in the layout.
-	Gap units.XY
+	Gap units.XY `view:"inline"`
 
 	// For layout, number of columns to use in a grid layout.
 	// If > 0, number of rows is computed as N elements / Columns.
@@ -397,8 +397,8 @@ func (st *Style) SetWrap(wrap bool) *Style {
 	return st
 }
 
-func (st *Style) SetMainAxis(ma mat32.Dims) *Style {
-	st.MainAxis = ma
+func (st *Style) SetDirection(dir Direction) *Style {
+	st.Direction = dir
 	return st
 }
 

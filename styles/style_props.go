@@ -13,7 +13,6 @@ import (
 	"goki.dev/glop/num"
 	"goki.dev/grr"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // StyleInhInit detects the style values of "inherit" and "initial",
@@ -283,17 +282,17 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.MainAxis = par.(*Style).MainAxis
+				s.Direction = par.(*Style).Direction
 			} else if init {
-				s.MainAxis = mat32.Y
+				s.Direction = Col
 			}
 			return
 		}
 		str := laser.ToString(val)
 		if str == "row" || str == "row-reverse" {
-			s.MainAxis = mat32.X
+			s.Direction = Row
 		} else {
-			s.MainAxis = mat32.Y
+			s.Direction = Col
 		}
 	},
 	// TODO(kai/styprops): mutli-dim overflow

@@ -79,6 +79,18 @@ func (s *Style) AlignPosInBox(inner, outer mat32.Vec2) mat32.Vec2 {
 
 /////////////////////////////////////////////////////////////////
 
+// Direction specifies which way items are laid out.
+type Direction int32 //enums:enum
+
+const (
+	Row Direction = iota
+	Col
+)
+
+func (d Direction) Dim() mat32.Dims {
+	return mat32.Dims(d)
+}
+
 // Display determines how items are displayed
 type Display int32 //enums:enum -trim-prefix Display
 
