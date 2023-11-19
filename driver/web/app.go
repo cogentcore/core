@@ -470,7 +470,3 @@ func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 func (app *appImpl) HideVirtualKeyboard() {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
 }
-
-func (app *appImpl) SetTitleBarIsDark(isDark bool) {
-	// no-op
-}

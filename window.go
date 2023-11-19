@@ -242,6 +242,10 @@ type Window interface {
 	// This only takes effect prior to opening a new window.
 	SetFPS(fps int)
 
+	// SetTitleBarIsDark sets whether the color theme of the window
+	// title bar is dark (as opposed to light).
+	SetTitleBarIsDark(isDark bool)
+
 	// EventMgr returns the events.Mgr for this window,
 	// which manages all of the Event sending.
 	EventMgr() *events.Mgr

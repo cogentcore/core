@@ -13,6 +13,6 @@ func (app *appImpl) IsDark() bool {
 	return false
 }
 
-func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+func (w *windowImpl) SetTitleBarIsDark(isDark bool) {
 	// no-op
 }

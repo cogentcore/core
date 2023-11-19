@@ -304,3 +304,7 @@ func (w *windowImpl) IsCursorEnabled() bool {
 	// no-op
 	return false
 }
+
+func (w *windowImpl) SetTitleBarIsDark(isDark bool) {
+	// no-op
+}

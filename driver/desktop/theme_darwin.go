@@ -84,6 +84,6 @@ func (app *appImpl) isDarkMonitor() {
 
 // TODO(kai): implement SetTitleBarIsDark on mac
 
-func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+func (w *windowImpl) SetTitleBarIsDark(isDark bool) {
 	// no-op
 }

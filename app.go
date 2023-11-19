@@ -171,10 +171,6 @@ type App interface {
 
 	// IsDark returns whether the system color theme is dark (as oppposed to light)
 	IsDark() bool
-
-	// SetTitleBarIsDark sets whether the color theme of window title bars is dark
-	// (as opposed to light).
-	SetTitleBarIsDark(isDark bool)
 }
 
 // Platforms are all the supported platforms for Goosi
