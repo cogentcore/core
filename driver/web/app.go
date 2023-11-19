@@ -235,33 +235,34 @@ func (app *appImpl) setSysWindow() {
 
 // resize updates the app sizing information and sends a resize event.
 func (app *appImpl) resize() {
-	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
-
 	app.screen.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
-	sz := image.Pt(w, h)
-	app.screen.Geometry.Max = sz
-	app.screen.PixSize = image.Pt(int(float32(sz.X)*app.screen.DevicePixelRatio), int(float32(sz.Y)*app.screen.DevicePixelRatio))
+	app.window.DevPixRatio = app.screen.DevicePixelRatio
 	dpi := 96 * app.screen.DevicePixelRatio
 	app.screen.PhysicalDPI = dpi
 	app.screen.LogicalDPI = dpi
-
-	physX := 25.4 * float32(w) / dpi
-	physY := 25.4 * float32(h) / dpi
-	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
-
 	app.window.PhysDPI = app.screen.PhysicalDPI
 	app.window.LogDPI = app.screen.LogicalDPI
-	app.window.PxSize = app.screen.PixSize
-	app.window.WnSize = app.screen.Geometry.Max
-	app.window.DevPixRatio = app.screen.DevicePixelRatio
-	app.window.RenderSize = app.screen.PixSize
+
+	sw, sh := js.Global().Get("screen").Get("width").Int(), js.Global().Get("screen").Get("height").Int()
+	ssz := image.Pt(sw, sh)
+	app.screen.Geometry.Max = ssz
+	app.screen.PixSize = image.Pt(int(float32(ssz.X)*app.screen.DevicePixelRatio), int(float32(ssz.Y)*app.screen.DevicePixelRatio))
+	physX := 25.4 * float32(sw) / dpi
+	physY := 25.4 * float32(sh) / dpi
+	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+
+	ww, wh := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
+	wsz := image.Pt(ww, wh)
+	app.window.WnSize = wsz
+	app.window.PxSize = image.Pt(int(float32(wsz.X)*app.screen.DevicePixelRatio), int(float32(wsz.Y)*app.screen.DevicePixelRatio))
+	app.window.RenderSize = app.window.PxSize
 
 	fmt.Printf("screen %#v\n", app.screen)
 	fmt.Printf("window %#v\n", app.window)
 
 	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Set("width", app.screen.PixSize.X)
-	canvas.Set("height", app.screen.PixSize.Y)
+	canvas.Set("width", app.window.PxSize.X)
+	canvas.Set("height", app.window.PxSize.Y)
 
 	app.window.EvMgr.WindowResize()
 }
