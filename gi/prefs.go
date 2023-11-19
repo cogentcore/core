@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/paint"
 	"goki.dev/goosi"
@@ -274,14 +275,10 @@ func (pf *Preferences) Apply() { //gti:add
 	switch pf.Theme {
 	case ThemeLight:
 		colors.SetScheme(false)
-		goosi.TheApp.SetTitleBarIsDark(false)
 	case ThemeDark:
 		colors.SetScheme(true)
-		goosi.TheApp.SetTitleBarIsDark(true)
 	case ThemeAuto:
-		isDark := goosi.TheApp.IsDark()
-		colors.SetScheme(isDark)
-		goosi.TheApp.SetTitleBarIsDark(isDark)
+		colors.SetScheme(goosi.TheApp.IsDark())
 	}
 	if pf.HiStyle == "" {
 		pf.HiStyle = "emacs" // todo: need light / dark versions
@@ -329,6 +326,8 @@ func (pf *Preferences) ApplyDPI() {
 	}
 	for _, w := range AllRenderWins {
 		w.GoosiWin.SetLogicalDPI(w.GoosiWin.Screen().LogicalDPI)
+		// this isn't DPI-related, but this is the most efficient place to do it
+		w.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	}
 }
 

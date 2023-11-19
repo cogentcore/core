@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"goki.dev/colors/matcolor"
 	"goki.dev/enums"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
@@ -229,6 +230,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	}
 	win.GoosiWin.SetName(title)
 	win.GoosiWin.SetParent(win)
+	win.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
