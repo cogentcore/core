@@ -274,10 +274,14 @@ func (pf *Preferences) Apply() { //gti:add
 	switch pf.Theme {
 	case ThemeLight:
 		colors.SetScheme(false)
+		goosi.TheApp.SetTitleBarIsDark(false)
 	case ThemeDark:
 		colors.SetScheme(true)
+		goosi.TheApp.SetTitleBarIsDark(true)
 	case ThemeAuto:
-		colors.SetScheme(goosi.TheApp.IsDark())
+		isDark := goosi.TheApp.IsDark()
+		colors.SetScheme(isDark)
+		goosi.TheApp.SetTitleBarIsDark(isDark)
 	}
 	if pf.HiStyle == "" {
 		pf.HiStyle = "emacs" // todo: need light / dark versions
