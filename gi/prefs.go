@@ -270,8 +270,9 @@ func (pf *Preferences) Apply() { //gti:add
 	if !OverridePrefsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(pf.Color)
 	}
-	colors.Schemes.Dark.Background.A = 250
-	colors.Schemes.Light.Background.A = 250
+	// TODO(kai): figure out transparency approach
+	// colors.Schemes.Dark.Background.A = 250
+	// colors.Schemes.Light.Background.A = 250
 	switch pf.Theme {
 	case ThemeLight:
 		colors.SetScheme(false)
