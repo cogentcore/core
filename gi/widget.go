@@ -249,6 +249,11 @@ type WidgetBase struct {
 	// type specific Listeners are added in OnInit when the widget is initialized.
 	Listeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
 
+	// PriorityEvents has event type(s) that this widget gets sent first.
+	// Events are sent in depth-first order, so this enables outer container
+	// widgets to get first access to these events.
+	PriorityEvents []events.Types
+
 	// CustomContextMenu is an optional context menu constructor function
 	// called by [Widget.MakeContextMenu] after any type-specified items are added.
 	// This function can decide where to insert new elements, and it should

@@ -123,8 +123,15 @@ type EventMgr struct {
 	// Last Select Mode from most recent Mouse, Keyboard events
 	LastSelMode events.SelectModes
 
-	// currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
-	Shortcuts Shortcuts `json:"-" xml:"-"`
+	// Currently active shortcuts for this window (shortcuts are always window-wide.
+	// Use widget key event processing for more local key functions)
+	Shortcuts Shortcuts
+
+	// PriorityFocus are widgets with Focus PriorityEvents
+	PriorityFocus []Widget
+
+	// PriorityOther are widgets with other PriorityEvents types
+	PriorityOther []Widget
 
 	// stage of DND process
 	// DNDStage DNDStages `desc:"stage of DND process"`
@@ -209,7 +216,15 @@ func (em *EventMgr) HandleFocusEvent(evi events.Event) {
 			em.FocusFirst()
 		}
 	}
-	if em.Focus != nil {
+	if em.PriorityFocus != nil {
+		for _, wi := range em.PriorityFocus {
+			wi.HandleEvent(evi)
+			if evi.IsHandled() {
+				break
+			}
+		}
+	}
+	if !evi.IsHandled() && em.Focus != nil {
 		em.Focus.HandleEvent(evi)
 	}
 	if !evi.IsHandled() && em.FocusWithins() {
@@ -1027,6 +1042,47 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		em.TriggerShortcut(cs)
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+// Shortcuts
+
+// GetPriorityWidgets gathers Widgets with PriorityEvents set
+// and also all widgets with Shortcuts
+func (em *EventMgr) GetPriorityWidgets() {
+	em.PriorityFocus = nil
+	em.PriorityOther = nil
+	em.Shortcuts = nil
+	em.Scene.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		if bt := AsButton(wi.This()); bt != nil {
+			if bt.Shortcut != "" {
+				em.AddShortcut(bt.Shortcut, bt)
+			}
+		}
+		if wb.PriorityEvents == nil {
+			return ki.Continue
+		}
+		for _, tp := range wb.PriorityEvents {
+			if tp.IsKey() {
+				em.PriorityFocus = append(em.PriorityFocus, wi)
+			} else {
+				em.PriorityOther = append(em.PriorityOther, wi)
+			}
+		}
+		return ki.Continue
+	})
+}
+
+// Shortcuts is a map between a key chord and a specific Button that can be
+// triggered.  This mapping must be unique, in that each chord has unique
+// Button, and generally each Button only has a single chord as well, though
+// this is not strictly enforced.  Shortcuts are evaluated *after* the
+// standard KeyMap event processing, so any conflicts are resolved in favor of
+// the local widget's key event processing, with the shortcut only operating
+// when no conflicting widgets are in focus.  Shortcuts are always window-wide
+// and are intended for global window / toolbar buttons.  Widget-specific key
+// functions should be handled directly within widget key event
+// processing.
+type Shortcuts map[key.Chord]*Button
 
 // AddShortcut adds given shortcut to given button.
 func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
