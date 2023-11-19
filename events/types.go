@@ -223,6 +223,36 @@ const (
 	Custom
 )
 
+// IsKey returns true if event type is a Key type
+func (tp Types) IsKey() bool {
+	return tp >= KeyDown && tp <= KeyChord
+}
+
+// IsMouse returns true if event type is a Mouse type
+func (tp Types) IsMouse() bool {
+	return tp >= MouseDown && tp <= LongHoverEnd
+}
+
+// IsTouch returns true if event type is a Touch type
+func (tp Types) IsTouch() bool {
+	return tp >= TouchStart && tp <= Rotate
+}
+
+// IsDrag returns true if event type is a Drag type
+func (tp Types) IsDrag() bool {
+	return tp >= DragStart && tp <= DragLeave
+}
+
+// IsSlide returns true if event type is a Slide type
+func (tp Types) IsSlide() bool {
+	return tp >= SlideStart && tp <= SlideStop
+}
+
+// IsWindow returns true if event type is a Window type
+func (tp Types) IsWindow() bool {
+	return tp >= Window && tp <= WindowPaint
+}
+
 // EventFlags encode boolean event properties
 type EventFlags int64 //enums:bitflag
 
