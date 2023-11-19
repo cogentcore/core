@@ -21,7 +21,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // Tabs switches among child widgets via tabs.  The selected widget gets
@@ -159,7 +158,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	}
 	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
 	frame.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
 	ts.Update()
@@ -442,7 +441,7 @@ func (ts *Tabs) ConfigWidget(sc *Scene) {
 		return
 	}
 	ts.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 	})
 	NewFrame(ts, "tabs")
 	NewFrame(ts, "frame")

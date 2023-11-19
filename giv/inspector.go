@@ -229,7 +229,7 @@ func (is *Inspector) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	is.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 	})
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
@@ -280,7 +280,7 @@ func (is *Inspector) ConfigSplits() {
 	if len(split.Kids) == 0 {
 		tvfr := gi.NewFrame(split, "tvfr")
 		tvfr.Style(func(s *styles.Style) {
-			s.MainAxis = mat32.Y
+			s.Direction = styles.Col
 			s.Overflow.Set(styles.OverflowAuto)
 			s.Gap.Zero()
 		})

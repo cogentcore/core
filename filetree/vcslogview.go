@@ -15,7 +15,6 @@ import (
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/vci/v2"
 )
 
@@ -66,7 +65,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.File = file
 	lv.Since = since
 	lv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 	})
 	config := ki.Config{}
 	config.Add(gi.FrameType, "toolbar")

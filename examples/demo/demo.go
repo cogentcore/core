@@ -300,12 +300,12 @@ func makeLayouts(ts *gi.Tabs) {
 	sv := gi.NewSplits(layouts).SetDim(mat32.X)
 
 	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
 	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")

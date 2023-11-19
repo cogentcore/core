@@ -22,7 +22,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // todo:
@@ -82,7 +81,7 @@ func (tv *TableView) TableViewInit() {
 
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
@@ -97,7 +96,6 @@ func (tv *TableView) TableViewInit() {
 			})
 		case "grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1)
 			})
 		case "grid-lay/grid": // slice grid

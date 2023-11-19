@@ -15,7 +15,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
-	"goki.dev/mat32/v2"
 )
 
 // LayoutFlex tests the core layout flex logic
@@ -32,7 +31,6 @@ func TestLayoutFlex(t *testing.T) {
 		sc.Style(func(s *styles.Style) {
 			s.Display = styles.DisplayGrid
 			s.Columns = 2
-			s.MainAxis = mat32.X
 			s.Gap.Set(units.Dot(4))
 		})
 

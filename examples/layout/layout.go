@@ -73,7 +73,7 @@ func app() {
 	case "frames-vert":
 		PlainFrames(sc, mat32.Vec2{0, 0})
 		sc.Style(func(s *styles.Style) {
-			s.MainAxis = mat32.Y
+			s.Direction = styles.Col
 			s.Wrap = true
 			s.Align.X = styles.AlignCenter
 		})
@@ -215,7 +215,7 @@ func app() {
 			s.Align.Set(styles.AlignCenter)
 		})
 		fr := gi.NewFrame(d).Style(func(s *styles.Style) { // note: this is critical for separating from topbar
-			s.MainAxis = mat32.Y
+			s.Direction = styles.Col
 			s.Grow.Set(1, 1)
 			s.Align.Set(styles.AlignCenter)
 		})
@@ -265,7 +265,6 @@ func SpaceFrame(par gi.Widget, nm ...string) (*gi.Frame, *gi.Space) {
 func HorizRow(par gi.Widget, nm ...string) *gi.Frame {
 	row := BoxFrame(par, nm...)
 	row.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.X
 		s.Grow.Set(1, 0)
 	})
 	return row
@@ -286,7 +285,7 @@ func TabFrame(par gi.Widget) (*gi.Frame, *gi.Frame) {
 	})
 	tfr := BoxFrame(tab)
 	tfr.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.Y
+		s.Direction = styles.Col
 	})
 	return tab, tfr
 }

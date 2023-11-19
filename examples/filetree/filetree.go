@@ -276,7 +276,7 @@ func (fb *FileBrowse) StdFrameConfig() ki.Config {
 // updt from ConfigChildren and does NOT call UpdateEnd
 func (fb *FileBrowse) StdConfig() (mods, updt bool) {
 	fb.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 	})
 	config := fb.StdFrameConfig()
 	mods, updt = fb.ConfigChildren(config)

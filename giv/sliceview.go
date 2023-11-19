@@ -287,7 +287,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
@@ -296,7 +296,6 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 		switch w.PathFrom(sv) {
 		case "grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
 			})
 		case "grid-lay/grid": // slice grid

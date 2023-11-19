@@ -22,7 +22,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // StructView represents a struct, creating a property editor of the fields --
@@ -64,7 +63,7 @@ type StructView struct {
 
 func (sv *StructView) OnInit() {
 	sv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {

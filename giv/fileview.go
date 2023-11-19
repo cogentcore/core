@@ -26,7 +26,6 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
 )
@@ -89,7 +88,7 @@ func (fv *FileView) OnInit() {
 
 func (fv *FileView) FileViewStyles() {
 	fv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.Grow.Set(1, 1)
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {

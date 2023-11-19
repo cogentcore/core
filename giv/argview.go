@@ -10,7 +10,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -31,7 +30,7 @@ type ArgView struct {
 
 func (av *ArgView) OnInit() {
 	av.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.Grow.Set(1, 1)
 	})
 	av.OnWidgetAdded(func(w gi.Widget) {

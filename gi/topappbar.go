@@ -184,7 +184,7 @@ func (tb *TopAppBar) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) ma
 func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 	if tb.OverflowButton == nil {
 		ic := icons.MoreVert
-		if tb.Styles.MainAxis != mat32.X {
+		if tb.Styles.Direction != styles.Row {
 			ic = icons.MoreHoriz
 		}
 		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
@@ -211,7 +211,7 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 }
 
 func (tb *TopAppBar) ParentSize() float32 {
-	ma := tb.Styles.MainAxis
+	ma := tb.Styles.Direction.Dim()
 	_, pwb := tb.ParentWidget()
 	psz := pwb.Geom.Size.Alloc.Content.Sub(tb.Geom.Size.Space)
 	avail := psz.Dim(ma)
@@ -220,7 +220,7 @@ func (tb *TopAppBar) ParentSize() float32 {
 
 // MoveToOverflow moves overflow out of children to the OverflowItems list
 func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
-	ma := tb.Styles.MainAxis
+	ma := tb.Styles.Direction.Dim()
 	avail := tb.ParentSize()
 	ovsz := tb.OverflowButton.Geom.Size.Actual.Total.Dim(ma)
 	avsz := avail - ovsz

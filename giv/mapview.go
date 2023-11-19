@@ -16,7 +16,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 )
 
 // MapView represents a map, creating a property editor of the values --
@@ -59,7 +58,7 @@ func (mv *MapView) OnInit() {
 
 func (mv *MapView) MapViewStyles() {
 	mv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.Grow.Set(1, 1)
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {

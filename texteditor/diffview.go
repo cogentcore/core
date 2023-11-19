@@ -148,7 +148,6 @@ func (dv *DiffView) DiffViewStyles() {
 		case "diff-lay":
 			df := w.(*gi.Layout)
 			w.Style(func(s *styles.Style) {
-				s.SetMainAxis(mat32.X)
 				s.Grow.Set(1,1)
 			})
 		}

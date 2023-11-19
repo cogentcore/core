@@ -57,14 +57,14 @@ func app() {
 	split.SetSplits(.3, .7)
 
 	svfr.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.Y
+		s.Direction = styles.Col
 		// s.Border.Color.Set(colors.Black)
 		// s.Border.Width.Set(units.Dp(2))
 		s.Grow.Set(1, 0)
 	})
 
 	tvfr.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.Y
+		s.Direction = styles.Col
 		// s.Border.Color.Set(colors.Black)
 		// s.Border.Width.Set(units.Dp(2))
 		s.Overflow.Y = styles.OverflowAuto

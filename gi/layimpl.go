@@ -763,13 +763,12 @@ func (ly *Layout) LaySetGapSizeFromCells() {
 
 func (ly *Layout) LaySetInitCellsFlex() {
 	li := &ly.LayImpl
-	ma := ly.Styles.MainAxis
-	ca := ma.Other()
-	li.MainAxis = ma
+	li.MainAxis = mat32.Dims(ly.Styles.Direction)
+	ca := li.MainAxis.Other()
 	li.Wraps = nil
 	idx := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		mat32.SetPointDim(&kwb.Geom.Cell, ma, idx)
+		mat32.SetPointDim(&kwb.Geom.Cell, li.MainAxis, idx)
 		mat32.SetPointDim(&kwb.Geom.Cell, ca, 0)
 		idx++
 		return ki.Continue
@@ -779,14 +778,13 @@ func (ly *Layout) LaySetInitCellsFlex() {
 			fmt.Println(ly, "no items:", idx)
 		}
 	}
-	mat32.SetPointDim(&li.Shape, ma, max(idx, 1)) // must be at least 1
+	mat32.SetPointDim(&li.Shape, li.MainAxis, max(idx, 1)) // must be at least 1
 	mat32.SetPointDim(&li.Shape, ca, 1)
 }
 
 func (ly *Layout) LaySetInitCellsWrap() {
 	li := &ly.LayImpl
-	ma := ly.Styles.MainAxis
-	li.MainAxis = ma
+	li.MainAxis = mat32.Dims(ly.Styles.Direction)
 	ni := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		ni++
@@ -1269,7 +1267,7 @@ func (ly *Layout) SizeDownWrap(sc *Scene, iter int) bool {
 	wrapped := false
 	li := &ly.LayImpl
 	sz := &ly.Geom.Size
-	d := ly.Styles.MainAxis
+	d := li.MainAxis
 	alloc := sz.Alloc.Content
 	gap := li.Gap.Dim(d)
 	fit := alloc.Dim(d)
@@ -1615,7 +1613,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	stPos = stPos.Sub(ly.Geom.RelPos).Max(mat32.Vec2{}) // redundant with any existing
 	pos := stPos
 	idx := 0
-	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.MainAxis == mat32.Y {
+	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Direction == styles.Col {
 		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			cidx := kwb.Geom.Cell
 			if cidx.Y == 0 && idx > 0 {

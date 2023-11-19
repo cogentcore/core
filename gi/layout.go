@@ -138,8 +138,8 @@ func (ly *Layout) LayoutStyles() {
 			if s.Wrap {
 				s.Grow.Set(1, 0)
 			} else {
-				s.Grow.SetDim(s.MainAxis, 1)
-				s.Grow.SetDim(s.MainAxis.Other(), 0)
+				s.Grow.SetDim(s.Direction.Dim(), 1)
+				s.Grow.SetDim(s.Direction.Dim().Other(), 0)
 			}
 		case s.Display == styles.DisplayStacked:
 			s.Grow.Set(1, 1)
@@ -341,7 +341,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 		return
 	}
 	grid := ly.Styles.Display == styles.DisplayGrid
-	if ly.Styles.MainAxis == mat32.X || grid {
+	if ly.Styles.Direction == styles.Row || grid {
 		switch kf {
 		case keyfun.MoveRight:
 			if ly.FocusNextChild(false) {
@@ -355,7 +355,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 			return
 		}
 	}
-	if ly.Styles.MainAxis == mat32.Y || grid {
+	if ly.Styles.Direction == styles.Col || grid {
 		switch kf {
 		case keyfun.MoveDown:
 			if ly.FocusNextChild(true) {

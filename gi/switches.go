@@ -14,7 +14,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // Switches is a widget for containing a set of switches.
@@ -71,13 +70,13 @@ func (sw *Switches) SwitchesStyles() {
 			ip, _ := w.IndexInParent()
 			brf := styles.BorderRadiusFull.Top
 			if ip == 0 {
-				if s.MainAxis == mat32.X {
+				if s.Direction == styles.Row {
 					s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
 				} else {
 					s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
 				}
 			} else if ip == sw.NumChildren()-1 {
-				if s.MainAxis == mat32.X {
+				if s.Direction == styles.Row {
 					s.Border.Width.SetLeft(units.Zero())
 					s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
 				} else {
@@ -85,7 +84,7 @@ func (sw *Switches) SwitchesStyles() {
 					s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
 				}
 			} else {
-				if s.MainAxis == mat32.X {
+				if s.Direction == styles.Row {
 					s.Border.Width.SetLeft(units.Zero())
 				} else {
 					s.Border.Width.SetTop(units.Zero())

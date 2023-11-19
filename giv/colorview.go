@@ -20,7 +20,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
 
@@ -72,7 +71,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := cv.UpdateStart()
 	cv.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.Y
+		s.Direction = styles.Col
 	})
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
@@ -198,10 +197,10 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		return
 	}
 	updt := cv.UpdateStart()
-	vl := gi.NewLayout(cv, "slider-lay").SetMainAxis(mat32.X)
-	nl := gi.NewLayout(cv, "num-lay").SetMainAxis(mat32.Y)
+	vl := gi.NewLayout(cv, "slider-lay")
+	nl := gi.NewLayout(cv, "num-lay")
 
-	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetMainAxis(mat32.X)
+	rgbalay := gi.NewLayout(nl, "nums-rgba-lay")
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
@@ -231,7 +230,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetMainAxis(mat32.X)
+	hslalay := gi.NewLayout(nl, "nums-hsla-lay")
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
@@ -261,7 +260,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetMainAxis(mat32.X)
+	hexlay := gi.NewLayout(nl, "nums-hex-lay")
 
 	gi.NewLabel(hexlay, "hexlbl").SetText("Hex")
 
@@ -296,7 +295,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		})
 	}
 
-	gi.NewFrame(vl, "value").SetMainAxis(mat32.X)
+	gi.NewFrame(vl, "value")
 	sg := gi.NewLayout(vl, "slider-grid").SetDisplay(styles.DisplayGrid)
 
 	gi.NewLabel(sg, "rlab").SetText("Red:")

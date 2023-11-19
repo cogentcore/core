@@ -17,7 +17,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
 )
 
@@ -190,7 +189,7 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	updt := dv.UpdateStart()
 
 	dv.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.Grow.Set(0, 0)
 	})
 

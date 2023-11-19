@@ -206,7 +206,6 @@ func (tv *TreeView) TreeViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-				s.SetMainAxis(mat32.X)
 				s.Gap.X.Ch(0.1)
 				s.Padding.Zero()
 

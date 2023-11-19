@@ -12,7 +12,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
@@ -48,7 +47,7 @@ func app() {
 			continue
 		}
 		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
-			s.MainAxis = mat32.Y
+			s.Direction = styles.Col
 			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 			s.Min.X.Em(15)
 		})

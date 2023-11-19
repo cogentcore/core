@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 )
 
 var (
@@ -55,7 +54,7 @@ func ErrorSnackbar(ctx Widget, err error) *Snackbar {
 
 func (sb *Snackbar) SnackbarStyles() {
 	sb.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
+		s.Direction = styles.Row
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))

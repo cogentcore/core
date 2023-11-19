@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
-	"goki.dev/mat32/v2"
 )
 
 // Dialog is a scene with methods for configuring a dialog
@@ -99,7 +98,6 @@ func (d *Dialog) Buttons() *Layout {
 	}
 	bb := NewLayout(d, "buttons")
 	bb.Style(func(s *styles.Style) {
-		s.SetMainAxis(mat32.X)
 		s.Gap.Set(units.Dp(8))
 	})
 	bb.OnWidgetAdded(func(w Widget) {
@@ -245,7 +243,7 @@ func (d *Dialog) Close() {
 func (d *Dialog) DialogStyles() {
 	d.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
-		s.SetMainAxis(mat32.Y)
+		s.Direction = styles.Col
 		s.Color = colors.Scheme.OnSurface
 		if !d.Stage.AsBase().NewWindow && !d.Stage.AsBase().FullWindow {
 			s.Padding.Set(units.Dp(24))
