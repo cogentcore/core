@@ -138,7 +138,7 @@ func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, 
 	} else {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
-	glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
+	// glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
 	// todo: glfw.Floating for always-on-top -- could set for modal
 	sz := sc.WinSizeFmPix(opts.Size) // note: this is in physical device units
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, nil)
