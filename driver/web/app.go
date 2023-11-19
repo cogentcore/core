@@ -237,7 +237,7 @@ func (app *appImpl) setSysWindow() {
 func (app *appImpl) resize() {
 	app.screen.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
 	app.window.DevPixRatio = app.screen.DevicePixelRatio
-	dpi := 96 * app.screen.DevicePixelRatio
+	dpi := 160 * app.screen.DevicePixelRatio
 	app.screen.PhysicalDPI = dpi
 	app.screen.LogicalDPI = dpi
 	app.window.PhysDPI = app.screen.PhysicalDPI
