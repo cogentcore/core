@@ -95,7 +95,7 @@ func (ts *Tabs) TabsStyles() {
 		case "frame":
 			frame := w.(*Frame)
 			w.Style(func(s *styles.Style) {
-				s.Display = styles.DisplayStacked
+				s.Display = styles.Stacked
 				frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
 				s.Min.X.Dp(160)
 				s.Min.Y.Dp(96)
@@ -158,7 +158,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	}
 	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
 	frame.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
 	ts.Update()
@@ -441,7 +441,7 @@ func (ts *Tabs) ConfigWidget(sc *Scene) {
 		return
 	}
 	ts.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 	})
 	NewFrame(ts, "tabs")
 	NewFrame(ts, "frame")

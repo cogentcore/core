@@ -160,7 +160,7 @@ func (sw *Switch) SwitchStyles() {
 			})
 		case "parts/stack":
 			w.Style(func(s *styles.Style) {
-				s.Display = styles.DisplayStacked
+				s.Display = styles.Stacked
 				s.Grow.Set(0, 0)
 				s.Gap.Zero()
 			})

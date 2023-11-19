@@ -88,7 +88,7 @@ func (fv *FileView) OnInit() {
 
 func (fv *FileView) FileViewStyles() {
 	fv.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
 	fv.OnWidgetAdded(func(w gi.Widget) {

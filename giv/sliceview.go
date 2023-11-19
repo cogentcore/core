@@ -287,7 +287,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
@@ -303,7 +303,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				sg.MinRows = sv.MinRows
-				s.SetDisplay(styles.DisplayGrid)
+				s.Display = styles.Grid
 				nWidgPerRow, _ := sv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)
@@ -2098,7 +2098,7 @@ type SliceViewGrid struct {
 
 func (sg *SliceViewGrid) OnInit() {
 	sg.Frame.OnInit()
-	sg.Styles.Display = styles.DisplayGrid
+	sg.Styles.Display = styles.Grid
 }
 
 func (sg *SliceViewGrid) SizeFromChildren(sc *gi.Scene, iter int, pass gi.LayoutPasses) mat32.Vec2 {

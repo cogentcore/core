@@ -134,16 +134,16 @@ func (ly *Layout) LayoutStyles() {
 		s.MaxBorder = styles.Border{}
 
 		switch {
-		case s.Display == styles.DisplayFlex:
+		case s.Display == styles.Flex:
 			if s.Wrap {
 				s.Grow.Set(1, 0)
 			} else {
 				s.Grow.SetDim(s.Direction.Dim(), 1)
 				s.Grow.SetDim(s.Direction.Dim().Other(), 0)
 			}
-		case s.Display == styles.DisplayStacked:
+		case s.Display == styles.Stacked:
 			s.Grow.Set(1, 1)
-		case s.Display == styles.DisplayGrid:
+		case s.Display == styles.Grid:
 			s.Grow.Set(1, 1)
 		}
 	})
@@ -167,7 +167,7 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 }
 
 func (ly *Layout) RenderChildren(sc *Scene) {
-	if ly.Styles.Display == styles.DisplayStacked {
+	if ly.Styles.Display == styles.Stacked {
 		kwi, _ := ly.StackTopWidget()
 		if kwi != nil {
 			kwi.Render(sc)
@@ -230,7 +230,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	}
 	cur := em.Focus
 	nxti := idx + 1
-	if ly.Styles.Display == styles.DisplayGrid && updn {
+	if ly.Styles.Display == styles.Grid && updn {
 		nxti = idx + ly.Styles.Columns
 	}
 	did := false
@@ -266,7 +266,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	}
 	cur := em.Focus
 	nxti := idx - 1
-	if ly.Styles.Display == styles.DisplayGrid && updn {
+	if ly.Styles.Display == styles.Grid && updn {
 		nxti = idx - ly.Styles.Columns
 	}
 	did := false
@@ -340,7 +340,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 		}
 		return
 	}
-	grid := ly.Styles.Display == styles.DisplayGrid
+	grid := ly.Styles.Display == styles.Grid
 	if ly.Styles.Direction == styles.Row || grid {
 		switch kf {
 		case keyfun.MoveRight:
@@ -355,7 +355,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 			return
 		}
 	}
-	if ly.Styles.Direction == styles.Col || grid {
+	if ly.Styles.Direction == styles.Column || grid {
 		switch kf {
 		case keyfun.MoveDown:
 			if ly.FocusNextChild(true) {

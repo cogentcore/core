@@ -71,7 +71,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	}
 	updt := cv.UpdateStart()
 	cv.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 	})
 
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
@@ -296,7 +296,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	}
 
 	gi.NewFrame(vl, "value")
-	sg := gi.NewLayout(vl, "slider-grid").SetDisplay(styles.DisplayGrid)
+	sg := gi.NewLayout(vl, "slider-grid").SetDisplay(styles.Grid)
 
 	gi.NewLabel(sg, "rlab").SetText("Red:")
 	rs := gi.NewSlider(sg, "red")
@@ -436,7 +436,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := gi.NewLayout(cv, "palette").SetDisplay(styles.DisplayGrid)
+	pg := gi.NewLayout(cv, "palette").SetDisplay(styles.Grid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
 	nms := colors.Names

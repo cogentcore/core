@@ -63,7 +63,7 @@ type StructView struct {
 
 func (sv *StructView) OnInit() {
 	sv.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
@@ -73,7 +73,7 @@ func (sv *StructView) OnInit() {
 			sg := w.(*gi.Frame)
 			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
-				s.Display = styles.DisplayGrid
+				s.Display = styles.Grid
 				s.Columns = 2
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)

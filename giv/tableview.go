@@ -81,7 +81,7 @@ func (tv *TableView) TableViewInit() {
 
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto
 		s.Grow.Set(1, 1)
@@ -103,7 +103,7 @@ func (tv *TableView) TableViewInit() {
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
 				sg.MinRows = tv.MinRows
-				s.SetDisplay(styles.DisplayGrid)
+				s.Display = styles.Grid
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)

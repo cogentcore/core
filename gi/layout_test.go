@@ -29,7 +29,7 @@ func TestLayoutFlex(t *testing.T) {
 		sc.SceneGeom.Size = image.Point{600, 400}
 
 		sc.Style(func(s *styles.Style) {
-			s.Display = styles.DisplayGrid
+			s.Display = styles.Grid
 			s.Columns = 2
 			s.Gap.Set(units.Dot(4))
 		})

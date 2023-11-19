@@ -31,7 +31,7 @@ func app() {
 
 	grid := gi.NewFrame(sc, "grid")
 	grid.Style(func(s *styles.Style) {
-		// s.Display = styles.DisplayGrid
+		// s.Display = styles.Grid
 		// s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
 		s.Wrap = true
 		s.Grow.Set(1, 1)
@@ -47,7 +47,7 @@ func app() {
 			continue
 		}
 		vb := gi.NewLayout(grid, icnm).Style(func(s *styles.Style) {
-			s.Direction = styles.Col
+			s.Direction = styles.Column
 			s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 			s.Min.X.Em(15)
 		})

@@ -58,7 +58,7 @@ func (mv *MapView) OnInit() {
 
 func (mv *MapView) MapViewStyles() {
 	mv.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
@@ -67,7 +67,7 @@ func (mv *MapView) MapViewStyles() {
 			mg := w.(*gi.Frame)
 			mg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
-				s.Display = styles.DisplayGrid
+				s.Display = styles.Grid
 				s.Columns = mv.NCols
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)

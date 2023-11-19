@@ -84,6 +84,7 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
 	})
 	ch.Style(func(s *styles.Style) {
+		// s.GrowWrap = true // note: this won't work because contents not placed until end
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		if s.Is(states.Focused) {

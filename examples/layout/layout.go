@@ -73,7 +73,7 @@ func app() {
 	case "frames-vert":
 		PlainFrames(sc, mat32.Vec2{0, 0})
 		sc.Style(func(s *styles.Style) {
-			s.Direction = styles.Col
+			s.Direction = styles.Column
 			s.Wrap = true
 			s.Align.X = styles.AlignCenter
 		})
@@ -215,7 +215,7 @@ func app() {
 			s.Align.Set(styles.AlignCenter)
 		})
 		fr := gi.NewFrame(d).Style(func(s *styles.Style) { // note: this is critical for separating from topbar
-			s.Direction = styles.Col
+			s.Direction = styles.Column
 			s.Grow.Set(1, 1)
 			s.Align.Set(styles.AlignCenter)
 		})
@@ -280,12 +280,12 @@ func Splits2(par gi.Widget) (*gi.Splits, *gi.Frame, *gi.Frame) {
 func TabFrame(par gi.Widget) (*gi.Frame, *gi.Frame) {
 	tab := BoxFrame(par)
 	tab.Style(func(s *styles.Style) {
-		s.Display = styles.DisplayStacked
+		s.Display = styles.Stacked
 		tab.StackTop = 0
 	})
 	tfr := BoxFrame(tab)
 	tfr.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 	})
 	return tab, tfr
 }

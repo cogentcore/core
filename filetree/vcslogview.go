@@ -65,7 +65,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.File = file
 	lv.Since = since
 	lv.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 	})
 	config := ki.Config{}
 	config.Add(gi.FrameType, "toolbar")

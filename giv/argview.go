@@ -30,7 +30,7 @@ type ArgView struct {
 
 func (av *ArgView) OnInit() {
 	av.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
 	av.OnWidgetAdded(func(w gi.Widget) {
@@ -45,7 +45,7 @@ func (av *ArgView) OnInit() {
 			})
 		case "args-grid":
 			w.Style(func(s *styles.Style) {
-				s.Display = styles.DisplayGrid
+				s.Display = styles.Grid
 				s.Columns = 2
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(10)

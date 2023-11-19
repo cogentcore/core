@@ -140,7 +140,7 @@ func (sc *Scene) SceneStyles() {
 		s.Color = colors.Scheme.OnBackground
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Overflow.Set(styles.OverflowAuto) // screen is always scroller of last resort
 
 		// insets

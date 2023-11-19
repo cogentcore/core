@@ -189,7 +189,7 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 	updt := dv.UpdateStart()
 
 	dv.Style(func(s *styles.Style) {
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Grow.Set(0, 0)
 	})
 
@@ -239,7 +239,7 @@ func (dv *DateView) ConfigWidget(sc *gi.Scene) {
 func (dv *DateView) ConfigDateGrid() {
 	grid := gi.NewLayout(dv, "grid")
 	grid.Style(func(s *styles.Style) {
-		s.SetDisplay(styles.DisplayGrid)
+		s.Display = styles.Grid
 		s.Columns = 7
 	})
 

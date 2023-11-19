@@ -243,7 +243,7 @@ func (d *Dialog) Close() {
 func (d *Dialog) DialogStyles() {
 	d.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
-		s.Direction = styles.Col
+		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface
 		if !d.Stage.AsBase().NewWindow && !d.Stage.AsBase().FullWindow {
 			s.Padding.Set(units.Dp(24))

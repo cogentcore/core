@@ -717,7 +717,7 @@ func (wb *WidgetBase) SizeUpChildren(sc *Scene) {
 
 // SizeUpChildren calls SizeUp on all the children of this node
 func (ly *Layout) SizeUpChildren(sc *Scene) {
-	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp(sc)
 			return ki.Continue
@@ -735,15 +735,15 @@ func (ly *Layout) SizeUpChildren(sc *Scene) {
 // to each widget, based on layout type.
 func (ly *Layout) LaySetInitCells() {
 	switch {
-	case ly.Styles.Display == styles.DisplayFlex:
+	case ly.Styles.Display == styles.Flex:
 		if ly.Styles.Wrap {
 			ly.LaySetInitCellsWrap()
 		} else {
 			ly.LaySetInitCellsFlex()
 		}
-	case ly.Styles.Display == styles.DisplayStacked:
+	case ly.Styles.Display == styles.Stacked:
 		ly.LaySetInitCellsStacked()
-	case ly.Styles.Display == styles.DisplayGrid:
+	case ly.Styles.Display == styles.Grid:
 		ly.LaySetInitCellsGrid()
 	default:
 		ly.LaySetInitCellsStacked() // whatever
@@ -903,7 +903,7 @@ func (ly *Layout) SizeFromChildrenFit(sc *Scene, iter int, pass LayoutPasses) {
 // as in the TopAppBar and Sliceview types.
 func (ly *Layout) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
 	var ksz mat32.Vec2
-	if ly.Styles.Display == styles.DisplayStacked {
+	if ly.Styles.Display == styles.Stacked {
 		ksz = ly.SizeFromChildrenStacked(sc)
 	} else {
 		ksz = ly.SizeFromChildrenCells(sc, iter, pass)
@@ -1042,7 +1042,7 @@ func (wb *WidgetBase) SizeDownChildren(sc *Scene, iter int) bool {
 // is what Layout type does.  Other special widget types can
 // do custom layout and call this too.
 func (ly *Layout) SizeDownChildren(sc *Scene, iter int) bool {
-	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		redo := false
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			re := kwi.SizeDown(sc, iter)
@@ -1197,7 +1197,7 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 // SizeDownGrow grows the element sizes based on total extra and Grow
 func (ly *Layout) SizeDownGrow(sc *Scene, iter int, extra mat32.Vec2) bool {
 	redo := false
-	if ly.Styles.Display == styles.DisplayStacked {
+	if ly.Styles.Display == styles.Stacked {
 		redo = ly.SizeDownGrowStacked(sc, iter, extra)
 	} else {
 		redo = ly.SizeDownGrowCells(sc, iter, extra)
@@ -1360,7 +1360,7 @@ func (ly *Layout) SizeDownGrowStacked(sc *Scene, iter int, extra mat32.Vec2) boo
 
 // SizeDownAllocActual sets Alloc to Actual for no-extra case.
 func (ly *Layout) SizeDownAllocActual(sc *Scene, iter int) {
-	if ly.Styles.Display == styles.DisplayStacked {
+	if ly.Styles.Display == styles.Stacked {
 		ly.SizeDownAllocActualStacked(sc, iter)
 		return
 	}
@@ -1507,7 +1507,7 @@ func (wb *WidgetBase) SizeFinalChildren(sc *Scene) {
 
 // SizeFinalChildren calls SizeFinal on all the children of this node
 func (ly *Layout) SizeFinalChildren(sc *Scene) {
-	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeFinal(sc)
 			return ki.Continue
@@ -1594,7 +1594,7 @@ func (ly *Layout) PositionLay(sc *Scene) {
 		ly.PositionWithinAlloc(sc, mat32.Vec2{})
 	}
 	ly.ConfigScrolls(sc) // and configure the scrolls
-	if ly.Styles.Display == styles.DisplayStacked {
+	if ly.Styles.Display == styles.Stacked {
 		ly.PositionStacked(sc)
 	} else {
 		ly.PositionCells(sc)
@@ -1613,7 +1613,7 @@ func (ly *Layout) PositionCells(sc *Scene) {
 	stPos = stPos.Sub(ly.Geom.RelPos).Max(mat32.Vec2{}) // redundant with any existing
 	pos := stPos
 	idx := 0
-	if ly.Styles.Display == styles.DisplayFlex && ly.Styles.Direction == styles.Col {
+	if ly.Styles.Display == styles.Flex && ly.Styles.Direction == styles.Column {
 		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			cidx := kwb.Geom.Cell
 			if cidx.Y == 0 && idx > 0 {
@@ -1747,7 +1747,7 @@ func (wb *WidgetBase) ScenePosChildren(sc *Scene) {
 
 // ScenePosChildren runs ScenePos on the children
 func (ly *Layout) ScenePosChildren(sc *Scene) {
-	if ly.Styles.Display == styles.DisplayStacked && !ly.Is(LayoutStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.Is(LayoutStackTopOnly) {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.ScenePos(sc)
 			return ki.Continue
