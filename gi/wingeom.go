@@ -269,7 +269,7 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 
 	winName := mgr.WinName(win.Title)
 	sc := win.GoosiWin.Screen()
-	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
+	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.GoosiWin.IsFullscreen()}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
@@ -416,12 +416,13 @@ func (mgr *WinGeomPrefsMgr) RestoreAll() {
 
 // RenderWinGeom records the geometry settings used for a given window
 type RenderWinGeom struct {
-	DPI float32
-	DPR float32
-	SX  int
-	SY  int
-	PX  int
-	PY  int
+	DPI        float32
+	DPR        float32
+	SX         int
+	SY         int
+	PX         int
+	PY         int
+	Fullscreen bool
 }
 
 func (wg *RenderWinGeom) Size() image.Point {

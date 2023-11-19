@@ -322,6 +322,9 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
+		if wgp.Fullscreen {
+			opts.SetFullscreen()
+		}
 	}
 	win := NewRenderWin(name, title, opts)
 	WinGeomMgr.SettingEnd()
