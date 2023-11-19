@@ -81,3 +81,9 @@ func (app *appImpl) isDarkMonitor() {
 		slog.Error("error adding system color theme file watcher: " + err.Error())
 	}
 }
+
+// TODO(kai): implement SetTitleBarIsDark on mac
+
+func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+	// no-op
+}

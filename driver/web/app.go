@@ -464,19 +464,13 @@ func (app *appImpl) IsDark() bool {
 }
 
 func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	// switch app.platform {
-	// case goosi.Android:
 	js.Global().Get("document").Call("getElementById", "text-field").Call("focus")
-	// case goosi.IOS:
-	// 	js.Global().Get("document").Call("getElementById", "app").Call("focus")
-	// }
 }
 
 func (app *appImpl) HideVirtualKeyboard() {
-	// switch app.platform {
-	// case goosi.Android:
 	js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
-	// case goosi.IOS:
-	// 	js.Global().Get("document").Call("getElementById", "app").Call("blur")
-	// }
+}
+
+func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+	// no-op
 }

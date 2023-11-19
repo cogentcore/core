@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"log/slog"
 	"syscall"
+	"unsafe"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -98,4 +99,21 @@ func (app *appImpl) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (cha
 		}()
 	}
 	return ec, nil
+}
+
+func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+	for _, win := range app.winlist {
+		hwnd := win.glw.GetWin32Window()
+
+		dwm := syscall.NewLazyDLL("dwmapi.dll")
+		setAtt := dwm.NewProc("DwmSetWindowAttribute")
+		ret, _, err := setAtt.Call(uintptr(unsafe.Pointer(hwnd)), // window handle
+			20,                               // DWMWA_USE_IMMERSIVE_DARK_MODE
+			uintptr(unsafe.Pointer(&isDark)), // on or off
+			8)                                // sizeof(darkMode)
+
+		if ret != 0 { // err is always non-nil, we check return value
+			slog.Error("failed to set window title bar color", "err", err)
+		}
+	}
 }

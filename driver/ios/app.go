@@ -483,3 +483,7 @@ func (app *appImpl) Quit() {
 func (app *appImpl) IsDark() bool {
 	return app.isDark
 }
+
+func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+	// no-op
+}

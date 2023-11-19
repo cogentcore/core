@@ -6,9 +6,13 @@
 
 package desktop
 
-// TODO(kai): implement IsDark on linux
+// TODO(kai): implement IsDark and SetTitleBarIsDark on linux
 
 // IsDark returns whether the system color theme is dark (as opposed to light).
 func (app *appImpl) IsDark() bool {
 	return false
+}
+
+func (app *appImpl) SetTitleBarIsDark(isDark bool) {
+	// no-op
 }
