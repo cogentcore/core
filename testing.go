@@ -7,6 +7,7 @@ package goosi
 import (
 	"errors"
 	"io/fs"
+	"os"
 	"path/filepath"
 
 	"goki.dev/grows/images"
@@ -26,6 +27,11 @@ type TestingT interface {
 // directory, it creates the image
 func AssertCaptureIs(t TestingT, filename string) {
 	capture := Capture()
+
+	err := os.MkdirAll("testdata", 0750)
+	if err != nil {
+		t.Errorf("error making testdata directory: %v", err)
+	}
 
 	filename = filepath.Join("testdata", filename)
 	if filepath.Ext(filename) == "" {
