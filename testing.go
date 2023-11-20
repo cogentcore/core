@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"goki.dev/grows/images"
 )
@@ -52,11 +53,12 @@ func AssertCaptureIs(t TestingT, filename string) {
 	}
 
 	if capture != img {
-		badFilename := filename + ".bad"
-		t.Errorf("goosi.AssertCaptureIs: image %q is not the same as expected; see %q", filename, badFilename)
-		err := images.Save(capture, badFilename)
+		ext := filepath.Ext(filename)
+		failFilename := strings.TrimSuffix(filename, ext) + ".fail" + ext
+		t.Errorf("goosi.AssertCaptureIs: image for %q is not the same as expected; see %q", filename, failFilename)
+		err := images.Save(capture, failFilename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error saving bad image: %v", err)
+			t.Errorf("goosi.AssertCaptureIs: error saving fail image: %v", err)
 		}
 	}
 }
