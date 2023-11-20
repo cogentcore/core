@@ -68,6 +68,9 @@ func AssertCaptureIs(t TestingT, filename string) {
 					break
 				}
 			}
+			if failed {
+				break
+			}
 		}
 	}
 
