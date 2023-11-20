@@ -21,10 +21,14 @@ func TestMain(m *testing.M) {
 
 func TestBasicWidgets(t *testing.T) {
 	types := gti.AllEmbeddersOf(WidgetBaseType)
+	sc := NewScene()
+	NewWindow(sc).Run()
 	for _, typ := range types {
-		sc := NewScene()
+		updt := sc.UpdateStart()
+		sc.DeleteChildAtIndex(1, true)
 		sc.NewChild(typ)
-		NewWindow(sc).Run()
+		sc.Update()
+		sc.UpdateEndLayout(updt)
 		goosi.AssertCaptureIs(t, strcase.ToSnake(typ.IDName))
 	}
 }
