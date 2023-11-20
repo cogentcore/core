@@ -97,7 +97,7 @@ type StageBase struct { //gti:add -setters
 
 	// widget in another scene that requested this stage to be created
 	// and provides context (stage)
-	CtxWidget Widget
+	Context Widget
 
 	// name of the Stage -- generally auto-set based on Scene Name
 	Name string
@@ -164,6 +164,8 @@ type Stage interface {
 	SetName(name string) *StageBase
 
 	SetTitle(title string) *StageBase
+
+	SetContext(ctx Widget) *StageBase
 
 	SetModal(bool) *StageBase
 
@@ -269,7 +271,9 @@ func (st *StageBase) SetNameFromScene() Stage {
 	}
 	sc := st.Scene
 	st.Name = sc.Name() + "-" + strings.ToLower(st.Type.String())
-	st.Title = sc.Title
+	if sc.Body != nil {
+		st.Title = sc.Body.Title
+	}
 	return st.This
 }
 

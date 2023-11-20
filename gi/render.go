@@ -438,11 +438,11 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
-// ConfigScene calls Config on all widgets in the Scene,
+// ConfigSceneWidgets calls Config on all widgets in the Scene,
 // which will set NeedsLayout to drive subsequent layout and render.
 // This is a top-level call, typically only done when the window
 // is first drawn, once the full sizing information is available.
-func (sc *Scene) ConfigScene() {
+func (sc *Scene) ConfigSceneWidgets() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
@@ -465,7 +465,7 @@ func (sc *Scene) ApplyStyleScene() {
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
 	sc.Fill() // full redraw
-	sc.ConfigScene()
+	sc.ConfigSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutRenderScene()
 }

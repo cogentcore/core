@@ -60,7 +60,8 @@ func NewSpellModelFromText() error {
 	if err != nil {
 		// TODO(kai/snack)
 		slog.Error("Could not open corpus file. This file is used to create the spelling model", "file", bigdatafile, "err", err)
-		NewDialog(nil).Title("Corpus File Not Found").Prompt("You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on.").Ok().Run()
+		ErrorDialog(nil, err)
+		// nil).Title("Corpus File Not Found").Prompt("You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on.").Ok().Run()
 		return err
 	}
 

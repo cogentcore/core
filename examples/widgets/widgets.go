@@ -103,24 +103,59 @@ func app() {
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
-		gi.NewDialog(b1).Title("Test Dialog").Prompt("This is a prompt").
-			Modal(true).NewWindow(true).Cancel().Ok().Run()
-
-		// gi.StringPromptDialog(vp, "", "Enter value here..",
-		// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
-		// 	rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 		dlg := send.(*gi.Dialog)
-		// 		if sig == int64(gi.DialogAccepted) {
-		// 			val := gi.StringPromptDialogValue(dlg)
-		// 			fmt.Printf("got string value: %v\n", val)
-		// 		}
+		
+		// b := gi.NewBody()
+		// gi.NewLabel(b).SetType(gi.LabelHeadlineLarge).SetText("Test Dialog")
+		// gi.NewLabel(b).SetText("This is a prompt")
+		// sc := gi.NewScene(b)
+		// sc.Sides.Bottom = func(par Widget) {
+		// 	brow := gi.NewLayout(par).Style(func(s *styles.Style) {
+		// 		s.Align.X = styles.AlignEnd
 		// 	})
+		// 	gi.NewButton(brow).SetText("Cancel").OnClick(func(e events.Event) {
+		// 		sc.Close()
+		// 	})
+		// 	gi.NewButton(brow).SetText("OK").OnClick(func(e events.Event) {
+		// 		sc.Close()
+		// 	})
+		// }
+		// gi.NewDialog(sc).SetModal(true).Run()
+
+		sc := gi.NewScene(gi.NewBody().AddTitle("Test Dialog").AddText("This is a prompt"))
+		sc.Footer.Add(func(par Widget) {
+			sc.AddCancel(par).OnClick(func(e events.Event) {
+				fmt.Println("cancel")
+			})
+			sc.AddOk(par).OnClick(func(e events.Event) {
+				fmt.Println("ok")
+			})
+		}
+		gi.NewDialog(sc).SetContext(b1).SetModal(true).Run() // note: NewDialog returns Stage
+		
+		// d := gi.NewDialog(b1).Title("Test Dialog").Prompt("This is a prompt").
+		// 	Modal(true).Cancel().Ok().
+		// OnAccept(func(e events.Event) {
+		// 	fmt.Println("ok")
+		// }).OnCancel(func(e events.Event) {
+		// 	fmt.Println("cancel")
+		// }).Run()
+
 	})
 
 	button2 := gi.NewButton(brow).SetText("Open Inspector").
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		txt := ""
+		
+		b := gi.NewBody().Title("What is it?").Prompt("Please enter your response:")
+		giv.NewValue(b, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
+		
+		d.Cancel().Ok().OnAccept(func(e events.Event) {
+			fmt.Println("dialog accepted; string entered:", txt)
+		}).Run()
+		
+		
+		
 		d := gi.NewDialog(button2).Title("What is it?").Prompt("Please enter your response:")
 		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
 		d.Cancel().Ok().OnAccept(func(e events.Event) {

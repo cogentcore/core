@@ -609,8 +609,7 @@ func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	asz := &sz.Actual.Content
 	isz := &sz.Internal
 	sz.SetInitContentMin(sz.Min) // start from style
-	*isz = *asz
-	styles.SetClampMinVec(isz, nsz)
+	*isz = nsz                   // internal is always accurate!
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := mat32.X; d <= mat32.Y; d++ {

@@ -132,5 +132,5 @@ func (sb *Snackbar) Run() *Snackbar {
 
 // Delete deletes the popup associated with the snackbar.
 func (sb *Snackbar) DeletePopup() {
-	sb.Stage.AsPopup().CtxWidget.AsWidget().Sc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
+	sb.Stage.AsPopup().Context.AsWidget().Sc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 }

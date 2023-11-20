@@ -104,10 +104,7 @@ func HiStylesView(st *histyle.Styles) {
 		histyle.StylesChanged = true
 	})
 
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
+	sc.Header.Add(func(par gi.Widget) {
 		oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")
 		sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)

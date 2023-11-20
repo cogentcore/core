@@ -97,7 +97,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	st.This = st
 	st.SetType(typ)
 	st.SetScene(sc)
-	st.CtxWidget = ctx
+	st.Context = ctx
 	cst := cwb.Sc.Stage
 	mst := cst.AsMain()
 	if mst != nil {
@@ -168,7 +168,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	case TooltipStage:
 		// on x axis, we center on the widget widget
 		// on y axis, we put our bottom 10 above the top of the widget
-		wb := st.CtxWidget.AsWidget()
+		wb := st.Context.AsWidget()
 		bb := wb.WinBBox()
 		wc := bb.Min.X + bb.Size().X/2
 		sc.SceneGeom.Pos.X = wc - sz.X/2

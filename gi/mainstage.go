@@ -67,12 +67,11 @@ func (st *MainStage) RenderCtx() *RenderContext {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the NewMainStage call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
+func NewMainStage(typ StageTypes, sc *Scene) *MainStage {
 	st := &MainStage{}
 	st.This = st
 	st.SetType(typ)
 	st.SetScene(sc)
-	st.CtxWidget = ctx
 	st.PopupMgr.Main = st
 	st.PopupMgr.This = &st.PopupMgr
 	return st
@@ -83,7 +82,7 @@ func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewWindow(sc *Scene) *MainStage {
-	return NewMainStage(WindowStage, sc, nil)
+	return NewMainStage(WindowStage, sc)
 }
 
 // NewDialog in dialogs.go
@@ -94,8 +93,8 @@ func NewWindow(sc *Scene) *MainStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewSheet(sc *Scene, side StageSides, ctx Widget) *MainStage {
-	return NewMainStage(SheetStage, sc, ctx).SetSide(side).AsMain()
+func NewSheet(sc *Scene, side StageSides) *MainStage {
+	return NewMainStage(SheetStage, sc).SetSide(side).AsMain()
 }
 
 /////////////////////////////////////////////////////
@@ -129,13 +128,13 @@ func (st *MainStage) SetWindowInsets() {
 
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
-	st.AddTopAppBar()
+	// st.AddTopAppBar()
 	return st
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
 	if st.FullWindow {
-		st.AddTopAppBar()
+		// st.AddTopAppBar()
 	}
 	return st
 }
@@ -145,33 +144,33 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 	return st
 }
 
-// SetDefaultTopAppbar sets the top app bar of the stage to its default value.
-// This should not be called by end-user code.
-func (st *StageBase) SetDefaultTopAppBar() {
-	// first fall back on context widget scene top app bar if we are a dialog
-	if st.Type == DialogStage {
-		cw := st.CtxWidget.AsWidget()
-		if cw != nil && cw.Sc != nil {
-			st.Scene.TopAppBar = cw.Sc.TopAppBar
-		}
-	}
-	if st.Scene.TopAppBar == nil {
-		st.Scene.TopAppBar = DefaultTopAppBar
-	}
-}
-
-func (st *MainStage) AddTopAppBar() *MainStage {
-	if st.Scene.TopAppBar == nil {
-		st.SetDefaultTopAppBar()
-		// if still nil, bail
-		if st.Scene.TopAppBar == nil {
-			return st
-		}
-	}
-	tb := st.Scene.InsertNewChild(TopAppBarType, 0).(*TopAppBar)
-	st.Scene.TopAppBar(tb)
-	return st
-}
+// // SetDefaultTopAppbar sets the top app bar of the stage to its default value.
+// // This should not be called by end-user code.
+// func (st *StageBase) SetDefaultTopAppBar() {
+// 	// first fall back on context widget scene top app bar if we are a dialog
+// 	if st.Type == DialogStage {
+// 		cw := st.Context.AsWidget()
+// 		if cw != nil && cw.Sc != nil {
+// 			st.Scene.TopAppBar = cw.Sc.TopAppBar
+// 		}
+// 	}
+// 	if st.Scene.TopAppBar == nil {
+// 		st.Scene.TopAppBar = DefaultTopAppBar
+// 	}
+// }
+//
+// func (st *MainStage) AddTopAppBar() *MainStage {
+// 	if st.Scene.TopAppBar == nil {
+// 		st.SetDefaultTopAppBar()
+// 		// if still nil, bail
+// 		if st.Scene.TopAppBar == nil {
+// 			return st
+// 		}
+// 	}
+// 	tb := st.Scene.InsertNewChild(TopAppBarType, 0).(*TopAppBar)
+// 	st.Scene.TopAppBar(tb)
+// 	return st
+// }
 
 // FirstWinManager creates a MainStageMgr for the first window
 // to be able to get sizing information prior to having a RenderWin,
@@ -228,8 +227,8 @@ func (st *MainStage) RunWindow() *MainStage {
 		CurRenderWin.GoStartEventLoop()
 		return st
 	}
-	if st.CtxWidget != nil {
-		ms := st.CtxWidget.AsWidget().Sc.MainStageMgr()
+	if st.Context != nil {
+		ms := st.Context.AsWidget().Sc.MainStageMgr()
 		msc := ms.Top().AsMain().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
@@ -249,7 +248,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	st.AddDialogDecor()
 	st.Scene.ConfigScene()
 
-	ctx := st.CtxWidget.AsWidget()
+	ctx := st.Context.AsWidget()
 	ms := ctx.Sc.MainStageMgr()
 	if ms == nil {
 		slog.Error("RunDialog: CurRenderWin is nil")

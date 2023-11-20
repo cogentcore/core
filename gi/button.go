@@ -86,19 +86,23 @@ const (
 	// that are the final in a sequence. It is equivalent
 	// to Material Design's filled button.
 	ButtonFilled ButtonTypes = iota
+
 	// ButtonTonal is a filled button, similar
 	// to [ButtonFilled]. It is used for the same purposes,
 	// but it has a lighter background color and less emphasis.
 	// It is equivalent to Material Design's filled tonal button.
 	ButtonTonal
+
 	// ButtonElevated is an elevated button with
 	// a light background color and a shadow.
 	// It is equivalent to Material Design's elevated button.
 	ButtonElevated
+
 	// ButtonOutlined is an outlined button that is
 	// used for secondary actions that are still important.
 	// It is equivalent to Material Design's outlined button.
 	ButtonOutlined
+
 	// ButtonText is a low-importance button with no border,
 	// background color, or shadow when not being interacted with.
 	// It renders primary-colored text, and it renders a background
@@ -109,6 +113,7 @@ const (
 	// to Material Design's text button, but it can also
 	// contain icons and other things.
 	ButtonText
+
 	// ButtonAction is a simple button that typically serves
 	// as a simple action among a series of other buttons
 	// (eg: in a toolbar), or as a part of another widget,
@@ -119,6 +124,7 @@ const (
 	// surrounding context  sufficiently. It is equivalent to Material Design's
 	// icon button, but it can also contain text and other things (and frequently does).
 	ButtonAction
+
 	// ButtonMenu is similar to [ButtonAction], but it is only
 	// for buttons located in popup menus.
 	ButtonMenu

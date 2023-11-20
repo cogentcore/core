@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -23,6 +23,23 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+type FuncStack []func(par Widget)
+
+func (fs *FuncStack) Add(fun func(par Widget)) *FuncStack {
+	*fs = append(*fs, fun)
+	return fs
+}
+
+func (fs *FuncStack) Call(par Widget) {
+	for _, fun := range *fs {
+		fun(par)
+	}
+}
+
+func (fs *FuncStack) Empty() bool {
+	return len(*fs) == 0
+}
+
 // see:
 //	- render.go for scene-based rendering code
 //	- layimpl.go for layout
@@ -43,17 +60,28 @@ import (
 type Scene struct {
 	Frame
 
-	// title of the Scene
-	Title string `set:"-"`
-
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
 	Data any
 
-	// TopAppBar is a function used to construct a top app bar at the top of the
-	// scene when it is set up. It is copied by default to all FullWindow [DialogStage]s
-	// created in the context of this scene.
-	TopAppBar func(tb *TopAppBar)
+	// Header contains functions for constructing the Header for this Scene,
+	// called in order added.
+	Header FuncStack
+
+	// Footer contains functions for constructing the Footer for this Scene,
+	// called in order added.
+	Footer FuncStack
+
+	// Left contains functions for constructing the Left sidebar / etc for this Scene,
+	// called in order added.
+	Left FuncStack
+
+	// Right contains functions for constructing the Right sidebar / etc for this Scene,
+	// called in order added.
+	Right FuncStack
+
+	// Body provides the main contents of the scene
+	Body *Body
 
 	// Size and position relative to overall rendering context.
 	SceneGeom mat32.Geom2DInt `edit:"-" set:"-"`
@@ -104,11 +132,20 @@ func (sc *Scene) FlagType() enums.BitFlagSetter {
 }
 
 // NewScene creates a new Scene that will serve as the content of a Stage
-// (e.g., a Window, Dialog, etc).  Scenes can also be added as part of the
-// Widget tree within another Scene, where they provide an optimized rendering
-// context for areas that tend to update frequently -- use NewSubScene with a
-// parent argument for that. If no name is provided, it defaults to "scene".
-func NewScene(name ...string) *Scene {
+// (e.g., a Window, Dialog, etc).  It is composed of optional Header, Footer
+// Left, Right panels with the given Body as the central content.
+func NewScene(body *Body, name ...string) *Scene {
+	sc := &Scene{}
+	sc.InitName(sc, name...)
+	sc.EventMgr.Scene = sc
+	sc.Body = body
+	sc.BgColor.SetSolid(colors.Transparent)
+	return sc
+}
+
+// NewEmptyScene creates a new Scene object without a Body, e.g., for use
+// in a Menu, Tooltip or other such simple popups
+func NewEmptyScene(name ...string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name...)
 	sc.EventMgr.Scene = sc
@@ -119,11 +156,48 @@ func NewScene(name ...string) *Scene {
 // NewSubScene creates a new [Scene] that will serve as a sub-scene of another [Scene].
 // Scenes can also be added as the content of a [Stage] (without a parent) through the
 // [NewScene] function. If no name is provided, it defaults to "scene".
-func NewSubScene(par ki.Ki, name ...string) *Scene {
-	sc := par.NewChild(SceneType, name...).(*Scene)
-	sc.EventMgr.Scene = sc
-	sc.BgColor.SetSolid(colors.Transparent)
-	return sc
+// func NewSubScene(par ki.Ki, name ...string) *Scene {
+// 	sc := par.NewChild(SceneType, name...).(*Scene)
+// 	sc.EventMgr.Scene = sc
+// 	sc.BgColor.SetSolid(colors.Transparent)
+// 	return sc
+// }
+
+// ConfigScene is called by the Stage to configure the Scene during Run process
+func (sc *Scene) ConfigScene() {
+	if !sc.Header.Empty() {
+		head := NewLayout(sc, "header")
+		sc.Header.Call(head)
+	}
+	if !sc.Left.Empty() || !sc.Right.Empty() {
+		mid := NewLayout(sc, "middle")
+		if !sc.Left.Empty() {
+			left := NewLayout(mid, "left")
+			sc.Left.Call(left)
+		}
+		mid.AddChild(sc.Body)
+		if !sc.Right.Empty() {
+			right := NewLayout(mid, "right")
+			sc.Right.Call(right)
+		}
+	} else {
+		sc.AddChild(sc.Body)
+	}
+	if !sc.Footer.Empty() {
+		foot := NewLayout(sc, "footer").Style(func(s *styles.Style) {
+			s.Align.X = styles.AlignEnd
+		})
+		sc.Footer.Call(foot)
+	}
+}
+
+// TopAppBar constructs or returns the TopAppBar in given parent Widget
+func (sc *Scene) TopAppBar(par Widget) *TopAppBar {
+	tb := par.ChildByType(TopAppBarType, ki.Embeds)
+	if tb != nil {
+		return tb.(*TopAppBar)
+	}
+	return NewTopAppBar(par)
 }
 
 func (sc *Scene) OnInit() {
@@ -176,12 +250,6 @@ func (sc *Scene) SceneStyles() {
 			uv(insets.Left),
 		)
 	})
-}
-
-// SetTitle sets the title
-func (sc *Scene) SetTitle(title string) *Scene {
-	sc.Title = title
-	return sc
 }
 
 // RenderCtx returns the current render context.
