@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
@@ -117,15 +118,15 @@ func (sc *Scene) AssertPixels(t TestingT, filename string) {
 	cbounds := capture.Bounds()
 	ibounds := img.Bounds()
 	if cbounds != ibounds {
-		t.Errorf("goosi.AssertCaptureIs: expected bounds %v for image for %q, but got bounds %v; see %q", ibounds, filename, cbounds, failFilename)
+		t.Errorf("goosi.AssertCaptureIs: expected bounds %v for image for %s, but got bounds %v; see %s", ibounds, filename, cbounds, failFilename)
 		failed = true
 	} else {
 		for y := cbounds.Min.Y; y < cbounds.Max.Y; y++ {
 			for x := cbounds.Min.X; x < cbounds.Max.X; x++ {
-				cc := capture.At(x, y)
-				ic := img.At(x, y)
+				cc := colors.AsRGBA(capture.At(x, y))
+				ic := colors.AsRGBA(img.At(x, y))
 				if cc != ic {
-					t.Errorf("goosi.AssertCaptureIs: image for %q is not the same as expected; see %q; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
+					t.Errorf("goosi.AssertCaptureIs: image for %s is not the same as expected; see %s; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
 					failed = true
 					break
 				}
