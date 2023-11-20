@@ -22,7 +22,7 @@ func TestLayout(t *testing.T) {
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 	})
 	NewWindow(sc).Run()
-	goosi.AssertCaptureIs(t, "layout")
+	goosi.AssertCaptureIs(t, "frame_20em")
 }
 
 // LayoutFlex tests the core layout flex logic
