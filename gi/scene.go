@@ -177,13 +177,17 @@ func (sc *Scene) ConfigScene() {
 			left := NewLayout(mid, "left")
 			sc.Left.Call(left)
 		}
-		mid.AddChild(sc.Body)
+		if sc.Body != nil {
+			mid.AddChild(sc.Body)
+		}
 		if !sc.Right.Empty() {
 			right := NewLayout(mid, "right")
 			sc.Right.Call(right)
 		}
 	} else {
-		sc.AddChild(sc.Body)
+		if sc.Body != nil {
+			sc.AddChild(sc.Body)
+		}
 	}
 	if !sc.Footer.Empty() {
 		foot := NewLayout(sc, "footer").Style(func(s *styles.Style) {

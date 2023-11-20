@@ -15,7 +15,7 @@ import (
 )
 
 func TestLayout(t *testing.T) {
-	sc := NewScene()
+	sc := NewEmptyScene()
 	NewFrame(sc).Style(func(s *styles.Style) {
 		s.Min.Set(units.Em(20))
 		s.Grow.Set(0, 0)
@@ -30,7 +30,7 @@ func TestLayout(t *testing.T) {
 // https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
 func TestLayoutFlex(t *testing.T) {
 	t.Skip()
-	sc := NewScene()
+	sc := NewEmptyScene()
 	sc.SceneGeom.Size = image.Point{600, 400}
 
 	sc.Style(func(s *styles.Style) {
