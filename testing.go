@@ -19,6 +19,13 @@ type TestingT interface {
 	Errorf(format string, args ...any)
 }
 
+// UpdateTestImages indicates whether to update currently saved test
+// images in [AssertCaptureIs] instead of comparing against them.
+// It is automatically set if the env variable "UPDATE_TEST_IMAGES" is "true",
+// and it should typically only be set through that. It should only be
+// set when behavior has been updated that causes test images to change.
+var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
+
 // AssertCaptureIs asserts that the result of [Capture] is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
@@ -38,6 +45,22 @@ func AssertCaptureIs(t TestingT, filename string) {
 	if filepath.Ext(filename) == "" {
 		filename += ".png"
 	}
+
+	ext := filepath.Ext(filename)
+	failFilename := strings.TrimSuffix(filename, ext) + ".fail" + ext
+
+	if UpdateTestImages {
+		err := images.Save(capture, filename)
+		if err != nil {
+			t.Errorf("goosi.AssertCaptureIs: error saving updated image: %v", err)
+		}
+		err = os.RemoveAll(failFilename)
+		if err != nil {
+			t.Errorf("goosi.AssertCaptureIs: error removing old fail image: %v", err)
+		}
+		return
+	}
+
 	img, _, err := images.Open(filename)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
@@ -47,12 +70,13 @@ func AssertCaptureIs(t TestingT, filename string) {
 		// we don't have the file yet, so we make it
 		err := images.Save(capture, filename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error saving image: %v", err)
+			t.Errorf("goosi.AssertCaptureIs: error saving new image: %v", err)
 		}
 		return
 	}
 
 	failed := false
+
 	cbounds := capture.Bounds()
 	ibounds := img.Bounds()
 	if cbounds != ibounds {
@@ -63,7 +87,7 @@ func AssertCaptureIs(t TestingT, filename string) {
 				cc := capture.At(x, y)
 				ic := img.At(x, y)
 				if cc != ic {
-					t.Errorf("goosi.AssertCaptureIs: expected color %v at (%d, %d), but got %v", ic, x, y, cc)
+					t.Errorf("goosi.AssertCaptureIs: image for %q is not the same as expected; see %q; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
 					failed = true
 					break
 				}
@@ -75,12 +99,14 @@ func AssertCaptureIs(t TestingT, filename string) {
 	}
 
 	if failed {
-		ext := filepath.Ext(filename)
-		failFilename := strings.TrimSuffix(filename, ext) + ".fail" + ext
-		t.Errorf("goosi.AssertCaptureIs: image for %q is not the same as expected; see %q", filename, failFilename)
 		err := images.Save(capture, failFilename)
 		if err != nil {
 			t.Errorf("goosi.AssertCaptureIs: error saving fail image: %v", err)
+		}
+	} else {
+		err := os.RemoveAll(failFilename)
+		if err != nil {
+			t.Errorf("goosi.AssertCaptureIs: error removing old fail image: %v", err)
 		}
 	}
 }
