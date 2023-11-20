@@ -324,7 +324,8 @@ func (app *appImpl) AppPrefsDir() string {
 }
 
 func (app *appImpl) PrefsDir() string {
-	return "!(ERROR: PrefsDir should not be called when goosi.TheApp.Platform() == goosi.Offscreen)"
+	// TODO(kai): figure out a better solution to offscreen prefs dir
+	return "./tmpPrefsDir"
 }
 
 func (app *appImpl) GetScreens() {
