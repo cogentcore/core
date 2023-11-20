@@ -13,6 +13,7 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
+	"goki.dev/goosi/events"
 	"goki.dev/grows/images"
 )
 
@@ -47,6 +48,20 @@ type TestingT interface {
 // set when behavior has been updated that causes test images to change,
 // and it should only be set once and then turned back off.
 var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
+
+// AssertPixelsOnShow is a helper function that makes a new window from
+// the scene, waits until it is shown, and then calls [Scene.AssertPixels]
+// with the given values. It does not return until all of those steps are
+// completed.
+func (sc *Scene) AssertPixelsOnShow(t TestingT, filename string) {
+	showed := make(chan struct{})
+	sc.On(events.Custom, func(e events.Event) {
+		sc.AssertPixels(t, filename)
+		showed <- struct{}{}
+	})
+	NewWindow(sc).Run()
+	<-showed
+}
 
 // AssertPixels asserts that [Scene.Pixels] is equivalent
 // to the image stored at the given filename in the testdata directory,
