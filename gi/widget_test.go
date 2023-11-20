@@ -21,7 +21,6 @@ func TestMain(m *testing.M) {
 func TestBasicWidgets(t *testing.T) {
 	types := gti.AllEmbeddersOf(WidgetBaseType)
 	for _, typ := range types {
-		typ := typ
 		sc := NewEmptyScene()
 		sc.NewChild(typ)
 		sc.AssertPixelsOnShow(t, strcase.ToSnake(typ.IDName))
