@@ -206,6 +206,7 @@ func (st *MainStage) RunWindow() *MainStage {
 	// and thus don't consider pref size
 	if st.NewWindow || !st.FullWindow {
 		sz = sc.PrefSize(sz)
+		fmt.Println("pref size:", sz)
 	}
 	if WinRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
@@ -315,7 +316,7 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 		Title: title, Size: st.Scene.SceneGeom.Size, StdPixels: false,
 	}
 	wgp := WinGeomMgr.Pref(title, nil)
-	if wgp != nil {
+	if goosi.TheApp.Platform() != goosi.Offscreen && wgp != nil {
 		WinGeomMgr.SettingStart()
 		opts.Size = wgp.Size()
 		opts.Pos = wgp.Pos()

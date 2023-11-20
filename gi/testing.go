@@ -59,7 +59,7 @@ func (sc *Scene) AssertPixelsOnShow(t TestingT, filename string) {
 		sc.AssertPixels(t, filename)
 		showed <- struct{}{}
 	})
-	NewWindow(sc).Run()
+	NewWindow(sc).SetNewWindow(true).Run()
 	<-showed
 }
 
