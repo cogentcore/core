@@ -51,9 +51,13 @@ func RecycleDialog(data any) bool {
 }
 
 // ErrorDialog returns a new Dialog [Stage] displaying the given error
-// in the context of the given widget.
-func ErrorDialog(ctx Widget, err error) Stage {
-	sc := NewScene(NewBody(ctx.Name() + "-error-dialog").AddTitle("There was an error").AddText(err.Error()))
+// in the context of the given widget.  Optional title can be provided.
+func ErrorDialog(ctx Widget, err error, title ...string) Stage {
+	ttl := "There was an error"
+	if len(title) > 0 {
+		ttl = title[0]
+	}
+	sc := NewScene(NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()))
 	sc.Footer.Add(func(par Widget) { sc.AddOk(par) })
 	return NewDialog(sc).SetContext(ctx)
 }
