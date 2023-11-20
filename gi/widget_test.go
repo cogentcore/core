@@ -10,6 +10,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 )
 
@@ -21,14 +22,14 @@ func TestMain(m *testing.M) {
 
 func TestBasicWidgets(t *testing.T) {
 	types := gti.AllEmbeddersOf(WidgetBaseType)
-	sc := NewScene()
-	NewWindow(sc).Run()
 	for _, typ := range types {
-		updt := sc.UpdateStart()
-		sc.DeleteChildAtIndex(1, true)
+		typ := typ
+		sc := NewEmptyScene()
 		sc.NewChild(typ)
-		sc.Update()
-		sc.UpdateEndLayout(updt)
-		goosi.AssertCaptureIs(t, strcase.ToSnake(typ.IDName))
+		sc.On(events.Custom, func(e events.Event) {
+			goosi.AssertCaptureIs(t, strcase.ToSnake(typ.IDName))
+			sc.Close()
+		})
+		NewWindow(sc).Run().Wait()
 	}
 }

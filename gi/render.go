@@ -17,6 +17,7 @@ import (
 	"goki.dev/cam/hct"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
@@ -433,6 +434,7 @@ func (sc *Scene) DoUpdate() bool {
 	if sc.ShowLayoutIter == 3 {
 		sc.ShowLayoutIter++
 		sc.EventMgr.ActivateStartFocus()
+		sc.Send(events.Custom) // listen to Custom event on Show
 	}
 
 	return true
