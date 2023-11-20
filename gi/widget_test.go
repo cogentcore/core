@@ -6,9 +6,12 @@ package gi
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/grr"
 	"goki.dev/gti"
 )
 
@@ -28,7 +31,8 @@ func TestBasicWidgets(t *testing.T) {
 }
 
 func TestTextWidgets(t *testing.T) {
-	strings := []string{"test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
+	strs := []string{"test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
+
 	funcs := map[string]func(par Widget, text string){
 		"button": func(par Widget, text string) {
 			NewButton(par).SetText(text)
@@ -36,12 +40,20 @@ func TestTextWidgets(t *testing.T) {
 		"label": func(par Widget, text string) {
 			NewLabel(par).SetText(text)
 		},
+		"switch": func(par Widget, text string) {
+			NewSwitch(par).SetText(text)
+		},
+		"tab": func(par Widget, text string) {
+			NewTab(par).SetText(text)
+		},
 	}
 	for nm, f := range funcs {
-		for _, str := range strings {
+		for _, str := range strs {
 			sc := NewEmptyScene()
 			f(sc, str)
-			sc.AssertPixelsOnShow(t, "text_"+nm+"_"+strcase.ToSnake(str))
+			fw, _, _ := strings.Cut(str, " ")
+			grr.Log0(os.MkdirAll(filepath.Join("testdata", nm), 0750))
+			sc.AssertPixelsOnShow(t, filepath.Join(nm, "text_"+strcase.ToSnake(fw)))
 		}
 	}
 }
