@@ -11,19 +11,23 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 func TestLayout(t *testing.T) {
-	t.Skip()
 	sc := NewEmptyScene()
 	NewFrame(sc).Style(func(s *styles.Style) {
 		s.Min.Set(units.Em(20))
 		s.Grow.Set(0, 0)
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 	})
+	captured := make(chan struct{})
+	sc.On(events.Custom, func(e events.Event) {
+		sc.AssertPixels(t, "frame_20em")
+		captured <- struct{}{}
+	})
 	NewWindow(sc).Run()
-	goosi.AssertCaptureIs(t, "frame_20em")
+	<-captured
 }
 
 // LayoutFlex tests the core layout flex logic
