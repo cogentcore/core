@@ -33,7 +33,7 @@ func NewDialog(sc *Scene) Stage {
 	// 	d.EventMgr.Scene = &d.Scene
 	// 	d.BgColor.SetSolid(colors.Transparent)
 	// 	d.DialogStyles()
-
+	sc.DialogStyles()
 	sc.Stage = NewMainStage(DialogStage, sc)
 	sc.Stage.SetModal(true)
 	return sc.Stage
@@ -73,7 +73,7 @@ func (sc *Scene) AddOk(par Widget, name ...string) *Button {
 	if len(name) > 0 {
 		nm = name[0]
 	}
-	bt := NewButton(par, nm)
+	bt := NewButton(par, nm).SetText("OK")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		sc.Close()
@@ -100,7 +100,7 @@ func (sc *Scene) AddCancel(par Widget, name ...string) *Button {
 	if len(name) > 0 {
 		nm = name[0]
 	}
-	bt := NewButton(par, nm).SetType(ButtonOutlined)
+	bt := NewButton(par, nm).SetType(ButtonOutlined).SetText("Cancel")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		sc.Close()

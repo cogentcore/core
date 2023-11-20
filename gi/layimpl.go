@@ -601,7 +601,7 @@ func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
 // expand Actual and remain at their current styled actual values,
 // absorbing the extra content size within their own scrolling zone
 // (full size recorded in Internal).
-func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
+func (ly *Layout) LaySetContentFitOverflow(sc *Scene, nsz mat32.Vec2, pass LayoutPasses) {
 	// todo: potentially the diff between Visible & Hidden is
 	// that Hidden also does Not expand beyond Alloc?
 	// can expt with that.
@@ -613,7 +613,7 @@ func (ly *Layout) LaySetContentFitOverflow(nsz mat32.Vec2, pass LayoutPasses) {
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if (nosz || oflow.Dim(d) >= styles.OverflowAuto) && ly.Par != nil {
+		if (nosz || (!sc.Is(ScPrefSizing) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -889,7 +889,7 @@ func (ly *Layout) LaySetInitCellsGrid() {
 // to update Actual and Internal size based on this.
 func (ly *Layout) SizeFromChildrenFit(sc *Scene, iter int, pass LayoutPasses) {
 	ksz := ly.This().(Layouter).SizeFromChildren(sc, iter, SizeDownPass)
-	ly.LaySetContentFitOverflow(ksz, pass)
+	ly.LaySetContentFitOverflow(sc, ksz, pass)
 	if LayoutTrace {
 		sz := &ly.Geom.Size
 		fmt.Println(ly, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)

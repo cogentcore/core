@@ -45,9 +45,9 @@ func app() {
 
 	sc.Header.Add(func(par gi.Widget) {
 		tb := sc.TopAppBar(par)
-		// if gi.DefaultTopAppBar != nil {
-		// 	gi.DefaultTopAppBar(tb)
-		// }
+		if gi.DefaultTopAppBar != nil {
+			gi.DefaultTopAppBar(tb)
+		}
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
 			OnClick(func(e events.Event) {
 				fmt.Println("TopAppBar Button 1")
