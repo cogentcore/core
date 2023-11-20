@@ -12,13 +12,11 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
 )
 
 func TestLayout(t *testing.T) {
-	driver.Main(func(a goosi.App) {
-		Init()
-		sc := NewScene("test-layout")
+	RunTest(func() {
+		sc := NewScene()
 		NewFrame(sc).Style(func(s *styles.Style) {
 			s.Min.Set(units.Em(20))
 			s.Grow.Set(0, 0)
@@ -34,11 +32,8 @@ func TestLayout(t *testing.T) {
 // https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
 func TestLayoutFlex(t *testing.T) {
 	t.Skip()
-	driver.Main(func(app goosi.App) {
-		LayoutTrace = true
-
-		Init()
-		sc := NewScene("testflex")
+	RunTest(func() {
+		sc := NewScene()
 		sc.SceneGeom.Size = image.Point{600, 400}
 
 		sc.Style(func(s *styles.Style) {
