@@ -47,9 +47,8 @@ func (mv *MapViewInline) OnInit() {
 }
 
 func (mv *MapViewInline) MapViewInlineStyles() {
-	mv.Style(func(s *styles.Style) {
-		s.Align.Y = styles.AlignCenter
-	})
+	// mv.Style(func(s *styles.Style) {
+	// })
 	mv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(mv) {
 		case "add-action":

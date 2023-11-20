@@ -117,7 +117,7 @@ func (lb *Label) LabelStyles() {
 		s.Min.Y.Em(1)
 		s.Min.X.Ch(3)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
-		s.Align.Y = styles.AlignCenter
+		// s.Align.Y = styles.Center
 		s.Grow.Set(0, 0)
 		s.GrowWrap = true
 
@@ -354,7 +354,7 @@ func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) mat32.Vec2 {
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
-	txs.Align, txs.AlignV = styles.AlignStart, styles.AlignStart
+	txs.Align, txs.AlignV = styles.Start, styles.Start
 	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnContext, nil)
 	lb.TextRender.LayoutStdLR(txs, fs, &lb.Styles.UnContext, sz)
 	rsz := lb.TextRender.Size.Ceil()

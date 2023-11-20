@@ -132,7 +132,7 @@ func (tv *TableView) TableViewInit() {
 				w.Style(func(s *styles.Style) {
 					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
-					s.Text.Align = styles.AlignEnd
+					s.Text.Align = styles.End
 					s.Min.Y.Em(1)
 					s.Grow.Set(0, 0)
 				})

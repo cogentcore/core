@@ -114,7 +114,7 @@ func (ch *Chooser) ChooserStyles() {
 	ch.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
-		s.Text.Align = styles.AlignCenter
+		s.Text.Align = styles.Center
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		switch ch.Type {
@@ -148,7 +148,8 @@ func (ch *Chooser) ChooserStyles() {
 		switch w.PathFrom(ch) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Align.Y = styles.AlignCenter
+				s.Align.Content = styles.Center
+				s.Align.Items = styles.Center
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
@@ -161,7 +162,6 @@ func (ch *Chooser) ChooserStyles() {
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Align.Y = styles.AlignCenter
 				// TODO(kai): figure out what to do with MaxLength
 				// if ch.MaxLength > 0 {
 				// 	s.Min.X.Ch(float32(ch.MaxLength))
@@ -208,7 +208,7 @@ func (ch *Chooser) ChooserStyles() {
 				s.Font.Size.Dp(16)
 				s.Min.X.Em(1)
 				s.Min.Y.Em(1)
-				s.Align.Y = styles.AlignCenter
+				s.Align.Self = styles.End
 			})
 		}
 	})

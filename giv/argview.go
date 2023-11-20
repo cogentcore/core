@@ -40,8 +40,7 @@ func (av *ArgView) OnInit() {
 			title.Type = gi.LabelTitleLarge
 			title.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
-				s.Text.Align = styles.AlignCenter
-				s.Align.Y = styles.AlignStart
+				s.Text.Align = styles.Center
 			})
 		case "args-grid":
 			w.Style(func(s *styles.Style) {
@@ -55,7 +54,6 @@ func (av *ArgView) OnInit() {
 		}
 		if w.Parent().Name() == "args-grid" {
 			w.Style(func(s *styles.Style) {
-				s.Align.X = styles.AlignCenter
 			})
 		}
 	})

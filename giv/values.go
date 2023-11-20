@@ -445,7 +445,7 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget) {
 			vv.SendChange()
 		})
 	})
-	gi.NewDialog(sc).SetContext(vv.Widget).Run()
+	gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

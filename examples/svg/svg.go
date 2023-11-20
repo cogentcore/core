@@ -91,7 +91,7 @@ func app() {
 	fnm.SetMinPrefWidth(units.Ch(60))
 
 	zmlb := gi.NewLabel(tbar, "zmlb", "Zoom: ")
-	zmlb.SetProp("vertical-align", styles.AlignMiddle)
+	zmlb.SetProp("vertical-align", styles.Middle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
 	zoomout := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
@@ -131,7 +131,7 @@ func app() {
 	gi.NewSpace(tbar, "spctr")
 	trlb := gi.NewLabel(tbar, "trlb", "Translate: ")
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
-	trlb.SetProp("vertical-align", styles.AlignMiddle)
+	trlb.SetProp("vertical-align", styles.Middle)
 
 	trx := gi.NewSpinBox(tbar, "trx")
 	// zoom.SetMinPrefWidth(units.NewEm(10))

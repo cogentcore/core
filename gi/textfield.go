@@ -180,7 +180,7 @@ func (tf *TextField) TextFieldStyles() {
 		if !tf.TrailingIcon.IsNil() {
 			s.Padding.Right.Dp(12)
 		}
-		s.Text.Align = styles.AlignStart
+		s.Text.Align = styles.Start
 		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
 		case TextFieldFilled:
@@ -229,8 +229,9 @@ func (tf *TextField) TextFieldStyles() {
 		switch w.PathFrom(tf) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
-				s.Align.Y = styles.AlignCenter
-				s.Text.AlignV = styles.AlignCenter
+				s.Align.Content = styles.Center
+				s.Align.Items = styles.Center
+				s.Text.AlignV = styles.Center
 				s.Gap.Zero()
 			})
 		case "parts/lead-icon":
@@ -240,7 +241,6 @@ func (tf *TextField) TextFieldStyles() {
 				s.Padding.Zero()
 				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.Align.Y = styles.AlignCenter
 				s.Margin.SetRight(units.Dp(8))
 				// If we are responsible for a positive (non-disabled) state layer
 				// (instead of our parent), then we amplify it so that it is clear
@@ -267,8 +267,6 @@ func (tf *TextField) TextFieldStyles() {
 				s.Padding.Zero()
 				s.Min.Y.Em(1)
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.Align.Y = styles.AlignCenter
-				// s.Align.X = styles.AlignEnd
 				s.Margin.SetLeft(units.Dp(8))
 				// same reasoning as for leading icon
 				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {

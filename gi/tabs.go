@@ -559,7 +559,7 @@ func (tb *Tab) TabStyles() {
 		// s.Border.Width.Right.SetDp(1)
 
 		s.Border.Radius.Zero()
-		s.Text.Align = styles.AlignCenter
+		s.Text.Align = styles.Center
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(10))
 
@@ -575,8 +575,8 @@ func (tb *Tab) TabStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
-				s.Align.Y = styles.AlignCenter
-				s.Overflow.X = styles.OverflowHidden // no scrollbars!
+				s.Align.Content = styles.Center
+				s.Align.Items = styles.Center
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
@@ -591,7 +591,6 @@ func (tb *Tab) TabStyles() {
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Align.Set(styles.AlignCenter)
 			})
 		case "parts/close-stretch":
 			w.Style(func(s *styles.Style) {
@@ -608,7 +607,6 @@ func (tb *Tab) TabStyles() {
 				// s.Margin.Zero()
 				s.Padding.Set(units.Dp(0))
 				s.Padding.Left.Dp(16)
-				s.Align.Y = styles.AlignCenter
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(colors.Transparent)
 				// if we have some state, we amplify it so we

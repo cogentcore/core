@@ -33,8 +33,8 @@ func app() {
 	// title := gi.NewLabel(sc, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
 	// title.Style(func(s *styles.Style) {
 	// 	s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-	// 	s.Text.Align = styles.AlignCenter
-	// 	s.Text.AlignV = styles.AlignStart
+	// 	s.Text.Align = styles.Center
+	// 	s.Text.AlignV = styles.Start
 	// })
 	//
 	splt := gi.NewSplits(sc, "split-view")

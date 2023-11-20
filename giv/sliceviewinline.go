@@ -52,9 +52,8 @@ func (sv *SliceViewInline) OnInit() {
 }
 
 func (sv *SliceViewInline) SliceViewInlineStyles() {
-	sv.Style(func(s *styles.Style) {
-		s.Align.Y = styles.AlignCenter
-	})
+	// sv.Style(func(s *styles.Style) {
+	// })
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
 		case "add-action":

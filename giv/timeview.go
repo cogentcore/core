@@ -265,7 +265,7 @@ func (dv *DateView) ConfigDateGrid() {
 		bt.Style(func(s *styles.Style) {
 			s.Min.X.Dp(40)
 			s.Min.Y.Dp(40)
-			// s.Text.Align = styles.AlignCenter
+			// s.Text.Align = styles.Center
 			s.Padding.Zero()
 			if dt.Month() != som.Month() {
 				s.Color = colors.Scheme.OnSurfaceVariant
@@ -284,9 +284,10 @@ func (dv *DateView) ConfigDateGrid() {
 			switch w.PathFrom(bt) {
 			case "parts":
 				w.Style(func(s *styles.Style) {
-					s.Text.Align = styles.AlignCenter
-					s.Text.AlignV = styles.AlignCenter
-					s.Align.Set(styles.AlignCenter)
+					s.Text.Align = styles.Center
+					s.Text.AlignV = styles.Center
+					// s.Align.Content = styles.Center
+					s.Justify.Content = styles.Center
 				})
 			case "parts/label":
 				lb := w.(*gi.Label)

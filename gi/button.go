@@ -150,6 +150,7 @@ func (bt *Button) ButtonStyles() {
 		if bt.Text == "" {
 			s.Padding.Right.Dp(16)
 		}
+		s.Justify.Content = styles.Center
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
 		case ButtonFilled:
@@ -175,10 +176,10 @@ func (bt *Button) ButtonStyles() {
 			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:
 			s.MaxBoxShadow = styles.BoxShadow0()
-			s.Align.X = styles.AlignStart
+			s.Justify.Content = styles.Start
 		case ButtonMenu:
 			s.Grow.Set(1, 0) // need to go to edge of menu
-			s.Align.X = styles.AlignStart
+			s.Justify.Content = styles.Start
 			s.Border.Radius = styles.BorderRadiusNone
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
@@ -192,11 +193,12 @@ func (bt *Button) ButtonStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
-				s.Align.Set(styles.AlignCenter)
-				s.Text.AlignV = styles.AlignCenter
-				if bt.Type == ButtonMenu || bt.Type == ButtonAction {
-					s.Align.X = styles.AlignStart
-				}
+				s.Align.Content = styles.Center
+				s.Align.Items = styles.Center
+				s.Text.AlignV = styles.Center
+				// if bt.Type == ButtonMenu || bt.Type == ButtonAction {
+				// 	s.Align.X = styles.Start
+				// }
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
@@ -204,7 +206,6 @@ func (bt *Button) ButtonStyles() {
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Align.Set(styles.AlignCenter)
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
@@ -224,7 +225,6 @@ func (bt *Button) ButtonStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Max.X.Zero()
-				s.Align.Set(styles.AlignCenter)
 				s.FillMargin = false
 			})
 		case "parts/ind-stretch":
@@ -237,7 +237,7 @@ func (bt *Button) ButtonStyles() {
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Align.Y = styles.AlignEnd
+				s.Align.Self = styles.End
 			})
 		case "parts/shortcut":
 			w.Style(func(s *styles.Style) {

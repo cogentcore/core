@@ -188,8 +188,7 @@ func (tv *TreeView) TreeViewStyles() {
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
-		s.Text.Align = styles.AlignStart
-		s.Align.Y = styles.AlignStart
+		s.Text.Align = styles.Start
 
 		// need to copy over to actual and then clear styles one
 		tv.actStateLayer = s.StateLayer
@@ -292,7 +291,7 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Padding.Zero()
 				s.Min.X.Em(0.8)
 				s.Min.Y.Em(0.8)
-				s.Align.Y = styles.AlignCenter
+				s.Align.Self = styles.Center
 				// we don't need to visibly tell the user that we are disabled;
 				// the lack of an icon accomplishes that; instead, we just inherit
 				// our state layer from the actual tree view state layer

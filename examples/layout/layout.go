@@ -75,12 +75,12 @@ func app() {
 		sc.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Wrap = true
-			s.Align.X = styles.AlignCenter
+			s.Align.X = styles.Center
 		})
 	case "frames-horiz":
 		row := HorizRow(sc)
 		row.Style(func(s *styles.Style) {
-			// s.Align.X = styles.AlignEnd
+			// s.Align.X = styles.End
 			s.Wrap = true
 		})
 		PlainFrames(row, mat32.Vec2{0, 0})
@@ -92,11 +92,11 @@ func app() {
 	case "text-align":
 		// 	row := HorizRow(sc)
 		sc.Style(func(s *styles.Style) {
-			s.Align.X = styles.AlignCenter
+			s.Align.X = styles.Center
 		})
 		gi.NewLabel(sc, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
-			s.Align.X = styles.AlignCenter
-			s.Text.Align = styles.AlignCenter
+			s.Align.X = styles.Center
+			s.Text.Align = styles.Center
 		})
 	case "long-text-wrap": // just text
 		WrapText(sc, VeryLongText)
@@ -104,10 +104,10 @@ func app() {
 		row := HorizRow(sc)
 		lbl := WrapText(row, VeryLongText)
 		row.Style(func(s *styles.Style) {
-			// s.Align.X = styles.AlignEnd
+			// s.Align.X = styles.End
 		})
 		lbl.Style(func(s *styles.Style) {
-			s.Align.X = styles.AlignCenter
+			s.Align.X = styles.Center
 		})
 		fr := BoxFrame(sc) // this takes up slack
 		sm := WrapText(fr, ShortText)
@@ -116,12 +116,12 @@ func app() {
 		row := HorizRow(sc)
 		lbl := WrapText(row, VeryLongText) // VeryLongText)
 		row.Style(func(s *styles.Style) {
-			// s.Align.X = styles.AlignEnd
+			// s.Align.X = styles.End
 			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
 			// s.Overflow.X = styles.OverflowAuto
 		})
 		lbl.Style(func(s *styles.Style) {
-			s.Text.Align = styles.AlignCenter
+			s.Text.Align = styles.Center
 		})
 		// fr := BoxFrame(sc) // this takes up slack
 		// sm := WrapText(fr, ShortText)
@@ -195,9 +195,9 @@ func app() {
 		})
 		bt.Config(sc)
 		bt.Parts.Style(func(s *styles.Style) {
-			s.Text.Align = styles.AlignCenter
-			s.Text.AlignV = styles.AlignCenter
-			s.Align.Set(styles.AlignCenter)
+			s.Text.Align = styles.Center
+			s.Text.AlignV = styles.Center
+			s.Align.Set(styles.Center)
 			s.Padding.Zero()
 			s.Margin.Zero()
 		})
@@ -212,26 +212,26 @@ func app() {
 		d := gi.NewBody(sc).FullWindow(true)
 		d.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
-			s.Align.Set(styles.AlignCenter)
+			s.Align.Set(styles.Center)
 		})
 		fr := gi.NewFrame(d).Style(func(s *styles.Style) { // note: this is critical for separating from topbar
 			s.Direction = styles.Column
 			s.Grow.Set(1, 1)
-			s.Align.Set(styles.AlignCenter)
+			s.Align.Set(styles.Center)
 		})
 		gi.NewLabel(fr).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
 			Style(func(s *styles.Style) {
-				s.Align.Set(styles.AlignCenter)
+				s.Align.Set(styles.Center)
 			})
 		gi.NewLabel(fr).SetType(gi.LabelBodyLarge).
 			SetText("Thank you for reporting your issue!").
 			Style(func(s *styles.Style) {
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.Align.Set(styles.AlignCenter)
+				s.Align.Set(styles.Center)
 			})
 		gi.NewButton(fr).SetType(gi.ButtonTonal).SetText("Return home").
 			Style(func(s *styles.Style) {
-				s.Align.Set(styles.AlignCenter)
+				s.Align.Set(styles.Center)
 			})
 		gi.NewButton(sc).SetText("Click Me").OnClick(func(e events.Event) {
 			d.Run()
@@ -305,7 +305,7 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			s.Grow = grow
-			// s.Align.X = styles.AlignCenter
+			// s.Align.X = styles.Center
 		})
 	}
 }

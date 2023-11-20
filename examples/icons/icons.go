@@ -26,7 +26,7 @@ func app() {
 	sc := gi.NewScene("gogi-icons-demo").SetTitle("GoGi Icons")
 
 	sc.Style(func(s *styles.Style) {
-		s.Align.X = styles.AlignStart
+		s.Align.X = styles.Start
 	})
 
 	grid := gi.NewFrame(sc, "grid")
@@ -35,7 +35,7 @@ func app() {
 		// s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
 		s.Wrap = true
 		s.Grow.Set(1, 1)
-		s.Align.X = styles.AlignStart
+		s.Align.X = styles.Start
 		s.Margin.Set(units.Dp(8))
 		s.Overflow.Y = styles.OverflowAuto
 	})

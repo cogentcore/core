@@ -27,11 +27,11 @@ func app() {
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
 
-	sc := gi.NewScene("gogi-demo").SetTitle("GoGi Demo")
+	b := gi.NewBody("gogi-demo").SetTitle("GoGi Demo")
 
 	// gi.DefaultTopAppBar = nil
 
-	ts := gi.NewTabs(sc)
+	ts := gi.NewTabs(b)
 	ts.DeleteTabButtons = false
 
 	makeHome(ts)
@@ -41,6 +41,7 @@ func app() {
 	makeLayouts(ts)
 	makeValues(ts)
 
+	sc := gi.NewScene(b)
 	gi.NewWindow(sc).Run().Wait()
 }
 
@@ -98,29 +99,29 @@ func makeButtons(ts *gi.Tabs) {
 
 	brow := gi.NewLayout(buttons).Style(func(s *styles.Style) {
 		s.Wrap = true
-		s.Align.Y = styles.AlignCenter
+		s.Align.Items = styles.Center
 	})
 	browt := gi.NewLayout(buttons).Style(func(s *styles.Style) {
 		s.Wrap = true
-		s.Align.Y = styles.AlignCenter
+		s.Align.Items = styles.Center
 	})
 	browi := gi.NewLayout(buttons).Style(func(s *styles.Style) {
 		s.Wrap = true
-		s.Align.Y = styles.AlignCenter
+		s.Align.Items = styles.Center
 	})
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu Buttons")
 	mbrow := gi.NewLayout(buttons).Style(func(s *styles.Style) {
 		s.Wrap = true
-		s.Align.Y = styles.AlignCenter
+		s.Align.Items = styles.Center
 	})
 	mbrowt := gi.NewLayout(buttons).Style(func(s *styles.Style) {
 		s.Wrap = true
-		s.Align.Y = styles.AlignCenter
+		s.Align.Items = styles.Center
 	})
 	mbrowi := gi.NewLayout(buttons).Style(func(s *styles.Style) {
 		s.Wrap = true
-		s.Align.Y = styles.AlignCenter
+		s.Align.Items = styles.Center
 	})
 
 	menu := func(m *gi.Scene) {

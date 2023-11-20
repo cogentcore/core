@@ -138,7 +138,8 @@ func (sc *Scene) DialogStyles() {
 		s.Color = colors.Scheme.OnSurface
 		if !sc.Stage.AsBase().NewWindow && !sc.Stage.AsBase().FullWindow {
 			s.Padding.Set(units.Dp(24))
-			s.Align.Set(styles.AlignCenter)
+			// s.Justify.Content = styles.Center // vert
+			// s.Align.Content = styles.Center // horiz
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()
 			// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?

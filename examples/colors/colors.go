@@ -23,7 +23,7 @@ func app() {
 	mfr := win.SetMainFrame()
 
 	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
-	row1.SetProp("vertical-align", styles.AlignMiddle)
+	row1.SetProp("vertical-align", styles.Middle)
 	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()

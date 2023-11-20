@@ -71,8 +71,8 @@ func (fb *FileBrowse) OnInit() {
 			title.Type = gi.LabelHeadlineSmall
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
-				s.Align.X = styles.AlignCenter
-				s.Align.Y = styles.AlignStart
+				s.Align.X = styles.Center
+				s.Align.Y = styles.Start
 			})
 		case "splits":
 			split := w.(*gi.Splits)

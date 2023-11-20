@@ -86,7 +86,7 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 		if !kc.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Align.Y = styles.AlignStart
+		s.Align.Self = styles.Start
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Min.X.Ch(20)

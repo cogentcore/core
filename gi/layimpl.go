@@ -1436,6 +1436,7 @@ func (wb *WidgetBase) SizeFinal(sc *Scene) {
 
 // SizeFinalWidget is the standard Widget SizeFinal pass
 func (wb *WidgetBase) SizeFinalWidget(sc *Scene) {
+	wb.Geom.RelPos.SetZero()
 	sz := &wb.Geom.Size
 	sz.Internal = sz.Actual.Content // keep it before we grow
 	wb.GrowToAlloc(sc)
@@ -1490,6 +1491,7 @@ func (ly *Layout) SizeFinalLay(sc *Scene) {
 		ly.SizeFinalWidget(sc) // behave like a widget
 		return
 	}
+	ly.Geom.RelPos.SetZero()
 	ly.SizeFinalChildren(sc) // kids do their own thing
 	ly.SizeFromChildrenFit(sc, 0, SizeFinalPass)
 	ly.GrowToAlloc(sc)
@@ -1546,13 +1548,23 @@ func (wb *WidgetBase) PositionWidget(sc *Scene) {
 	wb.PositionParts(sc)
 }
 
-func (wb *WidgetBase) PositionWithinAlloc(sc *Scene, allocPos mat32.Vec2) {
+func (wb *WidgetBase) PositionWithinAllocMainX(sc *Scene, pos mat32.Vec2, parJustify, parAlign styles.Aligns) {
 	sz := &wb.Geom.Size
-	pos := wb.Styles.AlignPosInBox(sz.Actual.Total, sz.Alloc.Total).Floor()
-	pos.SetAdd(allocPos)
+	pos.X += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
+	pos.Y += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
 	wb.Geom.RelPos = pos
 	if LayoutTrace {
-		fmt.Println(wb, "allocPos:", allocPos, "pos:", pos)
+		fmt.Println(wb, "Position within Main=X:", pos)
+	}
+}
+
+func (wb *WidgetBase) PositionWithinAllocMainY(sc *Scene, pos mat32.Vec2, parJustify, parAlign styles.Aligns) {
+	sz := &wb.Geom.Size
+	pos.Y += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
+	pos.X += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
+	wb.Geom.RelPos = pos
+	if LayoutTrace {
+		fmt.Println(wb, "Position within Main=Y:", pos)
 	}
 }
 
@@ -1562,10 +1574,10 @@ func (wb *WidgetBase) PositionParts(sc *Scene) {
 	}
 	sz := &wb.Geom.Size
 	pgm := &wb.Parts.Geom
-	pos := wb.Parts.Styles.AlignPosInBox(pgm.Size.Actual.Total, sz.Actual.Content).Floor()
-	pgm.RelPos = pos
+	pgm.RelPos.X = styles.AlignPos(wb.Parts.Styles.Justify.Content, pgm.Size.Actual.Total.X, sz.Actual.Content.X)
+	pgm.RelPos.Y = styles.AlignPos(wb.Parts.Styles.Align.Content, pgm.Size.Actual.Total.Y, sz.Actual.Content.Y)
 	if LayoutTrace {
-		fmt.Println(wb.Parts, "pos:", pos)
+		fmt.Println(wb.Parts, "parts align pos:", pgm.RelPos)
 	}
 	wb.Parts.This().(Widget).Position(sc)
 }
@@ -1590,7 +1602,7 @@ func (ly *Layout) PositionLay(sc *Scene) {
 		return
 	}
 	if ly.Par == nil {
-		ly.PositionWithinAlloc(sc, mat32.Vec2{})
+		ly.PositionWithinAllocMainY(sc, mat32.Vec2{}, ly.Styles.Justify.Items, ly.Styles.Align.Items)
 	}
 	ly.ConfigScrolls(sc) // and configure the scrolls
 	if ly.Styles.Display == styles.Stacked {
@@ -1602,45 +1614,68 @@ func (ly *Layout) PositionLay(sc *Scene) {
 }
 
 func (ly *Layout) PositionCells(sc *Scene) {
+	if ly.Styles.Display == styles.Flex && ly.Styles.Direction == styles.Column {
+		ly.PositionCellsMainY(sc)
+		return
+	}
+	ly.PositionCellsMainX(sc)
+}
+
+// Main axis = X
+func (ly *Layout) PositionCellsMainX(sc *Scene) {
+	// todo: can break apart further into Flex rows
+	gap := ly.LayImpl.Gap
+	sz := &ly.Geom.Size
+	if LayoutTraceDetail {
+		fmt.Println(ly, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
+	}
+	var stPos mat32.Vec2
+	stPos.X = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.X, sz.Alloc.Content.X)
+	stPos.Y = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.Y, sz.Alloc.Content.Y)
+	pos := stPos
+	var lastSz mat32.Vec2
+	idx := 0
+	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		cidx := kwb.Geom.Cell
+		if cidx.X == 0 && idx > 0 {
+			pos.X = stPos.X
+			pos.Y += lastSz.Y + gap.Y
+		}
+		kwb.PositionWithinAllocMainX(sc, pos, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		alloc := kwb.Geom.Size.Alloc.Total
+		pos.X += alloc.X + gap.X
+		lastSz = alloc
+		idx++
+		return ki.Continue
+	})
+}
+
+// Main axis = Y
+func (ly *Layout) PositionCellsMainY(sc *Scene) {
 	gap := ly.LayImpl.Gap
 	sz := &ly.Geom.Size
 	if LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
 	var lastSz mat32.Vec2
-	stPos := ly.Styles.AlignPosInBox(sz.Internal, sz.Alloc.Content).Floor()
-	stPos = stPos.Sub(ly.Geom.RelPos).Max(mat32.Vec2{}) // redundant with any existing
+	var stPos mat32.Vec2
+	stPos.Y = styles.AlignPos(ly.Styles.Justify.Content, sz.Internal.Y, sz.Alloc.Content.Y)
+	stPos.X = styles.AlignPos(ly.Styles.Align.Content, sz.Internal.X, sz.Alloc.Content.X)
 	pos := stPos
 	idx := 0
-	if ly.Styles.Display == styles.Flex && ly.Styles.Direction == styles.Column {
-		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			cidx := kwb.Geom.Cell
-			if cidx.Y == 0 && idx > 0 {
-				pos.Y = stPos.Y
-				pos.X += lastSz.X + gap.X
-			}
-			kwb.PositionWithinAlloc(sc, pos)
-			alloc := kwb.Geom.Size.Alloc.Total
-			pos.Y += alloc.Y + gap.Y
-			lastSz = alloc
-			idx++
-			return ki.Continue
-		})
-	} else {
-		ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-			cidx := kwb.Geom.Cell
-			if cidx.X == 0 && idx > 0 {
-				pos.X = stPos.X
-				pos.Y += lastSz.Y + gap.Y
-			}
-			kwb.PositionWithinAlloc(sc, pos)
-			alloc := kwb.Geom.Size.Alloc.Total
-			pos.X += alloc.X + gap.X
-			lastSz = alloc
-			idx++
-			return ki.Continue
-		})
-	}
+	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		cidx := kwb.Geom.Cell
+		if cidx.Y == 0 && idx > 0 {
+			pos.Y = stPos.Y
+			pos.X += lastSz.X + gap.X
+		}
+		kwb.PositionWithinAllocMainY(sc, pos, ly.Styles.Justify.Items, ly.Styles.Align.Items)
+		alloc := kwb.Geom.Size.Alloc.Total
+		pos.Y += alloc.Y + gap.Y
+		lastSz = alloc
+		idx++
+		return ki.Continue
+	})
 }
 
 func (ly *Layout) PositionWrap(sc *Scene) {

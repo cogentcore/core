@@ -67,7 +67,8 @@ func app() {
 
 	trow := gi.NewLayout(bd, "trow")
 	trow.Style(func(s *styles.Style) {
-		s.Align.X = styles.AlignCenter
+		s.Align.Items = styles.Center
+		s.Align.Content = styles.Center
 	})
 
 	giedsc := keyfun.ChordFor(keyfun.Inspector)
@@ -81,9 +82,8 @@ func app() {
 		See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
-			s.Align.X = styles.AlignCenter
-			s.Text.Align = styles.AlignCenter
-			// s.Text.AlignV = styles.AlignCenter
+			s.Text.Align = styles.Center
+			// s.Text.AlignV = styles.Center
 			s.Font.Family = "Times New Roman, serif"
 		})
 
@@ -113,7 +113,7 @@ func app() {
 		// sc := gi.NewScene(b)
 		// sc.Sides.Bottom = func(par Widget) {
 		// 	brow := gi.NewLayout(par).Style(func(s *styles.Style) {
-		// 		s.Align.X = styles.AlignEnd
+		// 		s.Align.X = styles.End
 		// 	})
 		// 	gi.NewButton(brow).SetText("Cancel").OnClick(func(e events.Event) {
 		// 		sc.Close()
@@ -203,7 +203,7 @@ func app() {
 
 	srow := gi.NewLayout(bd).
 		Style(func(s *styles.Style) {
-			s.Align.Y = styles.AlignCenter
+			s.Align.Items = styles.Center
 			s.Gap.X.Ex(2)
 		})
 
@@ -212,9 +212,8 @@ func app() {
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
-	slider0.Style(func(s *styles.Style) {
-		s.Align.Y = styles.AlignCenter
-	})
+	// slider0.Style(func(s *styles.Style) {
+	// })
 
 	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).
 		SetTracking(true).SetValue(0.5).SetThumbSize(mat32.NewVec2(1, 4))
@@ -227,9 +226,9 @@ func app() {
 	scroll0.OnChange(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
-	scroll0.Style(func(s *styles.Style) {
-		s.Align.Y = styles.AlignCenter
-	})
+	// scroll0.Style(func(s *styles.Style) {
+	// 	s.Align.Y = styles.Center
+	// })
 
 	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
 		SetVisiblePct(.01).SetValue(0).SetMax(3000).

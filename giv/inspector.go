@@ -51,8 +51,7 @@ func (is *Inspector) OnInit() {
 			title.Type = gi.LabelHeadlineSmall
 			title.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
-				s.Align.X = styles.AlignCenter
-				s.Align.Y = styles.AlignStart
+				s.Align.Self = styles.Center
 			})
 		}
 	})

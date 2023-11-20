@@ -148,7 +148,7 @@ func (cv *ColorView) OnInit() {
 			})
 		case "hexlbl":
 			w.Style(func(s *styles.Style) {
-				s.Align.Y = styles.AlignCenter
+				s.Align.Y = styles.Center
 			})
 		case "palette":
 			w.Style(func(s *styles.Style) {

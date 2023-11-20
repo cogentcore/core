@@ -122,8 +122,8 @@ func (sw *Switch) SwitchStyles() {
 		if !sw.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 		}
-		s.Text.Align = styles.AlignStart
-		s.Text.AlignV = styles.AlignCenter
+		s.Text.Align = styles.Start
+		s.Text.AlignV = styles.Center
 		s.Padding.Set(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusSmall
 
@@ -155,8 +155,9 @@ func (sw *Switch) SwitchStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Gap.Zero()
-				s.Align.Y = styles.AlignCenter
-				s.Text.AlignV = styles.AlignCenter
+				s.Align.Content = styles.Center
+				s.Align.Items = styles.Center
+				s.Text.AlignV = styles.Center
 			})
 		case "parts/stack":
 			w.Style(func(s *styles.Style) {
@@ -222,8 +223,7 @@ func (sw *Switch) SwitchStyles() {
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Align.Y = styles.AlignCenter
-				s.Text.AlignV = styles.AlignCenter
+				s.Text.AlignV = styles.Center
 				s.FillMargin = false
 			})
 		}

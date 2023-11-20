@@ -191,7 +191,7 @@ func (sc *Scene) ConfigScene() {
 	}
 	if !sc.Footer.Empty() {
 		foot := NewLayout(sc, "footer").Style(func(s *styles.Style) {
-			s.Align.X = styles.AlignEnd
+			s.Justify.Content = styles.End
 			s.Grow.Set(1, 0)
 		})
 		sc.Footer.Call(foot)
