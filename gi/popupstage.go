@@ -126,7 +126,7 @@ func NewCompleter(sc *Scene, ctx Widget) *PopupStage {
 
 // RunPopup runs a popup-style Stage in context widget's popups.
 func (st *PopupStage) RunPopup() *PopupStage {
-	st.Scene.ConfigScene()
+	st.Scene.ConfigSceneWidgets()
 	mm := st.MainMgr()
 	if mm == nil {
 		slog.Error("popupstage has no MainMgr")

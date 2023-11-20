@@ -108,9 +108,8 @@ func (is *Inspector) EditColorScheme() { //gti:add
 		return
 	}
 
-	sc := gi.NewScene("gogi-color-scheme")
-	sc.Title = "GoGi Color Scheme"
-	sc.Data = &colors.Schemes
+	b := gi.NewBody("gogi-color-scheme")
+	b.Title = "GoGi Color Scheme"
 
 	key := &matcolor.Key{
 		Primary:        colors.FromRGB(123, 135, 122),
@@ -123,23 +122,17 @@ func (is *Inspector) EditColorScheme() { //gti:add
 	p := matcolor.NewPalette(key)
 	schemes := matcolor.NewSchemes(p)
 
-	kv := NewStructView(sc, "kv")
+	kv := NewStructView(b, "kv")
 	kv.SetStruct(key)
-	// kv.Style(func(s *styles.Style) {
-	// 	kv.Grow.Set(1,1)
-	// })
-
-	split := gi.NewSplits(sc, "split")
-	split.Dim = mat32.X
+	split := gi.NewSplits(b, "split")
 
 	svl := NewStructView(split, "svl")
 	svl.SetStruct(&schemes.Light)
-	// svl.Style(func(s *styles.Style) {
-	// 	svl.Grow.Set(1,1)
-	// })
-
 	svd := NewStructView(split, "svd")
 	svd.SetStruct(&schemes.Dark)
+
+	sc := gi.NewScene(b)
+	sc.Data = &colors.Schemes
 
 	kv.OnChange(func(e events.Event) {
 		p = matcolor.NewPalette(key)
@@ -350,17 +343,16 @@ func InspectorDialog(obj ki.Ki) {
 	if gi.ActivateExistingMainWindow(obj) {
 		return
 	}
-	sc := gi.NewScene("inspector")
-	sc.Title = "Inspector"
+	b := gi.NewBody("inspector")
+	b.Title = "Inspector"
 	if obj != nil {
-		sc.Nm += "-" + obj.Name()
-		sc.Title += ": " + obj.Name()
+		b.Nm += "-" + obj.Name()
+		b.Title += ": " + obj.Name()
 	}
-
-	is := NewInspector(sc, "inspector")
+	is := NewInspector(b, "inspector")
 	is.SetRoot(obj)
 
-	sc.TopAppBar = is.TopAppBar
-
+	sc := gi.NewScene(b)
+	// sc.TopAppBar = is.TopAppBar
 	gi.NewWindow(sc).Run()
 }

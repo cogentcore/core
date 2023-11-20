@@ -18,15 +18,12 @@ func PrefsView(pf *gi.Preferences) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}
-	sc := gi.NewScene("gogi-prefs")
-	sc.Title = "GoGi Preferences"
+	b := gi.NewBody("gogi-prefs")
+	b.Title = "GoGi Preferences"
+	sc := gi.NewScene(b)
 	sc.Data = pf
-
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
-
+	sc.Header.Add(func(par gi.Widget) {
+		tb := sc.TopAppBar(par)
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
 		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
@@ -51,51 +48,13 @@ func PrefsView(pf *gi.Preferences) {
 			NewFuncButton(m, pf.Delete).SetConfirm(true)
 			NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 		})
-	}
-
-	sv := NewStructView(sc)
+	})
+	sv := NewStructView(b)
 	sv.SetStruct(pf)
 	sv.OnChange(func(e events.Event) {
 		pf.Apply()
 		pf.Save()
 	})
-
-	/*
-		mmen := win.MainMenu
-		MainMenuView(pf, win, mmen)
-
-		inClosePrompt := false
-		win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-			if !pf.Changed {
-				win.Close()
-				return
-			}
-			if inClosePrompt {
-				return
-			}
-			inClosePrompt = true
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
-				Prompt: "Do you want to save any changes to preferences before closing?"},
-				[]string{"Cancel", "Discard and Close", "Save and Close"},
-				func(dlg *gi.Dialog) {
-					switch sig {
-					case 0:
-						inClosePrompt = false
-						// default is to do nothing, i.e., cancel
-					case 1:
-						pf.Open() // if we don't do this, then it actually remains in edited state
-						win.Close()
-					case 2:
-						pf.Save()
-						fmt.Println("Preferences Saved to prefs.json")
-						win.Close()
-					}
-				})
-		})
-
-		win.MainMenuUpdated()
-	*/
-
 	gi.NewWindow(sc).Run()
 }
 
@@ -105,16 +64,15 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		return
 	}
 
-	sc := gi.NewScene("gogi-prefs-det").SetTitle("GoGi Detailed Preferences").SetData(pf)
+	b := gi.NewBody("gogi-prefs-det").SetTitle("GoGi Detailed Preferences")
 
-	sv := NewStructView(sc, "sv")
+	sv := NewStructView(b, "sv")
 	sv.SetStruct(pf)
 
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
+	sc := gi.NewScene(b).SetData(pf)
 
+	sc.Header.Add(func(par gi.Widget) {
+		tb := sc.TopAppBar(par)
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
 		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
@@ -124,42 +82,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		tb.AddOverflowMenu(func(m *gi.Scene) {
 			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 		})
-	}
-
-	/*
-		mmen := win.MainMenu
-		MainMenuView(pf, win, mmen)
-
-		inClosePrompt := false
-		win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-			if !pf.Changed {
-				win.Close()
-				return
-			}
-			if inClosePrompt {
-				return
-			}
-			inClosePrompt = true
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
-				Prompt: "Do you want to save any changes to detailed preferences before closing?"},
-				[]string{"Save and Close", "Discard and Close", "Cancel"},
-				func(dlg *gi.Dialog) {
-					switch sig {
-					case 0:
-						pf.Save()
-						fmt.Println("Preferences Saved to prefs_det.json")
-						win.Close()
-					case 1:
-						pf.Open() // if we don't do this, then it actually remains in edited state
-						win.Close()
-					case 2:
-						inClosePrompt = false
-						// default is to do nothing, i.e., cancel
-					}
-				})
-		})
-		win.MainMenuUpdated()
-	*/
+	})
 
 	gi.NewWindow(sc).Run()
 }
@@ -169,20 +92,19 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}
-	sc := gi.NewScene("gogi-prefs-dbg")
-	sc.Title = "GoGi Debugging Preferences"
-	sc.Data = pf
+	b := gi.NewBody("gogi-prefs-dbg")
+	b.Title = "GoGi Debugging Preferences"
 
-	sv := NewStructView(sc, "sv")
+	sv := NewStructView(b, "sv")
 	sv.SetStruct(pf)
 
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
+	sc := gi.NewScene(b)
+	sc.Data = pf
 
+	sc.Header.Add(func(par gi.Widget) {
+		tb := sc.TopAppBar(par)
 		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
-	}
+	})
 
 	gi.NewWindow(sc).Run()
 }

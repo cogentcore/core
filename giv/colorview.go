@@ -593,7 +593,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetIcon(icons.Colors)
 	bt.Tooltip = "Open color picker dialog"
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	bt.Style(func(s *styles.Style) {
 		clr, _ := vv.Color()
@@ -612,7 +612,7 @@ func (vv *ColorValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *ColorValue) OpenDialog(ctx gi.Widget) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -624,16 +624,18 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	d := gi.NewBody(ctx).AddTitle("Edit color").AddText(vv.Doc())
+	d := gi.NewBody().AddTitle("Edit color").AddText(vv.Doc())
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
-	d.OnAccept(func(e events.Event) {
-		cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
-		vv.SetColor(*cclr)
-		vv.UpdateWidget()
-		if fun != nil {
-			fun(d)
-		}
-	}).Cancel().Ok().Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
+			vv.SetColor(*cclr)
+			vv.UpdateWidget()
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -673,7 +675,7 @@ func (vv *ColorNameValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -682,7 +684,7 @@ func (vv *ColorNameValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *ColorNameValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
@@ -707,15 +709,17 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		}
 	}
 	si := 0
-	d := gi.NewBody(ctx).AddTitle("Select a Color Name").AddText(vv.Doc()).FullWindow(true)
-	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			vv.SetValue(sl[si].Name)
-			vv.UpdateWidget()
-		}
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	d := gi.NewBody().AddTitle("Select a Color Name").AddText(vv.Doc())
+	sc := gi.NewScene(d)
+	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				vv.SetValue(sl[si].Name)
+				vv.UpdateWidget()
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }

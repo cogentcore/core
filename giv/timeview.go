@@ -354,13 +354,18 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 	dt := gi.NewTextField(ly, "date").SetTooltip("The date").
 		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
-			d := gi.NewBody(w).AddTitle("Select date")
+			d := gi.NewBody().AddTitle("Select date")
 			NewDateView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
-			d.OnAccept(func(e events.Event) {
-				tt := vv.TmpSave.Val().Interface().(time.Time)
-				vv.SetValue(tt)
-				vv.UpdateWidget()
-			}).Cancel().Ok().Run()
+			sc := gi.NewScene(d)
+			sc.Footer.Add(func(par gi.Widget) {
+				sc.AddCancel(par)
+				sc.AddOk(par).OnClick(func(e events.Event) {
+					tt := vv.TmpSave.Val().Interface().(time.Time)
+					vv.SetValue(tt)
+					vv.UpdateWidget()
+				})
+			})
+			gi.NewDialog(sc).SetContext(w).Run()
 		})
 	dt.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
@@ -382,13 +387,18 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
 		SetLeadingIcon(icons.Schedule, func(e events.Event) {
-			d := gi.NewBody(w).AddTitle("Edit time")
+			d := gi.NewBody().AddTitle("Edit time")
 			NewTimeView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
-			d.OnAccept(func(e events.Event) {
-				tt := vv.TmpSave.Val().Interface().(time.Time)
-				vv.SetValue(tt)
-				vv.UpdateWidget()
-			}).Cancel().Ok().Run()
+			sc := gi.NewScene(d)
+			sc.Footer.Add(func(par gi.Widget) {
+				sc.AddCancel(par)
+				sc.AddOk(par).OnClick(func(e events.Event) {
+					tt := vv.TmpSave.Val().Interface().(time.Time)
+					vv.SetValue(tt)
+					vv.UpdateWidget()
+				})
+			})
+			gi.NewDialog(sc).SetContext(w).Run()
 		})
 	tm.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)

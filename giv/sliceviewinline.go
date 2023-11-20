@@ -84,13 +84,18 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 					title = "Slice of " + laser.NonPtrType(elType).Name()
 				}
-				d := gi.NewBody(sv).AddTitle(title).FullWindow(true)
+				d := gi.NewBody().AddTitle(title)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice).SetTmpSave(sv.TmpSave)
-				d.OnAccept(func(e events.Event) {
-					if sv.SliceValView != nil { // todo: this is not updating
-						sv.SliceValView.UpdateWidget()
-					}
-				}).Run()
+				sc := gi.NewScene(d)
+				sc.Footer.Add(func(par gi.Widget) {
+					sc.AddCancel(par)
+					sc.AddOk(par).OnClick(func(e events.Event) {
+						if sv.SliceValView != nil { // todo: this is not updating
+							sv.SliceValView.UpdateWidget()
+						}
+					})
+				})
+				gi.NewDialog(sc).SetContext(sv).SetFullWindow(true).Run()
 			})
 		}
 	})

@@ -37,14 +37,17 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
+	bd := gi.NewBody("widgets").SetTitle("GoGi Widgets Demo")
 
 	// gi.DefaultTopAppBar = nil // turns it off
 
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
+	sc := gi.NewScene(bd)
+
+	sc.Header.Add(func(par gi.Widget) {
+		tb := sc.TopAppBar(par)
+		// if gi.DefaultTopAppBar != nil {
+		// 	gi.DefaultTopAppBar(tb)
+		// }
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
 			OnClick(func(e events.Event) {
 				fmt.Println("TopAppBar Button 1")
@@ -60,9 +63,9 @@ func app() {
 			OnClick(func(e events.Event) {
 				fmt.Println("TopAppBar Button 2")
 			})
-	}
+	})
 
-	trow := gi.NewLayout(sc, "trow")
+	trow := gi.NewLayout(bd, "trow")
 	trow.Style(func(s *styles.Style) {
 		s.Align.X = styles.AlignCenter
 	})
@@ -87,10 +90,10 @@ func app() {
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(sc)
-	gi.NewLabel(sc).SetText("Buttons:")
+	gi.NewSpace(bd)
+	gi.NewLabel(bd).SetText("Buttons:")
 
-	brow := gi.NewLayout(sc, "brow").
+	brow := gi.NewLayout(bd, "brow").
 		Style(func(s *styles.Style) {
 			s.Gap.X.Em(1)
 		})
@@ -128,7 +131,7 @@ func app() {
 			d.AddOk(par).OnClick(func(e events.Event) {
 			})
 		})
-		gi.NewDialog(sc).SetContext(b1).SetModal(true).Run() // note: NewDialog returns Stage
+		gi.NewDialog(d).SetContext(b1).Run() // note: NewDialog returns Stage
 
 		// d := gi.NewDialog(b1).AddTitle("Test Dialog").AddText("This is a prompt").
 		// 	Modal(true).Cancel().Ok().
@@ -145,18 +148,16 @@ func app() {
 	button2.OnClick(func(e events.Event) {
 		txt := ""
 
-		b := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")
-		giv.NewValue(b, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
-
-		d.Cancel().Ok().OnAccept(func(e events.Event) {
-			fmt.Println("dialog accepted; string entered:", txt)
-		}).Run()
-
-		d := gi.NewDialog(button2).AddTitle("What is it?").AddText("Please enter your response:")
+		d := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")
 		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
-		d.Cancel().Ok().OnAccept(func(e events.Event) {
-			fmt.Println("dialog accepted; string entered:", txt)
-		}).Run()
+		sc := gi.NewScene(d)
+		sc.Footer.Add(func(par gi.Widget) {
+			sc.AddCancel(par)
+			sc.AddOk(par).OnClick(func(e events.Event) {
+				fmt.Println("dialog accepted; string entered:", txt)
+			})
+		})
+		gi.NewDialog(sc).SetContext(button2).Run()
 	})
 
 	toggle := gi.NewSwitch(brow).SetText("Toggle")
@@ -197,10 +198,10 @@ func app() {
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.NewSpace(sc)
-	gi.NewLabel(sc).SetText("Sliders:")
+	gi.NewSpace(bd)
+	gi.NewLabel(bd).SetText("Sliders:")
 
-	srow := gi.NewLayout(sc).
+	srow := gi.NewLayout(bd).
 		Style(func(s *styles.Style) {
 			s.Align.Y = styles.AlignCenter
 			s.Gap.X.Ex(2)
@@ -240,9 +241,9 @@ func app() {
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewLabel(sc).SetText("Text Widgets:")
+	gi.NewLabel(bd).SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(sc).
+	txrow := gi.NewLayout(bd).
 		Style(func(s *styles.Style) {
 			s.Gap.X.Ex(2)
 		})

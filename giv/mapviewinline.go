@@ -82,11 +82,16 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 					// 	tynm = tmptyp.String()
 					// }
 				}
-				d := gi.NewBody(mv).AddTitle(title).AddText(mv.Tooltip).FullWindow(true)
+				d := gi.NewBody().AddTitle(title).AddText(mv.Tooltip)
 				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map).SetTmpSave(mv.TmpSave)
-				d.OnAccept(func(e events.Event) {
-					mv.SendChange()
-				}).Run()
+				sc := gi.NewScene(d)
+				sc.Footer.Add(func(par gi.Widget) {
+					sc.AddCancel(par)
+					sc.AddOk(par).OnClick(func(e events.Event) {
+						mv.SendChange()
+					})
+				})
+				gi.NewDialog(sc).SetContext(mv).SetFullWindow(true).Run()
 			})
 		}
 	})

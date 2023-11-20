@@ -260,18 +260,23 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewBody(tv).AddTitle(actNm).AddText("Number and Type of Items to Insert:")
+	d := gi.NewBody().AddTitle(actNm).AddText("Number and Type of Items to Insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
-	d.Cancel().Ok().OnAccept(func(e events.Event) {
-		par := AsTreeView(tv.Par)
-		if tv.SyncNode != nil {
-			par.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
-		} else {
-			par.AddTreeNodes(rel, myidx, nd.Type, nd.Number)
-		}
-	}).Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			par := AsTreeView(tv.Par)
+			if tv.SyncNode != nil {
+				par.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
+			} else {
+				par.AddTreeNodes(rel, myidx, nd.Type, nd.Number)
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(tv).Run()
 }
 
 // AddChildNode adds a new child node to this one in the tree,
@@ -283,17 +288,22 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewBody(tv).AddTitle(ttl).AddText("Number and Type of Items to Add:")
+	d := gi.NewBody().AddTitle(ttl).AddText("Number and Type of Items to Add:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
-	d.Cancel().Ok().OnAccept(func(e events.Event) {
-		if tv.SyncNode != nil {
-			tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
-		} else {
-			tv.AddTreeNodes(0, 0, nd.Type, nd.Number)
-		}
-	}).Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if tv.SyncNode != nil {
+				tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
+			} else {
+				tv.AddTreeNodes(0, 0, nd.Type, nd.Number)
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(tv).Run()
 }
 
 // DeleteNode deletes the tree node or sync node corresponding
@@ -388,14 +398,16 @@ func (tv *TreeView) DuplicateSync() {
 func (tv *TreeView) EditNode() { //gti:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.KiType().Name
-		d := gi.NewBody(tv).AddTitle(tynm).FullWindow(true)
+		d := gi.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.SyncNode)
-		d.Run()
+		sc := gi.NewScene(d)
+		gi.NewDialog(sc).SetContext(tv).SetFullWindow(true).Run()
 	} else {
 		tynm := tv.KiType().Name
-		d := gi.NewBody(tv).AddTitle(tynm).FullWindow(true)
+		d := gi.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.This())
-		d.Run()
+		sc := gi.NewScene(d)
+		gi.NewDialog(sc).SetContext(tv).SetFullWindow(true).Run()
 	}
 }
 

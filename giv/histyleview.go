@@ -7,7 +7,6 @@ package giv
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/histyle"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -48,7 +47,7 @@ func (vv *HiStyleValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -57,24 +56,26 @@ func (vv *HiStyleValue) HasDialog() bool {
 	return true
 }
 
-func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *HiStyleValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
-	d := gi.NewBody(ctx).AddTitle("Select a HiStyle Highlighting Style").AddText(vv.Doc()).FullWindow(true)
-	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			hs := histyle.StyleNames[si]
-			vv.SetValue(hs)
-			vv.UpdateWidget()
-		}
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	d := gi.NewBody().AddTitle("Select a HiStyle Highlighting Style").AddText(vv.Doc())
+	sc := gi.NewScene(d)
+	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				hs := histyle.StyleNames[si]
+				vv.SetValue(hs)
+				vv.UpdateWidget()
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -86,68 +87,23 @@ func HiStylesView(st *histyle.Styles) {
 		return
 	}
 
-	sc := gi.NewScene("hi-styles")
-	sc.Title = "Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards."
-	sc.Data = st
-
-	title := gi.NewLabel(sc, "title").SetText(sc.Title)
-	title.Style(func(s *styles.Style) {
-		s.Min.X.Ch(30) // need for wrap
-		s.Grow.Set(1, 0)
-		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
-	})
-
-	mv := NewMapView(sc).SetMap(st)
-
+	b := gi.NewBody("hi-styles")
+	b.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
+	mv := NewMapView(b).SetMap(st)
 	histyle.StylesChanged = false
 	mv.OnChange(func(e events.Event) {
 		histyle.StylesChanged = true
 	})
-
+	sc := gi.NewScene(b)
+	sc.Data = st
 	sc.Header.Add(func(par gi.Widget) {
+		tb := sc.TopAppBar(par)
 		oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")
 		sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 		sj.Args[0].SetTag(".ext", ".histy")
 		gi.NewSeparator(tb)
 		mv.MapDefaultTopAppBar(tb)
-	}
-
-	// mmen := win.MainMenu
-	// MainMenuView(st, win, mmen)
-
-	// todo: close prompt
-	/*
-		inClosePrompt := false
-		win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-			if !histyle.StylesChanged || st != &histyle.CustomStyles { // only for main avail map..
-				win.Close()
-				return
-			}
-			if inClosePrompt {
-				return
-			}
-			inClosePrompt = true
-			gi.ChoiceDialog(sc, gi.DlgOpts{Title: "Save Styles Before Closing?",
-				Prompt: "Do you want to save any changes to std preferences styles file before closing, or Cancel the close and do a Save to a different file?"},
-				[]string{"Save and Close", "Discard and Close", "Cancel"}, func(dlg *gi.Dialog) {
-					switch sig {
-					case 0:
-						st.SavePrefs()
-						fmt.Printf("Preferences Saved to %v\n", histyle.PrefsStylesFileName)
-						win.Close()
-					case 1:
-						st.OpenPrefs() // revert
-						win.Close()
-					case 2:
-						inClosePrompt = false
-						// default is to do nothing, i.e., cancel
-					}
-				})
-		})
-
-		win.MainMenuUpdated()
-	*/
-
+	})
 	gi.NewWindow(sc).Run() // todo: should be a dialog instead?
 }

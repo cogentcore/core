@@ -173,7 +173,7 @@ type Value interface {
 	// for opening the dialog, and function is called with the the relevant dialog,
 	// so that the caller can execute its own actions based on the user
 	// hitting Ok or Cancel.
-	OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog))
+	OpenDialog(ctx gi.Widget)
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -482,7 +482,7 @@ func (vv *ValueBase) HasDialog() bool {
 	return false
 }
 
-func (vv *ValueBase) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *ValueBase) OpenDialog(ctx gi.Widget) {
 }
 
 func (vv *ValueBase) Val() reflect.Value {
@@ -536,17 +536,20 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && !laser.ValueIsZero(curnv) {
 			// actually new key and current exists
-			gi.NewBody(vv.Widget).AddTitle("Map Key Conflict").
-				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val)).
-				Cancel("Cancel change").Ok("Overwrite").
-				OnAccept(func(e events.Event) {
+			d := gi.NewScene(gi.NewBody().AddTitle("Map Key Conflict").
+				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val)))
+			d.Footer.Add(func(par gi.Widget) {
+				d.AddCancel(par).SetText("Cancel change")
+				d.AddOk(par).SetText("Overwrite").OnClick(func(e events.Event) {
 					cv := ov.MapIndex(kv)               // get current value
 					ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 					ov.SetMapIndex(nv, cv)              // set new key to current value
 					vv.Value = nv                       // update value to new key
 					vv.SaveTmp()
 					vv.SendChange()
-				}).Run()
+				})
+			})
+			gi.NewDialog(d).SetContext(vv.Widget).Run()
 			return false, nil // abort this action right now
 		}
 		ov.SetMapIndex(kv, reflect.Value{}) // delete old key

@@ -896,14 +896,19 @@ func (fv *FileView) EditPaths() {
 	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	d := gi.NewBody(fv).AddTitle("Recent file paths").AddText("Delete paths you no longer use").FullWindow(true)
+	d := gi.NewBody().AddTitle("Recent file paths").AddText("Delete paths you no longer use")
 	NewSliceView(d).SetSlice(&tmp).SetFlag(true, SliceViewNoAdd)
-	d.Cancel().Ok().OnAccept(func(e events.Event) {
-		gi.SavedPaths = nil
-		gi.SavedPaths = append(gi.SavedPaths, tmp...)
-		// add back the reset/edit menu items
-		gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
-		gi.SavePaths()
-		fv.UpdateFiles()
-	}).Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			gi.SavedPaths = nil
+			gi.SavedPaths = append(gi.SavedPaths, tmp...)
+			// add back the reset/edit menu items
+			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
+			gi.SavePaths()
+			fv.UpdateFiles()
+		})
+	})
+	gi.NewDialog(sc).SetContext(fv).SetFullWindow(true).Run()
 }

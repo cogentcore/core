@@ -415,14 +415,14 @@ func (sv *SliceViewBase) IsNil() bool {
 
 // BindSelectDialog makes the slice view a read-only selection slice view and then
 // binds its events to the given dialog and its current selection index to the given value.
-func (sv *SliceViewBase) BindSelectDialog(d *gi.Dialog, val *int) *SliceViewBase {
+func (sv *SliceViewBase) BindSelectDialog(sc *gi.Scene, val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.SelIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		*val = sv.SelIdx
-		d.AcceptDialog()
+		sc.Close()
 	})
 	return sv
 }
@@ -805,19 +805,24 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vvb := sv.SliceValView.AsValueBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				d := gi.NewBody(sv).AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
+				d := gi.NewBody().AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
 				ki.ChildByType[*gi.Chooser](w, true).SetTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true, 50)
-				d.Cancel().Ok().OnAccept(func(e events.Event) {
-					updt := ownki.UpdateStart()
-					for i := 0; i < nd.Number; i++ {
-						nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
-						ownki.InsertNewChild(nd.Type, idx+1+i, nm)
-					}
-					sv.SetChanged()
-					ownki.UpdateEnd(updt)
-				}).Run()
+				sc := gi.NewScene(d)
+				sc.Footer.Add(func(par gi.Widget) {
+					sc.AddCancel(par)
+					sc.AddOk(par).OnClick(func(e events.Event) {
+						updt := ownki.UpdateStart()
+						for i := 0; i < nd.Number; i++ {
+							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
+							ownki.InsertNewChild(nd.Type, idx+1+i, nm)
+						}
+						sv.SetChanged()
+						ownki.UpdateEnd(updt)
+					})
+				})
+				gi.NewDialog(sc).SetContext(sv).Run()
 			}
 		}
 	} else {

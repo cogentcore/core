@@ -490,7 +490,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 
 	sc.SetFlag(true, ScPrefSizing)
 	sc.SceneGeom.Size = initSz
-	sc.ConfigScene()
+	sc.ConfigSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
 	sz := &sc.Geom.Size

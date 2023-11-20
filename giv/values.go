@@ -410,7 +410,7 @@ func (vv *StructValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -419,7 +419,7 @@ func (vv *StructValue) HasButton() bool {
 	return true
 }
 
-func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *StructValue) OpenDialog(ctx gi.Widget) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -431,19 +431,21 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if gi.RecycleDialog(stru) {
 		return
 	}
-	d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
+	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
-	d.TopAppBar = gi.TopAppBarFor(stru)
-	if d.TopAppBar == nil {
-		d.TopAppBar = gi.DefaultTopAppBar
-	}
-	d.OnAccept(func(e events.Event) {
-		vv.UpdateWidget()
-		vv.SendChange()
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	sc := gi.NewScene(d)
+	// d.TopAppBar = gi.TopAppBarFor(stru)
+	// if d.TopAppBar == nil {
+	// 	d.TopAppBar = gi.DefaultTopAppBar
+	// }
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
+		})
+	})
+	gi.NewDialog(sc).SetContext(vv.Widget).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -553,7 +555,7 @@ func (vv *SliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -562,7 +564,7 @@ func (vv *SliceValue) HasButton() bool {
 	return true
 }
 
-func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *SliceValue) OpenDialog(ctx gi.Widget) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -576,41 +578,47 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
+		d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 		tv := NewTableView(d).SetSlice(slci)
 		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-		d.TopAppBar = gi.TopAppBarFor(slci)
-		if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
-			d.TopAppBar = func(tb *gi.TopAppBar) {
-				gi.DefaultTopAppBar(tb)
-				tv.SliceDefaultTopAppBar(tb)
-			}
-		}
-		d.OnAccept(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
-			if fun != nil {
-				fun(d)
-			}
-		}).Run()
+		sc := gi.NewScene(d)
+		sc.Header.Add(func(par gi.Widget) {
+			tb := sc.TopAppBar(par)
+			// d.TopAppBar = gi.TopAppBarFor(slci)
+			// if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
+			// 	d.TopAppBar = func(tb *gi.TopAppBar) {
+			// 	gi.DefaultTopAppBar(tb)
+			tv.SliceDefaultTopAppBar(tb)
+		})
+		sc.Footer.Add(func(par gi.Widget) {
+			sc.AddCancel(par)
+			sc.AddOk(par).OnClick(func(e events.Event) {
+				vv.UpdateWidget()
+				vv.SendChange()
+			})
+		})
+		gi.NewDialog(sc).SetContext(vv.Widget).Run()
 	} else {
-		d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
+		d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 		sv := NewSliceView(d).SetSlice(slci)
 		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-		d.TopAppBar = gi.TopAppBarFor(slci)
-		if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
-			d.TopAppBar = func(tb *gi.TopAppBar) {
-				gi.DefaultTopAppBar(tb)
-				sv.SliceDefaultTopAppBar(tb)
-			}
-		}
-		d.OnAccept(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
-			if fun != nil {
-				fun(d)
-			}
-		}).Run()
+		sc := gi.NewScene(d)
+		sc.Header.Add(func(par gi.Widget) {
+			tb := sc.TopAppBar(par)
+			// d.TopAppBar = gi.TopAppBarFor(slci)
+			// if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
+			// 	d.TopAppBar = func(tb *gi.TopAppBar) {
+			// gi.DefaultTopAppBar(tb)
+			sv.SliceDefaultTopAppBar(tb)
+		})
+		sc.Footer.Add(func(par gi.Widget) {
+			sc.AddCancel(par)
+			sc.AddOk(par).OnClick(func(e events.Event) {
+				vv.UpdateWidget()
+				vv.SendChange()
+			})
+		})
+		gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
 	}
 }
 
@@ -710,7 +718,7 @@ func (vv *MapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -719,7 +727,7 @@ func (vv *MapValue) HasButton() bool {
 	return true
 }
 
-func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *MapValue) OpenDialog(ctx gi.Widget) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -727,15 +735,17 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	mpi := vv.Value.Interface()
 	readOnly := vv.IsReadOnly()
-	d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
+	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 	NewMapView(d).SetMap(mpi).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-	d.OnAccept(func(e events.Event) {
-		vv.UpdateWidget()
-		vv.SendChange()
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
+		})
+	})
+	gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -845,7 +855,7 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			k := vv.KiStruct()
 			if k != nil {
 				bt := vv.Widget.(*gi.Button)
-				vv.OpenDialog(bt, nil)
+				vv.OpenDialog(bt)
 			}
 		})
 		gi.NewButton(m, "gogi-editor").SetText("Inspector").OnClick(func(e events.Event) {
@@ -863,7 +873,7 @@ func (vv *KiPtrValue) HasButton() bool {
 	return true
 }
 
-func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *KiPtrValue) OpenDialog(ctx gi.Widget) {
 	title, newPath, isZero := vv.GetTitle()
 	if isZero {
 		return
@@ -874,15 +884,17 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	readOnly := vv.IsReadOnly()
-	d := gi.NewBody(ctx).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
+	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-	d.OnAccept(func(e events.Event) {
-		vv.UpdateWidget()
-		vv.SendChange()
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1511,7 +1523,7 @@ func (vv *IconValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -1520,28 +1532,29 @@ func (vv *IconValue) HasDialog() bool {
 	return true
 }
 
-func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *IconValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
 	si := 0
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	d := gi.NewBody(ctx).AddTitle("Select an icon").AddText(vv.Doc()).FullWindow(true)
+	d := gi.NewBody().AddTitle("Select an icon").AddText(vv.Doc())
+	sc := gi.NewScene(d)
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(string(ics[row]))
-	}).
-		SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			ic := icons.AllIcons[si]
-			vv.SetValue(ic)
-			vv.UpdateWidget()
-		}
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				ic := icons.AllIcons[si]
+				vv.SetValue(ic)
+				vv.UpdateWidget()
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1579,7 +1592,7 @@ func (vv *FontValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget, nil)
+		vv.OpenDialog(vv.Widget)
 	})
 	vv.UpdateWidget()
 }
@@ -1591,7 +1604,7 @@ func (vv *FontValue) HasDialog() bool {
 // show fonts in a bigger size so you can actually see the differences
 var FontChooserSize = units.Pt(18)
 
-func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *FontValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
@@ -1601,7 +1614,8 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
-	d := gi.NewBody(ctx).AddTitle("Select a Font").AddText(vv.Doc()).FullWindow(true)
+	d := gi.NewBody().AddTitle("Select a Font").AddText(vv.Doc())
+	sc := gi.NewScene(d)
 	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
@@ -1611,17 +1625,18 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
 		s.Font.Size = FontChooserSize
-	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			fi := paint.FontLibrary.FontInfo[si]
-			vv.SetValue(fi.Name)
-			vv.UpdateWidget()
-		}
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				fi := paint.FontLibrary.FontInfo[si]
+				vv.SetValue(fi.Name)
+				vv.UpdateWidget()
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1663,7 +1678,7 @@ func (vv *FileValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.OnClick(func(e events.Event) {
 		bt := vv.Widget.(*gi.Button)
 		// e.SetHandled()
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -1672,29 +1687,31 @@ func (vv *FileValue) HasDialog() bool {
 	return true
 }
 
-func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *FileValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	d := gi.NewBody(ctx).AddTitle(vv.Name()).AddText(vv.Doc()).FullWindow(true)
+	d := gi.NewBody().AddTitle(vv.Name()).AddText(vv.Doc())
+	sc := gi.NewScene(d)
 	fv := NewFileView(d).SetFilename(cur, ext)
 	fv.OnSelect(func(e events.Event) {
 		cur = fv.SelectedFile()
 	}).OnDoubleClick(func(e events.Event) {
 		if fv.SelectedDoubleClick {
 			cur = fv.SelectedFile()
-			d.AcceptDialog()
+			sc.Close()
 		}
 	})
-	d.Cancel().Ok().OnAccept(func(e events.Event) {
-		vv.SetValue(cur)
-		vv.UpdateWidget()
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			vv.SetValue(cur)
+			vv.UpdateWidget()
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1773,7 +1790,7 @@ func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget, nil)
+		vv.OpenDialog(vv.Widget)
 	})
 	vv.UpdateWidget()
 }
@@ -1782,7 +1799,7 @@ func (vv *VersCtrlValue) HasDialog() bool {
 	return true
 }
 
-func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}

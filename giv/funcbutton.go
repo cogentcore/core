@@ -234,32 +234,44 @@ func (fb *FuncButton) CallFunc() {
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		gi.NewBody(ctx).AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
-			OnAccept(func(e events.Event) {
+		d := gi.NewScene(gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip))
+		d.Footer.Add(func(par gi.Widget) {
+			d.AddCancel(par)
+			d.AddOk(par).OnClick(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(nil)
 				fb.ShowReturnsDialog(rets)
-			}).Run()
+			})
+		})
+		gi.NewDialog(d).SetContext(ctx).Run()
 		return
 	}
-	d := gi.NewBody(ctx).AddTitle(fb.Text).AddText(fb.Tooltip)
+	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Args)
-	d.Cancel().Ok().OnAccept(func(e events.Event) {
-		rargs := make([]reflect.Value, len(fb.Args))
-		for i, arg := range fb.Args {
-			rargs[i] = laser.NonPtrValue(arg.Val())
-		}
-
-		if !fb.Confirm {
-			rets := fb.ReflectFunc.Call(rargs)
-			fb.ShowReturnsDialog(rets)
-			return
-		}
-		gi.NewBody(ctx).AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
-			OnAccept(func(e events.Event) {
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			rargs := make([]reflect.Value, len(fb.Args))
+			for i, arg := range fb.Args {
+				rargs[i] = laser.NonPtrValue(arg.Val())
+			}
+			if !fb.Confirm {
 				rets := fb.ReflectFunc.Call(rargs)
 				fb.ShowReturnsDialog(rets)
-			}).Run()
-	}).Run()
+				return
+			}
+			d := gi.NewScene(gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip))
+			d.Footer.Add(func(par gi.Widget) {
+				d.AddCancel(par)
+				d.AddOk(par).OnClick(func(e events.Event) {
+					rets := fb.ReflectFunc.Call(rargs)
+					fb.ShowReturnsDialog(rets)
+				})
+			})
+			gi.NewDialog(d).SetContext(ctx).Run()
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).Run()
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
@@ -305,9 +317,16 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if fb.Context == nil {
 		ctx = fb.This().(gi.Widget)
 	}
-	d := gi.NewBody(ctx).AddTitle(main).AddText(fb.Tooltip)
+	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
-	d.Ok().Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			// todo: do something with the args?
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).Run()
 }
 
 // SetArgs sets the appropriate [Value] objects for the

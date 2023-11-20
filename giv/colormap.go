@@ -62,16 +62,20 @@ func (cv *ColorMapView) ChooseColorMap() {
 		cur = cv.Map.Name
 	}
 	si := 0
-	d := gi.NewBody(cv).AddTitle("Select a color map").AddText("Choose color map to use from among available list").FullWindow(true)
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			nmap, ok := colormap.AvailMaps[sl[si]]
-			if ok {
-				cv.SetColorMapAction(nmap)
+	d := gi.NewBody().AddTitle("Select a color map").AddText("Choose color map to use from among available list")
+	sc := gi.NewScene(d)
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				nmap, ok := colormap.AvailMaps[sl[si]]
+				if ok {
+					cv.SetColorMapAction(nmap)
+				}
 			}
-		}
-	}).Run()
+		})
+	})
+	gi.NewDialog(sc).SetContext(cv).SetFullWindow(true).Run()
 }
 
 func (cv *ColorMapView) HandleColorMapEvents() {
@@ -174,7 +178,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget, nil)
+		vv.OpenDialog(vv.Widget)
 	})
 	vv.UpdateWidget()
 }
@@ -183,7 +187,7 @@ func (vv *ColorMapValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ColorMapValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
@@ -191,15 +195,17 @@ func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	cur := laser.ToString(vv.Value.Interface())
 
 	si := 0
-	d := gi.NewBody(ctx).AddTitle("Select a color map").AddText(vv.Doc()).FullWindow(true)
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			vv.SetValue(sl[si])
-			vv.UpdateWidget()
-		}
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	d := gi.NewBody().AddTitle("Select a color map").AddText(vv.Doc())
+	sc := gi.NewScene(d)
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				vv.SetValue(sl[si])
+				vv.UpdateWidget()
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }

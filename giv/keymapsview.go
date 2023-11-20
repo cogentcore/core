@@ -18,24 +18,18 @@ func KeyMapsView(km *keyfun.Maps) {
 	if gi.ActivateExistingMainWindow(km) {
 		return
 	}
-	sc := gi.NewScene("gogi-key-maps")
-	sc.Title = "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map"
-	sc.Data = km
-
-	gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)
-
-	tv := NewTableView(sc).SetSlice(km)
-
+	b := gi.NewBody("gogi-key-maps")
+	b.AddTitle("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
+	tv := NewTableView(b).SetSlice(km)
 	keyfun.AvailMapsChanged = false
 	tv.OnChange(func(e events.Event) {
 		keyfun.AvailMapsChanged = true
 	})
 
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
-
+	sc := gi.NewScene(b)
+	sc.Data = km
+	sc.Header.Add(func(par gi.Widget) {
+		tb := sc.TopAppBar(par)
 		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)
 		sp.SetUpdateFunc(func() {
 			sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
@@ -56,7 +50,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		tb.AddOverflowMenu(func(m *gi.Scene) {
 			NewFuncButton(m, km.OpenPrefs).SetIcon(icons.Open).SetKey(keyfun.OpenAlt1)
 		})
-	}
+	})
 
 	gi.NewWindow(sc).Run()
 }
@@ -102,7 +96,7 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt, nil)
+		vv.OpenDialog(bt)
 	})
 	vv.UpdateWidget()
 }
@@ -111,23 +105,25 @@ func (vv *KeyMapValue) HasDialog() bool {
 	return true
 }
 
-func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
+func (vv *KeyMapValue) OpenDialog(ctx gi.Widget) {
 	if vv.IsReadOnly() {
 		return
 	}
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	d := gi.NewBody(ctx).AddTitle("Select a key map").AddText(vv.Doc()).FullWindow(true)
-	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(d, &si)
-	d.OnAccept(func(e events.Event) {
-		if si >= 0 {
-			km := keyfun.AvailMaps[si]
-			vv.SetValue(km.Name)
-			vv.UpdateWidget()
-		}
-		if fun != nil {
-			fun(d)
-		}
-	}).Run()
+	b := gi.NewBody().AddTitle("Select a key map").AddText(vv.Doc())
+	sc := gi.NewScene(b)
+	NewTableView(b).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(sc, &si)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).OnClick(func(e events.Event) {
+			if si >= 0 {
+				km := keyfun.AvailMaps[si]
+				vv.SetValue(km.Name)
+				vv.UpdateWidget()
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
 }

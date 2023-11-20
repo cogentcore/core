@@ -34,6 +34,7 @@ func (bd *Body) OnInit() {
 func (bd *Body) BodyStyles() {
 	bd.Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
+		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
 }

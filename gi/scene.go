@@ -166,7 +166,9 @@ func NewEmptyScene(name ...string) *Scene {
 // ConfigScene is called by the Stage to configure the Scene during Run process
 func (sc *Scene) ConfigScene() {
 	if !sc.Header.Empty() {
-		head := NewLayout(sc, "header")
+		head := NewLayout(sc, "header").Style(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
+		})
 		sc.Header.Call(head)
 	}
 	if !sc.Left.Empty() || !sc.Right.Empty() {
@@ -186,6 +188,7 @@ func (sc *Scene) ConfigScene() {
 	if !sc.Footer.Empty() {
 		foot := NewLayout(sc, "footer").Style(func(s *styles.Style) {
 			s.Align.X = styles.AlignEnd
+			s.Grow.Set(1, 0)
 		})
 		sc.Footer.Call(foot)
 	}

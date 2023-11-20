@@ -193,6 +193,7 @@ func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
 	sc := st.Scene
 	sc.ConfigScene()
+	sc.ConfigSceneWidgets()
 
 	// note: need a StageMgr to get initial pref size
 	if CurRenderWin == nil {
@@ -247,6 +248,7 @@ func (st *MainStage) RunWindow() *MainStage {
 func (st *MainStage) RunDialog() *MainStage {
 	st.AddDialogDecor()
 	st.Scene.ConfigScene()
+	st.Scene.ConfigSceneWidgets()
 
 	ctx := st.Context.AsWidget()
 	ms := ctx.Sc.MainStageMgr()
@@ -291,6 +293,8 @@ func (st *MainStage) RunDialog() *MainStage {
 func (st *MainStage) RunSheet() *MainStage {
 	st.AddSheetDecor()
 	st.Scene.ConfigScene()
+	st.Scene.ConfigSceneWidgets()
+
 	if CurRenderWin == nil {
 		// todo: error here -- must have main window!
 		return nil
