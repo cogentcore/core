@@ -433,8 +433,10 @@ func (sc *Scene) DoUpdate() bool {
 
 	if sc.ShowLayoutIter == 3 {
 		sc.ShowLayoutIter++
-		sc.EventMgr.ActivateStartFocus()
-		sc.Send(events.Custom) // listen to Custom event on Show
+		if !sc.Is(ScPrefSizing) {
+			sc.EventMgr.ActivateStartFocus()
+			sc.Send(events.Custom) // listen to Custom event on Show
+		}
 	}
 
 	return true

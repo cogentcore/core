@@ -206,7 +206,6 @@ func (st *MainStage) RunWindow() *MainStage {
 	// and thus don't consider pref size
 	if st.NewWindow || !st.FullWindow {
 		sz = sc.PrefSize(sz)
-		fmt.Println("pref size:", sz)
 	}
 	if WinRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
