@@ -189,10 +189,10 @@ func (app *appImpl) setSysWindow(sz image.Point) error {
 	defer func() { handleRecover(recover()) }()
 
 	if sz.X == 0 {
-		sz.X = 1920
+		sz.X = 800
 	}
 	if sz.Y == 0 {
-		sz.Y = 1080
+		sz.Y = 600
 	}
 
 	app.screen.DevicePixelRatio = 1
