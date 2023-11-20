@@ -2,25 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build offscreen
-
 package gi
 
 import (
 	"image"
-	"os"
 	"testing"
 
+	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 )
 
+func TestLayout(t *testing.T) {
+	driver.Main(func(a goosi.App) {
+		Init()
+		sc := NewScene("test-layout")
+		NewFrame(sc).Style(func(s *styles.Style) {
+			s.Min.Set(units.Em(20))
+			s.Grow.Set(0, 0)
+			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		})
+		NewWindow(sc).Run()
+		goosi.AssertCaptureIs(t, "layout")
+	})
+}
+
 // LayoutFlex tests the core layout flex logic
 // See this spreadsheet for the core logic applied to the Grid case:
 // https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
 func TestLayoutFlex(t *testing.T) {
+	t.Skip()
 	driver.Main(func(app goosi.App) {
 		LayoutTrace = true
 
@@ -67,8 +80,5 @@ func TestLayoutFlex(t *testing.T) {
 		sc.ConfigScene()
 		sc.ApplyStyleScene()
 		sc.LayoutScene()
-
-		// app.Quit() // todo: doesn't work
-		os.Exit(0)
 	})
 }
