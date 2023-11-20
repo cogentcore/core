@@ -195,17 +195,6 @@ func (app *appImpl) setSysWindow(sz image.Point) error {
 		sz.Y = 600
 	}
 
-	app.screen.DevicePixelRatio = 1
-	app.screen.PixSize = sz
-	app.screen.Geometry.Max = app.screen.PixSize
-	dpi := float32(160)
-	app.screen.PhysicalDPI = dpi
-	app.screen.LogicalDPI = dpi
-
-	physX := 25.4 * float32(sz.X) / dpi
-	physY := 25.4 * float32(sz.Y) / dpi
-	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
-
 	app.window.PhysDPI = app.screen.PhysicalDPI
 	app.window.LogDPI = app.screen.LogicalDPI
 	app.window.PxSize = app.screen.PixSize
@@ -329,7 +318,17 @@ func (app *appImpl) PrefsDir() string {
 }
 
 func (app *appImpl) GetScreens() {
-	// note: this is not applicable in mobile because screen info is not avail until Size event
+	sz := image.Point{3840, 2160}
+	app.screen.DevicePixelRatio = 1
+	app.screen.PixSize = sz
+	app.screen.Geometry.Max = app.screen.PixSize
+	dpi := float32(160)
+	app.screen.PhysicalDPI = dpi
+	app.screen.LogicalDPI = dpi
+
+	physX := 25.4 * float32(sz.X) / dpi
+	physY := 25.4 * float32(sz.Y) / dpi
+	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
 }
 
 func (app *appImpl) Platform() goosi.Platforms {
