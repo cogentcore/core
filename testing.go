@@ -23,7 +23,8 @@ type TestingT interface {
 // images in [AssertCaptureIs] instead of comparing against them.
 // It is automatically set if the env variable "UPDATE_TEST_IMAGES" is "true",
 // and it should typically only be set through that. It should only be
-// set when behavior has been updated that causes test images to change.
+// set when behavior has been updated that causes test images to change,
+// and it should only be set once and then turned back off.
 var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
 
 // AssertCaptureIs asserts that the result of [Capture] is equivalent
