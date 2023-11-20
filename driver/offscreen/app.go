@@ -176,7 +176,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		},
 	}
 	app.window.EvMgr.Deque = &app.window.Deque
-	app.setSysWindow()
+	app.setSysWindow(opts.Size)
 
 	go app.window.winLoop()
 
@@ -184,21 +184,26 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 }
 
 // setSysWindow sets the underlying system window information.
-func (app *appImpl) setSysWindow() error {
+func (app *appImpl) setSysWindow(sz image.Point) error {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 
-	w, h := 800, 600
+	if sz.X == 0 {
+		sz.X = 1920
+	}
+	if sz.Y == 0 {
+		sz.Y = 1080
+	}
 
 	app.screen.DevicePixelRatio = 1
-	app.screen.PixSize = image.Pt(w, h)
+	app.screen.PixSize = sz
 	app.screen.Geometry.Max = app.screen.PixSize
 	dpi := float32(96)
 	app.screen.PhysicalDPI = dpi
 	app.screen.LogicalDPI = dpi
 
-	physX := 25.4 * float32(w) / dpi
-	physY := 25.4 * float32(h) / dpi
+	physX := 25.4 * float32(sz.X) / dpi
+	physY := 25.4 * float32(sz.Y) / dpi
 	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
 
 	app.window.PhysDPI = app.screen.PhysicalDPI
