@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/grr"
 )
 
 func TestMain(m *testing.M) {
@@ -42,7 +41,6 @@ func TestTextWidgets(t *testing.T) {
 			sc := NewEmptyScene()
 			f(sc, str)
 			fw, _, _ := strings.Cut(str, " ")
-			grr.Log0(os.MkdirAll(filepath.Join("testdata", nm), 0750))
 			sc.AssertPixelsOnShow(t, filepath.Join(nm, "text_"+strcase.ToSnake(fw)))
 		}
 	}

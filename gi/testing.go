@@ -73,14 +73,14 @@ func (sc *Scene) AssertPixelsOnShow(t TestingT, filename string) {
 func (sc *Scene) AssertPixels(t TestingT, filename string) {
 	capture := sc.Pixels
 
-	err := os.MkdirAll("testdata", 0750)
-	if err != nil {
-		t.Errorf("error making testdata directory: %v", err)
-	}
-
 	filename = filepath.Join("testdata", filename)
 	if filepath.Ext(filename) == "" {
 		filename += ".png"
+	}
+
+	err := os.MkdirAll(filepath.Dir(filename), 0750)
+	if err != nil {
+		t.Errorf("error making testdata directory: %v", err)
 	}
 
 	ext := filepath.Ext(filename)
