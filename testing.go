@@ -81,6 +81,7 @@ func AssertCaptureIs(t TestingT, filename string) {
 	cbounds := capture.Bounds()
 	ibounds := img.Bounds()
 	if cbounds != ibounds {
+		t.Errorf("goosi.AssertCaptureIs: expected bounds %v for image for %q, but got bounds %v; see %q", ibounds, filename, cbounds, failFilename)
 		failed = true
 	} else {
 		for y := cbounds.Min.Y; y < cbounds.Max.Y; y++ {
