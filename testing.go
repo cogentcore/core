@@ -52,7 +52,26 @@ func AssertCaptureIs(t TestingT, filename string) {
 		return
 	}
 
-	if capture != img {
+	failed := false
+	cbounds := capture.Bounds()
+	ibounds := img.Bounds()
+	if cbounds != ibounds {
+		failed = true
+	} else {
+		for y := cbounds.Min.Y; y < cbounds.Max.Y; y++ {
+			for x := cbounds.Min.X; x < cbounds.Max.X; x++ {
+				cc := capture.At(x, y)
+				ic := img.At(x, y)
+				if cc != ic {
+					t.Errorf("goosi.AssertCaptureIs: expected color %v at (%d, %d), but got %v", ic, x, y, cc)
+					failed = true
+					break
+				}
+			}
+		}
+	}
+
+	if failed {
 		ext := filepath.Ext(filename)
 		failFilename := strings.TrimSuffix(filename, ext) + ".fail" + ext
 		t.Errorf("goosi.AssertCaptureIs: image for %q is not the same as expected; see %q", filename, failFilename)
