@@ -325,7 +325,7 @@ func (app *appImpl) AppPrefsDir() string {
 
 func (app *appImpl) PrefsDir() string {
 	// TODO(kai): figure out a better solution to offscreen prefs dir
-	return "./tmpPrefsDir"
+	return filepath.Join(".", "tmpPrefsDir")
 }
 
 func (app *appImpl) GetScreens() {
