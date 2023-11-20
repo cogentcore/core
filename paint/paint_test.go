@@ -75,7 +75,7 @@ func TestRender(t *testing.T) {
 	fsty.Defaults()
 
 	// experiment!
-	tsty.Align = styles.AlignCenter
+	tsty.Align = styles.Center
 
 	txt := &Text{}
 	txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)

@@ -955,9 +955,9 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 	vextra := size.Y - vht
 	if vextra > 0 {
 		switch txtSty.AlignV {
-		case styles.AlignCenter:
+		case styles.Center:
 			vpad = vextra / 2
-		case styles.AlignEnd:
+		case styles.End:
 			vpad = vextra
 		}
 	}
@@ -977,9 +977,9 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 		hextra := size.X - ssz.X
 		if hextra > 0 {
 			switch txtSty.Align {
-			case styles.AlignCenter:
+			case styles.Center:
 				sr.RelPos.X += hextra / 2
-			case styles.AlignEnd:
+			case styles.End:
 				sr.RelPos.X += hextra
 			}
 		}

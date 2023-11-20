@@ -20,14 +20,14 @@ type Text struct { //gti:add
 	// and is typically relevant only for multi-line text:
 	// for single-line text, if element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
-	Align Align `xml:"text-align" inherit:"true"`
+	Align Aligns `xml:"text-align" inherit:"true"`
 
 	// prop: text-vertical-align (inherited) = vertical alignment of text.
 	// This is only applicable for SVG styling, not regular CSS / GoGi,
 	// which uses the global Align.Y.  It *only* applies to the text within
 	// its containing element: if that element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
-	AlignV Align `xml:"text-vertical-align" inherit:"true"`
+	AlignV Aligns `xml:"text-vertical-align" inherit:"true"`
 
 	// prop: text-anchor (inherited) = for svg rendering only:
 	// determines the alignment relative to text position coordinate.
@@ -79,8 +79,8 @@ var LineHeightNormal = units.Dp(-1)
 
 func (ts *Text) Defaults() {
 	ts.LineHeight = LineHeightNormal
-	ts.Align = AlignStart
-	ts.AlignV = AlignBaseline
+	ts.Align = Start
+	ts.AlignV = Baseline
 	ts.Direction = LTR
 	ts.OrientationVert = 90
 	ts.TabSize = 4
@@ -133,18 +133,18 @@ func (ts *Text) AlignFactors() (ax, ay float32) {
 	ay = 0.0
 	hal := ts.Align
 	switch hal {
-	case AlignCenter:
+	case Center:
 		ax = 0.5 // todo: determine if font is horiz or vert..
-	case AlignEnd:
+	case End:
 		ax = 1.0
 	}
 	val := ts.AlignV
 	switch val {
-	case AlignStart:
+	case Start:
 		ay = 0.9 // todo: need to find out actual baseline
-	case AlignCenter:
+	case Center:
 		ay = 0.45 // todo: determine if font is horiz or vert..
-	case AlignEnd:
+	case End:
 		ay = -0.1 // todo: need actual baseline
 	}
 	return

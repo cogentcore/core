@@ -62,7 +62,7 @@ func main() {
 	fsty.Defaults()
 
 	// experiment!
-	tsty.Align = styles.AlignCenter
+	tsty.Align = styles.Center
 
 	txt := &paint.Text{}
 	txt.SetHTML("This is <b>HTML</b> formatted <i>text</i>", fsty, tsty, &pc.UnContext, nil)

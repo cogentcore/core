@@ -232,12 +232,37 @@ var StyleStyleFuncs = map[string]StyleFunc{
 var StyleLayoutFuncs = map[string]StyleFunc{
 	"display": StyleFuncEnum(Flex,
 		func(obj *Style) enums.EnumSetter { return &obj.Display }),
-	"z-index": StyleFuncInt(int(0),
-		func(obj *Style) *int { return &obj.ZIndex }),
-	"horizontal-align": StyleFuncEnum(AlignStart,
-		func(obj *Style) enums.EnumSetter { return &obj.Align.X }),
-	"vertical-align": StyleFuncEnum(AlignCenter,
-		func(obj *Style) enums.EnumSetter { return &obj.Align.Y }),
+	"flex-direction": func(obj any, key string, val, par any, ctxt colors.Context) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				s.Direction = par.(*Style).Direction
+			} else if init {
+				s.Direction = Row
+			}
+			return
+		}
+		str := laser.ToString(val)
+		if str == "row" || str == "row-reverse" {
+			s.Direction = Row
+		} else {
+			s.Direction = Column
+		}
+	},
+	"wrap": StyleFuncBool(false,
+		func(obj *Style) *bool { return &obj.Wrap }),
+	"justify-content": StyleFuncEnum(Start,
+		func(obj *Style) enums.EnumSetter { return &obj.Justify.Content }),
+	"justify-items": StyleFuncEnum(Start,
+		func(obj *Style) enums.EnumSetter { return &obj.Justify.Items }),
+	"justify-self": StyleFuncEnum(Auto,
+		func(obj *Style) enums.EnumSetter { return &obj.Justify.Self }),
+	"align-content": StyleFuncEnum(Start,
+		func(obj *Style) enums.EnumSetter { return &obj.Align.Content }),
+	"align-items": StyleFuncEnum(Start,
+		func(obj *Style) enums.EnumSetter { return &obj.Align.Items }),
+	"align-self": StyleFuncEnum(Auto,
+		func(obj *Style) enums.EnumSetter { return &obj.Align.Self }),
 	"x": StyleFuncUnits(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Pos.X }),
 	"y": StyleFuncUnits(units.Value{},
@@ -278,23 +303,6 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		s.Padding.SetAny(val)
 	},
-	"flex-direction": func(obj any, key string, val, par any, ctxt colors.Context) {
-		s := obj.(*Style)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				s.Direction = par.(*Style).Direction
-			} else if init {
-				s.Direction = Row
-			}
-			return
-		}
-		str := laser.ToString(val)
-		if str == "row" || str == "row-reverse" {
-			s.Direction = Row
-		} else {
-			s.Direction = Column
-		}
-	},
 	// TODO(kai/styprops): mutli-dim overflow
 	"overflow": StyleFuncEnum(OverflowAuto,
 		func(obj *Style) enums.EnumSetter { return &obj.Overflow.X }),
@@ -308,6 +316,8 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		func(obj *Style) *int { return &obj.RowSpan }),
 	"col-span": StyleFuncInt(int(0),
 		func(obj *Style) *int { return &obj.ColSpan }),
+	"z-index": StyleFuncInt(int(0),
+		func(obj *Style) *int { return &obj.ZIndex }),
 	"scrollbar-width": StyleFuncUnits(units.Value{},
 		func(obj *Style) *units.Value { return &obj.ScrollBarWidth }),
 }
@@ -430,9 +440,9 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 
 // StyleTextFuncs are functions for styling the Text object
 var StyleTextFuncs = map[string]StyleFunc{
-	"text-align": StyleFuncEnum(AlignStart,
+	"text-align": StyleFuncEnum(Start,
 		func(obj *Text) enums.EnumSetter { return &obj.Align }),
-	"text-vertical-align": StyleFuncEnum(AlignStart,
+	"text-vertical-align": StyleFuncEnum(Start,
 		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
 	"text-anchor": StyleFuncEnum(AnchorStart,
 		func(obj *Text) enums.EnumSetter { return &obj.Anchor }),

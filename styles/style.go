@@ -46,21 +46,38 @@ type Style struct { //gti:add
 	// to the State info makes it easy to configure and manage.
 	Abilities abilities.Abilities
 
-	// Display controls how items are displayed, in terms of layout
-	Display Displays
-
 	// the cursor to switch to upon hovering over the element (inherited)
 	Cursor cursors.Cursor
 
-	// ordering factor for rendering depth -- lower numbers rendered first.
-	// Sort children according to this factor
-	ZIndex int
+	// Padding is the transparent space around central content of box,
+	// which is _included_ in the size of the standard box rendering.
+	Padding SideValues `view:"inline"`
 
-	// Align specifies the X, Y alignment of widget elements within a container
-	Align XY[Align] `view:"inline"`
+	// Margin is the outer-most transparent space around box element,
+	// which is _excluded_ from standard box rendering.
+	Margin SideValues `view:"inline"`
 
-	// position is only used for Layout = Nil cases
-	Pos units.XY `view:"inline"`
+	// Display controls how items are displayed, in terms of layout
+	Display Displays
+
+	// Direction specifies the order elements are organized:
+	// Row is horizontal, Col is vertical.
+	// See also [Wrap]
+	Direction Directions
+
+	// Wrap causes elements to wrap around in the CrossAxis dimension
+	// to fit within sizing constraints (on by default).
+	Wrap bool
+
+	// Justify specifies the distribution of elements along the main axis,
+	// i.e., the same as Direction, for Flex Display.  For Grid, the main axis is
+	// given by the writing direction (e.g., Row-wise for latin based languages).
+	Justify AlignSet `view:"inline"`
+
+	// Align specifies the cross-axis alignment of elements, orthogonal to the
+	// main Direction axis. For Grid, the cross-axis is orthogonal to the
+	// writing direction (e.g., Column-wise for latin based languages).
+	Align AlignSet `view:"inline"`
 
 	// Min is the minimum size of the actual content, exclusive of additional space
 	// from padding, border, margin; 0 = default is sum of Min for all content
@@ -86,14 +103,6 @@ type Style struct { //gti:add
 	// available space).
 	GrowWrap bool
 
-	// Padding is the transparent space around central content of box,
-	// which is _included_ in the size of the standard box rendering.
-	Padding SideValues `view:"inline"`
-
-	// Margin is the outer-most transparent space around box element,
-	// which is _excluded_ from standard box rendering.
-	Margin SideValues `view:"inline"`
-
 	// FillMargin determines is whether to fill the margin with
 	// the surrounding background color before rendering the element itself.
 	// This is typically necessary to prevent text, border, and box shadow from rendering
@@ -102,6 +111,19 @@ type Style struct { //gti:add
 	// is fully managed by something that is guaranteed to render the
 	// appropriate background color for the element.
 	FillMargin bool
+
+	// Overflow determines how to handle overflowing content in a layout.
+	// Default is OverflowVisible.  Set to OverflowAuto to enable scrollbars.
+	Overflow XY[Overflows]
+
+	// For layout, extra space added between elements in the layout.
+	Gap units.XY `view:"inline"`
+
+	// For layout, number of columns to use in a grid layout.
+	// If > 0, number of rows is computed as N elements / Columns.
+	// Used as a constraint in layout if individual elements
+	// do not specify their row, column positions
+	Columns int
 
 	// Border is a line border around the box element
 	Border Border
@@ -119,48 +141,6 @@ type Style struct { //gti:add
 	// effective margin to allocate for the element.
 	MaxBoxShadow []Shadow
 
-	/////////////////////////////
-	//  Layout
-
-	// Direction specifies the order elements are organized:
-	// Row is horizontal, Col is vertical.
-	// See also [Wrap]
-	Direction Directions
-
-	// Wrap causes elements to wrap around in the CrossAxis dimension
-	// to fit within sizing constraints (on by default).
-	Wrap bool
-
-	// Overflow determines how to handle overflowing content in a layout.
-	// Default is OverflowVisible.  Set to OverflowAuto to enable scrollbars.
-	Overflow XY[Overflow]
-
-	// For layout, extra space added between elements in the layout.
-	Gap units.XY `view:"inline"`
-
-	// For layout, number of columns to use in a grid layout.
-	// If > 0, number of rows is computed as N elements / Columns.
-	// Used as a constraint in layout if individual elements
-	// do not specify their row, column positions
-	Columns int
-
-	// width of a layout scrollbar
-	ScrollBarWidth units.Value
-
-	// prop: row = specifies the row that this element should appear within a grid layout
-	Row int
-
-	// prop: col = specifies the column that this element should appear within a grid layout
-	Col int
-
-	// specifies the number of sequential rows that this element should occupy
-	// within a grid layout (todo: not currently supported)
-	RowSpan int
-
-	// specifies the number of sequential columns that this element should occupy
-	// within a grid layout
-	ColSpan int
-
 	// prop: color (inherited) = text color -- also defines the currentColor variable value
 	Color color.RGBA `inherit:"true"`
 
@@ -177,6 +157,30 @@ type Style struct { //gti:add
 	// StateColor, if not the zero color, is the color to use for the StateLayer instead of Color. If you want to disable state layers
 	// for an element, do not use this; instead, set StateLayer to 0.
 	StateColor color.RGBA
+
+	// position is only used for Layout = Nil cases
+	Pos units.XY `view:"inline"`
+
+	// ordering factor for rendering depth -- lower numbers rendered first.
+	// Sort children according to this factor
+	ZIndex int
+
+	// prop: row = specifies the row that this element should appear within a grid layout
+	Row int
+
+	// prop: col = specifies the column that this element should appear within a grid layout
+	Col int
+
+	// specifies the number of sequential rows that this element should occupy
+	// within a grid layout (todo: not currently supported)
+	RowSpan int
+
+	// specifies the number of sequential columns that this element should occupy
+	// within a grid layout
+	ColSpan int
+
+	// width of a layout scrollbar
+	ScrollBarWidth units.Value
 
 	// font parameters -- no xml prefix -- also has color, background-color
 	Font Font

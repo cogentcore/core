@@ -29,6 +29,8 @@ import (
 var ScrollBarWidthDefault = float32(10)
 
 func (s *Style) LayoutDefaults() {
+	s.Justify.Defaults()
+	s.Align.Defaults()
 	s.Gap.Set(units.Em(0.5))
 	s.ScrollBarWidth.Dp(ScrollBarWidthDefault)
 }
@@ -63,18 +65,15 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.ScrollBarWidth.ToDots(uc)
 }
 
-// AlignPosInBox returns the position offset based on Align.X,Y settings
+// AlignPos returns the position offset based on Align.X,Y settings
 // for given inner-sized box within given outer-sized container box.
-func (s *Style) AlignPosInBox(inner, outer mat32.Vec2) mat32.Vec2 {
-	extra := outer.Sub(inner)
-	var pos mat32.Vec2
-	if extra.X > 0 {
-		pos.X += AlignFactor(s.Align.X) * extra.X
+func AlignPos(align Aligns, inner, outer float32) float32 {
+	extra := outer - inner
+	var pos float32
+	if extra > 0 {
+		pos += AlignFactor(align) * extra
 	}
-	if extra.Y > 0 {
-		pos.Y += AlignFactor(s.Align.Y) * extra.Y
-	}
-	return pos
+	return mat32.Floor(pos)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -116,55 +115,85 @@ const (
 	DisplayNone
 )
 
-// Align has all different types of alignment -- only some are applicable to
-// different contexts, but there is also so much overlap that it makes sense
-// to have them all in one list -- some are not standard CSS and used by
-// layout
-type Align int32 //enums:enum -trim-prefix Align
+// Aligns has all different types of alignment and justification.
+type Aligns int32 //enums:enum
 
 const (
+	// Auto means the item uses the container's AlignItems value
+	Auto Aligns = iota
+
 	// Align items to the start (top, left) of layout
-	AlignStart Align = iota
+	Start
 
 	// Align items to the end (bottom, right) of layout
-	AlignEnd
+	End
 
-	// Align all items centered around the center of layout space
-	AlignCenter
+	// Align items centered
+	Center
 
 	// Align to text baselines
-	AlignBaseline
+	Baseline
 
 	// First and last are flush, equal space between remaining items
-	AlignSpaceBetween
+	SpaceBetween
 
 	// First and last have 1/2 space at edges, full space between remaining items
-	AlignSpaceAround
+	SpaceAround
 
 	// Equal space at start, end, and between all items
-	AlignSpaceEvenly
+	SpaceEvenly
 )
 
-func AlignFactor(al Align) float32 {
+func AlignFactor(al Aligns) float32 {
 	switch al {
-	case AlignStart:
+	case Start:
 		return 0
-	case AlignEnd:
+	case End:
 		return 1
-	case AlignCenter:
+	case Center:
 		return 0.5
 	}
 	return 0
 }
 
+// AlignSet specifies the 3 levels of Justify or Align: Content, Items, and Self
+type AlignSet struct {
+	// Content specifies the distribution of the entire collection of items within
+	// any larger amount of space allocated to the container.  By contrast, Items
+	// and Self specify distribution within the individual element's allocated space.
+	Content Aligns
+
+	// Items specifies the distribution within the individual element's allocated space,
+	// as a default for all items within a collection.
+	Items Aligns
+
+	// Self specifies the distribution within the individual element's allocated space,
+	// for this specific item.  Auto defaults to containers Items setting.
+	Self Aligns
+}
+
+func (as *AlignSet) Defaults() {
+	as.Content = Start
+	as.Items = Start
+	as.Self = Auto
+}
+
+// ItemAlign returns the effective Aligns value between parent Items and Self
+func ItemAlign(parItems, self Aligns) Aligns {
+	if self == Auto {
+		return parItems
+	}
+	return self
+}
+
 // overflow type -- determines what happens when there is too much stuff in a layout
-type Overflow int32 //enums:enum -trim-prefix Overflow
+type Overflows int32 //enums:enum -trim-prefix Overflow
 
 const (
 	// OverflowVisible makes the overflow visible, meaning that the size
 	// of the container is always at least the Min size of its contents.
 	// No scrollbars are shown.
-	OverflowVisible Overflow = iota
+	OverflowVisible Overflows = iota
 
 	// OverflowHidden hides the overflow and doesn't present scrollbars.
 	OverflowHidden

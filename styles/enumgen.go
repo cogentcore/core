@@ -1253,146 +1253,151 @@ func (i *Displays) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _AlignValues = []Align{0, 1, 2, 3, 4, 5, 6}
+var _AlignsValues = []Aligns{0, 1, 2, 3, 4, 5, 6, 7}
 
-// AlignN is the highest valid value
-// for type Align, plus one.
-const AlignN Align = 7
+// AlignsN is the highest valid value
+// for type Aligns, plus one.
+const AlignsN Aligns = 8
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _AlignNoOp() {
+func _AlignsNoOp() {
 	var x [1]struct{}
-	_ = x[AlignStart-(0)]
-	_ = x[AlignEnd-(1)]
-	_ = x[AlignCenter-(2)]
-	_ = x[AlignBaseline-(3)]
-	_ = x[AlignSpaceBetween-(4)]
-	_ = x[AlignSpaceAround-(5)]
-	_ = x[AlignSpaceEvenly-(6)]
+	_ = x[Auto-(0)]
+	_ = x[Start-(1)]
+	_ = x[End-(2)]
+	_ = x[Center-(3)]
+	_ = x[Baseline-(4)]
+	_ = x[SpaceBetween-(5)]
+	_ = x[SpaceAround-(6)]
+	_ = x[SpaceEvenly-(7)]
 }
 
-var _AlignNameToValueMap = map[string]Align{
-	`Start`:        0,
-	`start`:        0,
-	`End`:          1,
-	`end`:          1,
-	`Center`:       2,
-	`center`:       2,
-	`Baseline`:     3,
-	`baseline`:     3,
-	`SpaceBetween`: 4,
-	`spacebetween`: 4,
-	`SpaceAround`:  5,
-	`spacearound`:  5,
-	`SpaceEvenly`:  6,
-	`spaceevenly`:  6,
+var _AlignsNameToValueMap = map[string]Aligns{
+	`Auto`:         0,
+	`auto`:         0,
+	`Start`:        1,
+	`start`:        1,
+	`End`:          2,
+	`end`:          2,
+	`Center`:       3,
+	`center`:       3,
+	`Baseline`:     4,
+	`baseline`:     4,
+	`SpaceBetween`: 5,
+	`spacebetween`: 5,
+	`SpaceAround`:  6,
+	`spacearound`:  6,
+	`SpaceEvenly`:  7,
+	`spaceevenly`:  7,
 }
 
-var _AlignDescMap = map[Align]string{
-	0: `Align items to the start (top, left) of layout`,
-	1: `Align items to the end (bottom, right) of layout`,
-	2: `Align all items centered around the center of layout space`,
-	3: `Align to text baselines`,
-	4: `First and last are flush, equal space between remaining items`,
-	5: `First and last have 1/2 space at edges, full space between remaining items`,
-	6: `Equal space at start, end, and between all items`,
+var _AlignsDescMap = map[Aligns]string{
+	0: `Auto means the item uses the container&#39;s AlignItems value`,
+	1: `Align items to the start (top, left) of layout`,
+	2: `Align items to the end (bottom, right) of layout`,
+	3: `Align items centered`,
+	4: `Align to text baselines`,
+	5: `First and last are flush, equal space between remaining items`,
+	6: `First and last have 1/2 space at edges, full space between remaining items`,
+	7: `Equal space at start, end, and between all items`,
 }
 
-var _AlignMap = map[Align]string{
-	0: `Start`,
-	1: `End`,
-	2: `Center`,
-	3: `Baseline`,
-	4: `SpaceBetween`,
-	5: `SpaceAround`,
-	6: `SpaceEvenly`,
+var _AlignsMap = map[Aligns]string{
+	0: `Auto`,
+	1: `Start`,
+	2: `End`,
+	3: `Center`,
+	4: `Baseline`,
+	5: `SpaceBetween`,
+	6: `SpaceAround`,
+	7: `SpaceEvenly`,
 }
 
 // String returns the string representation
-// of this Align value.
-func (i Align) String() string {
-	if str, ok := _AlignMap[i]; ok {
+// of this Aligns value.
+func (i Aligns) String() string {
+	if str, ok := _AlignsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Align value from its
+// SetString sets the Aligns value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *Align) SetString(s string) error {
-	if val, ok := _AlignNameToValueMap[s]; ok {
+func (i *Aligns) SetString(s string) error {
+	if val, ok := _AlignsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _AlignNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _AlignsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type Align")
+	return errors.New(s + " is not a valid value for type Aligns")
 }
 
-// Int64 returns the Align value as an int64.
-func (i Align) Int64() int64 {
+// Int64 returns the Aligns value as an int64.
+func (i Aligns) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the Align value from an int64.
-func (i *Align) SetInt64(in int64) {
-	*i = Align(in)
+// SetInt64 sets the Aligns value from an int64.
+func (i *Aligns) SetInt64(in int64) {
+	*i = Aligns(in)
 }
 
-// Desc returns the description of the Align value.
-func (i Align) Desc() string {
-	if str, ok := _AlignDescMap[i]; ok {
+// Desc returns the description of the Aligns value.
+func (i Aligns) Desc() string {
+	if str, ok := _AlignsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// AlignValues returns all possible values
-// for the type Align.
-func AlignValues() []Align {
-	return _AlignValues
+// AlignsValues returns all possible values
+// for the type Aligns.
+func AlignsValues() []Aligns {
+	return _AlignsValues
 }
 
 // Values returns all possible values
-// for the type Align.
-func (i Align) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_AlignValues))
-	for i, d := range _AlignValues {
+// for the type Aligns.
+func (i Aligns) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_AlignsValues))
+	for i, d := range _AlignsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type Align.
-func (i Align) IsValid() bool {
-	_, ok := _AlignMap[i]
+// valid option for type Aligns.
+func (i Aligns) IsValid() bool {
+	_, ok := _AlignsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Align) MarshalText() ([]byte, error) {
+func (i Aligns) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Align) UnmarshalText(text []byte) error {
+func (i *Aligns) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _OverflowValues = []Overflow{0, 1, 2, 3}
+var _OverflowsValues = []Overflows{0, 1, 2, 3}
 
-// OverflowN is the highest valid value
-// for type Overflow, plus one.
-const OverflowN Overflow = 4
+// OverflowsN is the highest valid value
+// for type Overflows, plus one.
+const OverflowsN Overflows = 4
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _OverflowNoOp() {
+func _OverflowsNoOp() {
 	var x [1]struct{}
 	_ = x[OverflowVisible-(0)]
 	_ = x[OverflowHidden-(1)]
@@ -1400,7 +1405,7 @@ func _OverflowNoOp() {
 	_ = x[OverflowScroll-(3)]
 }
 
-var _OverflowNameToValueMap = map[string]Overflow{
+var _OverflowsNameToValueMap = map[string]Overflows{
 	`Visible`: 0,
 	`visible`: 0,
 	`Hidden`:  1,
@@ -1411,14 +1416,14 @@ var _OverflowNameToValueMap = map[string]Overflow{
 	`scroll`:  3,
 }
 
-var _OverflowDescMap = map[Overflow]string{
+var _OverflowsDescMap = map[Overflows]string{
 	0: `OverflowVisible makes the overflow visible, meaning that the size of the container is always at least the Min size of its contents. No scrollbars are shown.`,
 	1: `OverflowHidden hides the overflow and doesn&#39;t present scrollbars.`,
 	2: `OverflowAuto automatically determines if scrollbars should be added to show the overflow. Scrollbars are added only if the actual content size is greater than the currently available size.`,
 	3: `OverflowScroll means that scrollbars are always visible, and is otherwise identical to Auto. However, only during Viewport PrefSize call, the actual content size is used -- otherwise it behaves just like Auto.`,
 }
 
-var _OverflowMap = map[Overflow]string{
+var _OverflowsMap = map[Overflows]string{
 	0: `Visible`,
 	1: `Hidden`,
 	2: `Auto`,
@@ -1426,77 +1431,77 @@ var _OverflowMap = map[Overflow]string{
 }
 
 // String returns the string representation
-// of this Overflow value.
-func (i Overflow) String() string {
-	if str, ok := _OverflowMap[i]; ok {
+// of this Overflows value.
+func (i Overflows) String() string {
+	if str, ok := _OverflowsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the Overflow value from its
+// SetString sets the Overflows value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *Overflow) SetString(s string) error {
-	if val, ok := _OverflowNameToValueMap[s]; ok {
+func (i *Overflows) SetString(s string) error {
+	if val, ok := _OverflowsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _OverflowNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _OverflowsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type Overflow")
+	return errors.New(s + " is not a valid value for type Overflows")
 }
 
-// Int64 returns the Overflow value as an int64.
-func (i Overflow) Int64() int64 {
+// Int64 returns the Overflows value as an int64.
+func (i Overflows) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the Overflow value from an int64.
-func (i *Overflow) SetInt64(in int64) {
-	*i = Overflow(in)
+// SetInt64 sets the Overflows value from an int64.
+func (i *Overflows) SetInt64(in int64) {
+	*i = Overflows(in)
 }
 
-// Desc returns the description of the Overflow value.
-func (i Overflow) Desc() string {
-	if str, ok := _OverflowDescMap[i]; ok {
+// Desc returns the description of the Overflows value.
+func (i Overflows) Desc() string {
+	if str, ok := _OverflowsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// OverflowValues returns all possible values
-// for the type Overflow.
-func OverflowValues() []Overflow {
-	return _OverflowValues
+// OverflowsValues returns all possible values
+// for the type Overflows.
+func OverflowsValues() []Overflows {
+	return _OverflowsValues
 }
 
 // Values returns all possible values
-// for the type Overflow.
-func (i Overflow) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_OverflowValues))
-	for i, d := range _OverflowValues {
+// for the type Overflows.
+func (i Overflows) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_OverflowsValues))
+	for i, d := range _OverflowsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type Overflow.
-func (i Overflow) IsValid() bool {
-	_, ok := _OverflowMap[i]
+// valid option for type Overflows.
+func (i Overflows) IsValid() bool {
+	_, ok := _OverflowsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Overflow) MarshalText() ([]byte, error) {
+func (i Overflows) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Overflow) UnmarshalText(text []byte) error {
+func (i *Overflows) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
