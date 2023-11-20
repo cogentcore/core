@@ -324,7 +324,7 @@ func (app *appImpl) AppPrefsDir() string {
 }
 
 func (app *appImpl) PrefsDir() string {
-	return "/data/data"
+	return "!(ERROR: PrefsDir should not be called when goosi.TheApp.Platform() == goosi.Offscreen)"
 }
 
 func (app *appImpl) GetScreens() {
@@ -332,7 +332,7 @@ func (app *appImpl) GetScreens() {
 }
 
 func (app *appImpl) Platform() goosi.Platforms {
-	return goosi.Web
+	return goosi.Offscreen
 }
 
 func (app *appImpl) OpenURL(url string) {

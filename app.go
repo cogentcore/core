@@ -194,12 +194,17 @@ const (
 
 	// Web is a web browser running the app through WASM
 	Web
+
+	// Offscreen is an offscreen driver typically used for testing,
+	// specified using the "offscreen" build tag
+	Offscreen
 )
 
-// IsMobile returns whether the platform is a mobile platform (iOS, Android, or Web).
-// Web is considered a mobile platform because it only supports one window.
+// IsMobile returns whether the platform is a mobile platform
+// (iOS, Android, Web, or Offscreen). Web and Offscreen are
+// considered mobile platforms because they only supports one window.
 func (p Platforms) IsMobile() bool {
-	return p == IOS || p == Android || p == Web
+	return p == IOS || p == Android || p == Web || p == Offscreen
 }
 
 // VirtualKeyboardTypes are all of the supported virtual keyboard types for mobile platforms

@@ -4,6 +4,7 @@ package goosi
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -11,11 +12,11 @@ import (
 	"goki.dev/enums"
 )
 
-var _PlatformsValues = []Platforms{0, 1, 2, 3, 4}
+var _PlatformsValues = []Platforms{0, 1, 2, 3, 4, 5, 6}
 
 // PlatformsN is the highest valid value
 // for type Platforms, plus one.
-const PlatformsN Platforms = 5
+const PlatformsN Platforms = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -26,19 +27,25 @@ func _PlatformsNoOp() {
 	_ = x[Windows-(2)]
 	_ = x[IOS-(3)]
 	_ = x[Android-(4)]
+	_ = x[Web-(5)]
+	_ = x[Offscreen-(6)]
 }
 
 var _PlatformsNameToValueMap = map[string]Platforms{
-	`MacOS`:    0,
-	`macos`:    0,
-	`LinuxX11`: 1,
-	`linuxx11`: 1,
-	`Windows`:  2,
-	`windows`:  2,
-	`IOS`:      3,
-	`ios`:      3,
-	`Android`:  4,
-	`android`:  4,
+	`MacOS`:     0,
+	`macos`:     0,
+	`LinuxX11`:  1,
+	`linuxx11`:  1,
+	`Windows`:   2,
+	`windows`:   2,
+	`IOS`:       3,
+	`ios`:       3,
+	`Android`:   4,
+	`android`:   4,
+	`Web`:       5,
+	`web`:       5,
+	`Offscreen`: 6,
+	`offscreen`: 6,
 }
 
 var _PlatformsDescMap = map[Platforms]string{
@@ -47,6 +54,8 @@ var _PlatformsDescMap = map[Platforms]string{
 	2: `Windows is a Microsoft Windows machine`,
 	3: `IOS is an Apple iOS or iPadOS mobile phone or iPad`,
 	4: `Android is an Android mobile phone or tablet`,
+	5: `Web is a web browser running the app through WASM`,
+	6: `Offscreen is an offscreen driver typically used for testing, specified using the &#34;offscreen&#34; build tag`,
 }
 
 var _PlatformsMap = map[Platforms]string{
@@ -55,6 +64,8 @@ var _PlatformsMap = map[Platforms]string{
 	2: `Windows`,
 	3: `IOS`,
 	4: `Android`,
+	5: `Web`,
+	6: `Offscreen`,
 }
 
 // String returns the string representation
@@ -453,8 +464,10 @@ func (i *WindowFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _WindowFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type WindowFlags")
+			return fmt.Errorf("%q is not a valid value for type WindowFlags", flg)
 		}
 	}
 	return nil
