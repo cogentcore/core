@@ -220,7 +220,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	case keyfun.Jump:
 		cancelAll()
 		kt.SetHandled()
-		ed.JumpToLinePrompt()
+		ed.JumpToLineAddText()
 	case keyfun.HistPrev:
 		cancelAll()
 		kt.SetHandled()
@@ -263,7 +263,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		kt.SetHandled()
 		ed.CancelComplete()
 		ed.ISearchCancel()
-		ed.QReplacePrompt()
+		ed.QReplaceAddText()
 	// case keyfun.Accept: // ctrl+enter
 	// 	ed.ISearchCancel()
 	// 	ed.QReplaceCancel()

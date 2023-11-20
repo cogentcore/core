@@ -536,8 +536,8 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 		curnv := ov.MapIndex(nv) // see if new value there already
 		if val != kv.Interface() && !laser.ValueIsZero(curnv) {
 			// actually new key and current exists
-			gi.NewDialog(vv.Widget).Title("Map Key Conflict").
-				Prompt(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val)).
+			gi.NewBody(vv.Widget).AddTitle("Map Key Conflict").
+				AddText(fmt.Sprintf("The map key value: %v already exists in the map; are you sure you want to overwrite the current value?", val)).
 				Cancel("Cancel change").Ok("Overwrite").
 				OnAccept(func(e events.Event) {
 					cv := ov.MapIndex(kv)               // get current value

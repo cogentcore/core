@@ -288,13 +288,13 @@ func (ed *Editor) QReplaceSig() {
 
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
 // user for items to search etc
-func (ed *Editor) QReplacePrompt() {
+func (ed *Editor) QReplaceAddText() {
 	find := ""
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	d := gi.NewDialog(ed).Title("Query-Replace").
-		Prompt("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
+	d := gi.NewBody().AddTitle("Query-Replace").
+		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
 	fc := gi.NewChooser(d, "find").SetEditable(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
@@ -316,12 +316,17 @@ func (ed *Editor) QReplacePrompt() {
 	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetState(lexitems, states.Checked).
 		SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
-	d.OnAccept(func(e events.Event) {
-		find := fc.CurVal.(string)
-		repl := rc.CurVal.(string)
-		lexItems := lxi.StateIs(states.Checked)
-		ed.QReplaceStart(find, repl, lexItems)
-	}).Cancel().Ok("Query-Replace").Run()
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).SetText("Query-Replace").OnClick(func(e events.Event) {
+			find := fc.CurVal.(string)
+			repl := rc.CurVal.(string)
+			lexItems := lxi.StateIs(states.Checked)
+			ed.QReplaceStart(find, repl, lexItems)
+		})
+	})
+	gi.NewDialog(sc).SetContext(d).Run()
 }
 
 // QReplaceStart starts query-replace using given find, replace strings

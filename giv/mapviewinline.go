@@ -82,7 +82,7 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 					// 	tynm = tmptyp.String()
 					// }
 				}
-				d := gi.NewDialog(mv).Title(title).Prompt(mv.Tooltip).FullWindow(true)
+				d := gi.NewBody(mv).AddTitle(title).AddText(mv.Tooltip).FullWindow(true)
 				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map).SetTmpSave(mv.TmpSave)
 				d.OnAccept(func(e events.Event) {
 					mv.SendChange()

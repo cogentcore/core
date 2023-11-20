@@ -431,7 +431,7 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if gi.RecycleDialog(stru) {
 		return
 	}
-	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
 	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
 	d.TopAppBar = gi.TopAppBarFor(stru)
 	if d.TopAppBar == nil {
@@ -576,7 +576,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
+		d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
 		tv := NewTableView(d).SetSlice(slci)
 		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.TopAppBar = gi.TopAppBarFor(slci)
@@ -594,7 +594,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 			}
 		}).Run()
 	} else {
-		d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
+		d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
 		sv := NewSliceView(d).SetSlice(slci)
 		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 		d.TopAppBar = gi.TopAppBarFor(slci)
@@ -727,7 +727,7 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	mpi := vv.Value.Interface()
 	readOnly := vv.IsReadOnly()
-	d := gi.NewDialog(vv.Widget).Title(title).Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(vv.Widget).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
 	NewMapView(d).SetMap(mpi).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
@@ -874,7 +874,7 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	readOnly := vv.IsReadOnly()
-	d := gi.NewDialog(ctx).Title(title).Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle(title).AddText(vv.Doc()).FullWindow(true)
 	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
 	d.OnAccept(func(e events.Event) {
 		vv.UpdateWidget()
@@ -1527,7 +1527,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	si := 0
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	d := gi.NewDialog(ctx).Title("Select an icon").Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle("Select an icon").AddText(vv.Doc()).FullWindow(true)
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(string(ics[row]))
 	}).
@@ -1601,7 +1601,7 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
-	d := gi.NewDialog(ctx).Title("Select a Font").Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle("Select a Font").AddText(vv.Doc()).FullWindow(true)
 	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
@@ -1678,7 +1678,7 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	d := gi.NewDialog(ctx).Title(vv.Name()).Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle(vv.Name()).AddText(vv.Doc()).FullWindow(true)
 	fv := NewFileView(d).SetFilename(cur, ext)
 	fv.OnSelect(func(e events.Event) {
 		cur = fv.SelectedFile()

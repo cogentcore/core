@@ -896,7 +896,7 @@ func (fv *FileView) EditPaths() {
 	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	d := gi.NewDialog(fv).Title("Recent file paths").Prompt("Delete paths you no longer use").FullWindow(true)
+	d := gi.NewBody(fv).AddTitle("Recent file paths").AddText("Delete paths you no longer use").FullWindow(true)
 	NewSliceView(d).SetSlice(&tmp).SetFlag(true, SliceViewNoAdd)
 	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		gi.SavedPaths = nil

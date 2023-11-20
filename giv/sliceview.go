@@ -805,7 +805,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vvb := sv.SliceValView.AsValueBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				d := gi.NewDialog(sv).Title("Slice New").Prompt("Number and Type of Items to Insert:")
+				d := gi.NewBody(sv).AddTitle("Slice New").AddText("Number and Type of Items to Insert:")
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
 				ki.ChildByType[*gi.Chooser](w, true).SetTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true, 50)

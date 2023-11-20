@@ -260,7 +260,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewDialog(tv).Title(actNm).Prompt("Number and Type of Items to Insert:")
+	d := gi.NewBody(tv).AddTitle(actNm).AddText("Number and Type of Items to Insert:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
@@ -283,7 +283,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.This().BaseType()
 	}
-	d := gi.NewDialog(tv).Title(ttl).Prompt("Number and Type of Items to Add:")
+	d := gi.NewBody(tv).AddTitle(ttl).AddText("Number and Type of Items to Add:")
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
@@ -388,12 +388,12 @@ func (tv *TreeView) DuplicateSync() {
 func (tv *TreeView) EditNode() { //gti:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.KiType().Name
-		d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
+		d := gi.NewBody(tv).AddTitle(tynm).FullWindow(true)
 		NewStructView(d).SetStruct(tv.SyncNode)
 		d.Run()
 	} else {
 		tynm := tv.KiType().Name
-		d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
+		d := gi.NewBody(tv).AddTitle(tynm).FullWindow(true)
 		NewStructView(d).SetStruct(tv.This())
 		d.Run()
 	}

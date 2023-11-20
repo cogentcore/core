@@ -624,7 +624,7 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	d := gi.NewDialog(ctx).Title("Edit color").Prompt(vv.Doc())
+	d := gi.NewBody(ctx).AddTitle("Edit color").AddText(vv.Doc())
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
 	d.OnAccept(func(e events.Event) {
 		cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
@@ -707,7 +707,7 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 		}
 	}
 	si := 0
-	d := gi.NewDialog(ctx).Title("Select a Color Name").Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle("Select a Color Name").AddText(vv.Doc()).FullWindow(true)
 	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {

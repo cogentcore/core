@@ -712,20 +712,24 @@ func (ed *Editor) CursorTransposeWord() {
 }
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
-func (ed *Editor) JumpToLinePrompt() {
+func (ed *Editor) JumpToLineAddText() {
 	val := ""
-	d := gi.NewDialog(ed).Title("Jump to line").Prompt("Line number to jump to")
+	d := gi.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
 	tf := gi.NewTextField(d).SetPlaceholder("Line number")
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	d.OnAccept(func(e events.Event) {
-		ln, err := laser.ToInt(val)
-		if err == nil {
-			ed.JumpToLine(int(ln))
-		}
-	}).Cancel().Ok("Jump").Run()
-
+	sc := gi.NewScene(d)
+	sc.Footer.Add(func(par gi.Widget) {
+		sc.AddCancel(par)
+		sc.AddOk(par).SetText("Jump").OnClick(func(e events.Event) {
+			ln, err := laser.ToInt(val)
+			if err == nil {
+				ed.JumpToLine(int(ln))
+			}
+		})
+	})
+	gi.NewDialog(sc).SetContext(ed).Run()
 }
 
 // JumpToLine jumps to given line number (minus 1)

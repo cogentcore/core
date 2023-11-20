@@ -91,14 +91,14 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 				}
 				cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 				if err == nil {
-					d := gi.NewDialog(lv).Title("Commit Info: " + cmt.Rev).FullWindow(true)
+					d := gi.NewBody(lv).AddTitle("Commit Info: " + cmt.Rev).FullWindow(true)
 					buf := texteditor.NewBuf()
 					buf.Filename = gi.FileName(lv.File)
 					buf.Opts.LineNos = true
 					buf.Stat()
 					texteditor.NewEditor(d).SetBuf(buf)
 					buf.SetText(cinfo)
-					gi.NewButton(d.Buttons()).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+					d.Footer.Add(func(par Widget) { gi.NewButton(par).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 						OnClick(func(e events.Event) {
 							d.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(cinfo))
 						})
@@ -210,7 +210,7 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	if since != "" {
 		title += " since: " + since
 	}
-	d := gi.NewDialog(ctx).Title(title).NewWindow(true)
+	d := gi.NewBody(ctx).AddTitle(title).NewWindow(true)
 
 	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)

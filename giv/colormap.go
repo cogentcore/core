@@ -62,7 +62,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 		cur = cv.Map.Name
 	}
 	si := 0
-	d := gi.NewDialog(cv).Title("Select a color map").Prompt("Choose color map to use from among available list").FullWindow(true)
+	d := gi.NewBody(cv).AddTitle("Select a color map").AddText("Choose color map to use from among available list").FullWindow(true)
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {
@@ -191,7 +191,7 @@ func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	cur := laser.ToString(vv.Value.Interface())
 
 	si := 0
-	d := gi.NewDialog(ctx).Title("Select a color map").Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle("Select a color map").AddText(vv.Doc()).FullWindow(true)
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {

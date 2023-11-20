@@ -234,14 +234,14 @@ func (fb *FuncButton) CallFunc() {
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		gi.NewDialog(ctx).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+		gi.NewBody(ctx).AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
 			OnAccept(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(nil)
 				fb.ShowReturnsDialog(rets)
 			}).Run()
 		return
 	}
-	d := gi.NewDialog(ctx).Title(fb.Text).Prompt(fb.Tooltip)
+	d := gi.NewBody(ctx).AddTitle(fb.Text).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Args)
 	d.Cancel().Ok().OnAccept(func(e events.Event) {
 		rargs := make([]reflect.Value, len(fb.Args))
@@ -254,7 +254,7 @@ func (fb *FuncButton) CallFunc() {
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		gi.NewDialog(ctx).Title(fb.Text + "?").Prompt("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
+		gi.NewBody(ctx).AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip).Cancel().Ok().
 			OnAccept(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(rargs)
 				fb.ShowReturnsDialog(rets)
@@ -305,7 +305,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if fb.Context == nil {
 		ctx = fb.This().(gi.Widget)
 	}
-	d := gi.NewDialog(ctx).Title(main).Prompt(fb.Tooltip)
+	d := gi.NewBody(ctx).AddTitle(main).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
 	d.Ok().Run()
 }

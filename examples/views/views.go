@@ -153,14 +153,14 @@ func app() {
 			SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
 			OnClick(func(e events.Event) {
 				sl := make([]float32, 2880)
-				d := gi.NewDialog(tb).Title("SliceView Test").Prompt("It should open quickly.").FullWindow(true)
+				d := gi.NewBody(tb).AddTitle("SliceView Test").AddText("It should open quickly.").FullWindow(true)
 				giv.NewSliceView(d).SetSlice(&sl)
 				d.Run()
 			})
 		gi.NewButton(tb, "table-test").SetText("TableDialog").
 			SetTooltip("open a TableViewDialog view").
 			OnClick(func(e events.Event) {
-				d := gi.NewDialog(tb).Title("TableView Test").Prompt("how does it resize.").FullWindow(true)
+				d := gi.NewBody(tb).AddTitle("TableView Test").AddText("how does it resize.").FullWindow(true)
 				giv.NewTableView(d).SetSlice(&tsttable)
 				d.Run()
 			})

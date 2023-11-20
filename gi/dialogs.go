@@ -54,17 +54,17 @@ func RecycleDialog(data any) bool {
 // in the context of the given widget.
 func ErrorDialog(ctx Widget, err error) Stage {
 	sc := NewScene(NewBody(ctx.Name() + "-error-dialog").AddTitle("There was an error").AddText(err.Error()))
-	sc.Footer.Add(func(par Widget) { sc.AddOK(par) })
+	sc.Footer.Add(func(par Widget) { sc.AddOk(par) })
 	return NewDialog(sc).SetContext(ctx)
 }
 
-// AddOK adds an OK button to given parent Widget (typically in Bottom
+// AddOk adds an OK button to given parent Widget (typically in Bottom
 // function), connecting to Close method the Ctrl+Enter keychord event.
 // Close sends a Change event to the Scene for listeners there.
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective OK buttons.
-func (sc *Scene) AddOK(par Widget, name ...string) *Button {
+func (sc *Scene) AddOk(par Widget, name ...string) *Button {
 	nm := "ok"
 	if len(name) > 0 {
 		nm = name[0]

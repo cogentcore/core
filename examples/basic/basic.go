@@ -28,7 +28,7 @@ func app() {
 	// 		fmt.Println("button clicked")
 	// 		// dialog := gi.NewScene("dialog")
 	// 		// gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
-	// 		// gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
+	// 		// gi.NewBody(dialog, but).SetModal().SetMovable().SetCloseable().Run()
 	// 	})
 
 	// gi.NewSwitch(sc)

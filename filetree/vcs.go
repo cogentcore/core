@@ -313,7 +313,7 @@ func (fn *Node) BlameVcsSel() { //gti:add
 // blame is the annotated blame code, while fbytes is the original file contents.
 func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
-	d := gi.NewDialog(ctx).Title(title).Ok()
+	d := gi.NewBody(ctx).AddTitle(title).Ok()
 
 	tv := texteditor.NewTwinEditors(d, "twin-view")
 	tv.SetFiles(fname, fname, true)

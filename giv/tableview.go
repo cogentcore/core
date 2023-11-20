@@ -915,7 +915,7 @@ func (tv *TableView) EditIdx(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	d := gi.NewDialog(tv).Title(tynm).FullWindow(true)
+	d := gi.NewBody(tv).AddTitle(tynm).FullWindow(true)
 	NewStructView(d).SetStruct(stru)
 	d.Run()
 }

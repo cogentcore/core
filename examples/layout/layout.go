@@ -209,7 +209,7 @@ func app() {
 		ts.Date = time.Now()
 		giv.NewStructView(sc).SetStruct(ts)
 	case "center-dialog":
-		d := gi.NewDialog(sc).FullWindow(true)
+		d := gi.NewBody(sc).FullWindow(true)
 		d.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 			s.Align.Set(styles.AlignCenter)

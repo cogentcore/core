@@ -12,7 +12,7 @@ func app() {
 	gi.NewLabel(body).SetText("Hello, World!")
 	gi.NewWindowBody(body).Run().Wait() // makes a scene behind the scenes..
 
-	gi.NewDialog(body).SetModal(true).
+	gi.NewBody(body).SetModal(true).
 	
 	gi.NewWindow(gi.NewScene(body)).Run().Wait()
 	

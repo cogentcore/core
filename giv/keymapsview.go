@@ -118,7 +118,7 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(d *gi.Dialog)) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	d := gi.NewDialog(ctx).Title("Select a key map").Prompt(vv.Doc()).FullWindow(true)
+	d := gi.NewBody(ctx).AddTitle("Select a key map").AddText(vv.Doc()).FullWindow(true)
 	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(d, &si)
 	d.OnAccept(func(e events.Event) {
 		if si >= 0 {

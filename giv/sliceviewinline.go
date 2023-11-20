@@ -84,7 +84,7 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 					title = "Slice of " + laser.NonPtrType(elType).Name()
 				}
-				d := gi.NewDialog(sv).Title(title).FullWindow(true)
+				d := gi.NewBody(sv).AddTitle(title).FullWindow(true)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice).SetTmpSave(sv.TmpSave)
 				d.OnAccept(func(e events.Event) {
 					if sv.SliceValView != nil { // todo: this is not updating
