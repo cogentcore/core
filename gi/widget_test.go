@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 )
@@ -26,10 +25,12 @@ func TestBasicWidgets(t *testing.T) {
 		typ := typ
 		sc := NewEmptyScene()
 		sc.NewChild(typ)
+		captured := make(chan struct{})
 		sc.On(events.Custom, func(e events.Event) {
-			goosi.AssertCaptureIs(t, strcase.ToSnake(typ.IDName))
-			sc.Close()
+			sc.AssertPixels(t, strcase.ToSnake(typ.IDName))
+			captured <- struct{}{}
 		})
-		NewWindow(sc).Run().Wait()
+		NewWindow(sc).Run()
+		<-captured
 	}
 }
