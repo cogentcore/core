@@ -198,7 +198,7 @@ func (app *appImpl) setSysWindow(sz image.Point) error {
 	app.screen.DevicePixelRatio = 1
 	app.screen.PixSize = sz
 	app.screen.Geometry.Max = app.screen.PixSize
-	dpi := float32(96)
+	dpi := float32(160)
 	app.screen.PhysicalDPI = dpi
 	app.screen.LogicalDPI = dpi
 
