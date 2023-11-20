@@ -15,16 +15,14 @@ import (
 )
 
 func TestLayout(t *testing.T) {
-	RunTest(func() {
-		sc := NewScene()
-		NewFrame(sc).Style(func(s *styles.Style) {
-			s.Min.Set(units.Em(20))
-			s.Grow.Set(0, 0)
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
-		})
-		NewWindow(sc).Run()
-		goosi.AssertCaptureIs(t, "layout")
+	sc := NewScene()
+	NewFrame(sc).Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(20))
+		s.Grow.Set(0, 0)
+		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 	})
+	NewWindow(sc).Run()
+	goosi.AssertCaptureIs(t, "layout")
 }
 
 // LayoutFlex tests the core layout flex logic
@@ -32,48 +30,46 @@ func TestLayout(t *testing.T) {
 // https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
 func TestLayoutFlex(t *testing.T) {
 	t.Skip()
-	RunTest(func() {
-		sc := NewScene()
-		sc.SceneGeom.Size = image.Point{600, 400}
+	sc := NewScene()
+	sc.SceneGeom.Size = image.Point{600, 400}
 
-		sc.Style(func(s *styles.Style) {
-			s.Display = styles.Grid
-			s.Columns = 2
-			s.Gap.Set(units.Dot(4))
-		})
-
-		sp1 := NewSpace(sc, "sp1")
-		sp1.Style(func(s *styles.Style) {
-			s.Min.X.Dot(10)
-			s.Min.Y.Dot(5)
-			s.Padding.Set(units.Dot(2))
-			s.Margin.Set(units.Dot(3))
-			s.Grow.Set(2, 1)
-		})
-
-		sp2 := NewSpace(sc, "sp2")
-		sp2.Style(func(s *styles.Style) {
-			s.Min.X.Dot(25)
-			s.Min.Y.Dot(10)
-			s.Grow.Set(1, 1)
-		})
-
-		sp3 := NewSpace(sc, "sp3")
-		sp3.Style(func(s *styles.Style) {
-			s.Min.X.Dot(5)
-			s.Min.Y.Dot(2)
-			s.Grow.Set(2, 1)
-		})
-
-		sp4 := NewSpace(sc, "sp4")
-		sp4.Style(func(s *styles.Style) {
-			s.Min.X.Dot(15)
-			s.Min.Y.Dot(15)
-			s.Grow.Set(1, 1)
-		})
-
-		sc.ConfigScene()
-		sc.ApplyStyleScene()
-		sc.LayoutScene()
+	sc.Style(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 2
+		s.Gap.Set(units.Dot(4))
 	})
+
+	sp1 := NewSpace(sc, "sp1")
+	sp1.Style(func(s *styles.Style) {
+		s.Min.X.Dot(10)
+		s.Min.Y.Dot(5)
+		s.Padding.Set(units.Dot(2))
+		s.Margin.Set(units.Dot(3))
+		s.Grow.Set(2, 1)
+	})
+
+	sp2 := NewSpace(sc, "sp2")
+	sp2.Style(func(s *styles.Style) {
+		s.Min.X.Dot(25)
+		s.Min.Y.Dot(10)
+		s.Grow.Set(1, 1)
+	})
+
+	sp3 := NewSpace(sc, "sp3")
+	sp3.Style(func(s *styles.Style) {
+		s.Min.X.Dot(5)
+		s.Min.Y.Dot(2)
+		s.Grow.Set(2, 1)
+	})
+
+	sp4 := NewSpace(sc, "sp4")
+	sp4.Style(func(s *styles.Style) {
+		s.Min.X.Dot(15)
+		s.Min.Y.Dot(15)
+		s.Grow.Set(1, 1)
+	})
+
+	sc.ConfigScene()
+	sc.ApplyStyleScene()
+	sc.LayoutScene()
 }

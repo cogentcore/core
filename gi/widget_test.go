@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"os"
 	"testing"
 
 	"github.com/iancoleman/strcase"
@@ -12,14 +13,18 @@ import (
 	"goki.dev/gti"
 )
 
-func TestBasicWidgets(t *testing.T) {
+func TestMain(m *testing.M) {
 	RunTest(func() {
-		types := gti.AllEmbeddersOf(WidgetBaseType)
-		for _, typ := range types {
-			sc := NewScene()
-			sc.NewChild(typ)
-			NewWindow(sc).Run()
-			goosi.AssertCaptureIs(t, strcase.ToSnake(typ.IDName))
-		}
+		os.Exit(m.Run())
 	})
+}
+
+func TestBasicWidgets(t *testing.T) {
+	types := gti.AllEmbeddersOf(WidgetBaseType)
+	for _, typ := range types {
+		sc := NewScene()
+		sc.NewChild(typ)
+		NewWindow(sc).Run()
+		goosi.AssertCaptureIs(t, strcase.ToSnake(typ.IDName))
+	}
 }
