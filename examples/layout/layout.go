@@ -116,14 +116,15 @@ func app() {
 	// gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
 
 	ctrl := &Control{}
+	ctrl.Grow.Set(1, 1)
 	splt := gi.NewSplits(b)
 
 	svfr := gi.NewFrame(splt).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	giv.NewStructView(svfr).SetStruct(ctrl)
+	sv := giv.NewStructView(svfr).SetStruct(ctrl)
 
-	fr := gi.NewFrame(splt)
+	fr := BoxFrame(splt)
 	PlainFrames(fr, mat32.Vec2{0, 0})
 	fr.Style(func(s *styles.Style) {
 		s.Display = ctrl.Display
@@ -136,7 +137,7 @@ func app() {
 		s.Grow = ctrl.Grow
 	})
 
-	gi.NewButton(svfr).SetText("Redraw").OnClick(func(e events.Event) {
+	sv.OnChange(func(e events.Event) {
 		fr.Update()
 	})
 
