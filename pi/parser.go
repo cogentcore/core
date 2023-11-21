@@ -11,9 +11,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"
@@ -180,7 +182,9 @@ func (pr *Parser) DoPassTwo(fs *FileState) {
 func (pr *Parser) LexAll(fs *FileState) {
 	pr.LexInit(fs)
 	// lprf := prof.Start("LexRun") // quite fast now..
+	pr.SaveGrammar("gmr.pig")
 	pr.LexRun(fs)
+	fs.LexErrReport()
 	// lprf.End()
 	pr.DoPassTwo(fs) // takes virtually no time
 }
@@ -286,7 +290,13 @@ func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *
 
 // ReadJSON opens lexer and parser rules from Bytes, in a standard JSON-formatted file
 func (pr *Parser) ReadJSON(b []byte) error {
-	return json.Unmarshal(b, pr)
+	err := json.Unmarshal(b, pr)
+	ki.UnmarshalPost(pr.Lexer.This())
+	ki.UnmarshalPost(pr.Parser.This())
+	if err != nil {
+		slog.Error(err)
+	}
+	return err
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file

@@ -17,6 +17,8 @@ import (
 	"goki.dev/pi/v2/token"
 )
 
+var Trace = true
+
 // Lexer is the interface type for lexers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes
 type Lexer interface {
@@ -108,6 +110,7 @@ func (lr *Rule) CompileAll(ls *State) bool {
 		lri := k.(*Rule)
 		ok := lri.Compile(ls)
 		if !ok {
+			fmt.Println("lex rule error", lr)
 			allok = false
 		}
 		return true
@@ -284,6 +287,9 @@ func (lr *Rule) Lex(ls *State) *Rule {
 			tok.Key = lr.String //  if we matched, this is it
 		}
 		ls.Add(tok, st, ed)
+		if Trace {
+			fmt.Println("Lex:", lr.Desc, "Added token:", tok, "at:", st, ed)
+		}
 	}
 	if !lr.HasChildren() {
 		return lr
@@ -310,6 +316,9 @@ func (lr *Rule) Lex(ls *State) *Rule {
 	// if kids don't match and we don't have any actions, we are just a grouper
 	// and thus we depend entirely on kids matching
 	if len(lr.Acts) == 0 {
+		if Trace {
+			fmt.Println("Lex:", lr.Desc, "fallthrough")
+		}
 		return nil
 	}
 
