@@ -30,7 +30,7 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	gi.SetAppName(opts.AppName)
 	gi.SetAppAbout(opts.AppAbout)
 
-	sc := gi.NewScene(opts.AppName).SetTitle(opts.AppTitle)
+	b := gi.NewBody(opts.AppName).SetTitle(opts.AppTitle)
 
 	gi.DefaultTopAppBar = func(tb *gi.TopAppBar) {
 		gi.DefaultTopAppBarStd(tb)
@@ -52,51 +52,8 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 		}
 	}
 
-	sv := giv.NewStructView(sc)
+	sv := giv.NewStructView(b)
 	sv.SetStruct(cfg)
 
-	gi.NewWindow(sc).Run().Wait()
-
-	// TODO: add main menu
-	/*
-
-		// Main Menu
-
-		appnm := gi.AppName()
-		mmen := win.MainMenu
-		mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
-
-		amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-		amen.Menu.AddAppMenu(win)
-
-		// TODO: finish these functions
-		fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-		fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: keyfun.MenuNew},
-			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-
-			})
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: keyfun.MenuOpen},
-			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			})
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: keyfun.MenuSave},
-			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if grease.ConfigFile != "" {
-					grease.Save(cfg, grease.ConfigFile)
-				}
-			})
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: keyfun.MenuSaveAs},
-			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			})
-		fmen.Menu.AddSeparator("csep")
-		fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: keyfun.WinClose},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				win.CloseReq()
-			})
-
-		emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-		emen.Menu.AddCopyCutPaste(win)
-
-		vp.UpdateEndNoSig(updt)
-		win.StartEventLoop()
-	*/
+	b.NewWindow().Run().Wait()
 }
