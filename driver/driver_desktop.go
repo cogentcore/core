@@ -12,10 +12,18 @@
 package driver
 
 import (
+	"testing"
+
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/desktop"
+	"goki.dev/goosi/driver/offscreen"
 )
 
 func driverMain(f func(goosi.App)) {
+	// TODO(kai): consider supporting running tests on mobile and web
+	if testing.Testing() {
+		offscreen.Main(f)
+		return
+	}
 	desktop.Main(f)
 }
