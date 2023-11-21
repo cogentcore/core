@@ -90,13 +90,13 @@ func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 	dm.Init()
 	defer dm.Mu.Unlock()
 	df := dm.Map[path]
-	// mask := bitflag.Mask32(int(DirSortByName), int(DirSortByModTime))
-	// bitflag.ClearMask32((*int32)(&df), mask)
-	// if modTime {
-	// 	bitflag.Set32((*int32)(&df), int(DirSortByModTime))
-	// } else {
-	// 	bitflag.Set32((*int32)(&df), int(DirSortByName))
-	// }
+	if modTime {
+		df.SetFlag(true, DirSortByModTime)
+		df.SetFlag(false, DirSortByName)
+	} else {
+		df.SetFlag(false, DirSortByModTime)
+		df.SetFlag(true, DirSortByName)
+	}
 	dm.Map[path] = df
 }
 

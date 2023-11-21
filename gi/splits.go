@@ -71,6 +71,10 @@ func (sl *Splits) SplitsStyles() {
 			// could enforce our own styles here..
 			// w.Style(func(s *styles.Style) {
 			// })
+		} else if w.Parent() == sl.This() {
+			w.Style(func(s *styles.Style) {
+				s.Overflow.Set(styles.OverflowAuto)
+			})
 		}
 	})
 }
