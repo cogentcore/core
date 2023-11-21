@@ -11,9 +11,11 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -138,6 +140,12 @@ func app() {
 	})
 
 	sv.OnChange(func(e events.Event) {
+		if ctrl.Display != styles.Stacked { // stacked will make all but top invisible
+			fr.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
+				kwb.SetState(false, states.Invisible)
+				return ki.Continue
+			})
+		}
 		fr.Update()
 	})
 
