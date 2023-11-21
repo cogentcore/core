@@ -5,6 +5,8 @@
 package filetree
 
 import (
+	"log/slog"
+
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/texteditor"
@@ -14,11 +16,10 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
 )
 
-// VCSLogView is a view of the variables
+// VCSLogView is a view of the VCS log data
 type VCSLogView struct {
 	gi.Layout
 
@@ -64,53 +65,56 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.Log = lg
 	lv.File = file
 	lv.Since = since
+	if lv.HasChildren() {
+		return
+	}
 	lv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	config := ki.Config{}
-	config.Add(gi.FrameType, "toolbar")
-	config.Add(giv.TableViewType, "log")
-	mods, updt := lv.ConfigChildren(config)
-	tv := lv.TableView()
-	if mods {
-		lv.RevA = "HEAD"
-		lv.RevB = ""
-		lv.SetA = true
-		lv.ConfigToolbar()
-		tv.OnDoubleClick(func(e events.Event) {
-			idx := tv.TmpIdx
-			if idx >= 0 && idx < len(lv.Log) {
-				cmt := lv.Log[idx]
-				if lv.File != "" {
-					if lv.SetA {
-						lv.SetRevA(cmt.Rev)
-					} else {
-						lv.SetRevB(cmt.Rev)
-					}
-					lv.ToggleRev()
-				}
-				cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
-				if err == nil {
-					d := gi.NewBody(lv).AddTitle("Commit Info: " + cmt.Rev).FullWindow(true)
-					buf := texteditor.NewBuf()
-					buf.Filename = gi.FileName(lv.File)
-					buf.Opts.LineNos = true
-					buf.Stat()
-					texteditor.NewEditor(d).SetBuf(buf)
-					buf.SetText(cinfo)
-					d.Footer.Add(func(par Widget) { gi.NewButton(par).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
-						OnClick(func(e events.Event) {
-							d.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(cinfo))
-						})
-					d.Ok().Run()
-				}
-			}
-		})
-	} else {
-		updt = lv.UpdateStart()
-	}
+	updt := lv.UpdateStart()
+	gi.NewToolbar(lv, "toolbar")
+	tv := giv.NewTableView(lv, "log")
 	tv.SetReadOnly(true)
 	tv.SetSlice(&lv.Log)
+	lv.RevA = "HEAD"
+	lv.RevB = ""
+	lv.SetA = true
+	lv.ConfigToolbar()
+	tv.OnDoubleClick(func(e events.Event) {
+		idx := tv.SelIdx
+		if idx < 0 || idx >= len(lv.Log) {
+			return
+		}
+		cmt := lv.Log[idx]
+		if lv.File != "" {
+			if lv.SetA {
+				lv.SetRevA(cmt.Rev)
+			} else {
+				lv.SetRevB(cmt.Rev)
+			}
+			lv.ToggleRev()
+		}
+		cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
+		if err != nil {
+			slog.Error(err.Error())
+			return
+		}
+		d := gi.NewBody().AddTitle("Commit Info: " + cmt.Rev)
+		buf := texteditor.NewBuf()
+		buf.Filename = gi.FileName(lv.File)
+		buf.Opts.LineNos = true
+		buf.Stat()
+		texteditor.NewEditor(d).SetBuf(buf)
+		buf.SetText(cinfo)
+		d.AddBottomBar(func(pw gi.Widget) {
+			gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+				OnClick(func(e events.Event) {
+					d.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cinfo))
+				})
+			d.AddOk(pw)
+		})
+		d.NewFullDialog(lv).Run()
+	})
 	lv.UpdateEndLayout(updt)
 }
 
@@ -200,7 +204,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 }
 
 // VCSLogViewDialog returns a VCS Log View for given repo, log and file (file could be empty)
-func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog {
+func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since string) *gi.Body {
 	title := "VCS Log: "
 	if file == "" {
 		title += "All files"
@@ -210,10 +214,8 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	if since != "" {
 		title += " since: " + since
 	}
-	d := gi.NewBody(ctx).AddTitle(title).NewWindow(true)
-
+	d := gi.NewBody().AddTitle(title)
 	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
-
 	return d
 }

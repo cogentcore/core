@@ -116,7 +116,10 @@ type Layouter interface {
 	// ManageOverflow uses overflow settings to determine if scrollbars
 	// are needed, based on difference between ActualOverflow (full actual size)
 	// and Alloc allocation.  Returns true if size changes as a result.
-	ManageOverflow(sc *Scene, iter int) bool
+	// If updtSize is false, then the Actual and Alloc sizes are NOT
+	// updated as a result of change from adding scrollbars
+	// (generally should be true, but some cases not)
+	ManageOverflow(sc *Scene, iter int, updtSize bool) bool
 }
 
 // AsLayout returns the given value as a value of type Layout if the type
@@ -1102,7 +1105,7 @@ func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
 	if LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(sc, iter) // this must go first.
+	chg := ly.This().(Layouter).ManageOverflow(sc, iter, true) // this must go first.
 	wrapped := false
 	if iter <= 1 && ly.Styles.IsFlexWrap() {
 		wrapped = ly.SizeDownWrap(sc, iter) // first recompute wrap
@@ -1138,7 +1141,10 @@ func (ly *Layout) SizeDownSetAllocs(sc *Scene, iter int) {
 
 // ManageOverflow uses overflow settings to determine if scrollbars
 // are needed (Internal > Alloc).  Returns true if size changes as a result.
-func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
+// If updtSize is false, then the Actual and Alloc sizes are NOT
+// updated as a result of change from adding scrollbars
+// (generally should be true, but some cases not)
+func (ly *Layout) ManageOverflow(sc *Scene, iter int, updtSize bool) bool {
 	sz := &ly.Geom.Size
 	oflow := sz.Internal.Sub(sz.Alloc.Content)
 	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
@@ -1185,8 +1191,10 @@ func (ly *Layout) ManageOverflow(sc *Scene, iter int) bool {
 		}
 	}
 	ly.This().(Layouter).LayoutSpace() // adds the scroll space
-	sz.SetTotalFromContent(&sz.Actual)
-	sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
+	if updtSize {
+		sz.SetTotalFromContent(&sz.Actual)
+		sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
+	}
 	if change && LayoutTrace {
 		fmt.Println(ly, "ManageOverflow changed")
 	}

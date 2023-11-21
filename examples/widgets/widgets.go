@@ -113,15 +113,15 @@ func app() {
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		txt := ""
-		b := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")
-		giv.NewValue(b, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
-		b.AddBottomBar(func(pw gi.Widget) {
-			b.AddCancel(pw)
-			b.AddOk(pw).OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")
+		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
 				fmt.Println("dialog accepted; string entered:", txt)
 			})
 		})
-		b.NewDialog(button2).Run()
+		d.NewDialog(button2).Run()
 	})
 
 	toggle := gi.NewSwitch(brow).SetText("Toggle")

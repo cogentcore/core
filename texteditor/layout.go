@@ -54,14 +54,14 @@ func (ed *Editor) UpdateFromAlloc() {
 
 func (ed *Editor) SizeFinal(sc *gi.Scene) {
 	sz := &ed.Geom.Size
-	ed.ManageOverflow(sc, 0)
+	ed.ManageOverflow(sc, 0, false)
 	ed.Layout.SizeFinal(sc)
 	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	sz.Actual.Content.X -= sbw // anticipate scroll
+	// sz.Actual.Content.X -= sbw // anticipate scroll
 	ed.UpdateFromAlloc()
 	ed.LayoutAllLines()
 	// fmt.Println("final pre manage, actual:", sz.Actual, "space:", sz.Space)
-	if ed.ManageOverflow(sc, 3) {
+	if ed.ManageOverflow(sc, 3, false) {
 		if ed.HasScroll[mat32.X] {
 			sz.Actual.Total.Y -= sbw
 		}

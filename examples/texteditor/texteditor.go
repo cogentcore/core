@@ -25,9 +25,9 @@ func app() {
 	gi.SetAppName("texteditor")
 	gi.SetAppAbout(`This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	gi.DefaultTopAppBar = nil
+	// gi.DefaultTopAppBar = nil
 
-	sc := gi.NewScene("texteditor-test").SetTitle("GoGi texteditor.Editor Test")
+	b := gi.NewBody().SetTitle("GoGi texteditor.Editor Test")
 
 	// hdrText := `This is a <b>test</b> of the texteditor.Editor`
 	// title := gi.NewLabel(sc, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
@@ -37,7 +37,7 @@ func app() {
 	// 	s.Text.AlignV = styles.Start
 	// })
 	//
-	splt := gi.NewSplits(sc, "split-view")
+	splt := gi.NewSplits(b, "split-view")
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
 	splt.Style(func(s *styles.Style) {
@@ -70,5 +70,5 @@ func app() {
 	txbuf.Open(samplefile)
 	// giv.InspectorDialog(&txbuf.Hi.PiLang.Parser().Parser) .Lexer //
 
-	sc.NewWindow().Run().Wait()
+	b.NewWindow().Run().Wait()
 }

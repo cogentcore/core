@@ -70,9 +70,7 @@ func (fb *FileBrowse) OnInit() {
 			title := w.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall
 			w.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
-				s.Align.X = styles.Center
-				s.Align.Y = styles.Start
+				s.Justify.Content = styles.Center
 			})
 		case "splits":
 			split := w.(*gi.Splits)
@@ -405,16 +403,12 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 // path, returning the window and the path
 func NewFileBrowser(path string) (*FileBrowse, gi.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
-	nm := "browser-" + projnm
+	// nm := "browser-" + projnm
 
-	sc := gi.NewScene(nm).SetTitle("Browser: " + projnm)
-	fb := NewFileBrowse(sc, "browser")
-
-	sc.TopAppBar = fb.TopAppBar
-
+	b := gi.NewBody().SetTitle("Browser: " + projnm)
+	fb := NewFileBrowse(b, "browser")
 	fb.OpenPath(gi.FileName(path))
-
-	return fb, sc.NewWindow().Run()
+	return fb, b.NewWindow().Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -296,9 +296,9 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	bbmax := mat32.NewVec2FmPoint(bb.Max)
 	pc.FillBox(rs, bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
 	pos := ed.RenderStartPos()
-	if bbmin.X > pos.X {
-		pos.X = bbmin.X
-	}
+	// if bbmin.X > pos.X {
+	// 	pos.X = bbmin.X
+	// }
 	stln := -1
 	edln := -1
 	for ln := 0; ln < ed.NLines; ln++ {

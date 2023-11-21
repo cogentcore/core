@@ -99,12 +99,15 @@ func (fn *Node) DuplicateFile() error {
 // deletes any selected files or directories. If any directory is selected,
 // all files and subdirectories in that directory are also deleted.
 func (fn *Node) DeleteFiles() { //gti:add
-	gi.NewBody(fn).AddTitle("Delete Files?").
-		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.").
-		Cancel().Ok("Delete Files").
-		OnAccept(func(e events.Event) {
+	d := gi.NewBody().AddTitle("Delete Files?").
+		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).SetText("Delete Files").OnClick(func(e events.Event) {
 			fn.DeleteFilesImpl()
-		}).Run()
+		})
+	})
+	d.NewDialog(fn).Run()
 }
 
 // DeleteFilesImpl does the actual deletion, no prompts
@@ -308,8 +311,8 @@ func (fn *Node) ShowFileInfo() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
-		d := gi.NewBody(fn).AddTitle("File info").FullWindow(true)
+		d := gi.NewBody().AddTitle("File info")
 		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
-		d.Run()
+		d.NewDialog(fn).Run()
 	}
 }
