@@ -26,7 +26,11 @@ type Body struct { //goki:no-new
 // having to access the Scene directly.
 func NewBody(name ...string) *Body {
 	bd := &Body{}
-	bd.InitName(bd, name...)
+	nm := AppName()
+	if len(name) > 0 {
+		nm = name[0]
+	}
+	bd.InitName(bd, nm)
 	bd.Sc = NewBodyScene(bd)
 	return bd
 }
