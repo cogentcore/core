@@ -102,6 +102,30 @@ func (sc *Scene) AddDefaultTopAppBar() {
 	})
 }
 
+// InheritBars inherits Bars functions from given other scene
+// for each side that the other scene marks as inherited.
+func (sc *Scene) InheritBars(osc *Scene) {
+	if osc == nil {
+		return
+	}
+	if osc.BarsInherit.Top || sc.BarsInherit.Top {
+		sc.Bars.Top = osc.Bars.Top
+		sc.BarsInherit.Top = true
+	}
+	if osc.BarsInherit.Bottom || sc.BarsInherit.Bottom {
+		sc.Bars.Bottom = osc.Bars.Bottom
+		sc.BarsInherit.Bottom = true
+	}
+	if osc.BarsInherit.Left || sc.BarsInherit.Left {
+		sc.Bars.Left = osc.Bars.Left
+		sc.BarsInherit.Left = true
+	}
+	if osc.BarsInherit.Right || sc.BarsInherit.Right {
+		sc.Bars.Right = osc.Bars.Right
+		sc.BarsInherit.Right = true
+	}
+}
+
 //////////////////////////////////////////////////////////////
 // 	Body wrappers
 

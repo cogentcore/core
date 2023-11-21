@@ -173,6 +173,7 @@ func (bd *Body) Close() {
 
 // DialogStyles sets default style functions for dialog Scenes
 func (sc *Scene) DialogStyles() {
+	sc.BarsInherit.Top = true
 	sc.Style(func(s *styles.Style) {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column

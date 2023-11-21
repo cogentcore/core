@@ -138,13 +138,12 @@ func (st *MainStage) SetWindowInsets() {
 
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
-	// st.AddTopAppBar()
 	return st
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
 	if st.FullWindow {
-		// st.AddTopAppBar()
+		st.InheritBars()
 	}
 	return st
 }
@@ -154,33 +153,16 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 	return st
 }
 
-// // SetDefaultTopAppbar sets the top app bar of the stage to its default value.
-// // This should not be called by end-user code.
-// func (st *StageBase) SetDefaultTopAppBar() {
-// 	// first fall back on context widget scene top app bar if we are a dialog
-// 	if st.Type == DialogStage {
-// 		cw := st.Context.AsWidget()
-// 		if cw != nil && cw.Sc != nil {
-// 			st.Scene.TopAppBar = cw.Sc.TopAppBar
-// 		}
-// 	}
-// 	if st.Scene.TopAppBar == nil {
-// 		st.Scene.TopAppBar = DefaultTopAppBar
-// 	}
-// }
-//
-// func (st *MainStage) AddTopAppBar() *MainStage {
-// 	if st.Scene.TopAppBar == nil {
-// 		st.SetDefaultTopAppBar()
-// 		// if still nil, bail
-// 		if st.Scene.TopAppBar == nil {
-// 			return st
-// 		}
-// 	}
-// 	tb := st.Scene.InsertNewChild(TopAppBarType, 0).(*TopAppBar)
-// 	st.Scene.TopAppBar(tb)
-// 	return st
-// }
+func (st *MainStage) InheritBars() {
+	if st.Context == nil {
+		return
+	}
+	cb := st.Context.AsWidget()
+	if cb.Sc == nil {
+		return
+	}
+	st.Scene.InheritBars(cb.Sc)
+}
 
 // FirstWinManager creates a MainStageMgr for the first window
 // to be able to get sizing information prior to having a RenderWin,

@@ -11,8 +11,9 @@ import (
 	"goki.dev/girl/styles"
 )
 
-// var samplefile gi.FileName = "sample.go"
-var samplefile gi.FileName = "../../Makefile"
+var samplefile gi.FileName = "sample.go"
+
+// var samplefile gi.FileName = "../../Makefile"
 
 // var samplefile gi.FileName = "../../README.md"
 
@@ -25,9 +26,9 @@ func app() {
 	gi.SetAppName("texteditor")
 	gi.SetAppAbout(`This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	// gi.DefaultTopAppBar = nil
-
 	b := gi.NewBody().SetTitle("GoGi texteditor.Editor Test")
+
+	b.AddDefaultTopAppBar()
 
 	// hdrText := `This is a <b>test</b> of the texteditor.Editor`
 	// title := gi.NewLabel(sc, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
@@ -66,7 +67,7 @@ func app() {
 	txed2.SetBuf(txbuf)
 
 	// txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
-	txbuf.Hi.Lang = "Makefile"
+	txbuf.Hi.Lang = "Go"
 	txbuf.Open(samplefile)
 	// giv.InspectorDialog(&txbuf.Hi.PiLang.Parser().Parser) .Lexer //
 
