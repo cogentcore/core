@@ -626,16 +626,15 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget) {
 	}
 	d := gi.NewBody().AddTitle("Edit color").AddText(vv.Doc())
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
 			vv.SetColor(*cclr)
 			vv.UpdateWidget()
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).Run()
+	d.NewDialog(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -710,16 +709,15 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget) {
 	}
 	si := 0
 	d := gi.NewBody().AddTitle("Select a Color Name").AddText(vv.Doc())
-	sc := gi.NewScene(d)
-	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				vv.SetValue(sl[si].Name)
 				vv.UpdateWidget()
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }

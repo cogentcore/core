@@ -917,12 +917,11 @@ func (tv *TableView) EditIdx(idx int) {
 	}
 	d := gi.NewBody().AddTitle(tynm)
 	NewStructView(d).SetStruct(stru)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw)
 	})
-	gi.NewDialog(sc).SetContext(tv).SetFullWindow(true).Run()
+	d.NewFullDialog(tv).Run()
 }
 
 func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {

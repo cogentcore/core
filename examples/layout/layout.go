@@ -6,34 +6,55 @@ package main
 
 import (
 	"fmt"
-	"time"
 
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
 
-type Wide struct {
-	Name  string
-	Title string
-	F2    string
-	F3    string
-}
+type Control struct {
+	// Display controls how items are displayed, in terms of layout
+	Display styles.Displays
 
-type Test struct {
-	Wide Wide `view:"inline"`
-	Vec  mat32.Vec2
-}
+	// Direction specifies the order elements are organized:
+	// Row is horizontal, Col is vertical.
+	// See also [Wrap]
+	Direction styles.Directions
 
-type TestTime struct {
-	Date time.Time
+	// Wrap causes elements to wrap around in the CrossAxis dimension
+	// to fit within sizing constraints (on by default).
+	Wrap bool
+
+	// Justify specifies the distribution of elements along the main axis,
+	// i.e., the same as Direction, for Flex Display.  For Grid, the main axis is
+	// given by the writing direction (e.g., Row-wise for latin based languages).
+	Justify styles.AlignSet `view:"inline"`
+
+	// Align specifies the cross-axis alignment of elements, orthogonal to the
+	// main Direction axis. For Grid, the cross-axis is orthogonal to the
+	// writing direction (e.g., Column-wise for latin based languages).
+	Align styles.AlignSet `view:"inline"`
+
+	// Min is the minimum size of the actual content, exclusive of additional space
+	// from padding, border, margin; 0 = default is sum of Min for all content
+	// (which _includes_ space for all sub-elements).
+	// This is equivalent to the Basis for the CSS flex styling model.
+	Min units.XY `view:"inline"`
+
+	// Max is the maximum size of the actual content, exclusive of additional space
+	// from padding, border, margin; 0 = default provides no Max size constraint
+	Max units.XY `view:"inline"`
+
+	// Grow is the proportional amount that the element can grow (stretch)
+	// if there is more space available.  0 = default = no growth.
+	// Extra available space is allocated as: Grow / sum (all Grow).
+	// Important: grow elements absorb available space and thus are not
+	// subject to alignment (Center, End).
+	Grow mat32.Vec2
 }
 
 var (
@@ -54,247 +75,6 @@ var (
 	}
 )
 
-func app() {
-	// turn on tracing in preferences, Debug
-	gi.LayoutTrace = true
-	gi.LayoutTraceDetail = true
-	// gi.UpdateTrace = true
-	// gi.RenderTrace = true
-
-	gi.SetAppName("layout")
-	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
-
-	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
-	gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
-
-	doCase := "small-round-button"
-
-	switch doCase {
-	case "frames-vert":
-		PlainFrames(sc, mat32.Vec2{0, 0})
-		sc.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Wrap = true
-			s.Align.X = styles.Center
-		})
-	case "frames-horiz":
-		row := HorizRow(sc)
-		row.Style(func(s *styles.Style) {
-			// s.Align.X = styles.End
-			s.Wrap = true
-		})
-		PlainFrames(row, mat32.Vec2{0, 0})
-		// gi.NewLabel(sc, "lbl").SetText(ShortText).Style(func(s *styles.Style) {
-		// })
-		HorizRow(sc).Style(func(s *styles.Style) {
-			s.Grow.Set(1, 1)
-		})
-	case "text-align":
-		// 	row := HorizRow(sc)
-		sc.Style(func(s *styles.Style) {
-			s.Align.X = styles.Center
-		})
-		gi.NewLabel(sc, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
-			s.Align.X = styles.Center
-			s.Text.Align = styles.Center
-		})
-	case "long-text-wrap": // just text
-		WrapText(sc, VeryLongText)
-	case "long-text-wrap-box": // text in box -- failing to adjust to full height
-		row := HorizRow(sc)
-		lbl := WrapText(row, VeryLongText)
-		row.Style(func(s *styles.Style) {
-			// s.Align.X = styles.End
-		})
-		lbl.Style(func(s *styles.Style) {
-			s.Align.X = styles.Center
-		})
-		fr := BoxFrame(sc) // this takes up slack
-		sm := WrapText(fr, ShortText)
-		_ = sm
-	case "long-text-wrap-max-box": // text in constrained box
-		row := HorizRow(sc)
-		lbl := WrapText(row, VeryLongText) // VeryLongText)
-		row.Style(func(s *styles.Style) {
-			// s.Align.X = styles.End
-			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
-			// s.Overflow.X = styles.OverflowAuto
-		})
-		lbl.Style(func(s *styles.Style) {
-			s.Text.Align = styles.Center
-		})
-		// fr := BoxFrame(sc) // this takes up slack
-		// sm := WrapText(fr, ShortText)
-		// _ = sm
-	case "scroll-absorb": // Auto scroll should absorb extra size
-		row := HorizRow(sc, "row")
-		f1, sp := SpaceFrame(row)
-		f1.Style(func(s *styles.Style) {
-			s.Overflow.Y = styles.OverflowAuto // this should absorb the size
-		})
-		sp.Style(func(s *styles.Style) {
-			s.Min.Y.Em(100)
-		})
-		BoxFrame(row).Style(func(s *styles.Style) {
-			s.Min.Y.Em(20) // fix size
-			s.Max.Y.Em(20) // fix size
-		})
-	case "scroll-absorb-splits": // Auto scroll should absorb extra size
-		sp, f1, f2 := Splits2(sc)
-		_ = sp
-		f1.Style(func(s *styles.Style) {
-			s.Overflow.Y = styles.OverflowAuto // this should absorb the size
-		})
-		gi.NewSpace(f1).Style(func(s *styles.Style) {
-			s.Grow.Set(1, 1)
-			s.Min.Y.Em(100)
-		})
-		f2.Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0)
-		})
-		gi.NewSpace(f2).Style(func(s *styles.Style) {
-			s.Min.X.Ch(20)
-			s.Min.Y.Em(20)
-		})
-	case "tabs-stack": // recreates the issue with demo tabs
-		// does not grow -- stacked not doing the right thing
-		tab, tfr := TabFrame(sc)
-		_ = tab
-		par := tfr // or sc
-		row := HorizRow(par)
-
-		sp := gi.NewSpace(row)
-		_ = sp
-		WrapText(par, LongText)
-		fr, sp2 := SpaceFrame(par)
-		_ = fr
-		_ = sp2
-		fr.Style(func(s *styles.Style) {
-			s.Grow.Set(0, 1)
-			s.Min.X.Em(20)
-			s.Min.Y.Em(10)
-		})
-	case "splits": // splits
-		sp, f1, f2 := Splits2(sc)
-		_ = f1
-		_ = f2
-		sp.SetSplits(.3, .7)
-	case "textfield-parts": // textfield parts alignment
-		gi.NewTextField(sc).AddClearButton()
-	case "switch":
-		gi.NewSwitch(sc)
-	case "button":
-		gi.NewButton(sc).SetText("Test")
-	case "small-round-button":
-		bt := gi.NewButton(sc).SetType(gi.ButtonAction).SetText("22").Style(func(s *styles.Style) {
-			s.Min.X.Dp(40)
-			s.Min.Y.Dp(40)
-			s.Padding.Zero()
-			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-			s.Color = colors.Scheme.Primary.On
-		})
-		bt.Config(sc)
-		bt.Parts.Style(func(s *styles.Style) {
-			s.Text.Align = styles.Center
-			s.Text.AlignV = styles.Center
-			s.Align.Set(styles.Center)
-			s.Padding.Zero()
-			s.Margin.Zero()
-		})
-	case "structview": // structview
-		ts := &Test{}
-		giv.NewStructView(sc).SetStruct(ts)
-	case "timeview": // time view
-		ts := &TestTime{}
-		ts.Date = time.Now()
-		giv.NewStructView(sc).SetStruct(ts)
-	case "center-dialog":
-		d := gi.NewBody(sc).FullWindow(true)
-		d.Style(func(s *styles.Style) {
-			s.Grow.Set(1, 1)
-			s.Align.Set(styles.Center)
-		})
-		fr := gi.NewFrame(d).Style(func(s *styles.Style) { // note: this is critical for separating from topbar
-			s.Direction = styles.Column
-			s.Grow.Set(1, 1)
-			s.Align.Set(styles.Center)
-		})
-		gi.NewLabel(fr).SetType(gi.LabelDisplayMedium).SetText("Event recorded!").
-			Style(func(s *styles.Style) {
-				s.Align.Set(styles.Center)
-			})
-		gi.NewLabel(fr).SetType(gi.LabelBodyLarge).
-			SetText("Thank you for reporting your issue!").
-			Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.OnSurfaceVariant
-				s.Align.Set(styles.Center)
-			})
-		gi.NewButton(fr).SetType(gi.ButtonTonal).SetText("Return home").
-			Style(func(s *styles.Style) {
-				s.Align.Set(styles.Center)
-			})
-		gi.NewButton(sc).SetText("Click Me").OnClick(func(e events.Event) {
-			d.Run()
-		})
-	default:
-		fmt.Println("error: case didn't match:", doCase)
-	}
-
-	gi.NewWindow(sc).Run().Wait()
-}
-
-func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
-	fr := gi.NewFrame(par, nm...)
-	fr.Style(func(s *styles.Style) {
-		s.Border.Color.Set(colors.Black)
-		s.Border.Width.Set(units.Dp(2))
-	})
-	return fr
-}
-
-func SpaceFrame(par gi.Widget, nm ...string) (*gi.Frame, *gi.Space) {
-	fr := gi.NewFrame(par, nm...)
-	fr.Style(func(s *styles.Style) {
-		s.Border.Color.Set(colors.Black)
-		s.Border.Width.Set(units.Dp(2))
-	})
-	sp := gi.NewSpace(fr)
-	return fr, sp
-}
-
-func HorizRow(par gi.Widget, nm ...string) *gi.Frame {
-	row := BoxFrame(par, nm...)
-	row.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 0)
-	})
-	return row
-}
-
-func Splits2(par gi.Widget) (*gi.Splits, *gi.Frame, *gi.Frame) {
-	sp := gi.NewSplits(par)
-	f1 := BoxFrame(sp)
-	f2 := BoxFrame(sp)
-	return sp, f1, f2
-}
-
-func TabFrame(par gi.Widget) (*gi.Frame, *gi.Frame) {
-	tab := BoxFrame(par)
-	tab.Style(func(s *styles.Style) {
-		s.Display = styles.Stacked
-		tab.StackTop = 0
-	})
-	tfr := BoxFrame(tab)
-	tfr.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-	return tab, tfr
-}
-
-func WrapText(par gi.Widget, txt string) *gi.Label {
-	lbl := gi.NewLabel(par, "wrap-text").SetText(txt)
-	return lbl
-}
-
 func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 	for i, sz := range FrameSizes {
 		i := i
@@ -308,4 +88,19 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 			// s.Align.X = styles.Center
 		})
 	}
+}
+
+func app() {
+	// turn on tracing in preferences, Debug
+	gi.LayoutTrace = true
+	gi.LayoutTraceDetail = true
+	// gi.UpdateTrace = true
+	// gi.RenderTrace = true
+
+	gi.SetAppName("layout")
+	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+
+	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
+	gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
+
 }

@@ -217,6 +217,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		rc := sc.RenderCtx()
 		if rc != nil {
 			st.UnContext.DPI = rc.LogicalDPI
+			// fmt.Println("dpi:", rc.LogicalDPI)
 		} else {
 			st.UnContext.DPI = 96
 		}

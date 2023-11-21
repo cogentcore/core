@@ -15,28 +15,43 @@ import (
 	"goki.dev/gti"
 )
 
-// NewDialog returns a new [Dialog] in the context of the given widget,
-// optionally with the given name.
-func NewDialog(sc *Scene) Stage {
-	// if ctx == nil {
-	// 	ctx = CurRenderWin.MainScene()
-	// }
-	// d := &Dialog{}
-	// nm := ""
-	// if len(name) > 0 {
-	// 	nm = name[0]
-	// } else if ctx != nil {
-	// 	nm = ctx.Name() + "-dialog"
-	// }
-	//
-	// 	d.InitName(d, nm)
-	// 	d.EventMgr.Scene = &d.Scene
-	// 	d.BgColor.SetSolid(colors.Transparent)
-	// 	d.DialogStyles()
+// todo: need a mechanism for nil Context to attach later
+
+// NewDialog returns a new PopupWindow dialog [Stage] in the context
+// of the given widget, optionally with the given name.
+// See [NewFullDialog] for a full-window dialog.
+func (sc *Scene) NewDialog(ctx Widget, name ...string) Stage {
 	sc.DialogStyles()
 	sc.Stage = NewMainStage(DialogStage, sc)
 	sc.Stage.SetModal(true)
+	sc.Stage.SetContext(ctx)
 	return sc.Stage
+}
+
+// NewFullDialog returns a new FullWindow dialog [Stage] in the context
+// of the given widget, optionally with the given name.
+// See [NewDialog] for a popup-window dialog.
+func (sc *Scene) NewFullDialog(ctx Widget, name ...string) Stage {
+	sc.DialogStyles()
+	sc.Stage = NewMainStage(DialogStage, sc)
+	sc.Stage.SetModal(true)
+	sc.Stage.SetContext(ctx)
+	sc.Stage.SetFullWindow(true)
+	return sc.Stage
+}
+
+// NewDialog returns a new PopupWindow dialog [Stage] in the context
+// of the given widget, optionally with the given name.
+// See [NewFullDialog] for a full-window dialog.
+func (bd *Body) NewDialog(ctx Widget, name ...string) Stage {
+	return bd.Sc.NewDialog(ctx, name...)
+}
+
+// NewFullDialog returns a new FullWindow dialog [Stage] in the context
+// of the given widget, optionally with the given name.
+// See [NewDialog] for a popup-window dialog.
+func (bd *Body) NewFullDialog(ctx Widget, name ...string) Stage {
+	return bd.Sc.NewFullDialog(ctx, name...)
 }
 
 // RecycleDialog looks for a dialog with the given data. If it
@@ -57,23 +72,23 @@ func ErrorDialog(ctx Widget, err error, title ...string) Stage {
 	if len(title) > 0 {
 		ttl = title[0]
 	}
-	sc := NewScene(NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()))
-	sc.Footer.Add(func(par Widget) { sc.AddOk(par) })
-	return NewDialog(sc).SetContext(ctx)
+	d := NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error())
+	d.AddBottomBar(func(pw Widget) { d.AddOk(pw) })
+	return d.NewDialog(ctx)
 }
 
 // AddOk adds an OK button to given parent Widget (typically in Bottom
-// function), connecting to Close method the Ctrl+Enter keychord event.
+// Bar function), connecting to Close method the Ctrl+Enter keychord event.
 // Close sends a Change event to the Scene for listeners there.
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective OK buttons.
-func (sc *Scene) AddOk(par Widget, name ...string) *Button {
+func (sc *Scene) AddOk(pw Widget, name ...string) *Button {
 	nm := "ok"
 	if len(name) > 0 {
 		nm = name[0]
 	}
-	bt := NewButton(par, nm).SetText("OK")
+	bt := NewButton(pw, nm).SetText("OK")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		sc.Close()
@@ -89,18 +104,18 @@ func (sc *Scene) AddOk(par Widget, name ...string) *Button {
 }
 
 // AddCancel adds Cancel button to given parent Widget
-// (typically in Bottom function),
+// (typically in Bottom Bar function),
 // connecting to Close method and the Esc keychord event.
 // Close sends a Change event to the Scene for listeners there.
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
 // Name should be passed when there are multiple effective Cancel buttons (rare).
-func (sc *Scene) AddCancel(par Widget, name ...string) *Button {
+func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 	nm := "cancel"
 	if len(name) > 0 {
 		nm = name[0]
 	}
-	bt := NewButton(par, nm).SetType(ButtonOutlined).SetText("Cancel")
+	bt := NewButton(pw, nm).SetType(ButtonOutlined).SetText("Cancel")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		sc.Close()
@@ -128,6 +143,32 @@ func (sc *Scene) Close() {
 		return
 	}
 	mm.PopDeleteType(DialogStage) // todo: this is probably not right
+}
+
+// AddOk adds an OK button to given parent Widget (typically in Bottom
+// Bar function), connecting to Close method the Ctrl+Enter keychord event.
+// Close sends a Change event to the Scene for listeners there.
+// Should add an OnClick listener to this button to perform additional
+// specific actions needed beyond Close.
+// Name should be passed when there are multiple effective OK buttons.
+func (bd *Body) AddOk(pw Widget, name ...string) *Button {
+	return bd.Sc.AddOk(pw, name...)
+}
+
+// AddCancel adds Cancel button to given parent Widget
+// (typically in Bottom Bar function),
+// connecting to Close method and the Esc keychord event.
+// Close sends a Change event to the Scene for listeners there.
+// Should add an OnClick listener to this button to perform additional
+// specific actions needed beyond Close.
+// Name should be passed when there are multiple effective Cancel buttons (rare).
+func (bd *Body) AddCancel(pw Widget, name ...string) *Button {
+	return bd.Sc.AddCancel(pw, name...)
+}
+
+// Close closes the stage associated with this Scene (typically for Dialog)
+func (bd *Body) Close() {
+	bd.Sc.Close()
 }
 
 // DialogStyles sets default style functions for dialog Scenes

@@ -285,7 +285,7 @@ func (dv *DateView) ConfigDateGrid() {
 			case "parts":
 				w.Style(func(s *styles.Style) {
 					s.Text.Align = styles.Center
-					s.Text.AlignV = styles.Center
+					// s.Text.AlignV = styles.Center
 					// s.Align.Content = styles.Center
 					s.Justify.Content = styles.Center
 				})
@@ -357,16 +357,15 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 			d := gi.NewBody().AddTitle("Select date")
 			NewDateView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
-			sc := gi.NewScene(d)
-			sc.Footer.Add(func(par gi.Widget) {
-				sc.AddCancel(par)
-				sc.AddOk(par).OnClick(func(e events.Event) {
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw)
+				d.AddOk(pw).OnClick(func(e events.Event) {
 					tt := vv.TmpSave.Val().Interface().(time.Time)
 					vv.SetValue(tt)
 					vv.UpdateWidget()
 				})
 			})
-			gi.NewDialog(sc).SetContext(w).Run()
+			d.NewDialog(w).Run()
 		})
 	dt.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
@@ -390,16 +389,15 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		SetLeadingIcon(icons.Schedule, func(e events.Event) {
 			d := gi.NewBody().AddTitle("Edit time")
 			NewTimeView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
-			sc := gi.NewScene(d)
-			sc.Footer.Add(func(par gi.Widget) {
-				sc.AddCancel(par)
-				sc.AddOk(par).OnClick(func(e events.Event) {
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw)
+				d.AddOk(pw).OnClick(func(e events.Event) {
 					tt := vv.TmpSave.Val().Interface().(time.Time)
 					vv.SetValue(tt)
 					vv.UpdateWidget()
 				})
 			})
-			gi.NewDialog(sc).SetContext(w).Run()
+			d.NewDialog(w).Run()
 		})
 	tm.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)

@@ -107,8 +107,8 @@ func (is *Inspector) EditColorScheme() { //gti:add
 		return
 	}
 
-	b := gi.NewBody("gogi-color-scheme")
-	b.Title = "GoGi Color Scheme"
+	d := gi.NewBody("gogi-color-scheme")
+	d.Title = "GoGi Color Scheme"
 
 	key := &matcolor.Key{
 		Primary:        colors.FromRGB(123, 135, 122),
@@ -121,17 +121,16 @@ func (is *Inspector) EditColorScheme() { //gti:add
 	p := matcolor.NewPalette(key)
 	schemes := matcolor.NewSchemes(p)
 
-	kv := NewStructView(b, "kv")
+	kv := NewStructView(d, "kv")
 	kv.SetStruct(key)
-	split := gi.NewSplits(b, "split")
+	split := gi.NewSplits(d, "split")
 
 	svl := NewStructView(split, "svl")
 	svl.SetStruct(&schemes.Light)
 	svd := NewStructView(split, "svd")
 	svd.SetStruct(&schemes.Dark)
 
-	sc := gi.NewScene(b)
-	sc.Data = &colors.Schemes
+	d.Sc.Data = &colors.Schemes // todo: needed?
 
 	kv.OnChange(func(e events.Event) {
 		p = matcolor.NewPalette(key)
@@ -142,7 +141,7 @@ func (is *Inspector) EditColorScheme() { //gti:add
 		svd.UpdateFields()
 	})
 
-	gi.NewWindow(sc).Run()
+	d.NewWindow().Run()
 }
 
 // ToggleSelectionMode toggles the editor between selection mode or not.
@@ -188,7 +187,6 @@ func (is *Inspector) SelectionMonitor() {
 		if tv == nil {
 			gi.NewSnackbar(is).Text(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).Run()
 		} else {
-			gi.UpdateTrace = true
 			updt := is.UpdateStart()
 			tv.OpenParents()
 			tv.ScrollToMe()
@@ -198,7 +196,6 @@ func (is *Inspector) SelectionMonitor() {
 			sc.SelectedWidget = sw
 			sw.AsWidget().SetNeedsRenderUpdate(sc, updt)
 			sc.UpdateEndRender(updt)
-			gi.UpdateTrace = false
 		}
 	}
 }
@@ -342,16 +339,17 @@ func InspectorDialog(obj ki.Ki) {
 	if gi.ActivateExistingMainWindow(obj) {
 		return
 	}
-	b := gi.NewBody("inspector")
-	b.Title = "Inspector"
+	d := gi.NewBody("inspector")
+	d.Title = "Inspector"
 	if obj != nil {
-		b.Nm += "-" + obj.Name()
-		b.Title += ": " + obj.Name()
+		d.Nm += "-" + obj.Name()
+		d.Title += ": " + obj.Name()
 	}
-	is := NewInspector(b, "inspector")
+	is := NewInspector(d, "inspector")
 	is.SetRoot(obj)
-
-	sc := gi.NewScene(b)
-	// sc.TopAppBar = is.TopAppBar
-	gi.NewWindow(sc).Run()
+	d.AddTopBar(func(pw gi.Widget) {
+		tb := d.TopAppBar(pw)
+		is.TopAppBar(tb)
+	})
+	d.NewWindow().Run()
 }

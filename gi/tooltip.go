@@ -39,7 +39,7 @@ func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
 // NewTooltipScene returns a new tooltip scene for the given widget with the
 // given tooltip based on the given position.
 func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
-	sc := NewEmptyScene(w.Name() + "-tooltip")
+	sc := NewScene(w.Name() + "-tooltip")
 	sc.SceneGeom.Pos.X = pos.X
 	sc.SceneGeom.Pos.Y = pos.Y
 	sc.Style(func(s *styles.Style) {

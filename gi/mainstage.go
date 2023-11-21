@@ -81,8 +81,18 @@ func NewMainStage(typ StageTypes, sc *Scene) *MainStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewWindow(sc *Scene) *MainStage {
-	return NewMainStage(WindowStage, sc)
+func (sc *Scene) NewWindow() *MainStage {
+	ms := NewMainStage(WindowStage, sc)
+	ms.SetNewWindow(true)
+	return ms
+}
+
+// NewWindow returns a new Window stage with given scene contents.
+// Make further configuration choices using Set* methods, which
+// can be chained directly after the New call.
+// Use an appropriate Run call at the end to start the Stage running.
+func (bd *Body) NewWindow() *MainStage {
+	return bd.Sc.NewWindow()
 }
 
 // NewDialog in dialogs.go
@@ -185,6 +195,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 	// fmt.Println("Screen Size:", rc.Size)
 	rc.SetFlag(true, RenderVisible)
 	rc.LogicalDPI = scr.LogicalDPI
+	fmt.Println("first win:", rc.LogicalDPI)
 	return ms
 }
 

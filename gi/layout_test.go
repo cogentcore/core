@@ -47,7 +47,7 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 		for _, dir := range dirs {
 			for _, align := range aligns {
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
-				sc := NewEmptyScene()
+				sc := NewScene()
 				sc.Style(func(s *styles.Style) {
 					s.Overflow.Set(styles.OverflowVisible)
 					s.Direction = dir
@@ -73,7 +73,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 			for _, align := range aligns {
 				align := align
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
-				sc := NewEmptyScene()
+				sc := NewScene()
 				sc.Style(func(s *styles.Style) {
 					if dir == styles.Row {
 						s.Min.Y.Px(300)
@@ -108,7 +108,7 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 			for _, align := range aligns {
 				align := align
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
-				sc := NewEmptyScene()
+				sc := NewScene()
 				sc.Style(func(s *styles.Style) {
 					if dir == styles.Row {
 						s.Min.X.Px(dsz)
@@ -134,7 +134,7 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 	for _, align := range aligns {
 		align := align
 		tnm := fmt.Sprintf("align_%v", align)
-		sc := NewEmptyScene()
+		sc := NewScene()
 		sc.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
@@ -154,7 +154,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 		ai := ai
 		align := align
 		tnm := fmt.Sprintf("align_%v", align)
-		sc := NewEmptyScene()
+		sc := NewScene()
 		sc.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
@@ -178,7 +178,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		ai := ai
 		align := align
 		tnm := fmt.Sprintf("align_%v", align)
-		sc := NewEmptyScene()
+		sc := NewScene()
 		sc.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid

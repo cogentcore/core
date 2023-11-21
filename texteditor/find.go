@@ -316,17 +316,16 @@ func (ed *Editor) QReplaceAddText() {
 	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetState(lexitems, states.Checked).
 		SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).SetText("Query-Replace").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
 			find := fc.CurVal.(string)
 			repl := rc.CurVal.(string)
 			lexItems := lxi.StateIs(states.Checked)
 			ed.QReplaceStart(find, repl, lexItems)
 		})
 	})
-	gi.NewDialog(sc).SetContext(d).Run()
+	d.NewDialog(ed).Run()
 }
 
 // QReplaceStart starts query-replace using given find, replace strings

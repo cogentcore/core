@@ -161,7 +161,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 		}
 	}
 
-	sc := NewEmptyScene(ctx.Name() + "-complete")
+	sc := NewScene(ctx.Name() + "-complete")
 	MenuSceneConfigStyles(sc)
 	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
 	sc.SceneGeom.Pos = pos

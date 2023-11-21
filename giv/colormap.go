@@ -63,10 +63,9 @@ func (cv *ColorMapView) ChooseColorMap() {
 	}
 	si := 0
 	d := gi.NewBody().AddTitle("Select a color map").AddText("Choose color map to use from among available list")
-	sc := gi.NewScene(d)
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				nmap, ok := colormap.AvailMaps[sl[si]]
 				if ok {
@@ -75,7 +74,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(cv).SetFullWindow(true).Run()
+	d.NewFullDialog(cv).Run()
 }
 
 func (cv *ColorMapView) HandleColorMapEvents() {
@@ -196,16 +195,15 @@ func (vv *ColorMapValue) OpenDialog(ctx gi.Widget) {
 
 	si := 0
 	d := gi.NewBody().AddTitle("Select a color map").AddText(vv.Doc())
-	sc := gi.NewScene(d)
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				vv.SetValue(sl[si])
 				vv.UpdateWidget()
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewDialog(ctx).Run()
 }

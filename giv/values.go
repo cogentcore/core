@@ -433,19 +433,14 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget) {
 	}
 	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
-	sc := gi.NewScene(d)
-	// d.TopAppBar = gi.TopAppBarFor(stru)
-	// if d.TopAppBar == nil {
-	// 	d.TopAppBar = gi.DefaultTopAppBar
-	// }
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			vv.UpdateWidget()
 			vv.SendChange()
 		})
 	})
-	gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
+	d.NewFullDialog(vv.Widget).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -581,44 +576,34 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget) {
 		d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 		tv := NewTableView(d).SetSlice(slci)
 		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-		sc := gi.NewScene(d)
-		sc.Header.Add(func(par gi.Widget) {
-			tb := sc.TopAppBar(par)
-			// d.TopAppBar = gi.TopAppBarFor(slci)
-			// if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
-			// 	d.TopAppBar = func(tb *gi.TopAppBar) {
-			// 	gi.DefaultTopAppBar(tb)
+		d.AddTopBar(func(pw gi.Widget) {
+			tb := d.DefaultTopAppBar(pw)
 			tv.SliceDefaultTopAppBar(tb)
 		})
-		sc.Footer.Add(func(par gi.Widget) {
-			sc.AddCancel(par)
-			sc.AddOk(par).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
 				vv.UpdateWidget()
 				vv.SendChange()
 			})
 		})
-		gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
+		d.NewFullDialog(vv.Widget).Run()
 	} else {
 		d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 		sv := NewSliceView(d).SetSlice(slci)
 		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-		sc := gi.NewScene(d)
-		sc.Header.Add(func(par gi.Widget) {
-			tb := sc.TopAppBar(par)
-			// d.TopAppBar = gi.TopAppBarFor(slci)
-			// if d.TopAppBar == nil && gi.DefaultTopAppBar != nil {
-			// 	d.TopAppBar = func(tb *gi.TopAppBar) {
-			// gi.DefaultTopAppBar(tb)
+		d.AddTopBar(func(pw gi.Widget) {
+			tb := d.DefaultTopAppBar(pw)
 			sv.SliceDefaultTopAppBar(tb)
 		})
-		sc.Footer.Add(func(par gi.Widget) {
-			sc.AddCancel(par)
-			sc.AddOk(par).OnClick(func(e events.Event) {
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
 				vv.UpdateWidget()
 				vv.SendChange()
 			})
 		})
-		gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
+		d.NewFullDialog(vv.Widget).Run()
 	}
 }
 
@@ -737,15 +722,14 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget) {
 	readOnly := vv.IsReadOnly()
 	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 	NewMapView(d).SetMap(mpi).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			vv.UpdateWidget()
 			vv.SendChange()
 		})
 	})
-	gi.NewDialog(sc).SetContext(vv.Widget).SetFullWindow(true).Run()
+	d.NewFullDialog(vv.Widget).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -886,15 +870,14 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget) {
 	readOnly := vv.IsReadOnly()
 	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
 	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			vv.UpdateWidget()
 			vv.SendChange()
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1540,13 +1523,12 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget) {
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	d := gi.NewBody().AddTitle("Select an icon").AddText(vv.Doc())
-	sc := gi.NewScene(d)
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(string(ics[row]))
-	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				ic := icons.AllIcons[si]
 				vv.SetValue(ic)
@@ -1554,7 +1536,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget) {
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1614,8 +1596,8 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget) {
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
+
 	d := gi.NewBody().AddTitle("Select a Font").AddText(vv.Doc())
-	sc := gi.NewScene(d)
 	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
@@ -1625,10 +1607,10 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget) {
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
 		s.Font.Size = FontChooserSize
-	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				fi := paint.FontLibrary.FontInfo[si]
 				vv.SetValue(fi.Name)
@@ -1636,7 +1618,7 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget) {
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1694,24 +1676,23 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget) {
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
 	d := gi.NewBody().AddTitle(vv.Name()).AddText(vv.Doc())
-	sc := gi.NewScene(d)
 	fv := NewFileView(d).SetFilename(cur, ext)
 	fv.OnSelect(func(e events.Event) {
 		cur = fv.SelectedFile()
 	}).OnDoubleClick(func(e events.Event) {
 		if fv.SelectedDoubleClick {
 			cur = fv.SelectedFile()
-			sc.Close()
+			d.Close()
 		}
 	})
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			vv.SetValue(cur)
 			vv.UpdateWidget()
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

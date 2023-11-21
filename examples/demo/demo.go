@@ -27,9 +27,9 @@ func app() {
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
 
-	b := gi.NewBody("gogi-demo").SetTitle("GoGi Demo")
+	b := gi.NewBody().SetTitle("GoGi Demo")
 
-	// gi.DefaultTopAppBar = nil
+	b.AddDefaultTopAppBar()
 
 	ts := gi.NewTabs(b)
 	ts.DeleteTabButtons = false
@@ -41,8 +41,7 @@ func app() {
 	makeLayouts(ts)
 	makeValues(ts)
 
-	sc := gi.NewScene(b)
-	gi.NewWindow(sc).Run().Wait()
+	b.NewWindow().Run().Wait()
 }
 
 //go:embed gopher.png

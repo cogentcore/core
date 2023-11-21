@@ -719,17 +719,16 @@ func (ed *Editor) JumpToLineAddText() {
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).SetText("Jump").OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).SetText("Jump").OnClick(func(e events.Event) {
 			ln, err := laser.ToInt(val)
 			if err == nil {
 				ed.JumpToLine(int(ln))
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ed).Run()
+	d.NewDialog(ed).Run()
 }
 
 // JumpToLine jumps to given line number (minus 1)

@@ -85,16 +85,15 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 				}
 				d := gi.NewBody().AddTitle(title)
 				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice).SetTmpSave(sv.TmpSave)
-				sc := gi.NewScene(d)
-				sc.Footer.Add(func(par gi.Widget) {
-					sc.AddCancel(par)
-					sc.AddOk(par).OnClick(func(e events.Event) {
+				d.AddBottomBar(func(pw gi.Widget) {
+					d.AddCancel(pw)
+					d.AddOk(pw).OnClick(func(e events.Event) {
 						if sv.SliceValView != nil { // todo: this is not updating
 							sv.SliceValView.UpdateWidget()
 						}
 					})
 				})
-				gi.NewDialog(sc).SetContext(sv).SetFullWindow(true).Run()
+				d.NewFullDialog(sv).Run()
 			})
 		}
 	})

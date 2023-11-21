@@ -59,5 +59,5 @@ func app() {
 		})
 	}
 
-	gi.NewWindow(sc).Run().Wait()
+	sc.NewWindow().Run().Wait()
 }

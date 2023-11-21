@@ -18,18 +18,17 @@ func KeyMapsView(km *keyfun.Maps) {
 	if gi.ActivateExistingMainWindow(km) {
 		return
 	}
-	b := gi.NewBody("gogi-key-maps")
-	b.AddTitle("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
-	tv := NewTableView(b).SetSlice(km)
+	d := gi.NewBody("gogi-key-maps")
+	d.AddTitle("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
+	tv := NewTableView(d).SetSlice(km)
 	keyfun.AvailMapsChanged = false
 	tv.OnChange(func(e events.Event) {
 		keyfun.AvailMapsChanged = true
 	})
 
-	sc := gi.NewScene(b)
-	sc.Data = km
-	sc.Header.Add(func(par gi.Widget) {
-		tb := sc.TopAppBar(par)
+	d.Sc.Data = km // todo: needed?
+	d.AddTopBar(func(pw gi.Widget) {
+		tb := d.DefaultTopAppBar(pw)
 		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)
 		sp.SetUpdateFunc(func() {
 			sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
@@ -52,7 +51,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		})
 	})
 
-	gi.NewWindow(sc).Run()
+	d.NewWindow().Run()
 }
 
 // ViewStdKeyMaps shows the standard maps that are compiled into the program and have
@@ -112,12 +111,11 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	b := gi.NewBody().AddTitle("Select a key map").AddText(vv.Doc())
-	sc := gi.NewScene(b)
-	NewTableView(b).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d := gi.NewBody().AddTitle("Select a key map").AddText(vv.Doc())
+	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				km := keyfun.AvailMaps[si]
 				vv.SetValue(km.Name)
@@ -125,5 +123,5 @@ func (vv *KeyMapValue) OpenDialog(ctx gi.Widget) {
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }

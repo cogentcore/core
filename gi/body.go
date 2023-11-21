@@ -20,9 +20,14 @@ type Body struct { //goki:no-new
 // NewBody creates a new Body that will serve as the content of a Scene
 // (e.g., a Window, Dialog, etc).  Body forms the central region
 // of a Scene, and has OverflowAuto scrollbars by default.
+// It will create its own parent Scene at this point, and has wrapper
+// functions to transparently manage everything that the Scene
+// typically manages during configuration, so you can usually avoid
+// having to access the Scene directly.
 func NewBody(name ...string) *Body {
 	bd := &Body{}
 	bd.InitName(bd, name...)
+	bd.Sc = NewBodyScene(bd)
 	return bd
 }
 

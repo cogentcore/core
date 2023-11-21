@@ -18,12 +18,11 @@ func PrefsView(pf *gi.Preferences) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}
-	b := gi.NewBody("gogi-prefs")
-	b.Title = "GoGi Preferences"
-	sc := gi.NewScene(b)
-	sc.Data = pf
-	sc.Header.Add(func(par gi.Widget) {
-		tb := sc.TopAppBar(par)
+	d := gi.NewBody("gogi-prefs")
+	d.Title = "GoGi Preferences"
+	d.Sc.Data = pf
+	d.AddTopBar(func(pw gi.Widget) {
+		tb := d.DefaultTopAppBar(pw)
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
 		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
@@ -49,13 +48,13 @@ func PrefsView(pf *gi.Preferences) {
 			NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 		})
 	})
-	sv := NewStructView(b)
+	sv := NewStructView(d)
 	sv.SetStruct(pf)
 	sv.OnChange(func(e events.Event) {
 		pf.Apply()
 		pf.Save()
 	})
-	gi.NewWindow(sc).Run()
+	d.NewWindow().Run()
 }
 
 // PrefsDetView opens a view of user detailed preferences
@@ -64,15 +63,15 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		return
 	}
 
-	b := gi.NewBody("gogi-prefs-det").SetTitle("GoGi Detailed Preferences")
+	d := gi.NewBody("gogi-prefs-det").SetTitle("GoGi Detailed Preferences")
 
-	sv := NewStructView(b, "sv")
+	sv := NewStructView(d, "sv")
 	sv.SetStruct(pf)
 
-	sc := gi.NewScene(b).SetData(pf)
+	d.Sc.Data = pf
 
-	sc.Header.Add(func(par gi.Widget) {
-		tb := sc.TopAppBar(par)
+	d.AddTopBar(func(pw gi.Widget) {
+		tb := d.DefaultTopAppBar(pw)
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
 		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
@@ -84,7 +83,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		})
 	})
 
-	gi.NewWindow(sc).Run()
+	d.NewWindow().Run()
 }
 
 // PrefsDbgView opens a view of user debugging preferences
@@ -92,19 +91,18 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}
-	b := gi.NewBody("gogi-prefs-dbg")
-	b.Title = "GoGi Debugging Preferences"
+	d := gi.NewBody("gogi-prefs-dbg")
+	d.Title = "GoGi Debugging Preferences"
 
-	sv := NewStructView(b, "sv")
+	sv := NewStructView(d, "sv")
 	sv.SetStruct(pf)
 
-	sc := gi.NewScene(b)
-	sc.Data = pf
+	d.Sc.Data = pf
 
-	sc.Header.Add(func(par gi.Widget) {
-		tb := sc.TopAppBar(par)
+	d.AddTopBar(func(pw gi.Widget) {
+		tb := d.DefaultTopAppBar(pw)
 		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
 	})
 
-	gi.NewWindow(sc).Run()
+	d.NewWindow().Run()
 }

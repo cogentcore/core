@@ -23,23 +23,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-type FuncStack []func(par Widget)
-
-func (fs *FuncStack) Add(fun func(par Widget)) *FuncStack {
-	*fs = append(*fs, fun)
-	return fs
-}
-
-func (fs *FuncStack) Call(par Widget) {
-	for _, fun := range *fs {
-		fun(par)
-	}
-}
-
-func (fs *FuncStack) Empty() bool {
-	return len(*fs) == 0
-}
-
 // see:
 //	- render.go for scene-based rendering code
 //	- layimpl.go for layout
@@ -64,23 +47,21 @@ type Scene struct {
 	// Used e.g., for recycling views of a given item instead of creating new one.
 	Data any
 
-	// Header contains functions for constructing the Header for this Scene,
-	// called in order added.
-	Header FuncStack
+	// Bars contains functions for constructing the control bars for this Scene,
+	// attached to different sides of a Scene (e.g., TopAppBar at Top,
+	// NavBar at Bottom, etc).  Functions are called in forward order
+	// so first added are called first.
+	Bars styles.Sides[BarFuncs]
 
-	// Footer contains functions for constructing the Footer for this Scene,
-	// called in order added.
-	Footer FuncStack
+	// BarsInherit determines which of the Bars side functions are inherited
+	// from the context widget, for FullWindow Dialogs
+	BarsInherit styles.Sides[bool]
 
-	// Left contains functions for constructing the Left sidebar / etc for this Scene,
-	// called in order added.
-	Left FuncStack
-
-	// Right contains functions for constructing the Right sidebar / etc for this Scene,
-	// called in order added.
-	Right FuncStack
-
-	// Body provides the main contents of the scene
+	// Body provides the main contents of scenes that use control Bars
+	// to allow the main window contents to be specified separately
+	// from that dynamic control content.  When constructing scenes using
+	// a Body, you can operate directly on the [Body], which has wrappers
+	// for most major Scene functions.
 	Body *Body
 
 	// Size and position relative to overall rendering context.
@@ -131,21 +112,26 @@ func (sc *Scene) FlagType() enums.BitFlagSetter {
 	return (*ScFlags)(&sc.Flags)
 }
 
-// NewScene creates a new Scene that will serve as the content of a Stage
-// (e.g., a Window, Dialog, etc).  It is composed of optional Header, Footer
-// Left, Right panels with the given Body as the central content.
-func NewScene(body *Body, name ...string) *Scene {
+// NewBodyScene creates a new Scene for use with an associated Body that
+// contains the main content of the Scene (e.g., a Window, Dialog, etc).
+// It will be constructed from the Bars-configured control bars on each
+// side, with the given Body as the central content.
+func NewBodyScene(body *Body, name ...string) *Scene {
 	sc := &Scene{}
-	sc.InitName(sc, name...)
+	nm := body.Nm + "-scene"
+	if len(name) > 0 {
+		nm = name[0]
+	}
+	sc.InitName(sc, nm)
 	sc.EventMgr.Scene = sc
 	sc.Body = body
 	sc.BgColor.SetSolid(colors.Transparent)
 	return sc
 }
 
-// NewEmptyScene creates a new Scene object without a Body, e.g., for use
-// in a Menu, Tooltip or other such simple popups
-func NewEmptyScene(name ...string) *Scene {
+// NewScene creates a new Scene object without a Body, e.g., for use
+// in a Menu, Tooltip or other such simple popups or non-control-bar Scenes.
+func NewScene(name ...string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name...)
 	sc.EventMgr.Scene = sc
@@ -162,50 +148,6 @@ func NewEmptyScene(name ...string) *Scene {
 // 	sc.BgColor.SetSolid(colors.Transparent)
 // 	return sc
 // }
-
-// ConfigScene is called by the Stage to configure the Scene during Run process
-func (sc *Scene) ConfigScene() {
-	if !sc.Header.Empty() {
-		head := NewLayout(sc, "header").Style(func(s *styles.Style) {
-			s.Grow.Set(1, 0)
-		})
-		sc.Header.Call(head)
-	}
-	if !sc.Left.Empty() || !sc.Right.Empty() {
-		mid := NewLayout(sc, "middle")
-		if !sc.Left.Empty() {
-			left := NewLayout(mid, "left")
-			sc.Left.Call(left)
-		}
-		if sc.Body != nil {
-			mid.AddChild(sc.Body)
-		}
-		if !sc.Right.Empty() {
-			right := NewLayout(mid, "right")
-			sc.Right.Call(right)
-		}
-	} else {
-		if sc.Body != nil {
-			sc.AddChild(sc.Body)
-		}
-	}
-	if !sc.Footer.Empty() {
-		foot := NewLayout(sc, "footer").Style(func(s *styles.Style) {
-			s.Justify.Content = styles.End
-			s.Grow.Set(1, 0)
-		})
-		sc.Footer.Call(foot)
-	}
-}
-
-// TopAppBar constructs or returns the TopAppBar in given parent Widget
-func (sc *Scene) TopAppBar(par Widget) *TopAppBar {
-	tb := par.ChildByType(TopAppBarType, ki.Embeds)
-	if tb != nil {
-		return tb.(*TopAppBar)
-	}
-	return NewTopAppBar(par)
-}
 
 func (sc *Scene) OnInit() {
 	sc.Sc = sc

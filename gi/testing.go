@@ -26,8 +26,7 @@ import (
 //		gi.RunTest(func() {
 //			sc := gi.NewScene()
 //			gi.NewLabel(sc).SetText("Something")
-//			gi.NewWindow(sc).Run()
-//			goosi.AssertCaptureIs(t, "something")
+//			sc.AssertPixelsOnShow(t, "something")
 //		})
 //	}
 func RunTest(test func()) {
@@ -51,17 +50,18 @@ type TestingT interface {
 var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
 
 // AssertPixelsOnShow is a helper function that makes a new window from
-// the scene, waits until it is shown, and then calls [Scene.AssertPixels]
-// with the given values. It does not return until all of those steps are
-// completed.
+// the scene, waits until it is shown, calls [Scene.AssertPixels]
+// with the given values, and then closes the window.
+// It does not return until all of those steps are completed.
 func (sc *Scene) AssertPixelsOnShow(t TestingT, filename string) {
 	showed := make(chan struct{})
 	sc.On(events.Custom, func(e events.Event) {
 		sc.AssertPixels(t, filename)
 		showed <- struct{}{}
 	})
-	NewWindow(sc).SetNewWindow(true).Run()
+	sc.NewWindow().SetNewWindow(true).Run()
 	<-showed
+	sc.Close()
 }
 
 // AssertPixels asserts that [Scene.Pixels] is equivalent
@@ -90,11 +90,11 @@ func (sc *Scene) AssertPixels(t TestingT, filename string) {
 	if UpdateTestImages {
 		err := images.Save(capture, filename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error saving updated image: %v", err)
+			t.Errorf("Scene.AssertPixels: error saving updated image: %v", err)
 		}
 		err = os.RemoveAll(failFilename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error removing old fail image: %v", err)
+			t.Errorf("Scene.AssertPixels: error removing old fail image: %v", err)
 		}
 		return
 	}
@@ -102,13 +102,13 @@ func (sc *Scene) AssertPixels(t TestingT, filename string) {
 	img, _, err := images.Open(filename)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
-			t.Errorf("goosi.AssertCaptureIs: error opening saved image: %v", err)
+			t.Errorf("Scene.AssertPixels: error opening saved image: %v", err)
 			return
 		}
 		// we don't have the file yet, so we make it
 		err := images.Save(capture, filename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error saving new image: %v", err)
+			t.Errorf("Scene.AssertPixels: error saving new image: %v", err)
 		}
 		return
 	}
@@ -118,7 +118,7 @@ func (sc *Scene) AssertPixels(t TestingT, filename string) {
 	cbounds := capture.Bounds()
 	ibounds := img.Bounds()
 	if cbounds != ibounds {
-		t.Errorf("goosi.AssertCaptureIs: expected bounds %v for image for %s, but got bounds %v; see %s", ibounds, filename, cbounds, failFilename)
+		t.Errorf("Scene.AssertPixels: expected bounds %v for image for %s, but got bounds %v; see %s", ibounds, filename, cbounds, failFilename)
 		failed = true
 	} else {
 		for y := cbounds.Min.Y; y < cbounds.Max.Y; y++ {
@@ -126,7 +126,7 @@ func (sc *Scene) AssertPixels(t TestingT, filename string) {
 				cc := colors.AsRGBA(capture.At(x, y))
 				ic := colors.AsRGBA(img.At(x, y))
 				if cc != ic {
-					t.Errorf("goosi.AssertCaptureIs: image for %s is not the same as expected; see %s; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
+					t.Errorf("Scene.AssertPixels: image for %s is not the same as expected; see %s; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
 					failed = true
 					break
 				}
@@ -140,12 +140,12 @@ func (sc *Scene) AssertPixels(t TestingT, filename string) {
 	if failed {
 		err := images.Save(capture, failFilename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error saving fail image: %v", err)
+			t.Errorf("Scene.AssertPixels: error saving fail image: %v", err)
 		}
 	} else {
 		err := os.RemoveAll(failFilename)
 		if err != nil {
-			t.Errorf("goosi.AssertCaptureIs: error removing old fail image: %v", err)
+			t.Errorf("Scene.AssertPixels: error removing old fail image: %v", err)
 		}
 	}
 }

@@ -414,7 +414,7 @@ func NewFileBrowser(path string) (*FileBrowse, gi.Stage) {
 
 	fb.OpenPath(gi.FileName(path))
 
-	return fb, gi.NewWindow(sc).Run()
+	return fb, sc.NewWindow().Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

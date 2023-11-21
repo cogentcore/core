@@ -264,10 +264,9 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			par := AsTreeView(tv.Par)
 			if tv.SyncNode != nil {
 				par.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
@@ -276,7 +275,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(tv).Run()
+	d.NewDialog(tv).Run()
 }
 
 // AddChildNode adds a new child node to this one in the tree,
@@ -292,10 +291,9 @@ func (tv *TreeView) AddChildNode() { //gti:add
 	nd := &gi.NewItemsData{Number: 1, Type: typ}
 	sg := NewStructView(d).SetStruct(nd).StructGrid()
 	ki.ChildByType[*gi.Chooser](sg, true).SetTypes(gti.AllEmbeddersOf(typ), true, true, 50)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if tv.SyncNode != nil {
 				tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
 			} else {
@@ -303,7 +301,7 @@ func (tv *TreeView) AddChildNode() { //gti:add
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(tv).Run()
+	d.NewDialog(tv).Run()
 }
 
 // DeleteNode deletes the tree node or sync node corresponding
@@ -400,14 +398,12 @@ func (tv *TreeView) EditNode() { //gti:add
 		tynm := tv.SyncNode.KiType().Name
 		d := gi.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.SyncNode)
-		sc := gi.NewScene(d)
-		gi.NewDialog(sc).SetContext(tv).SetFullWindow(true).Run()
+		d.NewFullDialog(tv).Run()
 	} else {
 		tynm := tv.KiType().Name
 		d := gi.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.This())
-		sc := gi.NewScene(d)
-		gi.NewDialog(sc).SetContext(tv).SetFullWindow(true).Run()
+		d.NewFullDialog(tv).Run()
 	}
 }
 

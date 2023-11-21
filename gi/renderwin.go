@@ -336,7 +336,11 @@ func (w *RenderWin) SetTitle(name string) {
 // physical DPI can be found in the Screen
 func (w *RenderWin) LogicalDPI() float32 {
 	if w.GoosiWin == nil {
-		return 96.0 // null default
+		sc := goosi.TheApp.Screen(0)
+		if sc == nil {
+			return 160 // null default
+		}
+		return sc.LogicalDPI
 	}
 	return w.GoosiWin.LogicalDPI()
 }

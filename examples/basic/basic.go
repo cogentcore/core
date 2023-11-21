@@ -33,5 +33,5 @@ func app() {
 
 	// gi.NewSwitch(sc)
 
-	gi.NewWindow(sc).Run().Wait()
+	sc.NewWindow().Run().Wait()
 }

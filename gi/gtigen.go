@@ -7,6 +7,7 @@ import (
 
 	"github.com/aymerick/douceur/css"
 	"goki.dev/colors"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
@@ -1656,11 +1657,9 @@ var SceneType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
-		{"Header", &gti.Field{Name: "Header", Type: "goki.dev/gi/v2/gi.FuncStack", LocalType: "FuncStack", Doc: "Header contains functions for constructing the Header for this Scene,\ncalled in order added.", Directives: gti.Directives{}, Tag: ""}},
-		{"Footer", &gti.Field{Name: "Footer", Type: "goki.dev/gi/v2/gi.FuncStack", LocalType: "FuncStack", Doc: "Footer contains functions for constructing the Footer for this Scene,\ncalled in order added.", Directives: gti.Directives{}, Tag: ""}},
-		{"Left", &gti.Field{Name: "Left", Type: "goki.dev/gi/v2/gi.FuncStack", LocalType: "FuncStack", Doc: "Left contains functions for constructing the Left sidebar / etc for this Scene,\ncalled in order added.", Directives: gti.Directives{}, Tag: ""}},
-		{"Right", &gti.Field{Name: "Right", Type: "goki.dev/gi/v2/gi.FuncStack", LocalType: "FuncStack", Doc: "Right contains functions for constructing the Right sidebar / etc for this Scene,\ncalled in order added.", Directives: gti.Directives{}, Tag: ""}},
-		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of the scene", Directives: gti.Directives{}, Tag: ""}},
+		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides[goki.dev/gi/v2/gi.BarFuncs]", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
+		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides[bool]", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
+		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
 		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
@@ -1722,40 +1721,30 @@ func (t *Scene) SetData(v any) *Scene {
 	return t
 }
 
-// SetHeader sets the [Scene.Header]:
-// Header contains functions for constructing the Header for this Scene,
-// called in order added.
-func (t *Scene) SetHeader(v FuncStack) *Scene {
-	t.Header = v
+// SetBars sets the [Scene.Bars]:
+// Bars contains functions for constructing the control bars for this Scene,
+// attached to different sides of a Scene (e.g., TopAppBar at Top,
+// NavBar at Bottom, etc).  Functions are called in forward order
+// so first added are called first.
+func (t *Scene) SetBars(v styles.Sides[BarFuncs]) *Scene {
+	t.Bars = v
 	return t
 }
 
-// SetFooter sets the [Scene.Footer]:
-// Footer contains functions for constructing the Footer for this Scene,
-// called in order added.
-func (t *Scene) SetFooter(v FuncStack) *Scene {
-	t.Footer = v
-	return t
-}
-
-// SetLeft sets the [Scene.Left]:
-// Left contains functions for constructing the Left sidebar / etc for this Scene,
-// called in order added.
-func (t *Scene) SetLeft(v FuncStack) *Scene {
-	t.Left = v
-	return t
-}
-
-// SetRight sets the [Scene.Right]:
-// Right contains functions for constructing the Right sidebar / etc for this Scene,
-// called in order added.
-func (t *Scene) SetRight(v FuncStack) *Scene {
-	t.Right = v
+// SetBarsInherit sets the [Scene.BarsInherit]:
+// BarsInherit determines which of the Bars side functions are inherited
+// from the context widget, for FullWindow Dialogs
+func (t *Scene) SetBarsInherit(v styles.Sides[bool]) *Scene {
+	t.BarsInherit = v
 	return t
 }
 
 // SetBody sets the [Scene.Body]:
-// Body provides the main contents of the scene
+// Body provides the main contents of scenes that use control Bars
+// to allow the main window contents to be specified separately
+// from that dynamic control content.  When constructing scenes using
+// a Body, you can operate directly on the [Body], which has wrappers
+// for most major Scene functions.
 func (t *Scene) SetBody(v *Body) *Scene {
 	t.Body = v
 	return t
@@ -2180,27 +2169,15 @@ func (t *Snackbar) SetData(v any) *Snackbar {
 	return t
 }
 
-// SetHeader sets the [Snackbar.Header]
-func (t *Snackbar) SetHeader(v FuncStack) *Snackbar {
-	t.Header = v
+// SetBars sets the [Snackbar.Bars]
+func (t *Snackbar) SetBars(v styles.Sides[BarFuncs]) *Snackbar {
+	t.Bars = v
 	return t
 }
 
-// SetFooter sets the [Snackbar.Footer]
-func (t *Snackbar) SetFooter(v FuncStack) *Snackbar {
-	t.Footer = v
-	return t
-}
-
-// SetLeft sets the [Snackbar.Left]
-func (t *Snackbar) SetLeft(v FuncStack) *Snackbar {
-	t.Left = v
-	return t
-}
-
-// SetRight sets the [Snackbar.Right]
-func (t *Snackbar) SetRight(v FuncStack) *Snackbar {
-	t.Right = v
+// SetBarsInherit sets the [Snackbar.BarsInherit]
+func (t *Snackbar) SetBarsInherit(v styles.Sides[bool]) *Snackbar {
+	t.BarsInherit = v
 	return t
 }
 

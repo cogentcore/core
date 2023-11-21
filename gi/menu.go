@@ -50,7 +50,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	if len(name) > 0 {
 		nm = name[0] + "-menu"
 	}
-	msc := NewEmptyScene(nm)
+	msc := NewScene(nm)
 	MenuSceneConfigStyles(msc)
 	menu(msc)
 	if !msc.HasChildren() {
@@ -150,7 +150,7 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 // calling the given function with the index of the selected string.
 // if string == sel, that menu item is selected initially.
 func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
-	m := NewEmptyScene()
+	m := NewScene()
 	for i, s := range strs {
 		i := i
 		b := NewButton(m).SetText(s).OnClick(func(e events.Event) {

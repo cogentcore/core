@@ -63,11 +63,10 @@ func (vv *HiStyleValue) OpenDialog(ctx gi.Widget) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	d := gi.NewBody().AddTitle("Select a HiStyle Highlighting Style").AddText(vv.Doc())
-	sc := gi.NewScene(d)
-	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(sc, &si)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
 				hs := histyle.StyleNames[si]
 				vv.SetValue(hs)
@@ -75,7 +74,7 @@ func (vv *HiStyleValue) OpenDialog(ctx gi.Widget) {
 			}
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).SetFullWindow(true).Run()
+	d.NewFullDialog(ctx).Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -87,17 +86,16 @@ func HiStylesView(st *histyle.Styles) {
 		return
 	}
 
-	b := gi.NewBody("hi-styles")
-	b.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
-	mv := NewMapView(b).SetMap(st)
+	d := gi.NewBody("hi-styles")
+	d.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
+	mv := NewMapView(d).SetMap(st)
 	histyle.StylesChanged = false
 	mv.OnChange(func(e events.Event) {
 		histyle.StylesChanged = true
 	})
-	sc := gi.NewScene(b)
-	sc.Data = st
-	sc.Header.Add(func(par gi.Widget) {
-		tb := sc.TopAppBar(par)
+	d.Sc.Data = st                   // todo: still needed?
+	d.AddTopBar(func(pw gi.Widget) { // todo: if?
+		tb := d.DefaultTopAppBar(pw)
 		oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")
 		sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
@@ -105,5 +103,5 @@ func HiStylesView(st *histyle.Styles) {
 		gi.NewSeparator(tb)
 		mv.MapDefaultTopAppBar(tb)
 	})
-	gi.NewWindow(sc).Run() // todo: should be a dialog instead?
+	d.NewWindow().Run() // note: no context here so not dialog
 }

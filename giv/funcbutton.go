@@ -234,23 +234,22 @@ func (fb *FuncButton) CallFunc() {
 			fb.ShowReturnsDialog(rets)
 			return
 		}
-		d := gi.NewScene(gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip))
-		d.Footer.Add(func(par gi.Widget) {
-			d.AddCancel(par)
-			d.AddOk(par).OnClick(func(e events.Event) {
+		d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
 				rets := fb.ReflectFunc.Call(nil)
 				fb.ShowReturnsDialog(rets)
 			})
 		})
-		gi.NewDialog(d).SetContext(ctx).Run()
+		d.NewDialog(ctx).Run()
 		return
 	}
 	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Args)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			rargs := make([]reflect.Value, len(fb.Args))
 			for i, arg := range fb.Args {
 				rargs[i] = laser.NonPtrValue(arg.Val())
@@ -260,18 +259,18 @@ func (fb *FuncButton) CallFunc() {
 				fb.ShowReturnsDialog(rets)
 				return
 			}
-			d := gi.NewScene(gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip))
-			d.Footer.Add(func(par gi.Widget) {
-				d.AddCancel(par)
-				d.AddOk(par).OnClick(func(e events.Event) {
+			d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw)
+				d.AddOk(pw).OnClick(func(e events.Event) {
 					rets := fb.ReflectFunc.Call(rargs)
 					fb.ShowReturnsDialog(rets)
 				})
 			})
-			gi.NewDialog(d).SetContext(ctx).Run()
+			d.NewDialog(ctx).Run()
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).Run()
+	d.NewDialog(ctx).Run()
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
@@ -319,14 +318,13 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	}
 	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
-	sc := gi.NewScene(d)
-	sc.Footer.Add(func(par gi.Widget) {
-		sc.AddCancel(par)
-		sc.AddOk(par).OnClick(func(e events.Event) {
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
 			// todo: do something with the args?
 		})
 	})
-	gi.NewDialog(sc).SetContext(ctx).Run()
+	d.NewDialog(ctx).Run()
 }
 
 // SetArgs sets the appropriate [Value] objects for the

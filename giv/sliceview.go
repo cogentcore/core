@@ -809,10 +809,9 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 				nd := &gi.NewItemsData{}
 				w := NewValue(d, nd).AsWidget()
 				ki.ChildByType[*gi.Chooser](w, true).SetTypes(gti.AllEmbeddersOf(ownki.BaseType()), true, true, 50)
-				sc := gi.NewScene(d)
-				sc.Footer.Add(func(par gi.Widget) {
-					sc.AddCancel(par)
-					sc.AddOk(par).OnClick(func(e events.Event) {
+				d.AddBottomBar(func(pw gi.Widget) {
+					d.AddCancel(pw)
+					d.AddOk(pw).OnClick(func(e events.Event) {
 						updt := ownki.UpdateStart()
 						for i := 0; i < nd.Number; i++ {
 							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
@@ -822,7 +821,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 						ownki.UpdateEnd(updt)
 					})
 				})
-				gi.NewDialog(sc).SetContext(sv).Run()
+				d.NewDialog(sv).Run()
 			}
 		}
 	} else {

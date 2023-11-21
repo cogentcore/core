@@ -83,14 +83,13 @@ func (mv *MapViewInline) MapViewInlineStyles() {
 				}
 				d := gi.NewBody().AddTitle(title).AddText(mv.Tooltip)
 				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map).SetTmpSave(mv.TmpSave)
-				sc := gi.NewScene(d)
-				sc.Footer.Add(func(par gi.Widget) {
-					sc.AddCancel(par)
-					sc.AddOk(par).OnClick(func(e events.Event) {
+				d.AddBottomBar(func(pw gi.Widget) {
+					d.AddCancel(pw)
+					d.AddOk(pw).OnClick(func(e events.Event) {
 						mv.SendChange()
 					})
 				})
-				gi.NewDialog(sc).SetContext(mv).SetFullWindow(true).Run()
+				d.NewFullDialog(mv).Run()
 			})
 		}
 	})

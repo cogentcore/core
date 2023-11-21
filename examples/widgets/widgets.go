@@ -37,17 +37,12 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	bd := gi.NewBody("widgets").SetTitle("GoGi Widgets Demo")
+	b := gi.NewBody("widgets").SetTitle("GoGi Widgets Demo")
 
 	// gi.DefaultTopAppBar = nil // turns it off
 
-	sc := gi.NewScene(bd)
-
-	sc.Header.Add(func(par gi.Widget) {
-		tb := sc.TopAppBar(par)
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
+	b.AddTopBar(func(pw gi.Widget) {
+		tb := b.DefaultTopAppBar(pw)
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
 			OnClick(func(e events.Event) {
 				fmt.Println("TopAppBar Button 1")
@@ -65,7 +60,7 @@ func app() {
 			})
 	})
 
-	trow := gi.NewLayout(bd, "trow")
+	trow := gi.NewLayout(b, "trow")
 	trow.Style(func(s *styles.Style) {
 		s.Align.Items = styles.Center
 		s.Align.Content = styles.Center
@@ -90,10 +85,10 @@ func app() {
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(bd)
-	gi.NewLabel(bd).SetText("Buttons:")
+	gi.NewSpace(b)
+	gi.NewLabel(b).SetText("Buttons:")
 
-	brow := gi.NewLayout(bd, "brow").
+	brow := gi.NewLayout(b, "brow").
 		Style(func(s *styles.Style) {
 			s.Gap.X.Em(1)
 		})
@@ -106,58 +101,27 @@ func app() {
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
-
-		// b := gi.NewBody()
-		// gi.NewLabel(b).SetType(gi.LabelHeadlineLarge).SetText("Test Dialog")
-		// gi.NewLabel(b).SetText("This is a prompt")
-		// sc := gi.NewScene(b)
-		// sc.Sides.Bottom = func(par Widget) {
-		// 	brow := gi.NewLayout(par).Style(func(s *styles.Style) {
-		// 		s.Align.X = styles.End
-		// 	})
-		// 	gi.NewButton(brow).SetText("Cancel").OnClick(func(e events.Event) {
-		// 		sc.Close()
-		// 	})
-		// 	gi.NewButton(brow).SetText("OK").OnClick(func(e events.Event) {
-		// 		sc.Close()
-		// 	})
-		// }
-		// gi.NewDialog(sc).SetModal(true).Run()
-
-		d := gi.NewScene(gi.NewBody().AddTitle("Test Dialog").AddText("This is a prompt"))
-		d.Footer.Add(func(par gi.Widget) {
-			d.AddCancel(par).OnClick(func(e events.Event) {
-			})
-			d.AddOk(par).OnClick(func(e events.Event) {
-			})
+		b := gi.NewBody().AddTitle("Test Dialog").AddText("This is a prompt")
+		b.AddBottomBar(func(pw gi.Widget) {
+			b.AddCancel(pw)
+			b.AddOk(pw)
 		})
-		gi.NewDialog(d).SetContext(b1).Run() // note: NewDialog returns Stage
-
-		// d := gi.NewDialog(b1).AddTitle("Test Dialog").AddText("This is a prompt").
-		// 	Modal(true).Cancel().Ok().
-		// OnAccept(func(e events.Event) {
-		// 	fmt.Println("ok")
-		// }).OnCancel(func(e events.Event) {
-		// 	fmt.Println("cancel")
-		// }).Run()
-
+		b.NewDialog(b1).Run()
 	})
 
 	button2 := gi.NewButton(brow).SetText("Open Inspector").
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		txt := ""
-
-		d := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")
-		giv.NewValue(d, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
-		sc := gi.NewScene(d)
-		sc.Footer.Add(func(par gi.Widget) {
-			sc.AddCancel(par)
-			sc.AddOk(par).OnClick(func(e events.Event) {
+		b := gi.NewBody().AddTitle("What is it?").AddText("Please enter your response:")
+		giv.NewValue(b, &txt).AsWidget().(*gi.TextField).SetPlaceholder("Enter string here...")
+		b.AddBottomBar(func(pw gi.Widget) {
+			b.AddCancel(pw)
+			b.AddOk(pw).OnClick(func(e events.Event) {
 				fmt.Println("dialog accepted; string entered:", txt)
 			})
 		})
-		gi.NewDialog(sc).SetContext(button2).Run()
+		b.NewDialog(button2).Run()
 	})
 
 	toggle := gi.NewSwitch(brow).SetText("Toggle")
@@ -198,10 +162,10 @@ func app() {
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.NewSpace(bd)
-	gi.NewLabel(bd).SetText("Sliders:")
+	gi.NewSpace(b)
+	gi.NewLabel(b).SetText("Sliders:")
 
-	srow := gi.NewLayout(bd).
+	srow := gi.NewLayout(b).
 		Style(func(s *styles.Style) {
 			s.Align.Items = styles.Center
 			s.Gap.X.Ex(2)
@@ -240,9 +204,9 @@ func app() {
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewLabel(bd).SetText("Text Widgets:")
+	gi.NewLabel(b).SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(bd).
+	txrow := gi.NewLayout(b).
 		Style(func(s *styles.Style) {
 			s.Gap.X.Ex(2)
 		})
@@ -267,5 +231,5 @@ func app() {
 		fmt.Printf("Chooser selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
 	})
 
-	gi.NewWindow(sc).Run().Wait()
+	b.NewWindow().Run().Wait()
 }

@@ -186,5 +186,5 @@ func app() {
 	// split.SetSplits(.3, .2, .2, .3)
 	split.SetSplits(.5, .5)
 
-	gi.NewWindow(sc).Run().Wait()
+	sc.NewWindow().Run().Wait()
 }

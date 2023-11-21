@@ -70,5 +70,5 @@ func app() {
 	txbuf.Open(samplefile)
 	// giv.InspectorDialog(&txbuf.Hi.PiLang.Parser().Parser) .Lexer //
 
-	gi.NewWindow(sc).Run().Wait()
+	sc.NewWindow().Run().Wait()
 }
