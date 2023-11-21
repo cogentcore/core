@@ -1598,6 +1598,7 @@ func (tf *TextField) HandleTextFieldKeys() {
 					} else {
 						tf.OfferComplete(dontForce)
 					}
+					tf.Send(events.Input)
 				}
 			}
 		}

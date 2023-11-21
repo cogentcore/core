@@ -209,16 +209,25 @@ func (tb *Buf) SignalViews(sig BufSignals, edit *textbuf.Edit) {
 	for _, vw := range tb.Views {
 		vw.BufSignal(sig, edit)
 	}
-	if sig == BufDone || sig == BufInsert || sig == BufDelete {
+	if sig == BufDone {
 		e := &events.Base{Typ: events.Change}
+		e.Init()
+		tb.Listeners.Call(e)
+	} else if sig == BufInsert || sig == BufDelete {
+		e := &events.Base{Typ: events.Input}
 		e.Init()
 		tb.Listeners.Call(e)
 	}
 }
 
-// OnChange adds an event listener function for the Change event
+// OnChange adds an event listener function for the [events.Change] event
 func (tb *Buf) OnChange(fun func(e events.Event)) {
 	tb.Listeners.Add(events.Change, fun)
+}
+
+// OnInput adds an event listener function for the [events.Input] event
+func (tb *Buf) OnInput(fun func(e events.Event)) {
+	tb.Listeners.Add(events.Input, fun)
 }
 
 // BufFlags hold key Buf state
