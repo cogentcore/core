@@ -380,11 +380,11 @@ func (i *SelectModes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41}
+var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42}
 
 // TypesN is the highest valid value
 // for type Types, plus one.
-const TypesN Types = 42
+const TypesN Types = 43
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -429,9 +429,10 @@ func _TypesNoOp() {
 	_ = x[Window-(36)]
 	_ = x[WindowResize-(37)]
 	_ = x[WindowPaint-(38)]
-	_ = x[OS-(39)]
-	_ = x[OSOpenFiles-(40)]
-	_ = x[Custom-(41)]
+	_ = x[Show-(39)]
+	_ = x[OS-(40)]
+	_ = x[OSOpenFiles-(41)]
+	_ = x[Custom-(42)]
 }
 
 var _TypesNameToValueMap = map[string]Types{
@@ -513,12 +514,14 @@ var _TypesNameToValueMap = map[string]Types{
 	`windowresize`:   37,
 	`WindowPaint`:    38,
 	`windowpaint`:    38,
-	`OS`:             39,
-	`os`:             39,
-	`OSOpenFiles`:    40,
-	`osopenfiles`:    40,
-	`Custom`:         41,
-	`custom`:         41,
+	`Show`:           39,
+	`show`:           39,
+	`OS`:             40,
+	`os`:             40,
+	`OSOpenFiles`:    41,
+	`osopenfiles`:    41,
+	`Custom`:         42,
+	`custom`:         42,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -561,9 +564,10 @@ var _TypesDescMap = map[Types]string{
 	36: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
 	37: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
 	38: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
-	39: `OS is an operating system generated event (app level typically)`,
-	40: `OSOpenFiles is an event telling app to open given files`,
-	41: `Custom is a user-defined event with a data any field`,
+	39: `Show is sent to a [goki.dev/gi/v2/gi.Scene] when it is shown. It is sent to no other elements.`,
+	40: `OS is an operating system generated event (app level typically)`,
+	41: `OSOpenFiles is an event telling app to open given files`,
+	42: `Custom is a user-defined event with a data any field`,
 }
 
 var _TypesMap = map[Types]string{
@@ -606,9 +610,10 @@ var _TypesMap = map[Types]string{
 	36: `Window`,
 	37: `WindowResize`,
 	38: `WindowPaint`,
-	39: `OS`,
-	40: `OSOpenFiles`,
-	41: `Custom`,
+	39: `Show`,
+	40: `OS`,
+	41: `OSOpenFiles`,
+	42: `Custom`,
 }
 
 // String returns the string representation

@@ -224,6 +224,10 @@ const (
 	// to keep pace with updating.
 	WindowPaint
 
+	// Show is sent to a [goki.dev/gi/v2/gi.Scene] when it is shown.
+	// It is sent to no other elements.
+	Show
+
 	// OS is an operating system generated event (app level typically)
 	OS
 
