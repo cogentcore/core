@@ -293,7 +293,7 @@ func (pr *Parser) ReadJSON(b []byte) error {
 	ki.UnmarshalPost(pr.Lexer.This())
 	ki.UnmarshalPost(pr.Parser.This())
 	if err != nil {
-		slog.Error(err)
+		slog.Error(err.Error())
 	}
 	return err
 }
