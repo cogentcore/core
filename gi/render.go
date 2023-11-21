@@ -462,10 +462,14 @@ func (sc *Scene) DoUpdate() bool {
 		return false
 	}
 
+	fmt.Println("sli", sc.ShowLayoutIter)
 	if sc.ShowLayoutIter == 3 {
+		fmt.Println("show", sc.Is(ScPrefSizing))
 		sc.ShowLayoutIter++
 		if !sc.Is(ScPrefSizing) {
+			fmt.Println("asf")
 			sc.EventMgr.ActivateStartFocus()
+			fmt.Println("showe")
 			sc.Send(events.Show)
 		}
 	}

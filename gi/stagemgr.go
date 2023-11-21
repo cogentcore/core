@@ -5,7 +5,9 @@
 package gi
 
 import (
+	"fmt"
 	"image"
+	"runtime/debug"
 	"sync"
 
 	"goki.dev/goosi/events"
@@ -87,12 +89,16 @@ func (sm *StageMgrBase) TopNotType(typ StageTypes) Stage {
 
 // Push pushes a new Stage to top, under Write lock
 func (sm *StageMgrBase) Push(st Stage) {
+	fmt.Println("LOCK")
+	debug.PrintStack()
 	sm.Mu.Lock()
+	fmt.Println("PAST LOCK")
 	defer sm.Mu.Unlock()
 
 	sm.Modified = true
 	sm.Stack.Add(st.AsBase().Name, st)
 	st.StageAdded(sm.This)
+	fmt.Println("WILL UNLOCK")
 }
 
 // Pop pops current Stage off the stack, returning it or nil if none.
