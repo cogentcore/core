@@ -22,7 +22,8 @@ func (i {{.Name}}) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *{{.Name}}) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	i.SetString(string(text))
+	return nil
 }
 `))
 
@@ -43,7 +44,8 @@ func (i *{{.Name}}) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
 	}
-	return i.SetString(s)
+	i.SetString(s)
+	return nil
 }
 `))
 
@@ -64,7 +66,8 @@ func (i *{{.Name}}) UnmarshalYAML(value *yaml.Node) error {
 	if err := n.Decode(&s); err != nil {
 		return err
 	}
-	return i.SetString(s)
+	i.SetString(s)
+	return nil
 }
 `))
 
