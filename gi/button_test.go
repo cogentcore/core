@@ -19,12 +19,12 @@ func TestButton(t *testing.T) {
 					var stf states.States
 					stf.SetFlag(true, st...)
 					nm := testName("button", typ, str, ic, stf)
-					t.Run(nm, func(t *testing.T) {
-						// t.Parallel()
-						sc := NewScene()
-						NewButton(sc).SetType(typ).SetText(str).SetIcon(ic).SetState(true, st...)
-						sc.AssertPixelsOnShow(t, nm)
-					})
+					// t.Run(nm, func(t *testing.T) {
+					// t.Parallel()
+					sc := NewScene()
+					NewButton(sc).SetType(typ).SetText(str).SetIcon(ic).SetState(true, st...)
+					sc.AssertPixelsOnShow(t, nm)
+					// })
 				}
 			}
 		}
