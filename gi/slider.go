@@ -71,14 +71,10 @@ type Slider struct { //goki:embedder
 	// optional icon for the dragging knob
 	Icon icons.Icon `view:"show-name"`
 
-	// if true, will send continuous updates of value changes as user moves the slider.
-	// otherwise only at the end. See TrackThr for a threshold on amount of change
-	Tracking bool
+	// threshold for amount of change in scroll value before emitting an input event
+	InputThreshold float32
 
-	// threshold for amount of change in scroll value before emitting a signal in Tracking mode
-	TrackThr float32
-
-	// snap the values to Step size increments
+	// whether to snap the values to Step size increments
 	Snap bool
 
 	// specifies the precision of decimal places (total, not after the decimal point)
@@ -145,8 +141,7 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 	sr.VisiblePct = fr.VisiblePct
 	sr.ThumbSize = fr.ThumbSize
 	sr.Icon = fr.Icon
-	sr.Tracking = fr.Tracking
-	sr.TrackThr = fr.TrackThr
+	sr.InputThreshold = fr.InputThreshold
 	sr.Snap = fr.Snap
 	sr.Prec = fr.Prec
 	sr.ValueColor = fr.ValueColor
@@ -160,7 +155,6 @@ func (sr *Slider) OnInit() {
 	sr.PageStep = 0.2
 	sr.Prec = 9
 	sr.ThumbSize.Set(1, 1)
-	sr.Tracking = true
 	sr.TrackSize = 0.5
 	sr.HandleSliderEvents()
 	sr.SliderStyles()
@@ -332,8 +326,9 @@ func (sr *Slider) SetSliderPos(pos float32) {
 // This version sends tracking changes
 func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
-	if sr.Tracking && mat32.Abs(sr.LastValue-sr.Value) > sr.TrackThr {
-		sr.SendChanged()
+	if mat32.Abs(sr.LastValue-sr.Value) > sr.InputThreshold {
+		sr.LastValue = sr.Value
+		sr.Send(events.Input)
 	}
 }
 
@@ -417,9 +412,7 @@ func (sr *Slider) HandleSliderMouse() {
 	sr.On(events.SlideStop, func(e events.Event) {
 		pos := sr.PointToRelPos(e.LocalPos())
 		sr.SetSliderPosAction(pos)
-		if !sr.Tracking {
-			sr.SendChanged()
-		}
+		sr.SendChanged()
 	})
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
@@ -429,9 +422,7 @@ func (sr *Slider) HandleSliderMouse() {
 			del = -del // invert for "natural" scroll
 		}
 		sr.SetSliderPosAction(sr.Pos - del)
-		if !sr.Tracking {
-			sr.SendChanged()
-		}
+		sr.SendChanged()
 	})
 }
 

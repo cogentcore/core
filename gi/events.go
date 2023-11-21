@@ -66,6 +66,11 @@ func (wb *WidgetBase) OnChange(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Change, fun)
 }
 
+// OnInput adds an event listener function for [events.Input] events
+func (wb *WidgetBase) OnInput(fun func(e events.Event)) *WidgetBase {
+	return wb.On(events.Input, fun)
+}
+
 // OnKeyChord adds an event listener function for [events.KeyChord] events
 func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.KeyChord, fun)
@@ -111,7 +116,7 @@ func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 	w.HandleEvent(e)
 }
 
-// SendChange sends the events.Change event, which is widely used to signal
+// SendChange sends the [events.Change] event, which is widely used to signal
 // updating for most widgets. It takes the event that the new change event
 // is derived from, if any.
 func (wb *WidgetBase) SendChange(orig ...events.Event) {

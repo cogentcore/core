@@ -1603,15 +1603,9 @@ func (t *ProgressBar) SetIcon(v icons.Icon) *ProgressBar {
 	return t
 }
 
-// SetTracking sets the [ProgressBar.Tracking]
-func (t *ProgressBar) SetTracking(v bool) *ProgressBar {
-	t.Tracking = v
-	return t
-}
-
-// SetTrackThr sets the [ProgressBar.TrackThr]
-func (t *ProgressBar) SetTrackThr(v float32) *ProgressBar {
-	t.TrackThr = v
+// SetInputThreshold sets the [ProgressBar.InputThreshold]
+func (t *ProgressBar) SetInputThreshold(v float32) *ProgressBar {
+	t.InputThreshold = v
 	return t
 }
 
@@ -1896,9 +1890,8 @@ var SliderType = gti.AddType(&gti.Type{
 		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment.", Directives: gti.Directives{}, Tag: ""}},
 		{"TrackSize", &gti.Field{Name: "TrackSize", Type: "float32", LocalType: "float32", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the dragging knob", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
-		{"Tracking", &gti.Field{Name: "Tracking", Type: "bool", LocalType: "bool", Doc: "if true, will send continuous updates of value changes as user moves the slider.\notherwise only at the end. See TrackThr for a threshold on amount of change", Directives: gti.Directives{}, Tag: ""}},
-		{"TrackThr", &gti.Field{Name: "TrackThr", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting a signal in Tracking mode", Directives: gti.Directives{}, Tag: ""}},
-		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "snap the values to Step size increments", Directives: gti.Directives{}, Tag: ""}},
+		{"InputThreshold", &gti.Field{Name: "InputThreshold", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting an input event", Directives: gti.Directives{}, Tag: ""}},
+		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "whether to snap the values to Step size increments", Directives: gti.Directives{}, Tag: ""}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions.", Directives: gti.Directives{}, Tag: ""}},
 		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
 		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
@@ -2015,23 +2008,15 @@ func (t *Slider) SetIcon(v icons.Icon) *Slider {
 	return t
 }
 
-// SetTracking sets the [Slider.Tracking]:
-// if true, will send continuous updates of value changes as user moves the slider.
-// otherwise only at the end. See TrackThr for a threshold on amount of change
-func (t *Slider) SetTracking(v bool) *Slider {
-	t.Tracking = v
-	return t
-}
-
-// SetTrackThr sets the [Slider.TrackThr]:
-// threshold for amount of change in scroll value before emitting a signal in Tracking mode
-func (t *Slider) SetTrackThr(v float32) *Slider {
-	t.TrackThr = v
+// SetInputThreshold sets the [Slider.InputThreshold]:
+// threshold for amount of change in scroll value before emitting an input event
+func (t *Slider) SetInputThreshold(v float32) *Slider {
+	t.InputThreshold = v
 	return t
 }
 
 // SetSnap sets the [Slider.Snap]:
-// snap the values to Step size increments
+// whether to snap the values to Step size increments
 func (t *Slider) SetSnap(v bool) *Slider {
 	t.Snap = v
 	return t

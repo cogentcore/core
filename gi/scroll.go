@@ -68,8 +68,7 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 	sb.SetType(SliderScrollbar)
 	sb.Sc = sc
 	sb.Dim = d
-	sb.Tracking = true
-	sb.TrackThr = 1
+	sb.InputThreshold = 1
 	sb.Min = 0.0
 	sb.Style(func(s *styles.Style) {
 		s.Padding.Zero()
@@ -87,7 +86,7 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 		}
 		s.Max = s.Min
 	})
-	sb.OnChange(func(e events.Event) {
+	sb.OnInput(func(e events.Event) {
 		e.SetHandled()
 		// fmt.Println("change event")
 		updt := ly.UpdateStart()

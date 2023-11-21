@@ -319,7 +319,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.Min.X = sv.Styles.ScrollBarWidth
 				s.Grow.Set(0, 1)
 			})
-			sb.OnChange(func(e events.Event) {
+			sb.OnInput(func(e events.Event) {
 				sv.StartIdx = int(sb.Value)
 				sv.This().(SliceViewer).UpdateWidgets()
 			})
@@ -465,7 +465,6 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Type = gi.SliderScrollbar
 	sb.StayInView = true
 	sb.Dim = mat32.Y
-	sb.Tracking = true
 	sb.Min = 0
 	sb.Step = 1
 	sv.UpdateScroll()
@@ -554,7 +553,7 @@ func (sv *SliceViewBase) UpdateScroll() {
 		sb.PageStep = 10 * sb.Step
 		sb.SetVisiblePct(1)
 	}
-	sb.TrackThr = sb.Step
+	sb.InputThreshold = sb.Step
 	sb.SetValue(float32(sv.StartIdx)) // essential for updating pos from value
 	sb.SetState(sv.VisRows == sv.SliceSize, states.Invisible)
 	sb.UpdateEndRender(updt)
