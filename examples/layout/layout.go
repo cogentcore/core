@@ -7,10 +7,13 @@ package main
 import (
 	"fmt"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
@@ -90,17 +93,52 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 	}
 }
 
+func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
+	fr := gi.NewFrame(par, nm...)
+	fr.Style(func(s *styles.Style) {
+		s.Border.Color.Set(colors.Black)
+		s.Border.Width.Set(units.Dp(2))
+	})
+	return fr
+}
+
 func app() {
 	// turn on tracing in preferences, Debug
-	gi.LayoutTrace = true
-	gi.LayoutTraceDetail = true
+	// gi.LayoutTrace = true
+	// gi.LayoutTraceDetail = true
 	// gi.UpdateTrace = true
 	// gi.RenderTrace = true
 
 	gi.SetAppName("layout")
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	sc := gi.NewScene("lay-test").SetTitle("GoGi Layout Test")
-	gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
+	b := gi.NewBody("lay-test").SetTitle("GoGi Layout Test")
+	// gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
 
+	ctrl := &Control{}
+	splt := gi.NewSplits(b)
+
+	svfr := gi.NewFrame(splt).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	giv.NewStructView(svfr).SetStruct(ctrl)
+
+	fr := gi.NewFrame(splt)
+	PlainFrames(fr, mat32.Vec2{0, 0})
+	fr.Style(func(s *styles.Style) {
+		s.Display = ctrl.Display
+		s.Direction = ctrl.Direction
+		s.Wrap = ctrl.Wrap
+		s.Justify = ctrl.Justify
+		s.Align = ctrl.Align
+		s.Min = ctrl.Min
+		s.Max = ctrl.Max
+		s.Grow = ctrl.Grow
+	})
+
+	gi.NewButton(svfr).SetText("Redraw").OnClick(func(e events.Event) {
+		fr.Update()
+	})
+
+	b.NewWindow().Run().Wait()
 }
