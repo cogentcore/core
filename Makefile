@@ -3,7 +3,7 @@
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test -covermode=atomic -coverprofile=coverage.out
+GOTEST=$(GOCMD) test -tag offscreen -covermode=atomic -coverprofile=coverage.out
 GOGET=$(GOCMD) get
 
 # exclude python from std builds
