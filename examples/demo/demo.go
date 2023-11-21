@@ -255,7 +255,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSwitches(inputs).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems([]string{"Segmented Button 1", "Segmented Button 2", "Segmented Button 3"}).
 		SetTooltips([]string{"A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3"})
 
-	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5).SetTracking(true)
+	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
 
 	sliderys := gi.NewLayout(inputs, "sliderys")

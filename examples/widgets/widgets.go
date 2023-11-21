@@ -171,33 +171,25 @@ func app() {
 			s.Gap.X.Ex(2)
 		})
 
-	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).
-		SetSnap(true).SetTracking(false).SetIcon(icons.RadioButtonChecked)
+	slider0 := gi.NewSlider(srow).SetDim(mat32.X).SetValue(0.5).SetSnap(true).SetIcon(icons.RadioButtonChecked)
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
-	// slider0.Style(func(s *styles.Style) {
-	// })
 
-	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).
-		SetTracking(true).SetValue(0.5).SetThumbSize(mat32.NewVec2(1, 4))
-	slider1.OnChange(func(e events.Event) {
+	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).SetValue(0.5).SetThumbSize(mat32.NewVec2(1, 4))
+	slider1.OnInput(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
 
 	scroll0 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.X).
-		SetVisiblePct(0.25).SetValue(0.25).SetTracking(true).SetStep(0.05).SetSnap(true)
-	scroll0.OnChange(func(e events.Event) {
+		SetVisiblePct(0.25).SetValue(0.25).SetStep(0.05).SetSnap(true)
+	scroll0.OnInput(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
-	// scroll0.Style(func(s *styles.Style) {
-	// 	s.Align.Y = styles.Center
-	// })
 
-	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).
-		SetVisiblePct(.01).SetValue(0).SetMax(3000).
-		SetTracking(true).SetStep(1).SetPageStep(10)
-	scroll1.OnChange(func(e events.Event) {
+	scroll1 := gi.NewSlider(srow).SetType(gi.SliderScrollbar).SetDim(mat32.Y).SetVisiblePct(.01).
+		SetValue(0).SetMax(3000).SetStep(1).SetPageStep(10)
+	scroll1.OnInput(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
 	})
 

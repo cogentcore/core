@@ -74,8 +74,8 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		s.Direction = styles.Column
 	})
 
-	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).SetTracking(true)
-	hue.OnChange(func(e events.Event) {
+	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue)
+	hue.OnInput(func(e events.Event) {
 		cv.Color.SetHue(hue.Value)
 		cv.SetHCT(cv.Color)
 	})
@@ -92,8 +92,8 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		}
 	})
 
-	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).SetTracking(true)
-	chroma.OnChange(func(e events.Event) {
+	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
+	chroma.OnInput(func(e events.Event) {
 		cv.Color.SetChroma(chroma.Value)
 		cv.SetHCT(cv.Color)
 	})
@@ -110,8 +110,8 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 		}
 	})
 
-	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone).SetTracking(true)
-	tone.OnChange(func(e events.Event) {
+	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
+	tone.OnInput(func(e events.Event) {
 		cv.Color.SetTone(tone.Value)
 		cv.SetHCT(cv.Color)
 	})
