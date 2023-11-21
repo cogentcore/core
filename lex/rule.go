@@ -110,7 +110,6 @@ func (lr *Rule) CompileAll(ls *State) bool {
 		lri := k.(*Rule)
 		ok := lri.Compile(ls)
 		if !ok {
-			fmt.Println("lex rule error", lr)
 			allok = false
 		}
 		return true
