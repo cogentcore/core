@@ -1806,9 +1806,9 @@ func (vv *TextEditorValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*texteditor.Editor)
+	te := vv.Widget.(*texteditor.Editor)
 	npv := laser.NonPtrValue(vv.Value)
-	sb.Buf.SetText([]byte(npv.String()))
+	te.Buf.SetText([]byte(npv.String()))
 }
 
 func (vv *TextEditorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
@@ -1821,9 +1821,14 @@ func (vv *TextEditorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 	tb := texteditor.NewBuf()
 	tb.Stat()
+	tb.OnChange(func(e events.Event) {
+		// fmt.Println(tb.Txt)
+		vv.SetValue(string(tb.Txt))
+		// fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
+	})
 
-	tv := w.(*texteditor.Editor)
-	tv.SetBuf(tb)
+	te := w.(*texteditor.Editor)
+	te.SetBuf(tb)
 
 	vv.UpdateWidget()
 }
