@@ -55,7 +55,7 @@ var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
 // It does not return until all of those steps are completed.
 func (sc *Scene) AssertPixelsOnShow(t TestingT, filename string) {
 	showed := make(chan struct{})
-	sc.On(events.Custom, func(e events.Event) {
+	sc.OnShow(func(e events.Event) {
 		sc.AssertPixels(t, filename)
 		showed <- struct{}{}
 	})

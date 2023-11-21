@@ -466,7 +466,7 @@ func (sc *Scene) DoUpdate() bool {
 		sc.ShowLayoutIter++
 		if !sc.Is(ScPrefSizing) {
 			sc.EventMgr.ActivateStartFocus()
-			sc.Send(events.Custom) // listen to Custom event on Show
+			sc.Send(events.Show)
 		}
 	}
 

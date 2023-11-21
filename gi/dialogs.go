@@ -133,9 +133,13 @@ func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 // Close closes the stage associated with this Scene (typically for Dialog)
 func (sc *Scene) Close() {
 	sc.Send(events.Change)
+	if sc.Stage == nil {
+		slog.Error("Scene has no Stage")
+		return
+	}
 	mm := sc.Stage.AsMain().StageMgr
 	if mm == nil {
-		slog.Error("dialog has no MainMgr")
+		slog.Error("Scene has no MainMgr")
 		return
 	}
 	if sc.Stage.AsBase().NewWindow {

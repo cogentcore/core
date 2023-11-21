@@ -1822,9 +1822,9 @@ func (vv *TextEditorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	tb := texteditor.NewBuf()
 	tb.Stat()
 	tb.OnChange(func(e events.Event) {
-		// fmt.Println(tb.Txt)
+		fmt.Println(tb.Txt)
 		vv.SetValue(string(tb.Txt))
-		// fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
+		fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
 	})
 
 	te := w.(*texteditor.Editor)
