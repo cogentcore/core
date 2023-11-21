@@ -17,7 +17,7 @@ import (
 	"goki.dev/pi/v2/token"
 )
 
-var Trace = true
+var Trace = false
 
 // Lexer is the interface type for lexers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes

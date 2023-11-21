@@ -182,9 +182,8 @@ func (pr *Parser) DoPassTwo(fs *FileState) {
 func (pr *Parser) LexAll(fs *FileState) {
 	pr.LexInit(fs)
 	// lprf := prof.Start("LexRun") // quite fast now..
-	pr.SaveGrammar("gmr.pig")
 	pr.LexRun(fs)
-	fs.LexErrReport()
+	// fs.LexErrReport()
 	// lprf.End()
 	pr.DoPassTwo(fs) // takes virtually no time
 }
