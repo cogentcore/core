@@ -195,7 +195,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 	// fmt.Println("Screen Size:", rc.Size)
 	rc.SetFlag(true, RenderVisible)
 	rc.LogicalDPI = scr.LogicalDPI
-	fmt.Println("first win:", rc.LogicalDPI)
+	// fmt.Println("first win:", rc.LogicalDPI)
 	return ms
 }
 

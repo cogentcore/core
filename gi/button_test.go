@@ -20,8 +20,8 @@ func TestButton(t *testing.T) {
 					stf.SetFlag(true, st...)
 					nm := testName("button", typ, str, ic, stf)
 					t.Run(nm, func(t *testing.T) {
-						t.Parallel()
-						sc := NewEmptyScene()
+						// t.Parallel()
+						sc := NewScene()
 						NewButton(sc).SetType(typ).SetText(str).SetIcon(ic).SetState(true, st...)
 						sc.AssertPixelsOnShow(t, nm)
 					})
