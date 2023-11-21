@@ -23,19 +23,12 @@ func app() {
 	// note: can add a path to view other icon sets
 	// svg.CurIconSet.OpenIconsFromPath("/Users/oreilly/github/inkscape/share/icons/multicolor/symbolic/actions")
 
-	sc := gi.NewScene("gogi-icons-demo").SetTitle("GoGi Icons")
+	b := gi.NewBody().SetTitle("GoGi Icons")
 
-	sc.Style(func(s *styles.Style) {
-		s.Align.X = styles.Start
-	})
-
-	grid := gi.NewFrame(sc, "grid")
+	grid := gi.NewFrame(b, "grid")
 	grid.Style(func(s *styles.Style) {
-		// s.Display = styles.Grid
-		// s.Columns = 4 // int(s.UnContext.Elw / (17 * s.UnContext.FontEm))
 		s.Wrap = true
 		s.Grow.Set(1, 1)
-		s.Align.X = styles.Start
 		s.Margin.Set(units.Dp(8))
 		s.Overflow.Y = styles.OverflowAuto
 	})
@@ -59,5 +52,5 @@ func app() {
 		})
 	}
 
-	sc.NewWindow().Run().Wait()
+	b.NewWindow().Run().Wait()
 }

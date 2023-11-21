@@ -141,32 +141,28 @@ func app() {
 	gi.SetAppName("views")
 	gi.SetAppAbout(`This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	sc := gi.NewScene("gogi-views-test").SetTitle("GoGi Views Test")
+	b := gi.NewBody().SetTitle("GoGi Views Test")
 
-	// gi.DefaultTopAppBar = nil
-
-	sc.TopAppBar = func(tb *gi.TopAppBar) {
-		if gi.DefaultTopAppBar != nil {
-			gi.DefaultTopAppBar(tb)
-		}
+	b.AddTopBar(func(pw gi.Widget) {
+		tb := b.DefaultTopAppBar(pw)
 		gi.NewButton(tb, "slice-test").SetText("SliceDialog").
 			SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
 			OnClick(func(e events.Event) {
 				sl := make([]float32, 2880)
-				d := gi.NewBody(tb).AddTitle("SliceView Test").AddText("It should open quickly.").FullWindow(true)
+				d := gi.NewBody().AddTitle("SliceView Test").AddText("It should open quickly.")
 				giv.NewSliceView(d).SetSlice(&sl)
-				d.Run()
+				d.NewFullDialog(tb).Run()
 			})
 		gi.NewButton(tb, "table-test").SetText("TableDialog").
 			SetTooltip("open a TableViewDialog view").
 			OnClick(func(e events.Event) {
-				d := gi.NewBody(tb).AddTitle("TableView Test").AddText("how does it resize.").FullWindow(true)
+				d := gi.NewBody().AddTitle("TableView Test").AddText("how does it resize.")
 				giv.NewTableView(d).SetSlice(&tsttable)
-				d.Run()
+				d.NewFullDialog(tb).Run()
 			})
-	}
+	})
 
-	split := gi.NewSplits(sc, "split")
+	split := gi.NewSplits(b, "split")
 	split.Dim = mat32.X
 
 	// strv := giv.NewStructView(sc, "strv")
@@ -186,5 +182,5 @@ func app() {
 	// split.SetSplits(.3, .2, .2, .3)
 	split.SetSplits(.5, .5)
 
-	sc.NewWindow().Run().Wait()
+	b.NewWindow().Run().Wait()
 }

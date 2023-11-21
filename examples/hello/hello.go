@@ -8,22 +8,7 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	body := gi.NewBody()
-	gi.NewLabel(body).SetText("Hello, World!")
-	gi.NewWindowBody(body).Run().Wait() // makes a scene behind the scenes..
-
-	gi.NewBody(body).SetModal(true).
-	
-	gi.NewWindow(gi.NewScene(body)).Run().Wait()
-	
-	scene := gi.NewScene(body) <- sets parent
-	scene.TopAppBar = ...
-	body <- overflow
-	scene.BottomAppBar
-
-
-	
-	// scene := gi.NewScene()
-	// gi.NewLabel(scene).SetText("Hello, World!")
-	// gi.NewWindow(scene).Run().Wait()
+	b := gi.NewBody()
+	gi.NewLabel(b).SetText("Hello, World!")
+	b.NewWindow().Run().Wait() // makes a scene behind the scenes..
 }

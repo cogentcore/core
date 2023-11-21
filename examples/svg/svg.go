@@ -4,6 +4,12 @@
 
 package main
 
+import "goki.dev/gi/v2/gimain"
+
+func main() { gimain.Run(app) }
+
+func app() {}
+
 // TODO: fix
 /*
 func main() { gimain.Run(app) }
