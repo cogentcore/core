@@ -243,7 +243,8 @@ func (i SliceViewFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SliceViewFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	i.SetString(string(text))
+	return nil
 }
 
 var _TreeViewFlagsValues = []TreeViewFlags{9, 10}
@@ -432,7 +433,8 @@ func (i TreeViewFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TreeViewFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	i.SetString(string(text))
+	return nil
 }
 
 var _ValueFlagsValues = []ValueFlags{0, 1, 2, 3}
@@ -604,5 +606,6 @@ func (i ValueFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ValueFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	i.SetString(string(text))
+	return nil
 }

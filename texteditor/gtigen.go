@@ -6,6 +6,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -164,6 +165,12 @@ func (t *Editor) SetClass(v string) *Editor {
 	return t
 }
 
+// SetPriorityEvents sets the [Editor.PriorityEvents]
+func (t *Editor) SetPriorityEvents(v []events.Types) *Editor {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [Editor.CustomContextMenu]
 func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
 	t.CustomContextMenu = v
@@ -235,6 +242,12 @@ func (t *TwinEditors) SetTooltip(v string) *TwinEditors {
 // SetClass sets the [TwinEditors.Class]
 func (t *TwinEditors) SetClass(v string) *TwinEditors {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [TwinEditors.PriorityEvents]
+func (t *TwinEditors) SetPriorityEvents(v []events.Types) *TwinEditors {
+	t.PriorityEvents = v
 	return t
 }
 

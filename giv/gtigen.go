@@ -9,6 +9,7 @@ import (
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -85,6 +86,12 @@ func (t *ArgView) SetTooltip(v string) *ArgView {
 // SetClass sets the [ArgView.Class]
 func (t *ArgView) SetClass(v string) *ArgView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [ArgView.PriorityEvents]
+func (t *ArgView) SetPriorityEvents(v []events.Types) *ArgView {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -168,6 +175,12 @@ func (t *ColorMapView) SetClass(v string) *ColorMapView {
 	return t
 }
 
+// SetPriorityEvents sets the [ColorMapView.PriorityEvents]
+func (t *ColorMapView) SetPriorityEvents(v []events.Types) *ColorMapView {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [ColorMapView.CustomContextMenu]
 func (t *ColorMapView) SetCustomContextMenu(v func(m *gi.Scene)) *ColorMapView {
 	t.CustomContextMenu = v
@@ -234,6 +247,12 @@ func (t *ColorView) SetTooltip(v string) *ColorView {
 // SetClass sets the [ColorView.Class]
 func (t *ColorView) SetClass(v string) *ColorView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [ColorView.PriorityEvents]
+func (t *ColorView) SetPriorityEvents(v []events.Types) *ColorView {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -356,6 +375,12 @@ func (t *FileView) SetClass(v string) *FileView {
 	return t
 }
 
+// SetPriorityEvents sets the [FileView.PriorityEvents]
+func (t *FileView) SetPriorityEvents(v []events.Types) *FileView {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [FileView.CustomContextMenu]
 func (t *FileView) SetCustomContextMenu(v func(m *gi.Scene)) *FileView {
 	t.CustomContextMenu = v
@@ -469,6 +494,12 @@ func (t *FuncButton) SetTooltip(v string) *FuncButton {
 // SetClass sets the [FuncButton.Class]
 func (t *FuncButton) SetClass(v string) *FuncButton {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [FuncButton.PriorityEvents]
+func (t *FuncButton) SetPriorityEvents(v []events.Types) *FuncButton {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -612,6 +643,12 @@ func (t *Inspector) SetClass(v string) *Inspector {
 	return t
 }
 
+// SetPriorityEvents sets the [Inspector.PriorityEvents]
+func (t *Inspector) SetPriorityEvents(v []events.Types) *Inspector {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [Inspector.CustomContextMenu]
 func (t *Inspector) SetCustomContextMenu(v func(m *gi.Scene)) *Inspector {
 	t.CustomContextMenu = v
@@ -681,6 +718,12 @@ func (t *KeyChordEdit) SetTooltip(v string) *KeyChordEdit {
 // SetClass sets the [KeyChordEdit.Class]
 func (t *KeyChordEdit) SetClass(v string) *KeyChordEdit {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [KeyChordEdit.PriorityEvents]
+func (t *KeyChordEdit) SetPriorityEvents(v []events.Types) *KeyChordEdit {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -806,6 +849,12 @@ func (t *MapView) SetClass(v string) *MapView {
 	return t
 }
 
+// SetPriorityEvents sets the [MapView.PriorityEvents]
+func (t *MapView) SetPriorityEvents(v []events.Types) *MapView {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [MapView.CustomContextMenu]
 func (t *MapView) SetCustomContextMenu(v func(m *gi.Scene)) *MapView {
 	t.CustomContextMenu = v
@@ -912,6 +961,12 @@ func (t *MapViewInline) SetClass(v string) *MapViewInline {
 	return t
 }
 
+// SetPriorityEvents sets the [MapViewInline.PriorityEvents]
+func (t *MapViewInline) SetPriorityEvents(v []events.Types) *MapViewInline {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [MapViewInline.CustomContextMenu]
 func (t *MapViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *MapViewInline {
 	t.CustomContextMenu = v
@@ -975,6 +1030,12 @@ func (t *SliceView) SetTooltip(v string) *SliceView {
 // SetClass sets the [SliceView.Class]
 func (t *SliceView) SetClass(v string) *SliceView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [SliceView.PriorityEvents]
+func (t *SliceView) SetPriorityEvents(v []events.Types) *SliceView {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -1273,6 +1334,12 @@ func (t *SliceViewBase) SetClass(v string) *SliceViewBase {
 	return t
 }
 
+// SetPriorityEvents sets the [SliceViewBase.PriorityEvents]
+func (t *SliceViewBase) SetPriorityEvents(v []events.Types) *SliceViewBase {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [SliceViewBase.CustomContextMenu]
 func (t *SliceViewBase) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewBase {
 	t.CustomContextMenu = v
@@ -1358,6 +1425,12 @@ func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid {
 // SetClass sets the [SliceViewGrid.Class]
 func (t *SliceViewGrid) SetClass(v string) *SliceViewGrid {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [SliceViewGrid.PriorityEvents]
+func (t *SliceViewGrid) SetPriorityEvents(v []events.Types) *SliceViewGrid {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -1472,6 +1545,12 @@ func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline {
 // SetClass sets the [SliceViewInline.Class]
 func (t *SliceViewInline) SetClass(v string) *SliceViewInline {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [SliceViewInline.PriorityEvents]
+func (t *SliceViewInline) SetPriorityEvents(v []events.Types) *SliceViewInline {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -1599,6 +1678,12 @@ func (t *StructView) SetClass(v string) *StructView {
 	return t
 }
 
+// SetPriorityEvents sets the [StructView.PriorityEvents]
+func (t *StructView) SetPriorityEvents(v []events.Types) *StructView {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [StructView.CustomContextMenu]
 func (t *StructView) SetCustomContextMenu(v func(m *gi.Scene)) *StructView {
 	t.CustomContextMenu = v
@@ -1720,6 +1805,12 @@ func (t *StructViewInline) SetClass(v string) *StructViewInline {
 	return t
 }
 
+// SetPriorityEvents sets the [StructViewInline.PriorityEvents]
+func (t *StructViewInline) SetPriorityEvents(v []events.Types) *StructViewInline {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [StructViewInline.CustomContextMenu]
 func (t *StructViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *StructViewInline {
 	t.CustomContextMenu = v
@@ -1805,6 +1896,12 @@ func (t *Editor) SetTooltip(v string) *Editor {
 // SetClass sets the [Editor.Class]
 func (t *Editor) SetClass(v string) *Editor {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [Editor.PriorityEvents]
+func (t *Editor) SetPriorityEvents(v []events.Types) *Editor {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -1913,6 +2010,12 @@ func (t *TableView) SetTooltip(v string) *TableView {
 // SetClass sets the [TableView.Class]
 func (t *TableView) SetClass(v string) *TableView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [TableView.PriorityEvents]
+func (t *TableView) SetPriorityEvents(v []events.Types) *TableView {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -2095,6 +2198,12 @@ func (t *TimeView) SetClass(v string) *TimeView {
 	return t
 }
 
+// SetPriorityEvents sets the [TimeView.PriorityEvents]
+func (t *TimeView) SetPriorityEvents(v []events.Types) *TimeView {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [TimeView.CustomContextMenu]
 func (t *TimeView) SetCustomContextMenu(v func(m *gi.Scene)) *TimeView {
 	t.CustomContextMenu = v
@@ -2173,6 +2282,12 @@ func (t *DateView) SetTooltip(v string) *DateView {
 // SetClass sets the [DateView.Class]
 func (t *DateView) SetClass(v string) *DateView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [DateView.PriorityEvents]
+func (t *DateView) SetPriorityEvents(v []events.Types) *DateView {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -2349,6 +2464,12 @@ func (t *TreeView) SetTooltip(v string) *TreeView {
 // SetClass sets the [TreeView.Class]
 func (t *TreeView) SetClass(v string) *TreeView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [TreeView.PriorityEvents]
+func (t *TreeView) SetPriorityEvents(v []events.Types) *TreeView {
+	t.PriorityEvents = v
 	return t
 }
 

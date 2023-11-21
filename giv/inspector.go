@@ -187,15 +187,16 @@ func (is *Inspector) SelectionMonitor() {
 		if tv == nil {
 			gi.NewSnackbar(is).Text(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).Run()
 		} else {
-			updt := is.UpdateStart()
+			updt := is.UpdateStartAsync() // coming from other tree
 			tv.OpenParents()
 			tv.ScrollToMe()
 			tv.SelectAction(events.SelectOne)
-			is.UpdateEndLayout(updt)
-			updt = sc.UpdateStart()
+			is.UpdateEndAsyncLayout(updt)
+
+			updt = sc.UpdateStartAsync()
 			sc.SelectedWidget = sw
 			sw.AsWidget().SetNeedsRenderUpdate(sc, updt)
-			sc.UpdateEndRender(updt)
+			sc.UpdateEndAsyncRender(updt)
 		}
 	}
 }

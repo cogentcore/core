@@ -433,5 +433,6 @@ func (i Funs) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Funs) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	i.SetString(string(text))
+	return nil
 }

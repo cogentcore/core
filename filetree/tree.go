@@ -94,7 +94,8 @@ func (fv *Tree) Destroy() {
 // given path into this tree -- uses config children to preserve extra info
 // already stored about files.  Only paths listed in Dirs will be opened.
 func (ft *Tree) OpenPath(path string) {
-	ft.FRoot = ft // we are our own root..
+	updt := ft.UpdateStartAsync() // note: safe for async updating
+	ft.FRoot = ft                 // we are our own root..
 	if ft.NodeType == nil {
 		ft.NodeType = NodeType
 	}
@@ -109,6 +110,7 @@ func (ft *Tree) OpenPath(path string) {
 	}
 	ft.FPath = gi.FileName(abs)
 	ft.UpdateAll()
+	ft.UpdateEndAsyncLayout(updt)
 }
 
 // UpdateAll does a full update of the tree -- calls ReadDir on current path

@@ -9,6 +9,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -170,6 +171,12 @@ func (t *Node) SetTooltip(v string) *Node {
 // SetClass sets the [Node.Class]
 func (t *Node) SetClass(v string) *Node {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [Node.PriorityEvents]
+func (t *Node) SetPriorityEvents(v []events.Types) *Node {
+	t.PriorityEvents = v
 	return t
 }
 
@@ -363,6 +370,12 @@ func (t *Tree) SetClass(v string) *Tree {
 	return t
 }
 
+// SetPriorityEvents sets the [Tree.PriorityEvents]
+func (t *Tree) SetPriorityEvents(v []events.Types) *Tree {
+	t.PriorityEvents = v
+	return t
+}
+
 // SetCustomContextMenu sets the [Tree.CustomContextMenu]
 func (t *Tree) SetCustomContextMenu(v func(m *gi.Scene)) *Tree {
 	t.CustomContextMenu = v
@@ -422,7 +435,7 @@ var VCSLogViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/filetree.VCSLogView",
 	ShortName:  "filetree.VCSLogView",
 	IDName:     "vcs-log-view",
-	Doc:        "VCSLogView is a view of the variables",
+	Doc:        "VCSLogView is a view of the VCS log data",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/vci/v2.Log", LocalType: "vci.Log", Doc: "current log", Directives: gti.Directives{}, Tag: ""}},
@@ -502,6 +515,12 @@ func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
 // SetClass sets the [VCSLogView.Class]
 func (t *VCSLogView) SetClass(v string) *VCSLogView {
 	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [VCSLogView.PriorityEvents]
+func (t *VCSLogView) SetPriorityEvents(v []events.Types) *VCSLogView {
+	t.PriorityEvents = v
 	return t
 }
 

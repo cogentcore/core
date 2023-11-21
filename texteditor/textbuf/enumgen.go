@@ -138,5 +138,6 @@ func (i Cases) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Cases) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	i.SetString(string(text))
+	return nil
 }

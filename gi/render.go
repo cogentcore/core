@@ -94,28 +94,59 @@ import (
 // event handler code) which does not have any flag protection,
 // and are also read in rendering and written in Layout.
 
-// UpdateStart sets the scene ScUpdating flag to prevent
-// render updates during construction on a scene.
-func (wb *WidgetBase) UpdateStart() bool {
-	updt := wb.Node.UpdateStart()
-	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
-		wb.Sc.SetFlag(true, ScUpdating)
-		if UpdateTrace {
-			fmt.Println("UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
-		}
+// UpdateStartAsync must be called for any asynchronous update
+// that happens outside of the usual user event-driven, same-thread
+// updates, or other updates that can happen during standard layout / rendering.
+// It waits for any current Render update to finish, via RenderCtx().ReadLock().
+// It must be paired with an UpdateEndAsync.
+// These calls CANNOT be triggered during a standard render update,
+// (whereas UpdateStart / End can be, and typically are)
+// because it will cause a hang on the Read Lock which
+// was already write locked at the start of the render.
+func (wb *WidgetBase) UpdateStartAsync() bool {
+	if wb.Sc == nil {
+		return wb.Node.UpdateStart()
 	}
-	return updt
+	wb.Sc.RenderCtx().ReadLock()
+	wb.Sc.SetFlag(true, ScUpdating)
+	return wb.UpdateStart()
 }
 
-// UpdateEnd resets the scene ScUpdating flag
-func (wb *WidgetBase) UpdateEnd(updt bool) {
-	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
-		wb.Sc.SetFlag(false, ScUpdating)
-		if UpdateTrace {
-			fmt.Println("UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
-		}
+// UpdateEndAsync must be called after [UpdateStartAsync] for any
+// asynchronous update that happens outside of the usual user event-driven,
+// same-thread updates.
+func (wb *WidgetBase) UpdateEndAsync(updt bool) {
+	if wb.Sc == nil {
+		wb.Node.UpdateEnd(updt)
+		return
 	}
-	wb.Node.UpdateEnd(updt)
+	wb.Sc.SetFlag(false, ScUpdating)
+	wb.Sc.RenderCtx().ReadUnlock()
+	wb.UpdateEnd(updt)
+}
+
+// UpdateEndAsyncLayout should be called instead of [UpdateEndAsync]
+// for any [UpdateStartAsync] / [UpdateEndAsync] block that needs
+// a re-layout at the end.  Just does [SetNeedsLayoutUpdate] after UpdateEnd,
+// and uses the cached wb.Sc pointer.
+func (wb *WidgetBase) UpdateEndAsyncLayout(updt bool) {
+	if !updt {
+		return
+	}
+	wb.UpdateEndAsync(updt)
+	wb.SetNeedsLayoutUpdate(wb.Sc, updt)
+}
+
+// UpdateEndAsyncRender should be called instead of [UpdateEndAsync]
+// for any [UpdateStartAsync] / [UpdateEndAsync] block that needs
+// a re-render at the end.  Just does [SetNeedsRenderUpdate] after UpdateEnd,
+// and uses the cached wb.Sc pointer.
+func (wb *WidgetBase) UpdateEndAsyncRender(updt bool) {
+	if !updt {
+		return
+	}
+	wb.UpdateEndAsync(updt)
+	wb.SetNeedsRenderUpdate(wb.Sc, updt)
 }
 
 // SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
@@ -127,7 +158,7 @@ func (wb *WidgetBase) SetNeedsRender() {
 
 // SetNeedsRenderUpdate sets the NeedsRender and Scene
 // NeedsRender flags, if updt is true.
-// See UpdateEndRender for convenience method.
+// See [UpdateEndRender] for convenience method.
 // This should be called after widget state changes
 // that don't need styling, e.g., in event handlers
 // or other update code, _after_ calling UpdateEnd(updt) and passing
@@ -153,8 +184,8 @@ func (wb *WidgetBase) SetNeedsRenderUpdate(sc *Scene, updt bool) {
 }
 
 // UpdateEndRender should be called instead of UpdateEnd
-// for any UpdateStart / UpdateEnd block that needs a re-render
-// at the end.  Just does SetNeedsRender after UpdateEnd,
+// for any [UpdateStart] / [UpdateEnd] block that needs a re-render
+// at the end.  Just does [SetNeedsRenderUpdate] after UpdateEnd,
 // and uses the cached wb.Sc pointer.
 func (wb *WidgetBase) UpdateEndRender(updt bool) {
 	if !updt {
@@ -226,8 +257,8 @@ func (wb *WidgetBase) Config(sc *Scene) {
 		return
 	}
 	wi := wb.This().(Widget)
-	updt := wi.UpdateStart()
 	wb.Sc = sc
+	updt := wi.UpdateStart()
 	wi.ConfigWidget(sc) // where everything actually happens
 	wb.UpdateEnd(updt)
 	wb.SetNeedsLayoutUpdate(sc, updt)
