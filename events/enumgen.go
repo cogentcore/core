@@ -4,6 +4,7 @@ package events
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -379,11 +380,11 @@ func (i *SelectModes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40}
+var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41}
 
 // TypesN is the highest valid value
 // for type Types, plus one.
-const TypesN Types = 41
+const TypesN Types = 42
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -424,12 +425,13 @@ func _TypesNoOp() {
 	_ = x[Focus-(32)]
 	_ = x[FocusLost-(33)]
 	_ = x[Change-(34)]
-	_ = x[Window-(35)]
-	_ = x[WindowResize-(36)]
-	_ = x[WindowPaint-(37)]
-	_ = x[OS-(38)]
-	_ = x[OSOpenFiles-(39)]
-	_ = x[Custom-(40)]
+	_ = x[Input-(35)]
+	_ = x[Window-(36)]
+	_ = x[WindowResize-(37)]
+	_ = x[WindowPaint-(38)]
+	_ = x[OS-(39)]
+	_ = x[OSOpenFiles-(40)]
+	_ = x[Custom-(41)]
 }
 
 var _TypesNameToValueMap = map[string]Types{
@@ -503,18 +505,20 @@ var _TypesNameToValueMap = map[string]Types{
 	`focuslost`:      33,
 	`Change`:         34,
 	`change`:         34,
-	`Window`:         35,
-	`window`:         35,
-	`WindowResize`:   36,
-	`windowresize`:   36,
-	`WindowPaint`:    37,
-	`windowpaint`:    37,
-	`OS`:             38,
-	`os`:             38,
-	`OSOpenFiles`:    39,
-	`osopenfiles`:    39,
-	`Custom`:         40,
-	`custom`:         40,
+	`Input`:          35,
+	`input`:          35,
+	`Window`:         36,
+	`window`:         36,
+	`WindowResize`:   37,
+	`windowresize`:   37,
+	`WindowPaint`:    38,
+	`windowpaint`:    38,
+	`OS`:             39,
+	`os`:             39,
+	`OSOpenFiles`:    40,
+	`osopenfiles`:    40,
+	`Custom`:         41,
+	`custom`:         41,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -552,13 +556,14 @@ var _TypesDescMap = map[Types]string{
 	31: `Select is sent for any direction of selection change on (or within if relevant) a Selectable element. Typically need to query the element(s) to determine current selection state.`,
 	32: `Focus is sent when Focsable element receives Focus`,
 	33: `FocusLost is sent when Focsable element loses Focus`,
-	34: `Change is when a value represented by the element has changed. This is for Editable, Checkable, Slidable items.`,
-	35: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
-	36: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
-	37: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
-	38: `OS is an operating system generated event (app level typically)`,
-	39: `OSOpenFiles is an event telling app to open given files`,
-	40: `Custom is a user-defined event with a data any field`,
+	34: `Change is when a value represented by the element has been changed by the user and committed (for example, someone has typed text in a textfield and then pressed enter). This is *not* triggered when the value has not been committed; see [Input] for that. This is for Editable, Checkable, and Slidable items.`,
+	35: `Input is when a value represented by the element has changed, but has not necessarily been committed (for example, this triggers each time someone presses a key in a text field). This *is* triggered when the value has not been committed; see [Change] for a version that only occurs when the value is committed. This is for Editable, Checkable, and Slidable items.`,
+	36: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
+	37: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
+	38: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
+	39: `OS is an operating system generated event (app level typically)`,
+	40: `OSOpenFiles is an event telling app to open given files`,
+	41: `Custom is a user-defined event with a data any field`,
 }
 
 var _TypesMap = map[Types]string{
@@ -597,12 +602,13 @@ var _TypesMap = map[Types]string{
 	32: `Focus`,
 	33: `FocusLost`,
 	34: `Change`,
-	35: `Window`,
-	36: `WindowResize`,
-	37: `WindowPaint`,
-	38: `OS`,
-	39: `OSOpenFiles`,
-	40: `Custom`,
+	35: `Input`,
+	36: `Window`,
+	37: `WindowResize`,
+	38: `WindowPaint`,
+	39: `OS`,
+	40: `OSOpenFiles`,
+	41: `Custom`,
 }
 
 // String returns the string representation
@@ -759,8 +765,10 @@ func (i *EventFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _EventFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type EventFlags")
+			return fmt.Errorf("%q is not a valid value for type EventFlags", flg)
 		}
 	}
 	return nil

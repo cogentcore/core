@@ -192,9 +192,20 @@ const (
 	// FocusLost is sent when Focsable element loses Focus
 	FocusLost
 
-	// Change is when a value represented by the element has changed.
-	// This is for Editable, Checkable, Slidable items.
+	// Change is when a value represented by the element has been changed
+	// by the user and committed (for example, someone has typed text in a
+	// textfield and then pressed enter). This is *not* triggered when
+	// the value has not been committed; see [Input] for that.
+	// This is for Editable, Checkable, and Slidable items.
 	Change
+
+	// Input is when a value represented by the element has changed, but
+	// has not necessarily been committed (for example, this triggers each
+	// time someone presses a key in a text field). This *is* triggered when
+	// the value has not been committed; see [Change] for a version that only
+	// occurs when the value is committed.
+	// This is for Editable, Checkable, and Slidable items.
+	Input
 
 	// Window reports on changes in the window position,
 	// visibility (iconify), focus changes, screen update, and closing.
