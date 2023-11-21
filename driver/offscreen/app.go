@@ -83,6 +83,7 @@ func Main(f func(goosi.App)) {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
+	theApp.GetScreens()
 	goosi.TheApp = theApp
 	go func() {
 		mainCallback(theApp)
@@ -197,10 +198,10 @@ func (app *appImpl) setSysWindow(sz image.Point) error {
 
 	app.window.PhysDPI = app.screen.PhysicalDPI
 	app.window.LogDPI = app.screen.LogicalDPI
-	app.window.PxSize = app.screen.PixSize
-	app.window.WnSize = app.screen.Geometry.Max
+	app.window.PxSize = sz
+	app.window.WnSize = sz
 	app.window.DevPixRatio = app.screen.DevicePixelRatio
-	app.window.RenderSize = app.screen.PixSize
+	app.window.RenderSize = sz
 
 	app.window.EvMgr.WindowResize()
 	app.window.EvMgr.Window(events.WinShow)
@@ -318,7 +319,7 @@ func (app *appImpl) PrefsDir() string {
 }
 
 func (app *appImpl) GetScreens() {
-	sz := image.Point{3840, 2160}
+	sz := image.Point{1920, 1080}
 	app.screen.DevicePixelRatio = 1
 	app.screen.PixSize = sz
 	app.screen.Geometry.Max = app.screen.PixSize
