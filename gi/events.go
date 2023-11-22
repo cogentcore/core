@@ -91,9 +91,11 @@ func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Select, fun)
 }
 
-// OnShow adds an event listener function for [events.Show] events
-func (sc *Scene) OnShow(fun func(e events.Event)) *WidgetBase {
-	return sc.On(events.Show, fun)
+// OnShow adds an event listener function for [events.Show] events on
+// the widget's Scene. Directly listening to Show events for non-scene
+// widgets does not work, so it must go through the Scene.
+func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
+	return wb.Sc.On(events.Show, fun)
 }
 
 // Send sends an NEW event of given type to this widget,
