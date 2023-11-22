@@ -69,8 +69,7 @@ func AddType(typ *Type) *Type {
 // TypeName returns the long, full package-path qualified type name.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeName(typ reflect.Type) string {
-	nptyp := laser.NonPtrType(typ)
-	return nptyp.PkgPath() + "." + nptyp.Name()
+	return laser.LongTypeName(typ)
 }
 
 // TypeNameObj returns the long, full package-path qualified type name
