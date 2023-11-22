@@ -382,17 +382,13 @@ func (vv *StructValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
-		bt.SetTextUpdate("nil")
+		bt.SetTextUpdate("None")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		if lbler, ok := opv.Interface().(gi.Labeler); ok {
 			bt.SetTextUpdate(lbler.Label())
 		} else {
-			txt := fmt.Sprintf("%T", npv.Interface())
-			if txt == "" {
-				fmt.Printf("no label for struct!")
-			}
-			bt.SetTextUpdate(txt)
+			bt.SetTextUpdate(laser.FriendlyTypeName(npv.Type()))
 		}
 	}
 }
@@ -1480,9 +1476,9 @@ func (vv *IconValue) UpdateWidget() {
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
 			if txt == "" {
-				txt = "none"
+				txt = "None"
 			}
-			bt.SetTextUpdate(txt)
+			bt.SetTextUpdate(sentencecase.Of(txt))
 		}
 	}
 }
