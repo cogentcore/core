@@ -109,7 +109,7 @@ func (sw *Switch) HandleSwitchEvents() {
 	sw.OnClick(func(e events.Event) {
 		e.SetHandled()
 		sw.SetChecked(!sw.StateIs(states.Checked))
-		sw.Send(events.Change, e)
+		sw.SendChange(e)
 		if sw.Type == SwitchChip {
 			sw.SetNeedsLayout()
 		}

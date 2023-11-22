@@ -803,7 +803,7 @@ func (tv *TreeView) SendSelectEvent(ctx events.Event) {
 // SendChangeEvent sends the events.Change event on the
 // RootView node, using context event if avail (else nil).
 func (tv *TreeView) SendChangeEvent(ctx events.Event) {
-	tv.RootView.Send(events.Change, nil)
+	tv.RootView.SendChange(nil)
 }
 
 // TreeViewChanged must be called after any structural
@@ -819,7 +819,7 @@ func (tv *TreeView) TreeViewChanged(ctx events.Event) {
 // RootView node, using context event if avail (else nil).
 // If SyncNode != nil, also does a re-sync from root.
 func (tv *TreeView) SendChangeEventReSync(ctx events.Event) {
-	tv.RootView.Send(events.Change, nil)
+	tv.RootView.SendChange(nil)
 	if tv.RootView.SyncNode != nil {
 		tv.RootView.ReSync()
 	}

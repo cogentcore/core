@@ -243,7 +243,7 @@ func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 			ip, _ := swi.IndexInParent()
 			sw.UnCheckAllBut(ip)
 		}
-		sw.Send(events.Change, e)
+		sw.SendChange(e)
 	})
 }
 
