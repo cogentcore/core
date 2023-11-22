@@ -247,12 +247,15 @@ func (st *MainStage) RunDialog() *MainStage {
 	ms := ctx.Sc.MainStageMgr()
 	if ms == nil {
 		slog.Error("RunDialog: CurRenderWin is nil")
-		return nil
 	}
-	winsz := ms.RenderCtx.Size
+
+	var winsz image.Point
+	if ms != nil {
+		winsz = ms.RenderCtx.Size
+		st.StageMgr = ms // temporary
+	}
 
 	sc := st.Scene
-	st.StageMgr = ms // temporary
 	sz := winsz
 	// history-based stages always take up the whole window
 	if !st.FullWindow {
@@ -277,7 +280,13 @@ func (st *MainStage) RunDialog() *MainStage {
 	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
 	sc.FitInWindow(winGeom) // does resize
 
-	ms.Push(st)
+	if ms != nil {
+		ms.Push(st)
+	} else {
+		ctx.OnShow(func(e events.Event) {
+			ctx.Sc.MainStageMgr().Push(st)
+		})
+	}
 	return st
 }
 
