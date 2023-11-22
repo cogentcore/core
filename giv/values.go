@@ -676,11 +676,9 @@ func (vv *MapValue) UpdateWidget() {
 	mpi := vv.Value.Interface()
 	txt := ""
 	if !npv.IsValid() || npv.IsNil() {
-		txt = "nil"
-	} else if npv.Kind() == reflect.Interface {
-		txt = fmt.Sprintf("Map: %T", npv.Interface())
+		txt = "None"
 	} else {
-		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), laser.MapKeyType(mpi).String(), laser.MapValueType(mpi).String())
+		txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(laser.MapValueType(mpi))))
 	}
 	bt.SetTextUpdate(txt)
 }
