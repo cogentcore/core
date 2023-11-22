@@ -239,21 +239,24 @@ func (st *MainStage) RunWindow() *MainStage {
 // RunDialog runs a Dialog with current settings.
 // RenderWin field will be set to the parent RenderWin window.
 func (st *MainStage) RunDialog() *MainStage {
+	ctx := st.Context.AsWidget()
+	ms := ctx.Sc.MainStageMgr()
+
+	// if our main stage manager is nil, we wait until our context is shown and then try again
+	if ms == nil {
+		slog.Error("RunDialog: CurRenderWin is nil")
+		ctx.OnShow(func(e events.Event) {
+			st.RunDialog()
+		})
+		return st
+	}
+
 	st.AddDialogDecor()
 	st.Scene.ConfigScene()
 	st.Scene.ConfigSceneWidgets()
 
-	ctx := st.Context.AsWidget()
-	ms := ctx.Sc.MainStageMgr()
-	if ms == nil {
-		slog.Error("RunDialog: CurRenderWin is nil")
-	}
-
-	var winsz image.Point
-	if ms != nil {
-		winsz = ms.RenderCtx.Size
-		st.StageMgr = ms // temporary
-	}
+	st.StageMgr = ms // temporary
+	winsz := ms.RenderCtx.Size
 
 	sc := st.Scene
 	sz := winsz
@@ -280,13 +283,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
 	sc.FitInWindow(winGeom) // does resize
 
-	if ms != nil {
-		ms.Push(st)
-	} else {
-		ctx.OnShow(func(e events.Event) {
-			ctx.Sc.MainStageMgr().Push(st)
-		})
-	}
+	ms.Push(st)
 	return st
 }
 
