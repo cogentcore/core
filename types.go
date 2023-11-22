@@ -7,6 +7,8 @@ package laser
 import (
 	"path"
 	"reflect"
+
+	"goki.dev/glop/sentencecase"
 )
 
 // LongTypeName returns the long, full package-path qualified type name.
@@ -28,6 +30,22 @@ func LongTypeName(typ reflect.Type) string {
 func ShortTypeName(typ reflect.Type) string {
 	nptyp := NonPtrType(typ)
 	return path.Base(nptyp.PkgPath()) + "." + nptyp.Name()
+}
+
+// FriendlyTypeName returns a user-friendly version of the name of the given type.
+// It transforms it into sentence case, excludes the package, and converts various
+// builtin types into more friendly forms (eg: "int" to "number").
+func FriendlyTypeName(typ reflect.Type) string {
+	nptyp := NonPtrType(typ)
+	nm := nptyp.Name()
+	switch nm {
+	case "string":
+		return "Text"
+	case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
+		return "Number"
+	default:
+		return sentencecase.Of(nm)
+	}
 }
 
 // TypeFor returns the [reflect.Type] that represents the type argument T.
