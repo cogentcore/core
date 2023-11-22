@@ -103,7 +103,7 @@ import (
 // because it will cause a hang on the Read Lock which
 // was already write locked at the start of the render.
 func (wb *WidgetBase) UpdateStartAsync() bool {
-	if wb.Sc == nil {
+	if wb.Sc == nil || wb.Sc.RenderCtx() == nil {
 		return wb.Node.UpdateStart()
 	}
 	wb.Sc.RenderCtx().ReadLock()
@@ -115,7 +115,7 @@ func (wb *WidgetBase) UpdateStartAsync() bool {
 // asynchronous update that happens outside of the usual user event-driven,
 // same-thread updates.
 func (wb *WidgetBase) UpdateEndAsync(updt bool) {
-	if wb.Sc == nil {
+	if wb.Sc == nil || wb.Sc.RenderCtx() == nil {
 		wb.Node.UpdateEnd(updt)
 		return
 	}
