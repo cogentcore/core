@@ -474,7 +474,6 @@ func (vv *StructInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	sv := vv.Widget.(*StructViewInline)
-	sv.Sc = sc
 	sv.Tooltip = vv.Doc()
 	sv.StructValView = vv
 	sv.ViewPath = vv.ViewPath
@@ -647,7 +646,6 @@ func (vv *SliceInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	sv := vv.Widget.(*SliceViewInline)
-	sv.Sc = sc
 	sv.Tooltip = vv.Doc()
 	sv.SliceValView = vv
 	sv.ViewPath = vv.ViewPath
@@ -766,7 +764,6 @@ func (vv *MapInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	sv := vv.Widget.(*MapViewInline)
-	sv.Sc = sc
 	sv.Tooltip = vv.Doc()
 	sv.MapValView = vv
 	sv.ViewPath = vv.ViewPath

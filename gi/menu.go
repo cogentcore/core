@@ -71,7 +71,6 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 				bt.HandleClickDismissMenu()
 			}
 		}
-		wb.Sc = msc
 		if !hasSelected && wb.StateIs(states.Selected) {
 			msc.EventMgr.SetStartFocus(wb)
 			hasSelected = true

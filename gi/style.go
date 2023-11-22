@@ -84,12 +84,6 @@ func (wb *WidgetBase) ApplyStyleParts(sc *Scene) {
 // Handles inheritance and runs the Styler functions.
 // Must be called under a StyMu Lock
 func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
-	if wb.Sc == nil && sc != nil {
-		wb.Sc = sc
-	}
-	if wb.Sc == nil {
-		return
-	}
 	if wb.OverrideStyle {
 		return
 	}

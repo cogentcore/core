@@ -256,7 +256,6 @@ func (wb *WidgetBase) Config(sc *Scene) {
 		return
 	}
 	wi := wb.This().(Widget)
-	wb.Sc = sc
 	updt := wi.UpdateStart()
 	wi.ConfigWidget(sc) // where everything actually happens
 	wb.UpdateEnd(updt)

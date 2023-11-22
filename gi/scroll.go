@@ -66,7 +66,6 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 	ki.SetParent(sb, ly.This())
 	// sr.SetFlag(true, ki.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
-	sb.Sc = sc
 	sb.Dim = d
 	sb.InputThreshold = 1
 	sb.Min = 0.0
