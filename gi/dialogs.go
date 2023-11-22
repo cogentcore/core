@@ -72,9 +72,8 @@ func ErrorDialog(ctx Widget, err error, title ...string) Stage {
 	if len(title) > 0 {
 		ttl = title[0]
 	}
-	d := NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error())
-	d.AddBottomBar(func(pw Widget) { d.AddOk(pw) })
-	return d.NewDialog(ctx)
+	return NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
+		AddOkOnly().NewDialog(ctx)
 }
 
 // AddOk adds an OK button to given parent Widget (typically in Bottom
@@ -101,6 +100,13 @@ func (sc *Scene) AddOk(pw Widget, name ...string) *Button {
 		}
 	})
 	return bt
+}
+
+// AddOkOnly just adds an OK button in the BottomBar
+// for simple popup dialogs that just need that one button
+func (sc *Scene) AddOkOnly() *Scene {
+	sc.Bars.Bottom.Add(func(pw Widget) { sc.AddOk(pw) })
+	return sc
 }
 
 // AddCancel adds Cancel button to given parent Widget
@@ -157,6 +163,13 @@ func (sc *Scene) Close() {
 // Name should be passed when there are multiple effective OK buttons.
 func (bd *Body) AddOk(pw Widget, name ...string) *Button {
 	return bd.Sc.AddOk(pw, name...)
+}
+
+// AddOkOnly just adds an OK button in the BottomBar
+// for simple popup dialogs that just need that one button
+func (bd *Body) AddOkOnly() *Body {
+	bd.Sc.AddOkOnly()
+	return bd
 }
 
 // AddCancel adds Cancel button to given parent Widget

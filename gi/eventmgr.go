@@ -686,9 +686,9 @@ func (em *EventMgr) FocusClear() bool {
 
 // GrabFocus sets focus to given item -- returns true if focus changed.
 // If item is nil, then nothing has focus.
-// This does NOT send the events.Focus event to the widget.
+// This does NOT send the events.Focus event to the widget. WHY?
 func (em *EventMgr) GrabFocus(w Widget) bool {
-	got := em.SetFocusImpl(w, false) // no event
+	got := em.SetFocusImpl(w, true) // really unclear why grab does not send event?
 	if w != nil {
 		w.AsWidget().ScrollToMe()
 	}
@@ -717,17 +717,20 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 		cfoc = nil
 	}
 	if cfoc == w {
+		// fmt.Println(w, "already focus")
 		return false
 	}
 	if KeyEventTrace {
-		fmt.Println("EventMgr set focus to:", w)
+		// fmt.Println("EventMgr set focus to:", w)
 	}
 
 	if cfoc != nil {
+		// fmt.Println(w, "already focus")
 		cfoc.Send(events.FocusLost)
 	}
 	em.Focus = w
 	if sendEvent && w != nil {
+		// fmt.Println(w, "focus event")
 		w.Send(events.Focus)
 	}
 	return true

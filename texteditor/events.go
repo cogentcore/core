@@ -23,10 +23,10 @@ import (
 
 // ViewEvents sets connections between mouse and key events and actions
 func (ed *Editor) HandleTextViewEvents() {
+	ed.HandleWidgetEvents()
 	ed.HandleLayoutEvents()
 	ed.HandleTextViewKeyChord()
 	ed.HandleTextViewMouse()
-	ed.HandleWidgetContextMenu()
 }
 
 ///////////////////////////////////////////////////////////////////////////////

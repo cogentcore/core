@@ -313,6 +313,6 @@ func (fn *Node) ShowFileInfo() { //gti:add
 		fn := AsNode(sels[i].This())
 		d := gi.NewBody().AddTitle("File info")
 		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
-		d.NewDialog(fn).Run()
+		d.AddOkOnly().NewDialog(fn).Run()
 	}
 }
