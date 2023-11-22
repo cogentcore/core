@@ -584,7 +584,7 @@ func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
 // This is the primary notification event for all Value elements. It takes
 // an optional original event to base the event on.
 func (vv *ValueBase) SendChange(orig ...events.Event) {
-	vv.SendChange(orig...)
+	vv.Send(events.Change, orig...)
 }
 
 // Send sends an NEW event of given type to this widget,
