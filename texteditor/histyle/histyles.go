@@ -15,7 +15,6 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/goosi"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/pi"
@@ -117,7 +116,7 @@ var StylesChanged = false
 
 // OpenPrefs opens Styles from App standard prefs directory, using PrefsStylesFileName
 func (hs *Styles) OpenPrefs() error {
-	pdir := goosi.TheApp.AppPrefsDir()
+	pdir := AppPrefsDir()
 	pnm := filepath.Join(pdir, PrefsStylesFileName)
 	StylesChanged = false
 	return hs.OpenJSON(gi.FileName(pnm))
@@ -125,7 +124,7 @@ func (hs *Styles) OpenPrefs() error {
 
 // SavePrefs saves Styles to App standard prefs directory, using PrefsStylesFileName
 func (hs *Styles) SavePrefs() error {
-	pdir := goosi.TheApp.AppPrefsDir()
+	pdir := AppPrefsDir()
 	pnm := filepath.Join(pdir, PrefsStylesFileName)
 	StylesChanged = false
 	MergeAvailStyles()

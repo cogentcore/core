@@ -138,7 +138,7 @@ func SetActiveMapName(mapnm MapName) {
 	if ok {
 		SetActiveMap(km, mapnm)
 	} else {
-		slog.Error("gi.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultMap)
+		slog.Error("keyfun.SetActiveKeyMapName: key map named not found, using default", "requested", mapnm, "default", DefaultMap)
 		km, _, ok = AvailMaps.MapByName(DefaultMap)
 		if ok {
 			SetActiveMap(km, DefaultMap)
@@ -147,7 +147,7 @@ func SetActiveMapName(mapnm MapName) {
 			for i, km := range AvailMaps {
 				avail[i] = km.Name
 			}
-			slog.Error("gi.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultMap, "available", avail)
+			slog.Error("keyfun.SetActiveKeyMapName: DefaultKeyMap not found either; trying first one", "default", DefaultMap, "available", avail)
 			if len(AvailMaps) > 0 {
 				nkm := AvailMaps[0]
 				SetActiveMap(&nkm.Map, MapName(nkm.Name))
@@ -163,7 +163,7 @@ func Of(chord key.Chord) Funs {
 	if chord != "" {
 		kf = (*ActiveMap)[chord]
 		// if KeyEventTrace {
-		// 	fmt.Printf("gi.KeyFun chord: %v = %v\n", chord, kf)
+		// 	fmt.Printf("keyfun.KeyFun chord: %v = %v\n", chord, kf)
 		// }
 	}
 	return kf
@@ -224,7 +224,7 @@ func ShortcutFor(kf Funs) key.Chord {
 func (km *Map) Update(kmName MapName) {
 	for key, val := range *km {
 		if val == Nil {
-			slog.Error("gi.KeyMap: key function is nil; probably renamed", "key", key)
+			slog.Error("keyfun.KeyMap: key function is nil; probably renamed", "key", key)
 			delete(*km, key)
 		}
 	}
@@ -242,7 +242,7 @@ func (km *Map) Update(kmName MapName) {
 			del := fun - lfun
 			if del > 1 {
 				for mi := lfun + 1; mi < fun; mi++ {
-					slog.Error("gi.KeyMap: key map is missing a key for a key function", "keyMap", kmName, "function", mi)
+					slog.Error("keyfun.KeyMap: key map is missing a key for a key function", "keyMap", kmName, "function", mi)
 					s := mi.String()
 					s = strings.TrimPrefix(s, "KeyFun")
 					s = "- Not Set - " + s
@@ -305,7 +305,7 @@ func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 			return &it.Map, i, true
 		}
 	}
-	slog.Error("gi.KeyMaps.MapByName: key map not found", "name", name)
+	slog.Error("keyfun.KeyMaps.MapByName: key map not found", "name", name)
 	return nil, -1, false
 }
 
