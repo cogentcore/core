@@ -34,9 +34,20 @@ func ShortTypeName(typ reflect.Type) string {
 
 // FriendlyTypeName returns a user-friendly version of the name of the given type.
 // It transforms it into sentence case, excludes the package, and converts various
-// builtin types into more friendly forms (eg: "int" to "number").
+// builtin types into more friendly forms (eg: "int" to "Number").
 func FriendlyTypeName(typ reflect.Type) string {
 	nptyp := NonPtrType(typ)
+	if nptyp.Kind() == reflect.Func {
+		str := "Function("
+		ni := nptyp.NumIn()
+		for i := 0; i < ni; i++ {
+			str += FriendlyTypeName(nptyp.In(i))
+			if i < ni-1 {
+				str += ", "
+			}
+		}
+		return str
+	}
 	nm := nptyp.Name()
 	switch nm {
 	case "string":
