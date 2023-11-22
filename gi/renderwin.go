@@ -1055,7 +1055,6 @@ func (w *RenderWin) RenderWindow() {
 		}
 	}
 	w.DrawScenes()
-	// fmt.Println("done render")
 }
 
 // DrawScenes does the drawing of RenderScenes to the window.

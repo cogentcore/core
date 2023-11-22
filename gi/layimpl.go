@@ -449,6 +449,15 @@ func (ls *LayImplState) InitCells() {
 	}
 }
 
+func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
+	zp := image.Point{}
+	if w.HasChildren() && (ls.Shape == zp || len(ls.Cells) == 0) {
+		fmt.Println(w, "Shape is nil in:", phase)
+		return false
+	}
+	return true
+}
+
 // Cell returns the cell for given dimension and index along that
 // dimension, and given other-dimension axis which is ignored for non-Wrap cases.
 // Does no range checking and will crash if out of bounds.
@@ -750,6 +759,8 @@ func (ly *Layout) LaySetInitCells() {
 	}
 	ly.LayImpl.InitCells()
 	ly.LaySetGapSizeFromCells()
+	ly.LayImpl.ShapeCheck(ly, "SizeUp")
+	// fmt.Println(ly, "SzUp Init", ly.LayImpl.Shape)
 }
 
 func (ly *Layout) LaySetGapSizeFromCells() {
@@ -1094,7 +1105,7 @@ func (ly *Layout) SizeDown(sc *Scene, iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (ly *Layout) SizeDownLay(sc *Scene, iter int) bool {
-	if !ly.HasChildren() {
+	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "SizeDown") {
 		return ly.SizeDownWidget(sc, iter) // behave like a widget
 	}
 	sz := &ly.Geom.Size
@@ -1493,7 +1504,7 @@ func (ly *Layout) SizeFinal(sc *Scene) {
 
 // SizeFinalLay is the Layout standard SizeFinal pass
 func (ly *Layout) SizeFinalLay(sc *Scene) {
-	if !ly.HasChildren() {
+	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "SizeFinal") {
 		ly.SizeFinalWidget(sc) // behave like a widget
 		return
 	}
@@ -1603,7 +1614,7 @@ func (ly *Layout) Position(sc *Scene) {
 }
 
 func (ly *Layout) PositionLay(sc *Scene) {
-	if !ly.HasChildren() {
+	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "Position") {
 		ly.PositionWidget(sc) // behave like a widget
 		return
 	}
@@ -1801,7 +1812,11 @@ func (ly *Layout) ScenePosChildren(sc *Scene) {
 // parents accumulated position and scrollbar position.
 // This step can be performed when scrolling after updating Scroll.
 func (ly *Layout) ScenePos(sc *Scene) {
-	if !ly.HasChildren() {
+	ly.ScenePosLay(sc)
+}
+
+func (ly *Layout) ScenePosLay(sc *Scene) {
+	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "ScenePos") {
 		ly.ScenePosWidget(sc) // behave like a widget
 		return
 	}

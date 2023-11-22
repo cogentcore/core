@@ -118,7 +118,7 @@ func (tv *TableView) TableViewInit() {
 				s.Min.X = tv.Styles.ScrollBarWidth
 				s.Grow.Set(0, 1)
 			})
-			sb.OnChange(func(e events.Event) {
+			sb.OnInput(func(e events.Event) {
 				updt := tv.UpdateStart()
 				tv.StartIdx = int(sb.Value)
 				tv.This().(SliceViewer).UpdateWidgets()

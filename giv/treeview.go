@@ -813,7 +813,7 @@ func (tv *TreeView) SendChangeEvent(ctx events.Event) {
 // SendChangeEvent to notify of changes.
 func (tv *TreeView) TreeViewChanged(ctx events.Event) {
 	tv.RootView.RootSetViewIdx()
-	tv.SendChangeEvent(ctx)
+	// tv.SendChangeEvent(ctx)
 }
 
 // SendChangeEventReSync sends the events.Change event on the

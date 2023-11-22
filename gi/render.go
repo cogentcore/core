@@ -93,6 +93,32 @@ import (
 // event handler code) which does not have any flag protection,
 // and are also read in rendering and written in Layout.
 
+/*
+// UpdateStart sets the scene ScUpdating flag to prevent
+// render updates during construction on a scene.
+func (wb *WidgetBase) UpdateStart() bool {
+	updt := wb.Node.UpdateStart()
+	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
+		wb.Sc.SetFlag(true, ScUpdating)
+		if UpdateTrace {
+			fmt.Println("UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
+		}
+	}
+	return updt
+}
+
+// UpdateEnd resets the scene ScUpdating flag
+func (wb *WidgetBase) UpdateEnd(updt bool) {
+	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
+		wb.Sc.SetFlag(false, ScUpdating)
+		if UpdateTrace {
+			fmt.Println("UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
+		}
+	}
+	wb.Node.UpdateEnd(updt)
+}
+*/
+
 // UpdateStartAsync must be called for any asynchronous update
 // that happens outside of the usual user event-driven, same-thread
 // updates, or other updates that can happen during standard layout / rendering.
