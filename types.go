@@ -63,18 +63,24 @@ func FriendlyTypeName(typ reflect.Type) string {
 	case reflect.Slice, reflect.Array, reflect.Map:
 		return FriendlyTypeName(nptyp.Elem()) + "s"
 	case reflect.Func:
-		str := "Function("
+		str := "Function of"
 		ni := nptyp.NumIn()
 		for i := 0; i < ni; i++ {
 			str += FriendlyTypeName(nptyp.In(i))
-			if i < ni-1 {
+			if ni == 2 && i == 0 {
+				str += " and "
+			} else if i == ni-2 {
+				str += ", and "
+			} else if i < ni-1 {
 				str += ", "
 			}
 		}
-		str += ")"
 		return str
 	}
-	return typ.String()
+	if nptyp.String() == "interface {}" {
+		return "Value"
+	}
+	return nptyp.String()
 }
 
 // TypeFor returns the [reflect.Type] that represents the type argument T.
