@@ -185,7 +185,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
 	sc := st.Scene
-	sc.ConfigScene()
+	sc.ConfigSceneBars()
 	sc.ConfigSceneWidgets()
 
 	// note: need a StageMgr to get initial pref size
@@ -251,14 +251,16 @@ func (st *MainStage) RunDialog() *MainStage {
 		return st
 	}
 
+	sc := st.Scene
+
 	st.AddDialogDecor()
-	st.Scene.ConfigScene()
-	st.Scene.ConfigSceneWidgets()
+	sc.ConfigSceneBars()
+	sc.ConfigSceneWidgets()
+	sc.SceneGeom.Pos = ctx.ContextMenuPos(nil)
 
 	st.StageMgr = ms // temporary
 	winsz := ms.RenderCtx.Size
 
-	sc := st.Scene
 	sz := winsz
 	// history-based stages always take up the whole window
 	if !st.FullWindow {
@@ -291,7 +293,7 @@ func (st *MainStage) RunDialog() *MainStage {
 // RenderWin field will be set to the parent RenderWin window.
 func (st *MainStage) RunSheet() *MainStage {
 	st.AddSheetDecor()
-	st.Scene.ConfigScene()
+	st.Scene.ConfigSceneBars()
 	st.Scene.ConfigSceneWidgets()
 
 	if CurRenderWin == nil {

@@ -29,14 +29,14 @@ var (
 	// when computing the preferred size (ScPrefSizing)
 	LayoutPrefMaxCols = 20
 
-	// LayoutFocusNameTimeoutMSec is the number of milliseconds between keypresses
+	// LayoutFocusNameTimeout is the amount of time between keypresses
 	// to combine characters into name to search for within layout -- starts over
 	// after this delay.
-	LayoutFocusNameTimeoutMSec = 500
+	LayoutFocusNameTimeout = 500 * time.Millisecond
 
-	// LayoutFocusNameTabMSec is the number of milliseconds since last focus name
+	// LayoutFocusNameTabTime is the number of milliseconds since last focus name
 	// event to allow tab to focus on next element with same name.
-	LayoutFocusNameTabMSec = 2000
+	LayoutFocusNameTabTime = 2000 * time.Millisecond
 
 	// LayoutAutoScrollDelay is amount of time to wait before trying to autoscroll again
 	LayoutAutoScrollDelay = 25 * time.Millisecond
@@ -398,20 +398,23 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 
 // FocusOnName processes key events to look for an element starting with given name
 func (ly *Layout) FocusOnName(e events.Event) bool {
+	if len(ly.PriorityEvents) > 0 { // don't do for priority
+		return false
+	}
 	if KeyEventTrace {
 		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
 	}
 	kf := keyfun.Of(e.KeyChord())
-	delayMs := int(e.Time().Sub(ly.FocusNameTime) / time.Millisecond)
+	delay := e.Time().Sub(ly.FocusNameTime)
 	ly.FocusNameTime = e.Time()
 	if kf == keyfun.FocusNext { // tab means go to next match -- don't worry about time
-		if ly.FocusName == "" || delayMs > LayoutFocusNameTabMSec {
+		if ly.FocusName == "" || delay > LayoutFocusNameTabTime {
 			ly.FocusName = ""
 			ly.FocusNameLast = nil
 			return false
 		}
 	} else {
-		if delayMs > LayoutFocusNameTimeoutMSec {
+		if delay > LayoutFocusNameTimeout {
 			ly.FocusName = ""
 		}
 		if !unicode.IsPrint(e.KeyRune()) || e.Modifiers() != 0 {
@@ -425,15 +428,14 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 			ly.FocusNameLast = nil // only use last if tabbing
 		}
 	}
-	e.SetHandled()
+	// e.SetHandled()
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel, found := ChildByLabelStartsCanFocus(ly, ly.FocusName, ly.FocusNameLast)
 	if found {
-		// todo:
-		// em := ly.EventMgr()
-		// if em != nil {
-		// 	em.SetFocus(focel.(Widget)) // this will also scroll by default!
-		// }
+		em := ly.EventMgr()
+		if em != nil {
+			em.SetFocus(focel.(Widget)) // this will also scroll by default!
+		}
 		ly.FocusNameLast = focel
 		return true
 	} else {
@@ -458,8 +460,8 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 			return ki.Continue
 		}
 		_, ni := AsWidget(k)
-		if ni != nil && !ni.CanFocus() { // don't go any further
-			return ki.Break
+		if ni == nil || !ni.CanFocus() { // don't go any further
+			return ki.Continue
 		}
 		if after != nil && !gotAfter {
 			if k == after {

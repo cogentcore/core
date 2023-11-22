@@ -721,11 +721,11 @@ type PrefsDetailed struct { //gti:add
 	// number of steps to take in PageUp / Down events in terms of number of items
 	LayoutPageSteps int `def:"10" min:"1" step:"1"`
 
-	// the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
-	LayoutFocusNameTimeoutMSec int `def:"500" min:"0" max:"5000" step:"20"`
+	// the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay
+	LayoutFocusNameTimeout time.Duration `def:"500" min:"0" max:"5000" step:"20"`
 
-	// the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
-	LayoutFocusNameTabMSec int `def:"2000" min:"10" max:"10000" step:"100"`
+	// the amount of time since last focus name event to allow tab to focus on next element with same name.
+	LayoutFocusNameTabTime time.Duration `def:"2000" min:"10" max:"10000" step:"100"`
 
 	// open dialogs in separate windows -- else do as popups in main window
 	DialogsSepRenderWin bool `def:"true"`
@@ -797,8 +797,8 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.CursorBlinkTime = CursorBlinkTime
 	pf.LayoutAutoScrollDelay = LayoutAutoScrollDelay
 	pf.LayoutPageSteps = LayoutPageSteps
-	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
-	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
+	pf.LayoutFocusNameTimeout = LayoutFocusNameTimeout
+	pf.LayoutFocusNameTabTime = LayoutFocusNameTabTime
 	pf.MenuMaxHeight = MenuMaxHeight
 	if TheViewIFace != nil {
 		TheViewIFace.PrefsDetDefaults(pf)
@@ -823,8 +823,8 @@ func (pf *PrefsDetailed) Apply() { //gti:add
 	CompleteWaitDuration = pf.CompleteWaitDuration
 	CompleteMaxItems = pf.CompleteMaxItems
 	CursorBlinkTime = pf.CursorBlinkTime
-	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
-	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
+	LayoutFocusNameTimeout = pf.LayoutFocusNameTimeout
+	LayoutFocusNameTabTime = pf.LayoutFocusNameTabTime
 	MenuMaxHeight = pf.MenuMaxHeight
 	if TheViewIFace != nil {
 		TheViewIFace.PrefsDetApply(pf)

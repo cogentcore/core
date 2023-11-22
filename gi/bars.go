@@ -33,8 +33,8 @@ func (bf *BarFuncs) IsEmpty() bool {
 	return len(*bf) == 0
 }
 
-// ConfigScene is called by the Stage to configure the Scene during Run process
-func (sc *Scene) ConfigScene() {
+// ConfigSceneBars configures the side control bars, for main scenes
+func (sc *Scene) ConfigSceneBars() {
 	if !sc.Bars.Top.IsEmpty() {
 		head := NewLayout(sc, "top-bar").Style(func(s *styles.Style) {
 			s.Grow.Set(1, 0)

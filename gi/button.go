@@ -282,6 +282,10 @@ func (bt *Button) SetIconUpdate(icon icons.Icon) *Button {
 	return bt
 }
 
+func (bt *Button) Label() string {
+	return bt.Text
+}
+
 // LabelWidget returns the label widget if present
 func (bt *Button) LabelWidget() *Label {
 	lbi := bt.Parts.ChildByName("label")

@@ -112,6 +112,7 @@ func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 	if len(orig) > 0 && orig[0] != nil {
 		e = orig[0].Clone()
 		e.AsBase().Typ = typ
+		e.AsBase().ClearHandled()
 	} else {
 		e = &events.Base{Typ: typ}
 		e.Init()
@@ -128,6 +129,11 @@ func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 // is derived from, if any.
 func (wb *WidgetBase) SendChange(orig ...events.Event) {
 	wb.Send(events.Change, orig...)
+}
+
+// AddPriorityEvent adds given event type to the set of priority events for this scene
+func (wb *WidgetBase) AddPriorityEvent(etype events.Types) {
+	wb.PriorityEvents = append(wb.PriorityEvents, etype)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.

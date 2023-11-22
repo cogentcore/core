@@ -95,10 +95,12 @@ func (sc *Scene) AddOk(pw Widget, name ...string) *Button {
 	sc.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Accept {
+			bt.Send(events.Click, e)
 			e.SetHandled()
 			sc.Close()
 		}
 	})
+	sc.AddPriorityEvent(events.KeyChord)
 	return bt
 }
 
@@ -130,9 +132,11 @@ func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Abort {
 			e.SetHandled()
+			bt.Send(events.Click, e)
 			sc.Close()
 		}
 	})
+	sc.AddPriorityEvent(events.KeyChord)
 	return bt
 }
 

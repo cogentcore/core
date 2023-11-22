@@ -799,7 +799,6 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
 	tf, ok := vv.Widget.(*gi.TextField)
 	if !ok {
 		return
@@ -808,8 +807,8 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
-		s.Grow.Set(1, 0)
 	})
+	vv.StdConfigWidget(w)
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..
 		in := []reflect.Value{reflect.ValueOf(tf)}
@@ -839,28 +838,48 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 	w.SetState(vv.IsReadOnly(), states.ReadOnly) // do right away
 	w.Style(func(s *styles.Style) {
 		w.SetState(vv.IsReadOnly(), states.ReadOnly) // and in style
-		if widthtag, ok := vv.Tag("width"); ok {
-			width, err := laser.ToFloat32(widthtag)
+		if tv, ok := vv.Tag("width"); ok {
+			v, err := laser.ToFloat32(tv)
 			if err == nil {
-				s.Min.X.Ch(width)
+				s.Min.X.Ch(v)
 			}
 		}
-		if maxwidthtag, ok := vv.Tag("max-width"); ok {
-			width, err := laser.ToFloat32(maxwidthtag)
+		if tv, ok := vv.Tag("max-width"); ok {
+			v, err := laser.ToFloat32(tv)
 			if err == nil {
-				s.Max.X.Ch(width)
+				if v < 0 {
+					s.Grow.X = 1 // support legacy
+				} else {
+					s.Max.X.Ch(v)
+				}
 			}
 		}
-		if heighttag, ok := vv.Tag("height"); ok {
-			height, err := laser.ToFloat32(heighttag)
+		if tv, ok := vv.Tag("height"); ok {
+			v, err := laser.ToFloat32(tv)
 			if err == nil {
-				s.Min.Y.Em(height)
+				s.Min.Y.Em(v)
 			}
 		}
-		if maxheighttag, ok := vv.Tag("max-height"); ok {
-			height, err := laser.ToFloat32(maxheighttag)
+		if tv, ok := vv.Tag("max-height"); ok {
+			v, err := laser.ToFloat32(tv)
 			if err == nil {
-				s.Min.Y.Em(height)
+				if v < 0 {
+					s.Grow.Y = 1
+				} else {
+					s.Max.Y.Em(v)
+				}
+			}
+		}
+		if tv, ok := vv.Tag("grow"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Grow.X = v
+			}
+		}
+		if tv, ok := vv.Tag("grow-y"); ok {
+			v, err := laser.ToFloat32(tv)
+			if err == nil {
+				s.Grow.Y = v
 			}
 		}
 		if vv.IsReadOnly() {

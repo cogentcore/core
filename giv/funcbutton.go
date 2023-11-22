@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 	"reflect"
@@ -221,28 +222,42 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	return fb
 }
 
-// CallFunc calls the function or method associated with this button,
-// prompting the user for any arguments.
-func (fb *FuncButton) CallFunc() {
+func (fb *FuncButton) GoodContext() gi.Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
 		ctx = fb.This().(gi.Widget)
 	}
+	return ctx
+}
+
+func (fb *FuncButton) CallFuncShowReturns(args []reflect.Value) {
+	rets := fb.ReflectFunc.Call(args)
+	fb.ShowReturnsDialog(rets)
+}
+
+// ConfirmDialog runs the confirm dialog
+func (fb *FuncButton) ConfirmDialog(args []reflect.Value) {
+	ctx := fb.GoodContext()
+	d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
+			fb.CallFuncShowReturns(args)
+		})
+	})
+	d.NewDialog(ctx).Run()
+}
+
+// CallFunc calls the function or method associated with this button,
+// prompting the user for any arguments.
+func (fb *FuncButton) CallFunc() {
+	ctx := fb.GoodContext()
 	if len(fb.Args) == 0 {
 		if !fb.Confirm {
-			rets := fb.ReflectFunc.Call(nil)
-			fb.ShowReturnsDialog(rets)
+			fb.CallFuncShowReturns(nil)
 			return
 		}
-		d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				rets := fb.ReflectFunc.Call(nil)
-				fb.ShowReturnsDialog(rets)
-			})
-		})
-		d.NewDialog(ctx).Run()
+		fb.ConfirmDialog(nil)
 		return
 	}
 	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
@@ -254,20 +269,12 @@ func (fb *FuncButton) CallFunc() {
 			for i, arg := range fb.Args {
 				rargs[i] = laser.NonPtrValue(arg.Val())
 			}
+			fmt.Println("in ok")
 			if !fb.Confirm {
-				rets := fb.ReflectFunc.Call(rargs)
-				fb.ShowReturnsDialog(rets)
+				fb.CallFuncShowReturns(rargs)
 				return
 			}
-			d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
-			d.AddBottomBar(func(pw gi.Widget) {
-				d.AddCancel(pw)
-				d.AddOk(pw).OnClick(func(e events.Event) {
-					rets := fb.ReflectFunc.Call(rargs)
-					fb.ShowReturnsDialog(rets)
-				})
-			})
-			d.NewDialog(ctx).Run()
+			fb.ConfirmDialog(rargs)
 		})
 	})
 	d.NewDialog(ctx).Run()

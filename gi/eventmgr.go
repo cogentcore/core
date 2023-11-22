@@ -220,6 +220,7 @@ func (em *EventMgr) HandleFocusEvent(evi events.Event) {
 		for _, wi := range em.PriorityFocus {
 			wi.HandleEvent(evi)
 			if evi.IsHandled() {
+				// fmt.Println(wi, "priority handled")
 				break
 			}
 		}

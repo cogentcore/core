@@ -1356,13 +1356,13 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip = vv.Doc()
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
 	})
+	vv.StdConfigWidget(w)
 	tf.Config(sc)
 
 	tf.OnLast(events.Change, func(e events.Event) {
@@ -1402,12 +1402,12 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		return
 	}
 	vv.Widget = w
-	vv.StdConfigWidget(w)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip = vv.Doc()
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
 	})
+	vv.StdConfigWidget(w)
 	tf.Config(sc)
 
 	tf.OnLast(events.Change, func(e events.Event) {

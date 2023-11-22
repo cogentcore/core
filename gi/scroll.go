@@ -121,8 +121,12 @@ func (ly *Layout) PositionScrolls(sc *Scene) {
 
 func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb := ly.Scrolls[d]
+	sz := &ly.Geom.Size
 	pos, ssz := ly.ScrollGeom(d)
-	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz {
+	asz := sz.Alloc.Content.Dim(d)
+	csz := sz.Internal.Dim(d)
+	vis := asz / csz
+	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == vis {
 		return
 	}
 	if ssz.X <= 0 || ssz.Y <= 0 {
@@ -130,13 +134,10 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 		return
 	}
 	sb.SetState(false, states.Invisible)
-	sz := &ly.Geom.Size
-	csz := sz.Internal.Dim(d)
-	asz := sz.Alloc.Content.Dim(d)
 	sb.Max = csz                       // only scrollbar
 	sb.Step = ly.Styles.Font.Size.Dots // step by lines
 	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
-	sb.SetVisiblePct(asz / csz)
+	sb.SetVisiblePct(vis)
 	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
 
