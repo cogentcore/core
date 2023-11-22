@@ -374,13 +374,14 @@ func (sr *Slider) SetValue(val float32) *Slider {
 }
 
 // SetValueAction sets the value and updates the slider representation, and
-// emits a changed signal
+// emits an input and change event
 func (sr *Slider) SetValueAction(val float32) {
 	if sr.Value == val {
 		return
 	}
 	sr.SetValue(val)
-	sr.Send(events.Change)
+	sr.Send(events.Input)
+	sr.SendChange()
 }
 
 ///////////////////////////////////////////////////////////
