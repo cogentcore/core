@@ -1,3 +1,5 @@
+github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
+github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 goki.dev/enums v0.9.38 h1:TiLSn6p/cvoxMsh/CJ7qpe3I+97pzObpZwMHw8HqyTY=
 goki.dev/enums v0.9.38/go.mod h1:KcoeVUS0p6sEI0vfAR9hqHpADEgm3GVIIbZvErScmzk=
 goki.dev/glop v0.1.4 h1:IBGyM/Aec5mDyT+hesq1jjCVc66TXM5fCdjSoxqJFlk=
