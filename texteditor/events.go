@@ -528,7 +528,6 @@ func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
 		tlb := tl.Bounds(rend, lpos)
-		fmt.Println(tl.URL, tlb, cpos)
 		if cpos.In(tlb) {
 			return tl, true
 		}
