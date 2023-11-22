@@ -714,7 +714,6 @@ func (wb *WidgetBase) SizeUpChildren(sc *Scene) {
 		kwi.SizeUp(sc)
 		return ki.Continue
 	})
-	return
 }
 
 // SizeUpChildren calls SizeUp on all the children of this node
@@ -730,7 +729,6 @@ func (ly *Layout) SizeUpChildren(sc *Scene) {
 		kwi.SizeUp(sc)
 		return ki.Continue
 	})
-	return
 }
 
 // SetInitCells sets the initial default assignment of cell indexes

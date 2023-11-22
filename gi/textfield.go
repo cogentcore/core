@@ -380,8 +380,8 @@ func (tf *TextField) EditDone() {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
 		tf.SendChange()
-		// widget can be killed after sendchange
-		if tf == nil || tf.This() == nil || tf.Is(ki.Deleted) {
+		// widget can be killed after SendChange
+		if tf.This() == nil || tf.Is(ki.Deleted) {
 			return
 		}
 	}
