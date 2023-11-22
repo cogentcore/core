@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
@@ -1512,7 +1513,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget) {
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	d := gi.NewBody().AddTitle("Select an icon").AddText(vv.Doc())
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
-		w.(*gi.Button).SetText(string(ics[row]))
+		w.(*gi.Button).SetText(sentencecase.Of(strcase.ToCamel(string(ics[row]))))
 	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
