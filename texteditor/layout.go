@@ -54,14 +54,15 @@ func (ed *Editor) UpdateFromAlloc() {
 
 func (ed *Editor) SizeFinal(sc *gi.Scene) {
 	sz := &ed.Geom.Size
-	ed.ManageOverflow(sc, 0, false)
+	ed.ManageOverflow(sc, 0, true)
 	ed.Layout.SizeFinal(sc)
 	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
-	// sz.Actual.Content.X -= sbw // anticipate scroll
+	sz.Actual.Content.X -= sbw // anticipate scroll
 	ed.UpdateFromAlloc()
 	ed.LayoutAllLines()
 	// fmt.Println("final pre manage, actual:", sz.Actual, "space:", sz.Space)
-	if ed.ManageOverflow(sc, 3, false) {
+	if ed.ManageOverflow(sc, 3, true) {
+		sz.Actual.Total = sz.Alloc.Total
 		if ed.HasScroll[mat32.X] {
 			sz.Actual.Total.Y -= sbw
 		}
@@ -145,6 +146,7 @@ func (ed *Editor) LayoutAllLines() {
 	ed.TotalSize = ed.LinesSize.Add(spc.Size())
 	ed.TotalSize.X += ed.LineNoOff
 	ed.Geom.Size.Internal = ed.TotalSize
+	ed.Geom.Size.Internal.Y += ed.LineHeight
 	// fmt.Println(ed, "internal:", ed.TotalSize)
 	// extraHalf := ed.LineHeight * 0.5 * float32(ed.NLinesChars.Y)
 	// todo: add extra half to bottom of size?
