@@ -86,7 +86,7 @@ type App interface {
 	Cursor(win Window) cursor.Cursor
 
 	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
-	// Linux: ~/.config, Windows: ?
+	// Linux: ~/.config, Windows: ~/AppData/Roaming
 	PrefsDir() string
 
 	// GoGiPrefsDir returns the GoGi preferences directory: PrefsDir + GoGi --
