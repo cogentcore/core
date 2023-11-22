@@ -175,6 +175,7 @@ func (tv *TreeView) OnInit() {
 }
 
 func (tv *TreeView) OnAdd() {
+	tv.WidgetBase.OnAdd()
 	tv.Text = tv.Nm
 }
 

@@ -260,9 +260,10 @@ type WidgetBase struct {
 	// typically add a separator to disambiguate.
 	CustomContextMenu func(m *Scene) `copy:"-" json:"-" xml:"-"`
 
-	// Sc is the overall Scene to which we belong.
-	// This is set during Config, and also passed to most Config, Layout,
-	// and Render functions as a convenience.
+	// Sc is the overall Scene to which we belong. It is automatically
+	// by widgets whenever they are added to another widget parent.
+	// It is passed to most Config, Layout, and Render functions as
+	// a convenience.
 	Sc *Scene `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field
@@ -274,6 +275,16 @@ type WidgetBase struct {
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 	return (*WidgetFlags)(&wb.Flags)
+}
+
+// OnAdd is called when widgets are added to a parent.
+// It sets the scene of the widget to its widget parent.
+// It should be called by all other OnAdd functions defined
+// by widget types.
+func (wb *WidgetBase) OnAdd() {
+	if _, pw := wb.ParentWidget(); pw != nil {
+		wb.Sc = pw.Sc
+	}
 }
 
 func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
