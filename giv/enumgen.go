@@ -4,6 +4,7 @@ package giv
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -243,7 +244,9 @@ func (i SliceViewFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SliceViewFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -433,7 +436,9 @@ func (i TreeViewFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TreeViewFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -606,6 +611,8 @@ func (i ValueFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ValueFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

@@ -151,6 +151,9 @@ type Editor struct { //goki:embedder
 	// at least one of the renders has links -- determines if we set the cursor for hand movements
 	HasLinks bool `set:"-" edit:"-" json:"-" xml:"-"`
 
+	// handles link clicks -- if nil, they are sent to the standard web URL handler
+	LinkHandler func(tl *paint.TextLink)
+
 	lastRecenter   int         `set:"-"`
 	lastAutoInsert rune        `set:"-"`
 	lastFilename   gi.FileName `set:"-"`
@@ -172,10 +175,10 @@ func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
 
 func (ed *Editor) OnInit() {
 	ed.HandleTextViewEvents()
-	ed.ViewStyles()
+	ed.EditorStyles()
 }
 
-func (ed *Editor) ViewStyles() {
+func (ed *Editor) EditorStyles() {
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		ed.CursorWidth.Dp(2)

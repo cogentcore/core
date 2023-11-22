@@ -46,7 +46,7 @@ func (av *ArgView) OnInit() {
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
 				s.Columns = 2
-				s.Min.X.Ch(20)
+				s.Min.X.Ch(60)
 				s.Min.Y.Em(10)
 				s.Grow.Set(1, 1)
 				s.Overflow.Set(styles.OverflowAuto)

@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/colors"
@@ -62,11 +63,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 		if wi.This() == msc.This() {
 			return ki.Continue
 		}
-		if wi == nil {
-			return ki.Continue
-		}
 		if bt := AsButton(wi); bt != nil {
-			bt.Type = ButtonMenu
 			if bt.Menu == nil {
 				bt.HandleClickDismissMenu()
 			}
@@ -149,15 +146,17 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 // calling the given function with the index of the selected string.
 // if string == sel, that menu item is selected initially.
 func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
-	m := NewScene()
-	for i, s := range strs {
-		i := i
-		b := NewButton(m).SetText(s).OnClick(func(e events.Event) {
-			fun(i)
-		})
-		if s == sel {
-			b.SetSelected(true)
+	return NewMenuScene(func(m *Scene) {
+		for i, s := range strs {
+			i := i
+			s := s
+			fmt.Println(i, s)
+			b := NewButton(m).SetText(s).OnClick(func(e events.Event) {
+				fun(i)
+			})
+			if s == sel {
+				b.SetSelected(true)
+			}
 		}
-	}
-	return m
+	})
 }

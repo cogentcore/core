@@ -185,6 +185,7 @@ func (tv *TreeView) TreeViewStyles() {
 		tv.Indent.Em(1)
 		tv.OpenDepth = 4
 		s.Border.Style.Set(styles.BorderNone)
+		s.MaxBorder = s.Border
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Zero()

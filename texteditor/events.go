@@ -15,6 +15,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/glop/indent"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/pi/v2/lex"
@@ -506,20 +507,11 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (ed *Editor) OpenLink(tl *paint.TextLink) {
-	// tl.Widget = ed.This().(gi.Widget)
-	// fmt.Printf("opening link: %v\n", tl.URL)
-	// if len(ed.LinkSig.Cons) == 0 {
-	// 	if paint.TextLinkHandler != nil {
-	// 		if paint.TextLinkHandler(*tl) {
-	// 			return
-	// 		}
-	// 		if paint.URLHandler != nil {
-	// 			paint.URLHandler(tl.URL)
-	// 		}
-	// 	}
-	// 	return
-	// }
-	// ed.LinkSig.Emit(ed.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	if ed.LinkHandler != nil {
+		ed.LinkHandler(tl)
+	} else {
+		goosi.TheApp.OpenURL(tl.URL)
+	}
 }
 
 // LinkAt returns link at given cursor position, if one exists there --
@@ -536,6 +528,7 @@ func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
 		tlb := tl.Bounds(rend, lpos)
+		fmt.Println(tl.URL, tlb, cpos)
 		if cpos.In(tlb) {
 			return tl, true
 		}
@@ -552,6 +545,7 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 		st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
 		end, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
 		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, end)
+		_ = reg
 		ed.HighlightRegion(reg)
 		ed.SetCursorShow(pos)
 		ed.SavePosHistory(ed.CursorPos)
@@ -563,9 +557,6 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 // HandleTextViewMouse handles mouse events.Event
 func (ed *Editor) HandleTextViewMouse() {
 	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
-		if ed.IsReadOnly() {
-			return
-		}
 		if !ed.StateIs(states.Focused) {
 			ed.GrabFocus()
 		}
@@ -591,9 +582,6 @@ func (ed *Editor) HandleTextViewMouse() {
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {
-		if ed.IsReadOnly() {
-			return
-		}
 		if !ed.StateIs(states.Focused) {
 			ed.GrabFocus()
 			ed.Send(events.Focus, e) // sets focused flag
@@ -618,9 +606,6 @@ func (ed *Editor) HandleTextViewMouse() {
 		}
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
-		if ed.IsReadOnly() {
-			return
-		}
 		e.SetHandled()
 		if !ed.SelectMode {
 			ed.SelectModeToggle()

@@ -452,7 +452,7 @@ func (ls *LayImplState) InitCells() {
 func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
 	zp := image.Point{}
 	if w.HasChildren() && (ls.Shape == zp || len(ls.Cells) == 0) {
-		fmt.Println(w, "Shape is nil in:", phase)
+		// fmt.Println(w, "Shape is nil in:", phase)
 		return false
 	}
 	return true

@@ -5,6 +5,7 @@ package texteditor
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -60,6 +61,7 @@ var EditorType = gti.AddType(&gti.Type{
 		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting cursor rendering -- shared between blink and main code", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
 		{"HasLinks", &gti.Field{Name: "HasLinks", Type: "bool", LocalType: "bool", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LinkHandler", &gti.Field{Name: "LinkHandler", Type: "func(tl *goki.dev/girl/paint.TextLink)", LocalType: "func(tl *paint.TextLink)", Doc: "handles link clicks -- if nil, they are sent to the standard web URL handler", Directives: gti.Directives{}, Tag: ""}},
 		{"lastRecenter", &gti.Field{Name: "lastRecenter", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"lastAutoInsert", &gti.Field{Name: "lastAutoInsert", Type: "rune", LocalType: "rune", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"lastFilename", &gti.Field{Name: "lastFilename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -150,6 +152,13 @@ func (t *Editor) SetHighlightColor(v colors.Full) *Editor {
 // the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
 func (t *Editor) SetCursorColor(v colors.Full) *Editor {
 	t.CursorColor = v
+	return t
+}
+
+// SetLinkHandler sets the [Editor.LinkHandler]:
+// handles link clicks -- if nil, they are sent to the standard web URL handler
+func (t *Editor) SetLinkHandler(v func(tl *paint.TextLink)) *Editor {
+	t.LinkHandler = v
 	return t
 }
 

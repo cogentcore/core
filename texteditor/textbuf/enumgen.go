@@ -4,6 +4,7 @@ package textbuf
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
@@ -138,6 +139,8 @@ func (i Cases) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Cases) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

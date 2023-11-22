@@ -4,6 +4,7 @@ package keyfun
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
@@ -433,6 +434,8 @@ func (i Funs) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Funs) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

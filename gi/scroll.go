@@ -137,6 +137,7 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb.Step = ly.Styles.Font.Size.Dots // step by lines
 	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
 	sb.SetVisiblePct(asz / csz)
+	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
 
 	sb.Update() // applies style

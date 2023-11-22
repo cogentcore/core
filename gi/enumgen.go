@@ -5,6 +5,7 @@ package gi
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -141,7 +142,9 @@ func (i ButtonTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ButtonTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -248,7 +251,9 @@ func (i ChooserTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ChooserTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -355,7 +360,9 @@ func (i CompleteSignals) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *CompleteSignals) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -545,7 +552,9 @@ func (i WidgetFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WidgetFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -657,7 +666,9 @@ func (i Stripes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Stripes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -829,7 +840,9 @@ func (i LabelTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LabelTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -941,7 +954,9 @@ func (i LayoutPasses) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LayoutPasses) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -1136,7 +1151,9 @@ func (i LayoutFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LayoutFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -1248,7 +1265,9 @@ func (i Densities) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Densities) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -1441,7 +1460,9 @@ func (i WinFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WinFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -1604,7 +1625,9 @@ func (i RenderContextFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RenderContextFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -1824,7 +1847,9 @@ func (i ScFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ScFlags) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -1931,7 +1956,9 @@ func (i SliderTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SliderTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -2038,7 +2065,9 @@ func (i SpellSignals) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SpellSignals) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -2170,7 +2199,9 @@ func (i StageTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *StageTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -2277,7 +2308,9 @@ func (i StageSides) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *StageSides) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -2399,7 +2432,9 @@ func (i SwitchTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SwitchTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -2506,7 +2541,9 @@ func (i TextFieldTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextFieldTypes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -2618,6 +2655,8 @@ func (i Themes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Themes) UnmarshalText(text []byte) error {
-	i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

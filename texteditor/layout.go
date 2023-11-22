@@ -60,7 +60,7 @@ func (ed *Editor) SizeFinal(sc *gi.Scene) {
 	sz.Actual.Content.X -= sbw // anticipate scroll
 	ed.UpdateFromAlloc()
 	ed.LayoutAllLines()
-	// fmt.Println("final pre manage, actual:", sz.Actual, "space:", sz.Space)
+	// fmt.Println(ed, "final pre manage, actual:", sz.Actual, "space:", sz.Space, "alloc:", sz.Alloc)
 	if ed.ManageOverflow(sc, 3, true) {
 		sz.Actual.Total = sz.Alloc.Total
 		if ed.HasScroll[mat32.X] {
