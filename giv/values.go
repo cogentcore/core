@@ -20,6 +20,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
@@ -511,16 +512,12 @@ func (vv *SliceValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	txt := ""
 	if !npv.IsValid() {
-		txt = "nil"
-	} else if npv.Kind() == reflect.Interface {
-		txt = fmt.Sprintf("Slice: %T", npv.Interface())
+		txt = "None"
 	} else {
-		if npv.Kind() == reflect.Array {
-			txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
-		} else if npv.IsNil() {
-			txt = "nil"
+		if npv.Kind() == reflect.Array || !npv.IsNil() {
+			txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(vv.ElType)))
 		} else {
-			txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
+			txt = "None"
 		}
 	}
 	ac.SetTextUpdate(txt)
