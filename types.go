@@ -16,7 +16,11 @@ import (
 // several maps to avoid any conflicts.  It is also very quick to compute.
 func LongTypeName(typ reflect.Type) string {
 	nptyp := NonPtrType(typ)
-	return nptyp.PkgPath() + "." + nptyp.Name()
+	nm := nptyp.Name()
+	if nm != "" {
+		return nptyp.PkgPath() + "." + nm
+	}
+	return typ.String()
 }
 
 // ShortTypeName returns the short version of a package-qualified type name
@@ -29,7 +33,11 @@ func LongTypeName(typ reflect.Type) string {
 // a bit slow.
 func ShortTypeName(typ reflect.Type) string {
 	nptyp := NonPtrType(typ)
-	return path.Base(nptyp.PkgPath()) + "." + nptyp.Name()
+	nm := nptyp.Name()
+	if nm != "" {
+		return path.Base(nptyp.PkgPath()) + "." + nm
+	}
+	return typ.String()
 }
 
 // FriendlyTypeName returns a user-friendly version of the name of the given type.
@@ -37,7 +45,24 @@ func ShortTypeName(typ reflect.Type) string {
 // builtin types into more friendly forms (eg: "int" to "Number").
 func FriendlyTypeName(typ reflect.Type) string {
 	nptyp := NonPtrType(typ)
-	if nptyp.Kind() == reflect.Func {
+	nm := nptyp.Name()
+
+	// if it is named, we use that
+	if nm != "" {
+		switch nm {
+		case "string":
+			return "Text"
+		case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
+			return "Number"
+		}
+		return sentencecase.Of(nm)
+	}
+
+	// otherwise, we fall back on Kind
+	switch nptyp.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Map:
+		return FriendlyTypeName(nptyp.Elem()) + "s"
+	case reflect.Func:
 		str := "Function("
 		ni := nptyp.NumIn()
 		for i := 0; i < ni; i++ {
@@ -46,17 +71,10 @@ func FriendlyTypeName(typ reflect.Type) string {
 				str += ", "
 			}
 		}
+		str += ")"
 		return str
 	}
-	nm := nptyp.Name()
-	switch nm {
-	case "string":
-		return "Text"
-	case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
-		return "Number"
-	default:
-		return sentencecase.Of(nm)
-	}
+	return typ.String()
 }
 
 // TypeFor returns the [reflect.Type] that represents the type argument T.
