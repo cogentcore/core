@@ -730,6 +730,7 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 		w.RenderCtx().ReadUnlock() // one case where we need to break lock
 		w.RenderWindow()
 		w.RenderCtx().ReadLock()
+		w.SendShowEvents()
 
 	case events.WindowResize:
 		evi.SetHandled()
@@ -1150,6 +1151,10 @@ func (w *RenderWin) GatherScenes() bool {
 		}
 	}
 	return true
+}
+
+func (w *RenderWin) SendShowEvents() {
+	w.StageMgr.SendShowEvents()
 }
 
 /*

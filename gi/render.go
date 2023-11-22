@@ -17,7 +17,6 @@ import (
 	"goki.dev/cam/hct"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
@@ -403,6 +402,11 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 //////////////////////////////////////////////////////////////////
 //		Scene
 
+// SceneShowLayoutIters is the number of iterations needed for the
+// first showing of a scene, to ensure recursive layout dynamics
+// have settled.
+const SceneShowLayoutIters = 3
+
 // DoUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
@@ -422,7 +426,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	// Do sequence of layout updates at start to deal with dynamically
 	// sized elements that require iterative passes of layout.
-	if sc.ShowLayoutIter < 3 { // 3 needed for SliceViewBase
+	if sc.ShowLayoutIter < SceneShowLayoutIters { // 3 needed for SliceViewBase
 		// fmt.Println("scene layout iter:", sc.ShowLayoutIter)
 		if sc.ShowLayoutIter == 0 {
 			sc.EventMgr.GetPriorityWidgets()
@@ -462,15 +466,10 @@ func (sc *Scene) DoUpdate() bool {
 		return false
 	}
 
-	fmt.Println("sli", sc.ShowLayoutIter)
-	if sc.ShowLayoutIter == 3 {
-		fmt.Println("show", sc.Is(ScPrefSizing))
+	if sc.ShowLayoutIter == SceneShowLayoutIters {
 		sc.ShowLayoutIter++
 		if !sc.Is(ScPrefSizing) {
-			fmt.Println("asf")
 			sc.EventMgr.ActivateStartFocus()
-			fmt.Println("showe")
-			sc.Send(events.Show)
 		}
 	}
 
