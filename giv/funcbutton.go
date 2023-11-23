@@ -249,7 +249,7 @@ func (fb *FuncButton) ConfirmDialog() {
 	d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
+		d.AddOk(pw).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.CallFuncShowReturns()
 		})
 	})
@@ -278,7 +278,7 @@ func (fb *FuncButton) CallFunc() {
 	NewArgView(d).SetArgs(fb.Args)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
+		d.AddOk(pw).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.CallFuncShowReturns()
 		})
 	})
