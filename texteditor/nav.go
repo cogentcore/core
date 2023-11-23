@@ -723,6 +723,7 @@ func (ed *Editor) JumpToLineAddText() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Jump").OnClick(func(e events.Event) {
+			val = tf.Text()
 			ln, err := laser.ToInt(val)
 			if err == nil {
 				ed.JumpToLine(int(ln))
