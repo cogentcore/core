@@ -593,7 +593,9 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetIcon(icons.Colors)
 	bt.Tooltip = "Open color picker dialog"
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	bt.Style(func(s *styles.Style) {
 		clr, _ := vv.Color()
@@ -608,33 +610,21 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorValue) HasButton() bool {
-	return true
-}
+func (vv *ColorValue) HasDialog() bool                      { return true }
+func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *ColorValue) OpenDialog(ctx gi.Widget) {
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
-		return
-	}
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	dclr := color.RGBA{}
 	clr, ok := vv.Color()
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	d := gi.NewBody().AddTitle("Edit color").AddText(vv.Doc())
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
-			vv.SetColor(*cclr)
-			vv.UpdateWidget()
-		})
-	})
-	d.NewDialog(ctx).Run()
+	return true, func() {
+		cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
+		vv.SetColor(*cclr)
+		vv.UpdateWidget()
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -674,19 +664,17 @@ func (vv *ColorNameValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		if vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *ColorNameValue) HasButton() bool {
-	return true
-}
+func (vv *ColorNameValue) HasDialog() bool                      { return true }
+func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *ColorNameValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *ColorNameValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := laser.ToString(vv.Value.Interface())
 	sl := make([]struct {
 		Name  string
@@ -708,16 +696,11 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget) {
 		}
 	}
 	si := 0
-	d := gi.NewBody().AddTitle("Select a Color Name").AddText(vv.Doc())
 	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				vv.SetValue(sl[si].Name)
-				vv.UpdateWidget()
-			}
-		})
-	})
-	d.NewFullDialog(ctx).Run()
+	return true, func() {
+		if si >= 0 {
+			vv.SetValue(sl[si].Name)
+			vv.UpdateWidget()
+		}
+	}
 }

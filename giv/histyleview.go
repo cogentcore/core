@@ -47,34 +47,27 @@ func (vv *HiStyleValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *HiStyleValue) HasDialog() bool {
-	return true
-}
+func (vv *HiStyleValue) HasDialog() bool                      { return true }
+func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *HiStyleValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *HiStyleValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
-	d := gi.NewBody().AddTitle("Select a HiStyle Highlighting Style").AddText(vv.Doc())
 	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				hs := histyle.StyleNames[si]
-				vv.SetValue(hs)
-				vv.UpdateWidget()
-			}
-		})
-	})
-	d.NewFullDialog(ctx).Run()
+	return true, func() {
+		if si >= 0 {
+			hs := histyle.StyleNames[si]
+			vv.SetValue(hs)
+			vv.UpdateWidget()
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

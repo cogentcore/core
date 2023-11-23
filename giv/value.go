@@ -162,18 +162,25 @@ type Value interface {
 	// any other change modifiers have had a chance to intervene first.
 	ConfigWidget(w gi.Widget, sc *gi.Scene)
 
-	// HasAction returns true if this value has an associated action, such as
-	// pulling up a dialog or chooser for this value.  Activate method will
-	// trigger this action.
+	// HasDialog returns true if this value has an associated Dialog,
+	// e.g., for FileName, StructView, SliceView, etc.
+	// The OpenDialog method will open the dialog.
 	HasDialog() bool
 
-	// OpenDialog opens a dialog or chooser for this value.
-	// This is called by default for single-argument methods that have value
-	// representations with actions.  The ctx Widget provides a context
-	// for opening the dialog, and function is called with the the relevant dialog,
-	// so that the caller can execute its own actions based on the user
-	// hitting Ok or Cancel.
-	OpenDialog(ctx gi.Widget)
+	// OpenDialog opens the dialog for this Value, if [HasDialog] is true.
+	// Given function closure is called for the Ok action, after value
+	// has been updated, if using the dialog as part of another control flow.
+	// Note that some cases just pop up a menu chooser, not a full dialog.
+	OpenDialog(ctx gi.Widget, fun func())
+
+	// ConfigDialog adds content to given dialog body for this value,
+	// for Values with [HasDialog] == true, that use full dialog scenes.
+	// The bool return is false if the value does not use this method
+	// (e.g., for simple menu choosers).
+	// The [OpenValueDialog] function is used to construct and run the dialog.
+	// The returned function is an optional closure to be called
+	// in the Ok case, for cases where extra logic is required.
+	ConfigDialog(d *gi.Body) (bool, func())
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -482,7 +489,11 @@ func (vv *ValueBase) HasDialog() bool {
 	return false
 }
 
-func (vv *ValueBase) OpenDialog(ctx gi.Widget) {
+func (vv *ValueBase) OpenDialog(ctx gi.Widget, fun func()) {
+}
+
+func (vv *ValueBase) ConfigDialog(d *gi.Body) (bool, func()) {
+	return false, nil
 }
 
 func (vv *ValueBase) Val() reflect.Value {
@@ -747,7 +758,6 @@ func (vv *ValueBase) OwnerLabel() string {
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
 func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
-	lbl := ""
 	var npt reflect.Type
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		npt = laser.NonPtrType(vv.Value.Type())
@@ -756,16 +766,16 @@ func (vv *ValueBase) GetTitle() (label, newPath string, isZero bool) {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		npt = laser.NonPtrType(opv.Type())
 	}
-	lbl += npt.String()
-	newPath = lbl
+	label += npt.String()
+	newPath = npt.String()
 	olbl := vv.OwnerLabel()
 	if olbl != "" {
-		lbl += ": " + olbl
+		label += ": " + olbl
 	}
 	if vv.ViewPath != "" {
-		lbl += " [" + vv.ViewPath + "]"
+		label += " [" + vv.ViewPath + "]"
 	}
-	return lbl, newPath, isZero
+	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -886,6 +896,35 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 			w.AsWidget().SetReadOnly(true)
 		}
 	})
+}
+
+// OpenValueDialog is a helper for OpenDialog for cases that use
+// [ConfigDialog] method to configure the dialog contents.
+func OpenValueDialog(vv Value, ctx gi.Widget, fun func()) {
+	vb := vv.AsValueBase()
+	title, _, _ := vb.GetTitle()
+	opv := laser.OnePtrUnderlyingValue(vb.Value)
+	obj := opv.Interface()
+	if gi.RecycleDialog(obj) {
+		return
+	}
+	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
+	ok, okfun := vv.ConfigDialog(d)
+	if !ok {
+		return
+	}
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
+			if okfun != nil {
+				okfun()
+			}
+			vv.UpdateWidget()
+			vv.SendChange()
+			fun()
+		})
+	})
+	d.NewFullDialog(ctx).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

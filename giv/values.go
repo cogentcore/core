@@ -408,37 +408,24 @@ func (vv *StructValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *StructValue) HasButton() bool {
-	return true
-}
+func (vv *StructValue) HasDialog() bool                      { return true }
+func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *StructValue) OpenDialog(ctx gi.Widget) {
-	title, newPath, isZero := vv.GetTitle()
-	if isZero {
-		return
+func (vv *StructValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+		return false, nil
 	}
-	vpath := vv.ViewPath + "/" + newPath
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
-	readOnly := vv.IsReadOnly()
 	stru := opv.Interface()
-	if gi.RecycleDialog(stru) {
-		return
-	}
-	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
-	NewStructView(d).SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetStruct(stru).SetState(readOnly, states.ReadOnly)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
-		})
-	})
-	d.NewFullDialog(vv.Widget).Run()
+	vpath := vv.ViewPath + "/" + laser.NonPtrType(opv.Type()).String()
+	NewStructView(d).SetStruct(stru).SetViewPath(vpath).SetTmpSave(vv.TmpSave).
+		SetReadOnly(vv.IsReadOnly())
+	return true, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -543,61 +530,41 @@ func (vv *SliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *SliceValue) HasButton() bool {
-	return true
-}
+func (vv *SliceValue) HasDialog() bool                      { return true }
+func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *SliceValue) OpenDialog(ctx gi.Widget) {
-	title, newPath, isZero := vv.GetTitle()
-	if isZero {
-		return
+func (vv *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+		return false, nil
 	}
-	vpath := vv.ViewPath + "/" + newPath
 	vvp := laser.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
 		slog.Error("giv.SliceValue: Cannot view unadressable (non-pointer) slices", "type", vv.Value.Type())
-		return
+		return false, nil
 	}
-	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
+	vpath := vv.ViewPath + "/" + laser.NonPtrType(vvp.Type()).String()
 	if !vv.IsArray && vv.ElIsStruct {
-		d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
-		tv := NewTableView(d).SetSlice(slci)
-		tv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
+		tv := NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
+		tv.SetReadOnly(vv.IsReadOnly())
 		d.AddTopBar(func(pw gi.Widget) {
 			tb := d.DefaultTopAppBar(pw)
 			tv.SliceDefaultTopAppBar(tb)
 		})
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				vv.UpdateWidget()
-				vv.SendChange()
-			})
-		})
-		d.NewFullDialog(vv.Widget).Run()
 	} else {
-		d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
-		sv := NewSliceView(d).SetSlice(slci)
-		sv.SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
+		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
+		sv.SetReadOnly(vv.IsReadOnly())
 		d.AddTopBar(func(pw gi.Widget) {
 			tb := d.DefaultTopAppBar(pw)
 			sv.SliceDefaultTopAppBar(tb)
 		})
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddCancel(pw)
-			d.AddOk(pw).OnClick(func(e events.Event) {
-				vv.UpdateWidget()
-				vv.SendChange()
-			})
-		})
-		d.NewFullDialog(vv.Widget).Run()
 	}
+	return true, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -693,33 +660,23 @@ func (vv *MapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.Tooltip = vv.Doc()
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *MapValue) HasButton() bool {
-	return true
-}
+func (vv *MapValue) HasDialog() bool                      { return true }
+func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *MapValue) OpenDialog(ctx gi.Widget) {
-	title, newPath, isZero := vv.GetTitle()
-	if isZero {
-		return
+func (vv *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+		return false, nil
 	}
-	vpath := vv.ViewPath + "/" + newPath
 	mpi := vv.Value.Interface()
-	readOnly := vv.IsReadOnly()
-	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
-	NewMapView(d).SetMap(mpi).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
-		})
-	})
-	d.NewFullDialog(vv.Widget).Run()
+	vpath := vv.ViewPath + "/" + laser.NonPtrType(vv.Value.Type()).String()
+	NewMapView(d).SetMap(mpi).SetViewPath(vpath).SetTmpSave(vv.TmpSave).
+		SetReadOnly(vv.IsReadOnly())
+	return true, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -827,8 +784,7 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
 			if k != nil {
-				bt := vv.Widget.(*gi.Button)
-				vv.OpenDialog(bt)
+				vv.OpenDialog(vv.Widget, nil)
 			}
 		})
 		gi.NewButton(m, "gogi-editor").SetText("Inspector").OnClick(func(e events.Event) {
@@ -842,31 +798,18 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.UpdateWidget()
 }
 
-func (vv *KiPtrValue) HasButton() bool {
-	return true
-}
+func (vv *KiPtrValue) HasDialog() bool                      { return true }
+func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *KiPtrValue) OpenDialog(ctx gi.Widget) {
-	title, newPath, isZero := vv.GetTitle()
-	if isZero {
-		return
-	}
+func (vv *KiPtrValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	k := vv.KiStruct()
 	if k == nil {
-		return
+		return false, nil
 	}
-	vpath := vv.ViewPath + "/" + newPath
-	readOnly := vv.IsReadOnly()
-	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
-	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).SetState(readOnly, states.ReadOnly)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			vv.UpdateWidget()
-			vv.SendChange()
-		})
-	})
-	d.NewFullDialog(ctx).Run()
+	vpath := vv.ViewPath + "/" + laser.NonPtrType(vv.Value.Type()).String()
+	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).
+		SetReadOnly(vv.IsReadOnly())
+	return true, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1495,37 +1438,30 @@ func (vv *IconValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *IconValue) HasDialog() bool {
-	return true
-}
+func (vv *IconValue) HasDialog() bool                      { return true }
+func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *IconValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	d := gi.NewBody().AddTitle("Select an icon").AddText(vv.Doc())
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(sentencecase.Of(strcase.ToCamel(string(ics[row]))))
 	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				ic := icons.AllIcons[si]
-				vv.SetValue(ic)
-				vv.UpdateWidget()
-			}
-		})
-	})
-	d.NewFullDialog(ctx).Run()
+	return true, func() {
+		if si >= 0 {
+			ic := icons.AllIcons[si]
+			vv.SetValue(ic)
+			vv.UpdateWidget()
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1563,30 +1499,26 @@ func (vv *FontValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget)
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *FontValue) HasDialog() bool {
-	return true
-}
+func (vv *FontValue) HasDialog() bool                      { return true }
+func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
 // show fonts in a bigger size so you can actually see the differences
 var FontChooserSize = units.Pt(18)
 
-func (vv *FontValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
-	wb := ctx.AsWidget()
+	wb := vv.Widget.AsWidget()
 	FontChooserSize.ToDots(&wb.Styles.UnContext)
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
-
-	d := gi.NewBody().AddTitle("Select a Font").AddText(vv.Doc())
 	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
@@ -1597,17 +1529,14 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget) {
 		s.Font.Style = fi[row].Style
 		s.Font.Size = FontChooserSize
 	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				fi := paint.FontLibrary.FontInfo[si]
-				vv.SetValue(fi.Name)
-				vv.UpdateWidget()
-			}
-		})
-	})
-	d.NewFullDialog(ctx).Run()
+
+	return true, func() {
+		if si >= 0 {
+			fi := paint.FontLibrary.FontInfo[si]
+			vv.SetValue(fi.Name)
+			vv.UpdateWidget()
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1647,24 +1576,19 @@ func (vv *FileValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		bt := vv.Widget.(*gi.Button)
-		// e.SetHandled()
-		vv.OpenDialog(bt)
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *FileValue) HasDialog() bool {
-	return true
-}
+func (vv *FileValue) HasDialog() bool                      { return true }
+func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *FileValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	d := gi.NewBody().AddTitle(vv.Name()).AddText(vv.Doc())
 	fv := NewFileView(d).SetFilename(cur, ext)
 	fv.OnSelect(func(e events.Event) {
 		cur = fv.SelectedFile()
@@ -1674,111 +1598,10 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget) {
 			d.Close()
 		}
 	})
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			vv.SetValue(cur)
-			vv.UpdateWidget()
-		})
-	})
-	d.NewFullDialog(ctx).Run()
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  VersCtrlValue
-
-// VersCtrlSystems is a list of supported Version Control Systems.
-// These must match the VCS Types from goki/pi/vci which in turn
-// is based on masterminds/vcs
-var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
-
-// IsVersCtrlSystem returns true if the given string matches one of the
-// standard VersCtrlSystems -- uses lowercase version of str.
-func IsVersCtrlSystem(str string) bool {
-	stl := strings.ToLower(str)
-	for _, vcn := range VersCtrlSystems {
-		if stl == vcn {
-			return true
-		}
-	}
-	return false
-}
-
-// VersCtrlName is the name of a version control system
-type VersCtrlName string
-
-func (vn VersCtrlName) String() string {
-	return string(vn)
-}
-
-func VersCtrlNameProper(vc string) VersCtrlName {
-	vcl := strings.ToLower(vc)
-	for _, vcnp := range VersCtrlSystems {
-		vcnpl := strings.ToLower(vcnp)
-		if strings.Compare(vcl, vcnpl) == 0 {
-			return VersCtrlName(vcnp)
-		}
-	}
-	return ""
-}
-
-// Value registers VersCtrlValue as the viewer of VersCtrlName
-func (kn VersCtrlName) Value() Value {
-	return &VersCtrlValue{}
-}
-
-// VersCtrlValue presents an action for displaying an VersCtrlName and selecting
-// from StringPopup
-type VersCtrlValue struct {
-	ValueBase
-}
-
-func (vv *VersCtrlValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
-}
-
-func (vv *VersCtrlValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	if txt == "" {
-		txt = "(none)"
-	}
-	bt.SetTextUpdate(txt)
-}
-
-func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
-	if vv.Widget == w {
+	return true, func() {
+		vv.SetValue(cur)
 		vv.UpdateWidget()
-		return
 	}
-	vv.Widget = w
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
-	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget)
-	})
-	vv.UpdateWidget()
-}
-
-func (vv *VersCtrlValue) HasDialog() bool {
-	return true
-}
-
-func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
-	// TODO(kai/menu): add back StringsChooserPopup here
-	// cur := laser.ToString(vv.Value.Interface())
-	// gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
-	// 	vv.SetValue(ac.Text)
-	// 	vv.UpdateWidget()
-	// })
 }
 
 // TextEditorValue presents a [texteditor.Editor] for editing longer text

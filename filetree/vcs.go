@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/Masterminds/vcs"
 	"goki.dev/gi/v2/gi"
@@ -17,7 +18,10 @@ import (
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
+	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/vci/v2"
 )
 
@@ -401,4 +405,93 @@ func (fn *Node) UpdateAllVcs() {
 		}
 		return ki.Break
 	})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  VersCtrlValue
+
+// VersCtrlSystems is a list of supported Version Control Systems.
+// These must match the VCS Types from goki/pi/vci which in turn
+// is based on masterminds/vcs
+var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
+
+// IsVersCtrlSystem returns true if the given string matches one of the
+// standard VersCtrlSystems -- uses lowercase version of str.
+func IsVersCtrlSystem(str string) bool {
+	stl := strings.ToLower(str)
+	for _, vcn := range VersCtrlSystems {
+		if stl == vcn {
+			return true
+		}
+	}
+	return false
+}
+
+// VersCtrlName is the name of a version control system
+type VersCtrlName string
+
+func (vn VersCtrlName) String() string {
+	return string(vn)
+}
+
+func VersCtrlNameProper(vc string) VersCtrlName {
+	vcl := strings.ToLower(vc)
+	for _, vcnp := range VersCtrlSystems {
+		vcnpl := strings.ToLower(vcnp)
+		if strings.Compare(vcl, vcnpl) == 0 {
+			return VersCtrlName(vcnp)
+		}
+	}
+	return ""
+}
+
+// Value registers VersCtrlValue as the viewer of VersCtrlName
+func (kn VersCtrlName) Value() Value {
+	return &VersCtrlValue{}
+}
+
+// VersCtrlValue presents an action for displaying an VersCtrlName and selecting
+// from StringPopup
+type VersCtrlValue struct {
+	ValueBase
+}
+
+func (vv *VersCtrlValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ButtonType
+	return vv.WidgetTyp
+}
+
+func (vv *VersCtrlValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	bt := vv.Widget.(*gi.Button)
+	txt := laser.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "(none)"
+	}
+	bt.SetTextUpdate(txt)
+}
+
+func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+	if vv.Widget == w {
+		vv.UpdateWidget()
+		return
+	}
+	vv.Widget = w
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
+	bt.OnClick(func(e events.Event) {
+		if vv.IsReadOnly() {
+			return
+		}
+		cur := laser.ToString(vv.Value.Interface())
+		m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(idx int) {
+			vv.SetValue(VersCtrlSytems[idx])
+			vv.UpdateWidget()
+		})
+		gi.NewMenuFromScene(m, bt, bt.ContextMenuPos(nil)).Run()
+	})
+	vv.UpdateWidget()
 }

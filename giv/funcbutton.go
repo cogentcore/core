@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"log"
 	"log/slog"
 	"reflect"
@@ -230,19 +229,28 @@ func (fb *FuncButton) GoodContext() gi.Widget {
 	return ctx
 }
 
-func (fb *FuncButton) CallFuncShowReturns(args []reflect.Value) {
-	rets := fb.ReflectFunc.Call(args)
+func (fb *FuncButton) CallFuncShowReturns() {
+	if len(fb.Args) == 0 {
+		rets := fb.ReflectFunc.Call(nil)
+		fb.ShowReturnsDialog(rets)
+		return
+	}
+	rargs := make([]reflect.Value, len(fb.Args))
+	for i, arg := range fb.Args {
+		rargs[i] = laser.NonPtrValue(arg.Val())
+	}
+	rets := fb.ReflectFunc.Call(rargs)
 	fb.ShowReturnsDialog(rets)
 }
 
 // ConfirmDialog runs the confirm dialog
-func (fb *FuncButton) ConfirmDialog(args []reflect.Value) {
+func (fb *FuncButton) ConfirmDialog() {
 	ctx := fb.GoodContext()
 	d := gi.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
-			fb.CallFuncShowReturns(args)
+			fb.CallFuncShowReturns()
 		})
 	})
 	d.NewDialog(ctx).Run()
@@ -254,10 +262,16 @@ func (fb *FuncButton) CallFunc() {
 	ctx := fb.GoodContext()
 	if len(fb.Args) == 0 {
 		if !fb.Confirm {
-			fb.CallFuncShowReturns(nil)
+			fb.CallFuncShowReturns()
 			return
 		}
-		fb.ConfirmDialog(nil)
+		fb.ConfirmDialog()
+		return
+	}
+	if len(fb.Args) == 1 && fb.Args[0].HasDialog() { // go direct to dialog
+		fb.Args[0].OpenDialog(ctx, func() {
+			fb.CallFuncShowReturns()
+		})
 		return
 	}
 	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
@@ -265,16 +279,7 @@ func (fb *FuncButton) CallFunc() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
-			rargs := make([]reflect.Value, len(fb.Args))
-			for i, arg := range fb.Args {
-				rargs[i] = laser.NonPtrValue(arg.Val())
-			}
-			fmt.Println("in ok")
-			if !fb.Confirm {
-				fb.CallFuncShowReturns(rargs)
-				return
-			}
-			fb.ConfirmDialog(rargs)
+			fb.CallFuncShowReturns()
 		})
 	})
 	d.NewDialog(ctx).Run()

@@ -177,33 +177,25 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget)
+		if vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *ColorMapValue) HasButton() bool {
-	return true
-}
+func (vv *ColorMapValue) HasDialog() bool                      { return true }
+func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *ColorMapValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
-
 	si := 0
-	d := gi.NewBody().AddTitle("Select a color map").AddText(vv.Doc())
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				vv.SetValue(sl[si])
-				vv.UpdateWidget()
-			}
-		})
-	})
-	d.NewDialog(ctx).Run()
+	return true, func() {
+		if si >= 0 {
+			vv.SetValue(sl[si])
+			vv.UpdateWidget()
+		}
+	}
 }

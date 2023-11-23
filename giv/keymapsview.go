@@ -95,33 +95,26 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(bt)
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(vv.Widget, nil)
+		}
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *KeyMapValue) HasDialog() bool {
-	return true
-}
+func (vv *KeyMapValue) HasDialog() bool                      { return true }
+func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
-func (vv *KeyMapValue) OpenDialog(ctx gi.Widget) {
-	if vv.IsReadOnly() {
-		return
-	}
+func (vv *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	d := gi.NewBody().AddTitle("Select a key map").AddText(vv.Doc())
 	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				km := keyfun.AvailMaps[si]
-				vv.SetValue(km.Name)
-				vv.UpdateWidget()
-			}
-		})
-	})
-	d.NewFullDialog(ctx).Run()
+	return true, func() {
+		if si >= 0 {
+			km := keyfun.AvailMaps[si]
+			vv.SetValue(km.Name)
+			vv.UpdateWidget()
+		}
+	}
 }

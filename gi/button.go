@@ -283,7 +283,10 @@ func (bt *Button) SetIconUpdate(icon icons.Icon) *Button {
 }
 
 func (bt *Button) Label() string {
-	return bt.Text
+	if bt.Text != "" {
+		return bt.Text
+	}
+	return bt.Nm
 }
 
 // LabelWidget returns the label widget if present
