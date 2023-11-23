@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 
 	"goki.dev/colors"
@@ -150,7 +149,6 @@ func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
 		for i, s := range strs {
 			i := i
 			s := s
-			fmt.Println(i, s)
 			b := NewButton(m).SetText(s).OnClick(func(e events.Event) {
 				fun(i)
 			})

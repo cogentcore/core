@@ -330,6 +330,9 @@ type LayCells struct {
 // Cell returns the cell for given dimension and index along that
 // dimension (X = Cols, idx = col, Y = Rows, idx = row)
 func (lc *LayCells) Cell(d mat32.Dims, idx int) *LayCell {
+	if len(lc.ColRow[d]) <= idx {
+		return nil
+	}
 	return &(lc.ColRow[d][idx])
 }
 
@@ -949,7 +952,10 @@ func (ly *Layout) SizeFromChildrenCells(sc *Scene, iter int, pass LayoutPasses) 
 
 			md := li.Cell(ma, mi, ci) // X, Y
 			cd := li.Cell(ca, ci, mi) // Y, X
-			msz := sz.Dim(ma)         // main axis size dim: X, Y
+			if md == nil || cd == nil {
+				break
+			}
+			msz := sz.Dim(ma) // main axis size dim: X, Y
 			mx := md.Size.Dim(ma)
 			mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
 			md.Size.SetDim(ma, mx)
@@ -1251,6 +1257,9 @@ func (ly *Layout) SizeDownGrowCells(sc *Scene, iter int, extra mat32.Vec2) bool 
 			ci := mat32.PointDim(cidx, ca) // Y, X
 			md := li.Cell(ma, mi, ci)      // X, Y
 			cd := li.Cell(ca, ci, mi)      // Y, X
+			if md == nil || cd == nil {
+				break
+			}
 			mx := md.Size.Dim(ma)
 			asz := mx
 			gsum := cd.Grow.Dim(ma)
