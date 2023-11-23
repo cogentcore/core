@@ -184,7 +184,7 @@ func (ed *Editor) EditorStyles() {
 		ed.CursorWidth.Dp(2)
 		ed.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
 		ed.SelectColor.SetSolid(colors.Scheme.Select.Container)
-		ed.HighlightColor.SetSolid(colors.Orange)
+		ed.HighlightColor.SetSolid(colors.Scheme.Warn.Container)
 		ed.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
 		s.Cursor = cursors.Text
