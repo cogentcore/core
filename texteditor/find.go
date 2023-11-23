@@ -123,7 +123,7 @@ func (ed *Editor) ISearchSelectMatch(midx int) {
 
 // ISearchSig sends the signal that ISearch is updated
 func (ed *Editor) ISearchSig() {
-	// ed.ViewSig.Emit(ed.This(), int64(ViewISearch), ed.CursorPos)
+	ed.Send(events.Input, nil)
 }
 
 // ISearchStart is an emacs-style interactive search mode -- this is called when
@@ -283,7 +283,7 @@ var (
 
 // QReplaceSig sends the signal that QReplace is updated
 func (ed *Editor) QReplaceSig() {
-	// ed.ViewSig.Emit(ed.This(), int64(ViewQReplace), ed.CursorPos)
+	ed.Send(events.Input, nil)
 }
 
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
@@ -295,7 +295,7 @@ func (ed *Editor) QReplaceAddText() {
 	}
 	d := gi.NewBody().AddTitle("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
-	fc := gi.NewChooser(d, "find").SetEditable(true)
+	fc := gi.NewChooser(d, "find").SetEditable(true).SetAllowNew(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(60)
@@ -305,7 +305,7 @@ func (ed *Editor) QReplaceAddText() {
 		fc.SetCurVal(find)
 	}
 
-	rc := gi.NewChooser(d, "repl").SetEditable(true)
+	rc := gi.NewChooser(d, "repl").SetEditable(true).SetAllowNew(true)
 	rc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(60)
@@ -319,8 +319,15 @@ func (ed *Editor) QReplaceAddText() {
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Query-Replace").OnClick(func(e events.Event) {
-			find := fc.CurVal.(string)
-			repl := rc.CurVal.(string)
+			fc.GetCurTextAction()
+			rc.GetCurTextAction()
+			var find, repl string
+			if s, ok := fc.CurVal.(string); ok {
+				find = s
+			}
+			if s, ok := rc.CurVal.(string); ok {
+				repl = s
+			}
 			lexItems := lxi.StateIs(states.Checked)
 			ed.QReplaceStart(find, repl, lexItems)
 		})

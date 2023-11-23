@@ -21,7 +21,7 @@ import (
 
 // CursorMovedSig sends the signal that cursor has moved
 func (ed *Editor) CursorMovedSig() {
-	// ed.ViewSig.Emit(ed.This(), int64(ViewCursorMoved), ed.CursorPos)
+	ed.Send(events.Input, nil)
 }
 
 // ValidateCursor sets current cursor to a valid cursor position
@@ -738,7 +738,7 @@ func (ed *Editor) JumpToLine(ln int) {
 	updt := ed.UpdateStart()
 	ed.SetCursorShow(lex.Pos{Ln: ln - 1})
 	ed.SavePosHistory(ed.CursorPos)
-	ed.UpdateEndRender(updt)
+	ed.UpdateEndLayout(updt)
 }
 
 // FindNextLink finds next link after given position, returns false if no such links

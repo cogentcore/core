@@ -498,6 +498,47 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 	return ch.CurVal
 }
 
+// GetCurTextAction is for Editable choosers only: sets the current index (CurIndex)
+// and the corresponding CurVal based on current user-entered Text value,
+// and triggers a Change event
+func (ch *Chooser) GetCurTextAction() any {
+	tf, ok := ch.TextField()
+	if !ok {
+		slog.Error("gi.Chooser: GetCurTextAction only available for Editable Chooser")
+		return ch.CurVal
+	}
+	ch.SetCurTextAction(tf.Text())
+	return ch.CurVal
+}
+
+// SetCurTextAction is for Editable choosers only: sets the current index (CurIndex)
+// and the corresponding CurVal based on given text string,
+// and triggers a Change event
+func (ch *Chooser) SetCurTextAction(text string) any {
+	ch.SetCurText(text)
+	ch.SendChange(nil)
+	return ch.CurVal
+}
+
+// SetCurText is for Editable choosers only: sets the current index (CurIndex)
+// and the corresponding CurVal based on given text string
+func (ch *Chooser) SetCurText(text string) any {
+	for idx, item := range ch.Items {
+		if text == ToLabel(item) {
+			ch.SetCurIndex(idx)
+			return ch.CurVal
+		}
+	}
+	if !ch.AllowNew {
+		// TODO: use validation
+		slog.Error("invalid Chooser value", "value", text)
+		return ch.CurVal
+	}
+	ch.Items = append(ch.Items, text)
+	ch.SetCurIndex(len(ch.Items) - 1)
+	return ch.CurVal
+}
+
 // ShowCurVal updates the display to present the
 // currently-selected value (CurVal)
 func (ch *Chooser) ShowCurVal(label string) {
@@ -668,21 +709,7 @@ func (ch *Chooser) HandleChooserKeys() {
 
 func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	tf.OnChange(func(e events.Event) {
-		text := tf.Text()
-		for idx, item := range ch.Items {
-			if text == ToLabel(item) {
-				ch.SetCurIndex(idx)
-				ch.SendChange(e)
-				return
-			}
-		}
-		if !ch.AllowNew {
-			// TODO: use validation
-			slog.Error("invalid Chooser value", "value", text)
-			return
-		}
-		ch.Items = append(ch.Items, text)
-		ch.SetCurIndex(len(ch.Items) - 1)
+		ch.SetCurText(tf.Text())
 		ch.SendChange(e)
 	})
 	// tf.OnFocus(func(e events.Event) {
