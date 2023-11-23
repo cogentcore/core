@@ -167,7 +167,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	sc.SceneGeom.Pos = pos
 	// we forward our key events to the context object
 	// so that you can keep typing while in a completer
-	sc.OnKeyChord(ctx.HandleEvent)
+	// sc.OnKeyChord(ctx.HandleEvent)
 
 	for i := 0; i < count; i++ {
 		cmp := &c.Completions[i]
@@ -179,6 +179,16 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 		NewButton(sc, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
 			OnClick(func(e events.Event) {
 				c.Complete(cmp.Text)
+			}).
+			OnKeyChord(func(e events.Event) {
+				kf := keyfun.Of(e.KeyChord())
+				if e.KeyRune() == ' ' {
+					ctx.HandleEvent(e) // bypass button handler!
+				}
+				if kf == keyfun.Enter {
+					e.SetHandled()
+					c.Complete(cmp.Text)
+				}
 			})
 	}
 	c.Stage.RunPopup()
