@@ -446,14 +446,14 @@ func VersCtrlNameProper(vc string) VersCtrlName {
 }
 
 // Value registers VersCtrlValue as the viewer of VersCtrlName
-func (kn VersCtrlName) Value() Value {
+func (kn VersCtrlName) Value() giv.Value {
 	return &VersCtrlValue{}
 }
 
 // VersCtrlValue presents an action for displaying an VersCtrlName and selecting
 // from StringPopup
 type VersCtrlValue struct {
-	ValueBase
+	giv.ValueBase
 }
 
 func (vv *VersCtrlValue) WidgetType() *gti.Type {
@@ -483,15 +483,20 @@ func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		if vv.IsReadOnly() {
-			return
+		if !vv.IsReadOnly() {
+			vv.OpenDialog(bt, nil)
 		}
-		cur := laser.ToString(vv.Value.Interface())
-		m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(idx int) {
-			vv.SetValue(VersCtrlSytems[idx])
-			vv.UpdateWidget()
-		})
-		gi.NewMenuFromScene(m, bt, bt.ContextMenuPos(nil)).Run()
 	})
 	vv.UpdateWidget()
+}
+
+func (vv *VersCtrlValue) HasDialog() bool { return true }
+
+func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func()) {
+	cur := laser.ToString(vv.Value.Interface())
+	m := gi.NewMenuFromStrings(VersCtrlSystems, cur, func(idx int) {
+		vv.SetValue(VersCtrlSystems[idx])
+		vv.UpdateWidget()
+	})
+	gi.NewMenuFromScene(m, ctx, ctx.ContextMenuPos(nil)).Run()
 }

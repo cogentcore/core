@@ -177,7 +177,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
-		if vv.IsReadOnly() {
+		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})
