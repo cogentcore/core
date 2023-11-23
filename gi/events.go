@@ -98,6 +98,16 @@ func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
 	return wb.Sc.On(events.Show, fun)
 }
 
+// OnClose adds an event listener function for [events.Close] events on
+// the widget's Scene. Directly listening to Close events for non-scene
+// widgets does not work, so it must go through the Scene.
+func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
+	if wb.Sc == nil {
+		return wb
+	}
+	return wb.Sc.On(events.Close, fun)
+}
+
 // Send sends an NEW event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).

@@ -157,6 +157,11 @@ func (tf *TextField) OnInit() {
 	tf.TextFieldStyles()
 }
 
+func (tf *TextField) OnAdd() {
+	tf.WidgetBase.OnAdd()
+	tf.HandleTextFieldClose()
+}
+
 func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.Style(func(s *styles.Style) {
@@ -1668,12 +1673,19 @@ func (tf *TextField) HandleTextFieldStateFromFocus() {
 	})
 }
 
+func (tf *TextField) HandleTextFieldClose() {
+	tf.OnClose(func(e events.Event) {
+		tf.EditDone()
+	})
+}
+
 func (tf *TextField) HandleTextFieldEvents() {
 	tf.HandleWidgetEvents()
 	tf.HandleSelectToggle()
 	tf.HandleTextFieldMouse()
 	tf.HandleTextFieldStateFromFocus()
 	tf.HandleTextFieldKeys()
+	tf.HandleTextFieldClose()
 }
 
 func (tf *TextField) ConfigParts(sc *Scene) {

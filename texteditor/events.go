@@ -23,17 +23,29 @@ import (
 )
 
 // ViewEvents sets connections between mouse and key events and actions
-func (ed *Editor) HandleTextViewEvents() {
+func (ed *Editor) HandleEditorEvents() {
 	ed.HandleWidgetEvents()
 	ed.HandleLayoutEvents()
-	ed.HandleTextViewKeyChord()
-	ed.HandleTextViewMouse()
+	ed.HandleEditorKeyChord()
+	ed.HandleEditorMouse()
+	ed.HandleEditorClose()
+}
+
+func (ed *Editor) OnAdd() {
+	ed.Layout.OnAdd()
+	ed.HandleEditorClose()
+}
+
+func (ed *Editor) HandleEditorClose() {
+	ed.OnClose(func(e events.Event) {
+		ed.EditDone()
+	})
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-func (ed *Editor) HandleTextViewKeyChord() {
+func (ed *Editor) HandleEditorKeyChord() {
 	ed.OnKeyChord(func(e events.Event) {
 		ed.KeyInput(e)
 	})
@@ -317,6 +329,10 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		kt.SetHandled()
 		ed.PasteHist()
+	case keyfun.Accept:
+		cancelAll()
+		kt.SetHandled()
+		ed.EditDone()
 	case keyfun.Undo:
 		cancelAll()
 		kt.SetHandled()
@@ -553,8 +569,8 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	return tl, ok
 }
 
-// HandleTextViewMouse handles mouse events.Event
-func (ed *Editor) HandleTextViewMouse() {
+// HandleEditorMouse handles mouse events.Event
+func (ed *Editor) HandleEditorMouse() {
 	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if !ed.StateIs(states.Focused) {
 			ed.GrabFocus()

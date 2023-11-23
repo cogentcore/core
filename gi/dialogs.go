@@ -142,7 +142,7 @@ func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 
 // Close closes the stage associated with this Scene (typically for Dialog)
 func (sc *Scene) Close() {
-	sc.SendChange()
+	sc.Send(events.Close, nil)
 	if sc.Stage == nil {
 		slog.Error("Scene has no Stage")
 		return

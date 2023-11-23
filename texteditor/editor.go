@@ -174,7 +174,7 @@ func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
 }
 
 func (ed *Editor) OnInit() {
-	ed.HandleTextViewEvents()
+	ed.HandleEditorEvents()
 	ed.EditorStyles()
 }
 
