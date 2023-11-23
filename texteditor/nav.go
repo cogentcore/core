@@ -61,7 +61,7 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 
 	ed.ClearScopelights()
 	ed.CursorPos = ed.Buf.ValidPos(pos)
-	ed.Buf.MarkupLine(ed.CursorPos.Ln)
+	// ed.Buf.MarkupLine(ed.CursorPos.Ln)
 	ed.CursorMovedSig()
 	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	ch := ed.CursorPos.Ch
