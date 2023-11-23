@@ -921,7 +921,9 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func()) {
 			}
 			vv.UpdateWidget()
 			vv.SendChange()
-			fun()
+			if fun != nil {
+				fun()
+			}
 		})
 	})
 	d.NewFullDialog(ctx).Run()
