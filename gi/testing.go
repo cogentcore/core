@@ -5,10 +5,10 @@
 package gi
 
 import (
-	"goki.dev/girl/paint"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
+	"goki.dev/grows/images"
 )
 
 // RunTest runs the given function after calling [driver.Main] and [Init].
@@ -41,7 +41,7 @@ func RunTest(test func()) {
 // scene is shown, right before [Scene.AssertPixels] is called. Also,
 // if a function is passed, [Scene.DoNeedsRender] is also called before
 // [Scene.AssertPixels].
-func (sc *Scene) AssertPixelsOnShow(t paint.TestingT, filename string, fun ...func()) {
+func (sc *Scene) AssertPixelsOnShow(t images.TestingT, filename string, fun ...func()) {
 	showed := make(chan struct{})
 	sc.OnShow(func(e events.Event) {
 		if len(fun) > 0 {
@@ -63,6 +63,6 @@ func (sc *Scene) AssertPixelsOnShow(t paint.TestingT, filename string, fun ...fu
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func (sc *Scene) AssertPixels(t paint.TestingT, filename string) {
-	paint.AssertImage(t, sc.Pixels, filename)
+func (sc *Scene) AssertPixels(t images.TestingT, filename string) {
+	images.AssertImage(t, sc.Pixels, filename)
 }
