@@ -27,14 +27,14 @@ type TestingT interface {
 // and it should only be set once and then turned back off.
 var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
 
-// AssertImage asserts that the given image is equivalent
+// Assert asserts that the given image is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
 // (eg: "button" becomes "testdata/button.png").
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func AssertImage(t TestingT, img image.Image, filename string) {
+func Assert(t TestingT, img image.Image, filename string) {
 	filename = filepath.Join("testdata", filename)
 	if filepath.Ext(filename) == "" {
 		filename += ".png"
