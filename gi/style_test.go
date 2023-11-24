@@ -44,7 +44,7 @@ func TestParentBackgroundColor(t *testing.T) {
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white_hovered_post"), func() {
 		fr.SetState(true, states.Hovered)
-		fr.ApplyStyle(sc)
+		fr.ApplyStyleTree(sc)
 		fr.SetNeedsRender()
 	})
 
@@ -69,7 +69,7 @@ func TestParentBackgroundColor(t *testing.T) {
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_post"), func() {
 		fr.SetState(true, states.Hovered)
-		fr.ApplyStyle(sc)
+		fr.ApplyStyleTree(sc)
 		fr.SetNeedsRender()
 	})
 }

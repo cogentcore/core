@@ -188,9 +188,8 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
-	wi := wb.This().(Widget)
 	updt := wb.UpdateStart()
-	wi.ApplyStyle(sc)
+	wb.ApplyStyleTree(sc)
 	wb.UpdateEnd(updt)
 	wb.SetNeedsRenderUpdate(sc, updt)
 }

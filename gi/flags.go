@@ -69,10 +69,10 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase {
 }
 
 // SetSelected sets the Selected flag to given value for the entire Widget
-// and calls ApplyStyle to apply any style changes.
+// and calls ApplyStyleTree to apply any style changes.
 func (wb *WidgetBase) SetSelected(sel bool) {
 	wb.SetStateWidget(sel, states.Selected)
-	wb.ApplyStyle(wb.Sc)
+	wb.ApplyStyleTree(wb.Sc)
 	wb.SetNeedsRender()
 }
 
