@@ -42,14 +42,14 @@ type Widget interface {
 	// ApplyStyle must generally be called after Config - it is called
 	// automatically when Scene is first shown, but must be called
 	// manually thereafter as needed after configuration changes.
-	// See ReConfig for a convenience function that does both.
+	// See Update for a convenience function that does both.
 	// ConfigScene on Scene handles full tree configuration.
 	// This config calls UpdateStart / End, and SetNeedsLayout,
 	// and calls ConfigWidget to do the actual configuration,
 	// so it does not need to manage this housekeeping.
 	// Thus, this Config call is typically never changed, and
 	// all custom configuration should happen in ConfigWidget.
-	Config(sc *Scene)
+	Config()
 
 	// ConfigWidget does the actual configuration of the widget,
 	// primarily configuring its Parts.
@@ -57,7 +57,7 @@ type Widget interface {
 	// (i.e., use Parts.ConfigChildren with Config).
 	// Outer Config call handles all the other infrastructure,
 	// so this call just does the core configuration.
-	ConfigWidget(sc *Scene)
+	ConfigWidget()
 
 	// Update calls Config and ApplyStyle on this widget.
 	// This should be called if any config options are changed
@@ -77,15 +77,15 @@ type Widget interface {
 	SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase
 
 	// ApplyStyle applies style functions to the widget based on current state.
-	// It is typically not overridden -- set style funcs to apply custom styling.
-	ApplyStyle(sc *Scene)
+	// It is typically not overridden; instead, call Style to apply custom styling.
+	ApplyStyle()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
 	// (e.g., text size).  Flexible elements (e.g., Label, Flex Wrap,
 	// TopAppBar) should reserve the _minimum_ size possible at this stage,
 	// and then Grow based on SizeDown allocation.
-	SizeUp(sc *Scene)
+	SizeUp()
 
 	// SizeDown (top-down, multiple iterations possible) provides top-down
 	// size allocations based initially on Scene available size and
@@ -97,7 +97,7 @@ type Widget interface {
 	// However, do NOT grow the Actual size to match Alloc at this stage,
 	// as Actual sizes must always represent the minimums (see Position).
 	// Returns true if any change in Actual size occurred.
-	SizeDown(sc *Scene, iter int) bool
+	SizeDown(iter int) bool
 
 	// SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
 	// Sizing phase: first grows widget Actual sizes based on their Grow
@@ -105,25 +105,25 @@ type Widget interface {
 	// actual Size information for layouts to register their actual sizes
 	// prior to positioning, which requires accurate Actual vs. Alloc
 	// sizes to perform correct alignment calculations.
-	SizeFinal(sc *Scene)
+	SizeFinal()
 
 	// Position uses the final sizes to set relative positions within layouts
 	// according to alignment settings, and Grow elements to their actual
 	// Alloc size per Styles settings and widget-specific behavior.
-	Position(sc *Scene)
+	Position()
 
 	// ScenePos computes scene-based absolute positions and final BBox
 	// bounding boxes for rendering, based on relative positions from
 	// Position step and parents accumulated position and scroll offset.
 	// This is the only step needed when scrolling (very fast).
-	ScenePos(sc *Scene)
+	ScenePos()
 
 	// Render performs actual rendering pass.  Bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
 	// the node is invisible and should not be rendered.
 	// If Parts are present, RenderParts is called by default.
 	// Layouts or other widgets that manage children should call RenderChildren.
-	Render(sc *Scene)
+	Render()
 
 	// On adds an event listener function for the given event type
 	On(etype events.Types, fun func(e events.Event)) *WidgetBase
