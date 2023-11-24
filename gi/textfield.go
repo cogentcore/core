@@ -1213,7 +1213,7 @@ func (tf *TextField) CursorSprite(on bool) *Sprite {
 }
 
 // RenderSelect renders the selected region, if any, underneath the text
-func (tf *TextField) RenderSelect(sc *Scene) {
+func (tf *TextField) RenderSelect() {
 	if !tf.HasSelection() {
 		return
 	}
@@ -1231,7 +1231,7 @@ func (tf *TextField) RenderSelect(sc *Scene) {
 
 	spos := tf.CharStartPos(effst, false)
 
-	rs := &sc.RenderState
+	rs := &tf.Sc.RenderState
 	pc := &rs.Paint
 	tsz := tf.TextWidth(effst, effed)
 	pc.FillBox(rs, spos, mat32.NewVec2(tsz, tf.FontHeight), &tf.SelectColor)
@@ -1688,7 +1688,7 @@ func (tf *TextField) HandleTextFieldEvents() {
 	tf.HandleTextFieldClose()
 }
 
-func (tf *TextField) ConfigParts(sc *Scene) {
+func (tf *TextField) ConfigParts() {
 	parts := tf.NewParts()
 	if tf.IsReadOnly() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		parts.DeleteChildren(ki.DestroyKids)
@@ -1722,30 +1722,30 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 		}
 		parts.Update()
 		parts.UpdateEnd(updt)
-		tf.SetNeedsLayoutUpdate(sc, updt)
+		tf.SetNeedsLayout(updt)
 	}
 }
 
 ////////////////////////////////////////////////////
 //  Widget Interface
 
-func (tf *TextField) ConfigWidget(sc *Scene) {
+func (tf *TextField) ConfigWidget() {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
-	tf.ConfigParts(sc)
+	tf.ConfigParts()
 }
 
 // StyleTextField does text field styling -- sets StyMu Lock
-func (tf *TextField) StyleTextField(sc *Scene) {
+func (tf *TextField) StyleTextField() {
 	tf.StyMu.Lock()
 	tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
-	tf.ApplyStyleWidget(sc)
+	tf.ApplyStyleWidget()
 	tf.CursorWidth.ToDots(&tf.Styles.UnContext)
 	tf.StyMu.Unlock()
 }
 
-func (tf *TextField) ApplyStyle(sc *Scene) {
-	tf.StyleTextField(sc)
+func (tf *TextField) ApplyStyle() {
+	tf.StyleTextField()
 }
 
 func (tf *TextField) UpdateRenderAll() bool {
@@ -1759,8 +1759,8 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
-func (tf *TextField) SizeUp(sc *Scene) {
-	tf.WidgetBase.SizeUp(sc)
+func (tf *TextField) SizeUp() {
+	tf.WidgetBase.SizeUp()
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1785,8 +1785,8 @@ func (tf *TextField) SizeUp(sc *Scene) {
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) ScenePos(sc *Scene) {
-	tf.WidgetBase.ScenePos(sc)
+func (tf *TextField) ScenePos() {
+	tf.WidgetBase.ScenePos()
 	tf.SetEffPosAndSize()
 }
 
@@ -1812,16 +1812,16 @@ func (tf *TextField) SetEffPosAndSize() {
 	tf.EffPos = pos.Ceil()
 }
 
-func (tf *TextField) RenderTextField(sc *Scene) {
-	rs, _, _ := tf.RenderLock(sc)
+func (tf *TextField) RenderTextField() {
+	rs, _, _ := tf.RenderLock()
 	defer tf.RenderUnlock(rs)
 
 	tf.AutoScroll() // inits paint with our style
 	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
-	tf.RenderStdBox(sc, st)
+	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
-	tf.RenderSelect(sc)
+	tf.RenderSelect()
 	pos := tf.EffPos
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		prevColor := st.Color
@@ -1838,12 +1838,12 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 	}
 }
 
-func (tf *TextField) Render(sc *Scene) {
+func (tf *TextField) Render() {
 	if tf.StateIs(states.Focused) && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
-	if tf.PushBounds(sc) {
-		tf.RenderTextField(sc)
+	if tf.PushBounds() {
+		tf.RenderTextField()
 		if !tf.IsReadOnly() {
 			if tf.StateIs(states.Focused) {
 				tf.StartCursor()
@@ -1851,9 +1851,9 @@ func (tf *TextField) Render(sc *Scene) {
 				tf.StopCursor()
 			}
 		}
-		tf.RenderParts(sc)
-		tf.RenderChildren(sc)
-		tf.PopBounds(sc)
+		tf.RenderParts()
+		tf.RenderChildren()
+		tf.PopBounds()
 	}
 }
 
