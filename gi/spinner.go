@@ -95,9 +95,9 @@ func (sp *Spinner) SetTextToValue() {
 	sp.SetTextUpdate(sp.ValToString(sp.Value))
 }
 
-func (sp *Spinner) SizeUp(sc *Scene) {
+func (sp *Spinner) SizeUp() {
 	sp.SetTextToValue()
-	sp.TextField.SizeUp(sc)
+	sp.TextField.SizeUp()
 }
 
 // SetMin sets the min limits on the value

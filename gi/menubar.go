@@ -75,21 +75,21 @@ func (mb *MenuBar) ShowMenuBar() bool {
 	return true
 }
 
-// func (mb *MenuBar) GetSize(sc *Scene, iter int) {
+// func (mb *MenuBar) GetSize(iter int) {
 // 	if !mb.ShowMenuBar() {
 // 		return
 // 	}
-// 	mb.Layout.GetSize(sc, iter)
+// 	mb.Layout.GetSize(iter)
 // }
 //
-// func (mb *MenuBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+// func (mb *MenuBar) DoLayout(parBBox image.Rectangle, iter int) bool {
 // 	if !mb.ShowMenuBar() {
 // 		return false
 // 	}
-// 	return mb.Layout.DoLayout(sc, parBBox, iter)
+// 	return mb.Layout.DoLayout(parBBox, iter)
 // }
 
-func (mb *MenuBar) Render(sc *Scene) {
+func (mb *MenuBar) Render() {
 	if !mb.ShowMenuBar() {
 		return
 	}

@@ -259,7 +259,7 @@ func (sw *Switches) ConfigItems() {
 	}
 }
 
-func (sw *Switches) ConfigSwitches(sc *Scene) {
+func (sw *Switches) ConfigSwitches() {
 	if len(sw.Items) == 0 {
 		sw.DeleteChildren(ki.DestroyKids)
 		return
@@ -275,6 +275,6 @@ func (sw *Switches) ConfigSwitches(sc *Scene) {
 	}
 }
 
-func (sw *Switches) ConfigWidget(sc *Scene) {
-	sw.ConfigSwitches(sc)
+func (sw *Switches) ConfigWidget() {
+	sw.ConfigSwitches()
 }

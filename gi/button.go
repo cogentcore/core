@@ -260,7 +260,7 @@ func (bt *Button) SetKey(kf keyfun.Funs) *Button {
 // This is used for more efficient large-scale updating in views.
 func (bt *Button) SetTextUpdate(text string) *Button {
 	bt.Text = text
-	bt.ConfigWidget(bt.Sc)
+	bt.ConfigWidget()
 	lb := bt.LabelWidget()
 	if lb != nil {
 		lb.SetTextUpdate(text)
@@ -274,7 +274,7 @@ func (bt *Button) SetTextUpdate(text string) *Button {
 // This is used for more efficient large-scale updating in views.
 func (bt *Button) SetIconUpdate(icon icons.Icon) *Button {
 	bt.Icon = icon
-	bt.ConfigWidget(bt.Sc)
+	bt.ConfigWidget()
 	ic := bt.IconWidget()
 	if ic != nil {
 		ic.SetIcon(icon)
