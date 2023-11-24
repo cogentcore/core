@@ -478,15 +478,15 @@ func (sr *Slider) HandleSliderEvents() {
 ///////////////////////////////////////////////////////////
 // 	Config
 
-func (sr *Slider) ConfigWidget(sc *Scene) {
-	sr.ConfigSlider(sc)
+func (sr *Slider) ConfigWidget() {
+	sr.ConfigSlider()
 }
 
-func (sr *Slider) ConfigSlider(sc *Scene) {
-	sr.ConfigParts(sc)
+func (sr *Slider) ConfigSlider() {
+	sr.ConfigParts()
 }
 
-func (sr *Slider) ConfigParts(sc *Scene) {
+func (sr *Slider) ConfigParts() {
 	if !sr.Icon.IsValid() {
 		if sr.Parts != nil {
 			sr.DeleteParts()
@@ -502,15 +502,15 @@ func (sr *Slider) ConfigParts(sc *Scene) {
 	ic.Update()
 }
 
-func (sr *Slider) Render(sc *Scene) {
-	if sr.PushBounds(sc) {
-		sr.RenderSlider(sc)
-		sr.PopBounds(sc)
+func (sr *Slider) Render() {
+	if sr.PushBounds() {
+		sr.RenderSlider()
+		sr.PopBounds()
 	}
 }
 
-func (sr *Slider) RenderSlider(sc *Scene) {
-	rs, pc, st := sr.RenderLock(sc)
+func (sr *Slider) RenderSlider() {
+	rs, pc, st := sr.RenderLock()
 
 	sr.SetPosFromValue(sr.Value)
 
@@ -519,7 +519,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
 
-		sr.RenderStdBox(sc, st)
+		sr.RenderStdBox(st)
 
 		bg := st.StateBackgroundColor(st.BackgroundColor)
 		if bg.IsNil() {
@@ -528,7 +528,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
 		pc.FillStyle.SetFullColor(&bg)
-		sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
+		sr.RenderBoxImpl(pos, sz, st.Border) // surround box
 		if !sr.ValueColor.IsNil() {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
@@ -541,7 +541,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
 			pc.FillStyle.SetFullColor(&sr.ValueColor)
-			sr.RenderBoxImpl(sc, tpos, tsz, st.Border)
+			sr.RenderBoxImpl(tpos, tsz, st.Border)
 		}
 		sr.RenderUnlock(rs)
 	} else {
@@ -552,7 +552,7 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		pos := sr.Geom.Pos.Content
 		bg, _ := sr.ParentBackgroundColor()
 		pc.FillStyle.SetFullColor(&bg)
-		sr.RenderBoxImpl(sc, pos, sz, st.Border)
+		sr.RenderBoxImpl(pos, sz, st.Border)
 
 		// need to apply state layer
 		ebg := st.StateBackgroundColor(st.BackgroundColor)
@@ -566,12 +566,12 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		sr.RenderBoxImpl(sc, bpos, bsz, st.Border) // track
+		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
 			pc.FillStyle.SetFullColor(&sr.ValueColor)
-			sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
+			sr.RenderBoxImpl(bpos, bsz, st.Border)
 		}
 
 		thsz := sr.ThumbSizeDots()
@@ -587,19 +587,19 @@ func (sr *Slider) RenderSlider(sc *Scene) {
 			tpos.SetSub(icsz.MulScalar(.5))
 			ic.Geom.Pos.Total = tpos
 			ic.SetContentPosFromPos()
-			ic.SetBBoxes(sc)
-			sr.Parts.Render(sc)
+			ic.SetBBoxes()
+			sr.Parts.Render()
 		} else {
 			pc.FillStyle.SetFullColor(&sr.ThumbColor)
 			tpos.SetSub(thsz.MulScalar(0.5))
-			sr.RenderBoxImpl(sc, tpos, thsz, st.Border)
+			sr.RenderBoxImpl(tpos, thsz, st.Border)
 			sr.RenderUnlock(rs)
 		}
 	}
 }
 
-func (sr *Slider) ScenePos(sc *Scene) {
-	sr.WidgetBase.ScenePos(sc)
+func (sr *Slider) ScenePos() {
+	sr.WidgetBase.ScenePos()
 	if !sr.StayInView {
 		return
 	}
@@ -609,7 +609,7 @@ func (sr *Slider) ScenePos(sc *Scene) {
 		return
 	}
 	sbw := mat32.Ceil(sr.Styles.ScrollBarWidth.Dots)
-	scmax := mat32.NewVec2FmPoint(sc.Geom.ContentBBox.Max).SubScalar(sbw)
+	scmax := mat32.NewVec2FmPoint(sr.Sc.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.SetContentPosFromPos()
 	sr.SetBBoxesFromAllocs()
