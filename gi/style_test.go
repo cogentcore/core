@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"goki.dev/colors"
+	"goki.dev/girl/abilities"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 )
@@ -25,11 +27,26 @@ func TestParentBackgroundColor(t *testing.T) {
 	}
 
 	sc, _ := make()
-	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color_base"))
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white"))
 
 	sc, fr := make()
 	fr.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Hoverable)
+	})
+	fr.SetState(true, states.Hovered)
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white_hovered"))
+
+	sc, fr = make()
+	fr.Style(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 	})
-	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color_gray"))
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray"))
+
+	sc, fr = make()
+	fr.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Hoverable)
+		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+	})
+	fr.SetState(true, states.Hovered)
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered"))
 }
