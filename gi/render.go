@@ -159,7 +159,7 @@ func (wb *WidgetBase) UpdateEndAsyncLayout(updt bool) {
 		return
 	}
 	wb.UpdateEndAsync(updt)
-	wb.SetNeedsLayoutUpdate(wb.Sc, updt)
+	wb.SetNeedsLayout(updt)
 }
 
 // UpdateEndAsyncRender should be called instead of [UpdateEndAsync]
@@ -171,14 +171,7 @@ func (wb *WidgetBase) UpdateEndAsyncRender(updt bool) {
 		return
 	}
 	wb.UpdateEndAsync(updt)
-	wb.SetNeedsRenderUpdate(wb.Sc, updt)
-}
-
-// SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
-// triggering a render of this widget on the next window update.
-// Also sets a Field Parent NeedsRender too.
-func (wb *WidgetBase) SetNeedsRender() {
-	wb.SetNeedsRenderUpdate(wb.Sc, true)
+	wb.SetNeedsRender(updt)
 }
 
 // SetNeedsRenderUpdate sets the NeedsRender and Scene
@@ -188,16 +181,16 @@ func (wb *WidgetBase) SetNeedsRender() {
 // that don't need styling, e.g., in event handlers
 // or other update code, _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsRenderUpdate(sc *Scene, updt bool) {
-	if !updt || sc == nil {
+func (wb *WidgetBase) SetNeedsRender(updt bool) {
+	if !updt || wb.Sc == nil {
 		return
 	}
 	if UpdateTrace {
 		fmt.Println("\tUpdateTrace: NeedsRender:", wb)
 	}
 	wb.SetFlag(true, NeedsRender)
-	if sc != nil {
-		sc.SetFlag(true, ScNeedsRender)
+	if wb.Sc != nil {
+		wb.Sc.SetFlag(true, ScNeedsRender)
 	}
 	// parent of Parts needs to render if parent
 	fi, _ := wb.ParentWidgetIf(func(p *WidgetBase) bool {
@@ -217,30 +210,24 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 		return
 	}
 	wb.UpdateEnd(updt)
-	wb.SetNeedsRenderUpdate(wb.Sc, updt)
+	wb.SetNeedsRender(updt)
 }
 
 // note: this is replacement for "SetNeedsFullReRender()" call:
-
-// SetNeedsLayout sets the ScNeedsLayout flag.
-// Use this when a change definitely requires a new Layout.
-func (wb *WidgetBase) SetNeedsLayout() {
-	wb.SetNeedsLayoutUpdate(wb.Sc, true)
-}
 
 // SetNeedsLayoutUpdate sets the ScNeedsLayout flag
 // if updt is true. See UpdateEndLayout for convenience method.
 // This should be called after widget Config call
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsLayoutUpdate(sc *Scene, updt bool) {
-	if !updt || sc == nil {
+func (wb *WidgetBase) SetNeedsLayout(updt bool) {
+	if !updt || wb.Sc == nil {
 		return
 	}
 	if updt && UpdateTrace {
 		fmt.Println("\tUpdateTrace: NeedsLayout:", wb)
 	}
-	sc.SetFlag(true, ScNeedsLayout)
+	wb.Sc.SetFlag(true, ScNeedsLayout)
 }
 
 // UpdateEndLayout should be called instead of UpdateEnd
@@ -252,7 +239,7 @@ func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 		return
 	}
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayoutUpdate(wb.Sc, updt)
+	wb.SetNeedsLayout(updt)
 }
 
 // NeedsRebuild returns true if the RenderContext indicates
@@ -276,22 +263,22 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 // which is typically needed once an item is displayed.
 // Config by itself is sufficient during initial construction because
 // everything will be automatically styled during initial display.
-func (wb *WidgetBase) Config(sc *Scene) {
+func (wb *WidgetBase) Config() {
 	if wb.This() == nil {
 		slog.Error("nil this in config")
 		return
 	}
 	wi := wb.This().(Widget)
 	updt := wi.UpdateStart()
-	wi.ConfigWidget(sc) // where everything actually happens
+	wi.ConfigWidget() // where everything actually happens
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayoutUpdate(sc, updt)
+	wb.SetNeedsLayout(updt)
 }
 
 // ConfigWidget is the interface method called by Config that
 // should be defined for each Widget type, which actually does
 // the configuration work.
-func (wb *WidgetBase) ConfigWidget(sc *Scene) {
+func (wb *WidgetBase) ConfigWidget() {
 	// this must be defined for each widget type
 }
 
@@ -299,7 +286,7 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 // are not already through [WidgetBase.NewParts], calls
 // [ki.Node.ConfigChildren] on those parts with the given config,
 // and then handles necessary updating logic with the given scene.
-func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config) {
+func (wb *WidgetBase) ConfigPartsImpl(config ki.Config) {
 	parts := wb.NewParts()
 	mods, updt := parts.ConfigChildren(config)
 	if !mods && !wb.NeedsRebuild() {
@@ -308,17 +295,17 @@ func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config) {
 	}
 	parts.Update()
 	parts.UpdateEnd(updt)
-	wb.SetNeedsLayoutUpdate(sc, updt)
+	wb.SetNeedsLayout(updt)
 }
 
 // ConfigTree calls Config on every Widget in the tree from me.
-func (wb *WidgetBase) ConfigTree(sc *Scene) {
+func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config(sc)
+		wi.Config()
 		return ki.Continue
 	})
 	pr.End()
@@ -334,14 +321,13 @@ func (wb *WidgetBase) Update() {
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
 	}
-	sc := wb.Sc
 	updt := wb.UpdateStart()
 	if UpdateTrace {
 		fmt.Println("\tUpdateTrace Update:", wb, "updt:", updt)
 	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config(sc) // sets sc if not
-		wi.ApplyStyle(sc)
+		wi.Config()
+		wi.ApplyStyle()
 		return ki.Continue
 	})
 	wb.UpdateEndLayout(updt)
@@ -349,13 +335,13 @@ func (wb *WidgetBase) Update() {
 
 // ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
 // Called during FullRender
-func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
+func (wb *WidgetBase) ApplyStyleTree() {
 	if wb.This() == nil {
 		return
 	}
 	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.ApplyStyle(sc)
+		wi.ApplyStyle()
 		return ki.Continue
 	})
 	pr.End()
@@ -408,7 +394,7 @@ func (sc *Scene) LayoutRenderScene() {
 
 // DoNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set
-func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
+func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This() == nil {
 		return
 	}
@@ -416,7 +402,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) && !kwi.Is(ki.Updating) {
 			kwi.SetFlag(false, NeedsRender)
-			kwi.Render(sc)
+			kwi.Render()
 			return ki.Break // done
 		}
 		return ki.Continue
@@ -483,7 +469,7 @@ func (sc *Scene) DoUpdate() bool {
 		// fmt.Println("scene layout done")
 	case sc.Is(ScNeedsRender):
 		// fmt.Println("scene render start")
-		sc.DoNeedsRender(sc)
+		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene render done")
@@ -509,7 +495,7 @@ func (sc *Scene) ConfigSceneWidgets() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	sc.ConfigTree(sc)
+	sc.ConfigTree()
 }
 
 // ApplyStyleScene calls ApplyStyle on all widgets in the Scene,
@@ -519,7 +505,7 @@ func (sc *Scene) ApplyStyleScene() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	sc.ApplyStyleTree(sc)
+	sc.ApplyStyleTree()
 	sc.SetFlag(true, ScNeedsLayout)
 }
 
@@ -570,7 +556,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 // -- this limits our drawing to our own bounding box, automatically -- must
 // be called as first step in Render returns whether the new bounds are
 // empty or not -- if empty then don't render!
-func (wb *WidgetBase) PushBounds(sc *Scene) bool {
+func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
@@ -584,7 +570,7 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 		}
 		return false
 	}
-	rs := &sc.RenderState
+	rs := &wb.Sc.RenderState
 	rs.PushBounds(wb.Geom.TotalBBox)
 	rs.Paint.StrokeStyle.Defaults() // start with default values
 	rs.Paint.FillStyle.Defaults()
@@ -596,13 +582,13 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
-func (wb *WidgetBase) PopBounds(sc *Scene) {
+func (wb *WidgetBase) PopBounds() {
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
 		return
 	}
-	rs := &sc.RenderState
+	rs := &wb.Sc.RenderState
 
-	if sc.Is(ScRenderBBoxes) {
+	if wb.Sc.Is(ScRenderBBoxes) {
 		pc := &rs.Paint
 		pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
 		sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
@@ -627,10 +613,10 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 		pc.StrokeStyle.Width = pcsw
 		pc.StrokeStyle.Color = pcsc
 
-		sc.RenderBBoxHue += 10
-		if sc.RenderBBoxHue > 360 {
-			rmdr := (int(sc.RenderBBoxHue-360) + 1) % 9
-			sc.RenderBBoxHue = float32(rmdr)
+		wb.Sc.RenderBBoxHue += 10
+		if wb.Sc.RenderBBoxHue > 360 {
+			rmdr := (int(wb.Sc.RenderBBoxHue-360) + 1) % 9
+			wb.Sc.RenderBBoxHue = float32(rmdr)
 		}
 	}
 
@@ -639,25 +625,25 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 
 // Render performs rendering on widget and parts, but not Children
 // for the base type, which does not manage children (see Layout).
-func (wb *WidgetBase) Render(sc *Scene) {
-	if wb.PushBounds(sc) {
-		wb.RenderParts(sc)
-		wb.PopBounds(sc)
+func (wb *WidgetBase) Render() {
+	if wb.PushBounds() {
+		wb.RenderParts()
+		wb.PopBounds()
 	}
 }
 
-func (wb *WidgetBase) RenderParts(sc *Scene) {
+func (wb *WidgetBase) RenderParts() {
 	if wb.Parts == nil {
 		return
 	}
-	wb.Parts.Render(sc) // is a layout, will do all
+	wb.Parts.Render() // is a layout, will do all
 }
 
 // RenderChildren renders all of node's children.
-func (wb *WidgetBase) RenderChildren(sc *Scene) {
+func (wb *WidgetBase) RenderChildren() {
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if !kwi.Is(ki.Updating) {
-			kwi.Render(sc)
+			kwi.Render()
 		}
 		return ki.Continue
 	})
@@ -668,9 +654,9 @@ func (wb *WidgetBase) RenderChildren(sc *Scene) {
 
 // RenderLock returns the locked paint.State, Paint, and Style with StyMu locked.
 // This should be called at start of widget-level rendering.
-func (wb *WidgetBase) RenderLock(sc *Scene) (*paint.State, *paint.Paint, *styles.Style) {
+func (wb *WidgetBase) RenderLock() (*paint.State, *paint.Paint, *styles.Style) {
 	wb.StyMu.RLock()
-	rs := &sc.RenderState
+	rs := &wb.Sc.RenderState
 	rs.Lock()
 	return rs, &rs.Paint, &wb.Styles
 }
@@ -683,19 +669,19 @@ func (wb *WidgetBase) RenderUnlock(rs *paint.State) {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(sc *Scene, pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
-	rs := &sc.RenderState
+func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
+	rs := &wb.Sc.RenderState
 	pc := &rs.Paint
 	pc.DrawBox(rs, pos, sz, bs)
 }
 
 // RenderStdBox draws standard box using given style.
 // paint.State and Style must already be locked at this point (RenderLock)
-func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
+func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
-	rs := &sc.RenderState
+	rs := &wb.Sc.RenderState
 	pc := &rs.Paint
 
 	pbc, psl := wb.ParentBackgroundColor()
