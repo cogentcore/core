@@ -21,8 +21,10 @@ func TestParentBackgroundColor(t *testing.T) {
 		fr = NewFrame(sc)
 		fr.Style(func(s *styles.Style) {
 			s.Min.Set(units.Em(5))
+			s.Align.Content = styles.Center
+			s.Justify.Content = styles.Center
 		})
-		NewLabel(fr).SetType(LabelTitleLarge).SetText("Test")
+		NewLabel(fr).SetType(LabelHeadlineSmall).SetText("Test")
 		return
 	}
 
