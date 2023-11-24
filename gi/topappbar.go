@@ -157,24 +157,24 @@ func (tb *TopAppBar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
-func (tb *TopAppBar) SizeUp(sc *Scene) {
-	tb.AllItemsToChildren(sc)
-	tb.Frame.SizeUp(sc)
+func (tb *TopAppBar) SizeUp() {
+	tb.AllItemsToChildren()
+	tb.Frame.SizeUp()
 }
 
 // todo: try doing move to overflow in Final
 
-func (tb *TopAppBar) SizeDown(sc *Scene, iter int) bool {
-	redo := tb.Frame.SizeDown(sc, iter)
+func (tb *TopAppBar) SizeDown(iter int) bool {
+	redo := tb.Frame.SizeDown(iter)
 	if iter == 0 {
 		return true // ensure a second pass
 	}
-	tb.MoveToOverflow(sc)
+	tb.MoveToOverflow()
 	return redo
 }
 
-func (tb *TopAppBar) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) mat32.Vec2 {
-	csz := tb.Frame.SizeFromChildren(sc, iter, pass)
+func (tb *TopAppBar) SizeFromChildren(iter int, pass LayoutPasses) mat32.Vec2 {
+	csz := tb.Frame.SizeFromChildren(iter, pass)
 	if pass == SizeUpPass || (pass == SizeDownPass && iter == 0) {
 		ovsz := tb.OverflowButton.Geom.Size.Actual.Total.X
 		csz.X = ovsz // present the minimum size initially
@@ -187,7 +187,7 @@ func (tb *TopAppBar) SizeFromChildren(sc *Scene, iter int, pass LayoutPasses) ma
 // so the full set is considered for the next layout round,
 // and ensures the overflow button is made and moves it
 // to the end of the list.
-func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
+func (tb *TopAppBar) AllItemsToChildren() {
 	if tb.OverflowButton == nil {
 		ic := icons.MoreVert
 		if tb.Styles.Direction != styles.Row {
@@ -196,7 +196,7 @@ func (tb *TopAppBar) AllItemsToChildren(sc *Scene) {
 		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
 			SetTooltip("Overflow toolbar items and additional menu items")
 		tb.OverflowButton.Menu = tb.OverflowMenu
-		tb.OverflowButton.Config(sc)
+		tb.OverflowButton.Config()
 	}
 	if len(tb.OverflowItems) > 0 {
 		tb.Kids = append(tb.Kids, tb.OverflowItems...)
@@ -225,7 +225,7 @@ func (tb *TopAppBar) ParentSize() float32 {
 }
 
 // MoveToOverflow moves overflow out of children to the OverflowItems list
-func (tb *TopAppBar) MoveToOverflow(sc *Scene) {
+func (tb *TopAppBar) MoveToOverflow() {
 	ma := tb.Styles.Direction.Dim()
 	avail := tb.ParentSize()
 	ovsz := tb.OverflowButton.Geom.Size.Actual.Total.Dim(ma)
@@ -268,7 +268,7 @@ func (tb *TopAppBar) OverflowMenu(m *Scene) {
 			}
 			cl := k.This().Clone()
 			m.AddChild(cl)
-			cl.This().(Widget).Config(m)
+			cl.This().(Widget).Config()
 		}
 		if nm > 1 { // default includes sep
 			NewSeparator(m)
