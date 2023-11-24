@@ -5,15 +5,13 @@
 package paint
 
 import (
-	"fmt"
 	"image"
-	"image/png"
-	"os"
 	"testing"
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 )
 
@@ -51,7 +49,7 @@ func TestRender(t *testing.T) {
 	// bs.Width.Set(units.NewDot(10))
 	bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
 	pc.FillStyle.SetColor(colors.Lightblue)
-	pc.StrokeStyle.Width.SetDot(10)
+	pc.StrokeStyle.Width.Dot(10)
 	bs.ToDots(&pc.UnContext)
 	pc.DrawBorder(rs, 60, 60, 150, 100, bs)
 	pc.FillStrokeClear(rs)
@@ -82,16 +80,13 @@ func TestRender(t *testing.T) {
 
 	// the last, size arg provides constraints for layout to fit within -- uses width mainly
 	tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.Vec2{100, 40})
-	fmt.Printf("text size: %v\n", tsz)
+	if tsz.X != 100 || tsz.Y != 40 {
+		t.Errorf("unexpected text size: %v", tsz)
+	}
 
 	txt.Render(rs, mat32.Vec2{85, 80})
 
 	rs.Unlock()
 
-	file, err := os.Create("test.png")
-	if err != nil {
-		t.Error(err)
-	}
-	defer file.Close()
-	png.Encode(file, img)
+	images.Assert(t, img, "basic_render")
 }

@@ -14,6 +14,7 @@ import (
 // note: the responses to the following two tests depend on what is installed on the system
 
 func TestFontAlts(t *testing.T) {
+	t.Skip("skip as informational printing only")
 	fa, serif, mono := FontAlts("serif")
 	fmt.Printf("FontAlts: serif: %v  serif: %v, mono: %v\n", fa, serif, mono)
 
