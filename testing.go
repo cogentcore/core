@@ -5,7 +5,7 @@
 package goosi
 
 import (
-	"goki.dev/girl/paint"
+	"goki.dev/grows/images"
 )
 
 // AssertCaptureIs asserts that the result of [Capture] is equivalent
@@ -15,6 +15,6 @@ import (
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func AssertCaptureIs(t paint.TestingT, filename string) {
-	paint.AssertImage(t, Capture(), filename)
+func AssertCaptureIs(t images.TestingT, filename string) {
+	images.AssertImage(t, Capture(), filename)
 }
