@@ -12,7 +12,8 @@ package ki
 
 // Last returns the last node in the tree
 func Last(nd Ki) Ki {
-	var last Ki
+	nd = LastChild(nd)
+	last := nd
 	nd.WalkPre(func(k Ki) bool {
 		last = k
 		return Continue
