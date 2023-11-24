@@ -6,6 +6,7 @@ package paint
 
 import (
 	"image"
+	"os"
 	"testing"
 
 	"goki.dev/colors"
@@ -15,9 +16,12 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-func TestRender(t *testing.T) {
+func TestMain(m *testing.M) {
 	FontLibrary.InitFontPaths(FontPaths...)
+	os.Exit(m.Run())
+}
 
+func TestRender(t *testing.T) {
 	imgsz := image.Point{320, 240}
 	szrec := image.Rectangle{Max: imgsz}
 	img := image.NewRGBA(szrec)
@@ -88,5 +92,5 @@ func TestRender(t *testing.T) {
 
 	rs.Unlock()
 
-	images.Assert(t, img, "basic_render")
+	images.Assert(t, img, "render")
 }
