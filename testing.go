@@ -16,5 +16,5 @@ import (
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
 func AssertCaptureIs(t images.TestingT, filename string) {
-	images.AssertImage(t, Capture(), filename)
+	images.Assert(t, Capture(), filename)
 }
