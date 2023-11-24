@@ -166,25 +166,25 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 	ly.Scrolls[d] = nil
 }
 
-func (ly *Layout) RenderChildren(sc *Scene) {
+func (ly *Layout) RenderChildren() {
 	if ly.Styles.Display == styles.Stacked {
 		kwi, _ := ly.StackTopWidget()
 		if kwi != nil {
-			kwi.Render(sc)
+			kwi.Render()
 		}
 		return
 	}
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		kwi.Render(sc)
+		kwi.Render()
 		return ki.Continue
 	})
 }
 
-func (ly *Layout) Render(sc *Scene) {
-	if ly.PushBounds(sc) {
-		ly.RenderChildren(sc)
-		ly.PopBounds(sc)
-		ly.RenderScrolls(sc)
+func (ly *Layout) Render() {
+	if ly.PushBounds() {
+		ly.RenderChildren()
+		ly.PopBounds()
+		ly.RenderScrolls()
 	}
 }
 

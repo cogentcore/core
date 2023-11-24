@@ -446,11 +446,11 @@ func (bt *Button) HandleButtonEvents() {
 	bt.HandleClickOnEnterSpace()
 }
 
-func (bt *Button) ConfigWidget(sc *Scene) {
-	bt.ConfigParts(sc)
+func (bt *Button) ConfigWidget() {
+	bt.ConfigParts()
 }
 
-func (bt *Button) ConfigParts(sc *Scene) {
+func (bt *Button) ConfigParts() {
 	parts := bt.NewParts()
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
@@ -487,7 +487,7 @@ func (bt *Button) ConfigParts(sc *Scene) {
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
-		bt.SetNeedsLayoutUpdate(sc, updt)
+		bt.SetNeedsLayout(updt)
 	}
 }
 
@@ -521,7 +521,7 @@ func (bt *Button) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lb
 		lbl := bt.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
 			lbl.SetText(txt)
-			lbl.Config(bt.Sc) // this is essential
+			lbl.Config() // this is essential
 		}
 	}
 }
@@ -546,17 +546,17 @@ func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
 	return scIdx
 }
 
-func (bt *Button) RenderButton(sc *Scene) {
-	rs, _, st := bt.RenderLock(sc)
-	bt.RenderStdBox(sc, st)
+func (bt *Button) RenderButton() {
+	rs, _, st := bt.RenderLock()
+	bt.RenderStdBox(st)
 	bt.RenderUnlock(rs)
 }
 
-func (bt *Button) Render(sc *Scene) {
-	if bt.PushBounds(sc) {
-		bt.RenderButton(sc)
-		bt.RenderParts(sc)
-		bt.PopBounds(sc)
+func (bt *Button) Render() {
+	if bt.PushBounds() {
+		bt.RenderButton()
+		bt.RenderParts()
+		bt.PopBounds()
 	}
 }
 
