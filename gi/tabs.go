@@ -366,7 +366,7 @@ func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type, name ...
 		return wi
 	}
 	wi, _ := AsWidget(fr.NewChild(typ, fr.Nm))
-	wi.Config(ts.Sc)
+	wi.Config()
 	return wi
 }
 
@@ -408,7 +408,7 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 }
 
 // ConfigNewTabButton configures the new tab + button at end of list of tabs
-func (ts *Tabs) ConfigNewTabButton(sc *Scene) bool {
+func (ts *Tabs) ConfigNewTabButton() bool {
 	sz := ts.NTabs()
 	tb := ts.Tabs()
 	ntb := len(tb.Kids)
@@ -436,7 +436,7 @@ func (ts *Tabs) ConfigNewTabButton(sc *Scene) bool {
 // ConfigWidget initializes the tab widget children if it hasn't been done yet.
 // only the 2 primary children (Frames) need to be configured.
 // no re-config needed when adding / deleting tabs -- just new layout.
-func (ts *Tabs) ConfigWidget(sc *Scene) {
+func (ts *Tabs) ConfigWidget() {
 	if len(ts.Kids) != 0 {
 		return
 	}
@@ -445,20 +445,20 @@ func (ts *Tabs) ConfigWidget(sc *Scene) {
 	})
 	NewFrame(ts, "tabs")
 	NewFrame(ts, "frame")
-	ts.ConfigNewTabButton(sc)
+	ts.ConfigNewTabButton()
 }
 
 // Tabs returns the layout containing the tabs (the first element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
-	ts.ConfigWidget(ts.Sc)
+	ts.ConfigWidget()
 	return ts.Child(0).(*Frame)
 }
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Frame() *Frame {
-	ts.ConfigWidget(ts.Sc)
+	ts.ConfigWidget()
 	return ts.Child(1).(*Frame)
 }
 
@@ -488,8 +488,8 @@ func (ts *Tabs) RenumberTabs() {
 }
 
 // RenderTabSeps renders the separators between tabs
-func (ts *Tabs) RenderTabSeps(sc *Scene) {
-	rs, pc, st := ts.RenderLock(sc)
+func (ts *Tabs) RenderTabSeps() {
+	rs, pc, st := ts.RenderLock()
 	defer ts.RenderUnlock(rs)
 
 	// just like with standard separator, use top width like CSS
@@ -511,12 +511,12 @@ func (ts *Tabs) RenderTabSeps(sc *Scene) {
 	pc.FillStrokeClear(rs)
 }
 
-func (ts *Tabs) Render(sc *Scene) {
-	if ts.PushBounds(sc) {
-		ts.RenderScrolls(sc)
-		ts.RenderChildren(sc)
-		ts.RenderTabSeps(sc)
-		ts.PopBounds(sc)
+func (ts *Tabs) Render() {
+	if ts.PushBounds() {
+		ts.RenderScrolls()
+		ts.RenderChildren()
+		ts.RenderTabSeps()
+		ts.PopBounds()
 	}
 }
 
@@ -638,18 +638,18 @@ func (tb *Tab) Tabs() *Tabs {
 	return AsTabs(ts)
 }
 
-func (tb *Tab) ConfigParts(sc *Scene) {
+func (tb *Tab) ConfigParts() {
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}
 	if tb.DeleteButton {
-		tb.ConfigPartsDeleteButton(sc)
+		tb.ConfigPartsDeleteButton()
 		return
 	}
-	tb.Button.ConfigParts(sc) // regular
+	tb.Button.ConfigParts() // regular
 }
 
-func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
+func (tb *Tab) ConfigPartsDeleteButton() {
 	parts := tb.NewParts()
 	config := ki.Config{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
@@ -685,6 +685,6 @@ func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 	}
 }
 
-func (tb *Tab) ConfigWidget(sc *Scene) {
-	tb.ConfigParts(sc)
+func (tb *Tab) ConfigWidget() {
+	tb.ConfigParts()
 }
