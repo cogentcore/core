@@ -41,7 +41,7 @@ func OpenSpellModel() error {
 	openpath := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Open(openpath)
 	if err != nil {
-		log.Printf("ERROR opening spelling dictionary: %s  error: %s\n", openpath, err)
+		slog.Error("opening spelling dictionary", "path", openpath, "err", err)
 	}
 	return err
 }
@@ -50,7 +50,7 @@ func OpenSpellModel() error {
 func NewSpellModelFromText() error {
 	bigdatapath, err := dirs.GoSrcDir("goki.dev/pi/v2/spell")
 	if err != nil {
-		log.Printf("Error getting path to corpus directory: %v.\n", err)
+		slog.Error("getting path to corpus directory", "err", err)
 		return err
 	}
 
@@ -66,7 +66,7 @@ func NewSpellModelFromText() error {
 
 	err = spell.Train(*file, true) // true - create a NEW spelling model
 	if err != nil {
-		log.Printf("Failed building model from corpus file: %v.\n", err)
+		slog.Error("Failed building model from corpus file", "err", err)
 		return err
 	}
 
