@@ -214,11 +214,11 @@ func (ch *Chooser) ChooserStyles() {
 	})
 }
 
-func (ch *Chooser) ConfigWidget(sc *Scene) {
-	ch.ConfigParts(sc)
+func (ch *Chooser) ConfigWidget() {
+	ch.ConfigParts()
 }
 
-func (ch *Chooser) ConfigParts(sc *Scene) {
+func (ch *Chooser) ConfigParts() {
 	parts := ch.NewParts()
 	config := ki.Config{}
 
@@ -253,12 +253,12 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	if ch.Editable {
 		tx := ch.Parts.Child(txIdx).(*TextField)
 		tx.SetText(ch.CurLabel)
-		tx.Config(ch.Sc) // this is essential
+		tx.Config() // this is essential
 		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 	} else {
 		lbl := ch.Parts.Child(lbIdx).(*Label)
 		lbl.SetText(ch.CurLabel)
-		lbl.Config(ch.Sc) // this is essential
+		lbl.Config() // this is essential
 	}
 	{ // indicator
 		ic := ch.Parts.Child(indIdx).(*Icon)
@@ -267,7 +267,7 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
-		ch.SetNeedsLayoutUpdate(sc, updt)
+		ch.SetNeedsLayout(updt)
 	}
 }
 
@@ -762,17 +762,17 @@ func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion
 	}
 }
 
-func (ch *Chooser) RenderChooser(sc *Scene) {
-	rs, _, st := ch.RenderLock(sc)
-	ch.RenderStdBox(sc, st)
+func (ch *Chooser) RenderChooser() {
+	rs, _, st := ch.RenderLock()
+	ch.RenderStdBox(st)
 	ch.RenderUnlock(rs)
 }
 
-func (ch *Chooser) Render(sc *Scene) {
-	if ch.PushBounds(sc) {
-		ch.RenderChooser(sc)
-		ch.RenderParts(sc)
-		ch.RenderChildren(sc)
-		ch.PopBounds(sc)
+func (ch *Chooser) Render() {
+	if ch.PushBounds() {
+		ch.RenderChooser()
+		ch.RenderParts()
+		ch.RenderChildren()
+		ch.PopBounds()
 	}
 }
