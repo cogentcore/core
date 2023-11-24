@@ -42,7 +42,9 @@ func TestParentBackgroundColor(t *testing.T) {
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white_hovered_post"), func() {
 		fr.SetState(true, states.Hovered)
-		fr.Update()
+		fr.ApplyStyle(sc)
+		fr.SetNeedsRender()
+		sc.DoNeedsRender(sc)
 	})
 
 	sc, fr = make()
