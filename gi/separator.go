@@ -53,8 +53,8 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	sp.Horiz = fr.Horiz
 }
 
-func (sp *Separator) RenderSeparator(sc *Scene) {
-	rs, pc, st := sp.RenderLock(sc)
+func (sp *Separator) RenderSeparator() {
+	rs, pc, st := sp.RenderLock()
 	defer sp.RenderUnlock(rs)
 
 	pos := sp.Geom.Pos.Total.Add(st.TotalMargin().Pos())
@@ -74,10 +74,10 @@ func (sp *Separator) RenderSeparator(sc *Scene) {
 	pc.FillStrokeClear(rs)
 }
 
-func (sp *Separator) Render(sc *Scene) {
-	if sp.PushBounds(sc) {
-		sp.RenderSeparator(sc)
-		sp.RenderChildren(sc)
-		sp.PopBounds(sc)
+func (sp *Separator) Render() {
+	if sp.PushBounds() {
+		sp.RenderSeparator()
+		sp.RenderChildren()
+		sp.PopBounds()
 	}
 }

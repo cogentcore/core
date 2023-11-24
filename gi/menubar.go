@@ -55,8 +55,8 @@ func (mb *MenuBar) MenuBarStyles() {
 }
 
 // MenuBarStdRender does the standard rendering of the bar
-func (mb *MenuBar) MenuBarStdRender(sc *Scene) {
-	rs, pc, st := mb.RenderLock(sc)
+func (mb *MenuBar) MenuBarStdRender() {
+	rs, pc, st := mb.RenderLock()
 	pos := mb.Geom.Pos.Total
 	sz := mb.Geom.Size.Actual.Total
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
@@ -93,11 +93,11 @@ func (mb *MenuBar) Render(sc *Scene) {
 	if !mb.ShowMenuBar() {
 		return
 	}
-	if mb.PushBounds(sc) {
-		mb.MenuBarStdRender(sc)
-		mb.RenderScrolls(sc)
-		mb.RenderChildren(sc)
-		mb.PopBounds(sc)
+	if mb.PushBounds() {
+		mb.MenuBarStdRender()
+		mb.RenderScrolls()
+		mb.RenderChildren()
+		mb.PopBounds()
 	}
 }
 

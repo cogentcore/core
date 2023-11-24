@@ -352,7 +352,7 @@ func (sc *Scene) LayoutScene() {
 	if LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
-	sc.SizeUp(sc)
+	sc.SizeUp()
 	sz := &sc.Geom.Size
 	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
 	sz.SetContentFromTotal(&sz.Alloc)
@@ -362,7 +362,7 @@ func (sc *Scene) LayoutScene() {
 	}
 	maxIter := 3
 	for iter := 0; iter < maxIter; iter++ { // 3  > 2; 4 same as 3
-		redo := sc.SizeDown(sc, iter)
+		redo := sc.SizeDown(iter)
 		if redo && iter < maxIter-1 {
 			if LayoutTrace {
 				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
@@ -374,22 +374,22 @@ func (sc *Scene) LayoutScene() {
 	if LayoutTrace {
 		fmt.Println("\n############################\nSizeFinal start:", sc)
 	}
-	sc.SizeFinal(sc)
+	sc.SizeFinal()
 	if LayoutTrace {
 		fmt.Println("\n############################\nPosition start:", sc)
 	}
-	sc.Position(sc)
+	sc.Position()
 	if LayoutTrace {
 		fmt.Println("\n############################\nScenePos start:", sc)
 	}
-	sc.ScenePos(sc)
+	sc.ScenePos()
 }
 
 // LayoutRenderScene does a layout and render of the tree:
 // GetSize, DoLayout, Render.  Needed after Config.
 func (sc *Scene) LayoutRenderScene() {
 	sc.LayoutScene()
-	sc.Render(sc)
+	sc.Render()
 }
 
 // DoNeedsRender calls Render on tree from me for nodes
@@ -598,9 +598,9 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.SetColor(hct.New(sc.RenderBBoxHue, 100, 50).AsRGBA())
+		pc.StrokeStyle.SetColor(hct.New(wb.Sc.RenderBBoxHue, 100, 50).AsRGBA())
 		pc.FillStyle.SetColor(nil)
-		if sc.SelectedWidget != nil && sc.SelectedWidget.This() == wb.This() {
+		if wb.Sc.SelectedWidget != nil && wb.Sc.SelectedWidget.This() == wb.This() {
 			fc := pc.StrokeStyle.Color.Solid
 			pc.FillStyle.SetColor(fc)
 			pc.FillStyle.Opacity = 0.2
@@ -809,7 +809,7 @@ func (sc *Scene) BenchmarkFullRender() {
 	n := 50
 	for i := 0; i < n; i++ {
 		sc.LayoutScene()
-		sc.Render(sc)
+		sc.Render()
 	}
 	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
@@ -827,7 +827,7 @@ func (sc *Scene) BenchmarkReRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		sc.Render(sc)
+		sc.Render()
 	}
 	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
