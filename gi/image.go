@@ -279,7 +279,7 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //////////////////////////////////////////////////////////////////////////////////
 //  Props
 
-// TODO: move this to comment directives
+// TODO(kai): move this to new system
 
 var ImageProps = ki.Props{
 	"Toolbar": ki.PropSlice{

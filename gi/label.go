@@ -209,7 +209,7 @@ func (lb *Label) LabelStyles() {
 func (lb *Label) SetTextUpdate(text string) *Label {
 	updt := lb.UpdateStart()
 	lb.Text = text
-	lb.ConfigLabel(lb.Sc)
+	lb.ConfigLabel()
 	lb.UpdateEndRender(updt)
 	return lb
 }
@@ -313,8 +313,8 @@ func (lb *Label) HandleLabelKeys() {
 	})
 }
 
-func (lb *Label) ConfigWidget(sc *Scene) {
-	lb.ConfigLabel(sc)
+func (lb *Label) ConfigWidget() {
+	lb.ConfigLabel()
 }
 
 // todo: ideally it would be possible to only call SetHTML once during config
@@ -324,13 +324,13 @@ func (lb *Label) ConfigWidget(sc *Scene) {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using actual content size to constrain layout.
-func (lb *Label) ConfigLabel(sc *Scene) {
-	lb.ConfigLabelSize(sc, lb.Geom.Size.Actual.Content)
+func (lb *Label) ConfigLabel() {
+	lb.ConfigLabelSize(lb.Geom.Size.Actual.Content)
 }
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using given size to constrain layout.
-func (lb *Label) ConfigLabelSize(sc *Scene, sz mat32.Vec2) {
+func (lb *Label) ConfigLabelSize(sz mat32.Vec2) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
@@ -346,7 +346,7 @@ func (lb *Label) ConfigLabelSize(sc *Scene, sz mat32.Vec2) {
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) mat32.Vec2 {
+func (lb *Label) ConfigLabelAlloc(sz mat32.Vec2) mat32.Vec2 {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
@@ -367,7 +367,7 @@ func (lb *Label) ConfigLabelAlloc(sc *Scene, sz mat32.Vec2) mat32.Vec2 {
 // for word wrap case, where the sizing actually matters.
 // this is based on the existing styled Actual.Content aspect ratio and
 // very rough estimate of total rendered size.
-func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
+func (lb *Label) SizeUpWrapSize() mat32.Vec2 {
 	csz := lb.Geom.Size.Actual.Content
 	chars := float32(len(lb.Text))
 	fht := float32(16)
@@ -397,13 +397,13 @@ func (lb *Label) SizeUpWrapSize(sc *Scene) mat32.Vec2 {
 	return sz
 }
 
-func (lb *Label) SizeUp(sc *Scene) {
-	lb.WidgetBase.SizeUp(sc) // sets Actual size based on styles
+func (lb *Label) SizeUp() {
+	lb.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &lb.Geom.Size
 	if lb.Styles.Text.HasWordWrap() {
-		lb.ConfigLabelSize(sc, lb.SizeUpWrapSize(sc))
+		lb.ConfigLabelSize(lb.SizeUpWrapSize())
 	} else {
-		lb.ConfigLabelSize(sc, sz.Actual.Content)
+		lb.ConfigLabelSize(sz.Actual.Content)
 	}
 	rsz := lb.TextRender.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
@@ -413,12 +413,12 @@ func (lb *Label) SizeUp(sc *Scene) {
 	}
 }
 
-func (lb *Label) SizeDown(sc *Scene, iter int) bool {
+func (lb *Label) SizeDown(iter int) bool {
 	if !lb.Styles.Text.HasWordWrap() || iter > 1 {
 		return false
 	}
 	sz := &lb.Geom.Size
-	rsz := lb.ConfigLabelAlloc(sc, sz.Alloc.Content) // use allocation
+	rsz := lb.ConfigLabelAlloc(sz.Alloc.Content) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.SetInitContentMin(lb.Styles.Min.Dots().Ceil())
@@ -433,26 +433,26 @@ func (lb *Label) SizeDown(sc *Scene, iter int) bool {
 	return chg
 }
 
-// func (lb *Label) SizeFinal(sc *Scene) {
+// func (lb *Label) SizeFinal() {
 // 	sz := &lb.Geom.Size
 // 	sz.Internal = sz.Actual.Content // keep it before we grow
-// 	// lb.GrowToAlloc(sc)     // we already grew as much as we could..
-// 	lb.StyleSizeUpdate(sc) // now that sizes are stable, ensure styling based on size is updated
-// 	lb.SizeFinalParts(sc)
+// 	// lb.GrowToAlloc()     // we already grew as much as we could..
+// 	lb.StyleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
+// 	lb.SizeFinalParts()
 // 	sz.SetTotalFromContent(&sz.Actual)
 // }
 
-func (lb *Label) RenderLabel(sc *Scene) {
-	rs, _, st := lb.RenderLock(sc)
+func (lb *Label) RenderLabel() {
+	rs, _, st := lb.RenderLock()
 	defer lb.RenderUnlock(rs)
-	lb.RenderStdBox(sc, st)
+	lb.RenderStdBox(st)
 	lb.TextRender.Render(rs, lb.Geom.Pos.Content)
 }
 
-func (lb *Label) Render(sc *Scene) {
-	if lb.PushBounds(sc) {
-		lb.RenderLabel(sc)
-		lb.RenderChildren(sc)
-		lb.PopBounds(sc)
+func (lb *Label) Render() {
+	if lb.PushBounds() {
+		lb.RenderLabel()
+		lb.RenderChildren()
+		lb.PopBounds()
 	}
 }
