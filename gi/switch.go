@@ -111,7 +111,7 @@ func (sw *Switch) HandleSwitchEvents() {
 		sw.SetChecked(!sw.StateIs(states.Checked))
 		sw.SendChange(e)
 		if sw.Type == SwitchChip {
-			sw.SetNeedsLayout()
+			sw.SetNeedsLayout(true)
 		}
 	})
 }
@@ -283,11 +283,11 @@ func (sw *Switch) ClearIcons() *Switch {
 	return sw
 }
 
-func (sw *Switch) ConfigWidget(sc *Scene) {
-	sw.ConfigParts(sc)
+func (sw *Switch) ConfigWidget() {
+	sw.ConfigParts()
 }
 
-func (sw *Switch) ConfigParts(sc *Scene) {
+func (sw *Switch) ConfigParts() {
 	parts := sw.NewParts()
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
@@ -325,17 +325,17 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
-		sw.SetNeedsLayoutUpdate(sc, updt)
+		sw.SetNeedsLayout(updt)
 	}
 }
 
-func (sw *Switch) RenderSwitch(sc *Scene) {
-	rs, _, st := sw.RenderLock(sc)
-	sw.RenderStdBox(sc, st)
+func (sw *Switch) RenderSwitch() {
+	rs, _, st := sw.RenderLock()
+	sw.RenderStdBox(st)
 	sw.RenderUnlock(rs)
 }
 
-func (sw *Switch) Render(sc *Scene) {
+func (sw *Switch) Render() {
 	sw.SetIconFromState() // make sure we're always up-to-date on render
 	if sw.Parts != nil {
 		ist := sw.Parts.ChildByName("stack", 0)
@@ -343,10 +343,10 @@ func (sw *Switch) Render(sc *Scene) {
 			ist.(*Layout).UpdateStackedVisibility()
 		}
 	}
-	if sw.PushBounds(sc) {
-		sw.RenderSwitch(sc)
-		sw.RenderParts(sc)
-		sw.RenderChildren(sc)
-		sw.PopBounds(sc)
+	if sw.PushBounds() {
+		sw.RenderSwitch()
+		sw.RenderParts()
+		sw.RenderChildren()
+		sw.PopBounds()
 	}
 }
