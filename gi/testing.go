@@ -54,12 +54,15 @@ var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
 // with the given values, and then closes the window.
 // It does not return until all of those steps are completed.
 // If a function is passed for the final argument, it is called after the
-// scene is shown, right before [Scene.AssertPixels] is called.
+// scene is shown, right before [Scene.AssertPixels] is called. Also,
+// if a function is passed, [Scene.DoNeedsRender] is also called before
+// [Scene.AssertPixels].
 func (sc *Scene) AssertPixelsOnShow(t TestingT, filename string, fun ...func()) {
 	showed := make(chan struct{})
 	sc.OnShow(func(e events.Event) {
 		if len(fun) > 0 {
 			fun[0]()
+			sc.DoNeedsRender(sc)
 		}
 		sc.AssertPixels(t, filename)
 		showed <- struct{}{}

@@ -20,9 +20,9 @@ func TestParentBackgroundColor(t *testing.T) {
 		sc = NewScene()
 		fr = NewFrame(sc)
 		fr.Style(func(s *styles.Style) {
-			s.Min.Set(units.Em(20))
+			s.Min.Set(units.Em(5))
 		})
-		NewLabel(fr).SetText("Test")
+		NewLabel(fr).SetType(LabelTitleLarge).SetText("Test")
 		return
 	}
 
@@ -44,7 +44,6 @@ func TestParentBackgroundColor(t *testing.T) {
 		fr.SetState(true, states.Hovered)
 		fr.ApplyStyle(sc)
 		fr.SetNeedsRender()
-		sc.DoNeedsRender(sc)
 	})
 
 	sc, fr = make()
@@ -68,5 +67,7 @@ func TestParentBackgroundColor(t *testing.T) {
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_post"), func() {
 		fr.SetState(true, states.Hovered)
+		fr.ApplyStyle(sc)
+		fr.SetNeedsRender()
 	})
 }
