@@ -64,5 +64,5 @@ func (sc *Scene) AssertPixelsOnShow(t images.TestingT, filename string, fun ...f
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
 func (sc *Scene) AssertPixels(t images.TestingT, filename string) {
-	images.AssertImage(t, sc.Pixels, filename)
+	images.Assert(t, sc.Pixels, filename)
 }
