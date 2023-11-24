@@ -72,8 +72,8 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase {
 // and calls ApplyStyleTree to apply any style changes.
 func (wb *WidgetBase) SetSelected(sel bool) {
 	wb.SetStateWidget(sel, states.Selected)
-	wb.ApplyStyleTree(wb.Sc)
-	wb.SetNeedsRender()
+	wb.ApplyStyleTree()
+	wb.SetNeedsRender(true)
 }
 
 // SetSelectedAction sets the Selected state flag
@@ -102,7 +102,7 @@ func (wb *WidgetBase) SetEnabled(enabled bool) *WidgetBase {
 // SetEnabledUpdt sets the Disabled flag
 func (wb *WidgetBase) SetEnabledUpdt(enabled bool) *WidgetBase {
 	wb.SetState(!enabled, states.Disabled)
-	wb.ApplyStyleUpdate(wb.Sc)
+	wb.ApplyStyleUpdate()
 	return wb
 }
 

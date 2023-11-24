@@ -167,7 +167,7 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 		return
 	}
 	if s.State != state {
-		wb.ApplyStyleUpdate(wb.Sc)
+		wb.ApplyStyleUpdate()
 		// wb.Transition(&s.StateLayer, s.State.StateLayer(), 500*time.Millisecond, LinearTransition)
 	}
 }

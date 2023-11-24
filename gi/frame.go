@@ -60,17 +60,17 @@ const (
 )
 
 // FrameStdRender does the standard rendering of the frame itself
-func (fr *Frame) FrameStdRender(sc *Scene) {
-	rs, _, st := fr.RenderLock(sc)
+func (fr *Frame) FrameStdRender() {
+	rs, _, st := fr.RenderLock()
 	defer fr.RenderUnlock(rs)
 
-	fr.RenderStdBox(sc, st)
+	fr.RenderStdBox(st)
 	//	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
 	//		fr.RenderStripes(sc)
 	//	}
 }
 
-func (fr *Frame) RenderStripes(sc *Scene) {
+func (fr *Frame) RenderStripes() {
 	/*
 		st := &fr.Styles
 		rs := &sc.RenderState
@@ -120,11 +120,11 @@ func (fr *Frame) RenderStripes(sc *Scene) {
 	*/
 }
 
-func (fr *Frame) Render(sc *Scene) {
-	if fr.PushBounds(sc) {
-		fr.FrameStdRender(sc)
-		fr.RenderChildren(sc)
-		fr.RenderScrolls(sc)
-		fr.PopBounds(sc)
+func (fr *Frame) Render() {
+	if fr.PushBounds() {
+		fr.FrameStdRender()
+		fr.RenderChildren()
+		fr.RenderScrolls()
+		fr.PopBounds()
 	}
 }
