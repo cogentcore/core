@@ -6,13 +6,12 @@ package paint
 
 import (
 	"image"
-	"image/png"
-	"os"
 	"testing"
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 )
 
@@ -50,10 +49,5 @@ func TestBoxModel(t *testing.T) {
 
 	rs.Unlock()
 
-	file, err := os.Create("boxmodel_test.png")
-	if err != nil {
-		t.Error(err)
-	}
-	defer file.Close()
-	png.Encode(file, img)
+	images.Assert(t, img, "boxmodel")
 }
