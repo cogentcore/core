@@ -305,6 +305,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		return
 	}
+	ctx := fb.GoodContext()
 	fb.SetReturnValues(rets)
 	// TODO: handle error return values
 	main := "Result of " + fb.Text
@@ -322,12 +323,8 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		gi.NewSnackbar(fb).Text(txt).Run()
+		gi.NewSnackbar(ctx).AddSnackbarText(txt).Stage.Run()
 		return
-	}
-	ctx := fb.Context
-	if fb.Context == nil {
-		ctx = fb.This().(gi.Widget)
 	}
 	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip)
 	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)

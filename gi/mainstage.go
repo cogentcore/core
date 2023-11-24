@@ -266,6 +266,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	if !st.FullWindow {
 		sz = sc.PrefSize(winsz)
 		sz = sz.Add(image.Point{50, 50})
+		sc.EventMgr.StartFocusFirst = true // fallback
 	}
 	if WinRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)

@@ -114,6 +114,9 @@ type EventMgr struct {
 	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
 	StartFocus Widget
 
+	// if StartFocus not set, activate starting focus on first element
+	StartFocusFirst bool
+
 	// previously-focused widget -- what was in Focus when FocusClear is called
 	PrevFocus Widget
 
@@ -702,6 +705,9 @@ func (em *EventMgr) GrabFocus(w Widget) bool {
 // for a version that does not.
 func (em *EventMgr) SetFocus(w Widget) bool {
 	got := em.SetFocusImpl(w, true) // sends event
+	// if !got {
+	// 	fmt.Println("focus failed!", w)
+	// }
 	if w != nil {
 		w.AsWidget().ScrollToMe()
 	}
@@ -715,6 +721,7 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 	cfoc := em.Focus
 	if cfoc == nil || cfoc.This() == nil || cfoc.Is(ki.Deleted) {
 		em.Focus = nil
+		// fmt.Println("nil foc impl")
 		cfoc = nil
 	}
 	if cfoc == w {
@@ -730,6 +737,7 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 		cfoc.Send(events.FocusLost)
 	}
 	em.Focus = w
+	// fmt.Println(em.Focus, "set focus")
 	if sendEvent && w != nil {
 		// fmt.Println(w, "focus event")
 		w.Send(events.Focus)
@@ -756,13 +764,13 @@ func (em *EventMgr) FocusWithins() bool {
 	return true
 }
 
-// todo: rewrite below to use ki walki functions
-// and make FocusPrevFrom actually work
-
 // FocusNext sets the focus on the next item
 // that can accept focus after the current Focus item.
 // returns true if a focus item found.
 func (em *EventMgr) FocusNext() bool {
+	if em.Focus == nil {
+		return em.FocusFirst()
+	}
 	return em.FocusNextFrom(em.Focus)
 }
 
@@ -770,42 +778,27 @@ func (em *EventMgr) FocusNext() bool {
 // that can accept focus after the given item.
 // returns true if a focus item found.
 func (em *EventMgr) FocusNextFrom(from Widget) bool {
-	gotFocus := false
-	focusNext := false // get the next guy
-	if from == nil {
-		focusNext = true
-	}
+	var next Widget
+	wi := from
+	wb := wi.AsWidget()
 
-	focRoot := em.Scene
-
-	for i := 0; i < 2; i++ {
-		focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-			if gotFocus {
-				return ki.Break
+	for next == nil {
+		if wb.Parts != nil {
+			if em.FocusNextFrom(wb.Parts) {
+				return true
 			}
-			if !wb.IsVisible() {
-				return ki.Continue
-			}
-			if from == wi { // current focus can be a non-can-focus item
-				focusNext = true
-				return ki.Continue
-			}
-			if !focusNext {
-				return ki.Continue
-			}
-			if !wi.AbilityIs(abilities.Focusable) {
-				return ki.Continue
-			}
-			em.SetFocus(wi)
-			gotFocus = true
-			return ki.Break // done
-		})
-		if gotFocus {
-			return true
 		}
-		focusNext = true // this time around, just get the first one
+		wi, wb = wb.WidgetNextVisible()
+		if wi == nil {
+			break
+		}
+		if wb.AbilityIs(abilities.Focusable) {
+			next = wi
+			break
+		}
 	}
-	return gotFocus
+	em.SetFocus(next)
+	return next != nil
 }
 
 // FocusOnOrNext sets the focus on the given item, or the next one that can
@@ -842,93 +835,62 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 		return true
 	}
 	em.Focus = foc
-	return em.FocusPrev()
+	fmt.Println("on or prev:", foc)
+	return em.FocusPrevFrom(foc)
 }
 
 // FocusPrev sets the focus on the previous item before the
 // current focus item.
 func (em *EventMgr) FocusPrev() bool {
+	if em.Focus == nil {
+		return em.FocusLast()
+	}
 	return em.FocusPrevFrom(em.Focus)
 }
 
 // FocusPrevFrom sets the focus on the previous item before the given item
 // (can be nil).
 func (em *EventMgr) FocusPrevFrom(from Widget) bool {
-	if from == nil { // must have a current item here
-		em.FocusLast()
-		// gotFocus = false
-		return false
+	var prev Widget
+	wi := from
+	wb := wi.AsWidget()
+
+	for prev == nil {
+		wi, wb = wb.WidgetPrevVisible()
+		if wi == nil {
+			break
+		}
+		// if wb.Parts != nil {
+		// 	if em.FocusLastFrom(wb.Parts) {
+		// 		return true
+		// 	}
+		// }
+		if wb.AbilityIs(abilities.Focusable) {
+			prev = wi
+			break
+		}
 	}
-
-	gotFocus := false
-	var prevItem Widget
-
-	focRoot := em.Scene
-
-	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		if gotFocus {
-			return ki.Break
-		}
-		if !wb.IsVisible() {
-			return ki.Continue
-		}
-		if from == wi {
-			gotFocus = true
-			return ki.Break
-		}
-		if !wb.AbilityIs(abilities.Focusable) {
-			return ki.Continue
-		}
-		prevItem = wi
-		return ki.Continue
-	})
-	if gotFocus && prevItem != nil {
-		em.SetFocus(prevItem)
-		return true
-	} else {
-		return em.FocusLast()
-	}
+	em.SetFocus(prev)
+	return prev != nil
 }
 
 // FocusFirst sets the focus on the first focusable item in the tree.
 // returns true if a focusable item was found.
 func (em *EventMgr) FocusFirst() bool {
-	var firstItem Widget
-	focRoot := em.Scene
-
-	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		if !wb.IsVisible() {
-			return ki.Continue
-		}
-		if !wb.AbilityIs(abilities.Focusable) {
-			return ki.Continue
-		}
-		firstItem = wi
-		return ki.Break
-	})
-	em.SetFocus(firstItem)
-	return firstItem != nil
+	return em.FocusNextFrom(em.Scene.This().(Widget))
 }
 
 // FocusLast sets the focus on the last focusable item in the tree.
 // returns true if a focusable item was found.
 func (em *EventMgr) FocusLast() bool {
-	var lastItem Widget
-	focRoot := em.Scene
+	return em.FocusLastFrom(em.Scene)
+}
 
-	// todo: could use walking functions in ki
-	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		if !wb.IsVisible() {
-			return ki.Continue
-		}
-		if !wb.AbilityIs(abilities.Focusable) {
-			return ki.Continue
-		}
-		lastItem = wi
-		return ki.Continue
-	})
-	em.SetFocus(lastItem)
-	return lastItem != nil
+// FocusLastFrom sets the focus on the last focusable item in the given tree.
+// returns true if a focusable item was found.
+func (em *EventMgr) FocusLastFrom(from Widget) bool {
+	last := ki.Last(from.This()).(Widget)
+	return em.FocusOnOrPrev(last)
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
@@ -963,12 +925,18 @@ func (em *EventMgr) SetStartFocus(k Widget) {
 // ActivateStartFocus activates start focus if there is no current focus
 // and StartFocus is set -- returns true if activated
 func (em *EventMgr) ActivateStartFocus() bool {
-	if em.StartFocus == nil {
+	if em.StartFocus == nil && !em.StartFocusFirst {
+		// fmt.Println("no start focus")
 		return false
 	}
 	sf := em.StartFocus
 	em.StartFocus = nil
-	em.SetFocus(sf)
+	if sf == nil {
+		em.FocusFirst()
+	} else {
+		// fmt.Println("start focus on:", sf)
+		em.SetFocus(sf)
+	}
 	return true
 }
 

@@ -68,12 +68,14 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 			}
 		}
 		if !hasSelected && wb.StateIs(states.Selected) {
+			// fmt.Println("start focus sel:", wb)
 			msc.EventMgr.SetStartFocus(wb)
 			hasSelected = true
 		}
 		return ki.Continue
 	})
 	if !hasSelected && msc.HasChildren() {
+		// fmt.Println("start focus first:", msc.Child(0).(Widget))
 		msc.EventMgr.SetStartFocus(msc.Child(0).(Widget))
 	}
 	return msc

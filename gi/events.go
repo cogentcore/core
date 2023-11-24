@@ -377,11 +377,8 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 		}
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Enter || e.KeyRune() == ' ' {
-			// TODO: do we need this?
-			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
 			e.SetHandled()
 			wb.Send(events.Click, e)
-			// }
 		}
 	})
 }

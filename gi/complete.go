@@ -249,33 +249,6 @@ func (c *Complete) On(etype events.Types, fun func(e events.Event)) {
 	c.Listeners.Add(etype, fun)
 }
 
-// KeyInput is the opportunity for completion to act on specific key inputs
-// The return value indicates whether the caller should set the event as handled
-func (c *Complete) KeyInput(kf keyfun.Funs) bool {
-	count := len(c.Completions)
-	switch kf {
-	case keyfun.FocusNext: // tab will complete if single item or try to extend if multiple items
-		if count > 0 {
-			if count == 1 { // just complete
-				c.Complete(c.Completions[0].Text)
-			} else { // try to extend the seed
-				// s := complete.ExtendSeed(c.Completions, c.Seed)
-				// c.CompleteSig.Emit(c.This(), int64(CompleteExtend), s)
-			}
-			return true
-		}
-	case keyfun.MoveDown:
-		if count == 1 {
-			return true
-		}
-	case keyfun.MoveUp:
-		if count == 1 {
-			return true
-		}
-	}
-	return false
-}
-
 func (c *Complete) GetCompletion(s string) complete.Completion {
 	for _, cc := range c.Completions {
 		if s == cc.Text {

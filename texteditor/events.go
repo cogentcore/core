@@ -9,6 +9,7 @@ import (
 	"image"
 	"unicode"
 
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/textbuf"
@@ -28,6 +29,7 @@ func (ed *Editor) HandleEditorEvents() {
 	ed.HandleLayoutEvents()
 	ed.HandleEditorKeyChord()
 	ed.HandleEditorMouse()
+	ed.HandleEditorLinkCursor()
 	ed.HandleEditorClose()
 }
 
@@ -601,6 +603,7 @@ func (ed *Editor) HandleEditorMouse() {
 			ed.GrabFocus()
 			ed.Send(events.Focus, e) // sets focused flag
 		}
+		updt := ed.UpdateStart()
 		e.SetHandled()
 		if ed.HasSelection() {
 			if ed.SelectReg.Start.Ln == ed.SelectReg.End.Ln {
@@ -619,6 +622,7 @@ func (ed *Editor) HandleEditorMouse() {
 				ed.CursorPos = ed.SelectReg.Start
 			}
 		}
+		ed.UpdateEndRender(updt)
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
@@ -631,46 +635,35 @@ func (ed *Editor) HandleEditorMouse() {
 	})
 }
 
-// todo: needs this in event filtering update!
-// if !ed.HasLinks {
-// 	return
-// }
+func (ed *Editor) HandleEditorLinkCursor() {
+	ed.On(events.MouseMove, func(e events.Event) {
+		if !ed.HasLinks {
 
-/*
-// MouseMoveEvent
-func (ed *View) MouseMoveEvent() {
-	we.AddFunc(events.MouseMove, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		me.SetHandled()
-		edv := recv.Embed(TypeView).(*View)
-		pt := ed.PointToRelPos(me.LocalPos())
-		mpos := edv.PixelToCursor(pt)
-		if mpos.Ln >= edv.NLines {
+		}
+		pt := ed.PointToRelPos(e.LocalPos())
+		mpos := ed.PixelToCursor(pt)
+		if mpos.Ln >= ed.NLines {
 			return
 		}
 		pos := ed.RenderStartPos()
 		pos.Y += ed.Offs[mpos.Ln]
 		pos.X += ed.LineNoOff
-		rend := &edv.Renders[mpos.Ln]
+		rend := &ed.Renders[mpos.Ln]
 		inLink := false
 		for _, tl := range rend.Links {
 			tlb := tl.Bounds(rend, pos)
-			if me.Pos().In(tlb) {
+			if e.LocalPos().In(tlb) {
 				inLink = true
 				break
 			}
 		}
-		// TODO: figure out how to handle links with new cursor setup
-		// if inLink {
-		// 	goosi.TheApp.Cursor(ed.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
-		// } else {
-		// 	goosi.TheApp.Cursor(ed.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
-		// }
-
+		if inLink {
+			ed.Styles.Cursor = cursors.Pointer
+		} else {
+			ed.Styles.Cursor = cursors.Text
+		}
 	})
 }
-
-*/
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.

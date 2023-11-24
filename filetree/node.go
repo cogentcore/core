@@ -236,8 +236,11 @@ func (fn *Node) UpdateDir() {
 		}
 	}
 	if mods {
+		root := fn.RootView
 		fn.Update()
-		fn.TreeViewChanged(nil)
+		if root != nil {
+			root.TreeViewChanged(nil)
+		}
 		fn.UpdateEndLayout(updt)
 	}
 }

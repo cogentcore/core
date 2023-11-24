@@ -494,3 +494,23 @@ func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) 
 		return fun(kwi, kwb)
 	})
 }
+
+// WidgetNextVisible returns the next visible node in the tree as a Widget,
+// nil if no more.
+func (wb *WidgetBase) WidgetNextVisible() (Widget, *WidgetBase) {
+	nwi, nwb := AsWidget(ki.Next(wb.This()))
+	for nwb != nil && !nwb.IsVisible() {
+		nwi, nwb = AsWidget(ki.Next(nwb.This()))
+	}
+	return nwi, nwb
+}
+
+// WidgetPrevVisible returns the previous visible node in the tree as a Widget,
+// nil if no more.
+func (wb *WidgetBase) WidgetPrevVisible() (Widget, *WidgetBase) {
+	nwi, nwb := AsWidget(ki.Prev(wb.This()))
+	for nwb != nil && !nwb.IsVisible() {
+		nwi, nwb = AsWidget(ki.Prev(nwb.This()))
+	}
+	return nwi, nwb
+}

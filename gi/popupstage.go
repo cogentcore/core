@@ -43,7 +43,9 @@ func (st *PopupStage) MainMgr() *MainStageMgr {
 }
 
 func (st *PopupStage) SetTimeout(dur time.Duration) *PopupStage {
-	st.Timeout = dur
+	if st != nil {
+		st.Timeout = dur
+	}
 	return st
 }
 

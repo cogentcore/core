@@ -331,6 +331,7 @@ func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	ed.Offs = nof
 
 	ed.NLines += nsz
+	ed.SetNeedsRender()
 	ed.SetNeedsLayout()
 }
 
@@ -354,9 +355,11 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	case BufDone:
 	case BufNew:
 		ed.ResetState()
+		ed.SetNeedsRender()
 		ed.SetNeedsLayout()
 		ed.SetCursorShow(ed.CursorPos)
 	case BufMods:
+		ed.SetNeedsRender()
 		ed.SetNeedsLayout()
 	case BufInsert:
 		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
@@ -387,6 +390,7 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 			ed.Update()
 		}
 	case BufMarkUpdt:
+		ed.SetNeedsRender()
 		ed.SetNeedsLayout() // comes from another goroutine
 	case BufClosed:
 		ed.SetBuf(nil)
@@ -436,10 +440,10 @@ func (ed *Editor) Redo() {
 ////////////////////////////////////////////////////
 //  Widget Interface
 
-// Config calls Init on widget
-// func (ed *View) ConfigWidget(vp *gi.Scene) {
-//
-// }
+func (ed *Editor) ConfigWidget(sc *gi.Scene) {
+	ed.SetNeedsRender()
+	ed.SetNeedsLayout()
+}
 
 // StyleView sets the style of widget
 func (ed *Editor) StyleView(sc *gi.Scene) {

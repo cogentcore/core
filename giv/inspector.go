@@ -150,7 +150,7 @@ func (is *Inspector) EditColorScheme() { //gti:add
 func (is *Inspector) ToggleSelectionMode() { //gti:add
 	sc := gi.AsScene(is.KiRoot)
 	if sc == nil {
-		gi.NewSnackbar(is).Text("SelectionMode is only available on Scene objects").Run()
+		gi.NewSnackbar(is).AddSnackbarText("SelectionMode is only available on Scene objects").Stage.Run()
 		return
 	}
 	updt := sc.UpdateStart()
@@ -185,7 +185,7 @@ func (is *Inspector) SelectionMonitor() {
 		}
 		tv := is.TreeView().FindSyncNode(sw.This())
 		if tv == nil {
-			gi.NewSnackbar(is).Text(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).Run()
+			gi.NewSnackbar(is).AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).Stage.Run()
 		} else {
 			updt := is.UpdateStartAsync() // coming from other tree
 			tv.OpenParents()
