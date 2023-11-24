@@ -34,7 +34,16 @@ func TestParentBackgroundColor(t *testing.T) {
 		s.SetAbilities(true, abilities.Hoverable)
 	})
 	fr.SetState(true, states.Hovered)
-	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white_hovered"))
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white_hovered_pre"))
+
+	sc, fr = make()
+	fr.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Hoverable)
+	})
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "white_hovered_post"), func() {
+		fr.SetState(true, states.Hovered)
+		fr.Update()
+	})
 
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
@@ -48,5 +57,14 @@ func TestParentBackgroundColor(t *testing.T) {
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 	})
 	fr.SetState(true, states.Hovered)
-	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered"))
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_pre"))
+
+	sc, fr = make()
+	fr.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Hoverable)
+		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+	})
+	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_post"), func() {
+		fr.SetState(true, states.Hovered)
+	})
 }
