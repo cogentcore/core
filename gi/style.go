@@ -73,17 +73,17 @@ func (wb *WidgetBase) BoxSpace() styles.SideFloats {
 
 // ApplyStyleParts styles the parts.
 // Automatically called by the default ApplyStyleWidget function.
-func (wb *WidgetBase) ApplyStyleParts(sc *Scene) {
+func (wb *WidgetBase) ApplyStyleParts() {
 	if wb.Parts == nil {
 		return
 	}
-	wb.Parts.ApplyStyleTree(sc)
+	wb.Parts.ApplyStyleTree()
 }
 
 // ApplyStyleWidget is the primary styling function for all Widgets.
 // Handles inheritance and runs the Styler functions.
 // Must be called under a StyMu Lock
-func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
+func (wb *WidgetBase) ApplyStyleWidget() {
 	if wb.OverrideStyle {
 		return
 	}
@@ -102,9 +102,9 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	if wb.Styles.Display == styles.DisplayNone {
 		wb.SetState(true, states.Invisible)
 	}
-	SetUnitContext(&wb.Styles, sc, mat32.Vec2{}, mat32.Vec2{})
-	sc.SetCurrentColor(wb.Styles.Color) // todo: do we need this anymore?
-	wb.ApplyStyleParts(sc)
+	SetUnitContext(&wb.Styles, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
+	wb.Sc.SetCurrentColor(wb.Styles.Color) // todo: do we need this anymore?
+	wb.ApplyStyleParts()
 }
 
 // ResetStyleWidget resets the widget styles and applies the basic
@@ -187,18 +187,18 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 	s.Gap.Y.Val *= spc
 }
 
-func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
+func (wb *WidgetBase) ApplyStyleUpdate() {
 	updt := wb.UpdateStart()
-	wb.ApplyStyleTree(sc)
+	wb.ApplyStyleTree()
 	wb.UpdateEnd(updt)
-	wb.SetNeedsRenderUpdate(sc, updt)
+	wb.SetNeedsRender(updt)
 }
 
-func (wb *WidgetBase) ApplyStyle(sc *Scene) {
+func (wb *WidgetBase) ApplyStyle() {
 	wb.StyMu.Lock() // todo: needed??  maybe not.
 	defer wb.StyMu.Unlock()
 
-	wb.ApplyStyleWidget(sc)
+	wb.ApplyStyleWidget()
 }
 
 // SetUnitContext sets the unit context based on size of scene, element, and parent
