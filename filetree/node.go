@@ -307,7 +307,7 @@ func (fn *Node) SetFileIcon() {
 		if bp.IconDisab != ic {
 			bp.IconDisab = ic
 			bp.Update()
-			fn.SetNeedsRender()
+			fn.SetNeedsRender(true)
 		}
 	}
 }
@@ -379,7 +379,7 @@ func (fn *Node) UpdateNode() error {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
 		fn.SetFileIcon()
-		fn.SetNeedsRender()
+		fn.SetNeedsRender(true)
 	}
 	return nil
 }
@@ -448,7 +448,7 @@ func (fn *Node) SortBys(modTime bool) { //gti:add
 // optionally can be sorted by modification time.
 func (fn *Node) SortBy(modTime bool) {
 	fn.FRoot.SetDirSortBy(fn.FPath, modTime)
-	fn.SetNeedsLayout()
+	fn.SetNeedsLayout(true)
 }
 
 // OpenAll opens all directories under this one
