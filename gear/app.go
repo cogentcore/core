@@ -73,6 +73,7 @@ func (a *App) ConfigWidget() {
 	cmds := gi.NewFrame(sp, "commands")
 	cmds.Style(func(s *styles.Style) {
 		s.Wrap = true
+		s.Align.Content = styles.End
 	})
 
 	tb := texteditor.NewBuf()
