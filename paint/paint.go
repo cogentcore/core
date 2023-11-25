@@ -366,7 +366,8 @@ func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) 
 // BlurBox blurs the given already drawn region with the given blur radius.
 // The blur radius passed to this function is the actual Gaussian
 // standard deviation (σ). This means that you need to divide a CSS-standard
-// blur radius value by four before passing it this function.
+// blur radius value by two before passing it this function
+// (see https://stackoverflow.com/questions/65454183/how-does-blur-radius-value-in-box-shadow-property-affect-the-resulting-blur).
 func (pc *Paint) BlurBox(rs *State, pos, size mat32.Vec2, blurRadius float32) {
 	rect := mat32.RectFromPosSizeMax(pos, size)
 	sub := rs.Image.SubImage(rect)

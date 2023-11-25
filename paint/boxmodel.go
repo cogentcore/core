@@ -76,8 +76,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 			pc.DrawBox(rs, shadow.BasePos(mpos), shadow.BaseSize(msz), styles.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
 			if shadow.Blur.Dots != 0 {
-				// must divide by 2^2 (4) like CSS
-				pc.BlurBox(rs, shadow.Pos(mpos), shadow.Size(msz), shadow.Blur.Dots*shadow.Blur.Dots/2)
+				pc.BlurBox(rs, shadow.Pos(mpos), shadow.Size(msz), shadow.Blur.Dots/2)
 			}
 			pc.FillStyle.Opacity = prevOpacity
 		}
