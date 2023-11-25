@@ -34,14 +34,17 @@ func run(c *config) error {
 }
 
 func app(c *config) error {
-	sc := gi.NewScene("gear").SetTitle("Gear")
+	gi.SetAppName("gear")
+	b := gi.NewBody().SetTitle("Gear")
 	cmd := gear.NewCmd(c.Command)
 	err := cmd.Parse()
 	if err != nil {
 		return err
 	}
-	app := gear.NewApp(sc).SetCmd(cmd)
-	gi.DefaultTopAppBar = app.TopAppBar
-	gi.NewWindow(sc).Run().Wait()
+	app := gear.NewApp(b).SetCmd(cmd)
+	b.AddTopBar(func(pw gi.Widget) {
+		app.TopAppBar(b.TopAppBar(pw))
+	})
+	b.NewWindow().Run().Wait()
 	return nil
 }

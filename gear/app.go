@@ -37,12 +37,16 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 		text := sentencecase.Of(strcase.ToCamel(strings.Join(fields[1:], " ")))
 		bt := gi.NewButton(tb).SetText(text).SetTooltip(cmd.Doc)
 		bt.OnClick(func(e events.Event) {
-			d := gi.NewDialog(bt).Title(text).Prompt(cmd.Doc).FullWindow(true)
+			d := gi.NewBody().AddTitle(text).AddText(cmd.Doc)
 			st := StructForFlags(cmd.Flags)
 			giv.NewStructView(d).SetStruct(st)
-			d.OnAccept(func(e events.Event) {
-				grr.Log0(xe.Verbose().Run(fields[0], fields[1:]...))
-			}).Cancel().Ok().Run()
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddCancel(pw)
+				d.AddOk(pw).SetText(text).OnClick(func(e events.Event) {
+					grr.Log0(xe.Verbose().Run(fields[0], fields[1:]...))
+				})
+			})
+			d.NewFullDialog(bt).Run()
 		})
 	}
 }
