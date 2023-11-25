@@ -5,7 +5,7 @@
 package gear
 
 import (
-	"bytes"
+	"io"
 	"reflect"
 	"strconv"
 	"strings"
@@ -17,6 +17,7 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -70,6 +71,9 @@ func (a *App) ConfigWidget() {
 	sp := gi.NewSplits(a, "splits").SetDim(mat32.Y)
 
 	cmds := gi.NewFrame(sp, "commands")
+	cmds.Style(func(s *styles.Style) {
+		s.Wrap = true
+	})
 
 	tb := texteditor.NewBuf()
 	tb.NewBuf(0)
@@ -83,7 +87,7 @@ func (a *App) ConfigWidget() {
 		}
 		e.SetHandled()
 		cmd := string(tb.Text())
-		tb.SetText([]byte{})
+		tb.NewBuf(0)
 
 		grr.Log0(a.RunCmd(cmd, cmds))
 	})
@@ -105,12 +109,18 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 	})
 	gi.NewLabel(cfr, "cmd").SetText("$ " + cmd)
 
-	out := &bytes.Buffer{}
+	r, w := io.Pipe()
 	buf := texteditor.NewBuf()
 	buf.NewBuf(0)
-	texteditor.NewEditor(cfr).SetBuf(buf)
+	buf.Opts.LineNos = false
+
+	te := texteditor.NewEditor(cfr).SetBuf(buf)
+	te.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(30), units.Em(10))
+	})
+
 	ob := &texteditor.OutBuf{}
-	ob.Init(out, buf, 0, func(line []byte) []byte { return line })
+	ob.Init(r, buf, 0, func(line []byte) []byte { return line })
 	go func() {
 		ob.MonOut()
 	}()
@@ -118,7 +128,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 	cmds.Update()
 	cmds.UpdateEnd(updt)
 
-	xc := xe.Major().SetStdout(out).SetStderr(out).SetErrors(out)
+	xc := xe.Major().SetStdout(w).SetStderr(w).SetErrors(w)
 
 	return xc.Run("bash", "-c", cmd)
 }
