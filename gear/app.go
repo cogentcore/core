@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
@@ -67,10 +68,19 @@ func (a *App) ConfigWidget() {
 
 	gi.NewFrame(sp, "commands")
 
-	tb := texteditor.NewBuf().SetText([]byte("$"))
+	tb := texteditor.NewBuf().SetText([]byte("$ "))
 	tb.Hi.Lang = "sh"
 	grr.Log0(tb.Stat())
-	texteditor.NewEditor(sp, "editor").SetBuf(tb)
+	te := texteditor.NewEditor(sp, "editor").SetBuf(tb)
+	te.OnKeyChord(func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Enter && e.Modifiers() == 0 {
+			cmd := string(tb.Text())
+			cmd = strings.TrimPrefix(cmd, "$ ")
+			cmd = strings.TrimSuffix(cmd, "\n")
+			grr.Log0(xe.Verbose().Run("bash", "-c", cmd))
+		}
+	})
 
 	sp.SetSplits(0.8, 0.2)
 
