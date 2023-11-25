@@ -11,7 +11,6 @@ import (
 	"math"
 	"slices"
 
-	"github.com/anthonynsimon/bild/blur"
 	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
@@ -371,7 +370,7 @@ func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) 
 func (pc *Paint) BlurBox(rs *State, pos, size mat32.Vec2, blurRadius float32) {
 	rect := mat32.RectFromPosSizeMax(pos, size)
 	sub := rs.Image.SubImage(rect)
-	sub = blur.Gaussian(sub, float64(blurRadius))
+	sub = GaussianBlur(sub, float64(blurRadius))
 	draw.Draw(rs.Image, rect, sub, rect.Min, draw.Src)
 }
 

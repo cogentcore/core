@@ -5,6 +5,7 @@
 package paint
 
 import (
+	"fmt"
 	"image"
 	"testing"
 
@@ -71,16 +72,19 @@ func TestBoxShadow(t *testing.T) {
 	st.Color = colors.Black
 	st.BackgroundColor.SetSolid(colors.Lightblue)
 	st.Border.Style.Set(styles.BorderSolid)
-	st.Border.Width.Set(units.Dp(5))
+	st.Border.Width.Set(units.Dp(0))
 	st.Border.Color.Set(colors.Red)
 	st.Border.Radius = styles.BorderRadiusFull
-	st.BoxShadow = styles.BoxShadow5()
+	st.BoxShadow = styles.BoxShadow1()
 
 	st.ToDots()
 
 	sbg := &colors.Full{Solid: colors.White}
 
-	sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
+	spc := st.BoxSpace().Size()
+	sz := spc.Add(mat32.Vec2{200, 100})
+	fmt.Println("spc:", spc)
+
 	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
 
 	rs.Unlock()
