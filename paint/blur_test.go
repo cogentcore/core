@@ -67,7 +67,7 @@ func TestGaussianBlur(t *testing.T) {
 }
 
 func TestEdgeBlurFactors(t *testing.T) {
-	fmt.Println(EdgeBlurFactors(4))
+	fmt.Println(EdgeBlurFactors(2, 4))
 }
 
 func TestShadowBlur(t *testing.T) {
@@ -97,7 +97,7 @@ func TestShadowBlur(t *testing.T) {
 			VOffset: units.Dp(6),
 			Blur:    units.Dp(30),
 			Spread:  units.Dp(5),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 1),
 		},
 	}
 

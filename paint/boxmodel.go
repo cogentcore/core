@@ -57,7 +57,6 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw LayState data because we need to clear
 		// any box shadow that may have gone in margin.
-		// mspos, mssz := st.BoxShadowPosSize(pos, sz)
 		pc.FillBox(rs, pos, sz, &sbg)
 	}
 
@@ -66,19 +65,24 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		// CSS effectively goes in reverse order
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
-
 			pc.StrokeStyle.SetColor(nil)
-
-			// TODO: better handling of opacity?
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
-			// we reset it back to 255 so that only the opacity affects it and we don't get double transparency
-			// shadow.Color = colors.SetA(shadow.Color, 255) // not a pointer so we can update
-
 			pc.FillStyle.SetColor(colors.SetA(shadow.Color, 255))
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
-			pc.DrawRoundedShadowBlur(rs, shadow.Blur.Dots, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
+
+			// note: we are using EdgeBlurFactors with radiusFactor = 1
+			// (sigma == radius), so we divide Blur / 2 relative to the
+			// CSS standard of sigma = blur / 2 (i.e., our sigma = blur,
+			// so we divide Blur / 2 to achieve the same effect).
+			// This works fine for low-opacity blur factors (the edges are
+			// so transparent that you can't really see beyond 1 sigma,
+			// if you used radiusFactor = 2).
+			// If a higher-contrast shadow is used, it would look better
+			// with radiusFactor = 2, and you'd have to remove this /2 factor.
+
+			pc.DrawRoundedShadowBlur(rs, shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
 			pc.FillStyle.Opacity = prevOpacity
 		}
 	}
@@ -94,7 +98,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		pc.FillStyle.SetFullColor(&bg)
 		// no border -- fill only
 		pc.DrawRoundedRectangle(rs, mpos.X, mpos.Y, msz.X, msz.Y, rad)
-		pc.FillStrokeClear(rs)
+		pc.Fill(rs)
 	}
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)

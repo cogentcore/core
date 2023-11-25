@@ -59,13 +59,15 @@ func GaussianBlur(src image.Image, sigma float64) *image.RGBA {
 
 // EdgeBlurFactors returns multiplicative factors that replicate the effect
 // of a Gaussian kernel applied to a sharp edge transition in the middle of
-// a line segment going from -radius to +radius, with a Gaussian
-// sigma = radius / 2.
-func EdgeBlurFactors(radius float32) []float32 {
-	radius = mat32.Ceil(radius)
+// a line segment, with a given Gaussian sigma, and radius = sigma * radiusFactor.
+// The returned line factors go from -radius to +radius.
+// For low-contrast (opacity) cases, radiusFactor = 1 works well,
+// because values beyond 1 sigma are effectively invisible, but 2 looks
+// better for greater contrast cases.
+func EdgeBlurFactors(sigma, radiusFactor float32) []float32 {
+	radius := mat32.Ceil(sigma * radiusFactor)
 	irad := int(radius)
 	klen := irad*2 + 1
-	sigma := radius / 2
 	sfactor := -0.5 / (sigma * sigma)
 
 	k := make([]float32, klen)

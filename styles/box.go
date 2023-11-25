@@ -194,11 +194,20 @@ func (s *Shadow) Margin() SideFloats {
 	// Offset goes either way, depending on side.
 	// Every side must be positive.
 
+	// note: we are using EdgeBlurFactors with radiusFactor = 1
+	// (sigma == radius), so we divide Blur / 2 relative to the
+	// CSS standard of sigma = blur / 2 (i.e., our sigma = blur,
+	// so we divide Blur / 2 to achieve the same effect).
+	// This works fine for low-opacity blur factors (the edges are
+	// so transparent that you can't really see beyond 1 sigma if
+	// you used radiusFactor = 2).
+	// If a higher-contrast shadow is used, it would look better
+	// with radiusFactor = 2, and you'd have to remove this /2 factor.
 	return NewSideFloats(
-		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots, 0),
-		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots, 0),
-		mat32.Max(s.Spread.Dots+s.VOffset.Dots+s.Blur.Dots, 0),
-		mat32.Max(s.Spread.Dots-s.HOffset.Dots+s.Blur.Dots, 0),
+		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots+s.VOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots-s.HOffset.Dots+s.Blur.Dots/2, 0),
 	)
 }
 
@@ -208,26 +217,6 @@ func (s *Style) AddBoxShadow(shadow ...Shadow) {
 		s.BoxShadow = []Shadow{}
 	}
 	s.BoxShadow = append(s.BoxShadow, shadow...)
-}
-
-// BoxShadowStartPos returns the position and size of the
-// area in which all of the box shadows are rendered, using
-// [Shadow.Pos] and [Shadow.Size]. It should be used as the
-// bounds to clear to prevent growing shadows.
-func (s *Style) BoxShadowPosSize(startPos, startSize mat32.Vec2) (pos mat32.Vec2, sz mat32.Vec2) {
-	// Need to think in terms of min/max bounds
-	// to get accurate pos and size if the shadow
-	// with the biggest size does not have the smallest pos
-	minPos := startPos
-	maxMax := startPos.Add(startSize) // max upper (max) bound
-	for _, sh := range s.BoxShadow {
-		curPos := sh.Pos(startPos)
-		curSz := sh.Size(startSize)
-
-		minPos = minPos.Min(curPos)
-		maxMax = maxMax.Max(curPos.Add(curSz))
-	}
-	return minPos, maxMax.Sub(minPos)
 }
 
 // BoxShadowMargin returns the effective box

@@ -733,13 +733,17 @@ func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r styles.Si
 // DrawRoundedShadowBlur draws a standard rounded rectangle
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
-// The BlurRadius adds Radius extra size around the rectangle,
-// with values inside the radius having the full color,
-// which fade in opacity out to the + radius dimension.
-// blurRadius is clamped to be <= w-2 and h-2.
-// The blur kernel has a Gaussian sigma of blurRadius / 2.
-func (pc *Paint) DrawRoundedShadowBlur(rs *State, blurRadius, x, y, w, h float32, r styles.SideFloats) {
-	if blurRadius <= 0 {
+// The blurSigma and radiusFactor args add a blurred shadow with
+// an effective Gaussian sigma = blurSigma, and radius = radiusFactor * sigma.
+// This shadow is rendered around the given box size up to given radius.
+// See EdgeBlurFactors for underlying blur factor code.
+// Using radiusFactor = 1 works well for weak shadows, where the fringe beyond
+// 1 sigma is essentially invisible.  To match the CSS standard, you then
+// pass blurSigma = blur / 2, radiusFactor = 1.  For darker shadows,
+// use blurSigma = blur / 2, radiusFactor = 2, and reserve extra space for the full shadow.
+// The effective blurRadius is clamped to be <= w-2 and h-2.
+func (pc *Paint) DrawRoundedShadowBlur(rs *State, blurSigma, radiusFactor, x, y, w, h float32, r styles.SideFloats) {
+	if blurSigma <= 0 || radiusFactor <= 0 {
 		pc.DrawRoundedRectangle(rs, x, y, w, h, r)
 		return
 	}
@@ -747,33 +751,31 @@ func (pc *Paint) DrawRoundedShadowBlur(rs *State, blurRadius, x, y, w, h float32
 	y = mat32.Floor(y)
 	w = mat32.Ceil(w)
 	h = mat32.Ceil(h)
-	br := mat32.Ceil(blurRadius)
+	br := mat32.Ceil(radiusFactor * blurSigma)
 	br = mat32.Clamp(br, 1, w/2-2)
 	br = mat32.Clamp(br, 1, h/2-2)
-	blurs := EdgeBlurFactors(br)
+	radiusFactor = br / blurSigma
+	blurs := EdgeBlurFactors(blurSigma, radiusFactor)
 
 	// pc.StrokeStyle.On = false
 	// pc.DrawRoundedRectangle(rs, x+br, y+br, w-2*br, h-2*br, r)
 	// pc.FillStrokeClear(rs)
+	origStroke := pc.StrokeStyle
+	origFill := pc.FillStyle
 	pc.StrokeStyle.On = true
 	pc.FillStyle.On = false
 	origOpacity := pc.FillStyle.Opacity
-	origStroke := pc.StrokeStyle.Color.Solid
-	origWidth := pc.StrokeStyle.Width
 	pc.StrokeStyle.Color.SetSolid(pc.FillStyle.Color.Solid)
 	pc.StrokeStyle.Width.Dots = 1
 	for i, b := range blurs {
-		bo := blurRadius - float32(i)
+		bo := br - float32(i)
 		pc.StrokeStyle.Opacity = b * origOpacity
 		pc.DrawRoundedRectangle(rs, x+bo, y+bo, w-2*bo, h-2*bo, r)
 		pc.Stroke(rs)
 
 	}
-	pc.FillStyle.Opacity = origOpacity
-	pc.StrokeStyle.Color.Solid = origStroke
-	pc.StrokeStyle.Width = origWidth
-	pc.StrokeStyle.On = false
-	pc.FillStyle.On = true
+	pc.StrokeStyle = origStroke
+	pc.FillStyle = origFill
 }
 
 // DrawEllipticalArc draws arc between angle1 and angle2 along an ellipse,
