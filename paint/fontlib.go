@@ -284,9 +284,8 @@ func (fl *FontLib) FontsAvailFromFS(fsys fs.FS, root string) error {
 			}
 			fn = afn + sfx
 		} else {
-			fn = strings.Replace(fn, "_", " ", -1)
-			fn = strings.Replace(fn, "-", " ", -1)
-			// fn = strings.Title(fn)
+			strs := camelcase.Split(strcase.ToCamel(fn))
+			fn = strings.Join(strs, " ")
 			for sc, rp := range shortFontMods {
 				if strings.HasSuffix(fn, sc) {
 					fn = strings.TrimSuffix(fn, sc)
