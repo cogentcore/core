@@ -271,26 +271,26 @@ func (tv *TableView) CacheVisFields() {
 }
 
 // Config configures the view
-func (tv *TableView) ConfigWidget(sc *gi.Scene) {
-	tv.ConfigTableView(sc)
+func (tv *TableView) ConfigWidget() {
+	tv.ConfigTableView()
 }
 
-func (tv *TableView) ConfigTableView(sc *gi.Scene) {
+func (tv *TableView) ConfigTableView() {
 	if tv.Is(SliceViewConfiged) {
 		tv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
 	updt := tv.UpdateStart()
 	tv.SortSlice()
-	tv.ConfigFrame(sc)
-	tv.This().(SliceViewer).ConfigRows(sc)
+	tv.ConfigFrame()
+	tv.This().(SliceViewer).ConfigRows()
 	tv.This().(SliceViewer).UpdateWidgets()
 	tv.ConfigScroll()
-	tv.ApplyStyleTree(sc)
+	tv.ApplyStyleTree()
 	tv.UpdateEndLayout(updt)
 }
 
-func (tv *TableView) ConfigFrame(sc *gi.Scene) {
+func (tv *TableView) ConfigFrame() {
 	if tv.HasChildren() {
 		return
 	}
@@ -300,10 +300,10 @@ func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	gl.SetFlag(true, gi.LayoutNoKeys)
 	NewSliceViewGrid(gl, "grid")
 	gi.NewSlider(gl, "scrollbar")
-	tv.ConfigHeader(sc)
+	tv.ConfigHeader()
 }
 
-func (tv *TableView) ConfigHeader(sc *gi.Scene) {
+func (tv *TableView) ConfigHeader() {
 	sgh := tv.SliceHeader()
 	if sgh.HasChildren() || tv.NVisFields == 0 {
 		return
@@ -410,7 +410,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 // ConfigRows configures VisRows worth of widgets
 // to display slice data.  It should only be called
 // when NeedsConfigRows is true: when VisRows changes.
-func (tv *TableView) ConfigRows(sc *gi.Scene) {
+func (tv *TableView) ConfigRows() {
 	sg := tv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
@@ -490,7 +490,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			cidx := ridx + idxOff + fli
 			w := ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(w, cidx, valnm)
-			vv.ConfigWidget(w, sc)
+			vv.ConfigWidget(w)
 			wb := w.AsWidget()
 			wb.OnSelect(func(e events.Event) {
 				e.SetHandled()
@@ -535,8 +535,8 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			}
 		}
 	}
-	tv.ConfigTree(sc)
-	tv.ApplyStyleTree(sc)
+	tv.ConfigTree()
+	tv.ApplyStyleTree()
 }
 
 // UpdateWidgets updates the row widget display to
@@ -939,8 +939,8 @@ func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
 //////////////////////////////////////////////////////
 // 	Header layout
 
-func (tv *TableView) SizeFinal(sc *gi.Scene) {
-	tv.SliceViewBase.SizeFinal(sc)
+func (tv *TableView) SizeFinal() {
+	tv.SliceViewBase.SizeFinal()
 	sg := tv.This().(SliceViewer).SliceGrid()
 	sh := tv.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {

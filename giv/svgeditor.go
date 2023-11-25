@@ -104,8 +104,8 @@ func (sve *Editor) SetTransform() {
 	sve.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", sve.Trans.X, sve.Trans.Y, sve.Scale, sve.Scale))
 }
 
-func (sve *Editor) Render(sc *gi.Scene) {
-	if sve.PushBounds(sc) {
+func (sve *Editor) Render() {
+	if sve.PushBounds() {
 		// rs := &sve.Render
 		// if sve.Fill {
 		// 	sve.FillScene()
@@ -114,8 +114,8 @@ func (sve *Editor) Render(sc *gi.Scene) {
 		// 	sve.SetNormXForm()
 		// }
 		// rs.PushXForm(sve.Pnt.XForm)
-		sve.RenderChildren(sc) // we must do children first, then us!
-		sve.PopBounds(sc)
+		sve.RenderChildren() // we must do children first, then us!
+		sve.PopBounds()
 		// rs.PopXForm()
 		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)
 	}
