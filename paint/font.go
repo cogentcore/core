@@ -14,6 +14,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/grr"
 	"goki.dev/ki/v2"
 	"golang.org/x/image/font/opentype"
 )
@@ -40,7 +41,7 @@ func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
 	if err != nil {
 		log.Printf("%v\n", err)
 		if fs.Face == nil {
-			face, _ = FontLibrary.Font("Go", intDots) // guaranteed to exist
+			face = grr.Log(FontLibrary.Font("Roboto", intDots)) // guaranteed to exist
 			fs.Face = face
 		}
 	} else {

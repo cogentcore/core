@@ -368,14 +368,14 @@ var defaultFonts embed.FS
 // FontFallbacks are a list of fallback fonts to try, at the basename level.
 // Make sure there are no loops!  Include Noto versions of everything in this
 // because they have the most stretch options, so they should be in the mix if
-// they have been installed, and include "Go" options last.
+// they have been installed, and include "Roboto" options last.
 var FontFallbacks = map[string]string{
 	"serif":            "Times New Roman",
 	"times":            "Times New Roman",
 	"Times New Roman":  "Liberation Serif",
 	"Liberation Serif": "NotoSerif",
 	"sans-serif":       "NotoSans",
-	"NotoSans":         "Go",
+	"NotoSans":         "Roboto",
 	"courier":          "Courier",
 	"Courier":          "Courier New",
 	"Courier New":      "NotoSansMono",
