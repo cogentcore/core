@@ -109,7 +109,7 @@ func (vv *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
+	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
 			km := keyfun.AvailMaps[si]

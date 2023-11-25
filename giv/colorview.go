@@ -696,7 +696,7 @@ func (vv *ColorNameValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		}
 	}
 	si := 0
-	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
+	NewTableView(d).SetSlice(&sl).SetSelIdx(curRow).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
 			vv.SetValue(sl[si].Name)
