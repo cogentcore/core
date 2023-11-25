@@ -25,6 +25,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
+	_ = rad
 
 	// the background color we actually use
 	bg := st.BackgroundColor
@@ -75,14 +76,11 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 			shadow.Color = colors.SetA(shadow.Color, 255) // not a pointer so we can update
 
 			pc.FillStyle.SetColor(shadow.Color)
-			// we only want radius for border, no actual border
-			pc.DrawBox(rs, shadow.BasePos(mpos), shadow.BaseSize(msz), styles.Border{Radius: st.Border.Radius})
-			// pc.FillStyle.Opacity = 1.0
+			spos := shadow.BasePos(mpos)
+			ssz := shadow.BaseSize(msz)
+			pc.DrawRoundedShadowBlur(rs, shadow.Blur.Dots, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
 			pc.FillStyle.Opacity = prevOpacity
 		}
-		// if shadow.Blur.Dots != 0 {
-		pc.BlurBox(rs, pos, sz, st.BoxShadow[0].Blur.Dots/2)
-		// }
 	}
 
 	// then draw the box over top of that.

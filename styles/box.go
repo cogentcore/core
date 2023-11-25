@@ -195,10 +195,10 @@ func (s *Shadow) Margin() SideFloats {
 	// Every side must be positive.
 
 	return NewSideFloats(
-		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots/2, 0),
-		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots/2, 0),
-		mat32.Max(s.Spread.Dots+s.VOffset.Dots+s.Blur.Dots/2, 0),
-		mat32.Max(s.Spread.Dots-s.HOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots, 0),
+		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots, 0),
+		mat32.Max(s.Spread.Dots+s.VOffset.Dots+s.Blur.Dots, 0),
+		mat32.Max(s.Spread.Dots-s.HOffset.Dots+s.Blur.Dots, 0),
 	)
 }
 

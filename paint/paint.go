@@ -730,90 +730,48 @@ func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r styles.Si
 	pc.ClosePath(rs)
 }
 
-// // DrawChangingRectangle draws a rounder rectangle with the given x and y position,
-// // width and height, and border radius for each corner.
-// func (pc *Paint) DrawMultiStyleBorder(rs *State, x, y, w, h float32, bs styles.Border) {
-// 	r := bs.Radius.Dots()
+// DrawRoundedShadowBlur draws a standard rounded rectangle
+// with a consistent border and with the given x and y position,
+// width and height, and border radius for each corner.
+// The BlurRadius adds Radius extra size around the rectangle,
+// with values inside the radius having the full color,
+// which fade in opacity out to the + radius dimension.
+// blurRadius is clamped to be <= w-2 and h-2.
+// The blur kernel has a Gaussian sigma of blurRadius / 2.
+func (pc *Paint) DrawRoundedShadowBlur(rs *State, blurRadius, x, y, w, h float32, r styles.SideFloats) {
+	if blurRadius <= 0 {
+		pc.DrawRoundedRectangle(rs, x, y, w, h, r)
+		return
+	}
+	x = mat32.Floor(x)
+	y = mat32.Floor(y)
+	w = mat32.Ceil(w)
+	h = mat32.Ceil(h)
+	br := mat32.Ceil(blurRadius)
+	br = mat32.Clamp(br, 1, w/2-2)
+	br = mat32.Clamp(br, 1, h/2-2)
+	blurs := EdgeBlurFactors(br)
 
-// 	// use consistent rounded rectangle for fill, and then draw borders side by side
-// 	pc.DrawConsistentRoundedRectangle(rs, x, y, w, h, r)
-// 	pc.Fill(rs)
+	pc.StrokeStyle.On = false
+	// pc.DrawRoundedRectangle(rs, x+br, y+br, w-2*br, h-2*br, r)
+	// pc.FillStrokeClear(rs)
+	pc.StrokeStyle.On = true
+	pc.FillStyle.On = false
+	origOpacity := pc.FillStyle.Opacity
+	origStroke := pc.StrokeStyle.Color.Solid
+	pc.StrokeStyle.Color.Solid = pc.FillStyle.Color.Solid
+	for i, b := range blurs {
+		bo := blurRadius - float32(i)
+		pc.StrokeStyle.Opacity = b * origOpacity
+		pc.DrawRoundedRectangle(rs, x+bo, y+bo, w-2*bo, h-2*bo, r)
+		pc.FillStrokeClear(rs)
 
-// 	// position values
-// 	var (
-// 		xtl, ytl   = x, y                 // top left
-// 		xtli, ytli = x + r.Top, y + r.Top // top left inset
-
-// 		xtr, ytr   = x + w, y                     // top right
-// 		xtri, ytri = x + w - r.Right, y + r.Right // top right inset
-
-// 		xbr, ybr   = x + w, y + h                       // bottom right
-// 		xbri, ybri = x + w - r.Bottom, y + h - r.Bottom // bottom right inset
-
-// 		xbl, ybl   = x, y + h                   // bottom left
-// 		xbli, ybli = x + r.Left, y + h - r.Left // bottom left inset
-// 	)
-
-// 	// SidesTODO: need to figure out how to style rounded corners correctly
-// 	// (in CSS they are split in the middle between different border side styles)
-
-// 	pc.NewSubPath(rs)
-// 	pc.MoveTo(rs, xtli, ytl)
-
-// 	// set the color if it is not the same as the already set color
-// 	if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Top)
-// 	}
-// 	pc.StrokeStyle.Width = bs.Width.Top
-// 	pc.LineTo(rs, xtri, ytr)
-// 	if r.Right != 0 {
-// 		pc.DrawArc(rs, xtri, ytri, r.Right, mat32.DegToRad(270), mat32.DegToRad(360))
-// 	}
-// 	// if the color or width is changing for the next one, we have to stroke now
-// 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
-// 		pc.Stroke(rs)
-// 		pc.NewSubPath(rs)
-// 		pc.MoveTo(rs, xtr, ytri)
-// 	}
-
-// 	if bs.Color.Right != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Right)
-// 	}
-// 	pc.StrokeStyle.Width = bs.Width.Right
-// 	pc.LineTo(rs, xbr, ybri)
-// 	if r.Bottom != 0 {
-// 		pc.DrawArc(rs, xbri, ybri, r.Bottom, mat32.DegToRad(0), mat32.DegToRad(90))
-// 	}
-// 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
-// 		pc.Stroke(rs)
-// 		pc.NewSubPath(rs)
-// 		pc.MoveTo(rs, xbri, ybr)
-// 	}
-
-// 	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
-// 	}
-// 	pc.StrokeStyle.Width = bs.Width.Bottom
-// 	pc.LineTo(rs, xbli, ybl)
-// 	if r.Left != 0 {
-// 		pc.DrawArc(rs, xbli, ybli, r.Left, mat32.DegToRad(90), mat32.DegToRad(180))
-// 	}
-// 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
-// 		pc.Stroke(rs)
-// 		pc.NewSubPath(rs)
-// 		pc.MoveTo(rs, xbl, ybli)
-// 	}
-
-// 	if bs.Color.Left != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Left)
-// 	}
-// 	pc.StrokeStyle.Width = bs.Width.Left
-// 	pc.LineTo(rs, xtl, ytli)
-// 	if r.Top != 0 {
-// 		pc.DrawArc(rs, xtli, ytli, r.Top, mat32.DegToRad(180), mat32.DegToRad(270))
-// 	}
-// 	pc.LineTo(rs, xtli, ytl)
-// }
+	}
+	pc.FillStyle.Opacity = origOpacity
+	pc.StrokeStyle.Color.Solid = origStroke
+	pc.StrokeStyle.On = false
+	pc.FillStyle.On = true
+}
 
 // DrawEllipticalArc draws arc between angle1 and angle2 along an ellipse,
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with

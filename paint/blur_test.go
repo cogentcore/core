@@ -11,6 +11,11 @@ import (
 	"testing"
 
 	"github.com/anthonynsimon/bild/blur"
+	"goki.dev/colors"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/grows/images"
+	"goki.dev/mat32/v2"
 )
 
 // This mostly replicates the first test from this reference:
@@ -63,4 +68,49 @@ func TestGaussianBlur(t *testing.T) {
 
 func TestEdgeBlurFactors(t *testing.T) {
 	fmt.Println(EdgeBlurFactors(4))
+}
+
+func TestShadowBlur(t *testing.T) {
+	imgsz := image.Point{320, 240}
+	szrec := image.Rectangle{Max: imgsz}
+	img := image.NewRGBA(szrec)
+
+	rs := &State{}
+	pc := &Paint{}
+
+	pc.Defaults()               // zeros are not good defaults for paint
+	pc.SetUnitContextExt(imgsz) // initialize units
+
+	rs.Init(imgsz.X, imgsz.Y, img)
+	rs.PushBounds(szrec)
+	rs.Lock()
+
+	st := &styles.Style{}
+	st.Defaults()
+	st.Color = colors.Black
+	st.BackgroundColor.SetSolid(colors.Transparent) // Lightblue)
+	st.Border.Width.Set(units.Dp(0))
+	st.Border.Radius = styles.BorderRadiusFull
+	st.BoxShadow = []styles.Shadow{
+		{
+			HOffset: units.Zero(),
+			VOffset: units.Dp(6),
+			Blur:    units.Dp(30),
+			Spread:  units.Dp(5),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+		},
+	}
+
+	st.ToDots()
+
+	sbg := &colors.Full{Solid: colors.White}
+
+	spc := st.BoxSpace().Size()
+	sz := spc.Add(mat32.Vec2{200, 100})
+
+	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
+
+	rs.Unlock()
+
+	images.Assert(t, img, "shadowblur")
 }
