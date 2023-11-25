@@ -73,9 +73,9 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
 			// we reset it back to 255 so that only the opacity affects it and we don't get double transparency
-			shadow.Color = colors.SetA(shadow.Color, 255) // not a pointer so we can update
+			// shadow.Color = colors.SetA(shadow.Color, 255) // not a pointer so we can update
 
-			pc.FillStyle.SetColor(shadow.Color)
+			pc.FillStyle.SetColor(colors.SetA(shadow.Color, 255))
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
 			pc.DrawRoundedShadowBlur(rs, shadow.Blur.Dots, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
@@ -94,7 +94,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		pc.FillStyle.SetFullColor(&bg)
 		// no border -- fill only
 		pc.DrawRoundedRectangle(rs, mpos.X, mpos.Y, msz.X, msz.Y, rad)
-		pc.Fill(rs)
+		pc.FillStrokeClear(rs)
 	}
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)

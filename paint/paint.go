@@ -752,23 +752,26 @@ func (pc *Paint) DrawRoundedShadowBlur(rs *State, blurRadius, x, y, w, h float32
 	br = mat32.Clamp(br, 1, h/2-2)
 	blurs := EdgeBlurFactors(br)
 
-	pc.StrokeStyle.On = false
+	// pc.StrokeStyle.On = false
 	// pc.DrawRoundedRectangle(rs, x+br, y+br, w-2*br, h-2*br, r)
 	// pc.FillStrokeClear(rs)
 	pc.StrokeStyle.On = true
 	pc.FillStyle.On = false
 	origOpacity := pc.FillStyle.Opacity
 	origStroke := pc.StrokeStyle.Color.Solid
-	pc.StrokeStyle.Color.Solid = pc.FillStyle.Color.Solid
+	origWidth := pc.StrokeStyle.Width
+	pc.StrokeStyle.Color.SetSolid(pc.FillStyle.Color.Solid)
+	pc.StrokeStyle.Width.Dots = 1
 	for i, b := range blurs {
 		bo := blurRadius - float32(i)
 		pc.StrokeStyle.Opacity = b * origOpacity
 		pc.DrawRoundedRectangle(rs, x+bo, y+bo, w-2*bo, h-2*bo, r)
-		pc.FillStrokeClear(rs)
+		pc.Stroke(rs)
 
 	}
 	pc.FillStyle.Opacity = origOpacity
 	pc.StrokeStyle.Color.Solid = origStroke
+	pc.StrokeStyle.Width = origWidth
 	pc.StrokeStyle.On = false
 	pc.FillStyle.On = true
 }
