@@ -146,7 +146,7 @@ type SliceViewer interface {
 
 	// ConfigRows configures VisRows worth of widgets
 	// to display slice data.
-	ConfigRows(sc *gi.Scene)
+	ConfigRows()
 
 	// UpdateWidgets updates the row widget display to
 	// represent the current state of the slice data,
@@ -414,41 +414,41 @@ func (sv *SliceViewBase) IsNil() bool {
 }
 
 // BindSelectDialog makes the slice view a read-only selection slice view and then
-// binds its events to the given dialog and its current selection index to the given value.
-func (sv *SliceViewBase) BindSelectDialog(sc *gi.Scene, val *int) *SliceViewBase {
+// binds its events to its scene and its current selection index to the given value.
+func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.SelIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		*val = sv.SelIdx
-		sc.Close()
+		sv.Sc.Close()
 	})
 	return sv
 }
 
 // Config configures a standard setup of the overall Frame
-func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
-	sv.ConfigSliceView(sc)
+func (sv *SliceViewBase) ConfigWidget() {
+	sv.ConfigSliceView()
 }
 
 // ConfigSliceView handles entire config.
 // ReConfig calls this, followed by ApplyStyleTree so we don't need to call that.
-func (sv *SliceViewBase) ConfigSliceView(sc *gi.Scene) {
+func (sv *SliceViewBase) ConfigSliceView() {
 	if sv.Is(SliceViewConfiged) {
 		sv.This().(SliceViewer).UpdateWidgets()
 		return
 	}
 	updt := sv.UpdateStart()
-	sv.ConfigFrame(sc)
-	sv.This().(SliceViewer).ConfigRows(sc)
+	sv.ConfigFrame()
+	sv.This().(SliceViewer).ConfigRows()
 	sv.This().(SliceViewer).UpdateWidgets()
 	sv.ConfigScroll()
-	sv.ApplyStyleTree(sc)
+	sv.ApplyStyleTree()
 	sv.UpdateEndLayout(updt)
 }
 
-func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
+func (sv *SliceViewBase) ConfigFrame() {
 	if sv.HasChildren() {
 		return
 	}
@@ -561,7 +561,7 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 // ConfigRows configures VisRows worth of widgets
 // to display slice data.
-func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
+func (sv *SliceViewBase) ConfigRows() {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
@@ -619,7 +619,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
 		sg.SetChild(w, ridx+idxOff, valnm)
-		vv.ConfigWidget(w, sc)
+		vv.ConfigWidget(w)
 		wb := w.AsWidget()
 		wb.OnSelect(func(e events.Event) {
 			e.SetHandled()
@@ -665,8 +665,8 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 			}
 		}
 	}
-	sv.ConfigTree(sc)
-	sv.ApplyStyleTree(sc)
+	sv.ConfigTree()
+	sv.ApplyStyleTree()
 }
 
 // UpdateWidgets updates the row widget display to
@@ -1255,7 +1255,7 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 			sv.SelIdx = idx
 			sv.SelectIdx(idx)
 		}
-		sv.ApplyStyleTree(sv.Sc)
+		sv.ApplyStyleTree()
 		sv.This().(SliceViewer).UpdateWidgets()
 		sv.Send(events.Select)
 	} else {
@@ -1429,7 +1429,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 		sv.UnselectIdx(idx)
 	}
 	sv.This().(SliceViewer).UpdateWidgets()
-	sv.ApplyStyleTree(sv.Sc)
+	sv.ApplyStyleTree()
 }
 
 // UnselectIdxAction unselects this idx (if selected) -- and emits a signal
@@ -2104,8 +2104,8 @@ func (sg *SliceViewGrid) OnInit() {
 	sg.Styles.Display = styles.Grid
 }
 
-func (sg *SliceViewGrid) SizeFromChildren(sc *gi.Scene, iter int, pass gi.LayoutPasses) mat32.Vec2 {
-	csz := sg.Frame.SizeFromChildren(sc, iter, pass)
+func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.Vec2 {
+	csz := sg.Frame.SizeFromChildren(iter, pass)
 	rht, err := sg.LayImpl.RowHeight(0, 0)
 	if err != nil {
 		fmt.Println("SliceViewGrid Sizing Error:", err)
@@ -2132,14 +2132,14 @@ func (sg *SliceViewGrid) SizeFromChildren(sc *gi.Scene, iter int, pass gi.Layout
 	return csz
 }
 
-func (sv *SliceViewBase) SizeFinal(sc *gi.Scene) {
+func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if sv.VisRows != sg.VisRows {
 		sv.VisRows = sg.VisRows
 		// fmt.Println("vis rows:", sg.VisRows)
-		sv.This().(SliceViewer).ConfigRows(sc)
-		sg.SizeFinalUpdateChildrenSizes(sc)
+		sv.This().(SliceViewer).ConfigRows()
+		sg.SizeFinalUpdateChildrenSizes()
 	}
-	sv.Frame.SizeFinal(sc)
+	sv.Frame.SizeFinal()
 	// fmt.Println(sv, "layout")
 }
