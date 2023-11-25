@@ -84,7 +84,7 @@ func (vv *KeyMapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -93,7 +93,7 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)

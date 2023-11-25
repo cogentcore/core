@@ -237,11 +237,11 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) ConfigWidget(sc *gi.Scene) {
-	fv.ConfigFileView(sc)
+func (fv *FileView) ConfigWidget() {
+	fv.ConfigFileView()
 }
 
-func (fv *FileView) ConfigFileView(sc *gi.Scene) {
+func (fv *FileView) ConfigFileView() {
 	if fv.HasChildren() {
 		return
 	}
@@ -277,7 +277,7 @@ func (fv *FileView) ConfigPathBar() {
 	pl := gi.NewLabel(pr, "path-lbl").SetText("Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
 	pf := gi.NewChooser(pr, "path").SetEditable(true)
-	pf.ConfigParts(fv.Sc)
+	pf.ConfigParts()
 	pft, found := pf.TextField()
 	if found {
 		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
@@ -753,8 +753,8 @@ func (fv *FileView) SaveSortPrefs() {
 	gi.Prefs.Save()
 }
 
-func (fv *FileView) ApplyStyle(sc *gi.Scene) {
-	fv.Frame.ApplyStyle(sc)
+func (fv *FileView) ApplyStyle() {
+	fv.Frame.ApplyStyle()
 	sf := fv.SelField()
 	sf.StartFocus() // need to call this when window is actually active
 }
