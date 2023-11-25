@@ -113,7 +113,8 @@ type TreeView struct {
 	// our alloc includes all of our children, but we only draw us.
 	WidgetSize mat32.Vec2 `copy:"-" json:"-" xml:"-" edit:"-"`
 
-	// cached root of the view
+	// The cached root of the view. It is automatically set and does not need to be
+	// set by the end user.
 	RootView *TreeView `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// SelectedNodes holds the currently-selected nodes, on the
@@ -177,6 +178,11 @@ func (tv *TreeView) OnInit() {
 func (tv *TreeView) OnAdd() {
 	tv.WidgetBase.OnAdd()
 	tv.Text = tv.Nm
+	if ptv := AsTreeView(tv.Parent()); ptv != nil {
+		tv.RootView = ptv.RootView
+	} else {
+		tv.RootView = tv
+	}
 }
 
 func (tv *TreeView) TreeViewStyles() {

@@ -216,7 +216,6 @@ func (fn *Node) UpdateDir() {
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
-		sf.RootView = fn.FRoot.AsTreeView()
 		if hasExtFiles && sf.Nm == ExternalFilesName {
 			fn.FRoot.UpdateExtFiles(sf)
 			continue

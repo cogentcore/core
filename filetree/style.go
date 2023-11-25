@@ -16,7 +16,6 @@ import (
 )
 
 func (ft *Tree) OnInit() {
-	ft.RootView = ft.AsTreeView()
 	ft.FRoot = ft
 	ft.NodeType = NodeType
 	ft.OpenDepth = 4

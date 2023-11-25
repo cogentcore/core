@@ -31,7 +31,6 @@ func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 	tv.SetNChildren(n, giv.TreeViewType, parnm+"ch")
 	for j := 0; j < n; j++ {
 		kt := tv.Child(j).(*giv.TreeView)
-		kt.RootView = tv.RootView
 		MakeTree(kt, iter, maxIter, maxKids)
 	}
 }
@@ -71,7 +70,6 @@ func app() {
 	})
 
 	tv := giv.NewTreeView(tvfr, "tv")
-	tv.RootView = tv
 
 	// depth := 3 // 1 = small tree for testing
 	depth := 10 // big tree

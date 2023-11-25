@@ -36,7 +36,6 @@ func (tv *TreeView) SyncRootNode(sk ki.Ki) *TreeView {
 		updt = tv.UpdateStart()
 		tv.SyncNode = sk
 	}
-	tv.RootView = tv
 	tvIdx := 0
 	tv.SyncToSrc(&tvIdx, true, 0)
 	tv.UpdateEndLayout(updt)
@@ -77,13 +76,12 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	tv.SetName(nm)
 	tv.ViewIdx = *tvIdx
 	(*tvIdx)++
-	tvPar := tv.TreeViewParent()
-	if tvPar != nil {
-		tv.RootView = tvPar.RootView
-		// if init && depth >= tv.RootView.OpenDepth {
-		// 	tv.SetClosed(true)
-		// }
-	}
+	// tvPar := tv.TreeViewParent()
+	// if tvPar != nil {
+	// 	if init && depth >= tv.RootView.OpenDepth {
+	// 		tv.SetClosed(true)
+	// 	}
+	// }
 	vcprop := "view-closed"
 	skids := *sk.Children()
 	tnl := make(ki.Config, 0, len(skids))
@@ -205,7 +203,6 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *gti.Type, n int) {
 		tv.SetChildAdded()
 		nki := tv.InsertNewChild(typ, myidx+i, nm)
 		ntv := AsTreeView(nki)
-		ntv.RootView = tv.RootView
 		ntv.Update()
 		if i == n-1 {
 			stv = ntv
@@ -357,7 +354,6 @@ func (tv *TreeView) Duplicate() { //gti:add
 	par.SetChildAdded()
 	par.InsertChild(nwkid, myidx+1)
 	ntv := AsTreeView(nwkid)
-	ntv.RootView = par.RootView
 	ntv.Update()
 	par.Update()
 	par.TreeViewChanged(nil)
