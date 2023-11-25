@@ -10,10 +10,12 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor"
+	"goki.dev/girl/styles"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -66,7 +68,7 @@ func (a *App) ConfigWidget() {
 
 	sp := gi.NewSplits(a, "splits").SetDim(mat32.Y)
 
-	gi.NewFrame(sp, "commands")
+	cmds := gi.NewFrame(sp, "commands")
 
 	tb := texteditor.NewBuf().SetText([]byte("$ "))
 	tb.Hi.Lang = "sh"
@@ -76,15 +78,34 @@ func (a *App) ConfigWidget() {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Enter && e.Modifiers() == 0 {
 			cmd := string(tb.Text())
+			tb.SetText([]byte("$ "))
+
 			cmd = strings.TrimPrefix(cmd, "$ ")
 			cmd = strings.TrimSuffix(cmd, "\n")
-			grr.Log0(xe.Verbose().Run("bash", "-c", cmd))
+			grr.Log0(a.RunCmd(cmd, cmds))
 		}
 	})
 
 	sp.SetSplits(0.8, 0.2)
 
 	a.UpdateEnd(updt)
+}
+
+// RunCmd runs the given command in the context of the given commands frame.
+func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
+	updt := cmds.UpdateStart()
+
+	cfr := gi.NewFrame(cmds).Style(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Border.Radius = styles.BorderRadiusLarge
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+	})
+	gi.NewLabel(cfr, "cmd").SetText("$ " + cmd)
+
+	cmds.Update()
+	cmds.UpdateEnd(updt)
+
+	return xe.Verbose().Run("bash", "-c", cmd)
 }
 
 // StructForFlags returns a new struct object for the given flags.
