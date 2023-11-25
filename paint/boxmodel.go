@@ -67,7 +67,9 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 			shadow := st.BoxShadow[i]
 			pc.StrokeStyle.SetColor(nil)
 			prevOpacity := pc.FillStyle.Opacity
-			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
+			// note: factor of 0.5 here does a reasonable job of matching
+			// material design shadows, at their specified alpha levels.
+			pc.FillStyle.Opacity = (float32(shadow.Color.A) / 255) * .5
 			pc.FillStyle.SetColor(colors.SetA(shadow.Color, 255))
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)

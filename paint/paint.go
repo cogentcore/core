@@ -754,19 +754,21 @@ func (pc *Paint) DrawRoundedShadowBlur(rs *State, blurSigma, radiusFactor, x, y,
 	br := mat32.Ceil(radiusFactor * blurSigma)
 	br = mat32.Clamp(br, 1, w/2-2)
 	br = mat32.Clamp(br, 1, h/2-2)
+	// radiusFactor = mat32.Ceil(br / blurSigma)
 	radiusFactor = br / blurSigma
 	blurs := EdgeBlurFactors(blurSigma, radiusFactor)
 
-	// pc.StrokeStyle.On = false
-	// pc.DrawRoundedRectangle(rs, x+br, y+br, w-2*br, h-2*br, r)
-	// pc.FillStrokeClear(rs)
 	origStroke := pc.StrokeStyle
 	origFill := pc.FillStyle
+	origOpacity := pc.FillStyle.Opacity
+
+	pc.StrokeStyle.On = false
+	pc.DrawRoundedRectangle(rs, x+br, y+br, w-2*br, h-2*br, r)
+	pc.FillStrokeClear(rs)
 	pc.StrokeStyle.On = true
 	pc.FillStyle.On = false
-	origOpacity := pc.FillStyle.Opacity
 	pc.StrokeStyle.Color.SetSolid(pc.FillStyle.Color.Solid)
-	pc.StrokeStyle.Width.Dots = 1
+	pc.StrokeStyle.Width.Dots = 1.5 // is the key number: 1 makes lines very transparent overall
 	for i, b := range blurs {
 		bo := br - float32(i)
 		pc.StrokeStyle.Opacity = b * origOpacity

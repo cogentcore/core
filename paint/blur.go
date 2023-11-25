@@ -72,7 +72,8 @@ func EdgeBlurFactors(sigma, radiusFactor float32) []float32 {
 
 	k := make([]float32, klen)
 	sum := float32(0)
-	for i, x := 0, -radius; i < klen; i, x = i+1, x+1 {
+	rstart := -radius + 0.5
+	for i, x := 0, rstart; i < klen; i, x = i+1, x+1 {
 		v := mat32.FastExp(sfactor * (x * x))
 		sum += v
 		k[i] = v

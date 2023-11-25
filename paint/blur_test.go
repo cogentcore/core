@@ -70,20 +70,14 @@ func TestEdgeBlurFactors(t *testing.T) {
 	fmt.Println(EdgeBlurFactors(2, 4))
 }
 
-func TestShadowBlur(t *testing.T) {
+func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 	imgsz := image.Point{320, 240}
 	szrec := image.Rectangle{Max: imgsz}
-	img := image.NewRGBA(szrec)
 
 	rs := &State{}
 	pc := &Paint{}
 
-	pc.Defaults()               // zeros are not good defaults for paint
-	pc.SetUnitContextExt(imgsz) // initialize units
-
-	rs.Init(imgsz.X, imgsz.Y, img)
-	rs.PushBounds(szrec)
-	rs.Lock()
+	pc.Defaults() // zeros are not good defaults for paint
 
 	st := &styles.Style{}
 	st.Defaults()
@@ -91,26 +85,61 @@ func TestShadowBlur(t *testing.T) {
 	st.BackgroundColor.SetSolid(colors.Transparent) // Lightblue)
 	st.Border.Width.Set(units.Dp(0))
 	st.Border.Radius = styles.BorderRadiusFull
-	st.BoxShadow = []styles.Shadow{
-		{
-			HOffset: units.Zero(),
-			VOffset: units.Dp(6),
-			Blur:    units.Dp(30),
-			Spread:  units.Dp(5),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 1),
-		},
-	}
+	st.BoxShadow = []styles.Shadow{shadow}
+
+	pc.SetUnitContextExt(imgsz) // initialize units
+	img := image.NewRGBA(szrec)
+	rs.Init(imgsz.X, imgsz.Y, img)
+	rs.PushBounds(szrec)
+	rs.Lock()
 
 	st.ToDots()
-
 	sbg := &colors.Full{Solid: colors.White}
-
 	spc := st.BoxSpace().Size()
 	sz := spc.Add(mat32.Vec2{200, 100})
-
 	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
-
 	rs.Unlock()
+	images.Assert(t, img, imgName)
+}
 
-	images.Assert(t, img, "shadowblur")
+func TestShadowBlur(t *testing.T) {
+
+	// fmt.Println("0.12", cie.SRGBToLinearComp(0.12)) // 0.013 -- too low
+
+	RunShadowBlur(t, "shadow5big_op1", styles.Shadow{
+		HOffset: units.Zero(),
+		VOffset: units.Dp(6),
+		Blur:    units.Dp(30),
+		Spread:  units.Dp(5),
+		Color:   colors.SetAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
+	})
+	RunShadowBlur(t, "shadow5big_op12", styles.Shadow{
+		HOffset: units.Zero(),
+		VOffset: units.Dp(6),
+		Blur:    units.Dp(30),
+		Spread:  units.Dp(5),
+		Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12), // actual
+	})
+	RunShadowBlur(t, "shadow5big_op1off36", styles.Shadow{
+		HOffset: units.Zero(),
+		VOffset: units.Dp(36),
+		Blur:    units.Dp(30),
+		Spread:  units.Dp(5),
+		Color:   colors.SetAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
+	})
+
+	RunShadowBlur(t, "shadow1sm_op1", styles.Shadow{
+		HOffset: units.Zero(),
+		VOffset: units.Dp(3),
+		Blur:    units.Dp(1),
+		Spread:  units.Dp(-2),
+		Color:   colors.SetAF32(colors.Scheme.Shadow, 1),
+	})
+	RunShadowBlur(t, "shadow1sm_op12", styles.Shadow{
+		HOffset: units.Zero(),
+		VOffset: units.Dp(3),
+		Blur:    units.Dp(1),
+		Spread:  units.Dp(-2),
+		Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+	})
 }

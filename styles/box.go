@@ -203,11 +203,20 @@ func (s *Shadow) Margin() SideFloats {
 	// you used radiusFactor = 2).
 	// If a higher-contrast shadow is used, it would look better
 	// with radiusFactor = 2, and you'd have to remove this /2 factor.
+
+	sdots := float32(0)
+	if s.Blur.Dots > 0 {
+		sdots = mat32.Ceil(0.5 * s.Blur.Dots)
+		if sdots < 2 { // for tight dp = 1 case, the render antialiasing requires a min width..
+			sdots = 2
+		}
+	}
+
 	return NewSideFloats(
-		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots/2, 0),
-		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots/2, 0),
-		mat32.Max(s.Spread.Dots+s.VOffset.Dots+s.Blur.Dots/2, 0),
-		mat32.Max(s.Spread.Dots-s.HOffset.Dots+s.Blur.Dots/2, 0),
+		mat32.Max(s.Spread.Dots-s.VOffset.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots+s.HOffset.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots+s.VOffset.Dots+sdots, 0),
+		mat32.Max(s.Spread.Dots-s.HOffset.Dots+sdots, 0),
 	)
 }
 
