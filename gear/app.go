@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -58,10 +59,17 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 
 	updt := a.UpdateStart()
 
-	st := StructForFlags(a.Cmd.Flags)
-	giv.NewStructView(a).SetStruct(st)
+	// st := StructForFlags(a.Cmd.Flags)
+	// giv.NewStructView(a).SetStruct(st)
 
-	a.UpdateEnd(updt)
+	sp := gi.NewSplits(a, "splits")
+
+	gi.NewFrame(sp, "commands")
+
+	texteditor.NewEditor(sp, "editor")
+
+	a.Update()
+	a.UpdateEndLayout(updt)
 }
 
 // StructForFlags returns a new struct object for the given flags.
