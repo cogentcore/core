@@ -64,12 +64,12 @@ func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 	return sv
 }
 
-func (sv *StructViewInline) ConfigWidget(sc *gi.Scene) {
-	sv.ConfigStruct(sc)
+func (sv *StructViewInline) ConfigWidget() {
+	sv.ConfigStruct()
 }
 
 // ConfigStruct configures the children for the current struct
-func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
+func (sv *StructViewInline) ConfigStruct() bool {
 	if laser.AnyIsNil(sv.Struct) {
 		return false
 	}
@@ -129,7 +129,7 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 		}
 		if wb.Class == "" {
 			wb.Class = "configed"
-			vv.ConfigWidget(w, sc)
+			vv.ConfigWidget(w)
 		} else {
 			vvb.Widget = w
 			vv.UpdateWidget()
@@ -163,7 +163,7 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
 		fmt.Println("did view if update")
 		sv.Update()
-		sv.SetNeedsLayout()
+		sv.SetNeedsLayout(true)
 	} else if sv.HasDefs {
 		updt := sv.UpdateStart()
 		for i, vv := range sv.FieldViews {
@@ -174,10 +174,10 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	}
 }
 
-// func (sv *StructViewInline) SizeUp(sc *gi.Scene) {
-// 	updt := sv.ConfigStruct(sc)
+// func (sv *StructViewInline) SizeUp() {
+// 	updt := sv.ConfigStruct()
 // 	if updt {
-// 		sv.ApplyStyleTree(sc)
+// 		sv.ApplyStyleTree()
 // 	}
-// 	sv.Frame.SizeUp(sc)
+// 	sv.Frame.SizeUp()
 // }
