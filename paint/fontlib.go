@@ -64,7 +64,9 @@ type FontLib struct {
 	// list of font paths to search for fonts
 	FontPaths []string
 
-	// map of font name to path to file
+	// Map of font name to path to file. If the path starts
+	// with "fs://", it indicates that it is located in
+	// [FontLib.FontsFS].
 	FontsAvail map[string]string
 
 	// information about each font -- this list should be used for selecting valid regularized font names
