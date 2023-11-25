@@ -71,7 +71,8 @@ func (a *App) ConfigWidget() {
 
 	cmds := gi.NewFrame(sp, "commands")
 
-	tb := texteditor.NewBuf().SetText([]byte("$ "))
+	tb := texteditor.NewBuf()
+	tb.NewBuf(0)
 	tb.Hi.Lang = "sh"
 	grr.Log0(tb.Stat())
 	te := texteditor.NewEditor(sp, "editor").SetBuf(tb)
@@ -82,9 +83,8 @@ func (a *App) ConfigWidget() {
 		}
 		e.SetHandled()
 		cmd := string(tb.Text())
-		tb.SetText([]byte("$ "))
+		tb.SetText([]byte{})
 
-		cmd = strings.TrimPrefix(cmd, "$ ")
 		grr.Log0(a.RunCmd(cmd, cmds))
 	})
 
@@ -107,14 +107,18 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 
 	out := &bytes.Buffer{}
 	buf := texteditor.NewBuf()
-	ob := &texteditor.OutBuf{}
-	ob.Init(out, buf, 200, func(line []byte) []byte { return line })
+	buf.NewBuf(0)
 	texteditor.NewEditor(cfr).SetBuf(buf)
+	ob := &texteditor.OutBuf{}
+	ob.Init(out, buf, 0, func(line []byte) []byte { return line })
+	go func() {
+		ob.MonOut()
+	}()
 
 	cmds.Update()
 	cmds.UpdateEnd(updt)
 
-	xc := xe.Verbose().SetStdout(out).SetStderr(out).SetErrors(out)
+	xc := xe.Major().SetStdout(out).SetStderr(out).SetErrors(out)
 
 	return xc.Run("bash", "-c", cmd)
 }
