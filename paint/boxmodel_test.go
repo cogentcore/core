@@ -33,7 +33,7 @@ func TestBoxModel(t *testing.T) {
 	st := &styles.Style{}
 	st.Defaults()
 	st.Color = colors.Black
-	st.BackgroundColor.SetSolid(colors.Green)
+	st.BackgroundColor.SetSolid(colors.Lightblue)
 	st.Border.Style.Set(styles.BorderSolid)
 	st.Border.Width.Set(units.Dp(5))
 	st.Border.Color.Set(colors.Red)
@@ -41,9 +41,10 @@ func TestBoxModel(t *testing.T) {
 
 	st.ToDots()
 
-	sbg := &colors.Full{Solid: colors.Blue}
+	sbg := &colors.Full{Solid: colors.White}
 
-	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, mat32.Vec2{200, 100}, sbg, 0)
+	sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
+	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
 
 	rs.Unlock()
 
@@ -68,7 +69,7 @@ func TestBoxShadow(t *testing.T) {
 	st := &styles.Style{}
 	st.Defaults()
 	st.Color = colors.Black
-	st.BackgroundColor.SetSolid(colors.Green)
+	st.BackgroundColor.SetSolid(colors.Lightblue)
 	st.Border.Style.Set(styles.BorderSolid)
 	st.Border.Width.Set(units.Dp(5))
 	st.Border.Color.Set(colors.Red)
@@ -77,9 +78,10 @@ func TestBoxShadow(t *testing.T) {
 
 	st.ToDots()
 
-	sbg := &colors.Full{Solid: colors.Blue}
+	sbg := &colors.Full{Solid: colors.White}
 
-	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, mat32.Vec2{200, 100}, sbg, 0)
+	sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
+	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
 
 	rs.Unlock()
 
