@@ -130,7 +130,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
 		if wb.Class == "" {
 			wb.Class = "configed"
-			arg.ConfigWidget(w, av.Sc)
+			arg.ConfigWidget(w)
 		} else {
 			arg.AsValueBase().Widget = w
 			arg.UpdateWidget()

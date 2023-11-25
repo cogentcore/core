@@ -166,7 +166,7 @@ func (vv *ColorMapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return

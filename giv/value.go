@@ -36,7 +36,7 @@ import (
 func NewValue(par ki.Ki, val any, name ...string) Value {
 	v := NewSoloValue(val)
 	w := par.NewChild(v.WidgetType()).(gi.Widget)
-	v.ConfigWidget(w, w.AsWidget().Sc)
+	v.ConfigWidget(w)
 	return v
 }
 
@@ -160,7 +160,7 @@ type Value interface {
 	// when the user edits it (values are always set immediately when the
 	// widget is updated).  Note: use OnLast(events.Change) to ensure that
 	// any other change modifiers have had a chance to intervene first.
-	ConfigWidget(w gi.Widget, sc *gi.Scene)
+	ConfigWidget(w gi.Widget)
 
 	// HasDialog returns true if this value has an associated Dialog,
 	// e.g., for FileName, StructView, SliceView, etc.
@@ -803,7 +803,7 @@ func (vv *ValueBase) UpdateWidget() {
 	}
 }
 
-func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -834,7 +834,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		tf.SetTypePassword()
 	}
 
-	tf.Config(sc)
+	tf.Config()
 	tf.OnChange(func(e events.Event) {
 		if vv.SetValue(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
