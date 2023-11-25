@@ -24,6 +24,7 @@ import (
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
+	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -1632,7 +1633,7 @@ func (vv *TextEditorValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 
 	tb := texteditor.NewBuf()
-	tb.Stat()
+	grr.Log0(tb.Stat())
 	tb.OnChange(func(e events.Event) {
 		fmt.Println(tb.Txt)
 		vv.SetValue(string(tb.Txt))
