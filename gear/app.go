@@ -5,6 +5,7 @@
 package gear
 
 import (
+	"bytes"
 	"reflect"
 	"strconv"
 	"strings"
@@ -98,15 +99,24 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 
 	cfr := gi.NewFrame(cmds).Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 	})
 	gi.NewLabel(cfr, "cmd").SetText("$ " + cmd)
 
+	out := &bytes.Buffer{}
+	buf := texteditor.NewBuf()
+	ob := &texteditor.OutBuf{}
+	ob.Init(out, buf, 200, func(line []byte) []byte { return line })
+	texteditor.NewEditor(cfr).SetBuf(buf)
+
 	cmds.Update()
 	cmds.UpdateEnd(updt)
 
-	return xe.Verbose().Run("bash", "-c", cmd)
+	xc := xe.Verbose().SetStdout(out).SetStderr(out).SetErrors(out)
+
+	return xc.Run("bash", "-c", cmd)
 }
 
 // StructForFlags returns a new struct object for the given flags.

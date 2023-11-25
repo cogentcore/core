@@ -13,7 +13,7 @@ import (
 
 type config struct { //gti:add
 	// Command is the command to run gear on
-	Command string `posarg:"0" required:"-" def:"goki"`
+	Command string `posarg:"0" required:"-" def:"ls"`
 }
 
 func main() {
