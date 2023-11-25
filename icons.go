@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
 	"goki.dev/glop/dirs"
+	"goki.dev/grr"
 )
 
 //go:generate go run gen.go
@@ -19,12 +20,12 @@ import (
 // Icons contains all of the embedded svg icons. It is initialized
 // to contain of the default icons located in the svg directory
 // (https://github.com/goki/icons/tree/main/svg), but it can be extended
-// by any packages by using a merged fs package.
-var Icons fs.FS = defaults
+// by any packages by using a merged fs package. All icons should be stored
+// in the root directory of the fs, which can be accomplished using [fs.Sub]
+// if you have icons in a subdirectory.
+var Icons fs.FS = grr.Log(fs.Sub(defaults, "svg"))
 
 // defaults contains the default icons.
-// It must be separate from Icons because Icons has to be a generic fs.FS
-// for compatability with merged fs's and go:embed can only be used on embed.FS.
 //
 //go:embed svg/*.svg
 var defaults embed.FS
@@ -80,8 +81,7 @@ func (i Icon) IsNil() bool {
 
 // Filename returns the filename of the icon in [Icons]
 func (i Icon) Filename() string {
-	// fs always uses forward slashes
-	return "svg/" + string(i) + ".svg"
+	return string(i) + ".svg"
 }
 
 // IsValid returns whether the icon name corresponds to
@@ -102,7 +102,7 @@ func All() []Icon {
 	if AllIcons != nil {
 		return AllIcons
 	}
-	files, err := fs.ReadDir(Icons, "svg")
+	files, err := fs.ReadDir(Icons, ".")
 	if err != nil {
 		return nil
 	}

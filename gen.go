@@ -13,7 +13,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 	"unicode"
@@ -45,12 +44,11 @@ var iconTmpl = template.Must(template.New("icon").Parse(
 func main() {
 	buf := bytes.NewBufferString(preamble)
 
-	fs.WalkDir(icons.Icons, "svg", func(path string, d fs.DirEntry, err error) error {
+	fs.WalkDir(icons.Icons, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
 		}
-		dir, name := filepath.Split(path)
-		name = strings.TrimSuffix(name, ".svg")
+		name := strings.TrimSuffix(path, ".svg")
 		// ignore fill icons as they are handled separately
 		if strings.HasSuffix(name, "-fill") {
 			return nil
@@ -64,10 +62,8 @@ func main() {
 		if unicode.IsDigit([]rune(camel)[0]) {
 			camel = "X" + camel
 		}
-		// no backslashes in URL paths
-		dir = strings.ReplaceAll(dir, `\`, "/")
 		data := iconData{
-			Dir:   dir,
+			Dir:   "svg/",
 			Snake: name,
 			Camel: camel,
 		}
