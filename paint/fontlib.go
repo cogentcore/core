@@ -19,6 +19,7 @@ import (
 	"github.com/fatih/camelcase"
 	"github.com/iancoleman/strcase"
 	"goki.dev/girl/styles"
+	"goki.dev/grr"
 )
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe
@@ -94,7 +95,7 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontsFS = defaultFonts
+		fl.FontsFS = grr.Log(fs.Sub(defaultFonts, "fonts"))
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)
@@ -131,7 +132,7 @@ func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 
 	if fl.FontsFS != nil {
 		// TODO(kai/font): support other file types in fonts fs
-		path = fontnm + ".tff"
+		path = fontnm + ".ttf"
 		b, err := fs.ReadFile(fl.FontsFS, path)
 		if err == nil {
 			bytes = b
@@ -157,7 +158,7 @@ func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 
 	if bytes == nil {
 		loadFontMu.RUnlock()
-		return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v", fontnm, fl.FontPaths)
+		return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts; try adding to FontPaths in gi.FontLibrary; searched FontLib.FontsFS and paths: %v", fontnm, fl.FontPaths)
 	}
 
 	loadFontMu.RUnlock()
