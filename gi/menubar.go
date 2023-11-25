@@ -55,8 +55,8 @@ func (mb *MenuBar) MenuBarStyles() {
 }
 
 // MenuBarStdRender does the standard rendering of the bar
-func (mb *MenuBar) MenuBarStdRender(sc *Scene) {
-	rs, pc, st := mb.RenderLock(sc)
+func (mb *MenuBar) MenuBarStdRender() {
+	rs, pc, st := mb.RenderLock()
 	pos := mb.Geom.Pos.Total
 	sz := mb.Geom.Size.Actual.Total
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
@@ -75,29 +75,29 @@ func (mb *MenuBar) ShowMenuBar() bool {
 	return true
 }
 
-// func (mb *MenuBar) GetSize(sc *Scene, iter int) {
+// func (mb *MenuBar) GetSize(iter int) {
 // 	if !mb.ShowMenuBar() {
 // 		return
 // 	}
-// 	mb.Layout.GetSize(sc, iter)
+// 	mb.Layout.GetSize(iter)
 // }
 //
-// func (mb *MenuBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+// func (mb *MenuBar) DoLayout(parBBox image.Rectangle, iter int) bool {
 // 	if !mb.ShowMenuBar() {
 // 		return false
 // 	}
-// 	return mb.Layout.DoLayout(sc, parBBox, iter)
+// 	return mb.Layout.DoLayout(parBBox, iter)
 // }
 
-func (mb *MenuBar) Render(sc *Scene) {
+func (mb *MenuBar) Render() {
 	if !mb.ShowMenuBar() {
 		return
 	}
-	if mb.PushBounds(sc) {
-		mb.MenuBarStdRender(sc)
-		mb.RenderScrolls(sc)
-		mb.RenderChildren(sc)
-		mb.PopBounds(sc)
+	if mb.PushBounds() {
+		mb.MenuBarStdRender()
+		mb.RenderScrolls()
+		mb.RenderChildren()
+		mb.PopBounds()
 	}
 }
 

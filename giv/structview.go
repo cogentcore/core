@@ -118,19 +118,19 @@ func (sv *StructView) UpdateField(field string) {
 }
 
 // Config configures the view
-func (sv *StructView) ConfigWidget(sc *gi.Scene) {
+func (sv *StructView) ConfigWidget() {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
 		if ks == nil || ks.This() == nil || ks.Is(ki.Deleted) {
 			return
 		}
 	}
 	if sv.HasChildren() {
-		sv.ConfigStructGrid(sc)
+		sv.ConfigStructGrid()
 		return
 	}
 	updt := sv.UpdateStart()
 	gi.NewFrame(sv, "struct-grid")
-	sv.ConfigStructGrid(sc)
+	sv.ConfigStructGrid()
 	sv.UpdateEndLayout(updt)
 }
 
@@ -158,7 +158,7 @@ func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
 
 // ConfigStructGrid configures the StructGrid for the current struct.
 // returns true if any fields changed.
-func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
+func (sv *StructView) ConfigStructGrid() bool {
 	if laser.AnyIsNil(sv.Struct) {
 		return false
 	}
@@ -302,7 +302,7 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 		}
 		if wb.Class == "" {
 			wb.Class = "configed"
-			vv.ConfigWidget(w, sc)
+			vv.ConfigWidget(w)
 		} else {
 			vvb.Widget = w
 			vv.UpdateWidget()

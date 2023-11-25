@@ -121,7 +121,7 @@ func (ft *Tree) UpdateAll() {
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeViewChanged(nil)
-	ft.SetNeedsLayout()
+	ft.SetNeedsLayout(true)
 	ft.UpdtMu.Unlock()
 	ft.UpdateEndAsyncLayout(updt)
 }

@@ -39,7 +39,7 @@ func (wb *WidgetBase) Transition(value any, to any, duration time.Duration, timi
 			inc := timingFunc(prop)
 			nv := vn + inc*diff
 			grr.Log0(laser.SetRobust(value, nv))
-			wb.SetNeedsRender()
+			wb.SetNeedsRender(true)
 		}
 		tick.Stop()
 	}()

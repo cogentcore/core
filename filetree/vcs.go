@@ -131,7 +131,7 @@ func (fn *Node) AddToVcs() {
 	err := repo.Add(string(fn.FPath))
 	if err == nil {
 		fn.Info.Vcs = vci.Added
-		fn.SetNeedsRender()
+		fn.SetNeedsRender(true)
 		return
 	}
 	fmt.Println(err)
@@ -157,7 +157,7 @@ func (fn *Node) DeleteFromVcs() {
 	err := repo.DeleteRemote(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.Info.Vcs = vci.Deleted
-		fn.SetNeedsRender()
+		fn.SetNeedsRender(true)
 		return
 	}
 	fmt.Println(err)
@@ -188,7 +188,7 @@ func (fn *Node) CommitToVcs(message string) (err error) {
 		return err
 	}
 	fn.Info.Vcs = vci.Stored
-	fn.SetNeedsRender()
+	fn.SetNeedsRender(true)
 	return err
 }
 
@@ -223,7 +223,7 @@ func (fn *Node) RevertVcs() (err error) {
 	if fn.Buf != nil {
 		fn.Buf.Revert()
 	}
-	fn.SetNeedsRender()
+	fn.SetNeedsRender(true)
 	return err
 }
 
@@ -473,7 +473,7 @@ func (vv *VersCtrlValue) UpdateWidget() {
 	bt.SetTextUpdate(txt)
 }
 
-func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *VersCtrlValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -481,7 +481,7 @@ func (vv *VersCtrlValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.Widget = w
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(bt, nil)

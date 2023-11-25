@@ -46,7 +46,7 @@ func (sc *Scene) AssertPixelsOnShow(t images.TestingT, filename string, fun ...f
 	sc.OnShow(func(e events.Event) {
 		if len(fun) > 0 {
 			fun[0]()
-			sc.DoNeedsRender(sc)
+			sc.DoNeedsRender()
 		}
 		sc.AssertPixels(t, filename)
 		showed <- struct{}{}

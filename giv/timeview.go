@@ -52,7 +52,7 @@ func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	return tv
 }
 
-func (tv *TimeView) ConfigWidget(sc *gi.Scene) {
+func (tv *TimeView) ConfigWidget() {
 	if tv.HasChildren() {
 		return
 	}
@@ -182,7 +182,7 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	return dv
 }
 
-func (dv *DateView) ConfigWidget(sc *gi.Scene) {
+func (dv *DateView) ConfigWidget() {
 	if dv.HasChildren() {
 		return
 	}
@@ -334,7 +334,7 @@ func (vv *TimeValue) UpdateWidget() {
 	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.Prefs.TimeFormat()))
 }
 
-func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -383,7 +383,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		// new date and old time
 		*tv = time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location())
 	})
-	dt.Config(sc)
+	dt.Config()
 
 	tm := gi.NewTextField(ly, "time").SetTooltip("The time").
 		SetLeadingIcon(icons.Schedule, func(e events.Event) {
@@ -415,7 +415,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		// old date and new time
 		*tv = time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location())
 	})
-	dt.Config(sc)
+	dt.Config()
 
 	vv.UpdateWidget()
 }
@@ -482,7 +482,7 @@ func (vv *DurationValue) UpdateWidget() {
 	ly.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
 }
 
-func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -505,7 +505,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sp.OnChange(func(e events.Event) {
 		vv.SetValue(sp.Value * float32(durationUnitsMap[ch.CurLabel]))
 	})
-	sp.Config(sc)
+	sp.Config()
 
 	units := []any{}
 	for _, u := range durationUnits {

@@ -145,7 +145,7 @@ func (im *Image) GrabRenderFrom(wi Widget) {
 	}
 }
 
-func (im *Image) DrawIntoScene(sc *Scene) {
+func (im *Image) DrawIntoScene() {
 	if im.Pixels == nil {
 		return
 	}
@@ -162,14 +162,14 @@ func (im *Image) DrawIntoScene(sc *Scene) {
 		}
 		r = nr
 	}
-	draw.Draw(sc.Pixels, r, im.Pixels, sp, draw.Over)
+	draw.Draw(im.Sc.Pixels, r, im.Pixels, sp, draw.Over)
 }
 
-func (im *Image) Render(sc *Scene) {
-	if im.PushBounds(sc) {
-		im.RenderChildren(sc)
-		im.DrawIntoScene(im.Sc)
-		im.PopBounds(sc)
+func (im *Image) Render() {
+	if im.PushBounds() {
+		im.RenderChildren()
+		im.DrawIntoScene()
+		im.PopBounds()
 	}
 }
 
@@ -279,7 +279,7 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //////////////////////////////////////////////////////////////////////////////////
 //  Props
 
-// TODO: move this to comment directives
+// TODO(kai): move this to new system
 
 var ImageProps = ki.Props{
 	"Toolbar": ki.PropSlice{

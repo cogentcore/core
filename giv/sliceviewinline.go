@@ -123,12 +123,12 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	return sv
 }
 
-func (sv *SliceViewInline) ConfigWidget(sc *gi.Scene) {
-	sv.ConfigSlice(sc)
+func (sv *SliceViewInline) ConfigWidget() {
+	sv.ConfigSlice()
 }
 
 // ConfigSlice configures children for slice view
-func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
+func (sv *SliceViewInline) ConfigSlice() bool {
 	if laser.AnyIsNil(sv.Slice) {
 		return false
 	}
@@ -169,7 +169,7 @@ func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
-		vv.ConfigWidget(w, sc)
+		vv.ConfigWidget(w)
 		if sv.IsReadOnly() {
 			w.AsWidget().SetReadOnly(true)
 		}

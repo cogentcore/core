@@ -253,12 +253,12 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	sl.UpdateEndLayout(updt)
 }
 
-func (sl *Splits) ConfigWidget(sc *Scene) {
+func (sl *Splits) ConfigWidget() {
 	sl.UpdateSplits()
-	sl.ConfigSplitters(sc)
+	sl.ConfigSplitters()
 }
 
-func (sl *Splits) ConfigSplitters(sc *Scene) {
+func (sl *Splits) ConfigSplitters() {
 	parts := sl.NewParts()
 	sz := len(sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
@@ -310,17 +310,17 @@ func (sl *Splits) HandleSplitsEvents() {
 	sl.HandleSplitsKeys()
 }
 
-func (sl *Splits) ApplyStyle(sc *Scene) {
+func (sl *Splits) ApplyStyle() {
 	sl.StyMu.Lock()
 
 	sl.UpdateSplits()
-	sl.ApplyStyleWidget(sc)
+	sl.ApplyStyleWidget()
 	sl.StyMu.Unlock()
 
-	sl.ConfigSplitters(sc)
+	sl.ConfigSplitters()
 }
 
-func (sl *Splits) SizeDownSetAllocs(sc *Scene, iter int) {
+func (sl *Splits) SizeDownSetAllocs(iter int) {
 	sz := &sl.Geom.Size
 	csz := sz.Alloc.Content
 	// fmt.Println(sl, sz.String())
@@ -338,18 +338,18 @@ func (sl *Splits) SizeDownSetAllocs(sc *Scene, iter int) {
 	})
 }
 
-func (sl *Splits) Position(sc *Scene) {
+func (sl *Splits) Position() {
 	if !sl.HasChildren() {
-		sl.Layout.Position(sc)
+		sl.Layout.Position()
 		return
 	}
 	sl.UpdateSplits()
-	sl.ConfigScrolls(sc)
-	sl.PositionSplits(sc)
-	sl.PositionChildren(sc)
+	sl.ConfigScrolls()
+	sl.PositionSplits()
+	sl.PositionChildren()
 }
 
-func (sl *Splits) PositionSplits(sc *Scene) {
+func (sl *Splits) PositionSplits() {
 	if sl.Parts != nil {
 		sl.Parts.Geom.Size = sl.Geom.Size // inherit: allows bbox to include handle
 	}
@@ -390,8 +390,8 @@ func (sl *Splits) PositionSplits(sc *Scene) {
 	})
 }
 
-func (sl *Splits) Render(sc *Scene) {
-	if sl.PushBounds(sc) {
+func (sl *Splits) Render() {
+	if sl.PushBounds() {
 		sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			sp := sl.Splits[i]
 			if sp <= 0.01 {
@@ -399,11 +399,11 @@ func (sl *Splits) Render(sc *Scene) {
 			} else {
 				kwb.SetState(false, states.Invisible)
 			}
-			kwi.Render(sc)
+			kwi.Render()
 			return ki.Continue
 		})
-		sl.RenderParts(sc)
-		sl.PopBounds(sc)
+		sl.RenderParts()
+		sl.PopBounds()
 	}
 }
 

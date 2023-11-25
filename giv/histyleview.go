@@ -36,7 +36,7 @@ func (vv *HiStyleValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *HiStyleValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *HiStyleValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -45,7 +45,7 @@ func (vv *HiStyleValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
@@ -60,7 +60,7 @@ func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(
 func (vv *HiStyleValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
-	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	NewSliceView(d).SetSlice(&histyle.StyleNames).SetSelVal(cur).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
 			hs := histyle.StyleNames[si]

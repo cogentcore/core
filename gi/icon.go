@@ -71,7 +71,7 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
-		ic.Config(ic.Sc)
+		ic.Config()
 		return false, nil
 	}
 	if ic.SVG.Root.HasChildren() && ic.IconName == icon {
@@ -81,7 +81,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.OpenFS(icons.Icons, fnm)
 	if err != nil {
-		ic.Config(ic.Sc)
+		ic.Config()
 		return false, err
 	}
 	ic.IconName = icon
@@ -89,7 +89,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 
 }
 
-func (ic *Icon) DrawIntoScene(sc *Scene) {
+func (ic *Icon) DrawIntoScene() {
 	if ic.SVG.Pixels == nil {
 		return
 	}
@@ -106,11 +106,11 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 		}
 		r = nr
 	}
-	draw.Draw(sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+	draw.Draw(ic.Sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }
 
 // RenderSVG renders the SVG to Pixels if needs update
-func (ic *Icon) RenderSVG(sc *Scene) {
+func (ic *Icon) RenderSVG() {
 	rc := ic.Sc.RenderCtx()
 	sv := &ic.SVG
 	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
@@ -138,11 +138,11 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	// fmt.Println("re-rendered icon:", sv.Name, "size:", sz)
 }
 
-func (ic *Icon) Render(sc *Scene) {
-	ic.RenderSVG(sc)
-	if ic.PushBounds(sc) {
-		ic.RenderChildren(sc)
-		ic.DrawIntoScene(sc)
-		ic.PopBounds(sc)
+func (ic *Icon) Render() {
+	ic.RenderSVG()
+	if ic.PushBounds() {
+		ic.RenderChildren()
+		ic.DrawIntoScene()
+		ic.PopBounds()
 	}
 }

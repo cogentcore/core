@@ -23,7 +23,7 @@ import (
 // triggers updating.
 func (ed *Editor) HighlightRegion(reg textbuf.Region) {
 	ed.Highlights = []textbuf.Region{reg}
-	ed.SetNeedsRender()
+	ed.SetNeedsRender(true)
 }
 
 // ClearHighlights clears the Highlights slice of all regions
@@ -32,7 +32,7 @@ func (ed *Editor) ClearHighlights() {
 		return
 	}
 	ed.Highlights = ed.Highlights[:0]
-	ed.SetNeedsRender()
+	ed.SetNeedsRender(true)
 }
 
 // ClearScopelights clears the Highlights slice of all regions

@@ -22,8 +22,8 @@ import (
 // Rendering Notes: all rendering is done in Render call.
 // Layout must be called whenever content changes across lines.
 
-func (ed *Editor) Render(sc *gi.Scene) {
-	if ed.PushBounds(sc) {
+func (ed *Editor) Render() {
+	if ed.PushBounds() {
 		ed.RenderAllLinesInBounds()
 		if ed.ScrollToCursorOnRender {
 			ed.ScrollToCursorOnRender = false
@@ -35,9 +35,9 @@ func (ed *Editor) Render(sc *gi.Scene) {
 		} else {
 			ed.StopCursor()
 		}
-		ed.RenderChildren(sc)
-		ed.PopBounds(sc)
-		ed.RenderScrolls(sc)
+		ed.RenderChildren()
+		ed.PopBounds()
+		ed.RenderScrolls()
 	} else {
 		ed.StopCursor()
 	}
@@ -563,7 +563,7 @@ func (ed *Editor) RenderLines(st, end int) bool {
 		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tScBBox)
 		// sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
 	}
-	ed.PopBounds(sc)
+	ed.PopBounds()
 	ed.UpdateEnd(updt)
 	return true
 }

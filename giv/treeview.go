@@ -223,8 +223,8 @@ func (tv *TreeView) TreeViewStyles() {
 					return
 				}
 				tv.SetState(true, states.Hovered)
-				tv.ApplyStyle(tv.Sc)
-				tv.SetNeedsRender()
+				tv.ApplyStyle()
+				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseLeave, func(e events.Event) {
@@ -232,8 +232,8 @@ func (tv *TreeView) TreeViewStyles() {
 					return
 				}
 				tv.SetState(false, states.Hovered)
-				tv.ApplyStyle(tv.Sc)
-				tv.SetNeedsRender()
+				tv.ApplyStyle()
+				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseDown, func(e events.Event) {
@@ -241,8 +241,8 @@ func (tv *TreeView) TreeViewStyles() {
 					return
 				}
 				tv.SetState(true, states.Active)
-				tv.ApplyStyle(tv.Sc)
-				tv.SetNeedsRender()
+				tv.ApplyStyle()
+				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.On(events.MouseUp, func(e events.Event) {
@@ -250,8 +250,8 @@ func (tv *TreeView) TreeViewStyles() {
 					return
 				}
 				tv.SetState(false, states.Active)
-				tv.ApplyStyle(tv.Sc)
-				tv.SetNeedsRender()
+				tv.ApplyStyle()
+				tv.SetNeedsRender(true)
 				e.SetHandled()
 			})
 			w.OnClick(func(e events.Event) {
@@ -436,7 +436,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigParts(sc *gi.Scene) {
+func (tv *TreeView) ConfigParts() {
 	parts := tv.NewParts()
 	config := ki.Config{}
 	config.Add(gi.SwitchType, "branch")
@@ -448,7 +448,7 @@ func (tv *TreeView) ConfigParts(sc *gi.Scene) {
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
 			tv.SetBranchState()
-			wb.Config(sc)
+			wb.Config()
 		}
 	}
 	if tv.Icon.IsValid() {
@@ -465,26 +465,26 @@ func (tv *TreeView) ConfigParts(sc *gi.Scene) {
 	}
 }
 
-func (tv *TreeView) ConfigWidget(sc *gi.Scene) {
-	tv.ConfigParts(sc)
+func (tv *TreeView) ConfigWidget() {
+	tv.ConfigParts()
 }
 
-func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
+func (tv *TreeView) StyleTreeView() {
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	// tv.Parts.Styles.InheritFields(&tv.Styles)
-	tv.ApplyStyleWidget(sc)
+	tv.ApplyStyleWidget()
 	// tv.Styles.StateLayer = 0 // turn off!
 	// note: this is essential for reasonable styling behavior
 }
 
-func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
+func (tv *TreeView) ApplyStyle() {
 	tv.StyMu.Lock() // todo: needed??  maybe not.
 	defer tv.StyMu.Unlock()
 
-	tv.StyleTreeView(sc)
+	tv.StyleTreeView()
 }
 
 func (tv *TreeView) UpdateBranchIcons() {
@@ -501,19 +501,19 @@ func (tv *TreeView) SetBranchState() {
 	case tv.IsClosed():
 		br.SetState(false, states.Disabled)
 		br.SetState(false, states.Checked)
-		br.SetNeedsRender()
+		br.SetNeedsRender(true)
 	default:
 		br.SetState(false, states.Disabled)
 		br.SetState(true, states.Checked)
-		br.SetNeedsRender()
+		br.SetNeedsRender(true)
 	}
 }
 
 // TreeView is tricky for alloc because it is both a layout
 // of its children but has to maintain its own bbox for its own widget.
 
-func (tv *TreeView) SizeUp(sc *gi.Scene) {
-	tv.WidgetBase.SizeUp(sc)
+func (tv *TreeView) SizeUp() {
+	tv.WidgetBase.SizeUp()
 	tv.WidgetSize = tv.Geom.Size.Actual.Total
 	h := tv.WidgetSize.Y
 	w := tv.WidgetSize.X
@@ -521,7 +521,7 @@ func (tv *TreeView) SizeUp(sc *gi.Scene) {
 	if !tv.IsClosed() {
 		// we layout children under us
 		tv.WidgetKidsIter(func(i int, kwi gi.Widget, kwb *gi.WidgetBase) bool {
-			kwi.SizeUp(sc)
+			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			w = max(w, tv.Indent.Dots+kwb.Geom.Size.Actual.Total.X)
 			// fmt.Println(kwb, w, h)
@@ -535,14 +535,14 @@ func (tv *TreeView) SizeUp(sc *gi.Scene) {
 	tv.WidgetSize.X = w  // stretch
 }
 
-func (tv *TreeView) SizeDown(sc *gi.Scene, iter int) bool {
+func (tv *TreeView) SizeDown(iter int) bool {
 	// note: key to not grab the whole allocation, as widget default does
-	redo := tv.SizeDownParts(sc, iter) // give our content to parts
-	re := tv.SizeDownChildren(sc, iter)
+	redo := tv.SizeDownParts(iter) // give our content to parts
+	re := tv.SizeDownChildren(iter)
 	return redo || re
 }
 
-func (tv *TreeView) Position(sc *gi.Scene) {
+func (tv *TreeView) Position() {
 	rn := tv.RootView
 	if rn == nil {
 		slog.Error("giv.TreeView: RootView is nil", "in node:", tv)
@@ -554,7 +554,7 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 	tv.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tv.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
 	tv.WidgetSize.X = tv.Geom.Size.Actual.Total.X
 
-	tv.WidgetBase.Position(sc)
+	tv.WidgetBase.Position()
 
 	if !tv.IsClosed() {
 		h := tv.WidgetSize.Y
@@ -562,24 +562,24 @@ func (tv *TreeView) Position(sc *gi.Scene) {
 			kwb.Geom.RelPos.Y = h
 			kwb.Geom.RelPos.X = tv.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y
-			kwi.Position(sc)
+			kwi.Position()
 			return ki.Continue
 		})
 	}
 }
 
-func (tv *TreeView) ScenePos(sc *gi.Scene) {
+func (tv *TreeView) ScenePos() {
 	sz := &tv.Geom.Size
 	if sz.Actual.Total == tv.WidgetSize {
 		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
 	}
-	tv.WidgetBase.ScenePos(sc)
-	tv.ScenePosChildren(sc)
+	tv.WidgetBase.ScenePos()
+	tv.ScenePosChildren()
 	tv.Geom.Size.Actual.Total = tv.WidgetSize // key: we revert to just ourselves
 }
 
-func (tv *TreeView) RenderNode(sc *gi.Scene) {
-	rs, pc, st := tv.RenderLock(sc)
+func (tv *TreeView) RenderNode() {
+	rs, pc, st := tv.RenderLock()
 	// must use workaround act values
 	st.StateLayer = tv.actStateLayer
 	if st.Is(states.Selected) {
@@ -596,23 +596,23 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	}
 }
 
-func (tv *TreeView) Render(sc *gi.Scene) {
-	if tv.PushBounds(sc) {
-		tv.RenderNode(sc)
+func (tv *TreeView) Render() {
+	if tv.PushBounds() {
+		tv.RenderNode()
 		if tv.Parts != nil {
 			// we must copy from actual values in parent
 			tv.Parts.Styles.StateLayer = tv.actStateLayer
 			if tv.StateIs(states.Selected) {
 				tv.Parts.Styles.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 			}
-			tv.RenderParts(sc)
+			tv.RenderParts()
 		}
-		tv.PopBounds(sc)
+		tv.PopBounds()
 	}
 	// we always have to render our kids b/c
 	// we could be out of scope but they could be in!
 	if !tv.IsClosed() {
-		tv.RenderChildren(sc)
+		tv.RenderChildren()
 	}
 }
 
@@ -662,11 +662,11 @@ func (tv *TreeView) HasSelection() bool {
 func (tv *TreeView) Select() {
 	if !tv.StateIs(states.Selected) {
 		tv.SetSelected(true)
-		tv.ApplyStyle(tv.Sc)
+		tv.ApplyStyle()
 		sl := tv.SelectedViews()
 		sl = append(sl, tv)
 		tv.SetSelectedViews(sl)
-		tv.SetNeedsRender()
+		tv.SetNeedsRender(true)
 	}
 }
 
@@ -675,7 +675,7 @@ func (tv *TreeView) Select() {
 func (tv *TreeView) Unselect() {
 	if tv.StateIs(states.Selected) {
 		tv.SetSelected(false)
-		tv.ApplyStyle(tv.Sc)
+		tv.ApplyStyle()
 		sl := tv.SelectedViews()
 		sz := len(sl)
 		for i := 0; i < sz; i++ {
@@ -685,7 +685,7 @@ func (tv *TreeView) Unselect() {
 			}
 		}
 		tv.SetSelectedViews(sl)
-		tv.SetNeedsRender()
+		tv.SetNeedsRender(true)
 	}
 }
 
@@ -699,8 +699,8 @@ func (tv *TreeView) UnselectAll() {
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		v.SetSelected(false)
-		v.ApplyStyle(tv.Sc)
-		v.SetNeedsRender()
+		v.ApplyStyle()
+		v.SetNeedsRender(true)
 	}
 	tv.UpdateEndRender(updt)
 }
@@ -1095,7 +1095,7 @@ func (tv *TreeView) Close() {
 	}
 	updt := tv.UpdateStart()
 	if tv.HasChildren() {
-		tv.SetNeedsLayout()
+		tv.SetNeedsLayout(true)
 	}
 	tv.SetClosed(true)
 	tv.SetBranchState()
@@ -1118,7 +1118,7 @@ func (tv *TreeView) Open() {
 	}
 	updt := tv.UpdateStart()
 	if tv.HasChildren() {
-		tv.SetNeedsLayout()
+		tv.SetNeedsLayout(true)
 		tv.SetClosed(false)
 		tv.SetBranchState()
 		tv.This().(TreeViewer).OnOpen()
@@ -1858,89 +1858,4 @@ func (tv *TreeView) HandleTreeViewDrag() {
 			}
 		})
 	*/
-}
-
-var TreeViewProps = ki.Props{
-	"CtxtMenuActive": ki.PropSlice{
-		{"SrcAddChild", ki.Props{
-			"label": "Add Child",
-		}},
-		{"SrcInsertBefore", ki.Props{
-			"label":    "Insert Before",
-			"shortcut": keyfun.Insert,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
-				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
-				// act.SetState(tv.IsRoot(""), states.Disabled)
-			}),
-		}},
-		{"SrcInsertAfter", ki.Props{
-			"label":    "Insert After",
-			"shortcut": keyfun.InsertAfter,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
-				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
-				// act.SetState(tv.IsRoot(""), states.Disabled)
-			}),
-		}},
-		{"SrcDuplicate", ki.Props{
-			"label":    "Duplicate",
-			"shortcut": keyfun.Duplicate,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
-				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
-				// act.SetState(tv.IsRoot(""), states.Disabled)
-			}),
-		}},
-		{"SrcDelete", ki.Props{
-			"label":    "Delete",
-			"shortcut": keyfun.Delete,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
-				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
-				// act.SetState(tv.IsRoot(""), states.Disabled)
-			}),
-		}},
-		{"sep-edit", ki.BlankProp{}},
-		{"Copy", ki.Props{
-			"shortcut": keyfun.Copy,
-			"Args": ki.PropSlice{
-				{"reset", ki.Props{
-					"value": true,
-				}},
-			},
-		}},
-		{"Cut", ki.Props{
-			"shortcut": keyfun.Cut,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
-				// tv := tvi.(ki.Ki).Embed(TreeViewType).(*TreeView)
-				// act.SetState(tv.IsRoot(""), states.Disabled)
-			}),
-		}},
-		{"Paste", ki.Props{
-			"shortcut": keyfun.Paste,
-		}},
-		{"sep-win", ki.BlankProp{}},
-		{"SrcEdit", ki.Props{
-			"label": "Edit",
-		}},
-		{"SrcInspector", ki.Props{
-			"label": "Inspector",
-		}},
-		{"sep-open", ki.BlankProp{}},
-		{"OpenAll", ki.Props{}},
-		{"CloseAll", ki.Props{}},
-	},
-	"CtxtMenuReadOnly": ki.PropSlice{
-		{"Copy", ki.Props{
-			"shortcut": keyfun.Copy,
-			"Args": ki.PropSlice{
-				{"reset", ki.Props{
-					"value": true,
-				}},
-			},
-		}},
-		{"SrcEdit", ki.Props{
-			"label": "Edit",
-		}},
-		{"SrcInspector", ki.Props{
-			"label": "Inspector",
-		}},
-	},
 }

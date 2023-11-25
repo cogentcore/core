@@ -47,16 +47,16 @@ func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
 // the sizing and need for scrollbars has been established.
 // The final position of the scrollbars is set during ScenePos in
 // PositionScrolls.  Scrolls are kept around in general.
-func (ly *Layout) ConfigScrolls(sc *Scene) {
+func (ly *Layout) ConfigScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.ConfigScroll(sc, d)
+			ly.ConfigScroll(d)
 		}
 	}
 }
 
 // ConfigScroll configures scroll for given dimension
-func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
+func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	if ly.Scrolls[d] != nil {
 		return
 	}
@@ -89,14 +89,14 @@ func (ly *Layout) ConfigScroll(sc *Scene, d mat32.Dims) {
 		e.SetHandled()
 		// fmt.Println("change event")
 		updt := ly.UpdateStart()
-		ly.This().(Widget).ScenePos(ly.Sc) // gets pos from scrolls, positions scrollbars
+		ly.This().(Widget).ScenePos() // gets pos from scrolls, positions scrollbars
 		ly.UpdateEndRender(updt)
 	})
 	sb.Update()
 }
 
 // GetScrollPosition sets our layout Scroll position from scrollbars
-func (ly *Layout) GetScrollPosition(sc *Scene) {
+func (ly *Layout) GetScrollPosition() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		ly.Geom.Scroll.SetDim(d, 0)
 		if ly.HasScroll[d] {
@@ -111,15 +111,15 @@ func (ly *Layout) GetScrollPosition(sc *Scene) {
 }
 
 // PositionScrolls arranges scrollbars
-func (ly *Layout) PositionScrolls(sc *Scene) {
+func (ly *Layout) PositionScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.PositionScroll(sc, d)
+			ly.PositionScroll(d)
 		}
 	}
 }
 
-func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
+func (ly *Layout) PositionScroll(d mat32.Dims) {
 	sb := ly.Scrolls[d]
 	sz := &ly.Geom.Size
 	pos, ssz := ly.ScrollGeom(d)
@@ -142,9 +142,9 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 	sb.SetValue(sb.Value) // keep in range
 
 	sb.Update() // applies style
-	sb.SizeUp(sc)
+	sb.SizeUp()
 	sb.Geom.Size.Alloc = ly.Geom.Size.Actual
-	sb.SizeDown(sc, 0)
+	sb.SizeDown(0)
 
 	sb.Geom.Pos.Total = pos
 	sb.SetContentPosFromPos()
@@ -154,10 +154,10 @@ func (ly *Layout) PositionScroll(sc *Scene, d mat32.Dims) {
 }
 
 // RenderScrolls draws the scrollbars
-func (ly *Layout) RenderScrolls(sc *Scene) {
+func (ly *Layout) RenderScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.Scrolls[d].Render(sc)
+			ly.Scrolls[d].Render()
 		}
 	}
 }
@@ -176,7 +176,7 @@ func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 		sb := ly.Scrolls[d]
 		nval := sb.Value + delta
 		sb.SetValueAction(nval)
-		ly.SetNeedsRender() // only render needed -- scroll updates pos
+		ly.SetNeedsRender(true) // only render needed -- scroll updates pos
 	}
 }
 
@@ -186,7 +186,7 @@ func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender()
+		ly.SetNeedsRender(true)
 	}
 }
 
@@ -196,7 +196,7 @@ func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 	if ly.HasScroll[d] {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
-		ly.SetNeedsRender()
+		ly.SetNeedsRender(true)
 	}
 }
 
@@ -389,7 +389,7 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
 	}
 	if did {
-		ly.SetNeedsRender()
+		ly.SetNeedsRender(true)
 	}
 	return did
 }

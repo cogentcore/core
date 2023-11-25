@@ -107,7 +107,7 @@ func (mv *MapView) UpdateValues() {
 }
 
 // Config configures the view
-func (mv *MapView) ConfigWidget(sc *gi.Scene) {
+func (mv *MapView) ConfigWidget() {
 	if !mv.HasChildren() {
 		gi.NewFrame(mv, "map-grid")
 	}
@@ -146,7 +146,6 @@ func (mv *MapView) ConfigMapGrid() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	sc := mv.Sc
 	sg := mv.MapGrid()
 	config := ki.Config{}
 	// always start fresh!
@@ -212,7 +211,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config)
 	if mods {
-		sg.SetNeedsLayoutUpdate(sc, updt)
+		sg.SetNeedsLayout(updt)
 	} else {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}
@@ -227,8 +226,8 @@ func (mv *MapView) ConfigMapGrid() {
 		})
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		w := sg.Child(i*ncol + 1).(gi.Widget)
-		kv.ConfigWidget(keyw, sc)
-		vv.ConfigWidget(w, sc)
+		kv.ConfigWidget(keyw)
+		vv.ConfigWidget(w)
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
 			typw.SetTypes(valtypes, false, true, 50)

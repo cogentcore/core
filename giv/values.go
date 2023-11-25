@@ -394,7 +394,7 @@ func (vv *StructValue) UpdateWidget() {
 	}
 }
 
-func (vv *StructValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *StructValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -406,7 +406,7 @@ func (vv *StructValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
 	bt.Tooltip = vv.Doc()
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
@@ -451,7 +451,7 @@ func (vv *StructInlineValue) UpdateWidget() {
 	sv.SetStruct(cst)
 }
 
-func (vv *StructInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *StructInlineValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -516,7 +516,7 @@ func (vv *SliceValue) GetTypeInfo() {
 	}
 }
 
-func (vv *SliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *SliceValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -528,7 +528,7 @@ func (vv *SliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
 	bt.Tooltip = vv.Doc()
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
@@ -599,7 +599,7 @@ func (vv *SliceInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *SliceInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *SliceInlineValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -647,7 +647,7 @@ func (vv *MapValue) UpdateWidget() {
 	bt.SetTextUpdate(txt)
 }
 
-func (vv *MapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *MapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -658,7 +658,7 @@ func (vv *MapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
 	bt.Tooltip = vv.Doc()
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
@@ -705,7 +705,7 @@ func (vv *MapInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *MapInlineValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *MapInlineValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -769,7 +769,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	bt.SetTextUpdate(path)
 }
 
-func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *KiPtrValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -794,7 +794,7 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			}
 		})
 	}
-	bt.Config(sc)
+	bt.Config()
 	vv.UpdateWidget()
 }
 
@@ -835,7 +835,7 @@ func (vv *BoolValue) UpdateWidget() {
 	cb.SetState(bv, states.Checked)
 }
 
-func (vv *BoolValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *BoolValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -844,7 +844,7 @@ func (vv *BoolValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip = vv.Doc()
-	cb.Config(sc)
+	cb.Config()
 	cb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(cb.StateIs(states.Checked))
 	})
@@ -878,7 +878,7 @@ func (vv *IntValue) UpdateWidget() {
 	}
 }
 
-func (vv *IntValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *IntValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -924,7 +924,7 @@ func (vv *IntValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-	sb.Config(sc)
+	sb.Config()
 	sb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
@@ -958,7 +958,7 @@ func (vv *FloatValue) UpdateWidget() {
 	}
 }
 
-func (vv *FloatValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *FloatValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -999,7 +999,7 @@ func (vv *FloatValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-	sb.Config(sc)
+	sb.Config()
 	sb.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(sb.Value)
 	})
@@ -1033,7 +1033,7 @@ func (vv *SliderValue) UpdateWidget() {
 	}
 }
 
-func (vv *SliderValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *SliderValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1067,7 +1067,7 @@ func (vv *SliderValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 			slog.Error("Float Step Value:", "error:", err)
 		}
 	}
-	sl.Config(sc)
+	sl.Config()
 	sl.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(sl.Value)
 	})
@@ -1118,7 +1118,7 @@ func (vv *EnumValue) UpdateWidget() {
 	// }
 }
 
-func (vv *EnumValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *EnumValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1130,7 +1130,7 @@ func (vv *EnumValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 	ev := vv.EnumValue()
 	ch.SetEnum(ev, false, 50)
-	ch.Config(sc)
+	ch.Config()
 	ch.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(ch.CurVal)
 	})
@@ -1178,7 +1178,7 @@ func (vv *BitFlagValue) UpdateWidget() {
 	sw.UpdateFromBitFlag(ev)
 }
 
-func (vv *BitFlagValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *BitFlagValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1193,7 +1193,7 @@ func (vv *BitFlagValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	sw.OnChange(func(e events.Event) {
 		sw.BitFlagValue(vv.EnumValue())
 	})
-	sw.Config(sc)
+	sw.Config()
 	vv.UpdateWidget()
 }
 
@@ -1223,7 +1223,7 @@ func (vv *TypeValue) UpdateWidget() {
 	}
 }
 
-func (vv *TypeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *TypeValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1252,7 +1252,7 @@ func (vv *TypeValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.SetTypes(tl, false, true, 50)
-	cb.Config(sc)
+	cb.Config()
 	cb.OnLast(events.Change, func(e events.Event) {
 		tval := cb.CurVal.(*gti.Type)
 		vv.SetValue(tval)
@@ -1285,7 +1285,7 @@ func (vv *ByteSliceValue) UpdateWidget() {
 	}
 }
 
-func (vv *ByteSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *ByteSliceValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1298,7 +1298,7 @@ func (vv *ByteSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		s.Min.X.Ch(16)
 	})
 	vv.StdConfigWidget(w)
-	tf.Config(sc)
+	tf.Config()
 
 	tf.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
@@ -1331,7 +1331,7 @@ func (vv *RuneSliceValue) UpdateWidget() {
 	}
 }
 
-func (vv *RuneSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *RuneSliceValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1343,7 +1343,7 @@ func (vv *RuneSliceValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		s.Min.X.Ch(16)
 	})
 	vv.StdConfigWidget(w)
-	tf.Config(sc)
+	tf.Config()
 
 	tf.OnLast(events.Change, func(e events.Event) {
 		vv.SetValue(tf.Text())
@@ -1379,7 +1379,7 @@ func (vv *NilValue) UpdateWidget() {
 	sb.SetTextUpdate("nil " + tstr)
 }
 
-func (vv *NilValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *NilValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1388,7 +1388,7 @@ func (vv *NilValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	sb := vv.Widget.(*gi.Label)
 	sb.Tooltip = vv.Doc()
-	sb.Config(sc)
+	sb.Config()
 	vv.UpdateWidget()
 }
 
@@ -1427,7 +1427,7 @@ func (vv *IconValue) UpdateWidget() {
 	}
 }
 
-func (vv *IconValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *IconValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1436,7 +1436,7 @@ func (vv *IconValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
@@ -1454,7 +1454,7 @@ func (vv *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
 		w.(*gi.Button).SetText(sentencecase.Of(strcase.ToCamel(string(ics[row]))))
-	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
 			ic := icons.AllIcons[si]
@@ -1488,7 +1488,7 @@ func (vv *FontValue) UpdateWidget() {
 	bt.SetTextUpdate(txt)
 }
 
-func (vv *FontValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *FontValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1497,7 +1497,7 @@ func (vv *FontValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
@@ -1528,7 +1528,7 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
 		s.Font.Size = FontChooserSize
-	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(&si)
 
 	return true, func() {
 		if si >= 0 {
@@ -1565,7 +1565,7 @@ func (vv *FileValue) UpdateWidget() {
 	bt.SetTextUpdate(txt)
 }
 
-func (vv *FileValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *FileValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1574,7 +1574,7 @@ func (vv *FileValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
@@ -1623,7 +1623,7 @@ func (vv *TextEditorValue) UpdateWidget() {
 	te.Buf.SetText([]byte(npv.String()))
 }
 
-func (vv *TextEditorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *TextEditorValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -1668,7 +1668,7 @@ func (vv *FuncValue) UpdateWidget() {
 	fbt.SetFunc(fun)
 }
 
-func (vv *FuncValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *FuncValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return

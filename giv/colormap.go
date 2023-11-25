@@ -43,7 +43,7 @@ func (cv *ColorMapView) OnInit() {
 // SetColorMap sets the color map and triggers a display update
 func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 	cv.Map = cmap
-	cv.SetNeedsRender()
+	cv.SetNeedsRender(true)
 }
 
 // SetColorMapAction sets the color map and triggers a display update
@@ -51,7 +51,7 @@ func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) {
 	cv.Map = cmap
 	cv.SendChange()
-	cv.SetNeedsRender()
+	cv.SetNeedsRender(true)
 }
 
 // ChooseColorMap pulls up a chooser to select a color map
@@ -63,7 +63,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 	}
 	si := 0
 	d := gi.NewBody().AddTitle("Select a color map").AddText("Choose color map to use from among available list")
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(&si)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddOk(pw).OnClick(func(e events.Event) {
 			if si >= 0 {
@@ -85,11 +85,11 @@ func (cv *ColorMapView) HandleColorMapEvents() {
 
 }
 
-func (cv *ColorMapView) RenderColorMap(sc *gi.Scene) {
+func (cv *ColorMapView) RenderColorMap() {
 	if cv.Map == nil {
 		cv.Map = colormap.StdMaps["ColdHot"]
 	}
-	rs := &sc.RenderState
+	rs := &cv.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
 
@@ -127,11 +127,11 @@ func (cv *ColorMapView) RenderColorMap(sc *gi.Scene) {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render(sc *gi.Scene) {
-	if cv.PushBounds(sc) {
-		cv.RenderColorMap(sc)
-		cv.RenderChildren(sc)
-		cv.PopBounds(sc)
+func (cv *ColorMapView) Render() {
+	if cv.PushBounds() {
+		cv.RenderColorMap()
+		cv.RenderChildren()
+		cv.PopBounds()
 	}
 }
 
@@ -166,7 +166,7 @@ func (vv *ColorMapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -175,7 +175,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
@@ -191,7 +191,7 @@ func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
 	si := 0
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(d.Sc, &si)
+	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
 			vv.SetValue(sl[si])

@@ -84,7 +84,7 @@ func (vv *KeyMapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -93,7 +93,7 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
@@ -109,7 +109,7 @@ func (vv *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
 	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := keyfun.AvailMaps.MapByName(keyfun.MapName(cur))
-	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(d.Sc, &si)
+	NewTableView(d).SetSlice(&keyfun.AvailMaps).SetSelIdx(curRow).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
 			km := keyfun.AvailMaps[si]

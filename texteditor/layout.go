@@ -5,7 +5,6 @@
 package texteditor
 
 import (
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/mat32/v2"
 )
@@ -52,16 +51,16 @@ func (ed *Editor) UpdateFromAlloc() {
 
 // note: Layout reverts to basic Widget behavior for layout if no kids, like us..
 
-func (ed *Editor) SizeFinal(sc *gi.Scene) {
+func (ed *Editor) SizeFinal() {
 	sz := &ed.Geom.Size
-	ed.ManageOverflow(sc, 0, true)
-	ed.Layout.SizeFinal(sc)
+	ed.ManageOverflow(0, true)
+	ed.Layout.SizeFinal()
 	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
 	sz.Actual.Content.X -= sbw // anticipate scroll
 	ed.UpdateFromAlloc()
 	ed.LayoutAllLines()
 	// fmt.Println(ed, "final pre manage, actual:", sz.Actual, "space:", sz.Space, "alloc:", sz.Alloc)
-	if ed.ManageOverflow(sc, 3, true) {
+	if ed.ManageOverflow(3, true) {
 		sz.Actual.Total = sz.Alloc.Total
 		if ed.HasScroll[mat32.X] {
 			sz.Actual.Total.Y -= sbw
@@ -76,15 +75,15 @@ func (ed *Editor) SizeFinal(sc *gi.Scene) {
 	}
 }
 
-func (ed *Editor) Position(sc *gi.Scene) {
-	ed.Layout.Position(sc)
-	ed.ConfigScrolls(sc)
+func (ed *Editor) Position() {
+	ed.Layout.Position()
+	ed.ConfigScrolls()
 }
 
-func (ed *Editor) ScenePos(sc *gi.Scene) {
-	ed.Layout.ScenePos(sc)
-	ed.GetScrollPosition(sc)
-	ed.PositionScrolls(sc)
+func (ed *Editor) ScenePos() {
+	ed.Layout.ScenePos()
+	ed.GetScrollPosition()
+	ed.PositionScrolls()
 }
 
 // LayoutAllLines generates TextRenders of lines
@@ -183,9 +182,9 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	ed.Buf.MarkupMu.RUnlock()
 
 	if needLay {
-		ed.SetNeedsLayout()
+		ed.SetNeedsLayout(true)
 	} else {
-		ed.SetNeedsRender()
+		ed.SetNeedsRender(true)
 	}
 	return needLay
 }

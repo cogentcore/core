@@ -63,7 +63,7 @@ func (is *Inspector) Update() { //gti:add
 		return
 	}
 	if w, ok := is.KiRoot.(gi.Widget); ok {
-		w.AsWidget().SetNeedsRender()
+		w.AsWidget().SetNeedsRender(true)
 	}
 }
 
@@ -88,7 +88,7 @@ func (is *Inspector) SaveAs(filename gi.FileName) { //gti:add
 	grr.Log0(jsons.Save(is.KiRoot, string(filename)))
 	is.Changed = false
 	is.Filename = filename
-	is.SetNeedsRender() // notify our editor
+	is.SetNeedsRender(true) // notify our editor
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
@@ -98,7 +98,7 @@ func (is *Inspector) Open(filename gi.FileName) { //gti:add
 	}
 	grr.Log0(jsons.Open(is.KiRoot, string(filename)))
 	is.Filename = filename
-	is.SetNeedsRender() // notify our editor
+	is.SetNeedsRender(true) // notify our editor
 }
 
 // EditColorScheme pulls up a window to edit the current color scheme
@@ -195,7 +195,7 @@ func (is *Inspector) SelectionMonitor() {
 
 			updt = sc.UpdateStartAsync()
 			sc.SelectedWidget = sw
-			sw.AsWidget().SetNeedsRenderUpdate(sc, updt)
+			sw.AsWidget().SetNeedsRender(updt)
 			sc.UpdateEndAsyncRender(updt)
 		}
 	}
@@ -209,12 +209,12 @@ func (is *Inspector) SetRoot(root ki.Ki) {
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	is.Config(is.Sc)
+	is.Config()
 	is.UpdateEnd(updt)
 }
 
 // Config configures the widget
-func (is *Inspector) ConfigWidget(sc *gi.Scene) {
+func (is *Inspector) ConfigWidget() {
 	if is.KiRoot == nil {
 		return
 	}

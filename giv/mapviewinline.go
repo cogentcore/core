@@ -104,12 +104,12 @@ func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
 	return mv
 }
 
-func (mv *MapViewInline) ConfigWidget(sc *gi.Scene) {
-	mv.ConfigMap(sc)
+func (mv *MapViewInline) ConfigWidget() {
+	mv.ConfigMap()
 }
 
 // ConfigMap configures children for map view
-func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
+func (mv *MapViewInline) ConfigMap() bool {
 	if laser.AnyIsNil(mv.Map) {
 		return false
 	}
@@ -168,8 +168,8 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		w, wb := gi.AsWidget(mv.Child((i * 2) + 1))
 		kw, kwb := gi.AsWidget(mv.Child(i * 2))
 		if wb.Class == "" {
-			vv.ConfigWidget(w, sc)
-			kv.ConfigWidget(kw, sc)
+			vv.ConfigWidget(w)
+			kv.ConfigWidget(kw)
 		} else {
 			wb.Class = "configed"
 			kwb.Class = "configed"
