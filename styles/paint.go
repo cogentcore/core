@@ -117,8 +117,10 @@ func (pc *Paint) ToDotsImpl(uc *units.Context) {
 // call at start of render.
 func (pc *Paint) SetUnitContextExt(size image.Point) {
 	pc.UnContext.Defaults()
-	pc.UnContext.DPI = 96                                                                                                       // paint (SVG) context is always 96 = 1to1
-	pc.UnContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y), float32(size.X), float32(size.Y)) // TODO: maybe should have different values for these sizes?
+	// paint (SVG) context is always 96 = 1to1
+	pc.UnContext.DPI = 96
+	// TODO: maybe should have different values for these sizes?
+	pc.UnContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y), float32(size.X), float32(size.Y))
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
 	pc.ToDotsImpl(&pc.UnContext)
 	pc.dotsSet = true
