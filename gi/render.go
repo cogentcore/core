@@ -572,6 +572,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	}
 	rs := &wb.Sc.RenderState
 	rs.PushBounds(wb.Geom.TotalBBox)
+	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
 	rs.Paint.StrokeStyle.Defaults() // start with default values
 	rs.Paint.FillStyle.Defaults()
 	if RenderTrace {

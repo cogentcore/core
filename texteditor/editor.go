@@ -26,15 +26,20 @@ import (
 	"goki.dev/pi/v2/lex"
 )
 
-// todo: make it a Layout and handle all the scrollbar stuff internally!
-// could also see about wrapping in a Scene in gide and benchmark that.
-
 // Editor is a widget for editing multiple lines of text (as compared to
-// [gi.TextField] for a single line).  The Editor is driven by a Buf buffer which
-// contains all the text, and manages all the edits, sending update signals
-// out to the views -- multiple views can be attached to a given buffer.  All
-// updating in the Editor should be within a single goroutine -- it would
-// require extensive protections throughout code otherwise.
+// [gi.TextField] for a single line).  The Editor is driven by a [Buf]
+// buffer which contains all the text, and manages all the edits,
+// sending update signals out to the views.
+//
+// Use SetNeedsRender to drive an render update for any change that does
+// not change the line-level layout of the text.
+// Use SetNeedsLayout whenever there are changes across lines that require
+// re-layout of the text.  This sets the Widget NeedsRender flag and triggers
+// layout during that render.
+//
+// Multiple views can be attached to a given buffer.  All updating in the
+// Editor should be within a single goroutine, as it would require
+// extensive protections throughout code otherwise.
 type Editor struct { //goki:embedder
 	gi.Layout
 
@@ -220,6 +225,12 @@ const (
 	// EditorHasLineNos indicates that this editor has line numbers (per Buf option)
 	EditorHasLineNos EditorFlags = EditorFlags(gi.WidgetFlagsN) + iota
 
+	// EditorNeedsLayout is set by SetNeedsLayout: Editor does significant
+	// internal layout in LayoutAllLines, and its layout is simply based
+	// on what it gets allocated, so it does not affect the rest
+	// of the Scene.
+	EditorNeedsLayout
+
 	// EditorLastWasTabAI indicates that last key was a Tab auto-indent
 	EditorLastWasTabAI
 
@@ -331,7 +342,6 @@ func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	ed.Offs = nof
 
 	ed.NLines += nsz
-	ed.SetNeedsRender(true)
 	ed.SetNeedsLayout(true)
 }
 
@@ -355,11 +365,9 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	case BufDone:
 	case BufNew:
 		ed.ResetState()
-		ed.SetNeedsRender(true)
-		ed.SetNeedsLayout(true)
 		ed.SetCursorShow(ed.CursorPos)
+		ed.SetNeedsLayout(true)
 	case BufMods:
-		ed.SetNeedsRender(true)
 		ed.SetNeedsLayout(true)
 	case BufInsert:
 		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
@@ -390,7 +398,6 @@ func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 			ed.Update()
 		}
 	case BufMarkUpdt:
-		ed.SetNeedsRender(true)
 		ed.SetNeedsLayout(true) // comes from another goroutine
 	case BufClosed:
 		ed.SetBuf(nil)
@@ -441,7 +448,6 @@ func (ed *Editor) Redo() {
 //  Widget Interface
 
 func (ed *Editor) ConfigWidget() {
-	ed.SetNeedsRender(true)
 	ed.SetNeedsLayout(true)
 }
 

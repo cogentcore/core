@@ -121,7 +121,7 @@ func (kc *KeyChordEdit) HandleKeyChord() {
 	})
 }
 
-// func (kc *KeyChordEdit) ApplyStyle(sc *gi.Scene) {
+// func (kc *KeyChordEdit) ApplyStyle() {
 // todo: are these still relevant?
 // 	kc.SetCanFocusIfActive()
 // 	kc.Selectable = true

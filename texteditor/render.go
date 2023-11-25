@@ -22,8 +22,21 @@ import (
 // Rendering Notes: all rendering is done in Render call.
 // Layout must be called whenever content changes across lines.
 
+func (ed *Editor) SetNeedsLayout(updt bool) {
+	if updt {
+		ed.SetNeedsRender(updt)
+		ed.SetFlag(true, EditorNeedsLayout)
+	}
+}
+
 func (ed *Editor) Render() {
 	if ed.PushBounds() {
+		ed.ApplyStyle()
+		if ed.Is(EditorNeedsLayout) {
+			ed.LayoutAllLines()
+			ed.GetScrollPosition()
+			ed.SetFlag(false, EditorNeedsLayout)
+		}
 		ed.RenderAllLinesInBounds()
 		if ed.ScrollToCursorOnRender {
 			ed.ScrollToCursorOnRender = false
