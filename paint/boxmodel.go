@@ -62,7 +62,10 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 
 	// first do any shadow
 	if st.HasBoxShadow() {
-		for _, shadow := range st.BoxShadow {
+		// CSS effectively goes in reverse order
+		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
+			shadow := st.BoxShadow[i]
+
 			pc.StrokeStyle.SetColor(nil)
 
 			// TODO: better handling of opacity?
