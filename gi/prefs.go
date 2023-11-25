@@ -151,8 +151,8 @@ func (pf *Preferences) Defaults() {
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
-	pf.FontFamily = "Go"
-	pf.MonoFont = "Go Mono"
+	pf.FontFamily = "Roboto"
+	pf.MonoFont = "Roboto Mono"
 	pf.KeyMap = keyfun.DefaultMap
 	pf.UpdateUser()
 }
