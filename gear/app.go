@@ -17,6 +17,7 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/xe"
 )
 
@@ -52,7 +53,7 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	}
 }
 
-func (a *App) ConfigWidget(sc *gi.Scene) {
+func (a *App) ConfigWidget() {
 	if a.HasChildren() {
 		return
 	}
@@ -62,14 +63,15 @@ func (a *App) ConfigWidget(sc *gi.Scene) {
 	// st := StructForFlags(a.Cmd.Flags)
 	// giv.NewStructView(a).SetStruct(st)
 
-	sp := gi.NewSplits(a, "splits")
+	sp := gi.NewSplits(a, "splits").SetDim(mat32.Y)
 
 	gi.NewFrame(sp, "commands")
 
 	texteditor.NewEditor(sp, "editor")
 
-	a.Update()
-	a.UpdateEndLayout(updt)
+	sp.SetSplits(0.8, 0.2)
+
+	a.UpdateEnd(updt)
 }
 
 // StructForFlags returns a new struct object for the given flags.
