@@ -276,12 +276,13 @@ func (tb *Buf) SetChanged() {
 }
 
 // SetText sets the text to given bytes
-func (tb *Buf) SetText(txt []byte) {
+func (tb *Buf) SetText(txt []byte) *Buf {
 	tb.Txt = txt
 	tb.BytesToLines()
 	tb.InitialMarkup()
 	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
+	return tb
 }
 
 func (tb *Buf) Update() {
