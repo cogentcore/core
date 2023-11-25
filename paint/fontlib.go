@@ -5,7 +5,10 @@
 package paint
 
 import (
+	"embed"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -14,21 +17,8 @@ import (
 	"sync"
 
 	"github.com/fatih/camelcase"
-	"github.com/goki/freetype/truetype"
 	"github.com/iancoleman/strcase"
 	"goki.dev/girl/styles"
-	"golang.org/x/image/font/gofont/gobold"
-	"golang.org/x/image/font/gofont/gobolditalic"
-	"golang.org/x/image/font/gofont/goitalic"
-	"golang.org/x/image/font/gofont/gomedium"
-	"golang.org/x/image/font/gofont/gomediumitalic"
-	"golang.org/x/image/font/gofont/gomono"
-	"golang.org/x/image/font/gofont/gomonobold"
-	"golang.org/x/image/font/gofont/gomonobolditalic"
-	"golang.org/x/image/font/gofont/gomonoitalic"
-	"golang.org/x/image/font/gofont/goregular"
-	"golang.org/x/image/font/gofont/gosmallcaps"
-	"golang.org/x/image/font/gofont/gosmallcapsitalic"
 )
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe
@@ -67,6 +57,9 @@ func (fi FontInfo) Label() string {
 // are loaded into the library, the names are appropriately regularized.
 type FontLib struct {
 
+	// An fs containing available fonts in its root directory, which are typically embedded through go:embed.
+	FontsFS fs.FS
+
 	// list of font paths to search for fonts
 	FontPaths []string
 
@@ -101,6 +94,7 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
+		fl.FontsFS = defaultFonts
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)
@@ -131,31 +125,63 @@ func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 			return face, nil
 		}
 	}
-	if path := fl.FontsAvail[fontnm]; path != "" {
-		loadFontMu.RUnlock()
-		loadFontMu.Lock()
-		face, err := OpenFontFace(fontnm, path, size, 0)
-		if err != nil || face == nil {
-			if err == nil {
-				err = fmt.Errorf("gi.FontLib: nil face with no error for: %v", fontnm)
-			}
-			slog.Error("gi.FontLib: error loading font, removed from list", "fontName", fontnm)
-			loadFontMu.Unlock()
-			fl.DeleteFont(fontnm)
+
+	var bytes []byte
+	var path string
+
+	if fl.FontsFS != nil {
+		// TODO(kai/font): support other file types in fonts fs
+		path = fontnm + ".tff"
+		b, err := fs.ReadFile(fl.FontsFS, path)
+		if err == nil {
+			bytes = b
+		} else if !errors.Is(err, fs.ErrNotExist) {
+			err = fmt.Errorf("error opening font file for font %q in FontsFS: %w", fontnm, err)
+			slog.Error(err.Error())
 			return nil, err
 		}
-		facemap := fl.Faces[fontnm]
-		if facemap == nil {
-			facemap = make(map[int]*styles.FontFace)
-			fl.Faces[fontnm] = facemap
-		}
-		facemap[size] = face
-		// fmt.Printf("Opened font face: %v %v\n", fontnm, size)
-		loadFontMu.Unlock()
-		return face, nil
 	}
+
+	if bytes == nil {
+		path := fl.FontsAvail[fontnm]
+		if path != "" {
+			b, err := os.ReadFile(path)
+			if err != nil {
+				err = fmt.Errorf("error opening font file for font %q with path %q: %w", fontnm, path, err)
+				slog.Error(err.Error())
+				return nil, err
+			}
+			bytes = b
+		}
+	}
+
+	if bytes == nil {
+		loadFontMu.RUnlock()
+		return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v", fontnm, fl.FontPaths)
+	}
+
 	loadFontMu.RUnlock()
-	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v", fontnm, fl.FontPaths)
+	loadFontMu.Lock()
+	face, err := OpenFontFace(bytes, fontnm, path, size, 0)
+	if err != nil || face == nil {
+		if err == nil {
+			err = fmt.Errorf("gi.FontLib: nil face with no error for: %v", fontnm)
+		}
+		slog.Error("gi.FontLib: error loading font, removed from list", "fontName", fontnm)
+		loadFontMu.Unlock()
+		fl.DeleteFont(fontnm)
+		return nil, err
+	}
+	facemap := fl.Faces[fontnm]
+	if facemap == nil {
+		facemap = make(map[int]*styles.FontFace)
+		fl.Faces[fontnm] = facemap
+	}
+	facemap[size] = face
+	// fmt.Printf("Opened font face: %v %v\n", fontnm, size)
+	loadFontMu.Unlock()
+	return face, nil
+
 }
 
 // DeleteFont removes given font from list of available fonts -- if not supported etc
@@ -209,7 +235,6 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontsAvail) > 0 {
 		fl.FontsAvail = make(map[string]string)
 	}
-	fl.GoFontsAvail()
 	for _, p := range fl.FontPaths {
 		fl.FontsAvailFromPath(p)
 	}
@@ -337,54 +362,8 @@ var altFontMap = map[string]string{
 	"verdana": "Verdana",
 }
 
-// see: https://blog.golang.org/go-fonts
-
-type GoFontInfo struct {
-	name string
-	ttf  []byte
-}
-
-var GoFonts = map[string]GoFontInfo{
-	"gofont/goregular":         {"Go", goregular.TTF},
-	"gofont/gobold":            {"Go Bold", gobold.TTF},
-	"gofont/gobolditalic":      {"Go Bold Italic", gobolditalic.TTF},
-	"gofont/goitalic":          {"Go Italic", goitalic.TTF},
-	"gofont/gomedium":          {"Go Medium", gomedium.TTF},
-	"gofont/gomediumitalic":    {"Go Medium Italic", gomediumitalic.TTF},
-	"gofont/gomono":            {"Go Mono", gomono.TTF},
-	"gofont/gomonobold":        {"Go Mono Bold", gomonobold.TTF},
-	"gofont/gomonobolditalic":  {"Go Mono Bold Italic", gomonobolditalic.TTF},
-	"gofont/gomonoitalic":      {"Go Mono Italic", gomonoitalic.TTF},
-	"gofont/gosmallcaps":       {"Go Small Caps", gosmallcaps.TTF},
-	"gofont/gosmallcapsitalic": {"Go Small Caps Italic", gosmallcapsitalic.TTF},
-}
-
-func OpenGoFont(name, path string, size int, strokeWidth int) (*styles.FontFace, error) {
-	gf, ok := GoFonts[path]
-	if !ok {
-		return nil, fmt.Errorf("font path for the Go font not found: %v", path)
-	}
-	f, _ := truetype.Parse(gf.ttf)
-	face := truetype.NewFace(f, &truetype.Options{
-		Size:   float64(size),
-		Stroke: strokeWidth,
-		// Hinting: font.HintingFull,
-		// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
-
-	})
-	ff := styles.NewFontFace(name, size, face)
-	return ff, nil
-}
-
-func (fl *FontLib) GoFontsAvail() {
-	for path, gf := range GoFonts {
-		basefn := strings.ToLower(gf.name)
-		fl.FontsAvail[basefn] = path
-		fi := FontInfo{Name: gf.name, Example: FontInfoExample}
-		_, fi.Stretch, fi.Weight, fi.Style = styles.FontNameToMods(gf.name)
-		fl.FontInfo = append(fl.FontInfo, fi)
-	}
-}
+//go:embed fonts/*.ttf
+var defaultFonts embed.FS
 
 // FontFallbacks are a list of fallback fonts to try, at the basename level.
 // Make sure there are no loops!  Include Noto versions of everything in this

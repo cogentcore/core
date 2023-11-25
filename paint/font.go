@@ -7,7 +7,6 @@ package paint
 import (
 	"log"
 	"math"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -51,22 +50,15 @@ func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
 	return fs.Font
 }
 
-// OpenFontFace loads a font file at given path, with given raw size in
-// display dots, and if strokeWidth is > 0, the font is drawn in outline form
-// (stroked) instead of filled (supported in SVG).
-// loadFontMu must be locked prior to calling
-func OpenFontFace(name, path string, size int, strokeWidth int) (*styles.FontFace, error) {
-	if strings.HasPrefix(path, "gofont") {
-		return OpenGoFont(name, path, size, strokeWidth)
-	}
-	fontBytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
+// OpenFontFace loads a font face from the given font file bytes, with the given
+// name and path for context, with given raw size in display dots, and if
+// strokeWidth is > 0, the font is drawn in outline form (stroked) instead of
+// filled (supported in SVG). loadFontMu must be locked prior to calling.
+func OpenFontFace(bytes []byte, name, path string, size int, strokeWidth int) (*styles.FontFace, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 	if ext == ".otf" {
 		// note: this compiles but otf fonts are NOT yet supported apparently
-		f, err := opentype.Parse(fontBytes)
+		f, err := opentype.Parse(bytes)
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +70,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*styles.FontFac
 		ff := styles.NewFontFace(name, size, face)
 		return ff, err
 	} else {
-		f, err := truetype.Parse(fontBytes)
+		f, err := truetype.Parse(bytes)
 		if err != nil {
 			return nil, err
 		}
