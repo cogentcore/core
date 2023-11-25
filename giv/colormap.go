@@ -43,7 +43,7 @@ func (cv *ColorMapView) OnInit() {
 // SetColorMap sets the color map and triggers a display update
 func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 	cv.Map = cmap
-	cv.SetNeedsRender()
+	cv.SetNeedsRender(true)
 }
 
 // SetColorMapAction sets the color map and triggers a display update
@@ -51,7 +51,7 @@ func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) {
 	cv.Map = cmap
 	cv.SendChange()
-	cv.SetNeedsRender()
+	cv.SetNeedsRender(true)
 }
 
 // ChooseColorMap pulls up a chooser to select a color map
@@ -85,11 +85,11 @@ func (cv *ColorMapView) HandleColorMapEvents() {
 
 }
 
-func (cv *ColorMapView) RenderColorMap(sc *gi.Scene) {
+func (cv *ColorMapView) RenderColorMap() {
 	if cv.Map == nil {
 		cv.Map = colormap.StdMaps["ColdHot"]
 	}
-	rs := &sc.RenderState
+	rs := &cv.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
 
@@ -127,11 +127,11 @@ func (cv *ColorMapView) RenderColorMap(sc *gi.Scene) {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render(sc *gi.Scene) {
-	if cv.PushBounds(sc) {
-		cv.RenderColorMap(sc)
-		cv.RenderChildren(sc)
-		cv.PopBounds(sc)
+func (cv *ColorMapView) Render() {
+	if cv.PushBounds() {
+		cv.RenderColorMap()
+		cv.RenderChildren()
+		cv.PopBounds()
 	}
 }
 
@@ -175,7 +175,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)

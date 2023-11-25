@@ -65,7 +65,7 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
+func (cv *ColorView) ConfigWidget() {
 	if cv.HasChildren() {
 		return
 	}
@@ -570,10 +570,10 @@ func (vv *ColorValue) UpdateWidget() {
 	}
 	vv.CreateTempIfNotPtr()
 	bt := vv.Widget.(*gi.Button)
-	bt.SetNeedsRender()
+	bt.SetNeedsRender(true)
 }
 
-func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -606,7 +606,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 		// TODO: use hct contrast color
 		s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
 	})
-	bt.Config(sc)
+	bt.Config()
 	vv.UpdateWidget()
 }
 
@@ -653,7 +653,7 @@ func (vv *ColorNameValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorNameValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
+func (vv *ColorNameValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
 		vv.UpdateWidget()
 		return
@@ -662,7 +662,7 @@ func (vv *ColorNameValue) ConfigWidget(w gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config(sc)
+	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)

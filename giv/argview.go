@@ -60,7 +60,7 @@ func (av *ArgView) OnInit() {
 }
 
 // Config configures the view
-func (av *ArgView) ConfigWidget(vp *gi.Scene) {
+func (av *ArgView) ConfigWidget() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.FrameType, "args-grid")
@@ -115,7 +115,7 @@ func (av *ArgView) ConfigArgsGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config) // not sure if always unique?
 	if mods {
-		av.SetNeedsLayoutUpdate(av.Sc, updt)
+		av.SetNeedsLayout(updt)
 	} else {
 		updt = sg.UpdateStart()
 	}
