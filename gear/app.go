@@ -67,7 +67,10 @@ func (a *App) ConfigWidget() {
 
 	gi.NewFrame(sp, "commands")
 
-	texteditor.NewEditor(sp, "editor")
+	tb := texteditor.NewBuf().SetText([]byte("$"))
+	tb.Hi.Lang = "sh"
+	grr.Log0(tb.Stat())
+	texteditor.NewEditor(sp, "editor").SetBuf(tb)
 
 	sp.SetSplits(0.8, 0.2)
 
