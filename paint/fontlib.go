@@ -57,7 +57,10 @@ func (fi FontInfo) Label() string {
 // are loaded into the library, the names are appropriately regularized.
 type FontLib struct {
 
-	// An fs containing available fonts in its root directory, which are typically embedded through go:embed.
+	// An fs containing available fonts, which are typically embedded through go:embed.
+	// It is initialized to contain of the default fonts located in the fonts directory
+	// (https://github.com/goki/girl/tree/main/paint/fonts), but it can be extended by
+	// any packages by using a merged fs package.
 	FontsFS fs.FS
 
 	// list of font paths to search for fonts
@@ -377,7 +380,7 @@ var FontFallbacks = map[string]string{
 	"courier":          "Courier",
 	"Courier":          "Courier New",
 	"Courier New":      "NotoSansMono",
-	"NotoSansMono":     "Go Mono",
+	"NotoSansMono":     "Roboto Mono",
 	"monospace":        "NotoSansMono",
 	"cursive":          "Comic Sans", // todo: look up more of these
 	"Comic Sans":       "Comic Sans MS",
