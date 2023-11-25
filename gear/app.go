@@ -76,14 +76,15 @@ func (a *App) ConfigWidget() {
 	te := texteditor.NewEditor(sp, "editor").SetBuf(tb)
 	te.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Enter && e.Modifiers() == 0 {
-			cmd := string(tb.Text())
-			tb.SetText([]byte("$ "))
-
-			cmd = strings.TrimPrefix(cmd, "$ ")
-			cmd = strings.TrimSuffix(cmd, "\n")
-			grr.Log0(a.RunCmd(cmd, cmds))
+		if !(kf == keyfun.Enter && e.Modifiers() == 0) {
+			return
 		}
+		e.SetHandled()
+		cmd := string(tb.Text())
+		tb.SetText([]byte("$ "))
+
+		cmd = strings.TrimPrefix(cmd, "$ ")
+		grr.Log0(a.RunCmd(cmd, cmds))
 	})
 
 	sp.SetSplits(0.8, 0.2)
