@@ -10,6 +10,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/convolution"
+	"goki.dev/mat32/v2"
 )
 
 // scipy impl:
@@ -54,4 +55,40 @@ func GaussianBlur(src image.Image, sigma float64) *image.RGBA {
 	result = convolution.Convolve(result, k.Transposed(), &options)
 
 	return result
+}
+
+// EdgeBlurFactors returns multiplicative factors that replicate the effect
+// of a Gaussian kernel applied to a sharp edge transition in the middle of
+// a line segment going from -radius to +radius, with a Gaussian
+// sigma = radius / 2.
+func EdgeBlurFactors(radius float32) []float32 {
+	radius = mat32.Ceil(radius)
+	irad := int(radius)
+	klen := irad*2 + 1
+	sigma := radius / 2
+	sfactor := -0.5 / (sigma * sigma)
+
+	k := make([]float32, klen)
+	sum := float32(0)
+	for i, x := 0, -radius; i < klen; i, x = i+1, x+1 {
+		v := mat32.FastExp(sfactor * (x * x))
+		sum += v
+		k[i] = v
+	}
+	for i, v := range k {
+		k[i] = v / sum
+	}
+
+	line := make([]float32, klen)
+	for li := range line {
+		sum := float32(0)
+		for ki, v := range k {
+			if ki >= (klen - li) {
+				break
+			}
+			sum += v
+		}
+		line[li] = sum
+	}
+	return line
 }

@@ -60,3 +60,7 @@ func TestGaussianBlur(t *testing.T) {
 	// 29 31 33 34 36
 	// 35 37 39 40 42
 }
+
+func TestEdgeBlurFactors(t *testing.T) {
+	fmt.Println(EdgeBlurFactors(4))
+}

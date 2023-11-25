@@ -56,8 +56,8 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw LayState data because we need to clear
 		// any box shadow that may have gone in margin.
-		mspos, mssz := st.BoxShadowPosSize(pos, sz)
-		pc.FillBox(rs, mspos, mssz, &sbg)
+		// mspos, mssz := st.BoxShadowPosSize(pos, sz)
+		pc.FillBox(rs, pos, sz, &sbg)
 	}
 
 	// first do any shadow
@@ -78,11 +78,11 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 			// we only want radius for border, no actual border
 			pc.DrawBox(rs, shadow.BasePos(mpos), shadow.BaseSize(msz), styles.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
-			if shadow.Blur.Dots != 0 {
-				pc.BlurBox(rs, shadow.Pos(pos), shadow.Size(sz), shadow.Blur.Dots/2)
-			}
 			pc.FillStyle.Opacity = prevOpacity
 		}
+		// if shadow.Blur.Dots != 0 {
+		pc.BlurBox(rs, pos, sz, st.BoxShadow[0].Blur.Dots/2)
+		// }
 	}
 
 	// then draw the box over top of that.

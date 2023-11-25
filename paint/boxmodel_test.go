@@ -75,7 +75,7 @@ func TestBoxShadow(t *testing.T) {
 	st.Border.Width.Set(units.Dp(0))
 	st.Border.Color.Set(colors.Red)
 	st.Border.Radius = styles.BorderRadiusFull
-	st.BoxShadow = styles.BoxShadow1()
+	st.BoxShadow = styles.BoxShadow5()
 
 	st.ToDots()
 
