@@ -6,6 +6,7 @@ package colormap
 
 import (
 	"image/color"
+	"maps"
 	"math"
 	"sort"
 
@@ -25,6 +26,10 @@ type Map struct {
 
 	// list of colors to interpolate between
 	Colors []color.RGBA
+}
+
+func (cm *Map) String() string {
+	return cm.Name
 }
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor
@@ -259,9 +264,7 @@ var StdMaps = map[string]*Map{
 var AvailMaps = map[string]*Map{}
 
 func init() {
-	for k, v := range StdMaps {
-		AvailMaps[k] = v
-	}
+	maps.Copy(AvailMaps, StdMaps)
 }
 
 // AvailMapsList returns a sorted list of color map names, e.g., for choosers
