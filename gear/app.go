@@ -5,12 +5,14 @@
 package gear
 
 import (
+	"fmt"
 	"io"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	"github.com/mattn/go-shellwords"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -32,6 +34,9 @@ type App struct {
 
 	// Cmd is the root command associated with this app.
 	Cmd *Cmd
+
+	// CurCmd is the current root command being typed in.
+	CurCmd string
 }
 
 var _ ki.Ki = (*App)(nil)
@@ -79,18 +84,28 @@ func (a *App) ConfigWidget() {
 	tb := texteditor.NewBuf()
 	tb.NewBuf(0)
 	tb.Hi.Lang = "sh"
+	tb.Opts.LineNos = false
 	grr.Log0(tb.Stat())
 	te := texteditor.NewEditor(sp, "editor").SetBuf(tb)
 	te.OnKeyChord(func(e events.Event) {
+		txt := string(tb.Text())
+
 		kf := keyfun.Of(e.KeyChord())
-		if !(kf == keyfun.Enter && e.Modifiers() == 0) {
+		if kf == keyfun.Enter && e.Modifiers() == 0 {
+			e.SetHandled()
+			tb.NewBuf(0)
+
+			grr.Log0(a.RunCmd(txt, cmds))
 			return
 		}
-		e.SetHandled()
-		cmd := string(tb.Text())
-		tb.NewBuf(0)
 
-		grr.Log0(a.RunCmd(cmd, cmds))
+		envs, words := grr.Log2(shellwords.ParseWithEnvs(txt))
+		if len(words) > 0 {
+			a.CurCmd = words[0]
+		} else {
+			a.CurCmd = ""
+		}
+		fmt.Println(envs, words)
 	})
 
 	sp.SetSplits(0.8, 0.2)
@@ -108,7 +123,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 	})
-	gi.NewLabel(cfr, "cmd").SetText("$ " + cmd)
+	gi.NewLabel(cfr, "cmd").SetType(gi.LabelTitleLarge).SetText(cmd)
 
 	r, w := io.Pipe()
 	buf := texteditor.NewBuf()
