@@ -44,59 +44,29 @@ func ToneContrastRatio(a, b float32) float32 {
 }
 
 // ContrastColor returns the color that will ensure that the given contrast ratio
-// between the given color and the resulting color is met. It returns nil, false if
-// the given ratio can not be achieved with the given color. The ratio must be between
-// 1 and 21. If the tone of the given color is greater than 50, it tries darker tones first,
-// and otherwise it tries lighter tones first.
-func ContrastColor(c color.Color, ratio float32) (color.Color, bool) {
-	h := FromColor(c)
-	ct, ok := ContrastTone(h.Tone, ratio)
-	if !ok {
-		return nil, false
-	}
-	return h.WithTone(ct), true
-}
-
-// ContrastColorUnsafe returns the color that will ensure that the given contrast ratio
 // between the given color and the resulting color is met. If the given ratio can
 // not be achieved with the given color, it returns the color that would result in
 // the highest contrast ratio. The ratio must be between 1 and 21. If the tone of
 // the given color is greater than 50, it tries darker tones first, and otherwise
-// it tries lighter tones first. This function is unsafe because the returned value
-// may not satisfy the ratio requirement.
-func ContrastColorUnsafe(c color.Color, ratio float32) color.Color {
+// it tries lighter tones first.
+func ContrastColor(c color.Color, ratio float32) color.Color {
 	h := FromColor(c)
-	ct := ContrastToneUnsafe(h.Tone, ratio)
+	ct := ContrastTone(h.Tone, ratio)
 	return h.WithTone(ct)
 }
 
-// ContrastTone returns the tone that will ensure that the given contrast ratio
-// between the given tone and the resulting tone is met. It returns -1, false if
-// the given ratio can not be achieved with the given tone. The tone must be between 0
-// and 100 and the ratio must be between 1 and 21. If the given tone is greater than 50,
-// it tries darker tones first, and otherwise it tries lighter tones first.
-func ContrastTone(tone, ratio float32) (float32, bool) {
-	if tone > 50 {
-		d, ok := ContrastToneDarker(tone, ratio)
-		if ok {
-			return d, true
-		}
-		l, ok := ContrastToneLighter(tone, ratio)
-		if ok {
-			return l, true
-		}
-		return -1, false
+// ContrastColorTry returns the color that will ensure that the given contrast ratio
+// between the given color and the resulting color is met. It returns nil, false if
+// the given ratio can not be achieved with the given color. The ratio must be between
+// 1 and 21. If the tone of the given color is greater than 50, it tries darker tones first,
+// and otherwise it tries lighter tones first.
+func ContrastColorTry(c color.Color, ratio float32) (color.Color, bool) {
+	h := FromColor(c)
+	ct, ok := ContrastToneTry(h.Tone, ratio)
+	if !ok {
+		return nil, false
 	}
-
-	l, ok := ContrastToneLighter(tone, ratio)
-	if ok {
-		return l, true
-	}
-	d, ok := ContrastToneDarker(tone, ratio)
-	if ok {
-		return d, true
-	}
-	return -1, false
+	return h.WithTone(ct), true
 }
 
 // ContrastTone returns the tone that will ensure that the given contrast ratio
@@ -104,10 +74,9 @@ func ContrastTone(tone, ratio float32) (float32, bool) {
 // not be achieved with the given tone, it returns the tone that would result in
 // the highest contrast ratio. The tone must be between 0 and 100 and the ratio must be
 // between 1 and 21. If the given tone is greater than 50, it tries darker tones first,
-// and otherwise it tries lighter tones first. This function is unsafe because the returned
-// value may not satisfy the ratio requirement.
-func ContrastToneUnsafe(tone, ratio float32) float32 {
-	ct, ok := ContrastTone(tone, ratio)
+// and otherwise it tries lighter tones first.
+func ContrastTone(tone, ratio float32) float32 {
+	ct, ok := ContrastToneTry(tone, ratio)
 	if ok {
 		return ct
 	}
@@ -119,12 +88,67 @@ func ContrastToneUnsafe(tone, ratio float32) float32 {
 	return 100
 }
 
+// ContrastToneTry returns the tone that will ensure that the given contrast ratio
+// between the given tone and the resulting tone is met. It returns -1, false if
+// the given ratio can not be achieved with the given tone. The tone must be between 0
+// and 100 and the ratio must be between 1 and 21. If the given tone is greater than 50,
+// it tries darker tones first, and otherwise it tries lighter tones first.
+func ContrastToneTry(tone, ratio float32) (float32, bool) {
+	if tone > 50 {
+		d, ok := ContrastToneDarkerTry(tone, ratio)
+		if ok {
+			return d, true
+		}
+		l, ok := ContrastToneLighterTry(tone, ratio)
+		if ok {
+			return l, true
+		}
+		return -1, false
+	}
+
+	l, ok := ContrastToneLighterTry(tone, ratio)
+	if ok {
+		return l, true
+	}
+	d, ok := ContrastToneDarkerTry(tone, ratio)
+	if ok {
+		return d, true
+	}
+	return -1, false
+}
+
 // ContrastToneLighter returns a tone greater than or equal to the given tone
+// that ensures that given contrast ratio between the two tones is met.
+// It returns 100 if the given ratio can not be achieved with the
+// given tone. The tone must be between 0 and 100 and the ratio must be
+// between 1 and 21.
+func ContrastToneLighter(tone, ratio float32) float32 {
+	safe, ok := ContrastToneLighterTry(tone, ratio)
+	if ok {
+		return safe
+	}
+	return 100
+}
+
+// ContrastToneDarker returns a tone less than or equal to the given tone
+// that ensures that given contrast ratio between the two tones is met.
+// It returns 0 if the given ratio can not be achieved with the
+// given tone. The tone must be between 0 and 100 and the ratio must be
+// between 1 and 21.
+func ContrastToneDarker(tone, ratio float32) float32 {
+	safe, ok := ContrastToneDarkerTry(tone, ratio)
+	if ok {
+		return safe
+	}
+	return 0
+}
+
+// ContrastToneLighterTry returns a tone greater than or equal to the given tone
 // that ensures that given contrast ratio between the two tones is met.
 // It returns -1, false if the given ratio can not be achieved with the
 // given tone. The tone must be between 0 and 100 and the ratio must be
 // between 1 and 21.
-func ContrastToneLighter(tone, ratio float32) (float32, bool) {
+func ContrastToneLighterTry(tone, ratio float32) (float32, bool) {
 	if tone < 0 || tone > 100 {
 		return -1, false
 	}
@@ -146,12 +170,12 @@ func ContrastToneLighter(tone, ratio float32) (float32, bool) {
 	return ret, true
 }
 
-// ContrastToneDarker returns a tone less than or equal to the given tone
+// ContrastToneDarkerTry returns a tone less than or equal to the given tone
 // that ensures that given contrast ratio between the two tones is met.
 // It returns -1, false if the given ratio can not be achieved with the
 // given tone. The tone must be between 0 and 100 and the ratio must be
 // between 1 and 21.
-func ContrastToneDarker(tone, ratio float32) (float32, bool) {
+func ContrastToneDarkerTry(tone, ratio float32) (float32, bool) {
 	if tone < 0 || tone > 100 {
 		return -1, false
 	}
@@ -171,34 +195,6 @@ func ContrastToneDarker(tone, ratio float32) (float32, bool) {
 		return -1, false
 	}
 	return ret, true
-}
-
-// ContrastToneLighterUnsafe returns a tone greater than or equal to the given tone
-// that ensures that given contrast ratio between the two tones is met.
-// It returns 100 if the given ratio can not be achieved with the
-// given tone. The tone must be between 0 and 100 and the ratio must be
-// between 1 and 21. This function is unsafe because the returned value may not
-// satisfy the ratio requirement.
-func ContrastToneLighterUnsafe(tone, ratio float32) float32 {
-	safe, ok := ContrastToneLighter(tone, ratio)
-	if ok {
-		return safe
-	}
-	return 100
-}
-
-// ContrastToneDarkerUnsafe returns a tone less than or equal to the given tone
-// that ensures that given contrast ratio between the two tones is met.
-// It returns 0 if the given ratio can not be achieved with the
-// given tone. The tone must be between 0 and 100 and the ratio must be
-// between 1 and 21. This function is unsafe because the returned value may not
-// satisfy the ratio requirement.
-func ContrastToneDarkerUnsafe(tone, ratio float32) float32 {
-	safe, ok := ContrastToneDarker(tone, ratio)
-	if ok {
-		return safe
-	}
-	return 0
 }
 
 // ContrastRatioOfYs returns the contrast ratio of two XYZ Y values.
