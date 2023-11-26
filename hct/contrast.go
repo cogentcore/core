@@ -69,24 +69,24 @@ func ToneContrastRatio(a, b float32) float32 {
 // the highest contrast ratio. The ratio must be between 1 and 21. If the tone of
 // the given color is greater than 50, it tries darker tones first, and otherwise
 // it tries lighter tones first.
-func ContrastColor(c color.Color, ratio float32) color.Color {
+func ContrastColor(c color.Color, ratio float32) color.RGBA {
 	h := FromColor(c)
 	ct := ContrastTone(h.Tone, ratio)
-	return h.WithTone(ct)
+	return h.WithTone(ct).AsRGBA()
 }
 
 // ContrastColorTry returns the color that will ensure that the given contrast ratio
-// between the given color and the resulting color is met. It returns nil, false if
+// between the given color and the resulting color is met. It returns color.RGBA{}, false if
 // the given ratio can not be achieved with the given color. The ratio must be between
 // 1 and 21. If the tone of the given color is greater than 50, it tries darker tones first,
 // and otherwise it tries lighter tones first.
-func ContrastColorTry(c color.Color, ratio float32) (color.Color, bool) {
+func ContrastColorTry(c color.Color, ratio float32) (color.RGBA, bool) {
 	h := FromColor(c)
 	ct, ok := ContrastToneTry(h.Tone, ratio)
 	if !ok {
-		return nil, false
+		return color.RGBA{}, false
 	}
-	return h.WithTone(ct), true
+	return h.WithTone(ct).AsRGBA(), true
 }
 
 // ContrastTone returns the tone that will ensure that the given contrast ratio

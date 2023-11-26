@@ -51,6 +51,26 @@ func TestToneContrastRatio(t *testing.T) {
 	}
 }
 
+func TestContrastColor(t *testing.T) {
+	type data struct {
+		color color.Color
+		ratio float32
+		want  color.Color
+	}
+	tests := []data{
+		{color.RGBA{0, 0, 0, 255}, 21, color.RGBA{255, 255, 255, 255}},
+		{color.RGBA{255, 255, 255, 255}, 21, color.RGBA{0, 0, 0, 255}},
+		{color.RGBA{100, 100, 100, 255}, 1, color.RGBA{100, 100, 100, 255}},
+		{color.RGBA{0, 0, 255, 255}, 8.59, color.RGBA{255, 255, 255, 255}},
+	}
+	for i, test := range tests {
+		res := ContrastColor(test.color, test.ratio)
+		if res != test.want {
+			t.Errorf("%d: expected %v but got %v", i, test.want, res)
+		}
+	}
+}
+
 func TestContrastTone(t *testing.T) {
 	type data struct {
 		tone  float32
