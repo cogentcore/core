@@ -90,12 +90,17 @@ func (a *App) ConfigWidget() {
 		s.Align.Content = styles.End
 	})
 
+	ef := gi.NewFrame(sp, "editor-frame").Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	dir := gi.NewLabel(ef, "dir").SetText(a.Dir)
+
 	tb := texteditor.NewBuf()
 	tb.NewBuf(0)
 	tb.Hi.Lang = "sh"
 	tb.Opts.LineNos = false
 	grr.Log0(tb.Stat())
-	te := texteditor.NewEditor(sp, "editor").SetBuf(tb)
+	te := texteditor.NewEditor(ef, "editor").SetBuf(tb)
 	te.OnKeyChord(func(e events.Event) {
 		txt := string(tb.Text())
 
@@ -104,7 +109,7 @@ func (a *App) ConfigWidget() {
 			e.SetHandled()
 			tb.NewBuf(0)
 
-			grr.Log0(a.RunCmd(txt, cmds))
+			grr.Log0(a.RunCmd(txt, cmds, dir))
 			return
 		}
 
@@ -122,8 +127,9 @@ func (a *App) ConfigWidget() {
 	a.UpdateEnd(updt)
 }
 
-// RunCmd runs the given command in the context of the given commands frame.
-func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
+// RunCmd runs the given command in the context of the given commands frame
+// and current directory label.
+func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	updt := cmds.UpdateStart()
 
 	cfr := gi.NewFrame(cmds).Style(func(s *styles.Style) {
@@ -166,6 +172,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 				return err
 			}
 		}
+		dir.SetTextUpdate(a.Dir)
 		return nil
 	}
 
