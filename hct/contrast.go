@@ -93,3 +93,31 @@ func Darker(tone, ratio float32) (float32, bool) {
 	}
 	return ret, true
 }
+
+// LighterUnsafe returns a tone greater than or equal to the given tone
+// that ensures that given contrast ratio between the two tones is met.
+// It returns 100 if the given ratio can not be achieved with the
+// given tone. Tone must be between 0 and 100 and ratio must be between
+// 1 and 21. This function is unsafe because the returned value may not
+// satisfy the ratio requirement.
+func LighterUnsafe(tone, ratio float32) float32 {
+	safe, ok := Lighter(tone, ratio)
+	if ok {
+		return safe
+	}
+	return 100
+}
+
+// DarkerUnsafe returns a tone less than or equal to the given tone
+// that ensures that given contrast ratio between the two tones is met.
+// It returns 0 if the given ratio can not be achieved with the
+// given tone. Tone must be between 0 and 100 and ratio must be between
+// 1 and 21. This function is unsafe because the returned value may not
+// satisfy the ratio requirement.
+func DarkerUnsafe(tone, ratio float32) float32 {
+	safe, ok := Darker(tone, ratio)
+	if ok {
+		return safe
+	}
+	return 0
+}
