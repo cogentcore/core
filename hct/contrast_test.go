@@ -85,8 +85,29 @@ func TestContrastToneLighter(t *testing.T) {
 	}
 	for i, test := range tests {
 		res := ContrastToneLighter(test.tone, test.ratio)
-		if mat32.Abs(res-test.want) > 0.5 {
+		if mat32.Abs(res-test.want) > 0.1 {
 			t.Errorf("%d: expected %g but got %g", i, test.want, res)
+		}
+	}
+}
+
+func TestContrastToneLighterTry(t *testing.T) {
+	type data struct {
+		tone  float32
+		ratio float32
+		want  float32
+		ok    bool
+	}
+	tests := []data{
+		{0, 21, 100, true},
+		{100, 21, -1, false},
+		{50, 1, 50, true},
+		{32.302586, 8.59, 100, true},
+	}
+	for i, test := range tests {
+		res, ok := ContrastToneLighterTry(test.tone, test.ratio)
+		if ok != test.ok || mat32.Abs(res-test.want) > 0.1 {
+			t.Errorf("%d: expected %g, %v but got %g, %v", i, test.want, test.ok, res, ok)
 		}
 	}
 }

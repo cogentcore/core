@@ -181,9 +181,10 @@ func ContrastToneLighterTry(tone, ratio float32) (float32, bool) {
 		return -1, false
 	}
 
+	// TODO(kai/cam): this +0.4 explained by the comment below only seems to cause problems
 	// Ensure gamut mapping, which requires a 'range' on tone, will still result
 	// the correct ratio by darkening slightly.
-	ret := cie.YToL(lightY) + 0.4
+	ret := cie.YToL(lightY) // + 0.4
 	if ret < 0 || ret > 100 {
 		return -1, false
 	}
@@ -208,9 +209,10 @@ func ContrastToneDarkerTry(tone, ratio float32) (float32, bool) {
 		return -1, false
 	}
 
+	// TODO(kai/cam): this +0.4 explained by the comment below only seems to cause problems
 	// Ensure gamut mapping, which requires a 'range' on tone, will still result
 	// the correct ratio by darkening slightly.
-	ret := cie.YToL(lightY) + 0.4
+	ret := cie.YToL(lightY) // + 0.4
 	if ret < 0 || ret > 100 {
 		return -1, false
 	}
