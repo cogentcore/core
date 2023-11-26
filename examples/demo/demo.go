@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"goki.dev/colors"
-	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
@@ -321,9 +320,9 @@ func makeValues(ts *gi.Tabs) {
 	})
 
 	giv.NewValue(values, colors.Red)
-	giv.NewValue(values, &colormap.Map{})
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, gi.FileName("demo.go"))
+	giv.NewValue(values, giv.ColorMapName(""))
 	giv.NewValue(values, hello)
 }
 

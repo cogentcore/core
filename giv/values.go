@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/colors/colormap"
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
@@ -54,9 +53,6 @@ func init() {
 	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(color.RGBA{})), func() Value {
 		return &ColorValue{}
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(colormap.Map{})), func() Value {
-		return &ColorMapValue{}
 	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {
 		return &ColorNameValue{}
