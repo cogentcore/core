@@ -43,12 +43,25 @@ func ToneContrastRatio(a, b float32) float32 {
 	return RatioOfYs(cie.LToY(a), cie.LToY(b))
 }
 
+// ContrastColor returns the color that will ensure that the given contrast ratio
+// between the given color and the resulting color is met. It returns nil, false if
+// the given ratio can not be achieved with the given color. The ratio must be between
+// 1 and 21. If the tone of the given color is greater than 50, it tries darker tones first,
+// and otherwise it tries lighter tones first.
+func ContrastColor(c color.Color, ratio float32) (color.Color, bool) {
+	h := FromColor(c)
+	ct, ok := ContrastTone(h.Tone, ratio)
+	if !ok {
+		return nil, false
+	}
+	return h.WithTone(ct), true
+}
+
 // ContrastTone returns the tone that will ensure that the given contrast ratio
 // between the given tone and the resulting tone is met. It returns -1, false if
 // the given ratio can not be achieved with the given tone. The tone must be between 0
 // and 100 and the ratio must be between 1 and 21. If the given tone is greater than 50,
-// it tries darker tones first, and otherwise it tries lighter tones first. This function
-// is unsafe because the returned value may not satisfy the ratio requirement.
+// it tries darker tones first, and otherwise it tries lighter tones first.
 func ContrastTone(tone, ratio float32) (float32, bool) {
 	if tone > 50 {
 		d, ok := Darker(tone, ratio)
@@ -78,7 +91,8 @@ func ContrastTone(tone, ratio float32) (float32, bool) {
 // not be achieved with the given tone, it returns the tone that would result in
 // the highest contrast ratio. The tone must be between 0 and 100 and the ratio must be
 // between 1 and 21. If the given tone is greater than 50, it tries darker tones first,
-// and otherwise it tries lighter tones first.
+// and otherwise it tries lighter tones first. This function is unsafe because the returned
+// value may not satisfy the ratio requirement.
 func ContrastToneUnsafe(tone, ratio float32) float32 {
 	ct, ok := ContrastTone(tone, ratio)
 	if ok {
