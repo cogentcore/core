@@ -5,6 +5,8 @@
 package gear
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"reflect"
@@ -150,6 +152,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	// output and input readers and writers
 	or, ow := io.Pipe()
 	ir, iw := io.Pipe()
+	ibuf := &bytes.Buffer{}
 
 	buf := texteditor.NewBuf()
 	buf.NewBuf(0)
@@ -161,7 +164,19 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 		s.Min.Set(units.Em(30), units.Em(10))
 	})
 	te.OnKeyChord(func(e events.Event) {
-		iw.Write([]byte(e.KeyChord()))
+		kc := e.KeyChord()
+		kf := keyfun.Of(kc)
+
+		fmt.Println(kc, kf)
+
+		switch kf {
+		case keyfun.Enter:
+			io.Copy(iw, ibuf)
+			iw.Write([]byte{'\n'})
+		default:
+			ibuf.Write([]byte(kc))
+		}
+
 	})
 
 	ob := &texteditor.OutBuf{}
@@ -175,7 +190,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	cmds.Update()
 	cmds.UpdateEndLayout(updt)
 
-	xc := xe.Major().SetDir(a.Dir).SetStdout(ow).SetStderr(ow).SetErrors(ow).SetStdin(ir)
+	xc := xe.Major().SetDir(a.Dir).SetStdout(ow).SetStderr(ow).SetErrors(ow).SetStdin(ir).SetBuffer(false)
 
 	words, err := shellwords.Parse(cmd)
 	if err != nil {
