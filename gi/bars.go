@@ -15,7 +15,7 @@ import (
 // so first added are called first.
 type BarFuncs []func(pw Widget)
 
-// Add adds given function for configuring a control bar
+// Add adds the given function for configuring a control bar
 func (bf *BarFuncs) Add(fun func(pw Widget)) *BarFuncs {
 	*bf = append(*bf, fun)
 	return bf
@@ -127,30 +127,38 @@ func (sc *Scene) InheritBars(osc *Scene) {
 }
 
 //////////////////////////////////////////////////////////////
-// 	Body wrappers
+// 	Scene wrappers
 
-// Add adds given function for configuring a control bar
+// AddTopBar adds the given function for configuring a control bar
 // at the top of the window
 func (bd *Body) AddTopBar(fun func(pw Widget)) {
 	bd.Sc.Bars.Top.Add(fun)
 }
 
-// Add adds given function for configuring a control bar
-// at the top of the window
+// AddLeftBar adds the given function for configuring a control bar
+// on the left of the window
 func (bd *Body) AddLeftBar(fun func(pw Widget)) {
 	bd.Sc.Bars.Left.Add(fun)
 }
 
-// Add adds given function for configuring a control bar
-// at the top of the window
+// AddRightBar adds the given function for configuring a control bar
+// on the right of the window
 func (bd *Body) AddRightBar(fun func(pw Widget)) {
 	bd.Sc.Bars.Right.Add(fun)
 }
 
-// Add adds given function for configuring a control bar
-// at the top of the window
+// AddBottomBar adds the given function for configuring a control bar
+// at the bottom of the window
 func (bd *Body) AddBottomBar(fun func(pw Widget)) {
 	bd.Sc.Bars.Bottom.Add(fun)
+}
+
+// AddTopAppBar is a helper function that adds the given function for
+// configuring a [TopAppBar] at the top of the window.
+func (bd *Body) AddTopAppBar(fun func(tb *TopAppBar)) {
+	bd.AddTopBar(func(pw Widget) {
+		fun(bd.TopAppBar(pw))
+	})
 }
 
 // TopAppBar constructs or returns the TopAppBar in given parent Widget
