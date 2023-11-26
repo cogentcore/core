@@ -692,6 +692,9 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	}
 
 	ri := sc
+	if si >= nspan {
+		return lex.Pos{Ln: cln, Ch: spoff}
+	}
 	rsz := len(ed.Renders[cln].Spans[si].Text)
 	if rsz == 0 {
 		return lex.Pos{Ln: cln, Ch: spoff}
