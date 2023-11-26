@@ -47,6 +47,7 @@ type App struct {
 var _ ki.Ki = (*App)(nil)
 
 func (a *App) OnInit() {
+	a.Frame.OnInit()
 	a.Dir = grr.Log(os.Getwd())
 }
 
