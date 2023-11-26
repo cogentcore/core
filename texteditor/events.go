@@ -279,11 +279,6 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		ed.CancelComplete()
 		ed.ISearchCancel()
 		ed.QReplaceAddText()
-	// case keyfun.Accept: // ctrl+enter
-	// 	ed.ISearchCancel()
-	// 	ed.QReplaceCancel()
-	// 	kt.SetHandled()
-	// 	ed.FocusNext()
 	case keyfun.Backspace:
 		// todo: previous item in qreplace
 		if ed.ISearch.On {

@@ -390,6 +390,12 @@ func (fv *FileView) ConfigSelRow() {
 	sf.OnChange(func(e events.Event) {
 		fv.SetSelFileAction(sf.Text())
 	})
+	sf.OnKeyChord(func(e events.Event) {
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Accept {
+			fv.SetSelFileAction(sf.Text())
+		}
+	})
 	sf.StartFocus()
 
 	el := sr.ChildByName("ext-lbl", 0).(*gi.Label)

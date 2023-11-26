@@ -356,7 +356,6 @@ func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
 	tmin, tmax := float32(tmini), float32(tmaxi)
 	cmin, cmax := ly.Geom.ContentRangeDim(d)
 	if tmin >= cmin && tmax <= cmax {
-		fmt.Println("fail: tmin > cmin:", tmin, cmin, "tmax <= cmax:", tmax, cmax)
 		return false
 	}
 	h := ly.Styles.Font.Size.Dots
@@ -365,18 +364,15 @@ func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
 		if trg < 0 {
 			trg = 0
 		}
-		fmt.Println("trg:", trg)
 		sb.SetValueAction(trg)
 		return true
 	} else {
 		if (tmax - tmin) < sb.ScrollThumbValue() { // only if whole thing fits
 			trg := sb.Value + float32(tmax-cmax) + h
-			fmt.Println("trg:", trg)
 			sb.SetValueAction(trg)
 			return true
 		}
 	}
-	fmt.Println("fail: tmin > cmin:", tmin, cmin, "tmax <= cmax:", tmax, cmax)
 	return false
 }
 

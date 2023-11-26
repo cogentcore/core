@@ -2543,7 +2543,8 @@ func (tb *Buf) SetCompleter(data any, matchFun complete.MatchFunc, editFun compl
 		}
 		tb.DeleteCompleter()
 	}
-	tb.Complete = gi.NewComplete().SetContext(data).SetMatchFunc(matchFun).SetEditFunc(editFun).SetLookupFunc(lookupFun)
+	tb.Complete = gi.NewComplete().SetContext(data).SetMatchFunc(matchFun).
+		SetEditFunc(editFun).SetLookupFunc(lookupFun)
 	tb.Complete.OnSelect(func(e events.Event) {
 		tb.CompleteText(tb.Complete.Completion)
 	})

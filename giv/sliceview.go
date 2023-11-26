@@ -422,7 +422,7 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		*val = sv.SelIdx
-		sv.Sc.SendKeyFun(keyfun.Accept, e)
+		sv.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 	})
 	return sv
 }

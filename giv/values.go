@@ -1598,10 +1598,11 @@ func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}).OnDoubleClick(func(e events.Event) {
 		if fv.SelectedDoubleClick {
 			cur = fv.SelectedFile()
-			d.Close()
+			d.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 		}
 	})
 	return true, func() {
+		cur = fv.SelectedFile()
 		vv.SetValue(cur)
 		vv.UpdateWidget()
 	}
