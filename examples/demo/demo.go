@@ -54,7 +54,7 @@ func makeHome(ts *gi.Tabs) {
 
 	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
 
-	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">GoGi</a> 2D and 3D Go GUI <u>framework.</u>`)
+	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">GoGi</a> 2D and 3D Go GUI <u>framework</u>.`)
 
 	pbar := gi.NewProgressBar(home)
 	pbar.Start(100)
@@ -93,37 +93,25 @@ func makeButtons(ts *gi.Tabs) {
 
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
-	gi.NewLabel(buttons, "bdesc").SetText(
+	gi.NewLabel(buttons).SetText(
 		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
 
-	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
+	makeRow := func() gi.Widget {
+		return gi.NewLayout(buttons).Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Align.Items = styles.Center
+		})
+	}
 
-	brow := gi.NewLayout(buttons).Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Align.Items = styles.Center
-	})
-	browt := gi.NewLayout(buttons).Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Align.Items = styles.Center
-	})
-	browi := gi.NewLayout(buttons).Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Align.Items = styles.Center
-	})
+	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard buttons")
+	brow := makeRow()
+	browt := makeRow()
+	browi := makeRow()
 
-	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu Buttons")
-	mbrow := gi.NewLayout(buttons).Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Align.Items = styles.Center
-	})
-	mbrowt := gi.NewLayout(buttons).Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Align.Items = styles.Center
-	})
-	mbrowi := gi.NewLayout(buttons).Style(func(s *styles.Style) {
-		s.Wrap = true
-		s.Align.Items = styles.Center
-	})
+	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Menu buttons")
+	mbrow := makeRow()
+	mbrowt := makeRow()
+	mbrowi := makeRow()
 
 	menu := func(m *gi.Scene) {
 		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1).
