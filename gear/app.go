@@ -98,7 +98,7 @@ func (a *App) ConfigWidget() {
 
 	tb := texteditor.NewBuf()
 	tb.NewBuf(0)
-	tb.Hi.Lang = "sh"
+	tb.Hi.Lang = "Bash"
 	tb.Opts.LineNos = false
 	grr.Log0(tb.Stat())
 	te := texteditor.NewEditor(ef, "editor").SetBuf(tb)
