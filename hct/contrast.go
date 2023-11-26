@@ -66,3 +66,30 @@ func Lighter(tone, ratio float32) (float32, bool) {
 	}
 	return ret, true
 }
+
+// Darker returns a tone less than or equal to the given tone
+// that ensures that given contrast ratio between the two tones is met.
+// It returns -1, false if the given ratio can not be achieved with the
+// given tone. Tone must be between 0 and 100 and ratio must be between
+// 1 and 21.
+func Darker(tone, ratio float32) (float32, bool) {
+	if tone < 0 || tone > 100 {
+		return -1, false
+	}
+
+	lightY := cie.LToY(tone)
+	darkY := ((lightY + 5) / ratio) - 5
+	realContrast := RatioOfYs(lightY, darkY)
+	delta := mat32.Abs(realContrast - ratio)
+	if realContrast < ratio && delta > 0.04 {
+		return -1, false
+	}
+
+	// Ensure gamut mapping, which requires a 'range' on tone, will still result
+	// the correct ratio by darkening slightly.
+	ret := cie.YToL(lightY) + 0.4
+	if ret < 0 || ret > 100 {
+		return -1, false
+	}
+	return ret, true
+}
