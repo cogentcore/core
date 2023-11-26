@@ -5,7 +5,6 @@
 package texteditor
 
 import (
-	"fmt"
 	"image"
 
 	"goki.dev/gi/v2/gi"
@@ -927,10 +926,6 @@ func (ed *Editor) ScrollCursorToBottom() bool {
 // vertical coordinate to center of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToVertCenter(pos int) bool {
-	if pos < 0 {
-		return false
-	}
-	// fmt.Println(mat32.Y, pos)
 	return ed.ScrollDimToCenter(mat32.Y, pos)
 }
 
@@ -983,7 +978,6 @@ func (ed *Editor) ScrollCursorToRight() bool {
 // horizontal coordinate to center of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToHorizCenter(pos int) bool {
-	fmt.Println(mat32.X, pos)
 	return ed.ScrollDimToCenter(mat32.X, pos)
 }
 

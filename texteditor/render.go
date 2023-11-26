@@ -34,7 +34,7 @@ func (ed *Editor) Render() {
 		ed.ApplyStyle()
 		if ed.Is(EditorNeedsLayout) {
 			ed.LayoutAllLines()
-			ed.GetScrollPosition()
+			ed.PositionScrolls()
 			ed.SetFlag(false, EditorNeedsLayout)
 		}
 		ed.RenderAllLinesInBounds()

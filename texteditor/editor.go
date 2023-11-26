@@ -336,6 +336,15 @@ func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 
 	// Offs
 	tmpof := make([]float32, nsz)
+	ov := float32(0)
+	if stln < len(ed.Offs) {
+		ov = ed.Offs[stln]
+	} else {
+		ov = ed.Offs[len(ed.Offs)-1]
+	}
+	for i := range tmpof {
+		tmpof[i] = ov
+	}
 	nof := append(ed.Offs, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])
 	copy(nof[stln:], tmpof)
