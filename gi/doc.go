@@ -101,6 +101,6 @@ examples/svg for an svg viewer, and examples/marbles for an svg animation.
 
 The gi.RenderWin can render Sprite images to an OverTex overlay texture, which is
 cleared to be transparent prior to rendering any active sprites.  This is used
-for cursors (e.g., TextField, giv.TextView cursors), Drag-n-Drop, etc.
+for cursors (e.g., TextField, giv.TextEditor cursors), Drag-n-Drop, etc.
 */
 package gi

@@ -198,6 +198,7 @@ func (ed *Editor) EditorStyles() {
 		} else {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
+		s.Font.Family = string(gi.Prefs.MonoFont)
 		s.Grow.Set(1, 1)
 		s.Overflow.Set(styles.OverflowAuto)   // absorbs all
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
@@ -207,7 +208,7 @@ func (ed *Editor) EditorStyles() {
 		s.Align.Content = styles.Start
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
-		s.Text.TabSize = 4
+		s.Text.TabSize = gi.Prefs.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
 
 		if s.State.Is(states.Focused) {
@@ -315,6 +316,7 @@ func (ed *Editor) SetBuf(buf *Buf) *Editor {
 			ed.PosHistIdx = bhl - 1
 		}
 	}
+	ed.LayoutAllLines()
 	ed.SetNeedsLayout(true)
 	return ed
 }

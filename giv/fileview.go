@@ -201,6 +201,8 @@ func (fv *FileView) SetPathFile(path, file, ext string) *FileView {
 
 // SelectedFile returns the full path to selected file
 func (fv *FileView) SelectedFile() string {
+	sf := fv.SelField()
+	sf.EditDone()
 	return filepath.Join(fv.DirPath, fv.SelFile)
 }
 

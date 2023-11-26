@@ -78,6 +78,9 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 	found := false
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
+		if sfn == nil {
+			return ki.Continue
+		}
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
 			found = true

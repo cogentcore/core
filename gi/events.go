@@ -161,7 +161,6 @@ func (wb *WidgetBase) SendKeyChord(kc key.Chord, orig ...events.Event) {
 
 func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifiers, orig ...events.Event) {
 	ke := events.NewKey(events.KeyChord, r, code, mods)
-	fmt.Println(ke.String())
 	if len(orig) > 0 && orig[0] != nil {
 		kb := *orig[0].AsBase()
 		ke.GenTime = kb.GenTime

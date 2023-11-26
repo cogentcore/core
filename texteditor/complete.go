@@ -83,7 +83,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
 	if len(ld.Text) > 0 {
-		// TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text}, ld.Text, nil)
+		// TextEditorDialog(nil, DlgOpts{Title: "Lookup: " + text}, ld.Text, nil)
 		return ld
 	}
 	if ld.Filename != "" {
@@ -91,7 +91,7 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 		_ = txt
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
 		_ = prmpt
-		// TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt}, txt, nil)
+		// TextEditorDialog(nil, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt}, txt, nil)
 		return ld
 	}
 

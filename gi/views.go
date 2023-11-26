@@ -26,6 +26,12 @@ type ViewIFace interface {
 	// to log).
 	CtxtMenuView(val any, readOnly bool, sc *Scene, m *Scene) bool
 
+	// CallFunc calls the given function in the context of the given widget,
+	// popping up a dialog to prompt for any arguments and show the return
+	// values of the function. It is a helper function that uses [NewSoloFuncButton]
+	// under the hood.
+	CallFunc(ctx Widget, fun any)
+
 	// Inspector opens an interactive editor of given Ki tree, at its root
 	Inspector(obj ki.Ki)
 

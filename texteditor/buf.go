@@ -384,10 +384,11 @@ func (tb *Buf) BytesLine(ln int) []byte {
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
-func (tb *Buf) SetHiStyle(style gi.HiStyleName) {
+func (tb *Buf) SetHiStyle(style gi.HiStyleName) *Buf {
 	tb.MarkupMu.Lock()
 	tb.Hi.SetHiStyle(style)
 	tb.MarkupMu.Unlock()
+	return tb
 }
 
 // SignalMods sends the BufMods signal for misc, potentially
@@ -398,8 +399,16 @@ func (tb *Buf) SignalMods() {
 
 // SetReadOnly sets the buffer in a ReadOnly state if readonly = true
 // otherwise is in editable state.
-func (tb *Buf) SetReadOnly(readonly bool) {
+func (tb *Buf) SetReadOnly(readonly bool) *Buf {
 	tb.Undos.Off = readonly
+	return tb
+}
+
+func (tb *Buf) SetFilename(fn string) *Buf {
+	tb.Filename = gi.FileName(fn)
+	tb.Stat()
+	tb.Hi.Init(&tb.Info, &tb.PiState)
+	return tb
 }
 
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
@@ -485,7 +494,7 @@ func (tb *Buf) FileModCheck() bool {
 			gi.NewButton(pw).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
 				// TODO(kai/dialog): add this back -- can't call giv from here!
-				// giv.CallFunc(tb, "SaveAs", vp)
+				gi.TheViewIFace.CallFunc(sc, tb.SaveAs)
 			})
 			gi.NewButton(pw).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()
@@ -527,8 +536,7 @@ func (tb *Buf) OpenFile(filename gi.FileName) error {
 	}
 	tb.Txt, err = ioutil.ReadAll(fp)
 	fp.Close()
-	tb.Filename = filename
-	tb.Stat()
+	tb.SetFilename(string(filename))
 	tb.BytesToLines()
 	return nil
 }
@@ -900,9 +908,9 @@ func (tb *Buf) DeleteView(vw *Editor) {
 
 // SceneFromView returns Scene from text editor, if avail
 func (tb *Buf) SceneFromView() *gi.Scene {
-	// if len(tb.Views) > 0 {
-	// 	return tb.Views[0].Scene
-	// }
+	if len(tb.Views) > 0 {
+		return tb.Views[0].Sc
+	}
 	return nil
 }
 

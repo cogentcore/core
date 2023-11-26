@@ -79,7 +79,7 @@ type Preferences struct { //gti:add
 	// parameters controlling GUI behavior
 	Params ParamPrefs
 
-	// editor preferences -- for TextView etc
+	// editor preferences -- for TextEditor etc
 	Editor EditorPrefs
 
 	// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
@@ -731,7 +731,7 @@ type PrefsDetailed struct { //gti:add
 	DialogsSepRenderWin bool `def:"true"`
 
 	// Maximum amount of clipboard history to retain
-	TextViewClipHistMax int `def:"100" min:"0" max:"1000" step:"5"`
+	TextEditorClipHistMax int `def:"100" min:"0" max:"1000" step:"5"`
 
 	// maximum number of lines to look for matching scope syntax (parens, brackets)
 	TextBufMaxScopeLines int `def:"100" min:"10" step:"10"`
@@ -804,7 +804,7 @@ func (pf *PrefsDetailed) Defaults() {
 		TheViewIFace.PrefsDetDefaults(pf)
 	}
 	// in giv:
-	// TextViewClipHistMax
+	// TextEditorClipHistMax
 	// TextBuf*
 	// MapInlineLen
 	// StructInlineLen
@@ -830,7 +830,7 @@ func (pf *PrefsDetailed) Apply() { //gti:add
 		TheViewIFace.PrefsDetApply(pf)
 	}
 	// in giv:
-	// TextViewClipHistMax = pf.TextViewClipHistMax
+	// TextEditorClipHistMax = pf.TextEditorClipHistMax
 	// TextBuf*
 	// MapInlineLen
 	// StructInlineLen

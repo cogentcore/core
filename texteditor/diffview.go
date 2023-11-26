@@ -82,7 +82,7 @@ package texteditor
 ///////////////////////////////////////////////////////////////////
 // DiffView
 
-// DiffView presents two side-by-side TextView windows showing the differences
+// DiffView presents two side-by-side TextEditor windows showing the differences
 // between two files (represented as lines of strings).
 
 	type DiffView struct {
@@ -156,7 +156,7 @@ func (dv *DiffView) DiffViewStyles() {
 
 // NextDiff moves to next diff region
 func (dv *DiffView) NextDiff(ab int) bool {
-	tva, tvb := dv.TextViews()
+	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
 		tv = tvb
@@ -186,7 +186,7 @@ func (dv *DiffView) NextDiff(ab int) bool {
 
 // PrevDiff moves to previous diff region
 func (dv *DiffView) PrevDiff(ab int) bool {
-	tva, tvb := dv.TextViews()
+	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
 		tv = tvb
@@ -288,7 +288,7 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	if !dv.IsConfiged() {
 		dv.Config(dv.Sc)
 	}
-	av, bv := dv.TextViews()
+	av, bv := dv.TextEditors()
 	aupdt := av.UpdateStart()
 	bupdt := bv.UpdateStart()
 	dv.BufA.LineColors = nil
@@ -455,7 +455,7 @@ func (dv *DiffView) TagWordDiffs() {
 // ApplyDiff applies change from the other buffer to the buffer for given file
 // name, from diff that includes given line.
 func (dv *DiffView) ApplyDiff(ab int, line int) bool {
-	tva, tvb := dv.TextViews()
+	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
 		tv = tvb
@@ -508,7 +508,7 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 // UndoDiff undoes last applied change, if any -- just does Undo in buffer and
 // updates the list of edits applied.
 func (dv *DiffView) UndoDiff(ab int) {
-	tva, tvb := dv.TextViews()
+	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
 		tv = tvb
@@ -679,17 +679,17 @@ func (dv *DiffView) DiffLay() *gi.Layout {
 	return lay
 }
 
-func (dv *DiffView) TextViewLays() (*gi.Layout, *gi.Layout) {
+func (dv *DiffView) TextEditorLays() (*gi.Layout, *gi.Layout) {
 	lay := dv.DiffLay()
 	a := lay.Child(0).(*gi.Layout)
 	b := lay.Child(1).(*gi.Layout)
 	return a, b
 }
 
-func (dv *DiffView) TextViews() (*DiffTextView, *DiffTextView) {
-	a, b := dv.TextViewLays()
-	av := a.Child(0).(*DiffTextView)
-	bv := b.Child(0).(*DiffTextView)
+func (dv *DiffView) TextEditors() (*DiffTextEditor, *DiffTextEditor) {
+	a, b := dv.TextEditorLays()
+	av := a.Child(0).(*DiffTextEditor)
+	bv := b.Child(0).(*DiffTextEditor)
 	return av, bv
 }
 
@@ -711,12 +711,12 @@ func (dv *DiffView) ConfigTexts() {
 	config.Add(gi.LayoutType, "text-a-lay")
 	config.Add(gi.LayoutType, "text-b-lay")
 	mods, updt := lay.ConfigChildren(config)
-	al, bl := dv.TextViewLays()
+	al, bl := dv.TextEditorLays()
 	if !mods {
 		updt = lay.UpdateStart()
 	} else {
-		av := NewDiffTextView(al, "text-a")
-		bv := NewDiffTextView(bl, "text-b")
+		av := NewDiffTextEditor(al, "text-a")
+		bv := NewDiffTextEditor(bl, "text-b")
 		// av.SetReadOnly()
 		// bv.SetReadOnly()
 		av.SetBuf(dv.BufA)
@@ -761,19 +761,19 @@ var DiffViewProps = ki.Props{
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//   DiffTextView
+//   DiffTextEditor
 
-// DiffTextView supports double-click based application of edits from one
+// DiffTextEditor supports double-click based application of edits from one
 // buffer to the other.
-type DiffTextView struct {
+type DiffTextEditor struct {
 	View
 }
 
-func (tv *DiffTextView) OnInit() {
-	tv.TextViewEvents()
+func (tv *DiffTextEditor) OnInit() {
+	tv.TextEditorEvents()
 }
 
-func (tv *DiffTextView) DiffView() *DiffView {
+func (tv *DiffTextEditor) DiffView() *DiffView {
 	dvi := tv.ParentByType(DiffViewType, ki.NoEmbeds)
 	if dvi == nil {
 		return nil
@@ -782,9 +782,9 @@ func (tv *DiffTextView) DiffView() *DiffView {
 }
 
 // MouseEvent handles the events.Event to process double-click
-func (tv *DiffTextView) HandleDoubleClick(me events.Event) {
+func (tv *DiffTextEditor) HandleDoubleClick(me events.Event) {
 	if me.MouseButton() != events.Left {
-		tv.TextView.MouseEvent(me)
+		tv.TextEditor.MouseEvent(me)
 		return
 	}
 	pt := tv.PointToRelPos(me.LocalPos())
@@ -805,8 +805,8 @@ func (tv *DiffTextView) HandleDoubleClick(me events.Event) {
 	tv.View.MouseEvent(me)
 }
 
-// TextViewEvents sets connections between mouse and key events and actions
-func (tv *DiffTextView) TextViewEvents() {
+// TextEditorEvents sets connections between mouse and key events and actions
+func (tv *DiffTextEditor) TextEditorEvents() {
 	// tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
