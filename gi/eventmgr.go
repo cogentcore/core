@@ -649,7 +649,7 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 // 	if chord == "" {
 // 		return
 // 	}
-// 	r, mods, err := chord.Decode()
+// 	r, code, mods, err := chord.Decode()
 // 	if err != nil {
 // 		return
 // 	}
@@ -782,7 +782,7 @@ func (em *EventMgr) FocusNextFrom(from Widget) bool {
 	wi := from
 	wb := wi.AsWidget()
 
-	for next == nil {
+	for wi != nil {
 		if wb.Parts != nil {
 			if em.FocusNextFrom(wb.Parts) {
 				return true
@@ -855,19 +855,19 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 	wi := from
 	wb := wi.AsWidget()
 
-	for prev == nil {
+	for wi != nil {
 		wi, wb = wb.WidgetPrevVisible()
 		if wi == nil {
 			break
 		}
-		// if wb.Parts != nil {
-		// 	if em.FocusLastFrom(wb.Parts) {
-		// 		return true
-		// 	}
-		// }
 		if wb.AbilityIs(abilities.Focusable) {
 			prev = wi
 			break
+		}
+		if wb.Parts != nil {
+			if em.FocusLastFrom(wb.Parts) {
+				return true
+			}
 		}
 	}
 	em.SetFocus(prev)

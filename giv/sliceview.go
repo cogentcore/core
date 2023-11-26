@@ -422,7 +422,7 @@ func (sv *SliceViewBase) BindSelectDialog(val *int) *SliceViewBase {
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		*val = sv.SelIdx
-		sv.Sc.Close()
+		sv.Sc.SendKeyFun(keyfun.Accept, e)
 	})
 	return sv
 }

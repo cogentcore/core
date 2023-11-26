@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/ki/v2"
 )
 
@@ -139,6 +140,41 @@ func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 // is derived from, if any.
 func (wb *WidgetBase) SendChange(orig ...events.Event) {
 	wb.Send(events.Change, orig...)
+}
+
+func (wb *WidgetBase) SendKeyFun(kf keyfun.Funs, orig ...events.Event) {
+	if wb.This() == nil || wb.Is(ki.Deleted) {
+		return
+	}
+	kc := keyfun.ChordFor(kf)
+	wb.SendKeyChord(kc, orig...)
+}
+
+func (wb *WidgetBase) SendKeyChord(kc key.Chord, orig ...events.Event) {
+	r, code, mods, err := kc.Decode()
+	if err != nil {
+		fmt.Println("SendKeyChord: Decode error:", err)
+		return
+	}
+	wb.SendKeyChordRune(r, code, mods, orig...)
+}
+
+func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifiers, orig ...events.Event) {
+	ke := events.NewKey(events.KeyChord, r, code, mods)
+	fmt.Println(ke.String())
+	if len(orig) > 0 && orig[0] != nil {
+		kb := *orig[0].AsBase()
+		ke.GenTime = kb.GenTime
+		ke.ClearHandled()
+	} else {
+		ke.Init()
+	}
+	ke.Typ = events.KeyChord
+	w, ok := wb.This().(Widget)
+	if !ok {
+		return
+	}
+	w.HandleEvent(ke)
 }
 
 // AddPriorityEvent adds given event type to the set of priority events for this scene

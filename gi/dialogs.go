@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log/slog"
 
 	"goki.dev/colors"
@@ -94,6 +95,7 @@ func (sc *Scene) AddOk(pw Widget, name ...string) *Button {
 	})
 	sc.OnKeyChord(func(e events.Event) {
 		kf := keyfun.Of(e.KeyChord())
+		fmt.Println("ok kf:", kf.String())
 		if kf == keyfun.Accept {
 			bt.Send(events.Click, e)
 			e.SetHandled()
