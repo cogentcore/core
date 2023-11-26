@@ -5,7 +5,6 @@
 package gear
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -105,7 +104,7 @@ func (a *App) ConfigWidget() {
 			e.SetHandled()
 			tb.NewBuf(0)
 
-			a.RunCmd(txt, cmds)
+			grr.Log0(a.RunCmd(txt, cmds))
 			return
 		}
 
@@ -115,7 +114,7 @@ func (a *App) ConfigWidget() {
 		} else {
 			a.CurCmd = ""
 		}
-		fmt.Println(envs, words)
+		_ = envs
 	})
 
 	sp.SetSplits(0.8, 0.2)
@@ -124,7 +123,7 @@ func (a *App) ConfigWidget() {
 }
 
 // RunCmd runs the given command in the context of the given commands frame.
-func (a *App) RunCmd(cmd string, cmds *gi.Frame) {
+func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 	updt := cmds.UpdateStart()
 
 	cfr := gi.NewFrame(cmds).Style(func(s *styles.Style) {
@@ -152,22 +151,29 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) {
 	}()
 
 	cmds.Update()
-	cmds.UpdateEnd(updt)
+	cmds.UpdateEndLayout(updt)
 
-	words := grr.Log(shellwords.Parse(cmd))
+	words, err := shellwords.Parse(cmd)
+	if err != nil {
+		return err
+	}
 	if len(words) > 0 && words[0] == "cd" {
 		if len(words) > 1 {
-			a.Dir = grr.Log(filepath.Abs(words[1]))
+			a.Dir = filepath.Join(a.Dir, words[1])
 		} else {
-			a.Dir = grr.Log(os.UserHomeDir())
+			a.Dir, err = os.UserHomeDir()
+			if err != nil {
+				return err
+			}
 		}
-		return
+		return nil
 	}
 
 	go func() {
 		xc := xe.Major().SetDir(a.Dir).SetStdout(w).SetStderr(w).SetErrors(w)
 		grr.Log0(xc.Run("bash", "-c", cmd))
 	}()
+	return nil
 }
 
 // StructForFlags returns a new struct object for the given flags.
