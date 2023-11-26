@@ -7,7 +7,6 @@ package gear
 import (
 	"io"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -108,6 +107,7 @@ func (a *App) ConfigWidget() {
 	})
 	te.OnKeyChord(func(e events.Event) {
 		txt := string(tb.Text())
+		txt = strings.TrimSuffix(txt, "\n")
 
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Enter && e.Modifiers() == 0 {
@@ -143,7 +143,9 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 	})
-	gi.NewLabel(cfr, "cmd").SetType(gi.LabelTitleLarge).SetText(cmd)
+	gi.NewLabel(cfr, "cmd").SetType(gi.LabelTitleLarge).SetText(cmd).Style(func(s *styles.Style) {
+		s.Font.Family = string(gi.Prefs.MonoFont)
+	})
 
 	r, w := io.Pipe()
 	buf := texteditor.NewBuf()
@@ -167,25 +169,23 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	cmds.Update()
 	cmds.UpdateEndLayout(updt)
 
+	xc := xe.Major().SetDir(a.Dir).SetStdout(w).SetStderr(w).SetErrors(w)
+
 	words, err := shellwords.Parse(cmd)
 	if err != nil {
 		return err
 	}
 	if len(words) > 0 && words[0] == "cd" {
-		if len(words) > 1 {
-			a.Dir = filepath.Join(a.Dir, words[1])
-		} else {
-			a.Dir, err = os.UserHomeDir()
-			if err != nil {
-				return err
-			}
+		d, err := xc.Output("bash", "-c", cmd+" && pwd")
+		if err != nil {
+			return err
 		}
+		a.Dir = d
 		dir.SetTextUpdate(a.Dir)
 		return nil
 	}
 
 	go func() {
-		xc := xe.Major().SetDir(a.Dir).SetStdout(w).SetStderr(w).SetErrors(w)
 		grr.Log0(xc.Run("bash", "-c", cmd))
 	}()
 	return nil
