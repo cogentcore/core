@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/colors/colormap"
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
@@ -47,6 +48,15 @@ func init() {
 	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(keyfun.MapName(""))), func() Value {
 		return &KeyMapValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gti.Type{})), func() Value {
+		return &TypeValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(color.RGBA{})), func() Value {
+		return &ColorValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(colormap.Map{})), func() Value {
+		return &ColorMapValue{}
 	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {
 		return &ColorNameValue{}
@@ -271,13 +281,6 @@ func ToValue(it any, tags string) Value {
 			return &MapValue{}
 		}
 	case vk == reflect.Struct:
-		// note: we need to handle these here b/c cannot define new methods for gi types
-		switch nptyp {
-		case laser.TypeFor[color.RGBA]():
-			return &ColorValue{}
-		case laser.TypeFor[gti.Type]():
-			return &TypeValue{}
-		}
 		nfld := laser.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
 			return &StructInlineValue{}

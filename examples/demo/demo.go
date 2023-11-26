@@ -11,11 +11,14 @@ import (
 	"time"
 
 	"goki.dev/colors"
+	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -81,8 +84,8 @@ func makeText(ts *gi.Tabs) {
 		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
-		s := strings.TrimPrefix(typ.String(), "Label")
-		gi.NewLabel(text, "label"+s).SetType(typ).SetText(s)
+		s := sentencecase.Of(typ.String())
+		gi.NewLabel(text, "label"+typ.String()).SetType(typ).SetText(s)
 	}
 }
 
@@ -263,16 +266,10 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
 
-	// tbuf := &giv.TextBuf{}
-	// tbuf.InitName(tbuf, "tbuf")
-	// tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
-
-	// tview := giv.NewTextView(inputs, "tview")
-	// tview.SetBuf(tbuf)
-	// tview.Style(func(s *styles.Style) {
-	// 	s.Max.X.SetDp(500)
-	// 	s.Max.Y.SetDp(300)
-	// })
+	tb := texteditor.NewBuf()
+	tb.NewBuf(0)
+	tb.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
+	texteditor.NewEditor(inputs).SetBuf(tb)
 }
 
 func makeLayouts(ts *gi.Tabs) {
@@ -324,6 +321,7 @@ func makeValues(ts *gi.Tabs) {
 	})
 
 	giv.NewValue(values, colors.Red)
+	giv.NewValue(values, &colormap.Map{})
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, gi.FileName("demo.go"))
 	giv.NewValue(values, hello)
@@ -340,78 +338,3 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	}
 	return
 }
-
-// func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
-// 	// Main Menu
-
-// 	appnm := gi.AppName()
-// 	mmen := win.MainMenu
-// 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
-
-// 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-// 	amen.Menu.AddAppMenu(win)
-
-// 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: keyfun.MenuNew},
-// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			fmt.Println("File:New menu action triggered")
-// 		})
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: keyfun.MenuOpen},
-// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			fmt.Println("File:Open menu action triggered")
-// 		})
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: keyfun.MenuSave},
-// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			fmt.Println("File:Save menu action triggered")
-// 		})
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: keyfun.MenuSaveAs},
-// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			fmt.Println("File:SaveAs menu action triggered")
-// 		})
-// 	fmen.Menu.AddSeparator("csep")
-// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: keyfun.WinClose},
-// 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 			win.CloseReq()
-// 		})
-// 	inQuitPrompt := false
-// 	gi.SetQuitReqFunc(func() {
-// 		if inQuitPrompt {
-// 			return
-// 		}
-// 		inQuitPrompt = true
-// 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-// 			Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
-// 			if dlg.Accepted {
-// 				gi.Quit()
-// 			} else {
-// 				inQuitPrompt = false
-// 			}
-// 		})
-// 	})
-
-// 	gi.SetQuitCleanFunc(func() {
-// 		fmt.Printf("Doing final Quit cleanup here..\n")
-// 	})
-
-// 	inClosePrompt := false
-// 	win.SetCloseReqFunc(func(w *gi.RenderWin) {
-// 		if inClosePrompt {
-// 			return
-// 		}
-// 		inClosePrompt = true
-// 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
-// 			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well.", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
-// 			if dlg.Accepted {
-// 				gi.Quit()
-// 			} else {
-// 				inClosePrompt = false
-// 			}
-// 		})
-// 	})
-
-// 	// win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-// 	// 	fmt.Printf("Doing final Close cleanup here..\n")
-// 	// })
-
-// 	win.MainMenuUpdated()
-// }
