@@ -224,6 +224,9 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 func (fb *FuncButton) GoodContext() gi.Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
+		if fb.This() == nil {
+			return nil
+		}
 		ctx = fb.This().(gi.Widget)
 	}
 	return ctx
@@ -306,6 +309,9 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		return
 	}
 	ctx := fb.GoodContext()
+	if ctx == nil {
+		return
+	}
 	fb.SetReturnValues(rets)
 	// TODO: handle error return values
 	main := "Result of " + fb.Text

@@ -32,6 +32,9 @@ func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 	var rnode *Node
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
+		if sfn == nil {
+			return ki.Continue
+		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -389,6 +392,9 @@ func (fn *Node) BlameVcs() ([]byte, error) {
 func (fn *Node) UpdateAllVcs() {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
+		if sfn == nil {
+			return ki.Continue
+		}
 		if !sfn.IsDir() {
 			return ki.Continue
 		}

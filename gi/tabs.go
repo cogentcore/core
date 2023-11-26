@@ -148,6 +148,8 @@ func (ts *Tabs) NewTab(label string, name ...string) *Frame {
 // to the kebab-case version of the label.
 func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	updt := ts.UpdateStart()
+	defer ts.UpdateEndLayout(updt)
+
 	fr := ts.Frame()
 	fr.SetChildAdded()
 	nm := ""
@@ -162,7 +164,6 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
 	ts.Update()
-	ts.UpdateEndLayout(updt)
 	return frame
 }
 
@@ -211,13 +212,14 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 // to that; otherwise, it will default to the kebab-case version of the label.
 func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, name ...string) {
 	ts.Mu.Lock()
-	fr := ts.Frame()
 	updt := ts.UpdateStart()
+	defer ts.UpdateEndLayout(updt)
+
+	fr := ts.Frame()
 	fr.SetChildAdded()
 	fr.InsertChild(frame, idx)
 	ts.InsertTabOnlyAt(frame, label, idx, name...)
 	ts.Mu.Unlock()
-	ts.UpdateEndLayout(updt)
 }
 
 // TabAtIndex returns content frame and tab button at given index, false if
@@ -251,11 +253,11 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	}
 	ts.Mu.Lock()
 	updt := ts.UpdateStart()
+	defer ts.UpdateEndLayout(updt)
 	ts.UnselectOtherTabs(idx)
 	tab.SetSelected(true)
 	fr.StackTop = idx
 	ts.Mu.Unlock()
-	ts.UpdateEndLayout(updt)
 	return frame, true
 }
 
@@ -384,6 +386,7 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	sz := len(*fr.Children())
 	tb := ts.Tabs()
 	updt := ts.UpdateStart()
+	defer ts.UpdateEndLayout(updt)
 	nxtidx := -1
 	if fr.StackTop == idx {
 		if idx > 0 {
@@ -399,7 +402,6 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	if nxtidx >= 0 {
 		ts.SelectTabIndex(nxtidx)
 	}
-	ts.UpdateEndLayout(updt)
 	if destroy {
 		return nil, tnm, true
 	} else {

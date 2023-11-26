@@ -461,6 +461,9 @@ func (fn *Node) OpenAll() { //gti:add
 func (fn *Node) CloseAll() { //gti:add
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
+		if sfn == nil {
+			return ki.Continue
+		}
 		if sfn.IsDir() {
 			sfn.Close()
 		}
