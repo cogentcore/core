@@ -5,6 +5,7 @@ package styles
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -155,7 +156,10 @@ func (i BorderStyles) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BorderStyles) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _FontStylesValues = []FontStyles{0, 1, 2}
@@ -266,7 +270,10 @@ func (i FontStyles) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontStyles) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _FontWeightsValues = []FontWeights{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
@@ -453,7 +460,10 @@ func (i FontWeights) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontWeights) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _FontStretchValues = []FontStretch{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -604,7 +614,10 @@ func (i FontStretch) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontStretch) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _TextDecorationsValues = []TextDecorations{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
@@ -806,7 +819,10 @@ func (i TextDecorations) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextDecorations) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _BaselineShiftsValues = []BaselineShifts{0, 1, 2}
@@ -917,7 +933,10 @@ func (i BaselineShifts) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BaselineShifts) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _FontVariantsValues = []FontVariants{0, 1}
@@ -1023,7 +1042,10 @@ func (i FontVariants) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontVariants) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _DirectionsValues = []Directions{0, 1}
@@ -1129,7 +1151,10 @@ func (i Directions) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Directions) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _DisplaysValues = []Displays{0, 1, 2, 3, 4}
@@ -1250,7 +1275,10 @@ func (i Displays) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Displays) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _AlignsValues = []Aligns{0, 1, 2, 3, 4, 5, 6, 7}
@@ -1386,7 +1414,10 @@ func (i Aligns) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Aligns) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _OverflowsValues = []Overflows{0, 1, 2, 3}
@@ -1502,7 +1533,10 @@ func (i Overflows) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Overflows) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _FillRulesValues = []FillRules{0, 1}
@@ -1608,7 +1642,10 @@ func (i FillRules) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FillRules) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _VectorEffectsValues = []VectorEffects{0, 1}
@@ -1714,7 +1751,10 @@ func (i VectorEffects) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *VectorEffects) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _LineCapsValues = []LineCaps{0, 1, 2, 3, 4}
@@ -1835,7 +1875,10 @@ func (i LineCaps) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LineCaps) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _LineJoinsValues = []LineJoins{0, 1, 2, 3, 4, 5}
@@ -1961,7 +2004,129 @@ func (i LineJoins) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LineJoins) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
+}
+
+var _SideIndexesValues = []SideIndexes{0, 1, 2, 3}
+
+// SideIndexesN is the highest valid value
+// for type SideIndexes, plus one.
+const SideIndexesN SideIndexes = 4
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _SideIndexesNoOp() {
+	var x [1]struct{}
+	_ = x[Top-(0)]
+	_ = x[Right-(1)]
+	_ = x[Bottom-(2)]
+	_ = x[Left-(3)]
+}
+
+var _SideIndexesNameToValueMap = map[string]SideIndexes{
+	`Top`:    0,
+	`top`:    0,
+	`Right`:  1,
+	`right`:  1,
+	`Bottom`: 2,
+	`bottom`: 2,
+	`Left`:   3,
+	`left`:   3,
+}
+
+var _SideIndexesDescMap = map[SideIndexes]string{
+	0: ``,
+	1: ``,
+	2: ``,
+	3: ``,
+}
+
+var _SideIndexesMap = map[SideIndexes]string{
+	0: `Top`,
+	1: `Right`,
+	2: `Bottom`,
+	3: `Left`,
+}
+
+// String returns the string representation
+// of this SideIndexes value.
+func (i SideIndexes) String() string {
+	if str, ok := _SideIndexesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the SideIndexes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *SideIndexes) SetString(s string) error {
+	if val, ok := _SideIndexesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _SideIndexesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type SideIndexes")
+}
+
+// Int64 returns the SideIndexes value as an int64.
+func (i SideIndexes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the SideIndexes value from an int64.
+func (i *SideIndexes) SetInt64(in int64) {
+	*i = SideIndexes(in)
+}
+
+// Desc returns the description of the SideIndexes value.
+func (i SideIndexes) Desc() string {
+	if str, ok := _SideIndexesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// SideIndexesValues returns all possible values
+// for the type SideIndexes.
+func SideIndexesValues() []SideIndexes {
+	return _SideIndexesValues
+}
+
+// Values returns all possible values
+// for the type SideIndexes.
+func (i SideIndexes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_SideIndexesValues))
+	for i, d := range _SideIndexesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type SideIndexes.
+func (i SideIndexes) IsValid() bool {
+	_, ok := _SideIndexesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i SideIndexes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *SideIndexes) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _UnicodeBidiValues = []UnicodeBidi{0, 1, 2}
@@ -2072,7 +2237,10 @@ func (i UnicodeBidi) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *UnicodeBidi) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _TextDirectionsValues = []TextDirections{0, 1, 2, 3, 4, 5, 6, 7}
@@ -2208,7 +2376,10 @@ func (i TextDirections) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextDirections) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _TextAnchorsValues = []TextAnchors{0, 1, 2}
@@ -2319,7 +2490,10 @@ func (i TextAnchors) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextAnchors) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _WhiteSpacesValues = []WhiteSpaces{0, 1, 2, 3, 4}
@@ -2440,5 +2614,8 @@ func (i WhiteSpaces) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WhiteSpaces) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

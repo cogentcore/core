@@ -16,6 +16,16 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+// SideIndexes provides names for the Sides in order defined
+type SideIndexes int32 //enums:enum
+
+const (
+	Top SideIndexes = iota
+	Right
+	Bottom
+	Left
+)
+
 // Sides contains values for each side or corner of a box.
 // If Sides contains sides, the struct field names correspond
 // directly to the side values (ie: Top = top side value).
