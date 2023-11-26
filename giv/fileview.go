@@ -496,7 +496,7 @@ func (fv *FileView) UpdatePath() {
 func (fv *FileView) UpdateFilesAction() {
 	fv.UpdateFiles()
 	sf := fv.SelField()
-	sf.GrabFocus()
+	sf.SetFocusEvent()
 }
 
 func (fv *FileView) ReadFiles() {
@@ -796,7 +796,7 @@ func (fv *FileView) KeyInput(kt events.Event) {
 	case keyfun.Search:
 		kt.SetHandled()
 		sf := fv.SelField()
-		sf.GrabFocus()
+		sf.SetFocusEvent()
 	}
 }
 

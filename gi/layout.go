@@ -434,7 +434,7 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	if found {
 		em := ly.EventMgr()
 		if em != nil {
-			em.SetFocus(focel.(Widget)) // this will also scroll by default!
+			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
 		}
 		ly.FocusNameLast = focel
 		return true

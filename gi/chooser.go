@@ -722,7 +722,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 			return
 		}
 		tf.FocusClear()
-		ch.GrabFocus()
+		ch.SetFocusEvent()
 		ch.Send(events.Focus, e)
 	})
 	// Chooser gives its textfield focus styling but not actual focus

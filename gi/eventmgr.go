@@ -211,10 +211,10 @@ func (em *EventMgr) HandleFocusEvent(evi events.Event) {
 	if em.Focus == nil {
 		switch {
 		case em.PrevFocus != nil:
-			em.SetFocus(em.PrevFocus)
+			em.SetFocusEvent(em.PrevFocus)
 			em.PrevFocus = nil
 		case em.StartFocus != nil:
-			em.SetFocus(em.StartFocus)
+			em.SetFocusEvent(em.StartFocus)
 		default:
 			em.FocusFirst()
 		}
@@ -685,25 +685,26 @@ func (em *EventMgr) FocusClear() bool {
 	if em.Focus != nil {
 		em.PrevFocus = em.Focus
 	}
-	return em.GrabFocus(nil)
+	return em.SetFocusEvent(nil)
 }
 
-// GrabFocus sets focus to given item -- returns true if focus changed.
+// SetFocus sets focus to given item, and returns true if focus changed.
 // If item is nil, then nothing has focus.
-// This does NOT send the events.Focus event to the widget. WHY?
-func (em *EventMgr) GrabFocus(w Widget) bool {
-	got := em.SetFocusImpl(w, true) // really unclear why grab does not send event?
+// This does NOT send the events.Focus event to the widget.
+// See [SetFocusEvent] for version that does send event.
+func (em *EventMgr) SetFocus(w Widget) bool {
+	got := em.SetFocusImpl(w, false) // no event
 	if w != nil {
 		w.AsWidget().ScrollToMe()
 	}
 	return got
 }
 
-// SetFocus sets focus to given item -- returns true if focus changed.
+// SetFocusEvent sets focus to given item, and returns true if focus changed.
 // If item is nil, then nothing has focus.
-// This sends the events.Focus event to the widget -- see GrabFocus
-// for a version that does not.
-func (em *EventMgr) SetFocus(w Widget) bool {
+// This sends the [events.Focus] event to the widget.
+// See [SetFocus] for a version that does not.
+func (em *EventMgr) SetFocusEvent(w Widget) bool {
 	got := em.SetFocusImpl(w, true) // sends event
 	// if !got {
 	// 	fmt.Println("focus failed!", w)
@@ -797,7 +798,7 @@ func (em *EventMgr) FocusNextFrom(from Widget) bool {
 			break
 		}
 	}
-	em.SetFocus(next)
+	em.SetFocusEvent(next)
 	return next != nil
 }
 
@@ -813,7 +814,7 @@ func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
-		em.SetFocus(foc)
+		em.SetFocusEvent(foc)
 		return true
 	}
 	return em.FocusNextFrom(foc)
@@ -831,7 +832,7 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
-		em.SetFocus(foc)
+		em.SetFocusEvent(foc)
 		return true
 	}
 	em.Focus = foc
@@ -870,7 +871,7 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 			}
 		}
 	}
-	em.SetFocus(prev)
+	em.SetFocusEvent(prev)
 	return prev != nil
 }
 
@@ -934,8 +935,8 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	if sf == nil {
 		em.FocusFirst()
 	} else {
-		// fmt.Println("start focus on:", sf)
-		em.SetFocus(sf)
+		fmt.Println("start focus on:", sf)
+		em.SetFocusEvent(sf)
 	}
 	return true
 }
@@ -969,8 +970,12 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		win.CloseReq()
 		e.SetHandled()
 	case keyfun.Menu:
-		if win.MainMenu != nil {
-			win.MainMenu.GrabFocus()
+		// if win.MainMenu != nil {
+		// 	win.MainMenu.SetFocusEvent()
+		// 	e.SetHandled()
+		// }
+		if tb := sc.GetTopAppBar(); tb != nil {
+			tb.SetFocusEvent()
 			e.SetHandled()
 		}
 	case keyfun.WinSnapshot:

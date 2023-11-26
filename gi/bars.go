@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"strings"
+
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 )
@@ -66,6 +68,29 @@ func (sc *Scene) ConfigSceneBars() {
 		})
 		sc.Bars.Bottom.Call(foot)
 	}
+}
+
+// GetBar returns Bar layout widget at given side, nil if not there.
+func (sc *Scene) GetBar(side styles.SideIndexes) *Layout {
+	nm := strings.ToLower(side.String()) + "-bar"
+	bar := sc.ChildByName(nm)
+	if bar != nil {
+		return bar.(*Layout)
+	}
+	return nil
+}
+
+// GetTopAppBar returns the TopAppBar if it exists, nil otherwise.
+func (sc *Scene) GetTopAppBar() *TopAppBar {
+	tb := sc.GetBar(styles.Top)
+	if tb == nil {
+		return nil
+	}
+	tab := tb.ChildByType(TopAppBarType, ki.Embeds)
+	if tab != nil {
+		return tab.(*TopAppBar)
+	}
+	return nil
 }
 
 // TopAppBar constructs or returns the TopAppBar in given parent Widget

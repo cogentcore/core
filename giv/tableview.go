@@ -831,7 +831,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if w.CanFocus() {
-			w.GrabFocus()
+			w.SetFocusEvent()
 			return w
 		}
 	}

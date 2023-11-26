@@ -986,7 +986,7 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 		return w
 	}
 	sv.SetFlag(true, SliceViewInFocusGrab)
-	w.GrabFocus()
+	w.SetFocusEvent()
 	sv.SetFlag(false, SliceViewInFocusGrab)
 	return w
 }
@@ -2029,7 +2029,7 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 		}
 	})
 	sv.OnClick(func(e events.Event) {
-		sv.GrabFocus()
+		sv.SetFocusEvent()
 	})
 
 	// todo: doubleclick unselectallidxs is crashing with recursive loop

@@ -238,7 +238,7 @@ func (wb *WidgetBase) HandleWidgetClick() {
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
 		if wb.AbilityIs(abilities.Focusable) {
-			wb.GrabFocus()
+			wb.SetFocus()
 		} else {
 			wb.FocusClear()
 		}
@@ -421,17 +421,41 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 ///////////////////////////////////////////////////////////////////
 //		Focus
 
-// GrabFocus grabs the keyboard input focus on this item or the first item within it
-// that can be focused (if none, then goes ahead and sets focus to this object)
-func (wb *WidgetBase) GrabFocus() {
+// SetFocus sets the keyboard input focus on this item or the first item within it
+// that can be focused (if none, then goes ahead and sets focus to this object).
+// This does NOT send an [events.Focus] event, which typically results in
+// the widget being styled as focused.  See [SetFocusEvent] for one that does.
+func (wb *WidgetBase) SetFocus() {
 	foc := wb.This().(Widget)
 	if !foc.AbilityIs(abilities.Focusable) {
 		foc = wb.FocusableInMe()
+		if foc == nil {
+			foc = wb.This().(Widget)
+		}
 	}
 	em := wb.EventMgr()
 	if em != nil {
 		// fmt.Println("grab focus:", foc)
-		em.GrabFocus(foc) // doesn't send event
+		em.SetFocus(foc) // doesn't send event
+	}
+}
+
+// SetFocusEvent sets the keyboard input focus on this item or the first item within it
+// that can be focused (if none, then goes ahead and sets focus to this object).
+// This sends an [events.Focus] event, which typically results in
+// the widget being styled as focused.  See [SetFocus] for one that does not.
+func (wb *WidgetBase) SetFocusEvent() {
+	foc := wb.This().(Widget)
+	if !foc.AbilityIs(abilities.Focusable) {
+		foc = wb.FocusableInMe()
+		if foc == nil {
+			foc = wb.This().(Widget)
+		}
+	}
+	em := wb.EventMgr()
+	if em != nil {
+		// fmt.Println("grab focus:", foc)
+		em.SetFocusEvent(foc) // doesn't send event
 	}
 }
 

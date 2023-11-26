@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/textbuf"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/glop/indent"
@@ -31,6 +32,7 @@ func (ed *Editor) HandleEditorEvents() {
 	ed.HandleEditorMouse()
 	ed.HandleEditorLinkCursor()
 	ed.HandleEditorClose()
+	ed.HandleEditorFocus()
 }
 
 func (ed *Editor) OnAdd() {
@@ -41,6 +43,19 @@ func (ed *Editor) OnAdd() {
 func (ed *Editor) HandleEditorClose() {
 	ed.OnClose(func(e events.Event) {
 		ed.EditDone()
+	})
+}
+
+func (ed *Editor) HandleEditorFocus() {
+	ed.OnFocusLost(func(e events.Event) {
+		if ed.IsReadOnly() {
+			return
+		}
+		if ed.AbilityIs(abilities.Focusable) {
+			fmt.Println(ed, "focus lost edit done")
+			ed.EditDone()
+			ed.SetState(false, states.Focused)
+		}
 	})
 }
 
@@ -570,7 +585,7 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 func (ed *Editor) HandleEditorMouse() {
 	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if !ed.StateIs(states.Focused) {
-			ed.GrabFocus()
+			ed.SetFocusEvent()
 		}
 		pt := ed.PointToRelPos(e.LocalPos())
 		newPos := ed.PixelToCursor(pt)
@@ -595,7 +610,7 @@ func (ed *Editor) HandleEditorMouse() {
 	})
 	ed.OnDoubleClick(func(e events.Event) {
 		if !ed.StateIs(states.Focused) {
-			ed.GrabFocus()
+			ed.SetFocusEvent()
 			ed.Send(events.Focus, e) // sets focused flag
 		}
 		updt := ed.UpdateStart()

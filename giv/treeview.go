@@ -742,20 +742,20 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 			if len(sl) > 1 {
 				tv.UnselectAll()
 				tv.Select()
-				tv.GrabFocus()
+				tv.SetFocus()
 				sel = true
 			}
 		} else {
 			tv.UnselectAll()
 			tv.Select()
-			tv.GrabFocus()
+			tv.SetFocus()
 			sel = true
 		}
 	case events.ExtendContinuous:
 		sl := tv.SelectedViews()
 		if len(sl) == 0 {
 			tv.Select()
-			tv.GrabFocus()
+			tv.SetFocus()
 			sel = true
 		} else {
 			minIdx := -1
@@ -788,7 +788,7 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 			tv.UnselectAction()
 		} else {
 			tv.Select()
-			tv.GrabFocus()
+			tv.SetFocus()
 			sel = true
 		}
 	case events.SelectQuiet:
@@ -883,7 +883,7 @@ func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
 func (tv *TreeView) MoveDownAction(selMode events.SelectModes) *TreeView {
 	nn := tv.MoveDown(selMode)
 	if nn != nil && nn != tv {
-		nn.GrabFocus()
+		nn.SetFocus()
 		nn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
@@ -943,7 +943,7 @@ func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
 func (tv *TreeView) MoveUpAction(selMode events.SelectModes) *TreeView {
 	nn := tv.MoveUp(selMode)
 	if nn != nil && nn != tv {
-		nn.GrabFocus()
+		nn.SetFocus()
 		nn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
@@ -977,7 +977,7 @@ func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 		if selMode == events.SelectOne {
 			fnn.SelectUpdate(selMode)
 		}
-		fnn.GrabFocus()
+		fnn.SetFocus()
 		fnn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
@@ -1009,7 +1009,7 @@ func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 		if selMode == events.SelectOne {
 			fnn.SelectUpdate(selMode)
 		}
-		fnn.GrabFocus()
+		fnn.SetFocus()
 		fnn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}
@@ -1041,7 +1041,7 @@ func (tv *TreeView) MoveToLastChild(selMode events.SelectModes) *TreeView {
 // and emits select event for newly selected item
 func (tv *TreeView) MoveHomeAction(selMode events.SelectModes) *TreeView {
 	tv.RootView.SelectUpdate(selMode)
-	tv.RootView.GrabFocus()
+	tv.RootView.SetFocus()
 	tv.RootView.ScrollToMe()
 	// tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), tv.RootView.This())
 	return tv.RootView
@@ -1070,7 +1070,7 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 		if selMode == events.SelectOne {
 			fnn.SelectUpdate(selMode)
 		}
-		fnn.GrabFocus()
+		fnn.SetFocus()
 		fnn.ScrollToMe()
 		tv.SendSelectEvent(nil)
 	}

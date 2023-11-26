@@ -428,7 +428,7 @@ func (tf *TextField) Clear() {
 	tf.StartPos = 0
 	tf.EndPos = 0
 	tf.SelectReset()
-	tf.GrabFocus() // this is essential for ensuring that the clear applies after focus is lost..
+	tf.SetFocusEvent() // this is essential for ensuring that the clear applies after focus is lost..
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1400,22 +1400,10 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 ///////////////////////////////////////////////////////////////////////////////
 //    Event handling
 
-// func (tf *TextField) HandleEvent(ev events.Event) {
-// 	// if tf.Sc.Type == ScDialog {
-// 	// todo: need dialogsig!
-// 	// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 	// 	tff := AsTextField(recv)
-// 	// 	if sig == int64(DialogAccepted) {
-// 	// 		tff.EditDone()
-// 	// 	}
-// 	// })
-// 	// }
-// }
-
 func (tf *TextField) HandleTextFieldMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.StateIs(states.Focused) {
-			tf.GrabFocus() // always grab, even if read only..
+			tf.SetFocusEvent() // always grab, even if read only..
 		}
 		if tf.IsReadOnly() {
 			return
@@ -1436,7 +1424,7 @@ func (tf *TextField) HandleTextFieldMouse() {
 		if tf.IsReadOnly() {
 			return
 		}
-		tf.GrabFocus()
+		tf.SetFocusEvent()
 		tf.Send(events.Focus, e) // sets focused flag
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
@@ -1444,8 +1432,7 @@ func (tf *TextField) HandleTextFieldMouse() {
 			return
 		}
 		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
-			tf.GrabFocus()
-			tf.Send(events.Focus, e) // sets focused flag
+			tf.SetFocusEvent()
 		}
 		e.SetHandled()
 		if tf.HasSelection() {
@@ -1477,15 +1464,6 @@ func (tf *TextField) HandleTextFieldKeys() {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())
-		// todo:
-		// win := tf.ParentRenderWin()
-		// if tf.Complete != nil {
-		// 	cpop := win.CurPopup()
-		// 	if PopupIsCompleter(cpop) {
-		// 		tf.Complete.KeyInput(kf)
-		// 	}
-		// }
-
 		if !tf.StateIs(states.Focused) && kf == keyfun.Abort {
 			return
 		}
