@@ -20,14 +20,24 @@
 package hct
 
 import (
+	"image/color"
+
 	"goki.dev/cam/cie"
 	"goki.dev/mat32/v2"
 )
 
-// ContrastRatio returns the contrast ratio between the given two tones.
+// ContrastRatio returns the contrast ratio between the given two colors.
+// The contrast ratio will be between 1 and 21.
+func ContrastRatio(a, b color.Color) float32 {
+	ah := FromColor(a)
+	bh := FromColor(b)
+	return ToneContrastRatio(ah.Tone, bh.Tone)
+}
+
+// ToneContrastRatio returns the contrast ratio between the given two tones.
 // The contrast ratio will be between 1 and 21, and the tones should be
 // between 0 and 100 and will be clamped to such.
-func ContrastRatio(a, b float32) float32 {
+func ToneContrastRatio(a, b float32) float32 {
 	a = mat32.Clamp(a, 0, 100)
 	b = mat32.Clamp(b, 0, 100)
 	return RatioOfYs(cie.LToY(a), cie.LToY(b))
@@ -74,8 +84,8 @@ func ContrastToneUnsafe(tone, ratio float32) float32 {
 	if ok {
 		return ct
 	}
-	dcr := ContrastRatio(tone, 0)
-	lcr := ContrastRatio(tone, 100)
+	dcr := ToneContrastRatio(tone, 0)
+	lcr := ToneContrastRatio(tone, 100)
 	if dcr > lcr {
 		return 0
 	}
