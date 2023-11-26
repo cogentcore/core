@@ -5,11 +5,11 @@
 package gear
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -152,7 +152,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	// output and input readers and writers
 	or, ow := io.Pipe()
 	ir, iw := io.Pipe()
-	ibuf := &bytes.Buffer{}
+	var ib []byte
 
 	buf := texteditor.NewBuf()
 	buf.NewBuf(0)
@@ -171,10 +171,15 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 
 		switch kf {
 		case keyfun.Enter:
-			io.Copy(iw, ibuf)
+			iw.Write(ib)
 			iw.Write([]byte{'\n'})
+			ib = nil
+		case keyfun.Backspace:
+			if len(ib) > 0 {
+				ib = slices.Delete(ib, len(ib)-1, len(ib))
+			}
 		default:
-			ibuf.Write([]byte(kc))
+			ib = append(ib, kc...)
 		}
 
 	})
