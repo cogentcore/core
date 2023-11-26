@@ -157,7 +157,7 @@ func FontAlts(fams string) (fns []string, serif, mono bool) {
 	if len(nms) == 0 {
 		fn := styles.PrefFontFamily
 		if fn == "" {
-			fns = []string{"Go"}
+			fns = []string{"Roboto"}
 			return
 		}
 	}
@@ -182,14 +182,14 @@ func FontAlts(fams string) (fns []string, serif, mono bool) {
 	// final baseline backups
 	if mono {
 		addUniqueFont(&fns, "NotoSansMono") // has more options
-		addUniqueFont(&fns, "Go Mono")      // just as good as liberation mono..
+		addUniqueFont(&fns, "Roboto Mono")  // just as good as liberation mono..
 	} else if serif {
 		addUniqueFont(&fns, "Liberation Serif")
 		addUniqueFont(&fns, "NotoSerif")
-		addUniqueFont(&fns, "Go") // not serif but drop dead backup
+		addUniqueFont(&fns, "Roboto") // not serif but drop dead backup
 	} else {
 		addUniqueFont(&fns, "NotoSans")
-		addUniqueFont(&fns, "Go") // good as anything
+		addUniqueFont(&fns, "Roboto") // good as anything
 	}
 
 	return
