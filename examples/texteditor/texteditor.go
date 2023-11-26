@@ -48,8 +48,6 @@ func app() {
 		// s.Text.LineHeight = units.Dot(1.1)
 	})
 
-	// generally need to put text view within its own layout for scrolling
-
 	txed1 := texteditor.NewEditor(splt, "texteditor-1")
 	txed1.Style(func(s *styles.Style) {
 		s.Min.X.Ch(20)
