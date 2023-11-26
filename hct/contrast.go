@@ -86,6 +86,19 @@ func ContrastTone(tone, ratio float32) (float32, bool) {
 	return -1, false
 }
 
+// ContrastColorUnsafe returns the color that will ensure that the given contrast ratio
+// between the given color and the resulting color is met. If the given ratio can
+// not be achieved with the given color, it returns the color that would result in
+// the highest contrast ratio. The ratio must be between 1 and 21. If the tone of
+// the given color is greater than 50, it tries darker tones first, and otherwise
+// it tries lighter tones first. This function is unsafe because the returned value
+// may not satisfy the ratio requirement.
+func ContrastColorUnsafe(c color.Color, ratio float32) color.Color {
+	h := FromColor(c)
+	ct := ContrastToneUnsafe(h.Tone, ratio)
+	return h.WithTone(ct)
+}
+
 // ContrastTone returns the tone that will ensure that the given contrast ratio
 // between the given tone and the resulting tone is met. If the given ratio can
 // not be achieved with the given tone, it returns the tone that would result in
