@@ -71,6 +71,27 @@ func TestContrastColor(t *testing.T) {
 	}
 }
 
+func TestContrastColorTry(t *testing.T) {
+	type data struct {
+		color color.Color
+		ratio float32
+		want  color.Color
+		ok    bool
+	}
+	tests := []data{
+		{color.RGBA{0, 0, 0, 255}, 21, color.RGBA{255, 255, 255, 255}, true},
+		{color.RGBA{150, 200, 255, 255}, 21, color.RGBA{}, false},
+		{color.RGBA{100, 100, 100, 255}, 1, color.RGBA{100, 100, 100, 255}, true},
+		{color.RGBA{0, 0, 255, 255}, 8.59, color.RGBA{255, 255, 255, 255}, true},
+	}
+	for i, test := range tests {
+		res, ok := ContrastColorTry(test.color, test.ratio)
+		if res != test.want {
+			t.Errorf("%d: expected %v, %v but got %v, %v", i, test.want, test.ok, res, ok)
+		}
+	}
+}
+
 func TestContrastTone(t *testing.T) {
 	type data struct {
 		tone  float32
@@ -87,6 +108,27 @@ func TestContrastTone(t *testing.T) {
 		res := ContrastTone(test.tone, test.ratio)
 		if mat32.Abs(res-test.want) > 0.5 {
 			t.Errorf("%d: expected %g but got %g", i, test.want, res)
+		}
+	}
+}
+
+func TestContrastToneTry(t *testing.T) {
+	type data struct {
+		tone  float32
+		ratio float32
+		want  float32
+		ok    bool
+	}
+	tests := []data{
+		{0, 21, 100, true},
+		{60, 18, -1, false},
+		{50, 1, 50, true},
+		{32.302586, 8.59, 100, true},
+	}
+	for i, test := range tests {
+		res, ok := ContrastToneTry(test.tone, test.ratio)
+		if ok != test.ok || mat32.Abs(res-test.want) > 0.5 {
+			t.Errorf("%d: expected %g, %v but got %g, %v", i, test.want, test.ok, res, ok)
 		}
 	}
 }
