@@ -26,6 +26,26 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+const (
+	// ContrastAA is the contrast ratio required by WCAG AA for body text
+	ContrastAA float32 = 4.5
+
+	// ContrastLargeAA is the contrast ratio required by WCAG AA for large text
+	// (at least 120-150% larger than the body text)
+	ContrastLargeAA float32 = 3
+
+	// ContrastGraphicsAA is the contrast ratio required by WCAG AA for graphical objects
+	// and active user interface components like graphs, icons, and form input borders
+	ContrastGraphicsAA float32 = 3
+
+	// ContrastAAA is the contrast ratio required by WCAG AAA for body text
+	ContrastAAA float32 = 7
+
+	// ContrastLargeAAA is the contrast ratio required by WCAG AAA for large text
+	// (at least 120-150% larger than the body text)
+	ContrastLargeAAA float32 = 4.5
+)
+
 // ContrastRatio returns the contrast ratio between the given two colors.
 // The contrast ratio will be between 1 and 21.
 func ContrastRatio(a, b color.Color) float32 {
