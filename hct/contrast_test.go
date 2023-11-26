@@ -111,3 +111,44 @@ func TestContrastToneLighterTry(t *testing.T) {
 		}
 	}
 }
+
+func TestContrastToneDarker(t *testing.T) {
+	type data struct {
+		tone  float32
+		ratio float32
+		want  float32
+	}
+	tests := []data{
+		{100, 21, 0},
+		{0, 21, 0},
+		{50, 1, 50},
+		{100, 8.59, 32.302586},
+	}
+	for i, test := range tests {
+		res := ContrastToneDarker(test.tone, test.ratio)
+		if mat32.Abs(res-test.want) > 0.1 {
+			t.Errorf("%d: expected %g but got %g", i, test.want, res)
+		}
+	}
+}
+
+func TestContrastToneDarkerTry(t *testing.T) {
+	type data struct {
+		tone  float32
+		ratio float32
+		want  float32
+		ok    bool
+	}
+	tests := []data{
+		{100, 21, 0, true},
+		{0, 21, -1, false},
+		{50, 1, 50, true},
+		{100, 8.59, 32.302586, true},
+	}
+	for i, test := range tests {
+		res, ok := ContrastToneDarkerTry(test.tone, test.ratio)
+		if ok != test.ok || mat32.Abs(res-test.want) > 0.1 {
+			t.Errorf("%d: expected %g, %v but got %g, %v", i, test.want, test.ok, res, ok)
+		}
+	}
+}
