@@ -27,6 +27,8 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/xe"
+
+	"github.com/robert-nix/ansihtml"
 )
 
 // App is a GUI view of a gear command.
@@ -151,7 +153,9 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	})
 
 	ob := &texteditor.OutBuf{}
-	ob.Init(r, buf, 0, func(line []byte) []byte { return line })
+	ob.Init(r, buf, 0, func(line []byte) []byte {
+		return ansihtml.ConvertToHTML(line)
+	})
 	go func() {
 		ob.MonOut()
 	}()
