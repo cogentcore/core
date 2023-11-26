@@ -17,14 +17,14 @@ import (
 type Map struct {
 	Name string
 
+	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
+	Indexed bool
+
 	// color to display for invalid numbers (e.g., NaN)
 	NoColor color.RGBA
 
 	// list of colors to interpolate between
 	Colors []color.RGBA
-
-	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
-	Indexed bool
 }
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor
@@ -71,21 +71,32 @@ func (cm *Map) MapIndex(val int) color.RGBA {
 
 // StdMaps is a list of standard color maps
 var StdMaps = map[string]*Map{
-	"ColdHot":        {"ColdHot", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 255, 255, 255}, {0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}, {255, 255, 0, 255}}, false},
-	"Jet":            {"Jet", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 127, 255}, {0, 0, 255, 255}, {0, 127, 255, 255}, {0, 255, 255, 255}, {127, 255, 127, 255}, {255, 255, 0, 255}, {255, 127, 0, 255}, {255, 0, 0, 255}, {127, 0, 0, 255}}, false},
-	"JetMuted":       {"JetMuted", color.RGBA{200, 200, 200, 255}, []color.RGBA{{25, 25, 153, 255}, {25, 102, 230, 255}, {0, 230, 230, 255}, {0, 179, 0, 255}, {230, 230, 0, 255}, {230, 102, 25, 255}, {153, 25, 25, 255}}, false},
-	"Viridis":        {"Viridis", color.RGBA{200, 200, 200, 255}, []color.RGBA{{72, 33, 114, 255}, {67, 62, 133, 255}, {56, 87, 140, 255}, {45, 111, 142, 255}, {36, 133, 142, 255}, {30, 155, 138, 255}, {42, 176, 127, 255}, {81, 197, 105, 255}, {134, 212, 73, 255}, {194, 223, 35, 255}, {253, 231, 37, 255}}, false},
-	"Plasma":         {"Plasma", color.RGBA{200, 200, 200, 255}, []color.RGBA{{61, 4, 155, 255}, {99, 0, 167, 255}, {133, 6, 166, 255}, {166, 32, 152, 255}, {192, 58, 131, 255}, {213, 84, 110, 255}, {231, 111, 90, 255}, {246, 141, 69, 255}, {253, 174, 50, 255}, {252, 210, 36, 255}, {240, 248, 33, 255}}, false},
-	"Inferno":        {"Inferno", color.RGBA{200, 200, 200, 255}, []color.RGBA{{37, 12, 3, 255}, {19, 11, 52, 255}, {57, 9, 99, 255}, {95, 19, 110, 255}, {133, 33, 107, 255}, {169, 46, 94, 255}, {203, 65, 73, 255}, {230, 93, 47, 255}, {247, 131, 17, 255}, {252, 174, 19, 255}, {245, 219, 76, 255}, {252, 254, 164, 255}}, false},
-	"BlueBlackRed":   {"BlueBlackRed", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {76, 76, 76, 255}, {255, 0, 0, 255}}, false},
-	"BlueGreyRed":    {"BlueGreyRed", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}}, false},
-	"BlueWhiteRed":   {"BlueWhiteRed", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {230, 230, 230, 255}, {255, 0, 0, 255}}, false},
-	"BlueGreenRed":   {"BlueGreenRed", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {0, 230, 0, 255}, {255, 0, 0, 255}}, false},
-	"Rainbow":        {"Rainbow", color.RGBA{200, 200, 200, 255}, []color.RGBA{{255, 0, 255, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}, false},
-	"ROYGBIV":        {"ROYGBIV", color.RGBA{200, 200, 200, 255}, []color.RGBA{{255, 0, 255, 255}, {0, 0, 127, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}, false},
-	"DarkLight":      {"DarkLight", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 0, 255}, {250, 250, 250, 255}}, false},
-	"DarkLightDark":  {"DarkLightDark", color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 0, 255}, {250, 250, 250, 255}, {0, 0, 0, 255}}, false},
-	"LightDarkLight": {"DarkLightDark", color.RGBA{200, 200, 200, 255}, []color.RGBA{{250, 250, 250, 255}, {0, 0, 0, 255}, {250, 250, 250, 255}}, false},
+	"ColdHot": {
+		"ColdHot",
+		false,
+		colors.FromRGB(200, 200, 200),
+		[]color.RGBA{
+			colors.FromRGB(0, 255, 255),
+			colors.FromRGB(0, 0, 255),
+			colors.FromRGB(127, 127, 127),
+			colors.FromRGB(255, 0, 0),
+			colors.FromRGB(255, 255, 0),
+		},
+	},
+	"Jet":            {"Jet", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 127, 255}, {0, 0, 255, 255}, {0, 127, 255, 255}, {0, 255, 255, 255}, {127, 255, 127, 255}, {255, 255, 0, 255}, {255, 127, 0, 255}, {255, 0, 0, 255}, {127, 0, 0, 255}}},
+	"JetMuted":       {"JetMuted", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{25, 25, 153, 255}, {25, 102, 230, 255}, {0, 230, 230, 255}, {0, 179, 0, 255}, {230, 230, 0, 255}, {230, 102, 25, 255}, {153, 25, 25, 255}}},
+	"Viridis":        {"Viridis", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{72, 33, 114, 255}, {67, 62, 133, 255}, {56, 87, 140, 255}, {45, 111, 142, 255}, {36, 133, 142, 255}, {30, 155, 138, 255}, {42, 176, 127, 255}, {81, 197, 105, 255}, {134, 212, 73, 255}, {194, 223, 35, 255}, {253, 231, 37, 255}}},
+	"Plasma":         {"Plasma", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{61, 4, 155, 255}, {99, 0, 167, 255}, {133, 6, 166, 255}, {166, 32, 152, 255}, {192, 58, 131, 255}, {213, 84, 110, 255}, {231, 111, 90, 255}, {246, 141, 69, 255}, {253, 174, 50, 255}, {252, 210, 36, 255}, {240, 248, 33, 255}}},
+	"Inferno":        {"Inferno", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{37, 12, 3, 255}, {19, 11, 52, 255}, {57, 9, 99, 255}, {95, 19, 110, 255}, {133, 33, 107, 255}, {169, 46, 94, 255}, {203, 65, 73, 255}, {230, 93, 47, 255}, {247, 131, 17, 255}, {252, 174, 19, 255}, {245, 219, 76, 255}, {252, 254, 164, 255}}},
+	"BlueBlackRed":   {"BlueBlackRed", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {76, 76, 76, 255}, {255, 0, 0, 255}}},
+	"BlueGreyRed":    {"BlueGreyRed", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}}},
+	"BlueWhiteRed":   {"BlueWhiteRed", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {230, 230, 230, 255}, {255, 0, 0, 255}}},
+	"BlueGreenRed":   {"BlueGreenRed", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 255, 255}, {0, 230, 0, 255}, {255, 0, 0, 255}}},
+	"Rainbow":        {"Rainbow", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{255, 0, 255, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}},
+	"ROYGBIV":        {"ROYGBIV", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{255, 0, 255, 255}, {0, 0, 127, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}},
+	"DarkLight":      {"DarkLight", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 0, 255}, {250, 250, 250, 255}}},
+	"DarkLightDark":  {"DarkLightDark", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{0, 0, 0, 255}, {250, 250, 250, 255}, {0, 0, 0, 255}}},
+	"LightDarkLight": {"DarkLightDark", false, color.RGBA{200, 200, 200, 255}, []color.RGBA{{250, 250, 250, 255}, {0, 0, 0, 255}, {250, 250, 250, 255}}},
 }
 
 // AvailMaps is the list of all available color maps
