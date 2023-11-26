@@ -285,7 +285,7 @@ func (mm *mainMenuImpl) AddItem(men goosi.Menu, titles string, shortcut string, 
 	scCommand := false
 	// don't register shortcuts on main menu -- just causes problems!
 	if false {
-		r, mods, err := key.Chord(shortcut).Decode()
+		r, _, mods, err := key.Chord(shortcut).Decode()
 		if err == nil {
 			sc = strings.ToLower(string(r))
 		}

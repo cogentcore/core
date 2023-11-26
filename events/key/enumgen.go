@@ -4,6 +4,8 @@ package key
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -682,7 +684,10 @@ func (i Codes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Codes) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _ModifiersValues = []Modifiers{0, 1, 2, 3}
@@ -702,14 +707,14 @@ func _ModifiersNoOp() {
 }
 
 var _ModifiersNameToValueMap = map[string]Modifiers{
-	`Shift`:   0,
-	`shift`:   0,
-	`Control`: 1,
-	`control`: 1,
-	`Alt`:     2,
-	`alt`:     2,
-	`Meta`:    3,
-	`meta`:    3,
+	`Shift`:                    0,
+	`shift`:                    0,
+	`Control`:                  1,
+	`control`:                  1,
+	`Alt`:                      2,
+	`alt`:                      2,
+	`called "Command" on OS X`: 3,
+	`called "command" on os x`: 3,
 }
 
 var _ModifiersDescMap = map[Modifiers]string{
@@ -723,7 +728,7 @@ var _ModifiersMap = map[Modifiers]string{
 	0: `Shift`,
 	1: `Control`,
 	2: `Alt`,
-	3: `Meta`,
+	3: `called "Command" on OS X`,
 }
 
 // String returns the string representation
@@ -774,8 +779,10 @@ func (i *Modifiers) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _ModifiersNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type Modifiers")
+			return fmt.Errorf("%q is not a valid value for type Modifiers", flg)
 		}
 	}
 	return nil
@@ -852,5 +859,8 @@ func (i Modifiers) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Modifiers) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

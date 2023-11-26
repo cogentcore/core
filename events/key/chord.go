@@ -62,15 +62,21 @@ func CodeIsModifier(c Codes) bool {
 }
 
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
-func (ch Chord) Decode() (r rune, mods Modifiers, err error) {
+func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 	cs := string(ch)
 	mods, cs = ModsFmString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {
 		r = rs[0]
-	} else {
-		err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, cs)
+		return
 	}
+	cstr := string(cs)
+	code.SetString(cstr)
+	if code != CodeUnknown {
+		r = 0
+		return
+	}
+	err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, string(cs))
 	return
 }
 
