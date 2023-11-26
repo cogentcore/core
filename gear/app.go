@@ -7,6 +7,8 @@ package gear
 import (
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -37,9 +39,16 @@ type App struct {
 
 	// CurCmd is the current root command being typed in.
 	CurCmd string
+
+	// Dir is the current directory of the app.
+	Dir string
 }
 
 var _ ki.Ki = (*App)(nil)
+
+func (a *App) OnInit() {
+	a.Dir = grr.Log(os.Getwd())
+}
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	gi.DefaultTopAppBarStd(tb)
@@ -95,7 +104,7 @@ func (a *App) ConfigWidget() {
 			e.SetHandled()
 			tb.NewBuf(0)
 
-			grr.Log0(a.RunCmd(txt, cmds))
+			a.RunCmd(txt, cmds)
 			return
 		}
 
@@ -114,7 +123,7 @@ func (a *App) ConfigWidget() {
 }
 
 // RunCmd runs the given command in the context of the given commands frame.
-func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
+func (a *App) RunCmd(cmd string, cmds *gi.Frame) {
 	updt := cmds.UpdateStart()
 
 	cfr := gi.NewFrame(cmds).Style(func(s *styles.Style) {
@@ -144,9 +153,20 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame) error {
 	cmds.Update()
 	cmds.UpdateEnd(updt)
 
-	xc := xe.Major().SetStdout(w).SetStderr(w).SetErrors(w)
+	words := grr.Log(shellwords.Parse(cmd))
+	if len(words) > 0 && words[0] == "cd" {
+		if len(words) > 1 {
+			a.Dir = grr.Log(filepath.Abs(words[1]))
+		} else {
+			a.Dir = grr.Log(os.UserHomeDir())
+		}
+		return
+	}
 
-	return xc.Run("bash", "-c", cmd)
+	go func() {
+		xc := xe.Major().SetDir(a.Dir).SetStdout(w).SetStderr(w).SetErrors(w)
+		grr.Log0(xc.Run("bash", "-c", cmd))
+	}()
 }
 
 // StructForFlags returns a new struct object for the given flags.
