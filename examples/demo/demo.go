@@ -319,7 +319,7 @@ func makeValues(ts *gi.Tabs) {
 		giv.InspectorDialog(ts.Sc)
 	})
 
-	giv.NewValue(values, colors.Red)
+	giv.NewValue(values, colors.Orange)
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, gi.FileName("demo.go"))
 	giv.NewValue(values, giv.ColorMapName(""))

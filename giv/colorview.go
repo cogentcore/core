@@ -12,7 +12,6 @@ import (
 	"sort"
 
 	"goki.dev/cam/hct"
-	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
@@ -570,6 +569,7 @@ func (vv *ColorValue) UpdateWidget() {
 	}
 	vv.CreateTempIfNotPtr()
 	bt := vv.Widget.(*gi.Button)
+	bt.Update()
 	bt.SetNeedsRender(true)
 }
 
@@ -603,8 +603,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		// so that it can be seen
 		dclr := colors.SetAF32(clr, 1)
 		s.BackgroundColor.SetSolid(dclr)
-		// TODO: use hct contrast color
-		s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
+		s.Color = colors.AsRGBA(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
 	bt.Config()
 	vv.UpdateWidget()
