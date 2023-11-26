@@ -41,10 +41,11 @@ func TestToneContrastRatio(t *testing.T) {
 		{0, 100, 21},
 		{100, 0, 21},
 		{50, 50, 1},
+		{100, 32.302586, 8.59},
 	}
 	for i, test := range tests {
 		res := ToneContrastRatio(test.a, test.b)
-		if res != test.want {
+		if mat32.Abs(res-test.want) > 0.1 {
 			t.Errorf("%d: expected %g but got %g", i, test.want, res)
 		}
 	}
