@@ -707,28 +707,28 @@ func _ModifiersNoOp() {
 }
 
 var _ModifiersNameToValueMap = map[string]Modifiers{
-	`Shift`:                    0,
-	`shift`:                    0,
-	`Control`:                  1,
-	`control`:                  1,
-	`Alt`:                      2,
-	`alt`:                      2,
-	`called "Command" on OS X`: 3,
-	`called "command" on os x`: 3,
+	`Shift`:   0,
+	`shift`:   0,
+	`Control`: 1,
+	`control`: 1,
+	`Alt`:     2,
+	`alt`:     2,
+	`Meta`:    3,
+	`meta`:    3,
 }
 
 var _ModifiersDescMap = map[Modifiers]string{
 	0: ``,
 	1: ``,
 	2: ``,
-	3: ``,
+	3: `called &#34;Command&#34; on OS X`,
 }
 
 var _ModifiersMap = map[Modifiers]string{
 	0: `Shift`,
 	1: `Control`,
 	2: `Alt`,
-	3: `called "Command" on OS X`,
+	3: `Meta`,
 }
 
 // String returns the string representation

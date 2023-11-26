@@ -19,7 +19,8 @@ const (
 	Shift Modifiers = iota
 	Control
 	Alt
-	Meta // called "Command" on OS X
+	// called "Command" on OS X
+	Meta
 )
 
 // ModsString returns the string representation of the modifiers
