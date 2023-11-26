@@ -103,6 +103,9 @@ func (a *App) ConfigWidget() {
 	tb.Opts.LineNos = false
 	grr.Log0(tb.Stat())
 	te := texteditor.NewEditor(ef, "editor").SetBuf(tb)
+	te.Style(func(s *styles.Style) {
+		s.Font.Family = string(gi.Prefs.MonoFont)
+	})
 	te.OnKeyChord(func(e events.Event) {
 		txt := string(tb.Text())
 
@@ -149,6 +152,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 
 	te := texteditor.NewEditor(cfr).SetBuf(buf)
 	te.Style(func(s *styles.Style) {
+		s.Font.Family = string(gi.Prefs.MonoFont)
 		s.Min.Set(units.Em(30), units.Em(10))
 	})
 
