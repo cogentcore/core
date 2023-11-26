@@ -124,6 +124,8 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	// which the developer can override in their stylers
 	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 	s.StateLayer = s.State.StateLayer()
+
+	s.Font.Family = string(Prefs.FontFamily)
 }
 
 // DefaultStyleWidget applies the base, widget-universal default
@@ -132,7 +134,6 @@ func (wb *WidgetBase) ResetStyleWidget() {
 func (wb *WidgetBase) DefaultStyleWidget() {
 	s := &wb.Styles
 
-	s.Font.Family = string(Prefs.FontFamily)
 	fsz := Prefs.FontSize / 100
 	s.Font.Size.Val *= fsz
 	s.Text.LineHeight.Val *= fsz
