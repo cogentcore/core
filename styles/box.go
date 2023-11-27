@@ -67,6 +67,22 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 			x = szx * (size.Y / szy)
 		}
 		return transform.Resize(img, int(x), int(y), transform.Linear)
+	case FitCover:
+		// var x, y float32
+		// if iar < bar {
+		// 	// if we have a lower x:y than them, x is our limiting size
+		// 	x = size.X
+		// 	// and we make our y in proportion to that
+		// 	y = szy * (size.X / szx)
+		// } else {
+		// 	// if we have a lower x:y than them, y is our limiting size
+		// 	y = size.Y
+		// 	// and we make our x in proportion to that
+		// 	x = szx * (size.Y / szy)
+		// }
+		// rimg := transform.Resize(img, int(x), int(y), transform.Linear)
+		// dst := image.NewRGBA(image.Rect(0, 0, int(min(x, szx)), int(min(y, szy))))
+		// draw.Draw(dst, )
 	}
 	return img
 }

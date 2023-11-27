@@ -48,7 +48,7 @@ func TestBackgroundColor(t *testing.T) {
 }
 
 func TestBackgroundImage(t *testing.T) {
-	imgsz := image.Point{320, 240}
+	imgsz := image.Point{500, 240}
 	szrec := image.Rectangle{Max: imgsz}
 	img := image.NewRGBA(szrec)
 
@@ -80,7 +80,8 @@ func TestBackgroundImage(t *testing.T) {
 	}
 
 	test(styles.FitFill, mat32.Vec2{0, 0})
-	test(styles.FitContain, mat32.Vec2{50, 75})
+	test(styles.FitContain, mat32.Vec2{0, 120})
+	test(styles.FitCover, mat32.Vec2{250, 0})
 
 	rs.Unlock()
 
