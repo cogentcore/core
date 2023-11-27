@@ -7,6 +7,8 @@ package paint
 import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/grows/images"
+	"goki.dev/grr"
 	"goki.dev/mat32/v2"
 )
 
@@ -94,13 +96,21 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if rad.IsZero() {
-		pc.FillBox(rs, mpos, msz, &bg)
+	if st.BackgroundImage != nil {
+		img, _, err := images.Read(st.BackgroundImage)
+		if grr.Log0(err) == nil {
+			// TODO(kai/girl): image scaling
+			pc.DrawImage(rs, img, mpos.X, mpos.Y)
+		}
 	} else {
-		pc.FillStyle.SetFullColor(&bg)
-		// no border -- fill only
-		pc.DrawRoundedRectangle(rs, mpos.X, mpos.Y, msz.X, msz.Y, rad)
-		pc.Fill(rs)
+		if rad.IsZero() {
+			pc.FillBox(rs, mpos, msz, &bg)
+		} else {
+			pc.FillStyle.SetFullColor(&bg)
+			// no border -- fill only
+			pc.DrawRoundedRectangle(rs, mpos.X, mpos.Y, msz.X, msz.Y, rad)
+			pc.Fill(rs)
+		}
 	}
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)

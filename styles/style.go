@@ -9,6 +9,7 @@ package styles
 import (
 	"fmt"
 	"image/color"
+	"io"
 	"strings"
 
 	"goki.dev/colors"
@@ -141,11 +142,16 @@ type Style struct { //gti:add
 	// effective margin to allocate for the element.
 	MaxBoxShadow []Shadow
 
-	// prop: color (inherited) = text color -- also defines the currentColor variable value
+	// Color specifies the text / content color, and it is inherited.
 	Color color.RGBA `inherit:"true"`
 
-	// prop: background-color = background color -- not inherited, transparent by default
+	// BackgroundColor specifies the background color of the element. It is not inherited,
+	// and it is transparent by default.
 	BackgroundColor colors.Full
+
+	// BackgroundImage, if non-nil, specifies an [io.Reader] to read a background image from using [image.Decode].
+	// If it is specified, [Style.BackgroundColor] has no effect.
+	BackgroundImage io.Reader
 
 	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
 	Opacity float32
