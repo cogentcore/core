@@ -258,9 +258,17 @@ func (ed *Editor) ReMarkup() {
 	ed.Buf.ReMarkup()
 }
 
-// IsChanged returns true if buffer was changed (edited)
+// IsChanged returns true if buffer was changed (edited) since last EditDone
 func (ed *Editor) IsChanged() bool {
 	if ed.Buf != nil && ed.Buf.IsChanged() {
+		return true
+	}
+	return false
+}
+
+// IsNotSaved returns true if buffer was changed (edited) since last Save
+func (ed *Editor) IsNotSaved() bool {
+	if ed.Buf != nil && ed.Buf.IsNotSaved() {
 		return true
 	}
 	return false

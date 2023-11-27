@@ -19,7 +19,7 @@ var EditorType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/texteditor.Editor",
 	ShortName: "texteditor.Editor",
 	IDName:    "editor",
-	Doc:       "Editor is a widget for editing multiple lines of text (as compared to\n[gi.TextField] for a single line).  The Editor is driven by a Buf buffer which\ncontains all the text, and manages all the edits, sending update signals\nout to the views -- multiple views can be attached to a given buffer.  All\nupdating in the Editor should be within a single goroutine -- it would\nrequire extensive protections throughout code otherwise.",
+	Doc:       "Editor is a widget for editing multiple lines of text (as compared to\n[gi.TextField] for a single line).  The Editor is driven by a [Buf]\nbuffer which contains all the text, and manages all the edits,\nsending update signals out to the views.\n\nUse SetNeedsRender to drive an render update for any change that does\nnot change the line-level layout of the text.\nUse SetNeedsLayout whenever there are changes across lines that require\nre-layout of the text.  This sets the Widget NeedsRender flag and triggers\nlayout during that render.\n\nMultiple views can be attached to a given buffer.  All updating in the\nEditor should be within a single goroutine, as it would require\nextensive protections throughout code otherwise.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},

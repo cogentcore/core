@@ -147,11 +147,11 @@ func (i *BufSignals) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _BufFlagsValues = []BufFlags{9, 10, 11, 12}
+var _BufFlagsValues = []BufFlags{9, 10, 11, 12, 13}
 
 // BufFlagsN is the highest valid value
 // for type BufFlags, plus one.
-const BufFlagsN BufFlags = 13
+const BufFlagsN BufFlags = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -160,7 +160,8 @@ func _BufFlagsNoOp() {
 	_ = x[BufAutoSaving-(9)]
 	_ = x[BufMarkingUp-(10)]
 	_ = x[BufChanged-(11)]
-	_ = x[BufFileModOk-(12)]
+	_ = x[BufNotSaved-(12)]
+	_ = x[BufFileModOk-(13)]
 }
 
 var _BufFlagsNameToValueMap = map[string]BufFlags{
@@ -170,22 +171,26 @@ var _BufFlagsNameToValueMap = map[string]BufFlags{
 	`markingup`:  10,
 	`Changed`:    11,
 	`changed`:    11,
-	`FileModOk`:  12,
-	`filemodok`:  12,
+	`NotSaved`:   12,
+	`notsaved`:   12,
+	`FileModOk`:  13,
+	`filemodok`:  13,
 }
 
 var _BufFlagsDescMap = map[BufFlags]string{
 	9:  `BufAutoSaving is used in atomically safe way to protect autosaving`,
 	10: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
-	11: `BufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
-	12: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
+	11: `BufChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`,
+	12: `BufNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`,
+	13: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
 }
 
 var _BufFlagsMap = map[BufFlags]string{
 	9:  `AutoSaving`,
 	10: `MarkingUp`,
 	11: `Changed`,
-	12: `FileModOk`,
+	12: `NotSaved`,
+	13: `FileModOk`,
 }
 
 // String returns the string representation

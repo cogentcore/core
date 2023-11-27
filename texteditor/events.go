@@ -52,7 +52,6 @@ func (ed *Editor) HandleEditorFocus() {
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {
-			fmt.Println(ed, "focus lost edit done")
 			ed.EditDone()
 			ed.SetState(false, states.Focused)
 		}

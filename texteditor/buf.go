@@ -26,6 +26,7 @@ import (
 	"goki.dev/glop/indent"
 	"goki.dev/glop/runes"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
@@ -241,16 +242,20 @@ const (
 	BufMarkingUp
 
 	// BufChanged indicates if the text has been changed (edited) relative to the
-	// original, since last save
+	// original, since last EditDone
 	BufChanged
+
+	// BufNotSaved indicates if the text has been changed (edited) relative to the
+	// original, since last Save
+	BufNotSaved
 
 	// BufFileModOk have already asked about fact that file has changed since being
 	// opened, user is ok
 	BufFileModOk
 )
 
-// HasFlag returns true if given flag is set
-func (tb *Buf) HasFlag(flag enums.BitFlag) bool {
+// Is returns true if given flag is set
+func (tb *Buf) Is(flag enums.BitFlag) bool {
 	return tb.Flags.HasFlag(flag)
 }
 
@@ -264,15 +269,28 @@ func (tb *Buf) ClearChanged() {
 	tb.SetFlag(false, BufChanged)
 }
 
+// ClearNotSaved resets the BufNotSaved flag, and also calls ClearChanged
+func (tb *Buf) ClearNotSaved() {
+	tb.ClearChanged()
+	tb.SetFlag(false, BufNotSaved)
+}
+
 // IsChanged indicates if the text has been changed (edited) relative to
-// the original, since last save
+// the original, since last EditDone
 func (tb *Buf) IsChanged() bool {
-	return tb.HasFlag(BufChanged)
+	return tb.Is(BufChanged)
+}
+
+// IsNotSaved indicates if the text has been changed (edited) relative to
+// the original, since last Save
+func (tb *Buf) IsNotSaved() bool {
+	return tb.Is(BufNotSaved)
 }
 
 // SetChanged marks buffer as changed
 func (tb *Buf) SetChanged() {
 	tb.SetFlag(true, BufChanged)
+	tb.SetFlag(true, BufNotSaved)
 }
 
 // SetText sets the text to given bytes
@@ -479,7 +497,7 @@ func (tb *Buf) ConfigSupported() bool {
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
 // that this is OK.  returns true if file was modified
 func (tb *Buf) FileModCheck() bool {
-	if tb.HasFlag(BufFileModOk) {
+	if tb.Is(BufFileModOk) {
 		return false
 	}
 	info, err := os.Stat(string(tb.Filename))
@@ -575,20 +593,21 @@ func (tb *Buf) Revert() bool {
 	if !didDiff {
 		tb.OpenFile(tb.Filename)
 	}
-	tb.ClearChanged()
+	tb.ClearNotSaved()
 	tb.AutoSaveDelete()
 	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
 	return true
 }
 
-// SaveAsFunc saves the current text into given file -- does an EditDone first to save edits
-// and checks for an existing file -- if it does exist then prompts to overwrite or not.
+// SaveAsFunc saves the current text into given file.
+// Does an EditDone first to save edits and checks for an existing file.
+// If it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
 func (tb *Buf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
-	if _, err := os.Stat(string(filename)); os.IsNotExist(err) {
+	if !grr.Log1(dirs.FileExists(string(filename))) {
 		tb.SaveFile(filename)
 		if afterFunc != nil {
 			afterFunc(false)
@@ -624,10 +643,10 @@ func (tb *Buf) SaveAs(filename gi.FileName) {
 func (tb *Buf) SaveFile(filename gi.FileName) error {
 	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		// TODO(kai/snack)
-		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
+		gi.ErrorSnackbar(tb.SceneFromView(), err)
 		slog.Error(err.Error())
 	} else {
+		tb.ClearNotSaved()
 		tb.Filename = filename
 		tb.Stat()
 	}
@@ -682,7 +701,7 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 				})
 				gi.NewButton(pw).SetText("Close without saving").OnClick(func(e events.Event) {
 					d.Close()
-					tb.ClearChanged()
+					tb.ClearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
@@ -702,7 +721,7 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 					}
 				})
 				d.AddOk(pw).SetText("Close without saving").OnClick(func(e events.Event) {
-					tb.ClearChanged()
+					tb.ClearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
@@ -714,7 +733,7 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 	tb.SignalViews(BufClosed, nil)
 	tb.NewBuf(1)
 	tb.Filename = ""
-	tb.ClearChanged()
+	tb.ClearNotSaved()
 	if afterFun != nil {
 		afterFun(false)
 	}
@@ -752,7 +771,7 @@ func (tb *Buf) AutoSaveFilename() string {
 
 // AutoSave does the autosave -- safe to call in a separate goroutine
 func (tb *Buf) AutoSave() error {
-	if tb.HasFlag(BufAutoSaving) {
+	if tb.Is(BufAutoSaving) {
 		return nil
 	}
 	tb.SetFlag(true, BufAutoSaving)
@@ -1652,7 +1671,7 @@ func (tb *Buf) MarkupLine(ln int) {
 
 // IsMarkingUp is true if the MarkupAllLines process is currently running
 func (tb *Buf) IsMarkingUp() bool {
-	return tb.HasFlag(BufMarkingUp)
+	return tb.Is(BufMarkingUp)
 }
 
 // InitialMarkup does the first-pass markup on the file
