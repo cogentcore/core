@@ -19,6 +19,19 @@ import (
 // stops -- overall rval is false if iteration was stopped or there was an
 // error (logged), true otherwise
 func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+	return FlatFieldsTypeFuncIf(typ, nil, fun)
+}
+
+// FlatFieldsTypeFunc calls a function on all the primary fields of a given
+// struct type, including those on anonymous embedded structs that this struct
+// has, passing the current (embedded) type and StructField -- effectively
+// flattens the reflect field list -- if fun returns false then iteration
+// stops -- overall rval is false if iteration was stopped or there was an
+// error (logged), true otherwise. If the given ifFun is non-nil, it is called
+// on every embedded struct field to determine whether the fields of that embedded
+// field should be handled (a return value of true indicates to continue down and
+// a value of false indicates to not).
+func FlatFieldsTypeFuncIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPtrType(typ)
 	if typ.Kind() != reflect.Struct {
 		log.Printf("laser.FlatFieldsTypeFunc: Must call on a struct type, not: %v\n", typ)
@@ -28,6 +41,11 @@ func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field refle
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
+			if ifFun != nil {
+				if !ifFun(typ, f) {
+					continue
+				}
+			}
 			rval = FlatFieldsTypeFunc(f.Type, fun) // no err here
 			if !rval {
 				break
@@ -43,7 +61,7 @@ func FlatFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field refle
 }
 
 // AllFieldsTypeFunc calls a function on all the fields of a given struct type,
-// including those on *any* embedded structs that this struct has -- if fun
+// including those on *any* fields of struct fields that this struct has -- if fun
 // returns false then iteration stops -- overall rval is false if iteration
 // was stopped or there was an error (logged), true otherwise.
 func AllFieldsTypeFunc(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
