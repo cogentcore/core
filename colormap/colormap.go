@@ -10,6 +10,7 @@ import (
 	"math"
 	"sort"
 
+	"goki.dev/cam/hct"
 	"goki.dev/colors"
 )
 
@@ -56,7 +57,7 @@ func (cm *Map) Map(val float64) color.RGBA {
 	cmix := ival - lidx
 	lclr := cm.Colors[int(lidx)]
 	uclr := cm.Colors[int(uidx)]
-	return colors.Blend(float32(cmix)*100, lclr, uclr)
+	return hct.Blend(float32(cmix)*100, lclr, uclr)
 }
 
 // MapIndex returns color for given index, for scale in Indexed mode.

@@ -296,16 +296,16 @@ func Opaquer(c color.Color, amount float32) color.RGBA {
 // blending is done directly on non-premultiplied RGB values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
-	f32 := NRGBAF32Model.Convert(x).(NRGBAF32)
-	othc := NRGBAF32Model.Convert(y).(NRGBAF32)
+	fx := NRGBAF32Model.Convert(x).(NRGBAF32)
+	fy := NRGBAF32Model.Convert(y).(NRGBAF32)
 	pct = mat32.Clamp(pct, 0, 100.0)
-	oth := pct / 100.0
-	me := 1.0 - pct/100.0
-	f32.R = me*f32.R + oth*othc.R
-	f32.G = me*f32.G + oth*othc.G
-	f32.B = me*f32.B + oth*othc.B
-	f32.A = me*f32.A + oth*othc.A
-	return AsRGBA(f32)
+	py := pct / 100
+	px := 1.0 - py
+	fx.R = px*fx.R + py*fy.R
+	fx.G = px*fx.G + py*fy.G
+	fx.B = px*fx.B + py*fy.B
+	fx.A = px*fx.A + py*fy.A
+	return AsRGBA(fx)
 }
 
 // m is the maximum color value returned by [image.Color.RGBA]
