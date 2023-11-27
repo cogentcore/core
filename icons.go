@@ -23,7 +23,7 @@ import (
 // by any packages by using a merged fs package. All icons should be stored
 // in the root directory of the fs, which can be accomplished using [fs.Sub]
 // if you have icons in a subdirectory.
-var Icons fs.FS = grr.Log(fs.Sub(defaults, "svg"))
+var Icons fs.FS = grr.Log1(fs.Sub(defaults, "svg"))
 
 // defaults contains the default icons.
 //
