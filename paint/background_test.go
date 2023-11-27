@@ -64,18 +64,23 @@ func TestBackgroundImage(t *testing.T) {
 
 	st := &styles.Style{}
 	st.Defaults()
-	f, err := os.Open("test.png")
-	if grr.Test(t, err) == nil {
-		defer f.Close()
-		st.BackgroundImage = f
-	}
-
 	st.ToDots()
 
 	sbg := &colors.Full{Solid: colors.White}
-
 	sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
-	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
+
+	test := func(of styles.ObjectFits, pos mat32.Vec2) {
+		st.ObjectFit = of
+		f, err := os.Open("test.png")
+		if grr.Test(t, err) == nil {
+			defer f.Close()
+			st.BackgroundImage = f
+		}
+		pc.DrawStdBox(rs, st, pos, sz, sbg, 0)
+	}
+
+	test(styles.FitFill, mat32.Vec2{0, 0})
+	test(styles.FitContain, mat32.Vec2{50, 75})
 
 	rs.Unlock()
 

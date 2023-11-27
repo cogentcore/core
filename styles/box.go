@@ -46,17 +46,27 @@ const (
 // in an object of the given size.
 func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 	sz := img.Bounds().Size()
+	szx, szy := float32(sz.X), float32(sz.Y)
 	// image and box aspect ratio
-	iar := float32(sz.X) / float32(sz.Y)
+	iar := szx / szy
 	bar := size.X / size.Y
 	switch st.ObjectFit {
 	case FitFill:
 		return transform.Resize(img, int(size.X), int(size.Y), transform.Linear)
 	case FitContain:
+		var x, y float32
 		if iar >= bar {
-			// dst := image.NewRGBA()
-			// draw.Draw(rimg)
+			// if we have a higher x:y than them, x is our limiting size
+			x = size.X
+			// and we make our y in proportion to that
+			y = szy * (size.X / szx)
+		} else {
+			// if we have a lower x:y than them, y is our limiting size
+			y = size.Y
+			// and we make our x in proportion to that
+			x = szx * (size.Y / szy)
 		}
+		return transform.Resize(img, int(x), int(y), transform.Linear)
 	}
 	return img
 }
