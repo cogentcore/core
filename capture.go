@@ -22,7 +22,7 @@ func Capture() *image.RGBA {
 // CaptureAs is a helper function that saves the result of [Capture] to the given filename.
 // It automatically logs any error in addition to returning it.
 func CaptureAs(filename string) error {
-	return grr.Log0(images.Save(Capture(), filename))
+	return grr.Log(images.Save(Capture(), filename))
 }
 
 var (
