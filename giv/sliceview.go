@@ -347,7 +347,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				})
 			case strings.HasPrefix(w.Name(), "value-"):
 				w.Style(func(s *styles.Style) {
-					idx := grr.Log(strconv.Atoi(strings.TrimPrefix(w.Name(), "value-")))
+					idx := grr.Log1(strconv.Atoi(strings.TrimPrefix(w.Name(), "value-")))
 					si := sv.StartIdx + idx
 					if si < sv.SliceSize {
 						sv.This().(SliceViewer).StyleRow(w, si, 0)

@@ -347,7 +347,7 @@ func (fv *FileView) ConfigFilesRow() {
 	fsv.SetSlice(&fv.Files)
 	fsv.StyleFunc = func(w gi.Widget, s *styles.Style, row, col int) {
 		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
-			s.Color = grr.Log(colors.FromName(clr))
+			s.Color = grr.Log1(colors.FromName(clr))
 			return
 		}
 		fn := fv.Files[row].Name

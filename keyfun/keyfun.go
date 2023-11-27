@@ -317,13 +317,13 @@ var PrefsMapsFileName = "key_maps_prefs.json"
 // You can save and open key maps to / from files to share, experiment, transfer, etc
 func (km *Maps) OpenJSON(filename string) error { //gti:add
 	*km = make(Maps, 0, 10) // reset
-	return grr.Log0(jsons.Open(km, filename))
+	return grr.Log(jsons.Open(km, filename))
 }
 
 // SaveJSON saves keymaps to a JSON-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
 func (km *Maps) SaveJSON(filename string) error { //gti:add
-	return grr.Log0(jsons.Save(km, filename))
+	return grr.Log(jsons.Save(km, filename))
 }
 
 // OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.

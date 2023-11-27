@@ -1638,7 +1638,7 @@ func (vv *TextEditorValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 
 	tb := texteditor.NewBuf()
-	grr.Log0(tb.Stat())
+	grr.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
 		fmt.Println(tb.Txt)
 		vv.SetValue(string(tb.Txt))

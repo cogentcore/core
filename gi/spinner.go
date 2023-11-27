@@ -204,16 +204,16 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 	// TODO(kai/snack)
 	if sp.Format == "" {
 		f64, err := strconv.ParseFloat(str, 32)
-		return float32(f64), grr.Log0(err)
+		return float32(f64), grr.Log(err)
 	}
 	if sp.FormatIsInt() {
 		var ival int
 		_, err := fmt.Sscanf(str, sp.Format, &ival)
-		return float32(ival), grr.Log0(err)
+		return float32(ival), grr.Log(err)
 	}
 	var fval float32
 	_, err := fmt.Sscanf(str, sp.Format, &fval)
-	return fval, grr.Log0(err)
+	return fval, grr.Log(err)
 }
 
 func (sp *Spinner) HandleSpinnerEvents() {

@@ -677,7 +677,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 	if win.Is(WinClosing) {
 		return
 	}
-	grr.Log0(goosi.TheApp.Cursor(win.GoosiWin).Set(cur))
+	grr.Log(goosi.TheApp.Cursor(win.GoosiWin).Set(cur))
 }
 
 // FocusClear saves current focus to FocusPrev

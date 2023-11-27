@@ -22,8 +22,8 @@ import (
 // at the FPS of the window, and it tells the widget to render on every FPS tick. If the starting and ending
 // value are the same, it does nothing. If not, it runs the transition in a separate goroutine.
 func (wb *WidgetBase) Transition(value any, to any, duration time.Duration, timingFunc func(prop float32) float32) {
-	vn := grr.Log(laser.ToFloat32(value))
-	tn := grr.Log(laser.ToFloat32(to))
+	vn := grr.Log1(laser.ToFloat32(value))
+	tn := grr.Log1(laser.ToFloat32(to))
 	diff := tn - vn
 	if diff == 0 {
 		return
@@ -38,7 +38,7 @@ func (wb *WidgetBase) Transition(value any, to any, duration time.Duration, timi
 			prop := float32(i) * propPer
 			inc := timingFunc(prop)
 			nv := vn + inc*diff
-			grr.Log0(laser.SetRobust(value, nv))
+			grr.Log(laser.SetRobust(value, nv))
 			wb.SetNeedsRender(true)
 		}
 		tick.Stop()

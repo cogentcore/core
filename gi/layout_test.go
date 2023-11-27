@@ -24,7 +24,7 @@ func LayoutTestFile(t *testing.T) string {
 	p := filepath.Join("testdata", "layout")
 	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name(), "TestLayout"))
 	n := filepath.Join("layout", tnm)
-	grr.Log0(os.MkdirAll(p, 0750))
+	grr.Log(os.MkdirAll(p, 0750))
 	return n
 }
 
@@ -32,7 +32,7 @@ func LayoutTestDir(t *testing.T) string {
 	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name(), "TestLayout"))
 	n := filepath.Join("layout", tnm)
 	p := filepath.Join("testdata", n)
-	grr.Log0(os.MkdirAll(p, 0750))
+	grr.Log(os.MkdirAll(p, 0750))
 	return n
 }
 

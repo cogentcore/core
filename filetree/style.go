@@ -42,17 +42,17 @@ func (fn *Node) FileNodeStyles() {
 		case fn.Buf != nil:
 			s.Font.Style = styles.FontItalic
 		case vcs == vci.Untracked:
-			s.Color = grr.Must(colors.FromHex("#808080"))
+			s.Color = grr.Must1(colors.FromHex("#808080"))
 		case vcs == vci.Modified:
-			s.Color = grr.Must(colors.FromHex("#4b7fd1"))
+			s.Color = grr.Must1(colors.FromHex("#4b7fd1"))
 		case vcs == vci.Added:
-			s.Color = grr.Must(colors.FromHex("#008800"))
+			s.Color = grr.Must1(colors.FromHex("#008800"))
 		case vcs == vci.Deleted:
-			s.Color = grr.Must(colors.FromHex("#ff4252"))
+			s.Color = grr.Must1(colors.FromHex("#ff4252"))
 		case vcs == vci.Conflicted:
-			s.Color = grr.Must(colors.FromHex("#ce8020"))
+			s.Color = grr.Must1(colors.FromHex("#ce8020"))
 		case vcs == vci.Updated:
-			s.Color = grr.Must(colors.FromHex("#008060"))
+			s.Color = grr.Must1(colors.FromHex("#008060"))
 		case vcs == vci.Stored:
 			// s.Color = std
 		}

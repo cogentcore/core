@@ -152,8 +152,8 @@ func (tv *TableView) TableViewInit() {
 					dp := strings.Index(fstr, ".")
 					istr := fstr[dp+1:] // index is after .
 					fstr = fstr[:dp]    // field idx is -X.
-					idx := grr.Log(strconv.Atoi(istr))
-					fli := grr.Log(strconv.Atoi(fstr))
+					idx := grr.Log1(strconv.Atoi(istr))
+					fli := grr.Log1(strconv.Atoi(fstr))
 					si := tv.StartIdx + idx
 					if si < tv.SliceSize {
 						tv.This().(SliceViewer).StyleRow(w, si, fli)

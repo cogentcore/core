@@ -76,7 +76,7 @@ func (is *Inspector) Save() { //gti:add
 		return
 	}
 
-	grr.Log0(jsons.Save(is.KiRoot, string(is.Filename)))
+	grr.Log(jsons.Save(is.KiRoot, string(is.Filename)))
 	is.Changed = false
 }
 
@@ -85,7 +85,7 @@ func (is *Inspector) SaveAs(filename gi.FileName) { //gti:add
 	if is.KiRoot == nil {
 		return
 	}
-	grr.Log0(jsons.Save(is.KiRoot, string(filename)))
+	grr.Log(jsons.Save(is.KiRoot, string(filename)))
 	is.Changed = false
 	is.Filename = filename
 	is.SetNeedsRender(true) // notify our editor
@@ -96,7 +96,7 @@ func (is *Inspector) Open(filename gi.FileName) { //gti:add
 	if is.KiRoot == nil {
 		return
 	}
-	grr.Log0(jsons.Open(is.KiRoot, string(filename)))
+	grr.Log(jsons.Open(is.KiRoot, string(filename)))
 	is.Filename = filename
 	is.SetNeedsRender(true) // notify our editor
 }

@@ -176,7 +176,7 @@ var PrefsFileName = "prefs.json"
 func (pf *Preferences) Open() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	err := grr.Log0(jsons.Open(pf, pnm))
+	err := grr.Log(jsons.Open(pf, pnm))
 	if err != nil {
 		return err
 	}
@@ -205,7 +205,7 @@ func (pf *Preferences) Open() error { //gti:add
 func (pf *Preferences) Save() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	err := grr.Log0(jsons.Save(pf, pnm))
+	err := grr.Log(jsons.Save(pf, pnm))
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (pf *Preferences) Delete() error { //gti:add
 func (pf *Preferences) LightMode() { //gti:add
 	pf.Theme = ThemeLight
 	colors.SetScheme(false)
-	grr.Log0(pf.Save())
+	grr.Log(pf.Save())
 	pf.UpdateAll()
 }
 
@@ -351,7 +351,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
 	} else {
 		pf.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
-	grr.Log0(pf.Save())
+	grr.Log(pf.Save())
 }
 
 // ScreenInfo returns screen info for all screens on the device
@@ -629,12 +629,12 @@ var SavedPaths FilePaths
 
 // Open file paths from a JSON-formatted file.
 func (pf *FilePaths) OpenJSON(filename string) error { //gti:add
-	return grr.Log0(jsons.Open(pf, filename))
+	return grr.Log(jsons.Open(pf, filename))
 }
 
 // Save file paths to a JSON-formatted file.
 func (pf *FilePaths) SaveJSON(filename string) error { //gti:add
-	return grr.Log0(jsons.Save(pf, filename))
+	return grr.Log(jsons.Save(pf, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max
@@ -768,7 +768,7 @@ var PrefsDetailedFileName = "prefs_det.json"
 func (pf *PrefsDetailed) Open() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	err := grr.Log0(jsons.Open(pf, pnm))
+	err := grr.Log(jsons.Open(pf, pnm))
 	pf.Changed = false
 	return err
 }
@@ -777,7 +777,7 @@ func (pf *PrefsDetailed) Open() error { //gti:add
 func (pf *PrefsDetailed) Save() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	err := grr.Log0(jsons.Save(pf, pnm))
+	err := grr.Log(jsons.Save(pf, pnm))
 	pf.Changed = false
 	return err
 }
