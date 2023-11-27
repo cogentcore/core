@@ -33,6 +33,18 @@ func Log[T any](v T, err error) T {
 	return v
 }
 
+// Log1 takes the given value and error and returns the value if
+// the error is nil, and logs the error and returns a zero value
+// if the error is non-nil. The intended usage is:
+//
+//	a := grr.Log1(MyFunc(v))
+func Log1[T any](v T, err error) T {
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	return v
+}
+
 // Log2 takes the given two values and error and returns the values if
 // the error is nil, and logs the error and returns zero values
 // if the error is non-nil. The intended usage is:
