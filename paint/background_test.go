@@ -12,6 +12,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/grows/images"
+	"goki.dev/grr"
 	"goki.dev/mat32/v2"
 )
 
@@ -64,9 +65,7 @@ func TestBackgroundImage(t *testing.T) {
 	st := &styles.Style{}
 	st.Defaults()
 	f, err := os.Open("test.png")
-	if err != nil {
-		t.Error(err)
-	} else {
+	if grr.Test(t, err) == nil {
 		defer f.Close()
 		st.BackgroundImage = f
 	}
