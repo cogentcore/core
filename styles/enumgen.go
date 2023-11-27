@@ -13,6 +13,130 @@ import (
 	"goki.dev/enums"
 )
 
+var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
+
+// ObjectFitsN is the highest valid value
+// for type ObjectFits, plus one.
+const ObjectFitsN ObjectFits = 5
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ObjectFitsNoOp() {
+	var x [1]struct{}
+	_ = x[FitFill-(0)]
+	_ = x[FitContain-(1)]
+	_ = x[FitCover-(2)]
+	_ = x[FitNone-(3)]
+	_ = x[FitScaleDown-(4)]
+}
+
+var _ObjectFitsNameToValueMap = map[string]ObjectFits{
+	`Fill`:      0,
+	`fill`:      0,
+	`Contain`:   1,
+	`contain`:   1,
+	`Cover`:     2,
+	`cover`:     2,
+	`None`:      3,
+	`none`:      3,
+	`ScaleDown`: 4,
+	`scaledown`: 4,
+}
+
+var _ObjectFitsDescMap = map[ObjectFits]string{
+	0: `FitFill indicates that the replaced object will fill the element&#39;s entire content box, stretching if necessary.`,
+	1: `FitContain indicates that the replaced object will resize as large as possible while fully fitting within the element&#39;s content box and maintaining its aspect ratio. Therefore, it may not fill the entire element.`,
+	2: `FitCover indicates that the replaced object will fill the element&#39;s entire content box, clipping if necessary.`,
+	3: `FitNone indicates that the replaced object will not resize.`,
+	4: `FitScaleDown indicates that the replaced object will size as if [FitNone] or [FitContain] was specified, using whichever will result in a smaller final size.`,
+}
+
+var _ObjectFitsMap = map[ObjectFits]string{
+	0: `Fill`,
+	1: `Contain`,
+	2: `Cover`,
+	3: `None`,
+	4: `ScaleDown`,
+}
+
+// String returns the string representation
+// of this ObjectFits value.
+func (i ObjectFits) String() string {
+	if str, ok := _ObjectFitsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the ObjectFits value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *ObjectFits) SetString(s string) error {
+	if val, ok := _ObjectFitsNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _ObjectFitsNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type ObjectFits")
+}
+
+// Int64 returns the ObjectFits value as an int64.
+func (i ObjectFits) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the ObjectFits value from an int64.
+func (i *ObjectFits) SetInt64(in int64) {
+	*i = ObjectFits(in)
+}
+
+// Desc returns the description of the ObjectFits value.
+func (i ObjectFits) Desc() string {
+	if str, ok := _ObjectFitsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ObjectFitsValues returns all possible values
+// for the type ObjectFits.
+func ObjectFitsValues() []ObjectFits {
+	return _ObjectFitsValues
+}
+
+// Values returns all possible values
+// for the type ObjectFits.
+func (i ObjectFits) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ObjectFitsValues))
+	for i, d := range _ObjectFitsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type ObjectFits.
+func (i ObjectFits) IsValid() bool {
+	_, ok := _ObjectFitsMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i ObjectFits) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *ObjectFits) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
+}
+
 var _BorderStylesValues = []BorderStyles{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
 // BorderStylesN is the highest valid value

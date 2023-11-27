@@ -12,6 +12,34 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+// ObjectFits are the different ways in which a replaced element
+// (image, video, etc) can be fit into its containing box.
+type ObjectFits int32 //enums:enum -trim-prefix Fit
+
+const (
+	// FitFill indicates that the replaced object will fill
+	// the element's entire content box, stretching if necessary.
+	FitFill ObjectFits = iota
+
+	// FitContain indicates that the replaced object will resize
+	// as large as possible while fully fitting within the element's
+	// content box and maintaining its aspect ratio. Therefore,
+	// it may not fill the entire element.
+	FitContain
+
+	// FitCover indicates that the replaced object will fill
+	// the element's entire content box, clipping if necessary.
+	FitCover
+
+	// FitNone indicates that the replaced object will not resize.
+	FitNone
+
+	// FitScaleDown indicates that the replaced object will size
+	// as if [FitNone] or [FitContain] was specified, using
+	// whichever will result in a smaller final size.
+	FitScaleDown
+)
+
 // note: background-color is in FontStyle as it is needed to make that the
 // only style needed for text render styling
 

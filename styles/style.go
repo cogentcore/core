@@ -126,6 +126,11 @@ type Style struct { //gti:add
 	// do not specify their row, column positions
 	Columns int
 
+	// If this object is a replaced object (image, video, etc)
+	// or has a background image, ObjectFit specifies the way
+	// in which the replaced object should be fit into the element.
+	ObjectFit ObjectFits
+
 	// Border is a line border around the box element
 	Border Border
 
