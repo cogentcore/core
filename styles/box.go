@@ -7,6 +7,7 @@ package styles
 import (
 	"image"
 	"image/color"
+	"image/draw"
 
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
@@ -68,21 +69,25 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 		}
 		return transform.Resize(img, int(x), int(y), transform.Linear)
 	case FitCover:
-		// var x, y float32
-		// if iar < bar {
-		// 	// if we have a lower x:y than them, x is our limiting size
-		// 	x = size.X
-		// 	// and we make our y in proportion to that
-		// 	y = szy * (size.X / szx)
-		// } else {
-		// 	// if we have a lower x:y than them, y is our limiting size
-		// 	y = size.Y
-		// 	// and we make our x in proportion to that
-		// 	x = szx * (size.Y / szy)
-		// }
-		// rimg := transform.Resize(img, int(x), int(y), transform.Linear)
-		// dst := image.NewRGBA(image.Rect(0, 0, int(min(x, szx)), int(min(y, szy))))
-		// draw.Draw(dst, )
+		var x, y float32
+		if iar < bar {
+			// if we have a lower x:y than them, x is our limiting size
+			x = size.X
+			// and we make our y in proportion to that
+			y = szy * (size.X / szx)
+		} else {
+			// if we have a lower x:y than them, y is our limiting size
+			y = size.Y
+			// and we make our x in proportion to that
+			x = szx * (size.Y / szy)
+		}
+		// our source image is the computed size
+		rimg := transform.Resize(img, int(x), int(y), transform.Linear)
+		// but we cap the destination size to the size of the containg object
+		drect := image.Rect(0, 0, int(min(x, size.X)), int(min(y, size.Y)))
+		dst := image.NewRGBA(drect)
+		draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
+		return dst
 	}
 	return img
 }
