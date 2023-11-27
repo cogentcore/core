@@ -21,7 +21,6 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
-	"golang.org/x/image/math/f64"
 )
 
 // image contains various image-related elements, including the Image node
@@ -63,78 +62,37 @@ func (im *Image) ImageStyles() {
 	})
 }
 
-// SetSize sets size of the bitmap image.
-// This does not resize any existing image, just makes a new image
-// if the size is different
-func (im *Image) SetSize(nwsz image.Point) *Image {
-	if nwsz.X == 0 || nwsz.Y == 0 {
-		return im
-	}
-	im.Size = nwsz // always make sure
-	if im.Pixels != nil && im.Pixels.Bounds().Size() == nwsz {
-		return im
-	}
-	im.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	return im
-}
-
-// OpenImage opens an image for the bitmap, and resizes to the size of the image
-// or the specified size -- pass 0 for width and/or height to use the actual image size
-// for that dimension
-func (im *Image) OpenImage(filename FileName, width, height float32) error {
+// OpenImage sets the image to the image located at the given filename.
+func (im *Image) OpenImage(filename FileName) error {
 	img, _, err := images.Open(string(filename))
 	if err != nil {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
 	im.Filename = filename
-	im.SetImage(img, width, height)
+	im.SetImage(img)
 	return nil
 }
 
-// OpenImageFS opens an image for the bitmap, and resizes to the size of the image
-// or the specified size -- pass 0 for width and/or height to use the actual image size
-// for that dimension
-func (im *Image) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
+// OpenImageFS sets the image to the image located at the given filename in the given fs.
+func (im *Image) OpenImageFS(fsys fs.FS, filename FileName) error {
 	img, _, err := images.OpenFS(fsys, string(filename))
 	if err != nil {
 		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
 	im.Filename = filename
-	im.SetImage(img, width, height)
+	im.SetImage(img)
 	return nil
 }
 
-// SetImage sets an image for the bitmap, and resizes to the size of the image
-// or the specified size -- pass 0 for width and/or height to use the actual image size
-// for that dimension.  Copies from given image into internal image for this bitmap.
-func (im *Image) SetImage(img image.Image, width, height float32) {
+// SetImage sets the image to the given image.
+// It copies from the given image into an internal image.
+func (im *Image) SetImage(img image.Image) {
 	updt := im.UpdateStart()
 	defer im.UpdateEnd(updt)
 
-	sz := img.Bounds().Size()
-	if width <= 0 && height <= 0 {
-		im.SetSize(sz)
-		im.Pixels = clone.AsRGBA(img)
-	} else {
-		tsz := sz
-		transformer := draw.BiLinear
-		scx := float32(1)
-		scy := float32(1)
-		if width > 0 {
-			scx = width / float32(sz.X)
-			tsz.X = int(width)
-		}
-		if height > 0 {
-			scy = height / float32(sz.Y)
-			tsz.Y = int(height)
-		}
-		im.SetSize(tsz)
-		m := mat32.Scale2D(scx, scy)
-		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
-		transformer.Transform(im.Pixels, s2d, img, img.Bounds(), draw.Src, nil)
-	}
+	im.Pixels = clone.AsRGBA(img)
 }
 
 // GrabRenderFrom grabs the rendered image from given node

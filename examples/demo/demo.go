@@ -17,8 +17,10 @@ import (
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
@@ -69,10 +71,11 @@ func makeHome(ts *gi.Tabs) {
 	}()
 
 	img := gi.NewImage(home)
-	err := img.OpenImageFS(gopherPng, "gopher.png", 300, 300)
-	if err != nil {
-		fmt.Println("error loading gopher image:", err)
-	}
+	grr.Log(img.OpenImageFS(gopherPng, "gopher.png"))
+	img.Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300))
+		s.ObjectFit = styles.FitContain
+	})
 }
 
 func makeText(ts *gi.Tabs) {
