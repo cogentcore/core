@@ -16,8 +16,8 @@ func main() { gimain.Run(app) }
 func app() {
 	sc := gi.NewScene("basic-video").SetTitle("Basic Video Example")
 	v := video.NewVideo(sc)
-	grr.Log0(v.Open("../videos/deer.mp4"))
+	grr.Log(v.Open("../videos/deer.mp4"))
 	w := gi.NewWindow(sc).Run()
-	grr.Log0(v.Play(0, 0))
+	grr.Log(v.Play(0, 0))
 	w.Wait()
 }
