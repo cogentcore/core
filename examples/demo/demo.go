@@ -206,6 +206,8 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewTextField(inputs).SetTypePassword().SetPlaceholder("Password")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 
+	gi.NewLabeledTextField(inputs).SetLabel("Labeled text field").SetHintText("Hint text")
+
 	spinners := gi.NewLayout(inputs, "spinners")
 
 	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)

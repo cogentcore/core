@@ -940,6 +940,162 @@ func (t *Label) SetCustomContextMenu(v func(m *Scene)) *Label {
 	return t
 }
 
+// LabeledTextFieldType is the [gti.Type] for [LabeledTextField]
+var LabeledTextFieldType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.LabeledTextField",
+	ShortName:  "gi.LabeledTextField",
+	IDName:     "labeled-text-field",
+	Doc:        "LabeledTextField is a [Label] with optional associated label,\nhint, and error text.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Label", &gti.Field{Name: "Label", Type: "string", LocalType: "string", Doc: "Label is the label for the text field", Directives: gti.Directives{}, Tag: ""}},
+		{"HintText", &gti.Field{Name: "HintText", Type: "string", LocalType: "string", Doc: "HintText is the hint text for the text field", Directives: gti.Directives{}, Tag: ""}},
+		{"ErrorText", &gti.Field{Name: "ErrorText", Type: "string", LocalType: "string", Doc: "ErrorText is the error text for the text field.\nIf it is specified, it will be shown instead of\n[LabeledTextField.HintText].", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/gi/v2/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &LabeledTextField{},
+})
+
+// NewLabeledTextField adds a new [LabeledTextField] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewLabeledTextField(par ki.Ki, name ...string) *LabeledTextField {
+	return par.NewChild(LabeledTextFieldType, name...).(*LabeledTextField)
+}
+
+// KiType returns the [*gti.Type] of [LabeledTextField]
+func (t *LabeledTextField) KiType() *gti.Type {
+	return LabeledTextFieldType
+}
+
+// New returns a new [*LabeledTextField] value
+func (t *LabeledTextField) New() ki.Ki {
+	return &LabeledTextField{}
+}
+
+// SetLabel sets the [LabeledTextField.Label]:
+// Label is the label for the text field
+func (t *LabeledTextField) SetLabel(v string) *LabeledTextField {
+	t.Label = v
+	return t
+}
+
+// SetHintText sets the [LabeledTextField.HintText]:
+// HintText is the hint text for the text field
+func (t *LabeledTextField) SetHintText(v string) *LabeledTextField {
+	t.HintText = v
+	return t
+}
+
+// SetErrorText sets the [LabeledTextField.ErrorText]:
+// ErrorText is the error text for the text field.
+// If it is specified, it will be shown instead of
+// [LabeledTextField.HintText].
+func (t *LabeledTextField) SetErrorText(v string) *LabeledTextField {
+	t.ErrorText = v
+	return t
+}
+
+// SetTooltip sets the [LabeledTextField.Tooltip]
+func (t *LabeledTextField) SetTooltip(v string) *LabeledTextField {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [LabeledTextField.Class]
+func (t *LabeledTextField) SetClass(v string) *LabeledTextField {
+	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [LabeledTextField.PriorityEvents]
+func (t *LabeledTextField) SetPriorityEvents(v []events.Types) *LabeledTextField {
+	t.PriorityEvents = v
+	return t
+}
+
+// SetCustomContextMenu sets the [LabeledTextField.CustomContextMenu]
+func (t *LabeledTextField) SetCustomContextMenu(v func(m *Scene)) *LabeledTextField {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetPlaceholder sets the [LabeledTextField.Placeholder]
+func (t *LabeledTextField) SetPlaceholder(v string) *LabeledTextField {
+	t.Placeholder = v
+	return t
+}
+
+// SetComplete sets the [LabeledTextField.Complete]
+func (t *LabeledTextField) SetComplete(v *Complete) *LabeledTextField {
+	t.Complete = v
+	return t
+}
+
+// SetNoEcho sets the [LabeledTextField.NoEcho]
+func (t *LabeledTextField) SetNoEcho(v bool) *LabeledTextField {
+	t.NoEcho = v
+	return t
+}
+
+// SetLeadingIconOnClick sets the [LabeledTextField.LeadingIconOnClick]
+func (t *LabeledTextField) SetLeadingIconOnClick(v func(e events.Event)) *LabeledTextField {
+	t.LeadingIconOnClick = v
+	return t
+}
+
+// SetTrailingIconOnClick sets the [LabeledTextField.TrailingIconOnClick]
+func (t *LabeledTextField) SetTrailingIconOnClick(v func(e events.Event)) *LabeledTextField {
+	t.TrailingIconOnClick = v
+	return t
+}
+
+// SetCursorWidth sets the [LabeledTextField.CursorWidth]
+func (t *LabeledTextField) SetCursorWidth(v units.Value) *LabeledTextField {
+	t.CursorWidth = v
+	return t
+}
+
+// SetType sets the [LabeledTextField.Type]
+func (t *LabeledTextField) SetType(v TextFieldTypes) *LabeledTextField {
+	t.Type = v
+	return t
+}
+
+// SetPlaceholderColor sets the [LabeledTextField.PlaceholderColor]
+func (t *LabeledTextField) SetPlaceholderColor(v color.RGBA) *LabeledTextField {
+	t.PlaceholderColor = v
+	return t
+}
+
+// SetSelectColor sets the [LabeledTextField.SelectColor]
+func (t *LabeledTextField) SetSelectColor(v colors.Full) *LabeledTextField {
+	t.SelectColor = v
+	return t
+}
+
+// SetCursorColor sets the [LabeledTextField.CursorColor]
+func (t *LabeledTextField) SetCursorColor(v colors.Full) *LabeledTextField {
+	t.CursorColor = v
+	return t
+}
+
+// SetMaxWidthReq sets the [LabeledTextField.MaxWidthReq]
+func (t *LabeledTextField) SetMaxWidthReq(v int) *LabeledTextField {
+	t.MaxWidthReq = v
+	return t
+}
+
+// SetSelectMode sets the [LabeledTextField.SelectMode]
+func (t *LabeledTextField) SetSelectMode(v bool) *LabeledTextField {
+	t.SelectMode = v
+	return t
+}
+
 // LayoutType is the [gti.Type] for [Layout]
 var LayoutType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Layout",
