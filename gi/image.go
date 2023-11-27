@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
@@ -105,7 +106,7 @@ func (im *Image) OpenImageFS(fsys fs.FS, filename FileName, width, height float3
 	return nil
 }
 
-// SetImage sets an image for the bitmap , and resizes to the size of the image
+// SetImage sets an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension.  Copies from given image into internal image for this bitmap.
 func (im *Image) SetImage(img image.Image, width, height float32) {
@@ -115,7 +116,7 @@ func (im *Image) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		im.SetSize(sz)
-		draw.Draw(im.Pixels, im.Pixels.Bounds(), img, image.Point{}, draw.Src)
+		im.Pixels = clone.AsRGBA(img)
 	} else {
 		tsz := sz
 		transformer := draw.BiLinear
@@ -162,7 +163,8 @@ func (im *Image) DrawIntoScene() {
 		}
 		r = nr
 	}
-	draw.Draw(im.Sc.Pixels, r, im.Pixels, sp, draw.Over)
+	rimg := im.Styles.ResizeImage(im.Pixels, im.Geom.Size.Actual.Content)
+	draw.Draw(im.Sc.Pixels, r, rimg, sp, draw.Over)
 }
 
 func (im *Image) Render() {
