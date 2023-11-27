@@ -69,14 +69,15 @@ func (sw *Switches) SwitchesStyles() {
 			}
 			ip, _ := w.IndexInParent()
 			brf := styles.BorderRadiusFull.Top
+			ps := &sw.Styles
 			if ip == 0 {
-				if s.Direction == styles.Row {
+				if ps.Direction == styles.Row {
 					s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
 				} else {
 					s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
 				}
 			} else if ip == sw.NumChildren()-1 {
-				if s.Direction == styles.Row {
+				if ps.Direction == styles.Row {
 					s.Border.Width.SetLeft(units.Zero())
 					s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
 				} else {
@@ -84,7 +85,7 @@ func (sw *Switches) SwitchesStyles() {
 					s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
 				}
 			} else {
-				if s.Direction == styles.Row {
+				if ps.Direction == styles.Row {
 					s.Border.Width.SetLeft(units.Zero())
 				} else {
 					s.Border.Width.SetTop(units.Zero())
