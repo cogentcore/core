@@ -17,7 +17,9 @@ import (
 	"os"
 	"strings"
 
+	"goki.dev/cam/hct"
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
@@ -100,6 +102,27 @@ type StyleEntry struct {
 //		he.FromChroma(ce)
 //		return he
 //	}
+
+// Norm normalizes the colors of the style entry such that they have consistent
+// chromas and tones that guarantee sufficient text contrast.
+func (se *StyleEntry) Norm() {
+	hc := hct.FromColor(se.Color)
+	ctone := float32(40)
+	if matcolor.SchemeIsDark {
+		ctone = 80
+	}
+	se.Color = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
+
+	if !colors.IsNil(se.Background) {
+		hb := hct.FromColor(se.Background)
+		btone := max(hb.Tone, 94)
+		if matcolor.SchemeIsDark {
+			btone = min(hb.Tone, 17)
+		}
+		se.Background = hc.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
+	}
+}
+
 func (se StyleEntry) String() string {
 	out := []string{}
 	if se.Bold != Pass {
