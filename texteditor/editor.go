@@ -320,8 +320,11 @@ func (ed *Editor) SetBuf(buf *Buf) *Editor {
 		buf.AddView(ed)
 		bhl := len(buf.PosHistory)
 		if bhl > 0 {
-			ed.CursorPos = buf.PosHistory[bhl-1]
+			cp := buf.PosHistory[bhl-1]
 			ed.PosHistIdx = bhl - 1
+			ed.SetCursorShow(cp)
+		} else {
+			ed.SetCursorShow(lex.Pos{})
 		}
 	}
 	ed.LayoutAllLines()
