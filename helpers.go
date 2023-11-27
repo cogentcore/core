@@ -8,29 +8,17 @@ import (
 	"log/slog"
 )
 
-// Log0 takes the given error and logs it if it is non-nil.
+// Log takes the given error and logs it if it is non-nil.
 // The intended usage is:
 //
-// grr.Log0(MyFunc(v))
-// or
-// return grr.Log0(MyFunc(v))
-func Log0(err error) error {
+//	grr.Log(MyFunc(v))
+//	// or
+//	return grr.Log(MyFunc(v))
+func Log(err error) error {
 	if err != nil {
 		slog.Error(err.Error())
 	}
 	return err
-}
-
-// Log takes the given value and error and returns the value if
-// the error is nil, and logs the error and returns a zero value
-// if the error is non-nil. The intended usage is:
-//
-//	a := grr.Log(MyFunc(v))
-func Log[T any](v T, err error) T {
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	return v
 }
 
 // Log1 takes the given value and error and returns the value if
@@ -81,21 +69,21 @@ func Log4[T1, T2, T3, T4 any](v1 T1, v2 T2, v3 T3, v4 T4, err error) (T1, T2, T3
 	return v1, v2, v3, v4
 }
 
-// Must0 takes the given error and panics if it is non-nil.
+// Must takes the given error and panics if it is non-nil.
 // The intended usage is:
 //
-//	grr.Must0(MyFunc(v))
-func Must0(err error) {
+//	grr.Must(MyFunc(v))
+func Must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-// Must takes the given value and error and returns the value if
+// Must1 takes the given value and error and returns the value if
 // the error is nil, and panics if the error is non-nil. The intended usage is:
 //
-//	a := grr.Must(MyFunc(v))
-func Must[T any](v T, err error) T {
+//	a := grr.Must1(MyFunc(v))
+func Must1[T any](v T, err error) T {
 	if err != nil {
 		panic(err)
 	}
