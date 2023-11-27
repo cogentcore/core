@@ -1241,7 +1241,7 @@ func (n *Node) UpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
-	if n.Is(Destroyed) || n.Is(Deleted) {
+	if n.This() == nil || n.Is(Destroyed) || n.Is(Deleted) {
 		return
 	}
 	if n.Is(ChildDeleted) || n.Is(ChildrenDeleted) {
