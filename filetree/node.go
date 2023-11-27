@@ -185,7 +185,7 @@ func (fn *Node) MyRelPath() string {
 // Returns os.Stat error if path cannot be accessed.
 func (fn *Node) ReadDir(path string) error {
 	_, fnm := filepath.Split(path)
-	fn.SetName(fnm)
+	fn.SetText(fnm)
 	pth, err := filepath.Abs(path)
 	if err != nil {
 		return err

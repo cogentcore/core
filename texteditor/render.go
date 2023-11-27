@@ -33,10 +33,11 @@ func (ed *Editor) Render() {
 	if ed.PushBounds() {
 		ed.ApplyStyle()
 		if ed.Is(EditorNeedsLayout) {
-			ed.LayoutAllLines()
-			ed.PositionScrolls()
+			ed.LayoutAll()
+			ed.ConfigScrolls()
 			ed.SetFlag(false, EditorNeedsLayout)
 		}
+		ed.PositionScrolls()
 		ed.RenderAllLinesInBounds()
 		if ed.ScrollToCursorOnRender {
 			ed.ScrollToCursorOnRender = false

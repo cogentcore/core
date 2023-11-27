@@ -243,6 +243,9 @@ type SliceViewBase struct {
 	// list of currently-selected slice indexes
 	SelIdxs map[int]struct{} `copy:"-"`
 
+	// index of row to select at start
+	InitSelIdx int `copy:"-" json:"-" xml:"-"`
+
 	// list of currently-dragged indexes
 	DraggedIdxs []int `copy:"-"`
 
@@ -278,6 +281,7 @@ func (sv *SliceViewBase) OnInit() {
 }
 
 func (sv *SliceViewBase) SliceViewBaseInit() {
+	sv.InitSelIdx = -1
 	sv.MinRows = 4
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
@@ -687,6 +691,11 @@ func (sv *SliceViewBase) UpdateWidgets() {
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	// sc := sv.Sc
+
+	if sv.InitSelIdx >= 0 {
+		sv.SelectIdx(sv.InitSelIdx)
+		sv.InitSelIdx = -1
+	}
 
 	sv.UpdateStartIdx()
 	for i := 0; i < sv.VisRows; i++ {

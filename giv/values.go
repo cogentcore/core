@@ -1519,7 +1519,7 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
-	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
+	tv := NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
 		}
@@ -1529,6 +1529,13 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		s.Font.Style = fi[row].Style
 		s.Font.Size = FontChooserSize
 	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(&si)
+
+	for i, fr := range fi {
+		if fr.Name == string(cur) {
+			tv.InitSelIdx = i
+			break
+		}
+	}
 
 	return true, func() {
 		fmt.Println(si)

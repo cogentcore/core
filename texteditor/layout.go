@@ -57,6 +57,13 @@ func (ed *Editor) SizeFinal() {
 	ed.Layout.SizeFinal()
 	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
 	sz.Actual.Content.X -= sbw // anticipate scroll
+	ed.LayoutAll()
+}
+
+// LayoutAll does LayoutAllLines and ManageOverflow to update scrolls
+func (ed *Editor) LayoutAll() {
+	sz := &ed.Geom.Size
+	sbw := mat32.Ceil(ed.Styles.ScrollBarWidth.Dots)
 	ed.UpdateFromAlloc()
 	ed.LayoutAllLines()
 	// fmt.Println(ed, "final pre manage, actual:", sz.Actual, "space:", sz.Space, "alloc:", sz.Alloc)
