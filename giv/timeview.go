@@ -128,6 +128,9 @@ func (tv *TimeView) ConfigWidget() {
 			tv.PM = true
 			sw.SelectItemAction(1)
 		}
+		sw.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
 		sw.OnChange(func(e events.Event) {
 			si := sw.SelectedItem()
 			tt := tv.Time
@@ -265,8 +268,11 @@ func (dv *DateView) ConfigDateGrid() {
 		bt.Style(func(s *styles.Style) {
 			s.Min.X.Dp(40)
 			s.Min.Y.Dp(40)
-			// s.Text.Align = styles.Center
 			s.Padding.Zero()
+			s.Align.Content = styles.Center
+			s.Align.Items = styles.Center
+			s.Justify.Content = styles.Center
+			s.Justify.Items = styles.Center
 			if dt.Month() != som.Month() {
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
@@ -284,10 +290,10 @@ func (dv *DateView) ConfigDateGrid() {
 			switch w.PathFrom(bt) {
 			case "parts":
 				w.Style(func(s *styles.Style) {
-					s.Text.Align = styles.Center
-					// s.Text.AlignV = styles.Center
-					// s.Align.Content = styles.Center
+					s.Align.Content = styles.Center
+					s.Align.Items = styles.Center
 					s.Justify.Content = styles.Center
+					s.Justify.Items = styles.Center
 				})
 			case "parts/label":
 				lb := w.(*gi.Label)
