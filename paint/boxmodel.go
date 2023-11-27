@@ -5,7 +5,6 @@
 package paint
 
 import (
-	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/grows/images"
@@ -100,7 +99,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	if st.BackgroundImage != nil {
 		img, _, err := images.Read(st.BackgroundImage)
 		if grr.Log(err) == nil {
-			rimg := transform.Resize(img, int(msz.X), int(msz.Y), transform.Linear)
+			rimg := st.ResizeImage(img, msz)
 			pc.DrawImage(rs, rimg, mpos.X, mpos.Y)
 		}
 	} else {

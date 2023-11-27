@@ -5,8 +5,10 @@
 package styles
 
 import (
+	"image"
 	"image/color"
 
+	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
@@ -39,6 +41,25 @@ const (
 	// whichever will result in a smaller final size.
 	FitScaleDown
 )
+
+// ResizeImage resizes the given image according to [Style.ObjectFit]
+// in an object of the given size.
+func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
+	sz := img.Bounds().Size()
+	// image and box aspect ratio
+	iar := float32(sz.X) / float32(sz.Y)
+	bar := size.X / size.Y
+	switch st.ObjectFit {
+	case FitFill:
+		return transform.Resize(img, int(size.X), int(size.Y), transform.Linear)
+	case FitContain:
+		if iar >= bar {
+			// dst := image.NewRGBA()
+			// draw.Draw(rimg)
+		}
+	}
+	return img
+}
 
 // note: background-color is in FontStyle as it is needed to make that the
 // only style needed for text render styling
