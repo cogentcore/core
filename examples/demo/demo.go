@@ -17,7 +17,6 @@ import (
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -48,34 +47,24 @@ func app() {
 	b.NewWindow().Run().Wait()
 }
 
-//go:embed gopher.png
-var gopherPng embed.FS
+//go:embed .goki/icons/512.png
+var giLogo embed.FS
 
 func makeHome(ts *gi.Tabs) {
 	home := ts.NewTab("Home")
-
-	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
-
-	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">GoGi</a> 2D and 3D Go GUI <u>framework</u>.`)
-
-	pbar := gi.NewProgressBar(home)
-	pbar.Start(100)
-	go func() {
-		for {
-			if pbar.ProgCur >= pbar.ProgMax {
-				pbar.Start(100)
-			}
-			time.Sleep(100 * time.Millisecond)
-			pbar.ProgStep()
-		}
-	}()
+	home.Style(func(s *styles.Style) {
+		s.Justify.Content = styles.Center
+		s.Align.Content = styles.Center
+		s.Align.Items = styles.Center
+		s.Text.Align = styles.Center
+	})
 
 	img := gi.NewImage(home)
-	grr.Log(img.OpenImageFS(gopherPng, "gopher.png"))
-	img.Style(func(s *styles.Style) {
-		s.Min.Set(units.Dp(300))
-		s.ObjectFit = styles.FitContain
-	})
+	grr.Log(img.OpenImageFS(giLogo, ".goki/icons/512.png"))
+
+	gi.NewLabel(home).SetType(gi.LabelDisplayLarge).SetText("The GoGi Demo")
+
+	gi.NewLabel(home).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev/gi">GoGi</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
 func makeText(ts *gi.Tabs) {
