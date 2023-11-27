@@ -693,7 +693,8 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	// sc := sv.Sc
 
 	if sv.InitSelIdx >= 0 {
-		sv.SelectIdx(sv.InitSelIdx)
+		sv.SelectIdxAction(sv.InitSelIdx, events.SelectOne)
+		fmt.Println("selected init:", sv.InitSelIdx)
 		sv.InitSelIdx = -1
 	}
 
@@ -765,6 +766,13 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	if sv.SelVal != nil {
 		sv.SelIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 		sv.SelVal = nil
+		sv.ScrollToIdx(sv.SelIdx)
+		sv.SetFocusEvent()
+	} else if sv.InitSelIdx >= 0 {
+		sv.SelIdx = sv.InitSelIdx
+		sv.InitSelIdx = -1
+		sv.ScrollToIdx(sv.SelIdx)
+		sv.SetFocusEvent()
 	}
 	if sv.IsReadOnly() && sv.SelIdx >= 0 {
 		sv.SelectIdx(sv.SelIdx)

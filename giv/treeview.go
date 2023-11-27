@@ -648,7 +648,15 @@ func (tv *TreeView) SelectedViews() []*TreeView {
 	if tv.RootView == nil {
 		return nil
 	}
-	return tv.RootView.SelectedNodes
+	if len(tv.RootView.SelectedNodes) == 0 {
+		return tv.RootView.SelectedNodes
+	}
+	sels := tv.RootView.SelectedNodes
+	nz := make([]*TreeView, 0, len(sels))
+	for _, sl := range sels {
+		nz = append(nz, sl)
+	}
+	return nz
 }
 
 // SetSelectedViews updates the selected views to given list

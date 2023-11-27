@@ -515,9 +515,10 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	if cur == nil {
 		return false
 	}
-	if cur == wb.This() {
+	if cur.This() == wb.This() {
 		return true
 	}
 	plev := cur.ParentLevel(wb.This())
+	// fmt.Println("plev:", plev)
 	return plev >= 0
 }

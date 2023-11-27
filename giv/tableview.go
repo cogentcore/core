@@ -659,7 +659,15 @@ func (tv *TableView) UpdateWidgets() {
 		tv.SelIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 		tv.SelField = ""
 		tv.SelVal = nil
+		tv.ScrollToIdx(tv.SelIdx)
+		tv.SetFocusEvent()
+	} else if tv.InitSelIdx >= 0 {
+		tv.SelIdx = tv.InitSelIdx
+		tv.InitSelIdx = -1
+		tv.ScrollToIdx(tv.SelIdx)
+		tv.SetFocusEvent()
 	}
+
 	if tv.IsReadOnly() && tv.SelIdx >= 0 {
 		tv.SelectIdx(tv.SelIdx)
 	}

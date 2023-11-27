@@ -191,24 +191,22 @@ func (ly *Layout) Render() {
 // ChildWithFocus returns a direct child of this layout that either is the
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.
-func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
+func (ly *Layout) ChildWithFocus() (Widget, int) {
 	em := ly.EventMgr()
 	if em == nil {
 		return nil, -1
 	}
-	for i, k := range ly.Kids {
-		if k == nil {
-			continue
+	var foc Widget
+	focIdx := -1
+	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		if kwb.ContainsFocus() {
+			foc = kwi
+			focIdx = i
+			return ki.Break
 		}
-		_, ni := AsWidget(k)
-		if ni == nil {
-			continue
-		}
-		if ni.ContainsFocus() {
-			return k, i
-		}
-	}
-	return nil, -1
+		return ki.Continue
+	})
+	return foc, focIdx
 }
 
 // FocusNextChild attempts to move the focus into the next layout child
@@ -222,6 +220,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	}
 	foc, idx := ly.ChildWithFocus()
 	if foc == nil {
+		fmt.Println("no child foc")
 		return false
 	}
 	em := ly.EventMgr()

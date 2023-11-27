@@ -499,7 +499,10 @@ func (vv *SliceValue) UpdateWidget() {
 		txt = "None"
 	} else {
 		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(vv.ElType)))
+			// txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(vv.ElType)))
+			// note: above crashes with:
+			// panic: reflect: call of reflect.Value.Len on interface Value
+			txt = sentencecase.Of(fmt.Sprintf("%ss", laser.FriendlyTypeName(vv.ElType)))
 		} else {
 			txt = "None"
 		}
@@ -1519,7 +1522,7 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	paint.FontLibrary.OpenAllFonts(int(FontChooserSize.Dots))
 	fi := paint.FontLibrary.FontInfo
 	cur := gi.FontName(laser.ToString(vv.Value.Interface()))
-	tv := NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
+	NewTableView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row, col int) {
 		if col != 4 {
 			return
 		}
@@ -1528,20 +1531,12 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		s.Font.Weight = fi[row].Weight
 		s.Font.Style = fi[row].Style
 		s.Font.Size = FontChooserSize
-	}).SetSlice(&fi).SetSelVal(cur).BindSelectDialog(&si)
-
-	for i, fr := range fi {
-		if fr.Name == string(cur) {
-			tv.InitSelIdx = i
-			break
-		}
-	}
+	}).SetSlice(&fi).SetSelVal(cur).SetSelField("Name").BindSelectDialog(&si)
 
 	return true, func() {
 		fmt.Println(si)
 		if si >= 0 {
 			fi := paint.FontLibrary.FontInfo[si]
-			fmt.Println(fi.Name)
 			vv.SetValue(fi.Name)
 			vv.UpdateWidget()
 		}

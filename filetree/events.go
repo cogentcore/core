@@ -12,8 +12,10 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
+	"goki.dev/vci/v2"
 )
 
 func (fn *Node) HandleFileNodeEvents() {
@@ -112,64 +114,109 @@ func VCSLabelFunc(fn *Node, label string) string {
 
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	giv.NewFuncButton(m, fn.ShowFileInfo).SetIcon(icons.Info).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.OpenFilesDefault).SetText("Open (w/default app)").SetIcon(icons.Open).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).
-		SetKey(keyfun.Duplicate).SetState(!fn.HasSelection(), states.Disabled)
+		SetKey(keyfun.Duplicate).Style(func(s *styles.Style) {
+		s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+	})
 	giv.NewFuncButton(m, fn.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).
-		SetKey(keyfun.Delete).SetState(!fn.HasSelection(), states.Disabled)
+		SetKey(keyfun.Delete).Style(func(s *styles.Style) {
+		s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+	})
 	giv.NewFuncButton(m, fn.RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
+		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.AddToVcsSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.DeleteFromVcsSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.CommitToVcsSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.RevertVcsSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.DiffVcsSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.LogVcsSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
 	giv.NewFuncButton(m, fn.BlameVcsSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
-		SetState(!fn.HasSelection(), states.Disabled)
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
 	gi.NewSeparator(m)
 
-	giv.NewFuncButton(m, fn.RemoveFromExterns).SetText(VCSLabelFunc(fn, "Remove from externs")).SetIcon(icons.Delete).
-		SetState(!fn.HasSelection(), states.Disabled)
+	giv.NewFuncButton(m, fn.RemoveFromExterns).SetIcon(icons.Delete).
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		})
 
 	gi.NewSeparator(m)
-	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(!fn.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		}).
 		OnClick(func(e events.Event) {
 			fn.This().(gi.Clipper).Copy(true)
 		})
-	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(!fn.HasSelection(), states.Disabled).
+	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		}).
 		OnClick(func(e events.Event) {
 			fn.This().(gi.Clipper).Cut()
 		})
 	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
+		Style(func(s *styles.Style) {
+			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		}).
 		OnClick(func(e events.Event) {
 			fn.This().(gi.Clipper).Paste()
 		})

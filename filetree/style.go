@@ -19,15 +19,12 @@ func (ft *Tree) OnInit() {
 	ft.FRoot = ft
 	ft.NodeType = NodeType
 	ft.OpenDepth = 4
-	// fn.Indent.SetEm(1)
 	ft.HandleFileNodeEvents()
 	ft.FileNodeStyles()
 }
 
 func (fn *Node) OnInit() {
 	fn.OpenDepth = 4
-	// fn.Indent.SetEm(1)
-
 	fn.HandleFileNodeEvents()
 	fn.FileNodeStyles()
 }
