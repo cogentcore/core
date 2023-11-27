@@ -195,20 +195,13 @@ func (ch *Chooser) ChooserStyles() {
 				// 	s.Min.X.Ch(float32(ch.MaxLength))
 				// }
 			})
-		case "parts/ind-stretch":
-			w.Style(func(s *styles.Style) {
-				if ch.Editable {
-					s.Min.X.Zero()
-				} else {
-					s.Min.X.Dp(16)
-				}
-			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(16)
 				s.Min.X.Em(1)
 				s.Min.Y.Em(1)
-				s.Align.Self = styles.End
+				s.Justify.Self = styles.End
+				s.Align.Self = styles.Center
 			})
 		}
 	})
