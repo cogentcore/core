@@ -234,39 +234,57 @@ func (tv *TableView) StructType() reflect.Type {
 func (tv *TableView) CacheVisFields() {
 	styp := tv.StructType()
 	tv.VisFields = make([]reflect.StructField, 0)
-	laser.FlatFieldsTypeFunc(styp, func(typ reflect.Type, fld reflect.StructField) bool {
-		if !fld.IsExported() {
-			return true
-		}
-		tvtag := fld.Tag.Get("tableview")
-		add := true
-		if tvtag != "" {
-			if tvtag == "-" {
-				add = false
-			} else if tvtag == "-select" && tv.IsReadOnly() {
-				add = false
-			} else if tvtag == "-edit" && !tv.IsReadOnly() {
-				add = false
+	laser.FlatFieldsTypeFuncIf(styp,
+		func(typ reflect.Type, fld reflect.StructField) bool {
+			if !fld.IsExported() {
+				return false
 			}
-		}
-		vtag := fld.Tag.Get("view")
-		if vtag == "-" {
-			add = false
-		}
-		if add {
-			if typ != styp {
-				rfld, has := styp.FieldByName(fld.Name)
-				if has {
-					tv.VisFields = append(tv.VisFields, rfld)
-				} else {
-					fmt.Printf("TableView: Field name: %v is ambiguous from base struct type: %v, cannot be used in view!\n", fld.Name, styp.String())
+			tvtag := fld.Tag.Get("tableview")
+			if tvtag != "" {
+				if tvtag == "-" {
+					return false
+				} else if tvtag == "-select" && tv.IsReadOnly() {
+					return false
+				} else if tvtag == "-edit" && !tv.IsReadOnly() {
+					return false
 				}
-			} else {
-				tv.VisFields = append(tv.VisFields, fld)
 			}
-		}
-		return true
-	})
+			vtag := fld.Tag.Get("view")
+			return vtag != "-"
+		},
+		func(typ reflect.Type, fld reflect.StructField) bool {
+			if !fld.IsExported() {
+				return true
+			}
+			tvtag := fld.Tag.Get("tableview")
+			add := true
+			if tvtag != "" {
+				if tvtag == "-" {
+					add = false
+				} else if tvtag == "-select" && tv.IsReadOnly() {
+					add = false
+				} else if tvtag == "-edit" && !tv.IsReadOnly() {
+					add = false
+				}
+			}
+			vtag := fld.Tag.Get("view")
+			if vtag == "-" {
+				add = false
+			}
+			if add {
+				if typ != styp {
+					rfld, has := styp.FieldByName(fld.Name)
+					if has {
+						tv.VisFields = append(tv.VisFields, rfld)
+					} else {
+						fmt.Printf("TableView: Field name: %v is ambiguous from base struct type: %v, cannot be used in view!\n", fld.Name, styp.String())
+					}
+				} else {
+					tv.VisFields = append(tv.VisFields, fld)
+				}
+			}
+			return true
+		})
 	tv.NVisFields = len(tv.VisFields)
 }
 
