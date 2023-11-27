@@ -112,7 +112,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log0(fs.Color.SetAny(val, ctxt))
+		grr.Log(fs.Color.SetAny(val, ctxt))
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -162,7 +162,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log0(fs.Color.SetAny(val, ctxt))
+		grr.Log(fs.Color.SetAny(val, ctxt))
 	},
 	"fill-opacity": StyleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),

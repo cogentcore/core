@@ -205,7 +205,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
+		fs.Color = grr.Log1(colors.FromAny(val, ctxt.Base()))
 	},
 	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Style)
@@ -217,7 +217,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
+		grr.Log(fs.BackgroundColor.SetAny(val, ctxt))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *Style) *float32 { return &obj.Opacity }),
@@ -417,7 +417,7 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 		if ctxt != nil {
 			base = ctxt.Base()
 		}
-		fs.Color = grr.Log(colors.FromAny(val, base))
+		fs.Color = grr.Log1(colors.FromAny(val, base))
 	},
 	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*FontRender)
@@ -429,7 +429,7 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
+		grr.Log(fs.BackgroundColor.SetAny(val, ctxt))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *FontRender) *float32 { return &obj.Opacity }),
@@ -539,7 +539,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log0(bs.Color.SetAny(val, ctxt.Base()))
+		grr.Log(bs.Color.SetAny(val, ctxt.Base()))
 	},
 }
 
@@ -608,7 +608,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log0(bs.Color.SetAny(val, ctxt.Base()))
+		grr.Log(bs.Color.SetAny(val, ctxt.Base()))
 	},
 }
 
@@ -635,7 +635,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		ss.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
+		ss.Color = grr.Log1(colors.FromAny(val, ctxt.Base()))
 	},
 	"box-shadow.inset": StyleFuncBool(false,
 		func(obj *Shadow) *bool { return &obj.Inset }),

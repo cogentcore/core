@@ -98,7 +98,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// doesn't render weirdly
 	if st.BackgroundImage != nil {
 		img, _, err := images.Read(st.BackgroundImage)
-		if grr.Log0(err) == nil {
+		if grr.Log(err) == nil {
 			// TODO(kai/girl): image scaling
 			pc.DrawImage(rs, img, mpos.X, mpos.Y)
 		}

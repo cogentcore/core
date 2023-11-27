@@ -99,7 +99,7 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontsFS = grr.Log(fs.Sub(defaultFonts, "fonts"))
+		fl.FontsFS = grr.Log1(fs.Sub(defaultFonts, "fonts"))
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)

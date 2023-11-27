@@ -41,7 +41,7 @@ func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
 	if err != nil {
 		log.Printf("%v\n", err)
 		if fs.Face == nil {
-			face = grr.Log(FontLibrary.Font("Roboto", intDots)) // guaranteed to exist
+			face = grr.Log1(FontLibrary.Font("Roboto", intDots)) // guaranteed to exist
 			fs.Face = face
 		}
 	} else {
