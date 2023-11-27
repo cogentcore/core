@@ -6,6 +6,8 @@ package hct
 
 import (
 	"image/color"
+
+	"goki.dev/mat32/v2"
 )
 
 // Lighten returns a color that is lighter by the
@@ -76,6 +78,23 @@ func Spin(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.SetHue(h.Hue + amount)
 	return h.AsRGBA()
+}
+
+// Blend returns a color that is the given percent blend between the first
+// and second color; 10 = 10% of the second and 90% of the first, etc;
+// blending is done directly on non-premultiplied HCT values, and
+// a correctly premultiplied color is returned.
+func Blend(pct float32, x, y color.Color) color.RGBA {
+	xh := FromColor(x)
+	xy := FromColor(y)
+	pct = mat32.Clamp(pct, 0, 100.0)
+	py := pct / 100
+	px := 1.0 - py
+	xh.Hue = px*xh.Hue + py*xy.Hue
+	xh.Chroma = px*xh.Chroma + py*xy.Chroma
+	xh.Tone = px*xh.Tone + py*xy.Tone
+	xh.A = px*xh.A + py*xy.A
+	return xh.AsRGBA()
 }
 
 // IsLight returns whether the given color is light
