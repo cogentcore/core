@@ -54,7 +54,7 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 	switch st.ObjectFit {
 	case FitFill:
 		return transform.Resize(img, int(size.X), int(size.Y), transform.Linear)
-	case FitContain:
+	case FitContain, FitScaleDown:
 		var x, y float32
 		if iar >= bar {
 			// if we have a higher x:y than them, x is our limiting size
@@ -66,6 +66,11 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 			y = size.Y
 			// and we make our x in proportion to that
 			x = szx * (size.Y / szy)
+		}
+		// in FitScaleDown, if containing results in a larger image, we use
+		// the original image instead
+		if st.ObjectFit == FitScaleDown && x >= szx {
+			return img
 		}
 		return transform.Resize(img, int(x), int(y), transform.Linear)
 	case FitCover:
