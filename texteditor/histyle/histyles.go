@@ -185,6 +185,12 @@ func Init() {
 		CustomStyles["custom-sample"] = cs
 	}
 	MergeAvailStyles()
+
+	for _, s := range AvailStyles {
+		for _, se := range *s {
+			se.Norm()
+		}
+	}
 }
 
 // StylesProps define the Toolbar and MenuBar for view

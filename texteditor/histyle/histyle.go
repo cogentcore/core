@@ -119,7 +119,7 @@ func (se *StyleEntry) Norm() {
 		if matcolor.SchemeIsDark {
 			btone = min(hb.Tone, 17)
 		}
-		se.Background = hc.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
+		se.Background = hb.WithChroma(max(hb.Chroma, 6)).WithTone(btone).AsRGBA()
 	}
 }
 
