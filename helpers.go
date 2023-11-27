@@ -122,3 +122,67 @@ func Must4[T1, T2, T3, T4 any](v1 T1, v2 T2, v3 T3, v4 T4, err error) (T1, T2, T
 	}
 	return v1, v2, v3, v4
 }
+
+// TestingT is an interface wrapper around *testing.T
+type TestingT interface {
+	Error(args ...any)
+}
+
+// Test takes the given error and errors the test it if it is non-nil.
+// The intended usage is:
+//
+//	grr.Test(t, MyFunc(v))
+func Test(t TestingT, err error) error {
+	if err != nil {
+		t.Error(err)
+	}
+	return err
+}
+
+// Test1 takes the given value and error and returns the value if
+// the error is nil, and errors the test and returns a zero value
+// if the error is non-nil. The intended usage is:
+//
+//	a := grr.Test1(t, MyFunc(v))
+func Test1[T any](t TestingT, v T, err error) T {
+	if err != nil {
+		t.Error(err)
+	}
+	return v
+}
+
+// Test2 takes the given two values and error and returns the values if
+// the error is nil, and errors the test and returns zero values
+// if the error is non-nil. The intended usage is:
+//
+//	a, b := grr.Test2(t, MyFunc(v))
+func Test2[T1, T2 any](t TestingT, v1 T1, v2 T2, err error) (T1, T2) {
+	if err != nil {
+		t.Error(err)
+	}
+	return v1, v2
+}
+
+// Test3 takes the given three values and error and returns the values if
+// the error is nil, and errors the test and returns zero values
+// if the error is non-nil. The intended usage is:
+//
+//	a, b, c := grr.Test3(t, MyFunc(v))
+func Test3[T1, T2, T3 any](t TestingT, v1 T1, v2 T2, v3 T3, err error) (T1, T2, T3) {
+	if err != nil {
+		t.Error(err)
+	}
+	return v1, v2, v3
+}
+
+// Test4 takes the given four values and error and returns the values if
+// the error is nil, and errors the test and returns zero values
+// if the error is non-nil. The intended usage is:
+//
+//	a, b, c, d := grr.Test4(t, MyFunc(v))
+func Test4[T1, T2, T3, T4 any](t TestingT, v1 T1, v2 T2, v3 T3, v4 T4, err error) (T1, T2, T3, T4) {
+	if err != nil {
+		t.Error(err)
+	}
+	return v1, v2, v3, v4
+}
