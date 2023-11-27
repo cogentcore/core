@@ -50,7 +50,7 @@ var _ ki.Ki = (*App)(nil)
 
 func (a *App) OnInit() {
 	a.Frame.OnInit()
-	a.Dir = grr.Log(os.Getwd())
+	a.Dir = grr.Log1(os.Getwd())
 }
 
 func (a *App) TopAppBar(tb *gi.TopAppBar) {
@@ -67,7 +67,7 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 			d.AddBottomBar(func(pw gi.Widget) {
 				d.AddCancel(pw)
 				d.AddOk(pw).SetText(text).OnClick(func(e events.Event) {
-					grr.Log0(xe.Verbose().Run(fields[0], fields[1:]...))
+					grr.Log(xe.Verbose().Run(fields[0], fields[1:]...))
 				})
 			})
 			d.NewFullDialog(bt).Run()
@@ -102,7 +102,7 @@ func (a *App) ConfigWidget() {
 	tb.NewBuf(0)
 	tb.Hi.Lang = "Bash"
 	tb.Opts.LineNos = false
-	grr.Log0(tb.Stat())
+	grr.Log(tb.Stat())
 	te := texteditor.NewEditor(ef, "editor").SetBuf(tb)
 	te.Style(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
@@ -116,7 +116,7 @@ func (a *App) ConfigWidget() {
 			e.SetHandled()
 			tb.NewBuf(0)
 
-			grr.Log0(a.RunCmd(txt, cmds, dir))
+			grr.Log(a.RunCmd(txt, cmds, dir))
 			return
 		}
 
@@ -212,7 +212,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	}
 
 	go func() {
-		grr.Log0(xc.Run("bash", "-c", cmd))
+		grr.Log(xc.Run("bash", "-c", cmd))
 	}()
 	return nil
 }

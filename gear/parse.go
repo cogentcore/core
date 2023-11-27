@@ -105,7 +105,7 @@ func (cm *Cmd) SetFromBlocks(blocks []ParseBlock) error {
 			// Now we must recursively parse the subcommand and any of its subcommands.
 			// Errors here are not fatal, as various subcommands could be mistakes, so
 			// we just log them and move on.
-			grr.Log0(cmd.Parse())
+			grr.Log(cmd.Parse())
 		}
 	}
 	return nil
