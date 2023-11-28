@@ -413,11 +413,6 @@ func (wb *WidgetBase) DoNeedsRender() {
 //////////////////////////////////////////////////////////////////
 //		Scene
 
-// SceneShowLayoutIters is the number of iterations needed for the
-// first showing of a scene, to ensure recursive layout dynamics
-// have settled.
-const SceneShowLayoutIters = 3
-
 // DoUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
@@ -435,15 +430,10 @@ func (sc *Scene) DoUpdate() bool {
 		return true
 	}
 
-	// Do sequence of layout updates at start to deal with dynamically
-	// sized elements that require iterative passes of layout.
-	if sc.ShowLayoutIter < SceneShowLayoutIters { // 3 needed for SliceViewBase
-		// fmt.Println("scene layout iter:", sc.ShowLayoutIter)
-		if sc.ShowLayoutIter == 0 {
-			sc.EventMgr.GetPriorityWidgets()
-		}
-		sc.ShowLayoutIter++
-		sc.SetFlag(true, ScNeedsLayout)
+	if sc.ShowIter == 0 { // first time
+		sc.EventMgr.GetPriorityWidgets()
+		sc.ShowIter++
+		sc.SetFlag(true, ScNeedsLayout) // ensure layout happens
 	}
 
 	switch {
@@ -477,8 +467,8 @@ func (sc *Scene) DoUpdate() bool {
 		return false
 	}
 
-	if sc.ShowLayoutIter == SceneShowLayoutIters {
-		sc.ShowLayoutIter++
+	if sc.ShowIter == 1 { // end of first pass
+		sc.ShowIter++
 		if !sc.Is(ScPrefSizing) {
 			sc.EventMgr.ActivateStartFocus()
 		}
@@ -545,7 +535,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	psz := sz.Actual.Total
 	// fmt.Println("\npref size:", psz, "csz:", sz.Actual.Content, "internal:", sz.Internal, "space:", sc.Geom.Size.Space)
 	sc.SetFlag(false, ScPrefSizing)
-	sc.ShowLayoutIter = 0
+	sc.ShowIter = 0
 	return psz.ToPointFloor()
 }
 

@@ -207,8 +207,8 @@ func (sm *StageMgrBase) SendShowEvents() {
 			continue
 		}
 		sc := st.Scene
-		if sc.ShowLayoutIter == SceneShowLayoutIters+1 {
-			sc.ShowLayoutIter++
+		if sc.ShowIter == 2 {
+			sc.ShowIter++
 			sc.Send(events.Show)
 		}
 	}

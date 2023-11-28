@@ -12,7 +12,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -163,25 +162,30 @@ func app() {
 			})
 	})
 
-	split := gi.NewSplits(b, "split")
-	split.Dim = mat32.X
+	// split := gi.NewSplits(b, "split")
+	// split.Dim = mat32.X
+	// split.SetSplits(.3, .2, .2, .3)
+	// split.SetSplits(.5, .5)
 
-	// strv := giv.NewStructView(sc, "strv")
-	// strv.SetStruct(&stru)
+	ts := gi.NewTabs(b)
+	tst := ts.NewTab("StructView")
+	tmv := ts.NewTab("MapView")
+	tsl := ts.NewTab("SliceView")
+	ttv := ts.NewTab("TabView")
 
-	// mv := giv.NewMapView(split, "mv")
-	// mv.SetMap(&tstmap)
+	strv := giv.NewStructView(tst, "strv")
+	strv.SetStruct(&stru)
 
-	sv := giv.NewSliceView(split, "sv")
-	sv.SetState(true, states.ReadOnly)
+	mv := giv.NewMapView(tmv, "mv")
+	mv.SetMap(&tstmap)
+
+	sv := giv.NewSliceView(tsl, "sv")
+	// sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&tstslice)
 
-	tv := giv.NewTableView(split, "tv")
-	tv.SetState(true, states.ReadOnly)
+	tv := giv.NewTableView(ttv, "tv")
+	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
-	//
-	// split.SetSplits(.3, .2, .2, .3)
-	split.SetSplits(.5, .5)
 
 	b.NewWindow().Run().Wait()
 }

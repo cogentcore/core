@@ -191,7 +191,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	sc.SceneGeom.Size = sz
 	sc.FitInWindow(msc.SceneGeom) // does resize
-	sc.ShowLayoutIter = 0
+	sc.ShowIter = 0
 
 	if st.Timeout > 0 {
 		time.AfterFunc(st.Timeout, func() {

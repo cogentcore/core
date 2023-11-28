@@ -353,6 +353,9 @@ func (ly *Layout) ScrollToBoxDim(d mat32.Dims, tmini, tmaxi int) bool {
 		return false
 	}
 	sb := ly.Scrolls[d]
+	if sb == nil || sb.This() == nil {
+		return false
+	}
 	tmin, tmax := float32(tmini), float32(tmaxi)
 	cmin, cmax := ly.Geom.ContentRangeDim(d)
 	if tmin >= cmin && tmax <= cmax {

@@ -264,6 +264,9 @@ type SliceViewBase struct {
 	// size of slice
 	SliceSize int `edit:"-" copy:"-" json:"-" xml:"-"`
 
+	// iteration through the configuration process, reset when a new slice type is set
+	ConfigIter int `edit:"-" copy:"-" json:"-" xml:"-"`
+
 	// temp idx state for e.g., dnd
 	TmpIdx int `copy:"-" view:"-" json:"-" xml:"-"`
 
@@ -382,6 +385,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 		newslc = (sv.Slice != sl)
 	}
 	if !newslc && sv.Is(SliceViewConfiged) {
+		sv.ConfigIter = 0
 		sv.Update()
 		return sv
 	}
@@ -767,12 +771,12 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		sv.SelIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 		sv.SelVal = nil
 		sv.ScrollToIdx(sv.SelIdx)
-		sv.SetFocusEvent()
+		// sv.SetFocusEvent() // todo: doesn't work -- probably need priority events or something?
 	} else if sv.InitSelIdx >= 0 {
 		sv.SelIdx = sv.InitSelIdx
 		sv.InitSelIdx = -1
 		sv.ScrollToIdx(sv.SelIdx)
-		sv.SetFocusEvent()
+		// sv.SetFocusEvent()
 	}
 	if sv.IsReadOnly() && sv.SelIdx >= 0 {
 		sv.SelectIdx(sv.SelIdx)
@@ -2151,12 +2155,12 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.
 
 func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	if sv.VisRows != sg.VisRows {
+	for sv.ConfigIter < 2 || sv.VisRows != sg.VisRows {
 		sv.VisRows = sg.VisRows
-		// fmt.Println("vis rows:", sg.VisRows)
 		sv.This().(SliceViewer).ConfigRows()
 		sg.SizeFinalUpdateChildrenSizes()
+		sv.ConfigIter++
 	}
+	// note: doing UpdateWidgets here seems to be unnecessary
 	sv.Frame.SizeFinal()
-	// fmt.Println(sv, "layout")
 }

@@ -1822,7 +1822,7 @@ var SceneType = gti.AddType(&gti.Type{
 		{"SelectedWidgetChan", &gti.Field{Name: "SelectedWidgetChan", Type: "chan goki.dev/gi/v2/gi.Widget", LocalType: "chan Widget", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting", Directives: gti.Directives{}, Tag: ""}},
 		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"ShowLayoutIter", &gti.Field{Name: "ShowLayoutIter", Type: "int", LocalType: "int", Doc: "ShowLayoutIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"ShowIter", &gti.Field{Name: "ShowIter", Type: "int", LocalType: "int", Doc: "ShowIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},

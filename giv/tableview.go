@@ -218,6 +218,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	}
 	tv.ResetSelectedIdxs()
 	tv.SetFlag(false, SliceViewSelectMode)
+	tv.ConfigIter = 0
 	tv.Update()
 	return tv
 }
@@ -660,12 +661,12 @@ func (tv *TableView) UpdateWidgets() {
 		tv.SelField = ""
 		tv.SelVal = nil
 		tv.ScrollToIdx(tv.SelIdx)
-		tv.SetFocusEvent()
+		// tv.SetFocusEvent() // todo:
 	} else if tv.InitSelIdx >= 0 {
 		tv.SelIdx = tv.InitSelIdx
 		tv.InitSelIdx = -1
 		tv.ScrollToIdx(tv.SelIdx)
-		tv.SetFocusEvent()
+		// tv.SetFocusEvent()
 	}
 
 	if tv.IsReadOnly() && tv.SelIdx >= 0 {
