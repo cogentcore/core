@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/png"
 	"io/fs"
@@ -38,8 +39,14 @@ type Image struct {
 	// the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" set:"-"`
 
-	// cached size of the last rendered image
-	PrevSize image.Point `copy:"-" xml:"-" json:"-" set:"-"`
+	// cached last rendered image
+	PrevPixels image.Image `copy:"-" xml:"-" json:"-" set:"-"`
+
+	// cached [styles.Style.ObjectFit] of the last rendered image
+	PrevObjectFit styles.ObjectFits `copy:"-" xml:"-" json:"-" set:"-"`
+
+	// cached allocated size for the last rendered image
+	PrevSize mat32.Vec2 `copy:"-" xml:"-" json:"-" set:"-"`
 }
 
 func (im *Image) CopyFieldsFrom(frm any) {
@@ -121,7 +128,16 @@ func (im *Image) DrawIntoScene() {
 		}
 		r = nr
 	}
-	rimg := im.Styles.ResizeImage(im.Pixels, im.Geom.Size.Actual.Content)
+	var rimg image.Image
+	if im.PrevPixels != nil && im.Styles.ObjectFit == im.PrevObjectFit && im.Geom.Size.Actual.Content == im.PrevSize {
+		rimg = im.PrevPixels
+	} else {
+		fmt.Println("resize")
+		rimg = im.Styles.ResizeImage(im.Pixels, im.Geom.Size.Actual.Content)
+		im.PrevPixels = rimg
+		im.PrevObjectFit = im.Styles.ObjectFit
+		im.PrevSize = im.Geom.Size.Actual.Content
+	}
 	draw.Draw(im.Sc.Pixels, r, rimg, sp, draw.Over)
 }
 
