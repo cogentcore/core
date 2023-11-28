@@ -816,7 +816,8 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
-		s.Padding.Set(units.Dp(8)) // match typical element size so alignment works better
+		s.Min.Y.Em(1.4)
+		s.Padding.Set(units.Dp(10)) // match typical element size so alignment works better
 	})
 	vv.StdConfigWidget(w)
 	if completetag, ok := vv.Tag("complete"); ok {
