@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/png"
 	"io/fs"
@@ -132,7 +131,6 @@ func (im *Image) DrawIntoScene() {
 	if im.PrevPixels != nil && im.Styles.ObjectFit == im.PrevObjectFit && im.Geom.Size.Actual.Content == im.PrevSize {
 		rimg = im.PrevPixels
 	} else {
-		fmt.Println("resize")
 		rimg = im.Styles.ResizeImage(im.Pixels, im.Geom.Size.Actual.Content)
 		im.PrevPixels = rimg
 		im.PrevObjectFit = im.Styles.ObjectFit
