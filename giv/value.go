@@ -919,18 +919,31 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 	if !ok {
 		return
 	}
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if okfun != nil {
-				okfun()
-			}
+
+	// if we don't have anything specific for ok events,
+	// we just register an OnClose event and skip the
+	// OK and Cancel buttons
+	if okfun == nil && fun == nil {
+		d.OnClose(func(e events.Event) {
 			vv.UpdateWidget()
 			vv.SendChange()
-			if fun != nil {
-				fun()
-			}
 		})
-	})
+	} else {
+		// otherwise, we have to make the bottom bar
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				if okfun != nil {
+					okfun()
+				}
+				vv.UpdateWidget()
+				vv.SendChange()
+				if fun != nil {
+					fun()
+				}
+			})
+		})
+	}
+
 	d.NewFullDialog(ctx).Run()
 }
