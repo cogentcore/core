@@ -3,8 +3,8 @@
 package gi
 
 import (
+	"image"
 	"image/color"
-	"sync"
 	"time"
 
 	"github.com/aymerick/douceur/css"
@@ -2619,13 +2619,15 @@ var _ = gti.AddType(&gti.Type{
 		{"Closeable", &gti.Field{Name: "Closeable", Type: "bool", LocalType: "bool", Doc: "for Dialogs: if true includes a close button for closing", Directives: gti.Directives{}, Tag: ""}},
 		{"Movable", &gti.Field{Name: "Movable", Type: "bool", LocalType: "bool", Doc: "for Dialogs: adds a handle titlebar Decor for moving", Directives: gti.Directives{}, Tag: ""}},
 		{"Resizable", &gti.Field{Name: "Resizable", Type: "bool", LocalType: "bool", Doc: "for Dialogs: adds a resize handle Decor for resizing", Directives: gti.Directives{}, Tag: ""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "image.Point", LocalType: "image.Point", Doc: "Target position for Scene to be placed within RenderWin", Directives: gti.Directives{}, Tag: ""}},
 		{"Side", &gti.Field{Name: "Side", Type: "goki.dev/gi/v2/gi.StageSides", LocalType: "StageSides", Doc: "Side for Stages that can operate on different sides, e.g.,\nfor Sheets: which side does the sheet come out from", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is item represented by this main stage -- used for recycling windows", Directives: gti.Directives{}, Tag: ""}},
-		{"PopupMgr", &gti.Field{Name: "PopupMgr", Type: "goki.dev/gi/v2/gi.StageMgr", LocalType: "StageMgr", Doc: "manager for the popups in this stage", Directives: gti.Directives{}, Tag: ""}},
-		{"MainMgr", &gti.Field{Name: "MainMgr", Type: "*goki.dev/gi/v2/gi.StageMgr", LocalType: "*StageMgr", Doc: "the parent stage manager for this stage, which lives in a RenderWin", Directives: gti.Directives{}, Tag: ""}},
+		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)\nIf a Main Stage, it points to itself.", Directives: gti.Directives{}, Tag: ""}},
+		{"PopupMgr", &gti.Field{Name: "PopupMgr", Type: "*goki.dev/gi/v2/gi.StageMgr", LocalType: "*StageMgr", Doc: "For Main stages, this is the manager for the popups within it (created\nspecifically for the main stage).\nFor Popups, this is the pointer to the PopupMgr within the\nMain Stage managing it.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"MainMgr", &gti.Field{Name: "MainMgr", Type: "*goki.dev/gi/v2/gi.StageMgr", LocalType: "*StageMgr", Doc: "For all stages, this is the Main stage manager that lives in a RenderWin\nand manages the Main Scenes.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context which has info about the RenderWin onto which we render.\nThis should be used instead of the RenderWin itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil.", Directives: gti.Directives{}, Tag: ""}},
 		{"Sprites", &gti.Field{Name: "Sprites", Type: "goki.dev/gi/v2/gi.Sprites", LocalType: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"SpriteDragging", &gti.Field{Name: "SpriteDragging", Type: "string", LocalType: "string", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Main is the MainStage that owns this Popup (via its PopupMgr)", Directives: gti.Directives{}, Tag: ""}},
 		{"Timeout", &gti.Field{Name: "Timeout", Type: "time.Duration", LocalType: "time.Duration", Doc: "if > 0, disappears after a timeout duration", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -2720,6 +2722,13 @@ func (t *Stage) SetResizable(v bool) *Stage {
 	return t
 }
 
+// SetPos sets the [Stage.Pos]:
+// Target position for Scene to be placed within RenderWin
+func (t *Stage) SetPos(v image.Point) *Stage {
+	t.Pos = v
+	return t
+}
+
 // SetSide sets the [Stage.Side]:
 // Side for Stages that can operate on different sides, e.g.,
 // for Sheets: which side does the sheet come out from
@@ -2735,17 +2744,21 @@ func (t *Stage) SetData(v any) *Stage {
 	return t
 }
 
-// SetPopupMgr sets the [Stage.PopupMgr]:
-// manager for the popups in this stage
-func (t *Stage) SetPopupMgr(v StageMgr) *Stage {
-	t.PopupMgr = v
+// SetMain sets the [Stage.Main]:
+// If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)
+// If a Main Stage, it points to itself.
+func (t *Stage) SetMain(v *Stage) *Stage {
+	t.Main = v
 	return t
 }
 
-// SetMainMgr sets the [Stage.MainMgr]:
-// the parent stage manager for this stage, which lives in a RenderWin
-func (t *Stage) SetMainMgr(v *StageMgr) *Stage {
-	t.MainMgr = v
+// SetRenderCtx sets the [Stage.RenderCtx]:
+// rendering context which has info about the RenderWin onto which we render.
+// This should be used instead of the RenderWin itself for all relevant
+// rendering information.  This is only available once a Stage is Run,
+// and must always be checked for nil.
+func (t *Stage) SetRenderCtx(v *RenderContext) *Stage {
+	t.RenderCtx = v
 	return t
 }
 
@@ -2763,13 +2776,6 @@ func (t *Stage) SetSpriteDragging(v string) *Stage {
 	return t
 }
 
-// SetMain sets the [Stage.Main]:
-// Main is the MainStage that owns this Popup (via its PopupMgr)
-func (t *Stage) SetMain(v *Stage) *Stage {
-	t.Main = v
-	return t
-}
-
 // SetTimeout sets the [Stage.Timeout]:
 // if > 0, disappears after a timeout duration
 func (t *Stage) SetTimeout(v time.Duration) *Stage {
@@ -2777,105 +2783,26 @@ func (t *Stage) SetTimeout(v time.Duration) *Stage {
 	return t
 }
 
-// StageMgrType is the [gti.Type] for [StageMgr]
-var StageMgrType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.StageMgr",
-	ShortName:  "gi.StageMgr",
-	IDName:     "stage-mgr",
-	Doc:        "StageMgr provides base impl for stage management,\nextended by PopupStageMgr and MainStageMgr.\nManages a stack of Stage elements.",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.StageMgr",
+	ShortName: "gi.StageMgr",
+	IDName:    "stage-mgr",
+	Doc:       "StageMgr manages a stack of Stage elements",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"This", &gti.Field{Name: "This", Type: "goki.dev/gi/v2/gi.StageMgr", LocalType: "StageMgr", Doc: "This is the StageMgr as a StageMgr interface -- preserves actual identity\nwhen calling interface methods in StageMgr.", Directives: gti.Directives{}, Tag: ""}},
-		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map[string, *goki.dev/gi/v2/gi.Stage]", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages", Directives: gti.Directives{}, Tag: ""}},
+		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map[string, *goki.dev/gi/v2/gi.Stage]", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Modified", &gti.Field{Name: "Modified", Type: "bool", LocalType: "bool", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle.", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context for the Stages lives here.\nEveryone comes back here to access it.", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderWin", &gti.Field{Name: "RenderWin", Type: "*goki.dev/gi/v2/gi.RenderWin", LocalType: "*RenderWin", Doc: "render window -- only set for stage manager within such a window.\nrely on the RenderCtx wherever possible.", Directives: gti.Directives{}, Tag: ""}},
-		{"History", &gti.Field{Name: "History", Type: "[]*goki.dev/gi/v2/gi.Stage", LocalType: "[]*Stage", Doc: "growing stack of viewing history of all stages.", Directives: gti.Directives{}, Tag: ""}},
-		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Main is the MainStage that manages a popup", Directives: gti.Directives{}, Tag: ""}},
-		{"Mu", &gti.Field{Name: "Mu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin", Directives: gti.Directives{}, Tag: ""}},
+		{"RenderWin", &gti.Field{Name: "RenderWin", Type: "*goki.dev/gi/v2/gi.RenderWin", LocalType: "*RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderCtx wherever possible.", Directives: gti.Directives{}, Tag: ""}},
+		{"History", &gti.Field{Name: "History", Type: "[]*goki.dev/gi/v2/gi.Stage", LocalType: "[]*Stage", Doc: "growing stack of viewing history of all stages.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Main is the Main Stage that owns this StageMgr, only set for Popup stages", Directives: gti.Directives{}, Tag: ""}},
+		{"Mu", &gti.Field{Name: "Mu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read.", Directives: gti.Directives{}, Tag: "view:\"-\" set:\"-\""}},
 	}),
-	Embeds:   ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &StageMgr{},
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// NewStageMgr adds a new [StageMgr] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewStageMgr(par ki.Ki, name ...string) *StageMgr {
-	return par.NewChild(StageMgrType, name...).(*StageMgr)
-}
-
-// KiType returns the [*gti.Type] of [StageMgr]
-func (t *StageMgr) KiType() *gti.Type {
-	return StageMgrType
-}
-
-// New returns a new [*StageMgr] value
-func (t *StageMgr) New() ki.Ki {
-	return &StageMgr{}
-}
-
-// SetThis sets the [StageMgr.This]:
-// This is the StageMgr as a StageMgr interface -- preserves actual identity
-// when calling interface methods in StageMgr.
-func (t *StageMgr) SetThis(v StageMgr) *StageMgr {
-	t.This = v
-	return t
-}
-
-// SetStack sets the [StageMgr.Stack]:
-// stack of stages
-func (t *StageMgr) SetStack(v ordmap.Map[string, *Stage]) *StageMgr {
-	t.Stack = v
-	return t
-}
-
-// SetModified sets the [StageMgr.Modified]:
-// Modified is set to true whenever the stack has been modified.
-// This is cleared by the RenderWin each render cycle.
-func (t *StageMgr) SetModified(v bool) *StageMgr {
-	t.Modified = v
-	return t
-}
-
-// SetRenderCtx sets the [StageMgr.RenderCtx]:
-// rendering context for the Stages lives here.
-// Everyone comes back here to access it.
-func (t *StageMgr) SetRenderCtx(v *RenderContext) *StageMgr {
-	t.RenderCtx = v
-	return t
-}
-
-// SetRenderWin sets the [StageMgr.RenderWin]:
-// render window -- only set for stage manager within such a window.
-// rely on the RenderCtx wherever possible.
-func (t *StageMgr) SetRenderWin(v *RenderWin) *StageMgr {
-	t.RenderWin = v
-	return t
-}
-
-// SetHistory sets the [StageMgr.History]:
-// growing stack of viewing history of all stages.
-func (t *StageMgr) SetHistory(v []*Stage) *StageMgr {
-	t.History = v
-	return t
-}
-
-// SetMain sets the [StageMgr.Main]:
-// Main is the MainStage that manages a popup
-func (t *StageMgr) SetMain(v *Stage) *StageMgr {
-	t.Main = v
-	return t
-}
-
-// SetMu sets the [StageMgr.Mu]:
-// mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
-func (t *StageMgr) SetMu(v sync.RWMutex) *StageMgr {
-	t.Mu = v
-	return t
-}
 
 // SwitchType is the [gti.Type] for [Switch]
 var SwitchType = gti.AddType(&gti.Type{

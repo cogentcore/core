@@ -20,18 +20,19 @@ import (
 // NewDialog returns a new PopupWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewFullDialog] for a full-window dialog.
-func (sc *Scene) NewDialog(ctx Widget, name ...string) Stage {
+func (sc *Scene) NewDialog(ctx Widget, name ...string) *Stage {
 	sc.DialogStyles()
 	sc.Stage = NewMainStage(DialogStage, sc)
 	sc.Stage.SetModal(true)
 	sc.Stage.SetContext(ctx)
+	sc.Stage.Pos = ctx.ContextMenuPos(nil)
 	return sc.Stage
 }
 
 // NewFullDialog returns a new FullWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewDialog] for a popup-window dialog.
-func (sc *Scene) NewFullDialog(ctx Widget, name ...string) Stage {
+func (sc *Scene) NewFullDialog(ctx Widget, name ...string) *Stage {
 	sc.DialogStyles()
 	sc.Stage = NewMainStage(DialogStage, sc)
 	sc.Stage.SetModal(true)
@@ -46,14 +47,14 @@ func (sc *Scene) NewFullDialog(ctx Widget, name ...string) Stage {
 // NewDialog returns a new PopupWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewFullDialog] for a full-window dialog.
-func (bd *Body) NewDialog(ctx Widget, name ...string) Stage {
+func (bd *Body) NewDialog(ctx Widget, name ...string) *Stage {
 	return bd.Sc.NewDialog(ctx, name...)
 }
 
 // NewFullDialog returns a new FullWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewDialog] for a popup-window dialog.
-func (bd *Body) NewFullDialog(ctx Widget, name ...string) Stage {
+func (bd *Body) NewFullDialog(ctx Widget, name ...string) *Stage {
 	return bd.Sc.NewFullDialog(ctx, name...)
 }
 
@@ -70,7 +71,7 @@ func RecycleDialog(data any) bool {
 
 // ErrorDialog returns a new Dialog [Stage] displaying the given error
 // in the context of the given widget.  Optional title can be provided.
-func ErrorDialog(ctx Widget, err error, title ...string) Stage {
+func ErrorDialog(ctx Widget, err error, title ...string) *Stage {
 	ttl := "There was an error"
 	if len(title) > 0 {
 		ttl = title[0]
@@ -147,19 +148,19 @@ func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 func (sc *Scene) Close() {
 	sc.Send(events.Close, nil)
 	if sc.Stage == nil {
-		slog.Error("Scene has no Stage")
+		slog.Error("Close: Scene has no Stage")
 		return
 	}
-	mm := sc.Stage.AsMain().StageMgr
+	mm := sc.Stage.MainMgr
 	if mm == nil {
 		// slog.Error("Scene has no MainMgr")
 		return
 	}
-	if sc.Stage.AsBase().NewWindow {
+	if sc.Stage.NewWindow {
 		mm.RenderWin.CloseReq()
 		return
 	}
-	mm.PopDeleteType(DialogStage) // todo: this is probably not right
+	mm.DeleteStage(sc.Stage)
 }
 
 // AddOk adds an OK button to given parent Widget (typically in Bottom
@@ -202,7 +203,7 @@ func (sc *Scene) DialogStyles() {
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Direction = styles.Column
 		s.Color = colors.Scheme.OnSurface
-		if !sc.Stage.AsBase().NewWindow && !sc.Stage.AsBase().FullWindow {
+		if !sc.Stage.NewWindow && !sc.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			// s.Justify.Content = styles.Center // vert
 			// s.Align.Content = styles.Center // horiz

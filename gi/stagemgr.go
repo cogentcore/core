@@ -5,40 +5,40 @@
 package gi
 
 import (
-	"fmt"
+	"image"
 	"sync"
 
 	"goki.dev/goosi/events"
 	"goki.dev/ordmap"
 )
 
-// StageMgr provides base impl for stage management,
-// extended by PopupStageMgr and MainStageMgr.
-// Manages a stack of Stage elements.
-type StageMgr struct {
-	// stack of stages
-	Stack ordmap.Map[string, *Stage]
+// StageMgr manages a stack of Stage elements
+type StageMgr struct { //gti:add
+	// stack of stages managed by this stage manager.
+	Stack ordmap.Map[string, *Stage] `set:"-"`
 
 	// Modified is set to true whenever the stack has been modified.
 	// This is cleared by the RenderWin each render cycle.
 	Modified bool
 
-	// rendering context for the Stages lives here.
-	// Everyone comes back here to access it.
+	// rendering context provides key rendering information and locking
+	// for the RenderWin in which the stages are running.
+	// the MainStageMgr within the RenderWin
 	RenderCtx *RenderContext
 
-	// render window -- only set for stage manager within such a window.
+	// render window to which we are rendering.
 	// rely on the RenderCtx wherever possible.
-	RenderWin *RenderWin `set:"-"`
+	RenderWin *RenderWin
 
 	// growing stack of viewing history of all stages.
-	History []*Stage
+	History []*Stage `set:"-"`
 
-	// Main is the MainStage that manages a popup
+	// Main is the Main Stage that owns this StageMgr, only set for Popup stages
 	Main *Stage
 
-	// mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
-	Mu sync.RWMutex `view:"-"`
+	// mutex protecting reading / updating of the Stack.
+	// Destructive stack updating gets a Write lock, else Read.
+	Mu sync.RWMutex `view:"-" set:"-"`
 }
 
 // Top returns the top-most Stage in the Stack, under Read Lock
@@ -62,7 +62,7 @@ func (sm *StageMgr) TopOfType(typ StageTypes) *Stage {
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
-		if st.AsBase().Type == typ {
+		if st.Type == typ {
 			return st
 		}
 	}
@@ -78,7 +78,7 @@ func (sm *StageMgr) TopNotType(typ StageTypes) *Stage {
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
-		if st.AsBase().Type != typ {
+		if st.Type != typ {
 			return st
 		}
 	}
@@ -91,8 +91,7 @@ func (sm *StageMgr) Push(st *Stage) {
 	defer sm.Mu.Unlock()
 
 	sm.Modified = true
-	sm.Stack.Add(st.AsBase().Name, st)
-	st.StageAdded(sm.This)
+	sm.Stack.Add(st.Name, st)
 }
 
 // Pop pops current Stage off the stack, returning it or nil if none.
@@ -112,6 +111,26 @@ func (sm *StageMgr) Pop() *Stage {
 	return st
 }
 
+// DeleteStage deletes given stage (removing from stack, calling Delete
+// on Stage), returning true if found.
+// It runs under Write lock.
+func (sm *StageMgr) DeleteStage(st *Stage) bool {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	l := sm.Stack.Len()
+	for i := l - 1; i >= 0; i-- {
+		s := sm.Stack.ValByIdx(i)
+		if st == s {
+			sm.Modified = true
+			sm.Stack.DeleteIdx(i, i+1)
+			st.Delete()
+			return true
+		}
+	}
+	return false
+}
+
 // PopType pops the top-most Stage of the given type of the stack,
 // returning it or nil if none. It runs under Write lock.
 func (sm *StageMgr) PopType(typ StageTypes) *Stage {
@@ -121,7 +140,7 @@ func (sm *StageMgr) PopType(typ StageTypes) *Stage {
 	l := sm.Stack.Len()
 	for i := l - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
-		if st.AsBase().Type == typ {
+		if st.Type == typ {
 			sm.Modified = true
 			sm.Stack.DeleteIdx(i, i+1)
 			return st
@@ -130,12 +149,8 @@ func (sm *StageMgr) PopType(typ StageTypes) *Stage {
 	return nil
 }
 
-// PopDelete pops current Stage off the stack and calls Delete on it.
+// PopDelete pops current top--most Stage off the stack and calls Delete on it.
 func (sm *StageMgr) PopDelete() {
-	if pm := sm.This.AsPopupMgr(); pm != nil {
-	} else {
-		fmt.Println("popdel: not a popup mgr!")
-	}
 	st := sm.Pop()
 	if st != nil {
 		st.Delete()
@@ -151,10 +166,10 @@ func (sm *StageMgr) PopDeleteType(typ StageTypes) {
 	}
 }
 
-// CloseAll closes all of the stages, calling Delete on each of them.
-// When Stage with Popups is Deleted, or when a RenderWindow is closed.
+// DeleteAll deletes all of the stages.
+// For when Stage with Popups is Deleted, or when a RenderWindow is closed.
 // requires outer RenderContext mutex!
-func (sm *StageMgr) CloseAll() {
+func (sm *StageMgr) DeleteAll() {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -167,6 +182,14 @@ func (sm *StageMgr) CloseAll() {
 		st := sm.Stack.ValByIdx(i)
 		st.Delete()
 		sm.Stack.DeleteIdx(i, i+1)
+	}
+}
+
+// Resize calls Resize on all stages within
+func (sm *StageMgr) Resize(sz image.Point) {
+	for _, kv := range sm.Stack.Order {
+		st := kv.Val
+		st.Resize(sz)
 	}
 }
 
@@ -201,7 +224,7 @@ func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 
 func (sm *StageMgr) SendShowEvents() {
 	for _, kv := range sm.Stack.Order {
-		st := kv.Val.AsBase()
+		st := kv.Val
 		if st.Scene == nil {
 			continue
 		}

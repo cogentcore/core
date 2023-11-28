@@ -6,11 +6,13 @@ package gi
 
 import (
 	"fmt"
+	"image"
 	"log/slog"
 	"strings"
 	"time"
 
 	"goki.dev/goosi"
+	"goki.dev/ki/v2"
 )
 
 // StageTypes are the types of Stage containers.
@@ -66,6 +68,18 @@ const (
 	// it no longer relevant.
 	CompleterStage
 )
+
+// IsMain returns true if this type of Stage is a Main stage that manages
+// its own set of popups
+func (st StageTypes) IsMain() bool {
+	return st <= SheetStage
+}
+
+// IsPopup returns true if this type of Stage is a Popup, managed by another
+// Main stage.
+func (st StageTypes) IsPopup() bool {
+	return !st.IsMain()
+}
 
 // StageSides are the Sides for Sheet Stages
 type StageSides int32 //enums:enum
@@ -129,6 +143,9 @@ type Stage struct { //gti:add -setters
 	// for Dialogs: adds a resize handle Decor for resizing
 	Resizable bool
 
+	// Target position for Scene to be placed within RenderWin
+	Pos image.Point
+
 	// Side for Stages that can operate on different sides, e.g.,
 	// for Sheets: which side does the sheet come out from
 	Side StageSides
@@ -136,20 +153,31 @@ type Stage struct { //gti:add -setters
 	// Data is item represented by this main stage -- used for recycling windows
 	Data any
 
-	// manager for the popups in this stage
-	PopupMgr StageMgr
+	// If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)
+	// If a Main Stage, it points to itself.
+	Main *Stage
 
-	// the parent stage manager for this stage, which lives in a RenderWin
-	MainMgr *StageMgr
+	// For Main stages, this is the manager for the popups within it (created
+	// specifically for the main stage).
+	// For Popups, this is the pointer to the PopupMgr within the
+	// Main Stage managing it.
+	PopupMgr *StageMgr `set:"-"`
+
+	// For all stages, this is the Main stage manager that lives in a RenderWin
+	// and manages the Main Scenes.
+	MainMgr *StageMgr `set:"-"`
+
+	// rendering context which has info about the RenderWin onto which we render.
+	// This should be used instead of the RenderWin itself for all relevant
+	// rendering information.  This is only available once a Stage is Run,
+	// and must always be checked for nil.
+	RenderCtx *RenderContext
 
 	// sprites are named images that are rendered last overlaying everything else.
 	Sprites Sprites `json:"-" xml:"-"`
 
 	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
 	SpriteDragging string `json:"-" xml:"-"`
-
-	// Main is the MainStage that owns this Popup (via its PopupMgr)
-	Main *Stage
 
 	// if > 0, disappears after a timeout duration
 	Timeout time.Duration
@@ -160,7 +188,7 @@ func (st *Stage) String() string {
 	if st.Scene != nil {
 		str += "  Scene: " + st.Scene.Name()
 	}
-	rc := st.RenderCtx()
+	rc := st.RenderCtx
 	if rc != nil {
 		str += "  Rc: " + rc.String()
 	}
@@ -193,6 +221,25 @@ func (st *Stage) SetScene(sc *Scene) *Stage {
 	return st
 }
 
+// SetMainMgr sets the MainMgr to given Main StageMgr (on RenderWin)
+// and also sets the RenderCtx from that.
+func (st *Stage) SetMainMgr(sm *StageMgr) *Stage {
+	st.MainMgr = sm
+	st.RenderCtx = sm.RenderCtx
+	return st
+}
+
+// SetPopupMgr sets the PopupMgr and MainMgr from the given *Main* Stage
+// to which this PopupStage belongs.
+func (st *Stage) SetPopupMgr(mainSt *Stage) *Stage {
+	st.Main = mainSt
+	st.MainMgr = mainSt.MainMgr
+	st.PopupMgr = mainSt.PopupMgr
+	st.RenderCtx = st.MainMgr.RenderCtx
+	return st
+}
+
+// SetType sets the type and also sets default parameters based on that type
 func (st *Stage) SetType(typ StageTypes) *Stage {
 	st.Type = typ
 	switch st.Type {
@@ -254,16 +301,51 @@ func (st *Stage) Wait() *Stage {
 	return st
 }
 
-// DoUpdate for base just calls DoUpdate on scene
-// returns stageMods = true if any Stages have been modified
+// DoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups for Main types.
+// returns stageMods = true if any Popup Stages have been modified
 // and sceneMods = true if any Scenes have been modified.
-func (st *Stage) PopupDoUpdate() (stageMods, sceneMods bool) {
+func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	if st.Scene == nil {
 		return
 	}
-	sceneMods = st.Scene.DoUpdate()
-	// if sceneMods {
+	if st.Type.IsMain() && st.PopupMgr != nil {
+		stageMods, sceneMods = st.PopupMgr.UpdateAll()
+	}
+	scMods := st.Scene.DoUpdate()
+	sceneMods = sceneMods || scMods
+	// if scMods {
 	// 	fmt.Println("scene mod", st.Scene.Name())
 	// }
 	return
+}
+
+func (st *Stage) Delete() {
+	if st.Type.IsMain() && st.PopupMgr != nil {
+		st.PopupMgr.DeleteAll()
+		st.Sprites.Reset()
+	}
+	if st.Scene != nil {
+		st.Scene.Delete(ki.DestroyKids)
+	}
+	st.Scene = nil
+	st.Main = nil
+	st.PopupMgr = nil
+	st.MainMgr = nil
+	st.RenderCtx = nil
+}
+
+func (st *Stage) Resize(sz image.Point) {
+	if st.Scene == nil {
+		return
+	}
+	switch st.Type {
+	case WindowStage:
+		st.SetWindowInsets() // todo: remove?
+		st.Scene.Resize(sz)
+	case DialogStage:
+		if st.FullWindow {
+			st.Scene.Resize(sz)
+		}
+		// todo: other types fit in constraints
+	}
 }

@@ -80,7 +80,11 @@ func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 	} else {
 		spos.Y += ed.Offs[pos.Ln] + ed.FontDescent
 	}
-	if len(ed.Renders[pos.Ln].Spans) > 0 {
+	if pos.Ln >= len(ed.Renders) {
+		return spos
+	}
+	rp := &ed.Renders[pos.Ln]
+	if len(rp.Spans) > 0 {
 		// note: Y from rune pos is baseline
 		rrp, _, _, _ := ed.Renders[pos.Ln].RuneRelPos(pos.Ch)
 		spos.X += rrp.X

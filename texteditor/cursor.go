@@ -144,7 +144,7 @@ func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
 	if sc == nil {
 		return nil
 	}
-	ms := sc.MainStage()
+	ms := sc.Stage.Main
 	if ms == nil {
 		return nil // only MainStage has sprites
 	}

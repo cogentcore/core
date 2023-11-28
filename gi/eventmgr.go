@@ -935,7 +935,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	if sf == nil {
 		em.FocusFirst()
 	} else {
-		fmt.Println("start focus on:", sf)
+		// fmt.Println("start focus on:", sf)
 		em.SetFocusEvent(sf)
 	}
 	return true

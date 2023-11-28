@@ -11,17 +11,8 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
-
-func (st *Stage) RenderCtx() *RenderContext {
-	if st.StageMgr == nil {
-		slog.Error("Stage has nil StageMgr", "stage", st.Name)
-		return nil
-	}
-	return st.StageMgr.RenderCtx
-}
 
 // NewMainStage returns a new MainStage with given type and scene contents.
 // Make further configuration choices using Set* methods, which
@@ -31,7 +22,9 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
+	st.PopupMgr = &StageMgr{}
 	st.PopupMgr.Main = st
+	st.Main = st
 	return st
 }
 
@@ -62,7 +55,7 @@ func (bd *Body) NewWindow() *Stage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewSheet(sc *Scene, side StageSides) *Stage {
-	return NewMainStage(SheetStage, sc).SetSide(side).AsMain()
+	return NewMainStage(SheetStage, sc).SetSide(side)
 }
 
 /////////////////////////////////////////////////////
@@ -71,12 +64,12 @@ func NewSheet(sc *Scene, side StageSides) *Stage {
 // SetWindowInsets updates the padding on the Scene
 // to the inset values provided by the RenderWin window.
 func (st *Stage) SetWindowInsets() {
-	if st.StageMgr == nil {
-		return
-	}
-	if st.StageMgr.RenderWin == nil {
-		return
-	}
+	// if st.StageMgr == nil {
+	// 	return
+	// }
+	// if st.StageMgr.RenderWin == nil {
+	// 	return
+	// }
 	// insets := st.StageMgr.RenderWin.GoosiWin.Insets()
 	// // fmt.Println(insets)
 	// uv := func(val float32) units.Value {
@@ -112,81 +105,89 @@ func (st *Stage) InheritBars() {
 	st.Scene.InheritBarsWidget(st.Context)
 }
 
-// FirstWinManager creates a MainStageMgr for the first window
+// FirstWinManager creates a temporary Main StageMgr for the first window
 // to be able to get sizing information prior to having a RenderWin,
 // based on the goosi App Screen Size. Only adds a RenderCtx.
 func (st *Stage) FirstWinManager() *StageMgr {
-	ms := &MainStageMgr{}
-	ms.This = ms
-	rc := &RenderContext{}
-	ms.RenderCtx = rc
-	scr := goosi.TheApp.Screen(0)
-	rc.Size = scr.Geometry.Size()
-	// fmt.Println("Screen Size:", rc.Size)
-	rc.SetFlag(true, RenderVisible)
-	rc.LogicalDPI = scr.LogicalDPI
-	// fmt.Println("first win:", rc.LogicalDPI)
+	ms := &StageMgr{}
+	ms.RenderCtx = NewRenderContext()
 	return ms
+}
+
+// ConfigMainStage does main-stage configuration steps
+func (st *Stage) ConfigMainStage() {
+	if st.NewWindow {
+		st.FullWindow = true
+	}
+	if !goosi.TheApp.Platform().IsMobile() {
+		st.NewWindow = false
+	}
+	sc := st.Scene
+	st.AddWindowDecor() // sensitive to cases
+	sc.ConfigSceneBars()
+	sc.ConfigSceneWidgets()
 }
 
 // RunWindow runs a Window with current settings.
 func (st *Stage) RunWindow() *Stage {
-	st.AddWindowDecor() // sensitive to cases
+	st.ConfigMainStage()
 	sc := st.Scene
-	sc.ConfigSceneBars()
-	sc.ConfigSceneWidgets()
 
-	// note: need a StageMgr to get initial pref size
+	// note: need a *temporary* MainMgr to get initial pref size
 	if CurRenderWin == nil {
-		st.StageMgr = st.FirstWinManager()
+		st.SetMainMgr(st.FirstWinManager())
 	} else {
-		st.StageMgr = &CurRenderWin.StageMgr
+		st.SetMainMgr(&CurRenderWin.MainStageMgr)
 	}
-	sz := st.RenderCtx().Size
+	sz := st.RenderCtx.Size
 	// non-new full windows must take up the whole window
 	// and thus don't consider pref size
-	if st.NewWindow || !st.FullWindow {
+	if st.NewWindow || !st.FullWindow || CurRenderWin == nil {
 		sz = sc.PrefSize(sz)
+		sz = sz.Add(image.Point{20, 20})
 	}
+	st.MainMgr = nil // reset
 	if WinRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
-	if st.NewWindow {
+	if st.NewWindow || CurRenderWin == nil {
 		sc.Resize(sz)
 		win := st.NewRenderWin()
 		if CurRenderWin == nil {
 			CurRenderWin = win
 		}
-		st.SetWindowInsets()
+		st.SetWindowInsets() // todo: delete?
 		win.GoStartEventLoop()
-		return st
-	}
-	if CurRenderWin == nil {
-		sc.Resize(sz)
-		CurRenderWin = st.NewRenderWin()
-		st.SetWindowInsets()
-		CurRenderWin.GoStartEventLoop()
 		return st
 	}
 	if st.Context != nil {
 		ms := st.Context.AsWidget().Sc.MainStageMgr()
-		msc := ms.Top().AsMain().Scene
+		msc := ms.Top().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
 		ms.Push(st)
+		st.SetMainMgr(ms)
 	} else {
-		msc := st.StageMgr.Top().AsMain().Scene
+		ms := &CurRenderWin.MainStageMgr
+		msc := ms.Top().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
-		CurRenderWin.StageMgr.Push(st)
+		ms.Push(st)
+		st.SetMainMgr(ms)
 	}
 	return st
 }
 
 // RunDialog runs a Dialog with current settings.
-// RenderWin field will be set to the parent RenderWin window.
 func (st *Stage) RunDialog() *Stage {
+	if st.Context == nil {
+		if CurRenderWin == nil {
+			slog.Error("RunDialog: Context is nil and CurRenderWin is nil, cannot Run!", "Dialog", st.Name, "Title", st.Title)
+			return nil
+		}
+		st.Context = CurRenderWin.MainStageMgr.Top().Scene
+	}
 	ctx := st.Context.AsWidget()
 	ms := ctx.Sc.MainStageMgr()
 
@@ -199,28 +200,25 @@ func (st *Stage) RunDialog() *Stage {
 		return st
 	}
 
+	st.ConfigMainStage()
 	sc := st.Scene
+	sc.SceneGeom.Pos = st.Pos
 
-	st.AddDialogDecor()
-	sc.ConfigSceneBars()
-	sc.ConfigSceneWidgets()
-	sc.SceneGeom.Pos = ctx.ContextMenuPos(nil)
-
-	st.StageMgr = ms // temporary
+	st.SetMainMgr(ms) // temporary for prefs
 	winsz := ms.RenderCtx.Size
 
 	sz := winsz
-	// history-based stages always take up the whole window
 	if !st.FullWindow {
 		sz = sc.PrefSize(winsz)
 		sz = sz.Add(image.Point{50, 50})
-		sc.EventMgr.StartFocusFirst = true // fallback
+		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
 	}
 	if WinRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
 	}
 
-	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {
+	if st.NewWindow {
+		st.MainMgr = nil
 		sc.Resize(sz)
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
@@ -233,25 +231,20 @@ func (st *Stage) RunDialog() *Stage {
 	sc.SceneGeom.Size = sz
 	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
 	sc.FitInWindow(winGeom) // does resize
-
 	ms.Push(st)
+	// st.SetMainMgr(ms) // already set
 	return st
 }
 
 // RunSheet runs a Sheet with current settings.
-// RenderWin field will be set to the parent RenderWin window.
+// Sheet MUST have context set.
 func (st *Stage) RunSheet() *Stage {
-	st.AddSheetDecor()
-	st.Scene.ConfigSceneBars()
-	st.Scene.ConfigSceneWidgets()
+	ctx := st.Context.AsWidget()
+	ms := ctx.Sc.MainStageMgr()
 
-	if CurRenderWin == nil {
-		// todo: error here -- must have main window!
-		return nil
-	}
-	// todo: need some kind of linkage here for dialog relative to existing window
-	// probably just CurRenderWin but it needs to be a stack or updated properly etc.
-	CurRenderWin.StageMgr.Push(st)
+	st.ConfigMainStage() // should set pos and size for side
+	ms.Push(st)
+	st.SetMainMgr(ms)
 	return st
 }
 
@@ -290,97 +283,40 @@ func (st *Stage) NewRenderWin() *RenderWin {
 	AllRenderWins.Add(win)
 	MainRenderWins.Add(win)
 	WinNewCloseStamp()
-	win.StageMgr.Push(st)
+	// initialize MainStageMgr
+	win.MainStageMgr.RenderWin = win
+	win.MainStageMgr.RenderCtx = NewRenderContext() // sets defaults according to Screen
+	// note: win is not yet created by the OS and we don't yet know its actual size
+	// or dpi.
+	win.MainStageMgr.Push(st)
+	st.SetMainMgr(&win.MainStageMgr)
 	return win
 }
 
-func (st *Stage) Delete() {
-	st.PopupMgr.CloseAll()
-	if st.Scene != nil {
-		st.Scene.Delete(ki.DestroyKids)
-	}
-	st.Scene = nil
-	st.StageMgr = nil
-}
-
-func (st *Stage) Resize(sz image.Point) {
-	if st.Scene == nil {
-		return
-	}
-	switch st.Type {
-	case WindowStage:
-		st.SetWindowInsets()
-		st.Scene.Resize(sz)
-	case DialogStage:
-		if st.FullWindow {
-			st.Scene.Resize(sz)
-		}
-		// todo: other types fit in constraints
-	}
-}
-
-// MainDoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups
-// returns stageMods = true if any Popup Stages have been modified
-// and sceneMods = true if any Scenes have been modified.
-func (st *Stage) MainDoUpdate() (stageMods, sceneMods bool) {
-	if st.Scene == nil {
-		return
-	}
-	stageMods, sceneMods = st.PopupMgr.UpdateAll()
-	scMod := st.Scene.DoUpdate()
-	sceneMods = sceneMods || scMod
-	// if scMod {
-	// 	fmt.Println("main scene mod:", st.Scene.Name)
-	// }
-	// if stageMods {
-	// 	fmt.Println("pop stage mod:", st.Name)
-	// }
-	return
-}
-
-func (st *Stage) MainStageAdded(smi StageMgr) {
-	st.StageMgr = smi.AsMainMgr()
-}
-
 // MainHandleEvent handles main stage events
-func (st *Stage) MainHandleEvent(evi events.Event) {
+func (st *Stage) MainHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
 	}
-	st.PopupMgr.HandleEvent(evi)
-	if evi.IsHandled() || st.PopupMgr.TopIsModal() {
-		if EventTrace && evi.Type() != events.MouseMove {
-			fmt.Println("Event handled by popup:", evi)
+	st.PopupMgr.PopupHandleEvent(e)
+	if e.IsHandled() || st.PopupMgr.TopIsModal() {
+		if EventTrace && e.Type() != events.MouseMove {
+			fmt.Println("Event handled by popup:", e)
 		}
 		return
 	}
-	evi.SetLocalOff(st.Scene.SceneGeom.Pos)
-	st.Scene.EventMgr.HandleEvent(evi)
+	e.SetLocalOff(st.Scene.SceneGeom.Pos)
+	st.Scene.EventMgr.HandleEvent(e)
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//		Main StageMgr
-
-func (sm *StageMgr) SetRenderWin(win *RenderWin) {
-	sm.RenderWin = win
-	sm.RenderCtx = &RenderContext{LogicalDPI: 96}
-}
-
-// resize resizes all main stages
-func (sm *StageMgr) Resize(sz image.Point) {
-	for _, kv := range sm.Stack.Order {
-		st := kv.Val.AsMain()
-		st.Resize(sz)
-	}
-}
-
-func (sm *StageMgr) MainHandleEvent(evi events.Event) {
+// MainHandleEvent calls MainHandleEvent on relevant stages in reverse order.
+func (sm *StageMgr) MainHandleEvent(e events.Event) {
 	n := sm.Stack.Len()
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i).AsMain()
-		st.HandleEvent(evi)
-		if evi.IsHandled() || st.Modal || st.Type == WindowStage {
-			return
+		st := sm.Stack.ValByIdx(i)
+		st.MainHandleEvent(e)
+		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
+			break
 		}
 	}
 }

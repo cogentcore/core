@@ -283,7 +283,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 // ClosePopup closes the parent Stage as a PopupStage.
 // Returns false if not a popup.
 func (ly *Layout) ClosePopup() bool {
-	ps := ly.Sc.PopupStage()
+	ps := ly.Sc.Stage
 	if ps == nil {
 		return false
 	}
