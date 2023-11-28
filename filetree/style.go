@@ -53,7 +53,7 @@ func (fn *Node) FileNodeStyles() {
 		case vcs == vci.Updated:
 			s.Color = grr.Must1(colors.FromHex("#008060"))
 		case vcs == vci.Stored:
-			// s.Color = std
+			s.Color = colors.Scheme.OnSurface
 		}
 	})
 	fn.OnWidgetAdded(func(w gi.Widget) {
