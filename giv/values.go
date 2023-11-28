@@ -1529,7 +1529,6 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}).SetSlice(&fi).SetSelVal(cur).SetSelField("Name").BindSelectDialog(&si)
 
 	return true, func() {
-		fmt.Println(si)
 		if si >= 0 {
 			fi := paint.FontLibrary.FontInfo[si]
 			vv.SetValue(fi.Name)

@@ -81,7 +81,7 @@ func (vv *KeyMapValue) UpdateWidget() {
 	}
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
-	bt.SetText(txt)
+	bt.SetTextUpdate(txt)
 }
 
 func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
@@ -113,7 +113,7 @@ func (vv *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	return true, func() {
 		if si >= 0 {
 			km := keyfun.AvailMaps[si]
-			vv.SetValue(km.Name)
+			vv.SetValue(keyfun.MapName(km.Name))
 			vv.UpdateWidget()
 		}
 	}
