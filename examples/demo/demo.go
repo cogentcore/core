@@ -17,6 +17,7 @@ import (
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -61,6 +62,9 @@ func makeHome(ts *gi.Tabs) {
 
 	img := gi.NewImage(home)
 	grr.Log(img.OpenImageFS(giLogo, ".goki/icons/512.png"))
+	img.Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(256))
+	})
 
 	gi.NewLabel(home).SetType(gi.LabelDisplayLarge).SetText("The GoGi Demo")
 

@@ -13,7 +13,6 @@ import (
 	"os"
 
 	"github.com/anthonynsimon/bild/clone"
-	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/grows/images"
@@ -36,17 +35,16 @@ type Image struct {
 	// file name of image loaded -- set by OpenImage
 	Filename FileName `set:"-"`
 
-	// size of the image
-	Size image.Point `set:"-"`
-
 	// the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" set:"-"`
+
+	// cached size of the last rendered image
+	PrevSize image.Point `copy:"-" xml:"-" json:"-" set:"-"`
 }
 
 func (im *Image) CopyFieldsFrom(frm any) {
 	fr := frm.(*Image)
 	im.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	im.Size = fr.Size
 	im.Filename = fr.Filename
 }
 
@@ -57,8 +55,11 @@ func (im *Image) OnInit() {
 
 func (im *Image) ImageStyles() {
 	im.Style(func(s *styles.Style) {
-		s.Min.X.Dp(float32(im.Size.X))
-		s.Min.Y.Dp(float32(im.Size.Y))
+		if im.Pixels != nil {
+			sz := im.Pixels.Bounds().Size()
+			s.Min.X.Dp(float32(sz.X))
+			s.Min.Y.Dp(float32(sz.Y))
+		}
 	})
 }
 
@@ -100,7 +101,6 @@ func (im *Image) GrabRenderFrom(wi Widget) {
 	img := GrabRenderFrom(wi)
 	if img != nil {
 		im.Pixels = img
-		im.Size = im.Pixels.Bounds().Size()
 	}
 }
 
@@ -205,35 +205,6 @@ func ImageClearer(im *image.RGBA, pct float32) {
 			im.Set(x, y, f32)
 		}
 	}
-}
-
-// ImageSizeMax computes the size of image where the largest size (X or Y) is set to maxSz
-func ImageSizeMax(sz image.Point, maxSz int) image.Point {
-	tsz := sz
-	if sz.X > sz.Y {
-		tsz.X = maxSz
-		tsz.Y = int(float32(sz.Y) * (float32(tsz.X) / float32(sz.X)))
-	} else {
-		tsz.Y = maxSz
-		tsz.X = int(float32(sz.X) * (float32(tsz.Y) / float32(sz.Y)))
-	}
-	return tsz
-}
-
-// ImageResize returns new image that has been resized to given size
-// uses sensible default level of smoothing (Linear interpolation)
-func ImageResize(img image.Image, szX, szY int) image.Image {
-	return transform.Resize(img, szX, szY, transform.Linear)
-}
-
-// ImageResizeMax resizes image so that the largest size (X or Y) is set to maxSz
-func ImageResizeMax(img image.Image, maxSz int) image.Image {
-	sz := img.Bounds().Size()
-	tsz := ImageSizeMax(sz, maxSz)
-	if tsz != sz {
-		img = transform.Resize(img, tsz.X, tsz.Y, transform.Linear)
-	}
-	return img
 }
 
 //////////////////////////////////////////////////////////////////////////////////
