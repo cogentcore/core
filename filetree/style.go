@@ -33,11 +33,13 @@ func (fn *Node) FileNodeStyles() {
 	fn.TreeViewStyles()
 	fn.Style(func(s *styles.Style) {
 		vcs := fn.Info.Vcs
-		switch {
-		case fn.IsExec():
+		if fn.IsExec() {
 			s.Font.Weight = styles.WeightBold
-		case fn.Buf != nil:
+		}
+		if fn.Buf != nil {
 			s.Font.Style = styles.FontItalic
+		}
+		switch {
 		case vcs == vci.Untracked:
 			s.Color = grr.Must1(colors.FromHex("#808080"))
 		case vcs == vci.Modified:
