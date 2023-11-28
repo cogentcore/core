@@ -35,6 +35,17 @@ func (bf *BarFuncs) IsEmpty() bool {
 	return len(*bf) == 0
 }
 
+// Inherit adds other bar funcs in front of any existing
+func (bf *BarFuncs) Inherit(obf BarFuncs) {
+	if len(obf) == 0 {
+		return
+	}
+	nbf := make(BarFuncs, len(obf), len(obf)+len(*bf))
+	copy(nbf, obf)
+	nbf = append(nbf, *bf...)
+	*bf = nbf
+}
+
 // ConfigSceneBars configures the side control bars, for main scenes
 func (sc *Scene) ConfigSceneBars() {
 	if !sc.Bars.Top.IsEmpty() {
@@ -127,6 +138,19 @@ func (sc *Scene) AddDefaultTopAppBar() {
 	})
 }
 
+// InheritBarsWidget inherits Bar functions based on a source widget
+// (e.g., Context of dialog)
+func (sc *Scene) InheritBarsWidget(wi Widget) {
+	if wi == nil || wi.This() == nil {
+		return
+	}
+	wb := wi.AsWidget()
+	if wb.Sc == nil {
+		return
+	}
+	sc.InheritBars(wb.Sc)
+}
+
 // InheritBars inherits Bars functions from given other scene
 // for each side that the other scene marks as inherited.
 func (sc *Scene) InheritBars(osc *Scene) {
@@ -134,19 +158,19 @@ func (sc *Scene) InheritBars(osc *Scene) {
 		return
 	}
 	if osc.BarsInherit.Top || sc.BarsInherit.Top {
-		sc.Bars.Top = osc.Bars.Top
+		sc.Bars.Top.Inherit(osc.Bars.Top)
 		sc.BarsInherit.Top = true
 	}
 	if osc.BarsInherit.Bottom || sc.BarsInherit.Bottom {
-		sc.Bars.Bottom = osc.Bars.Bottom
+		sc.Bars.Bottom.Inherit(osc.Bars.Bottom)
 		sc.BarsInherit.Bottom = true
 	}
 	if osc.BarsInherit.Left || sc.BarsInherit.Left {
-		sc.Bars.Left = osc.Bars.Left
+		sc.Bars.Left.Inherit(osc.Bars.Left)
 		sc.BarsInherit.Left = true
 	}
 	if osc.BarsInherit.Right || sc.BarsInherit.Right {
-		sc.Bars.Right = osc.Bars.Right
+		sc.Bars.Right.Inherit(osc.Bars.Right)
 		sc.BarsInherit.Right = true
 	}
 }

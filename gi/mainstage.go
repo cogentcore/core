@@ -142,9 +142,6 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
-	if st.FullWindow {
-		st.InheritBars()
-	}
 	return st
 }
 
@@ -154,14 +151,7 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 }
 
 func (st *MainStage) InheritBars() {
-	if st.Context == nil {
-		return
-	}
-	cb := st.Context.AsWidget()
-	if cb.Sc == nil {
-		return
-	}
-	st.Scene.InheritBars(cb.Sc)
+	st.Scene.InheritBarsWidget(st.Context)
 }
 
 // FirstWinManager creates a MainStageMgr for the first window

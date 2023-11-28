@@ -196,7 +196,6 @@ func (tb *TopAppBar) AllItemsToChildren() {
 		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
 			SetTooltip("Overflow toolbar items and additional menu items")
 		tb.OverflowButton.Menu = tb.OverflowMenu
-		tb.OverflowButton.Config()
 	}
 	if len(tb.OverflowItems) > 0 {
 		tb.Kids = append(tb.Kids, tb.OverflowItems...)
@@ -214,6 +213,7 @@ func (tb *TopAppBar) AllItemsToChildren() {
 		tb.Kids.DeleteAtIndex(ovi)
 	}
 	tb.Kids = append(tb.Kids, tb.OverflowButton.This())
+	tb.OverflowButton.Update()
 }
 
 func (tb *TopAppBar) ParentSize() float32 {
@@ -256,6 +256,7 @@ func (tb *TopAppBar) MoveToOverflow() {
 		tb.Kids.Move(n-1, ovidx)
 		tb.Kids = tb.Kids[:ovidx+1]
 	}
+	tb.OverflowButton.Update()
 }
 
 // OverflowMenu is the overflow menu function

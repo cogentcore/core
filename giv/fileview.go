@@ -667,7 +667,6 @@ func (fv *FileView) NewFolder() {
 		// emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
 		// gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView Error", Prompt: emsg, Ok: true, Cancel: false}, nil)
 	}
-	// fv.FileSig.Emit(fv.This(), int64(FileViewNewFolder), fv.DirPath)
 	fv.UpdateFilesAction()
 }
 
@@ -689,9 +688,8 @@ func (fv *FileView) SetSelFileAction(sel string) {
 	}
 	fv.SelectedIdx = sv.SelIdx
 	sf := fv.SelField()
-	sf.SetText(fv.SelFile)
+	sf.SetText(fv.SelFile) // make sure
 	fv.Send(events.Select) // receiver needs to get selectedFile
-	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
 // FileSelectAction updates selection with given selected file and emits

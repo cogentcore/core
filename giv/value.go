@@ -16,6 +16,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -815,6 +816,7 @@ func (vv *ValueBase) ConfigWidget(w gi.Widget) {
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(16)
+		s.Padding.Set(units.Dp(8)) // match typical element size so alignment works better
 	})
 	vv.StdConfigWidget(w)
 	if completetag, ok := vv.Tag("complete"); ok {

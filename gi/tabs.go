@@ -196,7 +196,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabIndex(idx)
+		ts.SelectTabByLabel(tab.Text)
 	})
 	fr := ts.Frame()
 	if len(fr.Kids) == 1 {
@@ -240,8 +240,9 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 	return frame, tab, true
 }
 
-// SelectTabIndex selects tab at given index, returning it -- returns false if
-// index is invalid
+// SelectTabIndex selects tab at given index, returning it.
+// Returns false if index is invalid.  This is the final
+// tab selection path.
 func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	frame, tab, ok := ts.TabAtIndex(idx)
 	if !ok {

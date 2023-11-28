@@ -112,7 +112,10 @@ func (ch *Chooser) ChooserStyles() {
 	ch.Icon = icons.None
 	ch.Indicator = icons.KeyboardArrowDown
 	ch.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
+		if !ch.Editable {
+			s.SetAbilities(true, abilities.Focusable)
+		}
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.Center
 		s.Border.Radius = styles.BorderRadiusSmall

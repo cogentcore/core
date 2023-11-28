@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"sync"
 
@@ -132,6 +133,10 @@ func (sm *StageMgrBase) PopType(typ StageTypes) Stage {
 
 // PopDelete pops current Stage off the stack and calls Delete on it.
 func (sm *StageMgrBase) PopDelete() {
+	if pm := sm.This.AsPopupMgr(); pm != nil {
+	} else {
+		fmt.Println("popdel: not a popup mgr!")
+	}
 	st := sm.Pop()
 	if st != nil {
 		st.Delete()

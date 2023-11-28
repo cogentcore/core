@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 
 	"log/slog"
@@ -55,7 +56,7 @@ type Button struct { //goki:embedder
 	// optional data that is sent with events to identify the button
 	Data any `json:"-" xml:"-" view:"-"`
 
-	// optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing
+	// optional function that is called to update state of button (typically updating ); called automatically for menus prior to showing
 	UpdateFunc func() `json:"-" xml:"-"`
 }
 
@@ -393,6 +394,8 @@ func (bt *Button) HandleClickDismissMenu() {
 			pst := bt.Sc.Stage.AsPopup()
 			if pst != nil && pst.Type == MenuStage {
 				pst.Close()
+			} else {
+				fmt.Println("error: popup not menu stage:", pst)
 			}
 		} else {
 			if bt.Sc == nil {

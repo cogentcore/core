@@ -37,6 +37,9 @@ func (sc *Scene) NewFullDialog(ctx Widget, name ...string) Stage {
 	sc.Stage.SetModal(true)
 	sc.Stage.SetContext(ctx)
 	sc.Stage.SetFullWindow(true)
+	if ctx != nil {
+		sc.InheritBarsWidget(ctx)
+	}
 	return sc.Stage
 }
 

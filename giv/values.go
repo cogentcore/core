@@ -555,17 +555,11 @@ func (vv *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	if !vv.IsArray && vv.ElIsStruct {
 		tv := NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
 		tv.SetReadOnly(vv.IsReadOnly())
-		d.AddTopBar(func(pw gi.Widget) {
-			tb := d.DefaultTopAppBar(pw)
-			tv.SliceDefaultTopAppBar(tb)
-		})
+		d.AddTopAppBar(tv.SliceDefaultTopAppBar)
 	} else {
 		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
 		sv.SetReadOnly(vv.IsReadOnly())
-		d.AddTopBar(func(pw gi.Widget) {
-			tb := d.DefaultTopAppBar(pw)
-			sv.SliceDefaultTopAppBar(tb)
-		})
+		d.AddTopAppBar(sv.SliceDefaultTopAppBar)
 	}
 	return true, nil
 }
@@ -677,8 +671,9 @@ func (vv *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	mpi := vv.Value.Interface()
 	vpath := vv.ViewPath + "/" + laser.NonPtrType(vv.Value.Type()).String()
-	NewMapView(d).SetMap(mpi).SetViewPath(vpath).SetTmpSave(vv.TmpSave).
-		SetReadOnly(vv.IsReadOnly())
+	mv := NewMapView(d).SetMap(mpi)
+	mv.SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetReadOnly(vv.IsReadOnly())
+	d.AddTopAppBar(mv.MapDefaultTopAppBar)
 	return true, nil
 }
 

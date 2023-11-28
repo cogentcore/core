@@ -264,7 +264,6 @@ func (is *Inspector) ConfigSplits() {
 		return
 	}
 	split := is.Splits()
-	// split.Dim = mat32.Y
 	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
@@ -279,7 +278,6 @@ func (is *Inspector) ConfigSplits() {
 		tv.OnSelect(func(e events.Event) {
 			if len(tv.SelectedNodes) > 0 {
 				sv.SetStruct(tv.SelectedNodes[0].SyncNode)
-				// todo: connect
 			}
 		})
 		split.SetSplits(.3, .7)

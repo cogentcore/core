@@ -108,6 +108,8 @@ func (ft *Tree) OpenPath(path string) {
 		abs = effpath
 	}
 	ft.FPath = gi.FileName(abs)
+	ft.Open()
+	ft.SetDirOpen(gi.FileName(abs))
 	ft.UpdateAll()
 }
 

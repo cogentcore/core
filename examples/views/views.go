@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -172,11 +173,11 @@ func app() {
 	// mv.SetMap(&tstmap)
 
 	sv := giv.NewSliceView(split, "sv")
-	// sv.SetState(true, states.ReadOnly)
+	sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&tstslice)
 
 	tv := giv.NewTableView(split, "tv")
-	// tv.SetState(true, states.ReadOnly)
+	tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 	//
 	// split.SetSplits(.3, .2, .2, .3)
