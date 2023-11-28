@@ -168,7 +168,7 @@ type EventMgr struct {
 }
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
-func (em *EventMgr) MainStageMgr() *MainStageMgr {
+func (em *EventMgr) MainStageMgr() *StageMgr {
 	if em.Scene == nil {
 		return nil
 	}

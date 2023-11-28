@@ -15,49 +15,9 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// MainStage manages a Scene serving as content for a
-// Window, Dialog, or Sheet, which are larger and potentially
-// complex Scenes that persist until dismissed, and can have
-// Decor widgets that control display.  MainStage has sprites.
-// MainStages live in a StageMgr associated with a RenderWin window,
-// and manage their own set of PopupStages via a PopupStageMgr,
-// and handle events using an EventMgr.
-type MainStage struct {
-	StageBase
-
-	// Data is item represented by this main stage -- used for recycling windows
-	Data any
-
-	// manager for the popups in this stage
-	PopupMgr PopupStageMgr
-
-	// the parent stage manager for this stage, which lives in a RenderWin
-	StageMgr *MainStageMgr
-
-	// sprites are named images that are rendered last overlaying everything else.
-	Sprites Sprites `json:"-" xml:"-"`
-
-	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
-	SpriteDragging string `json:"-" xml:"-"`
-}
-
-// AsMain returns this stage as a MainStage (for Main Window, Dialog, Sheet) types.
-// returns nil for PopupStage types.
-func (st *MainStage) AsMain() *MainStage {
-	return st
-}
-
-func (st *MainStage) String() string {
-	return "MainStage: " + st.StageBase.String()
-}
-
-func (st *MainStage) MainMgr() *MainStageMgr {
-	return st.StageMgr
-}
-
-func (st *MainStage) RenderCtx() *RenderContext {
+func (st *Stage) RenderCtx() *RenderContext {
 	if st.StageMgr == nil {
-		slog.Error("MainStage has nil StageMgr", "stage", st.Name)
+		slog.Error("Stage has nil StageMgr", "stage", st.Name)
 		return nil
 	}
 	return st.StageMgr.RenderCtx
@@ -67,13 +27,11 @@ func (st *MainStage) RenderCtx() *RenderContext {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the NewMainStage call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewMainStage(typ StageTypes, sc *Scene) *MainStage {
-	st := &MainStage{}
-	st.This = st
+func NewMainStage(typ StageTypes, sc *Scene) *Stage {
+	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
 	st.PopupMgr.Main = st
-	st.PopupMgr.This = &st.PopupMgr
 	return st
 }
 
@@ -81,7 +39,7 @@ func NewMainStage(typ StageTypes, sc *Scene) *MainStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func (sc *Scene) NewWindow() *MainStage {
+func (sc *Scene) NewWindow() *Stage {
 	ms := NewMainStage(WindowStage, sc)
 	ms.SetNewWindow(true)
 	return ms
@@ -91,7 +49,7 @@ func (sc *Scene) NewWindow() *MainStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func (bd *Body) NewWindow() *MainStage {
+func (bd *Body) NewWindow() *Stage {
 	return bd.Sc.NewWindow()
 }
 
@@ -103,7 +61,7 @@ func (bd *Body) NewWindow() *MainStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewSheet(sc *Scene, side StageSides) *MainStage {
+func NewSheet(sc *Scene, side StageSides) *Stage {
 	return NewMainStage(SheetStage, sc).SetSide(side).AsMain()
 }
 
@@ -112,7 +70,7 @@ func NewSheet(sc *Scene, side StageSides) *MainStage {
 
 // SetWindowInsets updates the padding on the Scene
 // to the inset values provided by the RenderWin window.
-func (st *MainStage) SetWindowInsets() {
+func (st *Stage) SetWindowInsets() {
 	if st.StageMgr == nil {
 		return
 	}
@@ -137,27 +95,27 @@ func (st *MainStage) SetWindowInsets() {
 }
 
 // only called when !NewWindow
-func (st *MainStage) AddWindowDecor() *MainStage {
+func (st *Stage) AddWindowDecor() *Stage {
 	return st
 }
 
-func (st *MainStage) AddDialogDecor() *MainStage {
+func (st *Stage) AddDialogDecor() *Stage {
 	return st
 }
 
-func (st *MainStage) AddSheetDecor() *MainStage {
+func (st *Stage) AddSheetDecor() *Stage {
 	// todo: handle based on side
 	return st
 }
 
-func (st *MainStage) InheritBars() {
+func (st *Stage) InheritBars() {
 	st.Scene.InheritBarsWidget(st.Context)
 }
 
 // FirstWinManager creates a MainStageMgr for the first window
 // to be able to get sizing information prior to having a RenderWin,
 // based on the goosi App Screen Size. Only adds a RenderCtx.
-func (st *MainStage) FirstWinManager() *MainStageMgr {
+func (st *Stage) FirstWinManager() *StageMgr {
 	ms := &MainStageMgr{}
 	ms.This = ms
 	rc := &RenderContext{}
@@ -172,7 +130,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 }
 
 // RunWindow runs a Window with current settings.
-func (st *MainStage) RunWindow() *MainStage {
+func (st *Stage) RunWindow() *Stage {
 	st.AddWindowDecor() // sensitive to cases
 	sc := st.Scene
 	sc.ConfigSceneBars()
@@ -228,7 +186,7 @@ func (st *MainStage) RunWindow() *MainStage {
 
 // RunDialog runs a Dialog with current settings.
 // RenderWin field will be set to the parent RenderWin window.
-func (st *MainStage) RunDialog() *MainStage {
+func (st *Stage) RunDialog() *Stage {
 	ctx := st.Context.AsWidget()
 	ms := ctx.Sc.MainStageMgr()
 
@@ -282,7 +240,7 @@ func (st *MainStage) RunDialog() *MainStage {
 
 // RunSheet runs a Sheet with current settings.
 // RenderWin field will be set to the parent RenderWin window.
-func (st *MainStage) RunSheet() *MainStage {
+func (st *Stage) RunSheet() *Stage {
 	st.AddSheetDecor()
 	st.Scene.ConfigSceneBars()
 	st.Scene.ConfigSceneWidgets()
@@ -297,7 +255,7 @@ func (st *MainStage) RunSheet() *MainStage {
 	return st
 }
 
-func (st *MainStage) NewRenderWin() *RenderWin {
+func (st *Stage) NewRenderWin() *RenderWin {
 	if st.Scene == nil {
 		slog.Error("MainStage.NewRenderWin: Scene is nil")
 	}
@@ -336,7 +294,7 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 	return win
 }
 
-func (st *MainStage) Delete() {
+func (st *Stage) Delete() {
 	st.PopupMgr.CloseAll()
 	if st.Scene != nil {
 		st.Scene.Delete(ki.DestroyKids)
@@ -345,7 +303,7 @@ func (st *MainStage) Delete() {
 	st.StageMgr = nil
 }
 
-func (st *MainStage) Resize(sz image.Point) {
+func (st *Stage) Resize(sz image.Point) {
 	if st.Scene == nil {
 		return
 	}
@@ -361,10 +319,10 @@ func (st *MainStage) Resize(sz image.Point) {
 	}
 }
 
-// DoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups
+// MainDoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups
 // returns stageMods = true if any Popup Stages have been modified
 // and sceneMods = true if any Scenes have been modified.
-func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
+func (st *Stage) MainDoUpdate() (stageMods, sceneMods bool) {
 	if st.Scene == nil {
 		return
 	}
@@ -380,12 +338,12 @@ func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
 	return
 }
 
-func (st *MainStage) StageAdded(smi StageMgr) {
+func (st *Stage) MainStageAdded(smi StageMgr) {
 	st.StageMgr = smi.AsMainMgr()
 }
 
-// HandleEvent handles all the non-Window events
-func (st *MainStage) HandleEvent(evi events.Event) {
+// MainHandleEvent handles main stage events
+func (st *Stage) MainHandleEvent(evi events.Event) {
 	if st.Scene == nil {
 		return
 	}
@@ -400,8 +358,34 @@ func (st *MainStage) HandleEvent(evi events.Event) {
 	st.Scene.EventMgr.HandleEvent(evi)
 }
 
-/*
+//////////////////////////////////////////////////////////////////////////////
+//		Main StageMgr
 
+func (sm *StageMgr) SetRenderWin(win *RenderWin) {
+	sm.RenderWin = win
+	sm.RenderCtx = &RenderContext{LogicalDPI: 96}
+}
+
+// resize resizes all main stages
+func (sm *StageMgr) Resize(sz image.Point) {
+	for _, kv := range sm.Stack.Order {
+		st := kv.Val.AsMain()
+		st.Resize(sz)
+	}
+}
+
+func (sm *StageMgr) MainHandleEvent(evi events.Event) {
+	n := sm.Stack.Len()
+	for i := n - 1; i >= 0; i-- {
+		st := sm.Stack.ValByIdx(i).AsMain()
+		st.HandleEvent(evi)
+		if evi.IsHandled() || st.Modal || st.Type == WindowStage {
+			return
+		}
+	}
+}
+
+/*
 todo: main menu on full win
 
 // ConfigVLay creates and configures the vertical layout as first child of

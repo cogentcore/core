@@ -89,7 +89,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
+func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *Stage {
 	if sc == nil || !sc.HasChildren() {
 		return nil
 	}
@@ -104,7 +104,7 @@ func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *PopupStage {
+func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
 	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
 }
 

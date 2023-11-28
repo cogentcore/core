@@ -32,7 +32,7 @@ type Completer interface {
 // It also holds the [PopupStage] associated with it.
 type Complete struct { //gti:add -setters
 	// Stage is the [PopupStage] associated with the [Complete]
-	Stage *PopupStage
+	Stage *Stage
 
 	// function to get the list of possible completions
 	MatchFunc complete.MatchFunc

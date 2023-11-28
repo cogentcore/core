@@ -6,44 +6,43 @@ package gi
 
 import (
 	"fmt"
-	"image"
 	"sync"
 
 	"goki.dev/goosi/events"
 	"goki.dev/ordmap"
 )
 
-// StageMgr is the stage manager interface
-type StageMgr interface {
-
-	// AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
-	AsMainMgr() *MainStageMgr
-
-	// AsPopupMgr returns underlying PopupStageMgr or nil if a MainStageMgr
-	AsPopupMgr() *PopupStageMgr
-}
-
-// StageMgrBase provides base impl for stage management,
+// StageMgr provides base impl for stage management,
 // extended by PopupStageMgr and MainStageMgr.
 // Manages a stack of Stage elements.
-type StageMgrBase struct {
-	// This is the StageMgr as a StageMgr interface -- preserves actual identity
-	// when calling interface methods in StageMgrBase.
-	This StageMgr
-
+type StageMgr struct {
 	// stack of stages
-	Stack ordmap.Map[string, Stage]
+	Stack ordmap.Map[string, *Stage]
 
 	// Modified is set to true whenever the stack has been modified.
 	// This is cleared by the RenderWin each render cycle.
 	Modified bool
+
+	// rendering context for the Stages lives here.
+	// Everyone comes back here to access it.
+	RenderCtx *RenderContext
+
+	// render window -- only set for stage manager within such a window.
+	// rely on the RenderCtx wherever possible.
+	RenderWin *RenderWin `set:"-"`
+
+	// growing stack of viewing history of all stages.
+	History []*Stage
+
+	// Main is the MainStage that manages a popup
+	Main *Stage
 
 	// mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
 	Mu sync.RWMutex `view:"-"`
 }
 
 // Top returns the top-most Stage in the Stack, under Read Lock
-func (sm *StageMgrBase) Top() Stage {
+func (sm *StageMgr) Top() *Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -56,7 +55,7 @@ func (sm *StageMgrBase) Top() Stage {
 
 // TopOfType returns the top-most Stage in the Stack
 // of the given type, under Read Lock
-func (sm *StageMgrBase) TopOfType(typ StageTypes) Stage {
+func (sm *StageMgr) TopOfType(typ StageTypes) *Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -72,7 +71,7 @@ func (sm *StageMgrBase) TopOfType(typ StageTypes) Stage {
 
 // TopNotType returns the top-most Stage in the Stack
 // that is NOT the given type, under Read Lock
-func (sm *StageMgrBase) TopNotType(typ StageTypes) Stage {
+func (sm *StageMgr) TopNotType(typ StageTypes) *Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -87,7 +86,7 @@ func (sm *StageMgrBase) TopNotType(typ StageTypes) Stage {
 }
 
 // Push pushes a new Stage to top, under Write lock
-func (sm *StageMgrBase) Push(st Stage) {
+func (sm *StageMgr) Push(st *Stage) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -98,7 +97,7 @@ func (sm *StageMgrBase) Push(st Stage) {
 
 // Pop pops current Stage off the stack, returning it or nil if none.
 // It runs under Write lock.
-func (sm *StageMgrBase) Pop() Stage {
+func (sm *StageMgr) Pop() *Stage {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -115,7 +114,7 @@ func (sm *StageMgrBase) Pop() Stage {
 
 // PopType pops the top-most Stage of the given type of the stack,
 // returning it or nil if none. It runs under Write lock.
-func (sm *StageMgrBase) PopType(typ StageTypes) Stage {
+func (sm *StageMgr) PopType(typ StageTypes) *Stage {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -132,7 +131,7 @@ func (sm *StageMgrBase) PopType(typ StageTypes) Stage {
 }
 
 // PopDelete pops current Stage off the stack and calls Delete on it.
-func (sm *StageMgrBase) PopDelete() {
+func (sm *StageMgr) PopDelete() {
 	if pm := sm.This.AsPopupMgr(); pm != nil {
 	} else {
 		fmt.Println("popdel: not a popup mgr!")
@@ -145,7 +144,7 @@ func (sm *StageMgrBase) PopDelete() {
 
 // PopDeleteType pops the top-most Stage of the given type off the stack
 // and calls Delete on it.
-func (sm *StageMgrBase) PopDeleteType(typ StageTypes) {
+func (sm *StageMgr) PopDeleteType(typ StageTypes) {
 	st := sm.PopType(typ)
 	if st != nil {
 		st.Delete()
@@ -155,7 +154,7 @@ func (sm *StageMgrBase) PopDeleteType(typ StageTypes) {
 // CloseAll closes all of the stages, calling Delete on each of them.
 // When Stage with Popups is Deleted, or when a RenderWindow is closed.
 // requires outer RenderContext mutex!
-func (sm *StageMgrBase) CloseAll() {
+func (sm *StageMgr) CloseAll() {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -180,7 +179,7 @@ func (sm *StageMgrBase) CloseAll() {
 //	This is called only during RenderWin.RenderWindow,
 //
 // under the global RenderCtx.Mu Write lock so nothing else can happen.
-func (sm *StageMgrBase) UpdateAll() (stageMods, sceneMods bool) {
+func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -200,7 +199,7 @@ func (sm *StageMgrBase) UpdateAll() (stageMods, sceneMods bool) {
 	return
 }
 
-func (sm *StageMgrBase) SendShowEvents() {
+func (sm *StageMgr) SendShowEvents() {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Val.AsBase()
 		if st.Scene == nil {
@@ -210,70 +209,6 @@ func (sm *StageMgrBase) SendShowEvents() {
 		if sc.ShowIter == 2 {
 			sc.ShowIter++
 			sc.Send(events.Show)
-		}
-	}
-}
-
-// AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
-func (sm *StageMgrBase) AsMainMgr() *MainStageMgr {
-	return nil
-}
-
-// AsPopupMgr returns underlying PopupStageMgr or nil if a MainStageMgr
-func (sm *StageMgrBase) AsPopupMgr() *PopupStageMgr {
-	return nil
-}
-
-//////////////////////////////////////////////////////////////
-//		MainStageMgr
-
-// MainStageMgr is the MainStage manager for MainStage types:
-// Window, Dialog, Sheet.
-// This lives in a RenderWin rendering window, and manages
-// all the content for the window.
-type MainStageMgr struct {
-	StageMgrBase
-
-	// rendering context for the Stages lives here.
-	// Everyone comes back here to access it.
-	RenderCtx *RenderContext
-
-	// render window -- only set for stage manager within such a window.
-	// rely on the RenderCtx wherever possible.
-	RenderWin *RenderWin
-
-	// growing stack of viewing history of all stages.
-	History []*MainStage
-}
-
-// AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
-func (sm *MainStageMgr) AsMainMgr() *MainStageMgr {
-	return sm
-}
-
-// Init is called when owning RenderWin is created.
-// Initializes data structures
-func (sm *MainStageMgr) Init(this StageMgr, win *RenderWin) {
-	sm.This = this
-	sm.RenderWin = win
-	sm.RenderCtx = &RenderContext{LogicalDPI: 96}
-}
-
-// resize resizes all main stages
-func (sm *MainStageMgr) Resize(sz image.Point) {
-	for _, kv := range sm.Stack.Order {
-		st := kv.Val.AsMain()
-		st.Resize(sz)
-	}
-}
-
-func (sm *MainStageMgr) HandleEvent(evi events.Event) {
-	n := sm.Stack.Len()
-	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i).AsMain()
-		st.HandleEvent(evi)
-		if evi.IsHandled() || st.Modal || st.Type == WindowStage {
-			return
 		}
 	}
 }

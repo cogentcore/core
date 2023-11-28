@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"time"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/events"
 )
 
 // StageTypes are the types of Stage containers.
@@ -78,17 +78,11 @@ const (
 	SideSheet
 )
 
-// StageBase is a container and manager for displaying a Scene
-// in different functional ways, defined by StageTypes.
-// MainStage extends to implement support for Main types
-// (Window, Dialog, Sheet) and PopupStage supports
-// Popup types (Menu, Tooltip, Snackbar, Chooser).
-// MainStage has an EventMgr for managing events including for Popups.
-type StageBase struct { //gti:add -setters
-	// This is the Stage as a Stage interface -- preserves actual identity
-	// when calling interface methods in StageBase.  Also use for chain return values.
-	This Stage
-
+// Stage is a container and manager for displaying a Scene
+// in different functional ways, defined by StageTypes, in two categories:
+// Main types (Window, Dialog, Sheet) and Popup types
+// (Menu, Tooltip, Snackbar, Chooser).
+type Stage struct { //gti:add -setters
 	// type of Stage: determines behavior and Styling
 	Type StageTypes `set:"-"`
 
@@ -118,10 +112,12 @@ type StageBase struct { //gti:add -setters
 	// whether to send no events to the stage and just pass them down to lower stages
 	IgnoreEvents bool
 
-	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
+	// NewWindow: if true, opens a Window or Dialog in its own separate operating
+	// system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	NewWindow bool
 
-	// if NewWindow is false, then this makes Dialogs and Windows take up the entire window they are created in
+	// if NewWindow is false, then this makes Dialogs and Windows take up
+	// the entire window they are created in.
 	FullWindow bool
 
 	// for Dialogs: if true includes a close button for closing
@@ -133,131 +129,42 @@ type StageBase struct { //gti:add -setters
 	// for Dialogs: adds a resize handle Decor for resizing
 	Resizable bool
 
-	// Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from
+	// Side for Stages that can operate on different sides, e.g.,
+	// for Sheets: which side does the sheet come out from
 	Side StageSides
+
+	// Data is item represented by this main stage -- used for recycling windows
+	Data any
+
+	// manager for the popups in this stage
+	PopupMgr StageMgr
+
+	// the parent stage manager for this stage, which lives in a RenderWin
+	MainMgr *StageMgr
+
+	// sprites are named images that are rendered last overlaying everything else.
+	Sprites Sprites `json:"-" xml:"-"`
+
+	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
+	SpriteDragging string `json:"-" xml:"-"`
+
+	// Main is the MainStage that owns this Popup (via its PopupMgr)
+	Main *Stage
+
+	// if > 0, disappears after a timeout duration
+	Timeout time.Duration
 }
 
-// Stage interface provides methods for setting values on Stages.
-// Convert to *MainStage or *PopupStage via As methods.
-type Stage interface {
-	fmt.Stringer
-
-	// AsBase returns this stage as a StageBase for accessing base fields.
-	AsBase() *StageBase
-
-	// AsMain returns this stage as a MainStage (for Main Window, Dialog, Sheet) types.
-	// returns nil for PopupStage types.
-	AsMain() *MainStage
-
-	// AsPopup returns this stage as a PopupStage (for Popup types)
-	// returns nil for MainStage types.
-	AsPopup() *PopupStage
-
-	// SetNameFromString sets the name of this Stage based on existing
-	// Scene and Type settings.
-	SetNameFromScene() Stage
-
-	SetScene(sc *Scene) *StageBase
-
-	SetType(typ StageTypes) *StageBase
-
-	SetName(name string) *StageBase
-
-	SetTitle(title string) *StageBase
-
-	SetContext(ctx Widget) *StageBase
-
-	SetModal(bool) *StageBase
-
-	SetScrim(bool) *StageBase
-
-	SetClickOff(bool) *StageBase
-
-	SetNewWindow(bool) *StageBase
-
-	SetFullWindow(bool) *StageBase
-
-	SetCloseable(bool) *StageBase
-
-	SetMovable(bool) *StageBase
-
-	SetResizable(bool) *StageBase
-
-	SetSide(side StageSides) *StageBase
-
-	// Run does the default run behavior based on the type of stage
-	Run() Stage
-
-	// Wait waits for the window to close.
-	// This should be included after the main window Run() call.
-	Wait() Stage
-
-	// MainMgr returns the MainStageMgr for this Stage.
-	// This is the owning manager for a MainStage and the controlling
-	// manager for a Popup.
-	MainMgr() *MainStageMgr
-
-	// RenderCtx returns the rendering context for this stage,
-	// via a stage manager -- could be nil if not available.
-	RenderCtx() *RenderContext
-
-	// StageAdded is called when a stage is added to its manager
-	StageAdded(sm StageMgr)
-
-	// HandleEvent handles given event within this stage
-	HandleEvent(evi events.Event)
-
-	// DoUpdate calls DoUpdate on the Scene,
-	// performing any Widget-level updates and rendering.
-	// returns stageMods = true if any Stages have been modified
-	// and sceneMods = true if any Scenes have been modified.
-	DoUpdate() (stageMods, sceneMods bool)
-
-	// Delete closes and frees resources for everything in the stage.
-	// Scenes have their own Delete method that allows them to Preserve
-	// themselves for re-use, but stages are always struck when done.
-	Delete()
-}
-
-func (st *StageBase) AsBase() *StageBase {
-	return st
-}
-
-func (st *StageBase) AsMain() *MainStage {
-	return nil
-}
-
-func (st *StageBase) AsPopup() *PopupStage {
-	return nil
-}
-
-func (st *StageBase) String() string {
+func (st *Stage) String() string {
 	str := fmt.Sprintf("%s Type: %s", st.Name, st.Type)
 	if st.Scene != nil {
 		str += "  Scene: " + st.Scene.Name()
 	}
-	rc := st.This.RenderCtx()
+	rc := st.RenderCtx()
 	if rc != nil {
 		str += "  Rc: " + rc.String()
 	}
 	return str
-}
-
-func (st *StageBase) MainMgr() *MainStageMgr {
-	return nil
-}
-
-func (st *StageBase) StageAdded(sm StageMgr) {
-}
-
-func (st *StageBase) RenderCtx() *RenderContext {
-	return nil
-}
-
-func (st *StageBase) HandleEvent(evi events.Event) {
-}
-
-func (st *StageBase) Delete() {
 }
 
 // Note: Set* methods are designed to be called in sequence to efficiently set
@@ -265,7 +172,7 @@ func (st *StageBase) Delete() {
 
 // SetNameFromString sets the name of this Stage based on existing
 // Scene and Type settings.
-func (st *StageBase) SetNameFromScene() Stage {
+func (st *Stage) SetNameFromScene() *Stage {
 	if st.Scene == nil {
 		return nil
 	}
@@ -274,19 +181,19 @@ func (st *StageBase) SetNameFromScene() Stage {
 	if sc.Body != nil {
 		st.Title = sc.Body.Title
 	}
-	return st.This
+	return st
 }
 
-func (st *StageBase) SetScene(sc *Scene) *StageBase {
+func (st *Stage) SetScene(sc *Scene) *Stage {
 	st.Scene = sc
 	if sc != nil {
-		sc.Stage = st.This
+		sc.Stage = st
 		st.SetNameFromScene()
 	}
 	return st
 }
 
-func (st *StageBase) SetType(typ StageTypes) *StageBase {
+func (st *Stage) SetType(typ StageTypes) *Stage {
 	st.Type = typ
 	switch st.Type {
 	case WindowStage:
@@ -324,33 +231,33 @@ func (st *StageBase) SetType(typ StageTypes) *StageBase {
 }
 
 // Run does the default run behavior based on the type of stage
-func (st *StageBase) Run() Stage {
+func (st *Stage) Run() *Stage {
 	if st.Scene == nil {
 		slog.Error("stage has nil scene")
 	}
 	switch st.Type {
 	case WindowStage:
-		return st.This.AsMain().RunWindow()
+		return st.RunWindow()
 	case DialogStage:
-		return st.This.AsMain().RunDialog()
+		return st.RunDialog()
 	case SheetStage:
-		return st.This.AsMain().RunSheet()
+		return st.RunSheet()
 	default:
-		return st.This.AsPopup().RunPopup()
+		return st.RunPopup()
 	}
 }
 
 // Wait waits for the window to close.
 // This should be included after the main window Run() call.
-func (st *StageBase) Wait() Stage {
+func (st *Stage) Wait() *Stage {
 	Wait()
-	return st.This
+	return st
 }
 
 // DoUpdate for base just calls DoUpdate on scene
 // returns stageMods = true if any Stages have been modified
 // and sceneMods = true if any Scenes have been modified.
-func (st *StageBase) DoUpdate() (stageMods, sceneMods bool) {
+func (st *Stage) PopupDoUpdate() (stageMods, sceneMods bool) {
 	if st.Scene == nil {
 		return
 	}

@@ -86,7 +86,7 @@ type RenderWin struct {
 
 	// MainStageMgr controlling the MainStage elements in this window.
 	// The Render Context in this manager is the original source for all Stages
-	StageMgr MainStageMgr
+	MainStageMgr StageMgr
 
 	// RenderScenes are the Scene elements that draw directly to the window,
 	// arranged in order.  See winrender.go for all rendering code.

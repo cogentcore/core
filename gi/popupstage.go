@@ -12,51 +12,21 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// PopupStage supports Popup types (Menu, Tooltip, Snackbar, Completer),
-// which are transitory and simple, without additional decor,
-// and are associated with and managed by a MainStage element (Window, etc).
-type PopupStage struct {
-	StageBase
+// func (st *Stage) MainMgr() *StageMgr {
+// 	if st.Main == nil {
+// 		return nil
+// 	}
+// 	return st.Main.StageMgr
+// }
 
-	// Main is the MainStage that owns this Popup (via its PopupMgr)
-	Main *MainStage
-
-	// if > 0, disappears after a timeout duration
-	Timeout time.Duration
-}
-
-// AsPopup returns this stage as a PopupStage (for Popup types)
-// returns nil for MainStage types.
-func (st *PopupStage) AsPopup() *PopupStage {
-	return st
-}
-
-func (st *PopupStage) String() string {
-	return "PopupStage: " + st.StageBase.String()
-}
-
-func (st *PopupStage) MainMgr() *MainStageMgr {
-	if st.Main == nil {
-		return nil
-	}
-	return st.Main.StageMgr
-}
-
-func (st *PopupStage) SetTimeout(dur time.Duration) *PopupStage {
-	if st != nil {
-		st.Timeout = dur
-	}
-	return st
-}
-
-func (st *PopupStage) RenderCtx() *RenderContext {
+func (st *Stage) PopupRenderCtx() *RenderContext {
 	if st.Main == nil {
 		return nil
 	}
 	return st.Main.RenderCtx()
 }
 
-func (st *PopupStage) Delete() {
+func (st *Stage) DeletePopup() {
 	if st.Scene != nil {
 		st.Scene.Delete(ki.DestroyKids)
 	}
@@ -64,12 +34,12 @@ func (st *PopupStage) Delete() {
 	st.Main = nil
 }
 
-func (st *PopupStage) StageAdded(smi StageMgr) {
+func (st *Stage) PopupStageAdded(smi StageMgr) {
 	pm := smi.AsPopupMgr()
 	st.Main = pm.Main
 }
 
-func (st *PopupStage) HandleEvent(evi events.Event) {
+func (st *Stage) PopupHandleEvent(evi events.Event) {
 	if st.Scene == nil {
 		return
 	}
@@ -85,7 +55,7 @@ func (st *PopupStage) HandleEvent(evi events.Event) {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the NewPopupStage call.
 // Use Run call at the end to start the Stage running.
-func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
+func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	if ctx == nil {
 		slog.Error("NewPopupStage needs a context Widget")
 		return nil
@@ -95,7 +65,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 		slog.Error("NewPopupStage context doesn't have a Stage")
 		return nil
 	}
-	st := &PopupStage{}
+	st := &Stage{}
 	st.This = st
 	st.SetType(typ)
 	st.SetScene(sc)
@@ -122,12 +92,12 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewCompleter(sc *Scene, ctx Widget) *PopupStage {
+func NewCompleter(sc *Scene, ctx Widget) *Stage {
 	return NewPopupStage(CompleterStage, sc, ctx)
 }
 
 // RunPopup runs a popup-style Stage in context widget's popups.
-func (st *PopupStage) RunPopup() *PopupStage {
+func (st *Stage) RunPopup() *Stage {
 	st.Scene.ConfigSceneWidgets()
 	mm := st.MainMgr()
 	if mm == nil {
@@ -206,7 +176,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 }
 
 // Close closes this stage as a popup
-func (st *PopupStage) Close() {
+func (st *Stage) Close() {
 	mn := st.Main
 	if mn == nil {
 		slog.Error("popupstage has no Main")
@@ -222,4 +192,76 @@ func (st *PopupStage) Close() {
 
 	cmgr := &mn.PopupMgr
 	cmgr.PopDelete()
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//		Main StageMgr
+
+// TopIsModal returns true if there is a Top PopupStage and it is Modal.
+func (pm *StageMgr) TopIsModal() bool {
+	top := pm.Top()
+	if top == nil {
+		return false
+	}
+	return top.AsBase().Modal
+}
+
+// PopupHandleEvent processes Popup events.
+// requires outer RenderContext mutex.
+func (pm *StageMgr) PopupHandleEvent(evi events.Event) {
+	top := pm.Top()
+	if top == nil {
+		return
+	}
+	tb := top.AsBase()
+	ts := tb.Scene
+
+	// we must get the top stage that does not ignore events
+	if tb.IgnoreEvents {
+		var ntop Stage
+		for i := pm.Stack.Len() - 1; i >= 0; i-- {
+			s := pm.Stack.ValByIdx(i)
+			if !s.AsBase().IgnoreEvents {
+				ntop = s
+				break
+			}
+		}
+		if ntop == nil {
+			return
+		}
+		top = ntop
+		tb = top.AsBase()
+		ts = tb.Scene
+	}
+
+	if evi.HasPos() {
+		pos := evi.Pos()
+		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
+		if pos.In(ts.SceneGeom.Bounds()) {
+			top.HandleEvent(evi)
+			evi.SetHandled()
+			return
+		}
+		if tb.ClickOff && evi.Type() == events.MouseUp {
+			pm.PopDelete()
+		}
+		if tb.Modal { // absorb any other events!
+			evi.SetHandled()
+			return
+		}
+		// otherwise not Handled, so pass on to first lower stage
+		// that accepts events and is in bounds
+		for i := pm.Stack.Len() - 1; i >= 0; i-- {
+			s := pm.Stack.ValByIdx(i)
+			sb := s.AsBase()
+			ss := sb.Scene
+			if !sb.IgnoreEvents && pos.In(ss.SceneGeom.Bounds()) {
+				s.HandleEvent(evi)
+				evi.SetHandled()
+				return
+			}
+		}
+	} else { // typically focus, so handle even if not in bounds
+		top.HandleEvent(evi) // could be set as Handled or not
+	}
 }

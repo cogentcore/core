@@ -232,7 +232,7 @@ func (sc *Scene) RenderWin() *RenderWin {
 // and manages all of the MainStage elements (Windows, Dialogs etc),
 // which in turn manage their popups.  This Scene could be in a popup
 // or in a main stage.
-func (sc *Scene) MainStageMgr() *MainStageMgr {
+func (sc *Scene) MainStageMgr() *StageMgr {
 	if sc.Stage == nil {
 		slog.Error("Scene has nil Stage", "scene", sc.Nm)
 		return nil
@@ -240,9 +240,9 @@ func (sc *Scene) MainStageMgr() *MainStageMgr {
 	return sc.Stage.MainMgr()
 }
 
-// PopupStage returns the Stage as a PopupStage.
+// Stage returns the Stage as a Stage.
 // nil if it is not a popup.
-func (sc *Scene) PopupStage() *PopupStage {
+func (sc *Scene) Stage() *Stage {
 	if sc.Stage == nil {
 		return nil
 	}
@@ -250,8 +250,8 @@ func (sc *Scene) PopupStage() *PopupStage {
 }
 
 // MainStage returns this Scene's Stage as a MainStage,
-// which could be nil if in fact it is in a PopupStage.
-func (sc *Scene) MainStage() *MainStage {
+// which could be nil if in fact it is in a Stage.
+func (sc *Scene) MainStage() *Stage {
 	return sc.Stage.AsMain()
 }
 
