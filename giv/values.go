@@ -1086,11 +1086,11 @@ func (vv *EnumValue) WidgetType() *gti.Type {
 }
 
 func (vv *EnumValue) EnumValue() enums.Enum {
-	ev, ok := vv.Value.Interface().(enums.Enum)
+	ev, ok := laser.OnePtrUnderlyingValue(vv.Value).Interface().(enums.Enum)
 	if ok {
 		return ev
 	}
-	slog.Error("giv.EnumValue: type must be enums.Enum")
+	slog.Error("giv.EnumValue: type must be enums.Enum", "was", vv.Value.Type())
 	return nil
 }
 

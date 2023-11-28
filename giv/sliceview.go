@@ -337,7 +337,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.End
 					s.Min.Y.Em(1)
-					s.Grow.Set(0, 0)
+					s.GrowWrap = false
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
