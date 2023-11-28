@@ -609,8 +609,10 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorValue) HasDialog() bool                      { return true }
-func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *ColorValue) HasDialog() bool { return true }
+func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Edit color")
+}
 
 func (vv *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	dclr := color.RGBA{}
@@ -670,8 +672,10 @@ func (vv *ColorNameValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorNameValue) HasDialog() bool                      { return true }
-func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *ColorNameValue) HasDialog() bool { return true }
+func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Select a color name")
+}
 
 func (vv *ColorNameValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := laser.ToString(vv.Value.Interface())

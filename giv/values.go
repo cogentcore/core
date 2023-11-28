@@ -1443,8 +1443,10 @@ func (vv *IconValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *IconValue) HasDialog() bool                      { return true }
-func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *IconValue) HasDialog() bool { return true }
+func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Select an icon")
+}
 
 func (vv *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0
@@ -1504,8 +1506,10 @@ func (vv *FontValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *FontValue) HasDialog() bool                      { return true }
-func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *FontValue) HasDialog() bool { return true }
+func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Select a font")
+}
 
 // show fonts in a bigger size so you can actually see the differences
 var FontChooserSize = units.Pt(18)

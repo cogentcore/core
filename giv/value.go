@@ -901,15 +901,20 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 
 // OpenValueDialog is a helper for OpenDialog for cases that use
 // [ConfigDialog] method to configure the dialog contents.
-func OpenValueDialog(vv Value, ctx gi.Widget, fun func()) {
+// If a title is specified, it is used as the title for the dialog
+// instead of the default one.
+func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 	vb := vv.AsValueBase()
-	title, _, _ := vb.GetTitle()
+	ttl, _, _ := vb.GetTitle()
+	if len(title) > 0 {
+		ttl = title[0]
+	}
 	opv := laser.OnePtrUnderlyingValue(vb.Value)
 	obj := opv.Interface()
 	if gi.RecycleDialog(obj) {
 		return
 	}
-	d := gi.NewBody().AddTitle(title).AddText(vv.Doc())
+	d := gi.NewBody().AddTitle(ttl).AddText(vv.Doc())
 	ok, okfun := vv.ConfigDialog(d)
 	if !ok {
 		return

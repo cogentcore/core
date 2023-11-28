@@ -102,8 +102,10 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *KeyMapValue) HasDialog() bool                      { return true }
-func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *KeyMapValue) HasDialog() bool { return true }
+func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Select a key map")
+}
 
 func (vv *KeyMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0

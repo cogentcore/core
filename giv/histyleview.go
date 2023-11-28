@@ -54,8 +54,10 @@ func (vv *HiStyleValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *HiStyleValue) HasDialog() bool                      { return true }
-func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *HiStyleValue) HasDialog() bool { return true }
+func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Select a syntax highlighting style")
+}
 
 func (vv *HiStyleValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	si := 0

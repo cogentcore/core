@@ -184,8 +184,10 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorMapValue) HasDialog() bool                      { return true }
-func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
+func (vv *ColorMapValue) HasDialog() bool { return true }
+func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func()) {
+	OpenValueDialog(vv, ctx, fun, "Select a color map")
+}
 
 func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	sl := colormap.AvailMapsList()
