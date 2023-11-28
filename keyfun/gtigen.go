@@ -55,26 +55,26 @@ var _ = gti.AddType(&gti.Type{
 	},
 
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"OpenJSON", &gti.Method{Name: "OpenJSON", Doc: "OpenJSON opens keymaps from a JSON-formatted file.\nYou can save and open key maps to / from files to share, experiment, transfer, etc", Directives: gti.Directives{
+		{"Open", &gti.Method{Name: "Open", Doc: "Open opens keymaps from a toml-formatted file.\nYou can save and open key maps to / from files to share, experiment, transfer, etc", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
-		{"SaveJSON", &gti.Method{Name: "SaveJSON", Doc: "SaveJSON saves keymaps to a JSON-formatted file.\nYou can save and open key maps to / from files to share, experiment, transfer, etc", Directives: gti.Directives{
+		{"Save", &gti.Method{Name: "Save", Doc: "Save saves keymaps to a toml-formatted file.\nYou can save and open key maps to / from files to share, experiment, transfer, etc", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
-		{"OpenPrefs", &gti.Method{Name: "OpenPrefs", Doc: "OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.\nThis is called automatically, so calling it manually should not be necessary in most cases.", Directives: gti.Directives{
+		{"OpenPrefs", &gti.Method{Name: "OpenPrefs", Doc: "OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.toml.\nThis is called automatically, so calling it manually should not be necessary in most cases.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
-		{"SavePrefs", &gti.Method{Name: "SavePrefs", Doc: "SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,\nwhich will be loaded automatically at startup if prefs SaveKeyMaps is checked\n(should be if you're using custom keymaps)", Directives: gti.Directives{
+		{"SavePrefs", &gti.Method{Name: "SavePrefs", Doc: "SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.toml,\nwhich will be loaded automatically at startup if prefs SaveKeyMaps is checked\n(should be if you're using custom keymaps)", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},

@@ -100,11 +100,11 @@ func (ed *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
 		spos.X += ed.LineNoOff
 		return spos
 	}
-	// if pos.Ln >= ed.NLines {
-	// 	spos.Y += float32(ed.LinesSize.Y)
-	// 	spos.X += ed.LineNoOff
-	// 	return spos
-	// }
+	if pos.Ln >= len(ed.Offs) {
+		spos.Y += float32(ed.LinesSize.Y)
+		spos.X += ed.LineNoOff
+		return spos
+	}
 	spos.Y += ed.Offs[pos.Ln] + mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
 	spos.X += ed.LineNoOff
 	if len(ed.Renders[pos.Ln].Spans) > 0 {

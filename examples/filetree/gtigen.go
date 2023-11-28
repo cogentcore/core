@@ -3,11 +3,7 @@
 package main
 
 import (
-	"goki.dev/gi/v2/filetree"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi/events"
 	"goki.dev/gti"
-	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
 )
 

@@ -311,38 +311,38 @@ func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 
 // PrefsMapsFileName is the name of the preferences file in GoGi prefs
 // directory for saving / loading the default AvailMaps key maps list
-var PrefsMapsFileName = "key_maps_prefs.json"
+var PrefsMapsFileName = "key_maps_prefs.toml"
 
-// OpenJSON opens keymaps from a JSON-formatted file.
+// Open opens keymaps from a toml-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
-func (km *Maps) OpenJSON(filename string) error { //gti:add
+func (km *Maps) Open(filename string) error { //gti:add
 	*km = make(Maps, 0, 10) // reset
 	return grr.Log(jsons.Open(km, filename))
 }
 
-// SaveJSON saves keymaps to a JSON-formatted file.
+// Save saves keymaps to a toml-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
-func (km *Maps) SaveJSON(filename string) error { //gti:add
+func (km *Maps) Save(filename string) error { //gti:add
 	return grr.Log(jsons.Save(km, filename))
 }
 
-// OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
+// OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.toml.
 // This is called automatically, so calling it manually should not be necessary in most cases.
 func (km *Maps) OpenPrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
-	return km.OpenJSON(pnm)
+	return km.Open(pnm)
 }
 
-// SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,
+// SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.toml,
 // which will be loaded automatically at startup if prefs SaveKeyMaps is checked
 // (should be if you're using custom keymaps)
 func (km *Maps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
-	return km.SaveJSON(pnm)
+	return km.Save(pnm)
 }
 
 // CopyFrom copies keymaps from given other map

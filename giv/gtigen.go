@@ -1147,6 +1147,12 @@ func (t *SliceView) SetSliceSize(v int) *SliceView {
 	return t
 }
 
+// SetConfigIter sets the [SliceView.ConfigIter]
+func (t *SliceView) SetConfigIter(v int) *SliceView {
+	t.ConfigIter = v
+	return t
+}
+
 // SetTmpIdx sets the [SliceView.TmpIdx]
 func (t *SliceView) SetTmpIdx(v int) *SliceView {
 	t.TmpIdx = v
@@ -1184,6 +1190,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", LocalType: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", LocalType: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", LocalType: "int", Doc: "size of slice", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"ConfigIter", &gti.Field{Name: "ConfigIter", Type: "int", LocalType: "int", Doc: "iteration through the configuration process, reset when a new slice type is set", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpIdx", &gti.Field{Name: "TmpIdx", Type: "int", LocalType: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ElVal", &gti.Field{Name: "ElVal", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
@@ -1318,6 +1325,13 @@ func (t *SliceViewBase) SetStartIdx(v int) *SliceViewBase {
 // size of slice
 func (t *SliceViewBase) SetSliceSize(v int) *SliceViewBase {
 	t.SliceSize = v
+	return t
+}
+
+// SetConfigIter sets the [SliceViewBase.ConfigIter]:
+// iteration through the configuration process, reset when a new slice type is set
+func (t *SliceViewBase) SetConfigIter(v int) *SliceViewBase {
+	t.ConfigIter = v
 	return t
 }
 
@@ -2138,6 +2152,12 @@ func (t *TableView) SetStartIdx(v int) *TableView {
 // SetSliceSize sets the [TableView.SliceSize]
 func (t *TableView) SetSliceSize(v int) *TableView {
 	t.SliceSize = v
+	return t
+}
+
+// SetConfigIter sets the [TableView.ConfigIter]
+func (t *TableView) SetConfigIter(v int) *TableView {
+	t.ConfigIter = v
 	return t
 }
 

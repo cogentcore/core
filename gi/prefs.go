@@ -17,7 +17,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/grows/jsons"
+	"goki.dev/grows/tomls"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -116,10 +116,10 @@ type Preferences struct { //gti:add
 	FileViewSort string `view:"-"`
 
 	// filename for saving / loading colors
-	ColorFilename FileName `view:"-" ext:".json"`
+	ColorFilename FileName `view:"-" ext:".toml"`
 
 	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-"`
+	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
 // Prefs are the overall preferences
@@ -170,13 +170,13 @@ func (pf *Preferences) UpdateAll() { //gti:add
 }
 
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
-var PrefsFileName = "prefs.json"
+var PrefsFileName = "prefs.toml"
 
 // Open preferences from GoGi standard prefs directory
 func (pf *Preferences) Open() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	err := grr.Log(jsons.Open(pf, pnm))
+	err := grr.Log(tomls.Open(pf, pnm))
 	if err != nil {
 		return err
 	}
@@ -205,7 +205,7 @@ func (pf *Preferences) Open() error { //gti:add
 func (pf *Preferences) Save() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
-	err := grr.Log(jsons.Save(pf, pnm))
+	err := grr.Log(tomls.Save(pf, pnm))
 	if err != nil {
 		return err
 	}
@@ -627,14 +627,14 @@ type FilePaths []string
 
 var SavedPaths FilePaths
 
-// Open file paths from a JSON-formatted file.
-func (pf *FilePaths) OpenJSON(filename string) error { //gti:add
-	return grr.Log(jsons.Open(pf, filename))
+// Open file paths from a toml-formatted file.
+func (pf *FilePaths) Open(filename string) error { //gti:add
+	return grr.Log(tomls.Open(pf, filename))
 }
 
-// Save file paths to a JSON-formatted file.
-func (pf *FilePaths) SaveJSON(filename string) error { //gti:add
-	return grr.Log(jsons.Save(pf, filename))
+// Save file paths to a toml-formatted file.
+func (pf *FilePaths) Save(filename string) error { //gti:add
+	return grr.Log(tomls.Save(pf, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max
@@ -644,7 +644,7 @@ func (pf *FilePaths) AddPath(path string, max int) {
 }
 
 // SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
-var SavedPathsFileName = "saved_paths.json"
+var SavedPathsFileName = "saved_paths.toml"
 
 // FileViewResetPaths defines a string that is added as an item to the recents menu
 var FileViewResetPaths = "<i>Reset Paths</i>"
@@ -660,7 +660,7 @@ func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.SaveJSON(pnm)
+	SavedPaths.Save(pnm)
 	// add back after save
 	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 }
@@ -671,7 +671,7 @@ func OpenPaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.OpenJSON(pnm)
+	SavedPaths.Open(pnm)
 	// add back after save
 	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 }
@@ -755,29 +755,29 @@ type PrefsDetailed struct { //gti:add
 	SliceInlineLen int `def:"4" min:"2" step:"1"`
 
 	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-"`
+	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
 // PrefsDet are the overall detailed preferences
 var PrefsDet = PrefsDetailed{}
 
 // PrefsDetailedFileName is the name of the detailed preferences file in GoGi prefs directory
-var PrefsDetailedFileName = "prefs_det.json"
+var PrefsDetailedFileName = "prefs_det.toml"
 
 // Open detailed preferences from GoGi standard prefs directory
 func (pf *PrefsDetailed) Open() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	err := grr.Log(jsons.Open(pf, pnm))
+	err := grr.Log(tomls.Open(pf, pnm))
 	pf.Changed = false
 	return err
 }
 
-// Save saves current preferences to standard prefs_det.json file, which is auto-loaded at startup
+// Save saves current preferences to standard prefs_det.toml file, which is auto-loaded at startup
 func (pf *PrefsDetailed) Save() error { //gti:add
 	pdir := GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	err := grr.Log(jsons.Save(pf, pnm))
+	err := grr.Log(tomls.Save(pf, pnm))
 	pf.Changed = false
 	return err
 }
@@ -884,7 +884,7 @@ type PrefsDebug struct { //gti:add
 	StructViewIfDebug *bool
 
 	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-"`
+	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
 // PrefsDbg are the overall debugging preferences
