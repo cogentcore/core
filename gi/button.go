@@ -8,7 +8,11 @@ import (
 	"fmt"
 	"log"
 
-	"log/slog"
+	"log/slog" // [view: -] signal for Spell -- see SpellSignals for the types
+	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
+
+	// [view: -] signal for Spell -- see SpellSignals for the types
+	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
 
 	"goki.dev/colors"
 	"goki.dev/cursors"

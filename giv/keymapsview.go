@@ -34,9 +34,9 @@ func KeyMapsView(km *keyfun.Maps) {
 			sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
 		})
 		oj := NewFuncButton(tb, km.Open).SetText("Open from file").SetIcon(icons.Open).SetKey(keyfun.Open)
-		oj.Args[0].SetTag("ext", ".toml")
+		oj.Args[0].SetTag("ext", ".json")
 		sj := NewFuncButton(tb, km.Save).SetText("Save to file").SetIcon(icons.SaveAs).SetKey(keyfun.SaveAs)
-		sj.Args[0].SetTag("ext", ".toml")
+		sj.Args[0].SetTag("ext", ".json")
 		gi.NewSeparator(tb)
 		vs := NewFuncButton(tb, ViewStdKeyMaps).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
 		vs.SetUpdateFunc(func() {

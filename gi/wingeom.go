@@ -163,7 +163,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
 	pdir := GoGiPrefsDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".toml")
+	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	b, err := os.ReadFile(pnm)
 	if err != nil {
 		// slog.Error(err.Error())rror())
@@ -198,7 +198,7 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 		return nil
 	}
 	pdir := GoGiPrefsDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".toml")
+	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	b, err := json.MarshalIndent(mgr.Geoms, "", "\t")
 	if err != nil {
 		slog.Error(err.Error())
@@ -382,7 +382,7 @@ func (mgr *WinGeomPrefsMgr) DeleteAll() {
 	defer mgr.Mu.Unlock()
 
 	pdir := GoGiPrefsDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".toml")
+	pnm := filepath.Join(pdir, mgr.FileName+".json")
 	os.Remove(pnm)
 	mgr.Geoms = make(WinGeomPrefs, 1000)
 }

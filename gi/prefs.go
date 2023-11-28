@@ -17,6 +17,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grows/jsons"
 	"goki.dev/grows/tomls"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -627,14 +628,14 @@ type FilePaths []string
 
 var SavedPaths FilePaths
 
-// Open file paths from a toml-formatted file.
+// Open file paths from a json-formatted file.
 func (pf *FilePaths) Open(filename string) error { //gti:add
-	return grr.Log(tomls.Open(pf, filename))
+	return grr.Log(jsons.Open(pf, filename))
 }
 
-// Save file paths to a toml-formatted file.
+// Save file paths to a json-formatted file.
 func (pf *FilePaths) Save(filename string) error { //gti:add
-	return grr.Log(tomls.Save(pf, filename))
+	return grr.Log(jsons.Save(pf, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max
@@ -644,7 +645,7 @@ func (pf *FilePaths) AddPath(path string, max int) {
 }
 
 // SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
-var SavedPathsFileName = "saved_paths.toml"
+var SavedPathsFileName = "saved_paths.json"
 
 // FileViewResetPaths defines a string that is added as an item to the recents menu
 var FileViewResetPaths = "<i>Reset Paths</i>"
