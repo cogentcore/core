@@ -339,21 +339,18 @@ func (ed *Editor) PasteHist() {
 	if ViewClipHistory == nil {
 		return
 	}
-	// TODO(kai/menu): StringsChooserPopup
-	/*
-		cl := ViewClipHistChooseList()
-			gi.StringsChooserPopup(cl, "", ed, func(ac *gi.Button) {
-				idx := ac.Data.(int)
-				clip := ViewClipHistory[idx]
-				if clip != nil {
-					updt := ed.UpdateStart()
-					defer ed.UpdateEndRender(updt)
-					ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
-					ed.InsertAtCursor(clip)
-					ed.SavePosHistory(ed.CursorPos)
-				}
-			})
-	*/
+	cl := ViewClipHistChooseList()
+	m := gi.NewMenuFromStrings(cl, "", func(idx int) {
+		clip := ViewClipHistory[idx]
+		if clip != nil {
+			updt := ed.UpdateStart()
+			defer ed.UpdateEndRender(updt)
+			ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
+			ed.InsertAtCursor(clip)
+			ed.SavePosHistory(ed.CursorPos)
+		}
+	})
+	gi.NewMenuFromScene(m, ed, ed.CursorBBox(ed.CursorPos).Min).Run()
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
