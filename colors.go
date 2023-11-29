@@ -335,3 +335,49 @@ func Inverse(c color.Color) color.RGBA {
 	r := AsRGBA(c)
 	return color.RGBA{255 - r.R, 255 - r.G, 255 - r.B, r.A}
 }
+
+// Add adds given color deltas to this color, safely avoiding overflow > 255
+func Add(c, dc color.Color) color.RGBA {
+	r, g, b, a := c.RGBA()      // uint32
+	dr, dg, db, da := dc.RGBA() // uint32
+	r = (r + dr) >> 8
+	g = (g + dg) >> 8
+	b = (b + db) >> 8
+	a = (a + da) >> 8
+	if r > 255 {
+		r = 255
+	}
+	if g > 255 {
+		g = 255
+	}
+	if b > 255 {
+		b = 255
+	}
+	if a > 255 {
+		a = 255
+	}
+	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+}
+
+// Sub subtracts given color deltas from this color, safely avoiding underflow < 0
+func Sub(c, dc color.Color) color.RGBA {
+	r, g, b, a := c.RGBA()      // uint32
+	dr, dg, db, da := dc.RGBA() // uint32
+	r = (r - dr) >> 8
+	g = (g - dg) >> 8
+	b = (b - db) >> 8
+	a = (a - da) >> 8
+	if r > 255 { // overflow
+		r = 0
+	}
+	if g > 255 {
+		g = 0
+	}
+	if b > 255 {
+		b = 0
+	}
+	if a > 255 {
+		a = 0
+	}
+	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+}
