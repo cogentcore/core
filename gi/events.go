@@ -103,9 +103,6 @@ func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
 // the widget's Scene. Directly listening to Close events for non-scene
 // widgets does not work, so it must go through the Scene.
 func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
-	if wb.Sc == nil {
-		return wb
-	}
 	return wb.Sc.On(events.Close, fun)
 }
 

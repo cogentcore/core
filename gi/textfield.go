@@ -1663,7 +1663,6 @@ func (tf *TextField) HandleTextFieldEvents() {
 	tf.HandleTextFieldMouse()
 	tf.HandleTextFieldStateFromFocus()
 	tf.HandleTextFieldKeys()
-	tf.HandleTextFieldClose()
 }
 
 func (tf *TextField) ConfigParts() {
