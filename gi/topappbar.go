@@ -31,28 +31,7 @@ var (
 // which will appear below any other OverflowMenu items added.
 func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 	NewButton(tb, "back").SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
-		stg := tb.Sc.Stage.Main
-		mm := stg.MainMgr
-		if mm == nil {
-			slog.Error("Top app bar has no MainMgr")
-			return
-		}
-		// if we are down to the last window, we don't
-		// let people close it with the back button
-		if mm.Stack.Len() <= 1 {
-			return
-		}
-		if stg.NewWindow {
-			mm.RenderWin.CloseReq()
-			return
-		}
-		// if stg.Type == DialogStage {
-		// 	st := mm.PopType(stg.Type)
-		// 	if dlg, ok := st.AsBase().Scene.This().(*Dialog); ok {
-		// 		dlg.AcceptDialog()
-		// 	}
-		// }
-		mm.PopDeleteType(stg.Type)
+		tb.Sc.Close()
 	})
 	// NewButton(tb).SetIcon(icons.ArrowForward)
 	ch := NewChooser(tb, "nav-bar").SetEditable(true).SetType(ChooserOutlined)

@@ -31,7 +31,6 @@ func (ed *Editor) HandleEditorEvents() {
 	ed.HandleEditorKeyChord()
 	ed.HandleEditorMouse()
 	ed.HandleEditorLinkCursor()
-	ed.HandleEditorClose()
 	ed.HandleEditorFocus()
 }
 
