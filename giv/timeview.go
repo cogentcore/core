@@ -478,13 +478,13 @@ func (vv *DurationValue) UpdateWidget() {
 		un = u
 		undur = v
 	}
-	adur := dur
+	adur := float32(dur)
 	if undur != 0 {
-		adur = dur / undur
+		adur /= float32(undur)
 	}
 
 	ly := vv.Widget.(*gi.Layout)
-	ly.ChildByName("value").(*gi.Spinner).SetValue(float32(adur))
+	ly.ChildByName("value").(*gi.Spinner).SetValue(adur)
 	ly.ChildByName("unit").(*gi.Chooser).SetCurVal(un)
 }
 
