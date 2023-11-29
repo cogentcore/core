@@ -68,7 +68,7 @@ type Editor struct { //goki:embedder
 	NLines int `set:"-" view:"-" json:"-" xml:"-"`
 
 	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
-	Renders []paint.Text `set:"-" view:"-" json:"-" xml:"-"`
+	Renders []paint.Text `set:"-" json:"-" xml:"-"`
 
 	// starting render offsets for top of each line
 	Offs []float32 `set:"-" view:"-" json:"-" xml:"-"`

@@ -10,6 +10,7 @@ import (
 	"image/color"
 
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/states"
@@ -150,9 +151,8 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 	sty := &ed.Styles
 	cspec := sty.BackgroundColor
 	bg := cspec.Solid
-	// STYTODO: fix text editor colors
-	// isDark := bg.IsDark()
-	// nclrs := len(ViewDepthColors)
+	isDark := matcolor.SchemeIsDark
+	nclrs := len(ViewDepthColors)
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
@@ -172,12 +172,11 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 			lx := &ht[ti]
 			if lx.Tok.Depth > 0 {
 				cspec.Solid = bg
-				// if isDark {
-				// 	// reverse order too
-				// 	cspec.Color.Add(ViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
-				// } else {
-				// 	cspec.Color.Sub(ViewDepthColors[lx.Tok.Depth%nclrs])
-				// }
+				if isDark { // reverse order too
+					cspec.Solid = colors.Add(bg, ViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
+				} else {
+					cspec.Solid = colors.Sub(bg, ViewDepthColors[lx.Tok.Depth%nclrs])
+				}
 				st := min(lsted, lx.St)
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed

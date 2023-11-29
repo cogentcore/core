@@ -356,6 +356,8 @@ func (tv *TreeView) TreeViewStyles() {
 			w.Style(func(s *styles.Style) {
 				// todo: (Kai) need to change these for clickable links in glide
 				s.SetNonSelectable()
+				s.Font = tv.Styles.Font // get our overall font settings
+				s.Color = tv.Styles.Color
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()

@@ -33,7 +33,9 @@ func (fn *Node) FileNodeStyles() {
 	fn.TreeViewStyles()
 	fn.Style(func(s *styles.Style) {
 		vcs := fn.Info.Vcs
-		if fn.IsExec() {
+		s.Font.Weight = styles.WeightNormal
+		s.Font.Style = styles.FontNormal
+		if fn.IsExec() && !fn.IsDir() {
 			s.Font.Weight = styles.WeightBold // todo: somehow not working
 		}
 		if fn.Buf != nil {
