@@ -394,6 +394,7 @@ func (bt *Button) HandleClickMenu() {
 func (bt *Button) HandleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnLast(events.Click, func(e events.Event) {
+		fmt.Println("click dismiss")
 		if bt.Sc != nil && bt.Sc.Stage != nil {
 			pst := bt.Sc.Stage
 			if pst != nil && pst.Type == MenuStage {

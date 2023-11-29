@@ -34,7 +34,7 @@ func (fn *Node) FileNodeStyles() {
 	fn.Style(func(s *styles.Style) {
 		vcs := fn.Info.Vcs
 		if fn.IsExec() {
-			s.Font.Weight = styles.WeightBold
+			s.Font.Weight = styles.WeightBold // todo: somehow not working
 		}
 		if fn.Buf != nil {
 			s.Font.Style = styles.FontItalic

@@ -119,7 +119,7 @@ func (st *Stage) ConfigMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
-	if !goosi.TheApp.Platform().IsMobile() {
+	if goosi.TheApp.Platform().IsMobile() {
 		st.NewWindow = false
 	}
 	sc := st.Scene
