@@ -69,15 +69,15 @@ func RecycleDialog(data any) bool {
 	return true
 }
 
-// ErrorDialog returns a new Dialog [Stage] displaying the given error
+// ErrorDialog opens a new Dialog displaying the given error
 // in the context of the given widget.  Optional title can be provided.
-func ErrorDialog(ctx Widget, err error, title ...string) *Stage {
+func ErrorDialog(ctx Widget, err error, title ...string) {
 	ttl := "There was an error"
 	if len(title) > 0 {
 		ttl = title[0]
 	}
-	return NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
-		AddOkOnly().NewDialog(ctx)
+	NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
+		AddOkOnly().NewDialog(ctx).Run()
 }
 
 // AddOk adds an OK button to given parent Widget (typically in Bottom

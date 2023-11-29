@@ -287,7 +287,7 @@ func (ly *Layout) ClosePopup() bool {
 	if ps == nil {
 		return false
 	}
-	ps.Close()
+	ps.ClosePopup()
 	return true
 }
 

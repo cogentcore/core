@@ -36,16 +36,17 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 
 // RunPopup runs a popup-style Stage in context widget's popups.
 func (st *Stage) RunPopup() *Stage {
-	// todo: not clear why needs this:
-	st.RenderCtx.Mu.RLock()
-	defer st.RenderCtx.Mu.RUnlock()
-
 	st.Scene.ConfigSceneWidgets()
 	sc := st.Scene
 
 	ctx := st.Context.AsWidget()
 	ms := ctx.Sc.Stage.Main
 	msc := ms.Scene
+
+	// note: completer and potentially other things drive popup creation asynchronously
+	// so we need to protect here *before* pushing the new guy on the stack, and during closing.
+	ms.RenderCtx.Mu.RLock()
+	defer ms.RenderCtx.Mu.RUnlock()
 
 	ms.PopupMgr.Push(st)
 	st.SetPopupMgr(ms) // sets all pointers
@@ -113,10 +114,16 @@ func (st *Stage) RunPopup() *Stage {
 	return st
 }
 
-// Close closes this stage as a popup
-func (st *Stage) Close() {
-	st.RenderCtx.Mu.RLock()
-	defer st.RenderCtx.Mu.RUnlock()
+// ClosePopup closes this stage as a popup
+func (st *Stage) ClosePopup() {
+	// note: this is critical for Completer to not crash due to async closing:
+	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
+		// fmt.Println("popup already gone")
+		return
+	}
+	// note: essential to lock here for async popups like completer
+	st.MainMgr.RenderCtx.Mu.RLock()
+	defer st.MainMgr.RenderCtx.Mu.RUnlock()
 
 	st.PopupMgr.PopDelete()
 }

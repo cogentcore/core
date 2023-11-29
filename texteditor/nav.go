@@ -82,7 +82,7 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 func (ed *Editor) SetCursorShow(pos lex.Pos) {
 	ed.SetCursor(pos)
 	ed.ScrollCursorToCenterIfHidden()
-	ed.RenderCursor(true)
+	// ed.RenderCursor(true)
 }
 
 // SetCursorCol sets the current target cursor column (CursorCol) to that

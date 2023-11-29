@@ -210,8 +210,9 @@ func (c *Complete) Cancel() bool {
 	if c.Stage == nil {
 		return false
 	}
-	c.Stage.Close()
+	st := c.Stage
 	c.Stage = nil
+	st.ClosePopup()
 	return true
 }
 

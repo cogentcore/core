@@ -397,7 +397,7 @@ func (bt *Button) HandleClickDismissMenu() {
 		if bt.Sc != nil && bt.Sc.Stage != nil {
 			pst := bt.Sc.Stage
 			if pst != nil && pst.Type == MenuStage {
-				pst.Close()
+				pst.ClosePopup()
 			} else {
 				fmt.Println("error: popup not menu stage:", pst)
 			}
