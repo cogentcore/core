@@ -328,7 +328,7 @@ func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
 	if mat32.Abs(sr.LastValue-sr.Value) > sr.InputThreshold {
 		// TODO(kai/input): we need this for InputThreshold to work, but it breaks Change events
-		sr.LastValue = sr.Value
+		// sr.LastValue = sr.Value
 		sr.Send(events.Input)
 	}
 }
