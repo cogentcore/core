@@ -24,15 +24,24 @@ type Completer interface {
 	SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc)
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // Complete
+
+// NewCompleter returns a new [CompleterStage] with given scene contents,
+// in connection with given widget (which provides key context).
+// Make further configuration choices using Set* methods, which
+// can be chained directly after the New call.
+// Use an appropriate Run call at the end to start the Stage running.
+func NewCompleter(sc *Scene, ctx Widget) *Stage {
+	return NewPopupStage(CompleterStage, sc, ctx)
+}
 
 // Complete holds the current completion data and functions to call for building
 // the list of possible completions and for editing text after a completion is selected.
 // It also holds the [PopupStage] associated with it.
 type Complete struct { //gti:add -setters
 	// Stage is the [PopupStage] associated with the [Complete]
-	Stage *PopupStage
+	Stage *Stage
 
 	// function to get the list of possible completions
 	MatchFunc complete.MatchFunc
@@ -201,8 +210,9 @@ func (c *Complete) Cancel() bool {
 	if c.Stage == nil {
 		return false
 	}
-	c.Stage.Close()
+	st := c.Stage
 	c.Stage = nil
+	st.ClosePopup()
 	return true
 }
 

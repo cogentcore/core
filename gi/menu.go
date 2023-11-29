@@ -81,20 +81,23 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	return msc
 }
 
-// NewMenuFromScene returns a new Menu stage with given scene contents,
+// NewMenuStage returns a new Menu stage with given scene contents,
 // in connection with given widget, which provides key context
 // for constructing the menu, at given RenderWin position
 // (e.g., use ContextMenuPos or WinPos method on ctx Widget).
-// Typically use NewMenu which takes a standard [Menu].
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
+func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 	if sc == nil || !sc.HasChildren() {
 		return nil
 	}
-	sc.SceneGeom.Pos = pos
-	return NewPopupStage(MenuStage, sc, ctx)
+	st := NewPopupStage(MenuStage, sc, ctx)
+	zp := image.Point{}
+	if pos != zp {
+		st.Pos = pos
+	}
+	return st
 }
 
 // NewMenu returns a new menu stage based on the given menu constructor
@@ -104,8 +107,8 @@ func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *PopupStage {
-	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
+func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
+	return NewMenuStage(NewMenuScene(menu, ctx.Name()), ctx, pos)
 }
 
 func (wb *WidgetBase) ContextMenu(m *Scene) {

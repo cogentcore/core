@@ -81,7 +81,7 @@ type Scene struct {
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// current stage in which this Scene is set
-	Stage Stage `copy:"-" json:"-" xml:"-" set:"-"`
+	Stage *Stage `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -170,12 +170,12 @@ func (sc *Scene) SceneStyles() {
 		if sc.Stage == nil {
 			return
 		}
-		ms := sc.Stage.AsMain()
+		ms := sc.Stage
 		if ms == nil || (ms.Type == DialogStage && !ms.FullWindow) {
 			return
 		}
 
-		mm := sc.Stage.MainMgr()
+		mm := sc.Stage.MainMgr
 		if mm == nil {
 			return
 		}
@@ -228,31 +228,16 @@ func (sc *Scene) RenderWin() *RenderWin {
 	return sm.RenderWin
 }
 
-// MainStageMgr returns the MainStageMgr that typically lives in a RenderWin
+// MainStageMgr returns the Main StageMgr that typically lives in a RenderWin
 // and manages all of the MainStage elements (Windows, Dialogs etc),
 // which in turn manage their popups.  This Scene could be in a popup
 // or in a main stage.
-func (sc *Scene) MainStageMgr() *MainStageMgr {
+func (sc *Scene) MainStageMgr() *StageMgr {
 	if sc.Stage == nil {
 		slog.Error("Scene has nil Stage", "scene", sc.Nm)
 		return nil
 	}
-	return sc.Stage.MainMgr()
-}
-
-// PopupStage returns the Stage as a PopupStage.
-// nil if it is not a popup.
-func (sc *Scene) PopupStage() *PopupStage {
-	if sc.Stage == nil {
-		return nil
-	}
-	return sc.Stage.AsPopup()
-}
-
-// MainStage returns this Scene's Stage as a MainStage,
-// which could be nil if in fact it is in a PopupStage.
-func (sc *Scene) MainStage() *MainStage {
-	return sc.Stage.AsMain()
+	return sc.Stage.MainMgr
 }
 
 // FitInWindow fits Scene geometry (pos, size) into given window geom.

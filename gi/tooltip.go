@@ -20,19 +20,19 @@ import (
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewTooltipFromScene(sc *Scene, ctx Widget) *PopupStage {
+func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 	return NewPopupStage(TooltipStage, sc, ctx)
 }
 
 // NewTooltip returns a new tooltip stage displaying the tooltip text
 // for the given widget at the given position.
-func NewTooltip(w Widget, pos image.Point) *PopupStage {
+func NewTooltip(w Widget, pos image.Point) *Stage {
 	return NewTooltipText(w, w.AsWidget().Tooltip, pos)
 }
 
 // NewTooltipText returns a new tooltip stage displaying the given tooltip text
 // for the given widget at the given position.
-func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
+func NewTooltipText(w Widget, tooltip string, pos image.Point) *Stage {
 	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos), w)
 }
 

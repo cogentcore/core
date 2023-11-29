@@ -31,8 +31,8 @@ var (
 // which will appear below any other OverflowMenu items added.
 func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 	NewButton(tb, "back").SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
-		stg := tb.Sc.MainStage()
-		mm := stg.StageMgr
+		stg := tb.Sc.Stage.Main
+		mm := stg.MainMgr
 		if mm == nil {
 			slog.Error("Top app bar has no MainMgr")
 			return
@@ -57,23 +57,23 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 	// NewButton(tb).SetIcon(icons.ArrowForward)
 	ch := NewChooser(tb, "nav-bar").SetEditable(true).SetType(ChooserOutlined)
 	ch.SetItemsFunc(func() {
-		stg := tb.Sc.MainStage()
-		mm := stg.StageMgr
+		stg := tb.Sc.Stage.Main
+		mm := stg.MainMgr
 		if mm == nil {
 			slog.Error("Top app bar has no MainMgr")
 			return
 		}
 		ch.Items = make([]any, mm.Stack.Len())
 		for i, kv := range mm.Stack.Order {
-			ch.Items[i] = kv.Val.AsBase().Scene.Name()
+			ch.Items[i] = kv.Val.Scene.Name()
 			if kv.Val == stg {
 				ch.SetCurIndex(i)
 			}
 		}
 	})
 	ch.OnChange(func(e events.Event) {
-		stg := tb.Sc.MainStage()
-		mm := stg.StageMgr
+		stg := tb.Sc.Stage.Main
+		mm := stg.MainMgr
 		if mm == nil {
 			slog.Error("Top app bar has no MainMgr")
 			return

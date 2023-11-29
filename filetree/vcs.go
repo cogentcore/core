@@ -504,5 +504,5 @@ func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func()) {
 		vv.SetValue(VersCtrlSystems[idx])
 		vv.UpdateWidget()
 	})
-	gi.NewMenuFromScene(m, ctx, ctx.ContextMenuPos(nil)).Run()
+	gi.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
 }

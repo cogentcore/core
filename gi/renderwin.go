@@ -62,37 +62,38 @@ var (
 // RenderWin provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
 //
-// RenderWin contents are all managed by the StageMgr (MainStageMgr) that
-// handles MainStage elements such as Window, Dialog, and Sheet, which in
-// turn manage their own stack of PopupStage elements such as Menu, Tooltip, etc.
+// RenderWin contents are all managed by the StageMgr that
+// handles Main Stage elements such as Window, Dialog, and Sheet, which in
+// turn manage their own stack of Popup Stage elements such as Menu, Tooltip, etc.
 // The contents of each Stage is provided by a Scene, containing Widgets,
 // and the Stage Pixels image is drawn to the RenderWin in the RenderWindow method.
 //
 // Rendering is handled by the vdraw.Drawer from the vgpu package, which is provided
 // by the goosi framework.  It is akin to a window manager overlaying Go image bitmaps
 // on top of each other in the proper order, based on the StageMgr stacking order.
-//   - Sprites are managed as layered textures of the same size, to enable
-//     unlimited number packed into a few descriptors for standard sizes.
+//   - Sprites are managed by the Main Stage, as layered textures of the same size,
+//     to enable unlimited number packed into a few descriptors for standard sizes.
 type RenderWin struct {
 	Flags WinFlags
 
 	Name string
 
-	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
+	// displayed name of window, for window manager etc.
+	// Window object name is the internal handle and is used for tracking property info etc
 	Title string
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
 	GoosiWin goosi.Window `json:"-" xml:"-"`
 
-	// MainStageMgr controlling the MainStage elements in this window.
-	// The Render Context in this manager is the original source for all Stages
-	StageMgr MainStageMgr
+	// MainStageMgr controlling the Main Stage elements in this window.
+	// The Render Context in this manager is the original source for all Stages.
+	MainStageMgr StageMgr
 
 	// RenderScenes are the Scene elements that draw directly to the window,
-	// arranged in order.  See winrender.go for all rendering code.
+	// arranged in order, and continuously updated during Render.
 	RenderScenes RenderScenes
 
-	// main menu -- is first element of Scene always -- leave empty to not render.  On MacOS, this drives screen main menu
+	// todo: remove?
 	MainMenu *MenuBar `json:"-" xml:"-"`
 
 	// below are internal vars used during the event loop
@@ -156,7 +157,8 @@ func (w *RenderWin) SetFlag(on bool, flag ...enums.BitFlag) {
 //                   New RenderWins and Init
 
 // NewRenderWin creates a new window with given internal name handle,
-// display name, and options.
+// display name, and options.  This is called by Stage.NewRenderWin
+// which handles setting the opts and other infrastructure.
 func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	win := &RenderWin{}
 	win.Name = name
@@ -173,7 +175,6 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
-	win.StageMgr.Init(&win.StageMgr, win)
 
 	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -186,13 +187,14 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	return win
 }
 
-// MainScene returns the current MainStage Scene
+// MainScene returns the current MainStageMgr Top Scene,
+// which is the current Window or FullWindow Dialog occupying the RenderWin.
 func (w *RenderWin) MainScene() *Scene {
-	top := w.StageMgr.Top()
+	top := w.MainStageMgr.Top()
 	if top == nil {
 		return nil
 	}
-	return top.AsBase().Scene
+	return top.Scene
 }
 
 // ActivateExistingMainWindow looks for existing window with given Data.
@@ -287,7 +289,7 @@ func (w *RenderWin) LogicalDPI() float32 {
 // ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
 // in increments of 6 dots to keep fonts rendering clearly.
 func (w *RenderWin) ZoomDPI(steps int) {
-	rctx := w.StageMgr.RenderCtx
+	rctx := w.RenderCtx()
 	rctx.Mu.RLock()
 
 	// w.InactivateAllSprites()
@@ -348,7 +350,7 @@ func StackAll() []byte {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *RenderWin) Resized(sz image.Point) {
-	rctx := w.StageMgr.RenderCtx
+	rctx := w.RenderCtx()
 	if !w.IsVisible() {
 		rctx.SetFlag(false, RenderVisible)
 		return
@@ -386,7 +388,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 	rctx.SetFlag(true, RenderVisible)
 	rctx.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
-	w.StageMgr.Resize(sz)
+	w.MainStageMgr.Resize(sz)
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
@@ -413,9 +415,9 @@ func (w *RenderWin) Close() {
 		return
 	}
 	// this causes hangs etc: not good
-	// w.StageMgr.RenderCtx.Mu.Lock() // allow other stuff to finish
+	// w.RenderCtx().Mu.Lock() // allow other stuff to finish
 	w.SetFlag(true, WinClosing)
-	// w.StageMgr.RenderCtx.Mu.Unlock()
+	// w.RenderCtx().Mu.Unlock()
 	w.GoosiWin.Close()
 }
 
@@ -473,7 +475,7 @@ func (w *RenderWin) Closed() {
 
 // IsClosed reports if the window has been closed
 func (w *RenderWin) IsClosed() bool {
-	return w.GoosiWin.IsClosed() || w.StageMgr.Stack.Len() == 0
+	return w.GoosiWin.IsClosed() || w.MainStageMgr.Stack.Len() == 0
 }
 
 // SetCloseReqFunc sets the function that is called whenever there is a
@@ -556,22 +558,12 @@ func (w *RenderWin) SendCustomEvent(data any) {
 	w.GoosiWin.EventMgr().Custom(data)
 }
 
-// SendShowEvent sends the WinShowEvent to anyone listening -- only sent once..
-func (w *RenderWin) SendShowEvent() {
-	if w.HasFlag(WinSentShow) {
-		return
-	}
-	w.SetFlag(true, WinSentShow)
-	// se := window.NewEvent(window.Show)
-	// se.Init()
-	// w.StageMgr.HandleEvent(se)
-}
-
+// todo: fix or remove
 // SendWinFocusEvent sends the RenderWinFocusEvent to widgets
 func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
 	// se := window.NewEvent(act)
 	// se.Init()
-	// w.StageMgr.HandleEvent(se)
+	// w.MainStageMgr.HandleEvent(se)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -583,11 +575,11 @@ func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
 func (w *RenderWin) PollEvents() {
 	goosi.TheApp.PollEvents()
 	for {
-		evi, has := w.GoosiWin.PollEvent()
+		e, has := w.GoosiWin.PollEvent()
 		if !has {
 			break
 		}
-		w.HandleEvent(evi)
+		w.HandleEvent(e)
 	}
 }
 
@@ -618,12 +610,12 @@ func (w *RenderWin) EventLoop() {
 			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
-		evi := w.GoosiWin.NextEvent()
+		e := w.GoosiWin.NextEvent()
 		if w.HasFlag(WinStopEventLoop) {
 			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
-		w.HandleEvent(evi)
+		w.HandleEvent(e)
 	}
 	if WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Name)
@@ -640,70 +632,71 @@ func (w *RenderWin) EventLoop() {
 // Because rendering itself is event driven, this extra level of safety
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
-func (w *RenderWin) HandleEvent(evi events.Event) {
+func (w *RenderWin) HandleEvent(e events.Event) {
 	w.RenderCtx().ReadLock()
 	// we manually handle ReadUnlock's in this function instead of deferring
 	// it to avoid a cryptic "sync: can't unlock an already unlocked RWMutex"
 	// error when panicking in the rendering goroutine. This is critical for
 	// debugging on Android. TODO: maybe figure out a more sustainable approach to this.
 
-	et := evi.Type()
+	et := e.Type()
 	if EventTrace && et != events.WindowPaint && et != events.MouseMove {
-		log.Printf("Got event: %s\n", evi)
+		log.Printf("Got event: %s\n", e)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
-		w.HandleWindowEvents(evi)
+		w.HandleWindowEvents(e)
 		w.RenderCtx().ReadUnlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
-	w.StageMgr.HandleEvent(evi)
+	w.MainStageMgr.MainHandleEvent(e)
 	w.RenderCtx().ReadUnlock()
 }
 
-func (w *RenderWin) HandleWindowEvents(evi events.Event) {
-	et := evi.Type()
+func (w *RenderWin) HandleWindowEvents(e events.Event) {
+	et := e.Type()
 	switch et {
 	case events.WindowPaint:
-		evi.SetHandled()
+		e.SetHandled()
 		w.RenderCtx().ReadUnlock() // one case where we need to break lock
 		w.RenderWindow()
 		w.RenderCtx().ReadLock()
 		w.SendShowEvents()
 
 	case events.WindowResize:
-		evi.SetHandled()
+		e.SetHandled()
 		w.Resized(w.GoosiWin.Size())
 
 	case events.Window:
-		ev := evi.(*events.WindowEvent)
+		ev := e.(*events.WindowEvent)
 		switch ev.Action {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
-			evi.SetHandled()
+			e.SetHandled()
 			w.SetFlag(true, WinStopEventLoop)
 			w.RenderCtx().ReadUnlock() // one case where we need to break lock
 			w.Closed()
 			w.RenderCtx().ReadLock()
 		case events.WinMinimize:
-			evi.SetHandled()
+			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			// if goosi.TheApp.Platform().IsMobile() {
 			// 	w.Scene.Geom.Size = image.Point{}
 			// }
 		case events.WinShow:
-			evi.SetHandled()
+			e.SetHandled()
 			// note that this is sent delayed by driver
 			if WinEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.Name)
 			}
+			// todo: remove?
 			// if w.NeedWinMenuUpdate() {
 			// 	w.MainMenuUpdateRenderWins()
 			// }
-			w.SendShowEvent() // happens AFTER full render
+			// w.SendShowEvent() // happens AFTER full render
 		case events.WinMove:
-			evi.SetHandled()
+			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
 			if WinGeomTrace {
 				log.Printf("WinGeomPrefs: recording from Move\n")
@@ -816,6 +809,24 @@ type RenderContext struct {
 	// of any other updates, which are Read locked so that you don't
 	// get caught in deadlocks among all the different Read locks.
 	Mu sync.RWMutex
+}
+
+// NewRenderContext returns a new RenderContext initialized according to
+// the main Screen size and LogicalDPI as initial defaults.
+// The actual window size is set during Resized method, which is typically
+// called after the window is created by the OS.
+func NewRenderContext() *RenderContext {
+	rc := &RenderContext{}
+	scr := goosi.TheApp.Screen(0)
+	if scr != nil {
+		rc.Size = scr.Geometry.Size()
+		rc.LogicalDPI = scr.LogicalDPI
+	} else {
+		rc.Size = image.Point{1080, 720}
+		rc.LogicalDPI = 160
+	}
+	rc.SetFlag(true, RenderVisible)
+	return rc
 }
 
 // WriteLock is only called by RenderWin during RenderWindow function
@@ -958,7 +969,7 @@ func (rs *RenderScenes) DrawAll(drw goosi.Drawer) {
 //  RenderWin methods
 
 func (w *RenderWin) RenderCtx() *RenderContext {
-	return w.StageMgr.RenderCtx
+	return w.MainStageMgr.RenderCtx
 }
 
 // RenderWindow performs all rendering based on current StageMgr config.
@@ -975,8 +986,8 @@ func (w *RenderWin) RenderWindow() {
 		rc.SetFlag(false, RenderRebuild)
 	}()
 
-	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
-	top := w.StageMgr.Top().AsMain()
+	stageMods, sceneMods := w.MainStageMgr.UpdateAll() // handles all Scene / Widget updates!
+	top := w.MainStageMgr.Top()
 	if !top.Sprites.Modified && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
 		return
@@ -1022,7 +1033,7 @@ func (w *RenderWin) DrawScenes() {
 
 	rs.SetImages(drw) // ensure all updated images copied
 
-	top := w.StageMgr.Top().AsMain()
+	top := w.MainStageMgr.Top()
 	if top.Sprites.Modified {
 		top.Sprites.ConfigSprites(drw)
 	}
@@ -1047,7 +1058,7 @@ func (w *RenderWin) GatherScenes() bool {
 	rs := &w.RenderScenes
 	rs.Reset()
 
-	sm := &w.StageMgr
+	sm := &w.MainStageMgr
 	n := sm.Stack.Len()
 	if n == 0 {
 		slog.Error("GatherScenes stack empty")
@@ -1057,7 +1068,7 @@ func (w *RenderWin) GatherScenes() bool {
 	// first, find the top-level window:
 	winIdx := 0
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValByIdx(i).AsMain()
+		st := sm.Stack.ValByIdx(i)
 		if st.Type == WindowStage {
 			if WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
@@ -1070,19 +1081,19 @@ func (w *RenderWin) GatherScenes() bool {
 
 	// then add everyone above that
 	for i := winIdx + 1; i < n; i++ {
-		st := sm.Stack.ValByIdx(i).AsMain()
+		st := sm.Stack.ValByIdx(i)
 		rs.Add(st.Scene)
 		if WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
 	}
 
-	top := sm.Top().AsMain()
+	top := sm.Top()
 	top.Sprites.Modified = true // ensure configured
 
 	// then add the popups for the top main stage
 	for _, kv := range top.PopupMgr.Stack.Order {
-		st := kv.Val.AsBase()
+		st := kv.Val
 		rs.Add(st.Scene)
 		if WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
@@ -1092,7 +1103,7 @@ func (w *RenderWin) GatherScenes() bool {
 }
 
 func (w *RenderWin) SendShowEvents() {
-	w.StageMgr.SendShowEvents()
+	w.MainStageMgr.SendShowEvents()
 }
 
 /*
@@ -1105,13 +1116,13 @@ func (w *RenderWin) MainMenuUpdated() {
 	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
-	w.StageMgr.RenderCtx.Mu.Lock()
+	w.MainStageMgr.RenderCtx.Mu.Lock()
 	if !w.IsVisible() { // could have closed while we waited for lock
-		w.StageMgr.RenderCtx.Mu.Unlock()
+		w.MainStageMgr.RenderCtx.Mu.Unlock()
 		return
 	}
 	w.MainMenu.UpdateMainMenu(w) // main update menu call, in bars.go for MenuBar
-	w.StageMgr.RenderCtx.Mu.Unlock()
+	w.MainStageMgr.RenderCtx.Mu.Unlock()
 }
 
 // MainMenuUpdateActives needs to be called whenever items on the main menu
@@ -1120,13 +1131,13 @@ func (w *RenderWin) MainMenuUpdateActives() {
 	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
-	w.StageMgr.RenderCtx.Mu.Lock()
+	w.MainStageMgr.RenderCtx.Mu.Lock()
 	if !w.IsVisible() { // could have closed while we waited for lock
-		w.StageMgr.RenderCtx.Mu.Unlock()
+		w.MainStageMgr.RenderCtx.Mu.Unlock()
 		return
 	}
 	w.MainMenu.MainMenuUpdateActives(w) // also in bars.go for MenuBar
-	w.StageMgr.RenderCtx.Mu.Unlock()
+	w.MainStageMgr.RenderCtx.Mu.Unlock()
 }
 
 // MainMenuUpdateRenderWins updates a RenderWin menu with a list of active menus.
@@ -1134,16 +1145,16 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
-	w.StageMgr.RenderCtx.Mu.Lock()
+	w.MainStageMgr.RenderCtx.Mu.Lock()
 	if !w.IsVisible() { // could have closed while we waited for lock
-		w.StageMgr.RenderCtx.Mu.Unlock()
+		w.MainStageMgr.RenderCtx.Mu.Unlock()
 		return
 	}
 	RenderWinGlobalMu.Lock()
 	wmeni := w.MainMenu.ChildByName("RenderWin", 3)
 	if wmeni == nil {
 		RenderWinGlobalMu.Unlock()
-		w.StageMgr.RenderCtx.Mu.Unlock()
+		w.MainStageMgr.RenderCtx.Mu.Unlock()
 		return
 	}
 	wmen := wmeni.(*Action)
@@ -1151,7 +1162,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	men.AddRenderWinsMenu(w)
 	wmen.Menu = men
 	RenderWinGlobalMu.Unlock()
-	w.StageMgr.RenderCtx.Mu.Unlock()
+	w.MainStageMgr.RenderCtx.Mu.Unlock()
 	w.MainMenuUpdated()
 }
 */

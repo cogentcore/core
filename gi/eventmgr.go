@@ -168,7 +168,7 @@ type EventMgr struct {
 }
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
-func (em *EventMgr) MainStageMgr() *MainStageMgr {
+func (em *EventMgr) MainStageMgr() *StageMgr {
 	if em.Scene == nil {
 		return nil
 	}
@@ -935,7 +935,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	if sf == nil {
 		em.FocusFirst()
 	} else {
-		fmt.Println("start focus on:", sf)
+		// fmt.Println("start focus on:", sf)
 		em.SetFocusEvent(sf)
 	}
 	return true

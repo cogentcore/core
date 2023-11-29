@@ -9,83 +9,13 @@ import (
 	"time"
 
 	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
 )
-
-// PopupStage supports Popup types (Menu, Tooltip, Snackbar, Completer),
-// which are transitory and simple, without additional decor,
-// and are associated with and managed by a MainStage element (Window, etc).
-type PopupStage struct {
-	StageBase
-
-	// Main is the MainStage that owns this Popup (via its PopupMgr)
-	Main *MainStage
-
-	// if > 0, disappears after a timeout duration
-	Timeout time.Duration
-}
-
-// AsPopup returns this stage as a PopupStage (for Popup types)
-// returns nil for MainStage types.
-func (st *PopupStage) AsPopup() *PopupStage {
-	return st
-}
-
-func (st *PopupStage) String() string {
-	return "PopupStage: " + st.StageBase.String()
-}
-
-func (st *PopupStage) MainMgr() *MainStageMgr {
-	if st.Main == nil {
-		return nil
-	}
-	return st.Main.StageMgr
-}
-
-func (st *PopupStage) SetTimeout(dur time.Duration) *PopupStage {
-	if st != nil {
-		st.Timeout = dur
-	}
-	return st
-}
-
-func (st *PopupStage) RenderCtx() *RenderContext {
-	if st.Main == nil {
-		return nil
-	}
-	return st.Main.RenderCtx()
-}
-
-func (st *PopupStage) Delete() {
-	if st.Scene != nil {
-		st.Scene.Delete(ki.DestroyKids)
-	}
-	st.Scene = nil
-	st.Main = nil
-}
-
-func (st *PopupStage) StageAdded(smi StageMgr) {
-	pm := smi.AsPopupMgr()
-	st.Main = pm.Main
-}
-
-func (st *PopupStage) HandleEvent(evi events.Event) {
-	if st.Scene == nil {
-		return
-	}
-	if evi.IsHandled() {
-		return
-	}
-	evi.SetLocalOff(st.Scene.SceneGeom.Pos)
-	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
-	st.Scene.EventMgr.HandleEvent(evi)
-}
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the NewPopupStage call.
 // Use Run call at the end to start the Stage running.
-func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
+func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	if ctx == nil {
 		slog.Error("NewPopupStage needs a context Widget")
 		return nil
@@ -95,57 +25,36 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 		slog.Error("NewPopupStage context doesn't have a Stage")
 		return nil
 	}
-	st := &PopupStage{}
-	st.This = st
+	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
 	st.Context = ctx
-	cst := cwb.Sc.Stage
-	mst := cst.AsMain()
-	if mst != nil {
-		st.Main = mst
-	} else {
-		pst := cst.AsPopup()
-		st.Main = pst.Main
-	}
-
-	switch typ {
-	case MenuStage:
-		MenuSceneConfigStyles(sc)
-	}
-
+	st.Pos = ctx.ContextMenuPos(nil)
+	// note: not setting all the connections until run
 	return st
 }
 
-// NewCompleter returns a new [CompleterStage] with given scene contents,
-// in connection with given widget (which provides key context).
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewCompleter(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(CompleterStage, sc, ctx)
-}
-
 // RunPopup runs a popup-style Stage in context widget's popups.
-func (st *PopupStage) RunPopup() *PopupStage {
+func (st *Stage) RunPopup() *Stage {
 	st.Scene.ConfigSceneWidgets()
-	mm := st.MainMgr()
-	if mm == nil {
-		slog.Error("popupstage has no MainMgr")
-		return st
-	}
-	mm.RenderCtx.Mu.RLock()
-	defer mm.RenderCtx.Mu.RUnlock()
+	sc := st.Scene
 
-	ms := mm.Top().AsMain() // main stage -- put all popups here
+	ctx := st.Context.AsWidget()
+	ms := ctx.Sc.Stage.Main
 	msc := ms.Scene
 
-	cmgr := &ms.PopupMgr
-	cmgr.Push(st)
-	sc := st.Scene
+	// note: completer and potentially other things drive popup creation asynchronously
+	// so we need to protect here *before* pushing the new guy on the stack, and during closing.
+	ms.RenderCtx.Mu.RLock()
+	defer ms.RenderCtx.Mu.RUnlock()
+
+	ms.PopupMgr.Push(st)
+	st.SetPopupMgr(ms) // sets all pointers
+
 	maxSz := msc.SceneGeom.Size
 
 	sc.SceneGeom.Size = maxSz
+	sc.SceneGeom.Pos = st.Pos
 	sz := sc.PrefSize(maxSz)
 	// fmt.Println(sz, maxSz)
 	scrollWd := int(sc.Styles.ScrollBarWidth.Dots)
@@ -198,28 +107,104 @@ func (st *PopupStage) RunPopup() *PopupStage {
 			if st.Main == nil {
 				return
 			}
-			st.Main.PopupMgr.PopDeleteType(st.Type)
+			st.PopupMgr.PopDeleteType(st.Type)
 		})
 	}
 
 	return st
 }
 
-// Close closes this stage as a popup
-func (st *PopupStage) Close() {
-	mn := st.Main
-	if mn == nil {
-		slog.Error("popupstage has no Main")
+// ClosePopup closes this stage as a popup
+func (st *Stage) ClosePopup() {
+	// note: this is critical for Completer to not crash due to async closing:
+	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
+		// fmt.Println("popup already gone")
 		return
 	}
-	mm := st.MainMgr()
-	if mm == nil {
-		slog.Error("popupstage has no MainMgr")
-		return
-	}
-	mm.RenderCtx.Mu.RLock()
-	defer mm.RenderCtx.Mu.RUnlock()
+	// note: essential to lock here for async popups like completer
+	st.MainMgr.RenderCtx.Mu.RLock()
+	defer st.MainMgr.RenderCtx.Mu.RUnlock()
 
-	cmgr := &mn.PopupMgr
-	cmgr.PopDelete()
+	st.PopupMgr.PopDelete()
+}
+
+func (st *Stage) PopupHandleEvent(e events.Event) {
+	if st.Scene == nil {
+		return
+	}
+	if e.IsHandled() {
+		return
+	}
+	e.SetLocalOff(st.Scene.SceneGeom.Pos)
+	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
+	st.Scene.EventMgr.HandleEvent(e)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// 	StageMgr for Popup
+
+// TopIsModal returns true if there is a Top PopupStage and it is Modal.
+func (pm *StageMgr) TopIsModal() bool {
+	top := pm.Top()
+	if top == nil {
+		return false
+	}
+	return top.Modal
+}
+
+// PopupHandleEvent processes Popup events.
+// requires outer RenderContext mutex.
+func (pm *StageMgr) PopupHandleEvent(e events.Event) {
+	top := pm.Top()
+	if top == nil {
+		return
+	}
+	ts := top.Scene
+
+	// we must get the top stage that does not ignore events
+	if top.IgnoreEvents {
+		var ntop *Stage
+		for i := pm.Stack.Len() - 1; i >= 0; i-- {
+			s := pm.Stack.ValByIdx(i)
+			if !s.IgnoreEvents {
+				ntop = s
+				break
+			}
+		}
+		if ntop == nil {
+			return
+		}
+		top = ntop
+		ts = top.Scene
+	}
+
+	if e.HasPos() {
+		pos := e.Pos()
+		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
+		if pos.In(ts.SceneGeom.Bounds()) {
+			top.PopupHandleEvent(e)
+			e.SetHandled()
+			return
+		}
+		if top.ClickOff && e.Type() == events.MouseUp {
+			pm.PopDelete()
+		}
+		if top.Modal { // absorb any other events!
+			e.SetHandled()
+			return
+		}
+		// otherwise not Handled, so pass on to first lower stage
+		// that accepts events and is in bounds
+		for i := pm.Stack.Len() - 1; i >= 0; i-- {
+			s := pm.Stack.ValByIdx(i)
+			ss := s.Scene
+			if !s.IgnoreEvents && pos.In(ss.SceneGeom.Bounds()) {
+				s.PopupHandleEvent(e)
+				e.SetHandled()
+				return
+			}
+		}
+	} else { // typically focus, so handle even if not in bounds
+		top.PopupHandleEvent(e) // could be set as Handled or not
+	}
 }

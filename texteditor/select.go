@@ -350,7 +350,7 @@ func (ed *Editor) PasteHist() {
 			ed.SavePosHistory(ed.CursorPos)
 		}
 	})
-	gi.NewMenuFromScene(m, ed, ed.CursorBBox(ed.CursorPos).Min).Run()
+	gi.NewMenuStage(m, ed, ed.CursorBBox(ed.CursorPos).Min).Run()
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text

@@ -164,7 +164,7 @@ func (pf *Preferences) UpdateAll() { //gti:add
 	pf.Apply()
 	colors.FullCache = nil
 	for _, w := range AllRenderWins {
-		rctx := w.StageMgr.RenderCtx
+		rctx := w.MainStageMgr.RenderCtx
 		rctx.LogicalDPI = w.LogicalDPI()
 		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	}

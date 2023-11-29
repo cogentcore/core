@@ -37,10 +37,10 @@ func NewSnackbar(ctx Widget, name ...string) *Scene {
 	return sc
 }
 
-// ErrorSnackbar returns a new [Snackbar] displaying the given error
+// ErrorSnackbar opens a [Snackbar] displaying the given error
 // in the context of the given widget.
-func ErrorSnackbar(ctx Widget, err error) *Scene {
-	return NewSnackbar(ctx, ctx.Name()+"-error-snackbar").AddSnackbarText("Error: " + err.Error())
+func ErrorSnackbar(ctx Widget, err error) {
+	NewSnackbar(ctx, ctx.Name()+"-error-snackbar").AddSnackbarText("Error: " + err.Error()).Stage.Run()
 }
 
 func (sc *Scene) SnackbarStyles() {
@@ -111,6 +111,6 @@ func (sc *Scene) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event
 
 // DeleteSnackbar deletes the popup associated with the snackbar.
 func (sc *Scene) DeleteSnackbar() {
-	sc.Stage.AsPopup().Context.AsWidget().Sc.MainStage().
+	sc.Stage.Context.AsWidget().Sc.Stage.Main.
 		PopupMgr.PopDeleteType(SnackbarStage)
 }

@@ -1100,7 +1100,7 @@ func TextFieldBlink() {
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Sc == nil || tf.Sc.MainStage() == nil || !tf.StateIs(states.Focused) || !tf.This().(Widget).IsVisible() {
+		if tf.Sc == nil || tf.Sc.Stage.Main == nil || !tf.StateIs(states.Focused) || !tf.This().(Widget).IsVisible() {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
@@ -1186,7 +1186,7 @@ func (tf *TextField) CursorSprite(on bool) *Sprite {
 	if sc == nil {
 		return nil
 	}
-	ms := sc.MainStage()
+	ms := sc.Stage.Main
 	if ms == nil {
 		return nil // only MainStage has sprites
 	}
