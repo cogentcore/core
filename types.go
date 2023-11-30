@@ -8,7 +8,7 @@ import (
 	"path"
 	"reflect"
 
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 )
 
 // LongTypeName returns the long, full package-path qualified type name.
@@ -55,7 +55,7 @@ func FriendlyTypeName(typ reflect.Type) string {
 		case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
 			return "Number"
 		}
-		return sentencecase.Of(nm)
+		return sentence.Case(nm)
 	}
 
 	// otherwise, we fall back on Kind
