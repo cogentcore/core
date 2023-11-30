@@ -6,7 +6,7 @@
 // An example of a string in sentence case is:
 //
 //	This is a string in sentence case that I wrote in the USA with the help of Google
-package sentencecase
+package sentence
 
 import (
 	"strings"
@@ -32,14 +32,14 @@ func AddProperNouns(nouns ...string) {
 	}
 }
 
-// Of returns the sentence case version of the given CamelCase string.
+// Case returns the sentence case version of the given CamelCase string.
 // It handles proper nouns through [ProperNouns], abbreviations,
 // and "I".
 //
 // An example of a string in sentence case is:
 //
 //	This is a string in sentence case that I wrote in the USA with the help of Google
-func Of(s string) string {
+func Case(s string) string {
 	words := camelcase.Split(s)
 	for i, word := range words {
 		// "I" is always capitalized
