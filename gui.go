@@ -9,7 +9,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grease"
 	"goki.dev/grog"
@@ -41,7 +41,7 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 				continue
 			}
 			// need to go to camel first (it is mostly in kebab)
-			gi.NewButton(tb, cmd.Name).SetText(sentencecase.Of(strcase.ToCamel(cmd.Name))).SetTooltip(cmd.Doc).
+			gi.NewButton(tb, cmd.Name).SetText(sentence.Case(strcase.ToCamel(cmd.Name))).SetTooltip(cmd.Doc).
 				OnClick(func(e events.Event) {
 					err := cmd.Func(cfg)
 					if err != nil {
