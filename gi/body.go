@@ -52,6 +52,7 @@ func (bd *Body) BodyStyles() {
 // which will be used by the Scene etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.Title = title
+	bd.Sc.Nm = title
 	NewLabel(bd, "title").SetText(title).SetType(LabelHeadlineSmall)
 	return bd
 }
