@@ -21,7 +21,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/grr"
@@ -502,7 +502,7 @@ func (vv *SliceValue) UpdateWidget() {
 			// txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(vv.ElType)))
 			// note: above crashes with:
 			// panic: reflect: call of reflect.Value.Len on interface Value
-			txt = sentencecase.Of(fmt.Sprintf("%ss", laser.FriendlyTypeName(vv.ElType)))
+			txt = sentence.Case(fmt.Sprintf("%ss", laser.FriendlyTypeName(vv.ElType)))
 		} else {
 			txt = "None"
 		}
@@ -639,7 +639,7 @@ func (vv *MapValue) UpdateWidget() {
 	if !npv.IsValid() || npv.IsNil() {
 		txt = "None"
 	} else {
-		txt = sentencecase.Of(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(laser.MapValueType(mpi))))
+		txt = sentence.Case(fmt.Sprintf("%d %ss", npv.Len(), laser.FriendlyTypeName(laser.MapValueType(mpi))))
 	}
 	bt.SetTextUpdate(txt)
 }
@@ -1420,7 +1420,7 @@ func (vv *IconValue) UpdateWidget() {
 			if txt == "" {
 				txt = "None"
 			}
-			bt.SetTextUpdate(sentencecase.Of(txt))
+			bt.SetTextUpdate(sentence.Case(txt))
 		}
 	}
 }
@@ -1453,7 +1453,7 @@ func (vv *IconValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	ics := icons.All()
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	NewSliceView(d).SetStyleFunc(func(w gi.Widget, s *styles.Style, row int) {
-		w.(*gi.Button).SetText(sentencecase.Of(strcase.ToCamel(string(ics[row]))))
+		w.(*gi.Button).SetText(sentence.Case(strcase.ToCamel(string(ics[row]))))
 	}).SetSlice(&ics).SetSelVal(cur).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {

@@ -15,7 +15,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -207,7 +207,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	}
 	// func name is not guaranteed to make it unique so we ensure it is (-1 because [ki.New] adds 1 first)
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
-	fb.SetText(sentencecase.Of(snm))
+	fb.SetText(sentence.Case(snm))
 	fb.SetTooltip(gfun.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists
@@ -369,7 +369,7 @@ func (fb *FuncButton) SetArgs() {
 			doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
 		}
 
-		label := sentencecase.Of(name)
+		label := sentence.Case(name)
 		val := reflect.New(atyp)
 
 		view := ToValue(val.Interface(), "")
@@ -414,7 +414,7 @@ func (fb *FuncButton) SetReturns() {
 			doc = "Unnamed return value of type " + laser.LongTypeName(rtyp)
 		}
 
-		label := sentencecase.Of(name)
+		label := sentence.Case(name)
 		val := reflect.New(rtyp)
 
 		view := ToValue(val.Interface(), "")

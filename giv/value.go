@@ -17,7 +17,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -323,9 +323,9 @@ func (vv *ValueBase) Label() string {
 		return lbltag
 	}
 	if vv.Field != nil {
-		return sentencecase.Of(vv.Field.Name)
+		return sentence.Case(vv.Field.Name)
 	}
-	return sentencecase.Of(vv.Nm)
+	return sentence.Case(vv.Nm)
 }
 
 func (vv *ValueBase) SetLabel(label string) {

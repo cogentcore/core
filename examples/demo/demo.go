@@ -18,7 +18,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -79,7 +79,7 @@ func makeText(ts *gi.Tabs) {
 		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
-		s := sentencecase.Of(typ.String())
+		s := sentence.Case(typ.String())
 		gi.NewLabel(text, "label"+typ.String()).SetType(typ).SetText(s)
 	}
 }

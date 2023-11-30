@@ -18,7 +18,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/bools"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -249,7 +249,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 							dupeFields[fnm] = true
 						}
 						// TODO(kai): how should we format this label?
-						svv.SetLabel(sentencecase.Of(fnm))
+						svv.SetLabel(sentence.Case(fnm))
 						labnm := fmt.Sprintf("label-%v", fnm)
 						valnm := fmt.Sprintf("value-%v", fnm)
 						config.Add(gi.LabelType, labnm)
