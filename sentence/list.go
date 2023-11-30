@@ -8,7 +8,8 @@ package sentence
 //   - nil => ""
 //   - "Go" => "Go"
 //   - "Go", "Python" => "Go and Python"
-//   - "Go", "Python", "C" => "Go, Python, and C"
+//   - "Go", "Python", "JavaScript" => "Go, Python, and JavaScript"
+//   - "Go", "Python", "JavaScript", "C" => "Go, Python, JavaScript, and C"
 func List(items ...string) string {
 	switch len(items) {
 	case 0:
