@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"log/slog"
-
 	"goki.dev/colors"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
@@ -142,25 +140,6 @@ func (sc *Scene) AddCancel(pw Widget, name ...string) *Button {
 	})
 	sc.AddPriorityEvent(events.KeyChord)
 	return bt
-}
-
-// Close closes the stage associated with this Scene (typically for Dialog)
-func (sc *Scene) Close() {
-	sc.Send(events.Close, nil)
-	if sc.Stage == nil {
-		slog.Error("Close: Scene has no Stage")
-		return
-	}
-	mm := sc.Stage.MainMgr
-	if mm == nil {
-		// slog.Error("Scene has no MainMgr")
-		return
-	}
-	if sc.Stage.NewWindow {
-		mm.RenderWin.CloseReq()
-		return
-	}
-	mm.DeleteStage(sc.Stage)
 }
 
 // AddOk adds an OK button to given parent Widget (typically in Bottom

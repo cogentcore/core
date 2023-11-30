@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"sync"
 
@@ -85,13 +86,27 @@ func (sm *StageMgr) TopNotType(typ StageTypes) *Stage {
 	return nil
 }
 
+// UniqueName returns unique name for given item
+func (sm *StageMgr) UniqueName(nm string) string {
+	ctr := 0
+	for _, kv := range sm.Stack.Order {
+		if kv.Key == nm {
+			ctr++
+		}
+	}
+	if ctr > 0 {
+		return fmt.Sprintf("%s-%d", nm, len(sm.Stack.Order))
+	}
+	return nm
+}
+
 // Push pushes a new Stage to top, under Write lock
 func (sm *StageMgr) Push(st *Stage) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
 	sm.Modified = true
-	sm.Stack.Add(st.Name, st)
+	sm.Stack.Add(sm.UniqueName(st.Name), st)
 }
 
 // Pop pops current Stage off the stack, returning it or nil if none.

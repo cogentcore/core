@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -291,6 +292,25 @@ func (sc *Scene) ScIsVisible() bool {
 // 	}
 // 	vp.Win.UploadScRegion(vp, vpin, winBBox)
 // }
+
+// Close closes the stage associated with this Scene (typically for Dialog)
+func (sc *Scene) Close() {
+	sc.Send(events.Close, nil)
+	if sc.Stage == nil {
+		slog.Error("Close: Scene has no Stage")
+		return
+	}
+	mm := sc.Stage.MainMgr
+	if mm == nil {
+		// slog.Error("Scene has no MainMgr")
+		return
+	}
+	if sc.Stage.NewWindow {
+		mm.RenderWin.CloseReq()
+		return
+	}
+	mm.DeleteStage(sc.Stage)
+}
 
 // Delete this Scene if not Flagged for preservation.
 // Removes Decor and Frame Widgets

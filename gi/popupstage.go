@@ -125,7 +125,7 @@ func (st *Stage) ClosePopup() {
 	st.MainMgr.RenderCtx.Mu.RLock()
 	defer st.MainMgr.RenderCtx.Mu.RUnlock()
 
-	st.PopupMgr.PopDelete()
+	st.PopupMgr.DeleteStage(st)
 }
 
 func (st *Stage) PopupHandleEvent(e events.Event) {
