@@ -366,7 +366,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 			d.AddBottomBar(func(pw gi.Widget) {
 				d.AddCancel(pw)
 				d.AddOk(pw).OnClick(func(e events.Event) {
-					tt := vv.TmpSave.Val().Interface().(time.Time)
+					tt := laser.OnePtrValue(vv.TmpSave.Val()).Interface().(*time.Time)
 					vv.SetValue(tt)
 					vv.UpdateWidget()
 				})
@@ -398,7 +398,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 			d.AddBottomBar(func(pw gi.Widget) {
 				d.AddCancel(pw)
 				d.AddOk(pw).OnClick(func(e events.Event) {
-					tt := vv.TmpSave.Val().Interface().(time.Time)
+					tt := laser.OnePtrValue(vv.TmpSave.Val()).Interface().(*time.Time)
 					vv.SetValue(tt)
 					vv.UpdateWidget()
 				})

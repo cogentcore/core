@@ -580,8 +580,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 	}
 	// need TmpSave
 	if vv.TmpSave == nil {
-		tt, _ := vv.Color()
-		vv.TmpSave = NewSoloValue(tt)
+		vv.TmpSave = vv
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
@@ -622,7 +621,7 @@ func (vv *ColorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	}
 	NewColorView(d).SetColor(dclr).SetTmpSave(vv.TmpSave)
 	return true, func() {
-		cclr := vv.TmpSave.Val().Interface().(*color.RGBA)
+		cclr := laser.OnePtrValue(vv.TmpSave.Val()).Interface().(*color.RGBA)
 		vv.SetColor(*cclr)
 		vv.UpdateWidget()
 	}
