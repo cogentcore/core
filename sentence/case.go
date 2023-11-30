@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package sentencecase converts CamelCase strings to sentence case.
-// An example of a string in sentence case is:
-//
-//	This is a string in sentence case that I wrote in the USA with the help of Google
+// Package sentence provides functions for creating formatted sentences.
 package sentence
 
 import (
