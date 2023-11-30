@@ -7,7 +7,7 @@ package gear
 
 import (
 	"github.com/iancoleman/strcase"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 )
 
 // Cmd contains all of the data for a parsed command line command.
@@ -29,7 +29,7 @@ type Cmd struct {
 func NewCmd(cmd string) *Cmd {
 	return &Cmd{
 		Cmd:  cmd,
-		Name: sentencecase.Of(strcase.ToCamel(cmd)),
+		Name: sentence.Case(strcase.ToCamel(cmd)),
 	}
 }
 

@@ -22,7 +22,7 @@ import (
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/ki/v2"
@@ -58,7 +58,7 @@ func (a *App) TopAppBar(tb *gi.TopAppBar) {
 	for _, cmd := range a.Cmd.Cmds {
 		cmd := cmd
 		fields := strings.Fields(cmd.Cmd)
-		text := sentencecase.Of(strcase.ToCamel(strings.Join(fields[1:], " ")))
+		text := sentence.Case(strcase.ToCamel(strings.Join(fields[1:], " ")))
 		bt := gi.NewButton(tb).SetText(text).SetTooltip(cmd.Doc)
 		bt.OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle(text).AddText(cmd.Doc)
