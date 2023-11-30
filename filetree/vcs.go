@@ -234,7 +234,7 @@ func (fn *Node) RevertVcs() (err error) {
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffViewDialog.
-func (fn *Node) DiffVcsSel(rev_a, rev_b string) { //gti:add
+func (fn *Node) DiffVcsSel(rev_a string, rev_b string) { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -255,9 +255,8 @@ func (fn *Node) DiffVcs(rev_a, rev_b string) error {
 	if fn.Info.Vcs == vci.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	// _, err := DiffViewDialogFromRevs(nil, repo, string(fn.FPath), fn.Buf, rev_a, rev_b)
-	// return err
-	return nil
+	_, err := texteditor.DiffViewDialogFromRevs(fn, repo, string(fn.FPath), fn.Buf, rev_a, rev_b)
+	return err
 }
 
 // LogVcsSel shows the VCS log of commits for selected files, optionally with a

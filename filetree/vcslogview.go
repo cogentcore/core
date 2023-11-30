@@ -71,7 +71,6 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	updt := lv.UpdateStart()
 	gi.NewToolbar(lv, "toolbar")
 	tv := giv.NewTableView(lv, "log")
 	tv.SetReadOnly(true)
@@ -115,7 +114,6 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		})
 		d.NewFullDialog(lv).Run()
 	})
-	lv.UpdateEndLayout(updt)
 }
 
 // SetRevA sets the RevA to use
@@ -153,8 +151,8 @@ func (lv *VCSLogView) ToggleRev() {
 }
 
 // Toolbar returns the toolbar
-func (lv *VCSLogView) Toolbar() *gi.Frame {
-	return lv.ChildByName("toolbar", 0).(*gi.Frame)
+func (lv *VCSLogView) Toolbar() *gi.Toolbar {
+	return lv.ChildByName("toolbar", 0).(*gi.Toolbar)
 }
 
 // TableView returns the tableview
@@ -189,8 +187,7 @@ func (lv *VCSLogView) ConfigToolbar() {
 		gi.NewSeparator(tb, "dsep")
 		gi.NewButton(tb, "diff").SetText("Diff").SetIcon(icons.Difference).SetTooltip("Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
-				// TOOD: add this back
-				// DiffViewDialogFromRevs(lv.Sc, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
+				texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
 			})
 		cba.OnClick(func(e events.Event) {
 			lv.SetA = cba.StateIs(states.Checked)
@@ -217,5 +214,6 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	d := gi.NewBody().AddTitle(title)
 	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
+	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	return d
 }

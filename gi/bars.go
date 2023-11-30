@@ -97,7 +97,7 @@ func (sc *Scene) GetTopAppBar() *TopAppBar {
 	if tb == nil {
 		return nil
 	}
-	tab := tb.ChildByType(TopAppBarType, ki.Embeds)
+	tab := tb.ChildByType(TopAppBarType, ki.NoEmbeds)
 	if tab != nil {
 		return tab.(*TopAppBar)
 	}
@@ -106,7 +106,7 @@ func (sc *Scene) GetTopAppBar() *TopAppBar {
 
 // TopAppBar constructs or returns the TopAppBar in given parent Widget
 func (sc *Scene) TopAppBar(pw Widget) *TopAppBar {
-	tb := pw.ChildByType(TopAppBarType, ki.Embeds)
+	tb := pw.ChildByType(TopAppBarType, ki.NoEmbeds)
 	if tb != nil {
 		return tb.(*TopAppBar)
 	}
@@ -117,7 +117,7 @@ func (sc *Scene) TopAppBar(pw Widget) *TopAppBar {
 // if DefaultTopAppBar function is != nil, and we are making a new
 // TopAppBar widget, then we call DefaultTopAppBar first.
 func (sc *Scene) DefaultTopAppBar(pw Widget) *TopAppBar {
-	tbi := pw.ChildByType(TopAppBarType, ki.Embeds)
+	tbi := pw.ChildByType(TopAppBarType, ki.NoEmbeds)
 	if tbi != nil {
 		return tbi.(*TopAppBar)
 	}

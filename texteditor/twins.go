@@ -7,7 +7,7 @@ package texteditor
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/ki/v2"
+	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
@@ -62,33 +62,35 @@ func (te *TwinEditors) SetFiles(fileA, fileB string, lineNos bool) {
 }
 
 func (te *TwinEditors) ConfigTexts() {
-	te.MakeBufs()
-	config := ki.Config{}
-	config.Add(EditorType, "text-a")
-	config.Add(EditorType, "text-b")
-	mods, updt := te.ConfigChildren(config)
-	if !mods {
-		updt = te.UpdateStart()
-	} else {
-		ae, be := te.Editors()
-		ae.SetBuf(te.BufA)
-		be.SetBuf(te.BufB)
-
-		// sync scrolling
-		// al.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	dm := mat32.Dims(sig)
-		// 	if dm == mat32.Y {
-		// 		bl.ScrollToPos(dm, data.(float32))
-		// 	}
-		// })
-		// bl.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	dm := mat32.Dims(sig)
-		// 	if dm == mat32.Y {
-		// 		al.ScrollToPos(dm, data.(float32))
-		// 	}
-		// })
+	if te.HasChildren() {
+		return
 	}
-	te.UpdateEnd(updt)
+	te.MakeBufs()
+	ae := NewEditor(te, "text-a")
+	be := NewEditor(te, "text-b")
+	ae.SetBuf(te.BufA)
+	be.SetBuf(te.BufB)
+
+	ae.On(events.Scroll, func(e events.Event) {
+		be.ScrollDelta(e)
+	})
+	be.On(events.Scroll, func(e events.Event) {
+		ae.ScrollDelta(e)
+	})
+
+	// sync scrolling
+	// al.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	dm := mat32.Dims(sig)
+	// 	if dm == mat32.Y {
+	// 		bl.ScrollToPos(dm, data.(float32))
+	// 	}
+	// })
+	// bl.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	dm := mat32.Dims(sig)
+	// 	if dm == mat32.Y {
+	// 		al.ScrollToPos(dm, data.(float32))
+	// 	}
+	// })
 }
 
 // Editors returns the two text Editors

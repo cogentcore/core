@@ -19,7 +19,7 @@ func PrefsView(pf *gi.Preferences) {
 		return
 	}
 	d := gi.NewBody("gogi-prefs")
-	d.Title = "GoGi Preferences"
+	d.SetTitle("GoGi Preferences")
 	d.Sc.Data = pf
 	d.AddTopBar(func(pw gi.Widget) {
 		tb := d.DefaultTopAppBar(pw)
