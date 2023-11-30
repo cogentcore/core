@@ -424,10 +424,11 @@ func (fb *FuncButton) SetReturns() {
 		view.SetDoc(doc)
 		fb.Returns[i] = view
 	}
-	fb.ShowReturn = nret > 0
-	if nret > 1 || hasComplex {
-		fb.ShowReturnAsDialog = true
-	}
+	// todo: only show return by default for non-nil error values
+	// fb.ShowReturn = nret > 0
+	// if nret > 1 || hasComplex {
+	// 	fb.ShowReturnAsDialog = true
+	// }
 }
 
 // SetReturnValues sets the [reflect.Value]s of the return
