@@ -15,8 +15,8 @@ import (
 	"os"
 	"time"
 
+	"goki.dev/fi"
 	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"
 )
@@ -268,7 +268,7 @@ func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 // FileState of results (can be nil if string is empty or no lexical tokens).
 // Also takes supporting contextual info for file / language that this string
 // is associated with (only for reference)
-func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *FileState {
+func (pr *Parser) ParseString(str string, fname string, sup fi.Supported) *FileState {
 	if str == "" {
 		return nil
 	}

@@ -45,7 +45,7 @@ var _ = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", Doc: "the current file being lex'd", Directives: gti.Directives{}}},
-		{"Sup", &gti.Field{Name: "Sup", Type: "filecat.Supported", Doc: "the supported file type, if supported (typically only supported files are processed)", Directives: gti.Directives{}}},
+		{"Sup", &gti.Field{Name: "Sup", Type: "fi.Supported", Doc: "the supported file type, if supported (typically only supported files are processed)", Directives: gti.Directives{}}},
 		{"BasePath", &gti.Field{Name: "BasePath", Type: "string", Doc: "base path for reporting file names -- this must be set externally e.g., by gide for the project root path", Directives: gti.Directives{}}},
 		{"Lexs", &gti.Field{Name: "Lexs", Type: "[]Line", Doc: "lex'd version of the lines -- allocated to size of Lines", Directives: gti.Directives{}}},
 		{"Comments", &gti.Field{Name: "Comments", Type: "[]Line", Doc: "comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses", Directives: gti.Directives{}}},

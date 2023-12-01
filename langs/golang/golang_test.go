@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
 	"goki.dev/prof/v2"
@@ -23,11 +23,11 @@ func init() {
 
 func TestParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
-	lp, _ := pi.LangSupport.Props(filecat.Go)
+	lp, _ := pi.LangSupport.Props(fi.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := pi.NewFileStates("testdata/textview.go", "", filecat.Go)
+	fs := pi.NewFileStates("testdata/textview.go", "", fi.Go)
 	txt, err := lex.OpenFileBytes(fs.Filename) // and other stuff
 	if err != nil {
 		t.Error(err)

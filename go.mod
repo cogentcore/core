@@ -9,6 +9,8 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/h2non/filetype v1.1.3
 	goki.dev/enums v0.9.38
+	goki.dev/fi v0.1.0
+	goki.dev/spell v0.1.0
 	goki.dev/glop v0.1.4
 	goki.dev/gti v0.1.16
 	goki.dev/icons v0.0.9

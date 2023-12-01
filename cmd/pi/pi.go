@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"goki.dev/fi"
 	"goki.dev/glop/dirs"
-	"goki.dev/pi/v2/filecat"
 	_ "goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/pi"
 	"goki.dev/pi/v2/syms"
@@ -57,13 +57,13 @@ func main() {
 
 func DoGoPath(path string) {
 	fmt.Printf("Processing path: %v\n", path)
-	lp, _ := pi.LangSupport.Props(filecat.Go)
+	lp, _ := pi.LangSupport.Props(fi.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 	fs := pi.NewFileState()
 	pkgsym := lp.Lang.ParseDir(fs, path, pi.LangDirOpts{Rebuild: true})
 	if pkgsym != nil {
-		syms.SaveSymDoc(pkgsym, filecat.Go, path)
+		syms.SaveSymDoc(pkgsym, fi.Go, path)
 	}
 }
 

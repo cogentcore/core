@@ -29,7 +29,7 @@
 //
 // The LangSupport variable provides the hub for accessing interfaces
 // for supported languages, using the StdLangProps map which
-// provides a lookup from the filecat.Supported language name to its
+// provides a lookup from the fi.Supported language name to its
 // associated Lang interface and pi.Parser parser.
 // Thus you can go from the GoGi giv.FileInfo.Sup field to its
 // associated GoPi methods using this map (and associated LangSupport

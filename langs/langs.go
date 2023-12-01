@@ -7,12 +7,12 @@ package langs
 import (
 	"fmt"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 )
 
-var ParserBytes map[filecat.Supported][]byte = make(map[filecat.Supported][]byte)
+var ParserBytes map[fi.Supported][]byte = make(map[fi.Supported][]byte)
 
-func OpenParser(sl filecat.Supported) ([]byte, error) {
+func OpenParser(sl fi.Supported) ([]byte, error) {
 	parserBytes, ok := ParserBytes[sl]
 	if !ok {
 		return nil, fmt.Errorf("langs.OpenParser: no parser bytes for %v", sl)

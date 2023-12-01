@@ -13,8 +13,8 @@ import (
 	"strings"
 	"unicode"
 
+	"goki.dev/fi"
 	"goki.dev/glop/indent"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
@@ -33,15 +33,15 @@ type GoLang struct {
 var TheGoLang = GoLang{}
 
 func init() {
-	pi.StdLangProps[filecat.Go].Lang = &TheGoLang
-	langs.ParserBytes[filecat.Go] = parserBytes
+	pi.StdLangProps[fi.Go].Lang = &TheGoLang
+	langs.ParserBytes[fi.Go] = parserBytes
 }
 
 func (gl *GoLang) Parser() *pi.Parser {
 	if gl.Pr != nil {
 		return gl.Pr
 	}
-	lp, _ := pi.LangSupport.Props(filecat.Go)
+	lp, _ := pi.LangSupport.Props(fi.Go)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStd()
 	}

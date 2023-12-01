@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unicode"
 
+	"goki.dev/fi"
 	"goki.dev/glop/indent"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/langs/bibtex"
 	"goki.dev/pi/v2/lex"
@@ -35,15 +35,15 @@ type MarkdownLang struct {
 var TheMarkdownLang = MarkdownLang{}
 
 func init() {
-	pi.StdLangProps[filecat.Markdown].Lang = &TheMarkdownLang
-	langs.ParserBytes[filecat.Markdown] = parserBytes
+	pi.StdLangProps[fi.Markdown].Lang = &TheMarkdownLang
+	langs.ParserBytes[fi.Markdown] = parserBytes
 }
 
 func (ml *MarkdownLang) Parser() *pi.Parser {
 	if ml.Pr != nil {
 		return ml.Pr
 	}
-	lp, _ := pi.LangSupport.Props(filecat.Markdown)
+	lp, _ := pi.LangSupport.Props(fi.Markdown)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStd()
 	}

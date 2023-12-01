@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 )
 
 // GoPiCacheDir returns the GoPi cache directory for given language, and ensures that it exists
-func GoPiCacheDir(lang filecat.Supported) (string, error) {
+func GoPiCacheDir(lang fi.Supported) (string, error) {
 	ucdir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
@@ -60,7 +60,7 @@ func GoRelPath(filename string) (string, error) {
 }
 
 // CacheFilename returns the filename to use for cache file for given filename
-func CacheFilename(lang filecat.Supported, filename string) (string, error) {
+func CacheFilename(lang fi.Supported, filename string) (string, error) {
 	cdir, err := GoPiCacheDir(lang)
 	if err != nil {
 		return "", err
@@ -85,7 +85,7 @@ func CacheFilename(lang filecat.Supported, filename string) (string, error) {
 // SaveSymCache saves cache of symbols starting with given symbol
 // (typically a package, module, library), which is at given
 // filename
-func SaveSymCache(sy *Symbol, lang filecat.Supported, filename string) error {
+func SaveSymCache(sy *Symbol, lang fi.Supported, filename string) error {
 	cfile, err := CacheFilename(lang, filename)
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func SaveSymCache(sy *Symbol, lang filecat.Supported, filename string) error {
 }
 
 // SaveSymDoc saves doc file of syms -- for double-checking contents etc
-func SaveSymDoc(sy *Symbol, lang filecat.Supported, filename string) error {
+func SaveSymDoc(sy *Symbol, lang fi.Supported, filename string) error {
 	cfile, err := CacheFilename(lang, filename)
 	if err != nil {
 		return err
@@ -111,7 +111,7 @@ func SaveSymDoc(sy *Symbol, lang filecat.Supported, filename string) error {
 // OpenSymCache opens cache of symbols into given symbol
 // (typically a package, module, library), which is at given
 // filename -- returns time stamp when cache was last saved
-func OpenSymCache(lang filecat.Supported, filename string) (*Symbol, time.Time, error) {
+func OpenSymCache(lang fi.Supported, filename string) (*Symbol, time.Time, error) {
 	cfile, err := CacheFilename(lang, filename)
 	if err != nil {
 		return nil, time.Time{}, err

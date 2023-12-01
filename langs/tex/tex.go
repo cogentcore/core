@@ -9,8 +9,8 @@ import (
 	"strings"
 	"unicode"
 
+	"goki.dev/fi"
 	"goki.dev/glop/indent"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/langs/bibtex"
 	"goki.dev/pi/v2/lex"
@@ -33,15 +33,15 @@ type TexLang struct {
 var TheTexLang = TexLang{}
 
 func init() {
-	pi.StdLangProps[filecat.TeX].Lang = &TheTexLang
-	langs.ParserBytes[filecat.TeX] = parserBytes
+	pi.StdLangProps[fi.TeX].Lang = &TheTexLang
+	langs.ParserBytes[fi.TeX] = parserBytes
 }
 
 func (tl *TexLang) Parser() *pi.Parser {
 	if tl.Pr != nil {
 		return tl.Pr
 	}
-	lp, _ := pi.LangSupport.Props(filecat.TeX)
+	lp, _ := pi.LangSupport.Props(fi.TeX)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStd()
 	}

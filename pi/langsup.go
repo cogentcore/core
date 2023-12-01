@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 	"goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/lex"
 )
@@ -40,7 +40,7 @@ const (
 type LangProps struct {
 
 	// language -- must be a supported one from Supported list
-	Sup filecat.Supported
+	Sup fi.Supported
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
 	CommentLn string
@@ -72,36 +72,36 @@ func (lp *LangProps) HasFlag(flg LangFlags) bool {
 }
 
 // StdLangProps is the standard compiled-in set of language properties
-var StdLangProps = map[filecat.Supported]*LangProps{
-	filecat.Ada:        {filecat.Ada, "--", "", "", nil, nil, nil},
-	filecat.Bash:       {filecat.Bash, "# ", "", "", nil, nil, nil},
-	filecat.Csh:        {filecat.Csh, "# ", "", "", nil, nil, nil},
-	filecat.C:          {filecat.C, "// ", "/* ", " */", nil, nil, nil},
-	filecat.CSharp:     {filecat.CSharp, "// ", "/* ", " */", nil, nil, nil},
-	filecat.D:          {filecat.D, "// ", "/* ", " */", nil, nil, nil},
-	filecat.ObjC:       {filecat.ObjC, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
-	filecat.Java:       {filecat.Java, "// ", "/* ", " */", nil, nil, nil},
-	filecat.JavaScript: {filecat.JavaScript, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Eiffel:     {filecat.Eiffel, "--", "", "", nil, nil, nil},
-	filecat.Haskell:    {filecat.Haskell, "--", "{- ", "-}", nil, nil, nil},
-	filecat.Lisp:       {filecat.Lisp, "; ", "", "", nil, nil, nil},
-	filecat.Lua:        {filecat.Lua, "--", "---[[ ", "--]]", nil, nil, nil},
-	filecat.Makefile:   {filecat.Makefile, "# ", "", "", []LangFlags{IndentTab}, nil, nil},
-	filecat.Matlab:     {filecat.Matlab, "% ", "%{ ", " %}", nil, nil, nil},
-	filecat.OCaml:      {filecat.OCaml, "", "(* ", " *)", nil, nil, nil},
-	filecat.Pascal:     {filecat.Pascal, "// ", " ", " }", nil, nil, nil},
-	filecat.Perl:       {filecat.Perl, "# ", "", "", nil, nil, nil},
-	filecat.Python:     {filecat.Python, "# ", "", "", []LangFlags{IndentSpace}, nil, nil},
-	filecat.Php:        {filecat.Php, "// ", "/* ", " */", nil, nil, nil},
-	filecat.R:          {filecat.R, "# ", "", "", nil, nil, nil},
-	filecat.Ruby:       {filecat.Ruby, "# ", "", "", nil, nil, nil},
-	filecat.Rust:       {filecat.Rust, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Scala:      {filecat.Scala, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Html:       {filecat.Html, "", "<!-- ", " -->", nil, nil, nil},
-	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, nil, nil},
-	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil, nil},
-	filecat.Yaml:       {filecat.Yaml, "#", "", "", []LangFlags{IndentSpace}, nil, nil},
+var StdLangProps = map[fi.Supported]*LangProps{
+	fi.Ada:        {fi.Ada, "--", "", "", nil, nil, nil},
+	fi.Bash:       {fi.Bash, "# ", "", "", nil, nil, nil},
+	fi.Csh:        {fi.Csh, "# ", "", "", nil, nil, nil},
+	fi.C:          {fi.C, "// ", "/* ", " */", nil, nil, nil},
+	fi.CSharp:     {fi.CSharp, "// ", "/* ", " */", nil, nil, nil},
+	fi.D:          {fi.D, "// ", "/* ", " */", nil, nil, nil},
+	fi.ObjC:       {fi.ObjC, "// ", "/* ", " */", nil, nil, nil},
+	fi.Go:         {fi.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
+	fi.Java:       {fi.Java, "// ", "/* ", " */", nil, nil, nil},
+	fi.JavaScript: {fi.JavaScript, "// ", "/* ", " */", nil, nil, nil},
+	fi.Eiffel:     {fi.Eiffel, "--", "", "", nil, nil, nil},
+	fi.Haskell:    {fi.Haskell, "--", "{- ", "-}", nil, nil, nil},
+	fi.Lisp:       {fi.Lisp, "; ", "", "", nil, nil, nil},
+	fi.Lua:        {fi.Lua, "--", "---[[ ", "--]]", nil, nil, nil},
+	fi.Makefile:   {fi.Makefile, "# ", "", "", []LangFlags{IndentTab}, nil, nil},
+	fi.Matlab:     {fi.Matlab, "% ", "%{ ", " %}", nil, nil, nil},
+	fi.OCaml:      {fi.OCaml, "", "(* ", " *)", nil, nil, nil},
+	fi.Pascal:     {fi.Pascal, "// ", " ", " }", nil, nil, nil},
+	fi.Perl:       {fi.Perl, "# ", "", "", nil, nil, nil},
+	fi.Python:     {fi.Python, "# ", "", "", []LangFlags{IndentSpace}, nil, nil},
+	fi.Php:        {fi.Php, "// ", "/* ", " */", nil, nil, nil},
+	fi.R:          {fi.R, "# ", "", "", nil, nil, nil},
+	fi.Ruby:       {fi.Ruby, "# ", "", "", nil, nil, nil},
+	fi.Rust:       {fi.Rust, "// ", "/* ", " */", nil, nil, nil},
+	fi.Scala:      {fi.Scala, "// ", "/* ", " */", nil, nil, nil},
+	fi.Html:       {fi.Html, "", "<!-- ", " -->", nil, nil, nil},
+	fi.TeX:        {fi.TeX, "% ", "", "", nil, nil, nil},
+	fi.Markdown:   {fi.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil, nil},
+	fi.Yaml:       {fi.Yaml, "#", "", "", []LangFlags{IndentSpace}, nil, nil},
 }
 
 // LangSupporter provides general support for supported languages.
@@ -137,8 +137,8 @@ func (ll *LangSupporter) OpenStd() error {
 	return nil
 }
 
-// Props looks up language properties by filecat.Supported const int type
-func (ll *LangSupporter) Props(sup filecat.Supported) (*LangProps, error) {
+// Props looks up language properties by fi.Supported const int type
+func (ll *LangSupporter) Props(sup fi.Supported) (*LangProps, error) {
 	lp, has := StdLangProps[sup]
 	if !has {
 		err := fmt.Errorf("pi.LangSupport.Props: no specific support for language: %v", sup)
@@ -151,7 +151,7 @@ func (ll *LangSupporter) Props(sup filecat.Supported) (*LangProps, error) {
 // PropsByName looks up language properties by string name of language
 // (with case-insensitive fallback). Returns error if not supported.
 func (ll *LangSupporter) PropsByName(lang string) (*LangProps, error) {
-	sup, err := filecat.SupportedByName(lang)
+	sup, err := fi.SupportedByName(lang)
 	if err != nil {
 		// log.Println(err.Error()) // don't want output during lexing..
 		return nil, err

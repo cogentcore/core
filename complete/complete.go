@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-Package Complete provides functions for text completion
-*/
 package complete
 
 import (

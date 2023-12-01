@@ -7,7 +7,7 @@ package pi
 import (
 	"sync"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 )
 
 // FileStates contains two FileState's: one is being processed while the
@@ -20,7 +20,7 @@ type FileStates struct {
 	Filename string
 
 	// the supported file type, if supported (typically only supported files are processed)
-	Sup filecat.Supported
+	Sup fi.Supported
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
 	BasePath string
@@ -46,7 +46,7 @@ type FileStates struct {
 
 // NewFileStates returns a new FileStates for given filename, basepath,
 // and supported file type.
-func NewFileStates(fname, basepath string, sup filecat.Supported) *FileStates {
+func NewFileStates(fname, basepath string, sup fi.Supported) *FileStates {
 	fs := &FileStates{}
 	fs.SetSrc(fname, basepath, sup)
 	return fs
@@ -54,7 +54,7 @@ func NewFileStates(fname, basepath string, sup filecat.Supported) *FileStates {
 
 // SetSrc sets the source that is processed by this FileStates
 // if basepath is empty then it is set to the path for the filename.
-func (fs *FileStates) SetSrc(fname, basepath string, sup filecat.Supported) {
+func (fs *FileStates) SetSrc(fname, basepath string, sup fi.Supported) {
 	fs.ProcMu.Lock() // make sure processing is done
 	defer fs.ProcMu.Unlock()
 	fs.SwitchMu.Lock()

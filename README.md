@@ -15,10 +15,6 @@ See the [Wiki](https://goki.dev/pi/v2/wiki) for more detailed docs, and [Google 
 
 The `pi` repository is also home to various other basic file-level packages including:
 
-* `filecat` -- categorizes file types based on suffix and magic cookies, etc.  Uses both [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) and [h2non/filetype](https://github.com/h2non/filetype) packages.
-
-* `spell` -- spell-checking based on [sajari/fuzzy]("https://github.com/sajari/fuzzy").
-
 * `complete` -- basic completion / lookup infrastructure.
 
 * `lsp` -- language server protocol interface (incomplete).

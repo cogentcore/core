@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 	"goki.dev/pi/v2/token"
 )
 
@@ -25,7 +25,7 @@ type File struct {
 	Filename string
 
 	// the supported file type, if supported (typically only supported files are processed)
-	Sup filecat.Supported
+	Sup fi.Supported
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
 	BasePath string
@@ -48,7 +48,7 @@ type File struct {
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
 // then it is set to the path for the filename
-func (fl *File) SetSrc(src [][]rune, fname, basepath string, sup filecat.Supported) {
+func (fl *File) SetSrc(src [][]rune, fname, basepath string, sup fi.Supported) {
 	fl.Filename = fname
 	if basepath != "" {
 		fl.BasePath = basepath
@@ -158,7 +158,7 @@ func (fl *File) OpenFile(fname string) error {
 		return err
 	}
 	rns := RunesFromBytes(alltxt)
-	sup := filecat.SupportedFromFile(fname)
+	sup := fi.SupportedFromFile(fname)
 	fl.SetSrc(rns, fname, "", sup)
 	return nil
 }
@@ -198,7 +198,7 @@ func (fl *File) InitFromLine(sfl *File, ln int) bool {
 }
 
 // InitFromString initializes from given string. Returns false if string is empty
-func (fl *File) InitFromString(str string, fname string, sup filecat.Supported) bool {
+func (fl *File) InitFromString(str string, fname string, sup fi.Supported) bool {
 	if str == "" {
 		return false
 	}

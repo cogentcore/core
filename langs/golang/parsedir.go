@@ -14,8 +14,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"goki.dev/fi"
 	"goki.dev/glop/dirs"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/pi"
 	"goki.dev/pi/v2/syms"
 	"goki.dev/pi/v2/token"
@@ -166,7 +166,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	}
 
 	if !opts.Rebuild {
-		csy, cts, err := syms.OpenSymCache(filecat.Go, pkgPathAbs)
+		csy, cts, err := syms.OpenSymCache(fi.Go, pkgPathAbs)
 		if err == nil && csy != nil {
 			sydir := filepath.Dir(csy.Filename)
 			diffPath := sydir != pkgPathAbs
@@ -249,7 +249,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
 	if !opts.Nocache {
-		syms.SaveSymCache(pkgsym, filecat.Go, pkgPathAbs)
+		syms.SaveSymCache(pkgsym, fi.Go, pkgPathAbs)
 	}
 	return pkgsym
 }

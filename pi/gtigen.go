@@ -38,7 +38,7 @@ var _ = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", Doc: "the filename", Directives: gti.Directives{}}},
-		{"Sup", &gti.Field{Name: "Sup", Type: "filecat.Supported", Doc: "the supported file type, if supported (typically only supported files are processed)", Directives: gti.Directives{}}},
+		{"Sup", &gti.Field{Name: "Sup", Type: "fi.Supported", Doc: "the supported file type, if supported (typically only supported files are processed)", Directives: gti.Directives{}}},
 		{"BasePath", &gti.Field{Name: "BasePath", Type: "string", Doc: "base path for reporting file names -- this must be set externally e.g., by gide for the project root path", Directives: gti.Directives{}}},
 		{"DoneIdx", &gti.Field{Name: "DoneIdx", Type: "int", Doc: "index of the state that is done", Directives: gti.Directives{}}},
 		{"FsA", &gti.Field{Name: "FsA", Type: "FileState", Doc: "one filestate", Directives: gti.Directives{}}},
@@ -93,7 +93,7 @@ var _ = gti.AddType(&gti.Type{
 	Doc:        "LangProps contains properties of languages supported by the Pi parser\nframework",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Sup", &gti.Field{Name: "Sup", Type: "filecat.Supported", Doc: "language -- must be a supported one from Supported list", Directives: gti.Directives{}}},
+		{"Sup", &gti.Field{Name: "Sup", Type: "fi.Supported", Doc: "language -- must be a supported one from Supported list", Directives: gti.Directives{}}},
 		{"CommentLn", &gti.Field{Name: "CommentLn", Type: "string", Doc: "character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used", Directives: gti.Directives{}}},
 		{"CommentSt", &gti.Field{Name: "CommentSt", Type: "string", Doc: "character(s) that start a multi-line comment or one that requires both start and end", Directives: gti.Directives{}}},
 		{"CommentEd", &gti.Field{Name: "CommentEd", Type: "string", Doc: "character(s) that end a multi-line comment or one that requires both start and end", Directives: gti.Directives{}}},
