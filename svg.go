@@ -20,9 +20,7 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// SVG is a viewport for containing and rendering SVG drawing objects,
-// corresponding to the svg tag in html.
-// It provides its own Pixels bitmap for drawing into.
+// SVG is an SVG object.
 type SVG struct {
 	// Name is the name of the SVG -- e.g., the filename if loaded
 	Name string
