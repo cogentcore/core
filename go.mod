@@ -1,6 +1,6 @@
 module goki.dev/spell
 
-go 1.21.4
+go 1.21.0
 
 require goki.dev/pi/v2 v2.0.0-dev0.0.12
 
