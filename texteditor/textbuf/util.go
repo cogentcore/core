@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-// BytesToLineStrings returns []string lines
+// BytesToLineStrings returns []string lines from []byte input.
 // If addNewLn is true, each string line has a \n appended at end.
 func BytesToLineStrings(txt []byte, addNewLn bool) []string {
 	lns := bytes.Split(txt, []byte("\n"))
@@ -30,6 +30,16 @@ func BytesToLineStrings(txt []byte, addNewLn bool) []string {
 		}
 	}
 	return str
+}
+
+// StringLinesToByteLines returns [][]byte lines from []string lines
+func StringLinesToByteLines(str []string) [][]byte {
+	nl := len(str)
+	bl := make([][]byte, nl)
+	for i, s := range str {
+		bl[i] = []byte(s)
+	}
+	return bl
 }
 
 // FileBytes returns the bytes of given file.

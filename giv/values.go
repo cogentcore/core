@@ -1640,7 +1640,7 @@ func (vv *TextEditorValue) ConfigWidget(w gi.Widget) {
 	tb := texteditor.NewBuf()
 	grr.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
-		fmt.Println(tb.Txt)
+		// fmt.Println(tb.Txt)
 		vv.SetValue(string(tb.Txt))
 		fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
 	})

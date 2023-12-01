@@ -39,6 +39,9 @@ func (fn *Node) OpenFilesDefault() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
+		if sn == nil {
+			continue
+		}
 		sn.OpenFileDefault()
 	}
 }
@@ -58,6 +61,9 @@ func (fn *Node) OpenFilesWith() {
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
+		if sn == nil {
+			continue
+		}
 		giv.CallFunc(sn, sn.OpenFileWith)
 	}
 }
@@ -81,6 +87,9 @@ func (fn *Node) DuplicateFiles() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
+		if sn == nil {
+			continue
+		}
 		sn.DuplicateFile()
 	}
 }
@@ -169,7 +178,7 @@ func (fn *Node) RenameFiles() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		if sn.IsExternal() {
+		if sn == nil || sn.IsExternal() {
 			continue
 		}
 		giv.CallFunc(sn, sn.RenameFile)
@@ -226,6 +235,9 @@ func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
 		return
 	}
 	sn := AsNode(sels[sz-1])
+	if sn == nil {
+		return
+	}
 	sn.NewFile(filename, addToVcs)
 }
 
@@ -262,6 +274,9 @@ func (fn *Node) NewFolders(foldername string) { //gti:add
 		return
 	}
 	sn := AsNode(sels[sz-1])
+	if sn == nil {
+		return
+	}
 	sn.NewFolder(foldername)
 }
 

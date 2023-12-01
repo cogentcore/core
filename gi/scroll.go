@@ -214,11 +214,11 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
-			e.SetHandled()
+			// e.SetHandled()
 			return
 		}
 		ly.ScrollActionDelta(mat32.X, fdel.Y)
-		e.SetHandled()
+		// e.SetHandled()
 		return
 	}
 
@@ -226,14 +226,14 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, fdel.Y)
 		ly.ScrollActionDelta(mat32.X, fdel.X)
-		e.SetHandled()
+		// e.SetHandled()
 	} else if ly.HasScroll[mat32.Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, fdel.Y)
 		if del.X != 0 {
 			se.Delta.Y = 0
 		} else {
-			e.SetHandled()
+			// e.SetHandled()
 		}
 	} else if ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
@@ -242,7 +242,7 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 			if del.Y != 0 {
 				se.Delta.X = 0
 			} else {
-				e.SetHandled()
+				// e.SetHandled()
 			}
 		}
 	}

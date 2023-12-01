@@ -11,14 +11,23 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
+	"goki.dev/laser"
 )
 
 // todo: need a mechanism for nil Context to attach later
+
+func NonNilContext(ctx Widget) Widget {
+	if !laser.AnyIsNil(ctx) {
+		return ctx
+	}
+	return CurRenderWin.MainStageMgr.Top().Scene
+}
 
 // NewDialog returns a new PopupWindow dialog [Stage] in the context
 // of the given widget, optionally with the given name.
 // See [NewFullDialog] for a full-window dialog.
 func (sc *Scene) NewDialog(ctx Widget, name ...string) *Stage {
+	ctx = NonNilContext(ctx)
 	sc.DialogStyles()
 	sc.Stage = NewMainStage(DialogStage, sc)
 	sc.Stage.SetModal(true)

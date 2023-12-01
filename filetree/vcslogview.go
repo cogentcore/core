@@ -79,6 +79,29 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.RevB = ""
 	lv.SetA = true
 	lv.ConfigToolbar()
+	tv.CustomContextMenu = func(m *gi.Scene) {
+		gi.NewSeparator(m)
+		gi.NewButton(m).SetText("Set Revision A").
+			SetTooltip("Set Buffer A's revision to this").
+			OnClick(func(e events.Event) {
+				idx := tv.SelIdx
+				if idx < 0 || idx >= len(lv.Log) {
+					return
+				}
+				cmt := lv.Log[idx]
+				lv.SetRevA(cmt.Rev)
+			})
+		gi.NewButton(m).SetText("Set Revision B").
+			SetTooltip("Set Buffer B's revision to this").
+			OnClick(func(e events.Event) {
+				idx := tv.SelIdx
+				if idx < 0 || idx >= len(lv.Log) {
+					return
+				}
+				cmt := lv.Log[idx]
+				lv.SetRevB(cmt.Rev)
+			})
+	}
 	tv.OnDoubleClick(func(e events.Event) {
 		idx := tv.SelIdx
 		if idx < 0 || idx >= len(lv.Log) {
@@ -116,7 +139,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	})
 }
 
-// SetRevA sets the RevA to use
+// SetRevA sets the revision to use for buffer A
 func (lv *VCSLogView) SetRevA(rev string) {
 	lv.RevA = rev
 	tb := lv.Toolbar()
@@ -127,7 +150,7 @@ func (lv *VCSLogView) SetRevA(rev string) {
 	tfi.(*gi.TextField).SetText(rev)
 }
 
-// SetRevB sets the RevB to use
+// SetRevB sets the revision to use for buffer B
 func (lv *VCSLogView) SetRevB(rev string) {
 	lv.RevB = rev
 	tb := lv.Toolbar()
@@ -166,36 +189,51 @@ func (lv *VCSLogView) ConfigToolbar() {
 	if lv.File != "" {
 		gi.NewLabel(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
 		gi.NewSeparator(tb, "flsep")
-		cba := gi.NewSwitch(tb, "a-rev")
-		cba.SetText("A Rev: ")
-		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
-		cba.SetState(true, states.Checked)
-		tfa := gi.NewTextField(tb, "a-tf")
-		tfa.SetText(lv.RevA)
+		cba := gi.NewSwitch(tb, "a-rev").SetText("A Rev: ").
+			SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff").
+			SetState(true, states.Checked)
+		tfa := gi.NewTextField(tb, "a-tf").SetText(lv.RevA)
 		tfa.OnChange(func(e events.Event) {
 			lv.RevA = tfa.Text()
 		})
+		gi.NewButton(tb, "view-a").SetText("View A").SetIcon(icons.Document).
+			SetTooltip("View file at revision A").
+			OnClick(func(e events.Event) {
+				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevA)
+			})
+
 		gi.NewSeparator(tb, "absep")
-		cbb := gi.NewSwitch(tb, "b-rev")
-		cbb.SetText("B Rev: ")
-		cbb.Tooltip = "If selected, double-clicking in log will set this B Revision to use for Diff"
-		tfb := gi.NewTextField(tb, "b-tf")
-		tfb.SetText(lv.RevB)
+
+		cbb := gi.NewSwitch(tb, "b-rev").SetText("B Rev: ").
+			SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
+		cbb.OnClick(func(e events.Event) {
+			lv.SetA = !cbb.StateIs(states.Checked)
+			cba.SetState(lv.SetA, states.Checked)
+			cba.SetNeedsRender(true)
+		})
+		cba.OnClick(func(e events.Event) {
+			lv.SetA = cba.StateIs(states.Checked)
+			cbb.SetState(!lv.SetA, states.Checked)
+			cbb.SetNeedsRender(true)
+		})
+
+		tfb := gi.NewTextField(tb, "b-tf").SetText(lv.RevB)
 		tfb.OnChange(func(e events.Event) {
 			lv.RevB = tfb.Text()
 		})
+		gi.NewButton(tb, "view-b").SetText("View B").SetIcon(icons.Document).
+			SetTooltip("View file at revision B").
+			OnClick(func(e events.Event) {
+				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevB)
+			})
+
 		gi.NewSeparator(tb, "dsep")
-		gi.NewButton(tb, "diff").SetText("Diff").SetIcon(icons.Difference).SetTooltip("Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy").
+
+		gi.NewButton(tb, "diff").SetText("Diff").SetIcon(icons.Difference).
+			SetTooltip("Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
 				texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
 			})
-		cba.OnClick(func(e events.Event) {
-			lv.SetA = cba.StateIs(states.Checked)
-		})
-		cbb.OnClick(func(e events.Event) {
-			lv.SetA = !cbb.StateIs(states.Checked)
-			// cba.SetState(lv.SetA, states.Checked)
-		})
 	}
 
 }
@@ -215,5 +253,25 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
 	d.NewFullDialog(ctx).SetNewWindow(true).Run()
+	return d
+}
+
+// FileAtRevDialog Shows a file at a given revision in a new dialog window
+func FileAtRevDialog(ctx gi.Widget, repo vci.Repo, file, rev string) *gi.Body {
+	fb, err := repo.FileContents(file, rev)
+	if err != nil {
+		gi.ErrorDialog(ctx, err)
+		return nil
+	}
+	if rev == "" {
+		rev = "HEAD"
+	}
+	title := "File at VCS Revision: " + dirs.DirAndFile(file) + "@" + rev
+	d := gi.NewBody().AddTitle(title)
+
+	tb := texteditor.NewBuf().SetText(fb).SetFilename(file) // file is key for getting lang
+	texteditor.NewEditor(d).SetBuf(tb).SetReadOnly(true)
+	d.NewFullDialog(ctx).SetNewWindow(true).Run()
+	tb.StartDelayedReMarkup() // update markup
 	return d
 }

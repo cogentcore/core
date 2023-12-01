@@ -50,7 +50,8 @@ func (ed *Editor) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
 	return ed.Renders[pos.Ln].RuneSpanPos(pos.Ch)
 }
 
-// SetCursor sets a new cursor position, enforcing it in range
+// SetCursor sets a new cursor position, enforcing it in range.
+// This is the main final pathway for all cursor movement.
 func (ed *Editor) SetCursor(pos lex.Pos) {
 	if ed.NLines == 0 || ed.Buf == nil {
 		ed.CursorPos = lex.PosZero
@@ -61,7 +62,6 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 
 	ed.ClearScopelights()
 	ed.CursorPos = ed.Buf.ValidPos(pos)
-	// ed.Buf.MarkupLine(ed.CursorPos.Ln)
 	ed.CursorMovedSig()
 	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	ch := ed.CursorPos.Ch

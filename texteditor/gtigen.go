@@ -5,7 +5,6 @@ package texteditor
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -23,23 +22,38 @@ var DiffViewType = gti.AddType(&gti.Type{
 	Doc:        "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FileA", &gti.Field{Name: "FileA", Type: "string", LocalType: "string", Doc: "first file name being compared", Directives: gti.Directives{}, Tag: "desc:\"first file name being compared\""}},
-		{"FileB", &gti.Field{Name: "FileB", Type: "string", LocalType: "string", Doc: "second file name being compared", Directives: gti.Directives{}, Tag: "desc:\"second file name being compared\""}},
-		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision for first file, if relevant", Directives: gti.Directives{}, Tag: "desc:\"revision for first file, if relevant\""}},
-		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision for second file, if relevant", Directives: gti.Directives{}, Tag: "desc:\"revision for second file, if relevant\""}},
-		{"Diffs", &gti.Field{Name: "Diffs", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "the diff records", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"the diff records\""}},
-		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"textbuf for A\""}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"textbuf for B\""}},
-		{"AlignD", &gti.Field{Name: "AlignD", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "aligned diffs records diff for aligned lines", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"aligned diffs records diff for aligned lines\""}},
-		{"EditA", &gti.Field{Name: "EditA", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "edit diffs records aligned diffs with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"edit diffs records aligned diffs with edits applied\""}},
-		{"EditB", &gti.Field{Name: "EditB", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "edit diffs records aligned diffs with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"edit diffs records aligned diffs with edits applied\""}},
-		{"UndoA", &gti.Field{Name: "UndoA", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "undo diffs records aligned diffs with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"undo diffs records aligned diffs with edits applied\""}},
-		{"UndoB", &gti.Field{Name: "UndoB", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "undo diffs records aligned diffs with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" desc:\"undo diffs records aligned diffs with edits applied\""}},
+		{"FileA", &gti.Field{Name: "FileA", Type: "string", LocalType: "string", Doc: "first file name being compared", Directives: gti.Directives{}, Tag: ""}},
+		{"FileB", &gti.Field{Name: "FileB", Type: "string", LocalType: "string", Doc: "second file name being compared", Directives: gti.Directives{}, Tag: ""}},
+		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision for first file, if relevant", Directives: gti.Directives{}, Tag: ""}},
+		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision for second file, if relevant", Directives: gti.Directives{}, Tag: ""}},
+		{"Diffs", &gti.Field{Name: "Diffs", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "the diff records", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufAOrig", &gti.Field{Name: "BufAOrig", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A only, original text", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufBOrig", &gti.Field{Name: "BufBOrig", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B only, original text", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufAEdit", &gti.Field{Name: "BufAEdit", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A only, unaligned, with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufBEdit", &gti.Field{Name: "BufBEdit", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B only, unaligned, with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufALineMap", &gti.Field{Name: "BufALineMap", Type: "[]int", LocalType: "[]int", Doc: "mapping of original line numbers (index) to edited line numbers,\naccounting for the edits applied so far", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufBLineMap", &gti.Field{Name: "BufBLineMap", Type: "[]int", LocalType: "[]int", Doc: "mapping of original line numbers (index) to edited line numbers,\naccounting for the edits applied so far", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufALineMapUndo", &gti.Field{Name: "BufALineMapUndo", Type: "[][]int", LocalType: "[][]int", Doc: "undo records for BufALineMap", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufBLineMapUndo", &gti.Field{Name: "BufBLineMapUndo", Type: "[][]int", LocalType: "[][]int", Doc: "undo records for BufBLineMap", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"AlignD", &gti.Field{Name: "AlignD", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "aligned diffs records diff for aligned lines", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"SaveFileA", &gti.Method{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"fname", &gti.Field{Name: "fname", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"SaveFileB", &gti.Method{Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"fname", &gti.Field{Name: "fname", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &DiffView{},
 })
 
@@ -86,62 +100,6 @@ func (t *DiffView) SetRevA(v string) *DiffView {
 // revision for second file, if relevant
 func (t *DiffView) SetRevB(v string) *DiffView {
 	t.RevB = v
-	return t
-}
-
-// SetDiffs sets the [DiffView.Diffs]:
-// the diff records
-func (t *DiffView) SetDiffs(v textbuf.Diffs) *DiffView {
-	t.Diffs = v
-	return t
-}
-
-// SetBufA sets the [DiffView.BufA]:
-// textbuf for A
-func (t *DiffView) SetBufA(v *Buf) *DiffView {
-	t.BufA = v
-	return t
-}
-
-// SetBufB sets the [DiffView.BufB]:
-// textbuf for B
-func (t *DiffView) SetBufB(v *Buf) *DiffView {
-	t.BufB = v
-	return t
-}
-
-// SetAlignD sets the [DiffView.AlignD]:
-// aligned diffs records diff for aligned lines
-func (t *DiffView) SetAlignD(v textbuf.Diffs) *DiffView {
-	t.AlignD = v
-	return t
-}
-
-// SetEditA sets the [DiffView.EditA]:
-// edit diffs records aligned diffs with edits applied
-func (t *DiffView) SetEditA(v textbuf.Diffs) *DiffView {
-	t.EditA = v
-	return t
-}
-
-// SetEditB sets the [DiffView.EditB]:
-// edit diffs records aligned diffs with edits applied
-func (t *DiffView) SetEditB(v textbuf.Diffs) *DiffView {
-	t.EditB = v
-	return t
-}
-
-// SetUndoA sets the [DiffView.UndoA]:
-// undo diffs records aligned diffs with edits applied
-func (t *DiffView) SetUndoA(v textbuf.Diffs) *DiffView {
-	t.UndoA = v
-	return t
-}
-
-// SetUndoB sets the [DiffView.UndoB]:
-// undo diffs records aligned diffs with edits applied
-func (t *DiffView) SetUndoB(v textbuf.Diffs) *DiffView {
-	t.UndoB = v
 	return t
 }
 

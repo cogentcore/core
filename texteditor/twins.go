@@ -66,31 +66,38 @@ func (te *TwinEditors) ConfigTexts() {
 		return
 	}
 	te.MakeBufs()
-	ae := NewEditor(te, "text-a")
-	be := NewEditor(te, "text-b")
-	ae.SetBuf(te.BufA)
-	be.SetBuf(te.BufB)
+	av := NewEditor(te, "text-a")
+	bv := NewEditor(te, "text-b")
+	av.SetBuf(te.BufA)
+	bv.SetBuf(te.BufB)
 
-	ae.On(events.Scroll, func(e events.Event) {
-		be.ScrollDelta(e)
+	av.On(events.Scroll, func(e events.Event) {
+		// bv.ScrollDelta(e)
+		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
+		bv.SetNeedsRender(true)
 	})
-	be.On(events.Scroll, func(e events.Event) {
-		ae.ScrollDelta(e)
+	bv.On(events.Scroll, func(e events.Event) {
+		// av.ScrollDelta(e)
+		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
+		av.SetNeedsRender(true)
 	})
-
-	// sync scrolling
-	// al.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	dm := mat32.Dims(sig)
-	// 	if dm == mat32.Y {
-	// 		bl.ScrollToPos(dm, data.(float32))
-	// 	}
-	// })
-	// bl.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	dm := mat32.Dims(sig)
-	// 	if dm == mat32.Y {
-	// 		al.ScrollToPos(dm, data.(float32))
-	// 	}
-	// })
+	inInputEvent := false
+	av.On(events.Input, func(e events.Event) {
+		if inInputEvent {
+			return
+		}
+		inInputEvent = true
+		bv.SetCursorShow(av.CursorPos)
+		inInputEvent = false
+	})
+	bv.On(events.Input, func(e events.Event) {
+		if inInputEvent {
+			return
+		}
+		inInputEvent = true
+		av.SetCursorShow(bv.CursorPos)
+		inInputEvent = false
+	})
 }
 
 // Editors returns the two text Editors

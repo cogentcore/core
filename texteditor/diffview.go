@@ -6,6 +6,8 @@ package texteditor
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -17,6 +19,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/lex"
@@ -55,6 +58,7 @@ func DiffViewDialogFromRevs(ctx gi.Widget, repo vci.Repo, file string, fbuf *Buf
 		} else {
 			fb, err := textbuf.FileBytes(file)
 			if err != nil {
+				gi.ErrorDialog(ctx, err)
 				return nil, err
 			}
 			bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
@@ -62,12 +66,14 @@ func DiffViewDialogFromRevs(ctx gi.Widget, repo vci.Repo, file string, fbuf *Buf
 	} else {
 		fb, err := repo.FileContents(file, rev_b)
 		if err != nil {
+			gi.ErrorDialog(ctx, err)
 			return nil, err
 		}
 		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
 	}
 	fb, err := repo.FileContents(file, rev_a)
 	if err != nil {
+		gi.ErrorDialog(ctx, err)
 		return nil, err
 	}
 	astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
@@ -104,40 +110,28 @@ type DiffView struct {
 	gi.Frame
 
 	// first file name being compared
-	FileA string `desc:"first file name being compared"`
+	FileA string
 
 	// second file name being compared
-	FileB string `desc:"second file name being compared"`
+	FileB string
 
 	// revision for first file, if relevant
-	RevA string `desc:"revision for first file, if relevant"`
+	RevA string
 
 	// revision for second file, if relevant
-	RevB string `desc:"revision for second file, if relevant"`
+	RevB string
 
-	// the diff records
-	Diffs textbuf.Diffs `json:"-" xml:"-" desc:"the diff records"`
+	// textbuf for A showing the aligned edit view
+	BufA *Buf `json:"-" xml:"-" set:"-"`
 
-	// textbuf for A
-	BufA *Buf `json:"-" xml:"-" desc:"textbuf for A"`
-
-	// textbuf for B
-	BufB *Buf `json:"-" xml:"-" desc:"textbuf for B"`
+	// textbuf for B showing the aligned edit view
+	BufB *Buf `json:"-" xml:"-" set:"-"`
 
 	// aligned diffs records diff for aligned lines
-	AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`
+	AlignD textbuf.Diffs `json:"-" xml:"-" set:"-"`
 
-	// edit diffs records aligned diffs with edits applied
-	EditA textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
-
-	// edit diffs records aligned diffs with edits applied
-	EditB textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
-
-	// undo diffs records aligned diffs with edits applied
-	UndoA textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
-
-	// undo diffs records aligned diffs with edits applied
-	UndoB textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
+	// Diffs applied
+	Diffs textbuf.DiffSelected
 }
 
 func (dv *DiffView) OnInit() {
@@ -219,72 +213,49 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 	return true
 }
 
-// ResetDiffs resets all active diff state -- after saving
-func (dv *DiffView) ResetDiffs() {
-	dv.BufA.LineColors = nil
-	dv.BufB.LineColors = nil
-	dv.AlignD = nil
-	dv.EditA = nil
-	dv.UndoA = nil
-	dv.EditB = nil
-	dv.UndoB = nil
+// SaveAs saves A or B edits into given file.
+// It checks for an existing file, prompts to overwrite or not.
+func (dv *DiffView) SaveAs(ab bool, filename gi.FileName) {
+	if !grr.Log1(dirs.FileExists(string(filename))) {
+		dv.SaveFile(ab, filename)
+	} else {
+		d := gi.NewBody().AddTitle("File Exists, Overwrite?").
+			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
+		d.AddBottomBar(func(pw gi.Widget) {
+			d.AddCancel(pw)
+			d.AddOk(pw).OnClick(func(e events.Event) {
+				dv.SaveFile(ab, filename)
+			})
+		})
+		d.NewDialog(dv).Run()
+	}
 }
 
-// RemoveAlignsA removes extra blank text lines added to align with B
-func (dv *DiffView) RemoveAlignsA() {
-	nd := len(dv.EditA)
-	for i := nd - 1; i >= 0; i-- {
-		df := dv.EditA[i]
-		switch df.Tag {
-		case 'r':
-			if df.J2 > df.I2 {
-				spos := lex.Pos{Ln: df.I2, Ch: 0}
-				epos := lex.Pos{Ln: df.J2, Ch: 0}
-				dv.BufA.DeleteText(spos, epos, true)
-			}
-		case 'i':
-			spos := lex.Pos{Ln: df.J1, Ch: 0}
-			epos := lex.Pos{Ln: df.J2, Ch: 0}
-			dv.BufA.DeleteText(spos, epos, true)
-		}
+// SaveFile writes A or B edits to file, with no prompting, etc
+func (dv *DiffView) SaveFile(ab bool, filename gi.FileName) error {
+	var txt string
+	if ab {
+		txt = strings.Join(dv.Diffs.B.Edit, "\n")
+	} else {
+		txt = strings.Join(dv.Diffs.A.Edit, "\n")
 	}
+	err := os.WriteFile(string(filename), []byte(txt), 0644)
+	if err != nil {
+		gi.ErrorSnackbar(dv, err)
+		slog.Error(err.Error())
+	}
+	return err
 }
 
 // SaveFileA saves the current state of file A to given filename
-func (dv *DiffView) SaveFileA(fname gi.FileName) {
-	dv.RemoveAlignsA()
-	dv.RemoveAlignsB()
-	dv.ResetDiffs()
-	dv.BufA.SaveAs(fname)
+func (dv *DiffView) SaveFileA(fname gi.FileName) { //gti:add
+	dv.SaveAs(false, fname)
 	// dv.UpdateToolbar()
 }
 
-// RemoveAlignsB removes extra blank text lines added to align with A
-func (dv *DiffView) RemoveAlignsB() {
-	nd := len(dv.EditB)
-	for i := nd - 1; i >= 0; i-- {
-		df := dv.EditB[i]
-		switch df.Tag {
-		case 'r':
-			if df.I2 > df.J2 {
-				spos := lex.Pos{Ln: df.J2, Ch: 0}
-				epos := lex.Pos{Ln: df.I2, Ch: 0}
-				dv.BufB.DeleteText(spos, epos, true)
-			}
-		case 'd':
-			spos := lex.Pos{Ln: df.I1, Ch: 0}
-			epos := lex.Pos{Ln: df.I2, Ch: 0}
-			dv.BufB.DeleteText(spos, epos, true)
-		}
-	}
-}
-
 // SaveFileB saves the current state of file B to given filename
-func (dv *DiffView) SaveFileB(fname gi.FileName) {
-	dv.RemoveAlignsA()
-	dv.RemoveAlignsB()
-	dv.ResetDiffs()
-	dv.BufB.SaveAs(fname)
+func (dv *DiffView) SaveFileB(fname gi.FileName) { //gti:add
+	dv.SaveAs(true, fname)
 	// dv.UpdateToolbar()
 }
 
@@ -294,20 +265,21 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	av, bv := dv.TextEditors()
 	aupdt := av.UpdateStart()
 	bupdt := bv.UpdateStart()
+
+	dv.Diffs.SetStringLines(astr, bstr)
+
 	dv.BufA.LineColors = nil
 	dv.BufB.LineColors = nil
-	del := colors.Red
-	ins := colors.Green
-	chg := colors.Blue
-	dv.Diffs = textbuf.DiffLines(astr, bstr)
-	nd := len(dv.Diffs)
+	del := colors.Scheme.Error.Base
+	ins := colors.Scheme.Success.Base
+	chg := colors.Scheme.Primary.Base
+
+	nd := len(dv.Diffs.Diffs)
 	dv.AlignD = make(textbuf.Diffs, nd)
-	dv.EditA = make(textbuf.Diffs, nd)
-	dv.EditB = make(textbuf.Diffs, nd)
 	var ab, bb [][]byte
 	absln := 0
 	bspc := []byte(" ")
-	for i, df := range dv.Diffs {
+	for i, df := range dv.Diffs.Diffs {
 		switch df.Tag {
 		case 'r':
 			di := df.I2 - df.I1
@@ -319,8 +291,6 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + dj
 			dv.AlignD[i] = ad
-			dv.EditA[i] = ad
-			dv.EditB[i] = ad
 			for i := 0; i < mx; i++ {
 				dv.BufA.SetLineColor(absln+i, chg)
 				dv.BufB.SetLineColor(absln+i, chg)
@@ -351,8 +321,6 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + di
 			dv.AlignD[i] = ad
-			dv.EditA[i] = ad
-			dv.EditB[i] = ad
 			for i := 0; i < di; i++ {
 				dv.BufA.SetLineColor(absln+i, del)
 				dv.BufB.SetLineColor(absln+i, ins)
@@ -370,8 +338,6 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + dj
 			dv.AlignD[i] = ad
-			dv.EditA[i] = ad
-			dv.EditB[i] = ad
 			for i := 0; i < dj; i++ {
 				dv.BufA.SetLineColor(absln+i, ins)
 				dv.BufB.SetLineColor(absln+i, del)
@@ -389,8 +355,6 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + di
 			dv.AlignD[i] = ad
-			dv.EditA[i] = ad
-			dv.EditB[i] = ad
 			for i := 0; i < di; i++ {
 				ab = append(ab, []byte(astr[df.I1+i]))
 				bb = append(bb, []byte(bstr[df.J1+i]))
@@ -403,8 +367,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	dv.TagWordDiffs()
 	dv.BufA.ReMarkup()
 	dv.BufB.ReMarkup()
-	av.UpdateEnd(aupdt)
-	bv.UpdateEnd(bupdt)
+	av.UpdateEndRender(aupdt)
+	bv.UpdateEndRender(bupdt)
 }
 
 // TagWordDiffs goes through replace diffs and tags differences at the
@@ -470,6 +434,7 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 	if di < 0 || df.Tag == 'e' {
 		return false
 	}
+
 	if ab == 0 {
 		dv.BufA.Undos.Off = false
 		// srcLen := len(dv.BufB.Lines[df.J2])
@@ -478,15 +443,7 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 		src := dv.BufB.Region(spos, epos)
 		dv.BufA.DeleteText(spos, epos, true)
 		dv.BufA.InsertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
-		ei, _ := dv.EditA.DiffForLine(df.J1)
-		if ei >= 0 {
-			dv.UndoA = append(dv.UndoA, dv.EditA[ei])
-			if df.Tag == 'd' {
-				dv.EditA[ei].Tag = 'i' // switch to insert which means that it will delete at end
-			} else {
-				dv.EditA = append(dv.EditA[:ei], dv.EditA[ei+1:]...)
-			}
-		}
+		dv.Diffs.BtoA(di)
 	} else {
 		dv.BufB.Undos.Off = false
 		spos := lex.Pos{Ln: df.J1, Ch: 0}
@@ -494,85 +451,31 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 		src := dv.BufA.Region(spos, epos)
 		dv.BufB.DeleteText(spos, epos, true)
 		dv.BufB.InsertText(spos, src.ToBytes(), true)
-		ei, _ := dv.EditB.DiffForLine(df.I1)
-		if ei >= 0 {
-			dv.UndoB = append(dv.UndoB, dv.EditB[ei])
-			if df.Tag == 'i' {
-				dv.EditB[ei].Tag = 'd' // switch to delete..
-			} else {
-				dv.EditB = append(dv.EditB[:ei], dv.EditB[ei+1:]...)
-			}
-		}
+		dv.Diffs.AtoB(di)
 	}
 	// dv.UpdateToolbar()
 	return true
 }
 
-// UndoDiff undoes last applied change, if any -- just does Undo in buffer and
-// updates the list of edits applied.
-func (dv *DiffView) UndoDiff(ab int) {
+// UndoDiff undoes last applied change, if any.
+func (dv *DiffView) UndoDiff(ab int) error {
 	tva, tvb := dv.TextEditors()
-	tv := tva
 	if ab == 1 {
-		tv = tvb
-	}
-	if ab == 0 {
-		dv.BufA.Undos.Off = false
-		nd := len(dv.UndoA)
-		if nd == 0 {
-			return
+		if !dv.Diffs.B.Undo() {
+			err := errors.New("No more edits to undo")
+			gi.ErrorSnackbar(dv, err)
+			return err
 		}
-		df := dv.UndoA[nd-1]
-		dv.UndoA = dv.UndoA[:nd-1]
-		if df.Tag == 'd' {
-			ei, _ := dv.EditA.DiffForLine(df.J1) // existing record
-			if ei >= 0 {
-				dv.EditA[ei].Tag = 'd' // restore
-			}
-		} else {
-			ei, _ := dv.EditA.DiffForLine(df.J1 - 1) // place to insert
-			oi, od := dv.AlignD.DiffForLine(df.J1)
-			if oi >= 0 {
-				df.Tag = od.Tag // restore
-			}
-			if ei < 0 {
-				dv.EditA = append(textbuf.Diffs{df}, dv.EditA...)
-			} else {
-				tmp := append(dv.EditA[:ei+1], df)
-				tmp = append(tmp, dv.EditA[ei+1:]...)
-				dv.EditA = tmp
-			}
-		}
+		tvb.Undo()
 	} else {
-		dv.BufB.Undos.Off = false
-		nd := len(dv.UndoB)
-		if nd == 0 {
-			return
+		if !dv.Diffs.A.Undo() {
+			err := errors.New("No more edits to undo")
+			gi.ErrorSnackbar(dv, err)
+			return err
 		}
-		df := dv.UndoB[nd-1]
-		dv.UndoB = dv.UndoB[:nd-1]
-		if df.Tag == 'i' {
-			ei, _ := dv.EditB.DiffForLine(df.J1) // existing record
-			if ei >= 0 {
-				dv.EditB[ei].Tag = 'i' // restore
-			}
-		} else {
-			ei, _ := dv.EditB.DiffForLine(df.J1 - 1) // place to insert
-			oi, od := dv.AlignD.DiffForLine(df.J1)
-			if oi >= 0 {
-				df.Tag = od.Tag // restore
-			}
-			if ei < 0 {
-				dv.EditB = append(textbuf.Diffs{df}, dv.EditB...)
-			} else {
-				tmp := append(dv.EditB[:ei+1], df)
-				tmp = append(tmp, dv.EditB[ei+1:]...)
-				dv.EditB = tmp
-			}
-		}
+		tva.Undo()
 	}
-	tv.Undo()
-	// dv.UpdateToolbar()
+	return nil
 }
 
 func (dv *DiffView) ConfigWidget() {
@@ -583,25 +486,43 @@ func (dv *DiffView) ConfigDiffView() {
 	if dv.HasChildren() {
 		return
 	}
-	dv.BufA = NewBuf()
-	dv.BufB = NewBuf()
-	dv.BufA.Filename = gi.FileName(dv.FileA)
+	dv.BufA = NewBuf().SetFilename(dv.FileA)
+	dv.BufB = NewBuf().SetFilename(dv.FileB)
 	dv.BufA.Opts.LineNos = true
 	dv.BufA.Stat() // update markup
-	dv.BufB.Filename = gi.FileName(dv.FileB)
 	dv.BufB.Opts.LineNos = true
 	dv.BufB.Stat() // update markup
-	av := NewDiffTextEditor(dv, "text-a")
-	bv := NewDiffTextEditor(dv, "text-b")
-	av.SetBuf(dv.BufA)
-	bv.SetBuf(dv.BufB)
+	av := NewDiffTextEditor(dv, "text-a").SetBuf(dv.BufA)
+	av.SetReadOnly(true)
+	bv := NewDiffTextEditor(dv, "text-b").SetBuf(dv.BufB)
+	bv.SetReadOnly(true)
 
-	// sync scrolling
 	av.On(events.Scroll, func(e events.Event) {
-		bv.ScrollDelta(e)
+		// bv.ScrollDelta(e)
+		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
+		bv.SetNeedsRender(true)
 	})
 	bv.On(events.Scroll, func(e events.Event) {
-		av.ScrollDelta(e)
+		// av.ScrollDelta(e)
+		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
+		av.SetNeedsRender(true)
+	})
+	inInputEvent := false
+	av.On(events.Input, func(e events.Event) {
+		if inInputEvent {
+			return
+		}
+		inInputEvent = true
+		bv.SetCursorShow(av.CursorPos)
+		inInputEvent = false
+	})
+	bv.On(events.Input, func(e events.Event) {
+		if inInputEvent {
+			return
+		}
+		inInputEvent = true
+		av.SetCursorShow(bv.CursorPos)
+		inInputEvent = false
 	})
 }
 
@@ -646,7 +567,7 @@ func (dv *DiffView) DiffViewTopAppBar(tb *gi.TopAppBar) {
 			s.State.SetFlag(!dv.BufA.IsChanged(), states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
-		SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function").
+		SetTooltip("save edited version of file with the given -- prompts for filename").
 		OnClick(func(e events.Event) {
 			// fb := giv.NewSoloFuncButton(ctx, dv.SaveFileA)
 			// fb.Args[0].SetValue(dv.FileA)
@@ -657,11 +578,13 @@ func (dv *DiffView) DiffViewTopAppBar(tb *gi.TopAppBar) {
 			s.State.SetFlag(!dv.BufA.IsChanged(), states.Disabled)
 		})
 
+	gi.NewSeparator(tb)
+
 	txtb := "B: " + dirs.DirAndFile(dv.FileB)
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}
-	gi.NewLabel(tb, "label-b", txtb)
+	gi.NewLabel(tb, "label-b").SetText(txtb)
 	gi.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
 		SetTooltip("move down to next diff region").
 		OnClick(func(e events.Event) {

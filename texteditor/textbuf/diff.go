@@ -31,39 +31,47 @@ func (di Diffs) DiffForLine(line int) (int, difflib.OpCode) {
 	return -1, difflib.OpCode{}
 }
 
+func DiffOpReverse(op difflib.OpCode) difflib.OpCode {
+	op.J1, op.I1 = op.I1, op.J1 // swap
+	op.J2, op.I2 = op.I2, op.J2 // swap
+	t := op.Tag
+	switch t {
+	case 'd':
+		op.Tag = 'i'
+	case 'i':
+		op.Tag = 'd'
+	}
+	return op
+}
+
 // Reverse returns the reverse-direction diffs, switching a vs. b
 func (di Diffs) Reverse() Diffs {
 	rd := make(Diffs, len(di))
 	for i := range di {
-		op := di[i]
-		op.J1, op.I1 = op.I1, op.J1 // swap
-		op.J2, op.I2 = op.I2, op.J2 // swap
-		t := op.Tag
-		switch t {
-		case 'd':
-			op.Tag = 'i'
-		case 'i':
-			op.Tag = 'd'
-		}
-		rd[i] = op
+		rd[i] = DiffOpReverse(di[i])
 	}
 	return rd
+}
+
+func DiffOpString(op difflib.OpCode) string {
+	switch op.Tag {
+	case 'r':
+		return fmt.Sprintf("delete lines: %v - %v, insert lines: %v - %v", op.I1, op.I2, op.J1, op.J2)
+	case 'd':
+		return fmt.Sprintf("delete lines: %v - %v", op.I1, op.I2)
+	case 'i':
+		return fmt.Sprintf("insert lines at %v: %v - %v", op.I1, op.J1, op.J2)
+	case 'e':
+		return fmt.Sprintf("same lines %v - %v == %v - %v", op.I1, op.I2, op.J1, op.J2)
+	}
+	return "<bad tag>"
 }
 
 // String satisfies the Stringer interface
 func (di Diffs) String() string {
 	var b strings.Builder
 	for _, df := range di {
-		switch df.Tag {
-		case 'r':
-			fmt.Fprintf(&b, "delete lines: %v - %v, insert lines: %v - %v\n", df.I1, df.I2, df.J1, df.J2)
-		case 'd':
-			fmt.Fprintf(&b, "delete lines: %v - %v\n", df.I1, df.I2)
-		case 'i':
-			fmt.Fprintf(&b, "insert lines at %v: %v - %v\n", df.I1, df.J1, df.J2)
-		case 'e':
-			fmt.Fprintf(&b, "same lines %v - %v == %v - %v\n", df.I1, df.I2, df.J1, df.J2)
-		}
+		b.WriteString(DiffOpString(df) + "\n")
 	}
 	return b.String()
 }
