@@ -1,6 +1,6 @@
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
-goki.dev/glop v0.1.4 h1:IBGyM/Aec5mDyT+hesq1jjCVc66TXM5fCdjSoxqJFlk=
-goki.dev/glop v0.1.4/go.mod h1:IXICQzPtXZokKzpVsAZRK2IUeQEJer84SDjsejw4PSo=
+goki.dev/glop v0.1.6 h1:QolRZeGS8AiRemZ0DiUBFMzZry8RiazDlCITJSRZYy4=
+goki.dev/glop v0.1.6/go.mod h1:IXICQzPtXZokKzpVsAZRK2IUeQEJer84SDjsejw4PSo=
 goki.dev/grr v0.0.6 h1:puJbNhOVYsSmj+6kt9RsQZJZxoKvzDU1iGe2+S8omO0=
 goki.dev/grr v0.0.6/go.mod h1:GptVd1cKZKNLthLDQIf6wxKDzx0FpNVgh03WggeMp0k=
