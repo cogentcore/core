@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
@@ -29,7 +30,6 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"golang.org/x/image/draw"
 )
@@ -898,12 +898,12 @@ func (tf *TextField) Paste() {
 	if em == nil {
 		return
 	}
-	data := em.ClipBoard().Read([]string{filecat.TextPlain})
+	data := em.ClipBoard().Read([]string{fi.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
 		}
-		tf.InsertAtCursor(data.Text(filecat.TextPlain))
+		tf.InsertAtCursor(data.Text(fi.TextPlain))
 	}
 }
 

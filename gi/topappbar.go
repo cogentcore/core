@@ -417,3 +417,25 @@ func (tb *TopAppBar) FindButtonByName(name string) (*Button, bool) {
 	return nil, false
 }
 */
+
+//////////////////////////////////////////////////////////////////////////////
+// 	AppActions
+
+// AppAction is an action llll;
+type AppAction struct {
+
+	// completion text -- what will actually be inserted if selected
+	Text string
+
+	// label to show the user -- only used for menu display if non-empty -- otherwise Text is used
+	Label string
+
+	// icon name
+	Icon string
+
+	// extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI
+	Desc string
+
+	// lang specific or other, e.g. class or type
+	Extra map[string]string
+}

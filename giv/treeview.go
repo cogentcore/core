@@ -15,6 +15,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/enums"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
@@ -27,7 +28,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
-	"goki.dev/pi/v2/filecat"
 )
 
 // TreeViewer is an interface for TreeView types
@@ -1316,7 +1316,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := ki.WriteNewJSON(tv.This(), &buf)
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
 		slog.Error("giv.TreeView MimeData Write JSON error:", err)
 	}
@@ -1329,14 +1329,14 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 	sl := make(ki.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == filecat.DataJson {
+		if d.Type == fi.DataJson {
 			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
 				slog.Error("giv.TreeView NodesFromMimeData: JSON load error:", err)
 			}
-		} else if d.Type == filecat.TextPlain { // paths
+		} else if d.Type == fi.TextPlain { // paths
 			pl = append(pl, string(d.Data))
 		}
 	}
@@ -1389,7 +1389,7 @@ func (tv *TreeView) Cut() { //gti:add
 // Paste pastes clipboard at given node.
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() { //gti:add
-	md := tv.EventMgr().ClipBoard().Read([]string{filecat.DataJson})
+	md := tv.EventMgr().ClipBoard().Read([]string{fi.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1620,7 +1620,7 @@ func (tv *TreeView) Dragged(de events.Event) {
 	sroot := tv.RootView.SyncNode
 	md := de.Data
 	for _, d := range md {
-		if d.Type == filecat.TextPlain { // link
+		if d.Type == fi.TextPlain { // link
 			path := string(d.Data)
 			sn := sroot.FindPath(path)
 			if sn != nil {

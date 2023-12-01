@@ -5,6 +5,7 @@
 package texteditor
 
 import (
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/textbuf"
@@ -12,7 +13,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 )
 
@@ -403,9 +403,9 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 func (ed *Editor) Paste() {
 	updt := ed.UpdateStart()
 	defer ed.UpdateEndRender(updt)
-	data := ed.EventMgr().ClipBoard().Read([]string{filecat.TextPlain})
+	data := ed.EventMgr().ClipBoard().Read([]string{fi.TextPlain})
 	if data != nil {
-		ed.InsertAtCursor(data.TypeData(filecat.TextPlain))
+		ed.InsertAtCursor(data.TypeData(fi.TextPlain))
 		ed.SavePosHistory(ed.CursorPos)
 	}
 }

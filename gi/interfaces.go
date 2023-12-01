@@ -91,7 +91,7 @@ type Clipper interface {
 	Cut()
 
 	// Paste pastes from clipboard to item, e.g.,
-	// md := goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Read([]string{filecat.DataJson})
+	// md := goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Read([]string{fi.DataJson})
 	// reads mime-encoded data from the clipboard, in this case in the JSON format
 	Paste()
 }

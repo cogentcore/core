@@ -18,6 +18,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/colors"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
@@ -27,7 +28,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/filecat"
 )
 
 //////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ type FileView struct {
 	ExtMap map[string]string
 
 	// files for current directory
-	Files []*filecat.FileInfo
+	Files []*fi.FileInfo
 
 	// index of currently-selected file in Files list (-1 if none)
 	SelectedIdx int `set:"-" edit:"-"`
@@ -167,16 +167,16 @@ func (fv *FileView) Disconnect() {
 
 // FileViewFilterFunc is a filtering function for files -- returns true if the
 // file should be visible in the view, and false if not
-type FileViewFilterFunc func(fv *FileView, fi *filecat.FileInfo) bool
+type FileViewFilterFunc func(fv *FileView, fi *fi.FileInfo) bool
 
 // FileViewDirOnlyFilter is a FileViewFilterFunc that only shows directories (folders).
-func FileViewDirOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
+func FileViewDirOnlyFilter(fv *FileView, fi *fi.FileInfo) bool {
 	return fi.IsDir()
 }
 
 // FileViewExtOnlyFilter is a FileViewFilterFunc that only shows files that
 // match the target extensions, and directories.
-func FileViewExtOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
+func FileViewExtOnlyFilter(fv *FileView, fi *fi.FileInfo) bool {
 	if fi.IsDir() {
 		return true
 	}
@@ -208,7 +208,7 @@ func (fv *FileView) SelectedFile() string {
 
 // SelectedFileInfo returns the currently-selected fileinfo, returns
 // false if none
-func (fv *FileView) SelectedFileInfo() (*filecat.FileInfo, bool) {
+func (fv *FileView) SelectedFileInfo() (*fi.FileInfo, bool) {
 	if fv.SelectedIdx < 0 || fv.SelectedIdx >= len(fv.Files) {
 		return nil, false
 	}
@@ -511,7 +511,7 @@ func (fv *FileView) ReadFiles() {
 		return
 	}
 
-	fv.Files = make([]*filecat.FileInfo, 0, 1000)
+	fv.Files = make([]*fi.FileInfo, 0, 1000)
 	filepath.Walk(effpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
@@ -525,7 +525,7 @@ func (fv *FileView) ReadFiles() {
 		if path == effpath { // proceed..
 			return nil
 		}
-		fi, ferr := filecat.NewFileInfo(path)
+		fi, ferr := fi.NewFileInfo(path)
 		keep := ferr == nil
 		if fv.FilterFunc != nil {
 			keep = fv.FilterFunc(fv, fi)

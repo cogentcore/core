@@ -8,10 +8,10 @@ import (
 	"strings"
 	"unicode"
 
+	"goki.dev/fi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/goosi/events"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
 )
@@ -120,7 +120,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		return
 	}
 
-	isDoc := ed.Buf.Info.Cat == filecat.Doc
+	isDoc := ed.Buf.Info.Cat == fi.Doc
 	tp := ed.CursorPos
 
 	kf := keyfun.Of(kt.KeyChord())

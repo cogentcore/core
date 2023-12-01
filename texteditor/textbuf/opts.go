@@ -5,9 +5,9 @@
 package textbuf
 
 import (
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/glop/indent"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/pi"
 )
 
@@ -50,8 +50,8 @@ func (tb *Opts) IndentChar() indent.Char {
 
 // ConfigSupported configures options based on the supported language info in GoPi
 // returns true if supported
-func (tb *Opts) ConfigSupported(sup filecat.Supported) bool {
-	if sup == filecat.NoSupport {
+func (tb *Opts) ConfigSupported(sup fi.Supported) bool {
+	if sup == fi.NoSupport {
 		return false
 	}
 	lp, ok := pi.StdLangProps[sup]
@@ -78,12 +78,12 @@ func SupportedComments(fpath string) (comLn, comSt, comEd string) {
 	comLn = "//"
 	comSt = "/*"
 	comEd = "*/"
-	mtyp, _, err := filecat.MimeFromFile(fpath)
+	mtyp, _, err := fi.MimeFromFile(fpath)
 	if err != nil {
 		return
 	}
-	sup := filecat.MimeSupported(mtyp)
-	if sup == filecat.NoSupport {
+	sup := fi.MimeSupported(mtyp)
+	if sup == fi.NoSupport {
 		return
 	}
 	lp, ok := pi.StdLangProps[sup]

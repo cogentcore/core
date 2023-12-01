@@ -13,7 +13,7 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/spell"
+	"goki.dev/spell"
 )
 
 // Completer interface supports the SetCompleter method for setting completer parameters

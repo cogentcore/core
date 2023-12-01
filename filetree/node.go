@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"goki.dev/enums"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/texteditor"
@@ -25,7 +26,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
 )
 
@@ -43,7 +43,7 @@ type Node struct { //goki:embedder
 	FPath gi.FileName `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
 
 	// full standard file info about this file
-	Info filecat.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
+	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`
 
 	// file buffer for editing this file
 	Buf *texteditor.Buf `edit:"-" set:"-" json:"-" xml:"-" copy:"-"`

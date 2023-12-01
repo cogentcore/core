@@ -12,10 +12,10 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
 	_ "goki.dev/pi/v2/suplangs"
@@ -27,7 +27,7 @@ import (
 type HiMarkup struct {
 
 	// full info about the file including category etc
-	Info *filecat.FileInfo
+	Info *fi.FileInfo
 
 	// syntax highlighting style
 	Style gi.HiStyleName
@@ -73,11 +73,11 @@ func (hm *HiMarkup) UsingPi() bool {
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init(info *filecat.FileInfo, pist *pi.FileStates) {
+func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
 	hm.Info = info
 	hm.PiState = pist
 
-	if hm.Info.Sup != filecat.NoSupport {
+	if hm.Info.Sup != fi.NoSupport {
 		if lp, err := pi.LangSupport.Props(hm.Info.Sup); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil

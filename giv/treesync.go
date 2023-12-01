@@ -10,6 +10,7 @@ import (
 	"log"
 	"log/slog"
 
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
@@ -17,7 +18,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/pi/v2/filecat"
 )
 
 // note: see this file has all the SyncNode specific
@@ -423,7 +423,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := ki.WriteNewJSON(src, &buf)
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
 		slog.Error("giv.TreeView MimeData Write JSON error:", err)
 	}
@@ -437,14 +437,14 @@ func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string
 	sl := make(ki.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == filecat.DataJson {
+		if d.Type == fi.DataJson {
 			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
 			} else {
 				slog.Error("giv.TreeView SyncNodesFromMimeData: JSON load error:", err)
 			}
-		} else if d.Type == filecat.TextPlain { // paths
+		} else if d.Type == fi.TextPlain { // paths
 			pl = append(pl, string(d.Data))
 		}
 	}

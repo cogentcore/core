@@ -46,7 +46,7 @@ func (fn *Node) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (fn *Node) Paste() {
-	md := fn.EventMgr().ClipBoard().Read([]string{filecat.TextPlain})
+	md := fn.EventMgr().ClipBoard().Read([]string{fi.TextPlain})
 	if md != nil {
 		fn.PasteMime(md)
 	}
@@ -92,7 +92,7 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes) ([]string, *Nod
 		} else {
 			d = md[i] // just a list
 		}
-		if d.Type != filecat.TextPlain {
+		if d.Type != fi.TextPlain {
 			continue
 		}
 		path := string(d.Data)
@@ -133,7 +133,7 @@ func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes) {
 		} else {
 			d = md[i] // just a list
 		}
-		if d.Type != filecat.TextPlain {
+		if d.Type != fi.TextPlain {
 			continue
 		}
 		path := string(d.Data)

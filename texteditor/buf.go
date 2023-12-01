@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"goki.dev/enums"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/gi/v2/texteditor/textbuf"
@@ -29,11 +30,10 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
-	"goki.dev/pi/v2/spell"
 	"goki.dev/pi/v2/token"
+	"goki.dev/spell"
 )
 
 var (
@@ -84,7 +84,7 @@ type Buf struct {
 	Opts textbuf.Opts
 
 	// full info about file
-	Info filecat.FileInfo
+	Info fi.FileInfo
 
 	// Pi parsing state info for file
 	PiState pi.FileStates
@@ -481,7 +481,7 @@ func (tb *Buf) Stat() error {
 // ConfigSupported configures options based on the supported language info in GoPi
 // returns true if supported
 func (tb *Buf) ConfigSupported() bool {
-	if tb.Info.Sup != filecat.NoSupport {
+	if tb.Info.Sup != fi.NoSupport {
 		if tb.Spell == nil {
 			tb.SetSpell()
 		}
@@ -2654,9 +2654,9 @@ func (tb *Buf) IsSpellEnabled(pos lex.Pos) bool {
 		return false
 	}
 	switch tb.Info.Cat {
-	case filecat.Doc: // not in code!
+	case fi.Doc: // not in code!
 		return !tb.InTokenCode(pos)
-	case filecat.Code:
+	case fi.Code:
 		return tb.InComment(pos) || tb.InLitString(pos)
 	default:
 		return false

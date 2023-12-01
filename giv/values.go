@@ -14,6 +14,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/enums"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor"
@@ -29,7 +30,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/pi/v2/filecat"
 )
 
 // values contains all the Values for basic builtin types
@@ -69,7 +69,7 @@ func init() {
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Duration(0))), func() Value {
 		return &DurationValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() Value {
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(fi.FileTime{})), func() Value {
 		return &TimeValue{}
 	})
 }

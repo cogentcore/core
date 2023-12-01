@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"goki.dev/colors"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -17,7 +18,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
-	"goki.dev/pi/v2/filecat"
 )
 
 // TimeView is a view for selecting a time
@@ -323,7 +323,7 @@ func (vv *TimeValue) TimeVal() *time.Time {
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v
-	case *filecat.FileTime:
+	case *fi.FileTime:
 		return (*time.Time)(v)
 	}
 	return nil

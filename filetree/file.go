@@ -11,11 +11,11 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
 )
 
@@ -309,7 +309,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	ppath := string(fn.FPath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
-	filecat.CopyFile(tpath, filename, perm)
+	fi.CopyFile(tpath, filename, perm)
 	fn.FRoot.UpdateNewFile(ppath)
 	ofn, ok := fn.FRoot.FindFile(filename)
 	if ok && ofn.Info.Vcs >= vci.Stored {

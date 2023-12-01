@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/filecat"
 )
 
 // FindDirNode finds directory node by given path.
@@ -133,16 +133,16 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 
 // FileExtCounts returns a count of all the different file extensions, sorted
 // from highest to lowest.
-// If cat is != filecat.Unknown then it only uses files of that type
-// (e.g., filecat.Code to find any code files)
-func (fn *Node) FileExtCounts(cat filecat.Cat) []NodeNameCount {
+// If cat is != fi.Unknown then it only uses files of that type
+// (e.g., fi.Code to find any code files)
+func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 	cmap := make(map[string]int, 20)
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return ki.Continue
 		}
-		if cat != filecat.Unknown {
+		if cat != fi.Unknown {
 			if sfn.Info.Cat != cat {
 				return ki.Continue
 			}
@@ -166,16 +166,16 @@ func (fn *Node) FileExtCounts(cat filecat.Cat) []NodeNameCount {
 }
 
 // LatestFileMod returns the most recent mod time of files in the tree.
-// If cat is != filecat.Unknown then it only uses files of that type
-// (e.g., filecat.Code to find any code files)
-func (fn *Node) LatestFileMod(cat filecat.Cat) time.Time {
+// If cat is != fi.Unknown then it only uses files of that type
+// (e.g., fi.Code to find any code files)
+func (fn *Node) LatestFileMod(cat fi.Cat) time.Time {
 	tmod := time.Time{}
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return ki.Continue
 		}
-		if cat != filecat.Unknown {
+		if cat != fi.Unknown {
 			if sfn.Info.Cat != cat {
 				return ki.Continue
 			}

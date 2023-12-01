@@ -17,6 +17,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/enums"
+	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
@@ -30,7 +31,6 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
-	"goki.dev/pi/v2/filecat"
 )
 
 ////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ type SliceViewer interface {
 	SliceDeleteAt(idx int)
 
 	// MimeDataType returns the data type for mime clipboard
-	// (copy / paste) data e.g., filecat.DataJson
+	// (copy / paste) data e.g., fi.DataJson
 	MimeDataType() string
 
 	// CopySelToMime copies selected rows to mime data
@@ -1469,7 +1469,7 @@ func (sv *SliceViewBase) MimeDataIdx(md *mimedata.Mimes, idx int) {
 	val := sv.SliceVal(idx)
 	b, err := json.MarshalIndent(val, "", "  ")
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: b})
+		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: b})
 	} else {
 		log.Printf("gi.SliceViewBase MimeData JSON Marshall error: %v\n", err)
 	}
@@ -1481,7 +1481,7 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 	svtyp := sv.SliceNPVal.Type()
 	sl := make([]any, 0, len(md))
 	for _, d := range md {
-		if d.Type == filecat.DataJson {
+		if d.Type == fi.DataJson {
 			nval := reflect.New(svtyp.Elem()).Interface()
 			err := json.Unmarshal(d.Data, nval)
 			if err == nil {
@@ -1495,9 +1495,9 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
 }
 
 // MimeDataType returns the data type for mime clipboard (copy / paste) data
-// e.g., filecat.DataJson
+// e.g., fi.DataJson
 func (sv *SliceViewBase) MimeDataType() string {
-	return filecat.DataJson
+	return fi.DataJson
 }
 
 // CopySelToMime copies selected rows to mime data

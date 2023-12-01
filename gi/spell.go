@@ -16,7 +16,7 @@ import (
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/spell"
+	"goki.dev/spell"
 )
 
 // InitSpell tries to load the saved fuzzy.spell model.

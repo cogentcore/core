@@ -30,7 +30,7 @@ var NodeType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"FPath", &gti.Field{Name: "FPath", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/pi/v2/filecat.FileInfo", LocalType: "filecat.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/pi/v2/fi.FileInfo", LocalType: "fi.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"FRoot", &gti.Field{Name: "FRoot", Type: "*goki.dev/gi/v2/filetree.Tree", LocalType: "*Tree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "goki.dev/vci/v2.Repo", LocalType: "vci.Repo", Doc: "version control system repository for this directory,\nonly non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
