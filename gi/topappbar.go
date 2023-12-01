@@ -5,9 +5,12 @@
 package gi
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
 
 	"goki.dev/colors"
+	"goki.dev/fi/uri"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -53,12 +56,19 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 			slog.Error("Top app bar has no MainMgr")
 			return
 		}
-		ch.Items = make([]any, mm.Stack.Len())
+		urs := tb.Resources.Generate()
+		ch.Items = make([]any, mm.Stack.Len()+len(urs))
 		for i, kv := range mm.Stack.Order {
-			ch.Items[i] = kv.Val.Scene.Name()
+			u := uri.URI{Label: kv.Val.Scene.Name()}
+			u.SetURL("scene", kv.Val.Scene.Name(), fmt.Sprintf("%d", i))
+			ch.Items[i] = u
 			if kv.Val == stg {
 				ch.SetCurIndex(i)
 			}
+		}
+		st := len(mm.Stack.Order)
+		for i, u := range urs {
+			ch.Items[st+i] = u
 		}
 	})
 	ch.OnChange(func(e events.Event) {
@@ -68,10 +78,22 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 			slog.Error("Top app bar has no MainMgr")
 			return
 		}
-		// TODO: optimize this?
-		kv := mm.Stack.Order[ch.CurIndex]
-		mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
-		mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
+		cv, ok := ch.CurVal.(uri.URI)
+		if !ok {
+			return
+		}
+		if cv.HasScheme("scene") {
+			// TODO: optimize this?
+			kv := mm.Stack.Order[ch.CurIndex] // todo: bad to rely on index!
+			mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
+			mm.Stack.InsertAtIdx(mm.Stack.Len(), kv.Key, kv.Val)
+			return
+		}
+		if cv.Func != nil {
+			cv.Func()
+			return
+		}
+		ErrorSnackbar(ch, errors.New("unable to process resource: "+cv.String()))
 	})
 	ch.Style(func(s *styles.Style) {
 		// s.GrowWrap = true // note: this won't work because contents not placed until end
@@ -97,6 +119,9 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 // mobile and desktop environments.
 type TopAppBar struct { //goki:embedder
 	Frame
+
+	// Resources are generators for resources shown in the top app bar
+	Resources uri.Resources
 
 	// items moved from the main toolbar, will be shown in the overflow menu
 	OverflowItems ki.Slice `set:"-" json:"-" xml:"-"`
@@ -417,25 +442,3 @@ func (tb *TopAppBar) FindButtonByName(name string) (*Button, bool) {
 	return nil, false
 }
 */
-
-//////////////////////////////////////////////////////////////////////////////
-// 	AppActions
-
-// AppAction is an action llll;
-type AppAction struct {
-
-	// completion text -- what will actually be inserted if selected
-	Text string
-
-	// label to show the user -- only used for menu display if non-empty -- otherwise Text is used
-	Label string
-
-	// icon name
-	Icon string
-
-	// extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI
-	Desc string
-
-	// lang specific or other, e.g. class or type
-	Extra map[string]string
-}
