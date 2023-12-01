@@ -157,7 +157,7 @@ func (tv *TreeView) SelectedSyncNodes() ki.Slice {
 	var sn ki.Slice
 	sl := tv.SelectedViews()
 	for _, v := range sl {
-		sn = append(sn, v.SyncNode)
+		sn = append(sn, v.AsTreeView().SyncNode)
 	}
 	return sn
 }

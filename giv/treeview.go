@@ -10,6 +10,7 @@ import (
 	"image"
 	"log"
 	"log/slog"
+	"slices"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
@@ -34,6 +35,8 @@ import (
 // overridable method hooks for actions taken on the TreeView,
 // including OnOpen, OnClose, etc.
 type TreeViewer interface {
+	gi.Widget
+
 	// AsTreeView returns the base *TreeView for this node
 	AsTreeView() *TreeView
 
@@ -119,7 +122,7 @@ type TreeView struct {
 
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
-	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" edit:"-"`
+	SelectedNodes []TreeViewer `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// actStateLayer is the actual state layer of the tree view, which
 	// should be used when rendering it and its parts (but not its children).
@@ -646,7 +649,7 @@ func (tv *TreeView) SelectModeToggle() {
 // SelectedViews returns a slice of the currently-selected
 // TreeViews within the entire tree, using a list maintained
 // by the root node
-func (tv *TreeView) SelectedViews() []*TreeView {
+func (tv *TreeView) SelectedViews() []TreeViewer {
 	if tv.RootView == nil {
 		return nil
 	}
@@ -654,15 +657,11 @@ func (tv *TreeView) SelectedViews() []*TreeView {
 		return tv.RootView.SelectedNodes
 	}
 	sels := tv.RootView.SelectedNodes
-	nz := make([]*TreeView, 0, len(sels))
-	for _, sl := range sels {
-		nz = append(nz, sl)
-	}
-	return nz
+	return slices.Clone(sels)
 }
 
 // SetSelectedViews updates the selected views to given list
-func (tv *TreeView) SetSelectedViews(sl []*TreeView) {
+func (tv *TreeView) SetSelectedViews(sl []TreeViewer) {
 	if tv.RootView != nil {
 		tv.RootView.SelectedNodes = sl
 	}
@@ -680,7 +679,7 @@ func (tv *TreeView) Select() {
 		tv.SetSelected(true)
 		tv.ApplyStyle()
 		sl := tv.SelectedViews()
-		sl = append(sl, tv)
+		sl = append(sl, tv.This().(TreeViewer))
 		tv.SetSelectedViews(sl)
 		tv.SetNeedsRender(true)
 	}
@@ -714,9 +713,10 @@ func (tv *TreeView) UnselectAll() {
 	sl := tv.SelectedViews()
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
-		v.SetSelected(false)
+		vt := v.AsTreeView()
+		vt.SetSelected(false)
 		v.ApplyStyle()
-		v.SetNeedsRender(true)
+		vt.SetNeedsRender(true)
 	}
 	tv.UpdateEndRender(updt)
 }
@@ -771,12 +771,13 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 			minIdx := -1
 			maxIdx := 0
 			for _, v := range sl {
+				vn := v.AsTreeView()
 				if minIdx < 0 {
-					minIdx = v.ViewIdx
+					minIdx = vn.ViewIdx
 				} else {
-					minIdx = min(minIdx, v.ViewIdx)
+					minIdx = min(minIdx, vn.ViewIdx)
 				}
-				maxIdx = max(maxIdx, v.ViewIdx)
+				maxIdx = max(maxIdx, vn.ViewIdx)
 			}
 			cidx := tv.ViewIdx
 			nn := tv

@@ -2365,7 +2365,7 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"ViewIdx", &gti.Field{Name: "ViewIdx", Type: "int", LocalType: "int", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
 		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
 		{"RootView", &gti.Field{Name: "RootView", Type: "*goki.dev/gi/v2/giv.TreeView", LocalType: "*TreeView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
-		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*goki.dev/gi/v2/giv.TreeView", LocalType: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]goki.dev/gi/v2/giv.TreeViewer", LocalType: "[]TreeViewer", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
 		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", LocalType: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2491,7 +2491,7 @@ func (t *TreeView) SetRootView(v *TreeView) *TreeView {
 // SetSelectedNodes sets the [TreeView.SelectedNodes]:
 // SelectedNodes holds the currently-selected nodes, on the
 // RootView node only.
-func (t *TreeView) SetSelectedNodes(v []*TreeView) *TreeView {
+func (t *TreeView) SetSelectedNodes(v []TreeViewer) *TreeView {
 	t.SelectedNodes = v
 	return t
 }

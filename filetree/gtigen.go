@@ -230,7 +230,7 @@ func (t *Node) SetRootView(v *giv.TreeView) *Node {
 }
 
 // SetSelectedNodes sets the [Node.SelectedNodes]
-func (t *Node) SetSelectedNodes(v []*giv.TreeView) *Node {
+func (t *Node) SetSelectedNodes(v []giv.TreeViewer) *Node {
 	t.SelectedNodes = v
 	return t
 }
@@ -426,7 +426,7 @@ func (t *Tree) SetRootView(v *giv.TreeView) *Tree {
 }
 
 // SetSelectedNodes sets the [Tree.SelectedNodes]
-func (t *Tree) SetSelectedNodes(v []*giv.TreeView) *Tree {
+func (t *Tree) SetSelectedNodes(v []giv.TreeViewer) *Tree {
 	t.SelectedNodes = v
 	return t
 }

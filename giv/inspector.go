@@ -277,7 +277,7 @@ func (is *Inspector) ConfigSplits() {
 		sv := NewStructView(split, "sv")
 		tv.OnSelect(func(e events.Event) {
 			if len(tv.SelectedNodes) > 0 {
-				sv.SetStruct(tv.SelectedNodes[0].SyncNode)
+				sv.SetStruct(tv.SelectedNodes[0].AsTreeView().SyncNode)
 			}
 		})
 		split.SetSplits(.3, .7)
