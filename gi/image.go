@@ -28,7 +28,7 @@ import (
 // Image is a Widget that is optimized to render a static bitmap image --
 // it expects to be a terminal node and does NOT call rendering etc on its
 // children.  It is particularly useful for overlays in drag-n-drop uses --
-// can grab the image of another vp and show that
+// can grab the image of another scene and show that
 type Image struct {
 	WidgetBase
 
