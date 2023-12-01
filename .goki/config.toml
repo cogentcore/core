@@ -1,0 +1,75 @@
+Name = "spell"
+Desc = ""
+Version = "v0.1.0"
+Type = "App"
+
+[Build]
+  Package = "."
+  Output = ""
+  ID = "com.org.todo.spell"
+  Debug = false
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
+
+[Web]
+  Port = "8080"
+  RandomVersion = false
+  Gzip = false
+  BackgroundColor = "#2d2c2c"
+  ThemeColor = "#2d2c2c"
+  LoadingLabel = ""
+  Lang = "en"
+  Title = ""
+  Description = ""
+  Author = ""
+  Image = ""
+  AutoUpdateInterval = "10s"
+  WasmContentLengthHeader = ""
+  ServiceWorkerTemplate = ""
+
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "version.go"
+  Package = "main"
+
+[Generate]
+  Dir = "."
+  Output = "gokigen.go"
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = true
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false
+    Setters = false
