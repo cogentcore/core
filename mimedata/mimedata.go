@@ -8,7 +8,7 @@
 // encoded in mimedata.Mimes which is just a []mimedata.Data slice -- it can
 // be encoded / decoded from mime multipart.
 //
-// see filecat package for known mimetypes
+// see fi package for known mimetypes
 package mimedata
 
 import (
@@ -23,7 +23,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"goki.dev/pi/v2/filecat"
+	"goki.dev/fi"
 )
 
 const (
@@ -49,12 +49,12 @@ type Data struct {
 // always have a text/plain representation of everything on clipboard /
 // drag-n-drop
 func NewTextData(text string) *Data {
-	return &Data{filecat.TextPlain, []byte(text)}
+	return &Data{fi.TextPlain, []byte(text)}
 }
 
 // NewTextDataBytes returns a Data representation of the bytes string
 func NewTextDataBytes(text []byte) *Data {
-	return &Data{filecat.TextPlain, text}
+	return &Data{fi.TextPlain, text}
 }
 
 // IsText returns true if type is any of the text/ types (literally looks for that
@@ -63,7 +63,7 @@ func IsText(typ string) bool {
 	if strings.HasPrefix(typ, "text/") {
 		return true
 	}
-	if typ == filecat.DataJson || typ == filecat.DataXml {
+	if typ == fi.DataJson || typ == fi.DataXml {
 		return true
 	}
 	return false

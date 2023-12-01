@@ -49,10 +49,10 @@ import (
 	"sync"
 	"unsafe"
 
+	"goki.dev/fi"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/pi/v2/filecat"
 )
 
 /////////////////////////////////////////////////////////////////
@@ -182,11 +182,11 @@ func (ci *clipImpl) Clear() {
 func addMimeText(cdata *C.char, datalen C.int) {
 	if *curMimeData == nil {
 		*curMimeData = make(mimedata.Mimes, 1)
-		(*curMimeData)[0] = &mimedata.Data{Type: filecat.TextPlain}
+		(*curMimeData)[0] = &mimedata.Data{Type: fi.TextPlain}
 	}
 	md := (*curMimeData)[0]
 	if len(md.Type) == 0 {
-		md.Type = filecat.TextPlain
+		md.Type = fi.TextPlain
 	}
 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
 	md.Data = append(md.Data, data...)
