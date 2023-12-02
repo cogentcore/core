@@ -1,4 +1,4 @@
-goki.dev/enums v0.9.41 h1:orKZGNzNvhPBtWWOd820xmsWW6+LF1oCxxvxv8RO99I=
-goki.dev/enums v0.9.41/go.mod h1:K7yuG+7XSa7ndfbbTVijJUCTweWuBD3ZQ3Sum5Sn3DQ=
+goki.dev/enums v0.9.42 h1:DQ37CSLmDtLWjivN9R1o6+OYEp47JBdMKNVpzoO8+/I=
+goki.dev/enums v0.9.42/go.mod h1:c2Ctzc7LXKh3X9A1fUsOrsS4JXNjfEyEEG0Sph3I6i4=
 golang.org/x/image v0.14.0 h1:tNgSxAFe3jC4uYqvZdTr84SZoM1KfwdC9SKIFrLjFn4=
 golang.org/x/image v0.14.0/go.mod h1:HUYqC05R2ZcZ3ejNQsIHQDQiwWM4JBqmm6MKANTp4LE=
