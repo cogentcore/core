@@ -9,10 +9,10 @@ require (
 	github.com/zergon321/reisen v0.1.9
 	goki.dev/gi/v2 v2.0.0-dev0.0.18
 	goki.dev/grr v0.0.7
-	goki.dev/gti v0.1.19
-	goki.dev/ki/v2 v2.0.0-dev0.0.21
+	goki.dev/gti v0.1.20
+	goki.dev/ki/v2 v2.0.0-dev0.0.22
 	goki.dev/ordmap v0.5.7
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.17
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.18
 )
 
 require (
@@ -48,24 +48,24 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
-	goki.dev/cam v0.9.37 // indirect
-	goki.dev/colors v0.8.31 // indirect
-	goki.dev/cursors v0.0.19 // indirect
-	goki.dev/enums v0.9.41 // indirect
-	goki.dev/fi v0.1.5 // indirect
-	goki.dev/girl v0.0.23 // indirect
+	goki.dev/cam v0.9.38 // indirect
+	goki.dev/colors v0.8.32 // indirect
+	goki.dev/cursors v0.0.20 // indirect
+	goki.dev/enums v0.9.42 // indirect
+	goki.dev/fi v0.1.6 // indirect
+	goki.dev/girl v0.0.24 // indirect
 	goki.dev/glop v0.1.6 // indirect
-	goki.dev/goosi v0.0.13 // indirect
-	goki.dev/grog v0.0.15 // indirect
-	goki.dev/grows v0.3.18 // indirect
+	goki.dev/goosi v0.0.14 // indirect
+	goki.dev/grog v0.0.16 // indirect
+	goki.dev/grows v0.3.19 // indirect
 	goki.dev/icons v0.0.11 // indirect
-	goki.dev/laser v0.1.21 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.16 // indirect
-	goki.dev/pi/v2 v2.0.0-dev0.0.14 // indirect
+	goki.dev/laser v0.1.22 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.17 // indirect
+	goki.dev/pi/v2 v2.0.0-dev0.0.15 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.4 // indirect
-	goki.dev/spell v0.1.2 // indirect
-	goki.dev/svg v0.1.16 // indirect
-	goki.dev/vci/v2 v2.0.0-dev0.0.19 // indirect
+	goki.dev/spell v0.1.4 // indirect
+	goki.dev/svg v0.1.17 // indirect
+	goki.dev/vci/v2 v2.0.0-dev0.0.20 // indirect
 	golang.org/x/exp/shiny v0.0.0-20231127185646-65229373498e // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
