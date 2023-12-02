@@ -62,7 +62,7 @@ func _CodesNoOp() {
 	_ = x[Code0-(39)]
 	_ = x[CodeReturnEnter-(40)]
 	_ = x[CodeEscape-(41)]
-	_ = x[CodeDeleteBackspace-(42)]
+	_ = x[CodeBackspace-(42)]
 	_ = x[CodeTab-(43)]
 	_ = x[CodeSpacebar-(44)]
 	_ = x[CodeHyphenMinus-(45)]
@@ -93,7 +93,7 @@ func _CodesNoOp() {
 	_ = x[CodeInsert-(73)]
 	_ = x[CodeHome-(74)]
 	_ = x[CodePageUp-(75)]
-	_ = x[CodeDeleteForward-(76)]
+	_ = x[CodeDelete-(76)]
 	_ = x[CodeEnd-(77)]
 	_ = x[CodePageDown-(78)]
 	_ = x[CodeRightArrow-(79)]
@@ -214,7 +214,7 @@ var _CodesNameToValueMap = map[string]Codes{
 	`returnenter`:       40,
 	`Escape`:            41,
 	`escape`:            41,
-	`DeleteBackspace`:   42,
+	`Backspace`:         42,
 	`deletebackspace`:   42,
 	`Tab`:               43,
 	`tab`:               43,
@@ -266,7 +266,7 @@ var _CodesNameToValueMap = map[string]Codes{
 	`home`:              74,
 	`PageUp`:            75,
 	`pageup`:            75,
-	`DeleteForward`:     76,
+	`Delete`:            76,
 	`deleteforward`:     76,
 	`End`:               77,
 	`end`:               77,
@@ -529,7 +529,7 @@ var _CodesMap = map[Codes]string{
 	39:    `0`,
 	40:    `ReturnEnter`,
 	41:    `Escape`,
-	42:    `DeleteBackspace`,
+	42:    `Backspace`,
 	43:    `Tab`,
 	44:    `Spacebar`,
 	45:    `-`,
@@ -560,7 +560,7 @@ var _CodesMap = map[Codes]string{
 	73:    `Insert`,
 	74:    `Home`,
 	75:    `PageUp`,
-	76:    `DeleteForward`,
+	76:    `Delete`,
 	77:    `End`,
 	78:    `PageDown`,
 	79:    `RightArrow`,

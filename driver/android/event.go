@@ -41,7 +41,7 @@ func keyboardTyped(str *C.char) {
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.window.EvMgr.KeyChord(0, key.CodeDeleteBackspace, 0) // TODO: modifiers
+	theApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scrolled
@@ -174,7 +174,7 @@ var androidKeycodes = map[int32]key.Codes{
 	C.AKEYCODE_TAB:             key.CodeTab,
 	C.AKEYCODE_SPACE:           key.CodeSpacebar,
 	C.AKEYCODE_ENTER:           key.CodeReturnEnter,
-	C.AKEYCODE_DEL:             key.CodeDeleteBackspace,
+	C.AKEYCODE_DEL:             key.CodeBackspace,
 	C.AKEYCODE_GRAVE:           key.CodeGraveAccent,
 	C.AKEYCODE_MINUS:           key.CodeHyphenMinus,
 	C.AKEYCODE_EQUALS:          key.CodeEqualSign,
@@ -187,7 +187,7 @@ var androidKeycodes = map[int32]key.Codes{
 	C.AKEYCODE_PAGE_UP:         key.CodePageUp,
 	C.AKEYCODE_PAGE_DOWN:       key.CodePageDown,
 	C.AKEYCODE_ESCAPE:          key.CodeEscape,
-	C.AKEYCODE_FORWARD_DEL:     key.CodeDeleteForward,
+	C.AKEYCODE_FORWARD_DEL:     key.CodeDelete,
 	C.AKEYCODE_CTRL_LEFT:       key.CodeLeftControl,
 	C.AKEYCODE_CTRL_RIGHT:      key.CodeRightControl,
 	C.AKEYCODE_CAPS_LOCK:       key.CodeCapsLock,

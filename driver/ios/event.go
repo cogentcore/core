@@ -84,7 +84,7 @@ func keyboardTyped(str *C.char) {
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.window.EvMgr.KeyChord(0, key.CodeDeleteBackspace, 0) // TODO: modifiers
+	theApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scrolled

@@ -27,6 +27,6 @@ func TestChordDecode(t *testing.T) {
 	RunChordDecode(Chord("Control+A"), t)
 	RunChordDecode(Chord("ReturnEnter"), t)
 	RunChordDecode(Chord("KeypadEnter"), t)
-	RunChordDecode(Chord("DeleteBackspace"), t)
+	RunChordDecode(Chord("Backspace"), t)
 	RunChordDecode(Chord("Escape"), t)
 }

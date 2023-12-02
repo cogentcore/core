@@ -95,7 +95,7 @@ func (ch Chord) Shortcut() string {
 	// 	cs = strings.Replace(cs, "Shift+", "↑", -1)
 	// 	cs = strings.Replace(cs, "Meta+", "Win+", -1) // todo: actual windows key
 	// }
-	cs = strings.Replace(cs, "DeleteBackspace", "⌫", -1)
-	cs = strings.Replace(cs, "DeleteForward", "⌦", -1)
+	cs = strings.Replace(cs, "Backspace", "⌫", -1)
+	cs = strings.Replace(cs, "Delete", "⌦", -1)
 	return cs
 }

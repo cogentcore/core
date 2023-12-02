@@ -64,7 +64,7 @@ const (
 
 	CodeReturnEnter        Codes = 40
 	CodeEscape             Codes = 41
-	CodeDeleteBackspace    Codes = 42
+	CodeBackspace          Codes = 42
 	CodeTab                Codes = 43
 	CodeSpacebar           Codes = 44
 	CodeHyphenMinus        Codes = 45 // -
@@ -93,13 +93,13 @@ const (
 	CodeF11 Codes = 68
 	CodeF12 Codes = 69
 
-	CodePause         Codes = 72
-	CodeInsert        Codes = 73
-	CodeHome          Codes = 74
-	CodePageUp        Codes = 75
-	CodeDeleteForward Codes = 76
-	CodeEnd           Codes = 77
-	CodePageDown      Codes = 78
+	CodePause    Codes = 72
+	CodeInsert   Codes = 73
+	CodeHome     Codes = 74
+	CodePageUp   Codes = 75
+	CodeDelete   Codes = 76
+	CodeEnd      Codes = 77
+	CodePageDown Codes = 78
 
 	CodeRightArrow Codes = 79
 	CodeLeftArrow  Codes = 80

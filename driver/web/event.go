@@ -144,9 +144,9 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 		app.keyMods.SetFlag(down, key.Meta)
 		return 0, key.CodeLeftMeta
 	case "Backspace":
-		return 0, key.CodeDeleteBackspace
+		return 0, key.CodeBackspace
 	case "Delete":
-		return 0, key.CodeDeleteForward
+		return 0, key.CodeDelete
 	case "Enter":
 		return 0, key.CodeReturnEnter
 	case "Tab":

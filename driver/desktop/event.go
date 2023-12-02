@@ -229,7 +229,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 	case glfw.KeyEscape:
 		return key.CodeEscape
 	case glfw.KeyBackspace:
-		return key.CodeDeleteBackspace
+		return key.CodeBackspace
 	case glfw.KeyTab:
 		return key.CodeTab
 	case glfw.KeySpace:
@@ -291,7 +291,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 	case glfw.KeyPageUp:
 		return key.CodePageUp
 	case glfw.KeyDelete:
-		return key.CodeDeleteForward
+		return key.CodeDelete
 	case glfw.KeyEnd:
 		return key.CodeEnd
 	case glfw.KeyPageDown:
