@@ -88,6 +88,7 @@ func (sv *SVG) ReadXML(reader io.Reader) error {
 	decoder.Entity = xml.HTMLEntity
 	decoder.CharsetReader = charset.NewReaderLabel
 	var err error
+outer:
 	for {
 		var t xml.Token
 		t, err = decoder.Token()
@@ -101,7 +102,7 @@ func (sv *SVG) ReadXML(reader io.Reader) error {
 		switch se := t.(type) {
 		case xml.StartElement:
 			err = sv.UnmarshalXML(decoder, se)
-			break
+			break outer
 			// todo: ignore rest?
 		}
 	}
@@ -777,11 +778,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 func (sv *SVG) SaveXML(fname string) error {
 	filename := string(fname)
 	fp, err := os.Create(filename)
-	defer fp.Close()
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+	defer fp.Close()
 	bw := bufio.NewWriter(fp)
 	err = sv.WriteXML(bw, true)
 	if err != nil {

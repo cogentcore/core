@@ -577,7 +577,6 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 		}
 		lastCmd = cmd
 	}
-	return
 }
 
 // PathDataBBox traverses the path data and extracts the local bounding box
@@ -670,12 +669,12 @@ func PathDataValidate(pc *paint.Paint, data *[]PathData, errstr string) error {
 		cmd, n := PathDataNextCmd(*data, &i)
 		trgn, ok := PathCmdNMap[cmd]
 		if !ok {
-			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command not valid: %v\n", errstr, cmd)
+			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command not valid: %v", errstr, cmd)
 			log.Println(err)
 			return err
 		}
 		if (trgn == 0 && n > 0) || (trgn > 0 && n%trgn != 0) {
-			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %v\n", errstr, cmd, n, trgn)
+			err := fmt.Errorf("gi.PathDataValidate on %v: Path Command %v has invalid n: %v -- should be: %v", errstr, cmd, n, trgn)
 			log.Println(err)
 			return err
 		}
@@ -777,7 +776,7 @@ func PathDataParse(d string) ([]PathData, error) {
 					cmd := PathDecodeCmd(r)
 					if cmd == PcErr {
 						if i != endi {
-							err := fmt.Errorf("gi.PathDataParse invalid command rune: %v\n", r)
+							err := fmt.Errorf("gi.PathDataParse invalid command rune: %v", r)
 							log.Println(err)
 							return nil, err
 						}
