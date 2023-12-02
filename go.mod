@@ -7,9 +7,9 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/h2non/filetype v1.1.3
-	goki.dev/enums v0.9.41
+	goki.dev/enums v0.9.42
 	goki.dev/icons v0.0.11
-	goki.dev/vci/v2 v2.0.0-dev0.0.18
+	goki.dev/vci/v2 v2.0.0-dev0.0.19
 )
 
 require (

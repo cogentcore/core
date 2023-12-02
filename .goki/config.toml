@@ -1,6 +1,6 @@
 Name = "fi"
 Desc = ""
-Version = "v0.1.5"
+Version = "v0.1.6"
 Type = "App"
 
 [Build]
@@ -46,7 +46,7 @@ Type = "App"
 
 [Release]
   VersionFile = "version.go"
-  Package = "main"
+  Package = "fi"
 
 [Generate]
   Dir = "."
