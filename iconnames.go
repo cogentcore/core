@@ -3612,6 +3612,9 @@ const (
 	// Girl is https://github.com/goki/icons/blob/main/svg/girl.svg
 	Girl Icon = "girl"
 
+	// Git is https://github.com/goki/icons/blob/main/svg/git.svg
+	Git Icon = "git"
+
 	// Gite is https://github.com/goki/icons/blob/main/svg/gite.svg
 	Gite Icon = "gite"
 
