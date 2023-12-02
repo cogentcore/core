@@ -192,7 +192,7 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Tok.Depth
-				ed.RenderRegionBoxSty(reg, sty, &cspec)
+				ed.RenderRegionBoxSty(reg, sty, &cspec, true) // full width alway
 			}
 		}
 		if lstdp > 0 {
@@ -238,20 +238,23 @@ func (ed *Editor) RenderScopelights(stln, edln int) {
 
 // RenderRegionBox renders a region in background color according to given background color
 func (ed *Editor) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
-	ed.RenderRegionBoxSty(reg, &ed.Styles, bgclr)
+	ed.RenderRegionBoxSty(reg, &ed.Styles, bgclr, false)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
-func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full) {
+func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full, fullWidth bool) {
 	st := reg.Start
 	end := reg.End
 	spos := ed.CharStartPosVis(st)
 	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
-	epos.X = float32(ed.Geom.ContentBBox.Max.X)
 	vsz := epos.Sub(spos)
 	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
+	}
+	ex := float32(ed.Geom.ContentBBox.Max.X)
+	if fullWidth {
+		epos.X = ex
 	}
 
 	rs := &ed.Sc.RenderState
@@ -265,12 +268,14 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	// on diff lines: fill to end of stln
 	seb := spos
 	seb.Y += ed.LineHeight
-	seb.X = epos.X
+	seb.X = ex
 	pc.FillBox(rs, spos, seb.Sub(spos), bgclr)
 	sfb := seb
+	sfb.X = spos.X
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
 		efb.Y -= ed.LineHeight
+		efb.X = ex
 		pc.FillBox(rs, sfb, efb.Sub(sfb), bgclr)
 	}
 	sed := epos
