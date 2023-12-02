@@ -9,6 +9,7 @@ import (
 
 	"github.com/aymerick/douceur/css"
 	"goki.dev/colors"
+	"goki.dev/fi/uri"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -19,6 +20,7 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/pi/v2/complete"
+	"goki.dev/svg"
 )
 
 // BodyType is the [gti.Type] for [Body]
@@ -787,7 +789,7 @@ var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
 	ShortName:  "gi.Image",
 	IDName:     "image",
-	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
+	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another scene and show that",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -2804,6 +2806,72 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SVGType is the [gti.Type] for [SVG]
+var SVGType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.SVG",
+	ShortName:  "gi.SVG",
+	IDName:     "svg",
+	Doc:        "SVG is a Widget that renders an [svg.SVG] object. It expects to be a terminal\nnode and does NOT call rendering etc on its children.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &SVG{},
+})
+
+// NewSVG adds a new [SVG] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSVG(par ki.Ki, name ...string) *SVG {
+	return par.NewChild(SVGType, name...).(*SVG)
+}
+
+// KiType returns the [*gti.Type] of [SVG]
+func (t *SVG) KiType() *gti.Type {
+	return SVGType
+}
+
+// New returns a new [*SVG] value
+func (t *SVG) New() ki.Ki {
+	return &SVG{}
+}
+
+// SetSvg sets the [SVG.SVG]:
+// SVG is the SVG object associated with the element.
+func (t *SVG) SetSvg(v *svg.SVG) *SVG {
+	t.SVG = v
+	return t
+}
+
+// SetTooltip sets the [SVG.Tooltip]
+func (t *SVG) SetTooltip(v string) *SVG {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [SVG.Class]
+func (t *SVG) SetClass(v string) *SVG {
+	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [SVG.PriorityEvents]
+func (t *SVG) SetPriorityEvents(v []events.Types) *SVG {
+	t.PriorityEvents = v
+	return t
+}
+
+// SetCustomContextMenu sets the [SVG.CustomContextMenu]
+func (t *SVG) SetCustomContextMenu(v func(m *Scene)) *SVG {
+	t.CustomContextMenu = v
+	return t
+}
+
 // SwitchType is the [gti.Type] for [Switch]
 var SwitchType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Switch",
@@ -3534,6 +3602,7 @@ var TopAppBarType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Resources", &gti.Field{Name: "Resources", Type: "goki.dev/fi/uri.Resources", LocalType: "uri.Resources", Doc: "Resources are generators for resources shown in the top app bar", Directives: gti.Directives{}, Tag: ""}},
 		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/gi/v2/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
@@ -3588,6 +3657,13 @@ func AsTopAppBar(k ki.Ki) *TopAppBar {
 
 // AsTopAppBar satisfies the [TopAppBarEmbedder] interface
 func (t *TopAppBar) AsTopAppBar() *TopAppBar {
+	return t
+}
+
+// SetResources sets the [TopAppBar.Resources]:
+// Resources are generators for resources shown in the top app bar
+func (t *TopAppBar) SetResources(v uri.Resources) *TopAppBar {
+	t.Resources = v
 	return t
 }
 
