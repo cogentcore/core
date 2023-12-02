@@ -43,8 +43,11 @@ func (ur URI) String() string {
 }
 
 func (ur *URI) SetURL(scheme, host, path string) {
-	u := url.URL{Scheme: scheme, Host: host, Path: path}
-	ur.URL = u.String()
+	// note: this is producing escaped URLs which is not user-friendly
+	// I can't quite figure out how to unescape
+	// u := url.URL{Scheme: scheme, Host: host, Path: path}
+	// ur.URL = u.String()
+	ur.URL = scheme + "://" + host + path
 }
 
 func (ur URI) HasScheme(scheme string) bool {
