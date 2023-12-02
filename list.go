@@ -8,6 +8,7 @@ import (
 	"image/color"
 
 	"goki.dev/cam/hct"
+	"goki.dev/colors/matcolor"
 )
 
 // List returns a list of n colors with the given HCT chroma and tone
@@ -23,4 +24,14 @@ func List(n int, chroma float32, tone float32) []color.RGBA {
 		res = append(res, h.AsRGBA())
 	}
 	return res
+}
+
+// AccentList calls [List] with standard chroma and tone values that will result
+// in matcolor-style base accent colors appropriate for the current color theme
+// (light vs dark).
+func AccentList(n int) []color.RGBA {
+	if matcolor.SchemeIsDark {
+		return List(n, 48, 80)
+	}
+	return List(n, 48, 40)
 }
