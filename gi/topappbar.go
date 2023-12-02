@@ -83,6 +83,7 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 			return
 		}
 		if cv.HasScheme("scene") {
+			e.SetHandled()
 			// TODO: optimize this?
 			kv := mm.Stack.Order[ch.CurIndex] // todo: bad to rely on index!
 			mm.Stack.DeleteIdx(ch.CurIndex, ch.CurIndex+1)
@@ -90,6 +91,7 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 			return
 		}
 		if cv.Func != nil {
+			e.SetHandled()
 			cv.Func()
 			return
 		}

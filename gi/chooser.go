@@ -720,6 +720,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 				ch.SetCurIndex(0)
 			}
 		}
+		tf.CursorStart()
 	})
 	tf.OnClick(func(e events.Event) {
 		if ch.IsReadOnly() {

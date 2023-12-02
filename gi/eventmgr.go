@@ -970,10 +970,6 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		win.CloseReq()
 		e.SetHandled()
 	case keyfun.Menu:
-		// if win.MainMenu != nil {
-		// 	win.MainMenu.SetFocusEvent()
-		// 	e.SetHandled()
-		// }
 		if tb := sc.GetTopAppBar(); tb != nil {
 			chi := tb.ChildByType(ChooserType, ki.Embeds)
 			if chi != nil {
