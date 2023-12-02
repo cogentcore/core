@@ -2,37 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package svg
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
+	"testing"
 
 	"goki.dev/girl/paint"
 	"goki.dev/glop/dirs"
 	"goki.dev/grows/images"
-	"goki.dev/svg"
 )
 
-func main() {
+func TestSVG(t *testing.T) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
-	dir := "./svgs"
-	out := "./testdata"
-	err := os.MkdirAll(out, 0755)
-	if err != nil {
-		panic("error creating testdata directory if it doesn't already exist")
-	}
+	dir := filepath.Join("testdata", "svg")
 	files := dirs.ExtFileNames(dir, []string{".svg"})
 
 	for _, fn := range files {
 		// if fn != "fig_bp_compute_delta.svg" {
 		// 	continue
 		// }
-		fmt.Println(fn)
-		sv := svg.NewSVG(640, 480)
+		sv := NewSVG(640, 480)
 		svfn := filepath.Join(dir, fn)
 		err := sv.OpenXML(svfn)
 		if err != nil {
@@ -42,7 +35,7 @@ func main() {
 		// fmt.Println(sv.Root.ViewBox)
 		sv.SetNormXForm()
 		sv.Render()
-		imfn := filepath.Join(out, strings.TrimSuffix(fn, ".svg")+".png")
-		images.Save(sv.Pixels, imfn)
+		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
+		images.Assert(t, sv.Pixels, imfn)
 	}
 }
