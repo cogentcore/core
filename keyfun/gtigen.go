@@ -82,5 +82,10 @@ var _ = gti.AddType(&gti.Type{
 		{"RevertToStd", &gti.Method{Name: "RevertToStd", Doc: "RevertToStd reverts the keymaps to using the StdKeyMaps that are compiled into the program\nand have all the lastest key functions defined.  If you have edited your maps, and are finding\nthings not working, it is a good idea to save your current maps and try this, or at least do\nViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"MarkdownDoc", &gti.Method{Name: "MarkdownDoc", Doc: "MarkdownDoc generates a markdown table of all the key mappings", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
 	}),
 })

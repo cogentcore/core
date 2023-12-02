@@ -673,6 +673,9 @@ func (ed *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	xoff := float32(bb.Min.X)
 	scrl := ed.Geom.Scroll.Y
 	nolno := float32(pt.X - int(ed.LineNoOff))
+	if sty.Font.Face == nil {
+		return lex.Pos{Ln: cln, Ch: 0}
+	}
 	sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
 	sc = max(0, sc)

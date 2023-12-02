@@ -975,7 +975,14 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		// 	e.SetHandled()
 		// }
 		if tb := sc.GetTopAppBar(); tb != nil {
-			tb.SetFocusEvent()
+			chi := tb.ChildByType(ChooserType, ki.Embeds)
+			if chi != nil {
+				_, ch := AsWidget(chi)
+				ch.Update()
+				ch.SetFocusEvent()
+			} else {
+				tb.SetFocusEvent()
+			}
 			e.SetHandled()
 		}
 	case keyfun.WinSnapshot:

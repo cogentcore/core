@@ -686,6 +686,11 @@ func (ch *Chooser) HandleChooserKeys() {
 				}
 				ch.SelectItemAction(idx)
 			}
+		case kf == keyfun.Menu:
+			if len(ch.Items) > 0 {
+				e.SetHandled()
+				ch.OpenMenu(e)
+			}
 		case kf == keyfun.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
 			e.SetHandled()
@@ -708,11 +713,14 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		ch.SetCurText(tf.Text())
 		ch.SendChange(e)
 	})
-	// tf.OnFocus(func(e events.Event) {
-	// 	if ch.ItemsFunc != nil {
-	// 		ch.ItemsFunc()
-	// 	}
-	// })
+	tf.OnFocus(func(e events.Event) {
+		if ch.ItemsFunc != nil {
+			ch.ItemsFunc()
+			if ch.CurIndex <= 0 {
+				ch.SetCurIndex(0)
+			}
+		}
+	})
 	tf.OnClick(func(e events.Event) {
 		if ch.IsReadOnly() {
 			return
