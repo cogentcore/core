@@ -1,6 +1,6 @@
 Name = "grows"
 Desc = ""
-Version = "v0.3.15"
+Version = "v0.3.16"
 Type = "Library"
 
 [Build]
@@ -21,6 +21,7 @@ Type = "Library"
 [Web]
   Port = "8080"
   RandomVersion = false
+  Gzip = false
   BackgroundColor = "#2d2c2c"
   ThemeColor = "#2d2c2c"
   LoadingLabel = ""
