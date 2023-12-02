@@ -905,6 +905,7 @@ func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 // ScrollToTop tells any parent scroll layout to scroll to get given vertical
 // coordinate at top of view to extent possible -- returns true if scrolled
 func (ed *Editor) ScrollToTop(pos int) bool {
+	ed.SetNeedsRender(true)
 	return ed.ScrollDimToStart(mat32.Y, pos)
 }
 
@@ -919,6 +920,7 @@ func (ed *Editor) ScrollCursorToTop() bool {
 // vertical coordinate at bottom of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToBottom(pos int) bool {
+	ed.SetNeedsRender(true)
 	return ed.ScrollDimToEnd(mat32.Y, pos)
 }
 
@@ -933,6 +935,7 @@ func (ed *Editor) ScrollCursorToBottom() bool {
 // vertical coordinate to center of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToVertCenter(pos int) bool {
+	ed.SetNeedsRender(true)
 	return ed.ScrollDimToCenter(mat32.Y, pos)
 }
 

@@ -186,6 +186,7 @@ func (sc *Scene) SceneStyles() {
 		}
 
 		insets := rw.GoosiWin.Insets()
+		// fmt.Println(insets)
 
 		uv := func(val float32) units.Value {
 			return units.Custom(func(uc *units.Context) float32 {

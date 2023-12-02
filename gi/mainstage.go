@@ -61,32 +61,6 @@ func NewSheet(sc *Scene, side StageSides) *Stage {
 /////////////////////////////////////////////////////
 //		Decorate
 
-// SetWindowInsets updates the padding on the Scene
-// to the inset values provided by the RenderWin window.
-func (st *Stage) SetWindowInsets() {
-	// if st.StageMgr == nil {
-	// 	return
-	// }
-	// if st.StageMgr.RenderWin == nil {
-	// 	return
-	// }
-	// insets := st.StageMgr.RenderWin.GoosiWin.Insets()
-	// // fmt.Println(insets)
-	// uv := func(val float32) units.Value {
-	// 	return units.Custom(func(uc *units.Context) float32 {
-	// 		return max(val, uc.Dp(12))
-	// 	})
-	// }
-	// st.Scene.Style(func(s *styles.Style) {
-	// 	s.Padding.Set(
-	// 		uv(insets.Top),
-	// 		uv(insets.Right),
-	// 		uv(insets.Bottom),
-	// 		uv(insets.Left),
-	// 	)
-	// })
-}
-
 // only called when !NewWindow
 func (st *Stage) AddWindowDecor() *Stage {
 	return st
@@ -157,7 +131,6 @@ func (st *Stage) RunWindow() *Stage {
 		if CurRenderWin == nil {
 			CurRenderWin = win
 		}
-		st.SetWindowInsets() // todo: delete?
 		win.GoStartEventLoop()
 		return st
 	}

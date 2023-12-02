@@ -59,7 +59,7 @@ func DefaultTopAppBarStd(tb *TopAppBar) { //gti:add
 		urs := tb.Resources.Generate()
 		ch.Items = make([]any, mm.Stack.Len()+len(urs))
 		for i, kv := range mm.Stack.Order {
-			u := uri.URI{Label: kv.Val.Scene.Name()}
+			u := uri.URI{Label: kv.Val.Scene.Name(), Icon: icons.SelectWindow}
 			u.SetURL("scene", kv.Val.Scene.Name(), fmt.Sprintf("%d", i))
 			ch.Items[i] = u
 			if kv.Val == stg {

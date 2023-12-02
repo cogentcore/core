@@ -340,7 +340,6 @@ func (st *Stage) Resize(sz image.Point) {
 	}
 	switch st.Type {
 	case WindowStage:
-		st.SetWindowInsets() // todo: remove?
 		st.Scene.Resize(sz)
 	case DialogStage:
 		if st.FullWindow {

@@ -619,7 +619,6 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 // MakeItemsMenuURI constructs a menu of all the items, for URI.
 // It is automatically set as the [Button.Menu] for the Chooser.
 func (ch *Chooser) MakeItemsMenuURI(m *Scene) {
-	fmt.Println("in uri")
 	for i, it := range ch.Items {
 		u := it.(uri.URI)
 		nm := "item-" + strconv.Itoa(i)
@@ -775,6 +774,9 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 		comps[idx] = complete.Completion{
 			Text: ToLabel(item),
 			Desc: tooltip,
+		}
+		if u, ok := item.(uri.URI); ok {
+			comps[idx].Icon = string(u.Icon)
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)

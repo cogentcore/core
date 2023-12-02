@@ -38,31 +38,31 @@ func app() {
 	// 	s.Text.AlignV = styles.Start
 	// })
 	//
-	splt := gi.NewSplits(b, "split-view")
-	splt.SetSplits(.5, .5)
-	// these are all inherited so we can put them at the top "editor panel" level
-	splt.Style(func(s *styles.Style) {
-		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-		s.Text.TabSize = 4
-		s.Font.Family = string(gi.Prefs.MonoFont)
-		// s.Text.LineHeight = units.Dot(1.1)
-	})
+	// splt := gi.NewSplits(b, "split-view")
+	// splt.SetSplits(.5, .5)
+	// // these are all inherited so we can put them at the top "editor panel" level
+	// splt.Style(func(s *styles.Style) {
+	// 	s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+	// 	s.Text.TabSize = 4
+	// 	s.Font.Family = string(gi.Prefs.MonoFont)
+	// 	// s.Text.LineHeight = units.Dot(1.1)
+	// })
 
-	txed1 := texteditor.NewEditor(splt, "texteditor-1")
+	txed1 := texteditor.NewEditor(b, "texteditor-1")
 	txed1.Style(func(s *styles.Style) {
 		s.Min.X.Ch(20)
 		s.Min.Y.Ch(10)
 	})
-
-	txed2 := texteditor.NewEditor(splt, "texteditor-2")
-	txed2.Style(func(s *styles.Style) {
-		s.Min.X.Ch(20)
-		s.Min.Y.Ch(10)
-	})
+	//
+	// 	txed2 := texteditor.NewEditor(splt, "texteditor-2")
+	// 	txed2.Style(func(s *styles.Style) {
+	// 		s.Min.X.Ch(20)
+	// 		s.Min.Y.Ch(10)
+	// 	})
 
 	txbuf := texteditor.NewBuf()
 	txed1.SetBuf(txbuf)
-	txed2.SetBuf(txbuf)
+	// txed2.SetBuf(txbuf)
 
 	// txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
 	txbuf.Hi.Lang = "Go"

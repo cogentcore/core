@@ -92,6 +92,19 @@ func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 	return spos
 }
 
+// CharStartPosVis returns the starting pos for given position
+// that is currently visible, based on bounding boxes.
+func (ed *Editor) CharStartPosVis(pos lex.Pos) mat32.Vec2 {
+	spos := ed.CharStartPos(pos)
+	bb := ed.Geom.ContentBBox
+	bbmin := mat32.NewVec2FmPoint(bb.Min)
+	bbmin.X += ed.LineNoOff
+	bbmax := mat32.NewVec2FmPoint(bb.Max)
+	spos.SetMax(bbmin)
+	spos.SetMin(bbmax)
+	return spos
+}
+
 // CharEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
@@ -232,25 +245,17 @@ func (ed *Editor) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
 func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full) {
 	st := reg.Start
 	end := reg.End
-	spos := ed.CharStartPos(st)
-	epos := ed.CharStartPos(end)
+	spos := ed.CharStartPosVis(st)
+	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
-	bb := ed.Geom.ContentBBox
-	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
+	epos.X = float32(ed.Geom.ContentBBox.Max.X)
+	vsz := epos.Sub(spos)
+	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
 	}
 
 	rs := &ed.Sc.RenderState
 	pc := &rs.Paint
-	// spc := sty.BoxSpace()
-
-	rst := ed.RenderStartPos()
-	// SidesTODO: this is sketchy
-	ex := float32(bb.Max.X) // - spc.Right
-	sx := rst.X + ed.LineNoOff
-
-	// fmt.Printf("select: %v -- %v\n", st, ed)
-
 	stsi, _, _ := ed.WrappedLineNo(st)
 	edsi, _, _ := ed.WrappedLineNo(end)
 	if st.Ln == end.Ln && stsi == edsi {
@@ -260,40 +265,36 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	// on diff lines: fill to end of stln
 	seb := spos
 	seb.Y += ed.LineHeight
-	seb.X = ex
+	seb.X = epos.X
 	pc.FillBox(rs, spos, seb.Sub(spos), bgclr)
 	sfb := seb
-	sfb.X = sx
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
 		efb.Y -= ed.LineHeight
-		efb.X = ex
 		pc.FillBox(rs, sfb, efb.Sub(sfb), bgclr)
 	}
 	sed := epos
 	sed.Y -= ed.LineHeight
-	sed.X = sx
+	sed.X = spos.X
 	pc.FillBox(rs, sed, epos.Sub(sed), bgclr)
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
 func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
-	spos := ed.CharStartPos(st)
+	spos := ed.CharStartPosVis(st)
 	epos := spos
-	bb := ed.Geom.ContentBBox
 	epos.Y += ed.LineHeight
-	epos.X = float32(bb.Max.X)
-	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
+	vsz := epos.Sub(spos)
+	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
 	}
-
 	rs := &ed.Sc.RenderState
 	pc := &rs.Paint
-
 	pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
 }
 
-// RenderStartPos is absolute rendering start position from our allocpos
+// RenderStartPos is absolute rendering start position from our content pos with scroll
+// This can be offscreen (left, up) based on scrolling.
 func (ed *Editor) RenderStartPos() mat32.Vec2 {
 	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
 	return pos
@@ -311,9 +312,6 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	bbmax := mat32.NewVec2FmPoint(bb.Max)
 	pc.FillBox(rs, bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
 	pos := ed.RenderStartPos()
-	// if bbmin.X > pos.X {
-	// 	pos.X = bbmin.X
-	// }
 	stln := -1
 	edln := -1
 	for ln := 0; ln < ed.NLines; ln++ {
@@ -547,6 +545,15 @@ func (ed *Editor) RenderLines(st, end int) bool {
 		ed.RenderHighlights(visSt, visEd)
 		ed.RenderScopelights(visSt, visEd)
 		ed.RenderSelect()
+
+		for ln := visSt; ln <= visEd; ln++ {
+			lst := pos.Y + ed.Offs[ln]
+			lp := pos
+			lp.Y = lst
+			lp.X += ed.LineNoOff
+			ed.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+		}
+
 		ed.RenderLineNosBox(visSt, visEd)
 
 		if ed.HasLineNos() {
@@ -558,13 +565,6 @@ func (ed *Editor) RenderLines(st, end int) bool {
 			rs.Unlock()
 			rs.PushBounds(tbb)
 			rs.Lock()
-		}
-		for ln := visSt; ln <= visEd; ln++ {
-			lst := pos.Y + ed.Offs[ln]
-			lp := pos
-			lp.Y = lst
-			lp.X += ed.LineNoOff
-			ed.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 		}
 		rs.Unlock()
 		if ed.HasLineNos() {
