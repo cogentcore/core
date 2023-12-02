@@ -1,6 +1,6 @@
 Name = "svg"
 Desc = ""
-Version = "v0.1.14"
+Version = "v0.1.15"
 Type = "App"
 
 [Build]
@@ -21,6 +21,7 @@ Type = "App"
 [Web]
   Port = "8080"
   RandomVersion = false
+  Gzip = false
   BackgroundColor = "#2d2c2c"
   ThemeColor = "#2d2c2c"
   LoadingLabel = ""
