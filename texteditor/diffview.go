@@ -177,10 +177,7 @@ func (dv *DiffView) NextDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorShow(lex.Pos{Ln: df.I1})
-	tva.ScrollCursorToVertCenter()
-	tvb.SetCursorShow(lex.Pos{Ln: df.I1})
-	tvb.ScrollCursorToVertCenter()
+	tva.SetCursorTarget(lex.Pos{Ln: df.I1})
 	return true
 }
 
@@ -206,10 +203,7 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorShow(lex.Pos{Ln: df.I1})
-	tva.ScrollCursorToVertCenter()
-	tvb.SetCursorShow(lex.Pos{Ln: df.I1})
-	tvb.ScrollCursorToVertCenter()
+	tva.SetCursorTarget(lex.Pos{Ln: df.I1})
 	return true
 }
 

@@ -354,11 +354,11 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _EditorFlagsValues = []EditorFlags{9, 10, 11, 12}
+var _EditorFlagsValues = []EditorFlags{9, 10, 11, 12, 13}
 
 // EditorFlagsN is the highest valid value
 // for type EditorFlags, plus one.
-const EditorFlagsN EditorFlags = 13
+const EditorFlagsN EditorFlags = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -368,6 +368,7 @@ func _EditorFlagsNoOp() {
 	_ = x[EditorNeedsLayout-(10)]
 	_ = x[EditorLastWasTabAI-(11)]
 	_ = x[EditorLastWasUndo-(12)]
+	_ = x[EditorTargetSet-(13)]
 }
 
 var _EditorFlagsNameToValueMap = map[string]EditorFlags{
@@ -379,6 +380,8 @@ var _EditorFlagsNameToValueMap = map[string]EditorFlags{
 	`editorlastwastabai`: 11,
 	`EditorLastWasUndo`:  12,
 	`editorlastwasundo`:  12,
+	`EditorTargetSet`:    13,
+	`editortargetset`:    13,
 }
 
 var _EditorFlagsDescMap = map[EditorFlags]string{
@@ -386,6 +389,7 @@ var _EditorFlagsDescMap = map[EditorFlags]string{
 	10: `EditorNeedsLayout is set by SetNeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`,
 	11: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`,
 	12: `EditorLastWasUndo indicates that last key was an undo`,
+	13: `EditorTargetSet indicates that the CursorTarget is set`,
 }
 
 var _EditorFlagsMap = map[EditorFlags]string{
@@ -393,6 +397,7 @@ var _EditorFlagsMap = map[EditorFlags]string{
 	10: `EditorNeedsLayout`,
 	11: `EditorLastWasTabAI`,
 	12: `EditorLastWasUndo`,
+	13: `EditorTargetSet`,
 }
 
 // String returns the string representation

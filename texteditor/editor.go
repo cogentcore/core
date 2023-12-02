@@ -85,14 +85,11 @@ type Editor struct { //goki:embedder
 	// current cursor position
 	CursorPos lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
+	// target cursor position for externally-set targets: ensures that it is visible
+	CursorTarg lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
 	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
-
-	// if true, scroll screen to cursor on next render
-	ScrollToCursorOnRender bool `set:"-" edit:"-" json:"-" xml:"-"`
-
-	// cursor position to scroll to
-	ScrollToCursorPos lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current index within PosHistory
 	PosHistIdx int `set:"-" edit:"-" json:"-" xml:"-"`
@@ -237,6 +234,9 @@ const (
 
 	// EditorLastWasUndo indicates that last key was an undo
 	EditorLastWasUndo
+
+	// EditorTargetSet indicates that the CursorTarget is set
+	EditorTargetSet
 )
 
 // EditDone completes editing and copies the active edited text to the text --

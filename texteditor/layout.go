@@ -111,6 +111,9 @@ func (ed *Editor) LayoutAllLines() {
 
 	ed.NLines = ed.Buf.NumLines()
 	nln := ed.NLines
+	if nln >= len(ed.Buf.Markup) {
+		nln = len(ed.Buf.Markup)
+	}
 	if cap(ed.Renders) >= nln {
 		ed.Renders = ed.Renders[:nln]
 	} else {

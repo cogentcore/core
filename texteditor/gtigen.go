@@ -5,6 +5,7 @@ package texteditor
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -26,18 +27,10 @@ var DiffViewType = gti.AddType(&gti.Type{
 		{"FileB", &gti.Field{Name: "FileB", Type: "string", LocalType: "string", Doc: "second file name being compared", Directives: gti.Directives{}, Tag: ""}},
 		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision for first file, if relevant", Directives: gti.Directives{}, Tag: ""}},
 		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision for second file, if relevant", Directives: gti.Directives{}, Tag: ""}},
-		{"Diffs", &gti.Field{Name: "Diffs", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "the diff records", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufAOrig", &gti.Field{Name: "BufAOrig", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A only, original text", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufBOrig", &gti.Field{Name: "BufBOrig", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B only, original text", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufAEdit", &gti.Field{Name: "BufAEdit", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A only, unaligned, with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufBEdit", &gti.Field{Name: "BufBEdit", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B only, unaligned, with edits applied", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufALineMap", &gti.Field{Name: "BufALineMap", Type: "[]int", LocalType: "[]int", Doc: "mapping of original line numbers (index) to edited line numbers,\naccounting for the edits applied so far", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufBLineMap", &gti.Field{Name: "BufBLineMap", Type: "[]int", LocalType: "[]int", Doc: "mapping of original line numbers (index) to edited line numbers,\naccounting for the edits applied so far", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufALineMapUndo", &gti.Field{Name: "BufALineMapUndo", Type: "[][]int", LocalType: "[][]int", Doc: "undo records for BufALineMap", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufBLineMapUndo", &gti.Field{Name: "BufBLineMapUndo", Type: "[][]int", LocalType: "[][]int", Doc: "undo records for BufBLineMap", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"AlignD", &gti.Field{Name: "AlignD", Type: "goki.dev/gi/v2/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "aligned diffs records diff for aligned lines", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Diffs", &gti.Field{Name: "Diffs", Type: "goki.dev/gi/v2/texteditor/textbuf.DiffSelected", LocalType: "textbuf.DiffSelected", Doc: "Diffs applied", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -100,6 +93,13 @@ func (t *DiffView) SetRevA(v string) *DiffView {
 // revision for second file, if relevant
 func (t *DiffView) SetRevB(v string) *DiffView {
 	t.RevB = v
+	return t
+}
+
+// SetDiffs sets the [DiffView.Diffs]:
+// Diffs applied
+func (t *DiffView) SetDiffs(v textbuf.DiffSelected) *DiffView {
+	t.Diffs = v
 	return t
 }
 
@@ -268,6 +268,7 @@ var EditorType = gti.AddType(&gti.Type{
 		{"LineNoOff", &gti.Field{Name: "LineNoOff", Type: "float32", LocalType: "float32", Doc: "horizontal offset for start of text after line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"LineNoRender", &gti.Field{Name: "LineNoRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render for line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"CursorTarg", &gti.Field{Name: "CursorTarg", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "target cursor position: ensures that it is visible", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorCol", &gti.Field{Name: "CursorCol", Type: "int", LocalType: "int", Doc: "desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"ScrollToCursorOnRender", &gti.Field{Name: "ScrollToCursorOnRender", Type: "bool", LocalType: "bool", Doc: "if true, scroll screen to cursor on next render", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"ScrollToCursorPos", &gti.Field{Name: "ScrollToCursorPos", Type: "goki.dev/pi/v2/lex.Pos", LocalType: "lex.Pos", Doc: "cursor position to scroll to", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},

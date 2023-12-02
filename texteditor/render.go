@@ -40,10 +40,8 @@ func (ed *Editor) Render() {
 		}
 		ed.PositionScrolls()
 		ed.RenderAllLinesInBounds()
-		if ed.ScrollToCursorOnRender {
-			ed.ScrollToCursorOnRender = false
-			ed.CursorPos = ed.ScrollToCursorPos
-			ed.ScrollCursorToTop()
+		if ed.Is(EditorTargetSet) {
+			ed.ScrollCursorToTarget()
 		}
 		if ed.StateIs(states.Focused) {
 			ed.StartCursor()

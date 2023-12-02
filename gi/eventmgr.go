@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -187,59 +188,70 @@ func (em *EventMgr) RenderWin() *RenderWin {
 ///////////////////////////////////////////////////////////////////////
 // 	HandleEvent
 
-func (em *EventMgr) HandleEvent(evi events.Event) {
+func (em *EventMgr) HandleEvent(e events.Event) {
 	// et := evi.Type()
 	// fmt.Printf("got event type: %v: %v\n", et, evi)
-	if evi.IsHandled() {
+	if e.IsHandled() {
 		return
 	}
 	switch {
-	case evi.HasPos():
-		em.HandlePosEvent(evi)
-	case evi.NeedsFocus():
-		em.HandleFocusEvent(evi)
+	case e.HasPos():
+		em.HandlePosEvent(e)
+	case e.NeedsFocus():
+		em.HandleFocusEvent(e)
 	default:
-		em.HandleOtherEvent(evi)
+		em.HandleOtherEvent(e)
 	}
 }
 
-func (em *EventMgr) HandleOtherEvent(evi events.Event) {
-	fmt.Println("TODO: Other event not handled", evi)
+func (em *EventMgr) HandleOtherEvent(e events.Event) {
+	fmt.Println("TODO: Other event not handled", e)
 }
 
-func (em *EventMgr) HandleFocusEvent(evi events.Event) {
+func (em *EventMgr) HandleFocusEvent(e events.Event) {
 	if em.Focus == nil {
 		switch {
-		case em.PrevFocus != nil:
-			em.SetFocusEvent(em.PrevFocus)
-			em.PrevFocus = nil
 		case em.StartFocus != nil:
+			if FocusTrace {
+				fmt.Println(em.Scene, "StartFocus:", em.StartFocus)
+			}
 			em.SetFocusEvent(em.StartFocus)
+		// case em.PrevFocus != nil:
+		// 	if FocusTrace {
+		// 		fmt.Println(em.Scene, "PrevFocus:", em.PrevFocus)
+		// 	}
+		// 	em.SetFocusEvent(em.PrevFocus)
+		// 	em.PrevFocus = nil
 		default:
 			em.FocusFirst()
 		}
 	}
 	if em.PriorityFocus != nil {
 		for _, wi := range em.PriorityFocus {
-			wi.HandleEvent(evi)
-			if evi.IsHandled() {
-				// fmt.Println(wi, "priority handled")
+			wi.HandleEvent(e)
+			if e.IsHandled() {
+				if FocusTrace {
+					fmt.Println(em.Scene, "PriorityFocus Handled:", wi)
+				}
 				break
 			}
 		}
 	}
-	if !evi.IsHandled() && em.Focus != nil {
-		em.Focus.HandleEvent(evi)
+	if !e.IsHandled() && em.Focus != nil {
+		em.Focus.HandleEvent(e)
 	}
-	if !evi.IsHandled() && em.FocusWithins() {
+	if !e.IsHandled() && em.FocusWithins() {
 		for _, fw := range em.FocusWithinStack {
-			fw.HandleEvent(evi)
-			if evi.IsHandled() {
+			fw.HandleEvent(e)
+			if e.IsHandled() {
+				if FocusTrace {
+					fmt.Println(em.Scene, "FocusWithin Handled:", fw)
+				}
 				break
 			}
 		}
 	}
-	em.ManagerKeyChordEvents(evi)
+	em.ManagerKeyChordEvents(e)
 }
 
 func (em *EventMgr) ResetOnMouseDown() {
@@ -260,9 +272,9 @@ func (em *EventMgr) ResetOnMouseDown() {
 	}
 }
 
-func (em *EventMgr) HandlePosEvent(evi events.Event) {
-	pos := evi.LocalPos()
-	et := evi.Type()
+func (em *EventMgr) HandlePosEvent(e events.Event) {
+	pos := e.LocalPos()
+	et := e.Type()
 	sc := em.Scene
 
 	isDrag := false
@@ -273,18 +285,18 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		switch {
 		case em.Drag != nil:
 			isDrag = true
-			em.Drag.HandleEvent(evi)
-			em.Drag.Send(events.DragMove, evi)
+			em.Drag.HandleEvent(e)
+			em.Drag.Send(events.DragMove, e)
 			// still needs to handle dragenter / leave
 		case em.Slide != nil:
-			em.Slide.HandleEvent(evi)
-			em.Slide.Send(events.SlideMove, evi)
+			em.Slide.HandleEvent(e)
+			em.Slide.Send(events.SlideMove, e)
 			return // nothing further
 		}
 	case events.Scroll:
 		switch {
 		case em.Scroll != nil:
-			em.Scroll.HandleEvent(evi)
+			em.Scroll.HandleEvent(e)
 			return
 		}
 	}
@@ -312,7 +324,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		}
 
 		if !isDrag {
-			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
+			w.HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
 		}
 		switch et {
 		case events.MouseMove:
@@ -334,7 +346,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		if press != nil {
 			em.Press = press
 		}
-		em.HandleLongPress(evi)
+		em.HandleLongPress(e)
 	case events.MouseMove:
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
@@ -343,8 +355,8 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 				hovs = append(hovs, w)
 			}
 		}
-		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
-		em.HandleLongHover(evi)
+		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
+		em.HandleLongHover(e)
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
@@ -355,42 +367,42 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 					hovs = append(hovs, w)
 				}
 			}
-			em.DragHovers = em.UpdateHovers(hovs, em.DragHovers, evi, events.DragEnter, events.DragLeave)
+			em.DragHovers = em.UpdateHovers(hovs, em.DragHovers, e, events.DragEnter, events.DragLeave)
 		case em.Slide != nil:
 		case em.Press != nil && em.Press.AbilityIs(abilities.Slideable):
-			if em.DragStartCheck(evi, SlideStartTime, SlideStartDist) {
+			if em.DragStartCheck(e, SlideStartTime, SlideStartDist) {
 				em.Slide = em.Press
-				em.Slide.Send(events.SlideStart, evi)
+				em.Slide.Send(events.SlideStart, e)
 			}
 		case em.Press != nil && em.Press.AbilityIs(abilities.Draggable):
-			if em.DragStartCheck(evi, DragStartTime, DragStartDist) {
+			if em.DragStartCheck(e, DragStartTime, DragStartDist) {
 				em.Drag = em.Press
-				em.Drag.Send(events.DragStart, evi)
+				em.Drag.Send(events.DragStart, e)
 			}
 		}
 		// if we already have a long press widget, we update it based on our dragging movement
 		if em.LongPressWidget != nil {
-			em.HandleLongPress(evi)
+			em.HandleLongPress(e)
 		}
 	case events.MouseUp:
 		switch {
 		case em.Slide != nil:
-			em.Slide.Send(events.SlideStop, evi)
+			em.Slide.Send(events.SlideStop, e)
 			em.Slide = nil
 		case em.Drag != nil:
-			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
+			em.Drag.Send(events.Drop, e) // todo: all we need or what?
 			em.Drag = nil
 		// if we have sent a long press start event, we don't send click
 		// events (non-nil widget plus nil timer means we already sent)
 		case em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil):
-			switch evi.MouseButton() {
+			switch e.MouseButton() {
 			case events.Left:
 				if sc.SelectedWidgetChan != nil {
 					sc.SelectedWidgetChan <- up
 				}
-				up.Send(events.Click, evi)
+				up.Send(events.Click, e)
 			case events.Right: // note: automatically gets Control+Left
-				up.Send(events.ContextMenu, evi)
+				up.Send(events.ContextMenu, e)
 			}
 		}
 		em.Press = nil
@@ -398,7 +410,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		// if we have sent a long press start event, we send an end
 		// event (non-nil widget plus nil timer means we already sent)
 		if em.LongPressWidget != nil && em.LongPressTimer == nil {
-			em.LongPressWidget.Send(events.LongPressEnd, evi)
+			em.LongPressWidget.Send(events.LongPressEnd, e)
 		}
 		em.LongPressWidget = nil
 		em.LongPressPos = image.Point{}
@@ -410,18 +422,18 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		// event on mobile, as that is needed to clear any
 		// hovered state
 		if up != nil && goosi.TheApp.Platform().IsMobile() {
-			up.Send(events.MouseLeave, evi)
+			up.Send(events.MouseLeave, e)
 		}
 	case events.Scroll:
 		switch {
 		case em.Slide != nil:
-			em.Slide.HandleEvent(evi)
+			em.Slide.HandleEvent(e)
 		case em.Drag != nil:
-			em.Drag.HandleEvent(evi)
+			em.Drag.HandleEvent(e)
 		case em.Press != nil:
-			em.Press.HandleEvent(evi)
+			em.Press.HandleEvent(e)
 		default:
-			em.Scene.HandleEvent(evi)
+			em.Scene.HandleEvent(e)
 		}
 	}
 
@@ -441,7 +453,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 
 // UpdateHovers updates the hovered widgets based on current
 // widgets in bounding box.
-func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, leave events.Types) []Widget {
+func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave events.Types) []Widget {
 	for _, prv := range em.Hovers {
 		stillIn := false
 		for _, cur := range hov {
@@ -451,7 +463,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 			}
 		}
 		if !stillIn && prv.This() != nil && !prv.Is(ki.Deleted) {
-			prv.Send(events.MouseLeave, evi)
+			prv.Send(events.MouseLeave, e)
 		}
 	}
 
@@ -464,7 +476,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 			}
 		}
 		if !wasIn {
-			cur.Send(events.MouseEnter, evi)
+			cur.Send(events.MouseEnter, e)
 		}
 	}
 	// todo: detect change in top one, use to update cursor
@@ -485,13 +497,13 @@ func (em *EventMgr) TopLongHover() Widget {
 }
 
 // HandleLongHover handles long hover events
-func (em *EventMgr) HandleLongHover(evi events.Event) {
-	em.HandleLong(evi, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
+func (em *EventMgr) HandleLongHover(e events.Event) {
+	em.HandleLong(e, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
 }
 
 // HandleLongPress handles long press events
-func (em *EventMgr) HandleLongPress(evi events.Event) {
-	em.HandleLong(evi, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
+func (em *EventMgr) HandleLongPress(e events.Event) {
+	em.HandleLong(e, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
 }
 
 // HandleLong is the implementation of [EventMgr.HandleLongHover] and
@@ -499,7 +511,7 @@ func (em *EventMgr) HandleLongPress(evi events.Event) {
 // long events using the given pointers to event manager fields and
 // constant type, time, and distance properties. It should not need to
 // be called by anything except for the aforementioned functions.
-func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *image.Point, t **time.Timer, styp, etyp events.Types, stime time.Duration, sdist int) {
+func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.Point, t **time.Timer, styp, etyp events.Types, stime time.Duration, sdist int) {
 	em.TimerMu.Lock()
 	defer em.TimerMu.Unlock()
 
@@ -515,7 +527,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 		// fmt.Println("cleared hover")
 	}
 
-	cpos := evi.Pos()
+	cpos := e.Pos()
 	dst := int(mat32.Hypot(float32(pos.X-cpos.X), float32(pos.Y-cpos.Y)))
 	// fmt.Println("dist:", dst)
 
@@ -529,7 +541,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 		// if we have already finished the timer, then we have already
 		// sent the start event, so we have to send the end one
 		if *t == nil {
-			(*w).Send(etyp, evi)
+			(*w).Send(etyp, e)
 		}
 		clearLong()
 		// fmt.Println("cleared")
@@ -550,7 +562,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 		// up not getting another mouse move event, so we will be on the
 		// element with no tooltip, which is a bug. Not returning here is
 		// the solution to https://github.com/goki/gi/issues/553
-		(*w).Send(etyp, evi)
+		(*w).Send(etyp, e)
 		clearLong()
 		// fmt.Println("fallthrough after clear")
 	}
@@ -566,7 +578,7 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 	// we now know we don't have the timer and thus sent the start
 	// event already, so we need to send a end event
 	if *w != nil {
-		(*w).Send(etyp, evi)
+		(*w).Send(etyp, e)
 		clearLong()
 		// fmt.Println("lhw, send end, cleared")
 		return
@@ -575,14 +587,14 @@ func (em *EventMgr) HandleLong(evi events.Event, deep Widget, w *Widget, pos *im
 	// now we can set it to our new widget
 	*w = deep
 	// fmt.Println("setting new:", deep)
-	*pos = evi.Pos()
+	*pos = e.Pos()
 	*t = time.AfterFunc(stime, func() {
 		em.TimerMu.Lock()
 		defer em.TimerMu.Unlock()
 		if *w == nil {
 			return
 		}
-		(*w).Send(styp, evi)
+		(*w).Send(styp, e)
 		// we are done with the timer, and this indicates that
 		// we have sent a start event
 		*t = nil
@@ -619,12 +631,12 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	})
 }
 
-func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int) bool {
-	since := evi.SinceStart()
+func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) bool {
+	since := e.SinceStart()
 	if since < dur {
 		return false
 	}
-	dst := int(mat32.NewVec2FmPoint(evi.StartDelta()).Length())
+	dst := int(mat32.NewVec2FmPoint(e.StartDelta()).Length())
 	return dst >= dist
 }
 
@@ -683,6 +695,9 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 // FocusClear saves current focus to FocusPrev
 func (em *EventMgr) FocusClear() bool {
 	if em.Focus != nil {
+		if FocusTrace {
+			fmt.Println(em.Scene, "FocusClear:", em.Focus)
+		}
 		em.PrevFocus = em.Focus
 	}
 	return em.SetFocusEvent(nil)
@@ -693,7 +708,16 @@ func (em *EventMgr) FocusClear() bool {
 // This does NOT send the events.Focus event to the widget.
 // See [SetFocusEvent] for version that does send event.
 func (em *EventMgr) SetFocus(w Widget) bool {
+	if FocusTrace {
+		fmt.Println(em.Scene, "SetFocus:", w)
+	}
 	got := em.SetFocusImpl(w, false) // no event
+	if !got {
+		if FocusTrace {
+			fmt.Println(em.Scene, "SetFocus: Failed", w)
+		}
+		return false
+	}
 	if w != nil {
 		w.AsWidget().ScrollToMe()
 	}
@@ -705,10 +729,19 @@ func (em *EventMgr) SetFocus(w Widget) bool {
 // This sends the [events.Focus] event to the widget.
 // See [SetFocus] for a version that does not.
 func (em *EventMgr) SetFocusEvent(w Widget) bool {
+	if FocusTrace {
+		fmt.Println(em.Scene, "SetFocusEvent:", w)
+		if strings.Contains(w.Name(), "textbut-") {
+			fmt.Println("focus on textbut")
+		}
+	}
 	got := em.SetFocusImpl(w, true) // sends event
-	// if !got {
-	// 	fmt.Println("focus failed!", w)
-	// }
+	if !got {
+		if FocusTrace {
+			fmt.Println(em.Scene, "SetFocusEvent: Failed", w)
+		}
+		return false
+	}
 	if w != nil {
 		w.AsWidget().ScrollToMe()
 	}
@@ -725,22 +758,23 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 		// fmt.Println("nil foc impl")
 		cfoc = nil
 	}
-	if cfoc == w {
-		// fmt.Println(w, "already focus")
+	if cfoc != nil && w != nil && cfoc.This() == w.This() {
+		if FocusTrace {
+			fmt.Println(em.Scene, "Already Focus:", cfoc)
+		}
+		// if sendEvent { // still send event
+		// 	w.Send(events.Focus)
+		// }
 		return false
 	}
-	if KeyEventTrace {
-		// fmt.Println("EventMgr set focus to:", w)
-	}
-
 	if cfoc != nil {
-		// fmt.Println(w, "already focus")
+		if FocusTrace {
+			fmt.Println(em.Scene, "Losing focus:", cfoc)
+		}
 		cfoc.Send(events.FocusLost)
 	}
 	em.Focus = w
-	// fmt.Println(em.Focus, "set focus")
 	if sendEvent && w != nil {
-		// fmt.Println(w, "focus event")
 		w.Send(events.Focus)
 	}
 	return true

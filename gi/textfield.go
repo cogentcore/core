@@ -1529,7 +1529,7 @@ func (tf *TextField) HandleTextFieldKeys() {
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
-			tf.FocusNext()
+			// tf.FocusNext()
 		case keyfun.FocusPrev:
 			e.SetHandled()
 			tf.CancelComplete()

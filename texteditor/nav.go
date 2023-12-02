@@ -85,6 +85,13 @@ func (ed *Editor) SetCursorShow(pos lex.Pos) {
 	// ed.RenderCursor(true)
 }
 
+// SetCursorTarget sets a new cursor target position, ensures that it is visible
+func (ed *Editor) SetCursorTarget(pos lex.Pos) {
+	ed.SetFlag(true, EditorTargetSet)
+	ed.CursorTarg = pos
+	ed.SetCursorShow(pos)
+}
+
 // SetCursorCol sets the current target cursor column (CursorCol) to that
 // of the given position
 func (ed *Editor) SetCursorCol(pos lex.Pos) {
@@ -936,6 +943,12 @@ func (ed *Editor) ScrollCursorToVertCenter() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	mid := (curBBox.Min.Y + curBBox.Max.Y) / 2
 	return ed.ScrollToVertCenter(mid)
+}
+
+func (ed *Editor) ScrollCursorToTarget() {
+	ed.CursorPos = ed.CursorTarg
+	ed.ScrollCursorToVertCenter()
+	ed.SetFlag(false, EditorTargetSet)
 }
 
 ///////////////////////////////////////////////////////////////////////////////

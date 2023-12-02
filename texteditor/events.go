@@ -572,7 +572,7 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, end)
 		_ = reg
 		ed.HighlightRegion(reg)
-		ed.SetCursorShow(pos)
+		ed.SetCursorTarget(pos)
 		ed.SavePosHistory(ed.CursorPos)
 		ed.OpenLink(tl)
 	}

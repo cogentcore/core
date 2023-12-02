@@ -41,4 +41,8 @@ var (
 	// EventTrace reports a trace of event handing to stdout.
 	// can be set in PrefsDebug from prefs gui
 	EventTrace = false
+
+	// FocusTrace reports a trace of focus.
+	// can be set in PrefsDebug from prefs gui
+	FocusTrace = false
 )
