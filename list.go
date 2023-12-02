@@ -28,10 +28,23 @@ func List(n int, chroma float32, tone float32) []color.RGBA {
 
 // AccentList calls [List] with standard chroma and tone values that will result
 // in matcolor-style base accent colors appropriate for the current color theme
-// (light vs dark).
+// (light vs dark). These colors will satisfy text contrast requirements when placed
+// on standard scheme backgrounds.
 func AccentList(n int) []color.RGBA {
 	if matcolor.SchemeIsDark {
 		return List(n, 48, 80)
 	}
 	return List(n, 48, 40)
+}
+
+// AccentVariantList calls [List] with standard chroma and tone values that will result
+// in variant versions of matcolor-style base accent colors appropriate for the current
+// color theme (light vs dark). These colors will not necessarily satisfy text contrast
+// requirements, and they are designed for things like graph lines that do not need to
+// stand out as much.
+func AccentVariantList(n int) []color.RGBA {
+	if matcolor.SchemeIsDark {
+		return List(n, 48, 60)
+	}
+	return List(n, 48, 50)
 }
