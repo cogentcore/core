@@ -14,6 +14,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/enums"
+	"goki.dev/fi/uri"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
@@ -589,6 +590,10 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	if len(ch.Items) == 0 {
 		return
 	}
+	if _, ok := ch.Items[0].(uri.URI); ok {
+		ch.MakeItemsMenuURI(m)
+		return
+	}
 	_, ics := ch.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
@@ -602,6 +607,24 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 				bt.Tooltip = ch.Tooltips[i]
 			}
 		}
+		bt.Data = i // index is the data
+		bt.SetSelected(i == ch.CurIndex)
+		idx := i
+		bt.OnClick(func(e events.Event) {
+			ch.SelectItemAction(idx)
+		})
+	}
+}
+
+// MakeItemsMenuURI constructs a menu of all the items, for URI.
+// It is automatically set as the [Button.Menu] for the Chooser.
+func (ch *Chooser) MakeItemsMenuURI(m *Scene) {
+	fmt.Println("in uri")
+	for i, it := range ch.Items {
+		u := it.(uri.URI)
+		nm := "item-" + strconv.Itoa(i)
+		bt := NewButton(m, nm).SetType(ButtonMenu).SetText(u.String()).
+			SetIcon(u.Icon).SetTooltip(u.Desc)
 		bt.Data = i // index is the data
 		bt.SetSelected(i == ch.CurIndex)
 		idx := i
