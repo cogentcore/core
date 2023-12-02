@@ -4,9 +4,9 @@ package cursors
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.18"
+	Version = "v0.0.19"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "05a77cb"
+	GitCommit = "0d1e52b"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-12-02 01:19"
+	VersionDate = "2023-12-02 01:26"
 )
