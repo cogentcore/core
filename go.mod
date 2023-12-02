@@ -12,29 +12,29 @@ require (
 	github.com/goki/go-difflib v1.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	goki.dev/cam v0.9.37
-	goki.dev/colors v0.8.31
-	goki.dev/cursors v0.0.19
-	goki.dev/enums v0.9.41
-	goki.dev/fi v0.1.5
-	goki.dev/girl v0.0.22
+	goki.dev/cam v0.9.38
+	goki.dev/colors v0.8.32
+	goki.dev/cursors v0.0.20
+	goki.dev/enums v0.9.42
+	goki.dev/fi v0.1.6
+	goki.dev/girl v0.0.24
 	goki.dev/glop v0.1.6
-	goki.dev/goosi v0.0.12
-	goki.dev/grog v0.0.14
-	goki.dev/grows v0.3.17
+	goki.dev/goosi v0.0.14
+	goki.dev/grog v0.0.16
+	goki.dev/grows v0.3.19
 	goki.dev/grr v0.0.7
-	goki.dev/gti v0.1.18
+	goki.dev/gti v0.1.20
 	goki.dev/icons v0.0.11
-	goki.dev/ki/v2 v2.0.0-dev0.0.20
-	goki.dev/laser v0.1.20
-	goki.dev/mat32/v2 v2.0.0-dev0.0.15
+	goki.dev/ki/v2 v2.0.0-dev0.0.22
+	goki.dev/laser v0.1.22
+	goki.dev/mat32/v2 v2.0.0-dev0.0.17
 	goki.dev/ordmap v0.5.7
-	goki.dev/pi/v2 v2.0.0-dev0.0.13
+	goki.dev/pi/v2 v2.0.0-dev0.0.15
 	goki.dev/prof/v2 v2.0.0-dev0.0.4
-	goki.dev/spell v0.1.2
-	goki.dev/svg v0.1.15
-	goki.dev/vci/v2 v2.0.0-dev0.0.18
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.16
+	goki.dev/spell v0.1.4
+	goki.dev/svg v0.1.17
+	goki.dev/vci/v2 v2.0.0-dev0.0.20
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.18
 	golang.org/x/image v0.14.0
 	gopkg.in/fsnotify.v1 v1.4.7
 )
