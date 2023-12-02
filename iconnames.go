@@ -1839,6 +1839,9 @@ const (
 	// ConnectingAirports is https://github.com/goki/icons/blob/main/svg/connecting_airports.svg
 	ConnectingAirports Icon = "connecting_airports"
 
+	// Constant is https://github.com/goki/icons/blob/main/svg/constant.svg
+	Constant Icon = "constant"
+
 	// Construction is https://github.com/goki/icons/blob/main/svg/construction.svg
 	Construction Icon = "construction"
 
@@ -3032,6 +3035,9 @@ const (
 
 	// FiberSmartRecord is https://github.com/goki/icons/blob/main/svg/fiber_smart_record.svg
 	FiberSmartRecord Icon = "fiber_smart_record"
+
+	// Field is https://github.com/goki/icons/blob/main/svg/field.svg
+	Field Icon = "field"
 
 	// FileExe is https://github.com/goki/icons/blob/main/svg/file-exe.svg
 	FileExe Icon = "file-exe"
@@ -4910,6 +4916,9 @@ const (
 
 	// Metabolism is https://github.com/goki/icons/blob/main/svg/metabolism.svg
 	Metabolism Icon = "metabolism"
+
+	// Method is https://github.com/goki/icons/blob/main/svg/method.svg
+	Method Icon = "method"
 
 	// MfgNestYaleLock is https://github.com/goki/icons/blob/main/svg/mfg_nest_yale_lock.svg
 	MfgNestYaleLock Icon = "mfg_nest_yale_lock"
@@ -8459,6 +8468,9 @@ const (
 
 	// VapingRooms is https://github.com/goki/icons/blob/main/svg/vaping_rooms.svg
 	VapingRooms Icon = "vaping_rooms"
+
+	// Variable is https://github.com/goki/icons/blob/main/svg/variable.svg
+	Variable Icon = "variable"
 
 	// Variables is https://github.com/goki/icons/blob/main/svg/variables.svg
 	Variables Icon = "variables"
