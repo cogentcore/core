@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/svg"
 	"golang.org/x/image/draw"
 )
@@ -28,18 +29,22 @@ func (sv *SVG) CopyFieldsFrom(frm any) {
 }
 
 func (sv *SVG) OnInit() {
+	sv.SVG = svg.NewSVG(0, 0)
+	sv.SVG.Norm = true
 	sv.HandleWidgetEvents()
 	sv.SVGStyles()
 }
 
 func (sv *SVG) SVGStyles() {
 	sv.Style(func(s *styles.Style) {
-		if sv.SVG.Pixels != nil {
-			sz := sv.SVG.Pixels.Bounds().Size()
-			s.Min.X.Dp(float32(sz.X))
-			s.Min.Y.Dp(float32(sz.Y))
-		}
+		s.Grow.Set(1, 1)
+		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))
 	})
+}
+
+func (sv *SVG) SizeFinal() {
+	sv.WidgetBase.SizeFinal()
+	sv.SVG.Resize(sv.Geom.Size.Actual.Content.ToPoint())
 }
 
 func (sv *SVG) DrawIntoScene() {
