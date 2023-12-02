@@ -35,7 +35,7 @@ type SVG struct {
 	Fill bool
 
 	// color to fill background if Fill set
-	BgColor colors.Full
+	BackgroundColor colors.Full
 
 	// Color can be set to provide a default Fill and Stroke Color value
 	Color colors.Full
@@ -89,7 +89,7 @@ func NewSVG(width, height int) *SVG {
 func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
 	sv.Geom.Size = sz
-	sv.BgColor.SetSolid(colors.White)
+	sv.BackgroundColor.SetSolid(colors.White)
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
 	sv.Root.InitName(&sv.Root, "svg")
@@ -124,7 +124,7 @@ func (sv *SVG) CopyFrom(fr *SVG) {
 	sv.Title = fr.Title
 	sv.Desc = fr.Desc
 	sv.Fill = fr.Fill
-	sv.BgColor = fr.BgColor
+	sv.BackgroundColor = fr.BackgroundColor
 	sv.Geom = fr.Geom
 	sv.Norm = fr.Norm
 	sv.InvertY = fr.InvertY
@@ -149,7 +149,7 @@ func (sv *SVG) DeleteAll() {
 // Color has support for special color names that are relative to
 // this current color.
 func (sv *SVG) Base() color.RGBA {
-	return sv.BgColor.Solid
+	return sv.BackgroundColor.Solid
 }
 
 // FullByURL finds a Node by an element name (URL-like path), and
@@ -229,7 +229,7 @@ func (sv *SVG) Render() {
 func (sv *SVG) FillViewport() {
 	rs := &sv.RenderState
 	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sv.Geom.Size), &sv.BgColor)
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sv.Geom.Size), &sv.BackgroundColor)
 	rs.Unlock()
 }
 
