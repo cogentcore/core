@@ -7,7 +7,6 @@ package svg
 import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -25,15 +24,11 @@ type Rect struct {
 	Radius mat32.Vec2 `xml:"{rx,ry}"`
 }
 
-// AddNewRect adds a new rectangle to given parent node, with given name, pos, and size.
-func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {
-	g := parent.NewChild(RectType, name).(*Rect)
-	g.Pos.Set(x, y)
-	g.Size.Set(sx, sy)
-	return g
-}
-
 func (g *Rect) SVGName() string { return "rect" }
+
+func (g *Rect) OnInit() {
+	g.Size.Set(1, 1)
+}
 
 func (g *Rect) CopyFieldsFrom(frm any) {
 	fr := frm.(*Rect)
@@ -41,14 +36,6 @@ func (g *Rect) CopyFieldsFrom(frm any) {
 	g.Pos = fr.Pos
 	g.Size = fr.Size
 	g.Radius = fr.Radius
-}
-
-func (g *Rect) SetPos(pos mat32.Vec2) {
-	g.Pos = pos
-}
-
-func (g *Rect) SetSize(sz mat32.Vec2) {
-	g.Size = sz
 }
 
 func (g *Rect) LocalBBox() mat32.Box2 {

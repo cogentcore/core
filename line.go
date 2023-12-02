@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -20,15 +19,11 @@ type Line struct {
 	End mat32.Vec2 `xml:"{x2,y2}"`
 }
 
-// AddNewLine adds a new line to given parent node, with given name, st and end.
-func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {
-	g := parent.NewChild(LineType, name).(*Line)
-	g.Start.Set(sx, sy)
-	g.End.Set(ex, ey)
-	return g
-}
-
 func (g *Line) SVGName() string { return "line" }
+
+func (g *Line) OnInit() {
+	g.End.Set(1, 1)
+}
 
 func (g *Line) CopyFieldsFrom(frm any) {
 	fr := frm.(*Line)

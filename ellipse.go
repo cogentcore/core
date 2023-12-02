@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -14,21 +13,17 @@ type Ellipse struct {
 	NodeBase
 
 	// position of the center of the ellipse
-	Pos mat32.Vec2 `xml:"{cx,cy}"`
+	Pos mat32.Vec2 `xml:"{cx,cy}" set:"-"`
 
 	// radii of the ellipse in the horizontal, vertical axes
 	Radii mat32.Vec2 `xml:"{rx,ry}"`
 }
 
-// AddNewEllipse adds a new button to given parent node, with given name, pos and radii.
-func AddNewEllipse(parent ki.Ki, name string, x, y, rx, ry float32) *Ellipse {
-	g := parent.NewChild(EllipseType, name).(*Ellipse)
-	g.Pos.Set(x, y)
-	g.Radii.Set(rx, ry)
-	return g
-}
-
 func (g *Ellipse) SVGName() string { return "ellipse" }
+
+func (g *Ellipse) OnInit() {
+	g.Radii.Set(1, 1)
+}
 
 func (g *Ellipse) CopyFieldsFrom(frm any) {
 	fr := frm.(*Ellipse)
@@ -37,12 +32,14 @@ func (g *Ellipse) CopyFieldsFrom(frm any) {
 	g.Radii = fr.Radii
 }
 
-func (g *Ellipse) SetPos(pos mat32.Vec2) {
+func (g *Ellipse) SetPos(pos mat32.Vec2) *Ellipse {
 	g.Pos = pos.Sub(g.Radii)
+	return g
 }
 
-func (g *Ellipse) SetSize(sz mat32.Vec2) {
+func (g *Ellipse) SetSize(sz mat32.Vec2) *Ellipse {
 	g.Radii = sz.MulScalar(0.5)
+	return g
 }
 
 func (g *Ellipse) LocalBBox() mat32.Box2 {

@@ -22,19 +22,10 @@ type Path struct {
 	NodeBase
 
 	// the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow
-	Data []PathData `xml:"-"`
+	Data []PathData `xml:"-" set:"-"`
 
 	// string version of the path data
 	DataStr string `xml:"d"`
-}
-
-// AddNewPath adds a new button to given parent node, with given name and path data.
-func AddNewPath(parent ki.Ki, name string, data string) *Path {
-	g := parent.NewChild(PathType, name).(*Path)
-	if data != "" {
-		g.SetData(data)
-	}
-	return g
 }
 
 func (g *Path) SVGName() string { return "path" }

@@ -4,19 +4,10 @@
 
 package svg
 
-import (
-	"goki.dev/ki/v2"
-)
-
 // Flow represents SVG flow* elements
 type Flow struct {
 	NodeBase
 	FlowType string
-}
-
-// AddNewFlow adds a new flow to given parent node, with given name.
-func AddNewFlow(parent ki.Ki, name string) *Flow {
-	return parent.NewChild(FlowType, name).(*Flow)
 }
 
 func (g *Flow) SVGName() string { return "flow" }

@@ -4,6 +4,7 @@ package svg
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -96,6 +97,8 @@ func (i *NodeFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*ki.Flags)(i).SetStringOr(flg)
 			if err != nil {
@@ -191,7 +194,10 @@ func (i NodeFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *NodeFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _ViewBoxMeetOrSliceValues = []ViewBoxMeetOrSlice{0, 1}
@@ -297,5 +303,8 @@ func (i ViewBoxMeetOrSlice) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ViewBoxMeetOrSlice) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

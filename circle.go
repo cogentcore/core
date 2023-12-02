@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -14,21 +13,17 @@ type Circle struct {
 	NodeBase
 
 	// position of the center of the circle
-	Pos mat32.Vec2 `xml:"{cx,cy}"`
+	Pos mat32.Vec2 `xml:"{cx,cy}" set:"-"`
 
 	// radius of the circle
 	Radius float32 `xml:"r"`
 }
 
-// AddNewCircle adds a new button to given parent node, with given name, x,y pos, and radius.
-func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {
-	g := parent.NewChild(CircleType, name).(*Circle)
-	g.Pos.Set(x, y)
-	g.Radius = radius
-	return g
-}
-
 func (g *Circle) SVGName() string { return "circle" }
+
+func (g *Circle) OnInit() {
+	g.Radius = 1
+}
 
 func (g *Circle) CopyFieldsFrom(frm any) {
 	fr := frm.(*Circle)
@@ -37,12 +32,14 @@ func (g *Circle) CopyFieldsFrom(frm any) {
 	g.Radius = fr.Radius
 }
 
-func (g *Circle) SetPos(pos mat32.Vec2) {
+func (g *Circle) SetPos(pos mat32.Vec2) *Circle {
 	g.Pos = pos.SubScalar(g.Radius)
+	return g
 }
 
-func (g *Circle) SetSize(sz mat32.Vec2) {
+func (g *Circle) SetSize(sz mat32.Vec2) *Circle {
 	g.Radius = 0.25 * (sz.X + sz.Y)
+	return g
 }
 
 func (g *Circle) LocalBBox() mat32.Box2 {

@@ -5,20 +5,12 @@
 package svg
 
 import (
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
 // Polygon is a SVG polygon
 type Polygon struct {
 	Polyline
-}
-
-// AddNewPolygon adds a new polygon to given parent node, with given name and points.
-func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
-	g := parent.NewChild(PolygonType, name).(*Polygon)
-	g.Points = points
-	return g
 }
 
 func (g *Polygon) SVGName() string { return "polygon" }

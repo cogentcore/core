@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"goki.dev/grows/images"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -36,13 +35,6 @@ type Image struct {
 	Pixels *image.RGBA `copy:"-" xml:"-" json:"-" view:"-"`
 }
 
-// AddNewImage adds a new image to given parent node, with given name and pos
-func AddNewImage(parent ki.Ki, name string, x, y float32) *Image {
-	g := parent.NewChild(ImageType, name).(*Image)
-	g.Pos.Set(x, y)
-	return g
-}
-
 func (g *Image) SVGName() string { return "image" }
 
 func (g *Image) CopyFieldsFrom(frm any) {
@@ -53,14 +45,6 @@ func (g *Image) CopyFieldsFrom(frm any) {
 	g.PreserveAspectRatio = fr.PreserveAspectRatio
 	g.Filename = fr.Filename
 	g.Pixels = fr.Pixels
-}
-
-func (g *Image) SetPos(pos mat32.Vec2) {
-	g.Pos = pos
-}
-
-func (g *Image) SetSize(sz mat32.Vec2) {
-	g.Size = sz
 }
 
 // SetImageSize sets size of the bitmap image.

@@ -198,7 +198,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "rect":
-				rect := AddNewRect(curPar, "rect", 0, 0, 1, 1)
+				rect := NewRect(curPar)
 				var x, y, w, h, rx, ry float32
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(rect, attr.Name.Local, attr.Value) {
@@ -228,7 +228,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				rect.Size.Set(w, h)
 				rect.Radius.Set(rx, ry)
 			case nm == "circle":
-				circle := AddNewCircle(curPar, "circle", 0, 0, 1)
+				circle := NewCircle(curPar)
 				var cx, cy, r float32
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(circle, attr.Name.Local, attr.Value) {
@@ -251,7 +251,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				circle.Pos.Set(cx, cy)
 				circle.Radius = r
 			case nm == "ellipse":
-				ellipse := AddNewEllipse(curPar, "ellipse", 0, 0, 1, 1)
+				ellipse := NewEllipse(curPar)
 				var cx, cy, rx, ry float32
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(ellipse, attr.Name.Local, attr.Value) {
@@ -276,7 +276,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				ellipse.Pos.Set(cx, cy)
 				ellipse.Radii.Set(rx, ry)
 			case nm == "line":
-				line := AddNewLine(curPar, "line", 0, 0, 1, 1)
+				line := NewLine(curPar)
 				var x1, x2, y1, y2 float32
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(line, attr.Name.Local, attr.Value) {
@@ -301,7 +301,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				line.Start.Set(x1, y1)
 				line.End.Set(x2, y2)
 			case nm == "polygon":
-				polygon := AddNewPolygon(curPar, "polygon", nil)
+				polygon := NewPolygon(curPar)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(polygon, attr.Name.Local, attr.Value) {
 						continue
@@ -312,7 +312,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
-								err = fmt.Errorf("SVG polygon has an odd number of points: %v str: %v\n", sz, attr.Value)
+								err = fmt.Errorf("SVG polygon has an odd number of points: %v str: %v", sz, attr.Value)
 								log.Println(err)
 								return err
 							}
@@ -330,7 +330,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "polyline":
-				polyline := AddNewPolyline(curPar, "polyline", nil)
+				polyline := NewPolyline(curPar)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(polyline, attr.Name.Local, attr.Value) {
 						continue
@@ -341,7 +341,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
-								err = fmt.Errorf("SVG polyline has an odd number of points: %v str: %v\n", sz, attr.Value)
+								err = fmt.Errorf("SVG polyline has an odd number of points: %v str: %v", sz, attr.Value)
 								log.Println(err)
 								return err
 							}
@@ -359,7 +359,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "path":
-				path := AddNewPath(curPar, "path", "")
+				path := NewPath(curPar)
 				for _, attr := range se.Attr {
 					if attr.Name.Local == "original-d" {
 						continue
@@ -378,7 +378,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "image":
-				img := AddNewImage(curPar, "image", 0, 0)
+				img := NewImage(curPar)
 				var x, y, w, h float32
 				b := false
 				for _, attr := range se.Attr {
@@ -430,15 +430,15 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "text":
 				var txt *Text
 				if se.Name.Local == "text" {
-					txt = AddNewText(curPar, "txt", 0, 0, "")
+					txt = NewText(curPar)
 					inTxt = true
 					curTxt = txt
 				} else {
 					if inTxt && curTxt != nil {
-						txt = AddNewText(curTxt, "tspan", 0, 0, "")
+						txt = NewText(curTxt, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
 						txt.Pos = curTxt.Pos
 					} else {
-						txt = AddNewText(curPar, "tspan", 0, 0, "")
+						txt = NewText(curPar, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
 					}
 					inTspn = true
 					curTspn = txt
@@ -504,9 +504,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					switch attr.Name.Local {
 					case "href":
 						nm := attr.Value
-						if strings.HasPrefix(nm, "#") {
-							nm = strings.TrimPrefix(nm, "#")
-						}
+						nm = strings.TrimPrefix(nm, "#")
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
@@ -530,9 +528,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					switch attr.Name.Local {
 					case "href":
 						nm := attr.Value
-						if strings.HasPrefix(nm, "#") {
-							nm = strings.TrimPrefix(nm, "#")
-						}
+						nm = strings.TrimPrefix(nm, "#")
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {

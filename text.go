@@ -10,7 +10,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -20,7 +19,7 @@ type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
-	Pos mat32.Vec2 `xml:"{x,y}"`
+	Pos mat32.Vec2 `xml:"{x,y}" set:"-"`
 
 	// width of text to render if using word-wrapping
 	Width float32 `xml:"width"`
@@ -59,14 +58,6 @@ type Text struct {
 	LastBBox mat32.Box2 `xml:"-" json:"-"`
 }
 
-// AddNewText adds a new text to given parent node, with given name, pos and text.
-func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {
-	g := parent.NewChild(TextType, name).(*Text)
-	g.Pos.Set(x, y)
-	g.Text = text
-	return g
-}
-
 func (g *Text) SVGName() string {
 	if len(g.Text) == 0 {
 		return "text"
@@ -96,21 +87,23 @@ func (g *Text) IsParText() bool {
 	return g.NumChildren() > 0 && g.Text == ""
 }
 
-func (g *Text) SetPos(pos mat32.Vec2) {
+func (g *Text) SetPos(pos mat32.Vec2) *Text {
 	g.Pos = pos
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
 		kt.Pos = g.Paint.XForm.MulVec2AsPt(pos)
 	}
+	return g
 }
 
-func (g *Text) SetSize(sz mat32.Vec2) {
+func (g *Text) SetSize(sz mat32.Vec2) *Text {
 	g.Width = sz.X
 	scx, _ := g.Paint.XForm.ExtractScale()
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
 		kt.Width = g.Width * scx
 	}
+	return g
 }
 
 func (g *Text) NodeBBox(sv *SVG) image.Rectangle {

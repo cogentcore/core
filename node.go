@@ -43,12 +43,6 @@ type Node interface {
 	// NodeBBox returns the bounding box in image coordinates for this node
 	NodeBBox(sv *SVG) image.Rectangle
 
-	// SetPos sets the *upper left* position of this element, in local dimensions
-	SetPos(pos mat32.Vec2)
-
-	// SetSize sets the overall size of this element, in local dimensions
-	SetSize(sz mat32.Vec2)
-
 	// ApplyXForm applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
 	ApplyXForm(sv *SVG, xf mat32.Mat2)

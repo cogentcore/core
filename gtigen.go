@@ -3,31 +3,41 @@
 package svg
 
 import (
+	"image"
+
+	"github.com/aymerick/douceur/css"
+	"goki.dev/colors"
+	"goki.dev/girl/paint"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 )
 
 // CircleType is the [gti.Type] for [Circle]
 var CircleType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Circle",
+	ShortName:  "svg.Circle",
+	IDName:     "circle",
 	Doc:        "Circle is a SVG circle",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "mat32.Vec2", Doc: "position of the center of the circle", Directives: gti.Directives{}}},
-		{"Radius", &gti.Field{Name: "Radius", Type: "float32", Doc: "radius of the circle", Directives: gti.Directives{}}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the center of the circle", Directives: gti.Directives{}, Tag: "xml:\"{cx,cy}\" set:\"-\""}},
+		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "radius of the circle", Directives: gti.Directives{}, Tag: "xml:\"r\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Circle{},
 })
 
-// NewCircle adds a new [Circle] with
-// the given name to the given parent.
-func NewCircle(par ki.Ki, name string) *Circle {
-	return par.NewChild(CircleType, name).(*Circle)
+// NewCircle adds a new [Circle] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewCircle(par ki.Ki, name ...string) *Circle {
+	return par.NewChild(CircleType, name...).(*Circle)
 }
 
 // KiType returns the [*gti.Type] of [Circle]
@@ -40,23 +50,70 @@ func (t *Circle) New() ki.Ki {
 	return &Circle{}
 }
 
+// SetRadius sets the [Circle.Radius]:
+// radius of the circle
+func (t *Circle) SetRadius(v float32) *Circle {
+	t.Radius = v
+	return t
+}
+
+// SetClass sets the [Circle.Class]
+func (t *Circle) SetClass(v string) *Circle {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Circle.CSS]
+func (t *Circle) SetCss(v ki.Props) *Circle {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Circle.CSSAgg]
+func (t *Circle) SetCssagg(v ki.Props) *Circle {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Circle.BBox]
+func (t *Circle) SetBbox(v image.Rectangle) *Circle {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Circle.VisBBox]
+func (t *Circle) SetVisBbox(v image.Rectangle) *Circle {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Circle.Paint]
+func (t *Circle) SetPaint(v paint.Paint) *Circle {
+	t.Paint = v
+	return t
+}
+
 // ClipPathType is the [gti.Type] for [ClipPath]
 var ClipPathType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.ClipPath",
+	ShortName:  "svg.ClipPath",
+	IDName:     "clip-path",
 	Doc:        "ClipPath is used for holding a path that renders as a clip path",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ClipPath{},
 })
 
-// NewClipPath adds a new [ClipPath] with
-// the given name to the given parent.
-func NewClipPath(par ki.Ki, name string) *ClipPath {
-	return par.NewChild(ClipPathType, name).(*ClipPath)
+// NewClipPath adds a new [ClipPath] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewClipPath(par ki.Ki, name ...string) *ClipPath {
+	return par.NewChild(ClipPathType, name...).(*ClipPath)
 }
 
 // KiType returns the [*gti.Type] of [ClipPath]
@@ -69,25 +126,65 @@ func (t *ClipPath) New() ki.Ki {
 	return &ClipPath{}
 }
 
+// SetClass sets the [ClipPath.Class]
+func (t *ClipPath) SetClass(v string) *ClipPath {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [ClipPath.CSS]
+func (t *ClipPath) SetCss(v ki.Props) *ClipPath {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [ClipPath.CSSAgg]
+func (t *ClipPath) SetCssagg(v ki.Props) *ClipPath {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [ClipPath.BBox]
+func (t *ClipPath) SetBbox(v image.Rectangle) *ClipPath {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [ClipPath.VisBBox]
+func (t *ClipPath) SetVisBbox(v image.Rectangle) *ClipPath {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [ClipPath.Paint]
+func (t *ClipPath) SetPaint(v paint.Paint) *ClipPath {
+	t.Paint = v
+	return t
+}
+
 // StyleSheetType is the [gti.Type] for [StyleSheet]
 var StyleSheetType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.StyleSheet",
+	ShortName:  "svg.StyleSheet",
+	IDName:     "style-sheet",
 	Doc:        "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Sheet", &gti.Field{Name: "Sheet", Type: "*css.Stylesheet", Doc: "", Directives: gti.Directives{}}},
+		{"Sheet", &gti.Field{Name: "Sheet", Type: "*github.com/aymerick/douceur/css.Stylesheet", LocalType: "*css.Stylesheet", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StyleSheet{},
 })
 
-// NewStyleSheet adds a new [StyleSheet] with
-// the given name to the given parent.
-func NewStyleSheet(par ki.Ki, name string) *StyleSheet {
-	return par.NewChild(StyleSheetType, name).(*StyleSheet)
+// NewStyleSheet adds a new [StyleSheet] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewStyleSheet(par ki.Ki, name ...string) *StyleSheet {
+	return par.NewChild(StyleSheetType, name...).(*StyleSheet)
 }
 
 // KiType returns the [*gti.Type] of [StyleSheet]
@@ -100,25 +197,71 @@ func (t *StyleSheet) New() ki.Ki {
 	return &StyleSheet{}
 }
 
+// SetSheet sets the [StyleSheet.Sheet]
+func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
+	t.Sheet = v
+	return t
+}
+
+// SetClass sets the [StyleSheet.Class]
+func (t *StyleSheet) SetClass(v string) *StyleSheet {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [StyleSheet.CSS]
+func (t *StyleSheet) SetCss(v ki.Props) *StyleSheet {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [StyleSheet.CSSAgg]
+func (t *StyleSheet) SetCssagg(v ki.Props) *StyleSheet {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [StyleSheet.BBox]
+func (t *StyleSheet) SetBbox(v image.Rectangle) *StyleSheet {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [StyleSheet.VisBBox]
+func (t *StyleSheet) SetVisBbox(v image.Rectangle) *StyleSheet {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [StyleSheet.Paint]
+func (t *StyleSheet) SetPaint(v paint.Paint) *StyleSheet {
+	t.Paint = v
+	return t
+}
+
 // MetaDataType is the [gti.Type] for [MetaData]
 var MetaDataType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.MetaData",
+	ShortName:  "svg.MetaData",
+	IDName:     "meta-data",
 	Doc:        "MetaData is used for holding meta data info",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MetaData", &gti.Field{Name: "MetaData", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		{"MetaData", &gti.Field{Name: "MetaData", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MetaData{},
 })
 
-// NewMetaData adds a new [MetaData] with
-// the given name to the given parent.
-func NewMetaData(par ki.Ki, name string) *MetaData {
-	return par.NewChild(MetaDataType, name).(*MetaData)
+// NewMetaData adds a new [MetaData] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewMetaData(par ki.Ki, name ...string) *MetaData {
+	return par.NewChild(MetaDataType, name...).(*MetaData)
 }
 
 // KiType returns the [*gti.Type] of [MetaData]
@@ -131,26 +274,72 @@ func (t *MetaData) New() ki.Ki {
 	return &MetaData{}
 }
 
+// SetMetaData sets the [MetaData.MetaData]
+func (t *MetaData) SetMetaData(v string) *MetaData {
+	t.MetaData = v
+	return t
+}
+
+// SetClass sets the [MetaData.Class]
+func (t *MetaData) SetClass(v string) *MetaData {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [MetaData.CSS]
+func (t *MetaData) SetCss(v ki.Props) *MetaData {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [MetaData.CSSAgg]
+func (t *MetaData) SetCssagg(v ki.Props) *MetaData {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [MetaData.BBox]
+func (t *MetaData) SetBbox(v image.Rectangle) *MetaData {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [MetaData.VisBBox]
+func (t *MetaData) SetVisBbox(v image.Rectangle) *MetaData {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [MetaData.Paint]
+func (t *MetaData) SetPaint(v paint.Paint) *MetaData {
+	t.Paint = v
+	return t
+}
+
 // EllipseType is the [gti.Type] for [Ellipse]
 var EllipseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Ellipse",
+	ShortName:  "svg.Ellipse",
+	IDName:     "ellipse",
 	Doc:        "Ellipse is a SVG ellipse",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "mat32.Vec2", Doc: "position of the center of the ellipse", Directives: gti.Directives{}}},
-		{"Radii", &gti.Field{Name: "Radii", Type: "mat32.Vec2", Doc: "radii of the ellipse in the horizontal, vertical axes", Directives: gti.Directives{}}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the center of the ellipse", Directives: gti.Directives{}, Tag: "xml:\"{cx,cy}\" set:\"-\""}},
+		{"Radii", &gti.Field{Name: "Radii", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "radii of the ellipse in the horizontal, vertical axes", Directives: gti.Directives{}, Tag: "xml:\"{rx,ry}\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Ellipse{},
 })
 
-// NewEllipse adds a new [Ellipse] with
-// the given name to the given parent.
-func NewEllipse(par ki.Ki, name string) *Ellipse {
-	return par.NewChild(EllipseType, name).(*Ellipse)
+// NewEllipse adds a new [Ellipse] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewEllipse(par ki.Ki, name ...string) *Ellipse {
+	return par.NewChild(EllipseType, name...).(*Ellipse)
 }
 
 // KiType returns the [*gti.Type] of [Ellipse]
@@ -163,25 +352,72 @@ func (t *Ellipse) New() ki.Ki {
 	return &Ellipse{}
 }
 
+// SetRadii sets the [Ellipse.Radii]:
+// radii of the ellipse in the horizontal, vertical axes
+func (t *Ellipse) SetRadii(v mat32.Vec2) *Ellipse {
+	t.Radii = v
+	return t
+}
+
+// SetClass sets the [Ellipse.Class]
+func (t *Ellipse) SetClass(v string) *Ellipse {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Ellipse.CSS]
+func (t *Ellipse) SetCss(v ki.Props) *Ellipse {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Ellipse.CSSAgg]
+func (t *Ellipse) SetCssagg(v ki.Props) *Ellipse {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Ellipse.BBox]
+func (t *Ellipse) SetBbox(v image.Rectangle) *Ellipse {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Ellipse.VisBBox]
+func (t *Ellipse) SetVisBbox(v image.Rectangle) *Ellipse {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Ellipse.Paint]
+func (t *Ellipse) SetPaint(v paint.Paint) *Ellipse {
+	t.Paint = v
+	return t
+}
+
 // FilterType is the [gti.Type] for [Filter]
 var FilterType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Filter",
+	ShortName:  "svg.Filter",
+	IDName:     "filter",
 	Doc:        "Filter represents SVG filter* elements",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FilterType", &gti.Field{Name: "FilterType", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		{"FilterType", &gti.Field{Name: "FilterType", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Filter{},
 })
 
-// NewFilter adds a new [Filter] with
-// the given name to the given parent.
-func NewFilter(par ki.Ki, name string) *Filter {
-	return par.NewChild(FilterType, name).(*Filter)
+// NewFilter adds a new [Filter] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewFilter(par ki.Ki, name ...string) *Filter {
+	return par.NewChild(FilterType, name...).(*Filter)
 }
 
 // KiType returns the [*gti.Type] of [Filter]
@@ -194,25 +430,71 @@ func (t *Filter) New() ki.Ki {
 	return &Filter{}
 }
 
+// SetFilterType sets the [Filter.FilterType]
+func (t *Filter) SetFilterType(v string) *Filter {
+	t.FilterType = v
+	return t
+}
+
+// SetClass sets the [Filter.Class]
+func (t *Filter) SetClass(v string) *Filter {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Filter.CSS]
+func (t *Filter) SetCss(v ki.Props) *Filter {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Filter.CSSAgg]
+func (t *Filter) SetCssagg(v ki.Props) *Filter {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Filter.BBox]
+func (t *Filter) SetBbox(v image.Rectangle) *Filter {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Filter.VisBBox]
+func (t *Filter) SetVisBbox(v image.Rectangle) *Filter {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Filter.Paint]
+func (t *Filter) SetPaint(v paint.Paint) *Filter {
+	t.Paint = v
+	return t
+}
+
 // FlowType is the [gti.Type] for [Flow]
 var FlowType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Flow",
+	ShortName:  "svg.Flow",
+	IDName:     "flow",
 	Doc:        "Flow represents SVG flow* elements",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FlowType", &gti.Field{Name: "FlowType", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		{"FlowType", &gti.Field{Name: "FlowType", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Flow{},
 })
 
-// NewFlow adds a new [Flow] with
-// the given name to the given parent.
-func NewFlow(par ki.Ki, name string) *Flow {
-	return par.NewChild(FlowType, name).(*Flow)
+// NewFlow adds a new [Flow] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewFlow(par ki.Ki, name ...string) *Flow {
+	return par.NewChild(FlowType, name...).(*Flow)
 }
 
 // KiType returns the [*gti.Type] of [Flow]
@@ -225,26 +507,72 @@ func (t *Flow) New() ki.Ki {
 	return &Flow{}
 }
 
+// SetFlowType sets the [Flow.FlowType]
+func (t *Flow) SetFlowType(v string) *Flow {
+	t.FlowType = v
+	return t
+}
+
+// SetClass sets the [Flow.Class]
+func (t *Flow) SetClass(v string) *Flow {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Flow.CSS]
+func (t *Flow) SetCss(v ki.Props) *Flow {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Flow.CSSAgg]
+func (t *Flow) SetCssagg(v ki.Props) *Flow {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Flow.BBox]
+func (t *Flow) SetBbox(v image.Rectangle) *Flow {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Flow.VisBBox]
+func (t *Flow) SetVisBbox(v image.Rectangle) *Flow {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Flow.Paint]
+func (t *Flow) SetPaint(v paint.Paint) *Flow {
+	t.Paint = v
+	return t
+}
+
 // GradientType is the [gti.Type] for [Gradient]
 var GradientType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Gradient",
+	ShortName:  "svg.Gradient",
+	IDName:     "gradient",
 	Doc:        "Gradient is used for holding a specified color gradient (ColorSpec)\nname is id for lookup in url",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Grad", &gti.Field{Name: "Grad", Type: "colors.Full", Doc: "the color gradient", Directives: gti.Directives{}}},
-		{"StopsName", &gti.Field{Name: "StopsName", Type: "string", Doc: "name of another gradient to get stops from", Directives: gti.Directives{}}},
+		{"Grad", &gti.Field{Name: "Grad", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"StopsName", &gti.Field{Name: "StopsName", Type: "string", LocalType: "string", Doc: "name of another gradient to get stops from", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Gradient{},
 })
 
-// NewGradient adds a new [Gradient] with
-// the given name to the given parent.
-func NewGradient(par ki.Ki, name string) *Gradient {
-	return par.NewChild(GradientType, name).(*Gradient)
+// NewGradient adds a new [Gradient] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewGradient(par ki.Ki, name ...string) *Gradient {
+	return par.NewChild(GradientType, name...).(*Gradient)
 }
 
 // KiType returns the [*gti.Type] of [Gradient]
@@ -257,23 +585,77 @@ func (t *Gradient) New() ki.Ki {
 	return &Gradient{}
 }
 
+// SetGrad sets the [Gradient.Grad]:
+// the color gradient
+func (t *Gradient) SetGrad(v colors.Full) *Gradient {
+	t.Grad = v
+	return t
+}
+
+// SetStopsName sets the [Gradient.StopsName]:
+// name of another gradient to get stops from
+func (t *Gradient) SetStopsName(v string) *Gradient {
+	t.StopsName = v
+	return t
+}
+
+// SetClass sets the [Gradient.Class]
+func (t *Gradient) SetClass(v string) *Gradient {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Gradient.CSS]
+func (t *Gradient) SetCss(v ki.Props) *Gradient {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Gradient.CSSAgg]
+func (t *Gradient) SetCssagg(v ki.Props) *Gradient {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Gradient.BBox]
+func (t *Gradient) SetBbox(v image.Rectangle) *Gradient {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Gradient.VisBBox]
+func (t *Gradient) SetVisBbox(v image.Rectangle) *Gradient {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Gradient.Paint]
+func (t *Gradient) SetPaint(v paint.Paint) *Gradient {
+	t.Paint = v
+	return t
+}
+
 // GroupType is the [gti.Type] for [Group]
 var GroupType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Group",
+	ShortName:  "svg.Group",
+	IDName:     "group",
 	Doc:        "Group groups together SVG elements.\nProvides a common transform for all group elements\nand shared style properties.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Group{},
 })
 
-// NewGroup adds a new [Group] with
-// the given name to the given parent.
-func NewGroup(par ki.Ki, name string) *Group {
-	return par.NewChild(GroupType, name).(*Group)
+// NewGroup adds a new [Group] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewGroup(par ki.Ki, name ...string) *Group {
+	return par.NewChild(GroupType, name...).(*Group)
 }
 
 // KiType returns the [*gti.Type] of [Group]
@@ -286,29 +668,69 @@ func (t *Group) New() ki.Ki {
 	return &Group{}
 }
 
+// SetClass sets the [Group.Class]
+func (t *Group) SetClass(v string) *Group {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Group.CSS]
+func (t *Group) SetCss(v ki.Props) *Group {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Group.CSSAgg]
+func (t *Group) SetCssagg(v ki.Props) *Group {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Group.BBox]
+func (t *Group) SetBbox(v image.Rectangle) *Group {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Group.VisBBox]
+func (t *Group) SetVisBbox(v image.Rectangle) *Group {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Group.Paint]
+func (t *Group) SetPaint(v paint.Paint) *Group {
+	t.Paint = v
+	return t
+}
+
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Image",
+	ShortName:  "svg.Image",
+	IDName:     "image",
 	Doc:        "Image is an SVG image (bitmap)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "mat32.Vec2", Doc: "position of the top-left of the image", Directives: gti.Directives{}}},
-		{"Size", &gti.Field{Name: "Size", Type: "mat32.Vec2", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)", Directives: gti.Directives{}}},
-		{"PreserveAspectRatio", &gti.Field{Name: "PreserveAspectRatio", Type: "bool", Doc: "directs resize operations to preserve aspect ratio", Directives: gti.Directives{}}},
-		{"Filename", &gti.Field{Name: "Filename", Type: "string", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}}},
-		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", Doc: "[view: -] the image pixels", Directives: gti.Directives{}}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the top-left of the image", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)", Directives: gti.Directives{}, Tag: "xml:\"{width,height}\""}},
+		{"PreserveAspectRatio", &gti.Field{Name: "PreserveAspectRatio", Type: "bool", LocalType: "bool", Doc: "directs resize operations to preserve aspect ratio", Directives: gti.Directives{}, Tag: "xml:\"preserveAspectRatio\""}},
+		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: ""}},
+		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "the image pixels", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Image{},
 })
 
-// NewImage adds a new [Image] with
-// the given name to the given parent.
-func NewImage(par ki.Ki, name string) *Image {
-	return par.NewChild(ImageType, name).(*Image)
+// NewImage adds a new [Image] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewImage(par ki.Ki, name ...string) *Image {
+	return par.NewChild(ImageType, name...).(*Image)
 }
 
 // KiType returns the [*gti.Type] of [Image]
@@ -321,26 +743,101 @@ func (t *Image) New() ki.Ki {
 	return &Image{}
 }
 
+// SetPos sets the [Image.Pos]:
+// position of the top-left of the image
+func (t *Image) SetPos(v mat32.Vec2) *Image {
+	t.Pos = v
+	return t
+}
+
+// SetSize sets the [Image.Size]:
+// rendered size of the image (imposes a scaling on image when it is rendered)
+func (t *Image) SetSize(v mat32.Vec2) *Image {
+	t.Size = v
+	return t
+}
+
+// SetPreserveAspectRatio sets the [Image.PreserveAspectRatio]:
+// directs resize operations to preserve aspect ratio
+func (t *Image) SetPreserveAspectRatio(v bool) *Image {
+	t.PreserveAspectRatio = v
+	return t
+}
+
+// SetFilename sets the [Image.Filename]:
+// file name of image loaded -- set by OpenImage
+func (t *Image) SetFilename(v string) *Image {
+	t.Filename = v
+	return t
+}
+
+// SetPixels sets the [Image.Pixels]:
+// the image pixels
+func (t *Image) SetPixels(v *image.RGBA) *Image {
+	t.Pixels = v
+	return t
+}
+
+// SetClass sets the [Image.Class]
+func (t *Image) SetClass(v string) *Image {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Image.CSS]
+func (t *Image) SetCss(v ki.Props) *Image {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Image.CSSAgg]
+func (t *Image) SetCssagg(v ki.Props) *Image {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Image.BBox]
+func (t *Image) SetBbox(v image.Rectangle) *Image {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Image.VisBBox]
+func (t *Image) SetVisBbox(v image.Rectangle) *Image {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Image.Paint]
+func (t *Image) SetPaint(v paint.Paint) *Image {
+	t.Paint = v
+	return t
+}
+
 // LineType is the [gti.Type] for [Line]
 var LineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Line",
+	ShortName:  "svg.Line",
+	IDName:     "line",
 	Doc:        "Line is a SVG line",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Start", &gti.Field{Name: "Start", Type: "mat32.Vec2", Doc: "position of the start of the line", Directives: gti.Directives{}}},
-		{"End", &gti.Field{Name: "End", Type: "mat32.Vec2", Doc: "position of the end of the line", Directives: gti.Directives{}}},
+		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the start of the line", Directives: gti.Directives{}, Tag: "xml:\"{x1,y1}\""}},
+		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the end of the line", Directives: gti.Directives{}, Tag: "xml:\"{x2,y2}\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Line{},
 })
 
-// NewLine adds a new [Line] with
-// the given name to the given parent.
-func NewLine(par ki.Ki, name string) *Line {
-	return par.NewChild(LineType, name).(*Line)
+// NewLine adds a new [Line] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewLine(par ki.Ki, name ...string) *Line {
+	return par.NewChild(LineType, name...).(*Line)
 }
 
 // KiType returns the [*gti.Type] of [Line]
@@ -353,34 +850,88 @@ func (t *Line) New() ki.Ki {
 	return &Line{}
 }
 
+// SetStart sets the [Line.Start]:
+// position of the start of the line
+func (t *Line) SetStart(v mat32.Vec2) *Line {
+	t.Start = v
+	return t
+}
+
+// SetEnd sets the [Line.End]:
+// position of the end of the line
+func (t *Line) SetEnd(v mat32.Vec2) *Line {
+	t.End = v
+	return t
+}
+
+// SetClass sets the [Line.Class]
+func (t *Line) SetClass(v string) *Line {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Line.CSS]
+func (t *Line) SetCss(v ki.Props) *Line {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Line.CSSAgg]
+func (t *Line) SetCssagg(v ki.Props) *Line {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Line.BBox]
+func (t *Line) SetBbox(v image.Rectangle) *Line {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Line.VisBBox]
+func (t *Line) SetVisBbox(v image.Rectangle) *Line {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Line.Paint]
+func (t *Line) SetPaint(v paint.Paint) *Line {
+	t.Paint = v
+	return t
+}
+
 // MarkerType is the [gti.Type] for [Marker]
 var MarkerType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Marker",
+	ShortName:  "svg.Marker",
+	IDName:     "marker",
 	Doc:        "Marker represents marker elements that can be drawn along paths (arrow heads, etc)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"RefPos", &gti.Field{Name: "RefPos", Type: "mat32.Vec2", Doc: "reference position to align the vertex position with, specified in ViewBox coordinates", Directives: gti.Directives{}}},
-		{"Size", &gti.Field{Name: "Size", Type: "mat32.Vec2", Doc: "size of marker to render, in Units units", Directives: gti.Directives{}}},
-		{"Units", &gti.Field{Name: "Units", Type: "MarkerUnits", Doc: "units to use", Directives: gti.Directives{}}},
-		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "ViewBox", Doc: "viewbox defines the internal coordinate system for the drawing elements within the marker", Directives: gti.Directives{}}},
-		{"Orient", &gti.Field{Name: "Orient", Type: "string", Doc: "orientation of the marker -- either 'auto' or an angle", Directives: gti.Directives{}}},
-		{"VertexPos", &gti.Field{Name: "VertexPos", Type: "mat32.Vec2", Doc: "current vertex position", Directives: gti.Directives{}}},
-		{"VertexAngle", &gti.Field{Name: "VertexAngle", Type: "float32", Doc: "current vertex angle in radians", Directives: gti.Directives{}}},
-		{"StrokeWidth", &gti.Field{Name: "StrokeWidth", Type: "float32", Doc: "current stroke width", Directives: gti.Directives{}}},
-		{"XForm", &gti.Field{Name: "XForm", Type: "mat32.Mat2", Doc: "net transform computed from settings and current values -- applied prior to rendering", Directives: gti.Directives{}}},
-		{"EffSize", &gti.Field{Name: "EffSize", Type: "mat32.Vec2", Doc: "effective size for actual rendering", Directives: gti.Directives{}}},
+		{"RefPos", &gti.Field{Name: "RefPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "reference position to align the vertex position with, specified in ViewBox coordinates", Directives: gti.Directives{}, Tag: "xml:\"{refX,refY}\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of marker to render, in Units units", Directives: gti.Directives{}, Tag: "xml:\"{markerWidth,markerHeight}\""}},
+		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/svg.MarkerUnits", LocalType: "MarkerUnits", Doc: "units to use", Directives: gti.Directives{}, Tag: "xml:\"markerUnits\""}},
+		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "goki.dev/svg.ViewBox", LocalType: "ViewBox", Doc: "viewbox defines the internal coordinate system for the drawing elements within the marker", Directives: gti.Directives{}, Tag: ""}},
+		{"Orient", &gti.Field{Name: "Orient", Type: "string", LocalType: "string", Doc: "orientation of the marker -- either 'auto' or an angle", Directives: gti.Directives{}, Tag: "xml:\"orient\""}},
+		{"VertexPos", &gti.Field{Name: "VertexPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "current vertex position", Directives: gti.Directives{}, Tag: ""}},
+		{"VertexAngle", &gti.Field{Name: "VertexAngle", Type: "float32", LocalType: "float32", Doc: "current vertex angle in radians", Directives: gti.Directives{}, Tag: ""}},
+		{"StrokeWidth", &gti.Field{Name: "StrokeWidth", Type: "float32", LocalType: "float32", Doc: "current stroke width", Directives: gti.Directives{}, Tag: ""}},
+		{"XForm", &gti.Field{Name: "XForm", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "net transform computed from settings and current values -- applied prior to rendering", Directives: gti.Directives{}, Tag: ""}},
+		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective size for actual rendering", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Marker{},
 })
 
-// NewMarker adds a new [Marker] with
-// the given name to the given parent.
-func NewMarker(par ki.Ki, name string) *Marker {
-	return par.NewChild(MarkerType, name).(*Marker)
+// NewMarker adds a new [Marker] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewMarker(par ki.Ki, name ...string) *Marker {
+	return par.NewChild(MarkerType, name...).(*Marker)
 }
 
 // KiType returns the [*gti.Type] of [Marker]
@@ -393,30 +944,140 @@ func (t *Marker) New() ki.Ki {
 	return &Marker{}
 }
 
+// SetRefPos sets the [Marker.RefPos]:
+// reference position to align the vertex position with, specified in ViewBox coordinates
+func (t *Marker) SetRefPos(v mat32.Vec2) *Marker {
+	t.RefPos = v
+	return t
+}
+
+// SetSize sets the [Marker.Size]:
+// size of marker to render, in Units units
+func (t *Marker) SetSize(v mat32.Vec2) *Marker {
+	t.Size = v
+	return t
+}
+
+// SetUnits sets the [Marker.Units]:
+// units to use
+func (t *Marker) SetUnits(v MarkerUnits) *Marker {
+	t.Units = v
+	return t
+}
+
+// SetViewBox sets the [Marker.ViewBox]:
+// viewbox defines the internal coordinate system for the drawing elements within the marker
+func (t *Marker) SetViewBox(v ViewBox) *Marker {
+	t.ViewBox = v
+	return t
+}
+
+// SetOrient sets the [Marker.Orient]:
+// orientation of the marker -- either 'auto' or an angle
+func (t *Marker) SetOrient(v string) *Marker {
+	t.Orient = v
+	return t
+}
+
+// SetVertexPos sets the [Marker.VertexPos]:
+// current vertex position
+func (t *Marker) SetVertexPos(v mat32.Vec2) *Marker {
+	t.VertexPos = v
+	return t
+}
+
+// SetVertexAngle sets the [Marker.VertexAngle]:
+// current vertex angle in radians
+func (t *Marker) SetVertexAngle(v float32) *Marker {
+	t.VertexAngle = v
+	return t
+}
+
+// SetStrokeWidth sets the [Marker.StrokeWidth]:
+// current stroke width
+func (t *Marker) SetStrokeWidth(v float32) *Marker {
+	t.StrokeWidth = v
+	return t
+}
+
+// SetXform sets the [Marker.XForm]:
+// net transform computed from settings and current values -- applied prior to rendering
+func (t *Marker) SetXform(v mat32.Mat2) *Marker {
+	t.XForm = v
+	return t
+}
+
+// SetEffSize sets the [Marker.EffSize]:
+// effective size for actual rendering
+func (t *Marker) SetEffSize(v mat32.Vec2) *Marker {
+	t.EffSize = v
+	return t
+}
+
+// SetClass sets the [Marker.Class]
+func (t *Marker) SetClass(v string) *Marker {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Marker.CSS]
+func (t *Marker) SetCss(v ki.Props) *Marker {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Marker.CSSAgg]
+func (t *Marker) SetCssagg(v ki.Props) *Marker {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Marker.BBox]
+func (t *Marker) SetBbox(v image.Rectangle) *Marker {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Marker.VisBBox]
+func (t *Marker) SetVisBbox(v image.Rectangle) *Marker {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Marker.Paint]
+func (t *Marker) SetPaint(v paint.Paint) *Marker {
+	t.Paint = v
+	return t
+}
+
 // NodeBaseType is the [gti.Type] for [NodeBase]
 var NodeBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.NodeBase",
+	ShortName:  "svg.NodeBase",
+	IDName:     "node-base",
 	Doc:        "svg.NodeBase is the base type for elements within the SVG scenegraph",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Class", &gti.Field{Name: "Class", Type: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}}},
-		{"CSS", &gti.Field{Name: "CSS", Type: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}}},
-		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "ki.Props", Doc: "[view: no-inline] aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}}},
-		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}}},
-		{"Paint", &gti.Field{Name: "Paint", Type: "paint.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}}},
+		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
+		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "xml:\"css\""}},
+		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/girl/paint.Paint", LocalType: "paint.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &NodeBase{},
 })
 
-// NewNodeBase adds a new [NodeBase] with
-// the given name to the given parent.
-func NewNodeBase(par ki.Ki, name string) *NodeBase {
-	return par.NewChild(NodeBaseType, name).(*NodeBase)
+// NewNodeBase adds a new [NodeBase] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewNodeBase(par ki.Ki, name ...string) *NodeBase {
+	return par.NewChild(NodeBaseType, name...).(*NodeBase)
 }
 
 // KiType returns the [*gti.Type] of [NodeBase]
@@ -429,26 +1090,72 @@ func (t *NodeBase) New() ki.Ki {
 	return &NodeBase{}
 }
 
+// SetClass sets the [NodeBase.Class]:
+// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
+func (t *NodeBase) SetClass(v string) *NodeBase {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [NodeBase.CSS]:
+// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
+func (t *NodeBase) SetCss(v ki.Props) *NodeBase {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [NodeBase.CSSAgg]:
+// aggregated css properties from all higher nodes down to me
+func (t *NodeBase) SetCssagg(v ki.Props) *NodeBase {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [NodeBase.BBox]:
+// bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.
+func (t *NodeBase) SetBbox(v image.Rectangle) *NodeBase {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [NodeBase.VisBBox]:
+// visible bounding box for the node intersected with the SVG image geometry
+func (t *NodeBase) SetVisBbox(v image.Rectangle) *NodeBase {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [NodeBase.Paint]:
+// paint style information for this node
+func (t *NodeBase) SetPaint(v paint.Paint) *NodeBase {
+	t.Paint = v
+	return t
+}
+
 // PathType is the [gti.Type] for [Path]
 var PathType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Path",
+	ShortName:  "svg.Path",
+	IDName:     "path",
 	Doc:        "Path renders SVG data sequences that can render just about anything",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Data", &gti.Field{Name: "Data", Type: "[]PathData", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow", Directives: gti.Directives{}}},
-		{"DataStr", &gti.Field{Name: "DataStr", Type: "string", Doc: "string version of the path data", Directives: gti.Directives{}}},
+		{"Data", &gti.Field{Name: "Data", Type: "[]goki.dev/svg.PathData", LocalType: "[]PathData", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow", Directives: gti.Directives{}, Tag: "xml:\"-\" set:\"-\""}},
+		{"DataStr", &gti.Field{Name: "DataStr", Type: "string", LocalType: "string", Doc: "string version of the path data", Directives: gti.Directives{}, Tag: "xml:\"d\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Path{},
 })
 
-// NewPath adds a new [Path] with
-// the given name to the given parent.
-func NewPath(par ki.Ki, name string) *Path {
-	return par.NewChild(PathType, name).(*Path)
+// NewPath adds a new [Path] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewPath(par ki.Ki, name ...string) *Path {
+	return par.NewChild(PathType, name...).(*Path)
 }
 
 // KiType returns the [*gti.Type] of [Path]
@@ -461,23 +1168,70 @@ func (t *Path) New() ki.Ki {
 	return &Path{}
 }
 
+// SetDataStr sets the [Path.DataStr]:
+// string version of the path data
+func (t *Path) SetDataStr(v string) *Path {
+	t.DataStr = v
+	return t
+}
+
+// SetClass sets the [Path.Class]
+func (t *Path) SetClass(v string) *Path {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Path.CSS]
+func (t *Path) SetCss(v ki.Props) *Path {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Path.CSSAgg]
+func (t *Path) SetCssagg(v ki.Props) *Path {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Path.BBox]
+func (t *Path) SetBbox(v image.Rectangle) *Path {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Path.VisBBox]
+func (t *Path) SetVisBbox(v image.Rectangle) *Path {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Path.Paint]
+func (t *Path) SetPaint(v paint.Paint) *Path {
+	t.Paint = v
+	return t
+}
+
 // PolygonType is the [gti.Type] for [Polygon]
 var PolygonType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Polygon",
+	ShortName:  "svg.Polygon",
+	IDName:     "polygon",
 	Doc:        "Polygon is a SVG polygon",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Polyline", &gti.Field{Name: "Polyline", Type: "Polyline", Doc: "", Directives: gti.Directives{}}},
+		{"Polyline", &gti.Field{Name: "Polyline", Type: "goki.dev/svg.Polyline", LocalType: "Polyline", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Polygon{},
 })
 
-// NewPolygon adds a new [Polygon] with
-// the given name to the given parent.
-func NewPolygon(par ki.Ki, name string) *Polygon {
-	return par.NewChild(PolygonType, name).(*Polygon)
+// NewPolygon adds a new [Polygon] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewPolygon(par ki.Ki, name ...string) *Polygon {
+	return par.NewChild(PolygonType, name...).(*Polygon)
 }
 
 // KiType returns the [*gti.Type] of [Polygon]
@@ -490,25 +1244,71 @@ func (t *Polygon) New() ki.Ki {
 	return &Polygon{}
 }
 
+// SetClass sets the [Polygon.Class]
+func (t *Polygon) SetClass(v string) *Polygon {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Polygon.CSS]
+func (t *Polygon) SetCss(v ki.Props) *Polygon {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Polygon.CSSAgg]
+func (t *Polygon) SetCssagg(v ki.Props) *Polygon {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Polygon.BBox]
+func (t *Polygon) SetBbox(v image.Rectangle) *Polygon {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Polygon.VisBBox]
+func (t *Polygon) SetVisBbox(v image.Rectangle) *Polygon {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Polygon.Paint]
+func (t *Polygon) SetPaint(v paint.Paint) *Polygon {
+	t.Paint = v
+	return t
+}
+
+// SetPoints sets the [Polygon.Points]
+func (t *Polygon) SetPoints(v []mat32.Vec2) *Polygon {
+	t.Points = v
+	return t
+}
+
 // PolylineType is the [gti.Type] for [Polyline]
 var PolylineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Polyline",
+	ShortName:  "svg.Polyline",
+	IDName:     "polyline",
 	Doc:        "Polyline is a SVG multi-line shape",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Points", &gti.Field{Name: "Points", Type: "[]mat32.Vec2", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest", Directives: gti.Directives{}}},
+		{"Points", &gti.Field{Name: "Points", Type: "[]goki.dev/mat32/v2.Vec2", LocalType: "[]mat32.Vec2", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest", Directives: gti.Directives{}, Tag: "xml:\"points\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Polyline{},
 })
 
-// NewPolyline adds a new [Polyline] with
-// the given name to the given parent.
-func NewPolyline(par ki.Ki, name string) *Polyline {
-	return par.NewChild(PolylineType, name).(*Polyline)
+// NewPolyline adds a new [Polyline] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewPolyline(par ki.Ki, name ...string) *Polyline {
+	return par.NewChild(PolylineType, name...).(*Polyline)
 }
 
 // KiType returns the [*gti.Type] of [Polyline]
@@ -521,27 +1321,74 @@ func (t *Polyline) New() ki.Ki {
 	return &Polyline{}
 }
 
+// SetPoints sets the [Polyline.Points]:
+// the coordinates to draw -- does a moveto on the first, then lineto for all the rest
+func (t *Polyline) SetPoints(v []mat32.Vec2) *Polyline {
+	t.Points = v
+	return t
+}
+
+// SetClass sets the [Polyline.Class]
+func (t *Polyline) SetClass(v string) *Polyline {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Polyline.CSS]
+func (t *Polyline) SetCss(v ki.Props) *Polyline {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Polyline.CSSAgg]
+func (t *Polyline) SetCssagg(v ki.Props) *Polyline {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Polyline.BBox]
+func (t *Polyline) SetBbox(v image.Rectangle) *Polyline {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Polyline.VisBBox]
+func (t *Polyline) SetVisBbox(v image.Rectangle) *Polyline {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Polyline.Paint]
+func (t *Polyline) SetPaint(v paint.Paint) *Polyline {
+	t.Paint = v
+	return t
+}
+
 // RectType is the [gti.Type] for [Rect]
 var RectType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Rect",
+	ShortName:  "svg.Rect",
+	IDName:     "rect",
 	Doc:        "Rect is a SVG rectangle, optionally with rounded corners",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "mat32.Vec2", Doc: "position of the top-left of the rectangle", Directives: gti.Directives{}}},
-		{"Size", &gti.Field{Name: "Size", Type: "mat32.Vec2", Doc: "size of the rectangle", Directives: gti.Directives{}}},
-		{"Radius", &gti.Field{Name: "Radius", Type: "mat32.Vec2", Doc: "radii for curved corners, as a proportion of width, height", Directives: gti.Directives{}}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the top-left of the rectangle", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of the rectangle", Directives: gti.Directives{}, Tag: "xml:\"{width,height}\""}},
+		{"Radius", &gti.Field{Name: "Radius", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "radii for curved corners, as a proportion of width, height", Directives: gti.Directives{}, Tag: "xml:\"{rx,ry}\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Rect{},
 })
 
-// NewRect adds a new [Rect] with
-// the given name to the given parent.
-func NewRect(par ki.Ki, name string) *Rect {
-	return par.NewChild(RectType, name).(*Rect)
+// NewRect adds a new [Rect] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewRect(par ki.Ki, name ...string) *Rect {
+	return par.NewChild(RectType, name...).(*Rect)
 }
 
 // KiType returns the [*gti.Type] of [Rect]
@@ -554,25 +1401,86 @@ func (t *Rect) New() ki.Ki {
 	return &Rect{}
 }
 
+// SetPos sets the [Rect.Pos]:
+// position of the top-left of the rectangle
+func (t *Rect) SetPos(v mat32.Vec2) *Rect {
+	t.Pos = v
+	return t
+}
+
+// SetSize sets the [Rect.Size]:
+// size of the rectangle
+func (t *Rect) SetSize(v mat32.Vec2) *Rect {
+	t.Size = v
+	return t
+}
+
+// SetRadius sets the [Rect.Radius]:
+// radii for curved corners, as a proportion of width, height
+func (t *Rect) SetRadius(v mat32.Vec2) *Rect {
+	t.Radius = v
+	return t
+}
+
+// SetClass sets the [Rect.Class]
+func (t *Rect) SetClass(v string) *Rect {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Rect.CSS]
+func (t *Rect) SetCss(v ki.Props) *Rect {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Rect.CSSAgg]
+func (t *Rect) SetCssagg(v ki.Props) *Rect {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Rect.BBox]
+func (t *Rect) SetBbox(v image.Rectangle) *Rect {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Rect.VisBBox]
+func (t *Rect) SetVisBbox(v image.Rectangle) *Rect {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Rect.Paint]
+func (t *Rect) SetPaint(v paint.Paint) *Rect {
+	t.Paint = v
+	return t
+}
+
 // SVGNodeType is the [gti.Type] for [SVGNode]
 var SVGNodeType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.SVGNode",
+	ShortName:  "svg.SVGNode",
+	IDName:     "svg-node",
 	Doc:        "SVGNode represents the root of an SVG tree",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering", Directives: gti.Directives{}}},
+		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "goki.dev/svg.ViewBox", LocalType: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Group", &gti.Field{Name: "Group", Type: "Group", Doc: "", Directives: gti.Directives{}}},
+		{"Group", &gti.Field{Name: "Group", Type: "goki.dev/svg.Group", LocalType: "Group", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SVGNode{},
 })
 
-// NewSVGNode adds a new [SVGNode] with
-// the given name to the given parent.
-func NewSVGNode(par ki.Ki, name string) *SVGNode {
-	return par.NewChild(SVGNodeType, name).(*SVGNode)
+// NewSVGNode adds a new [SVGNode] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSVGNode(par ki.Ki, name ...string) *SVGNode {
+	return par.NewChild(SVGNodeType, name...).(*SVGNode)
 }
 
 // KiType returns the [*gti.Type] of [SVGNode]
@@ -585,37 +1493,84 @@ func (t *SVGNode) New() ki.Ki {
 	return &SVGNode{}
 }
 
+// SetViewBox sets the [SVGNode.ViewBox]:
+// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
+func (t *SVGNode) SetViewBox(v ViewBox) *SVGNode {
+	t.ViewBox = v
+	return t
+}
+
+// SetClass sets the [SVGNode.Class]
+func (t *SVGNode) SetClass(v string) *SVGNode {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [SVGNode.CSS]
+func (t *SVGNode) SetCss(v ki.Props) *SVGNode {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [SVGNode.CSSAgg]
+func (t *SVGNode) SetCssagg(v ki.Props) *SVGNode {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [SVGNode.BBox]
+func (t *SVGNode) SetBbox(v image.Rectangle) *SVGNode {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [SVGNode.VisBBox]
+func (t *SVGNode) SetVisBbox(v image.Rectangle) *SVGNode {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [SVGNode.Paint]
+func (t *SVGNode) SetPaint(v paint.Paint) *SVGNode {
+	t.Paint = v
+	return t
+}
+
 // TextType is the [gti.Type] for [Text]
 var TextType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Text",
+	ShortName:  "svg.Text",
+	IDName:     "text",
 	Doc:        "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "mat32.Vec2", Doc: "position of the left, baseline of the text", Directives: gti.Directives{}}},
-		{"Width", &gti.Field{Name: "Width", Type: "float32", Doc: "width of text to render if using word-wrapping", Directives: gti.Directives{}}},
-		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "text string to render", Directives: gti.Directives{}}},
-		{"TextRender", &gti.Field{Name: "TextRender", Type: "paint.Text", Doc: "render version of text", Directives: gti.Directives{}}},
-		{"CharPosX", &gti.Field{Name: "CharPosX", Type: "[]float32", Doc: "character positions along X axis, if specified", Directives: gti.Directives{}}},
-		{"CharPosY", &gti.Field{Name: "CharPosY", Type: "[]float32", Doc: "character positions along Y axis, if specified", Directives: gti.Directives{}}},
-		{"CharPosDX", &gti.Field{Name: "CharPosDX", Type: "[]float32", Doc: "character delta-positions along X axis, if specified", Directives: gti.Directives{}}},
-		{"CharPosDY", &gti.Field{Name: "CharPosDY", Type: "[]float32", Doc: "character delta-positions along Y axis, if specified", Directives: gti.Directives{}}},
-		{"CharRots", &gti.Field{Name: "CharRots", Type: "[]float32", Doc: "character rotations, if specified", Directives: gti.Directives{}}},
-		{"TextLength", &gti.Field{Name: "TextLength", Type: "float32", Doc: "author's computed text length, if specified -- we attempt to match", Directives: gti.Directives{}}},
-		{"AdjustGlyphs", &gti.Field{Name: "AdjustGlyphs", Type: "bool", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?", Directives: gti.Directives{}}},
-		{"LastPos", &gti.Field{Name: "LastPos", Type: "mat32.Vec2", Doc: "last text render position -- lower-left baseline of start", Directives: gti.Directives{}}},
-		{"LastBBox", &gti.Field{Name: "LastBBox", Type: "mat32.Box2", Doc: "last actual bounding box in display units (dots)", Directives: gti.Directives{}}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position of the left, baseline of the text", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\" set:\"-\""}},
+		{"Width", &gti.Field{Name: "Width", Type: "float32", LocalType: "float32", Doc: "width of text to render if using word-wrapping", Directives: gti.Directives{}, Tag: "xml:\"width\""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "text string to render", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
+		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of text", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
+		{"CharPosX", &gti.Field{Name: "CharPosX", Type: "[]float32", LocalType: "[]float32", Doc: "character positions along X axis, if specified", Directives: gti.Directives{}, Tag: ""}},
+		{"CharPosY", &gti.Field{Name: "CharPosY", Type: "[]float32", LocalType: "[]float32", Doc: "character positions along Y axis, if specified", Directives: gti.Directives{}, Tag: ""}},
+		{"CharPosDX", &gti.Field{Name: "CharPosDX", Type: "[]float32", LocalType: "[]float32", Doc: "character delta-positions along X axis, if specified", Directives: gti.Directives{}, Tag: ""}},
+		{"CharPosDY", &gti.Field{Name: "CharPosDY", Type: "[]float32", LocalType: "[]float32", Doc: "character delta-positions along Y axis, if specified", Directives: gti.Directives{}, Tag: ""}},
+		{"CharRots", &gti.Field{Name: "CharRots", Type: "[]float32", LocalType: "[]float32", Doc: "character rotations, if specified", Directives: gti.Directives{}, Tag: ""}},
+		{"TextLength", &gti.Field{Name: "TextLength", Type: "float32", LocalType: "float32", Doc: "author's computed text length, if specified -- we attempt to match", Directives: gti.Directives{}, Tag: ""}},
+		{"AdjustGlyphs", &gti.Field{Name: "AdjustGlyphs", Type: "bool", LocalType: "bool", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?", Directives: gti.Directives{}, Tag: ""}},
+		{"LastPos", &gti.Field{Name: "LastPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "last text render position -- lower-left baseline of start", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
+		{"LastBBox", &gti.Field{Name: "LastBBox", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "last actual bounding box in display units (dots)", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "NodeBase", Doc: "", Directives: gti.Directives{}}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Text{},
 })
 
-// NewText adds a new [Text] with
-// the given name to the given parent.
-func NewText(par ki.Ki, name string) *Text {
-	return par.NewChild(TextType, name).(*Text)
+// NewText adds a new [Text] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewText(par ki.Ki, name ...string) *Text {
+	return par.NewChild(TextType, name...).(*Text)
 }
 
 // KiType returns the [*gti.Type] of [Text]
@@ -626,4 +1581,124 @@ func (t *Text) KiType() *gti.Type {
 // New returns a new [*Text] value
 func (t *Text) New() ki.Ki {
 	return &Text{}
+}
+
+// SetWidth sets the [Text.Width]:
+// width of text to render if using word-wrapping
+func (t *Text) SetWidth(v float32) *Text {
+	t.Width = v
+	return t
+}
+
+// SetText sets the [Text.Text]:
+// text string to render
+func (t *Text) SetText(v string) *Text {
+	t.Text = v
+	return t
+}
+
+// SetTextRender sets the [Text.TextRender]:
+// render version of text
+func (t *Text) SetTextRender(v paint.Text) *Text {
+	t.TextRender = v
+	return t
+}
+
+// SetCharPosX sets the [Text.CharPosX]:
+// character positions along X axis, if specified
+func (t *Text) SetCharPosX(v []float32) *Text {
+	t.CharPosX = v
+	return t
+}
+
+// SetCharPosY sets the [Text.CharPosY]:
+// character positions along Y axis, if specified
+func (t *Text) SetCharPosY(v []float32) *Text {
+	t.CharPosY = v
+	return t
+}
+
+// SetCharPosDx sets the [Text.CharPosDX]:
+// character delta-positions along X axis, if specified
+func (t *Text) SetCharPosDx(v []float32) *Text {
+	t.CharPosDX = v
+	return t
+}
+
+// SetCharPosDy sets the [Text.CharPosDY]:
+// character delta-positions along Y axis, if specified
+func (t *Text) SetCharPosDy(v []float32) *Text {
+	t.CharPosDY = v
+	return t
+}
+
+// SetCharRots sets the [Text.CharRots]:
+// character rotations, if specified
+func (t *Text) SetCharRots(v []float32) *Text {
+	t.CharRots = v
+	return t
+}
+
+// SetTextLength sets the [Text.TextLength]:
+// author's computed text length, if specified -- we attempt to match
+func (t *Text) SetTextLength(v float32) *Text {
+	t.TextLength = v
+	return t
+}
+
+// SetAdjustGlyphs sets the [Text.AdjustGlyphs]:
+// in attempting to match TextLength, should we adjust glyphs in addition to spacing?
+func (t *Text) SetAdjustGlyphs(v bool) *Text {
+	t.AdjustGlyphs = v
+	return t
+}
+
+// SetLastPos sets the [Text.LastPos]:
+// last text render position -- lower-left baseline of start
+func (t *Text) SetLastPos(v mat32.Vec2) *Text {
+	t.LastPos = v
+	return t
+}
+
+// SetLastBbox sets the [Text.LastBBox]:
+// last actual bounding box in display units (dots)
+func (t *Text) SetLastBbox(v mat32.Box2) *Text {
+	t.LastBBox = v
+	return t
+}
+
+// SetClass sets the [Text.Class]
+func (t *Text) SetClass(v string) *Text {
+	t.Class = v
+	return t
+}
+
+// SetCss sets the [Text.CSS]
+func (t *Text) SetCss(v ki.Props) *Text {
+	t.CSS = v
+	return t
+}
+
+// SetCssagg sets the [Text.CSSAgg]
+func (t *Text) SetCssagg(v ki.Props) *Text {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBbox sets the [Text.BBox]
+func (t *Text) SetBbox(v image.Rectangle) *Text {
+	t.BBox = v
+	return t
+}
+
+// SetVisBbox sets the [Text.VisBBox]
+func (t *Text) SetVisBbox(v image.Rectangle) *Text {
+	t.VisBBox = v
+	return t
+}
+
+// SetPaint sets the [Text.Paint]
+func (t *Text) SetPaint(v paint.Paint) *Text {
+	t.Paint = v
+	return t
 }

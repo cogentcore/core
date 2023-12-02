@@ -4,20 +4,11 @@
 
 package svg
 
-import (
-	"goki.dev/ki/v2"
-)
-
 // todo: needs to be impl
 
 // ClipPath is used for holding a path that renders as a clip path
 type ClipPath struct {
 	NodeBase
-}
-
-// AddNewClipPath adds a new clippath to given parent node, with given name.
-func AddNewClipPath(parent ki.Ki, name string) *ClipPath {
-	return parent.NewChild(ClipPathType, name).(*ClipPath)
 }
 
 func (g *ClipPath) SVGName() string { return "clippath" }
