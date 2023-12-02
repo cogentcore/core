@@ -3045,6 +3045,9 @@ const (
 	// FileMarkdown is https://github.com/goki/icons/blob/main/svg/file-markdown.svg
 	FileMarkdown Icon = "file-markdown"
 
+	// File is https://github.com/goki/icons/blob/main/svg/file.svg
+	File Icon = "file"
+
 	// FileCopy is https://github.com/goki/icons/blob/main/svg/file_copy.svg
 	FileCopy Icon = "file_copy"
 
@@ -4428,6 +4431,9 @@ const (
 	// LastPage is https://github.com/goki/icons/blob/main/svg/last_page.svg
 	LastPage Icon = "last_page"
 
+	// Latex is https://github.com/goki/icons/blob/main/svg/latex.svg
+	Latex Icon = "latex"
+
 	// Laundry is https://github.com/goki/icons/blob/main/svg/laundry.svg
 	Laundry Icon = "laundry"
 
@@ -4781,6 +4787,9 @@ const (
 
 	// MailLock is https://github.com/goki/icons/blob/main/svg/mail_lock.svg
 	MailLock Icon = "mail_lock"
+
+	// Make is https://github.com/goki/icons/blob/main/svg/make.svg
+	Make Icon = "make"
 
 	// Makefile is https://github.com/goki/icons/blob/main/svg/makefile.svg
 	Makefile Icon = "makefile"
@@ -8009,6 +8018,9 @@ const (
 
 	// Terminal is https://github.com/goki/icons/blob/main/svg/terminal.svg
 	Terminal Icon = "terminal"
+
+	// Tex is https://github.com/goki/icons/blob/main/svg/tex.svg
+	Tex Icon = "tex"
 
 	// TextAd is https://github.com/goki/icons/blob/main/svg/text_ad.svg
 	TextAd Icon = "text_ad"

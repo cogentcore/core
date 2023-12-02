@@ -6,3 +6,9 @@ These icons are from [Material Design Symbols](https://fonts.google.com/icons), 
 
 Both of those sources are under an Apache 2.0 license; see the [LICENSE_APACHE](LICENSE_APACHE) file.
 
+# Links
+
+* https://github.com/leungwensen/svg-icon
+* https://www.shareicon.net/search?kwd=function
+* https://github.com/microsoft/vscode-icons/
+
