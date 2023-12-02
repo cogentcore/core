@@ -1,6 +1,6 @@
 Name = "grease"
 Desc = "Package grease generates powerful CLIs and GUIs from simple struct types. It makes everything run smoothly; it is Go Run with Ease (Grease)."
-Version = "v0.8.28"
+Version = "v0.8.29"
 Type = "Library"
 
 [Build]
@@ -21,6 +21,7 @@ Type = "Library"
 [Web]
   Port = "8080"
   RandomVersion = false
+  Gzip = false
   BackgroundColor = "#2d2c2c"
   ThemeColor = "#2d2c2c"
   LoadingLabel = ""
