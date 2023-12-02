@@ -1524,12 +1524,14 @@ func (tf *TextField) HandleTextFieldKeys() {
 		case keyfun.Enter:
 			fallthrough
 		case keyfun.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
-			fallthrough
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.EditDone()
+			tf.FocusNext()
 		case keyfun.Accept: // ctrl+enter
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.EditDone()
-			// tf.FocusNext()
 		case keyfun.FocusPrev:
 			e.SetHandled()
 			tf.CancelComplete()

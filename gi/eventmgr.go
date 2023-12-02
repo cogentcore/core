@@ -9,7 +9,6 @@ import (
 	"image"
 	"log"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -216,12 +215,12 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 				fmt.Println(em.Scene, "StartFocus:", em.StartFocus)
 			}
 			em.SetFocusEvent(em.StartFocus)
-		// case em.PrevFocus != nil:
-		// 	if FocusTrace {
-		// 		fmt.Println(em.Scene, "PrevFocus:", em.PrevFocus)
-		// 	}
-		// 	em.SetFocusEvent(em.PrevFocus)
-		// 	em.PrevFocus = nil
+		case em.PrevFocus != nil:
+			if FocusTrace {
+				fmt.Println(em.Scene, "PrevFocus:", em.PrevFocus)
+			}
+			em.SetFocusEvent(em.PrevFocus)
+			em.PrevFocus = nil
 		default:
 			em.FocusFirst()
 		}
@@ -731,9 +730,6 @@ func (em *EventMgr) SetFocus(w Widget) bool {
 func (em *EventMgr) SetFocusEvent(w Widget) bool {
 	if FocusTrace {
 		fmt.Println(em.Scene, "SetFocusEvent:", w)
-		if strings.Contains(w.Name(), "textbut-") {
-			fmt.Println("focus on textbut")
-		}
 	}
 	got := em.SetFocusImpl(w, true) // sends event
 	if !got {
