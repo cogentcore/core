@@ -98,7 +98,7 @@ func PlainFrames(par gi.Widget, grow mat32.Vec2) {
 func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 	fr := gi.NewFrame(par, nm...)
 	fr.Style(func(s *styles.Style) {
-		s.Border.Color.Set(colors.Black)
+		s.Border.Color.Set(colors.Scheme.Outline)
 		s.Border.Width.Set(units.Dp(2))
 	})
 	return fr
