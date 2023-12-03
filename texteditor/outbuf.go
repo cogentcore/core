@@ -117,6 +117,7 @@ func (ob *OutBuf) OutToBuf() {
 	mlns = append(mlns, lfb...)
 	ob.Buf.Undos.Off = true
 	ob.Buf.AppendTextMarkup(tlns, mlns, EditSignal)
+	// ob.Buf.AppendText(mlns, EditSignal) // todo: trying to allow markup according to styles
 	ob.Buf.AutoScrollViews()
 	ob.CurOutLns = make([][]byte, 0, 100)
 	ob.CurOutMus = make([][]byte, 0, 100)

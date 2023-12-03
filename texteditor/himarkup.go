@@ -165,7 +165,7 @@ func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lex.Line, error) {
 }
 
 // ChromaTagsForLine generates the chroma tags for one line of chroma tokens
-func (hm *HiMarkup) ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
+func ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
 	cp := 0
 	for _, tok := range toks {
 		str := []rune(strings.TrimSuffix(tok.Value, "\n"))
@@ -199,7 +199,7 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 	sz := len(lines)
 	tags := make([]lex.Line, sz)
 	for li, lt := range lines {
-		hm.ChromaTagsForLine(&tags[li], lt)
+		ChromaTagsForLine(&tags[li], lt)
 	}
 	return tags, nil
 }
@@ -207,15 +207,21 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 // ChromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
 func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lex.Line, error) {
+	return ChromaTagsLine(hm.lexer, txt)
+}
+
+// ChromaTagsLine returns tags for one line according to current
+// syntax highlighting settings
+func ChromaTagsLine(lexer chroma.Lexer, txt []rune) (lex.Line, error) {
 	txtstr := string(txt) + "\n"
-	iterator, err := hm.lexer.Tokenise(nil, txtstr)
+	iterator, err := lexer.Tokenise(nil, txtstr)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, err
 	}
 	var tags lex.Line
 	toks := iterator.Tokens()
-	hm.ChromaTagsForLine(&tags, toks)
+	ChromaTagsForLine(&tags, toks)
 	return tags, nil
 }
 

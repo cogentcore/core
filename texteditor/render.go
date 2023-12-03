@@ -39,7 +39,7 @@ func (ed *Editor) Render() {
 			ed.SetFlag(false, EditorNeedsLayout)
 		}
 		ed.PositionScrolls()
-		ed.RenderAllLinesInBounds()
+		ed.RenderAllLines()
 		if ed.Is(EditorTargetSet) {
 			ed.ScrollCursorToTarget()
 		}
@@ -147,7 +147,7 @@ var ViewDepthColors = []color.RGBA{
 	{5, 0, 5, 0},
 }
 
-// RenderDepthBg renders the depth background color
+// RenderDepthBg renders the depth background color.
 func (ed *Editor) RenderDepthBg(stln, edln int) {
 	if ed.Buf == nil {
 		return
@@ -201,8 +201,7 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 	}
 }
 
-// RenderSelect renders the selection region as a selected background color
-// -- always called within context of outer RenderLines or RenderAllLines
+// RenderSelect renders the selection region as a selected background color.
 func (ed *Editor) RenderSelect() {
 	if !ed.HasSelection() {
 		return
@@ -210,9 +209,8 @@ func (ed *Editor) RenderSelect() {
 	ed.RenderRegionBox(ed.SelectReg, &ed.SelectColor)
 }
 
-// RenderHighlights renders the highlight regions as a highlighted background
-// color -- always called within context of outer RenderLines or
-// RenderAllLines
+// RenderHighlights renders the highlight regions as a
+// highlighted background color.
 func (ed *Editor) RenderHighlights(stln, edln int) {
 	for _, reg := range ed.Highlights {
 		reg := ed.Buf.AdjustReg(reg)
@@ -224,8 +222,7 @@ func (ed *Editor) RenderHighlights(stln, edln int) {
 }
 
 // RenderScopelights renders a highlight background color for regions
-// in the Scopelights list
-// -- always called within context of outer RenderLines or RenderAllLines
+// in the Scopelights list.
 func (ed *Editor) RenderScopelights(stln, edln int) {
 	for _, reg := range ed.Scopelights {
 		reg := ed.Buf.AdjustReg(reg)
@@ -306,9 +303,9 @@ func (ed *Editor) RenderStartPos() mat32.Vec2 {
 	return pos
 }
 
-// RenderAllLinesInBounds displays all the visible lines on the screen --
-// after PushBounds has already been called
-func (ed *Editor) RenderAllLinesInBounds() {
+// RenderAllLines displays all the visible lines on the screen,
+// after PushBounds has already been called.
+func (ed *Editor) RenderAllLines() {
 	rs := &ed.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
@@ -366,6 +363,9 @@ func (ed *Editor) RenderAllLinesInBounds() {
 		lp := pos
 		lp.Y = lst
 		lp.X += ed.LineNoOff
+		if lp.Y+ed.LineHeight > bbmax.Y {
+			break
+		}
 		ed.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 	}
 	rs.Unlock()
@@ -381,13 +381,10 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	}
 	rs := &ed.Sc.RenderState
 	pc := &rs.Paint
-	// sty := &ed.Styles
-	// spc := sty.BoxSpace()
 	bb := ed.Geom.ContentBBox
 	spos := mat32.NewVec2FmPoint(bb.Min)
 	epos := mat32.NewVec2FmPoint(bb.Max)
-	// SidesTODO: this is sketchy
-	epos.X = spos.X + ed.LineNoOff // - spc.Size().X/2
+	epos.X = spos.X + ed.LineNoOff
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }
 
@@ -405,9 +402,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	spos.X = float32(bb.Min.X)
 	epos := ed.CharEndPos(lex.Pos{Ln: end + 1})
 	epos.Y -= ed.LineHeight
-	// SidesTODO: this is sketchy
-	epos.X = spos.X + ed.LineNoOff //  - spc.Size().X/2
-	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
+	epos.X = spos.X + ed.LineNoOff
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }
 
@@ -422,7 +417,6 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 
 	sc := ed.Sc
 	sty := &ed.Styles
-	// spc := sty.BoxSpace()
 	fst := sty.FontRender()
 	rs := &sc.RenderState
 	pc := &rs.Paint
@@ -435,8 +429,10 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	if ln < ed.NLines-1 {
 		ebox.Y -= ed.LineHeight
 	}
-	// SidesTODO: this is sketchy
-	ebox.X = sbox.X + ed.LineNoOff // - spc.Size().X/2
+	if ebox.Y >= float32(bb.Max.Y) {
+		return
+	}
+	ebox.X = sbox.X + ed.LineNoOff
 	bsz := ebox.Sub(sbox)
 	lclr, hasLClr := ed.Buf.LineColors[ln]
 	actClr := lclr
