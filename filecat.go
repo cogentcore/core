@@ -35,8 +35,8 @@ package fi
 type Cat int32 //enums:enum
 
 const (
-	// Unknown is an unknown file category
-	Unknown Cat = iota
+	// UnknownCat is an unknown file category
+	UnknownCat Cat = iota
 
 	// Folder is a folder / directory
 	Folder
@@ -88,7 +88,7 @@ const (
 // Cats can be inferred from file types
 func CatFromMime(mime string) Cat {
 	if mime == "" {
-		return Unknown
+		return UnknownCat
 	}
 	mime = MimeNoChar(mime)
 	if mt, has := AvailMimes[mime]; has {
@@ -97,7 +97,7 @@ func CatFromMime(mime string) Cat {
 	// try from type:
 	ms := MimeTop(mime)
 	if ms == "" {
-		return Unknown
+		return UnknownCat
 	}
 	switch ms {
 	case "image":
@@ -114,5 +114,5 @@ func CatFromMime(mime string) Cat {
 	if ms == "text" {
 		return Text
 	}
-	return Unknown
+	return UnknownCat
 }

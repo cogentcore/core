@@ -42,8 +42,8 @@ type FileInfo struct {
 	// functional category of the file, based on mime data etc
 	Cat Cat `tableview:"-"`
 
-	// supported file type
-	Sup Supported `tableview:"-"`
+	// known file type
+	Known Known `tableview:"-"`
 
 	// file mode bits
 	Mode os.FileMode
@@ -92,26 +92,26 @@ func (fi *FileInfo) Stat() error {
 	if info.IsDir() {
 		fi.Kind = "Folder"
 		fi.Cat = Folder
-		fi.Sup = AnyFolder
+		fi.Known = AnyFolder
 	} else {
-		fi.Cat = Unknown
-		fi.Sup = NoSupport
+		fi.Cat = UnknownCat
+		fi.Known = Unknown
 		fi.Kind = ""
 		mtyp, _, err := MimeFromFile(fi.Path)
 		if err == nil {
 			fi.Mime = mtyp
 			fi.Cat = CatFromMime(fi.Mime)
-			fi.Sup = MimeSupported(fi.Mime)
-			if fi.Cat != Unknown {
+			fi.Known = MimeKnown(fi.Mime)
+			if fi.Cat != UnknownCat {
 				fi.Kind = fi.Cat.String() + ": "
 			}
-			if fi.Sup != NoSupport {
-				fi.Kind += fi.Sup.String()
+			if fi.Known != Unknown {
+				fi.Kind += fi.Known.String()
 			} else {
 				fi.Kind += MimeSub(fi.Mime)
 			}
 		}
-		if fi.Cat == Unknown {
+		if fi.Cat == UnknownCat {
 			if fi.IsExec() {
 				fi.Cat = Exe
 			}
@@ -287,8 +287,8 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	if fi.IsDir() {
 		return "folder", true
 	}
-	if fi.Sup != NoSupport {
-		snm := strings.ToLower(fi.Sup.String())
+	if fi.Known != Unknown {
+		snm := strings.ToLower(fi.Known.String())
 		if icn := icons.Icon(snm); icn.IsValid() {
 			return icn, true
 		}
@@ -305,7 +305,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 			return icn, true
 		}
 	}
-	if fi.Cat != Unknown {
+	if fi.Cat != UnknownCat {
 		cat := strings.ToLower(fi.Cat.String())
 		if icn := icons.Icon(cat); icn.IsValid() {
 			return icn, true

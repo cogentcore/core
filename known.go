@@ -10,49 +10,48 @@ import (
 	"fmt"
 )
 
-// fi.Supported are file types that are specifically supported by GoGi
-// and can be processed in one way or another, plus various others
-// that we SHOULD be able to process at some point
-type Supported int32 //enums:enum
+// fi.Known is an enumerated list of known file types, for which
+// appropriate actions can be taken etc.
+type Known int32 //enums:enum
 
-// SupportedMimes maps from the support type into the MimeType info for each
-// supported file type -- the supported MimeType may be just one of
-// multiple that correspond to the supported type -- it should be first in list
+// KnownMimes maps from the known type into the MimeType info for each
+// known file type -- the known MimeType may be just one of
+// multiple that correspond to the known type -- it should be first in list
 // and have extensions defined
-var SupportedMimes map[Supported]MimeType
+var KnownMimes map[Known]MimeType
 
 // MimeString gives the string representation of the canonical mime type
-// associated with given supported mime type.
-func MimeString(sup Supported) string {
-	mt, has := SupportedMimes[sup]
+// associated with given known mime type.
+func MimeString(kn Known) string {
+	mt, has := KnownMimes[kn]
 	if !has {
-		// log.Printf("fi.MimeString called with unrecognized 'Supported' type: %v\n", sup)
+		// log.Printf("fi.MimeString called with unrecognized 'Known' type: %v\n", sup)
 		return ""
 	}
 	return mt.Mime
 }
 
-// Cat returns the Cat category for given supported file type
-func (sup Supported) Cat() Cat {
-	if sup == NoSupport {
-		return Unknown
+// Cat returns the Cat category for given known file type
+func (kn Known) Cat() Cat {
+	if kn == Unknown {
+		return UnknownCat
 	}
-	mt, has := SupportedMimes[sup]
+	mt, has := KnownMimes[kn]
 	if !has {
-		// log.Printf("fi.SupportedCat called with unrecognized 'Supported' type: %v\n", sup)
-		return Unknown
+		// log.Printf("fi.KnownCat called with unrecognized 'Known' type: %v\n", sup)
+		return UnknownCat
 	}
 	return mt.Cat
 }
 
 // IsMatch returns true if given file type matches target type,
 // which could be any of the Any options
-func IsMatch(targ, typ Supported) bool {
+func IsMatch(targ, typ Known) bool {
 	if targ == Any {
 		return true
 	}
-	if targ == AnySupported {
-		return typ != NoSupport
+	if targ == AnyKnown {
+		return typ != Unknown
 	}
 	if targ == typ {
 		return true
@@ -95,7 +94,7 @@ func IsMatch(targ, typ Supported) bool {
 
 // IsMatchList returns true if given file type matches any of a list of targets
 // if list is empty, then always returns true
-func IsMatchList(targs []Supported, typ Supported) bool {
+func IsMatchList(targs []Known, typ Known) bool {
 	if len(targs) == 0 {
 		return true
 	}
@@ -107,15 +106,15 @@ func IsMatchList(targs []Supported, typ Supported) bool {
 	return false
 }
 
-// SupportedByName looks up supported file type by caps or lowercase name
-func SupportedByName(name string) (Supported, error) {
-	var sup Supported
-	err := sup.SetString(name)
+// KnownByName looks up known file type by caps or lowercase name
+func KnownByName(name string) (Known, error) {
+	var kn Known
+	err := kn.SetString(name)
 	if err != nil {
-		err = fmt.Errorf("fi.SupportedByName: doesn't look like that is a supported file type: %v", name)
-		return sup, err
+		err = fmt.Errorf("fi.KnownByName: doesn't look like that is a known file type: %v", name)
+		return kn, err
 	}
-	return sup, nil
+	return kn, nil
 }
 
 // These are the super high-frequency used mime types, to have very quick const level support
@@ -126,18 +125,18 @@ const (
 	DataCsv   = "text/csv"
 )
 
-// These are the supported file types, organized by category
+// These are the known file types, organized by category
 const (
-	// NoSupport = a non-supported file type
-	NoSupport Supported = iota
+	// Unknown = a non-known file type
+	Unknown Known = iota
 
-	// Any is used when selecting a file type, if any type is OK (including NoSupport)
-	// see also AnySupported and the Any options for each category
+	// Any is used when selecting a file type, if any type is OK (including Unknown)
+	// see also AnyKnown and the Any options for each category
 	Any
 
-	// AnySupported is used when selecting a file type, if any Supported
-	// file type is OK (excludes NoSupport) -- see Any and Any options for each category
-	AnySupported
+	// AnyKnown is used when selecting a file type, if any Known
+	// file type is OK (excludes Unknown) -- see Any and Any options for each category
+	AnyKnown
 
 	// Folder is a folder / directory
 	AnyFolder
