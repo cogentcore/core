@@ -39,8 +39,8 @@ const (
 // framework
 type LangProps struct {
 
-	// language -- must be a supported one from Supported list
-	Sup fi.Supported
+	// known language -- must be a supported one from Known list
+	Known fi.Known
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
 	CommentLn string
@@ -72,7 +72,7 @@ func (lp *LangProps) HasFlag(flg LangFlags) bool {
 }
 
 // StdLangProps is the standard compiled-in set of language properties
-var StdLangProps = map[fi.Supported]*LangProps{
+var StdLangProps = map[fi.Known]*LangProps{
 	fi.Ada:        {fi.Ada, "--", "", "", nil, nil, nil},
 	fi.Bash:       {fi.Bash, "# ", "", "", nil, nil, nil},
 	fi.Csh:        {fi.Csh, "# ", "", "", nil, nil, nil},
@@ -137,8 +137,8 @@ func (ll *LangSupporter) OpenStd() error {
 	return nil
 }
 
-// Props looks up language properties by fi.Supported const int type
-func (ll *LangSupporter) Props(sup fi.Supported) (*LangProps, error) {
+// Props looks up language properties by fi.Known const int type
+func (ll *LangSupporter) Props(sup fi.Known) (*LangProps, error) {
 	lp, has := StdLangProps[sup]
 	if !has {
 		err := fmt.Errorf("pi.LangSupport.Props: no specific support for language: %v", sup)
@@ -151,7 +151,7 @@ func (ll *LangSupporter) Props(sup fi.Supported) (*LangProps, error) {
 // PropsByName looks up language properties by string name of language
 // (with case-insensitive fallback). Returns error if not supported.
 func (ll *LangSupporter) PropsByName(lang string) (*LangProps, error) {
-	sup, err := fi.SupportedByName(lang)
+	sup, err := fi.KnownByName(lang)
 	if err != nil {
 		// log.Println(err.Error()) // don't want output during lexing..
 		return nil, err

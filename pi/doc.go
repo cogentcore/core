@@ -29,16 +29,12 @@
 //
 // The LangSupport variable provides the hub for accessing interfaces
 // for supported languages, using the StdLangProps map which
-// provides a lookup from the fi.Supported language name to its
+// provides a lookup from the fi.Known language name to its
 // associated Lang interface and pi.Parser parser.
 // Thus you can go from the GoGi giv.FileInfo.Sup field to its
 // associated GoPi methods using this map (and associated LangSupport
 // methods).  This map is extensible and other supported languages
-// can be added in other packages.  This requires a dependency on
-// gi/filecat sub-module in GoGi, which defines a broad set of supported
-// file categories and associated mime types, etc, which are generally
-// supported within the GoGi gui framework -- a subset of these are the
-// languages and file formats supported by GoPi parsing / lexing.
+// can be added in other packages.
 //
 // The piv sub-package provides the GUI for constructing and testing a
 // lexer and parser interactively.  It is the only sub-package with

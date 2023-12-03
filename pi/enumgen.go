@@ -4,6 +4,7 @@ package pi
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
@@ -123,5 +124,8 @@ func (i LangFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LangFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

@@ -19,8 +19,8 @@ type FileStates struct {
 	// the filename
 	Filename string
 
-	// the supported file type, if supported (typically only supported files are processed)
-	Sup fi.Supported
+	// the known file type, if known (typically only known files are processed)
+	Sup fi.Known
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
 	BasePath string
@@ -45,8 +45,8 @@ type FileStates struct {
 }
 
 // NewFileStates returns a new FileStates for given filename, basepath,
-// and supported file type.
-func NewFileStates(fname, basepath string, sup fi.Supported) *FileStates {
+// and known file type.
+func NewFileStates(fname, basepath string, sup fi.Known) *FileStates {
 	fs := &FileStates{}
 	fs.SetSrc(fname, basepath, sup)
 	return fs
@@ -54,7 +54,7 @@ func NewFileStates(fname, basepath string, sup fi.Supported) *FileStates {
 
 // SetSrc sets the source that is processed by this FileStates
 // if basepath is empty then it is set to the path for the filename.
-func (fs *FileStates) SetSrc(fname, basepath string, sup fi.Supported) {
+func (fs *FileStates) SetSrc(fname, basepath string, sup fi.Known) {
 	fs.ProcMu.Lock() // make sure processing is done
 	defer fs.ProcMu.Unlock()
 	fs.SwitchMu.Lock()

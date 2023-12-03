@@ -84,7 +84,7 @@ func NewFileState() *FileState {
 // SetSrc sets source to be parsed, and filename it came from, and also the
 // base path for project for reporting filenames relative to
 // (if empty, path to filename is used)
-func (fs *FileState) SetSrc(src [][]rune, fname, basepath string, sup fi.Supported) {
+func (fs *FileState) SetSrc(src [][]rune, fname, basepath string, sup fi.Known) {
 	fs.Init()
 	fs.Src.SetSrc(src, fname, basepath, sup)
 	fs.LexState.Filename = fname

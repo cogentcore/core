@@ -10,9 +10,9 @@ import (
 	"goki.dev/fi"
 )
 
-var ParserBytes map[fi.Supported][]byte = make(map[fi.Supported][]byte)
+var ParserBytes map[fi.Known][]byte = make(map[fi.Known][]byte)
 
-func OpenParser(sl fi.Supported) ([]byte, error) {
+func OpenParser(sl fi.Known) ([]byte, error) {
 	parserBytes, ok := ParserBytes[sl]
 	if !ok {
 		return nil, fmt.Errorf("langs.OpenParser: no parser bytes for %v", sl)
