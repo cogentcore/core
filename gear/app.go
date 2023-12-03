@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strconv"
@@ -195,24 +197,37 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	cmds.Update()
 	cmds.UpdateEndLayout(updt)
 
-	xc := xe.Major().SetDir(a.Dir).SetStdout(ow).SetStderr(ow).SetErrors(ow).SetStdin(ir)
-
 	words, err := shellwords.Parse(cmd)
 	if err != nil {
 		return err
 	}
 	if len(words) > 0 && words[0] == "cd" {
-		d, err := xc.Output("bash", "-c", cmd+" && pwd")
-		if err != nil {
-			return err
+		d := ""
+		if len(words) > 1 {
+			d = filepath.Join(a.Dir, words[1])
+			_, err := os.Stat(d)
+			if err != nil {
+				return err
+			}
+		} else {
+			d, err = os.UserHomeDir()
+			if err != nil {
+				return err
+			}
 		}
 		a.Dir = d
 		dir.SetTextUpdate(a.Dir)
 		return nil
 	}
 
+	c := exec.Command("bash", "-c", cmd)
+	c.Stdout = ow
+	c.Stderr = ow
+	c.Stdin = ir
+	c.Dir = a.Dir
+
 	go func() {
-		grr.Log(xc.SetBuffer(false).Run("bash", "-c", cmd))
+		grr.Log(c.Run())
 	}()
 	return nil
 }
