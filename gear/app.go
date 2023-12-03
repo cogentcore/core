@@ -240,9 +240,8 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	c.Dir = a.Dir
 	c.Cancel = func() error {
 		fmt.Println("icf")
-		return grr.Log(c.Process.Kill())
+		return grr.Log(xe.Run("bash", "-c", "kill -2 "+strconv.Itoa(c.Process.Pid)))
 	}
-
 	go func() {
 		grr.Log(c.Run())
 	}()
