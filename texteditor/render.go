@@ -249,6 +249,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
 	bb := ed.Geom.ContentBBox
+	stx := mat32.Ceil(float32(bb.Min.X) + ed.LineNoOff)
 	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
@@ -271,7 +272,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	seb.X = ex
 	pc.FillBox(rs, spos, seb.Sub(spos), bgclr)
 	sfb := seb
-	sfb.X = spos.X
+	sfb.X = stx
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
 		efb.Y -= ed.LineHeight
@@ -280,7 +281,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	}
 	sed := epos
 	sed.Y -= ed.LineHeight
-	sed.X = spos.X
+	sed.X = stx
 	pc.FillBox(rs, sed, epos.Sub(sed), bgclr)
 }
 
