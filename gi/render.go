@@ -174,8 +174,7 @@ func (wb *WidgetBase) UpdateEndAsyncRender(updt bool) {
 	wb.SetNeedsRender(updt)
 }
 
-// SetNeedsRenderUpdate sets the NeedsRender and Scene
-// NeedsRender flags, if updt is true.
+// SetNeedsRender sets the NeedsRender and Scene NeedsRender flags, if updt is true.
 // See [UpdateEndRender] for convenience method.
 // This should be called after widget state changes
 // that don't need styling, e.g., in event handlers

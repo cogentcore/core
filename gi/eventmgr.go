@@ -20,7 +20,6 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
-	"goki.dev/goosi/mimedata"
 	"goki.dev/grows/images"
 	"goki.dev/grr"
 	"goki.dev/ki/v2"
@@ -74,7 +73,8 @@ type EventMgr struct {
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex
 
-	// stack of widgets with mouse pointer in BBox, and are not Disabled
+	// stack of widgets with mouse pointer in BBox, and are not Disabled.
+	// Last item in the stack is the deepest nested widget (smallest BBox).
 	MouseInBBox []Widget
 
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
@@ -142,7 +142,7 @@ type EventMgr struct {
 	PriorityOther []Widget
 
 	// source data from DragStart event
-	DragData mimedata.Mimes
+	DragData any
 }
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
@@ -259,12 +259,8 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 	case events.MouseDown:
 		em.ResetOnMouseDown()
 	case events.MouseDrag:
+		isDrag = true
 		switch {
-		case em.Drag != nil:
-			isDrag = true
-			em.Drag.HandleEvent(e)
-			em.Drag.Send(events.DragMove, e)
-			// still needs to handle dragenter / leave
 		case em.Slide != nil:
 			em.Slide.HandleEvent(e)
 			em.Slide.Send(events.SlideMove, e)
@@ -345,6 +341,9 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				}
 			}
 			em.DragHovers = em.UpdateHovers(hovs, em.DragHovers, e, events.DragEnter, events.DragLeave)
+			em.DragMove(e)                   // updates sprite position
+			em.Drag.HandleEvent(e)           // raw drag
+			em.Drag.Send(events.DragMove, e) // usually ignored
 		case em.Slide != nil:
 		case em.Press != nil && em.Press.AbilityIs(abilities.Slideable):
 			if em.DragStartCheck(e, SlideStartTime, SlideStartDist) {
@@ -367,8 +366,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Slide.Send(events.SlideStop, e)
 			em.Slide = nil
 		case em.Drag != nil:
-			em.Drag.Send(events.Drop, e) // todo: all we need or what?
-			em.Drag = nil
+			em.DragDrop(em.Drag, e)
 		// if we have sent a long press start event, we don't send click
 		// events (non-nil widget plus nil timer means we already sent)
 		case em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil):
@@ -440,7 +438,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leav
 			}
 		}
 		if !stillIn && prv.This() != nil && !prv.Is(ki.Deleted) {
-			prv.Send(events.MouseLeave, e)
+			prv.Send(leave, e)
 		}
 	}
 
@@ -453,7 +451,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leav
 			}
 		}
 		if !wasIn {
-			cur.Send(events.MouseEnter, e)
+			cur.Send(enter, e)
 		}
 	}
 	// todo: detect change in top one, use to update cursor
@@ -617,20 +615,23 @@ func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) 
 	return dst >= dist
 }
 
-func (em *EventMgr) DragStartSprite(w Widget, md mimedata.Mimes, e events.Event) {
-	em.DragData = md
-	sp := NewSprite(DragSpriteName, image.Point{}, e.Pos())
-	sp.GrabRenderFrom(w) // todo: show number of items?
-	ImageClearer(sp.Pixels, 50.0)
+// DragStart starts a drag event, capturing a sprite image of the given widget
+// and storing the data for later use during Drop
+func (em *EventMgr) DragStart(w Widget, data any, e events.Event) {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
 	}
+	em.DragData = data
+	sp := NewSprite(DragSpriteName, image.Point{}, e.Pos())
+	sp.GrabRenderFrom(w) // todo: show number of items?
+	ImageClearer(sp.Pixels, 50.0)
 	sp.On = true
 	ms.Sprites.Add(sp)
 }
 
-func (em *EventMgr) DragMoveSprite(w Widget, e events.Event) {
+// DragMove is generally handled entirely by the event manager
+func (em *EventMgr) DragMove(e events.Event) {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
@@ -641,14 +642,60 @@ func (em *EventMgr) DragMoveSprite(w Widget, e events.Event) {
 		return
 	}
 	sp.Geom.Pos = e.Pos()
+	em.Scene.SetNeedsRender(true)
 }
 
-func (em *EventMgr) DragClearSprite(w Widget, e events.Event) {
+func (em *EventMgr) DragClearSprite() {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
 	}
 	ms.Sprites.InactivateSprite(DragSpriteName)
+}
+
+func (em *EventMgr) DragMenuAddModLabel(m *Scene, mod events.DropMods) {
+	switch mod {
+	case events.DropCopy:
+		NewLabel(m).SetText("Copy (Use Shift to Move):")
+	case events.DropMove:
+		NewLabel(m).SetText("Move:")
+	}
+}
+
+// DragDrop sends the events.Drop event to the top of the DragHovers stack.
+// clearing the current dragging sprite before doing anything.
+// It is up to the target to call
+func (em *EventMgr) DragDrop(drag Widget, e events.Event) {
+	em.DragClearSprite()
+	data := em.DragData
+	em.Drag = nil
+	if len(em.DragHovers) == 0 {
+		// if EventTrace {
+		fmt.Println(drag, "Drop has no target")
+		// }
+		return
+	}
+	targ := em.DragHovers[len(em.DragHovers)-1]
+	de := events.NewDragDrop(events.Drop, e.(*events.Mouse)) // gets the actual mod at this point
+	de.Data = data
+	de.Source = drag
+	de.Target = targ
+	// if EventTrace {
+	fmt.Println(targ, "Drop with mod:", de.DropMod, "source:", de.Source)
+	// }
+	targ.HandleEvent(de)
+}
+
+// DropFinalize should be called as the last step in the Drop event processing,
+// to send the DropDeleteSource event to the source in case of DropMod == DropMove.
+// Otherwise, nothing actually happens.
+func (em *EventMgr) DropFinalize(de *events.DragDrop) {
+	if de.DropMod != events.DropMove {
+		return
+	}
+	de.Typ = events.DropDeleteSource
+	de.ClearHandled()
+	de.Source.(Widget).HandleEvent(de)
 }
 
 ///////////////////////////////////////////////////////////////////

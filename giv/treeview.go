@@ -11,6 +11,7 @@ import (
 	"log"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
@@ -284,17 +285,17 @@ func (tv *TreeView) TreeViewStyles() {
 				}
 				tv.DragStart(e)
 			})
-			w.On(events.DragMove, func(e events.Event) {
-				if tv.This() == nil || tv.Is(ki.Deleted) {
-					return
-				}
-				tv.DragMove(e)
-			})
 			w.On(events.Drop, func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
 				tv.DragDrop(e)
+			})
+			w.On(events.DropDeleteSource, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
+				tv.DropDeleteSource(e)
 			})
 			// the context menu events will get sent to the parts, so it
 			// needs to intercept them and send them up
@@ -1413,30 +1414,6 @@ func (tv *TreeView) Paste() { //gti:add
 	}
 }
 
-// MakePasteMenu makes the menu of options for paste events
-func (tv *TreeView) MakePasteMenu(m *gi.Scene, data any) {
-	gi.NewButton(m).SetText("Assign To").SetData(data).
-		OnClick(func(e events.Event) {
-			tv.PasteAssign(data.(mimedata.Mimes))
-		})
-	gi.NewButton(m).SetText("Add to Children").SetData(data).
-		OnClick(func(e events.Event) {
-			tv.PasteChildren(data.(mimedata.Mimes), events.DropCopy)
-		})
-	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
-		gi.NewButton(m).SetText("Insert Before").SetData(data).
-			OnClick(func(e events.Event) {
-				tv.PasteBefore(data.(mimedata.Mimes), events.DropCopy)
-			})
-		gi.NewButton(m).SetText("Insert After").SetData(data).
-			OnClick(func(e events.Event) {
-				tv.PasteAfter(data.(mimedata.Mimes), events.DropCopy)
-			})
-	}
-	gi.NewButton(m).SetText("Cancel").SetData(data)
-	// todo: compare, etc..
-}
-
 // PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
 func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
@@ -1446,6 +1423,27 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	}
 	pos := tv.ContextMenuPos(nil)
 	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
+}
+
+// todo: this should be a TreeView interface method!
+
+// MakePasteMenu makes the menu of options for paste events
+func (tv *TreeView) MakePasteMenu(m *gi.Scene, md mimedata.Mimes) {
+	gi.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
+		tv.PasteAssign(md)
+	})
+	gi.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
+		tv.PasteChildren(md, events.DropCopy)
+	})
+	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
+		gi.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
+			tv.PasteBefore(md, events.DropCopy)
+		})
+		gi.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
+			tv.PasteAfter(md, events.DropCopy)
+		})
+	}
+	gi.NewButton(m).SetText("Cancel")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -1567,7 +1565,6 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 // DragStart starts a drag-n-drop on this node -- it includes any other
 // selected nodes as well, each as additional records in mimedata.
 func (tv *TreeView) DragStart(e events.Event) {
-	fmt.Println(tv, "drag start")
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
@@ -1579,18 +1576,85 @@ func (tv *TreeView) DragStart(e events.Event) {
 			}
 		}
 	}
-	tv.Sc.EventMgr.DragStartSprite(tv.This().(gi.Widget), md, e)
+	tv.Sc.EventMgr.DragStart(tv.This().(gi.Widget), md, e)
 }
 
-// DragMove handles drag move event
-func (tv *TreeView) DragMove(e events.Event) {
-	tv.Sc.EventMgr.DragMoveSprite(tv.This().(gi.Widget), e)
+// DropExternal is not handled by base case but could be in derived
+func (tv *TreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 }
 
 // DragDrop handles drag drop event
 func (tv *TreeView) DragDrop(e events.Event) {
-	fmt.Println("drop")
-	tv.Sc.EventMgr.DragClearSprite(tv.This().(gi.Widget), e)
+	// todo: some kind of validation for source
+	de := e.(*events.DragDrop)
+	tv.UnselectAll()
+	md := de.Data.(mimedata.Mimes)
+	mf := func(m *gi.Scene) {
+		tv.MakeDropMenu(m, md, de)
+	}
+	pos := tv.ContextMenuPos(nil)
+	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
+}
+
+// DropFinalize is called to finalize Drop actions on the Source node.
+// Only relevant for DropMod == DropMove.
+func (tv *TreeView) DropFinalize(de *events.DragDrop) {
+	tv.UnselectAll()
+	tv.Sc.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
+}
+
+// MakeDropMenu makes the menu of options for dropping on a target
+func (tv *TreeView) MakeDropMenu(m *gi.Scene, md mimedata.Mimes, de *events.DragDrop) {
+	mod := de.DropMod
+	tv.Sc.EventMgr.DragMenuAddModLabel(m, mod)
+	if mod == events.DropCopy {
+		gi.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
+			tv.PasteAssign(md)
+			tv.DropFinalize(de)
+		})
+	}
+	gi.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
+		tv.PasteChildren(md, mod)
+		tv.DropFinalize(de)
+	})
+	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
+		gi.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
+			tv.PasteBefore(md, mod)
+			tv.DropFinalize(de)
+		})
+		gi.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
+			tv.PasteAfter(md, mod)
+			tv.DropFinalize(de)
+		})
+	}
+	gi.NewButton(m).SetText("Cancel")
+}
+
+// DropDeleteSource handles delete source event for DropMove case
+func (tv *TreeView) DropDeleteSource(e events.Event) {
+	de := e.(*events.DragDrop)
+	tv.UnselectAll()
+	md := de.Data.(mimedata.Mimes)
+	sroot := tv.RootView.SyncNode
+	for _, d := range md {
+		if d.Type != fi.TextPlain { // link
+			continue
+		}
+		path := string(d.Data)
+		sn := sroot.FindPath(path)
+		if sn != nil {
+			sn.Delete(true)
+			// tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewDeleted), sn.This())
+		}
+		sn = sroot.FindPath(path + TreeViewTempMovedTag)
+		if sn != nil {
+			psplt := strings.Split(path, "/")
+			orgnm := psplt[len(psplt)-1]
+			sn.SetName(orgnm)
+			_, swb := gi.AsWidget(sn)
+			swb.SetNeedsRender(true)
+		}
+	}
 }
 
 /*
@@ -1614,16 +1678,6 @@ func (tv *TreeView) DragNDropExternal(de events.Event) {
 	tv.This().(gi.DragNDropper).DropExternal(de.Data, de.Mod)
 }
 
-// DragNDropFinalize is called to finalize actions on the Source node prior to
-// performing target actions -- mod must indicate actual action taken by the
-// target, including ignore
-func (tv *TreeView) DragNDropFinalize(mod events.DropMods) {
-	if tv.Scene == nil {
-		return
-	}
-	tv.UnselectAll()
-	tv.ParentRenderWin().FinalizeDragNDrop(mod)
-}
 
 // DragNDropFinalizeDefMod is called to finalize actions on the Source node prior to
 // performing target actions -- uses default drop mod in place when event was dropped.
@@ -1634,116 +1688,6 @@ func (tv *TreeView) DragNDropFinalizeDefMod() {
 	}
 	tv.UnselectAll()
 	win.FinalizeDragNDrop(win.EventMgr.DNDDropMod)
-}
-
-// Dragged is called after target accepts the drop -- we just remove
-// elements that were moved
-// satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (tv *TreeView) Dragged(de events.Event) {
-	if de.Mod != events.DropMove {
-		return
-	}
-	sroot := tv.RootView.SyncNode
-	md := de.Data
-	for _, d := range md {
-		if d.Type == fi.TextPlain { // link
-			path := string(d.Data)
-			sn := sroot.FindPath(path)
-			if sn != nil {
-				sn.Delete(true)
-				// tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewDeleted), sn.This())
-			}
-			sn = sroot.FindPath(path + TreeViewTempMovedTag)
-			if sn != nil {
-				psplt := strings.Split(path, "/")
-				orgnm := psplt[len(psplt)-1]
-				sn.SetName(orgnm)
-				sn.SetNeedsRender()
-			}
-		}
-	}
-}
-
-// MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
-	if len(*m) > 0 {
-		return
-	}
-	switch mod {
-	case events.DropCopy:
-		m.AddLabel("Copy (Use Shift to Move):")
-	case events.DropMove:
-		m.AddLabel("Move:")
-	}
-	if mod == events.DropCopy {
-		gi.NewButton(m).SetText("Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tv := recv.Embed(TreeViewType).(*TreeView)
-			tv.DropAssign(data.(mimedata.Mimes))
-		})
-	}
-	gi.NewButton(m).SetText("Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tv := recv.Embed(TreeViewType).(*TreeView)
-		tv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
-	})
-	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
-		gi.NewButton(m).SetText("Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tv := recv.Embed(TreeViewType).(*TreeView)
-			tv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
-		})
-		gi.NewButton(m).SetText("Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tv := recv.Embed(TreeViewType).(*TreeView)
-			tv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
-		})
-	}
-	gi.NewButton(m).SetText("Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tv := recv.Embed(TreeViewType).(*TreeView)
-		tv.DropCancel()
-	})
-	// todo: compare, etc..
-}
-
-// Drop pops up a menu to determine what specifically to do with dropped items
-// satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (tv *TreeView) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var menu gi.Menu
-	tv.MakeDropMenu(&menu, md, mod)
-	pos := tv.ContextMenuPos()
-	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
-}
-
-// DropExternal is not handled by base case but could be in derived
-func (tv *TreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
-	tv.DropCancel()
-}
-
-// DropAssign assigns mime data (only the first one!) to this node
-func (tv *TreeView) DropAssign(md mimedata.Mimes) {
-	tv.PasteAssign(md)
-	tv.DragNDropFinalize(events.DropCopy)
-}
-
-// DropBefore inserts object(s) from mime data before this node
-func (tv *TreeView) DropBefore(md mimedata.Mimes, mod events.DropMods) {
-	tv.PasteBefore(md, mod)
-	tv.DragNDropFinalize(mod)
-}
-
-// DropAfter inserts object(s) from mime data after this node
-func (tv *TreeView) DropAfter(md mimedata.Mimes, mod events.DropMods) {
-	tv.PasteAfter(md, mod)
-	tv.DragNDropFinalize(mod)
-}
-
-// DropChildren inserts object(s) from mime data at end of children of this node
-func (tv *TreeView) DropChildren(md mimedata.Mimes, mod events.DropMods) {
-	tv.PasteChildren(md, mod)
-	tv.DragNDropFinalize(mod)
-}
-
-// DropCancel cancels the drop action e.g., preventing deleting of source
-// items in a Move case
-func (tv *TreeView) DropCancel() {
-	tv.DragNDropFinalize(events.DropIgnore)
 }
 
 */
@@ -1867,10 +1811,10 @@ func (tv *TreeView) HandleTreeViewMouse() {
 	tv.On(events.DragStart, func(e events.Event) {
 		e.SetHandled()
 	})
-	tv.On(events.DragMove, func(e events.Event) {
+	tv.On(events.Drop, func(e events.Event) {
 		e.SetHandled()
 	})
-	tv.On(events.Drop, func(e events.Event) {
+	tv.On(events.DropDeleteSource, func(e events.Event) {
 		e.SetHandled()
 	})
 }

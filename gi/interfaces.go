@@ -97,6 +97,9 @@ type Clipper interface {
 }
 
 /*
+
+todo: update
+
 // DragNDropper is the interface for standard drag-n-drop actions
 // Types can use this interface to support extensible DND functionality
 // used in all relevant valueview types in giv package (e.g., TreeView)
