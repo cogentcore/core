@@ -513,7 +513,7 @@ func (ed *Editor) CursorStartLine() {
 	}
 	// fmt.Printf("sol cursorcol: %v\n", ed.CursorCol)
 	ed.SetCursor(ed.CursorPos)
-	ed.ScrollCursorToLeft()
+	ed.ScrollCursorToRight()
 	ed.RenderCursor(true)
 	ed.CursorSelect(org)
 }
@@ -892,8 +892,11 @@ func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	if (curBBox.Min.Y-int(ed.LineHeight)) < bb.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > bb.Max.Y {
 		did = ed.ScrollCursorToVertCenter()
 	}
-	if curBBox.Max.X < bb.Min.X || curBBox.Min.X > bb.Max.X {
-		did2 := ed.ScrollCursorToHorizCenter()
+	if curBBox.Max.X < bb.Min.X+int(ed.LineNoOff) {
+		did2 := ed.ScrollCursorToRight()
+		did = did || did2
+	} else if curBBox.Min.X > bb.Max.X {
+		did2 := ed.ScrollCursorToRight()
 		did = did || did2
 	}
 	return did
@@ -1002,6 +1005,7 @@ func (ed *Editor) ScrollToHorizCenter(pos int) bool {
 // scrolled.
 func (ed *Editor) ScrollCursorToHorizCenter() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
-	mid := (curBBox.Min.X + curBBox.Max.X) / 2
+	mn := int(mat32.Ceil(float32(curBBox.Min.X) + ed.LineNoOff))
+	mid := (mn + curBBox.Max.X) / 2
 	return ed.ScrollToHorizCenter(mid)
 }

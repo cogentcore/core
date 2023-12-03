@@ -9,9 +9,9 @@ import (
 	"image"
 	"image/color"
 
+	"goki.dev/cam/hct"
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -248,8 +248,8 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	spos := ed.CharStartPosVis(st)
 	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
-	vsz := epos.Sub(spos)
-	if vsz.X <= 0 || vsz.Y <= 0 {
+	bb := ed.Geom.ContentBBox
+	if int(mat32.Ceil(epos.Y)) < bb.Min.Y || int(mat32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
 	ex := float32(ed.Geom.ContentBBox.Max.X)
@@ -435,6 +435,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	ebox.X = sbox.X + ed.LineNoOff // - spc.Size().X/2
 	bsz := ebox.Sub(sbox)
 	lclr, hasLClr := ed.Buf.LineColors[ln]
+	actClr := lclr
 	if ed.CursorPos.Ln == ln {
 		if hasLClr { // split the diff!
 			bszhlf := bsz
@@ -444,11 +445,13 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 			nsp.X += bszhlf.X
 			pc.FillBoxColor(rs, nsp, bszhlf, ed.SelectColor.Solid)
 		} else {
+			actClr = ed.SelectColor.Solid
 			pc.FillBoxColor(rs, sbox, bsz, ed.SelectColor.Solid)
 		}
 	} else if hasLClr {
 		pc.FillBoxColor(rs, sbox, bsz, lclr)
 	} else if defFill {
+		actClr = ed.LineNumberColor.Solid
 		pc.FillBoxColor(rs, sbox, bsz, ed.LineNumberColor.Solid)
 	}
 
@@ -456,6 +459,10 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	lfmt := fmt.Sprintf("%d", ed.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
+
+	if hct.ContrastRatio(actClr, fst.Color) < hct.ContrastAA {
+		fst.Color = hct.ContrastColor(actClr, hct.ContrastAA)
+	}
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{}
 	lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
@@ -488,104 +495,6 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// 	tScBBox := tBBox.Add(winoff)
 	// 	sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
 	// }
-}
-
-// RenderLines displays a specific range of lines on the screen, also painting
-// selection.  end is *inclusive* line.  returns false if nothing visible.
-func (ed *Editor) RenderLines(st, end int) bool {
-	if ed == nil || ed.This() == nil || ed.Buf == nil {
-		return false
-	}
-	if !ed.This().(gi.Widget).IsVisible() {
-		return false
-	}
-	if st >= ed.NLines {
-		st = ed.NLines - 1
-	}
-	if end >= ed.NLines {
-		end = ed.NLines - 1
-	}
-	if st > end {
-		return false
-	}
-	sc := ed.Sc
-	updt := ed.UpdateStart()
-	sty := &ed.Styles
-	rs := &sc.RenderState
-	pc := &rs.Paint
-	pos := ed.RenderStartPos()
-	bb := ed.Geom.ContentBBox
-	var boxMin, boxMax mat32.Vec2
-	rs.PushBounds(bb)
-	// first get the box to fill
-	visSt := -1
-	visEd := -1
-	for ln := st; ln <= end; ln++ {
-		lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
-		if int(mat32.Ceil(led)) < bb.Min.Y {
-			continue
-		}
-		if int(mat32.Floor(lst)) > bb.Max.Y {
-			continue
-		}
-		lp := pos
-		if visSt < 0 {
-			visSt = ln
-			lp.Y = lst
-			boxMin = lp
-		}
-		visEd = ln // just keep updating
-		lp.Y = led
-		boxMax = lp
-	}
-	if !(visSt < 0 && visEd < 0) {
-		rs.Lock()
-		boxMin.X = float32(bb.Min.X) // go all the way
-		boxMax.X = float32(bb.Max.X) // go all the way
-		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.BackgroundColor)
-		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
-
-		ed.RenderDepthBg(visSt, visEd)
-		ed.RenderHighlights(visSt, visEd)
-		ed.RenderScopelights(visSt, visEd)
-		ed.RenderSelect()
-
-		for ln := visSt; ln <= visEd; ln++ {
-			lst := pos.Y + ed.Offs[ln]
-			lp := pos
-			lp.Y = lst
-			lp.X += ed.LineNoOff
-			ed.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-		}
-
-		ed.RenderLineNosBox(visSt, visEd)
-
-		if ed.HasLineNos() {
-			for ln := visSt; ln <= visEd; ln++ {
-				ed.RenderLineNo(ln, true, false)
-			}
-			tbb := bb
-			tbb.Min.X += int(ed.LineNoOff)
-			rs.Unlock()
-			rs.PushBounds(tbb)
-			rs.Lock()
-		}
-		rs.Unlock()
-		if ed.HasLineNos() {
-			rs.PopBounds()
-		}
-
-		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-		winoff := bb.Min.Sub(bb.Min)
-		tScBBox := tBBox.Add(winoff)
-		_ = tScBBox
-		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tScBBox)
-		// sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
-	}
-	ed.PopBounds()
-	ed.UpdateEnd(updt)
-	return true
 }
 
 // FirstVisibleLine finds the first visible line, starting at given line
