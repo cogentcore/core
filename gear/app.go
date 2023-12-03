@@ -18,6 +18,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/mattn/go-shellwords"
+	"github.com/robert-nix/ansihtml"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
@@ -32,8 +33,6 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/xe"
-
-	"github.com/robert-nix/ansihtml"
 )
 
 // App is a GUI view of a gear command.
