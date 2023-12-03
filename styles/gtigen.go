@@ -124,6 +124,23 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/girl/styles.AlignSet",
+	ShortName: "styles.AlignSet",
+	IDName:    "align-set",
+	Doc:       "AlignSet specifies the 3 levels of Justify or Align: Content, Items, and Self",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Content", &gti.Field{Name: "Content", Type: "goki.dev/girl/styles.Aligns", LocalType: "Aligns", Doc: "Content specifies the distribution of the entire collection of items within\nany larger amount of space allocated to the container.  By contrast, Items\nand Self specify distribution within the individual element's allocated space.", Directives: gti.Directives{}, Tag: ""}},
+		{"Items", &gti.Field{Name: "Items", Type: "goki.dev/girl/styles.Aligns", LocalType: "Aligns", Doc: "Items specifies the distribution within the individual element's allocated space,\nas a default for all items within a collection.", Directives: gti.Directives{}, Tag: ""}},
+		{"Self", &gti.Field{Name: "Self", Type: "goki.dev/girl/styles.Aligns", LocalType: "Aligns", Doc: "Self specifies the distribution within the individual element's allocated space,\nfor this specific item.  Auto defaults to containers Items setting.", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/girl/styles.Paint",
 	ShortName: "styles.Paint",
 	IDName:    "paint",
