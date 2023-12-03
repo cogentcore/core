@@ -142,7 +142,7 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 		if sfn == nil {
 			return ki.Continue
 		}
-		if cat != fi.Unknown {
+		if cat != fi.UnknownCat {
 			if sfn.Info.Cat != cat {
 				return ki.Continue
 			}
@@ -175,7 +175,7 @@ func (fn *Node) LatestFileMod(cat fi.Cat) time.Time {
 		if sfn == nil {
 			return ki.Continue
 		}
-		if cat != fi.Unknown {
+		if cat != fi.UnknownCat {
 			if sfn.Info.Cat != cat {
 				return ki.Continue
 			}

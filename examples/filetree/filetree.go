@@ -401,7 +401,7 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 
 // NewFileBrowser creates a new FileBrowse window with a new FileBrowse project for given
 // path, returning the window and the path
-func NewFileBrowser(path string) (*FileBrowse, gi.Stage) {
+func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
 	// nm := "browser-" + projnm
 

@@ -320,6 +320,9 @@ func (ed *Editor) RenderAllLinesInBounds() {
 	stln := -1
 	edln := -1
 	for ln := 0; ln < ed.NLines; ln++ {
+		if ln >= len(ed.Offs) || ln >= len(ed.Renders) {
+			break
+		}
 		lst := pos.Y + ed.Offs[ln]
 		led := lst + mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
 		if int(mat32.Ceil(led)) < bb.Min.Y {

@@ -77,8 +77,8 @@ func (hm *HiMarkup) Init(info *fi.FileInfo, pist *pi.FileStates) {
 	hm.Info = info
 	hm.PiState = pist
 
-	if hm.Info.Sup != fi.NoSupport {
-		if lp, err := pi.LangSupport.Props(hm.Info.Sup); err == nil {
+	if hm.Info.Known != fi.Unknown {
+		if lp, err := pi.LangSupport.Props(hm.Info.Known); err == nil {
 			if lp.Lang != nil {
 				hm.lexer = nil
 				hm.PiLang = lp.Lang

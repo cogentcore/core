@@ -459,7 +459,7 @@ func (tb *Buf) NewBuf(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(string(tb.Filename), "", tb.Info.Sup)
+	tb.PiState.SetSrc(string(tb.Filename), "", tb.Info.Known)
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 
 	tb.MarkupMu.Unlock()
@@ -474,21 +474,21 @@ func (tb *Buf) Stat() error {
 	if err != nil {
 		return err
 	}
-	tb.ConfigSupported()
+	tb.ConfigKnown()
 	return nil
 }
 
-// ConfigSupported configures options based on the supported language info in GoPi
+// ConfigKnown configures options based on the supported language info in GoPi
 // returns true if supported
-func (tb *Buf) ConfigSupported() bool {
-	if tb.Info.Sup != fi.NoSupport {
+func (tb *Buf) ConfigKnown() bool {
+	if tb.Info.Known != fi.Unknown {
 		if tb.Spell == nil {
 			tb.SetSpell()
 		}
 		if tb.Complete == nil {
 			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi, LookupPi)
 		}
-		return tb.Opts.ConfigSupported(tb.Info.Sup)
+		return tb.Opts.ConfigKnown(tb.Info.Known)
 	}
 	return false
 }

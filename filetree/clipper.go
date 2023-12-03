@@ -40,7 +40,7 @@ func (fn *Node) Cut() {
 	}
 	fn.Copy(false)
 	// todo: in the future, move files somewhere temporary, then use those temps for paste..
-	gi.PromptDialog(fn, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files.", Ok: true, Cancel: false}, nil)
+	gi.PromptDialog(fn, gi.DlgOpts{Title: "Cut Not Known", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files.", Ok: true, Cancel: false}, nil)
 }
 
 // Paste pastes clipboard at given node

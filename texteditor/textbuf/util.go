@@ -80,7 +80,7 @@ func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int)
 		lns = lns[:el]
 	}
 	if preComments && stLn > 0 && stLn < nln {
-		comLn, comSt, comEd := SupportedComments(fpath)
+		comLn, comSt, comEd := KnownComments(fpath)
 		stLn = PreCommentStart(lns, stLn, comLn, comSt, comEd, lnBack)
 	}
 

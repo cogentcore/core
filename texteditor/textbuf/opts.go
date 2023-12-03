@@ -48,10 +48,10 @@ func (tb *Opts) IndentChar() indent.Char {
 	return indent.Tab
 }
 
-// ConfigSupported configures options based on the supported language info in GoPi
+// ConfigKnown configures options based on the supported language info in GoPi
 // returns true if supported
-func (tb *Opts) ConfigSupported(sup fi.Supported) bool {
-	if sup == fi.NoSupport {
+func (tb *Opts) ConfigKnown(sup fi.Known) bool {
+	if sup == fi.Unknown {
 		return false
 	}
 	lp, ok := pi.StdLangProps[sup]
@@ -72,9 +72,9 @@ func (tb *Opts) ConfigSupported(sup fi.Supported) bool {
 	return true
 }
 
-// SupportedComments returns the comment strings for supported file types,
+// KnownComments returns the comment strings for supported file types,
 // and returns the standard C-style comments otherwise.
-func SupportedComments(fpath string) (comLn, comSt, comEd string) {
+func KnownComments(fpath string) (comLn, comSt, comEd string) {
 	comLn = "//"
 	comSt = "/*"
 	comEd = "*/"
@@ -82,8 +82,8 @@ func SupportedComments(fpath string) (comLn, comSt, comEd string) {
 	if err != nil {
 		return
 	}
-	sup := fi.MimeSupported(mtyp)
-	if sup == fi.NoSupport {
+	sup := fi.MimeKnown(mtyp)
+	if sup == fi.Unknown {
 		return
 	}
 	lp, ok := pi.StdLangProps[sup]
