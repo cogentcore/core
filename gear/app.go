@@ -195,7 +195,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	cmds.Update()
 	cmds.UpdateEndLayout(updt)
 
-	xc := xe.Major().SetDir(a.Dir).SetStdout(ow).SetStderr(ow).SetErrors(ow).SetStdin(ir).SetBuffer(false)
+	xc := xe.Major().SetDir(a.Dir).SetStdout(ow).SetStderr(ow).SetErrors(ow).SetStdin(ir)
 
 	words, err := shellwords.Parse(cmd)
 	if err != nil {
@@ -212,7 +212,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	}
 
 	go func() {
-		grr.Log(xc.Run("bash", "-c", cmd))
+		grr.Log(xc.SetBuffer(false).Run("bash", "-c", cmd))
 	}()
 	return nil
 }
