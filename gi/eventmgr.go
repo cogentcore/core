@@ -20,6 +20,7 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/grows/images"
 	"goki.dev/grr"
 	"goki.dev/ki/v2"
@@ -52,6 +53,10 @@ var (
 	// LongPressStopDist is the pixel distance beyond which the LongPressEnd
 	// event is sent
 	LongPressStopDist = 50
+)
+
+const (
+	DragSpriteName = "__DragSprite__"
 )
 
 // note: EventMgr should be in _exclusive_ control of its own state
@@ -136,35 +141,8 @@ type EventMgr struct {
 	// PriorityOther are widgets with other PriorityEvents types
 	PriorityOther []Widget
 
-	// stage of DND process
-	// DNDStage DNDStages `desc:"stage of DND process"`
-	//
-	// // drag-n-drop data -- if non-nil, then DND is taking place
-	// DNDData mimedata.Mimes `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	//
-	// // drag-n-drop source node
-	// DNDSource Widget `desc:"drag-n-drop source node"`
-
-	// 	// final event for DND which is sent if a finalize is received
-	// 	DNDFinalEvent events.Event `desc:"final event for DND which is sent if a finalize is received"`
-	//
-	// 	// modifier in place at time of drop event (DropMove or DropCopy)
-	// 	DNDDropMod events.DropMods `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
-
-	/*
-		startDrag       events.Event
-		dragStarted     bool
-		startDND        events.Event
-		dndStarted      bool
-		startHover      events.Event
-		curHover        events.Event
-		hoverStarted    bool
-		hoverTimer      *time.Timer
-		startDNDHover   events.Event
-		curDNDHover     events.Event
-		dndHoverStarted bool
-		dndHoverTimer   *time.Timer
-	*/
+	// source data from DragStart event
+	DragData mimedata.Mimes
 }
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
@@ -637,6 +615,40 @@ func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) 
 	}
 	dst := int(mat32.NewVec2FmPoint(e.StartDelta()).Length())
 	return dst >= dist
+}
+
+func (em *EventMgr) DragStartSprite(w Widget, md mimedata.Mimes, e events.Event) {
+	em.DragData = md
+	sp := NewSprite(DragSpriteName, image.Point{}, e.Pos())
+	sp.GrabRenderFrom(w) // todo: show number of items?
+	ImageClearer(sp.Pixels, 50.0)
+	ms := em.Scene.Stage.Main
+	if ms == nil {
+		return
+	}
+	sp.On = true
+	ms.Sprites.Add(sp)
+}
+
+func (em *EventMgr) DragMoveSprite(w Widget, e events.Event) {
+	ms := em.Scene.Stage.Main
+	if ms == nil {
+		return
+	}
+	sp, ok := ms.Sprites.SpriteByName(DragSpriteName)
+	if !ok {
+		fmt.Println("Drag sprite not found")
+		return
+	}
+	sp.Geom.Pos = e.Pos()
+}
+
+func (em *EventMgr) DragClearSprite(w Widget, e events.Event) {
+	ms := em.Scene.Stage.Main
+	if ms == nil {
+		return
+	}
+	ms.Sprites.InactivateSprite(DragSpriteName)
 }
 
 ///////////////////////////////////////////////////////////////////

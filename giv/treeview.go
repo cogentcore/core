@@ -190,7 +190,7 @@ func (tv *TreeView) OnAdd() {
 
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.Draggable, abilities.Droppable)
 		tv.Indent.Em(1)
 		tv.OpenDepth = 4
 		s.Border.Style.Set(styles.BorderNone)
@@ -215,7 +215,7 @@ func (tv *TreeView) TreeViewStyles() {
 		case "parts":
 			w.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
-				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
+				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable, abilities.Draggable, abilities.Droppable)
 				s.Gap.X.Ch(0.1)
 				s.Padding.Zero()
 
@@ -277,6 +277,24 @@ func (tv *TreeView) TreeViewStyles() {
 				if tv.HasChildren() {
 					tv.ToggleClose()
 				}
+			})
+			w.On(events.DragStart, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
+				tv.DragStart(e)
+			})
+			w.On(events.DragMove, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
+				tv.DragMove(e)
+			})
+			w.On(events.Drop, func(e events.Event) {
+				if tv.This() == nil || tv.Is(ki.Deleted) {
+					return
+				}
+				tv.DragDrop(e)
 			})
 			// the context menu events will get sent to the parts, so it
 			// needs to intercept them and send them up
@@ -1510,7 +1528,6 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		nwi.AsWidget().Update() // incl children
 		npath := ns.PathFrom(tv.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-
 			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
@@ -1547,9 +1564,10 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 //////////////////////////////////////////////////////////////////////////////
 //    Drag-n-Drop
 
-// DragNDropStart starts a drag-n-drop on this node -- it includes any other
-// selected nodes as well, each as additional records in mimedata
-func (tv *TreeView) DragNDropStart() {
+// DragStart starts a drag-n-drop on this node -- it includes any other
+// selected nodes as well, each as additional records in mimedata.
+func (tv *TreeView) DragStart(e events.Event) {
+	fmt.Println(tv, "drag start")
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
@@ -1561,10 +1579,18 @@ func (tv *TreeView) DragNDropStart() {
 			}
 		}
 	}
-	sp := &gi.Sprite{}
-	sp.GrabRenderFrom(tv) // todo: show number of items?
-	gi.ImageClearer(sp.Pixels, 50.0)
-	// tv.ParentRenderWin().StartDragNDrop(tv.This(), md, sp)
+	tv.Sc.EventMgr.DragStartSprite(tv.This().(gi.Widget), md, e)
+}
+
+// DragMove handles drag move event
+func (tv *TreeView) DragMove(e events.Event) {
+	tv.Sc.EventMgr.DragMoveSprite(tv.This().(gi.Widget), e)
+}
+
+// DragDrop handles drag drop event
+func (tv *TreeView) DragDrop(e events.Event) {
+	fmt.Println("drop")
+	tv.Sc.EventMgr.DragClearSprite(tv.This().(gi.Widget), e)
 }
 
 /*
@@ -1836,6 +1862,15 @@ func (tv *TreeView) HandleTreeViewMouse() {
 		e.SetHandled()
 	})
 	tv.OnClick(func(e events.Event) {
+		e.SetHandled()
+	})
+	tv.On(events.DragStart, func(e events.Event) {
+		e.SetHandled()
+	})
+	tv.On(events.DragMove, func(e events.Event) {
+		e.SetHandled()
+	})
+	tv.On(events.Drop, func(e events.Event) {
 		e.SetHandled()
 	})
 }
