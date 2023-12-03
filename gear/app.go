@@ -5,6 +5,7 @@
 package gear
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -27,6 +28,7 @@ import (
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/xe"
@@ -141,14 +143,25 @@ func (a *App) ConfigWidget() {
 func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	updt := cmds.UpdateStart()
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	cfr := gi.NewFrame(cmds).Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Direction = styles.Column
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 	})
-	gi.NewLabel(cfr, "cmd").SetType(gi.LabelTitleLarge).SetText(cmd).Style(func(s *styles.Style) {
+	tr := gi.NewLayout(cfr, "tr").Style(func(s *styles.Style) {
+		s.Align.Items = styles.Center
+		s.Padding.Set(units.Dp(8)).SetBottom(units.Zero())
+	})
+	gi.NewLabel(tr, "cmd").SetType(gi.LabelTitleLarge).SetText(cmd).Style(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
+		s.Grow.Set(1, 0)
+	})
+	gi.NewButton(tr, "kill").SetType(gi.ButtonAction).SetIcon(icons.Close).OnClick(func(e events.Event) {
+		cancel()
+		fmt.Println("canceled")
 	})
 
 	// output and input readers and writers
@@ -164,6 +177,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	te.Style(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
 		s.Min.Set(units.Em(30), units.Em(10))
+		s.BackgroundColor = cfr.Styles.BackgroundColor
 	})
 	te.OnKeyChord(func(e events.Event) {
 		kc := e.KeyChord()
@@ -220,11 +234,15 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 		return nil
 	}
 
-	c := exec.Command("bash", "-c", cmd)
+	c := exec.CommandContext(ctx, "bash", "-c", cmd)
 	c.Stdout = ow
 	c.Stderr = ow
 	c.Stdin = ir
 	c.Dir = a.Dir
+	c.Cancel = func() error {
+		fmt.Println("icf")
+		return grr.Log(c.Process.Kill())
+	}
 
 	go func() {
 		grr.Log(c.Run())
