@@ -49,17 +49,32 @@ func ExampleFromName_fail() {
 	// Output: {0 0 0 0} colors.FromName: name not found: invalidcolor
 }
 
+func ExampleFromString_rgb() {
+	fmt.Println(FromString("rgb(202, 38, 16, 112)", White))
+	// Output: {89 16 7 112} <nil>
+}
+
 func ExampleFromString_rgba() {
-	fmt.Println(FromString("rgba(188, 12, 71, 201)", White))
-	// Output: {188 12 71 201} <nil>
+	fmt.Println(FromString("rgba(188, 12, 71, 201)", Black))
+	// Output: {148 9 56 201} <nil>
 }
 
 func ExampleFromString_hsl() {
-	fmt.Println(FromString("hsl(12, 62, 50)", White))
+	fmt.Println(FromString("hsl(12, 62, 50, 189)", Blue))
+	// Output: {154 59 35 189} <nil>
+}
+
+func ExampleFromString_hsla() {
+	fmt.Println(FromString("hsla(12, 62, 50)", Rebeccapurple))
 	// Output: {207 80 48 255} <nil>
 }
 
+func ExampleFromString_hct() {
+	fmt.Println(FromString("hct(240, 56, 66)", Tan))
+	// Output: {7 171 240 255} <nil>
+}
+
 func ExampleFromString_hcta() {
-	fmt.Println(FromString("hcta(83, 91, 48, 233)", White))
-	// Output: {148 107 0 18} <nil>
+	fmt.Println(FromString("hcta(83, 91, 48, 233)", Lightcoral))
+	// Output: {135 98 0 233} <nil>
 }
