@@ -18,7 +18,7 @@ import (
 )
 
 // Gradient represents a linear or radial gradient.
-type Gradient struct {
+type Gradient struct { //gti:add -setters
 
 	// whether the gradient is a radial gradient (as opposed to a linear one)
 	Radial bool
@@ -106,56 +106,9 @@ func RadialGradient() *Gradient {
 	}
 }
 
-func (g *Gradient) SetRadial() *Gradient {
-	g.Radial = true
-	return g
-}
-
-func (g *Gradient) SetLinear() *Gradient {
-	g.Radial = false
-	return g
-}
-
-// SetBounds sets the bounds to the given value. It is just
-// a simple method that sets the value, and should not be confused
-// with [Gradient.SetUserBounds].
-func (g *Gradient) SetBounds(bounds mat32.Box2) *Gradient {
-	g.Bounds = bounds
-	return g
-}
-
-func (g *Gradient) SetCenter(center mat32.Vec2) *Gradient {
-	g.Center = center
-	return g
-}
-
-func (g *Gradient) SetFocal(focal mat32.Vec2) *Gradient {
-	g.Focal = focal
-	return g
-}
-
-func (g *Gradient) SetRadius(radius float32) *Gradient {
-	g.Radius = radius
-	return g
-}
-
+// AddStop adds a new stops with the given color, offset, and opacity to the gradient.
 func (g *Gradient) AddStop(color color.RGBA, offset, opacity float32) *Gradient {
 	g.Stops = append(g.Stops, GradientStop{Color: color, Offset: offset, Opacity: opacity})
-	return g
-}
-
-func (g *Gradient) SetMatrix(matrix mat32.Mat2) *Gradient {
-	g.Matrix = matrix
-	return g
-}
-
-func (g *Gradient) SetSpread(spread SpreadMethods) *Gradient {
-	g.Spread = spread
-	return g
-}
-
-func (g *Gradient) SetUnits(units GradientUnits) *Gradient {
-	g.Units = units
 	return g
 }
 

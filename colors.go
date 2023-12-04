@@ -4,6 +4,8 @@
 
 package colors
 
+//go:generate goki generate
+
 import (
 	"errors"
 	"fmt"
