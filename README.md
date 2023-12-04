@@ -54,10 +54,10 @@ const (
 type MyComplicatedEnum int16 //enums:enum
 
 const (
-	Go MyComplicatedEnum = -2 * iota + 1
-	Python
-	ObjectiveC
-	JavaScript
+    Go MyComplicatedEnum = -2 * iota + 1
+    Python
+    ObjectiveC
+    JavaScript
     WorstProgrammingLanguage = ObjectiveC
     // alias ^
 )
