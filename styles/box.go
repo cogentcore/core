@@ -377,21 +377,21 @@ func BoxShadow1() []Shadow {
 			VOffset: units.Dp(3),
 			Blur:    units.Dp(1),
 			Spread:  units.Dp(-2),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(2),
 			Blur:    units.Dp(2),
 			Spread:  units.Zero(),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(1),
 			Blur:    units.Dp(5),
 			Spread:  units.Zero(),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -405,21 +405,21 @@ func BoxShadow2() []Shadow {
 			VOffset: units.Dp(2),
 			Blur:    units.Dp(4),
 			Spread:  units.Dp(-1),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(4),
 			Blur:    units.Dp(5),
 			Spread:  units.Zero(),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(1),
 			Blur:    units.Dp(10),
 			Spread:  units.Zero(),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -435,21 +435,21 @@ func BoxShadow3() []Shadow {
 			VOffset: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -463,21 +463,21 @@ func BoxShadow4() []Shadow {
 			VOffset: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -491,21 +491,21 @@ func BoxShadow5() []Shadow {
 			VOffset: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(-6),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(16),
 			Blur:    units.Dp(24),
 			Spread:  units.Dp(2),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Zero(),
 			VOffset: units.Dp(6),
 			Blur:    units.Dp(30),
 			Spread:  units.Dp(5),
-			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+			Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }

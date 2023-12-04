@@ -377,10 +377,10 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 			if !colors.IsNil(s.StateColor) {
 				clr = s.StateColor
 			}
-			bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(clr, s.StateLayer))
+			bg.Solid = colors.AlphaBlend(bg.Solid, colors.WithAF32(clr, s.StateLayer))
 		}
 		if s.Opacity < 1 {
-			bg.Solid = colors.SetA(bg.Solid, uint8(s.Opacity*255)*bg.Solid.A)
+			bg.Solid = colors.WithA(bg.Solid, uint8(s.Opacity*255)*bg.Solid.A)
 		}
 		return bg
 	}
@@ -393,10 +393,10 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 			if !colors.IsNil(s.StateColor) {
 				clr = s.StateColor
 			}
-			res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(clr, s.StateLayer))
+			res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.WithAF32(clr, s.StateLayer))
 		}
 		if s.Opacity < 1 {
-			res.Gradient.Stops[i].Color = colors.SetA(stop.Color, uint8(s.Opacity*255)*stop.Color.A)
+			res.Gradient.Stops[i].Color = colors.WithA(stop.Color, uint8(s.Opacity*255)*stop.Color.A)
 		}
 	}
 	return res

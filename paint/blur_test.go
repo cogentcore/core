@@ -111,21 +111,21 @@ func TestShadowBlur(t *testing.T) {
 		VOffset: units.Dp(6),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.SetAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
+		Color:   colors.WithAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
 	})
 	RunShadowBlur(t, "shadow5big_op12", styles.Shadow{
 		HOffset: units.Zero(),
 		VOffset: units.Dp(6),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12), // actual
+		Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12), // actual
 	})
 	RunShadowBlur(t, "shadow5big_op1off36", styles.Shadow{
 		HOffset: units.Zero(),
 		VOffset: units.Dp(36),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.SetAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
+		Color:   colors.WithAF32(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
 	})
 
 	RunShadowBlur(t, "shadow1sm_op1", styles.Shadow{
@@ -133,13 +133,13 @@ func TestShadowBlur(t *testing.T) {
 		VOffset: units.Dp(3),
 		Blur:    units.Dp(1),
 		Spread:  units.Dp(-2),
-		Color:   colors.SetAF32(colors.Scheme.Shadow, 1),
+		Color:   colors.WithAF32(colors.Scheme.Shadow, 1),
 	})
 	RunShadowBlur(t, "shadow1sm_op12", styles.Shadow{
 		HOffset: units.Zero(),
 		VOffset: units.Dp(3),
 		Blur:    units.Dp(1),
 		Spread:  units.Dp(-2),
-		Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+		Color:   colors.WithAF32(colors.Scheme.Shadow, 0.12),
 	})
 }
