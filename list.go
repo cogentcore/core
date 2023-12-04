@@ -13,6 +13,7 @@ import (
 
 // List returns a list of n colors with the given HCT chroma and tone
 // and varying hues spaced equally in order to minimize the number of similar colors.
+// This can be useful for automatically generating colors for things like graph lines.
 func List(n int, chroma float32, tone float32) []color.RGBA {
 	res := []color.RGBA{}
 	if n == 0 {
