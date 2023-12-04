@@ -131,7 +131,7 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 			valstr := lstr[hidx+1:]
 			val64, err := strconv.ParseFloat(valstr, 32)
 			if err != nil && cmd != "blend" { // blend handles separately
-				return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from '%s': %w", valstr, err)
+				return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from %q: %w", valstr, err)
 			}
 			val := float32(val64)
 			switch cmd {
@@ -161,7 +161,7 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 				valstr = lstr[hidx+1 : clridx]
 				val64, err := strconv.ParseFloat(valstr, 32)
 				if err != nil {
-					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from '%s': %w", valstr, err)
+					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from %q: %w", valstr, err)
 				}
 				val := float32(val64)
 				clrstr := lstr[clridx+1:]

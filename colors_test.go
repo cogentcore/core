@@ -44,7 +44,7 @@ func ExampleFromName() {
 	// Output: {154 205 50 255} <nil>
 }
 
-func ExampleFromName_fail() {
+func ExampleFromName_error() {
 	fmt.Println(FromName("invalidcolor"))
 	// Output: {0 0 0 0} colors.FromName: name not found: invalidcolor
 }
@@ -77,4 +77,9 @@ func ExampleFromString_hct() {
 func ExampleFromString_hcta() {
 	fmt.Println(FromString("hcta(83, 91, 48, 233)", Lightcoral))
 	// Output: {135 98 0 233} <nil>
+}
+
+func ExampleFromString_error() {
+	fmt.Println(FromString("lighten-something", Rosybrown))
+	// Output: {0 0 0 0} colors.FromString: error getting numeric value from "something": strconv.ParseFloat: parsing "something": invalid syntax
 }
