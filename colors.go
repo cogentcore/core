@@ -4,7 +4,7 @@
 
 package colors
 
-//go:generate goki generate
+//go:generate goki generate ./...
 
 import (
 	"errors"

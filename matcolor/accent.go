@@ -7,7 +7,7 @@ package matcolor
 import "image/color"
 
 // Accent contains the four standard variations of a base accent color.
-type Accent struct {
+type Accent struct { //gti:add
 
 	// Base is the base color
 	Base color.RGBA

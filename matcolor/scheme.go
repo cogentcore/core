@@ -8,7 +8,7 @@ import "image/color"
 
 // Scheme contains the colors for one color scheme (ex: light or dark).
 // To generate a scheme, use [NewScheme].
-type Scheme struct {
+type Scheme struct { //gti:add
 
 	// Primary is the primary color applied to important elements
 	Primary Accent

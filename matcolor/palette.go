@@ -7,7 +7,7 @@ package matcolor
 // Palette contains a tonal palette with tonal values
 // for each of the standard colors and any custom colors.
 // Use [NewPalette] to create a new palette.
-type Palette struct {
+type Palette struct { //gti:add
 
 	// the tones for the primary key color
 	Primary Tones

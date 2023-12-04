@@ -27,7 +27,7 @@ import (
 
 // Key contains the set of key colors used to generate
 // a [Scheme] and [Palette]
-type Key struct {
+type Key struct { //gti:add
 
 	// the primary accent key color
 	Primary color.RGBA
