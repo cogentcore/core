@@ -129,7 +129,7 @@ func ExampleFromHex_short() {
 	// Output: {255 51 170 255} <nil>
 }
 
-func ExampleFromHex_short_lower() {
+func ExampleFromHex_shortLower() {
 	fmt.Println(FromHex("#bb6"))
 	// Output: {187 187 102 255} <nil>
 }
@@ -137,4 +137,14 @@ func ExampleFromHex_short_lower() {
 func ExampleFromHex_error() {
 	fmt.Println(FromHex("#ef"))
 	// Output: {0 0 0 0} colors.FromHex: could not process "ef"
+}
+
+func ExampleAsHex() {
+	fmt.Println(AsHex(Blueviolet))
+	// Output: #8A2BE2
+}
+
+func ExampleAsHex_withA() {
+	fmt.Println(AsHex(SetA(Red, 100)))
+	// Output: #FF000064
 }

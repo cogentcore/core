@@ -230,7 +230,10 @@ func AsHex(c color.Color) string {
 	if c == nil {
 		return "nil"
 	}
-	r := AsRGBA(c)
+	r := color.NRGBAModel.Convert(c).(color.NRGBA)
+	if r.A == 255 {
+		return fmt.Sprintf("#%02X%02X%02X", r.R, r.G, r.B)
+	}
 	return fmt.Sprintf("#%02X%02X%02X%02X", r.R, r.G, r.B, r.A)
 }
 
