@@ -9,6 +9,21 @@ import (
 	"testing"
 )
 
+func TestToDots(t *testing.T) {
+	tests := map[Units]float32{
+		UnitPx: 100,
+	}
+	var uc Context
+	uc.Defaults()
+	for unit, want := range tests {
+		v := New(100, unit)
+		have := v.ToDots(&uc)
+		if want != have {
+			t.Errorf("expected %g for %v, but got %g", want, unit, have)
+		}
+	}
+}
+
 func TestValCvt(t *testing.T) {
 	var ctxt Context
 	ctxt.Defaults()
