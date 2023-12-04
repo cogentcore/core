@@ -18,3 +18,4 @@ Everything in here is very short and lightweight -- anything requiring more than
 
 * [fatomic](fatomic) provides wrappers around `sync/atomic` methods for doing atomic operations on floating point numbers.
 
+* [sentence](sentence) provides functions for creating formatted sentences.
