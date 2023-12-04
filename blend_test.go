@@ -17,9 +17,6 @@ func TestAlphaBlend(t *testing.T) {
 	alphas := []float32{0.1, 0.5, 0.9}
 
 	for _, a := range alphas {
-		// dst := Blue
-		// dst.B = 200
-		// dst := SetB(Yellow, 100)
 		dst := Lightblue
 		src := SetAF32(Darkblue, a)
 
@@ -31,7 +28,6 @@ func TestAlphaBlend(t *testing.T) {
 		img := image.NewRGBA(isz)
 
 		b := AlphaBlend(dst, src)
-		fmt.Println(dst, src, b)
 
 		draw.Draw(img, i0, &image.Uniform{dst}, image.Point{}, draw.Src)
 		draw.Draw(img, i1, &image.Uniform{src}, image.Point{}, draw.Src)
@@ -39,15 +35,7 @@ func TestAlphaBlend(t *testing.T) {
 		draw.Draw(img, i3, &image.Uniform{dst}, image.Point{}, draw.Src)
 		draw.Draw(img, i3, &image.Uniform{src}, image.Point{}, draw.Over)
 
-		fnm := fmt.Sprintf("blend_%2d.png", int(a*100))
-		err := images.Save(img, fnm)
-		if err != nil {
-			t.Error(err)
-		}
-		ours := img.At(402, 2)
-		theirs := img.At(602, 2)
-		if ours != theirs {
-			t.Errorf("colors don't match: %v %v", ours, theirs)
-		}
+		fnm := fmt.Sprintf("blend_%2d", int(a*100))
+		images.Assert(t, img, fnm)
 	}
 }
