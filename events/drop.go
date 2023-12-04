@@ -5,29 +5,30 @@
 package events
 
 import (
+	"fmt"
+
 	"goki.dev/goosi/events/key"
-	"goki.dev/goosi/mimedata"
 )
 
-// dnd.Drag represents the drag-and-drop event, specifically the drop
-type Drag struct {
+// DragDrop represents the drag-and-drop Drop event
+type DragDrop struct {
 	Base
 
-	// When event is received by target, Mod indicates the suggested modifier
+	// When event is received by target, DropMod indicates the suggested modifier
 	// action associated with the drop (affected by holding down modifier
-	// keys), suggesting what to do with the dropped item, where appropriate
-	// -- receivers can ignore or process in their own relevant way as needed,
+	// keys), suggesting what to do with the dropped item, where appropriate.
+	// Receivers can ignore or process in their own relevant way as needed,
 	// BUT it is essential to update the event with the actual type of Mod
 	// action taken, because the event will be sent back to the source with
 	// this Mod as set by the receiver.  The main consequence is that a
 	// DropMove requires the drop source to delete itself once the event has
-	// been received -- otherwise it (typically) doesn't do anything, so just
+	// been received, otherwise it (typically) doesn't do anything, so just
 	// be careful about that particular case.
-	Mod DropMods
+	DropMod DropMods
 
-	// Data contains the MIME-typed data -- multiple different types are
-	// possible (and encouraged)
-	Data mimedata.Mimes
+	// Data contains the data from the Source of the drag,
+	// typically a mimedata encoded representation.
+	Data any
 
 	// Source of the drop -- only available for internal DND actions
 	Source any
@@ -37,18 +38,22 @@ type Drag struct {
 	Target any
 }
 
-func NewDrag(typ Types, mdrag *Mouse) *Drag {
-	ev := &Drag{}
+func NewDragDrop(typ Types, mdrag *Mouse) *DragDrop {
+	ev := &DragDrop{}
 	ev.Base = mdrag.Base
+	ev.Flags.SetFlag(false, Handled)
 	ev.Typ = typ
+	ev.DefaultMod()
 	return ev
 }
 
-func (ev *Drag) HasPos() bool {
-	return true
+func (ev *DragDrop) String() string {
+	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time())
 }
 
-// todo:
+func (ev *DragDrop) HasPos() bool {
+	return true
+}
 
 // DropMods indicates the modifier associated with the drop action (affected by
 // holding down modifier keys), suggesting what to do with the dropped item,
@@ -92,6 +97,6 @@ func DefaultModBits(mods key.Modifiers) DropMods {
 }
 
 // DefaultMod sets the default DropMod modifier action based on modifier keys
-func (e *Drag) DefaultMod() {
-	e.Mod = DefaultModBits(e.Mods)
+func (e *DragDrop) DefaultMod() {
+	e.DropMod = DefaultModBits(e.Mods)
 }

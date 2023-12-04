@@ -106,13 +106,6 @@ const (
 	// MouseDrag events has occurred to engage the DragStart event.
 	DragStart
 
-	// Drop is the final action of the drag-n-drop sequence, when
-	// an item being Dragged is dropped on top of a target element.
-	// This is also triggered with a nil target if the Escape key
-	// is pressed while dragging.  The target will also be nil if
-	// the target does not have the DropOK state active.
-	Drop
-
 	// DragMove is for a MouseDrag event during the drag-n-drop sequence.
 	// Usually don't need to listen to this one.  MouseDrag is also sent.
 	DragMove
@@ -124,6 +117,15 @@ const (
 	// DragLeave is like MouseLeave but after a DragStart during a
 	// drag-n-drop sequence.  MouseLeave is not sent in this case.
 	DragLeave
+
+	// Drop is sent when an item being Dragged is dropped on top of a
+	// target element. The event struct should be DragDrop.
+	Drop
+
+	// DropDeleteSource is sent to the source Drag element if the
+	// Drag-n-Drop event is a Move type, which requires deleting
+	// the source element.  The event struct should be DragDrop.
+	DropDeleteSource
 
 	// SlideStart is for a Slideable element when Active and a
 	// sufficient distance of MouseDrag events has occurred to

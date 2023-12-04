@@ -59,16 +59,6 @@ func NewMouse(typ Types, but Buttons, where image.Point, mods key.Modifiers) *Mo
 	return ev
 }
 
-// NewEventCopy makes a new copy of an existing event.
-// it resets the Handled flag.
-// func NewEventCopy(typ events.Types, cp *Event) *Mouse {
-// 	ev := &Mouse{}
-// 	*ev = *cp
-// 	ev.Typ = typ
-// 	ev.ClearHandled()
-// 	return ev
-// }
-
 func (ev *Mouse) String() string {
 	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time())
 }
