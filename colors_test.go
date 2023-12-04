@@ -193,3 +193,18 @@ func ExampleAlphaBlend() {
 	fmt.Println(AlphaBlend(Wheat, WithAF32(Blue, 0.5)))
 	// Output: {123 111 217 255}
 }
+
+func ExampleInverse() {
+	fmt.Println(Inverse(Limegreen))
+	// Output: {205 50 205 255}
+}
+
+func ExampleAdd() {
+	fmt.Println(Add(Red, Blue))
+	// Output: {255 0 255 255}
+}
+
+func ExampleSub() {
+	fmt.Println(Sub(Purple, Blue))
+	// Output: {128 0 0 0}
+}
