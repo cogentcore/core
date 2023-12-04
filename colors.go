@@ -110,7 +110,7 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 			format := "%d,%d,%d"
 			fmt.Sscanf(val, format, &h, &s, &l)
 		}
-		return SetA(hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0), uint8(a)), nil
+		return WithA(hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0), uint8(a)), nil
 	case strings.HasPrefix(lstr, "hct("), strings.HasPrefix(lstr, "hcta("):
 		val := lstr[strings.Index(lstr, "(")+1:]
 		val = strings.TrimRight(val, ")")
@@ -124,7 +124,7 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 			format := "%d,%d,%d"
 			fmt.Sscanf(val, format, &h, &c, &t)
 		}
-		return SetA(hct.New(float32(h), float32(c), float32(t)), uint8(a)), nil
+		return WithA(hct.New(float32(h), float32(c), float32(t)), uint8(a)), nil
 	default:
 		if hidx := strings.Index(lstr, "-"); hidx > 0 {
 			cmd := lstr[:hidx]
@@ -237,43 +237,43 @@ func AsHex(c color.Color) string {
 	return fmt.Sprintf("#%02X%02X%02X%02X", r.R, r.G, r.B, r.A)
 }
 
-// SetR returns the given color with the red
+// WithR returns the given color with the red
 // component (R) set to the given alpha-premultiplied value
-func SetR(c color.Color, r uint8) color.RGBA {
+func WithR(c color.Color, r uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.R = r
 	return rc
 }
 
-// SetG returns the given color with the green
+// WithG returns the given color with the green
 // component (G) set to the given alpha-premultiplied value
-func SetG(c color.Color, g uint8) color.RGBA {
+func WithG(c color.Color, g uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.G = g
 	return rc
 }
 
-// SetB returns the given color with the blue
+// WithB returns the given color with the blue
 // component (B) set to the given alpha-premultiplied value
-func SetB(c color.Color, b uint8) color.RGBA {
+func WithB(c color.Color, b uint8) color.RGBA {
 	rc := AsRGBA(c)
 	rc.B = b
 	return rc
 }
 
-// SetA returns the given color with the
+// WithA returns the given color with the
 // transparency (A) set to the given value,
 // with the color premultiplication updated.
-func SetA(c color.Color, a uint8) color.RGBA {
+func WithA(c color.Color, a uint8) color.RGBA {
 	n := color.NRGBAModel.Convert(c).(color.NRGBA)
 	n.A = a
 	return AsRGBA(n)
 }
 
-// SetAF32 returns the given color with the
+// WithAF32 returns the given color with the
 // transparency (A) set to the given float32 value
 // between 0 and 1, with the color premultiplication updated.
-func SetAF32(c color.Color, a float32) color.RGBA {
+func WithAF32(c color.Color, a float32) color.RGBA {
 	n := color.NRGBAModel.Convert(c).(color.NRGBA)
 	a = mat32.Clamp(a, 0, 1)
 	n.A = uint8(a * 255)
@@ -329,7 +329,6 @@ func AlphaBlend(dst, src color.Color) color.RGBA {
 
 	dr, dg, db, da := dst.RGBA()
 	sr, sg, sb, sa := src.RGBA()
-	// The 0x101 is here for the same reason as in [image/draw.drawRGBA]
 	a := (m - sa)
 
 	res.R = uint8((uint32(dr)*a/m + sr) >> 8)

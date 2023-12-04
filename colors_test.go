@@ -145,6 +145,31 @@ func ExampleAsHex() {
 }
 
 func ExampleAsHex_withA() {
-	fmt.Println(AsHex(SetA(Red, 100)))
+	fmt.Println(AsHex(WithA(Red, 100)))
 	// Output: #FF000064
+}
+
+func ExampleWithR() {
+	fmt.Println(WithR(Blue, 50))
+	// Output: {50 0 255 255}
+}
+
+func ExampleWithG() {
+	fmt.Println(WithG(Orange, 11))
+	// Output: {255 11 0 255}
+}
+
+func ExampleWithB() {
+	fmt.Println(WithB(Pink, 100))
+	// Output: {255 192 100 255}
+}
+
+func ExampleWithA() {
+	fmt.Println(WithA(Royalblue, 215))
+	// Output: {55 88 190 215}
+}
+
+func ExampleWithAF32() {
+	fmt.Println(WithAF32(Olive, 0.6))
+	// Output: {77 77 0 153}
 }

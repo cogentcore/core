@@ -18,7 +18,7 @@ func TestAlphaBlend(t *testing.T) {
 
 	for _, a := range alphas {
 		dst := Lightblue
-		src := SetAF32(Darkblue, a)
+		src := WithAF32(Darkblue, a)
 
 		isz := image.Rectangle{Max: image.Point{800, 200}}
 		i0 := image.Rect(0, 0, 200, 200)
