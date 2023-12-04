@@ -600,7 +600,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
 		// so that it can be seen
-		dclr := colors.SetAF32(clr, 1)
+		dclr := colors.WithAF32(clr, 1)
 		s.BackgroundColor.SetSolid(dclr)
 		s.Color = colors.AsRGBA(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
