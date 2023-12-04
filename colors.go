@@ -63,9 +63,9 @@ func FromName(name string) (color.RGBA, error) {
 }
 
 // FromString returns a color value from the given string.
-// FromString accepts the following types of strings: hex values,
-// standard color names, "none" or "off", rgb, rgba, hsl, hsla,
-// hct, and hcta values, or any of the following transformations
+// FromString accepts the following types of strings: standard
+// color names, hex, rgb, rgba, hsl, hsla, hct, and hcta values,
+// "none" or "off", or any of the following transformations
 // (which use the base color as the starting point):
 //
 //   - currentcolor = base color
@@ -158,13 +158,13 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 				if clridx < 0 {
 					return color.RGBA{}, fmt.Errorf("colors.FromString: blend color spec not found; format is: blend-PCT-color, got: %v; PCT-color is: %v", lstr, valstr)
 				}
-				valstr = lstr[hidx+1 : clridx]
-				val64, err := strconv.ParseFloat(valstr, 32)
+				bvalstr := valstr[:clridx]
+				val64, err := strconv.ParseFloat(bvalstr, 32)
 				if err != nil {
-					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from %q: %w", valstr, err)
+					return color.RGBA{}, fmt.Errorf("colors.FromString: error getting numeric value from %q: %w", bvalstr, err)
 				}
 				val := float32(val64)
-				clrstr := lstr[clridx+1:]
+				clrstr := valstr[clridx+1:]
 				othc, err := FromString(clrstr, base)
 				return Blend(val, base, othc), err
 			}
