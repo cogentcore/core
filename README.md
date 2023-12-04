@@ -23,9 +23,9 @@ package mypackage
 After the type declaration of *each* enum, add one of the following two comment directives:
 
 * `//enums:enum` for standard enums
-* `//enums:bitflag` for bit flag enums (see below for more information)
+* `//enums:bitflag` for bit flag enums (see [Bit flag enums](#bit-flag-enums) for more information)
 
-For example,
+Then, declare your enum values in a constant block using `iota`. The constant values can be unsequential, offset, and/or negative, but most enums are typically none of those. Also, you can declare aliases for values. For example:
 
 ```go
 package mypackage
@@ -43,10 +43,12 @@ const (
 type MyBitFlagEnum int64 //enums:bitflag
 
 const (
-    Enabled MyBitFlagEnum = iota
+    Enabled MyBitFlagEnum = -2 * iota + 1
     Disabled
     Focused
     Hovered
+    Inactive = Disabled
+    // alias ^
 )
 ```
 
