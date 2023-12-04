@@ -21,11 +21,6 @@ func IsNil(c color.Color) bool {
 	return AsRGBA(c) == color.RGBA{}
 }
 
-// SetToNil sets the given color to a nil initial default color
-func SetToNil(c *color.Color) {
-	*c = color.RGBA{}
-}
-
 // FromRGB makes a new RGBA color from the given
 // RGB uint8 values, using 255 for A.
 func FromRGB(r, g, b uint8) color.RGBA {
@@ -53,8 +48,8 @@ func AsString(c color.Color) string {
 	if s, ok := c.(fmt.Stringer); ok {
 		return s.String()
 	}
-	r, g, b, a := c.RGBA()
-	return fmt.Sprintf("rgba(%d, %d, %d, %d)", r, g, b, a)
+	r := AsRGBA(c)
+	return fmt.Sprintf("rgba(%d, %d, %d, %d)", r.R, r.G, r.B, r.A)
 }
 
 // FromName returns the color value specified
