@@ -103,3 +103,38 @@ func ExampleFromString_error() {
 	fmt.Println(FromString("lighten-something", Rosybrown))
 	// Output: {0 0 0 0} colors.FromString: error getting numeric value from "something": strconv.ParseFloat: parsing "something": invalid syntax
 }
+
+func ExampleFromAny() {
+	fmt.Println(FromAny("rgb(12, 18, 92)", Lawngreen))
+	// Output: {12 18 92 255} <nil>
+}
+
+func ExampleFromAny_error() {
+	fmt.Println(FromAny([]float32{}, Yellowgreen))
+	// Output: {0 0 0 0} colors.FromAny: could not get color from value [] of type []float32
+}
+
+func ExampleFromHex() {
+	fmt.Println(FromHex("#FF00FF"))
+	// Output: {255 0 255 255} <nil>
+}
+
+func ExampleFromHex_lower() {
+	fmt.Println(FromHex("#1abc2e"))
+	// Output: {26 188 46 255} <nil>
+}
+
+func ExampleFromHex_short() {
+	fmt.Println(FromHex("F3A"))
+	// Output: {255 51 170 255} <nil>
+}
+
+func ExampleFromHex_short_lower() {
+	fmt.Println(FromHex("#bb6"))
+	// Output: {187 187 102 255} <nil>
+}
+
+func ExampleFromHex_error() {
+	fmt.Println(FromHex("#ef"))
+	// Output: {0 0 0 0} colors.FromHex: could not process "ef"
+}

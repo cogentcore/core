@@ -196,7 +196,7 @@ func FromAny(val any, base color.Color) (color.RGBA, error) {
 	case color.Color:
 		return AsRGBA(valv), nil
 	default:
-		return color.RGBA{}, fmt.Errorf("colors.FromAny: could not set color from value %v of type %T", val, val)
+		return color.RGBA{}, fmt.Errorf("colors.FromAny: could not get color from value %v of type %T", val, val)
 	}
 }
 
@@ -219,7 +219,7 @@ func FromHex(hex string) (color.RGBA, error) {
 		format := "%02x%02x%02x%02x"
 		fmt.Sscanf(hex, format, &r, &g, &b, &a)
 	} else {
-		return color.RGBA{}, errors.New("colors.FromHex: could not process: " + hex)
+		return color.RGBA{}, fmt.Errorf("colors.FromHex: could not process %q", hex)
 	}
 	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
 }
