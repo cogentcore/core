@@ -29,7 +29,7 @@ type Days int32 //enums:enum -transform=snake_upper -addprefix=DAY_ -gql -no-jso
 
 const (
 	// Sunday is the first day of the week
-	Sunday Days = 2*iota + 1
+	Sunday Days = -2*iota + 1
 	// Monday is the second day of the week
 	Monday
 	// Tuesday is the third day of the week
