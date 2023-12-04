@@ -20,6 +20,8 @@ package mypackage
 ...
 ```
 
+Enum types are simply defined as any other Go type would be, just with a comment directive after it. Standard enum types can be defined as any signed or unsigned integer type, although `int32` is preferred because enum types could need to be big but never need to be giant. Bit flag enum types must be `int64`; see [Bit flag enums](#bit-flag-enums) for why.
+
 After the type declaration of *each* enum, add one of the following two comment directives:
 
 * `//enums:enum` for standard enums
@@ -43,11 +45,20 @@ const (
 type MyBitFlagEnum int64 //enums:bitflag
 
 const (
-    Enabled MyBitFlagEnum = -2 * iota + 1
+    Enabled MyBitFlagEnum = iota
     Disabled
     Focused
     Hovered
-    Inactive = Disabled
+)
+
+type MyComplicatedEnum int16 //enums:enum
+
+const (
+	Go MyComplicatedEnum = -2 * iota + 1
+	Python
+	ObjectiveC
+	JavaScript
+    WorstProgrammingLanguage = ObjectiveC
     // alias ^
 )
 ```
@@ -61,7 +72,7 @@ package mypackage
 
 //go:generate enumgen -json -transform snake
 
-type MyEnum int32 //enums:enum -add-prefix fruit_ -no-line-comment -sql
+type MyEnum uint32 //enums:enum -add-prefix fruit_ -no-line-comment -sql
 
 const (
     Apple MyEnum = iota
@@ -88,7 +99,7 @@ package mypackage
 
 //go:generate enumgen
 
-type Days int8 //enums:enum
+type Days uint8 //enums:enum
 
 const (
 	// Sunday is the first day of the week
