@@ -339,8 +339,8 @@ func AlphaBlend(dst, src color.Color) color.RGBA {
 }
 
 // Inverse returns the inverse of the given color
-// (255 - each component);
-// does not change the alpha channel.
+// (255 - each component). It does not change the
+// alpha channel.
 func Inverse(c color.Color) color.RGBA {
 	r := AsRGBA(c)
 	return color.RGBA{255 - r.R, 255 - r.G, 255 - r.B, r.A}

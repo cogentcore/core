@@ -173,3 +173,23 @@ func ExampleWithAF32() {
 	fmt.Println(WithAF32(Olive, 0.6))
 	// Output: {77 77 0 153}
 }
+
+func ExampleClearer() {
+	fmt.Println(Clearer(Gainsboro, 20))
+	// Output: {176 176 176 204}
+}
+
+func ExampleOpaquer() {
+	fmt.Println(Opaquer(WithAF32(Green, 0.15), 30))
+	// Output: {0 57 0 114}
+}
+
+func ExampleBlend() {
+	fmt.Println(Blend(30, Lightblue, Darkblue))
+	// Output: {121 151 203 255}
+}
+
+func ExampleAlphaBlend() {
+	fmt.Println(AlphaBlend(Wheat, WithAF32(Blue, 0.5)))
+	// Output: {123 111 217 255}
+}
