@@ -7,18 +7,35 @@ package units
 import (
 	"fmt"
 	"testing"
+
+	"goki.dev/mat32/v2"
 )
 
 func TestToDots(t *testing.T) {
 	tests := map[Units]float32{
-		UnitPx: 100,
+		UnitPx:  50,
+		UnitDp:  30,
+		UnitEw:  200,
+		UnitEh:  250,
+		UnitPw:  450,
+		UnitPh:  350,
+		UnitRem: 800,
+		UnitEm:  800,
+		UnitEx:  400,
+		UnitCh:  400,
 	}
 	var uc Context
 	uc.Defaults()
+	uc.Vpw = 1920
+	uc.Vph = 1080
+	uc.Elw = 400
+	uc.Elh = 500
+	uc.Paw = 900
+	uc.Pah = 700
 	for unit, want := range tests {
-		v := New(100, unit)
+		v := New(50, unit)
 		have := v.ToDots(&uc)
-		if want != have {
+		if mat32.Abs(have-want) > 0.001 {
 			t.Errorf("expected %g for %v, but got %g", want, unit, have)
 		}
 	}
