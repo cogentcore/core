@@ -106,7 +106,7 @@ func RadialGradient() *Gradient {
 	}
 }
 
-// AddStop adds a new stops with the given color, offset, and opacity to the gradient.
+// AddStop adds a new stop with the given color, offset, and opacity to the gradient.
 func (g *Gradient) AddStop(color color.RGBA, offset, opacity float32) *Gradient {
 	g.Stops = append(g.Stops, GradientStop{Color: color, Offset: offset, Opacity: opacity})
 	return g
