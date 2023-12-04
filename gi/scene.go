@@ -107,6 +107,9 @@ type Scene struct {
 	// ShowIter counts up at start of showing a Scene
 	// to trigger Show event and other steps at start of first show
 	ShowIter int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+
+	// ReRender items are re-rendered after the current pass
+	ReRender []Widget
 }
 
 func (sc *Scene) FlagType() enums.BitFlagSetter {

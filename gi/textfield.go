@@ -861,13 +861,6 @@ func (tf *TextField) DeleteSelection() string {
 	return cut
 }
 
-// MimeData adds selection to mimedata.
-// Satisfies Clipper interface -- can be extended in subtypes.
-func (tf *TextField) MimeData(md *mimedata.Mimes) {
-	cpy := tf.Selection()
-	*md = append(*md, mimedata.NewTextData(cpy))
-}
-
 // Copy copies any selected text to the clipboard.
 // Satisfies Clipper interface -- can be extended in subtypes.
 // optionally resetting the current selection
@@ -879,8 +872,8 @@ func (tf *TextField) Copy(reset bool) {
 	if !tf.HasSelection() {
 		return
 	}
-	md := mimedata.NewMimes(0, 1)
-	tf.This().(Clipper).MimeData(&md)
+
+	md := mimedata.NewText(tf.Text())
 	em := tf.EventMgr()
 	if em != nil {
 		em.ClipBoard().Write(md)
@@ -928,16 +921,16 @@ func (tf *TextField) InsertAtCursor(str string) {
 func (tf *TextField) ContextMenu(m *Scene) {
 	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
-			tf.This().(Clipper).Copy(true)
+			tf.Copy(true)
 		})
 	if !tf.IsReadOnly() {
 		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
-				tf.This().(Clipper).Cut()
+				tf.Cut()
 			})
 		pbt := NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
 			OnClick(func(e events.Event) {
-				tf.This().(Clipper).Paste()
+				tf.Paste()
 			})
 		cb := tf.Sc.EventMgr.ClipBoard()
 		if cb != nil {
@@ -1515,7 +1508,7 @@ func (tf *TextField) HandleTextFieldKeys() {
 		case keyfun.Copy:
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.This().(Clipper).Copy(true) // reset
+			tf.Copy(true) // reset
 		}
 		if tf.IsReadOnly() || e.IsHandled() {
 			return
@@ -1565,11 +1558,11 @@ func (tf *TextField) HandleTextFieldKeys() {
 		case keyfun.Cut:
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.This().(Clipper).Cut()
+			tf.Cut()
 		case keyfun.Paste:
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.This().(Clipper).Paste()
+			tf.Paste()
 		case keyfun.Complete:
 			e.SetHandled()
 			tf.OfferComplete(force)

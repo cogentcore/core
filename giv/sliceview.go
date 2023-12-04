@@ -1514,9 +1514,8 @@ func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
 	return md
 }
 
-// Copy copies selected rows to clip.Board, optionally resetting the selection
-// satisfies gi.Clipper interface and can be overridden by subtypes
-func (sv *SliceViewBase) Copy(reset bool) {
+// CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection
+func (sv *SliceViewBase) CopyIdxs(reset bool) {
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return
@@ -1527,15 +1526,6 @@ func (sv *SliceViewBase) Copy(reset bool) {
 	}
 	if reset {
 		sv.UnselectAllIdxs()
-	}
-}
-
-// CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection
-func (sv *SliceViewBase) CopyIdxs(reset bool) {
-	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Copy(reset)
-	} else {
-		sv.Copy(reset)
 	}
 }
 
@@ -1555,9 +1545,8 @@ func (sv *SliceViewBase) DeleteIdxs() {
 	sv.This().(SliceViewer).UpdateWidgets()
 }
 
-// Cut copies selected indexes to clip.Board and deletes selected indexes
-// satisfies gi.Clipper interface and can be overridden by subtypes
-func (sv *SliceViewBase) Cut() {
+// CutIdxs copies selected indexes to clip.Board and deletes selected indexes
+func (sv *SliceViewBase) CutIdxs() {
 	if len(sv.SelIdxs) == 0 {
 		return
 	}
@@ -1576,32 +1565,13 @@ func (sv *SliceViewBase) Cut() {
 	sv.This().(SliceViewer).UpdateWidgets()
 }
 
-// CutIdxs copies selected indexes to clip.Board and deletes selected indexes
-func (sv *SliceViewBase) CutIdxs() {
-	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Cut()
-	} else {
-		sv.Cut()
-	}
-}
-
-// Paste pastes clipboard at TmpIdx
-// satisfies gi.Clipper interface and can be overridden by subtypes
-func (sv *SliceViewBase) Paste() {
+// PasteIdx pastes clipboard at given idx
+func (sv *SliceViewBase) PasteIdx(idx int) {
+	sv.TmpIdx = idx
 	dt := sv.This().(SliceViewer).MimeDataType()
 	md := sv.EventMgr().ClipBoard().Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.TmpIdx)
-	}
-}
-
-// PasteIdx pastes clipboard at given idx
-func (sv *SliceViewBase) PasteIdx(idx int) {
-	sv.TmpIdx = idx
-	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Paste()
-	} else {
-		sv.Paste()
 	}
 }
 

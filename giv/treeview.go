@@ -52,6 +52,16 @@ type TreeViewer interface {
 	// UpdateBranchIcons is called during DoLayout to update branch icons
 	// when everything should be configured, prior to rendering.
 	UpdateBranchIcons()
+
+	// MimeData adds mimedata for this node: a text/plain of the Path.
+	MimeData(md *mimedata.Mimes)
+
+	// MakePasteMenu makes the menu of options for paste events
+	MakePasteMenu(m *gi.Scene, md mimedata.Mimes, fun func())
+
+	// DropFinalize is called to finalize Drop actions on the Source node.
+	// Only relevant for DropMod == DropMove.
+	DropFinalize(de *events.DragDrop)
 }
 
 // AsTreeView returns the given value as a value of type TreeView if the type
@@ -1232,7 +1242,7 @@ func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
 		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
-			tv.This().(gi.Clipper).Copy(true)
+			tv.Copy(true)
 		})
 	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 		SetState(!tv.HasSelection(), states.Disabled).
@@ -1261,16 +1271,16 @@ func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
 		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
-			tv.This().(gi.Clipper).Copy(true)
+			tv.Copy(true)
 		})
 	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
 		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
-			tv.This().(gi.Clipper).Cut()
+			tv.Cut()
 		})
 	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
 		OnClick(func(e events.Event) {
-			tv.This().(gi.Clipper).Paste()
+			tv.Paste()
 		})
 	cb := tv.Sc.EventMgr.ClipBoard()
 	if cb != nil {
@@ -1325,7 +1335,6 @@ func (tv *TreeView) IsRoot(op string) bool {
 //    Copy / Cut / Paste
 
 // MimeData adds mimedata for this node: a text/plain of the Path.
-// satisfies Clipper.MimeData interface
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	if tv.SyncNode != nil {
 		tv.MimeDataSync(md)
@@ -1368,11 +1377,11 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.This().(gi.Clipper).MimeData(&md) // source is always first..
+	tv.MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
-				sn.This().(gi.Clipper).MimeData(&md)
+				sn.MimeData(&md)
 			}
 		}
 	}
@@ -1419,28 +1428,30 @@ func (tv *TreeView) Paste() { //gti:add
 func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
 	mf := func(m *gi.Scene) {
-		tv.MakePasteMenu(m, md)
+		tv.This().(TreeViewer).MakePasteMenu(m, md, nil)
 	}
 	pos := tv.ContextMenuPos(nil)
 	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
 }
 
-// todo: this should be a TreeView interface method!
-
 // MakePasteMenu makes the menu of options for paste events
-func (tv *TreeView) MakePasteMenu(m *gi.Scene, md mimedata.Mimes) {
+func (tv *TreeView) MakePasteMenu(m *gi.Scene, md mimedata.Mimes, fun func()) {
 	gi.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tv.PasteAssign(md)
+		fun()
 	})
 	gi.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
 		tv.PasteChildren(md, events.DropCopy)
+		fun()
 	})
 	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
 		gi.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
 			tv.PasteBefore(md, events.DropCopy)
+			fun()
 		})
 		gi.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
 			tv.PasteAfter(md, events.DropCopy)
+			fun()
 		})
 	}
 	gi.NewButton(m).SetText("Cancel")
@@ -1568,11 +1579,11 @@ func (tv *TreeView) DragStart(e events.Event) {
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.This().(gi.Clipper).MimeData(&md) // source is always first..
+	tv.MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
-				sn.This().(gi.Clipper).MimeData(&md)
+				sn.MimeData(&md)
 			}
 		}
 	}
@@ -1590,7 +1601,9 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	tv.UnselectAll()
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *gi.Scene) {
-		tv.MakeDropMenu(m, md, de)
+		tv.This().(TreeViewer).MakePasteMenu(m, md, func() {
+			tv.This().(TreeViewer).DropFinalize(de)
+		})
 	}
 	pos := tv.ContextMenuPos(nil)
 	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
@@ -1601,33 +1614,6 @@ func (tv *TreeView) DragDrop(e events.Event) {
 func (tv *TreeView) DropFinalize(de *events.DragDrop) {
 	tv.UnselectAll()
 	tv.Sc.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
-}
-
-// MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TreeView) MakeDropMenu(m *gi.Scene, md mimedata.Mimes, de *events.DragDrop) {
-	mod := de.DropMod
-	tv.Sc.EventMgr.DragMenuAddModLabel(m, mod)
-	if mod == events.DropCopy {
-		gi.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
-			tv.PasteAssign(md)
-			tv.DropFinalize(de)
-		})
-	}
-	gi.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
-		tv.PasteChildren(md, mod)
-		tv.DropFinalize(de)
-	})
-	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
-		gi.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
-			tv.PasteBefore(md, mod)
-			tv.DropFinalize(de)
-		})
-		gi.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
-			tv.PasteAfter(md, mod)
-			tv.DropFinalize(de)
-		})
-	}
-	gi.NewButton(m).SetText("Cancel")
 }
 
 // DropDeleteSource handles delete source event for DropMove case
@@ -1676,18 +1662,6 @@ func (tv *TreeView) DragNDropExternal(de events.Event) {
 	}
 	de.SetHandled()
 	tv.This().(gi.DragNDropper).DropExternal(de.Data, de.Mod)
-}
-
-
-// DragNDropFinalizeDefMod is called to finalize actions on the Source node prior to
-// performing target actions -- uses default drop mod in place when event was dropped.
-func (tv *TreeView) DragNDropFinalizeDefMod() {
-	win := tv.ParentRenderWin()
-	if win == nil {
-		return
-	}
-	tv.UnselectAll()
-	win.FinalizeDragNDrop(win.EventMgr.DNDDropMod)
 }
 
 */
@@ -1764,7 +1738,7 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 		tv.ToggleClose()
 		kt.SetHandled()
 	case keyfun.Copy:
-		tv.This().(gi.Clipper).Copy(true)
+		tv.Copy(true)
 		kt.SetHandled()
 	}
 	if !tv.RootIsReadOnly() && !kt.IsHandled() {
@@ -1782,10 +1756,10 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 			tv.InsertAfter()
 			kt.SetHandled()
 		case keyfun.Cut:
-			tv.This().(gi.Clipper).Cut()
+			tv.Cut()
 			kt.SetHandled()
 		case keyfun.Paste:
-			tv.This().(gi.Clipper).Paste()
+			tv.Paste()
 			kt.SetHandled()
 		}
 	}

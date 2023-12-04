@@ -212,6 +212,11 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 	wb.SetNeedsRender(updt)
 }
 
+// AddReRender adds given widget to be re-rendered next pass
+func (sc *Scene) AddReRender(w Widget) {
+	sc.ReRender = append(sc.ReRender, w)
+}
+
 // note: this is replacement for "SetNeedsFullReRender()" call:
 
 // SetNeedsLayoutUpdate sets the ScNeedsLayout flag
@@ -462,6 +467,15 @@ func (sc *Scene) DoUpdate() bool {
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene render done")
+	case len(sc.ReRender) > 0:
+		for _, w := range sc.ReRender {
+			w.SetFlag(true, ScNeedsRender)
+		}
+		sc.ReRender = nil
+		sc.DoNeedsRender()
+		sc.SetFlag(false, ScNeedsRender)
+		sc.SetFlag(true, ScImageUpdated)
+
 	default:
 		return false
 	}

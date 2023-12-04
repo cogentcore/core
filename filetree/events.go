@@ -204,21 +204,21 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
-			fn.This().(gi.Clipper).Copy(true)
+			fn.Copy(true)
 		})
 	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
-			fn.This().(gi.Clipper).Cut()
+			fn.Cut()
 		})
 	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
-			fn.This().(gi.Clipper).Paste()
+			fn.Paste()
 		})
 	cb := fn.Sc.EventMgr.ClipBoard()
 	if cb != nil {

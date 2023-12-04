@@ -305,12 +305,17 @@ func (lb *Label) HandleLabelKeys() {
 		kf := keyfun.Of(e.KeyChord())
 		if kf == keyfun.Copy {
 			e.SetHandled()
-			md := mimedata.NewText(lb.Text)
-			lb.This().(Clipper).MimeData(&md)
-			lb.This().(Clipper).Copy(true)
-			fmt.Println("cp", md)
+			lb.Copy(true)
 		}
 	})
+}
+
+func (lb *Label) Copy(reset bool) {
+	md := mimedata.NewText(lb.Text)
+	em := lb.EventMgr()
+	if em != nil {
+		em.ClipBoard().Write(md)
+	}
 }
 
 func (lb *Label) ConfigWidget() {
