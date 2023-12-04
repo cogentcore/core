@@ -64,9 +64,9 @@ func FromName(name string) (color.RGBA, error) {
 
 // FromString returns a color value from the given string.
 // FromString accepts the following types of strings: hex values,
-// standard color names, "none" or "off", or
-// any of the following transformations (which
-// use the base color as the starting point):
+// standard color names, "none" or "off", rgb, rgba, hsl, hsla,
+// hct, and hcta values, or any of the following transformations
+// (which use the base color as the starting point):
 //
 //   - currentcolor = base color
 //   - inverse = inverse of base color
@@ -83,14 +83,7 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 	switch {
 	case lstr[0] == '#':
 		return FromHex(str)
-	case strings.HasPrefix(lstr, "hsl("):
-		val := lstr[4:]
-		val = strings.TrimRight(val, ")")
-		format := "%d,%d,%d"
-		var h, s, l int
-		fmt.Sscanf(val, format, &h, &s, &l)
-		return hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0).AsRGBA(), nil
-	case strings.HasPrefix(lstr, "rgb("):
+	case strings.HasPrefix(lstr, "rgb("), strings.HasPrefix(lstr, "rgba("):
 		val := lstr[4:]
 		val = strings.TrimRight(val, ")")
 		val = strings.Trim(val, "%")
@@ -103,15 +96,37 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 		} else {
 			fmt.Sscanf(val, format, &r, &g, &b)
 		}
-		return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
-	case strings.HasPrefix(lstr, "rgba("):
+		return FromNRGBA(uint8(r), uint8(g), uint8(b), uint8(a)), nil
+	case strings.HasPrefix(lstr, "hsl("):
+		val := lstr[4:]
+		val = strings.TrimRight(val, ")")
+		format := "%d,%d,%d"
+		var h, s, l int
+		fmt.Sscanf(val, format, &h, &s, &l)
+		return hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0).AsRGBA(), nil
+	case strings.HasPrefix(lstr, "hsla("):
 		val := lstr[5:]
 		val = strings.TrimRight(val, ")")
 		val = strings.Trim(val, "%")
-		var r, g, b, a int
+		var h, s, l, a int
 		format := "%d,%d,%d,%d"
-		fmt.Sscanf(val, format, &r, &g, &b, &a)
-		return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
+		fmt.Sscanf(val, format, &h, &s, &l, &a)
+		return SetA(hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0), uint8(a)), nil
+	case strings.HasPrefix(lstr, "hct("):
+		val := lstr[4:]
+		val = strings.TrimRight(val, ")")
+		format := "%d,%d,%d"
+		var h, c, t int
+		fmt.Sscanf(val, format, &h, &c, &t)
+		return hct.New(float32(h), float32(c), float32(t)).AsRGBA(), nil
+	case strings.HasPrefix(lstr, "hcta("):
+		val := lstr[5:]
+		val = strings.TrimRight(val, ")")
+		val = strings.Trim(val, "%")
+		var h, c, t, a int
+		format := "%d,%d,%d,%d"
+		fmt.Sscanf(val, format, &h, &c, &t, &a)
+		return SetA(hct.New(float32(h), float32(c), float32(t)), uint8(a)), nil
 	default:
 		if hidx := strings.Index(lstr, "-"); hidx > 0 {
 			cmd := lstr[:hidx]
