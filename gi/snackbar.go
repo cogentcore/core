@@ -37,10 +37,16 @@ func NewSnackbar(ctx Widget, name ...string) *Scene {
 	return sc
 }
 
+// MessageSnackbar opens a [Snackbar] displaying the given message
+// in the context of the given widget.
+func MessageSnackbar(ctx Widget, msg string) {
+	NewSnackbar(ctx, ctx.Name()+"-msg-snackbar").AddSnackbarText(msg).Stage.Run()
+}
+
 // ErrorSnackbar opens a [Snackbar] displaying the given error
 // in the context of the given widget.
 func ErrorSnackbar(ctx Widget, err error) {
-	NewSnackbar(ctx, ctx.Name()+"-error-snackbar").AddSnackbarText("Error: " + err.Error()).Stage.Run()
+	MessageSnackbar(ctx, "Error: "+err.Error())
 }
 
 func (sc *Scene) SnackbarStyles() {

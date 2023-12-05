@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"strings"
 
 	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
@@ -129,7 +130,10 @@ func (tv *TreeView) Label() string {
 		}
 		return tv.SyncNode.Name()
 	}
-	return tv.Text
+	if tv.Text != "" {
+		return tv.Text
+	}
+	return tv.Nm
 }
 
 // UpdateReadOnly updates the ReadOnly state based on SyncNode.
@@ -415,7 +419,6 @@ func (tv *TreeView) InspectNode() { //gti:add
 
 // MimeDataSync adds mimedata for this node: a text/plain of the Path,
 // and an application/json of the sync node.
-// satisfies Clipper.MimeData interface
 func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	sroot := tv.RootView.SyncNode
 	src := tv.SyncNode
@@ -522,13 +525,37 @@ func (tv *TreeView) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 }
 
 // CutSync copies to clip.Board and deletes selected items.
-// satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) CutSync() {
 	tv.Copy(false)
 	sels := tv.SelectedSyncNodes()
 	tv.UnselectAll()
 	for _, sn := range sels {
 		sn.Delete(true)
+	}
+	tv.SendChangeEventReSync(nil)
+}
+
+// DropDeleteSourceSync handles delete source event for DropMove case, for Sync
+func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
+	md := de.Data.(mimedata.Mimes)
+	sroot := tv.RootView.SyncNode
+	for _, d := range md {
+		if d.Type != fi.TextPlain { // link
+			continue
+		}
+		path := string(d.Data)
+		sn := sroot.FindPath(path)
+		if sn != nil {
+			sn.Delete(true)
+		}
+		sn = sroot.FindPath(path + TreeViewTempMovedTag)
+		if sn != nil {
+			psplt := strings.Split(path, "/")
+			orgnm := psplt[len(psplt)-1]
+			sn.SetName(orgnm)
+			_, swb := gi.AsWidget(sn)
+			swb.SetNeedsRender(true)
+		}
 	}
 	tv.SendChangeEventReSync(nil)
 }

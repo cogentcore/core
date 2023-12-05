@@ -110,6 +110,8 @@ func (ed *Editor) LayoutAllLines() {
 	// fmt.Printf("layout all: %v\n", ed.Nm)
 
 	ed.NLines = ed.Buf.NumLines()
+	ed.Buf.MarkupMu.RLock()
+
 	nln := ed.NLines
 	if nln >= len(ed.Buf.Markup) {
 		nln = len(ed.Buf.Markup)
@@ -134,7 +136,6 @@ func (ed *Editor) LayoutAllLines() {
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
-	ed.Buf.MarkupMu.RLock()
 	ed.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
 		ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())

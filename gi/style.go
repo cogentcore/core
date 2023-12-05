@@ -207,7 +207,9 @@ func (wb *WidgetBase) ApplyStyle() {
 // dots for rendering.
 // Zero values for element and parent size are ignored.
 func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
+	rebuild := false
 	if sc != nil {
+		rebuild = sc.NeedsRebuild()
 		rc := sc.RenderCtx()
 		if rc != nil {
 			st.UnContext.DPI = rc.LogicalDPI
@@ -218,7 +220,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		sz := sc.SceneGeom.Size
 		st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	}
-	if st.Font.Face == nil || sc.NeedsRebuild() {
+	if st.Font.Face == nil || rebuild {
 		pr := prof.Start("SetUnitContext-OpenFont")
 		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 		pr.End()

@@ -916,13 +916,19 @@ func (tb *Buf) AddView(vw *Editor) {
 
 // DeleteView removes given viewer from our buffer
 func (tb *Buf) DeleteView(vw *Editor) {
+	tb.MarkupMu.Lock()
+	tb.LinesMu.Lock()
+	defer func() {
+		tb.LinesMu.Unlock()
+		tb.MarkupMu.Unlock()
+	}()
+
 	for i, ede := range tb.Views {
 		if ede == vw {
 			tb.Views = append(tb.Views[:i], tb.Views[i+1:]...)
 			break
 		}
 	}
-	// tb.BufSig.Disconnect(vw.This())
 }
 
 // SceneFromView returns Scene from text editor, if avail

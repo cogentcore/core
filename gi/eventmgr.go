@@ -429,7 +429,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 // UpdateHovers updates the hovered widgets based on current
 // widgets in bounding box.
 func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave events.Types) []Widget {
-	for _, prv := range em.Hovers {
+	for _, prv := range prev {
 		stillIn := false
 		for _, cur := range hov {
 			if prv == cur {
@@ -444,7 +444,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leav
 
 	for _, cur := range hov {
 		wasIn := false
-		for _, prv := range em.Hovers {
+		for _, prv := range prev {
 			if prv == cur {
 				wasIn = true
 				break
@@ -670,19 +670,22 @@ func (em *EventMgr) DragDrop(drag Widget, e events.Event) {
 	data := em.DragData
 	em.Drag = nil
 	if len(em.DragHovers) == 0 {
-		// if EventTrace {
-		fmt.Println(drag, "Drop has no target")
-		// }
+		if EventTrace {
+			fmt.Println(drag, "Drop has no target")
+		}
 		return
+	}
+	for _, dwi := range em.DragHovers {
+		dwi.SetState(false, states.DragHovered)
 	}
 	targ := em.DragHovers[len(em.DragHovers)-1]
 	de := events.NewDragDrop(events.Drop, e.(*events.Mouse)) // gets the actual mod at this point
 	de.Data = data
 	de.Source = drag
 	de.Target = targ
-	// if EventTrace {
-	fmt.Println(targ, "Drop with mod:", de.DropMod, "source:", de.Source)
-	// }
+	if EventTrace {
+		fmt.Println(targ, "Drop with mod:", de.DropMod, "source:", de.Source)
+	}
 	targ.HandleEvent(de)
 }
 

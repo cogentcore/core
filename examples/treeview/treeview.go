@@ -46,7 +46,7 @@ func app() {
 
 	b := gi.NewBody().SetTitle("TreeView Test")
 
-	// gi.DefaultTopAppBar = nil
+	b.AddDefaultTopAppBar()
 
 	split := gi.NewSplits(b, "split")
 	split.Dim = mat32.X
@@ -59,7 +59,7 @@ func app() {
 		s.Direction = styles.Column
 		// s.Border.Color.Set(colors.Black)
 		// s.Border.Width.Set(units.Dp(2))
-		s.Grow.Set(1, 0)
+		s.Grow.Set(1, 1)
 	})
 
 	tvfr.Style(func(s *styles.Style) {

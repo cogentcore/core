@@ -217,6 +217,7 @@ func (fn *Node) RenameFile(newpath string) (err error) { //gti:add
 	if err == nil {
 		fn.FPath = gi.FileName(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
+		fn.SetText(fn.Info.Name)
 	}
 	if stored {
 		fn.AddToVcs()
@@ -242,7 +243,7 @@ func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
 }
 
 // NewFile makes a new file in this directory node
-func (fn *Node) NewFile(filename string, addToVcs bool) {
+func (fn *Node) NewFile(filename string, addToVcs bool) { //gti:add
 	if fn.IsExternal() {
 		return
 	}

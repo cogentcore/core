@@ -287,6 +287,16 @@ func (wb *WidgetBase) OnAdd() {
 	}
 }
 
+// SetScene sets the Scene pointer for this widget and all of its children.
+// This can be necessary when creating widgets outside the usual "NewWidget" paradigm,
+// e.g., when reading from a JSON file.
+func (wb *WidgetBase) SetScene(sc *Scene) {
+	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+		kwb.Sc = sc
+		return ki.Continue
+	})
+}
+
 func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	if w == nil {

@@ -19,49 +19,11 @@ import (
 )
 
 func (fn *Node) HandleFileNodeEvents() {
-	// note: put all mouse events in parts!
-	// note: OnClick is grabbed by the parts first -- we don't see it
-	/*
-		fn.On(events.KeyChord, func(e events.Event) {
-			kt := e.(*events.Key)
-			fn.KeyInput(kt)
-		})
-			ftvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-				de := d.(events.Event)
-				tvvi := recv.Embed(TypeNode)
-				if tvvi == nil {
-					return
-				}
-				tvv := tvvi.(*Node)
-				switch de.Action {
-				case events.Start:
-					tvv.DragNDropStart()
-				case events.DropOnTarget:
-					tvv.DragNDropTarget(de)
-				case events.DropFmSource:
-					tvv.This().(gi.DragNDropper).Dragged(de)
-				case events.External:
-					tvv.DragNDropExternal(de)
-				}
-			})
-			ftvwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-				de := d.(*events.FocusEvent)
-				tvvi := recv.Embed(TypeNode)
-				if tvvi == nil {
-					return
-				}
-				tvv := tvvi.(*Node)
-				switch de.Action {
-				case events.Enter:
-					tvv.ParentRenderWin().DNDSetCursor(de.Mod)
-				case events.Exit:
-					tvv.ParentRenderWin().DNDNotCursor()
-				case events.Hover:
-					tvv.Open()
-				}
-			})
-	*/
 	fn.HandleTreeViewEvents()
+	fn.On(events.KeyChord, func(e events.Event) {
+		kt := e.(*events.Key)
+		fn.KeyInput(kt)
+	})
 }
 
 func (fn *Node) KeyInput(kt events.Event) {

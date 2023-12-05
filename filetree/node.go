@@ -243,7 +243,7 @@ func (fn *Node) UpdateDir() {
 		}
 	}
 	if mods {
-		root := fn.RootView
+		root := fn.FRoot
 		fn.Update()
 		if root != nil {
 			root.TreeViewChanged(nil)
