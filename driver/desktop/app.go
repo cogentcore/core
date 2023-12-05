@@ -160,7 +160,9 @@ func (app *appImpl) mainLoop() {
 				f.done <- true
 			}
 		default:
-			glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
+			// note: Timeout version causes fairly regular crashing and is no longer necessary on mac.
+			// though we may need some additional blank events thrown in at some point.
+			glfw.WaitEvents() // Timeout(0.2)
 		}
 	}
 }

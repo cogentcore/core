@@ -32,9 +32,11 @@ const (
 	ContentTransferEncoding = "Content-Transfer-Encoding"
 )
 
-var MIMEVersion1B = ([]byte)(MIMEVersion1)
-var ContentTypeB = ([]byte)(ContentType)
-var ContentTransferEncodingB = ([]byte)(ContentTransferEncoding)
+var (
+	MIMEVersion1B            = ([]byte)(MIMEVersion1)
+	ContentTypeB             = ([]byte)(ContentType)
+	ContentTransferEncodingB = ([]byte)(ContentTransferEncoding)
+)
 
 // Data represents one element of MIME data as a type string and byte slice
 type Data struct {
