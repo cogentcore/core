@@ -582,11 +582,13 @@ func (tv *TableView) UpdateWidgets() {
 		i := i
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx
+		invis := tv.ConfigIter > 2 && si >= tv.SliceSize
 
 		var idxlab *gi.Label
 		if tv.Is(SliceViewShowIndex) {
 			idxlab = sg.Kids[ridx].(*gi.Label)
 			idxlab.SetTextUpdate(strconv.Itoa(si))
+			idxlab.SetState(invis, states.Invisible)
 		}
 
 		sitxt := strconv.Itoa(si)
@@ -602,6 +604,7 @@ func (tv *TableView) UpdateWidgets() {
 			field := tv.VisFields[fli]
 			cidx := ridx + idxOff + fli
 			w := sg.Kids[cidx].(gi.Widget)
+			wb := w.AsWidget()
 
 			var val reflect.Value
 			if si < tv.SliceSize {
@@ -620,29 +623,22 @@ func (tv *TableView) UpdateWidgets() {
 			vv.SetReadOnly(tv.IsReadOnly())
 			vv.UpdateWidget()
 
-			if si < tv.SliceSize {
-				w.SetState(false, states.Invisible)
+			w.SetState(invis, states.Invisible)
+			if !invis {
 				issel := tv.IdxIsSelected(si)
 				if tv.IsReadOnly() {
-					w.AsWidget().SetReadOnly(true)
+					wb.SetReadOnly(true)
 				}
-				w.AsWidget().SetSelected(issel)
+				wb.SetSelected(issel)
 			} else {
-				w.SetState(true, states.Invisible)
-				w.AsWidget().SetSelected(false)
+				wb.SetSelected(false)
 				if tv.Is(SliceViewShowIndex) {
-					idxlab.SetState(true, states.Invisible)
 					idxlab.SetSelected(false)
 				}
 			}
 		}
-
 		if !tv.IsReadOnly() {
 			cidx := ridx + tv.NVisFields + idxOff
-			invis := true
-			if si < tv.SliceSize {
-				invis = false
-			}
 			if !tv.Is(SliceViewNoAdd) {
 				addact := sg.Kids[cidx].(*gi.Button)
 				addact.SetState(invis, states.Invisible)

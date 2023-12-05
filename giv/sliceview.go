@@ -709,13 +709,16 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		w := sg.Kids[ridx+idxOff].(gi.Widget)
 		vv := sv.Values[i]
 		si := sv.StartIdx + i // slice idx
+		invis := sv.ConfigIter > 2 && si >= sv.SliceSize
+
 		var idxlab *gi.Label
 		if sv.Is(SliceViewShowIndex) {
 			idxlab = sg.Kids[ridx].(*gi.Label)
 			idxlab.SetTextUpdate(strconv.Itoa(si))
+			idxlab.SetState(invis, states.Invisible)
 		}
+		w.SetState(invis, states.Invisible)
 		if si < sv.SliceSize {
-			w.SetState(false, states.Invisible)
 			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 			vv.SetReadOnly(sv.IsReadOnly())
@@ -727,7 +730,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			issel := sv.IdxIsSelected(si)
 			w.AsWidget().SetSelected(issel)
 			if sv.Is(SliceViewShowIndex) {
-				idxlab.SetState(false, states.Invisible)
 				idxlab.SetSelected(issel)
 			}
 			if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
@@ -735,21 +737,19 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				if !sv.Is(SliceViewNoAdd) {
 					cidx++
 					addact := sg.Kids[cidx].(*gi.Button)
-					addact.SetState(false, states.Invisible)
+					addact.SetState(invis, states.Invisible)
 				}
 				if !sv.Is(SliceViewNoDelete) {
 					cidx++
 					delact := sg.Kids[cidx].(*gi.Button)
-					delact.SetState(false, states.Invisible)
+					delact.SetState(invis, states.Invisible)
 				}
 			}
 		} else {
-			w.SetState(true, states.Invisible)
 			vv.SetSliceValue(sv.ElVal, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
 			vv.UpdateWidget()
 			w.AsWidget().SetSelected(false)
 			if sv.Is(SliceViewShowIndex) {
-				idxlab.SetState(true, states.Invisible)
 				idxlab.SetSelected(false)
 			}
 			if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
@@ -757,12 +757,12 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				if !sv.Is(SliceViewNoAdd) {
 					cidx++
 					addact := sg.Kids[cidx].(*gi.Button)
-					addact.SetState(true, states.Invisible)
+					addact.SetState(invis, states.Invisible)
 				}
 				if !sv.Is(SliceViewNoDelete) {
 					cidx++
 					delact := sg.Kids[cidx].(*gi.Button)
-					delact.SetState(true, states.Invisible)
+					delact.SetState(invis, states.Invisible)
 				}
 			}
 		}
@@ -2133,4 +2133,13 @@ func (sv *SliceViewBase) SizeFinal() {
 	}
 	// note: doing UpdateWidgets here seems to be unnecessary
 	sv.Frame.SizeFinal()
+	sv.This().(SliceViewer).UpdateWidgets()
+}
+
+func (sv *SliceViewBase) Render() {
+	sv.Frame.Render()
+	if sv.ConfigIter == 2 {
+		sv.ConfigIter++
+		sv.This().(SliceViewer).UpdateWidgets()
+	}
 }

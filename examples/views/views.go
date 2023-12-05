@@ -110,7 +110,7 @@ func app() {
 	tstmap["mapkey2"] = "testing"
 	tstmap["mapkey3"] = "boring"
 
-	tsttable := make([]*TableStruct, 100)
+	tsttable := make([]*TableStruct, 2)
 
 	for i := range tsttable {
 		ts := &TableStruct{IntField: i, FloatField: float32(i) / 10.0}
