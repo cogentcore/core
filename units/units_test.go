@@ -13,16 +13,20 @@ import (
 
 func TestToDots(t *testing.T) {
 	tests := map[Units]float32{
-		UnitPx:  50,
-		UnitDp:  30,
-		UnitEw:  200,
-		UnitEh:  250,
-		UnitPw:  450,
-		UnitPh:  350,
-		UnitRem: 800,
-		UnitEm:  800,
-		UnitEx:  400,
-		UnitCh:  400,
+		UnitPx:   50,
+		UnitDp:   30,
+		UnitEw:   200,
+		UnitEh:   250,
+		UnitPw:   450,
+		UnitPh:   350,
+		UnitRem:  800,
+		UnitEm:   800,
+		UnitEx:   400,
+		UnitCh:   400,
+		UnitVw:   960,
+		UnitVh:   540,
+		UnitVmin: 540,
+		UnitVmax: 960,
 	}
 	var uc Context
 	uc.Defaults()

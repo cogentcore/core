@@ -150,9 +150,9 @@ func (uc *Context) Dots(un Units) float32 {
 	case UnitVh:
 		return 0.01 * uc.Vph
 	case UnitVmin:
-		return min(uc.Vpw, uc.Vph)
+		return 0.01 * min(uc.Vpw, uc.Vph)
 	case UnitVmax:
-		return max(uc.Vpw, uc.Vph)
+		return 0.01 * max(uc.Vpw, uc.Vph)
 	case UnitCm:
 		return uc.DPI / CmPerInch
 	case UnitMm:
