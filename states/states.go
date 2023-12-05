@@ -125,7 +125,7 @@ func (st States) StateLayer() float32 {
 		return 0.12
 	case st.Is(Active), st.Is(Focused):
 		return 0.10
-	case st.Is(Hovered):
+	case st.Is(Hovered), st.Is(DragHovered):
 		return 0.08
 	default:
 		return 0
