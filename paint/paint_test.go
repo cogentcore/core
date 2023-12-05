@@ -100,4 +100,8 @@ func TestBasicPaintFunctions(t *testing.T) {
 		pc.MoveTo(rs, 100, 200)
 		pc.LineTo(rs, 200, 100)
 	})
+	test("quadratic_to", func(rs *State, pc *Paint) {
+		pc.MoveTo(rs, 100, 200)
+		pc.QuadraticTo(rs, 120, 140, 200, 100)
+	})
 }
