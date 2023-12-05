@@ -140,4 +140,8 @@ func TestPaintFill(t *testing.T) {
 		g := colors.RadialGradient().AddStop(colors.Green, 0, 0.5).AddStop(colors.Blue, 0.6, 1).AddStop(colors.Purple, 1, 0.3)
 		pc.FillBox(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
 	})
+	test("blur_box", func(rs *State, pc *Paint) {
+		pc.FillBoxColor(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
+		pc.BlurBox(rs, mat32.Vec2{0, 50}, mat32.Vec2{300, 200}, 10)
+	})
 }
