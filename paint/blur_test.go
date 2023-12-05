@@ -14,7 +14,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 )
 
@@ -71,35 +70,21 @@ func TestEdgeBlurFactors(t *testing.T) {
 }
 
 func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
-	imgsz := image.Point{320, 240}
-	szrec := image.Rectangle{Max: imgsz}
+	RunTest(t, imgName, image.Pt(320, 240), func(rs *State, pc *Paint) {
+		st := &styles.Style{}
+		st.Defaults()
+		st.Color = colors.Black
+		st.BackgroundColor.SetSolid(colors.Transparent) // Lightblue)
+		st.Border.Width.Set(units.Dp(0))
+		st.Border.Radius = styles.BorderRadiusFull
+		st.BoxShadow = []styles.Shadow{shadow}
 
-	rs := &State{}
-	pc := &Paint{}
-
-	pc.Defaults() // zeros are not good defaults for paint
-
-	st := &styles.Style{}
-	st.Defaults()
-	st.Color = colors.Black
-	st.BackgroundColor.SetSolid(colors.Transparent) // Lightblue)
-	st.Border.Width.Set(units.Dp(0))
-	st.Border.Radius = styles.BorderRadiusFull
-	st.BoxShadow = []styles.Shadow{shadow}
-
-	pc.SetUnitContextExt(imgsz) // initialize units
-	img := image.NewRGBA(szrec)
-	rs.Init(imgsz.X, imgsz.Y, img)
-	rs.PushBounds(szrec)
-	rs.Lock()
-
-	st.ToDots()
-	sbg := &colors.Full{Solid: colors.White}
-	spc := st.BoxSpace().Size()
-	sz := spc.Add(mat32.Vec2{200, 100})
-	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
-	rs.Unlock()
-	images.Assert(t, img, imgName)
+		st.ToDots()
+		sbg := &colors.Full{Solid: colors.White}
+		spc := st.BoxSpace().Size()
+		sz := spc.Add(mat32.Vec2{200, 100})
+		pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
+	})
 }
 
 func TestShadowBlur(t *testing.T) {

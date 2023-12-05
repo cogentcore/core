@@ -7,13 +7,12 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/png"
-	"log"
-	"os"
 
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
+	"goki.dev/grows/images"
+	"goki.dev/grr"
 	"goki.dev/mat32/v2"
 )
 
@@ -37,13 +36,13 @@ func main() {
 	// first, draw a frame around the entire image
 	pc.StrokeStyle.SetColor(colors.Black)
 	pc.FillStyle.SetColor(colors.White)
-	pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
+	pc.StrokeStyle.Width.Dot(1) // use dots directly to render in literal pixels
 	pc.DrawRectangle(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y))
 	pc.FillStrokeClear(rs) // actually render path that has been setup
 
 	// next draw a rounded rectangle
 	pc.FillStyle.SetColor(nil)
-	pc.StrokeStyle.Width.SetDot(10)
+	pc.StrokeStyle.Width.Dot(10)
 	pc.DrawRoundedRectangle(rs, 20, 20, 150, 100, styles.NewSideFloats(6))
 	pc.FillStrokeClear(rs)
 
@@ -75,10 +74,5 @@ func main() {
 
 	rs.Unlock()
 
-	file, err := os.Create("image.png")
-	if err != nil {
-		log.Println(err)
-	}
-	defer file.Close()
-	png.Encode(file, img)
+	grr.Log(images.Save(img, "image.png"))
 }
