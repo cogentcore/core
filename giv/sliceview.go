@@ -192,6 +192,12 @@ type SliceViewer interface {
 	// (before) given slice index
 	PasteAtIdx(md mimedata.Mimes, idx int)
 
+	MakePasteMenu(m *gi.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
+	DragStart(e events.Event)
+	DragDrop(e events.Event)
+	DropFinalize(de *events.DragDrop)
+	DropDeleteSource(e events.Event)
+
 	// ItemCtxtMenu pulls up the context menu for given slice index
 	ItemCtxtMenu(idx int)
 
@@ -289,6 +295,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
 	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
+	svi := sv.This().(SliceViewer)
 
 	sv.HandleSliceViewEvents()
 
@@ -328,7 +335,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			})
 			sb.OnInput(func(e events.Event) {
 				sv.StartIdx = int(sb.Value)
-				sv.This().(SliceViewer).UpdateWidgets()
+				svi.UpdateWidgets()
 			})
 
 		}
@@ -336,11 +343,48 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.Activatable, abilities.Selectable, abilities.Draggable, abilities.Droppable)
 					s.Min.X.Em(1.5)
 					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.End
 					s.Min.Y.Em(1)
 					s.GrowWrap = false
+				})
+				w.On(events.DragStart, func(e events.Event) {
+					if sv.This() == nil || sv.Is(ki.Deleted) {
+						return
+					}
+					svi.DragStart(e)
+				})
+				w.On(events.DragEnter, func(e events.Event) {
+					if sv.This() == nil || sv.Is(ki.Deleted) {
+						return
+					}
+					sv.SetState(true, states.DragHovered)
+					sv.ApplyStyle()
+					sv.SetNeedsRender(true)
+					e.SetHandled()
+				})
+				w.On(events.DragLeave, func(e events.Event) {
+					if sv.This() == nil || sv.Is(ki.Deleted) {
+						return
+					}
+					sv.SetState(false, states.DragHovered)
+					sv.ApplyStyle()
+					sv.SetNeedsRender(true)
+					e.SetHandled()
+				})
+				w.On(events.Drop, func(e events.Event) {
+					if sv.This() == nil || sv.Is(ki.Deleted) {
+						return
+					}
+					svi.DragDrop(e)
+				})
+				w.On(events.DropDeleteSource, func(e events.Event) {
+					if sv.This() == nil || sv.Is(ki.Deleted) {
+						return
+					}
+					svi.DropDeleteSource(e)
 				})
 			case strings.HasPrefix(w.Name(), "add-"):
 				w.Style(func(s *styles.Style) {
@@ -471,7 +515,7 @@ func (sv *SliceViewBase) ConfigFrame() {
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	sb.Type = gi.SliderScrollbar
-	sb.StayInView = true
+	// sb.StayInView = true
 	sb.Dim = mat32.Y
 	sb.Min = 0
 	sb.Step = 1
@@ -1576,20 +1620,29 @@ func (sv *SliceViewBase) PasteIdx(idx int) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (sv *SliceViewBase) MakePasteMenu(m *gi.Scene, data any, idx int) {
-	gi.NewButton(m).SetText("Assign To").SetData(data).
-		OnClick(func(e events.Event) {
-			sv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
+func (sv *SliceViewBase) MakePasteMenu(m *gi.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+	svi := sv.This().(SliceViewer)
+	if mod == events.DropCopy {
+		gi.NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
+			svi.PasteAssign(md, idx)
+			if fun != nil {
+				fun()
+			}
 		})
-	gi.NewButton(m).SetText("Insert Before").SetData(data).
-		OnClick(func(e events.Event) {
-			sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
-		})
-	gi.NewButton(m).SetText("Insert After").SetData(data).
-		OnClick(func(e events.Event) {
-			sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
-		})
-	gi.NewButton(m).SetText("Cancel").SetData(data)
+	}
+	gi.NewButton(m).SetText("Insert before").OnClick(func(e events.Event) {
+		svi.PasteAtIdx(md, idx)
+		if fun != nil {
+			fun()
+		}
+	})
+	gi.NewButton(m).SetText("Insert after").OnClick(func(e events.Event) {
+		svi.PasteAtIdx(md, idx+1)
+		if fun != nil {
+			fun()
+		}
+	})
+	gi.NewButton(m).SetText("Cancel")
 }
 
 // PasteMenu performs a paste from the clipboard using given data -- pops up
@@ -1597,7 +1650,7 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Scene, data any, idx int) {
 func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	sv.UnselectAllIdxs()
 	mf := func(m *gi.Scene) {
-		sv.MakePasteMenu(m, md, idx)
+		sv.MakePasteMenu(m, md, idx, events.DropCopy, nil)
 	}
 	pos := sv.IdxPos(idx)
 	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
@@ -1671,103 +1724,50 @@ func (sv *SliceViewBase) Duplicate() int {
 //////////////////////////////////////////////////////////////////////////////
 //    Drag-n-Drop
 
-// DragNDropStart starts a drag-n-drop
-func (sv *SliceViewBase) DragNDropStart() {
+func (sv *SliceViewBase) DragStart(e events.Event) {
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
-	_ = md
 	ixs := sv.SelectedIdxsList(false) // ascending
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
 	if ok {
-		sp := &gi.Sprite{}
-		sp.GrabRenderFrom(w)
-		gi.ImageClearer(sp.Pixels, 50.0)
-		// todo:
-		// sv.ParentRenderWin().StartDragNDrop(sv.This(), md, sp)
+		sv.Sc.EventMgr.DragStart(w, md, e)
 	}
 }
 
-// DragNDropTarget handles a drag-n-drop drop
-func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
-	// de.Target = sv.This()
-	// if de.Mod == events.DropLink {
-	// 	de.Mod = events.DropCopy // link not supported -- revert to copy
-	// }
-	// idx, ok := sv.IdxFromPos(de.LocalPos().Y)
-	// if ok {
-	// 	de.SetHandled()
-	// 	sv.TmpIdx = idx
-	// 	if dpr, ok := sv.This().(gi.DragNDropper); ok {
-	// 		dpr.Drop(de.Data, de.Mod)
-	// 	} else {
-	// 		sv.Drop(de.Data, de.Mod)
-	// 	}
-	// }
-}
-
-// MakeDropMenu makes the menu of options for dropping on a target
-func (sv *SliceViewBase) MakeDropMenu(m *gi.Scene, data any, mod events.DropMods, idx int) {
-	switch mod {
-	case events.DropCopy:
-		gi.NewLabel(m, "copy").SetText("Copy (Shift=Move):")
-	case events.DropMove:
-		gi.NewLabel(m, "move").SetText("Move:")
-	}
-	if mod == events.DropCopy {
-		gi.NewButton(m, "assign-to").SetText("Assign To").SetData(data).
-			OnClick(func(e events.Event) {
-				sv.DropAssign(data.(mimedata.Mimes), idx)
+func (sv *SliceViewBase) DragDrop(e events.Event) {
+	de := e.(*events.DragDrop)
+	svi := sv.This().(SliceViewer)
+	pos := de.LocalPos()
+	idx, ok := sv.IdxFromPos(pos.Y)
+	if ok {
+		// sv.DraggedIdxs = nil
+		sv.TmpIdx = idx
+		sv.SaveDraggedIdxs(idx)
+		md := de.Data.(mimedata.Mimes)
+		mf := func(m *gi.Scene) {
+			sv.Sc.EventMgr.DragMenuAddModLabel(m, de.DropMod)
+			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
+				svi.DropFinalize(de)
 			})
+		}
+		pos := sv.IdxPos(sv.TmpIdx)
+		gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
 	}
-	gi.NewButton(m, "insert-before").SetText("Insert Before").SetData(data).
-		OnClick(func(e events.Event) {
-			sv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
-		})
-	gi.NewButton(m, "insert-after").SetText("Insert After").SetData(data).
-		OnClick(func(e events.Event) {
-			sv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
-		})
-	gi.NewButton(m, "cancel").SetText("Cancel").SetData(data).
-		OnClick(func(e events.Event) {
-			sv.DropCancel()
-		})
 }
 
-// Drop pops up a menu to determine what specifically to do with dropped items
-// this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
-func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
-	mf := func(m *gi.Scene) {
-		sv.MakeDropMenu(m, md, mod, sv.TmpIdx)
-	}
-	pos := sv.IdxPos(sv.TmpIdx)
-	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
-}
-
-// DropAssign assigns mime data (only the first one!) to this node
-func (sv *SliceViewBase) DropAssign(md mimedata.Mimes, idx int) {
-	sv.DraggedIdxs = nil
-	sv.This().(SliceViewer).PasteAssign(md, idx)
-	sv.DragNDropFinalize(events.DropCopy)
-}
-
-// DragNDropFinalize is called to finalize actions on the Source node prior to
-// performing target actions -- mod must indicate actual action taken by the
-// target, including ignore -- ends up calling DragNDropSource if us..
-func (sv *SliceViewBase) DragNDropFinalize(mod events.DropMods) {
+// DropFinalize is called to finalize Drop actions on the Source node.
+// Only relevant for DropMod == DropMove.
+func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
 	sv.UnselectAllIdxs()
-	// sv.ParentRenderWin().FinalizeDragNDrop(mod)
+	sv.Sc.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
-// DragNDropSource is called after target accepts the drop -- we just remove
-// elements that were moved
-func (sv *SliceViewBase) DragNDropSource(de events.Event) {
-	// if de.Mod != events.DropMove || len(sv.DraggedIdxs) == 0 {
-	// 	return
-	// }
-
+// DropDeleteSource handles delete source event for DropMove case
+func (sv *SliceViewBase) DropDeleteSource(e events.Event) {
+	// de := e.(*events.DragDrop)
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
@@ -1799,26 +1799,6 @@ func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 			sv.DraggedIdxs[i] = ix
 		}
 	}
-}
-
-// DropBefore inserts object(s) from mime data before this node
-func (sv *SliceViewBase) DropBefore(md mimedata.Mimes, mod events.DropMods, idx int) {
-	sv.SaveDraggedIdxs(idx)
-	sv.This().(SliceViewer).PasteAtIdx(md, idx)
-	sv.DragNDropFinalize(mod)
-}
-
-// DropAfter inserts object(s) from mime data after this node
-func (sv *SliceViewBase) DropAfter(md mimedata.Mimes, mod events.DropMods, idx int) {
-	sv.SaveDraggedIdxs(idx + 1)
-	sv.This().(SliceViewer).PasteAtIdx(md, idx+1)
-	sv.DragNDropFinalize(mod)
-}
-
-// DropCancel cancels the drop action e.g., preventing deleting of source
-// items in a Move case
-func (sv *SliceViewBase) DropCancel() {
-	sv.DragNDropFinalize(events.DropIgnore)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2022,55 +2002,6 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 	sv.OnClick(func(e events.Event) {
 		sv.SetFocusEvent()
 	})
-
-	// todo: doubleclick unselectallidxs is crashing with recursive loop
-	// sv.OnDoubleClick(func(e events.Event) {
-	// 	si := sv.SelectedIdx
-	// 	sv.UnselectAllIdxs()
-	// 	sv.SelectIdx(si)
-	// 	sv.Send(events.DoubleClick, e)
-	// 	e.SetHandled()
-	// })
-
-	// todo ctxmenu
-	// sv.Onwe.AddFunc(events.MouseUp, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	me := d.(events.Event)
-	// 	svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-	// 	// if !svv.StateIs(states.Focused) {
-	// 	// 	svv.GrabFocus()
-	// 	// }
-	// 	if me.Button == events.Right && me.Action == events.Release {
-	// 		svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
-	// 		me.SetHandled()
-	// 	}
-	// })
-	// svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	de := d.(events.Event)
-	// 	svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-	// 	switch de.Action {
-	// 	case events.Start:
-	// 		svv.DragNDropStart()
-	// 	case events.DropOnTarget:
-	// 		svv.DragNDropTarget(de)
-	// 	case events.DropFmSource:
-	// 		svv.DragNDropSource(de)
-	// 	}
-	// })
-	// sg := sv.This().(SliceViewer).SliceGrid()
-	// if sg != nil {
-	// 	sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 		de := d.(*events.FocusEvent)
-	// 		sgg := recv.Embed(gi.FrameType).(*gi.Frame)
-	// 		switch de.Action {
-	// 		case events.Enter:
-	// 			sgg.ParentRenderWin().DNDSetCursor(de.Mod)
-	// 		case events.Exit:
-	// 			sgg.ParentRenderWin().DNDNotCursor()
-	// 		case events.Hover:
-	// 			// nothing here?
-	// 		}
-	// 	})
-	// }
 }
 
 //////////////////////////////////////////////////////
