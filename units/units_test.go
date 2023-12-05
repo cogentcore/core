@@ -27,6 +27,13 @@ func TestToDots(t *testing.T) {
 		UnitVh:   540,
 		UnitVmin: 540,
 		UnitVmax: 960,
+		UnitCm:   1889.7638,
+		UnitMm:   188.97638,
+		UnitQ:    47.244095,
+		UnitIn:   4800,
+		UnitPc:   800,
+		UnitPt:   66.66667,
+		UnitDot:  50,
 	}
 	var uc Context
 	uc.Defaults()
