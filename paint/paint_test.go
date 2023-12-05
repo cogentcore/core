@@ -144,4 +144,16 @@ func TestPaintFill(t *testing.T) {
 		pc.FillBoxColor(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
 		pc.BlurBox(rs, mat32.Vec2{0, 50}, mat32.Vec2{300, 200}, 10)
 	})
+	test("fill", func(rs *State, pc *Paint) {
+		pc.FillStyle.SetColor(colors.Purple)
+		pc.StrokeStyle.SetColor(colors.Orange)
+		pc.DrawRectangle(rs, 50, 25, 150, 200)
+		pc.Fill(rs)
+	})
+	test("stroke", func(rs *State, pc *Paint) {
+		pc.FillStyle.SetColor(colors.Purple)
+		pc.StrokeStyle.SetColor(colors.Orange)
+		pc.DrawRectangle(rs, 50, 25, 150, 200)
+		pc.Stroke(rs)
+	})
 }
