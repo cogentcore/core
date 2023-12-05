@@ -123,7 +123,6 @@ func TestPaintPath(t *testing.T) {
 func TestPaintFill(t *testing.T) {
 	test := func(nm string, f func(rs *State, pc *Paint)) {
 		RunTest(t, nm, image.Pt(300, 300), func(rs *State, pc *Paint) {
-			pc.FillBox(rs, mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
 			f(rs, pc)
 		})
 	}
