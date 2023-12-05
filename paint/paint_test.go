@@ -88,10 +88,10 @@ func TestRender(t *testing.T) {
 	})
 }
 
-func TestBasicPaintFunctions(t *testing.T) {
+func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(rs *State, pc *Paint)) {
 		RunTest(t, nm, image.Pt(300, 300), func(rs *State, pc *Paint) {
-			pc.FillBox(rs, mat32.Vec2{}, mat32.Vec2{300, 300}, &colors.Full{Solid: colors.White})
+			pc.FillBox(rs, mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
 			f(rs, pc)
 			pc.FillStrokeClear(rs)
 		})
@@ -117,5 +117,24 @@ func TestBasicPaintFunctions(t *testing.T) {
 		pc.MoveTo(rs, 100, 200)
 		pc.MoveTo(rs, 200, 100)
 		pc.ClearPath(rs)
+	})
+}
+
+func TestPaintFill(t *testing.T) {
+	test := func(nm string, f func(rs *State, pc *Paint)) {
+		RunTest(t, nm, image.Pt(300, 300), func(rs *State, pc *Paint) {
+			pc.FillBox(rs, mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
+			f(rs, pc)
+		})
+	}
+	test("fill_box_color", func(rs *State, pc *Paint) {
+		pc.FillBoxColor(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
+	})
+	test("fill_box_solid", func(rs *State, pc *Paint) {
+		pc.FillBox(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.SolidFull(colors.Blue))
+	})
+	test("fill_box_linear_gradient", func(rs *State, pc *Paint) {
+		g := colors.LinearGradient().AddStop(colors.Red, 0, 1).AddStop(colors.Yellow, 0.3, 0.5).AddStop(colors.Green, 1, 1)
+		pc.FillBox(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
 	})
 }
