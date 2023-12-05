@@ -20,6 +20,7 @@ import (
 // This mostly replicates the first test from this reference:
 // https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html
 func TestGaussianBlur(t *testing.T) {
+	t.Skip("mostly informational; TODO: maybe make this a real pass/fail test at some point")
 	sigma := 1.0
 	k := GaussianBlurKernel1D(sigma)
 	fmt.Println(k.Matrix)
@@ -66,6 +67,7 @@ func TestGaussianBlur(t *testing.T) {
 }
 
 func TestEdgeBlurFactors(t *testing.T) {
+	t.Skip("mostly informational; TODO: maybe make this a real pass/fail test at some point")
 	fmt.Println(EdgeBlurFactors(2, 4))
 }
 

@@ -5,7 +5,6 @@
 package paint
 
 import (
-	"fmt"
 	"image"
 	"testing"
 
@@ -53,7 +52,6 @@ func TestBoxShadow(t *testing.T) {
 
 		spc := st.BoxSpace().Size()
 		sz := spc.Add(mat32.Vec2{200, 100})
-		fmt.Println("spc:", spc)
 
 		pc.DrawStdBox(rs, st, mat32.Vec2{50, 100}, sz, sbg, 0)
 	})
