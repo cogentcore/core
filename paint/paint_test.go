@@ -87,3 +87,17 @@ func TestRender(t *testing.T) {
 		txt.Render(rs, mat32.Vec2{85, 80})
 	})
 }
+
+func TestBasicPaintFunctions(t *testing.T) {
+	test := func(nm string, f func(rs *State, pc *Paint)) {
+		RunTest(t, nm, image.Pt(300, 300), func(rs *State, pc *Paint) {
+			pc.FillBox(rs, mat32.Vec2{}, mat32.Vec2{300, 300}, &colors.Full{Solid: colors.White})
+			f(rs, pc)
+			pc.FillStrokeClear(rs)
+		})
+	}
+	test("line_to", func(rs *State, pc *Paint) {
+		pc.MoveTo(rs, 100, 200)
+		pc.LineTo(rs, 200, 100)
+	})
+}
