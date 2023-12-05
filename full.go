@@ -21,6 +21,16 @@ type Full struct {
 	Gradient *Gradient
 }
 
+// SolidFull returns a new [Full] from the given solid color.
+func SolidFull(solid color.Color) *Full {
+	return &Full{Solid: AsRGBA(solid)}
+}
+
+// GradientFull returns a new [Full] from the given gradient color.
+func GradientFull(gradient *Gradient) *Full {
+	return &Full{Gradient: gradient}
+}
+
 // IsNil returns whether the color is nil, checking both the gradient
 // and the solid color.
 func (f *Full) IsNil() bool {
