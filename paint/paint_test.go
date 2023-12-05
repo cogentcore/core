@@ -144,6 +144,7 @@ func TestPaintFill(t *testing.T) {
 		pc.FillBoxColor(rs, mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
 		pc.BlurBox(rs, mat32.Vec2{0, 50}, mat32.Vec2{300, 200}, 10)
 	})
+
 	test("fill", func(rs *State, pc *Paint) {
 		pc.FillStyle.SetColor(colors.Purple)
 		pc.StrokeStyle.SetColor(colors.Orange)
@@ -155,5 +156,18 @@ func TestPaintFill(t *testing.T) {
 		pc.StrokeStyle.SetColor(colors.Orange)
 		pc.DrawRectangle(rs, 50, 25, 150, 200)
 		pc.Stroke(rs)
+	})
+	// testing whether nil values turn off stroking/filling with FillStrokeClear
+	test("fill_stroke_clear_fill", func(rs *State, pc *Paint) {
+		pc.FillStyle.SetColor(colors.Purple)
+		pc.StrokeStyle.SetColor(nil)
+		pc.DrawRectangle(rs, 50, 25, 150, 200)
+		pc.FillStrokeClear(rs)
+	})
+	test("fill_stroke_clear_stroke", func(rs *State, pc *Paint) {
+		pc.FillStyle.SetColor(nil)
+		pc.StrokeStyle.SetColor(colors.Orange)
+		pc.DrawRectangle(rs, 50, 25, 150, 200)
+		pc.FillStrokeClear(rs)
 	})
 }
