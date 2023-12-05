@@ -21,11 +21,11 @@ type TestingT interface {
 
 // UpdateTestImages indicates whether to update currently saved test
 // images in [AssertImage] instead of comparing against them.
-// It is automatically set if the env variable "UPDATE_TEST_IMAGES" is "true",
+// It is automatically set if the build tag "update" is specified,
 // and it should typically only be set through that. It should only be
 // set when behavior has been updated that causes test images to change,
 // and it should only be set once and then turned back off.
-var UpdateTestImages = os.Getenv("UPDATE_TEST_IMAGES") == "true"
+var UpdateTestImages = updateTestImages
 
 // Assert asserts that the given image is equivalent
 // to the image stored at the given filename in the testdata directory,
