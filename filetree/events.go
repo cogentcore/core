@@ -75,31 +75,42 @@ func VCSLabelFunc(fn *Node, label string) string {
 }
 
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
-	giv.NewFuncButton(m, fn.ShowFileInfo).SetIcon(icons.Info).
+	gi.NewButton(m).SetIcon(icons.Info).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
-		})
-	giv.NewFuncButton(m, fn.OpenFilesDefault).SetText("Open (w/default app)").SetIcon(icons.Open).
+		}).OnClick(func(e events.Event) {
+		fn.This().(Filer).ShowFileInfo()
+	})
+
+	gi.NewButton(m).SetText("Open (w/default app)").SetIcon(icons.Open).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
-		})
+		}).OnClick(func(e events.Event) {
+		fn.This().(Filer).OpenFilesDefault()
+	})
 	gi.NewSeparator(m)
 
-	giv.NewFuncButton(m, fn.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).
+	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).
 		SetKey(keyfun.Duplicate).Style(func(s *styles.Style) {
 		s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+	}).OnClick(func(e events.Event) {
+		fn.This().(Filer).DuplicateFiles()
 	})
-	giv.NewFuncButton(m, fn.DeleteFiles).SetText("Delete").SetIcon(icons.Delete).
+	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 		SetKey(keyfun.Delete).Style(func(s *styles.Style) {
 		s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+	}).OnClick(func(e events.Event) {
+		fn.This().(Filer).DeleteFiles()
 	})
-	giv.NewFuncButton(m, fn.RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).
+	gi.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
-		})
+		}).OnClick(func(e events.Event) {
+		fn.This().(Filer).RenameFiles()
+	})
 	gi.NewSeparator(m)
 
-	giv.NewFuncButton(m, fn.OpenAll).SetIcon(icons.KeyboardArrowDown).
+	giv.NewFuncButton(m, fn.OpenAll).SetText("Open All").SetIcon(icons.KeyboardArrowDown).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})

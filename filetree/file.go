@@ -33,6 +33,69 @@ func OSOpenCommand() string {
 	return "open"
 }
 
+// Filer is an interface for Filetree File actions
+type Filer interface {
+	// OpenFilesDefault opens selected files with default app for that file type (os defined).
+	// runs open on Mac, xdg-open on Linux, and start on Windows
+	OpenFilesDefault()
+
+	// OpenFileDefault opens file with default app for that file type (os defined)
+	// runs open on Mac, xdg-open on Linux, and start on Windows
+	OpenFileDefault() error
+
+	// OpenFilesWith opens selected files with user-specified command.
+	OpenFilesWith()
+
+	// OpenFileWith opens file with given command.
+	// does not wait for command to finish in this routine (separate routine Waits)
+	OpenFileWith(command string) error
+
+	// DuplicateFiles makes a copy of selected files
+	DuplicateFiles()
+
+	// DuplicateFile creates a copy of given file -- only works for regular files, not
+	// directories
+	DuplicateFile() error
+
+	// DeleteFiles deletes any selected files or directories. If any directory is selected,
+	// all files and subdirectories in that directory are also deleted.
+	DeleteFiles()
+
+	// DeleteFilesImpl does the actual deletion, no prompts
+	DeleteFilesImpl()
+
+	// DeleteFile deletes this file
+	DeleteFile() error
+
+	// RenameFiles renames any selected files
+	RenameFiles()
+
+	// RenameFile renames file to new name
+	RenameFile(newpath string) error
+
+	// NewFiles makes a new file in selected directory
+	NewFiles(filename string, addToVcs bool)
+
+	// NewFile makes a new file in this directory node
+	NewFile(filename string, addToVcs bool)
+
+	// NewFolders makes a new folder in the given selected directory
+	NewFolders(foldername string)
+
+	// NewFolder makes a new folder (directory) in this directory node
+	NewFolder(foldername string)
+
+	// CopyFileToDir copies given file path into node that is a directory.
+	// This does NOT check for overwriting -- that must be done at higher level!
+	CopyFileToDir(filename string, perm os.FileMode)
+
+	// Shows file information about selected file(s)
+	ShowFileInfo()
+}
+
+// check for interface impl
+var _ Filer = (*Node)(nil)
+
 // OpenFilesDefault opens selected files with default app for that file type (os defined).
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFilesDefault() { //gti:add
@@ -42,7 +105,7 @@ func (fn *Node) OpenFilesDefault() { //gti:add
 		if sn == nil {
 			continue
 		}
-		sn.OpenFileDefault()
+		sn.This().(Filer).OpenFileDefault()
 	}
 }
 
@@ -64,7 +127,7 @@ func (fn *Node) OpenFilesWith() {
 		if sn == nil {
 			continue
 		}
-		giv.CallFunc(sn, sn.OpenFileWith)
+		giv.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
 	}
 }
 
@@ -82,7 +145,7 @@ func (fn *Node) OpenFileWith(command string) error {
 	return err
 }
 
-// makes a copy of selected files
+// DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //gti:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
@@ -90,7 +153,7 @@ func (fn *Node) DuplicateFiles() { //gti:add
 		if sn == nil {
 			continue
 		}
-		sn.DuplicateFile()
+		sn.This().(Filer).DuplicateFile()
 	}
 }
 
@@ -113,7 +176,7 @@ func (fn *Node) DeleteFiles() { //gti:add
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Delete Files").OnClick(func(e events.Event) {
-			fn.DeleteFilesImpl()
+			fn.This().(Filer).DeleteFilesImpl()
 		})
 	})
 	d.NewDialog(fn).Run()
@@ -148,18 +211,19 @@ func (fn *Node) DeleteFilesImpl() {
 				fn.CloseBuf()
 			}
 		}
-		fn.DeleteFile()
+		fn.This().(Filer).DeleteFile()
 	}
 	root.UpdateDir()
 }
 
 // DeleteFile deletes this file
-func (fn *Node) DeleteFile() (err error) {
+func (fn *Node) DeleteFile() error {
 	if fn.IsExternal() {
 		return nil
 	}
 	fn.CloseBuf()
 	repo, _ := fn.Repo()
+	var err error
 	if !fn.Info.IsDir() && repo != nil && fn.Info.Vcs >= vci.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.FPath))
@@ -181,15 +245,16 @@ func (fn *Node) RenameFiles() { //gti:add
 		if sn == nil || sn.IsExternal() {
 			continue
 		}
-		giv.CallFunc(sn, sn.RenameFile)
+		giv.CallFunc(sn, sn.RenameFile) // todo: not using interface?
 	}
 }
 
 // RenameFile renames file to new name
-func (fn *Node) RenameFile(newpath string) (err error) { //gti:add
+func (fn *Node) RenameFile(newpath string) error { //gti:add
 	if fn.IsExternal() {
 		return nil
 	}
+	var err error
 	fn.CloseBuf() // invalid after this point
 	orgpath := fn.FPath
 	newpath, err = fn.Info.Rename(newpath)
@@ -228,7 +293,7 @@ func (fn *Node) RenameFile(newpath string) (err error) { //gti:add
 	return err
 }
 
-// makes a new file in selected directory
+// NewFiles makes a new file in selected directory
 func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
 	sels := fn.SelectedViews()
 	sz := len(sels)
@@ -239,7 +304,7 @@ func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
 	if sn == nil {
 		return
 	}
-	sn.NewFile(filename, addToVcs)
+	sn.This().(Filer).NewFile(filename, addToVcs)
 }
 
 // NewFile makes a new file in this directory node
@@ -254,8 +319,7 @@ func (fn *Node) NewFile(filename string, addToVcs bool) { //gti:add
 	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
-		// TODO(kai/snack)
-		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err), Ok: true, Cancel: false}, nil)
+		gi.ErrorSnackbar(fn, err)
 		return
 	}
 	fn.FRoot.UpdateNewFile(np)
@@ -278,7 +342,7 @@ func (fn *Node) NewFolders(foldername string) { //gti:add
 	if sn == nil {
 		return
 	}
-	sn.NewFolder(foldername)
+	sn.This().(Filer).NewFolder(foldername)
 }
 
 // NewFolder makes a new folder (directory) in this directory node
@@ -293,9 +357,7 @@ func (fn *Node) NewFolder(foldername string) { //gti:add
 	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		// TODO(kai/snack)
-		// emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", ppath, err)
-		// gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg, Ok: true, Cancel: false}, nil)
+		gi.ErrorSnackbar(fn, err)
 		return
 	}
 	fn.FRoot.UpdateNewFile(ppath)

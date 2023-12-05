@@ -124,6 +124,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		if view, _ := arg.Tag("view"); view == "-" {
 			continue
 		}
+		arg.SetTag("grow", "1")
 		lbl := sg.Child(i * 2).(*gi.Label)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
