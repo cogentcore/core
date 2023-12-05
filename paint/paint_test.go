@@ -104,4 +104,18 @@ func TestBasicPaintFunctions(t *testing.T) {
 		pc.MoveTo(rs, 100, 200)
 		pc.QuadraticTo(rs, 120, 140, 200, 100)
 	})
+	test("cubic_to", func(rs *State, pc *Paint) {
+		pc.MoveTo(rs, 100, 200)
+		pc.CubicTo(rs, 130, 110, 160, 180, 200, 100)
+	})
+	test("close_path", func(rs *State, pc *Paint) {
+		pc.MoveTo(rs, 100, 200)
+		pc.MoveTo(rs, 200, 100)
+		pc.ClosePath(rs)
+	})
+	test("clear_path", func(rs *State, pc *Paint) {
+		pc.MoveTo(rs, 100, 200)
+		pc.MoveTo(rs, 200, 100)
+		pc.ClearPath(rs)
+	})
 }
