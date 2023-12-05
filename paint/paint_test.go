@@ -45,7 +45,7 @@ func RunTest(t *testing.T, nm string, sz image.Point, f func(rs *State, pc *Pain
 }
 
 func TestRender(t *testing.T) {
-	RunTest(t, "render", image.Pt(320, 240), func(rs *State, pc *Paint) {
+	RunTest(t, "render", image.Pt(300, 300), func(rs *State, pc *Paint) {
 		bs := styles.Border{}
 		bs.Color.Set(colors.Red, colors.Blue, colors.Green, colors.Orange)
 		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
@@ -55,7 +55,7 @@ func TestRender(t *testing.T) {
 		// pc.StrokeStyle.SetColor(blk)
 		pc.FillStyle.SetColor(colors.White)
 		// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
-		pc.DrawBorder(rs, 0, 0, 320, 240, bs)
+		pc.DrawBorder(rs, 0, 0, 300, 300, bs)
 		pc.FillStrokeClear(rs) // actually render path that has been setup
 
 		// next draw a rounded rectangle

@@ -16,7 +16,7 @@ import (
 )
 
 func TestBackgroundColor(t *testing.T) {
-	RunTest(t, "background_color", image.Pt(320, 240), func(rs *State, pc *Paint) {
+	RunTest(t, "background_color", image.Pt(300, 300), func(rs *State, pc *Paint) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.BackgroundColor.SetSolid(colors.Blue)
@@ -26,7 +26,7 @@ func TestBackgroundColor(t *testing.T) {
 		sbg := &colors.Full{Solid: colors.White}
 
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
-		pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, sz, sbg, 0)
+		pc.DrawStdBox(rs, st, mat32.Vec2{50, 100}, sz, sbg, 0)
 	})
 }
 
