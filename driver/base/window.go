@@ -10,7 +10,6 @@
 package base
 
 import (
-	"image"
 	"sync"
 
 	"goki.dev/girl/styles"
@@ -102,6 +101,13 @@ func (w *Window[A]) Title() string {
 	return w.Titl
 }
 
+func (w *Window[A]) SetTitle(title string) {
+	if w.This.IsClosed() {
+		return
+	}
+	w.Titl = title
+}
+
 func (w *Window[A]) Flags() goosi.WindowFlags {
 	return w.Flag
 }
@@ -122,42 +128,6 @@ func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUFunc = f
 }
 
-func (w *Window[A]) Size() image.Point {
-	// w.Mu.Lock() // this prevents race conditions but also locks up
-	// defer w.Mu.Unlock()
-	return w.PixSize
-}
-
-func (w *Window[A]) WinSize() image.Point {
-	// w.Mu.Lock() // this prevents race conditions but also locks up
-	// defer w.Mu.Unlock()
-	return w.WnSize
-}
-
-func (w *Window[A]) Position() image.Point {
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-	return w.Pos
-}
-
 func (w *Window[A]) Insets() styles.SideFloats {
 	return w.Insts
-}
-
-func (w *Window[A]) PhysicalDPI() float32 {
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-	return w.PhysDPI
-}
-
-func (w *Window[A]) LogicalDPI() float32 {
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-	return w.LogDPI
-}
-
-func (w *Window[A]) SetLogicalDPI(dpi float32) {
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-	w.LogDPI = dpi
 }

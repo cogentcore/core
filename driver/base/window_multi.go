@@ -15,7 +15,7 @@ import (
 	"goki.dev/goosi"
 )
 
-// Window contains the data and logic common to all implementations of [goosi.Window]
+// WindowMulti contains the data and logic common to all implementations of [goosi.Window]
 // on multi-window platforms (desktop), as opposed to single-window
 // platforms (mobile, web, and offscreen), for which you should use [WindowSingle].
 // A WindowMulti is associated with a corresponding [goosi.App] type.
@@ -47,4 +47,40 @@ type WindowMulti[A goosi.App] struct {
 	// which is used for all rendering.
 	// It is: transient zoom factor * screen-specific multiplier * PhysicalDPI
 	LogDPI float32 `label:"Logical DPI"`
+}
+
+func (w *WindowMulti[A]) Size() image.Point {
+	// w.Mu.Lock() // this prevents race conditions but also locks up
+	// defer w.Mu.Unlock()
+	return w.PixSize
+}
+
+func (w *WindowMulti[A]) WinSize() image.Point {
+	// w.Mu.Lock() // this prevents race conditions but also locks up
+	// defer w.Mu.Unlock()
+	return w.WnSize
+}
+
+func (w *WindowMulti[A]) Position() image.Point {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	return w.Pos
+}
+
+func (w *WindowMulti[A]) PhysicalDPI() float32 {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	return w.PhysDPI
+}
+
+func (w *WindowMulti[A]) LogicalDPI() float32 {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	return w.LogDPI
+}
+
+func (w *WindowMulti[A]) SetLogicalDPI(dpi float32) {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	w.LogDPI = dpi
 }
