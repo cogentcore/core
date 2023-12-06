@@ -11,14 +11,34 @@ package base
 
 import (
 	"image"
+	"sync"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 )
 
 // Window contains the data and logic common to all implementations of [goosi.Window].
-type Window struct {
+// A Window is associated with a corresponding [goosi.App] type.
+type Window[A goosi.App] struct {
 	events.Deque
+
+	// App is the [goosi.App] associated with the window.
+	App A
+
+	// Mu is the main mutex protecting access to window operations, including [Window.RunOnWin] functions.
+	Mu sync.Mutex
+
+	// RunQueue is the queue of functions to call on the window loop. To add to it, use [Window.RunOnWin].
+	RunQueue chan FuncRun
+
+	publish     chan struct{}
+	publishDone chan struct{}
+	winClose    chan struct{}
+
+	mainMenu goosi.MainMenu
+
+	closeReqFunc   func(win goosi.Window)
+	closeCleanFunc func(win goosi.Window)
 
 	// Nm is the name of the window
 	Nm string
@@ -67,34 +87,34 @@ type Window struct {
 	DestroyGPUFunc func()
 }
 
-func (w *Window) Name() string {
+func (w *Window[A]) Name() string {
 	return w.Nm
 }
 
-func (w *Window) SetName(name string) {
+func (w *Window[A]) SetName(name string) {
 	w.Nm = name
 }
 
-func (w *Window) Title() string {
+func (w *Window[A]) Title() string {
 	return w.Titl
 }
 
-func (w *Window) Flags() goosi.WindowFlags {
+func (w *Window[A]) Flags() goosi.WindowFlags {
 	return w.Flag
 }
 
-func (w *Window) Is(flag goosi.WindowFlags) bool {
+func (w *Window[A]) Is(flag goosi.WindowFlags) bool {
 	return w.Flag.HasFlag(flag)
 }
 
-func (w *Window) SetFPS(fps int) {
+func (w *Window[A]) SetFPS(fps int) {
 	w.FPS = fps
 }
 
-func (w *Window) EventMgr() *events.Mgr {
+func (w *Window[A]) EventMgr() *events.Mgr {
 	return &w.EvMgr
 }
 
-func (w *Window) SetDestroyGPUResourcesFunc(f func()) {
+func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUFunc = f
 }

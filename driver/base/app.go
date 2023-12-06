@@ -25,7 +25,7 @@ type App struct {
 	// of the app when calling interface methods in the base App.
 	This goosi.App `view:"-"`
 
-	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] calls.
+	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] functions.
 	Mu sync.Mutex `view:"-"`
 
 	// MainQueue is the queue of functions to call on the main loop. To add to it, use [App.RunOnMain].
@@ -54,13 +54,6 @@ type App struct {
 
 	// Dark is whether the system color theme is dark (as opposed to light)
 	Dark bool
-}
-
-// FuncRun is a simple helper type that contains a function to call and a channel
-// to send a signal on when the function is finished running.
-type FuncRun struct {
-	F    func()
-	Done chan struct{}
 }
 
 // func Main(f func(a goosi.App)) {
