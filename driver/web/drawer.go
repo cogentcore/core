@@ -121,3 +121,7 @@ func (dw *drawerImpl) StartDraw(descIdx int) {
 func (dw *drawerImpl) EndDraw() {
 	// no-op
 }
+
+func (dw *drawerImpl) Surface() any {
+	return nil
+}
