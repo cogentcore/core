@@ -110,3 +110,7 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 		return dw.Frame.Format.Bounds()
 	}
 }
+
+func (dw *Drawer) Surface() any {
+	return dw.Surf
+}
