@@ -36,16 +36,14 @@ type Window[A goosi.App] struct {
 	// RunQueue is the queue of functions to call on the window loop. To add to it, use [Window.RunOnWin].
 	RunQueue chan FuncRun
 
-	publish     chan struct{}
-	publishDone chan struct{}
-
 	// WinClose is a channel on which a single is sent to indicate that the
 	// window should close.
 	WinClose chan struct{}
 
-	mainMenu goosi.MainMenu
+	// CloseReqFunc is the function to call on a close request
+	CloseReqFunc func(win goosi.Window)
 
-	CloseReqFunc   func(win goosi.Window)
+	// CloseCleanFunc is the function to call to close the window
 	CloseCleanFunc func(win goosi.Window)
 
 	// Nm is the name of the window
@@ -71,6 +69,9 @@ type Window[A goosi.App] struct {
 	// and the surface; otherwise it is difficult to
 	// ensure that the proper ordering of destruction applies.
 	DestroyGPUFunc func()
+
+	// CursorEnabled is whether the cursor is currently disabled
+	CursorEnabled bool
 }
 
 // WinLoop runs the window's own locked processing loop.
@@ -200,4 +201,12 @@ func (w *Window[A]) CloseClean() {
 	if w.CloseCleanFunc != nil {
 		w.CloseCleanFunc(w.This)
 	}
+}
+
+func (w *Window[A]) SetCursorEnabled(enabled, raw bool) {
+	w.CursorEnabled = enabled
+}
+
+func (w *Window[A]) IsCursorEnabled() bool {
+	return w.CursorEnabled
 }
