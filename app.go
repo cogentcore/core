@@ -156,11 +156,6 @@ type App interface {
 	// See also similar method on Window.
 	SendEmptyEvent()
 
-	// PollEvents tells the main event loop to check for any gui events right now.
-	// Call this periodically from longer-running functions to ensure
-	// GUI responsiveness.
-	PollEvents()
-
 	// ShowVirtualKeyboard shows a virtual keyboard of the given type.
 	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
 	ShowVirtualKeyboard(typ VirtualKeyboardTypes)

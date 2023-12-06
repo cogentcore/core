@@ -40,6 +40,9 @@ type App struct {
 	// Abt is the about information for the app.
 	Abt string `label:"About"`
 
+	// OpenFls are files that have been set by the operating system to open at startup.
+	OpenFls []string `label:"Open files"`
+
 	// Quitting is whether the app is quitting and thus closing all of the windows
 	Quitting bool
 
