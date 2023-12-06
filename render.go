@@ -11,7 +11,6 @@ import (
 
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -135,11 +134,10 @@ func (sc *Scene) IsConfiged() bool {
 	return sc.Frame != nil
 }
 
-// ConfigFrameFromDrawer configures framebuffer for GPU rendering
-// Using GPU and Device from a vgpu vdraw.Drawer.
-func (sc *Scene) ConfigFrameFromDrawer(drw *vdraw.Drawer) {
-	sf := drw.Surf
-	sc.ConfigFrame(sf.GPU, &sf.Device)
+// ConfigFrameFromSurface configures framebuffer for GPU rendering
+// Using GPU and Device from given vgpu.Surface
+func (sc *Scene) ConfigFrameFromSurface(surf *vgpu.Surface) {
+	sc.ConfigFrame(surf.GPU, &surf.Device)
 }
 
 // ConfigFrame configures framebuffer for GPU rendering,

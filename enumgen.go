@@ -4,6 +4,7 @@ package xyz
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -180,7 +181,10 @@ func (i LightColors) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LightColors) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _SelModesValues = []SelModes{0, 1, 2, 3}
@@ -296,7 +300,10 @@ func (i SelModes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SelModes) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _NodeFlagsValues = []NodeFlags{7, 8, 9}
@@ -393,6 +400,8 @@ func (i *NodeFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*ki.Flags)(i).SetStringOr(flg)
 			if err != nil {
@@ -488,7 +497,10 @@ func (i NodeFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *NodeFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _RenderClassesValues = []RenderClasses{0, 1, 2, 3, 4, 5, 6}
@@ -619,7 +631,10 @@ func (i RenderClasses) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RenderClasses) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _ScFlagsValues = []ScFlags{7, 8, 9, 10}
@@ -721,6 +736,8 @@ func (i *ScFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*ki.Flags)(i).SetStringOr(flg)
 			if err != nil {
@@ -816,5 +833,8 @@ func (i ScFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ScFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

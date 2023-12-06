@@ -26,18 +26,17 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/gi3d"
 	"goki.dev/glop/dirs"
 	"goki.dev/mat32/v2"
+	"goki.dev/xyz"
 )
 
-// note: gimain imports "goki.dev/gi/v2/gi3d/io/obj" to get this code
 func init() {
-	gi3d.Decoders[".obj"] = &Decoder{}
+	xyz.Decoders[".obj"] = &Decoder{}
 }
 
 // Decoder contains all decoded data from the obj and mtl files.
-// It also implements the gi3d.Decoder interface and an instance
+// It also implements the xyz.Decoder interface and an instance
 // is registered to handle .obj files.
 type Decoder struct {
 	Objfile       string               // .obj filename (without path)
@@ -55,7 +54,7 @@ type Decoder struct {
 	smoothCurrent bool                 // current smooth state
 }
 
-func (dec *Decoder) New() gi3d.Decoder {
+func (dec *Decoder) New() xyz.Decoder {
 	di := new(Decoder)
 	di.Objects = make([]Object, 0)
 	di.Warnings = make([]string, 0)
@@ -175,17 +174,17 @@ func (fc *Face) Destroy() {
 
 // Material contains all information about an object material
 type Material struct {
-	Name       string      // Material name
-	Illum      int         // Illumination model
-	Opacity    float32     // Opacity factor
-	Refraction float32     // Refraction factor
-	Shininess  float32     // Shininess (specular exponent)
-	Ambient    color.RGBA  // Ambient color reflectivity
-	Diffuse    color.RGBA  // Diffuse color reflectivity
-	Specular   color.RGBA  // Specular color reflectivity
-	Emissive   color.RGBA  // Emissive color
-	MapKd      string      // Texture file linked to diffuse color
-	Tiling     gi3d.Tiling // Tiling parameters: repeat and offset
+	Name       string     // Material name
+	Illum      int        // Illumination model
+	Opacity    float32    // Opacity factor
+	Refraction float32    // Refraction factor
+	Shininess  float32    // Shininess (specular exponent)
+	Ambient    color.RGBA // Ambient color reflectivity
+	Diffuse    color.RGBA // Diffuse color reflectivity
+	Specular   color.RGBA // Specular color reflectivity
+	Emissive   color.RGBA // Emissive color
+	MapKd      string     // Texture file linked to diffuse color
+	Tiling     xyz.Tiling // Tiling parameters: repeat and offset
 }
 
 // Light gray default material used as when other materials cannot be loaded.
@@ -205,40 +204,40 @@ const (
 )
 
 // SetScene sets group with with all the decoded objects.
-func (dec *Decoder) SetScene(sc *gi3d.Scene) {
-	gp := gi3d.NewGroup(sc, dec.Objfile)
+func (dec *Decoder) SetScene(sc *xyz.Scene) {
+	gp := xyz.NewGroup(sc, dec.Objfile)
 	dec.SetGroup(sc, gp)
 }
 
 // SetGroup sets group with with all the decoded objects.
 // calls Destroy after to free memory
-func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
+func (dec *Decoder) SetGroup(sc *xyz.Scene, gp *xyz.Group) {
 	for i := range dec.Objects {
 		obj := &dec.Objects[i]
 		if len(obj.Faces) == 0 {
 			continue
 		}
-		objgp := gi3d.NewGroup(gp, obj.Name)
+		objgp := xyz.NewGroup(gp, obj.Name)
 		dec.SetObject(sc, objgp, obj)
 	}
 	dec.Destroy()
 }
 
-// SetObject sets the object as a group with each gi3d.Solid as a mesh with unique material
-func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, ob *Object) {
+// SetObject sets the object as a group with each xyz.Solid as a mesh with unique material
+func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 	matName := ""
-	var sld *gi3d.Solid
-	var ms *gi3d.GenMesh
+	var sld *xyz.Solid
+	var ms *xyz.GenMesh
 	sldidx := 0
 	idxs := make([]int, 0, 4)
 	for fi := range ob.Faces {
 		face := &ob.Faces[fi]
 		if face.Material != matName || sld == nil {
 			sldnm := fmt.Sprintf("%s_%d", ob.Name, sldidx)
-			ms = &gi3d.GenMesh{}
+			ms = &xyz.GenMesh{}
 			ms.Nm = sldnm
 			sc.AddMeshUnique(ms)
-			sld = gi3d.NewSolid(objgp, sldnm).SetMesh(ms)
+			sld = xyz.NewSolid(objgp, sldnm).SetMesh(ms)
 			matName = face.Material
 			dec.SetMat(sc, sld, matName)
 			sldidx++
@@ -262,7 +261,7 @@ func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, ob *Object) {
 	}
 }
 
-func (dec *Decoder) addNorms(ms *gi3d.GenMesh, ai, bi, ci int, idxs []int) {
+func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
 	if ms.Norm.Size() >= ms.Vtx.Size() {
 		return
 	}
@@ -279,7 +278,7 @@ func (dec *Decoder) addNorms(ms *gi3d.GenMesh, ai, bi, ci int, idxs []int) {
 	}
 }
 
-func (dec *Decoder) setIndex(ms *gi3d.GenMesh, face *Face, idx int, idxs *[]int) {
+func (dec *Decoder) setIndex(ms *xyz.GenMesh, face *Face, idx int, idxs *[]int) {
 	if len(*idxs) > idx {
 		ms.Idx.Append(uint32((*idxs)[idx]))
 	} else {
@@ -287,7 +286,7 @@ func (dec *Decoder) setIndex(ms *gi3d.GenMesh, face *Face, idx int, idxs *[]int)
 	}
 }
 
-func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) int {
+func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	var vec3 mat32.Vec3
 	var vec2 mat32.Vec2
 
@@ -318,7 +317,7 @@ func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) int {
 }
 
 // SetMat sets the material for object
-func (dec *Decoder) SetMat(sc *gi3d.Scene, sld *gi3d.Solid, matnm string) {
+func (dec *Decoder) SetMat(sc *xyz.Scene, sld *xyz.Solid, matnm string) {
 	mat := dec.Materials[matnm]
 	if mat == nil {
 		mat = defaultMat
@@ -341,7 +340,7 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, sld *gi3d.Solid, matnm string) {
 }
 
 // loadTex loads given texture file
-func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *Material) {
+func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Material) {
 	if texfn == "" {
 		return
 	}
@@ -354,7 +353,7 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *
 	_, tfn := filepath.Split(texPath)
 	tf, err := sc.TextureByNameTry(tfn)
 	if err != nil {
-		tf = gi3d.NewTextureFile(sc, tfn, texPath)
+		tf = xyz.NewTextureFile(sc, tfn, texPath)
 	}
 	sld.Mat.SetTexture(tf)
 	if mat.Tiling.Repeat.X > 0 {

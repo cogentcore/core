@@ -38,7 +38,10 @@ var Update3DTrace = false
 // the camera (i.e., its Pose is copied) -- Solids in that group can
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
-type Scene struct { //goki:no-new
+//
+//goki:no-new
+//goki:embedder
+type Scene struct {
 	ki.Node
 
 	// Viewport-level viewbox within any parent Viewport2D

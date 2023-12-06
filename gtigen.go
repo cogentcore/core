@@ -217,11 +217,11 @@ var NodeBaseType = gti.AddType(&gti.Type{
 		{"Pose", &gti.Field{Name: "Pose", Type: "goki.dev/xyz.Pose", LocalType: "Pose", Doc: "complete specification of position and orientation", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/xyz.Scene", LocalType: "*Scene", Doc: "Sc is the cached Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"PoseMu", &gti.Field{Name: "PoseMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on pose access -- needed for parallel updating", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\"  set:\"-\""}},
-		{"MeshBBox", &gti.Field{Name: "MeshBBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "mesh-based local bounding box (aggregated for groups)", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"WorldBBox", &gti.Field{Name: "WorldBBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "world coordinates bounding box", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"NDCBBox", &gti.Field{Name: "NDCBBox", Type: "goki.dev/mat32/v2.Box3", LocalType: "mat32.Box3", Doc: "normalized display coordinates bounding box, used for frustrum clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds.", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds.", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"MeshBBox", &gti.Field{Name: "MeshBBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "mesh-based local bounding box (aggregated for groups)", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"WorldBBox", &gti.Field{Name: "WorldBBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "world coordinates bounding box", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"NDCBBox", &gti.Field{Name: "NDCBBox", Type: "goki.dev/mat32/v2.Box3", LocalType: "mat32.Box3", Doc: "normalized display coordinates bounding box, used for frustrum clipping", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds.", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds.", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -256,6 +256,7 @@ var SceneType = gti.AddType(&gti.Type{
 	Doc:       "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via gi3v.Scene3D,\nwhere it is copied into an overall gi.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Viewport-level viewbox within any parent Viewport2D", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -295,6 +296,28 @@ func (t *Scene) KiType() *gti.Type {
 // New returns a new [*Scene] value
 func (t *Scene) New() ki.Ki {
 	return &Scene{}
+}
+
+// SceneEmbedder is an interface that all types that embed Scene satisfy
+type SceneEmbedder interface {
+	AsScene() *Scene
+}
+
+// AsScene returns the given value as a value of type Scene if the type
+// of the given value embeds Scene, or nil otherwise
+func AsScene(k ki.Ki) *Scene {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SceneEmbedder); ok {
+		return t.AsScene()
+	}
+	return nil
+}
+
+// AsScene satisfies the [SceneEmbedder] interface
+func (t *Scene) AsScene() *Scene {
+	return t
 }
 
 // SetMultiSample sets the [Scene.MultiSample]:
