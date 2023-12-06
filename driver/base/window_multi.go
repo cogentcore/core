@@ -84,3 +84,36 @@ func (w *WindowMulti[A]) SetLogicalDPI(dpi float32) {
 	defer w.Mu.Unlock()
 	w.LogDPI = dpi
 }
+
+func (w *WindowMulti[A]) SetWinSize(sz image.Point) {
+	if w.This.IsClosed() {
+		return
+	}
+	w.WnSize = sz
+}
+
+func (w *WindowMulti[A]) SetSize(sz image.Point) {
+	if w.This.IsClosed() {
+		return
+	}
+	sc := w.This.GetScreen()
+	sz = sc.WinSizeFmPix(sz)
+	w.SetWinSize(sz)
+}
+
+func (w *WindowMulti[A]) SetPos(pos image.Point) {
+	if w.This.IsClosed() {
+		return
+	}
+	w.Pos = pos
+}
+
+func (w *WindowMulti[A]) SetGeom(pos image.Point, sz image.Point) {
+	if w.This.IsClosed() {
+		return
+	}
+	sc := w.This.GetScreen()
+	sz = sc.WinSizeFmPix(sz)
+	w.SetWinSize(sz)
+	w.Pos = pos
+}
