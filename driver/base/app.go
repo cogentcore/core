@@ -60,6 +60,15 @@ type FuncRun struct {
 	Done chan struct{}
 }
 
+// func Main(f func(a goosi.App)) {
+// 	goosi.TheApp.GetScreens()
+// 	go func() {
+// 		f(goosi.TheApp)
+// 		goosi.TheApp.StopMain()
+// 	}()
+// 	goosi.TheApp.MainLoop()
+// }
+
 // RunOnMain runs the given function on the main thread
 func (a *App) RunOnMain(f func()) {
 	if a.MainQueue == nil {
