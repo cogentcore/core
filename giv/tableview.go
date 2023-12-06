@@ -532,10 +532,8 @@ func (tv *TableView) ConfigRows() {
 				addnm := fmt.Sprintf("add-%v", itxt)
 				addact := gi.Button{}
 				sg.SetChild(&addact, cidx, addnm)
-				addact.SetType(gi.ButtonAction)
-				addact.SetIcon(icons.Add)
-				addact.Tooltip = "insert a new element at this index"
-				addact.OnClick(func(e events.Event) {
+				addact.SetType(gi.ButtonAction).SetIcon(icons.Add).
+					SetTooltip("insert a new element at this index").OnClick(func(e events.Event) {
 					tv.SliceNewAtRow(i + 1)
 				})
 				cidx++
@@ -544,10 +542,8 @@ func (tv *TableView) ConfigRows() {
 				delnm := fmt.Sprintf("del-%v", itxt)
 				delact := gi.Button{}
 				sg.SetChild(&delact, cidx, delnm)
-				delact.SetType(gi.ButtonAction)
-				delact.SetIcon(icons.Delete)
-				delact.Tooltip = "delete this element"
-				delact.OnClick(func(e events.Event) {
+				delact.SetType(gi.ButtonAction).SetIcon(icons.Delete).
+					SetTooltip("delete this element").OnClick(func(e events.Event) {
 					tv.SliceDeleteAtRow(i)
 				})
 				cidx++
@@ -582,7 +578,7 @@ func (tv *TableView) UpdateWidgets() {
 		i := i
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx
-		invis := tv.ConfigIter > 2 && si >= tv.SliceSize
+		invis := si >= tv.SliceSize
 
 		var idxlab *gi.Label
 		if tv.Is(SliceViewShowIndex) {
@@ -682,7 +678,7 @@ func (tv *TableView) StyleRow(w gi.Widget, idx, fidx int) {
 func (tv *TableView) SliceNewAt(idx int) {
 	tv.ViewMuLock()
 	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	defer tv.UpdateEndLayout(updt)
 
 	tv.SliceNewAtSel(idx)
 	laser.SliceNewAt(tv.Slice, idx)
@@ -706,7 +702,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	}
 	tv.ViewMuLock()
 	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	defer tv.UpdateEndLayout(updt)
 
 	tv.SliceDeleteAtSel(idx)
 

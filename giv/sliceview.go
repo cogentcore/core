@@ -692,11 +692,8 @@ func (sv *SliceViewBase) ConfigRows() {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Button{}
 					sg.SetChild(&addact, cidx, addnm)
-					addact.SetType(gi.ButtonAction)
-					addact.SetIcon(icons.Add)
-					addact.Tooltip = "insert a new element at this index"
-					addact.Data = i
-					addact.OnClick(func(e events.Event) {
+					addact.SetType(gi.ButtonAction).SetIcon(icons.Add).
+						SetTooltip("insert a new element at this index").OnClick(func(e events.Event) {
 						sv.SliceNewAtRow(i + 1)
 					})
 				}
@@ -706,11 +703,8 @@ func (sv *SliceViewBase) ConfigRows() {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Button{}
 					sg.SetChild(&delact, cidx, delnm)
-					delact.SetType(gi.ButtonAction)
-					delact.SetIcon(icons.Delete)
-					delact.Tooltip = "delete this element"
-					delact.Data = i
-					delact.OnClick(func(e events.Event) {
+					delact.SetType(gi.ButtonAction).SetIcon(icons.Delete).
+						SetTooltip("delete this element").OnClick(func(e events.Event) {
 						sv.SliceDeleteAtRow(i)
 					})
 				}
@@ -753,7 +747,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		w := sg.Kids[ridx+idxOff].(gi.Widget)
 		vv := sv.Values[i]
 		si := sv.StartIdx + i // slice idx
-		invis := sv.ConfigIter > 2 && si >= sv.SliceSize
+		invis := si >= sv.SliceSize
 
 		var idxlab *gi.Label
 		if sv.Is(SliceViewShowIndex) {
@@ -852,7 +846,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.ViewMuLock() // no return!  must unlock before return below
 
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndRender(updt)
+	defer sv.UpdateEndLayout(updt)
 
 	sv.SliceNewAtSel(idx)
 
@@ -2064,13 +2058,5 @@ func (sv *SliceViewBase) SizeFinal() {
 	}
 	// note: doing UpdateWidgets here seems to be unnecessary
 	sv.Frame.SizeFinal()
-	sv.This().(SliceViewer).UpdateWidgets()
-}
-
-func (sv *SliceViewBase) Render() {
-	sv.Frame.Render()
-	if sv.ConfigIter == 2 {
-		sv.ConfigIter++
-		sv.This().(SliceViewer).UpdateWidgets()
-	}
+	// sv.This().(SliceViewer).UpdateWidgets()
 }
