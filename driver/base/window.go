@@ -11,6 +11,7 @@ package base
 
 import (
 	"sync"
+	"time"
 
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
@@ -37,7 +38,10 @@ type Window[A goosi.App] struct {
 
 	publish     chan struct{}
 	publishDone chan struct{}
-	winClose    chan struct{}
+
+	// WinClose is a channel on which a single is sent to indicate that the
+	// window should close.
+	WinClose chan struct{}
 
 	mainMenu goosi.MainMenu
 
@@ -67,6 +71,43 @@ type Window[A goosi.App] struct {
 	// and the surface; otherwise it is difficult to
 	// ensure that the proper ordering of destruction applies.
 	DestroyGPUFunc func()
+}
+
+// WinLoop runs the window's own locked processing loop.
+func (w *Window[A]) WinLoop() {
+	var winPaint *time.Ticker
+	if w.FPS > 0 {
+		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
+	} else {
+		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
+	}
+	winShow := time.NewTimer(200 * time.Millisecond)
+outer:
+	for {
+		select {
+		case <-w.WinClose:
+			winPaint.Stop()
+			break outer
+		case <-winShow.C:
+			if !w.This.IsVisible() {
+				break outer
+			}
+			w.EvMgr.Window(events.WinShow)
+		case f := <-w.RunQueue:
+			if !w.This.IsVisible() {
+				break outer
+			}
+			f.F()
+			if f.Done != nil {
+				f.Done <- struct{}{}
+			}
+		case <-winPaint.C:
+			if !w.This.IsVisible() {
+				break outer
+			}
+			w.EvMgr.WindowPaint()
+		}
+	}
 }
 
 // RunOnWin runs given function on the window's unique locked thread.
