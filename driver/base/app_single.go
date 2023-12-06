@@ -29,7 +29,15 @@ type AppSingle[D goosi.Drawer, W goosi.Window] struct {
 	Screen *goosi.Screen
 }
 
-type AppSingler[D goosi.Drawer, W goosi.Window] interface {
+// AppSingler describes the common functionality implemented by [AppSingle]
+// apps that [WindowSingle] windows need to access.
+type AppSingler interface {
 	goosi.App
-	AsAppSingle() *AppSingle[D, W]
+
+	// SingleDrawer returns the single [goosi.Drawer] associated with this app.
+	SingleDrawer() goosi.Drawer
+}
+
+func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
+	return a.Drawer
 }

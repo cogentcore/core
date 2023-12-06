@@ -20,16 +20,16 @@ import (
 // platforms (desktop), for which you should use [WindowSingle].
 // A WindowSingle is associated with a corresponding [goosi.App] type.
 // The [goosi.App] type should embed [AppSingle].
-type WindowSingle[D goosi.Drawer, W goosi.Window, A AppSingler[D, W]] struct {
+type WindowSingle[A AppSingler] struct {
 	Window[A]
 }
 
-func (w *WindowSingle[D, W, A]) Drawer() goosi.Drawer {
-	return w.App.AsAppSingle().Drawer
+func (w *WindowSingle[A]) Drawer() goosi.Drawer {
+	return w.App.SingleDrawer()
 }
 
-func (w *WindowSingle[D, W, A]) GetScreen() *goosi.Screen {
-	return w.App.AsAppSingle().Screen
+func (w *WindowSingle[A]) GetScreen() *goosi.Screen {
+	return w.App.Screen(0)
 }
 
 func (w *WindowSingle[A]) Size() image.Point {
