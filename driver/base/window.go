@@ -45,8 +45,8 @@ type Window[A goosi.App] struct {
 
 	mainMenu goosi.MainMenu
 
-	closeReqFunc   func(win goosi.Window)
-	closeCleanFunc func(win goosi.Window)
+	CloseReqFunc   func(win goosi.Window)
+	CloseCleanFunc func(win goosi.Window)
 
 	// Nm is the name of the window
 	Nm string `label:"Name"`
@@ -171,4 +171,33 @@ func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 
 func (w *Window[A]) Insets() styles.SideFloats {
 	return w.Insts
+}
+
+func (w *Window[A]) SetCloseReqFunc(fun func(win goosi.Window)) {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	w.CloseReqFunc = fun
+}
+
+func (w *Window[A]) SetCloseCleanFunc(fun func(win goosi.Window)) {
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+	w.CloseCleanFunc = fun
+}
+
+func (w *Window[A]) CloseReq() {
+	if w.App.IsQuitting() {
+		w.This.Close()
+	}
+	if w.CloseReqFunc != nil {
+		w.CloseReqFunc(w.This)
+	} else {
+		w.This.Close()
+	}
+}
+
+func (w *Window[A]) CloseClean() {
+	if w.CloseCleanFunc != nil {
+		w.CloseCleanFunc(w.This)
+	}
 }
