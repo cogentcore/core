@@ -43,7 +43,7 @@ type App interface {
 
 	// Screen returns screen for given screen number, or nil if not a
 	// valid screen number.
-	Screen(scrN int) *Screen
+	Screen(n int) *Screen
 
 	// ScreenByName returns screen for given screen name, or nil if not a
 	// valid screen name.
