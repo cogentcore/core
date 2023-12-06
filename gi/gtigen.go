@@ -1366,7 +1366,7 @@ var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Preferences",
 	ShortName: "gi.Preferences",
 	IDName:    "preferences",
-	Doc:       "Preferences are the overall user preferences for GoGi, providing some basic\ncustomization -- in addition, most gui settings can be styled using\nCSS-style sheets under CustomStyle.  These prefs are saved and loaded from\nthe GoGi user preferences directory -- see oswin/App for further info.",
+	Doc:       "Preferences are the overall user preferences for GoGi, providing some basic\ncustomization -- in addition, most gui settings can be styled using\nCSS-style sheets under CustomStyle.  These prefs are saved and loaded from\nthe GoGi user preferences directory -- see goosi/App for further info.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -1461,7 +1461,7 @@ var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ScreenPrefs",
 	ShortName: "gi.ScreenPrefs",
 	IDName:    "screen-prefs",
-	Doc:       "ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global preferences.",
+	Doc:       "ScreenPrefs are the per-screen preferences -- see goosi/App/Screen() for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global preferences.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},

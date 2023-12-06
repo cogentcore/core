@@ -75,7 +75,7 @@ func VCSLabelFunc(fn *Node, label string) string {
 }
 
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
-	gi.NewButton(m).SetIcon(icons.Info).
+	gi.NewButton(m).SetText("File info").SetIcon(icons.Info).
 		Style(func(s *styles.Style) {
 			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {

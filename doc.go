@@ -24,7 +24,7 @@ All of the code is in the sub-packages within this repository:
 
 * histyle: text syntax-based highlighting styles -- used in textview.View
 
-  - oswin: OS-specific framework for low-level rendering, event interface,
+  - goosi: OS-specific framework for low-level rendering, event interface,
     including GPU abstraction (OpenGL for now, ultimately Vulcan)
 
 * python: access all of GoGi from within Python using GoPy system.

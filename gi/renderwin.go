@@ -583,7 +583,7 @@ func (w *RenderWin) PollEvents() {
 	}
 }
 
-// EventLoop runs the event processing loop for the RenderWin -- grabs oswin
+// EventLoop runs the event processing loop for the RenderWin -- grabs goosi
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
 func (w *RenderWin) EventLoop() {

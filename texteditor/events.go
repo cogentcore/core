@@ -531,7 +531,7 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 // OpenLink opens given link, either by sending LinkSig signal if there are
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
-// oswin/App.OpenURL())
+// goosi/App.OpenURL())
 func (ed *Editor) OpenLink(tl *paint.TextLink) {
 	if ed.LinkHandler != nil {
 		ed.LinkHandler(tl)

@@ -48,7 +48,7 @@ func Init() {
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
-// the GoGi user preferences directory -- see oswin/App for further info.
+// the GoGi user preferences directory -- see goosi/App for further info.
 type Preferences struct { //gti:add
 
 	// the color theme
@@ -468,7 +468,7 @@ func (pf *Preferences) TimeFormat() string {
 //////////////////////////////////////////////////////////////////
 //  ParamPrefs
 
-// ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
+// ScreenPrefs are the per-screen preferences -- see goosi/App/Screen() for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences.
 type ScreenPrefs struct { //gti:add
