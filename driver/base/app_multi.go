@@ -17,4 +17,18 @@ import "goki.dev/goosi"
 // with a corresponding type of [goosi.Window]. The [goosi.Window]
 // type should embed [WindowMulti].
 type AppMulti[W goosi.Window] struct {
+	App
+
+	// Windows are the windows associated with the app
+	Windows []W
+
+	// Screens are the screens associated with the app
+	Screens []*goosi.Screen
+
+	// AllScreens is a unique list of all screens ever seen, from which
+	// information can be got if something is missing in [AppMulti.Screens]
+	AllScreens []*goosi.Screen
+
+	// CtxWindow is a dynamically set context window used for some operations
+	CtxWindow W
 }

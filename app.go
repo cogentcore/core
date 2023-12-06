@@ -49,11 +49,6 @@ type App interface {
 	// valid screen name.
 	ScreenByName(name string) *Screen
 
-	// NoScreens returns true if there are no active screens currently
-	// (e.g., for a closed laptop with no external monitor attached)
-	// The previous list of Screens is retained so this is the check.
-	NoScreens() bool
-
 	// NWindows returns the number of windows open for this app.
 	NWindows() int
 
