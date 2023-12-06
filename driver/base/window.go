@@ -51,33 +51,8 @@ type Window[A goosi.App] struct {
 	// Titl is the title of the window
 	Titl string `label:"Title"`
 
-	// Pos is the position of the window
-	Pos image.Point
-
-	// WnSize is the size of the window in window-manager coords
-	WnSize image.Point
-
-	// PixSize is the pixel size of the window in raw display dots
-	PixSize image.Point
-
 	// Insts are the cached insets of the window
 	Insts styles.SideFloats `label:"Insets"`
-
-	// DevicePixelRatio is a factor that scales the screen's
-	// "natural" pixel coordinates into actual device pixels.
-	// On OS-X, it is backingScaleFactor = 2.0 on "retina"
-	DevicePixelRatio float32
-
-	// PhysicalDPI is the physical dots per inch of the screen,
-	// for generating true-to-physical-size output.
-	// It is computed as 25.4 * (PixSize.X / PhysicalSize.X)
-	// where 25.4 is the number of mm per inch.
-	PhysDPI float32 `label:"Physical DPI"`
-
-	// LogicalDPI is the logical dots per inch of the screen,
-	// which is used for all rendering.
-	// It is: transient zoom factor * screen-specific multiplier * PhysicalDPI
-	LogDPI float32 `label:"Logical DPI"`
 
 	// Flag contains the flags associated with the window
 	Flag goosi.WindowFlags

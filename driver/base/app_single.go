@@ -12,8 +12,7 @@ package base
 import "goki.dev/goosi"
 
 // AppSingle contains the data and logic common to all implementations of [goosi.App]
-// on single-window platforms (mobile, web, and offscreen), as opposed to multi-window
-// platforms (desktop), for which you should use [AppMulti]. An AppSingle is associated
+// on single-window platforms (mobile, web, and offscreen). An AppSingle is associated
 // with a corresponding type of [goosi.Drawer] and [goosi.Window]. The [goosi.Window]
 // type should embed [WindowSingle].
 type AppSingle[D goosi.Drawer, W goosi.Window] struct {
