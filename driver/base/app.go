@@ -12,6 +12,8 @@
 package base
 
 import (
+	"os"
+	"path/filepath"
 	"sync"
 
 	"goki.dev/goosi"
@@ -19,7 +21,9 @@ import (
 
 // App contains the data and logic common to all implementations of [goosi.App].
 type App struct {
-	Ths goosi.App
+	// This is the App as a [goosi.App] interface, which preserves the actual identity
+	// of the app when calling interface methods in the base App.
+	This goosi.App
 
 	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] calls.
 	Mu sync.Mutex
@@ -61,16 +65,20 @@ func (a *App) RunOnMain(f func()) {
 	if a.MainQueue == nil {
 		f()
 	} else {
+		a.This.SendEmptyEvent()
 		done := make(chan struct{})
 		a.MainQueue <- FuncRun{F: f, Done: done}
 		<-done
+		a.This.SendEmptyEvent()
 	}
 }
 
 // GoRunOnMain runs the given function on the main thread and returns immediately
 func (a *App) GoRunOnMain(f func()) {
 	go func() {
+		a.This.SendEmptyEvent()
 		a.MainQueue <- FuncRun{F: f, Done: nil}
+		a.This.SendEmptyEvent()
 	}()
 }
 
@@ -93,6 +101,18 @@ func (a *App) About() string {
 
 func (a *App) SetAbout(about string) {
 	a.Abt = about
+}
+
+func (a *App) GoGiPrefsDir() string {
+	pdir := filepath.Join(a.This.PrefsDir(), "GoGi")
+	os.MkdirAll(pdir, 0755)
+	return pdir
+}
+
+func (a *App) AppPrefsDir() string {
+	pdir := filepath.Join(a.This.PrefsDir(), a.Name())
+	os.MkdirAll(pdir, 0755)
+	return pdir
 }
 
 func (a *App) SetQuitReqFunc(fun func()) {
@@ -122,6 +142,6 @@ func (a *App) Quit() {
 	if a.Quitting {
 		return
 	}
-	a.Ths.QuitClean()
+	a.This.QuitClean()
 	a.StopMain()
 }
