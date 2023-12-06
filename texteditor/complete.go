@@ -100,12 +100,11 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 // CompleteText does completion for text files
 func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches) {
-	// todo:
-	// err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
-	// if err != nil {
-	// 	fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
-	// 	return md
-	// }
+	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
+	if err != nil {
+		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
+		return md
+	}
 
 	md.Seed = complete.SeedWhiteSpace(text)
 	if md.Seed == "" {
