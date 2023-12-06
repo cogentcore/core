@@ -23,10 +23,10 @@ import (
 type App struct {
 	// This is the App as a [goosi.App] interface, which preserves the actual identity
 	// of the app when calling interface methods in the base App.
-	This goosi.App
+	This goosi.App `view:"-"`
 
 	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] calls.
-	Mu sync.Mutex
+	Mu sync.Mutex `view:"-"`
 
 	// MainQueue is the queue of functions to call on the main loop. To add to it, use [App.RunOnMain].
 	MainQueue chan FuncRun
@@ -35,10 +35,10 @@ type App struct {
 	MainDone chan struct{}
 
 	// Nm is the name of the app.
-	Nm string
+	Nm string `label:"Name"`
 
 	// Abt is the about information for the app.
-	Abt string
+	Abt string `label:"About"`
 
 	// Quitting is whether the app is quitting and thus closing all of the windows
 	Quitting bool
