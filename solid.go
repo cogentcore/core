@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 import (
 	"fmt"
@@ -179,7 +179,7 @@ func (sld *Solid) ParentMaterial() *Material {
 // Validate checks that solid has valid mesh and texture settings, etc
 func (sld *Solid) Validate() error {
 	if sld.Mesh == "" {
-		err := fmt.Errorf("gi3d.Solid: %s Mesh name is empty", sld.Path())
+		err := fmt.Errorf("xyz.Solid: %s Mesh name is empty", sld.Path())
 		log.Println(err)
 		return err
 	}

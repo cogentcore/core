@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// Node is the common interface for all gi3d scenegraph nodes
+// Node is the common interface for all xyz scenegraph nodes
 type Node interface {
 	ki.Ki
 
@@ -378,7 +378,7 @@ func (nb *NodeBase) TrackLight(sc *Scene, lightName string) error {
 	defer nb.PoseMu.Unlock()
 	lt, ok := sc.Lights.ValByKeyTry(lightName)
 	if !ok {
-		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.Path(), lightName)
+		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}
 	switch l := lt.(type) {
 	case *DirLight:

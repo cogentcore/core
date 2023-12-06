@@ -22,7 +22,7 @@ The default camera navigation controls allow you to move around the scene.  To g
 
 * **TargetPan** moves the target in *world* horizontal / vertical / depth (X, Y, Z) axes, and tells the camera to LookAt that new target location.
 
-Here are the default bindings (you can see the `gi3d.Scene NavEvents` method in `gi3d/scene.go` for how it works -- set the `NoNav` flag to true to disable it and you can write a different mapping by either making a new version of the Scene type or wrapping the Scene in a custom outer type that handles all the keyboard mappings.
+Here are the default bindings (you can see the `xyz.Scene NavEvents` method in `xyz/scene.go` for how it works -- set the `NoNav` flag to true to disable it and you can write a different mapping by either making a new version of the Scene type or wrapping the Scene in a custom outer type that handles all the keyboard mappings.
 
 * Mouse or keyboard arrows with no modifiers does *Orbit* rotation
 * `Shift+Mouse` / `Shift+Arrow` = *Pan*

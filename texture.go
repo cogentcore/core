@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 import (
 	"fmt"
@@ -123,7 +123,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		return tx.Img
 	}
 	if tx.File == "" {
-		err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Nm)
+		err := fmt.Errorf("xyz.Texture: %v File must be set to a filename to load texture from", tx.Nm)
 		log.Println(err)
 		return nil
 	}

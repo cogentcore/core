@@ -28,7 +28,7 @@ The default camera navigation controls allow you to move around the scene.  To g
 
 * **TargetPan** moves the target in *world* horizontal / vertical / depth (X, Y, Z) axes, and tells the camera to LookAt that new target location.
 
-Here are the default bindings (you can see the `gi3d.Scene NavEvents` method in `gi3d/scene.go` for how it works -- set the `NoNav` flag to true to disable it and you can write a different mapping by either making a new version of the Scene type or wrapping the Scene in a custom outer type that handles all the keyboard mappings.
+Here are the default bindings (you can see the `xyz.Scene NavEvents` method in `xyz/scene.go` for how it works -- set the `NoNav` flag to true to disable it and you can write a different mapping by either making a new version of the Scene type or wrapping the Scene in a custom outer type that handles all the keyboard mappings.
 
 * Mouse or keyboard arrows with no modifiers does *Orbit* rotation
 * `Shift+Mouse` / `Shift+Arrow` = *Pan*
@@ -38,7 +38,7 @@ Here are the default bindings (you can see the `gi3d.Scene NavEvents` method in 
 * `Alt++` / `Alt+-` = *TargetPan* along depth Z axis
 * `Space` = reset to the Defaults initial camera location (+10 in Z, Up is +Y, and looking at origin)
 
-These controls are also present at the bottom of the `gi3d.SceneView` used here, which provides a basic gui around the 3D Scene.
+These controls are also present at the bottom of the `xyz.SceneView` used here, which provides a basic gui around the 3D Scene.
 
 ## Selecting and Manipulating
 
@@ -51,7 +51,7 @@ In `Manipulable` mode, you can change the Pose of objects by dragging on the dif
 * `Ctrl` = scale -- scales along the relevant dimensions.
 * `Alt` = rotate -- rotates in current "depth" plane (again move camera to rotate in other planes).
 
-The code for all of this is in `gi3d/manip.go` -- it is relatively straightforward, leveraging the GoGi event system, based on bounding boxes for directing events, and having builtin support for dragging etc.  The `ManipPt` manipulation points receive mouse events directly and translate movements into the respective transformations.
+The code for all of this is in `xyz/manip.go` -- it is relatively straightforward, leveraging the GoGi event system, based on bounding boxes for directing events, and having builtin support for dragging etc.  The `ManipPt` manipulation points receive mouse events directly and translate movements into the respective transformations.
 
 You can generate Go code for the Pose produced by manipulating, by clicking on the Pose field in the Edit dialog of a Node, and then clicking on the `Go Code` button in the toolbar.
 

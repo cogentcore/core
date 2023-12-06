@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package gi3d provides a 3D scenegraph for the GoGi GUI framework.
+Package xyz provides a 3D scenegraph for the GoGi GUI framework.
 
-The scenegraph is rooted at a gi3d.Scene node which is like gi.Viewport2D,
+The scenegraph is rooted at a xyz.Scene node which is like gi.Viewport2D,
 where the scene is rendered, similar to the svg.SVG node for SVG drawings.
 
 Children of the Scene are Node nodes, with Group and Solid as the main
@@ -74,4 +74,4 @@ simplifies gui interactions.  There is default support for selection and
 Pose manipulation handling -- see manip.go code and NodeBase's
 ConnectEvents3D which responds to mouse clicks.
 */
-package gi3d
+package xyz

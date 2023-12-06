@@ -1,4 +1,4 @@
-module goki.dev/gi3d
+module goki.dev/xyz
 
 go 1.21.0
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 import (
 	"fmt"
@@ -82,7 +82,7 @@ func DecodeFileFS(fsys fs.FS, fname string) (Decoder, error) {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
-		return nil, fmt.Errorf("gi3d.DecodeFile: file extension: %v not found in Decoders list for file %v", ext, fname)
+		return nil, fmt.Errorf("xyz.DecodeFile: file extension: %v not found in Decoders list for file %v", ext, fname)
 	}
 	dec := dt.New()
 	files := dec.SetFileFS(fsys, fname)
@@ -269,7 +269,7 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
-		return fmt.Errorf("gi3d.ReadObj: file extension: %v not found in Decoders list", ext)
+		return fmt.Errorf("xyz.ReadObj: file extension: %v not found in Decoders list", ext)
 	}
 	dec := dt.New()
 	dec.SetFile(fname)
@@ -298,7 +298,7 @@ func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
-		return fmt.Errorf("gi3d.ReadScene: file extension: %v not found in Decoders list", ext)
+		return fmt.Errorf("xyz.ReadScene: file extension: %v not found in Decoders list", ext)
 	}
 	dec := dt.New()
 	dec.SetFile(fname)

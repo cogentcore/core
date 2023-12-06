@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3dv
+package xyzv
 
 /*
 
@@ -136,7 +136,7 @@ func (em *Embed2D) UploadViewTex(sc *Scene) {
 			tx.SetImage(img)
 			em.Mat.SetTexture(sc, tx)
 		} else {
-			fmt.Printf("gi3d.Embed2D: error: texture name conflict: %s\n", txname)
+			fmt.Printf("xyz.Embed2D: error: texture name conflict: %s\n", txname)
 			em.Mat.SetTexture(sc, tx)
 		}
 	} else {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3dv
+package xyzv
 
 //go:generate goki generate
 
@@ -14,11 +14,11 @@ import (
 	"log/slog"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi3d"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/xyz"
 )
 
 // Scene3D contains a svg.SVG element.
@@ -27,7 +27,7 @@ type Scene3D struct {
 	gi.WidgetBase
 
 	// Scene is the 3D Scene
-	Scene gi3d.Scene
+	Scene xyz.Scene
 }
 
 func (se *Scene3D) CopyFieldsFrom(frm any) {
@@ -116,7 +116,7 @@ func (se *Scene3D) ConfigFrame(sc *gi.Scene) {
 			se.Scene.Config()
 		}
 	})
-	se.Scene.SetFlag(true, gi3d.ScNeedsRender)
+	se.Scene.SetFlag(true, xyz.ScNeedsRender)
 	se.SetNeedsRender()
 }
 
@@ -144,7 +144,7 @@ func (se *Scene3D) DrawIntoScene(sc *gi.Scene) {
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			slog.Error("gi3dv.Scene3D bad bounding box", "path", se, "startPos", sp, "bbox", r, "parBBox", pbb)
+			slog.Error("xyzv.Scene3D bad bounding box", "path", se, "startPos", sp, "bbox", r, "parBBox", pbb)
 			return
 		}
 		r = nr
@@ -164,7 +164,7 @@ func (se *Scene3D) Render3D(sc *gi.Scene) {
 	if se.Scene.Frame == nil {
 		return
 	}
-	if se.Scene.Is(gi3d.ScNeedsConfig) {
+	if se.Scene.Is(xyz.ScNeedsConfig) {
 		goosi.TheApp.RunOnMain(func() {
 			se.Scene.Config()
 		})

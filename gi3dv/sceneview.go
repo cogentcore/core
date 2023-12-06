@@ -4,14 +4,14 @@
 
 //go:build notyet
 
-package gi3dv
+package xyzv
 
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2"
 )
 
-// SceneView provides a toolbar controller for a gi3d.Scene
+// SceneView provides a toolbar controller for a xyz.Scene
 type SceneView struct {
 	gi.Layout
 }

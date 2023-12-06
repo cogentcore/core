@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ import (
 //
 // # Config:
 //
-// Unlike gi, gi3d Config can only be successfully done after the
+// Unlike gi, xyz Config can only be successfully done after the
 // GPU framework has been initialized, because it is all about allocating
 // GPU resources.
 // The Scene ScNeedsConfig flag indicates if any of these resources
@@ -39,7 +39,7 @@ import (
 // if ScUpdating is set, then an update is in progress and false is returned.
 // If no updates are required, then false is also returned, else true.
 // ScNeedsConfig is NOT handled here because it must be done on main thread,
-// so this must be checked separately (e.g., in gi3dv.Scene3D, it is requires
+// so this must be checked separately (e.g., in xyzv.Scene3D, it is requires
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	if sc.Is(ScUpdating) {
@@ -179,7 +179,7 @@ func (sc *Scene) ConfigFrame(gpu *vgpu.GPU, dev *vgpu.Device) {
 func (sc *Scene) Image() (*image.RGBA, error) {
 	fr := sc.Frame
 	if fr == nil {
-		return nil, fmt.Errorf("gi3d.Scene Image: Scene does not have a Frame")
+		return nil, fmt.Errorf("xyz.Scene Image: Scene does not have a Frame")
 	}
 	sy := &sc.Phong.Sys
 	tcmd := sy.MemCmdStart()
@@ -209,7 +209,7 @@ func (sc *Scene) ImageDone() {
 func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	fr := sc.Frame
 	if fr == nil {
-		return nil, fmt.Errorf("gi3d.Scene ImageCopy: Scene does not have a Frame")
+		return nil, fmt.Errorf("xyz.Scene ImageCopy: Scene does not have a Frame")
 	}
 	sy := &sc.Phong.Sys
 	tcmd := sy.MemCmdStart()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 //go:generate goki generate
 
@@ -150,7 +150,7 @@ func (sc *Scene) SaveCamera(name string) {
 func (sc *Scene) SetCamera(name string) error {
 	cam, ok := sc.SavedCams[name]
 	if !ok {
-		return fmt.Errorf("gi3d.Scene: %v saved camera of name: %v not found", sc.Nm, name)
+		return fmt.Errorf("xyz.Scene: %v saved camera of name: %v not found", sc.Nm, name)
 	}
 	sc.Camera = cam
 	return nil
@@ -185,7 +185,7 @@ func (sc *Scene) Validate() error {
 		return ki.Continue
 	})
 	if hasError {
-		return fmt.Errorf("gi3d.Scene: %v Validate found at least one error (see log)", sc.Path())
+		return fmt.Errorf("xyz.Scene: %v Validate found at least one error (see log)", sc.Path())
 	}
 	return nil
 }

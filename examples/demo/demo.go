@@ -13,14 +13,14 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi3d"
-	"goki.dev/gi3d/examples/assets"
-	"goki.dev/gi3d/gi3dv"
-	_ "goki.dev/gi3d/io/obj"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/xyz"
+	"goki.dev/xyz/examples/assets"
+	_ "goki.dev/xyz/io/obj"
+	"goki.dev/xyz/xyzv"
 
 	"goki.dev/mat32/v2"
 )
@@ -49,13 +49,13 @@ type Anim struct {
 	Ticker *time.Ticker `view:"-"`
 
 	// the scene
-	Scene *gi3dv.Scene3D
+	Scene *xyzv.Scene3D
 
 	// the torus
-	Torus *gi3d.Solid
+	Torus *xyz.Solid
 
 	// the gopher
-	Gopher *gi3d.Group
+	Gopher *xyz.Group
 
 	// original position
 	TorusPosOrig mat32.Vec3
@@ -66,7 +66,7 @@ type Anim struct {
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(se *gi3dv.Scene3D, on bool) {
+func (an *Anim) Start(se *xyzv.Scene3D, on bool) {
 	an.Scene = se
 	an.On = on
 	an.DoTorus = true
@@ -84,7 +84,7 @@ func (an *Anim) GetObjs() {
 	if torusi == nil {
 		return
 	}
-	an.Torus = torusi.(*gi3d.Solid)
+	an.Torus = torusi.(*xyz.Solid)
 	an.TorusPosOrig = an.Torus.Pose.Pos
 
 	ggp := se.ChildByName("go-group", 0)
@@ -95,7 +95,7 @@ func (an *Anim) GetObjs() {
 	if gophi == nil {
 		return
 	}
-	an.Gopher = gophi.(*gi3d.Group)
+	an.Gopher = gophi.(*xyz.Group)
 	an.GopherPosOrig = an.Gopher.Pose.Pos
 }
 
@@ -141,15 +141,15 @@ func app() {
 	// ki.SignalTrace = true
 	// gi.EventTrace = true
 	// gi.WinEventTrace = true
-	// gi3d.Update3DTrace = true
+	// xyz.Update3DTrace = true
 	// gi.Update2DTrace = true
 	vgpu.Debug = true
 
-	gi.SetAppName("gi3d")
+	gi.SetAppName("xyz")
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
+<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`)
 
-	sc := gi.NewScene("gi3d-demo").SetTitle("Gi3D Demo")
+	sc := gi.NewScene("xyz-demo").SetTitle("Gi3D Demo")
 
 	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz).
 		Style(func(s *styles.Style) {
@@ -159,7 +159,7 @@ func app() {
 	title := gi.NewLabel(trow, "title")
 	title.SetText(`This is a demonstration of the
 <a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
-See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
+See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</a> for detailed info and things to try.`)
 	title.SetType(gi.LabelHeadlineSmall).
 		SetStretchMax().
 		Style(func(s *styles.Style) {
@@ -177,7 +177,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 		s.SetStretchMax()
 	})
 
-	s3 := gi3dv.NewScene3D(scrow, "scene")
+	s3 := xyzv.NewScene3D(scrow, "scene")
 	se := &s3.Scene
 
 	// options - must be set here
@@ -187,45 +187,45 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 
 	// first, add lights, set camera
 	se.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
-	gi3d.NewAmbientLight(se, "ambient", 0.3, gi3d.DirectSun)
+	xyz.NewAmbientLight(se, "ambient", 0.3, xyz.DirectSun)
 
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	se.Camera.Pose.Pos.Set(-2, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	se.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
-	dir := gi3d.NewDirLight(se, "dir", 1, gi3d.DirectSun)
+	dir := xyz.NewDirLight(se, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
-	// point := gi3d.NewPointLight(sc, "point", 1, gi3d.DirectSun)
+	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)
 
-	// spot := gi3d.NewSpotLight(sc, "spot", 1, gi3d.DirectSun)
+	// spot := xyz.NewSpotLight(sc, "spot", 1, xyz.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	grtx := gi3d.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
+	grtx := xyz.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
 	// _ = grtx
-	// wdtx := gi3d.NewTextureFile(sc, "wood", "wood.png")
+	// wdtx := xyz.NewTextureFile(sc, "wood", "wood.png")
 
-	cbm := gi3d.NewBox(se, "cube1", 1, 1, 1)
+	cbm := xyz.NewBox(se, "cube1", 1, 1, 1)
 	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rbgp := gi3d.NewGroup(se, "r-b-group")
+	rbgp := xyz.NewGroup(se, "r-b-group")
 
-	gi3d.NewSolid(rbgp, "red-cube").SetMesh(cbm).
+	xyz.NewSolid(rbgp, "red-cube").SetMesh(cbm).
 		SetColor(colors.Red).SetShiny(500).SetPos(-1, 0, 0)
 
-	bcb := gi3d.NewSolid(rbgp, "blue-cube").SetMesh(cbm).
+	bcb := xyz.NewSolid(rbgp, "blue-cube").SetMesh(cbm).
 		SetColor(colors.Blue).SetShiny(10).SetReflective(0.2).
 		SetPos(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 
 	// alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
-	gi3d.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm).
+	xyz.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm).
 		SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
 
-	floorp := gi3d.NewPlane(se, "floor-plane", 100, 100)
-	floor := gi3d.NewSolid(se, "floor").SetMesh(floorp).
+	floorp := xyz.NewPlane(se, "floor-plane", 100, 100)
+	floor := xyz.NewSolid(se, "floor").SetMesh(floorp).
 		SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 
@@ -233,27 +233,27 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.SetDisabled() // not selectable
 
-	lnsm := gi3d.NewLines(se, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
-	lns := gi3d.NewSolid(se, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
+	lnsm := xyz.NewLines(se, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, xyz.CloseLines)
+	lns := xyz.NewSolid(se, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	gi3d.NewArrow(se, se, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
+	xyz.NewArrow(se, se, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
-	// gi3d.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
+	// xyz.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, xyz.Active)
 
-	cylm := gi3d.NewCylinder(se, "cylinder", 1.5, .5, 32, 1, true, true)
-	gi3d.NewSolid(se, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
+	cylm := xyz.NewCylinder(se, "cylinder", 1.5, .5, 32, 1, true, true)
+	xyz.NewSolid(se, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
 
-	capm := gi3d.NewCapsule(se, "capsule", 1.5, .5, 32, 1)
-	gi3d.NewSolid(se, "capsule").SetMesh(capm).SetColor(colors.Tan).
+	capm := xyz.NewCapsule(se, "capsule", 1.5, .5, 32, 1)
+	xyz.NewSolid(se, "capsule").SetMesh(capm).SetColor(colors.Tan).
 		SetPos(3.25, 0, 0)
 
-	sphm := gi3d.NewSphere(se, "sphere", .75, 32)
-	sph := gi3d.NewSolid(se, "sphere").SetMesh(sphm).SetColor(colors.Orange)
+	sphm := xyz.NewSphere(se, "sphere", .75, 32)
+	sph := xyz.NewSolid(se, "sphere").SetMesh(sphm).SetColor(colors.Orange)
 	sph.Mat.Color.A = 200
 	sph.Pose.Pos.Set(0, -2, 0)
 
@@ -265,7 +265,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	}
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	gogp := gi3d.NewGroup(se, "go-group")
+	gogp := xyz.NewGroup(se, "go-group")
 
 	bgo, _ := se.AddFmLibrary("gopher", gogp)
 	bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
@@ -273,20 +273,20 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	sgo, _ := se.AddFmLibrary("gopher", gogp)
 	sgo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
 
-	trsm := gi3d.NewTorus(se, "torus", .75, .1, 32)
-	trs := gi3d.NewSolid(se, "torus").SetMesh(trsm).SetColor(colors.White).
+	trsm := xyz.NewTorus(se, "torus", .75, .1, 32)
+	trs := xyz.NewSolid(se, "torus").SetMesh(trsm).SetColor(colors.White).
 		SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
 	trs.Mat.Color.A = 200
 
-	txt := gi3d.NewText2D(se, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	txt := xyz.NewText2D(se, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// txt.Styles.BackgroundColor.SetSolid(colors.White)
 	txt.Styles.Color = colors.Black
 	txt.Styles.Text.Align = styles.AlignLeft // styles.AlignCenter)
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.SetPos(0, 2.2, 0)
 
-	tcg := gi3d.NewGroup(se, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
-	gi3d.NewSolid(tcg, "first-person-gun").SetMesh(cbm).
+	tcg := xyz.NewGroup(se, xyz.TrackCameraName) // automatically tracks camera -- FPS effect
+	xyz.NewSolid(tcg, "first-person-gun").SetMesh(cbm).
 		SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5). // in front of camera
 		SetColor(color.RGBA{255, 0, 255, 128})
 
@@ -302,7 +302,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 
 	/*
 
-		emb := gi3d.NewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
+		emb := xyz.NewEmbed2D(sc, sc, "embed-but", 150, 100, xyz.FitContent)
 		emb.Pose.Pos.Set(-2, 2, 0)
 		// emb.Zoom = 1.5   // this is how to rescale overall size
 		evlay := gi.NewFrame(emb.Viewport, "vlay", gi.LayoutVert)

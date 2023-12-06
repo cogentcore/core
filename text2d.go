@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+package xyz
 
 import (
 	"fmt"
@@ -124,7 +124,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			txt.Mat.SetTexture(tx)
 		} else {
 			if vgpu.Debug {
-				fmt.Printf("gi3d.Text2D: error: texture name conflict: %s\n", txname)
+				fmt.Printf("xyz.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Mat.SetTexture(tx)
 			img = tx.Image()
@@ -162,12 +162,12 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 		sc := mat32.Vec3{sz.X, sz.Y, txt.Pose.Scale.Z}
 		ax, ay := txt.Styles.Text.AlignFactors()
 		al := txt.Styles.Text.AlignV
-		switch {
-		case styles.IsAlignStart(al):
+		switch al {
+		case styles.Start:
 			ay = -0.5
-		case styles.IsAlignMiddle(al):
+		case styles.Center:
 			ay = 0
-		case styles.IsAlignEnd(al):
+		case styles.End:
 			ay = 0.5
 		}
 		ps := txt.Pose.Pos

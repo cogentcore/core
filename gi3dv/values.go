@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3dv
+package xyzv
 
 import (
 	"log"
@@ -11,18 +11,18 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi3d"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/xyz"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  MeshValue
 
 // Value restylesers MeshValue as the viewer of MeshName
-// func (mn gi3d.MeshName) Value() giv.Value {
+// func (mn xyz.MeshName) Value() giv.Value {
 // 	return &MeshValue{}
 // }
 
@@ -73,16 +73,16 @@ func (vv *MeshValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.OwnKind != reflect.Struct {
 		return
 	}
-	ndi, ok := vv.Owner.(gi3d.Node)
+	ndi, ok := vv.Owner.(xyz.Node)
 	if !ok {
 		return
 	}
-	sci, err := ndi.ParentByTypeTry(gi3d.SceneType, ki.Embeds)
+	sci, err := ndi.ParentByTypeTry(xyz.SceneType, ki.Embeds)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	sc := sci.(*gi3d.Scene)
+	sc := sci.(*xyz.Scene)
 	sl := sc.MeshList()
 	sort.Strings(sl)
 
