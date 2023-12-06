@@ -41,3 +41,70 @@ type AppSingler interface {
 func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
 	return a.Drawer
 }
+
+func (app *appImpl) NScreens() int {
+	if app.screen != nil {
+		return 1
+	}
+	return 0
+}
+
+func (app *appImpl) Screen(scrN int) *goosi.Screen {
+	if scrN == 0 {
+		return app.screen
+	}
+	return nil
+}
+
+func (app *appImpl) ScreenByName(name string) *goosi.Screen {
+	if app.screen.Name == name {
+		return app.screen
+	}
+	return nil
+}
+
+func (app *appImpl) NoScreens() bool {
+	return app.screen == nil
+}
+
+func (app *appImpl) NWindows() int {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if app.window != nil {
+		return 1
+	}
+	return 0
+}
+
+func (app *appImpl) Window(win int) goosi.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if win == 0 {
+		return app.window
+	}
+	return nil
+}
+
+func (app *appImpl) WindowByName(name string) goosi.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if app.window.Name() == name {
+		return app.window
+	}
+	return nil
+}
+
+func (app *appImpl) WindowInFocus() goosi.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if app.window.IsFocus() {
+		return app.window
+	}
+	return nil
+}
+
+func (app *appImpl) ContextWindow() goosi.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	return app.window
+}
