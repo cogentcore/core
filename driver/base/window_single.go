@@ -18,8 +18,7 @@ import (
 // WindowSingle contains the data and logic common to all implementations of [goosi.Window]
 // on single-window platforms (mobile, web, and offscreen), as opposed to multi-window
 // platforms (desktop), for which you should use [WindowSingle].
-// A WindowSingle is associated with a corresponding [goosi.App] type.
-// The [goosi.App] type should embed [AppSingle].
+// A WindowSingle is associated with a corresponding [AppSingler] type.
 type WindowSingle[A AppSingler] struct {
 	Window[A]
 }
