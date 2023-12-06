@@ -115,14 +115,6 @@ type Window interface {
 	// information about its properties.
 	Screen() *Screen
 
-	// Parent returns the parent object of a given window -- for GoGi it is a
-	// gi.Window but could be something else in other frameworks.
-	Parent() any
-
-	// SetParent sets the parent object of a given window -- for GoGi it is a
-	// gi.Window but could be something else in other frameworks.
-	SetParent(par any)
-
 	// MainMenu returns the OS-level main menu for this window -- this is
 	// currently for MacOS only -- returns nil for others.
 	MainMenu() MainMenu

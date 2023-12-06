@@ -43,7 +43,7 @@ type Screen struct {
 
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
-	// On OS-X  it is backingScaleFactor = 2.0 on "retina"
+	// On OS-X, it is backingScaleFactor = 2.0 on "retina"
 	DevicePixelRatio float32
 
 	// PixSize is the number of actual pixels in the screen
