@@ -210,3 +210,11 @@ func (w *Window[A]) SetCursorEnabled(enabled, raw bool) {
 func (w *Window[A]) IsCursorEnabled() bool {
 	return w.CursorEnabled
 }
+
+func (w *Window[A]) SetMousePos(x, y float64) {
+	// no-op by default
+}
+
+func (w *Window[A]) SetTitleBarIsDark(isDark bool) {
+	// no-op by default
+}

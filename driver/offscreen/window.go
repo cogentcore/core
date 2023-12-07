@@ -5,8 +5,6 @@
 package offscreen
 
 import (
-	"image"
-
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
@@ -57,15 +55,6 @@ func (w *Window) IsVisible() bool {
 	// return w.isVisible && w.app.Surface != nil
 }
 
-func (w *Window) Activate() bool {
-	// TODO: implement?
-	return true
-}
-
-func (w *Window) DeActivate() {
-	// TODO: implement?
-}
-
 // SendEmptyEvent sends an empty, blank event to this window, which just has
 // the effect of pushing the system along during cases when the window
 // event loop needs to be "pinged" to get things moving along..
@@ -75,23 +64,6 @@ func (w *Window) SendEmptyEvent() {
 	}
 	w.EvMgr.Custom(nil)
 }
-
-
-func (w *Window) show() {
-	// TODO: implement?
-	w.isVisible = true
-}
-
-func (w *Window) Raise() {
-	// TODO: implement?
-	w.isVisible = true
-}
-
-func (w *Window) Minimize() {
-	// TODO: implement?
-	w.isVisible = false
-}
-
 
 func (w *Window) Close() {
 	w.app.mu.Lock()
@@ -104,21 +76,4 @@ func (w *Window) Close() {
 	if TheApp.quitting {
 		TheApp.quitCloseCnt <- struct{}{}
 	}
-}
-
-func (w *Window) SetMousePos(x, y float64) {
-	// no-op
-}
-
-func (w *Window) SetCursorEnabled(enabled, raw bool) {
-	// no-op
-}
-
-func (w *Window) IsCursorEnabled() bool {
-	// no-op
-	return false
-}
-
-func (w *Window) SetTitleBarIsDark(isDark bool) {
-	// no-op
 }

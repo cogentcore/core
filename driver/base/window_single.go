@@ -91,3 +91,11 @@ func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point) {
 	}
 	w.GetScreen().PixSize = sz
 }
+
+func (w *WindowSingle[A]) Raise() {
+	// no-op
+}
+
+func (w *WindowSingle[A]) Minimize() {
+	// no-op
+}
