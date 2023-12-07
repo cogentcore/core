@@ -106,8 +106,11 @@ type Slider struct { //goki:embedder
 	// logical position of the slider relative to Size
 	Pos float32 `edit:"-" set:"-"`
 
-	// previous emitted value - don't re-emit if it is the same
+	// previous Change event emitted value - don't re-emit Change if it is the same
 	LastValue float32 `edit:"-" copy:"-" xml:"-" json:"-" set:"-"`
+
+	// previous sliding value - for computing the Input change
+	PrevSlide float32 `edit:"-" copy:"-" xml:"-" json:"-" set:"-"`
 
 	// Computed size of the slide box in the relevant dimension
 	// range of motion, exclusive of spacing, based on layout allocation.
@@ -326,9 +329,9 @@ func (sr *Slider) SetSliderPos(pos float32) {
 // This version sends tracking changes
 func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
-	if mat32.Abs(sr.LastValue-sr.Value) > sr.InputThreshold {
+	if mat32.Abs(sr.PrevSlide-sr.Value) > sr.InputThreshold {
 		// TODO(kai/input): we need this for InputThreshold to work, but it breaks Change events
-		// sr.LastValue = sr.Value
+		sr.PrevSlide = sr.Value
 		sr.Send(events.Input)
 	}
 }
