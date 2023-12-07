@@ -95,7 +95,7 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 }
 
 // setSysWindow sets the underlying system window information.
-func (app *App) setSysWindow(sz image.Point) error {
+func (a *App) setSysWindow(sz image.Point) error {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 
@@ -105,11 +105,13 @@ func (app *App) setSysWindow(sz image.Point) error {
 	if sz.Y == 0 {
 		sz.Y = 600
 	}
+	a.Scrn.PixSize = sz
+	a.GetScreens()
 
-	app.Win.EvMgr.WindowResize()
-	app.Win.EvMgr.Window(events.WinShow)
-	app.Win.EvMgr.Window(events.ScreenUpdate)
-	app.Win.EvMgr.Window(events.WinFocus)
+	a.Win.EvMgr.WindowResize()
+	a.Win.EvMgr.Window(events.WinShow)
+	a.Win.EvMgr.Window(events.ScreenUpdate)
+	a.Win.EvMgr.Window(events.WinFocus)
 	return nil
 }
 
@@ -118,18 +120,19 @@ func (app *App) PrefsDir() string {
 	return filepath.Join(".", "tmpPrefsDir")
 }
 
-func (app *App) GetScreens() {
-	sz := image.Point{1920, 1080}
-	app.Scrn.DevicePixelRatio = 1
-	app.Scrn.PixSize = sz
-	app.Scrn.Geometry.Max = app.Scrn.PixSize
+func (a *App) GetScreens() {
+	if a.Scrn.PixSize == (image.Point{}) {
+		a.Scrn.PixSize = image.Point{800, 600}
+	}
+	a.Scrn.DevicePixelRatio = 1
+	a.Scrn.Geometry.Max = a.Scrn.PixSize
 	dpi := float32(160)
-	app.Scrn.PhysicalDPI = dpi
-	app.Scrn.LogicalDPI = dpi
+	a.Scrn.PhysicalDPI = dpi
+	a.Scrn.LogicalDPI = dpi
 
-	physX := 25.4 * float32(sz.X) / dpi
-	physY := 25.4 * float32(sz.Y) / dpi
-	app.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
+	physX := 25.4 * float32(a.Scrn.PixSize.X) / dpi
+	physY := 25.4 * float32(a.Scrn.PixSize.Y) / dpi
+	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 }
 
 func (app *App) Platform() goosi.Platforms {
