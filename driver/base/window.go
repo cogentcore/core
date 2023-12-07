@@ -170,6 +170,14 @@ func (w *Window[A]) Is(flag goosi.WindowFlags) bool {
 	return w.Flag.HasFlag(flag)
 }
 
+func (w *Window[A]) IsClosed() bool {
+	return w == nil || w.This == nil || w.This.Drawer() == nil
+}
+
+func (w *Window[A]) IsVisible() bool {
+	return w.This.IsClosed() || w.Is(goosi.Minimized)
+}
+
 func (w *Window[A]) SetFPS(fps int) {
 	w.FPS = fps
 }

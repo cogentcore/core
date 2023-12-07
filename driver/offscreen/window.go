@@ -25,18 +25,6 @@ func (w *Window) OSHandle() uintptr {
 	return 0
 }
 
-func (w *Window) IsClosed() bool {
-	return false
-	// return w.app.gpu == nil || w.app.Surface == nil
-}
-
-func (w *Window) IsVisible() bool {
-	w.app.mu.Lock()
-	defer w.app.mu.Unlock()
-	return true
-	// return w.isVisible && w.app.Surface != nil
-}
-
 // SendEmptyEvent sends an empty, blank event to this window, which just has
 // the effect of pushing the system along during cases when the window
 // event loop needs to be "pinged" to get things moving along..
