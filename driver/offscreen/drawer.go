@@ -30,7 +30,7 @@ func (dw *drawerImpl) MaxTextures() int {
 
 // DestBounds returns the bounds of the render destination
 func (dw *drawerImpl) DestBounds() image.Rectangle {
-	return theApp.screen.Geometry
+	return TheApp.screen.Geometry
 }
 
 // SetGoImage sets given Go image as a drawing source to given image index,
