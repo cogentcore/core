@@ -7,11 +7,8 @@
 package offscreen
 
 import (
-	"fmt"
-	"go/build"
 	"image"
 	"log"
-	"os"
 	"path/filepath"
 	"runtime/debug"
 
@@ -123,109 +120,6 @@ func (app *App) setSysWindow(sz image.Point) error {
 	return nil
 }
 
-func (app *App) DeleteWin(w *windowImpl) {
-	// TODO: implement?
-}
-
-func (app *App) NScreens() int {
-	if app.screen != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *App) Screen(scrN int) *goosi.Screen {
-	if scrN == 0 {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *App) ScreenByName(name string) *goosi.Screen {
-	if app.screen.Name == name {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *App) NoScreens() bool {
-	return app.screen == nil
-}
-
-func (app *App) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *App) Window(win int) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if win == 0 {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) WindowByName(name string) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.Name() == name {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) WindowInFocus() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.IsFocus() {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) ContextWindow() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return app.window
-}
-
-func (app *App) Name() string {
-	return app.name
-}
-
-func (app *App) SetName(name string) {
-	app.name = name
-}
-
-func (app *App) About() string {
-	return app.about
-}
-
-func (app *App) SetAbout(about string) {
-	app.about = about
-}
-
-func (app *App) OpenFiles() []string {
-	return app.openFiles
-}
-
-func (app *App) GoGiPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), "GoGi")
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *App) AppPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), app.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
 func (app *App) PrefsDir() string {
 	// TODO(kai): figure out a better solution to offscreen prefs dir
 	return filepath.Join(".", "tmpPrefsDir")
@@ -233,16 +127,16 @@ func (app *App) PrefsDir() string {
 
 func (app *App) GetScreens() {
 	sz := image.Point{1920, 1080}
-	app.screen.DevicePixelRatio = 1
-	app.screen.PixSize = sz
-	app.screen.Geometry.Max = app.screen.PixSize
+	app.Scrn.DevicePixelRatio = 1
+	app.Scrn.PixSize = sz
+	app.Scrn.Geometry.Max = app.Scrn.PixSize
 	dpi := float32(160)
-	app.screen.PhysicalDPI = dpi
-	app.screen.LogicalDPI = dpi
+	app.Scrn.PhysicalDPI = dpi
+	app.Scrn.LogicalDPI = dpi
 
 	physX := 25.4 * float32(sz.X) / dpi
 	physY := 25.4 * float32(sz.Y) / dpi
-	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+	app.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 }
 
 func (app *App) Platform() goosi.Platforms {
@@ -251,20 +145,6 @@ func (app *App) Platform() goosi.Platforms {
 
 func (app *App) OpenURL(url string) {
 	// TODO: implement
-}
-
-// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
-func SrcDir(dir string) (absDir string, err error) {
-	// TODO: does this make sense?
-	for _, srcDir := range build.Default.SrcDirs() {
-		absDir = filepath.Join(srcDir, dir)
-		finfo, err := os.Stat(absDir)
-		if err == nil && finfo.IsDir() {
-			return absDir, nil
-		}
-	}
-	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
@@ -278,29 +158,6 @@ func (app *App) ClipBoard(win goosi.Window) clip.Board {
 
 func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	return &cursor.CursorBase{} // no-op
-}
-
-func (app *App) SetQuitReqFunc(fun func()) {
-	app.quitReqFunc = fun
-}
-
-func (app *App) SetQuitCleanFunc(fun func()) {
-	app.quitCleanFunc = fun
-}
-
-func (app *App) QuitReq() {
-	if app.quitting {
-		return
-	}
-	if app.quitReqFunc != nil {
-		app.quitReqFunc()
-	} else {
-		app.Quit()
-	}
-}
-
-func (app *App) IsQuitting() bool {
-	return app.quitting
 }
 
 func (app *App) QuitClean() {
@@ -320,18 +177,6 @@ func (app *App) QuitClean() {
 	// 	<-app.quitCloseCnt
 	// 	// fmt.Printf("win closed: %v\n", i)
 	// }
-}
-
-func (app *App) Quit() {
-	if app.quitting {
-		return
-	}
-	app.QuitClean()
-	app.stopMain()
-}
-
-func (app *App) IsDark() bool {
-	return app.isDark
 }
 
 func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
