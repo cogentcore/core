@@ -75,8 +75,8 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 	// pr := prof.Start("RenderText")
 	// defer pr.End()
 
-	rs.BackupPaint()
-	defer rs.RestorePaint()
+	var ppaint styles.Paint
+	ppaint.CopyStyleFrom(rs.Paint.Paint)
 
 	rs.PushXForm(mat32.Identity2D()) // needed for SVG
 	defer rs.PopXForm()
@@ -171,6 +171,8 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 			sr.RenderLine(rs, tpos, styles.DecoLineThrough, 0.25)
 		}
 	}
+
+	rs.Paint.CopyStyleFrom(&ppaint)
 }
 
 // RenderTopPos renders at given top position -- uses first font info to

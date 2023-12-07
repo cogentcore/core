@@ -66,9 +66,6 @@ type State struct {
 	// stack of clips, if needed
 	ClipStack []*image.Alpha
 
-	// backup of paint -- don't need a full stack but sometimes safer to backup and restore
-	PaintBack Paint
-
 	// mutex for overall rendering
 	RenderMu sync.Mutex
 
@@ -206,14 +203,4 @@ func (rs *State) PopClip() {
 	rs.Mask = rs.ClipStack[sz-1]
 	rs.ClipStack[sz-1] = nil
 	rs.ClipStack = rs.ClipStack[:sz-1]
-}
-
-// BackupPaint copies style settings from Paint to PaintBack
-func (rs *State) BackupPaint() {
-	rs.PaintBack.CopyStyleFrom(&rs.Paint.Paint)
-}
-
-// RestorePaint restores style settings from PaintBack to Paint
-func (rs *State) RestorePaint() {
-	rs.Paint.CopyStyleFrom(&rs.PaintBack.Paint)
 }
