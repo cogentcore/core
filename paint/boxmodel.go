@@ -14,8 +14,8 @@ import (
 
 // DrawBox calls DrawBorder with position, size and border parameters
 // as a convenience method for DrawStdBox
-func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
-	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
+func (pc *Paint) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
+	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // DrawStdBox draws the CSS "standard box" model using given style.
@@ -23,7 +23,7 @@ func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs styles.Bor
 // The surround arguments are the background color and state layer of the surrounding
 // context of this box, typically obtained through [goki.dev/gi/v2/gi.WidgetBase.ParentBackgroundColor]
 // in a GUI context.
-func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32) {
+func (pc *Paint) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32) {
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
@@ -59,7 +59,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw LayState data because we need to clear
 		// any box shadow that may have gone in margin.
-		pc.FillBox(rs, pos, sz, &sbg)
+		pc.FillBox(pos, sz, &sbg)
 	}
 
 	// first do any shadow
@@ -86,7 +86,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 			// If a higher-contrast shadow is used, it would look better
 			// with radiusFactor = 2, and you'd have to remove this /2 factor.
 
-			pc.DrawRoundedShadowBlur(rs, shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
+			pc.DrawRoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
 			pc.FillStyle.Opacity = prevOpacity
 		}
 	}
@@ -100,16 +100,16 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		img, _, err := images.Read(st.BackgroundImage)
 		if grr.Log(err) == nil {
 			rimg := st.ResizeImage(img, msz)
-			pc.DrawImage(rs, rimg, mpos.X, mpos.Y)
+			pc.DrawImage(rimg, mpos.X, mpos.Y)
 		}
 	} else {
 		if rad.IsZero() {
-			pc.FillBox(rs, mpos, msz, &bg)
+			pc.FillBox(mpos, msz, &bg)
 		} else {
 			pc.FillStyle.SetFullColor(&bg)
 			// no border -- fill only
-			pc.DrawRoundedRectangle(rs, mpos.X, mpos.Y, msz.X, msz.Y, rad)
-			pc.Fill(rs)
+			pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
+			pc.Fill()
 		}
 	}
 
@@ -121,5 +121,5 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	pc.FillStyle.SetColor(nil)
 	// now that we have drawn background color
 	// above, we can draw the border
-	pc.DrawBox(rs, mpos, msz, st.Border)
+	pc.DrawBox(mpos, msz, st.Border)
 }
