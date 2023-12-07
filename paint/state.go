@@ -18,9 +18,6 @@ import (
 // while painting -- a viewport just has one of these
 type State struct {
 
-	// communal painter -- for widgets -- SVG have their own
-	Paint Paint
-
 	// current transform
 	CurXForm mat32.Mat2
 
@@ -75,7 +72,6 @@ type State struct {
 
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
-	rs.Paint.Defaults()
 	rs.CurXForm = mat32.Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
