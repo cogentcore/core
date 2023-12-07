@@ -11,6 +11,7 @@ import (
 	"math"
 	"slices"
 
+	"github.com/anthonynsimon/bild/clone"
 	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
@@ -65,6 +66,35 @@ func NewContext(width, height int) *Context {
 
 	pc.Defaults()
 	pc.SetUnitContextExt(sz)
+
+	return pc
+}
+
+// NewContextFromImage returns a new [Context] associated with an [image.RGBA]
+// copy of the given [image.Image]. It does not render directly onto the given
+// image; see [NewContextFromRGBA] for a version that renders directly.
+func NewContextFromImage(img *image.RGBA) *Context {
+	pc := &Context{&State{}, &styles.Paint{}}
+
+	pc.Init(img.Rect.Dx(), img.Rect.Dy(), img)
+
+	pc.Defaults()
+	pc.SetUnitContextExt(img.Rect.Size())
+
+	return pc
+}
+
+// NewContextFromRGBA returns a new [Context] associated with the given [image.RGBA].
+// It renders directly onto the given image; see [NewContextFromImage] for a version
+// that makes a copy.
+func NewContextFromRGBA(img image.Image) *Context {
+	pc := &Context{&State{}, &styles.Paint{}}
+
+	r := clone.AsRGBA(img)
+	pc.Init(r.Rect.Dx(), r.Rect.Dy(), r)
+
+	pc.Defaults()
+	pc.SetUnitContextExt(r.Rect.Size())
 
 	return pc
 }
