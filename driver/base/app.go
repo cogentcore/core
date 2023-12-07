@@ -131,6 +131,10 @@ func (a *App) SetAbout(about string) {
 	a.Abt = about
 }
 
+func (a *App) OpenFiles() []string {
+	return a.OpenFls
+}
+
 func (a *App) GoGiPrefsDir() string {
 	pdir := filepath.Join(a.This.PrefsDir(), "GoGi")
 	os.MkdirAll(pdir, 0755)
@@ -172,4 +176,8 @@ func (a *App) Quit() {
 	}
 	a.This.QuitClean()
 	a.StopMain()
+}
+
+func (a *App) IsDark() bool {
+	return a.Dark
 }
