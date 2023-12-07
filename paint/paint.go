@@ -49,6 +49,7 @@ SOFTWARE.
 // minimally on styling parameters in FontStyle
 type Paint struct {
 	*styles.Paint
+	*State
 }
 
 func NewPaint() Paint {
@@ -58,14 +59,14 @@ func NewPaint() Paint {
 }
 
 // convenience for final draw for shapes when done
-func (pc *Paint) FillStrokeClear(rs *State) {
+func (pc *Paint) FillStrokeClear() {
 	if pc.HasFill() {
-		pc.FillPreserve(rs)
+		pc.FillPreserve()
 	}
 	if pc.HasStroke() {
-		pc.StrokePreserve(rs)
+		pc.StrokePreserve()
 	}
-	pc.ClearPath(rs)
+	pc.ClearPath()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -73,26 +74,26 @@ func (pc *Paint) FillStrokeClear(rs *State) {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Paint) TransformPoint(rs *State, x, y float32) mat32.Vec2 {
-	return rs.CurXForm.MulVec2AsPt(mat32.Vec2{x, y})
+func (pc *Paint) TransformPoint(x, y float32) mat32.Vec2 {
+	return pc.CurXForm.MulVec2AsPt(mat32.Vec2{x, y})
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
 // coordinates, applying current transform
-func (pc *Paint) BoundingBox(rs *State, minX, minY, maxX, maxY float32) image.Rectangle {
+func (pc *Paint) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
 	if pc.HasStroke() {
-		sw = 0.5 * pc.StrokeWidth(rs)
+		sw = 0.5 * pc.StrokeWidth()
 	}
-	tmin := rs.CurXForm.MulVec2AsPt(mat32.Vec2{minX, minY})
-	tmax := rs.CurXForm.MulVec2AsPt(mat32.Vec2{maxX, maxY})
+	tmin := pc.CurXForm.MulVec2AsPt(mat32.Vec2{minX, minY})
+	tmax := pc.CurXForm.MulVec2AsPt(mat32.Vec2{maxX, maxY})
 	tp1 := mat32.NewVec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := mat32.NewVec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
 // BoundingBoxFromPoints computes the bounding box for a slice of points
-func (pc *Paint) BoundingBoxFromPoints(rs *State, points []mat32.Vec2) image.Rectangle {
+func (pc *Paint) BoundingBoxFromPoints(points []mat32.Vec2) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
@@ -103,61 +104,61 @@ func (pc *Paint) BoundingBoxFromPoints(rs *State, points []mat32.Vec2) image.Rec
 		min.SetMin(points[i])
 		max.SetMax(points[i])
 	}
-	return pc.BoundingBox(rs, min.X, min.Y, max.X, max.Y)
+	return pc.BoundingBox(min.X, min.Y, max.X, max.Y)
 }
 
 // MoveTo starts a new subpath within the current path starting at the
 // specified point.
-func (pc *Paint) MoveTo(rs *State, x, y float32) {
-	if rs.HasCurrent {
-		rs.Path.Stop(false) // note: used to add a point to separate FillPath..
+func (pc *Paint) MoveTo(x, y float32) {
+	if pc.HasCurrent {
+		pc.Path.Stop(false) // note: used to add a point to separate FillPath..
 	}
-	p := pc.TransformPoint(rs, x, y)
-	rs.Path.Start(p.Fixed())
-	rs.Start = p
-	rs.Current = p
-	rs.HasCurrent = true
+	p := pc.TransformPoint(x, y)
+	pc.Path.Start(p.Fixed())
+	pc.Start = p
+	pc.Current = p
+	pc.HasCurrent = true
 }
 
 // LineTo adds a line segment to the current path starting at the current
 // point. If there is no current point, it is equivalent to MoveTo(x, y)
-func (pc *Paint) LineTo(rs *State, x, y float32) {
-	if !rs.HasCurrent {
-		pc.MoveTo(rs, x, y)
+func (pc *Paint) LineTo(x, y float32) {
+	if !pc.HasCurrent {
+		pc.MoveTo(x, y)
 	} else {
-		p := pc.TransformPoint(rs, x, y)
-		rs.Path.Line(p.Fixed())
-		rs.Current = p
+		p := pc.TransformPoint(x, y)
+		pc.Path.Line(p.Fixed())
+		pc.Current = p
 	}
 }
 
 // QuadraticTo adds a quadratic bezier curve to the current path starting at
 // the current point. If there is no current point, it first performs
 // MoveTo(x1, y1)
-func (pc *Paint) QuadraticTo(rs *State, x1, y1, x2, y2 float32) {
-	if !rs.HasCurrent {
-		pc.MoveTo(rs, x1, y1)
+func (pc *Paint) QuadraticTo(x1, y1, x2, y2 float32) {
+	if !pc.HasCurrent {
+		pc.MoveTo(x1, y1)
 	}
-	p1 := pc.TransformPoint(rs, x1, y1)
-	p2 := pc.TransformPoint(rs, x2, y2)
-	rs.Path.QuadBezier(p1.Fixed(), p2.Fixed())
-	rs.Current = p2
+	p1 := pc.TransformPoint(x1, y1)
+	p2 := pc.TransformPoint(x2, y2)
+	pc.Path.QuadBezier(p1.Fixed(), p2.Fixed())
+	pc.Current = p2
 }
 
 // CubicTo adds a cubic bezier curve to the current path starting at the
 // current point. If there is no current point, it first performs
 // MoveTo(x1, y1).
-func (pc *Paint) CubicTo(rs *State, x1, y1, x2, y2, x3, y3 float32) {
-	if !rs.HasCurrent {
-		pc.MoveTo(rs, x1, y1)
+func (pc *Paint) CubicTo(x1, y1, x2, y2, x3, y3 float32) {
+	if !pc.HasCurrent {
+		pc.MoveTo(x1, y1)
 	}
 	// x0, y0 := rs.Current.X, rs.Current.Y
-	b := pc.TransformPoint(rs, x1, y1)
-	c := pc.TransformPoint(rs, x2, y2)
-	d := pc.TransformPoint(rs, x3, y3)
+	b := pc.TransformPoint(x1, y1)
+	c := pc.TransformPoint(x2, y2)
+	d := pc.TransformPoint(x3, y3)
 
-	rs.Path.CubeBezier(b.Fixed(), c.Fixed(), d.Fixed())
-	rs.Current = d
+	pc.Path.CubeBezier(b.Fixed(), c.Fixed(), d.Fixed())
+	pc.Current = d
 }
 
 // ClosePath adds a line segment from the current point to the beginning
