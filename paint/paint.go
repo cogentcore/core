@@ -74,7 +74,7 @@ func (pc *Paint) FillStrokeClear(rs *State) {
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
 func (pc *Paint) TransformPoint(rs *State, x, y float32) mat32.Vec2 {
-	return rs.XForm.MulVec2AsPt(mat32.Vec2{x, y})
+	return rs.CurXForm.MulVec2AsPt(mat32.Vec2{x, y})
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
@@ -84,8 +84,8 @@ func (pc *Paint) BoundingBox(rs *State, minX, minY, maxX, maxY float32) image.Re
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeWidth(rs)
 	}
-	tmin := rs.XForm.MulVec2AsPt(mat32.Vec2{minX, minY})
-	tmax := rs.XForm.MulVec2AsPt(mat32.Vec2{maxX, maxY})
+	tmin := rs.CurXForm.MulVec2AsPt(mat32.Vec2{minX, minY})
+	tmax := rs.CurXForm.MulVec2AsPt(mat32.Vec2{maxX, maxY})
 	tp1 := mat32.NewVec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := mat32.NewVec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
@@ -231,7 +231,7 @@ func (pc *Paint) StrokeWidth(rs *State) float32 {
 	if pc.VecEff == styles.VecEffNonScalingStroke {
 		return dw
 	}
-	scx, scy := rs.XForm.ExtractScale()
+	scx, scy := rs.CurXForm.ExtractScale()
 	sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
 	lw := mat32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
 	return lw
@@ -249,7 +249,7 @@ func (pc *Paint) stroke(rs *State) {
 
 	dash := slices.Clone(pc.StrokeStyle.Dashes)
 	if dash != nil {
-		scx, scy := rs.XForm.ExtractScale()
+		scx, scy := rs.CurXForm.ExtractScale()
 		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))
 		hasZero := false
 		for i := range dash {
@@ -275,7 +275,7 @@ func (pc *Paint) stroke(rs *State) {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.XForm))
+	rs.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.StrokeStyle.Opacity, rs.LastRenderBBox, rs.CurXForm))
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 
@@ -304,7 +304,7 @@ func (pc *Paint) fill(rs *State) {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
+	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.CurXForm))
 	rf.Draw()
 	rf.Clear()
 
@@ -984,7 +984,7 @@ func (pc *Paint) DrawImageAnchored(rs *State, fmIm image.Image, x, y, ax, ay flo
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
 	transformer := draw.BiLinear
-	m := rs.XForm.Translate(x, y)
+	m := rs.CurXForm.Translate(x, y)
 	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if rs.Mask == nil {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
@@ -1005,7 +1005,7 @@ func (pc *Paint) DrawImageScaled(rs *State, fmIm image.Image, x, y, w, h float32
 	isc := mat32.Vec2{w, h}.Div(isz)
 
 	transformer := draw.BiLinear
-	m := rs.XForm.Translate(x, y).Scale(isc.X, isc.Y)
+	m := rs.CurXForm.Translate(x, y).Scale(isc.X, isc.Y)
 	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if rs.Mask == nil {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)

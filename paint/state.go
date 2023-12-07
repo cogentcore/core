@@ -22,7 +22,7 @@ type State struct {
 	Paint Paint
 
 	// current transform
-	XForm mat32.Mat2
+	CurXForm mat32.Mat2
 
 	// current path
 	Path rasterx.Path
@@ -76,7 +76,7 @@ type State struct {
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.Paint.Defaults()
-	rs.XForm = mat32.Identity2D()
+	rs.CurXForm = mat32.Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
 	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
@@ -101,8 +101,8 @@ func (rs *State) PushXForm(xf mat32.Mat2) {
 	if rs.XFormStack == nil {
 		rs.XFormStack = make([]mat32.Mat2, 0)
 	}
-	rs.XFormStack = append(rs.XFormStack, rs.XForm)
-	rs.XForm = xf.Mul(rs.XForm)
+	rs.XFormStack = append(rs.XFormStack, rs.CurXForm)
+	rs.CurXForm = xf.Mul(rs.CurXForm)
 }
 
 // PushXFormLock pushes current xform onto stack and apply new xform on top of it
@@ -119,10 +119,10 @@ func (rs *State) PopXForm() {
 	sz := len(rs.XFormStack)
 	if sz == 0 {
 		slog.Error("programmer error: paint.State.PopXForm: stack is empty")
-		rs.XForm = mat32.Identity2D()
+		rs.CurXForm = mat32.Identity2D()
 		return
 	}
-	rs.XForm = rs.XFormStack[sz-1]
+	rs.CurXForm = rs.XFormStack[sz-1]
 	rs.XFormStack = rs.XFormStack[:sz-1]
 }
 

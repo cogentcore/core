@@ -80,7 +80,7 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 
 	rs.PushXForm(mat32.Identity2D()) // needed for SVG
 	defer rs.PopXForm()
-	rs.XForm = mat32.Identity2D()
+	rs.CurXForm = mat32.Identity2D()
 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
