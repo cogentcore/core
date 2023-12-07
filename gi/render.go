@@ -657,7 +657,7 @@ func (wb *WidgetBase) RenderChildren() {
 // RenderLock returns the locked [paint.Context] and [styles.Style] with StyMu locked.
 // This should be called at start of widget-level rendering, and should always
 // be associated with a corresponding [WidgetBase.RenderUnlock].
-func (wb *WidgetBase) RenderLock() (*paint.Paint, *styles.Style) {
+func (wb *WidgetBase) RenderLock() (*paint.Context, *styles.Style) {
 	wb.StyMu.RLock()
 	pc := &wb.Sc.PaintContext
 	pc.Lock()
