@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"image"
 
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
@@ -19,40 +18,30 @@ import (
 func main() {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
-	imgsz := image.Point{320, 240}
-	szrec := image.Rectangle{Max: imgsz}
-	img := image.NewRGBA(szrec)
-
-	rs := &paint.State{}
-	pc := &paint.Paint{}
-
-	pc.Defaults()               // zeros are not good defaults for paint
-	pc.SetUnitContextExt(imgsz) // initialize units
-
-	rs.Init(imgsz.X, imgsz.Y, img)
-	rs.PushBounds(szrec)
-	rs.Lock()
+	pc := paint.NewContext(320, 240)
+	pc.PushBounds(pc.Image.Rect)
+	pc.Lock()
 
 	// first, draw a frame around the entire image
 	pc.StrokeStyle.SetColor(colors.Black)
 	pc.FillStyle.SetColor(colors.White)
 	pc.StrokeStyle.Width.Dot(1) // use dots directly to render in literal pixels
-	pc.DrawRectangle(rs, 0, 0, float32(imgsz.X), float32(imgsz.Y))
-	pc.FillStrokeClear(rs) // actually render path that has been setup
+	pc.DrawRectangle(0, 0, float32(pc.Image.Rect.Max.X), float32(pc.Image.Rect.Max.Y))
+	pc.FillStrokeClear() // actually render path that has been setup
 
 	// next draw a rounded rectangle
 	pc.FillStyle.SetColor(nil)
 	pc.StrokeStyle.Width.Dot(10)
-	pc.DrawRoundedRectangle(rs, 20, 20, 150, 100, styles.NewSideFloats(6))
-	pc.FillStrokeClear(rs)
+	pc.DrawRoundedRectangle(20, 20, 150, 100, styles.NewSideFloats(6))
+	pc.FillStrokeClear()
 
 	// use units-based styling instead of dots:
 	pc.StrokeStyle.SetColor(colors.Blue)
 	pc.StrokeStyle.Width.Ew(2) // percent of total image (width)
 	pc.ToDots()                // convert pct -> dots based on units context
 	// fmt.Printf("pct dots: %g\n", pc.StrokeStyle.Width.Dots) // 6.4
-	pc.DrawRoundedRectangle(rs, 40, 40, 150, 100, styles.NewSideFloats(6))
-	pc.FillStrokeClear(rs)
+	pc.DrawRoundedRectangle(40, 40, 150, 100, styles.NewSideFloats(6))
+	pc.FillStrokeClear()
 
 	// Text rendering
 	tsty := &styles.Text{}
@@ -70,9 +59,9 @@ func main() {
 	tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.Vec2{100, 40})
 	fmt.Printf("text size: %v\n", tsz)
 
-	txt.Render(rs, mat32.Vec2{60, 50})
+	txt.Render(pc, mat32.Vec2{60, 50})
 
-	rs.Unlock()
+	pc.Unlock()
 
-	grr.Log(images.Save(img, "image.png"))
+	grr.Log(images.Save(pc.Image, "image.png"))
 }

@@ -18,11 +18,8 @@ import (
 // while painting -- a viewport just has one of these
 type State struct {
 
-	// communal painter -- for widgets -- SVG have their own
-	Paint Paint
-
 	// current transform
-	XForm mat32.Mat2
+	CurXForm mat32.Mat2
 
 	// current path
 	Path rasterx.Path
@@ -66,9 +63,6 @@ type State struct {
 	// stack of clips, if needed
 	ClipStack []*image.Alpha
 
-	// backup of paint -- don't need a full stack but sometimes safer to backup and restore
-	PaintBack Paint
-
 	// mutex for overall rendering
 	RenderMu sync.Mutex
 
@@ -78,8 +72,7 @@ type State struct {
 
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
-	rs.Paint.Defaults()
-	rs.XForm = mat32.Identity2D()
+	rs.CurXForm = mat32.Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
 	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
@@ -104,8 +97,8 @@ func (rs *State) PushXForm(xf mat32.Mat2) {
 	if rs.XFormStack == nil {
 		rs.XFormStack = make([]mat32.Mat2, 0)
 	}
-	rs.XFormStack = append(rs.XFormStack, rs.XForm)
-	rs.XForm = xf.Mul(rs.XForm)
+	rs.XFormStack = append(rs.XFormStack, rs.CurXForm)
+	rs.CurXForm = xf.Mul(rs.CurXForm)
 }
 
 // PushXFormLock pushes current xform onto stack and apply new xform on top of it
@@ -122,10 +115,10 @@ func (rs *State) PopXForm() {
 	sz := len(rs.XFormStack)
 	if sz == 0 {
 		slog.Error("programmer error: paint.State.PopXForm: stack is empty")
-		rs.XForm = mat32.Identity2D()
+		rs.CurXForm = mat32.Identity2D()
 		return
 	}
-	rs.XForm = rs.XFormStack[sz-1]
+	rs.CurXForm = rs.XFormStack[sz-1]
 	rs.XFormStack = rs.XFormStack[:sz-1]
 }
 
@@ -137,7 +130,7 @@ func (rs *State) PopXFormLock() {
 	rs.RenderMu.Unlock()
 }
 
-// PushBounds pushes current bounds onto stack and set new bounds
+// PushBounds pushes current bounds onto stack and set new bounds.
 // this is the essential first step in rendering!
 // any further actual rendering should always be surrounded
 // by Lock() / Unlock() calls
@@ -206,14 +199,4 @@ func (rs *State) PopClip() {
 	rs.Mask = rs.ClipStack[sz-1]
 	rs.ClipStack[sz-1] = nil
 	rs.ClipStack = rs.ClipStack[:sz-1]
-}
-
-// BackupPaint copies style settings from Paint to PaintBack
-func (rs *State) BackupPaint() {
-	rs.PaintBack.CopyStyleFrom(&rs.Paint.Paint)
-}
-
-// RestorePaint restores style settings from PaintBack to Paint
-func (rs *State) RestorePaint() {
-	rs.Paint.CopyStyleFrom(&rs.PaintBack.Paint)
 }
