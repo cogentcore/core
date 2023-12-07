@@ -68,8 +68,8 @@ type Scene struct {
 	// Size and position relative to overall rendering context.
 	SceneGeom mat32.Geom2DInt `edit:"-" set:"-"`
 
-	// render state for rendering
-	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// paint context for rendering
+	PaintContext paint.Context `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -270,7 +270,13 @@ func (sc *Scene) Resize(nwsz image.Point) {
 		sc.Pixels = nil
 	}
 	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	sc.RenderState.Init(nwsz.X, nwsz.Y, sc.Pixels)
+	if sc.PaintContext.State == nil {
+		sc.PaintContext.State = &paint.State{}
+	}
+	if sc.PaintContext.Paint == nil {
+		sc.PaintContext.Paint = &styles.Paint{}
+	}
+	sc.PaintContext.Init(nwsz.X, nwsz.Y, sc.Pixels)
 	sc.SceneGeom.Size = nwsz // make sure
 	sc.SetFlag(true, ScNeedsLayout)
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())

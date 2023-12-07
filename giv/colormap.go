@@ -89,9 +89,9 @@ func (cv *ColorMapView) RenderColorMap() {
 	if cv.Map == nil {
 		cv.Map = colormap.StdMaps["ColdHot"]
 	}
-	rs := &cv.Sc.RenderState
-	rs.Lock()
-	pc := &rs.Paint
+	pc := &cv.Sc.PaintContext
+	pc.Lock()
+	defer pc.Unlock()
 
 	pos := cv.Geom.Pos.Total
 	sz := cv.Geom.Size.Actual.Total
@@ -109,7 +109,7 @@ func (cv *ColorMapView) RenderColorMap() {
 			clr := cv.Map.MapIndex(i)
 			p := float32(i) * inc
 			pr.SetDim(cv.Orient, sp+p)
-			pc.FillBoxColor(rs, pr, sr, clr)
+			pc.FillBoxColor(pr, sr, clr)
 		}
 	} else {
 		inc := mat32.Ceil(lsz / 100)
@@ -121,10 +121,9 @@ func (cv *ColorMapView) RenderColorMap() {
 			val := p / (lsz - 1)
 			clr := cv.Map.Map(float64(val))
 			pr.SetDim(cv.Orient, sp+p)
-			pc.FillBoxColor(rs, pr, sr, clr)
+			pc.FillBoxColor(pr, sr, clr)
 		}
 	}
-	rs.Unlock()
 }
 
 func (cv *ColorMapView) Render() {

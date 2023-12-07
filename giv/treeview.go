@@ -644,18 +644,19 @@ func (tv *TreeView) ScenePos() {
 }
 
 func (tv *TreeView) RenderNode() {
-	rs, pc, st := tv.RenderLock()
+	pc, st := tv.RenderLock()
+	defer tv.RenderUnlock()
+
 	// must use workaround act values
 	st.StateLayer = tv.actStateLayer
 	if st.Is(states.Selected) {
 		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 	}
 	pbc, psl := tv.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, &pbc, psl)
+	pc.DrawStdBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, &pbc, psl)
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)
-	tv.RenderUnlock(rs)
 	if tv.Parts.HasAnyScroll() {
 		fmt.Println(tv, "tv scroll")
 	}

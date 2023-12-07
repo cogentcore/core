@@ -1224,10 +1224,9 @@ func (tf *TextField) RenderSelect() {
 
 	spos := tf.CharStartPos(effst, false)
 
-	rs := &tf.Sc.RenderState
-	pc := &rs.Paint
+	pc := &tf.Sc.PaintContext
 	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(rs, spos, mat32.NewVec2(tsz, tf.FontHeight), &tf.SelectColor)
+	pc.FillBox(spos, mat32.NewVec2(tsz, tf.FontHeight), &tf.SelectColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
@@ -1785,8 +1784,8 @@ func (tf *TextField) SetEffPosAndSize() {
 }
 
 func (tf *TextField) RenderTextField() {
-	rs, _, _ := tf.RenderLock()
-	defer tf.RenderUnlock(rs)
+	pc, _ := tf.RenderLock()
+	defer tf.RenderUnlock()
 
 	tf.AutoScroll() // inits paint with our style
 	st := &tf.Styles
@@ -1799,14 +1798,14 @@ func (tf *TextField) RenderTextField() {
 		prevColor := st.Color
 		st.Color = tf.PlaceholderColor
 		tf.RenderVis.SetString(tf.Placeholder, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
-		tf.RenderVis.RenderTopPos(rs, pos)
+		tf.RenderVis.RenderTopPos(pc, pos)
 		st.Color = prevColor
 	} else {
 		if tf.NoEcho {
 			cur = concealDots(len(cur))
 		}
 		tf.RenderVis.SetRunes(cur, st.FontRender(), &st.UnContext, &st.Text, true, 0, 0)
-		tf.RenderVis.RenderTopPos(rs, pos)
+		tf.RenderVis.RenderTopPos(pc, pos)
 	}
 }
 

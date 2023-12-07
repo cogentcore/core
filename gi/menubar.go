@@ -56,11 +56,12 @@ func (mb *MenuBar) MenuBarStyles() {
 
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender() {
-	rs, pc, st := mb.RenderLock()
+	pc, st := mb.RenderLock()
+	defer mb.RenderUnlock()
+
 	pos := mb.Geom.Pos.Total
 	sz := mb.Geom.Size.Actual.Total
-	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
-	mb.RenderUnlock(rs)
+	pc.FillBox(pos, sz, &st.BackgroundColor)
 }
 
 func (mb *MenuBar) ShowMenuBar() bool {

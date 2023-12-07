@@ -255,31 +255,30 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 		epos.X = ex
 	}
 
-	rs := &ed.Sc.RenderState
-	pc := &rs.Paint
+	pc := &ed.Sc.PaintContext
 	stsi, _, _ := ed.WrappedLineNo(st)
 	edsi, _, _ := ed.WrappedLineNo(end)
 	if st.Ln == end.Ln && stsi == edsi {
-		pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
+		pc.FillBox(spos, epos.Sub(spos), bgclr) // same line, done
 		return
 	}
 	// on diff lines: fill to end of stln
 	seb := spos
 	seb.Y += ed.LineHeight
 	seb.X = ex
-	pc.FillBox(rs, spos, seb.Sub(spos), bgclr)
+	pc.FillBox(spos, seb.Sub(spos), bgclr)
 	sfb := seb
 	sfb.X = stx
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
 		efb.Y -= ed.LineHeight
 		efb.X = ex
-		pc.FillBox(rs, sfb, efb.Sub(sfb), bgclr)
+		pc.FillBox(sfb, efb.Sub(sfb), bgclr)
 	}
 	sed := epos
 	sed.Y -= ed.LineHeight
 	sed.X = stx
-	pc.FillBox(rs, sed, epos.Sub(sed), bgclr)
+	pc.FillBox(sed, epos.Sub(sed), bgclr)
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
@@ -291,9 +290,8 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors
 	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
 	}
-	rs := &ed.Sc.RenderState
-	pc := &rs.Paint
-	pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
+	pc := &ed.Sc.PaintContext
+	pc.FillBox(spos, epos.Sub(spos), bgclr) // same line, done
 }
 
 // RenderStartPos is absolute rendering start position from our content pos with scroll
@@ -306,14 +304,13 @@ func (ed *Editor) RenderStartPos() mat32.Vec2 {
 // RenderAllLines displays all the visible lines on the screen,
 // after PushBounds has already been called.
 func (ed *Editor) RenderAllLines() {
-	rs := &ed.Sc.RenderState
-	rs.Lock()
-	pc := &rs.Paint
+	pc := &ed.Sc.PaintContext
+	pc.Lock()
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
 	bbmin := mat32.NewVec2FmPoint(bb.Min)
 	bbmax := mat32.NewVec2FmPoint(bb.Max)
-	pc.FillBox(rs, bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
+	pc.FillBox(bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
 	pos := ed.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -336,7 +333,7 @@ func (ed *Editor) RenderAllLines() {
 	}
 
 	if stln < 0 || edln < 0 { // shouldn't happen.
-		rs.Unlock()
+		pc.Unlock()
 		return
 	}
 
@@ -354,9 +351,9 @@ func (ed *Editor) RenderAllLines() {
 	if ed.HasLineNos() {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNoOff)
-		rs.Unlock()
-		rs.PushBounds(tbb)
-		rs.Lock()
+		pc.Unlock()
+		pc.PushBounds(tbb)
+		pc.Lock()
 	}
 	for ln := stln; ln <= edln; ln++ {
 		lst := pos.Y + ed.Offs[ln]
@@ -366,11 +363,11 @@ func (ed *Editor) RenderAllLines() {
 		if lp.Y+ed.LineHeight > bbmax.Y {
 			break
 		}
-		ed.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+		ed.Renders[ln].Render(pc, lp) // not top pos -- already has baseline offset
 	}
-	rs.Unlock()
+	pc.Unlock()
 	if ed.HasLineNos() {
-		rs.PopBounds()
+		pc.PopBounds()
 	}
 }
 
@@ -379,13 +376,12 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	if !ed.HasLineNos() {
 		return
 	}
-	rs := &ed.Sc.RenderState
-	pc := &rs.Paint
+	pc := &ed.Sc.PaintContext
 	bb := ed.Geom.ContentBBox
 	spos := mat32.NewVec2FmPoint(bb.Min)
 	epos := mat32.NewVec2FmPoint(bb.Max)
 	epos.X = spos.X + ed.LineNoOff
-	pc.FillBoxColor(rs, spos, epos.Sub(spos), ed.LineNumberColor.Solid)
+	pc.FillBoxColor(spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }
 
 // RenderLineNosBox renders the background for the line numbers in given range, in the LineNumberColor
@@ -393,8 +389,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	if !ed.HasLineNos() {
 		return
 	}
-	rs := &ed.Sc.RenderState
-	pc := &rs.Paint
+	pc := &ed.Sc.PaintContext
 	// sty := &ed.Styles
 	// spc := sty.BoxSpace()
 	bb := ed.Geom.ContentBBox
@@ -403,7 +398,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	epos := ed.CharEndPos(lex.Pos{Ln: end + 1})
 	epos.Y -= ed.LineHeight
 	epos.X = spos.X + ed.LineNoOff
-	pc.FillBoxColor(rs, spos, epos.Sub(spos), ed.LineNumberColor.Solid)
+	pc.FillBoxColor(spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }
 
 // RenderLineNo renders given line number -- called within context of other render
@@ -418,8 +413,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	sc := ed.Sc
 	sty := &ed.Styles
 	fst := sty.FontRender()
-	rs := &sc.RenderState
-	pc := &rs.Paint
+	pc := &sc.PaintContext
 	bb := ed.Geom.ContentBBox
 
 	// render fillbox
@@ -440,19 +434,19 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 		if hasLClr { // split the diff!
 			bszhlf := bsz
 			bszhlf.X /= 2
-			pc.FillBoxColor(rs, sbox, bszhlf, lclr)
+			pc.FillBoxColor(sbox, bszhlf, lclr)
 			nsp := sbox
 			nsp.X += bszhlf.X
-			pc.FillBoxColor(rs, nsp, bszhlf, ed.SelectColor.Solid)
+			pc.FillBoxColor(nsp, bszhlf, ed.SelectColor.Solid)
 		} else {
 			actClr = ed.SelectColor.Solid
-			pc.FillBoxColor(rs, sbox, bsz, ed.SelectColor.Solid)
+			pc.FillBoxColor(sbox, bsz, ed.SelectColor.Solid)
 		}
 	} else if hasLClr {
-		pc.FillBoxColor(rs, sbox, bsz, lclr)
+		pc.FillBoxColor(sbox, bsz, lclr)
 	} else if defFill {
 		actClr = ed.LineNumberColor.Solid
-		pc.FillBoxColor(rs, sbox, bsz, ed.LineNumberColor.Solid)
+		pc.FillBoxColor(sbox, bsz, ed.LineNumberColor.Solid)
 	}
 
 	fst.BackgroundColor.SetSolid(nil)
@@ -469,7 +463,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(bb.Min.X) // + spc.Pos().X
 
-	ed.LineNoRender.Render(rs, pos)
+	ed.LineNoRender.Render(pc, pos)
 	// todo: need an SvgRender interface that just takes an svg file or object
 	// and renders it to a given bitmap, and then just keep that around.
 	// if icnm, ok := ed.Buf.LineIcons[ln]; ok {

@@ -492,8 +492,8 @@ func (ts *Tabs) RenumberTabs() {
 
 // RenderTabSeps renders the separators between tabs
 func (ts *Tabs) RenderTabSeps() {
-	rs, pc, st := ts.RenderLock()
-	defer ts.RenderUnlock(rs)
+	pc, st := ts.RenderLock()
+	defer ts.RenderUnlock()
 
 	// just like with standard separator, use top width like CSS
 	// (see https://www.w3schools.com/howto/howto_css_dividers.asp)
@@ -509,9 +509,9 @@ func (ts *Tabs) RenderTabSeps() {
 
 		pos := ni.Geom.Pos.Total
 		sz := ni.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
-		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
+		pc.DrawLine(pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
-	pc.FillStrokeClear(rs)
+	pc.FillStrokeClear()
 }
 
 func (ts *Tabs) Render() {
