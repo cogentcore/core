@@ -43,6 +43,18 @@ func AsRGBA(c color.Color) color.RGBA {
 	return color.RGBAModel.Convert(c).(color.RGBA)
 }
 
+// FromFloat64 makes a new RGBA color from the given 0-1
+// normalized floating point numbers (alpha-premultiplied)
+func FromFloat64(r, g, b, a float64) color.RGBA {
+	return color.RGBA{uint8(r * 255.0), uint8(g * 255.0), uint8(b * 255.0), uint8(a * 255.0)}
+}
+
+// FromFloat32 makes a new RGBA color from the given 0-1
+// normalized floating point numbers (alpha-premultiplied)
+func FromFloat32(r, g, b, a float32) color.RGBA {
+	return color.RGBA{uint8(r * 255.0), uint8(g * 255.0), uint8(b * 255.0), uint8(a * 255.0)}
+}
+
 // AsString returns the given color as a string,
 // using its String method if it exists, and formatting
 // it as rgba(r, g, b, a) otherwise.
