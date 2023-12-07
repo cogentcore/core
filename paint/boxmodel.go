@@ -14,7 +14,7 @@ import (
 
 // DrawBox calls DrawBorder with position, size and border parameters
 // as a convenience method for DrawStdBox
-func (pc *Paint) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
+func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
@@ -23,7 +23,7 @@ func (pc *Paint) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 // The surround arguments are the background color and state layer of the surrounding
 // context of this box, typically obtained through [goki.dev/gi/v2/gi.WidgetBase.ParentBackgroundColor]
 // in a GUI context.
-func (pc *Paint) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32) {
+func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32) {
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()

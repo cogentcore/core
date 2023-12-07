@@ -72,7 +72,7 @@ func TestEdgeBlurFactors(t *testing.T) {
 }
 
 func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
-	RunTest(t, imgName, 300, 300, func(pc *Paint) {
+	RunTest(t, imgName, 300, 300, func(pc *Context) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.Color = colors.Black

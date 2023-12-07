@@ -14,7 +14,7 @@ import (
 )
 
 func TestBoxModel(t *testing.T) {
-	RunTest(t, "boxmodel", 300, 300, func(pc *Paint) {
+	RunTest(t, "boxmodel", 300, 300, func(pc *Context) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.Color = colors.Black
@@ -34,7 +34,7 @@ func TestBoxModel(t *testing.T) {
 }
 
 func TestBoxShadow(t *testing.T) {
-	RunTest(t, "boxshadow", 300, 300, func(pc *Paint) {
+	RunTest(t, "boxshadow", 300, 300, func(pc *Context) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.Color = colors.Black

@@ -653,7 +653,7 @@ func (sr *Span) LastFont() (face font.Face, color color.Color) {
 }
 
 // RenderBg renders the background behind chars
-func (sr *Span) RenderBg(pc *Paint, tpos mat32.Vec2) {
+func (sr *Span) RenderBg(pc *Context, tpos mat32.Vec2) {
 	curFace := sr.Render[0].Face
 	didLast := false
 	// first := true
@@ -699,7 +699,7 @@ func (sr *Span) RenderBg(pc *Paint, tpos mat32.Vec2) {
 }
 
 // RenderUnderline renders the underline for span -- ensures continuity to do it all at once
-func (sr *Span) RenderUnderline(pc *Paint, tpos mat32.Vec2) {
+func (sr *Span) RenderUnderline(pc *Context, tpos mat32.Vec2) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
@@ -763,7 +763,7 @@ func (sr *Span) RenderUnderline(pc *Paint, tpos mat32.Vec2) {
 }
 
 // RenderLine renders overline or line-through -- anything that is a function of ascent
-func (sr *Span) RenderLine(pc *Paint, tpos mat32.Vec2, deco styles.TextDecorations, ascPct float32) {
+func (sr *Span) RenderLine(pc *Context, tpos mat32.Vec2, deco styles.TextDecorations, ascPct float32) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false

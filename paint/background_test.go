@@ -15,7 +15,7 @@ import (
 )
 
 func TestBackgroundColor(t *testing.T) {
-	RunTest(t, "background_color", 300, 300, func(pc *Paint) {
+	RunTest(t, "background_color", 300, 300, func(pc *Context) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.BackgroundColor.SetSolid(colors.Blue)
@@ -30,7 +30,7 @@ func TestBackgroundColor(t *testing.T) {
 }
 
 func TestBackgroundImage(t *testing.T) {
-	RunTest(t, "background_image", 750, 400, func(pc *Paint) {
+	RunTest(t, "background_image", 750, 400, func(pc *Context) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.ToDots()

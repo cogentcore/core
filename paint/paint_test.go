@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [images.Assert] with the given name.
-func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Paint)) {
+func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)) {
 	pc := NewContext(width, height)
 	pc.PushBounds(pc.Image.Rect)
 	pc.Lock()
@@ -35,7 +35,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Paint)) 
 }
 
 func TestRender(t *testing.T) {
-	RunTest(t, "render", 300, 300, func(pc *Paint) {
+	RunTest(t, "render", 300, 300, func(pc *Context) {
 		bs := styles.Border{}
 		bs.Color.Set(colors.Red, colors.Blue, colors.Green, colors.Orange)
 		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
@@ -79,31 +79,31 @@ func TestRender(t *testing.T) {
 }
 
 func TestPaintPath(t *testing.T) {
-	test := func(nm string, f func(pc *Paint)) {
-		RunTest(t, nm, 300, 300, func(pc *Paint) {
+	test := func(nm string, f func(pc *Context)) {
+		RunTest(t, nm, 300, 300, func(pc *Context) {
 			pc.FillBox(mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
 			f(pc)
 			pc.FillStrokeClear()
 		})
 	}
-	test("line_to", func(pc *Paint) {
+	test("line_to", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.LineTo(200, 100)
 	})
-	test("quadratic_to", func(pc *Paint) {
+	test("quadratic_to", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.QuadraticTo(120, 140, 200, 100)
 	})
-	test("cubic_to", func(pc *Paint) {
+	test("cubic_to", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.CubicTo(130, 110, 160, 180, 200, 100)
 	})
-	test("close_path", func(pc *Paint) {
+	test("close_path", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.MoveTo(200, 100)
 		pc.ClosePath()
 	})
-	test("clear_path", func(pc *Paint) {
+	test("clear_path", func(pc *Context) {
 		pc.MoveTo(100, 200)
 		pc.MoveTo(200, 100)
 		pc.ClearPath()
@@ -111,37 +111,37 @@ func TestPaintPath(t *testing.T) {
 }
 
 func TestPaintFill(t *testing.T) {
-	test := func(nm string, f func(pc *Paint)) {
-		RunTest(t, nm, 300, 300, func(pc *Paint) {
+	test := func(nm string, f func(pc *Context)) {
+		RunTest(t, nm, 300, 300, func(pc *Context) {
 			f(pc)
 		})
 	}
-	test("fill_box_color", func(pc *Paint) {
+	test("fill_box_color", func(pc *Context) {
 		pc.FillBoxColor(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
 	})
-	test("fill_box_solid", func(pc *Paint) {
+	test("fill_box_solid", func(pc *Context) {
 		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.SolidFull(colors.Blue))
 	})
-	test("fill_box_linear_gradient", func(pc *Paint) {
+	test("fill_box_linear_gradient", func(pc *Context) {
 		g := colors.LinearGradient().AddStop(colors.Red, 0, 1).AddStop(colors.Yellow, 0.3, 0.5).AddStop(colors.Green, 1, 1)
 		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
 	})
-	test("fill_box_radial_gradient", func(pc *Paint) {
+	test("fill_box_radial_gradient", func(pc *Context) {
 		g := colors.RadialGradient().AddStop(colors.Green, 0, 0.5).AddStop(colors.Blue, 0.6, 1).AddStop(colors.Purple, 1, 0.3)
 		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
 	})
-	test("blur_box", func(pc *Paint) {
+	test("blur_box", func(pc *Context) {
 		pc.FillBoxColor(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
 		pc.BlurBox(mat32.Vec2{0, 50}, mat32.Vec2{300, 200}, 10)
 	})
 
-	test("fill", func(pc *Paint) {
+	test("fill", func(pc *Context) {
 		pc.FillStyle.SetColor(colors.Purple)
 		pc.StrokeStyle.SetColor(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.Fill()
 	})
-	test("stroke", func(pc *Paint) {
+	test("stroke", func(pc *Context) {
 		pc.FillStyle.SetColor(colors.Purple)
 		pc.StrokeStyle.SetColor(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
@@ -149,13 +149,13 @@ func TestPaintFill(t *testing.T) {
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear
-	test("fill_stroke_clear_fill", func(pc *Paint) {
+	test("fill_stroke_clear_fill", func(pc *Context) {
 		pc.FillStyle.SetColor(colors.Purple)
 		pc.StrokeStyle.SetColor(nil)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.FillStrokeClear()
 	})
-	test("fill_stroke_clear_stroke", func(pc *Paint) {
+	test("fill_stroke_clear_stroke", func(pc *Context) {
 		pc.FillStyle.SetColor(nil)
 		pc.StrokeStyle.SetColor(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)

@@ -71,7 +71,7 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking
-func (tr *Text) Render(pc *Paint, pos mat32.Vec2) {
+func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	// pr := prof.Start("RenderText")
 	// defer pr.End()
 
@@ -178,7 +178,7 @@ func (tr *Text) Render(pc *Paint, pos mat32.Vec2) {
 // RenderTopPos renders at given top position -- uses first font info to
 // compute baseline offset and calls overall Render -- convenience for simple
 // widget rendering without layouts
-func (tr *Text) RenderTopPos(pc *Paint, tpos mat32.Vec2) {
+func (tr *Text) RenderTopPos(pc *Context, tpos mat32.Vec2) {
 	if len(tr.Spans) == 0 {
 		return
 	}
