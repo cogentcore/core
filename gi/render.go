@@ -527,10 +527,10 @@ func (sc *Scene) DoRebuild() {
 // Typically the root Frame fills its background with color
 // but it can e.g., leave corners transparent for popups etc.
 func (sc *Scene) Fill() {
-	rs := &sc.RenderState
-	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sc.SceneGeom.Size), &sc.BgColor)
-	rs.Unlock()
+	pc := &sc.PaintContext
+	pc.Lock()
+	pc.FillBox(mat32.Vec2Zero, mat32.NewVec2FmPoint(sc.SceneGeom.Size), &sc.BgColor)
+	pc.Unlock()
 }
 
 // PrefSize computes the preferred size of the scene based on current contents.
@@ -573,11 +573,11 @@ func (wb *WidgetBase) PushBounds() bool {
 		}
 		return false
 	}
-	rs := &wb.Sc.RenderState
-	rs.PushBounds(wb.Geom.TotalBBox)
+	pc := &wb.Sc.PaintContext
+	pc.PushBounds(wb.Geom.TotalBBox)
 	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
-	rs.Paint.StrokeStyle.Defaults() // start with default values
-	rs.Paint.FillStyle.Defaults()
+	pc.StrokeStyle.Defaults() // start with default values
+	pc.FillStyle.Defaults()
 	if RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}
@@ -590,10 +590,9 @@ func (wb *WidgetBase) PopBounds() {
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
 		return
 	}
-	rs := &wb.Sc.RenderState
+	pc := &wb.Sc.PaintContext
 
 	if wb.Sc.Is(ScRenderBBoxes) {
-		pc := &rs.Paint
 		pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
 		sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
@@ -609,8 +608,8 @@ func (wb *WidgetBase) PopBounds() {
 			pc.FillStyle.SetColor(fc)
 			pc.FillStyle.Opacity = 0.2
 		}
-		pc.DrawRectangle(rs, pos.X, pos.Y, sz.X, sz.Y)
-		pc.FillStrokeClear(rs)
+		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
+		pc.FillStrokeClear()
 		// restore
 		pc.FillStyle.Opacity = pcop
 		pc.FillStyle.Color = pcfc
@@ -624,7 +623,7 @@ func (wb *WidgetBase) PopBounds() {
 		}
 	}
 
-	rs.PopBounds()
+	pc.PopBounds()
 }
 
 // Render performs rendering on widget and parts, but not Children
@@ -656,27 +655,26 @@ func (wb *WidgetBase) RenderChildren() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard Box Model rendering
 
-// RenderLock returns the locked paint.State, Paint, and Style with StyMu locked.
+// RenderLock returns the locked [paint.Context] and [styles.Style] with StyMu locked.
 // This should be called at start of widget-level rendering.
-func (wb *WidgetBase) RenderLock() (*paint.State, *paint.Paint, *styles.Style) {
+func (wb *WidgetBase) RenderLock() (*paint.Paint, *styles.Style) {
 	wb.StyMu.RLock()
-	rs := &wb.Sc.RenderState
-	rs.Lock()
-	return rs, &rs.Paint, &wb.Styles
+	pc := &wb.Sc.PaintContext
+	pc.Lock()
+	return pc, &wb.Styles
 }
 
-// RenderUnlock unlocks paint.State and style
-func (wb *WidgetBase) RenderUnlock(rs *paint.State) {
-	rs.Unlock()
+// RenderUnlock unlocks [paint.Context] and StyMu.
+func (wb *WidgetBase) RenderUnlock(pc *paint.Paint) {
+	pc.Unlock()
 	wb.StyMu.RUnlock()
 }
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
 func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
-	rs := &wb.Sc.RenderState
-	pc := &rs.Paint
-	pc.DrawBox(rs, pos, sz, bs)
+	pc := &wb.Sc.PaintContext
+	pc.DrawBox(pos, sz, bs)
 }
 
 // RenderStdBox draws standard box using given style.
@@ -685,13 +683,12 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
-	rs := &wb.Sc.RenderState
-	pc := &rs.Paint
+	pc := &wb.Sc.PaintContext
 
 	pbc, psl := wb.ParentBackgroundColor()
 	pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
 	sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
-	pc.DrawStdBox(rs, st, pos, sz, &pbc, psl)
+	pc.DrawStdBox(st, pos, sz, &pbc, psl)
 }
 
 //////////////////////////////////////////////////////////////////
