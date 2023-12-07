@@ -52,10 +52,19 @@ type Paint struct {
 	*styles.Paint
 }
 
-func NewPaint() Paint {
-	p := Paint{}
-	p.Defaults()
-	return p
+// NewContext returns a new [Context] associated with a new [image.RGBA]
+// with the given width and height.
+func NewContext(width, height int) *Paint {
+	pc := &Paint{}
+
+	sz := image.Pt(width, height)
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	pc.Init(width, height, img)
+
+	pc.Defaults()
+	pc.SetUnitContextExt(sz)
+
+	return pc
 }
 
 // convenience for final draw for shapes when done

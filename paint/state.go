@@ -134,7 +134,7 @@ func (rs *State) PopXFormLock() {
 	rs.RenderMu.Unlock()
 }
 
-// PushBounds pushes current bounds onto stack and set new bounds
+// PushBounds pushes current bounds onto stack and set new bounds.
 // this is the essential first step in rendering!
 // any further actual rendering should always be surrounded
 // by Lock() / Unlock() calls
