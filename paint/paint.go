@@ -55,7 +55,7 @@ type Paint struct {
 // NewContext returns a new [Context] associated with a new [image.RGBA]
 // with the given width and height.
 func NewContext(width, height int) *Paint {
-	pc := &Paint{}
+	pc := &Paint{&State{}, &styles.Paint{}}
 
 	sz := image.Pt(width, height)
 	img := image.NewRGBA(image.Rectangle{Max: sz})
