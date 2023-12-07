@@ -2043,6 +2043,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.
 	sg.VisRows = max(sg.VisRows, sg.MinRows)
 	minHt := sg.RowHeight * float32(sg.MinRows)
 	visHt := sg.RowHeight * float32(sg.VisRows)
+	fmt.Println("rowht:", sg.RowHeight, "allocht:", allocHt, "visrows:", sg.VisRows)
 	_ = visHt
 	csz.Y = minHt
 	return csz
@@ -2051,6 +2052,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.
 func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	for sv.ConfigIter < 2 || sv.VisRows != sg.VisRows {
+		fmt.Println("sv:", sv.VisRows, "sg:", sg.VisRows)
 		sv.VisRows = sg.VisRows
 		sv.This().(SliceViewer).ConfigRows()
 		sg.SizeFinalUpdateChildrenSizes()
@@ -2058,5 +2060,5 @@ func (sv *SliceViewBase) SizeFinal() {
 	}
 	// note: doing UpdateWidgets here seems to be unnecessary
 	sv.Frame.SizeFinal()
-	// sv.This().(SliceViewer).UpdateWidgets()
+	sv.This().(SliceViewer).UpdateWidgets()
 }

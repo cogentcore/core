@@ -147,6 +147,7 @@ func (fn *Node) OpenFileWith(command string) error {
 
 // DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //gti:add
+	root := fn.FRoot
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -155,6 +156,7 @@ func (fn *Node) DuplicateFiles() { //gti:add
 		}
 		sn.This().(Filer).DuplicateFile()
 	}
+	root.UpdateDir()
 }
 
 // DuplicateFile creates a copy of given file -- only works for regular files, not
@@ -239,6 +241,7 @@ func (fn *Node) DeleteFile() error {
 
 // renames any selected files
 func (fn *Node) RenameFiles() { //gti:add
+	root := fn.FRoot
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -247,6 +250,7 @@ func (fn *Node) RenameFiles() { //gti:add
 		}
 		giv.CallFunc(sn, sn.RenameFile) // todo: not using interface?
 	}
+	root.UpdateDir()
 }
 
 // RenameFile renames file to new name
@@ -286,9 +290,6 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	}
 	if stored {
 		fn.AddToVcs()
-	} else {
-		// fn.SetNeedsRender() // todo
-		fn.FRoot.UpdateDir() // need full update
 	}
 	return err
 }
