@@ -37,19 +37,19 @@ type AppMulti[W goosi.Window] struct {
 	CtxWindow W
 }
 
-func (app *AppMulti[W]) NScreens() int {
-	return len(app.Screens)
+func (a *AppMulti[W]) NScreens() int {
+	return len(a.Screens)
 }
 
-func (app *AppMulti[W]) Screen(n int) *goosi.Screen {
-	if n < len(app.Screens) {
-		return app.Screens[n]
+func (a *AppMulti[W]) Screen(n int) *goosi.Screen {
+	if n < len(a.Screens) {
+		return a.Screens[n]
 	}
 	return nil
 }
 
-func (app *AppMulti[W]) ScreenByName(name string) *goosi.Screen {
-	for _, sc := range app.Screens {
+func (a *AppMulti[W]) ScreenByName(name string) *goosi.Screen {
+	for _, sc := range a.Screens {
 		if sc.Name == name {
 			return sc
 		}
@@ -57,25 +57,25 @@ func (app *AppMulti[W]) ScreenByName(name string) *goosi.Screen {
 	return nil
 }
 
-func (app *AppMulti[W]) NWindows() int {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	return len(app.Windows)
+func (a *AppMulti[W]) NWindows() int {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	return len(a.Windows)
 }
 
-func (app *AppMulti[W]) Window(win int) goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	if win < len(app.Windows) {
-		return app.Windows[win]
+func (a *AppMulti[W]) Window(win int) goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	if win < len(a.Windows) {
+		return a.Windows[win]
 	}
 	return nil
 }
 
-func (app *AppMulti[W]) WindowByName(name string) goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	for _, win := range app.Windows {
+func (a *AppMulti[W]) WindowByName(name string) goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	for _, win := range a.Windows {
 		if win.Name() == name {
 			return win
 		}
@@ -83,10 +83,10 @@ func (app *AppMulti[W]) WindowByName(name string) goosi.Window {
 	return nil
 }
 
-func (app *AppMulti[W]) WindowInFocus() goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	for _, win := range app.Windows {
+func (a *AppMulti[W]) WindowInFocus() goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	for _, win := range a.Windows {
 		if win.Is(goosi.Focused) {
 			return win
 		}
@@ -94,10 +94,10 @@ func (app *AppMulti[W]) WindowInFocus() goosi.Window {
 	return nil
 }
 
-func (app *AppMulti[W]) ContextWindow() goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	return app.CtxWindow
+func (a *AppMulti[W]) ContextWindow() goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	return a.CtxWindow
 }
 
 // RemoveWindow removes the given Window from the app's list of windows.
@@ -106,4 +106,21 @@ func (a *AppMulti[W]) RemoveWindow(w goosi.Window) {
 	slices.DeleteFunc(a.Windows, func(ew W) bool {
 		return goosi.Window(ew) == w
 	})
+}
+
+func (a *AppMulti[W]) QuitClean() {
+	a.Quitting = true
+	if a.QuitCleanFunc != nil {
+		a.QuitCleanFunc()
+	}
+	a.Mu.Lock()
+	nwin := len(a.Windows)
+	for i := nwin - 1; i >= 0; i-- {
+		win := a.Windows[i]
+		go win.Close()
+	}
+	a.Mu.Unlock()
+	// for i := 0; i < nwin; i++ {
+	// 	<-app.QuitCloseCnt
+	// }
 }

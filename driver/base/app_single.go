@@ -108,3 +108,13 @@ func (a *AppSingle[D, W]) ContextWindow() goosi.Window {
 func (a *AppSingle[D, W]) RemoveWindow(w goosi.Window) {
 	// no-op
 }
+
+func (a *AppSingle[D, W]) QuitClean() {
+	a.Quitting = true
+	if a.QuitCleanFunc != nil {
+		a.QuitCleanFunc()
+	}
+	a.Mu.Lock()
+	a.Win.Close()
+	a.Mu.Unlock()
+}

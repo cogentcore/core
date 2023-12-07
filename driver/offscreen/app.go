@@ -148,22 +148,3 @@ func (app *App) ClipBoard(win goosi.Window) clip.Board {
 func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	return &cursor.CursorBase{} // no-op
 }
-
-func (app *App) QuitClean() {
-	// TODO: implement?
-	// app.quitting = true
-	// if app.quitCleanFunc != nil {
-	// 	app.quitCleanFunc()
-	// }
-	// app.mu.Lock()
-	// nwin := len(app.winlist)
-	// for i := nwin - 1; i >= 0; i-- {
-	// 	win := app.winlist[i]
-	// 	go win.Close()
-	// }
-	// app.mu.Unlock()
-	// for i := 0; i < nwin; i++ {
-	// 	<-app.quitCloseCnt
-	// 	// fmt.Printf("win closed: %v\n", i)
-	// }
-}
