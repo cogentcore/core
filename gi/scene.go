@@ -270,6 +270,12 @@ func (sc *Scene) Resize(nwsz image.Point) {
 		sc.Pixels = nil
 	}
 	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	if sc.PaintContext.State == nil {
+		sc.PaintContext.State = &paint.State{}
+	}
+	if sc.PaintContext.Paint == nil {
+		sc.PaintContext.Paint = &styles.Paint{}
+	}
 	sc.PaintContext.Init(nwsz.X, nwsz.Y, sc.Pixels)
 	sc.SceneGeom.Size = nwsz // make sure
 	sc.SetFlag(true, ScNeedsLayout)
