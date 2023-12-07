@@ -51,20 +51,19 @@ func (g *Circle) LocalBBox() mat32.Box2 {
 }
 
 func (g *Circle) Render(sv *SVG) {
-	vis, rs := g.PushXForm(sv)
+	vis, pc := g.PushXForm(sv)
 	if !vis {
 		return
 	}
-	pc := &g.Paint
-	rs.Lock()
-	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
-	pc.FillStrokeClear(rs)
-	rs.Unlock()
+	pc.Lock()
+	pc.DrawCircle(g.Pos.X, g.Pos.Y, g.Radius)
+	pc.FillStrokeClear()
+	pc.Unlock()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
 
-	rs.PopXFormLock()
+	pc.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

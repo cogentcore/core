@@ -51,20 +51,19 @@ func (g *Ellipse) LocalBBox() mat32.Box2 {
 }
 
 func (g *Ellipse) Render(sv *SVG) {
-	vis, rs := g.PushXForm(sv)
+	vis, pc := g.PushXForm(sv)
 	if !vis {
 		return
 	}
-	pc := &g.Paint
-	rs.Lock()
-	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
-	pc.FillStrokeClear(rs)
-	rs.Unlock()
+	pc.Lock()
+	pc.DrawEllipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
+	pc.FillStrokeClear()
+	pc.Unlock()
 
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
 
-	rs.PopXFormLock()
+	pc.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

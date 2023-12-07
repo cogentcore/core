@@ -183,12 +183,11 @@ func (g *Text) TextBBox() mat32.Box2 {
 
 // RenderText renders the text in full coords
 func (g *Text) RenderText(sv *SVG) {
-	pc := &g.Paint
-	rs := &sv.RenderState
+	pc := &paint.Context{&sv.RenderState, &g.Paint}
 	orgsz := pc.FontStyle.Size
-	pos := rs.XForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
-	rot := rs.XForm.ExtractRot()
-	scx, scy := rs.XForm.ExtractScale()
+	pos := pc.CurXForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
+	rot := pc.CurXForm.ExtractRot()
+	scx, scy := pc.CurXForm.ExtractScale()
 	scalex := scx / scy
 	if scalex == 1 {
 		scalex = 0
@@ -213,7 +212,7 @@ func (g *Text) RenderText(sv *SVG) {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {
-		sr.Render[i].RelPos = rs.XForm.MulVec2AsVec(sr.Render[i].RelPos)
+		sr.Render[i].RelPos = pc.CurXForm.MulVec2AsVec(sr.Render[i].RelPos)
 		sr.Render[i].Size.Y *= scy
 		sr.Render[i].Size.X *= scx
 	}
@@ -222,21 +221,21 @@ func (g *Text) RenderText(sv *SVG) {
 		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			// todo: this may not be fully correct, given relativity constraints
-			cpx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
+			cpx := pc.CurXForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
 			sr.Render[i].RelPos.X = cpx.X
 		}
 	}
 	if len(g.CharPosY) > 0 {
 		mx := min(len(g.CharPosY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			cpy := rs.XForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
+			cpy := pc.CurXForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
 			sr.Render[i].RelPos.Y = cpy.Y
 		}
 	}
 	if len(g.CharPosDX) > 0 {
 		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
+			dx := pc.CurXForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
 			if i > 0 {
 				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
 			} else {
@@ -247,7 +246,7 @@ func (g *Text) RenderText(sv *SVG) {
 	if len(g.CharPosDY) > 0 {
 		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dy := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
+			dy := pc.CurXForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
 			if i > 0 {
 				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
 			} else {
@@ -270,7 +269,7 @@ func (g *Text) RenderText(sv *SVG) {
 	g.LastBBox.Min = pos
 	g.LastBBox.Min.Y -= maxh * .8 // baseline adjust
 	g.LastBBox.Max = g.LastBBox.Min.Add(g.TextRender.Size)
-	g.TextRender.Render(rs, pos)
+	g.TextRender.Render(pc, pos)
 	g.BBoxes(sv)
 }
 

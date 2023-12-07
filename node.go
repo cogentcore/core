@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -26,7 +27,7 @@ type Node interface {
 	AsNodeBase() *NodeBase
 
 	// PaintStyle returns the SVG Paint style object for this node
-	PaintStyle() *paint.Paint
+	PaintStyle() *styles.Paint
 
 	// Style updates the Paint style for this node
 	Style(sv *SVG)
@@ -80,19 +81,19 @@ type NodeBase struct {
 	Class string
 
 	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-	CSS ki.Props `xml:"css"`
+	CSS ki.Props `xml:"css" set:"-"`
 
 	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline"`
+	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// visible bounding box for the node intersected with the SVG image geometry
-	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// paint style information for this node
-	Paint paint.Paint `json:"-" xml:"-"`
+	Paint styles.Paint `json:"-" xml:"-" set:"-"`
 }
 
 func (g *NodeBase) CopyFieldsFrom(frm any) {
@@ -127,7 +128,7 @@ func (n *NodeBase) BaseIface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }
 
-func (g *NodeBase) PaintStyle() *paint.Paint {
+func (g *NodeBase) PaintStyle() *styles.Paint {
 	return &g.Paint
 }
 
@@ -290,8 +291,8 @@ func (g *NodeBase) Style(sv *SVG) {
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
-		pc.CopyStyleFrom(&pp.Paint)
-		pc.SetStyleProps(&pp.Paint, *g.Properties(), ctxt)
+		pc.CopyStyleFrom(pp)
+		pc.SetStyleProps(pp, *g.Properties(), ctxt)
 	} else {
 		pc.SetStyleProps(nil, *g.Properties(), ctxt)
 	}
@@ -333,7 +334,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 	ctxt := colors.Context(sv)
 	if g.Par != sv.Root.This() {
 		pp := g.Par.(Node).PaintStyle()
-		pc.SetStyleProps(&pp.Paint, pmap, ctxt)
+		pc.SetStyleProps(pp, pmap, ctxt)
 	} else {
 		pc.SetStyleProps(nil, pmap, ctxt)
 	}
@@ -392,7 +393,7 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // PushXForm checks our bounding box and visibility, returning false if
 // out of bounds.  If visible, pushes our xform.
 // Must be called as first step in Render.
-func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.State) {
+func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.Context) {
 	g.BBox = image.Rectangle{}
 	if g.Paint.Off || g == nil || g.This() == nil {
 		return false, nil
@@ -412,10 +413,10 @@ func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.State) {
 	}
 
 	rs := &sv.RenderState
-	pc := &g.Paint
-	rs.PushXFormLock(pc.XForm)
+	rs.PushXFormLock(g.Paint.XForm)
 
-	return true, rs
+	pc := &paint.Context{rs, &g.Paint}
+	return true, pc
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {

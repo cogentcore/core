@@ -63,36 +63,6 @@ func (t *Circle) SetClass(v string) *Circle {
 	return t
 }
 
-// SetCss sets the [Circle.CSS]
-func (t *Circle) SetCss(v ki.Props) *Circle {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Circle.CSSAgg]
-func (t *Circle) SetCssagg(v ki.Props) *Circle {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Circle.BBox]
-func (t *Circle) SetBbox(v image.Rectangle) *Circle {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Circle.VisBBox]
-func (t *Circle) SetVisBbox(v image.Rectangle) *Circle {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Circle.Paint]
-func (t *Circle) SetPaint(v paint.Paint) *Circle {
-	t.Paint = v
-	return t
-}
-
 // ClipPathType is the [gti.Type] for [ClipPath]
 var ClipPathType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.ClipPath",
@@ -129,36 +99,6 @@ func (t *ClipPath) New() ki.Ki {
 // SetClass sets the [ClipPath.Class]
 func (t *ClipPath) SetClass(v string) *ClipPath {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [ClipPath.CSS]
-func (t *ClipPath) SetCss(v ki.Props) *ClipPath {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [ClipPath.CSSAgg]
-func (t *ClipPath) SetCssagg(v ki.Props) *ClipPath {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [ClipPath.BBox]
-func (t *ClipPath) SetBbox(v image.Rectangle) *ClipPath {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [ClipPath.VisBBox]
-func (t *ClipPath) SetVisBbox(v image.Rectangle) *ClipPath {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [ClipPath.Paint]
-func (t *ClipPath) SetPaint(v paint.Paint) *ClipPath {
-	t.Paint = v
 	return t
 }
 
@@ -209,36 +149,6 @@ func (t *StyleSheet) SetClass(v string) *StyleSheet {
 	return t
 }
 
-// SetCss sets the [StyleSheet.CSS]
-func (t *StyleSheet) SetCss(v ki.Props) *StyleSheet {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [StyleSheet.CSSAgg]
-func (t *StyleSheet) SetCssagg(v ki.Props) *StyleSheet {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [StyleSheet.BBox]
-func (t *StyleSheet) SetBbox(v image.Rectangle) *StyleSheet {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [StyleSheet.VisBBox]
-func (t *StyleSheet) SetVisBbox(v image.Rectangle) *StyleSheet {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [StyleSheet.Paint]
-func (t *StyleSheet) SetPaint(v paint.Paint) *StyleSheet {
-	t.Paint = v
-	return t
-}
-
 // MetaDataType is the [gti.Type] for [MetaData]
 var MetaDataType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.MetaData",
@@ -283,36 +193,6 @@ func (t *MetaData) SetMetaData(v string) *MetaData {
 // SetClass sets the [MetaData.Class]
 func (t *MetaData) SetClass(v string) *MetaData {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [MetaData.CSS]
-func (t *MetaData) SetCss(v ki.Props) *MetaData {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [MetaData.CSSAgg]
-func (t *MetaData) SetCssagg(v ki.Props) *MetaData {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [MetaData.BBox]
-func (t *MetaData) SetBbox(v image.Rectangle) *MetaData {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [MetaData.VisBBox]
-func (t *MetaData) SetVisBbox(v image.Rectangle) *MetaData {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [MetaData.Paint]
-func (t *MetaData) SetPaint(v paint.Paint) *MetaData {
-	t.Paint = v
 	return t
 }
 
@@ -365,36 +245,6 @@ func (t *Ellipse) SetClass(v string) *Ellipse {
 	return t
 }
 
-// SetCss sets the [Ellipse.CSS]
-func (t *Ellipse) SetCss(v ki.Props) *Ellipse {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Ellipse.CSSAgg]
-func (t *Ellipse) SetCssagg(v ki.Props) *Ellipse {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Ellipse.BBox]
-func (t *Ellipse) SetBbox(v image.Rectangle) *Ellipse {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Ellipse.VisBBox]
-func (t *Ellipse) SetVisBbox(v image.Rectangle) *Ellipse {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Ellipse.Paint]
-func (t *Ellipse) SetPaint(v paint.Paint) *Ellipse {
-	t.Paint = v
-	return t
-}
-
 // FilterType is the [gti.Type] for [Filter]
 var FilterType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Filter",
@@ -442,36 +292,6 @@ func (t *Filter) SetClass(v string) *Filter {
 	return t
 }
 
-// SetCss sets the [Filter.CSS]
-func (t *Filter) SetCss(v ki.Props) *Filter {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Filter.CSSAgg]
-func (t *Filter) SetCssagg(v ki.Props) *Filter {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Filter.BBox]
-func (t *Filter) SetBbox(v image.Rectangle) *Filter {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Filter.VisBBox]
-func (t *Filter) SetVisBbox(v image.Rectangle) *Filter {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Filter.Paint]
-func (t *Filter) SetPaint(v paint.Paint) *Filter {
-	t.Paint = v
-	return t
-}
-
 // FlowType is the [gti.Type] for [Flow]
 var FlowType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Flow",
@@ -516,36 +336,6 @@ func (t *Flow) SetFlowType(v string) *Flow {
 // SetClass sets the [Flow.Class]
 func (t *Flow) SetClass(v string) *Flow {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [Flow.CSS]
-func (t *Flow) SetCss(v ki.Props) *Flow {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Flow.CSSAgg]
-func (t *Flow) SetCssagg(v ki.Props) *Flow {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Flow.BBox]
-func (t *Flow) SetBbox(v image.Rectangle) *Flow {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Flow.VisBBox]
-func (t *Flow) SetVisBbox(v image.Rectangle) *Flow {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Flow.Paint]
-func (t *Flow) SetPaint(v paint.Paint) *Flow {
-	t.Paint = v
 	return t
 }
 
@@ -605,36 +395,6 @@ func (t *Gradient) SetClass(v string) *Gradient {
 	return t
 }
 
-// SetCss sets the [Gradient.CSS]
-func (t *Gradient) SetCss(v ki.Props) *Gradient {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Gradient.CSSAgg]
-func (t *Gradient) SetCssagg(v ki.Props) *Gradient {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Gradient.BBox]
-func (t *Gradient) SetBbox(v image.Rectangle) *Gradient {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Gradient.VisBBox]
-func (t *Gradient) SetVisBbox(v image.Rectangle) *Gradient {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Gradient.Paint]
-func (t *Gradient) SetPaint(v paint.Paint) *Gradient {
-	t.Paint = v
-	return t
-}
-
 // GroupType is the [gti.Type] for [Group]
 var GroupType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Group",
@@ -671,36 +431,6 @@ func (t *Group) New() ki.Ki {
 // SetClass sets the [Group.Class]
 func (t *Group) SetClass(v string) *Group {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [Group.CSS]
-func (t *Group) SetCss(v ki.Props) *Group {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Group.CSSAgg]
-func (t *Group) SetCssagg(v ki.Props) *Group {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Group.BBox]
-func (t *Group) SetBbox(v image.Rectangle) *Group {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Group.VisBBox]
-func (t *Group) SetVisBbox(v image.Rectangle) *Group {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Group.Paint]
-func (t *Group) SetPaint(v paint.Paint) *Group {
-	t.Paint = v
 	return t
 }
 
@@ -784,36 +514,6 @@ func (t *Image) SetClass(v string) *Image {
 	return t
 }
 
-// SetCss sets the [Image.CSS]
-func (t *Image) SetCss(v ki.Props) *Image {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Image.CSSAgg]
-func (t *Image) SetCssagg(v ki.Props) *Image {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Image.BBox]
-func (t *Image) SetBbox(v image.Rectangle) *Image {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Image.VisBBox]
-func (t *Image) SetVisBbox(v image.Rectangle) *Image {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Image.Paint]
-func (t *Image) SetPaint(v paint.Paint) *Image {
-	t.Paint = v
-	return t
-}
-
 // LineType is the [gti.Type] for [Line]
 var LineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Line",
@@ -867,36 +567,6 @@ func (t *Line) SetEnd(v mat32.Vec2) *Line {
 // SetClass sets the [Line.Class]
 func (t *Line) SetClass(v string) *Line {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [Line.CSS]
-func (t *Line) SetCss(v ki.Props) *Line {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Line.CSSAgg]
-func (t *Line) SetCssagg(v ki.Props) *Line {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Line.BBox]
-func (t *Line) SetBbox(v image.Rectangle) *Line {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Line.VisBBox]
-func (t *Line) SetVisBbox(v image.Rectangle) *Line {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Line.Paint]
-func (t *Line) SetPaint(v paint.Paint) *Line {
-	t.Paint = v
 	return t
 }
 
@@ -1020,36 +690,6 @@ func (t *Marker) SetClass(v string) *Marker {
 	return t
 }
 
-// SetCss sets the [Marker.CSS]
-func (t *Marker) SetCss(v ki.Props) *Marker {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Marker.CSSAgg]
-func (t *Marker) SetCssagg(v ki.Props) *Marker {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Marker.BBox]
-func (t *Marker) SetBbox(v image.Rectangle) *Marker {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Marker.VisBBox]
-func (t *Marker) SetVisBbox(v image.Rectangle) *Marker {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Marker.Paint]
-func (t *Marker) SetPaint(v paint.Paint) *Marker {
-	t.Paint = v
-	return t
-}
-
 // NodeBaseType is the [gti.Type] for [NodeBase]
 var NodeBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.NodeBase",
@@ -1059,11 +699,11 @@ var NodeBaseType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
-		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "xml:\"css\""}},
-		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/girl/paint.Paint", LocalType: "paint.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "xml:\"css\" set:\"-\""}},
+		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\" view:\"no-inline\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/girl/styles.Paint", LocalType: "styles.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1094,41 +734,6 @@ func (t *NodeBase) New() ki.Ki {
 // user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
 func (t *NodeBase) SetClass(v string) *NodeBase {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [NodeBase.CSS]:
-// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-func (t *NodeBase) SetCss(v ki.Props) *NodeBase {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [NodeBase.CSSAgg]:
-// aggregated css properties from all higher nodes down to me
-func (t *NodeBase) SetCssagg(v ki.Props) *NodeBase {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [NodeBase.BBox]:
-// bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.
-func (t *NodeBase) SetBbox(v image.Rectangle) *NodeBase {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [NodeBase.VisBBox]:
-// visible bounding box for the node intersected with the SVG image geometry
-func (t *NodeBase) SetVisBbox(v image.Rectangle) *NodeBase {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [NodeBase.Paint]:
-// paint style information for this node
-func (t *NodeBase) SetPaint(v paint.Paint) *NodeBase {
-	t.Paint = v
 	return t
 }
 
@@ -1181,36 +786,6 @@ func (t *Path) SetClass(v string) *Path {
 	return t
 }
 
-// SetCss sets the [Path.CSS]
-func (t *Path) SetCss(v ki.Props) *Path {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Path.CSSAgg]
-func (t *Path) SetCssagg(v ki.Props) *Path {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Path.BBox]
-func (t *Path) SetBbox(v image.Rectangle) *Path {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Path.VisBBox]
-func (t *Path) SetVisBbox(v image.Rectangle) *Path {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Path.Paint]
-func (t *Path) SetPaint(v paint.Paint) *Path {
-	t.Paint = v
-	return t
-}
-
 // PolygonType is the [gti.Type] for [Polygon]
 var PolygonType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Polygon",
@@ -1247,36 +822,6 @@ func (t *Polygon) New() ki.Ki {
 // SetClass sets the [Polygon.Class]
 func (t *Polygon) SetClass(v string) *Polygon {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [Polygon.CSS]
-func (t *Polygon) SetCss(v ki.Props) *Polygon {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Polygon.CSSAgg]
-func (t *Polygon) SetCssagg(v ki.Props) *Polygon {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Polygon.BBox]
-func (t *Polygon) SetBbox(v image.Rectangle) *Polygon {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Polygon.VisBBox]
-func (t *Polygon) SetVisBbox(v image.Rectangle) *Polygon {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Polygon.Paint]
-func (t *Polygon) SetPaint(v paint.Paint) *Polygon {
-	t.Paint = v
 	return t
 }
 
@@ -1331,36 +876,6 @@ func (t *Polyline) SetPoints(v []mat32.Vec2) *Polyline {
 // SetClass sets the [Polyline.Class]
 func (t *Polyline) SetClass(v string) *Polyline {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [Polyline.CSS]
-func (t *Polyline) SetCss(v ki.Props) *Polyline {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Polyline.CSSAgg]
-func (t *Polyline) SetCssagg(v ki.Props) *Polyline {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Polyline.BBox]
-func (t *Polyline) SetBbox(v image.Rectangle) *Polyline {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Polyline.VisBBox]
-func (t *Polyline) SetVisBbox(v image.Rectangle) *Polyline {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Polyline.Paint]
-func (t *Polyline) SetPaint(v paint.Paint) *Polyline {
-	t.Paint = v
 	return t
 }
 
@@ -1428,36 +943,6 @@ func (t *Rect) SetClass(v string) *Rect {
 	return t
 }
 
-// SetCss sets the [Rect.CSS]
-func (t *Rect) SetCss(v ki.Props) *Rect {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Rect.CSSAgg]
-func (t *Rect) SetCssagg(v ki.Props) *Rect {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Rect.BBox]
-func (t *Rect) SetBbox(v image.Rectangle) *Rect {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Rect.VisBBox]
-func (t *Rect) SetVisBbox(v image.Rectangle) *Rect {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Rect.Paint]
-func (t *Rect) SetPaint(v paint.Paint) *Rect {
-	t.Paint = v
-	return t
-}
-
 // SVGNodeType is the [gti.Type] for [SVGNode]
 var SVGNodeType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.SVGNode",
@@ -1503,36 +988,6 @@ func (t *SVGNode) SetViewBox(v ViewBox) *SVGNode {
 // SetClass sets the [SVGNode.Class]
 func (t *SVGNode) SetClass(v string) *SVGNode {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [SVGNode.CSS]
-func (t *SVGNode) SetCss(v ki.Props) *SVGNode {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [SVGNode.CSSAgg]
-func (t *SVGNode) SetCssagg(v ki.Props) *SVGNode {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [SVGNode.BBox]
-func (t *SVGNode) SetBbox(v image.Rectangle) *SVGNode {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [SVGNode.VisBBox]
-func (t *SVGNode) SetVisBbox(v image.Rectangle) *SVGNode {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [SVGNode.Paint]
-func (t *SVGNode) SetPaint(v paint.Paint) *SVGNode {
-	t.Paint = v
 	return t
 }
 
@@ -1670,35 +1125,5 @@ func (t *Text) SetLastBbox(v mat32.Box2) *Text {
 // SetClass sets the [Text.Class]
 func (t *Text) SetClass(v string) *Text {
 	t.Class = v
-	return t
-}
-
-// SetCss sets the [Text.CSS]
-func (t *Text) SetCss(v ki.Props) *Text {
-	t.CSS = v
-	return t
-}
-
-// SetCssagg sets the [Text.CSSAgg]
-func (t *Text) SetCssagg(v ki.Props) *Text {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBbox sets the [Text.BBox]
-func (t *Text) SetBbox(v image.Rectangle) *Text {
-	t.BBox = v
-	return t
-}
-
-// SetVisBbox sets the [Text.VisBBox]
-func (t *Text) SetVisBbox(v image.Rectangle) *Text {
-	t.VisBBox = v
-	return t
-}
-
-// SetPaint sets the [Text.Paint]
-func (t *Text) SetPaint(v paint.Paint) *Text {
-	t.Paint = v
 	return t
 }

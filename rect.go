@@ -47,12 +47,11 @@ func (g *Rect) LocalBBox() mat32.Box2 {
 }
 
 func (g *Rect) Render(sv *SVG) {
-	vis, rs := g.PushXForm(sv)
+	vis, pc := g.PushXForm(sv)
 	if !vis {
 		return
 	}
-	pc := &g.Paint
-	rs.Lock()
+	pc.Lock()
 	// TODO: figure out a better way to do this
 	bs := styles.Border{}
 	bs.Style.Set(styles.BorderSolid)
@@ -60,17 +59,17 @@ func (g *Rect) Render(sv *SVG) {
 	bs.Color.Set(pc.StrokeStyle.Color.Solid)
 	bs.Radius.Set(units.Px(g.Radius.X))
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
-		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+		pc.DrawRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
 		// SidesTODO: also support different radii for each corner
-		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
+		pc.DrawRoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
 	}
-	pc.FillStrokeClear(rs)
-	rs.Unlock()
+	pc.FillStrokeClear()
+	pc.Unlock()
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopXFormLock()
+	pc.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

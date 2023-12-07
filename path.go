@@ -55,7 +55,7 @@ func (g *Path) SetData(data string) error {
 	if err != nil {
 		return err
 	}
-	err = PathDataValidate(&g.Paint, &g.Data, g.Path())
+	err = PathDataValidate(&g.Data, g.Path())
 	return err
 }
 
@@ -72,15 +72,14 @@ func (g *Path) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, rs := g.PushXForm(sv)
+	vis, pc := g.PushXForm(sv)
 	if !vis {
 		return
 	}
-	rs.Lock()
-	pc := &g.Paint
-	PathDataRender(g.Data, pc, rs)
-	pc.FillStrokeClear(rs)
-	rs.Unlock()
+	pc.Lock()
+	PathDataRender(g.Data, pc)
+	pc.FillStrokeClear()
+	pc.Unlock()
 
 	g.BBoxes(sv)
 
@@ -115,7 +114,7 @@ func (g *Path) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	rs.PopXFormLock()
+	pc.PopXFormLock()
 }
 
 // PathCmds are the commands within the path SVG drawing data type
@@ -227,9 +226,9 @@ func reflectPt(pt, rp mat32.Vec2) mat32.Vec2 {
 	return pt.MulScalar(2).Sub(rp)
 }
 
-// PathDataRender traverses the path data and renders it using paint and render state --
-// we assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
+// PathDataRender traverses the path data and renders it using paint.
+// We assume all the data has been validated and that n's are sufficient, etc
+func PathDataRender(data []PathData, pc *paint.Context) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -242,63 +241,63 @@ func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
 		switch cmd {
 		case PcM:
 			cp = PathDataNextVec(data, &i)
-			pc.MoveTo(rs, cp.X, cp.Y)
+			pc.MoveTo(cp.X, cp.Y)
 			st = cp
 			for np := 1; np < n/2; np++ {
 				cp = PathDataNextVec(data, &i)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case Pcm:
 			cp = PathDataNextRel(data, &i, cp)
-			pc.MoveTo(rs, cp.X, cp.Y)
+			pc.MoveTo(cp.X, cp.Y)
 			st = cp
 			for np := 1; np < n/2; np++ {
 				cp = PathDataNextRel(data, &i, cp)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
 				cp = PathDataNextVec(data, &i)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
 				cp = PathDataNextRel(data, &i, cp)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
 				cp.X = PathDataNext(data, &i)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case Pch:
 			for np := 0; np < n; np++ {
 				cp.X += PathDataNext(data, &i)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case PcV:
 			for np := 0; np < n; np++ {
 				cp.Y = PathDataNext(data, &i)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case Pcv:
 			for np := 0; np < n; np++ {
 				cp.Y += PathDataNext(data, &i)
-				pc.LineTo(rs, cp.X, cp.Y)
+				pc.LineTo(cp.X, cp.Y)
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
 				xp = PathDataNextVec(data, &i)
 				ctrl = PathDataNextVec(data, &i)
 				cp = PathDataNextVec(data, &i)
-				pc.CubicTo(rs, xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.CubicTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
 				xp = PathDataNextRel(data, &i, cp)
 				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				pc.CubicTo(rs, xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.CubicTo(xp.X, xp.Y, ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcs:
 			rel = true
@@ -318,7 +317,7 @@ func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
 					xp = PathDataNextVec(data, &i)
 					cp = PathDataNextVec(data, &i)
 				}
-				pc.CubicTo(rs, ctrl.X, ctrl.Y, xp.X, xp.Y, cp.X, cp.Y)
+				pc.CubicTo(ctrl.X, ctrl.Y, xp.X, xp.Y, cp.X, cp.Y)
 				lastCmd = cmd
 				ctrl = xp
 			}
@@ -326,13 +325,13 @@ func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
 			for np := 0; np < n/4; np++ {
 				ctrl = PathDataNextVec(data, &i)
 				cp = PathDataNextVec(data, &i)
-				pc.QuadraticTo(rs, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
 				ctrl = PathDataNextRel(data, &i, cp)
 				cp = PathDataNextRel(data, &i, cp)
-				pc.QuadraticTo(rs, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 			}
 		case Pct:
 			rel = true
@@ -350,7 +349,7 @@ func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
-				pc.QuadraticTo(rs, ctrl.X, ctrl.Y, cp.X, cp.Y)
+				pc.QuadraticTo(ctrl.X, ctrl.Y, cp.X, cp.Y)
 				lastCmd = cmd
 			}
 		case Pca:
@@ -369,12 +368,12 @@ func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
 					cp = PathDataNextVec(data, &i)
 				}
 				ncx, ncy := paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
-				cp.X, cp.Y = pc.DrawEllipticalArcPath(rs, ncx, ncy, cp.X, cp.Y, prv.X, prv.Y, rad.X, rad.Y, ang, largeArc, sweep)
+				cp.X, cp.Y = pc.DrawEllipticalArcPath(ncx, ncy, cp.X, cp.Y, prv.X, prv.Y, rad.X, rad.Y, ang, largeArc, sweep)
 			}
 		case PcZ:
 			fallthrough
 		case Pcz:
-			pc.ClosePath(rs)
+			pc.ClosePath()
 			cp = st
 		}
 		lastCmd = cmd
@@ -648,7 +647,7 @@ func PathCmdIsRel(pc PathCmds) bool {
 }
 
 // PathDataValidate validates the path data and emits error messages on log
-func PathDataValidate(pc *paint.Paint, data *[]PathData, errstr string) error {
+func PathDataValidate(data *[]PathData, errstr string) error {
 	sz := len(*data)
 	if sz == 0 {
 		return nil
