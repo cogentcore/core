@@ -167,11 +167,3 @@ func (app *App) QuitClean() {
 	// 	// fmt.Printf("win closed: %v\n", i)
 	// }
 }
-
-func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	// no-op
-}
-
-func (app *App) HideVirtualKeyboard() {
-	// no-op
-}

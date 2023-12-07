@@ -181,3 +181,11 @@ func (a *App) Quit() {
 func (a *App) IsDark() bool {
 	return a.Dark
 }
+
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+	// no-op by default
+}
+
+func (a *App) HideVirtualKeyboard() {
+	// no-op by default
+}
