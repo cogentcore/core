@@ -417,6 +417,8 @@ func (wb *WidgetBase) DoNeedsRender() {
 //////////////////////////////////////////////////////////////////
 //		Scene
 
+var SceneShowIters = 2
+
 // DoUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
@@ -434,10 +436,12 @@ func (sc *Scene) DoUpdate() bool {
 		return true
 	}
 
-	if sc.ShowIter == 0 { // first time
-		sc.EventMgr.GetPriorityWidgets()
+	if sc.ShowIter < SceneShowIters {
+		if sc.ShowIter == 0 { // first time
+			sc.EventMgr.GetPriorityWidgets()
+		}
+		sc.SetFlag(true, ScNeedsLayout)
 		sc.ShowIter++
-		sc.SetFlag(true, ScNeedsLayout) // ensure layout happens
 	}
 
 	switch {
@@ -480,7 +484,7 @@ func (sc *Scene) DoUpdate() bool {
 		return false
 	}
 
-	if sc.ShowIter == 1 { // end of first pass
+	if sc.ShowIter == SceneShowIters { // end of first pass
 		sc.ShowIter++
 		if !sc.Is(ScPrefSizing) {
 			sc.EventMgr.ActivateStartFocus()

@@ -244,7 +244,7 @@ func (sm *StageMgr) SendShowEvents() {
 			continue
 		}
 		sc := st.Scene
-		if sc.ShowIter == 2 {
+		if sc.ShowIter == SceneShowIters+1 {
 			sc.ShowIter++
 			sc.Send(events.Show)
 		}
