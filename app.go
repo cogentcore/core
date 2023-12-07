@@ -72,6 +72,10 @@ type App interface {
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)
 
+	// RemoveWindow removes the given Window from the app's list of windows.
+	// It does not actually close it; see [Window.Close] for that.
+	RemoveWindow(win Window)
+
 	// ClipBoard returns the clip.Board handler for the system,
 	// in context of given window, which is optional (can be nil)
 	// but can provide useful context on some systems.

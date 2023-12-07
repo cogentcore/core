@@ -167,11 +167,6 @@ type Window interface {
 	// and returns immediately.
 	GoRunOnWin(f func())
 
-	// SendEmptyEvent sends an empty, blank event to this window, which just has
-	// the effect of pushing the system along during cases when the window
-	// event loop needs to be "pinged" to get things moving along..
-	SendEmptyEvent()
-
 	// Handle returns the driver-specific handle for this window.
 	// Currently, for all platforms, this is *glfw.Window, but that
 	// cannot always be assumed.  Only provided for unforeseen emergency use --

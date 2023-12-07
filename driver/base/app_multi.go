@@ -100,9 +100,10 @@ func (app *AppMulti[W]) ContextWindow() goosi.Window {
 	return app.CtxWindow
 }
 
-// DeleteWin removes the given window from the list of windows.
-func (a *AppMulti[W]) DeleteWin(w W) {
+// RemoveWindow removes the given Window from the app's list of windows.
+// It does not actually close it; see [Window.Close] for that.
+func (a *AppMulti[W]) RemoveWindow(w goosi.Window) {
 	slices.DeleteFunc(a.Windows, func(ew W) bool {
-		return goosi.Window(ew) == goosi.Window(w)
+		return goosi.Window(ew) == w
 	})
 }

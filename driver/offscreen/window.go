@@ -7,7 +7,6 @@ package offscreen
 import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
-	"goki.dev/goosi/events"
 )
 
 // Window is the implementation of [goosi.Window] on the offscreen platform.
@@ -23,27 +22,4 @@ func (w *Window) Handle() any {
 
 func (w *Window) OSHandle() uintptr {
 	return 0
-}
-
-// SendEmptyEvent sends an empty, blank event to this window, which just has
-// the effect of pushing the system along during cases when the window
-// event loop needs to be "pinged" to get things moving along..
-func (w *Window) SendEmptyEvent() {
-	if w.IsClosed() {
-		return
-	}
-	w.EvMgr.Custom(nil)
-}
-
-func (w *Window) Close() {
-	w.app.mu.Lock()
-	defer w.app.mu.Unlock()
-	w.winClose <- struct{}{} // break out of draw loop
-	w.CloseClean()
-	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	w.EvMgr.Window(events.WinClose)
-	TheApp.DeleteWin(w)
-	if TheApp.quitting {
-		TheApp.quitCloseCnt <- struct{}{}
-	}
 }

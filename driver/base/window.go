@@ -223,6 +223,15 @@ func (w *Window[A]) CloseClean() {
 	}
 }
 
+func (w *Window[A]) Close() {
+	// base implementation doesn't actually close any system windows,
+	// but platform-specific implementations can
+	w.WinClose <- struct{}{}
+	w.CloseClean()
+	w.EvMgr.Window(events.WinClose)
+	w.App.RemoveWindow(w.This)
+}
+
 func (w *Window[A]) MainMenu() goosi.MainMenu {
 	// nil by default
 	return nil

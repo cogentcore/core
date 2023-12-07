@@ -104,3 +104,7 @@ func (a *AppSingle[D, W]) ContextWindow() goosi.Window {
 	defer a.Mu.Unlock()
 	return a.Win
 }
+
+func (a *AppSingle[D, W]) RemoveWindow(w goosi.Window) {
+	// no-op
+}
