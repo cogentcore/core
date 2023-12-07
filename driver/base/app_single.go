@@ -22,11 +22,11 @@ type AppSingle[D goosi.Drawer, W goosi.Window] struct {
 	// Drawer is the single [goosi.Drawer] used for the app.
 	Drawer D
 
-	// Window is the single [goosi.Window] associated with the app.
-	Window W
+	// Win is the single [goosi.Window] associated with the app.
+	Win W
 
-	// Screen is the single [goosi.Screen] associated with the app.
-	Screen *goosi.Screen
+	// Scrn is the single [goosi.Screen] associated with the app.
+	Scrn *goosi.Screen
 }
 
 // AppSingler describes the common functionality implemented by [AppSingle]
@@ -42,69 +42,65 @@ func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
 	return a.Drawer
 }
 
-func (app *appImpl) NScreens() int {
-	if app.screen != nil {
+func (app *AppSingle[D, W]) NScreens() int {
+	if app.Scrn != nil {
 		return 1
 	}
 	return 0
 }
 
-func (app *appImpl) Screen(scrN int) *goosi.Screen {
-	if scrN == 0 {
-		return app.screen
+func (app *AppSingle[D, W]) Screen(n int) *goosi.Screen {
+	if n == 0 {
+		return app.Scrn
 	}
 	return nil
 }
 
-func (app *appImpl) ScreenByName(name string) *goosi.Screen {
-	if app.screen.Name == name {
-		return app.screen
+func (app *AppSingle[D, W]) ScreenByName(name string) *goosi.Screen {
+	if app.Scrn.Name == name {
+		return app.Scrn
 	}
 	return nil
 }
 
-func (app *appImpl) NoScreens() bool {
-	return app.screen == nil
-}
-
-func (app *appImpl) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window != nil {
+func (app *AppSingle[D, W]) NWindows() int {
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	if goosi.Window(app.Win) != nil {
 		return 1
 	}
 	return 0
 }
 
-func (app *appImpl) Window(win int) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
+func (app *AppSingle[D, W]) Window(win int) goosi.Window {
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
 	if win == 0 {
-		return app.window
+		return app.Win
 	}
 	return nil
 }
 
-func (app *appImpl) WindowByName(name string) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.Name() == name {
-		return app.window
+func (app *AppSingle[D, W]) WindowByName(name string) goosi.Window {
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	if app.Win.Name() == name {
+		return app.Win
 	}
 	return nil
 }
 
-func (app *appImpl) WindowInFocus() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.IsFocus() {
-		return app.window
+func (app *AppSingle[D, W]) WindowInFocus() goosi.Window {
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	if app.Win.IsFocus() {
+		return app.Win
 	}
 	return nil
 }
 
-func (app *appImpl) ContextWindow() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return app.window
+func (app *AppSingle[D, W]) ContextWindow() goosi.Window {
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	return app.Win
 }
