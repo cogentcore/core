@@ -64,73 +64,9 @@ func Main(f func(goosi.App)) {
 	goosi.TheApp = TheApp
 	go func() {
 		f(TheApp)
-		TheApp.stopMain()
+		TheApp.StopMain()
 	}()
-	TheApp.mainLoop()
-}
-
-func (app *App) mainLoop() {
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	for {
-		select {
-		case <-app.mainDone:
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		}
-	}
-}
-
-type funcRun struct {
-	f    func()
-	done chan bool
-}
-
-// RunOnMain runs given function on main thread
-func (app *App) RunOnMain(f func()) {
-	if app.mainQueue == nil {
-		f()
-	} else {
-		done := make(chan bool)
-		app.mainQueue <- funcRun{f: f, done: done}
-		<-done
-	}
-}
-
-// GoRunOnMain runs given function on main thread and returns immediately
-func (app *App) GoRunOnMain(f func()) {
-	go func() {
-		app.mainQueue <- funcRun{f: f, done: nil}
-	}()
-}
-
-// SendEmptyEvent sends an empty, blank event to global event processing
-// system, which has the effect of pushing the system along during cases when
-// the event loop needs to be "pinged" to get things moving along..
-func (app *App) SendEmptyEvent() {
-	app.window.SendEmptyEvent()
-}
-
-// PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
-// and returning when there are no more events.
-func (app *App) PollEventsOnMain() {
-	// TODO: implement?
-}
-
-// PollEvents tells the main event loop to check for any gui events right now.
-// Call this periodically from longer-running functions to ensure
-// GUI responsiveness.
-func (app *App) PollEvents() {
-	// TODO: implement?
-}
-
-// stopMain stops the main loop and thus terminates the app
-func (app *App) stopMain() {
-	app.mainDone <- struct{}{}
+	TheApp.MainLoop()
 }
 
 ////////////////////////////////////////////////////////

@@ -65,6 +65,22 @@ type App struct {
 // 	goosi.TheApp.MainLoop()
 // }
 
+func (a *App) MainLoop() {
+	a.MainQueue = make(chan FuncRun)
+	a.MainDone = make(chan struct{})
+	for {
+		select {
+		case <-a.MainDone:
+			return
+		case f := <-a.MainQueue:
+			f.F()
+			if f.Done != nil {
+				f.Done <- struct{}{}
+			}
+		}
+	}
+}
+
 // RunOnMain runs the given function on the main thread
 func (a *App) RunOnMain(f func()) {
 	if a.MainQueue == nil {
@@ -85,6 +101,13 @@ func (a *App) GoRunOnMain(f func()) {
 		a.MainQueue <- FuncRun{F: f, Done: nil}
 		a.This.SendEmptyEvent()
 	}()
+}
+
+// SendEmptyEvent sends an empty, blank event to global event processing
+// system, which has the effect of pushing the system along during cases when
+// the event loop needs to be "pinged" to get things moving along..
+func (a *App) SendEmptyEvent() {
+	// no-op by default
 }
 
 // StopMain stops the main loop and thus terminates the app
