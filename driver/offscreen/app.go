@@ -26,7 +26,7 @@ var _ goosi.App = TheApp
 
 // App is the [goosi.App] implementation on the offscreen platform
 type App struct {
-	base.AppSingle[*drawerImpl, *windowImpl]
+	base.AppSingle[*Drawer, *windowImpl]
 }
 
 // handleRecover takes the given value of recover, and, if it is not nil,
