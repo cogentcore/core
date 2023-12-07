@@ -25,20 +25,6 @@ func (w *Window) OSHandle() uintptr {
 	return 0
 }
 
-func (w *Window) Lock() bool {
-	// we re-use app mu for window because the app actually controls the system window
-	w.app.mu.Lock()
-	// if w.app.gpu == nil || w.app.Surface == nil {
-	// 	w.app.mu.Unlock()
-	// 	return false
-	// }
-	return true
-}
-
-func (w *Window) Unlock() {
-	w.app.mu.Unlock()
-}
-
 func (w *Window) IsClosed() bool {
 	return false
 	// return w.app.gpu == nil || w.app.Surface == nil

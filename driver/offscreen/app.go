@@ -74,8 +74,8 @@ func Main(f func(goosi.App)) {
 // Also, it hides all other windows and shows the new one.
 func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { handleRecover(recover()) }()
-	app.window = &Window{
-		app:         app,
+	app.Win = &Window{
+		App:         app,
 		isVisible:   true,
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
@@ -86,12 +86,12 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 			FPS:  60,
 		},
 	}
-	app.window.EvMgr.Deque = &app.window.Deque
+	app.Win.EvMgr.Deque = &app.Win.Deque
 	app.setSysWindow(opts.Size)
 
-	go app.window.winLoop()
+	go app.Win.WinLoop()
 
-	return app.window, nil
+	return app.Win, nil
 }
 
 // setSysWindow sets the underlying system window information.
@@ -106,17 +106,10 @@ func (app *App) setSysWindow(sz image.Point) error {
 		sz.Y = 600
 	}
 
-	app.window.PhysDPI = app.screen.PhysicalDPI
-	app.window.LogDPI = app.screen.LogicalDPI
-	app.window.PxSize = sz
-	app.window.WnSize = sz
-	app.window.DevPixRatio = app.screen.DevicePixelRatio
-	app.window.RenderSize = sz
-
-	app.window.EvMgr.WindowResize()
-	app.window.EvMgr.Window(events.WinShow)
-	app.window.EvMgr.Window(events.ScreenUpdate)
-	app.window.EvMgr.Window(events.WinFocus)
+	app.Win.EvMgr.WindowResize()
+	app.Win.EvMgr.Window(events.WinShow)
+	app.Win.EvMgr.Window(events.ScreenUpdate)
+	app.Win.EvMgr.Window(events.WinFocus)
 	return nil
 }
 
@@ -144,16 +137,12 @@ func (app *App) Platform() goosi.Platforms {
 }
 
 func (app *App) OpenURL(url string) {
-	// TODO: implement
+	// no-op
 }
 
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
 	// TODO: implement clipboard
-	// app.mu.Lock()
-	// app.ctxtwin = win.(*windowImpl)
-	// app.mu.Unlock()
 	return nil
-	// return &theClip
 }
 
 func (app *App) Cursor(win goosi.Window) cursor.Cursor {

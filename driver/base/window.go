@@ -131,6 +131,18 @@ func (w *Window[A]) GoRunOnWin(f func()) {
 	}()
 }
 
+func (w *Window[A]) Lock() bool {
+	if !w.This.IsClosed() {
+		return false
+	}
+	w.Mu.Lock()
+	return true
+}
+
+func (w *Window[A]) Unlock() {
+	w.Mu.Unlock()
+}
+
 func (w *Window[A]) Name() string {
 	return w.Nm
 }
