@@ -393,7 +393,7 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // PushXForm checks our bounding box and visibility, returning false if
 // out of bounds.  If visible, pushes our xform.
 // Must be called as first step in Render.
-func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.Paint) {
+func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.Context) {
 	g.BBox = image.Rectangle{}
 	if g.Paint.Off || g == nil || g.This() == nil {
 		return false, nil
@@ -415,7 +415,7 @@ func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.Paint) {
 	rs := &sv.RenderState
 	rs.PushXFormLock(g.Paint.XForm)
 
-	pc := &paint.Paint{rs, &g.Paint}
+	pc := &paint.Context{rs, &g.Paint}
 	return true, pc
 }
 

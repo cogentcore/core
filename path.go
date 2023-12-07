@@ -228,7 +228,7 @@ func reflectPt(pt, rp mat32.Vec2) mat32.Vec2 {
 
 // PathDataRender traverses the path data and renders it using paint.
 // We assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *paint.Paint) {
+func PathDataRender(data []PathData, pc *paint.Context) {
 	sz := len(data)
 	if sz == 0 {
 		return

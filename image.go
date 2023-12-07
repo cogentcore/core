@@ -100,7 +100,7 @@ func (g *Image) DrawImage(sv *SVG) {
 		return
 	}
 
-	pc := &paint.Paint{&sv.RenderState, &g.Paint}
+	pc := &paint.Context{&sv.RenderState, &g.Paint}
 	pc.DrawImageScaled(g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
