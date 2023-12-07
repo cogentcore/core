@@ -26,7 +26,7 @@ var _ goosi.App = TheApp
 
 // App is the [goosi.App] implementation on the offscreen platform
 type App struct {
-	base.AppSingle[*Drawer, *windowImpl]
+	base.AppSingle[*Drawer, *Window]
 }
 
 // handleRecover takes the given value of recover, and, if it is not nil,
@@ -74,7 +74,7 @@ func Main(f func(goosi.App)) {
 // Also, it hides all other windows and shows the new one.
 func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { handleRecover(recover()) }()
-	app.window = &windowImpl{
+	app.window = &Window{
 		app:         app,
 		isVisible:   true,
 		publish:     make(chan struct{}),

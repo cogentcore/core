@@ -380,7 +380,7 @@ func _WindowFlagsNoOp() {
 	_ = x[Tool-(2)]
 	_ = x[Fullscreen-(3)]
 	_ = x[Minimized-(4)]
-	_ = x[Focus-(5)]
+	_ = x[Focused-(5)]
 }
 
 var _WindowFlagsNameToValueMap = map[string]WindowFlags{

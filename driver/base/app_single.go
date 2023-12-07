@@ -93,7 +93,7 @@ func (a *AppSingle[D, W]) WindowByName(name string) goosi.Window {
 func (a *AppSingle[D, W]) WindowInFocus() goosi.Window {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	if a.Win.IsFocus() {
+	if a.Win.Is(goosi.Focused) {
 		return a.Win
 	}
 	return nil

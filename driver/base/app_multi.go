@@ -87,7 +87,7 @@ func (app *AppMulti[W]) WindowInFocus() goosi.Window {
 	app.Mu.Lock()
 	defer app.Mu.Unlock()
 	for _, win := range app.Windows {
-		if win.IsFocus() {
+		if win.Is(goosi.Focused) {
 			return win
 		}
 	}

@@ -34,6 +34,7 @@ import (
 // images per descriptor set can be uploaded and be ready to use in one render pass.
 // gi.Window uses multiple sets to get around this limitation.
 type Window interface {
+	events.Dequer
 
 	// Name returns the name of the window -- name is used strictly for
 	// internal tracking and finding of windows -- see Title for the displayed
@@ -126,23 +127,8 @@ type Window interface {
 	// to WindowFlags bits.
 	Flags() WindowFlags
 
-	// IsDialog returns true if this is a dialog window.
-	IsDialog() bool
-
-	// IsModal returns true if this is a modal window (blocks input to other windows).
-	IsModal() bool
-
-	// IsTool returns true if this is a tool window.
-	IsTool() bool
-
-	// IsFullscreen returns true if this is a fullscreen window.
-	IsFullscreen() bool
-
-	// IsMinimized returns true if this window is minimized.  See also IsVisible()
-	IsMinimized() bool
-
-	// IsFocus returns true if this window is focused (will receive keyboard input etc).
-	IsFocus() bool
+	// Is returns whether the window has the given flag.
+	Is(flag WindowFlags) bool
 
 	// IsClosed returns true if this window has been closed (but some threads
 	// may have not received the news yet)
@@ -244,8 +230,6 @@ type Window interface {
 	// EventMgr returns the events.Mgr for this window,
 	// which manages all of the Event sending.
 	EventMgr() *events.Mgr
-
-	events.Dequer
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -277,8 +261,8 @@ const (
 	// visible.
 	Minimized
 
-	// Focus indicates that the window has the focus.
-	Focus
+	// Focused indicates that the window has the focus.
+	Focused
 )
 
 // NewWindowOptions are optional arguments to NewWindow.
