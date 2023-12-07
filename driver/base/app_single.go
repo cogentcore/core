@@ -42,65 +42,65 @@ func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
 	return a.Drawer
 }
 
-func (app *AppSingle[D, W]) NScreens() int {
-	if app.Scrn != nil {
+func (a *AppSingle[D, W]) NScreens() int {
+	if a.Scrn != nil {
 		return 1
 	}
 	return 0
 }
 
-func (app *AppSingle[D, W]) Screen(n int) *goosi.Screen {
+func (a *AppSingle[D, W]) Screen(n int) *goosi.Screen {
 	if n == 0 {
-		return app.Scrn
+		return a.Scrn
 	}
 	return nil
 }
 
-func (app *AppSingle[D, W]) ScreenByName(name string) *goosi.Screen {
-	if app.Scrn.Name == name {
-		return app.Scrn
+func (a *AppSingle[D, W]) ScreenByName(name string) *goosi.Screen {
+	if a.Scrn.Name == name {
+		return a.Scrn
 	}
 	return nil
 }
 
-func (app *AppSingle[D, W]) NWindows() int {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	if goosi.Window(app.Win) != nil {
+func (a *AppSingle[D, W]) NWindows() int {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	if goosi.Window(a.Win) != nil {
 		return 1
 	}
 	return 0
 }
 
-func (app *AppSingle[D, W]) Window(win int) goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
+func (a *AppSingle[D, W]) Window(win int) goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
 	if win == 0 {
-		return app.Win
+		return a.Win
 	}
 	return nil
 }
 
-func (app *AppSingle[D, W]) WindowByName(name string) goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	if app.Win.Name() == name {
-		return app.Win
+func (a *AppSingle[D, W]) WindowByName(name string) goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	if a.Win.Name() == name {
+		return a.Win
 	}
 	return nil
 }
 
-func (app *AppSingle[D, W]) WindowInFocus() goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	if app.Win.IsFocus() {
-		return app.Win
+func (a *AppSingle[D, W]) WindowInFocus() goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	if a.Win.IsFocus() {
+		return a.Win
 	}
 	return nil
 }
 
-func (app *AppSingle[D, W]) ContextWindow() goosi.Window {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	return app.Win
+func (a *AppSingle[D, W]) ContextWindow() goosi.Window {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	return a.Win
 }
