@@ -72,10 +72,10 @@ func Main(f func(goosi.App)) {
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
-func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { handleRecover(recover()) }()
-	app.Win = &Window{
-		App:         app,
+	a.Win = &Window{
+		App:         a,
 		isVisible:   true,
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
@@ -86,12 +86,12 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 			FPS:  60,
 		},
 	}
-	app.Win.EvMgr.Deque = &app.Win.Deque
-	app.setSysWindow(opts.Size)
+	a.Win.EvMgr.Deque = &a.Win.Deque
+	a.setSysWindow(opts.Size)
 
-	go app.Win.WinLoop()
+	go a.Win.WinLoop()
 
-	return app.Win, nil
+	return a.Win, nil
 }
 
 // setSysWindow sets the underlying system window information.
@@ -115,7 +115,7 @@ func (a *App) setSysWindow(sz image.Point) error {
 	return nil
 }
 
-func (app *App) PrefsDir() string {
+func (a *App) PrefsDir() string {
 	// TODO(kai): figure out a better solution to offscreen prefs dir
 	return filepath.Join(".", "tmpPrefsDir")
 }
@@ -135,19 +135,19 @@ func (a *App) GetScreens() {
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 }
 
-func (app *App) Platform() goosi.Platforms {
+func (a *App) Platform() goosi.Platforms {
 	return goosi.Offscreen
 }
 
-func (app *App) OpenURL(url string) {
+func (a *App) OpenURL(url string) {
 	// no-op
 }
 
-func (app *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) ClipBoard(win goosi.Window) clip.Board {
 	// TODO: implement clipboard
 	return nil
 }
 
-func (app *App) Cursor(win goosi.Window) cursor.Cursor {
+func (a *App) Cursor(win goosi.Window) cursor.Cursor {
 	return &cursor.CursorBase{} // no-op
 }
