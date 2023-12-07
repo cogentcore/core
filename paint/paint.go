@@ -48,8 +48,8 @@ SOFTWARE.
 // Text rendering is handled separately in TextRender, but it depends
 // minimally on styling parameters in FontStyle
 type Paint struct {
-	*styles.Paint
 	*State
+	*styles.Paint
 }
 
 func NewPaint() Paint {
