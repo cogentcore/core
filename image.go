@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 
+	"goki.dev/girl/paint"
 	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
@@ -99,9 +100,8 @@ func (g *Image) DrawImage(sv *SVG) {
 		return
 	}
 
-	rs := &sv.RenderState
-	pc := &g.Paint
-	pc.DrawImageScaled(rs, g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+	pc := &paint.Paint{&sv.RenderState, &g.Paint}
+	pc.DrawImageScaled(g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
 func (g *Image) NodeBBox(sv *SVG) image.Rectangle {

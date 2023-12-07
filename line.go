@@ -51,15 +51,14 @@ func (g *Line) LocalBBox() mat32.Box2 {
 }
 
 func (g *Line) Render(sv *SVG) {
-	vis, rs := g.PushXForm(sv)
+	vis, pc := g.PushXForm(sv)
 	if !vis {
 		return
 	}
-	pc := &g.Paint
-	rs.Lock()
-	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	pc.Stroke(rs)
-	rs.Unlock()
+	pc.Lock()
+	pc.DrawLine(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
+	pc.Stroke()
+	pc.Unlock()
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
@@ -72,7 +71,7 @@ func (g *Line) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	rs.PopXFormLock()
+	pc.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

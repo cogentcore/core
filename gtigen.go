@@ -8,6 +8,7 @@ import (
 	"github.com/aymerick/douceur/css"
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -88,7 +89,7 @@ func (t *Circle) SetVisBbox(v image.Rectangle) *Circle {
 }
 
 // SetPaint sets the [Circle.Paint]
-func (t *Circle) SetPaint(v paint.Paint) *Circle {
+func (t *Circle) SetPaint(v styles.Paint) *Circle {
 	t.Paint = v
 	return t
 }
@@ -157,7 +158,7 @@ func (t *ClipPath) SetVisBbox(v image.Rectangle) *ClipPath {
 }
 
 // SetPaint sets the [ClipPath.Paint]
-func (t *ClipPath) SetPaint(v paint.Paint) *ClipPath {
+func (t *ClipPath) SetPaint(v styles.Paint) *ClipPath {
 	t.Paint = v
 	return t
 }
@@ -234,7 +235,7 @@ func (t *StyleSheet) SetVisBbox(v image.Rectangle) *StyleSheet {
 }
 
 // SetPaint sets the [StyleSheet.Paint]
-func (t *StyleSheet) SetPaint(v paint.Paint) *StyleSheet {
+func (t *StyleSheet) SetPaint(v styles.Paint) *StyleSheet {
 	t.Paint = v
 	return t
 }
@@ -311,7 +312,7 @@ func (t *MetaData) SetVisBbox(v image.Rectangle) *MetaData {
 }
 
 // SetPaint sets the [MetaData.Paint]
-func (t *MetaData) SetPaint(v paint.Paint) *MetaData {
+func (t *MetaData) SetPaint(v styles.Paint) *MetaData {
 	t.Paint = v
 	return t
 }
@@ -390,7 +391,7 @@ func (t *Ellipse) SetVisBbox(v image.Rectangle) *Ellipse {
 }
 
 // SetPaint sets the [Ellipse.Paint]
-func (t *Ellipse) SetPaint(v paint.Paint) *Ellipse {
+func (t *Ellipse) SetPaint(v styles.Paint) *Ellipse {
 	t.Paint = v
 	return t
 }
@@ -467,7 +468,7 @@ func (t *Filter) SetVisBbox(v image.Rectangle) *Filter {
 }
 
 // SetPaint sets the [Filter.Paint]
-func (t *Filter) SetPaint(v paint.Paint) *Filter {
+func (t *Filter) SetPaint(v styles.Paint) *Filter {
 	t.Paint = v
 	return t
 }
@@ -544,7 +545,7 @@ func (t *Flow) SetVisBbox(v image.Rectangle) *Flow {
 }
 
 // SetPaint sets the [Flow.Paint]
-func (t *Flow) SetPaint(v paint.Paint) *Flow {
+func (t *Flow) SetPaint(v styles.Paint) *Flow {
 	t.Paint = v
 	return t
 }
@@ -630,7 +631,7 @@ func (t *Gradient) SetVisBbox(v image.Rectangle) *Gradient {
 }
 
 // SetPaint sets the [Gradient.Paint]
-func (t *Gradient) SetPaint(v paint.Paint) *Gradient {
+func (t *Gradient) SetPaint(v styles.Paint) *Gradient {
 	t.Paint = v
 	return t
 }
@@ -699,7 +700,7 @@ func (t *Group) SetVisBbox(v image.Rectangle) *Group {
 }
 
 // SetPaint sets the [Group.Paint]
-func (t *Group) SetPaint(v paint.Paint) *Group {
+func (t *Group) SetPaint(v styles.Paint) *Group {
 	t.Paint = v
 	return t
 }
@@ -809,7 +810,7 @@ func (t *Image) SetVisBbox(v image.Rectangle) *Image {
 }
 
 // SetPaint sets the [Image.Paint]
-func (t *Image) SetPaint(v paint.Paint) *Image {
+func (t *Image) SetPaint(v styles.Paint) *Image {
 	t.Paint = v
 	return t
 }
@@ -895,7 +896,7 @@ func (t *Line) SetVisBbox(v image.Rectangle) *Line {
 }
 
 // SetPaint sets the [Line.Paint]
-func (t *Line) SetPaint(v paint.Paint) *Line {
+func (t *Line) SetPaint(v styles.Paint) *Line {
 	t.Paint = v
 	return t
 }
@@ -1045,7 +1046,7 @@ func (t *Marker) SetVisBbox(v image.Rectangle) *Marker {
 }
 
 // SetPaint sets the [Marker.Paint]
-func (t *Marker) SetPaint(v paint.Paint) *Marker {
+func (t *Marker) SetPaint(v styles.Paint) *Marker {
 	t.Paint = v
 	return t
 }
@@ -1063,7 +1064,7 @@ var NodeBaseType = gti.AddType(&gti.Type{
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\""}},
 		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/girl/paint.Paint", LocalType: "paint.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/girl/styles.Paint", LocalType: "styles.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1127,7 +1128,7 @@ func (t *NodeBase) SetVisBbox(v image.Rectangle) *NodeBase {
 
 // SetPaint sets the [NodeBase.Paint]:
 // paint style information for this node
-func (t *NodeBase) SetPaint(v paint.Paint) *NodeBase {
+func (t *NodeBase) SetPaint(v styles.Paint) *NodeBase {
 	t.Paint = v
 	return t
 }
@@ -1206,7 +1207,7 @@ func (t *Path) SetVisBbox(v image.Rectangle) *Path {
 }
 
 // SetPaint sets the [Path.Paint]
-func (t *Path) SetPaint(v paint.Paint) *Path {
+func (t *Path) SetPaint(v styles.Paint) *Path {
 	t.Paint = v
 	return t
 }
@@ -1275,7 +1276,7 @@ func (t *Polygon) SetVisBbox(v image.Rectangle) *Polygon {
 }
 
 // SetPaint sets the [Polygon.Paint]
-func (t *Polygon) SetPaint(v paint.Paint) *Polygon {
+func (t *Polygon) SetPaint(v styles.Paint) *Polygon {
 	t.Paint = v
 	return t
 }
@@ -1359,7 +1360,7 @@ func (t *Polyline) SetVisBbox(v image.Rectangle) *Polyline {
 }
 
 // SetPaint sets the [Polyline.Paint]
-func (t *Polyline) SetPaint(v paint.Paint) *Polyline {
+func (t *Polyline) SetPaint(v styles.Paint) *Polyline {
 	t.Paint = v
 	return t
 }
@@ -1453,7 +1454,7 @@ func (t *Rect) SetVisBbox(v image.Rectangle) *Rect {
 }
 
 // SetPaint sets the [Rect.Paint]
-func (t *Rect) SetPaint(v paint.Paint) *Rect {
+func (t *Rect) SetPaint(v styles.Paint) *Rect {
 	t.Paint = v
 	return t
 }
@@ -1531,7 +1532,7 @@ func (t *SVGNode) SetVisBbox(v image.Rectangle) *SVGNode {
 }
 
 // SetPaint sets the [SVGNode.Paint]
-func (t *SVGNode) SetPaint(v paint.Paint) *SVGNode {
+func (t *SVGNode) SetPaint(v styles.Paint) *SVGNode {
 	t.Paint = v
 	return t
 }
@@ -1698,7 +1699,7 @@ func (t *Text) SetVisBbox(v image.Rectangle) *Text {
 }
 
 // SetPaint sets the [Text.Paint]
-func (t *Text) SetPaint(v paint.Paint) *Text {
+func (t *Text) SetPaint(v styles.Paint) *Text {
 	t.Paint = v
 	return t
 }
