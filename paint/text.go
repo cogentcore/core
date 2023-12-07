@@ -71,16 +71,16 @@ func (tr *Text) InsertSpan(at int, ns *Span) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking
-func (tr *Text) Render(rs *State, pos mat32.Vec2) {
+func (tr *Text) Render(pc *Paint, pos mat32.Vec2) {
 	// pr := prof.Start("RenderText")
 	// defer pr.End()
 
 	var ppaint styles.Paint
-	ppaint.CopyStyleFrom(rs.Paint.Paint)
+	ppaint.CopyStyleFrom(pc.Paint)
 
-	rs.PushXForm(mat32.Identity2D()) // needed for SVG
-	defer rs.PopXForm()
-	rs.CurXForm = mat32.Identity2D()
+	pc.PushXForm(mat32.Identity2D()) // needed for SVG
+	defer pc.PopXForm()
+	pc.CurXForm = mat32.Identity2D()
 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
@@ -94,7 +94,7 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 		tpos := pos.Add(sr.RelPos)
 
 		d := &font.Drawer{
-			Dst:  rs.Image,
+			Dst:  pc.Image,
 			Src:  image.NewUniform(curColor),
 			Face: curFace,
 		}
@@ -102,13 +102,13 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 		// todo: cache flags if these are actually needed
 		if sr.HasDeco.HasFlag(styles.DecoBackgroundColor) {
 			// fmt.Println("rendering background color for span", rs)
-			sr.RenderBg(rs, tpos)
+			sr.RenderBg(pc, tpos)
 		}
 		if sr.HasDeco.HasFlag(styles.DecoUnderline) || sr.HasDeco.HasFlag(styles.DecoDottedUnderline) {
-			sr.RenderUnderline(rs, tpos)
+			sr.RenderUnderline(pc, tpos)
 		}
 		if sr.HasDeco.HasFlag(styles.DecoOverline) {
-			sr.RenderLine(rs, tpos, styles.DecoOverline, 1.1)
+			sr.RenderLine(pc, tpos, styles.DecoOverline, 1.1)
 		}
 
 		for i, r := range sr.Text {
@@ -130,8 +130,8 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 			tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
 			ll := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 			ur := ll.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, -rr.Size.Y}))
-			if int(mat32.Floor(ll.X)) > rs.Bounds.Max.X || int(mat32.Floor(ur.Y)) > rs.Bounds.Max.Y ||
-				int(mat32.Ceil(ur.X)) < rs.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < rs.Bounds.Min.Y {
+			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
+				int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue
 			}
 			d.Face = curFace
@@ -142,15 +142,15 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 				continue
 			}
 			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
-				idr := dr.Intersect(rs.Bounds)
+				idr := dr.Intersect(pc.Bounds)
 				soff := image.Point{}
-				if dr.Min.X < rs.Bounds.Min.X {
-					soff.X = rs.Bounds.Min.X - dr.Min.X
-					maskp.X += rs.Bounds.Min.X - dr.Min.X
+				if dr.Min.X < pc.Bounds.Min.X {
+					soff.X = pc.Bounds.Min.X - dr.Min.X
+					maskp.X += pc.Bounds.Min.X - dr.Min.X
 				}
-				if dr.Min.Y < rs.Bounds.Min.Y {
-					soff.Y = rs.Bounds.Min.Y - dr.Min.Y
-					maskp.Y += rs.Bounds.Min.Y - dr.Min.Y
+				if dr.Min.Y < pc.Bounds.Min.Y {
+					soff.Y = pc.Bounds.Min.Y - dr.Min.Y
+					maskp.Y += pc.Bounds.Min.Y - dr.Min.Y
 				}
 				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
@@ -168,17 +168,17 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 			}
 		}
 		if sr.HasDeco.HasFlag(styles.DecoLineThrough) {
-			sr.RenderLine(rs, tpos, styles.DecoLineThrough, 0.25)
+			sr.RenderLine(pc, tpos, styles.DecoLineThrough, 0.25)
 		}
 	}
 
-	rs.Paint.CopyStyleFrom(&ppaint)
+	pc.Paint.CopyStyleFrom(&ppaint)
 }
 
 // RenderTopPos renders at given top position -- uses first font info to
 // compute baseline offset and calls overall Render -- convenience for simple
 // widget rendering without layouts
-func (tr *Text) RenderTopPos(rs *State, tpos mat32.Vec2) {
+func (tr *Text) RenderTopPos(pc *Paint, tpos mat32.Vec2) {
 	if len(tr.Spans) == 0 {
 		return
 	}
@@ -189,7 +189,7 @@ func (tr *Text) RenderTopPos(rs *State, tpos mat32.Vec2) {
 	curFace := sr.Render[0].Face
 	pos := tpos
 	pos.Y += mat32.FromFixed(curFace.Metrics().Ascent)
-	tr.Render(rs, pos)
+	tr.Render(pc, pos)
 }
 
 // SetString is for basic text rendering with a single style of text (see
