@@ -510,7 +510,7 @@ func (sr *Slider) Render() {
 }
 
 func (sr *Slider) RenderSlider() {
-	rs, pc, st := sr.RenderLock()
+	pc, st := sr.RenderLock()
 
 	sr.SetPosFromValue(sr.Value)
 
@@ -543,7 +543,7 @@ func (sr *Slider) RenderSlider() {
 			pc.FillStyle.SetFullColor(&sr.ValueColor)
 			sr.RenderBoxImpl(tpos, tsz, st.Border)
 		}
-		sr.RenderUnlock(rs)
+		sr.RenderUnlock()
 	} else {
 		// pc.StrokeStyle.SetColor(&st.Border.Color)
 		// pc.StrokeStyle.Width = st.Border.Width
@@ -581,7 +581,7 @@ func (sr *Slider) RenderSlider() {
 
 		// render thumb as icon or box
 		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
-			sr.RenderUnlock(rs)
+			sr.RenderUnlock()
 			ic := sr.Parts.Child(0).(*Icon)
 			icsz := ic.Geom.Size.Actual.Content
 			tpos.SetSub(icsz.MulScalar(.5))
@@ -593,7 +593,7 @@ func (sr *Slider) RenderSlider() {
 			pc.FillStyle.SetFullColor(&sr.ThumbColor)
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxImpl(tpos, thsz, st.Border)
-			sr.RenderUnlock(rs)
+			sr.RenderUnlock()
 		}
 	}
 }

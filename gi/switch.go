@@ -330,9 +330,9 @@ func (sw *Switch) ConfigParts() {
 }
 
 func (sw *Switch) RenderSwitch() {
-	rs, _, st := sw.RenderLock()
+	_, st := sw.RenderLock()
 	sw.RenderStdBox(st)
-	sw.RenderUnlock(rs)
+	sw.RenderUnlock()
 }
 
 func (sw *Switch) Render() {

@@ -54,24 +54,24 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 }
 
 func (sp *Separator) RenderSeparator() {
-	rs, pc, st := sp.RenderLock()
-	defer sp.RenderUnlock(rs)
+	pc, st := sp.RenderLock()
+	defer sp.RenderUnlock()
 
 	pos := sp.Geom.Pos.Total.Add(st.TotalMargin().Pos())
 	sz := sp.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
 
 	if !st.BackgroundColor.IsNil() {
-		pc.FillBox(rs, pos, sz, &st.BackgroundColor)
+		pc.FillBox(pos, sz, &st.BackgroundColor)
 	}
 	// border-top is standard property for separators in CSS (see https://www.w3schools.com/howto/howto_css_dividers.asp)
 	pc.StrokeStyle.Width = st.Border.Width.Top
 	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
 	if sp.Horiz {
-		pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
+		pc.DrawLine(pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
 	} else {
-		pc.DrawLine(rs, pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
+		pc.DrawLine(pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
 	}
-	pc.FillStrokeClear(rs)
+	pc.FillStrokeClear()
 }
 
 func (sp *Separator) Render() {
