@@ -203,6 +203,11 @@ func (w *Window[A]) CloseClean() {
 	}
 }
 
+func (w *Window[A]) MainMenu() goosi.MainMenu {
+	// nil by default
+	return nil
+}
+
 func (w *Window[A]) SetCursorEnabled(enabled, raw bool) {
 	w.CursorEnabled = enabled
 }

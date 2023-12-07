@@ -88,9 +88,6 @@ type Window interface {
 	// and Pos is in OS-specific window manager units (i.e., as returned in Pos())
 	SetGeom(pos image.Point, sz image.Point)
 
-	// GetScreen returns the screen this window is in
-	GetScreen() *Screen
-
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This
 	// is the only supported mechanism for de-iconifying.

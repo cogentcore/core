@@ -27,20 +27,20 @@ func (w *WindowSingle[A]) Drawer() goosi.Drawer {
 	return w.App.SingleDrawer()
 }
 
-func (w *WindowSingle[A]) GetScreen() *goosi.Screen {
+func (w *WindowSingle[A]) Screen() *goosi.Screen {
 	return w.App.Screen(0)
 }
 
 func (w *WindowSingle[A]) Size() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.GetScreen().PixSize
+	return w.Screen().PixSize
 }
 
 func (w *WindowSingle[A]) WinSize() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
-	return w.GetScreen().PixSize
+	return w.Screen().PixSize
 }
 
 func (w *WindowSingle[A]) Position() image.Point {
@@ -52,33 +52,33 @@ func (w *WindowSingle[A]) Position() image.Point {
 func (w *WindowSingle[A]) PhysicalDPI() float32 {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
-	return w.GetScreen().PhysicalDPI
+	return w.Screen().PhysicalDPI
 }
 
 func (w *WindowSingle[A]) LogicalDPI() float32 {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
-	return w.GetScreen().LogicalDPI
+	return w.Screen().LogicalDPI
 }
 
 func (w *WindowSingle[A]) SetLogicalDPI(dpi float32) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
-	w.GetScreen().LogicalDPI = dpi
+	w.Screen().LogicalDPI = dpi
 }
 
 func (w *WindowSingle[A]) SetWinSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	w.GetScreen().PixSize = sz
+	w.Screen().PixSize = sz
 }
 
 func (w *WindowSingle[A]) SetSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	w.GetScreen().PixSize = sz
+	w.Screen().PixSize = sz
 }
 
 func (w *WindowSingle[A]) SetPos(pos image.Point) {
@@ -89,7 +89,7 @@ func (w *WindowSingle[A]) SetGeom(pos image.Point, sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	w.GetScreen().PixSize = sz
+	w.Screen().PixSize = sz
 }
 
 func (w *WindowSingle[A]) Raise() {

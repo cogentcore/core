@@ -96,7 +96,7 @@ func (w *WindowMulti[A]) SetSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	sc := w.This.GetScreen()
+	sc := w.This.Screen()
 	sz = sc.WinSizeFmPix(sz)
 	w.SetWinSize(sz)
 }
@@ -112,7 +112,7 @@ func (w *WindowMulti[A]) SetGeom(pos image.Point, sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
-	sc := w.This.GetScreen()
+	sc := w.This.Screen()
 	sz = sc.WinSizeFmPix(sz)
 	w.SetWinSize(sz)
 	w.Pos = pos

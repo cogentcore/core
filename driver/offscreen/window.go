@@ -25,10 +25,6 @@ func (w *Window) OSHandle() uintptr {
 	return 0
 }
 
-func (w *Window) MainMenu() goosi.MainMenu {
-	return w.mainMenu
-}
-
 func (w *Window) Lock() bool {
 	// we re-use app mu for window because the app actually controls the system window
 	w.app.mu.Lock()
