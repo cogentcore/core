@@ -656,7 +656,8 @@ func (wb *WidgetBase) RenderChildren() {
 //  Standard Box Model rendering
 
 // RenderLock returns the locked [paint.Context] and [styles.Style] with StyMu locked.
-// This should be called at start of widget-level rendering.
+// This should be called at start of widget-level rendering, and should always
+// be associated with a corresponding [WidgetBase.RenderUnlock].
 func (wb *WidgetBase) RenderLock() (*paint.Paint, *styles.Style) {
 	wb.StyMu.RLock()
 	pc := &wb.Sc.PaintContext
@@ -664,9 +665,11 @@ func (wb *WidgetBase) RenderLock() (*paint.Paint, *styles.Style) {
 	return pc, &wb.Styles
 }
 
-// RenderUnlock unlocks [paint.Context] and StyMu.
-func (wb *WidgetBase) RenderUnlock(pc *paint.Paint) {
-	pc.Unlock()
+// RenderUnlock unlocks the widget's associated [paint.Context] and StyMu.
+// This should be called at the end of widget-level rendering, and should always
+// be associated with a corresponding [WidgetBase.RenderLock].
+func (wb *WidgetBase) RenderUnlock() {
+	wb.Sc.PaintContext.Unlock()
 	wb.StyMu.RUnlock()
 }
 

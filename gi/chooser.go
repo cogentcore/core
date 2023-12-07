@@ -793,9 +793,9 @@ func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion
 }
 
 func (ch *Chooser) RenderChooser() {
-	rs, _, st := ch.RenderLock()
+	_, st := ch.RenderLock()
 	ch.RenderStdBox(st)
-	ch.RenderUnlock(rs)
+	ch.RenderUnlock()
 }
 
 func (ch *Chooser) Render() {

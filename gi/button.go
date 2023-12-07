@@ -554,9 +554,9 @@ func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
 }
 
 func (bt *Button) RenderButton() {
-	rs, _, st := bt.RenderLock()
+	_, st := bt.RenderLock()
 	bt.RenderStdBox(st)
-	bt.RenderUnlock(rs)
+	bt.RenderUnlock()
 }
 
 func (bt *Button) Render() {

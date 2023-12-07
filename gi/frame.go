@@ -61,10 +61,10 @@ const (
 
 // FrameStdRender does the standard rendering of the frame itself
 func (fr *Frame) FrameStdRender() {
-	rs, _, st := fr.RenderLock()
-	defer fr.RenderUnlock(rs)
-
+	_, st := fr.RenderLock()
 	fr.RenderStdBox(st)
+	fr.RenderUnlock()
+
 	//	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
 	//		fr.RenderStripes(sc)
 	//	}
