@@ -190,7 +190,7 @@ func (sv *SVG) Style() {
 		sv.Root.SetProp("stroke", sv.Color)
 		sv.Root.SetProp("fill", sv.Color)
 	}
-	sv.SetUnitContext(&sv.Root.Paint.Paint, mat32.Vec2{}, mat32.Vec2{})
+	sv.SetUnitContext(sv.Root.Paint.Paint, mat32.Vec2{}, mat32.Vec2{})
 
 	sv.Root.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
