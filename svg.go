@@ -190,7 +190,7 @@ func (sv *SVG) Style() {
 		sv.Root.SetProp("stroke", sv.Color)
 		sv.Root.SetProp("fill", sv.Color)
 	}
-	sv.SetUnitContext(sv.Root.Paint.Paint, mat32.Vec2{}, mat32.Vec2{})
+	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 
 	sv.Root.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
@@ -227,10 +227,10 @@ func (sv *SVG) Render() {
 }
 
 func (sv *SVG) FillViewport() {
-	rs := &sv.RenderState
-	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sv.Geom.Size), &sv.BackgroundColor)
-	rs.Unlock()
+	pc := &paint.Paint{&sv.RenderState, &sv.Root.Paint}
+	pc.Lock()
+	pc.FillBox(mat32.Vec2Zero, mat32.NewVec2FmPoint(sv.Geom.Size), &sv.BackgroundColor)
+	pc.Unlock()
 }
 
 // SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport

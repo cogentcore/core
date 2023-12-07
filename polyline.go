@@ -49,15 +49,14 @@ func (g *Polyline) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, rs := g.PushXForm(sv)
+	vis, pc := g.PushXForm(sv)
 	if !vis {
 		return
 	}
-	pc := &g.Paint
-	rs.Lock()
-	pc.DrawPolyline(rs, g.Points)
-	pc.FillStrokeClear(rs)
-	rs.Unlock()
+	pc.Lock()
+	pc.DrawPolyline(g.Points)
+	pc.FillStrokeClear()
+	pc.Unlock()
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
@@ -83,7 +82,7 @@ func (g *Polyline) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	rs.PopXFormLock()
+	pc.PopXFormLock()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
