@@ -130,6 +130,14 @@ func PrefsDir() string {
 	return goosi.TheApp.PrefsDir()
 }
 
+// AppDataDir returns the application-specific data directory:
+// [goosi.PrefsDir] + [App.Name]. It ensures that the directory exists first.
+// Use this directory to store all app-specific data including preferences.
+// PrefsDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
+func AppDataDir() string {
+	return goosi.TheApp.AppPrefsDir()
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //		AppBar
 
@@ -155,8 +163,9 @@ func StdAppBarStart(tb *Toolbar) {
 }
 
 // StdAppBarBack adds a back button
-func StdAppBarBack(tb *Toolbar) {
-	NewButton(tb, "back").SetIcon(icons.ArrowBack).OnClick(func(e events.Event) {
+func StdAppBarBack(tb *Toolbar) *Button {
+	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack)
+	bt.OnClick(func(e events.Event) {
 		stg := tb.Sc.Stage.Main
 		mm := stg.MainMgr
 		if mm == nil {
@@ -170,11 +179,12 @@ func StdAppBarBack(tb *Toolbar) {
 		}
 		tb.Sc.Close()
 	})
+	return bt
 }
 
 // StdAppBarChooser adds an AppChooser
-func StdAppBarChooser(tb *Toolbar) {
-	NewAppChooser(tb, "app-chooser")
+func StdAppBarChooser(tb *Toolbar) *AppChooser {
+	return NewAppChooser(tb, "app-chooser")
 }
 
 // todo: use CurrentMainScene instead?
