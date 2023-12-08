@@ -184,6 +184,10 @@ func (a *App) IsDark() bool {
 	return a.Dark
 }
 
+func (a *App) GetScreens() {
+	// no-op by default
+}
+
 func (a *App) OpenURL(url string) {
 	// no-op by default
 }

@@ -61,7 +61,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 
 // SetScreenInfo sets the screen information based on the given
 // requested window size.
-func (a *App) SetScreenInfo(sz image.Point) error {
+func (a *App) SetScreenInfo(sz image.Point) {
 	if sz.X == 0 {
 		sz.X = 800
 	}
@@ -69,15 +69,7 @@ func (a *App) SetScreenInfo(sz image.Point) error {
 		sz.Y = 600
 	}
 	a.Scrn.PixSize = sz
-	a.GetScreens()
 
-	return nil
-}
-
-func (a *App) GetScreens() {
-	if a.Scrn.PixSize == (image.Point{}) {
-		a.Scrn.PixSize = image.Point{800, 600}
-	}
 	a.Scrn.DevicePixelRatio = 1
 	a.Scrn.Geometry.Max = a.Scrn.PixSize
 	dpi := float32(160)
