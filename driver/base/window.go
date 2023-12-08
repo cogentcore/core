@@ -175,7 +175,7 @@ func (w *Window[A]) IsClosed() bool {
 }
 
 func (w *Window[A]) IsVisible() bool {
-	return w.This.IsClosed() || w.Is(goosi.Minimized)
+	return !w.This.IsClosed() && !w.Is(goosi.Minimized)
 }
 
 func (w *Window[A]) SetFPS(fps int) {
