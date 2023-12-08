@@ -974,8 +974,8 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 	sv.This().(SliceViewer).UpdateWidgets()
 }
 
-// SliceDefaultTopAppBar is a TopAppBar function that adds an "Add" button for slice
-func (sv *SliceViewBase) SliceDefaultTopAppBar(tb *gi.TopAppBar) {
+// ConfigToolbar configures a [gi.Toolbar] for this view
+func (sv *SliceViewBase) ConfigToolbar(tb *gi.Toolbar) {
 	if laser.AnyIsNil(sv.Slice) {
 		return
 	}

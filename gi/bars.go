@@ -46,8 +46,17 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 	*bf = nbf
 }
 
+// AddAppBar adds an AppBar function for an element within the scene
+func (sc *Scene) AddAppBar(fun func(tb *Toolbar)) {
+	sc.AppBars.Add(fun)
+}
+
 // ConfigSceneBars configures the side control bars, for main scenes
 func (sc *Scene) ConfigSceneBars() {
+	// at last possible moment, add app-specific app bar config
+	if sc.App != nil && sc.App.AppBarConfig != nil {
+		sc.Bars.Top.Add(sc.App.AppBarConfig) // put in the top by default
+	}
 	if !sc.Bars.Top.IsEmpty() {
 		head := NewLayout(sc, "top-bar").Style(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
@@ -91,51 +100,26 @@ func (sc *Scene) GetBar(side styles.SideIndexes) *Layout {
 	return nil
 }
 
-// GetTopAppBar returns the TopAppBar if it exists, nil otherwise.
-func (sc *Scene) GetTopAppBar() *TopAppBar {
+// GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
+func (sc *Scene) GetTopAppBar() *Toolbar {
 	tb := sc.GetBar(styles.Top)
 	if tb == nil {
 		return nil
 	}
-	tab := tb.ChildByType(TopAppBarType, ki.NoEmbeds)
+	tab := tb.ChildByType(ToolbarType, ki.NoEmbeds)
 	if tab != nil {
-		return tab.(*TopAppBar)
+		return tab.(*Toolbar)
 	}
 	return nil
 }
 
-// TopAppBar constructs or returns the TopAppBar in given parent Widget
-func (sc *Scene) TopAppBar(pw Widget) *TopAppBar {
-	tb := pw.ChildByType(TopAppBarType, ki.NoEmbeds)
+// RecycleToolbar constructs or returns a Toolbar in given parent Widget
+func RecycleToolbar(pw Widget) *Toolbar {
+	tb := pw.ChildByType(ToolbarType, ki.NoEmbeds)
 	if tb != nil {
-		return tb.(*TopAppBar)
+		return tb.(*Toolbar)
 	}
-	return NewTopAppBar(pw)
-}
-
-// DefaultTopAppBar constructs or returns the TopAppBar in given parent Widget.
-// if DefaultTopAppBar function is != nil, and we are making a new
-// TopAppBar widget, then we call DefaultTopAppBar first.
-func (sc *Scene) DefaultTopAppBar(pw Widget) *TopAppBar {
-	tbi := pw.ChildByType(TopAppBarType, ki.NoEmbeds)
-	if tbi != nil {
-		return tbi.(*TopAppBar)
-	}
-	tb := NewTopAppBar(pw)
-	if DefaultTopAppBar != nil {
-		DefaultTopAppBar(tb)
-	}
-	return tb
-}
-
-// AddDefaultTopAppBar adds code to Bars.Top to make a
-// DefaultTopAppBar on this Scene
-func (sc *Scene) AddDefaultTopAppBar() {
-	sc.Bars.Top.Add(func(pw Widget) {
-		if DefaultTopAppBar != nil {
-			sc.DefaultTopAppBar(pw)
-		}
-	})
+	return NewToolbar(pw)
 }
 
 // InheritBarsWidget inherits Bar functions based on a source widget
@@ -202,26 +186,7 @@ func (bd *Body) AddBottomBar(fun func(pw Widget)) {
 	bd.Sc.Bars.Bottom.Add(fun)
 }
 
-// AddTopAppBar is a helper function that adds the given function for
-// configuring a [TopAppBar] at the top of the window.
-func (bd *Body) AddTopAppBar(fun func(tb *TopAppBar)) {
-	bd.AddTopBar(func(pw Widget) {
-		fun(bd.TopAppBar(pw))
-	})
-}
-
-// TopAppBar constructs or returns the TopAppBar in given parent Widget
-func (bd *Body) TopAppBar(pw Widget) *TopAppBar {
-	return bd.Sc.TopAppBar(pw)
-}
-
-// DefaultTopAppBar constructs or returns the TopAppBar in given parent Widget
-func (bd *Body) DefaultTopAppBar(pw Widget) *TopAppBar {
-	return bd.Sc.DefaultTopAppBar(pw)
-}
-
-// AddDefaultTopAppBar adds code to Bars.Top to make a
-// DefaultTopAppBar on this Scene
-func (bd *Body) AddDefaultTopAppBar() {
-	bd.Sc.AddDefaultTopAppBar()
+// AddAppBar adds an AppBar function for an element within the scene
+func (bd *Body) AddAppBar(fun func(tb *Toolbar)) {
+	bd.Sc.AddAppBar(fun)
 }

@@ -138,13 +138,11 @@ func app() {
 	// gi.UpdateTrace = true
 	// gi.KeyEventTrace = true
 
-	gi.SetAppName("views")
-	gi.SetAppAbout(`This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	b := gi.NewAppBody("views").SetTitle("GoGi Views Test")
 
-	b := gi.NewBody().SetTitle("GoGi Views Test")
+	b.App().About = `This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`
 
-	b.AddTopBar(func(pw gi.Widget) {
-		tb := b.DefaultTopAppBar(pw)
+	b.AddAppBar(func(tb *gi.Toolbar) {
 		gi.NewButton(tb, "slice-test").SetText("SliceDialog").
 			SetTooltip("open a SliceViewDialog slice view with a lot of elments, for performance testing").
 			OnClick(func(e events.Event) {

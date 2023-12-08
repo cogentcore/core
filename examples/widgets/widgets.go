@@ -33,16 +33,11 @@ func app() {
 	// events.TraceEventCompression = true
 	// events.TraceWindowPaint = true
 
-	gi.SetAppName("widgets")
-	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
+	b := gi.NewAppBody("widgets").SetTitle("GoGi Widgets Demo")
 
-	b := gi.NewBody("widgets").SetTitle("GoGi Widgets Demo")
+	b.App().About = `This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`
 
-	// gi.DefaultTopAppBar = nil // turns it off
-
-	b.AddTopBar(func(pw gi.Widget) {
-		tb := b.DefaultTopAppBar(pw)
+	b.AddAppBar(func(tb *gi.Toolbar) { // put first in top app bar
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
 			OnClick(func(e events.Event) {
 				fmt.Println("TopAppBar Button 1")

@@ -328,8 +328,8 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	mv.Update()
 }
 
-// MapDefaultTopAppBar is a TopAppBar function that adds "Sort", "Add" buttons for map
-func (mv *MapView) MapDefaultTopAppBar(tb *gi.TopAppBar) {
+// ConfigToolbar configures a [gi.Toolbar] for this view
+func (mv *MapView) ConfigToolbar(tb *gi.Toolbar) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}

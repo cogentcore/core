@@ -26,7 +26,7 @@ type Body struct { //goki:no-new
 // having to access the Scene directly.
 func NewBody(name ...string) *Body {
 	bd := &Body{}
-	nm := AppName()
+	nm := ""
 	if len(name) > 0 {
 		nm = name[0]
 	}
@@ -64,5 +64,17 @@ func (bd *Body) AddText(text string) *Body {
 		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnSurfaceVariant
 	})
+	return bd
+}
+
+// App returns the App
+func (bd *Body) App() *App {
+	return bd.Sc.App
+}
+
+// SetApp sets the App
+func (bd *Body) SetApp(app *App) *Body {
+	bd.Sc.App = app
+	bd.Sc.Nm = app.Name
 	return bd
 }

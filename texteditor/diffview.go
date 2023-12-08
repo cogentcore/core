@@ -95,7 +95,7 @@ func DiffViewDialog(ctx gi.Widget, title string, astr, bstr []string, afile, bfi
 	dv.RevB = brev
 	dv.ConfigDiffView()
 	dv.DiffStrings(astr, bstr)
-	d.AddTopAppBar(dv.DiffViewTopAppBar)
+	d.AddAppBar(dv.ConfigToolbar)
 	// todo: any buttons?
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
@@ -520,8 +520,8 @@ func (dv *DiffView) ConfigDiffView() {
 	})
 }
 
-// DiffViewTopAppBar configures the top app bar with diff view actions
-func (dv *DiffView) DiffViewTopAppBar(tb *gi.TopAppBar) {
+// ConfigToolbar configures a [gi.Toolbar] for this view
+func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA

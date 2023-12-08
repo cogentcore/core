@@ -30,7 +30,7 @@ var NodeType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"FPath", &gti.Field{Name: "FPath", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/pi/v2/fi.FileInfo", LocalType: "fi.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/fi.FileInfo", LocalType: "fi.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"FRoot", &gti.Field{Name: "FRoot", Type: "*goki.dev/gi/v2/filetree.Tree", LocalType: "*Tree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "goki.dev/vci/v2.Repo", LocalType: "vci.Repo", Doc: "version control system repository for this directory,\nonly non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
@@ -43,7 +43,7 @@ var NodeType = gti.AddType(&gti.Type{
 		{"OpenFilesDefault", &gti.Method{Name: "OpenFilesDefault", Doc: "OpenFilesDefault opens selected files with default app for that file type (os defined).\nruns open on Mac, xdg-open on Linux, and start on Windows", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"DuplicateFiles", &gti.Method{Name: "DuplicateFiles", Doc: "makes a copy of selected files", Directives: gti.Directives{
+		{"DuplicateFiles", &gti.Method{Name: "DuplicateFiles", Doc: "DuplicateFiles makes a copy of selected files", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"DeleteFiles", &gti.Method{Name: "DeleteFiles", Doc: "deletes any selected files or directories. If any directory is selected,\nall files and subdirectories in that directory are also deleted.", Directives: gti.Directives{
@@ -57,9 +57,15 @@ var NodeType = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"newpath", &gti.Field{Name: "newpath", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"err", &gti.Field{Name: "err", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
-		{"NewFiles", &gti.Method{Name: "NewFiles", Doc: "makes a new file in selected directory", Directives: gti.Directives{
+		{"NewFiles", &gti.Method{Name: "NewFiles", Doc: "NewFiles makes a new file in selected directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"addToVcs", &gti.Field{Name: "addToVcs", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"NewFile", &gti.Method{Name: "NewFile", Doc: "NewFile makes a new file in this directory node", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},

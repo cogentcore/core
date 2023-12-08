@@ -27,8 +27,7 @@ func KeyMapsView(km *keyfun.Maps) {
 	})
 
 	d.Sc.Data = km // todo: needed?
-	d.AddTopBar(func(pw gi.Widget) {
-		tb := d.DefaultTopAppBar(pw)
+	d.AddAppBar(func(tb *gi.Toolbar) {
 		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)
 		sp.SetUpdateFunc(func() {
 			sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)

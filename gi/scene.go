@@ -44,9 +44,10 @@ import (
 type Scene struct {
 	Frame
 
-	// Data is the optional data value being represented by this scene.
-	// Used e.g., for recycling views of a given item instead of creating new one.
-	Data any
+	// App is the pointer to the application to which this scene belongs.
+	// The first Main Window Scene must set this, and others will automatically
+	// grab from there.
+	App *App
 
 	// Bars contains functions for constructing the control bars for this Scene,
 	// attached to different sides of a Scene (e.g., TopAppBar at Top,
@@ -58,12 +59,22 @@ type Scene struct {
 	// from the context widget, for FullWindow Dialogs
 	BarsInherit styles.Sides[bool]
 
+	// AppBars contains functions for configuring a top-level App toolbar,
+	// (e.g., TopAppBar) for elements contained within this Scene,
+	// that should be represented in any app-level toolbar constructed
+	// for this Scene.
+	AppBars ToolbarFuncs
+
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately
 	// from that dynamic control content.  When constructing scenes using
 	// a Body, you can operate directly on the [Body], which has wrappers
 	// for most major Scene functions.
 	Body *Body
+
+	// Data is the optional data value being represented by this scene.
+	// Used e.g., for recycling views of a given item instead of creating new one.
+	Data any
 
 	// Size and position relative to overall rendering context.
 	SceneGeom mat32.Geom2DInt `edit:"-" set:"-"`

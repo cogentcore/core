@@ -104,15 +104,18 @@ func (st *Stage) ConfigMainStage() {
 
 // RunWindow runs a Window with current settings.
 func (st *Stage) RunWindow() *Stage {
-	st.ConfigMainStage()
-	sc := st.Scene
-
 	// note: need a *temporary* MainMgr to get initial pref size
+	sc := st.Scene
 	if CurRenderWin == nil {
 		st.SetMainMgr(st.FirstWinManager())
 	} else {
+		if sc.App == nil { // inherit apps
+			sc.App = CurRenderWin.MainStageMgr.Top().Scene.App
+		}
 		st.SetMainMgr(&CurRenderWin.MainStageMgr)
 	}
+	st.ConfigMainStage()
+
 	sz := st.RenderCtx.Size
 	// non-new full windows must take up the whole window
 	// and thus don't consider pref size
@@ -175,6 +178,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	st.ConfigMainStage()
 	sc := st.Scene
+	sc.App = ctx.Sc.App
 	sc.SceneGeom.Pos = st.Pos
 
 	st.SetMainMgr(ms) // temporary for prefs

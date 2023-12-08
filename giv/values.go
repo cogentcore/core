@@ -555,11 +555,11 @@ func (vv *SliceValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	if !vv.IsArray && vv.ElIsStruct {
 		tv := NewTableView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
 		tv.SetReadOnly(vv.IsReadOnly())
-		d.AddTopAppBar(tv.SliceDefaultTopAppBar)
+		d.AddAppBar(tv.ConfigToolbar)
 	} else {
 		sv := NewSliceView(d).SetSlice(slci).SetTmpSave(vv.TmpSave).SetViewPath(vpath)
 		sv.SetReadOnly(vv.IsReadOnly())
-		d.AddTopAppBar(sv.SliceDefaultTopAppBar)
+		d.AddAppBar(sv.ConfigToolbar)
 	}
 	return true, nil
 }
@@ -673,7 +673,7 @@ func (vv *MapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	vpath := vv.ViewPath + "/" + laser.NonPtrType(vv.Value.Type()).String()
 	mv := NewMapView(d).SetMap(mpi)
 	mv.SetViewPath(vpath).SetTmpSave(vv.TmpSave).SetReadOnly(vv.IsReadOnly())
-	d.AddTopAppBar(mv.MapDefaultTopAppBar)
+	d.AddAppBar(mv.ConfigToolbar)
 	return true, nil
 }
 

@@ -21,8 +21,7 @@ func PrefsView(pf *gi.Preferences) {
 	d := gi.NewBody("gogi-prefs")
 	d.SetTitle("GoGi Preferences")
 	d.Sc.Data = pf
-	d.AddTopBar(func(pw gi.Widget) {
-		tb := d.DefaultTopAppBar(pw)
+	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
 		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
@@ -46,6 +45,7 @@ func PrefsView(pf *gi.Preferences) {
 			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 			NewFuncButton(m, pf.Delete).SetConfirm(true)
 			NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			gi.NewSeparator(tb)
 		})
 	})
 	sv := NewStructView(d)
@@ -70,8 +70,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 
 	d.Sc.Data = pf
 
-	d.AddTopBar(func(pw gi.Widget) {
-		tb := d.DefaultTopAppBar(pw)
+	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
 		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
@@ -80,6 +79,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		})
 		tb.AddOverflowMenu(func(m *gi.Scene) {
 			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
+			gi.NewSeparator(tb)
 		})
 	})
 
@@ -99,8 +99,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 
 	d.Sc.Data = pf
 
-	d.AddTopBar(func(pw gi.Widget) {
-		tb := d.DefaultTopAppBar(pw)
+	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
 	})
 

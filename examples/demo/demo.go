@@ -28,12 +28,8 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.SetAppName("gogi-demo")
-	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
-
-	b := gi.NewBody().SetTitle("GoGi Demo")
-
-	b.AddDefaultTopAppBar()
+	b := gi.NewAppBody("gogi-demo").SetTitle("GoGi Demo")
+	b.App().About = "The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework."
 
 	ts := gi.NewTabs(b)
 	ts.DeleteTabButtons = false

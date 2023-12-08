@@ -292,13 +292,7 @@ func (is *Inspector) SetChanged() {
 	is.Changed = true
 }
 
-func (is *Inspector) TopAppBar(tb *gi.TopAppBar) {
-	if gi.DefaultTopAppBar != nil {
-		gi.DefaultTopAppBar(tb)
-	} else {
-		gi.DefaultTopAppBarStd(tb)
-	}
-
+func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
 	up := NewFuncButton(tb, is.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(is.Changed)
@@ -346,9 +340,6 @@ func InspectorDialog(obj ki.Ki) {
 	}
 	is := NewInspector(d, "inspector")
 	is.SetRoot(obj)
-	d.AddTopBar(func(pw gi.Widget) {
-		tb := d.TopAppBar(pw)
-		is.TopAppBar(tb)
-	})
+	d.AddAppBar(is.ConfigToolbar)
 	d.NewWindow().Run()
 }

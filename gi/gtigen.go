@@ -23,6 +23,126 @@ import (
 	"goki.dev/svg"
 )
 
+// AppChooserType is the [gti.Type] for [AppChooser]
+var AppChooserType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.AppChooser",
+	ShortName:  "gi.AppChooser",
+	IDName:     "app-chooser",
+	Doc:        "AppChooser is an editable chooser element, typically placed at the start\nof the TopAppBar, that provides direct access to all manner of app resources.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Resources", &gti.Field{Name: "Resources", Type: "goki.dev/fi/uri.Resources", LocalType: "uri.Resources", Doc: "Resources are generators for resources accessible by the AppChooser", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Chooser", &gti.Field{Name: "Chooser", Type: "goki.dev/gi/v2/gi.Chooser", LocalType: "Chooser", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &AppChooser{},
+})
+
+// NewAppChooser adds a new [AppChooser] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewAppChooser(par ki.Ki, name ...string) *AppChooser {
+	return par.NewChild(AppChooserType, name...).(*AppChooser)
+}
+
+// KiType returns the [*gti.Type] of [AppChooser]
+func (t *AppChooser) KiType() *gti.Type {
+	return AppChooserType
+}
+
+// New returns a new [*AppChooser] value
+func (t *AppChooser) New() ki.Ki {
+	return &AppChooser{}
+}
+
+// SetResources sets the [AppChooser.Resources]:
+// Resources are generators for resources accessible by the AppChooser
+func (t *AppChooser) SetResources(v uri.Resources) *AppChooser {
+	t.Resources = v
+	return t
+}
+
+// SetTooltip sets the [AppChooser.Tooltip]
+func (t *AppChooser) SetTooltip(v string) *AppChooser {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [AppChooser.Class]
+func (t *AppChooser) SetClass(v string) *AppChooser {
+	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [AppChooser.PriorityEvents]
+func (t *AppChooser) SetPriorityEvents(v []events.Types) *AppChooser {
+	t.PriorityEvents = v
+	return t
+}
+
+// SetCustomContextMenu sets the [AppChooser.CustomContextMenu]
+func (t *AppChooser) SetCustomContextMenu(v func(m *Scene)) *AppChooser {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetType sets the [AppChooser.Type]
+func (t *AppChooser) SetType(v ChooserTypes) *AppChooser {
+	t.Type = v
+	return t
+}
+
+// SetIcon sets the [AppChooser.Icon]
+func (t *AppChooser) SetIcon(v icons.Icon) *AppChooser {
+	t.Icon = v
+	return t
+}
+
+// SetIndicator sets the [AppChooser.Indicator]
+func (t *AppChooser) SetIndicator(v icons.Icon) *AppChooser {
+	t.Indicator = v
+	return t
+}
+
+// SetEditable sets the [AppChooser.Editable]
+func (t *AppChooser) SetEditable(v bool) *AppChooser {
+	t.Editable = v
+	return t
+}
+
+// SetAllowNew sets the [AppChooser.AllowNew]
+func (t *AppChooser) SetAllowNew(v bool) *AppChooser {
+	t.AllowNew = v
+	return t
+}
+
+// SetItems sets the [AppChooser.Items]
+func (t *AppChooser) SetItems(v []any) *AppChooser {
+	t.Items = v
+	return t
+}
+
+// SetTooltips sets the [AppChooser.Tooltips]
+func (t *AppChooser) SetTooltips(v []string) *AppChooser {
+	t.Tooltips = v
+	return t
+}
+
+// SetMaxLength sets the [AppChooser.MaxLength]
+func (t *AppChooser) SetMaxLength(v int) *AppChooser {
+	t.MaxLength = v
+	return t
+}
+
+// SetItemsFunc sets the [AppChooser.ItemsFunc]
+func (t *AppChooser) SetItemsFunc(v func()) *AppChooser {
+	t.ItemsFunc = v
+	return t
+}
+
 // BodyType is the [gti.Type] for [Body]
 var BodyType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Body",
@@ -1815,9 +1935,10 @@ var SceneType = gti.AddType(&gti.Type{
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
 		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides[goki.dev/gi/v2/gi.BarFuncs]", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
 		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides[bool]", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
+		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.  These are", Directives: gti.Directives{}, Tag: ""}},
 		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
 		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
-		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"PaintContext", &gti.Field{Name: "PaintContext", Type: "goki.dev/girl/paint.Context", LocalType: "paint.Context", Doc: "paint context for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene.\nDefaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: ""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -1829,6 +1950,7 @@ var SceneType = gti.AddType(&gti.Type{
 		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"ShowIter", &gti.Field{Name: "ShowIter", Type: "int", LocalType: "int", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"ReRender", &gti.Field{Name: "ReRender", Type: "[]goki.dev/gi/v2/gi.Widget", LocalType: "[]Widget", Doc: "ReRender items are re-rendered after the current pass", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1895,6 +2017,16 @@ func (t *Scene) SetBarsInherit(v styles.Sides[bool]) *Scene {
 	return t
 }
 
+// SetAppBars sets the [Scene.AppBars]:
+// AppBars contains functions for configuring a top-level App toolbar,
+// (e.g., TopAppBar) for elements contained within this Scene,
+// that should be represented in any app-level toolbar constructed
+// for this Scene.  These are
+func (t *Scene) SetAppBars(v ToolbarFuncs) *Scene {
+	t.AppBars = v
+	return t
+}
+
 // SetBody sets the [Scene.Body]:
 // Body provides the main contents of scenes that use control Bars
 // to allow the main window contents to be specified separately
@@ -1926,6 +2058,13 @@ func (t *Scene) SetSelectedWidget(v Widget) *Scene {
 // selection mode is transmitted to the inspect editor after the user is done selecting
 func (t *Scene) SetSelectedWidgetChan(v chan Widget) *Scene {
 	t.SelectedWidgetChan = v
+	return t
+}
+
+// SetReRender sets the [Scene.ReRender]:
+// ReRender items are re-rendered after the current pass
+func (t *Scene) SetReRender(v []Widget) *Scene {
+	t.ReRender = v
 	return t
 }
 
@@ -2059,7 +2198,8 @@ var SliderType = gti.AddType(&gti.Type{
 		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
 		{"StayInView", &gti.Field{Name: "StayInView", Type: "bool", LocalType: "bool", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars.", Directives: gti.Directives{}, Tag: ""}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
-		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous Change event emitted value - don't re-emit Change if it is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"PrevSlide", &gti.Field{Name: "PrevSlide", Type: "float32", LocalType: "float32", Doc: "previous sliding value - for computing the Input change", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 	}),
@@ -3525,16 +3665,28 @@ func (t *TextField) SetCustomContextMenu(v func(m *Scene)) *TextField {
 
 // ToolbarType is the [gti.Type] for [Toolbar]
 var ToolbarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Toolbar",
-	ShortName:  "gi.Toolbar",
-	IDName:     "toolbar",
-	Doc:        "Toolbar is just a styled Frame layout for holding buttons\nand other widgets.  Use this for any toolbar embedded within\na window.  See TopAppBar for the main app-level toolbar,\nwith considerable additional functionality.",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Name:      "goki.dev/gi/v2/gi.Toolbar",
+	ShortName: "gi.Toolbar",
+	IDName:    "toolbar",
+	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/gi/v2/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
+	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"StdOverflowMenuFunc", &gti.Method{Name: "StdOverflowMenuFunc", Doc: "StdOverflowMenu adds standard overflow menu items.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"m", &gti.Field{Name: "m", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &Toolbar{},
 })
 
@@ -3554,6 +3706,35 @@ func (t *Toolbar) KiType() *gti.Type {
 // New returns a new [*Toolbar] value
 func (t *Toolbar) New() ki.Ki {
 	return &Toolbar{}
+}
+
+// ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
+type ToolbarEmbedder interface {
+	AsToolbar() *Toolbar
+}
+
+// AsToolbar returns the given value as a value of type Toolbar if the type
+// of the given value embeds Toolbar, or nil otherwise
+func AsToolbar(k ki.Ki) *Toolbar {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ToolbarEmbedder); ok {
+		return t.AsToolbar()
+	}
+	return nil
+}
+
+// AsToolbar satisfies the [ToolbarEmbedder] interface
+func (t *Toolbar) AsToolbar() *Toolbar {
+	return t
+}
+
+// SetOverflowButton sets the [Toolbar.OverflowButton]:
+// This is the overflow button
+func (t *Toolbar) SetOverflowButton(v *Button) *Toolbar {
+	t.OverflowButton = v
+	return t
 }
 
 // SetTooltip sets the [Toolbar.Tooltip]
@@ -3588,124 +3769,6 @@ func (t *Toolbar) SetStackTop(v int) *Toolbar {
 
 // SetStripes sets the [Toolbar.Stripes]
 func (t *Toolbar) SetStripes(v Stripes) *Toolbar {
-	t.Stripes = v
-	return t
-}
-
-// TopAppBarType is the [gti.Type] for [TopAppBar]
-var TopAppBarType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.TopAppBar",
-	ShortName: "gi.TopAppBar",
-	IDName:    "top-app-bar",
-	Doc:       "TopAppBar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nSet the Scene.TopAppBar to a toolbar function\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Resources", &gti.Field{Name: "Resources", Type: "goki.dev/fi/uri.Resources", LocalType: "uri.Resources", Doc: "Resources are generators for resources shown in the top app bar", Directives: gti.Directives{}, Tag: ""}},
-		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
-		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
-		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/gi/v2/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"DefaultOverflowMenu", &gti.Method{Name: "DefaultOverflowMenu", Doc: "DefaultOverflowMenu adds standard default overflow menu items.\nTypically you will want to add additional items and then call this function.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"m", &gti.Field{Name: "m", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-	}),
-	Instance: &TopAppBar{},
-})
-
-// NewTopAppBar adds a new [TopAppBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTopAppBar(par ki.Ki, name ...string) *TopAppBar {
-	return par.NewChild(TopAppBarType, name...).(*TopAppBar)
-}
-
-// KiType returns the [*gti.Type] of [TopAppBar]
-func (t *TopAppBar) KiType() *gti.Type {
-	return TopAppBarType
-}
-
-// New returns a new [*TopAppBar] value
-func (t *TopAppBar) New() ki.Ki {
-	return &TopAppBar{}
-}
-
-// TopAppBarEmbedder is an interface that all types that embed TopAppBar satisfy
-type TopAppBarEmbedder interface {
-	AsTopAppBar() *TopAppBar
-}
-
-// AsTopAppBar returns the given value as a value of type TopAppBar if the type
-// of the given value embeds TopAppBar, or nil otherwise
-func AsTopAppBar(k ki.Ki) *TopAppBar {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TopAppBarEmbedder); ok {
-		return t.AsTopAppBar()
-	}
-	return nil
-}
-
-// AsTopAppBar satisfies the [TopAppBarEmbedder] interface
-func (t *TopAppBar) AsTopAppBar() *TopAppBar {
-	return t
-}
-
-// SetResources sets the [TopAppBar.Resources]:
-// Resources are generators for resources shown in the top app bar
-func (t *TopAppBar) SetResources(v uri.Resources) *TopAppBar {
-	t.Resources = v
-	return t
-}
-
-// SetOverflowButton sets the [TopAppBar.OverflowButton]:
-// This is the overflow button
-func (t *TopAppBar) SetOverflowButton(v *Button) *TopAppBar {
-	t.OverflowButton = v
-	return t
-}
-
-// SetTooltip sets the [TopAppBar.Tooltip]
-func (t *TopAppBar) SetTooltip(v string) *TopAppBar {
-	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [TopAppBar.Class]
-func (t *TopAppBar) SetClass(v string) *TopAppBar {
-	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [TopAppBar.PriorityEvents]
-func (t *TopAppBar) SetPriorityEvents(v []events.Types) *TopAppBar {
-	t.PriorityEvents = v
-	return t
-}
-
-// SetCustomContextMenu sets the [TopAppBar.CustomContextMenu]
-func (t *TopAppBar) SetCustomContextMenu(v func(m *Scene)) *TopAppBar {
-	t.CustomContextMenu = v
-	return t
-}
-
-// SetStackTop sets the [TopAppBar.StackTop]
-func (t *TopAppBar) SetStackTop(v int) *TopAppBar {
-	t.StackTop = v
-	return t
-}
-
-// SetStripes sets the [TopAppBar.Stripes]
-func (t *TopAppBar) SetStripes(v Stripes) *TopAppBar {
 	t.Stripes = v
 	return t
 }
@@ -3792,15 +3855,3 @@ func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 	t.CustomContextMenu = v
 	return t
 }
-
-var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/gi/v2/gi.DefaultTopAppBarStd",
-	Doc:  "DefaultTopAppBarStd is the standard impl for a [Scene.TopAppBar].\nIt adds navigation buttons and an editable chooser bar,\nand calls AddDefaultOverflowMenu to provide default menu items,\nwhich will appear below any other OverflowMenu items added.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"tb", &gti.Field{Name: "tb", Type: "*goki.dev/gi/v2/gi.TopAppBar", LocalType: "*TopAppBar", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-})

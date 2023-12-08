@@ -88,15 +88,14 @@ func HiStylesView(st *histyle.Styles) {
 	mv.OnChange(func(e events.Event) {
 		histyle.StylesChanged = true
 	})
-	d.Sc.Data = st                   // todo: still needed?
-	d.AddTopBar(func(pw gi.Widget) { // todo: if?
-		tb := d.DefaultTopAppBar(pw)
+	d.Sc.Data = st // todo: still needed?
+	d.AddAppBar(func(tb *gi.Toolbar) {
 		oj := NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")
 		sj := NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 		sj.Args[0].SetTag(".ext", ".histy")
 		gi.NewSeparator(tb)
-		mv.MapDefaultTopAppBar(tb)
+		mv.ConfigToolbar(tb)
 	})
 	d.NewWindow().Run() // note: no context here so not dialog
 }
