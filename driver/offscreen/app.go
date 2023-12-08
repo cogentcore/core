@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/clip"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 )
@@ -98,17 +96,4 @@ func (a *App) GetScreens() {
 
 func (a *App) Platform() goosi.Platforms {
 	return goosi.Offscreen
-}
-
-func (a *App) OpenURL(url string) {
-	// no-op
-}
-
-func (a *App) ClipBoard(win goosi.Window) clip.Board {
-	// TODO: implement clipboard
-	return nil
-}
-
-func (a *App) Cursor(win goosi.Window) cursor.Cursor {
-	return &cursor.CursorBase{} // no-op
 }

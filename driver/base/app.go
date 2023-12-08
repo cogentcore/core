@@ -17,6 +17,8 @@ import (
 	"sync"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/clip"
+	"goki.dev/goosi/cursor"
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].
@@ -180,6 +182,20 @@ func (a *App) Quit() {
 
 func (a *App) IsDark() bool {
 	return a.Dark
+}
+
+func (a *App) OpenURL(url string) {
+	// no-op by default
+}
+
+func (a *App) ClipBoard(win goosi.Window) clip.Board {
+	// no-op by default
+	return &clip.BoardBase{}
+}
+
+func (a *App) Cursor(win goosi.Window) cursor.Cursor {
+	// no-op by default
+	return &cursor.CursorBase{}
 }
 
 func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
