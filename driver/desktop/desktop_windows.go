@@ -16,21 +16,22 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 )
 
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
-func (app *App) Platform() goosi.Platforms {
+func (a *App) Platform() goosi.Platforms {
 	return goosi.Windows
 }
 
-func (app *App) OpenURL(url string) {
+func (a *App) OpenURL(url string) {
 	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
-	cmd.Run()
+	grr.Log(cmd.Run())
 }
 
-func (app *App) PrefsDir() string {
+func (a *App) PrefsDir() string {
 	// todo: could use a more official windows protocol to get this stuff..
 	// https://msdn.microsoft.com/en-us/library/bb762188%28VS.85%29.aspx
 	// with FOLDERID_RoamingAppData
@@ -51,21 +52,18 @@ func (w *Window) Handle() any {
 /////////////////////////////////////////////////////////////////
 //   Clipboard
 
-type clipImpl struct {
-	lastWrite mimedata.Mimes
-}
+// TheClip is the single [clip.Board] for Windows
+var TheClip = Clip{}
 
-var theClip = clipImpl{}
+// Clip is the [clip.Board] implementation for Windows
+type Clip struct{}
 
-func (ci *clipImpl) IsEmpty() bool {
+func (cl *Clip) IsEmpty() bool {
 	str := glfw.GetClipboardString()
-	if len(str) == 0 {
-		return true
-	}
-	return false
+	return len(str) == 0
 }
 
-func (ci *clipImpl) Read(types []string) mimedata.Mimes {
+func (cl *Clip) Read(types []string) mimedata.Mimes {
 	str := glfw.GetClipboardString()
 	if len(str) == 0 {
 		return nil
@@ -90,7 +88,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	return nil
 }
 
-func (ci *clipImpl) Write(data mimedata.Mimes) error {
+func (cl *Clip) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -107,6 +105,6 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	return nil
 }
 
-func (ci *clipImpl) Clear() {
-	// nop
+func (cl *Clip) Clear() {
+	// no-op
 }

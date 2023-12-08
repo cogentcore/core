@@ -164,7 +164,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	glw.SetCloseCallback(w.OnCloseReq)
 	// glw.SetRefreshCallback(w.refresh)
 	glw.SetFocusCallback(w.Focused)
-	glw.SetIconifyCallback(w.Iconified)
+	glw.SetIconifyCallback(w.Iconify)
 
 	glw.SetKeyCallback(w.KeyEvent)
 	glw.SetCharModsCallback(w.CharEvent)
@@ -188,7 +188,7 @@ func (a *App) ClipBoard(win goosi.Window) clip.Board {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()
-	return &theClip
+	return &TheClip
 }
 
 func (a *App) Cursor(win goosi.Window) cursor.Cursor {
