@@ -44,16 +44,16 @@ type Node interface {
 	// NodeBBox returns the bounding box in image coordinates for this node
 	NodeBBox(sv *SVG) image.Rectangle
 
-	// ApplyXForm applies the given 2D transform to the geometry of this node
+	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
-	ApplyXForm(sv *SVG, xf mat32.Mat2)
+	ApplyTransform(sv *SVG, xf mat32.Mat2)
 
-	// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 	// relative to given point.  Trans translation and point are in top-level coordinates,
 	// so must be transformed into local coords first.
 	// Point is upper left corner of selection box that anchors the translation and scaling,
 	// and for rotation it is the center point around which to rotate
-	ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
+	ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
@@ -145,10 +145,10 @@ func (g *NodeBase) SetColorProps(prop, color string) {
 	}
 }
 
-// ParXForm returns the full compounded 2D transform matrix for all
+// ParTransform returns the full compounded 2D transform matrix for all
 // of the parents of this node.  If self is true, then include our
-// own xform too.
-func (g *NodeBase) ParXForm(self bool) mat32.Mat2 {
+// own transform too.
+func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
 	pars := []Node{}
 	xf := mat32.Identity2D()
 	n := g.This().(Node)
@@ -161,29 +161,29 @@ func (g *NodeBase) ParXForm(self bool) mat32.Mat2 {
 	}
 	np := len(pars)
 	if np > 0 {
-		xf = pars[np-1].PaintStyle().XForm
+		xf = pars[np-1].PaintStyle().Transform
 	}
 	for i := np - 2; i >= 0; i-- {
 		n := pars[i]
-		xf = n.PaintStyle().XForm.Mul(xf)
+		xf = n.PaintStyle().Transform.Mul(xf)
 	}
 	if self {
-		xf = g.Paint.XForm.Mul(xf)
+		xf = g.Paint.Transform.Mul(xf)
 	}
 	return xf
 }
 
-// ApplyXForm applies the given 2D transform to the geometry of this node
+// ApplyTransform applies the given 2D transform to the geometry of this node
 // this just does a direct transform multiplication on coordinates.
-func (g *NodeBase) ApplyXForm(sv *SVG, xf mat32.Mat2) {
+func (g *NodeBase) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 }
 
-// DeltaXForm computes the net transform matrix for given delta xform parameters
+// DeltaTransform computes the net transform matrix for given delta transform parameters
 // and the transformed version of the reference point.  If self is true, then
 // include the current node self transform, otherwise don't.  Groups do not
 // but regular rendering nodes do.
-func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
-	mxi := g.ParXForm(self)
+func (g *NodeBase) DeltaTransform(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
+	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVec2AsPt(pt)
 	ldel := mxi.MulVec2AsVec(trans)
@@ -193,12 +193,12 @@ func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, p
 	return xf, lpt
 }
 
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 // relative to given point.  Trans translation and point are in top-level coordinates,
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 }
 
 // SetFloat32SliceLen is a utility function to set given slice of float32 values
@@ -218,25 +218,25 @@ func SetFloat32SliceLen(dat *[]float32, sz int) {
 	}
 }
 
-// WriteXForm writes the node transform to slice at starting index.
+// WriteTransform writes the node transform to slice at starting index.
 // slice must already be allocated sufficiently.
-func (g *NodeBase) WriteXForm(dat []float32, idx int) {
-	dat[idx+0] = g.Paint.XForm.XX
-	dat[idx+1] = g.Paint.XForm.YX
-	dat[idx+2] = g.Paint.XForm.XY
-	dat[idx+3] = g.Paint.XForm.YY
-	dat[idx+4] = g.Paint.XForm.X0
-	dat[idx+5] = g.Paint.XForm.Y0
+func (g *NodeBase) WriteTransform(dat []float32, idx int) {
+	dat[idx+0] = g.Paint.Transform.XX
+	dat[idx+1] = g.Paint.Transform.YX
+	dat[idx+2] = g.Paint.Transform.XY
+	dat[idx+3] = g.Paint.Transform.YY
+	dat[idx+4] = g.Paint.Transform.X0
+	dat[idx+5] = g.Paint.Transform.Y0
 }
 
-// ReadXForm reads the node transform from slice at starting index.
-func (g *NodeBase) ReadXForm(dat []float32, idx int) {
-	g.Paint.XForm.XX = dat[idx+0]
-	g.Paint.XForm.YX = dat[idx+1]
-	g.Paint.XForm.XY = dat[idx+2]
-	g.Paint.XForm.YY = dat[idx+3]
-	g.Paint.XForm.X0 = dat[idx+4]
-	g.Paint.XForm.Y0 = dat[idx+5]
+// ReadTransform reads the node transform from slice at starting index.
+func (g *NodeBase) ReadTransform(dat []float32, idx int) {
+	g.Paint.Transform.XX = dat[idx+0]
+	g.Paint.Transform.YX = dat[idx+1]
+	g.Paint.Transform.XY = dat[idx+2]
+	g.Paint.Transform.YY = dat[idx+3]
+	g.Paint.Transform.X0 = dat[idx+4]
+	g.Paint.Transform.Y0 = dat[idx+5]
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -244,13 +244,13 @@ func (g *NodeBase) ReadXForm(dat []float32, idx int) {
 // Slice must be passed and will be resized if not the correct length.
 func (g *NodeBase) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 6)
-	g.WriteXForm(*dat, 0)
+	g.WriteTransform(*dat, 0)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
-	g.ReadXForm(dat, 0)
+	g.ReadTransform(dat, 0)
 }
 
 // FirstNonGroupNode returns the first item that is not a group
@@ -359,7 +359,7 @@ func (g *NodeBase) IsDefs() bool {
 
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
 func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
-	mxi := g.ParXForm(true) // include self
+	mxi := g.ParTransform(true) // include self
 	return bb.MulMat2(mxi).ToRect()
 }
 
@@ -379,7 +379,7 @@ func (g *NodeBase) LocalLineWidth() float32 {
 
 // ComputeBBox is called by default in render to compute bounding boxes for
 // gui interaction -- can only be done in rendering because that is when all
-// the proper xforms are all in place -- VpBBox is intersected with parent SVG
+// the proper transforms are all in place -- VpBBox is intersected with parent SVG
 func (g *NodeBase) BBoxes(sv *SVG) {
 	if g.This() == nil {
 		return
@@ -390,10 +390,10 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
-// PushXForm checks our bounding box and visibility, returning false if
-// out of bounds.  If visible, pushes our xform.
+// PushTransform checks our bounding box and visibility, returning false if
+// out of bounds.  If visible, pushes our transform.
 // Must be called as first step in Render.
-func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.Context) {
+func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	g.BBox = image.Rectangle{}
 	if g.Paint.Off || g == nil || g.This() == nil {
 		return false, nil
@@ -413,7 +413,7 @@ func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.Context) {
 	}
 
 	rs := &sv.RenderState
-	rs.PushXFormLock(g.Paint.XForm)
+	rs.PushTransformLock(g.Paint.Transform)
 
 	pc := &paint.Context{rs, &g.Paint}
 	return true, pc
@@ -427,7 +427,7 @@ func (g *NodeBase) RenderChildren(sv *SVG) {
 }
 
 func (g *NodeBase) Render(sv *SVG) {
-	vis, rs := g.PushXForm(sv)
+	vis, rs := g.PushTransform(sv)
 	if !vis {
 		return
 	}
@@ -435,7 +435,7 @@ func (g *NodeBase) Render(sv *SVG) {
 	// render path elements, then compute bbox, then fill / stroke
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopXFormLock()
+	rs.PopTransformLock()
 }
 
 // NodeFlags extend ki.Flags to hold SVG node state

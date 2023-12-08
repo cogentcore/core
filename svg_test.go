@@ -33,7 +33,7 @@ func TestSVG(t *testing.T) {
 			continue
 		}
 		// fmt.Println(sv.Root.ViewBox)
-		sv.SetNormXForm()
+		sv.SetNormTransform()
 		sv.Render()
 		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
 		images.Assert(t, sv.Pixels, imfn)

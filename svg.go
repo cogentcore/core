@@ -214,15 +214,15 @@ func (sv *SVG) Render() {
 		sv.FillViewport()
 	}
 	if sv.Norm {
-		sv.SetNormXForm()
+		sv.SetNormTransform()
 	}
 	sv.Root.Render(sv)
-	// rs.PushXForm(sv.Root.Paint.XForm)
+	// rs.PushTransform(sv.Root.Paint.Transform)
 	// for _, kid := range sv.Root.Kids {
 	// 	ni := kid.(Node)
 	// 	ni.Render()
 	// }
-	// rs.PopXForm()
+	// rs.PopTransform()
 	rs.PopBounds()
 }
 
@@ -233,10 +233,10 @@ func (sv *SVG) FillViewport() {
 	pc.Unlock()
 }
 
-// SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport
-func (sv *SVG) SetNormXForm() {
+// SetNormTransform sets a scaling transform to make the entire viewbox to fit the viewport
+func (sv *SVG) SetNormTransform() {
 	pc := &sv.Root.Paint
-	pc.XForm = mat32.Identity2D()
+	pc.Transform = mat32.Identity2D()
 	vb := &sv.Root.ViewBox
 	if vb.Size != mat32.Vec2Zero {
 		// todo: deal with all the other options!
@@ -245,20 +245,20 @@ func (sv *SVG) SetNormXForm() {
 		if sv.InvertY {
 			vpsY *= -1
 		}
-		pc.XForm = pc.XForm.Scale(vpsX, vpsY).Translate(-vb.Min.X, -vb.Min.Y)
+		pc.Transform = pc.Transform.Scale(vpsX, vpsY).Translate(-vb.Min.X, -vb.Min.Y)
 		if sv.InvertY {
-			pc.XForm.Y0 = -pc.XForm.Y0
+			pc.Transform.Y0 = -pc.Transform.Y0
 		}
 	}
 }
 
-// SetDPIXForm sets a scaling transform to compensate for
+// SetDPITransform sets a scaling transform to compensate for
 // a given LogicalDPI factor.
 // svg rendering is done within a 96 DPI context.
-func (sv *SVG) SetDPIXForm(logicalDPI float32) {
+func (sv *SVG) SetDPITransform(logicalDPI float32) {
 	pc := &sv.Root.Paint
 	dpisc := logicalDPI / 96.0
-	pc.XForm = mat32.Scale2D(dpisc, dpisc)
+	pc.Transform = mat32.Scale2D(dpisc, dpisc)
 }
 
 /*

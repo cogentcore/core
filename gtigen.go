@@ -586,7 +586,7 @@ var MarkerType = gti.AddType(&gti.Type{
 		{"VertexPos", &gti.Field{Name: "VertexPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "current vertex position", Directives: gti.Directives{}, Tag: ""}},
 		{"VertexAngle", &gti.Field{Name: "VertexAngle", Type: "float32", LocalType: "float32", Doc: "current vertex angle in radians", Directives: gti.Directives{}, Tag: ""}},
 		{"StrokeWidth", &gti.Field{Name: "StrokeWidth", Type: "float32", LocalType: "float32", Doc: "current stroke width", Directives: gti.Directives{}, Tag: ""}},
-		{"XForm", &gti.Field{Name: "XForm", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "net transform computed from settings and current values -- applied prior to rendering", Directives: gti.Directives{}, Tag: ""}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "net transform computed from settings and current values -- applied prior to rendering", Directives: gti.Directives{}, Tag: ""}},
 		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective size for actual rendering", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -670,10 +670,10 @@ func (t *Marker) SetStrokeWidth(v float32) *Marker {
 	return t
 }
 
-// SetXform sets the [Marker.XForm]:
+// SetTransform sets the [Marker.Transform]:
 // net transform computed from settings and current values -- applied prior to rendering
-func (t *Marker) SetXform(v mat32.Mat2) *Marker {
-	t.XForm = v
+func (t *Marker) SetTransform(v mat32.Mat2) *Marker {
+	t.Transform = v
 	return t
 }
 

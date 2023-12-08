@@ -39,7 +39,7 @@ type Marker struct {
 	StrokeWidth float32
 
 	// net transform computed from settings and current values -- applied prior to rendering
-	XForm mat32.Mat2
+	Transform mat32.Mat2
 
 	// effective size for actual rendering
 	EffSize mat32.Vec2
@@ -60,7 +60,7 @@ func (g *Marker) CopyFieldsFrom(frm any) {
 	g.VertexPos = fr.VertexPos
 	g.VertexAngle = fr.VertexAngle
 	g.StrokeWidth = fr.StrokeWidth
-	g.XForm = fr.XForm
+	g.Transform = fr.Transform
 	g.EffSize = fr.EffSize
 }
 
@@ -92,11 +92,11 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos mat32.Vec2, vertexAng, stroke
 	if mrk.ViewBox.Size.IsNil() {
 		mrk.ViewBox.Size = mat32.Vec2{3, 3}
 	}
-	mrk.XForm = mat32.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
-	mrk.XForm.X0 += vertexPos.X
-	mrk.XForm.Y0 += vertexPos.Y
+	mrk.Transform = mat32.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
+	mrk.Transform.X0 += vertexPos.X
+	mrk.Transform.Y0 += vertexPos.Y
 
-	mrk.Paint.XForm = mrk.XForm
+	mrk.Paint.Transform = mrk.Transform
 
 	mrk.Render(sv)
 }
@@ -104,12 +104,12 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos mat32.Vec2, vertexAng, stroke
 func (g *Marker) Render(sv *SVG) {
 	pc := &g.Paint
 	rs := &sv.RenderState
-	rs.PushXFormLock(pc.XForm)
+	rs.PushTransformLock(pc.Transform)
 
 	g.RenderChildren(sv)
 	g.BBoxes(sv) // must come after render
 
-	rs.PopXFormLock()
+	rs.PopTransformLock()
 }
 
 func (g *Marker) BBoxes(sv *SVG) {

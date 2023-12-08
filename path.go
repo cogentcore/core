@@ -72,7 +72,7 @@ func (g *Path) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, pc := g.PushXForm(sv)
+	vis, pc := g.PushTransform(sv)
 	if !vis {
 		return
 	}
@@ -114,7 +114,7 @@ func (g *Path) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	pc.PopXFormLock()
+	pc.PopTransformLock()
 }
 
 // PathCmds are the commands within the path SVG drawing data type
@@ -881,16 +881,16 @@ func PathDataString(data []PathData) string {
 //////////////////////////////////////////////////////////////////////////////////
 //  Transforms
 
-// ApplyXForm applies the given 2D transform to the geometry of this node
+// ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Path) ApplyXForm(sv *SVG, xf mat32.Mat2) {
+func (g *Path) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	// path may have horiz, vert elements -- only gen soln is to transform
-	g.Paint.XForm = g.Paint.XForm.Mul(xf)
-	g.SetProp("transform", g.Paint.XForm.String())
+	g.Paint.Transform = g.Paint.Transform.Mul(xf)
+	g.SetProp("transform", g.Paint.Transform.String())
 }
 
-// PathDataXFormAbs does the transform of next two data points as absolute coords
-func PathDataXFormAbs(data []PathData, i *int, xf mat32.Mat2, lpt mat32.Vec2) mat32.Vec2 {
+// PathDataTransformAbs does the transform of next two data points as absolute coords
+func PathDataTransformAbs(data []PathData, i *int, xf mat32.Mat2, lpt mat32.Vec2) mat32.Vec2 {
 	cp := PathDataNextVec(data, i)
 	tc := xf.MulVec2AsPtCtr(cp, lpt)
 	data[*i-2] = PathData(tc.X)
@@ -898,9 +898,9 @@ func PathDataXFormAbs(data []PathData, i *int, xf mat32.Mat2, lpt mat32.Vec2) ma
 	return tc
 }
 
-// PathDataXFormRel does the transform of next two data points as relative coords
+// PathDataTransformRel does the transform of next two data points as relative coords
 // compared to given cp coordinate.  returns new *absolute* coordinate
-func PathDataXFormRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat32.Vec2 {
+func PathDataTransformRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat32.Vec2 {
 	rp := PathDataNextVec(data, i)
 	tc := xf.MulVec2AsVec(rp)
 	data[*i-2] = PathData(tc.X)
@@ -908,26 +908,26 @@ func PathDataXFormRel(data []PathData, i *int, xf mat32.Mat2, cp mat32.Vec2) mat
 	return cp.Add(tc) // new abs
 }
 
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 // relative to given point.  Trans translation and point are in top-level coordinates,
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Path) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Paint.XForm.ExtractRot()
+func (g *Path) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		g.Paint.XForm = g.Paint.XForm.MulCtr(xf, lpt)
-		g.SetProp("transform", g.Paint.XForm.String())
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
+		g.Paint.Transform = g.Paint.Transform.MulCtr(xf, lpt)
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
-		g.ApplyXFormImpl(xf, lpt)
-		g.GradientApplyXFormPt(sv, xf, lpt)
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
+		g.ApplyTransformImpl(xf, lpt)
+		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }
 
-// ApplyXFormImpl does the implementation of applying a transform to all points
-func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
+// ApplyTransformImpl does the implementation of applying a transform to all points
+func (g *Path) ApplyTransformImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 	sz := len(g.Data)
 	data := g.Data
 	lastCmd := PcErr
@@ -938,28 +938,28 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 		rel := false
 		switch cmd {
 		case PcM:
-			cp = PathDataXFormAbs(data, &i, xf, lpt)
+			cp = PathDataTransformAbs(data, &i, xf, lpt)
 			st = cp
 			for np := 1; np < n/2; np++ {
-				cp = PathDataXFormAbs(data, &i, xf, lpt)
+				cp = PathDataTransformAbs(data, &i, xf, lpt)
 			}
 		case Pcm:
 			if i == 1 { // starting
-				cp = PathDataXFormAbs(data, &i, xf, lpt)
+				cp = PathDataTransformAbs(data, &i, xf, lpt)
 			} else {
-				cp = PathDataXFormRel(data, &i, xf, cp)
+				cp = PathDataTransformRel(data, &i, xf, cp)
 			}
 			st = cp
 			for np := 1; np < n/2; np++ {
-				cp = PathDataXFormRel(data, &i, xf, cp)
+				cp = PathDataTransformRel(data, &i, xf, cp)
 			}
 		case PcL:
 			for np := 0; np < n/2; np++ {
-				cp = PathDataXFormAbs(data, &i, xf, lpt)
+				cp = PathDataTransformAbs(data, &i, xf, lpt)
 			}
 		case Pcl:
 			for np := 0; np < n/2; np++ {
-				cp = PathDataXFormRel(data, &i, xf, cp)
+				cp = PathDataTransformRel(data, &i, xf, cp)
 			}
 		case PcH:
 			for np := 0; np < n; np++ {
@@ -991,15 +991,15 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 			}
 		case PcC:
 			for np := 0; np < n/6; np++ {
-				xp = PathDataXFormAbs(data, &i, xf, lpt)
-				ctrl = PathDataXFormAbs(data, &i, xf, lpt)
-				cp = PathDataXFormAbs(data, &i, xf, lpt)
+				xp = PathDataTransformAbs(data, &i, xf, lpt)
+				ctrl = PathDataTransformAbs(data, &i, xf, lpt)
+				cp = PathDataTransformAbs(data, &i, xf, lpt)
 			}
 		case Pcc:
 			for np := 0; np < n/6; np++ {
-				xp = PathDataXFormRel(data, &i, xf, cp)
-				ctrl = PathDataXFormRel(data, &i, xf, cp)
-				cp = PathDataXFormRel(data, &i, xf, cp)
+				xp = PathDataTransformRel(data, &i, xf, cp)
+				ctrl = PathDataTransformRel(data, &i, xf, cp)
+				cp = PathDataTransformRel(data, &i, xf, cp)
 			}
 		case Pcs:
 			rel = true
@@ -1013,24 +1013,24 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 					ctrl = cp
 				}
 				if rel {
-					xp = PathDataXFormRel(data, &i, xf, cp)
-					cp = PathDataXFormRel(data, &i, xf, cp)
+					xp = PathDataTransformRel(data, &i, xf, cp)
+					cp = PathDataTransformRel(data, &i, xf, cp)
 				} else {
-					xp = PathDataXFormAbs(data, &i, xf, lpt)
-					cp = PathDataXFormAbs(data, &i, xf, lpt)
+					xp = PathDataTransformAbs(data, &i, xf, lpt)
+					cp = PathDataTransformAbs(data, &i, xf, lpt)
 				}
 				lastCmd = cmd
 				ctrl = xp
 			}
 		case PcQ:
 			for np := 0; np < n/4; np++ {
-				ctrl = PathDataXFormAbs(data, &i, xf, lpt)
-				cp = PathDataXFormAbs(data, &i, xf, lpt)
+				ctrl = PathDataTransformAbs(data, &i, xf, lpt)
+				cp = PathDataTransformAbs(data, &i, xf, lpt)
 			}
 		case Pcq:
 			for np := 0; np < n/4; np++ {
-				ctrl = PathDataXFormRel(data, &i, xf, cp)
-				cp = PathDataXFormRel(data, &i, xf, cp)
+				ctrl = PathDataTransformRel(data, &i, xf, cp)
+				cp = PathDataTransformRel(data, &i, xf, cp)
 			}
 		case Pct:
 			rel = true
@@ -1044,9 +1044,9 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 					ctrl = cp
 				}
 				if rel {
-					cp = PathDataXFormRel(data, &i, xf, cp)
+					cp = PathDataTransformRel(data, &i, xf, cp)
 				} else {
-					cp = PathDataXFormAbs(data, &i, xf, lpt)
+					cp = PathDataTransformAbs(data, &i, xf, lpt)
 				}
 				lastCmd = cmd
 			}
@@ -1055,15 +1055,15 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 			fallthrough
 		case PcA:
 			for np := 0; np < n/7; np++ {
-				rad := PathDataXFormRel(data, &i, xf, mat32.Vec2{})
+				rad := PathDataTransformRel(data, &i, xf, mat32.Vec2{})
 				ang := PathDataNext(data, &i)
 				largeArc := (PathDataNext(data, &i) != 0)
 				sweep := (PathDataNext(data, &i) != 0)
 				pc := cp
 				if rel {
-					cp = PathDataXFormRel(data, &i, xf, cp)
+					cp = PathDataTransformRel(data, &i, xf, cp)
 				} else {
-					cp = PathDataXFormAbs(data, &i, xf, lpt)
+					cp = PathDataTransformAbs(data, &i, xf, lpt)
 				}
 				ncx, ncy := paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, pc.X, pc.Y, cp.X, cp.Y, sweep, largeArc)
 				_ = ncx
@@ -1088,7 +1088,7 @@ func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
 	for i := range g.Data {
 		(*dat)[i] = float32(g.Data[i])
 	}
-	g.WriteXForm(*dat, sz)
+	g.WriteTransform(*dat, sz)
 	g.GradientWritePts(sv, dat)
 }
 
@@ -1099,6 +1099,6 @@ func (g *Path) ReadGeom(sv *SVG, dat []float32) {
 	for i := range g.Data {
 		g.Data[i] = PathData(dat[i])
 	}
-	g.ReadXForm(dat, sz)
+	g.ReadTransform(dat, sz)
 	g.GradientReadPts(sv, dat)
 }

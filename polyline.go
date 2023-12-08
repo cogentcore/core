@@ -49,7 +49,7 @@ func (g *Polyline) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, pc := g.PushXForm(sv)
+	vis, pc := g.PushTransform(sv)
 	if !vis {
 		return
 	}
@@ -82,44 +82,44 @@ func (g *Polyline) Render(sv *SVG) {
 	}
 
 	g.RenderChildren(sv)
-	pc.PopXFormLock()
+	pc.PopTransformLock()
 }
 
-// ApplyXForm applies the given 2D transform to the geometry of this node
+// ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Polyline) ApplyXForm(sv *SVG, xf mat32.Mat2) {
+func (g *Polyline) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.XForm.IsIdentity() {
-		g.Paint.XForm = g.Paint.XForm.Mul(xf)
-		g.SetProp("transform", g.Paint.XForm.String())
+	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+		g.Paint.Transform = g.Paint.Transform.Mul(xf)
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		for i, p := range g.Points {
 			p = xf.MulVec2AsPt(p)
 			g.Points[i] = p
 		}
-		g.GradientApplyXForm(sv, xf)
+		g.GradientApplyTransform(sv, xf)
 	}
 }
 
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 // relative to given point.  Trans translation and point are in top-level coordinates,
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Polyline) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Paint.XForm.ExtractRot()
+func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Paint.XForm.MulCtr(xf, lpt)
-		g.Paint.XForm = mat
-		g.SetProp("transform", g.Paint.XForm.String())
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
+		mat := g.Paint.Transform.MulCtr(xf, lpt)
+		g.Paint.Transform = mat
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		for i, p := range g.Points {
 			p = xf.MulVec2AsPtCtr(p, lpt)
 			g.Points[i] = p
 		}
-		g.GradientApplyXFormPt(sv, xf, lpt)
+		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }
 
@@ -133,7 +133,7 @@ func (g *Polyline) WriteGeom(sv *SVG, dat *[]float32) {
 		(*dat)[i*2] = p.X
 		(*dat)[i*2+1] = p.Y
 	}
-	g.WriteXForm(*dat, sz)
+	g.WriteTransform(*dat, sz)
 	g.GradientWritePts(sv, dat)
 }
 
@@ -146,6 +146,6 @@ func (g *Polyline) ReadGeom(sv *SVG, dat []float32) {
 		p.Y = dat[i*2+1]
 		g.Points[i] = p
 	}
-	g.ReadXForm(dat, sz)
+	g.ReadTransform(dat, sz)
 	g.GradientReadPts(sv, dat)
 }

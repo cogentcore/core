@@ -47,31 +47,31 @@ func (g *Group) Render(sv *SVG) {
 	if pc.Off || rs == nil {
 		return
 	}
-	rs.PushXFormLock(pc.XForm)
+	rs.PushTransformLock(pc.Transform)
 
 	g.RenderChildren(sv)
 	g.BBoxes(sv) // must come after render
 
-	rs.PopXFormLock()
+	rs.PopTransformLock()
 }
 
-// ApplyXForm applies the given 2D transform to the geometry of this node
+// ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Group) ApplyXForm(sv *SVG, xf mat32.Mat2) {
-	g.Paint.XForm = xf.Mul(g.Paint.XForm)
-	g.SetProp("transform", g.Paint.XForm.String())
+func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+	g.Paint.Transform = xf.Mul(g.Paint.Transform)
+	g.SetProp("transform", g.Paint.Transform.String())
 }
 
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 // relative to given point.  Trans translation and point are in top-level coordinates,
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Group) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // group does NOT include self
-	mat := g.Paint.XForm.MulCtr(xf, lpt)
-	g.Paint.XForm = mat
-	g.SetProp("transform", g.Paint.XForm.String())
+func (g *Group) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
+	mat := g.Paint.Transform.MulCtr(xf, lpt)
+	g.Paint.Transform = mat
+	g.SetProp("transform", g.Paint.Transform.String())
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -79,11 +79,11 @@ func (g *Group) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot
 // Slice must be passed and will be resized if not the correct length.
 func (g *Group) WriteGeom(sv *SVG, dat *[]float32) {
 	SetFloat32SliceLen(dat, 6)
-	g.WriteXForm(*dat, 0)
+	g.WriteTransform(*dat, 0)
 }
 
 // ReadGeom reads the geometry of the node from a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 func (g *Group) ReadGeom(sv *SVG, dat []float32) {
-	g.ReadXForm(dat, 0)
+	g.ReadTransform(dat, 0)
 }

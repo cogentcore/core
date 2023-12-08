@@ -91,14 +91,14 @@ func (g *Text) SetPos(pos mat32.Vec2) *Text {
 	g.Pos = pos
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
-		kt.Pos = g.Paint.XForm.MulVec2AsPt(pos)
+		kt.Pos = g.Paint.Transform.MulVec2AsPt(pos)
 	}
 	return g
 }
 
 func (g *Text) SetSize(sz mat32.Vec2) *Text {
 	g.Width = sz.X
-	scx, _ := g.Paint.XForm.ExtractScale()
+	scx, _ := g.Paint.Transform.ExtractScale()
 	for _, kii := range g.Kids {
 		kt := kii.(*Text)
 		kt.Width = g.Width * scx
@@ -185,9 +185,9 @@ func (g *Text) TextBBox() mat32.Box2 {
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Context{&sv.RenderState, &g.Paint}
 	orgsz := pc.FontStyle.Size
-	pos := pc.CurXForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
-	rot := pc.CurXForm.ExtractRot()
-	scx, scy := pc.CurXForm.ExtractScale()
+	pos := pc.CurTransform.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
+	rot := pc.CurTransform.ExtractRot()
+	scx, scy := pc.CurTransform.ExtractScale()
 	scalex := scx / scy
 	if scalex == 1 {
 		scalex = 0
@@ -212,7 +212,7 @@ func (g *Text) RenderText(sv *SVG) {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {
-		sr.Render[i].RelPos = pc.CurXForm.MulVec2AsVec(sr.Render[i].RelPos)
+		sr.Render[i].RelPos = pc.CurTransform.MulVec2AsVec(sr.Render[i].RelPos)
 		sr.Render[i].Size.Y *= scy
 		sr.Render[i].Size.X *= scx
 	}
@@ -221,21 +221,21 @@ func (g *Text) RenderText(sv *SVG) {
 		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
 			// todo: this may not be fully correct, given relativity constraints
-			cpx := pc.CurXForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
+			cpx := pc.CurTransform.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
 			sr.Render[i].RelPos.X = cpx.X
 		}
 	}
 	if len(g.CharPosY) > 0 {
 		mx := min(len(g.CharPosY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			cpy := pc.CurXForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
+			cpy := pc.CurTransform.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
 			sr.Render[i].RelPos.Y = cpy.Y
 		}
 	}
 	if len(g.CharPosDX) > 0 {
 		mx := min(len(g.CharPosDX), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dx := pc.CurXForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
+			dx := pc.CurTransform.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
 			if i > 0 {
 				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
 			} else {
@@ -246,7 +246,7 @@ func (g *Text) RenderText(sv *SVG) {
 	if len(g.CharPosDY) > 0 {
 		mx := min(len(g.CharPosDY), len(sr.Render))
 		for i := 0; i < mx; i++ {
-			dy := pc.CurXForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
+			dy := pc.CurTransform.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
 			if i > 0 {
 				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
 			} else {
@@ -281,14 +281,14 @@ func (g *Text) Render(sv *SVG) {
 	if g.IsParText() {
 		pc := &g.Paint
 		rs := &sv.RenderState
-		rs.PushXFormLock(pc.XForm)
+		rs.PushTransformLock(pc.Transform)
 
 		g.RenderChildren(sv)
 		g.BBoxes(sv) // must come after render
 
-		rs.PopXFormLock()
+		rs.PopTransformLock()
 	} else {
-		vis, rs := g.PushXForm(sv)
+		vis, rs := g.PushTransform(sv)
 		if !vis {
 			return
 		}
@@ -301,55 +301,55 @@ func (g *Text) Render(sv *SVG) {
 		if g.IsParText() {
 			g.BBoxes(sv) // after kids have rendered
 		}
-		rs.PopXFormLock()
+		rs.PopTransformLock()
 	}
 }
 
-// ApplyXForm applies the given 2D transform to the geometry of this node
+// ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Text) ApplyXForm(sv *SVG, xf mat32.Mat2) {
+func (g *Text) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.XForm.IsIdentity() {
-		g.Paint.XForm = g.Paint.XForm.Mul(xf)
-		g.SetProp("transform", g.Paint.XForm.String())
+	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+		g.Paint.Transform = g.Paint.Transform.Mul(xf)
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		if g.IsParText() {
 			for _, kii := range g.Kids {
 				kt := kii.(*Text)
-				kt.ApplyXForm(sv, xf)
+				kt.ApplyTransform(sv, xf)
 			}
 		} else {
 			g.Pos = xf.MulVec2AsPt(g.Pos)
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
-			g.GradientApplyXForm(sv, xf)
+			g.GradientApplyTransform(sv, xf)
 		}
 	}
 }
 
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 // relative to given point.  Trans translation and point are in top-level coordinates,
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Text) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Paint.XForm.ExtractRot()
+func (g *Text) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Paint.XForm.MulCtr(xf, lpt)
-		g.Paint.XForm = mat
-		g.SetProp("transform", g.Paint.XForm.String())
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
+		mat := g.Paint.Transform.MulCtr(xf, lpt)
+		g.Paint.Transform = mat
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		if g.IsParText() {
 			// translation transform
-			xft, lptt := g.DeltaXForm(trans, scale, rot, pt, true) // include self when not a parent
+			xft, lptt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
 			// transform transform
-			xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false)
+			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false)
 			xf.X0 = 0 // negate translation effects
 			xf.Y0 = 0
-			mat := g.Paint.XForm.MulCtr(xf, lpt)
-			g.Paint.XForm = mat
-			g.SetProp("transform", g.Paint.XForm.String())
+			mat := g.Paint.Transform.MulCtr(xf, lpt)
+			g.Paint.Transform = mat
+			g.SetProp("transform", g.Paint.Transform.String())
 
 			g.Pos = xft.MulVec2AsPtCtr(g.Pos, lptt)
 			scx, _ := xft.ExtractScale()
@@ -360,7 +360,7 @@ func (g *Text) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot 
 				kt.Width *= scx
 			}
 		} else {
-			xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self when not a parent
+			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
 			g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
@@ -378,7 +378,7 @@ func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
 		(*dat)[0] = g.Pos.X
 		(*dat)[1] = g.Pos.Y
 		(*dat)[2] = g.Width
-		g.WriteXForm(*dat, 3)
+		g.WriteTransform(*dat, 3)
 		for i, kii := range g.Kids {
 			kt := kii.(*Text)
 			off := 9 + i*3
@@ -391,7 +391,7 @@ func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
 		(*dat)[0] = g.Pos.X
 		(*dat)[1] = g.Pos.Y
 		(*dat)[2] = g.Width
-		g.WriteXForm(*dat, 3)
+		g.WriteTransform(*dat, 3)
 	}
 }
 
@@ -401,7 +401,7 @@ func (g *Text) ReadGeom(sv *SVG, dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Width = dat[2]
-	g.ReadXForm(dat, 3)
+	g.ReadTransform(dat, 3)
 	if g.IsParText() {
 		for i, kii := range g.Kids {
 			kt := kii.(*Text)

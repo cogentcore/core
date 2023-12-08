@@ -60,43 +60,43 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 	return gr
 }
 
-// GradientApplyXForm applies the given transform to any gradients for this node,
+// GradientApplyTransform applies the given transform to any gradients for this node,
 // that are using specific coordinates (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyXForm(sv *SVG, xf mat32.Mat2) {
+func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyXForm(xf)
+			gr.Grad.Gradient.ApplyTransform(xf)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyXForm(xf)
+			gr.Grad.Gradient.ApplyTransform(xf)
 		}
 	}
 }
 
-// GradientApplyXFormPt applies the given transform with ctr point
+// GradientApplyTransformPt applies the given transform with ctr point
 // to any gradients for this node, that are using specific coordinates
 // (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyXFormPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec2) {
+func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyXFormPt(xf, pt)
+			gr.Grad.Gradient.ApplyTransformPt(xf, pt)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyXFormPt(xf, pt)
+			gr.Grad.Gradient.ApplyTransformPt(xf, pt)
 		}
 	}
 }

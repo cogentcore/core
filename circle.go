@@ -51,7 +51,7 @@ func (g *Circle) LocalBBox() mat32.Box2 {
 }
 
 func (g *Circle) Render(sv *SVG) {
-	vis, pc := g.PushXForm(sv)
+	vis, pc := g.PushTransform(sv)
 	if !vis {
 		return
 	}
@@ -63,42 +63,42 @@ func (g *Circle) Render(sv *SVG) {
 	g.BBoxes(sv)
 	g.RenderChildren(sv)
 
-	pc.PopXFormLock()
+	pc.PopTransformLock()
 }
 
-// ApplyXForm applies the given 2D transform to the geometry of this node
+// ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Circle) ApplyXForm(sv *SVG, xf mat32.Mat2) {
+func (g *Circle) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.XForm.IsIdentity() {
-		g.Paint.XForm = g.Paint.XForm.Mul(xf)
-		g.SetProp("transform", g.Paint.XForm.String())
+	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+		g.Paint.Transform = g.Paint.Transform.Mul(xf)
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
 		g.Pos = xf.MulVec2AsPt(g.Pos)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
-		g.GradientApplyXForm(sv, xf)
+		g.GradientApplyTransform(sv, xf)
 	}
 }
 
-// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 // relative to given point.  Trans translation and point are in top-level coordinates,
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Circle) ApplyDeltaXForm(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
-	crot := g.Paint.XForm.ExtractRot()
+func (g *Circle) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, false) // exclude self
-		mat := g.Paint.XForm.MulCtr(xf, lpt)
-		g.Paint.XForm = mat
-		g.SetProp("transform", g.Paint.XForm.String())
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
+		mat := g.Paint.Transform.MulCtr(xf, lpt)
+		g.Paint.Transform = mat
+		g.SetProp("transform", g.Paint.Transform.String())
 	} else {
-		xf, lpt := g.DeltaXForm(trans, scale, rot, pt, true) // include self
+		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
-		g.GradientApplyXFormPt(sv, xf, lpt)
+		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }
 
@@ -110,7 +110,7 @@ func (g *Circle) WriteGeom(sv *SVG, dat *[]float32) {
 	(*dat)[0] = g.Pos.X
 	(*dat)[1] = g.Pos.Y
 	(*dat)[2] = g.Radius
-	g.WriteXForm(*dat, 3)
+	g.WriteTransform(*dat, 3)
 	g.GradientWritePts(sv, dat)
 }
 
@@ -120,6 +120,6 @@ func (g *Circle) ReadGeom(sv *SVG, dat []float32) {
 	g.Pos.X = dat[0]
 	g.Pos.Y = dat[1]
 	g.Radius = dat[2]
-	g.ReadXForm(dat, 3)
+	g.ReadTransform(dat, 3)
 	g.GradientReadPts(sv, dat)
 }
