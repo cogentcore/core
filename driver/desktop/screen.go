@@ -177,7 +177,6 @@ func (a *App) GetScreens() {
 			a.Screens[1].ScreenNumber = 1
 		}
 	}
-	a.Mu.Unlock()
 }
 
 // SaveScreenInfo saves a copy of given screen info to screensAll list if unique

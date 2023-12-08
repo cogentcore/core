@@ -47,6 +47,7 @@ type App struct {
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.InitVk()
+	TheApp.This = TheApp
 	goosi.TheApp = TheApp
 	go func() {
 		f(TheApp)
@@ -139,6 +140,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 		glw:         glw,
 		scrnName:    sc.Name,
 	}
+	w.This = w
 	w.Draw = &vdraw.Drawer{}
 	w.EvMgr.Deque = &w.Deque
 
