@@ -15,13 +15,15 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true, Size: 32}}
+// TheCursor is the single [goosi.Cursor] for the web platform
+var TheCursor = Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}}
 
-type cursorImpl struct {
+// Cursor is the [cursor.Cursor] implementation on the web platform
+type Cursor struct {
 	cursor.CursorBase
 }
 
-func (c *cursorImpl) Set(cursor enums.Enum) error {
+func (cu *Cursor) Set(cursor enums.Enum) error {
 	s := cursor.String()
 	// css calls it default, not arrow
 	if cursor == cursors.Arrow {

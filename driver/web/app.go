@@ -20,10 +20,12 @@ import (
 	"goki.dev/goosi/events/key"
 )
 
-var theApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
+// TheApp is the single [goosi.App] for the web platform
+var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
-var _ goosi.App = theApp
+var _ goosi.App = TheApp
 
+// App is the [goosi.App] implementation on the web platform
 type App struct {
 	base.AppSingle[*Drawer, *Window]
 
@@ -38,17 +40,14 @@ type App struct {
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	defer func() { base.HandleRecover(recover()) }()
-	theApp.addEventListeners()
-	goosi.TheApp = theApp
+	TheApp.AddEventListeners()
+	goosi.TheApp = TheApp
 	go func() {
-		f(theApp)
-		theApp.StopMain()
+		f(TheApp)
+		TheApp.StopMain()
 	}()
-	theApp.MainLoop()
+	TheApp.MainLoop()
 }
-
-////////////////////////////////////////////////////////
-//  Window
 
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
@@ -58,15 +57,15 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 
 	app.Win = &Window{base.NewWindowSingle(app, opts)}
 	app.Win.EvMgr.Deque = &app.Win.Deque
-	app.setSysWindow()
+	app.SetSysWindow()
 
 	go app.Win.WinLoop()
 
 	return app.Win, nil
 }
 
-// setSysWindow sets the underlying system window information.
-func (app *App) setSysWindow() {
+// SetSysWindow sets the underlying system window information.
+func (app *App) SetSysWindow() {
 	defer func() { base.HandleRecover(recover()) }()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()
@@ -80,14 +79,14 @@ func (app *App) setSysWindow() {
 		app.platform = goosi.Windows
 	}
 
-	app.resize()
+	app.Resize()
 	app.Win.EvMgr.Window(events.WinShow)
 	app.Win.EvMgr.Window(events.ScreenUpdate)
 	app.Win.EvMgr.Window(events.WinFocus)
 }
 
-// resize updates the app sizing information and sends a resize event.
-func (app *App) resize() {
+// Resize updates the app sizing information and sends a Resize event.
+func (app *App) Resize() {
 	app.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
 	dpi := 160 * app.Scrn.DevicePixelRatio
 	app.Scrn.PhysicalDPI = dpi
@@ -128,11 +127,11 @@ func (app *App) OpenURL(url string) {
 }
 
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
-	return &theClip
+	return &TheClip
 }
 
 func (app *App) Cursor(win goosi.Window) cursor.Cursor {
-	return &theCursor
+	return &TheCursor
 }
 
 func (app *App) IsDark() bool {

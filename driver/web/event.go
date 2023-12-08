@@ -14,32 +14,32 @@ import (
 	"goki.dev/goosi/events/key"
 )
 
-func (app *App) addEventListeners() {
+func (app *App) AddEventListeners() {
 	g := js.Global()
-	g.Call("addEventListener", "mousedown", js.FuncOf(app.onMouseDown))
-	g.Call("addEventListener", "touchstart", js.FuncOf(app.onTouchStart))
-	g.Call("addEventListener", "mouseup", js.FuncOf(app.onMouseUp))
-	g.Call("addEventListener", "touchend", js.FuncOf(app.onTouchEnd))
-	g.Call("addEventListener", "mousemove", js.FuncOf(app.onMouseMove))
-	g.Call("addEventListener", "touchmove", js.FuncOf(app.onTouchMove))
-	g.Call("addEventListener", "contextmenu", js.FuncOf(app.onContextMenu))
-	g.Call("addEventListener", "keydown", js.FuncOf(app.onKeyDown))
-	g.Call("addEventListener", "keyup", js.FuncOf(app.onKeyUp))
-	g.Call("addEventListener", "beforeinput", js.FuncOf(app.onBeforeInput))
-	g.Call("addEventListener", "resize", js.FuncOf(app.onResize))
+	g.Call("addEventListener", "mousedown", js.FuncOf(app.OnMouseDown))
+	g.Call("addEventListener", "touchstart", js.FuncOf(app.OnTouchStart))
+	g.Call("addEventListener", "mouseup", js.FuncOf(app.OnMouseUp))
+	g.Call("addEventListener", "touchend", js.FuncOf(app.OnTouchEnd))
+	g.Call("addEventListener", "mousemove", js.FuncOf(app.OnMouseMove))
+	g.Call("addEventListener", "touchmove", js.FuncOf(app.OnTouchMove))
+	g.Call("addEventListener", "contextmenu", js.FuncOf(app.OnContextMenu))
+	g.Call("addEventListener", "keydown", js.FuncOf(app.OnKeyDown))
+	g.Call("addEventListener", "keyup", js.FuncOf(app.OnKeyUp))
+	g.Call("addEventListener", "beforeinput", js.FuncOf(app.OnBeforeInput))
+	g.Call("addEventListener", "resize", js.FuncOf(app.OnResize))
 }
 
-// eventPos returns the appropriate position for the given event,
+// EventPos returns the appropriate position for the given event,
 // multiplying the x and y components by the device pixel ratio
 // so that they line up correctly with the canvas.
-func (app *App) eventPos(e js.Value) image.Point {
+func (app *App) EventPos(e js.Value) image.Point {
 	xi, yi := e.Get("clientX").Int(), e.Get("clientY").Int()
 	xi = int(float32(xi) * app.Scrn.DevicePixelRatio)
 	yi = int(float32(yi) * app.Scrn.DevicePixelRatio)
 	return image.Pt(xi, yi)
 }
 
-func (app *App) onMouseDown(this js.Value, args []js.Value) any {
+func (app *App) OnMouseDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	but := e.Get("button").Int()
 	var ebut events.Buttons
@@ -51,25 +51,25 @@ func (app *App) onMouseDown(this js.Value, args []js.Value) any {
 	case 2:
 		ebut = events.Right
 	}
-	where := app.eventPos(e)
+	where := app.EventPos(e)
 	app.Win.EvMgr.MouseButton(events.MouseDown, ebut, where, app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onTouchStart(this js.Value, args []js.Value) any {
+func (app *App) OnTouchStart(this js.Value, args []js.Value) any {
 	e := args[0]
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
-		where := app.eventPos(touch)
+		where := app.EventPos(touch)
 		app.Win.EvMgr.MouseButton(events.MouseDown, events.Left, where, 0)
 	}
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onMouseUp(this js.Value, args []js.Value) any {
+func (app *App) OnMouseUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	but := e.Get("button").Int()
 	var ebut events.Buttons
@@ -81,45 +81,45 @@ func (app *App) onMouseUp(this js.Value, args []js.Value) any {
 	case 2:
 		ebut = events.Right
 	}
-	where := app.eventPos(e)
+	where := app.EventPos(e)
 	app.Win.EvMgr.MouseButton(events.MouseUp, ebut, where, app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onTouchEnd(this js.Value, args []js.Value) any {
+func (app *App) OnTouchEnd(this js.Value, args []js.Value) any {
 	e := args[0]
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
-		where := app.eventPos(touch)
+		where := app.EventPos(touch)
 		app.Win.EvMgr.MouseButton(events.MouseUp, events.Left, where, 0)
 	}
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onMouseMove(this js.Value, args []js.Value) any {
+func (app *App) OnMouseMove(this js.Value, args []js.Value) any {
 	e := args[0]
-	where := app.eventPos(e)
+	where := app.EventPos(e)
 	app.Win.EvMgr.MouseMove(where)
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onTouchMove(this js.Value, args []js.Value) any {
+func (app *App) OnTouchMove(this js.Value, args []js.Value) any {
 	e := args[0]
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
-		where := app.eventPos(touch)
+		where := app.EventPos(touch)
 		app.Win.EvMgr.MouseMove(where)
 	}
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onContextMenu(this js.Value, args []js.Value) any {
+func (app *App) OnContextMenu(this js.Value, args []js.Value) any {
 	// no-op (we handle elsewhere), but needed to prevent browser
 	// from making its own context menus on right clicks
 	e := args[0]
@@ -127,9 +127,9 @@ func (app *App) onContextMenu(this js.Value, args []js.Value) any {
 	return nil
 }
 
-// runeAndCodeFromKey returns the rune and key code corresponding to the given key string.
+// RuneAndCodeFromKey returns the rune and key code corresponding to the given key string.
 // down is whether this is from a keyDown event (as opposed to a keyUp one)
-func (app *App) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
+func (app *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	switch k {
 	case "Shift":
 		app.keyMods.SetFlag(down, key.Shift)
@@ -166,31 +166,31 @@ func (app *App) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	}
 }
 
-func (app *App) onKeyDown(this js.Value, args []js.Value) any {
+func (app *App) OnKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
 	if k == "Unidentified" {
 		return nil
 	}
-	r, c := app.runeAndCodeFromKey(k, true)
+	r, c := app.RuneAndCodeFromKey(k, true)
 	app.Win.EvMgr.Key(events.KeyDown, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onKeyUp(this js.Value, args []js.Value) any {
+func (app *App) OnKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
 	if k == "Unidentified" {
 		return nil
 	}
-	r, c := app.runeAndCodeFromKey(k, false)
+	r, c := app.RuneAndCodeFromKey(k, false)
 	app.Win.EvMgr.Key(events.KeyUp, r, c, app.keyMods)
 	e.Call("preventDefault")
 	return nil
 }
 
-func (app *App) onBeforeInput(this js.Value, args []js.Value) any {
+func (app *App) OnBeforeInput(this js.Value, args []js.Value) any {
 	e := args[0]
 	data := e.Get("data").String()
 	if data == "" {
@@ -203,7 +203,7 @@ func (app *App) onBeforeInput(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *App) onResize(this js.Value, args []js.Value) any {
-	app.resize()
+func (app *App) OnResize(this js.Value, args []js.Value) any {
+	app.Resize()
 	return nil
 }

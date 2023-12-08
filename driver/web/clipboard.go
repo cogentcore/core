@@ -14,17 +14,18 @@ import (
 
 // TODO(kai/web): support copying images and other mime formats, etc
 
-type clipImpl struct {
-}
+// TheClip is the single [clip.Board] for the offscreen platform
+var TheClip = Clip{}
 
-var theClip = clipImpl{}
+// Clip is the [clip.Board] implementation on the web platform
+type Clip struct{}
 
-func (ci *clipImpl) IsEmpty() bool {
+func (cl *Clip) IsEmpty() bool {
 	// no-op
 	return false
 }
 
-func (ci *clipImpl) Read(types []string) mimedata.Mimes {
+func (cl *Clip) Read(types []string) mimedata.Mimes {
 	str := make(chan string)
 	js.Global().Get("navigator").Get("clipboard").Call("readText").
 		Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -34,7 +35,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	return mimedata.NewText(<-str)
 }
 
-func (ci *clipImpl) Write(data mimedata.Mimes) error {
+func (cl *Clip) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -52,6 +53,6 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	return nil
 }
 
-func (ci *clipImpl) Clear() {
-	// nop
+func (cl *Clip) Clear() {
+	// no-op
 }
