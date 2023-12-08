@@ -142,7 +142,7 @@ func (w *Window[A]) GoRunOnWin(f func()) {
 }
 
 func (w *Window[A]) Lock() bool {
-	if !w.This.IsClosed() {
+	if w.This.IsClosed() {
 		return false
 	}
 	w.Mu.Lock()
