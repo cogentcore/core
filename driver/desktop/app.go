@@ -188,12 +188,12 @@ func (a *App) ClipBoard(win goosi.Window) clip.Board {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()
-	return &TheClip
+	return TheClip
 }
 
 func (a *App) Cursor(win goosi.Window) cursor.Cursor {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()
-	return &TheCursor
+	return TheCursor
 }

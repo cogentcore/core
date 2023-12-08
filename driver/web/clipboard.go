@@ -15,7 +15,7 @@ import (
 // TODO(kai/web): support copying images and other mime formats, etc
 
 // TheClip is the single [clip.Board] for the offscreen platform
-var TheClip = Clip{}
+var TheClip = &Clip{}
 
 // Clip is the [clip.Board] implementation for the web platform
 type Clip struct{}

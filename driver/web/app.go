@@ -130,11 +130,11 @@ func (a *App) OpenURL(url string) {
 }
 
 func (a *App) ClipBoard(win goosi.Window) clip.Board {
-	return &TheClip
+	return TheClip
 }
 
 func (a *App) Cursor(win goosi.Window) cursor.Cursor {
-	return &TheCursor
+	return TheCursor
 }
 
 func (a *App) IsDark() bool {

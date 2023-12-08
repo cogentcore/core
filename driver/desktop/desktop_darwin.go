@@ -41,18 +41,15 @@ import "C"
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 	"os/user"
 	"path/filepath"
-	"strings"
-	"sync"
 	"unsafe"
 
 	"goki.dev/fi"
 	"goki.dev/goosi"
-	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 )
 
 /////////////////////////////////////////////////////////////////
@@ -68,26 +65,26 @@ func SetThreadPri(p float64) error {
 	return nil
 }
 
-func (app *appImpl) Platform() goosi.Platforms {
+func (a *App) Platform() goosi.Platforms {
 	return goosi.MacOS
 }
 
-func (app *appImpl) OpenURL(url string) {
+func (a *App) OpenURL(url string) {
 	cmd := exec.Command("open", url)
-	cmd.Run()
+	grr.Log(cmd.Run())
 }
 
-func (app *appImpl) PrefsDir() string {
+func (a *App) PrefsDir() string {
 	usr, err := user.Current()
-	if err != nil {
-		log.Print(err)
+	if grr.Log(err) != nil {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "Library")
 }
 
+/*
 // this is the main call to create the main menu if not exist
-func (w *windowImpl) MainMenu() goosi.MainMenu {
+func (w *Window) MainMenu() goosi.MainMenu {
 	if w.mainMenu == nil {
 		mm := &mainMenuImpl{win: w}
 		w.mainMenu = mm
@@ -97,6 +94,7 @@ func (w *windowImpl) MainMenu() goosi.MainMenu {
 	}
 	return w.mainMenu.(*mainMenuImpl)
 }
+*/
 
 func (w *Window) Handle() any {
 	return uintptr(w.glw.GetCocoaWindow())
@@ -105,35 +103,38 @@ func (w *Window) Handle() any {
 /////////////////////////////////////////////////////////////////
 // clip.Board impl
 
-type clipImpl struct {
-	data mimedata.Mimes
+// TheClip is the single [clip.Board] for MacOS
+var TheClip = &Clip{}
+
+// Clip is the [clip.Board] implementation for MacOS
+type Clip struct {
+	// Data is the current clipboard data
+	Data mimedata.Mimes
 }
 
-var theClip = clipImpl{}
+// CurMimeData is the current mime data to write to from cocoa side
+var CurMimeData *mimedata.Mimes
 
-// curpMimeData is the current mime data to write to from cocoa side
-var curMimeData *mimedata.Mimes
-
-func (ci *clipImpl) IsEmpty() bool {
+func (cl *Clip) IsEmpty() bool {
 	ise := C.clipIsEmpty()
 	return bool(ise)
 }
 
-func (ci *clipImpl) Read(types []string) mimedata.Mimes {
+func (cl *Clip) Read(types []string) mimedata.Mimes {
 	if len(types) == 0 {
 		return nil
 	}
-	ci.data = nil
-	curMimeData = &ci.data
+	cl.Data = nil
+	CurMimeData = &cl.Data
 
 	wantText := mimedata.IsText(types[0])
 
 	if wantText {
 		C.clipReadText() // calls addMimeText
-		if len(ci.data) == 0 {
+		if len(cl.Data) == 0 {
 			return nil
 		}
-		dat := ci.data[0].Data
+		dat := cl.Data[0].Data
 		isMulti, mediaType, boundary, body := mimedata.IsMultipart(dat)
 		if isMulti {
 			return mimedata.FromMultipart(body, boundary)
@@ -148,10 +149,10 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	} else {
 		// todo: deal with image formats etc
 	}
-	return ci.data
+	return cl.Data
 }
 
-func (ci *clipImpl) WriteText(b []byte) {
+func (cl *Clip) WriteText(b []byte) {
 	sz := len(b)
 	cdata := C.malloc(C.size_t(sz))
 	copy((*[1 << 30]byte)(cdata)[0:sz], b)
@@ -159,32 +160,32 @@ func (ci *clipImpl) WriteText(b []byte) {
 	C.free(unsafe.Pointer(cdata))
 }
 
-func (ci *clipImpl) Write(data mimedata.Mimes) error {
-	ci.Clear()
+func (cl *Clip) Write(data mimedata.Mimes) error {
+	cl.Clear()
 	if len(data) > 1 { // multipart
 		mpd := data.ToMultipart()
-		ci.WriteText(mpd)
+		cl.WriteText(mpd)
 	} else {
 		d := data[0]
 		if mimedata.IsText(d.Type) {
-			ci.WriteText(d.Data)
+			cl.WriteText(d.Data)
 		}
 	}
 	C.clipWrite()
 	return nil
 }
 
-func (ci *clipImpl) Clear() {
+func (cl *Clip) Clear() {
 	C.clipClear()
 }
 
 //export addMimeText
 func addMimeText(cdata *C.char, datalen C.int) {
-	if *curMimeData == nil {
-		*curMimeData = make(mimedata.Mimes, 1)
-		(*curMimeData)[0] = &mimedata.Data{Type: fi.TextPlain}
+	if *CurMimeData == nil {
+		*CurMimeData = make(mimedata.Mimes, 1)
+		(*CurMimeData)[0] = &mimedata.Data{Type: fi.TextPlain}
 	}
-	md := (*curMimeData)[0]
+	md := (*CurMimeData)[0]
 	if len(md.Type) == 0 {
 		md.Type = fi.TextPlain
 	}
@@ -194,14 +195,17 @@ func addMimeText(cdata *C.char, datalen C.int) {
 
 //export addMimeData
 func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
-	if *curMimeData == nil {
-		*curMimeData = make(mimedata.Mimes, 0)
+	if *CurMimeData == nil {
+		*CurMimeData = make(mimedata.Mimes, 0)
 	}
 	typ := C.GoStringN(ctyp, typlen)
 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
-	*curMimeData = append(*curMimeData, &mimedata.Data{typ, data})
+	*CurMimeData = append(*CurMimeData, &mimedata.Data{typ, data})
 }
 
+// TODO(kai): figure out what to do with MacOS main menu
+
+/*
 ///////////////////////////////////////////////////////
 //  MainMenu
 
@@ -351,3 +355,4 @@ func macOpenFile(fname *C.char, flen C.int) {
 		// win.EventMgr.NewOS(events.OSEvent, []string{ofn})
 	}
 }
+*/

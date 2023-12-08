@@ -14,7 +14,7 @@ import (
 )
 
 // TheCursor is the single [goosi.Cursor] for the desktop platform
-var TheCursor = Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, Cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
+var TheCursor = &Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, Cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
 // Cursor is the [cursor.Cursor] implementation for the desktop platform
 type Cursor struct {

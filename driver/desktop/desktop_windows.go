@@ -7,7 +7,6 @@
 package desktop
 
 import (
-	"log"
 	"os/exec"
 	"os/user"
 	"path/filepath"
@@ -37,8 +36,7 @@ func (a *App) PrefsDir() string {
 	// with FOLDERID_RoamingAppData
 	// https://stackoverflow.com/questions/6883779/what-are-the-best-practices-for-storing-user-preferences-and-settings-in-win32-d
 	usr, err := user.Current()
-	if err != nil {
-		log.Print(err)
+	if grr.Log(err) != nil {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "AppData", "Roaming")
@@ -53,7 +51,7 @@ func (w *Window) Handle() any {
 //   Clipboard
 
 // TheClip is the single [clip.Board] for Windows
-var TheClip = Clip{}
+var TheClip = &Clip{}
 
 // Clip is the [clip.Board] implementation for Windows
 type Clip struct{}
