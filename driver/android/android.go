@@ -10,6 +10,8 @@
 //go:build android
 
 /*
+Package android implements goosi interfaces on Android mobile devices.
+
 Android Apps are built with -buildmode=c-shared. They are loaded by a
 running Java process.
 

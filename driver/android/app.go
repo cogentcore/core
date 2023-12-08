@@ -4,7 +4,6 @@
 
 //go:build android
 
-// Package android implements goosi interfaces on Android mobile devices
 package android
 
 import (
@@ -31,8 +30,6 @@ var theApp = &appImpl{
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
 }
-
-var _ goosi.App = theApp
 
 type appImpl struct {
 	mu            sync.Mutex
