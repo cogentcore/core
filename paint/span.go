@@ -156,6 +156,9 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	ucfont.Size = sty.Size
 	ucfont.Font = OpenFont(ucfont, ctxt) // note: this is lightweight once loaded in library
 
+	TextFontRenderMu.Lock()
+	defer TextFontRenderMu.Unlock()
+
 	nwr := []rune(str)
 	sz := len(nwr)
 	sr.Text = append(sr.Text, nwr...)
