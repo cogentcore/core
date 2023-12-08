@@ -62,54 +62,43 @@ func (app *App) initVk() {
 
 // destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
 func (app *App) destroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	fmt.Println("destroying vk")
-	vk.DeviceWaitIdle(app.Surface.Device.Device)
-	app.Draw.Destroy()
-	app.Surface.Destroy()
-	app.Surface = nil
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	vk.DeviceWaitIdle(app.Drawer.Surf.Device.Device)
+	app.Drawer.Destroy()
+	app.Drawer.Surf.Destroy()
+	app.Drawer = nil
 }
 
 // fullDestroyVk destroys all vulkan things for when the app is fully quit
 func (app *App) fullDestroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	app.window = nil
-	app.gpu.Destroy()
-	// vgpu.Terminate()
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	app.GPU.Destroy()
 }
-
-////////////////////////////////////////////////////////
-//  Window
 
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	defer func() { handleRecover(recover()) }()
-	fmt.Println("in new window")
+	defer func() { base.HandleRecover(recover()) }()
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
-		// fmt.Println("locking in new window")
-		app.mu.Lock()
-		// fmt.Println("past lock in new window")
+		app.Mu.Lock()
 		winptr = app.winptr
-		app.mu.Unlock()
+		app.Mu.Unlock()
 
 		if winptr != 0 {
 			break
 		}
 	}
-	fmt.Println("making new window")
 	if goosi.InitScreenLogicalDPIFunc != nil {
-		log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		goosi.InitScreenLogicalDPIFunc()
 	}
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	app.window = &windowImpl{
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	app.W = &windowImpl{
 		app:         app,
 		isVisible:   true,
 		publish:     make(chan struct{}),
