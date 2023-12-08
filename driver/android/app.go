@@ -12,7 +12,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 
 	vk "github.com/goki/vulkan"
 	"goki.dev/goosi"
@@ -25,7 +24,7 @@ import (
 )
 
 // TheApp is the single [goosi.App] for the Android platform
-var TheApp = &App{base.NewAppSingle[*vdraw.Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*vdraw.Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the Android platform
 type App struct {
@@ -89,7 +88,7 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	var winptr uintptr
 	for {
 		app.Mu.Lock()
-		winptr = app.winptr
+		winptr = app.Winptr
 		app.Mu.Unlock()
 
 		if winptr != 0 {
@@ -101,33 +100,20 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	app.Mu.Lock()
 	defer app.Mu.Unlock()
-	app.Win = &Window{
-		app:         app,
-		isVisible:   true,
-		publish:     make(chan struct{}),
-		winClose:    make(chan struct{}),
-		publishDone: make(chan struct{}),
-		WindowBase: goosi.WindowBase{
-			Titl: opts.GetTitle(),
-			Flag: opts.Flags,
-			FPS:  60,
-		},
-	}
-	app.window.EvMgr.Deque = &app.window.Deque
-	app.window.EvMgr.Window(events.WinShow)
-	app.window.EvMgr.Window(events.WinFocus)
+	app.Win = &Window{base.NewWindowSingle(app, opts)}
+	app.Win.EvMgr.Deque = &app.Win.Deque
+	app.Win.EvMgr.Window(events.WinShow)
+	app.Win.EvMgr.Window(events.WinFocus)
 
-	go app.window.winLoop()
+	go app.Win.WinLoop()
 
-	return app.window, nil
+	return app.Win, nil
 }
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
 func (app *App) setSysWindow(winptr uintptr) error {
-	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
-	fmt.Println("setting sys window")
+	defer func() { base.HandleRecover(recover()) }()
 	var sf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
