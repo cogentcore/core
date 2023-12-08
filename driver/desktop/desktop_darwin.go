@@ -98,7 +98,7 @@ func (w *windowImpl) MainMenu() goosi.MainMenu {
 	return w.mainMenu.(*mainMenuImpl)
 }
 
-func (w *windowImpl) OSHandle() uintptr {
+func (w *Window) Handle() any {
 	return uintptr(w.glw.GetCocoaWindow())
 }
 

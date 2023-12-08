@@ -44,12 +44,7 @@ func (app *App) PrefsDir() string {
 	// todo: convention is "manufacturer" before app -- not sure what that means in this context -- "Go"?
 }
 
-// this is the main call to create the main menu if not exist
-func (w *Window) MainMenu() goosi.MainMenu {
-	return nil
-}
-
-func (w *Window) OSHandle() uintptr {
+func (w *Window) Handle() any {
 	return uintptr(unsafe.Pointer(w.glw.GetWin32Window()))
 }
 

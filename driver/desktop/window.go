@@ -365,9 +365,10 @@ func (w *Window) refresh(gw *glfw.Window) {
 func (w *Window) focus(gw *glfw.Window, focused bool) {
 	if focused {
 		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
-		if w.mainMenu != nil {
-			w.mainMenu.SetMenu()
-		}
+		// TODO(kai): main menu
+		// if w.mainMenu != nil {
+		// 	w.mainMenu.SetMenu()
+		// }
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Focus))
 		w.EvMgr.Window(events.WinFocus)

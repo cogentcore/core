@@ -50,12 +50,7 @@ func (app *appImpl) PrefsDir() string {
 	return filepath.Join(usr.HomeDir, ".config")
 }
 
-// this is the main call to create the main menu if not exist
-func (w *windowImpl) MainMenu() goosi.MainMenu {
-	return nil
-}
-
-func (w *windowImpl) OSHandle() uintptr {
+func (w *Window) Handle() any {
 	return uintptr(w.glw.GetX11Window())
 }
 
