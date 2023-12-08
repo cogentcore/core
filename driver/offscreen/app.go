@@ -16,7 +16,7 @@ import (
 )
 
 // TheApp is the single [goosi.App] for the offscreen platform
-var TheApp = &App{}
+var TheApp = &App{base.NewAppSingle[*Drawer, *Window]()}
 
 var _ goosi.App = TheApp
 

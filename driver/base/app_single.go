@@ -38,6 +38,13 @@ type AppSingler interface {
 	SingleDrawer() goosi.Drawer
 }
 
+// NewAppSingle makes a new [AppSingle].
+func NewAppSingle[D goosi.Drawer, W goosi.Window]() AppSingle[D, W] {
+	return AppSingle[D, W]{
+		Scrn: &goosi.Screen{},
+	}
+}
+
 func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
 	return a.Drawer
 }
