@@ -111,12 +111,12 @@ func (sve *Editor) Render() {
 		// 	sve.FillScene()
 		// }
 		// if sve.Norm {
-		// 	sve.SetNormXForm()
+		// 	sve.SetNormTransform()
 		// }
-		// rs.PushXForm(sve.Pnt.XForm)
+		// rs.PushTransform(sve.Pnt.Transform)
 		sve.RenderChildren() // we must do children first, then us!
 		sve.PopBounds()
-		// rs.PopXForm()
+		// rs.PopTransform()
 		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)
 	}
 }
