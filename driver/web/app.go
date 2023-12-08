@@ -8,157 +8,43 @@
 package web
 
 import (
-	"fmt"
-	"go/build"
 	"image"
-	"log"
-	"os"
-	"path/filepath"
-	"runtime/debug"
 	"strings"
-	"sync"
 	"syscall/js"
 
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 )
 
-var theApp = &appImpl{
-	screen:       &goosi.Screen{},
-	name:         "GoGi",
-	quitCloseCnt: make(chan struct{}),
-}
+var theApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 var _ goosi.App = theApp
 
-type appImpl struct {
-	mu            sync.Mutex
-	mainQueue     chan funcRun
-	mainDone      chan struct{}
-	winptr        uintptr
-	Draw          drawerImpl
-	window        *windowImpl
-	screen        *goosi.Screen
-	name          string
-	about         string
-	openFiles     []string
-	quitting      bool          // set to true when quitting and closing windows
-	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
-	quitReqFunc   func()
-	quitCleanFunc func()
-	platform      goosi.Platforms // the underlying system platform (Android, iOS, etc)
-	insets        styles.SideFloats
-	keyMods       key.Modifiers // current key mods
-}
+type App struct {
+	base.AppSingle[*Drawer, *Window]
 
-var mainCallback func(goosi.App)
+	// Platform is the underlying system platform (Android, iOS, etc)
+	platform goosi.Platforms
 
-// handleRecover takes the given value of recover, and, if it is not nil,
-// prints a panic message and a stack trace, using a string-based log
-// method that guarantees that the stack trace will be printed before
-// the program exits. This is needed because, without this, the program
-// will exit before it can print the stack trace, which makes debugging
-// nearly impossible. The correct usage of handleRecover is:
-//
-//	func myFunc() {
-//		defer func() { handleRecover(recover()) }()
-//		...
-//	}
-func handleRecover(r any) {
-	if r == nil {
-		return
-	}
-	log.Println("panic:", r)
-	log.Println("")
-	log.Println("----- START OF STACK TRACE: -----")
-	log.Println(string(debug.Stack()))
-	log.Fatalln("----- END OF STACK TRACE -----")
+	// KeyMods are the current key mods
+	keyMods key.Modifiers
 }
 
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
-	mainCallback = f
+	defer func() { base.HandleRecover(recover()) }()
 	theApp.addEventListeners()
-	fmt.Println("setting the app")
 	goosi.TheApp = theApp
 	go func() {
-		mainCallback(theApp)
-		theApp.stopMain()
+		f(theApp)
+		theApp.StopMain()
 	}()
-	fmt.Println("running main loop")
-	theApp.mainLoop()
-}
-
-func (app *appImpl) mainLoop() {
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	for {
-		select {
-		case <-app.mainDone:
-			app.window.winClose <- struct{}{}
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		}
-	}
-}
-
-type funcRun struct {
-	f    func()
-	done chan bool
-}
-
-// RunOnMain runs given function on main thread
-func (app *appImpl) RunOnMain(f func()) {
-	if app.mainQueue == nil {
-		f()
-	} else {
-		done := make(chan bool)
-		app.mainQueue <- funcRun{f: f, done: done}
-		<-done
-	}
-}
-
-// GoRunOnMain runs given function on main thread and returns immediately
-func (app *appImpl) GoRunOnMain(f func()) {
-	go func() {
-		app.mainQueue <- funcRun{f: f, done: nil}
-	}()
-}
-
-// SendEmptyEvent sends an empty, blank event to global event processing
-// system, which has the effect of pushing the system along during cases when
-// the event loop needs to be "pinged" to get things moving along..
-func (app *appImpl) SendEmptyEvent() {
-	app.window.SendEmptyEvent()
-}
-
-// PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
-// and returning when there are no more events.
-func (app *appImpl) PollEventsOnMain() {
-	// TODO: implement?
-}
-
-// PollEvents tells the main event loop to check for any gui events right now.
-// Call this periodically from longer-running functions to ensure
-// GUI responsiveness.
-func (app *appImpl) PollEvents() {
-	// TODO: implement?
-}
-
-// stopMain stops the main loop and thus terminates the app
-func (app *appImpl) stopMain() {
-	app.mainDone <- struct{}{}
+	theApp.MainLoop()
 }
 
 ////////////////////////////////////////////////////////
@@ -167,54 +53,21 @@ func (app *appImpl) stopMain() {
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
-func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	defer func() { handleRecover(recover()) }()
-	fmt.Println("in new window")
-	// // the actual system window has to exist before we can create the window
-	// var winptr uintptr
-	// for {
-	// 	// fmt.Println("locking in new window")
-	// 	app.mu.Lock()
-	// 	// fmt.Println("past lock in new window")
-	// 	winptr = app.winptr
-	// 	app.mu.Unlock()
+func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+	defer func() { base.HandleRecover(recover()) }()
 
-	// 	if winptr != 0 {
-	// 		break
-	// 	}
-	// }
-	// fmt.Println("making new window")
-	// if goosi.InitScreenLogicalDPIFunc != nil {
-	// 	log.Println("app first new window calling InitScreenLogicalDPIFunc")
-	// 	goosi.InitScreenLogicalDPIFunc()
-	// }
-	// app.mu.Lock()
-	// defer app.mu.Unlock()
-	app.window = &windowImpl{
-		app:         app,
-		isVisible:   true,
-		publish:     make(chan struct{}),
-		winClose:    make(chan struct{}),
-		publishDone: make(chan struct{}),
-		WindowBase: goosi.WindowBase{
-			Titl: opts.GetTitle(),
-			Flag: opts.Flags,
-			FPS:  60,
-		},
-	}
-	app.window.EvMgr.Deque = &app.window.Deque
+	app.Win = &Window{base.NewWindowSingle(app, opts)}
+	app.Win.EvMgr.Deque = &app.Win.Deque
 	app.setSysWindow()
 
-	go app.window.winLoop()
+	go app.Win.WinLoop()
 
-	return app.window, nil
+	return app.Win, nil
 }
 
 // setSysWindow sets the underlying system window information.
-func (app *appImpl) setSysWindow() {
-	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
-	fmt.Println("setting sys window")
+func (app *App) setSysWindow() {
+	defer func() { base.HandleRecover(recover()) }()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	lua := strings.ToLower(ua)
@@ -228,245 +81,69 @@ func (app *appImpl) setSysWindow() {
 	}
 
 	app.resize()
-	app.window.EvMgr.Window(events.WinShow)
-	app.window.EvMgr.Window(events.ScreenUpdate)
-	app.window.EvMgr.Window(events.WinFocus)
+	app.Win.EvMgr.Window(events.WinShow)
+	app.Win.EvMgr.Window(events.ScreenUpdate)
+	app.Win.EvMgr.Window(events.WinFocus)
 }
 
 // resize updates the app sizing information and sends a resize event.
-func (app *appImpl) resize() {
-	app.screen.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
-	app.window.DevPixRatio = app.screen.DevicePixelRatio
-	dpi := 160 * app.screen.DevicePixelRatio
-	app.screen.PhysicalDPI = dpi
-	app.screen.LogicalDPI = dpi
-	app.window.PhysDPI = app.screen.PhysicalDPI
-	app.window.LogDPI = app.screen.LogicalDPI
+func (app *App) resize() {
+	app.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	dpi := 160 * app.Scrn.DevicePixelRatio
+	app.Scrn.PhysicalDPI = dpi
+	app.Scrn.LogicalDPI = dpi
 
-	sw, sh := js.Global().Get("screen").Get("width").Int(), js.Global().Get("screen").Get("height").Int()
-	ssz := image.Pt(sw, sh)
-	app.screen.Geometry.Max = ssz
-	app.screen.PixSize = image.Pt(int(float32(ssz.X)*app.screen.DevicePixelRatio), int(float32(ssz.Y)*app.screen.DevicePixelRatio))
-	physX := 25.4 * float32(sw) / dpi
-	physY := 25.4 * float32(sh) / dpi
-	app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+	w, h := js.Global().Get("screen").Get("innerWidth").Int(), js.Global().Get("screen").Get("innerHeight").Int()
+	sz := image.Pt(w, h)
+	app.Scrn.Geometry.Max = sz
+	app.Scrn.PixSize = image.Pt(int(float32(sz.X)*app.Scrn.DevicePixelRatio), int(float32(sz.Y)*app.Scrn.DevicePixelRatio))
+	physX := 25.4 * float32(w) / dpi
+	physY := 25.4 * float32(h) / dpi
+	app.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	ww, wh := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
-	wsz := image.Pt(ww, wh)
-	app.window.WnSize = wsz
-	app.window.PxSize = image.Pt(int(float32(wsz.X)*app.screen.DevicePixelRatio), int(float32(wsz.Y)*app.screen.DevicePixelRatio))
-	app.window.RenderSize = app.window.PxSize
-
-	fmt.Printf("screen %#v\n", app.screen)
-	fmt.Printf("window %#v\n", app.window)
+	// ww, wh := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
+	// wsz := image.Pt(ww, wh)
+	// app.window.WnSize = wsz
+	// app.window.PxSize = image.Pt(int(float32(wsz.X)*app.screen.DevicePixelRatio), int(float32(wsz.Y)*app.screen.DevicePixelRatio))
+	// app.window.RenderSize = app.window.PxSize
 
 	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Set("width", app.window.PxSize.X)
-	canvas.Set("height", app.window.PxSize.Y)
+	canvas.Set("width", app.Scrn.PixSize.X)
+	canvas.Set("height", app.Scrn.PixSize.Y)
 
-	app.window.EvMgr.WindowResize()
+	app.Win.EvMgr.WindowResize()
 }
 
-func (app *appImpl) DeleteWin(w *windowImpl) {
-	// TODO: implement?
-}
-
-func (app *appImpl) NScreens() int {
-	if app.screen != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *appImpl) Screen(scrN int) *goosi.Screen {
-	if scrN == 0 {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *appImpl) ScreenByName(name string) *goosi.Screen {
-	if app.screen.Name == name {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *appImpl) NoScreens() bool {
-	return app.screen == nil
-}
-
-func (app *appImpl) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *appImpl) Window(win int) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if win == 0 {
-		return app.window
-	}
-	return nil
-}
-
-func (app *appImpl) WindowByName(name string) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.Name() == name {
-		return app.window
-	}
-	return nil
-}
-
-func (app *appImpl) WindowInFocus() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.IsFocus() {
-		return app.window
-	}
-	return nil
-}
-
-func (app *appImpl) ContextWindow() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return app.window
-}
-
-func (app *appImpl) Name() string {
-	return app.name
-}
-
-func (app *appImpl) SetName(name string) {
-	app.name = name
-}
-
-func (app *appImpl) About() string {
-	return app.about
-}
-
-func (app *appImpl) SetAbout(about string) {
-	app.about = about
-}
-
-func (app *appImpl) OpenFiles() []string {
-	return app.openFiles
-}
-
-func (app *appImpl) GoGiPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), "GoGi")
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *appImpl) AppPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), app.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *appImpl) PrefsDir() string {
+func (app *App) PrefsDir() string {
+	// TODO(kai): implement web filesystem
 	return "/data/data"
 }
 
-func (app *appImpl) GetScreens() {
-	// note: this is not applicable in mobile because screen info is not avail until Size event
-}
-
-func (app *appImpl) Platform() goosi.Platforms {
+func (app *App) Platform() goosi.Platforms {
 	return goosi.Web
 }
 
-func (app *appImpl) OpenURL(url string) {
+func (app *App) OpenURL(url string) {
 	js.Global().Call("open", url)
 }
 
-// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
-func SrcDir(dir string) (absDir string, err error) {
-	// TODO: does this make sense?
-	for _, srcDir := range build.Default.SrcDirs() {
-		absDir = filepath.Join(srcDir, dir)
-		finfo, err := os.Stat(absDir)
-		if err == nil && finfo.IsDir() {
-			return absDir, nil
-		}
-	}
-	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
-}
-
-func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
+func (app *App) ClipBoard(win goosi.Window) clip.Board {
 	return &theClip
 }
 
-func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
+func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	return &theCursor
 }
 
-func (app *appImpl) SetQuitReqFunc(fun func()) {
-	app.quitReqFunc = fun
-}
-
-func (app *appImpl) SetQuitCleanFunc(fun func()) {
-	app.quitCleanFunc = fun
-}
-
-func (app *appImpl) QuitReq() {
-	if app.quitting {
-		return
-	}
-	if app.quitReqFunc != nil {
-		app.quitReqFunc()
-	} else {
-		app.Quit()
-	}
-}
-
-func (app *appImpl) IsQuitting() bool {
-	return app.quitting
-}
-
-func (app *appImpl) QuitClean() {
-	// TODO: implement?
-	// app.quitting = true
-	// if app.quitCleanFunc != nil {
-	// 	app.quitCleanFunc()
-	// }
-	// app.mu.Lock()
-	// nwin := len(app.winlist)
-	// for i := nwin - 1; i >= 0; i-- {
-	// 	win := app.winlist[i]
-	// 	go win.Close()
-	// }
-	// app.mu.Unlock()
-	// for i := 0; i < nwin; i++ {
-	// 	<-app.quitCloseCnt
-	// 	// fmt.Printf("win closed: %v\n", i)
-	// }
-}
-
-func (app *appImpl) Quit() {
-	if app.quitting {
-		return
-	}
-	app.QuitClean()
-	app.stopMain()
-}
-
-func (app *appImpl) IsDark() bool {
+func (app *App) IsDark() bool {
 	return js.Global().Get("matchMedia").Truthy() &&
 		js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Get("matches").Truthy()
 }
 
-func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("focus")
 }
 
-func (app *appImpl) HideVirtualKeyboard() {
+func (app *App) HideVirtualKeyboard() {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
 }

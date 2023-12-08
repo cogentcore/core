@@ -14,7 +14,7 @@ import (
 	"goki.dev/goosi/events/key"
 )
 
-func (app *appImpl) addEventListeners() {
+func (app *App) addEventListeners() {
 	g := js.Global()
 	g.Call("addEventListener", "mousedown", js.FuncOf(app.onMouseDown))
 	g.Call("addEventListener", "touchstart", js.FuncOf(app.onTouchStart))
@@ -32,14 +32,14 @@ func (app *appImpl) addEventListeners() {
 // eventPos returns the appropriate position for the given event,
 // multiplying the x and y components by the device pixel ratio
 // so that they line up correctly with the canvas.
-func (app *appImpl) eventPos(e js.Value) image.Point {
+func (app *App) eventPos(e js.Value) image.Point {
 	xi, yi := e.Get("clientX").Int(), e.Get("clientY").Int()
 	xi = int(float32(xi) * app.screen.DevicePixelRatio)
 	yi = int(float32(yi) * app.screen.DevicePixelRatio)
 	return image.Pt(xi, yi)
 }
 
-func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
+func (app *App) onMouseDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	but := e.Get("button").Int()
 	var ebut events.Buttons
@@ -57,7 +57,7 @@ func (app *appImpl) onMouseDown(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onTouchStart(this js.Value, args []js.Value) any {
+func (app *App) onTouchStart(this js.Value, args []js.Value) any {
 	e := args[0]
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
@@ -69,7 +69,7 @@ func (app *appImpl) onTouchStart(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onMouseUp(this js.Value, args []js.Value) any {
+func (app *App) onMouseUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	but := e.Get("button").Int()
 	var ebut events.Buttons
@@ -87,7 +87,7 @@ func (app *appImpl) onMouseUp(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onTouchEnd(this js.Value, args []js.Value) any {
+func (app *App) onTouchEnd(this js.Value, args []js.Value) any {
 	e := args[0]
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
@@ -99,7 +99,7 @@ func (app *appImpl) onTouchEnd(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
+func (app *App) onMouseMove(this js.Value, args []js.Value) any {
 	e := args[0]
 	where := app.eventPos(e)
 	app.window.EvMgr.MouseMove(where)
@@ -107,7 +107,7 @@ func (app *appImpl) onMouseMove(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onTouchMove(this js.Value, args []js.Value) any {
+func (app *App) onTouchMove(this js.Value, args []js.Value) any {
 	e := args[0]
 	touches := e.Get("changedTouches")
 	for i := 0; i < touches.Length(); i++ {
@@ -119,7 +119,7 @@ func (app *appImpl) onTouchMove(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onContextMenu(this js.Value, args []js.Value) any {
+func (app *App) onContextMenu(this js.Value, args []js.Value) any {
 	// no-op (we handle elsewhere), but needed to prevent browser
 	// from making its own context menus on right clicks
 	e := args[0]
@@ -129,7 +129,7 @@ func (app *appImpl) onContextMenu(this js.Value, args []js.Value) any {
 
 // runeAndCodeFromKey returns the rune and key code corresponding to the given key string.
 // down is whether this is from a keyDown event (as opposed to a keyUp one)
-func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
+func (app *App) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	switch k {
 	case "Shift":
 		app.keyMods.SetFlag(down, key.Shift)
@@ -166,7 +166,7 @@ func (app *appImpl) runeAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	}
 }
 
-func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
+func (app *App) onKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
 	if k == "Unidentified" {
@@ -178,7 +178,7 @@ func (app *appImpl) onKeyDown(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
+func (app *App) onKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
 	if k == "Unidentified" {
@@ -190,7 +190,7 @@ func (app *appImpl) onKeyUp(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onBeforeInput(this js.Value, args []js.Value) any {
+func (app *App) onBeforeInput(this js.Value, args []js.Value) any {
 	e := args[0]
 	data := e.Get("data").String()
 	if data == "" {
@@ -203,7 +203,7 @@ func (app *appImpl) onBeforeInput(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func (app *appImpl) onResize(this js.Value, args []js.Value) any {
+func (app *App) onResize(this js.Value, args []js.Value) any {
 	app.resize()
 	return nil
 }
