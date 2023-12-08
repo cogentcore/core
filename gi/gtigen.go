@@ -1932,11 +1932,12 @@ var SceneType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
+		{"App", &gti.Field{Name: "App", Type: "*goki.dev/gi/v2/gi.App", LocalType: "*App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there.", Directives: gti.Directives{}, Tag: ""}},
 		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides[goki.dev/gi/v2/gi.BarFuncs]", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
 		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides[bool]", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
-		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.  These are", Directives: gti.Directives{}, Tag: ""}},
+		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.", Directives: gti.Directives{}, Tag: ""}},
 		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
 		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"PaintContext", &gti.Field{Name: "PaintContext", Type: "goki.dev/girl/paint.Context", LocalType: "paint.Context", Doc: "paint context for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
@@ -1991,11 +1992,12 @@ func (t *Scene) AsScene() *Scene {
 	return t
 }
 
-// SetData sets the [Scene.Data]:
-// Data is the optional data value being represented by this scene.
-// Used e.g., for recycling views of a given item instead of creating new one.
-func (t *Scene) SetData(v any) *Scene {
-	t.Data = v
+// SetApp sets the [Scene.App]:
+// App is the pointer to the application to which this scene belongs.
+// The first Main Window Scene must set this, and others will automatically
+// grab from there.
+func (t *Scene) SetApp(v *App) *Scene {
+	t.App = v
 	return t
 }
 
@@ -2021,7 +2023,7 @@ func (t *Scene) SetBarsInherit(v styles.Sides[bool]) *Scene {
 // AppBars contains functions for configuring a top-level App toolbar,
 // (e.g., TopAppBar) for elements contained within this Scene,
 // that should be represented in any app-level toolbar constructed
-// for this Scene.  These are
+// for this Scene.
 func (t *Scene) SetAppBars(v ToolbarFuncs) *Scene {
 	t.AppBars = v
 	return t
@@ -2035,6 +2037,14 @@ func (t *Scene) SetAppBars(v ToolbarFuncs) *Scene {
 // for most major Scene functions.
 func (t *Scene) SetBody(v *Body) *Scene {
 	t.Body = v
+	return t
+}
+
+// SetData sets the [Scene.Data]:
+// Data is the optional data value being represented by this scene.
+// Used e.g., for recycling views of a given item instead of creating new one.
+func (t *Scene) SetData(v any) *Scene {
+	t.Data = v
 	return t
 }
 
@@ -3681,7 +3691,7 @@ var ToolbarType = gti.AddType(&gti.Type{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"StdOverflowMenuFunc", &gti.Method{Name: "StdOverflowMenuFunc", Doc: "StdOverflowMenu adds standard overflow menu items.", Directives: gti.Directives{
+		{"StdOverflowMenu", &gti.Method{Name: "StdOverflowMenu", Doc: "StdOverflowMenu adds standard overflow menu items.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"m", &gti.Field{Name: "m", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -3769,6 +3779,75 @@ func (t *Toolbar) SetStackTop(v int) *Toolbar {
 
 // SetStripes sets the [Toolbar.Stripes]
 func (t *Toolbar) SetStripes(v Stripes) *Toolbar {
+	t.Stripes = v
+	return t
+}
+
+// BasicBarType is the [gti.Type] for [BasicBar]
+var BasicBarType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.BasicBar",
+	ShortName:  "gi.BasicBar",
+	IDName:     "basic-bar",
+	Doc:        "BasicBar is just a styled Frame layout for holding buttons\nand other widgets.  Use this when the more advanced features\nof the Toolbar are not needed.",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &BasicBar{},
+})
+
+// NewBasicBar adds a new [BasicBar] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewBasicBar(par ki.Ki, name ...string) *BasicBar {
+	return par.NewChild(BasicBarType, name...).(*BasicBar)
+}
+
+// KiType returns the [*gti.Type] of [BasicBar]
+func (t *BasicBar) KiType() *gti.Type {
+	return BasicBarType
+}
+
+// New returns a new [*BasicBar] value
+func (t *BasicBar) New() ki.Ki {
+	return &BasicBar{}
+}
+
+// SetTooltip sets the [BasicBar.Tooltip]
+func (t *BasicBar) SetTooltip(v string) *BasicBar {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [BasicBar.Class]
+func (t *BasicBar) SetClass(v string) *BasicBar {
+	t.Class = v
+	return t
+}
+
+// SetPriorityEvents sets the [BasicBar.PriorityEvents]
+func (t *BasicBar) SetPriorityEvents(v []events.Types) *BasicBar {
+	t.PriorityEvents = v
+	return t
+}
+
+// SetCustomContextMenu sets the [BasicBar.CustomContextMenu]
+func (t *BasicBar) SetCustomContextMenu(v func(m *Scene)) *BasicBar {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetStackTop sets the [BasicBar.StackTop]
+func (t *BasicBar) SetStackTop(v int) *BasicBar {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [BasicBar.Stripes]
+func (t *BasicBar) SetStripes(v Stripes) *BasicBar {
 	t.Stripes = v
 	return t
 }

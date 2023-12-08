@@ -311,3 +311,36 @@ func ToolbarStyles(ly Layouter) {
 		}
 	})
 }
+
+// BasicBar is just a styled Frame layout for holding buttons
+// and other widgets.  Use this when the more advanced features
+// of the Toolbar are not needed.
+type BasicBar struct {
+	Frame
+}
+
+func (tb *BasicBar) OnInit() {
+	tb.BasicBarStyles()
+	tb.HandleLayoutEvents()
+}
+
+func (tb *BasicBar) BasicBarStyles() {
+	ToolbarStyles(tb)
+}
+
+// UpdateButtons calls UpdateFunc on all buttons in toolbar.
+// individual menus are automatically generated at popup time.
+func (tb *BasicBar) UpdateButtons() {
+	if tb == nil {
+		return
+	}
+	updt := tb.UpdateStart()
+	defer tb.UpdateEndRender(updt)
+
+	for _, mi := range tb.Kids {
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
+			ac.UpdateButtons()
+		}
+	}
+}

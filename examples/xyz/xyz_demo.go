@@ -145,8 +145,9 @@ func app() {
 	// vgpu.Debug = true
 
 	anim := &Anim{}
-	b := gi.NewBody().SetApp(gi.NewApp("xyz", `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`, gi.StdAppBarConfig))
+	b := gi.NewAppBody("xyz")
+	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
+<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 
 	gi.NewLabel(b).SetText(`This is a demonstration of the
 <a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
