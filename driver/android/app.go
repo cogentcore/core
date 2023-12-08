@@ -29,10 +29,13 @@ var TheApp = &App{base.NewAppSingle[*vdraw.Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the Android platform
 type App struct {
-	base.AppSingle[*vdraw.Drawer, *windowImpl]
+	base.AppSingle[*vdraw.Drawer, *Window]
 
 	// GPU is the system GPU used for the app
 	GPU *vgpu.GPU
+
+	// Winptr is the pointer to the underlying system window
+	Winptr uintptr
 }
 
 // Main is called from main thread when it is time to start running the
@@ -98,7 +101,7 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	app.Mu.Lock()
 	defer app.Mu.Unlock()
-	app.W = &windowImpl{
+	app.Win = &Window{
 		app:         app,
 		isVisible:   true,
 		publish:     make(chan struct{}),
@@ -158,7 +161,7 @@ func (app *App) setSysWindow(winptr uintptr) error {
 	return nil
 }
 
-func (app *App) DeleteWin(w *windowImpl) {
+func (app *App) DeleteWin(w *Window) {
 	// TODO: implement?
 }
 
