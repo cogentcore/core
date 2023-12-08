@@ -7,12 +7,3 @@
 package desktop
 
 // TODO(kai): implement IsDark and SetTitleBarIsDark on linux
-
-// IsDark returns whether the system color theme is dark (as opposed to light).
-func (app *appImpl) IsDark() bool {
-	return false
-}
-
-func (w *windowImpl) SetTitleBarIsDark(isDark bool) {
-	// no-op
-}
