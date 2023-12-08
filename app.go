@@ -139,6 +139,10 @@ type App interface {
 	// Quit closes all windows and exits the program.
 	Quit()
 
+	// MainLoop runs the main loop of the app. It should not be
+	// called by end-user code; it is for driver use only.
+	MainLoop()
+
 	// RunOnMain runs given function on main thread (where main event loop is running)
 	// Some functions (GUI-specific etc) must run on this initial main thread for the
 	// overall app.

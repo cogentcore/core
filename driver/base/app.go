@@ -58,14 +58,16 @@ type App struct {
 	Dark bool
 }
 
-// func Main(f func(a goosi.App)) {
-// 	goosi.TheApp.GetScreens()
-// 	go func() {
-// 		f(goosi.TheApp)
-// 		goosi.TheApp.StopMain()
-// 	}()
-// 	goosi.TheApp.MainLoop()
-// }
+func Main(f func(a goosi.App), a goosi.App, ab *App) {
+	defer func() { HandleRecover(recover()) }()
+	ab.This = a
+	goosi.TheApp = a
+	go func() {
+		f(a)
+		ab.StopMain()
+	}()
+	a.MainLoop()
+}
 
 func (a *App) MainLoop() {
 	a.MainQueue = make(chan FuncRun)
