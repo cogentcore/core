@@ -37,8 +37,8 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 		log.Printf("MonitorDebug: monitorChange: %v event: %v\n", monitor.GetName(), enm)
 	}
 	TheApp.GetScreens()
-	if len(TheApp.winlist) > 0 {
-		fw := TheApp.winlist[0]
+	if len(TheApp.Windows) > 0 {
+		fw := TheApp.Windows[0]
 		if monitorDebug {
 			log.Printf("MonitorDebug: monitorChange: sending screen update\n")
 		}
@@ -51,33 +51,33 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 }
 
 func (app *App) GetScreens() {
-	app.mu.Lock()
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+
 	mons := glfw.GetMonitors()
 	sz := len(mons)
 	if sz == 0 {
-		app.noScreens = true
+		app.Screens = []*goosi.Screen{}
 		if monitorDebug {
 			log.Printf("MonitorDebug: getScreens: no screens found!\n")
 		}
-		app.mu.Unlock()
 		return
 	}
 	if monitorDebug {
 		pm := glfw.GetPrimaryMonitor()
 		log.Printf("MonitorDebug: Primary monitor: %s   first monitor: %s\n", pm.GetName(), mons[0].GetName())
 	}
-	app.noScreens = false
-	app.screens = make([]*goosi.Screen, 0, sz)
+	app.Screens = make([]*goosi.Screen, 0, sz)
 	scNo := 0
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
 		if monitorDebug {
 			log.Printf("MonitorDebug: getScreens: mon number: %v name: %v\n", i, mon.GetName())
 		}
-		if len(app.screens) <= scNo {
-			app.screens = append(app.screens, &goosi.Screen{})
+		if len(app.Screens) <= scNo {
+			app.Screens = append(app.Screens, &goosi.Screen{})
 		}
-		sc := app.screens[scNo]
+		sc := app.Screens[scNo]
 		vm := mon.GetVideoMode()
 		if vm.Width == 0 || vm.Height == 0 {
 			if monitorDebug {
@@ -112,7 +112,7 @@ func (app *App) GetScreens() {
 					continue
 				}
 			}
-			app.screens = app.screens[0 : len(app.screens)-1] // not all there
+			app.Screens = app.Screens[0 : len(app.Screens)-1] // not all there
 			continue
 		}
 		pw, ph := mon.GetPhysicalSize()
@@ -120,7 +120,7 @@ func (app *App) GetScreens() {
 			if monitorDebug {
 				log.Printf("MonitorDebug: physical size %s returned 0 -- bailing\n", mon.GetName())
 			}
-			app.screens = app.screens[0 : len(app.screens)-1] // not all there
+			app.Screens = app.Screens[0 : len(app.Screens)-1] // not all there
 		}
 		x, y := mon.GetPos()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
@@ -165,23 +165,23 @@ func (app *App) GetScreens() {
 
 	// if originally a non-builtin monitor was primary, and now builtin is primary,
 	// then switch builtin and non-builtin.  see https://github.com/glfw/glfw/issues/2160
-	if sz > 1 && app.Platform() == goosi.MacOS && app.screens[0].Name == macOsBuiltinMonitor {
-		fss := app.screensAll[0]
+	if sz > 1 && app.Platform() == goosi.MacOS && app.Screens[0].Name == macOsBuiltinMonitor {
+		fss := app.AllScreens[0]
 		if fss.Name != macOsBuiltinMonitor {
 			if monitorDebug {
-				log.Printf("MonitorDebug: getScreens: MacOs, builtin is currently primary, but was not originally -- restoring primary monitor as: %s\n", app.screens[1].Name)
+				log.Printf("MonitorDebug: getScreens: MacOs, builtin is currently primary, but was not originally -- restoring primary monitor as: %s\n", app.Screens[1].Name)
 			}
 			// assume 2nd one is good..
-			app.screens[0], app.screens[1] = app.screens[1], app.screens[0] // swap
-			app.screens[0].ScreenNumber = 0
-			app.screens[1].ScreenNumber = 1
+			app.Screens[0], app.Screens[1] = app.Screens[1], app.Screens[0] // swap
+			app.Screens[0].ScreenNumber = 0
+			app.Screens[1].ScreenNumber = 1
 		}
 	}
-	app.mu.Unlock()
+	app.Mu.Unlock()
 }
 
 // saveScreenInfo saves a copy of given screen info to screensAll list if unique
-// based on name.  Returns true if added a new screen.
+// based on name. Returns true if added a new screen.
 func (app *App) saveScreenInfo(sc *goosi.Screen) bool {
 	_, has := app.findScreenInfo(sc.Name)
 	if has {
@@ -189,13 +189,13 @@ func (app *App) saveScreenInfo(sc *goosi.Screen) bool {
 	}
 	nsc := &goosi.Screen{}
 	*nsc = *sc
-	app.screensAll = append(app.screensAll, nsc)
+	app.AllScreens = append(app.AllScreens, nsc)
 	return true
 }
 
 // findScreenInfo finds saved screen info based on name
 func (app *App) findScreenInfo(name string) (*goosi.Screen, bool) {
-	for _, sc := range app.screensAll {
+	for _, sc := range app.AllScreens {
 		if sc.Name == name {
 			return sc, true
 		}

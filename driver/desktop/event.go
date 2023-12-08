@@ -73,7 +73,7 @@ func (w *Window) curMousePosPoint(gw *glfw.Window) image.Point {
 func (w *Window) mousePosToPoint(x, y float64) image.Point {
 	var where image.Point
 	if TheApp.Platform() == goosi.MacOS {
-		where = image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
+		where = image.Point{int(w.DevicePixelRatio * float32(x)), int(w.DevicePixelRatio * float32(y))}
 	} else {
 		where = image.Point{int(x), int(y)}
 	}
@@ -120,10 +120,10 @@ func (w *Window) cursorPosEvent(gw *glfw.Window, x, y float64) {
 		return
 	}
 	where := w.mousePosToPoint(x, y)
-	if w.mouseDisabled {
+	if !w.CursorEnabled {
 		w.EvMgr.ResettingPos = true
 		if TheApp.Platform() == goosi.MacOS {
-			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevPixRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevPixRatio))
+			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevicePixelRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevicePixelRatio))
 		} else {
 			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X), float64(w.EvMgr.Last.MousePos.Y))
 		}

@@ -195,5 +195,5 @@ func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	app.Mu.Lock()
 	app.CtxWindow = win.(*Window)
 	app.Mu.Unlock()
-	return &theCursor
+	return &TheCursor
 }

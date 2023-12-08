@@ -13,16 +13,16 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
+var TheCursor = Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
-type cursorImpl struct {
+type Cursor struct {
 	cursor.CursorBase
 	cursors  map[enums.Enum]map[int]*glfw.Cursor // cached cursors
 	mu       sync.Mutex
 	prevSize int // cached previous size
 }
 
-func (c *cursorImpl) Set(cursor enums.Enum) error {
+func (c *Cursor) Set(cursor enums.Enum) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if cursor == c.Cur && c.Size == c.prevSize { // we already have, so we don't need to set again
@@ -34,7 +34,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 		c.cursors[cursor] = sm
 	}
 	if cur, ok := sm[c.Size]; ok {
-		TheApp.ctxtwin.glw.SetCursor(cur)
+		TheApp.CtxWindow.glw.SetCursor(cur)
 		c.prevSize = c.Size
 		c.Cur = cursor
 		return nil
@@ -47,7 +47,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	h := ci.Hotspot
 	gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
 	sm[c.Size] = gc
-	TheApp.ctxtwin.glw.SetCursor(gc)
+	TheApp.CtxWindow.glw.SetCursor(gc)
 	c.prevSize = c.Size
 	c.Cur = cursor
 	return nil
