@@ -181,19 +181,19 @@ var StylePaintFuncs = map[string]StyleFunc{
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				pc.XForm = par.(*Paint).XForm
+				pc.Transform = par.(*Paint).Transform
 			} else if init {
-				pc.XForm = mat32.Identity2D()
+				pc.Transform = mat32.Identity2D()
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			pc.XForm.SetString(vt)
+			pc.Transform.SetString(vt)
 		case *mat32.Mat2:
-			pc.XForm = *vt
+			pc.Transform = *vt
 		case mat32.Mat2:
-			pc.XForm = vt
+			pc.Transform = vt
 		}
 	},
 }

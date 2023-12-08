@@ -19,7 +19,7 @@ import (
 type State struct {
 
 	// current transform
-	CurXForm mat32.Mat2
+	CurTransform mat32.Mat2
 
 	// current path
 	Path rasterx.Path
@@ -55,7 +55,7 @@ type State struct {
 	LastRenderBBox image.Rectangle
 
 	// stack of transforms
-	XFormStack []mat32.Mat2
+	TransformStack []mat32.Mat2
 
 	// stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
 	BoundsStack []image.Rectangle
@@ -72,7 +72,7 @@ type State struct {
 
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
-	rs.CurXForm = mat32.Identity2D()
+	rs.CurTransform = mat32.Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
 	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
@@ -91,42 +91,42 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
 }
 
-// PushXForm pushes current xform onto stack and apply new xform on top of it
+// PushTransform pushes current transform onto stack and apply new transform on top of it
 // must protect within render mutex lock (see Lock version)
-func (rs *State) PushXForm(xf mat32.Mat2) {
-	if rs.XFormStack == nil {
-		rs.XFormStack = make([]mat32.Mat2, 0)
+func (rs *State) PushTransform(xf mat32.Mat2) {
+	if rs.TransformStack == nil {
+		rs.TransformStack = make([]mat32.Mat2, 0)
 	}
-	rs.XFormStack = append(rs.XFormStack, rs.CurXForm)
-	rs.CurXForm = xf.Mul(rs.CurXForm)
+	rs.TransformStack = append(rs.TransformStack, rs.CurTransform)
+	rs.CurTransform = xf.Mul(rs.CurTransform)
 }
 
-// PushXFormLock pushes current xform onto stack and apply new xform on top of it
+// PushTransformLock pushes current transform onto stack and apply new transform on top of it
 // protects within render mutex lock
-func (rs *State) PushXFormLock(xf mat32.Mat2) {
+func (rs *State) PushTransformLock(xf mat32.Mat2) {
 	rs.RenderMu.Lock()
-	rs.PushXForm(xf)
+	rs.PushTransform(xf)
 	rs.RenderMu.Unlock()
 }
 
-// PopXForm pops xform off the stack and set to current xform
+// PopTransform pops transform off the stack and set to current transform
 // must protect within render mutex lock (see Lock version)
-func (rs *State) PopXForm() {
-	sz := len(rs.XFormStack)
+func (rs *State) PopTransform() {
+	sz := len(rs.TransformStack)
 	if sz == 0 {
-		slog.Error("programmer error: paint.State.PopXForm: stack is empty")
-		rs.CurXForm = mat32.Identity2D()
+		slog.Error("programmer error: paint.State.PopTransform: stack is empty")
+		rs.CurTransform = mat32.Identity2D()
 		return
 	}
-	rs.CurXForm = rs.XFormStack[sz-1]
-	rs.XFormStack = rs.XFormStack[:sz-1]
+	rs.CurTransform = rs.TransformStack[sz-1]
+	rs.TransformStack = rs.TransformStack[:sz-1]
 }
 
-// PopXFormLock pops xform off the stack and set to current xform
+// PopTransformLock pops transform off the stack and set to current transform
 // protects within render mutex lock (see Lock version)
-func (rs *State) PopXFormLock() {
+func (rs *State) PopTransformLock() {
 	rs.RenderMu.Lock()
-	rs.PopXForm()
+	rs.PopTransform()
 	rs.RenderMu.Unlock()
 }
 

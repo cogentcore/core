@@ -78,9 +78,9 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 	var ppaint styles.Paint
 	ppaint.CopyStyleFrom(pc.Paint)
 
-	pc.PushXForm(mat32.Identity2D()) // needed for SVG
-	defer pc.PopXForm()
-	pc.CurXForm = mat32.Identity2D()
+	pc.PushTransform(mat32.Identity2D()) // needed for SVG
+	defer pc.PopTransform()
+	pc.CurTransform = mat32.Identity2D()
 
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()

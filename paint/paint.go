@@ -116,7 +116,7 @@ func (pc *Context) FillStrokeClear() {
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
 func (pc *Context) TransformPoint(x, y float32) mat32.Vec2 {
-	return pc.CurXForm.MulVec2AsPt(mat32.Vec2{x, y})
+	return pc.CurTransform.MulVec2AsPt(mat32.Vec2{x, y})
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
@@ -126,8 +126,8 @@ func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeWidth()
 	}
-	tmin := pc.CurXForm.MulVec2AsPt(mat32.Vec2{minX, minY})
-	tmax := pc.CurXForm.MulVec2AsPt(mat32.Vec2{maxX, maxY})
+	tmin := pc.CurTransform.MulVec2AsPt(mat32.Vec2{minX, minY})
+	tmax := pc.CurTransform.MulVec2AsPt(mat32.Vec2{maxX, maxY})
 	tp1 := mat32.NewVec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := mat32.NewVec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
@@ -273,7 +273,7 @@ func (pc *Context) StrokeWidth() float32 {
 	if pc.VecEff == styles.VecEffNonScalingStroke {
 		return dw
 	}
-	scx, scy := pc.CurXForm.ExtractScale()
+	scx, scy := pc.CurTransform.ExtractScale()
 	sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
 	lw := mat32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
 	return lw
@@ -291,7 +291,7 @@ func (pc *Context) stroke() {
 
 	dash := slices.Clone(pc.StrokeStyle.Dashes)
 	if dash != nil {
-		scx, scy := pc.CurXForm.ExtractScale()
+		scx, scy := pc.CurTransform.ExtractScale()
 		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))
 		hasZero := false
 		for i := range dash {
@@ -317,7 +317,7 @@ func (pc *Context) stroke() {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurXForm))
+	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 
@@ -346,7 +346,7 @@ func (pc *Context) fill() {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurXForm))
+	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
 	rf.Draw()
 	rf.Clear()
 
@@ -1026,7 +1026,7 @@ func (pc *Context) DrawImageAnchored(fmIm image.Image, x, y, ax, ay float32) {
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
 	transformer := draw.BiLinear
-	m := pc.CurXForm.Translate(x, y)
+	m := pc.CurTransform.Translate(x, y)
 	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if pc.Mask == nil {
 		transformer.Transform(pc.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
@@ -1047,7 +1047,7 @@ func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 	isc := mat32.Vec2{w, h}.Div(isz)
 
 	transformer := draw.BiLinear
-	m := pc.CurXForm.Translate(x, y).Scale(isc.X, isc.Y)
+	m := pc.CurTransform.Translate(x, y).Scale(isc.X, isc.Y)
 	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 	if pc.Mask == nil {
 		transformer.Transform(pc.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
@@ -1065,18 +1065,18 @@ func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 // Identity resets the current transformation matrix to the identity matrix.
 // This results in no translating, scaling, rotating, or shearing.
 func (pc *Context) Identity() {
-	pc.XForm = mat32.Identity2D()
+	pc.Transform = mat32.Identity2D()
 }
 
 // Translate updates the current matrix with a translation.
 func (pc *Context) Translate(x, y float32) {
-	pc.XForm = pc.XForm.Translate(x, y)
+	pc.Transform = pc.Transform.Translate(x, y)
 }
 
 // Scale updates the current matrix with a scaling factor.
 // Scaling occurs about the origin.
 func (pc *Context) Scale(x, y float32) {
-	pc.XForm = pc.XForm.Scale(x, y)
+	pc.Transform = pc.Transform.Scale(x, y)
 }
 
 // ScaleAbout updates the current matrix with a scaling factor.
@@ -1090,7 +1090,7 @@ func (pc *Context) ScaleAbout(sx, sy, x, y float32) {
 // Rotate updates the current matrix with a clockwise rotation.
 // Rotation occurs about the origin. Angle is specified in radians.
 func (pc *Context) Rotate(angle float32) {
-	pc.XForm = pc.XForm.Rotate(angle)
+	pc.Transform = pc.Transform.Rotate(angle)
 }
 
 // RotateAbout updates the current matrix with a clockwise rotation.
@@ -1104,7 +1104,7 @@ func (pc *Context) RotateAbout(angle, x, y float32) {
 // Shear updates the current matrix with a shearing angle.
 // Shearing occurs about the origin.
 func (pc *Context) Shear(x, y float32) {
-	pc.XForm = pc.XForm.Shear(x, y)
+	pc.Transform = pc.Transform.Shear(x, y)
 }
 
 // ShearAbout updates the current matrix with a shearing angle.

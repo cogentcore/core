@@ -38,7 +38,7 @@ type Paint struct { //gti:add
 	VecEff VectorEffects `xml:"vector-effect"`
 
 	// prop: transform = our additions to transform -- pushed to render state
-	XForm mat32.Mat2 `xml:"transform"`
+	Transform mat32.Mat2 `xml:"transform"`
 
 	// units context -- parameters necessary for anchoring relative units
 	UnContext units.Context `xml:"-"`
@@ -59,7 +59,7 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.TextStyle.Defaults()
-	pc.XForm = mat32.Identity2D()
+	pc.Transform = mat32.Identity2D()
 }
 
 // CopyStyleFrom copies styles from another paint
