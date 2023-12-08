@@ -40,6 +40,8 @@ type App struct {
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	defer func() { base.HandleRecover(recover()) }()
+	TheApp.This = TheApp
+	TheApp.Drawer = &Drawer{}
 	TheApp.AddEventListeners()
 	goosi.TheApp = TheApp
 	go func() {
@@ -56,6 +58,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { base.HandleRecover(recover()) }()
 
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
+	a.Win.This = a.Win
 	a.Win.EvMgr.Deque = &a.Win.Deque
 	a.SetSysWindow()
 
