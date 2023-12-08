@@ -303,7 +303,7 @@ func (a *Mat2) SetString(str string) error {
 	for {
 		pidx := strings.IndexByte(str, '(')
 		if pidx < 0 {
-			err := fmt.Errorf("gi.Mat2 SetString: no params for xform: %v\n", str)
+			err := fmt.Errorf("gi.Mat2 SetString: no params for transform: %v\n", str)
 			log.Println(err)
 			return err
 		}
