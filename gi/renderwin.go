@@ -897,7 +897,7 @@ func (rs *RenderScenes) Add(sc *Scene) int {
 	}
 	idx := len(rs.Scenes)
 	if idx >= rs.MaxIdx {
-		fmt.Printf("gi.RenderScenes: ERROR too many Scenes to render all of them!  Max: %d\n", rs.MaxIdx)
+		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIdx)
 		return -1
 	}
 	rs.Scenes = append(rs.Scenes, sc)
