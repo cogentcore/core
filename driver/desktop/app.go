@@ -16,12 +16,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/driver/base"
 	"goki.dev/vgpu/v2/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -31,149 +31,67 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var VkOsDebug = false
-
-var theApp = &appImpl{
-	windows:      make(map[*glfw.Window]*windowImpl),
-	oswindows:    make(map[uintptr]*windowImpl),
-	winlist:      make([]*windowImpl, 0),
+var TheApp = &App{
+	windows:      make(map[*glfw.Window]*Window),
+	oswindows:    make(map[uintptr]*Window),
+	winlist:      make([]*Window, 0),
 	screens:      make([]*goosi.Screen, 0),
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
 }
 
-type appImpl struct {
-	mu            sync.Mutex
-	mainQueue     chan funcRun
-	mainDone      chan struct{}
-	gpu           *vgpu.GPU
-	shareWin      *glfw.Window // a non-visible, always-present window that all windows share gl context with
-	windows       map[*glfw.Window]*windowImpl
-	oswindows     map[uintptr]*windowImpl
-	winlist       []*windowImpl
-	screens       []*goosi.Screen
-	screensAll    []*goosi.Screen // unique list of all screens ever seen -- get info from here if fails
-	noScreens     bool            // if all screens have been disconnected, don't do anything..
-	ctxtwin       *windowImpl     // context window, dynamically set, for e.g., pointer and other methods
-	name          string
-	about         string
-	openFiles     []string
-	quitting      bool          // set to true when quitting and closing windows
-	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
-	quitReqFunc   func()
-	quitCleanFunc func()
-	isDark        bool
-}
+type App struct {
+	base.AppMulti[*Window]
 
-var mainCallback func(goosi.App)
+	// GPU is the system GPU used for the app
+	GPU *vgpu.GPU
+
+	// ShareWin is a non-visible, always-present window that all windows share gl context with
+	ShareWin *glfw.Window
+}
 
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	mainCallback = f
-	theApp.initVk()
-	goosi.TheApp = theApp
+	TheApp.initVk()
+	goosi.TheApp = TheApp
 	go func() {
-		mainCallback(theApp)
-		theApp.stopMain()
+		f(TheApp)
+		TheApp.stopMain()
 	}()
-	theApp.mainLoop()
-}
-
-type funcRun struct {
-	f    func()
-	done chan bool
-}
-
-// RunOnMain runs given function on main thread
-func (app *appImpl) RunOnMain(f func()) {
-	if app.mainQueue == nil {
-		f()
-	} else {
-		glfw.PostEmptyEvent()
-		done := make(chan bool)
-		app.mainQueue <- funcRun{f: f, done: done}
-		<-done
-		glfw.PostEmptyEvent()
-	}
-}
-
-// GoRunOnMain runs given function on main thread and returns immediately
-func (app *appImpl) GoRunOnMain(f func()) {
-	go func() {
-		glfw.PostEmptyEvent()
-		app.mainQueue <- funcRun{f: f, done: nil}
-		glfw.PostEmptyEvent()
-	}()
+	TheApp.mainLoop()
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
-func (app *appImpl) SendEmptyEvent() {
+func (app *App) SendEmptyEvent() {
 	glfw.PostEmptyEvent()
-}
-
-// PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
-// and returning when there are no more events.
-func (app *appImpl) PollEventsOnMain() {
-outer:
-	for {
-		select {
-		case <-app.mainDone:
-			glfw.Terminate()
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		default:
-			glfw.PollEvents()
-			break outer
-		}
-	}
-}
-
-// PollEvents tells the main event loop to check for any gui events right now.
-// Call this periodically from longer-running functions to ensure
-// GUI responsiveness.
-func (app *appImpl) PollEvents() {
-	app.RunOnMain(func() { app.PollEventsOnMain() })
 }
 
 // mainLoop starts running event loop on main thread (must be called
 // from the main thread).
-func (app *appImpl) mainLoop() {
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	// SetThreadPri(1)
-	// time.Sleep(100 * time.Millisecond)
+func (app *App) mainLoop() {
+	app.MainQueue = make(chan base.FuncRun)
+	app.MainDone = make(chan struct{})
 	for {
 		select {
-		case <-app.mainDone:
+		case <-app.MainDone:
 			glfw.Terminate()
 			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
+		case f := <-app.MainQueue:
+			f.F()
+			if f.Done != nil {
+				f.Done <- struct{}{}
 			}
 		default:
-			// note: Timeout version causes fairly regular crashing and is no longer necessary on mac.
-			// though we may need some additional blank events thrown in at some point.
-			glfw.WaitEvents() // Timeout(0.2)
+			glfw.WaitEvents()
 		}
 	}
 }
 
-// stopMain stops the main loop and thus terminates the app
-func (app *appImpl) stopMain() {
-	app.mainDone <- struct{}{}
-}
-
 // initVk initializes glfw, vulkan (vgpu), etc
-func (app *appImpl) initVk() {
+func (app *App) initVk() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("goosi.vkos failed to initialize glfw:", err)
 	}
@@ -185,16 +103,15 @@ func (app *appImpl) initVk() {
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.Visible, glfw.False)
 	var err error
-	app.shareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
+	app.ShareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
 		log.Fatalln("goosi.vkos failed to create hidden share window", err)
 	}
 
-	winext := app.shareWin.GetRequiredInstanceExtensions()
-	app.gpu = vgpu.NewGPU()
-	app.gpu.AddInstanceExt(winext...)
-	vgpu.Debug = VkOsDebug
-	app.gpu.Config(app.name)
+	winext := app.ShareWin.GetRequiredInstanceExtensions()
+	app.GPU = vgpu.NewGPU()
+	app.GPU.AddInstanceExt(winext...)
+	app.GPU.Config(app.Name())
 
 	app.GetScreens()
 }
@@ -202,15 +119,15 @@ func (app *appImpl) initVk() {
 ////////////////////////////////////////////////////////
 //  Window
 
-func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	if len(app.winlist) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
+func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+	if len(app.Windows) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
 		if monitorDebug {
 			log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		}
 		goosi.InitScreenLogicalDPIFunc()
 	}
 
-	sc := app.screens[0]
+	sc := app.Screens[0]
 
 	if opts == nil {
 		opts = &goosi.NewWindowOptions{}
@@ -227,7 +144,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		return nil, err
 	}
 
-	w := &windowImpl{
+	w := &Window{
 		app:         app,
 		glw:         glw,
 		scrnName:    sc.Name,
@@ -243,11 +160,11 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	w.EvMgr.Deque = &w.Deque
 
 	app.RunOnMain(func() {
-		surfPtr, err := glw.CreateWindowSurface(app.gpu.Instance, nil)
+		surfPtr, err := glw.CreateWindowSurface(app.GPU.Instance, nil)
 		if err != nil {
 			log.Println(err)
 		}
-		w.Surface = vgpu.NewSurface(app.gpu, vk.SurfaceFromPointer(surfPtr))
+		w.Surface = vgpu.NewSurface(app.GPU, vk.SurfaceFromPointer(surfPtr))
 		w.Draw.YIsDown = true
 		w.Draw.ConfigSurface(w.Surface, vgpu.MaxTexturesPerSet) // note: can expand
 	})
@@ -286,7 +203,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	return w, nil
 }
 
-func (app *appImpl) DeleteWin(w *windowImpl) {
+func (app *App) DeleteWin(w *Window) {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	_, ok := app.windows[w.glw]
@@ -303,11 +220,11 @@ func (app *appImpl) DeleteWin(w *windowImpl) {
 	delete(app.windows, w.glw)
 }
 
-func (app *appImpl) NScreens() int {
+func (app *App) NScreens() int {
 	return len(app.screens)
 }
 
-func (app *appImpl) Screen(scrN int) *goosi.Screen {
+func (app *App) Screen(scrN int) *goosi.Screen {
 	sz := len(app.screens)
 	if scrN < sz {
 		return app.screens[scrN]
@@ -315,7 +232,7 @@ func (app *appImpl) Screen(scrN int) *goosi.Screen {
 	return nil
 }
 
-func (app *appImpl) ScreenByName(name string) *goosi.Screen {
+func (app *App) ScreenByName(name string) *goosi.Screen {
 	for _, sc := range app.screens {
 		if sc.Name == name {
 			return sc
@@ -324,17 +241,17 @@ func (app *appImpl) ScreenByName(name string) *goosi.Screen {
 	return nil
 }
 
-func (app *appImpl) NoScreens() bool {
+func (app *App) NoScreens() bool {
 	return app.noScreens
 }
 
-func (app *appImpl) NWindows() int {
+func (app *App) NWindows() int {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	return len(app.winlist)
 }
 
-func (app *appImpl) Window(win int) goosi.Window {
+func (app *App) Window(win int) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	sz := len(app.winlist)
@@ -344,7 +261,7 @@ func (app *appImpl) Window(win int) goosi.Window {
 	return nil
 }
 
-func (app *appImpl) WindowByName(name string) goosi.Window {
+func (app *App) WindowByName(name string) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	for _, win := range app.winlist {
@@ -355,7 +272,7 @@ func (app *appImpl) WindowByName(name string) goosi.Window {
 	return nil
 }
 
-func (app *appImpl) WindowInFocus() goosi.Window {
+func (app *App) WindowInFocus() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	for _, win := range app.winlist {
@@ -366,40 +283,40 @@ func (app *appImpl) WindowInFocus() goosi.Window {
 	return nil
 }
 
-func (app *appImpl) ContextWindow() goosi.Window {
+func (app *App) ContextWindow() goosi.Window {
 	app.mu.Lock()
 	cw := app.ctxtwin
 	app.mu.Unlock()
 	return cw
 }
 
-func (app *appImpl) Name() string {
+func (app *App) Name() string {
 	return app.name
 }
 
-func (app *appImpl) SetName(name string) {
+func (app *App) SetName(name string) {
 	app.name = name
 }
 
-func (app *appImpl) About() string {
+func (app *App) About() string {
 	return app.about
 }
 
-func (app *appImpl) SetAbout(about string) {
+func (app *App) SetAbout(about string) {
 	app.about = about
 }
 
-func (app *appImpl) OpenFiles() []string {
+func (app *App) OpenFiles() []string {
 	return app.openFiles
 }
 
-func (app *appImpl) GoGiPrefsDir() string {
+func (app *App) GoGiPrefsDir() string {
 	pdir := filepath.Join(app.PrefsDir(), "GoGi")
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }
 
-func (app *appImpl) AppPrefsDir() string {
+func (app *App) AppPrefsDir() string {
 	pdir := filepath.Join(app.PrefsDir(), app.Name())
 	os.MkdirAll(pdir, 0755)
 	return pdir
@@ -418,29 +335,29 @@ func SrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
+func (app *App) ClipBoard(win goosi.Window) clip.Board {
 	app.mu.Lock()
-	app.ctxtwin = win.(*windowImpl)
+	app.ctxtwin = win.(*Window)
 	app.mu.Unlock()
 	return &theClip
 }
 
-func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
+func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	app.mu.Lock()
-	app.ctxtwin = win.(*windowImpl)
+	app.ctxtwin = win.(*Window)
 	app.mu.Unlock()
 	return &theCursor
 }
 
-func (app *appImpl) SetQuitReqFunc(fun func()) {
+func (app *App) SetQuitReqFunc(fun func()) {
 	app.quitReqFunc = fun
 }
 
-func (app *appImpl) SetQuitCleanFunc(fun func()) {
+func (app *App) SetQuitCleanFunc(fun func()) {
 	app.quitCleanFunc = fun
 }
 
-func (app *appImpl) QuitReq() {
+func (app *App) QuitReq() {
 	if app.quitting {
 		return
 	}
@@ -451,11 +368,11 @@ func (app *appImpl) QuitReq() {
 	}
 }
 
-func (app *appImpl) IsQuitting() bool {
+func (app *App) IsQuitting() bool {
 	return app.quitting
 }
 
-func (app *appImpl) QuitClean() {
+func (app *App) QuitClean() {
 	app.quitting = true
 	if app.quitCleanFunc != nil {
 		app.quitCleanFunc()
@@ -473,7 +390,7 @@ func (app *appImpl) QuitClean() {
 	}
 }
 
-func (app *appImpl) Quit() {
+func (app *App) Quit() {
 	if app.quitting {
 		return
 	}
@@ -481,10 +398,10 @@ func (app *appImpl) Quit() {
 	app.stopMain()
 }
 
-func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	// no-op
 }
 
-func (app *appImpl) HideVirtualKeyboard() {
+func (app *App) HideVirtualKeyboard() {
 	// no-op
 }

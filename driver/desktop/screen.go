@@ -36,9 +36,9 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 		}
 		log.Printf("MonitorDebug: monitorChange: %v event: %v\n", monitor.GetName(), enm)
 	}
-	theApp.GetScreens()
-	if len(theApp.winlist) > 0 {
-		fw := theApp.winlist[0]
+	TheApp.GetScreens()
+	if len(TheApp.winlist) > 0 {
+		fw := TheApp.winlist[0]
 		if monitorDebug {
 			log.Printf("MonitorDebug: monitorChange: sending screen update\n")
 		}
@@ -50,7 +50,7 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 	}
 }
 
-func (app *appImpl) GetScreens() {
+func (app *App) GetScreens() {
 	app.mu.Lock()
 	mons := glfw.GetMonitors()
 	sz := len(mons)
@@ -182,7 +182,7 @@ func (app *appImpl) GetScreens() {
 
 // saveScreenInfo saves a copy of given screen info to screensAll list if unique
 // based on name.  Returns true if added a new screen.
-func (app *appImpl) saveScreenInfo(sc *goosi.Screen) bool {
+func (app *App) saveScreenInfo(sc *goosi.Screen) bool {
 	_, has := app.findScreenInfo(sc.Name)
 	if has {
 		return false
@@ -194,7 +194,7 @@ func (app *appImpl) saveScreenInfo(sc *goosi.Screen) bool {
 }
 
 // findScreenInfo finds saved screen info based on name
-func (app *appImpl) findScreenInfo(name string) (*goosi.Screen, bool) {
+func (app *App) findScreenInfo(name string) (*goosi.Screen, bool) {
 	for _, sc := range app.screensAll {
 		if sc.Name == name {
 			return sc, true

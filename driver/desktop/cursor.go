@@ -34,7 +34,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 		c.cursors[cursor] = sm
 	}
 	if cur, ok := sm[c.Size]; ok {
-		theApp.ctxtwin.glw.SetCursor(cur)
+		TheApp.ctxtwin.glw.SetCursor(cur)
 		c.prevSize = c.Size
 		c.Cur = cursor
 		return nil
@@ -47,7 +47,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	h := ci.Hotspot
 	gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
 	sm[c.Size] = gc
-	theApp.ctxtwin.glw.SetCursor(gc)
+	TheApp.ctxtwin.glw.SetCursor(gc)
 	c.prevSize = c.Size
 	c.Cur = cursor
 	return nil

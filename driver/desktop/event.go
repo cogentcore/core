@@ -31,18 +31,18 @@ func glfwMods(mod glfw.ModifierKey) key.Modifiers {
 	return m
 }
 
-func (w *windowImpl) focusWindow() *windowImpl {
-	fw := theApp.WindowInFocus()
+func (w *Window) focusWindow() *Window {
+	fw := TheApp.WindowInFocus()
 	if w != fw {
 		if fw == nil {
 			fw = w
 		}
 	}
-	return fw.(*windowImpl)
+	return fw.(*Window)
 }
 
 // physical key
-func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
+func (w *Window) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
 	ec := glfwKeyCode(ky)
 	rn, _ := key.CodeRuneMap[ec]
@@ -58,21 +58,21 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 }
 
 // char input
-func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
+func (w *Window) charEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
 	fw := w.focusWindow()
 	fw.EvMgr.KeyChord(char, key.CodeUnknown, mods)
 	glfw.PostEmptyEvent() // todo: why?
 }
 
-func (w *windowImpl) curMousePosPoint(gw *glfw.Window) image.Point {
+func (w *Window) curMousePosPoint(gw *glfw.Window) image.Point {
 	xp, yp := gw.GetCursorPos()
 	return w.mousePosToPoint(xp, yp)
 }
 
-func (w *windowImpl) mousePosToPoint(x, y float64) image.Point {
+func (w *Window) mousePosToPoint(x, y float64) image.Point {
 	var where image.Point
-	if theApp.Platform() == goosi.MacOS {
+	if TheApp.Platform() == goosi.MacOS {
 		where = image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
 	} else {
 		where = image.Point{int(x), int(y)}
@@ -80,7 +80,7 @@ func (w *windowImpl) mousePosToPoint(x, y float64) image.Point {
 	return where
 }
 
-func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+func (w *Window) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
 	but := events.Left
 	switch button {
@@ -101,8 +101,8 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 	glfw.PostEmptyEvent() // why?
 }
 
-func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
-	if theApp.Platform() == goosi.MacOS {
+func (w *Window) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
+	if TheApp.Platform() == goosi.MacOS {
 		xoff *= float64(events.ScrollWheelSpeed)
 		yoff *= float64(events.ScrollWheelSpeed)
 	} else { // others have lower multipliers in general
@@ -115,14 +115,14 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	glfw.PostEmptyEvent()
 }
 
-func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
+func (w *Window) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	if w.EvMgr.ResettingPos {
 		return
 	}
 	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
 		w.EvMgr.ResettingPos = true
-		if theApp.Platform() == goosi.MacOS {
+		if TheApp.Platform() == goosi.MacOS {
 			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevPixRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevPixRatio))
 		} else {
 			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X), float64(w.EvMgr.Last.MousePos.Y))
@@ -133,10 +133,10 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	glfw.PostEmptyEvent()
 }
 
-func (w *windowImpl) cursorEnterEvent(gw *glfw.Window, entered bool) {
+func (w *Window) cursorEnterEvent(gw *glfw.Window, entered bool) {
 }
 
-func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
+func (w *Window) dropEvent(gw *glfw.Window, names []string) {
 	ln := len(names)
 	if ln == 0 {
 		return

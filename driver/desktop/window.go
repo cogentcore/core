@@ -25,9 +25,9 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
-type windowImpl struct {
+type Window struct {
 	goosi.WindowBase
-	app            *appImpl
+	app            *App
 	glw            *glfw.Window
 	Surface        *vgpu.Surface
 	Draw           vdraw.Drawer
@@ -43,35 +43,35 @@ type windowImpl struct {
 	mouseDisabled  bool
 }
 
-var _ goosi.Window = &windowImpl{}
+var _ goosi.Window = &Window{}
 
 // Handle returns the driver-specific handle for this window.
 // Currently, for all platforms, this is *glfw.Window, but that
 // cannot always be assumed.  Only provided for unforeseen emergency use --
 // please file an Issue for anything that should be added to Window
 // interface.
-func (w *windowImpl) Handle() any {
+func (w *Window) Handle() any {
 	return w.glw
 }
 
-func (w *windowImpl) Lock() bool {
+func (w *Window) Lock() bool {
 	w.mu.Lock()
-	if w.glw == nil || w.app.gpu == nil {
+	if w.glw == nil || w.app.GPU == nil {
 		w.mu.Unlock()
 		return false
 	}
 	return true
 }
 
-func (w *windowImpl) Unlock() {
+func (w *Window) Unlock() {
 	w.mu.Unlock()
 }
 
-func (w *windowImpl) Drawer() goosi.Drawer {
+func (w *Window) Drawer() goosi.Drawer {
 	return &w.Draw
 }
 
-func (w *windowImpl) IsClosed() bool {
+func (w *Window) IsClosed() bool {
 	if w == nil {
 		return true
 	}
@@ -80,8 +80,8 @@ func (w *windowImpl) IsClosed() bool {
 	return w.glw == nil
 }
 
-func (w *windowImpl) IsVisible() bool {
-	if w == nil || theApp.noScreens {
+func (w *Window) IsVisible() bool {
+	if w == nil || TheApp.noScreens {
 		return false
 	}
 	w.mu.Lock()
@@ -102,7 +102,7 @@ func (w *windowImpl) IsVisible() bool {
 //	   }
 //	   // do GPU calls here
 //	})
-func (w *windowImpl) Activate() bool {
+func (w *Window) Activate() bool {
 	// note: activate is only run on main thread so we don't need to check for mutex
 	if w == nil || w.glw == nil {
 		return false
@@ -116,7 +116,7 @@ func (w *windowImpl) Activate() bool {
 // Activate where relevant, so that if the window is already current context
 // no switching is required.
 // Must call this on app main thread using goosi.TheApp.RunOnMain
-func (w *windowImpl) DeActivate() {
+func (w *Window) DeActivate() {
 	glfw.DetachCurrentContext()
 }
 
@@ -151,13 +151,13 @@ func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, 
 }
 
 // NextEvent implements the events.EventDeque interface.
-func (w *windowImpl) NextEvent() events.Event {
+func (w *Window) NextEvent() events.Event {
 	e := w.Deque.NextEvent()
 	return e
 }
 
 // winLoop is the window's own locked processing loop.
-func (w *windowImpl) winLoop() {
+func (w *Window) winLoop() {
 	var winPaint *time.Ticker
 	if w.FPS > 0 {
 		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
@@ -196,7 +196,7 @@ outer:
 }
 
 // RunOnWin runs given function on the window's unique locked thread.
-func (w *windowImpl) RunOnWin(f func()) {
+func (w *Window) RunOnWin(f func()) {
 	if w.IsClosed() {
 		return
 	}
@@ -206,7 +206,7 @@ func (w *windowImpl) RunOnWin(f func()) {
 }
 
 // GoRunOnWin runs given function on window's unique locked thread and returns immediately
-func (w *windowImpl) GoRunOnWin(f func()) {
+func (w *Window) GoRunOnWin(f func()) {
 	if w.IsClosed() {
 		return
 	}
@@ -218,7 +218,7 @@ func (w *windowImpl) GoRunOnWin(f func()) {
 // SendEmptyEvent sends an empty, blank event to this window, which just has
 // the effect of pushing the system along during cases when the window
 // event loop needs to be "pinged" to get things moving along..
-func (w *windowImpl) SendEmptyEvent() {
+func (w *Window) SendEmptyEvent() {
 	if w.IsClosed() {
 		return
 	}
@@ -229,24 +229,24 @@ func (w *windowImpl) SendEmptyEvent() {
 ////////////////////////////////////////////////////////////
 //  Geom etc
 
-func (w *windowImpl) Screen() *goosi.Screen {
+func (w *Window) Screen() *goosi.Screen {
 	sc := w.getScreen()
 	return sc
 }
 
-func (w *windowImpl) Size() image.Point {
+func (w *Window) Size() image.Point {
 	// w.mu.Lock() // this prevents race conditions but also locks up
 	// defer w.mu.Unlock()
 	return w.PxSize
 }
 
-func (w *windowImpl) WinSize() image.Point {
+func (w *Window) WinSize() image.Point {
 	// w.mu.Lock()
 	// defer w.mu.Unlock()
 	return w.WnSize
 }
 
-func (w *windowImpl) Position() image.Point {
+func (w *Window) Position() image.Point {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	var ps image.Point
@@ -255,29 +255,29 @@ func (w *windowImpl) Position() image.Point {
 	return ps
 }
 
-func (w *windowImpl) Insets() styles.SideFloats {
+func (w *Window) Insets() styles.SideFloats {
 	return styles.NewSideFloats() // no-op
 }
 
-func (w *windowImpl) PhysicalDPI() float32 {
+func (w *Window) PhysicalDPI() float32 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.PhysDPI
 }
 
-func (w *windowImpl) LogicalDPI() float32 {
+func (w *Window) LogicalDPI() float32 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.LogDPI
 }
 
-func (w *windowImpl) SetLogicalDPI(dpi float32) {
+func (w *Window) SetLogicalDPI(dpi float32) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.LogDPI = dpi
 }
 
-func (w *windowImpl) SetTitle(title string) {
+func (w *Window) SetTitle(title string) {
 	if w.IsClosed() {
 		return
 	}
@@ -290,7 +290,7 @@ func (w *windowImpl) SetTitle(title string) {
 	})
 }
 
-func (w *windowImpl) SetWinSize(sz image.Point) {
+func (w *Window) SetWinSize(sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
@@ -303,7 +303,7 @@ func (w *windowImpl) SetWinSize(sz image.Point) {
 	})
 }
 
-func (w *windowImpl) SetSize(sz image.Point) {
+func (w *Window) SetSize(sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
@@ -312,7 +312,7 @@ func (w *windowImpl) SetSize(sz image.Point) {
 	w.SetWinSize(sz)
 }
 
-func (w *windowImpl) SetPos(pos image.Point) {
+func (w *Window) SetPos(pos image.Point) {
 	if w.IsClosed() {
 		return
 	}
@@ -325,7 +325,7 @@ func (w *windowImpl) SetPos(pos image.Point) {
 	})
 }
 
-func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
+func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
@@ -341,7 +341,7 @@ func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
 	})
 }
 
-func (w *windowImpl) show() {
+func (w *Window) show() {
 	if w.IsClosed() {
 		return
 	}
@@ -354,7 +354,7 @@ func (w *windowImpl) show() {
 	})
 }
 
-func (w *windowImpl) Raise() {
+func (w *Window) Raise() {
 	if w.IsClosed() {
 		return
 	}
@@ -371,7 +371,7 @@ func (w *windowImpl) Raise() {
 	})
 }
 
-func (w *windowImpl) Minimize() {
+func (w *Window) Minimize() {
 	if w.IsClosed() {
 		return
 	}
@@ -384,20 +384,20 @@ func (w *windowImpl) Minimize() {
 	})
 }
 
-func (w *windowImpl) SetCloseReqFunc(fun func(win goosi.Window)) {
+func (w *Window) SetCloseReqFunc(fun func(win goosi.Window)) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.closeReqFunc = fun
 }
 
-func (w *windowImpl) SetCloseCleanFunc(fun func(win goosi.Window)) {
+func (w *Window) SetCloseCleanFunc(fun func(win goosi.Window)) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.closeCleanFunc = fun
 }
 
-func (w *windowImpl) CloseReq() {
-	if theApp.quitting {
+func (w *Window) CloseReq() {
+	if TheApp.quitting {
 		w.Close()
 	}
 	if w.closeReqFunc != nil {
@@ -407,20 +407,20 @@ func (w *windowImpl) CloseReq() {
 	}
 }
 
-func (w *windowImpl) CloseClean() {
+func (w *Window) CloseClean() {
 	if w.closeCleanFunc != nil {
 		w.closeCleanFunc(w)
 	}
 }
 
-func (w *windowImpl) Close() {
+func (w *Window) Close() {
 	// this is actually the final common pathway for closing here
 	w.EvMgr.Window(events.WinClose)
 	w.mu.Lock()
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	theApp.DeleteWin(w)
+	TheApp.DeleteWin(w)
 	w.app.RunOnMain(func() {
 		vk.DeviceWaitIdle(w.Surface.Device.Device)
 		if w.DestroyGPUfunc != nil {
@@ -432,26 +432,26 @@ func (w *windowImpl) Close() {
 		w.glw = nil // marks as closed for all other calls
 		w.Surface = nil
 	})
-	if theApp.quitting {
-		theApp.quitCloseCnt <- struct{}{}
+	if TheApp.quitting {
+		TheApp.quitCloseCnt <- struct{}{}
 	}
 	w.mu.Unlock()
 }
 
-func (w *windowImpl) SetMousePos(x, y float64) {
+func (w *Window) SetMousePos(x, y float64) {
 	if !w.IsVisible() {
 		return
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if theApp.Platform() == goosi.MacOS {
+	if TheApp.Platform() == goosi.MacOS {
 		w.glw.SetCursorPos(x/float64(w.DevPixRatio), y/float64(w.DevPixRatio))
 	} else {
 		w.glw.SetCursorPos(x, y)
 	}
 }
 
-func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
+func (w *Window) SetCursorEnabled(enabled, raw bool) {
 	if enabled {
 		w.mouseDisabled = false
 		w.glw.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
@@ -464,16 +464,16 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
 	}
 }
 
-func (w *windowImpl) IsCursorEnabled() bool {
+func (w *Window) IsCursorEnabled() bool {
 	return !w.mouseDisabled
 }
 
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
-func (w *windowImpl) getScreen() *goosi.Screen {
+func (w *Window) getScreen() *goosi.Screen {
 	if w == nil || w.glw == nil {
-		return theApp.screens[0]
+		return TheApp.screens[0]
 	}
 	w.mu.Lock()
 	var sc *goosi.Screen
@@ -483,10 +483,10 @@ func (w *windowImpl) getScreen() *goosi.Screen {
 		if monitorDebug {
 			log.Printf("MonitorDebug: vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
 		}
-		sc = theApp.ScreenByName(mon.GetName())
+		sc = TheApp.ScreenByName(mon.GetName())
 		if sc == nil {
 			log.Printf("MonitorDebug: vkos getScreen: could not find screen of name: %v\n", mon.GetName())
-			sc = theApp.screens[0]
+			sc = TheApp.screens[0]
 		}
 		goto setScreen
 	}
@@ -510,7 +510,7 @@ setScreen:
 // which does not provide this functionality.
 // See: https://github.com/glfw/glfw/issues/1699
 // This is adapted from slawrence2302's code posted there.
-func (w *windowImpl) getScreenOvlp() *goosi.Screen {
+func (w *Window) getScreenOvlp() *goosi.Screen {
 	var wgeom image.Rectangle
 	wgeom.Min.X, wgeom.Min.Y = w.glw.GetPos()
 	var sz image.Point
@@ -519,7 +519,7 @@ func (w *windowImpl) getScreenOvlp() *goosi.Screen {
 
 	var csc *goosi.Screen
 	var ovlp int
-	for _, sc := range theApp.screens {
+	for _, sc := range TheApp.screens {
 		isect := sc.Geometry.Intersect(wgeom).Size()
 		ov := isect.X * isect.Y
 		if ov > ovlp || ovlp == 0 {
@@ -530,7 +530,7 @@ func (w *windowImpl) getScreenOvlp() *goosi.Screen {
 	return csc
 }
 
-func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
+func (w *Window) moved(gw *glfw.Window, x, y int) {
 	w.mu.Lock()
 	w.Pos = image.Point{x, y}
 	w.mu.Unlock()
@@ -539,12 +539,12 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 	w.EvMgr.Window(events.WinMove)
 }
 
-func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
+func (w *Window) winResized(gw *glfw.Window, width, height int) {
 	// w.app.GetScreens()  // this can crash here on win disconnect..
 	w.updtGeom()
 }
 
-func (w *windowImpl) updtGeom() {
+func (w *Window) updtGeom() {
 	w.mu.Lock()
 	cursc := w.scrnName
 	w.mu.Unlock()
@@ -571,22 +571,22 @@ func (w *windowImpl) updtGeom() {
 	w.EvMgr.WindowResize()
 }
 
-func (w *windowImpl) fbResized(gw *glfw.Window, width, height int) {
+func (w *Window) fbResized(gw *glfw.Window, width, height int) {
 	fbsz := image.Point{width, height}
 	if w.PxSize != fbsz {
 		w.updtGeom()
 	}
 }
 
-func (w *windowImpl) closeReq(gw *glfw.Window) {
+func (w *Window) closeReq(gw *glfw.Window) {
 	go w.CloseReq()
 }
 
-func (w *windowImpl) refresh(gw *glfw.Window) {
+func (w *Window) refresh(gw *glfw.Window) {
 	// go w.Publish()
 }
 
-func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
+func (w *Window) focus(gw *glfw.Window, focused bool) {
 	if focused {
 		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
 		if w.mainMenu != nil {
@@ -603,7 +603,7 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 	}
 }
 
-func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
+func (w *Window) iconify(gw *glfw.Window, iconified bool) {
 	if iconified {
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))

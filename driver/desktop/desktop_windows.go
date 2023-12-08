@@ -21,16 +21,16 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
-func (app *appImpl) Platform() goosi.Platforms {
+func (app *App) Platform() goosi.Platforms {
 	return goosi.Windows
 }
 
-func (app *appImpl) OpenURL(url string) {
+func (app *App) OpenURL(url string) {
 	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
 	cmd.Run()
 }
 
-func (app *appImpl) PrefsDir() string {
+func (app *App) PrefsDir() string {
 	// todo: could use a more official windows protocol to get this stuff..
 	// https://msdn.microsoft.com/en-us/library/bb762188%28VS.85%29.aspx
 	// with FOLDERID_RoamingAppData
@@ -45,11 +45,11 @@ func (app *appImpl) PrefsDir() string {
 }
 
 // this is the main call to create the main menu if not exist
-func (w *windowImpl) MainMenu() goosi.MainMenu {
+func (w *Window) MainMenu() goosi.MainMenu {
 	return nil
 }
 
-func (w *windowImpl) OSHandle() uintptr {
+func (w *Window) OSHandle() uintptr {
 	return uintptr(unsafe.Pointer(w.glw.GetWin32Window()))
 }
 
