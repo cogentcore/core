@@ -37,6 +37,11 @@ type AppMulti[W goosi.Window] struct {
 	CtxWindow W
 }
 
+// NewAppMulti makes a new [AppMulti].
+func NewAppMulti[W goosi.Window]() AppMulti[W] {
+	return AppMulti[W]{}
+}
+
 func (a *AppMulti[W]) NScreens() int {
 	return len(a.Screens)
 }

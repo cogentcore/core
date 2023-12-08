@@ -52,6 +52,13 @@ type WindowMulti[A goosi.App, D goosi.Drawer] struct {
 	LogDPI float32 `label:"Logical DPI"`
 }
 
+// NewWindowMulti makes a new [WindowMulti] for the given app with the given options.
+func NewWindowMulti[A goosi.App, D goosi.Drawer](a A, opts *goosi.NewWindowOptions) WindowMulti[A, D] {
+	return WindowMulti[A, D]{
+		Window: NewWindow(a, opts),
+	}
+}
+
 func (w *WindowMulti[A, D]) Drawer() goosi.Drawer {
 	return w.Draw
 }

@@ -26,12 +26,7 @@ type WindowSingle[A AppSingler] struct {
 // NewWindowSingle makes a new [WindowSingle] for the given app with the given options.
 func NewWindowSingle[A AppSingler](a A, opts *goosi.NewWindowOptions) WindowSingle[A] {
 	return WindowSingle[A]{
-		Window[A]{
-			App:  a,
-			Titl: opts.GetTitle(),
-			Flgs: opts.Flags,
-			FPS:  60,
-		},
+		NewWindow(a, opts),
 	}
 }
 

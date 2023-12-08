@@ -27,14 +27,7 @@ func init() {
 	runtime.LockOSThread()
 }
 
-var TheApp = &App{
-	windows:      make(map[*glfw.Window]*Window),
-	oswindows:    make(map[uintptr]*Window),
-	winlist:      make([]*Window, 0),
-	screens:      make([]*goosi.Screen, 0),
-	name:         "GoGi",
-	quitCloseCnt: make(chan struct{}),
-}
+var TheApp = &App{AppMulti: base.NewAppMulti[*Window]()}
 
 type App struct {
 	base.AppMulti[*Window]

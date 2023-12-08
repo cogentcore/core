@@ -74,6 +74,16 @@ type Window[A goosi.App] struct {
 	CursorEnabled bool
 }
 
+// NewWindow makes a new [Window] for the given app with the given options.
+func NewWindow[A goosi.App](a A, opts *goosi.NewWindowOptions) Window[A] {
+	return Window[A]{
+		App:  a,
+		Titl: opts.GetTitle(),
+		Flgs: opts.Flags,
+		FPS:  60,
+	}
+}
+
 // WinLoop runs the window's own locked processing loop.
 func (w *Window[A]) WinLoop() {
 	var winPaint *time.Ticker
