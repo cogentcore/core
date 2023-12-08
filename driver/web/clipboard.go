@@ -17,7 +17,7 @@ import (
 // TheClip is the single [clip.Board] for the offscreen platform
 var TheClip = Clip{}
 
-// Clip is the [clip.Board] implementation on the web platform
+// Clip is the [clip.Board] implementation for the web platform
 type Clip struct{}
 
 func (cl *Clip) IsEmpty() bool {

@@ -18,7 +18,7 @@ import (
 // TheCursor is the single [goosi.Cursor] for the web platform
 var TheCursor = Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}}
 
-// Cursor is the [cursor.Cursor] implementation on the web platform
+// Cursor is the [cursor.Cursor] implementation for the web platform
 type Cursor struct {
 	cursor.CursorBase
 }

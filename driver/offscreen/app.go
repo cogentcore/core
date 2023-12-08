@@ -20,7 +20,7 @@ var TheApp = &App{base.NewAppSingle[*Drawer, *Window]()}
 
 var _ goosi.App = TheApp
 
-// App is the [goosi.App] implementation on the offscreen platform
+// App is the [goosi.App] implementation for the offscreen platform
 type App struct {
 	base.AppSingle[*Drawer, *Window]
 }

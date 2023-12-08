@@ -25,7 +25,7 @@ var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 var _ goosi.App = TheApp
 
-// App is the [goosi.App] implementation on the web platform
+// App is the [goosi.App] implementation for the web platform
 type App struct {
 	base.AppSingle[*Drawer, *Window]
 
