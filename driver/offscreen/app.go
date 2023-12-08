@@ -74,11 +74,6 @@ func (a *App) SetScreenInfo(sz image.Point) error {
 	return nil
 }
 
-func (a *App) PrefsDir() string {
-	// TODO(kai): figure out a better solution to offscreen prefs dir
-	return filepath.Join(".", "tmpPrefsDir")
-}
-
 func (a *App) GetScreens() {
 	if a.Scrn.PixSize == (image.Point{}) {
 		a.Scrn.PixSize = image.Point{800, 600}
@@ -92,6 +87,11 @@ func (a *App) GetScreens() {
 	physX := 25.4 * float32(a.Scrn.PixSize.X) / dpi
 	physY := 25.4 * float32(a.Scrn.PixSize.Y) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
+}
+
+func (a *App) PrefsDir() string {
+	// TODO(kai): figure out a better solution to offscreen prefs dir
+	return filepath.Join(".", "tmpPrefsDir")
 }
 
 func (a *App) Platform() goosi.Platforms {

@@ -19,7 +19,3 @@ var _ goosi.Window = &Window{}
 func (w *Window) Handle() any {
 	return nil
 }
-
-func (w *Window) OSHandle() uintptr {
-	return 0
-}

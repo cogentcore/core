@@ -168,15 +168,25 @@ type Window interface {
 	GoRunOnWin(f func())
 
 	// Handle returns the driver-specific handle for this window.
-	// Currently, for all platforms, this is *glfw.Window, but that
-	// cannot always be assumed.  Only provided for unforeseen emergency use --
-	// please file an Issue for anything that should be added to Window
-	// interface.
+	// This is only provided for unforeseen emergency backup use;
+	// please file an issue for anything that should be added to the
+	// Window interface. If you need access to some OS API, somebody
+	// else probably does too.
+	//
+	// The return value of Handle is not guaranteed to be consistent
+	// across versions, and depends on platform-specific APIs that may
+	// receive unpredictable breaking changes.
+	//
+	// The return value of Handle will be of the following types for
+	// the following platforms:
+	//	- MacOS: uintptr representing NSWindow*
+	//	- LinuxX11: uintptr representing X11Window
+	//	- Windows: uintptr representing HWND
+	//	- IOS: uintptr representing UIViow
+	// 	- Android: uintptr representing *C.ANativeWindow
+	//	- Web: [js.Value] representing [js.Global] (for which you should just call [js.Global] directly)
+	//	- Offscreen: nil
 	Handle() any
-
-	// OSHandle returns the OS-specific underlying window handle:
-	// MacOS: NSWindow*, Windows:  HWND, LinuxX11: X11Window
-	OSHandle() uintptr
 
 	// Sets the mouse position to given values
 	SetMousePos(x, y float64)
