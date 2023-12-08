@@ -9,7 +9,6 @@ package offscreen
 import (
 	"image"
 	"path/filepath"
-	"runtime/debug"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
@@ -31,7 +30,6 @@ type App struct {
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	debug.SetPanicOnFault(true)
 	defer func() { base.HandleRecover(recover()) }()
 	TheApp.This = TheApp
 	TheApp.GetScreens()
@@ -43,42 +41,29 @@ func Main(f func(goosi.App)) {
 	TheApp.MainLoop()
 }
 
-////////////////////////////////////////////////////////
-//  Window
-
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { base.HandleRecover(recover()) }()
-	bw := &base.WindowSingle[*App]{
-		App:         a,
-		isVisible:   true,
-		publish:     make(chan struct{}),
-		winClose:    make(chan struct{}),
-		publishDone: make(chan struct{}),
-		WindowBase: goosi.WindowBase{
-			Titl: opts.GetTitle(),
-			Flag: opts.Flags,
-			FPS:  60,
-		},
-	}
-	a.Win = &Window{base.WindowSingle[*App]{}}
-	a.App = a
 
+	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.EvMgr.Deque = &a.Win.Deque
-	a.setSysWindow(opts.Size)
+	a.SetScreenInfo(opts.Size)
+
+	a.Win.EvMgr.WindowResize()
+	a.Win.EvMgr.Window(events.WinShow)
+	a.Win.EvMgr.Window(events.ScreenUpdate)
+	a.Win.EvMgr.Window(events.WinFocus)
 
 	go a.Win.WinLoop()
 
 	return a.Win, nil
 }
 
-// setSysWindow sets the underlying system window information.
-func (a *App) setSysWindow(sz image.Point) error {
-	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
-
+// SetScreenInfo sets the screen information based on the given
+// requested window size.
+func (a *App) SetScreenInfo(sz image.Point) error {
 	if sz.X == 0 {
 		sz.X = 800
 	}
@@ -88,10 +73,6 @@ func (a *App) setSysWindow(sz image.Point) error {
 	a.Scrn.PixSize = sz
 	a.GetScreens()
 
-	a.Win.EvMgr.WindowResize()
-	a.Win.EvMgr.Window(events.WinShow)
-	a.Win.EvMgr.Window(events.ScreenUpdate)
-	a.Win.EvMgr.Window(events.WinFocus)
 	return nil
 }
 

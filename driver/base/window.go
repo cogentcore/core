@@ -55,8 +55,8 @@ type Window[A goosi.App] struct {
 	// Insts are the cached insets of the window
 	Insts styles.SideFloats `label:"Insets"`
 
-	// Flag contains the flags associated with the window
-	Flag goosi.WindowFlags
+	// Flgs contains the flags associated with the window
+	Flgs goosi.WindowFlags
 
 	// FPS is the FPS (frames per second) for rendering the window
 	FPS int
@@ -163,11 +163,11 @@ func (w *Window[A]) SetTitle(title string) {
 }
 
 func (w *Window[A]) Flags() goosi.WindowFlags {
-	return w.Flag
+	return w.Flgs
 }
 
 func (w *Window[A]) Is(flag goosi.WindowFlags) bool {
-	return w.Flag.HasFlag(flag)
+	return w.Flgs.HasFlag(flag)
 }
 
 func (w *Window[A]) IsClosed() bool {
