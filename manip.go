@@ -245,7 +245,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		cdist := ssc.Camera.DistTo(ssc.Camera.Target)
 		scDel := float32(.0005) * cdist
 		panDel := float32(.0005) * cdist
-		// todo: use SVG ApplyDeltaXForm logic
+		// todo: use SVG ApplyDeltaTransform logic
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Control): // scale
 			dsc := dd.Mul(dm).MulScalar(scDel)
