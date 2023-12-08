@@ -1,4 +1,4 @@
-Name = "gi3d"
+Name = "xyz"
 Desc = ""
 Version = "v0.5.10"
 Type = "Library"
@@ -6,7 +6,7 @@ Type = "Library"
 [Build]
   Package = "."
   Output = ""
-  ID = "dev.goki.gi3d"
+  ID = "dev.goki.xyz"
   Debug = false
   Rebuild = false
   Install = false
@@ -46,7 +46,7 @@ Type = "Library"
 
 [Release]
   VersionFile = "version.go"
-  Package = "gi3d"
+  Package = "xyz"
 
 [Generate]
   Dir = "."
