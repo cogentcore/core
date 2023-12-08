@@ -47,13 +47,7 @@ type App struct {
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.InitVk()
-	TheApp.This = TheApp
-	goosi.TheApp = TheApp
-	go func() {
-		f(TheApp)
-		TheApp.StopMain()
-	}()
-	TheApp.MainLoop()
+	base.Main(f, TheApp, &TheApp.App)
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing

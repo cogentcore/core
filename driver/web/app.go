@@ -37,18 +37,10 @@ type App struct {
 }
 
 // Main is called from main thread when it is time to start running the
-// main loop.  When function f returns, the app ends automatically.
+// main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	defer func() { base.HandleRecover(recover()) }()
-	TheApp.This = TheApp
 	TheApp.Drawer = &Drawer{}
-	TheApp.AddEventListeners()
-	goosi.TheApp = TheApp
-	go func() {
-		f(TheApp)
-		TheApp.StopMain()
-	}()
-	TheApp.MainLoop()
+	base.Main(f, TheApp, &TheApp.App)
 }
 
 // NewWindow creates a new window with the given options.

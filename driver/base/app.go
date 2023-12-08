@@ -61,7 +61,9 @@ type App struct {
 // Main is called from main thread when it is time to start running the
 // main loop. When function f returns, the app ends automatically.
 //
-// This version of Main
+// This version of Main should be called by platform-specific implementations
+// of Main with their platform-specific app instance and its base App field.
+// Other platform-specific initial configuration steps can be called before this.
 func Main(f func(a goosi.App), a goosi.App, ab *App) {
 	defer func() { HandleRecover(recover()) }()
 	ab.This = a
