@@ -52,13 +52,6 @@ func QuitReq() {
 	goosi.TheApp.QuitReq()
 }
 
-// PollEvents tells the main event loop to check for any gui events right now.
-// Call this periodically from longer-running functions to ensure
-// GUI responsiveness.
-func PollEvents() {
-	goosi.TheApp.PollEvents()
-}
-
 // OpenURL opens the given URL in the user's default browser.  On Linux
 // this requires that xdg-utils package has been installed -- uses
 // xdg-open command.

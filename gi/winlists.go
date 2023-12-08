@@ -143,7 +143,7 @@ func (wl *RenderWinList) FocusNext() (*RenderWin, int) {
 			i++
 		}
 		fw = (*wl)[i]
-		if !fw.GoosiWin.IsMinimized() {
+		if !fw.GoosiWin.Is(goosi.Minimized) {
 			fw.GoosiWin.Raise()
 			break
 		}
