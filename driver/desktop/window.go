@@ -22,6 +22,7 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
+// Window is the implementation of [goosi.Window] for the desktop platform.
 type Window struct {
 	base.WindowMulti[*App, *vdraw.Drawer]
 
@@ -63,8 +64,9 @@ func (w *Window) DeActivate() {
 	glfw.DetachCurrentContext()
 }
 
-// must be run on main
-func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, error) {
+// NewGlfwWindow makes a new glfw window.
+// It must be run on main.
+func NewGlfwWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, error) {
 	_, _, tool, fullscreen := goosi.WindowFlagsToBool(opts.Flags)
 	// glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -93,12 +95,65 @@ func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, 
 	return win, err
 }
 
-////////////////////////////////////////////////////////////
-//  Geom etc
-
+// Screen gets the screen of the window, computing various window parameters.
 func (w *Window) Screen() *goosi.Screen {
-	sc := w.getScreen()
+	if w == nil || w.glw == nil {
+		return TheApp.Screens[0]
+	}
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+
+	var sc *goosi.Screen
+	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
+	// that is super useless it seems. only works for fullscreen
+	if mon != nil {
+		if MonitorDebug {
+			log.Printf("MonitorDebug: vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
+		}
+		sc = TheApp.ScreenByName(mon.GetName())
+		if sc == nil {
+			log.Printf("MonitorDebug: vkos getScreen: could not find screen of name: %v\n", mon.GetName())
+			sc = TheApp.Screens[0]
+		}
+		goto setScreen
+	}
+	sc = w.GetScreenOverlap()
+	// if monitorDebug {
+	// 	log.Printf("MonitorDebug: vkos window: %v getScreenOvlp() -- got screen: %v\n", w.Nm, sc.Name)
+	// }
+setScreen:
+	w.scrnName = sc.Name
+	w.PhysDPI = sc.PhysicalDPI
+	w.DevicePixelRatio = sc.DevicePixelRatio
+	if w.LogDPI == 0 {
+		w.LogDPI = sc.LogicalDPI
+	}
 	return sc
+}
+
+// GetScreenOverlap gets the monitor for given window
+// based on overlap of geometry, using limited glfw 3.3 api,
+// which does not provide this functionality.
+// See: https://github.com/glfw/glfw/issues/1699
+// This is adapted from slawrence2302's code posted there.
+func (w *Window) GetScreenOverlap() *goosi.Screen {
+	var wgeom image.Rectangle
+	wgeom.Min.X, wgeom.Min.Y = w.glw.GetPos()
+	var sz image.Point
+	sz.X, sz.Y = w.glw.GetSize()
+	wgeom.Max = wgeom.Min.Add(sz)
+
+	var csc *goosi.Screen
+	var ovlp int
+	for _, sc := range TheApp.Screens {
+		isect := sc.Geometry.Intersect(wgeom).Size()
+		ov := isect.X * isect.Y
+		if ov > ovlp || ovlp == 0 {
+			csc = sc
+			ovlp = ov
+		}
+	}
+	return csc
 }
 
 func (w *Window) SetTitle(title string) {
@@ -144,7 +199,7 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 	if w.IsClosed() {
 		return
 	}
-	sc := w.getScreen()
+	sc := w.Screen()
 	sz = sc.WinSizeFmPix(sz)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
@@ -156,7 +211,7 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 	})
 }
 
-func (w *Window) show() {
+func (w *Window) Show() {
 	if w.IsClosed() {
 		return
 	}
@@ -246,85 +301,25 @@ func (w *Window) SetCursorEnabled(enabled, raw bool) {
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
-func (w *Window) getScreen() *goosi.Screen {
-	if w == nil || w.glw == nil {
-		return TheApp.Screens[0]
-	}
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-
-	var sc *goosi.Screen
-	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
-	// that is super useless it seems. only works for fullscreen
-	if mon != nil {
-		if monitorDebug {
-			log.Printf("MonitorDebug: vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
-		}
-		sc = TheApp.ScreenByName(mon.GetName())
-		if sc == nil {
-			log.Printf("MonitorDebug: vkos getScreen: could not find screen of name: %v\n", mon.GetName())
-			sc = TheApp.Screens[0]
-		}
-		goto setScreen
-	}
-	sc = w.getScreenOvlp()
-	// if monitorDebug {
-	// 	log.Printf("MonitorDebug: vkos window: %v getScreenOvlp() -- got screen: %v\n", w.Nm, sc.Name)
-	// }
-setScreen:
-	w.scrnName = sc.Name
-	w.PhysDPI = sc.PhysicalDPI
-	w.DevicePixelRatio = sc.DevicePixelRatio
-	if w.LogDPI == 0 {
-		w.LogDPI = sc.LogicalDPI
-	}
-	return sc
-}
-
-// getScreenOvlp gets the monitor for given window
-// based on overlap of geometry, using limited glfw 3.3 api,
-// which does not provide this functionality.
-// See: https://github.com/glfw/glfw/issues/1699
-// This is adapted from slawrence2302's code posted there.
-func (w *Window) getScreenOvlp() *goosi.Screen {
-	var wgeom image.Rectangle
-	wgeom.Min.X, wgeom.Min.Y = w.glw.GetPos()
-	var sz image.Point
-	sz.X, sz.Y = w.glw.GetSize()
-	wgeom.Max = wgeom.Min.Add(sz)
-
-	var csc *goosi.Screen
-	var ovlp int
-	for _, sc := range TheApp.Screens {
-		isect := sc.Geometry.Intersect(wgeom).Size()
-		ov := isect.X * isect.Y
-		if ov > ovlp || ovlp == 0 {
-			csc = sc
-			ovlp = ov
-		}
-	}
-	return csc
-}
-
-func (w *Window) moved(gw *glfw.Window, x, y int) {
+func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Mu.Lock()
 	w.Pos = image.Point{x, y}
 	w.Mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
-	w.getScreen()
+	w.Screen() // gets parameters
 	w.EvMgr.Window(events.WinMove)
 }
 
-func (w *Window) winResized(gw *glfw.Window, width, height int) {
+func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	// w.app.GetScreens()  // this can crash here on win disconnect..
-	w.updtGeom()
+	w.UpdateGeom()
 }
 
-func (w *Window) updtGeom() {
+func (w *Window) UpdateGeom() {
 	w.Mu.Lock()
 	cursc := w.scrnName
 	w.Mu.Unlock()
-	sc := w.getScreen() // gets devpixratio etc
+	sc := w.Screen() // gets parameters
 	w.Mu.Lock()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.glw.GetSize()
@@ -340,29 +335,25 @@ func (w *Window) updtGeom() {
 	// 	w.winTex.SetSize(w.PxSize)
 	// }
 	if cursc != w.scrnName {
-		if monitorDebug {
+		if MonitorDebug {
 			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.scrnName, cursc)
 		}
 	}
 	w.EvMgr.WindowResize()
 }
 
-func (w *Window) fbResized(gw *glfw.Window, width, height int) {
+func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 	fbsz := image.Point{width, height}
 	if w.PixSize != fbsz {
-		w.updtGeom()
+		w.UpdateGeom()
 	}
 }
 
-func (w *Window) closeReq(gw *glfw.Window) {
+func (w *Window) OnCloseReq(gw *glfw.Window) {
 	go w.CloseReq()
 }
 
-func (w *Window) refresh(gw *glfw.Window) {
-	// go w.Publish()
-}
-
-func (w *Window) focus(gw *glfw.Window, focused bool) {
+func (w *Window) Focused(gw *glfw.Window, focused bool) {
 	if focused {
 		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
 		// TODO(kai): main menu
@@ -380,14 +371,14 @@ func (w *Window) focus(gw *glfw.Window, focused bool) {
 	}
 }
 
-func (w *Window) iconify(gw *glfw.Window, iconified bool) {
+func (w *Window) Iconify(gw *glfw.Window, iconified bool) {
 	if iconified {
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.EvMgr.Window(events.WinMinimize)
 	} else {
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
-		w.getScreen()
+		w.Screen() // gets parameters
 		w.EvMgr.Window(events.WinMinimize)
 	}
 }

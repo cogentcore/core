@@ -90,7 +90,7 @@ func (a *App) InitVk() {
 	}
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()
-	glfw.SetMonitorCallback(monitorChange)
+	glfw.SetMonitorCallback(a.MonitorChange)
 	// glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 	glfw.WindowHint(glfw.Resizable, glfw.False)
@@ -111,7 +111,7 @@ func (a *App) InitVk() {
 
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	if len(a.Windows) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
-		if monitorDebug {
+		if MonitorDebug {
 			log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		}
 		goosi.InitScreenLogicalDPIFunc()
@@ -128,7 +128,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	var glw *glfw.Window
 	var err error
 	a.RunOnMain(func() {
-		glw, err = newVkWindow(opts, sc)
+		glw, err = NewGlfwWindow(opts, sc)
 	})
 	if err != nil {
 		return nil, err
@@ -158,25 +158,25 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	a.Windows = append(a.Windows, w)
 	a.Mu.Unlock()
 
-	glw.SetPosCallback(w.moved)
-	glw.SetSizeCallback(w.winResized)
-	glw.SetFramebufferSizeCallback(w.fbResized)
-	glw.SetCloseCallback(w.closeReq)
+	glw.SetPosCallback(w.Moved)
+	glw.SetSizeCallback(w.WinResized)
+	glw.SetFramebufferSizeCallback(w.FbResized)
+	glw.SetCloseCallback(w.OnCloseReq)
 	// glw.SetRefreshCallback(w.refresh)
-	glw.SetFocusCallback(w.focus)
-	glw.SetIconifyCallback(w.iconify)
+	glw.SetFocusCallback(w.Focused)
+	glw.SetIconifyCallback(w.Iconified)
 
-	glw.SetKeyCallback(w.keyEvent)
-	glw.SetCharModsCallback(w.charEvent)
-	glw.SetMouseButtonCallback(w.mouseButtonEvent)
-	glw.SetScrollCallback(w.scrollEvent)
-	glw.SetCursorPosCallback(w.cursorPosEvent)
-	glw.SetCursorEnterCallback(w.cursorEnterEvent)
-	glw.SetDropCallback(w.dropEvent)
+	glw.SetKeyCallback(w.KeyEvent)
+	glw.SetCharModsCallback(w.CharEvent)
+	glw.SetMouseButtonCallback(w.MouseButtonEvent)
+	glw.SetScrollCallback(w.ScrollEvent)
+	glw.SetCursorPosCallback(w.CursorPosEvent)
+	glw.SetCursorEnterCallback(w.CursorEnterEvent)
+	glw.SetDropCallback(w.DropEvent)
 
-	w.show()
+	w.Show()
 	a.RunOnMain(func() {
-		w.updtGeom()
+		w.UpdateGeom()
 	})
 
 	go w.WinLoop() // start window's own dedicated publish update loop

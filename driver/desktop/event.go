@@ -14,7 +14,7 @@ import (
 	"goki.dev/goosi/mimedata"
 )
 
-func glfwMods(mod glfw.ModifierKey) key.Modifiers {
+func GlfwMods(mod glfw.ModifierKey) key.Modifiers {
 	var m key.Modifiers
 	if mod&glfw.ModShift != 0 {
 		m.SetFlag(true, key.Shift)
@@ -31,7 +31,7 @@ func glfwMods(mod glfw.ModifierKey) key.Modifiers {
 	return m
 }
 
-func (w *Window) focusWindow() *Window {
+func (w *Window) FocusWindow() *Window {
 	fw := TheApp.WindowInFocus()
 	if w != fw {
 		if fw == nil {
@@ -42,35 +42,35 @@ func (w *Window) focusWindow() *Window {
 }
 
 // physical key
-func (w *Window) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
-	mods := glfwMods(mod)
-	ec := glfwKeyCode(ky)
-	rn, _ := key.CodeRuneMap[ec]
+func (w *Window) KeyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
+	mods := GlfwMods(mod)
+	ec := GlfwKeyCode(ky)
+	rn := key.CodeRuneMap[ec]
 	typ := events.KeyDown
 	if action == glfw.Release {
 		typ = events.KeyUp
 	} else if action == glfw.Repeat {
 		typ = events.KeyDown
 	}
-	fw := w.focusWindow()
+	fw := w.FocusWindow()
 	fw.EvMgr.Key(typ, rn, ec, mods)
 	glfw.PostEmptyEvent() // todo: why??
 }
 
 // char input
-func (w *Window) charEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
-	mods := glfwMods(mod)
-	fw := w.focusWindow()
+func (w *Window) CharEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
+	mods := GlfwMods(mod)
+	fw := w.FocusWindow()
 	fw.EvMgr.KeyChord(char, key.CodeUnknown, mods)
 	glfw.PostEmptyEvent() // todo: why?
 }
 
-func (w *Window) curMousePosPoint(gw *glfw.Window) image.Point {
+func (w *Window) CurMousePosPoint(gw *glfw.Window) image.Point {
 	xp, yp := gw.GetCursorPos()
-	return w.mousePosToPoint(xp, yp)
+	return w.MousePosToPoint(xp, yp)
 }
 
-func (w *Window) mousePosToPoint(x, y float64) image.Point {
+func (w *Window) MousePosToPoint(x, y float64) image.Point {
 	var where image.Point
 	if TheApp.Platform() == goosi.MacOS {
 		where = image.Point{int(w.DevicePixelRatio * float32(x)), int(w.DevicePixelRatio * float32(y))}
@@ -80,8 +80,8 @@ func (w *Window) mousePosToPoint(x, y float64) image.Point {
 	return where
 }
 
-func (w *Window) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-	mods := glfwMods(mod)
+func (w *Window) MouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+	mods := GlfwMods(mod)
 	but := events.Left
 	switch button {
 	case glfw.MouseButtonMiddle:
@@ -96,12 +96,12 @@ func (w *Window) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, acti
 	if mod&glfw.ModControl != 0 { // special case: control always = RMB  can undo this downstream..
 		but = events.Right
 	}
-	where := w.curMousePosPoint(gw)
+	where := w.CurMousePosPoint(gw)
 	w.EvMgr.MouseButton(typ, but, where, mods)
 	glfw.PostEmptyEvent() // why?
 }
 
-func (w *Window) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
+func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	if TheApp.Platform() == goosi.MacOS {
 		xoff *= float64(events.ScrollWheelSpeed)
 		yoff *= float64(events.ScrollWheelSpeed)
@@ -110,16 +110,16 @@ func (w *Window) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 		yoff *= 4 * float64(events.ScrollWheelSpeed)
 	}
 	delta := image.Point{int(-xoff), int(-yoff)}
-	where := w.curMousePosPoint(gw)
+	where := w.CurMousePosPoint(gw)
 	w.EvMgr.Scroll(where, delta)
 	glfw.PostEmptyEvent()
 }
 
-func (w *Window) cursorPosEvent(gw *glfw.Window, x, y float64) {
+func (w *Window) CursorPosEvent(gw *glfw.Window, x, y float64) {
 	if w.EvMgr.ResettingPos {
 		return
 	}
-	where := w.mousePosToPoint(x, y)
+	where := w.MousePosToPoint(x, y)
 	if !w.CursorEnabled {
 		w.EvMgr.ResettingPos = true
 		if TheApp.Platform() == goosi.MacOS {
@@ -133,10 +133,10 @@ func (w *Window) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	glfw.PostEmptyEvent()
 }
 
-func (w *Window) cursorEnterEvent(gw *glfw.Window, entered bool) {
+func (w *Window) CursorEnterEvent(gw *glfw.Window, entered bool) {
 }
 
-func (w *Window) dropEvent(gw *glfw.Window, names []string) {
+func (w *Window) DropEvent(gw *glfw.Window, names []string) {
 	ln := len(names)
 	if ln == 0 {
 		return
@@ -150,7 +150,7 @@ func (w *Window) dropEvent(gw *glfw.Window, names []string) {
 }
 
 // TODO: should this be a map?
-func glfwKeyCode(kcode glfw.Key) key.Codes {
+func GlfwKeyCode(kcode glfw.Key) key.Codes {
 	switch kcode {
 	case glfw.KeyA:
 		return key.CodeA

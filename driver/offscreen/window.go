@@ -9,7 +9,7 @@ import (
 	"goki.dev/goosi/driver/base"
 )
 
-// Window is the implementation of [goosi.Window] on the offscreen platform.
+// Window is the implementation of [goosi.Window] for the offscreen platform.
 type Window struct {
 	base.WindowSingle[*App]
 }

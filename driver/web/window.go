@@ -13,6 +13,7 @@ import (
 	"goki.dev/goosi/driver/base"
 )
 
+// Window is the implementation of [goosi.Window] for the web platform.
 type Window struct {
 	base.WindowSingle[*App]
 }
