@@ -58,6 +58,10 @@ type App struct {
 	Dark bool
 }
 
+// Main is called from main thread when it is time to start running the
+// main loop. When function f returns, the app ends automatically.
+//
+// This version of Main
 func Main(f func(a goosi.App), a goosi.App, ab *App) {
 	defer func() { HandleRecover(recover()) }()
 	ab.This = a
