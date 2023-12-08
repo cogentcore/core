@@ -19,18 +19,15 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/glop/sentence"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
 
-func main() { fmt.Println("main"); gimain.Run(app) }
+func main() { gimain.Run(app) }
 
 func app() {
-	gi.EventTrace = true
-	fmt.Println("app")
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
 
@@ -47,14 +44,6 @@ func app() {
 	makeInputs(ts)
 	makeLayouts(ts)
 	makeValues(ts)
-
-	fmt.Println("gof")
-	go func() {
-		time.Sleep(3 * time.Second)
-		fmt.Println("ca")
-		goosi.CaptureAs("test")
-		fmt.Println("cad")
-	}()
 
 	b.NewWindow().Run().Wait()
 }
