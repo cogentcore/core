@@ -5,10 +5,15 @@
 package tomls
 
 import (
+	"bufio"
+	"fmt"
 	"io"
 	"io/fs"
+	"log"
+	"os"
 
 	"github.com/BurntSushi/toml"
+	"goki.dev/glop/dirs"
 	"goki.dev/grows"
 )
 
@@ -76,4 +81,23 @@ func Write(v any, writer io.Writer) error {
 // using TOML encoding
 func WriteBytes(v any) ([]byte, error) {
 	return grows.WriteBytes(v, grows.NewEncoderFunc(toml.NewEncoder))
+}
+
+// OpenFromPaths reads object from given TOML file,
+// looking on paths for the file.
+func OpenFromPaths(obj any, file string, paths []string) error {
+	filenames := dirs.FindFilesOnPaths(paths, file)
+	if len(filenames) == 0 {
+		err := fmt.Errorf("OpenFromPaths: No files found")
+		log.Println(err)
+		return err
+	}
+	// _, err = toml.DecodeFile(fp, obj)
+	fp, err := os.Open(filenames[0])
+	defer fp.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return Read(obj, bufio.NewReader(fp))
 }
