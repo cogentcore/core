@@ -326,33 +326,37 @@ func (mm *mainMenuImpl) ItemByTag(men goosi.Menu, tag int) goosi.MenuItem {
 func (mm *mainMenuImpl) SetItemActive(mitm goosi.MenuItem, active bool) {
 	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
 }
+*/
 
 //export menuFired
 func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
-	theApp.mu.Lock()
-	w, ok := theApp.oswindows[id]
-	theApp.mu.Unlock()
-	if !ok || w == nil {
-		return
-	}
+	/*
+		theApp.mu.Lock()
+		w, ok := theApp.oswindows[id]
+		theApp.mu.Unlock()
+		if !ok || w == nil {
+			return
+		}
 
-	tit := C.GoStringN(title, tilen)
-	osmm := w.MainMenu()
-	if osmm == nil {
-		return
-	}
-	go osmm.Triggered(w, tit, int(tag))
+		tit := C.GoStringN(title, tilen)
+		osmm := w.MainMenu()
+		if osmm == nil {
+			return
+		}
+		go osmm.Triggered(w, tit, int(tag))
+	*/
 }
 
 //export macOpenFile
 func macOpenFile(fname *C.char, flen C.int) {
-	ofn := C.GoString(fname)
-	// fmt.Printf("open file: %s\n", ofn)
-	if theApp.NWindows() == 0 {
-		theApp.openFiles = append(theApp.openFiles, ofn)
-	} else {
-		// win := theApp.Window(0)
-		// win.EventMgr.NewOS(events.OSEvent, []string{ofn})
-	}
+	/*
+		ofn := C.GoString(fname)
+		// fmt.Printf("open file: %s\n", ofn)
+		if theApp.NWindows() == 0 {
+			theApp.openFiles = append(theApp.openFiles, ofn)
+		} else {
+			// win := theApp.Window(0)
+			// win.EventMgr.NewOS(events.OSEvent, []string{ofn})
+		}
+	*/
 }
-*/
