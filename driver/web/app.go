@@ -52,53 +52,53 @@ func Main(f func(goosi.App)) {
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
-func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { base.HandleRecover(recover()) }()
 
-	app.Win = &Window{base.NewWindowSingle(app, opts)}
-	app.Win.EvMgr.Deque = &app.Win.Deque
-	app.SetSysWindow()
+	a.Win = &Window{base.NewWindowSingle(a, opts)}
+	a.Win.EvMgr.Deque = &a.Win.Deque
+	a.SetSysWindow()
 
-	go app.Win.WinLoop()
+	go a.Win.WinLoop()
 
-	return app.Win, nil
+	return a.Win, nil
 }
 
 // SetSysWindow sets the underlying system window information.
-func (app *App) SetSysWindow() {
+func (a *App) SetSysWindow() {
 	defer func() { base.HandleRecover(recover()) }()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	lua := strings.ToLower(ua)
 	if strings.Contains(lua, "android") {
-		app.platform = goosi.Android
+		a.platform = goosi.Android
 	} else if strings.Contains(lua, "ipad") || strings.Contains(lua, "iphone") || strings.Contains(lua, "ipod") {
-		app.platform = goosi.IOS
+		a.platform = goosi.IOS
 	} else {
 		// TODO(kai/web): more specific desktop platform
-		app.platform = goosi.Windows
+		a.platform = goosi.Windows
 	}
 
-	app.Resize()
-	app.Win.EvMgr.Window(events.WinShow)
-	app.Win.EvMgr.Window(events.ScreenUpdate)
-	app.Win.EvMgr.Window(events.WinFocus)
+	a.Resize()
+	a.Win.EvMgr.Window(events.WinShow)
+	a.Win.EvMgr.Window(events.ScreenUpdate)
+	a.Win.EvMgr.Window(events.WinFocus)
 }
 
 // Resize updates the app sizing information and sends a Resize event.
-func (app *App) Resize() {
-	app.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
-	dpi := 160 * app.Scrn.DevicePixelRatio
-	app.Scrn.PhysicalDPI = dpi
-	app.Scrn.LogicalDPI = dpi
+func (a *App) Resize() {
+	a.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	dpi := 160 * a.Scrn.DevicePixelRatio
+	a.Scrn.PhysicalDPI = dpi
+	a.Scrn.LogicalDPI = dpi
 
 	w, h := js.Global().Get("screen").Get("innerWidth").Int(), js.Global().Get("screen").Get("innerHeight").Int()
 	sz := image.Pt(w, h)
-	app.Scrn.Geometry.Max = sz
-	app.Scrn.PixSize = image.Pt(int(float32(sz.X)*app.Scrn.DevicePixelRatio), int(float32(sz.Y)*app.Scrn.DevicePixelRatio))
+	a.Scrn.Geometry.Max = sz
+	a.Scrn.PixSize = image.Pt(int(float32(sz.X)*a.Scrn.DevicePixelRatio), int(float32(sz.Y)*a.Scrn.DevicePixelRatio))
 	physX := 25.4 * float32(w) / dpi
 	physY := 25.4 * float32(h) / dpi
-	app.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
+	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
 	// ww, wh := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
 	// wsz := image.Pt(ww, wh)
@@ -107,42 +107,42 @@ func (app *App) Resize() {
 	// app.window.RenderSize = app.window.PxSize
 
 	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Set("width", app.Scrn.PixSize.X)
-	canvas.Set("height", app.Scrn.PixSize.Y)
+	canvas.Set("width", a.Scrn.PixSize.X)
+	canvas.Set("height", a.Scrn.PixSize.Y)
 
-	app.Win.EvMgr.WindowResize()
+	a.Win.EvMgr.WindowResize()
 }
 
-func (app *App) PrefsDir() string {
+func (a *App) PrefsDir() string {
 	// TODO(kai): implement web filesystem
 	return "/data/data"
 }
 
-func (app *App) Platform() goosi.Platforms {
+func (a *App) Platform() goosi.Platforms {
 	return goosi.Web
 }
 
-func (app *App) OpenURL(url string) {
+func (a *App) OpenURL(url string) {
 	js.Global().Call("open", url)
 }
 
-func (app *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) ClipBoard(win goosi.Window) clip.Board {
 	return &TheClip
 }
 
-func (app *App) Cursor(win goosi.Window) cursor.Cursor {
+func (a *App) Cursor(win goosi.Window) cursor.Cursor {
 	return &TheCursor
 }
 
-func (app *App) IsDark() bool {
+func (a *App) IsDark() bool {
 	return js.Global().Get("matchMedia").Truthy() &&
 		js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Get("matches").Truthy()
 }
 
-func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("focus")
 }
 
-func (app *App) HideVirtualKeyboard() {
+func (a *App) HideVirtualKeyboard() {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
 }
