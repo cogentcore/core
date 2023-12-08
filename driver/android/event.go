@@ -35,26 +35,26 @@ import (
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := convAndroidKeyCode(r)
-		theApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
+		TheApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
+	TheApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scrolled
 func scrolled(posX, posY, distanceX, distanceY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	delta := image.Pt(int(distanceX), int(distanceY))
-	theApp.window.EvMgr.Scroll(where, delta)
+	TheApp.window.EvMgr.Scroll(where, delta)
 }
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
-	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+	TheApp.window.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
 //export longPressed
@@ -97,7 +97,7 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 			seq := events.Sequence(C.AMotionEvent_getPointerId(e, i))
 			x := int(C.AMotionEvent_getX(e, i))
 			y := int(C.AMotionEvent_getY(e, i))
-			theApp.window.EvMgr.Touch(t, seq, image.Pt(x, y))
+			TheApp.window.EvMgr.Touch(t, seq, image.Pt(x, y))
 		}
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
@@ -122,7 +122,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		typ = events.KeyUp
 	}
 	// TODO(crawshaw): set Modifiers.
-	theApp.window.EvMgr.Key(typ, r, code, 0)
+	TheApp.window.EvMgr.Key(typ, r, code, 0)
 }
 
 var androidKeycodes = map[int32]key.Codes{

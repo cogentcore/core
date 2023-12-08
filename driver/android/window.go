@@ -18,7 +18,7 @@ import (
 
 type windowImpl struct {
 	goosi.WindowBase
-	app                *appImpl
+	app                *App
 	scrnName           string // last known screen name
 	runQueue           chan funcRun
 	publish            chan struct{}
@@ -262,7 +262,7 @@ func (w *windowImpl) SetCloseCleanFunc(fun func(win goosi.Window)) {
 }
 
 func (w *windowImpl) CloseReq() {
-	if theApp.quitting {
+	if TheApp.quitting {
 		w.Close()
 	}
 	if w.closeReqFunc != nil {
@@ -286,9 +286,9 @@ func (w *windowImpl) Close() {
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
 	w.EvMgr.Window(events.WinClose)
-	theApp.DeleteWin(w)
-	if theApp.quitting {
-		theApp.quitCloseCnt <- struct{}{}
+	TheApp.DeleteWin(w)
+	if TheApp.quitting {
+		TheApp.quitCloseCnt <- struct{}{}
 	}
 }
 

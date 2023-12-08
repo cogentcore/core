@@ -147,20 +147,20 @@ func onDestroy(activity *C.ANativeActivity) {
 
 //export onWindowFocusChanged
 func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
+	TheApp.mu.Lock()
+	defer TheApp.mu.Unlock()
 	if hasFocus > 0 {
-		theApp.window.EvMgr.Window(events.WinFocus)
+		TheApp.window.EvMgr.Window(events.WinFocus)
 	} else {
-		theApp.window.EvMgr.Window(events.WinFocusLost)
+		TheApp.window.EvMgr.Window(events.WinFocusLost)
 	}
 }
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
-	theApp.setSysWindow(uintptr(unsafe.Pointer(window)))
+	TheApp.mu.Lock()
+	defer TheApp.mu.Unlock()
+	TheApp.setSysWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export onNativeWindowRedrawNeeded
@@ -197,7 +197,7 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	theApp.isDark = bool(dark)
+	TheApp.isDark = bool(dark)
 }
 
 type windowConfig struct {
@@ -286,7 +286,7 @@ var (
 	activityDestroyed  = make(chan struct{})
 )
 
-func (app *appImpl) mainLoop() {
+func (app *App) mainLoop() {
 	fmt.Println("in main")
 	app.mainQueue = make(chan funcRun)
 	app.mainDone = make(chan struct{})
@@ -301,13 +301,13 @@ func (app *appImpl) mainLoop() {
 	// Preserve this OS thread for:
 	//	1. the attached JNI thread
 	fmt.Println("running main UI")
-	if err := mobileinit.RunOnJVM(theApp.mainUI); err != nil {
+	if err := mobileinit.RunOnJVM(TheApp.mainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (a *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showKeyboard(env, C.int(int32(typ)))
@@ -319,7 +319,7 @@ func (a *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func (a *appImpl) HideVirtualKeyboard() {
+func (a *App) HideVirtualKeyboard() {
 	if err := mobileinit.RunOnJVM(hideSoftInput); err != nil {
 		log.Fatalf("app: %v", err)
 	}
@@ -333,14 +333,14 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
+	TheApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
 	// fmt.Println("ic:", theApp.insets)
 }
 
-func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
+func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
 	go func() {
 		defer func() { handleRecover(recover()) }()
-		mainCallback(theApp)
+		mainCallback(TheApp)
 		app.stopMain()
 	}()
 
