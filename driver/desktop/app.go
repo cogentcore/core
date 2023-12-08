@@ -10,11 +10,7 @@
 package desktop
 
 import (
-	"fmt"
-	"go/build"
 	"log"
-	"os"
-	"path/filepath"
 	"runtime"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -57,7 +53,7 @@ func Main(f func(goosi.App)) {
 	goosi.TheApp = TheApp
 	go func() {
 		f(TheApp)
-		TheApp.stopMain()
+		TheApp.StopMain()
 	}()
 	TheApp.mainLoop()
 }
@@ -203,138 +199,6 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	return w, nil
 }
 
-func (app *App) DeleteWin(w *Window) {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	_, ok := app.windows[w.glw]
-	if !ok {
-		return
-	}
-	for i, wl := range app.winlist {
-		if wl == w {
-			app.winlist = append(app.winlist[:i], app.winlist[i+1:]...)
-			break
-		}
-	}
-	delete(app.oswindows, w.OSHandle())
-	delete(app.windows, w.glw)
-}
-
-func (app *App) NScreens() int {
-	return len(app.screens)
-}
-
-func (app *App) Screen(scrN int) *goosi.Screen {
-	sz := len(app.screens)
-	if scrN < sz {
-		return app.screens[scrN]
-	}
-	return nil
-}
-
-func (app *App) ScreenByName(name string) *goosi.Screen {
-	for _, sc := range app.screens {
-		if sc.Name == name {
-			return sc
-		}
-	}
-	return nil
-}
-
-func (app *App) NoScreens() bool {
-	return app.noScreens
-}
-
-func (app *App) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return len(app.winlist)
-}
-
-func (app *App) Window(win int) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	sz := len(app.winlist)
-	if win < sz {
-		return app.winlist[win]
-	}
-	return nil
-}
-
-func (app *App) WindowByName(name string) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	for _, win := range app.winlist {
-		if win.Name() == name {
-			return win
-		}
-	}
-	return nil
-}
-
-func (app *App) WindowInFocus() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	for _, win := range app.winlist {
-		if win.IsFocus() {
-			return win
-		}
-	}
-	return nil
-}
-
-func (app *App) ContextWindow() goosi.Window {
-	app.mu.Lock()
-	cw := app.ctxtwin
-	app.mu.Unlock()
-	return cw
-}
-
-func (app *App) Name() string {
-	return app.name
-}
-
-func (app *App) SetName(name string) {
-	app.name = name
-}
-
-func (app *App) About() string {
-	return app.about
-}
-
-func (app *App) SetAbout(about string) {
-	app.about = about
-}
-
-func (app *App) OpenFiles() []string {
-	return app.openFiles
-}
-
-func (app *App) GoGiPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), "GoGi")
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *App) AppPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), app.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
-func SrcDir(dir string) (absDir string, err error) {
-	for _, srcDir := range build.Default.SrcDirs() {
-		absDir = filepath.Join(srcDir, dir)
-		finfo, err := os.Stat(absDir)
-		if err == nil && finfo.IsDir() {
-			return absDir, nil
-		}
-	}
-	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
-}
-
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
 	app.mu.Lock()
 	app.ctxtwin = win.(*Window)
@@ -347,61 +211,4 @@ func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	app.ctxtwin = win.(*Window)
 	app.mu.Unlock()
 	return &theCursor
-}
-
-func (app *App) SetQuitReqFunc(fun func()) {
-	app.quitReqFunc = fun
-}
-
-func (app *App) SetQuitCleanFunc(fun func()) {
-	app.quitCleanFunc = fun
-}
-
-func (app *App) QuitReq() {
-	if app.quitting {
-		return
-	}
-	if app.quitReqFunc != nil {
-		app.quitReqFunc()
-	} else {
-		app.Quit()
-	}
-}
-
-func (app *App) IsQuitting() bool {
-	return app.quitting
-}
-
-func (app *App) QuitClean() {
-	app.quitting = true
-	if app.quitCleanFunc != nil {
-		app.quitCleanFunc()
-	}
-	app.mu.Lock()
-	nwin := len(app.winlist)
-	for i := nwin - 1; i >= 0; i-- {
-		win := app.winlist[i]
-		go win.Close()
-	}
-	app.mu.Unlock()
-	for i := 0; i < nwin; i++ {
-		<-app.quitCloseCnt
-		// fmt.Printf("win closed: %v\n", i)
-	}
-}
-
-func (app *App) Quit() {
-	if app.quitting {
-		return
-	}
-	app.QuitClean()
-	app.stopMain()
-}
-
-func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	// no-op
-}
-
-func (app *App) HideVirtualKeyboard() {
-	// no-op
 }
