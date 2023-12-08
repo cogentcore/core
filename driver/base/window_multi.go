@@ -117,3 +117,7 @@ func (w *WindowMulti[A]) SetGeom(pos image.Point, sz image.Point) {
 	w.SetWinSize(sz)
 	w.Pos = pos
 }
+
+func (w *WindowMulti[A]) IsVisible() bool {
+	return w.Window.IsVisible() && w.App.NScreens() != 0
+}
