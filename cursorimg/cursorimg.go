@@ -76,7 +76,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	// 	slog.Error(err.Error())
 	// 	return nil, err
 	// }
-	// sv.SetNormXForm()
+	// sv.SetNormTransform()
 	// sv.Render()
 	// return &Cursor{
 	// 	Image: sv.Pixels,
