@@ -5,7 +5,9 @@
 package grr
 
 import (
+	"errors"
 	"log/slog"
+	"strings"
 )
 
 // Log takes the given error and logs it if it is non-nil.
@@ -185,4 +187,18 @@ func Test4[T1, T2, T3, T4 any](t TestingT, v1 T1, v2 T2, v3 T3, v4 T4, err error
 		t.Error(err)
 	}
 	return v1, v2, v3, v4
+}
+
+// AllErrors returns an err as a concatenation of errors (nil if none).
+// no more than maxN are included (typically 10).
+func AllErrors(errs []error, maxN int) error {
+	if len(errs) == 0 {
+		return nil
+	}
+	mx := min(maxN, len(errs))
+	ers := make([]string, mx)
+	for i := 0; i < mx; i++ {
+		ers[i] = errs[i].Error()
+	}
+	return errors.New(strings.Join(ers, "\n"))
 }
