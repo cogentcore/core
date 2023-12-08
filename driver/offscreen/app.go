@@ -8,7 +8,6 @@ package offscreen
 
 import (
 	"image"
-	"log"
 	"path/filepath"
 	"runtime/debug"
 
@@ -29,33 +28,11 @@ type App struct {
 	base.AppSingle[*Drawer, *Window]
 }
 
-// handleRecover takes the given value of recover, and, if it is not nil,
-// prints a panic message and a stack trace, using a string-based log
-// method that guarantees that the stack trace will be printed before
-// the program exits. This is needed because, without this, the program
-// will exit before it can print the stack trace, which makes debugging
-// nearly impossible. The correct usage of handleRecover is:
-//
-//	func myFunc() {
-//		defer func() { handleRecover(recover()) }()
-//		...
-//	}
-func handleRecover(r any) {
-	if r == nil {
-		return
-	}
-	log.Println("panic:", r)
-	log.Println("")
-	log.Println("----- START OF STACK TRACE: -----")
-	log.Println(string(debug.Stack()))
-	log.Fatalln("----- END OF STACK TRACE -----")
-}
-
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
+	defer func() { base.HandleRecover(recover()) }()
 	TheApp.This = TheApp
 	TheApp.GetScreens()
 	goosi.TheApp = TheApp
@@ -73,8 +50,8 @@ func Main(f func(goosi.App)) {
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	defer func() { handleRecover(recover()) }()
-	a.Win = &Window{
+	defer func() { base.HandleRecover(recover()) }()
+	bw := &base.WindowSingle[*App]{
 		App:         a,
 		isVisible:   true,
 		publish:     make(chan struct{}),
@@ -86,6 +63,9 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 			FPS:  60,
 		},
 	}
+	a.Win = &Window{base.WindowSingle[*App]{}}
+	a.App = a
+
 	a.Win.EvMgr.Deque = &a.Win.Deque
 	a.setSysWindow(opts.Size)
 
