@@ -84,11 +84,11 @@ func (f *Full) CopyFrom(cp *Full) {
 
 // RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
 // the given opacity and bounds.
-func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
+func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
 	if f.Gradient == nil {
 		return rasterx.ApplyOpacity(f.Solid, float64(opacity))
 	}
-	return f.Gradient.RenderColor(opacity, bounds, xform)
+	return f.Gradient.RenderColor(opacity, bounds, transform)
 }
 
 // SetAny sets the color from the given value of any type.

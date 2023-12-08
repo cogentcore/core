@@ -215,17 +215,17 @@ func (g *GradientStop) Rasterx() rasterx.GradStop {
 
 // RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
 // the given opacity and bounds.
-func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
+func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
 	box := mat32.Box2{}
 	box.SetFromRect(bounds)
 	g.SetUserBounds(box)
 	r := g.Rasterx()
-	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
+	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&transform))
 }
 
-// ApplyXForm transforms the points for the gradient if it has
-// [UserSpaceOnUse] units, using the given xform matrix.
-func (g *Gradient) ApplyXForm(xf mat32.Mat2) {
+// ApplyTransform transforms the points for the gradient if it has
+// [UserSpaceOnUse] units, using the given transform matrix.
+func (g *Gradient) ApplyTransform(xf mat32.Mat2) {
 	if g.Units == ObjectBoundingBox {
 		return
 	}
@@ -238,9 +238,9 @@ func (g *Gradient) ApplyXForm(xf mat32.Mat2) {
 	}
 }
 
-// ApplyXFormPt transforms the points for the gradient if it has
-// [UserSpaceOnUse] units, using the given xform matrix and center point.
-func (g *Gradient) ApplyXFormPt(xf mat32.Mat2, pt mat32.Vec2) {
+// ApplyTransformPt transforms the points for the gradient if it has
+// [UserSpaceOnUse] units, using the given transform matrix and center point.
+func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 	if g.Units == ObjectBoundingBox {
 		return
 	}
