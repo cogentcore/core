@@ -29,6 +29,7 @@ import (
 func main() { fmt.Println("main"); gimain.Run(app) }
 
 func app() {
+	gi.EventTrace = true
 	fmt.Println("app")
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
