@@ -92,7 +92,7 @@ func (a *App) Resize() {
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
 
-	w, h := js.Global().Get("screen").Get("innerWidth").Int(), js.Global().Get("screen").Get("innerHeight").Int()
+	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
 	sz := image.Pt(w, h)
 	a.Scrn.Geometry.Max = sz
 	a.Scrn.PixSize = image.Pt(int(float32(sz.X)*a.Scrn.DevicePixelRatio), int(float32(sz.Y)*a.Scrn.DevicePixelRatio))
