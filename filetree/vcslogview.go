@@ -207,12 +207,12 @@ func (lv *VCSLogView) ConfigToolbar() {
 		cbb := gi.NewSwitch(tb, "b-rev").SetText("B Rev: ").
 			SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
 		cbb.OnClick(func(e events.Event) {
-			lv.SetA = !cbb.StateIs(states.Checked)
+			lv.SetA = !cbb.IsChecked()
 			cba.SetState(lv.SetA, states.Checked)
 			cba.SetNeedsRender(true)
 		})
 		cba.OnClick(func(e events.Event) {
-			lv.SetA = cba.StateIs(states.Checked)
+			lv.SetA = cba.IsChecked()
 			cbb.SetState(!lv.SetA, states.Checked)
 			cbb.SetNeedsRender(true)
 		})

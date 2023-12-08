@@ -380,7 +380,7 @@ func (tv *TreeView) TreeViewStyles() {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
-				if sw.StateIs(states.Checked) {
+				if sw.IsChecked() {
 					if !tv.IsClosed() {
 						tv.Close()
 					}

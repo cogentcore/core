@@ -9,7 +9,6 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/pi/v2/lex"
@@ -313,8 +312,8 @@ func (ed *Editor) QReplaceAddText() {
 	rc.SetStrings(PrevQReplaceRepls, true, 0)
 
 	lexitems := ed.QReplace.LexItems
-	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetState(lexitems, states.Checked).
-		SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
+	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
+	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
@@ -328,7 +327,7 @@ func (ed *Editor) QReplaceAddText() {
 			if s, ok := rc.CurVal.(string); ok {
 				repl = s
 			}
-			lexItems := lxi.StateIs(states.Checked)
+			lexItems := lxi.IsChecked()
 			ed.QReplaceStart(find, repl, lexItems)
 		})
 	})

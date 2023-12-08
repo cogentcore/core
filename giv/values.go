@@ -844,7 +844,7 @@ func (vv *BoolValue) ConfigWidget(w gi.Widget) {
 	cb.Tooltip = vv.Doc()
 	cb.Config()
 	cb.OnLast(events.Change, func(e events.Event) {
-		vv.SetValue(cb.StateIs(states.Checked))
+		vv.SetValue(cb.IsChecked())
 	})
 	vv.UpdateWidget()
 }

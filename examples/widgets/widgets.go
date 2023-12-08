@@ -11,7 +11,6 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -121,7 +120,7 @@ func app() {
 
 	toggle := gi.NewSwitch(brow).SetText("Toggle")
 	toggle.OnChange(func(e events.Event) {
-		fmt.Println("toggled", toggle.StateIs(states.Checked))
+		fmt.Println("toggled", toggle.IsChecked())
 	})
 
 	mb := gi.NewButton(brow).SetText("Menu Button")

@@ -71,10 +71,16 @@ func (sw *Switch) OnInit() {
 	sw.SwitchStyles()
 }
 
+// IsChecked tests if this switch is checked
+func (sw *Switch) IsChecked() bool {
+	return sw.StateIs(states.Checked)
+}
+
 // SetChecked sets the checked state and updates the icon accordingly
-func (sw *Switch) SetChecked(on bool) {
+func (sw *Switch) SetChecked(on bool) *Switch {
 	sw.SetState(on, states.Checked)
 	sw.SetIconFromState()
+	return sw
 }
 
 // SetIconFromState updates icon state based on checked status
@@ -90,7 +96,7 @@ func (sw *Switch) SetIconFromState() {
 	switch {
 	case sw.IsDisabled():
 		st.StackTop = 2
-	case sw.StateIs(states.Checked):
+	case sw.IsChecked():
 		st.StackTop = 0
 	default:
 		if sw.Type == SwitchChip {
@@ -108,7 +114,7 @@ func (sw *Switch) HandleSwitchEvents() {
 	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
 		e.SetHandled()
-		sw.SetChecked(!sw.StateIs(states.Checked))
+		sw.SetChecked(!sw.IsChecked())
 		sw.SendChange(e)
 		if sw.Type == SwitchChip {
 			sw.SetNeedsLayout(true)

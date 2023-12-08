@@ -9,7 +9,6 @@ import (
 	"slices"
 
 	"goki.dev/enums"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -134,7 +133,7 @@ func (sw *Switches) SelectItemAction(idx int) error {
 func (sw *Switches) SelectedItem() string {
 	for _, swi := range sw.Kids {
 		sw := swi.(*Switch)
-		if sw.StateIs(states.Checked) {
+		if sw.IsChecked() {
 			return sw.Text
 		}
 	}
@@ -231,7 +230,7 @@ func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
 		ev := els[i]
 		swi := sw.Child(i)
 		sw := swi.(*Switch)
-		if sw.StateIs(states.Checked) {
+		if sw.IsChecked() {
 			bitflag.SetFlag(true, ev.(enums.BitFlag))
 		}
 	}
@@ -240,7 +239,7 @@ func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
 // HandleSwitchEvents handles the events for the given switch.
 func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 	swi.OnChange(func(e events.Event) {
-		if sw.Mutex && swi.StateIs(states.Checked) {
+		if sw.Mutex && swi.IsChecked() {
 			ip, _ := swi.IndexInParent()
 			sw.UnCheckAllBut(ip)
 		}
