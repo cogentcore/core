@@ -143,8 +143,10 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
+	pt := styles.Paint{}
+	ctx := &paint.Context{State: rs, Paint: &pt}
 	// draw.Draw(img, bounds, &image.Uniform{txt.Styles.BackgroundColor.Color}, image.Point{}, draw.Src)
-	txt.TxtRender.Render(rs, txt.TxtPos)
+	txt.TxtRender.Render(ctx, txt.TxtPos)
 	rs.PopBounds()
 }
 
