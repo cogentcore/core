@@ -20,8 +20,11 @@ import (
 // platforms (mobile, web, and offscreen), for which you should use [WindowSingle].
 // A WindowMulti is associated with a corresponding [goosi.App] type.
 // The [goosi.App] type should embed [AppMulti].
-type WindowMulti[A goosi.App] struct {
+type WindowMulti[A goosi.App, D goosi.Drawer] struct {
 	Window[A]
+
+	// Draw is the [goosi.Drawer] used for this window.
+	Draw D
 
 	// Pos is the position of the window
 	Pos image.Point
@@ -49,50 +52,54 @@ type WindowMulti[A goosi.App] struct {
 	LogDPI float32 `label:"Logical DPI"`
 }
 
-func (w *WindowMulti[A]) Size() image.Point {
+func (w *WindowMulti[A, D]) Drawer() goosi.Drawer {
+	return w.Draw
+}
+
+func (w *WindowMulti[A, D]) Size() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
 	return w.PixSize
 }
 
-func (w *WindowMulti[A]) WinSize() image.Point {
+func (w *WindowMulti[A, D]) WinSize() image.Point {
 	// w.Mu.Lock() // this prevents race conditions but also locks up
 	// defer w.Mu.Unlock()
 	return w.WnSize
 }
 
-func (w *WindowMulti[A]) Position() image.Point {
+func (w *WindowMulti[A, D]) Position() image.Point {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	return w.Pos
 }
 
-func (w *WindowMulti[A]) PhysicalDPI() float32 {
+func (w *WindowMulti[A, D]) PhysicalDPI() float32 {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	return w.PhysDPI
 }
 
-func (w *WindowMulti[A]) LogicalDPI() float32 {
+func (w *WindowMulti[A, D]) LogicalDPI() float32 {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	return w.LogDPI
 }
 
-func (w *WindowMulti[A]) SetLogicalDPI(dpi float32) {
+func (w *WindowMulti[A, D]) SetLogicalDPI(dpi float32) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	w.LogDPI = dpi
 }
 
-func (w *WindowMulti[A]) SetWinSize(sz image.Point) {
+func (w *WindowMulti[A, D]) SetWinSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
 	w.WnSize = sz
 }
 
-func (w *WindowMulti[A]) SetSize(sz image.Point) {
+func (w *WindowMulti[A, D]) SetSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
@@ -101,14 +108,14 @@ func (w *WindowMulti[A]) SetSize(sz image.Point) {
 	w.SetWinSize(sz)
 }
 
-func (w *WindowMulti[A]) SetPos(pos image.Point) {
+func (w *WindowMulti[A, D]) SetPos(pos image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A]) SetGeom(pos image.Point, sz image.Point) {
+func (w *WindowMulti[A, D]) SetGeom(pos image.Point, sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
@@ -118,6 +125,6 @@ func (w *WindowMulti[A]) SetGeom(pos image.Point, sz image.Point) {
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A]) IsVisible() bool {
+func (w *WindowMulti[A, D]) IsVisible() bool {
 	return w.Window.IsVisible() && w.App.NScreens() != 0
 }

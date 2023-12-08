@@ -17,12 +17,13 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
+	"goki.dev/vgpu/v2/vdraw"
 
 	vk "github.com/goki/vulkan"
 )
 
 type Window struct {
-	base.WindowMulti[*App]
+	base.WindowMulti[*App, *vdraw.Drawer]
 
 	glw *glfw.Window
 
@@ -205,15 +206,15 @@ func (w *Window) Close() {
 	defer w.Mu.Unlock()
 
 	w.App.RunOnMain(func() {
-		vk.DeviceWaitIdle(w.Surface.Device.Device)
+		vk.DeviceWaitIdle(w.Draw.Surf.Device.Device)
 		if w.DestroyGPUFunc != nil {
 			w.DestroyGPUFunc()
 		}
 		w.Draw.Destroy()
-		w.Surface.Destroy()
+		w.Draw.Surf.Destroy()
 		w.glw.Destroy()
 		w.glw = nil // marks as closed for all other calls
-		w.Surface = nil
+		w.Draw = nil
 	})
 }
 
