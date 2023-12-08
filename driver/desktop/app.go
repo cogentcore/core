@@ -18,6 +18,7 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/driver/base"
+	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -134,18 +135,11 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 
 	w := &Window{
-		app:         app,
+		WindowMulti: base.NewWindowMulti[*App, *vdraw.Drawer](app, opts),
 		glw:         glw,
 		scrnName:    sc.Name,
-		publish:     make(chan struct{}),
-		winClose:    make(chan struct{}),
-		publishDone: make(chan struct{}),
-		WindowBase: goosi.WindowBase{
-			Titl: opts.GetTitle(),
-			Flag: opts.Flags,
-			FPS:  60,
-		},
 	}
+	w.Draw = &vdraw.Drawer{}
 	w.EvMgr.Deque = &w.Deque
 
 	app.RunOnMain(func() {
@@ -153,18 +147,16 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 		if err != nil {
 			log.Println(err)
 		}
-		w.Surface = vgpu.NewSurface(app.GPU, vk.SurfaceFromPointer(surfPtr))
+		sf := vgpu.NewSurface(app.GPU, vk.SurfaceFromPointer(surfPtr))
 		w.Draw.YIsDown = true
-		w.Draw.ConfigSurface(w.Surface, vgpu.MaxTexturesPerSet) // note: can expand
+		w.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet) // note: can expand
 	})
 
 	// bitflag.SetAtomic(&w.Flag, int(goosi.Focus)) // starts out focused
 
-	app.mu.Lock()
-	app.windows[glw] = w
-	app.oswindows[w.OSHandle()] = w
-	app.winlist = append(app.winlist, w)
-	app.mu.Unlock()
+	app.Mu.Lock()
+	app.Windows = append(app.Windows, w)
+	app.Mu.Unlock()
 
 	glw.SetPosCallback(w.moved)
 	glw.SetSizeCallback(w.winResized)
@@ -187,21 +179,21 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 		w.updtGeom()
 	})
 
-	go w.winLoop() // start window's own dedicated publish update loop
+	go w.WinLoop() // start window's own dedicated publish update loop
 
 	return w, nil
 }
 
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
-	app.mu.Lock()
-	app.ctxtwin = win.(*Window)
-	app.mu.Unlock()
+	app.Mu.Lock()
+	app.CtxWindow = win.(*Window)
+	app.Mu.Unlock()
 	return &theClip
 }
 
 func (app *App) Cursor(win goosi.Window) cursor.Cursor {
-	app.mu.Lock()
-	app.ctxtwin = win.(*Window)
-	app.mu.Unlock()
+	app.Mu.Lock()
+	app.CtxWindow = win.(*Window)
+	app.Mu.Unlock()
 	return &theCursor
 }
