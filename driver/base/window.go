@@ -231,9 +231,13 @@ func (w *Window[A]) CloseClean() {
 func (w *Window[A]) Close() {
 	// base implementation doesn't actually close any system windows,
 	// but platform-specific implementations can
+	w.EvMgr.Window(events.WinClose)
+
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
+
 	w.WinClose <- struct{}{}
 	w.CloseClean()
-	w.EvMgr.Window(events.WinClose)
 	w.App.RemoveWindow(w.This)
 }
 
