@@ -21,7 +21,7 @@ func TestList(t *testing.T) {
 	for _, test := range tests {
 		have := List(test.items...)
 		if have != test.want {
-			t.Errorf("expected %s but got %s for %v", test.want, have, test.items)
+			t.Errorf("expected %q but got %q for %v", test.want, have, test.items)
 		}
 	}
 }
