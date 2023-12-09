@@ -18,3 +18,45 @@ type Window struct {
 func (w *Window) Handle() any {
 	return w.App.Winptr
 }
+
+// // WinLoop runs the window's own locked processing loop.
+// func (w *Window) WinLoop() {
+// 	var winPaint *time.Ticker
+// 	if w.FPS > 0 {
+// 		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
+// 	} else {
+// 		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
+// 	}
+// 	winShow := time.NewTimer(200 * time.Millisecond)
+// outer:
+// 	for {
+// 		select {
+// 		case <-w.WinClose:
+// 			winPaint.Stop()
+// 			break outer
+// 		case <-winShow.C:
+// 			if !w.This.IsVisible() {
+// 				break outer
+// 			}
+// 			w.EvMgr.Window(events.WinShow)
+// 		case f := <-w.RunQueue:
+// 			if !w.This.IsVisible() {
+// 				break outer
+// 			}
+// 			f.F()
+// 			if f.Done != nil {
+// 				f.Done <- struct{}{}
+// 			}
+// 		case <-winPaint.C:
+// 			if !w.This.IsVisible() {
+// 				break outer
+// 			}
+// 			w.EvMgr.WindowPaint()
+// 			// NOTE: this is incredibly important; do not remove it (see [onNativeWindowRedrawNeeded] for why)
+// 			select {
+// 			case windowRedrawDone <- struct{}{}:
+// 			default:
+// 			}
+// 		}
+// 	}
+// }

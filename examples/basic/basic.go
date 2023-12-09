@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"time"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
@@ -19,6 +20,7 @@ func main() {
 
 func mainrun(a goosi.App) {
 	fmt.Println("mainrun")
+	time.Sleep(5 * time.Second)
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,

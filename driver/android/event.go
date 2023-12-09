@@ -24,15 +24,19 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 */
 import "C"
 import (
+	"fmt"
 	"image"
 	"log"
 
+	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 )
 
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	for _, r := range C.GoString(str) {
 		code := ConvAndroidKeyCode(r)
 		TheApp.Win.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
@@ -41,6 +45,8 @@ func keyboardTyped(str *C.char) {
 
 //export keyboardDelete
 func keyboardDelete() {
+	defer func() { base.HandleRecover(recover()) }()
+
 	TheApp.Win.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
@@ -53,18 +59,25 @@ func scrolled(posX, posY, distanceX, distanceY C.float) {
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	where := image.Pt(int(posX), int(posY))
 	TheApp.Win.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
 //export longPressed
 func longPressed(posX, posY C.float) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	// where := image.Pt(int(posX), int(posY))
 	// TheApp.Win.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }
 
 // ProcessEvents processes input queue events
 func ProcessEvents(env *C.JNIEnv, q *C.AInputQueue) {
+	defer func() { base.HandleRecover(recover()) }()
+
+	fmt.Println("pe")
 	var e *C.AInputEvent
 	for C.AInputQueue_getEvent(q, &e) >= 0 {
 		if C.AInputQueue_preDispatchEvent(q, e) != 0 {
@@ -73,6 +86,7 @@ func ProcessEvents(env *C.JNIEnv, q *C.AInputQueue) {
 		ProcessEvent(env, e)
 		C.AInputQueue_finishEvent(q, e, 0)
 	}
+	fmt.Println("ped")
 }
 
 // ProcessEvent processes an input queue event
