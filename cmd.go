@@ -74,14 +74,8 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 				return cmd, fmt.Errorf("error setting command from directive arguments (from comment %q): %w", dir.String(), err)
 			}
 		}
-		// we do these transformations afterward the directives so that we have the up-to-date documentation and name
-
-		// we can replace the camel case command name with a sentence case version
-		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, sentence.Case(cfn))
-
-		if strings.Count(cmd.Doc, ".") == 1 { // if we only have one period, get rid of it if it is at the end
-			cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")
-		}
+		// we format the doc after the directives so that we have the up-to-date documentation and name
+		cmd.Doc = sentence.Doc(cmd.Doc, cfn, sentence.Case(cmd.Name))
 	}
 	return cmd, nil
 }
