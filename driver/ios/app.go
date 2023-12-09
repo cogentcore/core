@@ -8,28 +8,22 @@
 package ios
 
 import (
-	"fmt"
-	"go/build"
 	"log"
-	"os"
+	"os/user"
 	"path/filepath"
 
 	vk "github.com/goki/vulkan"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
 // TheApp is the single [goosi.App] for the iOS platform
-var TheApp = &App{
-	screen:       &goosi.Screen{},
-	name:         "GoGi",
-	quitCloseCnt: make(chan struct{}),
-}
+var TheApp = &App{AppSingle: base.NewAppSingle[*vdraw.Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the iOS platform
 type App struct {
@@ -106,6 +100,7 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	app.Mu.Lock()
 	defer app.Mu.Unlock()
 	app.Win = &Window{base.NewWindowSingle(app, opts)}
+	app.Win.This = app.Win
 	app.Win.EvMgr.Deque = &app.Win.Deque
 	app.Win.EvMgr.Window(events.WinShow)
 	app.Win.EvMgr.Window(events.WinFocus)
@@ -153,173 +148,23 @@ func (app *App) setSysWindow(winptr uintptr) error {
 	return nil
 }
 
-func (app *App) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *App) Window(win int) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if win == 0 {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) WindowByName(name string) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.Name() == name {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) WindowInFocus() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.IsFocus() {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) ContextWindow() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return app.window
-}
-
-func (app *App) Name() string {
-	return app.name
-}
-
-func (app *App) SetName(name string) {
-	app.name = name
-}
-
-func (app *App) About() string {
-	return app.about
-}
-
-func (app *App) SetAbout(about string) {
-	app.about = about
-}
-
-func (app *App) OpenFiles() []string {
-	return app.openFiles
-}
-
-func (app *App) GoGiPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), "GoGi")
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *App) AppPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), app.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
 func (app *App) PrefsDir() string {
-	return "/data/data"
-}
-
-func (app *App) GetScreens() {
-	// note: this is not applicable in mobile because screen info is not avail until Size event
+	usr, err := user.Current()
+	if grr.Log(err) != nil {
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, "Library")
 }
 
 func (app *App) Platform() goosi.Platforms {
-	return goosi.Android
+	return goosi.IOS
 }
 
 func (app *App) OpenURL(url string) {
-	// TODO: implement
-}
-
-// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
-func SrcDir(dir string) (absDir string, err error) {
-	// TODO: does this make sense?
-	for _, srcDir := range build.Default.SrcDirs() {
-		absDir = filepath.Join(srcDir, dir)
-		finfo, err := os.Stat(absDir)
-		if err == nil && finfo.IsDir() {
-			return absDir, nil
-		}
-	}
-	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
+	// TODO(kai): implement OpenURL on iOS
 }
 
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
-	// TODO: implement clipboard
-	// app.mu.Lock()
-	// app.ctxtwin = win.(*windowImpl)
-	// app.mu.Unlock()
-	return nil
-	// return &theClip
-}
-
-func (app *App) Cursor(win goosi.Window) cursor.Cursor {
-	return &cursor.CursorBase{} // no-op
-}
-
-func (app *App) SetQuitReqFunc(fun func()) {
-	app.quitReqFunc = fun
-}
-
-func (app *App) SetQuitCleanFunc(fun func()) {
-	app.quitCleanFunc = fun
-}
-
-func (app *App) QuitReq() {
-	if app.quitting {
-		return
-	}
-	if app.quitReqFunc != nil {
-		app.quitReqFunc()
-	} else {
-		app.Quit()
-	}
-}
-
-func (app *App) IsQuitting() bool {
-	return app.quitting
-}
-
-func (app *App) QuitClean() {
-	// TODO: implement?
-	// app.quitting = true
-	// if app.quitCleanFunc != nil {
-	// 	app.quitCleanFunc()
-	// }
-	// app.mu.Lock()
-	// nwin := len(app.winlist)
-	// for i := nwin - 1; i >= 0; i-- {
-	// 	win := app.winlist[i]
-	// 	go win.Close()
-	// }
-	// app.mu.Unlock()
-	// for i := 0; i < nwin; i++ {
-	// 	<-app.quitCloseCnt
-	// 	// fmt.Printf("win closed: %v\n", i)
-	// }
-}
-
-func (app *App) Quit() {
-	if app.quitting {
-		return
-	}
-	app.QuitClean()
-	app.stopMain()
-}
-
-func (app *App) IsDark() bool {
-	return app.isDark
+	// TODO(kai): implement clipboard on iOS
+	return &clip.BoardBase{}
 }
