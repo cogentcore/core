@@ -392,10 +392,15 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		ltn := types.ExprString(field.Type)
 		ftyp := g.Pkg.TypesInfo.TypeOf(field.Type)
 		tn := ftyp.String()
-		// we get the name of the type before anything involving square brackets
-		// so that generic types don't confuse it
-		tn, _, _ = strings.Cut(tn, "[")
-		tn, _, _ = strings.Cut(tn, "]")
+
+		switch ftyp.(type) {
+		case *types.Slice, *types.Array, *types.Map:
+		default:
+			// if the type is not a slice, array, or map, we get the name of the type
+			// before anything involving square brackets so that generic types don't confuse it
+			tn, _, _ = strings.Cut(tn, "[")
+			tn, _, _ = strings.Cut(tn, "]")
+		}
 
 		name := ""
 		if len(field.Names) > 0 {
