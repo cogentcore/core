@@ -106,7 +106,7 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	app.Mu.Lock()
 	defer app.Mu.Unlock()
-	app.Win = &windowImpl{}
+	app.Win = &Window{}
 	app.window.EvMgr.Deque = &app.window.Deque
 	app.window.EvMgr.Window(events.WinShow)
 	app.window.EvMgr.Window(events.WinFocus)
@@ -169,7 +169,7 @@ func (app *App) setSysWindow(winptr uintptr) error {
 	return nil
 }
 
-func (app *App) DeleteWin(w *windowImpl) {
+func (app *App) DeleteWin(w *Window) {
 	// TODO: implement?
 }
 
