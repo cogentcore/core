@@ -52,7 +52,7 @@ func (a *App) PrefsDir() string {
 }
 
 func (w *Window) Handle() any {
-	return uintptr(w.glw.GetX11Window())
+	return uintptr(w.Glw.GetX11Window())
 }
 
 /////////////////////////////////////////////////////////////////

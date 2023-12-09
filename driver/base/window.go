@@ -91,20 +91,14 @@ func (w *Window[A]) WinLoop() {
 	} else {
 		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
 	}
-	winShow := time.NewTimer(200 * time.Millisecond)
 outer:
 	for {
 		select {
 		case <-w.WinClose:
 			winPaint.Stop()
 			break outer
-		case <-winShow.C:
-			if !w.This.IsVisible() {
-				break outer
-			}
-			w.EvMgr.Window(events.WinShow)
 		case f := <-w.RunQueue:
-			if !w.This.IsVisible() {
+			if w.This.IsClosed() {
 				break outer
 			}
 			f.F()
@@ -112,7 +106,7 @@ outer:
 				f.Done <- struct{}{}
 			}
 		case <-winPaint.C:
-			if !w.This.IsVisible() {
+			if w.This.IsClosed() {
 				break outer
 			}
 			w.EvMgr.WindowPaint()

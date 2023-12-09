@@ -102,7 +102,7 @@ func (app *App) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan er
 }
 
 func (w *Window) SetTitleBarIsDark(isDark bool) {
-	hwnd := w.glw.GetWin32Window()
+	hwnd := w.Glw.GetWin32Window()
 
 	dwm := syscall.NewLazyDLL("dwmapi.dll")
 	setAtt := dwm.NewProc("DwmSetWindowAttribute")

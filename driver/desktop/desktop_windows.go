@@ -44,7 +44,7 @@ func (a *App) PrefsDir() string {
 }
 
 func (w *Window) Handle() any {
-	return uintptr(unsafe.Pointer(w.glw.GetWin32Window()))
+	return uintptr(unsafe.Pointer(w.Glw.GetWin32Window()))
 }
 
 /////////////////////////////////////////////////////////////////
