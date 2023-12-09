@@ -42,7 +42,7 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 		cu.Cursors[cursor] = sm
 	}
 	if cur, ok := sm[cu.Size]; ok {
-		TheApp.CtxWindow.glw.SetCursor(cur)
+		TheApp.CtxWindow.Glw.SetCursor(cur)
 		cu.PrevSize = cu.Size
 		cu.Cur = cursor
 		return nil
@@ -55,7 +55,7 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 	h := ci.Hotspot
 	gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
 	sm[cu.Size] = gc
-	TheApp.CtxWindow.glw.SetCursor(gc)
+	TheApp.CtxWindow.Glw.SetCursor(gc)
 	cu.PrevSize = cu.Size
 	cu.Cur = cursor
 	return nil

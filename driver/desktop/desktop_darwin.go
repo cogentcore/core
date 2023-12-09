@@ -97,7 +97,7 @@ func (w *Window) MainMenu() goosi.MainMenu {
 */
 
 func (w *Window) Handle() any {
-	return uintptr(w.glw.GetCocoaWindow())
+	return uintptr(w.Glw.GetCocoaWindow())
 }
 
 /////////////////////////////////////////////////////////////////

@@ -18,6 +18,7 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/driver/base"
+	"goki.dev/grr"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 
@@ -130,19 +131,16 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 
 	w := &Window{
-		WindowMulti: base.NewWindowMulti[*App, *vdraw.Drawer](a, opts),
-		glw:         glw,
-		scrnName:    sc.Name,
+		WindowMulti:  base.NewWindowMulti[*App, *vdraw.Drawer](a, opts),
+		Glw:          glw,
+		ScreenWindow: sc.Name,
 	}
 	w.This = w
 	w.Draw = &vdraw.Drawer{}
 	w.EvMgr.Deque = &w.Deque
 
 	a.RunOnMain(func() {
-		surfPtr, err := glw.CreateWindowSurface(a.GPU.Instance, nil)
-		if err != nil {
-			log.Println(err)
-		}
+		surfPtr := grr.Log1(glw.CreateWindowSurface(a.GPU.Instance, nil))
 		sf := vgpu.NewSurface(a.GPU, vk.SurfaceFromPointer(surfPtr))
 		w.Draw.YIsDown = true
 		w.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet) // note: can expand

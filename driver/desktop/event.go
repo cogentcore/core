@@ -123,9 +123,9 @@ func (w *Window) CursorPosEvent(gw *glfw.Window, x, y float64) {
 	if !w.CursorEnabled {
 		w.EvMgr.ResettingPos = true
 		if TheApp.Platform() == goosi.MacOS {
-			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevicePixelRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevicePixelRatio))
+			w.Glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevicePixelRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevicePixelRatio))
 		} else {
-			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X), float64(w.EvMgr.Last.MousePos.Y))
+			w.Glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X), float64(w.EvMgr.Last.MousePos.Y))
 		}
 		w.EvMgr.ResettingPos = false
 	}

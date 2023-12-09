@@ -26,12 +26,12 @@ import (
 type Window struct {
 	base.WindowMulti[*App, *vdraw.Drawer]
 
-	glw *glfw.Window
+	// Glw is the glfw window associated with this window
+	Glw *glfw.Window
 
-	scrnName string // last known screen name
+	// ScreenName is the name of the last known screen this window was on
+	ScreenWindow string
 }
-
-var _ goosi.Window = &Window{}
 
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
@@ -48,10 +48,10 @@ var _ goosi.Window = &Window{}
 //	})
 func (w *Window) Activate() bool {
 	// note: activate is only run on main thread so we don't need to check for mutex
-	if w == nil || w.glw == nil {
+	if w == nil || w.Glw == nil {
 		return false
 	}
-	w.glw.MakeContextCurrent()
+	w.Glw.MakeContextCurrent()
 	return true
 }
 
@@ -97,14 +97,14 @@ func NewGlfwWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window
 
 // Screen gets the screen of the window, computing various window parameters.
 func (w *Window) Screen() *goosi.Screen {
-	if w == nil || w.glw == nil {
+	if w == nil || w.Glw == nil {
 		return TheApp.Screens[0]
 	}
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 
 	var sc *goosi.Screen
-	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
+	mon := w.Glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
 		if MonitorDebug {
@@ -122,7 +122,7 @@ func (w *Window) Screen() *goosi.Screen {
 	// 	log.Printf("MonitorDebug: vkos window: %v getScreenOvlp() -- got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
-	w.scrnName = sc.Name
+	w.ScreenWindow = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
 	w.DevicePixelRatio = sc.DevicePixelRatio
 	if w.LogDPI == 0 {
@@ -138,9 +138,9 @@ setScreen:
 // This is adapted from slawrence2302's code posted there.
 func (w *Window) GetScreenOverlap() *goosi.Screen {
 	var wgeom image.Rectangle
-	wgeom.Min.X, wgeom.Min.Y = w.glw.GetPos()
+	wgeom.Min.X, wgeom.Min.Y = w.Glw.GetPos()
 	var sz image.Point
-	sz.X, sz.Y = w.glw.GetSize()
+	sz.X, sz.Y = w.Glw.GetSize()
 	wgeom.Max = wgeom.Min.Add(sz)
 
 	var csc *goosi.Screen
@@ -162,10 +162,10 @@ func (w *Window) SetTitle(title string) {
 	}
 	w.Titl = title
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.glw.SetTitle(title)
+		w.Glw.SetTitle(title)
 	})
 }
 
@@ -175,10 +175,10 @@ func (w *Window) SetWinSize(sz image.Point) {
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.glw.SetSize(sz.X, sz.Y)
+		w.Glw.SetSize(sz.X, sz.Y)
 	})
 }
 
@@ -188,10 +188,10 @@ func (w *Window) SetPos(pos image.Point) {
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.glw.SetPos(pos.X, pos.Y)
+		w.Glw.SetPos(pos.X, pos.Y)
 	})
 }
 
@@ -203,11 +203,11 @@ func (w *Window) SetGeom(pos image.Point, sz image.Point) {
 	sz = sc.WinSizeFmPix(sz)
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.glw.SetSize(sz.X, sz.Y)
-		w.glw.SetPos(pos.X, pos.Y)
+		w.Glw.SetSize(sz.X, sz.Y)
+		w.Glw.SetPos(pos.X, pos.Y)
 	})
 }
 
@@ -217,10 +217,10 @@ func (w *Window) Show() {
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.glw.Show()
+		w.Glw.Show()
 	})
 }
 
@@ -230,13 +230,13 @@ func (w *Window) Raise() {
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
 		if w.Is(goosi.Minimized) {
-			w.glw.Restore()
+			w.Glw.Restore()
 		} else {
-			w.glw.Focus()
+			w.Glw.Focus()
 		}
 	})
 }
@@ -247,10 +247,10 @@ func (w *Window) Minimize() {
 	}
 	// note: anything run on main only doesn't need lock -- implicit lock
 	w.App.RunOnMain(func() {
-		if w.glw == nil { // by time we got to main, could be diff
+		if w.Glw == nil { // by time we got to main, could be diff
 			return
 		}
-		w.glw.Iconify()
+		w.Glw.Iconify()
 	})
 }
 
@@ -267,8 +267,8 @@ func (w *Window) Close() {
 		}
 		w.Draw.Destroy()
 		w.Draw.Surf.Destroy()
-		w.glw.Destroy()
-		w.glw = nil // marks as closed for all other calls
+		w.Glw.Destroy()
+		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil
 	})
 }
@@ -280,20 +280,20 @@ func (w *Window) SetMousePos(x, y float64) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	if TheApp.Platform() == goosi.MacOS {
-		w.glw.SetCursorPos(x/float64(w.DevicePixelRatio), y/float64(w.DevicePixelRatio))
+		w.Glw.SetCursorPos(x/float64(w.DevicePixelRatio), y/float64(w.DevicePixelRatio))
 	} else {
-		w.glw.SetCursorPos(x, y)
+		w.Glw.SetCursorPos(x, y)
 	}
 }
 
 func (w *Window) SetCursorEnabled(enabled, raw bool) {
 	w.CursorEnabled = enabled
 	if enabled {
-		w.glw.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+		w.Glw.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
 	} else {
-		w.glw.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+		w.Glw.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 		if raw && glfw.RawMouseMotionSupported() {
-			w.glw.SetInputMode(glfw.RawMouseMotion, glfw.True)
+			w.Glw.SetInputMode(glfw.RawMouseMotion, glfw.True)
 		}
 	}
 }
@@ -317,16 +317,16 @@ func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 
 func (w *Window) UpdateGeom() {
 	w.Mu.Lock()
-	cursc := w.scrnName
+	cursc := w.ScreenWindow
 	w.Mu.Unlock()
 	sc := w.Screen() // gets parameters
 	w.Mu.Lock()
 	var wsz image.Point
-	wsz.X, wsz.Y = w.glw.GetSize()
+	wsz.X, wsz.Y = w.Glw.GetSize()
 	// fmt.Printf("win size: %v\n", wsz)
 	w.WnSize = wsz
 	var fbsz image.Point
-	fbsz.X, fbsz.Y = w.glw.GetFramebufferSize()
+	fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
 	w.PixSize = fbsz
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
@@ -334,9 +334,9 @@ func (w *Window) UpdateGeom() {
 	// if w.Activate() {
 	// 	w.winTex.SetSize(w.PxSize)
 	// }
-	if cursc != w.scrnName {
+	if cursc != w.ScreenWindow {
 		if MonitorDebug {
-			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.scrnName, cursc)
+			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
 		}
 	}
 	w.EvMgr.WindowResize()
