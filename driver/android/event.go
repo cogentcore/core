@@ -35,32 +35,32 @@ import (
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := convAndroidKeyCode(r)
-		TheApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
+		TheApp.Win.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	TheApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
+	TheApp.Win.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scrolled
 func scrolled(posX, posY, distanceX, distanceY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	delta := image.Pt(int(distanceX), int(distanceY))
-	TheApp.window.EvMgr.Scroll(where, delta)
+	TheApp.Win.EvMgr.Scroll(where, delta)
 }
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
-	TheApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+	TheApp.Win.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
 //export longPressed
 func longPressed(posX, posY C.float) {
 	// where := image.Pt(int(posX), int(posY))
-	// theApp.window.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
+	// TheApp.Win.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }
 
 func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
@@ -122,7 +122,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		typ = events.KeyUp
 	}
 	// TODO(crawshaw): set Modifiers.
-	TheApp.window.EvMgr.Key(typ, r, code, 0)
+	TheApp.Win.EvMgr.Key(typ, r, code, 0)
 }
 
 var androidKeycodes = map[int32]key.Codes{

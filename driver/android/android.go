@@ -48,6 +48,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -55,6 +56,7 @@ import (
 	"unsafe"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/driver/mobile/callfn"
 	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
@@ -109,7 +111,6 @@ func callMain(mainPC uintptr) {
 
 //export onStart
 func onStart(activity *C.ANativeActivity) {
-	fmt.Println("started")
 }
 
 //export onResume
@@ -131,7 +132,6 @@ func onStop(activity *C.ANativeActivity) {
 
 //export onCreate
 func onCreate(activity *C.ANativeActivity) {
-	fmt.Println("created")
 	// Set the initial configuration.
 	//
 	// Note we use unbuffered channels to talk to the activity loop, and
@@ -147,19 +147,19 @@ func onDestroy(activity *C.ANativeActivity) {
 
 //export onWindowFocusChanged
 func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
-	TheApp.mu.Lock()
-	defer TheApp.mu.Unlock()
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
 	if hasFocus > 0 {
-		TheApp.window.EvMgr.Window(events.WinFocus)
+		TheApp.Win.EvMgr.Window(events.WinFocus)
 	} else {
-		TheApp.window.EvMgr.Window(events.WinFocusLost)
+		TheApp.Win.EvMgr.Window(events.WinFocusLost)
 	}
 }
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	TheApp.mu.Lock()
-	defer TheApp.mu.Unlock()
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
 	TheApp.setSysWindow(uintptr(unsafe.Pointer(window)))
 }
 
@@ -197,7 +197,7 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	TheApp.isDark = bool(dark)
+	TheApp.Dark = bool(dark)
 }
 
 type windowConfig struct {
@@ -235,11 +235,11 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 		640: // ACONFIGURATION_DENSITY_XXXHIGH
 		dpi = int(density)
 	case C.ACONFIGURATION_DENSITY_NONE:
-		log.Print("android device reports no screen density")
+		slog.Warn("android device reports no screen density")
 		dpi = 72
 	default:
 		// TODO: fix this always happening with value 240
-		log.Printf("android device reports unknown density: %d", density)
+		slog.Warn("android device reports unknown screen density", "density", density)
 		// All we can do is guess.
 		if density > 0 {
 			dpi = int(density)
@@ -286,21 +286,17 @@ var (
 	activityDestroyed  = make(chan struct{})
 )
 
-func (app *App) mainLoop() {
-	fmt.Println("in main")
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
+func (app *App) MainLoop() {
+	app.MainQueue = make(chan base.FuncRun)
+	app.MainDone = make(chan struct{})
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
-		defer func() { handleRecover(recover()) }()
-		fmt.Println("running input queue")
+		defer func() { base.HandleRecover(recover()) }()
 		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
 			log.Fatalf("app: %v", err)
 		}
 	}()
-	// Preserve this OS thread for:
-	//	1. the attached JNI thread
-	fmt.Println("running main UI")
+	// Preserve this OS thread for the attached JNI thread
 	if err := mobileinit.RunOnJVM(TheApp.mainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}
@@ -333,15 +329,14 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	TheApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
-	// fmt.Println("ic:", theApp.insets)
+	TheApp.Win.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
 func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
 	go func() {
-		defer func() { handleRecover(recover()) }()
-		mainCallback(TheApp)
-		app.stopMain()
+		defer func() { base.HandleRecover(recover()) }()
+		MainCallback(TheApp)
+		app.StopMain()
 	}()
 
 	var dpi float32
@@ -349,13 +344,13 @@ func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
 
 	for {
 		select {
-		case <-app.mainDone:
+		case <-app.MainDone:
 			app.fullDestroyVk()
 			return nil
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
+		case f := <-app.MainQueue:
+			f.F()
+			if f.Done != nil {
+				f.Done <- struct{}{}
 			}
 		case cfg := <-windowConfigChange:
 			dpi = cfg.dpi
@@ -365,38 +360,32 @@ func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
 			heightPx := int(C.ANativeWindow_getHeight(w))
 
 			if orientation == goosi.OrientationUnknown {
-				app.screen.Orientation = screenOrientation(widthPx, heightPx)
+				app.Scrn.Orientation = screenOrientation(widthPx, heightPx)
 			} else {
-				app.screen.Orientation = orientation
+				app.Scrn.Orientation = orientation
 			}
 
-			app.screen.DevicePixelRatio = 1
-			app.screen.PixSize = image.Pt(widthPx, heightPx)
-			app.screen.Geometry.Max = app.screen.PixSize
+			app.Scrn.DevicePixelRatio = 1
+			app.Scrn.PixSize = image.Pt(widthPx, heightPx)
+			app.Scrn.Geometry.Max = app.Scrn.PixSize
 
-			app.screen.PhysicalDPI = dpi
-			app.screen.LogicalDPI = dpi
+			app.Scrn.PhysicalDPI = dpi
+			app.Scrn.LogicalDPI = dpi
 
 			physX := 25.4 * float32(widthPx) / dpi
 			physY := 25.4 * float32(heightPx) / dpi
-			app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+			app.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-			app.window.PhysDPI = app.screen.PhysicalDPI
-			app.window.LogDPI = app.screen.LogicalDPI
-			app.window.PxSize = app.screen.PixSize
-			app.window.WnSize = app.screen.Geometry.Max
-			app.window.DevPixRatio = app.screen.DevicePixelRatio
-
-			app.window.EvMgr.WindowResize()
-			app.window.EvMgr.WindowPaint()
+			app.Win.EvMgr.WindowResize()
+			app.Win.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
-			app.window.SetSize(image.Point{})
-			app.window.EvMgr.Window(events.WinMinimize)
+			app.Win.SetSize(image.Point{})
+			app.Win.EvMgr.Window(events.WinMinimize)
 			app.destroyVk()
 		case <-activityDestroyed:
-			app.window.EvMgr.Window(events.WinClose)
+			app.Win.EvMgr.Window(events.WinClose)
 		}
 	}
 }
