@@ -404,6 +404,10 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 			if li >= 0 {
 				name = name[li+1:] // need to get rid of .
 			}
+			// we get the name of the type before anything involving square brackets
+			// so that generic types don't confuse it
+			name, _, _ = strings.Cut(name, "[")
+			name, _, _ = strings.Cut(name, "]")
 		}
 		dirs := gti.Directives{}
 		if field.Doc != nil {
