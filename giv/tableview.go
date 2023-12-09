@@ -17,6 +17,7 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -352,7 +353,11 @@ func (tv *TableView) ConfigHeader() {
 		field := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonMenu)
-		hdr.SetText(field.Name)
+		if lbl, ok := field.Tag.Lookup("label"); ok {
+			hdr.SetText(lbl)
+		} else {
+			hdr.SetText(sentence.Case(field.Name))
+		}
 		hdr.Data = fli
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
@@ -361,7 +366,7 @@ func (tv *TableView) ConfigHeader() {
 				hdr.SetIcon(icons.KeyboardArrowUp)
 			}
 		}
-		hdr.Tooltip = field.Name + " (click to sort by)"
+		hdr.Tooltip = hdr.Text + " (tap to sort by)"
 		// doc := field.Doc() // todo
 		// if doc != "" {
 		// 	hdr.Tooltip += ": " + doc
