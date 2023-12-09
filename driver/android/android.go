@@ -76,22 +76,16 @@ var mimeMap = map[string]string{
 // env, the current JNIEnv*, and
 // ctx, a jobject representing the global android.context.Context.
 func RunOnJVM(fn func(vm, jniEnv, ctx uintptr) error) error {
-	defer func() { base.HandleRecover(recover()) }()
-
 	return mobileinit.RunOnJVM(fn)
 }
 
 //export setCurrentContext
 func setCurrentContext(vm *C.JavaVM, ctx C.jobject) {
-	defer func() { base.HandleRecover(recover()) }()
-
 	mobileinit.SetCurrentContext(unsafe.Pointer(vm), uintptr(ctx))
 }
 
 //export callMain
 func callMain(mainPC uintptr) {
-	defer func() { base.HandleRecover(recover()) }()
-
 	for _, name := range []string{"FILESDIR", "TMPDIR", "PATH", "LD_LIBRARY_PATH"} {
 		n := C.CString(name)
 		os.Setenv(name, C.GoString(C.getenv(n)))
@@ -137,8 +131,6 @@ func onStop(activity *C.ANativeActivity) {
 
 //export onCreate
 func onCreate(activity *C.ANativeActivity) {
-	defer func() { base.HandleRecover(recover()) }()
-
 	fmt.Println("oc")
 	// Set the initial configuration.
 	//
@@ -150,36 +142,22 @@ func onCreate(activity *C.ANativeActivity) {
 
 //export onDestroy
 func onDestroy(activity *C.ANativeActivity) {
-	defer func() { base.HandleRecover(recover()) }()
-
 	activityDestroyed <- struct{}{}
 }
 
 //export onWindowFocusChanged
 func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
-	defer func() { base.HandleRecover(recover()) }()
-
-	// fmt.Println("owfc")
-	// fmt.Println("owfc 1")
-	// fmt.Println("owfc a", TheApp)
-	// fmt.Println("owfc mu", TheApp.Mu)
-
-	// TheApp.Mu.Lock()
-	// fmt.Println("owfc ml")
-	// defer TheApp.Mu.Unlock()
-	// if hasFocus > 0 {
-	// 	TheApp.Win.EvMgr.Window(events.WinFocus)
-	// } else {
-	// 	TheApp.Win.EvMgr.Window(events.WinFocusLost)
-	// }
-	// fmt.Println("owfcd")
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
+	if hasFocus > 0 {
+		TheApp.Win.EvMgr.Window(events.WinFocus)
+	} else {
+		TheApp.Win.EvMgr.Window(events.WinFocusLost)
+	}
 }
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	defer func() { base.HandleRecover(recover()) }()
-	fmt.Println("onwc")
-
 	TheApp.Mu.Lock()
 	defer TheApp.Mu.Unlock()
 	TheApp.SetSystemWindow(uintptr(unsafe.Pointer(window)))
@@ -187,44 +165,28 @@ func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow)
 
 //export onNativeWindowRedrawNeeded
 func onNativeWindowRedrawNeeded(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	defer func() { base.HandleRecover(recover()) }()
-
-	fmt.Println("oc")
-
-	// TheApp.Win.EvMgr.WindowResize()
-
 	// Called on orientation change and window resize.
 	// Send a request for redraw, and block this function
 	// until a complete draw and buffer swap is completed.
 	// This is required by the redraw documentation to
 	// avoid bad draws.
 	windowRedrawNeeded <- window
-	// <-windowRedrawDone
+	<-windowRedrawDone
 }
 
 //export onNativeWindowDestroyed
 func onNativeWindowDestroyed(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	defer func() { base.HandleRecover(recover()) }()
-
-	fmt.Println("onwd")
-
 	windowDestroyed <- window
 }
 
 //export onInputQueueCreated
 func onInputQueueCreated(activity *C.ANativeActivity, q *C.AInputQueue) {
-	defer func() { base.HandleRecover(recover()) }()
-	fmt.Println("oiqc")
-
 	inputQueue <- q
 	<-inputQueueDone
 }
 
 //export onInputQueueDestroyed
 func onInputQueueDestroyed(activity *C.ANativeActivity, q *C.AInputQueue) {
-	defer func() { base.HandleRecover(recover()) }()
-	fmt.Println("oiqd")
-
 	inputQueue <- nil
 	<-inputQueueDone
 }
@@ -235,8 +197,6 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	fmt.Println("sdm")
-	defer func() { base.HandleRecover(recover()) }()
 	TheApp.Dark = bool(dark)
 }
 
@@ -248,7 +208,6 @@ type windowConfig struct {
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 	defer func() { base.HandleRecover(recover()) }()
-	fmt.Println("wcr")
 
 	aconfig := C.AConfiguration_new()
 	C.AConfiguration_fromAssetManager(aconfig, activity.assetManager)
@@ -308,10 +267,6 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 
 //export onConfigurationChanged
 func onConfigurationChanged(activity *C.ANativeActivity) {
-	defer func() { base.HandleRecover(recover()) }()
-
-	fmt.Println("occ")
-
 	// A rotation event first triggers onConfigurationChanged, then
 	// calls onNativeWindowRedrawNeeded. We extract the orientation
 	// here and save it for the redraw event.
@@ -320,8 +275,6 @@ func onConfigurationChanged(activity *C.ANativeActivity) {
 
 //export onLowMemory
 func onLowMemory(activity *C.ANativeActivity) {
-	defer func() { base.HandleRecover(recover()) }()
-
 	runtime.GC()
 	debug.FreeOSMemory()
 }
@@ -337,8 +290,6 @@ var (
 )
 
 func (a *App) MainLoop() {
-	defer func() { base.HandleRecover(recover()) }()
-
 	fmt.Println("ml")
 	a.MainQueue = make(chan base.FuncRun)
 	a.MainDone = make(chan struct{})
@@ -357,9 +308,6 @@ func (a *App) MainLoop() {
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	defer func() { base.HandleRecover(recover()) }()
-
-	fmt.Println("svi")
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showKeyboard(env, C.int(int32(typ)))
@@ -372,16 +320,12 @@ func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
 func (a *App) HideVirtualKeyboard() {
-	defer func() { base.HandleRecover(recover()) }()
-
 	if err := mobileinit.RunOnJVM(hideSoftInput); err != nil {
 		log.Fatalf("app: %v", err)
 	}
 }
 
 func hideSoftInput(vm, jniEnv, ctx uintptr) error {
-	defer func() { base.HandleRecover(recover()) }()
-
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 	C.hideKeyboard(env)
 	return nil
@@ -389,14 +333,7 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	defer func() { base.HandleRecover(recover()) }()
-
-	// fmt.Println("ic")
-	// fmt.Println(TheApp)
-	// fmt.Println(TheApp.Win)
-	// fmt.Println(TheApp.Win.Insts)
-	// TheApp.Win.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
-	// fmt.Println("dic")
+	TheApp.Win.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
 // MainUI runs the main UI loop of the app.
@@ -404,24 +341,21 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 	fmt.Println("mui")
 	defer func() { base.HandleRecover(recover()) }()
 
-	// go func() {
-	// 	defer func() { base.HandleRecover(recover()) }()
-	// 	MainCallback(TheApp)
-	// 	a.StopMain()
-	// }()
+	go func() {
+		defer func() { base.HandleRecover(recover()) }()
+		MainCallback(TheApp)
+		a.StopMain()
+	}()
 
 	var dpi float32
 	var orientation goosi.ScreenOrientation
 
 	for {
-		fmt.Println("muic")
 		select {
 		case <-a.MainDone:
-			fmt.Println("md")
 			a.FullDestroyVk()
 			return nil
 		case f := <-a.MainQueue:
-			fmt.Println("mq")
 			f.F()
 			if f.Done != nil {
 				f.Done <- struct{}{}
@@ -436,10 +370,8 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 
-			fmt.Println("bsc")
 			a.Scrn.Orientation = orientation
 
-			fmt.Println("asc")
 			a.Scrn.DevicePixelRatio = 1
 			a.Scrn.PixSize = image.Pt(widthPx, heightPx)
 			a.Scrn.Geometry.Max = a.Scrn.PixSize
@@ -451,32 +383,22 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			physY := 25.4 * float32(heightPx) / dpi
 			a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-			fmt.Println("bwin")
-
 			a.Win.EvMgr.WindowResize()
 			a.Win.EvMgr.WindowPaint()
-
-			fmt.Println("awin")
 		case <-windowDestroyed:
-			fmt.Println("wd")
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			a.Win.SetSize(image.Point{})
 			a.Win.EvMgr.Window(events.WinMinimize)
 			a.DestroyVk()
 		case <-activityDestroyed:
-			fmt.Println("ad")
 			a.Win.EvMgr.Window(events.WinClose)
 		}
-		fmt.Println("muicd")
 	}
 }
 
 // RunInputQueue runs the input queue for the app.
 func RunInputQueue(vm, jniEnv, ctx uintptr) error {
-	fmt.Println("riq")
-	defer func() { base.HandleRecover(recover()) }()
-
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 
 	// Android loopers select on OS file descriptors, not Go channels, so we
