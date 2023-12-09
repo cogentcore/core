@@ -321,7 +321,7 @@ func (wb *WidgetBase) ConfigTree() {
 // to currently-displayed widgets.
 // It wraps everything in UpdateStart / UpdateEndLayout
 // so layout will automatically be called for next render.
-func (wb *WidgetBase) Update() {
+func (wb *WidgetBase) Update() { //git:add
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
 	}
