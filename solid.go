@@ -158,10 +158,9 @@ func (sld *Solid) SetEulerRotation(x, y, z float32) *Solid {
 	return sld
 }
 
-func (sld *Solid) Config(sc *Scene) {
-	sld.Sc = sc
+func (sld *Solid) Config() {
 	sld.Validate()
-	sld.NodeBase.Config(sc)
+	sld.NodeBase.Config()
 }
 
 // ParentMaterial returns parent's material or nil if not avail
@@ -241,11 +240,11 @@ func (sld *Solid) RenderClass() RenderClasses {
 }
 
 // Render activates this solid for rendering
-func (sld *Solid) Render(sc *Scene) {
-	sc.Phong.UseMeshName(string(sld.Mesh))
+func (sld *Solid) Render() {
+	sld.Sc.Phong.UseMeshName(string(sld.Mesh))
 	sld.PoseMu.RLock()
-	sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
+	sld.Sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
 	sld.PoseMu.RUnlock()
-	sld.Mat.Render(sc)
-	sc.Phong.Render()
+	sld.Mat.Render(sld.Sc)
+	sld.Sc.Phong.Render()
 }

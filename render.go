@@ -294,7 +294,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 			return ki.Break // going into a different type of thing, bail
 		}
 		ni.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
-		ni.UpdateBBox2D(size, sc)
+		ni.UpdateBBox2D(size)
 		return ki.Continue
 	})
 }
@@ -309,7 +309,7 @@ func (sc *Scene) ConfigNodes() {
 		if ni == nil {
 			return ki.Break
 		}
-		ni.Config(sc)
+		ni.Config()
 		return ki.Continue
 	})
 }
@@ -369,7 +369,7 @@ func (sc *Scene) TrackCamera() bool {
 	if !ok {
 		return false
 	}
-	tc.TrackCamera(sc)
+	tc.TrackCamera()
 	sc.SetNeedsUpdate() // need to update world model for nodes
 	return true
 }
@@ -475,7 +475,7 @@ func (sc *Scene) RenderImpl() {
 			if rc >= RClassTransTexture && rc != lastrc {
 				lastrc = rc
 			}
-			obj.Render(sc)
+			obj.Render()
 		}
 	}
 	sc.Phong.UpdtMu.Lock()

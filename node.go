@@ -49,14 +49,14 @@ type Node interface {
 
 	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
 	// size and other scene bbox info from scene
-	UpdateBBox2D(size mat32.Vec2, sc *Scene)
+	UpdateBBox2D(size mat32.Vec2)
 
 	// RayPick converts a given 2D point in scene image coordinates
 	// into a ray from the camera position pointing through line of sight of camera
 	// into *local* coordinates of the solid.
 	// This can be used to find point of intersection in local coordinates relative
 	// to a given plane of interest, for example (see Ray methods for intersections).
-	RayPick(pos image.Point, sc *Scene) mat32.Ray
+	RayPick(pos image.Point) mat32.Ray
 
 	// WorldMatrix returns the world matrix for this node, under read-lock protection.
 	WorldMatrix() *mat32.Mat4
@@ -83,11 +83,10 @@ type Node interface {
 	// IsTransparent returns true if solid has transparent color
 	IsTransparent() bool
 
-	// Config performs
-	Config(sc *Scene)
+	Config()
 
 	// UpdateNode does arbitrary node updating during render process
-	UpdateNode(sc *Scene)
+	UpdateNode()
 
 	// RenderClass returns the class of rendering for this solid.
 	// used for organizing the ordering of rendering
@@ -95,7 +94,7 @@ type Node interface {
 
 	// Render is called by Scene Render on main thread,
 	// everything ready to go..
-	Render(sc *Scene)
+	Render()
 
 	// Convenience methods for external setting of Pose values with appropriate locking
 
@@ -191,6 +190,24 @@ func (nb *NodeBase) AsNode() *NodeBase {
 	return nb
 }
 
+// OnAdd is called when nodes are added to a parent.
+// It sets the scene of the node to that of its parent.
+// It should be called by all other OnAdd functions defined by node types.
+func (nb *NodeBase) OnAdd() {
+	if nb.Par == nil {
+		return
+	}
+	if sc, ok := nb.Par.(*Scene); ok {
+		nb.Sc = sc
+		return
+	}
+	if _, pnb := AsNode(nb.Par); pnb != nil {
+		nb.Sc = pnb.Sc
+		return
+	}
+	fmt.Println(nb, "not set from parent")
+}
+
 // UpdateStart sets the scene ScUpdating flag to prevent
 // render updates during construction on a scene.
 func (nb *NodeBase) UpdateStart() bool {
@@ -259,7 +276,7 @@ func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
-func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
+func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2) {
 	off := mat32.Vec2{}
 	nb.PoseMu.RLock()
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMat4(&nb.Pose.WorldMatrix)
@@ -270,9 +287,13 @@ func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	// BBox is always relative to scene
 	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
 	// note: BBox is inaccurate for objects extending behind camera
-	isvis := sc.Camera.Frustum.IntersectsBox(nb.WorldBBox.BBox)
+	if nb.Sc == nil {
+		fmt.Println(nb, "Error: scene is nil")
+		return
+	}
+	isvis := nb.Sc.Camera.Frustum.IntersectsBox(nb.WorldBBox.BBox)
 	if isvis { // filter out invisible at objbbox level
-		scbounds := image.Rectangle{Max: sc.Geom.Size}
+		scbounds := image.Rectangle{Max: nb.Sc.Geom.Size}
 		bbvis := nb.BBox.Intersect(scbounds)
 		nb.ScBBox = bbvis
 	} else {
@@ -288,22 +309,22 @@ func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 // to a given plane of interest, for example (see Ray methods for intersections).
 // To convert mouse window-relative coords into scene-relative coords
 // subtract the sc.ObjBBox.Min which includes any scrolling effects
-func (nb *NodeBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
+func (nb *NodeBase) RayPick(pos image.Point) mat32.Ray {
 	// nb.PoseMu.RLock()
-	// sc.Camera.CamMu.RLock()
-	sz := sc.Geom.Size
+	// nb.Sc.Camera.CamMu.RLock()
+	sz := nb.Sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 	fpos := mat32.Vec2{float32(pos.X), float32(pos.Y)}
 	ndc := fpos.WindowToNDC(size, mat32.Vec2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
-	cdir := mat32.NewVec4FromVec3(ndc, 1).MulMat4(&sc.Camera.InvPrjnMatrix)
+	cdir := mat32.NewVec4FromVec3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
-	wdir := cdir.MulMat4(&sc.Camera.Pose.Matrix)
-	wpos := sc.Camera.Pose.Matrix.Pos()
-	// sc.Camera.CamMu.RUnlock()
+	wdir := cdir.MulMat4(&nb.Sc.Camera.Pose.Matrix)
+	wpos := nb.Sc.Camera.Pose.Matrix.Pos()
+	// nb.Sc.Camera.CamMu.RUnlock()
 	invM, err := nb.Pose.WorldMatrix.Inverse()
 	// nb.PoseMu.RUnlock()
 	if err != nil {
@@ -329,14 +350,14 @@ func (nb *NodeBase) NormDCBBox() mat32.Box3 {
 	return nb.NDCBBox
 }
 
-func (nb *NodeBase) Config(sc *Scene) {
+func (nb *NodeBase) Config() {
 	// nop by default -- could connect to scene for update signals or something
 }
 
-func (nb *NodeBase) UpdateNode(sc *Scene) {
+func (nb *NodeBase) UpdateNode() {
 }
 
-func (nb *NodeBase) Render(sc *Scene) {
+func (nb *NodeBase) Render() {
 	// nop
 }
 
@@ -362,21 +383,21 @@ func (nb *NodeBase) SetPoseQuat(quat mat32.Quat) {
 }
 
 // TrackCamera moves this node to pose of camera
-func (nb *NodeBase) TrackCamera(sc *Scene) {
+func (nb *NodeBase) TrackCamera() {
 	nb.PoseMu.Lock()
-	sc.Camera.CamMu.RLock()
-	nb.Pose.CopyFrom(&sc.Camera.Pose)
-	sc.Camera.CamMu.RUnlock()
+	nb.Sc.Camera.CamMu.RLock()
+	nb.Pose.CopyFrom(&nb.Sc.Camera.Pose)
+	nb.Sc.Camera.CamMu.RUnlock()
 	nb.PoseMu.Unlock()
 }
 
 // TrackLight moves node to position of light of given name.
 // For SpotLight, copies entire Pose. Does not work for Ambient light
 // which has no position information.
-func (nb *NodeBase) TrackLight(sc *Scene, lightName string) error {
+func (nb *NodeBase) TrackLight(lightName string) error {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
-	lt, ok := sc.Lights.ValByKeyTry(lightName)
+	lt, ok := nb.Sc.Lights.ValByKeyTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

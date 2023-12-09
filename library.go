@@ -38,6 +38,16 @@ func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
 	updt := sc.UpdateStart()
 	nwgp := gp.Clone().(*Group)
 	parent.AddChild(nwgp)
+
+	parent.WalkPre(func(k ki.Ki) bool {
+		ni, nb := AsNode(k)
+		if ni == nil {
+			return ki.Break
+		}
+		nb.Sc = sc
+		return ki.Continue
+	})
+
 	sc.UpdateEnd(updt)
 	return nwgp, nil
 }

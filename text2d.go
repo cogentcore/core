@@ -82,15 +82,15 @@ func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 	return sz, true
 }
 
-func (txt *Text2D) Config(sc *Scene) {
-	txt.Solid.Config(sc)
-	tm := sc.PlaneMesh2D()
+func (txt *Text2D) Config() {
+	txt.Solid.Config()
+	tm := txt.Sc.PlaneMesh2D()
 	txt.SetMesh(tm)
-	txt.RenderText(sc)
+	txt.RenderText()
 	txt.Validate()
 }
 
-func (txt *Text2D) RenderText(sc *Scene) {
+func (txt *Text2D) RenderText() {
 	gi.SetUnitContext(&txt.Styles, nil, mat32.Vec2{}, mat32.Vec2{})
 	txt.TxtRender.SetHTML(txt.Text, txt.Styles.FontRender(), &txt.Styles.Text, &txt.Styles.UnContext, nil)
 	sz := txt.TxtRender.Size
@@ -115,10 +115,10 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	var err error
 	if txt.Mat.TexPtr == nil {
 		txname := "__Text2D: " + txt.Nm
-		tx, err = sc.TextureByNameTry(txname)
+		tx, err = txt.Sc.TextureByNameTry(txname)
 		if err != nil {
 			tx = &TextureBase{Nm: txname}
-			sc.AddTexture(tx)
+			txt.Sc.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.SetImage(img)
 			txt.Mat.SetTexture(tx)
@@ -136,7 +136,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			img = image.NewRGBA(bounds)
 		}
 		tx.SetImage(img)
-		sc.Phong.UpdateTextureName(tx.Name())
+		txt.Sc.Phong.UpdateTextureName(tx.Name())
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
