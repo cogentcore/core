@@ -190,3 +190,8 @@ func (bd *Body) AddBottomBar(fun func(pw Widget)) {
 func (bd *Body) AddAppBar(fun func(tb *Toolbar)) {
 	bd.Sc.AddAppBar(fun)
 }
+
+// GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
+func (bd *Body) GetTopAppBar() *Toolbar {
+	return bd.Sc.GetTopAppBar()
+}
