@@ -19,33 +19,32 @@ package ios
 */
 import "C"
 import (
-	"fmt"
 	"image"
 
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 )
 
-// touchIDs are the current active touches. The position in the array
+// TouchIDs are the current active touches. The position in the array
 // is the ID, the value is the UITouch* pointer value.
 //
 // It is widely reported that the iPhone can handle up to 5 simultaneous
 // touch events, while the iPad can handle 11.
-var touchIDs [11]uintptr
+var TouchIDs [11]uintptr
 
 //export sendTouch
 func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 	id := -1
-	for i, val := range touchIDs {
+	for i, val := range TouchIDs {
 		if val == cTouch {
 			id = i
 			break
 		}
 	}
 	if id == -1 {
-		for i, val := range touchIDs {
+		for i, val := range TouchIDs {
 			if val == 0 {
-				touchIDs[i] = cTouch
+				TouchIDs[i] = cTouch
 				id = i
 				break
 			}
@@ -66,52 +65,50 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		// at every multi-touch event. See:
 		// https://github.com/fyne-io/fyne/issues/2407
 		// https://developer.apple.com/documentation/uikit/touches_presses_and_gestures?language=objc
-		for idx := range touchIDs {
-			touchIDs[idx] = 0
+		for idx := range TouchIDs {
+			TouchIDs[idx] = 0
 		}
 	}
 
-	TheApp.window.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
+	TheApp.Win.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
 }
 
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
-		code := getCodeFromRune(r)
-		TheApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
+		code := GetCodeFromRune(r)
+		TheApp.Win.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	TheApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
+	TheApp.Win.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scrolled
 func scrolled(posX, posY, distanceX, distanceY C.float) {
-	fmt.Println("scrolled")
 	where := image.Pt(int(posX), int(posY))
 	// make negative so that it goes in the opposite direction
 	// of finger movement (natural scrolling)
 	delta := image.Pt(int(-distanceX), int(-distanceY))
-	TheApp.window.EvMgr.Scroll(where, delta)
+	TheApp.Win.EvMgr.Scroll(where, delta)
 }
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
-	fmt.Println("scaled")
 	where := image.Pt(int(posX), int(posY))
-	TheApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+	TheApp.Win.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
 //export longPressed
 func longPressed(posX, posY C.float) {
-	fmt.Println("longPressed")
 	// where := image.Pt(int(posX), int(posY))
 	// theApp.window.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }
 
-var codeRune = map[rune]key.Codes{
+// CodeFromRune is a map from rune to goosi key code
+var CodeFromRune = map[rune]key.Codes{
 	'0':  key.Code0,
 	'1':  key.Code1,
 	'2':  key.Code2,
@@ -189,8 +186,9 @@ var codeRune = map[rune]key.Codes{
 	'/':  key.CodeSlash,
 }
 
-func getCodeFromRune(r rune) key.Codes {
-	if code, ok := codeRune[r]; ok {
+// GetCodeFromRune returns the goosi key code for the given rune
+func GetCodeFromRune(r rune) key.Codes {
+	if code, ok := CodeFromRune[r]; ok {
 		return code
 	}
 	return key.CodeUnknown
