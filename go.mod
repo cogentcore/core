@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/mattn/go-shellwords v1.0.12
-	goki.dev/grog v0.0.16
+	goki.dev/grog v0.0.17
 )
 
 require (
@@ -16,12 +16,14 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
-	goki.dev/cam v0.9.38 // indirect
-	goki.dev/colors v0.8.32 // indirect
-	goki.dev/enums v0.9.42 // indirect
-	goki.dev/glop v0.1.6 // indirect
-	goki.dev/laser v0.1.22 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.17 // indirect
+	goki.dev/cam v0.9.39 // indirect
+	goki.dev/colors v0.8.33 // indirect
+	goki.dev/enums v0.9.43 // indirect
+	goki.dev/glop v0.1.7 // indirect
+	goki.dev/gti v0.1.21 // indirect
+	goki.dev/laser v0.1.23 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.18 // indirect
+	goki.dev/ordmap v0.5.7 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
