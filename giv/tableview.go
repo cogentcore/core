@@ -443,6 +443,8 @@ func (tv *TableView) ConfigRows() {
 	sg.DeleteChildren(ki.DestroyKids)
 	tv.Values = nil
 
+	tv.This().(SliceViewer).UpdtSliceSize()
+
 	if tv.IsNil() {
 		return
 	}
@@ -570,6 +572,8 @@ func (tv *TableView) UpdateWidgets() {
 
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
+
+	tv.This().(SliceViewer).UpdtSliceSize()
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 

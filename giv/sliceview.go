@@ -627,6 +627,8 @@ func (sv *SliceViewBase) ConfigRows() {
 	sg.DeleteChildren(ki.DestroyKids)
 	sv.Values = nil
 
+	sv.This().(SliceViewer).UpdtSliceSize()
+
 	if sv.IsNil() {
 		return
 	}
@@ -730,6 +732,8 @@ func (sv *SliceViewBase) UpdateWidgets() {
 
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
+
+	sv.This().(SliceViewer).UpdtSliceSize()
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	// sc := sv.Sc
