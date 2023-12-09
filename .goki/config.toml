@@ -1,6 +1,6 @@
 Name = "fi"
 Desc = ""
-Version = "v0.1.6"
+Version = "v0.1.7"
 Type = "App"
 
 [Build]
