@@ -7,16 +7,11 @@
 package android
 
 import (
-	"fmt"
-	"go/build"
 	"log"
-	"os"
-	"path/filepath"
 
 	vk "github.com/goki/vulkan"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vdraw"
@@ -114,235 +109,46 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 // It should only be called when app.mu is already locked.
 func (app *App) setSysWindow(winptr uintptr) error {
 	defer func() { base.HandleRecover(recover()) }()
-	var sf vk.Surface
+	var vsf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
-	ret := vk.CreateWindowSurface(app.gpu.Instance, winptr, nil, &sf)
+	ret := vk.CreateWindowSurface(app.GPU.Instance, winptr, nil, &vsf)
 	if err := vk.Error(ret); err != nil {
 		return err
 	}
-	app.Surface = vgpu.NewSurface(app.gpu, sf)
+	sf := vgpu.NewSurface(app.GPU, vsf)
 
-	fmt.Println("setting system")
-	app.System = app.gpu.NewGraphicsSystem(app.name, &app.Surface.Device)
-	app.System.ConfigRender(&app.Surface.Format, vgpu.UndefType)
-	app.Surface.SetRender(&app.System.Render)
-	// app.window.System.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
-	app.System.Config()
-	fmt.Println("making drawer")
-	app.Draw = vdraw.Drawer{
-		Sys:     *app.System,
+	sys := app.GPU.NewGraphicsSystem(app.Name(), &sf.Device)
+	sys.ConfigRender(&sf.Format, vgpu.UndefType)
+	sf.SetRender(&sys.Render)
+	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
+	sys.Config()
+	app.Drawer = &vdraw.Drawer{
+		Sys:     *sys,
 		YIsDown: true,
 	}
 	// app.window.Draw.ConfigSys()
-	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
+	app.Drawer.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
-	app.winptr = winptr
+	app.Winptr = winptr
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
-	if app.window != nil {
-		app.window.EvMgr.Window(events.WinShow)
-		app.window.EvMgr.Window(events.ScreenUpdate)
+	if app.Win != nil {
+		app.Win.EvMgr.Window(events.WinShow)
+		app.Win.EvMgr.Window(events.ScreenUpdate)
 	}
 	return nil
-}
-
-func (app *App) DeleteWin(w *Window) {
-	// TODO: implement?
-}
-
-func (app *App) NScreens() int {
-	if app.screen != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *App) Screen(scrN int) *goosi.Screen {
-	if scrN == 0 {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *App) ScreenByName(name string) *goosi.Screen {
-	if app.screen.Name == name {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *App) NoScreens() bool {
-	return app.screen == nil
-}
-
-func (app *App) NWindows() int {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *App) Window(win int) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if win == 0 {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) WindowByName(name string) goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.Name() == name {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) WindowInFocus() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.window.IsFocus() {
-		return app.window
-	}
-	return nil
-}
-
-func (app *App) ContextWindow() goosi.Window {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	return app.window
-}
-
-func (app *App) Name() string {
-	return app.name
-}
-
-func (app *App) SetName(name string) {
-	app.name = name
-}
-
-func (app *App) About() string {
-	return app.about
-}
-
-func (app *App) SetAbout(about string) {
-	app.about = about
-}
-
-func (app *App) OpenFiles() []string {
-	return app.openFiles
-}
-
-func (app *App) GoGiPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), "GoGi")
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
-func (app *App) AppPrefsDir() string {
-	pdir := filepath.Join(app.PrefsDir(), app.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
 }
 
 func (app *App) PrefsDir() string {
 	return "/data/data"
 }
 
-func (app *App) GetScreens() {
-	// note: this is not applicable in mobile because screen info is not avail until Size event
-}
-
 func (app *App) Platform() goosi.Platforms {
 	return goosi.Android
 }
 
-func (app *App) OpenURL(url string) {
-	// TODO: implement
-}
-
-// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
-func SrcDir(dir string) (absDir string, err error) {
-	// TODO: does this make sense?
-	for _, srcDir := range build.Default.SrcDirs() {
-		absDir = filepath.Join(srcDir, dir)
-		finfo, err := os.Stat(absDir)
-		if err == nil && finfo.IsDir() {
-			return absDir, nil
-		}
-	}
-	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
-}
-
 func (app *App) ClipBoard(win goosi.Window) clip.Board {
-	// TODO: implement clipboard
-	// app.mu.Lock()
-	// app.ctxtwin = win.(*windowImpl)
-	// app.mu.Unlock()
-	return nil
-	// return &theClip
-}
-
-func (app *App) Cursor(win goosi.Window) cursor.Cursor {
-	return &cursor.CursorBase{} // no-op
-}
-
-func (app *App) SetQuitReqFunc(fun func()) {
-	app.quitReqFunc = fun
-}
-
-func (app *App) SetQuitCleanFunc(fun func()) {
-	app.quitCleanFunc = fun
-}
-
-func (app *App) QuitReq() {
-	if app.quitting {
-		return
-	}
-	if app.quitReqFunc != nil {
-		app.quitReqFunc()
-	} else {
-		app.Quit()
-	}
-}
-
-func (app *App) IsQuitting() bool {
-	return app.quitting
-}
-
-func (app *App) QuitClean() {
-	// TODO: implement?
-	// app.quitting = true
-	// if app.quitCleanFunc != nil {
-	// 	app.quitCleanFunc()
-	// }
-	// app.mu.Lock()
-	// nwin := len(app.winlist)
-	// for i := nwin - 1; i >= 0; i-- {
-	// 	win := app.winlist[i]
-	// 	go win.Close()
-	// }
-	// app.mu.Unlock()
-	// for i := 0; i < nwin; i++ {
-	// 	<-app.quitCloseCnt
-	// 	// fmt.Printf("win closed: %v\n", i)
-	// }
-}
-
-func (app *App) Quit() {
-	if app.quitting {
-		return
-	}
-	app.QuitClean()
-	app.stopMain()
-}
-
-func (app *App) IsDark() bool {
-	return app.isDark
+	// TODO(kai): implement clipboard on Android
+	return &clip.BoardBase{}
 }
