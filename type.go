@@ -34,7 +34,7 @@ type Type struct {
 	// Methods are available for all types
 	Methods *Methods
 
-	// Embeded fields for struct types
+	// Embedded fields for struct types
 	Embeds *Fields
 
 	// Fields for struct types

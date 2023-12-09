@@ -54,6 +54,17 @@ func TypeByValueTry(val any) (*Type, error) {
 	return TypeByNameTry(TypeNameObj(val))
 }
 
+// TypeByReflectType returns the [Type] of the given reflect type
+func TypeByReflectType(typ reflect.Type) *Type {
+	return TypeByName(TypeName(typ))
+}
+
+// TypeByReflectTypeTry returns the [Type] of the given reflect type,
+// or an error if it is not found
+func TypeByReflectTypeTry(typ reflect.Type) (*Type, error) {
+	return TypeByNameTry(TypeName(typ))
+}
+
 // AddType adds a constructed [Type] to the registry
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
@@ -76,10 +87,7 @@ func TypeName(typ reflect.Type) string {
 // from given object.  Automatically finds the non-pointer base type.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeNameObj(v any) string {
-	typ := reflect.TypeOf(v)
-	for typ.Kind() == reflect.Ptr {
-		typ = typ.Elem()
-	}
+	typ := laser.NonPtrType(reflect.TypeOf(v))
 	return TypeName(typ)
 }
 
@@ -98,28 +106,34 @@ func AllEmbeddersOf(typ *Type) []*Type {
 	return typs
 }
 
-// ShortTypeName returns the short version of a package-qualified type name
-// which just has the last element of the path.  This is what is used in
-// standard Go programming, and is is used for the key to lookup reflect.Type
-// names -- i.e., this is what you should save in a JSON file.
-// The potential naming conflict is worth the brevity, and typically a given
-// file will only contain mutually-compatible, non-conflicting types.
-// This is cached in ShortNames because the path.Base computation is apparently
-// a bit slow.
-// func ShortTypeName(typ reflect.Type) string {
-// 	return path.Base(typ.PkgPath()) + "." + typ.Name()
-// }
-
-/*
-// TypeFor returns the [Type] for the given
-// type. It returns nil if the type is not found
-// in the [TypeRegistry].
-func TypeFor[T any]() *Type {
-	for _, typ := range TypeRegistry {
-		if _, ok := typ.Instance.(T); ok {
-			return typ
+// GetDoc gets the documentation for the given value with the given owner value and field.
+// The owner value and field may be nil. The owner value, if non-nil, is the value that
+// contains the value (the parent struct, map, slice, or array). The field, if non-nil,
+// is the struct field that the value represents.
+func GetDoc(v reflect.Value, owner any, field *reflect.StructField) (string, bool) {
+	// if we are not part of a struct, we just get the documentation for our type
+	if field == nil || owner == nil {
+		rtyp := laser.NonPtrType(v.Type())
+		typ := TypeByName(TypeName(rtyp))
+		if typ == nil {
+			return "", false
 		}
+		return typ.Doc, true
 	}
-	return nil
+
+	// otherwise, we get our field documentation in our parent
+	otyp := TypeByValue(owner)
+	if otyp != nil {
+		f := GetField(otyp, field.Name)
+		if f == nil {
+			return "", false
+		}
+		return f.Doc, true
+	}
+	// if we aren't in gti, we fall back on struct tag
+	desc, ok := field.Tag.Lookup("desc")
+	if !ok {
+		return "", false
+	}
+	return desc, true
 }
-*/
