@@ -8,7 +8,7 @@ package main
 
 // TODO: fix
 /*
-// todo: investigate "github.com/antonmedv/expr" instead of govaluate -- much better supported!
+// todo: investigate "github.com/expr-lang/expr" instead of govaluate -- much better supported!
 
 var colornames = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
 

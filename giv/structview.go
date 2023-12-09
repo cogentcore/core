@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/ast"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/ast"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/bools"
