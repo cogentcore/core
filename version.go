@@ -4,9 +4,9 @@ package grog
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.17"
+	Version = "v0.0.18"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "f95d297"
+	GitCommit = "ab97237"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-12-09 18:36"
+	VersionDate = "2023-12-09 19:11"
 )
