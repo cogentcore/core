@@ -11,6 +11,8 @@
 // to implement interfaces defined in package goosi.
 package base
 
+//go:generate goki generate
+
 import (
 	"os"
 	"path/filepath"
@@ -22,7 +24,7 @@ import (
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].
-type App struct {
+type App struct { //gti:add
 	// This is the App as a [goosi.App] interface, which preserves the actual identity
 	// of the app when calling interface methods in the base App.
 	This goosi.App `view:"-"`
@@ -31,10 +33,10 @@ type App struct {
 	Mu sync.Mutex `view:"-"`
 
 	// MainQueue is the queue of functions to call on the main loop. To add to it, use [App.RunOnMain].
-	MainQueue chan FuncRun
+	MainQueue chan FuncRun `view:"-"`
 
 	// MainDone is a channel on which is a signal is sent when the main loop of the app should be terminated.
-	MainDone chan struct{}
+	MainDone chan struct{} `view:"-"`
 
 	// Nm is the name of the app.
 	Nm string `label:"Name"`

@@ -23,7 +23,7 @@ import (
 )
 
 // Window is the implementation of [goosi.Window] for the desktop platform.
-type Window struct {
+type Window struct { //gti:add
 	base.WindowMulti[*App, *vdraw.Drawer]
 
 	// Glw is the glfw window associated with this window

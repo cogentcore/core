@@ -20,8 +20,8 @@ import (
 
 // Window contains the data and logic common to all implementations of [goosi.Window].
 // A Window is associated with a corresponding [goosi.App] type.
-type Window[A goosi.App] struct {
-	events.Deque
+type Window[A goosi.App] struct { //gti:add
+	events.Deque `view:"-"`
 
 	// This is the Window as a [goosi.Window] interface, which preserves the actual identity
 	// of the window when calling interface methods in the base Window.
@@ -34,11 +34,11 @@ type Window[A goosi.App] struct {
 	Mu sync.Mutex `view:"-"`
 
 	// RunQueue is the queue of functions to call on the window loop. To add to it, use [Window.RunOnWin].
-	RunQueue chan FuncRun
+	RunQueue chan FuncRun `view:"-"`
 
 	// WinClose is a channel on which a single is sent to indicate that the
 	// window should close.
-	WinClose chan struct{}
+	WinClose chan struct{} `view:"-"`
 
 	// CloseReqFunc is the function to call on a close request
 	CloseReqFunc func(win goosi.Window)
@@ -53,7 +53,7 @@ type Window[A goosi.App] struct {
 	Titl string `label:"Title"`
 
 	// Flgs contains the flags associated with the window
-	Flgs goosi.WindowFlags
+	Flgs goosi.WindowFlags `label:"Flags"`
 
 	// FPS is the FPS (frames per second) for rendering the window
 	FPS int
@@ -67,7 +67,7 @@ type Window[A goosi.App] struct {
 	// ensure that the proper ordering of destruction applies.
 	DestroyGPUFunc func()
 
-	// CursorEnabled is whether the cursor is currently disabled
+	// CursorEnabled is whether the cursor is currently enabled
 	CursorEnabled bool
 }
 

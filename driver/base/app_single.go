@@ -19,20 +19,20 @@ import (
 // platforms (desktop), for which you should use [AppMulti]. An AppSingle is associated
 // with a corresponding type of [goosi.Drawer] and [goosi.Window]. The [goosi.Window]
 // type should embed [WindowSingle].
-type AppSingle[D goosi.Drawer, W goosi.Window] struct {
+type AppSingle[D goosi.Drawer, W goosi.Window] struct { //gti:add
 	App
 
 	// Drawer is the single [goosi.Drawer] used for the app.
 	Drawer D
 
 	// Win is the single [goosi.Window] associated with the app.
-	Win W
+	Win W `label:"Window"`
 
 	// Scrn is the single [goosi.Screen] associated with the app.
-	Scrn *goosi.Screen
+	Scrn *goosi.Screen `label:"Screen"`
 
 	// Insts are the size of any insets on the sides of the screen.
-	Insts styles.SideFloats
+	Insts styles.SideFloats `label:"Insets"`
 }
 
 // AppSingler describes the common functionality implemented by [AppSingle]

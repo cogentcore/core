@@ -20,7 +20,7 @@ import (
 // on single-window platforms (mobile, web, and offscreen), as opposed to multi-window
 // platforms (desktop), for which you should use [WindowSingle].
 // A WindowSingle is associated with a corresponding [AppSingler] type.
-type WindowSingle[A AppSingler] struct {
+type WindowSingle[A AppSingler] struct { //gti:add
 	Window[A]
 }
 

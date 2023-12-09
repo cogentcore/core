@@ -20,20 +20,20 @@ import (
 // platforms (mobile, web, and offscreen), for which you should use [WindowSingle].
 // A WindowMulti is associated with a corresponding [goosi.App] type.
 // The [goosi.App] type should embed [AppMulti].
-type WindowMulti[A goosi.App, D goosi.Drawer] struct {
+type WindowMulti[A goosi.App, D goosi.Drawer] struct { //gti:add
 	Window[A]
 
 	// Draw is the [goosi.Drawer] used for this window.
-	Draw D
+	Draw D `label:"Drawer"`
 
 	// Pos is the position of the window
-	Pos image.Point
+	Pos image.Point `label:"Position"`
 
-	// WnSize is the size of the window in window-manager coords
-	WnSize image.Point
+	// WnSize is the size of the window in window manager coordinates
+	WnSize image.Point `label:"Window manager size"`
 
 	// PixSize is the pixel size of the window in raw display dots
-	PixSize image.Point
+	PixSize image.Point `label:"Pixel size"`
 
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
