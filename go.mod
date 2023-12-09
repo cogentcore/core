@@ -8,6 +8,6 @@ retract (
 )
 
 require (
-	goki.dev/enums v0.9.44
+	goki.dev/enums v0.9.45
 	golang.org/x/image v0.14.0
 )
