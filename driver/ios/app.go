@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/driver/base"
@@ -35,9 +34,6 @@ type App struct {
 
 	// Winptr is the pointer to the underlying system window
 	Winptr uintptr
-
-	// Insets are the screen insets
-	Insets styles.SideFloats
 }
 
 // Main is called from main thread when it is time to start running the
