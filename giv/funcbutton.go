@@ -200,15 +200,17 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	fb.SetArgs()
 	fb.SetReturns()
 	// get name without package
-	snm := gfun.Name
+	snm := fb.Func.Name
 	li := strings.LastIndex(snm, ".")
 	if li >= 0 {
 		snm = snm[li+1:] // must also get rid of "."
 	}
 	// func name is not guaranteed to make it unique so we ensure it is (-1 because [ki.New] adds 1 first)
 	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
-	fb.SetText(sentence.Case(snm))
-	fb.SetTooltip(gfun.Doc)
+	txt := sentence.Case(snm)
+	fb.SetText(txt)
+	fb.Func.Doc = sentence.Doc(fb.Func.Doc, snm, txt)
+	fb.SetTooltip(fb.Func.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists
 	ic := icons.Icon(strcase.ToSnake(snm))
