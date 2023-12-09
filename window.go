@@ -34,7 +34,6 @@ import (
 // images per descriptor set can be uploaded and be ready to use in one render pass.
 // gi.Window uses multiple sets to get around this limitation.
 type Window interface {
-	events.Dequer
 
 	// Name returns the name of the window -- name is used strictly for
 	// internal tracking and finding of windows -- see Title for the displayed

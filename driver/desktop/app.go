@@ -137,7 +137,6 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	w.This = w
 	w.Draw = &vdraw.Drawer{}
-	w.EvMgr.Deque = &w.Deque
 
 	a.RunOnMain(func() {
 		surfPtr := grr.Log1(glw.CreateWindowSurface(a.GPU.Instance, nil))

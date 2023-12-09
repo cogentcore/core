@@ -22,7 +22,8 @@ var TraceWindowPaint = false
 // for its parent window.  Caches state as needed
 // to generate derived events such as MouseDrag.
 type Mgr struct {
-	Deque Dequer // must be set to parent window where events are sent
+	// Deque is the event queue
+	Deque Deque
 
 	// flag for ignoring mouse events when disabling mouse movement
 	ResettingPos bool

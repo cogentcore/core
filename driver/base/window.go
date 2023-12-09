@@ -21,7 +21,6 @@ import (
 // Window contains the data and logic common to all implementations of [goosi.Window].
 // A Window is associated with a corresponding [goosi.App] type.
 type Window[A goosi.App] struct { //gti:add
-	events.Deque `view:"-"`
 
 	// This is the Window as a [goosi.Window] interface, which preserves the actual identity
 	// of the window when calling interface methods in the base Window.

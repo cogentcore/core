@@ -41,7 +41,6 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
-	a.Win.EvMgr.Deque = &a.Win.Deque
 	a.SetScreenInfo(opts.Size)
 
 	a.Win.EvMgr.WindowResize()

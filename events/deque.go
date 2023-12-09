@@ -25,29 +25,6 @@ var TraceEventCompression = false
 // event compression to manage the common situation where
 // event processing is slower than event generation,
 // such as with Mouse movement and Paint events.
-type Dequer interface {
-	// Send adds an event to the end of the deque,
-	// replacing the last of the same type unless marked
-	// as Unique.
-	// They are returned by NextEvent in FIFO order.
-	Send(e Event)
-
-	// SendFirst adds an event to the start of the deque.
-	// They are returned by NextEvent in LIFO order,
-	// and have priority over events sent via Send.
-	SendFirst(e Event)
-
-	// NextEvent returns the next event in the deque.
-	// It blocks until such an event has been sent.
-	NextEvent() Event
-
-	// PollEvent returns the next event in the deque if available,
-	// and returns true.
-	// If none are available, it returns false immediately.
-	PollEvent() (Event, bool)
-}
-
-// Deque is an infinitely buffered double-ended queue of events.
 // The zero value is usable, but a Deque value must not be copied.
 type Deque struct {
 	Back  []Event // FIFO.
