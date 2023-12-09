@@ -36,6 +36,7 @@ import "C"
 import (
 	"image"
 	"log"
+	"log/slog"
 	"runtime"
 	"strings"
 	"unsafe"
@@ -58,15 +59,17 @@ func init() {
 	initThreadID = uint64(C.threadID())
 }
 
-func main(f func(goosi.App)) {
+// MainLoop is the main app loop.
+//
+// We process UIKit events in runApp on the initial OS thread and run the
+// standard goosi main loop in another goroutine.
+func (a *App) MainLoop() {
 	if tid := uint64(C.threadID()); tid != initThreadID {
-		log.Fatalf("main called on thread %d, but init ran on %d", tid, initThreadID)
+		log.Fatalf("App.MainLoop called on thread %d, but init ran on %d", tid, initThreadID)
 	}
 
-	go func() {
-		f(TheApp)
-		// TODO(crawshaw): trigger runApp to return
-	}()
+	go a.App.MainLoop()
+
 	C.runApp()
 	log.Fatalln("unexpected return from runApp")
 }
@@ -123,7 +126,7 @@ func setScreen(scale int) {
 	}
 
 	if v == 0 {
-		log.Printf("unknown machine: %s", name)
+		slog.Warn("unknown machine: %s", name)
 		v = 163 // emergency fallback
 	}
 
@@ -186,55 +189,6 @@ func lifecycleVisible() {
 func lifecycleFocused() {
 	if TheApp.Win != nil {
 		TheApp.Win.EvMgr.Window(events.WinFocus)
-	}
-}
-
-//export drawloop
-func drawloop() {
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-
-	for {
-		select {
-		/*
-			case <-TheApp.window.publish:
-				TheApp.window.publishDone <- struct{}{}
-				return
-			case <-time.After(100 * time.Millisecond): // in case the method blocked!
-				return
-		*/
-		}
-	}
-}
-
-//export startloop
-func startloop() {
-	go TheApp.loop()
-}
-
-// loop is the primary drawing loop.
-//
-// After UIKit has captured the initial OS thread for processing UIKit
-// events in runApp, it starts loop on another goroutine. It is locked
-// to an OS thread for its OpenGL context.
-func (app *App) loop() {
-	runtime.LockOSThread()
-
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	for {
-		select {
-		case <-app.mainDone:
-			app.fullDestroyVk()
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		case <-TheApp.window.publish:
-			TheApp.window.publishDone <- struct{}{}
-		}
 	}
 }
 
