@@ -19,7 +19,7 @@ import (
 var TheApp = &App{base.NewAppSingle[*Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the offscreen platform
-type App struct {
+type App struct { //gti:add
 	base.AppSingle[*Drawer, *Window]
 }
 

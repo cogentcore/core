@@ -52,7 +52,7 @@ func (a *App) OnMouseDown(this js.Value, args []js.Value) any {
 		ebut = events.Right
 	}
 	where := a.EventPos(e)
-	a.Win.EvMgr.MouseButton(events.MouseDown, ebut, where, a.keyMods)
+	a.Win.EvMgr.MouseButton(events.MouseDown, ebut, where, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -82,7 +82,7 @@ func (a *App) OnMouseUp(this js.Value, args []js.Value) any {
 		ebut = events.Right
 	}
 	where := a.EventPos(e)
-	a.Win.EvMgr.MouseButton(events.MouseUp, ebut, where, a.keyMods)
+	a.Win.EvMgr.MouseButton(events.MouseUp, ebut, where, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -132,16 +132,16 @@ func (a *App) OnContextMenu(this js.Value, args []js.Value) any {
 func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 	switch k {
 	case "Shift":
-		a.keyMods.SetFlag(down, key.Shift)
+		a.KeyMods.SetFlag(down, key.Shift)
 		return 0, key.CodeLeftShift
 	case "Control":
-		a.keyMods.SetFlag(down, key.Control)
+		a.KeyMods.SetFlag(down, key.Control)
 		return 0, key.CodeLeftControl
 	case "Alt":
-		a.keyMods.SetFlag(down, key.Alt)
+		a.KeyMods.SetFlag(down, key.Alt)
 		return 0, key.CodeLeftAlt
 	case "Meta":
-		a.keyMods.SetFlag(down, key.Meta)
+		a.KeyMods.SetFlag(down, key.Meta)
 		return 0, key.CodeLeftMeta
 	case "Backspace":
 		return 0, key.CodeBackspace
@@ -173,7 +173,7 @@ func (a *App) OnKeyDown(this js.Value, args []js.Value) any {
 		return nil
 	}
 	r, c := a.RuneAndCodeFromKey(k, true)
-	a.Win.EvMgr.Key(events.KeyDown, r, c, a.keyMods)
+	a.Win.EvMgr.Key(events.KeyDown, r, c, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -185,7 +185,7 @@ func (a *App) OnKeyUp(this js.Value, args []js.Value) any {
 		return nil
 	}
 	r, c := a.RuneAndCodeFromKey(k, false)
-	a.Win.EvMgr.Key(events.KeyUp, r, c, a.keyMods)
+	a.Win.EvMgr.Key(events.KeyUp, r, c, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -197,7 +197,7 @@ func (a *App) OnBeforeInput(this js.Value, args []js.Value) any {
 		return nil
 	}
 	for _, r := range data {
-		a.Win.EvMgr.KeyChord(r, 0, a.keyMods)
+		a.Win.EvMgr.KeyChord(r, 0, a.KeyMods)
 	}
 	e.Call("preventDefault")
 	return nil

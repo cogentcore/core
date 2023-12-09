@@ -11,7 +11,7 @@ import (
 )
 
 // Window is the implementation of [goosi.Window] for the Android platform.
-type Window struct {
+type Window struct { //gti:add
 	base.WindowSingle[*App]
 }
 

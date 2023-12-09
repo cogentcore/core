@@ -24,14 +24,14 @@ import (
 var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the web platform
-type App struct {
+type App struct { //gti:add
 	base.AppSingle[*Drawer, *Window]
 
-	// Platform is the underlying system platform (Android, iOS, etc)
-	platform goosi.Platforms
+	// SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)
+	SystemPlatform goosi.Platforms
 
 	// KeyMods are the current key mods
-	keyMods key.Modifiers
+	KeyMods key.Modifiers
 }
 
 // Main is called from main thread when it is time to start running the
@@ -68,12 +68,12 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	lua := strings.ToLower(ua)
 	if strings.Contains(lua, "android") {
-		a.platform = goosi.Android
+		a.SystemPlatform = goosi.Android
 	} else if strings.Contains(lua, "ipad") || strings.Contains(lua, "iphone") || strings.Contains(lua, "ipod") {
-		a.platform = goosi.IOS
+		a.SystemPlatform = goosi.IOS
 	} else {
 		// TODO(kai/web): more specific desktop platform
-		a.platform = goosi.Windows
+		a.SystemPlatform = goosi.Windows
 	}
 
 	a.Resize()

@@ -10,6 +10,8 @@
 // Package driver provides the default driver for accessing a screen.
 package driver
 
+//go:generate goki generate ./...
+
 import "goki.dev/goosi"
 
 // TODO: figure out what to say about the responsibility for users of this
