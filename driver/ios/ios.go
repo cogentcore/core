@@ -34,12 +34,10 @@ void hideKeyboard();
 */
 import "C"
 import (
-	"fmt"
 	"image"
 	"log"
 	"runtime"
 	"strings"
-	"time"
 	"unsafe"
 
 	"goki.dev/goosi"
@@ -73,18 +71,25 @@ func main(f func(goosi.App)) {
 	log.Fatalln("unexpected return from runApp")
 }
 
-var dpi float32     // raw display dots per inch
-var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
-
+// DisplayMetrics contains information about the current display information
 var DisplayMetrics struct {
-	WidthPx  int
+	// WidthPx is the width of the screen in pixels
+	WidthPx int
+
+	// HeightPx is the height of the screen in pixels
 	HeightPx int
+
+	// DPI is the current raw display dots per inch
+	DPI float32
+
+	// ScreenScale is the current [UIScreen mainScreen].scale, which is either 1, 2, or 3.
+	ScreenScale int
 }
 
 //export setWindowPtr
 func setWindowPtr(window *C.void) {
-	TheApp.mu.Lock()
-	defer TheApp.mu.Unlock()
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
 	TheApp.setSysWindow(uintptr(unsafe.Pointer(window)))
 }
 
@@ -92,6 +97,7 @@ func setWindowPtr(window *C.void) {
 func setDisplayMetrics(width, height int, scale int) {
 	DisplayMetrics.WidthPx = width
 	DisplayMetrics.HeightPx = height
+	DisplayMetrics.ScreenScale = scale
 }
 
 //export setScreen
@@ -121,72 +127,65 @@ func setScreen(scale int) {
 		v = 163 // emergency fallback
 	}
 
-	dpi = v * float32(scale)
-	screenScale = scale
+	DisplayMetrics.DPI = v * float32(scale)
+	DisplayMetrics.ScreenScale = scale
 }
 
 //export updateConfig
 func updateConfig(width, height, orientation int32) {
-	TheApp.mu.Lock()
-	defer TheApp.mu.Unlock()
-	TheApp.screen.Orientation = goosi.OrientationUnknown
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
+	TheApp.Scrn.Orientation = goosi.OrientationUnknown
 	switch orientation {
 	case C.UIDeviceOrientationPortrait, C.UIDeviceOrientationPortraitUpsideDown:
-		TheApp.screen.Orientation = goosi.Portrait
+		TheApp.Scrn.Orientation = goosi.Portrait
 	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
-		TheApp.screen.Orientation = goosi.Landscape
+		TheApp.Scrn.Orientation = goosi.Landscape
 		width, height = height, width
 	}
-	fmt.Println("getting device padding")
 	insets := C.getDevicePadding()
-	fscale := float32(screenScale)
-	TheApp.insets.Set(
+	fscale := float32(DisplayMetrics.ScreenScale)
+	TheApp.Win.Insts.Set(
 		float32(insets.top)*fscale,
 		float32(insets.right)*fscale,
 		float32(insets.bottom)*fscale,
 		float32(insets.left)*fscale,
 	)
 
-	TheApp.screen.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
-	TheApp.screen.PixSize = image.Pt(int(width), int(height))
-	TheApp.screen.Geometry.Max = TheApp.screen.PixSize
+	TheApp.Scrn.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
+	TheApp.Scrn.PixSize = image.Pt(int(width), int(height))
+	TheApp.Scrn.Geometry.Max = TheApp.Scrn.PixSize
 
-	TheApp.screen.PhysicalDPI = dpi
-	TheApp.screen.LogicalDPI = dpi
+	TheApp.Scrn.PhysicalDPI = DisplayMetrics.DPI
+	TheApp.Scrn.LogicalDPI = DisplayMetrics.DPI
 
-	physX := 25.4 * float32(width) / dpi
-	physY := 25.4 * float32(height) / dpi
-	TheApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+	physX := 25.4 * float32(width) / DisplayMetrics.DPI
+	physY := 25.4 * float32(height) / DisplayMetrics.DPI
+	TheApp.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	fmt.Println("getting is dark")
-	TheApp.isDark = bool(C.isDark())
-	fmt.Println("got is dark")
+	TheApp.Dark = bool(C.isDark())
 }
 
 //export lifecycleDead
 func lifecycleDead() {
-	fmt.Println("lifecycle dead")
 	TheApp.fullDestroyVk()
 }
 
 //export lifecycleAlive
 func lifecycleAlive() {
-	fmt.Println("lifecycle alive")
 }
 
 //export lifecycleVisible
 func lifecycleVisible() {
-	fmt.Println("lifecycle visible")
-	if TheApp.window != nil {
-		TheApp.window.EvMgr.Window(events.WinShow)
+	if TheApp.Win != nil {
+		TheApp.Win.EvMgr.Window(events.WinShow)
 	}
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
-	fmt.Println("lifecycle focused")
-	if TheApp.window != nil {
-		TheApp.window.EvMgr.Window(events.WinFocus)
+	if TheApp.Win != nil {
+		TheApp.Win.EvMgr.Window(events.WinFocus)
 	}
 }
 
@@ -197,11 +196,13 @@ func drawloop() {
 
 	for {
 		select {
-		case <-TheApp.window.publish:
-			TheApp.window.publishDone <- struct{}{}
-			return
-		case <-time.After(100 * time.Millisecond): // in case the method blocked!
-			return
+		/*
+			case <-TheApp.window.publish:
+				TheApp.window.publishDone <- struct{}{}
+				return
+			case <-time.After(100 * time.Millisecond): // in case the method blocked!
+				return
+		*/
 		}
 	}
 }
