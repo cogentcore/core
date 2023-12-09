@@ -9,7 +9,7 @@ require (
 	github.com/h2non/filetype v1.1.3
 	goki.dev/enums v0.9.44
 	goki.dev/icons v0.0.12
-	goki.dev/vci/v2 v2.0.0-dev0.0.21
+	goki.dev/vci/v2 v2.0.0-dev0.0.22
 )
 
 require (
