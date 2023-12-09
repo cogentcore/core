@@ -45,7 +45,6 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename);
 */
 import "C"
 import (
-	"fmt"
 	"image"
 	"log"
 	"log/slog"
@@ -86,7 +85,6 @@ func setCurrentContext(vm *C.JavaVM, ctx C.jobject) {
 
 //export callMain
 func callMain(mainPC uintptr) {
-	fmt.Println("calling main")
 	for _, name := range []string{"FILESDIR", "TMPDIR", "PATH", "LD_LIBRARY_PATH"} {
 		n := C.CString(name)
 		os.Setenv(name, C.GoString(C.getenv(n)))
@@ -207,6 +205,8 @@ type windowConfig struct {
 }
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
+	defer func() { base.HandleRecover(recover()) }()
+
 	aconfig := C.AConfiguration_new()
 	C.AConfiguration_fromAssetManager(aconfig, activity.assetManager)
 	orient := C.AConfiguration_getOrientation(aconfig)
@@ -335,6 +335,8 @@ func insetsChanged(top, bottom, left, right int) {
 
 // MainUI runs the main UI loop of the app.
 func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
+	defer func() { base.HandleRecover(recover()) }()
+
 	go func() {
 		defer func() { base.HandleRecover(recover()) }()
 		MainCallback(TheApp)
