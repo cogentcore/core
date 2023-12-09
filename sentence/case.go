@@ -30,7 +30,7 @@ func AddProperNouns(nouns ...string) {
 	}
 }
 
-// Case returns the sentence case version of the given CamelCase string.
+// Case returns the sentence case version of the given string.
 // It handles proper nouns through [ProperNouns], abbreviations,
 // and "I".
 //
