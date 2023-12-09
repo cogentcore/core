@@ -4,7 +4,8 @@ go 1.21.0
 
 require (
 	github.com/BurntSushi/toml v1.3.2
-	goki.dev/enums v0.9.42
+	goki.dev/enums v0.9.43
+	goki.dev/glop v0.1.7
 	golang.org/x/image v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
