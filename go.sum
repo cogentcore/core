@@ -1,6 +1,6 @@
 github.com/Masterminds/vcs v1.13.3 h1:IIA2aBdXvfbIM+yl/eTnL4hb1XwdpvuQLglAix1gweE=
 github.com/Masterminds/vcs v1.13.3/go.mod h1:TiE7xuEjl1N4j016moRd6vezp6e6Lz23gypeXfzXeW8=
-goki.dev/enums v0.9.42 h1:DQ37CSLmDtLWjivN9R1o6+OYEp47JBdMKNVpzoO8+/I=
-goki.dev/enums v0.9.42/go.mod h1:c2Ctzc7LXKh3X9A1fUsOrsS4JXNjfEyEEG0Sph3I6i4=
-goki.dev/glop v0.1.6 h1:QolRZeGS8AiRemZ0DiUBFMzZry8RiazDlCITJSRZYy4=
-goki.dev/glop v0.1.6/go.mod h1:IXICQzPtXZokKzpVsAZRK2IUeQEJer84SDjsejw4PSo=
+goki.dev/enums v0.9.43 h1:vAltk0s6E1ZyD9pa1dA5OQhLpgwLr0nVW/ypkzObmo4=
+goki.dev/enums v0.9.43/go.mod h1:+CUrv7Hf7O62LE4qxhdip2GyXILO/kqQHa89POhl7Sg=
+goki.dev/glop v0.1.7 h1:62BRMBGcLIa08iew5maDVi+0VsAmIGjBgIrAB1oFYpY=
+goki.dev/glop v0.1.7/go.mod h1:IXICQzPtXZokKzpVsAZRK2IUeQEJer84SDjsejw4PSo=
