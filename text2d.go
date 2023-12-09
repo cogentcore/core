@@ -9,7 +9,6 @@ import (
 	"image"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -91,7 +90,13 @@ func (txt *Text2D) Config() {
 }
 
 func (txt *Text2D) RenderText() {
-	gi.SetUnitContext(&txt.Styles, nil, mat32.Vec2{}, mat32.Vec2{})
+	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
+	st := &txt.Styles
+	if st.Font.Face == nil {
+		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
+	}
+	st.ToDots()
+
 	txt.TxtRender.SetHTML(txt.Text, txt.Styles.FontRender(), &txt.Styles.Text, &txt.Styles.UnContext, nil)
 	sz := txt.TxtRender.Size
 	txt.TxtRender.LayoutStdLR(&txt.Styles.Text, txt.Styles.FontRender(), &txt.Styles.UnContext, sz)
@@ -184,10 +189,7 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	if txt.Styles.BackgroundColor.Solid.A < 255 {
-		return true
-	}
-	return false
+	return txt.Styles.BackgroundColor.Solid.A < 255
 }
 
 func (txt *Text2D) RenderClass() RenderClasses {
