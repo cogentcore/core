@@ -45,6 +45,7 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename);
 */
 import "C"
 import (
+	"fmt"
 	"image"
 	"log"
 	"log/slog"
@@ -130,6 +131,7 @@ func onStop(activity *C.ANativeActivity) {
 
 //export onCreate
 func onCreate(activity *C.ANativeActivity) {
+	fmt.Println("oc")
 	// Set the initial configuration.
 	//
 	// Note we use unbuffered channels to talk to the activity loop, and
@@ -288,6 +290,7 @@ var (
 )
 
 func (a *App) MainLoop() {
+	fmt.Println("ml")
 	a.MainQueue = make(chan base.FuncRun)
 	a.MainDone = make(chan struct{})
 	// TODO: merge the runInputQueue and mainUI functions?
@@ -335,6 +338,7 @@ func insetsChanged(top, bottom, left, right int) {
 
 // MainUI runs the main UI loop of the app.
 func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
+	fmt.Println("mui")
 	defer func() { base.HandleRecover(recover()) }()
 
 	go func() {
@@ -357,9 +361,12 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 				f.Done <- struct{}{}
 			}
 		case cfg := <-windowConfigChange:
+			fmt.Println("wcc", cfg)
 			dpi = cfg.dpi
 			orientation = cfg.orientation
+			fmt.Println("dwcc")
 		case w := <-windowRedrawNeeded:
+			fmt.Println("wrn")
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 
