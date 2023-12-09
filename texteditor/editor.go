@@ -127,7 +127,10 @@ type Editor struct { //goki:embedder
 	// line height, cached during styling
 	LineHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// fontdescent, cached during styling
+	// font ascent, cached during styling
+	FontAscent float32 `set:"-" edit:"-" json:"-" xml:"-"`
+
+	// font descent, cached during styling
 	FontDescent float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// height in lines and width in chars of the visible area

@@ -21,12 +21,6 @@ type WidgetFlags ki.Flags //enums:bitflag
 const (
 	// NeedsRender needs to be rendered on next render iteration
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
-
-	// InstaDrag indicates this node should start dragging immediately when
-	// clicked -- otherwise there is a time-and-distance threshold to the
-	// start of dragging -- use this for controls that are small and are
-	// primarily about dragging (e.g., the Splitter handle)
-	InstaDrag
 )
 
 func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {

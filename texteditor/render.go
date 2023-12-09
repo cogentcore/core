@@ -461,7 +461,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	ed.LineNoRender.SetString(lnstr, fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{}
 	lst := ed.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
-	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
+	pos.Y = lst + ed.FontAscent - ed.FontDescent
 	pos.X = float32(bb.Min.X) // + spc.Pos().X
 
 	ed.LineNoRender.Render(pc, pos)

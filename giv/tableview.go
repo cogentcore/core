@@ -345,7 +345,7 @@ func (tv *TableView) ConfigHeader() {
 	nfld := tv.NVisFields
 	if tv.Is(SliceViewShowIndex) {
 		lbl := sgh.Child(0).(*gi.Label)
-		lbl.Text = "Index"
+		lbl.SetText("Idx").SetType(gi.LabelBodyMedium)
 	}
 	for fli := 0; fli < nfld; fli++ {
 		fli := fli
@@ -362,10 +362,10 @@ func (tv *TableView) ConfigHeader() {
 			}
 		}
 		hdr.Tooltip = field.Name + " (click to sort by)"
-		dsc := field.Tag.Get("desc")
-		if dsc != "" {
-			hdr.Tooltip += ": " + dsc
-		}
+		// doc := field.Doc() // todo
+		// if doc != "" {
+		// 	hdr.Tooltip += ": " + doc
+		// }
 		hdr.OnClick(func(e events.Event) {
 			tv.SortSliceAction(fli)
 		})

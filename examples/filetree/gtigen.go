@@ -46,10 +46,10 @@ var FileBrowseType = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"TopAppBar", &gti.Method{Name: "TopAppBar", Doc: "", Directives: gti.Directives{
+		{"ConfigToolbar", &gti.Method{Name: "ConfigToolbar", Doc: "", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"tb", &gti.Field{Name: "tb", Type: "*goki.dev/gi/v2/gi.TopAppBar", LocalType: "*gi.TopAppBar", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"tb", &gti.Field{Name: "tb", Type: "*goki.dev/gi/v2/gi.Toolbar", LocalType: "*gi.Toolbar", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 	Instance: &FileBrowse{},

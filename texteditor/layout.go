@@ -17,6 +17,7 @@ func (ed *Editor) StyleSizes() {
 	ed.FontHeight = sty.Font.Face.Metrics.Height
 	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
 	ed.FontDescent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
+	ed.FontAscent = mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
 	ed.LineNoDigs = max(1+int(mat32.Log10(float32(ed.NLines))), 3)
 	lno := true
 	if ed.Buf != nil {

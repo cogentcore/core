@@ -338,6 +338,8 @@ func (vv *ValueBase) Doc() string {
 		return vv.SavedDoc
 	}
 
+	// todo: make a helper function in gti
+
 	// if we are not part of a struct, we just get the documentation for our type
 	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
 		typ := gti.TypeByName(gti.TypeName(vv.Value.Type()))
