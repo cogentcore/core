@@ -289,7 +289,7 @@ func (is *Inspector) TopAppBar(tb *gi.TopAppBar) {
 	sa.Args[0].SetValue(is.Filename)
 	sa.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
-	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Dns)
+	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
 }
 
 func (is *Inspector) MenuBar(mb *gi.MenuBar) {
