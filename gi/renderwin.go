@@ -595,7 +595,7 @@ func (w *RenderWin) EventLoop() {
 			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
-		e := w.GoosiWin.NextEvent()
+		e := w.GoosiWin.EventMgr().Deque.NextEvent()
 		if w.HasFlag(WinStopEventLoop) {
 			w.SetFlag(false, WinStopEventLoop)
 			break
