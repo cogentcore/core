@@ -1,6 +1,6 @@
 Name = "xyz"
 Desc = ""
-Version = "v0.5.11"
+Version = "v0.5.12"
 Type = "Library"
 
 [Build]
