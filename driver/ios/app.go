@@ -14,13 +14,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"sync"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
@@ -33,194 +32,81 @@ var TheApp = &App{
 	quitCloseCnt: make(chan struct{}),
 }
 
+// App is the [goosi.App] implementation for the iOS platform
 type App struct {
-	mu            sync.Mutex
-	mainQueue     chan funcRun
-	mainDone      chan struct{}
-	winptr        uintptr
-	System        *vgpu.System
-	Surface       *vgpu.Surface
-	Draw          vdraw.Drawer
-	window        *windowImpl
-	gpu           *vgpu.GPU
-	screen        *goosi.Screen
-	noScreens     bool // if all screens have been disconnected, don't do anything..
-	name          string
-	about         string
-	openFiles     []string
-	quitting      bool          // set to true when quitting and closing windows
-	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
-	quitReqFunc   func()
-	quitCleanFunc func()
-	isDark        bool
-	insets        styles.SideFloats
-}
+	base.AppSingle[*vdraw.Drawer, *Window]
 
-var mainCallback func(goosi.App)
+	// GPU is the system GPU used for the app
+	GPU *vgpu.GPU
 
-// handleRecover takes the given value of recover, and, if it is not nil,
-// prints a panic message and a stack trace, using a string-based log
-// method that guarantees that the stack trace will be printed before
-// the program exits. This is needed because, without this, the program
-// will exit before it can print the stack trace, which makes debugging
-// nearly impossible. The correct usage of handleRecover is:
-//
-//	func myFunc() {
-//		defer func() { handleRecover(recover()) }()
-//		...
-//	}
-func handleRecover(r any) {
-	if r == nil {
-		return
-	}
-	log.Println("panic:", r)
-	log.Println("")
-	log.Println("----- START OF STACK TRACE: -----")
-	log.Println(string(debug.Stack()))
-	log.Fatalln("----- END OF STACK TRACE -----")
+	// Winptr is the pointer to the underlying system window
+	Winptr uintptr
 }
 
 // Main is called from main thread when it is time to start running the
-// main loop.  When function f returns, the app ends automatically.
+// main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	log.Println("GoLog: IN MAIN")
-	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
-	mainCallback = f
 	TheApp.initVk()
-	goosi.TheApp = TheApp
-	main(f)
+	base.Main(f, TheApp, &TheApp.App)
 }
 
-type funcRun struct {
-	f    func()
-	done chan bool
-}
-
-// RunOnMain runs given function on main thread
-func (app *App) RunOnMain(f func()) {
-	if app.mainQueue == nil {
-		f()
-	} else {
-		done := make(chan bool)
-		app.mainQueue <- funcRun{f: f, done: done}
-		<-done
-	}
-}
-
-// GoRunOnMain runs given function on main thread and returns immediately
-func (app *App) GoRunOnMain(f func()) {
-	go func() {
-		app.mainQueue <- funcRun{f: f, done: nil}
-	}()
-}
-
-// SendEmptyEvent sends an empty, blank event to global event processing
-// system, which has the effect of pushing the system along during cases when
-// the event loop needs to be "pinged" to get things moving along..
-func (app *App) SendEmptyEvent() {
-	app.window.SendEmptyEvent()
-}
-
-// PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
-// and returning when there are no more events.
-func (app *App) PollEventsOnMain() {
-	// TODO: implement?
-}
-
-// PollEvents tells the main event loop to check for any gui events right now.
-// Call this periodically from longer-running functions to ensure
-// GUI responsiveness.
-func (app *App) PollEvents() {
-	// TODO: implement?
-}
-
-// stopMain stops the main loop and thus terminates the app
-func (app *App) stopMain() {
-	app.mainDone <- struct{}{}
-}
-
-// initVk initializes vulkan things
+// initVk initializes Vulkan things for the app
 func (app *App) initVk() {
-	fmt.Println("initializing vk")
-	vgpu.Debug = true
 	err := vk.SetDefaultGetInstanceProcAddr()
 	if err != nil {
-		log.Fatalln("goosi/driver/android.app.initVk: failed to set Vulkan DefaultGetInstanceProcAddr")
+		// TODO(kai): maybe implement better error handling here
+		log.Fatalln("goosi/driver/ios.App.InitVk: failed to set Vulkan DefaultGetInstanceProcAddr")
 	}
 	err = vk.Init()
 	if err != nil {
-		log.Fatalln("goosi/driver/android.app.initVk: failed to initialize vulkan")
+		log.Fatalln("goosi/driver/ios.App.InitVk: failed to initialize vulkan")
 	}
 
 	winext := vk.GetRequiredInstanceExtensions()
-	app.gpu = vgpu.NewGPU()
-	app.gpu.AddInstanceExt(winext...)
-	app.gpu.Config(app.name)
-	fmt.Println("init vk done")
+	app.GPU = vgpu.NewGPU()
+	app.GPU.AddInstanceExt(winext...)
+	app.GPU.Config(app.Name())
 }
 
 // destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
 func (app *App) destroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	fmt.Println("destroying vk")
-	vk.DeviceWaitIdle(app.Surface.Device.Device)
-	app.Draw.Destroy()
-	app.Surface.Destroy()
-	app.Surface = nil
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	vk.DeviceWaitIdle(app.Drawer.Surf.Device.Device)
+	app.Drawer.Destroy()
+	app.Drawer.Surf.Destroy()
+	app.Drawer = nil
 }
 
 // fullDestroyVk destroys all vulkan things for when the app is fully quit
 func (app *App) fullDestroyVk() {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	app.window = nil
-	app.gpu.Destroy()
-	// vgpu.Terminate()
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	app.GPU.Destroy()
 }
-
-////////////////////////////////////////////////////////
-//  Window
 
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	defer func() { handleRecover(recover()) }()
-	fmt.Println("in new window")
+	defer func() { base.HandleRecover(recover()) }()
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
-		// fmt.Println("locking in new window")
-		app.mu.Lock()
-		// fmt.Println("past lock in new window")
-		winptr = app.winptr
-		app.mu.Unlock()
+		app.Mu.Lock()
+		winptr = app.Winptr
+		app.Mu.Unlock()
 
 		if winptr != 0 {
 			break
 		}
 	}
-	fmt.Println("making new window")
 	if goosi.InitScreenLogicalDPIFunc != nil {
-		log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		goosi.InitScreenLogicalDPIFunc()
 	}
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	app.window = &windowImpl{
-		app:         app,
-		isVisible:   true,
-		publish:     make(chan struct{}),
-		winClose:    make(chan struct{}),
-		publishDone: make(chan struct{}),
-		WindowBase: goosi.WindowBase{
-			Titl: opts.GetTitle(),
-			Flag: opts.Flags,
-			FPS:  60,
-		},
-	}
+	app.Mu.Lock()
+	defer app.Mu.Unlock()
+	app.Win = &windowImpl{}
 	app.window.EvMgr.Deque = &app.window.Deque
 	app.window.EvMgr.Window(events.WinShow)
 	app.window.EvMgr.Window(events.WinFocus)
