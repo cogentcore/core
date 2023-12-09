@@ -225,7 +225,6 @@ func (fl *FontLib) AddFontPaths(paths ...string) bool {
 func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontPaths) == 0 {
 		slog.Error("girl/paint.FontLib: no font paths; need to add some")
-		return false
 	}
 	loadFontMu.Lock()
 	defer loadFontMu.Unlock()
