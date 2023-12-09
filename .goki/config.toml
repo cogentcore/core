@@ -1,6 +1,6 @@
 Name = "cursors"
 Desc = ""
-Version = "v0.0.20"
+Version = "v0.0.21"
 Type = "Library"
 
 [Build]
