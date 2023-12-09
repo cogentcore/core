@@ -292,7 +292,7 @@ var (
 func (a *App) MainLoop() {
 	a.MainQueue = make(chan base.FuncRun)
 	a.MainDone = make(chan struct{})
-	// TODO: merge the runInputQueue and mainUI functions?
+	// TODO: maybe merge the RunInputQueue and MainUI functions?
 	go func() {
 		defer func() { base.HandleRecover(recover()) }()
 		if err := mobileinit.RunOnJVM(RunInputQueue); err != nil {
