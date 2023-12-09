@@ -170,7 +170,6 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 		return nil
 	}
 	win.GoosiWin.SetName(title)
-	win.GoosiWin.SetParent(win)
 	win.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
@@ -569,20 +568,6 @@ func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Main Method: EventLoop
 
-// PollEvents first tells the main event loop to check for any gui events now
-// and then it runs the event processing loop for the RenderWin as long
-// as there are events to be processed, and then returns.
-func (w *RenderWin) PollEvents() {
-	goosi.TheApp.PollEvents()
-	for {
-		e, has := w.GoosiWin.PollEvent()
-		if !has {
-			break
-		}
-		w.HandleEvent(e)
-	}
-}
-
 // EventLoop runs the event processing loop for the RenderWin -- grabs goosi
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
@@ -912,7 +897,7 @@ func (rs *RenderScenes) Add(sc *Scene) int {
 	}
 	idx := len(rs.Scenes)
 	if idx >= rs.MaxIdx {
-		fmt.Printf("gi.RenderScenes: ERROR too many Scenes to render all of them!  Max: %d\n", rs.MaxIdx)
+		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIdx)
 		return -1
 	}
 	rs.Scenes = append(rs.Scenes, sc)
@@ -1009,7 +994,7 @@ func (w *RenderWin) RenderWindow() {
 
 // DrawScenes does the drawing of RenderScenes to the window.
 func (w *RenderWin) DrawScenes() {
-	if !w.IsVisible() || w.GoosiWin.IsMinimized() {
+	if !w.IsVisible() || w.GoosiWin.Is(goosi.Minimized) {
 		if WinRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.Name)
 		}

@@ -269,7 +269,7 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 
 	winName := mgr.WinName(win.Title)
 	sc := win.GoosiWin.Screen()
-	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.GoosiWin.IsFullscreen()}
+	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio, Fullscreen: win.GoosiWin.Is(goosi.Fullscreen)}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
