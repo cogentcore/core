@@ -155,8 +155,9 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 	if !ed.Buf.Opts.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
 		return
 	}
-	ed.Buf.MarkupMu.RLock() // needed for HiTags access
-	defer ed.Buf.MarkupMu.RUnlock()
+	buf := ed.Buf
+	buf.MarkupMu.RLock() // needed for HiTags access
+	defer buf.MarkupMu.RUnlock()
 
 	bb := ed.Geom.ContentBBox
 	sty := &ed.Styles
@@ -174,10 +175,10 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 		if int(mat32.Floor(lst)) > bb.Max.Y {
 			continue
 		}
-		if ln >= len(ed.Buf.HiTags) { // may be out of sync
+		if ln >= len(buf.HiTags) { // may be out of sync
 			continue
 		}
-		ht := ed.Buf.HiTags[ln]
+		ht := buf.HiTags[ln]
 		lsted := 0
 		for ti := range ht {
 			lx := &ht[ti]

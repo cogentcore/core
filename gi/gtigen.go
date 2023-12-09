@@ -3878,7 +3878,11 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Update", &gti.Method{Name: "Update", Doc: "Update calls Config and then ApplyStyle\non every Widget in the tree from me.\nThis should be used after any structural changes\nto currently-displayed widgets.\nIt wraps everything in UpdateStart / UpdateEndLayout\nso layout will automatically be called for next render.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &WidgetBase{},
 })
 

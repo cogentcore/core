@@ -461,7 +461,7 @@ func (fn *Node) SortBy(modTime bool) {
 // OpenAll opens all directories under this one
 func (fn *Node) OpenAll() { //gti:add
 	fn.FRoot.InOpenAll = true // causes chaining of opening
-	fn.Open()
+	fn.TreeView.OpenAll()
 	fn.FRoot.InOpenAll = false
 }
 

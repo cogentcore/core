@@ -110,11 +110,12 @@ func (ed *Editor) LayoutAllLines() {
 	// fmt.Printf("layout all: %v\n", ed.Nm)
 
 	ed.NLines = ed.Buf.NumLines()
-	ed.Buf.MarkupMu.RLock()
+	buf := ed.Buf
+	buf.MarkupMu.RLock()
 
 	nln := ed.NLines
-	if nln >= len(ed.Buf.Markup) {
-		nln = len(ed.Buf.Markup)
+	if nln >= len(buf.Markup) {
+		nln = len(buf.Markup)
 	}
 	if cap(ed.Renders) >= nln {
 		ed.Renders = ed.Renders[:nln]
@@ -138,7 +139,7 @@ func (ed *Editor) LayoutAllLines() {
 
 	ed.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
-		ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
+		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
 		ed.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
 		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
 			ed.HasLinks = true
@@ -148,7 +149,7 @@ func (ed *Editor) LayoutAllLines() {
 		off += lsz
 		mxwd = mat32.Max(mxwd, ed.Renders[ln].Size.X)
 	}
-	ed.Buf.MarkupMu.RUnlock()
+	buf.MarkupMu.RUnlock()
 
 	ed.LinesSize = mat32.Vec2{mxwd, off}
 

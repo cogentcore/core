@@ -323,9 +323,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) TopAppBar(tb *gi.TopAppBar) { //gti:add
-	gi.DefaultTopAppBar(tb)
-
+func (fb *FileBrowse) ConfigToolbar(tb *gi.Toolbar) { //gti:add
 	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	op := giv.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
 	op.Args[0].SetValue(fb.ActiveFilename)
@@ -403,10 +401,11 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 // path, returning the window and the path
 func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
 	_, projnm, _, _ := ProjPathParse(path)
-	// nm := "browser-" + projnm
+	nm := "browser-" + projnm
 
-	b := gi.NewBody().SetTitle("Browser: " + projnm)
+	b := gi.NewAppBody(nm).SetTitle("Browser: " + projnm)
 	fb := NewFileBrowse(b, "browser")
+	b.AddAppBar(fb.ConfigToolbar)
 	fb.OpenPath(gi.FileName(path))
 	return fb, b.NewWindow().Run()
 }

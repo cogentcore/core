@@ -190,8 +190,8 @@ func (lv *VCSLogView) ConfigToolbar() {
 		gi.NewLabel(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
 		gi.NewSeparator(tb, "flsep")
 		cba := gi.NewSwitch(tb, "a-rev").SetText("A Rev: ").
-			SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff").
-			SetState(true, states.Checked)
+			SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
+		cba.SetState(true, states.Checked)
 		tfa := gi.NewTextField(tb, "a-tf").SetText(lv.RevA)
 		tfa.OnChange(func(e events.Event) {
 			lv.RevA = tfa.Text()
