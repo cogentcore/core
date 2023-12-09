@@ -103,7 +103,7 @@ func (is *Inspector) Open(filename gi.FileName) { //gti:add
 
 // ToggleSelectionMode toggles the editor between selection mode or not.
 // In selection mode, bounding boxes are rendered around each Widget,
-// and clicks
+// and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //gti:add
 	sc := gi.AsScene(is.KiRoot)
 	if sc == nil {
