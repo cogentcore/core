@@ -52,6 +52,8 @@ func keyboardDelete() {
 
 //export scrolled
 func scrolled(posX, posY, distanceX, distanceY C.float) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	where := image.Pt(int(posX), int(posY))
 	delta := image.Pt(int(distanceX), int(distanceY))
 	TheApp.Win.EvMgr.Scroll(where, delta)
@@ -91,6 +93,8 @@ func ProcessEvents(env *C.JNIEnv, q *C.AInputQueue) {
 
 // ProcessEvent processes an input queue event
 func ProcessEvent(env *C.JNIEnv, e *C.AInputEvent) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	switch C.AInputEvent_getType(e) {
 	case C.AINPUT_EVENT_TYPE_KEY:
 		ProcessKey(env, e)
@@ -122,6 +126,8 @@ func ProcessEvent(env *C.JNIEnv, e *C.AInputEvent) {
 
 // ProcessKey processes an input key event
 func ProcessKey(env *C.JNIEnv, e *C.AInputEvent) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	deviceID := C.AInputEvent_getDeviceId(e)
 	if deviceID == 0 {
 		// Software keyboard input, leaving for scribe/IME.
@@ -247,6 +253,8 @@ var AndroidKeyCodes = map[int32]key.Codes{
 
 // ConvAndroidKeyCode converts the given android key code to a goosi key code
 func ConvAndroidKeyCode(aKeyCode int32) key.Codes {
+	defer func() { base.HandleRecover(recover()) }()
+
 	if code, ok := AndroidKeyCodes[aKeyCode]; ok {
 		return code
 	}

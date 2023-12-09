@@ -198,7 +198,7 @@ func onNativeWindowRedrawNeeded(activity *C.ANativeActivity, window *C.ANativeWi
 	// until a complete draw and buffer swap is completed.
 	// This is required by the redraw documentation to
 	// avoid bad draws.
-	// windowRedrawNeeded <- window
+	windowRedrawNeeded <- window
 	// <-windowRedrawDone
 }
 
@@ -320,6 +320,8 @@ func onConfigurationChanged(activity *C.ANativeActivity) {
 
 //export onLowMemory
 func onLowMemory(activity *C.ANativeActivity) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	runtime.GC()
 	debug.FreeOSMemory()
 }

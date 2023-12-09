@@ -42,6 +42,8 @@ var MainCallback func(a goosi.App)
 // Main is called from main thread when it is time to start running the
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
+	defer func() { base.HandleRecover(recover()) }()
+
 	MainCallback = f
 	TheApp.InitVk()
 	time.Sleep(time.Second)
@@ -73,6 +75,8 @@ func (a *App) InitVk() {
 
 // DestroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
 func (a *App) DestroyVk() {
+	defer func() { base.HandleRecover(recover()) }()
+
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
 	vk.DeviceWaitIdle(a.Drawer.Surf.Device.Device)
@@ -83,6 +87,8 @@ func (a *App) DestroyVk() {
 
 // FullDestroyVk destroys all vulkan things for when the app is fully quit
 func (a *App) FullDestroyVk() {
+	defer func() { base.HandleRecover(recover()) }()
+
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
 	a.GPU.Destroy()
@@ -161,14 +167,20 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 }
 
 func (a *App) PrefsDir() string {
+	defer func() { base.HandleRecover(recover()) }()
+
 	return "/data/data"
 }
 
 func (a *App) Platform() goosi.Platforms {
+	defer func() { base.HandleRecover(recover()) }()
+
 	return goosi.Android
 }
 
 func (a *App) ClipBoard(win goosi.Window) clip.Board {
+	defer func() { base.HandleRecover(recover()) }()
+
 	// TODO(kai): implement clipboard on Android
 	return &clip.BoardBase{}
 }

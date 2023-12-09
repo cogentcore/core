@@ -7,10 +7,10 @@ package main
 import (
 	"fmt"
 	"image"
-	"time"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
+	"goki.dev/grr"
 )
 
 func main() {
@@ -20,16 +20,13 @@ func main() {
 
 func mainrun(a goosi.App) {
 	fmt.Println("mainrun")
-	time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
 		Title:     "Goosi Test Window",
 	}
-	w, err := goosi.TheApp.NewWindow(opts)
-	if err != nil {
-		panic(err)
-	}
+	w := grr.Log1(goosi.TheApp.NewWindow(opts))
 
 	fmt.Println("got new window", w)
 

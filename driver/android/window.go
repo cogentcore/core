@@ -16,6 +16,8 @@ type Window struct {
 }
 
 func (w *Window) Handle() any {
+	defer func() { base.HandleRecover(recover()) }()
+
 	return w.App.Winptr
 }
 
