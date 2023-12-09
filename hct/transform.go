@@ -90,9 +90,9 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	pct = mat32.Clamp(pct, 0, 100.0)
 	py := pct / 100
 	px := 1.0 - py
-	xh.Hue = px*xh.Hue + py*xy.Hue
-	xh.Chroma = px*xh.Chroma + py*xy.Chroma
-	xh.Tone = px*xh.Tone + py*xy.Tone
+	xh.SetHue(px*xh.Hue + py*xy.Hue)
+	xh.SetChroma(px*xh.Chroma + py*xy.Chroma)
+	xh.SetTone(px*xh.Tone + py*xy.Tone)
 	xh.A = px*xh.A + py*xy.A
 	return xh.AsRGBA()
 }

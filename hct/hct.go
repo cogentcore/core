@@ -27,9 +27,12 @@ import (
 	"goki.dev/cam/cie"
 )
 
-// HCT, hue, chroma, and tone. A color system that provides a perceptually
-// accurate color measurement system that can also accurately render what
-// colors will appear as in different lighting environments.
+// HCT represents a color as hue, chroma, and tone. HCT is a color system
+// that provides a perceptually accurate color measurement system that can
+// also accurately render what colors will appear as in different lighting
+// environments. Directly setting the values of the HCT and RGB fields will
+// have no effect on the underlying color; instead, use the Set methods
+// ([HCT.SetHue], etc). The A field (transparency) can be set directly.
 type HCT struct {
 
 	// hue (h) is the spectral identity of the color (red, green, blue etc) in degrees (0-360)
@@ -41,7 +44,7 @@ type HCT struct {
 	// tone is the L* component from the LAB (L*a*b*) color system, which is linear in human perception of lightness. It ranges from 0 to 100.
 	Tone float32 `min:"0" max:"100"`
 
-	// sRGB standard gamma-corrected 0-1 normalized RGB representation of the color.  Critically, components are not premultiplied by alpha
+	// sRGB standard gamma-corrected 0-1 normalized RGB representation of the color.  Critically, components are not premultiplied by alpha.
 	R, G, B, A float32
 }
 
