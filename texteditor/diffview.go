@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -99,6 +100,23 @@ func DiffViewDialog(ctx gi.Widget, title string, astr, bstr []string, afile, bfi
 	// todo: any buttons?
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
+}
+
+// TextDialog opens a dialog for displaying text string
+func TextDialog(ctx gi.Widget, title, text string) *Editor {
+	d := gi.NewBody().AddTitle(title)
+	buf := NewBuf()
+	ed := NewEditor(d).SetBuf(buf)
+	buf.SetText([]byte(text))
+	d.AddBottomBar(func(pw gi.Widget) {
+		gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+			OnClick(func(e events.Event) {
+				d.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+			})
+		d.AddOk(pw)
+	})
+	d.NewFullDialog(ctx).Run()
+	return ed
 }
 
 ///////////////////////////////////////////////////////////////////

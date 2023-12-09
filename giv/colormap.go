@@ -41,17 +41,19 @@ func (cv *ColorMapView) OnInit() {
 }
 
 // SetColorMap sets the color map and triggers a display update
-func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
+func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) *ColorMapView {
 	cv.Map = cmap
 	cv.SetNeedsRender(true)
+	return cv
 }
 
 // SetColorMapAction sets the color map and triggers a display update
 // and signals the ColorMapSig signal
-func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) {
+func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) *ColorMapView {
 	cv.Map = cmap
 	cv.SendChange()
 	cv.SetNeedsRender(true)
+	return cv
 }
 
 // ChooseColorMap pulls up a chooser to select a color map
