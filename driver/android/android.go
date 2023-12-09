@@ -332,7 +332,7 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	TheApp.Win.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
+	TheApp.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
 // MainUI runs the main UI loop of the app.

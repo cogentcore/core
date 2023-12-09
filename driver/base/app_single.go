@@ -9,7 +9,10 @@
 
 package base
 
-import "goki.dev/goosi"
+import (
+	"goki.dev/girl/styles"
+	"goki.dev/goosi"
+)
 
 // AppSingle contains the data and logic common to all implementations of [goosi.App]
 // on single-window platforms (mobile, web, and offscreen), as opposed to multi-window
@@ -27,6 +30,9 @@ type AppSingle[D goosi.Drawer, W goosi.Window] struct {
 
 	// Scrn is the single [goosi.Screen] associated with the app.
 	Scrn *goosi.Screen
+
+	// Insts are the size of any insets on the sides of the screen.
+	Insts styles.SideFloats
 }
 
 // AppSingler describes the common functionality implemented by [AppSingle]
@@ -36,6 +42,9 @@ type AppSingler interface {
 
 	// SingleDrawer returns the single [goosi.Drawer] associated with this app.
 	SingleDrawer() goosi.Drawer
+
+	// Insets returns the size of any insets on the sides of the screen.
+	Insets() styles.SideFloats
 }
 
 // NewAppSingle makes a new [AppSingle].
@@ -47,6 +56,10 @@ func NewAppSingle[D goosi.Drawer, W goosi.Window]() AppSingle[D, W] {
 
 func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
 	return a.Drawer
+}
+
+func (a *AppSingle[D, W]) Insets() styles.SideFloats {
+	return a.Insts
 }
 
 func (a *AppSingle[D, W]) NScreens() int {

@@ -12,6 +12,7 @@ package base
 import (
 	"image"
 
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 )
 
@@ -105,4 +106,8 @@ func (w *WindowSingle[A]) Raise() {
 
 func (w *WindowSingle[A]) Minimize() {
 	// no-op
+}
+
+func (w *WindowSingle[A]) Insets() styles.SideFloats {
+	return w.App.Insets()
 }
