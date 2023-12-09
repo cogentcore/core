@@ -34,19 +34,19 @@ void hideKeyboard();
 */
 import "C"
 import (
-	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"runtime"
 	"strings"
-	"time"
 	"unsafe"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 )
 
-var initThreadID uint64
+// InitThreadID is the ID of the thread on which the app was initialized
+var InitThreadID uint64
 
 func init() {
 	// Lock the goroutine responsible for initialization to an OS thread.
@@ -57,43 +57,51 @@ func init() {
 	// A discussion on this topic:
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
-	initThreadID = uint64(C.threadID())
+	InitThreadID = uint64(C.threadID())
 }
 
-func main(f func(goosi.App)) {
-	//if tid := uint64(C.threadID()); tid != initThreadID {
-	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
-	//}
+// MainLoop is the main app loop.
+//
+// We process UIKit events in runApp on the initial OS thread and run the
+// standard goosi main loop in another goroutine.
+func (a *App) MainLoop() {
+	if tid := uint64(C.threadID()); tid != InitThreadID {
+		log.Fatalf("App.MainLoop called on thread %d, but init ran on %d", tid, InitThreadID)
+	}
 
-	log.Println("in mobile main")
-	go func() {
-		f(theApp)
-		// TODO(crawshaw): trigger runApp to return
-	}()
-	log.Println("running c app")
+	go a.App.MainLoop()
+
 	C.runApp()
-	panic("unexpected return from app.runApp")
+	log.Fatalln("unexpected return from runApp")
 }
 
-var dpi float32     // raw display dots per inch
-var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
-
+// DisplayMetrics contains information about the current display information
 var DisplayMetrics struct {
-	WidthPx  int
+	// WidthPx is the width of the screen in pixels
+	WidthPx int
+
+	// HeightPx is the height of the screen in pixels
 	HeightPx int
+
+	// DPI is the current raw display dots per inch
+	DPI float32
+
+	// ScreenScale is the current [UIScreen mainScreen].scale, which is either 1, 2, or 3.
+	ScreenScale int
 }
 
 //export setWindowPtr
 func setWindowPtr(window *C.void) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
-	theApp.setSysWindow(uintptr(unsafe.Pointer(window)))
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
+	TheApp.SetSystemWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export setDisplayMetrics
 func setDisplayMetrics(width, height int, scale int) {
 	DisplayMetrics.WidthPx = width
 	DisplayMetrics.HeightPx = height
+	DisplayMetrics.ScreenScale = scale
 }
 
 //export setScreen
@@ -119,132 +127,78 @@ func setScreen(scale int) {
 	}
 
 	if v == 0 {
-		log.Printf("unknown machine: %s", name)
+		slog.Warn("unknown machine: %s", name)
 		v = 163 // emergency fallback
 	}
 
-	dpi = v * float32(scale)
-	screenScale = scale
+	DisplayMetrics.DPI = v * float32(scale)
+	DisplayMetrics.ScreenScale = scale
 }
 
 //export updateConfig
 func updateConfig(width, height, orientation int32) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
-	theApp.screen.Orientation = goosi.OrientationUnknown
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
+	TheApp.Scrn.Orientation = goosi.OrientationUnknown
 	switch orientation {
 	case C.UIDeviceOrientationPortrait, C.UIDeviceOrientationPortraitUpsideDown:
-		theApp.screen.Orientation = goosi.Portrait
+		TheApp.Scrn.Orientation = goosi.Portrait
 	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
-		theApp.screen.Orientation = goosi.Landscape
+		TheApp.Scrn.Orientation = goosi.Landscape
 		width, height = height, width
 	}
-	fmt.Println("getting device padding")
 	insets := C.getDevicePadding()
-	fscale := float32(screenScale)
-	theApp.insets.Set(
+	fscale := float32(DisplayMetrics.ScreenScale)
+	TheApp.Insts.Set(
 		float32(insets.top)*fscale,
 		float32(insets.right)*fscale,
 		float32(insets.bottom)*fscale,
 		float32(insets.left)*fscale,
 	)
 
-	theApp.screen.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
-	theApp.screen.PixSize = image.Pt(int(width), int(height))
-	theApp.screen.Geometry.Max = theApp.screen.PixSize
+	TheApp.Scrn.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
+	TheApp.Scrn.PixSize = image.Pt(int(width), int(height))
+	TheApp.Scrn.Geometry.Max = TheApp.Scrn.PixSize
 
-	theApp.screen.PhysicalDPI = dpi
-	theApp.screen.LogicalDPI = dpi
+	TheApp.Scrn.PhysicalDPI = DisplayMetrics.DPI
+	TheApp.Scrn.LogicalDPI = DisplayMetrics.DPI
 
-	physX := 25.4 * float32(width) / dpi
-	physY := 25.4 * float32(height) / dpi
-	theApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+	physX := 25.4 * float32(width) / DisplayMetrics.DPI
+	physY := 25.4 * float32(height) / DisplayMetrics.DPI
+	TheApp.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	fmt.Println("getting is dark")
-	theApp.isDark = bool(C.isDark())
-	fmt.Println("got is dark")
+	TheApp.Dark = bool(C.isDark())
 }
 
 //export lifecycleDead
 func lifecycleDead() {
-	fmt.Println("lifecycle dead")
-	theApp.fullDestroyVk()
+	TheApp.FullDestroyVk()
 }
 
 //export lifecycleAlive
 func lifecycleAlive() {
-	fmt.Println("lifecycle alive")
 }
 
 //export lifecycleVisible
 func lifecycleVisible() {
-	fmt.Println("lifecycle visible")
-	if theApp.window != nil {
-		theApp.window.EvMgr.Window(events.WinShow)
+	if TheApp.Win != nil {
+		TheApp.Win.EvMgr.Window(events.WinShow)
 	}
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
-	fmt.Println("lifecycle focused")
-	if theApp.window != nil {
-		theApp.window.EvMgr.Window(events.WinFocus)
-	}
-}
-
-//export drawloop
-func drawloop() {
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-
-	for {
-		select {
-		case <-theApp.window.publish:
-			theApp.window.publishDone <- struct{}{}
-			return
-		case <-time.After(100 * time.Millisecond): // in case the method blocked!
-			return
-		}
-	}
-}
-
-//export startloop
-func startloop() {
-	go theApp.loop()
-}
-
-// loop is the primary drawing loop.
-//
-// After UIKit has captured the initial OS thread for processing UIKit
-// events in runApp, it starts loop on another goroutine. It is locked
-// to an OS thread for its OpenGL context.
-func (app *appImpl) loop() {
-	runtime.LockOSThread()
-
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	for {
-		select {
-		case <-app.mainDone:
-			app.fullDestroyVk()
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		case <-theApp.window.publish:
-			theApp.window.publishDone <- struct{}{}
-		}
+	if TheApp.Win != nil {
+		TheApp.Win.EvMgr.Window(events.WinFocus)
 	}
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	C.showKeyboard(C.int(int32(typ)))
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func (app *appImpl) HideVirtualKeyboard() {
+func (a *App) HideVirtualKeyboard() {
 	C.hideKeyboard()
 }

@@ -10,6 +10,8 @@
 //go:build android
 
 /*
+Package android implements goosi interfaces on Android mobile devices.
+
 Android Apps are built with -buildmode=c-shared. They are loaded by a
 running Java process.
 
@@ -43,9 +45,9 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename);
 */
 import "C"
 import (
-	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -53,6 +55,7 @@ import (
 	"unsafe"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/driver/mobile/callfn"
 	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
@@ -82,7 +85,6 @@ func setCurrentContext(vm *C.JavaVM, ctx C.jobject) {
 
 //export callMain
 func callMain(mainPC uintptr) {
-	fmt.Println("calling main")
 	for _, name := range []string{"FILESDIR", "TMPDIR", "PATH", "LD_LIBRARY_PATH"} {
 		n := C.CString(name)
 		os.Setenv(name, C.GoString(C.getenv(n)))
@@ -107,7 +109,6 @@ func callMain(mainPC uintptr) {
 
 //export onStart
 func onStart(activity *C.ANativeActivity) {
-	fmt.Println("started")
 }
 
 //export onResume
@@ -129,7 +130,6 @@ func onStop(activity *C.ANativeActivity) {
 
 //export onCreate
 func onCreate(activity *C.ANativeActivity) {
-	fmt.Println("created")
 	// Set the initial configuration.
 	//
 	// Note we use unbuffered channels to talk to the activity loop, and
@@ -145,20 +145,20 @@ func onDestroy(activity *C.ANativeActivity) {
 
 //export onWindowFocusChanged
 func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
 	if hasFocus > 0 {
-		theApp.window.EvMgr.Window(events.WinFocus)
+		TheApp.Win.EvMgr.Window(events.WinFocus)
 	} else {
-		theApp.window.EvMgr.Window(events.WinFocusLost)
+		TheApp.Win.EvMgr.Window(events.WinFocusLost)
 	}
 }
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
-	theApp.setSysWindow(uintptr(unsafe.Pointer(window)))
+	TheApp.Mu.Lock()
+	defer TheApp.Mu.Unlock()
+	TheApp.SetSystemWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export onNativeWindowRedrawNeeded
@@ -169,7 +169,9 @@ func onNativeWindowRedrawNeeded(activity *C.ANativeActivity, window *C.ANativeWi
 	// This is required by the redraw documentation to
 	// avoid bad draws.
 	windowRedrawNeeded <- window
-	<-windowRedrawDone
+	// TODO(kai): do we need windowRedrawDone here?
+	// It is unclear how to implement it with the way goosi is structured.
+	// <-windowRedrawDone
 }
 
 //export onNativeWindowDestroyed
@@ -195,15 +197,18 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	theApp.isDark = bool(dark)
+	TheApp.Dark = bool(dark)
 }
 
+// windowConfig contains the window configuration information fetched from the native activity
 type windowConfig struct {
-	orientation goosi.ScreenOrientation
-	dpi         float32 // raw display dots per inch
+	Orientation goosi.ScreenOrientation
+	DPI         float32 // raw display dots per inch
 }
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
+	defer func() { base.HandleRecover(recover()) }()
+
 	aconfig := C.AConfiguration_new()
 	C.AConfiguration_fromAssetManager(aconfig, activity.assetManager)
 	orient := C.AConfiguration_getOrientation(aconfig)
@@ -233,11 +238,11 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 		640: // ACONFIGURATION_DENSITY_XXXHIGH
 		dpi = int(density)
 	case C.ACONFIGURATION_DENSITY_NONE:
-		log.Print("android device reports no screen density")
+		slog.Warn("android device reports no screen density")
 		dpi = 72
 	default:
 		// TODO: fix this always happening with value 240
-		log.Printf("android device reports unknown density: %d", density)
+		slog.Warn("android device reports unknown screen density", "density", density)
 		// All we can do is guess.
 		if density > 0 {
 			dpi = int(density)
@@ -255,8 +260,8 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 	}
 
 	return windowConfig{
-		orientation: o,
-		dpi:         float32(dpi),
+		Orientation: o,
+		DPI:         float32(dpi),
 	}
 }
 
@@ -284,28 +289,24 @@ var (
 	activityDestroyed  = make(chan struct{})
 )
 
-func (app *appImpl) mainLoop() {
-	fmt.Println("in main")
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	// TODO: merge the runInputQueue and mainUI functions?
+func (a *App) MainLoop() {
+	a.MainQueue = make(chan base.FuncRun)
+	a.MainDone = make(chan struct{})
+	// TODO: maybe merge the RunInputQueue and MainUI functions?
 	go func() {
-		defer func() { handleRecover(recover()) }()
-		fmt.Println("running input queue")
-		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
+		defer func() { base.HandleRecover(recover()) }()
+		if err := mobileinit.RunOnJVM(RunInputQueue); err != nil {
 			log.Fatalf("app: %v", err)
 		}
 	}()
-	// Preserve this OS thread for:
-	//	1. the attached JNI thread
-	fmt.Println("running main UI")
-	if err := mobileinit.RunOnJVM(theApp.mainUI); err != nil {
+	// Preserve this OS thread for the attached JNI thread
+	if err := mobileinit.RunOnJVM(TheApp.MainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (a *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showKeyboard(env, C.int(int32(typ)))
@@ -317,7 +318,7 @@ func (a *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func (a *appImpl) HideVirtualKeyboard() {
+func (a *App) HideVirtualKeyboard() {
 	if err := mobileinit.RunOnJVM(hideSoftInput); err != nil {
 		log.Fatalf("app: %v", err)
 	}
@@ -331,82 +332,62 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
-	// fmt.Println("ic:", theApp.insets)
+	TheApp.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
-func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
-	go func() {
-		defer func() { handleRecover(recover()) }()
-		mainCallback(theApp)
-		app.stopMain()
-	}()
+// MainUI runs the main UI loop of the app.
+func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
+	defer func() { base.HandleRecover(recover()) }()
 
 	var dpi float32
 	var orientation goosi.ScreenOrientation
 
 	for {
 		select {
-		case <-app.mainDone:
-			app.fullDestroyVk()
+		case <-a.MainDone:
+			a.FullDestroyVk()
 			return nil
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
+		case f := <-a.MainQueue:
+			f.F()
+			if f.Done != nil {
+				f.Done <- struct{}{}
 			}
 		case cfg := <-windowConfigChange:
-			dpi = cfg.dpi
-			orientation = cfg.orientation
+			dpi = cfg.DPI
+			orientation = cfg.Orientation
 		case w := <-windowRedrawNeeded:
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 
-			if orientation == goosi.OrientationUnknown {
-				app.screen.Orientation = screenOrientation(widthPx, heightPx)
-			} else {
-				app.screen.Orientation = orientation
-			}
+			a.Scrn.Orientation = orientation
 
-			app.screen.DevicePixelRatio = 1
-			app.screen.PixSize = image.Pt(widthPx, heightPx)
-			app.screen.Geometry.Max = app.screen.PixSize
+			a.Scrn.DevicePixelRatio = 1
+			a.Scrn.PixSize = image.Pt(widthPx, heightPx)
+			a.Scrn.Geometry.Max = a.Scrn.PixSize
 
-			app.screen.PhysicalDPI = dpi
-			app.screen.LogicalDPI = dpi
+			a.Scrn.PhysicalDPI = dpi
+			a.Scrn.LogicalDPI = dpi
 
 			physX := 25.4 * float32(widthPx) / dpi
 			physY := 25.4 * float32(heightPx) / dpi
-			app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+			a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-			app.window.PhysDPI = app.screen.PhysicalDPI
-			app.window.LogDPI = app.screen.LogicalDPI
-			app.window.PxSize = app.screen.PixSize
-			app.window.WnSize = app.screen.Geometry.Max
-			app.window.DevPixRatio = app.screen.DevicePixelRatio
-
-			app.window.EvMgr.WindowResize()
-			app.window.EvMgr.WindowPaint()
+			a.Win.EvMgr.WindowResize()
+			a.Win.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
-			app.window.SetSize(image.Point{})
-			app.window.EvMgr.Window(events.WinMinimize)
-			app.destroyVk()
+			a.Win.SetSize(image.Point{})
+			a.Win.EvMgr.Window(events.WinMinimize)
+			a.DestroyVk()
 		case <-activityDestroyed:
-			app.window.EvMgr.Window(events.WinClose)
+			a.Win.EvMgr.Window(events.WinClose)
 		}
 	}
 }
 
-func screenOrientation(width, height int) goosi.ScreenOrientation {
-	if width > height {
-		return goosi.Landscape
-	}
-	return goosi.Portrait
-}
-
-func runInputQueue(vm, jniEnv, ctx uintptr) error {
+// RunInputQueue runs the input queue for the app.
+func RunInputQueue(vm, jniEnv, ctx uintptr) error {
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 
 	// Android loopers select on OS file descriptors, not Go channels, so we
@@ -427,7 +408,7 @@ func runInputQueue(vm, jniEnv, ctx uintptr) error {
 			default:
 			case p := <-pending:
 				if q != nil {
-					processEvents(env, q)
+					ProcessEvents(env, q)
 					C.AInputQueue_detachLooper(q)
 				}
 				q = p
@@ -438,7 +419,7 @@ func runInputQueue(vm, jniEnv, ctx uintptr) error {
 			}
 		}
 		if q != nil {
-			processEvents(env, q)
+			ProcessEvents(env, q)
 		}
 	}
 }

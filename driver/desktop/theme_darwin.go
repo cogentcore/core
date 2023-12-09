@@ -28,7 +28,7 @@ const plistPath = `/Library/Preferences/.GlobalPreferences.plist`
 var plist = filepath.Join(os.Getenv("HOME"), plistPath)
 
 // IsDark returns whether the system color theme is dark (as opposed to light).
-func (app *appImpl) IsDark() bool {
+func (a *App) IsDark() bool {
 	cmd := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle")
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
@@ -43,7 +43,7 @@ func (app *appImpl) IsDark() bool {
 
 // isDarkMonitor monitors the state of the dark mode in a separate goroutine
 // and calls the given function with the new value whenever it changes.
-func (app *appImpl) isDarkMonitor() {
+func (a *App) isDarkMonitor() {
 	// TODO: do we need to close gracefully here if the app is done?
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -53,7 +53,7 @@ func (app *appImpl) isDarkMonitor() {
 
 	go func() {
 		defer watcher.Close()
-		wasDark := app.IsDark() // we need to store this so that we only update when it changes
+		wasDark := a.IsDark() // we need to store this so that we only update when it changes
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -61,9 +61,9 @@ func (app *appImpl) isDarkMonitor() {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					isDark := app.IsDark()
+					isDark := a.IsDark()
 					if isDark != wasDark {
-						app.isDark = isDark
+						a.Dark = isDark
 						wasDark = isDark
 					}
 				}
@@ -83,7 +83,3 @@ func (app *appImpl) isDarkMonitor() {
 }
 
 // TODO(kai): implement SetTitleBarIsDark on mac
-
-func (w *windowImpl) SetTitleBarIsDark(isDark bool) {
-	// no-op
-}

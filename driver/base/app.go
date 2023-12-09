@@ -17,6 +17,8 @@ import (
 	"sync"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/clip"
+	"goki.dev/goosi/cursor"
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].
@@ -25,7 +27,7 @@ type App struct {
 	// of the app when calling interface methods in the base App.
 	This goosi.App `view:"-"`
 
-	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] calls.
+	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] functions.
 	Mu sync.Mutex `view:"-"`
 
 	// MainQueue is the queue of functions to call on the main loop. To add to it, use [App.RunOnMain].
@@ -40,6 +42,9 @@ type App struct {
 	// Abt is the about information for the app.
 	Abt string `label:"About"`
 
+	// OpenFls are files that have been set by the operating system to open at startup.
+	OpenFls []string `label:"Open files"`
+
 	// Quitting is whether the app is quitting and thus closing all of the windows
 	Quitting bool
 
@@ -53,11 +58,37 @@ type App struct {
 	Dark bool
 }
 
-// FuncRun is a simple helper type that contains a function to call and a channel
-// to send a signal on when the function is finished running.
-type FuncRun struct {
-	F    func()
-	Done chan struct{}
+// Main is called from main thread when it is time to start running the
+// main loop. When function f returns, the app ends automatically.
+//
+// This version of Main should be called by platform-specific implementations
+// of Main with their platform-specific app instance and its base App field.
+// Other platform-specific initial configuration steps can be called before this.
+func Main(f func(a goosi.App), a goosi.App, ab *App) {
+	defer func() { HandleRecover(recover()) }()
+	ab.This = a
+	goosi.TheApp = a
+	go func() {
+		f(a)
+		ab.StopMain()
+	}()
+	a.MainLoop()
+}
+
+func (a *App) MainLoop() {
+	a.MainQueue = make(chan FuncRun)
+	a.MainDone = make(chan struct{})
+	for {
+		select {
+		case <-a.MainDone:
+			return
+		case f := <-a.MainQueue:
+			f.F()
+			if f.Done != nil {
+				f.Done <- struct{}{}
+			}
+		}
+	}
 }
 
 // RunOnMain runs the given function on the main thread
@@ -82,6 +113,13 @@ func (a *App) GoRunOnMain(f func()) {
 	}()
 }
 
+// SendEmptyEvent sends an empty, blank event to global event processing
+// system, which has the effect of pushing the system along during cases when
+// the event loop needs to be "pinged" to get things moving along..
+func (a *App) SendEmptyEvent() {
+	// no-op by default
+}
+
 // StopMain stops the main loop and thus terminates the app
 func (a *App) StopMain() {
 	a.MainDone <- struct{}{}
@@ -101,6 +139,10 @@ func (a *App) About() string {
 
 func (a *App) SetAbout(about string) {
 	a.Abt = about
+}
+
+func (a *App) OpenFiles() []string {
+	return a.OpenFls
 }
 
 func (a *App) GoGiPrefsDir() string {
@@ -144,4 +186,34 @@ func (a *App) Quit() {
 	}
 	a.This.QuitClean()
 	a.StopMain()
+}
+
+func (a *App) IsDark() bool {
+	return a.Dark
+}
+
+func (a *App) GetScreens() {
+	// no-op by default
+}
+
+func (a *App) OpenURL(url string) {
+	// no-op by default
+}
+
+func (a *App) ClipBoard(win goosi.Window) clip.Board {
+	// no-op by default
+	return &clip.BoardBase{}
+}
+
+func (a *App) Cursor(win goosi.Window) cursor.Cursor {
+	// no-op by default
+	return &cursor.CursorBase{}
+}
+
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+	// no-op by default
+}
+
+func (a *App) HideVirtualKeyboard() {
+	// no-op by default
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 )
 
 // Notes on intermixing glfw and xgb: bottom line, can't do:
@@ -32,16 +33,16 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
-func (app *appImpl) Platform() goosi.Platforms {
+func (a *App) Platform() goosi.Platforms {
 	return goosi.LinuxX11
 }
 
-func (app *appImpl) OpenURL(url string) {
+func (a *App) OpenURL(url string) {
 	cmd := exec.Command("xdg-open", url)
-	cmd.Run()
+	grr.Log(cmd.Run())
 }
 
-func (app *appImpl) PrefsDir() string {
+func (a *App) PrefsDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Print(err)
@@ -50,25 +51,20 @@ func (app *appImpl) PrefsDir() string {
 	return filepath.Join(usr.HomeDir, ".config")
 }
 
-// this is the main call to create the main menu if not exist
-func (w *windowImpl) MainMenu() goosi.MainMenu {
-	return nil
-}
-
-func (w *windowImpl) OSHandle() uintptr {
-	return uintptr(w.glw.GetX11Window())
+func (w *Window) Handle() any {
+	return uintptr(w.Glw.GetX11Window())
 }
 
 /////////////////////////////////////////////////////////////////
 //   Clipboard
 
-type clipImpl struct {
-	lastWrite mimedata.Mimes
-}
+// TheClip is the single [clip.Board] for Linux
+var TheClip = &Clip{}
 
-var theClip = clipImpl{}
+// Clip is the [clip.Board] implementation for Linux
+type Clip struct{}
 
-func (ci *clipImpl) IsEmpty() bool {
+func (cl *Clip) IsEmpty() bool {
 	str := glfw.GetClipboardString()
 	if len(str) == 0 {
 		return true
@@ -76,7 +72,7 @@ func (ci *clipImpl) IsEmpty() bool {
 	return false
 }
 
-func (ci *clipImpl) Read(types []string) mimedata.Mimes {
+func (cl *Clip) Read(types []string) mimedata.Mimes {
 	str := glfw.GetClipboardString()
 	if len(str) == 0 {
 		return nil
@@ -101,7 +97,7 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	return nil
 }
 
-func (ci *clipImpl) Write(data mimedata.Mimes) error {
+func (cl *Clip) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -118,6 +114,6 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	return nil
 }
 
-func (ci *clipImpl) Clear() {
+func (cl *Clip) Clear() {
 	// nop
 }

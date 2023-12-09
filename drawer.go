@@ -33,7 +33,7 @@ const (
 
 // Drawer is an interface representing a type capable of high-performance
 // rendering to a window surface. It is implemented by [*goki.dev/vgpu/v2/vdraw.Drawer]
-// and an internal web driver.
+// and internal web and offscreen drivers.
 type Drawer interface {
 	// SetMaxTextures updates the max number of textures for drawing
 	// Must call this prior to doing any allocation of images.

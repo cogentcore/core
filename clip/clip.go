@@ -41,3 +41,13 @@ type Board interface {
 	// Clear clears the clipboard
 	Clear()
 }
+
+// BoardBase is a basic implementation of [Board] that does nothing.
+type BoardBase struct{}
+
+var _ Board = &BoardBase{}
+
+func (bb *BoardBase) IsEmpty() bool                      { return true }
+func (bb *BoardBase) Read(types []string) mimedata.Mimes { return nil }
+func (bb *BoardBase) Write(data mimedata.Mimes) error    { return nil }
+func (bb *BoardBase) Clear()                             {}

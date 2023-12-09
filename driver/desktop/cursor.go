@@ -13,42 +13,50 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
+// TheCursor is the single [goosi.Cursor] for the desktop platform
+var TheCursor = &Cursor{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, Cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
-type cursorImpl struct {
+// Cursor is the [cursor.Cursor] implementation for the desktop platform
+type Cursor struct {
 	cursor.CursorBase
-	cursors  map[enums.Enum]map[int]*glfw.Cursor // cached cursors
-	mu       sync.Mutex
-	prevSize int // cached previous size
+
+	// Cursors are the cached glfw cursors
+	Cursors map[enums.Enum]map[int]*glfw.Cursor
+
+	// Mu is a mutex protecting access to the cursors
+	Mu sync.Mutex
+
+	// PrevSize is the cached previous size
+	PrevSize int
 }
 
-func (c *cursorImpl) Set(cursor enums.Enum) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if cursor == c.Cur && c.Size == c.prevSize { // we already have, so we don't need to set again
+func (cu *Cursor) Set(cursor enums.Enum) error {
+	cu.Mu.Lock()
+	defer cu.Mu.Unlock()
+	if cursor == cu.Cur && cu.Size == cu.PrevSize { // we already have, so we don't need to set again
 		return nil
 	}
-	sm := c.cursors[cursor]
+	sm := cu.Cursors[cursor]
 	if sm == nil {
 		sm = map[int]*glfw.Cursor{}
-		c.cursors[cursor] = sm
+		cu.Cursors[cursor] = sm
 	}
-	if cur, ok := sm[c.Size]; ok {
-		theApp.ctxtwin.glw.SetCursor(cur)
-		c.prevSize = c.Size
-		c.Cur = cursor
+	if cur, ok := sm[cu.Size]; ok {
+		TheApp.CtxWindow.Glw.SetCursor(cur)
+		cu.PrevSize = cu.Size
+		cu.Cur = cursor
 		return nil
 	}
 
-	ci, err := cursorimg.Get(cursor, c.Size)
+	ci, err := cursorimg.Get(cursor, cu.Size)
 	if err != nil {
 		return err
 	}
 	h := ci.Hotspot
 	gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
-	sm[c.Size] = gc
-	theApp.ctxtwin.glw.SetCursor(gc)
-	c.prevSize = c.Size
-	c.Cur = cursor
+	sm[cu.Size] = gc
+	TheApp.CtxWindow.Glw.SetCursor(gc)
+	cu.PrevSize = cu.Size
+	cu.Cur = cursor
 	return nil
 }

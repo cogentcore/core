@@ -28,7 +28,7 @@ const (
 )
 
 // IsDark returns whether the system color theme is dark (as opposed to light).
-func (app *appImpl) IsDark() bool {
+func (app *App) IsDark() bool {
 	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
 	if err != nil {
 		slog.Error("error opening theme registry key: " + err.Error())
@@ -53,7 +53,7 @@ func (app *appImpl) IsDark() bool {
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil. It also takes a done channel, and it will stop monitoring when
 // that done channel is closed.
-func (app *appImpl) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
+func (app *App) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
 	var regNotifyChangeKeyValue *syscall.Proc
 
 	if advapi32, err := syscall.LoadDLL("Advapi32.dll"); err == nil {
@@ -101,8 +101,8 @@ func (app *appImpl) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (cha
 	return ec, nil
 }
 
-func (w *windowImpl) SetTitleBarIsDark(isDark bool) {
-	hwnd := w.glw.GetWin32Window()
+func (w *Window) SetTitleBarIsDark(isDark bool) {
+	hwnd := w.Glw.GetWin32Window()
 
 	dwm := syscall.NewLazyDLL("dwmapi.dll")
 	setAtt := dwm.NewProc("DwmSetWindowAttribute")

@@ -34,6 +34,7 @@ import (
 // images per descriptor set can be uploaded and be ready to use in one render pass.
 // gi.Window uses multiple sets to get around this limitation.
 type Window interface {
+	events.Dequer
 
 	// Name returns the name of the window -- name is used strictly for
 	// internal tracking and finding of windows -- see Title for the displayed
@@ -115,14 +116,6 @@ type Window interface {
 	// information about its properties.
 	Screen() *Screen
 
-	// Parent returns the parent object of a given window -- for GoGi it is a
-	// gi.Window but could be something else in other frameworks.
-	Parent() any
-
-	// SetParent sets the parent object of a given window -- for GoGi it is a
-	// gi.Window but could be something else in other frameworks.
-	SetParent(par any)
-
 	// MainMenu returns the OS-level main menu for this window -- this is
 	// currently for MacOS only -- returns nil for others.
 	MainMenu() MainMenu
@@ -131,23 +124,8 @@ type Window interface {
 	// to WindowFlags bits.
 	Flags() WindowFlags
 
-	// IsDialog returns true if this is a dialog window.
-	IsDialog() bool
-
-	// IsModal returns true if this is a modal window (blocks input to other windows).
-	IsModal() bool
-
-	// IsTool returns true if this is a tool window.
-	IsTool() bool
-
-	// IsFullscreen returns true if this is a fullscreen window.
-	IsFullscreen() bool
-
-	// IsMinimized returns true if this window is minimized.  See also IsVisible()
-	IsMinimized() bool
-
-	// IsFocus returns true if this window is focused (will receive keyboard input etc).
-	IsFocus() bool
+	// Is returns whether the window has the given flag.
+	Is(flag WindowFlags) bool
 
 	// IsClosed returns true if this window has been closed (but some threads
 	// may have not received the news yet)
@@ -189,21 +167,26 @@ type Window interface {
 	// and returns immediately.
 	GoRunOnWin(f func())
 
-	// SendEmptyEvent sends an empty, blank event to this window, which just has
-	// the effect of pushing the system along during cases when the window
-	// event loop needs to be "pinged" to get things moving along..
-	SendEmptyEvent()
-
 	// Handle returns the driver-specific handle for this window.
-	// Currently, for all platforms, this is *glfw.Window, but that
-	// cannot always be assumed.  Only provided for unforeseen emergency use --
-	// please file an Issue for anything that should be added to Window
-	// interface.
+	// This is only provided for unforeseen emergency backup use;
+	// please file an issue for anything that should be added to the
+	// Window interface. If you need access to some OS API, somebody
+	// else probably does too.
+	//
+	// The return value of Handle is not guaranteed to be consistent
+	// across versions, and depends on platform-specific APIs that may
+	// receive unpredictable breaking changes.
+	//
+	// The return value of Handle will be of the following types for
+	// the following platforms:
+	//	- MacOS: uintptr representing NSWindow*
+	//	- LinuxX11: uintptr representing X11Window
+	//	- Windows: uintptr representing HWND
+	//	- IOS: uintptr representing UIViow
+	// 	- Android: uintptr representing *C.ANativeWindow
+	//	- Web: [js.Value] representing [js.Global] (for which you should just call [js.Global] directly)
+	//	- Offscreen: nil
 	Handle() any
-
-	// OSHandle returns the OS-specific underlying window handle:
-	// MacOS: NSWindow*, Windows:  HWND, LinuxX11: X11Window
-	OSHandle() uintptr
 
 	// Sets the mouse position to given values
 	SetMousePos(x, y float64)
@@ -249,92 +232,6 @@ type Window interface {
 	// EventMgr returns the events.Mgr for this window,
 	// which manages all of the Event sending.
 	EventMgr() *events.Mgr
-
-	events.Dequer
-}
-
-// WindowBase provides a base-level implementation of the generic data aspects
-// of the window, including maintaining the current window size and dpi
-type WindowBase struct {
-	events.Deque
-	Nm          string
-	Titl        string
-	Pos         image.Point
-	WnSize      image.Point // window-manager coords
-	PxSize      image.Point // pixel size
-	DevPixRatio float32
-	PhysDPI     float32
-	LogDPI      float32
-	Par         any
-	Flag        WindowFlags
-	FPS         int
-	EvMgr       events.Mgr
-
-	// set this to a function that will destroy GPU resources
-	// in the main thread prior to destroying the drawer
-	// and the surface -- otherwise it is difficult to
-	// ensure that the proper ordering of destruction applies.
-	DestroyGPUfunc func()
-}
-
-func (w WindowBase) Name() string {
-	return w.Nm
-}
-
-func (w *WindowBase) SetName(name string) {
-	w.Nm = name
-}
-
-func (w WindowBase) Title() string {
-	return w.Titl
-}
-
-func (w WindowBase) Parent() any {
-	return w.Par
-}
-
-func (w *WindowBase) SetParent(parent any) {
-	w.Par = parent
-}
-
-func (w *WindowBase) Flags() WindowFlags {
-	return w.Flag
-}
-
-func (w *WindowBase) IsDialog() bool {
-	return w.Flag.HasFlag(Dialog)
-}
-
-func (w *WindowBase) IsModal() bool {
-	return w.Flag.HasFlag(Modal)
-}
-
-func (w *WindowBase) IsTool() bool {
-	return w.Flag.HasFlag(Tool)
-}
-
-func (w *WindowBase) IsFullscreen() bool {
-	return w.Flag.HasFlag(Fullscreen)
-}
-
-func (w *WindowBase) IsMinimized() bool {
-	return w.Flag.HasFlag(Minimized)
-}
-
-func (w *WindowBase) IsFocus() bool {
-	return w.Flag.HasFlag(Focus)
-}
-
-func (w *WindowBase) SetFPS(fps int) {
-	w.FPS = fps
-}
-
-func (w *WindowBase) EventMgr() *events.Mgr {
-	return &w.EvMgr
-}
-
-func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {
-	w.DestroyGPUfunc = f
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -366,8 +263,8 @@ const (
 	// visible.
 	Minimized
 
-	// Focus indicates that the window has the focus.
-	Focus
+	// Focused indicates that the window has the focus.
+	Focused
 )
 
 // NewWindowOptions are optional arguments to NewWindow.

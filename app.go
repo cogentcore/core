@@ -43,16 +43,11 @@ type App interface {
 
 	// Screen returns screen for given screen number, or nil if not a
 	// valid screen number.
-	Screen(scrN int) *Screen
+	Screen(n int) *Screen
 
 	// ScreenByName returns screen for given screen name, or nil if not a
 	// valid screen name.
 	ScreenByName(name string) *Screen
-
-	// NoScreens returns true if there are no active screens currently
-	// (e.g., for a closed laptop with no external monitor attached)
-	// The previous list of Screens is retained so this is the check.
-	NoScreens() bool
 
 	// NWindows returns the number of windows open for this app.
 	NWindows() int
@@ -76,6 +71,10 @@ type App interface {
 	// NewWindow returns a new Window for this screen. A nil opts is valid and
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)
+
+	// RemoveWindow removes the given Window from the app's list of windows.
+	// It does not actually close it; see [Window.Close] for that.
+	RemoveWindow(win Window)
 
 	// ClipBoard returns the clip.Board handler for the system,
 	// in context of given window, which is optional (can be nil)
@@ -140,6 +139,10 @@ type App interface {
 	// Quit closes all windows and exits the program.
 	Quit()
 
+	// MainLoop runs the main loop of the app. It should not be
+	// called by end-user code; it is for driver use only.
+	MainLoop()
+
 	// RunOnMain runs given function on main thread (where main event loop is running)
 	// Some functions (GUI-specific etc) must run on this initial main thread for the
 	// overall app.
@@ -155,11 +158,6 @@ type App interface {
 	// the event loop needs to be "pinged" to get things moving along.
 	// See also similar method on Window.
 	SendEmptyEvent()
-
-	// PollEvents tells the main event loop to check for any gui events right now.
-	// Call this periodically from longer-running functions to ensure
-	// GUI responsiveness.
-	PollEvents()
 
 	// ShowVirtualKeyboard shows a virtual keyboard of the given type.
 	// ShowVirtualKeyboard only has an effect on mobile platforms (iOS and Android).

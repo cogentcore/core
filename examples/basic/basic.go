@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, web!")
+	fmt.Println("Hello, basic!")
 	driver.Main(mainrun)
 }
 
@@ -30,4 +30,6 @@ func mainrun(a goosi.App) {
 	}
 
 	fmt.Println("got new window", w)
+
+	select {}
 }

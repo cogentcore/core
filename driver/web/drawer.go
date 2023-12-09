@@ -13,10 +13,10 @@ import (
 	"unsafe"
 )
 
-// drawerImpl is a TEMPORARY, low-performance implementation of [goosi.Drawer].
+// Drawer is a TEMPORARY, low-performance implementation of [goosi.Drawer].
 // It will be replaced with a full WebGPU based drawer at some point.
-// TODO: replace drawerImpl with WebGPU
-type drawerImpl struct {
+// TODO: replace Drawer with WebGPU
+type Drawer struct {
 	maxTextures int
 	image       *image.RGBA     // target render image
 	images      [][]*image.RGBA // stack of images indexed by render scene index and then layer number
@@ -24,25 +24,25 @@ type drawerImpl struct {
 
 // SetMaxTextures updates the max number of textures for drawing
 // Must call this prior to doing any allocation of images.
-func (dw *drawerImpl) SetMaxTextures(maxTextures int) {
+func (dw *Drawer) SetMaxTextures(maxTextures int) {
 	dw.maxTextures = maxTextures
 }
 
 // MaxTextures returns the max number of textures for drawing
-func (dw *drawerImpl) MaxTextures() int {
+func (dw *Drawer) MaxTextures() int {
 	return dw.maxTextures
 }
 
 // DestBounds returns the bounds of the render destination
-func (dw *drawerImpl) DestBounds() image.Rectangle {
-	return theApp.screen.Geometry
+func (dw *Drawer) DestBounds() image.Rectangle {
+	return TheApp.Scrn.Geometry
 }
 
 // SetGoImage sets given Go image as a drawing source to given image index,
 // and layer, used in subsequent Draw methods.
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
-func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
+func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 	if dw.image == nil {
 		dw.image = image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 	}
@@ -59,7 +59,7 @@ func (dw *drawerImpl) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 // ConfigImageDefaultFormat configures the draw image at the given index
 // to fit the default image format specified by the given width, height,
 // and number of layers.
-func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
+func (dw *Drawer) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
 	// no-op
 }
 
@@ -69,7 +69,7 @@ func (dw *drawerImpl) ConfigImageDefaultFormat(idx int, width int, height int, l
 
 // SyncImages must be called after images have been updated, to sync
 // memory up to the GPU.
-func (dw *drawerImpl) SyncImages() {
+func (dw *Drawer) SyncImages() {
 	// no-op
 }
 
@@ -81,7 +81,7 @@ func (dw *drawerImpl) SyncImages() {
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
-func (dw *drawerImpl) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
+func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.images[idx][layer]
 	draw.Draw(dw.image, dr, img, sr.Min, op)
 	return nil
@@ -93,7 +93,7 @@ func (dw *drawerImpl) Scale(idx, layer int, dr image.Rectangle, sr image.Rectang
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
-func (dw *drawerImpl) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
+func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.images[idx][layer]
 	// fmt.Println("cp", idx, layer, dp, dp.Add(img.Rect.Size()), sr.Min)
 	draw.Draw(dw.image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
@@ -103,7 +103,7 @@ func (dw *drawerImpl) Copy(idx, layer int, dp image.Point, sr image.Rectangle, o
 // UseTextureSet selects the descriptor set to use --
 // choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *drawerImpl) UseTextureSet(descIdx int) {
+func (dw *Drawer) UseTextureSet(descIdx int) {
 	// no-op
 }
 
@@ -111,14 +111,14 @@ func (dw *drawerImpl) UseTextureSet(descIdx int) {
 // No images can be added or set after this point.
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *drawerImpl) StartDraw(descIdx int) {
+func (dw *Drawer) StartDraw(descIdx int) {
 	sz := dw.image.Bounds().Size()
 	ptr := uintptr(unsafe.Pointer(&dw.image.Pix[0]))
 	js.Global().Call("displayImage", ptr, len(dw.image.Pix), sz.X, sz.Y)
 }
 
 // EndDraw ends image drawing rendering process on render target
-func (dw *drawerImpl) EndDraw() {
+func (dw *Drawer) EndDraw() {
 	// no-op
 }
 
