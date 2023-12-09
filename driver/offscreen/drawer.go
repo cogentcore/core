@@ -113,3 +113,7 @@ func (dw *Drawer) StartDraw(descIdx int) {
 
 // EndDraw ends image drawing rendering process on render target
 func (dw *Drawer) EndDraw() {}
+
+func (dw *Drawer) Surface() any {
+	return nil
+}

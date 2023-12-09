@@ -95,4 +95,8 @@ type Drawer interface {
 
 	// EndDraw ends image drawing rendering process on render target
 	EndDraw()
+
+	// Surface is the vgpu device being drawn to.
+	// Could be nil on unsupported devices (web).
+	Surface() any
 }
