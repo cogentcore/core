@@ -12,6 +12,9 @@ package driver
 
 //go:generate goki generate ./...
 
+// NOTE: go generate must be run with each possible GOOS to generate everything
+// (GOOS=android, GOOS=ios, GOOS=js, and GOOS=[any_desktop_os])
+
 import "goki.dev/goosi"
 
 // TODO: figure out what to say about the responsibility for users of this
