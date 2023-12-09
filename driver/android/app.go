@@ -107,7 +107,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 }
 
 // SetSystemWindow sets the underlying system window pointer, surface, system, and drawer.
-// It should only be called when app.Mu is already locked.
+// It should only be called when [App.Mu] is already locked.
 func (a *App) SetSystemWindow(winptr uintptr) error {
 	defer func() { base.HandleRecover(recover()) }()
 	var vsf vk.Surface

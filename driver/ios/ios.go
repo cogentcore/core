@@ -45,7 +45,8 @@ import (
 	"goki.dev/goosi/events"
 )
 
-var initThreadID uint64
+// InitThreadID is the ID of the thread on which the app was initialized
+var InitThreadID uint64
 
 func init() {
 	// Lock the goroutine responsible for initialization to an OS thread.
@@ -56,7 +57,7 @@ func init() {
 	// A discussion on this topic:
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
-	initThreadID = uint64(C.threadID())
+	InitThreadID = uint64(C.threadID())
 }
 
 // MainLoop is the main app loop.
@@ -64,8 +65,8 @@ func init() {
 // We process UIKit events in runApp on the initial OS thread and run the
 // standard goosi main loop in another goroutine.
 func (a *App) MainLoop() {
-	if tid := uint64(C.threadID()); tid != initThreadID {
-		log.Fatalf("App.MainLoop called on thread %d, but init ran on %d", tid, initThreadID)
+	if tid := uint64(C.threadID()); tid != InitThreadID {
+		log.Fatalf("App.MainLoop called on thread %d, but init ran on %d", tid, InitThreadID)
 	}
 
 	go a.App.MainLoop()
@@ -193,11 +194,11 @@ func lifecycleFocused() {
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (a *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	C.showKeyboard(C.int(int32(typ)))
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func (app *App) HideVirtualKeyboard() {
+func (a *App) HideVirtualKeyboard() {
 	C.hideKeyboard()
 }
