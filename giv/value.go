@@ -338,37 +338,12 @@ func (vv *ValueBase) Doc() string {
 		return vv.SavedDoc
 	}
 
-	// todo: make a helper function in gti
-
-	// if we are not part of a struct, we just get the documentation for our type
-	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
-		rtyp := laser.NonPtrType(vv.Value.Type())
-		typ := gti.TypeByName(gti.TypeName(rtyp))
-		if typ == nil {
-			return ""
-		}
-		vv.SetFlag(true, ValueHasSavedDoc)
-		vv.SavedDoc = sentence.Doc(typ.Doc, rtyp.Name(), vv.Label())
-		return vv.SavedDoc
-	}
-	// otherwise, we get our field documentation in our parent
-	otyp := gti.TypeByValue(vv.Owner)
-	if otyp == nil {
-		// if we aren't in gti, we fall back on struct tag
-		desc, ok := vv.Field.Tag.Lookup("desc")
-		if !ok {
-			return ""
-		}
-		vv.SetFlag(true, ValueHasSavedDoc)
-		vv.SavedDoc = sentence.Doc(desc, vv.Field.Name, vv.Label())
-		return vv.SavedDoc
-	}
-	f := gti.GetField(otyp, vv.Field.Name)
-	if f == nil {
+	doc, ok := gti.GetDoc(vv.Value, vv.Owner, vv.Field, vv.Label())
+	if !ok {
 		return ""
 	}
+	vv.SavedDoc = doc
 	vv.SetFlag(true, ValueHasSavedDoc)
-	vv.SavedDoc = sentence.Doc(f.Doc, vv.Field.Name, vv.Label())
 	return vv.SavedDoc
 }
 
