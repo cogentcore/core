@@ -74,6 +74,8 @@ type Window[A goosi.App] struct {
 // NewWindow makes a new [Window] for the given app with the given options.
 func NewWindow[A goosi.App](a A, opts *goosi.NewWindowOptions) Window[A] {
 	return Window[A]{
+		RunQueue:      make(chan FuncRun),
+		WinClose:      make(chan struct{}),
 		App:           a,
 		Titl:          opts.GetTitle(),
 		Flgs:          opts.Flags,
