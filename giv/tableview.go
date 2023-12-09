@@ -20,6 +20,7 @@ import (
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -367,10 +368,10 @@ func (tv *TableView) ConfigHeader() {
 			}
 		}
 		hdr.Tooltip = hdr.Text + " (tap to sort by)"
-		// doc := field.Doc() // todo
-		// if doc != "" {
-		// 	hdr.Tooltip += ": " + doc
-		// }
+		doc, ok := gti.GetDoc(reflect.Value{}, tv.ElVal, &field, hdr.Text)
+		if ok && doc != "" {
+			hdr.Tooltip += ": " + doc
+		}
 		hdr.OnClick(func(e events.Event) {
 			tv.SortSliceAction(fli)
 		})

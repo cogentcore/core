@@ -338,7 +338,7 @@ func (vv *ValueBase) Doc() string {
 		return vv.SavedDoc
 	}
 
-	doc, ok := gti.GetDoc(vv.Value, vv.Owner, vv.Field, vv.Label())
+	doc, ok := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
 	if !ok {
 		return ""
 	}
