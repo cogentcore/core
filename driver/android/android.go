@@ -202,8 +202,8 @@ func setDarkMode(dark C.bool) {
 
 // windowConfig contains the window configuration information fetched from the native activity
 type windowConfig struct {
-	orientation goosi.ScreenOrientation
-	dpi         float32 // raw display dots per inch
+	Orientation goosi.ScreenOrientation
+	DPI         float32 // raw display dots per inch
 }
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
@@ -260,8 +260,8 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 	}
 
 	return windowConfig{
-		orientation: o,
-		dpi:         float32(dpi),
+		Orientation: o,
+		DPI:         float32(dpi),
 	}
 }
 
@@ -353,8 +353,8 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 				f.Done <- struct{}{}
 			}
 		case cfg := <-windowConfigChange:
-			dpi = cfg.dpi
-			orientation = cfg.orientation
+			dpi = cfg.DPI
+			orientation = cfg.Orientation
 		case w := <-windowRedrawNeeded:
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))

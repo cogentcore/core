@@ -61,18 +61,16 @@ func init() {
 }
 
 func main(f func(goosi.App)) {
-	//if tid := uint64(C.threadID()); tid != initThreadID {
-	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
-	//}
+	if tid := uint64(C.threadID()); tid != initThreadID {
+		log.Fatalf("main called on thread %d, but init ran on %d", tid, initThreadID)
+	}
 
-	log.Println("in mobile main")
 	go func() {
 		f(TheApp)
 		// TODO(crawshaw): trigger runApp to return
 	}()
-	log.Println("running c app")
 	C.runApp()
-	panic("unexpected return from app.runApp")
+	log.Fatalln("unexpected return from runApp")
 }
 
 var dpi float32     // raw display dots per inch
