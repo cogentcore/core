@@ -108,14 +108,17 @@ func AllEmbeddersOf(typ *Type) []*Type {
 }
 
 // GetDoc gets the documentation for the given value with the given owner value, field, and label.
-// The owner value and field may be nil. The owner value, if non-nil, is the value that
+// The value, owner value, and field may be nil/invalid. The owner value, if valid, is the value that
 // contains the value (the parent struct, map, slice, or array). The field, if non-nil,
 // is the struct field that the value represents. GetDoc uses the given label to format
 // the documentation with [sentence.Doc] before returning it.
-func GetDoc(v reflect.Value, owner any, field *reflect.StructField, label string) (string, bool) {
+func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) (string, bool) {
 	// if we are not part of a struct, we just get the documentation for our type
-	if field == nil || owner == nil {
-		rtyp := laser.NonPtrType(v.Type())
+	if field == nil || !owner.IsValid() {
+		if !val.IsValid() {
+			return "", false
+		}
+		rtyp := laser.NonPtrType(val.Type())
 		typ := TypeByName(TypeName(rtyp))
 		if typ == nil {
 			return "", false
@@ -124,7 +127,7 @@ func GetDoc(v reflect.Value, owner any, field *reflect.StructField, label string
 	}
 
 	// otherwise, we get our field documentation in our parent
-	otyp := TypeByValue(owner)
+	otyp := TypeByReflectType(owner.Type())
 	if otyp != nil {
 		f := GetField(otyp, field.Name)
 		if f == nil {
