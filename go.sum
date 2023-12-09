@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-goki.dev/enums v0.9.43 h1:vAltk0s6E1ZyD9pa1dA5OQhLpgwLr0nVW/ypkzObmo4=
-goki.dev/enums v0.9.43/go.mod h1:+CUrv7Hf7O62LE4qxhdip2GyXILO/kqQHa89POhl7Sg=
+goki.dev/enums v0.9.44 h1:jpkh4ML2p+NKPF6xo/KM5ljC3l0WmFLCwN5AP51cmzY=
+goki.dev/enums v0.9.44/go.mod h1:JTPWYcGlA1TggiV8Cv6H6r9pbgMTNxFaGce6LfIyxJE=
 goki.dev/glop v0.1.7 h1:62BRMBGcLIa08iew5maDVi+0VsAmIGjBgIrAB1oFYpY=
 goki.dev/glop v0.1.7/go.mod h1:IXICQzPtXZokKzpVsAZRK2IUeQEJer84SDjsejw4PSo=
 golang.org/x/image v0.14.0 h1:tNgSxAFe3jC4uYqvZdTr84SZoM1KfwdC9SKIFrLjFn4=
