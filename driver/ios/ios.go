@@ -94,7 +94,7 @@ var DisplayMetrics struct {
 func setWindowPtr(window *C.void) {
 	TheApp.Mu.Lock()
 	defer TheApp.Mu.Unlock()
-	TheApp.setSysWindow(uintptr(unsafe.Pointer(window)))
+	TheApp.SetSystemWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export setDisplayMetrics
@@ -172,7 +172,7 @@ func updateConfig(width, height, orientation int32) {
 
 //export lifecycleDead
 func lifecycleDead() {
-	TheApp.fullDestroyVk()
+	TheApp.FullDestroyVk()
 }
 
 //export lifecycleAlive
