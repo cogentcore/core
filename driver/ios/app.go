@@ -26,15 +26,14 @@ import (
 	"goki.dev/vgpu/v2/vgpu"
 )
 
-var theApp = &appImpl{
+// TheApp is the single [goosi.App] for the iOS platform
+var TheApp = &App{
 	screen:       &goosi.Screen{},
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
 }
 
-var _ goosi.App = theApp
-
-type appImpl struct {
+type App struct {
 	mu            sync.Mutex
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
@@ -88,8 +87,8 @@ func Main(f func(goosi.App)) {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
-	theApp.initVk()
-	goosi.TheApp = theApp
+	TheApp.initVk()
+	goosi.TheApp = TheApp
 	main(f)
 }
 
@@ -99,7 +98,7 @@ type funcRun struct {
 }
 
 // RunOnMain runs given function on main thread
-func (app *appImpl) RunOnMain(f func()) {
+func (app *App) RunOnMain(f func()) {
 	if app.mainQueue == nil {
 		f()
 	} else {
@@ -110,7 +109,7 @@ func (app *appImpl) RunOnMain(f func()) {
 }
 
 // GoRunOnMain runs given function on main thread and returns immediately
-func (app *appImpl) GoRunOnMain(f func()) {
+func (app *App) GoRunOnMain(f func()) {
 	go func() {
 		app.mainQueue <- funcRun{f: f, done: nil}
 	}()
@@ -119,30 +118,30 @@ func (app *appImpl) GoRunOnMain(f func()) {
 // SendEmptyEvent sends an empty, blank event to global event processing
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
-func (app *appImpl) SendEmptyEvent() {
+func (app *App) SendEmptyEvent() {
 	app.window.SendEmptyEvent()
 }
 
 // PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
 // and returning when there are no more events.
-func (app *appImpl) PollEventsOnMain() {
+func (app *App) PollEventsOnMain() {
 	// TODO: implement?
 }
 
 // PollEvents tells the main event loop to check for any gui events right now.
 // Call this periodically from longer-running functions to ensure
 // GUI responsiveness.
-func (app *appImpl) PollEvents() {
+func (app *App) PollEvents() {
 	// TODO: implement?
 }
 
 // stopMain stops the main loop and thus terminates the app
-func (app *appImpl) stopMain() {
+func (app *App) stopMain() {
 	app.mainDone <- struct{}{}
 }
 
 // initVk initializes vulkan things
-func (app *appImpl) initVk() {
+func (app *App) initVk() {
 	fmt.Println("initializing vk")
 	vgpu.Debug = true
 	err := vk.SetDefaultGetInstanceProcAddr()
@@ -162,7 +161,7 @@ func (app *appImpl) initVk() {
 }
 
 // destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
-func (app *appImpl) destroyVk() {
+func (app *App) destroyVk() {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	fmt.Println("destroying vk")
@@ -173,7 +172,7 @@ func (app *appImpl) destroyVk() {
 }
 
 // fullDestroyVk destroys all vulkan things for when the app is fully quit
-func (app *appImpl) fullDestroyVk() {
+func (app *App) fullDestroyVk() {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	app.window = nil
@@ -187,7 +186,7 @@ func (app *appImpl) fullDestroyVk() {
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
-func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("in new window")
 	// the actual system window has to exist before we can create the window
@@ -228,17 +227,17 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 
 	// on iOS, NewWindow happens after updateConfig, so we copy the
 	// info over from the screen here.
-	fmt.Println("copying physical dpi; screen:", theApp.screen, "; window:", theApp.window)
-	theApp.window.PhysDPI = theApp.screen.PhysicalDPI
+	fmt.Println("copying physical dpi; screen:", TheApp.screen, "; window:", TheApp.window)
+	TheApp.window.PhysDPI = TheApp.screen.PhysicalDPI
 	fmt.Println("copied physical dpi")
-	theApp.window.LogDPI = theApp.screen.LogicalDPI
-	theApp.window.PxSize = theApp.screen.PixSize
-	theApp.window.WnSize = theApp.screen.Geometry.Max
-	theApp.window.DevPixRatio = theApp.screen.DevicePixelRatio
+	TheApp.window.LogDPI = TheApp.screen.LogicalDPI
+	TheApp.window.PxSize = TheApp.screen.PixSize
+	TheApp.window.WnSize = TheApp.screen.Geometry.Max
+	TheApp.window.DevPixRatio = TheApp.screen.DevicePixelRatio
 
 	fmt.Println("sending window events")
-	theApp.window.EvMgr.WindowResize()
-	theApp.window.EvMgr.WindowPaint()
+	TheApp.window.EvMgr.WindowResize()
+	TheApp.window.EvMgr.WindowPaint()
 
 	go app.window.winLoop()
 
@@ -247,7 +246,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
-func (app *appImpl) setSysWindow(winptr uintptr) error {
+func (app *App) setSysWindow(winptr uintptr) error {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
@@ -284,36 +283,36 @@ func (app *appImpl) setSysWindow(winptr uintptr) error {
 	return nil
 }
 
-func (app *appImpl) DeleteWin(w *windowImpl) {
+func (app *App) DeleteWin(w *windowImpl) {
 	// TODO: implement?
 }
 
-func (app *appImpl) NScreens() int {
+func (app *App) NScreens() int {
 	if app.screen != nil {
 		return 1
 	}
 	return 0
 }
 
-func (app *appImpl) Screen(scrN int) *goosi.Screen {
+func (app *App) Screen(scrN int) *goosi.Screen {
 	if scrN == 0 {
 		return app.screen
 	}
 	return nil
 }
 
-func (app *appImpl) ScreenByName(name string) *goosi.Screen {
+func (app *App) ScreenByName(name string) *goosi.Screen {
 	if app.screen.Name == name {
 		return app.screen
 	}
 	return nil
 }
 
-func (app *appImpl) NoScreens() bool {
+func (app *App) NoScreens() bool {
 	return app.screen == nil
 }
 
-func (app *appImpl) NWindows() int {
+func (app *App) NWindows() int {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	if app.window != nil {
@@ -322,7 +321,7 @@ func (app *appImpl) NWindows() int {
 	return 0
 }
 
-func (app *appImpl) Window(win int) goosi.Window {
+func (app *App) Window(win int) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	if win == 0 {
@@ -331,7 +330,7 @@ func (app *appImpl) Window(win int) goosi.Window {
 	return nil
 }
 
-func (app *appImpl) WindowByName(name string) goosi.Window {
+func (app *App) WindowByName(name string) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	if app.window.Name() == name {
@@ -340,7 +339,7 @@ func (app *appImpl) WindowByName(name string) goosi.Window {
 	return nil
 }
 
-func (app *appImpl) WindowInFocus() goosi.Window {
+func (app *App) WindowInFocus() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	if app.window.IsFocus() {
@@ -349,57 +348,57 @@ func (app *appImpl) WindowInFocus() goosi.Window {
 	return nil
 }
 
-func (app *appImpl) ContextWindow() goosi.Window {
+func (app *App) ContextWindow() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	return app.window
 }
 
-func (app *appImpl) Name() string {
+func (app *App) Name() string {
 	return app.name
 }
 
-func (app *appImpl) SetName(name string) {
+func (app *App) SetName(name string) {
 	app.name = name
 }
 
-func (app *appImpl) About() string {
+func (app *App) About() string {
 	return app.about
 }
 
-func (app *appImpl) SetAbout(about string) {
+func (app *App) SetAbout(about string) {
 	app.about = about
 }
 
-func (app *appImpl) OpenFiles() []string {
+func (app *App) OpenFiles() []string {
 	return app.openFiles
 }
 
-func (app *appImpl) GoGiPrefsDir() string {
+func (app *App) GoGiPrefsDir() string {
 	pdir := filepath.Join(app.PrefsDir(), "GoGi")
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }
 
-func (app *appImpl) AppPrefsDir() string {
+func (app *App) AppPrefsDir() string {
 	pdir := filepath.Join(app.PrefsDir(), app.Name())
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }
 
-func (app *appImpl) PrefsDir() string {
+func (app *App) PrefsDir() string {
 	return "/data/data"
 }
 
-func (app *appImpl) GetScreens() {
+func (app *App) GetScreens() {
 	// note: this is not applicable in mobile because screen info is not avail until Size event
 }
 
-func (app *appImpl) Platform() goosi.Platforms {
+func (app *App) Platform() goosi.Platforms {
 	return goosi.Android
 }
 
-func (app *appImpl) OpenURL(url string) {
+func (app *App) OpenURL(url string) {
 	// TODO: implement
 }
 
@@ -417,7 +416,7 @@ func SrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
+func (app *App) ClipBoard(win goosi.Window) clip.Board {
 	// TODO: implement clipboard
 	// app.mu.Lock()
 	// app.ctxtwin = win.(*windowImpl)
@@ -426,19 +425,19 @@ func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
 	// return &theClip
 }
 
-func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
+func (app *App) Cursor(win goosi.Window) cursor.Cursor {
 	return &cursor.CursorBase{} // no-op
 }
 
-func (app *appImpl) SetQuitReqFunc(fun func()) {
+func (app *App) SetQuitReqFunc(fun func()) {
 	app.quitReqFunc = fun
 }
 
-func (app *appImpl) SetQuitCleanFunc(fun func()) {
+func (app *App) SetQuitCleanFunc(fun func()) {
 	app.quitCleanFunc = fun
 }
 
-func (app *appImpl) QuitReq() {
+func (app *App) QuitReq() {
 	if app.quitting {
 		return
 	}
@@ -449,11 +448,11 @@ func (app *appImpl) QuitReq() {
 	}
 }
 
-func (app *appImpl) IsQuitting() bool {
+func (app *App) IsQuitting() bool {
 	return app.quitting
 }
 
-func (app *appImpl) QuitClean() {
+func (app *App) QuitClean() {
 	// TODO: implement?
 	// app.quitting = true
 	// if app.quitCleanFunc != nil {
@@ -472,7 +471,7 @@ func (app *appImpl) QuitClean() {
 	// }
 }
 
-func (app *appImpl) Quit() {
+func (app *App) Quit() {
 	if app.quitting {
 		return
 	}
@@ -480,6 +479,6 @@ func (app *appImpl) Quit() {
 	app.stopMain()
 }
 
-func (app *appImpl) IsDark() bool {
+func (app *App) IsDark() bool {
 	return app.isDark
 }

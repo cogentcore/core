@@ -32,15 +32,9 @@ type App struct {
 	Winptr uintptr
 }
 
-// MainCallback is set to the function passed to [Main].
-// It is needed so that the main callback function can
-// be run correctly on the JVM.
-var MainCallback func(a goosi.App)
-
 // Main is called from main thread when it is time to start running the
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	MainCallback = f
 	TheApp.InitVk()
 	base.Main(f, TheApp, &TheApp.App)
 }

@@ -67,7 +67,7 @@ func main(f func(goosi.App)) {
 
 	log.Println("in mobile main")
 	go func() {
-		f(theApp)
+		f(TheApp)
 		// TODO(crawshaw): trigger runApp to return
 	}()
 	log.Println("running c app")
@@ -85,9 +85,9 @@ var DisplayMetrics struct {
 
 //export setWindowPtr
 func setWindowPtr(window *C.void) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
-	theApp.setSysWindow(uintptr(unsafe.Pointer(window)))
+	TheApp.mu.Lock()
+	defer TheApp.mu.Unlock()
+	TheApp.setSysWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export setDisplayMetrics
@@ -129,46 +129,46 @@ func setScreen(scale int) {
 
 //export updateConfig
 func updateConfig(width, height, orientation int32) {
-	theApp.mu.Lock()
-	defer theApp.mu.Unlock()
-	theApp.screen.Orientation = goosi.OrientationUnknown
+	TheApp.mu.Lock()
+	defer TheApp.mu.Unlock()
+	TheApp.screen.Orientation = goosi.OrientationUnknown
 	switch orientation {
 	case C.UIDeviceOrientationPortrait, C.UIDeviceOrientationPortraitUpsideDown:
-		theApp.screen.Orientation = goosi.Portrait
+		TheApp.screen.Orientation = goosi.Portrait
 	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
-		theApp.screen.Orientation = goosi.Landscape
+		TheApp.screen.Orientation = goosi.Landscape
 		width, height = height, width
 	}
 	fmt.Println("getting device padding")
 	insets := C.getDevicePadding()
 	fscale := float32(screenScale)
-	theApp.insets.Set(
+	TheApp.insets.Set(
 		float32(insets.top)*fscale,
 		float32(insets.right)*fscale,
 		float32(insets.bottom)*fscale,
 		float32(insets.left)*fscale,
 	)
 
-	theApp.screen.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
-	theApp.screen.PixSize = image.Pt(int(width), int(height))
-	theApp.screen.Geometry.Max = theApp.screen.PixSize
+	TheApp.screen.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
+	TheApp.screen.PixSize = image.Pt(int(width), int(height))
+	TheApp.screen.Geometry.Max = TheApp.screen.PixSize
 
-	theApp.screen.PhysicalDPI = dpi
-	theApp.screen.LogicalDPI = dpi
+	TheApp.screen.PhysicalDPI = dpi
+	TheApp.screen.LogicalDPI = dpi
 
 	physX := 25.4 * float32(width) / dpi
 	physY := 25.4 * float32(height) / dpi
-	theApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+	TheApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
 
 	fmt.Println("getting is dark")
-	theApp.isDark = bool(C.isDark())
+	TheApp.isDark = bool(C.isDark())
 	fmt.Println("got is dark")
 }
 
 //export lifecycleDead
 func lifecycleDead() {
 	fmt.Println("lifecycle dead")
-	theApp.fullDestroyVk()
+	TheApp.fullDestroyVk()
 }
 
 //export lifecycleAlive
@@ -179,16 +179,16 @@ func lifecycleAlive() {
 //export lifecycleVisible
 func lifecycleVisible() {
 	fmt.Println("lifecycle visible")
-	if theApp.window != nil {
-		theApp.window.EvMgr.Window(events.WinShow)
+	if TheApp.window != nil {
+		TheApp.window.EvMgr.Window(events.WinShow)
 	}
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
 	fmt.Println("lifecycle focused")
-	if theApp.window != nil {
-		theApp.window.EvMgr.Window(events.WinFocus)
+	if TheApp.window != nil {
+		TheApp.window.EvMgr.Window(events.WinFocus)
 	}
 }
 
@@ -199,8 +199,8 @@ func drawloop() {
 
 	for {
 		select {
-		case <-theApp.window.publish:
-			theApp.window.publishDone <- struct{}{}
+		case <-TheApp.window.publish:
+			TheApp.window.publishDone <- struct{}{}
 			return
 		case <-time.After(100 * time.Millisecond): // in case the method blocked!
 			return
@@ -210,7 +210,7 @@ func drawloop() {
 
 //export startloop
 func startloop() {
-	go theApp.loop()
+	go TheApp.loop()
 }
 
 // loop is the primary drawing loop.
@@ -218,7 +218,7 @@ func startloop() {
 // After UIKit has captured the initial OS thread for processing UIKit
 // events in runApp, it starts loop on another goroutine. It is locked
 // to an OS thread for its OpenGL context.
-func (app *appImpl) loop() {
+func (app *App) loop() {
 	runtime.LockOSThread()
 
 	app.mainQueue = make(chan funcRun)
@@ -233,18 +233,18 @@ func (app *appImpl) loop() {
 			if f.done != nil {
 				f.done <- true
 			}
-		case <-theApp.window.publish:
-			theApp.window.publishDone <- struct{}{}
+		case <-TheApp.window.publish:
+			TheApp.window.publishDone <- struct{}{}
 		}
 	}
 }
 
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+func (app *App) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	C.showKeyboard(C.int(int32(typ)))
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func (app *appImpl) HideVirtualKeyboard() {
+func (app *App) HideVirtualKeyboard() {
 	C.hideKeyboard()
 }

@@ -71,20 +71,20 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		}
 	}
 
-	theApp.window.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
+	TheApp.window.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
 }
 
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := getCodeFromRune(r)
-		theApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
+		TheApp.window.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
+	TheApp.window.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scrolled
@@ -94,14 +94,14 @@ func scrolled(posX, posY, distanceX, distanceY C.float) {
 	// make negative so that it goes in the opposite direction
 	// of finger movement (natural scrolling)
 	delta := image.Pt(int(-distanceX), int(-distanceY))
-	theApp.window.EvMgr.Scroll(where, delta)
+	TheApp.window.EvMgr.Scroll(where, delta)
 }
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	fmt.Println("scaled")
 	where := image.Pt(int(posX), int(posY))
-	theApp.window.EvMgr.Magnify(float32(scaleFactor), where)
+	TheApp.window.EvMgr.Magnify(float32(scaleFactor), where)
 }
 
 //export longPressed
