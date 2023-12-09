@@ -13,7 +13,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 
 	vk "github.com/goki/vulkan"
 	"goki.dev/goosi"
@@ -106,96 +105,52 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	app.Mu.Lock()
 	defer app.Mu.Unlock()
-	app.Win = &Window{}
-	app.window.EvMgr.Deque = &app.window.Deque
-	app.window.EvMgr.Window(events.WinShow)
-	app.window.EvMgr.Window(events.WinFocus)
+	app.Win = &Window{base.NewWindowSingle(app, opts)}
+	app.Win.EvMgr.Deque = &app.Win.Deque
+	app.Win.EvMgr.Window(events.WinShow)
+	app.Win.EvMgr.Window(events.WinFocus)
 
-	// on iOS, NewWindow happens after updateConfig, so we copy the
-	// info over from the screen here.
-	fmt.Println("copying physical dpi; screen:", TheApp.screen, "; window:", TheApp.window)
-	TheApp.window.PhysDPI = TheApp.screen.PhysicalDPI
-	fmt.Println("copied physical dpi")
-	TheApp.window.LogDPI = TheApp.screen.LogicalDPI
-	TheApp.window.PxSize = TheApp.screen.PixSize
-	TheApp.window.WnSize = TheApp.screen.Geometry.Max
-	TheApp.window.DevPixRatio = TheApp.screen.DevicePixelRatio
+	TheApp.Win.EvMgr.WindowResize()
+	TheApp.Win.EvMgr.WindowPaint()
 
-	fmt.Println("sending window events")
-	TheApp.window.EvMgr.WindowResize()
-	TheApp.window.EvMgr.WindowPaint()
+	go app.Win.WinLoop()
 
-	go app.window.winLoop()
-
-	return app.window, nil
+	return app.Win, nil
 }
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
 func (app *App) setSysWindow(winptr uintptr) error {
-	debug.SetPanicOnFault(true)
-	defer func() { handleRecover(recover()) }()
-	fmt.Println("setting sys window")
-	var sf vk.Surface
+	defer func() { base.HandleRecover(recover()) }()
+	var vsf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
-	ret := vk.CreateWindowSurface(app.gpu.Instance, winptr, nil, &sf)
+	ret := vk.CreateWindowSurface(app.GPU.Instance, winptr, nil, &vsf)
 	if err := vk.Error(ret); err != nil {
 		return err
 	}
-	app.Surface = vgpu.NewSurface(app.gpu, sf)
+	sf := vgpu.NewSurface(app.GPU, vsf)
 
-	fmt.Println("setting system")
-	app.System = app.gpu.NewGraphicsSystem(app.name, &app.Surface.Device)
-	app.System.ConfigRender(&app.Surface.Format, vgpu.UndefType)
-	app.Surface.SetRender(&app.System.Render)
-	// app.window.System.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
-	app.System.Config()
-	fmt.Println("making drawer")
-	app.Draw = vdraw.Drawer{
-		Sys:     *app.System,
+	sys := app.GPU.NewGraphicsSystem(app.Name(), &sf.Device)
+	sys.ConfigRender(&sf.Format, vgpu.UndefType)
+	sf.SetRender(&sys.Render)
+	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
+	sys.Config()
+	app.Drawer = &vdraw.Drawer{
+		Sys:     *sys,
 		YIsDown: true,
 	}
-	// app.window.Draw.ConfigSys()
-	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
+	// a.Drawer.ConfigSys()
+	app.Drawer.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
-	app.winptr = winptr
+	app.Winptr = winptr
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
-	if app.window != nil {
-		app.window.EvMgr.Window(events.WinShow)
-		app.window.EvMgr.Window(events.ScreenUpdate)
+	if app.Win != nil {
+		app.Win.EvMgr.Window(events.WinShow)
+		app.Win.EvMgr.Window(events.ScreenUpdate)
 	}
 	return nil
-}
-
-func (app *App) DeleteWin(w *Window) {
-	// TODO: implement?
-}
-
-func (app *App) NScreens() int {
-	if app.screen != nil {
-		return 1
-	}
-	return 0
-}
-
-func (app *App) Screen(scrN int) *goosi.Screen {
-	if scrN == 0 {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *App) ScreenByName(name string) *goosi.Screen {
-	if app.screen.Name == name {
-		return app.screen
-	}
-	return nil
-}
-
-func (app *App) NoScreens() bool {
-	return app.screen == nil
 }
 
 func (app *App) NWindows() int {

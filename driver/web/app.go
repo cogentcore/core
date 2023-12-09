@@ -50,15 +50,15 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
 	a.Win.EvMgr.Deque = &a.Win.Deque
-	a.SetSysWindow()
+	a.SetSystemWindow()
 
 	go a.Win.WinLoop()
 
 	return a.Win, nil
 }
 
-// SetSysWindow sets the underlying system window information.
-func (a *App) SetSysWindow() {
+// SetSystemWindow sets the underlying system window information.
+func (a *App) SetSystemWindow() {
 	defer func() { base.HandleRecover(recover()) }()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()
