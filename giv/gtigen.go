@@ -287,7 +287,7 @@ var FileViewType = gti.AddType(&gti.Type{
 		{"Ext", &gti.Field{Name: "Ext", Type: "string", LocalType: "string", Doc: "target extension(s) (comma separated if multiple, including initial .), if any", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "goki.dev/gi/v2/giv.FileViewFilterFunc", LocalType: "FileViewFilterFunc", Doc: "optional styling function", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", LocalType: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}, Tag: ""}},
-		{"Files", &gti.Field{Name: "Files", Type: "[]*goki.dev/pi/v2/fi.FileInfo", LocalType: "[]*fi.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}, Tag: ""}},
+		{"Files", &gti.Field{Name: "Files", Type: "[]*goki.dev/fi.FileInfo", LocalType: "[]*fi.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}, Tag: ""}},
 		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\""}},
 		{"SelectedDoubleClick", &gti.Field{Name: "SelectedDoubleClick", Type: "bool", LocalType: "bool", Doc: "set to true if a file was selected via double-click,\nwhich can then be a signal to dialogs to accept.", Directives: gti.Directives{}, Tag: ""}},
 		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
@@ -589,10 +589,10 @@ var InspectorType = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"EditColorScheme", &gti.Method{Name: "EditColorScheme", Doc: "EditColorScheme pulls up a window to edit the current color scheme", Directives: gti.Directives{
+		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicks", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicks", Directives: gti.Directives{
+		{"InspectApp", &gti.Method{Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
@@ -2399,15 +2399,15 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"CloseAll", &gti.Method{Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Copy", &gti.Method{Name: "Copy", Doc: "Copy copies to clip.Board, optionally resetting the selection.\nsatisfies gi.Clipper interface and can be overridden by subtypes", Directives: gti.Directives{
+		{"Copy", &gti.Method{Name: "Copy", Doc: "Copy copies to clip.Board, optionally resetting the selection.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"reset", &gti.Field{Name: "reset", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Cut", &gti.Method{Name: "Cut", Doc: "Cut copies to clip.Board and deletes selected items.\nsatisfies gi.Clipper interface and can be overridden by subtypes", Directives: gti.Directives{
+		{"Cut", &gti.Method{Name: "Cut", Doc: "Cut copies to clip.Board and deletes selected items.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Paste", &gti.Method{Name: "Paste", Doc: "Paste pastes clipboard at given node.\nsatisfies gi.Clipper interface and can be overridden by subtypes", Directives: gti.Directives{
+		{"Paste", &gti.Method{Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),

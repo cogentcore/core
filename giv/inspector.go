@@ -8,11 +8,11 @@ import (
 	"fmt"
 
 	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
 	"goki.dev/grr"
@@ -101,49 +101,6 @@ func (is *Inspector) Open(filename gi.FileName) { //gti:add
 	is.SetNeedsRender(true) // notify our editor
 }
 
-// EditColorScheme pulls up a window to edit the current color scheme
-func (is *Inspector) EditColorScheme() { //gti:add
-	if gi.ActivateExistingMainWindow(&colors.Schemes) {
-		return
-	}
-
-	d := gi.NewBody("gogi-color-scheme")
-	d.Title = "GoGi Color Scheme"
-
-	key := &matcolor.Key{
-		Primary:        colors.FromRGB(123, 135, 122),
-		Secondary:      colors.FromRGB(106, 196, 178),
-		Tertiary:       colors.FromRGB(106, 196, 178),
-		Error:          colors.FromRGB(219, 46, 37),
-		Neutral:        colors.FromRGB(133, 131, 121),
-		NeutralVariant: colors.FromRGB(107, 106, 101),
-	}
-	p := matcolor.NewPalette(key)
-	schemes := matcolor.NewSchemes(p)
-
-	kv := NewStructView(d, "kv")
-	kv.SetStruct(key)
-	split := gi.NewSplits(d, "split")
-
-	svl := NewStructView(split, "svl")
-	svl.SetStruct(&schemes.Light)
-	svd := NewStructView(split, "svd")
-	svd.SetStruct(&schemes.Dark)
-
-	d.Sc.Data = &colors.Schemes // todo: needed?
-
-	kv.OnChange(func(e events.Event) {
-		p = matcolor.NewPalette(key)
-		schemes = matcolor.NewSchemes(p)
-		colors.Schemes = schemes
-		gi.Prefs.UpdateAll()
-		svl.UpdateFields()
-		svd.UpdateFields()
-	})
-
-	d.NewWindow().Run()
-}
-
 // ToggleSelectionMode toggles the editor between selection mode or not.
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicks
@@ -168,7 +125,7 @@ func (is *Inspector) ToggleSelectionMode() { //gti:add
 	sc.UpdateEndLayout(updt)
 }
 
-// SelectionMonitor
+// SelectionMonitor monitors the selected widget
 func (is *Inspector) SelectionMonitor() {
 	for {
 		sc := gi.AsScene(is.KiRoot)
@@ -199,6 +156,13 @@ func (is *Inspector) SelectionMonitor() {
 			sc.UpdateEndAsyncRender(updt)
 		}
 	}
+}
+
+// InspectApp displays the underlying operating system app
+func (is *Inspector) InspectApp() { //gti:add
+	d := gi.NewBody()
+	NewStructView(d).SetStruct(goosi.TheApp).SetReadOnly(true)
+	d.NewFullDialog(is).Run()
 }
 
 // SetRoot sets the source root and ensures everything is configured
@@ -303,7 +267,7 @@ func (is *Inspector) TopAppBar(tb *gi.TopAppBar) {
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(is.Changed)
 	})
-	sel := NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
+	sel := NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
 	sel.SetUpdateFunc(func() {
 		sc, ok := is.KiRoot.(*gi.Scene)
 		sel.SetEnabled(ok)
@@ -325,7 +289,7 @@ func (is *Inspector) TopAppBar(tb *gi.TopAppBar) {
 	sa.Args[0].SetValue(is.Filename)
 	sa.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
-	NewFuncButton(tb, is.EditColorScheme).SetIcon(icons.Colors)
+	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Dns)
 }
 
 func (is *Inspector) MenuBar(mb *gi.MenuBar) {
