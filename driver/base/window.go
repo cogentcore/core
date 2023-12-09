@@ -52,9 +52,6 @@ type Window[A goosi.App] struct {
 	// Titl is the title of the window
 	Titl string `label:"Title"`
 
-	// Insts are the cached insets of the window
-	Insts styles.SideFloats `label:"Insets"`
-
 	// Flgs contains the flags associated with the window
 	Flgs goosi.WindowFlags
 
@@ -203,7 +200,8 @@ func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 }
 
 func (w *Window[A]) Insets() styles.SideFloats {
-	return w.Insts
+	// no-op by default
+	return styles.NewSideFloats()
 }
 
 func (w *Window[A]) SetCloseReqFunc(fun func(win goosi.Window)) {
