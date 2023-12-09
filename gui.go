@@ -27,14 +27,10 @@ func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 // App does runs the GUI. It should be called on the main thread.
 // It should typically not be called by end-user code; see [Run].
 func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
-	gi.SetAppName(opts.AppName)
-	gi.SetAppAbout(opts.AppAbout)
+	b := gi.NewAppBody(opts.AppName).SetTitle(opts.AppTitle)
+	b.App().About = opts.AppAbout
 
-	b := gi.NewBody(opts.AppName).SetTitle(opts.AppTitle)
-
-	gi.DefaultTopAppBar = func(tb *gi.TopAppBar) {
-		gi.DefaultTopAppBarStd(tb)
-
+	b.AddAppBar(func(tb *gi.Toolbar) {
 		for _, cmd := range cmds {
 			cmd := cmd
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
@@ -50,7 +46,7 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 					}
 				})
 		}
-	}
+	})
 
 	sv := giv.NewStructView(b)
 	sv.SetStruct(cfg)
