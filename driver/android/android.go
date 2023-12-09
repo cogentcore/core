@@ -160,7 +160,7 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
 	TheApp.Mu.Lock()
 	defer TheApp.Mu.Unlock()
-	TheApp.setSysWindow(uintptr(unsafe.Pointer(window)))
+	TheApp.SetSystemWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export onNativeWindowRedrawNeeded
@@ -347,7 +347,7 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 	for {
 		select {
 		case <-a.MainDone:
-			a.fullDestroyVk()
+			a.FullDestroyVk()
 			return nil
 		case f := <-a.MainQueue:
 			f.F()

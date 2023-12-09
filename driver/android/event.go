@@ -99,7 +99,7 @@ func ProcessEvent(env *C.JNIEnv, e *C.AInputEvent) {
 			seq := events.Sequence(C.AMotionEvent_getPointerId(e, i))
 			x := int(C.AMotionEvent_getX(e, i))
 			y := int(C.AMotionEvent_getY(e, i))
-			TheApp.window.EvMgr.Touch(t, seq, image.Pt(x, y))
+			TheApp.Win.EvMgr.Touch(t, seq, image.Pt(x, y))
 		}
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
