@@ -134,7 +134,7 @@ func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 	path := fl.FontsAvail[fontnm]
 	if path == "" {
 		loadFontMu.RUnlock()
-		return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts; try adding to FontPaths in gi.FontLibrary; searched FontLib.FontsFS and paths: %v", fontnm, fl.FontPaths)
+		return nil, fmt.Errorf("girl/paint.FontLib: Font named: %v not found in list of available fonts; try adding to FontPaths in girl/paint.FontLibrary; searched FontLib.FontsFS and paths: %v", fontnm, fl.FontPaths)
 	}
 
 	var bytes []byte
@@ -162,9 +162,9 @@ func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 	face, err := OpenFontFace(bytes, fontnm, path, size, 0)
 	if err != nil || face == nil {
 		if err == nil {
-			err = fmt.Errorf("gi.FontLib: nil face with no error for: %v", fontnm)
+			err = fmt.Errorf("girl/paint.FontLib: nil face with no error for: %v", fontnm)
 		}
-		slog.Error("gi.FontLib: error loading font, removed from list", "fontName", fontnm)
+		slog.Error("girl/paint.FontLib: error loading font, removed from list", "fontName", fontnm)
 		loadFontMu.Unlock()
 		fl.DeleteFont(fontnm)
 		return nil, err
@@ -224,7 +224,7 @@ func (fl *FontLib) AddFontPaths(paths ...string) bool {
 // UpdateFontsAvail scans for all fonts we can use on the FontPaths
 func (fl *FontLib) UpdateFontsAvail() bool {
 	if len(fl.FontPaths) == 0 {
-		slog.Error("gi.FontLib: no font paths; need to add some")
+		slog.Error("girl/paint.FontLib: no font paths; need to add some")
 		return false
 	}
 	loadFontMu.Lock()
@@ -234,12 +234,12 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 	}
 	err := fl.FontsAvailFromFS(fl.FontsFS, "fs://")
 	if err != nil {
-		slog.Error("gi.FontLib: error walking FontLib.FontsFS", "err", err)
+		slog.Error("girl/paint.FontLib: error walking FontLib.FontsFS", "err", err)
 	}
 	for _, p := range fl.FontPaths {
 		err := fl.FontsAvailFromFS(os.DirFS(p), p+string(filepath.Separator))
 		if err != nil {
-			slog.Error("gi.FontLib: error walking path", "path", p, "err", err)
+			slog.Error("girl/paint.FontLib: error walking path", "path", p, "err", err)
 		}
 	}
 	sort.Slice(fl.FontInfo, func(i, j int) bool {
@@ -255,7 +255,7 @@ func (fl *FontLib) UpdateFontsAvail() bool {
 func (fl *FontLib) FontsAvailFromFS(fsys fs.FS, root string) error {
 	return fs.WalkDir(fsys, ".", func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
-			slog.Error("gi.FontLib: error accessing path", "path", path, "err", err)
+			slog.Error("girl/paint.FontLib: error accessing path", "path", path, "err", err)
 			return err
 		}
 		ext := strings.ToLower(filepath.Ext(path))
