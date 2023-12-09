@@ -20,7 +20,7 @@ var _ = gti.AddType(&gti.Type{
 		{"ShareWin", &gti.Field{Name: "ShareWin", Type: "*github.com/go-gl/glfw/v3.3/glfw.Window", LocalType: "*glfw.Window", Doc: "ShareWin is a non-visible, always-present window that all windows share gl context with", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Window]", &gti.Field{Name: "Window]", Type: "goki.dev/goosi/driver/base.AppMulti[*goki.dev/goosi/driver/desktop.Window]", LocalType: "base.AppMulti[*Window]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"AppMulti", &gti.Field{Name: "AppMulti", Type: "goki.dev/goosi/driver/base.AppMulti", LocalType: "base.AppMulti[*Window]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
@@ -38,7 +38,7 @@ var _ = gti.AddType(&gti.Type{
 		{"ScreenWindow", &gti.Field{Name: "ScreenWindow", Type: "string", LocalType: "string", Doc: "ScreenName is the name of the last known screen this window was on", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Drawer]", &gti.Field{Name: "Drawer]", Type: "goki.dev/goosi/driver/base.WindowMulti[*goki.dev/goosi/driver/desktop.App, *goki.dev/vgpu/v2/vdraw.Drawer]", LocalType: "base.WindowMulti[*App, *vdraw.Drawer]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WindowMulti", &gti.Field{Name: "WindowMulti", Type: "goki.dev/goosi/driver/base.WindowMulti", LocalType: "base.WindowMulti[*App, *vdraw.Drawer]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })

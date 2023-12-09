@@ -120,7 +120,7 @@ var _ = gti.AddType(&gti.Type{
 		{"LogDPI", &gti.Field{Name: "LogDPI", Type: "float32", LocalType: "float32", Doc: "LogicalDPI is the logical dots per inch of the screen,\nwhich is used for all rendering.\nIt is: transient zoom factor * screen-specific multiplier * PhysicalDPI", Directives: gti.Directives{}, Tag: "label:\"Logical DPI\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Window[A]", &gti.Field{Name: "Window[A]", Type: "goki.dev/goosi/driver/base.Window[A]", LocalType: "Window[A]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Window", &gti.Field{Name: "Window", Type: "goki.dev/goosi/driver/base.Window", LocalType: "Window[A]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
@@ -135,7 +135,7 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Window[A]", &gti.Field{Name: "Window[A]", Type: "goki.dev/goosi/driver/base.Window[A]", LocalType: "Window[A]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Window", &gti.Field{Name: "Window", Type: "goki.dev/goosi/driver/base.Window", LocalType: "Window[A]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
