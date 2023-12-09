@@ -86,6 +86,8 @@ func NewWindow[A goosi.App](a A, opts *goosi.NewWindowOptions) Window[A] {
 
 // WinLoop runs the window's own locked processing loop.
 func (w *Window[A]) WinLoop() {
+	defer func() { HandleRecover(recover()) }()
+
 	var winPaint *time.Ticker
 	if w.FPS > 0 {
 		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))

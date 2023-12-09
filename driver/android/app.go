@@ -102,6 +102,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
+	a.Win.This = a.Win
 	a.Win.EvMgr.Deque = &a.Win.Deque
 	a.Win.EvMgr.Window(events.WinShow)
 	a.Win.EvMgr.Window(events.WinFocus)

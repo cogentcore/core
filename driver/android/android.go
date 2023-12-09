@@ -171,7 +171,7 @@ func onNativeWindowRedrawNeeded(activity *C.ANativeActivity, window *C.ANativeWi
 	// This is required by the redraw documentation to
 	// avoid bad draws.
 	windowRedrawNeeded <- window
-	<-windowRedrawDone
+	// <-windowRedrawDone
 }
 
 //export onNativeWindowDestroyed
@@ -340,12 +340,6 @@ func insetsChanged(top, bottom, left, right int) {
 func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 	fmt.Println("mui")
 	defer func() { base.HandleRecover(recover()) }()
-
-	go func() {
-		defer func() { base.HandleRecover(recover()) }()
-		MainCallback(TheApp)
-		a.StopMain()
-	}()
 
 	var dpi float32
 	var orientation goosi.ScreenOrientation
