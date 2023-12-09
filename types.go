@@ -11,6 +11,7 @@ import (
 	"sort"
 	"sync/atomic"
 
+	"goki.dev/glop/sentence"
 	"goki.dev/laser"
 )
 
@@ -106,11 +107,12 @@ func AllEmbeddersOf(typ *Type) []*Type {
 	return typs
 }
 
-// GetDoc gets the documentation for the given value with the given owner value and field.
+// GetDoc gets the documentation for the given value with the given owner value, field, and label.
 // The owner value and field may be nil. The owner value, if non-nil, is the value that
 // contains the value (the parent struct, map, slice, or array). The field, if non-nil,
-// is the struct field that the value represents.
-func GetDoc(v reflect.Value, owner any, field *reflect.StructField) (string, bool) {
+// is the struct field that the value represents. GetDoc uses the given label to format
+// the documentation with [sentence.Doc] before returning it.
+func GetDoc(v reflect.Value, owner any, field *reflect.StructField, label string) (string, bool) {
 	// if we are not part of a struct, we just get the documentation for our type
 	if field == nil || owner == nil {
 		rtyp := laser.NonPtrType(v.Type())
@@ -118,7 +120,7 @@ func GetDoc(v reflect.Value, owner any, field *reflect.StructField) (string, boo
 		if typ == nil {
 			return "", false
 		}
-		return typ.Doc, true
+		return sentence.Doc(typ.Doc, rtyp.Name(), label), true
 	}
 
 	// otherwise, we get our field documentation in our parent
@@ -128,12 +130,12 @@ func GetDoc(v reflect.Value, owner any, field *reflect.StructField) (string, boo
 		if f == nil {
 			return "", false
 		}
-		return f.Doc, true
+		return sentence.Doc(f.Doc, field.Name, label), true
 	}
 	// if we aren't in gti, we fall back on struct tag
 	desc, ok := field.Tag.Lookup("desc")
 	if !ok {
 		return "", false
 	}
-	return desc, true
+	return sentence.Doc(desc, field.Name, label), true
 }
