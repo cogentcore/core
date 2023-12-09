@@ -200,6 +200,7 @@ func setDarkMode(dark C.bool) {
 	TheApp.Dark = bool(dark)
 }
 
+// windowConfig contains the window configuration information fetched from the native activity
 type windowConfig struct {
 	orientation goosi.ScreenOrientation
 	dpi         float32 // raw display dots per inch
@@ -286,18 +287,18 @@ var (
 	activityDestroyed  = make(chan struct{})
 )
 
-func (app *App) MainLoop() {
-	app.MainQueue = make(chan base.FuncRun)
-	app.MainDone = make(chan struct{})
+func (a *App) MainLoop() {
+	a.MainQueue = make(chan base.FuncRun)
+	a.MainDone = make(chan struct{})
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
 		defer func() { base.HandleRecover(recover()) }()
-		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
+		if err := mobileinit.RunOnJVM(RunInputQueue); err != nil {
 			log.Fatalf("app: %v", err)
 		}
 	}()
 	// Preserve this OS thread for the attached JNI thread
-	if err := mobileinit.RunOnJVM(TheApp.mainUI); err != nil {
+	if err := mobileinit.RunOnJVM(TheApp.MainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}
 }
@@ -332,11 +333,12 @@ func insetsChanged(top, bottom, left, right int) {
 	TheApp.Win.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
-func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
+// MainUI runs the main UI loop of the app.
+func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 	go func() {
 		defer func() { base.HandleRecover(recover()) }()
 		MainCallback(TheApp)
-		app.StopMain()
+		a.StopMain()
 	}()
 
 	var dpi float32
@@ -344,10 +346,10 @@ func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
 
 	for {
 		select {
-		case <-app.MainDone:
-			app.fullDestroyVk()
+		case <-a.MainDone:
+			a.fullDestroyVk()
 			return nil
-		case f := <-app.MainQueue:
+		case f := <-a.MainQueue:
 			f.F()
 			if f.Done != nil {
 				f.Done <- struct{}{}
@@ -359,45 +361,35 @@ func (app *App) mainUI(vm, jniEnv, ctx uintptr) error {
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 
-			if orientation == goosi.OrientationUnknown {
-				app.Scrn.Orientation = screenOrientation(widthPx, heightPx)
-			} else {
-				app.Scrn.Orientation = orientation
-			}
+			a.Scrn.Orientation = orientation
 
-			app.Scrn.DevicePixelRatio = 1
-			app.Scrn.PixSize = image.Pt(widthPx, heightPx)
-			app.Scrn.Geometry.Max = app.Scrn.PixSize
+			a.Scrn.DevicePixelRatio = 1
+			a.Scrn.PixSize = image.Pt(widthPx, heightPx)
+			a.Scrn.Geometry.Max = a.Scrn.PixSize
 
-			app.Scrn.PhysicalDPI = dpi
-			app.Scrn.LogicalDPI = dpi
+			a.Scrn.PhysicalDPI = dpi
+			a.Scrn.LogicalDPI = dpi
 
 			physX := 25.4 * float32(widthPx) / dpi
 			physY := 25.4 * float32(heightPx) / dpi
-			app.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
+			a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-			app.Win.EvMgr.WindowResize()
-			app.Win.EvMgr.WindowPaint()
+			a.Win.EvMgr.WindowResize()
+			a.Win.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
-			app.Win.SetSize(image.Point{})
-			app.Win.EvMgr.Window(events.WinMinimize)
-			app.destroyVk()
+			a.Win.SetSize(image.Point{})
+			a.Win.EvMgr.Window(events.WinMinimize)
+			a.DestroyVk()
 		case <-activityDestroyed:
-			app.Win.EvMgr.Window(events.WinClose)
+			a.Win.EvMgr.Window(events.WinClose)
 		}
 	}
 }
 
-func screenOrientation(width, height int) goosi.ScreenOrientation {
-	if width > height {
-		return goosi.Landscape
-	}
-	return goosi.Portrait
-}
-
-func runInputQueue(vm, jniEnv, ctx uintptr) error {
+// RunInputQueue runs the input queue for the app.
+func RunInputQueue(vm, jniEnv, ctx uintptr) error {
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 
 	// Android loopers select on OS file descriptors, not Go channels, so we
@@ -418,7 +410,7 @@ func runInputQueue(vm, jniEnv, ctx uintptr) error {
 			default:
 			case p := <-pending:
 				if q != nil {
-					processEvents(env, q)
+					ProcessEvents(env, q)
 					C.AInputQueue_detachLooper(q)
 				}
 				q = p
@@ -429,7 +421,7 @@ func runInputQueue(vm, jniEnv, ctx uintptr) error {
 			}
 		}
 		if q != nil {
-			processEvents(env, q)
+			ProcessEvents(env, q)
 		}
 	}
 }

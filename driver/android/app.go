@@ -41,12 +41,12 @@ var MainCallback func(a goosi.App)
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	MainCallback = f
-	TheApp.initVk()
+	TheApp.InitVk()
 	base.Main(f, TheApp, &TheApp.App)
 }
 
-// initVk initializes vulkan things
-func (app *App) initVk() {
+// InitVk initializes Vulkan things for the app
+func (a *App) InitVk() {
 	err := vk.SetDefaultGetInstanceProcAddr()
 	if err != nil {
 		// TODO(kai): maybe implement better error handling here
@@ -58,39 +58,39 @@ func (app *App) initVk() {
 	}
 
 	winext := vk.GetRequiredInstanceExtensions()
-	app.GPU = vgpu.NewGPU()
-	app.GPU.AddInstanceExt(winext...)
-	app.GPU.Config(app.Name())
+	a.GPU = vgpu.NewGPU()
+	a.GPU.AddInstanceExt(winext...)
+	a.GPU.Config(a.Name())
 }
 
-// destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
-func (app *App) destroyVk() {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	vk.DeviceWaitIdle(app.Drawer.Surf.Device.Device)
-	app.Drawer.Destroy()
-	app.Drawer.Surf.Destroy()
-	app.Drawer = nil
+// DestroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
+func (a *App) DestroyVk() {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	vk.DeviceWaitIdle(a.Drawer.Surf.Device.Device)
+	a.Drawer.Destroy()
+	a.Drawer.Surf.Destroy()
+	a.Drawer = nil
 }
 
-// fullDestroyVk destroys all vulkan things for when the app is fully quit
-func (app *App) fullDestroyVk() {
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	app.GPU.Destroy()
+// FullDestroyVk destroys all vulkan things for when the app is fully quit
+func (a *App) FullDestroyVk() {
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	a.GPU.Destroy()
 }
 
 // NewWindow creates a new window with the given options.
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
-func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { base.HandleRecover(recover()) }()
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
-		app.Mu.Lock()
-		winptr = app.Winptr
-		app.Mu.Unlock()
+		a.Mu.Lock()
+		winptr = a.Winptr
+		a.Mu.Unlock()
 
 		if winptr != 0 {
 			break
@@ -99,62 +99,62 @@ func (app *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	if goosi.InitScreenLogicalDPIFunc != nil {
 		goosi.InitScreenLogicalDPIFunc()
 	}
-	app.Mu.Lock()
-	defer app.Mu.Unlock()
-	app.Win = &Window{base.NewWindowSingle(app, opts)}
-	app.Win.EvMgr.Deque = &app.Win.Deque
-	app.Win.EvMgr.Window(events.WinShow)
-	app.Win.EvMgr.Window(events.WinFocus)
+	a.Mu.Lock()
+	defer a.Mu.Unlock()
+	a.Win = &Window{base.NewWindowSingle(a, opts)}
+	a.Win.EvMgr.Deque = &a.Win.Deque
+	a.Win.EvMgr.Window(events.WinShow)
+	a.Win.EvMgr.Window(events.WinFocus)
 
-	go app.Win.WinLoop()
+	go a.Win.WinLoop()
 
-	return app.Win, nil
+	return a.Win, nil
 }
 
-// setSysWindow sets the underlying system window pointer, surface, system, and drawer.
+// SetSystemWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
-func (app *App) setSysWindow(winptr uintptr) error {
+func (a *App) SetSystemWindow(winptr uintptr) error {
 	defer func() { base.HandleRecover(recover()) }()
 	var vsf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
-	ret := vk.CreateWindowSurface(app.GPU.Instance, winptr, nil, &vsf)
+	ret := vk.CreateWindowSurface(a.GPU.Instance, winptr, nil, &vsf)
 	if err := vk.Error(ret); err != nil {
 		return err
 	}
-	sf := vgpu.NewSurface(app.GPU, vsf)
+	sf := vgpu.NewSurface(a.GPU, vsf)
 
-	sys := app.GPU.NewGraphicsSystem(app.Name(), &sf.Device)
+	sys := a.GPU.NewGraphicsSystem(a.Name(), &sf.Device)
 	sys.ConfigRender(&sf.Format, vgpu.UndefType)
 	sf.SetRender(&sys.Render)
 	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
 	sys.Config()
-	app.Drawer = &vdraw.Drawer{
+	a.Drawer = &vdraw.Drawer{
 		Sys:     *sys,
 		YIsDown: true,
 	}
 	// app.window.Draw.ConfigSys()
-	app.Drawer.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
+	a.Drawer.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
-	app.Winptr = winptr
+	a.Winptr = winptr
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
-	if app.Win != nil {
-		app.Win.EvMgr.Window(events.WinShow)
-		app.Win.EvMgr.Window(events.ScreenUpdate)
+	if a.Win != nil {
+		a.Win.EvMgr.Window(events.WinShow)
+		a.Win.EvMgr.Window(events.ScreenUpdate)
 	}
 	return nil
 }
 
-func (app *App) PrefsDir() string {
+func (a *App) PrefsDir() string {
 	return "/data/data"
 }
 
-func (app *App) Platform() goosi.Platforms {
+func (a *App) Platform() goosi.Platforms {
 	return goosi.Android
 }
 
-func (app *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) ClipBoard(win goosi.Window) clip.Board {
 	// TODO(kai): implement clipboard on Android
 	return &clip.BoardBase{}
 }

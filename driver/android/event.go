@@ -34,7 +34,7 @@ import (
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
-		code := convAndroidKeyCode(r)
+		code := ConvAndroidKeyCode(r)
 		TheApp.Win.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
@@ -63,21 +63,23 @@ func longPressed(posX, posY C.float) {
 	// TheApp.Win.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }
 
-func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
+// ProcessEvents processes input queue events
+func ProcessEvents(env *C.JNIEnv, q *C.AInputQueue) {
 	var e *C.AInputEvent
 	for C.AInputQueue_getEvent(q, &e) >= 0 {
 		if C.AInputQueue_preDispatchEvent(q, e) != 0 {
 			continue
 		}
-		processEvent(env, e)
+		ProcessEvent(env, e)
 		C.AInputQueue_finishEvent(q, e, 0)
 	}
 }
 
-func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
+// ProcessEvent processes an input queue event
+func ProcessEvent(env *C.JNIEnv, e *C.AInputEvent) {
 	switch C.AInputEvent_getType(e) {
 	case C.AINPUT_EVENT_TYPE_KEY:
-		processKey(env, e)
+		ProcessKey(env, e)
 	case C.AINPUT_EVENT_TYPE_MOTION:
 		// At most one of the events in this batch is an up or down event; get its index and change.
 		upDownIndex := C.size_t(C.AMotionEvent_getAction(e)&C.AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> C.AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT
@@ -104,7 +106,8 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 	}
 }
 
-func processKey(env *C.JNIEnv, e *C.AInputEvent) {
+// ProcessKey processes an input key event
+func ProcessKey(env *C.JNIEnv, e *C.AInputEvent) {
 	deviceID := C.AInputEvent_getDeviceId(e)
 	if deviceID == 0 {
 		// Software keyboard input, leaving for scribe/IME.
@@ -112,7 +115,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 	}
 
 	r := rune(C.getKeyRune(env, e))
-	code := convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e)))
+	code := ConvAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e)))
 
 	if r >= '0' && r <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
 		return
@@ -125,7 +128,8 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 	TheApp.Win.EvMgr.Key(typ, r, code, 0)
 }
 
-var androidKeycodes = map[int32]key.Codes{
+// AndroidKeyCodes is a map from android system key codes to goosi key codes
+var AndroidKeyCodes = map[int32]key.Codes{
 	C.AKEYCODE_HOME:            key.CodeHome,
 	C.AKEYCODE_0:               key.Code0,
 	C.AKEYCODE_1:               key.Code1,
@@ -227,8 +231,9 @@ var androidKeycodes = map[int32]key.Codes{
 	C.AKEYCODE_VOLUME_MUTE:     key.CodeMute,
 }
 
-func convAndroidKeyCode(aKeyCode int32) key.Codes {
-	if code, ok := androidKeycodes[aKeyCode]; ok {
+// ConvAndroidKeyCode converts the given android key code to a goosi key code
+func ConvAndroidKeyCode(aKeyCode int32) key.Codes {
+	if code, ok := AndroidKeyCodes[aKeyCode]; ok {
 		return code
 	}
 	return key.CodeUnknown
