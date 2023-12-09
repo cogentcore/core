@@ -7,9 +7,9 @@ package grease
 import (
 	"fmt"
 	"strings"
-	"unicode"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/glop/sentence"
 	"goki.dev/gti"
 )
 
@@ -76,17 +76,8 @@ func CmdFromFunc[T any](fun func(T) error) (*Cmd[T], error) {
 		}
 		// we do these transformations afterward the directives so that we have the up-to-date documentation and name
 
-		// get the command name in Title Case so we can replace "CmdName"
-		// with "Cmd Name" so it is fully accurate English and more consistent
-		// with the rest of the app
-		rs := []rune(cmd.Name)
-		for i, r := range rs {
-			// if we are the first character or are after a space, we should be capitalized
-			if i == 0 || unicode.IsSpace(rs[i-1]) {
-				rs[i] = unicode.ToUpper(r)
-			}
-		}
-		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, string(rs))
+		// we can replace the camel case command name with a sentence case version
+		cmd.Doc = strings.ReplaceAll(cmd.Doc, cfn, sentence.Case(cfn))
 
 		if strings.Count(cmd.Doc, ".") == 1 { // if we only have one period, get rid of it if it is at the end
 			cmd.Doc = strings.TrimSuffix(cmd.Doc, ".")
