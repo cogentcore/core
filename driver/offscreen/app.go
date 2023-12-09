@@ -36,6 +36,9 @@ func Main(f func(goosi.App)) {
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { base.HandleRecover(recover()) }()
 
+	if goosi.InitScreenLogicalDPIFunc != nil {
+		goosi.InitScreenLogicalDPIFunc()
+	}
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
 	a.Win.EvMgr.Deque = &a.Win.Deque
