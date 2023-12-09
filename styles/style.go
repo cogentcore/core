@@ -295,15 +295,8 @@ func (s *Style) InheritFields(par *Style) {
 	s.Text.InheritFields(&par.Text)
 }
 
-// StyleToDots runs ToDots on unit values, to compile down to raw pixels
-func (s *Style) StyleToDots(uc *units.Context) {
-	// none
-}
-
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels
 func (s *Style) ToDotsImpl(uc *units.Context) {
-	s.StyleToDots(uc)
-
 	s.LayoutToDots(uc)
 	s.Font.ToDots(uc)
 	s.Text.ToDots(uc)
