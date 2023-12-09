@@ -342,13 +342,14 @@ func (vv *ValueBase) Doc() string {
 
 	// if we are not part of a struct, we just get the documentation for our type
 	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
-		typ := gti.TypeByName(gti.TypeName(vv.Value.Type()))
+		rtyp := laser.NonPtrType(vv.Value.Type())
+		typ := gti.TypeByName(gti.TypeName(rtyp))
 		if typ == nil {
 			return ""
 		}
 		vv.SetFlag(true, ValueHasSavedDoc)
-		vv.SavedDoc = typ.Doc
-		return typ.Doc
+		vv.SavedDoc = sentence.Doc(typ.Doc, rtyp.Name(), vv.Label())
+		return vv.SavedDoc
 	}
 	// otherwise, we get our field documentation in our parent
 	otyp := gti.TypeByValue(vv.Owner)
@@ -359,16 +360,16 @@ func (vv *ValueBase) Doc() string {
 			return ""
 		}
 		vv.SetFlag(true, ValueHasSavedDoc)
-		vv.SavedDoc = desc
-		return desc
+		vv.SavedDoc = sentence.Doc(desc, vv.Field.Name, vv.Label())
+		return vv.SavedDoc
 	}
 	f := gti.GetField(otyp, vv.Field.Name)
 	if f == nil {
 		return ""
 	}
 	vv.SetFlag(true, ValueHasSavedDoc)
-	vv.SavedDoc = f.Doc
-	return f.Doc
+	vv.SavedDoc = sentence.Doc(f.Doc, vv.Field.Name, vv.Label())
+	return vv.SavedDoc
 }
 
 func (vv *ValueBase) SetDoc(doc string) {
