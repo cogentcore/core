@@ -38,6 +38,7 @@ type App struct {
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
+	TheApp.AddEventListeners()
 	base.Main(f, TheApp, &TheApp.App)
 }
 

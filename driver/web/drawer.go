@@ -122,6 +122,6 @@ func (dw *Drawer) EndDraw() {
 	// no-op
 }
 
-func (dw *drawerImpl) Surface() any {
+func (dw *Drawer) Surface() any {
 	return nil
 }
