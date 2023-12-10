@@ -279,15 +279,22 @@ func (ac *AppChooser) OnInit() {
 			return
 		}
 		urs := ac.Resources.Generate()
-		ac.Items = make([]any, mm.Stack.Len()+len(urs))
+		iln := mm.Stack.Len() + len(urs)
+		ac.Items = make([]any, iln)
+		ac.Icons = make([]icons.Icon, iln)
+		ac.Tooltips = make([]string, iln)
 		for i, kv := range mm.Stack.Order {
 			u := uri.URI{Label: kv.Val.Scene.Name(), Icon: icons.SelectWindow}
 			u.SetURL("scene", kv.Val.Scene.Name(), fmt.Sprintf("%d", i))
 			ac.Items[i] = u
+			ac.Icons[i] = u.Icon
+			ac.Tooltips[i] = u.URL
 		}
 		st := len(mm.Stack.Order)
 		for i, u := range urs {
 			ac.Items[st+i] = u
+			ac.Icons[st+i] = u.Icon
+			ac.Tooltips[st+i] = u.URL
 		}
 	})
 	ac.OnChange(func(e events.Event) {

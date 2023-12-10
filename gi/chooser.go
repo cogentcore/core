@@ -64,7 +64,12 @@ type Chooser struct {
 	// items available for selection
 	Items []any `json:"-" xml:"-"`
 
-	// an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items
+	// an optional list of icons displayed for Chooser items;
+	// the indices for the icons correspond to those for the items
+	Icons []icons.Icon `json:"-" xml:"-"`
+
+	// an optional list of tooltips displayed on hover for Chooser items;
+	// the indices for the tooltips correspond to those for the items
 	Tooltips []string `json:"-" xml:"-"`
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
@@ -396,8 +401,9 @@ func (ch *Chooser) SetIcons(el []icons.Icon, setFirst bool, maxLen int) *Chooser
 		return ch
 	}
 	ch.Items = make([]any, n)
-	for i, str := range el {
-		ch.Items[i] = str
+	for i, ic := range el {
+		ch.Items[i] = ic
+		ch.Icons[i] = ic
 	}
 	if maxLen > 0 {
 		ch.SetToMaxLength(maxLen)
@@ -587,43 +593,16 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	if ch.ItemsFunc != nil {
 		ch.ItemsFunc()
 	}
-	if len(ch.Items) == 0 {
-		return
-	}
-	if _, ok := ch.Items[0].(uri.URI); ok {
-		ch.MakeItemsMenuURI(m)
-		return
-	}
-	_, ics := ch.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
 		bt := NewButton(m, nm).SetType(ButtonMenu)
-		if ics {
-			bt.Icon = it.(icons.Icon)
-			bt.Tooltip = string(bt.Icon)
-		} else {
-			bt.Text = ToLabel(it)
-			if len(ch.Tooltips) > i {
-				bt.Tooltip = ch.Tooltips[i]
-			}
+		bt.SetText(ToLabel(it))
+		if len(ch.Icons) > i {
+			bt.SetIcon(ch.Icons[i])
 		}
-		bt.Data = i // index is the data
-		bt.SetSelected(i == ch.CurIndex)
-		idx := i
-		bt.OnClick(func(e events.Event) {
-			ch.SelectItemAction(idx)
-		})
-	}
-}
-
-// MakeItemsMenuURI constructs a menu of all the items, for URI.
-// It is automatically set as the [Button.Menu] for the Chooser.
-func (ch *Chooser) MakeItemsMenuURI(m *Scene) {
-	for i, it := range ch.Items {
-		u := it.(uri.URI)
-		nm := "item-" + strconv.Itoa(i)
-		bt := NewButton(m, nm).SetType(ButtonMenu).SetText(u.Label).
-			SetIcon(u.Icon).SetTooltip(u.URL)
+		if len(ch.Tooltips) > i {
+			bt.SetTooltip(ch.Tooltips[i])
+		}
 		bt.Data = i // index is the data
 		bt.SetSelected(i == ch.CurIndex)
 		idx := i
