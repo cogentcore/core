@@ -151,12 +151,6 @@ func (a *App) GoGiDataDir() string {
 	return pdir
 }
 
-func (a *App) AppDataDir() string {
-	pdir := filepath.Join(a.This.DataDir(), a.Name())
-	os.MkdirAll(pdir, 0755)
-	return pdir
-}
-
 func (a *App) SetQuitReqFunc(fun func()) {
 	a.QuitReqFunc = fun
 }

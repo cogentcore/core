@@ -92,10 +92,6 @@ type App interface {
 	// ensures that the directory exists first.
 	GoGiDataDir() string
 
-	// AppDataDir returns the application-specific data directory:
-	// DataDir + App.Name --ensures that the directory exists first.
-	AppDataDir() string
-
 	// About is an informative message about the app.  Can use HTML
 	// formatting, including links.
 	About() string
