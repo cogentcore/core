@@ -226,7 +226,7 @@ func (ch *Chooser) ConfigParts() {
 
 	icIdx := -1
 	var lbIdx, txIdx, indIdx int
-	if ch.Icon.IsValid() {
+	if ch.Icon.IsValid() && !ch.Editable {
 		config.Add(IconType, "icon")
 		config.Add(SpaceType, "space")
 		icIdx = 0
@@ -255,6 +255,7 @@ func (ch *Chooser) ConfigParts() {
 	if ch.Editable {
 		tx := ch.Parts.Child(txIdx).(*TextField)
 		tx.SetText(ch.CurLabel)
+		tx.SetLeadingIcon(ch.Icon)
 		tx.Config() // this is essential
 		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 	} else {
