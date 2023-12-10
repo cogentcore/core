@@ -6,11 +6,37 @@ package colors
 
 import (
 	"image/color"
+	"math"
 
 	"goki.dev/cam/hct"
 	"goki.dev/colors/matcolor"
 	"goki.dev/mat32/v2"
 )
+
+// BinarySpacedNumber returns a floating point number in the 0-1 range based on the
+// binary representation of the given input number, such that the biggest differences
+// are in the lowest-order bits, with progressively smaller differences for higher powers.
+// 0 = 0; 1 = 0.5; 2 = 0.25; 3 = 0.75; 4 = 0.125; 5 = 0.625...
+func BinarySpacedNumber(idx int) float32 {
+	nb := int(mat32.Ceil(mat32.Log(float32(idx)) / math.Ln2))
+	rv := float32(0)
+	for i := 0; i <= nb; i++ {
+		pbase := 1 << i
+		base := 1 << (i + 1)
+		dv := (idx % base) / pbase
+		iv := float32(dv) * (1 / float32(base))
+		rv += iv
+	}
+	return rv
+}
+
+// BinarySpacedColor returns a maximally widely-spaced sequence of colors
+// for prgressive values of the index, using the Hue value of the HCT space.
+// This is useful for assigning colors in graphs etc.
+func BinarySpacedColor(idx int, chroma, tone float32) color.RGBA {
+	h := hct.New(360*BinarySpacedNumber(idx), chroma, tone)
+	return h.AsRGBA()
+}
 
 // List returns a list of n colors with the given HCT chroma and tone
 // and varying hues spaced equally in order to minimize the number of similar colors.
