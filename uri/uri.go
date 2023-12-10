@@ -34,12 +34,7 @@ type URI struct {
 }
 
 func (ur URI) String() string {
-	s := ""
-	if ur.Label != "" {
-		s += ur.Label + ": "
-	}
-	s += ur.URL
-	return s
+	return ur.Label
 }
 
 func (ur *URI) SetURL(scheme, host, path string) {
