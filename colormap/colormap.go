@@ -9,12 +9,12 @@ package colormap
 import (
 	"image/color"
 	"maps"
-	"math"
 	"sort"
 
 	"goki.dev/cam/cam16"
 	"goki.dev/cam/hct"
 	"goki.dev/colors"
+	"goki.dev/mat32/v2"
 )
 
 // BlendTypes are different algorithms (colorspaces) to use for blending
@@ -60,12 +60,12 @@ func (cm *Map) String() string {
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor
 // which can be used to indicate missing values.
-func (cm *Map) Map(val float64) color.RGBA {
+func (cm *Map) Map(val float32) color.RGBA {
 	nc := len(cm.Colors)
 	if nc < 2 {
 		return color.RGBA{}
 	}
-	if math.IsNaN(val) {
+	if mat32.IsNaN(val) {
 		return cm.NoColor
 	}
 	if val <= 0 {
@@ -73,13 +73,13 @@ func (cm *Map) Map(val float64) color.RGBA {
 	} else if val >= 1 {
 		return cm.Colors[nc-1]
 	}
-	ival := val * float64(nc-1)
-	lidx := math.Floor(ival)
-	uidx := math.Ceil(ival)
+	ival := val * float32(nc-1)
+	lidx := mat32.Floor(ival)
+	uidx := mat32.Ceil(ival)
 	if lidx == uidx {
 		return cm.Colors[int(lidx)]
 	}
-	cmix := float32(100 * (1 - (ival - lidx)))
+	cmix := 100 * (1 - (ival - lidx))
 	lclr := cm.Colors[int(lidx)]
 	uclr := cm.Colors[int(uidx)]
 	switch cm.Blend {

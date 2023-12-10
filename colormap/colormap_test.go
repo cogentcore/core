@@ -41,7 +41,7 @@ func TestColorMaps(t *testing.T) {
 			yp = idx*(nblend+1) + bi
 			cm.Blend = bm
 			for x := 0; x < nX; x++ {
-				xv := float64(x) / float64(nX)
+				xv := float32(x) / float32(nX)
 				c := cm.Map(xv)
 				ys := yp * sqSz
 				xs := x * sqX
