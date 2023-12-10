@@ -622,8 +622,8 @@ func (ch *Chooser) MakeItemsMenuURI(m *Scene) {
 	for i, it := range ch.Items {
 		u := it.(uri.URI)
 		nm := "item-" + strconv.Itoa(i)
-		bt := NewButton(m, nm).SetType(ButtonMenu).SetText(u.String()).
-			SetIcon(u.Icon).SetTooltip(u.Desc)
+		bt := NewButton(m, nm).SetType(ButtonMenu).SetText(u.Label).
+			SetIcon(u.Icon).SetTooltip(u.URL)
 		bt.Data = i // index is the data
 		bt.SetSelected(i == ch.CurIndex)
 		idx := i
