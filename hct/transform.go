@@ -83,8 +83,8 @@ func Spin(c color.Color, amount float32) color.RGBA {
 }
 
 // Blend returns a color that is the given percent blend between the first
-// and second color; 10 = 10% of the second and 90% of the first, etc;
-// blending is done directly on non-premultiplied HCT values, and
+// and second color; 10 = 10% of the first and 90% of the second, etc;
+// blending is done directly on non-premultiplied CAM16-UCS values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
 	pct = mat32.Clamp(pct, 0, 100)
