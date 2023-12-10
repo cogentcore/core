@@ -74,10 +74,13 @@ func TestCAM(t *testing.T) {
 }
 
 func TestXYZ(t *testing.T) {
-	x, y, z := cie.SRGBToXYZ(0.5, 0.1, 0.1)
-	cam := FromXYZ(x, y, z)
-	xc, yc, zc := cam.XYZ()
-	if x != xc || y != yc || z != zc {
-		t.Errorf("xyz: %g, %g, %g  cam: %#v  xyzc: %g %g %g", x, y, z, cam, xc, yc, zc)
+	tests := [][3]float32{{0.5, 0.1, 0.6}, {0.3, 0.5, 0.1}, {0.4, 0.2, 0.8}, {0.777, 0.424, 0.521}}
+	for _, test := range tests {
+		x, y, z := cie.SRGBToXYZ(test[0], test[1], test[2])
+		cam := FromXYZ(x, y, z)
+		xc, yc, zc := cam.XYZ()
+		expect(t, x, xc)
+		expect(t, y, yc)
+		expect(t, z, zc)
 	}
 }
