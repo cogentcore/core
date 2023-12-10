@@ -84,3 +84,19 @@ func TestXYZ(t *testing.T) {
 		expect(t, z, zc)
 	}
 }
+
+func TestUCS(t *testing.T) {
+	tests := [][3]float32{{1, 1, 0}, {0, 0, 1}} // , {0.4, 0.2, 0.8}, {0.777, 0.424, 0.521}}
+	for _, test := range tests {
+		x, y, z := cie.SRGBToXYZ(test[0], test[1], test[2])
+		cam := FromXYZ(x, y, z)
+		j, _, a, b := cam.UCS()
+		ccam := FromUCS(j, a, b)
+		// fmt.Printf("srgb: %g, %g, %g, cam: %#v  ccam: %#v\n", test[0], test[1], test[2], *cam, *ccam)
+		expect(t, cam.Chroma, ccam.Chroma)
+		expect(t, cam.Lightness, ccam.Lightness)
+		expect(t, cam.Colorfulness, ccam.Colorfulness)
+		expect(t, cam.Saturation, ccam.Saturation)
+		expect(t, cam.Brightness, ccam.Brightness)
+	}
+}
