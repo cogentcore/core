@@ -426,7 +426,9 @@ func (vv *ValueBase) SetSliceValue(val reflect.Value, owner any, idx int, tmpSav
 // (e.g., for arg values).
 func (vv *ValueBase) SetSoloValue(val reflect.Value) {
 	vv.OwnKind = reflect.Invalid
-	vv.Value = val
+	// we must ensure that it is a pointer value so that it has
+	// an underlying value that updates when changes occur
+	vv.Value = laser.PtrValue(val)
 }
 
 // SetSoloValueIface sets the value for a singleton standalone value

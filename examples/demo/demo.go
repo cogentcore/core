@@ -304,7 +304,7 @@ func makeValues(ts *gi.Tabs) {
 	giv.NewValue(values, colors.Orange)
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, gi.FileName("demo.go"))
-	giv.NewValue(values, giv.ColorMapName(""))
+	giv.NewValue(values, giv.ColorMapName("ColdHot"))
 	giv.NewValue(values, hello)
 }
 

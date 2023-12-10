@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
@@ -41,7 +42,13 @@ func (vv *ColorMapValue) WidgetType() *gti.Type {
 	return vv.WidgetTyp
 }
 
-func (vv *ColorMapValue) UpdateWidget() {}
+func (vv *ColorMapValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	vv.Widget.ApplyStyle()
+	vv.AsWidgetBase().SetNeedsRender(true)
+}
 
 func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
@@ -61,6 +68,9 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusExtraSmall
+
+		s.Grow.Set(0, 0)
+		s.Min.Set(units.Em(10), units.Em(1.5))
 
 		cmn, ok := laser.NonPtrValue(vv.Value).Interface().(ColorMapName)
 		if !ok || cmn == "" {
@@ -92,7 +102,7 @@ func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
-			vv.SetValue(sl[si])
+			vv.SetValue(ColorMapName(sl[si]))
 			vv.UpdateWidget()
 		}
 	}
