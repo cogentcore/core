@@ -5,9 +5,11 @@
 package hct
 
 import (
+	"fmt"
 	"image/color"
 
 	"goki.dev/cam/cam16"
+	"goki.dev/cam/cie"
 	"goki.dev/mat32/v2"
 )
 
@@ -89,11 +91,11 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	pct = mat32.Clamp(pct, 0, 100)
 	amt := pct / 100
 
-	hx := FromColor(x)
-	hy := FromColor(y)
+	xsr, xsg, xsb, _ := cie.SRGBUint32ToFloat(x.RGBA())
+	ysr, ysg, ysb, _ := cie.SRGBUint32ToFloat(y.RGBA())
 
-	cx := cam16.FromSRGB(hx.R, hx.G, hx.B)
-	cy := cam16.FromSRGB(hy.R, hy.G, hy.B)
+	cx := cam16.FromSRGB(xsr, xsg, xsb)
+	cy := cam16.FromSRGB(ysr, ysg, ysb)
 
 	xj, _, xa, xb := cx.UCS()
 	yj, _, ya, yb := cy.UCS()
@@ -101,8 +103,10 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	j := yj + (xj-yj)*amt
 	a := ya + (xa-ya)*amt
 	b := yb + (xb-yb)*amt
+	fmt.Println("j", j, "a", a, "b", b)
 
 	cam := cam16.FromUCS(j, a, b)
+	fmt.Printf("cam %#v\n", cam)
 	return cam.AsRGBA()
 }
 

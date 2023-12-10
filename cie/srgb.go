@@ -64,8 +64,18 @@ func SRGBFmLinear100(rl, gl, bl float32) (r, g, b float32) {
 	return
 }
 
-// SRGBFloatToUint32 converts the given sRGB float32 values to uint32 values,
-// performing premultiplication with the a value.
+// SRGBFloatToUint8 converts the given non-alpha-premuntiplied sRGB float32
+// values to alpha-premultiplied sRGB uint8 values.
+func SRGBFloatToUint8(rf, gf, bf, af float32) (r, g, b, a uint8) {
+	r = uint8(rf*af*255 + 0.5)
+	g = uint8(gf*af*255 + 0.5)
+	b = uint8(bf*af*255 + 0.5)
+	a = uint8(af*255 + 0.5)
+	return
+}
+
+// SRGBFloatToUint32 converts the given non-alpha-premuntiplied sRGB float32
+// values to alpha-premultiplied sRGB uint32 values.
 func SRGBFloatToUint32(rf, gf, bf, af float32) (r, g, b, a uint32) {
 	r = uint32(rf*af*65535 + 0.5)
 	g = uint32(gf*af*65535 + 0.5)
@@ -74,12 +84,22 @@ func SRGBFloatToUint32(rf, gf, bf, af float32) (r, g, b, a uint32) {
 	return
 }
 
-// SRGBFloatToUint8 converts the given sRGB float32 values to uint8 values,
-// performing premultiplication with the a value.
-func SRGBFloatToUint8(rf, gf, bf, af float32) (r, g, b, a uint8) {
-	r = uint8(rf*af*255 + 0.5)
-	g = uint8(gf*af*255 + 0.5)
-	b = uint8(bf*af*255 + 0.5)
-	a = uint8(af*255 + 0.5)
+// SRGBUint8ToFloat converts the given alpha-premultiplied sRGB uint8 values
+// to non-alpha-premuntiplied sRGB float32 values.
+func SRGBUint8ToFloat(r, g, b, a uint32) (fr, fg, fb, fa float32) {
+	fa = float32(a) / 255
+	fr = (float32(r) / 255) / fa
+	fg = (float32(g) / 255) / fa
+	fb = (float32(b) / 255) / fa
+	return
+}
+
+// SRGBUint32ToFloat converts the given alpha-premultiplied sRGB uint32 values
+// to non-alpha-premuntiplied sRGB float32 values.
+func SRGBUint32ToFloat(r, g, b, a uint32) (fr, fg, fb, fa float32) {
+	fa = float32(a) / 65535
+	fr = (float32(r) / 65535) / fa
+	fg = (float32(g) / 65535) / fa
+	fb = (float32(b) / 65535) / fa
 	return
 }
