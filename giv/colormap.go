@@ -7,6 +7,8 @@ package giv
 import (
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/abilities"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/laser"
@@ -37,7 +39,14 @@ type ColorMapView struct {
 
 func (cv *ColorMapView) OnInit() {
 	cv.HandleColorMapEvents()
-	// todo: style
+	cv.ColorMapStyles()
+}
+
+func (cv *ColorMapView) ColorMapStyles() {
+	cv.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable)
+		s.Border.Radius = styles.BorderRadiusExtraSmall
+	})
 }
 
 // SetColorMap sets the color map and triggers a display update
