@@ -16,10 +16,6 @@ import (
 // Used on Solid to link to meshes by name.
 type MeshName string
 
-func (mn MeshName) String() string {
-	return string(mn)
-}
-
 // Mesh parameterizes the mesh-based shape used for rendering a Solid.
 // Only indexed triangle meshes are supported.
 // All Mesh's must know in advance the number of vertex and index points
