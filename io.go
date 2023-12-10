@@ -78,9 +78,6 @@ func (sv *SVG) OpenFS(fsys fs.FS, fname string) error {
 // xml.Decoder to create the SVG scenegraph for corresponding SVG drawing.
 // Removes any existing content in SVG first. To process a byte slice, pass:
 // bytes.NewReader([]byte(str)) -- all errors are logged and also returned.
-// If this is being read into a live scenegraph, then you MUST call
-//
-//	svg.FullInit2DTree() after to initialize it for rendering.
 func (sv *SVG) ReadXML(reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
 	decoder.Strict = false
