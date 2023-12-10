@@ -200,12 +200,12 @@ var StdMaps = map[string]*Map{
 			{252, 254, 164, 255},
 		},
 	},
-	"RedBlue": {
-		Name:    "RedBlue",
+	"BlueRed": {
+		Name:    "BlueRed",
 		NoColor: color.RGBA{200, 200, 200, 255},
 		Colors: []color.RGBA{
-			{255, 0, 0, 255},
 			{0, 0, 255, 255},
+			{255, 0, 0, 255},
 		},
 	},
 	"BlueBlackRed": {
