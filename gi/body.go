@@ -67,11 +67,6 @@ func (bd *Body) AddText(text string) *Body {
 	return bd
 }
 
-// App returns the App
-func (bd *Body) App() *App {
-	return bd.Sc.App
-}
-
 // SetApp sets the App
 func (bd *Body) SetApp(app *App) *Body {
 	bd.Sc.App = app

@@ -76,6 +76,11 @@ func (app *App) DataDir() string {
 	return pdir
 }
 
+// App returns the [App] this widget is contained in
+func (wb *WidgetBase) App() *App {
+	return wb.Sc.App
+}
+
 // todo: deal with this stuff too:
 
 // SetQuitReqFunc sets the function that is called whenever there is a
