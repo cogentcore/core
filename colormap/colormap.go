@@ -17,6 +17,7 @@ import (
 // Map maps a value onto a color by interpolating between a list of colors
 // defining a spectrum, or optionally as an indexed list of colors.
 type Map struct {
+	// Name is the name of the color map
 	Name string
 
 	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
@@ -78,10 +79,9 @@ func (cm *Map) MapIndex(val int) color.RGBA {
 // StdMaps is a list of standard color maps
 var StdMaps = map[string]*Map{
 	"ColdHot": {
-		"ColdHot",
-		false,
-		colors.FromRGB(200, 200, 200),
-		[]color.RGBA{
+		Name:    "ColdHot",
+		NoColor: colors.FromRGB(200, 200, 200),
+		Colors: []color.RGBA{
 			{0, 255, 255, 255},
 			{0, 0, 255, 255},
 			{127, 127, 127, 255},
@@ -90,10 +90,9 @@ var StdMaps = map[string]*Map{
 		},
 	},
 	"Jet": {
-		"Jet",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+		Name:    "Jet",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 127, 255},
 			{0, 0, 255, 255},
 			{0, 127, 255, 255},
@@ -106,10 +105,9 @@ var StdMaps = map[string]*Map{
 		},
 	},
 	"JetMuted": {
-		"JetMuted",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+		Name:    "JetMuted",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{25, 25, 153, 255},
 			{25, 102, 230, 255},
 			{0, 230, 230, 255},
@@ -120,10 +118,9 @@ var StdMaps = map[string]*Map{
 		},
 	},
 	"Viridis": {
-		"Viridis",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+		Name:    "Viridis",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{72, 33, 114, 255},
 			{67, 62, 133, 255},
 			{56, 87, 140, 255},
@@ -138,10 +135,9 @@ var StdMaps = map[string]*Map{
 		},
 	},
 	"Plasma": {
-		"Plasma",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+		Name:    "Plasma",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{61, 4, 155, 255},
 			{99, 0, 167, 255},
 			{133, 6, 166, 255},
@@ -156,10 +152,9 @@ var StdMaps = map[string]*Map{
 		},
 	},
 	"Inferno": {
-		"Inferno",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+		Name:    "Inferno",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{37, 12, 3, 255},
 			{19, 11, 52, 255},
 			{57, 9, 99, 255},
@@ -174,46 +169,46 @@ var StdMaps = map[string]*Map{
 			{252, 254, 164, 255},
 		},
 	},
-	"BlueBlackRed": {"BlueBlackRed",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"BlueBlackRed": {
+		Name:    "BlueBlackRed",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{76, 76, 76, 255},
 			{255, 0, 0, 255},
 		},
 	},
-	"BlueGreyRed": {"BlueGreyRed",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"BlueGreyRed": {
+		Name:    "BlueGreyRed",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{127, 127, 127, 255},
 			{255, 0, 0, 255},
 		},
 	},
-	"BlueWhiteRed": {"BlueWhiteRed",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"BlueWhiteRed": {
+		Name:    "BlueWhiteRed",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{230, 230, 230, 255},
 			{255, 0, 0, 255},
 		},
 	},
-	"BlueGreenRed": {"BlueGreenRed",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"BlueGreenRed": {
+		Name:    "BlueGreenRed",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 255, 255},
 			{0, 230, 0, 255},
 			{255, 0, 0, 255},
 		},
 	},
-	"Rainbow": {"Rainbow",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"Rainbow": {
+		Name:    "Rainbow",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{255, 0, 255, 255},
 			{0, 0, 255, 255},
 			{0, 255, 0, 255},
@@ -221,10 +216,10 @@ var StdMaps = map[string]*Map{
 			{255, 0, 0, 255},
 		},
 	},
-	"ROYGBIV": {"ROYGBIV",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"ROYGBIV": {
+		Name:    "ROYGBIV",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{255, 0, 255, 255},
 			{0, 0, 127, 255},
 			{0, 0, 255, 255},
@@ -233,27 +228,27 @@ var StdMaps = map[string]*Map{
 			{255, 0, 0, 255},
 		},
 	},
-	"DarkLight": {"DarkLight",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"DarkLight": {
+		Name:    "DarkLight",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 0, 255},
 			{250, 250, 250, 255},
 		},
 	},
-	"DarkLightDark": {"DarkLightDark",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"DarkLightDark": {
+		Name:    "DarkLightDark",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{0, 0, 0, 255},
 			{250, 250, 250, 255},
 			{0, 0, 0, 255},
 		},
 	},
-	"LightDarkLight": {"DarkLightDark",
-		false,
-		color.RGBA{200, 200, 200, 255},
-		[]color.RGBA{
+	"LightDarkLight": {
+		Name:    "DarkLightDark",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
 			{250, 250, 250, 255},
 			{0, 0, 0, 255},
 			{250, 250, 250, 255},
