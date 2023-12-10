@@ -555,14 +555,13 @@ func (ch *Chooser) ShowCurVal(label string) {
 			tf.SetTextUpdate(ch.CurLabel)
 		}
 	} else {
-		if icnm, isic := ch.CurVal.(icons.Icon); isic {
-			ch.SetIcon(icnm)
-		} else {
-			lbl := ch.LabelWidget()
-			if lbl != nil {
-				lbl.SetTextUpdate(ch.CurLabel)
-			}
+		lbl := ch.LabelWidget()
+		if lbl != nil {
+			lbl.SetTextUpdate(ch.CurLabel)
 		}
+	}
+	if ch.CurIndex < len(ch.Icons) {
+		ch.SetIcon(ch.Icons[ch.CurIndex])
 	}
 }
 
