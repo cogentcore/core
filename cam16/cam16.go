@@ -53,15 +53,15 @@ type CAM struct {
 
 // RGBA implements the color.Color interface.
 func (cam *CAM) RGBA() (r, g, b, a uint32) {
-	xyz := cam.XYZ()
-	rf, gf, bf := cie.XYZToSRGB(xyz.X, xyz.Y, xyz.Z)
+	x, y, z := cam.XYZ()
+	rf, gf, bf := cie.XYZToSRGB(x, y, z)
 	return cie.SRGBFloatToUint32(rf, gf, bf, 1)
 }
 
 // AsRGBA returns the color as a [color.RGBA].
 func (cam *CAM) AsRGBA() color.RGBA {
-	xyz := cam.XYZ()
-	rf, gf, bf := cie.XYZToSRGB(xyz.X, xyz.Y, xyz.Z)
+	x, y, z := cam.XYZ()
+	rf, gf, bf := cie.XYZToSRGB(x, y, z)
 	r, g, b, a := cie.SRGBFloatToUint8(rf, gf, bf, 1)
 	return color.RGBA{r, g, b, a}
 }
