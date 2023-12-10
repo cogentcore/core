@@ -49,22 +49,22 @@ type Var struct {
 	SizeOf int
 
 	// texture manages its own memory allocation -- set this for texture objects that change size dynamically -- otherwise image host staging memory is allocated in a common buffer
-	TextureOwns bool `inactive:"+"`
+	TextureOwns bool `edit:"-"`
 
 	// index into the dynamic offset list, where dynamic offsets of vals need to be set -- for Uniform and Storage roles -- set during Set:DescLayout
-	DynOffIdx int `inactive:"+"`
+	DynOffIdx int `edit:"-"`
 
 	// the array of values allocated for this variable.  The size of this array is determined by the Set membership of this Var, and the current index is updated at the set level.  For Texture Roles, there is a separate descriptor for each value (image) -- otherwise dynamic offset binding is used.
 	Vals Vals
 
 	// for dynamically bound vars (Vertex, Uniform, Storage), this is the index of the currently bound value in Vals list -- index in this array is the descIdx out of Vars NDescs (see for docs) to allow for parallel update pathways -- only valid until set again -- only actually used for Vertex binding, as unforms etc have the WriteDescriptor mechanism.
-	BindValIdx []int `inactive:"+"`
+	BindValIdx []int `edit:"-"`
 
 	// index of the storage buffer in Memory that holds this Var -- for Storage buffer types.  Due to support for dynamic binding, all Vals of a given Var must be stored in the same buffer, and the allocation mechanism ensures this.  This constrains large vars approaching the MaxStorageBufferRange capacity to only have 1 val, which is typically reasonable given that compute shaders use large data and tend to use static binding anyway, and graphics uses tend to be smaller.
-	StorageBuff int `inactive:"+"`
+	StorageBuff int `edit:"-"`
 
 	// offset -- only for push constants
-	Offset int `inactive:"+"`
+	Offset int `edit:"-"`
 }
 
 // Init initializes the main values

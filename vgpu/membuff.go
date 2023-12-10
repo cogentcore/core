@@ -41,7 +41,7 @@ type MemBuff struct {
 	AlignBytes int
 
 	// true if memory has been allocated, copied, transfered
-	Active bool `inactive:"+"`
+	Active bool `edit:"-"`
 }
 
 // AllocHost allocates memory for this buffer of given size in bytes,

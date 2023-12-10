@@ -29,10 +29,10 @@ type Vars struct {
 	RoleMap map[VarRoles][]*Var
 
 	// true if a VertexSet has been added
-	HasVertex bool `inactive:"+"`
+	HasVertex bool `edit:"-"`
 
 	// true if PushSet has been added
-	HasPush bool `inactive:"+"`
+	HasPush bool `edit:"-"`
 
 	// number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased.
 	NDescs int
@@ -41,7 +41,7 @@ type Vars struct {
 	Mem *Memory `view:"-"`
 
 	// if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type
-	StaticVars bool `inactive:"+"`
+	StaticVars bool `edit:"-"`
 
 	// vulkan descriptor layout based on vars
 	VkDescLayout vk.PipelineLayout `view:"-"`
