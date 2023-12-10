@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/cam/hct"
 	"goki.dev/colors/matcolor"
+	"goki.dev/mat32/v2"
 )
 
 // List returns a list of n colors with the given HCT chroma and tone
@@ -19,9 +20,13 @@ func List(n int, chroma float32, tone float32) []color.RGBA {
 	if n == 0 {
 		return res
 	}
+	fn := float32(n)
 	inc := 360 / float32(min(n, 6))
-	for i := 0; i < n; i++ {
-		h := hct.New(float32(i)*inc, chroma, tone)
+	for i := float32(0); i < fn; i++ {
+		hue := float32(i) * inc
+		hue -= mat32.Mod(hue, 360) * (i / fn)
+
+		h := hct.New(hue, chroma, tone)
 		res = append(res, h.AsRGBA())
 	}
 	return res
