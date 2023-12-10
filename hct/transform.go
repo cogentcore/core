@@ -6,8 +6,6 @@ package hct
 
 import (
 	"image/color"
-
-	"goki.dev/mat32/v2"
 )
 
 // Lighten returns a color that is lighter by the
@@ -85,16 +83,32 @@ func Spin(c color.Color, amount float32) color.RGBA {
 // blending is done directly on non-premultiplied HCT values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
-	hx := FromColor(x)
-	hy := FromColor(y)
-	pct = mat32.Clamp(pct, 0, 100.0)
-	py := pct / 100
-	px := 1.0 - py
-	hx.SetHue(px*hx.Hue + py*hy.Hue)
-	hx.SetChroma(px*hx.Chroma + py*hy.Chroma)
-	hx.SetTone(px*hx.Tone + py*hy.Tone)
-	hx.A = px*hx.A + py*hy.A
-	return hx.AsRGBA()
+	// TODO(kai): finish Blend
+	// pct = mat32.Clamp(pct, 0, 100)
+	// amt := pct / 100
+
+	// hx := FromColor(x)
+	// hy := FromColor(y)
+
+	// cx := cam16.SRGBToCAM(hx.R, hx.G, hx.B)
+	// cy := cam16.SRGBToCAM(hy.R, hy.G, hy.B)
+
+	// xj, _, xa, xb := cx.UCS()
+	// yj, _, ya, yb := cy.UCS()
+
+	// j := yj + (xj-yj)*amt
+	// a := ya + (xa-ya)*amt
+	// b := yb + (xb-yb)*amt
+
+	return color.RGBAModel.Convert(x).(color.RGBA)
+
+	// py := pct / 100
+	// px := 1.0 - py
+	// hx.SetHue(px*hx.Hue + py*hy.Hue)
+	// hx.SetChroma(px*hx.Chroma + py*hy.Chroma)
+	// hx.SetTone(px*hx.Tone + py*hy.Tone)
+	// hx.A = px*hx.A + py*hy.A
+	// return hx.AsRGBA()
 }
 
 // IsLight returns whether the given color is light
