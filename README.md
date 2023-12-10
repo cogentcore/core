@@ -60,7 +60,7 @@ See [hct](hct) for implementation.
 
 ## HCT Colorspace
 
-![hct colorspace](examples/hctspace/hctspace.png)
+![hct colorspace](hct/testdata/hctspace.png)
 
 # Color in V1
 

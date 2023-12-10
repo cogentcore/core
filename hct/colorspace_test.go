@@ -5,7 +5,6 @@
 package hct
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -21,7 +20,6 @@ func TestColorSpace(t *testing.T) {
 	hueInc := 15
 	hueMax := 345
 	nHue := (hueMax / hueInc) + 1
-	fmt.Println(nHue)
 	huePages := 4
 	huePerPage := nHue / huePages
 	chromaInc := 10

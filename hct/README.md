@@ -10,7 +10,7 @@ Unlike contrast ratio, measuring contrast in L* is linear, and simple to calcula
 
 ## HCT Colorspace
 
-![hct colorspace](../examples/hctspace/hctspace.png)
+![hct colorspace](testdata/hctspace.png)
 
 
 
