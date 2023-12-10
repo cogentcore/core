@@ -569,6 +569,9 @@ func (ch *Chooser) ShowCurVal(label string) {
 			ch.SetNeedsLayout(true)
 		}
 	}
+	if ch.CurIndex < len(ch.Tooltips) {
+		ch.SetTooltip(ch.Tooltips[ch.CurIndex])
+	}
 }
 
 // SelectItem selects a given item and updates the display to it
