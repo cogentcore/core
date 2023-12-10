@@ -657,9 +657,6 @@ func (tv *TreeView) RenderNode() {
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)
-	if tv.Parts.HasAnyScroll() {
-		fmt.Println(tv, "tv scroll")
-	}
 }
 
 func (tv *TreeView) Render() {
