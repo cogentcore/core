@@ -19,9 +19,9 @@ func List(n int, chroma float32, tone float32) []color.RGBA {
 	if n == 0 {
 		return res
 	}
-	inc := 360 / float32(n)
-	for i := float32(0); i < 360; i += inc {
-		h := hct.New(i, chroma, tone)
+	inc := 360 / float32(min(n, 6))
+	for i := 0; i < n; i++ {
+		h := hct.New(float32(i)*inc, chroma, tone)
 		res = append(res, h.AsRGBA())
 	}
 	return res
