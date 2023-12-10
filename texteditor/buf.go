@@ -1280,6 +1280,7 @@ func (tb *Buf) InsertTextImpl(st lex.Pos, text []byte) *textbuf.Edit {
 	rsz := len(rs)
 	ed := st
 	var tbe *textbuf.Edit
+	st.Ch = min(len(tb.Lines[st.Ln]), st.Ch)
 	if sz == 1 {
 		nt := append(tb.Lines[st.Ln], rs...) // first append to end to extend capacity
 		copy(nt[st.Ch+rsz:], nt[st.Ch:])     // move stuff to end

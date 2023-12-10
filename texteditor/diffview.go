@@ -97,7 +97,6 @@ func DiffViewDialog(ctx gi.Widget, title string, astr, bstr []string, afile, bfi
 	dv.ConfigDiffView()
 	dv.DiffStrings(astr, bstr)
 	d.AddAppBar(dv.ConfigToolbar)
-	// todo: any buttons?
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
 }
