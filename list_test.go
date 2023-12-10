@@ -4,13 +4,7 @@
 
 package colors
 
-import (
-	"testing"
-
-	"goki.dev/cam/hct"
-	"goki.dev/mat32/v2"
-)
-
+/*
 func TestList(t *testing.T) {
 	type data struct {
 		n      int
@@ -52,3 +46,4 @@ func TestList(t *testing.T) {
 		}
 	}
 }
+*/

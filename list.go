@@ -30,14 +30,38 @@ func BinarySpacedNumber(idx int) float32 {
 	return rv
 }
 
-// BinarySpacedColor returns a maximally widely-spaced sequence of colors
-// for prgressive values of the index, using the Hue value of the HCT space.
-// This is useful for assigning colors in graphs etc.
-func BinarySpacedColor(idx int, chroma, tone float32) color.RGBA {
+// BinarySpaced returns a maximally widely-spaced sequence of colors
+// for progressive values of the index, using the Hue value of the HCT space.
+// This is useful, for example, for assigning colors in graphs.
+func BinarySpaced(idx int, chroma, tone float32) color.RGBA {
 	h := hct.New(360*BinarySpacedNumber(idx), chroma, tone)
 	return h.AsRGBA()
 }
 
+// BinarySpacedAccent calls [BinarySpaced] with standard chroma and tone values that will result
+// in matcolor-style base accent colors appropriate for the current color theme
+// (light vs dark). These colors will satisfy text contrast requirements when placed
+// on standard scheme backgrounds.
+func BinarySpacedAccent(idx int) color.RGBA {
+	if matcolor.SchemeIsDark {
+		return BinarySpaced(idx, 48, 80)
+	}
+	return BinarySpaced(idx, 48, 40)
+}
+
+// BinarySpacedAccentVariant calls [BinarySpaced] with standard chroma and tone values that will result
+// in variant versions of matcolor-style base accent colors appropriate for the current
+// color theme (light vs dark). These colors will not necessarily satisfy text contrast
+// requirements, and they are designed for things like graph lines that do not need to
+// stand out as much.
+func BinarySpacedAccentVariant(idx int) color.RGBA {
+	if matcolor.SchemeIsDark {
+		return BinarySpaced(idx, 48, 50)
+	}
+	return BinarySpaced(idx, 48, 60)
+}
+
+/*
 // List returns a list of n colors with the given HCT chroma and tone
 // and varying hues spaced equally in order to minimize the number of similar colors.
 // This can be useful for automatically generating colors for things like graph lines.
@@ -80,3 +104,4 @@ func AccentVariantList(n int) []color.RGBA {
 	}
 	return List(n, 48, 50)
 }
+*/
