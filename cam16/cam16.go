@@ -145,3 +145,78 @@ func FromXYZView(x, y, z float32, vw *View) *CAM {
 	s = 50 * mat32.Sqrt((alpha*vw.C)/(vw.AW+4))
 	return &CAM{Hue: hue, Chroma: C, Colorfulness: M, Saturation: s, Brightness: Q, Lightness: J}
 }
+
+/*
+// XYZ returns the CAM color as XYZ coordinates
+// under standard viewing conditions.
+func (cam *CAM) XYZ() mat32.Vec3 {
+	return cam.XYZView(NewStdView())
+}
+
+// XYZ returns the CAM color as XYZ coordinates
+// under the given viewing conditions.
+func (cam *CAM) XYZView(vw *View) mat32.Vec3 {
+	alpha := float32(0)
+	if cam.Chroma != 0 || cam.Lightness != 0 {
+		alpha = cam.Chroma / mat32.Sqrt(cam.Lightness / 100)
+	}
+
+ t := mat32.Pow(
+	alpha /
+		mat32.Pow(
+			1.64 -
+				mat32.Pow(0.29, vw.BgYToWhiteY),
+			0.73),
+	1.0 / 0.9)
+
+ hRad := mat32.DegToRad(hue)
+
+eHue := 0.25 * (mat32.Cos(hRad + 2) + 3.8)
+ac := vw.AW * mat32.Pow(cam.Lightness / 100, 1 / vw.C / vw.Z)
+p1 := eHue * (50000 / 13) * vw.NC * vw.NCB
+
+p2 := ac / vw.NBB
+
+hSin := mat32.Sin(hRad)
+hCos := mat32.Cos(hRad)
+
+gamma := 23 *
+(p2 + 0.305) *
+	t /
+	(23 * p1 + 11 * t * hCos + 108 * t * hSin)
+a := gamma * hCos
+b := gamma * hSin
+rA := (460 * p2 + 451 * a + 288 * b) / 1403
+gA := (460 * p2 - 891 * a - 261 * b) / 1403
+bA := (460 * p2 - 220 * a - 6300 * b) / 1403
+
+rCBase := max(0, (27.13 * rA.abs()) / (400 - rA.abs()))
+rC := MathUtils.signum(rA) *
+	(100.0 / viewingConditions.fl) *
+	math.pow(rCBase, 1.0 / 0.42);
+final gCBase = math.max(0, (27.13 * gA.abs()) / (400.0 - gA.abs()));
+final gC = MathUtils.signum(gA) *
+	(100.0 / viewingConditions.fl) *
+	math.pow(gCBase, 1.0 / 0.42);
+final bCBase = math.max(0, (27.13 * bA.abs()) / (400.0 - bA.abs()));
+final bC = MathUtils.signum(bA) *
+	(100.0 / viewingConditions.fl) *
+	math.pow(bCBase, 1.0 / 0.42);
+final rF = rC / viewingConditions.rgbD[0];
+final gF = gC / viewingConditions.rgbD[1];
+final bF = bC / viewingConditions.rgbD[2];
+
+final x = 1.86206786 * rF - 1.01125463 * gF + 0.14918677 * bF;
+final y = 0.38752654 * rF + 0.62144744 * gF - 0.00897398 * bF;
+final z = -0.01584150 * rF - 0.03412294 * gF + 1.04996444 * bF;
+
+if (array != null) {
+  array[0] = x;
+  array[1] = y;
+  array[2] = z;
+  return array;
+} else {
+  return [x, y, z];
+}
+}
+*/
