@@ -91,7 +91,7 @@ type Rule struct {
 	MatchLen int `view:"-" json:"-" xml:"-"`
 
 	// NameMap lookup map -- created during Compile
-	NmMap map[string]*Rule `inactive:"+" json:"-" xml:"-"`
+	NmMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
 }
 
 func (lr *Rule) BaseIface() reflect.Type {

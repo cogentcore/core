@@ -89,22 +89,22 @@ type Rule struct {
 	Rules RuleList `json:"-" xml:"-"`
 
 	// strategic matching order for matching the rules
-	Order []int `inactive:"+" json:"-" xml:"-"`
+	Order []int `edit:"-" json:"-" xml:"-"`
 
 	// map from first tokens / keywords to rules for FirstTokMap case
-	FiTokMap map[string]*Rule `inactive:"+" json:"-" xml:"-"`
+	FiTokMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
 
 	// for FirstTokMap, the start of the else cases not covered by the map
-	FiTokElseIdx int `inactive:"+" json:"-" xml:"-"`
+	FiTokElseIdx int `edit:"-" json:"-" xml:"-"`
 
 	// exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules
-	ExclKeyIdx int `inactive:"+" json:"-" xml:"-"`
+	ExclKeyIdx int `edit:"-" json:"-" xml:"-"`
 
 	// exclusionary forward-search rule elements compiled from Rule string
-	ExclFwd RuleList `inactive:"+" json:"-" xml:"-"`
+	ExclFwd RuleList `edit:"-" json:"-" xml:"-"`
 
 	// exclusionary reverse-search rule elements compiled from Rule string
-	ExclRev RuleList `inactive:"+" json:"-" xml:"-"`
+	ExclRev RuleList `edit:"-" json:"-" xml:"-"`
 }
 
 // RuleFlags define bitflags for rule options compiled from rule syntax
