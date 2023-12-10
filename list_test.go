@@ -5,6 +5,8 @@
 package colors
 
 import (
+	"fmt"
+	"math"
 	"testing"
 
 	"goki.dev/cam/hct"
@@ -50,5 +52,40 @@ func TestList(t *testing.T) {
 				t.Errorf("%d.%d: expected hue %g but got %g", i, j, ehue, h.Hue)
 			}
 		}
+	}
+}
+
+func TestListExpPow(t *testing.T) {
+	ndiv := 2.0
+	for v := 0.0; v < 100; v++ {
+		// nary := []int{}
+		nb := int(math.Ceil(math.Log(v) / math.Log(ndiv)))
+		rv := 0.0
+		for i := 0; i <= nb; i++ {
+			pbase := math.Pow(ndiv, float64(i))
+			base := math.Pow(ndiv, float64(i+1))
+			dv := math.Floor((math.Mod(v, base)) / pbase)
+			// nary = append(nary, int(dv))
+			iv := dv * (1.0 / base)
+			rv += iv
+			fmt.Println("v: ", v, "i: ", i, "base: ", base, "pbase: ", pbase, "iv: ", iv, "dv: ", dv)
+		}
+		fmt.Printf("v: %g  rv: %7.4g\n########\n", v, rv)
+	}
+}
+
+func TestListExpBin(t *testing.T) {
+	for v := 0; v < 100; v++ {
+		nb := int(mat32.Ceil(mat32.Log(float32(v)) / mat32.Log(2)))
+		rv := float32(0)
+		for i := 0; i <= nb; i++ {
+			pbase := 1 << i
+			base := 1 << (i + 1)
+			dv := (v % base) / pbase
+			iv := float32(dv) * (1 / float32(base))
+			rv += iv
+			fmt.Println("v: ", v, "i: ", i, "base: ", base, "pbase: ", pbase, "iv: ", iv, "dv: ", dv)
+		}
+		fmt.Printf("v: %d  rv: %7.4g\n########\n", v, rv)
 	}
 }
