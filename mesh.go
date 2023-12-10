@@ -225,11 +225,13 @@ func (sc *Scene) SetMeshes() {
 // each mesh Update method must call SetMod to trigger the update
 func (sc *Scene) UpdateMeshes() {
 	ph := &sc.Phong
+	ph.UpdtMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Val
 		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
 		ms.Update(sc, vtxAry, normAry, texAry, clrAry, idxAry)
 	}
+	ph.UpdtMu.Unlock()
 	ph.Sync()
 }
 
