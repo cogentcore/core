@@ -45,7 +45,7 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)
-		s.Max.X.Em(200)
+		s.Max.X.Em(20)
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Padding.Set(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
