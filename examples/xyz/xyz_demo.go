@@ -42,7 +42,7 @@ type Anim struct {
 	DoGopher bool
 
 	// current angle
-	Ang float32 `inactive:"+"`
+	Ang float32 `edit:"-"`
 
 	// the time.Ticker for animating the scene
 	Ticker *time.Ticker `view:"-"`
