@@ -38,7 +38,7 @@ func TestView(t *testing.T) {
 }
 
 func TestCAM(t *testing.T) {
-	camw := SRGBToCAM(1, 1, 1)
+	camw := FromSRGB(1, 1, 1)
 	expect(t, 209.492, camw.Hue)
 	expect(t, 2.869, camw.Chroma)
 	expect(t, 100, camw.Lightness)
@@ -46,7 +46,7 @@ func TestCAM(t *testing.T) {
 	expect(t, 12.068, camw.Saturation)
 	expect(t, 155.521, camw.Brightness)
 
-	camr := SRGBToCAM(1, 0, 0)
+	camr := FromSRGB(1, 0, 0)
 	expect(t, 27.408, camr.Hue)
 	expect(t, 113.354, camr.Chroma)
 	expect(t, 46.445, camr.Lightness)
@@ -54,7 +54,7 @@ func TestCAM(t *testing.T) {
 	expect(t, 91.889, camr.Saturation)
 	expect(t, 105.988, camr.Brightness)
 
-	camg := SRGBToCAM(0, 1, 0)
+	camg := FromSRGB(0, 1, 0)
 	expect(t, 142.139, camg.Hue)
 	expect(t, 108.406, camg.Chroma)
 	expect(t, 79.331, camg.Lightness)
@@ -62,7 +62,7 @@ func TestCAM(t *testing.T) {
 	expect(t, 78.604, camg.Saturation)
 	expect(t, 138.520, camg.Brightness)
 
-	camb := SRGBToCAM(0, 0, 1)
+	camb := FromSRGB(0, 0, 1)
 	expect(t, 282.788, camb.Hue)
 	expect(t, 87.227, camb.Chroma)
 	expect(t, 25.465, camb.Lightness)

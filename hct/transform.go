@@ -6,6 +6,9 @@ package hct
 
 import (
 	"image/color"
+
+	"goki.dev/cam/cam16"
+	"goki.dev/mat32/v2"
 )
 
 // Lighten returns a color that is lighter by the
@@ -84,21 +87,24 @@ func Spin(c color.Color, amount float32) color.RGBA {
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
 	// TODO(kai): finish Blend
-	// pct = mat32.Clamp(pct, 0, 100)
-	// amt := pct / 100
+	pct = mat32.Clamp(pct, 0, 100)
+	amt := pct / 100
 
-	// hx := FromColor(x)
-	// hy := FromColor(y)
+	hx := FromColor(x)
+	hy := FromColor(y)
 
-	// cx := cam16.SRGBToCAM(hx.R, hx.G, hx.B)
-	// cy := cam16.SRGBToCAM(hy.R, hy.G, hy.B)
+	cx := cam16.FromSRGB(hx.R, hx.G, hx.B)
+	cy := cam16.FromSRGB(hy.R, hy.G, hy.B)
 
-	// xj, _, xa, xb := cx.UCS()
-	// yj, _, ya, yb := cy.UCS()
+	xj, _, xa, xb := cx.UCS()
+	yj, _, ya, yb := cy.UCS()
 
-	// j := yj + (xj-yj)*amt
-	// a := ya + (xa-ya)*amt
-	// b := yb + (xb-yb)*amt
+	j := yj + (xj-yj)*amt
+	a := ya + (xa-ya)*amt
+	b := yb + (xb-yb)*amt
+	_ = j
+	_ = a
+	_ = b
 
 	return color.RGBAModel.Convert(x).(color.RGBA)
 

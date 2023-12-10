@@ -164,7 +164,7 @@ func (h HCT) WithTone(tone float32) HCT {
 // and RGB values have gamma correction.  Alpha is always 1.
 func SRGBToHCT(r, g, b float32) HCT {
 	x, y, z := cie.SRGBToXYZ(r, g, b)
-	cam := cam16.XYZToCAM(100*x, 100*y, 100*z)
+	cam := cam16.FromXYZ(100*x, 100*y, 100*z)
 	l, _, _ := cie.XYZToLAB(x, y, z)
 	return HCT{Hue: cam.Hue, Chroma: cam.Chroma, Tone: l, R: r, G: g, B: b, A: 1}
 }

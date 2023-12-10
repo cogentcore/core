@@ -58,22 +58,22 @@ func (cam *CAM) UCS() (j, m, a, b float32) {
 	return
 }
 
-// SRGBToCAM returns CAM values from given SRGB color coordinates,
+// FromSRGB returns CAM values from given SRGB color coordinates,
 // under standard viewing conditions.  The RGB value range is 0-1,
 // and RGB values have gamma correction.
-func SRGBToCAM(r, g, b float32) *CAM {
-	return XYZToCAM(cie.SRGB100ToXYZ(r, g, b))
+func FromSRGB(r, g, b float32) *CAM {
+	return FromXYZ(cie.SRGB100ToXYZ(r, g, b))
 }
 
-// XYZToCAM returns CAM values from given XYZ color coordinate,
+// FromXYZ returns CAM values from given XYZ color coordinate,
 // under standard viewing conditions
-func XYZToCAM(x, y, z float32) *CAM {
-	return XYZToCAMView(x, y, z, NewStdView())
+func FromXYZ(x, y, z float32) *CAM {
+	return FromXYZView(x, y, z, NewStdView())
 }
 
-// XYZToCAMView returns CAM values from given XYZ color coordinate,
+// FromXYZView returns CAM values from given XYZ color coordinate,
 // under given viewing conditions.  Requires 100-base XYZ coordinates.
-func XYZToCAMView(x, y, z float32, vw *View) *CAM {
+func FromXYZView(x, y, z float32, vw *View) *CAM {
 	l, m, s := XYZToLMS(x, y, z)
 	redVgreen, yellowVblue, grey, greyNorm := LMSToOps(l, m, s, vw)
 
