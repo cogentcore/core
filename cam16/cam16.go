@@ -54,14 +54,14 @@ type CAM struct {
 // RGBA implements the color.Color interface.
 func (cam *CAM) RGBA() (r, g, b, a uint32) {
 	x, y, z := cam.XYZ()
-	rf, gf, bf := cie.XYZToSRGB(x, y, z)
+	rf, gf, bf := cie.XYZ100ToSRGB(x, y, z)
 	return cie.SRGBFloatToUint32(rf, gf, bf, 1)
 }
 
 // AsRGBA returns the color as a [color.RGBA].
 func (cam *CAM) AsRGBA() color.RGBA {
 	x, y, z := cam.XYZ()
-	rf, gf, bf := cie.XYZToSRGB(x, y, z)
+	rf, gf, bf := cie.XYZ100ToSRGB(x, y, z)
 	r, g, b, a := cie.SRGBFloatToUint8(rf, gf, bf, 1)
 	return color.RGBA{r, g, b, a}
 }
@@ -162,12 +162,14 @@ func FromXYZView(x, y, z float32, vw *View) *CAM {
 
 // XYZ returns the CAM color as XYZ coordinates
 // under standard viewing conditions.
+// Returns 100-base XYZ coordinates.
 func (cam *CAM) XYZ() (x, y, z float32) {
 	return cam.XYZView(NewStdView())
 }
 
 // XYZ returns the CAM color as XYZ coordinates
 // under the given viewing conditions.
+// Returns 100-base XYZ coordinates.
 func (cam *CAM) XYZView(vw *View) (x, y, z float32) {
 	alpha := float32(0)
 	if cam.Chroma != 0 || cam.Lightness != 0 {

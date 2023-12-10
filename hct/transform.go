@@ -5,7 +5,6 @@
 package hct
 
 import (
-	"fmt"
 	"image/color"
 
 	"goki.dev/cam/cam16"
@@ -100,14 +99,11 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	xj, _, xa, xb := cx.UCS()
 	yj, _, ya, yb := cy.UCS()
 
-	fmt.Println(xj, xa, xb)
 	j := yj + (xj-yj)*amt
 	a := ya + (xa-ya)*amt
 	b := yb + (xb-yb)*amt
-	fmt.Println("j", j, "a", a, "b", b)
 
 	cam := cam16.FromUCS(j, a, b)
-	fmt.Printf("cam %#v\n", cam)
 	return cam.AsRGBA()
 }
 

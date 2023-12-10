@@ -42,6 +42,14 @@ func XYZToSRGB(x, y, z float32) (r, g, b float32) {
 	return
 }
 
+// XYZ100ToSRGB converts XYZ CIE standard color space, 100 base units,
+// into sRGB
+func XYZ100ToSRGB(x, y, z float32) (r, g, b float32) {
+	rl, bl, gl := XYZToSRGBLin(x/100, y/100, z/100)
+	r, g, b = SRGBFmLinear(rl, bl, gl)
+	return
+}
+
 // XYZNormD65 normalizes XZY values relative to the D65 outdoor white light values
 func XYZNormD65(x, y, z float32) (xr, yr, zr float32) {
 	xr = x * (1 / 0.95047)

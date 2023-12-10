@@ -82,6 +82,12 @@ func TestXYZ(t *testing.T) {
 		expect(t, x, xc)
 		expect(t, y, yc)
 		expect(t, z, zc)
+		rf, gf, bf := cie.XYZToSRGB(x, y, z)
+		expect(t, rf, test[0])
+		expect(t, gf, test[1])
+		expect(t, bf, test[2])
+		// r, g, b, a := cie.SRGBFloatToUint8(rf, gf, bf, 1)
+		// fmt.Println(rf, gf, bf, r, g, b, a)
 	}
 }
 
