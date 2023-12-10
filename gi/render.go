@@ -155,9 +155,6 @@ func (wb *WidgetBase) UpdateEndAsync(updt bool) {
 // a re-layout at the end.  Just does [SetNeedsLayoutUpdate] after UpdateEnd,
 // and uses the cached wb.Sc pointer.
 func (wb *WidgetBase) UpdateEndAsyncLayout(updt bool) {
-	if !updt {
-		return
-	}
 	wb.UpdateEndAsync(updt)
 	wb.SetNeedsLayout(updt)
 }
@@ -167,9 +164,6 @@ func (wb *WidgetBase) UpdateEndAsyncLayout(updt bool) {
 // a re-render at the end.  Just does [SetNeedsRenderUpdate] after UpdateEnd,
 // and uses the cached wb.Sc pointer.
 func (wb *WidgetBase) UpdateEndAsyncRender(updt bool) {
-	if !updt {
-		return
-	}
 	wb.UpdateEndAsync(updt)
 	wb.SetNeedsRender(updt)
 }
