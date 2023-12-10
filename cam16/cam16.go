@@ -67,6 +67,27 @@ func FromUCS(j, a, b float32) *CAM {
 // FromUCS returns CAM values from the given CAM16-UCS coordinates
 // (jstar, astar, and bstar), using the given viewing conditions
 func FromUCSView(j, a, b float32, vw *View) *CAM {
+	m := mat32.Sqrt(a*a + b*b)
+	M := (mat32.Exp(m*0.0228) - 1.0) / 0.0228
+	c := M / vw.FLRoot
+	h := mat32.Atan2(b, a) * (180.0 / mat32.Pi)
+	if h < 0 {
+		h += 360
+	}
+	j /= 1 - (j-100)*0.007
+
+	return FromJCHView(j, c, h, vw)
+}
+
+// FromJCH returns CAM values from the given lightness (j), chroma (c),
+// and hue (h) values under standard viewing condition
+func FromJCH(j, c, h float32) *CAM {
+	return FromJCHView(j, c, h, NewStdView())
+}
+
+// FromJCHView returns CAM values from the given lightness (j), chroma (c),
+// and hue (h) values under the given viewing conditions
+func FromJCHView(j, c, h float32, vw *View) *CAM {
 	return &CAM{}
 }
 
