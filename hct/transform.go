@@ -7,8 +7,6 @@ package hct
 import (
 	"image/color"
 
-	"goki.dev/cam/cam16"
-	"goki.dev/cam/cie"
 	"goki.dev/mat32/v2"
 )
 
@@ -82,29 +80,40 @@ func Spin(c color.Color, amount float32) color.RGBA {
 	return h.AsRGBA()
 }
 
+func MinHueDistance(a, b float32) float32 {
+	d1 := b - a
+	d2 := (b + 360) - a
+	d3 := (b - (a + 360))
+	d1a := mat32.Abs(d1)
+	d2a := mat32.Abs(d2)
+	d3a := mat32.Abs(d3)
+	if d1a < d2a && d1a < d3a {
+		return d1
+	}
+	if d2a < d1a && d2a < d3a {
+		return d2
+	}
+	return d3
+}
+
 // Blend returns a color that is the given percent blend between the first
 // and second color; 10 = 10% of the first and 90% of the second, etc;
-// blending is done directly on non-premultiplied CAM16-UCS values, and
+// blending is done directly on non-premultiplied HCT values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
+	hx := FromColor(x)
+	hy := FromColor(y)
 	pct = mat32.Clamp(pct, 0, 100)
-	amt := pct / 100
+	px := pct / 100
+	py := 1 - px
 
-	xsr, xsg, xsb, _ := cie.SRGBUint32ToFloat(x.RGBA())
-	ysr, ysg, ysb, _ := cie.SRGBUint32ToFloat(y.RGBA())
-
-	cx := cam16.FromSRGB(xsr, xsg, xsb)
-	cy := cam16.FromSRGB(ysr, ysg, ysb)
-
-	xj, _, xa, xb := cx.UCS()
-	yj, _, ya, yb := cy.UCS()
-
-	j := yj + (xj-yj)*amt
-	a := ya + (xa-ya)*amt
-	b := yb + (xb-yb)*amt
-
-	cam := cam16.FromUCS(j, a, b)
-	return cam.AsRGBA()
+	dhue := MinHueDistance(hx.Hue, hy.Hue)
+	hue := hx.Hue + py*dhue
+	chroma := px*hx.Chroma + py*hy.Chroma
+	tone := px*hx.Tone + py*hy.Tone
+	hr := New(hue, chroma, tone)
+	hr.A = px*hx.A + py*hy.A
+	return hr.AsRGBA()
 }
 
 // IsLight returns whether the given color is light
