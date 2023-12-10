@@ -561,7 +561,12 @@ func (ch *Chooser) ShowCurVal(label string) {
 		}
 	}
 	if ch.CurIndex < len(ch.Icons) {
+		picon := ch.Icon
 		ch.SetIcon(ch.Icons[ch.CurIndex])
+		if ch.Icon != picon {
+			ch.Update()
+			ch.SetNeedsLayout(true)
+		}
 	}
 }
 
