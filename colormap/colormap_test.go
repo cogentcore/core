@@ -16,10 +16,10 @@ import (
 
 func TestColorMaps(t *testing.T) {
 	nmaps := len(StdMaps)
-	nblend := 2
+	nblend := int(BlendTypesN)
 	// y axis is maps x blend mode
 	nY := nmaps * (nblend + 1)
-	nX := 256
+	nX := 512
 
 	sqSz := 16
 	sqX := 2
@@ -37,9 +37,9 @@ func TestColorMaps(t *testing.T) {
 	slices.Sort(keys)
 	for idx, k := range keys {
 		cm := StdMaps[k]
-		for bm := 0; bm < nblend; bm++ {
-			yp = idx*3 + bm
-			cm.RGBBlend = bm == 1
+		for bi, bm := range BlendTypesValues() {
+			yp = idx*(nblend+1) + bi
+			cm.Blend = bm
 			for x := 0; x < nX; x++ {
 				xv := float64(x) / float64(nX)
 				c := cm.Map(xv)

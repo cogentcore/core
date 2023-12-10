@@ -4,14 +4,33 @@
 
 package colormap
 
+//go:generate goki generate
+
 import (
 	"image/color"
 	"maps"
 	"math"
 	"sort"
 
+	"goki.dev/cam/cam16"
 	"goki.dev/cam/hct"
 	"goki.dev/colors"
+)
+
+// BlendTypes are different algorithms (colorspaces) to use for blending
+// the color stop values in generating the gradients.
+type BlendTypes int32 //enums:enum
+
+const (
+	// HCT uses hue, chroma, tone space and generally produces the best results
+	HCT BlendTypes = iota
+
+	// RGB uses raw RGB space and was used in v1 and is used in most other colormap
+	// software, so to reproduce existing results, select this option.
+	RGB
+
+	// CAM16 is an alternative colorspace, similar to HCT, but not quite as good.
+	CAM16
 )
 
 // Map maps a value onto a color by interpolating between a list of colors
@@ -26,7 +45,7 @@ type Map struct {
 	// use the original RGB-space blending function.
 	// Otherwise uses the new HCT-based blending function
 	// that uses a more perceptually-accurate color space.
-	RGBBlend bool
+	Blend BlendTypes
 
 	// color to display for invalid numbers (e.g., NaN)
 	NoColor color.RGBA
@@ -63,10 +82,14 @@ func (cm *Map) Map(val float64) color.RGBA {
 	cmix := float32(100 * (1 - (ival - lidx)))
 	lclr := cm.Colors[int(lidx)]
 	uclr := cm.Colors[int(uidx)]
-	if cm.RGBBlend {
+	switch cm.Blend {
+	case HCT:
+		return hct.Blend(cmix, lclr, uclr)
+	case CAM16:
+		return cam16.Blend(cmix, lclr, uclr)
+	default:
 		return colors.Blend(cmix, lclr, uclr)
 	}
-	return hct.Blend(cmix, lclr, uclr)
 }
 
 // MapIndex returns color for given index, for scale in Indexed mode.
@@ -175,6 +198,14 @@ var StdMaps = map[string]*Map{
 			{252, 174, 19, 255},
 			{245, 219, 76, 255},
 			{252, 254, 164, 255},
+		},
+	},
+	"RedBlue": {
+		Name:    "RedBlue",
+		NoColor: color.RGBA{200, 200, 200, 255},
+		Colors: []color.RGBA{
+			{255, 0, 0, 255},
+			{0, 0, 255, 255},
 		},
 	},
 	"BlueBlackRed": {
