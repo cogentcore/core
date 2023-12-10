@@ -48,7 +48,7 @@ func mainrun(a goosi.App) {
 	make := func() {
 		// note: drawer is always created and ready to go
 		// we are creating an additional rendering system here.
-		sf = w.Drawer().Surf
+		sf = w.Drawer().Surface().(*vgpu.Surface)
 		sy = sf.GPU.NewGraphicsSystem("drawidx", &sf.Device)
 
 		destroy := func() {
@@ -113,7 +113,7 @@ func mainrun(a goosi.App) {
 	}
 
 	for {
-		evi := w.NextEvent()
+		evi := w.EventMgr().Deque.NextEvent()
 		et := evi.Type()
 		if et != events.WindowPaint {
 			fmt.Println("got event", evi)
