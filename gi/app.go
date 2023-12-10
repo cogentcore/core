@@ -284,9 +284,6 @@ func (ac *AppChooser) OnInit() {
 			u := uri.URI{Label: kv.Val.Scene.Name(), Icon: icons.SelectWindow}
 			u.SetURL("scene", kv.Val.Scene.Name(), fmt.Sprintf("%d", i))
 			ac.Items[i] = u
-			if kv.Val == stg {
-				ac.SetCurIndex(i)
-			}
 		}
 		st := len(mm.Stack.Order)
 		for i, u := range urs {
@@ -330,5 +327,15 @@ func (ac *AppChooser) OnInit() {
 			s.Border.Width.Zero()
 			s.Border.Color.Zero()
 		}
+	})
+}
+
+func (ac *AppChooser) OnAdd() {
+	ac.WidgetBase.OnAdd()
+	ac.OnShow(func(e events.Event) {
+		ac.ItemsFunc()
+		// our current scene is always the first item,
+		// so we select it on show
+		ac.SetCurIndex(0)
 	})
 }
