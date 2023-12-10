@@ -58,6 +58,18 @@ func (cam *CAM) UCS() (j, m, a, b float32) {
 	return
 }
 
+// FromUCS returns CAM values from the given CAM16-UCS coordinates
+// (jstar, astar, and bstar), under standard viewing conditions
+func FromUCS(j, a, b float32) *CAM {
+	return FromUCSView(j, a, b, NewStdView())
+}
+
+// FromUCS returns CAM values from the given CAM16-UCS coordinates
+// (jstar, astar, and bstar), using the given viewing conditions
+func FromUCSView(j, a, b float32, vw *View) *CAM {
+	return &CAM{}
+}
+
 // FromSRGB returns CAM values from given SRGB color coordinates,
 // under standard viewing conditions.  The RGB value range is 0-1,
 // and RGB values have gamma correction.

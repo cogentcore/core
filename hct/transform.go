@@ -102,19 +102,11 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	j := yj + (xj-yj)*amt
 	a := ya + (xa-ya)*amt
 	b := yb + (xb-yb)*amt
-	_ = j
-	_ = a
-	_ = b
+
+	rc := cam16.FromUCS(j, a, b)
+	_ = rc
 
 	return color.RGBAModel.Convert(x).(color.RGBA)
-
-	// py := pct / 100
-	// px := 1.0 - py
-	// hx.SetHue(px*hx.Hue + py*hy.Hue)
-	// hx.SetChroma(px*hx.Chroma + py*hy.Chroma)
-	// hx.SetTone(px*hx.Tone + py*hy.Tone)
-	// hx.A = px*hx.A + py*hy.A
-	// return hx.AsRGBA()
 }
 
 // IsLight returns whether the given color is light
