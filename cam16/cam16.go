@@ -162,13 +162,13 @@ func FromXYZView(x, y, z float32, vw *View) *CAM {
 
 // XYZ returns the CAM color as XYZ coordinates
 // under standard viewing conditions.
-func (cam *CAM) XYZ() mat32.Vec3 {
+func (cam *CAM) XYZ() (x, y, z float32) {
 	return cam.XYZView(NewStdView())
 }
 
 // XYZ returns the CAM color as XYZ coordinates
 // under the given viewing conditions.
-func (cam *CAM) XYZView(vw *View) mat32.Vec3 {
+func (cam *CAM) XYZView(vw *View) (x, y, z float32) {
 	alpha := float32(0)
 	if cam.Chroma != 0 || cam.Lightness != 0 {
 		alpha = cam.Chroma / mat32.Sqrt(cam.Lightness/100)
@@ -220,9 +220,8 @@ func (cam *CAM) XYZView(vw *View) mat32.Vec3 {
 	gF := gC / vw.RGBD.Y
 	bF := bC / vw.RGBD.Z
 
-	x := 1.86206786*rF - 1.01125463*gF + 0.14918677*bF
-	y := 0.38752654*rF + 0.62144744*gF - 0.00897398*bF
-	z := -0.01584150*rF - 0.03412294*gF + 1.04996444*bF
-
-	return mat32.NewVec3(x, y, z)
+	x = 1.86206786*rF - 1.01125463*gF + 0.14918677*bF
+	y = 0.38752654*rF + 0.62144744*gF - 0.00897398*bF
+	z = -0.01584150*rF - 0.03412294*gF + 1.04996444*bF
+	return
 }
