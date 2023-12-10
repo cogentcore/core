@@ -7,6 +7,7 @@ package cam16
 import (
 	"testing"
 
+	"goki.dev/cam/cie"
 	"goki.dev/mat32/v2"
 )
 
@@ -70,4 +71,13 @@ func TestCAM(t *testing.T) {
 	expect(t, 93.674, camb.Saturation)
 	expect(t, 78.481, camb.Brightness)
 
+}
+
+func TestXYZ(t *testing.T) {
+	x, y, z := cie.SRGBToXYZ(0.5, 0.1, 0.1)
+	cam := FromXYZ(x, y, z)
+	xc, yc, zc := cam.XYZ()
+	if x != xc || y != yc || z != zc {
+		t.Errorf("xyz: %g, %g, %g  cam: %#v  xyzc: %g %g %g", x, y, z, cam, xc, yc, zc)
+	}
 }
