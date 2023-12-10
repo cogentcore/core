@@ -325,7 +325,7 @@ func (km *Maps) Save(filename string) error { //gti:add
 // OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
 // This is called automatically, so calling it manually should not be necessary in most cases.
 func (km *Maps) OpenPrefs() error { //gti:add
-	pdir := goosi.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
 	return km.Open(pnm)
@@ -335,7 +335,7 @@ func (km *Maps) OpenPrefs() error { //gti:add
 // which will be loaded automatically at startup if prefs SaveKeyMaps is checked
 // (should be if you're using custom keymaps)
 func (km *Maps) SavePrefs() error { //gti:add
-	pdir := goosi.TheApp.GoGiPrefsDir()
+	pdir := goosi.TheApp.GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
 	return km.Save(pnm)

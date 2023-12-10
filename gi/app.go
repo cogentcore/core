@@ -69,9 +69,9 @@ func (app *App) Config() {
 // DataDir returns the application-specific data directory:
 // [goosi.DataDir] + [App.Name]. It ensures that the directory exists first.
 // Use this directory to store all app-specific data including preferences.
-// PrefsDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
+// DataDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
 func (app *App) DataDir() string {
-	pdir := filepath.Join(goosi.TheApp.PrefsDir(), app.Name)
+	pdir := filepath.Join(goosi.TheApp.DataDir(), app.Name)
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }
@@ -116,24 +116,24 @@ func OpenURL(url string) {
 	goosi.TheApp.OpenURL(url)
 }
 
-// GoGiDataDir returns the GoGi preferences directory: [PrefsDir] + "GoGi".
+// GoGiDataDir returns the GoGi data directory: [DataDir] + "GoGi".
 // It ensures that the directory exists first.
 func GoGiDataDir() string {
-	return goosi.TheApp.GoGiPrefsDir()
+	return goosi.TheApp.GoGiDataDir()
 }
 
-// DataDir returns the OS-specific preferences directory: Mac: ~/Library,
+// DataDir returns the OS-specific data directory: Mac: ~/Library,
 // Linux: ~/.config, Windows: ~/AppData/Roaming
 func DataDir() string {
-	return goosi.TheApp.PrefsDir()
+	return goosi.TheApp.DataDir()
 }
 
 // AppDataDir returns the application-specific data directory:
-// [goosi.PrefsDir] + [App.Name]. It ensures that the directory exists first.
+// [goosi.DataDir] + [App.Name]. It ensures that the directory exists first.
 // Use this directory to store all app-specific data including preferences.
-// PrefsDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
+// DataDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
 func AppDataDir() string {
-	return goosi.TheApp.AppPrefsDir()
+	return goosi.TheApp.AppDataDir()
 }
 
 //////////////////////////////////////////////////////////////////////////////
