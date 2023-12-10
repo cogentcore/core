@@ -317,15 +317,15 @@ func Opaquer(c color.Color, amount float32) color.RGBA {
 }
 
 // Blend returns a color that is the given percent blend between the first
-// and second color; 10 = 10% of the second and 90% of the first, etc;
+// and second color; 10 = 10% of the first and 90% of the second, etc;
 // blending is done directly on non-premultiplied RGB values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
 	fx := NRGBAF32Model.Convert(x).(NRGBAF32)
 	fy := NRGBAF32Model.Convert(y).(NRGBAF32)
 	pct = mat32.Clamp(pct, 0, 100.0)
-	py := pct / 100
-	px := 1.0 - py
+	px := pct / 100
+	py := 1.0 - px
 	fx.R = px*fx.R + py*fy.R
 	fx.G = px*fx.G + py*fy.G
 	fx.B = px*fx.B + py*fy.B

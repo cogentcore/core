@@ -23,6 +23,11 @@ type Map struct {
 	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
 	Indexed bool
 
+	// use the original RGB-space blending function.
+	// Otherwise uses the new HCT-based blending function
+	// that uses a more perceptually-accurate color space.
+	RGBBlend bool
+
 	// color to display for invalid numbers (e.g., NaN)
 	NoColor color.RGBA
 
@@ -55,10 +60,13 @@ func (cm *Map) Map(val float64) color.RGBA {
 	if lidx == uidx {
 		return cm.Colors[int(lidx)]
 	}
-	cmix := ival - lidx
+	cmix := float32(100 * (1 - (ival - lidx)))
 	lclr := cm.Colors[int(lidx)]
 	uclr := cm.Colors[int(uidx)]
-	return hct.Blend(float32(cmix)*100, lclr, uclr)
+	if cm.RGBBlend {
+		return colors.Blend(cmix, lclr, uclr)
+	}
+	return hct.Blend(cmix, lclr, uclr)
 }
 
 // MapIndex returns color for given index, for scale in Indexed mode.
