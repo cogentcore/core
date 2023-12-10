@@ -5,7 +5,9 @@
 package giv
 
 import (
+	"goki.dev/colors"
 	"goki.dev/colors/colormap"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
@@ -18,20 +20,16 @@ import (
 // ColorMapName provides a gui chooser of maps in AvailColorMaps
 type ColorMapName string
 
-func (cn ColorMapName) String() string {
-	return string(cn)
-}
-
 /////////////////////////////////////////////////////////////////////////////
 //  ColorMapView
 
 // ColorMapView is a widget that displays a ColorMap.
 // Note that this is not a Value widget
 type ColorMapView struct {
-	gi.WidgetBase
+	gi.Frame
 
-	// orientation along which to display the spectrum
-	Orient mat32.Dims
+	// Dim is the dimension on which to display the spectrum
+	Dim mat32.Dims
 
 	// the colormap that we view
 	Map *colormap.Map
@@ -45,7 +43,14 @@ func (cv *ColorMapView) OnInit() {
 func (cv *ColorMapView) ColorMapStyles() {
 	cv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable)
+		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusExtraSmall
+
+		s.BackgroundColor.Gradient = colors.LinearGradient()
+		for i := float32(0); i < 1; i += 0.01 {
+			gc := cv.Map.Map(i)
+			s.BackgroundColor.Gradient.AddStop(gc, i, 1)
+		}
 	})
 }
 
@@ -94,55 +99,6 @@ func (cv *ColorMapView) HandleColorMapEvents() {
 		cv.ChooseColorMap()
 	})
 
-}
-
-func (cv *ColorMapView) RenderColorMap() {
-	if cv.Map == nil {
-		cv.Map = colormap.StdMaps["ColdHot"]
-	}
-	pc := &cv.Sc.PaintContext
-	pc.Lock()
-	defer pc.Unlock()
-
-	pos := cv.Geom.Pos.Total
-	sz := cv.Geom.Size.Actual.Total
-	pr := pos
-	sr := sz
-	sp := pr.Dim(cv.Orient)
-
-	lsz := sz.Dim(cv.Orient)
-
-	if cv.Map.Indexed {
-		nc := len(cv.Map.Colors)
-		inc := mat32.Ceil(lsz / float32(nc))
-		sr.SetDim(cv.Orient, inc)
-		for i := 0; i < nc; i++ {
-			clr := cv.Map.MapIndex(i)
-			p := float32(i) * inc
-			pr.SetDim(cv.Orient, sp+p)
-			pc.FillBoxColor(pr, sr, clr)
-		}
-	} else {
-		inc := mat32.Ceil(lsz / 100)
-		if inc < 2 {
-			inc = 2
-		}
-		sr.SetDim(cv.Orient, inc)
-		for p := float32(0); p < lsz; p += inc {
-			val := p / (lsz - 1)
-			clr := cv.Map.Map(float64(val))
-			pr.SetDim(cv.Orient, sp+p)
-			pc.FillBoxColor(pr, sr, clr)
-		}
-	}
-}
-
-func (cv *ColorMapView) Render() {
-	if cv.PushBounds() {
-		cv.RenderColorMap()
-		cv.RenderChildren()
-		cv.PopBounds()
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -10,19 +10,11 @@ package gi
 // ColorName provides a value-view GUI lookup of valid color names
 type ColorName string
 
-func (cn ColorName) String() string {
-	return string(cn)
-}
-
 // FontName is used to specify a font, as the unique name of
 // the font family.
 // This automatically provides a chooser menu for fonts
 // using giv Value.
 type FontName string
-
-func (fn FontName) String() string {
-	return string(fn)
-}
 
 // FileName is used to specify an filename (including path).
 // Automatically opens the FileView dialog using Value system.
@@ -30,13 +22,5 @@ func (fn FontName) String() string {
 // use of FileViewDialog under FuncButton automatic method calling.
 type FileName string
 
-func (fn FileName) String() string {
-	return string(fn)
-}
-
 // HiStyleName is a highlighting style name
 type HiStyleName string
-
-func (hs HiStyleName) String() string {
-	return string(hs)
-}

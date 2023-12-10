@@ -152,7 +152,7 @@ func (t *ColorMapView) New() ki.Ki {
 // SetOrient sets the [ColorMapView.Orient]:
 // orientation along which to display the spectrum
 func (t *ColorMapView) SetOrient(v mat32.Dims) *ColorMapView {
-	t.Orient = v
+	t.Dim = v
 	return t
 }
 

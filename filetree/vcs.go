@@ -435,10 +435,6 @@ func IsVersCtrlSystem(str string) bool {
 // VersCtrlName is the name of a version control system
 type VersCtrlName string
 
-func (vn VersCtrlName) String() string {
-	return string(vn)
-}
-
 func VersCtrlNameProper(vc string) VersCtrlName {
 	vcl := strings.ToLower(vc)
 	for _, vcnp := range VersCtrlSystems {

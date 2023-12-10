@@ -115,10 +115,6 @@ var ActiveMap *Map
 // available key map names, for use in preferences etc.
 type MapName string
 
-func (kn MapName) String() string {
-	return string(kn)
-}
-
 // ActiveMapName is the name of the active keymap
 var ActiveMapName MapName
 
