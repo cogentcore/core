@@ -42,7 +42,7 @@ func (a *App) OpenURL(url string) {
 	grr.Log(cmd.Run())
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Print(err)

@@ -75,9 +75,9 @@ func (a *App) SetScreenInfo(sz image.Point) {
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	// TODO(kai): figure out a better solution to offscreen prefs dir
-	return filepath.Join(".", "tmpPrefsDir")
+	return filepath.Join(".", "tmpDataDir")
 }
 
 func (a *App) Platform() goosi.Platforms {

@@ -30,7 +30,7 @@ func (a *App) OpenURL(url string) {
 	grr.Log(cmd.Run())
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	// todo: could use a more official windows protocol to get this stuff..
 	// https://msdn.microsoft.com/en-us/library/bb762188%28VS.85%29.aspx
 	// with FOLDERID_RoamingAppData

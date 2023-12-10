@@ -140,7 +140,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	return nil
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	return "/data/data"
 }
 

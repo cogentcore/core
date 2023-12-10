@@ -74,7 +74,7 @@ func (a *App) OpenURL(url string) {
 	grr.Log(cmd.Run())
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	usr, err := user.Current()
 	if grr.Log(err) != nil {
 		return "/tmp"

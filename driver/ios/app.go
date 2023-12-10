@@ -147,7 +147,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	return nil
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	usr, err := user.Current()
 	if grr.Log(err) != nil {
 		return "/tmp"

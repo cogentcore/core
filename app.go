@@ -84,17 +84,17 @@ type App interface {
 	// Cursor returns the cursor.Cursor handler for the system, in context of given window.
 	Cursor(win Window) cursor.Cursor
 
-	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
+	// DataDir returns the OS-specific data directory: Mac: ~/Library,
 	// Linux: ~/.config, Windows: ~/AppData/Roaming
-	PrefsDir() string
+	DataDir() string
 
-	// GoGiPrefsDir returns the GoGi preferences directory: PrefsDir + GoGi --
+	// GoGiDataDir returns the GoGi data directory: DataDir + GoGi --
 	// ensures that the directory exists first.
-	GoGiPrefsDir() string
+	GoGiDataDir() string
 
-	// AppPrefsDir returns the application-specific preferences directory:
-	// PrefsDir + App.Name --ensures that the directory exists first.
-	AppPrefsDir() string
+	// AppDataDir returns the application-specific data directory:
+	// DataDir + App.Name --ensures that the directory exists first.
+	AppDataDir() string
 
 	// About is an informative message about the app.  Can use HTML
 	// formatting, including links.

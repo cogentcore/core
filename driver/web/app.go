@@ -109,7 +109,7 @@ func (a *App) Resize() {
 	a.Win.EvMgr.WindowResize()
 }
 
-func (a *App) PrefsDir() string {
+func (a *App) DataDir() string {
 	// TODO(kai): implement web filesystem
 	return "/data/data"
 }
