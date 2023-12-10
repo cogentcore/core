@@ -68,7 +68,7 @@ func FromUCS(j, a, b float32) *CAM {
 // (jstar, astar, and bstar), using the given viewing conditions
 func FromUCSView(j, a, b float32, vw *View) *CAM {
 	m := mat32.Sqrt(a*a + b*b)
-	M := (mat32.Exp(m*0.0228) - 1.0) / 0.0228
+	M := (mat32.Exp(m*0.0228) - 1) / 0.0228
 	c := M / vw.FLRoot
 	h := mat32.Atan2(b, a) * (180.0 / mat32.Pi)
 	if h < 0 {
@@ -88,7 +88,15 @@ func FromJCH(j, c, h float32) *CAM {
 // FromJCHView returns CAM values from the given lightness (j), chroma (c),
 // and hue (h) values under the given viewing conditions
 func FromJCHView(j, c, h float32, vw *View) *CAM {
-	return &CAM{}
+	cam := &CAM{Lightness: j, Chroma: c, Hue: h}
+	cam.Brightness = (4 / vw.C) *
+		mat32.Sqrt(cam.Lightness/100) *
+		(vw.AW + 4) *
+		(vw.FLRoot)
+	cam.Colorfulness = cam.Chroma * vw.FLRoot
+	alpha := cam.Chroma / mat32.Sqrt(cam.Lightness/100)
+	cam.Saturation = 50 * mat32.Sqrt((alpha*vw.C)/(vw.AW+4))
+	return cam
 }
 
 // FromSRGB returns CAM values from given SRGB color coordinates,
