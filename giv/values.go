@@ -54,9 +54,6 @@ func init() {
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(color.RGBA{})), func() Value {
 		return &ColorValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {
-		return &ColorNameValue{}
-	})
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() Value {
 		return &KeyChordValue{}
 	})

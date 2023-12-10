@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"sync"
 
-	"goki.dev/colors/colormap"
 	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
@@ -110,80 +109,6 @@ func (t *ArgView) SetStackTop(v int) *ArgView {
 // SetStripes sets the [ArgView.Stripes]
 func (t *ArgView) SetStripes(v gi.Stripes) *ArgView {
 	t.Stripes = v
-	return t
-}
-
-// ColorMapViewType is the [gti.Type] for [ColorMapView]
-var ColorMapViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.ColorMapView",
-	ShortName:  "giv.ColorMapView",
-	IDName:     "color-map-view",
-	Doc:        "ColorMapView is a widget that displays a ColorMap.\nNote that this is not a Value widget",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Orient", &gti.Field{Name: "Orient", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "orientation along which to display the spectrum", Directives: gti.Directives{}, Tag: ""}},
-		{"Map", &gti.Field{Name: "Map", Type: "*goki.dev/colors/colormap.Map", LocalType: "*colormap.Map", Doc: "the colormap that we view", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ColorMapView{},
-})
-
-// NewColorMapView adds a new [ColorMapView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewColorMapView(par ki.Ki, name ...string) *ColorMapView {
-	return par.NewChild(ColorMapViewType, name...).(*ColorMapView)
-}
-
-// KiType returns the [*gti.Type] of [ColorMapView]
-func (t *ColorMapView) KiType() *gti.Type {
-	return ColorMapViewType
-}
-
-// New returns a new [*ColorMapView] value
-func (t *ColorMapView) New() ki.Ki {
-	return &ColorMapView{}
-}
-
-// SetOrient sets the [ColorMapView.Orient]:
-// orientation along which to display the spectrum
-func (t *ColorMapView) SetOrient(v mat32.Dims) *ColorMapView {
-	t.Dim = v
-	return t
-}
-
-// SetMap sets the [ColorMapView.Map]:
-// the colormap that we view
-func (t *ColorMapView) SetMap(v *colormap.Map) *ColorMapView {
-	t.Map = v
-	return t
-}
-
-// SetTooltip sets the [ColorMapView.Tooltip]
-func (t *ColorMapView) SetTooltip(v string) *ColorMapView {
-	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [ColorMapView.Class]
-func (t *ColorMapView) SetClass(v string) *ColorMapView {
-	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [ColorMapView.PriorityEvents]
-func (t *ColorMapView) SetPriorityEvents(v []events.Types) *ColorMapView {
-	t.PriorityEvents = v
-	return t
-}
-
-// SetCustomContextMenu sets the [ColorMapView.CustomContextMenu]
-func (t *ColorMapView) SetCustomContextMenu(v func(m *gi.Scene)) *ColorMapView {
-	t.CustomContextMenu = v
 	return t
 }
 

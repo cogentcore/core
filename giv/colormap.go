@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"log/slog"
+
 	"goki.dev/colors"
 	"goki.dev/colors/colormap"
 	"goki.dev/cursors"
@@ -17,120 +19,29 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// ColorMapName provides a gui chooser of maps in AvailColorMaps
+// ColorMapName represents the name of a color map, which can be edited using a [ColorMapValue].
 type ColorMapName string
 
-/////////////////////////////////////////////////////////////////////////////
-//  ColorMapView
-
-// ColorMapView is a widget that displays a ColorMap.
-// Note that this is not a Value widget
-type ColorMapView struct {
-	gi.Frame
-
-	// Dim is the dimension on which to display the spectrum
-	Dim mat32.Dims
-
-	// the colormap that we view
-	Map *colormap.Map
-}
-
-func (cv *ColorMapView) OnInit() {
-	cv.HandleColorMapEvents()
-	cv.ColorMapStyles()
-}
-
-func (cv *ColorMapView) ColorMapStyles() {
-	cv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable)
-		s.Cursor = cursors.Pointer
-		s.Border.Radius = styles.BorderRadiusExtraSmall
-
-		s.BackgroundColor.Gradient = colors.LinearGradient()
-		for i := float32(0); i < 1; i += 0.01 {
-			gc := cv.Map.Map(i)
-			s.BackgroundColor.Gradient.AddStop(gc, i, 1)
-		}
-	})
-}
-
-// SetColorMap sets the color map and triggers a display update
-func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) *ColorMapView {
-	cv.Map = cmap
-	cv.SetNeedsRender(true)
-	return cv
-}
-
-// SetColorMapAction sets the color map and triggers a display update
-// and signals the ColorMapSig signal
-func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) *ColorMapView {
-	cv.Map = cmap
-	cv.SendChange()
-	cv.SetNeedsRender(true)
-	return cv
-}
-
-// ChooseColorMap pulls up a chooser to select a color map
-func (cv *ColorMapView) ChooseColorMap() {
-	sl := colormap.AvailMapsList()
-	cur := ""
-	if cv.Map != nil {
-		cur = cv.Map.Name
-	}
-	si := 0
-	d := gi.NewBody().AddTitle("Select a color map").AddText("Choose color map to use from among available list")
-	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(&si)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			if si >= 0 {
-				nmap, ok := colormap.AvailMaps[sl[si]]
-				if ok {
-					cv.SetColorMapAction(nmap)
-				}
-			}
-		})
-	})
-	d.NewFullDialog(cv).Run()
-}
-
-func (cv *ColorMapView) HandleColorMapEvents() {
-	cv.HandleWidgetEvents()
-	cv.OnClick(func(e events.Event) {
-		cv.ChooseColorMap()
-	})
-
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  ColorMapValue
-
-// Value registers ColorMapValue as the viewer of ColorMapName
-func (mn ColorMapName) Value() Value {
+func (cmn ColorMapName) Value() Value {
 	return &ColorMapValue{}
 }
 
-// ColorMapValue presents an button for displaying a ColorMapName and selecting
-// meshes from a ChooserDialog
+// ColorMapValue displays a color map spectrum and can be clicked on
+// to display a dialog for selecting different color map options.
+// It represents a [ColorMapName] value.
 type ColorMapValue struct {
 	ValueBase
+
+	// Dim is the dimension on which to display the color map spectrum
+	Dim mat32.Dims
 }
 
 func (vv *ColorMapValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
+	vv.WidgetTyp = gi.FrameType
 	return vv.WidgetTyp
 }
 
-func (vv *ColorMapValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	if txt == "" {
-		txt = "(none, click to select)"
-	}
-	bt.SetText(txt)
-}
+func (vv *ColorMapValue) UpdateWidget() {}
 
 func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	if vv.Widget == w {
@@ -139,12 +50,31 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	}
 	vv.Widget = w
 	vv.StdConfigWidget(w)
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
+	fr := vv.Widget.(*gi.Frame)
+	fr.Config()
+	fr.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
+		}
+	})
+	fr.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable)
+		s.Cursor = cursors.Pointer
+		s.Border.Radius = styles.BorderRadiusExtraSmall
+
+		cmn, ok := laser.NonPtrValue(vv.Value).Interface().(ColorMapName)
+		if !ok || cmn == "" {
+			return
+		}
+		cm, ok := colormap.AvailMaps[string(cmn)]
+		if !ok {
+			slog.Error("got invalid color map name", cmn)
+			return
+		}
+		s.BackgroundColor.Gradient = colors.LinearGradient()
+		for i := float32(0); i < 1; i += 0.01 {
+			gc := cm.Map(i)
+			s.BackgroundColor.Gradient.AddStop(gc, i, 1)
 		}
 	})
 	vv.UpdateWidget()
