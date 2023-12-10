@@ -85,16 +85,16 @@ func Spin(c color.Color, amount float32) color.RGBA {
 // blending is done directly on non-premultiplied HCT values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
-	xh := FromColor(x)
-	xy := FromColor(y)
+	hx := FromColor(x)
+	hy := FromColor(y)
 	pct = mat32.Clamp(pct, 0, 100.0)
 	py := pct / 100
 	px := 1.0 - py
-	xh.SetHue(px*xh.Hue + py*xy.Hue)
-	xh.SetChroma(px*xh.Chroma + py*xy.Chroma)
-	xh.SetTone(px*xh.Tone + py*xy.Tone)
-	xh.A = px*xh.A + py*xy.A
-	return xh.AsRGBA()
+	hx.SetHue(px*hx.Hue + py*hy.Hue)
+	hx.SetChroma(px*hx.Chroma + py*hy.Chroma)
+	hx.SetTone(px*hx.Tone + py*hy.Tone)
+	hx.A = px*hx.A + py*hy.A
+	return hx.AsRGBA()
 }
 
 // IsLight returns whether the given color is light
