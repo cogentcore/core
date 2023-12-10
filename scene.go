@@ -115,7 +115,7 @@ type Scene struct {
 func (sc *Scene) Defaults() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
-	sc.BackgroundColor = colors.White
+	sc.BackgroundColor = colors.Scheme.Background
 	sc.SelParams.Defaults()
 }
 
