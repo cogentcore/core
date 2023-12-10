@@ -59,13 +59,14 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	fr := vv.Widget.(*gi.Frame)
 	fr.Config()
+	fr.HandleClickOnEnterSpace()
 	fr.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})
 	fr.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable)
+		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable, abilities.Focusable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 
@@ -102,7 +103,7 @@ func (vv *ColorMapValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	NewSliceView(d).SetSlice(&sl).SetSelVal(cur).BindSelectDialog(&si)
 	return true, func() {
 		if si >= 0 {
-			vv.SetValue(ColorMapName(sl[si]))
+			vv.SetValue(sl[si])
 			vv.UpdateWidget()
 		}
 	}
