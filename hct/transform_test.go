@@ -18,7 +18,7 @@ func TestBlend(t *testing.T) {
 }
 
 func TestMinHueDistance(t *testing.T) {
-	t.Skip("informational confirmational")
+	t.Skip("informational confirmation")
 	for i := 0; i < 50; i++ {
 		a := rand.Intn(360)
 		b := rand.Intn(360)

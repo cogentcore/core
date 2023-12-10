@@ -80,6 +80,9 @@ func Spin(c color.Color, amount float32) color.RGBA {
 	return h.AsRGBA()
 }
 
+// MinHueDistance finds the minimum distance between two hues.
+// A positive number means add to a to get to b.
+// A negative number means subtract from a to get to b.
 func MinHueDistance(a, b float32) float32 {
 	d1 := b - a
 	d2 := (b + 360) - a
@@ -108,7 +111,11 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	py := 1 - px
 
 	dhue := MinHueDistance(hx.Hue, hy.Hue)
-	hue := hx.Hue + py*dhue
+
+	// weight as a function of chroma strength: if near grey, hue is unreliable
+	cpy := py * hy.Chroma / (px*hx.Chroma + py*hy.Chroma)
+	hue := hx.Hue + cpy*dhue
+
 	chroma := px*hx.Chroma + py*hy.Chroma
 	tone := px*hx.Tone + py*hy.Tone
 	hr := New(hue, chroma, tone)
