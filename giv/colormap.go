@@ -68,7 +68,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	fr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable, abilities.Focusable)
 		s.Cursor = cursors.Pointer
-		s.Border.Radius = styles.BorderRadiusExtraSmall
+		s.Border.Radius = styles.BorderRadiusMedium
 
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Em(10), units.Em(1.5))

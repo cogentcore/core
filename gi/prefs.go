@@ -175,7 +175,7 @@ var PrefsFileName = "prefs.toml"
 
 // Open preferences from GoGi standard prefs directory
 func (pf *Preferences) Open() error { //gti:add
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	err := grr.Log(tomls.Open(pf, pnm))
 	if err != nil {
@@ -204,7 +204,7 @@ func (pf *Preferences) Open() error { //gti:add
 
 // Save saves the preferences to the GoGi standard prefs directory
 func (pf *Preferences) Save() error { //gti:add
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	err := grr.Log(tomls.Save(pf, pnm))
 	if err != nil {
@@ -233,7 +233,7 @@ func (pf *Preferences) Save() error { //gti:add
 // are absolutely sure you want to. You may want to consider making a copy
 // of your preferences through "Save as" before doing this.
 func (pf *Preferences) Delete() error { //gti:add
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	return os.Remove(pnm)
 }
@@ -659,7 +659,7 @@ var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewE
 // SavePaths saves the active SavedPaths to prefs dir
 func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.Save(pnm)
 	// add back after save
@@ -670,7 +670,7 @@ func SavePaths() {
 func OpenPaths() {
 	// remove to be sure we don't have duplicate extras
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.Open(pnm)
 	// add back after save
@@ -767,7 +767,7 @@ var PrefsDetailedFileName = "prefs_det.toml"
 
 // Open detailed preferences from GoGi standard prefs directory
 func (pf *PrefsDetailed) Open() error { //gti:add
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	err := grr.Log(tomls.Open(pf, pnm))
 	pf.Changed = false
@@ -776,7 +776,7 @@ func (pf *PrefsDetailed) Open() error { //gti:add
 
 // Save saves current preferences to standard prefs_det.toml file, which is auto-loaded at startup
 func (pf *PrefsDetailed) Save() error { //gti:add
-	pdir := GoGiPrefsDir()
+	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	err := grr.Log(tomls.Save(pf, pnm))
 	pf.Changed = false
