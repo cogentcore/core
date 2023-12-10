@@ -135,6 +135,17 @@ func (fb *FuncButton) CopyFieldsFrom(frm any) {
 	fb.ShowReturnAsDialog = fr.ShowReturnAsDialog
 }
 
+// SetText sets the [FuncButton.Text] and updates the tooltip to correspond to the new name.
+func (fb *FuncButton) SetText(v string) *FuncButton {
+	ptext := fb.Text
+	fb.Text = v
+	if fb.Func != nil && fb.Text != ptext && ptext != "" {
+		fb.Func.Doc = sentence.Doc(fb.Func.Doc, ptext, fb.Text)
+		fb.SetTooltip(fb.Func.Doc)
+	}
+	return fb
+}
+
 // SetFunc sets the function associated with the FuncButton to the
 // given function or method value. For documentation information for
 // the function to be obtained, it must be added to gti. SetFunc is

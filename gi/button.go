@@ -38,7 +38,7 @@ type Button struct { //goki:embedder
 	Type ButtonTypes
 
 	// label for the button -- if blank then no label is presented
-	Text string `xml:"text"`
+	Text string `set:"-"`
 
 	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
 	Icon icons.Icon `xml:"icon" view:"show-name"`
@@ -256,6 +256,16 @@ func (bt *Button) ButtonStyles() {
 // SetKey sets the shortcut of the button from the given [keyfun.Funs]
 func (bt *Button) SetKey(kf keyfun.Funs) *Button {
 	bt.SetShortcut(keyfun.ShortcutFor(kf))
+	return bt
+}
+
+// NOTE: Button.SetText must be defined manually so that [giv.FuncButton]
+// can define its own SetText method that updates the tooltip
+
+// SetText sets the [Button.Text]:
+// label for the button -- if blank then no label is presented
+func (bt *Button) SetText(v string) *Button {
+	bt.Text = v
 	return bt
 }
 

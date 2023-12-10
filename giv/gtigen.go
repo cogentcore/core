@@ -515,12 +515,6 @@ func (t *FuncButton) SetType(v gi.ButtonTypes) *FuncButton {
 	return t
 }
 
-// SetText sets the [FuncButton.Text]
-func (t *FuncButton) SetText(v string) *FuncButton {
-	t.Text = v
-	return t
-}
-
 // SetIcon sets the [FuncButton.Icon]
 func (t *FuncButton) SetIcon(v icons.Icon) *FuncButton {
 	t.Icon = v

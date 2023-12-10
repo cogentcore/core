@@ -288,13 +288,6 @@ func (t *Button) SetType(v ButtonTypes) *Button {
 	return t
 }
 
-// SetText sets the [Button.Text]:
-// label for the button -- if blank then no label is presented
-func (t *Button) SetText(v string) *Button {
-	t.Text = v
-	return t
-}
-
 // SetIcon sets the [Button.Icon]:
 // optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
 func (t *Button) SetIcon(v icons.Icon) *Button {
