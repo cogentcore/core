@@ -128,14 +128,6 @@ func DataDir() string {
 	return goosi.TheApp.DataDir()
 }
 
-// AppDataDir returns the application-specific data directory:
-// [goosi.DataDir] + [App.Name]. It ensures that the directory exists first.
-// Use this directory to store all app-specific data including preferences.
-// DataDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
-func AppDataDir() string {
-	return goosi.TheApp.AppDataDir()
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //		AppBar
 
