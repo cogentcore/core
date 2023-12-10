@@ -48,6 +48,10 @@ type CAM struct {
 	Lightness float32
 }
 
+// // RGBA implements the color.Color interface.
+// func (cam *CAM) RGBA() (r, g, b, a uint32) {
+// }
+
 // UCS returns the CAM16-UCS components based on the the CAM values
 func (cam *CAM) UCS() (j, m, a, b float32) {
 	j = (1 + 100*0.007) * cam.Lightness / (1 + 0.007*cam.Lightness)
