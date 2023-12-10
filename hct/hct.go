@@ -78,16 +78,13 @@ func model(c color.Color) color.Color {
 // RGBA implements the color.Color interface.
 // Performs the premultiplication of the RGB components by alpha at this point.
 func (h HCT) RGBA() (r, g, b, a uint32) {
-	r = uint32(h.R*h.A*65535.0 + 0.5)
-	g = uint32(h.G*h.A*65535.0 + 0.5)
-	b = uint32(h.B*h.A*65535.0 + 0.5)
-	a = uint32(h.A*65535.0 + 0.5)
-	return
+	return cie.SRGBFloatToUint32(h.R, h.G, h.B, h.A)
 }
 
 // AsRGBA returns a standard color.RGBA type
 func (h HCT) AsRGBA() color.RGBA {
-	return color.RGBA{uint8(h.R*h.A*255.0 + 0.5), uint8(h.G*h.A*255.0 + 0.5), uint8(h.B*h.A*255.0 + 0.5), uint8(h.A*255.0 + 0.5)}
+	r, g, b, a := cie.SRGBFloatToUint8(h.R, h.G, h.B, h.A)
+	return color.RGBA{r, g, b, a}
 }
 
 // SetUint32 sets components from unsigned 32bit integers (alpha-premultiplied)

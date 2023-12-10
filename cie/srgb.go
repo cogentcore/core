@@ -63,3 +63,23 @@ func SRGBFmLinear100(rl, gl, bl float32) (r, g, b float32) {
 	b = SRGBFmLinearComp(bl / 100)
 	return
 }
+
+// SRGBFloatToUint32 converts the given sRGB float32 values to uint32 values,
+// performing premultiplication with the a value.
+func SRGBFloatToUint32(rf, gf, bf, af float32) (r, g, b, a uint32) {
+	r = uint32(rf*af*65535 + 0.5)
+	g = uint32(gf*af*65535 + 0.5)
+	b = uint32(bf*af*65535 + 0.5)
+	a = uint32(af*65535 + 0.5)
+	return
+}
+
+// SRGBFloatToUint8 converts the given sRGB float32 values to uint8 values,
+// performing premultiplication with the a value.
+func SRGBFloatToUint8(rf, gf, bf, af float32) (r, g, b, a uint8) {
+	r = uint8(rf*af*255 + 0.5)
+	g = uint8(gf*af*255 + 0.5)
+	b = uint8(bf*af*255 + 0.5)
+	a = uint8(af*255 + 0.5)
+	return
+}
