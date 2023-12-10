@@ -74,7 +74,7 @@ func FromUCSView(j, a, b float32, vw *View) *CAM {
 	m := mat32.Sqrt(a*a + b*b)
 	M := (mat32.Exp(m*0.0228) - 1) / 0.0228
 	c := M / vw.FLRoot
-	h := mat32.Atan2(b, a) * (180.0 / mat32.Pi)
+	h := mat32.RadToDeg(mat32.Atan2(b, a))
 	if h < 0 {
 		h += 360
 	}
