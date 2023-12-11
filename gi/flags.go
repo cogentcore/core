@@ -23,42 +23,54 @@ const (
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 )
 
-func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
-	return wb.Styles.State.HasFlag(flag)
+// StateIs returns whether the widget has the given [states.States] flag set
+func (wb *WidgetBase) StateIs(state states.States) bool {
+	return wb.Styles.State.HasFlag(state)
 }
 
-func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
-	return wb.Styles.Abilities.HasFlag(flag)
+// AbilityIs returns whether the widget has the given [abilities.Abilities] flag set
+func (wb *WidgetBase) AbilityIs(able abilities.Abilities) bool {
+	return wb.Styles.Abilities.HasFlag(able)
 }
 
-// SetState sets the given [styles.Style.State] flags
-func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) *WidgetBase {
-	wb.Styles.State.SetFlag(on, state...)
+// SetState sets the given [states.State] flags to the given value
+func (wb *WidgetBase) SetState(on bool, state ...states.States) *WidgetBase {
+	bfs := make([]enums.BitFlag, len(state))
+	for i, st := range state {
+		bfs[i] = st
+	}
+	wb.Styles.State.SetFlag(on, bfs...)
 	return wb
 }
 
 // SetStateTree sets the given [styles.Style.State] flags for tree starting
 // at receiving widget.
-func (wb *WidgetBase) SetStateTree(on bool, state ...enums.BitFlag) {
+func (wb *WidgetBase) SetStateTree(on bool, state ...states.States) *WidgetBase {
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wb.SetState(on, state...)
 		return ki.Continue
 	})
+	return wb
 }
 
 // SetStateWidget sets the given [styles.Style.State] flags for the
 // entire Widget including any Parts != nil
-func (wb *WidgetBase) SetStateWidget(on bool, state ...enums.BitFlag) {
+func (wb *WidgetBase) SetStateWidget(on bool, state ...states.States) *WidgetBase {
 	wb.SetState(on, state...)
 	if wb.Parts == nil {
-		return
+		return wb
 	}
 	wb.Parts.SetStateTree(on, state...)
+	return wb
 }
 
-// SetAbilities sets the [styles.Style.Abilities] flags
-func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase {
-	wb.Styles.Abilities.SetFlag(on, able...)
+// SetAbilities sets the given [abilities.Abilities] flags to the given value
+func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase {
+	bfs := make([]enums.BitFlag, len(able))
+	for i, st := range able {
+		bfs[i] = st
+	}
+	wb.Styles.Abilities.SetFlag(on, bfs...)
 	return wb
 }
 
@@ -134,10 +146,10 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 
 // HasStateWithin returns whether the current node or any
 // of its children have the given state flag.
-func (wb *WidgetBase) HasStateWithin(flag enums.BitFlag) bool {
+func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	got := false
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		if wb.StateIs(flag) {
+		if wb.StateIs(state) {
 			got = true
 			return ki.Break
 		}

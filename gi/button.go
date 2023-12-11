@@ -144,7 +144,7 @@ func (bt *Button) ButtonStyles() {
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
-		if !bt.IsReadOnly() {
+		if !bt.IsDisabled() {
 			s.Cursor = cursors.Pointer
 		}
 		s.Border.Radius = styles.BorderRadiusFull
@@ -189,7 +189,7 @@ func (bt *Button) ButtonStyles() {
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}
-		if s.Is(states.Hovered) && !bt.IsReadOnly() {
+		if s.Is(states.Hovered) && !bt.IsDisabled() {
 			s.BoxShadow = s.MaxBoxShadow
 		}
 	})

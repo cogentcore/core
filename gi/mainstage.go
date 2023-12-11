@@ -242,7 +242,6 @@ func (st *Stage) RunSheet() *Stage {
 }
 
 func (st *Stage) NewRenderWin() *RenderWin {
-	fmt.Println("nrw")
 	if st.Scene == nil {
 		slog.Error("MainStage.NewRenderWin: Scene is nil")
 	}

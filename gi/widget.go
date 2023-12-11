@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"goki.dev/enums"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
@@ -64,17 +65,17 @@ type Widget interface {
 	// while the Scene is being viewed.
 	Update()
 
-	// StateIs returns true if given Style.State flag is set
-	StateIs(flag enums.BitFlag) bool
+	// StateIs returns whether the widget has the given [states.States] flag set
+	StateIs(flag states.States) bool
 
-	// AbilityIs returns true if given Style.Abilities flag is set
-	AbilityIs(flag enums.BitFlag) bool
+	// AbilityIs returns whether the widget has the given [abilities.Abilities] flag set
+	AbilityIs(flag abilities.Abilities) bool
 
-	// SetState sets the given [styles.Style.State] flags
-	SetState(on bool, state ...enums.BitFlag) *WidgetBase
+	// SetState sets the given [states.State] flags to the given value
+	SetState(on bool, state ...states.States) *WidgetBase
 
-	// SetAbilities sets the given [styles.Style.Abilities] flags
-	SetAbilities(on bool, able ...enums.BitFlag) *WidgetBase
+	// SetAbilities sets the given [abilities.Abilities] flags to the given value
+	SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase
 
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden; instead, call Style to apply custom styling.

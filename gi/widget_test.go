@@ -12,7 +12,6 @@ import (
 	"unicode"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/enums"
 	"goki.dev/girl/states"
 	"goki.dev/icons"
 	"goki.dev/laser"
@@ -27,7 +26,7 @@ func TestMain(m *testing.M) {
 var (
 	testStrings = []string{"", "test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
 	testIcons   = []icons.Icon{"", icons.Search}
-	testStates  = [][]enums.BitFlag{
+	testStates  = [][]states.States{
 		{},
 		{states.Disabled},
 		{states.Hovered},
