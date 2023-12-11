@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -326,7 +327,7 @@ func (sc *Scene) Close() {
 		// slog.Error("Scene has no MainMgr")
 		return
 	}
-	if sc.Stage.NewWindow {
+	if sc.Stage.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		mm.RenderWin.CloseReq()
 		return
 	}

@@ -93,6 +93,10 @@ func (st *Stage) ConfigMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
+	// if we are on mobile, we can never have new windows
+	if goosi.TheApp.Platform().IsMobile() {
+		st.NewWindow = false
+	}
 	sc := st.Scene
 	st.AddWindowDecor() // sensitive to cases
 	sc.ConfigSceneBars()
@@ -102,23 +106,18 @@ func (st *Stage) ConfigMainStage() {
 // RunWindow runs a Window with current settings.
 func (st *Stage) RunWindow() *Stage {
 	sc := st.Scene
-	// if we are on mobile, we can never have new windows, unless we are
-	// in one of the special circumstances stated below
-	if goosi.TheApp.Platform().IsMobile() {
-		st.NewWindow = false
-	}
+	noTop := false
 	if CurRenderWin == nil {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* MainMgr to get initial pref size
-		st.NewWindow = true
 		st.SetMainMgr(st.FirstWinManager())
 	} else {
 		top := CurRenderWin.MainStageMgr.TopOfType(WindowStage)
 		if top == nil {
 			// if we have no window in the existing MainMgr (probably because it was deleted),
 			// we are in a similar situation to the situation above with no current render window,
-			// so we need to be in a new window, and we need a *temporary* MainMgr to get initial pref size
-			st.NewWindow = true
+			// so we need a *temporary* MainMgr to get initial pref size
+			noTop = true
 			st.SetMainMgr(st.FirstWinManager())
 		} else {
 			if sc.App == nil { // inherit apps
@@ -132,7 +131,7 @@ func (st *Stage) RunWindow() *Stage {
 	sz := st.RenderCtx.Size
 	// non-new full windows must take up the whole window
 	// and thus don't consider pref size
-	if st.NewWindow || !st.FullWindow || CurRenderWin == nil {
+	if st.NewWindow || !st.FullWindow || CurRenderWin == nil || noTop {
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{20, 20})
 	}
@@ -141,6 +140,10 @@ func (st *Stage) RunWindow() *Stage {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
+	if noTop {
+		sc.Resize(sz)
+		return st
+	}
 	if st.NewWindow || CurRenderWin == nil {
 		sc.Resize(sz)
 		win := st.NewRenderWin()
@@ -239,6 +242,7 @@ func (st *Stage) RunSheet() *Stage {
 }
 
 func (st *Stage) NewRenderWin() *RenderWin {
+	fmt.Println("nrw")
 	if st.Scene == nil {
 		slog.Error("MainStage.NewRenderWin: Scene is nil")
 	}
