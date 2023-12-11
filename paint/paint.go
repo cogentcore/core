@@ -359,24 +359,24 @@ func (pc *Context) Fill() {
 	pc.ClearPath()
 }
 
-// FillBox is an optimized fill of a square region with a uniform color if
-// the given color spec is a solid color
+// FillBox performs an optimized fill of a square region with a uniform color if
+// the given full color is a solid color. If it is not, it calls [Context.DrawRectangle]
+// and [Context.Fill] to fill the region.
 func (pc *Context) FillBox(pos, size mat32.Vec2, clr *colors.Full) {
 	if clr.Gradient == nil {
-		b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-		c := colors.ApplyOpacity(clr.Solid, pc.FillStyle.Opacity)
-		draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Over)
-	} else {
-		pc.FillStyle.SetFullColor(clr)
-		pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
-		pc.Fill()
+		pc.FillBoxColor(pos, size, clr.Solid)
+		return
 	}
+	pc.FillStyle.SetFullColor(clr)
+	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
+	pc.Fill()
 }
 
-// FillBoxColor is an optimized fill of a square region with given uniform color
+// FillBoxColor performs an optimized fill of a square region with the given uniform color.
 func (pc *Context) FillBoxColor(pos, size mat32.Vec2, clr color.Color) {
 	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-	draw.Draw(pc.Image, b, &image.Uniform{clr}, image.Point{}, draw.Src)
+	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
+	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Over)
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.
