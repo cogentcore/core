@@ -96,7 +96,7 @@ func ExampleFromString_darken() {
 
 func ExampleFromString_blend() {
 	fmt.Println(FromString("blend-40-#fff", Black))
-	// Output: {102 102 102 255} <nil>
+	// Output: {153 153 153 255} <nil>
 }
 
 func ExampleFromString_error() {
@@ -174,6 +174,11 @@ func ExampleWithAF32() {
 	// Output: {77 77 0 153}
 }
 
+func ExampleApplyOpacity() {
+	fmt.Println(ApplyOpacity(WithAF32(Gold, 0.4), 0.3))
+	// Output: {30 25 0 30}
+}
+
 func ExampleClearer() {
 	fmt.Println(Clearer(Gainsboro, 20))
 	// Output: {176 176 176 204}
@@ -186,7 +191,7 @@ func ExampleOpaquer() {
 
 func ExampleBlend() {
 	fmt.Println(Blend(30, Lightblue, Darkblue))
-	// Output: {121 151 203 255}
+	// Output: {52 65 166 255}
 }
 
 func ExampleAlphaBlend() {

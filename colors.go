@@ -294,6 +294,20 @@ func WithAF32(c color.Color, a float32) color.RGBA {
 	return AsRGBA(n)
 }
 
+// ApplyOpacity applies the given opacity (0-1) to the given color
+// and returns the result. It is different from [WithA] in that it
+// sets the transparency (A) value of the color to the current value
+// times the given value instead of just directly overriding it.
+func ApplyOpacity(c color.Color, opacity float32) color.RGBA {
+	r := AsRGBA(c)
+	if opacity == 1 {
+		return r
+	}
+	a := r.A
+	// new A is current A times opacity
+	return WithA(c, uint8(float32(a)*opacity))
+}
+
 // Clearer returns a color that is the given amount
 // more transparent (lower alpha value) in terms of
 // RGBA absolute alpha from 0 to 100, with the color
