@@ -44,9 +44,18 @@ func MessageSnackbar(ctx Widget, msg string) {
 }
 
 // ErrorSnackbar opens a [Snackbar] displaying the given error
-// in the context of the given widget.
-func ErrorSnackbar(ctx Widget, err error) {
-	MessageSnackbar(ctx, "Error: "+err.Error())
+// in the context of the given widget. Optional label text can be
+// provided; if it is not, the label text will default to "Error".
+// If the given error is nil, no snackbar. is created.
+func ErrorSnackbar(ctx Widget, err error, label ...string) {
+	if err == nil {
+		return
+	}
+	lbl := "Error"
+	if len(label) > 0 {
+		lbl = label[0]
+	}
+	MessageSnackbar(ctx, lbl+": "+err.Error())
 }
 
 func (sc *Scene) SnackbarStyles() {

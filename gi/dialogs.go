@@ -87,8 +87,14 @@ func MessageDialog(ctx Widget, msg string, title ...string) {
 }
 
 // ErrorDialog opens a new Dialog displaying the given error
-// in the context of the given widget.  Optional title can be provided.
+// in the context of the given widget. An optional title can
+// be provided; if it is not, the title will default to
+// "There was an error". If the given error is nil, no dialog
+// is created.
 func ErrorDialog(ctx Widget, err error, title ...string) {
+	if err == nil {
+		return
+	}
 	ttl := "There was an error"
 	if len(title) > 0 {
 		ttl = title[0]
