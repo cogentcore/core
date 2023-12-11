@@ -434,7 +434,7 @@ type FontRender struct { //gti:add
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor colors.Full `xml:"background-color"`
 
-	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
+	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32 `xml:"opacity"`
 }
 

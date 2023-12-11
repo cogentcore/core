@@ -317,7 +317,7 @@ func (pc *Context) stroke() {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 
@@ -346,7 +346,7 @@ func (pc *Context) fill() {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
 	rf.Draw()
 	rf.Clear()
 
@@ -390,7 +390,8 @@ func (pc *Context) Fill() {
 func (pc *Context) FillBox(pos, size mat32.Vec2, clr *colors.Full) {
 	if clr.Gradient == nil {
 		b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-		draw.Draw(pc.Image, b, &image.Uniform{clr.Solid}, image.Point{}, draw.Src)
+		c := colors.ApplyOpacity(clr.Solid, pc.FillStyle.Opacity)
+		draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Src)
 	} else {
 		pc.FillStyle.SetFullColor(clr)
 		pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)

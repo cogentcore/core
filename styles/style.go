@@ -158,7 +158,7 @@ type Style struct { //gti:add
 	// If it is specified, [Style.BackgroundColor] has no effect.
 	BackgroundImage io.Reader
 
-	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
+	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32
 
 	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the

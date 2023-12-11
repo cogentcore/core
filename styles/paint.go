@@ -185,7 +185,7 @@ type Fill struct {
 	// prop: fill = fill color specification
 	Color colors.Full `xml:"fill"`
 
-	// prop: fill-opacity = global alpha opacity / transparency factor
+	// prop: fill-opacity = global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"fill-opacity"`
 
 	// prop: fill-rule = rule for how to fill more complex shapes with crossing lines
@@ -273,7 +273,7 @@ type Stroke struct {
 	// prop: stroke = stroke color specification
 	Color colors.Full `xml:"stroke"`
 
-	// prop: stroke-opacity = global alpha opacity / transparency factor
+	// prop: stroke-opacity = global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"stroke-opacity"`
 
 	// prop: stroke-width = line width

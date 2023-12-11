@@ -91,11 +91,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 		}
 		curFace := sr.Render[0].Face
 		curColor := sr.Render[0].Color
-		if pc.FontStyle.Opacity != 1 {
-			a := colors.AsRGBA(curColor).A
-			// new A is current A times opacity
-			curColor = colors.WithA(curColor, uint8(float32(a)*pc.FontStyle.Opacity))
-		}
+		curColor = colors.ApplyOpacity(curColor, pc.FontStyle.Opacity)
 		tpos := pos.Add(sr.RelPos)
 
 		d := &font.Drawer{
@@ -120,11 +116,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			rr := &(sr.Render[i])
 			if rr.Color != nil {
 				curColor := rr.Color
-				if pc.FontStyle.Opacity != 1 {
-					a := colors.AsRGBA(curColor).A
-					// new A is current A times opacity
-					curColor = colors.WithA(curColor, uint8(float32(a)*pc.FontStyle.Opacity))
-				}
+				curColor = colors.ApplyOpacity(curColor, pc.FontStyle.Opacity)
 				d.Src = image.NewUniform(curColor)
 			}
 			curFace = rr.CurFace(curFace)
