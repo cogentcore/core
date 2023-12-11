@@ -71,7 +71,7 @@ func (ed *Editor) CancelComplete() {
 
 // Lookup attempts to lookup symbol at current location, popping up a window
 // if something is found
-func (ed *Editor) Lookup() {
+func (ed *Editor) Lookup() { //gti:add
 	if ed.Buf.Complete == nil || ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
 		return
 	}

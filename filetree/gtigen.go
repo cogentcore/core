@@ -63,13 +63,13 @@ var NodeType = gti.AddType(&gti.Type{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-			{"addToVcs", &gti.Field{Name: "addToVcs", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"addToVCS", &gti.Field{Name: "addToVCS", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"NewFile", &gti.Method{Name: "NewFile", Doc: "NewFile makes a new file in this directory node", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-			{"addToVcs", &gti.Field{Name: "addToVcs", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"addToVCS", &gti.Field{Name: "addToVCS", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"NewFolders", &gti.Method{Name: "NewFolders", Doc: "makes a new folder in the given selected directory", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
@@ -98,31 +98,31 @@ var NodeType = gti.AddType(&gti.Type{
 		{"RemoveFromExterns", &gti.Method{Name: "RemoveFromExterns", Doc: "RemoveFromExterns removes file from list of external files", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"AddToVcsSel", &gti.Method{Name: "AddToVcsSel", Doc: "AddToVcsSel adds selected files to version control system", Directives: gti.Directives{
+		{"AddToVCSSel", &gti.Method{Name: "AddToVCSSel", Doc: "AddToVCSSel adds selected files to version control system", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"DeleteFromVcsSel", &gti.Method{Name: "DeleteFromVcsSel", Doc: "DeleteFromVcsSel removes selected files from version control system", Directives: gti.Directives{
+		{"DeleteFromVCSSel", &gti.Method{Name: "DeleteFromVCSSel", Doc: "DeleteFromVCSSel removes selected files from version control system", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"CommitToVcsSel", &gti.Method{Name: "CommitToVcsSel", Doc: "CommitToVcsSel commits to version control system based on last selected file", Directives: gti.Directives{
+		{"CommitToVCSSel", &gti.Method{Name: "CommitToVCSSel", Doc: "CommitToVCSSel commits to version control system based on last selected file", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"RevertVcsSel", &gti.Method{Name: "RevertVcsSel", Doc: "RevertVcsSel removes selected files from version control system", Directives: gti.Directives{
+		{"RevertVCSSel", &gti.Method{Name: "RevertVCSSel", Doc: "RevertVCSSel removes selected files from version control system", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"DiffVcsSel", &gti.Method{Name: "DiffVcsSel", Doc: "DiffVcsSel shows the diffs between two versions of selected files, given by the\nrevision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.\n-1, -2 etc also work as universal ways of specifying prior revisions.\nDiffs are shown in a DiffViewDialog.", Directives: gti.Directives{
+		{"DiffVCSSel", &gti.Method{Name: "DiffVCSSel", Doc: "DiffVCSSel shows the diffs between two versions of selected files, given by the\nrevision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.\n-1, -2 etc also work as universal ways of specifying prior revisions.\nDiffs are shown in a DiffViewDialog.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"rev_a", &gti.Field{Name: "rev_a", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 			{"rev_b", &gti.Field{Name: "rev_b", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"LogVcsSel", &gti.Method{Name: "LogVcsSel", Doc: "LogVcsSel shows the VCS log of commits for selected files, optionally with a\nsince date qualifier: If since is non-empty, it should be\na date-like expression that the VCS will understand, such as\n1/1/2020, yesterday, last year, etc.  SVN only understands a\nnumber as a maximum number of items to return.\nIf allFiles is true, then the log will show revisions for all files, not just\nthis one.\nReturns the Log and also shows it in a VCSLogView which supports further actions.", Directives: gti.Directives{
+		{"LogVCSSel", &gti.Method{Name: "LogVCSSel", Doc: "LogVCSSel shows the VCS log of commits for selected files, optionally with a\nsince date qualifier: If since is non-empty, it should be\na date-like expression that the VCS will understand, such as\n1/1/2020, yesterday, last year, etc.  SVN only understands a\nnumber as a maximum number of items to return.\nIf allFiles is true, then the log will show revisions for all files, not just\nthis one.\nReturns the Log and also shows it in a VCSLogView which supports further actions.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"allFiles", &gti.Field{Name: "allFiles", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 			{"since", &gti.Field{Name: "since", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"BlameVcsSel", &gti.Method{Name: "BlameVcsSel", Doc: "BlameVcsSel shows the VCS blame report for this file, reporting for each line\nthe revision and author of the last change.", Directives: gti.Directives{
+		{"BlameVCSSel", &gti.Method{Name: "BlameVCSSel", Doc: "BlameVCSSel shows the VCS blame report for this file, reporting for each line\nthe revision and author of the last change.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),

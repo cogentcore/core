@@ -45,10 +45,10 @@ func (fn *Node) FirstVCS() (vci.Repo, *Node) {
 	return repo, rnode
 }
 
-// DetectVcsRepo detects and configures DirRepo if this directory is root of
+// DetectVCSRepo detects and configures DirRepo if this directory is root of
 // a VCS repository.  if updateFiles is true, gets the files in the dir.
 // returns true if a repository was newly found here.
-func (fn *Node) DetectVcsRepo(updateFiles bool) bool {
+func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 	repo, _ := fn.Repo()
 	if repo != nil {
 		if updateFiles {
@@ -114,18 +114,18 @@ func (fn *Node) UpdateRepoFiles() {
 	fn.RepoFiles, _ = fn.DirRepo.Files()
 }
 
-// AddToVcsSel adds selected files to version control system
-func (fn *Node) AddToVcsSel() { //gti:add
+// AddToVCSSel adds selected files to version control system
+func (fn *Node) AddToVCSSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		sn.AddToVcs()
+		sn.AddToVCS()
 	}
 }
 
-// AddToVcs adds file to version control
-func (fn *Node) AddToVcs() {
+// AddToVCS adds file to version control
+func (fn *Node) AddToVCS() {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return
@@ -140,18 +140,18 @@ func (fn *Node) AddToVcs() {
 	fmt.Println(err)
 }
 
-// DeleteFromVcsSel removes selected files from version control system
-func (fn *Node) DeleteFromVcsSel() { //gti:add
+// DeleteFromVCSSel removes selected files from version control system
+func (fn *Node) DeleteFromVCSSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		sn.DeleteFromVcs()
+		sn.DeleteFromVCS()
 	}
 }
 
-// DeleteFromVcs removes file from version control
-func (fn *Node) DeleteFromVcs() {
+// DeleteFromVCS removes file from version control
+func (fn *Node) DeleteFromVCS() {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return
@@ -166,19 +166,19 @@ func (fn *Node) DeleteFromVcs() {
 	fmt.Println(err)
 }
 
-// CommitToVcsSel commits to version control system based on last selected file
-func (fn *Node) CommitToVcsSel() { //gti:add
+// CommitToVCSSel commits to version control system based on last selected file
+func (fn *Node) CommitToVCSSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	if n == 0 { // shouldn't happen
 		return
 	}
 	sn := AsNode(sels[n-1])
-	giv.CallFunc(sn, fn.CommitToVcs)
+	giv.CallFunc(sn, fn.CommitToVCS)
 }
 
-// CommitToVcs commits file changes to version control system
-func (fn *Node) CommitToVcs(message string) (err error) {
+// CommitToVCS commits file changes to version control system
+func (fn *Node) CommitToVCS(message string) (err error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return
@@ -195,18 +195,18 @@ func (fn *Node) CommitToVcs(message string) (err error) {
 	return err
 }
 
-// RevertVcsSel removes selected files from version control system
-func (fn *Node) RevertVcsSel() { //gti:add
+// RevertVCSSel removes selected files from version control system
+func (fn *Node) RevertVCSSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		sn.RevertVcs()
+		sn.RevertVCS()
 	}
 }
 
-// RevertVcs reverts file changes since last commit
-func (fn *Node) RevertVcs() (err error) {
+// RevertVCS reverts file changes since last commit
+func (fn *Node) RevertVCS() (err error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return
@@ -230,24 +230,24 @@ func (fn *Node) RevertVcs() (err error) {
 	return err
 }
 
-// DiffVcsSel shows the diffs between two versions of selected files, given by the
+// DiffVCSSel shows the diffs between two versions of selected files, given by the
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffViewDialog.
-func (fn *Node) DiffVcsSel(rev_a string, rev_b string) { //gti:add
+func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		sn.DiffVcs(rev_a, rev_b)
+		sn.DiffVCS(rev_a, rev_b)
 	}
 }
 
-// DiffVcs shows the diffs between two versions of this file, given by the
+// DiffVCS shows the diffs between two versions of this file, given by the
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffViewDialog.
-func (fn *Node) DiffVcs(rev_a, rev_b string) error {
+func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
@@ -259,7 +259,7 @@ func (fn *Node) DiffVcs(rev_a, rev_b string) error {
 	return err
 }
 
-// LogVcsSel shows the VCS log of commits for selected files, optionally with a
+// LogVCSSel shows the VCS log of commits for selected files, optionally with a
 // since date qualifier: If since is non-empty, it should be
 // a date-like expression that the VCS will understand, such as
 // 1/1/2020, yesterday, last year, etc.  SVN only understands a
@@ -267,16 +267,16 @@ func (fn *Node) DiffVcs(rev_a, rev_b string) error {
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
-func (fn *Node) LogVcsSel(allFiles bool, since string) { //gti:add
+func (fn *Node) LogVCSSel(allFiles bool, since string) { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		sn.LogVcs(allFiles, since)
+		sn.LogVCS(allFiles, since)
 	}
 }
 
-// LogVcs shows the VCS log of commits for this file, optionally with a
+// LogVCS shows the VCS log of commits for this file, optionally with a
 // since date qualifier: If since is non-empty, it should be
 // a date-like expression that the VCS will understand, such as
 // 1/1/2020, yesterday, last year, etc.  SVN only understands a
@@ -284,7 +284,7 @@ func (fn *Node) LogVcsSel(allFiles bool, since string) { //gti:add
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
-func (fn *Node) LogVcs(allFiles bool, since string) (vci.Log, error) {
+func (fn *Node) LogVCS(allFiles bool, since string) (vci.Log, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
@@ -304,14 +304,14 @@ func (fn *Node) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	return lg, nil
 }
 
-// BlameVcsSel shows the VCS blame report for this file, reporting for each line
+// BlameVCSSel shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
-func (fn *Node) BlameVcsSel() { //gti:add
+func (fn *Node) BlameVCSSel() { //gti:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
-		sn.BlameVcs()
+		sn.BlameVCS()
 	}
 }
 
@@ -344,7 +344,7 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	tv.BufA.SetText(btxt)
 	tv.BufB.SetText(fbytes)
 	tv.ConfigTexts()
-	tv.SetSplits(.2, .8)
+	tv.SetSplits(.3, .7)
 
 	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {
@@ -360,13 +360,13 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddOk(pw)
 	})
-	d.NewFullDialog(ctx).Run()
+	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	return tv
 }
 
-// BlameVcs shows the VCS blame report for this file, reporting for each line
+// BlameVCS shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
-func (fn *Node) BlameVcs() ([]byte, error) {
+func (fn *Node) BlameVCS() ([]byte, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
@@ -387,8 +387,8 @@ func (fn *Node) BlameVcs() ([]byte, error) {
 	return blm, nil
 }
 
-// UpdateAllVcs does an update on any repositories below this one in file tree
-func (fn *Node) UpdateAllVcs() {
+// UpdateAllVCS does an update on any repositories below this one in file tree
+func (fn *Node) UpdateAllVCS() {
 	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
@@ -398,7 +398,7 @@ func (fn *Node) UpdateAllVcs() {
 			return ki.Continue
 		}
 		if sfn.DirRepo == nil {
-			if !sfn.DetectVcsRepo(false) {
+			if !sfn.DetectVCSRepo(false) {
 				return ki.Continue
 			}
 		}

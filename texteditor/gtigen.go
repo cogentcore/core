@@ -299,7 +299,11 @@ var EditorType = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Lookup", &gti.Method{Name: "Lookup", Doc: "Lookup attempts to lookup symbol at current location, popping up a window\nif something is found", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &Editor{},
 })
 

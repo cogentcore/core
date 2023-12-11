@@ -203,7 +203,7 @@ func (fn *Node) ReadDir(path string) error {
 
 // UpdateDir updates the directory and all the nodes under it
 func (fn *Node) UpdateDir() {
-	fn.DetectVcsRepo(true) // update files
+	fn.DetectVCSRepo(true) // update files
 	path := string(fn.FPath)
 	// fmt.Printf("path: %v  node: %v\n", path, fn.Path())
 	repo, rnode := fn.Repo()

@@ -74,10 +74,10 @@ type Filer interface {
 	RenameFile(newpath string) error
 
 	// NewFiles makes a new file in selected directory
-	NewFiles(filename string, addToVcs bool)
+	NewFiles(filename string, addToVCS bool)
 
 	// NewFile makes a new file in this directory node
-	NewFile(filename string, addToVcs bool)
+	NewFile(filename string, addToVCS bool)
 
 	// NewFolders makes a new folder in the given selected directory
 	NewFolders(foldername string)
@@ -289,13 +289,13 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 		fn.SetText(fn.Info.Name)
 	}
 	if stored {
-		fn.AddToVcs()
+		fn.AddToVCS()
 	}
 	return err
 }
 
 // NewFiles makes a new file in selected directory
-func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
+func (fn *Node) NewFiles(filename string, addToVCS bool) { //gti:add
 	sels := fn.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -305,11 +305,11 @@ func (fn *Node) NewFiles(filename string, addToVcs bool) { //gti:add
 	if sn == nil {
 		return
 	}
-	sn.This().(Filer).NewFile(filename, addToVcs)
+	sn.This().(Filer).NewFile(filename, addToVCS)
 }
 
 // NewFile makes a new file in this directory node
-func (fn *Node) NewFile(filename string, addToVcs bool) { //gti:add
+func (fn *Node) NewFile(filename string, addToVCS bool) { //gti:add
 	if fn.IsExternal() {
 		return
 	}
@@ -324,10 +324,10 @@ func (fn *Node) NewFile(filename string, addToVcs bool) { //gti:add
 		return
 	}
 	fn.FRoot.UpdateNewFile(np)
-	if addToVcs {
+	if addToVCS {
 		nfn, ok := fn.FRoot.FindFile(np)
 		if ok && nfn.This() != fn.FRoot.This() {
-			nfn.AddToVcs()
+			nfn.AddToVCS()
 		}
 	}
 }
@@ -379,7 +379,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	if ok && ofn.Info.Vcs >= vci.Stored {
 		nfn, ok := fn.FRoot.FindFile(tpath)
 		if ok && nfn.This() != fn.FRoot.This() {
-			nfn.AddToVcs()
+			nfn.AddToVCS()
 			nfn.UpdateNode()
 		}
 	}

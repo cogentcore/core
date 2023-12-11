@@ -74,6 +74,39 @@ func VCSLabelFunc(fn *Node, label string) string {
 	return label
 }
 
+func (fn *Node) FileNodeVCSContextMenu(m *gi.Scene) {
+	giv.NewFuncButton(m, fn.AddToVCSSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
+		})
+	giv.NewFuncButton(m, fn.DeleteFromVCSSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
+	giv.NewFuncButton(m, fn.CommitToVCSSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
+	giv.NewFuncButton(m, fn.RevertVCSSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
+	gi.NewSeparator(m)
+
+	giv.NewFuncButton(m, fn.DiffVCSSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
+	giv.NewFuncButton(m, fn.LogVCSSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
+	giv.NewFuncButton(m, fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
+		Style(func(s *styles.Style) {
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+		})
+}
+
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	gi.NewButton(m).SetText("File info").SetIcon(icons.Info).
 		Style(func(s *styles.Style) {
@@ -134,36 +167,7 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 		})
 	gi.NewSeparator(m)
 
-	giv.NewFuncButton(m, fn.AddToVcsSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
-		})
-	giv.NewFuncButton(m, fn.DeleteFromVcsSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
-		})
-	giv.NewFuncButton(m, fn.CommitToVcsSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
-		})
-	giv.NewFuncButton(m, fn.RevertVcsSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
-		})
-	gi.NewSeparator(m)
-
-	giv.NewFuncButton(m, fn.DiffVcsSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
-		})
-	giv.NewFuncButton(m, fn.LogVcsSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
-		})
-	giv.NewFuncButton(m, fn.BlameVcsSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
-		Style(func(s *styles.Style) {
-			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
-		})
+	fn.FileNodeVCSContextMenu(m)
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.RemoveFromExterns).SetIcon(icons.Delete).
