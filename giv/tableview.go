@@ -96,6 +96,12 @@ func (tv *TableView) TableViewInit() {
 			sh.Style(func(s *styles.Style) {
 				s.Grow.Set(0, 0)
 			})
+		case "header/head-idx": // index header
+			lbl := w.(*gi.Label)
+			lbl.SetText("Index").SetType(gi.LabelBodyMedium)
+			w.Style(func(s *styles.Style) {
+				s.Align.Self = styles.Center
+			})
 		case "grid-lay": // grid layout
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
@@ -126,7 +132,6 @@ func (tv *TableView) TableViewInit() {
 				tv.This().(SliceViewer).UpdateWidgets()
 				tv.UpdateEndRender(updt)
 			})
-
 		}
 		if w.Parent().PathFrom(tv) == "grid-lay/grid" {
 			switch {
@@ -345,10 +350,6 @@ func (tv *TableView) ConfigHeader() {
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	_, idxOff := tv.RowWidgetNs()
 	nfld := tv.NVisFields
-	if tv.Is(SliceViewShowIndex) {
-		lbl := sgh.Child(0).(*gi.Label)
-		lbl.SetText("Idx").SetType(gi.LabelBodyMedium)
-	}
 	for fli := 0; fli < nfld; fli++ {
 		fli := fli
 		field := tv.VisFields[fli]
