@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/fi/uri"
@@ -17,6 +18,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
@@ -281,8 +283,12 @@ func (ac *AppChooser) OnInit() {
 		ac.Icons = make([]icons.Icon, iln)
 		ac.Tooltips = make([]string, iln)
 		for i, kv := range mm.Stack.Order {
-			u := uri.URI{Label: kv.Val.Scene.Name(), Icon: icons.SelectWindow}
-			u.SetURL("scene", kv.Val.Scene.Name(), fmt.Sprintf("%d", i))
+			nm := kv.Val.Scene.Name()
+			// -scene is frequently placed at the end of scene names, so we remove it
+			nm = strings.TrimSuffix(nm, "-scene")
+			nm = sentence.Case(nm)
+			u := uri.URI{Label: nm, Icon: icons.SelectWindow}
+			u.SetURL("scene", nm, fmt.Sprintf("%d", i))
 			ac.Items[i] = u
 			ac.Icons[i] = u.Icon
 			ac.Tooltips[i] = u.URL
