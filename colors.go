@@ -296,16 +296,16 @@ func WithAF32(c color.Color, a float32) color.RGBA {
 
 // ApplyOpacity applies the given opacity (0-1) to the given color
 // and returns the result. It is different from [WithA] in that it
-// sets the transparency (A) value of the color to the current value
-// times the given value instead of just directly overriding it.
+// preserves the original transparency (A) value of the color
+// while still reducing the effective opacity of the color.
 func ApplyOpacity(c color.Color, opacity float32) color.RGBA {
 	// we get the effective RGB values of the original color
 	// (this performs alpha-premultiplication)
-	r, g, b, _ := c.RGBA()
+	r, g, b, a := c.RGBA()
 	// then we make a new color with the opacity and the premultiplied values,
 	// which means we perform alpha-premultiplication with both the original A
-	// and the opacity
-	return AsRGBA(color.NRGBA{uint8(r), uint8(g), uint8(b), uint8(opacity * 255)})
+	// and the opacity (but we keep the original A value)
+	return color.RGBA{uint8(opacity * float32(uint8(r))), uint8(opacity * float32(uint8(g))), uint8(opacity * float32(uint8(b))), uint8(a)}
 }
 
 // Clearer returns a color that is the given amount
