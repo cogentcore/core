@@ -145,8 +145,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	// and instead always have the same gray colors
 	if s.Is(states.Disabled) {
 		s.Cursor = cursors.NotAllowed
-		// this will get the state layer for the disabled state
-		s.StateLayer = s.State.StateLayer()
+		s.Opacity = 0.38
 		return
 	}
 	// TODO(kai): what about context menus on mobile?

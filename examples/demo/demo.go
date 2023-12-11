@@ -157,6 +157,7 @@ func makeButtons(ts *gi.Tabs) {
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
+		b.SetState(true, states.Disabled)
 
 		bt := gi.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s).
 			SetTooltip("A standard " + sl + " button with a label")
