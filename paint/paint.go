@@ -279,12 +279,13 @@ func (pc *Context) StrokeWidth() float32 {
 	return lw
 }
 
-func (pc *Context) stroke() {
+// StrokePreserve strokes the current path with the current color, line width,
+// line cap, line join and dash settings. The path is preserved after this
+// operation.
+func (pc *Context) StrokePreserve() {
 	if pc.Raster == nil {
 		return
 	}
-	// pr := prof.Start("Paint.stroke")
-	// defer pr.End()
 
 	pc.RasterMu.Lock()
 	defer pc.RasterMu.Unlock()
@@ -314,54 +315,11 @@ func (pc *Context) stroke() {
 	pc.Scanner.SetClip(pc.Bounds)
 	pc.Path.AddTo(pc.Raster)
 	fbox := pc.Raster.Scanner.GetPathExtent()
-	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
-
-	/*
-		pc.CompSpanner.DrawToImage(pc.Image)
-		pc.CompSpanner.Clear()
-	*/
-
-}
-
-func (pc *Context) fill() {
-	if pc.Raster == nil {
-		return
-	}
-	// pr := prof.Start("Paint.fill")
-	// pr.End()
-
-	pc.RasterMu.Lock()
-	defer pc.RasterMu.Unlock()
-
-	rf := &pc.Raster.Filler
-	rf.SetWinding(pc.FillStyle.Rule == styles.FillRuleNonZero)
-	pc.Scanner.SetClip(pc.Bounds)
-	pc.Path.AddTo(rf)
-	fbox := pc.Scanner.GetPathExtent()
-	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
-	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
-	rf.Draw()
-	rf.Clear()
-
-	/*
-		pc.CompSpanner.DrawToImage(pc.Image)
-		pc.CompSpanner.Clear()
-	*/
-
-}
-
-// StrokePreserve strokes the current path with the current color, line width,
-// line cap, line join and dash settings. The path is preserved after this
-// operation.
-func (pc *Context) StrokePreserve() {
-	pc.stroke()
 }
 
 // Stroke strokes the current path with the current color, line width,
@@ -375,7 +333,23 @@ func (pc *Context) Stroke() {
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
 func (pc *Context) FillPreserve() {
-	pc.fill()
+	if pc.Raster == nil {
+		return
+	}
+
+	pc.RasterMu.Lock()
+	defer pc.RasterMu.Unlock()
+
+	rf := &pc.Raster.Filler
+	rf.SetWinding(pc.FillStyle.Rule == styles.FillRuleNonZero)
+	pc.Scanner.SetClip(pc.Bounds)
+	pc.Path.AddTo(rf)
+	fbox := pc.Scanner.GetPathExtent()
+	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	rf.Draw()
+	rf.Clear()
 }
 
 // Fill fills the current path with the current color. Open subpaths
@@ -423,7 +397,7 @@ func (pc *Context) BlurBox(pos, size mat32.Vec2, blurRadius float32) {
 func (pc *Context) ClipPreserve() {
 	clip := image.NewAlpha(pc.Image.Bounds())
 	// painter := raster.NewAlphaOverPainter(clip) // todo!
-	pc.fill()
+	pc.FillPreserve()
 	if pc.Mask == nil {
 		pc.Mask = clip
 	} else { // todo: this one operation MASSIVELY slows down clip usage -- unclear why
