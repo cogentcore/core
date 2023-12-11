@@ -98,6 +98,12 @@ func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt colors.Con
 	pc.StyleSet = true
 }
 
+func (pc *Paint) FromStyle(st *Style) {
+	pc.UnContext = st.UnContext
+	pc.FontStyle = *st.FontRender()
+	pc.TextStyle = st.Text
+}
+
 // StyleToDots runs ToDots on unit values, to compile down to raw pixels
 func (pc *Paint) StyleToDots(uc *units.Context) {
 }
