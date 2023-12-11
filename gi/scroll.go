@@ -77,11 +77,11 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 		od := d.Other()
 		_, sz := ly.ScrollGeom(d)
 		if sz.X > 0 && sz.Y > 0 {
-			s.State.SetFlag(false, states.Invisible)
+			s.SetState(false, states.Invisible)
 			s.Min.SetDim(d, units.Dot(sz.Dim(d)))
 			s.Min.SetDim(od, units.Dot(sz.Dim(od)))
 		} else {
-			s.State.SetFlag(true, states.Invisible)
+			s.SetState(true, states.Invisible)
 		}
 		s.Max = s.Min
 	})

@@ -550,7 +550,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.NextDiff(0)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(len(dv.AlignD) <= 1, states.Disabled)
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Prev").SetIcon(icons.KeyboardArrowUp).
 		SetTooltip("move up to previous diff region").
@@ -558,7 +558,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.PrevDiff(0)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(len(dv.AlignD) <= 1, states.Disabled)
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 		})
 	gi.NewButton(tb).SetText("A &lt;- B").SetIcon(icons.ContentCopy).
 		SetTooltip("for current diff region, apply change from corresponding version in B, and move to next diff").
@@ -567,7 +567,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.NextDiff(0)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(len(dv.AlignD) <= 1, states.Disabled)
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Undo").SetIcon(icons.Undo).
 		SetTooltip("undo last diff apply action (A &lt;- B)").
@@ -575,7 +575,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.UndoDiff(0)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!dv.BufA.IsChanged(), states.Disabled)
+			s.SetState(!dv.BufA.IsChanged(), states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
 		SetTooltip("save edited version of file with the given -- prompts for filename").
@@ -586,7 +586,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			gi.TheViewIFace.CallFunc(dv, dv.SaveFileA)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!dv.BufA.IsChanged(), states.Disabled)
+			s.SetState(!dv.BufA.IsChanged(), states.Disabled)
 		})
 
 	gi.NewSeparator(tb)
@@ -602,7 +602,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.NextDiff(1)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(len(dv.AlignD) <= 1, states.Disabled)
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Prev").SetIcon(icons.KeyboardArrowUp).
 		SetTooltip("move up to previous diff region").
@@ -610,7 +610,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.PrevDiff(1)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(len(dv.AlignD) <= 1, states.Disabled)
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 		})
 	gi.NewButton(tb).SetText("A -&gt; B").SetIcon(icons.ContentCopy).
 		SetTooltip("for current diff region, apply change from corresponding version in A, and move to next diff").
@@ -619,7 +619,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.NextDiff(1)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(len(dv.AlignD) <= 1, states.Disabled)
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Undo").SetIcon(icons.Undo).
 		SetTooltip("undo last diff apply action (A -&gt; B)").
@@ -627,7 +627,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			dv.UndoDiff(1)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!dv.BufB.IsChanged(), states.Disabled)
+			s.SetState(!dv.BufB.IsChanged(), states.Disabled)
 		})
 	gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
 		SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function").
@@ -638,7 +638,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			gi.TheViewIFace.CallFunc(dv, dv.SaveFileB)
 		}).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!dv.BufB.IsChanged(), states.Disabled)
+			s.SetState(!dv.BufB.IsChanged(), states.Disabled)
 		})
 }
 

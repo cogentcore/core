@@ -77,14 +77,14 @@ func VCSLabelFunc(fn *Node, label string) string {
 func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	gi.NewButton(m).SetText("File info").SetIcon(icons.Info).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).ShowFileInfo()
 	})
 
 	gi.NewButton(m).SetText("Open (w/default app)").SetIcon(icons.Open).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).OpenFilesDefault()
 	})
@@ -92,19 +92,19 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 
 	gi.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).
 		SetKey(keyfun.Duplicate).Style(func(s *styles.Style) {
-		s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DuplicateFiles()
 	})
 	gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 		SetKey(keyfun.Delete).Style(func(s *styles.Style) {
-		s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DeleteFiles()
 	})
 	gi.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).RenameFiles()
 	})
@@ -112,83 +112,83 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 
 	giv.NewFuncButton(m, fn.OpenAll).SetText("Open All").SetIcon(icons.KeyboardArrowDown).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
+			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
+			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
+			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.AddToVcsSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.DeleteFromVcsSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.CommitToVcsSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.RevertVcsSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
 		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.DiffVcsSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.LogVcsSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
 		})
 	giv.NewFuncButton(m, fn.BlameVcsSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
+			s.SetState(!fn.HasSelection() || fn.Info.Vcs == vci.Untracked, states.Disabled)
 		})
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.RemoveFromExterns).SetIcon(icons.Delete).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
 
 	gi.NewSeparator(m)
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Copy(true)
 		})
 	gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keyfun.Cut).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Cut()
 		})
 	pbt := gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keyfun.Paste).
 		Style(func(s *styles.Style) {
-			s.State.SetFlag(!fn.HasSelection(), states.Disabled)
+			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Paste()
