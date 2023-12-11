@@ -365,7 +365,7 @@ func (pc *Context) FillBox(pos, size mat32.Vec2, clr *colors.Full) {
 	if clr.Gradient == nil {
 		b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		c := colors.ApplyOpacity(clr.Solid, pc.FillStyle.Opacity)
-		draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Src)
+		draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Over)
 	} else {
 		pc.FillStyle.SetFullColor(clr)
 		pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
