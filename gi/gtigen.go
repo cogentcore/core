@@ -125,6 +125,12 @@ func (t *AppChooser) SetItems(v []any) *AppChooser {
 	return t
 }
 
+// SetIcons sets the [AppChooser.Icons]
+func (t *AppChooser) SetIcons(v []icons.Icon) *AppChooser {
+	t.Icons = v
+	return t
+}
+
 // SetTooltips sets the [AppChooser.Tooltips]
 func (t *AppChooser) SetTooltips(v []string) *AppChooser {
 	t.Tooltips = v
@@ -376,7 +382,8 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", LocalType: "[]any", Doc: "items available for selection", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", LocalType: "[]string", Doc: "an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Icons", &gti.Field{Name: "Icons", Type: "[]goki.dev/icons.Icon", LocalType: "[]icons.Icon", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", LocalType: "[]string", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", LocalType: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}, Tag: ""}},
 		{"ItemsFunc", &gti.Field{Name: "ItemsFunc", Type: "func()", LocalType: "func()", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)", Directives: gti.Directives{}, Tag: ""}},
@@ -448,8 +455,17 @@ func (t *Chooser) SetItems(v []any) *Chooser {
 	return t
 }
 
+// SetIcons sets the [Chooser.Icons]:
+// an optional list of icons displayed for Chooser items;
+// the indices for the icons correspond to those for the items
+func (t *Chooser) SetIcons(v []icons.Icon) *Chooser {
+	t.Icons = v
+	return t
+}
+
 // SetTooltips sets the [Chooser.Tooltips]:
-// an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items
+// an optional list of tooltips displayed on hover for Chooser items;
+// the indices for the tooltips correspond to those for the items
 func (t *Chooser) SetTooltips(v []string) *Chooser {
 	t.Tooltips = v
 	return t
@@ -2115,10 +2131,10 @@ var SeparatorType = gti.AddType(&gti.Type{
 	Doc:        "Separator draws a vertical or horizontal line",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Horiz", &gti.Field{Name: "Horiz", Type: "bool", LocalType: "bool", Doc: "whether this is a horizontal separator; if false, it is vertical", Directives: gti.Directives{}, Tag: ""}},
+		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "Dim is the dimension the separator goes along (x means it's longer horizontally, etc)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Separator{},
@@ -2142,10 +2158,10 @@ func (t *Separator) New() ki.Ki {
 	return &Separator{}
 }
 
-// SetHoriz sets the [Separator.Horiz]:
-// whether this is a horizontal separator; if false, it is vertical
-func (t *Separator) SetHoriz(v bool) *Separator {
-	t.Horiz = v
+// SetDim sets the [Separator.Dim]:
+// Dim is the dimension the separator goes along (x means it's longer horizontally, etc)
+func (t *Separator) SetDim(v mat32.Dims) *Separator {
+	t.Dim = v
 	return t
 }
 
@@ -2170,6 +2186,18 @@ func (t *Separator) SetPriorityEvents(v []events.Types) *Separator {
 // SetCustomContextMenu sets the [Separator.CustomContextMenu]
 func (t *Separator) SetCustomContextMenu(v func(m *Scene)) *Separator {
 	t.CustomContextMenu = v
+	return t
+}
+
+// SetStackTop sets the [Separator.StackTop]
+func (t *Separator) SetStackTop(v int) *Separator {
+	t.StackTop = v
+	return t
+}
+
+// SetStripes sets the [Separator.Stripes]
+func (t *Separator) SetStripes(v Stripes) *Separator {
+	t.Stripes = v
 	return t
 }
 

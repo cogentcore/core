@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // MenuSceneConfigStyles configures the default styles
@@ -33,7 +34,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Horiz = true
+			sp.Dim = mat32.X
 		}
 	})
 }

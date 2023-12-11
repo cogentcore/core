@@ -392,16 +392,17 @@ func (ch *Chooser) SetStrings(el []string, setFirst bool, maxLen int) *Chooser {
 	return ch
 }
 
-// SetIcons sets the Items list from a list of icons.Icon values.
+// SetIconItems sets the Items list from a list of icons.Icon values.
 // If setFirst then set current item to the first item in the list,
 // and maxLen if > 0 auto-sets the width of the button to the
 // contents, with the given upper limit.
-func (ch *Chooser) SetIcons(el []icons.Icon, setFirst bool, maxLen int) *Chooser {
+func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool, maxLen int) *Chooser {
 	n := len(el)
 	if n == 0 {
 		return ch
 	}
 	ch.Items = make([]any, n)
+	ch.Icons = make([]icons.Icon, n)
 	for i, ic := range el {
 		ch.Items[i] = ic
 		ch.Icons[i] = ic

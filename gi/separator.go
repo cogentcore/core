@@ -8,76 +8,42 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/mat32/v2"
 )
+
+// TODO(kai): this seems bad
 
 // Separator defines a string to indicate a menu separator item
 var MenuTextSeparator = "-------------"
 
 // Separator draws a vertical or horizontal line
 type Separator struct {
-	WidgetBase
+	Frame
 
-	// whether this is a horizontal separator; if false, it is vertical
-	Horiz bool
+	// Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)
+	Dim mat32.Dims
 }
 
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.Style(func(s *styles.Style) {
-		s.Margin.Zero()
 		s.Align.Self = styles.Center
 		s.Justify.Self = styles.Center
-		if sp.Horiz {
-			s.Border.Style.Top = styles.BorderSolid
-			s.Border.Color.Top = colors.Scheme.OutlineVariant
-			s.Border.Width.Top.Dp(2)
+		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		if sp.Dim == mat32.X {
 			s.Grow.Set(1, 0)
-			s.Padding.Set(units.Dp(4), units.Zero())
-			s.Min.Y.Dp(2)
-			s.Min.X.Em(1)
+			s.Min.Y.Dp(1)
+			s.Margin.SetHoriz(units.Dp(6))
 		} else {
-			s.Border.Style.Left = styles.BorderSolid
-			s.Border.Color.Left = colors.Scheme.OutlineVariant
-			s.Border.Width.Left.Dp(2)
-			s.Padding.Set(units.Zero(), units.Dp(4))
 			s.Grow.Set(0, 1)
-			s.Min.X.Dp(2)
-			s.Min.Y.Em(1)
+			s.Min.X.Dp(1)
+			s.Margin.SetVert(units.Dp(6))
 		}
 	})
 }
 
 func (sp *Separator) CopyFieldsFrom(frm any) {
 	fr := frm.(*Separator)
-	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sp.Horiz = fr.Horiz
-}
-
-func (sp *Separator) RenderSeparator() {
-	pc, st := sp.RenderLock()
-	defer sp.RenderUnlock()
-
-	pos := sp.Geom.Pos.Total.Add(st.TotalMargin().Pos())
-	sz := sp.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
-
-	if !st.BackgroundColor.IsNil() {
-		pc.FillBox(pos, sz, &st.BackgroundColor)
-	}
-	// border-top is standard property for separators in CSS (see https://www.w3schools.com/howto/howto_css_dividers.asp)
-	pc.StrokeStyle.Width = st.Border.Width.Top
-	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
-	if sp.Horiz {
-		pc.DrawLine(pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
-	} else {
-		pc.DrawLine(pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
-	}
-	pc.FillStrokeClear()
-}
-
-func (sp *Separator) Render() {
-	if sp.PushBounds() {
-		sp.RenderSeparator()
-		sp.RenderChildren()
-		sp.PopBounds()
-	}
+	sp.Frame.CopyFieldsFrom(&fr.Frame)
+	sp.Dim = fr.Dim
 }
