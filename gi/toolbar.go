@@ -6,6 +6,7 @@ package gi
 
 import (
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
@@ -33,6 +34,10 @@ type Toolbar struct { //goki:embedder
 	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
+	// ToolbarFuncs contains functions for configuring this toolbar,
+	// called on Config
+	ToolbarFuncs ToolbarFuncs
+
 	// This is the overflow button
 	OverflowButton *Button
 }
@@ -54,6 +59,17 @@ func (tb *Toolbar) ToolbarStyles() {
 func (tb *Toolbar) IsVisible() bool {
 	// do not render toolbars with no buttons
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
+}
+
+func (tb *Toolbar) ConfigWidget() {
+	if len(tb.Kids) == 0 {
+		if len(tb.ToolbarFuncs) > 0 {
+			for _, f := range tb.ToolbarFuncs {
+				f(tb)
+			}
+		}
+	}
+	tb.Frame.ConfigWidget()
 }
 
 func (tb *Toolbar) SizeUp() {
@@ -155,7 +171,12 @@ func (tb *Toolbar) MoveToOverflow() {
 		tb.Kids.Move(n-1, ovidx)
 		tb.Kids = tb.Kids[:ovidx+1]
 	}
-	tb.OverflowButton.Update()
+	if len(tb.OverflowItems) == 0 && len(tb.OverflowMenus) == 0 {
+		tb.OverflowButton.SetState(true, states.Invisible)
+	} else {
+		tb.OverflowButton.SetState(false, states.Invisible)
+		tb.OverflowButton.Update()
+	}
 }
 
 // OverflowMenu is the overflow menu function

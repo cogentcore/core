@@ -264,9 +264,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	trs.Mat.Color.A = 200
 
 	txt := xyz.NewText2D(se, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-	// txt.Styles.BackgroundColor.SetSolid(colors.White)
-	txt.Styles.Color = colors.Black
-	txt.Styles.Text.Align = styles.Start
+	txt.Styles.Text.Align = styles.Center
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.SetPos(0, 2.2, 0)
 
