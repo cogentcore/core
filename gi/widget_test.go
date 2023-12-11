@@ -29,6 +29,7 @@ var (
 	testIcons   = []icons.Icon{"", icons.Search}
 	testStates  = [][]enums.BitFlag{
 		{},
+		{states.Disabled},
 		{states.Hovered},
 		{states.Focused},
 		{states.Active},

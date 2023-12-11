@@ -93,9 +93,6 @@ func (st *Stage) ConfigMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
-	if goosi.TheApp.Platform().IsMobile() {
-		st.NewWindow = false
-	}
 	sc := st.Scene
 	st.AddWindowDecor() // sensitive to cases
 	sc.ConfigSceneBars()
@@ -104,15 +101,31 @@ func (st *Stage) ConfigMainStage() {
 
 // RunWindow runs a Window with current settings.
 func (st *Stage) RunWindow() *Stage {
-	// note: need a *temporary* MainMgr to get initial pref size
 	sc := st.Scene
+	// if we are on mobile, we can never have new windows, unless we are
+	// in one of the special circumstances stated below
+	if goosi.TheApp.Platform().IsMobile() {
+		st.NewWindow = false
+	}
 	if CurRenderWin == nil {
+		// If we have no current render window, we need to be in a new window,
+		// and we need a *temporary* MainMgr to get initial pref size
+		st.NewWindow = true
 		st.SetMainMgr(st.FirstWinManager())
 	} else {
-		if sc.App == nil { // inherit apps
-			sc.App = CurRenderWin.MainStageMgr.TopOfType(WindowStage).Scene.App
+		top := CurRenderWin.MainStageMgr.TopOfType(WindowStage)
+		if top == nil {
+			// if we have no window in the existing MainMgr (probably because it was deleted),
+			// we are in a similar situation to the situation above with no current render window,
+			// so we need to be in a new window, and we need a *temporary* MainMgr to get initial pref size
+			st.NewWindow = true
+			st.SetMainMgr(st.FirstWinManager())
+		} else {
+			if sc.App == nil { // inherit apps
+				sc.App = top.Scene.App
+			}
+			st.SetMainMgr(&CurRenderWin.MainStageMgr)
 		}
-		st.SetMainMgr(&CurRenderWin.MainStageMgr)
 	}
 	st.ConfigMainStage()
 

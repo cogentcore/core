@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"testing"
 
 	"goki.dev/girl/states"
@@ -19,6 +20,7 @@ func TestButton(t *testing.T) {
 					var stf states.States
 					stf.SetFlag(true, st...)
 					nm := testName("button", typ, str, ic, stf)
+					fmt.Println(nm)
 					// t.Run(nm, func(t *testing.T) {
 					// t.Parallel()
 					sc := NewScene()

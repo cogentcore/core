@@ -33,8 +33,9 @@ func Wait() {
 	WinWait.Wait()
 }
 
-// CurRenderWin is the current RenderWin window
-// On mobile, this is the _only_ window.
+// CurRenderWin is the current RenderWin window.
+// On single window platforms (mobile, web, and offscreen),
+// this is the _only_ render window.
 var CurRenderWin *RenderWin
 
 var (
