@@ -8,6 +8,7 @@ import (
 	"image"
 	"log/slog"
 
+	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/svg"
@@ -129,8 +130,8 @@ func (ic *Icon) RenderSVG() {
 	}
 	sv.Resize(sz) // does Config if needed
 
-	// TODO: what about gradient icons?
-	ic.SVG.Color.SetSolid(ic.Styles.Color)
+	// TODO(kai): what about gradient icons?
+	ic.SVG.Color.SetSolid(colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity))
 
 	sv.Render()
 	ic.RendSize = sz
