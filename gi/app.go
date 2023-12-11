@@ -311,6 +311,8 @@ func (ac *AppChooser) OnInit() {
 		if !ok {
 			return
 		}
+		ic := ac.Icons[ac.CurIndex]
+		ac.SetIconUpdate(ic)
 		if cv.HasScheme("scene") {
 			e.SetHandled()
 			// TODO: optimize this?

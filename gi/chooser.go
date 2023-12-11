@@ -298,6 +298,26 @@ func (ch *Chooser) IconWidget() *Icon {
 	return ici.(*Icon)
 }
 
+// SetIconUpdate sets the icon and drives an update, for the already-displayed case.
+func (ch *Chooser) SetIconUpdate(ic icons.Icon) *Chooser {
+	updt := ch.UpdateStart()
+	defer ch.UpdateEndRender(updt)
+
+	ch.Icon = ic
+	if ch.Editable {
+		tf, ok := ch.TextField()
+		if ok {
+			tf.SetLeadingIconUpdate(ic)
+		}
+	} else {
+		iw := ch.IconWidget()
+		if iw != nil {
+			iw.SetIconUpdate(ic)
+		}
+	}
+	return ch
+}
+
 // TextField returns the text field of an editable Chooser
 // if present
 func (ch *Chooser) TextField() (*TextField, bool) {

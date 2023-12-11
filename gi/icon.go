@@ -55,8 +55,7 @@ func (ic *Icon) IconStyles() {
 	})
 }
 
-// SetIcon sets the icon by name into given Icon wrapper, logging error
-// message if not found etc.
+// SetIcon sets the icon, logging error if not found.
 // Does nothing if IconName is already == icon name.
 func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	_, err := ic.SetIconTry(icon)
@@ -66,7 +65,15 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	return ic
 }
 
-// SetIconTry sets the icon by name into given Icon wrapper, returning error
+// SetIconUpdate sets the icon and sets flag to render.
+// Does nothing if IconName is already == icon name.
+func (ic *Icon) SetIconUpdate(icon icons.Icon) *Icon {
+	ic.SetIcon(icon)
+	ic.SetNeedsRender(true)
+	return ic
+}
+
+// SetIconTry sets the icon, returning error
 // message if not found etc, and returning true if a new icon was actually set.
 // Does nothing and returns false if IconName is already == icon name.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
