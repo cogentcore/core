@@ -27,7 +27,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, s
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
-	_ = rad
+
+	pc.FillStyle.Opacity = st.Opacity
+	pc.StrokeStyle.Opacity = st.Opacity
 
 	// the background color we actually use
 	bg := st.BackgroundColor

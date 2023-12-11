@@ -307,6 +307,7 @@ func (s *Style) CopyFrom(cp *Style) {
 func (s *Style) InheritFields(par *Style) {
 	// fmt.Println("Inheriting from", *par)
 	s.Color = par.Color
+	s.Opacity = par.Opacity
 	// we only inherit the parent's state layer if we don't have one for ourself
 	if s.StateLayer == 0 {
 		s.StateLayer = par.StateLayer
@@ -392,9 +393,9 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 			}
 			bg.Solid = colors.AlphaBlend(bg.Solid, colors.WithAF32(clr, s.StateLayer))
 		}
-		if s.Opacity < 1 {
-			bg.Solid = colors.WithA(bg.Solid, uint8(s.Opacity*255)*bg.Solid.A)
-		}
+		// if s.Opacity < 1 {
+		// 	bg.Solid = colors.WithA(bg.Solid, uint8(s.Opacity*255)*bg.Solid.A)
+		// }
 		return bg
 	}
 	// still need to copy because underlying gradient isn't automatically copied
@@ -408,9 +409,9 @@ func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 			}
 			res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.WithAF32(clr, s.StateLayer))
 		}
-		if s.Opacity < 1 {
-			res.Gradient.Stops[i].Color = colors.WithA(stop.Color, uint8(s.Opacity*255)*stop.Color.A)
-		}
+		// if s.Opacity < 1 {
+		// 	res.Gradient.Stops[i].Color = colors.WithA(stop.Color, uint8(s.Opacity*255)*stop.Color.A)
+		// }
 	}
 	return res
 }
