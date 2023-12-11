@@ -30,6 +30,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, s
 
 	pc.FillStyle.Opacity = st.Opacity
 	pc.StrokeStyle.Opacity = st.Opacity
+	pc.FontStyle.Opacity = st.Opacity
 
 	// the background color we actually use
 	bg := st.BackgroundColor

@@ -90,7 +90,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 			continue
 		}
 		curFace := sr.Render[0].Face
-		curColor := sr.Render[0].Color
+		curColor := colors.WithAF32(sr.Render[0].Color, pc.FontStyle.Opacity)
 		tpos := pos.Add(sr.RelPos)
 
 		d := &font.Drawer{
@@ -114,7 +114,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 		for i, r := range sr.Text {
 			rr := &(sr.Render[i])
 			if rr.Color != nil {
-				curColor = rr.Color
+				curColor = colors.WithAF32(rr.Color, pc.FontStyle.Opacity)
 				d.Src = image.NewUniform(curColor)
 			}
 			curFace = rr.CurFace(curFace)
