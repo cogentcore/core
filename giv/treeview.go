@@ -652,8 +652,8 @@ func (tv *TreeView) RenderNode() {
 	if st.Is(states.Selected) {
 		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 	}
-	pbc, psl := tv.ParentBackgroundColor()
-	pc.DrawStdBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, &pbc, psl)
+	pbc, psl, pop := tv.ParentBackgroundColor()
+	pc.DrawStdBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, &pbc, psl, pop)
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)

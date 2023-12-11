@@ -526,7 +526,8 @@ func (sr *Slider) RenderSlider() {
 
 		bg := st.StateBackgroundColor(st.BackgroundColor)
 		if bg.IsNil() {
-			bg, _ = sr.ParentBackgroundColor()
+			// TODO(kai): we probably need to handle parent state layer and opacity here
+			bg, _, _ = sr.ParentBackgroundColor()
 		}
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
@@ -553,7 +554,8 @@ func (sr *Slider) RenderSlider() {
 
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
-		bg, _ := sr.ParentBackgroundColor()
+		// TODO(kai): we probably need to handle parent state layer and opacity here
+		bg, _, _ := sr.ParentBackgroundColor()
 		pc.FillStyle.SetFullColor(&bg)
 		sr.RenderBoxImpl(pos, sz, st.Border)
 
@@ -561,7 +563,8 @@ func (sr *Slider) RenderSlider() {
 		ebg := st.StateBackgroundColor(st.BackgroundColor)
 		pc.FillStyle.SetFullColor(&ebg)
 		if ebg.IsNil() {
-			ebg, _ = sr.ParentBackgroundColor()
+			// TODO(kai): we probably need to handle parent state layer and opacity here
+			ebg, _, _ = sr.ParentBackgroundColor()
 		}
 
 		trsz := sz.Dim(od) * sr.TrackSize

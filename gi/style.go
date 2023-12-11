@@ -220,30 +220,43 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	st.ToDots()
 }
 
-// ParentBackgroundColor returns the background color and state layer
-// of the nearest widget parent of the widget that has a defined
-// background color or state layer, using a recursive approach to
-// get further parent background colors for widgets with a state layer
-// but not a background color. If no such parent is found,
-// it returns a transparent background color and a 0 state layer.
-func (wb *WidgetBase) ParentBackgroundColor() (colors.Full, float32) {
-	// todo: this style reading requires a mutex!
+// ParentBackgroundColor returns the background color, state layer, and opacity
+// of the nearest widget parent of the widget that has a defined background color,
+// non-0 state later, or non-1 opacity, using a recursive approach to get further
+// parent background colors for widgets with a non-0 state layer or non-1 opacity but
+// not a defined background color. If no such parent is found, it returns a
+// transparent background color, a 0 state layer, and a 1 opacity.
+func (wb *WidgetBase) ParentBackgroundColor() (colors.Full, float32, float32) {
+	// TODO(kai): this style reading might require a mutex
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		// if we have a color or a state layer, we are a relevant breakpoint
-		return !p.Styles.BackgroundColor.IsNil() || p.Styles.StateLayer > 0
+		// if we have a color, a non-0 state layer, or a non-1 opacity,
+		// we are a relevant breakpoint
+		return !p.Styles.BackgroundColor.IsNil() || p.Styles.StateLayer > 0 || p.Styles.Opacity < 1
 	})
 	if pwb == nil {
-		return colors.Full{}, 0
+		return colors.Full{}, 0, 1
 	}
-	// If we don't have a background color ourselves (but we have a state layer),
-	// we recursively get our parent's background color and apply our state layer
-	// to it. This makes state layers work on transparent elements.
+	// If we don't have a background color ourselves (but we have a non-0 state layer
+	// or non-1 opacity) we recursively get our parent's background color and any
+	// other attributes we don't have defined and apply our defined attributes to it.
+	// This makes opacities and state layers work on transparent elements.
 	if pwb.Styles.BackgroundColor.IsNil() {
-		pbc, _ := pwb.ParentBackgroundColor()
-		return pbc, pwb.Styles.StateLayer
+		pbc, psl, pop := pwb.ParentBackgroundColor()
+
+		// if we have both defined, we use both
+		if pwb.Styles.StateLayer > 0 && pwb.Styles.Opacity < 1 {
+			return pbc, pwb.Styles.StateLayer, pwb.Styles.Opacity
+		}
+		// if we only have state layer defined, we use it and get the parent opacity
+		if pwb.Styles.StateLayer > 0 {
+			return pbc, pwb.Styles.StateLayer, pop
+		}
+		// if we only have opacity defined, we use it and get the parent state layer
+		return pbc, psl, pwb.Styles.Opacity
 	}
-	// Otherwise, we can directly apply the state layer to our background color
-	return pwb.Styles.BackgroundColor, pwb.Styles.StateLayer
+	// Otherwise, we can directly apply our state layer and opacity
+	// to our background color
+	return pwb.Styles.BackgroundColor, pwb.Styles.StateLayer, pwb.Styles.Opacity
 }
 
 // IsNthChild returns whether the node is nth-child of its parent
