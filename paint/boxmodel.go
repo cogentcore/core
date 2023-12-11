@@ -18,19 +18,15 @@ func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
-// DrawStdBox draws the CSS "standard box" model using given style.
+// DrawStdBox draws the CSS "standard box" model using the given style.
 // This is used for rendering widgets such as buttons, textfields, etc in a GUI.
-// The surround arguments are the background color and state layer of the surrounding
-// context of this box, typically obtained through [goki.dev/gi/v2/gi.WidgetBase.ParentBackgroundColor]
-// in a GUI context.
-func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32) {
+// The surround arguments are the background color, state layer, and opacity of
+// the surrounding context of this box, typically obtained through
+// [goki.dev/gi/v2/gi.WidgetBase.ParentBackgroundColor] in a GUI context.
+func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32, surroundOpacity float32) {
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
-
-	pc.FillStyle.Opacity = st.Opacity
-	pc.StrokeStyle.Opacity = st.Opacity
-	pc.FontStyle.Opacity = st.Opacity
 
 	// the background color we actually use
 	bg := st.BackgroundColor
@@ -52,6 +48,8 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, s
 		sbg := st.StateBackgroundColor(*surroundBgColor)
 		st.StateLayer = psl
 
+		pc.FillStyle.Opacity = surroundOpacity
+
 		// We need to fill the whole box where the
 		// box shadows / element can go to prevent growing
 		// box shadows and borders. We couldn't just
@@ -64,6 +62,10 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, s
 		// any box shadow that may have gone in margin.
 		pc.FillBox(pos, sz, &sbg)
 	}
+
+	pc.FillStyle.Opacity = st.Opacity
+	pc.StrokeStyle.Opacity = st.Opacity
+	pc.FontStyle.Opacity = st.Opacity
 
 	// first do any shadow
 	if st.HasBoxShadow() {

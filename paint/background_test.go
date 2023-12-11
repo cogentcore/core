@@ -25,7 +25,7 @@ func TestBackgroundColor(t *testing.T) {
 		sbg := &colors.Full{Solid: colors.White}
 
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
-		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, sbg, 0)
+		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, sbg, 0, 1)
 	})
 }
 
@@ -45,7 +45,7 @@ func TestBackgroundImage(t *testing.T) {
 				defer f.Close()
 				st.BackgroundImage = f
 			}
-			pc.DrawStdBox(st, pos, sz, sbg, 0)
+			pc.DrawStdBox(st, pos, sz, sbg, 0, 1)
 		}
 
 		test(styles.FitFill, mat32.Vec2{0, 0})
