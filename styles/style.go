@@ -260,20 +260,40 @@ func StylePropsXML(props map[string]any) string {
 	return sb.String()
 }
 
-func NewStyle() Style {
-	s := Style{}
+// NewStyle returns a new [Style] object with default values
+func NewStyle() *Style {
+	s := &Style{}
 	s.Defaults()
 	return s
 }
 
-// Is returns true if the State flag is set
+// Is returns whether the given [states.States] flag is set
 func (s *Style) Is(st states.States) bool {
 	return s.State.HasFlag(st)
 }
 
-// SetAbilities sets the abilities flags
-func (s *Style) SetAbilities(on bool, able ...enums.BitFlag) {
-	s.Abilities.SetFlag(on, able...)
+// AbilityIs returns whether the given [abilities.Abilities] flag is set
+func (s *Style) AbilityIs(able abilities.Abilities) bool {
+	return s.Abilities.HasFlag(able)
+}
+
+// SetState sets the given [states.State] flags to the given value
+func (s *Style) SetState(on bool, state ...states.States) *Style {
+	bfs := make([]enums.BitFlag, len(state))
+	for i, st := range state {
+		bfs[i] = st
+	}
+	s.State.SetFlag(on, bfs...)
+	return s
+}
+
+// SetAbilities sets the given [states.State] flags to the given value
+func (s *Style) SetAbilities(on bool, able ...abilities.Abilities) {
+	bfs := make([]enums.BitFlag, len(able))
+	for i, st := range able {
+		bfs[i] = st
+	}
+	s.Abilities.SetFlag(on, bfs...)
 }
 
 // CopyFrom copies from another style, while preserving relevant local state
