@@ -2582,6 +2582,7 @@ func (tb *Buf) SetCompleter(data any, matchFun complete.MatchFunc, editFun compl
 	tb.Complete.OnSelect(func(e events.Event) {
 		tb.CompleteText(tb.Complete.Completion)
 	})
+	// todo: what about CompleteExtend event type?
 	// TODO(kai/complete): clean this up and figure out what to do about Extend and only connecting once
 	// note: only need to connect once..
 	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
@@ -2598,8 +2599,6 @@ func (tb *Buf) DeleteCompleter() {
 	if tb.Complete == nil {
 		return
 	}
-	// tb.Complete.CompleteSig.Disconnect(tb.This())
-	// tb.Complete.Destroy()
 	tb.Complete = nil
 }
 
@@ -2677,18 +2676,10 @@ func (tb *Buf) SetSpell() {
 		return
 	}
 	gi.InitSpell()
-	tb.Spell = &gi.Spell{}
-	tb.Spell.InitName(tb.Spell, "tb-spellcorrect") // needed for standalone Ki's
-	// note: only need to connect once..
-	// tb.Spell.SpellSig.ConnectOnly(func(dlg *gi.Dialog) {
-	// 	if sig == int64(gi.SpellSelect) {
-	// 		tbf, _ := recv.Embed(TypeBuf).(*Buf)
-	// 		tbf.CorrectText(data.(string)) // always use data
-	// 	} else if sig == int64(gi.SpellIgnore) {
-	// 		tbf, _ := recv.Embed(TypeBuf).(*Buf)
-	// 		tbf.CorrectText(data.(string)) // always use data
-	// 	}
-	// })
+	tb.Spell = gi.NewSpell()
+	tb.Spell.OnSelect(func(e events.Event) {
+		tb.CorrectText(tb.Spell.Correction)
+	})
 }
 
 // DeleteSpell deletes any existing spell object
@@ -2696,8 +2687,6 @@ func (tb *Buf) DeleteSpell() {
 	if tb.Spell == nil {
 		return
 	}
-	// tb.Spell.SpellSig.Disconnect(tb.This())
-	tb.Spell.Destroy()
 	tb.Spell = nil
 }
 

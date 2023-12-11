@@ -95,22 +95,6 @@ func (ed *Editor) KeyInput(kt events.Event) {
 	}
 	kf := keyfun.Of(kt.KeyChord())
 
-	// todo:
-	// cpop := win.CurPopup()
-	// if gi.PopupIsCompleter(cpop) {
-	// 	setprocessed := ed.Buf.Complete.KeyInput(kf)
-	// 	if setprocessed {
-	// 		kt.SetHandled()
-	// 	}
-	// }
-	//
-	// if gi.PopupIsCorrector(cpop) {
-	// 	setprocessed := ed.Buf.Spell.KeyInput(kf)
-	// 	if setprocessed {
-	// 		kt.SetHandled()
-	// 	}
-	// }
-
 	if kt.IsHandled() {
 		return
 	}
@@ -601,9 +585,9 @@ func (ed *Editor) HandleEditorMouse() {
 				ed.SavePosHistory(ed.CursorPos)
 				ed.Paste()
 			}
-		case events.Right:
-			ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
-			ed.Send(events.ContextMenu, e)
+			// case events.Right:
+			// 	ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
+			// 	ed.Send(events.ContextMenu, e)
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {

@@ -11,11 +11,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
-	"goki.dev/gi/v2/keyfun"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
 	"goki.dev/spell"
 )
 
@@ -107,9 +106,7 @@ func SaveSpellModel() error {
 // Spell
 
 // Spell
-type Spell struct {
-	ki.Node
-
+type Spell struct { //gti:add -setters
 	// line number in source that spelling is operating on, if relevant
 	SrcLn int
 
@@ -128,13 +125,16 @@ type Spell struct {
 	// the user's correction selection
 	Correction string `set:"-"`
 
-	// the scene where the current popup menu is presented
-	Sc *Scene ` set:"-"`
-}
+	// the event listeners for the spell (it sends Select events)
+	Listeners events.Listeners `set:"-" view:"-"`
 
-func (sp *Spell) Disconnect() {
-	// sp.Node.Disconnect()
-	// sp.SpellSig.DisconnectAll()
+	// Stage is the [PopupStage] associated with the [Spell]
+	Stage *Stage
+
+	ShowMu sync.Mutex `set:"-"`
+
+	// the scene where the current popup menu is presented
+	// Sc *Scene ` set:"-"`
 }
 
 // SpellSignals are signals that are sent by Spell
@@ -147,6 +147,11 @@ const (
 	// SpellIgnore signals the user chose ignore so clear the tag
 	SpellIgnore
 )
+
+// NewSpell returns a new [Spell]
+func NewSpell() *Spell {
+	return &Spell{}
+}
 
 // CheckWord checks the model to determine if the word is known.
 // automatically checks the Ignore list first.
@@ -167,91 +172,79 @@ func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) *Spell {
 // Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
-func (sp *Spell) Show(text string, sc *Scene, pt image.Point) {
-	// TODO(kai/menu): what should we do here?
-	// if sc == nil || sc.Win == nil {
-	// 	return
-	// }
-	// cpop := sc.Win.CurPopup()
-	// if PopupIsCorrector(cpop) {
-	// 	sc.Win.SetDelPopup(cpop)
-	// }
-	// sp.ShowNow(text, sc, pt)
+func (sp *Spell) Show(text string, ctx Widget, pos image.Point) {
+	if sp.Stage != nil {
+		sp.Cancel()
+	}
+	sp.ShowNow(text, ctx, pos)
 }
 
 // ShowNow actually builds the correction popup menu
-func (sp *Spell) ShowNow(word string, m *Scene, pt image.Point) {
-	// TODO(kai/menu): what should we do here?
-	// if sc == nil || sc.Win == nil {
-	// 	return
-	// }
-	// cpop := sc.Win.CurPopup()
-	// if PopupIsCorrector(cpop) {
-	// 	sc.Win.SetDelPopup(cpop)
-	// }
+func (sp *Spell) ShowNow(word string, ctx Widget, pos image.Point) {
+	if sp.Stage != nil {
+		sp.Cancel()
+	}
+	sp.ShowMu.Lock()
+	defer sp.ShowMu.Unlock()
 
-	var text string
+	sc := NewScene(ctx.Name() + "-spell")
+	MenuSceneConfigStyles(sc)
+	sp.Stage = NewPopupStage(CompleterStage, sc, ctx).SetPos(pos)
+
 	if sp.IsLastLearned(word) {
-		text = "unlearn"
-		NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
-			sp.UnLearnLast()
-		})
+		NewButton(sc).SetText("unlearn").SetTooltip("unlearn the last learned word").
+			OnClick(func(e events.Event) {
+				sp.UnLearnLast()
+			})
 	} else {
 		count := len(sp.Suggest)
 		if count == 1 && sp.Suggest[0] == word {
 			return
 		}
 		if count == 0 {
-			text = "no suggestion"
-			NewButton(m, text).SetText(text).SetData(text)
+			NewButton(sc).SetText("no suggestion")
 		} else {
 			for i := 0; i < count; i++ {
-				text = sp.Suggest[i]
-				NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
+				text := sp.Suggest[i]
+				NewButton(sc).SetText(text).OnClick(func(e events.Event) {
 					sp.Spell(text)
 				})
 			}
 		}
-		NewSeparator(m)
-		text = "learn"
-		NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
+		NewSeparator(sc)
+		NewButton(sc).SetText("learn").OnClick(func(e events.Event) {
 			sp.LearnWord()
 		})
-		text = "ignore"
-		NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
+		NewButton(sc).SetText("ignore").OnClick(func(e events.Event) {
 			sp.IgnoreWord()
 		})
 	}
-	// TODO(kai/menu): what should we do here?
-	// scp := PopupMenu(m, pt.X, pt.Y, sc, "tf-spellcheck-menu")
-	// scp.Type = ScCorrector
-	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	sp.Stage.RunPopup()
 }
 
-// Spell emits a signal to let subscribers know that the user has made a
+// Spell sends a Select event to Listeners indicating that the user has made a
 // selection from the list of possible corrections
 func (sp *Spell) Spell(s string) {
 	sp.Cancel()
 	sp.Correction = s
-	// sp.SpellSig.Emit(sp.This(), int64(SpellSelect), s)
+	sp.Listeners.Call(&events.Base{Typ: events.Select})
 }
 
-// KeyInput is the opportunity for the spelling correction popup to act on specific key inputs
-func (sp *Spell) KeyInput(kf keyfun.Funs) bool { // true - caller should set key processed
-	switch kf {
-	case keyfun.MoveDown:
-		return true
-	case keyfun.MoveUp:
-		return true
-	}
-	return false
+// OnSelect registers given listener function for Select events on Value.
+// This is the primary notification event for all Complete elements.
+func (sp *Spell) OnSelect(fun func(e events.Event)) {
+	sp.On(events.Select, fun)
+}
+
+// On adds an event listener function for the given event type
+func (sp *Spell) On(etype events.Types, fun func(e events.Event)) {
+	sp.Listeners.Add(etype, fun)
 }
 
 // LearnWord gets the misspelled/unknown word and passes to LearnWord
 func (sp *Spell) LearnWord() {
 	sp.LastLearned = strings.ToLower(sp.Word)
 	spell.LearnWord(sp.Word)
-	// sp.SpellSig.Emit(sp.This(), int64(SpellSelect), sp.Word)
 }
 
 // IsLastLearned returns true if given word was the last one learned
@@ -274,23 +267,17 @@ func (sp *Spell) UnLearnLast() {
 // IgnoreWord adds the word to the ignore list
 func (sp *Spell) IgnoreWord() {
 	spell.IgnoreWord(sp.Word)
-	// sp.SpellSig.Emit(sp.This(), int64(SpellIgnore), sp.Word)
 }
 
-// Cancel cancels any pending spell correction -- call when new events nullify prior correction
+// Cancel cancels any pending spell correction.
+// call when new events nullify prior correction.
 // returns true if canceled
 func (sp *Spell) Cancel() bool {
-	// TODO(kai/menu): what should we do here?
-	// if sp.Sc == nil || sp.Sc.Win == nil {
-	// 	return false
-	// }
-	// cpop := sp.Sc.Win.CurPopup()
-	// did := false
-	// if PopupIsCorrector(cpop) {
-	// 	did = true
-	// 	sp.Sc.Win.SetDelPopup(cpop)
-	// }
-	// sp.Sc = nil
-	// return did
-	return false
+	if sp.Stage == nil {
+		return false
+	}
+	st := sp.Stage
+	sp.Stage = nil
+	st.ClosePopup()
+	return true
 }

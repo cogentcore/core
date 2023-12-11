@@ -226,8 +226,6 @@ func (wb *WidgetBase) PosInScBBox(pos image.Point) bool {
 // For Left button:
 // If Checkable, toggles Checked. if Focusable, Focuses or clears,
 // If Selectable, updates state and sends Select, Deselect.
-// For Right button:
-// Sends ContextMenu event that Activates a context menu if present.
 func (wb *WidgetBase) HandleWidgetClick() {
 	wb.OnClick(func(e events.Event) {
 		// fmt.Println("click", wb)

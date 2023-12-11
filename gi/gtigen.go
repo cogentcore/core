@@ -520,7 +520,6 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]", Directives: gti.Directives{}, Tag: ""}},
 		{"MatchFunc", &gti.Field{Name: "MatchFunc", Type: "goki.dev/pi/v2/complete.MatchFunc", LocalType: "complete.MatchFunc", Doc: "function to get the list of possible completions", Directives: gti.Directives{}, Tag: ""}},
 		{"LookupFunc", &gti.Field{Name: "LookupFunc", Type: "goki.dev/pi/v2/complete.LookupFunc", LocalType: "complete.LookupFunc", Doc: "function to get the text to show for lookup", Directives: gti.Directives{}, Tag: ""}},
 		{"EditFunc", &gti.Field{Name: "EditFunc", Type: "goki.dev/pi/v2/complete.EditFunc", LocalType: "complete.EditFunc", Doc: "function to edit text using the selected completion", Directives: gti.Directives{}, Tag: ""}},
@@ -531,6 +530,7 @@ var _ = gti.AddType(&gti.Type{
 		{"Seed", &gti.Field{Name: "Seed", Type: "string", LocalType: "string", Doc: "current completion seed", Directives: gti.Directives{}, Tag: ""}},
 		{"Completion", &gti.Field{Name: "Completion", Type: "string", LocalType: "string", Doc: "the user's completion selection", Directives: gti.Directives{}, Tag: ""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "the event listeners for the completer (it sends Select events)", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]", Directives: gti.Directives{}, Tag: ""}},
 		{"DelayTimer", &gti.Field{Name: "DelayTimer", Type: "*time.Timer", LocalType: "*time.Timer", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DelayMu", &gti.Field{Name: "DelayMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -538,13 +538,6 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// SetStage sets the [Complete.Stage]:
-// Stage is the [PopupStage] associated with the [Complete]
-func (t *Complete) SetStage(v *Stage) *Complete {
-	t.Stage = v
-	return t
-}
 
 // SetMatchFunc sets the [Complete.MatchFunc]:
 // function to get the list of possible completions
@@ -606,6 +599,13 @@ func (t *Complete) SetSeed(v string) *Complete {
 // the user's completion selection
 func (t *Complete) SetCompletion(v string) *Complete {
 	t.Completion = v
+	return t
+}
+
+// SetStage sets the [Complete.Stage]:
+// Stage is the [PopupStage] associated with the [Complete]
+func (t *Complete) SetStage(v *Stage) *Complete {
+	t.Stage = v
 	return t
 }
 
@@ -1942,8 +1942,8 @@ var SceneType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"App", &gti.Field{Name: "App", Type: "*goki.dev/gi/v2/gi.App", LocalType: "*App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there.", Directives: gti.Directives{}, Tag: ""}},
-		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
-		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
+		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides[goki.dev/gi/v2/gi.BarFuncs]", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
+		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides[bool]", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
 		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.", Directives: gti.Directives{}, Tag: ""}},
 		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
@@ -2131,7 +2131,7 @@ var SeparatorType = gti.AddType(&gti.Type{
 	Doc:        "Separator draws a vertical or horizontal line",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "Dim is the dimension the separator goes along (x means it's longer horizontally, etc)", Directives: gti.Directives{}, Tag: ""}},
+		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2159,7 +2159,7 @@ func (t *Separator) New() ki.Ki {
 }
 
 // SetDim sets the [Separator.Dim]:
-// Dim is the dimension the separator goes along (x means it's longer horizontally, etc)
+// Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)
 func (t *Separator) SetDim(v mat32.Dims) *Separator {
 	t.Dim = v
 	return t
@@ -2418,13 +2418,14 @@ func (t *Slider) SetCustomContextMenu(v func(m *Scene)) *Slider {
 	return t
 }
 
-// SpellType is the [gti.Type] for [Spell]
-var SpellType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Spell",
-	ShortName:  "gi.Spell",
-	IDName:     "spell",
-	Doc:        "Spell",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Spell",
+	ShortName: "gi.Spell",
+	IDName:    "spell",
+	Doc:       "Spell",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SrcLn", &gti.Field{Name: "SrcLn", Type: "int", LocalType: "int", Doc: "line number in source that spelling is operating on, if relevant", Directives: gti.Directives{}, Tag: ""}},
 		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", LocalType: "int", Doc: "character position in source that spelling is operating on (start of word to be corrected)", Directives: gti.Directives{}, Tag: ""}},
@@ -2432,32 +2433,13 @@ var SpellType = gti.AddType(&gti.Type{
 		{"Word", &gti.Field{Name: "Word", Type: "string", LocalType: "string", Doc: "word being checked", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", LocalType: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Correction", &gti.Field{Name: "Correction", Type: "string", LocalType: "string", Doc: "the user's correction selection", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: " set:\"-\""}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "the event listeners for the spell (it sends Select events)", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]", Directives: gti.Directives{}, Tag: ""}},
+		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Spell{},
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// NewSpell adds a new [Spell] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSpell(par ki.Ki, name ...string) *Spell {
-	return par.NewChild(SpellType, name...).(*Spell)
-}
-
-// KiType returns the [*gti.Type] of [Spell]
-func (t *Spell) KiType() *gti.Type {
-	return SpellType
-}
-
-// New returns a new [*Spell] value
-func (t *Spell) New() ki.Ki {
-	return &Spell{}
-}
 
 // SetSrcLn sets the [Spell.SrcLn]:
 // line number in source that spelling is operating on, if relevant
@@ -2477,6 +2459,13 @@ func (t *Spell) SetSrcCh(v int) *Spell {
 // list of suggested corrections
 func (t *Spell) SetSuggest(v []string) *Spell {
 	t.Suggest = v
+	return t
+}
+
+// SetStage sets the [Spell.Stage]:
+// Stage is the [PopupStage] associated with the [Spell]
+func (t *Spell) SetStage(v *Stage) *Spell {
+	t.Stage = v
 	return t
 }
 
@@ -2965,7 +2954,7 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map[string, *goki.dev/gi/v2/gi.Stage]", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Modified", &gti.Field{Name: "Modified", Type: "bool", LocalType: "bool", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle.", Directives: gti.Directives{}, Tag: ""}},
 		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin", Directives: gti.Directives{}, Tag: ""}},
 		{"RenderWin", &gti.Field{Name: "RenderWin", Type: "*goki.dev/gi/v2/gi.RenderWin", LocalType: "*RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderCtx wherever possible.", Directives: gti.Directives{}, Tag: ""}},
@@ -3700,6 +3689,7 @@ var ToolbarType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"ToolbarFuncs", &gti.Field{Name: "ToolbarFuncs", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config", Directives: gti.Directives{}, Tag: ""}},
 		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/gi/v2/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -3752,6 +3742,14 @@ func AsToolbar(k ki.Ki) *Toolbar {
 
 // AsToolbar satisfies the [ToolbarEmbedder] interface
 func (t *Toolbar) AsToolbar() *Toolbar {
+	return t
+}
+
+// SetToolbarFuncs sets the [Toolbar.ToolbarFuncs]:
+// ToolbarFuncs contains functions for configuring this toolbar,
+// called on Config
+func (t *Toolbar) SetToolbarFuncs(v ToolbarFuncs) *Toolbar {
+	t.ToolbarFuncs = v
 	return t
 }
 

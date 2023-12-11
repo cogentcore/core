@@ -16,6 +16,15 @@ import (
 	"goki.dev/spell"
 )
 
+var (
+	// CompleteWaitDuration is the amount of time to wait before
+	// showing the completion menu
+	CompleteWaitDuration time.Duration = 0
+
+	// CompleteMaxItems is the max number of items to display in completer popup
+	CompleteMaxItems = 25
+)
+
 // Completer interface supports the SetCompleter method for setting completer parameters
 // This is defined e.g., on TextField and textview.Buf
 type Completer interface {
@@ -40,9 +49,6 @@ func NewCompleter(sc *Scene, ctx Widget) *Stage {
 // the list of possible completions and for editing text after a completion is selected.
 // It also holds the [PopupStage] associated with it.
 type Complete struct { //gti:add -setters
-	// Stage is the [PopupStage] associated with the [Complete]
-	Stage *Stage
-
 	// function to get the list of possible completions
 	MatchFunc complete.MatchFunc
 
@@ -73,6 +79,9 @@ type Complete struct { //gti:add -setters
 	// the event listeners for the completer (it sends Select events)
 	Listeners events.Listeners `set:"-" view:"-"`
 
+	// Stage is the [PopupStage] associated with the [Complete]
+	Stage *Stage
+
 	DelayTimer *time.Timer `set:"-"`
 	DelayMu    sync.Mutex  `set:"-"`
 	ShowMu     sync.Mutex  `set:"-"`
@@ -89,13 +98,6 @@ const (
 	// completions have a common prefix longer than current seed
 	CompleteExtend
 )
-
-// CompleteWaitDuration is the amount of time to wait before
-// showing the completion menu
-var CompleteWaitDuration time.Duration = 0
-
-// CompleteMaxItems is the max number of items to display in completer popup
-var CompleteMaxItems = 25
 
 // NewComplete returns a new [Complete] object. It does not show it; see [Complete.Show].
 func NewComplete() *Complete {
@@ -157,6 +159,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
+
 	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
 	c.Completions = md.Matches
 	c.Seed = md.Seed
@@ -239,7 +242,7 @@ func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Poi
 	c.LookupFunc(c.Context, text, posLn, posCh) // this processes result directly
 }
 
-// Complete emits a signal to let subscribers know that the user has made a
+// Complete sends Select event to listeners, indicating that the user has made a
 // selection from the list of possible completions
 func (c *Complete) Complete(s string) {
 	c.Cancel()

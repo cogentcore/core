@@ -164,8 +164,8 @@ type Widget interface {
 
 	// ShowContextMenu displays the context menu of various actions
 	// to perform on a Widget, activated by default on the ShowContextMenu
-	// event, triggered by a Right mouse click ()
-	// -- returns immediately, and actions are all executed directly
+	// event, triggered by a Right mouse click.
+	// Returns immediately, and actions are all executed directly
 	// (later) via the action signals.  Calls MakeContextMenu and
 	// ContextMenuPos.
 	ShowContextMenu(e events.Event)
