@@ -7,6 +7,7 @@ package xyz
 import (
 	"fmt"
 	"image"
+	"image/draw"
 
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
@@ -42,7 +43,7 @@ type Text2D struct {
 	TxtPos mat32.Vec2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
-	TxtRender paint.Text `set:"-" view:"-" xml:"-" json:"-"`
+	TxtRender paint.Text `set:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
 	RenderState paint.State `set:"-" copy:"-" json:"-" xml:"-" view:"-"`
@@ -82,9 +83,9 @@ func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 }
 
 func (txt *Text2D) Config() {
-	txt.Solid.Config()
 	tm := txt.Sc.PlaneMesh2D()
 	txt.SetMesh(tm)
+	txt.Solid.Config()
 	txt.RenderText()
 	txt.Validate()
 }
@@ -92,17 +93,18 @@ func (txt *Text2D) Config() {
 func (txt *Text2D) RenderText() {
 	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
 	st := &txt.Styles
+	fr := st.FontRender()
 	if st.Font.Face == nil {
-		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
+		st.Font = paint.OpenFont(fr, &st.UnContext)
 	}
 	st.ToDots()
 
-	txt.TxtRender.SetHTML(txt.Text, txt.Styles.FontRender(), &txt.Styles.Text, &txt.Styles.UnContext, nil)
+	txt.TxtRender.SetHTML(txt.Text, fr, &txt.Styles.Text, &txt.Styles.UnContext, nil)
 	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Styles.Text, txt.Styles.FontRender(), &txt.Styles.UnContext, sz)
+	txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnContext, sz)
 	if txt.TxtRender.Size != sz {
 		sz = txt.TxtRender.Size
-		txt.TxtRender.LayoutStdLR(&txt.Styles.Text, txt.Styles.FontRender(), &txt.Styles.UnContext, sz)
+		txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
 		}
@@ -149,8 +151,10 @@ func (txt *Text2D) RenderText() {
 	}
 	rs.PushBounds(bounds)
 	pt := styles.Paint{}
+	pt.Defaults()
+	pt.FromStyle(st)
 	ctx := &paint.Context{State: rs, Paint: &pt}
-	// draw.Draw(img, bounds, &image.Uniform{txt.Styles.BackgroundColor.Color}, image.Point{}, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{st.BackgroundColor.Solid}, image.Point{}, draw.Src)
 	txt.TxtRender.Render(ctx, txt.TxtPos)
 	rs.PopBounds()
 }
