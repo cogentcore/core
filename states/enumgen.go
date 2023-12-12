@@ -33,7 +33,7 @@ func _StatesNoOp() {
 	_ = x[Focused-(8)]
 	_ = x[FocusedWithin-(9)]
 	_ = x[Checked-(10)]
-	_ = x[Indeterminant-(11)]
+	_ = x[Indeterminate-(11)]
 	_ = x[Hovered-(12)]
 	_ = x[LongHovered-(13)]
 	_ = x[LongPressed-(14)]
@@ -70,8 +70,8 @@ var _StatesNameToValueMap = map[string]States{
 	`focusedwithin`: 9,
 	`Checked`:       10,
 	`checked`:       10,
-	`Indeterminant`: 11,
-	`indeterminant`: 11,
+	`Indeterminate`: 11,
+	`indeterminate`: 11,
 	`Hovered`:       12,
 	`hovered`:       12,
 	`LongHovered`:   13,
@@ -108,7 +108,7 @@ var _StatesDescMap = map[States]string{
 	8:  `Focused elements receive keyboard input.`,
 	9:  `FocusedWithin elements have a Focused element within them, including self.`,
 	10: `Checked is for check boxes or radio buttons or other similar state.`,
-	11: `Indeterminant indicates that the true state of an item is unknown. For example, [Checked] state items may be in an uncertain state if they represent other checked items, some of which are checked and some of which are not.`,
+	11: `Indeterminate indicates that the true state of an item is unknown. For example, [Checked] state items may be in an uncertain state if they represent other checked items, some of which are checked and some of which are not.`,
 	12: `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active (nor DragHovered).`,
 	13: `LongHovered indicates a Hover event that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup.`,
 	14: `LongPressed indicates a MouseDown event that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip and/or context menu popup.`,
@@ -134,7 +134,7 @@ var _StatesMap = map[States]string{
 	8:  `Focused`,
 	9:  `FocusedWithin`,
 	10: `Checked`,
-	11: `Indeterminant`,
+	11: `Indeterminate`,
 	12: `Hovered`,
 	13: `LongHovered`,
 	14: `LongPressed`,
