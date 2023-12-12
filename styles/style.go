@@ -386,6 +386,10 @@ var StyleDefault Style
 // given parent actual background color and the properties of the style object.
 func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
 	if s.Opacity >= 1 && s.StateLayer <= 0 {
+		if s.BackgroundColor.IsNil() {
+			s.ActualBackgroundColor = *pabg
+			return
+		}
 		s.ActualBackgroundColor = s.BackgroundColor
 		return
 	}
@@ -393,9 +397,11 @@ func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
 	// TODO(kai): support gradient surrounding background colors
 
 	if s.BackgroundColor.Gradient == nil {
+		s.ActualBackgroundColor = s.BackgroundColor
+
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
-			obg := colors.ApplyOpacity(s.BackgroundColor.Solid, s.Opacity)
+			obg := colors.ApplyOpacity(s.ActualBackgroundColor.Solid, s.Opacity)
 			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
 		}
 
@@ -406,7 +412,7 @@ func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
 			}
 			// we take our state-layer-applied state color and then overlay it onto our background color
 			sclr := colors.WithAF32(clr, s.StateLayer)
-			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(s.BackgroundColor.Solid, sclr))
+			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(s.ActualBackgroundColor.Solid, sclr))
 		}
 
 		return
