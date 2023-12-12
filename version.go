@@ -4,9 +4,9 @@ package mat32
 
 const (
 	// Version is the version of this package being used
-	Version = "v2.0.0-dev0.0.21"
+	Version = "v2.0.0-dev0.0.22"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "abf14e1"
+	GitCommit = "c101e9b"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-12-12 15:55"
+	VersionDate = "2023-12-12 20:48"
 )
