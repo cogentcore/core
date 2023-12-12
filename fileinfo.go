@@ -22,7 +22,7 @@ import (
 
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
-type FileInfo struct {
+type FileInfo struct { //gti:add
 
 	// icon for file
 	Ic icons.Icon `tableview:"no-header"`
@@ -151,7 +151,7 @@ func (fi *FileInfo) IsHidden() bool {
 
 // Duplicate creates a copy of given file -- only works for regular files, not
 // directories.
-func (fi *FileInfo) Duplicate() (string, error) {
+func (fi *FileInfo) Duplicate() (string, error) { //gti:add
 	if fi.IsDir() {
 		err := fmt.Errorf("giv.Duplicate: cannot copy directory: %v", fi.Path)
 		log.Println(err)
@@ -173,7 +173,7 @@ func (fi *FileInfo) Duplicate() (string, error) {
 }
 
 // Delete deletes the file or if a directory the directory and all files and subdirectories
-func (fi *FileInfo) Delete() error {
+func (fi *FileInfo) Delete() error { //gti:add
 	if fi.IsDir() {
 		path := fi.Path
 		d, err := os.Open(path)
@@ -266,7 +266,7 @@ func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 // Rename renames (moves) this file to given new path name
 // Updates the FileInfo setting to the new name, although it might
 // be out of scope if it moved into a new path
-func (fi *FileInfo) Rename(path string) (newpath string, err error) {
+func (fi *FileInfo) Rename(path string) (newpath string, err error) { //gti:add
 	orgpath := fi.Path
 	newpath, err = fi.RenamePath(path)
 	if err != nil {

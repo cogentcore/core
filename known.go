@@ -4,7 +4,7 @@
 
 package fi
 
-//go:generate enumgen
+//go:generate goki generate
 
 import (
 	"fmt"
