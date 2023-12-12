@@ -385,20 +385,19 @@ var StyleDefault Style
 // ComputeActualBackgroundColor sets [Style.ActualBackgroundColor] based on the
 // given parent actual background color and the properties of the style object.
 func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
+	s.ActualBackgroundColor = s.BackgroundColor
+	if s.ActualBackgroundColor.IsNil() {
+		s.ActualBackgroundColor = *pabg
+	}
+
 	if s.Opacity >= 1 && s.StateLayer <= 0 {
-		if s.BackgroundColor.IsNil() {
-			s.ActualBackgroundColor = *pabg
-			return
-		}
-		s.ActualBackgroundColor = s.BackgroundColor
+		// we have no transformations to apply
 		return
 	}
 
 	// TODO(kai): support gradient surrounding background colors
 
 	if s.BackgroundColor.Gradient == nil {
-		s.ActualBackgroundColor = s.BackgroundColor
-
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
 			obg := colors.ApplyOpacity(s.ActualBackgroundColor.Solid, s.Opacity)
