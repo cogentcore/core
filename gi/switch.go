@@ -33,7 +33,7 @@ type Switch struct {
 	// icon to use for the off, unchecked state of the switch
 	IconOff icons.Icon `view:"show-name"`
 
-	// icon to use for the indeterminant (unknown) state
+	// icon to use for the indeterminate (unknown) state
 	IconUnk icons.Icon `view:"show-name"`
 }
 
@@ -93,7 +93,7 @@ func (sw *Switch) SetIconFromState() {
 	}
 	st := ist.(*Layout)
 	switch {
-	case sw.StateIs(states.Indeterminant):
+	case sw.StateIs(states.Indeterminate):
 		st.StackTop = 2
 	case sw.IsChecked():
 		st.StackTop = 0
@@ -202,7 +202,7 @@ func (sw *Switch) SwitchStyles() {
 					s.Min.Y.Em(1.5)
 				}
 			})
-		case "parts/stack/icon2": // indeterminant
+		case "parts/stack/icon2": // indeterminate
 			w.Style(func(s *styles.Style) {
 				switch sw.Type {
 				case SwitchSwitch:

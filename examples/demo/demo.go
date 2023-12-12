@@ -234,23 +234,23 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}).
 		SetTooltips([]string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"})
 
-	is := gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Indeterminant 1", "Indeterminant 2", "indeterminant 3"}).
+	is := gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Indeterminate 1", "Indeterminate 2", "Indeterminate 3"}).
 		SetTooltips([]string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"})
 	is.Config()
 	for _, swi := range is.Kids {
 		sw := swi.(*gi.Switch)
-		sw.SetState(true, states.Indeterminant)
+		sw.SetState(true, states.Indeterminate)
 	}
 
 	gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems([]string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}).
 		SetTooltips([]string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"})
 
-	is = gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetItems([]string{"Indeterminant 1", "Indeterminant 2", "indeterminant 3"}).
+	is = gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetItems([]string{"Indeterminate 1", "Indeterminate 2", "Indeterminate 3"}).
 		SetTooltips([]string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"})
 	is.Config()
 	for _, swi := range is.Kids {
 		sw := swi.(*gi.Switch)
-		sw.SetState(true, states.Indeterminant)
+		sw.SetState(true, states.Indeterminate)
 	}
 
 	gi.NewSwitches(inputs).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems([]string{"Segmented Button 1", "Segmented Button 2", "Segmented Button 3"}).

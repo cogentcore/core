@@ -544,13 +544,13 @@ func (tv *TreeView) SetBranchState() {
 	}
 	switch {
 	case !tv.HasChildren():
-		br.SetState(true, states.Indeterminant)
+		br.SetState(true, states.Indeterminate)
 	case tv.IsClosed():
-		br.SetState(false, states.Indeterminant)
+		br.SetState(false, states.Indeterminate)
 		br.SetState(false, states.Checked)
 		br.SetNeedsRender(true)
 	default:
-		br.SetState(false, states.Indeterminant)
+		br.SetState(false, states.Indeterminate)
 		br.SetState(true, states.Checked)
 		br.SetNeedsRender(true)
 	}

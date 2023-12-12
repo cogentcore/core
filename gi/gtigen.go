@@ -3043,7 +3043,7 @@ var SwitchType = gti.AddType(&gti.Type{
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "the label text for the switch", Directives: gti.Directives{}, Tag: ""}},
 		{"IconOn", &gti.Field{Name: "IconOn", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the on, checked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"IconOff", &gti.Field{Name: "IconOff", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the off, unchecked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
-		{"IconUnk", &gti.Field{Name: "IconUnk", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the indeterminant (unknown) state", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
+		{"IconUnk", &gti.Field{Name: "IconUnk", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the indeterminate (unknown) state", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -3092,7 +3092,7 @@ func (t *Switch) SetIconOff(v icons.Icon) *Switch {
 }
 
 // SetIconUnk sets the [Switch.IconUnk]:
-// icon to use for the indeterminant (unknown) state
+// icon to use for the indeterminate (unknown) state
 func (t *Switch) SetIconUnk(v icons.Icon) *Switch {
 	t.IconUnk = v
 	return t
