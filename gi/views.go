@@ -13,19 +13,6 @@ import (
 // allowing it to be a sub-package with just this narrow set of dependencies
 // of gi on giv. The one impl is in giv/valueview.go.
 type ViewIFace interface {
-	// TODO(kai/menu): what should we do about CtxtMenuView?
-	// CtxtMenuView configures a popup context menu according to the
-	// "CtxtMenu" properties registered on the type for given value element,
-	// through the kit.AddType method.  See
-	// https://goki.dev/gi/v2/wiki/Views for full details on formats and
-	// options for configuring the menu.  It looks first for "CtxtMenuActive"
-	// or "CtxtMenuReadOnly" depending on ReadOnly flag (which applies to the
-	// gui view), so you can have different menus in those cases, and then
-	// falls back on "CtxtMenu".  Returns false if there is no context menu
-	// defined for this type, or on errors (which are programmer errors sent
-	// to log).
-	CtxtMenuView(val any, readOnly bool, sc *Scene, m *Scene) bool
-
 	// CallFunc calls the given function in the context of the given widget,
 	// popping up a dialog to prompt for any arguments and show the return
 	// values of the function. It is a helper function that uses [NewSoloFuncButton]

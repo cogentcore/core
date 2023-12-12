@@ -1116,7 +1116,29 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"CopyIdxs", &gti.Method{Name: "CopyIdxs", Doc: "CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"reset", &gti.Field{Name: "reset", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"DeleteIdxs", &gti.Method{Name: "DeleteIdxs", Doc: "DeleteIdxs deletes all selected indexes", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"CutIdxs", &gti.Method{Name: "CutIdxs", Doc: "CutIdxs copies selected indexes to clip.Board and deletes selected indexes", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"PasteIdx", &gti.Method{Name: "PasteIdx", Doc: "PasteIdx pastes clipboard at given idx", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"idx", &gti.Field{Name: "idx", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Duplicate", &gti.Method{Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"int", &gti.Field{Name: "int", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+	}),
 	Instance: &SliceViewBase{},
 })
 

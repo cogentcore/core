@@ -207,14 +207,8 @@ func (fn *Node) ContextMenu(m *gi.Scene) {
 	// derived types put native menu code here
 	if fn.CustomContextMenu != nil {
 		fn.CustomContextMenu(m)
+		return
 	}
-	// TODO(kai/menu): need a replacement for this:
-	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsReadOnly(), tv.Scene, m) { // our viewed obj's menu
-	// 	if tv.ShowViewCtxtMenu {
-	// 		m.AddSeparator("sep-tvmenu")
-	// 		CtxtMenuView(tv.This(), tv.RootIsReadOnly(), tv.Scene, m)
-	// 	}
-	// } else {
 	if fn.IsReadOnly() {
 		fn.TreeViewContextMenuReadOnly(m)
 	} else {

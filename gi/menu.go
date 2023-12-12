@@ -117,7 +117,6 @@ func (wb *WidgetBase) ContextMenu(m *Scene) {
 	if wb.CustomContextMenu != nil {
 		wb.CustomContextMenu(m)
 	}
-	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), wb.Sc, m)
 }
 
 // ContextMenuPos returns the default position for the context menu

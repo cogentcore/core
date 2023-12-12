@@ -165,23 +165,23 @@ func app() {
 	// split.SetSplits(.3, .2, .2, .3)
 	// split.SetSplits(.5, .5)
 
-	// ts := gi.NewTabs(b)
-	// tst := ts.NewTab("StructView")
-	// tmv := ts.NewTab("MapView")
-	// tsl := ts.NewTab("SliceView")
-	// ttv := ts.NewTab("TabView")
+	ts := gi.NewTabs(b)
+	tst := ts.NewTab("StructView")
+	tmv := ts.NewTab("MapView")
+	tsl := ts.NewTab("SliceView")
+	ttv := ts.NewTab("TabView")
 
-	// strv := giv.NewStructView(tst, "strv")
-	// strv.SetStruct(&stru)
-	//
-	// mv := giv.NewMapView(tmv, "mv")
-	// mv.SetMap(&tstmap)
-	//
-	// sv := giv.NewSliceView(tsl, "sv")
-	// // sv.SetState(true, states.ReadOnly)
-	// sv.SetSlice(&tstslice)
+	strv := giv.NewStructView(tst, "strv")
+	strv.SetStruct(&stru)
 
-	tv := giv.NewTableView(b, "tv")
+	mv := giv.NewMapView(tmv, "mv")
+	mv.SetMap(&tstmap)
+
+	sv := giv.NewSliceView(tsl, "sv")
+	// sv.SetState(true, states.ReadOnly)
+	sv.SetSlice(&tstslice)
+
+	tv := giv.NewTableView(ttv, "tv")
 	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 

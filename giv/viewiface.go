@@ -15,12 +15,6 @@ import (
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, readOnly bool, sc *gi.Scene, m *gi.Scene) bool {
-	// TODO(kai/menu): add back CtxtMenuView here
-	// return CtxtMenuView(val, readOnly, sc, menu)
-	return false
-}
-
 func (vi *ViewIFace) CallFunc(ctx gi.Widget, fun any) {
 	CallFunc(ctx, fun)
 }

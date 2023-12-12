@@ -80,25 +80,16 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.SetA = true
 	lv.ConfigToolbar()
 	tv.CustomContextMenu = func(m *gi.Scene) {
-		gi.NewSeparator(m)
 		gi.NewButton(m).SetText("Set Revision A").
 			SetTooltip("Set Buffer A's revision to this").
 			OnClick(func(e events.Event) {
-				idx := tv.SelIdx
-				if idx < 0 || idx >= len(lv.Log) {
-					return
-				}
-				cmt := lv.Log[idx]
+				cmt := lv.Log[tv.SelIdx]
 				lv.SetRevA(cmt.Rev)
 			})
 		gi.NewButton(m).SetText("Set Revision B").
 			SetTooltip("Set Buffer B's revision to this").
 			OnClick(func(e events.Event) {
-				idx := tv.SelIdx
-				if idx < 0 || idx >= len(lv.Log) {
-					return
-				}
-				cmt := lv.Log[idx]
+				cmt := lv.Log[tv.SelIdx]
 				lv.SetRevB(cmt.Rev)
 			})
 	}

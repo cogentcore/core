@@ -26,7 +26,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 )
 
@@ -247,19 +246,14 @@ func (fv *FileView) ConfigFileView() {
 	if fv.HasChildren() {
 		return
 	}
-	config := ki.Config{}
-	config.Add(gi.FrameType, "path-tbar")
-	config.Add(gi.LayoutType, "files-row")
-	config.Add(gi.LayoutType, "sel-row")
-	mods, updt := fv.ConfigChildren(config)
-	if mods {
-		fv.ConfigPathBar()
-		fv.ConfigFilesRow()
-		fv.ConfigSelRow()
-		fv.UpdateFiles()
-		fv.UpdateEndLayout(updt)
-		// fv.Update()
-	}
+	gi.NewFrame(fv, "path-tbar")
+	gi.NewLayout(fv, "files-row")
+	gi.NewLayout(fv, "sel-row")
+
+	fv.ConfigPathBar()
+	fv.ConfigFilesRow()
+	fv.ConfigSelRow()
+	fv.UpdateFiles()
 }
 
 func (fv *FileView) ConfigPathBar() {
@@ -268,16 +262,15 @@ func (fv *FileView) ConfigPathBar() {
 		return
 	}
 
-	config := ki.Config{}
-	config.Add(gi.LabelType, "path-lbl")
-	config.Add(gi.ChooserType, "path")
-	config.Add(gi.ButtonType, "path-up")
-	config.Add(gi.ButtonType, "path-ref")
-	config.Add(gi.ButtonType, "path-fav")
-	config.Add(gi.ButtonType, "new-folder")
+	gi.NewLabel(pr, "path-lbl")
+	gi.NewChooser(pr, "path")
+	gi.NewButton(pr, "path-up")
+	gi.NewButton(pr, "path-ref")
+	gi.NewButton(pr, "path-fav")
+	gi.NewButton(pr, "new-folder")
 
-	pl := gi.NewLabel(pr, "path-lbl").SetText("Path:")
-	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
+	gi.NewLabel(pr, "path-lbl").SetText("Path:").
+		SetTooltip("Path to look for files in: can select from list of recent paths, or edit a value directly")
 	pf := gi.NewChooser(pr, "path").SetEditable(true)
 	pf.ConfigParts()
 	pft, found := pf.TextField()
@@ -328,12 +321,9 @@ func (fv *FileView) ConfigPathBar() {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
-	config := ki.Config{}
-	config.Add(TableViewType, "favs-view")
-	config.Add(TableViewType, "files-view")
-	fr.ConfigChildren(config) // already covered by parent update
+	sv := NewTableView(fr, "favs-view")
+	fsv := NewTableView(fr, "files-view")
 
-	sv := fv.FavsView()
 	sv.SelIdx = -1
 	sv.SetReadOnly(true)
 	sv.SetSlice(&gi.Prefs.FavPaths)
@@ -341,8 +331,27 @@ func (fv *FileView) ConfigFilesRow() {
 		fv.FavSelect(sv.SelIdx)
 	})
 
+	fsv.CustomContextMenu = func(m *gi.Scene) {
+		gi.NewButton(m).SetText("Make a copy").SetIcon(icons.Copy).
+			SetTooltip("Makes a copy of the selected file").
+			OnClick(func(e events.Event) {
+				fn := fv.Files[fsv.SelIdx]
+				fn.Duplicate()
+			})
+		gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
+			SetTooltip("Deletes the selected file").
+			OnClick(func(e events.Event) {
+				fn := fv.Files[fsv.SelIdx]
+				NewFuncButton(fsv, fn.Delete).SetConfirm(true).CallFunc()
+			})
+		gi.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
+			SetTooltip("Renames the selected file").
+			OnClick(func(e events.Event) {
+				fn := fv.Files[fsv.SelIdx]
+				NewFuncButton(fsv, fn.Rename).SetConfirm(true).CallFunc()
+			})
+	}
 	fv.ReadFiles()
-	fsv := fv.FilesView()
 	fsv.SetReadOnly(true)
 	fsv.SetSlice(&fv.Files)
 	fsv.StyleFunc = func(w gi.Widget, s *styles.Style, row, col int) {
@@ -358,6 +367,7 @@ func (fv *FileView) ConfigFilesRow() {
 			s.Color = colors.Scheme.OnSurface
 		}
 	}
+
 	if gi.Prefs.FileViewSort != "" {
 		fsv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
@@ -375,20 +385,12 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelRow()
-	config := ki.Config{}
-	config.Add(gi.LabelType, "sel-lbl")
-	config.Add(gi.TextFieldType, "sel")
-	config.Add(gi.LabelType, "ext-lbl")
-	config.Add(gi.TextFieldType, "ext")
-	sr.ConfigChildren(config) // already covered by parent update
+	gi.NewLabel(sr, "sel-lbl").SetText("File: ").
+		SetTooltip("enter file name here (or select from above list)")
 
-	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
-	sl.Text = "File:"
-	sl.Tooltip = "enter file name here (or select from above list)"
-	sf := fv.SelField()
-	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", keyfun.ShortcutFor(keyfun.WordLeft), keyfun.ShortcutFor(keyfun.Jump), keyfun.ShortcutFor(keyfun.SelectMode), keyfun.ShortcutFor(keyfun.Insert), keyfun.ShortcutFor(keyfun.InsertAfter), keyfun.ShortcutFor(keyfun.Open), keyfun.ShortcutFor(keyfun.HistPrev), keyfun.ShortcutFor(keyfun.HistNext), keyfun.ShortcutFor(keyfun.Search))
+	sf := gi.NewTextField(sr, "sel").SetText(fv.SelFile).
+		SetTooltip(fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", keyfun.ShortcutFor(keyfun.WordLeft), keyfun.ShortcutFor(keyfun.Jump), keyfun.ShortcutFor(keyfun.SelectMode), keyfun.ShortcutFor(keyfun.Insert), keyfun.ShortcutFor(keyfun.InsertAfter), keyfun.ShortcutFor(keyfun.Open), keyfun.ShortcutFor(keyfun.HistPrev), keyfun.ShortcutFor(keyfun.HistNext), keyfun.ShortcutFor(keyfun.Search)))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
-	sf.SetText(fv.SelFile)
 	sf.OnChange(func(e events.Event) {
 		fv.SetSelFileAction(sf.Text())
 	})
@@ -400,11 +402,9 @@ func (fv *FileView) ConfigSelRow() {
 	})
 	sf.StartFocus()
 
-	el := sr.ChildByName("ext-lbl", 0).(*gi.Label)
-	el.Text = "Extension(s):"
-	el.Tooltip = "target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start"
-	ef := fv.ExtField()
-	ef.SetText(fv.Ext)
+	gi.NewLabel(sr, "ext-lbl").SetText("Extension(s):").
+		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start")
+	ef := gi.NewTextField(sr, "ext").SetText(fv.Ext)
 	ef.OnChange(func(e events.Event) {
 		fv.SetExtAction(ef.Text())
 	})
@@ -797,30 +797,6 @@ func (fv *FileView) KeyInput(kt events.Event) {
 		sf.SetFocusEvent()
 	}
 }
-
-// todo: context menu for fileinfo
-/*
-var FileInfoProps = ki.Props{
-	"CtxtMenu": ki.PropSlice{
-		{"Duplicate", ki.Props{
-			"desc":    "Duplicate this file or folder",
-			"confirm": true,
-		}},
-		{"Delete", ki.Props{
-			"desc":    "Ok to delete this file or folder?  This is not undoable and is not moving to trash / recycle bin",
-			"confirm": true,
-		}},
-		{"Rename", ki.Props{
-			"desc": "Rename file to new file name",
-			"Args": ki.PropSlice{
-				{"New Name", ki.Props{
-					"default-field": "Name",
-				}},
-			},
-		}},
-	},
-}
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion

@@ -951,6 +951,14 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
+	if tf.CustomContextMenu != nil {
+		tf.CustomContextMenu(m)
+		return
+	}
+	tf.TextFieldContextMenu(m)
+}
+
+func (tf *TextField) TextFieldContextMenu(m *Scene) {
 	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			tf.Copy(true)

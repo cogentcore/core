@@ -98,16 +98,14 @@ const (
 	// if true, user cannot delete elements from the slice
 	SliceViewNoDelete
 
-	// if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?
-	SliceViewShowViewCtxtMenu
-
 	// whether the slice is actually an array -- no modifications -- set by SetSlice
 	SliceViewIsArray
 
 	// whether to show index or not
 	SliceViewShowIndex
 
-	// support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events
+	// support key navigation when ReadOnly (default true).
+	// uses a capture of up / down events to manipulate selection, not focus.
 	SliceViewReadOnlyKeyNav
 
 	// editing-mode select rows mode
@@ -197,12 +195,6 @@ type SliceViewer interface {
 	DragDrop(e events.Event)
 	DropFinalize(de *events.DragDrop)
 	DropDeleteSource(e events.Event)
-
-	// ItemCtxtMenu pulls up the context menu for given slice index
-	ItemCtxtMenu(idx int)
-
-	// StdCtxtMenu generates the standard context menu for this view
-	StdCtxtMenu(m *gi.Scene, idx int)
 }
 
 // SliceViewBase is the base for SliceView and TableView and any other viewers
@@ -669,6 +661,7 @@ func (sv *SliceViewBase) ConfigRows() {
 				sv.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
+			idxlab.CustomContextMenu = sv.CustomContextMenu
 		}
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
@@ -679,6 +672,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			e.SetHandled()
 			sv.UpdateSelectRow(i)
 		})
+		wb.CustomContextMenu = sv.CustomContextMenu
 
 		if sv.IsReadOnly() {
 			w.AsWidget().SetReadOnly(true)
@@ -1557,7 +1551,7 @@ func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
 }
 
 // CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection
-func (sv *SliceViewBase) CopyIdxs(reset bool) {
+func (sv *SliceViewBase) CopyIdxs(reset bool) { //gti:add
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return
@@ -1572,7 +1566,7 @@ func (sv *SliceViewBase) CopyIdxs(reset bool) {
 }
 
 // DeleteIdxs deletes all selected indexes
-func (sv *SliceViewBase) DeleteIdxs() {
+func (sv *SliceViewBase) DeleteIdxs() { //gti:add
 	if len(sv.SelIdxs) == 0 {
 		return
 	}
@@ -1588,7 +1582,7 @@ func (sv *SliceViewBase) DeleteIdxs() {
 }
 
 // CutIdxs copies selected indexes to clip.Board and deletes selected indexes
-func (sv *SliceViewBase) CutIdxs() {
+func (sv *SliceViewBase) CutIdxs() { //gti:add
 	if len(sv.SelIdxs) == 0 {
 		return
 	}
@@ -1608,7 +1602,7 @@ func (sv *SliceViewBase) CutIdxs() {
 }
 
 // PasteIdx pastes clipboard at given idx
-func (sv *SliceViewBase) PasteIdx(idx int) {
+func (sv *SliceViewBase) PasteIdx(idx int) { //gti:add
 	sv.TmpIdx = idx
 	dt := sv.This().(SliceViewer).MimeDataType()
 	md := sv.EventMgr().ClipBoard().Read([]string{dt})
@@ -1705,7 +1699,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 
 // Duplicate copies selected items and inserts them after current selection --
 // return idx of start of duplicates if successful, else -1
-func (sv *SliceViewBase) Duplicate() int {
+func (sv *SliceViewBase) Duplicate() int { //gti:add
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
 		return -1
@@ -1802,54 +1796,30 @@ func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (sv *SliceViewBase) StdCtxtMenu(m *gi.Scene, idx int) {
+func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
+	if sv.CustomContextMenu != nil {
+		sv.CustomContextMenu(m)
+		return
+	}
+	sv.SliceViewContextMenu(m)
+}
+
+func (sv *SliceViewBase) SliceViewContextMenu(m *gi.Scene) {
 	if sv.IsReadOnly() || sv.Is(SliceViewIsArray) {
 		return
 	}
-	gi.NewButton(m).SetText("Copy").SetData(idx).
-		OnClick(func(e events.Event) {
-			sv.CopyIdxs(true)
-		})
-	gi.NewButton(m).SetText("Cut").SetData(idx).
-		OnClick(func(e events.Event) {
-			sv.CutIdxs()
-		})
-	gi.NewButton(m).SetText("Paste").SetData(idx).
-		OnClick(func(e events.Event) {
-			sv.PasteIdx(idx)
-		})
-	gi.NewButton(m).SetText("Duplicate").SetData(idx).
-		OnClick(func(e events.Event) {
-			sv.Duplicate()
-		})
-}
-
-func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
-	val := sv.SliceVal(idx)
-	if val == nil {
-		return
-	}
-
-	// TODO(kai/menu): CtxtMenuView
-	// if CtxtMenuView(val, sv.IsReadOnly(), sv.Sc, &menu) {
-	// 	if sv.ShowViewCtxtMenu {
-	// 		menu.AddSeparator("sep-svmenu")
-	// 		sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
-	// 	}
-	// } else {
-
-	// TODO(kai/menu): handle empty menu
-	mf := func(m *gi.Scene) {
-		sv.This().(SliceViewer).StdCtxtMenu(m, idx)
-	}
-	pos := sv.IdxPos(idx)
-	// if pos == (image.Point{}) {
-	// 	em := sv.EventMgr()
-	// 	if em != nil {
-	// 		pos = em.LastMousePos
-	// 	}
-	// }
-	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
+	gi.NewButton(m).SetText("Copy").OnClick(func(e events.Event) {
+		sv.CopyIdxs(true)
+	})
+	gi.NewButton(m).SetText("Cut").OnClick(func(e events.Event) {
+		sv.CutIdxs()
+	})
+	gi.NewButton(m).SetText("Paste").OnClick(func(e events.Event) {
+		sv.PasteIdx(sv.SelIdx)
+	})
+	gi.NewButton(m).SetText("Duplicate").OnClick(func(e events.Event) {
+		sv.Duplicate()
+	})
 }
 
 // KeyInputNav supports multiple selection navigation keys

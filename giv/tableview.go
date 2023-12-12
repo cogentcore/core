@@ -490,6 +490,7 @@ func (tv *TableView) ConfigRows() {
 				tv.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
+			idxlab.CustomContextMenu = tv.CustomContextMenu
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
@@ -524,6 +525,7 @@ func (tv *TableView) ConfigRows() {
 				e.SetHandled()
 				tv.UpdateSelectRow(i)
 			})
+			wb.CustomContextMenu = tv.CustomContextMenu
 
 			if tv.IsReadOnly() {
 				w.AsWidget().SetReadOnly(true)
@@ -954,16 +956,23 @@ func (tv *TableView) EditIdx(idx int) {
 	d.NewFullDialog(tv).Run()
 }
 
-func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
-	if tv.Is(SliceViewIsArray) {
+func (tv *TableView) ContextMenu(m *gi.Scene) {
+	if tv.CustomContextMenu != nil {
+		tv.CustomContextMenu(m)
 		return
 	}
-	tv.SliceViewBase.StdCtxtMenu(m, idx)
-	gi.NewSeparator(m, "sep-edit")
-	gi.NewButton(m, "edit").SetText("Edit").SetData(idx).
-		OnClick(func(e events.Event) {
-			tv.EditIdx(idx)
-		})
+	tv.TableViewContextMenu(m)
+}
+
+func (tv *TableView) TableViewContextMenu(m *gi.Scene) {
+	if !tv.Is(SliceViewIsArray) {
+		gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
+			OnClick(func(e events.Event) {
+				tv.EditIdx(tv.SelIdx)
+			})
+		gi.NewSeparator(m)
+	}
+	tv.SliceViewContextMenu(m)
 }
 
 //////////////////////////////////////////////////////
