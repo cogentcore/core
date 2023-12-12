@@ -1,8 +1,6 @@
 module goki.dev/goosi
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0
