@@ -491,35 +491,10 @@ func (ts *Tabs) RenumberTabs() {
 	}
 }
 
-// RenderTabSeps renders the separators between tabs
-func (ts *Tabs) RenderTabSeps() {
-	pc, st := ts.RenderLock()
-	defer ts.RenderUnlock()
-
-	// just like with standard separator, use top width like CSS
-	// (see https://www.w3schools.com/howto/howto_css_dividers.asp)
-	pc.StrokeStyle.Width = st.Border.Width.Top
-	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
-	bw := st.Border.Width.Dots()
-
-	tbs := ts.Tabs()
-	sz := len(tbs.Kids)
-	for i := 1; i < sz; i++ {
-		tb := tbs.Child(i).(Widget)
-		ni := tb.AsWidget()
-
-		pos := ni.Geom.Pos.Total
-		sz := ni.Geom.Size.Actual.Total.Sub(st.TotalMargin().Size())
-		pc.DrawLine(pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
-	}
-	pc.FillStrokeClear()
-}
-
 func (ts *Tabs) Render() {
 	if ts.PushBounds() {
 		ts.RenderScrolls()
 		ts.RenderChildren()
-		ts.RenderTabSeps()
 		ts.PopBounds()
 	}
 }
@@ -560,7 +535,8 @@ func (tb *Tab) TabStyles() {
 		// s.Min.Y.Ch(6)
 
 		// s.Border.Style.Right = styles.BorderSolid
-		// s.Border.Width.Right.SetDp(1)
+		// s.Border.Color.Right = colors.Scheme.OutlineVariant
+		// s.Border.Width.Right.Dp(1)
 
 		s.Border.Radius.Zero()
 		s.Text.Align = styles.Center
