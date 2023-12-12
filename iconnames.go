@@ -6378,6 +6378,9 @@ const (
 	// RadioButtonChecked is https://github.com/goki/icons/blob/main/svg/radio_button_checked.svg
 	RadioButtonChecked Icon = "radio_button_checked"
 
+	// RadioButtonPartial is https://github.com/goki/icons/blob/main/svg/radio_button_partial.svg
+	RadioButtonPartial Icon = "radio_button_partial"
+
 	// RadioButtonUnchecked is https://github.com/goki/icons/blob/main/svg/radio_button_unchecked.svg
 	RadioButtonUnchecked Icon = "radio_button_unchecked"
 
@@ -8186,6 +8189,9 @@ const (
 
 	// Today is https://github.com/goki/icons/blob/main/svg/today.svg
 	Today Icon = "today"
+
+	// ToggleMid is https://github.com/goki/icons/blob/main/svg/toggle_mid.svg
+	ToggleMid Icon = "toggle_mid"
 
 	// ToggleOff is https://github.com/goki/icons/blob/main/svg/toggle_off.svg
 	ToggleOff Icon = "toggle_off"
