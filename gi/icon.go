@@ -114,7 +114,7 @@ func (ic *Icon) DrawIntoScene() {
 		}
 		r = nr
 	}
-	draw.Draw(ic.Sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+	draw.Draw(ic.Sc.Pixels, r, ic.SVG.Pixels, sp, draw.Src)
 }
 
 // RenderSVG renders the SVG to Pixels if needs update

@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"fmt"
+
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
@@ -101,6 +103,7 @@ func (av *ArgView) ConfigArgsGrid() {
 	sg := av.ArgsGrid()
 	sg.Stripes = gi.RowStripes
 	config := ki.Config{}
+	argnms := make(map[string]bool)
 	for i := range av.Args {
 		arg := av.Args[i]
 		if view, _ := arg.Tag("view"); view == "-" {
@@ -108,6 +111,10 @@ func (av *ArgView) ConfigArgsGrid() {
 		}
 		vtyp := arg.WidgetType()
 		knm := strcase.ToKebab(arg.Name())
+		if _, has := argnms[knm]; has {
+			knm += fmt.Sprintf("%d", i)
+		}
+		argnms[knm] = true
 		labnm := "label-" + knm
 		valnm := "value-" + knm
 		config.Add(gi.LabelType, labnm)
@@ -119,16 +126,17 @@ func (av *ArgView) ConfigArgsGrid() {
 	} else {
 		updt = sg.UpdateStart()
 	}
+	idx := 0
 	for i := range av.Args {
 		arg := av.Args[i]
 		if view, _ := arg.Tag("view"); view == "-" {
 			continue
 		}
 		arg.SetTag("grow", "1")
-		lbl := sg.Child(i * 2).(*gi.Label)
+		lbl := sg.Child(idx * 2).(*gi.Label)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
-		w, wb := gi.AsWidget(sg.Child((i * 2) + 1))
+		w, wb := gi.AsWidget(sg.Child((idx * 2) + 1))
 		if wb.Class == "" {
 			wb.Class = "configed"
 			arg.ConfigWidget(w)
@@ -136,6 +144,7 @@ func (av *ArgView) ConfigArgsGrid() {
 			arg.AsValueBase().Widget = w
 			arg.UpdateWidget()
 		}
+		idx++
 	}
 	sg.UpdateEnd(updt)
 }
