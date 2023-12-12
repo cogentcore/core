@@ -143,7 +143,7 @@ func (sw *Switches) SelectedItem() string {
 // UnCheckAll unchecks all switches
 func (sw *Switches) UnCheckAll() {
 	updt := sw.UpdateStart()
-	for _, cbi := range *sw.Children() {
+	for _, cbi := range sw.Kids {
 		cs := cbi.(*Switch)
 		cs.SetChecked(false)
 	}
@@ -153,7 +153,7 @@ func (sw *Switches) UnCheckAll() {
 // UnCheckAllBut unchecks all switches except given one
 func (sw *Switches) UnCheckAllBut(idx int) {
 	updt := sw.UpdateStart()
-	for i, cbi := range *sw.Children() {
+	for i, cbi := range sw.Kids {
 		if i == idx {
 			continue
 		}
@@ -248,7 +248,7 @@ func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 }
 
 func (sw *Switches) ConfigItems() {
-	for i, swi := range *sw.Children() {
+	for i, swi := range sw.Kids {
 		s := swi.(*Switch)
 		s.SetType(sw.Type)
 		lbl := sw.Items[i]
@@ -260,10 +260,10 @@ func (sw *Switches) ConfigItems() {
 }
 
 func (sw *Switches) ConfigSwitches() {
-	if len(sw.Items) == 0 {
-		sw.DeleteChildren(ki.DestroyKids)
-		return
-	}
+	// if len(sw.Items) == 0 {
+	// 	sw.DeleteChildren(ki.DestroyKids)
+	// 	return
+	// }
 	config := ki.Config{}
 	for _, lb := range sw.Items {
 		config.Add(SwitchType, lb)

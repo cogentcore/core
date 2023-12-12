@@ -33,8 +33,8 @@ type Switch struct {
 	// icon to use for the off, unchecked state of the switch
 	IconOff icons.Icon `view:"show-name"`
 
-	// icon to use for the disabled state of the switch
-	IconDisab icons.Icon `view:"show-name"`
+	// icon to use for the indeterminant (unknown) state
+	IconUnk icons.Icon `view:"show-name"`
 }
 
 // SwitchTypes contains the different types of [Switch]es
@@ -62,11 +62,10 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 	sw.Text = fr.Text
 	sw.IconOn = fr.IconOn
 	sw.IconOff = fr.IconOff
-	sw.IconDisab = fr.IconDisab
+	sw.IconUnk = fr.IconUnk
 }
 
 func (sw *Switch) OnInit() {
-	sw.IconDisab = icons.Blank
 	sw.HandleSwitchEvents()
 	sw.SwitchStyles()
 }
@@ -94,7 +93,7 @@ func (sw *Switch) SetIconFromState() {
 	}
 	st := ist.(*Layout)
 	switch {
-	case sw.IsDisabled():
+	case sw.StateIs(states.Indeterminant):
 		st.StackTop = 2
 	case sw.IsChecked():
 		st.StackTop = 0
@@ -203,7 +202,7 @@ func (sw *Switch) SwitchStyles() {
 					s.Min.Y.Em(1.5)
 				}
 			})
-		case "parts/stack/icon2": // disab
+		case "parts/stack/icon2": // indeterminant
 			w.Style(func(s *styles.Style) {
 				switch sw.Type {
 				case SwitchSwitch:
@@ -240,23 +239,26 @@ func (sw *Switch) SwitchStyles() {
 func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	updt := sw.UpdateStart()
 	sw.Type = typ
-	sw.IconDisab = icons.Blank
+	sw.IconUnk = icons.Blank
 	switch sw.Type {
 	case SwitchSwitch:
 		// TODO: material has more advanced switches with a checkmark
 		// if they are turned on; we could implement that at some point
 		sw.IconOn = icons.ToggleOn.Fill()
 		sw.IconOff = icons.ToggleOff
+		sw.IconUnk = icons.ToggleMid
 	case SwitchChip, SwitchSegmentedButton:
 		sw.IconOn = icons.Check
 		sw.IconOff = icons.None
-		sw.IconDisab = icons.None
+		sw.IconUnk = icons.None
 	case SwitchCheckbox:
 		sw.IconOn = icons.CheckBox.Fill()
 		sw.IconOff = icons.CheckBoxOutlineBlank
+		sw.IconUnk = icons.IndeterminateCheckBox
 	case SwitchRadioButton:
 		sw.IconOn = icons.RadioButtonChecked
 		sw.IconOff = icons.RadioButtonUnchecked
+		sw.IconUnk = icons.RadioButtonPartial
 	}
 	sw.UpdateEndLayout(updt)
 	return sw
@@ -285,7 +287,7 @@ func (sw *Switch) SetIcons(on, off icons.Icon) *Switch {
 func (sw *Switch) ClearIcons() *Switch {
 	sw.IconOn = icons.None
 	sw.IconOff = icons.None
-	sw.IconDisab = icons.None
+	sw.IconUnk = icons.None
 	return sw
 }
 
@@ -318,8 +320,8 @@ func (sw *Switch) ConfigParts() {
 		icon.SetIcon(sw.IconOn)
 		icoff := ist.Child(1).(*Icon)
 		icoff.SetIcon(sw.IconOff)
-		icdsb := ist.Child(2).(*Icon)
-		icdsb.SetIcon(sw.IconDisab)
+		icunk := ist.Child(2).(*Icon)
+		icunk.SetIcon(sw.IconUnk)
 	}
 	sw.SetIconFromState()
 	if lbIdx >= 0 {

@@ -311,8 +311,8 @@ func (fn *Node) SetFileIcon() {
 		ic = icons.Blank
 	}
 	if bp, ok := fn.BranchPart(); ok {
-		if bp.IconDisab != ic {
-			bp.IconDisab = ic
+		if bp.IconUnk != ic {
+			bp.IconUnk = ic
 			bp.Update()
 			fn.SetNeedsRender(true)
 		}

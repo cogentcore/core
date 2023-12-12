@@ -1953,7 +1953,6 @@ var SceneType = gti.AddType(&gti.Type{
 		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene.\nDefaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: ""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"CurColor", &gti.Field{Name: "CurColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Current color in styling -- used for relative color names", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"RenderBBoxHue", &gti.Field{Name: "RenderBBoxHue", Type: "float32", LocalType: "float32", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"SelectedWidget", &gti.Field{Name: "SelectedWidget", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "Widget", Doc: "the currently selected widget through the inspect editor selection mode", Directives: gti.Directives{}, Tag: ""}},
 		{"SelectedWidgetChan", &gti.Field{Name: "SelectedWidgetChan", Type: "chan goki.dev/gi/v2/gi.Widget", LocalType: "chan Widget", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting", Directives: gti.Directives{}, Tag: ""}},
@@ -3044,7 +3043,7 @@ var SwitchType = gti.AddType(&gti.Type{
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "the label text for the switch", Directives: gti.Directives{}, Tag: ""}},
 		{"IconOn", &gti.Field{Name: "IconOn", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the on, checked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"IconOff", &gti.Field{Name: "IconOff", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the off, unchecked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
-		{"IconDisab", &gti.Field{Name: "IconDisab", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the disabled state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
+		{"IconUnk", &gti.Field{Name: "IconUnk", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the indeterminant (unknown) state", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -3092,10 +3091,10 @@ func (t *Switch) SetIconOff(v icons.Icon) *Switch {
 	return t
 }
 
-// SetIconDisab sets the [Switch.IconDisab]:
-// icon to use for the disabled state of the switch
-func (t *Switch) SetIconDisab(v icons.Icon) *Switch {
-	t.IconDisab = v
+// SetIconUnk sets the [Switch.IconUnk]:
+// icon to use for the indeterminant (unknown) state
+func (t *Switch) SetIconUnk(v icons.Icon) *Switch {
+	t.IconUnk = v
 	return t
 }
 

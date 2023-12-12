@@ -347,7 +347,7 @@ func (tv *TreeView) TreeViewStyles() {
 			sw.Type = gi.SwitchCheckbox
 			sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen
 			sw.IconOff = icons.KeyboardArrowRight // icons.Folder
-			sw.IconDisab = icons.Blank
+			sw.IconUnk = icons.Blank
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
@@ -544,13 +544,13 @@ func (tv *TreeView) SetBranchState() {
 	}
 	switch {
 	case !tv.HasChildren():
-		br.SetState(true, states.Disabled)
+		br.SetState(true, states.Indeterminant)
 	case tv.IsClosed():
-		br.SetState(false, states.Disabled)
+		br.SetState(false, states.Indeterminant)
 		br.SetState(false, states.Checked)
 		br.SetNeedsRender(true)
 	default:
-		br.SetState(false, states.Disabled)
+		br.SetState(false, states.Indeterminant)
 		br.SetState(true, states.Checked)
 		br.SetNeedsRender(true)
 	}

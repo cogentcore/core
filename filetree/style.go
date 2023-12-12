@@ -75,7 +75,7 @@ func (fn *Node) FileNodeStyles() {
 			sw.Type = gi.SwitchCheckbox
 			sw.IconOn = icons.FolderOpen
 			sw.IconOff = icons.Folder
-			sw.IconDisab = icons.Blank
+			sw.IconUnk = icons.Blank
 			// sw.Style(func(s *styles.Style) {
 			// 	s.Max.X.SetEm(1.5)
 			// 	s.Max.Y.SetEm(1.5)
