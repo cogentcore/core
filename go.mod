@@ -2,40 +2,42 @@ module goki.dev/gi/v2
 
 go 1.21.0
 
+toolchain go1.21.4
+
 require (
 	github.com/Masterminds/vcs v1.13.3
 	github.com/alecthomas/chroma/v2 v2.12.0
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
-	github.com/expr-lang/expr v1.15.6
+	github.com/expr-lang/expr v1.15.7
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/goki/go-difflib v1.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	goki.dev/cam v0.9.40
-	goki.dev/colors v0.8.34
-	goki.dev/cursors v0.0.22
-	goki.dev/enums v0.9.44
-	goki.dev/fi v0.1.9
-	goki.dev/girl v0.0.26
-	goki.dev/glop v0.1.7
-	goki.dev/goosi v0.0.16
-	goki.dev/grog v0.0.18
-	goki.dev/grows v0.3.21
-	goki.dev/grr v0.0.8
-	goki.dev/gti v0.1.22
-	goki.dev/icons v0.0.12
-	goki.dev/ki/v2 v2.0.0-dev0.0.24
-	goki.dev/laser v0.1.24
-	goki.dev/mat32/v2 v2.0.0-dev0.0.19
-	goki.dev/ordmap v0.5.7
-	goki.dev/pi/v2 v2.0.0-dev0.0.17
+	goki.dev/cam v0.9.42
+	goki.dev/colors v0.8.36
+	goki.dev/cursors v0.0.24
+	goki.dev/enums v0.9.47
+	goki.dev/fi v0.1.11
+	goki.dev/girl v0.0.28
+	goki.dev/glop v0.1.8
+	goki.dev/goosi v0.0.18
+	goki.dev/grog v0.0.20
+	goki.dev/grows v0.3.23
+	goki.dev/grr v0.0.9
+	goki.dev/gti v0.1.24
+	goki.dev/icons v0.0.13
+	goki.dev/ki/v2 v2.0.0-dev0.0.26
+	goki.dev/laser v0.1.26
+	goki.dev/mat32/v2 v2.0.0-dev0.0.21
+	goki.dev/ordmap v0.5.8
+	goki.dev/pi/v2 v2.0.0-dev0.0.19
 	goki.dev/prof/v2 v2.0.0-dev0.0.4
-	goki.dev/spell v0.1.6
-	goki.dev/svg v0.1.19
-	goki.dev/vci/v2 v2.0.0-dev0.0.22
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.20
-	goki.dev/xyz v0.5.11
+	goki.dev/spell v0.1.8
+	goki.dev/svg v0.1.21
+	goki.dev/vci/v2 v2.0.0-dev0.0.24
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.22
+	goki.dev/xyz v0.5.13
 	golang.org/x/image v0.14.0
 	gopkg.in/fsnotify.v1 v1.4.7
 )
