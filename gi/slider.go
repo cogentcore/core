@@ -195,8 +195,8 @@ func (sr *Slider) SliderStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		}
 
-		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
-		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
+		// sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
+		// sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 		s.Color = colors.Scheme.OnSurface
 
 		s.Border.Style.Set(styles.BorderNone)
@@ -519,20 +519,10 @@ func (sr *Slider) RenderSlider() {
 
 	od := sr.Dim.Other()
 	if sr.Type == SliderScrollbar {
-		// pc.StrokeStyle.SetColor(&st.Border.Color)
-		// pc.StrokeStyle.Width = st.Border.Width
-
 		sr.RenderStdBox(st)
 
-		bg := st.StateBackgroundColor(st.BackgroundColor)
-		if bg.IsNil() {
-			// TODO(kai): we probably need to handle parent state layer and opacity here
-			bg, _, _ = sr.ParentBackgroundColor()
-		}
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
-		pc.FillStyle.SetFullColor(&bg)
-		sr.RenderBoxImpl(pos, sz, st.Border) // surround box
 		if !sr.ValueColor.IsNil() {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
@@ -549,23 +539,10 @@ func (sr *Slider) RenderSlider() {
 		}
 		sr.RenderUnlock()
 	} else {
-		// pc.StrokeStyle.SetColor(&st.Border.Color)
-		// pc.StrokeStyle.Width = st.Border.Width
+		sr.RenderStdBox(st)
 
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
-		// TODO(kai): we probably need to handle parent state layer and opacity here
-		bg, _, _ := sr.ParentBackgroundColor()
-		pc.FillStyle.SetFullColor(&bg)
-		sr.RenderBoxImpl(pos, sz, st.Border)
-
-		// need to apply state layer
-		ebg := st.StateBackgroundColor(st.BackgroundColor)
-		pc.FillStyle.SetFullColor(&ebg)
-		if ebg.IsNil() {
-			// TODO(kai): we probably need to handle parent state layer and opacity here
-			ebg, _, _ = sr.ParentBackgroundColor()
-		}
 
 		trsz := sz.Dim(od) * sr.TrackSize
 		bsz := sz
