@@ -1,6 +1,6 @@
 Name = "svg"
 Desc = ""
-Version = "v0.1.20"
+Version = "v0.1.21"
 Type = "App"
 
 [Build]
