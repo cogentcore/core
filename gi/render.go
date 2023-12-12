@@ -687,7 +687,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 
 	pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
 	sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
-	pabg := wb.ParentBackgroundColor()
+	pabg := wb.ParentActualBackgroundColor()
 	pc.DrawStdBox(st, pos, sz, pabg)
 }
 

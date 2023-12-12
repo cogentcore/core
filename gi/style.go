@@ -95,7 +95,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	wb.DefaultStyleWidget()
 	wb.RunStylers()
 	wb.ApplyStylePrefs()
-	wb.Styles.ComputeActualBackgroundColor(wb.ParentBackgroundColor())
+	wb.Styles.ComputeActualBackgroundColor(wb.ParentActualBackgroundColor())
 
 	// note: this does not un-set the Invisible if not None, because all kinds of things
 	// can turn invisible to off.
@@ -219,13 +219,10 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	st.ToDots()
 }
 
-// ParentBackgroundColor returns the background color, state layer, and opacity
-// of the nearest widget parent of the widget that has a defined background color,
-// non-0 state later, or non-1 opacity, using a recursive approach to get further
-// parent background colors for widgets with a non-0 state layer or non-1 opacity but
-// not a defined background color. If no such parent is found, it returns a
-// transparent background color, a 0 state layer, and a 1 opacity.
-func (wb *WidgetBase) ParentBackgroundColor() *colors.Full {
+// ParentActualBackgroundColor returns the actual background color of
+// the parent of the widget. If it has no parent, it returns a transparent
+// color.
+func (wb *WidgetBase) ParentActualBackgroundColor() *colors.Full {
 	_, pw := wb.ParentWidget()
 	if pw == nil {
 		return &colors.Full{}

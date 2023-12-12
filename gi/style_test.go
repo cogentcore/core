@@ -15,7 +15,7 @@ import (
 	"goki.dev/girl/units"
 )
 
-func TestParentBackgroundColor(t *testing.T) {
+func TestParentActualBackgroundColor(t *testing.T) {
 	make := func() (sc *Scene, fr *Frame) {
 		sc = NewScene()
 		fr = NewFrame(sc)
