@@ -188,13 +188,8 @@ func (sv *SVG) Style() {
 	sv.Root.Paint.Defaults()
 	if !sv.Color.IsNil() {
 		c := sv.Color
-		// we interpret transparency values as opacity
-		if c.Gradient == nil && c.Solid.A != 255 {
-			sv.Root.SetProp("opacity", float32(c.Solid.A)/255)
-			c.Solid.A = 255
-		}
-		sv.Root.SetProp("stroke", c)
-		sv.Root.SetProp("fill", c)
+		sv.Root.SetColorProps("stroke", colors.AsHex(c.Solid))
+		sv.Root.SetColorProps("fill", colors.AsHex(c.Solid))
 	}
 	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 
