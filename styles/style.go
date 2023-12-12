@@ -383,8 +383,8 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 var StyleDefault Style
 
 // ComputeActualBackgroundColor sets [Style.ActualBackgroundColor] based on the
-// given surrounding background color and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColor(sbg *colors.Full) {
+// given parent actual background color and the properties of the style object.
+func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
 	if s.Opacity >= 1 && s.StateLayer <= 0 {
 		s.ActualBackgroundColor = s.BackgroundColor
 		return
@@ -396,7 +396,7 @@ func (s *Style) ComputeActualBackgroundColor(sbg *colors.Full) {
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
 			obg := colors.ApplyOpacity(s.BackgroundColor.Solid, s.Opacity)
-			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(sbg.Solid, obg))
+			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
 		}
 
 		if s.StateLayer > 0 {
@@ -419,7 +419,7 @@ func (s *Style) ComputeActualBackgroundColor(sbg *colors.Full) {
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
 			obg := colors.ApplyOpacity(stop.Color, s.Opacity)
-			s.ActualBackgroundColor.Gradient.Stops[i].Color = colors.AlphaBlend(sbg.Solid, obg)
+			s.ActualBackgroundColor.Gradient.Stops[i].Color = colors.AlphaBlend(pabg.Solid, obg)
 		}
 
 		if s.StateLayer > 0 {

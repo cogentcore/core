@@ -18,38 +18,24 @@ func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
-// DrawStdBox draws the CSS "standard box" model using the given style.
-// This is used for rendering widgets such as buttons, textfields, etc in a GUI.
-// The surround arguments are the background color, state layer, and opacity of
-// the surrounding context of this box, typically obtained through
-// [goki.dev/gi/v2/gi.WidgetBase.ParentBackgroundColor] in a GUI context.
-func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32, surroundOpacity float32) {
+// DrawStdBox draws the CSS "standard box" model using the given styling information,
+// position, size, and parent actual background color. This is used for rendering
+// widgets such as buttons, textfields, etc in a GUI. DrawStdBox automatically computes
+// the [Style.ActualBackgroundColor] of this style object, but needs to be passed that
+// of its parent.
+func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg *colors.Full) {
+	st.ComputeActualBackgroundColor(pabg)
+
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
 
-	// the background color we actually use
-	bg := st.BackgroundColor
-	if bg.IsNil() {
+	if st.ActualBackgroundColor.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		bg = *surroundBgColor
-	}
-	// we need to apply the state layer after getting the
-	// surrounding background color
-	bg = st.StateBackgroundColor(bg)
-
-	// we only fill the surrounding background color if we are told to
-	if st.FillMargin {
-		// we apply the surrounding state layer to the surrounding background color
-		psl := st.StateLayer
-		st.StateLayer = surroundStateLayer
-		sbg := st.StateBackgroundColor(*surroundBgColor)
-		st.StateLayer = psl
-
-		pc.FillStyle.Opacity = surroundOpacity
-
+		st.ActualBackgroundColor = *pabg
+	} else if st.FillMargin {
 		// We need to fill the whole box where the
 		// box shadows / element can go to prevent growing
 		// box shadows and borders. We couldn't just
@@ -60,7 +46,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, s
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw LayState data because we need to clear
 		// any box shadow that may have gone in margin.
-		pc.FillBox(pos, sz, &sbg)
+		pc.FillBox(pos, sz, pabg)
 	}
 
 	pc.FillStyle.Opacity = st.Opacity
@@ -109,9 +95,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, s
 		}
 	} else {
 		if rad.IsZero() {
-			pc.FillBox(mpos, msz, &bg)
+			pc.FillBox(mpos, msz, &st.ActualBackgroundColor)
 		} else {
-			pc.FillStyle.SetFullColor(&bg)
+			pc.FillStyle.SetFullColor(&st.ActualBackgroundColor)
 			// no border -- fill only
 			pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
 			pc.Fill()
