@@ -372,11 +372,20 @@ func (pc *Context) FillBox(pos, size mat32.Vec2, clr *colors.Full) {
 	pc.Fill()
 }
 
-// FillBoxColor performs an optimized fill of a square region with the given uniform color.
+// FillBoxColor performs an optimized overlay (alpha blend) fill
+// of a square region with the given uniform color.
 func (pc *Context) FillBoxColor(pos, size mat32.Vec2, clr color.Color) {
 	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
 	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Over)
+}
+
+// BlitBoxColor performs an optimized overwriting fill
+// of a square region with the given uniform color.
+func (pc *Context) BlitBoxColor(pos, size mat32.Vec2, clr color.Color) {
+	b := pc.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
+	c := colors.ApplyOpacity(clr, pc.FillStyle.Opacity)
+	draw.Draw(pc.Image, b, &image.Uniform{c}, image.Point{}, draw.Src)
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.

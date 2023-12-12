@@ -52,7 +52,10 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw LayState data because we need to clear
 		// any box shadow that may have gone in margin.
-		pc.FillBox(pos, sz, pabg)
+		pc.BlitBoxColor(pos, sz, pabg.Solid)
+		if pabg.Gradient != nil {
+			pc.FillBox(pos, sz, pabg) // on top of base blit
+		}
 	}
 
 	pc.StrokeStyle.Opacity = st.Opacity
