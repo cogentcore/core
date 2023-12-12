@@ -518,11 +518,13 @@ func (sr *Slider) RenderSlider() {
 	sr.SetPosFromValue(sr.Value)
 
 	od := sr.Dim.Other()
-	if sr.Type == SliderScrollbar {
-		sz := sr.Geom.Size.Actual.Content
-		pos := sr.Geom.Pos.Content
+	sz := sr.Geom.Size.Actual.Content
+	pos := sr.Geom.Pos.Content
 
-		pc.DrawStdBox(st, pos, sz, sr.ParentActualBackgroundColor()) // track
+	pabg := sr.ParentActualBackgroundColor()
+
+	if sr.Type == SliderScrollbar {
+		pc.DrawStdBox(st, pos, sz, pabg) // track
 		if !sr.ValueColor.IsNil() {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
@@ -534,15 +536,13 @@ func (sr *Slider) RenderSlider() {
 			origsz := sz.Dim(od)
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
-			pc.FillStyle.SetFullColor(&sr.ValueColor)
+			vabg := sr.Styles.ComputeActualBackgroundColorFor(&sr.ValueColor, pabg)
+			pc.FillStyle.SetFullColor(&vabg)
 			sr.RenderBoxImpl(tpos, tsz, st.Border) // thumb
 		}
 		sr.RenderUnlock()
 	} else {
-		sz := sr.Geom.Size.Actual.Content
-		pos := sr.Geom.Pos.Content
-
-		pc.FillStyle.SetFullColor(sr.ParentActualBackgroundColor())
+		pc.FillStyle.SetFullColor(pabg)
 		// surrounding box (needed to prevent it from rendering over itself)
 		sr.RenderBoxImpl(pos, sz, st.Border)
 
@@ -556,7 +556,8 @@ func (sr *Slider) RenderSlider() {
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
-			pc.FillStyle.SetFullColor(&sr.ValueColor)
+			vabg := sr.Styles.ComputeActualBackgroundColorFor(&sr.ValueColor, pabg)
+			pc.FillStyle.SetFullColor(&vabg)
 			sr.RenderBoxImpl(bpos, bsz, st.Border)
 		}
 
@@ -576,7 +577,8 @@ func (sr *Slider) RenderSlider() {
 			ic.SetBBoxes()
 			sr.Parts.Render()
 		} else {
-			pc.FillStyle.SetFullColor(&sr.ThumbColor)
+			tabg := sr.Styles.ComputeActualBackgroundColorFor(&sr.ThumbColor, pabg)
+			pc.FillStyle.SetFullColor(&tabg)
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxImpl(tpos, thsz, st.Border)
 			sr.RenderUnlock()
