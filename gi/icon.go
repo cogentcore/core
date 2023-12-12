@@ -98,7 +98,9 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 }
 
 func (ic *Icon) DrawIntoScene() {
-	ic.RenderStdBox(&ic.Styles)
+	_, st := ic.RenderLock()
+	defer ic.RenderUnlock()
+	ic.RenderStdBox(st)
 
 	if ic.SVG.Pixels == nil {
 		return
