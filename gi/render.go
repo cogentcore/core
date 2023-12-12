@@ -571,6 +571,7 @@ func (wb *WidgetBase) PushBounds() bool {
 		}
 		return false
 	}
+	wb.Styles.ComputeActualBackgroundColor(wb.ParentActualBackgroundColor())
 	pc := &wb.Sc.PaintContext
 	pc.PushBounds(wb.Geom.TotalBBox)
 	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
