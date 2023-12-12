@@ -35,7 +35,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
 		st.ActualBackgroundColor = *pabg
-	} else if st.FillMargin {
+	}
+
+	if st.FillMargin {
 		// We need to fill the whole box where the
 		// box shadows / element can go to prevent growing
 		// box shadows and borders. We couldn't just
