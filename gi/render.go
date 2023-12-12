@@ -270,7 +270,7 @@ func (wb *WidgetBase) Config() {
 	updt := wi.UpdateStart()
 	wi.ConfigWidget() // where everything actually happens
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(updt)
+	wb.SetNeedsLayout(updt) // todo: switch to render here
 }
 
 // ConfigWidget is the interface method called by Config that

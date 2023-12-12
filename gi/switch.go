@@ -273,13 +273,35 @@ func (sw *Switch) LabelWidget() *Label {
 	return lbi.(*Label)
 }
 
-// SetIcons sets the icons for the on (checked)
-// and off (unchecked) states, and updates the switch
-func (sw *Switch) SetIcons(on, off icons.Icon) *Switch {
-	updt := sw.UpdateStart()
+// SetIcons sets the icons for the on (checked), off (unchecked)
+// and indeterminante (unknown) states.  See [SetIconsUpdate] for
+// a version that updates the icon rendering
+func (sw *Switch) SetIcons(on, off, unk icons.Icon) *Switch {
 	sw.IconOn = on
 	sw.IconOff = off
-	sw.UpdateEndLayout(updt)
+	sw.IconUnk = unk
+	return sw
+}
+
+// SetIconsUpdate sets the icons for the on (checked), off (unchecked)
+// and indeterminante (unknown) states.  Drives updating of
+// underlying icon rendering, for use post-display.
+func (sw *Switch) SetIconsUpdate(on, off, unk icons.Icon) *Switch {
+	updt := sw.UpdateStart()
+	defer sw.UpdateEndRender(updt)
+
+	sw.SetIcons(on, off, unk)
+	if sw.Parts == nil || !sw.Parts.HasChildren() {
+		return sw
+	}
+	ist := sw.Parts.Child(0).(*Layout)
+	icon := ist.Child(0).(*Icon)
+	icon.SetIconUpdate(sw.IconOn)
+	icoff := ist.Child(1).(*Icon)
+	icoff.SetIconUpdate(sw.IconOff)
+	icunk := ist.Child(2).(*Icon)
+	icunk.SetIconUpdate(sw.IconUnk)
+	sw.Update()
 	return sw
 }
 

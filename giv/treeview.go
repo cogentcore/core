@@ -345,9 +345,7 @@ func (tv *TreeView) TreeViewStyles() {
 		case "parts/branch":
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
-			sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen
-			sw.IconOff = icons.KeyboardArrowRight // icons.Folder
-			sw.IconUnk = icons.Blank
+			sw.SetIcons(icons.KeyboardArrowDown, icons.KeyboardArrowRight, icons.Blank)
 			sw.Style(func(s *styles.Style) {
 				// parent will handle our cursor
 				s.Cursor = cursors.None
@@ -365,7 +363,7 @@ func (tv *TreeView) TreeViewStyles() {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
 					return
 				}
-				if sw.IsChecked() {
+				if sw.IsChecked() && !sw.StateIs(states.Indeterminate) {
 					if !tv.IsClosed() {
 						tv.Close()
 					}
@@ -421,9 +419,12 @@ const (
 	// (children not visible)  Otherwise Open.
 	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.WidgetFlagsN) + iota
 
-	// This flag on the Root node determines whether keyboard movements
+	// When set on the Root node determines whether keyboard movements
 	// update selection or not.
 	TreeViewFlagSelectMode
+
+	// Set in the [Open] method to prevent recursive opening for lazy-open nodes
+	TreeViewInOpen
 )
 
 // IsClosed returns whether this node itself closed?
@@ -1157,7 +1158,7 @@ func (tv *TreeView) Close() {
 	tv.SetBranchState()
 	tv.This().(TreeViewer).OnClose()
 	tv.SetKidsVisibility(true) // parent closed
-	tv.UpdateEndRender(updt)
+	tv.UpdateEndLayout(updt)
 }
 
 // OnOpen is called when a node is opened.
@@ -1172,15 +1173,21 @@ func (tv *TreeView) Open() {
 	if !tv.IsClosed() {
 		return
 	}
+	if tv.Is(TreeViewInOpen) {
+		return
+	}
+	tv.SetFlag(true, TreeViewInOpen)
 	updt := tv.UpdateStart()
+	tv.This().(TreeViewer).OnOpen() // this can open lazy-open nodes
 	if tv.HasChildren() {
 		tv.SetNeedsLayout(true)
 		tv.SetClosed(false)
 		tv.SetBranchState()
-		tv.This().(TreeViewer).OnOpen()
 		tv.SetKidsVisibility(false)
+		tv.This().(TreeViewer).OnOpen() // this can open lazy-open nodes
 	}
-	tv.UpdateEndRender(updt)
+	tv.SetFlag(false, TreeViewInOpen)
+	tv.UpdateEndLayout(updt)
 }
 
 // ToggleClose toggles the close / open status: if closed, opens, and vice-versa

@@ -7,7 +7,6 @@ package filetree
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -73,18 +72,7 @@ func (fn *Node) FileNodeStyles() {
 		case "parts/branch":
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
-			sw.IconOn = icons.FolderOpen
-			sw.IconOff = icons.Folder
-			sw.IconUnk = icons.Blank
-			// sw.Style(func(s *styles.Style) {
-			// 	s.Max.X.SetEm(1.5)
-			// 	s.Max.Y.SetEm(1.5)
-			// })
-			sw.OnClick(func(e events.Event) {
-				if sw.StateIs(states.Disabled) {
-					fn.OpenEmptyDir()
-				}
-			})
+			sw.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
 		}
 	})
 }

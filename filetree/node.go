@@ -312,9 +312,8 @@ func (fn *Node) SetFileIcon() {
 	}
 	if bp, ok := fn.BranchPart(); ok {
 		if bp.IconUnk != ic {
-			bp.IconUnk = ic
-			bp.Update()
-			fn.SetNeedsRender(true)
+			bp.SetIconsUpdate(icons.FolderOpen, icons.Folder, ic)
+			fn.Update()
 		}
 	}
 }

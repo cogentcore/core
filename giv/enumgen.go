@@ -245,11 +245,11 @@ func (i *SliceViewFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _TreeViewFlagsValues = []TreeViewFlags{8, 9}
+var _TreeViewFlagsValues = []TreeViewFlags{8, 9, 10}
 
 // TreeViewFlagsN is the highest valid value
 // for type TreeViewFlags, plus one.
-const TreeViewFlagsN TreeViewFlags = 10
+const TreeViewFlagsN TreeViewFlags = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -257,23 +257,28 @@ func _TreeViewFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[TreeViewFlagClosed-(8)]
 	_ = x[TreeViewFlagSelectMode-(9)]
+	_ = x[TreeViewInOpen-(10)]
 }
 
 var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
-	`Closed`:     8,
-	`closed`:     8,
-	`SelectMode`: 9,
-	`selectmode`: 9,
+	`Closed`:         8,
+	`closed`:         8,
+	`SelectMode`:     9,
+	`selectmode`:     9,
+	`TreeViewInOpen`: 10,
+	`treeviewinopen`: 10,
 }
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
-	8: `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
-	9: `This flag on the Root node determines whether keyboard movements update selection or not.`,
+	8:  `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
+	9:  `When set on the Root node determines whether keyboard movements update selection or not.`,
+	10: `Set in the [Open] method to prevent recursive opening for lazy-open nodes`,
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{
-	8: `Closed`,
-	9: `SelectMode`,
+	8:  `Closed`,
+	9:  `SelectMode`,
+	10: `TreeViewInOpen`,
 }
 
 // String returns the string representation
