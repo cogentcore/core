@@ -43,27 +43,6 @@ func (wb *WidgetBase) SetState(on bool, state ...states.States) *WidgetBase {
 	return wb
 }
 
-// SetStateTree sets the given [styles.Style.State] flags for tree starting
-// at receiving widget.
-func (wb *WidgetBase) SetStateTree(on bool, state ...states.States) *WidgetBase {
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wb.SetState(on, state...)
-		return ki.Continue
-	})
-	return wb
-}
-
-// SetStateWidget sets the given [styles.Style.State] flags for the
-// entire Widget including any Parts != nil
-func (wb *WidgetBase) SetStateWidget(on bool, state ...states.States) *WidgetBase {
-	wb.SetState(on, state...)
-	if wb.Parts == nil {
-		return wb
-	}
-	wb.Parts.SetStateTree(on, state...)
-	return wb
-}
-
 // SetAbilities sets the given [abilities.Abilities] flags to the given value
 func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase {
 	bfs := make([]enums.BitFlag, len(able))
@@ -77,7 +56,7 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *Widget
 // SetSelected sets the Selected flag to given value for the entire Widget
 // and calls ApplyStyleTree to apply any style changes.
 func (wb *WidgetBase) SetSelected(sel bool) {
-	wb.SetStateWidget(sel, states.Selected)
+	wb.SetState(sel, states.Selected)
 	wb.ApplyStyleTree()
 	wb.SetNeedsRender(true)
 }
