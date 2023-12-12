@@ -147,7 +147,7 @@ func (fn *Node) OpenFileWith(command string) error {
 
 // DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //gti:add
-	root := fn.FRoot
+	fn.FRoot.SetNeedsLayout(true)
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -156,7 +156,6 @@ func (fn *Node) DuplicateFiles() { //gti:add
 		}
 		sn.This().(Filer).DuplicateFile()
 	}
-	root.UpdateDir()
 }
 
 // DuplicateFile creates a copy of given file -- only works for regular files, not
@@ -186,7 +185,7 @@ func (fn *Node) DeleteFiles() { //gti:add
 
 // DeleteFilesImpl does the actual deletion, no prompts
 func (fn *Node) DeleteFilesImpl() {
-	root := fn.FRoot
+	fn.FRoot.SetNeedsLayout(true)
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
@@ -215,13 +214,17 @@ func (fn *Node) DeleteFilesImpl() {
 		}
 		fn.This().(Filer).DeleteFile()
 	}
-	root.UpdateDir()
 }
 
 // DeleteFile deletes this file
 func (fn *Node) DeleteFile() error {
 	if fn.IsExternal() {
 		return nil
+	}
+	pari := fn.Par
+	var par *Node
+	if pari != nil {
+		par = AsNode(pari)
 	}
 	fn.CloseBuf()
 	repo, _ := fn.Repo()
@@ -236,12 +239,15 @@ func (fn *Node) DeleteFile() error {
 	if err == nil {
 		fn.Delete(true)
 	}
+	if par != nil {
+		par.UpdateNode()
+	}
 	return err
 }
 
 // renames any selected files
 func (fn *Node) RenameFiles() { //gti:add
-	root := fn.FRoot
+	fn.FRoot.SetNeedsRender(true)
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -250,7 +256,6 @@ func (fn *Node) RenameFiles() { //gti:add
 		}
 		giv.CallFunc(sn, sn.RenameFile) // todo: not using interface?
 	}
-	root.UpdateDir()
 }
 
 // RenameFile renames file to new name
@@ -258,6 +263,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	if fn.IsExternal() {
 		return nil
 	}
+	root := fn.FRoot
 	var err error
 	fn.CloseBuf() // invalid after this point
 	orgpath := fn.FPath
@@ -291,6 +297,10 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	if stored {
 		fn.AddToVCS()
 	}
+	if root != nil {
+		root.UpdatePath(string(orgpath))
+		root.UpdatePath(newpath)
+	}
 	return err
 }
 
@@ -323,13 +333,13 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //gti:add
 		gi.ErrorSnackbar(fn, err)
 		return
 	}
-	fn.FRoot.UpdateNewFile(np)
 	if addToVCS {
 		nfn, ok := fn.FRoot.FindFile(np)
 		if ok && nfn.This() != fn.FRoot.This() {
 			nfn.AddToVCS()
 		}
 	}
+	fn.FRoot.UpdatePath(np)
 }
 
 // makes a new folder in the given selected directory
@@ -361,7 +371,7 @@ func (fn *Node) NewFolder(foldername string) { //gti:add
 		gi.ErrorSnackbar(fn, err)
 		return
 	}
-	fn.FRoot.UpdateNewFile(ppath)
+	fn.FRoot.UpdatePath(ppath)
 }
 
 // CopyFileToDir copies given file path into node that is a directory.
@@ -374,7 +384,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
 	fi.CopyFile(tpath, filename, perm)
-	fn.FRoot.UpdateNewFile(ppath)
+	fn.FRoot.UpdatePath(ppath)
 	ofn, ok := fn.FRoot.FindFile(filename)
 	if ok && ofn.Info.Vcs >= vci.Stored {
 		nfn, ok := fn.FRoot.FindFile(tpath)

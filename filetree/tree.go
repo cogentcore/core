@@ -130,30 +130,25 @@ func (ft *Tree) UpdateAll() {
 }
 
 // UpdatePath updates the tree at the directory level for given path
-// and everything below it
-// func (ft *Tree) UpdatePath(path string) {
-// 	ft.UpdtMu.Lock()
-// 	ft.UpdtMu.Unlock()
-// }
-
-// todo: rewrite below to use UpdatePath
-
-// UpdateNewFile should be called with path to a new file that has just been
-// created -- will update view to show that file, and if that file doesn't
-// exist, it updates the directory containing that file
-func (ft *Tree) UpdateNewFile(filename string) {
-	ft.DirsTo(filename)
-	fpath, _ := filepath.Split(filename)
-	fpath = filepath.Clean(fpath)
-	if fn, ok := ft.FindFile(filename); ok {
-		// fmt.Printf("updating node for file: %v\n", filename)
-		fn.UpdateNode()
-	} else if fn, ok := ft.FindFile(fpath); ok {
-		// fmt.Printf("updating node for path: %v\n", fpath)
-		fn.UpdateNode()
-		// } else {
-		// log.Printf("giv.Tree UpdateNewFile: no node found for path to update: %v\n", filename)
+// and everything below it.  It flags that it needs render update,
+// but if a deletion or insertion happened, then SetNeedsLayout should also
+// be called.
+func (ft *Tree) UpdatePath(path string) {
+	ft.SetNeedsRender(true) //
+	path = filepath.Clean(path)
+	ft.DirsTo(path)
+	if fn, ok := ft.FindFile(path); ok {
+		if fn.IsDir() {
+			fn.UpdateNode()
+			return
+		}
 	}
+	fpath, _ := filepath.Split(path)
+	if fn, ok := ft.FindFile(fpath); ok {
+		fn.UpdateNode()
+		return
+	}
+	gi.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
 }
 
 // ConfigWatcher configures a new watcher for tree
