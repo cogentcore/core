@@ -78,7 +78,7 @@ func (an *Anim) Start(se *xyzv.Scene3D, on bool) {
 
 // GetObjs gets the objects to animate
 func (an *Anim) GetObjs() {
-	se := &an.Scene.Scene
+	se := an.Scene.Scene
 	torusi := se.ChildByName("torus", 0)
 	if torusi == nil {
 		return
@@ -163,7 +163,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	})
 
 	s3 := xyzv.NewScene3D(b)
-	se := &s3.Scene
+	se := s3.Scene
 
 	// options - must be set here
 	// sc.MultiSample = 1

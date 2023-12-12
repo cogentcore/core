@@ -22,23 +22,22 @@ import (
 	"goki.dev/xyz"
 )
 
-// Scene3D contains a svg.SVG element.
-// The rendered version is cached for a given size.
+// Scene3D is a Widget that manages a xyz.Scene.
 type Scene3D struct {
 	gi.WidgetBase
 
 	// Scene is the 3D Scene
-	Scene xyz.Scene
+	Scene *xyz.Scene `set:"-"`
 }
 
 func (se *Scene3D) CopyFieldsFrom(frm any) {
 	fr := frm.(*Scene3D)
 	se.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	se.Scene.CopyFrom(&fr.Scene)
+	se.Scene.CopyFrom(fr.Scene)
 }
 
 func (se *Scene3D) OnInit() {
-	se.Scene.InitName(&se.Scene, "Scene")
+	se.Scene = xyz.NewScene("Scene")
 	se.Scene.Defaults()
 	se.HandleScene3DEvents()
 	se.Scene3DStyles()
@@ -54,14 +53,20 @@ func (se *Scene3D) Scene3DStyles() {
 
 func (se *Scene3D) HandleScene3DEvents() {
 	se.On(events.MouseDown, func(e events.Event) {
+		pos := se.Geom.ContentBBox.Min
+		e.SetLocalOff(e.LocalOff().Add(pos))
 		se.Scene.MouseDownEvent(e)
 		se.SetNeedsRender(true)
 	})
 	se.On(events.SlideMove, func(e events.Event) {
+		pos := se.Geom.ContentBBox.Min
+		e.SetLocalOff(e.LocalOff().Add(pos))
 		se.Scene.SlideMoveEvent(e)
 		se.SetNeedsRender(true)
 	})
 	se.On(events.Scroll, func(e events.Event) {
+		pos := se.Geom.ContentBBox.Min
+		e.SetLocalOff(e.LocalOff().Add(pos))
 		se.Scene.MouseScrollEvent(e.(*events.MouseScroll))
 		se.SetNeedsRender(true)
 	})

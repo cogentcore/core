@@ -8,7 +8,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
-	"goki.dev/xyz"
 )
 
 // Scene3DType is the [gti.Type] for [Scene3D]
@@ -19,7 +18,7 @@ var Scene3DType = gti.AddType(&gti.Type{
 	Doc:        "Scene3D contains a svg.SVG element.\nThe rendered version is cached for a given size.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Scene", &gti.Field{Name: "Scene", Type: "goki.dev/xyz.Scene", LocalType: "xyz.Scene", Doc: "Scene is the 3D Scene", Directives: gti.Directives{}, Tag: ""}},
+		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/xyz.Scene", LocalType: "*xyz.Scene", Doc: "Scene is the 3D Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -44,13 +43,6 @@ func (t *Scene3D) KiType() *gti.Type {
 // New returns a new [*Scene3D] value
 func (t *Scene3D) New() ki.Ki {
 	return &Scene3D{}
-}
-
-// SetScene sets the [Scene3D.Scene]:
-// Scene is the 3D Scene
-func (t *Scene3D) SetScene(v xyz.Scene) *Scene3D {
-	t.Scene = v
-	return t
 }
 
 // SetTooltip sets the [Scene3D.Tooltip]
