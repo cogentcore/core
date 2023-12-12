@@ -1,8 +1,6 @@
 module goki.dev/fi
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/alecthomas/chroma/v2 v2.12.0
