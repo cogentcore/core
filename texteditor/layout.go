@@ -140,6 +140,9 @@ func (ed *Editor) LayoutAllLines() {
 
 	ed.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
+		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
+			break
+		}
 		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.TextStyleProps())
 		ed.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
 		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
