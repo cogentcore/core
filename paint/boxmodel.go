@@ -37,6 +37,10 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		st.ActualBackgroundColor = *pabg
 	}
 
+	// note that we always set the fill opacity to 1 because we are already applying
+	// the opacity of the background color in ComputeActualBackgroundColor above
+	pc.FillStyle.Opacity = 1
+
 	if st.FillMargin {
 		// We need to fill the whole box where the
 		// box shadows / element can go to prevent growing
@@ -51,7 +55,6 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		pc.FillBox(pos, sz, pabg)
 	}
 
-	pc.FillStyle.Opacity = st.Opacity
 	pc.StrokeStyle.Opacity = st.Opacity
 	pc.FontStyle.Opacity = st.Opacity
 
