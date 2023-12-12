@@ -61,7 +61,7 @@ func (g *Image) SetImageSize(nwsz image.Point) {
 	g.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 }
 
-// SetImage sets an image for the bitmap , and resizes to the size of the image
+// SetImage sets an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension.  Copies from given image into internal image for this bitmap.
 func (g *Image) SetImage(img image.Image, width, height float32) {

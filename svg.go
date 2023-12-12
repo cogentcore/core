@@ -187,8 +187,13 @@ func (sv *SVG) Style() {
 
 	sv.Root.Paint.Defaults()
 	if !sv.Color.IsNil() {
-		sv.Root.SetProp("stroke", sv.Color)
-		sv.Root.SetProp("fill", sv.Color)
+		c := sv.Color
+		if c.Gradient == nil {
+			sv.Root.SetProp("opacity", float32(c.Solid.A)/255)
+			c.Solid.A = 255
+		}
+		sv.Root.SetProp("stroke", c)
+		sv.Root.SetProp("fill", c)
 	}
 	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 
