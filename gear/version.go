@@ -4,9 +4,9 @@ package gear
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.1"
+	Version = "v0.0.2"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "4c826b5"
+	GitCommit = "b1898ab"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-12-09 19:36"
+	VersionDate = "2023-12-12 16:05"
 )
