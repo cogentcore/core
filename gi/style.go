@@ -95,6 +95,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	wb.DefaultStyleWidget()
 	wb.RunStylers()
 	wb.ApplyStylePrefs()
+	wb.Styles.ComputeActualBackgroundColor(wb.ParentBackgroundColor())
 
 	// note: this does not un-set the Invisible if not None, because all kinds of things
 	// can turn invisible to off.
