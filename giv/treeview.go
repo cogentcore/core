@@ -357,24 +357,9 @@ func (tv *TreeView) TreeViewStyles() {
 				s.Min.X.Em(0.8)
 				s.Min.Y.Em(0.8)
 				s.Align.Self = styles.Center
-				// we don't need to visibly tell the user that we are disabled;
-				// the lack of an icon accomplishes that; instead, we just inherit
-				// our state layer from the actual tree view state layer
-				if s.Is(states.Disabled) {
-					s.StateLayer = tv.actStateLayer
-				}
-				// If we are responsible for a positive (non-disabled) state layer
-				// (instead of our parent), then we amplify it so that it is clear
-				// that we ourself are receiving a state layer amplifying event.
-				// Otherwise, we set our state color to that of our parent (OnSurface)
-				// so that it does not appear as if we are getting interaction ourself;
-				// instead, we are a part of our parent and render a background color no
-				// different than them.
-				if !s.Is(states.Disabled) && (s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) || s.Is(states.DragHovered)) {
-					s.StateLayer *= 3
-				} else {
-					s.StateColor = colors.Scheme.OnSurface
-				}
+				// we amplify any state layer we receiver so that it is clear
+				// we are receiving it, not just our parent
+				s.StateLayer *= 3
 			})
 			sw.OnClick(func(e events.Event) {
 				if tv.This() == nil || tv.Is(ki.Deleted) {
@@ -539,10 +524,7 @@ func (tv *TreeView) StyleTreeView() {
 		tv.SetClosed(true)
 	}
 	tv.Indent.ToDots(&tv.Styles.UnContext)
-	// tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.ApplyStyleWidget()
-	// tv.Styles.StateLayer = 0 // turn off!
-	// note: this is essential for reasonable styling behavior
 }
 
 func (tv *TreeView) ApplyStyle() {
@@ -647,16 +629,21 @@ func (tv *TreeView) RenderNode() {
 	pc, st := tv.RenderLock()
 	defer tv.RenderUnlock()
 
+	pabg := tv.ParentActualBackgroundColor()
+
 	// must use workaround act values
 	st.StateLayer = tv.actStateLayer
 	if st.Is(states.Selected) {
 		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 	}
-	pabg := tv.ParentActualBackgroundColor()
+	tv.Styles.ComputeActualBackgroundColor(pabg)
+
 	pc.DrawStdBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, pabg)
+
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.BackgroundColor.SetSolid(colors.Transparent)
+	tv.Styles.ComputeActualBackgroundColor(pabg)
 }
 
 func (tv *TreeView) Render() {
