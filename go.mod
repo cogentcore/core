@@ -1,6 +1,6 @@
 module goki.dev/gengo
 
-go 1.21.0
+go 1.21
 
 require golang.org/x/tools v0.16.0
 
