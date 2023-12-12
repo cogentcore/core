@@ -16,8 +16,7 @@ import (
 
 func TestBackgroundColor(t *testing.T) {
 	RunTest(t, "background_color", 300, 300, func(pc *Context) {
-		st := &styles.Style{}
-		st.Defaults()
+		st := styles.NewStyle()
 		st.BackgroundColor.SetSolid(colors.Blue)
 		st.ToDots()
 
@@ -28,8 +27,7 @@ func TestBackgroundColor(t *testing.T) {
 
 func TestBackgroundImage(t *testing.T) {
 	RunTest(t, "background_image", 750, 400, func(pc *Context) {
-		st := &styles.Style{}
-		st.Defaults()
+		st := styles.NewStyle()
 		st.ToDots()
 
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
