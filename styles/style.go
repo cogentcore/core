@@ -380,23 +380,32 @@ var StyleDefault Style
 // ComputeActualBackgroundColor sets [Style.ActualBackgroundColor] based on the
 // given parent actual background color and the properties of the style object.
 func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
-	s.ActualBackgroundColor = s.BackgroundColor
-	if s.ActualBackgroundColor.IsNil() {
-		s.ActualBackgroundColor = *pabg
+	s.ActualBackgroundColor = s.ComputeActualBackgroundColorFor(&s.BackgroundColor, pabg)
+}
+
+// ComputeActualBackgroundColorFor returns the actual background color for
+// the given background color based on the given parent actual background color
+// and the properties of the style object.
+func (s *Style) ComputeActualBackgroundColorFor(bg, pabg *colors.Full) colors.Full {
+	// need to make a copy so that we don't modify the original
+	abg := *bg
+
+	if abg.IsNil() {
+		abg = *pabg
 	}
 
 	if s.Opacity >= 1 && s.StateLayer <= 0 {
 		// we have no transformations to apply
-		return
+		return abg
 	}
 
 	// TODO(kai): support gradient surrounding background colors
 
-	if s.BackgroundColor.Gradient == nil {
+	if abg.Gradient == nil {
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
-			obg := colors.ApplyOpacity(s.ActualBackgroundColor.Solid, s.Opacity)
-			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
+			obg := colors.ApplyOpacity(abg.Solid, s.Opacity)
+			abg.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
 		}
 
 		if s.StateLayer > 0 {
@@ -406,20 +415,20 @@ func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
 			}
 			// we take our state-layer-applied state color and then overlay it onto our background color
 			sclr := colors.WithAF32(clr, s.StateLayer)
-			s.ActualBackgroundColor.SetSolid(colors.AlphaBlend(s.ActualBackgroundColor.Solid, sclr))
+			abg.SetSolid(colors.AlphaBlend(abg.Solid, sclr))
 		}
 
-		return
+		return abg
 	}
 
-	// need to copy because underlying gradient isn't automatically copied
-	s.ActualBackgroundColor = colors.Full{}
-	s.ActualBackgroundColor.CopyFrom(&s.BackgroundColor)
-	for i, stop := range s.ActualBackgroundColor.Gradient.Stops {
+	// need to fully copy from start because underlying gradient isn't automatically copied
+	abg = colors.Full{}
+	abg.CopyFrom(bg)
+	for i, stop := range abg.Gradient.Stops {
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
 			obg := colors.ApplyOpacity(stop.Color, s.Opacity)
-			s.ActualBackgroundColor.Gradient.Stops[i].Color = colors.AlphaBlend(pabg.Solid, obg)
+			abg.Gradient.Stops[i].Color = colors.AlphaBlend(pabg.Solid, obg)
 		}
 
 		if s.StateLayer > 0 {
@@ -429,9 +438,10 @@ func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
 			}
 			// we take our state-layer-applied state color and then overlay it onto our background color
 			sclr := colors.WithAF32(clr, s.StateLayer)
-			s.ActualBackgroundColor.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, sclr)
+			abg.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, sclr)
 		}
 	}
+	return abg
 }
 
 func (st *Style) IsFlexWrap() bool {
