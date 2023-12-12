@@ -19,13 +19,10 @@ func TestBackgroundColor(t *testing.T) {
 		st := &styles.Style{}
 		st.Defaults()
 		st.BackgroundColor.SetSolid(colors.Blue)
-
 		st.ToDots()
 
-		sbg := &colors.Full{Solid: colors.White}
-
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
-		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, sbg, 0, 1)
+		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.SolidFull(colors.White))
 	})
 }
 
@@ -35,7 +32,6 @@ func TestBackgroundImage(t *testing.T) {
 		st.Defaults()
 		st.ToDots()
 
-		sbg := &colors.Full{Solid: colors.White}
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
 
 		test := func(of styles.ObjectFits, pos mat32.Vec2) {
@@ -45,7 +41,7 @@ func TestBackgroundImage(t *testing.T) {
 				defer f.Close()
 				st.BackgroundImage = f
 			}
-			pc.DrawStdBox(st, pos, sz, sbg, 0, 1)
+			pc.DrawStdBox(st, pos, sz, colors.SolidFull(colors.White))
 		}
 
 		test(styles.FitFill, mat32.Vec2{0, 0})
