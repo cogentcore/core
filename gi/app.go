@@ -56,7 +56,7 @@ func NewApp(name string) *App {
 // NewAppBody returns a new Body with a new App initialized with
 // the main properties.
 func NewAppBody(name string) *Body {
-	b := NewBody()
+	b := NewBody(name)
 	b.SetApp(NewApp(name))
 	return b
 }

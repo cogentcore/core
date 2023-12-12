@@ -70,6 +70,6 @@ func (bd *Body) AddText(text string) *Body {
 // SetApp sets the App
 func (bd *Body) SetApp(app *App) *Body {
 	bd.Sc.App = app
-	bd.Sc.Nm = app.Name
+	bd.Nm = app.Name
 	return bd
 }
