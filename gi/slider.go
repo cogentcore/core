@@ -542,12 +542,17 @@ func (sr *Slider) RenderSlider() {
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
 
+		pc.FillStyle.SetFullColor(sr.ParentActualBackgroundColor())
+		// surrounding box (needed to prevent it from rendering over itself)
+		sr.RenderBoxImpl(pos, sz, st.Border)
+
 		trsz := sz.Dim(od) * sr.TrackSize
 		bsz := sz
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		pc.DrawStdBox(st, bpos, bsz, sr.ParentActualBackgroundColor()) // track
+		pc.FillStyle.SetFullColor(&sr.Styles.ActualBackgroundColor)
+		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
