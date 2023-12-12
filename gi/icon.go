@@ -125,10 +125,11 @@ func (ic *Icon) DrawIntoScene() {
 func (ic *Icon) RenderSVG() {
 	rc := ic.Sc.RenderCtx()
 	sv := &ic.SVG
+	clr := colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
-		if isz == ic.RendSize && sv.Name == string(ic.IconName) && sv.Color.Solid == ic.Styles.Color {
+		if isz == ic.RendSize && sv.Name == string(ic.IconName) && sv.Color.Solid == clr {
 			return
 		}
 	}
@@ -142,7 +143,7 @@ func (ic *Icon) RenderSVG() {
 	sv.Resize(sz) // does Config if needed
 
 	// TODO(kai): what about gradient icons?
-	ic.SVG.Color.SetSolid(colors.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity))
+	ic.SVG.Color.SetSolid(clr)
 
 	sv.Render()
 	ic.RendSize = sz
