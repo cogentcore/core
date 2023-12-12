@@ -759,7 +759,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	path := "nil"
 	k := vv.KiStruct()
 	if k != nil {
-		path = k.Path()
+		path = k.AsKi().String()
 	}
 	bt.SetTextUpdate(path)
 }
