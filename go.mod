@@ -2,12 +2,14 @@ module goki.dev/enums
 
 go 1.21.0
 
+toolchain go1.21.4
+
 require (
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/gengo v0.3.10
+	goki.dev/gengo v0.3.11
 	goki.dev/grease v0.8.35
 	goki.dev/gti v0.1.23
-	goki.dev/ordmap v0.5.7
+	goki.dev/ordmap v0.5.8
 	golang.org/x/tools v0.16.0
 )
 
@@ -24,7 +26,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	goki.dev/cam v0.9.41 // indirect
 	goki.dev/colors v0.8.35 // indirect
-	goki.dev/glop v0.1.7 // indirect
+	goki.dev/glop v0.1.8 // indirect
 	goki.dev/grog v0.0.19 // indirect
 	goki.dev/grows v0.3.22 // indirect
 	goki.dev/laser v0.1.25 // indirect
