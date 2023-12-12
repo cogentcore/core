@@ -67,6 +67,12 @@ const (
 	// Checked is for check boxes or radio buttons or other similar state.
 	Checked
 
+	// Indeterminant indicates that the true state of an item is unknown.
+	// For example, [Checked] state items may be in an uncertain state
+	// if they represent other checked items, some of which are checked
+	// and some of which are not.
+	Indeterminant
+
 	// Hovered indicates that a mouse pointer has entered the space over
 	// an element, but it is not Active (nor DragHovered).
 	Hovered
