@@ -1,8 +1,6 @@
 module goki.dev/svg
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/aymerick/douceur v0.2.0
