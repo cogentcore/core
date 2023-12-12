@@ -519,10 +519,10 @@ func (sr *Slider) RenderSlider() {
 
 	od := sr.Dim.Other()
 	if sr.Type == SliderScrollbar {
-		sr.RenderStdBox(st)
-
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
+
+		pc.DrawStdBox(st, pos, sz, sr.ParentActualBackgroundColor()) // track
 		if !sr.ValueColor.IsNil() {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
@@ -535,12 +535,10 @@ func (sr *Slider) RenderSlider() {
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
 			pc.FillStyle.SetFullColor(&sr.ValueColor)
-			sr.RenderBoxImpl(tpos, tsz, st.Border)
+			sr.RenderBoxImpl(tpos, tsz, st.Border) // thumb
 		}
 		sr.RenderUnlock()
 	} else {
-		sr.RenderStdBox(st)
-
 		sz := sr.Geom.Size.Actual.Content
 		pos := sr.Geom.Pos.Content
 
@@ -549,7 +547,7 @@ func (sr *Slider) RenderSlider() {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
+		pc.DrawStdBox(st, bpos, bsz, sr.ParentActualBackgroundColor()) // track
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
