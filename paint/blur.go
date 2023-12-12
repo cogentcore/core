@@ -6,6 +6,7 @@ package paint
 
 import (
 	"image"
+	"log/slog"
 	"math"
 
 	"github.com/anthonynsimon/bild/clone"
@@ -70,6 +71,10 @@ func EdgeBlurFactors(sigma, radiusFactor float32) []float32 {
 	klen := irad*2 + 1
 	sfactor := -0.5 / (sigma * sigma)
 
+	if klen < 0 {
+		slog.Error("unexpected error (need to fix): paint.EdgeBlurFactors: got out of range klen", "klen", klen, "radius", radius, "sigma", sigma, "radiusFactor", radiusFactor)
+		return []float32{}
+	}
 	k := make([]float32, klen)
 	sum := float32(0)
 	rstart := -radius + 0.5

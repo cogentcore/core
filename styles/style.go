@@ -310,13 +310,8 @@ func (s *Style) CopyFrom(cp *Style) {
 // InheritFields from parent: Manual inheriting of values is much faster than
 // automatic version!
 func (s *Style) InheritFields(par *Style) {
-	// fmt.Println("Inheriting from", *par)
 	s.Color = par.Color
 	s.Opacity = par.Opacity
-	// we only inherit the parent's state layer if we don't have one for ourself
-	if s.StateLayer == 0 {
-		s.StateLayer = par.StateLayer
-	}
 	s.Font.InheritFields(&par.Font)
 	s.Text.InheritFields(&par.Text)
 }

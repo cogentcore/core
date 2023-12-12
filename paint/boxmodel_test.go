@@ -69,7 +69,6 @@ func TestActualBackgroundColor(t *testing.T) {
 		d := styles.NewStyle()
 		d.BackgroundColor.SetSolid(colors.Transparent)
 		d.Opacity = 0.5
-		c.StateLayer = 0.1
 		pc.DrawStdBox(d, mat32.Vec2{100, 100}, mat32.Vec2{100, 100}, &c.ActualBackgroundColor)
 	})
 }
