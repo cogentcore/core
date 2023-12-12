@@ -283,10 +283,15 @@ func (ac *AppChooser) OnInit() {
 		ac.Icons = make([]icons.Icon, iln)
 		ac.Tooltips = make([]string, iln)
 		for i, kv := range mm.Stack.Order {
-			nm := kv.Val.Scene.Name()
-			// -scene is frequently placed at the end of scene names, so we remove it
-			nm = strings.TrimSuffix(nm, "-scene")
-			nm = sentence.Case(nm)
+			nm := ""
+			if kv.Val.Scene.Body != nil && kv.Val.Scene.Body.Title != "" {
+				nm = kv.Val.Scene.Body.Title
+			} else {
+				nm = kv.Val.Scene.Name()
+				// -scene is frequently placed at the end of scene names, so we remove it
+				nm = strings.TrimSuffix(nm, "-scene")
+				nm = sentence.Case(nm)
+			}
 			u := uri.URI{Label: nm, Icon: icons.SelectWindow}
 			u.SetURL("scene", nm, fmt.Sprintf("%d", i))
 			ac.Items[i] = u
