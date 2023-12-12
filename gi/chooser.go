@@ -196,9 +196,8 @@ func (ch *Chooser) ChooserStyles() {
 				s.Padding.Zero()
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Zero()
-				// must stay consistent with parent
-				s.StateLayer = ch.Styles.StateLayer
-				s.StateColor = ch.Styles.Color
+				// allow parent to dictate state layer
+				s.StateLayer = 0
 				s.BackgroundColor.SetSolid(colors.Transparent)
 				// if ch.MaxLength > 0 {
 				// 	s.Min.X.Ch(float32(ch.MaxLength))
