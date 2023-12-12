@@ -1,8 +1,6 @@
 module goki.dev/girl
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/anthonynsimon/bild v0.13.0
