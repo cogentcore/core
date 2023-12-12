@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"image/color"
 	"image/png"
 	"io"
 	"log/slog"
@@ -95,9 +94,6 @@ type Scene struct {
 
 	// current stage in which this Scene is set
 	Stage *Stage `copy:"-" json:"-" xml:"-" set:"-"`
-
-	// Current color in styling -- used for relative color names
-	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
 	RenderBBoxHue float32 `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -346,36 +342,6 @@ func (sc *Scene) Delete(destroy bool) {
 // DeleteImpl does the deletion, removing Decor and Frame Widgets.
 func (sc *Scene) DeleteImpl() {
 	sc.DeleteChildren(ki.DestroyKids)
-}
-
-// SetCurrentColor sets the current color in concurrent-safe way
-func (sc *Scene) SetCurrentColor(clr color.RGBA) {
-	if sc == nil {
-		return
-	}
-	sc.StyleMu.Lock()
-	sc.CurColor = clr
-	sc.StyleMu.Unlock()
-}
-
-// ContextColor gets the current color in concurrent-safe way.
-// Implements the styles.Context interface
-func (sc *Scene) ContextColor() color.RGBA {
-	if sc == nil {
-		return color.RGBA{}
-	}
-	sc.StyleMu.RLock()
-	clr := sc.CurColor
-	sc.StyleMu.RUnlock()
-	return clr
-}
-
-// ContextColorSpecByURL finds a Node by an element name (URL-like path), and
-// attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
-// Used for colorspec styling based on url() value.
-func (sc *Scene) ContextColorSpecByURL(url string) *colors.Full {
-	// todo: not currently supported -- see if needed for html / glide
-	return nil
 }
 
 //////////////////////////////////////////////////////////////////

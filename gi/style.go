@@ -102,7 +102,6 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		wb.SetState(true, states.Invisible)
 	}
 	SetUnitContext(&wb.Styles, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
-	wb.Sc.SetCurrentColor(wb.Styles.Color) // todo: do we need this anymore?
 	wb.ApplyStyleParts()
 }
 
