@@ -1,11 +1,9 @@
 module goki.dev/cursors
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
-	goki.dev/enums v0.9.49
+	goki.dev/enums v0.9.51
 	goki.dev/grows v0.3.26
 )
 
