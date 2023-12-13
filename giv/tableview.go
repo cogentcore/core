@@ -494,12 +494,6 @@ func (tv *TableView) ConfigRows() {
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
-		if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(si)
-			if slbl != "" {
-				vpath = tv.ViewPath + "[" + slbl + "]"
-			}
-		}
 		for fli := 0; fli < tv.NVisFields; fli++ {
 			fli := fli
 			field := tv.VisFields[fli]
@@ -602,10 +596,12 @@ func (tv *TableView) UpdateWidgets() {
 
 		sitxt := strconv.Itoa(si)
 		vpath := tv.ViewPath + "[" + sitxt + "]"
-		if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(si)
-			if slbl != "" {
-				vpath = tv.ViewPath + "[" + slbl + "]"
+		if si < tv.SliceSize {
+			if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
+				slbl := lblr.ElemLabel(si)
+				if slbl != "" {
+					vpath = tv.ViewPath + "[" + slbl + "]"
+				}
 			}
 		}
 		for fli := 0; fli < tv.NVisFields; fli++ {
