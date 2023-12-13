@@ -1364,14 +1364,7 @@ func (vv *NilValue) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.Label)
-	npv := laser.NonPtrValue(vv.Value)
-	tstr := ""
-	if !laser.ValueIsZero(npv) {
-		tstr = npv.String() // npv.Type().String()
-	} else if !laser.ValueIsZero(vv.Value) {
-		tstr = vv.Value.String() // vv.Value.Type().String()
-	}
-	sb.SetTextUpdate("nil " + tstr)
+	sb.SetTextUpdate("None")
 }
 
 func (vv *NilValue) ConfigWidget(w gi.Widget) {

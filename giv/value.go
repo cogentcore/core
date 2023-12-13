@@ -774,7 +774,7 @@ func (vv *ValueBase) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	// fmt.Printf("vvb val: %v  type: %v  kind: %v\n", npv.Interface(), npv.Type().String(), npv.Kind())
 	if npv.Kind() == reflect.Interface && laser.ValueIsZero(npv) {
-		tf.SetText("nil")
+		tf.SetText("None")
 	} else {
 		txt := laser.ToString(vv.Value.Interface())
 		// fmt.Println("text set to:", txt)
