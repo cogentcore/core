@@ -227,6 +227,16 @@ func (om *Map[K, V]) Vals() []V {
 	return vl
 }
 
+// Copy copies all of the entries from the given ordered map
+// into this ordered map. It keeps existing entries in this
+// map unless they also exist in the given map, in which case
+// they are overwritten.
+func (om *Map[K, V]) Copy(from *Map[K, V]) {
+	for _, kv := range from.Order {
+		om.Add(kv.Key, kv.Val)
+	}
+}
+
 // String returns the map as a string
 func (om *Map[K, V]) String() string {
 	return fmt.Sprintf("%v", om.Order)
