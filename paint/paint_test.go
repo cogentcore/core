@@ -100,7 +100,8 @@ func TestPaintPath(t *testing.T) {
 	})
 	test("close_path", func(pc *Context) {
 		pc.MoveTo(100, 200)
-		pc.MoveTo(200, 100)
+		pc.LineTo(200, 100)
+		pc.LineTo(250, 150)
 		pc.ClosePath()
 	})
 	test("clear_path", func(pc *Context) {
