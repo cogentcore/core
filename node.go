@@ -13,6 +13,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
+	"goki.dev/grr"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -135,18 +136,8 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 // SetColorProps sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
 func (g *NodeBase) SetColorProps(prop, color string) {
-	if color[0] == '#' {
-		if len(color) == 9 {
-			g.SetProp(prop, color[:7]) // exclude alpha
-			alphai := 0
-			fmt.Sscanf(color[7:], "%02x", &alphai)
-			g.SetProp(prop+"-opacity", fmt.Sprintf("%g", float32(alphai)/255))
-			return
-		}
-		// omitted alpha means opacity = 1
-		g.SetProp(prop+"-opacity", "1")
-		return
-	}
+	clr := grr.Log1(colors.FromString(color))
+	g.SetProp(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	g.SetProp(prop, color)
 }
 
