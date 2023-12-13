@@ -1179,13 +1179,12 @@ func (tv *TreeView) Open() {
 	}
 	tv.SetFlag(true, TreeViewInOpen)
 	updt := tv.UpdateStart()
-	tv.This().(TreeViewer).OnOpen() // this can open lazy-open nodes
 	if tv.HasChildren() {
 		tv.SetNeedsLayout(true)
 		tv.SetClosed(false)
 		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
-		tv.This().(TreeViewer).OnOpen() // this can open lazy-open nodes
+		tv.This().(TreeViewer).OnOpen()
 	}
 	tv.SetFlag(false, TreeViewInOpen)
 	tv.UpdateEndLayout(updt)

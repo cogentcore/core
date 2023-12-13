@@ -431,9 +431,6 @@ func (fn *Node) OpenEmptyDir() bool {
 	if fn.IsDir() && !fn.HasChildren() {
 		updt := fn.UpdateStart()
 		fn.OpenDir()
-		fn.Open()
-		fn.Update()
-		fn.UpdateNode() // needs a second pass
 		fn.UpdateEndLayout(updt)
 		return true
 	}
