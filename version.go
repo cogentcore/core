@@ -4,9 +4,9 @@ package xe
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.24"
+	Version = "v0.0.25"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "c10a367"
+	GitCommit = "2c5449a"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-12-13 00:31"
+	VersionDate = "2023-12-13 01:08"
 )
