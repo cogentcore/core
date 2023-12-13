@@ -8,8 +8,8 @@ package option
 // Option represents an optional (nullable) type. If Valid is true, Option
 // represents Value. Otherwise, it represents a null/unset/invalid value.
 type Option[T any] struct {
-	Value T
 	Valid bool
+	Value T
 }
 
 // Set sets the value to the given value.
