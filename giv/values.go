@@ -156,7 +156,8 @@ func StructTagVal(key, tags string) string {
 // for details on supported tags -- these are NOT set for the view element, only
 // used for options that affect what kind of view to create.
 // See FieldToValue for version that takes into account the properties of the owner.
-// gopy:interface=handle
+//
+//gopy:interface=handle
 func ToValue(it any, tags string) Value {
 	if it == nil {
 		return &ValueBase{}
@@ -1690,6 +1691,42 @@ func (vv *FuncValue) ConfigWidget(w gi.Widget) {
 
 	fbt := vv.Widget.(*FuncButton)
 	fbt.Type = gi.ButtonTonal
+
+	vv.UpdateWidget()
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//  OptionValue
+
+// OptionValue presents an [option.Option]
+type OptionValue struct {
+	ValueBase
+}
+
+func (vv *OptionValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.FrameType
+	return vv.WidgetTyp
+}
+
+func (vv *OptionValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+}
+
+func (vv *OptionValue) ConfigWidget(w gi.Widget) {
+	if vv.Widget == w {
+		vv.UpdateWidget()
+		return
+	}
+	vv.Widget = w
+	vv.StdConfigWidget(w)
+
+	fr := vv.Widget.(*gi.Frame)
+
+	gi.NewButton(fr, "unset").SetText("Unset")
+	val := vv.Value.FieldByName("Value").Interface()
+	NewValue(fr, val, "value")
 
 	vv.UpdateWidget()
 }
