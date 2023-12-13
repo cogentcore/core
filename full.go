@@ -91,10 +91,10 @@ func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, transform ma
 	return f.Gradient.RenderColor(opacity, bounds, transform)
 }
 
-// SetAny sets the color from the given value of any type.
-// It handles values of types [color.Color], [*Gradient],
-// and string.
-func (f *Full) SetAny(val any, ctx Context) error {
+// SetAny sets the color from the given value of any type in the given Context.
+// It handles values of types [color.Color], [*Gradient], and string. If no Context
+// is provided, it uses [BaseContext] with [Transparent].
+func (f *Full) SetAny(val any, ctx ...Context) error {
 	switch valv := val.(type) {
 	case *Full:
 		*f = *valv
@@ -107,7 +107,7 @@ func (f *Full) SetAny(val any, ctx Context) error {
 	case Gradient:
 		*f.Gradient = valv
 	case string:
-		f.SetString(valv, ctx)
+		f.SetString(valv, ctx...)
 	}
 	return nil
 }

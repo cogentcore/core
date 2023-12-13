@@ -143,7 +143,7 @@ func FromString(str string, base ...color.Color) (color.RGBA, error) {
 		return WithA(hct.New(float32(h), float32(c), float32(t)), uint8(a)), nil
 	default:
 		var bc color.Color = Transparent
-		if len(base) > 0 && base[0] != nil {
+		if len(base) > 0 {
 			bc = base[0]
 		}
 

@@ -38,10 +38,15 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 // so we save them in the cache instead of constantly recomputing!
 var FullCache map[string]*Full
 
-// SetString sets the color spec from a standard CSS-formatted string.
-// SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
-// See [Full.UnmarshalXML] for an XML-based version.
-func (f *Full) SetString(str string, ctx Context) error {
+// SetString sets the color spec from a standard CSS-formatted string in the
+// given Context. SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
+// See [Full.UnmarshalXML] for an XML-based version. If no Context is
+// provied, SetString uses [BaseContext] with [Transparent].
+func (f *Full) SetString(str string, ctx ...Context) error {
+	ct := BaseContext(Transparent)
+	if len(ctx) > 0 {
+		ct = ctx[0]
+	}
 	if FullCache == nil {
 		FullCache = make(map[string]*Full)
 	}
@@ -55,7 +60,7 @@ func (f *Full) SetString(str string, ctx Context) error {
 	// TODO: handle url values
 	if strings.HasPrefix(str, "url(") {
 		if ctx != nil {
-			full := ctx.FullByURL(str)
+			full := ct.FullByURL(str)
 			if full != nil {
 				*f = *full
 				return nil
@@ -109,7 +114,7 @@ func (f *Full) SetString(str string, ctx Context) error {
 		FullCache[fullnm] = svcs
 	} else {
 		f.Gradient = nil
-		s, err := FromString(str, nil)
+		s, err := FromString(str, ct.Base())
 		if err != nil {
 			return err
 		}
