@@ -20,8 +20,8 @@ github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUq
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
-goki.dev/enums v0.9.51 h1:dLmPK6G2XFx55rUz7sf27Rp3e8YZbtdCqUE2foeQtOU=
-goki.dev/enums v0.9.51/go.mod h1:D6ZY5Jr0caBarIlbFLXDxynuZ6+w7R5bcghHmPoqcnA=
+goki.dev/enums v0.9.52 h1:q5BYXyJoYZqrLbBdP3NQSzcmedy2yQ331cWu4Xs4zr4=
+goki.dev/enums v0.9.52/go.mod h1:T8vLSgJQAkTP0WdPa0aZSS/yMYJHrqPKafqYwQTfWAU=
 goki.dev/glop v0.1.8 h1:nB4JctMmBJZzzp216bK/SDZoJ01IBMRFoIJPSkvGJa8=
 goki.dev/glop v0.1.8/go.mod h1:Q9TPQIlJ5LL38UITJonRUEmEbPPTHWOJED+xD63VmIg=
 goki.dev/grr v0.0.9 h1:iFkelH1Lf17Z7hlRUsID/td0ZJj1oImzgG4RBpDh5OA=
