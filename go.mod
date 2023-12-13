@@ -3,9 +3,9 @@ module goki.dev/cam
 go 1.21
 
 require (
-	goki.dev/enums v0.9.49
+	goki.dev/enums v0.9.51
 	goki.dev/glop v0.1.8
-	goki.dev/grows v0.3.24
+	goki.dev/grows v0.3.26
 	goki.dev/mat32/v2 v2.0.0-dev0.0.23
 )
 
