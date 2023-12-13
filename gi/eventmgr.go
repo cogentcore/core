@@ -26,6 +26,8 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+// TODO(kai): add these to prefs
+
 var (
 	// DragStartTime is the time to wait before DragStart
 	DragStartTime = 200 * time.Millisecond
@@ -44,7 +46,7 @@ var (
 
 	// LongHoverStopDist is the pixel distance beyond which the LongHoverEnd
 	// event is sent
-	LongHoverStopDist = 50
+	LongHoverStopDist = 5
 
 	// LongPressTime is the time to wait before sending a LongPress event
 	LongPressTime = 500 * time.Millisecond
