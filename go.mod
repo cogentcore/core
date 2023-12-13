@@ -1,8 +1,6 @@
 module goki.dev/gi/v2
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/Masterminds/vcs v1.13.3
@@ -19,24 +17,24 @@ require (
 	goki.dev/cursors v0.0.29
 	goki.dev/enums v0.9.52
 	goki.dev/fi v0.1.16
-	goki.dev/girl v0.0.31
+	goki.dev/girl v0.0.32
 	goki.dev/glop v0.1.8
-	goki.dev/goosi v0.0.21
-	goki.dev/grog v0.0.23
-	goki.dev/grows v0.3.26
+	goki.dev/goosi v0.0.22
+	goki.dev/grog v0.0.24
+	goki.dev/grows v0.3.27
 	goki.dev/grr v0.0.9
-	goki.dev/gti v0.1.27
+	goki.dev/gti v0.1.28
 	goki.dev/icons v0.0.14
-	goki.dev/ki/v2 v2.0.0-dev0.0.29
-	goki.dev/laser v0.1.29
-	goki.dev/mat32/v2 v2.0.0-dev0.0.23
+	goki.dev/ki/v2 v2.0.0-dev0.0.30
+	goki.dev/laser v0.1.30
+	goki.dev/mat32/v2 v2.0.0-dev0.0.24
 	goki.dev/ordmap v0.5.8
-	goki.dev/pi/v2 v2.0.0-dev0.0.22
+	goki.dev/pi/v2 v2.0.0-dev0.0.23
 	goki.dev/prof/v2 v2.0.0-dev0.0.4
-	goki.dev/spell v0.1.11
-	goki.dev/svg v0.1.24
-	goki.dev/vci/v2 v2.0.0-dev0.0.27
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.25
+	goki.dev/spell v0.1.12
+	goki.dev/svg v0.1.25
+	goki.dev/vci/v2 v2.0.0-dev0.0.28
+	goki.dev/vgpu/v2 v2.0.0-dev0.0.26
 	goki.dev/xyz v0.5.16
 	golang.org/x/image v0.14.0
 	gopkg.in/fsnotify.v1 v1.4.7
