@@ -220,6 +220,23 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	return nil, err
 }
 
+// DepthImage returns the current rendered depth image
+func (sc *Scene) DepthImage() ([]float32, error) {
+	fr := sc.Frame
+	if fr == nil {
+		return nil, fmt.Errorf("xyz.Scene DepthImage: Scene does not have a Frame")
+	}
+	sy := &sc.Phong.Sys
+	tcmd := sy.MemCmdStart()
+	fr.GrabDepthImage(tcmd)
+	sy.MemCmdEndSubmitWaitFree()
+	depth, err := fr.Render.DepthImageArray()
+	if err == nil {
+		return depth, err
+	}
+	return nil, err
+}
+
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (sc *Scene) UpdateMeshBBox() {
