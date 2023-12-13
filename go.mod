@@ -1,8 +1,6 @@
 module goki.dev/colors
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
