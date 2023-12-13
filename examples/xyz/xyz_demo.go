@@ -190,7 +190,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 
 	grtx := xyz.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
 	// _ = grtx
-	// wdtx := xyz.NewTextureFile(sc, "wood", "wood.png")
 
 	cbm := xyz.NewBox(se, "cube1", 1, 1, 1)
 	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
