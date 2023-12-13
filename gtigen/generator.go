@@ -403,9 +403,9 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		}
 
 		name := ""
-		if len(field.Names) > 0 {
+		if len(field.Names) == 1 {
 			name = field.Names[0].Name
-		} else {
+		} else if len(field.Names) == 0 {
 			// if we have no name, fall back on type name
 			name = tn
 			// we must get rid of any package name, as field
@@ -414,6 +414,21 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 			if li >= 0 {
 				name = name[li+1:] // need to get rid of .
 			}
+		} else {
+			// if we have more than one name, that typically indicates
+			// type-omitted arguments (eg: "func(x, y float32)"), so
+			// we handle all of the names seperately here and then continue.
+			for _, nm := range field.Names {
+				nfield := *field
+				nfield.Names = []*ast.Ident{nm}
+				nlist := &ast.FieldList{List: []*ast.Field{&nfield}}
+				nfields, err := g.GetFields(nlist, cfg)
+				if err != nil {
+					return nil, err
+				}
+				res.Copy(nfields)
+			}
+			continue
 		}
 		dirs := gti.Directives{}
 		if field.Doc != nil {
