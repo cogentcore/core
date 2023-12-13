@@ -1,8 +1,6 @@
 module goki.dev/grease
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/iancoleman/strcase v0.3.0
