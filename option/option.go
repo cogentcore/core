@@ -24,3 +24,12 @@ func (o *Option[T]) Clear() *Option[T] {
 	o.Valid = false
 	return o
 }
+
+// Or returns the value of the option if it is not marked
+// as null/unset/invalid, and otherwise it returns the given value.
+func (o *Option[T]) Or(or T) T {
+	if o.Valid {
+		return o.Value
+	}
+	return or
+}
