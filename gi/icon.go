@@ -134,10 +134,9 @@ func (ic *Icon) RenderSVG() {
 		}
 	}
 	// todo: units context from us to SVG??
-	zp := image.Point{}
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
-	if sz == zp {
-		ic.RendSize = zp
+	if sz == (image.Point{}) {
+		ic.RendSize = image.Point{}
 		return
 	}
 	// ensure that we have new pixels to render to in order to prevent
@@ -149,7 +148,7 @@ func (ic *Icon) RenderSVG() {
 	sv.Resize(sz) // does Config if needed
 
 	// TODO(kai): what about gradient icons?
-	ic.SVG.Color.SetSolid(clr)
+	sv.Color.SetSolid(clr)
 
 	sv.Render()
 	ic.RendSize = sz
