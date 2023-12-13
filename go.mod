@@ -1,14 +1,12 @@
 module goki.dev/colors
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
-	goki.dev/cam v0.9.45
-	goki.dev/enums v0.9.49
-	goki.dev/grows v0.3.25
+	goki.dev/cam v0.9.46
+	goki.dev/enums v0.9.51
+	goki.dev/grows v0.3.26
 	goki.dev/gti v0.1.27
 	goki.dev/laser v0.1.29
 	goki.dev/mat32/v2 v2.0.0-dev0.0.23
