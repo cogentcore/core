@@ -292,6 +292,12 @@ func (s *Style) SetState(on bool, state ...states.States) *Style {
 	return s
 }
 
+// SetEnabled sets the Disabled State flag according to given bool
+func (s *Style) SetEnabled(on bool) *Style {
+	s.State.SetFlag(!on, states.Disabled)
+	return s
+}
+
 // SetAbilities sets the given [states.State] flags to the given value
 func (s *Style) SetAbilities(on bool, able ...abilities.Abilities) {
 	bfs := make([]enums.BitFlag, len(able))
