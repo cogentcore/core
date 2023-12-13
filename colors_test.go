@@ -50,42 +50,42 @@ func ExampleFromName_error() {
 }
 
 func ExampleFromString_name() {
-	fmt.Println(FromString("violet", Gray))
+	fmt.Println(FromString("violet"))
 	// Output: {238 130 238 255} <nil>
 }
 
 func ExampleFromString_hex() {
-	fmt.Println(FromString("#2af", Yellow))
+	fmt.Println(FromString("#2af"))
 	// Output: {34 170 255 255} <nil>
 }
 
 func ExampleFromString_rgb() {
-	fmt.Println(FromString("rgb(202, 38, 16, 112)", White))
+	fmt.Println(FromString("rgb(202, 38, 16, 112)"))
 	// Output: {89 16 7 112} <nil>
 }
 
 func ExampleFromString_rgba() {
-	fmt.Println(FromString("rgba(188, 12, 71, 201)", Black))
+	fmt.Println(FromString("rgba(188, 12, 71, 201)"))
 	// Output: {148 9 56 201} <nil>
 }
 
 func ExampleFromString_hsl() {
-	fmt.Println(FromString("hsl(12, 62, 50, 189)", Blue))
+	fmt.Println(FromString("hsl(12, 62, 50, 189)"))
 	// Output: {154 59 35 189} <nil>
 }
 
 func ExampleFromString_hsla() {
-	fmt.Println(FromString("hsla(12, 62, 50)", Rebeccapurple))
+	fmt.Println(FromString("hsla(12, 62, 50)"))
 	// Output: {207 80 48 255} <nil>
 }
 
 func ExampleFromString_hct() {
-	fmt.Println(FromString("hct(240, 56, 66)", Tan))
+	fmt.Println(FromString("hct(240, 56, 66)"))
 	// Output: {7 171 240 255} <nil>
 }
 
 func ExampleFromString_hcta() {
-	fmt.Println(FromString("hcta(83, 91, 48, 233)", Lightcoral))
+	fmt.Println(FromString("hcta(83, 91, 48, 233)"))
 	// Output: {135 98 0 233} <nil>
 }
 
@@ -100,17 +100,17 @@ func ExampleFromString_blend() {
 }
 
 func ExampleFromString_error() {
-	fmt.Println(FromString("lighten-something", Rosybrown))
+	fmt.Println(FromString("lighten-something"))
 	// Output: {0 0 0 0} colors.FromString: error getting numeric value from "something": strconv.ParseFloat: parsing "something": invalid syntax
 }
 
 func ExampleFromAny() {
-	fmt.Println(FromAny("rgb(12, 18, 92)", Lawngreen))
+	fmt.Println(FromAny("rgb(12, 18, 92)"))
 	// Output: {12 18 92 255} <nil>
 }
 
 func ExampleFromAny_error() {
-	fmt.Println(FromAny([]float32{}, Yellowgreen))
+	fmt.Println(FromAny([]float32{}))
 	// Output: {0 0 0 0} colors.FromAny: could not get color from value [] of type []float32
 }
 
