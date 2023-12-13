@@ -1,6 +1,6 @@
 Name = "cam"
 Desc = ""
-Version = "v0.9.44"
+Version = "v0.9.45"
 Type = "Library"
 
 [Build]
