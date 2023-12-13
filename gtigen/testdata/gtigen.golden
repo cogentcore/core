@@ -117,8 +117,8 @@ var _ = gti.AddFunc(&gti.Func{
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"y", &gti.Field{Name: "y", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"z", &gti.Field{Name: "z", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"y", &gti.Field{Name: "y", Type: "struct{}", LocalType: "struct{}", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"z", &gti.Field{Name: "z", Type: "struct{}", LocalType: "struct{}", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })

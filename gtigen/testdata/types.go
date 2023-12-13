@@ -48,7 +48,7 @@ func Alert(msg string) {
 // we test various type omitted arg combinations
 
 func TypeOmittedArgs0(x, y float32)                {}
-func TypeOmittedArgs1(x int, y, z float32)         {}
+func TypeOmittedArgs1(x int, y, z struct{})        {}
 func TypeOmittedArgs2(x, y, z int)                 {}
 func TypeOmittedArgs3(x int, y, z bool, w float32) {}
 func TypeOmittedArgs4(x, y, z string, w bool)      {}
