@@ -1,6 +1,6 @@
 Name = "gi"
 Desc = ""
-Version = "v2.0.0-dev0.0.22"
+Version = "v2.0.0-dev0.0.23"
 Type = "Library"
 
 [Build]
