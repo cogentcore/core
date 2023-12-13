@@ -1,9 +1,11 @@
 module goki.dev/laser
 
-go 1.21
+go 1.21.0
+
+toolchain go1.21.4
 
 require (
-	goki.dev/enums v0.9.47
+	goki.dev/enums v0.9.49
 	goki.dev/glop v0.1.8
 )
 

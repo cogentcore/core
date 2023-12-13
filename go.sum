@@ -2,7 +2,7 @@ github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
-goki.dev/enums v0.9.47 h1:iOI5UlxshxLC7Mx352Bq1ofk5o7ne0zG7VxQ4XoHU54=
-goki.dev/enums v0.9.47/go.mod h1:tLl60mG8CCw1pMga836oy1XUaaq/sudSPWyzyTZxh5I=
+goki.dev/enums v0.9.49 h1:rJqIsaoTcUY4jGIZFCEtTDSQiyqcYVx6MHGYaqI2YHA=
+goki.dev/enums v0.9.49/go.mod h1:wpzxuwSrOLuYW4FzjNl7O03zAALa0nLlIaX2k86OFdk=
 goki.dev/glop v0.1.8 h1:nB4JctMmBJZzzp216bK/SDZoJ01IBMRFoIJPSkvGJa8=
 goki.dev/glop v0.1.8/go.mod h1:Q9TPQIlJ5LL38UITJonRUEmEbPPTHWOJED+xD63VmIg=
