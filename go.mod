@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/gengo v0.3.12
+	goki.dev/gengo v0.3.13
 	goki.dev/grease v0.8.37
 	goki.dev/gti v0.1.25
 	goki.dev/ordmap v0.5.8
