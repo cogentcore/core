@@ -1,8 +1,6 @@
 module goki.dev/pi/v2
 
-go 1.21.0
-
-toolchain go1.21.4
+go 1.21
 
 require (
 	github.com/akutz/sortfold v0.2.1
