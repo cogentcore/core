@@ -44,3 +44,5 @@ func (p *Person) Introduction() string { //gti:add
 func Alert(msg string) {
 	fmt.Println("Alert:", msg)
 }
+
+func TypeOmittedArgs(x int, y, z float32) {}
