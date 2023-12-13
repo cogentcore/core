@@ -25,23 +25,32 @@ func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 }
 
 // NewTooltip returns a new tooltip stage displaying the tooltip text
-// for the given widget at the given position.
-func NewTooltip(w Widget, pos image.Point) *Stage {
-	return NewTooltipText(w, w.AsWidget().Tooltip, pos)
+// for the given widget based on the widget's position and size.
+func NewTooltip(w Widget) *Stage {
+	return NewTooltipText(w, w.AsWidget().Tooltip)
 }
 
 // NewTooltipText returns a new tooltip stage displaying the given tooltip text
-// for the given widget at the given position.
-func NewTooltipText(w Widget, tooltip string, pos image.Point) *Stage {
-	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos), w)
+// for the given widget based on the widget's position and size.
+func NewTooltipText(w Widget, tooltip string) *Stage {
+	wb := w.AsWidget()
+	bb := wb.WinBBox()
+	return NewTooltipTextAt(w, tooltip, bb.Min, bb.Size())
+}
+
+// NewTooltipTextAt returns a new tooltip stage displaying the given tooltip text
+// for the given widget at the given position with the given size.
+func NewTooltipTextAt(w Widget, tooltip string, pos, sz image.Point) *Stage {
+	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos, sz), w)
 }
 
 // NewTooltipScene returns a new tooltip scene for the given widget with the
-// given tooltip based on the given position.
-func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
+// given tooltip based on the given context position and context size.
+func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 	sc := NewScene(w.Name() + "-tooltip")
-	sc.SceneGeom.Pos.X = pos.X
-	sc.SceneGeom.Pos.Y = pos.Y
+	// tooltip positioning uses the original scene geom as the context values
+	sc.SceneGeom.Pos = pos
+	sc.SceneGeom.Size = sz
 	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)

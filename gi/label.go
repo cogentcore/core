@@ -244,7 +244,7 @@ func (lb *Label) HandleEvents() {
 			if e.LocalPos().In(tlb) {
 				inLink = true
 				if lb.StateIs(states.LongHovered) || lb.StateIs(states.LongPressed) {
-					NewTooltipText(lb, tl.URL, tlb.Min).Run()
+					NewTooltipTextAt(lb, tl.URL, tlb.Min, tlb.Size()).Run()
 					e.SetHandled()
 				}
 				break
