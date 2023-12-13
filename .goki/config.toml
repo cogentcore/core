@@ -1,6 +1,6 @@
 Name = "spell"
 Desc = ""
-Version = "v0.1.10"
+Version = "v0.1.11"
 Type = "App"
 
 [Build]
