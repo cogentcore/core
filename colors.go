@@ -46,13 +46,35 @@ func AsRGBA(c color.Color) color.RGBA {
 // FromFloat64 makes a new RGBA color from the given 0-1
 // normalized floating point numbers (alpha-premultiplied)
 func FromFloat64(r, g, b, a float64) color.RGBA {
-	return color.RGBA{uint8(r * 255.0), uint8(g * 255.0), uint8(b * 255.0), uint8(a * 255.0)}
+	return color.RGBA{uint8(r * 255), uint8(g * 255), uint8(b * 255), uint8(a * 255)}
 }
 
 // FromFloat32 makes a new RGBA color from the given 0-1
 // normalized floating point numbers (alpha-premultiplied)
 func FromFloat32(r, g, b, a float32) color.RGBA {
-	return color.RGBA{uint8(r * 255.0), uint8(g * 255.0), uint8(b * 255.0), uint8(a * 255.0)}
+	return color.RGBA{uint8(r * 255), uint8(g * 255), uint8(b * 255), uint8(a * 255)}
+}
+
+// ToFloat32 returns 0-1 normalized floating point numbers from given color
+// (alpha-premultiplied)
+func ToFloat32(c color.Color) (r, g, b, a float32) {
+	f := NRGBAF32Model.Convert(c).(NRGBAF32)
+	r = f.R
+	g = f.G
+	b = f.B
+	a = f.A
+	return
+}
+
+// ToFloat64 returns 0-1 normalized floating point numbers from given color
+// (alpha-premultiplied)
+func ToFloat64(c color.Color) (r, g, b, a float64) {
+	f := NRGBAF32Model.Convert(c).(NRGBAF32)
+	r = float64(f.R)
+	g = float64(f.G)
+	b = float64(f.B)
+	a = float64(f.A)
+	return
 }
 
 // AsString returns the given color as a string,
