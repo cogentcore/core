@@ -79,8 +79,10 @@ func FromName(name string) (color.RGBA, error) {
 // FromString returns a color value from the given string.
 // FromString accepts the following types of strings: standard
 // color names, hex, rgb, rgba, hsl, hsla, hct, and hcta values,
-// "none" or "off", or any of the following transformations
-// (which use the base color as the starting point):
+// "none" or "off", or any of the transformations listed below.
+// The transformations use the given single base color as their starting
+// point; if you do not provide a base color, they will use [Transparent]
+// as their starting point. The transformations are:
 //
 //   - currentcolor = base color
 //   - inverse = inverse of base color
@@ -89,7 +91,7 @@ func FromName(name string) (color.RGBA, error) {
 //   - spin-VAL: manipulates the hue level in HCT by VAL
 //   - clearer-VAL or opaquer-VAL: manipulates the alpha level by VAL
 //   - blend-VAL-color: blends given percent of given color name relative to base
-func FromString(str string, base color.Color) (color.RGBA, error) {
+func FromString(str string, base ...color.Color) (color.RGBA, error) {
 	if len(str) == 0 { // consider it null
 		return color.RGBA{}, nil
 	}
@@ -140,6 +142,11 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 		}
 		return WithA(hct.New(float32(h), float32(c), float32(t)), uint8(a)), nil
 	default:
+		var bc color.Color = Transparent
+		if len(base) > 0 && base[0] != nil {
+			bc = base[0]
+		}
+
 		if hidx := strings.Index(lstr, "-"); hidx > 0 {
 			cmd := lstr[:hidx]
 			valstr := lstr[hidx+1:]
@@ -150,23 +157,23 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 			val := float32(val64)
 			switch cmd {
 			case "lighten":
-				return hct.Lighten(base, val), nil
+				return hct.Lighten(bc, val), nil
 			case "darken":
-				return hct.Darken(base, val), nil
+				return hct.Darken(bc, val), nil
 			case "highlight":
-				return hct.Highlight(base, val), nil
+				return hct.Highlight(bc, val), nil
 			case "samelight":
-				return hct.Samelight(base, val), nil
+				return hct.Samelight(bc, val), nil
 			case "saturate":
-				return hct.Saturate(base, val), nil
+				return hct.Saturate(bc, val), nil
 			case "desaturate":
-				return hct.Desaturate(base, val), nil
+				return hct.Desaturate(bc, val), nil
 			case "spin":
-				return hct.Spin(base, val), nil
+				return hct.Spin(bc, val), nil
 			case "clearer":
-				return Clearer(base, val), nil
+				return Clearer(bc, val), nil
 			case "opaquer":
-				return Opaquer(base, val), nil
+				return Opaquer(bc, val), nil
 			case "blend":
 				clridx := strings.Index(valstr, "-")
 				if clridx < 0 {
@@ -179,8 +186,8 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 				}
 				val := float32(val64)
 				clrstr := valstr[clridx+1:]
-				othc, err := FromString(clrstr, base)
-				return Blend(val, base, othc), err
+				othc, err := FromString(clrstr, bc)
+				return Blend(val, bc, othc), err
 			}
 		}
 		switch lstr {
@@ -189,12 +196,9 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 		case "transparent":
 			return Transparent, nil
 		case "currentcolor":
-			return AsRGBA(base), nil
+			return AsRGBA(bc), nil
 		case "inverse":
-			if base != nil {
-				return Inverse(base), nil
-			}
-			return color.RGBA{}, errors.New("colors.FromString: base color must be provided for inverse color transformation")
+			return Inverse(bc), nil
 		default:
 			return FromName(lstr)
 		}
@@ -203,10 +207,12 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 
 // FromAny returns a color from the given value of any type.
 // It handles values of types string and [color.Color].
-func FromAny(val any, base color.Color) (color.RGBA, error) {
+// It takes an optional base color for relative transformations
+// (see [FromString]).
+func FromAny(val any, base ...color.Color) (color.RGBA, error) {
 	switch valv := val.(type) {
 	case string:
-		return FromString(valv, base)
+		return FromString(valv, base...)
 	case color.Color:
 		return AsRGBA(valv), nil
 	default:
