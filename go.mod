@@ -22,8 +22,8 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
-	goki.dev/cam v0.9.45 // indirect
-	goki.dev/colors v0.8.39 // indirect
+	goki.dev/cam v0.9.46 // indirect
+	goki.dev/colors v0.8.41 // indirect
 	goki.dev/glop v0.1.8 // indirect
 	goki.dev/grog v0.0.23 // indirect
 	goki.dev/grows v0.3.26 // indirect
