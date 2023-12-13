@@ -170,6 +170,7 @@ func app() {
 	tmv := ts.NewTab("MapView")
 	tsl := ts.NewTab("SliceView")
 	ttv := ts.NewTab("TabView")
+	_, _, _, _ = tst, tmv, tsl, ttv
 
 	strv := giv.NewStructView(tst, "strv")
 	strv.SetStruct(&stru)

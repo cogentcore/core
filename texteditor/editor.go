@@ -179,11 +179,12 @@ func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
 }
 
 func (ed *Editor) OnInit() {
-	ed.HandleEditorEvents()
-	ed.EditorStyles()
+	ed.WidgetBase.OnInit()
+	ed.HandleEvents()
+	ed.SetStyles()
 }
 
-func (ed *Editor) EditorStyles() {
+func (ed *Editor) SetStyles() {
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		ed.CursorWidth.Dp(2)

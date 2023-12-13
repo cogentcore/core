@@ -152,10 +152,11 @@ type DiffView struct {
 }
 
 func (dv *DiffView) OnInit() {
-	dv.DiffViewStyles()
+	dv.Frame.OnInit()
+	dv.SetStyles()
 }
 
-func (dv *DiffView) DiffViewStyles() {
+func (dv *DiffView) SetStyles() {
 	dv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
@@ -659,7 +660,7 @@ type DiffTextEditor struct {
 
 func (tv *DiffTextEditor) OnInit() {
 	tv.Editor.OnInit()
-	tv.HandleDiffDoubleClick()
+	tv.HandleDoubleClick()
 }
 
 func (tv *DiffTextEditor) DiffView() *DiffView {
@@ -670,7 +671,7 @@ func (tv *DiffTextEditor) DiffView() *DiffView {
 	return dvi.(*DiffView)
 }
 
-func (tv *DiffTextEditor) HandleDiffDoubleClick() {
+func (tv *DiffTextEditor) HandleDoubleClick() {
 	tv.On(events.DoubleClick, func(e events.Event) {
 		pt := tv.PointToRelPos(e.LocalPos())
 		if pt.X >= 0 && pt.X < int(tv.LineNoOff) {

@@ -31,6 +31,11 @@ type ArgView struct {
 }
 
 func (av *ArgView) OnInit() {
+	av.Frame.OnInit()
+	av.SetStyles()
+}
+
+func (av *ArgView) SetStyles() {
 	av.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

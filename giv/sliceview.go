@@ -278,18 +278,18 @@ func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
 }
 
 func (sv *SliceViewBase) OnInit() {
-	sv.SliceViewBaseInit()
+	sv.Frame.OnInit()
+	sv.HandleEvents()
+	sv.SetStyles()
 }
 
-func (sv *SliceViewBase) SliceViewBaseInit() {
+func (sv *SliceViewBase) SetStyles() {
 	sv.InitSelIdx = -1
 	sv.MinRows = 4
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
 	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
 	svi := sv.This().(SliceViewer)
-
-	sv.HandleSliceViewEvents()
 
 	sv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
@@ -1950,7 +1950,7 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 	}
 }
 
-func (sv *SliceViewBase) HandleSliceViewEvents() {
+func (sv *SliceViewBase) HandleEvents() {
 	sv.On(events.Scroll, func(e events.Event) {
 		e.SetHandled()
 		se := e.(*events.MouseScroll)

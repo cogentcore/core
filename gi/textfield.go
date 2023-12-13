@@ -153,16 +153,19 @@ func (tf *TextField) CopyFieldsFrom(frm any) {
 }
 
 func (tf *TextField) OnInit() {
-	tf.HandleTextFieldEvents()
-	tf.TextFieldStyles()
+	tf.WidgetBase.OnInit()
+	tf.HandleEvents()
+	tf.SetStyles()
 }
 
 func (tf *TextField) OnAdd() {
 	tf.WidgetBase.OnAdd()
-	tf.HandleTextFieldClose()
+	tf.OnClose(func(e events.Event) {
+		tf.EditDone()
+	})
 }
 
-func (tf *TextField) TextFieldStyles() {
+func (tf *TextField) SetStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
@@ -1432,7 +1435,14 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 ///////////////////////////////////////////////////////////////////////////////
 //    Event handling
 
-func (tf *TextField) HandleTextFieldMouse() {
+func (tf *TextField) HandleEvents() {
+	tf.HandleSelectToggle()
+	tf.HandleMouse()
+	tf.HandleStateFromFocus()
+	tf.HandleKeys()
+}
+
+func (tf *TextField) HandleMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.StateIs(states.Focused) {
 			tf.SetFocusEvent() // always grab, even if read only..
@@ -1490,7 +1500,7 @@ func (tf *TextField) HandleTextFieldMouse() {
 	})
 }
 
-func (tf *TextField) HandleTextFieldKeys() {
+func (tf *TextField) HandleKeys() {
 	tf.OnKeyChord(func(e events.Event) {
 		if KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
@@ -1659,7 +1669,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 }
 */
 
-func (tf *TextField) HandleTextFieldStateFromFocus() {
+func (tf *TextField) HandleStateFromFocus() {
 	tf.OnFocus(func(e events.Event) {
 		if tf.IsReadOnly() {
 			return
@@ -1683,20 +1693,6 @@ func (tf *TextField) HandleTextFieldStateFromFocus() {
 			tf.SetState(false, states.Focused)
 		}
 	})
-}
-
-func (tf *TextField) HandleTextFieldClose() {
-	tf.OnClose(func(e events.Event) {
-		tf.EditDone()
-	})
-}
-
-func (tf *TextField) HandleTextFieldEvents() {
-	tf.HandleWidgetEvents()
-	tf.HandleSelectToggle()
-	tf.HandleTextFieldMouse()
-	tf.HandleTextFieldStateFromFocus()
-	tf.HandleTextFieldKeys()
 }
 
 func (tf *TextField) ConfigParts() {

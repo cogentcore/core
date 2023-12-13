@@ -43,12 +43,14 @@ type MapViewInline struct {
 }
 
 func (mv *MapViewInline) OnInit() {
-	mv.MapViewInlineStyles()
+	mv.Layout.OnInit()
+	mv.SetStyles()
 }
 
-func (mv *MapViewInline) MapViewInlineStyles() {
-	// mv.Style(func(s *styles.Style) {
-	// })
+func (mv *MapViewInline) SetStyles() {
+	mv.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(mv) {
 		case "add-action":

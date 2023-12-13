@@ -48,12 +48,9 @@ func (tb *Toolbar) CopyFieldsFrom(frm any) {
 }
 
 func (tb *Toolbar) OnInit() {
-	tb.ToolbarStyles()
-	tb.HandleLayoutEvents()
-}
-
-func (tb *Toolbar) ToolbarStyles() {
+	tb.WidgetBase.OnInit()
 	ToolbarStyles(tb)
+	tb.Layout.HandleEvents()
 }
 
 func (tb *Toolbar) IsVisible() bool {
@@ -240,21 +237,9 @@ func (tb *Toolbar) DeleteShortcuts() {
 	}
 }
 
-// UpdateButtons calls UpdateFunc on all buttons in toolbar.
-// individual menus are automatically generated at popup time.
-func (tb *Toolbar) UpdateButtons() {
-	if tb == nil {
-		return
-	}
-	updt := tb.UpdateStart()
-	defer tb.UpdateEndRender(updt)
-
-	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ButtonType) {
-			ac := AsButton(mi)
-			ac.UpdateButtons()
-		}
-	}
+// UpdateBar calls ApplyStyleUpdate to update to current state
+func (tb *Toolbar) UpdateBar() {
+	tb.ApplyStyleUpdate()
 }
 
 // TODO(kai/menu): figure out what to do here
@@ -345,27 +330,12 @@ type BasicBar struct {
 }
 
 func (tb *BasicBar) OnInit() {
-	tb.BasicBarStyles()
-	tb.HandleLayoutEvents()
-}
-
-func (tb *BasicBar) BasicBarStyles() {
+	tb.WidgetBase.OnInit()
 	ToolbarStyles(tb)
+	tb.Layout.HandleEvents()
 }
 
-// UpdateButtons calls UpdateFunc on all buttons in toolbar.
-// individual menus are automatically generated at popup time.
-func (tb *BasicBar) UpdateButtons() {
-	if tb == nil {
-		return
-	}
-	updt := tb.UpdateStart()
-	defer tb.UpdateEndRender(updt)
-
-	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ButtonType) {
-			ac := AsButton(mi)
-			ac.UpdateButtons()
-		}
-	}
+// UpdateBar calls ApplyStyleUpdate to update to current state
+func (tb *BasicBar) UpdateBar() {
+	tb.ApplyStyleUpdate()
 }

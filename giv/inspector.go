@@ -39,6 +39,11 @@ type Inspector struct {
 }
 
 func (is *Inspector) OnInit() {
+	is.Frame.OnInit()
+	is.SetStyles()
+}
+
+func (is *Inspector) SetStyles() {
 	is.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
@@ -57,8 +62,8 @@ func (is *Inspector) OnInit() {
 	})
 }
 
-// Update updates the objects being edited (e.g., updating display changes)
-func (is *Inspector) Update() { //gti:add
+// UpdateItems updates the objects being edited (e.g., updating display changes)
+func (is *Inspector) UpdateItems() { //gti:add
 	if is.KiRoot == nil {
 		return
 	}
@@ -257,37 +262,24 @@ func (is *Inspector) SetChanged() {
 }
 
 func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
-	up := NewFuncButton(tb, is.Update).SetIcon(icons.Refresh)
-	up.SetUpdateFunc(func() {
-		up.SetEnabled(is.Changed)
-	})
-	sel := NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
-	sel.SetUpdateFunc(func() {
-		sc, ok := is.KiRoot.(*gi.Scene)
-		sel.SetEnabled(ok)
-		if !ok {
-			return
-		}
-		_ = sc
-		// TODO(kai/sel): check if has flag
-	})
+	NewFuncButton(tb, is.UpdateItems).SetIcon(icons.Refresh)
+	// StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed) })
+	NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
+		StyleFirst(func(s *styles.Style) {
+			_, ok := is.KiRoot.(*gi.Scene)
+			s.SetEnabled(ok)
+		})
 	gi.NewSeparator(tb)
 	op := NewFuncButton(tb, is.Open).SetKey(keyfun.Open)
 	op.Args[0].SetValue(is.Filename)
 	op.Args[0].SetTag("ext", ".json")
-	save := NewFuncButton(tb, is.Save).SetKey(keyfun.Save)
-	save.SetUpdateFunc(func() {
-		save.SetEnabledUpdt(is.Changed && is.Filename != "")
-	})
+	NewFuncButton(tb, is.Save).SetKey(keyfun.Save).
+		StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
 	sa := NewFuncButton(tb, is.SaveAs).SetKey(keyfun.SaveAs)
 	sa.Args[0].SetValue(is.Filename)
 	sa.Args[0].SetTag("ext", ".json")
 	gi.NewSeparator(tb)
 	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
-}
-
-func (is *Inspector) MenuBar(mb *gi.MenuBar) {
-	NewFuncButton(mb, is.Update)
 }
 
 // InspectorDialog opens an interactive editor of the given Ki tree, at its

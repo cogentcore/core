@@ -43,11 +43,11 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 }
 
 func (ic *Icon) OnInit() {
-	ic.HandleWidgetEvents()
-	ic.IconStyles()
+	ic.WidgetBase.OnInit()
+	ic.SetStyles()
 }
 
-func (ic *Icon) IconStyles() {
+func (ic *Icon) SetStyles() {
 	ic.SVG.Norm = true
 	ic.Style(func(s *styles.Style) {
 		s.Min.X.Dp(16)

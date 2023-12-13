@@ -24,6 +24,11 @@ type TwinEditors struct {
 }
 
 func (te *TwinEditors) OnInit() {
+	te.Splits.OnInit()
+	te.SetStyles()
+}
+
+func (te *TwinEditors) SetStyles() {
 	te.Dim = mat32.X
 	te.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)

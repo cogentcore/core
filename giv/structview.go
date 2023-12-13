@@ -62,6 +62,11 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
+	sv.Frame.OnInit()
+	sv.SetStyles()
+}
+
+func (sv *StructView) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

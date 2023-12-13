@@ -173,7 +173,7 @@ func (fn *Node) IsAutoSave() bool {
 
 // MyRelPath returns the relative path from root for this node
 func (fn *Node) MyRelPath() string {
-	if fn.IsIrregular() {
+	if fn.IsIrregular() || fn.FRoot == nil {
 		return fn.Nm
 	}
 	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))

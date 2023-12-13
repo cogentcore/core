@@ -15,21 +15,19 @@ import (
 )
 
 func (ft *Tree) OnInit() {
+	ft.Node.OnInit()
 	ft.FRoot = ft
 	ft.NodeType = NodeType
 	ft.OpenDepth = 4
-	ft.HandleFileNodeEvents()
-	ft.FileNodeStyles()
 }
 
 func (fn *Node) OnInit() {
-	fn.OpenDepth = 4
-	fn.HandleFileNodeEvents()
-	fn.FileNodeStyles()
+	fn.TreeView.OnInit()
+	fn.HandleEvents()
+	fn.SetStyles()
 }
 
-func (fn *Node) FileNodeStyles() {
-	fn.TreeViewStyles()
+func (fn *Node) SetStyles() {
 	fn.Style(func(s *styles.Style) {
 		vcs := fn.Info.Vcs
 		s.Font.Weight = styles.WeightNormal

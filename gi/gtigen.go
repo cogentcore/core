@@ -20,7 +20,6 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/svg"
 )
 
 // AppChooserType is the [gti.Type] for [AppChooser]
@@ -74,12 +73,6 @@ func (t *AppChooser) SetTooltip(v string) *AppChooser {
 // SetClass sets the [AppChooser.Class]
 func (t *AppChooser) SetClass(v string) *AppChooser {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [AppChooser.PriorityEvents]
-func (t *AppChooser) SetPriorityEvents(v []events.Types) *AppChooser {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -197,12 +190,6 @@ func (t *Body) SetClass(v string) *Body {
 	return t
 }
 
-// SetPriorityEvents sets the [Body.PriorityEvents]
-func (t *Body) SetPriorityEvents(v []events.Types) *Body {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Body.CustomContextMenu]
 func (t *Body) SetCustomContextMenu(v func(m *Scene)) *Body {
 	t.CustomContextMenu = v
@@ -218,6 +205,57 @@ func (t *Body) SetStackTop(v int) *Body {
 // SetStripes sets the [Body.Stripes]
 func (t *Body) SetStripes(v Stripes) *Body {
 	t.Stripes = v
+	return t
+}
+
+// BoxType is the [gti.Type] for [Box]
+var BoxType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Box",
+	ShortName:  "gi.Box",
+	IDName:     "box",
+	Doc:        "Box is a simple base [Widget] that renders the Std Box model",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Box{},
+})
+
+// NewBox adds a new [Box] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewBox(par ki.Ki, name ...string) *Box {
+	return par.NewChild(BoxType, name...).(*Box)
+}
+
+// KiType returns the [*gti.Type] of [Box]
+func (t *Box) KiType() *gti.Type {
+	return BoxType
+}
+
+// New returns a new [*Box] value
+func (t *Box) New() ki.Ki {
+	return &Box{}
+}
+
+// SetTooltip sets the [Box.Tooltip]
+func (t *Box) SetTooltip(v string) *Box {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Box.Class]
+func (t *Box) SetClass(v string) *Box {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Box.CustomContextMenu]
+func (t *Box) SetCustomContextMenu(v func(m *Scene)) *Box {
+	t.CustomContextMenu = v
 	return t
 }
 
@@ -237,8 +275,7 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope.\nAvoid conflict with other shortcuts (a log message will be emitted if so).\nShortcuts are processed after all other processing of keyboard input.\nUse Command for Control / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: ""}},
-		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func()", LocalType: "func()", Doc: "optional function that is called to update state of button (typically updating ); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that can be used for event handling", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -328,16 +365,9 @@ func (t *Button) SetMenu(v func(m *Scene)) *Button {
 }
 
 // SetData sets the [Button.Data]:
-// optional data that is sent with events to identify the button
+// optional data that can be used for event handling
 func (t *Button) SetData(v any) *Button {
 	t.Data = v
-	return t
-}
-
-// SetUpdateFunc sets the [Button.UpdateFunc]:
-// optional function that is called to update state of button (typically updating ); called automatically for menus prior to showing
-func (t *Button) SetUpdateFunc(v func()) *Button {
-	t.UpdateFunc = v
 	return t
 }
 
@@ -350,12 +380,6 @@ func (t *Button) SetTooltip(v string) *Button {
 // SetClass sets the [Button.Class]
 func (t *Button) SetClass(v string) *Button {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Button.PriorityEvents]
-func (t *Button) SetPriorityEvents(v []events.Types) *Button {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -496,12 +520,6 @@ func (t *Chooser) SetTooltip(v string) *Chooser {
 // SetClass sets the [Chooser.Class]
 func (t *Chooser) SetClass(v string) *Chooser {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Chooser.PriorityEvents]
-func (t *Chooser) SetPriorityEvents(v []events.Types) *Chooser {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -662,12 +680,6 @@ func (t *StyleSheet) SetClass(v string) *StyleSheet {
 	return t
 }
 
-// SetPriorityEvents sets the [StyleSheet.PriorityEvents]
-func (t *StyleSheet) SetPriorityEvents(v []events.Types) *StyleSheet {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [StyleSheet.CustomContextMenu]
 func (t *StyleSheet) SetCustomContextMenu(v func(m *Scene)) *StyleSheet {
 	t.CustomContextMenu = v
@@ -728,12 +740,6 @@ func (t *Frame) SetClass(v string) *Frame {
 	return t
 }
 
-// SetPriorityEvents sets the [Frame.PriorityEvents]
-func (t *Frame) SetPriorityEvents(v []events.Types) *Frame {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Frame.CustomContextMenu]
 func (t *Frame) SetCustomContextMenu(v func(m *Scene)) *Frame {
 	t.CustomContextMenu = v
@@ -760,7 +766,7 @@ var HandleType = gti.AddType(&gti.Type{
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Handle{},
@@ -827,27 +833,9 @@ func (t *Handle) SetClass(v string) *Handle {
 	return t
 }
 
-// SetPriorityEvents sets the [Handle.PriorityEvents]
-func (t *Handle) SetPriorityEvents(v []events.Types) *Handle {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Handle.CustomContextMenu]
 func (t *Handle) SetCustomContextMenu(v func(m *Scene)) *Handle {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetStackTop sets the [Handle.StackTop]
-func (t *Handle) SetStackTop(v int) *Handle {
-	t.StackTop = v
-	return t
-}
-
-// SetStripes sets the [Handle.Stripes]
-func (t *Handle) SetStripes(v Stripes) *Handle {
-	t.Stripes = v
 	return t
 }
 
@@ -898,12 +886,6 @@ func (t *Icon) SetTooltip(v string) *Icon {
 // SetClass sets the [Icon.Class]
 func (t *Icon) SetClass(v string) *Icon {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Icon.PriorityEvents]
-func (t *Icon) SetPriorityEvents(v []events.Types) *Icon {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -961,12 +943,6 @@ func (t *Image) SetTooltip(v string) *Image {
 // SetClass sets the [Image.Class]
 func (t *Image) SetClass(v string) *Image {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Image.PriorityEvents]
-func (t *Image) SetPriorityEvents(v []events.Types) *Image {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -1063,12 +1039,6 @@ func (t *Label) SetClass(v string) *Label {
 	return t
 }
 
-// SetPriorityEvents sets the [Label.PriorityEvents]
-func (t *Label) SetPriorityEvents(v []events.Types) *Label {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Label.CustomContextMenu]
 func (t *Label) SetCustomContextMenu(v func(m *Scene)) *Label {
 	t.CustomContextMenu = v
@@ -1144,12 +1114,6 @@ func (t *LabeledTextField) SetTooltip(v string) *LabeledTextField {
 // SetClass sets the [LabeledTextField.Class]
 func (t *LabeledTextField) SetClass(v string) *LabeledTextField {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [LabeledTextField.PriorityEvents]
-func (t *LabeledTextField) SetPriorityEvents(v []events.Types) *LabeledTextField {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -1292,12 +1256,6 @@ func (t *Layout) SetClass(v string) *Layout {
 	return t
 }
 
-// SetPriorityEvents sets the [Layout.PriorityEvents]
-func (t *Layout) SetPriorityEvents(v []events.Types) *Layout {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Layout.CustomContextMenu]
 func (t *Layout) SetCustomContextMenu(v func(m *Scene)) *Layout {
 	t.CustomContextMenu = v
@@ -1346,12 +1304,6 @@ func (t *Stretch) SetTooltip(v string) *Stretch {
 // SetClass sets the [Stretch.Class]
 func (t *Stretch) SetClass(v string) *Stretch {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Stretch.PriorityEvents]
-func (t *Stretch) SetPriorityEvents(v []events.Types) *Stretch {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -1406,88 +1358,9 @@ func (t *Space) SetClass(v string) *Space {
 	return t
 }
 
-// SetPriorityEvents sets the [Space.PriorityEvents]
-func (t *Space) SetPriorityEvents(v []events.Types) *Space {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Space.CustomContextMenu]
 func (t *Space) SetCustomContextMenu(v func(m *Scene)) *Space {
 	t.CustomContextMenu = v
-	return t
-}
-
-// MenuBarType is the [gti.Type] for [MenuBar]
-var MenuBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.MenuBar",
-	ShortName:  "gi.MenuBar",
-	IDName:     "menu-bar",
-	Doc:        "MenuBar is a Layout (typically horizontal) that renders a gradient\nbackground and has convenience methods for adding menus.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MainMenu", &gti.Field{Name: "MainMenu", Type: "bool", LocalType: "bool", Doc: "is this the main menu bar for a window?  controls whether displayed on macOS", Directives: gti.Directives{}, Tag: ""}},
-		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*goki.dev/gi/v2/gi.Button", LocalType: "map[string]*Button", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &MenuBar{},
-})
-
-// NewMenuBar adds a new [MenuBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewMenuBar(par ki.Ki, name ...string) *MenuBar {
-	return par.NewChild(MenuBarType, name...).(*MenuBar)
-}
-
-// KiType returns the [*gti.Type] of [MenuBar]
-func (t *MenuBar) KiType() *gti.Type {
-	return MenuBarType
-}
-
-// New returns a new [*MenuBar] value
-func (t *MenuBar) New() ki.Ki {
-	return &MenuBar{}
-}
-
-// SetMainMenu sets the [MenuBar.MainMenu]:
-// is this the main menu bar for a window?  controls whether displayed on macOS
-func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
-	t.MainMenu = v
-	return t
-}
-
-// SetTooltip sets the [MenuBar.Tooltip]
-func (t *MenuBar) SetTooltip(v string) *MenuBar {
-	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [MenuBar.Class]
-func (t *MenuBar) SetClass(v string) *MenuBar {
-	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [MenuBar.PriorityEvents]
-func (t *MenuBar) SetPriorityEvents(v []events.Types) *MenuBar {
-	t.PriorityEvents = v
-	return t
-}
-
-// SetCustomContextMenu sets the [MenuBar.CustomContextMenu]
-func (t *MenuBar) SetCustomContextMenu(v func(m *Scene)) *MenuBar {
-	t.CustomContextMenu = v
-	return t
-}
-
-// SetStackTop sets the [MenuBar.StackTop]
-func (t *MenuBar) SetStackTop(v int) *MenuBar {
-	t.StackTop = v
 	return t
 }
 
@@ -1834,12 +1707,6 @@ func (t *ProgressBar) SetClass(v string) *ProgressBar {
 	return t
 }
 
-// SetPriorityEvents sets the [ProgressBar.PriorityEvents]
-func (t *ProgressBar) SetPriorityEvents(v []events.Types) *ProgressBar {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [ProgressBar.CustomContextMenu]
 func (t *ProgressBar) SetCustomContextMenu(v func(m *Scene)) *ProgressBar {
 	t.CustomContextMenu = v
@@ -2098,12 +1965,6 @@ func (t *Scene) SetClass(v string) *Scene {
 	return t
 }
 
-// SetPriorityEvents sets the [Scene.PriorityEvents]
-func (t *Scene) SetPriorityEvents(v []events.Types) *Scene {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Scene.CustomContextMenu]
 func (t *Scene) SetCustomContextMenu(v func(m *Scene)) *Scene {
 	t.CustomContextMenu = v
@@ -2133,7 +1994,7 @@ var SeparatorType = gti.AddType(&gti.Type{
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Separator{},
@@ -2176,27 +2037,9 @@ func (t *Separator) SetClass(v string) *Separator {
 	return t
 }
 
-// SetPriorityEvents sets the [Separator.PriorityEvents]
-func (t *Separator) SetPriorityEvents(v []events.Types) *Separator {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Separator.CustomContextMenu]
 func (t *Separator) SetCustomContextMenu(v func(m *Scene)) *Separator {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetStackTop sets the [Separator.StackTop]
-func (t *Separator) SetStackTop(v int) *Separator {
-	t.StackTop = v
-	return t
-}
-
-// SetStripes sets the [Separator.Stripes]
-func (t *Separator) SetStripes(v Stripes) *Separator {
-	t.Stripes = v
 	return t
 }
 
@@ -2405,12 +2248,6 @@ func (t *Slider) SetClass(v string) *Slider {
 	return t
 }
 
-// SetPriorityEvents sets the [Slider.PriorityEvents]
-func (t *Slider) SetPriorityEvents(v []events.Types) *Slider {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Slider.CustomContextMenu]
 func (t *Slider) SetCustomContextMenu(v func(m *Scene)) *Slider {
 	t.CustomContextMenu = v
@@ -2575,12 +2412,6 @@ func (t *Spinner) SetClass(v string) *Spinner {
 	return t
 }
 
-// SetPriorityEvents sets the [Spinner.PriorityEvents]
-func (t *Spinner) SetPriorityEvents(v []events.Types) *Spinner {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Spinner.CustomContextMenu]
 func (t *Spinner) SetCustomContextMenu(v func(m *Scene)) *Spinner {
 	t.CustomContextMenu = v
@@ -2736,12 +2567,6 @@ func (t *Splits) SetTooltip(v string) *Splits {
 // SetClass sets the [Splits.Class]
 func (t *Splits) SetClass(v string) *Splits {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Splits.PriorityEvents]
-func (t *Splits) SetPriorityEvents(v []events.Types) *Splits {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -2973,7 +2798,7 @@ var SVGType = gti.AddType(&gti.Type{
 	Doc:        "SVG is a Widget that renders an [svg.SVG] object. It expects to be a terminal\nnode and does NOT call rendering etc on its children.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: ""}},
+		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -3000,13 +2825,6 @@ func (t *SVG) New() ki.Ki {
 	return &SVG{}
 }
 
-// SetSvg sets the [SVG.SVG]:
-// SVG is the SVG object associated with the element.
-func (t *SVG) SetSvg(v *svg.SVG) *SVG {
-	t.SVG = v
-	return t
-}
-
 // SetTooltip sets the [SVG.Tooltip]
 func (t *SVG) SetTooltip(v string) *SVG {
 	t.Tooltip = v
@@ -3016,12 +2834,6 @@ func (t *SVG) SetTooltip(v string) *SVG {
 // SetClass sets the [SVG.Class]
 func (t *SVG) SetClass(v string) *SVG {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [SVG.PriorityEvents]
-func (t *SVG) SetPriorityEvents(v []events.Types) *SVG {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -3107,12 +2919,6 @@ func (t *Switch) SetTooltip(v string) *Switch {
 // SetClass sets the [Switch.Class]
 func (t *Switch) SetClass(v string) *Switch {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Switch.PriorityEvents]
-func (t *Switch) SetPriorityEvents(v []events.Types) *Switch {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -3221,12 +3027,6 @@ func (t *Switches) SetTooltip(v string) *Switches {
 // SetClass sets the [Switches.Class]
 func (t *Switches) SetClass(v string) *Switches {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Switches.PriorityEvents]
-func (t *Switches) SetPriorityEvents(v []events.Types) *Switches {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -3344,12 +3144,6 @@ func (t *Tabs) SetClass(v string) *Tabs {
 	return t
 }
 
-// SetPriorityEvents sets the [Tabs.PriorityEvents]
-func (t *Tabs) SetPriorityEvents(v []events.Types) *Tabs {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Tabs.CustomContextMenu]
 func (t *Tabs) SetCustomContextMenu(v func(m *Scene)) *Tabs {
 	t.CustomContextMenu = v
@@ -3425,12 +3219,6 @@ func (t *Tab) SetClass(v string) *Tab {
 	return t
 }
 
-// SetPriorityEvents sets the [Tab.PriorityEvents]
-func (t *Tab) SetPriorityEvents(v []events.Types) *Tab {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Tab.CustomContextMenu]
 func (t *Tab) SetCustomContextMenu(v func(m *Scene)) *Tab {
 	t.CustomContextMenu = v
@@ -3470,12 +3258,6 @@ func (t *Tab) SetMenu(v func(m *Scene)) *Tab {
 // SetData sets the [Tab.Data]
 func (t *Tab) SetData(v any) *Tab {
 	t.Data = v
-	return t
-}
-
-// SetUpdateFunc sets the [Tab.UpdateFunc]
-func (t *Tab) SetUpdateFunc(v func()) *Tab {
-	t.UpdateFunc = v
 	return t
 }
 
@@ -3664,12 +3446,6 @@ func (t *TextField) SetClass(v string) *TextField {
 	return t
 }
 
-// SetPriorityEvents sets the [TextField.PriorityEvents]
-func (t *TextField) SetPriorityEvents(v []events.Types) *TextField {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [TextField.CustomContextMenu]
 func (t *TextField) SetCustomContextMenu(v func(m *Scene)) *TextField {
 	t.CustomContextMenu = v
@@ -3771,12 +3547,6 @@ func (t *Toolbar) SetClass(v string) *Toolbar {
 	return t
 }
 
-// SetPriorityEvents sets the [Toolbar.PriorityEvents]
-func (t *Toolbar) SetPriorityEvents(v []events.Types) *Toolbar {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Toolbar.CustomContextMenu]
 func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
 	t.CustomContextMenu = v
@@ -3840,12 +3610,6 @@ func (t *BasicBar) SetClass(v string) *BasicBar {
 	return t
 }
 
-// SetPriorityEvents sets the [BasicBar.PriorityEvents]
-func (t *BasicBar) SetPriorityEvents(v []events.Types) *BasicBar {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [BasicBar.CustomContextMenu]
 func (t *BasicBar) SetCustomContextMenu(v func(m *Scene)) *BasicBar {
 	t.CustomContextMenu = v
@@ -3881,8 +3645,8 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/goosi/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: ""}},
-		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "CustomContextMenu is an optional context menu constructor function\ncalled by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should\ntypically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/goosi/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "CustomContextMenu is an optional context menu constructor function\ncalled by [Widget.MakeContextMenu].  If it is set, then\nit takes over full control of making the context menu for the\n[events.ContextMenu] event.  It can call other standard menu functions\nas needed.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "Sc is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent.\nIt is passed to most Config, Layout, and Render functions as\na convenience.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -3932,20 +3696,12 @@ func (t *WidgetBase) SetClass(v string) *WidgetBase {
 	return t
 }
 
-// SetPriorityEvents sets the [WidgetBase.PriorityEvents]:
-// PriorityEvents has event type(s) that this widget gets sent first.
-// Events are sent in depth-first order, so this enables outer container
-// widgets to get first access to these events.
-func (t *WidgetBase) SetPriorityEvents(v []events.Types) *WidgetBase {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [WidgetBase.CustomContextMenu]:
 // CustomContextMenu is an optional context menu constructor function
-// called by [Widget.MakeContextMenu] after any type-specified items are added.
-// This function can decide where to insert new elements, and it should
-// typically add a separator to disambiguate.
+// called by [Widget.MakeContextMenu].  If it is set, then
+// it takes over full control of making the context menu for the
+// [events.ContextMenu] event.  It can call other standard menu functions
+// as needed.
 func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 	t.CustomContextMenu = v
 	return t

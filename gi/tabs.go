@@ -56,16 +56,13 @@ func (ts *Tabs) CopyFieldsFrom(frm any) {
 }
 
 func (ts *Tabs) OnInit() {
+	ts.WidgetBase.OnInit()
+	ts.Layout.HandleEvents()
+	ts.SetStyles()
+}
+
+func (ts *Tabs) SetStyles() {
 	ts.DeleteTabButtons = true
-	ts.HandleTabsEvents()
-	ts.TabsStyles()
-}
-
-func (ts *Tabs) HandleTabsEvents() {
-	ts.HandleLayoutEvents()
-}
-
-func (ts *Tabs) TabsStyles() {
 	ts.Style(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -517,13 +514,14 @@ type Tab struct {
 }
 
 func (tb *Tab) OnInit() {
-	tb.MaxChars = 16
-	tb.DeleteButton = true
-	tb.HandleButtonEvents()
-	tb.TabStyles()
+	tb.WidgetBase.OnInit()
+	tb.Button.HandleEvents()
+	tb.SetStyles()
 }
 
-func (tb *Tab) TabStyles() {
+func (tb *Tab) SetStyles() {
+	tb.MaxChars = 16
+	tb.DeleteButton = true
 	tb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(tb.ShortcutTooltip() != "", abilities.LongHoverable)

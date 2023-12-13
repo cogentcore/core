@@ -65,6 +65,12 @@ func (sp *Spinner) CopyFieldsFrom(frm any) {
 }
 
 func (sp *Spinner) OnInit() {
+	sp.WidgetBase.OnInit()
+	sp.HandleEvents()
+	sp.SetStyles()
+}
+
+func (sp *Spinner) SetStyles() {
 	sp.Step = 0.1
 	sp.PageStep = 0.2
 	sp.Max = 1.0
@@ -74,12 +80,7 @@ func (sp *Spinner) OnInit() {
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
 		sp.IncrValue(1)
 	})
-	sp.HandleSpinnerEvents()
-	sp.SpinnerStyles()
-}
-
-func (sp *Spinner) SpinnerStyles() {
-	sp.TextFieldStyles()
+	sp.TextField.SetStyles()
 	sp.Style(func(s *styles.Style) {
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(4)
@@ -216,13 +217,8 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 	return fval, grr.Log(err)
 }
 
-func (sp *Spinner) HandleSpinnerEvents() {
-	sp.HandleTextFieldEvents()
-	sp.HandleSpinnerScroll()
-	sp.HandleSpinnerKeys()
-}
-
-func (sp *Spinner) HandleSpinnerScroll() {
+func (sp *Spinner) HandleEvents() {
+	sp.TextField.HandleEvents()
 	sp.On(events.Scroll, func(e events.Event) {
 		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
 			return
@@ -231,9 +227,6 @@ func (sp *Spinner) HandleSpinnerScroll() {
 		se.SetHandled()
 		sp.IncrValue(float32(se.DimDelta(mat32.Y)))
 	})
-}
-
-func (sp *Spinner) HandleSpinnerKeys() {
 	sp.OnChange(func(e events.Event) {
 		text := sp.Text()
 		val, err := sp.StringToVal(text)
@@ -244,6 +237,10 @@ func (sp *Spinner) HandleSpinnerKeys() {
 		}
 		sp.SetValue(val)
 	})
+	sp.HandleKeys()
+}
+
+func (sp *Spinner) HandleKeys() {
 	sp.OnKeyChord(func(e events.Event) {
 		if sp.IsReadOnly() {
 			return

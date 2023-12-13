@@ -100,11 +100,12 @@ const (
 )
 
 func (lb *Label) OnInit() {
-	lb.HandleLabelEvents()
-	lb.LabelStyles()
+	lb.WidgetBase.OnInit()
+	lb.HandleEvents()
+	lb.SetStyles()
 }
 
-func (lb *Label) LabelStyles() {
+func (lb *Label) SetStyles() {
 	lb.Type = LabelBodyLarge
 	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
@@ -214,59 +215,23 @@ func (lb *Label) SetTextUpdate(text string) *Label {
 	return lb
 }
 
-func (lb *Label) HandleLabelEvents() {
-	lb.HandleWidgetEvents()
+func (lb *Label) HandleEvents() {
 	// lb.HandleLabelLongHover()
-	lb.HandleLabelClickStd()
-	lb.HandleLabelMouseMove()
-	lb.HandleLabelKeys()
-}
-
-// func (lb *Label) HandleLabelLongHover() {
-// 	lb.On(events.LongHoverStart, func(e events.Event) {
-// 		fmt.Println("lb lhs")
-// 		pos := lb.Geom.Pos.Content
-// 		for _, tl := range lb.TextRender.Links {
-// 			tlb := tl.Bounds(&lb.TextRender, pos)
-// 			fmt.Println(pos, tlb, e.LocalPos(), e.Pos())
-// 			if e.LocalPos().In(tlb) {
-// 				fmt.Println("ntt")
-// 				NewTooltipText(lb, tl.URL, tlb.Min).Run()
-// 				e.SetHandled()
-// 				return
-// 			}
-// 		}
-// 	})
-// }
-
-// HandleLabelClickStd calls [HandleLabelClick] with [goosi.TheApp.OpenURL].
-func (lb *Label) HandleLabelClickStd() {
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		goosi.TheApp.OpenURL(tl.URL)
 	})
-}
-
-// HandleLabelClick handles click events such that the given function will be called
-// on any links that are clicked on.
-func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
-	lb.OnClick(func(e events.Event) {
-		pos := lb.Geom.Pos.Content
-		for _, tl := range lb.TextRender.Links {
-			// TODO(kai/link): is there a better way to be safe here?
-			if tl.Label == "" {
-				continue
-			}
-			tlb := tl.Bounds(&lb.TextRender, pos)
-			if e.LocalPos().In(tlb) {
-				openLink(&tl)
-				e.SetHandled()
-				return
-			}
+	lb.OnKeyChord(func(e events.Event) {
+		// TODO(kai): get label copying working
+		fmt.Println("kc", e)
+		if !lb.StateIs(states.Selected) {
+			return
+		}
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Copy {
+			e.SetHandled()
+			lb.Copy(true)
 		}
 	})
-}
-
-func (lb *Label) HandleLabelMouseMove() {
 	lb.On(events.MouseMove, func(e events.Event) {
 		pos := lb.Geom.Pos.Content
 		inLink := false
@@ -295,17 +260,39 @@ func (lb *Label) HandleLabelMouseMove() {
 	})
 }
 
-func (lb *Label) HandleLabelKeys() {
-	lb.OnKeyChord(func(e events.Event) {
-		// TODO(kai): get label copying working
-		fmt.Println("kc", e)
-		if !lb.StateIs(states.Selected) {
-			return
-		}
-		kf := keyfun.Of(e.KeyChord())
-		if kf == keyfun.Copy {
-			e.SetHandled()
-			lb.Copy(true)
+// func (lb *Label) HandleLabelLongHover() {
+// 	lb.On(events.LongHoverStart, func(e events.Event) {
+// 		fmt.Println("lb lhs")
+// 		pos := lb.Geom.Pos.Content
+// 		for _, tl := range lb.TextRender.Links {
+// 			tlb := tl.Bounds(&lb.TextRender, pos)
+// 			fmt.Println(pos, tlb, e.LocalPos(), e.Pos())
+// 			if e.LocalPos().In(tlb) {
+// 				fmt.Println("ntt")
+// 				NewTooltipText(lb, tl.URL, tlb.Min).Run()
+// 				e.SetHandled()
+// 				return
+// 			}
+// 		}
+// 	})
+// }
+
+// HandleLabelClick handles click events such that the given function will be called
+// on any links that are clicked on.
+func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
+	lb.OnClick(func(e events.Event) {
+		pos := lb.Geom.Pos.Content
+		for _, tl := range lb.TextRender.Links {
+			// TODO(kai/link): is there a better way to be safe here?
+			if tl.Label == "" {
+				continue
+			}
+			tlb := tl.Bounds(&lb.TextRender, pos)
+			if e.LocalPos().In(tlb) {
+				openLink(&tl)
+				e.SetHandled()
+				return
+			}
 		}
 	})
 }
@@ -437,15 +424,6 @@ func (lb *Label) SizeDown(iter int) bool {
 	}
 	return chg
 }
-
-// func (lb *Label) SizeFinal() {
-// 	sz := &lb.Geom.Size
-// 	sz.Internal = sz.Actual.Content // keep it before we grow
-// 	// lb.GrowToAlloc()     // we already grew as much as we could..
-// 	lb.StyleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
-// 	lb.SizeFinalParts()
-// 	sz.SetTotalFromContent(&sz.Actual)
-// }
 
 func (lb *Label) RenderLabel() {
 	pc, st := lb.RenderLock()

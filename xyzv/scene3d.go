@@ -39,19 +39,20 @@ func (se *Scene3D) CopyFieldsFrom(frm any) {
 func (se *Scene3D) OnInit() {
 	se.Scene = xyz.NewScene("Scene")
 	se.Scene.Defaults()
-	se.HandleScene3DEvents()
-	se.Scene3DStyles()
+	se.WidgetBase.OnInit()
+	se.HandleEvents()
+	se.SetStyles()
 }
 
-func (se *Scene3D) Scene3DStyles() {
+func (se *Scene3D) SetStyles() {
 	se.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Focusable, abilities.Activatable, abilities.Slideable)
+		s.SetAbilities(true, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Em(20))
 	})
 }
 
-func (se *Scene3D) HandleScene3DEvents() {
+func (se *Scene3D) HandleEvents() {
 	se.On(events.MouseDown, func(e events.Event) {
 		pos := se.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
@@ -74,7 +75,6 @@ func (se *Scene3D) HandleScene3DEvents() {
 		se.Scene.KeyChordEvent(e)
 		se.SetNeedsRender(true)
 	})
-	se.HandleWidgetEvents()
 }
 
 func (se *Scene3D) ConfigWidget() {

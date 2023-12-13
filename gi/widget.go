@@ -253,12 +253,13 @@ type WidgetBase struct {
 	// PriorityEvents has event type(s) that this widget gets sent first.
 	// Events are sent in depth-first order, so this enables outer container
 	// widgets to get first access to these events.
-	PriorityEvents []events.Types
+	PriorityEvents []events.Types `set:"-"`
 
 	// CustomContextMenu is an optional context menu constructor function
-	// called by [Widget.MakeContextMenu] after any type-specified items are added.
-	// This function can decide where to insert new elements, and it should
-	// typically add a separator to disambiguate.
+	// called by [Widget.MakeContextMenu].  If it is set, then
+	// it takes over full control of making the context menu for the
+	// [events.ContextMenu] event.  It can call other standard menu functions
+	// as needed.
 	CustomContextMenu func(m *Scene) `copy:"-" json:"-" xml:"-"`
 
 	// Sc is the overall Scene to which we belong. It is automatically
@@ -276,6 +277,15 @@ type WidgetBase struct {
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 	return (*WidgetFlags)(&wb.Flags)
+}
+
+// OnInit for WidgetBase is not called by the usual ki mechanism,
+// but should be called by every Widget type in its own OnInit
+// to establish all the default styling and event handling
+// that applies to all widgets.
+func (wb *WidgetBase) OnInit() {
+	wb.SetStyles()
+	wb.HandleEvents()
 }
 
 // OnAdd is called when widgets are added to a parent.

@@ -15,9 +15,9 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/grows/images"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 )
@@ -55,11 +55,11 @@ func (im *Image) CopyFieldsFrom(frm any) {
 }
 
 func (im *Image) OnInit() {
-	im.HandleWidgetEvents()
-	im.ImageStyles()
+	im.WidgetBase.OnInit()
+	im.SetStyles()
 }
 
-func (im *Image) ImageStyles() {
+func (im *Image) SetStyles() {
 	im.Style(func(s *styles.Style) {
 		if im.Pixels != nil {
 			sz := im.Pixels.Bounds().Size()
@@ -147,6 +147,14 @@ func (im *Image) Render() {
 	}
 }
 
+// ConfigToolbar can be used to configure a toolbar for image
+func (im *Image) ConfigToolbar(tb *Toolbar) {
+	NewButton(tb).SetText("OpenImage").SetIcon(icons.Open).
+		OnClick(func(e events.Event) {
+			TheViewIFace.CallFunc(im, im.OpenImage)
+		})
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
 
@@ -219,30 +227,4 @@ func ImageClearer(im *image.RGBA, pct float32) {
 			im.Set(x, y, f32)
 		}
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-//  Props
-
-// TODO(kai): move this to new system
-
-var ImageProps = ki.Props{
-	"Toolbar": ki.PropSlice{
-		{"OpenImage", ki.Props{
-			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
-			"icon": icons.Open,
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"default-field": "Filename",
-					"ext":           ".png,.jpg",
-				}},
-				{"Width", ki.Props{
-					"desc": "width in raw display dots -- use image size if 0",
-				}},
-				{"Height", ki.Props{
-					"desc": "height in raw display dots -- use image size if 0",
-				}},
-			},
-		}},
-	},
 }

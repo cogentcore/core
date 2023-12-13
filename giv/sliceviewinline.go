@@ -48,12 +48,14 @@ type SliceViewInline struct {
 }
 
 func (sv *SliceViewInline) OnInit() {
-	sv.SliceViewInlineStyles()
+	sv.Layout.OnInit()
+	sv.SetStyles()
 }
 
-func (sv *SliceViewInline) SliceViewInlineStyles() {
-	// sv.Style(func(s *styles.Style) {
-	// })
+func (sv *SliceViewInline) SetStyles() {
+	sv.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
 		case "add-action":

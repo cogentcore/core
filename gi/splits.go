@@ -48,11 +48,12 @@ func (sl *Splits) CopyFieldsFrom(frm any) {
 }
 
 func (sl *Splits) OnInit() {
-	sl.HandleSplitsEvents()
-	sl.SplitsStyles()
+	sl.WidgetBase.OnInit()
+	sl.HandleEvents()
+	sl.SetStyles()
 }
 
-func (sl *Splits) SplitsStyles() {
+func (sl *Splits) SetStyles() {
 	sl.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
@@ -274,7 +275,7 @@ func (sl *Splits) ConfigSplitters() {
 	}
 }
 
-func (sl *Splits) HandleSplitsKeys() {
+func (sl *Splits) HandleEvents() {
 	sl.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
@@ -304,10 +305,6 @@ func (sl *Splits) HandleSplitsKeys() {
 			}
 		}
 	})
-}
-
-func (sl *Splits) HandleSplitsEvents() {
-	sl.HandleSplitsKeys()
 }
 
 func (sl *Splits) ApplyStyle() {

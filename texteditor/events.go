@@ -24,28 +24,26 @@ import (
 	"goki.dev/pi/v2/pi"
 )
 
-// ViewEvents sets connections between mouse and key events and actions
-func (ed *Editor) HandleEditorEvents() {
-	ed.HandleWidgetEvents()
-	ed.HandleLayoutEvents()
-	ed.HandleEditorKeyChord()
-	ed.HandleEditorMouse()
-	ed.HandleEditorLinkCursor()
-	ed.HandleEditorFocus()
+func (ed *Editor) HandleEvents() {
+	ed.Layout.HandleEvents()
+	ed.HandleKeyChord()
+	ed.HandleMouse()
+	ed.HandleLinkCursor()
+	ed.HandleFocus()
 }
 
 func (ed *Editor) OnAdd() {
 	ed.Layout.OnAdd()
-	ed.HandleEditorClose()
+	ed.HandleClose()
 }
 
-func (ed *Editor) HandleEditorClose() {
+func (ed *Editor) HandleClose() {
 	ed.OnClose(func(e events.Event) {
 		ed.EditDone()
 	})
 }
 
-func (ed *Editor) HandleEditorFocus() {
+func (ed *Editor) HandleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {
 			return
@@ -60,7 +58,7 @@ func (ed *Editor) HandleEditorFocus() {
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-func (ed *Editor) HandleEditorKeyChord() {
+func (ed *Editor) HandleKeyChord() {
 	ed.OnKeyChord(func(e events.Event) {
 		ed.KeyInput(e)
 	})
@@ -563,8 +561,8 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	return tl, ok
 }
 
-// HandleEditorMouse handles mouse events.Event
-func (ed *Editor) HandleEditorMouse() {
+// HandleMouse handles mouse events.Event
+func (ed *Editor) HandleMouse() {
 	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocusEvent()
@@ -627,7 +625,7 @@ func (ed *Editor) HandleEditorMouse() {
 	})
 }
 
-func (ed *Editor) HandleEditorLinkCursor() {
+func (ed *Editor) HandleLinkCursor() {
 	ed.On(events.MouseMove, func(e events.Event) {
 		if !ed.HasLinks {
 

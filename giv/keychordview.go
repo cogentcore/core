@@ -77,11 +77,12 @@ type KeyChordEdit struct {
 }
 
 func (kc *KeyChordEdit) OnInit() {
-	kc.HandleKeyChordEvents()
-	kc.KeyChordStyles()
+	kc.Label.OnInit()
+	kc.HandleEvents()
+	kc.SetStyles()
 }
 
-func (kc *KeyChordEdit) KeyChordStyles() {
+func (kc *KeyChordEdit) SetStyles() {
 	kc.Style(func(s *styles.Style) {
 		if !kc.IsReadOnly() {
 			s.Cursor = cursors.Pointer
@@ -110,7 +111,13 @@ func (kc *KeyChordEdit) ContextMenu(m *gi.Scene) {
 	})
 }
 
-func (kc *KeyChordEdit) HandleKeyChord() {
+func (kc *KeyChordEdit) HandleEvents() {
+	// kc.HoverEvent()
+	// kc.MouseEvent()
+	kc.HandleKeys()
+}
+
+func (kc *KeyChordEdit) HandleKeys() {
 	kc.On(events.KeyChord, func(e events.Event) {
 		if kc.StateIs(states.Focused) {
 			e.SetHandled()
@@ -120,46 +127,3 @@ func (kc *KeyChordEdit) HandleKeyChord() {
 		}
 	})
 }
-
-// func (kc *KeyChordEdit) ApplyStyle() {
-// todo: are these still relevant?
-// 	kc.SetCanFocusIfActive()
-// 	kc.Selectable = true
-// 	kc.Redrawable = true
-// 	kc.StyleLabel()
-// 	kc.LayoutLabel()
-// }
-
-func (kc *KeyChordEdit) HandleKeyChordEvents() {
-	// kc.HoverEvent()
-	// kc.MouseEvent()
-	kc.HandleWidgetEvents()
-	kc.HandleKeyChord()
-}
-
-// func (kc *KeyChordEdit) FocusChanged(change gi.FocusChanges) {
-// 	switch change {
-// 	case gi.FocusLost:
-// 		kc.FocusActive = false
-// 		kc.ClearSelected()
-//		   kc.SendChange()
-// 		kc.SetNeedsRender()
-// 	case gi.FocusGot:
-// 		kc.FocusActive = true
-// 		kc.SetSelected(true)
-// 		kc.ScrollToMe()
-// 		kc.EmitFocusedSignal()
-// 		kc.SetNeedsRender()
-// 	case gi.FocusInactive:
-// 		kc.FocusActive = false
-// 		kc.ClearSelected()
-// 		kc.ChordUpdated()
-// 		kc.SetNeedsRender()
-// 	case gi.FocusActive:
-// 		// we don't re-activate on keypress here, so that you don't end up stuck
-// 		// on a given keychord
-// 		// kc.SetSelected()
-// 		// kc.FocusActive = true
-// 		// kc.ScrollToMe()
-// 	}
-// }

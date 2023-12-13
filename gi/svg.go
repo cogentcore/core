@@ -19,7 +19,7 @@ type SVG struct {
 	WidgetBase
 
 	// SVG is the SVG object associated with the element.
-	SVG *svg.SVG
+	SVG *svg.SVG `set:"-"`
 }
 
 func (sv *SVG) CopyFieldsFrom(frm any) {
@@ -31,11 +31,11 @@ func (sv *SVG) CopyFieldsFrom(frm any) {
 func (sv *SVG) OnInit() {
 	sv.SVG = svg.NewSVG(0, 0)
 	sv.SVG.Norm = true
-	sv.HandleWidgetEvents()
-	sv.SVGStyles()
+	sv.WidgetBase.OnInit()
+	sv.SetStyles()
 }
 
-func (sv *SVG) SVGStyles() {
+func (sv *SVG) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Dp(sv.SVG.Root.ViewBox.Size.X), units.Dp(sv.SVG.Root.ViewBox.Size.Y))

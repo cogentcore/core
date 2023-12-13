@@ -94,12 +94,7 @@ type RenderWin struct {
 	// arranged in order, and continuously updated during Render.
 	RenderScenes RenderScenes
 
-	// todo: remove?
-	MainMenu *MenuBar `json:"-" xml:"-"`
-
 	// below are internal vars used during the event loop
-
-	lastWinMenuUpdate time.Time
 
 	// todo: need some other way of freeing GPU resources -- this is not clean:
 	// // the phongs for the window
@@ -509,18 +504,6 @@ func WinNewCloseStamp() {
 	RenderWinGlobalMu.Lock()
 	WinNewCloseTime = time.Now()
 	RenderWinGlobalMu.Unlock()
-}
-
-// NeedWinMenuUpdate returns true if our lastWinMenuUpdate is != WinNewCloseTime
-func (w *RenderWin) NeedWinMenuUpdate() bool {
-	RenderWinGlobalMu.Lock()
-	updt := false
-	if w.lastWinMenuUpdate != WinNewCloseTime {
-		w.lastWinMenuUpdate = WinNewCloseTime
-		updt = true
-	}
-	RenderWinGlobalMu.Unlock()
-	return updt
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1091,64 +1074,3 @@ func (w *RenderWin) GatherScenes() bool {
 func (w *RenderWin) SendShowEvents() {
 	w.MainStageMgr.SendShowEvents()
 }
-
-/*
-/////////////////////////////////////////////////////////////////////////////
-//                   MainMenu Updating
-
-// MainMenuUpdated needs to be called whenever the main menu for this window
-// is updated in terms of items added or removed.
-func (w *RenderWin) MainMenuUpdated() {
-	if w == nil || w.MainMenu == nil || !w.IsVisible() {
-		return
-	}
-	w.MainStageMgr.RenderCtx.Mu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.MainStageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	w.MainMenu.UpdateMainMenu(w) // main update menu call, in bars.go for MenuBar
-	w.MainStageMgr.RenderCtx.Mu.Unlock()
-}
-
-// MainMenuUpdateActives needs to be called whenever items on the main menu
-// for this window have their IsActive status updated.
-func (w *RenderWin) MainMenuUpdateActives() {
-	if w == nil || w.MainMenu == nil || !w.IsVisible() {
-		return
-	}
-	w.MainStageMgr.RenderCtx.Mu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.MainStageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	w.MainMenu.MainMenuUpdateActives(w) // also in bars.go for MenuBar
-	w.MainStageMgr.RenderCtx.Mu.Unlock()
-}
-
-// MainMenuUpdateRenderWins updates a RenderWin menu with a list of active menus.
-func (w *RenderWin) MainMenuUpdateRenderWins() {
-	if w == nil || w.MainMenu == nil || !w.IsVisible() {
-		return
-	}
-	w.MainStageMgr.RenderCtx.Mu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.MainStageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	RenderWinGlobalMu.Lock()
-	wmeni := w.MainMenu.ChildByName("RenderWin", 3)
-	if wmeni == nil {
-		RenderWinGlobalMu.Unlock()
-		w.MainStageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	wmen := wmeni.(*Action)
-	men := make(Menu, 0, len(AllRenderWins))
-	men.AddRenderWinsMenu(w)
-	wmen.Menu = men
-	RenderWinGlobalMu.Unlock()
-	w.MainStageMgr.RenderCtx.Mu.Unlock()
-	w.MainMenuUpdated()
-}
-*/

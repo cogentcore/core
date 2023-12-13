@@ -7,6 +7,7 @@ package giv
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 )
@@ -23,11 +24,6 @@ func PrefsView(pf *gi.Preferences) {
 	d.Sc.Data = pf
 	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
-		gi.NewSeparator(tb)
-		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
-		save.SetUpdateFunc(func() {
-			save.SetEnabledUpdt(pf.Changed)
-		})
 		gi.NewSeparator(tb)
 		NewFuncButton(tb, pf.LightMode)
 		NewFuncButton(tb, pf.DarkMode)
@@ -51,8 +47,14 @@ func PrefsView(pf *gi.Preferences) {
 	sv := NewStructView(d)
 	sv.SetStruct(pf)
 	sv.OnChange(func(e events.Event) {
+		pf.Changed = true
+		tab := d.GetTopAppBar()
+		if tab != nil {
+			tab.UpdateBar()
+		}
 		pf.Apply()
 		pf.Save()
+		pf.UpdateAll()
 	})
 	d.NewWindow().Run()
 }
@@ -73,10 +75,8 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 	d.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
 		gi.NewSeparator(tb)
-		save := NewFuncButton(tb, pf.Save).SetKey(keyfun.Save)
-		save.SetUpdateFunc(func() {
-			save.SetEnabledUpdt(pf.Changed)
-		})
+		NewFuncButton(tb, pf.Save).SetKey(keyfun.Save).
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(pf.Changed) })
 		tb.AddOverflowMenu(func(m *gi.Scene) {
 			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
 			gi.NewSeparator(tb)

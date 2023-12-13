@@ -9,7 +9,6 @@ import (
 	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -85,12 +84,6 @@ func (t *ArgView) SetTooltip(v string) *ArgView {
 // SetClass sets the [ArgView.Class]
 func (t *ArgView) SetClass(v string) *ArgView {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [ArgView.PriorityEvents]
-func (t *ArgView) SetPriorityEvents(v []events.Types) *ArgView {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -172,12 +165,6 @@ func (t *ColorView) SetTooltip(v string) *ColorView {
 // SetClass sets the [ColorView.Class]
 func (t *ColorView) SetClass(v string) *ColorView {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [ColorView.PriorityEvents]
-func (t *ColorView) SetPriorityEvents(v []events.Types) *ColorView {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -300,12 +287,6 @@ func (t *FileView) SetClass(v string) *FileView {
 	return t
 }
 
-// SetPriorityEvents sets the [FileView.PriorityEvents]
-func (t *FileView) SetPriorityEvents(v []events.Types) *FileView {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [FileView.CustomContextMenu]
 func (t *FileView) SetCustomContextMenu(v func(m *gi.Scene)) *FileView {
 	t.CustomContextMenu = v
@@ -422,12 +403,6 @@ func (t *FuncButton) SetClass(v string) *FuncButton {
 	return t
 }
 
-// SetPriorityEvents sets the [FuncButton.PriorityEvents]
-func (t *FuncButton) SetPriorityEvents(v []events.Types) *FuncButton {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [FuncButton.CustomContextMenu]
 func (t *FuncButton) SetCustomContextMenu(v func(m *gi.Scene)) *FuncButton {
 	t.CustomContextMenu = v
@@ -470,12 +445,6 @@ func (t *FuncButton) SetData(v any) *FuncButton {
 	return t
 }
 
-// SetUpdateFunc sets the [FuncButton.UpdateFunc]
-func (t *FuncButton) SetUpdateFunc(v func()) *FuncButton {
-	t.UpdateFunc = v
-	return t
-}
-
 // InspectorType is the [gti.Type] for [Inspector]
 var InspectorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.Inspector",
@@ -492,7 +461,7 @@ var InspectorType = gti.AddType(&gti.Type{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"Update", &gti.Method{Name: "Update", Doc: "Update updates the objects being edited (e.g., updating display changes)", Directives: gti.Directives{
+		{"UpdateItems", &gti.Method{Name: "UpdateItems", Doc: "UpdateItems updates the objects being edited (e.g., updating display changes)", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"Save", &gti.Method{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: gti.Directives{
@@ -559,12 +528,6 @@ func (t *Inspector) SetTooltip(v string) *Inspector {
 // SetClass sets the [Inspector.Class]
 func (t *Inspector) SetClass(v string) *Inspector {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Inspector.PriorityEvents]
-func (t *Inspector) SetPriorityEvents(v []events.Types) *Inspector {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -637,12 +600,6 @@ func (t *KeyChordEdit) SetTooltip(v string) *KeyChordEdit {
 // SetClass sets the [KeyChordEdit.Class]
 func (t *KeyChordEdit) SetClass(v string) *KeyChordEdit {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [KeyChordEdit.PriorityEvents]
-func (t *KeyChordEdit) SetPriorityEvents(v []events.Types) *KeyChordEdit {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -768,12 +725,6 @@ func (t *MapView) SetClass(v string) *MapView {
 	return t
 }
 
-// SetPriorityEvents sets the [MapView.PriorityEvents]
-func (t *MapView) SetPriorityEvents(v []events.Types) *MapView {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [MapView.CustomContextMenu]
 func (t *MapView) SetCustomContextMenu(v func(m *gi.Scene)) *MapView {
 	t.CustomContextMenu = v
@@ -880,12 +831,6 @@ func (t *MapViewInline) SetClass(v string) *MapViewInline {
 	return t
 }
 
-// SetPriorityEvents sets the [MapViewInline.PriorityEvents]
-func (t *MapViewInline) SetPriorityEvents(v []events.Types) *MapViewInline {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [MapViewInline.CustomContextMenu]
 func (t *MapViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *MapViewInline {
 	t.CustomContextMenu = v
@@ -949,12 +894,6 @@ func (t *SliceView) SetTooltip(v string) *SliceView {
 // SetClass sets the [SliceView.Class]
 func (t *SliceView) SetClass(v string) *SliceView {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [SliceView.PriorityEvents]
-func (t *SliceView) SetPriorityEvents(v []events.Types) *SliceView {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -1303,12 +1242,6 @@ func (t *SliceViewBase) SetClass(v string) *SliceViewBase {
 	return t
 }
 
-// SetPriorityEvents sets the [SliceViewBase.PriorityEvents]
-func (t *SliceViewBase) SetPriorityEvents(v []events.Types) *SliceViewBase {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [SliceViewBase.CustomContextMenu]
 func (t *SliceViewBase) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewBase {
 	t.CustomContextMenu = v
@@ -1394,12 +1327,6 @@ func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid {
 // SetClass sets the [SliceViewGrid.Class]
 func (t *SliceViewGrid) SetClass(v string) *SliceViewGrid {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [SliceViewGrid.PriorityEvents]
-func (t *SliceViewGrid) SetPriorityEvents(v []events.Types) *SliceViewGrid {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -1514,12 +1441,6 @@ func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline {
 // SetClass sets the [SliceViewInline.Class]
 func (t *SliceViewInline) SetClass(v string) *SliceViewInline {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [SliceViewInline.PriorityEvents]
-func (t *SliceViewInline) SetPriorityEvents(v []events.Types) *SliceViewInline {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -1647,12 +1568,6 @@ func (t *StructView) SetClass(v string) *StructView {
 	return t
 }
 
-// SetPriorityEvents sets the [StructView.PriorityEvents]
-func (t *StructView) SetPriorityEvents(v []events.Types) *StructView {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [StructView.CustomContextMenu]
 func (t *StructView) SetCustomContextMenu(v func(m *gi.Scene)) *StructView {
 	t.CustomContextMenu = v
@@ -1689,7 +1604,7 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructViewInline{},
@@ -1774,12 +1689,6 @@ func (t *StructViewInline) SetClass(v string) *StructViewInline {
 	return t
 }
 
-// SetPriorityEvents sets the [StructViewInline.PriorityEvents]
-func (t *StructViewInline) SetPriorityEvents(v []events.Types) *StructViewInline {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [StructViewInline.CustomContextMenu]
 func (t *StructViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *StructViewInline {
 	t.CustomContextMenu = v
@@ -1792,18 +1701,12 @@ func (t *StructViewInline) SetStackTop(v int) *StructViewInline {
 	return t
 }
 
-// SetStripes sets the [StructViewInline.Stripes]
-func (t *StructViewInline) SetStripes(v gi.Stripes) *StructViewInline {
-	t.Stripes = v
-	return t
-}
-
-// EditorType is the [gti.Type] for [Editor]
-var EditorType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.Editor",
-	ShortName:  "giv.Editor",
-	IDName:     "editor",
-	Doc:        "Editor supports editing of SVG elements",
+// SVGEditorType is the [gti.Type] for [SVGEditor]
+var SVGEditorType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.SVGEditor",
+	ShortName:  "giv.SVGEditor",
+	IDName:     "svg-editor",
+	Doc:        "SVGEditor supports editing of SVG elements",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Trans", &gti.Field{Name: "Trans", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "view translation offset (from dragging)", Directives: gti.Directives{}, Tag: ""}},
@@ -1811,71 +1714,65 @@ var EditorType = gti.AddType(&gti.Type{
 		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", LocalType: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"SVG", &gti.Field{Name: "SVG", Type: "goki.dev/gi/v2/gi.SVG", LocalType: "gi.SVG", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Editor{},
+	Instance: &SVGEditor{},
 })
 
-// NewEditor adds a new [Editor] with the given name
+// NewSVGEditor adds a new [SVGEditor] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewEditor(par ki.Ki, name ...string) *Editor {
-	return par.NewChild(EditorType, name...).(*Editor)
+func NewSVGEditor(par ki.Ki, name ...string) *SVGEditor {
+	return par.NewChild(SVGEditorType, name...).(*SVGEditor)
 }
 
-// KiType returns the [*gti.Type] of [Editor]
-func (t *Editor) KiType() *gti.Type {
-	return EditorType
+// KiType returns the [*gti.Type] of [SVGEditor]
+func (t *SVGEditor) KiType() *gti.Type {
+	return SVGEditorType
 }
 
-// New returns a new [*Editor] value
-func (t *Editor) New() ki.Ki {
-	return &Editor{}
+// New returns a new [*SVGEditor] value
+func (t *SVGEditor) New() ki.Ki {
+	return &SVGEditor{}
 }
 
-// SetTrans sets the [Editor.Trans]:
+// SetTrans sets the [SVGEditor.Trans]:
 // view translation offset (from dragging)
-func (t *Editor) SetTrans(v mat32.Vec2) *Editor {
+func (t *SVGEditor) SetTrans(v mat32.Vec2) *SVGEditor {
 	t.Trans = v
 	return t
 }
 
-// SetScale sets the [Editor.Scale]:
+// SetScale sets the [SVGEditor.Scale]:
 // view scaling (from zooming)
-func (t *Editor) SetScale(v float32) *Editor {
+func (t *SVGEditor) SetScale(v float32) *SVGEditor {
 	t.Scale = v
 	return t
 }
 
-// SetSetDragCursor sets the [Editor.SetDragCursor]:
+// SetSetDragCursor sets the [SVGEditor.SetDragCursor]:
 // has dragging cursor been set yet?
-func (t *Editor) SetSetDragCursor(v bool) *Editor {
+func (t *SVGEditor) SetSetDragCursor(v bool) *SVGEditor {
 	t.SetDragCursor = v
 	return t
 }
 
-// SetTooltip sets the [Editor.Tooltip]
-func (t *Editor) SetTooltip(v string) *Editor {
+// SetTooltip sets the [SVGEditor.Tooltip]
+func (t *SVGEditor) SetTooltip(v string) *SVGEditor {
 	t.Tooltip = v
 	return t
 }
 
-// SetClass sets the [Editor.Class]
-func (t *Editor) SetClass(v string) *Editor {
+// SetClass sets the [SVGEditor.Class]
+func (t *SVGEditor) SetClass(v string) *SVGEditor {
 	t.Class = v
 	return t
 }
 
-// SetPriorityEvents sets the [Editor.PriorityEvents]
-func (t *Editor) SetPriorityEvents(v []events.Types) *Editor {
-	t.PriorityEvents = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Editor.CustomContextMenu]
-func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
+// SetCustomContextMenu sets the [SVGEditor.CustomContextMenu]
+func (t *SVGEditor) SetCustomContextMenu(v func(m *gi.Scene)) *SVGEditor {
 	t.CustomContextMenu = v
 	return t
 }
@@ -1979,12 +1876,6 @@ func (t *TableView) SetTooltip(v string) *TableView {
 // SetClass sets the [TableView.Class]
 func (t *TableView) SetClass(v string) *TableView {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [TableView.PriorityEvents]
-func (t *TableView) SetPriorityEvents(v []events.Types) *TableView {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -2179,12 +2070,6 @@ func (t *TimeView) SetClass(v string) *TimeView {
 	return t
 }
 
-// SetPriorityEvents sets the [TimeView.PriorityEvents]
-func (t *TimeView) SetPriorityEvents(v []events.Types) *TimeView {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [TimeView.CustomContextMenu]
 func (t *TimeView) SetCustomContextMenu(v func(m *gi.Scene)) *TimeView {
 	t.CustomContextMenu = v
@@ -2263,12 +2148,6 @@ func (t *DateView) SetTooltip(v string) *DateView {
 // SetClass sets the [DateView.Class]
 func (t *DateView) SetClass(v string) *DateView {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [DateView.PriorityEvents]
-func (t *DateView) SetPriorityEvents(v []events.Types) *DateView {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -2446,12 +2325,6 @@ func (t *TreeView) SetTooltip(v string) *TreeView {
 // SetClass sets the [TreeView.Class]
 func (t *TreeView) SetClass(v string) *TreeView {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [TreeView.PriorityEvents]
-func (t *TreeView) SetPriorityEvents(v []events.Types) *TreeView {
-	t.PriorityEvents = v
 	return t
 }
 

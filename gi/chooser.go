@@ -110,11 +110,12 @@ const (
 )
 
 func (ch *Chooser) OnInit() {
-	ch.HandleChooserEvents()
-	ch.ChooserStyles()
+	ch.WidgetBase.OnInit()
+	ch.HandleEvents()
+	ch.SetStyles()
 }
 
-func (ch *Chooser) ChooserStyles() {
+func (ch *Chooser) SetStyles() {
 	ch.Icon = icons.None
 	ch.Indicator = icons.KeyboardArrowDown
 	ch.Style(func(s *styles.Style) {
@@ -640,14 +641,10 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	}
 }
 
-func (ch *Chooser) HandleChooserEvents() {
-	ch.HandleWidgetEvents()
+func (ch *Chooser) HandleEvents() {
 	ch.HandleSelectToggle()
-	ch.HandleClickMenu()
-	ch.HandleChooserKeys()
-}
+	ch.HandleKeys()
 
-func (ch *Chooser) HandleClickMenu() {
 	ch.OnClick(func(e events.Event) {
 		if ch.OpenMenu(e) {
 			e.SetHandled()
@@ -672,7 +669,7 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 	return true
 }
 
-func (ch *Chooser) HandleChooserKeys() {
+func (ch *Chooser) HandleKeys() {
 	ch.OnKeyChord(func(e events.Event) {
 		if KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())

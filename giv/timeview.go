@@ -40,6 +40,10 @@ type TimeView struct {
 	PM bool `set:"-"`
 }
 
+func (tv *TimeView) OnInit() {
+	tv.Frame.OnInit()
+}
+
 // SetTime sets the source time and updates the view
 func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	updt := tv.UpdateStart()
@@ -57,10 +61,6 @@ func (tv *TimeView) ConfigWidget() {
 		return
 	}
 	updt := tv.UpdateStart()
-
-	// tv.Style(func(s *styles.Style) {
-	//
-	// })
 
 	hour := gi.NewTextField(tv, "hour")
 	if gi.Prefs.Clock24 {
@@ -170,6 +170,10 @@ type DateView struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
+}
+
+func (dv *DateView) OnInit() {
+	dv.Frame.OnInit()
 }
 
 // SetTime sets the source time and updates the view

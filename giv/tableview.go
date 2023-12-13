@@ -69,17 +69,17 @@ var _ SliceViewer = (*TableView)(nil)
 type TableViewStyleFunc func(w gi.Widget, s *styles.Style, row, col int)
 
 func (tv *TableView) OnInit() {
-	tv.TableViewInit()
+	tv.Frame.OnInit()
+	tv.SliceViewBase.HandleEvents()
+	tv.SetStyles()
 }
 
-func (tv *TableView) TableViewInit() {
+func (tv *TableView) SetStyles() {
 	tv.SortIdx = -1
 	tv.MinRows = 4
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.SetFlag(true, SliceViewShowIndex)
 	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
-
-	tv.HandleSliceViewEvents()
 
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)

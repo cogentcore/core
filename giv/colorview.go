@@ -63,12 +63,18 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 	return cv
 }
 
+func (cv *ColorView) OnInit() {
+	cv.Frame.OnInit()
+}
+
 // Config configures a standard setup of entire view
 func (cv *ColorView) ConfigWidget() {
 	if cv.HasChildren() {
 		return
 	}
 	updt := cv.UpdateStart()
+	defer cv.UpdateEndRender(updt)
+
 	cv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
@@ -127,7 +133,6 @@ func (cv *ColorView) ConfigWidget() {
 		}
 	})
 
-	cv.UpdateEnd(updt)
 }
 
 /*

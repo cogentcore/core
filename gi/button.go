@@ -8,11 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"log/slog" // [view: -] signal for Spell -- see SpellSignals for the types
-	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
-
-	// [view: -] signal for Spell -- see SpellSignals for the types
-	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
+	"log/slog"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
@@ -57,11 +53,8 @@ type Button struct { //goki:embedder
 	// The constructor function should add buttons to the scene that it is passed.
 	Menu func(m *Scene)
 
-	// optional data that is sent with events to identify the button
+	// optional data that can be used for event handling
 	Data any `json:"-" xml:"-" view:"-"`
-
-	// optional function that is called to update state of button (typically updating ); called automatically for menus prior to showing
-	UpdateFunc func() `json:"-" xml:"-"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
@@ -136,11 +129,12 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.HandleButtonEvents()
-	bt.ButtonStyles()
+	bt.WidgetBase.OnInit()
+	bt.HandleEvents()
+	bt.SetStyles()
 }
 
-func (bt *Button) ButtonStyles() {
+func (bt *Button) SetStyles() {
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
@@ -394,11 +388,6 @@ func (bt *Button) ShowContextMenu(e events.Event) {
 }
 
 func (bt *Button) HandleClickMenu() {
-	bt.OnClick(func(e events.Event) {
-		if bt.OpenMenu(e) {
-			e.SetHandled()
-		}
-	})
 }
 
 func (bt *Button) HandleClickDismissMenu() {
@@ -456,11 +445,14 @@ func (bt *Button) HandleLongHoverTooltip() {
 	})
 }
 
-func (bt *Button) HandleButtonEvents() {
-	bt.HandleWidgetEvents()
-	bt.HandleLongHoverTooltip()
-	bt.HandleClickMenu()
+func (bt *Button) HandleEvents() {
+	bt.HandleLongHoverTooltip() // our own version adds the shortcut
 	bt.HandleClickOnEnterSpace()
+	bt.OnClick(func(e events.Event) {
+		if bt.OpenMenu(e) {
+			e.SetHandled()
+		}
+	})
 }
 
 func (bt *Button) ConfigWidget() {
@@ -574,13 +566,6 @@ func (bt *Button) Render() {
 		bt.RenderButton()
 		bt.RenderParts()
 		bt.PopBounds()
-	}
-}
-
-// UpdateButtons calls UpdateFunc on me and any of my menu items
-func (bt *Button) UpdateButtons() {
-	if bt.UpdateFunc != nil {
-		bt.UpdateFunc()
 	}
 }
 

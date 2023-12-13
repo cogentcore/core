@@ -7,6 +7,7 @@ package giv
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -28,23 +29,20 @@ func KeyMapsView(km *keyfun.Maps) {
 
 	d.Sc.Data = km // todo: needed?
 	d.AddAppBar(func(tb *gi.Toolbar) {
-		sp := NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save)
-		sp.SetUpdateFunc(func() {
-			sp.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps)
-		})
+		NewFuncButton(tb, km.SavePrefs).SetText("Save to preferences").SetIcon(icons.Save).SetKey(keyfun.Save).
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(keyfun.AvailMapsChanged && km == &keyfun.AvailMaps) })
 		oj := NewFuncButton(tb, km.Open).SetText("Open from file").SetIcon(icons.Open).SetKey(keyfun.Open)
 		oj.Args[0].SetTag("ext", ".json")
 		sj := NewFuncButton(tb, km.Save).SetText("Save to file").SetIcon(icons.SaveAs).SetKey(keyfun.SaveAs)
 		sj.Args[0].SetTag("ext", ".json")
 		gi.NewSeparator(tb)
-		vs := NewFuncButton(tb, ViewStdKeyMaps).SetConfirm(true).SetText("View standard").SetIcon(icons.Visibility)
-		vs.SetUpdateFunc(func() {
-			vs.SetEnabledUpdt(km != &keyfun.StdMaps)
-		})
-		rs := NewFuncButton(tb, km.RevertToStd).SetConfirm(true).SetText("Revert to standard").SetIcon(icons.DeviceReset)
-		rs.SetUpdateFunc(func() {
-			rs.SetEnabledUpdt(km != &keyfun.StdMaps)
-		})
+		NewFuncButton(tb, ViewStdKeyMaps).SetConfirm(true).
+			SetText("View standard").SetIcon(icons.Visibility).
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(km != &keyfun.StdMaps) })
+
+		NewFuncButton(tb, km.RevertToStd).SetConfirm(true).
+			SetText("Revert to standard").SetIcon(icons.DeviceReset).
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(km != &keyfun.StdMaps) })
 		NewFuncButton(tb, km.MarkdownDoc).SetIcon(icons.Document).
 			SetShowReturn(true).SetShowReturnAsDialog(true)
 		tb.AddOverflowMenu(func(m *gi.Scene) {

@@ -204,8 +204,8 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	}
 }
 
-// HandleWidgetEvents adds the default events for Widget objects.
-func (wb *WidgetBase) HandleWidgetEvents() {
+// HandleEvents sets the default WidgetBase event handlers
+func (wb *WidgetBase) HandleEvents() {
 	wb.HandleWidgetClick()
 	wb.HandleWidgetStateFromMouse()
 	wb.HandleLongHoverTooltip()
@@ -399,7 +399,8 @@ func (wb *WidgetBase) HandleWidgetMagnify() {
 }
 
 // HandleClickOnEnterSpace adds key event handler for Enter or Space
-// to generate a Click action
+// to generate a Click action.  This is not added by default,
+// but is added in Button and Switch Widgets for example.
 func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	wb.OnKeyChord(func(e events.Event) {
 		if KeyEventTrace {

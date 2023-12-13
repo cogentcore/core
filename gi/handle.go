@@ -17,7 +17,7 @@ import (
 // Handle represents a draggable handle that can be
 // used to control the size of an element.
 type Handle struct {
-	Frame
+	Box
 
 	// dimension along which the handle slides (opposite of the dimension it is longest on)
 	Dim mat32.Dims
@@ -34,11 +34,12 @@ type Handle struct {
 }
 
 func (hl *Handle) OnInit() {
+	hl.WidgetBase.OnInit()
 	hl.HandleEvents()
-	hl.HandleStyles()
+	hl.SetStyles()
 }
 
-func (hl *Handle) HandleStyles() {
+func (hl *Handle) SetStyles() {
 	hl.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Pressable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 

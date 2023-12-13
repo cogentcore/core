@@ -12,11 +12,9 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// todo: this should just create an SVG as first child?
-
-// Editor supports editing of SVG elements
-type Editor struct {
-	gi.WidgetBase
+// SVGEditor supports editing of SVG elements
+type SVGEditor struct {
+	gi.SVG
 
 	// view translation offset (from dragging)
 	Trans mat32.Vec2
@@ -28,21 +26,21 @@ type Editor struct {
 	SetDragCursor bool `view:"-"`
 }
 
-func (sve *Editor) CopyFieldsFrom(frm any) {
-	fr := frm.(*Editor)
+func (sve *SVGEditor) CopyFieldsFrom(frm any) {
+	fr := frm.(*SVGEditor)
 	// g.SVG.CopyFieldsFrom(&fr.SVG)
 	sve.Trans = fr.Trans
 	sve.Scale = fr.Scale
 	sve.SetDragCursor = fr.SetDragCursor
 }
 
-func (sve *Editor) OnInit() {
+func (sve *SVGEditor) OnInit() {
+	sve.SVG.OnInit()
 	// todo: abilities include draggable
-	sve.HandleEditorEvents()
+	sve.HandleEvents()
 }
 
-// HandleEditorEvents handles svg editing events
-func (sve *Editor) HandleEditorEvents() {
+func (sve *SVGEditor) HandleEvents() {
 	sve.On(events.DragMove, func(e events.Event) {
 		e.SetHandled()
 		del := e.PrevDelta()
@@ -87,7 +85,7 @@ func (sve *Editor) HandleEditorEvents() {
 }
 
 // InitScale ensures that Scale is initialized and non-zero
-func (sve *Editor) InitScale() {
+func (sve *SVGEditor) InitScale() {
 	if sve.Scale == 0 {
 		mvp := sve.Sc
 		if mvp != nil {
@@ -99,12 +97,12 @@ func (sve *Editor) InitScale() {
 }
 
 // SetTransform sets the transform based on Trans and Scale values
-func (sve *Editor) SetTransform() {
+func (sve *SVGEditor) SetTransform() {
 	sve.InitScale()
 	sve.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", sve.Trans.X, sve.Trans.Y, sve.Scale, sve.Scale))
 }
 
-func (sve *Editor) Render() {
+func (sve *SVGEditor) Render() {
 	if sve.PushBounds() {
 		// rs := &sve.Render
 		// if sve.Fill {

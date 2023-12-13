@@ -191,8 +191,9 @@ func (tv *TreeView) RootSetViewIdx() int {
 }
 
 func (tv *TreeView) OnInit() {
-	tv.HandleTreeViewEvents()
-	tv.TreeViewStyles()
+	tv.WidgetBase.OnInit()
+	tv.HandleEvents()
+	tv.SetStyles()
 }
 
 func (tv *TreeView) OnAdd() {
@@ -205,7 +206,7 @@ func (tv *TreeView) OnAdd() {
 	}
 }
 
-func (tv *TreeView) TreeViewStyles() {
+func (tv *TreeView) SetStyles() {
 	tvi := tv.This().(TreeViewer)
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.Draggable, abilities.Droppable)
@@ -1705,97 +1706,96 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 	return AsTreeView(tv.Par)
 }
 
-func (tv *TreeView) HandleTreeViewEvents() {
-	tv.HandleWidgetEvents()
+func (tv *TreeView) HandleEvents() {
+	tv.HandleMouse()
+	tv.HandleKeys()
+}
+
+func (tv *TreeView) HandleKeys() {
 	tv.On(events.KeyChord, func(e events.Event) {
-		tv.HandleTreeViewKeyChord(e)
-	})
-	tv.HandleTreeViewMouse()
-}
-
-func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
-	if gi.KeyEventTrace {
-		fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
-	}
-	kf := keyfun.Of(kt.KeyChord())
-	selMode := events.SelectModeBits(kt.Modifiers())
-
-	if selMode == events.SelectOne {
-		if tv.SelectMode() {
-			selMode = events.ExtendContinuous
+		if gi.KeyEventTrace {
+			fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
 		}
-	}
+		kf := keyfun.Of(e.KeyChord())
+		selMode := events.SelectModeBits(e.Modifiers())
 
-	tvi := tv.This().(TreeViewer)
+		if selMode == events.SelectOne {
+			if tv.SelectMode() {
+				selMode = events.ExtendContinuous
+			}
+		}
 
-	// first all the keys that work for ReadOnly and active
-	switch kf {
-	case keyfun.CancelSelect:
-		tv.UnselectAll()
-		tv.SetSelectMode(false)
-		kt.SetHandled()
-	case keyfun.MoveRight:
-		tv.Open()
-		kt.SetHandled()
-	case keyfun.MoveLeft:
-		tv.Close()
-		kt.SetHandled()
-	case keyfun.MoveDown:
-		tv.MoveDownAction(selMode)
-		kt.SetHandled()
-	case keyfun.MoveUp:
-		tv.MoveUpAction(selMode)
-		kt.SetHandled()
-	case keyfun.PageUp:
-		tv.MovePageUpAction(selMode)
-		kt.SetHandled()
-	case keyfun.PageDown:
-		tv.MovePageDownAction(selMode)
-		kt.SetHandled()
-	case keyfun.Home:
-		tv.MoveHomeAction(selMode)
-		kt.SetHandled()
-	case keyfun.End:
-		tv.MoveEndAction(selMode)
-		kt.SetHandled()
-	case keyfun.SelectMode:
-		tv.SelectModeToggle()
-		kt.SetHandled()
-	case keyfun.SelectAll:
-		tv.SelectAll()
-		kt.SetHandled()
-	case keyfun.Enter:
-		tv.ToggleClose()
-		kt.SetHandled()
-	case keyfun.Copy:
-		tvi.Copy(true)
-		kt.SetHandled()
-	}
-	if !tv.RootIsReadOnly() && !kt.IsHandled() {
+		tvi := tv.This().(TreeViewer)
+
+		// first all the keys that work for ReadOnly and active
 		switch kf {
-		case keyfun.Delete:
-			tvi.DeleteNode()
-			kt.SetHandled()
-		case keyfun.Duplicate:
-			tvi.Duplicate()
-			kt.SetHandled()
-		case keyfun.Insert:
-			tvi.InsertBefore()
-			kt.SetHandled()
-		case keyfun.InsertAfter:
-			tvi.InsertAfter()
-			kt.SetHandled()
-		case keyfun.Cut:
-			tvi.Cut()
-			kt.SetHandled()
-		case keyfun.Paste:
-			tvi.Paste()
-			kt.SetHandled()
+		case keyfun.CancelSelect:
+			tv.UnselectAll()
+			tv.SetSelectMode(false)
+			e.SetHandled()
+		case keyfun.MoveRight:
+			tv.Open()
+			e.SetHandled()
+		case keyfun.MoveLeft:
+			tv.Close()
+			e.SetHandled()
+		case keyfun.MoveDown:
+			tv.MoveDownAction(selMode)
+			e.SetHandled()
+		case keyfun.MoveUp:
+			tv.MoveUpAction(selMode)
+			e.SetHandled()
+		case keyfun.PageUp:
+			tv.MovePageUpAction(selMode)
+			e.SetHandled()
+		case keyfun.PageDown:
+			tv.MovePageDownAction(selMode)
+			e.SetHandled()
+		case keyfun.Home:
+			tv.MoveHomeAction(selMode)
+			e.SetHandled()
+		case keyfun.End:
+			tv.MoveEndAction(selMode)
+			e.SetHandled()
+		case keyfun.SelectMode:
+			tv.SelectModeToggle()
+			e.SetHandled()
+		case keyfun.SelectAll:
+			tv.SelectAll()
+			e.SetHandled()
+		case keyfun.Enter:
+			tv.ToggleClose()
+			e.SetHandled()
+		case keyfun.Copy:
+			tvi.Copy(true)
+			e.SetHandled()
 		}
-	}
+		if !tv.RootIsReadOnly() && !e.IsHandled() {
+			switch kf {
+			case keyfun.Delete:
+				tvi.DeleteNode()
+				e.SetHandled()
+			case keyfun.Duplicate:
+				tvi.Duplicate()
+				e.SetHandled()
+			case keyfun.Insert:
+				tvi.InsertBefore()
+				e.SetHandled()
+			case keyfun.InsertAfter:
+				tvi.InsertAfter()
+				e.SetHandled()
+			case keyfun.Cut:
+				tvi.Cut()
+				e.SetHandled()
+			case keyfun.Paste:
+				tvi.Paste()
+				e.SetHandled()
+			}
+		}
+	})
 }
 
-func (tv *TreeView) HandleTreeViewMouse() {
+func (tv *TreeView) HandleMouse() {
 	// we let the parts handle our state
 	// so that we only get it when we are doing
 	// something with this treeview specifically,

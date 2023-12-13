@@ -18,13 +18,18 @@ var MenuTextSeparator = "-------------"
 
 // Separator draws a vertical or horizontal line
 type Separator struct {
-	Frame
+	Box
 
 	// Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)
 	Dim mat32.Dims
 }
 
 func (sp *Separator) OnInit() {
+	sp.WidgetBase.OnInit()
+	sp.SetStyles()
+}
+
+func (sp *Separator) SetStyles() {
 	// TODO: fix disappearing separator in menu
 	sp.Style(func(s *styles.Style) {
 		s.Align.Self = styles.Center
@@ -44,6 +49,6 @@ func (sp *Separator) OnInit() {
 
 func (sp *Separator) CopyFieldsFrom(frm any) {
 	fr := frm.(*Separator)
-	sp.Frame.CopyFieldsFrom(&fr.Frame)
+	sp.Box.CopyFieldsFrom(&fr.Box)
 	sp.Dim = fr.Dim
 }

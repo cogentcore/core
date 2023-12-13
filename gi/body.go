@@ -37,10 +37,10 @@ func NewBody(name ...string) *Body {
 
 func (bd *Body) OnInit() {
 	bd.Frame.OnInit()
-	bd.BodyStyles()
+	bd.SetStyles()
 }
 
-func (bd *Body) BodyStyles() {
+func (bd *Body) SetStyles() {
 	bd.Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column

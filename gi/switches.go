@@ -42,11 +42,11 @@ func (sw *Switches) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switches) OnInit() {
-	sw.HandleWidgetEvents()
-	sw.SwitchesStyles()
+	sw.Frame.OnInit()
+	sw.SetStyles()
 }
 
-func (sw *Switches) SwitchesStyles() {
+func (sw *Switches) SetStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))

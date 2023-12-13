@@ -53,10 +53,11 @@ type MapView struct {
 }
 
 func (mv *MapView) OnInit() {
-	mv.MapViewStyles()
+	mv.Frame.OnInit()
+	mv.SetStyles()
 }
 
-func (mv *MapView) MapViewStyles() {
+func (mv *MapView) SetStyles() {
 	mv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

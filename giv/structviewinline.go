@@ -18,7 +18,7 @@ import (
 // StructViewInline represents a struct as a single line widget,
 // for smaller structs and those explicitly marked inline.
 type StructViewInline struct {
-	gi.Frame
+	gi.Layout
 
 	// the struct that we are a view onto
 	Struct any `set:"-"`
@@ -46,12 +46,14 @@ type StructViewInline struct {
 }
 
 func (sv *StructViewInline) OnInit() {
-	sv.StructViewInlineStyles()
+	sv.Layout.OnInit()
+	sv.SetStyles()
 }
 
-func (sv *StructViewInline) StructViewInlineStyles() {
-	// sv.Style(func(s *styles.Style) {
-	// })
+func (sv *StructViewInline) SetStyles() {
+	sv.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+	})
 }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
@@ -173,11 +175,3 @@ func (sv *StructViewInline) UpdateFieldAction() {
 		sv.UpdateEndRender(updt)
 	}
 }
-
-// func (sv *StructViewInline) SizeUp() {
-// 	updt := sv.ConfigStruct()
-// 	if updt {
-// 		sv.ApplyStyleTree()
-// 	}
-// 	sv.Frame.SizeUp()
-// }

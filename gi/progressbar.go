@@ -38,6 +38,11 @@ func (pb *ProgressBar) CopyFieldsFrom(frm any) {
 }
 
 func (pb *ProgressBar) OnInit() {
+	pb.WidgetBase.OnInit()
+	pb.SetStyles()
+}
+
+func (pb *ProgressBar) SetStyles() {
 	pb.Type = SliderScrollbar
 	pb.Dim = mat32.X
 	pb.ThumbSize.Set(1, 1)
@@ -48,11 +53,6 @@ func (pb *ProgressBar) OnInit() {
 	pb.Prec = 9
 	pb.SetReadOnly(true)
 
-	pb.HandleWidgetEvents()
-	pb.ProgressBarStyles()
-}
-
-func (pb *ProgressBar) ProgressBarStyles() {
 	pb.Style(func(s *styles.Style) {
 		pb.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 		pb.ThumbColor.SetSolid(colors.Scheme.Primary.Base)

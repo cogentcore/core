@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"slices"
+
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -52,6 +54,16 @@ func (wb *WidgetBase) Style(s func(s *styles.Style)) *WidgetBase {
 	return wb
 }
 
+// StyleFirst inserts the given styler at the start of the widget's stylers,
+// ensuring that it is run first, before even the WidgetBase default styler.
+// This is useful for any functions that update widget state flags
+// based on other variables, so that these are reflected in the base styling
+// function that updates styles based on state.
+func (wb *WidgetBase) StyleFirst(s func(s *styles.Style)) *WidgetBase {
+	wb.Stylers = slices.Insert(wb.Stylers, 0, s)
+	return wb
+}
+
 // StyleRLock does a read-lock for reading the style
 func (wb *WidgetBase) StyleRLock() {
 	wb.StyMu.RLock()
@@ -92,7 +104,6 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	if pwb != nil {
 		wb.Styles.InheritFields(&pwb.Styles)
 	}
-	wb.DefaultStyleWidget()
 	wb.RunStylers()
 	wb.ApplyStylePrefs()
 
@@ -126,37 +137,42 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	s.Font.Family = string(Prefs.FontFamily)
 }
 
-// DefaultStyleWidget applies the base, widget-universal default
-// styles to the widget. It is called automatically in [ApplyStyleWidget]
-// and should not need to be called by end-user code.
-func (wb *WidgetBase) DefaultStyleWidget() {
-	s := &wb.Styles
+// SetStyles sets the base, widget-universal default
+// style function that applies to all widgets.
+// It is added and called first in the styling order.
+// Because it handles default styling in response to
+// State flags such as Disabled and Selected, these state
+// flags must be set prior to calling this.
+// Use [StyleFirst] to add a function that is called prior to
+// this, to update state flags.
+func (wb *WidgetBase) SetStyles() {
+	wb.Style(func(s *styles.Style) {
+		fsz := Prefs.FontSize / 100
+		s.Font.Size.Val *= fsz
+		s.Text.LineHeight.Val *= fsz
 
-	fsz := Prefs.FontSize / 100
-	s.Font.Size.Val *= fsz
-	s.Text.LineHeight.Val *= fsz
+		s.MaxBorder.Style.Set(styles.BorderSolid)
+		s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
+		s.MaxBorder.Width.Set(units.Dp(1))
 
-	s.MaxBorder.Style.Set(styles.BorderSolid)
-	s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
-	s.MaxBorder.Width.Set(units.Dp(1))
+		// if we are disabled, we do not react to any state changes,
+		// and instead always have the same gray colors
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
+			s.Opacity = 0.38
+			return
+		}
+		// TODO(kai): what about context menus on mobile?
+		s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable, abilities.LongPressable)
 
-	// if we are disabled, we do not react to any state changes,
-	// and instead always have the same gray colors
-	if s.Is(states.Disabled) {
-		s.Cursor = cursors.NotAllowed
-		s.Opacity = 0.38
-		return
-	}
-	// TODO(kai): what about context menus on mobile?
-	s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable, abilities.LongPressable)
-
-	if s.Is(states.Focused) {
-		s.Border = s.MaxBorder
-	}
-	if s.Is(states.Selected) {
-		s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		s.Color = colors.Scheme.Select.OnContainer
-	}
+		if s.Is(states.Focused) {
+			s.Border = s.MaxBorder
+		}
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			s.Color = colors.Scheme.Select.OnContainer
+		}
+	})
 }
 
 // RunStylers runs the style functions specified in
@@ -185,6 +201,9 @@ func (wb *WidgetBase) ApplyStylePrefs() {
 	s.Gap.Y.Val *= spc
 }
 
+// ApplyStyleUpdate calls ApplyStyleTree within an UpdateRender block.
+// This is the main call needed to ensure that state-sensitive styling
+// is updated, when state changes.
 func (wb *WidgetBase) ApplyStyleUpdate() {
 	updt := wb.UpdateStart()
 	wb.ApplyStyleTree()

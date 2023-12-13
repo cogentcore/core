@@ -123,11 +123,12 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 }
 
 func (ly *Layout) OnInit() {
-	ly.LayoutStyles()
-	ly.HandleLayoutEvents()
+	ly.WidgetBase.OnInit()
+	ly.SetStyles()
+	ly.HandleEvents()
 }
 
-func (ly *Layout) LayoutStyles() {
+func (ly *Layout) SetStyles() {
 	ly.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		// we never want borders on layouts
@@ -291,108 +292,105 @@ func (ly *Layout) ClosePopup() bool {
 	return true
 }
 
-func (ly *Layout) HandleLayoutEvents() {
-	ly.HandleWidgetEvents()
-	ly.HandleLayoutKeys()
-	ly.HandleLayoutScrollEvents()
-}
-
-// HandleLayoutKeys handles all key events for navigating focus within a Layout
-// Typically this is done by the parent Scene level layout, but can be
-// done by default if FocusWithinable Ability is set.
-func (ly *Layout) HandleLayoutKeys() {
-	ly.OnKeyChord(func(e events.Event) {
-		ly.LayoutKeysImpl(e)
+func (ly *Layout) HandleEvents() {
+	ly.HandleKeys()
+	ly.On(events.Scroll, func(e events.Event) {
+		// fmt.Println(ly, "scroll event", e)
+		ly.ScrollDelta(e)
 	})
 }
 
-// LayoutKeys is key processing for layouts -- focus name and arrow keys
-func (ly *Layout) LayoutKeysImpl(e events.Event) {
-	if ly.Is(LayoutNoKeys) {
-		return
-	}
-	if KeyEventTrace {
-		fmt.Println("Layout KeyInput:", ly)
-	}
-	kf := keyfun.Of(e.KeyChord())
-	if kf == keyfun.Abort {
-		if ly.ClosePopup() {
-			e.SetHandled()
+// HandleKeys handles all key events for navigating focus within a Layout.
+// Typically this is done by the parent Scene level layout, but can be
+// done by default if FocusWithinable Ability is set.
+func (ly *Layout) HandleKeys() {
+	ly.OnKeyChord(func(e events.Event) {
+		if ly.Is(LayoutNoKeys) {
+			return
 		}
-		return
-	}
-	em := ly.EventMgr()
-	if em == nil {
-		return
-	}
-	switch kf {
-	case keyfun.FocusNext: // tab
-		if em.FocusNext() {
-			// fmt.Println("foc next", ly, ly.EventMgr().Focus)
-			e.SetHandled()
+		if KeyEventTrace {
+			fmt.Println("Layout KeyInput:", ly)
 		}
-		return
-	case keyfun.FocusPrev: // shift-tab
-		if em.FocusPrev() {
-			// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
-			e.SetHandled()
+		kf := keyfun.Of(e.KeyChord())
+		if kf == keyfun.Abort {
+			if ly.ClosePopup() {
+				e.SetHandled()
+			}
+			return
 		}
-		return
-	}
-	grid := ly.Styles.Display == styles.Grid
-	if ly.Styles.Direction == styles.Row || grid {
+		em := ly.EventMgr()
+		if em == nil {
+			return
+		}
 		switch kf {
-		case keyfun.MoveRight:
-			if ly.FocusNextChild(false) {
+		case keyfun.FocusNext: // tab
+			if em.FocusNext() {
+				// fmt.Println("foc next", ly, ly.EventMgr().Focus)
 				e.SetHandled()
 			}
 			return
-		case keyfun.MoveLeft:
-			if ly.FocusPrevChild(false) {
-				e.SetHandled()
-			}
-			return
-		}
-	}
-	if ly.Styles.Direction == styles.Column || grid {
-		switch kf {
-		case keyfun.MoveDown:
-			if ly.FocusNextChild(true) {
-				e.SetHandled()
-			}
-			return
-		case keyfun.MoveUp:
-			if ly.FocusPrevChild(true) {
-				e.SetHandled()
-			}
-			return
-		case keyfun.PageDown:
-			proc := false
-			for st := 0; st < LayoutPageSteps; st++ {
-				if !ly.FocusNextChild(true) {
-					break
-				}
-				proc = true
-			}
-			if proc {
-				e.SetHandled()
-			}
-			return
-		case keyfun.PageUp:
-			proc := false
-			for st := 0; st < LayoutPageSteps; st++ {
-				if !ly.FocusPrevChild(true) {
-					break
-				}
-				proc = true
-			}
-			if proc {
+		case keyfun.FocusPrev: // shift-tab
+			if em.FocusPrev() {
+				// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
 				e.SetHandled()
 			}
 			return
 		}
-	}
-	ly.FocusOnName(e)
+		grid := ly.Styles.Display == styles.Grid
+		if ly.Styles.Direction == styles.Row || grid {
+			switch kf {
+			case keyfun.MoveRight:
+				if ly.FocusNextChild(false) {
+					e.SetHandled()
+				}
+				return
+			case keyfun.MoveLeft:
+				if ly.FocusPrevChild(false) {
+					e.SetHandled()
+				}
+				return
+			}
+		}
+		if ly.Styles.Direction == styles.Column || grid {
+			switch kf {
+			case keyfun.MoveDown:
+				if ly.FocusNextChild(true) {
+					e.SetHandled()
+				}
+				return
+			case keyfun.MoveUp:
+				if ly.FocusPrevChild(true) {
+					e.SetHandled()
+				}
+				return
+			case keyfun.PageDown:
+				proc := false
+				for st := 0; st < LayoutPageSteps; st++ {
+					if !ly.FocusNextChild(true) {
+						break
+					}
+					proc = true
+				}
+				if proc {
+					e.SetHandled()
+				}
+				return
+			case keyfun.PageUp:
+				proc := false
+				for st := 0; st < LayoutPageSteps; st++ {
+					if !ly.FocusPrevChild(true) {
+						break
+					}
+					proc = true
+				}
+				if proc {
+					e.SetHandled()
+				}
+				return
+			}
+		}
+		ly.FocusOnName(e)
+	})
 }
 
 // FocusOnName processes key events to look for an element starting with given name
@@ -481,28 +479,6 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 	return nil, false
 }
 
-// HandleLayoutScrollEvents registers scrolling-related mouse events processed by
-// Layout -- most subclasses of Layout will want these..
-func (ly *Layout) HandleLayoutScrollEvents() {
-	ly.On(events.Scroll, func(e events.Event) {
-		// fmt.Println(ly, "scroll event", e)
-		ly.ScrollDelta(e)
-	})
-	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	// we.AddFunc(events.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	me := d.(*dnd.Event)
-	// 	li := AsLayout(recv)
-	// 	li.AutoScroll(me.Pos())
-	// })
-	// we.AddFunc(events.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	me := d.(events.Event)
-	// 	li := AsLayout(recv)
-	// 	if li.Sc.Type == ScMenu {
-	// 		li.AutoScroll(me.Pos())
-	// 	}
-	// })
-}
-
 ///////////////////////////////////////////////////////////
 //    Stretch and Space -- dummy elements for layouts
 
@@ -514,6 +490,8 @@ type Stretch struct {
 }
 
 func (st *Stretch) OnInit() {
+	st.WidgetBase.SetStyles()
+	// note: not getting base events
 	st.Style(func(s *styles.Style) {
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
@@ -533,6 +511,8 @@ type Space struct {
 }
 
 func (sp *Space) OnInit() {
+	sp.WidgetBase.SetStyles()
+	// note: not getting base events
 	sp.Style(func(s *styles.Style) {
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)

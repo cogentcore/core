@@ -163,11 +163,12 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) OnInit() {
 	sc.Sc = sc
-	sc.SceneStyles()
-	sc.HandleLayoutEvents()
+	sc.WidgetBase.OnInit()
+	sc.SetStyles()
+	sc.Layout.HandleEvents()
 }
 
-func (sc *Scene) SceneStyles() {
+func (sc *Scene) SetStyles() {
 	sc.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		s.Cursor = cursors.Arrow

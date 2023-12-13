@@ -81,11 +81,12 @@ type FileView struct {
 }
 
 func (fv *FileView) OnInit() {
-	fv.HandleFileViewEvents()
-	fv.FileViewStyles()
+	fv.Frame.OnInit()
+	fv.HandleEvents()
+	fv.SetStyles()
 }
 
-func (fv *FileView) FileViewStyles() {
+func (fv *FileView) SetStyles() {
 	fv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -765,7 +766,7 @@ func (fv *FileView) ApplyStyle() {
 	sf.StartFocus() // need to call this when window is actually active
 }
 
-func (fv *FileView) HandleFileViewEvents() {
+func (fv *FileView) HandleEvents() {
 	fv.OnKeyChord(func(e events.Event) {
 		fv.KeyInput(e)
 	})

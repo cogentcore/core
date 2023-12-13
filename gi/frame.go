@@ -32,11 +32,11 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 }
 
 func (fr *Frame) OnInit() {
-	fr.HandleLayoutEvents()
-	fr.FrameStyles()
+	fr.Layout.HandleEvents()
+	fr.SetStyles()
 }
 
-func (fr *Frame) FrameStyles() {
+func (fr *Frame) SetStyles() {
 	fr.Style(func(s *styles.Style) {
 		// note: using Pressable here so we get clicks, but don't change to Active state.
 		// getting clicks allows us to clear focus on click.

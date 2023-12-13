@@ -66,8 +66,9 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switch) OnInit() {
-	sw.HandleSwitchEvents()
-	sw.SwitchStyles()
+	sw.WidgetBase.OnInit()
+	sw.HandleEvents()
+	sw.SetStyles()
 }
 
 // IsChecked tests if this switch is checked
@@ -107,9 +108,8 @@ func (sw *Switch) SetIconFromState() {
 	}
 }
 
-func (sw *Switch) HandleSwitchEvents() {
-	sw.HandleWidgetEvents()
-	sw.HandleSelectToggle()
+func (sw *Switch) HandleEvents() {
+	sw.HandleSelectToggle() // on widgetbase
 	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
 		e.SetHandled()
@@ -121,7 +121,7 @@ func (sw *Switch) HandleSwitchEvents() {
 	})
 }
 
-func (sw *Switch) SwitchStyles() {
+func (sw *Switch) SetStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		if !sw.IsReadOnly() {

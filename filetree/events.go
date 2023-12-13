@@ -18,8 +18,7 @@ import (
 	"goki.dev/vci/v2"
 )
 
-func (fn *Node) HandleFileNodeEvents() {
-	fn.HandleTreeViewEvents()
+func (fn *Node) HandleEvents() {
 	fn.On(events.KeyChord, func(e events.Event) {
 		kt := e.(*events.Key)
 		fn.KeyInput(kt)
@@ -59,9 +58,6 @@ func (fn *Node) KeyInput(kt events.Event) {
 			giv.CallFunc(fn, fn.NewFolder)
 			kt.SetHandled()
 		}
-	}
-	if !kt.IsHandled() {
-		fn.HandleTreeViewKeyChord(kt)
 	}
 }
 

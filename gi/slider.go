@@ -152,6 +152,12 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 }
 
 func (sr *Slider) OnInit() {
+	sr.WidgetBase.OnInit()
+	sr.HandleEvents()
+	sr.SetStyles()
+}
+
+func (sr *Slider) SetStyles() {
 	sr.Max = 1.0
 	sr.VisiblePct = 1
 	sr.Step = 0.1
@@ -159,11 +165,6 @@ func (sr *Slider) OnInit() {
 	sr.Prec = 9
 	sr.ThumbSize.Set(1, 1)
 	sr.TrackSize = 0.5
-	sr.HandleSliderEvents()
-	sr.SliderStyles()
-}
-
-func (sr *Slider) SliderStyles() {
 	sr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
@@ -390,6 +391,11 @@ func (sr *Slider) SetValueAction(val float32) {
 ///////////////////////////////////////////////////////////
 // 	Events
 
+func (sr *Slider) HandleEvents() {
+	sr.HandleMouse()
+	sr.HandleKeys()
+}
+
 // PointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
@@ -399,7 +405,7 @@ func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Dim)
 }
 
-func (sr *Slider) HandleSliderMouse() {
+func (sr *Slider) HandleMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
 		pos := sr.PointToRelPos(e.LocalPos())
 		sr.SetSliderPosAction(pos)
@@ -431,7 +437,7 @@ func (sr *Slider) HandleSliderMouse() {
 	})
 }
 
-func (sr *Slider) HandleSliderKeys() {
+func (sr *Slider) HandleKeys() {
 	sr.OnKeyChord(func(e events.Event) {
 		if KeyEventTrace {
 			fmt.Printf("SliderBase KeyInput: %v\n", sr.Path())
@@ -470,12 +476,6 @@ func (sr *Slider) HandleSliderKeys() {
 			e.SetHandled()
 		}
 	})
-}
-
-func (sr *Slider) HandleSliderEvents() {
-	sr.HandleWidgetEvents()
-	sr.HandleSliderMouse()
-	sr.HandleSliderKeys()
 }
 
 ///////////////////////////////////////////////////////////
