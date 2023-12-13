@@ -53,10 +53,13 @@ func (st *Stage) RunPopup() *Stage {
 
 	maxSz := msc.SceneGeom.Size
 
+	// original size and position, which is that of the context widget / location for a tooltip
+	osz := sc.SceneGeom.Size
+	opos := sc.SceneGeom.Pos
+
 	sc.SceneGeom.Size = maxSz
 	sc.SceneGeom.Pos = st.Pos
 	sz := sc.PrefSize(maxSz)
-	// fmt.Println(sz, maxSz)
 	scrollWd := int(sc.Styles.ScrollBarWidth.Dots)
 	fontHt := 16
 	if sc.Styles.Font.Face != nil {
@@ -77,23 +80,21 @@ func (st *Stage) RunPopup() *Stage {
 		// get enough space to fit plus 10 extra pixels of margin
 		sc.SceneGeom.Pos.Y = b.Max.Y - sz.Y - 10
 	case TooltipStage:
-		// on x axis, we center on the widget widget
-		// on y axis, we put our bottom 10 above the top of the widget
-		wb := st.Context.AsWidget()
-		bb := wb.WinBBox()
-		wc := bb.Min.X + bb.Size().X/2
+		// on x axis, we center on the original (widget) position
+		// on y axis, we put our bottom 10 above the top of the original (widget) position
+		wc := opos.X + osz.X/2
 		sc.SceneGeom.Pos.X = wc - sz.X/2
 
 		// default to tooltip above element
-		ypos := bb.Min.Y - sz.Y - 10
+		ypos := opos.Y - sz.Y - 10
 		if ypos < 0 {
 			ypos = 0
 		}
 		// however, if we are within 10 pixels of the element,
 		// we put the tooltip below it instead of above it
 		maxy := ypos + sz.Y
-		if maxy > bb.Min.Y-10 {
-			ypos = bb.Max.Y + 10
+		if maxy > opos.Y-10 {
+			ypos = opos.Add(osz).Y + 10
 		}
 		sc.SceneGeom.Pos.Y = ypos
 	}
