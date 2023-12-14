@@ -12,7 +12,7 @@ import (
 
 	"testing"
 
-	. "github.com/srwiley/rasterx"
+	. "goki.dev/girl/rasterx"
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/math/fixed"
 )
@@ -330,14 +330,14 @@ func TestGeom(t *testing.T) {
 }
 
 func TestToLength(t *testing.T) {
-        p := fixed.Point26_6{X: 2, Y: -2}
-        ln := fixed.I(40)
+	p := fixed.Point26_6{X: 2, Y: -2}
+	ln := fixed.I(40)
 
-        q := ToLength(p, ln)
-        expected := fixed.Point26_6{X: 1810, Y: -1810}
-        if q != expected {
-                t.Error("wrong point", q)
-        }
+	q := ToLength(p, ln)
+	expected := fixed.Point26_6{X: 1810, Y: -1810}
+	if q != expected {
+		t.Error("wrong point", q)
+	}
 }
 
 func TestShapes(t *testing.T) {
