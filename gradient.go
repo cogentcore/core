@@ -149,21 +149,6 @@ func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
 	}
 }
 
-// Points returns the points of the gradient as an array of 5 floats.
-// If the gradient is radial, the points are of the form:
-//
-//	[cx, cy, fx, fy, r]
-//
-// If the gradient is linear, the points are of the form:
-//
-//	[x1, y1, x2, y2, 0]
-func (g *Gradient) Points() [5]float64 {
-	if g.Radial {
-		return [5]float64{float64(g.Center.X), float64(g.Center.Y), float64(g.Focal.X), float64(g.Focal.Y), float64(g.Radius)}
-	}
-	return [5]float64{float64(g.Bounds.Min.X), float64(g.Bounds.Min.Y), float64(g.Bounds.Max.X), float64(g.Bounds.Max.Y), 0}
-}
-
 // RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
 // the given opacity and bounds.
 func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
@@ -306,17 +291,17 @@ func (g *Gradient) blendStops(t, opacity float64, s1, s2 GradStop, flip bool) co
 }
 
 // GetColorFunction returns the color function
-func (g *Gradient) GetColorFunction(opacity float64) Func {
+func (g *Gradient) GetColorFunction(opacity float32) Func {
 	return g.GetColorFunctionUS(opacity, mat32.Identity2D())
 }
 
 // GetColorFunctionUS returns the color function using the User Space objMatrix
-func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix mat32.Mat2) Func {
+func (g *Gradient) GetColorFunctionUS(opacity float32, objMatrix mat32.Mat2) Func {
 	switch len(g.Stops) {
 	case 0:
-		return ApplyOpacity(color.RGBA{0, 0, 0, 255}, opacity) // default error color for gradient w/o stops.
+		return SolidFunc(ApplyOpacity(color.RGBA{0, 0, 0, 255}, opacity)) // default error color for gradient w/o stops.
 	case 1:
-		return ApplyOpacity(g.Stops[0].StopColor, opacity) // Illegal, I think, should really should not happen.
+		return SolidFunc(ApplyOpacity(g.Stops[0].Color, opacity)) // Illegal, I think, should really should not happen.
 	}
 
 	// sort by offset in ascending order
@@ -324,20 +309,20 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix mat32.Mat2) Fun
 		return g.Stops[i].Offset < g.Stops[j].Offset
 	})
 
-	w, h := float64(g.Bounds.W), float64(g.Bounds.H)
-	oriX, oriY := float64(g.Bounds.X), float64(g.Bounds.Y)
-	gradT := Identity.Translate(oriX, oriY).Scale(w, h).
-		Mult(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Invert()
+	w, h := g.Bounds.Size().X, g.Bounds.Size().Y
+	oriX, oriY := g.Bounds.Min.X, g.Bounds.Min.Y
+	gradT := mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
+		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 
-	if g.IsRadial {
-		cx, cy, fx, fy, rx, ry := g.Points[0], g.Points[1], g.Points[2], g.Points[3], g.Points[4], g.Points[4]
+	if g.Radial {
+		cx, cy, fx, fy, rx, ry := g.Center.X, g.Center.Y, g.Focal.X, g.Focal.Y, g.Radius, g.Radius
 		if g.Units == ObjectBoundingBox {
-			cx = g.Bounds.X + g.Bounds.W*cx
-			cy = g.Bounds.Y + g.Bounds.H*cy
-			fx = g.Bounds.X + g.Bounds.W*fx
-			fy = g.Bounds.Y + g.Bounds.H*fy
-			rx *= g.Bounds.W
-			ry *= g.Bounds.H
+			cx = g.Bounds.Max.X * cx
+			cy = g.Bounds.Max.Y * cy
+			fx = g.Bounds.Max.X * fx
+			fy = g.Bounds.Max.Y * fy
+			rx *= g.Bounds.Size().X
+			ry *= g.Bounds.Size().Y
 		} else {
 			cx, cy = g.Matrix.Transform(cx, cy)
 			fx, fy = g.Matrix.Transform(fx, fy)
@@ -380,7 +365,7 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix mat32.Mat2) Fun
 			nfx, nfy, intersects := RayCircleIntersectionF(fx, fy, cx, cy, cx, cy, 1.0-epsilonF)
 			fx, fy = nfx, nfy
 			if intersects == false {
-				return color.RGBA{255, 255, 0, 255} // should not happen
+				return SolidFunc(color.RGBA{255, 255, 0, 255}) // should not happen
 			}
 		}
 		if g.Units == ObjectBoundingBox {
@@ -398,7 +383,7 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix mat32.Mat2) Fun
 				dx, dy := ex-fx, ey-fy
 				if tdx*tdx+tdy*tdy < epsilonF {
 					s := g.Stops[len(g.Stops)-1]
-					return ApplyOpacity(s.StopColor, s.Opacity*opacity)
+					return ApplyOpacity(s.Color, s.Opacity*opacity)
 				}
 				return g.tColor(math.Sqrt(dx*dx+dy*dy)/math.Sqrt(tdx*tdx+tdy*tdy), opacity)
 			})
@@ -418,7 +403,7 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix mat32.Mat2) Fun
 			dx, dy := ex-fx, ey-fy
 			if tdx*tdx+tdy*tdy < epsilonF {
 				s := g.Stops[len(g.Stops)-1]
-				return ApplyOpacity(s.StopColor, s.Opacity*opacity)
+				return ApplyOpacity(s.Color, s.Opacity*opacity)
 			}
 			return g.tColor(math.Sqrt(dx*dx+dy*dy)/math.Sqrt(tdx*tdx+tdy*tdy), opacity)
 		})
