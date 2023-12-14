@@ -4,7 +4,7 @@ GiRl is the GoGi render library -- renders to an `image.RGBA` using CSS-based st
 
 The original rendering design borrowed heavily from: [gg](https://github.com/fogleman/gg).  Relative to gg, the primary advantages of GiRl include:
 
-* Use of [rasterx](https://github.com/srwiley/rasterx) and SVG / CSS styles to provide more SVG-compliant rendering, that is also fast.  Supports color gradients etc.
+* Use of [rasterx](rasterx) and SVG / CSS styles to provide more SVG-compliant rendering, that is also fast.  Supports color gradients etc.
 
 * Full-featured HTML-styled text layout and rendering, which is significantly more advanced than what is present in the gg system.
 

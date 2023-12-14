@@ -18,7 +18,7 @@ import (
 	"github.com/srwiley/scanFT"
 	"github.com/srwiley/scanx"
 
-	"github.com/srwiley/rasterx"
+	"goki.dev/girl/rasterx"
 )
 
 func SaveToPngFile(filePath string, m image.Image) error {
