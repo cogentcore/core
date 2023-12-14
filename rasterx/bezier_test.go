@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	. "goki.dev/girl/rasterx"
+	. "github.com/srwiley/rasterx"
 	//"golang.org/x/image/math/fixed"
 )
 
@@ -18,9 +18,7 @@ func lerp(t, px, py, qx, qy float32) (x, y float32) {
 }
 
 // CubeLerpTo and adapted from golang.org/x/image/vector
-//
-//	adds a cubic Bézier segment, from the pen via (bx, by) and (cx, cy)
-//
+//  adds a cubic Bézier segment, from the pen via (bx, by) and (cx, cy)
 // to (dx, dy), and moves the pen to (dx, dy).
 //
 // The coordinates are allowed to be out of the Rasterizer's bounds.

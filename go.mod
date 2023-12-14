@@ -7,7 +7,7 @@ require (
 	github.com/fatih/camelcase v1.0.0
 	github.com/goki/freetype v1.0.1
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/girl/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
+	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	goki.dev/colors v0.8.41
 	goki.dev/cursors v0.0.29

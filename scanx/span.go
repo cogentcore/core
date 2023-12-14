@@ -6,7 +6,7 @@ import (
 	"image/draw"
 
 	"github.com/BurntSushi/xgbutil/xgraphics"
-	"goki.dev/girl/rasterx"
+	"github.com/srwiley/rasterx"
 )
 
 const (
@@ -60,7 +60,7 @@ type (
 	}
 )
 
-// Clear clears the current spans
+//Clear clears the current spans
 func (x *LinkListSpanner) Clear() {
 	x.lastY, x.lastP = 0, 0
 	x.spans = x.spans[0:0]
@@ -112,7 +112,7 @@ func (x *LinkListSpanner) spansToPix(pix []uint8, stride int, xpixel bool) {
 	}
 }
 
-// DrawToImage draws the accumulated y spans onto the img
+//DrawToImage draws the accumulated y spans onto the img
 func (x *LinkListSpanner) DrawToImage(img image.Image) {
 	switch img := img.(type) {
 	case *xgraphics.Image:
@@ -271,7 +271,7 @@ func NewImgSpanner(img interface{}) (x *ImgSpanner) {
 	return
 }
 
-// SetImage set the image that the XSpanner will draw onto
+//SetImage set the image that the XSpanner will draw onto
 func (x *ImgSpanner) SetImage(img interface{}) {
 	switch img := img.(type) {
 	case *xgraphics.Image:
@@ -327,7 +327,7 @@ func (x *ImgSpanner) GetSpanFunc() SpanFunc {
 	}
 }
 
-// SpanColorFuncR draw the span using a colorFunc and replaces the previous values.
+//SpanColorFuncR draw the span using a colorFunc and replaces the previous values.
 func (x *ImgSpanner) SpanColorFuncR(yi, xi0, xi1 int, ma uint32) {
 	i0 := (yi)*x.stride + (xi0)*4
 	i1 := i0 + (xi1-xi0)*4
@@ -345,7 +345,7 @@ func (x *ImgSpanner) SpanColorFuncR(yi, xi0, xi1 int, ma uint32) {
 	}
 }
 
-// SpanFgColorR draws the span with the fore ground color and replaces the previous values.
+//SpanFgColorR draws the span with the fore ground color and replaces the previous values.
 func (x *ImgSpanner) SpanFgColorR(yi, xi0, xi1 int, ma uint32) {
 	i0 := (yi)*x.stride + (xi0)*4
 	i1 := i0 + (xi1-xi0)*4
@@ -362,7 +362,7 @@ func (x *ImgSpanner) SpanFgColorR(yi, xi0, xi1 int, ma uint32) {
 	}
 }
 
-// SpanColorFunc draws the span using a colorFunc and the  Porter-Duff composition operator.
+//SpanColorFunc draws the span using a colorFunc and the  Porter-Duff composition operator.
 func (x *ImgSpanner) SpanColorFunc(yi, xi0, xi1 int, ma uint32) {
 	i0 := (yi)*x.stride + (xi0)*4
 	i1 := i0 + (xi1-xi0)*4
@@ -387,7 +387,7 @@ func (x *ImgSpanner) SpanColorFunc(yi, xi0, xi1 int, ma uint32) {
 	}
 }
 
-// SpanFgColor draw the span using the fore ground color and the Porter-Duff composition operator.
+//SpanFgColor draw the span using the fore ground color and the Porter-Duff composition operator.
 func (x *ImgSpanner) SpanFgColor(yi, xi0, xi1 int, ma uint32) {
 	i0 := (yi)*x.stride + (xi0)*4
 	i1 := i0 + (xi1-xi0)*4

@@ -38,8 +38,8 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 h1:XPYXKIuH/n5zpUoEWk2jWV/SjEMNYmqDYmTgbjmhtaI=
 github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44/go.mod h1:cNQ3dwVJtS5Hmnjxy6AgTPd0Inb3pW05ftPSX7NZO7Q=
-goki.dev/girl/rasterx v0.0.0-20220730225603-2ab79fcdd4ef h1:Ch6Q+AZUxDBCVqdkI8FSpFyZDtCVBc2VmejdNrm5rRQ=
-goki.dev/girl/rasterx v0.0.0-20220730225603-2ab79fcdd4ef/go.mod h1:nXTWP6+gD5+LUJ8krVhhoeHjvHTutPxMYl5SvkcnJNE=
+github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef h1:Ch6Q+AZUxDBCVqdkI8FSpFyZDtCVBc2VmejdNrm5rRQ=
+github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef/go.mod h1:nXTWP6+gD5+LUJ8krVhhoeHjvHTutPxMYl5SvkcnJNE=
 github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f h1:uLR2GaV0kWYZ3Ns3l3sjtiN+mOWAQadvrL8HXcyKjl0=
 github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f/go.mod h1:LZwgIPG9X6nH6j5Ef+xMFspl6Hru4b5EJxzMfeqHYJY=
 github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 h1:ZdkidVdpLW13BQ9a+/3uerT2ezy9J7KQWH18JCfhDmI=

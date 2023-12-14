@@ -12,8 +12,8 @@ import (
 	"slices"
 
 	"github.com/anthonynsimon/bild/clone"
+	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
-	"goki.dev/girl/rasterx"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
