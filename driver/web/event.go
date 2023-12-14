@@ -22,6 +22,7 @@ func (a *App) AddEventListeners() {
 	g.Call("addEventListener", "touchend", js.FuncOf(a.OnTouchEnd))
 	g.Call("addEventListener", "mousemove", js.FuncOf(a.OnMouseMove))
 	g.Call("addEventListener", "touchmove", js.FuncOf(a.OnTouchMove))
+	g.Call("addEventListener", "wheel", js.FuncOf(a.OnWheel))
 	g.Call("addEventListener", "contextmenu", js.FuncOf(a.OnContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(a.OnKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(a.OnKeyUp))
@@ -115,6 +116,15 @@ func (a *App) OnTouchMove(this js.Value, args []js.Value) any {
 		where := a.EventPos(touch)
 		a.Win.EvMgr.MouseMove(where)
 	}
+	e.Call("preventDefault")
+	return nil
+}
+
+func (a *App) OnWheel(this js.Value, args []js.Value) any {
+	e := args[0]
+	dx := e.Get("deltaX").Int()
+	dy := e.Get("deltaY").Int()
+	a.Win.EvMgr.Scroll(a.EventPos(e), image.Pt(dx, dy))
 	e.Call("preventDefault")
 	return nil
 }
