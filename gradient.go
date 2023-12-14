@@ -92,6 +92,7 @@ const (
 func LinearGradient() *Gradient {
 	return &Gradient{
 		Spread: PadSpread,
+		Points: [4]float32{0, 0, 0, 1},
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
 	}
