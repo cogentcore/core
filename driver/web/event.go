@@ -34,7 +34,14 @@ func (a *App) AddEventListeners() {
 // multiplying the x and y components by the device pixel ratio
 // so that they line up correctly with the canvas.
 func (a *App) EventPos(e js.Value) image.Point {
-	xi, yi := e.Get("clientX").Int(), e.Get("clientY").Int()
+	return a.EventPosFor(e.Get("clientX"), e.Get("clientY"))
+}
+
+// EventPosFor transforms the given position by
+// multiplying the x and y components by the device pixel ratio
+// so that they line up correctly with the canvas.
+func (a *App) EventPosFor(x, y js.Value) image.Point {
+	xi, yi := x.Int(), y.Int()
 	xi = int(float32(xi) * a.Scrn.DevicePixelRatio)
 	yi = int(float32(yi) * a.Scrn.DevicePixelRatio)
 	return image.Pt(xi, yi)
@@ -122,9 +129,8 @@ func (a *App) OnTouchMove(this js.Value, args []js.Value) any {
 
 func (a *App) OnWheel(this js.Value, args []js.Value) any {
 	e := args[0]
-	dx := e.Get("deltaX").Int()
-	dy := e.Get("deltaY").Int()
-	a.Win.EvMgr.Scroll(a.EventPos(e), image.Pt(dx, dy))
+	delta := a.EventPosFor(e.Get("deltaX"), e.Get("deltaY"))
+	a.Win.EvMgr.Scroll(a.EventPos(e), delta)
 	e.Call("preventDefault")
 	return nil
 }
