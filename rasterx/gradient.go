@@ -10,50 +10,6 @@ import (
 	"sort"
 )
 
-// SVG bounds paremater constants
-const (
-	ObjectBoundingBox GradientUnits = iota
-	UserSpaceOnUse
-)
-
-// SVG spread parameter constants
-const (
-	PadSpread SpreadMethod = iota
-	ReflectSpread
-	RepeatSpread
-)
-
-const epsilonF = 1e-5
-
-type (
-	// SpreadMethod is the type for spread parameters
-	SpreadMethod byte
-	// GradientUnits is the type for gradient units
-	GradientUnits byte
-	// GradStop represents a stop in the SVG 2.0 gradient specification
-	GradStop struct {
-		StopColor color.Color
-		Offset    float64
-		Opacity   float64
-	}
-	// Gradient holds a description of an SVG 2.0 gradient
-	Gradient struct {
-		Points   [5]float64
-		Stops    []GradStop
-		Bounds   struct{ X, Y, W, H float64 }
-		Matrix   Matrix2D
-		Spread   SpreadMethod
-		Units    GradientUnits
-		IsRadial bool
-	}
-)
-
-// ApplyOpacity sets the color's alpha channel to the given value
-func ApplyOpacity(c color.Color, opacity float64) color.NRGBA {
-	r, g, b, _ := c.RGBA()
-	return color.NRGBA{uint8(r), uint8(g), uint8(b), uint8(opacity * 0xFF)}
-}
-
 // tColor takes the paramaterized value along the gradient's stops and
 // returns a color depending on the spreadMethod value of the gradient and
 // the gradient's slice of stop values.
@@ -154,12 +110,12 @@ func (g *Gradient) blendStops(t, opacity float64, s1, s2 GradStop, flip bool) co
 		0xFF}, (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
 }
 
-//GetColorFunction returns the color function
+// GetColorFunction returns the color function
 func (g *Gradient) GetColorFunction(opacity float64) interface{} {
 	return g.GetColorFunctionUS(opacity, Identity)
 }
 
-//GetColorFunctionUS returns the color function using the User Space objMatrix
+// GetColorFunctionUS returns the color function using the User Space objMatrix
 func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix Matrix2D) interface{} {
 	switch len(g.Stops) {
 	case 0:
