@@ -41,6 +41,11 @@ type TreeViewer interface {
 	// AsTreeView returns the base *TreeView for this node
 	AsTreeView() *TreeView
 
+	// CanOpen returns true if the node is able to open.
+	// By default it checks HasChildren(), but could check other properties
+	// to perform lazy building of the tree.
+	CanOpen() bool
+
 	// OnOpen is called when a node is opened.
 	// The base version does nothing.
 	OnOpen()
@@ -497,7 +502,7 @@ func (tv *TreeView) ConfigParts() {
 	}
 	config.Add(gi.LabelType, "label")
 	mods, updt := parts.ConfigChildren(config)
-	if tv.HasChildren() {
+	if tv.This().(TreeViewer).CanOpen() {
 		if wb, ok := tv.BranchPart(); ok {
 			tv.SetBranchState()
 			wb.Config()
@@ -545,7 +550,7 @@ func (tv *TreeView) SetBranchState() {
 		return
 	}
 	switch {
-	case !tv.HasChildren():
+	case !tv.This().(TreeViewer).CanOpen():
 		br.SetState(true, states.Indeterminate)
 	case tv.IsClosed():
 		br.SetState(false, states.Indeterminate)
@@ -1167,6 +1172,13 @@ func (tv *TreeView) Close() {
 func (tv *TreeView) OnOpen() {
 }
 
+// CanOpen returns true if the node is able to open.
+// By default it checks HasChildren(), but could check other properties
+// to perform lazy building of the tree.
+func (tv *TreeView) CanOpen() bool {
+	return tv.HasChildren()
+}
+
 // Open opens the given node and updates the view accordingly
 // (if it is not already opened)
 // Calls OnOpen in TreeViewer interface for extensible actions.
@@ -1179,7 +1191,7 @@ func (tv *TreeView) Open() {
 	}
 	tv.SetFlag(true, TreeViewInOpen)
 	updt := tv.UpdateStart()
-	if tv.HasChildren() {
+	if tv.This().(TreeViewer).CanOpen() {
 		tv.SetNeedsLayout(true)
 		tv.SetClosed(false)
 		tv.SetBranchState()

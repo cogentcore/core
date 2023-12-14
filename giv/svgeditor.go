@@ -8,8 +8,12 @@ import (
 	"fmt"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/abilities"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 	"goki.dev/mat32/v2"
+	"goki.dev/svg"
 )
 
 // SVGEditor supports editing of SVG elements
@@ -28,7 +32,7 @@ type SVGEditor struct {
 
 func (sve *SVGEditor) CopyFieldsFrom(frm any) {
 	fr := frm.(*SVGEditor)
-	// g.SVG.CopyFieldsFrom(&fr.SVG)
+	sve.SVG.CopyFieldsFrom(&fr.SVG)
 	sve.Trans = fr.Trans
 	sve.Scale = fr.Scale
 	sve.SetDragCursor = fr.SetDragCursor
@@ -38,39 +42,56 @@ func (sve *SVGEditor) OnInit() {
 	sve.SVG.OnInit()
 	// todo: abilities include draggable
 	sve.HandleEvents()
+	sve.SetStyles()
+}
+
+func (sve *SVGEditor) SetStyles() {
+	sve.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Slideable, abilities.Pressable, abilities.LongHoverable, abilities.Scrollable)
+	})
+}
+
+func (sve *SVGEditor) ContextMenu(m *gi.Scene) {
+	gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
+		SetTooltip("edit object(s) under mouse").
+		OnClick(func(e events.Event) {
+			objs := svg.NodesContainingPoint(&sve.SVG.SVG.Root, e.LocalPos(), true)
+			if len(objs) == 0 {
+				gi.MessageSnackbar(sve, "no svg nodes found under mouse")
+				return
+			}
+			if len(objs) == 1 {
+				d := gi.NewBody().AddTitle(sve.Nm + " Node")
+				NewStructView(d).SetStruct(objs[0])
+				d.NewFullDialog(sve).Run()
+			} else {
+				d := gi.NewBody().AddTitle(sve.Nm + " Nodes")
+				NewSliceView(d).SetSlice(objs)
+				d.NewFullDialog(sve).Run()
+			}
+		})
 }
 
 func (sve *SVGEditor) HandleEvents() {
-	sve.On(events.DragMove, func(e events.Event) {
+	sve.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		del := e.PrevDelta()
 		sve.Trans.X += float32(del.X)
 		sve.Trans.Y += float32(del.Y)
 		sve.SetTransform()
+		sve.SetNeedsRender(true)
 	})
 	sve.On(events.Scroll, func(e events.Event) {
 		e.SetHandled()
+		se := e.(*events.MouseScroll)
 		sve.InitScale()
-		// todo:
-		// sve.Scale += float32(e.ScrollDelta(mat32.Y)) / 20
+		sve.Scale += float32(se.DimDelta(mat32.Y)) / 20
 		if sve.Scale <= 0 {
 			sve.Scale = 0.01
 		}
 		sve.SetTransform()
-		// ssvg.SetFullReRender()
-		// ssvg.SetNeedsRender()
+		sve.SetNeedsRender(true)
 	})
-	// todo: context menu
-	// sve.OnAddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	obj := sve.FirstContainingPoint(e.LocalPos(), true)
-	// 	_ = obj
-	// 	if e.Action == events.Release && e.Button == events.Right {
-	// 		e.SetHandled()
-	// 		// if obj != nil {
-	// 		// 	giv.StructViewDialog(ssvg.Scene, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
-	// 		// }
-	// 	}
-	// })
 	// sve.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	e := d.(events.Event)
 	// 	e.SetHandled()
@@ -99,22 +120,8 @@ func (sve *SVGEditor) InitScale() {
 // SetTransform sets the transform based on Trans and Scale values
 func (sve *SVGEditor) SetTransform() {
 	sve.InitScale()
-	sve.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", sve.Trans.X, sve.Trans.Y, sve.Scale, sve.Scale))
-}
-
-func (sve *SVGEditor) Render() {
-	if sve.PushBounds() {
-		// rs := &sve.Render
-		// if sve.Fill {
-		// 	sve.FillScene()
-		// }
-		// if sve.Norm {
-		// 	sve.SetNormTransform()
-		// }
-		// rs.PushTransform(sve.Pnt.Transform)
-		sve.RenderChildren() // we must do children first, then us!
-		sve.PopBounds()
-		// rs.PopTransform()
-		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)
+	if sve.SVG.SVG != nil {
+		sve.SVG.SVG.Norm = false
+		sve.SVG.SVG.Root.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", sve.Trans.X, sve.Trans.Y, sve.Scale, sve.Scale))
 	}
 }

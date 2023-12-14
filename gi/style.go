@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"image"
 	"slices"
 
 	"goki.dev/colors"
@@ -222,14 +223,19 @@ func (wb *WidgetBase) ApplyStyle() {
 // dots for rendering.
 // Zero values for element and parent size are ignored.
 func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
-	rebuild := sc.NeedsRebuild()
-	rc := sc.RenderCtx()
+	rebuild := false
+	var rc *RenderContext
+	sz := image.Point{1920, 1280}
+	if sc != nil {
+		rebuild = sc.NeedsRebuild()
+		rc = sc.RenderCtx()
+		sz = sc.SceneGeom.Size
+	}
 	if rc != nil {
 		st.UnContext.DPI = rc.LogicalDPI
 	} else {
-		st.UnContext.DPI = 96
+		st.UnContext.DPI = 160
 	}
-	sz := sc.SceneGeom.Size
 	st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 	if st.Font.Face == nil || rebuild {
 		st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics

@@ -22,13 +22,10 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// image contains various image-related elements, including the Image node
-// for showing images, and image processing utilities
-
-// Image is a Widget that is optimized to render a static bitmap image --
-// it expects to be a terminal node and does NOT call rendering etc on its
-// children.  It is particularly useful for overlays in drag-n-drop uses --
-// can grab the image of another scene and show that
+// Image is a Widget that renders a static bitmap image.
+// See [Styles.ObjectFits] for how to control the image rendering within
+// the allocated size.  The minimum requested size is the pixel size in
+// Dp units (1/160th of an inch).
 type Image struct {
 	WidgetBase
 
@@ -97,9 +94,27 @@ func (im *Image) OpenImageFS(fsys fs.FS, filename FileName) error {
 // It copies from the given image into an internal image.
 func (im *Image) SetImage(img image.Image) {
 	updt := im.UpdateStart()
-	defer im.UpdateEnd(updt)
+	defer im.UpdateEndRender(updt)
 
 	im.Pixels = clone.AsRGBA(img)
+	im.PrevPixels = nil
+}
+
+// SetSize is a convenience method to ensure that the image
+// is given size.  A new image will be created of the given size
+// if the current one is not of the specified size.
+func (im *Image) SetSize(sz image.Point) {
+	updt := im.UpdateStart()
+	defer im.UpdateEndRender(updt)
+
+	if im.Pixels != nil {
+		csz := im.Pixels.Bounds().Size()
+		if sz == csz {
+			return
+		}
+	}
+	im.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
+	im.PrevPixels = nil
 }
 
 // GrabRenderFrom grabs the rendered image from given node
@@ -141,8 +156,8 @@ func (im *Image) DrawIntoScene() {
 
 func (im *Image) Render() {
 	if im.PushBounds() {
-		im.RenderChildren()
 		im.DrawIntoScene()
+		im.RenderChildren()
 		im.PopBounds()
 	}
 }

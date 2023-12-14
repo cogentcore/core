@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
@@ -163,7 +162,6 @@ func (sv *StructViewInline) UpdateFields() {
 
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
-		fmt.Println("did view if update")
 		sv.Update()
 		sv.SetNeedsLayout(true)
 	} else if sv.HasDefs {

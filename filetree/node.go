@@ -368,6 +368,7 @@ func (fn *Node) UpdateNode() error {
 	if fn.IsIrregular() {
 		return nil
 	}
+	// fmt.Println(fn, "updt node start")
 	if fn.IsDir() {
 		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
@@ -387,6 +388,7 @@ func (fn *Node) UpdateNode() error {
 		fn.SetFileIcon()
 		fn.SetNeedsRender(true)
 	}
+	// fmt.Println(fn, "updt node end")
 	return nil
 }
 
@@ -405,6 +407,10 @@ func (fn *Node) OpenDirs() {
 
 func (fn *Node) OnOpen() {
 	fn.OpenDir()
+}
+
+func (fn *Node) CanOpen() bool {
+	return fn.HasChildren() || fn.IsDir()
 }
 
 // OpenDir opens given directory node
