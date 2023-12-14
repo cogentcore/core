@@ -204,6 +204,22 @@ func (a Mat2) Inverse() Mat2 {
 	return b
 }
 
+// Transform multiples the input vector by the matrix and outputs the results vector
+// components.
+func (m Mat2) Transform(x1, y1 float32) (x2, y2 float32) {
+	x2 = x1*m.XX + y1*m.XY + m.X0
+	y2 = x1*m.YX + y1*m.YY + m.Y0
+	return
+}
+
+// TransformVector is a modified version of [Mat2.Transform] that ignores the
+// translation components (X0 and Y0).
+func (a Mat2) TransformVector(x1, y1 float32) (x2, y2 float32) {
+	x2 = x1*a.XX + y1*a.XY
+	y2 = x1*a.YX + y1*a.YY
+	return
+}
+
 // ParseFloat32 logs any strconv.ParseFloat errors
 func ParseFloat32(pstr string) (float32, error) {
 	r, err := strconv.ParseFloat(pstr, 32)
