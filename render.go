@@ -73,6 +73,15 @@ func (sc *Scene) SetNeedsConfig() {
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
+// UpdateNodesIfNeeded can be called to update prior to an ad-hoc render
+// if the NeedsUpdate flag has been set (resets flag)
+func (sc *Scene) UpdateNodesIfNeeded() {
+	if sc.Is(ScNeedsUpdate) {
+		sc.UpdateNodes()
+		sc.SetFlag(false, ScNeedsUpdate)
+	}
+}
+
 // UpdateStart sets the scene ScUpdating flag to prevent
 // render updates during construction on a scene.
 // if already updating, returns false.
