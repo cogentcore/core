@@ -313,8 +313,9 @@ func (wb *WidgetBase) ConfigTree() {
 // on every Widget in the tree from me.
 // This should be used after any structural changes
 // to currently-displayed widgets.
-// It wraps everything in UpdateStart / UpdateEndLayout
-// so layout will automatically be called for next render.
+// It wraps everything in UpdateStart / UpdateEndRender
+// so node will render on next pass.
+// Call SetNeedsLayout to also trigger a layout where needed.
 func (wb *WidgetBase) Update() { //gti:add
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
@@ -328,7 +329,7 @@ func (wb *WidgetBase) Update() { //gti:add
 		wi.ApplyStyle()
 		return ki.Continue
 	})
-	wb.UpdateEndLayout(updt)
+	wb.UpdateEndRender(updt)
 }
 
 // ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.

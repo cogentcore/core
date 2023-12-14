@@ -98,6 +98,7 @@ func (mv *MapView) SetMap(mp any) *MapView {
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.Update()
+	mv.SetNeedsLayout(true)
 	return mv
 }
 
@@ -303,6 +304,7 @@ func (mv *MapView) MapAdd() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
+	updt := mv.UpdateStart()
 	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
@@ -310,6 +312,7 @@ func (mv *MapView) MapAdd() {
 	}
 	mv.SetChanged()
 	mv.Update()
+	mv.UpdateEndLayout(updt)
 }
 
 // MapDelete deletes a key-value from the map
@@ -325,8 +328,8 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetChanged()
-	mv.UpdateEnd(updt)
 	mv.Update()
+	mv.UpdateEndLayout(updt)
 }
 
 // ConfigToolbar configures a [gi.Toolbar] for this view

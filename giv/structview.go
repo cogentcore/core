@@ -97,6 +97,7 @@ func (sv *StructView) SetStruct(st any) *StructView {
 	}
 	sv.Struct = st
 	sv.Update()
+	sv.SetNeedsLayout(true)
 	return sv
 }
 
@@ -342,6 +343,7 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 	if sv.HasViewIfs {
 		sv.Update()
+		sv.SetNeedsLayout(true)
 	} else if sv.HasDefs {
 		sg := sv.StructGrid()
 		updt := sg.UpdateStart()
