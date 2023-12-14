@@ -10,10 +10,8 @@ package colors
 
 import (
 	"image"
-
 	"image/color"
 
-	"github.com/srwiley/rasterx"
 	"goki.dev/mat32/v2"
 )
 
@@ -164,63 +162,15 @@ func (g *Gradient) Points() [5]float64 {
 	return [5]float64{float64(g.Bounds.Min.X), float64(g.Bounds.Min.Y), float64(g.Bounds.Max.X), float64(g.Bounds.Max.Y), 0}
 }
 
-// Rasterx returns the gradient as a [rasterx.Gradient]
-func (g *Gradient) Rasterx() *rasterx.Gradient {
-	r := &rasterx.Gradient{
-		Points: g.Points(),
-		Stops:  make([]rasterx.GradStop, len(g.Stops)),
-		// one might call this ridiculous, and they would be absolutely correct,
-		// but we don't have control over the rasterx source code, and
-		// https://github.com/golang/go/issues/12854 hasn't been approved
-		Bounds: struct {
-			X float64
-			Y float64
-			W float64
-			H float64
-		}{
-			X: float64(g.Bounds.Min.X),
-			Y: float64(g.Bounds.Min.Y),
-			W: float64(g.Bounds.Size().X),
-			H: float64(g.Bounds.Size().Y),
-		},
-		Matrix:   MatToRasterx(&g.Matrix),
-		Spread:   rasterx.SpreadMethod(g.Spread), // we have the same constant values, so this is okay
-		Units:    rasterx.GradientUnits(g.Units), // we have the same constant values, so this is okay
-		IsRadial: g.Radial,
-	}
-	for i, stop := range g.Stops {
-		r.Stops[i] = stop.Rasterx()
-	}
-	return r
-}
-
-// MatToRasterx converts the given [mat32.Mat2] to a [rasterx.Matrix2D]
-func MatToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
-	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
-}
-
-// RasterxToMat converts the given [rasterx.Matrix2D] to a [mat32.Mat2]
-func RasterxToMat(mat *rasterx.Matrix2D) mat32.Mat2 {
-	return mat32.Mat2{float32(mat.A), float32(mat.B), float32(mat.C), float32(mat.D), float32(mat.E), float32(mat.F)}
-}
-
-// Rasterx returns the gradient stop as a [rasterx.GradStop]
-func (g *GradientStop) Rasterx() rasterx.GradStop {
-	return rasterx.GradStop{
-		StopColor: g.Color,
-		Offset:    float64(g.Offset),
-		Opacity:   float64(g.Opacity),
-	}
-}
-
 // RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
 // the given opacity and bounds.
 func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
 	box := mat32.Box2{}
 	box.SetFromRect(bounds)
 	g.SetUserBounds(box)
-	r := g.Rasterx()
-	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&transform))
+	return color.RGBA{} // TODO
+	// r := g.Rasterx()
+	// return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&transform))
 }
 
 // ApplyTransform transforms the points for the gradient if it has

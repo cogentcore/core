@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/srwiley/rasterx"
 	"goki.dev/mat32/v2"
 )
 
@@ -86,7 +85,7 @@ func (f *Full) CopyFrom(cp *Full) {
 // the given opacity and bounds.
 func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
 	if f.Gradient == nil {
-		return rasterx.ApplyOpacity(f.Solid, float64(opacity))
+		return ApplyOpacity(f.Solid, opacity)
 	}
 	return f.Gradient.RenderColor(opacity, bounds, transform)
 }
