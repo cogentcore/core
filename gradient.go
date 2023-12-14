@@ -22,8 +22,9 @@ type Gradient struct { //gti:add -setters
 	// whether the gradient is a radial gradient (as opposed to a linear one)
 	Radial bool
 
-	// the bounds for linear gradients (x1, y1, x2, and y2 in SVG)
-	Bounds mat32.Box2
+	// for linear gradients, the points of the gradient that determine the direction
+	// in which it goes (x1, x2, y1, and y2 in svg)
+	Points [4]float32
 
 	// the center point for radial gradients (cx and cy in SVG)
 	Center mat32.Vec2
@@ -37,14 +38,17 @@ type Gradient struct { //gti:add -setters
 	// the stops of the gradient
 	Stops []GradientStop
 
-	// the matrix for the gradient
-	Matrix mat32.Mat2
-
 	// the spread methods for the gradient
 	Spread SpreadMethods
 
 	// the units for the gradient
 	Units GradientUnits
+
+	// the bounds of the gradient; this should typically not be set by end-users
+	Bounds mat32.Box2 `set:"-"`
+
+	// the matrix for the gradient; this should typically not be set by end-users
+	Matrix mat32.Mat2 `set:"-"`
 }
 
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification
@@ -411,10 +415,10 @@ func (g *Gradient) GetColorFunctionUS(opacity float32, objMatrix mat32.Mat2) Fun
 	}
 	p1x, p1y, p2x, p2y := g.Points[0], g.Points[1], g.Points[2], g.Points[3]
 	if g.Units == ObjectBoundingBox {
-		p1x = g.Bounds.X + g.Bounds.W*p1x
-		p1y = g.Bounds.Y + g.Bounds.H*p1y
-		p2x = g.Bounds.X + g.Bounds.W*p2x
-		p2y = g.Bounds.Y + g.Bounds.H*p2y
+		p1x = g.Bounds.Max.X * p1x
+		p1y = g.Bounds.Max.Y * p1y
+		p2x = g.Bounds.Max.X * p2x
+		p2y = g.Bounds.Max.Y * p2y
 
 		dx := p2x - p1x
 		dy := p2y - p1y
@@ -450,7 +454,7 @@ func (g *Gradient) GetColorFunctionUS(opacity float32, objMatrix mat32.Mat2) Fun
 // a ray starting at s2 passing through s1 and a circle in fixed point.
 // Returns intersects == false if no solution is possible. If two
 // solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float64) (x, y float64, intersects bool) {
+func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32, intersects bool) {
 	n := s2X - cX // Calculating using 64* rather than divide
 	m := s2Y - cY
 
