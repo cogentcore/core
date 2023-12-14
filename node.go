@@ -249,21 +249,55 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadTransform(dat, 0)
 }
 
-// FirstNonGroupNode returns the first item that is not a group
-// recursing into groups until a non-group item is found.
-func FirstNonGroupNode(kn ki.Ki) ki.Ki {
-	var ngn ki.Ki
-	kn.WalkPre(func(k ki.Ki) bool {
-		if k == nil || k.This() == nil || k.Is(ki.Deleted) || k.Is(ki.Destroyed) {
+// SVGWalkPre does ki WalkPre on given node using given walk function
+// with SVG Node parameters.  Automatically filters
+// nil or deleted items.  Return ki.Continue (true) to continue,
+// and ki.Break (false) to terminate.
+func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
+	n.WalkPre(func(k ki.Ki) bool {
+		kni := k.(Node)
+		if kni == nil || kni.This() == nil || kni.Is(ki.Deleted) {
 			return ki.Break
 		}
-		if _, isgp := k.(*Group); isgp {
+		return fun(kni, kni.AsNodeBase())
+	})
+}
+
+// FirstNonGroupNode returns the first item that is not a group
+// recursing into groups until a non-group item is found.
+func FirstNonGroupNode(n Node) Node {
+	var ngn Node
+	SVGWalkPre(n, func(kni Node, knb *NodeBase) bool {
+		if _, isgp := kni.This().(*Group); isgp {
 			return ki.Continue
 		}
-		ngn = k
+		ngn = kni
 		return ki.Break
 	})
 	return ngn
+}
+
+// NodesContainingPoint returns all Nodes with Bounding Box that contains
+// given point, optionally only those that are terminal nodes (no leaves).
+// Excludes the starting node.
+func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
+	var cn []Node
+	SVGWalkPre(n, func(kni Node, knb *NodeBase) bool {
+		if kni.This() == n.This() {
+			return ki.Continue
+		}
+		if leavesOnly && kni.HasChildren() {
+			return ki.Continue
+		}
+		if knb.Paint.Off {
+			return ki.Break
+		}
+		if pt.In(knb.BBox) {
+			cn = append(cn, kni)
+		}
+		return ki.Continue
+	})
+	return cn
 }
 
 //////////////////////////////////////////////////////////////////
