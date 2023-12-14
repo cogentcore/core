@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/srwiley/scanx"
 	"goki.dev/girl/rasterx"
+	"goki.dev/girl/scanx"
 	"goki.dev/mat32/v2"
 )
 

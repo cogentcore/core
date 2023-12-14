@@ -9,8 +9,8 @@ import (
 
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/scanFT"
-	"github.com/srwiley/scanx"
 	"goki.dev/girl/rasterx"
+	"goki.dev/girl/scanx"
 )
 
 func ReadIconSet(paths []string) (icons []*oksvg.SvgIcon) {

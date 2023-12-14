@@ -10,7 +10,6 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f
-	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	goki.dev/colors v0.8.41
 	goki.dev/cursors v0.0.29
 	goki.dev/enums v0.9.52

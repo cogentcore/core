@@ -16,7 +16,7 @@ import (
 
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/scanFT"
-	"github.com/srwiley/scanx"
+	"goki.dev/girl/scanx"
 
 	"goki.dev/girl/rasterx"
 )
