@@ -27,6 +27,7 @@ type App struct { //gti:add
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
+	TheApp.GetScreens()
 	base.Main(f, TheApp, &TheApp.App)
 }
 
@@ -41,7 +42,8 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	}
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
-	a.SetScreenInfo(opts.Size)
+	a.Scrn.PixSize = opts.Size
+	a.GetScreens()
 
 	a.Win.EvMgr.WindowResize()
 	a.Win.EvMgr.Window(events.WinShow)
@@ -53,16 +55,13 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	return a.Win, nil
 }
 
-// SetScreenInfo sets the screen information based on the given
-// requested window size.
-func (a *App) SetScreenInfo(sz image.Point) {
-	if sz.X == 0 {
-		sz.X = 800
+func (a *App) GetScreens() {
+	if a.Scrn.PixSize.X == 0 {
+		a.Scrn.PixSize.X = 800
 	}
-	if sz.Y == 0 {
-		sz.Y = 600
+	if a.Scrn.PixSize.Y == 0 {
+		a.Scrn.PixSize.Y = 600
 	}
-	a.Scrn.PixSize = sz
 
 	a.Scrn.DevicePixelRatio = 1
 	a.Scrn.Geometry.Max = a.Scrn.PixSize
