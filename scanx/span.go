@@ -6,7 +6,7 @@ import (
 	"image/draw"
 
 	"github.com/BurntSushi/xgbutil/xgraphics"
-	"goki.dev/girl/rasterx"
+	"goki.dev/colors"
 )
 
 const (
@@ -56,7 +56,7 @@ type (
 		// xgraphics.Images swap r and b pixel values
 		// compared to saved rgb value.
 		xpixel    bool
-		colorFunc rasterx.ColorFunc
+		colorFunc colors.Func
 	}
 )
 
@@ -301,7 +301,7 @@ func (x *ImgSpanner) SetColor(c interface{}) {
 			G: uint8(g >> 8),
 			B: uint8(b >> 8),
 			A: uint8(a >> 8)}
-	case rasterx.ColorFunc:
+	case colors.Func:
 		x.colorFunc = c
 	}
 }

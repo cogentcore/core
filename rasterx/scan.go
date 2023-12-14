@@ -10,11 +10,14 @@ package rasterx
 
 import (
 	"image"
+	"log/slog"
 	"math"
+	"reflect"
 
 	"image/color"
 	"image/draw"
 
+	"goki.dev/colors"
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/image/vector"
 )
@@ -26,10 +29,10 @@ func (c *ColorFuncImage) At(x, y int) color.Color {
 
 type (
 	// ColorFuncImage implements and image
-	// using the provided colorFunc
+	// using the provided [colors.Func]
 	ColorFuncImage struct {
 		image.Uniform
-		colorFunc ColorFunc
+		colorFunc colors.Func
 	}
 
 	// ScannerGV uses the google vector rasterizer
@@ -85,13 +88,15 @@ func (s *ScannerGV) SetColor(clr interface{}) {
 			}
 			s.Source = s.clipImage
 		}
-	case ColorFunc:
+	case colors.Func:
 		s.clipImage.ColorFuncImage.colorFunc = c
 		if s.clipImage.clip == image.ZR {
 			s.Source = &s.clipImage.ColorFuncImage
 		} else {
 			s.Source = s.clipImage
 		}
+	default:
+		slog.Error("rasterx.ScannerGV.SetColor: got unexpected type of color", "type", reflect.TypeOf(clr))
 	}
 }
 

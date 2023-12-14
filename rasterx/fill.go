@@ -6,15 +6,12 @@ package rasterx
 
 import (
 	"image"
-	"image/color"
 	"math"
 
 	"golang.org/x/image/math/fixed"
 )
 
 type (
-	// ColorFunc maps a color to x y coordinates
-	ColorFunc func(x, y int) color.Color
 	// Scanner interface for path generating types
 	Scanner interface {
 		Start(a fixed.Point26_6)
