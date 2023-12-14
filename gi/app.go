@@ -267,6 +267,12 @@ type AppChooser struct {
 	Resources uri.Resources
 }
 
+func (ac *AppChooser) CopyFieldsFrom(frm any) {
+	fr := frm.(*AppChooser)
+	ac.Chooser.CopyFieldsFrom(&fr.Chooser)
+	ac.Resources = fr.Resources
+}
+
 func (ac *AppChooser) OnInit() {
 	ac.Chooser.OnInit()
 	ac.SetEditable(true).SetType(ChooserOutlined)
