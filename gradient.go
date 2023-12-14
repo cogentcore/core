@@ -152,15 +152,13 @@ func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
 	}
 }
 
-// RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
-// the given opacity and bounds.
-func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
+// RenderColor returns the [Func] for rendering, applying the
+// given opacity and bounds.
+func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) Func {
 	box := mat32.Box2{}
 	box.SetFromRect(bounds)
 	g.SetUserBounds(box)
-	return color.RGBA{} // TODO
-	// r := g.Rasterx()
-	// return r.GetColorFunctionUS(float32(opacity), MatToRasterx(&transform))
+	return g.GetColorFunctionUS(opacity, transform)
 }
 
 // ApplyTransform transforms the points for the gradient if it has
