@@ -294,6 +294,8 @@ func (g *Gradient) GetColorFunction(opacity float32) Func {
 	return g.GetColorFunctionUS(opacity, mat32.Identity2D())
 }
 
+const epsilonF = 1e-5
+
 // GetColorFunctionUS returns the color function using the User Space objMatrix
 func (g *Gradient) GetColorFunctionUS(opacity float32, objMatrix mat32.Mat2) Func {
 	switch len(g.Stops) {
@@ -442,4 +444,43 @@ func (g *Gradient) GetColorFunctionUS(opacity float32, objMatrix mat32.Mat2) Fun
 		dfy := y - p1y
 		return g.tColor((dx*dfx+dy*dfy)/d, opacity)
 	})
+}
+
+// RayCircleIntersectionF calculates in floating point the points of intersection of
+// a ray starting at s2 passing through s1 and a circle in fixed point.
+// Returns intersects == false if no solution is possible. If two
+// solutions are possible, the point closest to s2 is returned
+func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float64) (x, y float64, intersects bool) {
+	n := s2X - cX // Calculating using 64* rather than divide
+	m := s2Y - cY
+
+	e := s2X - s1X
+	d := s2Y - s1Y
+
+	// Quadratic normal form coefficients
+	A, B, C := e*e+d*d, -2*(e*n+m*d), n*n+m*m-r*r
+
+	D := B*B - 4*A*C
+
+	if D <= 0 {
+		return // No intersection or is tangent
+	}
+
+	D = mat32.Sqrt(D)
+	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
+	p1OnSide := t1 > 0
+	p2OnSide := t2 > 0
+
+	switch {
+	case p1OnSide && p2OnSide:
+		if t2 < t1 { // both on ray, use closest to s2
+			t1 = t2
+		}
+	case p2OnSide: // Only p2 on ray
+		t1 = t2
+	case p1OnSide: // only p1 on ray
+	default: // Neither solution is on the ray
+		return
+	}
+	return (n - e*t1) + cX, (m - d*t1) + cY, true
 }
