@@ -1,6 +1,6 @@
 // Copyright 2018 by the rasterx Authors. All rights reserved.
 // Created 2018 by S.R.Wiley
-package rasterx
+package raster
 
 import (
 	"math/rand"

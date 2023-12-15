@@ -2,7 +2,7 @@
 //_
 // created: 2017 by S.R.Wiley
 
-package rasterx
+package raster
 
 import (
 	"golang.org/x/image/math/fixed"

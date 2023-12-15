@@ -2,7 +2,7 @@
 //
 // created: 2017 by S.R.Wiley
 
-package rasterx
+package raster
 
 import (
 	"goki.dev/mat32/v2"

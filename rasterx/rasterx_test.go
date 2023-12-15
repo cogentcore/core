@@ -1,6 +1,6 @@
 // Copyright 2018 by the rasterx Authors. All rights reserved.
 // Created 2018 by S.R.Wiley
-package rasterx
+package raster
 
 import (
 	"image"
@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"goki.dev/colors"
-	"goki.dev/girl/scanx"
+	"goki.dev/girl/scan"
 	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/math/fixed"
@@ -104,7 +104,7 @@ func BenchmarkScan(b *testing.B) {
 		p       = GetTestPath()
 		wx, wy  = 512, 512
 		img     = image.NewRGBA(image.Rect(0, 0, wx, wy))
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 	f := NewFiller(wx, wy, scanner)
 	p.AddTo(f)
@@ -119,7 +119,7 @@ func BenchmarkFill(b *testing.B) {
 		p       = GetTestPath()
 		wx, wy  = 512, 512
 		img     = image.NewRGBA(image.Rect(0, 0, wx, wy))
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 	f := NewFiller(wx, wy, scanner)
 	b.ResetTimer()
@@ -135,7 +135,7 @@ func BenchmarkDash(b *testing.B) {
 		p       = GetTestPath()
 		wx, wy  = 512, 512
 		img     = image.NewRGBA(image.Rect(0, 0, wx, wy))
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 	b.ResetTimer()
 	d := NewDasher(wx, wy, scanner)
@@ -151,7 +151,7 @@ func TestRoundRect(t *testing.T) {
 	var (
 		wx, wy  = 512, 512
 		img     = image.NewRGBA(image.Rect(0, 0, wx, wy))
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 		f       = NewFiller(wx, wy, scanner)
 	)
 
@@ -275,7 +275,7 @@ func TestShapes(t *testing.T) {
 
 		img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 		f       = NewFiller(wx, wy, scanner)
 		s       = NewStroker(wx, wy, scanner)
 		d       = NewDasher(wx, wy, scanner)
@@ -284,65 +284,65 @@ func TestShapes(t *testing.T) {
 	doShapes(t, f, f, "shapeF", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	s.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip)
 	doShapes(t, s, s, "shapeS1", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	s.SetStroke(10*64, 4*64, nil, RoundCap, RoundGap, ArcClip)
 	doShapes(t, s, s, "shapeS2", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	s.SetStroke(10*64, 4*64, nil, nil, nil, Miter)
 	doShapes(t, s, s, "shapeS3", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, SquareCap, nil, RoundGap, ArcClip, []float32{33, 12}, 30)
 	doShapes(t, d, d, "shapeD0", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Miter, []float32{33, 12}, 250)
 	doShapes(t, d, d, "shapeD1", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, ButtCap, CubicCap, QuadraticGap, Arc, []float32{33, 12}, -30)
 	doShapes(t, d, d, "shapeD2", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, nil, QuadraticCap, RoundGap, MiterClip, []float32{12, 4}, 14)
 	doShapes(t, d, d, "shapeD3", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Bevel, []float32{0, 0}, 0)
 	doShapes(t, d, d, "shapeD4", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, SquareCap, nil, nil, Round, []float32{}, 0)
 	doShapes(t, d, d, "shapeD5", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, MiterClip, nil, 0)
 	doShapes(t, d, d, "shapeD6", img)
 
 	getOpenCubicPath().AddTo(f)
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	f.Draw()
 	f.Clear()
 
 	s.SetStroke(4*64, 1, SquareCap, nil, RoundGap, ArcClip)
 	getOpenCubicPath().AddTo(s)
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	s.Draw()
 	s.Clear()
 
@@ -351,7 +351,7 @@ func TestShapes(t *testing.T) {
 	s.SetStroke(4<<6, 2<<6, SquareCap, nil, RoundGap, ArcClip)
 	getOpenCubicPath2().AddTo(s)
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	s.Draw()
 	s.Clear()
 
@@ -362,7 +362,7 @@ func TestShapes(t *testing.T) {
 	p.AddTo(s)
 	_ = p.String() // Just flexes to ToSVGString
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
-	scanner.Spanner = scanx.NewImgSpanner(img)
+	scanner.Spanner = scan.NewImgSpanner(img)
 	s.Draw()
 	s.Clear()
 	p.Clear()
@@ -443,7 +443,7 @@ func TestGradient(t *testing.T) {
 	var (
 		wx, wy  = 512, 512
 		img     = image.NewRGBA(image.Rect(0, 0, wx, wy))
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
 	linear := colors.LinearGradient().SetEnd(mat32.Vec2{1, 0}).
@@ -565,7 +565,7 @@ func TestMultiFunction(t *testing.T) {
 	var (
 		wx, wy  = 512, 512
 		img     = image.NewRGBA(image.Rect(0, 0, wx, wy))
-		scanner = scanx.NewScanner(scanx.NewImgSpanner(img), wx, wy)
+		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
 	scanner.SetColor(colors.SolidRender(colors.Cornflowerblue))

@@ -2,7 +2,7 @@
 //_
 // Created 2017 by S.R.Wiley
 
-package rasterx
+package raster
 
 import (
 	"image"

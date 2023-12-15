@@ -2,7 +2,7 @@
 // Copyright 2017 by the rasterx Authors. All rights reserved.
 // Created: 2/12/2017 by S.R.Wiley
 
-package rasterx
+package raster
 
 import (
 	"fmt"

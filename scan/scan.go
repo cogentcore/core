@@ -7,7 +7,7 @@
 // FreeType License or the GNU General Public License version 2 (or
 // any later version), both of which can be found in the LICENSE file.
 
-// Package scanx provides an anti-aliasing 2-D rasterizer.
+// Package scan provides an anti-aliasing 2-D rasterizer.
 // taken from the larger Freetype suite of font-related packages, but the
 // raster package is not specific to font rasterization, and can be used
 // standalone without any other Freetype package.
@@ -15,7 +15,7 @@
 // the Freetype "smooth" module, and the Anti-Grain Geometry library. A
 // description of the area/coverage algorithm is at
 // http://projects.tuxee.net/cl-vectors/section-the-cl-aa-algorithm
-package scanx
+package scan
 
 import (
 	"image"

@@ -3,7 +3,7 @@
 // created: 2/06/2018 by S.R.Wiley
 // Functions that rasterize common shapes easily.
 
-package rasterx
+package raster
 
 import (
 	"goki.dev/mat32/v2"

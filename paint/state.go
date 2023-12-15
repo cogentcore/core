@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"goki.dev/girl/rasterx"
-	"goki.dev/girl/scanx"
+	"goki.dev/girl/scan"
 	"goki.dev/mat32/v2"
 )
 
@@ -28,10 +28,10 @@ type State struct {
 	Raster *rasterx.Dasher
 
 	// scanner for scanx
-	Scanner *scanx.Scanner
+	Scanner *scan.Scanner
 
 	// spanner for scanx
-	ImgSpanner *scanx.ImgSpanner
+	ImgSpanner *scan.ImgSpanner
 
 	// starting point, for close path
 	Start mat32.Vec2
@@ -85,8 +85,8 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 		rs.CompSpanner = &scanx.CompressSpanner{}
 		rs.CompSpanner.SetBounds(img.Bounds())
 	*/
-	rs.ImgSpanner = scanx.NewImgSpanner(img)
-	rs.Scanner = scanx.NewScanner(rs.ImgSpanner, width, height)
+	rs.ImgSpanner = scan.NewImgSpanner(img)
+	rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
 	// rs.Scanner = scanx.NewScanner(rs.CompSpanner, width, height)
 	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
 }
