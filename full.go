@@ -66,7 +66,7 @@ func (f *Full) SetName(name string) error {
 
 // CopyFrom copies from the given full color, making new copies
 // of the gradient stops instead of re-using pointers
-func (f *Full) CopyFrom(cp *Full) {
+func (f *Full) CopyFrom(cp Full) {
 	f.Solid = cp.Solid
 	if f.Gradient == nil && cp.Gradient == nil {
 		return
