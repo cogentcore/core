@@ -103,7 +103,7 @@ func RunLinkListSpanner(b *testing.B, mult int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, ic := range beachIcons {
-			ic.SetTarget(0.0, 0.0, float64(bounds.Max.X), float64(bounds.Max.Y))
+			ic.SetTarget(0.0, 0.0, float32(bounds.Max.X), float32(bounds.Max.Y))
 			ic.Draw(rasterScanC, 1.0)
 			spannerC.DrawToImage(img)
 			rasterScanC.Clear()
@@ -131,7 +131,7 @@ func RunFTScanner(b *testing.B, mult int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, ic := range beachIcons {
-			ic.SetTarget(0.0, 0.0, float64(bounds.Max.X), float64(bounds.Max.Y))
+			ic.SetTarget(0.0, 0.0, float32(bounds.Max.X), float32(bounds.Max.Y))
 			ic.Draw(rasterFT, 1.0)
 			rasterFT.Clear()
 		}
@@ -157,7 +157,7 @@ func RunImgSpanner(b *testing.B, mult int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, ic := range beachIcons {
-			ic.SetTarget(0.0, 0.0, float64(bounds.Max.X), float64(bounds.Max.Y))
+			ic.SetTarget(0.0, 0.0, float32(bounds.Max.X), float32(bounds.Max.Y))
 			ic.Draw(rasterScanX, 1.0)
 			rasterScanX.Clear()
 		}
@@ -182,7 +182,7 @@ func RunGVScanner(b *testing.B, mult int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, ic := range beachIcons {
-			ic.SetTarget(0.0, 0.0, float64(bounds.Max.X), float64(bounds.Max.Y))
+			ic.SetTarget(0.0, 0.0, float32(bounds.Max.X), float32(bounds.Max.Y))
 			ic.Draw(raster, 1.0)
 			scannerGV.Clear()
 		}

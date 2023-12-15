@@ -6,8 +6,8 @@ package rasterx
 
 import (
 	"fmt"
-	"math"
 
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -33,14 +33,14 @@ func DotProd(p fixed.Point26_6, q fixed.Point26_6) fixed.Int52_12 {
 
 // Length is the distance from the origin of the point
 func Length(v fixed.Point26_6) fixed.Int26_6 {
-	vx, vy := float64(v.X), float64(v.Y)
-	return fixed.Int26_6(math.Sqrt(vx*vx + vy*vy))
+	vx, vy := float32(v.X), float32(v.Y)
+	return fixed.Int26_6(mat32.Sqrt(vx*vx + vy*vy))
 }
 
 // PathCommand is the type for the path command token
-type PathCommand fixed.Int26_6
+type PathCommand fixed.Int26_6 //enums:enum
 
-// Human readable path constants
+// Human readable path command constants
 const (
 	PathMoveTo PathCommand = iota
 	PathLineTo
@@ -156,9 +156,9 @@ func ToLength(p fixed.Point26_6, ln fixed.Int26_6) (q fixed.Point26_6) {
 		return
 	}
 
-	pX, pY := float64(p.X), float64(p.Y)
-	lnF := float64(ln)
-	pLen := math.Sqrt(pX*pX + pY*pY)
+	pX, pY := float32(p.X), float32(p.Y)
+	lnF := float32(ln)
+	pLen := mat32.Sqrt(pX*pX + pY*pY)
 
 	qX, qY := pX*lnF/pLen, pY*lnF/pLen
 	q.X, q.Y = fixed.Int26_6(qX), fixed.Int26_6(qY)
@@ -230,14 +230,14 @@ func CircleCircleIntersection(ct, cl fixed.Point26_6, rt, rl fixed.Int26_6) (xt1
 		return // No solution. One circle is contained by the other.
 	}
 
-	rlf, rtf, df := float64(rl), float64(rt), float64(d)
+	rlf, rtf, df := float32(rl), float32(rt), float32(d)
 	af := (rtf*rtf - rlf*rlf + df*df) / df / 2.0
-	hfd := math.Sqrt(rtf*rtf-af*af) / df
+	hfd := mat32.Sqrt(rtf*rtf-af*af) / df
 	afd := af / df
 
-	rOffx, rOffy := float64(-dc.Y)*hfd, float64(dc.X)*hfd
-	p2x := float64(ct.X) + float64(dc.X)*afd
-	p2y := float64(ct.Y) + float64(dc.Y)*afd
+	rOffx, rOffy := float32(-dc.Y)*hfd, float32(dc.X)*hfd
+	p2x := float32(ct.X) + float32(dc.X)*afd
+	p2y := float32(ct.Y) + float32(dc.Y)*afd
 	xt1x, xt1y := p2x+rOffx, p2y+rOffy
 	xt2x, xt2y := p2x-rOffx, p2y-rOffy
 	return fixed.Point26_6{X: fixed.Int26_6(xt1x), Y: fixed.Int26_6(xt1y)},
@@ -259,8 +259,8 @@ func CalcIntersect(a1, a2, b1, b2 fixed.Point26_6) (x fixed.Point26_6) {
 // Returns intersects == false if no solution is possible. If two
 // solutions are possible, the point closest to s2 is returned
 func RayCircleIntersection(s1, s2, c fixed.Point26_6, r fixed.Int26_6) (x fixed.Point26_6, intersects bool) {
-	fx, fy, intersects := RayCircleIntersectionF(float64(s1.X), float64(s1.Y),
-		float64(s2.X), float64(s2.Y), float64(c.X), float64(c.Y), float64(r))
+	fx, fy, intersects := RayCircleIntersectionF(float32(s1.X), float32(s1.Y),
+		float32(s2.X), float32(s2.Y), float32(c.X), float32(c.Y), float32(r))
 	return fixed.Point26_6{X: fixed.Int26_6(fx),
 		Y: fixed.Int26_6(fy)}, intersects
 
@@ -270,7 +270,7 @@ func RayCircleIntersection(s1, s2, c fixed.Point26_6, r fixed.Int26_6) (x fixed.
 // a ray starting at s2 passing through s1 and a circle in fixed point.
 // Returns intersects == false if no solution is possible. If two
 // solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float64) (x, y float64, intersects bool) {
+func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32, intersects bool) {
 	n := s2X - cX // Calculating using 64* rather than divide
 	m := s2Y - cY
 
@@ -286,7 +286,7 @@ func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float64) (x, y float64
 		return // No intersection or is tangent
 	}
 
-	D = math.Sqrt(D)
+	D = mat32.Sqrt(D)
 	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
 	p1OnSide := t1 > 0
 	p2OnSide := t2 > 0

@@ -141,7 +141,7 @@ func BenchmarkDashGV(b *testing.B) {
 	)
 	b.ResetTimer()
 	d := NewDasher(wx, wy, scannerGV)
-	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float64{33, 12}, 0)
+	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
 	for i := 0; i < b.N; i++ {
 		p.AddTo(d)
 		d.Draw()
@@ -265,7 +265,7 @@ func TestRoundRect(t *testing.T) {
 
 }
 
-func isClose(a, b Matrix2D, epsilon float64) bool {
+func isClose(a, b Matrix2D, epsilon float32) bool {
 	if math.Abs(a.A-b.A) > epsilon ||
 		math.Abs(a.B-b.B) > epsilon ||
 		math.Abs(a.C-b.C) > epsilon ||
@@ -371,32 +371,32 @@ func TestShapes(t *testing.T) {
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scannerGV.Dest = imgs
-	d.SetStroke(10*64, 4*64, SquareCap, nil, RoundGap, ArcClip, []float64{33, 12}, 30)
+	d.SetStroke(10*64, 4*64, SquareCap, nil, RoundGap, ArcClip, []float32{33, 12}, 30)
 	doShapes(t, d, d, "testdata/shapeGVD0.png", imgs)
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scannerGV.Dest = imgs
-	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Miter, []float64{33, 12}, 250)
+	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Miter, []float32{33, 12}, 250)
 	doShapes(t, d, d, "testdata/shapeGVD1.png", imgs)
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scannerGV.Dest = imgs
-	d.SetStroke(10*64, 4*64, ButtCap, CubicCap, QuadraticGap, Arc, []float64{33, 12}, -30)
+	d.SetStroke(10*64, 4*64, ButtCap, CubicCap, QuadraticGap, Arc, []float32{33, 12}, -30)
 	doShapes(t, d, d, "testdata/shapeGVD2.png", imgs)
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scannerGV.Dest = imgs
-	d.SetStroke(10*64, 4*64, nil, QuadraticCap, RoundGap, MiterClip, []float64{12, 4}, 14)
+	d.SetStroke(10*64, 4*64, nil, QuadraticCap, RoundGap, MiterClip, []float32{12, 4}, 14)
 	doShapes(t, d, d, "testdata/shapeGVD3.png", imgs)
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scannerGV.Dest = imgs
-	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Bevel, []float64{0, 0}, 0)
+	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Bevel, []float32{0, 0}, 0)
 	doShapes(t, d, d, "testdata/shapeGVD4.png", imgs)
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scannerGV.Dest = imgs
-	d.SetStroke(10*64, 4*64, SquareCap, nil, nil, Round, []float64{}, 0)
+	d.SetStroke(10*64, 4*64, SquareCap, nil, nil, Round, []float32{}, 0)
 	doShapes(t, d, d, "testdata/shapeGVD5.png", imgs)
 
 	imgs = image.NewRGBA(image.Rect(0, 0, wx, wy))
@@ -529,8 +529,8 @@ func TestGradient(t *testing.T) {
 		scannerGV = NewScannerGV(wx, wy, img, img.Bounds())
 	)
 
-	linearGradient := &Gradient{Points: [5]float64{0, 0, 1, 0, 0},
-		IsRadial: false, Bounds: struct{ X, Y, W, H float64 }{
+	linearGradient := &Gradient{Points: [5]float32{0, 0, 1, 0, 0},
+		IsRadial: false, Bounds: struct{ X, Y, W, H float32 }{
 			X: 50, Y: 50, W: 100, H: 100}, Matrix: Identity}
 
 	linearGradient.Stops = []GradStop{
@@ -539,8 +539,8 @@ func TestGradient(t *testing.T) {
 		GradStop{StopColor: colornames.Darksalmon, Offset: 1.0, Opacity: .75},
 	}
 
-	radialGradient := &Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5},
-		IsRadial: true, Bounds: struct{ X, Y, W, H float64 }{
+	radialGradient := &Gradient{Points: [5]float32{0.5, 0.5, 0.5, 0.5, 0.5},
+		IsRadial: true, Bounds: struct{ X, Y, W, H float32 }{
 			X: 230, Y: 230, W: 100, H: 100},
 		Matrix: Identity, Spread: ReflectSpread}
 
@@ -551,7 +551,7 @@ func TestGradient(t *testing.T) {
 	}
 
 	d := NewDasher(wx, wy, scannerGV)
-	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float64{33, 12}, 0)
+	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
 	// p is in the shape of a capital Q
 	p := getPartPath()
 
@@ -606,7 +606,7 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	radialGradient.Units = ObjectBoundingBox
-	radialGradient.Points = [5]float64{0.5, 0.5, 0, 0, 0.2} // move focus away from
+	radialGradient.Points = [5]float32{0.5, 0.5, 0, 0, 0.2} // move focus away from
 	scannerGV.SetColor(radialGradient.GetColorFunction(1.0))
 	AddRect(300, 210, 450, 300, 0, f)
 	f.Draw()
@@ -614,7 +614,7 @@ func TestGradient(t *testing.T) {
 
 	radialGradient.Units = UserSpaceOnUse
 	linearGradient.Spread = PadSpread
-	radialGradient.Points = [5]float64{0.5, 0.5, 0.1, 0.1, 0.5} // move focus away from center
+	radialGradient.Points = [5]float32{0.5, 0.5, 0.1, 0.1, 0.5} // move focus away from center
 	scannerGV.SetColor(radialGradient.GetColorFunction(1.0))
 	AddRect(20, 160, 150, 310, 0, f)
 	f.Draw()
@@ -634,8 +634,8 @@ func TestGradient(t *testing.T) {
 
 	// Lets try a sinusoidal grid pattern.
 	var colF ColorFunc = func(x, y int) color.Color {
-		sinx, siny, sinxy := math.Sin(float64(x)*math.Pi/20), math.Sin(float64(y)*math.Pi/10),
-			math.Sin(float64(y+x)*math.Pi/30)
+		sinx, siny, sinxy := math.Sin(float32(x)*math.Pi/20), math.Sin(float32(y)*math.Pi/10),
+			math.Sin(float32(y+x)*math.Pi/30)
 		r := (1 + sinx) * 120
 		g := (1 + siny) * 120
 		b := (1 + sinxy) * 120
@@ -666,7 +666,7 @@ func TestMultiFunctionGV(t *testing.T) {
 
 	scannerGV.SetColor(colornames.Cornflowerblue)
 	d := NewDasher(wx, wy, scannerGV)
-	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float64{33, 12}, 0)
+	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
 	// p is in the shape of a capital Q
 	p := GetTestPath()
 

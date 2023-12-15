@@ -80,7 +80,7 @@ func CompareSpanners(t *testing.T, file string, img1, img2 *image.RGBA, width, h
 		t.FailNow()
 	}
 
-	icon.SetTarget(float64(0), float64(0), float64(width), float64(height))
+	icon.SetTarget(float32(0), float32(0), float32(width), float32(height))
 	if testImg {
 		spanner := scanx.NewImgSpanner(img1)
 		spanner.Op = op
@@ -161,7 +161,7 @@ func CompareSpannersX(t *testing.T, file string, img1, img2 *xgraphics.Image, wi
 		t.FailNow()
 	}
 
-	icon.SetTarget(float64(0), float64(0), float64(width), float64(height))
+	icon.SetTarget(float32(0), float32(0), float32(width), float32(height))
 
 	if testImg {
 		spanner := scanx.NewImgSpanner(img1)

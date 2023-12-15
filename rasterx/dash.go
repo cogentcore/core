@@ -83,7 +83,7 @@ func (r *Dasher) lineF(b fixed.Point26_6) {
 // line ends. If one is nil, the other function is used at both ends. gp is the gap function that determines how a
 // gap on the convex side of two lines joining is filled. jm is the JoinMode for curve segments. Dashes is the values for
 // the dash pattern. Pass in nil or an empty slice for no dashes. dashoffset is the starting offset into the dash array.
-func (r *Dasher) SetStroke(width, miterLimit fixed.Int26_6, capL, capT CapFunc, gp GapFunc, jm JoinMode, dashes []float64, dashOffset float64) {
+func (r *Dasher) SetStroke(width, miterLimit fixed.Int26_6, capL, capT CapFunc, gp GapFunc, jm JoinMode, dashes []float32, dashOffset float32) {
 	r.Stroker.SetStroke(width, miterLimit, capL, capT, gp, jm)
 
 	r.Dashes = r.Dashes[:0] // clear the dash array
