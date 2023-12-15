@@ -201,14 +201,14 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 			// t is just distance from center
 			// scaled by the bounds aspect ratio times r
 			if g.Units == ObjectBoundingBox {
-				return FuncRender(func(xi, yi int) color.Color {
-					pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
+				return FuncRender(func(x, y int) color.Color {
+					pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
 					d := pt.Sub(c)
 					return g.tColor(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
 				})
 			}
-			return FuncRender(func(xi, yi int) color.Color {
-				pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
+			return FuncRender(func(x, y int) color.Color {
+				pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
 				d := pt.Sub(c)
 				return g.tColor(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
 			})
@@ -227,8 +227,8 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 			}
 		}
 		if g.Units == ObjectBoundingBox {
-			return FuncRender(func(xi, yi int) color.Color {
-				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
+			return FuncRender(func(x, y int) color.Color {
+				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
 				e := pt.Div(r)
 
 				t1, intersects := RayCircleIntersectionF(e, f, c, 1)
@@ -245,8 +245,8 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 				return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 			})
 		}
-		return FuncRender(func(xi, yi int) color.Color {
-			pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
+		return FuncRender(func(x, y int) color.Color {
+			pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
 			e := pt.Div(r)
 
 			t1, intersects := RayCircleIntersectionF(e, f, c, 1)
@@ -270,8 +270,8 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 
 		d := e.Sub(s)
 		dd := d.X*d.X + d.Y*d.Y // self inner prod
-		return FuncRender(func(xi, yi int) color.Color {
-			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
+		return FuncRender(func(x, y int) color.Color {
+			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
 			df := pt.Sub(s)
 			return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
 		})
@@ -286,8 +286,8 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	// if dd == 0.0 {
 	// 	fmt.Println("zero delta")
 	// }
-	return FuncRender(func(xi, yi int) color.Color {
-		pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
+	return FuncRender(func(x, y int) color.Color {
+		pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
 		df := pt.Sub(s)
 		return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
 	})
