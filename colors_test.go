@@ -190,7 +190,7 @@ func ExampleOpaquer() {
 }
 
 func ExampleBlend() {
-	fmt.Println(Blend(30, Lightblue, Darkblue))
+	fmt.Println(BlendRGB(30, Lightblue, Darkblue))
 	// Output: {52 65 166 255}
 }
 

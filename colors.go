@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"goki.dev/cam/cam16"
 	"goki.dev/cam/hct"
 	"goki.dev/cam/hsl"
 	"goki.dev/mat32/v2"
@@ -209,7 +210,7 @@ func FromString(str string, base ...color.Color) (color.RGBA, error) {
 				val := float32(val64)
 				clrstr := valstr[clridx+1:]
 				othc, err := FromString(clrstr, bc)
-				return Blend(val, bc, othc), err
+				return hct.Blend(val, bc, othc), err
 			}
 		}
 		switch lstr {
@@ -359,10 +360,24 @@ func Opaquer(c color.Color, amount float32) color.RGBA {
 }
 
 // Blend returns a color that is the given percent blend between the first
-// and second color; 10 = 10% of the first and 90% of the second, etc;
-// blending is done directly on non-premultiplied RGB values, and
+// and second color; 10 = 10% of the first and 90% of the second, etc.
+// Blending is done using the given blending algorithm.
+func Blend(bt BlendTypes, pct float32, x, y color.Color) color.RGBA {
+	switch bt {
+	case HCT:
+		return hct.Blend(pct, x, y)
+	case CAM16:
+		return cam16.Blend(pct, x, y)
+	default:
+		return BlendRGB(pct, x, y)
+	}
+}
+
+// BlendRGB returns a color that is the given percent blend between the first
+// and second color; 10 = 10% of the first and 90% of the second, etc.
+// Blending is done directly on non-premultiplied RGB values, and
 // a correctly premultiplied color is returned.
-func Blend(pct float32, x, y color.Color) color.RGBA {
+func BlendRGB(pct float32, x, y color.Color) color.RGBA {
 	fx := NRGBAF32Model.Convert(x).(NRGBAF32)
 	fy := NRGBAF32Model.Convert(y).(NRGBAF32)
 	pct = mat32.Clamp(pct, 0, 100.0)

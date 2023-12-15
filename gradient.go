@@ -12,7 +12,6 @@ import (
 	"image/color"
 	"sort"
 
-	"goki.dev/cam/hct"
 	"goki.dev/mat32/v2"
 )
 
@@ -317,36 +316,6 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	})
 }
 
-// ApplyTransform transforms the points for the gradient if it has
-// [UserSpaceOnUse] units, using the given transform matrix.
-func (g *Gradient) ApplyTransform(xf mat32.Mat2) {
-	if g.Units == ObjectBoundingBox {
-		return
-	}
-	rot := xf.ExtractRot()
-	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
-		g.Matrix = g.Matrix.Mul(xf)
-	} else {
-		g.Bounds.Min = xf.MulVec2AsPt(g.Bounds.Min)
-		g.Bounds.Max = xf.MulVec2AsPt(g.Bounds.Max)
-	}
-}
-
-// ApplyTransformPt transforms the points for the gradient if it has
-// [UserSpaceOnUse] units, using the given transform matrix and center point.
-func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
-	if g.Units == ObjectBoundingBox {
-		return
-	}
-	rot := xf.ExtractRot()
-	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
-		g.Matrix = g.Matrix.MulCtr(xf, pt)
-	} else {
-		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)
-		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
-	}
-}
-
 // ColorAt takes the given paramaterized value along the gradient's stops and
 // returns a color depending on [Gradient.Spread] and [Gradient.Stops].
 func (g *Gradient) ColorAt(v, opacity float32) color.Color {
@@ -438,7 +407,37 @@ func (g *Gradient) BlendStops(v, opacity float32, s1, s2 GradientStop, flip bool
 	}
 	tp := (v - s1off) / (s2.Offset - s1off)
 
-	return ApplyOpacity(hct.Blend(100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
+	return ApplyOpacity(Blend(g.Blend, 100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
+}
+
+// ApplyTransform transforms the points for the gradient if it has
+// [UserSpaceOnUse] units, using the given transform matrix.
+func (g *Gradient) ApplyTransform(xf mat32.Mat2) {
+	if g.Units == ObjectBoundingBox {
+		return
+	}
+	rot := xf.ExtractRot()
+	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+		g.Matrix = g.Matrix.Mul(xf)
+	} else {
+		g.Bounds.Min = xf.MulVec2AsPt(g.Bounds.Min)
+		g.Bounds.Max = xf.MulVec2AsPt(g.Bounds.Max)
+	}
+}
+
+// ApplyTransformPt transforms the points for the gradient if it has
+// [UserSpaceOnUse] units, using the given transform matrix and center point.
+func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
+	if g.Units == ObjectBoundingBox {
+		return
+	}
+	rot := xf.ExtractRot()
+	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+		g.Matrix = g.Matrix.MulCtr(xf, pt)
+	} else {
+		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)
+		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
+	}
 }
 
 // RayCircleIntersectionF calculates in floating point the points of intersection of
