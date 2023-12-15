@@ -253,19 +253,19 @@ func (x *LinkListSpanner) SpanOver(yi, xi0, xi1 int, ma uint32) {
 	}
 }
 
-// SetBgColor sets the background color for blending
-func (x *LinkListSpanner) SetBgColor(c interface{}) {
-	x.bgColor = getColorRGBA(c)
+// SetBgColor sets the background color for blending to the solid part of the given color
+func (x *LinkListSpanner) SetBgColor(c *colors.Render) {
+	x.bgColor = c.Solid
 }
 
-// SetColor sets the color of x if it is a color.Color and ignores a rasterx.ColorFunction
-func (x *LinkListSpanner) SetColor(c interface{}) {
-	x.fgColor = getColorRGBA(c)
+// SetColor sets the color of x to the solid part of the given color
+func (x *LinkListSpanner) SetColor(c *colors.Render) {
+	x.fgColor = c.Solid
 }
 
 // NewImgSpanner returns an ImgSpanner set to draw to the img.
-// Img argument must be a *xgraphics.Image or *image.Image type
-func NewImgSpanner(img interface{}) (x *ImgSpanner) {
+// Img argument must be a *xgraphics.Image or *image.RGBA type
+func NewImgSpanner[I *xgraphics.Image | *image.RGBA](img I) (x *ImgSpanner) {
 	x = &ImgSpanner{}
 	x.SetImage(img)
 	return
@@ -288,22 +288,12 @@ func (x *ImgSpanner) SetImage(img interface{}) {
 }
 
 // SetColor sets the color of x to either a color.Color or a rasterx.ColorFunction
-func (x *ImgSpanner) SetColor(c interface{}) {
-	switch c := c.(type) {
-	case color.Color:
-		x.colorFunc = nil
-		r, g, b, a := c.RGBA()
-		if x.xpixel == true { // apparently r and b values swap in xgraphics.Image
-			r, b = b, r
-		}
-		x.fgColor = color.RGBA{
-			R: uint8(r >> 8),
-			G: uint8(g >> 8),
-			B: uint8(b >> 8),
-			A: uint8(a >> 8)}
-	case colors.Func:
-		x.colorFunc = c
+func (x *ImgSpanner) SetColor(c *colors.Render) {
+	if c.Func != nil {
+		x.colorFunc = c.Func
+		return
 	}
+	x.fgColor = c.Solid
 }
 
 // GetSpanFunc returns the function that consumes a span described by the parameters.

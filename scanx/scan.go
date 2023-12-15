@@ -22,6 +22,7 @@ import (
 	"image"
 	"math"
 
+	"goki.dev/colors"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -30,7 +31,7 @@ type (
 	SpanFunc func(yi, xi0, xi1 int, alpha uint32)
 	//Spanner consumes spans as they are created by the Scanner Draw function
 	Spanner interface {
-		SetColor(color interface{})
+		SetColor(color *colors.Render)
 		// This returns a function that is efficent given the Spanner parameters.
 		GetSpanFunc() SpanFunc
 	}
@@ -91,13 +92,13 @@ func (s *Scanner) set(a fixed.Point26_6) {
 	}
 }
 
-//SetWinding set the winding rule for the polygons
+// SetWinding set the winding rule for the polygons
 func (s *Scanner) SetWinding(useNonZeroWinding bool) {
 	s.UseNonZeroWinding = useNonZeroWinding
 }
 
-//SetColor accepts either a Color or ColorFunc
-func (s *Scanner) SetColor(clr interface{}) {
+// SetColor sets the color used for rendering.
+func (s *Scanner) SetColor(clr *colors.Render) {
 	s.spanner.SetColor(clr)
 }
 
@@ -419,7 +420,7 @@ func (s *Scanner) Draw() {
 	}
 }
 
-//GetPathExtent returns the bounds of the accumulated path extent
+// GetPathExtent returns the bounds of the accumulated path extent
 func (s *Scanner) GetPathExtent() fixed.Rectangle26_6 {
 	return fixed.Rectangle26_6{
 		Min: fixed.Point26_6{X: s.minX, Y: s.minY},
