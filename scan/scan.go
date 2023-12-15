@@ -33,69 +33,70 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-type (
-	// SpanFunc type for span functions
-	SpanFunc func(yi, xi0, xi1 int, alpha uint32)
-	//Spanner consumes spans as they are created by the Scanner Draw function
-	Spanner interface {
-		SetColor(color colors.Render)
-		// This returns a function that is efficient given the Spanner parameters.
-		GetSpanFunc() SpanFunc
+// Scanner is a refactored version of the freetype scanner
+type Scanner struct {
+	// If false, the behavior is to use the even-odd winding fill
+	// rule during Rasterize.
+	UseNonZeroWinding bool
+
+	// The Width of the Rasterizer. The height is implicit in len(cellIndex).
+	Width int
+
+	// The current pen position.
+	A fixed.Point26_6
+
+	// The current cell and its area/coverage being accumulated.
+	Xi, Yi int
+	Area   int
+	Cover  int
+
+	// The clip bounds of the scanner
+	Clip image.Rectangle
+
+	// The saved cells.
+	Cell []Cell
+
+	// Linked list of cells, one per row.
+	CellIndex []int
+
+	// The spanner that we use.
+	Spanner Spanner
+
+	// The bounds.
+	MinX, MinY, MaxX, MaxY fixed.Int26_6
+}
+
+// SpanFunc is the type of a span function
+type SpanFunc func(yi, xi0, xi1 int, alpha uint32)
+
+// A Spanner consumes spans as they are created by the Scanner Draw function
+type Spanner interface {
+	SetColor(color colors.Render)
+	// This returns a function that is efficient given the Spanner parameters.
+	GetSpanFunc() SpanFunc
+}
+
+// Cell is part of a linked list (for a given yi co-ordinate) of accumulated
+// area/coverage for the pixel at (xi, yi).
+type Cell struct {
+	Xi    int
+	Area  int
+	Cover int
+	Next  int
+}
+
+func (s *Scanner) Set(a fixed.Point26_6) {
+	if s.MaxX < a.X {
+		s.MaxX = a.X
 	}
-
-	// cell is part of a linked list (for a given yi co-ordinate) of accumulated
-	// area/coverage for the pixel at (xi, yi).
-	cell struct {
-		xi          int
-		area, cover int
-		next        int
+	if s.MaxY < a.Y {
+		s.MaxY = a.Y
 	}
-
-	// A Span is a horizontal segment of pixels with constant alpha. X0 is an
-	// inclusive bound and X1 is exclusive, the same as for slices. A fully opaque
-	// Span has Alpha == 0xffff.
-	// Span struct {
-	// 	Y, X0, X1 int
-	// 	Alpha     uint32
-	// }
-
-	// Scanner is a refactored version of the free type scanner
-	Scanner struct {
-		// If false, the behavior is to use the even-odd winding fill
-		// rule during Rasterize.
-		UseNonZeroWinding bool
-
-		// The width of the Rasterizer. The height is implicit in len(cellIndex).
-		width int
-
-		// The current pen position.
-		a fixed.Point26_6
-		// The current cell and its area/coverage being accumulated.
-		xi, yi      int
-		area, cover int
-		clip        image.Rectangle
-
-		// Saved cells.
-		cell []cell
-		// Linked list of cells, one per row.
-		cellIndex              []int
-		Spanner                Spanner
-		minX, minY, maxX, maxY fixed.Int26_6 // keep track of bounds
+	if s.MinX > a.X {
+		s.MinX = a.X
 	}
-)
-
-func (s *Scanner) set(a fixed.Point26_6) {
-	if s.maxX < a.X {
-		s.maxX = a.X
-	}
-	if s.maxY < a.Y {
-		s.maxY = a.Y
-	}
-	if s.minX > a.X {
-		s.minX = a.X
-	}
-	if s.minY > a.Y {
-		s.minY = a.Y
+	if s.MinY > a.Y {
+		s.MinY = a.Y
 	}
 }
 
@@ -109,61 +110,61 @@ func (s *Scanner) SetColor(clr colors.Render) {
 	s.Spanner.SetColor(clr)
 }
 
-// findCell returns the index in r.cell for the cell corresponding to
+// FindCell returns the index in [Scanner.Cell] for the cell corresponding to
 // (r.xi, r.yi). The cell is created if necessary.
-func (s *Scanner) findCell() int {
-	yi := s.yi
-	if yi < 0 || yi >= len(s.cellIndex) {
+func (s *Scanner) FindCell() int {
+	yi := s.Yi
+	if yi < 0 || yi >= len(s.CellIndex) {
 		return -1
 	}
-	xi := s.xi
+	xi := s.Xi
 	if xi < 0 {
 		xi = -1
-	} else if xi > s.width {
-		xi = s.width
+	} else if xi > s.Width {
+		xi = s.Width
 	}
-	i, prev := s.cellIndex[yi], -1
-	for i != -1 && s.cell[i].xi <= xi {
-		if s.cell[i].xi == xi {
+	i, prev := s.CellIndex[yi], -1
+	for i != -1 && s.Cell[i].Xi <= xi {
+		if s.Cell[i].Xi == xi {
 			return i
 		}
-		i, prev = s.cell[i].next, i
+		i, prev = s.Cell[i].Next, i
 	}
-	c := len(s.cell)
-	s.cell = append(s.cell, cell{xi, 0, 0, i})
+	c := len(s.Cell)
+	s.Cell = append(s.Cell, Cell{xi, 0, 0, i})
 	if prev == -1 {
-		s.cellIndex[yi] = c
+		s.CellIndex[yi] = c
 	} else {
-		s.cell[prev].next = c
+		s.Cell[prev].Next = c
 	}
 	return c
 }
 
-// saveCell saves any accumulated r.area/r.cover for (r.xi, r.yi).
-func (s *Scanner) saveCell() {
-	if s.area != 0 || s.cover != 0 {
-		i := s.findCell()
+// SaveCell saves any accumulated [Scanner.Area] or [Scanner.Cover] for ([Scanner.Xi], [Scanner.Yi]).
+func (s *Scanner) SaveCell() {
+	if s.Area != 0 || s.Cover != 0 {
+		i := s.FindCell()
 		if i != -1 {
-			s.cell[i].area += s.area
-			s.cell[i].cover += s.cover
+			s.Cell[i].Area += s.Area
+			s.Cell[i].Cover += s.Cover
 		}
-		s.area = 0
-		s.cover = 0
+		s.Area = 0
+		s.Cover = 0
 	}
 }
 
-// setCell sets the (xi, yi) cell that r is accumulating area/coverage for.
-func (s *Scanner) setCell(xi, yi int) {
-	if s.xi != xi || s.yi != yi {
-		s.saveCell()
-		s.xi, s.yi = xi, yi
+// SetCell sets the (xi, yi) cell that r is accumulating area/coverage for.
+func (s *Scanner) SetCell(xi, yi int) {
+	if s.Xi != xi || s.Yi != yi {
+		s.SaveCell()
+		s.Xi, s.Yi = xi, yi
 	}
 }
 
-// scan accumulates area/coverage for the yi'th scanline, going from
+// Scan accumulates area/coverage for the yi'th scanline, going from
 // x0 to x1 in the horizontal direction (in 26.6 fixed point co-ordinates)
 // and from y0f to y1f fractional vertical units within that scanline.
-func (s *Scanner) scan(yi int, x0, y0f, x1, y1f fixed.Int26_6) {
+func (s *Scanner) Scan(yi int, x0, y0f, x1, y1f fixed.Int26_6) {
 	// Break the 26.6 fixed point X co-ordinates into integral and fractional parts.
 	x0i := int(x0) / 64
 	x0f := x0 - fixed.Int26_6(64*x0i)
@@ -172,14 +173,14 @@ func (s *Scanner) scan(yi int, x0, y0f, x1, y1f fixed.Int26_6) {
 
 	// A perfectly horizontal scan.
 	if y0f == y1f {
-		s.setCell(x1i, yi)
+		s.SetCell(x1i, yi)
 		return
 	}
 	dx, dy := x1-x0, y1f-y0f
 	// A single cell scan.
 	if x0i == x1i {
-		s.area += int((x0f + x1f) * dy)
-		s.cover += int(dy)
+		s.Area += int((x0f + x1f) * dy)
+		s.Cover += int(dy)
 		return
 	}
 	// There are at least two cells. Apart from the first and last cells,
@@ -203,10 +204,10 @@ func (s *Scanner) scan(yi int, x0, y0f, x1, y1f fixed.Int26_6) {
 	}
 	// Do the first cell.
 	xi, y := x0i, y0f
-	s.area += int((x0f + edge1) * yDelta)
-	s.cover += int(yDelta)
+	s.Area += int((x0f + edge1) * yDelta)
+	s.Cover += int(yDelta)
 	xi, y = xi+xiDelta, y+yDelta
-	s.setCell(xi, yi)
+	s.SetCell(xi, yi)
 	if xi != x1i {
 		// Do all the intermediate cells.
 		p = 64 * (y1f - y + yDelta)
@@ -223,29 +224,29 @@ func (s *Scanner) scan(yi int, x0, y0f, x1, y1f fixed.Int26_6) {
 				yDelta++
 				yRem -= q
 			}
-			s.area += int(64 * yDelta)
-			s.cover += int(yDelta)
+			s.Area += int(64 * yDelta)
+			s.Cover += int(yDelta)
 			xi, y = xi+xiDelta, y+yDelta
-			s.setCell(xi, yi)
+			s.SetCell(xi, yi)
 		}
 	}
 	// Do the last cell.
 	yDelta = y1f - y
-	s.area += int((edge0 + x1f) * yDelta)
-	s.cover += int(yDelta)
+	s.Area += int((edge0 + x1f) * yDelta)
+	s.Cover += int(yDelta)
 }
 
 // Start starts a new path at the given point.
 func (s *Scanner) Start(a fixed.Point26_6) {
-	s.set(a)
-	s.setCell(int(a.X/64), int(a.Y/64))
-	s.a = a
+	s.Set(a)
+	s.SetCell(int(a.X/64), int(a.Y/64))
+	s.A = a
 }
 
 // Line adds a linear segment to the current curve.
 func (s *Scanner) Line(b fixed.Point26_6) {
-	s.set(b)
-	x0, y0 := s.a.X, s.a.Y
+	s.Set(b)
+	x0, y0 := s.A.X, s.A.Y
 	x1, y1 := b.X, b.Y
 	dx, dy := x1-x0, y1-y0
 	// Break the 26.6 fixed point Y co-ordinates into integral and fractional
@@ -257,7 +258,7 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 
 	if y0i == y1i {
 		// There is only one scanline.
-		s.scan(y0i, x0, y0f, x1, y1f)
+		s.Scan(y0i, x0, y0f, x1, y1f)
 
 	} else if dx == 0 {
 		// This is a vertical line segment. We avoid calling r.scan and instead
@@ -276,24 +277,24 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 		// Do the first pixel.
 		dcover := int(edge1 - y0f)
 		darea := int(x0fTimes2 * dcover)
-		s.area += darea
-		s.cover += dcover
+		s.Area += darea
+		s.Cover += dcover
 		yi += yiDelta
-		s.setCell(x0i, yi)
+		s.SetCell(x0i, yi)
 		// Do all the intermediate pixels.
 		dcover = int(edge1 - edge0)
 		darea = int(x0fTimes2 * dcover)
 		for yi != y1i {
-			s.area += darea
-			s.cover += dcover
+			s.Area += darea
+			s.Cover += dcover
 			yi += yiDelta
-			s.setCell(x0i, yi)
+			s.SetCell(x0i, yi)
 		}
 		// Do the last pixel.
 		dcover = int(y1f - edge0)
 		darea = int(x0fTimes2 * dcover)
-		s.area += darea
-		s.cover += dcover
+		s.Area += darea
+		s.Cover += dcover
 
 	} else {
 		// There are at least two scanlines. Apart from the first and last
@@ -317,9 +318,9 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 		}
 		// Do the first scanline.
 		x, yi := x0, y0i
-		s.scan(yi, x, y0f, x+xDelta, edge1)
+		s.Scan(yi, x, y0f, x+xDelta, edge1)
 		x, yi = x+xDelta, yi+yiDelta
-		s.setCell(int(x)/64, yi)
+		s.SetCell(int(x)/64, yi)
 		if yi != y1i {
 			// Do all the intermediate scanlines.
 			p = 64 * dx
@@ -336,23 +337,23 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 					xDelta++
 					xRem -= q
 				}
-				s.scan(yi, x, edge0, x+xDelta, edge1)
+				s.Scan(yi, x, edge0, x+xDelta, edge1)
 				x, yi = x+xDelta, yi+yiDelta
-				s.setCell(int(x)/64, yi)
+				s.SetCell(int(x)/64, yi)
 			}
 		}
 		// Do the last scanline.
-		s.scan(yi, x, edge0, x1, y1f)
+		s.Scan(yi, x, edge0, x1, y1f)
 	}
 	// The next lineTo starts from b.
-	s.a = b
+	s.A = b
 }
 
-// areaToAlpha converts an area value to a uint32 alpha value. A completely
+// AreaToAlpha converts an area value to a uint32 alpha value. A completely
 // filled pixel corresponds to an area of 64*64*2, and an alpha of 0xffff. The
 // conversion of area values greater than this depends on the winding rule:
 // even-odd or non-zero.
-func (s *Scanner) areaToAlpha(area int) uint32 {
+func (s *Scanner) AreaToAlpha(area int) uint32 {
 	// The C Freetype implementation (version 2.3.12) does "alpha := area>>1"
 	// without the +1. Round-to-nearest gives a more symmetric result than
 	// round-down. The C implementation also returns 8-bit alpha, not 16-bit
@@ -384,19 +385,19 @@ func (s *Scanner) areaToAlpha(area int) uint32 {
 // width (and 0 <= X0 < X1 <= r.width) and non-zero A, except for the final
 // Span, which has Y, X0, X1 and A all equal to zero.
 func (s *Scanner) Draw() {
-	b := image.Rect(0, 0, s.width, len(s.cellIndex))
-	if s.clip.Dx() != 0 && s.clip.Dy() != 0 {
-		b = b.Intersect(s.clip)
+	b := image.Rect(0, 0, s.Width, len(s.CellIndex))
+	if s.Clip.Dx() != 0 && s.Clip.Dy() != 0 {
+		b = b.Intersect(s.Clip)
 	}
-	s.saveCell()
+	s.SaveCell()
 	span := s.Spanner.GetSpanFunc()
 	for yi := b.Min.Y; yi < b.Max.Y; yi++ {
 		xi, cover := 0, 0
-		for c := s.cellIndex[yi]; c != -1; c = s.cell[c].next {
-			if cover != 0 && s.cell[c].xi > xi {
-				alpha := s.areaToAlpha(cover * 64 * 2)
+		for c := s.CellIndex[yi]; c != -1; c = s.Cell[c].Next {
+			if cover != 0 && s.Cell[c].Xi > xi {
+				alpha := s.AreaToAlpha(cover * 64 * 2)
 				if alpha != 0 {
-					xi0, xi1 := xi, s.cell[c].xi
+					xi0, xi1 := xi, s.Cell[c].Xi
 					if xi0 < b.Min.X {
 						xi0 = b.Min.X
 					}
@@ -408,11 +409,11 @@ func (s *Scanner) Draw() {
 					}
 				}
 			}
-			cover += s.cell[c].cover
-			alpha := s.areaToAlpha(cover*64*2 - s.cell[c].area)
-			xi = s.cell[c].xi + 1
+			cover += s.Cell[c].Cover
+			alpha := s.AreaToAlpha(cover*64*2 - s.Cell[c].Area)
+			xi = s.Cell[c].Xi + 1
 			if alpha != 0 {
-				xi0, xi1 := s.cell[c].xi, xi
+				xi0, xi1 := s.Cell[c].Xi, xi
 				if xi0 < b.Min.X {
 					xi0 = b.Min.X
 				}
@@ -430,23 +431,23 @@ func (s *Scanner) Draw() {
 // GetPathExtent returns the bounds of the accumulated path extent
 func (s *Scanner) GetPathExtent() fixed.Rectangle26_6 {
 	return fixed.Rectangle26_6{
-		Min: fixed.Point26_6{X: s.minX, Y: s.minY},
-		Max: fixed.Point26_6{X: s.maxX, Y: s.maxY}}
+		Min: fixed.Point26_6{X: s.MinX, Y: s.MinY},
+		Max: fixed.Point26_6{X: s.MaxX, Y: s.MaxY}}
 }
 
 // Clear cancels any previous accumulated scans
 func (s *Scanner) Clear() {
-	s.a = fixed.Point26_6{}
-	s.xi = 0
-	s.yi = 0
-	s.area = 0
-	s.cover = 0
-	s.cell = s.cell[:0]
-	for i := 0; i < len(s.cellIndex); i++ {
-		s.cellIndex[i] = -1
+	s.A = fixed.Point26_6{}
+	s.Xi = 0
+	s.Yi = 0
+	s.Area = 0
+	s.Cover = 0
+	s.Cell = s.Cell[:0]
+	for i := 0; i < len(s.CellIndex); i++ {
+		s.CellIndex[i] = -1
 	}
 	const mxfi = fixed.Int26_6(math.MaxInt32)
-	s.minX, s.minY, s.maxX, s.maxY = mxfi, mxfi, -mxfi, -mxfi
+	s.MinX, s.MinY, s.MaxX, s.MaxY = mxfi, mxfi, -mxfi, -mxfi
 }
 
 // SetBounds sets the maximum width and height of the rasterized image and
@@ -458,14 +459,14 @@ func (s *Scanner) SetBounds(width, height int) {
 	if height < 0 {
 		height = 0
 	}
-	s.width = width
-	s.cell = s.cell[:0]
-	if height > cap(s.cellIndex) {
-		s.cellIndex = make([]int, height)
+	s.Width = width
+	s.Cell = s.Cell[:0]
+	if height > cap(s.CellIndex) {
+		s.CellIndex = make([]int, height)
 	}
 	// Make sure length of cellIndex = height
-	s.cellIndex = s.cellIndex[0:height]
-	s.width = width
+	s.CellIndex = s.CellIndex[0:height]
+	s.Width = width
 	s.Clear()
 }
 
@@ -479,5 +480,5 @@ func NewScanner(xs Spanner, width, height int) (sc *Scanner) {
 // SetClip will not affect accumulation of scans, but it will
 // clip drawing of the spans int the Draw func by the clip rectangle.
 func (s *Scanner) SetClip(r image.Rectangle) {
-	s.clip = r
+	s.Clip = r
 }
