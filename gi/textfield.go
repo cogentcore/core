@@ -1269,7 +1269,7 @@ func (tf *TextField) RenderSelect() {
 
 	pc := &tf.Sc.PaintContext
 	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(spos, mat32.NewVec2(tsz, tf.FontHeight), &tf.SelectColor)
+	pc.FillBox(spos, mat32.NewVec2(tsz, tf.FontHeight), tf.SelectColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible

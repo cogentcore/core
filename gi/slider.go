@@ -536,8 +536,8 @@ func (sr *Slider) RenderSlider() {
 			origsz := sz.Dim(od)
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
-			vabg := sr.Styles.ComputeActualBackgroundColorFor(&sr.ValueColor, pabg)
-			pc.FillStyle.SetFullColor(&vabg)
+			vabg := sr.Styles.ComputeActualBackgroundColorFor(sr.ValueColor, pabg)
+			pc.FillStyle.SetFullColor(vabg)
 			sr.RenderBoxImpl(tpos, tsz, st.Border) // thumb
 		}
 		sr.RenderUnlock()
@@ -551,13 +551,13 @@ func (sr *Slider) RenderSlider() {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		pc.FillStyle.SetFullColor(&sr.Styles.ActualBackgroundColor)
+		pc.FillStyle.SetFullColor(sr.Styles.ActualBackgroundColor)
 		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
 
 		if !sr.ValueColor.IsNil() {
 			bsz.SetDim(sr.Dim, sr.Pos)
-			vabg := sr.Styles.ComputeActualBackgroundColorFor(&sr.ValueColor, pabg)
-			pc.FillStyle.SetFullColor(&vabg)
+			vabg := sr.Styles.ComputeActualBackgroundColorFor(sr.ValueColor, pabg)
+			pc.FillStyle.SetFullColor(vabg)
 			sr.RenderBoxImpl(bpos, bsz, st.Border)
 		}
 
@@ -577,8 +577,8 @@ func (sr *Slider) RenderSlider() {
 			ic.SetBBoxes()
 			sr.Parts.Render()
 		} else {
-			tabg := sr.Styles.ComputeActualBackgroundColorFor(&sr.ThumbColor, pabg)
-			pc.FillStyle.SetFullColor(&tabg)
+			tabg := sr.Styles.ComputeActualBackgroundColorFor(sr.ThumbColor, pabg)
+			pc.FillStyle.SetFullColor(tabg)
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxImpl(tpos, thsz, st.Border)
 			sr.RenderUnlock()

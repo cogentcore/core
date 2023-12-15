@@ -197,7 +197,7 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 			}
 		}
 		if lstdp > 0 {
-			ed.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, &cspec)
+			ed.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, cspec)
 		}
 	}
 }
@@ -311,7 +311,7 @@ func (ed *Editor) RenderAllLines() {
 	bb := ed.Geom.ContentBBox
 	bbmin := mat32.NewVec2FmPoint(bb.Min)
 	bbmax := mat32.NewVec2FmPoint(bb.Max)
-	pc.FillBox(bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
+	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.BackgroundColor)
 	pos := ed.RenderStartPos()
 	stln := -1
 	edln := -1
