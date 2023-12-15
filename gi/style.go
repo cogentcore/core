@@ -246,12 +246,12 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 // ParentActualBackgroundColor returns the actual background color of
 // the parent of the widget. If it has no parent, it returns a transparent
 // color.
-func (wb *WidgetBase) ParentActualBackgroundColor() *colors.Full {
+func (wb *WidgetBase) ParentActualBackgroundColor() colors.Full {
 	_, pw := wb.ParentWidget()
 	if pw == nil {
-		return &colors.Full{}
+		return colors.Full{}
 	}
-	return &pw.Styles.ActualBackgroundColor
+	return pw.Styles.ActualBackgroundColor
 }
 
 // IsNthChild returns whether the node is nth-child of its parent
