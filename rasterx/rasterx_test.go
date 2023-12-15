@@ -5,7 +5,6 @@ package rasterx
 import (
 	"image"
 	"image/color"
-	"math"
 
 	"testing"
 
@@ -540,16 +539,16 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	// Lets try a sinusoidal grid pattern.
-	var colF ColorFunc = func(x, y int) color.Color {
-		sinx, siny, sinxy := math.Sin(float32(x)*math.Pi/20), math.Sin(float32(y)*math.Pi/10),
-			math.Sin(float32(y+x)*math.Pi/30)
+	cf := func(x, y int) color.Color {
+		sinx, siny, sinxy := mat32.Sin(float32(x)*mat32.Pi/20), mat32.Sin(float32(y)*mat32.Pi/10),
+			mat32.Sin(float32(y+x)*mat32.Pi/30)
 		r := (1 + sinx) * 120
 		g := (1 + siny) * 120
 		b := (1 + sinxy) * 120
-		return &color.RGBA{uint8(r), uint8(g), uint8(b), 255}
+		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 	}
 
-	scannerGV.SetColor(colF)
+	scannerGV.SetColor(cf)
 	AddRect(20, 300, 150, 450, 0, f)
 
 	f.Draw()
