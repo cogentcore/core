@@ -417,14 +417,8 @@ func (g *Gradient) BlendStops(v, opacity float32, s1, s2 GradientStop, flip bool
 		v = 1 - v
 	}
 	tp := (v - s1off) / (s2.Offset - s1off)
-	r1, g1, b1, _ := s1.Color.RGBA()
-	r2, g2, b2, _ := s2.Color.RGBA()
 
-	return ApplyOpacity(color.RGBA{
-		uint8((float32(r1)*(1-tp) + float32(r2)*tp) / 256),
-		uint8((float32(g1)*(1-tp) + float32(g2)*tp) / 256),
-		uint8((float32(b1)*(1-tp) + float32(b2)*tp) / 256),
-		0xFF}, (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
+	return ApplyOpacity(Blend(100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
 }
 
 // RayCircleIntersectionF calculates in floating point the points of intersection of
