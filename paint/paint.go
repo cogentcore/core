@@ -13,7 +13,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"goki.dev/colors"
-	"goki.dev/girl/rasterx"
+	"goki.dev/girl/raster"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
@@ -229,38 +229,38 @@ func (pc *Context) NewSubPath() {
 
 // Path Drawing
 
-func (pc *Context) capfunc() rasterx.CapFunc {
+func (pc *Context) capfunc() raster.CapFunc {
 	switch pc.StrokeStyle.Cap {
 	case styles.LineCapButt:
-		return rasterx.ButtCap
+		return raster.ButtCap
 	case styles.LineCapRound:
-		return rasterx.RoundCap
+		return raster.RoundCap
 	case styles.LineCapSquare:
-		return rasterx.SquareCap
+		return raster.SquareCap
 	case styles.LineCapCubic:
-		return rasterx.CubicCap
+		return raster.CubicCap
 	case styles.LineCapQuadratic:
-		return rasterx.QuadraticCap
+		return raster.QuadraticCap
 	}
 	return nil
 }
 
-func (pc *Context) joinmode() rasterx.JoinMode {
+func (pc *Context) joinmode() raster.JoinMode {
 	switch pc.StrokeStyle.Join {
 	case styles.LineJoinMiter:
-		return rasterx.Miter
+		return raster.Miter
 	case styles.LineJoinMiterClip:
-		return rasterx.MiterClip
+		return raster.MiterClip
 	case styles.LineJoinRound:
-		return rasterx.Round
+		return raster.Round
 	case styles.LineJoinBevel:
-		return rasterx.Bevel
+		return raster.Bevel
 	case styles.LineJoinArcs:
-		return rasterx.Arc
+		return raster.Arc
 	case styles.LineJoinArcsClip:
-		return rasterx.ArcClip
+		return raster.ArcClip
 	}
-	return rasterx.Arc
+	return raster.Arc
 }
 
 // StrokeWidth obtains the current stoke width subject to transform (or not

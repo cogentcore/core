@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"sync"
 
-	"goki.dev/girl/rasterx"
+	"goki.dev/girl/raster"
 	"goki.dev/girl/scan"
 	"goki.dev/mat32/v2"
 )
@@ -22,10 +22,10 @@ type State struct {
 	CurTransform mat32.Mat2
 
 	// current path
-	Path rasterx.Path
+	Path raster.Path
 
-	// rasterizer -- stroke / fill rendering engine from rasterx
-	Raster *rasterx.Dasher
+	// rasterizer -- stroke / fill rendering engine from raster
+	Raster *raster.Dasher
 
 	// scanner for scanx
 	Scanner *scan.Scanner
@@ -66,7 +66,7 @@ type State struct {
 	// mutex for overall rendering
 	RenderMu sync.Mutex
 
-	// mutex for final rasterx rendering -- only one at a time
+	// mutex for final raster rendering -- only one at a time
 	RasterMu sync.Mutex
 }
 
@@ -75,7 +75,7 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.CurTransform = mat32.Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
-	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
+	// rs.Scanner = raster.NewScannerGV(width, height, img, img.Bounds())
 	// and cut out painter:
 	/*
 		painter := scanFT.NewRGBAPainter(img)
@@ -88,7 +88,7 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.ImgSpanner = scan.NewImgSpanner(img)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, width, height)
 	// rs.Scanner = scanx.NewScanner(rs.CompSpanner, width, height)
-	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
+	rs.Raster = raster.NewDasher(width, height, rs.Scanner)
 }
 
 // PushTransform pushes current transform onto stack and apply new transform on top of it
