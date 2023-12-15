@@ -24,3 +24,10 @@ func SolidRender(solid color.Color) Render {
 func FuncRender(f Func) Render {
 	return Render{Func: f}
 }
+
+// SetSolid sets the render color to the given solid [color.Color],
+// also setting the Func to nil.
+func (r *Render) SetSolid(solid color.Color) {
+	r.Solid = AsRGBA(solid)
+	r.Func = nil
+}
