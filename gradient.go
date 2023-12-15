@@ -22,9 +22,11 @@ type Gradient struct { //gti:add -setters
 	// whether the gradient is a radial gradient (as opposed to a linear one)
 	Radial bool
 
-	// for linear gradients, the points of the gradient that determine the direction
-	// in which it goes (x1, x2, y1, and y2 in svg)
-	Points [4]float32
+	// the starting point for linear gradients (x1 and y1 in SVG)
+	Start mat32.Vec2
+
+	// the ending point for linear gradients (x2 and y2 in SVG)
+	End mat32.Vec2
 
 	// the center point for radial gradients (cx and cy in SVG)
 	Center mat32.Vec2
@@ -92,7 +94,7 @@ const (
 func LinearGradient() *Gradient {
 	return &Gradient{
 		Spread: PadSpread,
-		Points: [4]float32{0, 0, 0, 1},
+		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
 	}
@@ -396,32 +398,32 @@ func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) Render {
 			return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 		})
 	}
-	p1, p2 := mat32.Vec2{g.Points[0], g.Points[1]}, mat32.Vec2{g.Points[2], g.Points[3]}
+	s, e := g.Start, g.End
 	if g.Units == ObjectBoundingBox {
-		p1.SetMul(g.Bounds.Max)
-		p2.SetMul(g.Bounds.Max)
+		s.SetMul(g.Bounds.Max)
+		e.SetMul(g.Bounds.Max)
 
-		d := p2.Sub(p1)
+		d := e.Sub(s)
 		dd := d.X*d.X + d.Y*d.Y // self inner prod
 		return FuncRender(func(xi, yi int) color.Color {
 			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
-			df := pt.Sub(p1)
+			df := pt.Sub(s)
 			return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
 		})
 	}
 
-	p1 = g.Matrix.MulVec2AsPt(p1)
-	p2 = g.Matrix.MulVec2AsPt(p2)
-	p1 = objMatrix.MulVec2AsPt(p1)
-	p2 = objMatrix.MulVec2AsPt(p2)
-	d := p2.Sub(p1)
+	s = g.Matrix.MulVec2AsPt(s)
+	e = g.Matrix.MulVec2AsPt(e)
+	s = objMatrix.MulVec2AsPt(s)
+	e = objMatrix.MulVec2AsPt(e)
+	d := e.Sub(s)
 	dd := d.X*d.X + d.Y*d.Y
 	// if dd == 0.0 {
 	// 	fmt.Println("zero delta")
 	// }
 	return FuncRender(func(xi, yi int) color.Color {
 		pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
-		df := pt.Sub(p1)
+		df := pt.Sub(s)
 		return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
 	})
 }
