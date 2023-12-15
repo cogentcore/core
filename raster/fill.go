@@ -1,6 +1,10 @@
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Based on https://github.com/srwiley/rasterx:
 // Copyright 2018 by the rasterx Authors. All rights reserved.
-//_
-// Created 2017 by S.R.Wiley
+// Created 2018 by S.R.Wiley
 
 package raster
 
