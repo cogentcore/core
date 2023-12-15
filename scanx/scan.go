@@ -1,21 +1,20 @@
-// 2018: This is the anti-aliasing algorithym from the golang
+// 2018: This is the anti-aliasing algorithm from the golang
 // translation of FreeType. It has been adapted for use by the scanx package
 // which replaces the painter interface with the spanner interface.
-//__
+
 // Copyright 2010 The Freetype-Go Authors. All rights reserved.
 // Use of this source code is governed by your choice of either the
 // FreeType License or the GNU General Public License version 2 (or
 // any later version), both of which can be found in the LICENSE file.
-//_
-// Package provides an anti-aliasing 2-D rasterizer.
-// taken fron the larger Freetype suite of font-related packages, but the
+
+// Package scanx provides an anti-aliasing 2-D rasterizer.
+// taken from the larger Freetype suite of font-related packages, but the
 // raster package is not specific to font rasterization, and can be used
 // standalone without any other Freetype package.
 // Rasterization is done by the same area/coverage accumulation algorithm as
 // the Freetype "smooth" module, and the Anti-Grain Geometry library. A
 // description of the area/coverage algorithm is at
 // http://projects.tuxee.net/cl-vectors/section-the-cl-aa-algorithm
-
 package scanx
 
 import (
@@ -32,7 +31,7 @@ type (
 	//Spanner consumes spans as they are created by the Scanner Draw function
 	Spanner interface {
 		SetColor(color *colors.Render)
-		// This returns a function that is efficent given the Spanner parameters.
+		// This returns a function that is efficient given the Spanner parameters.
 		GetSpanFunc() SpanFunc
 	}
 
