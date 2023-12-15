@@ -32,6 +32,13 @@ func NewEmptyBox2() Box2 {
 	return bx
 }
 
+// NewBox2FromRect returns a new [Box2] from the given [image.Rectangle].
+func NewBox2FromRect(rect image.Rectangle) Box2 {
+	b := Box2{}
+	b.SetFromRect(rect)
+	return b
+}
+
 // SetEmpty set this bounding box to empty (min / max +/- Infinity)
 func (b *Box2) SetEmpty() {
 	b.Min.SetScalar(Infinity)
