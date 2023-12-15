@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"golang.org/x/image/math/fixed"
 )
 
 /*
@@ -144,6 +146,13 @@ func (a Mat2) MulCtr(b Mat2, ctr Vec2) Mat2 {
 	rv.X0 += ctr.X
 	rv.Y0 += ctr.Y
 	return rv
+}
+
+// TFixed transforms a fixed.Point26_6 by the matrix
+func (a Mat2) TFixed(x fixed.Point26_6) (y fixed.Point26_6) {
+	y.X = fixed.Int26_6((float32(x.X)*a.XX + float32(x.Y)*a.XY) + a.X0*32)
+	y.Y = fixed.Int26_6((float32(x.X)*a.YX + float32(x.Y)*a.YY) + a.Y0*32)
+	return
 }
 
 func (a Mat2) Translate(x, y float32) Mat2 {
