@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -366,11 +367,13 @@ func Blend(bt BlendTypes, pct float32, x, y color.Color) color.RGBA {
 	switch bt {
 	case HCT:
 		return hct.Blend(pct, x, y)
+	case RGB:
+		return BlendRGB(pct, x, y)
 	case CAM16:
 		return cam16.Blend(pct, x, y)
-	default:
-		return BlendRGB(pct, x, y)
 	}
+	slog.Error("got unexpected blend type", "type", bt)
+	return color.RGBA{}
 }
 
 // BlendRGB returns a color that is the given percent blend between the first

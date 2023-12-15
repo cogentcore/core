@@ -10,6 +10,7 @@ package colors
 
 import (
 	"image/color"
+	"log/slog"
 	"sort"
 
 	"goki.dev/mat32/v2"
@@ -230,7 +231,34 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	gradT := mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
 		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 
-	if g.Type == RadialGradient {
+	switch g.Type {
+	case LinearGradient:
+		s, e := g.Start, g.End
+		if g.Units == ObjectBoundingBox {
+			s = g.Bounds.Min.Add(g.Bounds.Size().Mul(s))
+			e = g.Bounds.Min.Add(g.Bounds.Size().Mul(e))
+
+			d := e.Sub(s)
+			dd := d.X*d.X + d.Y*d.Y // self inner prod
+			return FuncRender(func(x, y int) color.Color {
+				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
+				df := pt.Sub(s)
+				return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
+			})
+		}
+
+		s = g.Matrix.MulVec2AsPt(s)
+		e = g.Matrix.MulVec2AsPt(e)
+		s = objMatrix.MulVec2AsPt(s)
+		e = objMatrix.MulVec2AsPt(e)
+		d := e.Sub(s)
+		dd := d.X*d.X + d.Y*d.Y
+		return FuncRender(func(x, y int) color.Color {
+			pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
+			df := pt.Sub(s)
+			return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
+		})
+	case RadialGradient:
 		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
 		if g.Units == ObjectBoundingBox {
 			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
@@ -312,35 +340,11 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 			}
 			return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 		})
-	}
-	s, e := g.Start, g.End
-	if g.Units == ObjectBoundingBox {
-		s = g.Bounds.Min.Add(g.Bounds.Size().Mul(s))
-		e = g.Bounds.Min.Add(g.Bounds.Size().Mul(e))
+	case ConicGradient:
 
-		d := e.Sub(s)
-		dd := d.X*d.X + d.Y*d.Y // self inner prod
-		return FuncRender(func(x, y int) color.Color {
-			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
-			df := pt.Sub(s)
-			return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
-		})
 	}
-
-	s = g.Matrix.MulVec2AsPt(s)
-	e = g.Matrix.MulVec2AsPt(e)
-	s = objMatrix.MulVec2AsPt(s)
-	e = objMatrix.MulVec2AsPt(e)
-	d := e.Sub(s)
-	dd := d.X*d.X + d.Y*d.Y
-	// if dd == 0.0 {
-	// 	fmt.Println("zero delta")
-	// }
-	return FuncRender(func(x, y int) color.Color {
-		pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
-		df := pt.Sub(s)
-		return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
-	})
+	slog.Error("got unexpected gradient type", "type", g.Type)
+	return Render{}
 }
 
 // ColorAt takes the given paramaterized value along the gradient's stops and
