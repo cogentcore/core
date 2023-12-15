@@ -2,8 +2,6 @@ github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
-github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef h1:Ch6Q+AZUxDBCVqdkI8FSpFyZDtCVBc2VmejdNrm5rRQ=
-github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef/go.mod h1:nXTWP6+gD5+LUJ8krVhhoeHjvHTutPxMYl5SvkcnJNE=
 goki.dev/cam v0.9.46 h1:FwqL0SjwR5mBESzOi4FHN9/HRhbiDPmvD75EcGVPmL0=
 goki.dev/cam v0.9.46/go.mod h1:CI53lzIdarlFDHwvCzGipC3SAAWnBGe+ktKMAB40kMI=
 goki.dev/enums v0.9.51 h1:dLmPK6G2XFx55rUz7sf27Rp3e8YZbtdCqUE2foeQtOU=

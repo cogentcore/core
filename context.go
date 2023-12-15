@@ -13,6 +13,8 @@ type Context interface {
 	// FullByURL returns the [Full] color with the given URL.
 	// A URL of "#name" is typical, where name
 	// is the name of a node with a [Full] color in it.
+	// If it returns nil, that indicats that there is no [Full] color
+	// associated with the given URL.
 	FullByURL(url string) *Full
 }
 

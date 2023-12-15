@@ -9,11 +9,9 @@
 package colors
 
 import (
-	"image"
-
 	"image/color"
+	"sort"
 
-	"github.com/srwiley/rasterx"
 	"goki.dev/mat32/v2"
 )
 
@@ -23,8 +21,11 @@ type Gradient struct { //gti:add -setters
 	// whether the gradient is a radial gradient (as opposed to a linear one)
 	Radial bool
 
-	// the bounds for linear gradients (x1, y1, x2, and y2 in SVG)
-	Bounds mat32.Box2
+	// the starting point for linear gradients (x1 and y1 in SVG)
+	Start mat32.Vec2
+
+	// the ending point for linear gradients (x2 and y2 in SVG)
+	End mat32.Vec2
 
 	// the center point for radial gradients (cx and cy in SVG)
 	Center mat32.Vec2
@@ -38,14 +39,17 @@ type Gradient struct { //gti:add -setters
 	// the stops of the gradient
 	Stops []GradientStop
 
-	// the matrix for the gradient
-	Matrix mat32.Mat2
-
 	// the spread methods for the gradient
 	Spread SpreadMethods
 
 	// the units for the gradient
 	Units GradientUnits
+
+	// the bounds of the gradient; this should typically not be set by end-users
+	Bounds mat32.Box2
+
+	// the matrix for the gradient; this should typically not be set by end-users
+	Matrix mat32.Mat2
 }
 
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification
@@ -89,8 +93,9 @@ const (
 func LinearGradient() *Gradient {
 	return &Gradient{
 		Spread: PadSpread,
+		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
 }
 
@@ -103,6 +108,7 @@ func RadialGradient() *Gradient {
 		Center: mat32.Vec2{0.5, 0.5},
 		Focal:  mat32.Vec2{0.5, 0.5},
 		Radius: 0.5,
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
 }
 
@@ -138,89 +144,157 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 // box, taking into account radial gradients and a standard linear left-to-right
 // gradient direction. It also sets the type of units to [UserSpaceOnUse].
 func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
+	g.Bounds = bbox
 	g.Units = UserSpaceOnUse
 	if g.Radial {
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
 		g.Focal = g.Center
-		g.Radius = 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
+		g.Radius = 0.5 * max(bbox.Size().X, bbox.Size().Y)
 	} else {
-		g.Bounds = bbox
-		g.Bounds.Max.Y = g.Bounds.Min.Y // linear L-R
+		g.Start = bbox.Min
+		g.End = bbox.Max
+		// default is linear left-to-right, so we keep the starting and ending Y the same
+		g.End.Y = g.Start.Y
 	}
 }
 
-// Points returns the points of the gradient as an array of 5 floats.
-// If the gradient is radial, the points are of the form:
-//
-//	[cx, cy, fx, fy, r]
-//
-// If the gradient is linear, the points are of the form:
-//
-//	[x1, y1, x2, y2, 0]
-func (g *Gradient) Points() [5]float64 {
+// RenderColor returns the [Render] color for rendering, applying the given opacity.
+func (g *Gradient) RenderColor(opacity float32) Render {
+	return g.RenderColorTransform(opacity, mat32.Identity2D())
+}
+
+const epsilonF = 1e-5
+
+// RenderColorTransform returns the render color using the given user space object transform matrix
+func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) Render {
+	switch len(g.Stops) {
+	case 0:
+		return SolidRender(ApplyOpacity(color.RGBA{0, 0, 0, 255}, opacity)) // default error color for gradient w/o stops.
+	case 1:
+		return SolidRender(ApplyOpacity(g.Stops[0].Color, opacity)) // Illegal, I think, should really should not happen.
+	}
+
+	// sort by offset in ascending order
+	sort.Slice(g.Stops, func(i, j int) bool {
+		return g.Stops[i].Offset < g.Stops[j].Offset
+	})
+
+	w, h := g.Bounds.Size().X, g.Bounds.Size().Y
+	oriX, oriY := g.Bounds.Min.X, g.Bounds.Min.Y
+	gradT := mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
+		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
+
 	if g.Radial {
-		return [5]float64{float64(g.Center.X), float64(g.Center.Y), float64(g.Focal.X), float64(g.Focal.Y), float64(g.Radius)}
+		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
+		if g.Units == ObjectBoundingBox {
+			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
+			f = g.Bounds.Min.Add(g.Bounds.Size().Mul(f))
+			r.SetMul(g.Bounds.Size())
+		} else {
+			c = g.Matrix.MulVec2AsPt(c)
+			f = g.Matrix.MulVec2AsPt(f)
+			r = g.Matrix.MulVec2AsVec(r)
+
+			c = objMatrix.MulVec2AsPt(c)
+			f = objMatrix.MulVec2AsPt(f)
+			r = objMatrix.MulVec2AsVec(r)
+		}
+
+		if c == f {
+			// When the focus and center are the same things are much simpler;
+			// t is just distance from center
+			// scaled by the bounds aspect ratio times r
+			if g.Units == ObjectBoundingBox {
+				return FuncRender(func(x, y int) color.Color {
+					pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
+					d := pt.Sub(c)
+					return g.ColorAt(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
+				})
+			}
+			return FuncRender(func(x, y int) color.Color {
+				pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
+				d := pt.Sub(c)
+				return g.ColorAt(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
+			})
+		}
+		f.SetDiv(r)
+		c.SetDiv(r)
+
+		df := f.Sub(c)
+
+		if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
+			// point of line from center to focus and circle as per SVG specs.
+			nf, intersects := RayCircleIntersectionF(f, c, c, 1.0-epsilonF)
+			f = nf
+			if !intersects {
+				return SolidRender(FromRGB(255, 255, 0)) // should not happen
+			}
+		}
+		if g.Units == ObjectBoundingBox {
+			return FuncRender(func(x, y int) color.Color {
+				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
+				e := pt.Div(r)
+
+				t1, intersects := RayCircleIntersectionF(e, f, c, 1)
+				if !intersects { // In this case, use the last stop color
+					s := g.Stops[len(g.Stops)-1]
+					return ApplyOpacity(s.Color, s.Opacity*opacity)
+				}
+				td := t1.Sub(f)
+				d := e.Sub(f)
+				if td.X*td.X+td.Y*td.Y < epsilonF {
+					s := g.Stops[len(g.Stops)-1]
+					return ApplyOpacity(s.Color, s.Opacity*opacity)
+				}
+				return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
+			})
+		}
+		return FuncRender(func(x, y int) color.Color {
+			pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
+			e := pt.Div(r)
+
+			t1, intersects := RayCircleIntersectionF(e, f, c, 1)
+			if !intersects { // In this case, use the last stop color
+				s := g.Stops[len(g.Stops)-1]
+				return ApplyOpacity(s.Color, s.Opacity*opacity)
+			}
+			td := t1.Sub(f)
+			d := e.Sub(f)
+			if td.X*td.X+td.Y*td.Y < epsilonF {
+				s := g.Stops[len(g.Stops)-1]
+				return ApplyOpacity(s.Color, s.Opacity*opacity)
+			}
+			return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
+		})
 	}
-	return [5]float64{float64(g.Bounds.Min.X), float64(g.Bounds.Min.Y), float64(g.Bounds.Max.X), float64(g.Bounds.Max.Y), 0}
-}
+	s, e := g.Start, g.End
+	if g.Units == ObjectBoundingBox {
+		s = g.Bounds.Min.Add(g.Bounds.Size().Mul(s))
+		e = g.Bounds.Min.Add(g.Bounds.Size().Mul(e))
 
-// Rasterx returns the gradient as a [rasterx.Gradient]
-func (g *Gradient) Rasterx() *rasterx.Gradient {
-	r := &rasterx.Gradient{
-		Points: g.Points(),
-		Stops:  make([]rasterx.GradStop, len(g.Stops)),
-		// one might call this ridiculous, and they would be absolutely correct,
-		// but we don't have control over the rasterx source code, and
-		// https://github.com/golang/go/issues/12854 hasn't been approved
-		Bounds: struct {
-			X float64
-			Y float64
-			W float64
-			H float64
-		}{
-			X: float64(g.Bounds.Min.X),
-			Y: float64(g.Bounds.Min.Y),
-			W: float64(g.Bounds.Size().X),
-			H: float64(g.Bounds.Size().Y),
-		},
-		Matrix:   MatToRasterx(&g.Matrix),
-		Spread:   rasterx.SpreadMethod(g.Spread), // we have the same constant values, so this is okay
-		Units:    rasterx.GradientUnits(g.Units), // we have the same constant values, so this is okay
-		IsRadial: g.Radial,
+		d := e.Sub(s)
+		dd := d.X*d.X + d.Y*d.Y // self inner prod
+		return FuncRender(func(x, y int) color.Color {
+			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
+			df := pt.Sub(s)
+			return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
+		})
 	}
-	for i, stop := range g.Stops {
-		r.Stops[i] = stop.Rasterx()
-	}
-	return r
-}
 
-// MatToRasterx converts the given [mat32.Mat2] to a [rasterx.Matrix2D]
-func MatToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
-	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
-}
-
-// RasterxToMat converts the given [rasterx.Matrix2D] to a [mat32.Mat2]
-func RasterxToMat(mat *rasterx.Matrix2D) mat32.Mat2 {
-	return mat32.Mat2{float32(mat.A), float32(mat.B), float32(mat.C), float32(mat.D), float32(mat.E), float32(mat.F)}
-}
-
-// Rasterx returns the gradient stop as a [rasterx.GradStop]
-func (g *GradientStop) Rasterx() rasterx.GradStop {
-	return rasterx.GradStop{
-		StopColor: g.Color,
-		Offset:    float64(g.Offset),
-		Opacity:   float64(g.Opacity),
-	}
-}
-
-// RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
-// the given opacity and bounds.
-func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) any {
-	box := mat32.Box2{}
-	box.SetFromRect(bounds)
-	g.SetUserBounds(box)
-	r := g.Rasterx()
-	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&transform))
+	s = g.Matrix.MulVec2AsPt(s)
+	e = g.Matrix.MulVec2AsPt(e)
+	s = objMatrix.MulVec2AsPt(s)
+	e = objMatrix.MulVec2AsPt(e)
+	d := e.Sub(s)
+	dd := d.X*d.X + d.Y*d.Y
+	// if dd == 0.0 {
+	// 	fmt.Println("zero delta")
+	// }
+	return FuncRender(func(x, y int) color.Color {
+		pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
+		df := pt.Sub(s)
+		return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
+	})
 }
 
 // ApplyTransform transforms the points for the gradient if it has
@@ -251,4 +325,143 @@ func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)
 		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
 	}
+}
+
+// ColorAt takes the given paramaterized value along the gradient's stops and
+// returns a color depending on [Gradient.Spread] and [Gradient.Stops].
+func (g *Gradient) ColorAt(v, opacity float32) color.Color {
+	d := len(g.Stops)
+	// These cases can be taken care of early on
+	if v >= 1.0 && g.Spread == PadSpread {
+		s := g.Stops[d-1]
+		return ApplyOpacity(s.Color, s.Opacity*opacity)
+	}
+	if v <= 0.0 && g.Spread == PadSpread {
+		return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+	}
+
+	modRange := float32(1)
+	if g.Spread == ReflectSpread {
+		modRange = 2
+	}
+	mod := mat32.Mod(v, modRange)
+	if mod < 0 {
+		mod += modRange
+	}
+
+	place := 0 // Advance to place where mod is greater than the indicated stop
+	for place != len(g.Stops) && mod > g.Stops[place].Offset {
+		place++
+	}
+	switch g.Spread {
+	case RepeatSpread:
+		var s1, s2 GradientStop
+		switch place {
+		case 0, d:
+			s1, s2 = g.Stops[d-1], g.Stops[0]
+		default:
+			s1, s2 = g.Stops[place-1], g.Stops[place]
+		}
+		return g.BlendStops(mod, opacity, s1, s2, false)
+	case ReflectSpread:
+		switch place {
+		case 0:
+			return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+		case d:
+			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
+			// Since this is the reflect spead mode, the mod interval is two, allowing the stop list to be
+			// iterated in reverse before repeating the sequence.
+			for place != d*2 && mod-1 > (1-g.Stops[d*2-place-1].Offset) {
+				place++
+			}
+			switch place {
+			case d:
+				s := g.Stops[d-1]
+				return ApplyOpacity(s.Color, s.Opacity*opacity)
+			case d * 2:
+				return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+			default:
+				return g.BlendStops(mod-1, opacity,
+					g.Stops[d*2-place], g.Stops[d*2-place-1], true)
+			}
+		default:
+			return g.BlendStops(mod, opacity,
+				g.Stops[place-1], g.Stops[place], false)
+		}
+	default: // PadSpread
+		switch place {
+		case 0:
+			return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+		case len(g.Stops):
+			s := g.Stops[len(g.Stops)-1]
+			return ApplyOpacity(s.Color, s.Opacity*opacity)
+		default:
+			return g.BlendStops(mod, opacity, g.Stops[place-1], g.Stops[place], false)
+		}
+	}
+}
+
+// BlendStops blends the given two gradient stops together based on the given value and opacity.
+func (g *Gradient) BlendStops(v, opacity float32, s1, s2 GradientStop, flip bool) color.Color {
+	s1off := s1.Offset
+	if s1.Offset > s2.Offset && !flip { // happens in repeat spread mode
+		s1off--
+		if v > 1 {
+			v--
+		}
+	}
+	if s2.Offset == s1off {
+		return ApplyOpacity(s2.Color, s2.Opacity)
+	}
+	if flip {
+		v = 1 - v
+	}
+	tp := (v - s1off) / (s2.Offset - s1off)
+	r1, g1, b1, _ := s1.Color.RGBA()
+	r2, g2, b2, _ := s2.Color.RGBA()
+
+	return ApplyOpacity(color.RGBA{
+		uint8((float32(r1)*(1-tp) + float32(r2)*tp) / 256),
+		uint8((float32(g1)*(1-tp) + float32(g2)*tp) / 256),
+		uint8((float32(b1)*(1-tp) + float32(b2)*tp) / 256),
+		0xFF}, (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
+}
+
+// RayCircleIntersectionF calculates in floating point the points of intersection of
+// a ray starting at s2 passing through s1 and a circle in fixed point.
+// Returns intersects == false if no solution is possible. If two
+// solutions are possible, the point closest to s2 is returned
+func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, intersects bool) {
+	n := s2.X - c.X // Calculating using 64* rather than divide
+	m := s2.Y - c.Y
+
+	e := s2.X - s1.X
+	d := s2.Y - s1.Y
+
+	// Quadratic normal form coefficients
+	A, B, C := e*e+d*d, -2*(e*n+m*d), n*n+m*m-r*r
+
+	D := B*B - 4*A*C
+
+	if D <= 0 {
+		return // No intersection or is tangent
+	}
+
+	D = mat32.Sqrt(D)
+	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
+	p1OnSide := t1 > 0
+	p2OnSide := t2 > 0
+
+	switch {
+	case p1OnSide && p2OnSide:
+		if t2 < t1 { // both on ray, use closest to s2
+			t1 = t2
+		}
+	case p2OnSide: // Only p2 on ray
+		t1 = t2
+	case p1OnSide: // only p1 on ray
+	default: // Neither solution is on the ray
+		return
+	}
+	return mat32.Vec2{(n - e*t1) + c.X, (m - d*t1) + c.Y}, true
 }

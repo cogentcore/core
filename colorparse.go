@@ -36,7 +36,7 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 
 // FullCache is a cache of named full colors -- only a few are constantly re-used
 // so we save them in the cache instead of constantly recomputing!
-var FullCache map[string]*Full
+var FullCache map[string]Full
 
 // SetString sets the color spec from a standard CSS-formatted string in the
 // given Context. SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
@@ -48,7 +48,7 @@ func (f *Full) SetString(str string, ctx ...Context) error {
 		ct = ctx[0]
 	}
 	if FullCache == nil {
-		FullCache = make(map[string]*Full)
+		FullCache = make(map[string]Full)
 	}
 	fullnm := AsHex(f.Solid) + str
 	if ccg, ok := FullCache[fullnm]; ok {
@@ -109,8 +109,8 @@ func (f *Full) SetString(str string, ctx ...Context) error {
 			}
 		}
 		FixGradientStops(f.Gradient)
-		svcs := &Full{} // critical to save a copy..
-		svcs.CopyFrom(f)
+		svcs := Full{} // critical to save a copy..
+		svcs.CopyFrom(*f)
 		FullCache[fullnm] = svcs
 	} else {
 		f.Gradient = nil

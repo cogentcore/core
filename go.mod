@@ -3,7 +3,6 @@ module goki.dev/colors
 go 1.21
 
 require (
-	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	goki.dev/cam v0.9.46
 	goki.dev/enums v0.9.51
 	goki.dev/grows v0.3.26
