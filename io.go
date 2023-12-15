@@ -507,7 +507,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
-								grad.Grad.CopyFrom(&hrg.Grad)
+								grad.Grad.CopyFrom(hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
 						}
@@ -531,7 +531,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
-								grad.Grad.CopyFrom(&hrg.Grad)
+								grad.Grad.CopyFrom(hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
 						}

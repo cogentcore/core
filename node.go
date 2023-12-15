@@ -138,7 +138,9 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 func (g *NodeBase) SetColorProps(prop, color string) {
 	clr := grr.Log1(colors.FromString(color))
 	g.SetProp(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
-	g.SetProp(prop, color)
+	// we have consumed the A via opacity, so we reset it to 255
+	clr.A = 255
+	g.SetProp(prop, colors.AsHex(clr))
 }
 
 // ParTransform returns the full compounded 2D transform matrix for all
