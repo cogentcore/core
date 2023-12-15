@@ -12,6 +12,7 @@ import (
 	"image/color"
 	"sort"
 
+	"goki.dev/cam/hct"
 	"goki.dev/mat32/v2"
 )
 
@@ -418,7 +419,7 @@ func (g *Gradient) BlendStops(v, opacity float32, s1, s2 GradientStop, flip bool
 	}
 	tp := (v - s1off) / (s2.Offset - s1off)
 
-	return ApplyOpacity(Blend(100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
+	return ApplyOpacity(hct.Blend(100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
 }
 
 // RayCircleIntersectionF calculates in floating point the points of intersection of
