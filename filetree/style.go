@@ -7,7 +7,6 @@ package filetree
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -72,11 +71,6 @@ func (fn *Node) SetStyles() {
 			sw := w.(*gi.Switch)
 			sw.Type = gi.SwitchCheckbox
 			sw.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
-			sw.OnClick(func(e events.Event) {
-				if sw.StateIs(states.Indeterminate) {
-					fn.OpenEmptyDir()
-				}
-			})
 		}
 	})
 }
