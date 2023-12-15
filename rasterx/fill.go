@@ -8,6 +8,7 @@ import (
 	"image"
 	"math"
 
+	"goki.dev/colors"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -19,13 +20,14 @@ type (
 		Draw()
 		GetPathExtent() fixed.Rectangle26_6
 		SetBounds(w, h int)
-		SetColor(color interface{})
+
+		// SetColor sets the color used for rendering.
+		SetColor(color *colors.Render)
 		SetWinding(useNonZeroWinding bool)
 		Clear()
 
-		// SetClip sets an optional clipping rectangle to restrict rendering
-		// only to that region -- if size is 0 then ignored (set to image.ZR
-		// to clear)
+		// SetClip sets an optional clipping rectangle to restrict rendering only to
+		// that region. If rect is zero (image.Rectangle{}), then clipping is disabled.
 		SetClip(rect image.Rectangle)
 	}
 	// Adder interface for types that can accumlate path commands

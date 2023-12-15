@@ -10,11 +10,8 @@ package rasterx
 
 import (
 	"image"
-	"log/slog"
 	"math"
-	"reflect"
 
-	"image/color"
 	"image/draw"
 
 	"goki.dev/colors"
@@ -22,52 +19,20 @@ import (
 	"golang.org/x/image/vector"
 )
 
-// At returns the color at the point x,y
-func (c *ColorFuncImage) At(x, y int) color.Color {
-	return c.colorFunc(x, y)
+type ScannerGV struct {
+	r vector.Rasterizer
+	//a, first fixed.Point26_6
+	Dest                   draw.Image
+	Targ                   image.Rectangle
+	RenderColor            *colors.Render
+	Source                 image.Image
+	Offset                 image.Point
+	minX, minY, maxX, maxY fixed.Int26_6 // keep track of bounds
 }
-
-type (
-	// ColorFuncImage implements and image
-	// using the provided [colors.Func]
-	ColorFuncImage struct {
-		image.Uniform
-		colorFunc colors.Func
-	}
-
-	// ScannerGV uses the google vector rasterizer
-	ScannerGV struct {
-		r vector.Rasterizer
-		//a, first fixed.Point26_6
-		Dest                   draw.Image
-		Targ                   image.Rectangle
-		clipImage              *ClipImage
-		Source                 image.Image
-		Offset                 image.Point
-		minX, minY, maxX, maxY fixed.Int26_6 // keep track of bounds
-	}
-)
-
-// ClipImage is a clipable ColorFuncImage
-type ClipImage struct {
-	ColorFuncImage
-	clip image.Rectangle
-}
-
-var noApha = color.RGBA{0, 0, 0, 0}
 
 // GetPathExtent returns the extent of the path
 func (s *ScannerGV) GetPathExtent() fixed.Rectangle26_6 {
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: s.minX, Y: s.minY}, Max: fixed.Point26_6{X: s.maxX, Y: s.maxY}}
-}
-
-// At returns the color of the ClipImage at the point x,y
-func (c *ClipImage) At(x, y int) color.Color {
-	p := image.Point{x, y}
-	if p.In(c.clip) {
-		return c.ColorFuncImage.At(x, y)
-	}
-	return noApha
 }
 
 // SetWinding set the winding rule for the scanner
@@ -75,40 +40,15 @@ func (s *ScannerGV) SetWinding(useNonZeroWinding bool) {
 	// no-op as scanner gv does not support even-odd winding
 }
 
-// SetColor set the color type for the scanner
-func (s *ScannerGV) SetColor(clr interface{}) {
-	switch c := clr.(type) {
-	case color.Color:
-		s.clipImage.ColorFuncImage.Uniform.C = c
-		if s.clipImage.clip == image.ZR {
-			s.Source = &s.clipImage.ColorFuncImage.Uniform
-		} else {
-			s.clipImage.ColorFuncImage.colorFunc = func(x, y int) color.Color {
-				return c
-			}
-			s.Source = s.clipImage
-		}
-	case colors.Func:
-		s.clipImage.ColorFuncImage.colorFunc = c
-		if s.clipImage.clip == image.ZR {
-			s.Source = &s.clipImage.ColorFuncImage
-		} else {
-			s.Source = s.clipImage
-		}
-	default:
-		slog.Error("rasterx.ScannerGV.SetColor: got unexpected type of color", "type", reflect.TypeOf(clr))
-	}
+// SetColor sets the color used for rendering.
+func (s *ScannerGV) SetColor(c *colors.Render) {
+	s.RenderColor = c
 }
 
 // SetClip sets an optional clipping rectangle to restrict rendering only to
-// that region -- if size is 0 then ignored (set to image.ZR to clear)
+// that region. If rect is zero (image.Rectangle{}), then clipping is disabled.
 func (s *ScannerGV) SetClip(rect image.Rectangle) {
-	s.clipImage.clip = rect
-	if s.Source == &s.clipImage.ColorFuncImage.Uniform {
-		s.SetColor(s.clipImage.ColorFuncImage.Uniform.C)
-	} else {
-		s.SetColor(s.clipImage.ColorFuncImage.colorFunc)
-	}
+	s.RenderColor.Clip = rect
 }
 
 func (s *ScannerGV) set(a fixed.Point26_6) {
@@ -138,7 +78,7 @@ func (s *ScannerGV) Line(b fixed.Point26_6) {
 	s.r.LineTo(float32(b.X)/64, float32(b.Y)/64)
 }
 
-// Draw renders the accumulate scan to the desination
+// Draw renders the accumulate scan to the destination
 func (s *ScannerGV) Draw() {
 	// This draws the entire bounds of the image, because
 	// at this point the alpha mask does not shift with the
@@ -172,15 +112,13 @@ func (s *ScannerGV) SetBounds(width, height int) {
 }
 
 // NewScannerGV creates a new Scanner with the given bounds.
-func NewScannerGV(width, height int, dest draw.Image,
-	targ image.Rectangle) *ScannerGV {
-	s := new(ScannerGV)
+func NewScannerGV(width, height int, dest draw.Image, targ image.Rectangle) *ScannerGV {
+	s := &ScannerGV{}
 	s.SetBounds(width, height)
 	s.Dest = dest
 	s.Targ = targ
-	s.clipImage = &ClipImage{}
-	s.clipImage.ColorFuncImage.Uniform.C = &color.RGBA{255, 0, 0, 255}
-	s.Source = &s.clipImage.ColorFuncImage.Uniform
-	s.Offset = image.Point{0, 0}
+	s.RenderColor = colors.SolidRender(colors.Red)
+	s.Source = &image.Uniform{s.RenderColor.Solid}
+	s.Offset = image.Point{}
 	return s
 }
