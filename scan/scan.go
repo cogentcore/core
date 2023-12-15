@@ -1,5 +1,13 @@
-// 2018: This is the anti-aliasing algorithm from the golang
-// translation of FreeType. It has been adapted for use by the scanx package
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Based on https://github.com/srwiley/scanx:
+// Copyright 2018 by the scanx Authors. All rights reserved.
+// Created 2018 by S.R.Wiley
+
+// This is the anti-aliasing algorithm from the golang
+// translation of FreeType. It has been adapted for use by the scan package
 // which replaces the painter interface with the spanner interface.
 
 // Copyright 2010 The Freetype-Go Authors. All rights reserved.
