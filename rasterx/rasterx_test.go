@@ -99,7 +99,7 @@ func GetTestPath() (testPath Path) {
 	return
 }
 
-func BenchmarkScanGV(b *testing.B) {
+func BenchmarkScan(b *testing.B) {
 	var (
 		p       = GetTestPath()
 		wx, wy  = 512, 512
@@ -114,7 +114,7 @@ func BenchmarkScanGV(b *testing.B) {
 	}
 }
 
-func BenchmarkFillGV(b *testing.B) {
+func BenchmarkFill(b *testing.B) {
 	var (
 		p       = GetTestPath()
 		wx, wy  = 512, 512
@@ -130,7 +130,7 @@ func BenchmarkFillGV(b *testing.B) {
 	}
 }
 
-func BenchmarkDashGV(b *testing.B) {
+func BenchmarkDash(b *testing.B) {
 	var (
 		p       = GetTestPath()
 		wx, wy  = 512, 512
@@ -235,7 +235,7 @@ func TestRoundRect(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, "roundRectGV")
+	images.Assert(t, img, "roundRect")
 }
 
 func isClose(a, b mat32.Mat2, epsilon float32) bool {
@@ -281,57 +281,57 @@ func TestShapes(t *testing.T) {
 		d       = NewDasher(wx, wy, scanner)
 	)
 
-	doShapes(t, f, f, "shapeGVF", img)
+	doShapes(t, f, f, "shapeF", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	s.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip)
-	doShapes(t, s, s, "shapeGVS1", img)
+	doShapes(t, s, s, "shapeS1", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	s.SetStroke(10*64, 4*64, nil, RoundCap, RoundGap, ArcClip)
-	doShapes(t, s, s, "shapeGVS2", img)
+	doShapes(t, s, s, "shapeS2", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	s.SetStroke(10*64, 4*64, nil, nil, nil, Miter)
-	doShapes(t, s, s, "shapeGVS3", img)
+	doShapes(t, s, s, "shapeS3", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, SquareCap, nil, RoundGap, ArcClip, []float32{33, 12}, 30)
-	doShapes(t, d, d, "shapeGVD0", img)
+	doShapes(t, d, d, "shapeD0", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Miter, []float32{33, 12}, 250)
-	doShapes(t, d, d, "shapeGVD1", img)
+	doShapes(t, d, d, "shapeD1", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, ButtCap, CubicCap, QuadraticGap, Arc, []float32{33, 12}, -30)
-	doShapes(t, d, d, "shapeGVD2", img)
+	doShapes(t, d, d, "shapeD2", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, nil, QuadraticCap, RoundGap, MiterClip, []float32{12, 4}, 14)
-	doShapes(t, d, d, "shapeGVD3", img)
+	doShapes(t, d, d, "shapeD3", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, Bevel, []float32{0, 0}, 0)
-	doShapes(t, d, d, "shapeGVD4", img)
+	doShapes(t, d, d, "shapeD4", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, SquareCap, nil, nil, Round, []float32{}, 0)
-	doShapes(t, d, d, "shapeGVD5", img)
+	doShapes(t, d, d, "shapeD5", img)
 
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
 	scanner.Spanner = scanx.NewImgSpanner(img)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, MiterClip, nil, 0)
-	doShapes(t, d, d, "shapeGVD6", img)
+	doShapes(t, d, d, "shapeD6", img)
 
 	getOpenCubicPath().AddTo(f)
 	img = image.NewRGBA(image.Rect(0, 0, wx, wy))
@@ -555,12 +555,12 @@ func TestGradient(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, "gradGV")
+	images.Assert(t, img, "grad")
 }
 
 // TestMultiFunction tests a Dasher's ability to function
 // as a filler, stroker, and dasher by invoking the corresponding anonymous structs
-func TestMultiFunctionGV(t *testing.T) {
+func TestMultiFunction(t *testing.T) {
 
 	var (
 		wx, wy  = 512, 512
@@ -604,5 +604,5 @@ func TestMultiFunctionGV(t *testing.T) {
 	d.Draw()
 	d.Clear()
 
-	images.Assert(t, img, "tmfGV")
+	images.Assert(t, img, "tmf")
 }
