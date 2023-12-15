@@ -26,8 +26,8 @@ var _ = gti.AddType(&gti.Type{
 		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors.GradientStop", LocalType: "[]GradientStop", Doc: "the stops of the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors.SpreadMethods", LocalType: "SpreadMethods", Doc: "the spread methods for the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors.GradientUnits", LocalType: "GradientUnits", Doc: "the units for the gradient", Directives: gti.Directives{}, Tag: ""}},
-		{"Bounds", &gti.Field{Name: "Bounds", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounds of the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Matrix", &gti.Field{Name: "Matrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "the matrix for the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Bounds", &gti.Field{Name: "Bounds", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounds of the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: ""}},
+		{"Matrix", &gti.Field{Name: "Matrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "the matrix for the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -93,5 +93,19 @@ func (t *Gradient) SetSpread(v SpreadMethods) *Gradient {
 // the units for the gradient
 func (t *Gradient) SetUnits(v GradientUnits) *Gradient {
 	t.Units = v
+	return t
+}
+
+// SetBounds sets the [Gradient.Bounds]:
+// the bounds of the gradient; this should typically not be set by end-users
+func (t *Gradient) SetBounds(v mat32.Box2) *Gradient {
+	t.Bounds = v
+	return t
+}
+
+// SetMatrix sets the [Gradient.Matrix]:
+// the matrix for the gradient; this should typically not be set by end-users
+func (t *Gradient) SetMatrix(v mat32.Mat2) *Gradient {
+	t.Matrix = v
 	return t
 }

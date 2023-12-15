@@ -47,10 +47,10 @@ type Gradient struct { //gti:add -setters
 	Units GradientUnits
 
 	// the bounds of the gradient; this should typically not be set by end-users
-	Bounds mat32.Box2 `set:"-"`
+	Bounds mat32.Box2
 
 	// the matrix for the gradient; this should typically not be set by end-users
-	Matrix mat32.Mat2 `set:"-"`
+	Matrix mat32.Mat2
 }
 
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification
