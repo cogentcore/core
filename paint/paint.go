@@ -293,7 +293,7 @@ func (pc *Context) StrokePreserve() {
 	dash := slices.Clone(pc.StrokeStyle.Dashes)
 	if dash != nil {
 		scx, scy := pc.CurTransform.ExtractScale()
-		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))
+		sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
 		hasZero := false
 		for i := range dash {
 			dash[i] *= sc

@@ -289,7 +289,7 @@ type Stroke struct {
 	MinWidth units.Value `xml:"stroke-min-width"`
 
 	// prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
-	Dashes []float64 `xml:"stroke-dasharray"`
+	Dashes []float32 `xml:"stroke-dasharray"`
 
 	// prop: stroke-linecap = how to draw the end cap of lines
 	Cap LineCaps `xml:"stroke-linecap"`
