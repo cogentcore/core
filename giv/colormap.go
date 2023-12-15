@@ -84,7 +84,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			return
 		}
-		s.BackgroundColor.Gradient = colors.LinearGradient()
+		s.BackgroundColor.Gradient = colors.NewLinearGradient()
 		for i := float32(0); i < 1; i += 0.01 {
 			gc := cm.Map(i)
 			s.BackgroundColor.Gradient.AddStop(gc, i, 1)
