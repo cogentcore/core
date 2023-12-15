@@ -5,7 +5,6 @@
 package colors
 
 import (
-	"image"
 	"image/color"
 )
 
@@ -14,9 +13,6 @@ import (
 type Render struct {
 	Solid color.RGBA
 	Func  Func
-
-	// If non-zero, points outside of Clip will be clipped and represented as [Transparent]
-	Clip image.Rectangle
 }
 
 // SolidRender returns a new [Render] corresponding to the given solid color.
@@ -27,16 +23,4 @@ func SolidRender(solid color.Color) *Render {
 // FuncRender returns a new [Render] corresponding to the given color [Func].
 func FuncRender(f Func) *Render {
 	return &Render{Func: f}
-}
-
-// At returns the color that should be used for rendering at the given point.
-func (r *Render) At(x, y int) color.Color {
-	p := image.Pt(x, y)
-	if r.Clip != (image.Rectangle{}) && !p.In(r.Clip) {
-		return Transparent
-	}
-	if r.Func != nil {
-		return r.Func(x, y)
-	}
-	return r.Solid
 }
