@@ -16,6 +16,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/grows/images"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -40,7 +41,8 @@ type SVG struct {
 	// Color can be set to provide a default Fill and Stroke Color value
 	Color colors.Full
 
-	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
+	// Size is size of image, Pos is offset within any parent viewport.
+	// Node bounding boxes are based on 0 Pos offset within Pixels image
 	Geom mat32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
@@ -49,17 +51,28 @@ type SVG struct {
 	// physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysHeight units.Value
 
-	// prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size
+	// Norm installs a transform that renormalizes so that the specified
+	// ViewBox exactly fits within the allocated SVG size.
 	Norm bool
 
-	// prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default
+	// InvertY, when doing Norm transform, also flip the Y axis so that
+	// the smallest Y value is at the bottom of the SVG box,
+	// instead of being at the top as it is by default.
 	InvertY bool
 
+	// Translate specifies a translation to apply beyond what is specified in the SVG,
+	// and in addition to the effects of Norm if active.
+	Translate mat32.Vec2
+
+	// Scale specifies a zoom scale factor to apply beyond what is specified in the SVG,
+	// and in addition to the effects of Norm if active.
+	Scale float32
+
 	// render state for rendering
-	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-"`
+	RenderState paint.State `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// live pixels that we render into
-	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-"`
+	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" edit:"-"`
 
 	// all defs defined elements go here (gradients, symbols, etc)
 	Defs Group
@@ -89,6 +102,7 @@ func NewSVG(width, height int) *SVG {
 func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
 	sv.Geom.Size = sz
+	sv.Scale = 1
 	sv.BackgroundColor.SetSolid(colors.White)
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
@@ -209,21 +223,14 @@ func (sv *SVG) Render() {
 
 	sv.Style()
 
+	sv.SetRootTransform()
+
 	rs := &sv.RenderState
 	rs.PushBounds(sv.Pixels.Bounds())
 	if sv.Fill {
 		sv.FillViewport()
 	}
-	if sv.Norm {
-		sv.SetNormTransform()
-	}
 	sv.Root.Render(sv)
-	// rs.PushTransform(sv.Root.Paint.Transform)
-	// for _, kid := range sv.Root.Kids {
-	// 	ni := kid.(Node)
-	// 	ni.Render()
-	// }
-	// rs.PopTransform()
 	rs.PopBounds()
 }
 
@@ -234,22 +241,34 @@ func (sv *SVG) FillViewport() {
 	pc.Unlock()
 }
 
-// SetNormTransform sets a scaling transform to make the entire viewbox to fit the viewport
-func (sv *SVG) SetNormTransform() {
+// SetRootTransform sets the Root node transform based on Norm, Translate, Scale
+// parameters set on the SVG object.
+func (sv *SVG) SetRootTransform() {
+	sc := mat32.Vec2{1, 1}
+	tr := mat32.Vec2{}
+	if sv.Norm {
+		vb := &sv.Root.ViewBox
+		if vb.Size != mat32.Vec2Zero {
+			sc.X = float32(sv.Geom.Size.X) / vb.Size.X
+			sc.Y = float32(sv.Geom.Size.Y) / vb.Size.Y
+			if sv.InvertY {
+				sc.Y *= -1
+			}
+			tr = vb.Min.MulScalar(-1)
+		} else {
+			sz := sv.Root.LocalBBox().Size()
+			if sz != mat32.Vec2Zero {
+				sc.X = float32(sv.Geom.Size.X) / sz.X
+				sc.Y = float32(sv.Geom.Size.Y) / sz.Y
+			}
+		}
+	}
+	tr.SetAdd(sv.Translate)
+	sc.SetMulScalar(sv.Scale)
 	pc := &sv.Root.Paint
-	pc.Transform = mat32.Identity2D()
-	vb := &sv.Root.ViewBox
-	if vb.Size != mat32.Vec2Zero {
-		// todo: deal with all the other options!
-		vpsX := float32(sv.Geom.Size.X) / vb.Size.X
-		vpsY := float32(sv.Geom.Size.Y) / vb.Size.Y
-		if sv.InvertY {
-			vpsY *= -1
-		}
-		pc.Transform = pc.Transform.Scale(vpsX, vpsY).Translate(-vb.Min.X, -vb.Min.Y)
-		if sv.InvertY {
-			pc.Transform.Y0 = -pc.Transform.Y0
-		}
+	pc.Transform = pc.Transform.Scale(sc.X, sc.Y).Translate(tr.X, tr.Y)
+	if sv.InvertY {
+		pc.Transform.Y0 = -pc.Transform.Y0
 	}
 }
 
@@ -262,53 +281,10 @@ func (sv *SVG) SetDPITransform(logicalDPI float32) {
 	pc.Transform = mat32.Scale2D(dpisc, dpisc)
 }
 
-/*
-// todo:  for gi wrapper node:
-//
-// func (sv *SVG) OnInit() {
-// 	sv.AddStyler(func(s *styles.Style) {
-// 		if par := sv.ParentWidget(); par != nil {
-// 			sv.Paint.FillStyle.Color.SetColor(par.Style.Color)
-// 			sv.Paint.StrokeStyle.Color.SetColor(par.Style.Color)
-// 		}
-// 	})
-// }
-
-// func (sv *SVG) Style2D() {
-// 	if nv, err := sv.PropTry("norm"); err == nil {
-// 		sv.Norm, _ = kit.ToBool(nv)
-// 	}
-// 	if iv, err := sv.PropTry("invert-y"); err == nil {
-// 		sv.InvertY, _ = kit.ToBool(iv)
-// 	}
-// }
-
-var SVGProps = ki.Props{
-	ki.EnumTypeFlag: TypeSVGFlags,
-	"Toolbar": ki.PropSlice{
-		{"OpenXML", ki.Props{
-			"label": "Open...",
-			"desc":  "Open SVG XML-formatted file",
-			"icon":  icons.Open,
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".svg",
-				}},
-			},
-		}},
-		{"SaveXML", ki.Props{
-			"label": "SaveAs...",
-			"desc":  "Save SVG content to an XML-formatted file.",
-			"icon":  icons.SaveAs,
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".svg",
-				}},
-			},
-		}},
-	},
+// SavePNG saves the Pixels to a PNG file
+func (sv *SVG) SavePNG(fname string) error {
+	return images.Save(sv.Pixels, fname)
 }
-*/
 
 //////////////////////////////////////////////////////////////
 // 	SVGNode

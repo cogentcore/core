@@ -26,6 +26,7 @@ func TestSVG(t *testing.T) {
 		// 	continue
 		// }
 		sv := NewSVG(640, 480)
+		sv.Norm = true
 		svfn := filepath.Join(dir, fn)
 		err := sv.OpenXML(svfn)
 		if err != nil {
@@ -33,7 +34,6 @@ func TestSVG(t *testing.T) {
 			continue
 		}
 		// fmt.Println(sv.Root.ViewBox)
-		sv.SetNormTransform()
 		sv.Render()
 		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
 		images.Assert(t, sv.Pixels, imfn)
