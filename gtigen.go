@@ -17,12 +17,13 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Radial", &gti.Field{Name: "Radial", Type: "bool", LocalType: "bool", Doc: "whether the gradient is a radial gradient (as opposed to a linear one)", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/colors.GradientTypes", LocalType: "GradientTypes", Doc: "the type of gradient (linear, radial, or conic)", Directives: gti.Directives{}, Tag: ""}},
 		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point for linear gradients (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point for linear gradients (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
-		{"Center", &gti.Field{Name: "Center", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the center point for radial gradients (cx and cy in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"Center", &gti.Field{Name: "Center", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the center point for radial and conic gradients (cx and cy in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Focal", &gti.Field{Name: "Focal", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the focal point for radial gradients (fx and fy in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "the radius for radial gradients (r in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"Rotation", &gti.Field{Name: "Rotation", Type: "float32", LocalType: "float32", Doc: "the starting clockwise rotation of conic gradients (0-1) (<angle> in css)", Directives: gti.Directives{}, Tag: ""}},
 		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors.GradientStop", LocalType: "[]GradientStop", Doc: "the stops of the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors.SpreadMethods", LocalType: "SpreadMethods", Doc: "the spread methods for the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors.GradientUnits", LocalType: "GradientUnits", Doc: "the units used for the gradient", Directives: gti.Directives{}, Tag: ""}},
@@ -34,10 +35,10 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetRadial sets the [Gradient.Radial]:
-// whether the gradient is a radial gradient (as opposed to a linear one)
-func (t *Gradient) SetRadial(v bool) *Gradient {
-	t.Radial = v
+// SetType sets the [Gradient.Type]:
+// the type of gradient (linear, radial, or conic)
+func (t *Gradient) SetType(v GradientTypes) *Gradient {
+	t.Type = v
 	return t
 }
 
@@ -56,7 +57,7 @@ func (t *Gradient) SetEnd(v mat32.Vec2) *Gradient {
 }
 
 // SetCenter sets the [Gradient.Center]:
-// the center point for radial gradients (cx and cy in SVG)
+// the center point for radial and conic gradients (cx and cy in SVG)
 func (t *Gradient) SetCenter(v mat32.Vec2) *Gradient {
 	t.Center = v
 	return t
@@ -73,6 +74,13 @@ func (t *Gradient) SetFocal(v mat32.Vec2) *Gradient {
 // the radius for radial gradients (r in SVG)
 func (t *Gradient) SetRadius(v float32) *Gradient {
 	t.Radius = v
+	return t
+}
+
+// SetRotation sets the [Gradient.Rotation]:
+// the starting clockwise rotation of conic gradients (0-1) (<angle> in css)
+func (t *Gradient) SetRotation(v float32) *Gradient {
+	t.Rotation = v
 	return t
 }
 

@@ -18,8 +18,8 @@ import (
 // Gradient represents a linear or radial gradient.
 type Gradient struct { //gti:add -setters
 
-	// whether the gradient is a radial gradient (as opposed to a linear one)
-	Radial bool
+	// the type of gradient (linear, radial, or conic)
+	Type GradientTypes
 
 	// the starting point for linear gradients (x1 and y1 in SVG)
 	Start mat32.Vec2
@@ -27,7 +27,7 @@ type Gradient struct { //gti:add -setters
 	// the ending point for linear gradients (x2 and y2 in SVG)
 	End mat32.Vec2
 
-	// the center point for radial gradients (cx and cy in SVG)
+	// the center point for radial and conic gradients (cx and cy in SVG)
 	Center mat32.Vec2
 
 	// the focal point for radial gradients (fx and fy in SVG)
@@ -35,6 +35,9 @@ type Gradient struct { //gti:add -setters
 
 	// the radius for radial gradients (r in SVG)
 	Radius float32
+
+	// the starting clockwise rotation of conic gradients (0-1) (<angle> in css)
+	Rotation float32
 
 	// the stops of the gradient
 	Stops []GradientStop
@@ -55,12 +58,32 @@ type Gradient struct { //gti:add -setters
 	Matrix mat32.Mat2
 }
 
-// GradientStop represents a gradient stop in the SVG 2.0 gradient specification
+// GradientStop represents a single stop in a [Gradient]
 type GradientStop struct {
-	Color   color.RGBA // the color of the stop
-	Offset  float32    // the offset (position) of the stop
-	Opacity float32    // the opacity of the stop
+	// the color of the stop
+	Color color.RGBA
+
+	// the offset (position) of the stop (0-1)
+	Offset float32
+
+	// the opacity of the stop (0-1)
+	Opacity float32
 }
+
+// GradientTypes are the different types of gradients available
+// (linear, radial, and conic).
+type GradientTypes int32 //enums:enum
+
+const (
+	// Linear is a linear gradient
+	Linear GradientTypes = iota
+
+	// Radial is a radial gradient
+	Radial
+
+	// Conic is a conic gradient
+	Conic
+)
 
 // SpreadMethods are the methods used when a gradient reaches
 // its end but the object isn't fully filled.
@@ -111,6 +134,7 @@ const (
 // LinearGradient returns a new linear gradient
 func LinearGradient() *Gradient {
 	return &Gradient{
+		Type:   Linear,
 		Spread: PadSpread,
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
@@ -121,7 +145,7 @@ func LinearGradient() *Gradient {
 // RadialGradient returns a new radial gradient
 func RadialGradient() *Gradient {
 	return &Gradient{
-		Radial: true,
+		Type:   Radial,
 		Spread: PadSpread,
 		Matrix: mat32.Identity2D(),
 		Center: mat32.Vec2{0.5, 0.5},
@@ -165,15 +189,18 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
 	g.Bounds = bbox
 	g.Units = UserSpaceOnUse
-	if g.Radial {
-		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
-		g.Focal = g.Center
-		g.Radius = 0.5 * max(bbox.Size().X, bbox.Size().Y)
-	} else {
+	switch g.Type {
+	case Linear:
 		g.Start = bbox.Min
 		g.End = bbox.Max
 		// default is linear left-to-right, so we keep the starting and ending Y the same
 		g.End.Y = g.Start.Y
+	case Radial:
+		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
+		g.Focal = g.Center
+		g.Radius = 0.5 * max(bbox.Size().X, bbox.Size().Y)
+	case Conic:
+		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
 	}
 }
 
@@ -203,7 +230,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	gradT := mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
 		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 
-	if g.Radial {
+	if g.Type == Radial {
 		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
 		if g.Units == ObjectBoundingBox {
 			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
@@ -417,7 +444,7 @@ func (g *Gradient) ApplyTransform(xf mat32.Mat2) {
 		return
 	}
 	rot := xf.ExtractRot()
-	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+	if g.Type == Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
 		g.Matrix = g.Matrix.Mul(xf)
 	} else {
 		g.Bounds.Min = xf.MulVec2AsPt(g.Bounds.Min)
@@ -432,7 +459,7 @@ func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 		return
 	}
 	rot := xf.ExtractRot()
-	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+	if g.Type == Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
 		g.Matrix = g.Matrix.MulCtr(xf, pt)
 	} else {
 		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)

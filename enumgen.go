@@ -11,6 +11,120 @@ import (
 	"goki.dev/enums"
 )
 
+var _GradientTypesValues = []GradientTypes{0, 1, 2}
+
+// GradientTypesN is the highest valid value
+// for type GradientTypes, plus one.
+const GradientTypesN GradientTypes = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _GradientTypesNoOp() {
+	var x [1]struct{}
+	_ = x[Linear-(0)]
+	_ = x[Radial-(1)]
+	_ = x[Conic-(2)]
+}
+
+var _GradientTypesNameToValueMap = map[string]GradientTypes{
+	`Linear`: 0,
+	`linear`: 0,
+	`Radial`: 1,
+	`radial`: 1,
+	`Conic`:  2,
+	`conic`:  2,
+}
+
+var _GradientTypesDescMap = map[GradientTypes]string{
+	0: `Linear is a linear gradient`,
+	1: `Radial is a radial gradient`,
+	2: `Conic is a conic gradient`,
+}
+
+var _GradientTypesMap = map[GradientTypes]string{
+	0: `Linear`,
+	1: `Radial`,
+	2: `Conic`,
+}
+
+// String returns the string representation
+// of this GradientTypes value.
+func (i GradientTypes) String() string {
+	if str, ok := _GradientTypesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the GradientTypes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *GradientTypes) SetString(s string) error {
+	if val, ok := _GradientTypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _GradientTypesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type GradientTypes")
+}
+
+// Int64 returns the GradientTypes value as an int64.
+func (i GradientTypes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the GradientTypes value from an int64.
+func (i *GradientTypes) SetInt64(in int64) {
+	*i = GradientTypes(in)
+}
+
+// Desc returns the description of the GradientTypes value.
+func (i GradientTypes) Desc() string {
+	if str, ok := _GradientTypesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// GradientTypesValues returns all possible values
+// for the type GradientTypes.
+func GradientTypesValues() []GradientTypes {
+	return _GradientTypesValues
+}
+
+// Values returns all possible values
+// for the type GradientTypes.
+func (i GradientTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_GradientTypesValues))
+	for i, d := range _GradientTypesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type GradientTypes.
+func (i GradientTypes) IsValid() bool {
+	_, ok := _GradientTypesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i GradientTypes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *GradientTypes) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
+}
+
 var _SpreadMethodsValues = []SpreadMethods{0, 1, 2}
 
 // SpreadMethodsN is the highest valid value

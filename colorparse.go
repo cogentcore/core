@@ -362,7 +362,7 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					f.Gradient = LinearGradient()
 					f.Gradient.Bounds.Max = mat32.Vec2{1, 0} // SVG is LTR by default
 				} else {
-					f.Gradient.Radial = false
+					f.Gradient.Type = Linear
 				}
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
@@ -388,7 +388,7 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if f.Gradient == nil {
 					f.Gradient = RadialGradient()
 				} else {
-					f.Gradient.Radial = true
+					f.Gradient.Type = Radial
 				}
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
