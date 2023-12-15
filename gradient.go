@@ -155,7 +155,7 @@ func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
 
 // RenderColor returns the [Render] color for rendering,
 // applying the given opacity and bounds.
-func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) *Render {
+func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) Render {
 	box := mat32.Box2{}
 	box.SetFromRect(bounds)
 	g.SetUserBounds(box)
@@ -295,7 +295,7 @@ func (g *Gradient) blendStops(t, opacity float32, s1, s2 GradientStop, flip bool
 const epsilonF = 1e-5
 
 // RenderColorUS returns the render color using the given User Space object transform matrix
-func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) *Render {
+func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) Render {
 	switch len(g.Stops) {
 	case 0:
 		return SolidRender(ApplyOpacity(color.RGBA{0, 0, 0, 255}, opacity)) // default error color for gradient w/o stops.

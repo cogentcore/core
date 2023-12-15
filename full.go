@@ -16,18 +16,18 @@ import (
 // Solid should typically be set using the [Full.SetSolid] method to
 // ensure that Gradient is nil and thus Solid will be taken into account.
 type Full struct {
-	Solid    color.RGBA
 	Gradient *Gradient
+	Solid    color.RGBA
 }
 
 // SolidFull returns a new [Full] from the given solid color.
-func SolidFull(solid color.Color) *Full {
-	return &Full{Solid: AsRGBA(solid)}
+func SolidFull(solid color.Color) Full {
+	return Full{Solid: AsRGBA(solid)}
 }
 
 // GradientFull returns a new [Full] from the given gradient color.
-func GradientFull(gradient *Gradient) *Full {
-	return &Full{Gradient: gradient}
+func GradientFull(gradient *Gradient) Full {
+	return Full{Gradient: gradient}
 }
 
 // IsNil returns whether the color is nil, checking both the gradient
@@ -82,7 +82,7 @@ func (f *Full) CopyFrom(cp *Full) {
 }
 
 // RenderColor returns the [Render] color for rendering, applying the given opacity and bounds.
-func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) *Render {
+func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) Render {
 	if f.Gradient == nil {
 		return SolidRender(ApplyOpacity(f.Solid, opacity))
 	}
