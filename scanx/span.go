@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/BurntSushi/xgbutil/xgraphics"
 	"goki.dev/colors"
 )
 
@@ -31,8 +30,7 @@ type (
 	}
 
 	// LinkListSpanner is a Spanner that draws Spans onto a draw.Image
-	// interface satisfying struct but it is optimized for *xgraphics.Image
-	// and *image.RGBA image types
+	// interface satisfying struct but it is optimized for [*image.RGBA].
 	// It uses a solid Color only for fg and bg and does not support a color function
 	// used by gradients. Spans are accumulated into a set of linked lists, one for
 	// every horizontal line in the image. After the spans for the image are accumulated,
@@ -44,18 +42,13 @@ type (
 		lastY, lastP int
 	}
 
-	// ImgSpanner is a Spanner that draws Spans onto *xgraphics.Image
-	// or *image.RGBA image types
+	// ImgSpanner is a Spanner that draws Spans onto an [*image.RGBA] image.
 	// It uses either a color function as a the color source, or a fgColor
 	// if colFunc is nil.
 	ImgSpanner struct {
 		baseSpanner
-		pix    []uint8
-		stride int
-
-		// xgraphics.Images swap r and b pixel values
-		// compared to saved rgb value.
-		xpixel    bool
+		pix       []uint8
+		stride    int
 		colorFunc colors.Func
 	}
 )
@@ -89,7 +82,7 @@ func (x *LinkListSpanner) spansToImage(img draw.Image) {
 	}
 }
 
-func (x *LinkListSpanner) spansToPix(pix []uint8, stride int, xpixel bool) {
+func (x *LinkListSpanner) spansToPix(pix []uint8, stride int) {
 	for y := 0; y < x.bounds.Dy(); y++ {
 		yo := y * stride
 		p := x.spans[y].next
@@ -98,9 +91,6 @@ func (x *LinkListSpanner) spansToPix(pix []uint8, stride int, xpixel bool) {
 			i0 := yo + spCell.x0*4
 			i1 := i0 + (spCell.x1-spCell.x0)*4
 			r, g, b, a := spCell.clr.R, spCell.clr.G, spCell.clr.B, spCell.clr.A
-			if xpixel { // R and B are reversed in xgraphics.Image vs image.RGBA
-				r, b = b, r
-			}
 			for i := i0; i < i1; i += 4 {
 				pix[i+0] = r
 				pix[i+1] = g
@@ -115,10 +105,8 @@ func (x *LinkListSpanner) spansToPix(pix []uint8, stride int, xpixel bool) {
 // DrawToImage draws the accumulated y spans onto the img
 func (x *LinkListSpanner) DrawToImage(img image.Image) {
 	switch img := img.(type) {
-	case *xgraphics.Image:
-		x.spansToPix(img.Pix, img.Stride, true)
 	case *image.RGBA:
-		x.spansToPix(img.Pix, img.Stride, false)
+		x.spansToPix(img.Pix, img.Stride)
 	case draw.Image:
 		x.spansToImage(img)
 	}
@@ -128,19 +116,6 @@ func (x *LinkListSpanner) DrawToImage(img image.Image) {
 func (x *LinkListSpanner) SetBounds(bounds image.Rectangle) {
 	x.bounds = bounds
 	x.Clear()
-}
-
-func getColorRGBA(c interface{}) (rgba color.RGBA) {
-	switch c := c.(type) {
-	case color.Color:
-		r, g, b, a := c.RGBA()
-		rgba = color.RGBA{
-			R: uint8(r >> 8),
-			G: uint8(g >> 8),
-			B: uint8(b >> 8),
-			A: uint8(a >> 8)}
-	}
-	return
 }
 
 func (x *LinkListSpanner) blendColor(under color.RGBA, ma uint32) color.RGBA {
@@ -263,28 +238,18 @@ func (x *LinkListSpanner) SetColor(c *colors.Render) {
 	x.fgColor = c.Solid
 }
 
-// NewImgSpanner returns an ImgSpanner set to draw to the img.
-// Img argument must be a *xgraphics.Image or *image.RGBA type
-func NewImgSpanner[I *xgraphics.Image | *image.RGBA](img I) (x *ImgSpanner) {
+// NewImgSpanner returns an ImgSpanner set to draw to the given [*image.RGBA].
+func NewImgSpanner(img *image.RGBA) (x *ImgSpanner) {
 	x = &ImgSpanner{}
 	x.SetImage(img)
 	return
 }
 
-// SetImage set the image that the XSpanner will draw onto
-func (x *ImgSpanner) SetImage(img interface{}) {
-	switch img := img.(type) {
-	case *xgraphics.Image:
-		x.pix = img.Pix
-		x.stride = img.Stride
-		x.xpixel = true
-		x.bounds = img.Bounds()
-	case *image.RGBA:
-		x.pix = img.Pix
-		x.stride = img.Stride
-		x.xpixel = false
-		x.bounds = img.Bounds()
-	}
+// SetImage set the [*image.RGBA] that the ImgSpanner will draw onto.
+func (x *ImgSpanner) SetImage(img *image.RGBA) {
+	x.pix = img.Pix
+	x.stride = img.Stride
+	x.bounds = img.Bounds()
 }
 
 // SetColor sets the color of x to either a color.Color or a rasterx.ColorFunction
@@ -324,9 +289,6 @@ func (x *ImgSpanner) SpanColorFuncR(yi, xi0, xi1 int, ma uint32) {
 	cx := xi0
 	for i := i0; i < i1; i += 4 {
 		rcr, rcg, rcb, rca := x.colorFunc(cx, yi).RGBA()
-		if x.xpixel == true {
-			rcr, rcb = rcb, rcr
-		}
 		cx++
 		x.pix[i+0] = uint8(rcr * ma / mp)
 		x.pix[i+1] = uint8(rcg * ma / mp)
@@ -361,9 +323,6 @@ func (x *ImgSpanner) SpanColorFunc(yi, xi0, xi1 int, ma uint32) {
 	for i := i0; i < i1; i += 4 {
 		// uses the Porter-Duff composition operator.
 		rcr, rcg, rcb, rca := x.colorFunc(cx, yi).RGBA()
-		if x.xpixel == true {
-			rcr, rcb = rcb, rcr
-		}
 		cx++
 		a := (m - (rca * ma / m)) * pa
 		dr := uint32(x.pix[i+0])
