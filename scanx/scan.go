@@ -71,7 +71,7 @@ type (
 		cell []cell
 		// Linked list of cells, one per row.
 		cellIndex              []int
-		spanner                Spanner
+		Spanner                Spanner
 		minX, minY, maxX, maxY fixed.Int26_6 // keep track of bounds
 	}
 )
@@ -98,7 +98,7 @@ func (s *Scanner) SetWinding(useNonZeroWinding bool) {
 
 // SetColor sets the color used for rendering.
 func (s *Scanner) SetColor(clr colors.Render) {
-	s.spanner.SetColor(clr)
+	s.Spanner.SetColor(clr)
 }
 
 // findCell returns the index in r.cell for the cell corresponding to
@@ -381,7 +381,7 @@ func (s *Scanner) Draw() {
 		b = b.Intersect(s.clip)
 	}
 	s.saveCell()
-	span := s.spanner.GetSpanFunc()
+	span := s.Spanner.GetSpanFunc()
 	for yi := b.Min.Y; yi < b.Max.Y; yi++ {
 		xi, cover := 0, 0
 		for c := s.cellIndex[yi]; c != -1; c = s.cell[c].next {
@@ -463,7 +463,7 @@ func (s *Scanner) SetBounds(width, height int) {
 
 // NewScanner creates a new Scanner with the given bounds.
 func NewScanner(xs Spanner, width, height int) (sc *Scanner) {
-	sc = &Scanner{spanner: xs, UseNonZeroWinding: true}
+	sc = &Scanner{Spanner: xs, UseNonZeroWinding: true}
 	sc.SetBounds(width, height)
 	return
 }
