@@ -204,13 +204,13 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 				return FuncRender(func(x, y int) color.Color {
 					pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
 					d := pt.Sub(c)
-					return g.tColor(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
+					return g.ColorAt(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
 				})
 			}
 			return FuncRender(func(x, y int) color.Color {
 				pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
 				d := pt.Sub(c)
-				return g.tColor(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
+				return g.ColorAt(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
 			})
 		}
 		f.SetDiv(r)
@@ -242,7 +242,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 					s := g.Stops[len(g.Stops)-1]
 					return ApplyOpacity(s.Color, s.Opacity*opacity)
 				}
-				return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
+				return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 			})
 		}
 		return FuncRender(func(x, y int) color.Color {
@@ -260,7 +260,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 				s := g.Stops[len(g.Stops)-1]
 				return ApplyOpacity(s.Color, s.Opacity*opacity)
 			}
-			return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
+			return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 		})
 	}
 	s, e := g.Start, g.End
@@ -273,7 +273,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 		return FuncRender(func(x, y int) color.Color {
 			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
 			df := pt.Sub(s)
-			return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
+			return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
 		})
 	}
 
@@ -289,7 +289,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	return FuncRender(func(x, y int) color.Color {
 		pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
 		df := pt.Sub(s)
-		return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
+		return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
 	})
 }
 
@@ -323,17 +323,16 @@ func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 	}
 }
 
-// tColor takes the paramaterized value along the gradient's stops and
-// returns a color depending on the spreadMethod value of the gradient and
-// the gradient's slice of stop values.
-func (g *Gradient) tColor(t, opacity float32) color.Color {
+// ColorAt takes the given paramaterized value along the gradient's stops and
+// returns a color depending on [Gradient.Spread] and [Gradient.Stops].
+func (g *Gradient) ColorAt(v, opacity float32) color.Color {
 	d := len(g.Stops)
 	// These cases can be taken care of early on
-	if t >= 1.0 && g.Spread == PadSpread {
+	if v >= 1.0 && g.Spread == PadSpread {
 		s := g.Stops[d-1]
 		return ApplyOpacity(s.Color, s.Opacity*opacity)
 	}
-	if t <= 0.0 && g.Spread == PadSpread {
+	if v <= 0.0 && g.Spread == PadSpread {
 		return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
 	}
 
@@ -341,7 +340,7 @@ func (g *Gradient) tColor(t, opacity float32) color.Color {
 	if g.Spread == ReflectSpread {
 		modRange = 2
 	}
-	mod := mat32.Mod(t, modRange)
+	mod := mat32.Mod(v, modRange)
 	if mod < 0 {
 		mod += modRange
 	}
@@ -359,7 +358,7 @@ func (g *Gradient) tColor(t, opacity float32) color.Color {
 		default:
 			s1, s2 = g.Stops[place-1], g.Stops[place]
 		}
-		return g.blendStops(mod, opacity, s1, s2, false)
+		return g.BlendStops(mod, opacity, s1, s2, false)
 	case ReflectSpread:
 		switch place {
 		case 0:
@@ -378,11 +377,11 @@ func (g *Gradient) tColor(t, opacity float32) color.Color {
 			case d * 2:
 				return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
 			default:
-				return g.blendStops(mod-1, opacity,
+				return g.BlendStops(mod-1, opacity,
 					g.Stops[d*2-place], g.Stops[d*2-place-1], true)
 			}
 		default:
-			return g.blendStops(mod, opacity,
+			return g.BlendStops(mod, opacity,
 				g.Stops[place-1], g.Stops[place], false)
 		}
 	default: // PadSpread
@@ -393,26 +392,27 @@ func (g *Gradient) tColor(t, opacity float32) color.Color {
 			s := g.Stops[len(g.Stops)-1]
 			return ApplyOpacity(s.Color, s.Opacity*opacity)
 		default:
-			return g.blendStops(mod, opacity, g.Stops[place-1], g.Stops[place], false)
+			return g.BlendStops(mod, opacity, g.Stops[place-1], g.Stops[place], false)
 		}
 	}
 }
 
-func (g *Gradient) blendStops(t, opacity float32, s1, s2 GradientStop, flip bool) color.Color {
+// BlendStops blends the given two gradient stops together based on the given value and opacity.
+func (g *Gradient) BlendStops(v, opacity float32, s1, s2 GradientStop, flip bool) color.Color {
 	s1off := s1.Offset
 	if s1.Offset > s2.Offset && !flip { // happens in repeat spread mode
 		s1off--
-		if t > 1 {
-			t--
+		if v > 1 {
+			v--
 		}
 	}
 	if s2.Offset == s1off {
 		return ApplyOpacity(s2.Color, s2.Opacity)
 	}
 	if flip {
-		t = 1 - t
+		v = 1 - v
 	}
-	tp := (t - s1off) / (s2.Offset - s1off)
+	tp := (v - s1off) / (s2.Offset - s1off)
 	r1, g1, b1, _ := s1.Color.RGBA()
 	r2, g2, b2, _ := s2.Color.RGBA()
 
