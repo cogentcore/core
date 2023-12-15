@@ -133,10 +133,10 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		switch vt := val.(type) {
 		case string:
 			fs.Dashes = ParseDashesString(vt)
-		case []float64:
-			mat32.CopyFloat64s(&fs.Dashes, vt)
-		case *[]float64:
-			mat32.CopyFloat64s(&fs.Dashes, *vt)
+		case []float32:
+			mat32.CopyFloat32s(&fs.Dashes, vt)
+		case *[]float32:
+			mat32.CopyFloat32s(&fs.Dashes, *vt)
 		}
 	},
 	"stroke-linecap": StyleFuncEnum(LineCapButt,
@@ -199,19 +199,19 @@ var StylePaintFuncs = map[string]StyleFunc{
 }
 
 // ParseDashesString gets a dash slice from given string
-func ParseDashesString(str string) []float64 {
+func ParseDashesString(str string) []float32 {
 	if len(str) == 0 || str == "none" {
 		return nil
 	}
 	ds := strings.Split(str, ",")
-	dl := make([]float64, len(ds))
+	dl := make([]float32, len(ds))
 	for i, dstr := range ds {
-		d, err := strconv.ParseFloat(strings.TrimSpace(dstr), 64)
+		d, err := strconv.ParseFloat(strings.TrimSpace(dstr), 32)
 		if err != nil {
 			log.Printf("gi.ParseDashesString parsing error: %v\n", err)
 			return nil
 		}
-		dl[i] = d
+		dl[i] = float32(d)
 	}
 	return dl
 }

@@ -12,8 +12,8 @@ import (
 	"slices"
 
 	"github.com/anthonynsimon/bild/clone"
-	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
+	"goki.dev/girl/raster"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
@@ -229,38 +229,38 @@ func (pc *Context) NewSubPath() {
 
 // Path Drawing
 
-func (pc *Context) capfunc() rasterx.CapFunc {
+func (pc *Context) capfunc() raster.CapFunc {
 	switch pc.StrokeStyle.Cap {
 	case styles.LineCapButt:
-		return rasterx.ButtCap
+		return raster.ButtCap
 	case styles.LineCapRound:
-		return rasterx.RoundCap
+		return raster.RoundCap
 	case styles.LineCapSquare:
-		return rasterx.SquareCap
+		return raster.SquareCap
 	case styles.LineCapCubic:
-		return rasterx.CubicCap
+		return raster.CubicCap
 	case styles.LineCapQuadratic:
-		return rasterx.QuadraticCap
+		return raster.QuadraticCap
 	}
 	return nil
 }
 
-func (pc *Context) joinmode() rasterx.JoinMode {
+func (pc *Context) joinmode() raster.JoinMode {
 	switch pc.StrokeStyle.Join {
 	case styles.LineJoinMiter:
-		return rasterx.Miter
+		return raster.Miter
 	case styles.LineJoinMiterClip:
-		return rasterx.MiterClip
+		return raster.MiterClip
 	case styles.LineJoinRound:
-		return rasterx.Round
+		return raster.Round
 	case styles.LineJoinBevel:
-		return rasterx.Bevel
+		return raster.Bevel
 	case styles.LineJoinArcs:
-		return rasterx.Arc
+		return raster.Arc
 	case styles.LineJoinArcsClip:
-		return rasterx.ArcClip
+		return raster.ArcClip
 	}
-	return rasterx.Arc
+	return raster.Arc
 }
 
 // StrokeWidth obtains the current stoke width subject to transform (or not
@@ -293,7 +293,7 @@ func (pc *Context) StrokePreserve() {
 	dash := slices.Clone(pc.StrokeStyle.Dashes)
 	if dash != nil {
 		scx, scy := pc.CurTransform.ExtractScale()
-		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))
+		sc := 0.5 * (mat32.Abs(scx) + mat32.Abs(scy))
 		hasZero := false
 		for i := range dash {
 			dash[i] *= sc
@@ -317,7 +317,10 @@ func (pc *Context) StrokePreserve() {
 	fbox := pc.Raster.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	if pc.FillStyle.Color.Gradient != nil {
+		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.NewBox2FromRect(pc.LastRenderBBox))
+	}
+	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColorTransform(pc.StrokeStyle.Opacity, pc.CurTransform))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 }
@@ -347,7 +350,10 @@ func (pc *Context) FillPreserve() {
 	fbox := pc.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	if pc.FillStyle.Color.Gradient != nil {
+		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.NewBox2FromRect(pc.LastRenderBBox))
+	}
+	rf.SetColor(pc.FillStyle.Color.RenderColorTransform(pc.FillStyle.Opacity, pc.CurTransform))
 	rf.Draw()
 	rf.Clear()
 }
@@ -362,7 +368,7 @@ func (pc *Context) Fill() {
 // FillBox performs an optimized fill of a square region with a uniform color if
 // the given full color is a solid color. If it is not, it calls [Context.DrawRectangle]
 // and [Context.Fill] to fill the region.
-func (pc *Context) FillBox(pos, size mat32.Vec2, clr *colors.Full) {
+func (pc *Context) FillBox(pos, size mat32.Vec2, clr colors.Full) {
 	if clr.Gradient == nil {
 		pc.FillBoxColor(pos, size, clr.Solid)
 		return

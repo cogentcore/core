@@ -745,7 +745,7 @@ func (sr *Span) RenderUnderline(pc *Context, tpos mat32.Vec2) {
 			pc.StrokeStyle.Color.SetSolid(curColor)
 		}
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
-			pc.StrokeStyle.Dashes = []float64{2, 2}
+			pc.StrokeStyle.Dashes = []float32{2, 2}
 		}
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, 2 * dw}))
 		ep := rp.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, 2 * dw}))

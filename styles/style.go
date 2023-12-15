@@ -385,33 +385,30 @@ var StyleDefault Style
 
 // ComputeActualBackgroundColor sets [Style.ActualBackgroundColor] based on the
 // given parent actual background color and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColor(pabg *colors.Full) {
-	s.ActualBackgroundColor = s.ComputeActualBackgroundColorFor(&s.BackgroundColor, pabg)
+func (s *Style) ComputeActualBackgroundColor(pabg colors.Full) {
+	s.ActualBackgroundColor = s.ComputeActualBackgroundColorFor(s.BackgroundColor, pabg)
 }
 
 // ComputeActualBackgroundColorFor returns the actual background color for
 // the given background color based on the given parent actual background color
 // and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColorFor(bg, pabg *colors.Full) colors.Full {
-	// need to make a copy so that we don't modify the original
-	abg := *bg
-
-	if abg.IsNil() {
-		abg = *pabg
+func (s *Style) ComputeActualBackgroundColorFor(bg, pabg colors.Full) colors.Full {
+	if bg.IsNil() {
+		bg = pabg
 	}
 
 	if s.Opacity >= 1 && s.StateLayer <= 0 {
 		// we have no transformations to apply
-		return abg
+		return bg
 	}
 
 	// TODO(kai): support gradient surrounding background colors
 
-	if abg.Gradient == nil {
+	if bg.Gradient == nil {
 		if s.Opacity < 1 {
 			// we take our opacity-applied background color and then overlay it onto our surrounding color
-			obg := colors.ApplyOpacity(abg.Solid, s.Opacity)
-			abg.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
+			obg := colors.ApplyOpacity(bg.Solid, s.Opacity)
+			bg.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
 		}
 
 		if s.StateLayer > 0 {
@@ -421,14 +418,14 @@ func (s *Style) ComputeActualBackgroundColorFor(bg, pabg *colors.Full) colors.Fu
 			}
 			// we take our state-layer-applied state color and then overlay it onto our background color
 			sclr := colors.WithAF32(clr, s.StateLayer)
-			abg.SetSolid(colors.AlphaBlend(abg.Solid, sclr))
+			bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
 		}
 
-		return abg
+		return bg
 	}
 
-	// need to fully copy from start because underlying gradient isn't automatically copied
-	abg = colors.Full{}
+	// need to make a full copy because underlying gradient isn't automatically copied
+	abg := colors.Full{}
 	abg.CopyFrom(bg)
 	for i, stop := range abg.Gradient.Stops {
 		if s.Opacity < 1 {
