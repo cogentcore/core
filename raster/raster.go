@@ -8,6 +8,8 @@
 
 package raster
 
+//go:generate goki generate
+
 import (
 	"image"
 
