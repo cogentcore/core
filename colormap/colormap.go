@@ -4,8 +4,6 @@
 
 package colormap
 
-//go:generate goki generate
-
 import (
 	"image/color"
 	"maps"
@@ -17,22 +15,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// BlendTypes are different algorithms (colorspaces) to use for blending
-// the color stop values in generating the gradients.
-type BlendTypes int32 //enums:enum
-
-const (
-	// HCT uses hue, chroma, tone space and generally produces the best results
-	HCT BlendTypes = iota
-
-	// RGB uses raw RGB space and was used in v1 and is used in most other colormap
-	// software, so to reproduce existing results, select this option.
-	RGB
-
-	// CAM16 is an alternative colorspace, similar to HCT, but not quite as good.
-	CAM16
-)
-
 // Map maps a value onto a color by interpolating between a list of colors
 // defining a spectrum, or optionally as an indexed list of colors.
 type Map struct {
@@ -42,10 +24,8 @@ type Map struct {
 	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
 	Indexed bool
 
-	// use the original RGB-space blending function.
-	// Otherwise uses the new HCT-based blending function
-	// that uses a more perceptually-accurate color space.
-	Blend BlendTypes
+	// the colorspace algorithm to use for blending colors
+	Blend colors.BlendTypes
 
 	// color to display for invalid numbers (e.g., NaN)
 	NoColor color.RGBA
@@ -83,9 +63,9 @@ func (cm *Map) Map(val float32) color.RGBA {
 	lclr := cm.Colors[int(lidx)]
 	uclr := cm.Colors[int(uidx)]
 	switch cm.Blend {
-	case HCT:
+	case colors.HCT:
 		return hct.Blend(cmix, lclr, uclr)
-	case CAM16:
+	case colors.CAM16:
 		return cam16.Blend(cmix, lclr, uclr)
 	default:
 		return colors.Blend(cmix, lclr, uclr)

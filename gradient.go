@@ -43,8 +43,11 @@ type Gradient struct { //gti:add -setters
 	// the spread methods for the gradient
 	Spread SpreadMethods
 
-	// the units for the gradient
+	// the units used for the gradient
 	Units GradientUnits
+
+	// the colorspace algorithm to use for blending colors
+	Blend BlendTypes
 
 	// the bounds of the gradient; this should typically not be set by end-users
 	Bounds mat32.Box2
@@ -88,6 +91,22 @@ const (
 	// UserSpaceOnUse indicates that coordinate values are specified
 	// in the current user coordinate system when the gradient is used.
 	UserSpaceOnUse
+)
+
+// BlendTypes are different algorithms (colorspaces) to use for blending
+// the color stop values in generating the gradients.
+type BlendTypes int32 //enums:enum
+
+const (
+	// HCT uses hue, chroma, tone space and generally produces the best results
+	HCT BlendTypes = iota
+
+	// RGB uses raw RGB space and was used in v1 and is used in most other colormap
+	// software, so to reproduce existing results, select this option.
+	RGB
+
+	// CAM16 is an alternative colorspace, similar to HCT, but not quite as good.
+	CAM16
 )
 
 // LinearGradient returns a new linear gradient

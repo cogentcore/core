@@ -25,7 +25,8 @@ var _ = gti.AddType(&gti.Type{
 		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "the radius for radial gradients (r in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors.GradientStop", LocalType: "[]GradientStop", Doc: "the stops of the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors.SpreadMethods", LocalType: "SpreadMethods", Doc: "the spread methods for the gradient", Directives: gti.Directives{}, Tag: ""}},
-		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors.GradientUnits", LocalType: "GradientUnits", Doc: "the units for the gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors.GradientUnits", LocalType: "GradientUnits", Doc: "the units used for the gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Blend", &gti.Field{Name: "Blend", Type: "goki.dev/colors.BlendTypes", LocalType: "BlendTypes", Doc: "the colorspace algorithm to use for blending colors", Directives: gti.Directives{}, Tag: ""}},
 		{"Bounds", &gti.Field{Name: "Bounds", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounds of the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: ""}},
 		{"Matrix", &gti.Field{Name: "Matrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "the matrix for the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -90,9 +91,16 @@ func (t *Gradient) SetSpread(v SpreadMethods) *Gradient {
 }
 
 // SetUnits sets the [Gradient.Units]:
-// the units for the gradient
+// the units used for the gradient
 func (t *Gradient) SetUnits(v GradientUnits) *Gradient {
 	t.Units = v
+	return t
+}
+
+// SetBlend sets the [Gradient.Blend]:
+// the colorspace algorithm to use for blending colors
+func (t *Gradient) SetBlend(v BlendTypes) *Gradient {
+	t.Blend = v
 	return t
 }
 

@@ -11,12 +11,13 @@ import (
 	"slices"
 	"testing"
 
+	"goki.dev/colors"
 	"goki.dev/grows/images"
 )
 
 func TestColorMaps(t *testing.T) {
 	nmaps := len(StdMaps)
-	nblend := int(BlendTypesN)
+	nblend := int(colors.BlendTypesN)
 	// y axis is maps x blend mode
 	nY := nmaps * (nblend + 1)
 	nX := 512
@@ -37,7 +38,7 @@ func TestColorMaps(t *testing.T) {
 	slices.Sort(keys)
 	for idx, k := range keys {
 		cm := StdMaps[k]
-		for bi, bm := range BlendTypesValues() {
+		for bi, bm := range colors.BlendTypesValues() {
 			yp = idx*(nblend+1) + bi
 			cm.Blend = bm
 			for x := 0; x < nX; x++ {
