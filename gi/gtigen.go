@@ -900,7 +900,7 @@ var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
 	ShortName:  "gi.Image",
 	IDName:     "image",
-	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another scene and show that",
+	Doc:        "Image is a Widget that renders a static bitmap image.\nSee [Styles.ObjectFits] for how to control the image rendering within\nthe allocated size.  The minimum requested size is the pixel size in\nDp units (1/160th of an inch).",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -2795,7 +2795,7 @@ var SVGType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.SVG",
 	ShortName:  "gi.SVG",
 	IDName:     "svg",
-	Doc:        "SVG is a Widget that renders an [svg.SVG] object. It expects to be a terminal\nnode and does NOT call rendering etc on its children.",
+	Doc:        "SVG is a Widget that renders an [svg.SVG] object.\nIf not ReadOnly, the user can pan and zoom the display.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -2803,7 +2803,29 @@ var SVGType = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"OpenSVG", &gti.Method{Name: "OpenSVG", Doc: "OpenSVG opens an XML-formatted SVG file", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"SaveSVG", &gti.Method{Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"SavePNG", &gti.Method{Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+	}),
 	Instance: &SVG{},
 })
 
@@ -3655,7 +3677,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"Update", &gti.Method{Name: "Update", Doc: "Update calls Config and then ApplyStyle\non every Widget in the tree from me.\nThis should be used after any structural changes\nto currently-displayed widgets.\nIt wraps everything in UpdateStart / UpdateEndLayout\nso layout will automatically be called for next render.", Directives: gti.Directives{
+		{"Update", &gti.Method{Name: "Update", Doc: "Update calls Config and then ApplyStyle\non every Widget in the tree from me.\nThis should be used after any structural changes\nto currently-displayed widgets.\nIt wraps everything in UpdateStart / UpdateEndRender\nso node will render on next pass.\nCall SetNeedsLayout to also trigger a layout where needed.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),

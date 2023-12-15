@@ -17,6 +17,7 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
@@ -95,6 +96,7 @@ func (tv *TableView) SetStyles() {
 			gi.ToolbarStyles(sh)
 			sh.Style(func(s *styles.Style) {
 				s.Grow.Set(0, 0)
+				s.Gap.Set(units.Em(0.5)) // matches grid default
 			})
 		case "header/head-idx": // index header
 			lbl := w.(*gi.Label)
@@ -115,6 +117,7 @@ func (tv *TableView) SetStyles() {
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)
+				s.Gap.Set(units.Em(0.5)) // note: match header
 				// baseline mins:
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)

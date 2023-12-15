@@ -446,7 +446,7 @@ func (sc *Scene) DoUpdate() bool {
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
-		// fmt.Println("scene restyle")
+		// fmt.Println(sc, "scene restyle")
 		sc.Fill() // full redraw
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
@@ -454,14 +454,14 @@ func (sc *Scene) DoUpdate() bool {
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
 	case sc.Is(ScNeedsLayout):
-		// fmt.Println("scene layout start")
+		// fmt.Println(sc, "scene layout start")
 		sc.Fill() // full redraw
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
 	case sc.Is(ScNeedsRender):
-		// fmt.Println("scene render start")
+		// fmt.Println(sc, "scene render start")
 		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)

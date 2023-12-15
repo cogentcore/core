@@ -49,6 +49,7 @@ func (ic *Icon) OnInit() {
 
 func (ic *Icon) SetStyles() {
 	ic.SVG.Norm = true
+	ic.SVG.Scale = 1
 	ic.Style(func(s *styles.Style) {
 		s.Min.X.Dp(16)
 		s.Min.Y.Dp(16)
@@ -150,6 +151,7 @@ func (ic *Icon) RenderSVG() {
 	// TODO(kai): what about gradient icons?
 	sv.Color.SetSolid(clr)
 
+	sv.Scale = 1
 	sv.Render()
 	ic.RendSize = sz
 	sv.Name = string(ic.IconName)
