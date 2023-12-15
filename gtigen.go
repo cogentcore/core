@@ -18,14 +18,16 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Radial", &gti.Field{Name: "Radial", Type: "bool", LocalType: "bool", Doc: "whether the gradient is a radial gradient (as opposed to a linear one)", Directives: gti.Directives{}, Tag: ""}},
-		{"Bounds", &gti.Field{Name: "Bounds", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounds for linear gradients (x1, y1, x2, and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point for linear gradients (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point for linear gradients (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Center", &gti.Field{Name: "Center", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the center point for radial gradients (cx and cy in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Focal", &gti.Field{Name: "Focal", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the focal point for radial gradients (fx and fy in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "the radius for radial gradients (r in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors.GradientStop", LocalType: "[]GradientStop", Doc: "the stops of the gradient", Directives: gti.Directives{}, Tag: ""}},
-		{"Matrix", &gti.Field{Name: "Matrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "the matrix for the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors.SpreadMethods", LocalType: "SpreadMethods", Doc: "the spread methods for the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors.GradientUnits", LocalType: "GradientUnits", Doc: "the units for the gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Bounds", &gti.Field{Name: "Bounds", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounds of the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Matrix", &gti.Field{Name: "Matrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "the matrix for the gradient; this should typically not be set by end-users", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -38,10 +40,17 @@ func (t *Gradient) SetRadial(v bool) *Gradient {
 	return t
 }
 
-// SetBounds sets the [Gradient.Bounds]:
-// the bounds for linear gradients (x1, y1, x2, and y2 in SVG)
-func (t *Gradient) SetBounds(v mat32.Box2) *Gradient {
-	t.Bounds = v
+// SetStart sets the [Gradient.Start]:
+// the starting point for linear gradients (x1 and y1 in SVG)
+func (t *Gradient) SetStart(v mat32.Vec2) *Gradient {
+	t.Start = v
+	return t
+}
+
+// SetEnd sets the [Gradient.End]:
+// the ending point for linear gradients (x2 and y2 in SVG)
+func (t *Gradient) SetEnd(v mat32.Vec2) *Gradient {
+	t.End = v
 	return t
 }
 
@@ -70,13 +79,6 @@ func (t *Gradient) SetRadius(v float32) *Gradient {
 // the stops of the gradient
 func (t *Gradient) SetStops(v []GradientStop) *Gradient {
 	t.Stops = v
-	return t
-}
-
-// SetMatrix sets the [Gradient.Matrix]:
-// the matrix for the gradient
-func (t *Gradient) SetMatrix(v mat32.Mat2) *Gradient {
-	t.Matrix = v
 	return t
 }
 
