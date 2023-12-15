@@ -50,4 +50,8 @@ type Config struct { //gti:add
 
 	// whether to generate GraphQL marshaling methods for gqlgen
 	GQL bool
+
+	// whether to allow enums to extend other enums; this should be on in almost all circumstances, but can
+	// be turned off for specific enum types that extend non-enum types
+	Extend bool `def:"true"`
 }

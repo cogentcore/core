@@ -125,7 +125,8 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		utyp := typ.Underlying()
 
 		tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
-		if typnm != utyp.String() { // if our direct type isn't the same as our underlying type, we are extending our direct type
+		// if our direct type isn't the same as our underlying type, we are extending our direct type
+		if cfg.Extend && typnm != utyp.String() {
 			tt.Extends = typnm
 		}
 		switch dir.Directive {
