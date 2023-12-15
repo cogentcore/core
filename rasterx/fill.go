@@ -22,7 +22,7 @@ type (
 		SetBounds(w, h int)
 
 		// SetColor sets the color used for rendering.
-		SetColor(color *colors.Render)
+		SetColor(color colors.Render)
 		SetWinding(useNonZeroWinding bool)
 		Clear()
 

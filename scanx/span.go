@@ -229,12 +229,12 @@ func (x *LinkListSpanner) SpanOver(yi, xi0, xi1 int, ma uint32) {
 }
 
 // SetBgColor sets the background color for blending to the solid part of the given color
-func (x *LinkListSpanner) SetBgColor(c *colors.Render) {
+func (x *LinkListSpanner) SetBgColor(c colors.Render) {
 	x.bgColor = c.Solid
 }
 
 // SetColor sets the color of x to the solid part of the given color
-func (x *LinkListSpanner) SetColor(c *colors.Render) {
+func (x *LinkListSpanner) SetColor(c colors.Render) {
 	x.fgColor = c.Solid
 }
 
@@ -253,7 +253,7 @@ func (x *ImgSpanner) SetImage(img *image.RGBA) {
 }
 
 // SetColor sets the color of x to either a color.Color or a rasterx.ColorFunction
-func (x *ImgSpanner) SetColor(c *colors.Render) {
+func (x *ImgSpanner) SetColor(c colors.Render) {
 	if c.Func != nil {
 		x.colorFunc = c.Func
 		return

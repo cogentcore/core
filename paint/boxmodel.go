@@ -23,7 +23,7 @@ func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 // widgets such as buttons, textfields, etc in a GUI. DrawStdBox automatically computes
 // the [Style.ActualBackgroundColor] of this style object, but needs to be passed that
 // of its parent.
-func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg *colors.Full) {
+func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg colors.Full) {
 	st.ComputeActualBackgroundColor(pabg)
 
 	mpos := pos.Add(st.TotalMargin().Pos())
@@ -34,7 +34,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		st.ActualBackgroundColor = *pabg
+		st.ActualBackgroundColor = pabg
 	}
 
 	// note that we always set the fill opacity to 1 because we are already applying

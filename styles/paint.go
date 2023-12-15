@@ -226,8 +226,8 @@ func (pf *Fill) SetColor(cl color.Color) {
 }
 
 // SetFullColor sets full color (solid or gradient) from source
-func (pf *Fill) SetFullColor(cl *colors.Full) {
-	if cl == nil {
+func (pf *Fill) SetFullColor(cl colors.Full) {
+	if cl.IsNil() {
 		pf.On = false
 	} else {
 		pf.On = true
@@ -333,8 +333,8 @@ func (ps *Stroke) SetColor(cl color.Color) {
 }
 
 // SetFullColor sets full color spec from source
-func (ps *Stroke) SetFullColor(cl *colors.Full) {
-	if cl == nil {
+func (ps *Stroke) SetFullColor(cl colors.Full) {
+	if cl.IsNil() {
 		ps.On = false
 	} else {
 		ps.On = true

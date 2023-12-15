@@ -30,7 +30,7 @@ type (
 	SpanFunc func(yi, xi0, xi1 int, alpha uint32)
 	//Spanner consumes spans as they are created by the Scanner Draw function
 	Spanner interface {
-		SetColor(color *colors.Render)
+		SetColor(color colors.Render)
 		// This returns a function that is efficient given the Spanner parameters.
 		GetSpanFunc() SpanFunc
 	}
@@ -97,7 +97,7 @@ func (s *Scanner) SetWinding(useNonZeroWinding bool) {
 }
 
 // SetColor sets the color used for rendering.
-func (s *Scanner) SetColor(clr *colors.Render) {
+func (s *Scanner) SetColor(clr colors.Render) {
 	s.spanner.SetColor(clr)
 }
 

@@ -362,7 +362,7 @@ func (pc *Context) Fill() {
 // FillBox performs an optimized fill of a square region with a uniform color if
 // the given full color is a solid color. If it is not, it calls [Context.DrawRectangle]
 // and [Context.Fill] to fill the region.
-func (pc *Context) FillBox(pos, size mat32.Vec2, clr *colors.Full) {
+func (pc *Context) FillBox(pos, size mat32.Vec2, clr colors.Full) {
 	if clr.Gradient == nil {
 		pc.FillBoxColor(pos, size, clr.Solid)
 		return
