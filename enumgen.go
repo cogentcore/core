@@ -21,9 +21,9 @@ const GradientTypesN GradientTypes = 3
 // Re-run the enumgen command to generate them again.
 func _GradientTypesNoOp() {
 	var x [1]struct{}
-	_ = x[Linear-(0)]
-	_ = x[Radial-(1)]
-	_ = x[Conic-(2)]
+	_ = x[LinearGradient-(0)]
+	_ = x[RadialGradient-(1)]
+	_ = x[ConicGradient-(2)]
 }
 
 var _GradientTypesNameToValueMap = map[string]GradientTypes{

@@ -75,14 +75,14 @@ type GradientStop struct {
 type GradientTypes int32 //enums:enum
 
 const (
-	// Linear is a linear gradient
-	Linear GradientTypes = iota
+	// LinearGradient indicates to use a linear gradient
+	LinearGradient GradientTypes = iota
 
-	// Radial is a radial gradient
-	Radial
+	// RadialGradient indicates to use a radial gradient
+	RadialGradient
 
-	// Conic is a conic gradient
-	Conic
+	// ConicGradient indicates to use a conic gradient
+	ConicGradient
 )
 
 // SpreadMethods are the methods used when a gradient reaches
@@ -131,10 +131,10 @@ const (
 	CAM16
 )
 
-// LinearGradient returns a new linear gradient
-func LinearGradient() *Gradient {
+// NewLinearGradient returns a new linear gradient
+func NewLinearGradient() *Gradient {
 	return &Gradient{
-		Type:   Linear,
+		Type:   LinearGradient,
 		Spread: PadSpread,
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
@@ -142,10 +142,10 @@ func LinearGradient() *Gradient {
 	}
 }
 
-// RadialGradient returns a new radial gradient
-func RadialGradient() *Gradient {
+// NewRadialGradient returns a new radial gradient
+func NewRadialGradient() *Gradient {
 	return &Gradient{
-		Type:   Radial,
+		Type:   RadialGradient,
 		Spread: PadSpread,
 		Matrix: mat32.Identity2D(),
 		Center: mat32.Vec2{0.5, 0.5},
@@ -190,16 +190,16 @@ func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
 	g.Bounds = bbox
 	g.Units = UserSpaceOnUse
 	switch g.Type {
-	case Linear:
+	case LinearGradient:
 		g.Start = bbox.Min
 		g.End = bbox.Max
 		// default is linear left-to-right, so we keep the starting and ending Y the same
 		g.End.Y = g.Start.Y
-	case Radial:
+	case RadialGradient:
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
 		g.Focal = g.Center
 		g.Radius = 0.5 * max(bbox.Size().X, bbox.Size().Y)
-	case Conic:
+	case ConicGradient:
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
 	}
 }
@@ -230,7 +230,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	gradT := mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
 		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 
-	if g.Type == Radial {
+	if g.Type == RadialGradient {
 		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
 		if g.Units == ObjectBoundingBox {
 			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
@@ -444,7 +444,7 @@ func (g *Gradient) ApplyTransform(xf mat32.Mat2) {
 		return
 	}
 	rot := xf.ExtractRot()
-	if g.Type == Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+	if g.Type == RadialGradient || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
 		g.Matrix = g.Matrix.Mul(xf)
 	} else {
 		g.Bounds.Min = xf.MulVec2AsPt(g.Bounds.Min)
@@ -459,7 +459,7 @@ func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 		return
 	}
 	rot := xf.ExtractRot()
-	if g.Type == Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+	if g.Type == RadialGradient || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
 		g.Matrix = g.Matrix.MulCtr(xf, pt)
 	} else {
 		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)

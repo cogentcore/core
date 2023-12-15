@@ -84,25 +84,25 @@ func (f *Full) SetString(str string, ctx ...Context) error {
 		pars = strings.TrimSuffix(pars, ")")
 		switch gtyp {
 		case "repeating-linear":
-			f.Gradient = LinearGradient().SetSpread(RepeatSpread)
+			f.Gradient = NewLinearGradient().SetSpread(RepeatSpread)
 			err := f.parseLinearGrad(pars)
 			if err != nil {
 				return err
 			}
 		case "linear":
-			f.Gradient = LinearGradient()
+			f.Gradient = NewLinearGradient()
 			err := f.parseLinearGrad(pars)
 			if err != nil {
 				return err
 			}
 		case "repeating-radial":
-			f.Gradient = RadialGradient().SetSpread(RepeatSpread)
+			f.Gradient = NewRadialGradient().SetSpread(RepeatSpread)
 			err := f.parseRadialGrad(pars)
 			if err != nil {
 				return err
 			}
 		case "radial":
-			f.Gradient = RadialGradient()
+			f.Gradient = NewRadialGradient()
 			err := f.parseRadialGrad(pars)
 			if err != nil {
 				return err
@@ -359,10 +359,10 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			switch se.Name.Local {
 			case "linearGradient":
 				if f.Gradient == nil {
-					f.Gradient = LinearGradient()
+					f.Gradient = NewLinearGradient()
 					f.Gradient.Bounds.Max = mat32.Vec2{1, 0} // SVG is LTR by default
 				} else {
-					f.Gradient.Type = Linear
+					f.Gradient.Type = LinearGradient
 				}
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
@@ -386,9 +386,9 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				}
 			case "radialGradient":
 				if f.Gradient == nil {
-					f.Gradient = RadialGradient()
+					f.Gradient = NewRadialGradient()
 				} else {
-					f.Gradient.Type = Radial
+					f.Gradient.Type = RadialGradient
 				}
 				var setFx, setFy bool
 				for _, attr := range se.Attr {

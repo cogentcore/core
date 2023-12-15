@@ -5,9 +5,9 @@
 package colors
 
 func ExampleLinearGradient() {
-	LinearGradient().AddStop(White, 0, 1).AddStop(Black, 1, 1)
+	NewLinearGradient().AddStop(White, 0, 1).AddStop(Black, 1, 1)
 }
 
 func ExampleRadialGradient() {
-	RadialGradient().AddStop(Green, 0, 1).AddStop(Yellow, 0.5, 1).AddStop(Red, 1, 1)
+	NewRadialGradient().AddStop(Green, 0, 1).AddStop(Yellow, 0.5, 1).AddStop(Red, 1, 1)
 }
