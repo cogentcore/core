@@ -1,15 +1,13 @@
 // Copyright 2018 by the rasterx Authors. All rights reserved.
 // Created 2018 by S.R.Wiley
-package rasterx_test
+package rasterx
 
 import (
-	"math"
 	"math/rand"
 	"testing"
 	"time"
 
-	. "goki.dev/girl/rasterx"
-	//"golang.org/x/image/math/fixed"
+	"goki.dev/mat32/v2"
 )
 
 // Copied from golang.org/x/image/vector
@@ -31,7 +29,7 @@ func CubeLerpTo(ax, ay, bx, by, cx, cy, dx, dy float32, LineTo func(ex, ey float
 	}
 	if devsq >= 0.333 {
 		const tol = 3
-		n := 1 + int(math.Sqrt(math.Sqrt(tol*float32(devsq))))
+		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
 		t, nInv := float32(0), 1/float32(n)
 		for i := 0; i < n-1; i++ {
 			t += nInv
@@ -51,7 +49,7 @@ func QuadLerpTo(ax, ay, bx, by, cx, cy float32, LineTo func(dx, dy float32)) {
 	devsq := devSquared(ax, ay, bx, by, cx, cy)
 	if devsq >= 0.333 {
 		const tol = 3
-		n := 1 + int(math.Sqrt(math.Sqrt(tol*float32(devsq))))
+		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
 		t, nInv := float32(0), 1/float32(n)
 		for i := 0; i < n-1; i++ {
 			t += nInv
@@ -61,27 +59,6 @@ func QuadLerpTo(ax, ay, bx, by, cx, cy float32, LineTo func(dx, dy float32)) {
 		}
 	}
 	LineTo(cx, cy)
-}
-
-// devSquared returns a measure of how curvy the sequence (ax, ay) to (bx, by)
-// to (cx, cy) is. It determines how many line segments will approximate a
-// Bézier curve segment.
-//
-// http://lists.nongnu.org/archive/html/freetype-devel/2016-08/msg00080.html
-// gives the rationale for this evenly spaced heuristic instead of a recursive
-// de Casteljau approach:
-//
-// The reason for the subdivision by n is that I expect the "flatness"
-// computation to be semi-expensive (it's done once rather than on each
-// potential subdivision) and also because you'll often get fewer subdivisions.
-// Taking a circular arc as a simplifying assumption (ie a spherical cow),
-// where I get n, a recursive approach would get 2^⌈lg n⌉, which, if I haven't
-// made any horrible mistakes, is expected to be 33% more in the limit.
-// copied from golang.org/x/image/vector
-func devSquared(ax, ay, bx, by, cx, cy float32) float32 {
-	devx := ax - 2*bx + cx
-	devy := ay - 2*by + cy
-	return devx*devx + devy*devy
 }
 
 var tc = []float32{ //test coorinates
@@ -131,7 +108,7 @@ func TestBezierCube(t *testing.T) {
 	for i := 0; i < tests*8; i++ {
 		coords = append(coords, float32(rnd.Intn(100)))
 	}
-	epsilon := 1e-4 // allowed range for round off error
+	epsilon := float32(1e-4) // allowed range for round off error
 	for i := 0; i < tests; i++ {
 		var r1x, r1y, r2x, r2y []float32
 		set := coords[i*8 : (i+1)*8]
@@ -153,12 +130,12 @@ func TestBezierCube(t *testing.T) {
 		}
 		//t.Log("Bez to", len(r1x), "lines")
 		for i, v := range r1x {
-			if math.Abs(float32(v-r2x[i])) > epsilon {
+			if mat32.Abs(float32(v-r2x[i])) > epsilon {
 				t.Error("x mismatch", v, "vs", r2x[i], " diff ", v-r2x[i])
 			}
 		}
 		for i, v := range r1y {
-			if math.Abs(float32(v-r2y[i])) > epsilon {
+			if mat32.Abs(float32(v-r2y[i])) > epsilon {
 				t.Error("y mismatch", v, "vs", r2y[i], " diff ", v-r2y[i])
 			}
 		}
@@ -172,7 +149,7 @@ func TestBezierQuad(t *testing.T) {
 	for i := 0; i < tests*8; i++ {
 		coords = append(coords, float32(rnd.Intn(100)))
 	}
-	epsilon := 1e-4 // allowed range for round off error
+	epsilon := float32(1e-4) // allowed range for round off error
 	for i := 0; i < tests; i++ {
 		var r1x, r1y, r2x, r2y []float32
 		set := coords[i*6 : (i+1)*6]
@@ -194,16 +171,15 @@ func TestBezierQuad(t *testing.T) {
 		}
 		//t.Log("Bez to", len(r1x), "lines")
 		for i, v := range r1x {
-			if math.Abs(float32(v-r2x[i])) > epsilon {
+			if mat32.Abs(float32(v-r2x[i])) > epsilon {
 				t.Error("x mismatch", v, "vs", r2x[i], " diff ", v-r2x[i])
 			}
 		}
 		for i, v := range r1y {
-			if math.Abs(float32(v-r2y[i])) > epsilon {
+			if mat32.Abs(float32(v-r2y[i])) > epsilon {
 				t.Error("y mismatch", v, "vs", r2y[i], " diff ", v-r2y[i])
 			}
 		}
 
 	}
-
 }
