@@ -304,3 +304,34 @@ func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32
 	}
 	return (n - e*t1) + cX, (m - d*t1) + cY, true
 }
+
+// MatrixAdder is an adder that applies matrix M to all points
+type MatrixAdder struct {
+	Adder
+	M mat32.Mat2
+}
+
+// Reset sets the matrix M to identity
+func (t *MatrixAdder) Reset() {
+	t.M = mat32.Identity2D()
+}
+
+// Start starts a new path
+func (t *MatrixAdder) Start(a fixed.Point26_6) {
+	t.Adder.Start(t.M.TFixed(a))
+}
+
+// Line adds a linear segment to the current curve.
+func (t *MatrixAdder) Line(b fixed.Point26_6) {
+	t.Adder.Line(t.M.TFixed(b))
+}
+
+// QuadBezier adds a quadratic segment to the current curve.
+func (t *MatrixAdder) QuadBezier(b, c fixed.Point26_6) {
+	t.Adder.QuadBezier(t.M.TFixed(b), t.M.TFixed(c))
+}
+
+// CubeBezier adds a cubic segment to the current curve.
+func (t *MatrixAdder) CubeBezier(b, c, d fixed.Point26_6) {
+	t.Adder.CubeBezier(t.M.TFixed(b), t.M.TFixed(c), t.M.TFixed(d))
+}
