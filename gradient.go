@@ -314,97 +314,86 @@ func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) *Render 
 		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 
 	if g.Radial {
-		cx, cy, fx, fy, rx, ry := g.Center.X, g.Center.Y, g.Focal.X, g.Focal.Y, g.Radius, g.Radius
+		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
 		if g.Units == ObjectBoundingBox {
-			cx = g.Bounds.Max.X * cx
-			cy = g.Bounds.Max.Y * cy
-			fx = g.Bounds.Max.X * fx
-			fy = g.Bounds.Max.Y * fy
-			rx *= g.Bounds.Size().X
-			ry *= g.Bounds.Size().Y
+			c.SetMul(g.Bounds.Max)
+			f.SetMul(g.Bounds.Max)
+			r.SetMul(g.Bounds.Size())
 		} else {
-			cx, cy = g.Matrix.Transform(cx, cy)
-			fx, fy = g.Matrix.Transform(fx, fy)
-			rx, ry = g.Matrix.TransformVector(rx, ry)
-			cx, cy = objMatrix.Transform(cx, cy)
-			fx, fy = objMatrix.Transform(fx, fy)
-			rx, ry = objMatrix.TransformVector(rx, ry)
+			c = g.Matrix.MulVec2AsPt(c)
+			f = g.Matrix.MulVec2AsPt(f)
+			r = g.Matrix.MulVec2AsVec(r)
+
+			c = objMatrix.MulVec2AsPt(c)
+			f = objMatrix.MulVec2AsPt(f)
+			r = objMatrix.MulVec2AsVec(r)
 		}
 
-		if cx == fx && cy == fy {
+		if c == f {
 			// When the focus and center are the same things are much simpler;
 			// t is just distance from center
 			// scaled by the bounds aspect ratio times r
 			if g.Units == ObjectBoundingBox {
 				return FuncRender(func(xi, yi int) color.Color {
-					x, y := gradT.Transform(float32(xi)+0.5, float32(yi)+0.5)
-					dx := float32(x) - cx
-					dy := float32(y) - cy
-					return g.tColor(mat32.Sqrt(dx*dx/(rx*rx)+(dy*dy)/(ry*ry)), opacity)
+					pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
+					d := pt.Sub(c)
+					return g.tColor(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
 				})
 			}
 			return FuncRender(func(xi, yi int) color.Color {
-				x := float32(xi) + 0.5
-				y := float32(yi) + 0.5
-				dx := x - cx
-				dy := y - cy
-				return g.tColor(mat32.Sqrt(dx*dx/(rx*rx)+(dy*dy)/(ry*ry)), opacity)
+				pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
+				d := pt.Sub(c)
+				return g.tColor(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
 			})
 		}
-		fx /= rx
-		fy /= ry
-		cx /= rx
-		cy /= ry
+		f.SetDiv(r)
+		c.SetDiv(r)
 
-		dfx := fx - cx
-		dfy := fy - cy
+		df := f.Sub(c)
 
-		if dfx*dfx+dfy*dfy > 1 { // Focus outside of circle; use intersection
+		if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
 			// point of line from center to focus and circle as per SVG specs.
-			nfx, nfy, intersects := RayCircleIntersectionF(fx, fy, cx, cy, cx, cy, 1.0-epsilonF)
-			fx, fy = nfx, nfy
-			if intersects == false {
-				return SolidRender(color.RGBA{255, 255, 0, 255}) // should not happen
+			nf, intersects := RayCircleIntersectionF(f, c, c, 1.0-epsilonF)
+			f = nf
+			if !intersects {
+				return SolidRender(colors.FromRGB{255, 255, 0}) // should not happen
 			}
 		}
 		if g.Units == ObjectBoundingBox {
 			return FuncRender(func(xi, yi int) color.Color {
-				x, y := gradT.Transform(float32(xi)+0.5, float32(yi)+0.5)
-				ex := x / rx
-				ey := y / ry
+				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
+				e := pt.Div(r)
 
-				t1x, t1y, intersects := RayCircleIntersectionF(ex, ey, fx, fy, cx, cy, 1.0)
-				if intersects == false { //In this case, use the last stop color
+				t1, intersects := RayCircleIntersectionF(e, f, c, 1)
+				if !intersects { // In this case, use the last stop color
 					s := g.Stops[len(g.Stops)-1]
 					return ApplyOpacity(s.Color, s.Opacity*opacity)
 				}
-				tdx, tdy := t1x-fx, t1y-fy
-				dx, dy := ex-fx, ey-fy
-				if tdx*tdx+tdy*tdy < epsilonF {
+				td := t1.Sub(f)
+				d := e.Sub(f)
+				if td.X*td.X+td.Y*td.Y < epsilonF {
 					s := g.Stops[len(g.Stops)-1]
 					return ApplyOpacity(s.Color, s.Opacity*opacity)
 				}
-				return g.tColor(mat32.Sqrt(dx*dx+dy*dy)/mat32.Sqrt(tdx*tdx+tdy*tdy), opacity)
+				return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 			})
 		}
 		return FuncRender(func(xi, yi int) color.Color {
-			x := float32(xi) + 0.5
-			y := float32(yi) + 0.5
-			ex := x / rx
-			ey := y / ry
+			pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
+			e := pt.Div(r)
 
-			t1x, t1y, intersects := RayCircleIntersectionF(ex, ey, fx, fy, cx, cy, 1.0)
-			if intersects == false { //In this case, use the last stop color
+			t1, intersects := RayCircleIntersectionF(e, f, c, 1)
+			if !intersects { // In this case, use the last stop color
 				s := g.Stops[len(g.Stops)-1]
 				return ApplyOpacity(s.Color, s.Opacity*opacity)
 			}
-			tdx, tdy := t1x-fx, t1y-fy
-			dx, dy := ex-fx, ey-fy
-			if tdx*tdx+tdy*tdy < epsilonF {
+			td := t1.Sub(f)
+			d := e.Sub(f)
+			if td.X*td.X+td.Y*td.Y < epsilonF {
 				s := g.Stops[len(g.Stops)-1]
 				return ApplyOpacity(s.Color, s.Opacity*opacity)
 			}
-			return g.tColor(mat32.Sqrt(dx*dx+dy*dy)/mat32.Sqrt(tdx*tdx+tdy*tdy), opacity)
+			return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 		})
 	}
 	p1x, p1y, p2x, p2y := g.Points[0], g.Points[1], g.Points[2], g.Points[3]
@@ -448,12 +437,12 @@ func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) *Render 
 // a ray starting at s2 passing through s1 and a circle in fixed point.
 // Returns intersects == false if no solution is possible. If two
 // solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32, intersects bool) {
-	n := s2X - cX // Calculating using 64* rather than divide
-	m := s2Y - cY
+func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, intersects bool) {
+	n := s2.X - c.X // Calculating using 64* rather than divide
+	m := s2.Y - c.Y
 
-	e := s2X - s1X
-	d := s2Y - s1Y
+	e := s2.X - s1.X
+	d := s2.Y - s1.Y
 
 	// Quadratic normal form coefficients
 	A, B, C := e*e+d*d, -2*(e*n+m*d), n*n+m*m-r*r
@@ -480,5 +469,5 @@ func RayCircleIntersectionF(s1X, s1Y, s2X, s2Y, cX, cY, r float32) (x, y float32
 	default: // Neither solution is on the ray
 		return
 	}
-	return (n - e*t1) + cX, (m - d*t1) + cY, true
+	return mat32.Vec2{(n - e*t1) + c.X, (m - d*t1) + c.Y}, true
 }
