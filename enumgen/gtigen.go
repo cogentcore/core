@@ -28,7 +28,7 @@ var _ = gti.AddType(&gti.Type{
 		{"YAML", &gti.Field{Name: "YAML", Type: "bool", LocalType: "bool", Doc: "whether to generate YAML marshaling methods", Directives: gti.Directives{}, Tag: ""}},
 		{"SQL", &gti.Field{Name: "SQL", Type: "bool", LocalType: "bool", Doc: "whether to generate methods that implement the SQL Scanner and Valuer interfaces", Directives: gti.Directives{}, Tag: ""}},
 		{"GQL", &gti.Field{Name: "GQL", Type: "bool", LocalType: "bool", Doc: "whether to generate GraphQL marshaling methods for gqlgen", Directives: gti.Directives{}, Tag: ""}},
-		{"Extend", &gti.Field{Name: "Extend", Type: "bool", LocalType: "bool", Doc: "whether to allow enums to extend other enums; this should be on in almost all circumstances, but can\nbe turned off for specific enum types that extend non-enum types", Directives: gti.Directives{}, Tag: "def:\"true\""}},
+		{"Extend", &gti.Field{Name: "Extend", Type: "bool", LocalType: "bool", Doc: "whether to allow enums to extend other enums; this should be on in almost all circumstances,\nbut can be turned off for specific enum types that extend non-enum types", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
