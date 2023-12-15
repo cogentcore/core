@@ -27,24 +27,24 @@ func _GradientTypesNoOp() {
 }
 
 var _GradientTypesNameToValueMap = map[string]GradientTypes{
-	`Linear`: 0,
-	`linear`: 0,
-	`Radial`: 1,
-	`radial`: 1,
-	`Conic`:  2,
-	`conic`:  2,
+	`LinearGradient`: 0,
+	`lineargradient`: 0,
+	`RadialGradient`: 1,
+	`radialgradient`: 1,
+	`ConicGradient`:  2,
+	`conicgradient`:  2,
 }
 
 var _GradientTypesDescMap = map[GradientTypes]string{
-	0: `Linear is a linear gradient`,
-	1: `Radial is a radial gradient`,
-	2: `Conic is a conic gradient`,
+	0: `LinearGradient indicates to use a linear gradient`,
+	1: `RadialGradient indicates to use a radial gradient`,
+	2: `ConicGradient indicates to use a conic gradient`,
 }
 
 var _GradientTypesMap = map[GradientTypes]string{
-	0: `Linear`,
-	1: `Radial`,
-	2: `Conic`,
+	0: `LinearGradient`,
+	1: `RadialGradient`,
+	2: `ConicGradient`,
 }
 
 // String returns the string representation
