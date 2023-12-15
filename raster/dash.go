@@ -16,20 +16,23 @@ import (
 // dashed lines with end capping
 type Dasher struct {
 	Stroker
-	Dashes                    []fixed.Int26_6
-	dashPlace                 int
-	firstDashIsGap, dashIsGap bool
-	deltaDash, DashOffset     fixed.Int26_6
-	sgm                       Rasterx
-	// sgm allows us to switch between dashing
+	Dashes         []fixed.Int26_6
+	DashPlace      int
+	FirstDashIsGap bool
+	DashIsGap      bool
+	DeltaDash      fixed.Int26_6
+	DashOffset     fixed.Int26_6
+
+	// Sgm allows us to switch between dashing
 	// and non-dashing rasterizers in the SetStroke function.
+	Sgm Raster
 }
 
-// joinF overides stroker joinF during dashed stroking, because we need to slightly modify
+// JoinF overides stroker JoinF during dashed stroking, because we need to slightly modify
 // the the call as below to handle the case of the join being in a dash gap.
-func (r *Dasher) joinF() {
-	if len(r.Dashes) == 0 || !r.inStroke || !r.dashIsGap {
-		r.Stroker.joinF()
+func (r *Dasher) JoinF() {
+	if len(r.Dashes) == 0 || !r.inStroke || !r.DashIsGap {
+		r.Stroker.JoinF()
 	}
 }
 
@@ -37,27 +40,27 @@ func (r *Dasher) joinF() {
 func (r *Dasher) Start(a fixed.Point26_6) {
 	// Advance dashPlace to the dashOffset start point and set deltaDash
 	if len(r.Dashes) > 0 {
-		r.deltaDash = r.DashOffset
-		r.dashIsGap = false
-		r.dashPlace = 0
-		for r.deltaDash > r.Dashes[r.dashPlace] {
-			r.deltaDash -= r.Dashes[r.dashPlace]
-			r.dashIsGap = !r.dashIsGap
-			r.dashPlace++
-			if r.dashPlace == len(r.Dashes) {
-				r.dashPlace = 0
+		r.DeltaDash = r.DashOffset
+		r.DashIsGap = false
+		r.DashPlace = 0
+		for r.DeltaDash > r.Dashes[r.DashPlace] {
+			r.DeltaDash -= r.Dashes[r.DashPlace]
+			r.DashIsGap = !r.DashIsGap
+			r.DashPlace++
+			if r.DashPlace == len(r.Dashes) {
+				r.DashPlace = 0
 			}
 		}
-		r.firstDashIsGap = r.dashIsGap
+		r.FirstDashIsGap = r.DashIsGap
 	}
 	r.Stroker.Start(a)
 }
 
-// lineF overides stroker lineF to modify the the call as below
+// LineF overides stroker LineF to modify the the call as below
 // while performing the join in a dashed stroke.
-func (r *Dasher) lineF(b fixed.Point26_6) {
+func (r *Dasher) LineF(b fixed.Point26_6) {
 	var bnorm fixed.Point26_6
-	a := r.a // Copy local a since r.a is going to change during stroke operation
+	a := r.A // Copy local a since r.a is going to change during stroke operation
 	ba := b.Sub(a)
 	segLen := Length(ba)
 	var nlt fixed.Int26_6
@@ -66,19 +69,19 @@ func (r *Dasher) lineF(b fixed.Point26_6) {
 	} else {
 		bnorm = turnPort90(ToLength(b.Sub(a), r.u)) // Intra segment normal
 	}
-	for segLen+r.deltaDash > r.Dashes[r.dashPlace] {
-		nl := r.Dashes[r.dashPlace] - r.deltaDash
+	for segLen+r.DeltaDash > r.Dashes[r.DashPlace] {
+		nl := r.Dashes[r.DashPlace] - r.DeltaDash
 		nlt += nl
 		r.dashLineStrokeBit(a.Add(ToLength(ba, nlt)), bnorm, false)
-		r.dashIsGap = !r.dashIsGap
+		r.DashIsGap = !r.DashIsGap
 		segLen -= nl
-		r.deltaDash = 0
-		r.dashPlace++
-		if r.dashPlace == len(r.Dashes) {
-			r.dashPlace = 0
+		r.DeltaDash = 0
+		r.DashPlace++
+		if r.DashPlace == len(r.Dashes) {
+			r.DashPlace = 0
 		}
 	}
-	r.deltaDash += segLen
+	r.DeltaDash += segLen
 	r.dashLineStrokeBit(b, bnorm, true)
 }
 
@@ -92,7 +95,7 @@ func (r *Dasher) SetStroke(width, miterLimit fixed.Int26_6, capL, capT CapFunc, 
 
 	r.Dashes = r.Dashes[:0] // clear the dash array
 	if len(dashes) == 0 {
-		r.sgm = &r.Stroker // This is just plain stroking
+		r.Sgm = &r.Stroker // This is just plain stroking
 		return
 	}
 	// Dashed Stroke
@@ -109,11 +112,11 @@ func (r *Dasher) SetStroke(width, miterLimit fixed.Int26_6, capL, capT CapFunc, 
 	}
 	if !oneIsPos {
 		r.Dashes = r.Dashes[:0]
-		r.sgm = &r.Stroker // This is just plain stroking
+		r.Sgm = &r.Stroker // This is just plain stroking
 		return
 	}
 	r.DashOffset = fixed.Int26_6(dashOffset * 64)
-	r.sgm = r // Use the full dasher
+	r.Sgm = r // Use the full dasher
 }
 
 // Stop terminates a dashed line
@@ -125,12 +128,12 @@ func (r *Dasher) Stop(isClosed bool) {
 	if !r.inStroke {
 		return
 	}
-	if isClosed && r.a != r.firstP.P {
-		r.LineSeg(r.sgm, r.firstP.P)
+	if isClosed && r.A != r.firstP.P {
+		r.LineSeg(r.Sgm, r.firstP.P)
 	}
 	ra := &r.Filler
-	if isClosed && !r.firstDashIsGap && !r.dashIsGap { // closed connect w/o caps
-		a := r.a
+	if isClosed && !r.FirstDashIsGap && !r.DashIsGap { // closed connect w/o caps
+		a := r.A
 		r.firstP.TNorm = r.leadPoint.TNorm
 		r.firstP.RT = r.leadPoint.RT
 		r.firstP.TTan = r.leadPoint.TTan
@@ -141,10 +144,10 @@ func (r *Dasher) Stop(isClosed bool) {
 		r.Joiner(r.firstP)
 		r.firstP.blackWidowMark(ra)
 	} else { // Cap open ends
-		if !r.dashIsGap {
+		if !r.DashIsGap {
 			r.CapL(ra, r.leadPoint.P, r.leadPoint.TNorm)
 		}
-		if !r.firstDashIsGap {
+		if !r.FirstDashIsGap {
 			r.CapT(ra, r.firstP.P, Invert(r.firstP.LNorm))
 		}
 	}
@@ -154,8 +157,8 @@ func (r *Dasher) Stop(isClosed bool) {
 // dashLineStrokeBit is a helper function that reduces code redundancey in the
 // lineF function.
 func (r *Dasher) dashLineStrokeBit(b, bnorm fixed.Point26_6, dontClose bool) {
-	if !r.dashIsGap { // Moving from dash to gap
-		a := r.a
+	if !r.DashIsGap { // Moving from dash to gap
+		a := r.A
 		ra := &r.Filler
 		ra.Start(b.Sub(bnorm))
 		ra.Line(a.Sub(r.ln))
@@ -170,25 +173,25 @@ func (r *Dasher) dashLineStrokeBit(b, bnorm fixed.Point26_6, dontClose bool) {
 			r.CapT(ra, b, Invert(bnorm))
 		}
 	}
-	r.a = b
+	r.A = b
 	r.ln = bnorm
 }
 
 // Line for Dasher is here to pass the dasher sgm to LineP
 func (r *Dasher) Line(b fixed.Point26_6) {
-	r.LineSeg(r.sgm, b)
+	r.LineSeg(r.Sgm, b)
 }
 
 // QuadBezier for dashing
 func (r *Dasher) QuadBezier(b, c fixed.Point26_6) {
-	r.quadBezierf(r.sgm, b, c)
+	r.quadBezierf(r.Sgm, b, c)
 }
 
 // CubeBezier starts a stroked cubic bezier.
 // It is a low level function exposed for the purposes of callbacks
 // and debugging.
 func (r *Dasher) CubeBezier(b, c, d fixed.Point26_6) {
-	r.cubeBezierf(r.sgm, b, c, d)
+	r.cubeBezierf(r.Sgm, b, c, d)
 }
 
 // NewDasher returns a Dasher ptr with default values.
@@ -201,6 +204,6 @@ func NewDasher(width, height int, scanner Scanner) *Dasher {
 	r.SetBounds(width, height)
 	r.SetWinding(true)
 	r.SetStroke(1*64, 4*64, ButtCap, nil, FlatGap, MiterClip, nil, 0)
-	r.sgm = &r.Stroker
+	r.Sgm = &r.Stroker
 	return r
 }

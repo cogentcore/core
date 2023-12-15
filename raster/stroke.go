@@ -471,10 +471,10 @@ func (r *Stroker) Stop(isClosed bool) {
 	}
 	rf := &r.Filler
 	if isClosed {
-		if r.firstP.P != rf.a {
+		if r.firstP.P != rf.A {
 			r.Line(r.firstP.P)
 		}
-		a := rf.a
+		a := rf.A
 		r.firstP.TNorm = r.leadPoint.TNorm
 		r.firstP.RT = r.leadPoint.RT
 		r.firstP.TTan = r.leadPoint.TTan
@@ -486,7 +486,7 @@ func (r *Stroker) Stop(isClosed bool) {
 		r.Joiner(r.firstP)
 		r.firstP.blackWidowMark(rf)
 	} else {
-		a := rf.a
+		a := rf.A
 		rf.Start(r.leadPoint.P.Sub(r.leadPoint.TNorm))
 		rf.Line(a.Sub(r.ln))
 		rf.Start(a.Add(r.ln))
@@ -508,16 +508,16 @@ func (r *Stroker) CubeBezier(b, c, d fixed.Point26_6) {
 }
 
 // quadBezierf calcs end curvature of beziers
-func (r *Stroker) quadBezierf(s Rasterx, b, c fixed.Point26_6) {
+func (r *Stroker) quadBezierf(s Raster, b, c fixed.Point26_6) {
 	r.trailPoint = r.leadPoint
-	r.CalcEndCurvature(r.a, b, c, c, b, r.a, fixed.Int52_12(2<<12), doCalcCurvature(s))
+	r.CalcEndCurvature(r.A, b, c, c, b, r.A, fixed.Int52_12(2<<12), doCalcCurvature(s))
 	r.QuadBezierF(s, b, c)
-	r.a = c
+	r.A = c
 }
 
 // doCalcCurvature determines if calculation of the end curvature is required
 // depending on the raster type and JoinMode
-func doCalcCurvature(r Rasterx) bool {
+func doCalcCurvature(r Raster) bool {
 	switch q := r.(type) {
 	case *Filler:
 		return false // never for filler
@@ -530,8 +530,8 @@ func doCalcCurvature(r Rasterx) bool {
 	}
 }
 
-func (r *Stroker) cubeBezierf(sgm Rasterx, b, c, d fixed.Point26_6) {
-	if (r.a == b && c == d) || (r.a == b && b == c) || (c == b && d == c) {
+func (r *Stroker) cubeBezierf(sgm Raster, b, c, d fixed.Point26_6) {
+	if (r.A == b && c == d) || (r.A == b && b == c) || (c == b && d == c) {
 		sgm.Line(d)
 		return
 	}
@@ -541,16 +541,16 @@ func (r *Stroker) cubeBezierf(sgm Rasterx, b, c, d fixed.Point26_6) {
 	const dm = fixed.Int52_12((3 << 12) / 2)
 	switch {
 	// b != c, and c != d see above
-	case r.a == b:
+	case r.A == b:
 		r.CalcEndCurvature(b, c, d, d, c, b, dm, doCalcCurve)
 	// b != a,  and b != c, see above
 	case c == d:
-		r.CalcEndCurvature(r.a, b, c, c, b, r.a, dm, doCalcCurve)
+		r.CalcEndCurvature(r.A, b, c, c, b, r.A, dm, doCalcCurve)
 	default:
-		r.CalcEndCurvature(r.a, b, c, d, c, b, dm, doCalcCurve)
+		r.CalcEndCurvature(r.A, b, c, d, c, b, dm, doCalcCurve)
 	}
 	r.CubeBezierF(sgm, b, c, d)
-	r.a = d
+	r.A = d
 }
 
 // Line adds a line segment to the rasterizer
@@ -559,9 +559,9 @@ func (r *Stroker) Line(b fixed.Point26_6) {
 }
 
 // LineSeg is called by both the Stroker and Dasher
-func (r *Stroker) LineSeg(sgm Rasterx, b fixed.Point26_6) {
+func (r *Stroker) LineSeg(sgm Raster, b fixed.Point26_6) {
 	r.trailPoint = r.leadPoint
-	ba := b.Sub(r.a)
+	ba := b.Sub(r.A)
 	if ba.X == 0 && ba.Y == 0 { // a == b, line is degenerate
 		if r.trailPoint.TTan.X != 0 || r.trailPoint.TTan.Y != 0 {
 			ba = r.trailPoint.TTan // Use last tangent for seg tangent
@@ -576,22 +576,22 @@ func (r *Stroker) LineSeg(sgm Rasterx, b fixed.Point26_6) {
 	r.leadPoint.TNorm = bnorm
 	r.trailPoint.RL = 0.0
 	r.leadPoint.RT = 0.0
-	r.trailPoint.P = r.a
+	r.trailPoint.P = r.A
 	r.leadPoint.P = b
 
-	sgm.joinF()
-	sgm.lineF(b)
-	r.a = b
+	sgm.JoinF()
+	sgm.LineF(b)
+	r.A = b
 }
 
-// lineF is for intra-curve lines. It is required for the Rasterizer interface
+// LineF is for intra-curve lines. It is required for the Rasterizer interface
 // so that if the line is being stroked or dash stroked, different actions can be
 // taken.
-func (r *Stroker) lineF(b fixed.Point26_6) {
+func (r *Stroker) LineF(b fixed.Point26_6) {
 	// b is either an intra-segment value, or
 	// the end of the segment.
 	var bnorm fixed.Point26_6
-	a := r.a                // Hold a since r.a is going to change during stroke operation
+	a := r.A                // Hold a since r.a is going to change during stroke operation
 	if b == r.leadPoint.P { // End of segment
 		bnorm = r.leadPoint.TNorm // Use more accurate leadPoint tangent
 	} else {
@@ -602,7 +602,7 @@ func (r *Stroker) lineF(b fixed.Point26_6) {
 	ra.Line(a.Sub(r.ln))
 	ra.Start(a.Add(r.ln))
 	ra.Line(b.Add(bnorm))
-	r.a = b
+	r.A = b
 	r.ln = bnorm
 }
 
@@ -633,7 +633,7 @@ func (r *Stroker) CalcEndCurvature(p0, p1, p2, q0, q1, q2 fixed.Point26_6,
 	}
 }
 
-func (r *Stroker) joinF() {
+func (r *Stroker) JoinF() {
 	if !r.inStroke {
 		r.inStroke = true
 		r.firstP = r.trailPoint
@@ -641,8 +641,8 @@ func (r *Stroker) joinF() {
 		ra := &r.Filler
 		tl := r.trailPoint.P.Sub(r.trailPoint.TNorm)
 		th := r.trailPoint.P.Add(r.trailPoint.TNorm)
-		if r.a != r.trailPoint.P || r.ln != r.trailPoint.TNorm {
-			a := r.a
+		if r.A != r.trailPoint.P || r.ln != r.trailPoint.TNorm {
+			a := r.A
 			ra.Start(tl)
 			ra.Line(a.Sub(r.ln))
 			ra.Start(a.Add(r.ln))
@@ -652,7 +652,7 @@ func (r *Stroker) joinF() {
 		r.trailPoint.blackWidowMark(ra)
 	}
 	r.ln = r.trailPoint.LNorm
-	r.a = r.trailPoint.P
+	r.A = r.trailPoint.P
 }
 
 // blackWidowMark handles a gap in a stroke that can occur when a line end is too close

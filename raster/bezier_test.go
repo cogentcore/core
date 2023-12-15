@@ -29,8 +29,8 @@ func lerp(t, px, py, qx, qy float32) (x, y float32) {
 //
 // The coordinates are allowed to be out of the Rasterizer's bounds.
 func CubeLerpTo(ax, ay, bx, by, cx, cy, dx, dy float32, LineTo func(ex, ey float32)) {
-	devsq := devSquared(ax, ay, bx, by, dx, dy)
-	if devsqAlt := devSquared(ax, ay, cx, cy, dx, dy); devsq < devsqAlt {
+	devsq := DevSquared(ax, ay, bx, by, dx, dy)
+	if devsqAlt := DevSquared(ax, ay, cx, cy, dx, dy); devsq < devsqAlt {
 		devsq = devsqAlt
 	}
 	if devsq >= 0.333 {
@@ -52,7 +52,7 @@ func CubeLerpTo(ax, ay, bx, by, cx, cy, dx, dy float32, LineTo func(ex, ey float
 
 // QuadLerpTo and adapted from golang.org/x/image/vector
 func QuadLerpTo(ax, ay, bx, by, cx, cy float32, LineTo func(dx, dy float32)) {
-	devsq := devSquared(ax, ay, bx, by, cx, cy)
+	devsq := DevSquared(ax, ay, bx, by, cx, cy)
 	if devsq >= 0.333 {
 		const tol = 3
 		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
