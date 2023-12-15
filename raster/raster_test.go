@@ -452,13 +452,13 @@ func TestGradient(t *testing.T) {
 		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
-	linear := colors.LinearGradient().SetEnd(mat32.Vec2{1, 0}).
+	linear := colors.NewLinearGradient().SetEnd(mat32.Vec2{1, 0}).
 		SetBounds(mat32.Box2{mat32.Vec2{50, 50}, mat32.Vec2{150, 150}}).
 		AddStop(colors.Aquamarine, 0.3, 1.0).
 		AddStop(colors.Skyblue, 0.6, 1).
 		AddStop(colors.Darksalmon, 1.0, .75)
 
-	radial := colors.RadialGradient().
+	radial := colors.NewRadialGradient().
 		SetBounds(mat32.Box2{mat32.Vec2{230, 230}, mat32.Vec2{330, 330}}).SetSpread(colors.ReflectSpread).
 		AddStop(colors.Orchid, 0.3, 1).
 		AddStop(colors.Bisque, 0.6, 1).
