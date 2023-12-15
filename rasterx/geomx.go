@@ -11,7 +11,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-// Invert  returns the point inverted around the origin
+// Invert returns the point inverted around the origin
 func Invert(v fixed.Point26_6) fixed.Point26_6 {
 	return fixed.Point26_6{X: -v.X, Y: -v.Y}
 }
@@ -37,7 +37,7 @@ func Length(v fixed.Point26_6) fixed.Int26_6 {
 	return fixed.Int26_6(math.Sqrt(vx*vx + vy*vy))
 }
 
-//PathCommand is the type for the path command token
+// PathCommand is the type for the path command token
 type PathCommand fixed.Int26_6
 
 // Human readable path constants
@@ -169,7 +169,7 @@ func ToLength(p fixed.Point26_6, ln fixed.Int26_6) (q fixed.Point26_6) {
 // line from the bow to the stern. (port means left side of the direction you are heading)
 // isIntersecting is just convienice to reduce code, and if false returns false, because p1 and p2 are not valid
 func ClosestPortside(bow, stern, p1, p2 fixed.Point26_6, isIntersecting bool) (xt fixed.Point26_6, intersects bool) {
-	if isIntersecting == false {
+	if !isIntersecting {
 		return
 	}
 	dir := bow.Sub(stern)
