@@ -356,7 +356,7 @@ func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) *Render 
 			nf, intersects := RayCircleIntersectionF(f, c, c, 1.0-epsilonF)
 			f = nf
 			if !intersects {
-				return SolidRender(colors.FromRGB{255, 255, 0}) // should not happen
+				return SolidRender(FromRGB(255, 255, 0)) // should not happen
 			}
 		}
 		if g.Units == ObjectBoundingBox {
@@ -396,40 +396,33 @@ func (g *Gradient) RenderColorUS(opacity float32, objMatrix mat32.Mat2) *Render 
 			return g.tColor(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
 		})
 	}
-	p1x, p1y, p2x, p2y := g.Points[0], g.Points[1], g.Points[2], g.Points[3]
+	p1, p2 := mat32.Vec2{g.Points[0], g.Points[1]}, mat32.Vec2{g.Points[2], g.Points[3]}
 	if g.Units == ObjectBoundingBox {
-		p1x = g.Bounds.Max.X * p1x
-		p1y = g.Bounds.Max.Y * p1y
-		p2x = g.Bounds.Max.X * p2x
-		p2y = g.Bounds.Max.Y * p2y
+		p1.SetMul(g.Bounds.Max)
+		p2.SetMul(g.Bounds.Max)
 
-		dx := p2x - p1x
-		dy := p2y - p1y
-		d := (dx*dx + dy*dy) // self inner prod
+		d := p2.Sub(p1)
+		dd := d.X*d.X + d.Y*d.Y // self inner prod
 		return FuncRender(func(xi, yi int) color.Color {
-			x, y := gradT.Transform(float32(xi)+0.5, float32(yi)+0.5)
-			dfx := x - p1x
-			dfy := y - p1y
-			return g.tColor((dx*dfx+dy*dfy)/d, opacity)
+			pt := gradT.MulVec2AsPt(mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5})
+			df := pt.Sub(p1)
+			return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
 		})
 	}
 
-	p1x, p1y = g.Matrix.Transform(p1x, p1y)
-	p2x, p2y = g.Matrix.Transform(p2x, p2y)
-	p1x, p1y = objMatrix.Transform(p1x, p1y)
-	p2x, p2y = objMatrix.Transform(p2x, p2y)
-	dx := p2x - p1x
-	dy := p2y - p1y
-	d := (dx*dx + dy*dy)
-	// if d == 0.0 {
+	p1 = g.Matrix.MulVec2AsPt(p1)
+	p2 = g.Matrix.MulVec2AsPt(p2)
+	p1 = objMatrix.MulVec2AsPt(p1)
+	p2 = objMatrix.MulVec2AsPt(p2)
+	d := p2.Sub(p1)
+	dd := d.X*d.X + d.Y*d.Y
+	// if dd == 0.0 {
 	// 	fmt.Println("zero delta")
 	// }
 	return FuncRender(func(xi, yi int) color.Color {
-		x := float32(xi) + 0.5
-		y := float32(yi) + 0.5
-		dfx := x - p1x
-		dfy := y - p1y
-		return g.tColor((dx*dfx+dy*dfy)/d, opacity)
+		pt := mat32.Vec2{float32(xi) + 0.5, float32(yi) + 0.5}
+		df := pt.Sub(p1)
+		return g.tColor((d.X*df.X+d.Y*df.Y)/dd, opacity)
 	})
 }
 
