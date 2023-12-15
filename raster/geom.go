@@ -20,13 +20,13 @@ func Invert(v fixed.Point26_6) fixed.Point26_6 {
 	return fixed.Point26_6{X: -v.X, Y: -v.Y}
 }
 
-// turnStarboard90 returns the vector 90 degrees starboard (right in direction heading)
-func turnStarboard90(v fixed.Point26_6) fixed.Point26_6 {
+// TurnStarboard90 returns the vector 90 degrees starboard (right in direction heading)
+func TurnStarboard90(v fixed.Point26_6) fixed.Point26_6 {
 	return fixed.Point26_6{X: -v.Y, Y: v.X}
 }
 
-// turnPort90 returns the vector 90 degrees port (left in direction heading)
-func turnPort90(v fixed.Point26_6) fixed.Point26_6 {
+// TurnPort90 returns the vector 90 degrees port (left in direction heading)
+func TurnPort90(v fixed.Point26_6) fixed.Point26_6 {
 	return fixed.Point26_6{X: v.Y, Y: -v.X}
 }
 

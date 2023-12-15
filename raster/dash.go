@@ -28,10 +28,24 @@ type Dasher struct {
 	Sgm Raster
 }
 
+// NewDasher returns a Dasher ptr with default values.
+// A Dasher has all of the capabilities of a Stroker, Filler, and Scanner, plus the ability
+// to stroke curves with solid lines. Use SetStroke to configure with non-default
+// values.
+func NewDasher(width, height int, scanner Scanner) *Dasher {
+	r := new(Dasher)
+	r.Scanner = scanner
+	r.SetBounds(width, height)
+	r.SetWinding(true)
+	r.SetStroke(1*64, 4*64, ButtCap, nil, FlatGap, MiterClip, nil, 0)
+	r.Sgm = &r.Stroker
+	return r
+}
+
 // JoinF overides stroker JoinF during dashed stroking, because we need to slightly modify
 // the the call as below to handle the case of the join being in a dash gap.
 func (r *Dasher) JoinF() {
-	if len(r.Dashes) == 0 || !r.inStroke || !r.DashIsGap {
+	if len(r.Dashes) == 0 || !r.InStroke || !r.DashIsGap {
 		r.Stroker.JoinF()
 	}
 }
@@ -64,15 +78,15 @@ func (r *Dasher) LineF(b fixed.Point26_6) {
 	ba := b.Sub(a)
 	segLen := Length(ba)
 	var nlt fixed.Int26_6
-	if b == r.leadPoint.P { // End of segment
-		bnorm = r.leadPoint.TNorm // Use more accurate leadPoint tangent
+	if b == r.LeadPoint.P { // End of segment
+		bnorm = r.LeadPoint.TNorm // Use more accurate leadPoint tangent
 	} else {
-		bnorm = turnPort90(ToLength(b.Sub(a), r.u)) // Intra segment normal
+		bnorm = TurnPort90(ToLength(b.Sub(a), r.U)) // Intra segment normal
 	}
 	for segLen+r.DeltaDash > r.Dashes[r.DashPlace] {
 		nl := r.Dashes[r.DashPlace] - r.DeltaDash
 		nlt += nl
-		r.dashLineStrokeBit(a.Add(ToLength(ba, nlt)), bnorm, false)
+		r.DashLineStrokeBit(a.Add(ToLength(ba, nlt)), bnorm, false)
 		r.DashIsGap = !r.DashIsGap
 		segLen -= nl
 		r.DeltaDash = 0
@@ -82,7 +96,7 @@ func (r *Dasher) LineF(b fixed.Point26_6) {
 		}
 	}
 	r.DeltaDash += segLen
-	r.dashLineStrokeBit(b, bnorm, true)
+	r.DashLineStrokeBit(b, bnorm, true)
 }
 
 // SetStroke set the parameters for stroking a line. width is the width of the line, miterlimit is the miter cutoff
@@ -125,44 +139,44 @@ func (r *Dasher) Stop(isClosed bool) {
 		r.Stroker.Stop(isClosed)
 		return
 	}
-	if !r.inStroke {
+	if !r.InStroke {
 		return
 	}
-	if isClosed && r.A != r.firstP.P {
-		r.LineSeg(r.Sgm, r.firstP.P)
+	if isClosed && r.A != r.FirstP.P {
+		r.LineSeg(r.Sgm, r.FirstP.P)
 	}
 	ra := &r.Filler
 	if isClosed && !r.FirstDashIsGap && !r.DashIsGap { // closed connect w/o caps
 		a := r.A
-		r.firstP.TNorm = r.leadPoint.TNorm
-		r.firstP.RT = r.leadPoint.RT
-		r.firstP.TTan = r.leadPoint.TTan
-		ra.Start(r.firstP.P.Sub(r.firstP.TNorm))
-		ra.Line(a.Sub(r.ln))
-		ra.Start(a.Add(r.ln))
-		ra.Line(r.firstP.P.Add(r.firstP.TNorm))
-		r.Joiner(r.firstP)
-		r.firstP.blackWidowMark(ra)
+		r.FirstP.TNorm = r.LeadPoint.TNorm
+		r.FirstP.RT = r.LeadPoint.RT
+		r.FirstP.TTan = r.LeadPoint.TTan
+		ra.Start(r.FirstP.P.Sub(r.FirstP.TNorm))
+		ra.Line(a.Sub(r.Ln))
+		ra.Start(a.Add(r.Ln))
+		ra.Line(r.FirstP.P.Add(r.FirstP.TNorm))
+		r.Joiner(r.FirstP)
+		r.FirstP.BlackWidowMark(ra)
 	} else { // Cap open ends
 		if !r.DashIsGap {
-			r.CapL(ra, r.leadPoint.P, r.leadPoint.TNorm)
+			r.CapL(ra, r.LeadPoint.P, r.LeadPoint.TNorm)
 		}
 		if !r.FirstDashIsGap {
-			r.CapT(ra, r.firstP.P, Invert(r.firstP.LNorm))
+			r.CapT(ra, r.FirstP.P, Invert(r.FirstP.LNorm))
 		}
 	}
-	r.inStroke = false
+	r.InStroke = false
 }
 
-// dashLineStrokeBit is a helper function that reduces code redundancey in the
-// lineF function.
-func (r *Dasher) dashLineStrokeBit(b, bnorm fixed.Point26_6, dontClose bool) {
+// DashLineStrokeBit is a helper function that reduces code redundancy in the
+// LineF function.
+func (r *Dasher) DashLineStrokeBit(b, bnorm fixed.Point26_6, dontClose bool) {
 	if !r.DashIsGap { // Moving from dash to gap
 		a := r.A
 		ra := &r.Filler
 		ra.Start(b.Sub(bnorm))
-		ra.Line(a.Sub(r.ln))
-		ra.Start(a.Add(r.ln))
+		ra.Line(a.Sub(r.Ln))
+		ra.Start(a.Add(r.Ln))
 		ra.Line(b.Add(bnorm))
 		if !dontClose {
 			r.CapL(ra, b, bnorm)
@@ -174,7 +188,7 @@ func (r *Dasher) dashLineStrokeBit(b, bnorm fixed.Point26_6, dontClose bool) {
 		}
 	}
 	r.A = b
-	r.ln = bnorm
+	r.Ln = bnorm
 }
 
 // Line for Dasher is here to pass the dasher sgm to LineP
@@ -184,26 +198,12 @@ func (r *Dasher) Line(b fixed.Point26_6) {
 
 // QuadBezier for dashing
 func (r *Dasher) QuadBezier(b, c fixed.Point26_6) {
-	r.quadBezierf(r.Sgm, b, c)
+	r.QuadBezierf(r.Sgm, b, c)
 }
 
 // CubeBezier starts a stroked cubic bezier.
 // It is a low level function exposed for the purposes of callbacks
 // and debugging.
 func (r *Dasher) CubeBezier(b, c, d fixed.Point26_6) {
-	r.cubeBezierf(r.Sgm, b, c, d)
-}
-
-// NewDasher returns a Dasher ptr with default values.
-// A Dasher has all of the capabilities of a Stroker, Filler, and Scanner, plus the ability
-// to stroke curves with solid lines. Use SetStroke to configure with non-default
-// values.
-func NewDasher(width, height int, scanner Scanner) *Dasher {
-	r := new(Dasher)
-	r.Scanner = scanner
-	r.SetBounds(width, height)
-	r.SetWinding(true)
-	r.SetStroke(1*64, 4*64, ButtCap, nil, FlatGap, MiterClip, nil, 0)
-	r.Sgm = &r.Stroker
-	return r
+	r.CubeBezierf(r.Sgm, b, c, d)
 }

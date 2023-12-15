@@ -136,16 +136,16 @@ func AddArc(points []float32, cx, cy, px, py float32, p Adder) (lx, ly float32) 
 	alpha := mat32.Sin(dEta) * (mat32.Sqrt(4+3*tde*tde) - 1) / 3 // Mat32 is fun!
 	lx, ly = px, py
 	sinTheta, cosTheta := mat32.Sin(rotX), mat32.Cos(rotX)
-	ldx, ldy := ellipsePrime(points[0], points[1], sinTheta, cosTheta, etaStart, cx, cy)
+	ldx, ldy := EllipsePrime(points[0], points[1], sinTheta, cosTheta, etaStart, cx, cy)
 	for i := 1; i <= segs; i++ {
 		eta := etaStart + dEta*float32(i)
 		var px, py float32
 		if i == segs {
 			px, py = points[5], points[6] // Just makes the end point exact; no roundoff error
 		} else {
-			px, py = ellipsePointAt(points[0], points[1], sinTheta, cosTheta, eta, cx, cy)
+			px, py = EllipsePointAt(points[0], points[1], sinTheta, cosTheta, eta, cx, cy)
 		}
-		dx, dy := ellipsePrime(points[0], points[1], sinTheta, cosTheta, eta, cx, cy)
+		dx, dy := EllipsePrime(points[0], points[1], sinTheta, cosTheta, eta, cx, cy)
 		p.CubeBezier(ToFixedP(lx+alpha*ldx, ly+alpha*ldy),
 			ToFixedP(px-alpha*dx, py-alpha*dy), ToFixedP(px, py))
 		lx, ly, ldx, ldy = px, py, dx, dy
@@ -153,8 +153,8 @@ func AddArc(points []float32, cx, cy, px, py float32, p Adder) (lx, ly float32) 
 	return lx, ly
 }
 
-// ellipsePrime gives tangent vectors for parameterized elipse; a, b, radii, eta parameter, center cx, cy
-func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
+// EllipsePrime gives tangent vectors for parameterized elipse; a, b, radii, eta parameter, center cx, cy
+func EllipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
 	bCosEta := b * mat32.Cos(eta)
 	aSinEta := a * mat32.Sin(eta)
 	px = -aSinEta*cosTheta - bCosEta*sinTheta
@@ -162,8 +162,8 @@ func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32
 	return
 }
 
-// ellipsePointAt gives points for parameterized elipse; a, b, radii, eta parameter, center cx, cy
-func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
+// EllipsePointAt gives points for parameterized elipse; a, b, radii, eta parameter, center cx, cy
+func EllipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
 	aCosEta := a * mat32.Cos(eta)
 	bSinEta := b * mat32.Sin(eta)
 	px = cx + aCosEta*cosTheta - bSinEta*sinTheta

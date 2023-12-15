@@ -20,6 +20,18 @@ type Filler struct {
 	First fixed.Point26_6
 }
 
+// NewFiller returns a Filler ptr with default values.
+// A Filler in addition to rasterizing lines like a Scann,
+// can also rasterize quadratic and cubic bezier curves.
+// If Scanner is nil default scanner ScannerGV is used
+func NewFiller(width, height int, scanner Scanner) *Filler {
+	r := new(Filler)
+	r.Scanner = scanner
+	r.SetBounds(width, height)
+	r.SetWinding(true)
+	return r
+}
+
 // Start starts a new path at the given point.
 func (r *Filler) Start(a fixed.Point26_6) {
 	r.A = a
@@ -188,16 +200,4 @@ func (r *Filler) SetBounds(width, height int) {
 	}
 	r.Scanner.SetBounds(width, height)
 	r.Clear()
-}
-
-// NewFiller returns a Filler ptr with default values.
-// A Filler in addition to rasterizing lines like a Scann,
-// can also rasterize quadratic and cubic bezier curves.
-// If Scanner is nil default scanner ScannerGV is used
-func NewFiller(width, height int, scanner Scanner) *Filler {
-	r := new(Filler)
-	r.Scanner = scanner
-	r.SetBounds(width, height)
-	r.SetWinding(true)
-	return r
 }
