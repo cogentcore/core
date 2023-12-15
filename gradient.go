@@ -183,8 +183,8 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	if g.Radial {
 		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
 		if g.Units == ObjectBoundingBox {
-			c.SetMul(g.Bounds.Max)
-			f.SetMul(g.Bounds.Max)
+			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
+			f = g.Bounds.Min.Add(g.Bounds.Size().Mul(f))
 			r.SetMul(g.Bounds.Size())
 		} else {
 			c = g.Matrix.MulVec2AsPt(c)
@@ -265,8 +265,8 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	}
 	s, e := g.Start, g.End
 	if g.Units == ObjectBoundingBox {
-		s.SetMul(g.Bounds.Max)
-		e.SetMul(g.Bounds.Max)
+		s = g.Bounds.Min.Add(g.Bounds.Size().Mul(s))
+		e = g.Bounds.Min.Add(g.Bounds.Size().Mul(e))
 
 		d := e.Sub(s)
 		dd := d.X*d.X + d.Y*d.Y // self inner prod
