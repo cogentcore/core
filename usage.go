@@ -95,7 +95,8 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
 	b.WriteString(grog.TitleColor("\nFlags:\n") + Indent + grog.TitleColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
-	b.WriteString(Indent + grog.TitleColor("or CamelCase, and can have one or two leading dashes.\n\n"))
+	b.WriteString(Indent + grog.TitleColor("or CamelCase, and can have one or two leading dashes. Use a\n"))
+	b.WriteString(Indent + grog.TitleColor("\"no\" prefix to turn off a bool flag.\n\n"))
 
 	// add meta ones (help, config, verbose, etc) first
 	mcfields := &Fields{}
