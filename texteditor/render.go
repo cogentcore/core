@@ -193,11 +193,11 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Tok.Depth
-				ed.RenderRegionBoxSty(reg, sty, &cspec, true) // full width alway
+				ed.RenderRegionBoxSty(reg, sty, cspec, true) // full width alway
 			}
 		}
 		if lstdp > 0 {
-			ed.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, &cspec)
+			ed.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, cspec)
 		}
 	}
 }
@@ -207,7 +207,7 @@ func (ed *Editor) RenderSelect() {
 	if !ed.HasSelection() {
 		return
 	}
-	ed.RenderRegionBox(ed.SelectReg, &ed.SelectColor)
+	ed.RenderRegionBox(ed.SelectReg, ed.SelectColor)
 }
 
 // RenderHighlights renders the highlight regions as a
@@ -218,7 +218,7 @@ func (ed *Editor) RenderHighlights(stln, edln int) {
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
-		ed.RenderRegionBox(reg, &ed.HighlightColor)
+		ed.RenderRegionBox(reg, ed.HighlightColor)
 	}
 }
 
@@ -230,17 +230,17 @@ func (ed *Editor) RenderScopelights(stln, edln int) {
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
-		ed.RenderRegionBox(reg, &ed.HighlightColor)
+		ed.RenderRegionBox(reg, ed.HighlightColor)
 	}
 }
 
 // RenderRegionBox renders a region in background color according to given background color
-func (ed *Editor) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
+func (ed *Editor) RenderRegionBox(reg textbuf.Region, bgclr colors.Full) {
 	ed.RenderRegionBoxSty(reg, &ed.Styles, bgclr, false)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
-func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full, fullWidth bool) {
+func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr colors.Full, fullWidth bool) {
 	st := reg.Start
 	end := reg.End
 	spos := ed.CharStartPosVis(st)
@@ -283,7 +283,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
+func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr colors.Full) {
 	spos := ed.CharStartPosVis(st)
 	epos := spos
 	epos.Y += ed.LineHeight
@@ -311,7 +311,7 @@ func (ed *Editor) RenderAllLines() {
 	bb := ed.Geom.ContentBBox
 	bbmin := mat32.NewVec2FmPoint(bb.Min)
 	bbmax := mat32.NewVec2FmPoint(bb.Max)
-	pc.FillBox(bbmin, bbmax.Sub(bbmin), &sty.BackgroundColor)
+	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.BackgroundColor)
 	pos := ed.RenderStartPos()
 	stln := -1
 	edln := -1
