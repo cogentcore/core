@@ -317,7 +317,10 @@ func (pc *Context) StrokePreserve() {
 	fbox := pc.Raster.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColor(pc.StrokeStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	if pc.FillStyle.Color.Gradient != nil {
+		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.NewBox2FromRect(pc.LastRenderBBox))
+	}
+	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColorTransform(pc.StrokeStyle.Opacity, pc.CurTransform))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 }
@@ -347,7 +350,10 @@ func (pc *Context) FillPreserve() {
 	fbox := pc.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FillStyle.Opacity, pc.LastRenderBBox, pc.CurTransform))
+	if pc.FillStyle.Color.Gradient != nil {
+		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.NewBox2FromRect(pc.LastRenderBBox))
+	}
+	rf.SetColor(pc.FillStyle.Color.RenderColorTransform(pc.FillStyle.Opacity, pc.CurTransform))
 	rf.Draw()
 	rf.Clear()
 }
