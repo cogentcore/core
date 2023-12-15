@@ -95,7 +95,7 @@ func LinearGradient() *Gradient {
 		Spread: PadSpread,
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
 }
 
@@ -108,6 +108,7 @@ func RadialGradient() *Gradient {
 		Center: mat32.Vec2{0.5, 0.5},
 		Focal:  mat32.Vec2{0.5, 0.5},
 		Radius: 0.5,
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
 }
 
@@ -143,14 +144,17 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 // box, taking into account radial gradients and a standard linear left-to-right
 // gradient direction. It also sets the type of units to [UserSpaceOnUse].
 func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
+	g.Bounds = bbox
 	g.Units = UserSpaceOnUse
 	if g.Radial {
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
 		g.Focal = g.Center
-		g.Radius = 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
+		g.Radius = 0.5 * max(bbox.Size().X, bbox.Size().Y)
 	} else {
-		g.Bounds = bbox
-		g.Bounds.Max.Y = g.Bounds.Min.Y // linear L-R
+		g.Start = bbox.Min
+		g.End = bbox.Max
+		// default is linear left-to-right, so we keep the starting and ending Y the same
+		g.End.Y = g.Start.Y
 	}
 }
 
