@@ -9,6 +9,7 @@ require (
 	goki.dev/girl v0.0.32
 	goki.dev/glop v0.1.8
 	goki.dev/grows v0.3.27
+	goki.dev/grr v0.0.9
 	goki.dev/gti v0.1.28
 	goki.dev/ki/v2 v2.0.0-dev0.0.30
 	goki.dev/laser v0.1.30
@@ -32,6 +33,5 @@ require (
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/cam v0.9.46 // indirect
 	goki.dev/cursors v0.0.29 // indirect
-	goki.dev/grr v0.0.9 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )

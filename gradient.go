@@ -321,7 +321,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 	}
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
 	n.SetProp(prop, url)
-	ngr.Grad.CopyFrom(&gr.Grad)
+	ngr.Grad.CopyFrom(gr.Grad)
 	return gr
 }
 
