@@ -5,7 +5,6 @@
 package colors
 
 import (
-	"image"
 	"image/color"
 
 	"goki.dev/mat32/v2"
@@ -81,12 +80,20 @@ func (f *Full) CopyFrom(cp Full) {
 	f.Gradient.CopyFrom(cp.Gradient)
 }
 
-// RenderColor returns the [Render] color for rendering, applying the given opacity and bounds.
-func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, transform mat32.Mat2) Render {
+// RenderColor returns the [Render] color for rendering, applying the given opacity.
+func (f *Full) RenderColor(opacity float32) Render {
 	if f.Gradient == nil {
 		return SolidRender(ApplyOpacity(f.Solid, opacity))
 	}
-	return f.Gradient.RenderColor(opacity, bounds, transform)
+	return f.Gradient.RenderColor(opacity)
+}
+
+// RenderColorBounds returns the [Render] color for rendering, applying the given opacity and transform.
+func (f *Full) RenderColorTransform(opacity float32, transform mat32.Mat2) Render {
+	if f.Gradient == nil {
+		return SolidRender(ApplyOpacity(f.Solid, opacity))
+	}
+	return f.Gradient.RenderColorTransform(opacity, transform)
 }
 
 // SetAny sets the color from the given value of any type in the given Context.
