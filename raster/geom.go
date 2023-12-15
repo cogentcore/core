@@ -42,7 +42,7 @@ func Length(v fixed.Point26_6) fixed.Int26_6 {
 }
 
 // PathCommand is the type for the path command token
-type PathCommand fixed.Int26_6 //enums:enum
+type PathCommand fixed.Int26_6 //enums:enum -no-extend
 
 // Human readable path command constants
 const (
