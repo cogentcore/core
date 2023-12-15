@@ -374,37 +374,37 @@ func TestShapes(t *testing.T) {
 }
 
 func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) {
-	f.SetColor(colors.Blueviolet)
+	f.SetColor(colors.SolidRender(colors.Blueviolet))
 	AddEllipse(240, 200, 140, 180, 0, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.Darkseagreen)
+	f.SetColor(colors.SolidRender(colors.Darkseagreen))
 	AddEllipse(240, 200, 40, 180, 45, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.Darkgoldenrod)
+	f.SetColor(colors.SolidRender(colors.Darkgoldenrod))
 	AddCircle(300, 300, 80, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.Forestgreen)
+	f.SetColor(colors.SolidRender(colors.Forestgreen))
 	AddRoundRect(30, 30, 130, 130, 10, 20, 45, RoundGap, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.Blueviolet)
+	f.SetColor(colors.SolidRender(colors.Blueviolet))
 	AddRoundRect(30, 30, 130, 130, 150, 150, 0, nil, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(ApplyOpacity(colors.Lightgoldenrodyellow, 0.6))
+	f.SetColor(colors.SolidRender(colors.ApplyOpacity(colors.Lightgoldenrodyellow, 0.6)))
 	AddCircle(80, 80, 50, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.Lemonchiffon)
+	f.SetColor(colors.SolidRender(colors.Lemonchiffon))
 	f.SetClip(image.Rect(65, 65, 95, 95))
 	AddCircle(80, 80, 50, fa)
 	f.Draw()
@@ -412,7 +412,7 @@ func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) 
 
 	f.SetClip(image.ZR)
 
-	f.SetColor(colors.Firebrick)
+	f.SetColor(colors.SolidRender(colors.Firebrick))
 	AddRect(370, 370, 400, 500, 15, fa)
 	f.Draw()
 	f.Clear()
