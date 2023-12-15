@@ -271,6 +271,7 @@ func (x *ImgSpanner) SetColor(c colors.Render) {
 		return
 	}
 	x.FgColor = c.Solid
+	x.ColorFunc = nil
 }
 
 // GetSpanFunc returns the function that consumes a span described by the parameters.
