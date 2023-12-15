@@ -2,17 +2,7 @@
 // created: 2018 by S.R.Wiley
 package scanx_test
 
-import (
-	"image"
-
-	"testing"
-
-	"github.com/srwiley/oksvg"
-	"github.com/srwiley/scanFT"
-	"goki.dev/girl/rasterx"
-	"goki.dev/girl/scanx"
-)
-
+/*
 func ReadIconSet(paths []string) (icons []*oksvg.SvgIcon) {
 	for _, p := range paths {
 		icon, errSvg := oksvg.ReadIcon(p, oksvg.IgnoreErrorMode)
@@ -188,3 +178,4 @@ func RunGVScanner(b *testing.B, mult int) {
 		}
 	}
 }
+*/

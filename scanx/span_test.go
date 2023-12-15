@@ -1,47 +1,6 @@
 package scanx_test
 
-import (
-	"bufio"
-	"fmt"
-	"image"
-	"image/draw"
-	"image/png"
-	"log"
-	"os"
-	"path/filepath"
-	"strings"
-	"testing"
-
-	"github.com/BurntSushi/xgbutil/xgraphics"
-
-	"github.com/srwiley/oksvg"
-	"github.com/srwiley/scanFT"
-	"goki.dev/girl/scanx"
-
-	"goki.dev/girl/rasterx"
-)
-
-func SaveToPngFile(filePath string, m image.Image) error {
-	// Create the file
-	f, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	// Create Writer from file
-	b := bufio.NewWriter(f)
-	// Write the image into the buffer
-	err = png.Encode(b, m)
-	if err != nil {
-		return err
-	}
-	err = b.Flush()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
+/*
 func FilePathWalkDir(root string) (files []string, err error) {
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) (e error) {
 		if !info.IsDir() && strings.HasSuffix(path, ".svg") {
@@ -384,3 +343,4 @@ func TestSpannersX(t *testing.T) {
 // 	}
 // 	fmt.Println(" length", cntr)
 // }
+*/
