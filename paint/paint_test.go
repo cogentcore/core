@@ -123,7 +123,11 @@ func TestPaintFill(t *testing.T) {
 	test("fill_box_solid", func(pc *Context) {
 		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.SolidFull(colors.Blue))
 	})
-	test("fill_box_linear_gradient", func(pc *Context) {
+	test("fill_box_linear_gradient_red_green", func(pc *Context) {
+		g := colors.LinearGradient().AddStop(colors.Red, 0, 1).AddStop(colors.Limegreen, 1, 1)
+		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
+	})
+	test("fill_box_linear_gradient_red_yellow_green", func(pc *Context) {
 		g := colors.LinearGradient().AddStop(colors.Red, 0, 1).AddStop(colors.Yellow, 0.3, 1).AddStop(colors.Green, 1, 1)
 		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
 	})
