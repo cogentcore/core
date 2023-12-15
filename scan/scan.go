@@ -15,8 +15,8 @@
 // FreeType License or the GNU General Public License version 2 (or
 // any later version), both of which can be found in the LICENSE file.
 
-// Package scan provides an anti-aliasing 2-D rasterizer.
-// taken from the larger Freetype suite of font-related packages, but the
+// Package scan provides an anti-aliasing 2-D rasterizer, which is
+// based on the larger Freetype suite of font-related packages, but the
 // raster package is not specific to font rasterization, and can be used
 // standalone without any other Freetype package.
 // Rasterization is done by the same area/coverage accumulation algorithm as

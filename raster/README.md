@@ -11,7 +11,7 @@ Raster is a golang rasterizer that implements path stroking functions capable of
 * Line start and end capping functions can be different.
 
 
-![rasterx example](/doc/TestShapes4.svg.png?raw=true "Rasterx Example")
+![rasterx example](doc/TestShapes4.svg.png?raw=true "Rasterx Example")
 
 The above image shows the effect of using different join modes for a stroked curving path. The top stroked path uses miter (green) or arc (red, yellow, orange) join functions with high miter limit. The middle and lower path shows the effect of using the miter-clip and arc-clip joins, repectively, with different miter-limit values. The black chevrons at the top show different cap and gap functions.
 
@@ -57,7 +57,7 @@ BenchmarkDashFT-16    	     500     2800493 ns/op
 The package uses an interface called Rasterx, which is satisfied by three structs, Filler, Stroker and Dasher.  The Filler flattens Bezier curves into lines and uses an anonymously composed Scanner for the antialiasing step. The Stroker embeds a Filler and adds path stroking, and the Dasher embedds a Stroker and adds the ability to create dashed stroked curves.
 
 
-![rasterx Scheme](/doc/schematic.png?raw=true "Rasterx Scheme")
+![rasterx Scheme](doc/schematic.png?raw=true "Rasterx Scheme")
 
 Each of the Filler, Dasher, and Stroker can function on their own and each implement the Rasterx interface, so if you need just the curve filling but no stroking capability, you only need a Filler. On the other hand if you have created a Dasher and want to use it to Fill, you can just do this:
 
