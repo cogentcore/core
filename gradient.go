@@ -243,9 +243,9 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	gr := sv.Defs.NewChild(GradientType, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {
-		gr.Grad.Gradient = colors.RadialGradient()
+		gr.Grad.Gradient = colors.NewRadialGradient()
 	} else {
-		gr.Grad.Gradient = colors.LinearGradient()
+		gr.Grad.Gradient = colors.NewLinearGradient()
 	}
 	return gr, url
 }
