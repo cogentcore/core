@@ -446,26 +446,17 @@ func TestGradient(t *testing.T) {
 		scannerGV = NewScannerGV(wx, wy, img, img.Bounds())
 	)
 
-	linearGradient := &Gradient{Points: [5]float32{0, 0, 1, 0, 0},
-		IsRadial: false, Bounds: struct{ X, Y, W, H float32 }{
-			X: 50, Y: 50, W: 100, H: 100}, Matrix: Identity}
+	linear := colors.LinearGradient().SetEnd(mat32.Vec2{1, 0}).
+		SetBounds(mat32.Box2{mat32.Vec2{50, 50}, mat32.Vec2{150, 150}}).
+		AddStop(colors.Aquamarine, 0.3, 1.0).
+		AddStop(colors.Skyblue, 0.6, 1).
+		AddStop(colors.Darksalmon, 1.0, .75)
 
-	linearGradient.Stops = []GradStop{
-		GradStop{StopColor: colors.Aquamarine, Offset: 0.3, Opacity: 1.0},
-		GradStop{StopColor: colors.Skyblue, Offset: 0.6, Opacity: 1},
-		GradStop{StopColor: colors.Darksalmon, Offset: 1.0, Opacity: .75},
-	}
-
-	radialGradient := &Gradient{Points: [5]float32{0.5, 0.5, 0.5, 0.5, 0.5},
-		IsRadial: true, Bounds: struct{ X, Y, W, H float32 }{
-			X: 230, Y: 230, W: 100, H: 100},
-		Matrix: Identity, Spread: ReflectSpread}
-
-	radialGradient.Stops = []GradStop{
-		GradStop{StopColor: colors.Orchid, Offset: 0.3, Opacity: 1},
-		GradStop{StopColor: colors.Bisque, Offset: 0.6, Opacity: 1},
-		GradStop{StopColor: colors.Chartreuse, Offset: 1.0, Opacity: 0.4},
-	}
+	radial := colors.RadialGradient().
+		SetBounds(mat32.Box2{mat32.Vec2{230, 230}, mat32.Vec2{330, 330}}).SetSpread(colors.ReflectSpread).
+		AddStop(colors.Orchid, 0.3, 1).
+		AddStop(colors.Bisque, 0.6, 1).
+		AddStop(colors.Chartreuse, 1.0, 0.4)
 
 	d := NewDasher(wx, wy, scannerGV)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
@@ -479,13 +470,13 @@ func TestGradient(t *testing.T) {
 
 	p.AddTo(offsetPath)
 
-	scannerGV.SetColor(radialGradient.GetColorFunction(1))
+	scannerGV.SetColor(radial.RenderColor(1))
 	f.Draw()
 	f.Clear()
 
 	scannerGV.SetClip(image.Rect(420, 350, 460, 400))
 	offsetPath.M = mat32.Identity2D().Translate(340, 180)
-	scannerGV.SetColor(radialGradient.GetColorFunction(1))
+	scannerGV.SetColor(radial.RenderColor(1))
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
@@ -499,52 +490,51 @@ func TestGradient(t *testing.T) {
 		t.Error("path reset failed", offsetPath)
 	}
 
-	scannerGV.SetColor(linearGradient.GetColorFunction(1.0))
+	scannerGV.SetColor(linear.RenderColor(1))
 	p.AddTo(f)
 	f.Draw()
 	f.Clear()
 
-	linearGradient.Spread = RepeatSpread
-	scannerGV.SetColor(linearGradient.GetColorFunction(1.0))
+	linear.SetSpread(colors.RepeatSpread)
+	scannerGV.SetColor(linear.RenderColor(1))
 	AddRect(20, 460, 150, 610, 45, f)
 	f.Draw()
 	f.Clear()
 
-	radialGradient.Units = UserSpaceOnUse
-	scannerGV.SetColor(radialGradient.GetColorFunction(1.0))
+	radial.SetUnits(colors.UserSpaceOnUse)
+	scannerGV.SetColor(radial.RenderColor(1))
 	AddRect(300, 20, 450, 170, 0, f)
 	f.Draw()
 	f.Clear()
 
-	linearGradient.Units = UserSpaceOnUse
-	scannerGV.SetColor(linearGradient.GetColorFunction(1.0))
+	linear.SetUnits(colors.UserSpaceOnUse)
+	scannerGV.SetColor(linear.RenderColor(1))
 	AddRect(300, 180, 450, 200, 0, f)
 	f.Draw()
 	f.Clear()
 
-	radialGradient.Units = ObjectBoundingBox
-	radialGradient.Points = [5]float32{0.5, 0.5, 0, 0, 0.2} // move focus away from
-	scannerGV.SetColor(radialGradient.GetColorFunction(1.0))
+	radial.SetUnits(colors.ObjectBoundingBox).
+		SetFocal(mat32.Vec2{}).SetRadius(0.2) // move focus away from
+	scannerGV.SetColor(radial.RenderColor(1))
 	AddRect(300, 210, 450, 300, 0, f)
 	f.Draw()
 	f.Clear()
 
-	radialGradient.Units = UserSpaceOnUse
-	linearGradient.Spread = PadSpread
-	radialGradient.Points = [5]float32{0.5, 0.5, 0.1, 0.1, 0.5} // move focus away from center
-	scannerGV.SetColor(radialGradient.GetColorFunction(1.0))
+	radial.SetUnits(colors.UserSpaceOnUse).SetSpread(colors.PadSpread).
+		SetFocal(mat32.Vec2{0.1, 0.1}).SetRadius(0.5) // move focus away from center
+	scannerGV.SetColor(radial.RenderColor(1))
 	AddRect(20, 160, 150, 310, 0, f)
 	f.Draw()
 	f.Clear()
 
-	linearGradient.Stops = linearGradient.Stops[0:1]
-	scannerGV.SetColor(linearGradient.GetColorFunction(1.0))
+	linear.Stops = linear.Stops[0:1]
+	scannerGV.SetColor(linear.RenderColor(1))
 	AddRect(300, 180, 450, 200, 0, f)
 	f.Draw()
 	f.Clear()
 
-	linearGradient.Stops = linearGradient.Stops[0:0]
-	scannerGV.SetColor(linearGradient.GetColorFunction(1.0))
+	linear.Stops = linear.Stops[0:0]
+	scannerGV.SetColor(linear.RenderColor(1))
 	AddRect(300, 180, 450, 200, 0, f)
 	f.Draw()
 	f.Clear()
