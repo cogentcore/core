@@ -6,6 +6,7 @@
 // Copyright 2018 by the rasterx Authors. All rights reserved.
 // Created 2018 by S.R.Wiley
 
+// Package gradient provides linear, radial, and conic color gradients.
 package gradient
 
 import (
@@ -43,7 +44,7 @@ type Gradient struct { //gti:add -setters
 	// the stops of the gradient
 	Stops []GradientStop
 
-	// the spread methods for the gradient
+	// the spread method used for the gradient
 	Spread SpreadMethods
 
 	// the units used for the gradient
@@ -61,30 +62,13 @@ type Gradient struct { //gti:add -setters
 
 // GradientStop represents a single stop in a [Gradient]
 type GradientStop struct {
+
 	// the color of the stop
 	Color color.RGBA
 
 	// the offset (position) of the stop (0-1)
 	Offset float32
-
-	// the opacity of the stop (0-1)
-	Opacity float32
 }
-
-// GradientTypes are the different types of gradients available
-// (linear, radial, and conic).
-type GradientTypes int32 //enums:enum
-
-const (
-	// LinearGradient indicates to use a linear gradient
-	LinearGradient GradientTypes = iota
-
-	// RadialGradient indicates to use a radial gradient
-	RadialGradient
-
-	// ConicGradient indicates to use a conic gradient
-	ConicGradient
-)
 
 // SpreadMethods are the methods used when a gradient reaches
 // its end but the object isn't fully filled.
