@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Note: this is based on https://github.com/srwiley/rasterx
-// Copyright 2018 All rights reserved.
-// Created: 5/12/2018 by S.R.Wiley
+// Based on https://github.com/srwiley/rasterx:
+// Copyright 2018 by the rasterx Authors. All rights reserved.
+// Created 2018 by S.R.Wiley
 
-package colors
+package gradient
 
 import (
 	"image/color"
