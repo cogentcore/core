@@ -11,6 +11,7 @@ package gradient
 import (
 	"image"
 	"image/color"
+	"math"
 
 	"goki.dev/mat32/v2"
 )
@@ -27,17 +28,11 @@ type Linear struct {
 	// the stops for the gradient
 	Stops []GradientStop
 
-	// the spread method used for the gradient
+	// the spread method used for the gradient if it stops before the end
 	Spread SpreadMethods
-
-	// the units used for the gradient
-	Units GradientUnits
 
 	// the colorspace algorithm to use for blending colors
 	Blend BlendTypes
-
-	// the bounds of the gradient; this should typically not be set by end-users
-	Box mat32.Box2
 
 	// the matrix for the gradient; this should typically not be set by end-users
 	Matrix mat32.Mat2
@@ -50,7 +45,6 @@ func NewLinear() *Linear {
 	return &Linear{
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
-		Box:    mat32.B2(0, 0, 1, 1),
 	}
 }
 
@@ -61,7 +55,7 @@ func (l *Linear) ColorModel() color.Model {
 
 // Bounds returns the bounds of the gradient
 func (l *Linear) Bounds() image.Rectangle {
-	return l.Box.ToRect()
+	return image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
 }
 
 // At returns the color of the gradient at the given point

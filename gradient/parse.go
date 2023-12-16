@@ -8,7 +8,7 @@
 //
 // created: 2/12/2017 by S.R.Wiley
 
-package colors
+package gradient
 
 import (
 	"encoding/xml"
