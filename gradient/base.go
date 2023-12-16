@@ -30,6 +30,11 @@ type Base struct { //gti:add
 	Blend colors.BlendTypes
 }
 
+// AddStop adds a new stop with the given color and position to the gradient.
+func (b *Base) AddStop(color color.RGBA, pos float32) {
+	b.Stops = append(b.Stops, Stop{color, pos})
+}
+
 // ColorModel returns the color model used by the gradient, which is [color.RGBAModel]
 func (b *Base) ColorModel() color.Model {
 	return color.RGBAModel

@@ -12,7 +12,6 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/colors"
 	"goki.dev/mat32/v2"
 )
 
@@ -39,7 +38,7 @@ func NewLinear() *Linear {
 
 // AddStop adds a new stop with the given color and position to the linear gradient.
 func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
-	l.Stops = append(l.Stops, Stop{color, pos})
+	l.Base.AddStop(color, pos)
 	return l
 }
 
@@ -47,7 +46,7 @@ func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
 func (l *Linear) At(x, y int) color.Color {
 	switch len(l.Stops) {
 	case 0:
-		return colors.Black // default color for gradient without stops
+		return color.RGBA{}
 	case 1:
 		return l.Stops[0].Color
 	}
