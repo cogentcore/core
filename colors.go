@@ -360,26 +360,28 @@ func Opaquer(c color.Color, amount float32) color.RGBA {
 	return AsRGBA(f32)
 }
 
-// Blend returns a color that is the given percent blend between the first
-// and second color; 10 = 10% of the first and 90% of the second, etc.
-// Blending is done using the given blending algorithm.
-func Blend(bt BlendTypes, pct float32, x, y color.Color) color.RGBA {
+// Blend returns a color that is the given proportion between the first
+// and second color. For example, 0.1 indicates to blend 10% of the first
+// color and 90% of the second. Blending is done using the given blending
+// algorithm.
+func Blend(bt BlendTypes, p float32, x, y color.Color) color.RGBA {
 	switch bt {
 	case HCT:
-		return hct.Blend(pct, x, y)
+		return hct.Blend(p, x, y)
 	case RGB:
-		return BlendRGB(pct, x, y)
+		return BlendRGB(p, x, y)
 	case CAM16:
-		return cam16.Blend(pct, x, y)
+		return cam16.Blend(p, x, y)
 	}
 	slog.Error("got unexpected blend type", "type", bt)
 	return color.RGBA{}
 }
 
-// BlendRGB returns a color that is the given percent blend between the first
-// and second color; 10 = 10% of the first and 90% of the second, etc.
-// Blending is done directly on non-premultiplied RGB values, and
-// a correctly premultiplied color is returned.
+// BlendRGB returns a color that is the given proportion between the first
+// and second color in RGB colorspace. For example, 0.1 indicates to blend
+// 10% of the first color and 90% of the second. Blending is done directly
+// on non-premultiplied
+// RGB values, and a correctly premultiplied color is returned.
 func BlendRGB(pct float32, x, y color.Color) color.RGBA {
 	fx := NRGBAF32Model.Convert(x).(NRGBAF32)
 	fy := NRGBAF32Model.Convert(y).(NRGBAF32)
