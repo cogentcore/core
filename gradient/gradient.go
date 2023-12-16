@@ -42,7 +42,7 @@ type Gradient struct { //gti:add -setters
 	Rotation float32
 
 	// the stops of the gradient
-	Stops []GradientStop
+	Stops []Stop
 
 	// the spread method used for the gradient
 	Spread SpreadMethods
@@ -60,14 +60,14 @@ type Gradient struct { //gti:add -setters
 	Matrix mat32.Mat2
 }
 
-// GradientStop represents a single stop in a [Gradient]
-type GradientStop struct {
+// Stop represents a single stop in a gradient
+type Stop struct {
 
 	// the color of the stop
 	Color color.RGBA
 
-	// the offset (position) of the stop (0-1)
-	Offset float32
+	// the position of the stop between 0 and 1
+	Pos float32
 }
 
 // SpreadMethods are the methods used when a gradient reaches
@@ -142,7 +142,7 @@ func NewRadialGradient() *Gradient {
 
 // AddStop adds a new stop with the given color, offset, and opacity to the gradient.
 func (g *Gradient) AddStop(color color.RGBA, offset, opacity float32) *Gradient {
-	g.Stops = append(g.Stops, GradientStop{Color: color, Offset: offset, Opacity: opacity})
+	g.Stops = append(g.Stops, Stop{Color: color, Pos: offset, Opacity: opacity})
 	return g
 }
 
@@ -151,7 +151,7 @@ func (g *Gradient) AddStop(color color.RGBA, offset, opacity float32) *Gradient 
 func (g *Gradient) CopyFrom(cp *Gradient) {
 	*g = *cp
 	if cp.Stops != nil {
-		g.Stops = make([]GradientStop, len(cp.Stops))
+		g.Stops = make([]Stop, len(cp.Stops))
 		copy(g.Stops, cp.Stops)
 	}
 }
@@ -163,7 +163,7 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 		return
 	}
 	if len(g.Stops) != len(cp.Stops) {
-		g.Stops = make([]GradientStop, len(cp.Stops))
+		g.Stops = make([]Stop, len(cp.Stops))
 	}
 	copy(g.Stops, cp.Stops)
 }
@@ -207,7 +207,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 
 	// sort by offset in ascending order
 	sort.Slice(g.Stops, func(i, j int) bool {
-		return g.Stops[i].Offset < g.Stops[j].Offset
+		return g.Stops[i].Pos < g.Stops[j].Pos
 	})
 
 	w, h := g.Bounds.Size().X, g.Bounds.Size().Y
@@ -354,12 +354,12 @@ func (g *Gradient) ColorAt(v, opacity float32) color.Color {
 	}
 
 	place := 0 // Advance to place where mod is greater than the indicated stop
-	for place != len(g.Stops) && mod > g.Stops[place].Offset {
+	for place != len(g.Stops) && mod > g.Stops[place].Pos {
 		place++
 	}
 	switch g.Spread {
 	case RepeatSpread:
-		var s1, s2 GradientStop
+		var s1, s2 Stop
 		switch place {
 		case 0, d:
 			s1, s2 = g.Stops[d-1], g.Stops[0]
@@ -375,7 +375,7 @@ func (g *Gradient) ColorAt(v, opacity float32) color.Color {
 			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
 			// Since this is the reflect spead mode, the mod interval is two, allowing the stop list to be
 			// iterated in reverse before repeating the sequence.
-			for place != d*2 && mod-1 > (1-g.Stops[d*2-place-1].Offset) {
+			for place != d*2 && mod-1 > (1-g.Stops[d*2-place-1].Pos) {
 				place++
 			}
 			switch place {
@@ -406,21 +406,21 @@ func (g *Gradient) ColorAt(v, opacity float32) color.Color {
 }
 
 // BlendStops blends the given two gradient stops together based on the given value and opacity.
-func (g *Gradient) BlendStops(v, opacity float32, s1, s2 GradientStop, flip bool) color.Color {
-	s1off := s1.Offset
-	if s1.Offset > s2.Offset && !flip { // happens in repeat spread mode
+func (g *Gradient) BlendStops(v, opacity float32, s1, s2 Stop, flip bool) color.Color {
+	s1off := s1.Pos
+	if s1.Pos > s2.Pos && !flip { // happens in repeat spread mode
 		s1off--
 		if v > 1 {
 			v--
 		}
 	}
-	if s2.Offset == s1off {
+	if s2.Pos == s1off {
 		return ApplyOpacity(s2.Color, s2.Opacity)
 	}
 	if flip {
 		v = 1 - v
 	}
-	tp := (v - s1off) / (s2.Offset - s1off)
+	tp := (v - s1off) / (s2.Pos - s1off)
 
 	return ApplyOpacity(Blend(g.Blend, 100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
 }

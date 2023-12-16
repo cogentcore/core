@@ -181,11 +181,11 @@ outer:
 		case strings.HasPrefix(par, ")"):
 			break outer
 		default: // must be a color stop
-			var stop *GradientStop
+			var stop *Stop
 			if len(f.Gradient.Stops) > stopIdx {
 				stop = &(f.Gradient.Stops[stopIdx])
 			} else {
-				stop = &GradientStop{Opacity: 1.0, Color: Black}
+				stop = &Stop{Opacity: 1.0, Color: Black}
 			}
 			if stopIdx == 0 {
 				prevColor = f.Solid // base color
@@ -251,11 +251,11 @@ outer:
 		case strings.HasPrefix(par, ")"):
 			break outer
 		default: // must be a color stop
-			var stop *GradientStop
+			var stop *Stop
 			if len(f.Gradient.Stops) > stopIdx {
 				stop = &(f.Gradient.Stops[stopIdx])
 			} else {
-				stop = &GradientStop{Opacity: 1.0, Color: Black}
+				stop = &Stop{Opacity: 1.0, Color: Black}
 			}
 			if stopIdx == 0 {
 				prevColor = f.Solid // base color
@@ -281,7 +281,7 @@ outer:
 	return nil
 }
 
-func parseColorStop(stop *GradientStop, prevColor color.RGBA, par string) error {
+func parseColorStop(stop *Stop, prevColor color.RGBA, par string) error {
 	cnm := par
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
@@ -290,7 +290,7 @@ func parseColorStop(stop *GradientStop, prevColor color.RGBA, par string) error 
 		if err != nil {
 			return fmt.Errorf("invalid offset %q: %w", offs, err)
 		}
-		stop.Offset = off
+		stop.Pos = off
 	}
 	// color blending doesn't work well in pre-multiplied alpha RGB space!
 	if IsNil(prevColor) && strings.HasPrefix(cnm, "clearer-") {
@@ -418,7 +418,7 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					f.Gradient.Focal.Y = f.Gradient.Center.Y
 				}
 			case "stop":
-				stop := GradientStop{Opacity: 1, Color: Black}
+				stop := Stop{Opacity: 1, Color: Black}
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {
@@ -438,7 +438,7 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
-						stop.Offset, err = readFraction(attr.Value)
+						stop.Pos, err = readFraction(attr.Value)
 						if err != nil {
 							return err
 						}
@@ -539,28 +539,28 @@ func FixGradientStops(grad *Gradient) {
 	last := float32(0)
 	for i := 0; i < sz; i++ {
 		st := &(grad.Stops[i])
-		if i == sz-1 && st.Offset == 0 {
+		if i == sz-1 && st.Pos == 0 {
 			if last < 1.0 {
-				st.Offset = 1.0
+				st.Pos = 1.0
 			} else {
-				st.Offset = last
+				st.Pos = last
 			}
 		}
-		if i > 0 && st.Offset == 0 && splitSt < 0 {
+		if i > 0 && st.Pos == 0 && splitSt < 0 {
 			splitSt = i
-			st.Offset = last
+			st.Pos = last
 			continue
 		}
 		if splitSt > 0 {
-			start := grad.Stops[splitSt].Offset
-			end := st.Offset
+			start := grad.Stops[splitSt].Pos
+			end := st.Pos
 			per := (end - start) / float32(1+(i-splitSt))
 			cur := start + per
 			for j := splitSt; j < i; j++ {
-				grad.Stops[j].Offset = cur
+				grad.Stops[j].Pos = cur
 				cur += per
 			}
 		}
-		last = st.Offset
+		last = st.Pos
 	}
 }
