@@ -14,7 +14,6 @@ import (
 	"log/slog"
 	"sort"
 
-	"goki.dev/colors"
 	"goki.dev/mat32/v2"
 )
 
@@ -330,99 +329,6 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	}
 	slog.Error("got unexpected gradient type", "type", g.Type)
 	return Render{}
-}
-
-// GetColor returns the color at the given normalized position along the
-// given gradient stops using the given spread method and blend algorithm.
-func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend colors.BlendTypes) color.Color {
-	d := len(stops)
-
-	// These cases can be taken care of early on
-	if spread == PadSpread {
-		if pos >= 1 {
-			return stops[d-1].Color
-		}
-		if pos <= 0 {
-			return stops[0].Color
-		}
-	}
-
-	modRange := float32(1)
-	if spread == ReflectSpread {
-		modRange = 2
-	}
-	mod := mat32.Mod(pos, modRange)
-	if mod < 0 {
-		mod += modRange
-	}
-
-	place := 0 // Advance to place where mod is greater than the indicated stop
-	for place != len(stops) && mod > stops[place].Pos {
-		place++
-	}
-	switch spread {
-	case RepeatSpread:
-		var s1, s2 Stop
-		switch place {
-		case 0, d:
-			s1, s2 = stops[d-1], stops[0]
-		default:
-			s1, s2 = stops[place-1], stops[place]
-		}
-		return BlendStops(mod, s1, s2, false, blend)
-	case ReflectSpread:
-		switch place {
-		case 0:
-			return stops[0].Color
-		case d:
-			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
-			// Since this is the reflect spread mode, the mod interval is two, allowing the stop list to be
-			// iterated in reverse before repeating the sequence.
-			for place != d*2 && mod-1 > (1-stops[d*2-place-1].Pos) {
-				place++
-			}
-			switch place {
-			case d:
-				return stops[d-1].Color
-			case d * 2:
-				return stops[0].Color
-			default:
-				return BlendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true, blend)
-			}
-		default:
-			return BlendStops(mod, stops[place-1], stops[place], false, blend)
-		}
-	default: // PadSpread
-		switch place {
-		case 0:
-			return stops[0].Color
-		case d:
-			return stops[d-1].Color
-		default:
-			return BlendStops(mod, stops[place-1], stops[place], false, blend)
-		}
-	}
-}
-
-// BlendStops blends the given two gradient stops together based on the given position
-// and blending algorithm. If flip is true, it effectively flips the given position.
-func BlendStops(pos float32, s1, s2 Stop, flip bool, blend colors.BlendTypes) color.Color {
-	s1off := s1.Pos
-	if s1.Pos > s2.Pos && !flip { // happens in repeat spread mode
-		s1off--
-		if pos > 1 {
-			pos--
-		}
-	}
-	if s2.Pos == s1off {
-		return s2.Color
-	}
-	if flip {
-		pos = 1 - pos
-	}
-	tp := (pos - s1off) / (s2.Pos - s1off)
-
-	return colors.Blend(blend, 100*(1-tp), s1.Color, s2.Color)
 }
 
 // ApplyTransform transforms the points for the gradient if it has
