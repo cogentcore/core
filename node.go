@@ -318,7 +318,7 @@ func (nb *NodeBase) RayPick(pos image.Point) mat32.Ray {
 	ndc := fpos.WindowToNDC(size, mat32.Vec2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
-	cdir := mat32.NewVec4FromVec3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)
+	cdir := mat32.V4FromV3(ndc, 1).MulMat4(&nb.Sc.Camera.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
@@ -330,7 +330,7 @@ func (nb *NodeBase) RayPick(pos image.Point) mat32.Ray {
 	if err != nil {
 		log.Println(err)
 	}
-	lpos := mat32.NewVec4FromVec3(wpos, 1).MulMat4(invM)
+	lpos := mat32.V4FromV3(wpos, 1).MulMat4(invM)
 	ldir := wdir.MulMat4(invM)
 	ldir.SetNormal()
 	ray := mat32.NewRay(mat32.Vec3{lpos.X, lpos.Y, lpos.Z}, mat32.Vec3{ldir.X, ldir.Y, ldir.Z})

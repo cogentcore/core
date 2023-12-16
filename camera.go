@@ -232,7 +232,7 @@ func (cm *Camera) TargetFmView() {
 	cm.CamMu.Lock()
 	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
 	tpos := mat32.Vec4{0, 0, -trgdist, 1}          // target is that distance along -Z axis in front of me
-	cm.Target = mat32.NewVec3FromVec4(tpos.MulMat4(&cm.Pose.Matrix))
+	cm.Target = mat32.V3FromV4(tpos.MulMat4(&cm.Pose.Matrix))
 	cm.CamMu.Unlock()
 }
 
@@ -264,11 +264,11 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	fpt := mat32.Vec2{float32(pt.X), float32(pt.Y)}
 	ndc := fpt.WindowToNDC(fsize, mat32.Vec2{}, true) // flipY
 	ndc.Z = -1                                        // at closest point
-	cdir := mat32.NewVec4FromVec3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)
+	cdir := mat32.V4FromV3(ndc, 1).MulMat4(&cm.InvPrjnMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
-	wdir := mat32.NewVec3FromVec4(cdir.MulMat4(&cm.Pose.Matrix))
+	wdir := mat32.V3FromV4(cdir.MulMat4(&cm.Pose.Matrix))
 	del := wdir.MulScalar(zoomPct)
 	cm.Pose.Pos.SetAdd(del)
 	cm.CamMu.Unlock()
