@@ -8,9 +8,14 @@
 
 package gradient
 
-import "goki.dev/mat32/v2"
+import (
+	"image"
+	"image/color"
 
-// Linear represents a linear gradient.
+	"goki.dev/mat32/v2"
+)
+
+// Linear represents a linear gradient. It implements the [image.Image] interface.
 type Linear struct {
 
 	// the starting point of the gradient (x1 and y1 in SVG)
@@ -32,18 +37,34 @@ type Linear struct {
 	Blend BlendTypes
 
 	// the bounds of the gradient; this should typically not be set by end-users
-	Bounds mat32.Box2
+	Box mat32.Box2
 
 	// the matrix for the gradient; this should typically not be set by end-users
 	Matrix mat32.Mat2
 }
 
-// NewLinear returns a new [Linear] gradient
+var _ image.Image = &Linear{}
+
+// NewLinear returns a new [Linear] gradient.
 func NewLinear() *Linear {
 	return &Linear{
-		Spread: PadSpread,
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+		Box:    mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
+}
+
+// ColorModel returns the color model used by the gradient, which is [color.RGBAModel]
+func (l *Linear) ColorModel() color.Model {
+	return color.RGBAModel
+}
+
+// Bounds returns the bounds of the gradient
+func (l *Linear) Bounds() image.Rectangle {
+	return l.Box.ToRect()
+}
+
+// At returns the color of the gradient at the given point
+func (l *Linear) At(x, y int) color.Color {
+	return color.RGBA{}
 }
