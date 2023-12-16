@@ -613,7 +613,7 @@ func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) 
 	if since < dur {
 		return false
 	}
-	dst := int(mat32.NewVec2FmPoint(e.StartDelta()).Length())
+	dst := int(mat32.V2FromPoint(e.StartDelta()).Length())
 	return dst >= dist
 }
 

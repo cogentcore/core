@@ -528,7 +528,7 @@ func (sc *Scene) DoRebuild() {
 func (sc *Scene) Fill() {
 	pc := &sc.PaintContext
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.NewVec2FmPoint(sc.SceneGeom.Size), sc.BgColor)
+	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sc.SceneGeom.Size), sc.BgColor)
 	pc.Unlock()
 }
 
@@ -592,8 +592,8 @@ func (wb *WidgetBase) PopBounds() {
 	pc := &wb.Sc.PaintContext
 
 	if wb.Sc.Is(ScRenderBBoxes) {
-		pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
-		sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
+		pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
+		sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
 		pcsw := pc.StrokeStyle.Width
 		pcsc := pc.StrokeStyle.Color
@@ -687,8 +687,8 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 
 	pc := &wb.Sc.PaintContext
 
-	pos := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Min)
-	sz := mat32.NewVec2FmPoint(wb.Geom.TotalBBox.Size())
+	pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
+	sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
 	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackgroundColor())
 }
 

@@ -170,7 +170,7 @@ func app() {
 		fmt.Println("slider0", slider0.Value)
 	})
 
-	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).SetValue(0.5).SetThumbSize(mat32.NewVec2(1, 4))
+	slider1 := gi.NewSlider(srow).SetDim(mat32.Y).SetValue(0.5).SetThumbSize(mat32.V2(1, 4))
 	slider1.OnInput(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})

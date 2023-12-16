@@ -1089,7 +1089,7 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	pos := tf.EffPos
 	if wincoords {
 		sc := tf.Sc
-		pos = pos.Add(mat32.NewVec2FmPoint(sc.SceneGeom.Pos))
+		pos = pos.Add(mat32.V2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
 	return mat32.Vec2{pos.X + cpos, pos.Y}
@@ -1269,7 +1269,7 @@ func (tf *TextField) RenderSelect() {
 
 	pc := &tf.Sc.PaintContext
 	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(spos, mat32.NewVec2(tsz, tf.FontHeight), tf.SelectColor)
+	pc.FillBox(spos, mat32.V2(tsz, tf.FontHeight), tf.SelectColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
@@ -1785,7 +1785,7 @@ func (tf *TextField) SizeUp() {
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	// w += 2.0 // give some extra buffer
-	nsz := mat32.NewVec2(w, tf.FontHeight)
+	nsz := mat32.V2(w, tf.FontHeight)
 	sz := &tf.Geom.Size
 	sz.FitSizeMax(&sz.Actual.Content, nsz)
 	sz.SetTotalFromContent(&sz.Actual)

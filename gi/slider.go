@@ -401,7 +401,7 @@ func (sr *Slider) HandleEvents() {
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	sr.BBoxMu.RLock()
 	defer sr.BBoxMu.RUnlock()
-	ptf := mat32.NewVec2FmPoint(pt).Dim(sr.Dim)
+	ptf := mat32.V2FromPoint(pt).Dim(sr.Dim)
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Dim)
 }
 
@@ -597,7 +597,7 @@ func (sr *Slider) ScenePos() {
 		return
 	}
 	sbw := mat32.Ceil(sr.Styles.ScrollBarWidth.Dots)
-	scmax := mat32.NewVec2FmPoint(sr.Sc.Geom.ContentBBox.Max).SubScalar(sbw)
+	scmax := mat32.V2FromPoint(sr.Sc.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.SetContentPosFromPos()
 	sr.SetBBoxesFromAllocs()

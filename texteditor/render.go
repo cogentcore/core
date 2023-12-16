@@ -97,9 +97,9 @@ func (ed *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 func (ed *Editor) CharStartPosVis(pos lex.Pos) mat32.Vec2 {
 	spos := ed.CharStartPos(pos)
 	bb := ed.Geom.ContentBBox
-	bbmin := mat32.NewVec2FmPoint(bb.Min)
+	bbmin := mat32.V2FromPoint(bb.Min)
 	bbmin.X += ed.LineNoOff
-	bbmax := mat32.NewVec2FmPoint(bb.Max)
+	bbmax := mat32.V2FromPoint(bb.Max)
 	spos.SetMax(bbmin)
 	spos.SetMin(bbmax)
 	return spos
@@ -309,8 +309,8 @@ func (ed *Editor) RenderAllLines() {
 	pc.Lock()
 	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
-	bbmin := mat32.NewVec2FmPoint(bb.Min)
-	bbmax := mat32.NewVec2FmPoint(bb.Max)
+	bbmin := mat32.V2FromPoint(bb.Min)
+	bbmax := mat32.V2FromPoint(bb.Max)
 	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.BackgroundColor)
 	pos := ed.RenderStartPos()
 	stln := -1
@@ -379,8 +379,8 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	}
 	pc := &ed.Sc.PaintContext
 	bb := ed.Geom.ContentBBox
-	spos := mat32.NewVec2FmPoint(bb.Min)
-	epos := mat32.NewVec2FmPoint(bb.Max)
+	spos := mat32.V2FromPoint(bb.Min)
+	epos := mat32.V2FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNoOff
 	pc.FillBoxColor(spos, epos.Sub(spos), ed.LineNumberColor.Solid)
 }

@@ -71,7 +71,7 @@ func (hl *Handle) SetStyles() {
 
 func (hl *Handle) HandleEvents() {
 	hl.On(events.SlideMove, func(e events.Event) {
-		hl.Pos = mat32.NewVec2FmPoint(e.Pos()).Dim(hl.Dim)
+		hl.Pos = mat32.V2FromPoint(e.Pos()).Dim(hl.Dim)
 		hl.SendChange(e)
 	})
 }

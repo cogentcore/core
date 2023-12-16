@@ -27,11 +27,11 @@ func (ly *Layout) HasAnyScroll() bool {
 func (ly *Layout) ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2) {
 	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	od := d.Other()
-	bbmin := mat32.NewVec2FmPoint(ly.Geom.ContentBBox.Min)
-	bbmax := mat32.NewVec2FmPoint(ly.Geom.ContentBBox.Max)
+	bbmin := mat32.V2FromPoint(ly.Geom.ContentBBox.Min)
+	bbmax := mat32.V2FromPoint(ly.Geom.ContentBBox.Max)
 	if ly.This() != ly.Sc.This() { // if not the scene, keep inside the scene
-		bbmin.SetMax(mat32.NewVec2FmPoint(ly.Sc.Geom.ContentBBox.Min))
-		bbmax.SetMin(mat32.NewVec2FmPoint(ly.Sc.Geom.ContentBBox.Max).SubScalar(sbw))
+		bbmin.SetMax(mat32.V2FromPoint(ly.Sc.Geom.ContentBBox.Min))
+		bbmax.SetMin(mat32.V2FromPoint(ly.Sc.Geom.ContentBBox.Max).SubScalar(sbw))
 	}
 	pos.SetDim(d, bbmin.Dim(d))
 	pos.SetDim(od, bbmax.Dim(od))
@@ -209,7 +209,7 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	var del image.Point
 	del.X = se.DimDelta(mat32.X)
 	del.Y = se.DimDelta(mat32.Y)
-	fdel := mat32.NewVec2FmPoint(del)
+	fdel := mat32.V2FromPoint(del)
 
 	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {

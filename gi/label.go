@@ -382,7 +382,7 @@ func (lb *Label) SizeUpWrapSize() mat32.Vec2 {
 		h = area / w
 		h = max(h, csz.Y)
 	}
-	sz := mat32.NewVec2(w, h)
+	sz := mat32.V2(w, h)
 	if LayoutTrace {
 		fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
 	}
