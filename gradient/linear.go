@@ -9,11 +9,9 @@
 package gradient
 
 import (
-	"cmp"
 	"image"
 	"image/color"
 	"math"
-	"slices"
 
 	"goki.dev/colors"
 	"goki.dev/mat32/v2"
@@ -28,7 +26,7 @@ type Linear struct { //gti:add -setters
 	// the ending point of the gradient (x2 and y2 in SVG)
 	End mat32.Vec2
 
-	// the stops for the gradient
+	// the stops for the gradient; use AddStop to add stops
 	Stops []Stop `set:"-"`
 
 	// the spread method used for the gradient if it stops before the end
@@ -36,9 +34,6 @@ type Linear struct { //gti:add -setters
 
 	// the colorspace algorithm to use for blending colors
 	Blend BlendTypes
-
-	// the matrix for the gradient; this should typically not be set by end-users
-	Matrix mat32.Mat2 `set:"-"`
 }
 
 var _ image.Image = &Linear{}
@@ -46,8 +41,8 @@ var _ image.Image = &Linear{}
 // NewLinear returns a new [Linear] gradient.
 func NewLinear() *Linear {
 	return &Linear{
-		End:    mat32.Vec2{0, 1},
-		Matrix: mat32.Identity2D(),
+		// default in CSS is "to bottom"
+		End: mat32.V2(0, 1),
 	}
 }
 
@@ -76,19 +71,10 @@ func (l *Linear) At(x, y int) color.Color {
 		return l.Stops[0].Color // Illegal, I think, should really should not happen.
 	}
 
-	// sort by pos in ascending order
-	slices.SortFunc(l.Stops, func(a, b Stop) int {
-		return cmp.Compare(a.Pos, b.Pos)
-	})
-
-	s, e := l.Start, l.End
-	s = l.Matrix.MulVec2AsPt(s)
-	e = l.Matrix.MulVec2AsPt(e)
-
-	d := e.Sub(s)
+	d := l.End.Sub(l.Start)
 	dd := d.X*d.X + d.Y*d.Y // self inner prod
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
-	df := pt.Sub(s)
+	df := pt.Sub(l.Start)
 	return l.ColorAt((d.X*df.X + d.Y*df.Y) / dd)
 }
