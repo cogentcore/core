@@ -1019,6 +1019,16 @@ func SetRobust(to, frm any) error {
 		es.SetInt64(fm)
 		return nil
 	}
+
+	if bv, ok := to.(bools.BoolSetter); ok {
+		fb, err := ToBool(frm)
+		if err != nil {
+			return err
+		}
+		bv.SetBool(fb)
+		return nil
+	}
+
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		fm, err := ToInt(frm)
