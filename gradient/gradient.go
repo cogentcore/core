@@ -178,8 +178,6 @@ func (g *Gradient) RenderColor(opacity float32) Render {
 	return g.RenderColorTransform(opacity, mat32.Identity2D())
 }
 
-const epsilonF = 1e-5
-
 // RenderColorTransform returns the render color using the given user space object transform matrix
 func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) Render {
 	switch len(g.Stops) {
@@ -343,43 +341,4 @@ func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)
 		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
 	}
-}
-
-// RayCircleIntersectionF calculates in floating point the points of intersection of
-// a ray starting at s2 passing through s1 and a circle in fixed point.
-// Returns intersects == false if no solution is possible. If two
-// solutions are possible, the point closest to s2 is returned
-func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, intersects bool) {
-	n := s2.X - c.X // Calculating using 64* rather than divide
-	m := s2.Y - c.Y
-
-	e := s2.X - s1.X
-	d := s2.Y - s1.Y
-
-	// Quadratic normal form coefficients
-	A, B, C := e*e+d*d, -2*(e*n+m*d), n*n+m*m-r*r
-
-	D := B*B - 4*A*C
-
-	if D <= 0 {
-		return // No intersection or is tangent
-	}
-
-	D = mat32.Sqrt(D)
-	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
-	p1OnSide := t1 > 0
-	p2OnSide := t2 > 0
-
-	switch {
-	case p1OnSide && p2OnSide:
-		if t2 < t1 { // both on ray, use closest to s2
-			t1 = t2
-		}
-	case p2OnSide: // Only p2 on ray
-		t1 = t2
-	case p1OnSide: // only p1 on ray
-	default: // Neither solution is on the ray
-		return
-	}
-	return mat32.Vec2{(n - e*t1) + c.X, (m - d*t1) + c.Y}, true
 }

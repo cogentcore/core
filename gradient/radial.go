@@ -44,6 +44,8 @@ func (r *Radial) AddStop(color color.RGBA, pos float32) *Radial {
 	return r
 }
 
+const epsilonF = 1e-5
+
 // At returns the color of the radial gradient at the given point
 func (r *Radial) At(x, y int) color.Color {
 	switch len(r.Stops) {
@@ -68,7 +70,7 @@ func (r *Radial) At(x, y int) color.Color {
 
 	if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
 		// point of line from center to focus and circle as per SVG specs.
-		nf, intersects := RayCircleIntersectionF(f, c, c, 1.0-epsilonF)
+		nf, intersects := RayCircleIntersectionF(f, c, c, 1-epsilonF)
 		f = nf
 		if !intersects {
 			return color.RGBA{} // should not happen
@@ -93,4 +95,43 @@ func (r *Radial) At(x, y int) color.Color {
 
 	pos := mat32.Sqrt(d.X*d.X+d.Y*d.Y) / mat32.Sqrt(td.X*td.X+td.Y*td.Y)
 	return r.GetColor(pos)
+}
+
+// RayCircleIntersectionF calculates in floating point the points of intersection of
+// a ray starting at s2 passing through s1 and a circle in fixed point.
+// Returns intersects == false if no solution is possible. If two
+// solutions are possible, the point closest to s2 is returned
+func RayCircleIntersectionF(s1, s2, c mat32.Vec2, r float32) (pt mat32.Vec2, intersects bool) {
+	n := s2.X - c.X // Calculating using 64* rather than divide
+	m := s2.Y - c.Y
+
+	e := s2.X - s1.X
+	d := s2.Y - s1.Y
+
+	// Quadratic normal form coefficients
+	A, B, C := e*e+d*d, -2*(e*n+m*d), n*n+m*m-r*r
+
+	D := B*B - 4*A*C
+
+	if D <= 0 {
+		return // No intersection or is tangent
+	}
+
+	D = mat32.Sqrt(D)
+	t1, t2 := (-B+D)/(2*A), (-B-D)/(2*A)
+	p1OnSide := t1 > 0
+	p2OnSide := t2 > 0
+
+	switch {
+	case p1OnSide && p2OnSide:
+		if t2 < t1 { // both on ray, use closest to s2
+			t1 = t2
+		}
+	case p2OnSide: // Only p2 on ray
+		t1 = t2
+	case p1OnSide: // only p1 on ray
+	default: // Neither solution is on the ray
+		return
+	}
+	return mat32.V2((n-e*t1)+c.X, (m-d*t1)+c.Y), true
 }
