@@ -4,18 +4,21 @@
 
 package colors
 
-import "image/color"
+import (
+	"image"
+	"image/color"
+)
 
 // Context contains information about the context in which color parsing occurs.
 type Context interface {
 	// Base returns the base color that the color parsing is relative top
 	Base() color.RGBA
-	// FullByURL returns the [Full] color with the given URL.
-	// A URL of "#name" is typical, where name
-	// is the name of a node with a [Full] color in it.
-	// If it returns nil, that indicats that there is no [Full] color
-	// associated with the given URL.
-	FullByURL(url string) *Full
+	// FullByURL returns the [image.Image] color with the given URL.
+	// A URL of "#name" is typical, where name is the name of a node
+	// with an [image.Image] color in it. If it returns nil, that
+	// indicats that there is no [image.Image] color associated with
+	// the given URL.
+	ColorByURL(url string) image.Image
 }
 
 // BaseContext returns a basic [Context] based on the given base color.
@@ -31,6 +34,6 @@ func (bc *baseContext) Base() color.RGBA {
 	return bc.base
 }
 
-func (bc *baseContext) FullByURL(url string) *Full {
+func (bc *baseContext) ColorByURL(url string) image.Image {
 	return nil
 }
