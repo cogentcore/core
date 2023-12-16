@@ -331,76 +331,74 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 	return Render{}
 }
 
-// ColorAt takes the given paramaterized value along the gradient's stops and
-// returns a color depending on [Gradient.Spread] and [Gradient.Stops].
-func (g *Gradient) ColorAt(v, opacity float32) color.Color {
-	d := len(g.Stops)
+// GetColor returns the color at the given normalized position along the
+// given gradient stops using the given spread method and blend algorithm.
+func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend BlendTypes) color.Color {
+	d := len(stops)
+
 	// These cases can be taken care of early on
-	if v >= 1.0 && g.Spread == PadSpread {
-		s := g.Stops[d-1]
-		return ApplyOpacity(s.Color, s.Opacity*opacity)
-	}
-	if v <= 0.0 && g.Spread == PadSpread {
-		return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+	if spread == PadSpread {
+		if pos >= 1 {
+			return stops[d-1].Color
+		}
+		if pos <= 0 {
+			return stops[0].Color
+		}
 	}
 
 	modRange := float32(1)
-	if g.Spread == ReflectSpread {
+	if spread == ReflectSpread {
 		modRange = 2
 	}
-	mod := mat32.Mod(v, modRange)
+	mod := mat32.Mod(pos, modRange)
 	if mod < 0 {
 		mod += modRange
 	}
 
 	place := 0 // Advance to place where mod is greater than the indicated stop
-	for place != len(g.Stops) && mod > g.Stops[place].Pos {
+	for place != len(stops) && mod > stops[place].Pos {
 		place++
 	}
-	switch g.Spread {
+	switch spread {
 	case RepeatSpread:
 		var s1, s2 Stop
 		switch place {
 		case 0, d:
-			s1, s2 = g.Stops[d-1], g.Stops[0]
+			s1, s2 = stops[d-1], stops[0]
 		default:
-			s1, s2 = g.Stops[place-1], g.Stops[place]
+			s1, s2 = stops[place-1], stops[place]
 		}
-		return g.BlendStops(mod, opacity, s1, s2, false)
+		return BlendStops(mod, s1, s2, false)
 	case ReflectSpread:
 		switch place {
 		case 0:
-			return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+			return stops[0].Color
 		case d:
 			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
-			// Since this is the reflect spead mode, the mod interval is two, allowing the stop list to be
+			// Since this is the reflect spread mode, the mod interval is two, allowing the stop list to be
 			// iterated in reverse before repeating the sequence.
-			for place != d*2 && mod-1 > (1-g.Stops[d*2-place-1].Pos) {
+			for place != d*2 && mod-1 > (1-stops[d*2-place-1].Pos) {
 				place++
 			}
 			switch place {
 			case d:
-				s := g.Stops[d-1]
-				return ApplyOpacity(s.Color, s.Opacity*opacity)
+				return stops[d-1].Color
 			case d * 2:
-				return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
+				return stops[0].Color
 			default:
-				return g.BlendStops(mod-1, opacity,
-					g.Stops[d*2-place], g.Stops[d*2-place-1], true)
+				return BlendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true)
 			}
 		default:
-			return g.BlendStops(mod, opacity,
-				g.Stops[place-1], g.Stops[place], false)
+			return BlendStops(mod, stops[place-1], stops[place], false)
 		}
 	default: // PadSpread
 		switch place {
 		case 0:
-			return ApplyOpacity(g.Stops[0].Color, g.Stops[0].Opacity*opacity)
-		case len(g.Stops):
-			s := g.Stops[len(g.Stops)-1]
-			return ApplyOpacity(s.Color, s.Opacity*opacity)
+			return stops[0].Color
+		case d:
+			return stops[d-1].Color
 		default:
-			return g.BlendStops(mod, opacity, g.Stops[place-1], g.Stops[place], false)
+			return BlendStops(mod, stops[place-1], stops[place], false)
 		}
 	}
 }

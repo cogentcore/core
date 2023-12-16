@@ -76,5 +76,6 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	df := pt.Sub(l.Start)
-	return l.ColorAt((d.X*df.X + d.Y*df.Y) / dd)
+	pos := (d.X*df.X + d.Y*df.Y) / dd
+	return GetColor(pos, l.Stops, l.Spread, l.Blend)
 }
