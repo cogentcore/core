@@ -61,4 +61,36 @@ func (r *Radial) At(x, y int) color.Color {
 		pos := mat32.Sqrt(d.X*d.X/(r.Radius.X*r.Radius.X) + (d.Y*d.Y)/(r.Radius.Y*r.Radius.Y))
 		return r.GetColor(pos)
 	}
+
+	c, f := r.Center.Div(r.Radius), r.Focal.Div(r.Radius)
+
+	df := f.Sub(c)
+
+	if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
+		// point of line from center to focus and circle as per SVG specs.
+		nf, intersects := RayCircleIntersectionF(f, c, c, 1.0-epsilonF)
+		f = nf
+		if !intersects {
+			return color.RGBA{} // should not happen
+		}
+	}
+
+	v := mat32.V2(float32(x)+0.5, float32(y)+0.5)
+	e := v.Div(r.Radius)
+
+	t1, intersects := RayCircleIntersectionF(e, f, c, 1)
+	if !intersects { // In this case, use the last stop color
+		s := r.Stops[len(r.Stops)-1]
+		return s.Color
+	}
+
+	td := t1.Sub(f)
+	d := e.Sub(f)
+	if td.X*td.X+td.Y*td.Y < epsilonF {
+		s := r.Stops[len(r.Stops)-1]
+		return s.Color
+	}
+
+	pos := mat32.Sqrt(d.X*d.X+d.Y*d.Y) / mat32.Sqrt(td.X*td.X+td.Y*td.Y)
+	return r.GetColor(pos)
 }
