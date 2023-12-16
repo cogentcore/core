@@ -301,12 +301,12 @@ func (sf SideFloats) Max(other SideFloats) SideFloats {
 
 // Pos returns the position offset casued by the side/corner values (Left, Top)
 func (sf SideFloats) Pos() mat32.Vec2 {
-	return mat32.NewVec2(sf.Left, sf.Top)
+	return mat32.V2(sf.Left, sf.Top)
 }
 
 // Size returns the toal size the side/corner values take up (Left + Right, Top + Bottom)
 func (sf SideFloats) Size() mat32.Vec2 {
-	return mat32.NewVec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
+	return mat32.V2(sf.Left+sf.Right, sf.Top+sf.Bottom)
 }
 
 // ToValues returns the side floats a

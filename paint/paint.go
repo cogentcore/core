@@ -128,8 +128,8 @@ func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	}
 	tmin := pc.CurTransform.MulVec2AsPt(mat32.Vec2{minX, minY})
 	tmax := pc.CurTransform.MulVec2AsPt(mat32.Vec2{maxX, maxY})
-	tp1 := mat32.NewVec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
-	tp2 := mat32.NewVec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
+	tp1 := mat32.V2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
+	tp2 := mat32.V2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
@@ -318,7 +318,7 @@ func (pc *Context) StrokePreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if pc.FillStyle.Color.Gradient != nil {
-		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.NewBox2FromRect(pc.LastRenderBBox))
+		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.B2FromRect(pc.LastRenderBBox))
 	}
 	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColorTransform(pc.StrokeStyle.Opacity, pc.CurTransform))
 	pc.Raster.Draw()
@@ -351,7 +351,7 @@ func (pc *Context) FillPreserve() {
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	if pc.FillStyle.Color.Gradient != nil {
-		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.NewBox2FromRect(pc.LastRenderBBox))
+		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.B2FromRect(pc.LastRenderBBox))
 	}
 	rf.SetColor(pc.FillStyle.Color.RenderColorTransform(pc.FillStyle.Opacity, pc.CurTransform))
 	rf.Draw()
@@ -1033,7 +1033,7 @@ func (pc *Context) DrawImageAnchored(fmIm image.Image, x, y, ax, ay float32) {
 // (an additional scaling is applied to the transform matrix used in rendering)
 func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 	s := fmIm.Bounds().Size()
-	isz := mat32.NewVec2FmPoint(s)
+	isz := mat32.V2FromPoint(s)
 	isc := mat32.Vec2{w, h}.Div(isz)
 
 	transformer := draw.BiLinear
