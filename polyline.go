@@ -34,7 +34,7 @@ func (g *Polyline) SetSize(sz mat32.Vec2) {
 }
 
 func (g *Polyline) LocalBBox() mat32.Box2 {
-	bb := mat32.NewEmptyBox2()
+	bb := mat32.EmptyB2()
 	for _, pt := range g.Points {
 		bb.ExpandByPoint(pt)
 	}

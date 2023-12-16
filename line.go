@@ -41,7 +41,7 @@ func (g *Line) SetSize(sz mat32.Vec2) {
 }
 
 func (g *Line) LocalBBox() mat32.Box2 {
-	bb := mat32.NewEmptyBox2()
+	bb := mat32.EmptyB2()
 	bb.ExpandByPoint(g.Start)
 	bb.ExpandByPoint(g.End)
 	hlw := 0.5 * g.LocalLineWidth()

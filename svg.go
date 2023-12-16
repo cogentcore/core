@@ -237,7 +237,7 @@ func (sv *SVG) Render() {
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.NewVec2FmPoint(sv.Geom.Size), sv.BackgroundColor)
+	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sv.Geom.Size), sv.BackgroundColor)
 	pc.Unlock()
 }
 
