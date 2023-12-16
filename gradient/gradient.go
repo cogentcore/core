@@ -60,16 +60,6 @@ type Gradient struct { //gti:add -setters
 	Matrix mat32.Mat2
 }
 
-// Stop represents a single stop in a gradient
-type Stop struct {
-
-	// the color of the stop
-	Color color.RGBA
-
-	// the position of the stop between 0 and 1
-	Pos float32
-}
-
 // SpreadMethods are the methods used when a gradient reaches
 // its end but the object isn't fully filled.
 type SpreadMethods int32 //enums:enum
@@ -99,36 +89,6 @@ const (
 	// in the current user coordinate system when the gradient is used.
 	UserSpaceOnUse
 )
-
-// NewLinearGradient returns a new linear gradient
-func NewLinearGradient() *Gradient {
-	return &Gradient{
-		Type:   LinearGradient,
-		Spread: PadSpread,
-		End:    mat32.Vec2{0, 1},
-		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
-	}
-}
-
-// NewRadialGradient returns a new radial gradient
-func NewRadialGradient() *Gradient {
-	return &Gradient{
-		Type:   RadialGradient,
-		Spread: PadSpread,
-		Matrix: mat32.Identity2D(),
-		Center: mat32.Vec2{0.5, 0.5},
-		Focal:  mat32.Vec2{0.5, 0.5},
-		Radius: 0.5,
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
-	}
-}
-
-// AddStop adds a new stop with the given color, offset, and opacity to the gradient.
-func (g *Gradient) AddStop(color color.RGBA, offset, opacity float32) *Gradient {
-	g.Stops = append(g.Stops, Stop{Color: color, Pos: offset, Opacity: opacity})
-	return g
-}
 
 // CopyFrom copies from the given gradient, making new copies
 // of the stops instead of re-using pointers

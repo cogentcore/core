@@ -30,6 +30,16 @@ type Base struct { //gti:add
 	Blend colors.BlendTypes
 }
 
+// Stop represents a single stop in a gradient
+type Stop struct {
+
+	// the color of the stop
+	Color color.RGBA
+
+	// the position of the stop between 0 and 1
+	Pos float32
+}
+
 // AddStop adds a new stop with the given color and position to the gradient.
 func (b *Base) AddStop(color color.RGBA, pos float32) {
 	b.Stops = append(b.Stops, Stop{color, pos})

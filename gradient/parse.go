@@ -529,7 +529,8 @@ func (f *Full) ReadGradAttr(attr xml.Attr) error {
 	return nil
 }
 
-// FixGradientStops applies the CSS rules to regularize the gradient stops: https://www.w3.org/TR/css3-images/#color-stop-syntax
+// FixGradientStops applies the CSS rules to regularize the gradient stops:
+// https://www.w3.org/TR/css3-images/#color-stop-syntax
 func FixGradientStops(grad *Gradient) {
 	sz := len(grad.Stops)
 	if sz == 0 {
