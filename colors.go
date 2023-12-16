@@ -9,6 +9,7 @@ package colors
 import (
 	"errors"
 	"fmt"
+	"image"
 	"image/color"
 	"log/slog"
 	"strconv"
@@ -279,6 +280,11 @@ func AsHex(c color.Color) string {
 		return fmt.Sprintf("#%02X%02X%02X", r.R, r.G, r.B)
 	}
 	return fmt.Sprintf("#%02X%02X%02X%02X", r.R, r.G, r.B, r.A)
+}
+
+// Uniform returns a new uniform [image.Image] filled completely with the given color.
+func Uniform(c color.Color) image.Image {
+	return image.NewUniform(c)
 }
 
 // WithR returns the given color with the red

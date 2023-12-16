@@ -50,7 +50,7 @@ func NewLinear() *Linear {
 	return &Linear{
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
-		Box:    mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+		Box:    mat32.B2(0, 0, 1, 1),
 	}
 }
 
