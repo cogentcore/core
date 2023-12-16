@@ -139,7 +139,7 @@ func NewLinearGradient() *Gradient {
 		Spread: PadSpread,
 		End:    mat32.Vec2{0, 1},
 		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+		Bounds: mat32.B2(0, 0, 1, 1),
 	}
 }
 
@@ -152,7 +152,7 @@ func NewRadialGradient() *Gradient {
 		Center: mat32.Vec2{0.5, 0.5},
 		Focal:  mat32.Vec2{0.5, 0.5},
 		Radius: 0.5,
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+		Bounds: mat32.B2(0, 0, 1, 1),
 	}
 }
 
@@ -259,7 +259,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 			return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
 		})
 	case RadialGradient:
-		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
+		c, f, r := g.Center, g.Focal, mat32.V2Scalar(g.Radius)
 		if g.Units == ObjectBoundingBox {
 			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
 			f = g.Bounds.Min.Add(g.Bounds.Size().Mul(f))
