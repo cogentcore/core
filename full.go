@@ -8,7 +8,8 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/mat32/v2"
+	"github.com/anthonynsimon/bild/adjust"
+	"github.com/anthonynsimon/bild/clone"
 )
 
 // Full represents a fully specified color that can either be a solid color or an
@@ -27,18 +28,20 @@ func SolidFull(solid color.Color) Full {
 	return Full{Solid: AsRGBA(solid)}
 }
 
-// GradientFull returns a new [Full] from the given gradient color.
-func GradientFull(gradient *Gradient) Full {
-	return Full{Gradient: gradient}
+// ImageFull returns a new [Full] from the given image.
+func ImageFull(img image.Image) Full {
+	return Full{Image: img}
 }
 
-// IsNil returns whether the color is nil, checking both the gradient
+// IsNil returns whether the color is nil, checking both the image
 // and the solid color.
 func (f *Full) IsNil() bool {
-	return f.Gradient == nil && IsNil(f.Solid)
+	return f.Image == nil && IsNil(f.Solid)
 }
 
-// SolidOrNil returns the solid color if it is not non-nil, or nil otherwise.
+// TODO(kai): does SolidOrNil really make sense?
+
+// SolidOrNil returns the solid color if it is non-nil, or nil otherwise.
 // It is should be used by consumers that explicitly handle nil colors.
 func (f *Full) SolidOrNil() color.Color {
 	if IsNil(f.Solid) {
@@ -48,74 +51,57 @@ func (f *Full) SolidOrNil() color.Color {
 }
 
 // SetSolid sets the color to the given solid [color.Color],
-// also setting the gradient to nil.
+// also setting the image to nil.
 func (f *Full) SetSolid(solid color.Color) {
 	f.Solid = AsRGBA(solid)
-	f.Gradient = nil
+	f.Image = nil
 }
 
-// SetSolid sets the color to the solid color with the given name,
-// also setting the gradient to nil.
+// SetName sets the color to the solid color with the given name,
+// also setting the image to nil.
 func (f *Full) SetName(name string) error {
 	s, err := FromName(name)
 	if err != nil {
 		return err
 	}
-	f.Solid = s
-	f.Gradient = nil
+	f.SetSolid(s)
 	return nil
 }
 
-// CopyFrom copies from the given full color, making new copies
-// of the gradient stops instead of re-using pointers
+// CopyFrom copies from the given full color, making a copy of the image
+// if it is non-nil.
 func (f *Full) CopyFrom(cp Full) {
 	f.Solid = cp.Solid
-	if f.Gradient == nil && cp.Gradient == nil {
-		return
+	if cp.Image != nil {
+		f.Image = clone.AsRGBA(cp.Image)
 	}
-	if cp.Gradient == nil {
-		f.Gradient = nil
-		return
-	}
-	if f.Gradient == nil {
-		f.Gradient = &Gradient{}
-	}
-	f.Gradient.CopyFrom(cp.Gradient)
 }
 
-// RenderColor returns the [Render] color for rendering, applying the given opacity.
-func (f *Full) RenderColor(opacity float32) Render {
-	if f.Gradient == nil {
-		return SolidRender(ApplyOpacity(f.Solid, opacity))
+// ApplyOpacity applies the given opacity to the color and the image if it is non-nil.
+func (f *Full) ApplyOpacity(opacity float32) {
+	f.Solid = ApplyOpacity(f.Solid, opacity)
+	if f.Image != nil {
+		f.Image = adjust.Apply(f.Image, func(r color.RGBA) color.RGBA {
+			return ApplyOpacity(r, opacity)
+		})
 	}
-	return f.Gradient.RenderColor(opacity)
-}
-
-// RenderColorBounds returns the [Render] color for rendering, applying the given opacity and transform.
-func (f *Full) RenderColorTransform(opacity float32, transform mat32.Mat2) Render {
-	if f.Gradient == nil {
-		return SolidRender(ApplyOpacity(f.Solid, opacity))
-	}
-	return f.Gradient.RenderColorTransform(opacity, transform)
 }
 
 // SetAny sets the color from the given value of any type in the given Context.
-// It handles values of types [color.Color], [*Gradient], and string. If no Context
+// It handles values of types [Full], [color.Color], [image.Image], and string. If no Context
 // is provided, it uses [BaseContext] with [Transparent].
 func (f *Full) SetAny(val any, ctx ...Context) error {
-	switch valv := val.(type) {
+	switch v := val.(type) {
 	case *Full:
-		*f = *valv
+		*f = *v
 	case Full:
-		*f = valv
+		*f = v
 	case color.Color:
-		f.Solid = AsRGBA(valv)
-	case *Gradient:
-		*f.Gradient = *valv
-	case Gradient:
-		*f.Gradient = valv
+		f.SetSolid(v)
+	case image.Image:
+		f.Image = v
 	case string:
-		f.SetString(valv, ctx...)
+		f.SetString(v, ctx...)
 	}
 	return nil
 }
