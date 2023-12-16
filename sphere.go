@@ -36,7 +36,7 @@ func (s *Sphere) SetFromBox(box Box3) {
 
 // SetFromPoints sets this sphere from the specified points array and optional center.
 func (s *Sphere) SetFromPoints(points []Vec3, optCenter *Vec3) {
-	box := NewEmptyBox3()
+	box := EmptyB3()
 	if optCenter != nil {
 		s.Center = *optCenter
 	} else {
@@ -90,9 +90,9 @@ func (s *Sphere) ClampPoint(point Vec3) Vec3 {
 	return rv
 }
 
-// GetBoundingBox calculates a Box3 which bounds this sphere.
+// GetBoundingBox calculates a [Box3] which bounds this sphere.
 func (s *Sphere) GetBoundingBox() Box3 {
-	box := NewBox3(s.Center, s.Center)
+	box := Box3{s.Center, s.Center}
 	box.ExpandByScalar(s.Radius)
 	return box
 }

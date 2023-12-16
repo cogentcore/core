@@ -19,21 +19,20 @@ type Box2 struct {
 	Max Vec2
 }
 
-// NewBox2 creates and returns a new Box2 defined
-// by its minimum and maximum coordinates.
-func NewBox2(min, max Vec2) Box2 {
-	return Box2{min, max}
+// B2 returns a new [Box2] from the given minimum and maximum x and y coordinates.
+func B2(x0, y0, x1, y1 float32) Box2 {
+	return Box2{V2(x0, y0), V2(x1, y1)}
 }
 
-// NewEmptyBox2 creates and returns a new Box2 with empty min / max
-func NewEmptyBox2() Box2 {
+// EmptyB2 returns a new [Box2] with empty minimum and maximum values
+func EmptyB2() Box2 {
 	bx := Box2{}
 	bx.SetEmpty()
 	return bx
 }
 
-// NewBox2FromRect returns a new [Box2] from the given [image.Rectangle].
-func NewBox2FromRect(rect image.Rectangle) Box2 {
+// B2FromRect returns a new [Box2] from the given [image.Rectangle].
+func B2FromRect(rect image.Rectangle) Box2 {
 	b := Box2{}
 	b.SetFromRect(rect)
 	return b
@@ -75,8 +74,8 @@ func (b *Box2) SetFromPoints(points []Vec2) {
 
 // SetFromRect set this bounding box from an image.Rectangle
 func (b *Box2) SetFromRect(rect image.Rectangle) {
-	b.Min = NewVec2FmPoint(rect.Min)
-	b.Max = NewVec2FmPoint(rect.Max)
+	b.Min = V2FromPoint(rect.Min)
+	b.Max = V2FromPoint(rect.Max)
 }
 
 // ToRect returns image.Rectangle version of this bbox, using floor for min
@@ -145,7 +144,7 @@ func (b Box2) MulMat2(m Mat2) Box2 {
 	cs[2] = m.MulVec2AsPt(Vec2{b.Max.X, b.Min.Y})
 	cs[3] = m.MulVec2AsPt(Vec2{b.Max.X, b.Max.Y})
 
-	nb := NewEmptyBox2()
+	nb := EmptyB2()
 	for i := 0; i < 4; i++ {
 		nb.ExpandByPoint(cs[i])
 	}

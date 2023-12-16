@@ -17,14 +17,13 @@ type Box3 struct {
 	Max Vec3
 }
 
-// NewBox3 creates and returns a new Box3 defined
-// by its minimum and maximum coordinates.
-func NewBox3(min, max Vec3) Box3 {
-	return Box3{min, max}
+// B3 returns a new [Box3] from the given minimum and maximum x, y, and z coordinates.
+func B3(x0, y0, z0, x1, y1, z1 float32) Box3 {
+	return Box3{V3(x0, y0, z0), V3(x1, y1, z1)}
 }
 
-// NewEmptyBox3 creates and returns a new Box3 with empty min / max
-func NewEmptyBox3() Box3 {
+// EmptyB3 returns a new [Box3] with empty minimum and maximum values.
+func EmptyB3() Box3 {
 	bx := Box3{}
 	bx.SetEmpty()
 	return bx
@@ -222,7 +221,7 @@ func (b Box3) MulQuat(q Quat) Box3 {
 	cs[6] = Vec3{b.Max.X, b.Min.Y, b.Max.Z}.MulQuat(q)
 	cs[7] = Vec3{b.Min.X, b.Max.Y, b.Max.Z}.MulQuat(q)
 
-	nb := NewEmptyBox3()
+	nb := EmptyB3()
 	for i := 0; i < 8; i++ {
 		nb.ExpandByPoint(cs[i])
 	}
@@ -257,7 +256,7 @@ func (b Box3) MVProjToNDC(m *Mat4) Box3 {
 	cs[6] = Vec4{b.Max.X, b.Min.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
 	cs[7] = Vec4{b.Min.X, b.Max.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
 
-	nb := NewEmptyBox3()
+	nb := EmptyB3()
 	for i := 0; i < 8; i++ {
 		nb.ExpandByPoint(cs[i])
 	}

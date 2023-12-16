@@ -26,18 +26,18 @@ var (
 	Vec4W    = Vec4{0, 0, 0, 1}
 )
 
-// NewVec4 returns a new Vec4 with the specified components.
-func NewVec4(x, y, z, w float32) Vec4 {
+// V4 returns a new [Vec4] with the given x, y, z, and w components.
+func V4(x, y, z, w float32) Vec4 {
 	return Vec4{X: x, Y: y, Z: z, W: w}
 }
 
-// NewVec4Scalar returns a new Vec4 with all components set to scalar.
-func NewVec4Scalar(s float32) Vec4 {
+// V4Scalar returns a new [Vec4] with all components set to the given scalar value.
+func V4Scalar(s float32) Vec4 {
 	return Vec4{X: s, Y: s, Z: s, W: s}
 }
 
-// NewVec4FromVec3 returns a new Vec4 from a Vec3 and W
-func NewVec4FromVec3(v Vec3, w float32) Vec4 {
+// V4FromV3 returns a new [Vec4] from the given [Vec3] and w component.
+func V4FromV3(v Vec3, w float32) Vec4 {
 	nv := Vec4{}
 	nv.SetFromVec3(v, w)
 	return nv
@@ -316,7 +316,7 @@ func (v *Vec4) Clamp(min, max Vec4) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vec4) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(NewVec4Scalar(minVal), NewVec4Scalar(maxVal))
+	v.Clamp(V4Scalar(minVal), V4Scalar(maxVal))
 }
 
 // Floor returns vector with mat32.Floor() applied to each of this vector's components.

@@ -16,13 +16,13 @@ type Vec2i struct {
 	Y int32
 }
 
-// NewVec2i returns a new Vec2i with the specified x and y components.
-func NewVec2i(x, y int32) Vec2i {
+// V2i returns a new [Vec2i] with the given x and y components.
+func V2i(x, y int32) Vec2i {
 	return Vec2i{X: x, Y: y}
 }
 
-// NewVec2iScalar returns a new Vec2i with all components set to scalar.
-func NewVec2iScalar(s int32) Vec2i {
+// V2iScalar returns a new [Vec2i] with all components set to the given scalar value.
+func V2iScalar(s int32) Vec2i {
 	return Vec2i{X: s, Y: s}
 }
 
@@ -262,7 +262,7 @@ func (v *Vec2i) Clamp(min, max Vec2i) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vec2i) ClampScalar(minVal, maxVal int32) {
-	v.Clamp(NewVec2iScalar(minVal), NewVec2iScalar(maxVal))
+	v.Clamp(V2iScalar(minVal), V2iScalar(maxVal))
 }
 
 // Negate returns vector with each component negated.

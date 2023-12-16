@@ -26,18 +26,18 @@ var (
 	Vec3Z    = Vec3{0, 0, 1}
 )
 
-// NewVec3 returns a new Vec3 with the specified x, y and y components.
-func NewVec3(x, y, z float32) Vec3 {
+// V3 returns a new [Vec3] with the given x, y and z components.
+func V3(x, y, z float32) Vec3 {
 	return Vec3{X: x, Y: y, Z: z}
 }
 
-// NewVec3Scalar returns a new Vec3 with all components set to scalar.
-func NewVec3Scalar(s float32) Vec3 {
+// V3Scalar returns a new [Vec3] with all components set to the given scalar value.
+func V3Scalar(s float32) Vec3 {
 	return Vec3{X: s, Y: s, Z: s}
 }
 
-// NewVec3FromVec4 returns a new Vec3 from a Vec4
-func NewVec3FromVec4(v Vec4) Vec3 {
+// V3FromV4 returns a new [Vec3] from the given [Vec4].
+func V3FromV4(v Vec4) Vec3 {
 	nv := Vec3{}
 	nv.SetFromVec4(v)
 	return nv
@@ -305,7 +305,7 @@ func (v *Vec3) Clamp(min, max Vec3) {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 func (v *Vec3) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(NewVec3Scalar(minVal), NewVec3Scalar(maxVal))
+	v.Clamp(V3Scalar(minVal), V3Scalar(maxVal))
 }
 
 // Floor returns vector with mat32.Floor() applied to each of this vector's components.
@@ -484,7 +484,7 @@ func (v Vec3) MulMat4(m *Mat4) Vec3 {
 // MulMat4 on the 3-dim vector.  Use 0 for normals and 1 for positions
 // as the 4th dim to set.
 func (v Vec3) MulMat4AsVec4(m *Mat4, w float32) Vec3 {
-	return NewVec3FromVec4(NewVec4FromVec3(v, w).MulMat4(m))
+	return V3FromV4(V4FromV3(v, w).MulMat4(m))
 }
 
 // SetMulMat4 sets vector multiplied by specified 4x4 matrix.
@@ -496,7 +496,7 @@ func (v *Vec3) SetMulMat4(m *Mat4) {
 // and do perspective divide to return normalized display coordinates (NDC).
 // w is value for 4th coordinate -- use 1 for positions, 0 for normals.
 func (v Vec3) MVProjToNDC(m *Mat4, w float32) Vec3 {
-	clip := NewVec4FromVec3(v, w).MulMat4(m)
+	clip := V4FromV3(v, w).MulMat4(m)
 	return clip.PerspDiv()
 }
 
