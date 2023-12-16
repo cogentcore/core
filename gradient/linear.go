@@ -33,7 +33,7 @@ type Linear struct { //gti:add -setters
 	Spread SpreadMethods
 
 	// the colorspace algorithm to use for blending colors
-	Blend BlendTypes
+	Blend colors.BlendTypes
 }
 
 var _ image.Image = &Linear{}

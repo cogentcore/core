@@ -14,6 +14,7 @@ import (
 	"log/slog"
 	"sort"
 
+	"goki.dev/colors"
 	"goki.dev/mat32/v2"
 )
 
@@ -333,7 +334,7 @@ func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) R
 
 // GetColor returns the color at the given normalized position along the
 // given gradient stops using the given spread method and blend algorithm.
-func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend BlendTypes) color.Color {
+func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend colors.BlendTypes) color.Color {
 	d := len(stops)
 
 	// These cases can be taken care of early on
@@ -368,7 +369,7 @@ func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend BlendTypes)
 		default:
 			s1, s2 = stops[place-1], stops[place]
 		}
-		return BlendStops(mod, s1, s2, false)
+		return BlendStops(mod, s1, s2, false, blend)
 	case ReflectSpread:
 		switch place {
 		case 0:
@@ -386,10 +387,10 @@ func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend BlendTypes)
 			case d * 2:
 				return stops[0].Color
 			default:
-				return BlendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true)
+				return BlendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true, blend)
 			}
 		default:
-			return BlendStops(mod, stops[place-1], stops[place], false)
+			return BlendStops(mod, stops[place-1], stops[place], false, blend)
 		}
 	default: // PadSpread
 		switch place {
@@ -398,29 +399,30 @@ func GetColor(pos float32, stops []Stop, spread SpreadMethods, blend BlendTypes)
 		case d:
 			return stops[d-1].Color
 		default:
-			return BlendStops(mod, stops[place-1], stops[place], false)
+			return BlendStops(mod, stops[place-1], stops[place], false, blend)
 		}
 	}
 }
 
-// BlendStops blends the given two gradient stops together based on the given value and opacity.
-func (g *Gradient) BlendStops(v, opacity float32, s1, s2 Stop, flip bool) color.Color {
+// BlendStops blends the given two gradient stops together based on the given position
+// and blending algorithm. If flip is true, it effectively flips the given position.
+func BlendStops(pos float32, s1, s2 Stop, flip bool, blend colors.BlendTypes) color.Color {
 	s1off := s1.Pos
 	if s1.Pos > s2.Pos && !flip { // happens in repeat spread mode
 		s1off--
-		if v > 1 {
-			v--
+		if pos > 1 {
+			pos--
 		}
 	}
 	if s2.Pos == s1off {
-		return ApplyOpacity(s2.Color, s2.Opacity)
+		return s2.Color
 	}
 	if flip {
-		v = 1 - v
+		pos = 1 - pos
 	}
-	tp := (v - s1off) / (s2.Pos - s1off)
+	tp := (pos - s1off) / (s2.Pos - s1off)
 
-	return ApplyOpacity(Blend(g.Blend, 100*(1-tp), s1.Color, s2.Color), (s1.Opacity*(1-tp)+s2.Opacity*tp)*opacity)
+	return colors.Blend(blend, 100*(1-tp), s1.Color, s2.Color)
 }
 
 // ApplyTransform transforms the points for the gradient if it has
