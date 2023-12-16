@@ -11,7 +11,6 @@ package gradient
 import (
 	"image"
 	"image/color"
-	"math"
 
 	"goki.dev/colors"
 	"goki.dev/mat32/v2"
@@ -19,21 +18,13 @@ import (
 
 // Linear represents a linear gradient. It implements the [image.Image] interface.
 type Linear struct { //gti:add -setters
+	Base
 
 	// the starting point of the gradient (x1 and y1 in SVG)
 	Start mat32.Vec2
 
 	// the ending point of the gradient (x2 and y2 in SVG)
 	End mat32.Vec2
-
-	// the stops for the gradient; use AddStop to add stops
-	Stops []Stop `set:"-"`
-
-	// the spread method used for the gradient if it stops before the end
-	Spread SpreadMethods
-
-	// the colorspace algorithm to use for blending colors
-	Blend colors.BlendTypes
 }
 
 var _ image.Image = &Linear{}
@@ -50,16 +41,6 @@ func NewLinear() *Linear {
 func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
 	l.Stops = append(l.Stops, Stop{color, pos})
 	return l
-}
-
-// ColorModel returns the color model used by the gradient, which is [color.RGBAModel]
-func (l *Linear) ColorModel() color.Model {
-	return color.RGBAModel
-}
-
-// Bounds returns the bounds of the gradient
-func (l *Linear) Bounds() image.Rectangle {
-	return image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
 }
 
 // At returns the color of the gradient at the given point
