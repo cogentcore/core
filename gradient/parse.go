@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 
@@ -34,33 +35,35 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 	return ""
 }
 
-// FullCache is a cache of named full colors -- only a few are constantly re-used
+// FullCache is a cache of named full colors; only a few are constantly re-used
 // so we save them in the cache instead of constantly recomputing!
-var FullCache map[string]Full
+// var FullCache map[string]Full
 
 // SetString sets the color spec from a standard CSS-formatted string in the
 // given Context. SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
 // See [Full.UnmarshalXML] for an XML-based version. If no Context is
 // provied, SetString uses [BaseContext] with [Transparent].
-func (f *Full) SetString(str string, ctx ...Context) error {
-	ct := BaseContext(Transparent)
+func FromString(str string, ctx ...colors.Context) error {
+	var ct colors.Context
 	if len(ctx) > 0 {
 		ct = ctx[0]
+	} else {
+		ct = colors.BaseContext(colors.Transparent)
 	}
-	if FullCache == nil {
-		FullCache = make(map[string]Full)
-	}
-	fullnm := AsHex(f.Solid) + str
-	if ccg, ok := FullCache[fullnm]; ok {
-		f.CopyFrom(ccg)
-		return nil
-	}
+	// if FullCache == nil {
+	// 	FullCache = make(map[string]Full)
+	// }
+	// fullnm := AsHex(f.Solid) + str
+	// if ccg, ok := FullCache[fullnm]; ok {
+	// 	f.CopyFrom(ccg)
+	// 	return nil
+	// }
 
 	str = strings.TrimSpace(str)
 	// TODO: handle url values
 	if strings.HasPrefix(str, "url(") {
 		if ctx != nil {
-			full := ct.FullByURL(str)
+			full := ct.ColorByURL(str)
 			if full != nil {
 				*f = *full
 				return nil
