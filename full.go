@@ -57,6 +57,11 @@ func (f *Full) SetSolid(solid color.Color) {
 	f.Image = nil
 }
 
+// SetImage sets the color to the given [image.Image].
+func (f *Full) SetImage(img image.Image) {
+	f.Image = img
+}
+
 // SetName sets the color to the solid color with the given name,
 // also setting the image to nil.
 func (f *Full) SetName(name string) error {
@@ -99,7 +104,7 @@ func (f *Full) SetAny(val any, ctx ...Context) error {
 	case color.Color:
 		f.SetSolid(v)
 	case image.Image:
-		f.Image = v
+		f.SetImage(v)
 	case string:
 		f.SetString(v, ctx...)
 	}

@@ -66,8 +66,7 @@ func (f *Full) SetString(str string, ctx ...Context) error {
 				return nil
 			}
 		}
-		f.Gradient = nil
-		f.Solid = Black
+		f.SetSolid(Black)
 		return fmt.Errorf("unable to find url %q", str)
 	}
 	str = strings.ToLower(str)
@@ -113,12 +112,11 @@ func (f *Full) SetString(str string, ctx ...Context) error {
 		svcs.CopyFrom(*f)
 		FullCache[fullnm] = svcs
 	} else {
-		f.Gradient = nil
 		s, err := FromString(str, ct.Base())
 		if err != nil {
 			return err
 		}
-		f.Solid = s
+		f.SetSolid(s)
 	}
 	return nil
 }
