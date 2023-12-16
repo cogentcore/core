@@ -987,7 +987,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	XMLAddAttr(&me.Attr, "id", name)
 
 	linear := true
-	if gr.Radial {
+	if gr.Type == colors.RadialGradient {
 		linear = false
 		me.Name.Local = "radialGradient"
 	} else {

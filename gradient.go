@@ -37,7 +37,7 @@ func (gr *Gradient) CopyFieldsFrom(frm any) {
 
 // GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientTypeName() string {
-	if gr.Grad.Gradient != nil && gr.Grad.Gradient.Radial {
+	if gr.Grad.Gradient != nil && gr.Grad.Gradient.Type == colors.RadialGradient {
 		return "radialGradient"
 	}
 	return "linearGradient"
@@ -117,7 +117,7 @@ func GradientWritePts(gr *colors.Gradient, dat *[]float32) {
 	*dat = append(*dat, gr.Matrix.YY)
 	*dat = append(*dat, gr.Matrix.X0)
 	*dat = append(*dat, gr.Matrix.Y0)
-	if !gr.Radial {
+	if gr.Type != colors.RadialGradient {
 		*dat = append(*dat, gr.Bounds.Min.X)
 		*dat = append(*dat, gr.Bounds.Min.Y)
 		*dat = append(*dat, gr.Bounds.Max.X)
@@ -155,7 +155,7 @@ func GradientReadPts(gr *colors.Gradient, dat []float32) {
 	}
 	sz := len(dat)
 	n := 6
-	if !gr.Radial {
+	if gr.Type != colors.RadialGradient {
 		n = 10
 		gr.Bounds.Min.X = dat[sz-4]
 		gr.Bounds.Min.Y = dat[sz-3]
