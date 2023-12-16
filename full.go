@@ -5,18 +5,21 @@
 package colors
 
 import (
+	"image"
 	"image/color"
 
 	"goki.dev/mat32/v2"
 )
 
-// Full represents a fully specified color that can either be a solid color or
-// a gradient. If Gradient is nil, it is a solid color; otherwise, it is a gradient.
-// Solid should typically be set using the [Full.SetSolid] method to
-// ensure that Gradient is nil and thus Solid will be taken into account.
+// Full represents a fully specified color that can either be a solid color or an
+// [image.Image]. If Image is nil, it is a solid color; otherwise, it is an image.
+// Solid should typically be set using the [Full.SetSolid] method to ensure that
+// Image is nil and thus Solid will be taken into account. Image is frequently set
+// to a gradient type (eg: [gradient.Linear], [gradient.Radial], or [gradient.Conic]),
+// which all implement the [image.Image] interface.
 type Full struct {
-	Gradient *Gradient
-	Solid    color.RGBA
+	Image image.Image
+	Solid color.RGBA
 }
 
 // SolidFull returns a new [Full] from the given solid color.
