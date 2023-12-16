@@ -29,7 +29,7 @@ type Linear struct { //gti:add -setters
 
 var _ image.Image = &Linear{}
 
-// NewLinear returns a new [Linear] gradient.
+// NewLinear returns a new downward-facing [Linear] gradient.
 func NewLinear() *Linear {
 	return &Linear{
 		// default in CSS is "to bottom"
@@ -43,13 +43,13 @@ func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
 	return l
 }
 
-// At returns the color of the gradient at the given point
+// At returns the color of the linear gradient at the given point
 func (l *Linear) At(x, y int) color.Color {
 	switch len(l.Stops) {
 	case 0:
-		return colors.Black // default error color for gradient w/o stops.
+		return colors.Black // default color for gradient without stops
 	case 1:
-		return l.Stops[0].Color // Illegal, I think, should really should not happen.
+		return l.Stops[0].Color
 	}
 
 	d := l.End.Sub(l.Start)

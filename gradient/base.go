@@ -18,7 +18,7 @@ import (
 )
 
 // Base contains the data and logic common to all gradient types.
-type Base struct {
+type Base struct { //gti:add
 
 	// the stops for the gradient; use AddStop to add stops
 	Stops []Stop `set:"-"`

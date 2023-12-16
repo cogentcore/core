@@ -100,22 +100,6 @@ const (
 	UserSpaceOnUse
 )
 
-// BlendTypes are different algorithms (colorspaces) to use for blending
-// the color stop values in generating the gradients.
-type BlendTypes int32 //enums:enum
-
-const (
-	// HCT uses hue, chroma, tone space and generally produces the best results
-	HCT BlendTypes = iota
-
-	// RGB uses raw RGB space and was used in v1 and is used in most other colormap
-	// software, so to reproduce existing results, select this option.
-	RGB
-
-	// CAM16 is an alternative colorspace, similar to HCT, but not quite as good.
-	CAM16
-)
-
 // NewLinearGradient returns a new linear gradient
 func NewLinearGradient() *Gradient {
 	return &Gradient{
