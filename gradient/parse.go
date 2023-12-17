@@ -13,6 +13,7 @@ package gradient
 import (
 	"encoding/xml"
 	"fmt"
+	"image"
 	"image/color"
 	"io"
 	"strconv"
@@ -35,42 +36,38 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 	return ""
 }
 
-// FullCache is a cache of named full colors; only a few are constantly re-used
-// so we save them in the cache instead of constantly recomputing!
-// var FullCache map[string]Full
+// Cache is a cache of the [image.Image] results of [FromString] calls
+// for each string passed to [FromString].
+var Cache map[string]image.Image
 
 // SetString sets the color spec from a standard CSS-formatted string in the
 // given Context. SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
 // See [Full.UnmarshalXML] for an XML-based version. If no Context is
 // provied, SetString uses [BaseContext] with [Transparent].
-func FromString(str string, ctx ...colors.Context) error {
+func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	var ct colors.Context
 	if len(ctx) > 0 {
 		ct = ctx[0]
 	} else {
 		ct = colors.BaseContext(colors.Transparent)
 	}
-	// if FullCache == nil {
-	// 	FullCache = make(map[string]Full)
-	// }
-	// fullnm := AsHex(f.Solid) + str
-	// if ccg, ok := FullCache[fullnm]; ok {
-	// 	f.CopyFrom(ccg)
-	// 	return nil
-	// }
+
+	if Cache == nil {
+		Cache = make(map[string]image.Image)
+	}
+	cnm := str
+	if img, ok := Cache[cnm]; ok {
+		// TODO(kai): do we need to clone?
+		return img, nil
+	}
 
 	str = strings.TrimSpace(str)
-	// TODO: handle url values
 	if strings.HasPrefix(str, "url(") {
-		if ctx != nil {
-			full := ct.ColorByURL(str)
-			if full != nil {
-				*f = *full
-				return nil
-			}
+		img := ct.ImageByURL(str)
+		if img == nil {
+			return nil, fmt.Errorf("unable to find url %q", str)
 		}
-		f.SetSolid(Black)
-		return fmt.Errorf("unable to find url %q", str)
+		return img, nil
 	}
 	str = strings.ToLower(str)
 	grad := "-gradient"
@@ -79,7 +76,7 @@ func FromString(str string, ctx ...colors.Context) error {
 		rmdr := str[gidx+len(grad):]
 		pidx := strings.IndexByte(rmdr, '(')
 		if pidx < 0 {
-			return fmt.Errorf("gradient specified but parameters not found in string %q", str)
+			return nil, fmt.Errorf("gradient specified but parameters not found in string %q", str)
 		}
 		pars := rmdr[pidx+1:]
 		pars = strings.TrimSuffix(pars, ");")
@@ -113,7 +110,7 @@ func FromString(str string, ctx ...colors.Context) error {
 		FixGradientStops(f.Gradient)
 		svcs := Full{} // critical to save a copy..
 		svcs.CopyFrom(*f)
-		FullCache[fullnm] = svcs
+		Cache[fullnm] = svcs
 	} else {
 		s, err := FromString(str, ct.Base())
 		if err != nil {
