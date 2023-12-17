@@ -21,7 +21,7 @@ const (
 	// HCT uses hue, chroma, tone space and generally produces the best results
 	HCT BlendTypes = iota
 
-	// RGB uses raw RGB space and was used in v1 and is used in most other colormap
+	// RGB uses raw RGB space and was used in v1 and is used in most other
 	// software, so to reproduce existing results, select this option.
 	RGB
 

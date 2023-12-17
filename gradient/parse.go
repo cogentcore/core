@@ -83,8 +83,8 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		pars = strings.TrimSuffix(pars, ")")
 		switch gtyp {
 		case "repeating-linear":
-			f.Gradient = NewLinearGradient().SetSpread(RepeatSpread)
-			err := f.parseLinearGrad(pars)
+			g := NewLinear().SetSpread(RepeatSpread)
+			err := g.SetString(pars)
 			if err != nil {
 				return err
 			}
@@ -529,17 +529,17 @@ func (f *Full) ReadGradAttr(attr xml.Attr) error {
 	return nil
 }
 
-// FixGradientStops applies the CSS rules to regularize the gradient stops:
+// FixGradientStops applies the CSS rules to regularize the given gradient stops:
 // https://www.w3.org/TR/css3-images/#color-stop-syntax
-func FixGradientStops(grad *Gradient) {
-	sz := len(grad.Stops)
+func FixGradientStops(stops []Stop) {
+	sz := len(stops)
 	if sz == 0 {
 		return
 	}
 	splitSt := -1
 	last := float32(0)
 	for i := 0; i < sz; i++ {
-		st := &(grad.Stops[i])
+		st := &stops[i]
 		if i == sz-1 && st.Pos == 0 {
 			if last < 1.0 {
 				st.Pos = 1.0
@@ -553,12 +553,12 @@ func FixGradientStops(grad *Gradient) {
 			continue
 		}
 		if splitSt > 0 {
-			start := grad.Stops[splitSt].Pos
+			start := stops[splitSt].Pos
 			end := st.Pos
 			per := (end - start) / float32(1+(i-splitSt))
 			cur := start + per
 			for j := splitSt; j < i; j++ {
-				grad.Stops[j].Pos = cur
+				stops[j].Pos = cur
 				cur += per
 			}
 		}
