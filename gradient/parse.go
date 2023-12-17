@@ -327,10 +327,8 @@ func ReadXML(reader io.Reader) (image.Image, error) {
 func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error) {
 	start := &se
 
-	// gb is the base of the gradient being parsed
-	var gb *Base
-	// g is the actual value of the gradient being parsed
-	var g image.Image
+	// the gradient currently being parsed
+	var g Gradient
 
 	for {
 		var t xml.Token
@@ -352,7 +350,6 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 			switch se.Name.Local {
 			case "linearGradient":
 				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
-				gb = &l.Base
 				g = l
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
@@ -368,7 +365,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 					case "y2":
 						l.End.Y, err = ReadFraction(attr.Value)
 					default:
-						err = ReadGradAttr(gb, attr)
+						err = ReadGradAttr(g, attr)
 					}
 					if err != nil {
 						return nil, fmt.Errorf("error parsing linear gradient: %w", err)
@@ -376,7 +373,6 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 				}
 			case "radialGradient":
 				r := NewRadial()
-				gb = &r.Base
 				g = r
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
@@ -397,7 +393,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 						setFy = true
 						r.Focal.Y, err = ReadFraction(attr.Value)
 					default:
-						err = ReadGradAttr(gb, attr)
+						err = ReadGradAttr(g, attr)
 					}
 					if err != nil {
 						return nil, fmt.Errorf("error parsing radial gradient: %w", err)
@@ -449,9 +445,10 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 					}
 				}
 				stop.Color = colors.ApplyOpacity(stop.Color, opacity)
-				if gb == nil {
+				if g == nil {
 					return nil, fmt.Errorf("got stop outside of gradient: %v", stop)
 				} else {
+					gb := g.AsBase()
 					gb.Stops = append(gb.Stops, stop)
 				}
 			default:
@@ -491,7 +488,8 @@ func ReadFraction(v string) (float32, error) {
 }
 
 // ReadGradAttr reads the given xml attribute onto the given gradient.
-func ReadGradAttr(gb *Base, attr xml.Attr) error {
+func ReadGradAttr(g Gradient, attr xml.Attr) error {
+	gb := g.AsBase()
 	switch attr.Name.Local {
 	// TODO(kai): implement gradientTransform and gradientUnits
 	/*
