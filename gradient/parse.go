@@ -275,7 +275,7 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
 		offs := strings.TrimSpace(par[spcidx+1:])
-		off, err := readFraction(offs)
+		off, err := ReadFraction(offs)
 		if err != nil {
 			return fmt.Errorf("invalid offset %q: %w", offs, err)
 		}
@@ -357,13 +357,13 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement, gb *Base, g image.I
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "x1":
-						l.Start.X, err = readFraction(attr.Value)
+						l.Start.X, err = ReadFraction(attr.Value)
 					case "y1":
-						l.Start.Y, err = readFraction(attr.Value)
+						l.Start.Y, err = ReadFraction(attr.Value)
 					case "x2":
-						l.End.X, err = readFraction(attr.Value)
+						l.End.X, err = ReadFraction(attr.Value)
 					case "y2":
-						l.End.Y, err = readFraction(attr.Value)
+						l.End.Y, err = ReadFraction(attr.Value)
 					default:
 						err = ReadGradAttr(gb, attr)
 					}
@@ -380,18 +380,18 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement, gb *Base, g image.I
 					// note: id not processed here - must be done externally
 					case "r":
 						var radius float32
-						radius, err = readFraction(attr.Value)
+						radius, err = ReadFraction(attr.Value)
 						r.Radius.SetScalar(radius)
 					case "cx":
-						r.Center.X, err = readFraction(attr.Value)
+						r.Center.X, err = ReadFraction(attr.Value)
 					case "cy":
-						r.Center.Y, err = readFraction(attr.Value)
+						r.Center.Y, err = ReadFraction(attr.Value)
 					case "fx":
 						setFx = true
-						r.Focal.X, err = readFraction(attr.Value)
+						r.Focal.X, err = ReadFraction(attr.Value)
 					case "fy":
 						setFy = true
-						r.Focal.Y, err = readFraction(attr.Value)
+						r.Focal.Y, err = ReadFraction(attr.Value)
 					default:
 						err = ReadGradAttr(gb, attr)
 					}
@@ -427,7 +427,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement, gb *Base, g image.I
 				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
-						stop.Pos, err = readFraction(attr.Value)
+						stop.Pos, err = ReadFraction(attr.Value)
 						if err != nil {
 							return nil, err
 						}
@@ -466,7 +466,8 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement, gb *Base, g image.I
 	return g, nil
 }
 
-func readFraction(v string) (float32, error) {
+// ReadFraction reads a decimal value from the given string.
+func ReadFraction(v string) (float32, error) {
 	v = strings.TrimSpace(v)
 	d := float32(1)
 	if strings.HasSuffix(v, "%") {
@@ -485,22 +486,25 @@ func readFraction(v string) (float32, error) {
 	return f, nil
 }
 
+// ReadGradAttr reads the given xml attribute onto the given gradient.
 func ReadGradAttr(gb *Base, attr xml.Attr) error {
 	switch attr.Name.Local {
-	case "gradientTransform":
-		tx := mat32.Identity2D()
-		err := tx.SetString(attr.Value)
-		if err != nil {
-			return err
-		}
-		f.Gradient.Matrix = tx
-	case "gradientUnits":
-		switch strings.TrimSpace(attr.Value) {
-		case "userSpaceOnUse":
-			f.Gradient.Units = UserSpaceOnUse
-		case "objectBoundingBox":
-			f.Gradient.Units = ObjectBoundingBox
-		}
+	/*
+		case "gradientTransform":
+			tx := mat32.Identity2D()
+			err := tx.SetString(attr.Value)
+			if err != nil {
+				return err
+			}
+			f.Gradient.Matrix = tx
+		case "gradientUnits":
+			switch strings.TrimSpace(attr.Value) {
+			case "userSpaceOnUse":
+				f.Gradient.Units = UserSpaceOnUse
+			case "objectBoundingBox":
+				f.Gradient.Units = ObjectBoundingBox
+			}
+	*/
 	case "spreadMethod":
 		switch strings.TrimSpace(attr.Value) {
 		case "pad":

@@ -9,6 +9,7 @@ require (
 	goki.dev/gti v0.1.27
 	goki.dev/mat32/v2 v2.0.0-dev0.0.23
 	goki.dev/ordmap v0.5.8
+	golang.org/x/net v0.19.0
 )
 
 require (
@@ -17,4 +18,5 @@ require (
 	goki.dev/glop v0.1.8 // indirect
 	goki.dev/laser v0.1.29 // indirect
 	golang.org/x/image v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
