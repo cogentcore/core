@@ -72,7 +72,7 @@ func TestReadXML(t *testing.T) {
 			<stop offset="90%" stop-color="red" />
 		  </radialGradient>`, NewRadial().
 			AddStop(colors.Blue, 0.1).
-			AddStop(colors.Purple, 0.35).
+			AddStop(colors.ApplyOpacity(colors.Purple, 0.33), 0.35).
 			AddStop(colors.Red, 0.9)},
 	}
 	for _, test := range tests {

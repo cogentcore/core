@@ -377,6 +377,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 			case "radialGradient":
 				r := NewRadial()
 				gb = &r.Base
+				g = r
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
