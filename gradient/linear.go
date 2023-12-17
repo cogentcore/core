@@ -30,6 +30,9 @@ var _ Gradient = &Linear{}
 // NewLinear returns a new downward-facing [Linear] gradient.
 func NewLinear() *Linear {
 	return &Linear{
+		Base: Base{
+			Transform: mat32.Identity2D(),
+		},
 		// default in CSS is "to bottom"
 		End: mat32.V2(0, 1),
 	}

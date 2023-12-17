@@ -9,33 +9,34 @@
 // Package gradient provides linear, radial, and conic color gradients.
 package gradient
 
-// SpreadMethods are the methods used when a gradient reaches
-// its end but the object isn't fully filled.
-type SpreadMethods int32 //enums:enum
+// Spreads are the spread methods used when a gradient reaches
+// its end but the object isn't yet fully filled.
+type Spreads int32 //enums:enum
 
 const (
-	// PadSpread indicates to have the final color of the gradient fill
+	// Pad indicates to have the final color of the gradient fill
 	// the object beyond the end of the gradient.
-	PadSpread SpreadMethods = iota
-	// ReflectSpread indicates to have a gradient repeat in reverse order
+	Pad Spreads = iota
+	// Reflect indicates to have a gradient repeat in reverse order
 	// (offset 1 to 0) to fully fill an object beyond the end of the gradient.
-	ReflectSpread
-	// RepeatSpread indicates to have a gradient continue in its original order
+	Reflect
+	// Repeat indicates to have a gradient continue in its original order
 	// (offset 0 to 1) by jumping back to the start to fully fill an object beyond
 	// the end of the gradient.
-	RepeatSpread
+	Repeat
 )
 
-// GradientUnits are the types of SVG gradient units
-type GradientUnits int32 //enums:enum
+// Units are the types of units used for gradient coordinate values
+type Units int32 //enums:enum
 
 const (
 	// ObjectBoundingBox indicates that coordinate values are scaled
-	// relative to the size of the object and are specified in the range
-	// of 0 to 1.
-	ObjectBoundingBox GradientUnits = iota
+	// relative to the size of the object and are specified in the
+	// normalized range of 0 to 1.
+	ObjectBoundingBox Units = iota
 	// UserSpaceOnUse indicates that coordinate values are specified
-	// in the current user coordinate system when the gradient is used.
+	// in the current user coordinate system when the gradient is used
+	// (ie: actual SVG/gi coordinates).
 	UserSpaceOnUse
 )
 

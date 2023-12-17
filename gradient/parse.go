@@ -93,7 +93,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	case "linear", "repeating-linear":
 		l := NewLinear()
 		if gtyp == "repeating-linear" {
-			l.SetSpread(RepeatSpread)
+			l.SetSpread(Repeat)
 		}
 		err := l.SetString(pars)
 		if err != nil {
@@ -105,7 +105,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	case "radial", "repeating-radial":
 		r := NewRadial()
 		if gtyp == "repeating-radial" {
-			r.SetSpread(RepeatSpread)
+			r.SetSpread(Repeat)
 		}
 		err := r.SetString(pars)
 		if err != nil {
@@ -511,11 +511,11 @@ func ReadGradAttr(g Gradient, attr xml.Attr) error {
 	case "spreadMethod":
 		switch strings.TrimSpace(attr.Value) {
 		case "pad":
-			gb.Spread = PadSpread
+			gb.Spread = Pad
 		case "reflect":
-			gb.Spread = ReflectSpread
+			gb.Spread = Reflect
 		case "repeat":
-			gb.Spread = RepeatSpread
+			gb.Spread = Repeat
 		}
 	}
 	return nil

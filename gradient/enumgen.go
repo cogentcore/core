@@ -11,223 +11,223 @@ import (
 	"goki.dev/enums"
 )
 
-var _SpreadMethodsValues = []SpreadMethods{0, 1, 2}
+var _SpreadsValues = []Spreads{0, 1, 2}
 
-// SpreadMethodsN is the highest valid value
-// for type SpreadMethods, plus one.
-const SpreadMethodsN SpreadMethods = 3
+// SpreadsN is the highest valid value
+// for type Spreads, plus one.
+const SpreadsN Spreads = 3
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _SpreadMethodsNoOp() {
+func _SpreadsNoOp() {
 	var x [1]struct{}
-	_ = x[PadSpread-(0)]
-	_ = x[ReflectSpread-(1)]
-	_ = x[RepeatSpread-(2)]
+	_ = x[Pad-(0)]
+	_ = x[Reflect-(1)]
+	_ = x[Repeat-(2)]
 }
 
-var _SpreadMethodsNameToValueMap = map[string]SpreadMethods{
-	`PadSpread`:     0,
-	`padspread`:     0,
-	`ReflectSpread`: 1,
-	`reflectspread`: 1,
-	`RepeatSpread`:  2,
-	`repeatspread`:  2,
+var _SpreadsNameToValueMap = map[string]Spreads{
+	`Pad`:     0,
+	`pad`:     0,
+	`Reflect`: 1,
+	`reflect`: 1,
+	`Repeat`:  2,
+	`repeat`:  2,
 }
 
-var _SpreadMethodsDescMap = map[SpreadMethods]string{
-	0: `PadSpread indicates to have the final color of the gradient fill the object beyond the end of the gradient.`,
-	1: `ReflectSpread indicates to have a gradient repeat in reverse order (offset 1 to 0) to fully fill an object beyond the end of the gradient.`,
-	2: `RepeatSpread indicates to have a gradient continue in its original order (offset 0 to 1) by jumping back to the start to fully fill an object beyond the end of the gradient.`,
+var _SpreadsDescMap = map[Spreads]string{
+	0: `Pad indicates to have the final color of the gradient fill the object beyond the end of the gradient.`,
+	1: `Reflect indicates to have a gradient repeat in reverse order (offset 1 to 0) to fully fill an object beyond the end of the gradient.`,
+	2: `Repeat indicates to have a gradient continue in its original order (offset 0 to 1) by jumping back to the start to fully fill an object beyond the end of the gradient.`,
 }
 
-var _SpreadMethodsMap = map[SpreadMethods]string{
-	0: `PadSpread`,
-	1: `ReflectSpread`,
-	2: `RepeatSpread`,
+var _SpreadsMap = map[Spreads]string{
+	0: `Pad`,
+	1: `Reflect`,
+	2: `Repeat`,
 }
 
 // String returns the string representation
-// of this SpreadMethods value.
-func (i SpreadMethods) String() string {
-	if str, ok := _SpreadMethodsMap[i]; ok {
+// of this Spreads value.
+func (i Spreads) String() string {
+	if str, ok := _SpreadsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the SpreadMethods value from its
+// SetString sets the Spreads value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *SpreadMethods) SetString(s string) error {
-	if val, ok := _SpreadMethodsNameToValueMap[s]; ok {
+func (i *Spreads) SetString(s string) error {
+	if val, ok := _SpreadsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _SpreadMethodsNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _SpreadsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type SpreadMethods")
+	return errors.New(s + " is not a valid value for type Spreads")
 }
 
-// Int64 returns the SpreadMethods value as an int64.
-func (i SpreadMethods) Int64() int64 {
+// Int64 returns the Spreads value as an int64.
+func (i Spreads) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the SpreadMethods value from an int64.
-func (i *SpreadMethods) SetInt64(in int64) {
-	*i = SpreadMethods(in)
+// SetInt64 sets the Spreads value from an int64.
+func (i *Spreads) SetInt64(in int64) {
+	*i = Spreads(in)
 }
 
-// Desc returns the description of the SpreadMethods value.
-func (i SpreadMethods) Desc() string {
-	if str, ok := _SpreadMethodsDescMap[i]; ok {
+// Desc returns the description of the Spreads value.
+func (i Spreads) Desc() string {
+	if str, ok := _SpreadsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// SpreadMethodsValues returns all possible values
-// for the type SpreadMethods.
-func SpreadMethodsValues() []SpreadMethods {
-	return _SpreadMethodsValues
+// SpreadsValues returns all possible values
+// for the type Spreads.
+func SpreadsValues() []Spreads {
+	return _SpreadsValues
 }
 
 // Values returns all possible values
-// for the type SpreadMethods.
-func (i SpreadMethods) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SpreadMethodsValues))
-	for i, d := range _SpreadMethodsValues {
+// for the type Spreads.
+func (i Spreads) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_SpreadsValues))
+	for i, d := range _SpreadsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type SpreadMethods.
-func (i SpreadMethods) IsValid() bool {
-	_, ok := _SpreadMethodsMap[i]
+// valid option for type Spreads.
+func (i Spreads) IsValid() bool {
+	_, ok := _SpreadsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SpreadMethods) MarshalText() ([]byte, error) {
+func (i Spreads) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *SpreadMethods) UnmarshalText(text []byte) error {
+func (i *Spreads) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
 		log.Println(err)
 	}
 	return nil
 }
 
-var _GradientUnitsValues = []GradientUnits{0, 1}
+var _UnitsValues = []Units{0, 1}
 
-// GradientUnitsN is the highest valid value
-// for type GradientUnits, plus one.
-const GradientUnitsN GradientUnits = 2
+// UnitsN is the highest valid value
+// for type Units, plus one.
+const UnitsN Units = 2
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _GradientUnitsNoOp() {
+func _UnitsNoOp() {
 	var x [1]struct{}
 	_ = x[ObjectBoundingBox-(0)]
 	_ = x[UserSpaceOnUse-(1)]
 }
 
-var _GradientUnitsNameToValueMap = map[string]GradientUnits{
+var _UnitsNameToValueMap = map[string]Units{
 	`ObjectBoundingBox`: 0,
 	`objectboundingbox`: 0,
 	`UserSpaceOnUse`:    1,
 	`userspaceonuse`:    1,
 }
 
-var _GradientUnitsDescMap = map[GradientUnits]string{
-	0: `ObjectBoundingBox indicates that coordinate values are scaled relative to the size of the object and are specified in the range of 0 to 1.`,
-	1: `UserSpaceOnUse indicates that coordinate values are specified in the current user coordinate system when the gradient is used.`,
+var _UnitsDescMap = map[Units]string{
+	0: `ObjectBoundingBox indicates that coordinate values are scaled relative to the size of the object and are specified in the normalized range of 0 to 1.`,
+	1: `UserSpaceOnUse indicates that coordinate values are specified in the current user coordinate system when the gradient is used (ie: actual SVG/gi coordinates).`,
 }
 
-var _GradientUnitsMap = map[GradientUnits]string{
+var _UnitsMap = map[Units]string{
 	0: `ObjectBoundingBox`,
 	1: `UserSpaceOnUse`,
 }
 
 // String returns the string representation
-// of this GradientUnits value.
-func (i GradientUnits) String() string {
-	if str, ok := _GradientUnitsMap[i]; ok {
+// of this Units value.
+func (i Units) String() string {
+	if str, ok := _UnitsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the GradientUnits value from its
+// SetString sets the Units value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *GradientUnits) SetString(s string) error {
-	if val, ok := _GradientUnitsNameToValueMap[s]; ok {
+func (i *Units) SetString(s string) error {
+	if val, ok := _UnitsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _GradientUnitsNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _UnitsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type GradientUnits")
+	return errors.New(s + " is not a valid value for type Units")
 }
 
-// Int64 returns the GradientUnits value as an int64.
-func (i GradientUnits) Int64() int64 {
+// Int64 returns the Units value as an int64.
+func (i Units) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the GradientUnits value from an int64.
-func (i *GradientUnits) SetInt64(in int64) {
-	*i = GradientUnits(in)
+// SetInt64 sets the Units value from an int64.
+func (i *Units) SetInt64(in int64) {
+	*i = Units(in)
 }
 
-// Desc returns the description of the GradientUnits value.
-func (i GradientUnits) Desc() string {
-	if str, ok := _GradientUnitsDescMap[i]; ok {
+// Desc returns the description of the Units value.
+func (i Units) Desc() string {
+	if str, ok := _UnitsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// GradientUnitsValues returns all possible values
-// for the type GradientUnits.
-func GradientUnitsValues() []GradientUnits {
-	return _GradientUnitsValues
+// UnitsValues returns all possible values
+// for the type Units.
+func UnitsValues() []Units {
+	return _UnitsValues
 }
 
 // Values returns all possible values
-// for the type GradientUnits.
-func (i GradientUnits) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_GradientUnitsValues))
-	for i, d := range _GradientUnitsValues {
+// for the type Units.
+func (i Units) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_UnitsValues))
+	for i, d := range _UnitsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type GradientUnits.
-func (i GradientUnits) IsValid() bool {
-	_, ok := _GradientUnitsMap[i]
+// valid option for type Units.
+func (i Units) IsValid() bool {
+	_, ok := _UnitsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i GradientUnits) MarshalText() ([]byte, error) {
+func (i Units) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *GradientUnits) UnmarshalText(text []byte) error {
+func (i *Units) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
 		log.Println(err)
 	}

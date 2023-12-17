@@ -33,6 +33,9 @@ var _ Gradient = &Radial{}
 // NewRadial returns a new centered [Radial] gradient.
 func NewRadial() *Radial {
 	return &Radial{
+		Base: Base{
+			Transform: mat32.Identity2D(),
+		},
 		// default is fully centered
 		Center: mat32.V2Scalar(0.5),
 		Focal:  mat32.V2Scalar(0.5),

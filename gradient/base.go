@@ -32,10 +32,20 @@ type Base struct { //gti:add
 	Stops []Stop `set:"-"`
 
 	// the spread method used for the gradient if it stops before the end
-	Spread SpreadMethods
+	Spread Spreads
 
 	// the colorspace algorithm to use for blending colors
 	Blend colors.BlendTypes
+
+	// the units to use for the gradient
+	Units Units
+
+	// the bounding box of the object with the gradient; this is used when rendering
+	// gradients with [Units] of [ObjectBoundingBox].
+	BoundingBox mat32.Box2
+
+	// Transform is the transformation matrix applied to the gradient's points.
+	Transform mat32.Mat2
 }
 
 // Stop represents a single stop in a gradient
@@ -74,7 +84,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 	d := len(b.Stops)
 
 	// These cases can be taken care of early on
-	if b.Spread == PadSpread {
+	if b.Spread == Pad {
 		if pos >= 1 {
 			return b.Stops[d-1].Color
 		}
@@ -84,7 +94,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 	}
 
 	modRange := float32(1)
-	if b.Spread == ReflectSpread {
+	if b.Spread == Reflect {
 		modRange = 2
 	}
 	mod := mat32.Mod(pos, modRange)
@@ -97,7 +107,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 		place++
 	}
 	switch b.Spread {
-	case RepeatSpread:
+	case Repeat:
 		var s1, s2 Stop
 		switch place {
 		case 0, d:
@@ -106,7 +116,7 @@ func (b *Base) GetColor(pos float32) color.Color {
 			s1, s2 = b.Stops[place-1], b.Stops[place]
 		}
 		return b.BlendStops(mod, s1, s2, false)
-	case ReflectSpread:
+	case Reflect:
 		switch place {
 		case 0:
 			return b.Stops[0].Color
