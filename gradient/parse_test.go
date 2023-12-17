@@ -58,10 +58,11 @@ func TestReadXML(t *testing.T) {
 		want Gradient
 	}
 	tests := []test{
-		{`<linearGradient id="myGradient">
+		{`<linearGradient id="myGradient" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />
 		<stop offset="95%" stop-color="red" />
 	  </linearGradient>`, NewLinear().
+			SetTransform(mat32.Mat2{XX: -4.371139e-08, YX: 1, XY: -1, YY: -4.371139e-08, X0: 0, Y0: 0}).
 			SetStart(mat32.V2(0, 0)).SetEnd(mat32.V2(1, 0)).
 			AddStop(colors.Gold, 0.05).
 			AddStop(colors.Red, 0.95)},
