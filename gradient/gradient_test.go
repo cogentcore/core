@@ -32,6 +32,7 @@ func TestColorAt(t *testing.T) {
 		want []value
 	}
 	tests := []test{
+		// ensure same results with ObjectBoundingBox and UserSpaceOnUse
 		{NewLinear().
 			AddStop(colors.White, 0).
 			AddStop(colors.Black, 1),
@@ -41,6 +42,17 @@ func TestColorAt(t *testing.T) {
 				{78, 17, color.RGBA{205, 205, 205, 255}},
 				{33, 50, color.RGBA{118, 118, 117, 255}},
 			}},
+		{NewLinear().SetUnits(UserSpaceOnUse).
+			SetEnd(mat32.V2(0, 100)).
+			AddStop(colors.White, 0).
+			AddStop(colors.Black, 1),
+			[]value{
+				{33, 71, color.RGBA{68, 67, 67, 255}},
+				{78, 71, color.RGBA{68, 67, 67, 255}},
+				{78, 17, color.RGBA{205, 205, 205, 255}},
+				{33, 50, color.RGBA{118, 118, 117, 255}},
+			}},
+
 		{linearGoldRedTransformTest,
 			[]value{
 				{50, 50, color.RGBA{255, 141, 52, 255}},
@@ -48,12 +60,16 @@ func TestColorAt(t *testing.T) {
 				{81, 23, color.RGBA{255, 185, 76, 255}},
 				{81, 94, color.RGBA{254, 12, 0, 255}},
 			}},
+
+		// ensure same results with ObjectBoundingBox and UserSpaceOnUse
 		{NewRadial().
 			SetCenter(mat32.V2(0.9, 0.5)).SetFocal(mat32.V2(0.9, 0.5)).
 			AddStop(colors.Blue, 0.1).
 			AddStop(colors.Yellow, 0.85),
 			[]value{
 				{90, 50, colors.Blue},
+				{70, 60, color.RGBA{0, 165, 183, 255}},
+				{35, 40, colors.Yellow},
 			}},
 		{NewRadial().SetUnits(UserSpaceOnUse).
 			SetCenter(mat32.V2(90, 50)).SetFocal(mat32.V2(90, 50)).SetRadius(mat32.V2Scalar(50)).
@@ -61,6 +77,8 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.Yellow, 0.85),
 			[]value{
 				{90, 50, colors.Blue},
+				{70, 60, color.RGBA{0, 165, 183, 255}},
+				{35, 40, colors.Yellow},
 			}},
 	}
 	for i, test := range tests {
