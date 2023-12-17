@@ -40,6 +40,11 @@ func TestColorAt(t *testing.T) {
 				{78, 17, color.RGBA{205, 205, 205, 255}},
 				{33, 50, color.RGBA{118, 118, 117, 255}},
 			}},
+		{linearGoldRedTransformTest,
+			[]value{
+				{50, 50, color.RGBA{255, 141, 52, 255}},
+				{7, 50, color.RGBA{255, 141, 52, 255}},
+			}},
 	}
 	for i, test := range tests {
 		for j, v := range test.want {
