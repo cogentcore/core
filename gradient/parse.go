@@ -307,6 +307,7 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 func ReadXML(reader io.Reader) (image.Image, error) {
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
+
 	for {
 		t, err := decoder.Token()
 		if err != nil {
@@ -317,7 +318,7 @@ func ReadXML(reader io.Reader) (image.Image, error) {
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			return UnmarshalXML(decoder, se)
+			return UnmarshalXML(decoder, se, nil, nil)
 			// todo: ignore rest?
 		}
 	}
@@ -325,10 +326,8 @@ func ReadXML(reader io.Reader) (image.Image, error) {
 }
 
 // UnmarshalXML parses the given XML gradient color data
-func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error) {
+func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement, gb *Base, g image.Image) (image.Image, error) {
 	start := &se
-
-	var gb *Base
 
 	for {
 		var t xml.Token
@@ -351,6 +350,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 			case "linearGradient":
 				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
 				gb = &l.Base
+				g = l
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
 					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
@@ -406,7 +406,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 					r.Focal.Y = r.Center.Y
 				}
 			case "stop":
-				stop := Stop{Opacity: 1, Color: Black}
+				stop := Stop{Color: colors.Black}
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {
@@ -423,50 +423,47 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 						ats = append(ats, a)
 					}
 				}
+				opacity := 1.0
 				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
 						stop.Pos, err = readFraction(attr.Value)
 						if err != nil {
-							return err
+							return nil, err
 						}
 					case "stop-color":
-						clr, err := FromString(attr.Value, nil)
+						clr, err := colors.FromString(attr.Value, nil)
 						if err != nil {
-							return fmt.Errorf("invalid color string: %w", err)
+							return nil, fmt.Errorf("invalid color string: %w", err)
 						}
 						stop.Color = clr
 					case "stop-opacity":
-						var o64 float64
-						o64, err = strconv.ParseFloat(attr.Value, 32)
+						opacity, err = strconv.ParseFloat(attr.Value, 32)
 						if err != nil {
-							return err
+							return nil, err
 						}
-						stop.Opacity = float32(o64)
-					}
-					if err != nil {
-						return fmt.Errorf("error parsing color stop: %w", err)
 					}
 				}
-				if f.Gradient == nil {
-					return fmt.Errorf("no gradient but stops in: %v stop: %v", f, stop)
+				stop.Color = colors.ApplyOpacity(stop.Color, float32(opacity))
+				if gb == nil {
+					return nil, fmt.Errorf("got stop outside of gradient: %v", stop)
 				} else {
-					f.Gradient.Stops = append(f.Gradient.Stops, stop)
+					gb.Stops = append(gb.Stops, stop)
 				}
 			default:
-				return fmt.Errorf("cannot process svg element %q", se.Name.Local)
+				return nil, fmt.Errorf("cannot process svg element %q", se.Name.Local)
 			}
 		case xml.EndElement:
 			if se.Name.Local == "linearGradient" || se.Name.Local == "radialGradient" {
-				return nil
+				return g, nil
 			}
 			if se.Name.Local != "stop" {
-				return fmt.Errorf("got unexpected end element: %v", se.Name.Local)
+				return nil, fmt.Errorf("got unexpected end element: %v", se.Name.Local)
 			}
 		case xml.CharData:
 		}
 	}
-	return nil
+	return g, nil
 }
 
 func readFraction(v string) (float32, error) {
