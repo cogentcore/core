@@ -13,12 +13,11 @@ import (
 type Context interface {
 	// Base returns the base color that the color parsing is relative top
 	Base() color.RGBA
-	// FullByURL returns the [image.Image] color with the given URL.
-	// A URL of "#name" is typical, where name is the name of a node
-	// with an [image.Image] color in it. If it returns nil, that
-	// indicats that there is no [image.Image] color associated with
-	// the given URL.
-	ColorByURL(url string) image.Image
+	// ImageByURL returns the [image.Image] associated with the given URL.
+	// Typical URL formats are HTTP URLs like "https://example.com" and node
+	// URLs like "#name". If it returns nil, that indicats that there is no
+	// [image.Image] color associated with the given URL.
+	ImageByURL(url string) image.Image
 }
 
 // BaseContext returns a basic [Context] based on the given base color.
@@ -34,6 +33,6 @@ func (bc *baseContext) Base() color.RGBA {
 	return bc.base
 }
 
-func (bc *baseContext) ColorByURL(url string) image.Image {
+func (bc *baseContext) ImageByURL(url string) image.Image {
 	return nil
 }
