@@ -15,11 +15,13 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"io"
 	"strconv"
 	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/mat32/v2"
+	"golang.org/x/net/html/charset"
 )
 
 // XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
@@ -301,9 +303,8 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	return nil
 }
 
-/*
-// ReadXML reads a XML-formatted [Full] from the given io.Reader
-func (f *Full) ReadXML(reader io.Reader) error {
+// ReadXML reads a XML-formatted gradient color from the given io.Reader
+func ReadXML(reader io.Reader) (image.Image, error) {
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
 	for {
@@ -312,21 +313,22 @@ func (f *Full) ReadXML(reader io.Reader) error {
 			if err == io.EOF {
 				break
 			}
-			return fmt.Errorf("error parsing color xml: %w", err)
+			return nil, fmt.Errorf("error parsing color xml: %w", err)
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			return f.UnmarshalXML(decoder, se)
+			return UnmarshalXML(decoder, se)
 			// todo: ignore rest?
 		}
 	}
-	return nil
+	return nil, nil
 }
 
-// UnmarshalXML parses the given XML-formatted string to set the color
-// specification
-func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
+// UnmarshalXML parses the given XML gradient color data
+func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error) {
 	start := &se
+
+	var gb *Base
 
 	for {
 		var t xml.Token
@@ -341,36 +343,32 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			if err == io.EOF {
 				break
 			}
-			return fmt.Errorf("error parsing color: %w", err)
+			return nil, fmt.Errorf("error parsing color: %w", err)
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "linearGradient":
-				if f.Gradient == nil {
-					f.Gradient = NewLinearGradient()
-					f.Gradient.Bounds.Max = mat32.Vec2{1, 0} // SVG is LTR by default
-				} else {
-					f.Gradient.Type = LinearGradient
-				}
+				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
+				gb = &l.Base
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
 					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "x1":
-						f.Gradient.Bounds.Min.X, err = readFraction(attr.Value)
+						l.Start.X, err = readFraction(attr.Value)
 					case "y1":
-						f.Gradient.Bounds.Min.Y, err = readFraction(attr.Value)
+						l.Start.Y, err = readFraction(attr.Value)
 					case "x2":
-						f.Gradient.Bounds.Max.X, err = readFraction(attr.Value)
+						l.End.X, err = readFraction(attr.Value)
 					case "y2":
-						f.Gradient.Bounds.Max.Y, err = readFraction(attr.Value)
+						l.End.Y, err = readFraction(attr.Value)
 					default:
-						err = f.ReadGradAttr(attr)
+						err = ReadGradAttr(&l.Base, attr)
 					}
 					if err != nil {
-						return fmt.Errorf("error parsing linear gradient: %w", err)
+						return nil, fmt.Errorf("error parsing linear gradient: %w", err)
 					}
 				}
 			case "radialGradient":
@@ -471,7 +469,6 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	}
 	return nil
 }
-*/
 
 func readFraction(v string) (float32, error) {
 	v = strings.TrimSpace(v)
@@ -492,8 +489,7 @@ func readFraction(v string) (float32, error) {
 	return f, nil
 }
 
-/*
-func (f *Full) ReadGradAttr(attr xml.Attr) error {
+func ReadGradAttr(gb *Base, attr xml.Attr) error {
 	switch attr.Name.Local {
 	case "gradientTransform":
 		tx := mat32.Identity2D()
@@ -512,16 +508,15 @@ func (f *Full) ReadGradAttr(attr xml.Attr) error {
 	case "spreadMethod":
 		switch strings.TrimSpace(attr.Value) {
 		case "pad":
-			f.Gradient.Spread = PadSpread
+			gb.Spread = PadSpread
 		case "reflect":
-			f.Gradient.Spread = ReflectSpread
+			gb.Spread = ReflectSpread
 		case "repeat":
-			f.Gradient.Spread = RepeatSpread
+			gb.Spread = RepeatSpread
 		}
 	}
 	return nil
 }
-*/
 
 // FixGradientStops applies the CSS rules to regularize the given gradient stops:
 // https://www.w3.org/TR/css3-images/#color-stop-syntax
