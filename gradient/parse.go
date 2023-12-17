@@ -93,29 +93,29 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 
 	switch gtyp {
 	case "linear", "repeating-linear":
-		g := NewLinear()
+		l := NewLinear()
 		if gtyp == "repeating-linear" {
-			g.SetSpread(RepeatSpread)
+			l.SetSpread(RepeatSpread)
 		}
-		err := g.SetString(pars)
+		err := l.SetString(pars)
 		if err != nil {
 			return nil, err
 		}
-		FixGradientStops(g.Stops)
-		Cache[cnm] = g
-		return g, nil
+		FixGradientStops(l.Stops)
+		Cache[cnm] = l
+		return l, nil
 	case "radial", "repeating-radial":
-		g := NewRadial()
+		r := NewRadial()
 		if gtyp == "repeating-radial" {
-			g.SetSpread(RepeatSpread)
+			r.SetSpread(RepeatSpread)
 		}
-		err := g.SetString(pars)
+		err := r.SetString(pars)
 		if err != nil {
 			return nil, err
 		}
-		FixGradientStops(g.Stops)
-		Cache[cnm] = g
-		return g, nil
+		FixGradientStops(r.Stops)
+		Cache[cnm] = r
+		return r, nil
 	}
 	return nil, fmt.Errorf("got unknown gradient type %q", gtyp)
 }
@@ -140,7 +140,7 @@ var GradientDegToSides = map[string]string{
 	"-45deg":  "top left",
 }
 
-// SetString sets the gradient from the given CSS linear gradient string
+// SetString sets the linear gradient from the given CSS linear gradient string
 // (only the part inside of "linear-gradient(...)") (see
 // https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
 func (l *Linear) SetString(str string) error {
@@ -207,11 +207,12 @@ outer:
 	return nil
 }
 
-// todo: this is complex:
-// https://www.w3.org/TR/css3-images/#radial-gradients
-
-func (f *Full) parseRadialGrad(pars string) error {
-	plist := strings.Split(pars, ", ")
+// SetString sets the radial gradient from the given CSS radial gradient string
+// (only the part inside of "radial-gradient(...)") (see
+// https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/radial-gradient)
+func (r *Radial) SetString(str string) error {
+	// TODO(kai): not fully following spec yet
+	plist := strings.Split(str, ", ")
 	var prevColor color.RGBA
 	stopIdx := 0
 outer:
@@ -219,60 +220,49 @@ outer:
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 		// origPar := par
 		switch {
-		case strings.Contains(par, "circle"):
-			f.Gradient.Center.SetScalar(0.5)
-			f.Gradient.Focal.SetScalar(0.5)
-			f.Gradient.Radius = 0.5
-		case strings.Contains(par, "ellipse"):
-			f.Gradient.Center.SetScalar(0.5)
-			f.Gradient.Focal.SetScalar(0.5)
-			f.Gradient.Radius = 0.5
+		case strings.Contains(par, "circle"), strings.Contains(par, "ellipse"):
+			r.Center.SetScalar(0.5)
+			r.Focal.SetScalar(0.5)
+			r.Radius.SetScalar(0.5)
 		case strings.HasPrefix(par, "at "):
 			sides := strings.Split(par[3:], " ")
-			f.Gradient.Center = mat32.Vec2{}
-			f.Gradient.Focal = mat32.Vec2{}
-			f.Gradient.Radius = 0
+			r.Center = mat32.Vec2{}
+			r.Focal = mat32.Vec2{}
+			r.Radius = mat32.Vec2{}
 			for _, side := range sides {
 				switch side {
 				case "bottom":
-					f.Gradient.Bounds.Min.Y = 0
+					r.Bounds.Min.Y = 0
 				case "top":
-					f.Gradient.Bounds.Min.Y = 1
+					r.Bounds.Min.Y = 1
 				case "right":
-					f.Gradient.Bounds.Min.X = 0
+					r.Bounds.Min.X = 0
 				case "left":
-					f.Gradient.Bounds.Min.X = 1
+					r.Bounds.Min.X = 1
 				}
 			}
 		case strings.HasPrefix(par, ")"):
 			break outer
 		default: // must be a color stop
 			var stop *Stop
-			if len(f.Gradient.Stops) > stopIdx {
-				stop = &(f.Gradient.Stops[stopIdx])
+			if len(r.Stops) > stopIdx {
+				stop = &r.Stops[stopIdx]
 			} else {
-				stop = &Stop{Opacity: 1.0, Color: Black}
-			}
-			if stopIdx == 0 {
-				prevColor = f.Solid // base color
-				// fmt.Printf("starting prev color: %v\n", prevColor)
+				stop = &Stop{}
 			}
 			err := parseColorStop(stop, prevColor, par)
 			if err != nil {
 				return err
 			}
-			if len(f.Gradient.Stops) <= stopIdx {
-				f.Gradient.Stops = append(f.Gradient.Stops, *stop)
-			}
-			if stopIdx == 0 {
-				f.Solid = AsRGBA(stop.Color) // keep first one
+			if len(r.Stops) <= stopIdx {
+				r.Stops = append(r.Stops, *stop)
 			}
 			prevColor = stop.Color
 			stopIdx++
 		}
 	}
-	if len(f.Gradient.Stops) > stopIdx {
-		f.Gradient.Stops = f.Gradient.Stops[:stopIdx]
+	if len(r.Stops) > stopIdx {
+		r.Stops = r.Stops[:stopIdx]
 	}
 	return nil
 }
