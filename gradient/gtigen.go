@@ -22,7 +22,7 @@ var _ = gti.AddType(&gti.Type{
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors/gradient.Spreads", LocalType: "Spreads", Doc: "the spread method used for the gradient if it stops before the end", Directives: gti.Directives{}, Tag: ""}},
 		{"Blend", &gti.Field{Name: "Blend", Type: "goki.dev/colors.BlendTypes", LocalType: "colors.BlendTypes", Doc: "the colorspace algorithm to use for blending colors", Directives: gti.Directives{}, Tag: ""}},
 		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient", Directives: gti.Directives{}, Tag: ""}},
-		{"BoundingBox", &gti.Field{Name: "BoundingBox", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox].", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox].", Directives: gti.Directives{}, Tag: ""}},
 		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -79,8 +79,8 @@ func (t *Linear) SetUnits(v Units) *Linear {
 	return t
 }
 
-// SetBoundingBox sets the [Linear.BoundingBox]
-func (t *Linear) SetBoundingBox(v mat32.Box2) *Linear {
+// SetBox sets the [Linear.Box]
+func (t *Linear) SetBox(v mat32.Box2) *Linear {
 	t.Box = v
 	return t
 }
@@ -149,8 +149,8 @@ func (t *Radial) SetUnits(v Units) *Radial {
 	return t
 }
 
-// SetBoundingBox sets the [Radial.BoundingBox]
-func (t *Radial) SetBoundingBox(v mat32.Box2) *Radial {
+// SetBox sets the [Radial.Box]
+func (t *Radial) SetBox(v mat32.Box2) *Radial {
 	t.Box = v
 	return t
 }

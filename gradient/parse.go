@@ -491,23 +491,13 @@ func ReadFraction(v string) (float32, error) {
 func ReadGradAttr(g Gradient, attr xml.Attr) error {
 	gb := g.AsBase()
 	switch attr.Name.Local {
-	// TODO(kai): implement gradientTransform and gradientUnits
-	/*
-		case "gradientTransform":
-			tx := mat32.Identity2D()
-			err := tx.SetString(attr.Value)
-			if err != nil {
-				return err
-			}
-			f.Gradient.Matrix = tx
-		case "gradientUnits":
-			switch strings.TrimSpace(attr.Value) {
-			case "userSpaceOnUse":
-				f.Gradient.Units = UserSpaceOnUse
-			case "objectBoundingBox":
-				f.Gradient.Units = ObjectBoundingBox
-			}
-	*/
+	case "gradientTransform":
+		err := gb.Transform.SetString(attr.Value)
+		if err != nil {
+			return err
+		}
+	case "gradientUnits":
+		return gb.Units.SetString(strings.TrimSpace(attr.Value))
 	case "spreadMethod":
 		return gb.Spread.SetString(strings.TrimSpace(attr.Value))
 	}

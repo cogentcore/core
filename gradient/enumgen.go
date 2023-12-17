@@ -137,9 +137,9 @@ func _UnitsNoOp() {
 }
 
 var _UnitsNameToValueMap = map[string]Units{
-	`ObjectBoundingBox`: 0,
+	`objectBoundingBox`: 0,
 	`objectboundingbox`: 0,
-	`UserSpaceOnUse`:    1,
+	`userSpaceOnUse`:    1,
 	`userspaceonuse`:    1,
 }
 
@@ -149,8 +149,8 @@ var _UnitsDescMap = map[Units]string{
 }
 
 var _UnitsMap = map[Units]string{
-	0: `ObjectBoundingBox`,
-	1: `UserSpaceOnUse`,
+	0: `objectBoundingBox`,
+	1: `userSpaceOnUse`,
 }
 
 // String returns the string representation
