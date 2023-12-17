@@ -35,7 +35,10 @@ func TestColorAt(t *testing.T) {
 			AddStop(colors.White, 0).
 			AddStop(colors.Black, 1),
 			[]value{
-				{7, 3, colors.Gray},
+				{33, 71, color.RGBA{68, 67, 67, 255}},
+				{78, 71, color.RGBA{68, 67, 67, 255}},
+				{78, 17, color.RGBA{205, 205, 205, 255}},
+				{33, 50, color.RGBA{118, 118, 117, 255}},
 			}},
 	}
 	for i, test := range tests {
