@@ -48,10 +48,17 @@ func TestColorAt(t *testing.T) {
 				{81, 23, color.RGBA{255, 185, 76, 255}},
 				{81, 94, color.RGBA{254, 12, 0, 255}},
 			}},
+		{NewRadial().
+			SetCenter(mat32.V2(0.9, 0.5)).SetFocal(mat32.V2(0.9, 0.5)).
+			AddStop(colors.Blue, 0.1).
+			AddStop(colors.Yellow, 0.85),
+			[]value{
+				{90, 50, colors.Blue},
+			}},
 		{NewRadial().SetUnits(UserSpaceOnUse).
-			SetCenter(mat32.V2(90, 50)).SetFocal(mat32.V2(90, 50)).
-			AddStop(colors.Blue, 0).
-			AddStop(colors.Yellow, 0.7),
+			SetCenter(mat32.V2(90, 50)).SetFocal(mat32.V2(90, 50)).SetRadius(mat32.V2Scalar(50)).
+			AddStop(colors.Blue, 0.1).
+			AddStop(colors.Yellow, 0.85),
 			[]value{
 				{90, 50, colors.Blue},
 			}},
