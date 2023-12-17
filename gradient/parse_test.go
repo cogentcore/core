@@ -6,7 +6,6 @@ package gradient
 
 import (
 	"bytes"
-	"image"
 	"reflect"
 	"testing"
 
@@ -18,7 +17,7 @@ import (
 func TestFromString(t *testing.T) {
 	type test struct {
 		str  string
-		want image.Image
+		want Gradient
 	}
 	tests := []test{
 		{"linear-gradient(#e66465, #9198e5)", NewLinear().
@@ -56,7 +55,7 @@ func TestFromString(t *testing.T) {
 func TestReadXML(t *testing.T) {
 	type test struct {
 		str  string
-		want image.Image
+		want Gradient
 	}
 	tests := []test{
 		{`<linearGradient id="myGradient">
