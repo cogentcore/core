@@ -33,6 +33,15 @@ func TestFromString(t *testing.T) {
 			AddStop(colors.Blue, 0).
 			AddStop(colors.Green, 0.4).
 			AddStop(colors.Red, 1)},
+		{"radial-gradient(circle at center, red 0, blue, green 100%)", NewRadial().
+			AddStop(colors.Red, 0).
+			AddStop(colors.Blue, 0.5).
+			AddStop(colors.Green, 1)},
+		{"radial-gradient(ellipse at right, purple 0.3, yellow 60%, gray)", NewRadial().
+			SetCenter(mat32.V2(1, 0)).SetFocal(mat32.V2(1, 0)).
+			AddStop(colors.Purple, 0.3).
+			AddStop(colors.Yellow, 0.6).
+			AddStop(colors.Gray, 1)},
 	}
 	for _, test := range tests {
 		have, err := FromString(test.str)
