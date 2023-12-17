@@ -21,7 +21,8 @@ type Config struct { //gti:add
 	// the output file location relative to the package on which enumgen is being called
 	Output string `def:"enumgen.go"`
 
-	// if specified, the enum item transformation method (eg: snake, kebab, lower)
+	// if specified, the enum item transformation method (upper, lower, snake, snake-upper, kebab, kebab-upper,
+	// camel, camel-lower, title, title-lower, first, first-upper, first-lower, or whitespace)
 	Transform string
 
 	// if specified, a comma-separated list of prefixes to trim from each item

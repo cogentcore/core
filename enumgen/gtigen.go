@@ -18,7 +18,7 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "the source directory to run enumgen on (can be set to multiple through paths like ./...)", Directives: gti.Directives{}, Tag: "def:\".\" posarg:\"0\" required:\"-\""}},
 		{"Output", &gti.Field{Name: "Output", Type: "string", LocalType: "string", Doc: "the output file location relative to the package on which enumgen is being called", Directives: gti.Directives{}, Tag: "def:\"enumgen.go\""}},
-		{"Transform", &gti.Field{Name: "Transform", Type: "string", LocalType: "string", Doc: "if specified, the enum item transformation method (eg: snake, kebab, lower)", Directives: gti.Directives{}, Tag: ""}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "string", LocalType: "string", Doc: "if specified, the enum item transformation method (upper, lower, snake, snake-upper, kebab, kebab-upper,\ncamel, camel-lower, title, title-lower, first, first-upper, first-lower, or whitespace)", Directives: gti.Directives{}, Tag: ""}},
 		{"TrimPrefix", &gti.Field{Name: "TrimPrefix", Type: "string", LocalType: "string", Doc: "if specified, a comma-separated list of prefixes to trim from each item", Directives: gti.Directives{}, Tag: ""}},
 		{"AddPrefix", &gti.Field{Name: "AddPrefix", Type: "string", LocalType: "string", Doc: "if specified, the prefix to add to each item", Directives: gti.Directives{}, Tag: ""}},
 		{"LineComment", &gti.Field{Name: "LineComment", Type: "bool", LocalType: "bool", Doc: "whether to use line comment text as printed text when present", Directives: gti.Directives{}, Tag: "def:\"true\""}},

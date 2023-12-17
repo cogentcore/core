@@ -98,18 +98,22 @@ func (g *Generator) PrefixValueNames(values []Value, c *Config) {
 func (g *Generator) TransformValueNames(values []Value, c *Config) error {
 	var fn func(src string) string
 	switch c.Transform {
-	case "snake":
-		fn = strcase.ToSnake
-	case "snake_upper", "snake-upper":
-		fn = strcase.ToScreamingSnake
-	case "kebab":
-		fn = strcase.ToKebab
-	case "kebab_upper", "kebab-upper":
-		fn = strcase.ToScreamingKebab
 	case "upper":
 		fn = strings.ToUpper
 	case "lower":
 		fn = strings.ToLower
+	case "snake":
+		fn = strcase.ToSnake
+	case "snake-upper":
+		fn = strcase.ToScreamingSnake
+	case "kebab":
+		fn = strcase.ToKebab
+	case "kebab-upper":
+		fn = strcase.ToScreamingKebab
+	case "camel":
+		fn = strcase.ToCamel
+	case "camel-lower":
+		fn = strcase.ToLowerCamel
 	case "title":
 		fn = strings.Title
 	case "title-lower":
@@ -123,12 +127,12 @@ func (g *Generator) TransformValueNames(values []Value, c *Config) error {
 			r, _ := utf8.DecodeRuneInString(s)
 			return string(r)
 		}
-	case "first_upper", "first-upper":
+	case "first-upper":
 		fn = func(s string) string {
 			r, _ := utf8.DecodeRuneInString(s)
 			return strings.ToUpper(string(r))
 		}
-	case "first_lower", "first-lower":
+	case "first-lower":
 		fn = func(s string) string {
 			r, _ := utf8.DecodeRuneInString(s)
 			return strings.ToLower(string(r))
