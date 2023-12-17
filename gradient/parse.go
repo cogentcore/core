@@ -99,7 +99,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		}
 		err := g.SetString(pars)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		FixGradientStops(g.Stops)
 		Cache[cnm] = g
@@ -111,7 +111,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		}
 		err := g.SetString(pars)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		FixGradientStops(g.Stops)
 		Cache[cnm] = g
@@ -140,8 +140,11 @@ var GradientDegToSides = map[string]string{
 	"-45deg":  "top left",
 }
 
-func (f *Full) parseLinearGrad(pars string) error {
-	plist := strings.Split(pars, ", ")
+// SetString sets the gradient from the given CSS linear gradient string
+// (only the part inside of "linear-gradient(...)") (see
+// https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
+func (l *Linear) SetString(str string) error {
+	plist := strings.Split(str, ", ")
 	var prevColor color.RGBA
 	stopIdx := 0
 outer:
@@ -150,6 +153,7 @@ outer:
 		origPar := par
 		switch {
 		case strings.Contains(par, "deg"):
+			// TODO(kai): this is not true and should be fixed to use trig
 			// can't use trig, b/c need to be full 1, 0 values -- just use map
 			var ok bool
 			par, ok = GradientDegToSides[par]
@@ -160,52 +164,45 @@ outer:
 			fallthrough
 		case strings.HasPrefix(par, "to "):
 			sides := strings.Split(par[3:], " ")
-			f.Gradient.Bounds = mat32.Box2{}
+			l.Start, l.End = mat32.Vec2{}, mat32.Vec2{}
 			for _, side := range sides {
 				switch side {
 				case "bottom":
-					f.Gradient.Bounds.Min.Y = 0
-					f.Gradient.Bounds.Max.Y = 1
+					l.Start.Y = 0
+					l.End.Y = 1
 				case "top":
-					f.Gradient.Bounds.Min.Y = 1
-					f.Gradient.Bounds.Max.Y = 0
+					l.Start.Y = 1
+					l.End.Y = 0
 				case "right":
-					f.Gradient.Bounds.Min.X = 0
-					f.Gradient.Bounds.Max.X = 1
+					l.Start.X = 0
+					l.End.X = 1
 				case "left":
-					f.Gradient.Bounds.Min.X = 1
-					f.Gradient.Bounds.Max.X = 0
+					l.Start.X = 1
+					l.End.X = 0
 				}
 			}
 		case strings.HasPrefix(par, ")"):
 			break outer
 		default: // must be a color stop
 			var stop *Stop
-			if len(f.Gradient.Stops) > stopIdx {
-				stop = &(f.Gradient.Stops[stopIdx])
+			if len(l.Stops) > stopIdx {
+				stop = &(l.Stops[stopIdx])
 			} else {
-				stop = &Stop{Opacity: 1.0, Color: Black}
-			}
-			if stopIdx == 0 {
-				prevColor = f.Solid // base color
-				// fmt.Printf("starting prev color: %v\n", prevColor)
+				stop = &Stop{}
 			}
 			err := parseColorStop(stop, prevColor, par)
 			if err != nil {
 				return err
 			}
-			if len(f.Gradient.Stops) <= stopIdx {
-				f.Gradient.Stops = append(f.Gradient.Stops, *stop)
-			}
-			if stopIdx == 0 {
-				f.Solid = AsRGBA(stop.Color) // keep first one
+			if len(l.Stops) <= stopIdx {
+				l.Stops = append(l.Stops, *stop)
 			}
 			prevColor = stop.Color
 			stopIdx++
 		}
 	}
-	if len(f.Gradient.Stops) > stopIdx {
-		f.Gradient.Stops = f.Gradient.Stops[:stopIdx]
+	if len(l.Stops) > stopIdx {
+		l.Stops = l.Stops[:stopIdx]
 	}
 	return nil
 }
