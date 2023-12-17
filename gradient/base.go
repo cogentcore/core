@@ -42,7 +42,7 @@ type Base struct { //gti:add
 
 	// the bounding box of the object with the gradient; this is used when rendering
 	// gradients with [Units] of [ObjectBoundingBox].
-	BoundingBox mat32.Box2
+	Box mat32.Box2
 
 	// Transform is the transformation matrix applied to the gradient's points.
 	Transform mat32.Mat2
@@ -68,14 +68,32 @@ func (b *Base) AsBase() *Base {
 	return b
 }
 
-// ColorModel returns the color model used by the gradient, which is [color.RGBAModel]
+// NewBase returns a new [Base] with default values. It should
+// only be used in the New functions of gradient types.
+func NewBase() Base {
+	return Base{
+		Box:       mat32.B2(0, 0, 1, 1),
+		Transform: mat32.Identity2D(),
+	}
+}
+
+// ColorModel returns the color model used by the gradient image, which is [color.RGBAModel]
 func (b *Base) ColorModel() color.Model {
 	return color.RGBAModel
 }
 
-// Bounds returns the bounds of the gradient, which are infinite.
+// Bounds returns the bounds of the gradient image, which are infinite.
 func (b *Base) Bounds() image.Rectangle {
 	return image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
+}
+
+// ObjectMatrix returns the effective object transformation matrix for a gradient
+// with [Units] of [ObjectBoundingBox].
+func (b *Base) ObjectMatrix() mat32.Mat2 {
+	w, h := b.Box.Size().X, b.Box.Size().Y
+	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
+	return mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
+		Mul(b.Transform).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 
 // GetColor returns the color at the given normalized position along the

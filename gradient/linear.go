@@ -30,9 +30,7 @@ var _ Gradient = &Linear{}
 // NewLinear returns a new downward-facing [Linear] gradient.
 func NewLinear() *Linear {
 	return &Linear{
-		Base: Base{
-			Transform: mat32.Identity2D(),
-		},
+		Base: NewBase(),
 		// default in CSS is "to bottom"
 		End: mat32.V2(0, 1),
 	}
@@ -53,11 +51,23 @@ func (l *Linear) At(x, y int) color.Color {
 		return l.Stops[0].Color
 	}
 
-	d := l.End.Sub(l.Start)
+	s, e := l.Start, l.End
+	if l.Units == ObjectBoundingBox {
+		s = l.Box.Min.Add(l.Box.Size().Mul(s))
+		e = l.Box.Min.Add(l.Box.Size().Mul(e))
+	} else {
+		s = l.Transform.MulVec2AsPt(s)
+		e = l.Transform.MulVec2AsPt(e)
+	}
+
+	d := e.Sub(s)
 	dd := d.X*d.X + d.Y*d.Y // self inner prod
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
-	df := pt.Sub(l.Start)
+	if l.Units == ObjectBoundingBox {
+		pt = l.ObjectMatrix().MulVec2AsPt(pt)
+	}
+	df := pt.Sub(s)
 	pos := (d.X*df.X + d.Y*df.Y) / dd
 	return l.GetColor(pos)
 }

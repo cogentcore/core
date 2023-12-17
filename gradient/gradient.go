@@ -11,7 +11,7 @@ package gradient
 
 // Spreads are the spread methods used when a gradient reaches
 // its end but the object isn't yet fully filled.
-type Spreads int32 //enums:enum
+type Spreads int32 //enums:enum -transform lower
 
 const (
 	// Pad indicates to have the final color of the gradient fill

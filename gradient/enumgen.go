@@ -27,11 +27,8 @@ func _SpreadsNoOp() {
 }
 
 var _SpreadsNameToValueMap = map[string]Spreads{
-	`Pad`:     0,
 	`pad`:     0,
-	`Reflect`: 1,
 	`reflect`: 1,
-	`Repeat`:  2,
 	`repeat`:  2,
 }
 
@@ -42,9 +39,9 @@ var _SpreadsDescMap = map[Spreads]string{
 }
 
 var _SpreadsMap = map[Spreads]string{
-	0: `Pad`,
-	1: `Reflect`,
-	2: `Repeat`,
+	0: `pad`,
+	1: `reflect`,
+	2: `repeat`,
 }
 
 // String returns the string representation

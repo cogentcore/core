@@ -81,7 +81,7 @@ func (t *Linear) SetUnits(v Units) *Linear {
 
 // SetBoundingBox sets the [Linear.BoundingBox]
 func (t *Linear) SetBoundingBox(v mat32.Box2) *Linear {
-	t.BoundingBox = v
+	t.Box = v
 	return t
 }
 
@@ -151,7 +151,7 @@ func (t *Radial) SetUnits(v Units) *Radial {
 
 // SetBoundingBox sets the [Radial.BoundingBox]
 func (t *Radial) SetBoundingBox(v mat32.Box2) *Radial {
-	t.BoundingBox = v
+	t.Box = v
 	return t
 }
 
