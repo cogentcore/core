@@ -365,46 +365,45 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 					case "y2":
 						l.End.Y, err = readFraction(attr.Value)
 					default:
-						err = ReadGradAttr(&l.Base, attr)
+						err = ReadGradAttr(gb, attr)
 					}
 					if err != nil {
 						return nil, fmt.Errorf("error parsing linear gradient: %w", err)
 					}
 				}
 			case "radialGradient":
-				if f.Gradient == nil {
-					f.Gradient = NewRadialGradient()
-				} else {
-					f.Gradient.Type = RadialGradient
-				}
+				r := NewRadial()
+				gb = &r.Base
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "r":
-						f.Gradient.Radius, err = readFraction(attr.Value)
+						var radius float32
+						radius, err = readFraction(attr.Value)
+						r.Radius.SetScalar(radius)
 					case "cx":
-						f.Gradient.Center.X, err = readFraction(attr.Value)
+						r.Center.X, err = readFraction(attr.Value)
 					case "cy":
-						f.Gradient.Center.Y, err = readFraction(attr.Value)
+						r.Center.Y, err = readFraction(attr.Value)
 					case "fx":
 						setFx = true
-						f.Gradient.Focal.X, err = readFraction(attr.Value)
+						r.Focal.X, err = readFraction(attr.Value)
 					case "fy":
 						setFy = true
-						f.Gradient.Focal.Y, err = readFraction(attr.Value)
+						r.Focal.Y, err = readFraction(attr.Value)
 					default:
-						err = f.ReadGradAttr(attr)
+						err = ReadGradAttr(gb, attr)
 					}
 					if err != nil {
-						return fmt.Errorf("error parsing radial gradient: %w", err)
+						return nil, fmt.Errorf("error parsing radial gradient: %w", err)
 					}
 				}
 				if !setFx { // set fx to cx by default
-					f.Gradient.Focal.X = f.Gradient.Center.X
+					r.Focal.X = r.Center.X
 				}
 				if !setFy { // set fy to cy by default
-					f.Gradient.Focal.Y = f.Gradient.Center.Y
+					r.Focal.Y = r.Center.Y
 				}
 			case "stop":
 				stop := Stop{Opacity: 1, Color: Black}
