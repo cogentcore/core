@@ -426,7 +426,7 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 						ats = append(ats, a)
 					}
 				}
-				opacity := 1.0
+				opacity := float32(1)
 				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
@@ -435,19 +435,19 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error
 							return nil, err
 						}
 					case "stop-color":
-						clr, err := colors.FromString(attr.Value, nil)
+						clr, err := colors.FromString(attr.Value)
 						if err != nil {
 							return nil, fmt.Errorf("invalid color string: %w", err)
 						}
 						stop.Color = clr
 					case "stop-opacity":
-						opacity, err = strconv.ParseFloat(attr.Value, 32)
+						opacity, err = ReadFraction(attr.Value)
 						if err != nil {
 							return nil, err
 						}
 					}
 				}
-				stop.Color = colors.ApplyOpacity(stop.Color, float32(opacity))
+				stop.Color = colors.ApplyOpacity(stop.Color, opacity)
 				if gb == nil {
 					return nil, fmt.Errorf("got stop outside of gradient: %v", stop)
 				} else {

@@ -66,6 +66,14 @@ func TestReadXML(t *testing.T) {
 			SetStart(mat32.V2(0, 0)).SetEnd(mat32.V2(1, 0)).
 			AddStop(colors.Gold, 0.05).
 			AddStop(colors.Red, 0.95)},
+		{`<radialGradient id="myGradient">
+			<stop offset="10%" stop-color="blue" />
+			<stop offset="35%" stop-color="purple" stop-opacity="33%" />
+			<stop offset="90%" stop-color="red" />
+		  </radialGradient>`, NewRadial().
+			AddStop(colors.Blue, 0.1).
+			AddStop(colors.Purple, 0.35).
+			AddStop(colors.Red, 0.9)},
 	}
 	for _, test := range tests {
 		r := bytes.NewBufferString(test.str)
