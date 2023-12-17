@@ -71,54 +71,53 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	}
 	str = strings.ToLower(str)
 	grad := "-gradient"
-	if gidx := strings.Index(str, grad); gidx > 0 {
-		gtyp := str[:gidx]
-		rmdr := str[gidx+len(grad):]
-		pidx := strings.IndexByte(rmdr, '(')
-		if pidx < 0 {
-			return nil, fmt.Errorf("gradient specified but parameters not found in string %q", str)
+
+	gidx := strings.Index(str, grad)
+	if gidx <= 0 {
+		s, err := colors.FromString(str, ct.Base())
+		if err != nil {
+			return nil, err
 		}
-		pars := rmdr[pidx+1:]
-		pars = strings.TrimSuffix(pars, ");")
-		pars = strings.TrimSuffix(pars, ")")
-		switch gtyp {
-		case "repeating-linear":
-			g := NewLinear().SetSpread(RepeatSpread)
-			err := g.SetString(pars)
-			if err != nil {
-				return err
-			}
-		case "linear":
-			f.Gradient = NewLinearGradient()
-			err := f.parseLinearGrad(pars)
-			if err != nil {
-				return err
-			}
-		case "repeating-radial":
-			f.Gradient = NewRadialGradient().SetSpread(RepeatSpread)
-			err := f.parseRadialGrad(pars)
-			if err != nil {
-				return err
-			}
-		case "radial":
-			f.Gradient = NewRadialGradient()
-			err := f.parseRadialGrad(pars)
-			if err != nil {
-				return err
-			}
+		return colors.Uniform(s), nil
+	}
+
+	gtyp := str[:gidx]
+	rmdr := str[gidx+len(grad):]
+	pidx := strings.IndexByte(rmdr, '(')
+	if pidx < 0 {
+		return nil, fmt.Errorf("gradient specified but parameters not found in string %q", str)
+	}
+	pars := rmdr[pidx+1:]
+	pars = strings.TrimSuffix(pars, ");")
+	pars = strings.TrimSuffix(pars, ")")
+
+	switch gtyp {
+	case "linear", "repeating-linear":
+		g := NewLinear()
+		if gtyp == "repeating-linear" {
+			g.SetSpread(RepeatSpread)
 		}
-		FixGradientStops(f.Gradient)
-		svcs := Full{} // critical to save a copy..
-		svcs.CopyFrom(*f)
-		Cache[fullnm] = svcs
-	} else {
-		s, err := FromString(str, ct.Base())
+		err := g.SetString(pars)
 		if err != nil {
 			return err
 		}
-		f.SetSolid(s)
+		FixGradientStops(g.Stops)
+		Cache[cnm] = g
+		return g, nil
+	case "radial", "repeating-radial":
+		g := NewRadial()
+		if gtyp == "repeating-radial" {
+			g.SetSpread(RepeatSpread)
+		}
+		err := g.SetString(pars)
+		if err != nil {
+			return err
+		}
+		FixGradientStops(g.Stops)
+		Cache[cnm] = g
+		return g, nil
 	}
-	return nil
+	return nil, fmt.Errorf("got unknown gradient type %q", gtyp)
 }
 
 // GradientDegToSides maps gradient degree notation to side notation
