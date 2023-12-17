@@ -44,6 +44,8 @@ func TestColorAt(t *testing.T) {
 			[]value{
 				{50, 50, color.RGBA{255, 141, 52, 255}},
 				{7, 50, color.RGBA{255, 141, 52, 255}},
+				{81, 23, color.RGBA{255, 185, 76, 255}},
+				{81, 94, color.RGBA{254, 12, 0, 255}},
 			}},
 	}
 	for i, test := range tests {
