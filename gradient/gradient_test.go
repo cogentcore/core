@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"goki.dev/colors"
+	"goki.dev/mat32/v2"
 )
 
 func ExampleLinear() {
@@ -46,6 +47,13 @@ func TestColorAt(t *testing.T) {
 				{7, 50, color.RGBA{255, 141, 52, 255}},
 				{81, 23, color.RGBA{255, 185, 76, 255}},
 				{81, 94, color.RGBA{254, 12, 0, 255}},
+			}},
+		{NewRadial().SetUnits(UserSpaceOnUse).
+			SetCenter(mat32.V2(90, 50)).SetFocal(mat32.V2(90, 50)).
+			AddStop(colors.Blue, 0).
+			AddStop(colors.Yellow, 0.7),
+			[]value{
+				{90, 50, colors.Blue},
 			}},
 	}
 	for i, test := range tests {
