@@ -221,22 +221,25 @@ outer:
 			r.Focal.SetScalar(0.5)
 			r.Radius.SetScalar(0.5)
 		case strings.HasPrefix(par, "at "):
-			sides := strings.Split(par[3:], " ")
-			r.Center = mat32.Vec2{}
-			r.Focal = mat32.Vec2{}
-			r.Radius = mat32.Vec2{}
-			for _, side := range sides {
-				switch side {
-				case "bottom":
-					r.Bounds.Min.Y = 0
-				case "top":
-					r.Bounds.Min.Y = 1
-				case "right":
-					r.Bounds.Min.X = 0
-				case "left":
-					r.Bounds.Min.X = 1
-				}
-			}
+			// TODO(kai): fix this
+			/*
+				sides := strings.Split(par[3:], " ")
+				r.Center = mat32.Vec2{}
+				r.Focal = mat32.Vec2{}
+				r.Radius = mat32.Vec2{}
+					for _, side := range sides {
+						switch side {
+						case "bottom":
+							r.Bounds.Min.Y = 0
+						case "top":
+							r.Bounds.Min.Y = 1
+						case "right":
+							r.Bounds.Min.X = 0
+						case "left":
+							r.Bounds.Min.X = 1
+						}
+					}
+			*/
 		case strings.HasPrefix(par, ")"):
 			break outer
 		default: // must be a color stop
