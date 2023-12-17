@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 
 	"golang.org/x/net/html/charset"
@@ -190,7 +189,7 @@ outer:
 			} else {
 				stop = &Stop{}
 			}
-			err := parseColorStop(stop, prevColor, par)
+			err := ParseColorStop(stop, prevColor, par)
 			if err != nil {
 				return err
 			}
@@ -250,7 +249,7 @@ outer:
 			} else {
 				stop = &Stop{}
 			}
-			err := parseColorStop(stop, prevColor, par)
+			err := ParseColorStop(stop, prevColor, par)
 			if err != nil {
 				return err
 			}
@@ -267,7 +266,9 @@ outer:
 	return nil
 }
 
-func parseColorStop(stop *Stop, prevColor color.RGBA, par string) error {
+// ParseColorStop parses the given color stop based on the given previous color
+// and parent gradient string.
+func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	cnm := par
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
@@ -278,22 +279,25 @@ func parseColorStop(stop *Stop, prevColor color.RGBA, par string) error {
 		}
 		stop.Pos = off
 	}
-	// color blending doesn't work well in pre-multiplied alpha RGB space!
-	if IsNil(prevColor) && strings.HasPrefix(cnm, "clearer-") {
-		pcts := strings.TrimPrefix(cnm, "clearer-")
-		pct, _ := laser.ToFloat(pcts)
-		stop.Opacity = (100.0 - float32(pct)) / 100.0
-		stop.Color = prevColor
-	} else if IsNil(prevColor) && cnm == "transparent" {
-		stop.Opacity = 0
-		stop.Color = prevColor
-	} else {
-		clr, err := FromString(cnm, prevColor)
-		if err != nil {
-			return fmt.Errorf("invalid color string %q: %w", cnm, err)
-		}
-		stop.Color = clr
+	// TODO(kai): do we need this?
+	/*
+		// color blending doesn't work well in pre-multiplied alpha RGB space!
+		if colors.IsNil(prevColor) && strings.HasPrefix(cnm, "clearer-") {
+			pcts := strings.TrimPrefix(cnm, "clearer-")
+			pct, _ := laser.ToFloat(pcts)
+			stop.Opacity = (100.0 - float32(pct)) / 100.0
+			stop.Color = prevColor
+		} else if colors.IsNil(prevColor) && cnm == "transparent" {
+			stop.Opacity = 0
+			stop.Color = prevColor
+		} else {
+	*/
+	clr, err := colors.FromString(cnm, prev)
+	if err != nil {
+		return fmt.Errorf("got invalid color string %q: %w", cnm, err)
 	}
+	stop.Color = clr
+	// }
 	return nil
 }
 
