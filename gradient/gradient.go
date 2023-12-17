@@ -9,57 +9,6 @@
 // Package gradient provides linear, radial, and conic color gradients.
 package gradient
 
-import (
-	"image/color"
-	"log/slog"
-	"sort"
-
-	"goki.dev/mat32/v2"
-)
-
-// Gradient represents a linear or radial gradient.
-type Gradient struct { //gti:add -setters
-
-	// the type of gradient (linear, radial, or conic)
-	Type GradientTypes
-
-	// the starting point for linear gradients (x1 and y1 in SVG)
-	Start mat32.Vec2
-
-	// the ending point for linear gradients (x2 and y2 in SVG)
-	End mat32.Vec2
-
-	// the center point for radial and conic gradients (cx and cy in SVG)
-	Center mat32.Vec2
-
-	// the focal point for radial gradients (fx and fy in SVG)
-	Focal mat32.Vec2
-
-	// the radius for radial gradients (r in SVG)
-	Radius float32
-
-	// the starting clockwise rotation of conic gradients (0-1) (<angle> in css)
-	Rotation float32
-
-	// the stops of the gradient
-	Stops []Stop
-
-	// the spread method used for the gradient
-	Spread SpreadMethods
-
-	// the units used for the gradient
-	Units GradientUnits
-
-	// the colorspace algorithm to use for blending colors
-	Blend BlendTypes
-
-	// the bounds of the gradient; this should typically not be set by end-users
-	Bounds mat32.Box2
-
-	// the matrix for the gradient; this should typically not be set by end-users
-	Matrix mat32.Mat2
-}
-
 // SpreadMethods are the methods used when a gradient reaches
 // its end but the object isn't fully filled.
 type SpreadMethods int32 //enums:enum
@@ -90,27 +39,7 @@ const (
 	UserSpaceOnUse
 )
 
-// CopyFrom copies from the given gradient, making new copies
-// of the stops instead of re-using pointers
-func (g *Gradient) CopyFrom(cp *Gradient) {
-	*g = *cp
-	if cp.Stops != nil {
-		g.Stops = make([]Stop, len(cp.Stops))
-		copy(g.Stops, cp.Stops)
-	}
-}
-
-// CopyStopsFrom copies the gradient stops from the given gradient,
-// if both have gradient stops
-func (g *Gradient) CopyStopsFrom(cp *Gradient) {
-	if len(g.Stops) == 0 || len(cp.Stops) == 0 {
-		return
-	}
-	if len(g.Stops) != len(cp.Stops) {
-		g.Stops = make([]Stop, len(cp.Stops))
-	}
-	copy(g.Stops, cp.Stops)
-}
+/*
 
 // SetGradientPoints sets the bounds of the gradient based on the given bounding
 // box, taking into account radial gradients and a standard linear left-to-right
@@ -302,3 +231,4 @@ func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
 		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
 	}
 }
+*/

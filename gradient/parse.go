@@ -15,14 +15,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"io"
 	"strconv"
 	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/mat32/v2"
-
-	"golang.org/x/net/html/charset"
 )
 
 // XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
@@ -301,6 +298,7 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	return nil
 }
 
+/*
 // ReadXML reads a XML-formatted [Full] from the given io.Reader
 func (f *Full) ReadXML(reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
@@ -470,6 +468,7 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	}
 	return nil
 }
+*/
 
 func readFraction(v string) (float32, error) {
 	v = strings.TrimSpace(v)
@@ -490,6 +489,7 @@ func readFraction(v string) (float32, error) {
 	return f, nil
 }
 
+/*
 func (f *Full) ReadGradAttr(attr xml.Attr) error {
 	switch attr.Name.Local {
 	case "gradientTransform":
@@ -518,6 +518,7 @@ func (f *Full) ReadGradAttr(attr xml.Attr) error {
 	}
 	return nil
 }
+*/
 
 // FixGradientStops applies the CSS rules to regularize the given gradient stops:
 // https://www.w3.org/TR/css3-images/#color-stop-syntax
