@@ -58,16 +58,31 @@ func (r *Radial) At(x, y int) color.Color {
 		return r.Stops[0].Color
 	}
 
+	c, f, rs := r.Center, r.Focal, r.Radius
+	if r.Units == ObjectBoundingBox {
+		c = r.Box.Min.Add(r.Box.Size().Mul(c))
+		f = r.Box.Min.Add(r.Box.Size().Mul(f))
+		rs.SetMul(r.Box.Size())
+	} else {
+		c = r.Transform.MulVec2AsPt(c)
+		f = r.Transform.MulVec2AsPt(f)
+		rs = r.Transform.MulVec2AsVec(rs)
+	}
+
 	if r.Center == r.Focal {
 		// When the center and focal are the same things are much simpler;
-		// pos is just distance from center scaled by r
-		v := mat32.V2(float32(x)+0.5, float32(y)+0.5)
-		d := v.Sub(r.Center)
-		pos := mat32.Sqrt(d.X*d.X/(r.Radius.X*r.Radius.X) + (d.Y*d.Y)/(r.Radius.Y*r.Radius.Y))
+		// pos is just distance from center scaled by radius
+		pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
+		if r.Units == ObjectBoundingBox {
+			pt = r.ObjectMatrix().MulVec2AsPt(pt)
+		}
+		d := pt.Sub(c)
+		pos := mat32.Sqrt(d.X*d.X/(rs.X*rs.X) + (d.Y*d.Y)/(rs.Y*rs.Y))
 		return r.GetColor(pos)
 	}
 
-	c, f := r.Center.Div(r.Radius), r.Focal.Div(r.Radius)
+	f.SetDiv(rs)
+	c.SetDiv(rs)
 
 	df := f.Sub(c)
 
@@ -80,8 +95,11 @@ func (r *Radial) At(x, y int) color.Color {
 		}
 	}
 
-	v := mat32.V2(float32(x)+0.5, float32(y)+0.5)
-	e := v.Div(r.Radius)
+	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
+	if r.Units == ObjectBoundingBox {
+		pt = r.ObjectMatrix().MulVec2AsPt(pt)
+	}
+	e := pt.Div(rs)
 
 	t1, intersects := RayCircleIntersectionF(e, f, c, 1)
 	if !intersects { // In this case, use the last stop color
