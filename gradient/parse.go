@@ -38,10 +38,10 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 // for each string passed to [FromString].
 var Cache map[string]image.Image
 
-// SetString sets the color spec from a standard CSS-formatted string in the
-// given Context. SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
-// See [Full.UnmarshalXML] for an XML-based version. If no Context is
-// provied, SetString uses [BaseContext] with [Transparent].
+// FromString parses the given CSS image/gradient/color string and returns the resulting image.
+// FromString is based on https://www.w3schools.com/css/css3_gradients.asp.
+// See [UnmarshalXML] for an XML-based version. If no Context is
+// provied, FromString uses [BaseContext] with [Transparent].
 func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	var ct colors.Context
 	if len(ctx) > 0 {
