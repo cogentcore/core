@@ -509,14 +509,7 @@ func ReadGradAttr(g Gradient, attr xml.Attr) error {
 			}
 	*/
 	case "spreadMethod":
-		switch strings.TrimSpace(attr.Value) {
-		case "pad":
-			gb.Spread = Pad
-		case "reflect":
-			gb.Spread = Reflect
-		case "repeat":
-			gb.Spread = Repeat
-		}
+		return gb.Spread.SetString(strings.TrimSpace(attr.Value))
 	}
 	return nil
 }
