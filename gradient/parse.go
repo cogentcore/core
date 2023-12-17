@@ -142,6 +142,7 @@ var GradientDegToSides = map[string]string{
 // (only the part inside of "linear-gradient(...)") (see
 // https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
 func (l *Linear) SetString(str string) error {
+	// TODO(kai): not fully following spec yet
 	plist := strings.Split(str, ", ")
 	var prevColor color.RGBA
 	stopIdx := 0
@@ -216,32 +217,29 @@ func (r *Radial) SetString(str string) error {
 outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
-		// origPar := par
+
+		// currently we just ignore circle and ellipse, but we should handle them at some point
+		par = strings.TrimPrefix(par, "circle")
+		par = strings.TrimPrefix(par, "ellipse")
+		par = strings.TrimLeft(par, " ")
 		switch {
-		case strings.Contains(par, "circle"), strings.Contains(par, "ellipse"):
-			r.Center.SetScalar(0.5)
-			r.Focal.SetScalar(0.5)
-			r.Radius.SetScalar(0.5)
 		case strings.HasPrefix(par, "at "):
-			// TODO(kai): fix this
-			/*
-				sides := strings.Split(par[3:], " ")
-				r.Center = mat32.Vec2{}
-				r.Focal = mat32.Vec2{}
-				r.Radius = mat32.Vec2{}
-					for _, side := range sides {
-						switch side {
-						case "bottom":
-							r.Bounds.Min.Y = 0
-						case "top":
-							r.Bounds.Min.Y = 1
-						case "right":
-							r.Bounds.Min.X = 0
-						case "left":
-							r.Bounds.Min.X = 1
-						}
-					}
-			*/
+			sides := strings.Split(par[3:], " ")
+			for _, side := range sides {
+				switch side {
+				case "bottom":
+					r.Center.Set(0.5, 1)
+				case "top":
+					r.Center.Set(0.5, 0)
+				case "right":
+					r.Center.Set(1, 0.5)
+				case "left":
+					r.Center.Set(0, 0.5)
+				case "center":
+					r.Center.Set(0.5, 0.5)
+				}
+				r.Focal = r.Center
+			}
 		case strings.HasPrefix(par, ")"):
 			break outer
 		default: // must be a color stop
