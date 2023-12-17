@@ -310,6 +310,9 @@ func (fn *Node) SetFileIcon() {
 	if !hasic {
 		ic = icons.Blank
 	}
+	if _, ok := fn.BranchPart(); !ok {
+		fn.Update()
+	}
 	if bp, ok := fn.BranchPart(); ok {
 		if bp.IconUnk != ic {
 			bp.SetIconsUpdate(icons.FolderOpen, icons.Folder, ic)
@@ -385,16 +388,16 @@ func (fn *Node) UpdateNode() error {
 		if repo != nil {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
+		fn.Update()
 		fn.SetFileIcon()
-		fn.SetNeedsRender(true)
 	}
 	// fmt.Println(fn, "updt node end")
 	return nil
 }
 
-func (fn *Node) UpdateBranchIcons() {
-	fn.SetFileIcon()
-}
+// func (fn *Node) UpdateBranchIcons() {
+// 	fn.SetFileIcon()
+// }
 
 // OpenDirs opens directories for selected views
 func (fn *Node) OpenDirs() {

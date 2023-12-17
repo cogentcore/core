@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"log/slog"
 
@@ -84,6 +85,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		return false, nil
 	}
 	if ic.SVG.Root.HasChildren() && ic.IconName == icon {
+		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
 	fnm := icon.Filename()
@@ -94,6 +96,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		return false, err
 	}
 	ic.IconName = icon
+	fmt.Println("icon set:", icon)
 	return true, nil
 
 }

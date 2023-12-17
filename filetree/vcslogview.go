@@ -15,6 +15,7 @@ import (
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/vci/v2"
 )
@@ -91,6 +92,18 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 			OnClick(func(e events.Event) {
 				cmt := lv.Log[tv.SelIdx]
 				lv.SetRevB(cmt.Rev)
+			})
+		gi.NewButton(m).SetText("Copy Revision ID").
+			SetTooltip("Copies the revision number / hash for this ").
+			OnClick(func(e events.Event) {
+				cmt := lv.Log[tv.SelIdx]
+				tv.EventMgr().ClipBoard().Write(mimedata.NewText(cmt.Rev))
+			})
+		gi.NewButton(m).SetText("Checkout Revision").
+			SetTooltip("Checks out this revision").
+			OnClick(func(e events.Event) {
+				cmt := lv.Log[tv.SelIdx]
+				grr.Log(repo.UpdateVersion(cmt.Rev))
 			})
 	}
 	tv.OnDoubleClick(func(e events.Event) {

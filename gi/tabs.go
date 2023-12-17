@@ -161,6 +161,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, nm)
 	ts.Update()
+	ts.SetNeedsLayout(true)
 	return frame
 }
 
