@@ -9,7 +9,6 @@
 package gradient
 
 import (
-	"image"
 	"image/color"
 
 	"goki.dev/mat32/v2"
@@ -26,7 +25,7 @@ type Linear struct { //gti:add -setters
 	End mat32.Vec2
 }
 
-var _ image.Image = &Linear{}
+var _ Gradient = &Linear{}
 
 // NewLinear returns a new downward-facing [Linear] gradient.
 func NewLinear() *Linear {

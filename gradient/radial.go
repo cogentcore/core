@@ -28,6 +28,8 @@ type Radial struct { //gti:add -setters
 	Radius mat32.Vec2
 }
 
+var _ Gradient = &Radial{}
+
 // NewRadial returns a new centered [Radial] gradient.
 func NewRadial() *Radial {
 	return &Radial{

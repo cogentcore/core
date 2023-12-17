@@ -17,6 +17,14 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+// Gradient is the interface that all gradient types satisfy.
+type Gradient interface {
+	image.Image
+
+	// AsBase returns the [Base] of the gradient
+	AsBase() *Base
+}
+
 // Base contains the data and logic common to all gradient types.
 type Base struct { //gti:add
 
@@ -43,6 +51,11 @@ type Stop struct {
 // AddStop adds a new stop with the given color and position to the gradient.
 func (b *Base) AddStop(color color.RGBA, pos float32) {
 	b.Stops = append(b.Stops, Stop{color, pos})
+}
+
+// AsBase returns the [Base] of the gradient
+func (b *Base) AsBase() *Base {
+	return b
 }
 
 // ColorModel returns the color model used by the gradient, which is [color.RGBAModel]
