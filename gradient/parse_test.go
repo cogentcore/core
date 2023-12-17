@@ -5,6 +5,7 @@
 package gradient
 
 import (
+	"bytes"
 	"image"
 	"reflect"
 	"testing"
@@ -48,6 +49,30 @@ func TestFromString(t *testing.T) {
 		grr.Test(t, err)
 		if !reflect.DeepEqual(have, test.want) {
 			t.Errorf("for %q: \n expected: \n %#v \n but got: \n %#v", test.str, test.want, have)
+		}
+	}
+}
+
+func TestReadXML(t *testing.T) {
+	type test struct {
+		str  string
+		want image.Image
+	}
+	tests := []test{
+		{`<linearGradient id="myGradient">
+		<stop offset="5%" stop-color="gold" />
+		<stop offset="95%" stop-color="red" />
+	  </linearGradient>`, NewLinear().
+			SetStart(mat32.V2(0, 0)).SetEnd(mat32.V2(1, 0)).
+			AddStop(colors.Gold, 0.05).
+			AddStop(colors.Red, 0.95)},
+	}
+	for _, test := range tests {
+		r := bytes.NewBufferString(test.str)
+		have, err := ReadXML(r)
+		grr.Test(t, err)
+		if !reflect.DeepEqual(have, test.want) {
+			t.Errorf("for %s: \n expected: \n %#v \n but got: \n %#v", test.str, test.want, have)
 		}
 	}
 }

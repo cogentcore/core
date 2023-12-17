@@ -316,7 +316,7 @@ func ReadXML(reader io.Reader) (image.Image, error) {
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			return UnmarshalXML(decoder, se, nil, nil)
+			return UnmarshalXML(decoder, se)
 			// todo: ignore rest?
 		}
 	}
@@ -324,8 +324,13 @@ func ReadXML(reader io.Reader) (image.Image, error) {
 }
 
 // UnmarshalXML parses the given XML gradient color data
-func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement, gb *Base, g image.Image) (image.Image, error) {
+func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error) {
 	start := &se
+
+	// gb is the base of the gradient being parsed
+	var gb *Base
+	// g is the actual value of the gradient being parsed
+	var g image.Image
 
 	for {
 		var t xml.Token
@@ -487,6 +492,7 @@ func ReadFraction(v string) (float32, error) {
 // ReadGradAttr reads the given xml attribute onto the given gradient.
 func ReadGradAttr(gb *Base, attr xml.Attr) error {
 	switch attr.Name.Local {
+	// TODO(kai): implement gradientTransform and gradientUnits
 	/*
 		case "gradientTransform":
 			tx := mat32.Identity2D()
