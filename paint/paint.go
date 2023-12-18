@@ -332,7 +332,9 @@ func (pc *Context) StrokePreserve() {
 // line cap, line join and dash settings. The path is cleared after this
 // operation.
 func (pc *Context) Stroke() {
-	pc.StrokePreserve()
+	if pc.HasStroke() {
+		pc.StrokePreserve()
+	}
 	pc.ClearPath()
 }
 
@@ -366,7 +368,9 @@ func (pc *Context) FillPreserve() {
 // Fill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is cleared after this operation.
 func (pc *Context) Fill() {
-	pc.FillPreserve()
+	if pc.HasFill() {
+		pc.FillPreserve()
+	}
 	pc.ClearPath()
 }
 
