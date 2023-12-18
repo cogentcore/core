@@ -317,7 +317,7 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 }
 
 // ReadXML reads a XML-formatted gradient color from the given io.Reader
-func ReadXML(reader io.Reader) (image.Image, error) {
+func ReadXML(reader io.Reader) (Gradient, error) {
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
 
@@ -339,7 +339,7 @@ func ReadXML(reader io.Reader) (image.Image, error) {
 }
 
 // UnmarshalXML parses the given XML gradient color data
-func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (image.Image, error) {
+func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (Gradient, error) {
 	start := &se
 
 	// the gradient currently being parsed
