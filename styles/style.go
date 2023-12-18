@@ -469,7 +469,7 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 			if abg == nil {
 				abg = clone.AsRGBA(bg)
 			}
-			draw.Draw(abg, abg.Bounds(), colors.Uniform(sclr), image.Point{}, draw.Over)
+			draw.Draw(abg, abg.Bounds(), colors.C(sclr), image.Point{}, draw.Over)
 		}
 
 		return abg

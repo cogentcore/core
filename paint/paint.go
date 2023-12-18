@@ -653,7 +653,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 
 // 	// set the color if it is not the same as the already set color
 // 	if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
+// 		pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Top
 // 	pc.LineTo(x+w, y)
@@ -665,7 +665,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Right != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Right)
+// 		pc.StrokeStyle.Color = colors.C(bs.Color.Right)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Right
 // 	pc.LineTo(x+w, y+h)
@@ -676,7 +676,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Bottom)
+// 		pc.StrokeStyle.Color = colors.C(bs.Color.Bottom)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Bottom
 // 	pc.LineTo(x, y+h)
@@ -687,7 +687,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Left != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Left)
+// 		pc.StrokeStyle.Color = colors.C(bs.Color.Left)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Left
 // 	pc.LineTo(x, y)
@@ -700,7 +700,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 // 		// set the color if it is not the same as the already set color
 // 		if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 			pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
+// 			pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 // 		}
 // 		pc.StrokeStyle.Width = bs.Width.Top
 // 		pc.DrawConsistentRoundedRectangle(x, y, w, h, bs.Radius.Dots())

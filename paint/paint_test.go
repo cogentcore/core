@@ -43,7 +43,7 @@ func TestRender(t *testing.T) {
 		bs.ToDots(&pc.UnContext)
 
 		// first, draw a frame around the entire image
-		// pc.StrokeStyle.Color = colors.Uniform(blk)
+		// pc.StrokeStyle.Color = colors.C(blk)
 		pc.FillStyle.Color = colors.C(colors.White)
 		// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
 		pc.DrawBorder(0, 0, 300, 300, bs)
