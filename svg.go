@@ -32,14 +32,14 @@ type SVG struct {
 	// the description of the svg
 	Desc string `xml:"desc"`
 
-	// fill the viewport with background-color
+	// fill the viewport with Background
 	Fill bool
 
-	// color to fill background if Fill set
-	BackgroundColor colors.Full
+	// image/color to fill background with if Fill is on
+	Background image.Image
 
 	// Color can be set to provide a default Fill and Stroke Color value
-	Color colors.Full
+	Color image.Image
 
 	// Size is size of image, Pos is offset within any parent viewport.
 	// Node bounding boxes are based on 0 Pos offset within Pixels image
@@ -103,7 +103,6 @@ func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
 	sv.Geom.Size = sz
 	sv.Scale = 1
-	sv.BackgroundColor.SetSolid(colors.White)
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
 	sv.Root.InitName(&sv.Root, "svg")
@@ -138,7 +137,7 @@ func (sv *SVG) CopyFrom(fr *SVG) {
 	sv.Title = fr.Title
 	sv.Desc = fr.Desc
 	sv.Fill = fr.Fill
-	sv.BackgroundColor = fr.BackgroundColor
+	sv.Background = fr.Background
 	sv.Geom = fr.Geom
 	sv.Norm = fr.Norm
 	sv.InvertY = fr.InvertY
@@ -163,13 +162,14 @@ func (sv *SVG) DeleteAll() {
 // Color has support for special color names that are relative to
 // this current color.
 func (sv *SVG) Base() color.RGBA {
-	return sv.BackgroundColor.Solid
+	return colors.AsRGBA(colors.ToUniform(sv.Background))
 }
 
-// FullByURL finds a Node by an element name (URL-like path), and
-// attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
-// Used for colorspec styling based on url() value.
-func (sv *SVG) FullByURL(url string) *colors.Full {
+// ImageByURL finds a Node by an element name (URL-like path), and
+// attempts to convert it to an [image.Image].
+// Used for color styling based on url() value.
+func (sv *SVG) ImageByURL(url string) image.Image {
+	// TODO(kai): support taking snapshot of element as image in SVG.ImageByURL
 	if sv == nil {
 		return nil
 	}
@@ -178,12 +178,12 @@ func (sv *SVG) FullByURL(url string) *colors.Full {
 	def := sv.FindDefByName(val)
 	if def != nil {
 		if grad, ok := def.(*Gradient); ok {
-			return &grad.Grad
+			return grad.Grad
 		}
 	}
 	ne := sv.FindNamedElement(val)
 	if grad, ok := ne.(*Gradient); ok {
-		return &grad.Grad
+		return grad.Grad
 	}
 	return nil
 }
@@ -200,10 +200,11 @@ func (sv *SVG) Style() {
 	})
 
 	sv.Root.Paint.Defaults()
-	if !sv.Color.IsNil() {
-		c := sv.Color
-		sv.Root.SetColorProps("stroke", colors.AsHex(c.Solid))
-		sv.Root.SetColorProps("fill", colors.AsHex(c.Solid))
+	if sv.Color != nil {
+		// TODO(kai/imageColor): handle non-uniform colors here
+		c := colors.ToUniform(sv.Color)
+		sv.Root.SetColorProps("stroke", colors.AsHex(c))
+		sv.Root.SetColorProps("fill", colors.AsHex(c))
 	}
 	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
 
@@ -237,7 +238,7 @@ func (sv *SVG) Render() {
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sv.Geom.Size), sv.BackgroundColor)
+	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sv.Geom.Size), sv.Background)
 	pc.Unlock()
 }
 
