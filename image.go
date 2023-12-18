@@ -7,7 +7,6 @@ package colors
 import (
 	"image"
 	"image/color"
-	"math"
 )
 
 // Uniform returns a new uniform [image.Image] filled completely with the given color.
@@ -38,7 +37,7 @@ func (p *pattern) ColorModel() color.Model {
 }
 
 func (p *pattern) Bounds() image.Rectangle {
-	return image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
+	return image.Rect(-1e9, -1e9, 1e9, 1e9)
 }
 
 func (p *pattern) At(x, y int) color.Color {

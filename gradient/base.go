@@ -11,7 +11,6 @@ package gradient
 import (
 	"image"
 	"image/color"
-	"math"
 
 	"goki.dev/colors"
 	"goki.dev/mat32/v2"
@@ -84,7 +83,7 @@ func (b *Base) ColorModel() color.Model {
 
 // Bounds returns the bounds of the gradient image, which are infinite.
 func (b *Base) Bounds() image.Rectangle {
-	return image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
+	return image.Rect(-1e9, -1e9, 1e9, 1e9)
 }
 
 // ObjectMatrix returns the effective object transformation matrix for a gradient
