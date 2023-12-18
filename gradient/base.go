@@ -86,6 +86,31 @@ func (b *Base) Bounds() image.Rectangle {
 	return image.Rect(-1e9, -1e9, 1e9, 1e9)
 }
 
+// CopyFrom copies from the given gradient (cp) onto this gradient (g),
+// making new copies of the stops instead of re-using pointers
+func CopyFrom(g Gradient, cp Gradient) {
+	switch g := g.(type) {
+	case *Linear:
+		*g = *cp.(*Linear)
+	case *Radial:
+		*g = *cp.(*Radial)
+	}
+	g.AsBase().CopyStopsFrom(cp.AsBase())
+}
+
+// CopyStopsFrom copies the base gradient stops from the given base gradient,
+// if both have gradient stops
+func (b *Base) CopyStopsFrom(cp *Base) {
+	if len(b.Stops) == 0 || len(cp.Stops) == 0 {
+		b.Stops = nil
+		return
+	}
+	if len(b.Stops) != len(cp.Stops) {
+		b.Stops = make([]Stop, len(cp.Stops))
+	}
+	copy(b.Stops, cp.Stops)
+}
+
 // ObjectMatrix returns the effective object transformation matrix for a gradient
 // with [Units] of [ObjectBoundingBox].
 func (b *Base) ObjectMatrix() mat32.Mat2 {
