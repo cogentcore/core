@@ -95,6 +95,8 @@ func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
 // OnShow adds an event listener function for [events.Show] events on
 // the widget's Scene. Directly listening to Show events for non-scene
 // widgets does not work, so it must go through the Scene.
+// This must typically be called in OnAdd() or later, and
+// definitely NOT in OnInit, because only then will the Scene be set.
 func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
 	return wb.Sc.On(events.Show, fun)
 }
