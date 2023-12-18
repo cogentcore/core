@@ -384,16 +384,16 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 // StyleDefault is default style can be used when property specifies "default"
 var StyleDefault Style
 
-// ComputeActualBackgroundColor sets [Style.ActualBackground] based on the
+// ComputeActualBackground sets [Style.ActualBackground] based on the
 // given parent actual background and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColor(pabg image.Image) {
-	s.ActualBackground = s.ComputeActualBackgroundColorFor(s.Background, pabg)
+func (s *Style) ComputeActualBackground(pabg image.Image) {
+	s.ActualBackground = s.ComputeActualBackgroundFor(s.Background, pabg)
 }
 
-// ComputeActualBackgroundColorFor returns the actual background for
+// ComputeActualBackgroundFor returns the actual background for
 // the given background based on the given parent actual background
 // and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColorFor(bg, pabg image.Image) image.Image {
+func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 	if bg == nil {
 		bg = pabg
 	}

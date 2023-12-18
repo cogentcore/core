@@ -22,7 +22,7 @@ func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, textfields, etc in a GUI.
 func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
-	st.ComputeActualBackgroundColor(pabg)
+	st.ComputeActualBackground(pabg)
 
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
@@ -36,7 +36,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	}
 
 	// note that we always set the fill opacity to 1 because we are already applying
-	// the opacity of the background color in ComputeActualBackgroundColor above
+	// the opacity of the background color in ComputeActualBackground above
 	pc.FillStyle.Opacity = 1
 
 	if st.FillMargin {
