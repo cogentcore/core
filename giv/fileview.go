@@ -263,13 +263,6 @@ func (fv *FileView) ConfigPathBar() {
 		return
 	}
 
-	gi.NewLabel(pr, "path-lbl")
-	gi.NewChooser(pr, "path")
-	gi.NewButton(pr, "path-up")
-	gi.NewButton(pr, "path-ref")
-	gi.NewButton(pr, "path-fav")
-	gi.NewButton(pr, "new-folder")
-
 	gi.NewLabel(pr, "path-lbl").SetText("Path:").
 		SetTooltip("Path to look for files in: can select from list of recent paths, or edit a value directly")
 	pf := gi.NewChooser(pr, "path").SetEditable(true)
