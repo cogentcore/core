@@ -4,7 +4,6 @@ package xyzv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
@@ -15,7 +14,7 @@ var Scene3DType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/xyzv.Scene3D",
 	ShortName:  "xyzv.Scene3D",
 	IDName:     "scene-3-d",
-	Doc:        "Scene3D contains a svg.SVG element.\nThe rendered version is cached for a given size.",
+	Doc:        "Scene3D is a Widget that manages a xyz.Scene.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/xyz.Scene", LocalType: "*xyz.Scene", Doc: "Scene is the 3D Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -54,12 +53,6 @@ func (t *Scene3D) SetTooltip(v string) *Scene3D {
 // SetClass sets the [Scene3D.Class]
 func (t *Scene3D) SetClass(v string) *Scene3D {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Scene3D.PriorityEvents]
-func (t *Scene3D) SetPriorityEvents(v []events.Types) *Scene3D {
-	t.PriorityEvents = v
 	return t
 }
 
