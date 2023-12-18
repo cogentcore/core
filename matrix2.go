@@ -102,6 +102,7 @@ func Skew2D(x, y float32) Mat2 {
 	}
 }
 
+// Mul returns a*b
 func (a Mat2) Mul(b Mat2) Mat2 {
 	return Mat2{
 		a.XX*b.XX + a.YX*b.XY,
@@ -111,6 +112,11 @@ func (a Mat2) Mul(b Mat2) Mat2 {
 		a.X0*b.XX + a.Y0*b.XY + b.X0,
 		a.X0*b.YX + a.Y0*b.YY + b.Y0,
 	}
+}
+
+// SetMul sets a to a*b
+func (a *Mat2) SetMul(b Mat2) {
+	*a = a.Mul(b)
 }
 
 // MulVec2AsVec multiplies the Vec2 as a vector without adding translations.
@@ -146,6 +152,11 @@ func (a Mat2) MulCtr(b Mat2, ctr Vec2) Mat2 {
 	rv.X0 += ctr.X
 	rv.Y0 += ctr.Y
 	return rv
+}
+
+// SetMulCtr sets the matrix to the result of [Mat2.MulCtr].
+func (a *Mat2) SetMulCtr(b Mat2, ctr Vec2) {
+	*a = a.MulCtr(b, ctr)
 }
 
 // TFixed transforms a fixed.Point26_6 by the matrix
