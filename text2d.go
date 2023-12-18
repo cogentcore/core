@@ -60,7 +60,7 @@ func (txt *Text2D) Defaults() {
 	txt.Styles.Font.Size.Pt(36)
 	txt.Styles.Margin.Set(units.Px(2))
 	txt.Styles.Color = colors.Scheme.OnSurface
-	txt.Styles.BackgroundColor.SetSolid(colors.Transparent)
+	txt.Styles.Background = nil
 	txt.Mat.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
 
@@ -154,7 +154,7 @@ func (txt *Text2D) RenderText() {
 	pt.Defaults()
 	pt.FromStyle(st)
 	ctx := &paint.Context{State: rs, Paint: &pt}
-	draw.Draw(img, bounds, &image.Uniform{st.BackgroundColor.Solid}, image.Point{}, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{st.Background.Solid}, image.Point{}, draw.Src)
 	txt.TxtRender.Render(ctx, txt.TxtPos)
 	rs.PopBounds()
 }
@@ -193,7 +193,7 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	return txt.Styles.BackgroundColor.Solid.A < 255
+	return txt.Styles.Background.Solid.A < 255
 }
 
 func (txt *Text2D) RenderClass() RenderClasses {
