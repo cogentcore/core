@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -16,13 +17,13 @@ import (
 /////////////////////////////////////////////////////////////////////////////
 //  Gradient
 
-// Gradient is used for holding a specified color gradient (ColorSpec)
-// name is id for lookup in url
+// Gradient is used for holding a specified color gradient.
+// The name is the id for lookup in url
 type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad colors.Full
+	Grad gradient.Gradient
 
 	// name of another gradient to get stops from
 	StopsName string
@@ -37,14 +38,14 @@ func (gr *Gradient) CopyFieldsFrom(frm any) {
 
 // GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientTypeName() string {
-	if gr.Grad.Gradient != nil && gr.Grad.Gradient.Type == colors.RadialGradient {
+	if _, ok := gr.Grad.(*gradient.Radial); ok {
 		return "radialGradient"
 	}
 	return "linearGradient"
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//		SVG gradient mgmt
+//		SVG gradient management
 
 // GradientByName returns the gradient of given name, stored on SVG node
 func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
@@ -68,14 +69,14 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransform(xf)
+			gr.Grad.AsBase().Transform.SetMul(xf)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransform(xf)
+			gr.Grad.AsBase().Transform.SetMul(xf)
 		}
 	}
 }
@@ -89,14 +90,14 @@ func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransformPt(xf, pt)
+			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransformPt(xf, pt)
+			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt)
 		}
 	}
 }
@@ -243,9 +244,9 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	gr := sv.Defs.NewChild(GradientType, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {
-		gr.Grad.Gradient = colors.NewRadialGradient()
+		gr.Grad.Gradient = gradient.NewRadial()
 	} else {
-		gr.Grad.Gradient = colors.NewLinearGradient()
+		gr.Grad.Gradient = gradient.NewLinear()
 	}
 	return gr, url
 }
