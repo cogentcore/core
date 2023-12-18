@@ -148,7 +148,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 		s.Grow.Set(1, 0)
 		s.Direction = styles.Column
 		s.Border.Radius = styles.BorderRadiusLarge
-		s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
+		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 	})
 	tr := gi.NewLayout(cfr, "tr").Style(func(s *styles.Style) {
 		s.Align.Items = styles.Center
