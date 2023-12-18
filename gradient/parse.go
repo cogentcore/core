@@ -118,6 +118,21 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	return nil, fmt.Errorf("got unknown gradient type %q", gtyp)
 }
 
+// FromAny returns the color image specified by the given value of any type in the
+// given Context. It handles values of types [color.Color], [image.Image], and string.
+// If no Context is provided, it uses [BaseContext] with [Transparent].
+func FromAny(val any, ctx ...colors.Context) (image.Image, error) {
+	switch v := val.(type) {
+	case color.Color:
+		return colors.Uniform(v), nil
+	case image.Image:
+		return v, nil
+	case string:
+		return FromString(v, ctx...)
+	}
+	return nil, fmt.Errorf("gradient.FromAny: got unsupported type %T", val)
+}
+
 // GradientDegToSides maps gradient degree notation to side notation
 var GradientDegToSides = map[string]string{
 	"0deg":    "top",
