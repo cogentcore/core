@@ -514,7 +514,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					}
 				}
-				grad.Grad, err = gradient.UnmarshalXML(decoder, se)
+				err = gradient.UnmarshalXML(&grad.Grad, decoder, se)
 				if err != nil {
 					return err
 				}
@@ -538,7 +538,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					}
 				}
-				grad.Grad, err = gradient.UnmarshalXML(decoder, se)
+				err = gradient.UnmarshalXML(&grad.Grad, decoder, se)
 				if err != nil {
 					return err
 				}
