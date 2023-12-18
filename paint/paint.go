@@ -366,10 +366,31 @@ func (pc *Context) Fill() {
 	pc.ClearPath()
 }
 
+// BlitBox performs an optimized overwriting fill of a square region with a uniform color if
+// the given image is an [image.Uniform]. If it is not, it calls [Context.DrawRectangle]
+// and [Context.Fill] to fill the region.
+func (pc *Context) BlitBox(pos, size mat32.Vec2, img image.Image) {
+	if img == nil {
+		pc.BlitBoxColor(pos, size, color.RGBA{})
+		return
+	}
+	if u, ok := img.(*image.Uniform); ok {
+		pc.BlitBoxColor(pos, size, u.C)
+		return
+	}
+	pc.FillStyle.Color = img
+	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
+	pc.Fill()
+}
+
 // FillBox performs an optimized fill of a square region with a uniform color if
 // the given image is an [image.Uniform]. If it is not, it calls [Context.DrawRectangle]
 // and [Context.Fill] to fill the region.
 func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
+	if img == nil {
+		pc.FillBoxColor(pos, size, color.RGBA{})
+		return
+	}
 	if u, ok := img.(*image.Uniform); ok {
 		pc.FillBoxColor(pos, size, u.C)
 		return
