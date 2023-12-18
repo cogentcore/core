@@ -338,7 +338,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
 
-	pc.Off = !pc.Display || pc.HasNoStrokeOrFill()
+	pc.Off = !pc.Display || (pc.StrokeStyle.Color == nil && pc.FillStyle.Color == nil)
 }
 
 // AggCSS aggregates css properties
@@ -403,7 +403,7 @@ func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
 // LocalLineWidth returns the line width in local coordinates
 func (g *NodeBase) LocalLineWidth() float32 {
 	pc := &g.Paint
-	if !pc.StrokeStyle.On {
+	if pc.StrokeStyle.Color == nil {
 		return 0
 	}
 	return pc.StrokeStyle.Width.Dots
