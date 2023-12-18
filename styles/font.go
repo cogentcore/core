@@ -114,11 +114,6 @@ func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Co
 	// 	fs.InheritFields(parent)
 	// }
 	fs.StyleFromProps(parent, props, ctxt)
-	fs.SetStylePost(props)
-}
-
-func (fs *Font) SetStylePost(props map[string]any) {
-
 }
 
 /*

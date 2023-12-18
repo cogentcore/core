@@ -114,10 +114,6 @@ func (ts *Text) InheritFields(par *Text) {
 	ts.TabSize = par.TabSize
 }
 
-func (ts *Text) SetStylePost(props map[string]any) {
-
-}
-
 // EffLineHeight returns the effective line height for the given
 // font height, handling the [LineHeightNormal] special case.
 func (ts *Text) EffLineHeight(fontHeight float32) float32 {
