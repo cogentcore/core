@@ -7,6 +7,7 @@ package paint
 import (
 	"image"
 
+	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 )
@@ -60,13 +61,13 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// CSS effectively goes in reverse order
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
-			pc.StrokeStyle.SetColor(nil)
+			pc.StrokeStyle.Color = nil
 			// note: diving by 2 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
 			// This does not modify the value of the original shadow
 			// because it is not a pointer.
 			shadow.Color.A /= 2
-			pc.FillStyle.SetColor(shadow.Color)
+			pc.FillStyle.Color = colors.Uniform(shadow.Color)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
 
@@ -92,7 +93,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	if rad.IsZero() {
 		pc.FillBox(mpos, msz, st.ActualBackground)
 	} else {
-		pc.FillStyle.SetImage(st.ActualBackground)
+		pc.FillStyle.Color = st.ActualBackground
 		// no border -- fill onl
 		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
 		pc.Fill()
@@ -103,7 +104,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	// pc.FillStyle.SetImage(&st.BackgroundColor)
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
-	pc.FillStyle.SetColor(nil)
+	pc.FillStyle.Color = nil
 	// now that we have drawn background color
 	// above, we can draw the border
 	pc.DrawBox(mpos, msz, st.Border)

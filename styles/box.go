@@ -219,6 +219,8 @@ type Shadow struct { //gti:add
 	// prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size
 	Spread units.Value `xml:".spread"`
 
+	// TODO(kai/imageColor)
+
 	// prop: .color = color of the shadow
 	Color color.RGBA `xml:".color"`
 

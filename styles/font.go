@@ -469,7 +469,6 @@ func (fr *FontRender) SetStyleProps(parent *FontRender, props map[string]any, ct
 	}
 	fr.Font.StyleFromProps(pfont, props, ctxt)
 	fr.StyleRenderFromProps(parent, props, ctxt)
-	fr.SetStylePost(props)
 }
 
 func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any, ctxt colors.Context) {
