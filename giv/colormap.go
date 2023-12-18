@@ -76,13 +76,13 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 
 		cmn, ok := laser.NonPtrValue(vv.Value).Interface().(ColorMapName)
 		if !ok || cmn == "" {
-			s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
+			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
 		}
 		cm, ok := colormap.AvailMaps[string(cmn)]
 		if !ok {
 			slog.Error("got invalid color map name", "name", cmn)
-			s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
+			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
 		}
 		g := gradient.NewLinear().SetEnd(mat32.V2(1, 0))

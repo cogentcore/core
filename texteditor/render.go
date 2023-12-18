@@ -456,7 +456,7 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 		pc.FillBox(sbox, bsz, ed.LineNumberColor)
 	}
 
-	fst.Background = colors.Uniform(nil)
+	fst.Background = colors.C(nil)
 	lfmt := fmt.Sprintf("%d", ed.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)

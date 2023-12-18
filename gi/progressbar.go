@@ -54,10 +54,10 @@ func (pb *ProgressBar) SetStyles() {
 	pb.SetReadOnly(true)
 
 	pb.Style(func(s *styles.Style) {
-		pb.ValueColor = colors.Uniform(colors.Scheme.Primary.Base)
-		pb.ThumbColor = colors.Uniform(colors.Scheme.Primary.Base)
+		pb.ValueColor = colors.C(colors.Scheme.Primary.Base)
+		pb.ThumbColor = colors.C(colors.Scheme.Primary.Base)
 
-		s.Background = colors.Uniform(colors.Scheme.SurfaceContainerHighest)
+		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 
 		s.Color = colors.Scheme.OnSurface
 

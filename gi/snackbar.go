@@ -63,7 +63,7 @@ func (sc *Scene) SnackbarStyles() {
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))
-		s.Background = colors.Uniform(colors.Scheme.InverseSurface)
+		s.Background = colors.C(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
 		s.Align.Content = styles.Center

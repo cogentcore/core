@@ -88,7 +88,7 @@ func (cv *ColorView) ConfigWidget() {
 	})
 	hue.Style(func(s *styles.Style) {
 		hue.ValueColor = nil
-		hue.ThumbColor = colors.Uniform(cv.Color)
+		hue.ThumbColor = colors.C(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
@@ -107,7 +107,7 @@ func (cv *ColorView) ConfigWidget() {
 	})
 	chroma.Style(func(s *styles.Style) {
 		chroma.ValueColor = nil
-		chroma.ThumbColor = colors.Uniform(cv.Color)
+		chroma.ThumbColor = colors.C(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
@@ -126,7 +126,7 @@ func (cv *ColorView) ConfigWidget() {
 	})
 	tone.Style(func(s *styles.Style) {
 		tone.ValueColor = nil
-		tone.ThumbColor = colors.Uniform(cv.Color)
+		tone.ThumbColor = colors.C(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
@@ -611,7 +611,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		// we need to display button as non-transparent
 		// so that it can be seen
 		dclr := colors.WithAF32(clr, 1)
-		s.Background = colors.Uniform(dclr)
+		s.Background = colors.C(dclr)
 		s.Color = colors.AsRGBA(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
 	bt.Config()

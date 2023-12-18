@@ -135,7 +135,7 @@ func (ed *Editor) LayoutAllLines() {
 
 	sty := &ed.Styles
 	fst := sty.FontRender()
-	fst.Background = colors.Uniform(nil)
+	fst.Background = colors.C(nil)
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
@@ -178,7 +178,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	}
 	sty := &ed.Styles
 	fst := sty.FontRender()
-	fst.Background = colors.Uniform(nil)
+	fst.Background = colors.C(nil)
 	mxwd := float32(ed.LinesSize.X)
 	needLay := false
 

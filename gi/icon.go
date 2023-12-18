@@ -149,7 +149,7 @@ func (ic *Icon) RenderSVG() {
 	sv.Resize(sz) // does Config if needed
 
 	// TODO(kai): what about gradient icons?
-	sv.Color = colors.Uniform(clr)
+	sv.Color = colors.C(clr)
 
 	sv.Scale = 1
 	sv.Render()

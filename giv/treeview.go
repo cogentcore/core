@@ -641,7 +641,7 @@ func (tv *TreeView) RenderNode() {
 	// must use workaround act values
 	st.StateLayer = tv.actStateLayer
 	if st.Is(states.Selected) {
-		st.Background = colors.Uniform(colors.Scheme.Select.Container)
+		st.Background = colors.C(colors.Scheme.Select.Container)
 	}
 	tv.Styles.ComputeActualBackground(pabg)
 
@@ -660,7 +660,7 @@ func (tv *TreeView) Render() {
 			// we must copy from actual values in parent
 			tv.Parts.Styles.StateLayer = tv.actStateLayer
 			if tv.StateIs(states.Selected) {
-				tv.Parts.Styles.Background = colors.Uniform(colors.Scheme.Select.Container)
+				tv.Parts.Styles.Background = colors.C(colors.Scheme.Select.Container)
 			}
 			tv.RenderParts()
 		}

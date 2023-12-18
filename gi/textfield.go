@@ -170,9 +170,9 @@ func (tf *TextField) SetStyles() {
 	tf.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		tf.CursorWidth.Dp(1)
-		tf.SelectColor = colors.Uniform(colors.Scheme.Select.Container)
+		tf.SelectColor = colors.C(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
-		tf.CursorColor = colors.Uniform(colors.Scheme.Primary.Base)
+		tf.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
@@ -197,7 +197,7 @@ func (tf *TextField) SetStyles() {
 			s.Border.Width.Zero()
 			s.Border.Color.Zero()
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
-			s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
+			s.Background = colors.C(colors.Scheme.SurfaceContainer)
 
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)
@@ -230,7 +230,7 @@ func (tf *TextField) SetStyles() {
 			s.Background = nil
 		}
 		if s.Is(states.Selected) {
-			s.Background = colors.Uniform(colors.Scheme.Select.Container)
+			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
 	tf.OnWidgetAdded(func(w Widget) {

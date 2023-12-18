@@ -50,14 +50,14 @@ func TestParentActualBackground(t *testing.T) {
 
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
-		s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray"))
 
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
-		s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	fr.SetState(true, states.Hovered)
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_pre"))
@@ -65,7 +65,7 @@ func TestParentActualBackground(t *testing.T) {
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
-		s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_post"), func() {
 		fr.SetState(true, states.Hovered)

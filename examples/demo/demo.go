@@ -296,12 +296,12 @@ func makeLayouts(ts *gi.Tabs) {
 
 	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
-		s.Background = colors.Uniform(colors.Scheme.SurfaceContainerLow)
+		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(left).SetType(gi.LabelHeadlineMedium).SetText("Left")
 	right := gi.NewFrame(sv).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
-		s.Background = colors.Uniform(colors.Scheme.SurfaceContainerLow)
+		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 	})
 	gi.NewLabel(right).SetType(gi.LabelHeadlineMedium).SetText("Right")
 }

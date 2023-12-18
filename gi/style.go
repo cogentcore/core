@@ -170,7 +170,7 @@ func (wb *WidgetBase) SetStyles() {
 			s.Border = s.MaxBorder
 		}
 		if s.Is(states.Selected) {
-			s.Background = colors.Uniform(colors.Scheme.Select.Container)
+			s.Background = colors.C(colors.Scheme.Select.Container)
 			s.Color = colors.Scheme.Select.OnContainer
 		}
 	})

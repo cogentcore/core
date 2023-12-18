@@ -44,7 +44,7 @@ func (hl *Handle) SetStyles() {
 		s.SetAbilities(true, abilities.Pressable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 
 		// TODO(kai/margin): this is intentionally designed to work with the
 		// current way margin is handled, but will break after it is fixed.

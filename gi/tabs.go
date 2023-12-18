@@ -82,7 +82,7 @@ func (ts *Tabs) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Gap.Zero()
-				s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
+				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 
 				// s.Border.Style.Set(styles.BorderNone)
 				// s.Border.Style.Bottom = styles.BorderSolid

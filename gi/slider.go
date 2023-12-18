@@ -181,19 +181,19 @@ func (sr *Slider) SetStyles() {
 			s.Min.X.Em(1)
 		}
 		if sr.Type == SliderSlider {
-			sr.ValueColor = colors.Uniform(colors.Scheme.Primary.Base)
-			sr.ThumbColor = colors.Uniform(colors.Scheme.Primary.Base)
+			sr.ValueColor = colors.C(colors.Scheme.Primary.Base)
+			sr.ThumbColor = colors.C(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
-			s.Background = colors.Uniform(colors.Scheme.SurfaceVariant)
+			s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		} else {
 			if sr.Dim == mat32.X {
 				s.Min.Y = s.ScrollBarWidth
 			} else {
 				s.Min.X = s.ScrollBarWidth
 			}
-			sr.ValueColor = colors.Uniform(colors.Scheme.OutlineVariant)
-			sr.ThumbColor = colors.Uniform(colors.Scheme.OutlineVariant)
-			s.Background = colors.Uniform(colors.Scheme.SurfaceContainerLow)
+			sr.ValueColor = colors.C(colors.Scheme.OutlineVariant)
+			sr.ThumbColor = colors.C(colors.Scheme.OutlineVariant)
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}
 
 		// sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)

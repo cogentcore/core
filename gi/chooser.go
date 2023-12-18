@@ -129,7 +129,7 @@ func (ch *Chooser) SetStyles() {
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		switch ch.Type {
 		case ChooserFilled:
-			s.Background = colors.Uniform(colors.Scheme.Secondary.Container)
+			s.Background = colors.C(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)

@@ -188,10 +188,10 @@ func (ed *Editor) SetStyles() {
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		ed.CursorWidth.Dp(2)
-		ed.LineNumberColor = colors.Uniform(colors.Scheme.SurfaceContainer)
-		ed.SelectColor = colors.Uniform(colors.Scheme.Select.Container)
-		ed.HighlightColor = colors.Uniform(colors.Scheme.Warn.Container)
-		ed.CursorColor = colors.Uniform(colors.Scheme.Primary.Base)
+		ed.LineNumberColor = colors.C(colors.Scheme.SurfaceContainer)
+		ed.SelectColor = colors.C(colors.Scheme.Select.Container)
+		ed.HighlightColor = colors.C(colors.Scheme.Warn.Container)
+		ed.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
 		s.Cursor = cursors.Text
 		if gi.Prefs.Editor.WordWrap {
@@ -213,9 +213,9 @@ func (ed *Editor) SetStyles() {
 		s.Color = colors.Scheme.OnSurface
 
 		if s.State.Is(states.Focused) {
-			s.Background = colors.Uniform(colors.Scheme.Surface)
+			s.Background = colors.C(colors.Scheme.Surface)
 		} else {
-			s.Background = colors.Uniform(colors.Scheme.SurfaceContainerHigh)
+			s.Background = colors.C(colors.Scheme.SurfaceContainerHigh)
 		}
 	})
 }

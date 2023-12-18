@@ -169,7 +169,7 @@ func (sc *Scene) SetStyles() {
 	sc.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		s.Cursor = cursors.Arrow
-		s.Background = colors.Uniform(colors.Scheme.Background)
+		s.Background = colors.C(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
