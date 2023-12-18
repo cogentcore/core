@@ -9,6 +9,14 @@
 // Package gradient provides linear, radial, and conic color gradients.
 package gradient
 
+import (
+	"image"
+	"image/color"
+
+	"github.com/anthonynsimon/bild/adjust"
+	"goki.dev/colors"
+)
+
 // Spreads are the spread methods used when a gradient reaches
 // its end but the object isn't yet fully filled.
 type Spreads int32 //enums:enum -transform lower
@@ -39,6 +47,26 @@ const (
 	// (ie: actual SVG/gi coordinates).
 	UserSpaceOnUse
 )
+
+// ApplyOpacity applies the given opacity to the given image, handling
+// [image.Uniform] and [Gradient] as special cases.
+func ApplyOpacity(img image.Image, opacity float32) image.Image {
+	switch img := img.(type) {
+	case *image.Uniform:
+		img.C = colors.ApplyOpacity(img.C, opacity)
+	case Gradient:
+		gb := img.AsBase()
+		for i, s := range gb.Stops {
+			s.Color = colors.ApplyOpacity(s.Color, opacity)
+			gb.Stops[i] = s
+		}
+	default:
+		img = adjust.Apply(img, func(r color.RGBA) color.RGBA {
+			return colors.ApplyOpacity(r, opacity)
+		})
+	}
+	return img
+}
 
 /*
 
