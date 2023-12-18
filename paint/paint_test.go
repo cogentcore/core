@@ -84,6 +84,9 @@ func TestPaintPath(t *testing.T) {
 		RunTest(t, nm, 300, 300, func(pc *Context) {
 			pc.FillBox(mat32.Vec2{}, mat32.Vec2{300, 300}, colors.Uniform(colors.White))
 			f(pc)
+			pc.StrokeStyle.Color = colors.Uniform(colors.Blue)
+			pc.FillStyle.Color = colors.Uniform(colors.Yellow)
+			pc.StrokeStyle.Width.Dot(3)
 			pc.FillStrokeClear()
 		})
 	}
