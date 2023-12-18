@@ -699,7 +699,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 // Called prior to using -- logs an error if not.
 func (wb *WidgetBase) HasSc() bool {
 	if wb.This() == nil || wb.Sc == nil {
-		slog.Debug("gi.WidgetBase: object or scene is nil\n")
+		slog.Debug("gi.WidgetBase: object or scene is nil")
 		return false
 	}
 	return true
