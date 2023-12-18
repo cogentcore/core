@@ -5,10 +5,10 @@
 package paint
 
 import (
+	"image"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
-	"goki.dev/grows/images"
-	"goki.dev/grr"
 	"goki.dev/mat32/v2"
 )
 
@@ -19,18 +19,14 @@ func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 }
 
 // DrawStdBox draws the CSS "standard box" model using the given styling information,
-// position, size, and parent actual background color. This is used for rendering
-// widgets such as buttons, textfields, etc in a GUI. DrawStdBox automatically computes
-// the [Style.ActualBackgroundColor] of this style object, but needs to be passed that
-// of its parent.
-func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg colors.Full) {
-	st.ComputeActualBackgroundColor(pabg)
-
+// position, size, and parent actual background. This is used for rendering
+// widgets such as buttons, textfields, etc in a GUI.
+func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
 
-	if st.ActualBackground.IsNil() {
+	if st.ActualBackground == nil {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
@@ -50,12 +46,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// This also fixes https://github.com/goki/gi/issues/579.
 		// This isn't an ideal solution because of performance,
 		// so TODO: maybe come up with a better solution for this.
-		// We need to use raw LayState data because we need to clear
+		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
-		pc.BlitBoxColor(pos, sz, pabg.Solid)
-		if pabg.Gradient != nil {
-			pc.FillBox(pos, sz, pabg) // on top of base blit
-		}
+		pc.FillBox(pos, sz, pabg)
 	}
 
 	pc.StrokeStyle.Opacity = st.Opacity
@@ -95,21 +88,13 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if st.BackgroundImage != nil {
-		img, _, err := images.Read(st.BackgroundImage)
-		if grr.Log(err) == nil {
-			rimg := st.ResizeImage(img, msz)
-			pc.DrawImage(rimg, mpos.X, mpos.Y)
-		}
+	if rad.IsZero() {
+		pc.FillBox(mpos, msz, st.ActualBackground)
 	} else {
-		if rad.IsZero() {
-			pc.FillBox(mpos, msz, st.ActualBackground)
-		} else {
-			pc.FillStyle.SetFullColor(st.ActualBackground)
-			// no border -- fill onl
-			pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
-			pc.Fill()
-		}
+		pc.FillStyle.SetFullColor(st.ActualBackground)
+		// no border -- fill onl
+		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
+		pc.Fill()
 	}
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
