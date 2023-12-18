@@ -406,6 +406,7 @@ func (vv *StructValue) ConfigWidget(w gi.Widget) {
 	bt.Tooltip = vv.Doc()
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
+		vv.SetDialogType(e)
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
@@ -531,6 +532,7 @@ func (vv *SliceValue) ConfigWidget(w gi.Widget) {
 	bt.Tooltip = vv.Doc()
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
+		vv.SetDialogType(e)
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
@@ -655,6 +657,7 @@ func (vv *MapValue) ConfigWidget(w gi.Widget) {
 	bt.Tooltip = vv.Doc()
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
+		vv.SetDialogType(e)
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
@@ -780,6 +783,7 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget) {
 		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
 			if k != nil {
+				vv.SetDialogType(e)
 				vv.OpenDialog(vv.Widget, nil)
 			}
 		})
@@ -1428,6 +1432,7 @@ func (vv *IconValue) ConfigWidget(w gi.Widget) {
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
+			vv.SetDialogType(e)
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})
@@ -1491,6 +1496,7 @@ func (vv *FontValue) ConfigWidget(w gi.Widget) {
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
+			vv.SetDialogType(e)
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})
@@ -1570,6 +1576,7 @@ func (vv *FileValue) ConfigWidget(w gi.Widget) {
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
+			vv.SetDialogType(e)
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})

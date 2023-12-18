@@ -442,11 +442,11 @@ func (i *TreeViewFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _ValueFlagsValues = []ValueFlags{0, 1, 2, 3}
+var _ValueFlagsValues = []ValueFlags{0, 1, 2, 3, 4}
 
 // ValueFlagsN is the highest valid value
 // for type ValueFlags, plus one.
-const ValueFlagsN ValueFlags = 4
+const ValueFlagsN ValueFlags = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -456,17 +456,20 @@ func _ValueFlagsNoOp() {
 	_ = x[ValueMapKey-(1)]
 	_ = x[ValueHasSavedLabel-(2)]
 	_ = x[ValueHasSavedDoc-(3)]
+	_ = x[ValueDialogNewWindow-(4)]
 }
 
 var _ValueFlagsNameToValueMap = map[string]ValueFlags{
-	`ReadOnly`:      0,
-	`readonly`:      0,
-	`MapKey`:        1,
-	`mapkey`:        1,
-	`HasSavedLabel`: 2,
-	`hassavedlabel`: 2,
-	`HasSavedDoc`:   3,
-	`hassaveddoc`:   3,
+	`ReadOnly`:        0,
+	`readonly`:        0,
+	`MapKey`:          1,
+	`mapkey`:          1,
+	`HasSavedLabel`:   2,
+	`hassavedlabel`:   2,
+	`HasSavedDoc`:     3,
+	`hassaveddoc`:     3,
+	`DialogNewWindow`: 4,
+	`dialognewwindow`: 4,
 }
 
 var _ValueFlagsDescMap = map[ValueFlags]string{
@@ -474,6 +477,7 @@ var _ValueFlagsDescMap = map[ValueFlags]string{
 	1: `for OwnKind = Map, this value represents the Key -- otherwise the Value`,
 	2: `ValueHasSavedLabel is whether the value has a saved version of its label, which can be set either automatically or explicitly`,
 	3: `ValueHasSavedDoc is whether the value has a saved version of its documentation, which can be set either automatically or explicitly`,
+	4: `ValueDialogNewWindow indicates that the dialog should be opened with in a new window, instead of a typical FullWindow in same current window. this is triggered by holding down any modifier key while clicking on a button that opens the window.`,
 }
 
 var _ValueFlagsMap = map[ValueFlags]string{
@@ -481,6 +485,7 @@ var _ValueFlagsMap = map[ValueFlags]string{
 	1: `MapKey`,
 	2: `HasSavedLabel`,
 	3: `HasSavedDoc`,
+	4: `DialogNewWindow`,
 }
 
 // String returns the string representation

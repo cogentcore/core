@@ -57,10 +57,10 @@ func (vv *MeshValue) ConfigWidget(widg gi.Widget) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
-		if vv.IsReadOnly() {
-			return
+		if !vv.IsReadOnly() {
+			vv.SetDialogType(e)
+			vv.OpenDialog(bt, nil)
 		}
-		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }

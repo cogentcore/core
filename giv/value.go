@@ -18,7 +18,9 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/glop/sentence"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -66,6 +68,12 @@ const (
 	// ValueHasSavedDoc is whether the value has a saved version of its
 	// documentation, which can be set either automatically or explicitly
 	ValueHasSavedDoc
+
+	// ValueDialogNewWindow indicates that the dialog should be opened with
+	// in a new window, instead of a typical FullWindow in same current window.
+	// this is triggered by holding down any modifier key while clicking on a
+	// button that opens the window.
+	ValueDialogNewWindow
 )
 
 // Value is an interface for managing the GUI representation of values
@@ -337,12 +345,15 @@ func (vv *ValueBase) Doc() string {
 	if vv.Is(ValueHasSavedDoc) {
 		return vv.SavedDoc
 	}
-
+	tip := ""
+	if vv.HasDialog() && !goosi.TheApp.Platform().IsMobile() {
+		tip = "[press any modifier key to open dialog in new window] "
+	}
 	doc, ok := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
-	if !ok {
+	if !ok && tip == "" {
 		return ""
 	}
-	vv.SavedDoc = doc
+	vv.SavedDoc = tip + doc
 	vv.SetFlag(true, ValueHasSavedDoc)
 	return vv.SavedDoc
 }
@@ -879,6 +890,10 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 	})
 }
 
+func (vv *ValueBase) SetDialogType(e events.Event) {
+	vv.SetFlag(e.HasAnyModifier(key.Shift, key.Alt, key.Control, key.Meta), ValueDialogNewWindow)
+}
+
 // OpenValueDialog is a helper for OpenDialog for cases that use
 // [ConfigDialog] method to configure the dialog contents.
 // If a title is specified, it is used as the title for the dialog
@@ -925,5 +940,9 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 		})
 	}
 
-	d.NewFullDialog(ctx).Run()
+	ds := d.NewFullDialog(ctx)
+	if vv.Is(ValueDialogNewWindow) {
+		ds.SetNewWindow(true)
+	}
+	ds.Run()
 }

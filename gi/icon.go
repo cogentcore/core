@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
 
@@ -96,7 +95,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		return false, err
 	}
 	ic.IconName = icon
-	fmt.Println("icon set:", icon)
+	// fmt.Println("icon set:", icon)
 	return true, nil
 
 }

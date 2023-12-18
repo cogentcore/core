@@ -95,6 +95,7 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
 	bt.Config()
 	bt.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
+			vv.SetDialogType(e)
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})

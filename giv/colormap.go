@@ -63,6 +63,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	fr.HandleClickOnEnterSpace()
 	fr.OnClick(func(e events.Event) {
 		if !vv.IsReadOnly() {
+			vv.SetDialogType(e)
 			vv.OpenDialog(vv.Widget, nil)
 		}
 	})
