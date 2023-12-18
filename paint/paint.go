@@ -13,6 +13,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/girl/raster"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
@@ -317,10 +318,12 @@ func (pc *Context) StrokePreserve() {
 	fbox := pc.Raster.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if pc.FillStyle.Color.Gradient != nil {
-		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.B2FromRect(pc.LastRenderBBox))
+	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
+		gb := g.AsBase()
+		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
+		gb.Transform = pc.CurTransform
 	}
-	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColorTransform(pc.StrokeStyle.Opacity, pc.CurTransform))
+	pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 }
@@ -350,10 +353,12 @@ func (pc *Context) FillPreserve() {
 	fbox := pc.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if pc.FillStyle.Color.Gradient != nil {
-		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.B2FromRect(pc.LastRenderBBox))
+	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
+		gb := g.AsBase()
+		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
+		gb.Transform = pc.CurTransform
 	}
-	rf.SetColor(pc.FillStyle.Color.RenderColorTransform(pc.FillStyle.Opacity, pc.CurTransform))
+	rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
 	rf.Draw()
 	rf.Clear()
 }
@@ -366,14 +371,14 @@ func (pc *Context) Fill() {
 }
 
 // FillBox performs an optimized fill of a square region with a uniform color if
-// the given full color is a solid color. If it is not, it calls [Context.DrawRectangle]
+// the given image is an [image.Uniform]. If it is not, it calls [Context.DrawRectangle]
 // and [Context.Fill] to fill the region.
-func (pc *Context) FillBox(pos, size mat32.Vec2, clr colors.Full) {
-	if clr.Gradient == nil {
-		pc.FillBoxColor(pos, size, clr.Solid)
+func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
+	if u, ok := img.(*image.Uniform); ok {
+		pc.FillBoxColor(pos, size, u.C)
 		return
 	}
-	pc.FillStyle.SetFullColor(clr)
+	pc.FillStyle.SetFullColor(img)
 	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
 	pc.Fill()
 }
