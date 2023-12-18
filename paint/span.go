@@ -199,7 +199,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 		return
 	}
 
-	bgc := sty.Background.At(0, 0)
+	bgc := colors.ToUniform(sty.Background)
 	if noBG {
 		bgc = nil
 	}

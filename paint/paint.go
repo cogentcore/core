@@ -466,7 +466,7 @@ func (pc *Context) ResetClip() {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Context) Clear() {
-	src := image.NewUniform(pc.FillStyle.Color.At(0, 0))
+	src := pc.FillStyle.Color
 	draw.Draw(pc.Image, pc.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 

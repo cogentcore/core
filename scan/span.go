@@ -242,12 +242,12 @@ func (x *LinkListSpanner) SpanOver(yi, xi0, xi1 int, ma uint32) {
 
 // SetBgColor sets the background color for blending to the first pixel of the given color
 func (x *LinkListSpanner) SetBgColor(c image.Image) {
-	x.BgColor = colors.AsRGBA(c.At(0, 0))
+	x.BgColor = colors.AsRGBA(colors.ToUniform(c))
 }
 
 // SetColor sets the color of x to the first pixel of the given color
 func (x *LinkListSpanner) SetColor(c image.Image) {
-	x.FgColor = colors.AsRGBA(c.At(0, 0))
+	x.FgColor = colors.AsRGBA(colors.ToUniform(c))
 }
 
 // NewImgSpanner returns an ImgSpanner set to draw to the given [*image.RGBA].
