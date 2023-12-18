@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/grows/images"
@@ -81,7 +82,7 @@ func TestRender(t *testing.T) {
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Context)) {
 		RunTest(t, nm, 300, 300, func(pc *Context) {
-			pc.FillBox(mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
+			pc.FillBox(mat32.Vec2{}, mat32.Vec2{300, 300}, colors.Uniform(colors.White))
 			f(pc)
 			pc.FillStrokeClear()
 		})
@@ -121,23 +122,24 @@ func TestPaintFill(t *testing.T) {
 		pc.FillBoxColor(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
 	})
 	test("fill_box_solid", func(pc *Context) {
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.SolidFull(colors.Blue))
+		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Uniform(colors.Blue))
 	})
 	test("fill_box_linear_gradient_black_white", func(pc *Context) {
-		g := colors.NewLinearGradient().AddStop(colors.Black, 0, 1).AddStop(colors.White, 1, 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
+		g := gradient.NewLinear().AddStop(colors.Black, 0).AddStop(colors.White, 1)
+		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
 	})
 	test("fill_box_linear_gradient_red_green", func(pc *Context) {
-		g := colors.NewLinearGradient().AddStop(colors.Red, 0, 1).AddStop(colors.Limegreen, 1, 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
+		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Limegreen, 1)
+		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
 	})
 	test("fill_box_linear_gradient_red_yellow_green", func(pc *Context) {
-		g := colors.NewLinearGradient().AddStop(colors.Red, 0, 1).AddStop(colors.Yellow, 0.3, 1).AddStop(colors.Green, 1, 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
+		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Yellow, 0.3).AddStop(colors.Green, 1)
+		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
 	})
 	test("fill_box_radial_gradient", func(pc *Context) {
-		g := colors.NewRadialGradient().AddStop(colors.Green, 0, 0.5).AddStop(colors.Blue, 0.6, 1).AddStop(colors.Purple, 1, 0.3)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.GradientFull(g))
+		g := gradient.NewRadial().AddStop(colors.ApplyOpacity(colors.Green, 0.5), 0).AddStop(colors.Blue, 0.6).
+			AddStop(colors.ApplyOpacity(colors.Purple, 0.3), 1)
+		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
 	})
 	test("blur_box", func(pc *Context) {
 		pc.FillBoxColor(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)

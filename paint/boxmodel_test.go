@@ -25,7 +25,7 @@ func TestBoxModel(t *testing.T) {
 		st.ToDots()
 
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
-		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.SolidFull(colors.White))
+		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.Uniform(colors.White))
 	})
 }
 
@@ -44,7 +44,7 @@ func TestBoxShadow(t *testing.T) {
 		spc := st.BoxSpace().Size()
 		sz := spc.Add(mat32.Vec2{200, 100})
 
-		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.SolidFull(colors.White))
+		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.Uniform(colors.White))
 	})
 }
 
@@ -52,7 +52,7 @@ func TestActualBackgroundColor(t *testing.T) {
 	RunTest(t, "actual_background_color", 300, 300, func(pc *Context) {
 		a := styles.NewStyle()
 		a.Background = colors.Uniform(colors.Lightgray)
-		pc.DrawStdBox(a, mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
+		pc.DrawStdBox(a, mat32.Vec2{}, mat32.Vec2{300, 300}, colors.Uniform(colors.White))
 
 		b := styles.NewStyle()
 		b.Background = colors.Uniform(colors.Red)
