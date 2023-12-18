@@ -15,7 +15,7 @@
 package key
 
 // Codes is the identity of a key relative to a notional "standard" keyboard.
-type Codes uint32 //enums:enum -trimprefix Code
+type Codes uint32 //enums:enum -trimprefix Code -no-line-comment
 
 // Physical key codes.
 //
@@ -74,7 +74,7 @@ const (
 	CodeBackslash          Codes = 49 // \
 	CodeSemicolon          Codes = 51 // ;
 	CodeApostrophe         Codes = 52 // '
-	CodeGraveAccent        Codes = 53 // Backtick
+	CodeGraveAccent        Codes = 53 // `
 	CodeComma              Codes = 54 // ,
 	CodeFullStop           Codes = 55 // .
 	CodeSlash              Codes = 56 // /
@@ -107,9 +107,9 @@ const (
 	CodeUpArrow    Codes = 82
 
 	CodeKeypadNumLock     Codes = 83
-	CodeKeypadSlash       Codes = 84 // KeypadSlash
+	CodeKeypadSlash       Codes = 84
 	CodeKeypadAsterisk    Codes = 85 // *
-	CodeKeypadHyphenMinus Codes = 86 // KeypadHyphenMinus
+	CodeKeypadHyphenMinus Codes = 86
 	CodeKeypadPlusSign    Codes = 87 // +
 	CodeKeypadEnter       Codes = 88
 	CodeKeypad1           Codes = 89
@@ -122,8 +122,8 @@ const (
 	CodeKeypad8           Codes = 96
 	CodeKeypad9           Codes = 97
 	CodeKeypad0           Codes = 98
-	CodeKeypadFullStop    Codes = 99  // KeypadFullStop
-	CodeKeypadEqualSign   Codes = 103 // KeypadEqualSign
+	CodeKeypadFullStop    Codes = 99
+	CodeKeypadEqualSign   Codes = 103
 
 	CodeF13 Codes = 104
 	CodeF14 Codes = 105
