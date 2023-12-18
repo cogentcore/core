@@ -266,6 +266,11 @@ func (x *ImgSpanner) SetImage(img *image.RGBA) {
 
 // SetColor sets the color of x to the given color image
 func (x *ImgSpanner) SetColor(c image.Image) {
+	if c == nil {
+		x.FgColor = color.RGBA{}
+		x.ColorImage = nil
+		return
+	}
 	if u, ok := c.(*image.Uniform); ok {
 		x.FgColor = colors.AsRGBA(u.C)
 		x.ColorImage = nil
