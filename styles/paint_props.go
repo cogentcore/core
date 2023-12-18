@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/enums"
 	"goki.dev/girl/units"
 	"goki.dev/grr"
@@ -112,7 +113,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log(fs.Color.SetAny(val, ctxt))
+		fs.Color = grr.Log1(gradient.FromAny(val, ctxt))
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -162,7 +163,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		grr.Log(fs.Color.SetAny(val, ctxt))
+		fs.Color = grr.Log1(gradient.FromAny(val, ctxt))
 	},
 	"fill-opacity": StyleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
