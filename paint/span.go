@@ -201,7 +201,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 
 	bgc := colors.ToUniform(sty.Background)
 	if noBG {
-		bgc = nil
+		bgc = color.RGBA{}
 	}
 
 	ucfont := &styles.FontRender{}
@@ -220,7 +220,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 	sr.Render[0].BackgroundColor = bgc
 	sr.Render[0].RotRad = rot
 	sr.Render[0].ScaleX = scalex
-	if bgc != nil {
+	if !colors.IsNil(bgc) {
 		for i := range sr.Text {
 			sr.Render[i].BackgroundColor = bgc
 		}
