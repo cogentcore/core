@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
@@ -56,7 +57,7 @@ func (g *Rect) Render(sv *SVG) {
 	bs := styles.Border{}
 	bs.Style.Set(styles.BorderSolid)
 	bs.Width.Set(pc.StrokeStyle.Width)
-	bs.Color.Set(pc.StrokeStyle.Color.Solid)
+	bs.Color.Set(colors.ToUniform(pc.StrokeStyle.Color))
 	bs.Radius.Set(units.Px(g.Radius.X))
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)

@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/girl/styles"
 	"goki.dev/grows/images"
 	"goki.dev/ki/v2"
@@ -507,13 +508,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
-								grad.Grad.CopyFrom(hrg.Grad)
+								grad.Grad = gradient.CopyOf(hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
 						}
 					}
 				}
-				err = grad.Grad.UnmarshalXML(decoder, se)
+				err = gradient.UnmarshalXML(&grad.Grad, decoder, se)
 				if err != nil {
 					return err
 				}
@@ -531,13 +532,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
-								grad.Grad.CopyFrom(hrg.Grad)
+								grad.Grad = gradient.CopyOf(hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
 						}
 					}
 				}
-				err = grad.Grad.UnmarshalXML(decoder, se)
+				err = gradient.UnmarshalXML(&grad.Grad, decoder, se)
 				if err != nil {
 					return err
 				}
@@ -609,7 +610,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				mrk.RefPos.Set(rx, ry)
 				mrk.Size.Set(szx, szy)
 			case nm == "use":
-				link := colors.XMLAttr("href", se.Attr)
+				link := gradient.XMLAttr("href", se.Attr)
 				itm := sv.FindNamedElement(link)
 				if itm != nil {
 					cln := itm.Clone().(Node)
@@ -978,16 +979,17 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 }
 
 func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
-	cs := &nd.Grad
-	if cs.Gradient == nil {
+	// TODO(kai): why isn't this in colors/gradient?
+	gr := nd.Grad
+	if gr == nil {
 		return
 	}
-	gr := cs.Gradient
+	gb := gr.AsBase()
 	me := xml.StartElement{}
 	XMLAddAttr(&me.Attr, "id", name)
 
 	linear := true
-	if gr.Type == colors.RadialGradient {
+	if _, ok := gr.(*gradient.Radial); ok {
 		linear = false
 		me.Name.Local = "radialGradient"
 	} else {
@@ -996,41 +998,35 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 
 	if linear {
 		// must be non-zero to add
-		if gr.Bounds != (mat32.Box2{}) {
-			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gr.Bounds.Min.X))
-			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gr.Bounds.Min.Y))
-			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gr.Bounds.Max.X))
-			XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", gr.Bounds.Max.Y))
+		if gb.Box != (mat32.Box2{}) {
+			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gb.Box.Min.X))
+			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gb.Box.Min.Y))
+			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gb.Box.Max.X))
+			XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", gb.Box.Max.Y))
 		}
 	} else {
+		r := gr.(*gradient.Radial)
 		// must be non-zero to add
-		if gr.Center != (mat32.Vec2{}) {
-			XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", gr.Center.X))
-			XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", gr.Center.Y))
+		if r.Center != (mat32.Vec2{}) {
+			XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", r.Center.X))
+			XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", r.Center.Y))
 		}
-		if gr.Focal != (mat32.Vec2{}) {
-			XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", gr.Focal.X))
-			XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", gr.Focal.Y))
+		if r.Focal != (mat32.Vec2{}) {
+			XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", r.Focal.X))
+			XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", r.Focal.Y))
 		}
-		if gr.Radius != 0 {
-			XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", gr.Radius))
+		if r.Radius != (mat32.Vec2{}) {
+			XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", max(r.Radius.X, r.Radius.Y)))
 		}
 	}
-	if gr.Units == colors.ObjectBoundingBox {
-		XMLAddAttr(&me.Attr, "gradientUnits", "objectBoundingBox")
-	} else {
-		XMLAddAttr(&me.Attr, "gradientUnits", "userSpaceOnUse")
-	}
-	switch gr.Spread {
-	case colors.ReflectSpread:
-		XMLAddAttr(&me.Attr, "spreadMethod", "reflect")
-	case colors.RepeatSpread:
-		XMLAddAttr(&me.Attr, "spreadMethod", "repeat")
+	XMLAddAttr(&me.Attr, "gradientUnits", gb.Units.String())
+	// pad is default
+	if gb.Spread != gradient.Pad {
+		XMLAddAttr(&me.Attr, "spreadMethod", gb.Spread.String())
 	}
 
-	idxf := gr.Matrix == mat32.Identity2D()
-	if !idxf {
-		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gr.Matrix.XX, gr.Matrix.YX, gr.Matrix.XY, gr.Matrix.YY, gr.Matrix.X0, gr.Matrix.Y0))
+	if gb.Transform != mat32.Identity2D() {
+		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gb.Transform.XX, gb.Transform.YX, gb.Transform.XY, gb.Transform.YY, gb.Transform.X0, gb.Transform.Y0))
 	}
 
 	if nd.StopsName != "" {
@@ -1039,13 +1035,13 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 
 	enc.EncodeToken(me)
 	if nd.StopsName == "" {
-		for _, gs := range gr.Stops {
+		for _, gs := range gb.Stops {
 			se := xml.StartElement{}
 			se.Name.Local = "stop"
 			clr := gs.Color
 			hs := colors.AsHex(clr)[:7] // get rid of transparency
-			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
-			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))
+			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, float32(clr.A)/255))
+			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Pos))
 			enc.EncodeToken(se)
 			enc.WriteEnd(se.Name.Local)
 		}

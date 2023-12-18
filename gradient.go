@@ -8,7 +8,7 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -16,13 +16,13 @@ import (
 /////////////////////////////////////////////////////////////////////////////
 //  Gradient
 
-// Gradient is used for holding a specified color gradient (ColorSpec)
-// name is id for lookup in url
+// Gradient is used for holding a specified color gradient.
+// The name is the id for lookup in url
 type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad colors.Full
+	Grad gradient.Gradient
 
 	// name of another gradient to get stops from
 	StopsName string
@@ -31,20 +31,20 @@ type Gradient struct {
 func (gr *Gradient) CopyFieldsFrom(frm any) {
 	fr := frm.(*Gradient)
 	gr.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	gr.Grad = fr.Grad
+	gradient.CopyFrom(gr.Grad, fr.Grad)
 	gr.StopsName = fr.StopsName
 }
 
 // GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientTypeName() string {
-	if gr.Grad.Gradient != nil && gr.Grad.Gradient.Type == colors.RadialGradient {
+	if _, ok := gr.Grad.(*gradient.Radial); ok {
 		return "radialGradient"
 	}
 	return "linearGradient"
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//		SVG gradient mgmt
+//		SVG gradient management
 
 // GradientByName returns the gradient of given name, stored on SVG node
 func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
@@ -68,14 +68,14 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransform(xf)
+			gr.Grad.AsBase().Transform.SetMul(xf)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransform(xf)
+			gr.Grad.AsBase().Transform.SetMul(xf)
 		}
 	}
 }
@@ -89,40 +89,37 @@ func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransformPt(xf, pt)
+			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.Gradient.ApplyTransformPt(xf, pt)
+			gr.Grad.AsBase().Transform.SetMulCtr(xf, pt)
 		}
 	}
 }
 
-// GradientWritePoints writes the UserSpaceOnUse gradient points to
+// GradientWritePoints writes the gradient points to
 // a slice of floating point numbers, appending to end of slice.
-func GradientWritePts(gr *colors.Gradient, dat *[]float32) {
+func GradientWritePts(gr gradient.Gradient, dat *[]float32) {
 	// TODO: do we want this, and is this the right way to structure it?
 	if gr == nil {
 		return
 	}
-	if gr.Units == colors.ObjectBoundingBox {
-		return
-	}
-	*dat = append(*dat, gr.Matrix.XX)
-	*dat = append(*dat, gr.Matrix.YX)
-	*dat = append(*dat, gr.Matrix.XY)
-	*dat = append(*dat, gr.Matrix.YY)
-	*dat = append(*dat, gr.Matrix.X0)
-	*dat = append(*dat, gr.Matrix.Y0)
-	if gr.Type != colors.RadialGradient {
-		*dat = append(*dat, gr.Bounds.Min.X)
-		*dat = append(*dat, gr.Bounds.Min.Y)
-		*dat = append(*dat, gr.Bounds.Max.X)
-		*dat = append(*dat, gr.Bounds.Max.Y)
-	}
+	gb := gr.AsBase()
+	*dat = append(*dat, gb.Transform.XX)
+	*dat = append(*dat, gb.Transform.YX)
+	*dat = append(*dat, gb.Transform.XY)
+	*dat = append(*dat, gb.Transform.YY)
+	*dat = append(*dat, gb.Transform.X0)
+	*dat = append(*dat, gb.Transform.Y0)
+
+	*dat = append(*dat, gb.Box.Min.X)
+	*dat = append(*dat, gb.Box.Min.Y)
+	*dat = append(*dat, gb.Box.Max.X)
+	*dat = append(*dat, gb.Box.Max.Y)
 }
 
 // GradientWritePts writes the geometry of the gradients for this node
@@ -132,42 +129,37 @@ func (g *NodeBase) GradientWritePts(sv *SVG, dat *[]float32) {
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientWritePts(gr.Grad.Gradient, dat)
+			GradientWritePts(gr.Grad, dat)
 		}
 	}
 	gnm = NodePropURL(g, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientWritePts(gr.Grad.Gradient, dat)
+			GradientWritePts(gr.Grad, dat)
 		}
 	}
 }
 
-// GradientReadPoints reads the UserSpaceOnUse gradient points from
+// GradientReadPoints reads the gradient points from
 // a slice of floating point numbers, reading from the end.
-func GradientReadPts(gr *colors.Gradient, dat []float32) {
+func GradientReadPts(gr gradient.Gradient, dat []float32) {
 	if gr == nil {
 		return
 	}
-	if gr.Units == colors.ObjectBoundingBox {
-		return
-	}
+	gb := gr.AsBase()
 	sz := len(dat)
-	n := 6
-	if gr.Type != colors.RadialGradient {
-		n = 10
-		gr.Bounds.Min.X = dat[sz-4]
-		gr.Bounds.Min.Y = dat[sz-3]
-		gr.Bounds.Max.X = dat[sz-2]
-		gr.Bounds.Max.Y = dat[sz-1]
-	}
-	gr.Matrix.XX = dat[(sz-n)+0]
-	gr.Matrix.YX = dat[(sz-n)+1]
-	gr.Matrix.XY = dat[(sz-n)+2]
-	gr.Matrix.YY = dat[(sz-n)+3]
-	gr.Matrix.X0 = dat[(sz-n)+4]
-	gr.Matrix.Y0 = dat[(sz-n)+5]
+	gb.Box.Min.X = dat[sz-4]
+	gb.Box.Min.Y = dat[sz-3]
+	gb.Box.Max.X = dat[sz-2]
+	gb.Box.Max.Y = dat[sz-1]
+
+	gb.Transform.XX = dat[sz-10]
+	gb.Transform.YX = dat[sz-9]
+	gb.Transform.XY = dat[sz-8]
+	gb.Transform.YY = dat[sz-7]
+	gb.Transform.X0 = dat[sz-6]
+	gb.Transform.Y0 = dat[sz-5]
 }
 
 // GradientReadPts reads the geometry of the gradients for this node
@@ -177,14 +169,14 @@ func (g *NodeBase) GradientReadPts(sv *SVG, dat []float32) {
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientReadPts(gr.Grad.Gradient, dat)
+			GradientReadPts(gr.Grad, dat)
 		}
 	}
 	gnm = NodePropURL(g, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientReadPts(gr.Grad.Gradient, dat)
+			GradientReadPts(gr.Grad, dat)
 		}
 	}
 }
@@ -199,7 +191,7 @@ func (sv *SVG) GradientUpdateStops(gr *Gradient) {
 	}
 	sgr := sv.GradientByName(gr, gr.StopsName)
 	if sgr != nil {
-		gr.Grad.Gradient.CopyStopsFrom(sgr.Grad.Gradient)
+		gr.Grad.AsBase().CopyStopsFrom(sgr.Grad.AsBase())
 	}
 }
 
@@ -224,7 +216,7 @@ func (sv *SVG) GradientNewForNode(n Node, radial bool, stops string) (*Gradient,
 	gr, url := sv.GradientNew(radial)
 	gr.StopsName = stops
 	bbox := n.LocalBBox()
-	gr.Grad.Gradient.SetUserBounds(bbox)
+	gr.Grad.AsBase().SetBox(bbox)
 	sv.GradientUpdateStops(gr)
 	return gr, url
 }
@@ -243,9 +235,9 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	gr := sv.Defs.NewChild(GradientType, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {
-		gr.Grad.Gradient = colors.NewRadialGradient()
+		gr.Grad = gradient.NewRadial()
 	} else {
-		gr.Grad.Gradient = colors.NewLinearGradient()
+		gr.Grad = gradient.NewLinear()
 	}
 	return gr, url
 }
@@ -296,8 +288,9 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 		return
 	}
 	bbox := n.LocalBBox()
-	gr.Grad.Gradient.SetUserBounds(bbox)
-	gr.Grad.Gradient.Matrix = mat32.Identity2D()
+	gb := gr.Grad.AsBase()
+	gb.SetBox(bbox)
+	gb.SetTransform(mat32.Identity2D())
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node
@@ -321,8 +314,9 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 	}
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
 	n.SetProp(prop, url)
-	ngr.Grad.CopyFrom(gr.Grad)
-	return gr
+	gradient.CopyFrom(ngr.Grad, gr.Grad)
+	// TODO(kai): should this return ngr or gr? (used to return gr but ngr seems correct)
+	return ngr
 }
 
 // GradientDeleteNodeProp deletes any existing gradient for node

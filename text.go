@@ -7,6 +7,7 @@ package svg
 import (
 	"image"
 
+	"goki.dev/colors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -193,8 +194,8 @@ func (g *Text) RenderText(sv *SVG) {
 		scalex = 0
 	}
 	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
-	if !pc.FillStyle.Color.IsNil() {
-		pc.FontStyle.Color = pc.FillStyle.Color.Solid
+	if pc.FillStyle.Color != nil {
+		pc.FontStyle.Color = colors.ToUniform(pc.FillStyle.Color)
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y

@@ -252,7 +252,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 					IncRefCount(el)
 				}
 			} else {
-				if gr.Grad.Gradient != nil && len(gr.Grad.Gradient.Stops) > 0 {
+				if gr.Grad != nil && len(gr.Grad.AsBase().Stops) > 0 {
 					IncRefCount(k) // keep us around
 				}
 			}
