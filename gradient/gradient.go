@@ -13,9 +13,50 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/anthonynsimon/bild/adjust"
 	"goki.dev/colors"
+	"goki.dev/mat32/v2"
 )
+
+// Gradient is the interface that all gradient types satisfy.
+type Gradient interface {
+	image.Image
+
+	// AsBase returns the [Base] of the gradient
+	AsBase() *Base
+}
+
+// Base contains the data and logic common to all gradient types.
+type Base struct { //gti:add -setters
+
+	// the stops for the gradient; use AddStop to add stops
+	Stops []Stop `set:"-"`
+
+	// the spread method used for the gradient if it stops before the end
+	Spread Spreads
+
+	// the colorspace algorithm to use for blending colors
+	Blend colors.BlendTypes
+
+	// the units to use for the gradient
+	Units Units
+
+	// the bounding box of the object with the gradient; this is used when rendering
+	// gradients with [Units] of [ObjectBoundingBox].
+	Box mat32.Box2
+
+	// Transform is the transformation matrix applied to the gradient's points.
+	Transform mat32.Mat2
+}
+
+// Stop represents a single stop in a gradient
+type Stop struct {
+
+	// the color of the stop
+	Color color.RGBA
+
+	// the position of the stop between 0 and 1
+	Pos float32
+}
 
 // Spreads are the spread methods used when a gradient reaches
 // its end but the object isn't yet fully filled.
@@ -48,251 +89,167 @@ const (
 	UserSpaceOnUse
 )
 
-// ApplyOpacity applies the given opacity to the given image, handling
-// [image.Uniform] and [Gradient] as special cases.
-func ApplyOpacity(img image.Image, opacity float32) image.Image {
-	return Apply(img, func(c color.RGBA) color.RGBA {
-		return colors.ApplyOpacity(c, opacity)
-	})
+// AddStop adds a new stop with the given color and position to the gradient.
+func (b *Base) AddStop(color color.RGBA, pos float32) {
+	b.Stops = append(b.Stops, Stop{color, pos})
 }
 
-// Apply returns a copy of the given image with the given color function
-// applied to each pixel of the image. It handles [image.Uniform] and
-// [Gradient] as special cases, only calling the function for the uniform
-// color and each stop color, respectively.
-func Apply(img image.Image, f func(c color.RGBA) color.RGBA) image.Image {
-	if img == nil {
-		return nil
+// AsBase returns the [Base] of the gradient
+func (b *Base) AsBase() *Base {
+	return b
+}
+
+// NewBase returns a new [Base] with default values. It should
+// only be used in the New functions of gradient types.
+func NewBase() Base {
+	return Base{
+		Box:       mat32.B2(0, 0, 100, 100),
+		Transform: mat32.Identity2D(),
 	}
-	switch img := img.(type) {
-	case *image.Uniform:
-		return image.NewUniform(f(colors.AsRGBA(img)))
-	case Gradient:
-		res := CopyOf(img)
-		gb := res.AsBase()
-		for i, s := range gb.Stops {
-			s.Color = f(s.Color)
-			gb.Stops[i] = s
+}
+
+// ColorModel returns the color model used by the gradient image, which is [color.RGBAModel]
+func (b *Base) ColorModel() color.Model {
+	return color.RGBAModel
+}
+
+// Bounds returns the bounds of the gradient image, which are infinite.
+func (b *Base) Bounds() image.Rectangle {
+	return image.Rect(-1e9, -1e9, 1e9, 1e9)
+}
+
+// CopyFrom copies from the given gradient (cp) onto this gradient (g),
+// making new copies of the stops instead of re-using pointers.
+// It assumes the gradients are of the same type.
+func CopyFrom(g Gradient, cp Gradient) {
+	switch g := g.(type) {
+	case *Linear:
+		*g = *cp.(*Linear)
+	case *Radial:
+		*g = *cp.(*Radial)
+	}
+	g.AsBase().CopyStopsFrom(cp.AsBase())
+}
+
+// CopyOf returns a copy of the given gradient, making copies of the stops
+// instead of re-using pointers.
+func CopyOf(g Gradient) Gradient {
+	var res Gradient
+	switch g := g.(type) {
+	case *Linear:
+		res = &Linear{}
+		CopyFrom(res, g)
+	case *Radial:
+		res = &Radial{}
+		CopyFrom(res, g)
+	}
+	return res
+}
+
+// CopyStopsFrom copies the base gradient stops from the given base gradient
+func (b *Base) CopyStopsFrom(cp *Base) {
+	b.Stops = make([]Stop, len(cp.Stops))
+	copy(b.Stops, cp.Stops)
+}
+
+// ObjectMatrix returns the effective object transformation matrix for a gradient
+// with [Units] of [ObjectBoundingBox].
+func (b *Base) ObjectMatrix() mat32.Mat2 {
+	w, h := b.Box.Size().X, b.Box.Size().Y
+	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
+	return mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
+		Mul(b.Transform).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
+}
+
+// GetColor returns the color at the given normalized position along the
+// gradient's stops using its spread method and blend algorithm.
+func (b *Base) GetColor(pos float32) color.Color {
+	d := len(b.Stops)
+
+	// These cases can be taken care of early on
+	if b.Spread == Pad {
+		if pos >= 1 {
+			return b.Stops[d-1].Color
 		}
-		return res
-	default:
-		return adjust.Apply(img, f)
-	}
-}
-
-/*
-// ApplyOpacityOver applies the given opacity to the given image as if
-// it were "over" the given over image, handling [image.Uniform] and
-// [Gradient] as special cases.
-func ApplyOpacityOver(img, over image.Image, opacity float32) image.Image {
-	switch over := over.(type) {
-	case *image.Uniform:
-		img.C = colors.ApplyOpacity(img.C, opacity)
-	case Gradient:
-		gb := img.AsBase()
-		for i, s := range gb.Stops {
-			s.Color = colors.ApplyOpacity(s.Color, opacity)
-			gb.Stops[i] = s
+		if pos <= 0 {
+			return b.Stops[0].Color
 		}
-	default:
-		img = adjust.Apply(img, func(r color.RGBA) color.RGBA {
-			return colors.ApplyOpacity(r, opacity)
-		})
-	}
-	return img
-}
-*/
-
-/*
-
-// SetGradientPoints sets the bounds of the gradient based on the given bounding
-// box, taking into account radial gradients and a standard linear left-to-right
-// gradient direction. It also sets the type of units to [UserSpaceOnUse].
-func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
-	g.Bounds = bbox
-	g.Units = UserSpaceOnUse
-	switch g.Type {
-	case LinearGradient:
-		g.Start = bbox.Min
-		g.End = bbox.Max
-		// default is linear left-to-right, so we keep the starting and ending Y the same
-		g.End.Y = g.Start.Y
-	case RadialGradient:
-		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
-		g.Focal = g.Center
-		g.Radius = 0.5 * max(bbox.Size().X, bbox.Size().Y)
-	case ConicGradient:
-		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
-	}
-}
-
-// RenderColor returns the [Render] color for rendering, applying the given opacity.
-func (g *Gradient) RenderColor(opacity float32) Render {
-	return g.RenderColorTransform(opacity, mat32.Identity2D())
-}
-
-// RenderColorTransform returns the render color using the given user space object transform matrix
-func (g *Gradient) RenderColorTransform(opacity float32, objMatrix mat32.Mat2) Render {
-	switch len(g.Stops) {
-	case 0:
-		return SolidRender(ApplyOpacity(color.RGBA{0, 0, 0, 255}, opacity)) // default error color for gradient w/o stops.
-	case 1:
-		return SolidRender(ApplyOpacity(g.Stops[0].Color, opacity)) // Illegal, I think, should really should not happen.
 	}
 
-	// sort by offset in ascending order
-	sort.Slice(g.Stops, func(i, j int) bool {
-		return g.Stops[i].Pos < g.Stops[j].Pos
-	})
+	modRange := float32(1)
+	if b.Spread == Reflect {
+		modRange = 2
+	}
+	mod := mat32.Mod(pos, modRange)
+	if mod < 0 {
+		mod += modRange
+	}
 
-	w, h := g.Bounds.Size().X, g.Bounds.Size().Y
-	oriX, oriY := g.Bounds.Min.X, g.Bounds.Min.Y
-	gradT := mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
-		Mul(g.Matrix).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
-
-	switch g.Type {
-	case LinearGradient:
-		s, e := g.Start, g.End
-		if g.Units == ObjectBoundingBox {
-			s = g.Bounds.Min.Add(g.Bounds.Size().Mul(s))
-			e = g.Bounds.Min.Add(g.Bounds.Size().Mul(e))
-
-			d := e.Sub(s)
-			dd := d.X*d.X + d.Y*d.Y // self inner prod
-			return FuncRender(func(x, y int) color.Color {
-				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
-				df := pt.Sub(s)
-				return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
-			})
+	place := 0 // Advance to place where mod is greater than the indicated stop
+	for place != len(b.Stops) && mod > b.Stops[place].Pos {
+		place++
+	}
+	switch b.Spread {
+	case Repeat:
+		var s1, s2 Stop
+		switch place {
+		case 0, d:
+			s1, s2 = b.Stops[d-1], b.Stops[0]
+		default:
+			s1, s2 = b.Stops[place-1], b.Stops[place]
 		}
-
-		s = g.Matrix.MulVec2AsPt(s)
-		e = g.Matrix.MulVec2AsPt(e)
-		s = objMatrix.MulVec2AsPt(s)
-		e = objMatrix.MulVec2AsPt(e)
-		d := e.Sub(s)
-		dd := d.X*d.X + d.Y*d.Y
-		return FuncRender(func(x, y int) color.Color {
-			pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
-			df := pt.Sub(s)
-			return g.ColorAt((d.X*df.X+d.Y*df.Y)/dd, opacity)
-		})
-	case RadialGradient:
-		c, f, r := g.Center, g.Focal, mat32.NewVec2Scalar(g.Radius)
-		if g.Units == ObjectBoundingBox {
-			c = g.Bounds.Min.Add(g.Bounds.Size().Mul(c))
-			f = g.Bounds.Min.Add(g.Bounds.Size().Mul(f))
-			r.SetMul(g.Bounds.Size())
-		} else {
-			c = g.Matrix.MulVec2AsPt(c)
-			f = g.Matrix.MulVec2AsPt(f)
-			r = g.Matrix.MulVec2AsVec(r)
-
-			c = objMatrix.MulVec2AsPt(c)
-			f = objMatrix.MulVec2AsPt(f)
-			r = objMatrix.MulVec2AsVec(r)
-		}
-
-		if c == f {
-			// When the focus and center are the same things are much simpler;
-			// t is just distance from center
-			// scaled by the bounds aspect ratio times r
-			if g.Units == ObjectBoundingBox {
-				return FuncRender(func(x, y int) color.Color {
-					pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
-					d := pt.Sub(c)
-					return g.ColorAt(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
-				})
+		return b.BlendStops(mod, s1, s2, false)
+	case Reflect:
+		switch place {
+		case 0:
+			return b.Stops[0].Color
+		case d:
+			// Advance to place where mod-1 is greater than the stop indicated by place in reverse of the stop slice.
+			// Since this is the reflect b.Spread mode, the mod interval is two, allowing the stop list to be
+			// iterated in reverse before repeating the sequence.
+			for place != d*2 && mod-1 > (1-b.Stops[d*2-place-1].Pos) {
+				place++
 			}
-			return FuncRender(func(x, y int) color.Color {
-				pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
-				d := pt.Sub(c)
-				return g.ColorAt(mat32.Sqrt(d.X*d.X/(r.X*r.X)+(d.Y*d.Y)/(r.Y*r.Y)), opacity)
-			})
-		}
-		f.SetDiv(r)
-		c.SetDiv(r)
-
-		df := f.Sub(c)
-
-		if df.X*df.X+df.Y*df.Y > 1 { // Focus outside of circle; use intersection
-			// point of line from center to focus and circle as per SVG specs.
-			nf, intersects := RayCircleIntersectionF(f, c, c, 1.0-epsilonF)
-			f = nf
-			if !intersects {
-				return SolidRender(FromRGB(255, 255, 0)) // should not happen
+			switch place {
+			case d:
+				return b.Stops[d-1].Color
+			case d * 2:
+				return b.Stops[0].Color
+			default:
+				return b.BlendStops(mod-1, b.Stops[d*2-place], b.Stops[d*2-place-1], true)
 			}
+		default:
+			return b.BlendStops(mod, b.Stops[place-1], b.Stops[place], false)
 		}
-		if g.Units == ObjectBoundingBox {
-			return FuncRender(func(x, y int) color.Color {
-				pt := gradT.MulVec2AsPt(mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5})
-				e := pt.Div(r)
-
-				t1, intersects := RayCircleIntersectionF(e, f, c, 1)
-				if !intersects { // In this case, use the last stop color
-					s := g.Stops[len(g.Stops)-1]
-					return ApplyOpacity(s.Color, s.Opacity*opacity)
-				}
-				td := t1.Sub(f)
-				d := e.Sub(f)
-				if td.X*td.X+td.Y*td.Y < epsilonF {
-					s := g.Stops[len(g.Stops)-1]
-					return ApplyOpacity(s.Color, s.Opacity*opacity)
-				}
-				return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
-			})
+	default: // PadSpread
+		switch place {
+		case 0:
+			return b.Stops[0].Color
+		case d:
+			return b.Stops[d-1].Color
+		default:
+			return b.BlendStops(mod, b.Stops[place-1], b.Stops[place], false)
 		}
-		return FuncRender(func(x, y int) color.Color {
-			pt := mat32.Vec2{float32(x) + 0.5, float32(y) + 0.5}
-			e := pt.Div(r)
-
-			t1, intersects := RayCircleIntersectionF(e, f, c, 1)
-			if !intersects { // In this case, use the last stop color
-				s := g.Stops[len(g.Stops)-1]
-				return ApplyOpacity(s.Color, s.Opacity*opacity)
-			}
-			td := t1.Sub(f)
-			d := e.Sub(f)
-			if td.X*td.X+td.Y*td.Y < epsilonF {
-				s := g.Stops[len(g.Stops)-1]
-				return ApplyOpacity(s.Color, s.Opacity*opacity)
-			}
-			return g.ColorAt(mat32.Sqrt(d.X*d.X+d.Y*d.Y)/mat32.Sqrt(td.X*td.X+td.Y*td.Y), opacity)
-		})
-	case ConicGradient:
-
-	}
-	slog.Error("got unexpected gradient type", "type", g.Type)
-	return Render{}
-}
-
-// ApplyTransform transforms the points for the gradient if it has
-// [UserSpaceOnUse] units, using the given transform matrix.
-func (g *Gradient) ApplyTransform(xf mat32.Mat2) {
-	if g.Units == ObjectBoundingBox {
-		return
-	}
-	rot := xf.ExtractRot()
-	if g.Type == RadialGradient || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
-		g.Matrix = g.Matrix.Mul(xf)
-	} else {
-		g.Bounds.Min = xf.MulVec2AsPt(g.Bounds.Min)
-		g.Bounds.Max = xf.MulVec2AsPt(g.Bounds.Max)
 	}
 }
 
-// ApplyTransformPt transforms the points for the gradient if it has
-// [UserSpaceOnUse] units, using the given transform matrix and center point.
-func (g *Gradient) ApplyTransformPt(xf mat32.Mat2, pt mat32.Vec2) {
-	if g.Units == ObjectBoundingBox {
-		return
+// BlendStops blends the given two gradient stops together based on the given position,
+// using the gradient's blending algorithm. If flip is true, it flips the given position.
+func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
+	s1off := s1.Pos
+	if s1.Pos > s2.Pos && !flip { // happens in repeat spread mode
+		s1off--
+		if pos > 1 {
+			pos--
+		}
 	}
-	rot := xf.ExtractRot()
-	if g.Type == RadialGradient || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
-		g.Matrix = g.Matrix.MulCtr(xf, pt)
-	} else {
-		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)
-		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
+	if s2.Pos == s1off {
+		return s2.Color
 	}
+	if flip {
+		pos = 1 - pos
+	}
+	tp := (pos - s1off) / (s2.Pos - s1off)
+
+	return colors.Blend(b.Blend, 100*(1-tp), s1.Color, s2.Color)
 }
-*/
