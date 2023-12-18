@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"log/slog"
 	"strconv"
 	"time"
@@ -172,24 +173,20 @@ type DateView struct {
 	ViewPath string
 }
 
-func (dv *DateView) OnInit() {
-	dv.Frame.OnInit()
-}
-
 // SetTime sets the source time and updates the view
 func (dv *DateView) SetTime(tim time.Time) *DateView {
-	updt := dv.UpdateStart()
 	dv.Time = tim
 	if dv.TmpSave != nil {
 		dv.TmpSave.SetValue(dv.Time)
 	}
-	dv.Update()
-	dv.UpdateEndRender(updt)
-	dv.SendChange()
+	// dv.SendChange()
+	// dv.Update()
+	// dv.SetNeedsLayout(true)
 	return dv
 }
 
 func (dv *DateView) ConfigWidget() {
+	fmt.Println("cw", dv.HasChildren())
 	if dv.HasChildren() {
 		return
 	}
@@ -209,13 +206,9 @@ func (dv *DateView) ConfigWidget() {
 	month := gi.NewChooser(trow, "month").SetItems(sms)
 	month.SetCurIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
-		updt := dv.UpdateStart()
 		dv.DeleteChildByName("grid", true)
 		// set our month
 		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
-		dv.ConfigDateGrid()
-		dv.Update()
-		dv.UpdateEndLayout(updt)
 	})
 
 	yr := dv.Time.Year()
@@ -227,15 +220,11 @@ func (dv *DateView) ConfigWidget() {
 	year := gi.NewChooser(trow, "year").SetItems(yrs)
 	year.SetCurVal(yr)
 	year.OnChange(func(e events.Event) {
-		updt := dv.UpdateStart()
 		dv.DeleteChildByName("grid", true)
 		// we are centered at current year with 100 in each direction
 		nyr := year.CurIndex + yr - 100
 		// set our year
 		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
-		dv.ConfigDateGrid()
-		dv.Update()
-		dv.UpdateEndLayout(updt)
 	})
 
 	dv.ConfigDateGrid()
@@ -366,11 +355,11 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	dt := gi.NewTextField(ly, "date").SetTooltip("The date").
 		SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 			d := gi.NewBody().AddTitle("Select date")
-			NewDateView(d).SetTime(*vv.TimeVal()).SetTmpSave(vv.TmpSave)
+			NewDateView(d).SetTmpSave(vv.TmpSave).SetTime(*vv.TimeVal())
 			d.AddBottomBar(func(pw gi.Widget) {
 				d.AddCancel(pw)
 				d.AddOk(pw).OnClick(func(e events.Event) {
-					tt := laser.OnePtrValue(vv.TmpSave.Val()).Interface().(*time.Time)
+					tt := vv.TmpSave.Val().Interface().(*time.Time)
 					vv.SetValue(tt)
 					vv.UpdateWidget()
 				})
