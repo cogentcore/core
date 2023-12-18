@@ -92,7 +92,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	if rad.IsZero() {
 		pc.FillBox(mpos, msz, st.ActualBackground)
 	} else {
-		pc.FillStyle.SetFullColor(st.ActualBackground)
+		pc.FillStyle.SetImage(st.ActualBackground)
 		// no border -- fill onl
 		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
 		pc.Fill()
@@ -100,7 +100,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetFullColor(&st.BackgroundColor)
+	// pc.FillStyle.SetImage(&st.BackgroundColor)
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	pc.FillStyle.SetColor(nil)

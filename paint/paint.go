@@ -378,7 +378,7 @@ func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
 		pc.FillBoxColor(pos, size, u.C)
 		return
 	}
-	pc.FillStyle.SetFullColor(img)
+	pc.FillStyle.SetImage(img)
 	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
 	pc.Fill()
 }

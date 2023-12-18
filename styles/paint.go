@@ -222,7 +222,7 @@ func (pf *Fill) SetColor(cl color.Color) {
 }
 
 // SetImage sets the rendering color to the given image
-func (pf *Fill) SetFullColor(cl image.Image) {
+func (pf *Fill) SetImage(cl image.Image) {
 	if cl == nil {
 		pf.On = false
 	} else {
@@ -324,8 +324,8 @@ func (ps *Stroke) SetColor(cl color.Color) {
 	}
 }
 
-// SetFullColor sets full color spec from source
-func (ps *Stroke) SetFullColor(cl image.Image) {
+// SetImage sets full color spec from source
+func (ps *Stroke) SetImage(cl image.Image) {
 	if cl == nil {
 		ps.On = false
 	} else {
