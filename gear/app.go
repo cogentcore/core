@@ -148,7 +148,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 		s.Grow.Set(1, 0)
 		s.Direction = styles.Column
 		s.Border.Radius = styles.BorderRadiusLarge
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
 	})
 	tr := gi.NewLayout(cfr, "tr").Style(func(s *styles.Style) {
 		s.Align.Items = styles.Center
@@ -176,7 +176,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 	te.Style(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
 		s.Min.Set(units.Em(30), units.Em(10))
-		s.BackgroundColor = cfr.Styles.BackgroundColor
+		s.Background = cfr.Styles.Background
 	})
 	te.OnKeyChord(func(e events.Event) {
 		kc := e.KeyChord()
