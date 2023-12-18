@@ -114,16 +114,9 @@ func CopyOf(g Gradient) Gradient {
 	return res
 }
 
-// CopyStopsFrom copies the base gradient stops from the given base gradient,
-// if both have gradient stops
+// CopyStopsFrom copies the base gradient stops from the given base gradient
 func (b *Base) CopyStopsFrom(cp *Base) {
-	if len(b.Stops) == 0 || len(cp.Stops) == 0 {
-		b.Stops = nil
-		return
-	}
-	if len(b.Stops) != len(cp.Stops) {
-		b.Stops = make([]Stop, len(cp.Stops))
-	}
+	b.Stops = make([]Stop, len(cp.Stops))
 	copy(b.Stops, cp.Stops)
 }
 
