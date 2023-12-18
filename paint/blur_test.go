@@ -75,7 +75,6 @@ func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 	RunTest(t, imgName, 300, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.Color = colors.Black
-		st.BackgroundColor.SetSolid(colors.Transparent) // Lightblue)
 		st.Border.Width.Set(units.Dp(0))
 		st.Border.Radius = styles.BorderRadiusFull
 		st.BoxShadow = []styles.Shadow{shadow}
@@ -83,7 +82,7 @@ func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 
 		spc := st.BoxSpace().Size()
 		sz := spc.Add(mat32.Vec2{200, 100})
-		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.SolidFull(colors.White))
+		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.C(colors.White))
 	})
 }
 

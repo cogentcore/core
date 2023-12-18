@@ -13,7 +13,6 @@ package raster
 import (
 	"image"
 
-	"goki.dev/colors"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -52,7 +51,8 @@ type Scanner interface {
 	SetBounds(w, h int)
 
 	// SetColor sets the color used for rendering.
-	SetColor(color colors.Render)
+	SetColor(color image.Image)
+
 	SetWinding(useNonZeroWinding bool)
 	Clear()
 

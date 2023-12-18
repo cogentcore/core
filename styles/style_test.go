@@ -21,7 +21,7 @@ func (tc *TestContext) Base() color.RGBA {
 	return colors.White
 }
 
-func (tc *TestContext) FullByURL(url string) *colors.Full {
+func (tc *TestContext) ImageByURL(url string) *colors.Full {
 	return nil
 }
 

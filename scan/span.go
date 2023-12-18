@@ -28,9 +28,9 @@ const (
 // if colFunc is nil.
 type ImgSpanner struct {
 	BaseSpanner
-	Pix       []uint8
-	Stride    int
-	ColorFunc colors.Func
+	Pix        []uint8
+	Stride     int
+	ColorImage image.Image
 }
 
 // LinkListSpanner is a Spanner that draws Spans onto a draw.Image
@@ -240,14 +240,14 @@ func (x *LinkListSpanner) SpanOver(yi, xi0, xi1 int, ma uint32) {
 	}
 }
 
-// SetBgColor sets the background color for blending to the solid part of the given color
-func (x *LinkListSpanner) SetBgColor(c colors.Render) {
-	x.BgColor = c.Solid
+// SetBgColor sets the background color for blending to the first pixel of the given color
+func (x *LinkListSpanner) SetBgColor(c image.Image) {
+	x.BgColor = colors.AsRGBA(colors.ToUniform(c))
 }
 
-// SetColor sets the color of x to the solid part of the given color
-func (x *LinkListSpanner) SetColor(c colors.Render) {
-	x.FgColor = c.Solid
+// SetColor sets the color of x to the first pixel of the given color
+func (x *LinkListSpanner) SetColor(c image.Image) {
+	x.FgColor = colors.AsRGBA(colors.ToUniform(c))
 }
 
 // NewImgSpanner returns an ImgSpanner set to draw to the given [*image.RGBA].
@@ -264,14 +264,14 @@ func (x *ImgSpanner) SetImage(img *image.RGBA) {
 	x.Bounds = img.Bounds()
 }
 
-// SetColor sets the color of x to either a color.Color or a rasterx.ColorFunction
-func (x *ImgSpanner) SetColor(c colors.Render) {
-	if c.Func != nil {
-		x.ColorFunc = c.Func
+// SetColor sets the color of x to the given color image
+func (x *ImgSpanner) SetColor(c image.Image) {
+	if u, ok := c.(*image.Uniform); ok {
+		x.FgColor = colors.AsRGBA(u.C)
+		x.ColorImage = nil
 		return
 	}
-	x.FgColor = c.Solid
-	x.ColorFunc = nil
+	x.ColorImage = c
 }
 
 // GetSpanFunc returns the function that consumes a span described by the parameters.
@@ -280,7 +280,7 @@ func (x *ImgSpanner) SetColor(c colors.Render) {
 // to dispatch the function in the draw method.
 func (x *ImgSpanner) GetSpanFunc() SpanFunc {
 	var (
-		useColorFunc = x.ColorFunc != nil
+		useColorFunc = x.ColorImage != nil
 		drawOver     = x.Op == draw.Over
 	)
 	switch {
@@ -301,7 +301,7 @@ func (x *ImgSpanner) SpanColorFuncR(yi, xi0, xi1 int, ma uint32) {
 	i1 := i0 + (xi1-xi0)*4
 	cx := xi0
 	for i := i0; i < i1; i += 4 {
-		rcr, rcg, rcb, rca := x.ColorFunc(cx, yi).RGBA()
+		rcr, rcg, rcb, rca := x.ColorImage.At(cx, yi).RGBA()
 		cx++
 		x.Pix[i+0] = uint8(rcr * ma / mp)
 		x.Pix[i+1] = uint8(rcg * ma / mp)
@@ -335,7 +335,7 @@ func (x *ImgSpanner) SpanColorFunc(yi, xi0, xi1 int, ma uint32) {
 
 	for i := i0; i < i1; i += 4 {
 		// uses the Porter-Duff composition operator.
-		rcr, rcg, rcb, rca := x.ColorFunc(cx, yi).RGBA()
+		rcr, rcg, rcb, rca := x.ColorImage.At(cx, yi).RGBA()
 		cx++
 		a := (m - (rca * ma / m)) * pa
 		dr := uint32(x.Pix[i+0])

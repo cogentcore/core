@@ -5,10 +5,10 @@
 package paint
 
 import (
+	"image"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
-	"goki.dev/grows/images"
-	"goki.dev/grr"
 	"goki.dev/mat32/v2"
 )
 
@@ -19,26 +19,24 @@ func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 }
 
 // DrawStdBox draws the CSS "standard box" model using the given styling information,
-// position, size, and parent actual background color. This is used for rendering
-// widgets such as buttons, textfields, etc in a GUI. DrawStdBox automatically computes
-// the [Style.ActualBackgroundColor] of this style object, but needs to be passed that
-// of its parent.
-func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg colors.Full) {
-	st.ComputeActualBackgroundColor(pabg)
+// position, size, and parent actual background. This is used for rendering
+// widgets such as buttons, textfields, etc in a GUI.
+func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, pabg image.Image) {
+	st.ComputeActualBackground(pabg)
 
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
 
-	if st.ActualBackgroundColor.IsNil() {
+	if st.ActualBackground == nil {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		st.ActualBackgroundColor = pabg
+		st.ActualBackground = pabg
 	}
 
 	// note that we always set the fill opacity to 1 because we are already applying
-	// the opacity of the background color in ComputeActualBackgroundColor above
+	// the opacity of the background color in ComputeActualBackground above
 	pc.FillStyle.Opacity = 1
 
 	if st.FillMargin {
@@ -50,12 +48,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// This also fixes https://github.com/goki/gi/issues/579.
 		// This isn't an ideal solution because of performance,
 		// so TODO: maybe come up with a better solution for this.
-		// We need to use raw LayState data because we need to clear
+		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
-		pc.BlitBoxColor(pos, sz, pabg.Solid)
-		if pabg.Gradient != nil {
-			pc.FillBox(pos, sz, pabg) // on top of base blit
-		}
+		pc.FillBox(pos, sz, pabg)
 	}
 
 	pc.StrokeStyle.Opacity = st.Opacity
@@ -66,12 +61,13 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		// CSS effectively goes in reverse order
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
-			pc.StrokeStyle.SetColor(nil)
-			prevOpacity := pc.FillStyle.Opacity
-			// note: factor of 0.5 here does a reasonable job of matching
+			pc.StrokeStyle.Color = nil
+			// note: diving by 2 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			pc.FillStyle.Opacity = (float32(shadow.Color.A) / 255) * .5
-			pc.FillStyle.SetColor(colors.WithA(shadow.Color, 255))
+			// This does not modify the value of the original shadow
+			// because it is not a pointer.
+			shadow.Color.A /= 2
+			pc.FillStyle.Color = colors.C(shadow.Color)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
 
@@ -86,7 +82,6 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 			// with radiusFactor = 2, and you'd have to remove this /2 factor.
 
 			pc.DrawRoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
-			pc.FillStyle.Opacity = prevOpacity
 		}
 	}
 
@@ -95,29 +90,21 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if st.BackgroundImage != nil {
-		img, _, err := images.Read(st.BackgroundImage)
-		if grr.Log(err) == nil {
-			rimg := st.ResizeImage(img, msz)
-			pc.DrawImage(rimg, mpos.X, mpos.Y)
-		}
+	if rad.IsZero() {
+		pc.FillBox(mpos, msz, st.ActualBackground)
 	} else {
-		if rad.IsZero() {
-			pc.FillBox(mpos, msz, st.ActualBackgroundColor)
-		} else {
-			pc.FillStyle.SetFullColor(st.ActualBackgroundColor)
-			// no border -- fill onl
-			pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
-			pc.Fill()
-		}
+		pc.FillStyle.Color = st.ActualBackground
+		// no border -- fill onl
+		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
+		pc.Fill()
 	}
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetFullColor(&st.BackgroundColor)
+	// pc.FillStyle.SetImage(&st.BackgroundColor)
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
-	pc.FillStyle.SetColor(nil)
+	pc.FillStyle.Color = nil
 	// now that we have drawn background color
 	// above, we can draw the border
 	pc.DrawBox(mpos, msz, st.Border)

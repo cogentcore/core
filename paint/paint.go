@@ -13,6 +13,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/girl/raster"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
@@ -99,14 +100,10 @@ func NewContextFromRGBA(img image.Image) *Context {
 	return pc
 }
 
-// convenience for final draw for shapes when done
+// FillStrokeClear is a convenience final stroke and clear draw for shapes when done
 func (pc *Context) FillStrokeClear() {
-	if pc.HasFill() {
-		pc.FillPreserve()
-	}
-	if pc.HasStroke() {
-		pc.StrokePreserve()
-	}
+	pc.FillPreserve()
+	pc.StrokePreserve()
 	pc.ClearPath()
 }
 
@@ -123,7 +120,7 @@ func (pc *Context) TransformPoint(x, y float32) mat32.Vec2 {
 // coordinates, applying current transform
 func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
-	if pc.HasStroke() {
+	if pc.StrokeStyle.Color != nil {
 		sw = 0.5 * pc.StrokeWidth()
 	}
 	tmin := pc.CurTransform.MulVec2AsPt(mat32.Vec2{minX, minY})
@@ -283,7 +280,7 @@ func (pc *Context) StrokeWidth() float32 {
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Context) StrokePreserve() {
-	if pc.Raster == nil {
+	if pc.Raster == nil || pc.StrokeStyle.Color == nil {
 		return
 	}
 
@@ -317,10 +314,12 @@ func (pc *Context) StrokePreserve() {
 	fbox := pc.Raster.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if pc.FillStyle.Color.Gradient != nil {
-		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.B2FromRect(pc.LastRenderBBox))
+	if g, ok := pc.StrokeStyle.Color.(gradient.Gradient); ok {
+		gb := g.AsBase()
+		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
+		gb.Transform = pc.CurTransform
 	}
-	pc.Raster.SetColor(pc.StrokeStyle.Color.RenderColorTransform(pc.StrokeStyle.Opacity, pc.CurTransform))
+	pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 }
@@ -336,7 +335,7 @@ func (pc *Context) Stroke() {
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
 func (pc *Context) FillPreserve() {
-	if pc.Raster == nil {
+	if pc.Raster == nil || pc.FillStyle.Color == nil {
 		return
 	}
 
@@ -350,10 +349,12 @@ func (pc *Context) FillPreserve() {
 	fbox := pc.Scanner.GetPathExtent()
 	pc.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if pc.FillStyle.Color.Gradient != nil {
-		pc.FillStyle.Color.Gradient.SetUserBounds(mat32.B2FromRect(pc.LastRenderBBox))
+	if g, ok := pc.FillStyle.Color.(gradient.Gradient); ok {
+		gb := g.AsBase()
+		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
+		gb.Transform = pc.CurTransform
 	}
-	rf.SetColor(pc.FillStyle.Color.RenderColorTransform(pc.FillStyle.Opacity, pc.CurTransform))
+	rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
 	rf.Draw()
 	rf.Clear()
 }
@@ -366,14 +367,14 @@ func (pc *Context) Fill() {
 }
 
 // FillBox performs an optimized fill of a square region with a uniform color if
-// the given full color is a solid color. If it is not, it calls [Context.DrawRectangle]
+// the given image is an [image.Uniform]. If it is not, it calls [Context.DrawRectangle]
 // and [Context.Fill] to fill the region.
-func (pc *Context) FillBox(pos, size mat32.Vec2, clr colors.Full) {
-	if clr.Gradient == nil {
-		pc.FillBoxColor(pos, size, clr.Solid)
+func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
+	if u, ok := img.(*image.Uniform); ok {
+		pc.FillBoxColor(pos, size, u.C)
 		return
 	}
-	pc.FillStyle.SetFullColor(clr)
+	pc.FillStyle.Color = img
 	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
 	pc.Fill()
 }
@@ -461,13 +462,13 @@ func (pc *Context) ResetClip() {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Context) Clear() {
-	src := image.NewUniform(&pc.FillStyle.Color.Solid)
+	src := pc.FillStyle.Color
 	draw.Draw(pc.Image, pc.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Context) SetPixel(x, y int) {
-	pc.Image.Set(x, y, &pc.StrokeStyle.Color.Solid)
+	pc.Image.Set(x, y, pc.StrokeStyle.Color.At(x, y))
 }
 
 func (pc *Context) DrawLine(x1, y1, x2, y2 float32) {
@@ -529,9 +530,9 @@ func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
-		// set the color if it is not nil and the stroke style is not on and set to the correct color
-		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || pc.StrokeStyle.Color.Gradient != nil || bs.Color.Top != pc.StrokeStyle.Color.Solid) {
-			pc.StrokeStyle.SetColor(bs.Color.Top)
+		// set the color if it is not nil and the stroke style is not set to the correct color
+		if !colors.IsNil(bs.Color.Top) && bs.Color.Top != colors.ToUniform(pc.StrokeStyle.Color) {
+			pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
 		if r.IsZero() {
@@ -576,8 +577,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.MoveTo(xtli, ytl)
 
 	// set the color if it is not the same as the already set color
-	if pc.StrokeStyle.Color.Gradient != nil || bs.Color.Top != pc.StrokeStyle.Color.Solid {
-		pc.StrokeStyle.SetColor(bs.Color.Top)
+	if colors.C(bs.Color.Top) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 	}
 	pc.StrokeStyle.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
@@ -591,8 +592,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xtr, ytri)
 	}
 
-	if bs.Color.Right != pc.StrokeStyle.Color.Solid {
-		pc.StrokeStyle.SetColor(bs.Color.Right)
+	if colors.C(bs.Color.Right) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Right)
 	}
 	pc.StrokeStyle.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
@@ -605,8 +606,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbri, ybr)
 	}
 
-	if bs.Color.Bottom != pc.StrokeStyle.Color.Solid {
-		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+	if colors.C(bs.Color.Bottom) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Bottom)
 	}
 	pc.StrokeStyle.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
@@ -619,8 +620,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbl, ybli)
 	}
 
-	if bs.Color.Left != pc.StrokeStyle.Color.Solid {
-		pc.StrokeStyle.SetColor(bs.Color.Left)
+	if colors.C(bs.Color.Left) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Left)
 	}
 	pc.StrokeStyle.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)
@@ -652,7 +653,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 
 // 	// set the color if it is not the same as the already set color
 // 	if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Top)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Top
 // 	pc.LineTo(x+w, y)
@@ -664,7 +665,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Right != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Right)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Right)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Right
 // 	pc.LineTo(x+w, y+h)
@@ -675,7 +676,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Bottom)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Bottom
 // 	pc.LineTo(x, y+h)
@@ -686,7 +687,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Left != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Left)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Left)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Left
 // 	pc.LineTo(x, y)
@@ -699,7 +700,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 // 		// set the color if it is not the same as the already set color
 // 		if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 			pc.StrokeStyle.SetColor(bs.Color.Top)
+// 			pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
 // 		}
 // 		pc.StrokeStyle.Width = bs.Width.Top
 // 		pc.DrawConsistentRoundedRectangle(x, y, w, h, bs.Radius.Dots())
@@ -794,13 +795,12 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 	origFill := pc.FillStyle
 	origOpacity := pc.FillStyle.Opacity
 
-	pc.StrokeStyle.On = false
+	pc.StrokeStyle.Color = nil
 	pc.DrawRoundedRectangle(x+br, y+br, w-2*br, h-2*br, r)
 	pc.FillStrokeClear()
-	pc.StrokeStyle.On = true
-	pc.FillStyle.On = false
-	pc.StrokeStyle.Color.SetSolid(pc.FillStyle.Color.Solid)
-	pc.StrokeStyle.Width.Dots = 1.5 // is the key number: 1 makes lines very transparent overall
+	pc.StrokeStyle.Color = pc.FillStyle.Color
+	pc.FillStyle.Color = nil
+	pc.StrokeStyle.Width.Dots = 1.5 // 1.5 is the key number: 1 makes lines very transparent overall
 	for i, b := range blurs {
 		bo := br - float32(i)
 		pc.StrokeStyle.Opacity = b * origOpacity

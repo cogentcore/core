@@ -29,7 +29,6 @@ import (
 	"image"
 	"math"
 
-	"goki.dev/colors"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -71,7 +70,9 @@ type SpanFunc func(yi, xi0, xi1 int, alpha uint32)
 
 // A Spanner consumes spans as they are created by the Scanner Draw function
 type Spanner interface {
-	SetColor(color colors.Render)
+	// SetColor sets the color used for rendering.
+	SetColor(color image.Image)
+
 	// This returns a function that is efficient given the Spanner parameters.
 	GetSpanFunc() SpanFunc
 }
@@ -106,7 +107,7 @@ func (s *Scanner) SetWinding(useNonZeroWinding bool) {
 }
 
 // SetColor sets the color used for rendering.
-func (s *Scanner) SetColor(clr colors.Render) {
+func (s *Scanner) SetColor(clr image.Image) {
 	s.Spanner.SetColor(clr)
 }
 

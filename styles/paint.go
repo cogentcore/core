@@ -90,10 +90,6 @@ func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt colors.Con
 	}
 	pc.StyleFromProps(par, props, ctxt)
 
-	pc.StrokeStyle.SetStylePost(props)
-	pc.FillStyle.SetStylePost(props)
-	pc.FontStyle.SetStylePost(props)
-	pc.TextStyle.SetStylePost(props)
 	pc.PropsNil = (len(props) == 0)
 	pc.StyleSet = true
 }
@@ -104,13 +100,8 @@ func (pc *Paint) FromStyle(st *Style) {
 	pc.TextStyle = st.Text
 }
 
-// StyleToDots runs ToDots on unit values, to compile down to raw pixels
-func (pc *Paint) StyleToDots(uc *units.Context) {
-}
-
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels
 func (pc *Paint) ToDotsImpl(uc *units.Context) {
-	pc.StyleToDots(uc)
 	pc.StrokeStyle.ToDots(uc)
 	pc.FillStyle.ToDots(uc)
 	pc.FontStyle.ToDots(uc)
@@ -141,24 +132,6 @@ func (pc *Paint) ToDots() {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// State query
-
-// does the current Paint have an active stroke to render?
-func (pc *Paint) HasStroke() bool {
-	return pc.StrokeStyle.On
-}
-
-// does the current Paint have an active fill to render?
-func (pc *Paint) HasFill() bool {
-	return pc.FillStyle.On
-}
-
-// does the current Paint not have either a stroke or fill?  in which case, often we just skip it
-func (pc *Paint) HasNoStrokeOrFill() bool {
-	return (!pc.StrokeStyle.On && !pc.FillStyle.On)
-}
-
 /////////////////////////////////////////////////////////////////
 //  enums
 
@@ -185,11 +158,8 @@ const (
 // Fill contains all the properties for filling a region
 type Fill struct {
 
-	// is fill active -- if property is none then false
-	On bool
-
-	// prop: fill = fill color specification
-	Color colors.Full `xml:"fill"`
+	// prop: fill = fill color image specification; filling is off if nil
+	Color image.Image `xml:"fill"`
 
 	// prop: fill-opacity = global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"fill-opacity"`
@@ -200,39 +170,9 @@ type Fill struct {
 
 // Defaults initializes default values for paint fill
 func (pf *Fill) Defaults() {
-	pf.On = true // svg says fill is ON by default
-	pf.SetColor(color.Black)
+	pf.Color = colors.C(color.Black)
 	pf.Rule = FillRuleNonZero
 	pf.Opacity = 1.0
-}
-
-// SetStylePost does some updating after setting the style from user properties
-func (pf *Fill) SetStylePost(props map[string]any) {
-	if pf.Color.IsNil() {
-		pf.On = false
-	} else {
-		pf.On = true
-	}
-}
-
-// SetColor sets a solid fill color -- nil turns off filling
-func (pf *Fill) SetColor(cl color.Color) {
-	if cl == nil {
-		pf.On = false
-	} else {
-		pf.On = true
-		pf.Color.SetSolid(cl)
-	}
-}
-
-// SetFullColor sets full color (solid or gradient) from source
-func (pf *Fill) SetFullColor(cl colors.Full) {
-	if cl.IsNil() {
-		pf.On = false
-	} else {
-		pf.On = true
-		pf.Color.CopyFrom(cl)
-	}
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -273,11 +213,8 @@ const (
 // Stroke contains all the properties for painting a line
 type Stroke struct {
 
-	// is stroke active -- if property is none then false
-	On bool
-
-	// prop: stroke = stroke color specification
-	Color colors.Full `xml:"stroke"`
+	// prop: stroke = stroke color image specification; stroking is off if nil
+	Color image.Image `xml:"stroke"`
 
 	// prop: stroke-opacity = global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"stroke-opacity"`
@@ -303,43 +240,14 @@ type Stroke struct {
 
 // Defaults initializes default values for paint stroke
 func (ps *Stroke) Defaults() {
-	ps.On = false // svg says default is off
-	ps.SetColor(colors.Black)
+	// stroking is off by default in svg
+	ps.Color = nil
 	ps.Width.Px(1)
 	ps.MinWidth.Dot(.5)
 	ps.Cap = LineCapButt
 	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
 	ps.MiterLimit = 10.0
 	ps.Opacity = 1.0
-}
-
-// SetStylePost does some updating after setting the style from user properties
-func (ps *Stroke) SetStylePost(props map[string]any) {
-	if ps.Color.IsNil() {
-		ps.On = false
-	} else {
-		ps.On = true
-	}
-}
-
-// SetColor sets a solid stroke color -- nil turns off stroking
-func (ps *Stroke) SetColor(cl color.Color) {
-	if cl == nil {
-		ps.On = false
-	} else {
-		ps.On = true
-		ps.Color.SetSolid(cl)
-	}
-}
-
-// SetFullColor sets full color spec from source
-func (ps *Stroke) SetFullColor(cl colors.Full) {
-	if cl.IsNil() {
-		ps.On = false
-	} else {
-		ps.On = true
-		ps.Color.CopyFrom(cl)
-	}
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

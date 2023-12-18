@@ -146,6 +146,8 @@ type Border struct { //gti:add
 	// prop: border-radius = rounding of the corners
 	Radius SideValues `xml:"radius" view:"inline"`
 
+	// TODO(kai/imageColor)
+
 	// prop: border-color = color of the border
 	Color SideColors `xml:"color" view:"inline"`
 }
@@ -216,6 +218,8 @@ type Shadow struct { //gti:add
 
 	// prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size
 	Spread units.Value `xml:".spread"`
+
+	// TODO(kai/imageColor)
 
 	// prop: .color = color of the shadow
 	Color color.RGBA `xml:".color"`

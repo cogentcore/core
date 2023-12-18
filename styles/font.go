@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"image"
 	"image/color"
 	"log/slog"
 	"strings"
@@ -113,11 +114,6 @@ func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Co
 	// 	fs.InheritFields(parent)
 	// }
 	fs.StyleFromProps(parent, props, ctxt)
-	fs.SetStylePost(props)
-}
-
-func (fs *Font) SetStylePost(props map[string]any) {
-
 }
 
 /*
@@ -432,7 +428,7 @@ type FontRender struct { //gti:add
 	Color color.RGBA `xml:"color" inherit:"true"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
-	BackgroundColor colors.Full `xml:"background-color"`
+	Background image.Image `xml:"background-color"`
 
 	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32 `xml:"opacity"`
@@ -473,7 +469,6 @@ func (fr *FontRender) SetStyleProps(parent *FontRender, props map[string]any, ct
 	}
 	fr.Font.StyleFromProps(pfont, props, ctxt)
 	fr.StyleRenderFromProps(parent, props, ctxt)
-	fr.SetStylePost(props)
 }
 
 func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any, ctxt colors.Context) {

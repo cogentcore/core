@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/enums"
 	"goki.dev/girl/units"
 	"goki.dev/glop/num"
@@ -211,13 +212,13 @@ var StyleStyleFuncs = map[string]StyleFunc{
 		fs := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				fs.BackgroundColor = par.(*Style).BackgroundColor
+				fs.Background = par.(*Style).Background
 			} else if init {
-				fs.BackgroundColor = colors.Full{}
+				fs.Background = nil
 			}
 			return
 		}
-		grr.Log(fs.BackgroundColor.SetAny(val, ctxt))
+		fs.Background = grr.Log1(gradient.FromAny(val, ctxt))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *Style) *float32 { return &obj.Opacity }),
@@ -423,13 +424,13 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 		fs := obj.(*FontRender)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				fs.BackgroundColor = par.(*FontRender).BackgroundColor
+				fs.Background = par.(*FontRender).Background
 			} else if init {
-				fs.BackgroundColor = colors.Full{}
+				fs.Background = nil
 			}
 			return
 		}
-		grr.Log(fs.BackgroundColor.SetAny(val, ctxt))
+		fs.Background = grr.Log1(gradient.FromAny(val, ctxt))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *FontRender) *float32 { return &obj.Opacity }),

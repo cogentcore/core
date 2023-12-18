@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/girl/scan"
 	"goki.dev/grows/images"
 	"goki.dev/mat32/v2"
@@ -161,82 +162,82 @@ func TestRoundRect(t *testing.T) {
 		f       = NewFiller(wx, wy, scanner)
 	)
 
-	scanner.SetColor(colors.SolidRender(colors.Cadetblue))
+	scanner.SetColor(colors.C(colors.Cadetblue))
 	AddRoundRect(30, 30, 130, 130, 40, 40, 0, RoundGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Burlywood))
+	scanner.SetColor(colors.C(colors.Burlywood))
 	AddRoundRect(140, 30, 240, 130, 10, 40, 0, RoundGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Yellowgreen))
+	scanner.SetColor(colors.C(colors.Yellowgreen))
 	AddRoundRect(250, 30, 350, 130, 40, 10, 0, RoundGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Lightgreen))
+	scanner.SetColor(colors.C(colors.Lightgreen))
 	AddRoundRect(370, 30, 470, 130, 20, 20, 45, RoundGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Cadetblue))
+	scanner.SetColor(colors.C(colors.Cadetblue))
 	AddRoundRect(30, 140, 130, 240, 40, 40, 0, QuadraticGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Burlywood))
+	scanner.SetColor(colors.C(colors.Burlywood))
 	AddRoundRect(140, 140, 240, 240, 10, 40, 0, QuadraticGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Yellowgreen))
+	scanner.SetColor(colors.C(colors.Yellowgreen))
 	AddRoundRect(250, 140, 350, 240, 40, 10, 0, QuadraticGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Blueviolet))
+	scanner.SetColor(colors.C(colors.Blueviolet))
 	AddRoundRect(370, 140, 470, 240, 20, 20, 45, QuadraticGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Cadetblue))
+	scanner.SetColor(colors.C(colors.Cadetblue))
 	AddRoundRect(30, 250, 130, 350, 40, 40, 0, CubicGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Burlywood))
+	scanner.SetColor(colors.C(colors.Burlywood))
 	AddRoundRect(140, 250, 240, 350, 10, 40, 0, CubicGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Yellowgreen))
+	scanner.SetColor(colors.C(colors.Yellowgreen))
 	AddRoundRect(250, 250, 350, 350, 40, 10, 0, CubicGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Lightgreen))
+	scanner.SetColor(colors.C(colors.Lightgreen))
 	AddRoundRect(370, 250, 470, 350, 20, 20, 45, CubicGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Cadetblue))
+	scanner.SetColor(colors.C(colors.Cadetblue))
 	AddRoundRect(30, 360, 130, 460, 40, 40, 0, FlatGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Burlywood))
+	scanner.SetColor(colors.C(colors.Burlywood))
 	AddRoundRect(140, 360, 240, 460, 10, 40, 0, FlatGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Yellowgreen))
+	scanner.SetColor(colors.C(colors.Yellowgreen))
 	AddRoundRect(250, 360, 350, 460, 40, 10, 0, FlatGap, f)
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Blueviolet))
+	scanner.SetColor(colors.C(colors.Blueviolet))
 	AddRoundRect(370, 360, 470, 460, 20, 20, 45, FlatGap, f)
 	f.Draw()
 	f.Clear()
@@ -380,37 +381,37 @@ func TestShapes(t *testing.T) {
 }
 
 func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) {
-	f.SetColor(colors.SolidRender(colors.Blueviolet))
+	f.SetColor(colors.C(colors.Blueviolet))
 	AddEllipse(240, 200, 140, 180, 0, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.SolidRender(colors.Darkseagreen))
+	f.SetColor(colors.C(colors.Darkseagreen))
 	AddEllipse(240, 200, 40, 180, 45, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.SolidRender(colors.Darkgoldenrod))
+	f.SetColor(colors.C(colors.Darkgoldenrod))
 	AddCircle(300, 300, 80, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.SolidRender(colors.Forestgreen))
+	f.SetColor(colors.C(colors.Forestgreen))
 	AddRoundRect(30, 30, 130, 130, 10, 20, 45, RoundGap, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.SolidRender(colors.Blueviolet))
+	f.SetColor(colors.C(colors.Blueviolet))
 	AddRoundRect(30, 30, 130, 130, 150, 150, 0, nil, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.SolidRender(colors.ApplyOpacity(colors.Lightgoldenrodyellow, 0.6)))
+	f.SetColor(colors.C(colors.ApplyOpacity(colors.Lightgoldenrodyellow, 0.6)))
 	AddCircle(80, 80, 50, fa)
 	f.Draw()
 	f.Clear()
 
-	f.SetColor(colors.SolidRender(colors.Lemonchiffon))
+	f.SetColor(colors.C(colors.Lemonchiffon))
 	f.SetClip(image.Rect(65, 65, 95, 95))
 	AddCircle(80, 80, 50, fa)
 	f.Draw()
@@ -418,7 +419,7 @@ func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) 
 
 	f.SetClip(image.ZR)
 
-	f.SetColor(colors.SolidRender(colors.Firebrick))
+	f.SetColor(colors.C(colors.Firebrick))
 	AddRect(370, 370, 400, 500, 15, fa)
 	f.Draw()
 	f.Clear()
@@ -452,17 +453,17 @@ func TestGradient(t *testing.T) {
 		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
-	linear := colors.NewLinearGradient().SetEnd(mat32.Vec2{1, 0}).
-		SetBounds(mat32.Box2{mat32.Vec2{50, 50}, mat32.Vec2{150, 150}}).
-		AddStop(colors.Aquamarine, 0.3, 1.0).
-		AddStop(colors.Skyblue, 0.6, 1).
-		AddStop(colors.Darksalmon, 1.0, .75)
+	linear := gradient.NewLinear().SetEnd(mat32.Vec2{1, 0}).
+		SetBox(mat32.Box2{mat32.Vec2{50, 50}, mat32.Vec2{150, 150}}).
+		AddStop(colors.Aquamarine, 0.3).
+		AddStop(colors.Skyblue, 0.6).
+		AddStop(colors.ApplyOpacity(colors.Darksalmon, 0.75), 1)
 
-	radial := colors.NewRadialGradient().
-		SetBounds(mat32.Box2{mat32.Vec2{230, 230}, mat32.Vec2{330, 330}}).SetSpread(colors.ReflectSpread).
-		AddStop(colors.Orchid, 0.3, 1).
-		AddStop(colors.Bisque, 0.6, 1).
-		AddStop(colors.Chartreuse, 1.0, 0.4)
+	radial := gradient.NewRadial().
+		SetBox(mat32.Box2{mat32.Vec2{230, 230}, mat32.Vec2{330, 330}}).SetSpread(gradient.Reflect).
+		AddStop(colors.Orchid, 0.3).
+		AddStop(colors.Bisque, 0.6).
+		AddStop(colors.ApplyOpacity(colors.Chartreuse, 0.4), 1)
 
 	d := NewDasher(wx, wy, scanner)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
@@ -476,13 +477,13 @@ func TestGradient(t *testing.T) {
 
 	p.AddTo(offsetPath)
 
-	scanner.SetColor(radial.RenderColor(1))
+	scanner.SetColor(radial)
 	f.Draw()
 	f.Clear()
 
 	scanner.SetClip(image.Rect(420, 350, 460, 400))
 	offsetPath.M = mat32.Identity2D().Translate(340, 180)
-	scanner.SetColor(radial.RenderColor(1))
+	scanner.SetColor(radial)
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
@@ -496,51 +497,51 @@ func TestGradient(t *testing.T) {
 		t.Error("path reset failed", offsetPath)
 	}
 
-	scanner.SetColor(linear.RenderColor(1))
+	scanner.SetColor(linear)
 	p.AddTo(f)
 	f.Draw()
 	f.Clear()
 
-	linear.SetSpread(colors.RepeatSpread)
-	scanner.SetColor(linear.RenderColor(1))
+	linear.SetSpread(gradient.Repeat)
+	scanner.SetColor(linear)
 	AddRect(20, 460, 150, 610, 45, f)
 	f.Draw()
 	f.Clear()
 
-	radial.SetUnits(colors.UserSpaceOnUse)
-	scanner.SetColor(radial.RenderColor(1))
+	radial.SetUnits(gradient.UserSpaceOnUse)
+	scanner.SetColor(radial)
 	AddRect(300, 20, 450, 170, 0, f)
 	f.Draw()
 	f.Clear()
 
-	linear.SetUnits(colors.UserSpaceOnUse)
-	scanner.SetColor(linear.RenderColor(1))
+	linear.SetUnits(gradient.UserSpaceOnUse)
+	scanner.SetColor(linear)
 	AddRect(300, 180, 450, 200, 0, f)
 	f.Draw()
 	f.Clear()
 
-	radial.SetUnits(colors.ObjectBoundingBox).
-		SetFocal(mat32.Vec2{}).SetRadius(0.2) // move focus away from
-	scanner.SetColor(radial.RenderColor(1))
+	radial.SetUnits(gradient.ObjectBoundingBox).
+		SetFocal(mat32.Vec2{}).SetRadius(mat32.V2Scalar(0.2)) // move focus away from
+	scanner.SetColor(radial)
 	AddRect(300, 210, 450, 300, 0, f)
 	f.Draw()
 	f.Clear()
 
-	radial.SetUnits(colors.UserSpaceOnUse).SetSpread(colors.PadSpread).
-		SetFocal(mat32.Vec2{0.1, 0.1}).SetRadius(0.5) // move focus away from center
-	scanner.SetColor(radial.RenderColor(1))
+	radial.SetUnits(gradient.UserSpaceOnUse).SetSpread(gradient.Pad).
+		SetFocal(mat32.Vec2{0.1, 0.1}).SetRadius(mat32.V2Scalar(0.5)) // move focus away from center
+	scanner.SetColor(radial)
 	AddRect(20, 160, 150, 310, 0, f)
 	f.Draw()
 	f.Clear()
 
 	linear.Stops = linear.Stops[0:1]
-	scanner.SetColor(linear.RenderColor(1))
+	scanner.SetColor(linear)
 	AddRect(300, 180, 450, 200, 0, f)
 	f.Draw()
 	f.Clear()
 
 	linear.Stops = linear.Stops[0:0]
-	scanner.SetColor(linear.RenderColor(1))
+	scanner.SetColor(linear)
 	AddRect(300, 180, 450, 200, 0, f)
 	f.Draw()
 	f.Clear()
@@ -555,7 +556,7 @@ func TestGradient(t *testing.T) {
 		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 	}
 
-	scanner.SetColor(colors.FuncRender(cf))
+	scanner.SetColor(colors.Pattern(cf))
 	AddRect(20, 300, 150, 450, 0, f)
 
 	f.Draw()
@@ -574,7 +575,7 @@ func TestMultiFunction(t *testing.T) {
 		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
-	scanner.SetColor(colors.SolidRender(colors.Cornflowerblue))
+	scanner.SetColor(colors.C(colors.Cornflowerblue))
 	d := NewDasher(wx, wy, scanner)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
 	// p is in the shape of a capital Q
@@ -594,7 +595,7 @@ func TestMultiFunction(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Cornsilk))
+	scanner.SetColor(colors.C(colors.Cornsilk))
 
 	s := &d.Stroker // This is the anon Stroke in the Dasher. It also satisfies
 	// the Rasterizer interface, but will perform a fill on the path.
@@ -602,7 +603,7 @@ func TestMultiFunction(t *testing.T) {
 	s.Draw()
 	s.Clear()
 
-	scanner.SetColor(colors.SolidRender(colors.Darkolivegreen))
+	scanner.SetColor(colors.C(colors.Darkolivegreen))
 
 	// Now lets use the Dasher itself; it will perform a dashed stroke if dashes are set
 	// in the SetStroke method.
