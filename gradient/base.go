@@ -87,7 +87,8 @@ func (b *Base) Bounds() image.Rectangle {
 }
 
 // CopyFrom copies from the given gradient (cp) onto this gradient (g),
-// making new copies of the stops instead of re-using pointers
+// making new copies of the stops instead of re-using pointers.
+// It assumes the gradients are of the same type.
 func CopyFrom(g Gradient, cp Gradient) {
 	switch g := g.(type) {
 	case *Linear:
@@ -96,6 +97,21 @@ func CopyFrom(g Gradient, cp Gradient) {
 		*g = *cp.(*Radial)
 	}
 	g.AsBase().CopyStopsFrom(cp.AsBase())
+}
+
+// CopyOf returns a copy of the given gradient, making copies of the stops
+// instead of re-using pointers.
+func CopyOf(g Gradient) Gradient {
+	var res Gradient
+	switch g := g.(type) {
+	case *Linear:
+		res = &Linear{}
+		CopyFrom(res, g)
+	case *Radial:
+		res = &Radial{}
+		CopyFrom(res, g)
+	}
+	return res
 }
 
 // CopyStopsFrom copies the base gradient stops from the given base gradient,

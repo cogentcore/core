@@ -65,12 +65,13 @@ func Apply(img image.Image, f func(c color.RGBA) color.RGBA) image.Image {
 	case *image.Uniform:
 		return image.NewUniform(f(colors.AsRGBA(img)))
 	case Gradient:
-		gb := img.AsBase()
+		res := CopyOf(img)
+		gb := res.AsBase()
 		for i, s := range gb.Stops {
 			s.Color = f(s.Color)
 			gb.Stops[i] = s
 		}
-		return img
+		return res
 	default:
 		return adjust.Apply(img, f)
 	}
