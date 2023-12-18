@@ -30,78 +30,52 @@ func BinarySpacedNumber(idx int) float32 {
 	return rv
 }
 
-// BinarySpaced returns a maximally widely-spaced sequence of colors
-// for progressive values of the index, using the Hue value of the HCT space.
+// Spaced returns a maximally widely-spaced sequence of colors
+// for progressive values of the index, using the HCT space.
 // This is useful, for example, for assigning colors in graphs.
-func BinarySpaced(idx int, chroma, tone float32) color.RGBA {
-	h := hct.New(360*BinarySpacedNumber(idx), chroma, tone)
-	return h.AsRGBA()
-}
-
-// BinarySpacedAccent calls [BinarySpaced] with standard chroma and tone values that will result
-// in matcolor-style base accent colors appropriate for the current color theme
-// (light vs dark). These colors will satisfy text contrast requirements when placed
-// on standard scheme backgrounds.
-func BinarySpacedAccent(idx int) color.RGBA {
+func Spaced(idx int) color.RGBA {
 	if matcolor.SchemeIsDark {
-		return BinarySpaced(idx, 48, 80)
+		return SpacedDark(idx)
 	}
-	return BinarySpaced(idx, 48, 40)
+	return SpacedLight(idx)
 }
 
-// BinarySpacedAccentVariant calls [BinarySpaced] with standard chroma and tone values that will result
-// in variant versions of matcolor-style base accent colors appropriate for the current
-// color theme (light vs dark). These colors will not necessarily satisfy text contrast
-// requirements, and they are designed for things like graph lines that do not need to
-// stand out as much.
-func BinarySpacedAccentVariant(idx int) color.RGBA {
-	if matcolor.SchemeIsDark {
-		return BinarySpaced(idx, 48, 50)
-	}
-	return BinarySpaced(idx, 48, 60)
+// SpacedLight is the Light mode version of Spaced
+func SpacedLight(idx int) color.RGBA {
+	// red, blue, green, yellow, violet, aqua, orange, blueviolet
+	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
+	hues := []float32{25, 255, 150, 105, 340, 210, 60, 300}
+	// even 45:       30, 75, 120, 165, 210, 255, 300, 345,
+	toffs := []float32{0, -10, 0, 10, 0, 0, 5, 0}
+	tones := []float32{65, 80, 45, 65, 80}
+	chromas := []float32{90, 90, 90, 20, 20}
+	ncats := len(hues)
+	ntc := len(tones)
+	hi := idx % ncats
+	hr := idx / ncats
+	tci := hr % ntc
+	hue := hues[hi]
+	tone := toffs[hi] + tones[tci]
+	chroma := chromas[tci]
+	return hct.New(hue, float32(chroma), tone).AsRGBA()
 }
 
-/*
-// List returns a list of n colors with the given HCT chroma and tone
-// and varying hues spaced equally in order to minimize the number of similar colors.
-// This can be useful for automatically generating colors for things like graph lines.
-func List(n int, chroma float32, tone float32) []color.RGBA {
-	res := []color.RGBA{}
-	if n == 0 {
-		return res
-	}
-	fn := float32(n)
-	inc := 360 / float32(min(n, 6))
-	for i := float32(0); i < fn; i++ {
-		hue := float32(i) * inc
-		hue -= mat32.Mod(hue, 360) * (i / fn)
-
-		h := hct.New(hue, chroma, tone)
-		res = append(res, h.AsRGBA())
-	}
-	return res
+// SpacedDark is the Dark mode version of Spaced
+func SpacedDark(idx int) color.RGBA {
+	// red, blue, green, yellow, violet, aqua, orange, blueviolet
+	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
+	hues := []float32{25, 255, 150, 105, 340, 210, 60, 300}
+	// even 45:       30, 75, 120, 165, 210, 255, 300, 345,
+	toffs := []float32{0, -10, 0, 10, 0, 0, 5, 0}
+	tones := []float32{65, 80, 45, 65, 80}
+	chromas := []float32{90, 90, 90, 20, 20}
+	ncats := len(hues)
+	ntc := len(tones)
+	hi := idx % ncats
+	hr := idx / ncats
+	tci := hr % ntc
+	hue := hues[hi]
+	tone := toffs[hi] + tones[tci]
+	chroma := chromas[tci]
+	return hct.New(hue, float32(chroma), tone).AsRGBA()
 }
-
-// AccentList calls [List] with standard chroma and tone values that will result
-// in matcolor-style base accent colors appropriate for the current color theme
-// (light vs dark). These colors will satisfy text contrast requirements when placed
-// on standard scheme backgrounds.
-func AccentList(n int) []color.RGBA {
-	if matcolor.SchemeIsDark {
-		return List(n, 48, 80)
-	}
-	return List(n, 48, 40)
-}
-
-// AccentVariantList calls [List] with standard chroma and tone values that will result
-// in variant versions of matcolor-style base accent colors appropriate for the current
-// color theme (light vs dark). These colors will not necessarily satisfy text contrast
-// requirements, and they are designed for things like graph lines that do not need to
-// stand out as much.
-func AccentVariantList(n int) []color.RGBA {
-	if matcolor.SchemeIsDark {
-		return List(n, 48, 60)
-	}
-	return List(n, 48, 50)
-}
-*/
