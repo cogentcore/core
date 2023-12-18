@@ -10,10 +10,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
 	"strings"
 
-	"github.com/anthonynsimon/bild/clone"
 	"goki.dev/colors"
 	"goki.dev/colors/gradient"
 	"goki.dev/cursors"
@@ -403,55 +401,78 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 		return bg
 	}
 
-	// TODO(kai): support gradient surrounding background colors
+	// TODO(kai): improve this function to handle all use cases correctly
 
-	/*
-		switch bg := bg.(type) {
-		case *image.Uniform:
-			if s.Opacity < 1 {
-				// we take our opacity-applied background color and then overlay it onto our surrounding color
-				obg := colors.ApplyOpacity(bg, s.Opacity)
-				bg.C = colors.AlphaBlend(pabg.Solid, obg)
-			}
-
-			if s.StateLayer > 0 {
-				clr := s.Color
-				if !colors.IsNil(s.StateColor) {
-					clr = s.StateColor
-				}
-				// we take our state-layer-applied state color and then overlay it onto our background color
-				sclr := colors.WithAF32(clr, s.StateLayer)
-				bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
-			}
-
-			return bg
-		case gradient.Gradient:
-		default:
-	*/
-	var abg *image.RGBA
+	upabg := colors.ToUniform(pabg)
 
 	if s.Opacity < 1 {
-		// we take our opacity-applied background and then overlay it onto our surrounding color
-		obg := gradient.ApplyOpacity(bg, s.Opacity)
-		abg = clone.AsRGBA(pabg)
-		draw.Draw(abg, bg.Bounds(), obg, image.Point{}, draw.Over)
+		bg = gradient.Apply(bg, func(c color.RGBA) color.RGBA {
+			// we take our opacity-applied background color and then overlay it onto our surrounding color
+			obg := colors.ApplyOpacity(c, s.Opacity)
+			return colors.AlphaBlend(upabg, obg)
+		})
 	}
-
 	if s.StateLayer > 0 {
-		clr := s.Color
+		sc := s.Color
 		if !colors.IsNil(s.StateColor) {
-			clr = s.StateColor
+			sc = s.StateColor
 		}
-		// we take our state-layer-applied state color and then overlay it onto our background color
-		sclr := colors.WithAF32(clr, s.StateLayer)
-		if abg == nil {
-			abg = clone.AsRGBA(bg)
-		}
-		draw.Draw(abg, abg.Bounds(), colors.Uniform(sclr), image.Point{}, draw.Over)
+		bg = gradient.Apply(bg, func(c color.RGBA) color.RGBA {
+			// we take our state-layer-applied state color and then overlay it onto our background color
+			sclr := colors.WithAF32(sc, s.StateLayer)
+			return colors.AlphaBlend(c, sclr)
+		})
 	}
+	return bg
 
-	return abg
-	// }
+	/*
+			switch bg := bg.(type) {
+			case *image.Uniform:
+				if s.Opacity < 1 {
+					// we take our opacity-applied background color and then overlay it onto our surrounding color
+					obg := colors.ApplyOpacity(bg, s.Opacity)
+					bg.C = colors.AlphaBlend(pabg.Solid, obg)
+				}
+
+				if s.StateLayer > 0 {
+					clr := s.Color
+					if !colors.IsNil(s.StateColor) {
+						clr = s.StateColor
+					}
+					// we take our state-layer-applied state color and then overlay it onto our background color
+					sclr := colors.WithAF32(clr, s.StateLayer)
+					bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
+				}
+
+				return bg
+			case gradient.Gradient:
+			default:
+
+		var abg *image.RGBA
+
+		if s.Opacity < 1 {
+			// we take our opacity-applied background and then overlay it onto our surrounding color
+			obg := gradient.ApplyOpacity(bg, s.Opacity)
+			abg = clone.AsRGBA(pabg)
+			draw.Draw(abg, bg.Bounds(), obg, image.Point{}, draw.Over)
+		}
+
+		if s.StateLayer > 0 {
+			clr := s.Color
+			if !colors.IsNil(s.StateColor) {
+				clr = s.StateColor
+			}
+			// we take our state-layer-applied state color and then overlay it onto our background color
+			sclr := colors.WithAF32(clr, s.StateLayer)
+			if abg == nil {
+				abg = clone.AsRGBA(bg)
+			}
+			draw.Draw(abg, abg.Bounds(), colors.Uniform(sclr), image.Point{}, draw.Over)
+		}
+
+		return abg
+		// }
+	*/
 }
 
 func (st *Style) IsFlexWrap() bool {
