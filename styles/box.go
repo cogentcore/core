@@ -146,6 +146,8 @@ type Border struct { //gti:add
 	// prop: border-radius = rounding of the corners
 	Radius SideValues `xml:"radius" view:"inline"`
 
+	// TODO(kai): support image border colors
+
 	// prop: border-color = color of the border
 	Color SideColors `xml:"color" view:"inline"`
 }

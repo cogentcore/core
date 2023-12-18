@@ -466,13 +466,13 @@ func (pc *Context) ResetClip() {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Context) Clear() {
-	src := image.NewUniform(&pc.FillStyle.Color.Solid)
+	src := image.NewUniform(pc.FillStyle.Color.At(0, 0))
 	draw.Draw(pc.Image, pc.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Context) SetPixel(x, y int) {
-	pc.Image.Set(x, y, &pc.StrokeStyle.Color.Solid)
+	pc.Image.Set(x, y, pc.StrokeStyle.Color.At(x, y))
 }
 
 func (pc *Context) DrawLine(x1, y1, x2, y2 float32) {
@@ -535,7 +535,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and the stroke style is not on and set to the correct color
-		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || pc.StrokeStyle.Color.Gradient != nil || bs.Color.Top != pc.StrokeStyle.Color.Solid) {
+		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || colors.Uniform(bs.Color.Top) != pc.StrokeStyle.Color) {
 			pc.StrokeStyle.SetColor(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
@@ -581,7 +581,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.MoveTo(xtli, ytl)
 
 	// set the color if it is not the same as the already set color
-	if pc.StrokeStyle.Color.Gradient != nil || bs.Color.Top != pc.StrokeStyle.Color.Solid {
+	if colors.Uniform(bs.Color.Top) != pc.StrokeStyle.Color {
 		pc.StrokeStyle.SetColor(bs.Color.Top)
 	}
 	pc.StrokeStyle.Width = bs.Width.Top
@@ -596,7 +596,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xtr, ytri)
 	}
 
-	if bs.Color.Right != pc.StrokeStyle.Color.Solid {
+	if colors.Uniform(bs.Color.Right) != pc.StrokeStyle.Color {
 		pc.StrokeStyle.SetColor(bs.Color.Right)
 	}
 	pc.StrokeStyle.Width = bs.Width.Right
@@ -610,7 +610,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbri, ybr)
 	}
 
-	if bs.Color.Bottom != pc.StrokeStyle.Color.Solid {
+	if colors.Uniform(bs.Color.Bottom) != pc.StrokeStyle.Color {
 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
 	}
 	pc.StrokeStyle.Width = bs.Width.Bottom
@@ -624,7 +624,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbl, ybli)
 	}
 
-	if bs.Color.Left != pc.StrokeStyle.Color.Solid {
+	if colors.Uniform(bs.Color.Left) != pc.StrokeStyle.Color {
 		pc.StrokeStyle.SetColor(bs.Color.Left)
 	}
 	pc.StrokeStyle.Width = bs.Width.Left
@@ -804,7 +804,7 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 	pc.FillStrokeClear()
 	pc.StrokeStyle.On = true
 	pc.FillStyle.On = false
-	pc.StrokeStyle.Color.SetSolid(pc.FillStyle.Color.Solid)
+	pc.StrokeStyle.Color = pc.FillStyle.Color
 	pc.StrokeStyle.Width.Dots = 1.5 // is the key number: 1 makes lines very transparent overall
 	for i, b := range blurs {
 		bo := br - float32(i)
