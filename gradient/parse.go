@@ -365,7 +365,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 			case "linearGradient":
 				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
 
-				// if we already have a gradient, we don't use this one
+				// if we don't already have a gradient, we use this one
 				if *g == nil {
 					*g = l
 				} else if pl, ok := (*g).(*Linear); ok {
@@ -395,7 +395,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 			case "radialGradient":
 				r := NewRadial()
 
-				// if we already have a gradient, we don't use this one
+				// if we don't already have a gradient, we use this one
 				if *g == nil {
 					*g = r
 				} else if pr, ok := (*g).(*Radial); ok {
