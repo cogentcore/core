@@ -8,8 +8,8 @@ package styles
 
 import (
 	"fmt"
+	"image"
 	"image/color"
-	"io"
 	"strings"
 
 	"goki.dev/colors"
@@ -150,13 +150,9 @@ type Style struct { //gti:add
 	// Color specifies the text / content color, and it is inherited.
 	Color color.RGBA `inherit:"true"`
 
-	// BackgroundColor specifies the background color of the element. It is not inherited,
-	// and it is transparent by default.
-	BackgroundColor colors.Full
-
-	// BackgroundImage, if non-nil, specifies an [io.Reader] to read a background image from using [image.Decode].
-	// If it is specified, [Style.BackgroundColor] has no effect.
-	BackgroundImage io.Reader
+	// Background specifies the background of the element. It is not inherited,
+	// and it is nil (transparent) by default.
+	Background image.Image
 
 	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32
@@ -169,10 +165,10 @@ type Style struct { //gti:add
 	// for an element, do not use this; instead, set StateLayer to 0.
 	StateColor color.RGBA
 
-	// ActualBackgroundColor, is the computed actual background color rendered for the element,
-	// taking into account its BackgroundColor, Opacity, StateLayer, and parent
-	// ActualBackgroundColor. It is automatically computed and should not be set manually.
-	ActualBackgroundColor colors.Full
+	// ActualBackground is the computed actual background rendered for the element,
+	// taking into account its Background, Opacity, StateLayer, and parent
+	// ActualBackground. It is automatically computed and should not be set manually.
+	ActualBackground image.Image
 
 	// position is only used for Layout = Nil cases
 	Pos units.XY `view:"inline"`
@@ -310,7 +306,7 @@ func (s *Style) SetAbilities(on bool, able ...abilities.Abilities) {
 // CopyFrom copies from another style, while preserving relevant local state
 func (s *Style) CopyFrom(cp *Style) {
 	*s = *cp
-	s.BackgroundColor = cp.BackgroundColor
+	s.Background = cp.Background
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than
@@ -383,17 +379,17 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 // StyleDefault is default style can be used when property specifies "default"
 var StyleDefault Style
 
-// ComputeActualBackgroundColor sets [Style.ActualBackgroundColor] based on the
-// given parent actual background color and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColor(pabg colors.Full) {
-	s.ActualBackgroundColor = s.ComputeActualBackgroundColorFor(s.BackgroundColor, pabg)
+// ComputeActualBackgroundColor sets [Style.ActualBackground] based on the
+// given parent actual background and the properties of the style object.
+func (s *Style) ComputeActualBackgroundColor(pabg image.Image) {
+	s.ActualBackground = s.ComputeActualBackgroundColorFor(s.Background, pabg)
 }
 
-// ComputeActualBackgroundColorFor returns the actual background color for
-// the given background color based on the given parent actual background color
+// ComputeActualBackgroundColorFor returns the actual background for
+// the given background based on the given parent actual background
 // and the properties of the style object.
-func (s *Style) ComputeActualBackgroundColorFor(bg, pabg colors.Full) colors.Full {
-	if bg.IsNil() {
+func (s *Style) ComputeActualBackgroundColorFor(bg, pabg image.Image) image.Image {
+	if bg == nil {
 		bg = pabg
 	}
 
@@ -404,47 +400,50 @@ func (s *Style) ComputeActualBackgroundColorFor(bg, pabg colors.Full) colors.Ful
 
 	// TODO(kai): support gradient surrounding background colors
 
-	if bg.Gradient == nil {
-		if s.Opacity < 1 {
-			// we take our opacity-applied background color and then overlay it onto our surrounding color
-			obg := colors.ApplyOpacity(bg.Solid, s.Opacity)
-			bg.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
-		}
-
-		if s.StateLayer > 0 {
-			clr := s.Color
-			if !colors.IsNil(s.StateColor) {
-				clr = s.StateColor
+	/*
+		if bg.Gradient == nil {
+			if s.Opacity < 1 {
+				// we take our opacity-applied background color and then overlay it onto our surrounding color
+				obg := colors.ApplyOpacity(bg.Solid, s.Opacity)
+				bg.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
 			}
-			// we take our state-layer-applied state color and then overlay it onto our background color
-			sclr := colors.WithAF32(clr, s.StateLayer)
-			bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
-		}
 
-		return bg
-	}
-
-	// need to make a full copy because underlying gradient isn't automatically copied
-	abg := colors.Full{}
-	abg.CopyFrom(bg)
-	for i, stop := range abg.Gradient.Stops {
-		if s.Opacity < 1 {
-			// we take our opacity-applied background color and then overlay it onto our surrounding color
-			obg := colors.ApplyOpacity(stop.Color, s.Opacity)
-			abg.Gradient.Stops[i].Color = colors.AlphaBlend(pabg.Solid, obg)
-		}
-
-		if s.StateLayer > 0 {
-			clr := s.Color
-			if !colors.IsNil(s.StateColor) {
-				clr = s.StateColor
+			if s.StateLayer > 0 {
+				clr := s.Color
+				if !colors.IsNil(s.StateColor) {
+					clr = s.StateColor
+				}
+				// we take our state-layer-applied state color and then overlay it onto our background color
+				sclr := colors.WithAF32(clr, s.StateLayer)
+				bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
 			}
-			// we take our state-layer-applied state color and then overlay it onto our background color
-			sclr := colors.WithAF32(clr, s.StateLayer)
-			abg.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, sclr)
+
+			return bg
 		}
-	}
-	return abg
+
+		// need to make a full copy because underlying gradient isn't automatically copied
+		abg := colors.Full{}
+		abg.CopyFrom(bg)
+		for i, stop := range abg.Gradient.Stops {
+			if s.Opacity < 1 {
+				// we take our opacity-applied background color and then overlay it onto our surrounding color
+				obg := colors.ApplyOpacity(stop.Color, s.Opacity)
+				abg.Gradient.Stops[i].Color = colors.AlphaBlend(pabg.Solid, obg)
+			}
+
+			if s.StateLayer > 0 {
+				clr := s.Color
+				if !colors.IsNil(s.StateColor) {
+					clr = s.StateColor
+				}
+				// we take our state-layer-applied state color and then overlay it onto our background color
+				sclr := colors.WithAF32(clr, s.StateLayer)
+				abg.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, sclr)
+			}
+		}
+		return abg
+	*/
+	return bg
 }
 
 func (st *Style) IsFlexWrap() bool {

@@ -211,13 +211,13 @@ var StyleStyleFuncs = map[string]StyleFunc{
 		fs := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				fs.BackgroundColor = par.(*Style).BackgroundColor
+				fs.Background = par.(*Style).Background
 			} else if init {
-				fs.BackgroundColor = colors.Full{}
+				fs.Background = colors.Full{}
 			}
 			return
 		}
-		grr.Log(fs.BackgroundColor.SetAny(val, ctxt))
+		grr.Log(fs.Background.SetAny(val, ctxt))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *Style) *float32 { return &obj.Opacity }),

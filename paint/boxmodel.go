@@ -30,11 +30,11 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
 
-	if st.ActualBackgroundColor.IsNil() {
+	if st.ActualBackground.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		st.ActualBackgroundColor = pabg
+		st.ActualBackground = pabg
 	}
 
 	// note that we always set the fill opacity to 1 because we are already applying
@@ -103,9 +103,9 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		}
 	} else {
 		if rad.IsZero() {
-			pc.FillBox(mpos, msz, st.ActualBackgroundColor)
+			pc.FillBox(mpos, msz, st.ActualBackground)
 		} else {
-			pc.FillStyle.SetFullColor(st.ActualBackgroundColor)
+			pc.FillStyle.SetFullColor(st.ActualBackground)
 			// no border -- fill onl
 			pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
 			pc.Fill()
