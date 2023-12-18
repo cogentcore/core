@@ -7,7 +7,6 @@ package paint
 import (
 	"image"
 
-	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 )
@@ -62,11 +61,12 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
 			pc.StrokeStyle.SetColor(nil)
-			prevOpacity := pc.FillStyle.Opacity
-			// note: factor of 0.5 here does a reasonable job of matching
+			// note: diving by 2 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			pc.FillStyle.Opacity = (float32(shadow.Color.A) / 255) * .5
-			pc.FillStyle.SetColor(colors.WithA(shadow.Color, 255))
+			// This does not modify the value of the original shadow
+			// because it is not a pointer.
+			shadow.Color.A /= 2
+			pc.FillStyle.SetColor(shadow.Color)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
 
@@ -81,7 +81,6 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 			// with radiusFactor = 2, and you'd have to remove this /2 factor.
 
 			pc.DrawRoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
-			pc.FillStyle.Opacity = prevOpacity
 		}
 	}
 
