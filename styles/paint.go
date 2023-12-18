@@ -170,7 +170,7 @@ type Fill struct {
 
 // Defaults initializes default values for paint fill
 func (pf *Fill) Defaults() {
-	pf.Color = colors.Uniform(color.Black)
+	pf.Color = colors.C(color.Black)
 	pf.Rule = FillRuleNonZero
 	pf.Opacity = 1.0
 }

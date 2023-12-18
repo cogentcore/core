@@ -17,11 +17,11 @@ import (
 func TestBackgroundColor(t *testing.T) {
 	RunTest(t, "background_color", 300, 300, func(pc *Context) {
 		st := styles.NewStyle()
-		st.Background = colors.Uniform(colors.Blue)
+		st.Background = colors.C(colors.Blue)
 		st.ToDots()
 
 		sz := st.BoxSpace().Size().Add(mat32.Vec2{200, 100})
-		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.Uniform(colors.White))
+		pc.DrawStdBox(st, mat32.Vec2{50, 100}, sz, colors.C(colors.White))
 	})
 }
 
@@ -37,7 +37,7 @@ func TestBackgroundImage(t *testing.T) {
 
 		test := func(of styles.ObjectFits, pos mat32.Vec2) {
 			st.ObjectFit = of
-			pc.DrawStdBox(st, pos, sz, colors.Uniform(colors.White))
+			pc.DrawStdBox(st, pos, sz, colors.C(colors.White))
 		}
 
 		test(styles.FitFill, mat32.Vec2{0, 0})

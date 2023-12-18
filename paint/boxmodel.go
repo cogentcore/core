@@ -67,7 +67,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 			// This does not modify the value of the original shadow
 			// because it is not a pointer.
 			shadow.Color.A /= 2
-			pc.FillStyle.Color = colors.Uniform(shadow.Color)
+			pc.FillStyle.Color = colors.C(shadow.Color)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msz)
 

@@ -307,7 +307,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "mark":
-		fs.Background = colors.Uniform(colors.Scheme.Warn.Container)
+		fs.Background = colors.C(colors.Scheme.Warn.Container)
 		did = true
 	case "abbr", "acronym":
 		fs.SetDeco(styles.DecoDottedUnderline)
@@ -315,7 +315,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
 		fs.Font = OpenFont(fs, ctxt)
-		fs.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
+		fs.Background = colors.C(colors.Scheme.SurfaceContainer)
 		did = true
 	}
 	return did

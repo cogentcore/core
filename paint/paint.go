@@ -532,7 +532,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and the stroke style is not set to the correct color
 		if !colors.IsNil(bs.Color.Top) && bs.Color.Top != colors.ToUniform(pc.StrokeStyle.Color) {
-			pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
+			pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
 		if r.IsZero() {
@@ -577,8 +577,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.MoveTo(xtli, ytl)
 
 	// set the color if it is not the same as the already set color
-	if colors.Uniform(bs.Color.Top) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
+	if colors.C(bs.Color.Top) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 	}
 	pc.StrokeStyle.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
@@ -592,8 +592,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xtr, ytri)
 	}
 
-	if colors.Uniform(bs.Color.Right) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Right)
+	if colors.C(bs.Color.Right) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Right)
 	}
 	pc.StrokeStyle.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
@@ -606,8 +606,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbri, ybr)
 	}
 
-	if colors.Uniform(bs.Color.Bottom) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Bottom)
+	if colors.C(bs.Color.Bottom) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Bottom)
 	}
 	pc.StrokeStyle.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
@@ -620,8 +620,8 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 		pc.MoveTo(xbl, ybli)
 	}
 
-	if colors.Uniform(bs.Color.Left) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Left)
+	if colors.C(bs.Color.Left) != pc.StrokeStyle.Color {
+		pc.StrokeStyle.Color = colors.C(bs.Color.Left)
 	}
 	pc.StrokeStyle.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)
