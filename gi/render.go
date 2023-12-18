@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"goki.dev/cam/hct"
+	"goki.dev/colors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -600,11 +601,11 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.SetColor(hct.New(wb.Sc.RenderBBoxHue, 100, 50).AsRGBA())
-		pc.FillStyle.SetColor(nil)
+		pc.StrokeStyle.Color = colors.Uniform(hct.New(wb.Sc.RenderBBoxHue, 100, 50))
+		pc.FillStyle.Color = nil
 		if wb.Sc.SelectedWidget != nil && wb.Sc.SelectedWidget.This() == wb.This() {
 			fc := pc.StrokeStyle.Color
-			pc.FillStyle.SetImage(fc)
+			pc.FillStyle.Color = fc
 			pc.FillStyle.Opacity = 0.2
 		}
 		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
