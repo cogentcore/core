@@ -61,6 +61,9 @@ func ApplyOpacity(img image.Image, opacity float32) image.Image {
 // [Gradient] as special cases, only calling the function for the uniform
 // color and each stop color, respectively.
 func Apply(img image.Image, f func(c color.RGBA) color.RGBA) image.Image {
+	if img == nil {
+		return nil
+	}
 	switch img := img.(type) {
 	case *image.Uniform:
 		return image.NewUniform(f(colors.AsRGBA(img)))
