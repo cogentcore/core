@@ -191,7 +191,7 @@ func (sv *SVG) GradientUpdateStops(gr *Gradient) {
 	}
 	sgr := sv.GradientByName(gr, gr.StopsName)
 	if sgr != nil {
-		gr.Grad.Gradient.CopyStopsFrom(sgr.Grad.Gradient)
+		gr.Grad.AsBase().CopyStopsFrom(sgr.Grad.AsBase())
 	}
 }
 
@@ -216,7 +216,7 @@ func (sv *SVG) GradientNewForNode(n Node, radial bool, stops string) (*Gradient,
 	gr, url := sv.GradientNew(radial)
 	gr.StopsName = stops
 	bbox := n.LocalBBox()
-	gr.Grad.Gradient.SetUserBounds(bbox)
+	gr.Grad.AsBase().SetBox(bbox)
 	sv.GradientUpdateStops(gr)
 	return gr, url
 }
@@ -288,8 +288,9 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 		return
 	}
 	bbox := n.LocalBBox()
-	gr.Grad.Gradient.SetUserBounds(bbox)
-	gr.Grad.AsBase().Transform = mat32.Identity2D()
+	gb := gr.Grad.AsBase()
+	gb.SetBox(bbox)
+	gb.SetTransform(mat32.Identity2D())
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node
@@ -313,8 +314,8 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 	}
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
 	n.SetProp(prop, url)
-	ngr.Grad.CopyFrom(gr.Grad)
-	return gr
+	gradient.CopyFrom(ngr.Grad, gr.Grad)
+	return ngr
 }
 
 // GradientDeleteNodeProp deletes any existing gradient for node
