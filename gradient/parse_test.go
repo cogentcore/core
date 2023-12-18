@@ -53,11 +53,19 @@ func TestFromString(t *testing.T) {
 }
 
 // used in multiple tests
-var linearGoldRedTransformTest = NewLinear().
-	SetTransform(mat32.Mat2{XX: -4.371139e-08, YX: 1, XY: -1, YY: -4.371139e-08, X0: 0, Y0: 0}).
-	SetStart(mat32.V2(0, 0)).SetEnd(mat32.V2(1, 0)).
-	AddStop(colors.Gold, 0.05).
-	AddStop(colors.Red, 0.95)
+var (
+	linearTransformTest = NewLinear().
+				SetTransform(mat32.Rotate2D(mat32.Pi/2)).
+				SetStart(mat32.V2(0, 0)).SetEnd(mat32.V2(1, 0)).
+				AddStop(colors.Gold, 0.05).
+				AddStop(colors.Red, 0.95)
+
+	radialTransformTest = NewRadial().
+				SetTransform(mat32.Translate2D(0.1, 0.1).Scale(0.5, 1.75)).
+				AddStop(colors.Red, 0.3).
+				AddStop(colors.Blue, 0.6).
+				AddStop(colors.Orange, 0.95)
+)
 
 func TestReadXML(t *testing.T) {
 	type test struct {
@@ -65,11 +73,20 @@ func TestReadXML(t *testing.T) {
 		want Gradient
 	}
 	tests := []test{
-		{`<linearGradient id="myGradient" gradientTransform="rotate(90)">
+		{`<linearGradient id="myGradient">
+		<stop offset="0.6" stop-color="#f31" />
+		<stop offset="1.2" stop-color="#bbbff6" />
+	  </linearGradient>`, NewLinear().
+			SetEnd(mat32.V2(1, 0)).
+			AddStop(grr.Log1(colors.FromHex("#f31")), 0.6).
+			AddStop(grr.Log1(colors.FromHex("#bbbff6")), 1.2)},
+
+		{`<linearGradient id="something" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />
 		<stop offset="95%" stop-color="red" />
-	  </linearGradient>`, linearGoldRedTransformTest},
-		{`<radialGradient id="myGradient">
+	  </linearGradient>`, linearTransformTest},
+
+		{`<radialGradient id="random">
 			<stop offset="10%" stop-color="blue" />
 			<stop offset="35%" stop-color="purple" stop-opacity="33%" />
 			<stop offset="90%" stop-color="red" />
@@ -77,6 +94,12 @@ func TestReadXML(t *testing.T) {
 			AddStop(colors.Blue, 0.1).
 			AddStop(colors.ApplyOpacity(colors.Purple, 0.33), 0.35).
 			AddStop(colors.Red, 0.9)},
+
+		{`<radialGradient id="h3ll0_wor1d!" gradientTransform="translate(0.1, 0.1) scale(0.5, 1.75)">
+			<stop offset="30%" stop-color="red" />
+			<stop offset="60%" stop-color="blue" />
+			<stop offset="95%" stop-color="orange" />
+		  </radialGradient>`, radialTransformTest},
 	}
 	for _, test := range tests {
 		r := bytes.NewBufferString(test.str)
