@@ -76,7 +76,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		if err != nil {
 			return nil, err
 		}
-		return colors.Uniform(s), nil
+		return colors.C(s), nil
 	}
 
 	gtyp := str[:gidx]
@@ -124,7 +124,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 func FromAny(val any, ctx ...colors.Context) (image.Image, error) {
 	switch v := val.(type) {
 	case color.Color:
-		return colors.Uniform(v), nil
+		return colors.C(v), nil
 	case image.Image:
 		return v, nil
 	case string:

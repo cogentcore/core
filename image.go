@@ -9,8 +9,8 @@ import (
 	"image/color"
 )
 
-// Uniform returns a new uniform [image.Image] filled completely with the given color.
-func Uniform(c color.Color) image.Image {
+// C returns a new uniform [image.Image] filled completely with the given color.
+func C(c color.Color) image.Image {
 	return image.NewUniform(c)
 }
 
