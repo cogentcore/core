@@ -69,6 +69,29 @@ func ApplyOpacity(img image.Image, opacity float32) image.Image {
 }
 
 /*
+// ApplyOpacityOver applies the given opacity to the given image as if
+// it were "over" the given over image, handling [image.Uniform] and
+// [Gradient] as special cases.
+func ApplyOpacityOver(img, over image.Image, opacity float32) image.Image {
+	switch over := over.(type) {
+	case *image.Uniform:
+		img.C = colors.ApplyOpacity(img.C, opacity)
+	case Gradient:
+		gb := img.AsBase()
+		for i, s := range gb.Stops {
+			s.Color = colors.ApplyOpacity(s.Color, opacity)
+			gb.Stops[i] = s
+		}
+	default:
+		img = adjust.Apply(img, func(r color.RGBA) color.RGBA {
+			return colors.ApplyOpacity(r, opacity)
+		})
+	}
+	return img
+}
+*/
+
+/*
 
 // SetGradientPoints sets the bounds of the gradient based on the given bounding
 // box, taking into account radial gradients and a standard linear left-to-right
