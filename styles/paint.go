@@ -215,6 +215,7 @@ func (pf *Fill) SetStylePost(props map[string]any) {
 func (pf *Fill) SetColor(cl color.Color) {
 	if cl == nil {
 		pf.On = false
+		pf.Color = nil
 	} else {
 		pf.On = true
 		pf.Color = colors.Uniform(cl)
@@ -225,6 +226,7 @@ func (pf *Fill) SetColor(cl color.Color) {
 func (pf *Fill) SetImage(cl image.Image) {
 	if cl == nil {
 		pf.On = false
+		pf.Color = nil
 	} else {
 		pf.On = true
 		pf.Color = cl
@@ -318,6 +320,7 @@ func (ps *Stroke) SetStylePost(props map[string]any) {
 func (ps *Stroke) SetColor(cl color.Color) {
 	if cl == nil {
 		ps.On = false
+		ps.Color = nil
 	} else {
 		ps.On = true
 		ps.Color = colors.Uniform(cl)
@@ -328,6 +331,7 @@ func (ps *Stroke) SetColor(cl color.Color) {
 func (ps *Stroke) SetImage(cl image.Image) {
 	if cl == nil {
 		ps.On = false
+		ps.Color = nil
 	} else {
 		ps.On = true
 		ps.Color = cl
