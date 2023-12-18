@@ -43,8 +43,8 @@ func TestRender(t *testing.T) {
 		bs.ToDots(&pc.UnContext)
 
 		// first, draw a frame around the entire image
-		// pc.StrokeStyle.SetColor(blk)
-		pc.FillStyle.SetColor(colors.White)
+		// pc.StrokeStyle.Color = colors.Uniform(blk)
+		pc.FillStyle.Color = colors.Uniform(colors.White)
 		// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
 		pc.DrawBorder(0, 0, 300, 300, bs)
 		pc.FillStrokeClear() // actually render path that has been setup
@@ -53,7 +53,7 @@ func TestRender(t *testing.T) {
 		bs.Color.Set(colors.Purple, colors.Green, colors.Red, colors.Blue)
 		// bs.Width.Set(units.NewDot(10))
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
-		pc.FillStyle.SetColor(colors.Lightblue)
+		pc.FillStyle.Color = colors.Uniform(colors.Lightblue)
 		pc.StrokeStyle.Width.Dot(10)
 		bs.ToDots(&pc.UnContext)
 		pc.DrawBorder(60, 60, 150, 100, bs)
@@ -147,28 +147,28 @@ func TestPaintFill(t *testing.T) {
 	})
 
 	test("fill", func(pc *Context) {
-		pc.FillStyle.SetColor(colors.Purple)
-		pc.StrokeStyle.SetColor(colors.Orange)
+		pc.FillStyle.Color = colors.Uniform(colors.Purple)
+		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.Fill()
 	})
 	test("stroke", func(pc *Context) {
-		pc.FillStyle.SetColor(colors.Purple)
-		pc.StrokeStyle.SetColor(colors.Orange)
+		pc.FillStyle.Color = colors.Uniform(colors.Purple)
+		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.Stroke()
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear
 	test("fill_stroke_clear_fill", func(pc *Context) {
-		pc.FillStyle.SetColor(colors.Purple)
-		pc.StrokeStyle.SetColor(nil)
+		pc.FillStyle.Color = colors.Uniform(colors.Purple)
+		pc.StrokeStyle.Color = colors.Uniform(nil)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.FillStrokeClear()
 	})
 	test("fill_stroke_clear_stroke", func(pc *Context) {
-		pc.FillStyle.SetColor(nil)
-		pc.StrokeStyle.SetColor(colors.Orange)
+		pc.FillStyle.Color = colors.Uniform(nil)
+		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.FillStrokeClear()
 	})

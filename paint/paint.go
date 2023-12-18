@@ -100,14 +100,10 @@ func NewContextFromRGBA(img image.Image) *Context {
 	return pc
 }
 
-// convenience for final draw for shapes when done
+// FillStrokeClear is a convenience final stroke and clear draw for shapes when done
 func (pc *Context) FillStrokeClear() {
-	if pc.HasFill() {
-		pc.FillPreserve()
-	}
-	if pc.HasStroke() {
-		pc.StrokePreserve()
-	}
+	pc.FillPreserve()
+	pc.StrokePreserve()
 	pc.ClearPath()
 }
 
@@ -124,7 +120,7 @@ func (pc *Context) TransformPoint(x, y float32) mat32.Vec2 {
 // coordinates, applying current transform
 func (pc *Context) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
-	if pc.HasStroke() {
+	if pc.StrokeStyle.Color != nil {
 		sw = 0.5 * pc.StrokeWidth()
 	}
 	tmin := pc.CurTransform.MulVec2AsPt(mat32.Vec2{minX, minY})
@@ -284,7 +280,7 @@ func (pc *Context) StrokeWidth() float32 {
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
 func (pc *Context) StrokePreserve() {
-	if pc.Raster == nil {
+	if pc.Raster == nil || pc.StrokeStyle.Color == nil {
 		return
 	}
 
@@ -332,16 +328,14 @@ func (pc *Context) StrokePreserve() {
 // line cap, line join and dash settings. The path is cleared after this
 // operation.
 func (pc *Context) Stroke() {
-	if pc.HasStroke() {
-		pc.StrokePreserve()
-	}
+	pc.StrokePreserve()
 	pc.ClearPath()
 }
 
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
 func (pc *Context) FillPreserve() {
-	if pc.Raster == nil {
+	if pc.Raster == nil || pc.FillStyle.Color == nil {
 		return
 	}
 
@@ -368,9 +362,7 @@ func (pc *Context) FillPreserve() {
 // Fill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is cleared after this operation.
 func (pc *Context) Fill() {
-	if pc.HasFill() {
-		pc.FillPreserve()
-	}
+	pc.FillPreserve()
 	pc.ClearPath()
 }
 
@@ -382,7 +374,7 @@ func (pc *Context) FillBox(pos, size mat32.Vec2, img image.Image) {
 		pc.FillBoxColor(pos, size, u.C)
 		return
 	}
-	pc.FillStyle.SetImage(img)
+	pc.FillStyle.Color = img
 	pc.DrawRectangle(pos.X, pos.Y, size.X, size.Y)
 	pc.Fill()
 }
@@ -538,9 +530,9 @@ func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
-		// set the color if it is not nil and the stroke style is not on and set to the correct color
-		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || colors.Uniform(bs.Color.Top) != pc.StrokeStyle.Color) {
-			pc.StrokeStyle.SetColor(bs.Color.Top)
+		// set the color if it is not nil and the stroke style is not set to the correct color
+		if !colors.IsNil(bs.Color.Top) && bs.Color.Top != colors.ToUniform(pc.StrokeStyle.Color) {
+			pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
 		if r.IsZero() {
@@ -586,7 +578,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 
 	// set the color if it is not the same as the already set color
 	if colors.Uniform(bs.Color.Top) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.SetColor(bs.Color.Top)
+		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
 	}
 	pc.StrokeStyle.Width = bs.Width.Top
 	pc.LineTo(xtri, ytr)
@@ -601,7 +593,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	}
 
 	if colors.Uniform(bs.Color.Right) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.SetColor(bs.Color.Right)
+		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Right)
 	}
 	pc.StrokeStyle.Width = bs.Width.Right
 	pc.LineTo(xbr, ybri)
@@ -615,7 +607,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	}
 
 	if colors.Uniform(bs.Color.Bottom) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Bottom)
 	}
 	pc.StrokeStyle.Width = bs.Width.Bottom
 	pc.LineTo(xbli, ybl)
@@ -629,7 +621,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	}
 
 	if colors.Uniform(bs.Color.Left) != pc.StrokeStyle.Color {
-		pc.StrokeStyle.SetColor(bs.Color.Left)
+		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Left)
 	}
 	pc.StrokeStyle.Width = bs.Width.Left
 	pc.LineTo(xtl, ytli)
@@ -661,7 +653,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 
 // 	// set the color if it is not the same as the already set color
 // 	if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Top)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Top
 // 	pc.LineTo(x+w, y)
@@ -673,7 +665,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Right != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Right)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Right)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Right
 // 	pc.LineTo(x+w, y+h)
@@ -684,7 +676,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Bottom)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Bottom
 // 	pc.LineTo(x, y+h)
@@ -695,7 +687,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	}
 
 // 	if bs.Color.Left != pc.StrokeStyle.Color.Color {
-// 		pc.StrokeStyle.SetColor(bs.Color.Left)
+// 		pc.StrokeStyle.Color = colors.Uniform(bs.Color.Left)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Left
 // 	pc.LineTo(x, y)
@@ -708,7 +700,7 @@ func (pc *Context) DrawRectangle(x, y, w, h float32) {
 // 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 // 		// set the color if it is not the same as the already set color
 // 		if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
-// 			pc.StrokeStyle.SetColor(bs.Color.Top)
+// 			pc.StrokeStyle.Color = colors.Uniform(bs.Color.Top)
 // 		}
 // 		pc.StrokeStyle.Width = bs.Width.Top
 // 		pc.DrawConsistentRoundedRectangle(x, y, w, h, bs.Radius.Dots())
@@ -803,13 +795,12 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 	origFill := pc.FillStyle
 	origOpacity := pc.FillStyle.Opacity
 
-	pc.StrokeStyle.On = false
+	pc.StrokeStyle.Color = nil
 	pc.DrawRoundedRectangle(x+br, y+br, w-2*br, h-2*br, r)
 	pc.FillStrokeClear()
-	pc.StrokeStyle.On = true
-	pc.FillStyle.On = false
 	pc.StrokeStyle.Color = pc.FillStyle.Color
-	pc.StrokeStyle.Width.Dots = 1.5 // is the key number: 1 makes lines very transparent overall
+	pc.FillStyle.Color = nil
+	pc.StrokeStyle.Width.Dots = 1.5 // 1.5 is the key number: 1 makes lines very transparent overall
 	for i, b := range blurs {
 		bo := br - float32(i)
 		pc.StrokeStyle.Opacity = b * origOpacity
