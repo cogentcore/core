@@ -342,7 +342,7 @@ func (ac *AppChooser) OnInit() {
 	ac.Style(func(s *styles.Style) {
 		// s.GrowWrap = true // note: this won't work because contents not placed until end
 		s.Border.Radius = styles.BorderRadiusFull
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+		s.Background = colors.Uniform(colors.Scheme.SurfaceContainerHighest)
 		if s.Is(states.Focused) {
 			s.Border.Width.Set(units.Dp(2))
 			s.Border.Color.Set(colors.Scheme.Primary.Base)

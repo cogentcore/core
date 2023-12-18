@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/colors/colormap"
+	"goki.dev/colors/gradient"
 	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/abilities"
@@ -75,20 +76,21 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 
 		cmn, ok := laser.NonPtrValue(vv.Value).Interface().(ColorMapName)
 		if !ok || cmn == "" {
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+			s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
 			return
 		}
 		cm, ok := colormap.AvailMaps[string(cmn)]
 		if !ok {
 			slog.Error("got invalid color map name", "name", cmn)
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+			s.Background = colors.Uniform(colors.Scheme.OutlineVariant)
 			return
 		}
-		s.BackgroundColor.Gradient = colors.NewLinearGradient()
+		g := gradient.NewLinear()
 		for i := float32(0); i < 1; i += 0.01 {
 			gc := cm.Map(i)
-			s.BackgroundColor.Gradient.AddStop(gc, i, 1)
+			g.AddStop(gc, i)
 		}
+		s.Background = g
 	})
 	vv.UpdateWidget()
 }

@@ -129,7 +129,7 @@ func (ch *Chooser) SetStyles() {
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		switch ch.Type {
 		case ChooserFilled:
-			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Background = colors.Uniform(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)
@@ -199,7 +199,7 @@ func (ch *Chooser) SetStyles() {
 				s.Border.Width.Zero()
 				// allow parent to dictate state layer
 				s.StateLayer = 0
-				s.BackgroundColor.SetSolid(colors.Transparent)
+				s.Background = colors.Uniform(colors.Transparent)
 				// if ch.MaxLength > 0 {
 				// 	s.Min.X.Ch(float32(ch.MaxLength))
 				// }

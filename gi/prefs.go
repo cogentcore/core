@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/paint"
@@ -162,7 +163,7 @@ func (pf *Preferences) Defaults() {
 // rebuild of default styles.
 func (pf *Preferences) UpdateAll() { //gti:add
 	pf.Apply()
-	colors.FullCache = nil
+	gradient.Cache = nil
 	for _, w := range AllRenderWins {
 		rctx := w.MainStageMgr.RenderCtx
 		rctx.LogicalDPI = w.LogicalDPI()

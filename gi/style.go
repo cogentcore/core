@@ -170,7 +170,7 @@ func (wb *WidgetBase) SetStyles() {
 			s.Border = s.MaxBorder
 		}
 		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			s.Background = colors.Uniform(colors.Scheme.Select.Container)
 			s.Color = colors.Scheme.Select.OnContainer
 		}
 	})
@@ -243,15 +243,14 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	st.ToDots()
 }
 
-// ParentActualBackgroundColor returns the actual background color of
-// the parent of the widget. If it has no parent, it returns a transparent
-// color.
-func (wb *WidgetBase) ParentActualBackgroundColor() colors.Full {
+// ParentActualBackground returns the actual background of
+// the parent of the widget. If it has no parent, it returns nil.
+func (wb *WidgetBase) ParentActualBackground() image.Image {
 	_, pw := wb.ParentWidget()
 	if pw == nil {
-		return colors.Full{}
+		return nil
 	}
-	return pw.Styles.ActualBackgroundColor
+	return pw.Styles.ActualBackground
 }
 
 // IsNthChild returns whether the node is nth-child of its parent

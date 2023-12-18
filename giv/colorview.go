@@ -13,6 +13,7 @@ import (
 
 	"goki.dev/cam/hct"
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
@@ -85,16 +86,17 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	hue.Style(func(s *styles.Style) {
-		hue.ValueColor.SetSolid(colors.Transparent)
-		hue.ThumbColor.SetSolid(cv.Color)
+		hue.ValueColor = colors.Uniform(colors.Transparent)
+		hue.ThumbColor = colors.Uniform(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
-		s.BackgroundColor.Gradient = colors.NewLinearGradient()
+		g := gradient.NewLinear()
 		for h := float32(0); h <= 360; h += 5 {
 			gc := cv.Color.WithHue(h)
-			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), h/360, 1)
+			g.AddStop(gc.AsRGBA(), h/360)
 		}
+		s.Background = g
 	})
 
 	chroma := gi.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
@@ -103,16 +105,17 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	chroma.Style(func(s *styles.Style) {
-		chroma.ValueColor.SetSolid(colors.Transparent)
-		chroma.ThumbColor.SetSolid(cv.Color)
+		chroma.ValueColor = colors.Uniform(colors.Transparent)
+		chroma.ThumbColor = colors.Uniform(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
-		s.BackgroundColor.Gradient = colors.NewLinearGradient()
+		g := gradient.NewLinear()
 		for c := float32(0); c <= 150; c += 5 {
 			gc := cv.Color.WithChroma(c)
-			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), c/150, 1)
+			g.AddStop(gc.AsRGBA(), c/150)
 		}
+		s.Background = g
 	})
 
 	tone := gi.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
@@ -121,16 +124,17 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	tone.Style(func(s *styles.Style) {
-		tone.ValueColor.SetSolid(colors.Transparent)
-		tone.ThumbColor.SetSolid(cv.Color)
+		tone.ValueColor = colors.Uniform(colors.Transparent)
+		tone.ThumbColor = colors.Uniform(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
-		s.BackgroundColor.Gradient = colors.NewLinearGradient()
+		g := gradient.NewLinear()
 		for c := float32(0); c <= 100; c += 5 {
 			gc := cv.Color.WithTone(c)
-			s.BackgroundColor.Gradient.AddStop(gc.AsRGBA(), c/100, 1)
+			g.AddStop(gc.AsRGBA(), c/100)
 		}
+		s.Background = g
 	})
 
 }
@@ -606,7 +610,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 		// we need to display button as non-transparent
 		// so that it can be seen
 		dclr := colors.WithAF32(clr, 1)
-		s.BackgroundColor.SetSolid(dclr)
+		s.Background = colors.Uniform(dclr)
 		s.Color = colors.AsRGBA(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
 	bt.Config()

@@ -53,16 +53,16 @@ type Editor struct { //goki:embedder
 	CursorWidth units.Value `xml:"cursor-width"`
 
 	// the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
-	LineNumberColor colors.Full
+	LineNumberColor image.Image
 
 	// the color used for the user text selection background color; this should be set in Stylers like all other style properties
-	SelectColor colors.Full
+	SelectColor image.Image
 
 	// the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
-	HighlightColor colors.Full
+	HighlightColor image.Image
 
 	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-	CursorColor colors.Full
+	CursorColor image.Image
 
 	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
 	NLines int `set:"-" view:"-" json:"-" xml:"-"`
@@ -188,10 +188,10 @@ func (ed *Editor) SetStyles() {
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		ed.CursorWidth.Dp(2)
-		ed.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
-		ed.SelectColor.SetSolid(colors.Scheme.Select.Container)
-		ed.HighlightColor.SetSolid(colors.Scheme.Warn.Container)
-		ed.CursorColor.SetSolid(colors.Scheme.Primary.Base)
+		ed.LineNumberColor = colors.Uniform(colors.Scheme.SurfaceContainer)
+		ed.SelectColor = colors.Uniform(colors.Scheme.Select.Container)
+		ed.HighlightColor = colors.Uniform(colors.Scheme.Warn.Container)
+		ed.CursorColor = colors.Uniform(colors.Scheme.Primary.Base)
 
 		s.Cursor = cursors.Text
 		if gi.Prefs.Editor.WordWrap {
@@ -213,9 +213,9 @@ func (ed *Editor) SetStyles() {
 		s.Color = colors.Scheme.OnSurface
 
 		if s.State.Is(states.Focused) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+			s.Background = colors.Uniform(colors.Scheme.Surface)
 		} else {
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
+			s.Background = colors.Uniform(colors.Scheme.SurfaceContainerHigh)
 		}
 	})
 }

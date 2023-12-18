@@ -1927,7 +1927,7 @@ func (t *Scene) SetData(v any) *Scene {
 // background color for filling scene.
 // Defaults to transparent so that popups can have rounded corners
 func (t *Scene) SetBgColor(v colors.Full) *Scene {
-	t.BgColor = v
+	t.Background = v
 	return t
 }
 

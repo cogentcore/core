@@ -79,10 +79,10 @@ type TextField struct { //goki:embedder
 	PlaceholderColor color.RGBA
 
 	// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
-	SelectColor colors.Full
+	SelectColor image.Image
 
 	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-	CursorColor colors.Full
+	CursorColor image.Image
 
 	// true if the text has been edited relative to the original
 	Edited bool `json:"-" xml:"-" set:"-"`
@@ -170,9 +170,9 @@ func (tf *TextField) SetStyles() {
 	tf.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		tf.CursorWidth.Dp(1)
-		tf.SelectColor.SetSolid(colors.Scheme.Select.Container)
+		tf.SelectColor = colors.Uniform(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
-		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
+		tf.CursorColor = colors.Uniform(colors.Scheme.Primary.Base)
 
 		if !tf.IsReadOnly() {
 			s.Cursor = cursors.Text
@@ -197,7 +197,7 @@ func (tf *TextField) SetStyles() {
 			s.Border.Width.Zero()
 			s.Border.Color.Zero()
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+			s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
 
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)
@@ -227,10 +227,10 @@ func (tf *TextField) SetStyles() {
 			s.Border.Width.Zero()
 			s.Border.Radius.Zero()
 			s.MaxBorder = s.Border
-			s.BackgroundColor.SetSolid(colors.Transparent)
+			s.Background = colors.Uniform(colors.Transparent)
 		}
 		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			s.Background = colors.Uniform(colors.Scheme.Select.Container)
 		}
 	})
 	tf.OnWidgetAdded(func(w Widget) {
@@ -1237,7 +1237,7 @@ func (tf *TextField) CursorSprite(on bool) *Sprite {
 		sp = NewSprite(spnm, bbsz, image.Point{})
 		sp.On = on
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{tf.CursorColor.Solid}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, tf.CursorColor, image.Point{}, draw.Src)
 		ms.Sprites.Add(sp)
 	}
 	if on {

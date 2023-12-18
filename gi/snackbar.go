@@ -30,7 +30,6 @@ func NewSnackbar(ctx Widget, name ...string) *Scene {
 		nm = ctx.Name() + "-snackbar"
 	}
 	sc := NewScene(nm)
-	sc.BgColor.SetSolid(colors.Transparent)
 	sc.SnackbarStyles()
 
 	sc.Stage = NewPopupStage(SnackbarStage, sc, ctx).SetTimeout(SnackbarTimeout)
@@ -64,7 +63,7 @@ func (sc *Scene) SnackbarStyles() {
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))
-		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
+		s.Background = colors.Uniform(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
 		s.Align.Content = styles.Center

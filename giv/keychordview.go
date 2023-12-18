@@ -94,11 +94,11 @@ func (kc *KeyChordEdit) SetStyles() {
 		s.Padding.Set(units.Dp(8))
 		s.SetTextWrap(false)
 		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			s.Background = colors.Uniform(colors.Scheme.Select.Container)
 			s.Color = colors.Scheme.Select.OnContainer
 		} else {
 			// STYTODO: get state styles working
-			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Background = colors.Uniform(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
 		}
 	})

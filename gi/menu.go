@@ -24,7 +24,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 		s.Grow.Set(0, 0)
 		s.Padding.Set(units.Dp(2))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = styles.BoxShadow2()
 		s.Gap.Zero()
 	})

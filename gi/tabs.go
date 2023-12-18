@@ -82,7 +82,7 @@ func (ts *Tabs) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Gap.Zero()
-				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+				s.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
 
 				// s.Border.Style.Set(styles.BorderNone)
 				// s.Border.Style.Bottom = styles.BorderSolid
@@ -586,7 +586,7 @@ func (tb *Tab) SetStyles() {
 				s.Padding.Set(units.Dp(0))
 				s.Padding.Left.Dp(16)
 				s.Border.Radius = styles.BorderRadiusFull
-				s.BackgroundColor.SetSolid(colors.Transparent)
+				s.Background = colors.Uniform(colors.Transparent)
 				// if we have some state, we amplify it so we
 				// are clearly distinguishable from our parent button
 				// TODO: get this working

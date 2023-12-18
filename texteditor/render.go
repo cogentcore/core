@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/cam/hct"
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/states"
@@ -161,8 +162,6 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 
 	bb := ed.Geom.ContentBBox
 	sty := &ed.Styles
-	cspec := sty.BackgroundColor
-	bg := cspec.Solid
 	isDark := matcolor.SchemeIsDark
 	nclrs := len(ViewDepthColors)
 	lstdp := 0
@@ -183,21 +182,28 @@ func (ed *Editor) RenderDepthBg(stln, edln int) {
 		for ti := range ht {
 			lx := &ht[ti]
 			if lx.Tok.Depth > 0 {
-				cspec.Solid = bg
+				var vdc color.RGBA
 				if isDark { // reverse order too
-					cspec.Solid = colors.Add(bg, ViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
+					vdc = ViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs]
 				} else {
-					cspec.Solid = colors.Sub(bg, ViewDepthColors[lx.Tok.Depth%nclrs])
+					vdc = ViewDepthColors[lx.Tok.Depth%nclrs]
 				}
+				bg := gradient.Apply(sty.Background, func(c color.RGBA) color.RGBA {
+					if isDark { // reverse order too
+						return colors.Add(c, vdc)
+					}
+					return colors.Sub(c, vdc)
+				})
+
 				st := min(lsted, lx.St)
 				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Tok.Depth
-				ed.RenderRegionBoxSty(reg, sty, cspec, true) // full width alway
+				ed.RenderRegionBoxSty(reg, sty, bg, true) // full width alway
 			}
 		}
 		if lstdp > 0 {
-			ed.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, cspec)
+			ed.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, sty.Background)
 		}
 	}
 }
@@ -234,13 +240,13 @@ func (ed *Editor) RenderScopelights(stln, edln int) {
 	}
 }
 
-// RenderRegionBox renders a region in background color according to given background color
-func (ed *Editor) RenderRegionBox(reg textbuf.Region, bgclr colors.Full) {
-	ed.RenderRegionBoxSty(reg, &ed.Styles, bgclr, false)
+// RenderRegionBox renders a region in background according to given background
+func (ed *Editor) RenderRegionBox(reg textbuf.Region, bg image.Image) {
+	ed.RenderRegionBoxSty(reg, &ed.Styles, bg, false)
 }
 
-// RenderRegionBoxSty renders a region in given style and background color
-func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr colors.Full, fullWidth bool) {
+// RenderRegionBoxSty renders a region in given style and background
+func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
 	st := reg.Start
 	end := reg.End
 	spos := ed.CharStartPosVis(st)
@@ -260,30 +266,30 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgcl
 	stsi, _, _ := ed.WrappedLineNo(st)
 	edsi, _, _ := ed.WrappedLineNo(end)
 	if st.Ln == end.Ln && stsi == edsi {
-		pc.FillBox(spos, epos.Sub(spos), bgclr) // same line, done
+		pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 		return
 	}
 	// on diff lines: fill to end of stln
 	seb := spos
 	seb.Y += ed.LineHeight
 	seb.X = ex
-	pc.FillBox(spos, seb.Sub(spos), bgclr)
+	pc.FillBox(spos, seb.Sub(spos), bg)
 	sfb := seb
 	sfb.X = stx
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
 		efb.Y -= ed.LineHeight
 		efb.X = ex
-		pc.FillBox(sfb, efb.Sub(sfb), bgclr)
+		pc.FillBox(sfb, efb.Sub(sfb), bg)
 	}
 	sed := epos
 	sed.Y -= ed.LineHeight
 	sed.X = stx
-	pc.FillBox(sed, epos.Sub(sed), bgclr)
+	pc.FillBox(sed, epos.Sub(sed), bg)
 }
 
-// RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr colors.Full) {
+// RenderRegionToEnd renders a region in given style and background, to end of line from start
+func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bg image.Image) {
 	spos := ed.CharStartPosVis(st)
 	epos := spos
 	epos.Y += ed.LineHeight
@@ -292,7 +298,7 @@ func (ed *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr colors.
 		return
 	}
 	pc := &ed.Sc.PaintContext
-	pc.FillBox(spos, epos.Sub(spos), bgclr) // same line, done
+	pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 }
 
 // RenderStartPos is absolute rendering start position from our content pos with scroll
@@ -311,7 +317,7 @@ func (ed *Editor) RenderAllLines() {
 	bb := ed.Geom.ContentBBox
 	bbmin := mat32.V2FromPoint(bb.Min)
 	bbmax := mat32.V2FromPoint(bb.Max)
-	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.BackgroundColor)
+	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.Background)
 	pos := ed.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -382,7 +388,7 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	spos := mat32.V2FromPoint(bb.Min)
 	epos := mat32.V2FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNoOff
-	pc.FillBoxColor(spos, epos.Sub(spos), ed.LineNumberColor.Solid)
+	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
 }
 
 // RenderLineNosBox renders the background for the line numbers in given range, in the LineNumberColor
@@ -399,7 +405,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 	epos := ed.CharEndPos(lex.Pos{Ln: end + 1})
 	epos.Y -= ed.LineHeight
 	epos.X = spos.X + ed.LineNoOff
-	pc.FillBoxColor(spos, epos.Sub(spos), ed.LineNumberColor.Solid)
+	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
 }
 
 // RenderLineNo renders given line number -- called within context of other render
@@ -438,19 +444,19 @@ func (ed *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 			pc.FillBoxColor(sbox, bszhlf, lclr)
 			nsp := sbox
 			nsp.X += bszhlf.X
-			pc.FillBoxColor(nsp, bszhlf, ed.SelectColor.Solid)
+			pc.FillBox(nsp, bszhlf, ed.SelectColor)
 		} else {
-			actClr = ed.SelectColor.Solid
-			pc.FillBoxColor(sbox, bsz, ed.SelectColor.Solid)
+			actClr = colors.ToUniform(ed.SelectColor)
+			pc.FillBox(sbox, bsz, ed.SelectColor)
 		}
 	} else if hasLClr {
 		pc.FillBoxColor(sbox, bsz, lclr)
 	} else if defFill {
-		actClr = ed.LineNumberColor.Solid
-		pc.FillBoxColor(sbox, bsz, ed.LineNumberColor.Solid)
+		actClr = colors.ToUniform(ed.LineNumberColor)
+		pc.FillBox(sbox, bsz, ed.LineNumberColor)
 	}
 
-	fst.BackgroundColor.SetSolid(nil)
+	fst.Background = colors.Uniform(nil)
 	lfmt := fmt.Sprintf("%d", ed.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)

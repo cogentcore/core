@@ -528,7 +528,7 @@ func (sc *Scene) DoRebuild() {
 func (sc *Scene) Fill() {
 	pc := &sc.PaintContext
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sc.SceneGeom.Size), sc.BgColor)
+	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sc.SceneGeom.Size), sc.Background)
 	pc.Unlock()
 }
 
@@ -572,7 +572,7 @@ func (wb *WidgetBase) PushBounds() bool {
 		}
 		return false
 	}
-	wb.Styles.ComputeActualBackgroundColor(wb.ParentActualBackgroundColor())
+	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
 	pc := &wb.Sc.PaintContext
 	pc.PushBounds(wb.Geom.TotalBBox)
 	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
@@ -603,8 +603,8 @@ func (wb *WidgetBase) PopBounds() {
 		pc.StrokeStyle.SetColor(hct.New(wb.Sc.RenderBBoxHue, 100, 50).AsRGBA())
 		pc.FillStyle.SetColor(nil)
 		if wb.Sc.SelectedWidget != nil && wb.Sc.SelectedWidget.This() == wb.This() {
-			fc := pc.StrokeStyle.Color.Solid
-			pc.FillStyle.SetColor(fc)
+			fc := pc.StrokeStyle.Color
+			pc.FillStyle.SetFullColor(fc)
 			pc.FillStyle.Opacity = 0.2
 		}
 		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
@@ -689,7 +689,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 
 	pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
 	sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
-	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackgroundColor())
+	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackground())
 }
 
 //////////////////////////////////////////////////////////////////
