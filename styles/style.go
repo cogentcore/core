@@ -10,9 +10,12 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"strings"
 
+	"github.com/anthonynsimon/bild/clone"
 	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/cursors"
 	"goki.dev/enums"
 	"goki.dev/girl/abilities"
@@ -402,50 +405,29 @@ func (s *Style) ComputeActualBackgroundColorFor(bg, pabg image.Image) image.Imag
 
 	// TODO(kai): support gradient surrounding background colors
 
-	/*
-		if bg.Gradient == nil {
-			if s.Opacity < 1 {
-				// we take our opacity-applied background color and then overlay it onto our surrounding color
-				obg := colors.ApplyOpacity(bg.Solid, s.Opacity)
-				bg.SetSolid(colors.AlphaBlend(pabg.Solid, obg))
-			}
+	var abg *image.RGBA
 
-			if s.StateLayer > 0 {
-				clr := s.Color
-				if !colors.IsNil(s.StateColor) {
-					clr = s.StateColor
-				}
-				// we take our state-layer-applied state color and then overlay it onto our background color
-				sclr := colors.WithAF32(clr, s.StateLayer)
-				bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
-			}
+	if s.Opacity < 1 {
+		// we take our opacity-applied background and then overlay it onto our surrounding color
+		obg := gradient.ApplyOpacity(bg, s.Opacity)
+		abg = clone.AsRGBA(pabg)
+		draw.Draw(abg, bg.Bounds(), obg, image.Point{}, draw.Over)
+	}
 
-			return bg
+	if s.StateLayer > 0 {
+		clr := s.Color
+		if !colors.IsNil(s.StateColor) {
+			clr = s.StateColor
 		}
-
-		// need to make a full copy because underlying gradient isn't automatically copied
-		abg := colors.Full{}
-		abg.CopyFrom(bg)
-		for i, stop := range abg.Gradient.Stops {
-			if s.Opacity < 1 {
-				// we take our opacity-applied background color and then overlay it onto our surrounding color
-				obg := colors.ApplyOpacity(stop.Color, s.Opacity)
-				abg.Gradient.Stops[i].Color = colors.AlphaBlend(pabg.Solid, obg)
-			}
-
-			if s.StateLayer > 0 {
-				clr := s.Color
-				if !colors.IsNil(s.StateColor) {
-					clr = s.StateColor
-				}
-				// we take our state-layer-applied state color and then overlay it onto our background color
-				sclr := colors.WithAF32(clr, s.StateLayer)
-				abg.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, sclr)
-			}
+		// we take our state-layer-applied state color and then overlay it onto our background color
+		sclr := colors.WithAF32(clr, s.StateLayer)
+		if abg == nil {
+			abg = clone.AsRGBA(bg)
 		}
-		return abg
-	*/
-	return bg
+		draw.Draw(abg, abg.Bounds(), colors.Uniform(sclr), image.Point{}, draw.Over)
+	}
+
+	return abg
 }
 
 func (st *Style) IsFlexWrap() bool {
