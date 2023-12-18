@@ -316,8 +316,9 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	return nil
 }
 
-// ReadXML reads a XML-formatted gradient color from the given io.Reader
-func ReadXML(reader io.Reader) (Gradient, error) {
+// ReadXML reads an XML-formatted gradient color from the given io.Reader and
+// sets the properties of the given gradient accordingly.
+func ReadXML(g *Gradient, reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
 
@@ -327,23 +328,21 @@ func ReadXML(reader io.Reader) (Gradient, error) {
 			if err == io.EOF {
 				break
 			}
-			return nil, fmt.Errorf("error parsing color xml: %w", err)
+			return fmt.Errorf("error parsing color xml: %w", err)
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			return UnmarshalXML(decoder, se)
+			return UnmarshalXML(g, decoder, se)
 			// todo: ignore rest?
 		}
 	}
-	return nil, nil
+	return nil
 }
 
-// UnmarshalXML parses the given XML gradient color data
-func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (Gradient, error) {
+// UnmarshalXML parses the given XML gradient color data and sets the properties
+// of the given gradient accordingly.
+func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error {
 	start := &se
-
-	// the gradient currently being parsed
-	var g Gradient
 
 	for {
 		var t xml.Token
@@ -358,14 +357,14 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (Gradient, error) {
 			if err == io.EOF {
 				break
 			}
-			return nil, fmt.Errorf("error parsing color: %w", err)
+			return fmt.Errorf("error parsing color: %w", err)
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "linearGradient":
 				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
-				g = l
+				*g = l
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
 					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
@@ -380,15 +379,15 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (Gradient, error) {
 					case "y2":
 						l.End.Y, err = ReadFraction(attr.Value)
 					default:
-						err = ReadGradAttr(g, attr)
+						err = ReadGradAttr(*g, attr)
 					}
 					if err != nil {
-						return nil, fmt.Errorf("error parsing linear gradient: %w", err)
+						return fmt.Errorf("error parsing linear gradient: %w", err)
 					}
 				}
 			case "radialGradient":
 				r := NewRadial()
-				g = r
+				*g = r
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
@@ -408,10 +407,10 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (Gradient, error) {
 						setFy = true
 						r.Focal.Y, err = ReadFraction(attr.Value)
 					default:
-						err = ReadGradAttr(g, attr)
+						err = ReadGradAttr(*g, attr)
 					}
 					if err != nil {
-						return nil, fmt.Errorf("error parsing radial gradient: %w", err)
+						return fmt.Errorf("error parsing radial gradient: %w", err)
 					}
 				}
 				if !setFx { // set fx to cx by default
@@ -444,42 +443,42 @@ func UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) (Gradient, error) {
 					case "offset":
 						stop.Pos, err = ReadFraction(attr.Value)
 						if err != nil {
-							return nil, err
+							return err
 						}
 					case "stop-color":
 						clr, err := colors.FromString(attr.Value)
 						if err != nil {
-							return nil, fmt.Errorf("invalid color string: %w", err)
+							return fmt.Errorf("invalid color string: %w", err)
 						}
 						stop.Color = clr
 					case "stop-opacity":
 						opacity, err = ReadFraction(attr.Value)
 						if err != nil {
-							return nil, err
+							return err
 						}
 					}
 				}
 				stop.Color = colors.ApplyOpacity(stop.Color, opacity)
 				if g == nil {
-					return nil, fmt.Errorf("got stop outside of gradient: %v", stop)
+					return fmt.Errorf("got stop outside of gradient: %v", stop)
 				} else {
-					gb := g.AsBase()
+					gb := (*g).AsBase()
 					gb.Stops = append(gb.Stops, stop)
 				}
 			default:
-				return nil, fmt.Errorf("cannot process svg element %q", se.Name.Local)
+				return fmt.Errorf("cannot process svg element %q", se.Name.Local)
 			}
 		case xml.EndElement:
 			if se.Name.Local == "linearGradient" || se.Name.Local == "radialGradient" {
-				return g, nil
+				return nil
 			}
 			if se.Name.Local != "stop" {
-				return nil, fmt.Errorf("got unexpected end element: %v", se.Name.Local)
+				return fmt.Errorf("got unexpected end element: %v", se.Name.Local)
 			}
 		case xml.CharData:
 		}
 	}
-	return g, nil
+	return nil
 }
 
 // ReadFraction reads a decimal value from the given string.

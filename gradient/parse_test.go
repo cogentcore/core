@@ -103,8 +103,8 @@ func TestReadXML(t *testing.T) {
 	}
 	for _, test := range tests {
 		r := bytes.NewBufferString(test.str)
-		have, err := ReadXML(r)
-		grr.Test(t, err)
+		var have Gradient
+		grr.Test(t, ReadXML(&have, r))
 		if !reflect.DeepEqual(have, test.want) {
 			t.Errorf("for %s: \n expected: \n %#v \n but got: \n %#v", test.str, test.want, have)
 		}
