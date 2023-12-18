@@ -604,7 +604,7 @@ func (wb *WidgetBase) PopBounds() {
 		pc.FillStyle.SetColor(nil)
 		if wb.Sc.SelectedWidget != nil && wb.Sc.SelectedWidget.This() == wb.This() {
 			fc := pc.StrokeStyle.Color
-			pc.FillStyle.SetFullColor(fc)
+			pc.FillStyle.SetImage(fc)
 			pc.FillStyle.Opacity = 0.2
 		}
 		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)

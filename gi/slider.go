@@ -537,12 +537,12 @@ func (sr *Slider) RenderSlider() {
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
-			pc.FillStyle.SetFullColor(vabg)
+			pc.FillStyle.SetImage(vabg)
 			sr.RenderBoxImpl(tpos, tsz, st.Border) // thumb
 		}
 		sr.RenderUnlock()
 	} else {
-		pc.FillStyle.SetFullColor(pabg)
+		pc.FillStyle.SetImage(pabg)
 		// surrounding box (needed to prevent it from rendering over itself)
 		sr.RenderBoxImpl(pos, sz, st.Border)
 
@@ -551,13 +551,13 @@ func (sr *Slider) RenderSlider() {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		pc.FillStyle.SetFullColor(sr.Styles.ActualBackground)
+		pc.FillStyle.SetImage(sr.Styles.ActualBackground)
 		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
 
 		if sr.ValueColor != nil {
 			bsz.SetDim(sr.Dim, sr.Pos)
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
-			pc.FillStyle.SetFullColor(vabg)
+			pc.FillStyle.SetImage(vabg)
 			sr.RenderBoxImpl(bpos, bsz, st.Border)
 		}
 
@@ -578,7 +578,7 @@ func (sr *Slider) RenderSlider() {
 			sr.Parts.Render()
 		} else {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
-			pc.FillStyle.SetFullColor(tabg)
+			pc.FillStyle.SetImage(tabg)
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxImpl(tpos, thsz, st.Border)
 			sr.RenderUnlock()
