@@ -8,7 +8,6 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/colors"
 	"goki.dev/colors/gradient"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -102,28 +101,25 @@ func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec
 	}
 }
 
-// GradientWritePoints writes the UserSpaceOnUse gradient points to
+// GradientWritePoints writes the gradient points to
 // a slice of floating point numbers, appending to end of slice.
-func GradientWritePts(gr *colors.Gradient, dat *[]float32) {
+func GradientWritePts(gr gradient.Gradient, dat *[]float32) {
 	// TODO: do we want this, and is this the right way to structure it?
 	if gr == nil {
 		return
 	}
-	if gr.Units == colors.ObjectBoundingBox {
-		return
-	}
-	*dat = append(*dat, gr.Matrix.XX)
-	*dat = append(*dat, gr.Matrix.YX)
-	*dat = append(*dat, gr.Matrix.XY)
-	*dat = append(*dat, gr.Matrix.YY)
-	*dat = append(*dat, gr.Matrix.X0)
-	*dat = append(*dat, gr.Matrix.Y0)
-	if gr.Type != colors.RadialGradient {
-		*dat = append(*dat, gr.Bounds.Min.X)
-		*dat = append(*dat, gr.Bounds.Min.Y)
-		*dat = append(*dat, gr.Bounds.Max.X)
-		*dat = append(*dat, gr.Bounds.Max.Y)
-	}
+	gb := gr.AsBase()
+	*dat = append(*dat, gb.Transform.XX)
+	*dat = append(*dat, gb.Transform.YX)
+	*dat = append(*dat, gb.Transform.XY)
+	*dat = append(*dat, gb.Transform.YY)
+	*dat = append(*dat, gb.Transform.X0)
+	*dat = append(*dat, gb.Transform.Y0)
+
+	*dat = append(*dat, gb.Box.Min.X)
+	*dat = append(*dat, gb.Box.Min.Y)
+	*dat = append(*dat, gb.Box.Max.X)
+	*dat = append(*dat, gb.Box.Max.Y)
 }
 
 // GradientWritePts writes the geometry of the gradients for this node
@@ -133,42 +129,37 @@ func (g *NodeBase) GradientWritePts(sv *SVG, dat *[]float32) {
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientWritePts(gr.Grad.Gradient, dat)
+			GradientWritePts(gr.Grad, dat)
 		}
 	}
 	gnm = NodePropURL(g, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientWritePts(gr.Grad.Gradient, dat)
+			GradientWritePts(gr.Grad, dat)
 		}
 	}
 }
 
-// GradientReadPoints reads the UserSpaceOnUse gradient points from
+// GradientReadPoints reads the gradient points from
 // a slice of floating point numbers, reading from the end.
-func GradientReadPts(gr *colors.Gradient, dat []float32) {
+func GradientReadPts(gr gradient.Gradient, dat []float32) {
 	if gr == nil {
 		return
 	}
-	if gr.Units == colors.ObjectBoundingBox {
-		return
-	}
+	gb := gr.AsBase()
 	sz := len(dat)
-	n := 6
-	if gr.Type != colors.RadialGradient {
-		n = 10
-		gr.Bounds.Min.X = dat[sz-4]
-		gr.Bounds.Min.Y = dat[sz-3]
-		gr.Bounds.Max.X = dat[sz-2]
-		gr.Bounds.Max.Y = dat[sz-1]
-	}
-	gr.Matrix.XX = dat[(sz-n)+0]
-	gr.Matrix.YX = dat[(sz-n)+1]
-	gr.Matrix.XY = dat[(sz-n)+2]
-	gr.Matrix.YY = dat[(sz-n)+3]
-	gr.Matrix.X0 = dat[(sz-n)+4]
-	gr.Matrix.Y0 = dat[(sz-n)+5]
+	gb.Box.Min.X = dat[sz-4]
+	gb.Box.Min.Y = dat[sz-3]
+	gb.Box.Max.X = dat[sz-2]
+	gb.Box.Max.Y = dat[sz-1]
+
+	gb.Transform.XX = dat[sz-10]
+	gb.Transform.YX = dat[sz-9]
+	gb.Transform.XY = dat[sz-8]
+	gb.Transform.YY = dat[sz-7]
+	gb.Transform.X0 = dat[sz-6]
+	gb.Transform.Y0 = dat[sz-5]
 }
 
 // GradientReadPts reads the geometry of the gradients for this node
@@ -178,14 +169,14 @@ func (g *NodeBase) GradientReadPts(sv *SVG, dat []float32) {
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientReadPts(gr.Grad.Gradient, dat)
+			GradientReadPts(gr.Grad, dat)
 		}
 	}
 	gnm = NodePropURL(g, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(g, gnm)
 		if gr != nil {
-			GradientReadPts(gr.Grad.Gradient, dat)
+			GradientReadPts(gr.Grad, dat)
 		}
 	}
 }
@@ -244,9 +235,9 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	gr := sv.Defs.NewChild(GradientType, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {
-		gr.Grad.Gradient = gradient.NewRadial()
+		gr.Grad = gradient.NewRadial()
 	} else {
-		gr.Grad.Gradient = gradient.NewLinear()
+		gr.Grad = gradient.NewLinear()
 	}
 	return gr, url
 }
@@ -298,7 +289,7 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 	}
 	bbox := n.LocalBBox()
 	gr.Grad.Gradient.SetUserBounds(bbox)
-	gr.Grad.Gradient.Matrix = mat32.Identity2D()
+	gr.Grad.AsBase().Transform = mat32.Identity2D()
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node
