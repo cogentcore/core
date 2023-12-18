@@ -15,7 +15,7 @@ var _ = gti.AddType(&gti.Type{
 	IDName:    "base",
 	Doc:       "Base contains the data and logic common to all gradient types.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors/gradient.Stop", LocalType: "[]Stop", Doc: "the stops for the gradient; use AddStop to add stops", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -28,6 +28,42 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetSpread sets the [Base.Spread]:
+// the spread method used for the gradient if it stops before the end
+func (t *Base) SetSpread(v Spreads) *Base {
+	t.Spread = v
+	return t
+}
+
+// SetBlend sets the [Base.Blend]:
+// the colorspace algorithm to use for blending colors
+func (t *Base) SetBlend(v colors.BlendTypes) *Base {
+	t.Blend = v
+	return t
+}
+
+// SetUnits sets the [Base.Units]:
+// the units to use for the gradient
+func (t *Base) SetUnits(v Units) *Base {
+	t.Units = v
+	return t
+}
+
+// SetBox sets the [Base.Box]:
+// the bounding box of the object with the gradient; this is used when rendering
+// gradients with [Units] of [ObjectBoundingBox].
+func (t *Base) SetBox(v mat32.Box2) *Base {
+	t.Box = v
+	return t
+}
+
+// SetTransform sets the [Base.Transform]:
+// Transform is the transformation matrix applied to the gradient's points.
+func (t *Base) SetTransform(v mat32.Mat2) *Base {
+	t.Transform = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/colors/gradient.Linear",

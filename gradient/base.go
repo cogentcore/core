@@ -25,7 +25,7 @@ type Gradient interface {
 }
 
 // Base contains the data and logic common to all gradient types.
-type Base struct { //gti:add
+type Base struct { //gti:add -setters
 
 	// the stops for the gradient; use AddStop to add stops
 	Stops []Stop `set:"-"`
