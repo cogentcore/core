@@ -15,12 +15,12 @@ func Uniform(c color.Color) image.Image {
 }
 
 // ToUniform converts the given image to a uniform color.
-func ToUniform(img image.Image) color.Color {
+func ToUniform(img image.Image) color.RGBA {
 	// TODO(kai/imageColor): we probably shouldn't need this anymore once everyone is an image
 	if img == nil {
-		return nil
+		return color.RGBA{}
 	}
-	return img.At(0, 0)
+	return AsRGBA(img.At(0, 0))
 }
 
 // Pattern returns a new unbounded [image.Image] represented by the given pattern function.
