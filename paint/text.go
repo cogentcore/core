@@ -307,7 +307,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "mark":
-		fs.Background.SetSolid(colors.Scheme.Warn.Container)
+		fs.Background = colors.Uniform(colors.Scheme.Warn.Container)
 		did = true
 	case "abbr", "acronym":
 		fs.SetDeco(styles.DecoDottedUnderline)
@@ -315,7 +315,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
 		fs.Font = OpenFont(fs, ctxt)
-		fs.Background.SetSolid(colors.Scheme.SurfaceContainer)
+		fs.Background = colors.Uniform(colors.Scheme.SurfaceContainer)
 		did = true
 	}
 	return did
@@ -416,7 +416,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				case "q":
 					curf := fstack[len(fstack)-1]
 					atStart := len(curSp.Text) == 0
-					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco)
+					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco)
 					if nextIsParaStart && atStart {
 						curSp.SetNewPara()
 					}
@@ -473,7 +473,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				curSp = &(tr.Spans[len(tr.Spans)-1])
 			case "q":
 				curf := fstack[len(fstack)-1]
-				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco)
+				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco)
 			case "a":
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
@@ -494,7 +494,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 					return unicode.IsSpace(r)
 				})
 			}
-			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco, font, ctxt)
+			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco, font, ctxt)
 			if nextIsParaStart && atStart {
 				curSp.SetNewPara()
 			}
@@ -553,7 +553,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				bidx += eidx + 2
 			} else { // get past <
 				curf := fstack[len(fstack)-1]
-				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco, font, ctxt)
+				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco, font, ctxt)
 				bidx++
 			}
 		}
@@ -577,7 +577,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				// 	curSp = &(tr.Spans[len(tr.Spans)-1])
 				case "q":
 					curf := fstack[len(fstack)-1]
-					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco)
+					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco)
 				case "a":
 					if curLinkIdx >= 0 {
 						tl := &tr.Links[curLinkIdx]
@@ -632,7 +632,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					case "q":
 						curf := fstack[len(fstack)-1]
 						atStart := len(curSp.Text) == 0
-						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco)
+						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco)
 						if nextIsParaStart && atStart {
 							curSp.SetNewPara()
 						}
@@ -708,7 +708,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					}
 				case '\n': // todo absorb other line endings
 					unestr := html.UnescapeString(string(tmpbuf))
-					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco, font, ctxt)
+					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco, font, ctxt)
 					tmpbuf = tmpbuf[0:0]
 					tr.Spans = append(tr.Spans, Span{})
 					curSp = &(tr.Spans[len(tr.Spans)-1])
@@ -721,7 +721,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 			if !didNl {
 				unestr := html.UnescapeString(string(tmpbuf))
 				// fmt.Printf("%v added: %v\n", bidx, unestr)
-				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background.SolidOrNil(), curf.Deco, font, ctxt)
+				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background.At(0, 0), curf.Deco, font, ctxt)
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
 					tl.Label = unestr

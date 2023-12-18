@@ -147,6 +147,8 @@ type Style struct { //gti:add
 	// effective margin to allocate for the element.
 	MaxBoxShadow []Shadow
 
+	// TODO(kai/imageColor)
+
 	// Color specifies the text / content color, and it is inherited.
 	Color color.RGBA `inherit:"true"`
 

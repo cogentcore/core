@@ -17,7 +17,7 @@ func TestBoxModel(t *testing.T) {
 	RunTest(t, "boxmodel", 300, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.Color = colors.Black
-		st.Background.SetSolid(colors.Lightblue)
+		st.Background = colors.Uniform(colors.Lightblue)
 		st.Border.Style.Set(styles.BorderSolid)
 		st.Border.Width.Set(units.Dp(5))
 		st.Border.Color.Set(colors.Red)
@@ -33,7 +33,7 @@ func TestBoxShadow(t *testing.T) {
 	RunTest(t, "boxshadow", 300, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.Color = colors.Black
-		st.Background.SetSolid(colors.Lightblue)
+		st.Background = colors.Uniform(colors.Lightblue)
 		st.Border.Style.Set(styles.BorderSolid)
 		st.Border.Width.Set(units.Dp(0))
 		st.Border.Color.Set(colors.Red)
@@ -51,23 +51,23 @@ func TestBoxShadow(t *testing.T) {
 func TestActualBackgroundColor(t *testing.T) {
 	RunTest(t, "actual_background_color", 300, 300, func(pc *Context) {
 		a := styles.NewStyle()
-		a.Background.SetSolid(colors.Lightgray)
+		a.Background = colors.Uniform(colors.Lightgray)
 		pc.DrawStdBox(a, mat32.Vec2{}, mat32.Vec2{300, 300}, colors.SolidFull(colors.White))
 
 		b := styles.NewStyle()
-		b.Background.SetSolid(colors.Red)
+		b.Background = colors.Uniform(colors.Red)
 		b.Opacity = 0.5
 		pc.DrawStdBox(b, mat32.Vec2{50, 50}, mat32.Vec2{200, 200}, a.ActualBackground)
 
 		c := styles.NewStyle()
-		c.Background.SetSolid(colors.Blue)
+		c.Background = colors.Uniform(colors.Blue)
 		c.Opacity = 0.5
 		c.StateLayer = 0.1
 		pc.DrawStdBox(c, mat32.Vec2{75, 75}, mat32.Vec2{150, 150}, b.ActualBackground)
 
 		// d is transparent and thus should not be any different than c
 		d := styles.NewStyle()
-		d.Background.SetSolid(colors.Transparent)
+		d.Background = colors.Uniform(colors.Transparent)
 		d.Opacity = 0.5
 		pc.DrawStdBox(d, mat32.Vec2{100, 100}, mat32.Vec2{100, 100}, c.ActualBackground)
 	})

@@ -11,6 +11,7 @@ import (
 	"sync"
 	"unicode"
 
+	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
@@ -198,7 +199,7 @@ func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG boo
 		return
 	}
 
-	bgc := color.Color(&sty.Background.Solid)
+	bgc := sty.Background.At(0, 0)
 	if noBG {
 		bgc = nil
 	}
@@ -688,7 +689,7 @@ func (sr *Span) RenderBg(pc *Context, tpos mat32.Vec2) {
 			didLast = false
 			continue
 		}
-		pc.FillStyle.Color.SetSolid(rr.BackgroundColor)
+		pc.FillStyle.Color = colors.Uniform(rr.BackgroundColor)
 		szt := mat32.Vec2{rr.Size.X, -rr.Size.Y}
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 		ul := sp.Add(tx.MulVec2AsVec(mat32.Vec2{0, szt.Y}))
@@ -742,7 +743,7 @@ func (sr *Span) RenderUnderline(pc *Context, tpos mat32.Vec2) {
 		dw := .05 * rr.Size.Y
 		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color.SetSolid(curColor)
+			pc.StrokeStyle.Color = colors.Uniform(curColor)
 		}
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
 			pc.StrokeStyle.Dashes = []float32{2, 2}
@@ -807,7 +808,7 @@ func (sr *Span) RenderLine(pc *Context, tpos mat32.Vec2, deco styles.TextDecorat
 		dw := 0.05 * rr.Size.Y
 		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color.SetSolid(curColor)
+			pc.StrokeStyle.Color = colors.Uniform(curColor)
 		}
 		yo := ascPct * asc32
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, -yo}))

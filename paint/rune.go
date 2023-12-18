@@ -26,6 +26,8 @@ type Rune struct {
 	// color to draw characters in
 	Color color.Color `json:"-" xml:"-"`
 
+	// TODO(kai/imageColor)
+
 	// background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background
 	BackgroundColor color.Color `json:"-" xml:"-"`
 
