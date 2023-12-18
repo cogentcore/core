@@ -556,7 +556,7 @@ func TestGradient(t *testing.T) {
 		return color.RGBA{uint8(r), uint8(g), uint8(b), 255}
 	}
 
-	scanner.SetColor(colors.FuncRender(cf))
+	scanner.SetColor(colors.Pattern(cf))
 	AddRect(20, 300, 150, 450, 0, f)
 
 	f.Draw()

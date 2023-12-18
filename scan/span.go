@@ -265,7 +265,7 @@ func (x *ImgSpanner) SetImage(img *image.RGBA) {
 }
 
 // SetColor sets the color of x to either a color.Color or a rasterx.ColorFunction
-func (x *ImgSpanner) SetColor(c colors.Render) {
+func (x *ImgSpanner) SetColor(c image.Image) {
 	if c.Func != nil {
 		x.ColorFunc = c.Func
 		return

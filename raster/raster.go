@@ -52,6 +52,7 @@ type Scanner interface {
 
 	// SetColor sets the color used for rendering.
 	SetColor(color image.Image)
+
 	SetWinding(useNonZeroWinding bool)
 	Clear()
 
