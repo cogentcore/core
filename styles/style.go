@@ -394,6 +394,8 @@ func (s *Style) ComputeActualBackground(pabg image.Image) {
 func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 	if bg == nil {
 		bg = pabg
+	} else if u, ok := bg.(*image.Uniform); ok && colors.IsNil(u.C) {
+		bg = pabg
 	}
 
 	if s.Opacity >= 1 && s.StateLayer <= 0 {
