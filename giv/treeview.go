@@ -230,7 +230,7 @@ func (tv *TreeView) SetStyles() {
 		s.StateLayer = 0
 		if s.Is(states.Selected) {
 			// render handles manually, similar to with actStateLayer
-			s.BackgroundColor.SetSolid(colors.Transparent)
+			s.Background = nil
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -636,21 +636,21 @@ func (tv *TreeView) RenderNode() {
 	pc, st := tv.RenderLock()
 	defer tv.RenderUnlock()
 
-	pabg := tv.ParentActualBackgroundColor()
+	pabg := tv.ParentActualBackground()
 
 	// must use workaround act values
 	st.StateLayer = tv.actStateLayer
 	if st.Is(states.Selected) {
-		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+		st.Background = colors.C(colors.Scheme.Select.Container)
 	}
-	tv.Styles.ComputeActualBackgroundColor(pabg)
+	tv.Styles.ComputeActualBackground(pabg)
 
 	pc.DrawStdBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, pabg)
 
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
-	st.BackgroundColor.SetSolid(colors.Transparent)
-	tv.Styles.ComputeActualBackgroundColor(pabg)
+	st.Background = nil
+	tv.Styles.ComputeActualBackground(pabg)
 }
 
 func (tv *TreeView) Render() {
@@ -660,7 +660,7 @@ func (tv *TreeView) Render() {
 			// we must copy from actual values in parent
 			tv.Parts.Styles.StateLayer = tv.actStateLayer
 			if tv.StateIs(states.Selected) {
-				tv.Parts.Styles.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+				tv.Parts.Styles.Background = colors.C(colors.Scheme.Select.Container)
 			}
 			tv.RenderParts()
 		}

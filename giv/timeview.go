@@ -286,7 +286,7 @@ func (dv *DateView) ConfigDateGrid() {
 				s.Color = colors.Scheme.Primary.Base
 			}
 			if dt.Year() == dv.Time.Year() && dt.YearDay() == dv.Time.YearDay() {
-				s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+				s.Background = colors.C(colors.Scheme.Primary.Base)
 				s.Color = colors.Scheme.Primary.On
 			}
 		})

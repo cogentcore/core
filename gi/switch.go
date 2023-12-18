@@ -134,7 +134,7 @@ func (sw *Switch) SetStyles() {
 
 		if sw.Type == SwitchChip {
 			if s.Is(states.Checked) {
-				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+				s.Background = colors.C(colors.Scheme.SurfaceVariant)
 				s.Color = colors.Scheme.OnSurfaceVariant
 			} else {
 				s.Border.Color.Set(colors.Scheme.Outline)
@@ -146,13 +146,13 @@ func (sw *Switch) SetStyles() {
 			s.Border.Color.Set(colors.Scheme.Outline)
 			s.Border.Width.Set(units.Dp(1))
 			if s.Is(states.Checked) {
-				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+				s.Background = colors.C(colors.Scheme.SurfaceVariant)
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
 		}
 
 		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
 	sw.OnWidgetAdded(func(w Widget) {

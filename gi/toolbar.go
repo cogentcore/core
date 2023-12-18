@@ -303,7 +303,7 @@ func ToolbarStyles(ly Layouter) {
 	ly.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Padding.SetHoriz(units.Dp(16))
 		s.Gap.Zero()
 	})

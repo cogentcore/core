@@ -157,7 +157,7 @@ func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
 		}
 		sp = gi.NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{ed.CursorColor.Solid}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, ed.CursorColor, image.Point{}, draw.Src)
 		ms.Sprites.Add(sp)
 	}
 	if on {

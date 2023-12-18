@@ -85,9 +85,9 @@ type Scene struct {
 	// live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// background color for filling scene.
-	// Defaults to transparent so that popups can have rounded corners
-	BgColor colors.Full
+	// Background for filling scene.
+	// Defaults to nil so that popups can have rounded corners.
+	Background image.Image
 
 	// event manager for this scene
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" set:"-"`
@@ -137,7 +137,6 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 	sc.InitName(sc, nm)
 	sc.EventMgr.Scene = sc
 	sc.Body = body
-	sc.BgColor.SetSolid(colors.Transparent)
 	return sc
 }
 
@@ -147,7 +146,6 @@ func NewScene(name ...string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name...)
 	sc.EventMgr.Scene = sc
-	sc.BgColor.SetSolid(colors.Transparent)
 	return sc
 }
 
@@ -157,7 +155,6 @@ func NewScene(name ...string) *Scene {
 // func NewSubScene(par ki.Ki, name ...string) *Scene {
 // 	sc := par.NewChild(SceneType, name...).(*Scene)
 // 	sc.EventMgr.Scene = sc
-// 	sc.BgColor.SetSolid(colors.Transparent)
 // 	return sc
 // }
 
@@ -172,7 +169,7 @@ func (sc *Scene) SetStyles() {
 	sc.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		s.Cursor = cursors.Arrow
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		s.Background = colors.C(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}

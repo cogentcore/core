@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/aymerick/douceur/css"
-	"goki.dev/colors"
 	"goki.dev/fi/uri"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -1172,13 +1171,13 @@ func (t *LabeledTextField) SetPlaceholderColor(v color.RGBA) *LabeledTextField {
 }
 
 // SetSelectColor sets the [LabeledTextField.SelectColor]
-func (t *LabeledTextField) SetSelectColor(v colors.Full) *LabeledTextField {
+func (t *LabeledTextField) SetSelectColor(v image.Image) *LabeledTextField {
 	t.SelectColor = v
 	return t
 }
 
 // SetCursorColor sets the [LabeledTextField.CursorColor]
-func (t *LabeledTextField) SetCursorColor(v colors.Full) *LabeledTextField {
+func (t *LabeledTextField) SetCursorColor(v image.Image) *LabeledTextField {
 	t.CursorColor = v
 	return t
 }
@@ -1780,13 +1779,13 @@ func (t *ProgressBar) SetPrec(v int) *ProgressBar {
 }
 
 // SetValueColor sets the [ProgressBar.ValueColor]
-func (t *ProgressBar) SetValueColor(v colors.Full) *ProgressBar {
+func (t *ProgressBar) SetValueColor(v image.Image) *ProgressBar {
 	t.ValueColor = v
 	return t
 }
 
 // SetThumbColor sets the [ProgressBar.ThumbColor]
-func (t *ProgressBar) SetThumbColor(v colors.Full) *ProgressBar {
+func (t *ProgressBar) SetThumbColor(v image.Image) *ProgressBar {
 	t.ThumbColor = v
 	return t
 }
@@ -1809,15 +1808,15 @@ var SceneType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"App", &gti.Field{Name: "App", Type: "*goki.dev/gi/v2/gi.App", LocalType: "*App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there.", Directives: gti.Directives{}, Tag: ""}},
-		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides[goki.dev/gi/v2/gi.BarFuncs]", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
-		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides[bool]", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
+		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
+		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
 		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.", Directives: gti.Directives{}, Tag: ""}},
 		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
 		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"PaintContext", &gti.Field{Name: "PaintContext", Type: "goki.dev/girl/paint.Context", LocalType: "paint.Context", Doc: "paint context for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene.\nDefaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: ""}},
+		{"Background", &gti.Field{Name: "Background", Type: "image.Image", LocalType: "image.Image", Doc: "Background for filling scene.\nDefaults to nil so that popups can have rounded corners.", Directives: gti.Directives{}, Tag: ""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"RenderBBoxHue", &gti.Field{Name: "RenderBBoxHue", Type: "float32", LocalType: "float32", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
@@ -1923,11 +1922,11 @@ func (t *Scene) SetData(v any) *Scene {
 	return t
 }
 
-// SetBgColor sets the [Scene.BgColor]:
-// background color for filling scene.
-// Defaults to transparent so that popups can have rounded corners
-func (t *Scene) SetBgColor(v colors.Full) *Scene {
-	t.BgColor = v
+// SetBackground sets the [Scene.Background]:
+// Background for filling scene.
+// Defaults to nil so that popups can have rounded corners.
+func (t *Scene) SetBackground(v image.Image) *Scene {
+	t.Background = v
 	return t
 }
 
@@ -2067,8 +2066,8 @@ var SliderType = gti.AddType(&gti.Type{
 		{"InputThreshold", &gti.Field{Name: "InputThreshold", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting an input event", Directives: gti.Directives{}, Tag: ""}},
 		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "whether to snap the values to Step size increments", Directives: gti.Directives{}, Tag: ""}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions.", Directives: gti.Directives{}, Tag: ""}},
-		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
-		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
+		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "image.Image", LocalType: "image.Image", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
+		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "image.Image", LocalType: "image.Image", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider.", Directives: gti.Directives{}, Tag: ""}},
 		{"StayInView", &gti.Field{Name: "StayInView", Type: "bool", LocalType: "bool", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars.", Directives: gti.Directives{}, Tag: ""}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous Change event emitted value - don't re-emit Change if it is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
@@ -2211,7 +2210,7 @@ func (t *Slider) SetPrec(v int) *Slider {
 // It should be set in the StyleFuncs, just like the main style object is.
 // If it is set to transparent, no value is rendered, so the value section of the slider
 // just looks like the rest of the slider.
-func (t *Slider) SetValueColor(v colors.Full) *Slider {
+func (t *Slider) SetValueColor(v image.Image) *Slider {
 	t.ValueColor = v
 	return t
 }
@@ -2221,7 +2220,7 @@ func (t *Slider) SetValueColor(v colors.Full) *Slider {
 // It should be set in the StyleFuncs, just like the main style object is.
 // If it is set to transparent, no thumb is rendered, so the thumb section of the slider
 // just looks like the rest of the slider.
-func (t *Slider) SetThumbColor(v colors.Full) *Slider {
+func (t *Slider) SetThumbColor(v image.Image) *Slider {
 	t.ThumbColor = v
 	return t
 }
@@ -2467,13 +2466,13 @@ func (t *Spinner) SetPlaceholderColor(v color.RGBA) *Spinner {
 }
 
 // SetSelectColor sets the [Spinner.SelectColor]
-func (t *Spinner) SetSelectColor(v colors.Full) *Spinner {
+func (t *Spinner) SetSelectColor(v image.Image) *Spinner {
 	t.SelectColor = v
 	return t
 }
 
 // SetCursorColor sets the [Spinner.CursorColor]
-func (t *Spinner) SetCursorColor(v colors.Full) *Spinner {
+func (t *Spinner) SetCursorColor(v image.Image) *Spinner {
 	t.CursorColor = v
 	return t
 }
@@ -2778,7 +2777,7 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map[string, *goki.dev/gi/v2/gi.Stage]", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Modified", &gti.Field{Name: "Modified", Type: "bool", LocalType: "bool", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle.", Directives: gti.Directives{}, Tag: ""}},
 		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin", Directives: gti.Directives{}, Tag: ""}},
 		{"RenderWin", &gti.Field{Name: "RenderWin", Type: "*goki.dev/gi/v2/gi.RenderWin", LocalType: "*RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderCtx wherever possible.", Directives: gti.Directives{}, Tag: ""}},
@@ -3304,8 +3303,8 @@ var TextFieldType = gti.AddType(&gti.Type{
 		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}, Tag: "xml:\"cursor-width\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TextFieldTypes", LocalType: "TextFieldTypes", Doc: "the type of the text field", Directives: gti.Directives{}, Tag: ""}},
 		{"PlaceholderColor", &gti.Field{Name: "PlaceholderColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color", Directives: gti.Directives{}, Tag: ""}},
-		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
-		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
+		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
+		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"Edited", &gti.Field{Name: "Edited", Type: "bool", LocalType: "bool", Doc: "true if the text has been edited relative to the original", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"EditTxt", &gti.Field{Name: "EditTxt", Type: "[]rune", LocalType: "[]rune", Doc: "the live text string being edited, with latest modifications -- encoded as runes", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"MaxWidthReq", &gti.Field{Name: "MaxWidthReq", Type: "int", LocalType: "int", Doc: "maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override", Directives: gti.Directives{}, Tag: ""}},
@@ -3430,14 +3429,14 @@ func (t *TextField) SetPlaceholderColor(v color.RGBA) *TextField {
 
 // SetSelectColor sets the [TextField.SelectColor]:
 // the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
-func (t *TextField) SetSelectColor(v colors.Full) *TextField {
+func (t *TextField) SetSelectColor(v image.Image) *TextField {
 	t.SelectColor = v
 	return t
 }
 
 // SetCursorColor sets the [TextField.CursorColor]:
 // the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-func (t *TextField) SetCursorColor(v colors.Full) *TextField {
+func (t *TextField) SetCursorColor(v image.Image) *TextField {
 	t.CursorColor = v
 	return t
 }

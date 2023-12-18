@@ -98,6 +98,8 @@ type Buf struct {
 	// icons for given lines -- use SetLineIcon and DeleteLineIcon
 	LineIcons map[int]icons.Icon
 
+	// TODO(kai/imageColor) (and also add line number text color)
+
 	// special line number colors given lines -- use SetLineColor and DeleteLineColor
 	LineColors map[int]color.RGBA
 

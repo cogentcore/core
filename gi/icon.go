@@ -130,7 +130,7 @@ func (ic *Icon) RenderSVG() {
 	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
-		if isz == ic.RendSize && sv.Name == string(ic.IconName) && sv.Color.Solid == clr {
+		if isz == ic.RendSize && sv.Name == string(ic.IconName) && colors.ToUniform(sv.Color) == clr {
 			return
 		}
 	}
@@ -149,7 +149,7 @@ func (ic *Icon) RenderSVG() {
 	sv.Resize(sz) // does Config if needed
 
 	// TODO(kai): what about gradient icons?
-	sv.Color.SetSolid(clr)
+	sv.Color = colors.C(clr)
 
 	sv.Scale = 1
 	sv.Render()

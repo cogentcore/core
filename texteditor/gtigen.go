@@ -3,12 +3,12 @@
 package texteditor
 
 import (
-	"goki.dev/colors"
+	"image"
+
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -115,12 +115,6 @@ func (t *DiffView) SetClass(v string) *DiffView {
 	return t
 }
 
-// SetPriorityEvents sets the [DiffView.PriorityEvents]
-func (t *DiffView) SetPriorityEvents(v []events.Types) *DiffView {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [DiffView.CustomContextMenu]
 func (t *DiffView) SetCustomContextMenu(v func(m *gi.Scene)) *DiffView {
 	t.CustomContextMenu = v
@@ -184,12 +178,6 @@ func (t *DiffTextEditor) SetClass(v string) *DiffTextEditor {
 	return t
 }
 
-// SetPriorityEvents sets the [DiffTextEditor.PriorityEvents]
-func (t *DiffTextEditor) SetPriorityEvents(v []events.Types) *DiffTextEditor {
-	t.PriorityEvents = v
-	return t
-}
-
 // SetCustomContextMenu sets the [DiffTextEditor.CustomContextMenu]
 func (t *DiffTextEditor) SetCustomContextMenu(v func(m *gi.Scene)) *DiffTextEditor {
 	t.CustomContextMenu = v
@@ -215,25 +203,25 @@ func (t *DiffTextEditor) SetCursorWidth(v units.Value) *DiffTextEditor {
 }
 
 // SetLineNumberColor sets the [DiffTextEditor.LineNumberColor]
-func (t *DiffTextEditor) SetLineNumberColor(v colors.Full) *DiffTextEditor {
+func (t *DiffTextEditor) SetLineNumberColor(v image.Image) *DiffTextEditor {
 	t.LineNumberColor = v
 	return t
 }
 
 // SetSelectColor sets the [DiffTextEditor.SelectColor]
-func (t *DiffTextEditor) SetSelectColor(v colors.Full) *DiffTextEditor {
+func (t *DiffTextEditor) SetSelectColor(v image.Image) *DiffTextEditor {
 	t.SelectColor = v
 	return t
 }
 
 // SetHighlightColor sets the [DiffTextEditor.HighlightColor]
-func (t *DiffTextEditor) SetHighlightColor(v colors.Full) *DiffTextEditor {
+func (t *DiffTextEditor) SetHighlightColor(v image.Image) *DiffTextEditor {
 	t.HighlightColor = v
 	return t
 }
 
 // SetCursorColor sets the [DiffTextEditor.CursorColor]
-func (t *DiffTextEditor) SetCursorColor(v colors.Full) *DiffTextEditor {
+func (t *DiffTextEditor) SetCursorColor(v image.Image) *DiffTextEditor {
 	t.CursorColor = v
 	return t
 }
@@ -257,10 +245,10 @@ var EditorType = gti.AddType(&gti.Type{
 		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*Buf", Doc: "the text buffer that we're editing", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"placeholder\""}},
 		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}, Tag: "xml:\"cursor-width\""}},
-		{"LineNumberColor", &gti.Field{Name: "LineNumberColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
-		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the user text selection background color; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
-		{"HighlightColor", &gti.Field{Name: "HighlightColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
-		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
+		{"LineNumberColor", &gti.Field{Name: "LineNumberColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
+		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the user text selection background color; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
+		{"HighlightColor", &gti.Field{Name: "HighlightColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
+		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"NLines", &gti.Field{Name: "NLines", Type: "int", LocalType: "int", Doc: "number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"Renders", &gti.Field{Name: "Renders", Type: "[]goki.dev/girl/paint.Text", LocalType: "[]paint.Text", Doc: "renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"Offs", &gti.Field{Name: "Offs", Type: "[]float32", LocalType: "[]float32", Doc: "starting render offsets for top of each line", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
@@ -363,28 +351,28 @@ func (t *Editor) SetCursorWidth(v units.Value) *Editor {
 
 // SetLineNumberColor sets the [Editor.LineNumberColor]:
 // the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
-func (t *Editor) SetLineNumberColor(v colors.Full) *Editor {
+func (t *Editor) SetLineNumberColor(v image.Image) *Editor {
 	t.LineNumberColor = v
 	return t
 }
 
 // SetSelectColor sets the [Editor.SelectColor]:
 // the color used for the user text selection background color; this should be set in Stylers like all other style properties
-func (t *Editor) SetSelectColor(v colors.Full) *Editor {
+func (t *Editor) SetSelectColor(v image.Image) *Editor {
 	t.SelectColor = v
 	return t
 }
 
 // SetHighlightColor sets the [Editor.HighlightColor]:
 // the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
-func (t *Editor) SetHighlightColor(v colors.Full) *Editor {
+func (t *Editor) SetHighlightColor(v image.Image) *Editor {
 	t.HighlightColor = v
 	return t
 }
 
 // SetCursorColor sets the [Editor.CursorColor]:
 // the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-func (t *Editor) SetCursorColor(v colors.Full) *Editor {
+func (t *Editor) SetCursorColor(v image.Image) *Editor {
 	t.CursorColor = v
 	return t
 }
@@ -405,12 +393,6 @@ func (t *Editor) SetTooltip(v string) *Editor {
 // SetClass sets the [Editor.Class]
 func (t *Editor) SetClass(v string) *Editor {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [Editor.PriorityEvents]
-func (t *Editor) SetPriorityEvents(v []events.Types) *Editor {
-	t.PriorityEvents = v
 	return t
 }
 
@@ -485,12 +467,6 @@ func (t *TwinEditors) SetTooltip(v string) *TwinEditors {
 // SetClass sets the [TwinEditors.Class]
 func (t *TwinEditors) SetClass(v string) *TwinEditors {
 	t.Class = v
-	return t
-}
-
-// SetPriorityEvents sets the [TwinEditors.PriorityEvents]
-func (t *TwinEditors) SetPriorityEvents(v []events.Types) *TwinEditors {
-	t.PriorityEvents = v
 	return t
 }
 

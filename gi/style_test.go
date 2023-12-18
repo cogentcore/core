@@ -15,7 +15,7 @@ import (
 	"goki.dev/girl/units"
 )
 
-func TestParentActualBackgroundColor(t *testing.T) {
+func TestParentActualBackground(t *testing.T) {
 	make := func() (sc *Scene, fr *Frame) {
 		sc = NewScene()
 		fr = NewFrame(sc)
@@ -50,14 +50,14 @@ func TestParentActualBackgroundColor(t *testing.T) {
 
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
-		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray"))
 
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
-		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	fr.SetState(true, states.Hovered)
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_pre"))
@@ -65,7 +65,7 @@ func TestParentActualBackgroundColor(t *testing.T) {
 	sc, fr = make()
 	fr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
-		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	sc.AssertPixelsOnShow(t, filepath.Join("style", "parent_background_color", "gray_hovered_post"), func() {
 		fr.SetState(true, states.Hovered)

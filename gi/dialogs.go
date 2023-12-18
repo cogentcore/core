@@ -214,7 +214,7 @@ func (sc *Scene) DialogStyles() {
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()
 			// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}
 	})
 }

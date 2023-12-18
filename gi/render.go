@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"goki.dev/cam/hct"
+	"goki.dev/colors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -528,7 +529,7 @@ func (sc *Scene) DoRebuild() {
 func (sc *Scene) Fill() {
 	pc := &sc.PaintContext
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sc.SceneGeom.Size), sc.BgColor)
+	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sc.SceneGeom.Size), sc.Background)
 	pc.Unlock()
 }
 
@@ -572,7 +573,7 @@ func (wb *WidgetBase) PushBounds() bool {
 		}
 		return false
 	}
-	wb.Styles.ComputeActualBackgroundColor(wb.ParentActualBackgroundColor())
+	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
 	pc := &wb.Sc.PaintContext
 	pc.PushBounds(wb.Geom.TotalBBox)
 	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
@@ -600,11 +601,11 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.SetColor(hct.New(wb.Sc.RenderBBoxHue, 100, 50).AsRGBA())
-		pc.FillStyle.SetColor(nil)
+		pc.StrokeStyle.Color = colors.C(hct.New(wb.Sc.RenderBBoxHue, 100, 50))
+		pc.FillStyle.Color = nil
 		if wb.Sc.SelectedWidget != nil && wb.Sc.SelectedWidget.This() == wb.This() {
-			fc := pc.StrokeStyle.Color.Solid
-			pc.FillStyle.SetColor(fc)
+			fc := pc.StrokeStyle.Color
+			pc.FillStyle.Color = fc
 			pc.FillStyle.Opacity = 0.2
 		}
 		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
@@ -689,7 +690,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 
 	pos := mat32.V2FromPoint(wb.Geom.TotalBBox.Min)
 	sz := mat32.V2FromPoint(wb.Geom.TotalBBox.Size())
-	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackgroundColor())
+	pc.DrawStdBox(st, pos, sz, wb.ParentActualBackground())
 }
 
 //////////////////////////////////////////////////////////////////
@@ -699,7 +700,7 @@ func (wb *WidgetBase) RenderStdBox(st *styles.Style) {
 // Called prior to using -- logs an error if not.
 func (wb *WidgetBase) HasSc() bool {
 	if wb.This() == nil || wb.Sc == nil {
-		slog.Debug("gi.WidgetBase: object or scene is nil\n")
+		slog.Debug("gi.WidgetBase: object or scene is nil")
 		return false
 	}
 	return true

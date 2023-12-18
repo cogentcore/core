@@ -34,7 +34,7 @@ func (sp *Separator) SetStyles() {
 	sp.Style(func(s *styles.Style) {
 		s.Align.Self = styles.Center
 		s.Justify.Self = styles.Center
-		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		s.Background = colors.C(colors.Scheme.OutlineVariant)
 		if sp.Dim == mat32.X {
 			s.Grow.Set(1, 0)
 			s.Min.Y.Dp(1)

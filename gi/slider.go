@@ -86,13 +86,13 @@ type Slider struct { //goki:embedder
 	// It should be set in the StyleFuncs, just like the main style object is.
 	// If it is set to transparent, no value is rendered, so the value section of the slider
 	// just looks like the rest of the slider.
-	ValueColor colors.Full
+	ValueColor image.Image
 
 	// The background color that is used for styling the thumb (handle) of the slider.
 	// It should be set in the StyleFuncs, just like the main style object is.
 	// If it is set to transparent, no thumb is rendered, so the thumb section of the slider
 	// just looks like the rest of the slider.
-	ThumbColor colors.Full
+	ThumbColor image.Image
 
 	// If true, keep the slider (typically a Scrollbar) within the parent Scene
 	// bounding box, if the parent is in view.  This is the default behavior
@@ -181,19 +181,19 @@ func (sr *Slider) SetStyles() {
 			s.Min.X.Em(1)
 		}
 		if sr.Type == SliderSlider {
-			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
-			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
+			sr.ValueColor = colors.C(colors.Scheme.Primary.Base)
+			sr.ThumbColor = colors.C(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+			s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		} else {
 			if sr.Dim == mat32.X {
 				s.Min.Y = s.ScrollBarWidth
 			} else {
 				s.Min.X = s.ScrollBarWidth
 			}
-			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
-			sr.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+			sr.ValueColor = colors.C(colors.Scheme.OutlineVariant)
+			sr.ThumbColor = colors.C(colors.Scheme.OutlineVariant)
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}
 
 		// sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
@@ -521,11 +521,11 @@ func (sr *Slider) RenderSlider() {
 	sz := sr.Geom.Size.Actual.Content
 	pos := sr.Geom.Pos.Content
 
-	pabg := sr.ParentActualBackgroundColor()
+	pabg := sr.ParentActualBackground()
 
 	if sr.Type == SliderScrollbar {
 		pc.DrawStdBox(st, pos, sz, pabg) // track
-		if !sr.ValueColor.IsNil() {
+		if sr.ValueColor != nil {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
 			tpos := pos
@@ -536,13 +536,13 @@ func (sr *Slider) RenderSlider() {
 			origsz := sz.Dim(od)
 			tsz.SetDim(od, osz)
 			tpos.SetAddDim(od, 0.5*(osz-origsz))
-			vabg := sr.Styles.ComputeActualBackgroundColorFor(sr.ValueColor, pabg)
-			pc.FillStyle.SetFullColor(vabg)
+			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
+			pc.FillStyle.Color = vabg
 			sr.RenderBoxImpl(tpos, tsz, st.Border) // thumb
 		}
 		sr.RenderUnlock()
 	} else {
-		pc.FillStyle.SetFullColor(pabg)
+		pc.FillStyle.Color = pabg
 		// surrounding box (needed to prevent it from rendering over itself)
 		sr.RenderBoxImpl(pos, sz, st.Border)
 
@@ -551,13 +551,13 @@ func (sr *Slider) RenderSlider() {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
-		pc.FillStyle.SetFullColor(sr.Styles.ActualBackgroundColor)
+		pc.FillStyle.Color = sr.Styles.ActualBackground
 		sr.RenderBoxImpl(bpos, bsz, st.Border) // track
 
-		if !sr.ValueColor.IsNil() {
+		if sr.ValueColor != nil {
 			bsz.SetDim(sr.Dim, sr.Pos)
-			vabg := sr.Styles.ComputeActualBackgroundColorFor(sr.ValueColor, pabg)
-			pc.FillStyle.SetFullColor(vabg)
+			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
+			pc.FillStyle.Color = vabg
 			sr.RenderBoxImpl(bpos, bsz, st.Border)
 		}
 
@@ -577,8 +577,8 @@ func (sr *Slider) RenderSlider() {
 			ic.SetBBoxes()
 			sr.Parts.Render()
 		} else {
-			tabg := sr.Styles.ComputeActualBackgroundColorFor(sr.ThumbColor, pabg)
-			pc.FillStyle.SetFullColor(tabg)
+			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
+			pc.FillStyle.Color = tabg
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxImpl(tpos, thsz, st.Border)
 			sr.RenderUnlock()
