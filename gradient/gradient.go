@@ -51,21 +51,29 @@ const (
 // ApplyOpacity applies the given opacity to the given image, handling
 // [image.Uniform] and [Gradient] as special cases.
 func ApplyOpacity(img image.Image, opacity float32) image.Image {
+	return Apply(img, func(c color.RGBA) color.RGBA {
+		return colors.ApplyOpacity(c, opacity)
+	})
+}
+
+// Apply returns a copy of the given image with the given color function
+// applied to each pixel of the image. It handles [image.Uniform] and
+// [Gradient] as special cases, only calling the function for the uniform
+// color and each stop color, respectively.
+func Apply(img image.Image, f func(c color.RGBA) color.RGBA) image.Image {
 	switch img := img.(type) {
 	case *image.Uniform:
-		img.C = colors.ApplyOpacity(img.C, opacity)
+		return image.NewUniform(f(colors.AsRGBA(img)))
 	case Gradient:
 		gb := img.AsBase()
 		for i, s := range gb.Stops {
-			s.Color = colors.ApplyOpacity(s.Color, opacity)
+			s.Color = f(s.Color)
 			gb.Stops[i] = s
 		}
+		return img
 	default:
-		img = adjust.Apply(img, func(r color.RGBA) color.RGBA {
-			return colors.ApplyOpacity(r, opacity)
-		})
+		return adjust.Apply(img, f)
 	}
-	return img
 }
 
 /*
