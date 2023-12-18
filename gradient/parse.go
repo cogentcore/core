@@ -364,7 +364,14 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 			switch se.Name.Local {
 			case "linearGradient":
 				l := NewLinear().SetEnd(mat32.V2(1, 0)) // SVG is LTR by default
-				*g = l
+
+				// if we already have a gradient, we don't use this one
+				if *g == nil {
+					*g = l
+				} else if pl, ok := (*g).(*Linear); ok {
+					// if our previous gradient is also linear, we build on it
+					l = pl
+				}
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
 					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
@@ -387,7 +394,14 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 				}
 			case "radialGradient":
 				r := NewRadial()
-				*g = r
+
+				// if we already have a gradient, we don't use this one
+				if *g == nil {
+					*g = r
+				} else if pr, ok := (*g).(*Radial); ok {
+					// if our previous gradient is also radial, we build on it
+					r = pr
+				}
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
