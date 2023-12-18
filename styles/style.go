@@ -211,7 +211,7 @@ func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.UnContext.Defaults()
 	s.LayoutDefaults()
-	s.Color = colors.Black
+	s.Color = colors.Scheme.OnSurface
 	s.Opacity = 1
 	s.FillMargin = true
 	s.Font.Defaults()
