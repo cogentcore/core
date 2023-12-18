@@ -423,13 +423,13 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 		fs := obj.(*FontRender)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				fs.BackgroundColor = par.(*FontRender).BackgroundColor
+				fs.Background = par.(*FontRender).Background
 			} else if init {
-				fs.BackgroundColor = colors.Full{}
+				fs.Background = colors.Full{}
 			}
 			return
 		}
-		grr.Log(fs.BackgroundColor.SetAny(val, ctxt))
+		grr.Log(fs.Background.SetAny(val, ctxt))
 	},
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *FontRender) *float32 { return &obj.Opacity }),

@@ -188,8 +188,8 @@ type Fill struct {
 	// is fill active -- if property is none then false
 	On bool
 
-	// prop: fill = fill color specification
-	Color colors.Full `xml:"fill"`
+	// prop: fill = fill color image specification
+	Color image.Image `xml:"fill"`
 
 	// prop: fill-opacity = global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"fill-opacity"`
@@ -208,11 +208,7 @@ func (pf *Fill) Defaults() {
 
 // SetStylePost does some updating after setting the style from user properties
 func (pf *Fill) SetStylePost(props map[string]any) {
-	if pf.Color.IsNil() {
-		pf.On = false
-	} else {
-		pf.On = true
-	}
+	pf.On = pf.Color != nil
 }
 
 // SetColor sets a solid fill color -- nil turns off filling
@@ -221,17 +217,17 @@ func (pf *Fill) SetColor(cl color.Color) {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color.SetSolid(cl)
+		pf.Color = colors.Uniform(cl)
 	}
 }
 
-// SetFullColor sets full color (solid or gradient) from source
-func (pf *Fill) SetFullColor(cl colors.Full) {
-	if cl.IsNil() {
+// SetImage sets the rendering color to the given image
+func (pf *Fill) SetFullColor(cl image.Image) {
+	if cl == nil {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color.CopyFrom(cl)
+		pf.Color = cl
 	}
 }
 
@@ -276,8 +272,8 @@ type Stroke struct {
 	// is stroke active -- if property is none then false
 	On bool
 
-	// prop: stroke = stroke color specification
-	Color colors.Full `xml:"stroke"`
+	// prop: stroke = stroke color image specification
+	Color image.Image `xml:"stroke"`
 
 	// prop: stroke-opacity = global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"stroke-opacity"`
@@ -315,11 +311,7 @@ func (ps *Stroke) Defaults() {
 
 // SetStylePost does some updating after setting the style from user properties
 func (ps *Stroke) SetStylePost(props map[string]any) {
-	if ps.Color.IsNil() {
-		ps.On = false
-	} else {
-		ps.On = true
-	}
+	ps.On = ps.Color != nil
 }
 
 // SetColor sets a solid stroke color -- nil turns off stroking
@@ -328,17 +320,17 @@ func (ps *Stroke) SetColor(cl color.Color) {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.Color.SetSolid(cl)
+		ps.Color = colors.Uniform(cl)
 	}
 }
 
 // SetFullColor sets full color spec from source
-func (ps *Stroke) SetFullColor(cl colors.Full) {
-	if cl.IsNil() {
+func (ps *Stroke) SetFullColor(cl image.Image) {
+	if cl == nil {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.Color.CopyFrom(cl)
+		ps.Color = cl
 	}
 }
 

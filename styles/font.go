@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"image"
 	"image/color"
 	"log/slog"
 	"strings"
@@ -432,7 +433,7 @@ type FontRender struct { //gti:add
 	Color color.RGBA `xml:"color" inherit:"true"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
-	BackgroundColor colors.Full `xml:"background-color"`
+	Background image.Image `xml:"background-color"`
 
 	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32 `xml:"opacity"`
