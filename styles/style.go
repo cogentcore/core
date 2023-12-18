@@ -405,6 +405,29 @@ func (s *Style) ComputeActualBackgroundColorFor(bg, pabg image.Image) image.Imag
 
 	// TODO(kai): support gradient surrounding background colors
 
+	/*
+		switch bg := bg.(type) {
+		case *image.Uniform:
+			if s.Opacity < 1 {
+				// we take our opacity-applied background color and then overlay it onto our surrounding color
+				obg := colors.ApplyOpacity(bg, s.Opacity)
+				bg.C = colors.AlphaBlend(pabg.Solid, obg)
+			}
+
+			if s.StateLayer > 0 {
+				clr := s.Color
+				if !colors.IsNil(s.StateColor) {
+					clr = s.StateColor
+				}
+				// we take our state-layer-applied state color and then overlay it onto our background color
+				sclr := colors.WithAF32(clr, s.StateLayer)
+				bg.SetSolid(colors.AlphaBlend(bg.Solid, sclr))
+			}
+
+			return bg
+		case gradient.Gradient:
+		default:
+	*/
 	var abg *image.RGBA
 
 	if s.Opacity < 1 {
@@ -428,6 +451,7 @@ func (s *Style) ComputeActualBackgroundColorFor(bg, pabg image.Image) image.Imag
 	}
 
 	return abg
+	// }
 }
 
 func (st *Style) IsFlexWrap() bool {
