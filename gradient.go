@@ -31,7 +31,7 @@ type Gradient struct {
 func (gr *Gradient) CopyFieldsFrom(frm any) {
 	fr := frm.(*Gradient)
 	gr.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	gr.Grad = fr.Grad
+	gradient.CopyFrom(gr.Grad, fr.Grad)
 	gr.StopsName = fr.StopsName
 }
 
@@ -315,6 +315,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
 	n.SetProp(prop, url)
 	gradient.CopyFrom(ngr.Grad, gr.Grad)
+	// TODO(kai): should this return ngr or gr? (used to return gr but ngr seems correct)
 	return ngr
 }
 
