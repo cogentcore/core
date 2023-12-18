@@ -227,7 +227,7 @@ func (tf *TextField) SetStyles() {
 			s.Border.Width.Zero()
 			s.Border.Radius.Zero()
 			s.MaxBorder = s.Border
-			s.Background = colors.Uniform(colors.Transparent)
+			s.Background = nil
 		}
 		if s.Is(states.Selected) {
 			s.Background = colors.Uniform(colors.Scheme.Select.Container)

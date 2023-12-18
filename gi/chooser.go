@@ -199,7 +199,7 @@ func (ch *Chooser) SetStyles() {
 				s.Border.Width.Zero()
 				// allow parent to dictate state layer
 				s.StateLayer = 0
-				s.Background = colors.Uniform(colors.Transparent)
+				s.Background = nil
 				// if ch.MaxLength > 0 {
 				// 	s.Min.X.Ch(float32(ch.MaxLength))
 				// }

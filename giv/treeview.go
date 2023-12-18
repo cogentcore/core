@@ -230,7 +230,7 @@ func (tv *TreeView) SetStyles() {
 		s.StateLayer = 0
 		if s.Is(states.Selected) {
 			// render handles manually, similar to with actStateLayer
-			s.Background = colors.Uniform(colors.Transparent)
+			s.Background = nil
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
@@ -649,7 +649,7 @@ func (tv *TreeView) RenderNode() {
 
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
-	st.Background = colors.Uniform(colors.Transparent)
+	st.Background = nil
 	tv.Styles.ComputeActualBackground(pabg)
 }
 

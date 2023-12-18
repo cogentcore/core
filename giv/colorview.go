@@ -87,7 +87,7 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	hue.Style(func(s *styles.Style) {
-		hue.ValueColor = colors.Uniform(colors.Transparent)
+		hue.ValueColor = nil
 		hue.ThumbColor = colors.Uniform(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
@@ -106,7 +106,7 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	chroma.Style(func(s *styles.Style) {
-		chroma.ValueColor = colors.Uniform(colors.Transparent)
+		chroma.ValueColor = nil
 		chroma.ThumbColor = colors.Uniform(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
@@ -125,7 +125,7 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	tone.Style(func(s *styles.Style) {
-		tone.ValueColor = colors.Uniform(colors.Transparent)
+		tone.ValueColor = nil
 		tone.ThumbColor = colors.Uniform(cv.Color)
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)

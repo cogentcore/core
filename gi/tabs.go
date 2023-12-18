@@ -586,7 +586,7 @@ func (tb *Tab) SetStyles() {
 				s.Padding.Set(units.Dp(0))
 				s.Padding.Left.Dp(16)
 				s.Border.Radius = styles.BorderRadiusFull
-				s.Background = colors.Uniform(colors.Transparent)
+				s.Background = nil
 				// if we have some state, we amplify it so we
 				// are clearly distinguishable from our parent button
 				// TODO: get this working

@@ -155,7 +155,6 @@ func NewScene(name ...string) *Scene {
 // func NewSubScene(par ki.Ki, name ...string) *Scene {
 // 	sc := par.NewChild(SceneType, name...).(*Scene)
 // 	sc.EventMgr.Scene = sc
-// 	sc.BgColor.SetSolid(colors.Transparent)
 // 	return sc
 // }
 
