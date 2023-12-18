@@ -6,7 +6,7 @@ import (
 	"image"
 
 	"github.com/aymerick/douceur/css"
-	"goki.dev/colors"
+	"goki.dev/colors/gradient"
 	"goki.dev/girl/paint"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -344,10 +344,10 @@ var GradientType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/svg.Gradient",
 	ShortName:  "svg.Gradient",
 	IDName:     "gradient",
-	Doc:        "Gradient is used for holding a specified color gradient (ColorSpec)\nname is id for lookup in url",
+	Doc:        "Gradient is used for holding a specified color gradient.\nThe name is the id for lookup in url",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Grad", &gti.Field{Name: "Grad", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Grad", &gti.Field{Name: "Grad", Type: "goki.dev/colors/gradient.Gradient", LocalType: "gradient.Gradient", Doc: "the color gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"StopsName", &gti.Field{Name: "StopsName", Type: "string", LocalType: "string", Doc: "name of another gradient to get stops from", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -377,7 +377,7 @@ func (t *Gradient) New() ki.Ki {
 
 // SetGrad sets the [Gradient.Grad]:
 // the color gradient
-func (t *Gradient) SetGrad(v colors.Full) *Gradient {
+func (t *Gradient) SetGrad(v gradient.Gradient) *Gradient {
 	t.Grad = v
 	return t
 }
