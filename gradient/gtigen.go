@@ -22,8 +22,9 @@ var _ = gti.AddType(&gti.Type{
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors/gradient.Spreads", LocalType: "Spreads", Doc: "the spread method used for the gradient if it stops before the end", Directives: gti.Directives{}, Tag: ""}},
 		{"Blend", &gti.Field{Name: "Blend", Type: "goki.dev/colors.BlendTypes", LocalType: "colors.BlendTypes", Doc: "the colorspace algorithm to use for blending colors", Directives: gti.Directives{}, Tag: ""}},
 		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient", Directives: gti.Directives{}, Tag: ""}},
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox].", Directives: gti.Directives{}, Tag: ""}},
-		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points.", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]; this must be set using SetTransform\nto recompute necessary values.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points;\nit must be set using SetTransform to recompute necessary values.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ObjectMatrix", &gti.Field{Name: "ObjectMatrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "ObjectMatrix is the effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users, but\nmust be updated using [Base.ComputeObjectMatrix] whenever [Base.Box] or\n[Base.Transform] is updated, which happens automatically in SetBox and SetTransform.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -47,21 +48,6 @@ func (t *Base) SetBlend(v colors.BlendTypes) *Base {
 // the units to use for the gradient
 func (t *Base) SetUnits(v Units) *Base {
 	t.Units = v
-	return t
-}
-
-// SetBox sets the [Base.Box]:
-// the bounding box of the object with the gradient; this is used when rendering
-// gradients with [Units] of [ObjectBoundingBox].
-func (t *Base) SetBox(v mat32.Box2) *Base {
-	t.Box = v
-	return t
-}
-
-// SetTransform sets the [Base.Transform]:
-// Transform is the transformation matrix applied to the gradient's points.
-func (t *Base) SetTransform(v mat32.Mat2) *Base {
-	t.Transform = v
 	return t
 }
 
@@ -112,18 +98,6 @@ func (t *Linear) SetBlend(v colors.BlendTypes) *Linear {
 // SetUnits sets the [Linear.Units]
 func (t *Linear) SetUnits(v Units) *Linear {
 	t.Units = v
-	return t
-}
-
-// SetBox sets the [Linear.Box]
-func (t *Linear) SetBox(v mat32.Box2) *Linear {
-	t.Box = v
-	return t
-}
-
-// SetTransform sets the [Linear.Transform]
-func (t *Linear) SetTransform(v mat32.Mat2) *Linear {
-	t.Transform = v
 	return t
 }
 
@@ -182,17 +156,5 @@ func (t *Radial) SetBlend(v colors.BlendTypes) *Radial {
 // SetUnits sets the [Radial.Units]
 func (t *Radial) SetUnits(v Units) *Radial {
 	t.Units = v
-	return t
-}
-
-// SetBox sets the [Radial.Box]
-func (t *Radial) SetBox(v mat32.Box2) *Radial {
-	t.Box = v
-	return t
-}
-
-// SetTransform sets the [Radial.Transform]
-func (t *Radial) SetTransform(v mat32.Mat2) *Radial {
-	t.Transform = v
 	return t
 }

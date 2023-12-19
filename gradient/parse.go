@@ -218,6 +218,7 @@ outer:
 	if len(l.Stops) > stopIdx {
 		l.Stops = l.Stops[:stopIdx]
 	}
+	l.Update()
 	return nil
 }
 
@@ -278,6 +279,7 @@ outer:
 	if len(r.Stops) > stopIdx {
 		r.Stops = r.Stops[:stopIdx]
 	}
+	r.Update()
 	return nil
 }
 
@@ -395,6 +397,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 						return fmt.Errorf("error parsing linear gradient: %w", err)
 					}
 				}
+				l.Update()
 			case "radialGradient":
 				r := NewRadial()
 
@@ -436,6 +439,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 				if !setFy { // set fy to cy by default
 					r.Focal.Y = r.Center.Y
 				}
+				r.Update()
 			case "stop":
 				stop := Stop{Color: colors.Black}
 				ats := se.Attr

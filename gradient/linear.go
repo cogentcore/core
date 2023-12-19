@@ -29,16 +29,36 @@ var _ Gradient = &Linear{}
 
 // NewLinear returns a new downward-facing [Linear] gradient.
 func NewLinear() *Linear {
-	return &Linear{
+	return (&Linear{
 		Base: NewBase(),
 		// default in CSS is "to bottom"
 		End: mat32.V2(0, 1),
-	}
+	}).Update()
 }
 
 // AddStop adds a new stop with the given color and position to the linear gradient.
 func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
 	l.Base.AddStop(color, pos)
+	return l
+}
+
+// SetBox sets the [Linear.Box]
+func (l *Linear) SetBox(v mat32.Box2) *Linear {
+	l.Box = v
+	return l.Update()
+}
+
+// SetTransform sets the [Linear.Transform]
+func (l *Linear) SetTransform(v mat32.Mat2) *Linear {
+	l.Transform = v
+	return l.Update()
+}
+
+// Update updates the computed fields of the linear gradient after it has been modified.
+// It should only be called by end users when they modify properties of the linear gradient
+// outside of Set functions that have comments stating that they must be set using Set functions.
+func (l *Linear) Update() *Linear {
+	l.Base.Update()
 	return l
 }
 
@@ -65,7 +85,7 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.ObjectMatrix().MulVec2AsPt(pt)
+		pt = l.ObjectMatrix.MulVec2AsPt(pt)
 	}
 	df := pt.Sub(s)
 	pos := (d.X*df.X + d.Y*df.Y) / dd

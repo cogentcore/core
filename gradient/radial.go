@@ -32,18 +32,38 @@ var _ Gradient = &Radial{}
 
 // NewRadial returns a new centered [Radial] gradient.
 func NewRadial() *Radial {
-	return &Radial{
+	return (&Radial{
 		Base: NewBase(),
 		// default is fully centered
 		Center: mat32.V2Scalar(0.5),
 		Focal:  mat32.V2Scalar(0.5),
 		Radius: mat32.V2Scalar(0.5),
-	}
+	}).Update()
 }
 
 // AddStop adds a new stop with the given color and position to the radial gradient.
 func (r *Radial) AddStop(color color.RGBA, pos float32) *Radial {
 	r.Base.AddStop(color, pos)
+	return r
+}
+
+// SetBox sets the [Radial.Box]
+func (r *Radial) SetBox(v mat32.Box2) *Radial {
+	r.Box = v
+	return r.Update()
+}
+
+// SetTransform sets the [Radial.Transform]
+func (r *Radial) SetTransform(v mat32.Mat2) *Radial {
+	r.Transform = v
+	return r.Update()
+}
+
+// Update updates the computed fields of the radial gradient after it has been modified.
+// It should only be called by end users when they modify properties of the radial gradient
+// outside of Set functions that have comments stating that they must be set using Set functions.
+func (r *Radial) Update() *Radial {
+	r.Base.Update()
 	return r
 }
 
@@ -74,7 +94,7 @@ func (r *Radial) At(x, y int) color.Color {
 		// pos is just distance from center scaled by radius
 		pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
-			pt = r.ObjectMatrix().MulVec2AsPt(pt)
+			pt = r.ObjectMatrix.MulVec2AsPt(pt)
 		}
 		d := pt.Sub(c)
 		pos := mat32.Sqrt(d.X*d.X/(rs.X*rs.X) + (d.Y*d.Y)/(rs.Y*rs.Y))
@@ -97,7 +117,7 @@ func (r *Radial) At(x, y int) color.Color {
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
-		pt = r.ObjectMatrix().MulVec2AsPt(pt)
+		pt = r.ObjectMatrix.MulVec2AsPt(pt)
 	}
 	e := pt.Div(rs)
 

@@ -41,11 +41,19 @@ type Base struct { //gti:add -setters
 	Units Units
 
 	// the bounding box of the object with the gradient; this is used when rendering
-	// gradients with [Units] of [ObjectBoundingBox].
-	Box mat32.Box2
+	// gradients with [Units] of [ObjectBoundingBox]; this must be set using SetTransform
+	// to recompute necessary values.
+	Box mat32.Box2 `set:"-"`
 
-	// Transform is the transformation matrix applied to the gradient's points.
-	Transform mat32.Mat2
+	// Transform is the transformation matrix applied to the gradient's points;
+	// it must be set using SetTransform to recompute necessary values.
+	Transform mat32.Mat2 `set:"-"`
+
+	// ObjectMatrix is the effective object transformation matrix for a gradient
+	// with [Units] of [ObjectBoundingBox]. It should not be set by end users, but
+	// must be updated using [Base.ComputeObjectMatrix] whenever [Base.Box] or
+	// [Base.Transform] is updated, which happens automatically in SetBox and SetTransform.
+	ObjectMatrix mat32.Mat2 `set:"-"`
 }
 
 // Stop represents a single stop in a gradient
@@ -152,12 +160,18 @@ func (b *Base) CopyStopsFrom(cp *Base) {
 	copy(b.Stops, cp.Stops)
 }
 
-// ObjectMatrix returns the effective object transformation matrix for a gradient
-// with [Units] of [ObjectBoundingBox].
-func (b *Base) ObjectMatrix() mat32.Mat2 {
+// Update updates the computed fields of the base gradient after it has been modified.
+// It should only be called by other gradient types in their Update functions.
+func (b *Base) Update() {
+	b.ComputeObjectMatrix()
+}
+
+// ComputeObjectMatrix computes the effective object transformation matrix for a gradient
+// with [Units] of [ObjectBoundingBox], setting [Base.ObjectMatrix].
+func (b *Base) ComputeObjectMatrix() {
 	w, h := b.Box.Size().X, b.Box.Size().Y
 	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
-	return mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
+	b.ObjectMatrix = mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
 		Mul(b.Transform).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 
