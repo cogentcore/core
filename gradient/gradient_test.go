@@ -42,7 +42,7 @@ func TestColorAt(t *testing.T) {
 				{78, 17, color.RGBA{205, 205, 205, 255}},
 				{33, 50, color.RGBA{118, 118, 117, 255}},
 			}},
-		{linearTransformTest,
+		{CopyOf(linearTransformTest),
 			[]value{
 				{50, 50, color.RGBA{255, 141, 52, 255}},
 				{7, 50, color.RGBA{255, 141, 52, 255}},
@@ -58,7 +58,7 @@ func TestColorAt(t *testing.T) {
 				{70, 60, color.RGBA{0, 165, 183, 255}},
 				{35, 40, colors.Yellow},
 			}},
-		{radialTransformTest,
+		{CopyOf(radialTransformTest),
 			[]value{
 				{41, 62, color.RGBA{166, 54, 212, 255}},
 				{26, 54, color.RGBA{221, 0, 106, 255}},
@@ -67,32 +67,36 @@ func TestColorAt(t *testing.T) {
 			}},
 	}
 	for i, test := range tests {
+		test.gr.Update()
 		for j, v := range test.want {
 			have := test.gr.At(v.x, v.y)
 			if have != v.want {
 				t.Errorf("%d.%d: expected %v at %v but got %v", i, j, v.want, image.Pt(v.x, v.y), have)
 			}
+		}
 
-			// ensure same results with UserSpaceOnUse as ObjectBoundingBox
-			var ugr Gradient
-			switch gr := test.gr.(type) {
-			case *Linear:
-				// make a copy
-				l := *gr
-				l.Start.SetMul(gr.Box.Size())
-				l.End.SetMul(gr.Box.Size())
-				ugr = &l
-			case *Radial:
-				// make a copy
-				r := *gr
-				r.Center.SetMul(gr.Box.Size())
-				r.Focal.SetMul(gr.Box.Size())
-				r.Radius.SetMul(gr.Box.Size())
-				ugr = &r
-			}
-			ugr.AsBase().Units = UserSpaceOnUse
-			ugr.Update()
-			have = ugr.At(v.x, v.y)
+		// ensure same results with UserSpaceOnUse as ObjectBoundingBox
+		var ugr Gradient
+		switch gr := test.gr.(type) {
+		case *Linear:
+			// make a copy
+			l := *gr
+			l.Start.SetMul(gr.Box.Size())
+			l.End.SetMul(gr.Box.Size())
+			ugr = &l
+		case *Radial:
+			// make a copy
+			r := *gr
+			r.Center.SetMul(gr.Box.Size())
+			r.Focal.SetMul(gr.Box.Size())
+			r.Radius.SetMul(gr.Box.Size())
+			ugr = &r
+		}
+		ugr.AsBase().SetUnits(UserSpaceOnUse)
+		ugr.Update()
+
+		for j, v := range test.want {
+			have := ugr.At(v.x, v.y)
 			if have != v.want {
 				t.Errorf("%d.%d: UserSpaceOnUse: expected %v at %v but got %v", i, j, v.want, image.Pt(v.x, v.y), have)
 			}

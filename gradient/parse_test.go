@@ -84,7 +84,7 @@ func TestReadXML(t *testing.T) {
 		{`<linearGradient id="something" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />
 		<stop offset="95%" stop-color="red" />
-	  </linearGradient>`, linearTransformTest},
+	  </linearGradient>`, CopyOf(linearTransformTest)},
 
 		{`<radialGradient id="random">
 			<stop offset="10%" stop-color="blue" />
@@ -99,7 +99,7 @@ func TestReadXML(t *testing.T) {
 			<stop offset="30%" stop-color="red" />
 			<stop offset="60%" stop-color="blue" />
 			<stop offset="95%" stop-color="orange" />
-		  </radialGradient>`, radialTransformTest},
+		  </radialGradient>`, CopyOf(radialTransformTest)},
 	}
 	for _, test := range tests {
 		r := bytes.NewBufferString(test.str)

@@ -21,10 +21,10 @@ var _ = gti.AddType(&gti.Type{
 		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors/gradient.Stop", LocalType: "[]Stop", Doc: "the stops for the gradient; use AddStop to add stops", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors/gradient.Spreads", LocalType: "Spreads", Doc: "the spread method used for the gradient if it stops before the end", Directives: gti.Directives{}, Tag: ""}},
 		{"Blend", &gti.Field{Name: "Blend", Type: "goki.dev/colors.BlendTypes", LocalType: "colors.BlendTypes", Doc: "the colorspace algorithm to use for blending colors", Directives: gti.Directives{}, Tag: ""}},
-		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient; this must be set using SetUnits\nor be followed by an Update call.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]; this must be set using SetBox\nor be followed by an Update call.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points;\nit must be set using SetTransform or be folloed by an Update call.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ObjectMatrix", &gti.Field{Name: "ObjectMatrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "ObjectMatrix is the effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users, but\nmust be updated using [Base.ComputeObjectMatrix] whenever [Base.Box] or\n[Base.Transform] is updated, which happens automatically in SetBox and SetTransform.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox]", Directives: gti.Directives{}, Tag: ""}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points", Directives: gti.Directives{}, Tag: ""}},
+		{"ObjectMatrix", &gti.Field{Name: "ObjectMatrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "ObjectMatrix is the computed effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -44,6 +44,28 @@ func (t *Base) SetBlend(v colors.BlendTypes) *Base {
 	return t
 }
 
+// SetUnits sets the [Base.Units]:
+// the units to use for the gradient
+func (t *Base) SetUnits(v Units) *Base {
+	t.Units = v
+	return t
+}
+
+// SetBox sets the [Base.Box]:
+// the bounding box of the object with the gradient; this is used when rendering
+// gradients with [Units] of [ObjectBoundingBox]
+func (t *Base) SetBox(v mat32.Box2) *Base {
+	t.Box = v
+	return t
+}
+
+// SetTransform sets the [Base.Transform]:
+// Transform is the transformation matrix applied to the gradient's points
+func (t *Base) SetTransform(v mat32.Mat2) *Base {
+	t.Transform = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/colors/gradient.Linear",
 	ShortName: "gradient.Linear",
@@ -53,8 +75,8 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point of the gradient (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point of the gradient (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point of the gradient (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point of the gradient (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"EffStart", &gti.Field{Name: "EffStart", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"EffEnd", &gti.Field{Name: "EffEnd", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
@@ -63,6 +85,20 @@ var _ = gti.AddType(&gti.Type{
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetStart sets the [Linear.Start]:
+// the starting point of the gradient (x1 and y1 in SVG)
+func (t *Linear) SetStart(v mat32.Vec2) *Linear {
+	t.Start = v
+	return t
+}
+
+// SetEnd sets the [Linear.End]:
+// the ending point of the gradient (x2 and y2 in SVG)
+func (t *Linear) SetEnd(v mat32.Vec2) *Linear {
+	t.End = v
+	return t
+}
 
 // SetSpread sets the [Linear.Spread]
 func (t *Linear) SetSpread(v Spreads) *Linear {
@@ -73,6 +109,24 @@ func (t *Linear) SetSpread(v Spreads) *Linear {
 // SetBlend sets the [Linear.Blend]
 func (t *Linear) SetBlend(v colors.BlendTypes) *Linear {
 	t.Blend = v
+	return t
+}
+
+// SetUnits sets the [Linear.Units]
+func (t *Linear) SetUnits(v Units) *Linear {
+	t.Units = v
+	return t
+}
+
+// SetBox sets the [Linear.Box]
+func (t *Linear) SetBox(v mat32.Box2) *Linear {
+	t.Box = v
+	return t
+}
+
+// SetTransform sets the [Linear.Transform]
+func (t *Linear) SetTransform(v mat32.Mat2) *Linear {
+	t.Transform = v
 	return t
 }
 
@@ -125,5 +179,23 @@ func (t *Radial) SetSpread(v Spreads) *Radial {
 // SetBlend sets the [Radial.Blend]
 func (t *Radial) SetBlend(v colors.BlendTypes) *Radial {
 	t.Blend = v
+	return t
+}
+
+// SetUnits sets the [Radial.Units]
+func (t *Radial) SetUnits(v Units) *Radial {
+	t.Units = v
+	return t
+}
+
+// SetBox sets the [Radial.Box]
+func (t *Radial) SetBox(v mat32.Box2) *Radial {
+	t.Box = v
+	return t
+}
+
+// SetTransform sets the [Radial.Transform]
+func (t *Radial) SetTransform(v mat32.Mat2) *Radial {
+	t.Transform = v
 	return t
 }

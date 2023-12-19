@@ -24,9 +24,8 @@ type Gradient interface {
 	// AsBase returns the [Base] of the gradient
 	AsBase() *Base
 
-	// Update updates the computed fields of the gradient after it has been modified.
-	// It should only be called by end users when they modify properties of the gradient
-	// that have comments stating that they must be set using Set functions outside of Set functions.
+	// Update updates the computed fields of the gradient. It must be
+	// called before rendering the gradient, and it should only be called then.
 	Update()
 }
 
@@ -42,23 +41,18 @@ type Base struct { //gti:add -setters
 	// the colorspace algorithm to use for blending colors
 	Blend colors.BlendTypes
 
-	// the units to use for the gradient; this must be set using SetUnits
-	// or be followed by an Update call.
-	Units Units `set:"-"`
+	// the units to use for the gradient
+	Units Units
 
 	// the bounding box of the object with the gradient; this is used when rendering
-	// gradients with [Units] of [ObjectBoundingBox]; this must be set using SetBox
-	// or be followed by an Update call.
-	Box mat32.Box2 `set:"-"`
+	// gradients with [Units] of [ObjectBoundingBox]
+	Box mat32.Box2
 
-	// Transform is the transformation matrix applied to the gradient's points;
-	// it must be set using SetTransform or be folloed by an Update call.
-	Transform mat32.Mat2 `set:"-"`
+	// Transform is the transformation matrix applied to the gradient's points
+	Transform mat32.Mat2
 
-	// ObjectMatrix is the effective object transformation matrix for a gradient
-	// with [Units] of [ObjectBoundingBox]. It should not be set by end users, but
-	// must be updated using [Base.ComputeObjectMatrix] whenever [Base.Box] or
-	// [Base.Transform] is updated, which happens automatically in SetBox and SetTransform.
+	// ObjectMatrix is the computed effective object transformation matrix for a gradient
+	// with [Units] of [ObjectBoundingBox]. It should not be set by end users.
 	ObjectMatrix mat32.Mat2 `set:"-"`
 }
 
@@ -166,9 +160,9 @@ func (b *Base) CopyStopsFrom(cp *Base) {
 	copy(b.Stops, cp.Stops)
 }
 
-// UpdateBase updates the computed fields of the base gradient after it has been modified.
-// It should only be called by other gradient types in their [Gradient.Update] functions.
-// It is named UpdateBase to avoid people accidentally calling it instead of [Gradient.Update].
+// UpdateBase updates the computed fields of the base gradient. It should only be called
+// by other gradient types in their [Gradient.Update] functions. It is named UpdateBase
+// to avoid people accidentally calling it instead of [Gradient.Update].
 func (b *Base) UpdateBase() {
 	b.ComputeObjectMatrix()
 }
