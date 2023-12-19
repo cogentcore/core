@@ -316,6 +316,9 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	return nil
 }
 
+// NOTE: XML marshalling functionality is at [goki.dev/svg.SVGNodeXMLGrad] instead of here
+// because it uses a lot of SVG and XML infrastructure defined there.
+
 // ReadXML reads an XML-formatted gradient color from the given io.Reader and
 // sets the properties of the given gradient accordingly.
 func ReadXML(g *Gradient, reader io.Reader) error {
