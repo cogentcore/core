@@ -165,9 +165,10 @@ func (b *Base) CopyStopsFrom(cp *Base) {
 	copy(b.Stops, cp.Stops)
 }
 
-// Update updates the computed fields of the base gradient after it has been modified.
-// It should only be called by other gradient types in their Update functions.
-func (b *Base) Update() {
+// UpdateBase updates the computed fields of the base gradient after it has been modified.
+// It should only be called by other gradient types in their [Gradient.Update] functions.
+// It is named UpdateBase to avoid people accidentally calling it instead of [Gradient.Update].
+func (b *Base) UpdateBase() {
 	b.ComputeObjectMatrix()
 }
 

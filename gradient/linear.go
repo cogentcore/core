@@ -62,7 +62,7 @@ func (l *Linear) SetTransform(v mat32.Mat2) *Linear {
 // It should only be called by end users when they modify properties of the linear gradient
 // outside of Set functions that have comments stating that they must be set using Set functions.
 func (l *Linear) Update() {
-	l.Base.Update()
+	l.UpdateBase()
 }
 
 // At returns the color of the linear gradient at the given point

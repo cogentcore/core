@@ -67,7 +67,7 @@ func (r *Radial) SetTransform(v mat32.Mat2) *Radial {
 // It should only be called by end users when they modify properties of the radial gradient
 // outside of Set functions that have comments stating that they must be set using Set functions.
 func (r *Radial) Update() {
-	r.Base.Update()
+	r.UpdateBase()
 }
 
 const epsilonF = 1e-5
