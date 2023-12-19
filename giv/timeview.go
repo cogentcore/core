@@ -206,6 +206,7 @@ func (dv *DateView) ConfigWidget() {
 	month := gi.NewChooser(trow, "month").SetItems(sms)
 	month.SetCurIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
+		fmt.Println("moc")
 		dv.DeleteChildByName("grid", true)
 		// set our month
 		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
@@ -220,6 +221,7 @@ func (dv *DateView) ConfigWidget() {
 	year := gi.NewChooser(trow, "year").SetItems(yrs)
 	year.SetCurVal(yr)
 	year.OnChange(func(e events.Event) {
+		fmt.Println("yoc")
 		dv.DeleteChildByName("grid", true)
 		// we are centered at current year with 100 in each direction
 		nyr := year.CurIndex + yr - 100
