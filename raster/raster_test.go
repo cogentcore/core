@@ -453,7 +453,7 @@ func TestGradient(t *testing.T) {
 		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
-	linear := gradient.NewLinear().SetEnd(mat32.Vec2{1, 0}).
+	linear := gradient.NewLinear().
 		SetBox(mat32.Box2{mat32.Vec2{50, 50}, mat32.Vec2{150, 150}}).
 		AddStop(colors.Aquamarine, 0.3).
 		AddStop(colors.Skyblue, 0.6).
