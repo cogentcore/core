@@ -24,6 +24,7 @@ var _ = gti.AddType(&gti.Type{
 		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox].", Directives: gti.Directives{}, Tag: ""}},
 		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points.", Directives: gti.Directives{}, Tag: ""}},
+		{"ObjectMatrix", &gti.Field{Name: "ObjectMatrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "ObjectMatrix is the computed effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -76,6 +77,8 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point of the gradient (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: ""}},
 		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point of the gradient (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"EffStart", &gti.Field{Name: "EffStart", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "EffStart is the computed effective transformed starting point of the gradient.\nIt should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"EffEnd", &gti.Field{Name: "EffEnd", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "EffEnd is the computed effective transformed ending point of the gradient.\nIt should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Base", &gti.Field{Name: "Base", Type: "goki.dev/colors/gradient.Base", LocalType: "Base", Doc: "", Directives: gti.Directives{}, Tag: ""}},
