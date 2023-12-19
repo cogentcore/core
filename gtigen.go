@@ -41,7 +41,7 @@ var _ = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
-		{"Rename", &gti.Method{Name: "Rename", Doc: "Rename renames (moves) this file to given new path name\nUpdates the FileInfo setting to the new name, although it might\nbe out of scope if it moved into a new path", Directives: gti.Directives{
+		{"Rename", &gti.Method{Name: "Rename", Doc: "Rename renames (moves) this file to given new path name.\nUpdates the FileInfo setting to the new name, although it might\nbe out of scope if it moved into a new path", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"path", &gti.Field{Name: "path", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},

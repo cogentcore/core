@@ -263,7 +263,7 @@ func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	return newpath, nil
 }
 
-// Rename renames (moves) this file to given new path name
+// Rename renames (moves) this file to given new path name.
 // Updates the FileInfo setting to the new name, although it might
 // be out of scope if it moved into a new path
 func (fi *FileInfo) Rename(path string) (newpath string, err error) { //gti:add
