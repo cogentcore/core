@@ -978,6 +978,9 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	return se.Name.Local
 }
 
+// SVGNodeXMLGrad adds the XML for the given gradient to the given encoder.
+// This is not in goki.dev/colors/gradient because it uses a lot of SVG
+// and XML infrastructure defined here.
 func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	// TODO(kai): why isn't this in colors/gradient?
 	gr := nd.Grad
