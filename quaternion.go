@@ -87,6 +87,10 @@ func (q *Quat) IsNil() bool {
 	return false
 }
 
+func (q Quat) String() string {
+	return fmt.Sprintf("(%v, %v, %v, %v)", q.X, q.Y, q.Z, q.W)
+}
+
 // SetFromEuler sets this quaternion from the specified vector with
 // Euler angles for each axis. It is assumed that the Euler angles
 // are in XYZ order.
