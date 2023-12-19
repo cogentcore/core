@@ -20,7 +20,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/laser"
-	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
 
@@ -92,7 +91,7 @@ func (cv *ColorView) ConfigWidget() {
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
-		g := gradient.NewLinear().SetEnd(mat32.V2(1, 0))
+		g := gradient.NewLinear()
 		for h := float32(0); h <= 360; h += 5 {
 			gc := cv.Color.WithHue(h)
 			g.AddStop(gc.AsRGBA(), h/360)
@@ -111,7 +110,7 @@ func (cv *ColorView) ConfigWidget() {
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
-		g := gradient.NewLinear().SetEnd(mat32.V2(1, 0))
+		g := gradient.NewLinear()
 		for c := float32(0); c <= 150; c += 5 {
 			gc := cv.Color.WithChroma(c)
 			g.AddStop(gc.AsRGBA(), c/150)
@@ -130,7 +129,7 @@ func (cv *ColorView) ConfigWidget() {
 		s.Min.Y.Em(2)
 		s.Min.X.Em(40)
 		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
-		g := gradient.NewLinear().SetEnd(mat32.V2(1, 0))
+		g := gradient.NewLinear()
 		for c := float32(0); c <= 100; c += 5 {
 			gc := cv.Color.WithTone(c)
 			g.AddStop(gc.AsRGBA(), c/100)

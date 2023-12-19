@@ -86,7 +86,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
 		}
-		g := gradient.NewLinear().SetEnd(mat32.V2(1, 0))
+		g := gradient.NewLinear()
 		for i := float32(0); i < 1; i += 0.01 {
 			gc := cm.Map(i)
 			g.AddStop(gc, i)
