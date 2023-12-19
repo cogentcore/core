@@ -17,20 +17,25 @@ import (
 // It will be replaced with a full WebGPU based drawer at some point.
 // TODO: replace Drawer with WebGPU
 type Drawer struct {
-	maxTextures int
-	image       *image.RGBA     // target render image
-	images      [][]*image.RGBA // stack of images indexed by render scene index and then layer number
+	// MaxTxts is the max number of textures
+	MaxTxts int
+
+	// Image is the target render image
+	Image *image.RGBA
+
+	// Images is a stack of images indexed by render scene index and then layer number
+	Images [][]*image.RGBA
 }
 
 // SetMaxTextures updates the max number of textures for drawing
 // Must call this prior to doing any allocation of images.
 func (dw *Drawer) SetMaxTextures(maxTextures int) {
-	dw.maxTextures = maxTextures
+	dw.MaxTxts = maxTextures
 }
 
 // MaxTextures returns the max number of textures for drawing
 func (dw *Drawer) MaxTextures() int {
-	return dw.maxTextures
+	return dw.MaxTxts
 }
 
 // DestBounds returns the bounds of the render destination
@@ -43,13 +48,13 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
-	if dw.image == nil {
-		dw.image = image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+	if dw.Image == nil {
+		dw.Image = image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 	}
-	for len(dw.images) <= idx {
-		dw.images = append(dw.images, nil)
+	for len(dw.Images) <= idx {
+		dw.Images = append(dw.Images, nil)
 	}
-	imgs := &dw.images[idx]
+	imgs := &dw.Images[idx]
 	for len(*imgs) <= layer {
 		*imgs = append(*imgs, nil)
 	}
@@ -62,10 +67,6 @@ func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 func (dw *Drawer) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
 	// no-op
 }
-
-// ConfigImage configures the draw image at given index
-// to fit the given image format and number of layers as a drawing source.
-// ConfigImage(idx int, fmt *vgpu.ImageFormat)
 
 // SyncImages must be called after images have been updated, to sync
 // memory up to the GPU.
@@ -82,8 +83,8 @@ func (dw *Drawer) SyncImages() {
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
-	img := dw.images[idx][layer]
-	draw.Draw(dw.image, dr, img, sr.Min, op)
+	img := dw.Images[idx][layer]
+	draw.Draw(dw.Image, dr, img, sr.Min, op)
 	return nil
 }
 
@@ -94,9 +95,9 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
-	img := dw.images[idx][layer]
+	img := dw.Images[idx][layer]
 	// fmt.Println("cp", idx, layer, dp, dp.Add(img.Rect.Size()), sr.Min)
-	draw.Draw(dw.image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
+	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
 	return nil
 }
 
@@ -122,11 +123,12 @@ func (dw *Drawer) StartDraw(descIdx int) {
 // EndDraw ends image drawing rendering process on render target.
 // This is the thing that actually does the drawing on web.
 func (dw *Drawer) EndDraw() {
-	sz := dw.image.Bounds().Size()
-	ptr := uintptr(unsafe.Pointer(&dw.image.Pix[0]))
-	js.Global().Call("displayImage", ptr, len(dw.image.Pix), sz.X, sz.Y)
+	sz := dw.Image.Bounds().Size()
+	ptr := uintptr(unsafe.Pointer(&dw.Image.Pix[0]))
+	js.Global().Call("displayImage", ptr, len(dw.Image.Pix), sz.X, sz.Y)
 }
 
 func (dw *Drawer) Surface() any {
+	// no-op
 	return nil
 }

@@ -104,16 +104,24 @@ func (dw *Drawer) UseTextureSet(descIdx int) {}
 // No images can be added or set after this point.
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
+// This is a no-op on offscreen; if rendering logic is done here instead of
+// EndDraw, everything is delayed by one render because Scale and Copy are
+// called after StartDraw but before EndDraw, and we need them to be called
+// before actually rendering the image to the capture channel.
 func (dw *Drawer) StartDraw(descIdx int) {
+	// no-op
+}
+
+// EndDraw ends image drawing rendering process on render target.
+// This is the function that actually sends the image to the capture channel.
+func (dw *Drawer) EndDraw() {
 	if !goosi.NeedsCapture {
 		return
 	}
 	goosi.CaptureImage <- dw.Image
 }
 
-// EndDraw ends image drawing rendering process on render target
-func (dw *Drawer) EndDraw() {}
-
 func (dw *Drawer) Surface() any {
+	// no-op
 	return nil
 }
