@@ -10,6 +10,8 @@
 
 package mat32
 
+import "fmt"
+
 // Vec4 is a vector/point in homogeneous coordinates with X, Y, Z and W components.
 type Vec4 struct {
 	X float32
@@ -101,6 +103,10 @@ func (v Vec4) Dim(dim Dims) float32 {
 	default:
 		panic("dim is out of range")
 	}
+}
+
+func (v Vec4) String() string {
+	return fmt.Sprintf("(%v, %v, %v, %v)", v.X, v.Y, v.Z, v.W)
 }
 
 // SetByName sets this vector component value by its case insensitive name: "x", "y", "z" or "w".
