@@ -111,6 +111,7 @@ func (b *Base) AsBase() *Base {
 // only be used in the New functions of gradient types.
 func NewBase() Base {
 	return Base{
+		Blend:     colors.RGB, // TODO(kai): figure out a better solution to this
 		Box:       mat32.B2(0, 0, 100, 100),
 		Transform: mat32.Identity2D(),
 	}
