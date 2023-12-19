@@ -318,6 +318,7 @@ func (pc *Context) StrokePreserve() {
 		gb := g.AsBase()
 		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
 		gb.Transform = pc.CurTransform
+		g.Update()
 	}
 	pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 	pc.Raster.Draw()
@@ -353,6 +354,7 @@ func (pc *Context) FillPreserve() {
 		gb := g.AsBase()
 		gb.Box = mat32.B2FromRect(pc.LastRenderBBox)
 		gb.Transform = pc.CurTransform
+		g.Update()
 	}
 	rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
 	rf.Draw()
