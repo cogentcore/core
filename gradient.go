@@ -215,8 +215,7 @@ func (sv *SVG) GradientDeleteForNode(n Node, grnm string) bool {
 func (sv *SVG) GradientNewForNode(n Node, radial bool, stops string) (*Gradient, string) {
 	gr, url := sv.GradientNew(radial)
 	gr.StopsName = stops
-	bbox := n.LocalBBox()
-	gr.Grad.AsBase().SetBox(bbox)
+	gr.Grad.AsBase().SetBox(n.LocalBBox())
 	sv.GradientUpdateStops(gr)
 	return gr, url
 }
@@ -287,9 +286,8 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 	if gr == nil {
 		return
 	}
-	bbox := n.LocalBBox()
 	gb := gr.Grad.AsBase()
-	gb.SetBox(bbox)
+	gb.SetBox(n.LocalBBox())
 	gb.SetTransform(mat32.Identity2D())
 }
 
