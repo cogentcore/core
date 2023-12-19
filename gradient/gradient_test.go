@@ -76,21 +76,15 @@ func TestColorAt(t *testing.T) {
 		}
 
 		// ensure same results with UserSpaceOnUse as ObjectBoundingBox
-		var ugr Gradient
-		switch gr := test.gr.(type) {
+		ugr := CopyOf(test.gr)
+		switch ugr := ugr.(type) {
 		case *Linear:
-			// make a copy
-			l := *gr
-			l.Start.SetMul(gr.Box.Size())
-			l.End.SetMul(gr.Box.Size())
-			ugr = &l
+			ugr.Start.SetMul(ugr.Box.Size())
+			ugr.End.SetMul(ugr.Box.Size())
 		case *Radial:
-			// make a copy
-			r := *gr
-			r.Center.SetMul(gr.Box.Size())
-			r.Focal.SetMul(gr.Box.Size())
-			r.Radius.SetMul(gr.Box.Size())
-			ugr = &r
+			ugr.Center.SetMul(ugr.Box.Size())
+			ugr.Focal.SetMul(ugr.Box.Size())
+			ugr.Radius.SetMul(ugr.Box.Size())
 		}
 		ugr.AsBase().SetUnits(UserSpaceOnUse)
 		ugr.Update()
