@@ -350,6 +350,15 @@ func (fv *FileView) ConfigFilesRow() {
 				fn := fv.Files[fsv.SelIdx]
 				CallFunc(fsv, fn.Rename)
 			})
+		gi.NewSeparator(m)
+		gi.NewButton(m).SetText("Info").SetIcon(icons.Info).
+			SetTooltip("View information about the selected file").
+			OnClick(func(e events.Event) {
+				fn := fv.Files[fsv.SelIdx]
+				d := gi.NewBody().AddTitle("Info: " + fn.Name)
+				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
+				d.AddOkOnly().NewDialog(fsv).Run()
+			})
 	}
 	fv.ReadFiles()
 	fsv.SetReadOnly(true)
