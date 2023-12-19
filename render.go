@@ -38,7 +38,7 @@ import (
 // if ScUpdating is set, then an update is in progress and false is returned.
 // If no updates are required, then false is also returned, else true.
 // ScNeedsConfig is NOT handled here because it must be done on main thread,
-// so this must be checked separately (e.g., in xyzv.Scene3D, as it requires
+// so this must be checked separately (e.g., in xyzv.Scene, as it requires
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	if sc.Is(ScUpdating) {
