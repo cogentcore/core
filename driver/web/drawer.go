@@ -111,15 +111,20 @@ func (dw *Drawer) UseTextureSet(descIdx int) {
 // No images can be added or set after this point.
 // descIdx is the descriptor set to use -- choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
+// This is a no-op on web; if rendering logic is done here instead of
+// EndDraw, everything is delayed by one render because Scale and Copy are
+// called after StartDraw but before EndDraw, and we need them to be called
+// before actually rendering the image to the browser.
 func (dw *Drawer) StartDraw(descIdx int) {
+	// no-op
+}
+
+// EndDraw ends image drawing rendering process on render target.
+// This is the thing that actually does the drawing on web.
+func (dw *Drawer) EndDraw() {
 	sz := dw.image.Bounds().Size()
 	ptr := uintptr(unsafe.Pointer(&dw.image.Pix[0]))
 	js.Global().Call("displayImage", ptr, len(dw.image.Pix), sz.X, sz.Y)
-}
-
-// EndDraw ends image drawing rendering process on render target
-func (dw *Drawer) EndDraw() {
-	// no-op
 }
 
 func (dw *Drawer) Surface() any {
