@@ -35,12 +35,12 @@ type Linear struct { //gti:add -setters
 
 var _ Gradient = &Linear{}
 
-// NewLinear returns a new downward-facing [Linear] gradient.
+// NewLinear returns a new left-to-right [Linear] gradient.
 func NewLinear() *Linear {
 	return &Linear{
 		Base: NewBase(),
-		// default in CSS is "to bottom"
-		End: mat32.V2(0, 1),
+		// default in SVG is LTR
+		End: mat32.V2(1, 0),
 	}
 }
 
