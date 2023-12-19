@@ -177,7 +177,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	se.Camera.Pose.Pos.Set(-2, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	se.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+	se.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
 
 	dir := xyz.NewDirLight(se, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
