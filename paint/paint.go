@@ -371,6 +371,7 @@ func (pc *Context) Fill() {
 // and [Context.Fill] to fill the region.
 func (pc *Context) BlitBox(pos, size mat32.Vec2, img image.Image) {
 	if img == nil {
+		pc.BlitBoxColor(pos, size, color.RGBA{})
 		return
 	}
 	if u, ok := img.(*image.Uniform); ok {
