@@ -326,23 +326,29 @@ func (fv *FileView) ConfigFilesRow() {
 	})
 
 	fsv.CustomContextMenu = func(m *gi.Scene) {
-		gi.NewButton(m).SetText("Make a copy").SetIcon(icons.Copy).
+		gi.NewButton(m).SetText("Open").SetIcon(icons.Open).
+			SetTooltip("Open the selected file using the default app").
+			OnClick(func(e events.Event) {
+				gi.OpenURL(fv.SelectedFile())
+			})
+		gi.NewSeparator(m)
+		gi.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
 			SetTooltip("Makes a copy of the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
 				fn.Duplicate()
 			})
 		gi.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-			SetTooltip("Deletes the selected file").
+			SetTooltip("Delete the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
 				NewFuncButton(fsv, fn.Delete).SetConfirm(true).CallFunc()
 			})
-		gi.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
-			SetTooltip("Renames the selected file").
+		gi.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
+			SetTooltip("Rename the selected file").
 			OnClick(func(e events.Event) {
 				fn := fv.Files[fsv.SelIdx]
-				NewFuncButton(fsv, fn.Rename).SetConfirm(true).CallFunc()
+				CallFunc(fsv, fn.Rename)
 			})
 	}
 	fv.ReadFiles()
