@@ -861,6 +861,9 @@ type RenderScenes struct {
 
 	// ordered list of scenes -- index is Drawer image index.
 	Scenes []*Scene
+
+	// SceneIdx holds the index for each scene -- used to detect changes in index
+	SceneIdx map[*Scene]int
 }
 
 // SetIdxRange sets the index range based on starting index and n
@@ -872,10 +875,13 @@ func (rs *RenderScenes) SetIdxRange(st, n int) {
 // Reset resets the list
 func (rs *RenderScenes) Reset() {
 	rs.Scenes = nil
+	if rs.SceneIdx == nil {
+		rs.SceneIdx = make(map[*Scene]int)
+	}
 }
 
 // Add adds a new node, returning index
-func (rs *RenderScenes) Add(sc *Scene) int {
+func (rs *RenderScenes) Add(sc *Scene, scIdx map[*Scene]int) int {
 	if sc.Pixels == nil {
 		return -1
 	}
@@ -884,6 +890,14 @@ func (rs *RenderScenes) Add(sc *Scene) int {
 		slog.Error("gi.RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIdx)
 		return -1
 	}
+	if prvIdx, has := rs.SceneIdx[sc]; has {
+		if prvIdx != idx {
+			sc.SetFlag(true, ScImageUpdated) // need to copy b/c cur has diff image
+		}
+	} else {
+		sc.SetFlag(true, ScImageUpdated) // need to copy b/c new
+	}
+	scIdx[sc] = idx
 	rs.Scenes = append(rs.Scenes, sc)
 	return idx
 }
@@ -1026,6 +1040,7 @@ func (w *RenderWin) DrawScenes() {
 func (w *RenderWin) GatherScenes() bool {
 	rs := &w.RenderScenes
 	rs.Reset()
+	scIdx := make(map[*Scene]int)
 
 	sm := &w.MainStageMgr
 	n := sm.Stack.Len()
@@ -1042,7 +1057,7 @@ func (w *RenderWin) GatherScenes() bool {
 			if WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
-			rs.Add(st.Scene)
+			rs.Add(st.Scene, scIdx)
 			winIdx = i
 			break
 		}
@@ -1051,7 +1066,7 @@ func (w *RenderWin) GatherScenes() bool {
 	// then add everyone above that
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValByIdx(i)
-		rs.Add(st.Scene)
+		rs.Add(st.Scene, scIdx)
 		if WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -1063,11 +1078,12 @@ func (w *RenderWin) GatherScenes() bool {
 	// then add the popups for the top main stage
 	for _, kv := range top.PopupMgr.Stack.Order {
 		st := kv.Val
-		rs.Add(st.Scene)
+		rs.Add(st.Scene, scIdx)
 		if WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
+	rs.SceneIdx = scIdx
 	return true
 }
 
