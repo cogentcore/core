@@ -4,7 +4,7 @@
 
 package xyz
 
-//go:generate goki generate
+//go:generate goki generate -add-types
 
 import (
 	"fmt"
@@ -80,18 +80,6 @@ type Scene struct {
 	// has dragging cursor been set yet?
 	SetDragCursor bool `view:"-" set:"-"`
 
-	// how to deal with selection / manipulation events
-	SelMode SelModes
-
-	// currently selected node
-	CurSel Node `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
-
-	// currently selected manipulation control point
-	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
-
-	// parameters for selection / manipulation box
-	SelParams SelParams `view:"inline"`
-
 	// the vphong rendering system
 	Phong vphong.Phong `set:"-"`
 
@@ -116,7 +104,6 @@ func (sc *Scene) Defaults() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.BackgroundColor = colors.Scheme.Background
-	sc.SelParams.Defaults()
 }
 
 // NewScene creates a new Scene to contain a 3D scenegraph.

@@ -59,6 +59,10 @@ func (ps *Pose) CopyFrom(op *Pose) {
 	ps.UpdateMatrix()
 }
 
+func (ps *Pose) String() string {
+	return "Pos: " + ps.Pos.String() + "; Scale: " + ps.Scale.String() + "; Quat: " + ps.Quat.String()
+}
+
 // GenGoSet returns code to set values at given path (var.member etc)
 func (ps *Pose) GenGoSet(path string) string {
 	return ps.Pos.GenGoSet(path+".Pos") + "; " + ps.Scale.GenGoSet(path+".Scale") + "; " + ps.Quat.GenGoSet(path+".Quat")

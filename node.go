@@ -389,6 +389,8 @@ func (nb *NodeBase) TrackCamera() {
 	nb.Pose.CopyFrom(&nb.Sc.Camera.Pose)
 	nb.Sc.Camera.CamMu.RUnlock()
 	nb.PoseMu.Unlock()
+
+	UpdateWorldMatrix(nb.This())
 }
 
 // TrackLight moves node to position of light of given name.

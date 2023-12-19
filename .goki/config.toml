@@ -67,7 +67,7 @@ Type = "Library"
   [Generate.Gtigen]
     Dir = "."
     Output = "gtigen.go"
-    AddTypes = false
+    AddTypes = true
     AddMethods = false
     AddFuncs = false
     Instance = false

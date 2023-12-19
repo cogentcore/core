@@ -6,10 +6,12 @@ package xyz
 
 import (
 	"fmt"
+	"image"
 	"strings"
 
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -17,6 +19,28 @@ var (
 	OrbitFactor = float32(0.025)
 	PanFactor   = float32(0.001)
 )
+
+// NodesUnderPoint returns list of nodes within given node that
+// have their ScBBox within given 2D scene point (excludes starting node).
+// This is a good first-pass step for node-level
+// event handling based on 2D mouse events.
+func NodesUnderPoint(n ki.Ki, pt image.Point) []Node {
+	var ns []Node
+	n.WalkPre(func(k ki.Ki) bool {
+		if k == n.This() {
+			return ki.Continue
+		}
+		ni, nb := AsNode(k)
+		if !ni.IsVisible() {
+			return ki.Break
+		}
+		if pt.In(nb.ScBBox) {
+			ns = append(ns, ni)
+		}
+		return ki.Continue
+	})
+	return ns
+}
 
 func (sc *Scene) SlideMoveEvent(e events.Event) {
 	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
@@ -59,16 +83,6 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	default:
 		sc.Camera.ZoomTo(pt, sz, zoom*zoomDel)
 	}
-	sc.SetFlag(true, ScNeedsRender)
-}
-
-func (sc *Scene) MouseDownEvent(e events.Event) {
-	if sc.NoNav {
-		return
-	}
-	// if ssc.CurManipPt == nil {
-	sc.SetSel(nil) // clear any selection at this point
-	// }
 	sc.SetFlag(true, ScNeedsRender)
 }
 
@@ -172,8 +186,6 @@ func (sc *Scene) NavKeyEvents(kt events.Event) {
 		kt.SetHandled()
 		obj := sc.Child(0).(*Solid)
 		fmt.Printf("updated obj: %v\n", obj.Path())
-		// obj.UpdateSig()
 		return
 	}
-	// sc.UpdateSig()
 }

@@ -38,7 +38,7 @@ import (
 // if ScUpdating is set, then an update is in progress and false is returned.
 // If no updates are required, then false is also returned, else true.
 // ScNeedsConfig is NOT handled here because it must be done on main thread,
-// so this must be checked separately (e.g., in xyzv.Scene3D, it is requires
+// so this must be checked separately (e.g., in xyzv.Scene3D, as it requires
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	if sc.Is(ScUpdating) {
@@ -272,33 +272,24 @@ func (sc *Scene) UpdateMeshBBox() {
 	}
 }
 
-// UpdateWorldMatrix updates the world matrix for all scene elements.
-func (sc *Scene) UpdateWorldMatrix() {
+// UpdateWorldMatrix updates the world matrix for node and everything inside it
+func UpdateWorldMatrix(n ki.Ki) {
 	idmtx := mat32.NewMat4()
-	for _, kid := range sc.Kids { //
-		kii, _ := AsNode(kid)
-		if kii == nil {
-			continue
+	n.WalkPre(func(k ki.Ki) bool {
+		ni, _ := AsNode(k)
+		if ni == nil {
+			return ki.Continue
 		}
-		kii.UpdateWorldMatrix(idmtx)
-		kii.WalkPre(func(k ki.Ki) bool {
-			if k == kid {
-				return ki.Continue // skip, already did
-			}
-			ni, _ := AsNode(k)
-			if ni == nil {
-				return ki.Break // going into a different type of thing, bail
-			}
-			pi, pd := AsNode(k.Parent())
-			if pi == nil {
-				return ki.Break
-			}
+		_, pd := AsNode(k.Parent())
+		if pd == nil {
+			ni.UpdateWorldMatrix(idmtx)
+		} else {
 			pd.PoseMu.RLock()
 			ni.UpdateWorldMatrix(&pd.Pose.WorldMatrix)
 			pd.PoseMu.RUnlock()
-			return ki.Continue
-		})
-	}
+		}
+		return ki.Continue
+	})
 }
 
 // UpdateMVPMatrix updates the Model-View-Projection matrix for all scene elements
@@ -312,7 +303,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 
 	sc.WalkPre(func(k ki.Ki) bool {
-		if k == sc.This() {
+		if k.This() == sc.This() {
 			return ki.Continue
 		}
 		ni, _ := AsNode(k)
@@ -358,7 +349,7 @@ func (sc *Scene) Config() {
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	sc.ConfigNodes()
-	sc.UpdateWorldMatrix()
+	UpdateWorldMatrix(sc.This())
 	sc.ConfigLights()
 	sc.ConfigMeshesTextures()
 	sc.SetFlag(false, ScNeedsConfig)
@@ -378,7 +369,7 @@ func (sc *Scene) ConfigMeshesTextures() {
 }
 
 func (sc *Scene) UpdateNodes() {
-	sc.UpdateWorldMatrix()
+	UpdateWorldMatrix(sc.This())
 	sc.UpdateMeshBBox()
 }
 

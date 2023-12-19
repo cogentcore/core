@@ -9,7 +9,22 @@ import (
 	"goki.dev/vgpu/v2/vshape"
 )
 
-// shapes define different standard mesh shapes
+const (
+	// TrackCameraName is a reserved top-level Group name -- this group
+	// will have its Pose updated to match that of the camera automatically.
+	TrackCameraName = "TrackCamera"
+
+	// Plane2DMeshName is the reserved name for the 2D plane mesh
+	// used for Text2D and Embed2D
+	Plane2DMeshName = "__Plane2D"
+
+	// LineMeshName is the reserved name for a unit-sized Line segment
+	LineMeshName = "__UnitLine"
+
+	// ConeMeshName is the reserved name for a unit-sized Cone segment.
+	// Has the number of segments appended.
+	ConeMeshName = "__UnitCone"
+)
 
 ///////////////////////////////////////////////////////////////////////////
 //   Plane
