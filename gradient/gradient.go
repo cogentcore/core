@@ -42,8 +42,9 @@ type Base struct { //gti:add -setters
 	// the colorspace algorithm to use for blending colors
 	Blend colors.BlendTypes
 
-	// the units to use for the gradient
-	Units Units
+	// the units to use for the gradient; this must be set using SetUnits
+	// or be followed by an Update call.
+	Units Units `set:"-"`
 
 	// the bounding box of the object with the gradient; this is used when rendering
 	// gradients with [Units] of [ObjectBoundingBox]; this must be set using SetBox

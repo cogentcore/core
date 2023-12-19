@@ -19,10 +19,13 @@ type Linear struct { //gti:add -setters
 	Base
 
 	// the starting point of the gradient (x1 and y1 in SVG)
-	Start mat32.Vec2
+	Start mat32.Vec2 `set:"-"`
 
 	// the ending point of the gradient (x2 and y2 in SVG)
-	End mat32.Vec2
+	End mat32.Vec2 `set:"-"`
+
+	EffStart mat32.Vec2 `set:"-"`
+	EffEnd   mat32.Vec2 `set:"-"`
 }
 
 var _ Gradient = &Linear{}
@@ -44,6 +47,13 @@ func (l *Linear) AddStop(color color.RGBA, pos float32) *Linear {
 	return l
 }
 
+// SetUnits sets the [Linear.Units]
+func (l *Linear) SetUnits(v Units) *Linear {
+	l.Units = v
+	l.Update()
+	return l
+}
+
 // SetBox sets the [Linear.Box]
 func (l *Linear) SetBox(v mat32.Box2) *Linear {
 	l.Box = v
@@ -58,11 +68,35 @@ func (l *Linear) SetTransform(v mat32.Mat2) *Linear {
 	return l
 }
 
+// SetStart sets the [Linear.Start]:
+// the starting point of the gradient (x1 and y1 in SVG)
+func (l *Linear) SetStart(v mat32.Vec2) *Linear {
+	l.Start = v
+	l.Update()
+	return l
+}
+
+// SetEnd sets the [Linear.End]:
+// the ending point of the gradient (x2 and y2 in SVG)
+func (l *Linear) SetEnd(v mat32.Vec2) *Linear {
+	l.End = v
+	l.Update()
+	return l
+}
+
 // Update updates the computed fields of the linear gradient after it has been modified.
 // It should only be called by end users when they modify properties of the linear gradient
 // outside of Set functions that have comments stating that they must be set using Set functions.
 func (l *Linear) Update() {
 	l.UpdateBase()
+
+	if l.Units == ObjectBoundingBox {
+		l.EffStart = l.Box.Min.Add(l.Box.Size().Mul(l.Start))
+		l.EffEnd = l.Box.Min.Add(l.Box.Size().Mul(l.End))
+	} else {
+		l.EffStart = l.Transform.MulVec2AsPt(l.Start)
+		l.EffEnd = l.Transform.MulVec2AsPt(l.End)
+	}
 }
 
 // At returns the color of the linear gradient at the given point
@@ -74,23 +108,14 @@ func (l *Linear) At(x, y int) color.Color {
 		return l.Stops[0].Color
 	}
 
-	s, e := l.Start, l.End
-	if l.Units == ObjectBoundingBox {
-		s = l.Box.Min.Add(l.Box.Size().Mul(s))
-		e = l.Box.Min.Add(l.Box.Size().Mul(e))
-	} else {
-		s = l.Transform.MulVec2AsPt(s)
-		e = l.Transform.MulVec2AsPt(e)
-	}
-
-	d := e.Sub(s)
+	d := l.EffEnd.Sub(l.EffStart)
 	dd := d.X*d.X + d.Y*d.Y // self inner prod
 
 	pt := mat32.V2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
 		pt = l.ObjectMatrix.MulVec2AsPt(pt)
 	}
-	df := pt.Sub(s)
+	df := pt.Sub(l.EffStart)
 	pos := (d.X*df.X + d.Y*df.Y) / dd
 	return l.GetColor(pos)
 }

@@ -91,6 +91,7 @@ func TestColorAt(t *testing.T) {
 				ugr = &r
 			}
 			ugr.AsBase().Units = UserSpaceOnUse
+			ugr.Update()
 			have = ugr.At(v.x, v.y)
 			if have != v.want {
 				t.Errorf("%d.%d: UserSpaceOnUse: expected %v at %v but got %v", i, j, v.want, image.Pt(v.x, v.y), have)
