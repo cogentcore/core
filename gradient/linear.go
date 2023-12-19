@@ -24,8 +24,13 @@ type Linear struct { //gti:add -setters
 	// the ending point of the gradient (x2 and y2 in SVG)
 	End mat32.Vec2
 
+	// EffStart is the computed effective transformed starting point of the gradient.
+	// It should not be set by end users.
 	EffStart mat32.Vec2 `set:"-"`
-	EffEnd   mat32.Vec2 `set:"-"`
+
+	// EffEnd is the computed effective transformed ending point of the gradient.
+	// It should not be set by end users.
+	EffEnd mat32.Vec2 `set:"-"`
 }
 
 var _ Gradient = &Linear{}
