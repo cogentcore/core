@@ -8,19 +8,21 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
+	// gi.RenderTrace = true
 	// gi.WinEventTrace = true
 	// gi.EventTrace = true
 	// gi.LayoutTrace = true
 	// gi.LayoutTraceDetail = true
 	// gi.RenderTrace = true
 
-	b := gi.NewBody().SetTitle("Basic")
+	b := gi.NewAppBody("basic")
+	b.App().AppBarConfig = nil
 
-	gi.DefaultTopAppBar = nil
+	gi.NewButton(b).SetType(gi.ButtonAction).SetText("Action")
 
 	// gi.NewIcon(sc).SetIcon(icons.Add)
 
-	gi.NewLabel(b).SetText("Hello, World!")
+	// gi.NewLabel(b).SetText("Hello, World!")
 
 	// gi.NewButton(sc).
 	// 	SetText("Open Dialog").SetIcon(icons.OpenInNew).
