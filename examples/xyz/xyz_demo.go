@@ -47,8 +47,8 @@ type Anim struct {
 	// the time.Ticker for animating the scene
 	Ticker *time.Ticker `view:"-"`
 
-	// the scene
-	Scene *xyzv.Scene3D
+	// the scene viewer
+	SceneView *xyzv.SceneView
 
 	// the torus
 	Torus *xyz.Solid
@@ -65,8 +65,8 @@ type Anim struct {
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(se *xyzv.Scene3D, on bool) {
-	an.Scene = se
+func (an *Anim) Start(se *xyzv.SceneView, on bool) {
+	an.SceneView = se
 	an.On = on
 	an.DoTorus = true
 	an.DoGopher = true
@@ -78,7 +78,7 @@ func (an *Anim) Start(se *xyzv.Scene3D, on bool) {
 
 // GetObjs gets the objects to animate
 func (an *Anim) GetObjs() {
-	se := an.Scene.Scene
+	se := an.SceneView.Scene()
 	torusi := se.ChildByName("torus", 0)
 	if torusi == nil {
 		return
@@ -101,15 +101,15 @@ func (an *Anim) GetObjs() {
 // Animate
 func (an *Anim) Animate() {
 	for {
-		if an.Ticker == nil || an.Scene.This() == nil {
+		if an.Ticker == nil || an.SceneView.This() == nil {
 			return
 		}
 		<-an.Ticker.C // wait for tick
-		if !an.On || an.Scene.This() == nil || an.Scene.Is(ki.Deleted) || an.Torus == nil || an.Gopher == nil {
+		if !an.On || an.SceneView.This() == nil || an.SceneView.Is(ki.Deleted) || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
-
-		updt := an.Scene.UpdateStart3D()
+		sc := an.SceneView.Scene()
+		updt := sc.UpdateStart()
 		radius := float32(0.3)
 
 		if an.DoTorus {
@@ -130,7 +130,8 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		an.Scene.UpdateEndUpdate3D(updt)
+		sc.UpdateEndUpdate(updt)
+		an.SceneView.Scene3D().SetNeedsRender(true)
 		an.Ang += an.Speed
 	}
 }
@@ -162,8 +163,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 		anim.On = !anim.On
 	})
 
-	s3 := xyzv.NewScene3D(b)
-	se := s3.Scene
+	sv := xyzv.NewSceneView(b)
+	sv.Config()
+	se := sv.Scene3D()
+	sc := sv.Scene()
+	se.SelMode = xyzv.Manipulable
 
 	// options - must be set here
 	// sc.MultiSample = 1
@@ -171,15 +175,15 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	se.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
-	xyz.NewAmbientLight(se, "ambient", 0.3, xyz.DirectSun)
+	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
+	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
-	se.Camera.Pose.Pos.Set(-2, 2, 10)
+	sc.Camera.Pose.Pos.Set(-2, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	se.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
 
-	dir := xyz.NewDirLight(se, "dir", 1, xyz.DirectSun)
+	dir := xyz.NewDirLight(sc, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
@@ -188,13 +192,13 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	// spot := xyz.NewSpotLight(sc, "spot", 1, xyz.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	grtx := xyz.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
+	grtx := xyz.NewTextureFileFS(assets.Content, sc, "ground", "ground.png")
 	// _ = grtx
 
-	cbm := xyz.NewBox(se, "cube1", 1, 1, 1)
+	cbm := xyz.NewBox(sc, "cube1", 1, 1, 1)
 	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rbgp := xyz.NewGroup(se, "r-b-group")
+	rbgp := xyz.NewGroup(sc, "r-b-group")
 
 	xyz.NewSolid(rbgp, "red-cube").SetMesh(cbm).
 		SetColor(colors.Red).SetShiny(500).SetPos(-1, 0, 0)
@@ -208,8 +212,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	xyz.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm).
 		SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
 
-	floorp := xyz.NewPlane(se, "floor-plane", 100, 100)
-	floor := xyz.NewSolid(se, "floor").SetMesh(floorp).
+	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
+	floor := xyz.NewSolid(sc, "floor").SetMesh(floorp).
 		SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 
@@ -217,57 +221,57 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.SetDisabled() // not selectable
 
-	lnsm := xyz.NewLines(se, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, xyz.CloseLines)
-	lns := xyz.NewSolid(se, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
+	lnsm := xyz.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, xyz.CloseLines)
+	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	xyz.NewArrow(se, se, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
+	xyz.NewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
 	// xyz.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, xyz.Active)
 
-	cylm := xyz.NewCylinder(se, "cylinder", 1.5, .5, 32, 1, true, true)
-	xyz.NewSolid(se, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
+	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+	xyz.NewSolid(sc, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
 
-	capm := xyz.NewCapsule(se, "capsule", 1.5, .5, 32, 1)
-	xyz.NewSolid(se, "capsule").SetMesh(capm).SetColor(colors.Tan).
+	capm := xyz.NewCapsule(sc, "capsule", 1.5, .5, 32, 1)
+	xyz.NewSolid(sc, "capsule").SetMesh(capm).SetColor(colors.Tan).
 		SetPos(3.25, 0, 0)
 
-	sphm := xyz.NewSphere(se, "sphere", .75, 32)
-	sph := xyz.NewSolid(se, "sphere").SetMesh(sphm).SetColor(colors.Orange)
+	sphm := xyz.NewSphere(sc, "sphere", .75, 32)
+	sph := xyz.NewSolid(sc, "sphere").SetMesh(sphm).SetColor(colors.Orange)
 	sph.Mat.Color.A = 200
 	sph.Pose.Pos.Set(0, -2, 0)
 
 	// Good strategy for objects if used in multiple places is to load
 	// into library, then add from there.
-	lgo, err := se.OpenToLibraryFS(assets.Content, "gopher.obj", "")
+	lgo, err := sc.OpenToLibraryFS(assets.Content, "gopher.obj", "")
 	if err != nil {
 		log.Println(err)
 	}
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	gogp := xyz.NewGroup(se, "go-group")
+	gogp := xyz.NewGroup(sc, "go-group")
 
-	bgo, _ := se.AddFmLibrary("gopher", gogp)
+	bgo, _ := sc.AddFmLibrary("gopher", gogp)
 	bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
 
-	sgo, _ := se.AddFmLibrary("gopher", gogp)
+	sgo, _ := sc.AddFmLibrary("gopher", gogp)
 	sgo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
 
-	trsm := xyz.NewTorus(se, "torus", .75, .1, 32)
-	trs := xyz.NewSolid(se, "torus").SetMesh(trsm).SetColor(colors.White).
+	trsm := xyz.NewTorus(sc, "torus", .75, .1, 32)
+	trs := xyz.NewSolid(sc, "torus").SetMesh(trsm).SetColor(colors.White).
 		SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
 	trs.Mat.Color.A = 200
 
-	txt := xyz.NewText2D(se, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	txt := xyz.NewText2D(sc, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	txt.Styles.Text.Align = styles.Center
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.SetPos(0, 2.2, 0)
 
-	tcg := xyz.NewGroup(se, xyz.TrackCameraName) // automatically tracks camera -- FPS effect
+	tcg := xyz.NewGroup(sc, xyz.TrackCameraName) // automatically tracks camera -- FPS effect
 	xyz.NewSolid(tcg, "first-person-gun").SetMesh(cbm).
 		SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5). // in front of camera
 		SetColor(color.RGBA{255, 0, 255, 128})
@@ -275,7 +279,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 	///////////////////////////////////////////////////
 	//  Animation & Embedded controls
 
-	anim.Start(s3, false) // start without animation running
+	anim.Start(sv, false) // start without animation running
 
 	/*
 

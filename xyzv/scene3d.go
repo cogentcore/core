@@ -22,12 +22,26 @@ import (
 	"goki.dev/xyz"
 )
 
-// Scene3D is a Widget that manages a xyz.Scene.
+// Scene3D is a gi.Widget that manages a xyz.Scene,
+// providing the basic rendering logic for the 3D scene
+// in the 2D gi gui context.
 type Scene3D struct {
 	gi.WidgetBase
 
 	// Scene is the 3D Scene
 	Scene *xyz.Scene `set:"-"`
+
+	// how to deal with selection / manipulation events
+	SelMode SelModes
+
+	// currently selected node
+	CurSel xyz.Node `copy:"-" json:"-" xml:"-" view:"-"`
+
+	// currently selected manipulation control point
+	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-"`
+
+	// parameters for selection / manipulation box
+	SelParams SelParams `view:"inline"`
 }
 
 func (se *Scene3D) CopyFieldsFrom(frm any) {
@@ -46,25 +60,13 @@ func (se *Scene3D) OnInit() {
 
 func (se *Scene3D) SetStyles() {
 	se.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable)
+		s.SetAbilities(true, abilities.Pressable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Em(20))
 	})
 }
 
 func (se *Scene3D) HandleEvents() {
-	se.On(events.MouseDown, func(e events.Event) {
-		pos := se.Geom.ContentBBox.Min
-		e.SetLocalOff(e.LocalOff().Add(pos))
-		se.Scene.MouseDownEvent(e)
-		se.SetNeedsRender(true)
-	})
-	se.On(events.SlideMove, func(e events.Event) {
-		pos := se.Geom.ContentBBox.Min
-		e.SetLocalOff(e.LocalOff().Add(pos))
-		se.Scene.SlideMoveEvent(e)
-		se.SetNeedsRender(true)
-	})
 	se.On(events.Scroll, func(e events.Event) {
 		pos := se.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
@@ -75,6 +77,7 @@ func (se *Scene3D) HandleEvents() {
 		se.Scene.KeyChordEvent(e)
 		se.SetNeedsRender(true)
 	})
+	se.HandleSelectEvents()
 }
 
 func (se *Scene3D) ConfigWidget() {

@@ -333,6 +333,11 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
 		em.HandleLongHover(e)
 	case events.MouseDrag:
+		// n := len(em.MouseInBBox)
+		// for i := n - 1; i >= 0; i-- {
+		// 	w := em.MouseInBBox[i]
+		// 	w.HandleEvent(e) // first crack at it
+		// }
 		switch {
 		case em.Drag != nil:
 			hovs := make([]Widget, 0, len(em.MouseInBBox))
