@@ -65,8 +65,8 @@ type Anim struct {
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(se *xyzv.SceneView, on bool) {
-	an.SceneView = se
+func (an *Anim) Start(sv *xyzv.SceneView, on bool) {
+	an.SceneView = sv
 	an.On = on
 	an.DoTorus = true
 	an.DoGopher = true
@@ -78,15 +78,15 @@ func (an *Anim) Start(se *xyzv.SceneView, on bool) {
 
 // GetObjs gets the objects to animate
 func (an *Anim) GetObjs() {
-	se := an.SceneView.Scene()
-	torusi := se.ChildByName("torus", 0)
+	sc := an.SceneView.SceneXYZ()
+	torusi := sc.ChildByName("torus", 0)
 	if torusi == nil {
 		return
 	}
 	an.Torus = torusi.(*xyz.Solid)
 	an.TorusPosOrig = an.Torus.Pose.Pos
 
-	ggp := se.ChildByName("go-group", 0)
+	ggp := sc.ChildByName("go-group", 0)
 	if ggp == nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (an *Anim) Animate() {
 		if !an.On || an.SceneView.This() == nil || an.SceneView.Is(ki.Deleted) || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
-		sc := an.SceneView.Scene()
+		sc := an.SceneView.SceneXYZ()
 		updt := sc.UpdateStart()
 		radius := float32(0.3)
 
@@ -131,7 +131,7 @@ func (an *Anim) Animate() {
 		}
 
 		sc.UpdateEndUpdate(updt)
-		an.SceneView.Scene3D().SetNeedsRender(true)
+		an.SceneView.SceneWidget().SetNeedsRender(true)
 		an.Ang += an.Speed
 	}
 }
@@ -148,11 +148,11 @@ func app() {
 	anim := &Anim{}
 	b := gi.NewAppBody("xyz")
 	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
+<p>The <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 
 	gi.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the
 <a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
-See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</a> for detailed info and things to try.`).
+See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
 			s.Text.Align = styles.Center
@@ -165,9 +165,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/xyz/README.md">README</
 
 	sv := xyzv.NewSceneView(b)
 	sv.Config()
-	se := sv.Scene3D()
-	sc := sv.Scene()
-	se.SelMode = xyzv.Manipulable
+	sw := sv.SceneWidget()
+	sc := sv.SceneXYZ()
+	sw.SelMode = xyzv.Manipulable
 
 	// options - must be set here
 	// sc.MultiSample = 1

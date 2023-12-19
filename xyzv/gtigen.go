@@ -43,12 +43,12 @@ func (t *ManipPt) SetMat(v xyz.Material) *ManipPt {
 	return t
 }
 
-// Scene3DType is the [gti.Type] for [Scene3D]
-var Scene3DType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/xyzv.Scene3D",
-	ShortName:  "xyzv.Scene3D",
-	IDName:     "scene-3-d",
-	Doc:        "Scene3D is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.",
+// SceneType is the [gti.Type] for [Scene]
+var SceneType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/xyzv.Scene",
+	ShortName:  "xyzv.Scene",
+	IDName:     "scene",
+	Doc:        "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/xyz.Scene", LocalType: "*xyz.Scene", Doc: "Scene is the 3D Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -61,69 +61,69 @@ var Scene3DType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Scene3D{},
+	Instance: &Scene{},
 })
 
-// NewScene3D adds a new [Scene3D] with the given name
+// NewScene adds a new [Scene] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewScene3D(par ki.Ki, name ...string) *Scene3D {
-	return par.NewChild(Scene3DType, name...).(*Scene3D)
+func NewScene(par ki.Ki, name ...string) *Scene {
+	return par.NewChild(SceneType, name...).(*Scene)
 }
 
-// KiType returns the [*gti.Type] of [Scene3D]
-func (t *Scene3D) KiType() *gti.Type {
-	return Scene3DType
+// KiType returns the [*gti.Type] of [Scene]
+func (t *Scene) KiType() *gti.Type {
+	return SceneType
 }
 
-// New returns a new [*Scene3D] value
-func (t *Scene3D) New() ki.Ki {
-	return &Scene3D{}
+// New returns a new [*Scene] value
+func (t *Scene) New() ki.Ki {
+	return &Scene{}
 }
 
-// SetSelMode sets the [Scene3D.SelMode]:
+// SetSelMode sets the [Scene.SelMode]:
 // how to deal with selection / manipulation events
-func (t *Scene3D) SetSelMode(v SelModes) *Scene3D {
+func (t *Scene) SetSelMode(v SelModes) *Scene {
 	t.SelMode = v
 	return t
 }
 
-// SetCurSel sets the [Scene3D.CurSel]:
+// SetCurSel sets the [Scene.CurSel]:
 // currently selected node
-func (t *Scene3D) SetCurSel(v xyz.Node) *Scene3D {
+func (t *Scene) SetCurSel(v xyz.Node) *Scene {
 	t.CurSel = v
 	return t
 }
 
-// SetCurManipPt sets the [Scene3D.CurManipPt]:
+// SetCurManipPt sets the [Scene.CurManipPt]:
 // currently selected manipulation control point
-func (t *Scene3D) SetCurManipPt(v *ManipPt) *Scene3D {
+func (t *Scene) SetCurManipPt(v *ManipPt) *Scene {
 	t.CurManipPt = v
 	return t
 }
 
-// SetSelParams sets the [Scene3D.SelParams]:
+// SetSelParams sets the [Scene.SelParams]:
 // parameters for selection / manipulation box
-func (t *Scene3D) SetSelParams(v SelParams) *Scene3D {
+func (t *Scene) SetSelParams(v SelParams) *Scene {
 	t.SelParams = v
 	return t
 }
 
-// SetTooltip sets the [Scene3D.Tooltip]
-func (t *Scene3D) SetTooltip(v string) *Scene3D {
+// SetTooltip sets the [Scene.Tooltip]
+func (t *Scene) SetTooltip(v string) *Scene {
 	t.Tooltip = v
 	return t
 }
 
-// SetClass sets the [Scene3D.Class]
-func (t *Scene3D) SetClass(v string) *Scene3D {
+// SetClass sets the [Scene.Class]
+func (t *Scene) SetClass(v string) *Scene {
 	t.Class = v
 	return t
 }
 
-// SetCustomContextMenu sets the [Scene3D.CustomContextMenu]
-func (t *Scene3D) SetCustomContextMenu(v func(m *gi.Scene)) *Scene3D {
+// SetCustomContextMenu sets the [Scene.CustomContextMenu]
+func (t *Scene) SetCustomContextMenu(v func(m *gi.Scene)) *Scene {
 	t.CustomContextMenu = v
 	return t
 }

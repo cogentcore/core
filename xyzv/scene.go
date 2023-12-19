@@ -22,10 +22,10 @@ import (
 	"goki.dev/xyz"
 )
 
-// Scene3D is a gi.Widget that manages a xyz.Scene,
+// Scene is a gi.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D gi gui context.
-type Scene3D struct {
+type Scene struct {
 	gi.WidgetBase
 
 	// Scene is the 3D Scene
@@ -44,59 +44,61 @@ type Scene3D struct {
 	SelParams SelParams `view:"inline"`
 }
 
-func (se *Scene3D) CopyFieldsFrom(frm any) {
-	fr := frm.(*Scene3D)
-	se.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	se.Scene.CopyFrom(fr.Scene)
+func (sw *Scene) CopyFieldsFrom(frm any) {
+	fr := frm.(*Scene)
+	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sw.Scene.CopyFrom(fr.Scene)
 }
 
-func (se *Scene3D) OnInit() {
-	se.Scene = xyz.NewScene("Scene")
-	se.Scene.Defaults()
-	se.WidgetBase.OnInit()
-	se.HandleEvents()
-	se.SetStyles()
+func (sw *Scene) OnInit() {
+	sw.Scene = xyz.NewScene("Scene")
+	sw.Scene.Defaults()
+	sw.SelParams.Defaults()
+	sw.WidgetBase.OnInit()
+	sw.HandleEvents()
+	sw.SetStyles()
 }
 
-func (se *Scene3D) SetStyles() {
-	se.Style(func(s *styles.Style) {
+func (sw *Scene) SetStyles() {
+	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Pressable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Em(20))
 	})
 }
 
-func (se *Scene3D) HandleEvents() {
-	se.On(events.Scroll, func(e events.Event) {
-		pos := se.Geom.ContentBBox.Min
+func (sw *Scene) HandleEvents() {
+	sw.On(events.Scroll, func(e events.Event) {
+		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
-		se.Scene.MouseScrollEvent(e.(*events.MouseScroll))
-		se.SetNeedsRender(true)
+		sw.Scene.MouseScrollEvent(e.(*events.MouseScroll))
+		sw.SetNeedsRender(true)
 	})
-	se.On(events.KeyChord, func(e events.Event) {
-		se.Scene.KeyChordEvent(e)
-		se.SetNeedsRender(true)
+	sw.On(events.KeyChord, func(e events.Event) {
+		sw.Scene.KeyChordEvent(e)
+		sw.SetNeedsRender(true)
 	})
-	se.HandleSelectEvents()
+	sw.HandleSlideEvents()
+	sw.HandleSelectEvents()
 }
 
-func (se *Scene3D) ConfigWidget() {
-	se.ConfigFrame()
+func (sw *Scene) ConfigWidget() {
+	sw.ConfigFrame()
 }
 
 // ConfigFrame configures the framebuffer for GPU rendering,
 // using the RenderWin GPU and Device.
-func (se *Scene3D) ConfigFrame() {
+func (sw *Scene) ConfigFrame() {
 	zp := image.Point{}
-	sz := se.Geom.Size.Actual.Content.ToPointFloor()
+	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
 	if sz == zp {
 		return
 	}
-	se.Scene.Geom.Size = sz
+	sw.Scene.Geom.Size = sz
 
 	doConfig := false
-	if se.Scene.Frame != nil {
-		cursz := se.Scene.Frame.Format.Size
+	if sw.Scene.Frame != nil {
+		cursz := sw.Scene.Frame.Format.Size
 		if cursz == sz {
 			return
 		}
@@ -104,67 +106,67 @@ func (se *Scene3D) ConfigFrame() {
 		doConfig = true
 	}
 
-	win := se.Sc.EventMgr.RenderWin()
+	win := sw.Sc.EventMgr.RenderWin()
 	if win == nil {
 		return
 	}
 	drw := win.GoosiWin.Drawer()
 	goosi.TheApp.RunOnMain(func() {
-		se.Scene.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
+		sw.Scene.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
 		if doConfig {
-			se.Scene.Config()
+			sw.Scene.Config()
 		}
 	})
-	se.Scene.SetFlag(true, xyz.ScNeedsRender)
-	se.SetNeedsRender(true)
+	sw.Scene.SetFlag(true, xyz.ScNeedsRender)
+	sw.SetNeedsRender(true)
 }
 
-func (se *Scene3D) DrawIntoScene() {
-	if se.Scene.Frame == nil {
+func (sw *Scene) DrawIntoScene() {
+	if sw.Scene.Frame == nil {
 		return
 	}
-	r := se.Geom.ContentBBox
+	r := sw.Geom.ContentBBox
 	sp := image.Point{}
-	if se.Par != nil { // use parents children bbox to determine where we can draw
-		_, pwb := gi.AsWidget(se.Par)
+	if sw.Par != nil { // use parents children bbox to determine where we can draw
+		_, pwb := gi.AsWidget(sw.Par)
 		pbb := pwb.Geom.ContentBBox
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
-			slog.Error("xyzv.Scene3D bad bounding box", "path", se, "startPos", sp, "bbox", r, "parBBox", pbb)
+			slog.Error("xyzv.Scene bad bounding box", "path", sw, "startPos", sp, "bbox", r, "parBBox", pbb)
 			return
 		}
 		r = nr
 	}
-	img, err := se.Scene.Image() // direct access
+	img, err := sw.Scene.Image() // direct access
 	if err != nil {
 		log.Println("frame image err:", err)
 		return
 	}
-	draw.Draw(se.Sc.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
-	se.Scene.ImageDone()
+	draw.Draw(sw.Sc.Pixels, r, img, sp, draw.Src) // note: critical to not use Over here!
+	sw.Scene.ImageDone()
 }
 
 // Render renders the Frame Image
-func (se *Scene3D) Render3D() {
-	se.ConfigFrame() // nop if all good
-	if se.Scene.Frame == nil {
+func (sw *Scene) Render3D() {
+	sw.ConfigFrame() // nop if all good
+	if sw.Scene.Frame == nil {
 		return
 	}
-	if se.Scene.Is(xyz.ScNeedsConfig) {
+	if sw.Scene.Is(xyz.ScNeedsConfig) {
 		goosi.TheApp.RunOnMain(func() {
-			se.Scene.Config()
+			sw.Scene.Config()
 		})
 	}
-	se.Scene.DoUpdate()
+	sw.Scene.DoUpdate()
 }
 
-func (se *Scene3D) Render() {
-	if se.PushBounds() {
-		se.Render3D()
-		se.DrawIntoScene()
-		se.RenderChildren()
-		se.PopBounds()
+func (sw *Scene) Render() {
+	if sw.PushBounds() {
+		sw.Render3D()
+		sw.DrawIntoScene()
+		sw.RenderChildren()
+		sw.PopBounds()
 	}
 }
 
@@ -173,14 +175,14 @@ func (se *Scene3D) Render() {
 // render updates during construction on a scene.
 // if already updating, returns false.
 // Pass the result to UpdateEnd* methods.
-func (se *Scene3D) UpdateStart3D() bool {
-	return se.Scene.UpdateStart()
+func (sw *Scene) UpdateStart3D() bool {
+	return sw.Scene.UpdateStart()
 }
 
 // UpdateEnd3D calls UpdateEnd on the 3D Scene:
 // resets the scene ScUpdating flag if updt = true
-func (se *Scene3D) UpdateEnd3D(updt bool) {
-	se.Scene.UpdateEnd(updt)
+func (sw *Scene) UpdateEnd3D(updt bool) {
+	sw.Scene.UpdateEnd(updt)
 }
 
 // UpdateEndRender3D calls UpdateEndRender on the 3D Scene
@@ -189,10 +191,10 @@ func (se *Scene3D) UpdateEnd3D(updt bool) {
 // and sets the ScNeedsRender flag; updt is from UpdateStart().
 // Render only updates based on camera changes, not any node-level
 // changes. See [UpdateEndUpdate].
-func (se *Scene3D) UpdateEndRender3D(updt bool) {
+func (sw *Scene) UpdateEndRender3D(updt bool) {
 	if updt {
-		se.Scene.UpdateEndRender(updt)
-		se.SetNeedsRender(updt)
+		sw.Scene.UpdateEndRender(updt)
+		sw.SetNeedsRender(updt)
 	}
 }
 
@@ -202,10 +204,10 @@ func (se *Scene3D) UpdateEndRender3D(updt bool) {
 // and sets the ScNeedsUpdate flag; updt is from UpdateStart().
 // Update is for when any node Pose or material changes happen.
 // See [UpdateEndConfig] for major changes.
-func (se *Scene3D) UpdateEndUpdate3D(updt bool) {
+func (sw *Scene) UpdateEndUpdate3D(updt bool) {
 	if updt {
-		se.Scene.UpdateEndUpdate(updt)
-		se.SetNeedsRender(updt)
+		sw.Scene.UpdateEndUpdate(updt)
+		sw.SetNeedsRender(updt)
 	}
 }
 
@@ -214,10 +216,10 @@ func (se *Scene3D) UpdateEndUpdate3D(updt bool) {
 // UpdateEndConfig resets the scene ScUpdating flag if updt = true
 // and sets the ScNeedsConfig flag; updt is from UpdateStart().
 // Config is for Texture, Lighting Meshes or more complex nodes).
-func (se *Scene3D) UpdateEndConfig3D(updt bool) {
+func (sw *Scene) UpdateEndConfig3D(updt bool) {
 	if updt {
-		se.Scene.UpdateEndConfig(updt)
-		se.SetNeedsRender(updt)
+		sw.Scene.UpdateEndConfig(updt)
+		sw.SetNeedsRender(updt)
 	}
 }
 

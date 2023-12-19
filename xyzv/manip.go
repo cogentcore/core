@@ -62,20 +62,20 @@ func (sp *SelParams) Defaults() {
 
 // SetSel -- if Selectable is true, then given object is selected
 // if node is nil then selection is reset.
-func (se *Scene3D) SetSel(nd xyz.Node) {
-	if se.SelMode == NotSelectable {
+func (sw *Scene) SetSel(nd xyz.Node) {
+	if sw.SelMode == NotSelectable {
 		return
 	}
-	if se.CurSel == nd {
+	if sw.CurSel == nd {
 		return
 	}
-	sc := se.Scene
+	sc := sw.Scene
 	if nd == nil {
 		// if sv.CurSel != nil {
 		// 	sv.CurSel.AsNode().SetSelected(false)
 		// }
-		se.CurManipPt = nil
-		se.CurSel = nil
+		sw.CurManipPt = nil
+		sw.CurSel = nil
 		updt := sc.UpdateStart()
 		sc.DeleteChildByName(SelBoxName, ki.DestroyKids)
 		sc.DeleteChildByName(ManipBoxName, ki.DestroyKids)
@@ -84,60 +84,60 @@ func (se *Scene3D) SetSel(nd xyz.Node) {
 	}
 	manip, ok := nd.(*ManipPt)
 	if ok {
-		se.CurManipPt = manip
+		sw.CurManipPt = manip
 		return
 	}
-	se.CurSel = nd
+	sw.CurSel = nd
 	// nd.AsNode().SetSelected()
-	switch se.SelMode {
+	switch sw.SelMode {
 	case Selectable:
 		return
 	case SelectionBox:
-		se.SelectBox()
+		sw.SelectBox()
 	case Manipulable:
-		se.ManipBox()
+		sw.ManipBox()
 	}
 }
 
 // SelectBox draws a selection box around selected node
-func (se *Scene3D) SelectBox() {
-	if se.CurSel == nil {
+func (sw *Scene) SelectBox() {
+	if sw.CurSel == nil {
 		return
 	}
-	sc := se.Scene
+	sc := sw.Scene
 
 	updt := sc.UpdateStart()
 	defer sc.UpdateEndUpdate(updt)
 
-	nb := se.CurSel.AsNode()
+	nb := sw.CurSel.AsNode()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
-	clr := se.SelParams.Color
-	xyz.NewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, se.SelParams.Width, clr, xyz.Inactive)
+	clr := sw.SelParams.Color
+	xyz.NewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sw.SelParams.Width, clr, xyz.Inactive)
 
-	se.SetNeedsRender(true)
+	sw.SetNeedsRender(true)
 }
 
 // ManipBox draws a manipulation box around selected node
-func (se *Scene3D) ManipBox() {
-	se.CurManipPt = nil
-	if se.CurSel == nil {
+func (sw *Scene) ManipBox() {
+	sw.CurManipPt = nil
+	if sw.CurSel == nil {
 		return
 	}
-	sc := se.Scene
+	sc := sw.Scene
 
 	updt := sc.UpdateStart()
 	defer sc.UpdateEndConfig(updt)
 
 	nm := ManipBoxName
 
-	nb := se.CurSel.AsNode()
+	nb := sw.CurSel.AsNode()
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
-	clr := se.SelParams.Color
+	clr := sw.SelParams.Color
 
 	bbox := nb.WorldBBox.BBox
-	mb := xyz.NewLineBox(sc, sc, nm, nm, bbox, se.SelParams.Width, clr, xyz.Inactive)
+	mb := xyz.NewLineBox(sc, sc, nm, nm, bbox, sw.SelParams.Width, clr, xyz.Inactive)
 
-	mbspm := xyz.NewSphere(sc, nm+"-pt", se.SelParams.Radius, 16)
+	mbspm := xyz.NewSphere(sc, nm+"-pt", sw.SelParams.Radius, 16)
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
@@ -150,12 +150,12 @@ func (se *Scene3D) ManipBox() {
 	NewManipPt(mb, nm+"-uul", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Max.Y, bbox.Min.Z})
 	NewManipPt(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
 
-	se.SetNeedsRender(true)
+	sw.SetNeedsRender(true)
 }
 
 // SetManipPt sets the CurManipPt
-func (se *Scene3D) SetManipPt(pt *ManipPt) {
-	se.CurManipPt = pt
+func (sw *Scene) SetManipPt(pt *ManipPt) {
+	sw.CurManipPt = pt
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -178,62 +178,62 @@ func NewManipPt(par ki.Ki, name string, meshName string, clr color.RGBA, pos mat
 	return mpt
 }
 
-func (se *Scene3D) HandleSelectEvents() {
-	se.On(events.MouseDown, func(e events.Event) {
-		sc := se.Scene
-		pos := se.Geom.ContentBBox.Min
+func (sw *Scene) HandleSelectEvents() {
+	sw.On(events.MouseDown, func(e events.Event) {
+		sc := sw.Scene
+		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
 		ns := xyz.NodesUnderPoint(sc, e.LocalPos())
 		nsel := len(ns)
 		switch {
 		case nsel == 0:
-			se.SetSel(nil)
+			sw.SetSel(nil)
 		case nsel == 1:
-			se.SetSel(ns[0])
+			sw.SetSel(ns[0])
 		default:
 			for _, n := range ns {
 				if _, ok := n.(*ManipPt); ok {
-					se.SetSel(n)
+					sw.SetSel(n)
 					return
 				}
 			}
-			if se.CurSel == nil {
-				se.SetSel(ns[0])
+			if sw.CurSel == nil {
+				sw.SetSel(ns[0])
 			} else {
 				got := false
 				for i, n := range ns {
-					if se.CurSel == n {
+					if sw.CurSel == n {
 						if i < nsel-1 {
-							se.SetSel(ns[i+1])
+							sw.SetSel(ns[i+1])
 						} else {
-							se.SetSel(ns[0])
+							sw.SetSel(ns[0])
 						}
 						got = true
 						break
 					}
 				}
 				if !got {
-					se.SetSel(ns[0])
+					sw.SetSel(ns[0])
 				}
 			}
 		}
 	})
 }
 
-func (se *Scene3D) HandleSlideEvents() {
-	se.On(events.SlideMove, func(e events.Event) {
-		pos := se.Geom.ContentBBox.Min
+func (sw *Scene) HandleSlideEvents() {
+	sw.On(events.SlideMove, func(e events.Event) {
+		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
-		sc := se.Scene
-		if se.CurManipPt == nil || se.CurSel == nil {
+		sc := sw.Scene
+		if sw.CurManipPt == nil || sw.CurSel == nil {
 			sc.SlideMoveEvent(e)
-			se.SetNeedsRender(true)
+			sw.SetNeedsRender(true)
 			return
 		}
-		sn := se.CurSel.AsNode()
-		mpt := se.CurManipPt
+		sn := sw.CurSel.AsNode()
+		mpt := sw.CurManipPt
 		mb := mpt.Par.(*xyz.Group)
-		del := e.StartDelta()
+		del := e.PrevDelta()
 		dx := float32(del.X)
 		dy := float32(del.Y)
 		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
@@ -298,7 +298,7 @@ func (se *Scene3D) HandleSlideEvents() {
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}
-		sc.UpdateEnd(updt)
-		se.SetNeedsRender(updt)
+		sc.UpdateEndUpdate(updt)
+		sw.SetNeedsRender(updt)
 	})
 }

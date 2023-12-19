@@ -36,19 +36,22 @@ func (sv *SceneView) ConfigWidget() {
 
 func (sv *SceneView) ConfigSceneView() {
 	if sv.HasChildren() {
+		sv.UpdateToolbar()
 		return
 	}
-	NewScene3D(sv, "scene")
+	NewScene(sv, "scene")
 	tb := gi.NewToolbar(sv, "tb")
 	sv.ConfigToolbar(tb)
 }
 
-func (sv *SceneView) Scene3D() *Scene3D {
-	return sv.ChildByName("scene", 0).(*Scene3D)
+// SceneWidget returns the gi.Widget Scene (xyzv.Scene)
+func (sv *SceneView) SceneWidget() *Scene {
+	return sv.ChildByName("scene", 0).(*Scene)
 }
 
-func (sv *SceneView) Scene() *xyz.Scene {
-	return sv.Scene3D().Scene
+// Scene returns the xyz.Scene
+func (sv *SceneView) SceneXYZ() *xyz.Scene {
+	return sv.SceneWidget().Scene
 }
 
 func (sv *SceneView) Toolbar() *gi.Toolbar {
@@ -59,9 +62,22 @@ func (sv *SceneView) Toolbar() *gi.Toolbar {
 	return tbi.(*gi.Toolbar)
 }
 
+func (sv *SceneView) UpdateToolbar() {
+	tb := sv.Toolbar()
+	if tb == nil {
+		return
+	}
+	sw := sv.SceneWidget()
+	smi := tb.ChildByName("selmode", 10)
+	if smi != nil {
+		sm := smi.(*gi.Chooser)
+		sm.SetCurVal(sw.SelMode)
+	}
+}
+
 func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
-	se := sv.Scene3D()
-	sc := sv.Scene()
+	sw := sv.SceneWidget()
+	sc := sv.SceneXYZ()
 	gi.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
 		OnClick(func(e events.Event) {
 			sc.SetCamera("default")
@@ -150,28 +166,28 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 	}
 	gi.NewSeparator(tb)
 
-	sm := gi.NewChooser(tb).SetEnum(se.SelMode, false, 0)
+	sm := gi.NewChooser(tb, "selmode").SetEnum(sw.SelMode, false, 0)
 	sm.OnChange(func(e events.Event) {
-		se.SelMode = sm.CurVal.(SelModes)
+		sw.SelMode = sm.CurVal.(SelModes)
 	})
-	sm.SetCurVal(se.SelMode)
+	sm.SetCurVal(sw.SelMode)
 
 	gi.NewButton(tb).SetText("Edit").SetIcon(icons.Edit).
 		SetTooltip("edit the currently-selected object").
 		OnClick(func(e events.Event) {
-			if se.CurSel == nil {
+			if sw.CurSel == nil {
 				return
 			}
 			d := gi.NewBody().AddTitle("Selected Node")
-			giv.NewStructView(d).SetStruct(se.CurSel)
-			d.AddOkOnly().NewDialog(sv).SetNewWindow(true).Run()
+			giv.NewStructView(d).SetStruct(sw.CurSel)
+			d.NewDialog(sv).SetNewWindow(true).Run()
 		})
 
 	gi.NewButton(tb).SetText("Edit Scene").SetIcon(icons.Edit).
 		SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 		OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("xyz.Scene")
-			giv.NewStructView(d).SetStruct(sv.Scene())
-			d.AddOkOnly().NewDialog(sv).SetNewWindow(true).Run()
+			giv.NewStructView(d).SetStruct(sv.SceneXYZ())
+			d.NewDialog(sv).SetNewWindow(true).Run()
 		})
 }

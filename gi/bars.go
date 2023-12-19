@@ -55,7 +55,9 @@ func (sc *Scene) AddAppBar(fun func(tb *Toolbar)) {
 func (sc *Scene) ConfigSceneBars() {
 	// at last possible moment, add app-specific app bar config
 	if sc.App != nil && sc.App.AppBarConfig != nil {
-		sc.Bars.Top.Add(sc.App.AppBarConfig) // put in the top by default
+		if sc.Bars.Top.IsEmpty() {
+			sc.Bars.Top.Add(sc.App.AppBarConfig) // put in the top by default
+		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
 		head := NewLayout(sc, "top-bar").Style(func(s *styles.Style) {

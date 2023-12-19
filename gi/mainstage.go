@@ -192,9 +192,9 @@ func (st *Stage) RunDialog() *Stage {
 		return st
 	}
 
-	st.ConfigMainStage()
 	sc := st.Scene
 	sc.App = ctx.Sc.App
+	st.ConfigMainStage()
 	sc.SceneGeom.Pos = st.Pos
 
 	st.SetMainMgr(ms) // temporary for prefs
