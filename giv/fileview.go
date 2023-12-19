@@ -29,6 +29,23 @@ import (
 	"goki.dev/pi/v2/complete"
 )
 
+func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfile string)) {
+	d := gi.NewBody()
+	if title != "" {
+		d.SetTitle(title)
+	}
+	fv := NewFileView(d).SetFilename(filename, exts)
+	fv.OnSelect(func(e events.Event) {
+		fun(fv.SelectedFile())
+	}).OnDoubleClick(func(e events.Event) {
+		if fv.SelectedDoubleClick {
+			fun(fv.SelectedFile())
+			d.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
+		}
+	})
+	d.NewDialog(ctx).SetNewWindow(true).Run()
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  FileView
 

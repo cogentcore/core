@@ -146,7 +146,7 @@ func app() {
 	// vgpu.Debug = true
 
 	anim := &Anim{}
-	b := gi.NewAppBody("xyz")
+	b := gi.NewAppBody("xyz").SetTitle("XYZ Demo")
 	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 
@@ -178,13 +178,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">READ
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
 	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 
+	dir := xyz.NewDirLight(sc, "dir", 1, xyz.DirectSun)
+	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(-2, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
-
-	dir := xyz.NewDirLight(sc, "dir", 1, xyz.DirectSun)
-	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)

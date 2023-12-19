@@ -2,57 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build notyet
-
 package main
 
-/*
 import (
-	"log"
-
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/xyz"
-	"goki.dev/girl/units"
+	"goki.dev/gi/v2/xyzv"
+	"goki.dev/goosi/events"
+	"goki.dev/grr"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
+	"goki.dev/xyz"
+	_ "goki.dev/xyz/io/obj"
 )
 
 func main() { gimain.Run(app) }
 
 func app() {
-	width := 1600
-	height := 1200
+	b := gi.NewAppBody("xyzview").SetTitle("XYZ Object Viewer")
+	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
 
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
-
-	gi.SetAppName("xyzview")
-	gi.SetAppAbout(`This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
-<p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`)
-
-	win := gi.NewMainWindow("xyz-viewer", "GoGi 3D Viewer", width, height)
-
-	vp := win.WinViewport2D()
-	updt := vp.UpdateStart()
-
-	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.Ex(1))
-
-	tbar := gi.NewToolbar(mfr, "tbar")
-	tbar.SetStretchMaxWidth()
-
-	//////////////////////////////////////////
-	//    Scene
-
-	gi.NewSpace(mfr, "scspc")
-	scvw := xyz.NewSceneView(mfr, "sceneview")
-	scvw.SetStretchMax()
-	scvw.Config()
-	sc := scvw.Scene()
+	sv := xyzv.NewSceneView(b)
+	sv.Config()
+	sc := sv.SceneXYZ()
 
 	// first, add lights, set camera
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
@@ -67,49 +42,35 @@ func app() {
 	// spot := xyz.NewSpotLight(sc, "spot", 1, xyz.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+	sc.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
 
-	objgp := xyz.NewGroup(sc, sc, "obj-gp")
+	objgp := xyz.NewGroup(sc, "obj-gp")
 
-	_, err := sc.OpenNewObj("objs/airplane_prop_001.obj", objgp)
-	if err != nil {
-		log.Println(err)
-	}
+	curFn := "objs/airplane_prop_001.obj"
 
-	curFn := ""
+	// grr.Log1(sc.OpenNewObj("objs/airplane_prop_001.obj", objgp))
+
 	exts := ".obj,.dae,.gltf"
 
-	tbar.AddAction(gi.ActOpts{Label: "Open...", Icon: icons.Open, Tooltip: "Open a 3D object file for viewing."}, win.This(), func(recv, send ki.Ki, sig int64, data any) {
-		giv.FileViewDialog(vp, curFn, exts, giv.DlgOpts{Title: "Open 3D Object", Prompt: "Open a 3D object file for viewing."}, nil,
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
-					dlg, _ := send.Embed(gi.TypeDialog).(*gi.Dialog)
-					fn := giv.FileViewDialogValue(dlg)
-					curFn = fn
+	b.AddAppBar(func(tb *gi.Toolbar) {
+		gi.NewButton(tb).SetText("Open").SetIcon(icons.Open).
+			SetTooltip("Open a 3D object file for viewing").
+			OnClick(func(e events.Event) {
+				giv.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {
+					curFn = selFile
 					updt := sc.UpdateStart()
 					objgp.DeleteChildren(true)
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
 					ki.DelMgr.DestroyDeleted() // this is actually essential to prevent leaking memory!
-					_, err := sc.OpenNewObj(fn, objgp)
-					if err != nil {
-						log.Println(err)
-					}
+					grr.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
-					sc.UpdateEnd(updt)
-				}
+					sc.UpdateEndConfig(updt)
+					sv.SetNeedsRender(true)
+				})
 			})
 	})
 
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu.AddAppMenu(win)
-
-	win.MainMenuUpdated()
-	vp.UpdateEndNoSig(updt)
-	win.StartEventLoop()
+	sc.SetNeedsConfig()
+	b.NewWindow().Run().Wait()
 }
-*/
