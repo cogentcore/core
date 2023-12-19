@@ -32,13 +32,15 @@ var _ Gradient = &Radial{}
 
 // NewRadial returns a new centered [Radial] gradient.
 func NewRadial() *Radial {
-	return (&Radial{
+	r := &Radial{
 		Base: NewBase(),
 		// default is fully centered
 		Center: mat32.V2Scalar(0.5),
 		Focal:  mat32.V2Scalar(0.5),
 		Radius: mat32.V2Scalar(0.5),
-	}).Update()
+	}
+	r.Update()
+	return r
 }
 
 // AddStop adds a new stop with the given color and position to the radial gradient.
@@ -50,21 +52,22 @@ func (r *Radial) AddStop(color color.RGBA, pos float32) *Radial {
 // SetBox sets the [Radial.Box]
 func (r *Radial) SetBox(v mat32.Box2) *Radial {
 	r.Box = v
-	return r.Update()
+	r.Update()
+	return r
 }
 
 // SetTransform sets the [Radial.Transform]
 func (r *Radial) SetTransform(v mat32.Mat2) *Radial {
 	r.Transform = v
-	return r.Update()
+	r.Update()
+	return r
 }
 
 // Update updates the computed fields of the radial gradient after it has been modified.
 // It should only be called by end users when they modify properties of the radial gradient
 // outside of Set functions that have comments stating that they must be set using Set functions.
-func (r *Radial) Update() *Radial {
+func (r *Radial) Update() {
 	r.Base.Update()
-	return r
 }
 
 const epsilonF = 1e-5

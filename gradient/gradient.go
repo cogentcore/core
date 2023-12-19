@@ -23,6 +23,11 @@ type Gradient interface {
 
 	// AsBase returns the [Base] of the gradient
 	AsBase() *Base
+
+	// Update updates the computed fields of the gradient after it has been modified.
+	// It should only be called by end users when they modify properties of the gradient
+	// that have comments stating that they must be set using Set functions outside of Set functions.
+	Update()
 }
 
 // Base contains the data and logic common to all gradient types.
@@ -41,12 +46,12 @@ type Base struct { //gti:add -setters
 	Units Units
 
 	// the bounding box of the object with the gradient; this is used when rendering
-	// gradients with [Units] of [ObjectBoundingBox]; this must be set using SetTransform
-	// to recompute necessary values.
+	// gradients with [Units] of [ObjectBoundingBox]; this must be set using SetBox
+	// or be followed by an Update call.
 	Box mat32.Box2 `set:"-"`
 
 	// Transform is the transformation matrix applied to the gradient's points;
-	// it must be set using SetTransform to recompute necessary values.
+	// it must be set using SetTransform or be folloed by an Update call.
 	Transform mat32.Mat2 `set:"-"`
 
 	// ObjectMatrix is the effective object transformation matrix for a gradient
