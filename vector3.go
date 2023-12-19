@@ -21,9 +21,6 @@ type Vec3 struct {
 
 var (
 	Vec3Zero = Vec3{0, 0, 0}
-	Vec3X    = Vec3{1, 0, 0}
-	Vec3Y    = Vec3{0, 1, 0}
-	Vec3Z    = Vec3{0, 0, 1}
 )
 
 // V3 returns a new [Vec3] with the given x, y and z components.

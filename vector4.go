@@ -20,10 +20,6 @@ type Vec4 struct {
 
 var (
 	Vec4Zero = Vec4{0, 0, 0, 0}
-	Vec4X    = Vec4{1, 0, 0, 0}
-	Vec4Y    = Vec4{0, 1, 0, 0}
-	Vec4Z    = Vec4{0, 0, 1, 0}
-	Vec4W    = Vec4{0, 0, 0, 1}
 )
 
 // V4 returns a new [Vec4] with the given x, y, z, and w components.

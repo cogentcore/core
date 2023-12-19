@@ -25,8 +25,6 @@ type Vec2 struct {
 
 var (
 	Vec2Zero = Vec2{0, 0}
-	Vec2X    = Vec2{1, 0}
-	Vec2Y    = Vec2{0, 1}
 )
 
 // V2 returns a new [Vec2] with the given x and y components.
