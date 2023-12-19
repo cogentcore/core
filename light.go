@@ -195,7 +195,7 @@ func (sl *SpotLight) LookAt(target, upDir mat32.Vec3) {
 
 // LookAtOrigin points the spotlight at origin with Y axis pointing Up (i.e., standard)
 func (sl *SpotLight) LookAtOrigin() {
-	sl.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
+	sl.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0))
 }
 
 /////////////////////////////////////////////////////////////////////////
