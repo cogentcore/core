@@ -45,10 +45,10 @@ type Base struct { //gti:add -setters
 	Units Units
 
 	// the bounding box of the object with the gradient; this is used when rendering
-	// gradients with [Units] of [ObjectBoundingBox]
+	// gradients with [Units] of [ObjectBoundingBox].
 	Box mat32.Box2
 
-	// Transform is the transformation matrix applied to the gradient's points
+	// Transform is the transformation matrix applied to the gradient's points.
 	Transform mat32.Mat2
 
 	// ObjectMatrix is the computed effective object transformation matrix for a gradient
