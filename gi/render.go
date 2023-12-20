@@ -529,7 +529,7 @@ func (sc *Scene) DoRebuild() {
 func (sc *Scene) Fill() {
 	pc := &sc.PaintContext
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sc.SceneGeom.Size), sc.Background)
+	pc.FillBox(mat32.Vec2{}, mat32.V2FromPoint(sc.SceneGeom.Size), sc.Background)
 	pc.Unlock()
 }
 

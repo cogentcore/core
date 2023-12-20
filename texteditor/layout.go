@@ -99,7 +99,7 @@ func (ed *Editor) ScenePos() {
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
 func (ed *Editor) LayoutAllLines() {
-	if ed.LineLayoutSize == mat32.Vec2Zero || ed.Styles.Font.Size.Val == 0 {
+	if ed.LineLayoutSize == (mat32.Vec2{}) || ed.Styles.Font.Size.Val == 0 {
 		return
 	}
 	if ed.Buf == nil || ed.Buf.NumLines() == 0 {

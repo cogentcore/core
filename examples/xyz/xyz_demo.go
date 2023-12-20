@@ -184,7 +184,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">READ
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(-2, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	sc.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0)) // defaults to looking at origin
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)

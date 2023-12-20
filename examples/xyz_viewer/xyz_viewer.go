@@ -43,7 +43,7 @@ func app() {
 	// spot := xyz.NewSpotLight(sc, "spot", 1, xyz.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	sc.Camera.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0)) // defaults to looking at origin
 
 	objgp := xyz.NewGroup(sc, "obj-gp")
 
