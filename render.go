@@ -300,7 +300,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 
 	sc.Camera.Pose.UpdateMatrix()
 	sz := sc.Geom.Size
-	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
+	size := mat32.V2(float32(sz.X), float32(sz.Y))
 
 	sc.WalkPre(func(k ki.Ki) bool {
 		if k.This() == sc.This() {
