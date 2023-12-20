@@ -171,5 +171,5 @@ func (ph *Phong) SetSpotLight(idx int, color, pos, dir mat32.Vec3, angDecay, cut
 	ph.Spot[idx].Color = color
 	ph.Spot[idx].Pos = pos
 	ph.Spot[idx].Dir = dir
-	ph.Spot[idx].Decay = mat32.Vec4{X: angDecay, Y: cutAngle, Z: linDecay, W: quadDecay}
+	ph.Spot[idx].Decay = mat32.V4(angDecay, cutAngle, linDecay, quadDecay)
 }
