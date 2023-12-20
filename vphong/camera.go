@@ -11,7 +11,7 @@ import "goki.dev/mat32/v2"
 func CameraViewMat(pos, target, up mat32.Vec3) *mat32.Mat4 {
 	var lookq mat32.Quat
 	lookq.SetFromRotationMatrix(mat32.NewLookAt(pos, target, up))
-	scale := mat32.Vec3{1, 1, 1}
+	scale := mat32.V3(1, 1, 1)
 	var cview mat32.Mat4
 	cview.SetTransform(pos, lookq, scale)
 	view, _ := cview.Inverse()

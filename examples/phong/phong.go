@@ -95,11 +95,11 @@ func main() {
 	ph.AddAmbientLight(amblt)
 
 	dirlt := mat32.NewVec3Color(color.White).MulScalar(1)
-	ph.AddDirLight(dirlt, mat32.Vec3{0, 1, 1})
+	ph.AddDirLight(dirlt, mat32.V3(0, 1, 1))
 
-	// ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.Vec3{0, 2, 5}, .1, .01)
+	// ph.AddPointLight(mat32.NewVec3Color(color.White), mat32.V3(0, 2, 5), .1, .01)
 	//
-	// ph.AddSpotLight(mat32.NewVec3Color(color.White), mat32.Vec3{-2, 5, -2}, mat32.Vec3{0, -1, 0}, 10, 45, .01, .001)
+	// ph.AddSpotLight(mat32.NewVec3Color(color.White), mat32.V3(-2, 5, -2), mat32.V3(0, -1, 0), 10, 45, .01, .001)
 
 	/////////////////////////////
 	// Meshes
@@ -135,7 +135,7 @@ func main() {
 	nVtx, nIdx = torus.N()
 	ph.AddMesh("torus", nVtx, nIdx, false)
 
-	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), false)
+	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0), {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), false)
 	nVtx, nIdx = lines.N()
 	ph.AddMesh("lines", nVtx, nIdx, false)
 
@@ -173,8 +173,8 @@ func main() {
 	// Camera / Mtxs
 
 	// This is the standard camera view projection computation
-	campos := mat32.Vec3{0, 2, 10}
-	view := vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
+	campos := mat32.V3(0, 2, 10)
+	view := vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.Vec3Y)
 
 	aspect := sf.Format.Aspect()
 	var prjn mat32.Mat4
@@ -244,7 +244,7 @@ func main() {
 
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
-		view = vphong.CameraViewMat(campos, mat32.Vec3{0, 0, 0}, mat32.Vec3Y)
+		view = vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.Vec3Y)
 		prjn.SetVkPerspective(45, aspect, 0.01, 100)
 		ph.SetViewPrjn(view, &prjn)
 	}
