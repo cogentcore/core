@@ -180,7 +180,7 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 			}
 			d := gi.NewBody().AddTitle("Selected Node")
 			giv.NewStructView(d).SetStruct(sw.CurSel)
-			d.NewDialog(sv).SetNewWindow(true).Run()
+			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})
 
 	gi.NewButton(tb).SetText("Edit Scene").SetIcon(icons.Edit).
@@ -188,6 +188,6 @@ func (sv *SceneView) ConfigToolbar(tb *gi.Toolbar) {
 		OnClick(func(e events.Event) {
 			d := gi.NewBody().AddTitle("xyz.Scene")
 			giv.NewStructView(d).SetStruct(sv.SceneXYZ())
-			d.NewDialog(sv).SetNewWindow(true).Run()
+			d.NewFullDialog(sv).SetNewWindow(true).Run()
 		})
 }
