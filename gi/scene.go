@@ -254,7 +254,12 @@ func (sc *Scene) MainStageMgr() *StageMgr {
 // FitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
 func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
-	geom := sc.SceneGeom.FitInWindow(winGeom)
+	geom := sc.SceneGeom
+	// full offscreen windows ignore any window geometry constraints
+	// because they must be unbounded by any previous window sizes
+	if goosi.TheApp.Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
+		geom = geom.FitInWindow(winGeom)
+	}
 	sc.Resize(geom.Size)
 	sc.SceneGeom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)

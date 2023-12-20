@@ -131,7 +131,9 @@ func (st *Stage) RunWindow() *Stage {
 	sz := st.RenderCtx.Size
 	// non-new full windows must take up the whole window
 	// and thus don't consider pref size
-	if st.NewWindow || !st.FullWindow || CurRenderWin == nil {
+	// offscreen windows always consider pref size because
+	// they must be unbounded by any previous window sizes
+	if st.NewWindow || !st.FullWindow || CurRenderWin == nil || goosi.TheApp.Platform() == goosi.Offscreen {
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{20, 20})
 	}
