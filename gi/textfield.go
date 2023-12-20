@@ -1092,7 +1092,7 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 		pos = pos.Add(mat32.V2FromPoint(sc.SceneGeom.Pos))
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
-	return mat32.Vec2{pos.X + cpos, pos.Y}
+	return mat32.V2(pos.X+cpos, pos.Y)
 }
 
 // ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view

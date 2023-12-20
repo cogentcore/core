@@ -221,7 +221,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">READ
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.SetDisabled() // not selectable
 
-	lnsm := xyz.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, xyz.CloseLines)
+	lnsm := xyz.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), xyz.CloseLines)
 	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 

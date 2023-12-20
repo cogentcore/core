@@ -88,8 +88,8 @@ func app() {
 	SvgMarbles = svg.NewGroup(SvgGraph, "SvgMarbles")
 	SvgCoords = svg.NewGroup(SvgGraph, "SvgCoords")
 
-	gmin = mat32.Vec2{-10, -10}
-	gmax = mat32.Vec2{10, 10}
+	gmin = mat32.V2(-10, -10)
+	gmax = mat32.V2(10, 10)
 	gsz = gmax.Sub(gmin)
 	ginc = gsz.DivScalar(GraphSize)
 

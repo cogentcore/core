@@ -72,7 +72,6 @@ var (
 	AlignText = "This is text to test for text align<br>This line is short<br>This is text to test for text align, this one is longer"
 
 	FrameSizes = [5]mat32.Vec2{
-		{20, 100},
 		{80, 20},
 		{60, 80},
 		{40, 120},
@@ -127,7 +126,7 @@ func app() {
 	sv := giv.NewStructView(svfr).SetStruct(ctrl)
 
 	fr := BoxFrame(splt)
-	PlainFrames(fr, mat32.Vec2{0, 0})
+	PlainFrames(fr, mat32.V2(0, 0))
 	fr.Style(func(s *styles.Style) {
 		s.Display = ctrl.Display
 		s.Direction = ctrl.Direction

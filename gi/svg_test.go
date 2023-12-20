@@ -16,6 +16,6 @@ func TestSVG(t *testing.T) {
 	sc := NewScene()
 	sv := NewSVG(sc)
 	sv.SVG.Root.ViewBox.Size.SetScalar(10)
-	svg.NewCircle(&sv.SVG.Root).SetPos(mat32.Vec2{5, 5}).SetRadius(5)
+	svg.NewCircle(&sv.SVG.Root).SetPos(mat32.V2(5, 5)).SetRadius(5)
 	sc.AssertPixelsOnShow(t, filepath.Join("svg", "basic_circle"))
 }

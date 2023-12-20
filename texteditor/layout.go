@@ -156,7 +156,7 @@ func (ed *Editor) LayoutAllLines() {
 	}
 	buf.MarkupMu.RUnlock()
 
-	ed.LinesSize = mat32.Vec2{mxwd, off}
+	ed.LinesSize = mat32.V2(mxwd, off)
 
 	spc := sty.BoxSpace()
 	ed.TotalSize = ed.LinesSize.Add(spc.Size())

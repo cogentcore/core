@@ -583,7 +583,7 @@ func (tv *TreeView) SizeUp() {
 		})
 	}
 	sz := &tv.Geom.Size
-	sz.Actual.Content = mat32.Vec2{w, h}
+	sz.Actual.Content = mat32.V2(w, h)
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // need allocation to match!
 	tv.WidgetSize.X = w  // stretch

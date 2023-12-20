@@ -325,8 +325,8 @@ type Marble struct {
 func (mb *Marble) Init(diff float32) {
 	randNum := (rand.Float32() * 2) - 1
 	xPos := randNum * Gr.Params.Width
-	mb.Pos = mat32.Vec2{xPos, 10 - diff}
-	mb.Vel = mat32.Vec2{0, float32(-Gr.Params.StartSpeed)}
+	mb.Pos = mat32.V2(xPos, 10 - diff)
+	mb.Vel = mat32.V2(0, float32(-Gr.Params.StartSpeed))
 	mb.PrvPos = mb.Pos
 }
 
@@ -466,9 +466,9 @@ func UpdateMarbles() {
 				nvx := ln.Bounce * (m.Vel.X*mat32.Cos(angR) - m.Vel.Y*mat32.Sin(angR))
 				nvy := ln.Bounce * (m.Vel.X*mat32.Sin(angR) + m.Vel.Y*mat32.Cos(angR))
 
-				m.Vel = mat32.Vec2{nvx, nvy}
+				m.Vel = mat32.V2(nvx, nvy)
 
-				m.Pos = mat32.Vec2{xi, yi}
+				m.Pos = mat32.V2(xi, yi)
 
 			}
 		}
