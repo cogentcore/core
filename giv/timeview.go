@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"log/slog"
 	"strconv"
 	"time"
@@ -186,63 +185,51 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	if dv.TmpSave != nil {
 		dv.TmpSave.SetValue(dv.Time)
 	}
-	// dv.SendChange()
-	// dv.Update()
-	// dv.SetNeedsLayout(true)
+	dv.SendChange()
+	dv.Update()
+	dv.SetNeedsLayout(true)
 	return dv
 }
 
 func (dv *DateView) ConfigWidget() {
-	if dv.Time == dv.ConfigTime {
-		fmt.Println("same time:", dv.Time)
-		return
-	}
 	updt := dv.UpdateStart()
-	if !dv.HasChildren() {
+	if dv.HasChildren() {
+		dv.DeleteChildren(ki.DestroyKids)
+	} else {
 		dv.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 0)
 		})
-
-		trow := gi.NewLayout(dv)
-
-		sms := make([]any, len(shortMonths))
-		for i, sm := range shortMonths {
-			sms[i] = sm
-		}
-		month := gi.NewChooser(trow, "month").SetItems(sms)
-		month.SetCurIndex(int(dv.Time.Month() - 1))
-		month.OnChange(func(e events.Event) {
-			dv.DeleteChildByName("grid", true)
-			// set our month
-			dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
-			dv.ConfigDateGrid()
-			dv.Update()
-		})
-
-		yr := dv.Time.Year()
-		yrs := []any{}
-		// we go 100 in each direction from the current year
-		for i := yr - 100; i <= yr+100; i++ {
-			yrs = append(yrs, i)
-		}
-		year := gi.NewChooser(trow, "year").SetItems(yrs)
-		year.SetCurVal(yr)
-		year.OnChange(func(e events.Event) {
-			dv.DeleteChildByName("grid", true)
-			// we are centered at current year with 100 in each direction
-			nyr := year.CurIndex + yr - 100
-			// set our year
-			dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
-			dv.ConfigDateGrid()
-			dv.Update()
-		})
 	}
 
-	gri := dv.ChildByName("grid", 2)
-	if gri != nil {
-		dv.DeleteChildByName("grid", ki.DestroyKids)
+	trow := gi.NewLayout(dv)
+
+	sms := make([]any, len(shortMonths))
+	for i, sm := range shortMonths {
+		sms[i] = sm
 	}
+	month := gi.NewChooser(trow, "month").SetItems(sms)
+	month.SetCurIndex(int(dv.Time.Month() - 1))
+	month.OnChange(func(e events.Event) {
+		// set our month
+		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
+	})
+
+	yr := dv.Time.Year()
+	yrs := []any{}
+	// we go 100 in each direction from the current year
+	for i := yr - 100; i <= yr+100; i++ {
+		yrs = append(yrs, i)
+	}
+	year := gi.NewChooser(trow, "year").SetItems(yrs)
+	year.SetCurVal(yr)
+	year.OnChange(func(e events.Event) {
+		// we are centered at current year with 100 in each direction
+		nyr := year.CurIndex + yr - 100
+		// set our year
+		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+	})
+
 	dv.ConfigDateGrid()
 	dv.UpdateEndLayout(updt)
 }
