@@ -4,6 +4,6 @@ go 1.21
 
 require (
 	github.com/Masterminds/vcs v1.13.3
-	goki.dev/enums v0.9.52
-	goki.dev/glop v0.1.8
+	goki.dev/enums v0.9.53
+	goki.dev/glop v0.1.9
 )
