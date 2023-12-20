@@ -8,14 +8,12 @@ import (
 	"fmt"
 	"math"
 	"testing"
-
-	"github.com/chewxy/math32"
 )
 
 func TestFastExp(t *testing.T) {
 	for x := float32(-87); x <= 88.43114; x += 1.0e-01 {
 		fx := FastExp(x)
-		sx := math32.Exp(x)
+		sx := float32(math.Exp(float64(x)))
 		if Abs((fx-sx)/sx) > 1.0e-5 {
 			t.Fatalf("Exp4 at: %g  err from cx: %g  vs  %g\n", x, fx, sx)
 		}
