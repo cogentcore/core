@@ -792,7 +792,7 @@ func (tx *Text) RuneRelPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 		sr := &tx.Spans[nsp-1]
 		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
-	return mat32.Vec2Zero, -1, -1, false
+	return mat32.Vec2{}, -1, -1, false
 }
 
 // RuneEndPos returns the relative ending position of the given rune index,
@@ -814,7 +814,7 @@ func (tx *Text) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 		sr := &tx.Spans[nsp-1]
 		return sr.LastPos, nsp - 1, len(sr.Render), false
 	}
-	return mat32.Vec2Zero, -1, -1, false
+	return mat32.Vec2{}, -1, -1, false
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -828,7 +828,7 @@ func (tx *Text) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 // calculations of variable line spacing as needed.
 func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
 	if len(tr.Spans) == 0 {
-		return mat32.Vec2Zero
+		return mat32.Vec2{}
 	}
 
 	// pr := prof.Start("TextLayout")
