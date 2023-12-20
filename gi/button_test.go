@@ -9,7 +9,6 @@ import (
 )
 
 func TestButton(t *testing.T) {
-	NewBody("base").NewWindow().Run()
 	for _, typ := range ButtonTypesValues() {
 		for _, str := range testStrings {
 			for _, ic := range testIcons {
