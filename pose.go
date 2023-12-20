@@ -42,7 +42,7 @@ type Pose struct {
 
 // Defaults sets defaults only if current values are nil
 func (ps *Pose) Defaults() {
-	if ps.Scale.IsNil() {
+	if ps.Scale == (mat32.Vec3{}) {
 		ps.Scale.Set(1, 1, 1)
 	}
 	if ps.Quat.IsNil() {

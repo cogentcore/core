@@ -106,7 +106,7 @@ func (cm *Camera) UpdateMatrix() {
 func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 	cm.CamMu.Lock()
 	cm.Target = target
-	if upDir.IsNil() {
+	if upDir == (mat32.Vec3{}) {
 		upDir = mat32.V3(0, 1, 0)
 	}
 	cm.UpDir = upDir
@@ -163,7 +163,7 @@ func (cm *Camera) ViewMainAxis() (dim mat32.Dims, sign float32) {
 // the Up direction vector to keep looking at the target.
 func (cm *Camera) Orbit(delX, delY float32) {
 	ctdir := cm.ViewVector()
-	if ctdir.IsNil() {
+	if ctdir == (mat32.Vec3{}) {
 		ctdir.Set(0, 0, 1)
 	}
 	dir := ctdir.Normal()
@@ -241,7 +241,7 @@ func (cm *Camera) TargetFmView() {
 func (cm *Camera) Zoom(zoomPct float32) {
 	ctaxis := cm.ViewVector()
 	cm.CamMu.Lock()
-	if ctaxis.IsNil() {
+	if ctaxis == (mat32.Vec3{}) {
 		ctaxis.Set(0, 0, 1)
 	}
 	dist := ctaxis.Length()

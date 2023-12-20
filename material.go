@@ -25,7 +25,7 @@ type Tiling struct {
 
 // Defaults sets default tiling params if not yet initialized
 func (tl *Tiling) Defaults() {
-	if tl.Repeat.IsNil() {
+	if tl.Repeat == (mat32.Vec2{}) {
 		tl.Repeat.Set(1, 1)
 	}
 }
