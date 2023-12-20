@@ -825,21 +825,15 @@ func MaxPos(a, b float32) float32 {
 }
 
 // IntMultiple returns the interger multiple of mod closest to given value:
-// int(Round(val / mod)) * mod
+// Round(val / mod) * mod
 func IntMultiple(val, mod float32) float32 {
-	return float32(int(math.Round(float64(val)/float64(mod)))) * mod
+	return Round(val/mod) * mod
 }
 
 // IntMultipleGE returns the interger multiple of mod >= given value:
-// int(Ceil(val / mod)) * mod
+// Ceil(val / mod) * mod
 func IntMultipleGE(val, mod float32) float32 {
-	return float32(int(math.Ceil(float64(val)/float64(mod)))) * mod
-}
-
-// IntMultiple64 returns the interger multiple of mod closest to given value:
-// int(Round(val / mod)) * mod
-func IntMultiple64(val, mod float64) float64 {
-	return float64(int(math.Round(float64(val)/float64(mod)))) * mod
+	return Ceil(val/mod) * mod
 }
 
 // Truncate64 truncates a floating point number to given level of precision
