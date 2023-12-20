@@ -19,10 +19,6 @@ type Vec3 struct {
 	Z float32
 }
 
-var (
-	Vec3Zero = Vec3{0, 0, 0}
-)
-
 // V3 returns a new [Vec3] with the given x, y and z components.
 func V3(x, y, z float32) Vec3 {
 	return Vec3{X: x, Y: y, Z: z}

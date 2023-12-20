@@ -23,10 +23,6 @@ type Vec2 struct {
 	Y float32
 }
 
-var (
-	Vec2Zero = Vec2{0, 0}
-)
-
 // V2 returns a new [Vec2] with the given x and y components.
 func V2(x, y float32) Vec2 {
 	return Vec2{X: x, Y: y}
@@ -53,10 +49,7 @@ func V2FromFixed(pt fixed.Point26_6) Vec2 {
 
 // IsNil returns true if all values are 0 (uninitialized).
 func (v Vec2) IsNil() bool {
-	if v.X == 0 && v.Y == 0 {
-		return true
-	}
-	return false
+	return v == Vec2{}
 }
 
 // Set sets this vector's X and Y components.
