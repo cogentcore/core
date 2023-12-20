@@ -20,6 +20,7 @@ import (
 // These are mostly just wrappers around chewxy/math32, which has
 // some optimized implementations.
 
+// Mathematical constants.
 const (
 	E   = math.E
 	Pi  = math.Pi
@@ -36,16 +37,23 @@ const (
 	Log10E = math.Log10E
 )
 
+// Floating-point limit values.
+// Max is the largest finite value representable by the type.
+// SmallestNonzero is the smallest positive, non-zero value representable by the type.
 const (
 	MaxFloat32             = math.MaxFloat32
 	SmallestNonzeroFloat32 = math.SmallestNonzeroFloat32
 )
 
 const (
+	// DegToRadFactor is the number of radians per degree.
 	DegToRadFactor = Pi / 180
+
+	// RadToDegFactor is the number of degrees per radian.
 	RadToDegFactor = 180 / Pi
 )
 
+// Infinity is positive infinity.
 var Infinity = float32(math.Inf(1))
 
 // DegToRad converts a number from degrees to radians
@@ -85,54 +93,152 @@ func Acos(x float32) float32 {
 	return math32.Acos(x)
 }
 
+// Acosh returns the inverse hyperbolic cosine of x.
+//
+// Special cases are:
+//
+//	Acosh(+Inf) = +Inf
+//	Acosh(x) = NaN if x < 1
+//	Acosh(NaN) = NaN
 func Acosh(x float32) float32 {
 	return math32.Acosh(x)
 }
 
+// Asin returns the arcsine, in radians, of x.
+//
+// Special cases are:
+//
+//	Asin(±0) = ±0
+//	Asin(x) = NaN if x < -1 or x > 1
 func Asin(x float32) float32 {
 	return math32.Asin(x)
 }
 
+// Asinh returns the inverse hyperbolic sine of x.
+//
+// Special cases are:
+//
+//	Asinh(±0) = ±0
+//	Asinh(±Inf) = ±Inf
+//	Asinh(NaN) = NaN
 func Asinh(x float32) float32 {
 	return math32.Asinh(x)
 }
 
+// Atan returns the arctangent, in radians, of x.
+//
+// Special cases are:
+//
+//	Atan(±0) = ±0
+//	Atan(±Inf) = ±Pi/2
 func Atan(x float32) float32 {
 	return math32.Atan(x)
 }
 
+// Atan2 returns the arc tangent of y/x, using the signs of the two to determine the quadrant of the return value.
+// Special cases are (in order):
+//
+//	Atan2(y, NaN) = NaN
+//	Atan2(NaN, x) = NaN
+//	Atan2(+0, x>=0) = +0
+//	Atan2(-0, x>=0) = -0
+//	Atan2(+0, x<=-0) = +Pi
+//	Atan2(-0, x<=-0) = -Pi
+//	Atan2(y>0, 0) = +Pi/2
+//	Atan2(y<0, 0) = -Pi/2
+//	Atan2(+Inf, +Inf) = +Pi/4
+//	Atan2(-Inf, +Inf) = -Pi/4
+//	Atan2(+Inf, -Inf) = 3Pi/4
+//	Atan2(-Inf, -Inf) = -3Pi/4
+//	Atan2(y, +Inf) = 0
+//	Atan2(y>0, -Inf) = +Pi
+//	Atan2(y<0, -Inf) = -Pi
+//	Atan2(+Inf, x) = +Pi/2
+//	Atan2(-Inf, x) = -Pi/2
 func Atan2(y, x float32) float32 {
-	return float32(math.Atan2(float64(y), float64(x)))
+	return math32.Atan2(y, x)
 }
 
+// Atanh returns the inverse hyperbolic tangent of x.
+//
+// Special cases are:
+//
+//	Atanh(1) = +Inf
+//	Atanh(±0) = ±0
+//	Atanh(-1) = -Inf
+//	Atanh(x) = NaN if x < -1 or x > 1
+//	Atanh(NaN) = NaN
 func Atanh(x float32) float32 {
 	return math32.Atanh(x)
 }
 
+// Cbrt returns the cube root of x.
+//
+// Special cases are:
+//
+//	Cbrt(±0) = ±0
+//	Cbrt(±Inf) = ±Inf
+//	Cbrt(NaN) = NaN
 func Cbrt(x float32) float32 {
 	return math32.Cbrt(x)
 }
 
+// Ceil returns the least integer value greater than or equal to x.
+//
+// Special cases are:
+//
+//	Ceil(±0) = ±0
+//	Ceil(±Inf) = ±Inf
+//	Ceil(NaN) = NaN
 func Ceil(x float32) float32 {
 	return math32.Ceil(x)
 }
 
-func Copysign(x, y float32) float32 {
-	return float32(math.Copysign(float64(x), float64(y)))
+// Copysign returns a value with the magnitude of f
+// and the sign of sign.
+func Copysign(f, sign float32) float32 {
+	return math32.Copysign(f, sign)
 }
 
+// Cos returns the cosine of the radian argument x.
+//
+// Special cases are:
+//
+//	Cos(±Inf) = NaN
+//	Cos(NaN) = NaN
 func Cos(x float32) float32 {
 	return math32.Cos(x)
 }
 
+// Cosh returns the hyperbolic cosine of x.
+//
+// Special cases are:
+//
+//	Cosh(±0) = 1
+//	Cosh(±Inf) = +Inf
+//	Cosh(NaN) = NaN
 func Cosh(x float32) float32 {
 	return math32.Cosh(x)
 }
 
+// Dim returns the maximum of x-y or 0.
+//
+// Special cases are:
+//
+//	Dim(+Inf, +Inf) = NaN
+//	Dim(-Inf, -Inf) = NaN
+//	Dim(x, NaN) = Dim(NaN, x) = NaN
 func Dim(x, y float32) float32 {
-	return float32(math.Dim(float64(x), float64(y)))
+	return math32.Dim(x, y)
 }
 
+// Erf returns the error function of x.
+//
+// Special cases are:
+//
+//	Erf(+Inf) = 1
+//	Erf(-Inf) = -1
+//	Erf(NaN) = NaN
 func Erf(x float32) float32 {
 	return math32.Erf(x)
 }
