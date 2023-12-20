@@ -27,14 +27,6 @@ func V3iScalar(s int32) Vec3i {
 	return Vec3i{X: s, Y: s, Z: s}
 }
 
-// IsNil returns true if all values are 0 (uninitialized).
-func (v Vec3i) IsNil() bool {
-	if v.X == 0 && v.Y == 0 && v.Z == 0 {
-		return true
-	}
-	return false
-}
-
 // Set sets this vector X, Y and Z components.
 func (v *Vec3i) Set(x, y, z int32) {
 	v.X = x

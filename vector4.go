@@ -37,14 +37,6 @@ func V4FromV3(v Vec3, w float32) Vec4 {
 	return nv
 }
 
-// IsNil returns true if all values are 0 (uninitialized).
-func (v Vec4) IsNil() bool {
-	if v.X == 0 && v.Y == 0 && v.Z == 0 && v.W == 0 {
-		return true
-	}
-	return false
-}
-
 // Set sets this vector X, Y, Z and W components.
 func (v *Vec4) Set(x, y, z, w float32) {
 	v.X = x

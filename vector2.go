@@ -47,11 +47,6 @@ func V2FromFixed(pt fixed.Point26_6) Vec2 {
 	return v
 }
 
-// IsNil returns true if all values are 0 (uninitialized).
-func (v Vec2) IsNil() bool {
-	return v == Vec2{}
-}
-
 // Set sets this vector's X and Y components.
 func (v *Vec2) Set(x, y float32) {
 	v.X = x

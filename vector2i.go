@@ -26,14 +26,6 @@ func V2iScalar(s int32) Vec2i {
 	return Vec2i{X: s, Y: s}
 }
 
-// IsNil returns true if all values are 0 (uninitialized).
-func (v Vec2i) IsNil() bool {
-	if v.X == 0 && v.Y == 0 {
-		return true
-	}
-	return false
-}
-
 // Set sets this vector X and Y components.
 func (v *Vec2i) Set(x, y int32) {
 	v.X = x
