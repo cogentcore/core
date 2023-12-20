@@ -8,7 +8,7 @@ require (
 	goki.dev/enums v0.9.53
 	goki.dev/glop v0.1.9
 	goki.dev/grows v0.3.28
-	goki.dev/gti v0.1.29
+	goki.dev/gti v0.1.30
 	goki.dev/laser v0.1.31
 	goki.dev/mat32/v2 v2.0.0-dev0.0.25
 	goki.dev/mobile v0.5.8
