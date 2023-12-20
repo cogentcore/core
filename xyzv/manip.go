@@ -46,15 +46,20 @@ const (
 
 // SelParams are parameters for selection / manipulation box
 type SelParams struct {
-	Color  color.RGBA `desc:"name of color to use for selection box (default yellow)"`
-	Width  float32    `desc:"width of the box lines (.01 default)"`
-	Radius float32    `desc:"radius of the manipulation control point spheres"`
+	// color for selection box (default yellow)
+	Color color.RGBA
+
+	// width of the box lines, scaled by view distance
+	Width float32 `def:"0.001"`
+
+	// radius of the manipulation control point spheres, scaled by view distance
+	Radius float32 `def:"0.005"`
 }
 
 func (sp *SelParams) Defaults() {
 	sp.Color = colors.Yellow
-	sp.Width = .01
-	sp.Radius = .05
+	sp.Width = .001
+	sp.Radius = .005
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -134,10 +139,12 @@ func (sw *Scene) ManipBox() {
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
 	clr := sw.SelParams.Color
 
-	bbox := nb.WorldBBox.BBox
-	mb := xyz.NewLineBox(sc, sc, nm, nm, bbox, sw.SelParams.Width, clr, xyz.Inactive)
+	cdist := mat32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
 
-	mbspm := xyz.NewSphere(sc, nm+"-pt", sw.SelParams.Radius, 16)
+	bbox := nb.WorldBBox.BBox
+	mb := xyz.NewLineBox(sc, sc, nm, nm, bbox, sw.SelParams.Width*cdist, clr, xyz.Inactive)
+
+	mbspm := xyz.NewSphere(sc, nm+"-pt", sw.SelParams.Radius*cdist, 16)
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
