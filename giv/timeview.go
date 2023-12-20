@@ -260,14 +260,23 @@ func (dv *DateView) ConfigDateGrid() {
 	eom := dv.Time.AddDate(0, 1, -dv.Time.Day())
 	// start of the week containing the start of the month
 	somw := som.AddDate(0, 0, -int(som.Weekday()))
+	// year day of the start of the week containing the start of the month
+	somwyd := somw.YearDay()
 	// end of the week containing the end of the month
 	eomw := eom.AddDate(0, 0, int(6-eom.Weekday()))
+	// year day of the end of the week containing the end of the month
+	eomwyd := eomw.YearDay()
+	// if we have moved up a year (happens in December),
+	// we add the number of days in this year
+	if eomw.Year() > somw.Year() {
+		eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
+	}
 
-	for yd := somw.YearDay(); yd <= eomw.YearDay(); yd++ {
+	for yd := somwyd; yd <= eomwyd; yd++ {
 		yd := yd
 		yds := strconv.Itoa(yd)
 		// actual time of this date
-		dt := somw.AddDate(0, 0, yd-somw.YearDay())
+		dt := somw.AddDate(0, 0, yd-somwyd)
 		ds := strconv.Itoa(dt.Day())
 		// fmt.Println(ds)
 		bt := gi.NewButton(grid, "day-"+yds).SetType(gi.ButtonAction).SetText(ds)
