@@ -580,7 +580,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 
 // PathDataBBox traverses the path data and extracts the local bounding box
 func PathDataBBox(data []PathData) mat32.Box2 {
-	bb := mat32.EmptyB2()
+	bb := mat32.B2Empty()
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cp mat32.Vec2, ctrls []mat32.Vec2) bool {
 		bb.ExpandByPoint(cp)
 		return ki.Continue
