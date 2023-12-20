@@ -187,44 +187,51 @@ func NewManipPt(par ki.Ki, name string, meshName string, clr color.RGBA, pos mat
 
 func (sw *Scene) HandleSelectEvents() {
 	sw.On(events.MouseDown, func(e events.Event) {
-		sc := sw.Scene
-		pos := sw.Geom.ContentBBox.Min
-		e.SetLocalOff(e.LocalOff().Add(pos))
-		ns := xyz.NodesUnderPoint(sc, e.LocalPos())
-		nsel := len(ns)
-		switch {
-		case nsel == 0:
-			sw.SetSel(nil)
-		case nsel == 1:
-			sw.SetSel(ns[0])
-		default:
-			for _, n := range ns {
-				if _, ok := n.(*ManipPt); ok {
-					sw.SetSel(n)
-					return
-				}
-			}
-			if sw.CurSel == nil {
-				sw.SetSel(ns[0])
-			} else {
-				got := false
-				for i, n := range ns {
-					if sw.CurSel == n {
-						if i < nsel-1 {
-							sw.SetSel(ns[i+1])
-						} else {
-							sw.SetSel(ns[0])
-						}
-						got = true
-						break
-					}
-				}
-				if !got {
-					sw.SetSel(ns[0])
-				}
+		sw.HandleSelectEventsImpl(e)
+	})
+	sw.On(events.DoubleClick, func(e events.Event) {
+		sw.HandleSelectEventsImpl(e)
+	})
+}
+
+func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
+	sc := sw.Scene
+	pos := sw.Geom.ContentBBox.Min
+	e.SetLocalOff(e.LocalOff().Add(pos))
+	ns := xyz.NodesUnderPoint(sc, e.LocalPos())
+	nsel := len(ns)
+	switch {
+	case nsel == 0:
+		sw.SetSel(nil)
+	case nsel == 1:
+		sw.SetSel(ns[0])
+	default:
+		for _, n := range ns {
+			if _, ok := n.(*ManipPt); ok {
+				sw.SetSel(n)
+				return
 			}
 		}
-	})
+		if sw.CurSel == nil {
+			sw.SetSel(ns[0])
+		} else {
+			got := false
+			for i, n := range ns {
+				if sw.CurSel == n {
+					if i < nsel-1 {
+						sw.SetSel(ns[i+1])
+					} else {
+						sw.SetSel(ns[0])
+					}
+					got = true
+					break
+				}
+			}
+			if !got {
+				sw.SetSel(ns[0])
+			}
+		}
+	}
 }
 
 func (sw *Scene) HandleSlideEvents() {
