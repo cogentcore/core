@@ -121,7 +121,7 @@ func SetLines(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 		v := ep.Sub(sp)
 		vn := v.Normal()
 		xyang := mat32.Atan2(vn.Y, vn.X)
-		xy := mat32.Vec2{wdy * mat32.Cos(xyang+pi2), wdy * mat32.Sin(xyang+pi2)}
+		xy := mat32.V2(wdy*mat32.Cos(xyang+pi2), wdy*mat32.Sin(xyang+pi2))
 
 		//   sypzm --- eypzm
 		//   / |        / |
@@ -255,10 +255,10 @@ func SetLines(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 
 // MiterPts returns the miter points
 func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) mat32.Vec2 {
-	ppd := mat32.Vec2{ax - bx, ay - by}
+	ppd := mat32.V2(ax-bx, ay-by)
 	ppu := ppd.Normal()
 
-	epd := mat32.Vec2{cx - bx, cy - by}
+	epd := mat32.V2(cx-bx, cy-by)
 	epv := epd.Normal()
 
 	dp := ppu.Dot(epv)

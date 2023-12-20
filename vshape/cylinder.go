@@ -165,7 +165,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 			vtxAry.SetVec3(vidx+idx*3, pt)
 			bb.ExpandByPoint(pt)
 			vtxsRow = append(vtxsRow, idx)
-			uvsRow = append(uvsRow, mat32.Vec2{u, 1.0 - v})
+			uvsRow = append(uvsRow, mat32.V2(u, 1.0-v))
 			idx++
 		}
 		vtxs = append(vtxs, vtxsRow)
@@ -236,7 +236,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 		for x := 0; x < radialSegs; x++ {
 			uv1 = uvsOrig[0][x]
 			uv2 = uvsOrig[0][x+1]
-			uv3 = mat32.Vec2{uv2.X, 0}
+			uv3 = mat32.V2(uv2.X, 0)
 			// Appends CENTER with its own UV.
 			vtxAry.Set(vidx+idx*3, 0, hHt, 0)
 			normAry.Set(vidx+idx*3, 0, 1, 0)
@@ -295,7 +295,7 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 		for x := 0; x < radialSegs; x++ {
 			uv1 = uvsOrig[heightSegs][x]
 			uv2 = uvsOrig[heightSegs][x+1]
-			uv3 = mat32.Vec2{uv2.X, 1}
+			uv3 = mat32.V2(uv2.X, 1)
 			// Appends CENTER with its own UV.
 			vtxAry.Set(vidx+idx*3, 0, -hHt, 0)
 			normAry.Set(vidx+idx*3, 0, -1, 0)

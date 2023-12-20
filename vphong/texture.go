@@ -168,7 +168,7 @@ func (ph *Phong) UseTexturePars(repeat mat32.Vec2, off mat32.Vec2) {
 // UseFullTexture sets the texture parameters for the next render command:
 // to render the full texture: repeat = 1,1; off = 0,0
 func (ph *Phong) UseFullTexture() {
-	ph.Cur.TexPars.Set(mat32.Vec2{1, 1}, mat32.Vec2{})
+	ph.Cur.TexPars.Set(mat32.V2(1, 1), mat32.Vec2{})
 }
 
 // TexPars holds texture parameters: how often to repeat the texture image and offset
