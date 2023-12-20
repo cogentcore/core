@@ -48,9 +48,6 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
-	if dw.Image == nil {
-		dw.Image = image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-	}
 	for len(dw.Images) <= idx {
 		dw.Images = append(dw.Images, nil)
 	}
@@ -97,15 +94,6 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.Images[idx][layer]
-
-	// if our source image is larger than our destination image,
-	// we have to remake our destination image to be the right size
-	ssz := img.Rect.Size()
-	dsz := dw.Image.Bounds().Size()
-	if ssz.X > dsz.Y || ssz.Y > dsz.Y {
-		dw.Image = image.NewRGBA(img.Rect)
-	}
-
 	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
 	return nil
 }

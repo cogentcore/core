@@ -106,6 +106,8 @@ func (a *App) Resize() {
 	canvas.Set("width", a.Scrn.PixSize.X)
 	canvas.Set("height", a.Scrn.PixSize.Y)
 
+	a.Drawer.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+
 	a.Win.EvMgr.WindowResize()
 }
 
