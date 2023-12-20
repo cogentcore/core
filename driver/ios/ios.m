@@ -1,4 +1,4 @@
-// Copyright 2023 The GoKi Authors. All rights reserved.
+// Copyright 2023 The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -255,7 +255,7 @@ static void sendTouches(int change, NSSet* touches) {
 @end
 
 void runApp(void) {
-	printf("GoLog: ObjectiveC: GoKi: RUN APP");
+	printf("GoLog: ObjectiveC: Goki: RUN APP");
 	char * argv[] = {};
 	@autoreleasepool {
 		UIApplicationMain(0, argv, nil, NSStringFromClass([GoAppAppDelegate class]));

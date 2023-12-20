@@ -1,6 +1,6 @@
 Name = "goosi"
 Desc = ""
-Version = "v0.0.22"
+Version = "v0.0.23"
 Type = "Library"
 
 [Build]
@@ -64,6 +64,7 @@ Type = "Library"
     YAML = false
     SQL = false
     GQL = false
+    Extend = true
   [Generate.Gtigen]
     Dir = "."
     Output = "gtigen.go"
