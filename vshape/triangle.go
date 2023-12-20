@@ -43,7 +43,7 @@ func SetTriangle(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, 
 
 	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
 
-	bb := mat32.EmptyB3()
+	bb := mat32.B3Empty()
 	bb.ExpandByPoints([]mat32.Vec3{a, b, c})
 	return bb
 }
@@ -82,7 +82,7 @@ func SetQuad(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxO
 	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2),
 		uint32(vtxOff), uint32(vtxOff+2), uint32(vtxOff+3))
 
-	bb := mat32.EmptyB3()
+	bb := mat32.B3Empty()
 	bb.ExpandByPoints(vtxs)
 	return bb
 }

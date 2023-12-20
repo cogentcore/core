@@ -71,7 +71,7 @@ func SetColor(clrAry mat32.ArrayF32, vtxOff int, nvtxs int, clr mat32.Vec4) {
 
 // BBoxFromVtxs returns the bounding box updated from the range of vertex points
 func BBoxFromVtxs(vtxAry mat32.ArrayF32, vtxOff int, nvtxs int) mat32.Box3 {
-	bb := mat32.EmptyB3()
+	bb := mat32.B3Empty()
 	vidx := vtxOff * 3
 	var vtx mat32.Vec3
 	for vi := 0; vi < nvtxs; vi++ {
