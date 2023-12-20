@@ -165,10 +165,7 @@ func (ray *Ray) DistSqToSegment(v0, v1 Vec3, optPointOnRay, optPointOnSegment *V
 
 // IsIntersectionSphere returns if this ray intersects with the specified sphere.
 func (ray *Ray) IsIntersectionSphere(sphere Sphere) bool {
-	if ray.DistToPoint(sphere.Center) <= sphere.Radius {
-		return true
-	}
-	return false
+	return ray.DistToPoint(sphere.Center) <= sphere.Radius
 }
 
 // IntersectSphere calculates the point which is the intersection of this ray with the specified sphere.
@@ -209,11 +206,8 @@ func (ray *Ray) IsIntersectPlane(plane Plane) bool {
 		return true
 	}
 	denom := plane.Norm.Dot(ray.Dir)
-	if denom*distToPoint < 0 {
-		return true
-	}
-	// ray origin is behind the plane (and is pointing behind it)
-	return false
+	// if false, ray origin is behind the plane (and is pointing behind it)
+	return denom*distToPoint < 0
 }
 
 // DistToPlane returns the distance of this ray origin to its intersection point in the plane.

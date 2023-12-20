@@ -57,10 +57,7 @@ func (s *Sphere) IsEmpty(sphere *Sphere) bool {
 
 // ContainsPoint returns if this sphere contains the specified point.
 func (s *Sphere) ContainsPoint(point Vec3) bool {
-	if point.DistToSquared(s.Center) <= (s.Radius * s.Radius) {
-		return true
-	}
-	return false
+	return point.DistToSquared(s.Center) <= (s.Radius * s.Radius)
 }
 
 // DistToPoint returns the distance from the sphere surface to the specified point.
@@ -71,10 +68,7 @@ func (s *Sphere) DistToPoint(point Vec3) float32 {
 // IntersectSphere returns if other sphere intersects this one.
 func (s *Sphere) IntersectSphere(other Sphere) bool {
 	radiusSum := s.Radius + other.Radius
-	if other.Center.DistToSquared(s.Center) <= (radiusSum * radiusSum) {
-		return true
-	}
-	return false
+	return other.Center.DistToSquared(s.Center) <= (radiusSum * radiusSum)
 }
 
 // ClampPoint clamps the specified point inside the sphere.

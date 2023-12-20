@@ -90,7 +90,7 @@ func (t *Triangle) Area() float32 {
 
 // Midpoint returns the triangle's midpoint.
 func (t *Triangle) Midpoint() Vec3 {
-	return t.A.Add(t.B).Add(t.C).MulScalar(1 / 3)
+	return t.A.Add(t.B).Add(t.C).MulScalar(float32(1) / 3)
 }
 
 // Normal returns the triangle's normal.

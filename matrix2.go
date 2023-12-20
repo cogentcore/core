@@ -272,7 +272,7 @@ func ReadPoints(pstr string) []float32 {
 	var pts []float32
 	lr := ' '
 	for i, r := range pstr {
-		if unicode.IsNumber(r) == false && r != '.' && !(r == '-' && lr == 'e') && r != 'e' {
+		if !unicode.IsNumber(r) && r != '.' && !(r == '-' && lr == 'e') && r != 'e' {
 			if lastIdx != -1 {
 				s := pstr[lastIdx:i]
 				p, err := ParseFloat32(s)
@@ -292,7 +292,7 @@ func ReadPoints(pstr string) []float32 {
 		lr = r
 	}
 	if lastIdx != -1 && lastIdx != len(pstr) {
-		s := pstr[lastIdx:len(pstr)]
+		s := pstr[lastIdx:]
 		p, err := ParseFloat32(s)
 		if err != nil {
 			return nil
@@ -305,7 +305,7 @@ func ReadPoints(pstr string) []float32 {
 // PointsCheckN checks the number of points read and emits an error if not equal to n
 func PointsCheckN(pts []float32, n int, errmsg string) error {
 	if len(pts) != n {
-		return fmt.Errorf("%v incorrect number of points: %v != %v\n", errmsg, len(pts), n)
+		return fmt.Errorf("%v incorrect number of points: %v != %v", errmsg, len(pts), n)
 	}
 	return nil
 }
@@ -323,7 +323,7 @@ func (a *Mat2) SetString(str string) error {
 	for {
 		pidx := strings.IndexByte(str, '(')
 		if pidx < 0 {
-			err := fmt.Errorf("gi.Mat2 SetString: no params for transform: %v\n", str)
+			err := fmt.Errorf("gi.Mat2 SetString: no params for transform: %v", str)
 			log.Println(err)
 			return err
 		}
@@ -370,7 +370,7 @@ func (a *Mat2) SetString(str string) error {
 			} else if len(pts) == 2 {
 				*a = a.Scale(pts[0], pts[1])
 			} else {
-				err := fmt.Errorf("%v incorrect number of points: 2 != %v\n", errmsg, len(pts))
+				err := fmt.Errorf("%v incorrect number of points: 2 != %v", errmsg, len(pts))
 				log.Println(err)
 			}
 		case "scalex":
