@@ -622,7 +622,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	tv.Buf.MarkupMu.RUnlock()
 
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-	nwSz := mat32.Vec2{mxwd, off + extraHalf}.ToPointCeil()
+	nwSz := mat32.V2(mxwd, off + extraHalf).ToPointCeil()
 	// fmt.Printf("lay lines: diff: %v  old: %v  new: %v\n", diff, tv.LinesSize, nwSz)
 	if inLayout {
 		tv.LinesSize = nwSz
@@ -637,7 +637,7 @@ func (tv *TextView) SetSize() bool {
 	spc := sty.BoxSpace()
 	rndsz := tv.RenderSz
 	rndsz.X += tv.LineNoOff
-	netsz := mat32.Vec2{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
+	netsz := mat32.V2(float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y))
 	cursz := tv.LayData.AllocSize.SubScalar(2 * spc)
 	if cursz.X < 10 || cursz.Y < 10 {
 		nwsz := netsz.Max(rndsz)
@@ -727,10 +727,10 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 			off += lsz
 		}
 		extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-		nwSz := mat32.Vec2{mxwd, off + extraHalf}.ToPointCeil()
+		nwSz := mat32.V2(mxwd, off + extraHalf).ToPointCeil()
 		tv.ResizeIfNeeded(nwSz)
 	} else {
-		nwSz := mat32.Vec2{mxwd, 0}.ToPointCeil()
+		nwSz := mat32.V2(mxwd, 0).ToPointCeil()
 		nwSz.Y = tv.LinesSize.Y
 		tv.ResizeIfNeeded(nwSz)
 	}
