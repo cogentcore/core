@@ -11,6 +11,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/xyzv"
 	"goki.dev/goosi/events"
+	_ "goki.dev/grows/images"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -47,10 +48,10 @@ func app() {
 	objgp := xyz.NewGroup(sc, "obj-gp")
 
 	curFn := "objs/airplane_prop_001.obj"
-
-	// grr.Log1(sc.OpenNewObj("objs/airplane_prop_001.obj", objgp))
-
+	// curFn := "objs/piano_005.obj"
 	exts := ".obj,.dae,.gltf"
+
+	grr.Log1(sc.OpenNewObj(curFn, objgp))
 
 	b.AddAppBar(func(tb *gi.Toolbar) {
 		gi.NewButton(tb).SetText("Open").SetIcon(icons.Open).

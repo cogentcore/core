@@ -35,13 +35,16 @@ func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfil
 		d.SetTitle(title)
 	}
 	fv := NewFileView(d).SetFilename(filename, exts)
-	fv.OnSelect(func(e events.Event) {
-		fun(fv.SelectedFile())
-	}).OnDoubleClick(func(e events.Event) {
+	fv.OnDoubleClick(func(e events.Event) {
 		if fv.SelectedDoubleClick {
-			fun(fv.SelectedFile())
 			d.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 		}
+	})
+	d.AddBottomBar(func(pw gi.Widget) {
+		d.AddCancel(pw)
+		d.AddOk(pw).OnClick(func(e events.Event) {
+			fun(fv.SelectedFile())
+		})
 	})
 	d.NewDialog(ctx).SetNewWindow(true).Run()
 }
