@@ -22,7 +22,8 @@ func (a *App) AddEventListeners() {
 	g.Call("addEventListener", "touchend", js.FuncOf(a.OnTouchEnd))
 	g.Call("addEventListener", "mousemove", js.FuncOf(a.OnMouseMove))
 	g.Call("addEventListener", "touchmove", js.FuncOf(a.OnTouchMove))
-	g.Call("addEventListener", "wheel", js.FuncOf(a.OnWheel))
+	// see https://chromestatus.com/feature/6662647093133312
+	g.Call("addEventListener", "wheel", js.FuncOf(a.OnWheel), map[string]any{"passive": false})
 	g.Call("addEventListener", "contextmenu", js.FuncOf(a.OnContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(a.OnKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(a.OnKeyUp))
