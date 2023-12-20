@@ -96,12 +96,6 @@ func (a *App) Resize() {
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	// ww, wh := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
-	// wsz := image.Pt(ww, wh)
-	// app.window.WnSize = wsz
-	// app.window.PxSize = image.Pt(int(float32(wsz.X)*app.screen.DevicePixelRatio), int(float32(wsz.Y)*app.screen.DevicePixelRatio))
-	// app.window.RenderSize = app.window.PxSize
-
 	canvas := js.Global().Get("document").Call("getElementById", "app")
 	canvas.Set("width", a.Scrn.PixSize.X)
 	canvas.Set("height", a.Scrn.PixSize.Y)

@@ -44,9 +44,6 @@ func (dw *Drawer) DestBounds() image.Rectangle {
 // A standard Go image is rendered upright on a standard surface.
 // Set flipY to true to flip.
 func (dw *Drawer) SetGoImage(idx, layer int, img image.Image, flipY bool) {
-	if dw.Image == nil {
-		dw.Image = image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-	}
 	for len(dw.Images) <= idx {
 		dw.Images = append(dw.Images, nil)
 	}
@@ -77,8 +74,9 @@ func (dw *Drawer) SyncImages() {}
 // Over = alpha blend with existing
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error {
-	img := dw.Images[idx][layer]
-	draw.Draw(dw.Image, dr, img, sr.Min, op)
+	// TODO(kai): unclear whether we need Drawer.Scale
+	// img := dw.Images[idx][layer]
+	// draw.Draw(dw.Image, dr, img, sr.Min, op)
 	return nil
 }
 
@@ -90,7 +88,6 @@ func (dw *Drawer) Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, 
 // flipY = flipY axis when drawing this image
 func (dw *Drawer) Copy(idx, layer int, dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) error {
 	img := dw.Images[idx][layer]
-	// fmt.Println("cp", idx, layer, dp, dp.Add(img.Rect.Size()), sr.Min)
 	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(img.Rect.Size())}, img, sr.Min, op)
 	return nil
 }

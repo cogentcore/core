@@ -72,6 +72,8 @@ func (a *App) GetScreens() {
 	physX := 25.4 * float32(a.Scrn.PixSize.X) / dpi
 	physY := 25.4 * float32(a.Scrn.PixSize.Y) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
+
+	a.Drawer.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 }
 
 func (a *App) DataDir() string {
