@@ -23,6 +23,12 @@ func TestMain(m *testing.M) {
 	})
 }
 
+func TestBasic(t *testing.T) {
+	sc := NewScene()
+	NewLabel(sc).SetText("Test")
+	sc.AssertPixelsOnShow(t, "basic")
+}
+
 var (
 	testStrings = []string{"", "test", "Hello, world!", "123.456", "This is a really long test sentence with a lot of words in it."}
 	testIcons   = []icons.Icon{"", icons.Search}
