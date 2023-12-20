@@ -1,6 +1,6 @@
 Name = "svg"
 Desc = ""
-Version = "v0.1.25"
+Version = "v0.1.26"
 Type = "App"
 
 [Build]
@@ -64,6 +64,7 @@ Type = "App"
     YAML = false
     SQL = false
     GQL = false
+    Extend = true
   [Generate.Gtigen]
     Dir = "."
     Output = "gtigen.go"
