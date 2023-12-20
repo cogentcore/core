@@ -36,7 +36,7 @@ func (s *Sphere) SetFromBox(box Box3) {
 
 // SetFromPoints sets this sphere from the specified points array and optional center.
 func (s *Sphere) SetFromPoints(points []Vec3, optCenter *Vec3) {
-	box := EmptyB3()
+	box := B3Empty()
 	if optCenter != nil {
 		s.Center = *optCenter
 	} else {

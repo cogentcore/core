@@ -24,8 +24,8 @@ func B2(x0, y0, x1, y1 float32) Box2 {
 	return Box2{V2(x0, y0), V2(x1, y1)}
 }
 
-// EmptyB2 returns a new [Box2] with empty minimum and maximum values
-func EmptyB2() Box2 {
+// B2Empty returns a new [Box2] with empty minimum and maximum values
+func B2Empty() Box2 {
 	bx := Box2{}
 	bx.SetEmpty()
 	return bx
@@ -144,7 +144,7 @@ func (b Box2) MulMat2(m Mat2) Box2 {
 	cs[2] = m.MulVec2AsPt(V2(b.Max.X, b.Min.Y))
 	cs[3] = m.MulVec2AsPt(V2(b.Max.X, b.Max.Y))
 
-	nb := EmptyB2()
+	nb := B2Empty()
 	for i := 0; i < 4; i++ {
 		nb.ExpandByPoint(cs[i])
 	}
