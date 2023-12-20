@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -64,7 +65,15 @@ func (ph *Phong) ConfigTextures() {
 	txset := vars.SetMap[int(TexSet)]
 	txset.ConfigVals(ntx)
 	for i, kv := range ph.Textures.Order {
-		_, img, _ := txset.ValByIdxTry("Tex", i)
+		_, img, err := txset.ValByIdxTry("Tex", i)
+		if err != nil {
+			slog.Error("vgpu.Phong ConfigTextures: txset Image is nil", "Image", i)
+			continue
+		}
+		if kv.Val.Image == nil {
+			slog.Error("vgpu.Phong ConfigTextures: Image is nil", "Image", i)
+			continue
+		}
 		img.Texture.ConfigGoImage(kv.Val.Image.Bounds().Size(), 1)
 	}
 	ivar := txset.VarMap["Tex"]
