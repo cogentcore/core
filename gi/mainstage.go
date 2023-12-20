@@ -191,7 +191,9 @@ func (st *Stage) RunDialog() *Stage {
 	}
 
 	sc := st.Scene
-	sc.App = ctx.Sc.App
+	if st.FullWindow {
+		sc.App = ctx.Sc.App
+	}
 	st.ConfigMainStage()
 	sc.SceneGeom.Pos = st.Pos
 
@@ -200,6 +202,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	sz := winsz
 	if !st.FullWindow {
+		sc.App = ctx.Sc.App // just for reference
 		sz = sc.PrefSize(winsz)
 		sz = sz.Add(image.Point{50, 50})
 		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
