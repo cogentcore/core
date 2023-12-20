@@ -13,18 +13,14 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/girl/states"
-	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/laser"
 )
 
 func TestMain(m *testing.M) {
 	RunTest(func() {
-		bsc := NewScene("__test-base-scene")
-		bsc.OnShow(func(e events.Event) {
-			os.Exit(m.Run())
-		})
-		bsc.NewWindow().Run().Wait()
+		NewScene("__test-base-scene").NewWindow().Run()
+		os.Exit(m.Run())
 	})
 }
 
