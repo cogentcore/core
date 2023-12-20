@@ -238,7 +238,7 @@ func (sv *SVG) Render() {
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
 	pc.Lock()
-	pc.FillBox(mat32.Vec2Zero, mat32.V2FromPoint(sv.Geom.Size), sv.Background)
+	pc.FillBox(mat32.Vec2{}, mat32.V2FromPoint(sv.Geom.Size), sv.Background)
 	pc.Unlock()
 }
 
@@ -249,7 +249,7 @@ func (sv *SVG) SetRootTransform() {
 	tr := mat32.Vec2{}
 	if sv.Norm {
 		vb := &sv.Root.ViewBox
-		if vb.Size != mat32.Vec2Zero {
+		if vb.Size != (mat32.Vec2{}) {
 			sc.X = float32(sv.Geom.Size.X) / vb.Size.X
 			sc.Y = float32(sv.Geom.Size.Y) / vb.Size.Y
 			if sv.InvertY {
@@ -258,7 +258,7 @@ func (sv *SVG) SetRootTransform() {
 			tr = vb.Min.MulScalar(-1)
 		} else {
 			sz := sv.Root.LocalBBox().Size()
-			if sz != mat32.Vec2Zero {
+			if sz != (mat32.Vec2{}) {
 				sc.X = float32(sv.Geom.Size.X) / sz.X
 				sc.Y = float32(sv.Geom.Size.Y) / sz.Y
 			}

@@ -28,8 +28,8 @@ type ViewBox struct {
 
 // Defaults returns viewbox to defaults
 func (vb *ViewBox) Defaults() {
-	vb.Min = mat32.Vec2Zero
-	vb.Size = mat32.Vec2Zero
+	vb.Min = mat32.Vec2{}
+	vb.Size = mat32.Vec2{}
 	vb.PreserveAspectRatio.Align = NoAlign
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
