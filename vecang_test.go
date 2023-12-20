@@ -9,11 +9,11 @@ import (
 )
 
 func TestV3AngleTo(t *testing.T) {
-	ref := Vec3{1, 0, 0}
+	ref := V3(1, 0, 0)
 	for ang := float32(0); ang < Pi*2; ang += Pi / 10 {
 		cos := Cos(ang)
 		sin := Sin(ang)
-		v := Vec3{cos, sin, 0}
+		v := V3(cos, sin, 0)
 		vang := v.AngleTo(ref)
 		vcos := Cos(vang)
 		vsin := Sin(vang)
@@ -26,11 +26,11 @@ func TestV3AngleTo(t *testing.T) {
 			t.Errorf("Vec3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
 		}
 	}
-	ref = Vec3{0, 1, 0}
+	ref = V3(0, 1, 0)
 	for ang := float32(0); ang < Pi*2; ang += Pi / 10 {
 		cos := Cos(ang)
 		sin := Sin(ang)
-		v := Vec3{0, cos, sin}
+		v := V3(0, cos, sin)
 		vang := v.AngleTo(ref)
 		vcos := Cos(vang)
 		vsin := Sin(vang)
@@ -43,11 +43,11 @@ func TestV3AngleTo(t *testing.T) {
 			t.Errorf("Vec3.AngleTo: Sin: %v != orig Sin: %v\n", vsin, sin)
 		}
 	}
-	ref = Vec3{0, 0, 1}
+	ref = V3(0, 0, 1)
 	for ang := float32(0); ang < Pi*2; ang += Pi / 10 {
 		cos := Cos(ang)
 		sin := Sin(ang)
-		v := Vec3{sin, 0, cos}
+		v := V3(sin, 0, cos)
 		vang := v.AngleTo(ref)
 		vcos := Cos(vang)
 		vsin := Sin(vang)

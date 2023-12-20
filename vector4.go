@@ -566,5 +566,5 @@ func (v *Vec4) SetAxisFromRotationMatrix(m *Mat4) {
 // PerspDiv returns the 3-vector of normalized display coordinates (NDC) from given 4-vector
 // By dividing by the 4th W component
 func (v Vec4) PerspDiv() Vec3 {
-	return Vec3{v.X / v.W, v.Y / v.W, v.Z / v.W}
+	return V3(v.X/v.W, v.Y/v.W, v.Z/v.W)
 }

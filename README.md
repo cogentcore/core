@@ -15,7 +15,7 @@ So, in this `mat32` package, `Add` looks like this:
 ```Go
 // Add adds other vector to this one and returns result in a new vector.
 func (v Vec3) Add(other Vec3) Vec3 {
-	return Vec3{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
+	return V3(v.X + other.X, v.Y + other.Y, v.Z + other.Z)
 }
 ```
 
