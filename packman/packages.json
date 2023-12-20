@@ -1,7 +1,7 @@
 [
     {
         "ID": "dev",
-        "Name": "The GoKi Developer Tools",
+        "Name": "The Goki Developer Tools",
         "InstallCommands": {
             "darwin": [
                 {
