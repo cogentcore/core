@@ -112,11 +112,11 @@ func mainrun(a goosi.App) {
 
 		// This is the standard camera view projection computation
 		cam, _ = camv.Vals.ValByIdxTry(0)
-		campos := mat32.Vec3{0, 0, 2}
-		target := mat32.Vec3{0, 0, 0}
+		campos := mat32.V3(0, 0, 2)
+		target := mat32.V3(0, 0, 0)
 		var lookq mat32.Quat
 		lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.Vec3Y))
-		scale := mat32.Vec3{1, 1, 1}
+		scale := mat32.V3(1, 1, 1)
 		var cview mat32.Mat4
 		cview.SetTransform(campos, lookq, scale)
 		view, _ := cview.Inverse()
