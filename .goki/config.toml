@@ -1,6 +1,6 @@
 Name = "colors"
 Desc = ""
-Version = "v0.8.41"
+Version = "v0.8.42"
 Type = "Library"
 
 [Build]
@@ -64,6 +64,7 @@ Type = "Library"
     YAML = false
     SQL = false
     GQL = false
+    Extend = true
   [Generate.Gtigen]
     Dir = "."
     Output = "gtigen.go"
