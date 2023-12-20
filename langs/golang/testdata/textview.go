@@ -518,12 +518,12 @@ func (tv *TextView) ParentLayout() *gi.Layout {
 func (tv *TextView) RenderSize() mat32.Vec2 {
 	spc := tv.Sty.BoxSpace()
 	if tv.Par == nil {
-		return mat32.Vec2Zero
+		return mat32.Vec2{}
 	}
 	parw := tv.ParentLayout()
 	if parw == nil {
 		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", tv.Par.Type(), tv.PathUnique())
-		return mat32.Vec2Zero
+		return mat32.Vec2{}
 	}
 	parw.SetReRenderAnchor()
 	paloc := parw.LayData.AllocSizeOrig
