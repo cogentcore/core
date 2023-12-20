@@ -130,8 +130,8 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 				scx = rr.ScaleX
 			}
 			tx := mat32.Scale2D(scx, 1).Rotate(rr.RotRad)
-			ll := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
-			ur := ll.Add(tx.MulVec2AsVec(mat32.Vec2{rr.Size.X, -rr.Size.Y}))
+			ll := rp.Add(tx.MulVec2AsVec(mat32.V2(0, dsc32)))
+			ur := ll.Add(tx.MulVec2AsVec(mat32.V2(rr.Size.X, -rr.Size.Y)))
 			if int(mat32.Floor(ll.X)) > pc.Bounds.Max.X || int(mat32.Floor(ur.Y)) > pc.Bounds.Max.Y ||
 				int(mat32.Ceil(ur.X)) < pc.Bounds.Min.X || int(mat32.Ceil(ll.Y)) < pc.Bounds.Min.Y {
 				continue
@@ -157,7 +157,7 @@ func (tr *Text) Render(pc *Context, pos mat32.Vec2) {
 				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
 				srect := dr.Sub(dr.Min)
-				dbase := mat32.Vec2{rp.X - float32(dr.Min.X), rp.Y - float32(dr.Min.Y)}
+				dbase := mat32.V2(rp.X-float32(dr.Min.X), rp.Y-float32(dr.Min.Y))
 
 				transformer := draw.BiLinear
 				fx, fy := float32(dr.Min.X), float32(dr.Min.Y)
@@ -211,7 +211,7 @@ func (tr *Text) SetString(str string, fontSty *styles.FontRender, ctxt *units.Co
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = mat32.Vec2{ssz.X, mat32.FromFixed(vht)}
+	tr.Size = mat32.V2(ssz.X, mat32.FromFixed(vht))
 
 }
 
@@ -231,7 +231,7 @@ func (tr *Text) SetStringRot90(str string, fontSty *styles.FontRender, ctxt *uni
 	sr.SetRunePosTBRot(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = mat32.Vec2{mat32.FromFixed(vht), ssz.Y}
+	tr.Size = mat32.V2(mat32.FromFixed(vht), ssz.Y)
 }
 
 // SetRunes is for basic text rendering with a single style of text (see
@@ -251,7 +251,7 @@ func (tr *Text) SetRunes(str []rune, fontSty *styles.FontRender, ctxt *units.Con
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = mat32.Vec2{ssz.X, mat32.FromFixed(vht)}
+	tr.Size = mat32.V2(ssz.X, mat32.FromFixed(vht))
 }
 
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags
@@ -953,7 +953,7 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 		size.Y = vht
 	}
 
-	tr.Size = mat32.Vec2{maxw, vht}
+	tr.Size = mat32.V2(maxw, vht)
 
 	vpad := float32(0) // padding at top to achieve vertical alignment
 	vextra := size.Y - vht

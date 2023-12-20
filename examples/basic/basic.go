@@ -56,10 +56,10 @@ func main() {
 	txt.SetHTML("This is <b>HTML</b> formatted <i>text</i>", fsty, tsty, &pc.UnContext, nil)
 
 	// the last, size arg provides constraints for layout to fit within -- uses width mainly
-	tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.Vec2{100, 40})
+	tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.V2(100, 40))
 	fmt.Printf("text size: %v\n", tsz)
 
-	txt.Render(pc, mat32.Vec2{60, 50})
+	txt.Render(pc, mat32.V2(60, 50))
 
 	pc.Unlock()
 

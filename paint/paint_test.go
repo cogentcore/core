@@ -70,19 +70,19 @@ func TestRender(t *testing.T) {
 		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)
 
 		// the last, size arg provides constraints for layout to fit within -- uses width mainly
-		tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.Vec2{100, 40})
+		tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.V2(100, 40))
 		if tsz.X != 100 || tsz.Y != 40 {
 			t.Errorf("unexpected text size: %v", tsz)
 		}
 
-		txt.Render(pc, mat32.Vec2{85, 80})
+		txt.Render(pc, mat32.V2(85, 80))
 	})
 }
 
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Context)) {
 		RunTest(t, nm, 300, 300, func(pc *Context) {
-			pc.FillBox(mat32.Vec2{}, mat32.Vec2{300, 300}, colors.C(colors.White))
+			pc.FillBox(mat32.Vec2{}, mat32.V2(300, 300), colors.C(colors.White))
 			f(pc)
 			pc.StrokeStyle.Color = colors.C(colors.Blue)
 			pc.FillStyle.Color = colors.C(colors.Yellow)
@@ -122,31 +122,31 @@ func TestPaintFill(t *testing.T) {
 		})
 	}
 	test("fill_box_color", func(pc *Context) {
-		pc.FillBoxColor(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
+		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
 	})
 	test("fill_box_solid", func(pc *Context) {
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.C(colors.Blue))
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Blue))
 	})
 	test("fill_box_linear_gradient_black_white", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Black, 0).AddStop(colors.White, 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
 	test("fill_box_linear_gradient_red_green", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Limegreen, 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
 	test("fill_box_linear_gradient_red_yellow_green", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Yellow, 0.3).AddStop(colors.Green, 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
 	test("fill_box_radial_gradient", func(pc *Context) {
 		g := gradient.NewRadial().AddStop(colors.ApplyOpacity(colors.Green, 0.5), 0).AddStop(colors.Blue, 0.6).
 			AddStop(colors.ApplyOpacity(colors.Purple, 0.3), 1)
-		pc.FillBox(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, g)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
 	})
 	test("blur_box", func(pc *Context) {
-		pc.FillBoxColor(mat32.Vec2{10, 100}, mat32.Vec2{200, 100}, colors.Green)
-		pc.BlurBox(mat32.Vec2{0, 50}, mat32.Vec2{300, 200}, 10)
+		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
+		pc.BlurBox(mat32.V2(0, 50), mat32.V2(300, 200), 10)
 	})
 
 	test("fill", func(pc *Context) {

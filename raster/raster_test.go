@@ -454,13 +454,13 @@ func TestGradient(t *testing.T) {
 	)
 
 	linear := gradient.NewLinear().
-		SetBox(mat32.Box2{mat32.Vec2{50, 50}, mat32.Vec2{150, 150}}).
+		SetBox(mat32.Box2{mat32.V2(50, 50), mat32.V2(150, 150)}).
 		AddStop(colors.Aquamarine, 0.3).
 		AddStop(colors.Skyblue, 0.6).
 		AddStop(colors.ApplyOpacity(colors.Darksalmon, 0.75), 1)
 
 	radial := gradient.NewRadial().
-		SetBox(mat32.Box2{mat32.Vec2{230, 230}, mat32.Vec2{330, 330}}).SetSpread(gradient.Reflect).
+		SetBox(mat32.Box2{mat32.V2(230, 230), mat32.V2(330, 330)}).SetSpread(gradient.Reflect).
 		AddStop(colors.Orchid, 0.3).
 		AddStop(colors.Bisque, 0.6).
 		AddStop(colors.ApplyOpacity(colors.Chartreuse, 0.4), 1)
@@ -528,7 +528,7 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	radial.SetUnits(gradient.UserSpaceOnUse).SetSpread(gradient.Pad).
-		SetFocal(mat32.Vec2{0.1, 0.1}).SetRadius(mat32.V2Scalar(0.5)) // move focus away from center
+		SetFocal(mat32.V2(0.1, 0.1)).SetRadius(mat32.V2Scalar(0.5)) // move focus away from center
 	scanner.SetColor(radial)
 	AddRect(20, 160, 150, 310, 0, f)
 	f.Draw()
