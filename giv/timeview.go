@@ -18,6 +18,7 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
+	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
@@ -52,7 +53,7 @@ func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	if tv.TmpSave != nil {
 		tv.TmpSave.SetValue(tv.Time)
 	}
-	tv.UpdateEndRender(updt)
+	tv.UpdateEndLayout(updt)
 	tv.SendChange()
 	return tv
 }
@@ -166,11 +167,17 @@ type DateView struct {
 	// the time that we are viewing
 	Time time.Time `set:"-"`
 
-	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+	// value view that needs to have SaveTmp called on it whenever a change
+	// is made to one of the underlying values.
+	// pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// a record of parent View names that have led up to this view
+	// displayed as extra contextual information in view dialog windows
 	ViewPath string
+
+	// ConfigTime is the time that was configured
+	ConfigTime time.Time `set:"-" view:"-"`
 }
 
 // SetTime sets the source time and updates the view
@@ -186,51 +193,57 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 }
 
 func (dv *DateView) ConfigWidget() {
-	fmt.Println("cw", dv.HasChildren())
-	if dv.HasChildren() {
+	if dv.Time == dv.ConfigTime {
+		fmt.Println("same time:", dv.Time)
 		return
 	}
 	updt := dv.UpdateStart()
+	if !dv.HasChildren() {
+		dv.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.Set(0, 0)
+		})
 
-	dv.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.Grow.Set(0, 0)
-	})
+		trow := gi.NewLayout(dv)
 
-	trow := gi.NewLayout(dv)
+		sms := make([]any, len(shortMonths))
+		for i, sm := range shortMonths {
+			sms[i] = sm
+		}
+		month := gi.NewChooser(trow, "month").SetItems(sms)
+		month.SetCurIndex(int(dv.Time.Month() - 1))
+		month.OnChange(func(e events.Event) {
+			dv.DeleteChildByName("grid", true)
+			// set our month
+			dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
+			dv.ConfigDateGrid()
+			dv.Update()
+		})
 
-	sms := make([]any, len(shortMonths))
-	for i, sm := range shortMonths {
-		sms[i] = sm
+		yr := dv.Time.Year()
+		yrs := []any{}
+		// we go 100 in each direction from the current year
+		for i := yr - 100; i <= yr+100; i++ {
+			yrs = append(yrs, i)
+		}
+		year := gi.NewChooser(trow, "year").SetItems(yrs)
+		year.SetCurVal(yr)
+		year.OnChange(func(e events.Event) {
+			dv.DeleteChildByName("grid", true)
+			// we are centered at current year with 100 in each direction
+			nyr := year.CurIndex + yr - 100
+			// set our year
+			dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+			dv.ConfigDateGrid()
+			dv.Update()
+		})
 	}
-	month := gi.NewChooser(trow, "month").SetItems(sms)
-	month.SetCurIndex(int(dv.Time.Month() - 1))
-	month.OnChange(func(e events.Event) {
-		fmt.Println("moc")
-		dv.DeleteChildByName("grid", true)
-		// set our month
-		dv.SetTime(dv.Time.AddDate(0, month.CurIndex+1-int(dv.Time.Month()), 0))
-	})
 
-	yr := dv.Time.Year()
-	yrs := []any{}
-	// we go 100 in each direction from the current year
-	for i := yr - 100; i <= yr+100; i++ {
-		yrs = append(yrs, i)
+	gri := dv.ChildByName("grid", 2)
+	if gri != nil {
+		dv.DeleteChildByName("grid", ki.DestroyKids)
 	}
-	year := gi.NewChooser(trow, "year").SetItems(yrs)
-	year.SetCurVal(yr)
-	year.OnChange(func(e events.Event) {
-		fmt.Println("yoc")
-		dv.DeleteChildByName("grid", true)
-		// we are centered at current year with 100 in each direction
-		nyr := year.CurIndex + yr - 100
-		// set our year
-		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
-	})
-
 	dv.ConfigDateGrid()
-
 	dv.UpdateEndLayout(updt)
 }
 
@@ -256,14 +269,15 @@ func (dv *DateView) ConfigDateGrid() {
 		// actual time of this date
 		dt := somw.AddDate(0, 0, yd-somw.YearDay())
 		ds := strconv.Itoa(dt.Day())
+		// fmt.Println(ds)
 		bt := gi.NewButton(grid, "day-"+yds).SetType(gi.ButtonAction).SetText(ds)
 		bt.OnClick(func(e events.Event) {
 			dv.SetTime(dt)
 		})
 		bt.Style(func(s *styles.Style) {
-			s.Min.X.Dp(40)
-			s.Min.Y.Dp(40)
-			s.Padding.Zero()
+			s.Min.X.Dp(30) // 30 is key for centering
+			s.Min.Y.Dp(30)
+			s.Padding.Set(units.Dp(6)) // 4 min, can go higher
 			s.Align.Content = styles.Center
 			s.Align.Items = styles.Center
 			s.Justify.Content = styles.Center
@@ -295,6 +309,8 @@ func (dv *DateView) ConfigDateGrid() {
 				lb.Type = gi.LabelBodyLarge
 				w.Style(func(s *styles.Style) {
 					s.Border.Radius = styles.BorderRadiusFull
+					s.Text.Align = styles.Center
+					s.Text.AlignV = styles.Center
 				})
 			}
 		})
