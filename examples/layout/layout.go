@@ -72,6 +72,7 @@ var (
 	AlignText = "This is text to test for text align<br>This line is short<br>This is text to test for text align, this one is longer"
 
 	FrameSizes = [5]mat32.Vec2{
+		{20, 100},
 		{80, 20},
 		{60, 80},
 		{40, 120},
