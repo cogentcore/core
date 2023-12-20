@@ -117,7 +117,7 @@ func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 
 // LookAtOrigin points the camera at origin with Y axis pointing Up (i.e., standard)
 func (cm *Camera) LookAtOrigin() {
-	cm.LookAt(mat32.Vec3Zero, mat32.V3(0, 1, 0))
+	cm.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0))
 }
 
 // LookAtTarget points the camera at current target using current up direction
