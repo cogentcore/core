@@ -13,12 +13,12 @@ package mat32
 import (
 	"math"
 	"strconv"
+
+	"github.com/chewxy/math32"
 )
 
-// This are just float32 wrappers around the std library math package funcs
-// because they are highly optimized and the conversion cost is almost always
-// less than naive implementation.  Also they have surprisingly complex
-// logic associated with NaN and Inf handling.
+// These are mostly just wrappers around chewxy/math32, which has
+// some optimized implementations.
 
 const (
 	E   = math.E
@@ -58,10 +58,17 @@ func RadToDeg(radians float32) float32 {
 	return radians * RadToDegFactor
 }
 
+// Abs returns the absolute value of x.
+//
+// Special cases are:
+//
+//	Abs(±Inf) = +Inf
+//	Abs(NaN) = NaN
 func Abs(x float32) float32 {
-	return float32(math.Abs(float64(x)))
+	return math32.Abs(x)
 }
 
+// Sign returns -1 if x < 0 and 1 otherwise.
 func Sign(x float32) float32 {
 	if x < 0 {
 		return -1
@@ -69,24 +76,29 @@ func Sign(x float32) float32 {
 	return 1
 }
 
+// Acos returns the arccosine, in radians, of x.
+//
+// Special case is:
+//
+//	Acos(x) = NaN if x < -1 or x > 1
 func Acos(x float32) float32 {
-	return float32(math.Acos(float64(x)))
+	return math32.Acos(x)
 }
 
 func Acosh(x float32) float32 {
-	return float32(math.Acosh(float64(x)))
+	return math32.Acosh(x)
 }
 
 func Asin(x float32) float32 {
-	return float32(math.Asin(float64(x)))
+	return math32.Asin(x)
 }
 
 func Asinh(x float32) float32 {
-	return float32(math.Asinh(float64(x)))
+	return math32.Asinh(x)
 }
 
 func Atan(x float32) float32 {
-	return float32(math.Atan(float64(x)))
+	return math32.Atan(x)
 }
 
 func Atan2(y, x float32) float32 {
@@ -94,15 +106,15 @@ func Atan2(y, x float32) float32 {
 }
 
 func Atanh(x float32) float32 {
-	return float32(math.Atanh(float64(x)))
+	return math32.Atanh(x)
 }
 
 func Cbrt(x float32) float32 {
-	return float32(math.Cbrt(float64(x)))
+	return math32.Cbrt(x)
 }
 
 func Ceil(x float32) float32 {
-	return float32(math.Ceil(float64(x)))
+	return math32.Ceil(x)
 }
 
 func Copysign(x, y float32) float32 {
@@ -110,11 +122,11 @@ func Copysign(x, y float32) float32 {
 }
 
 func Cos(x float32) float32 {
-	return float32(math.Cos(float64(x)))
+	return math32.Cos(x)
 }
 
 func Cosh(x float32) float32 {
-	return float32(math.Cosh(float64(x)))
+	return math32.Cosh(x)
 }
 
 func Dim(x, y float32) float32 {
@@ -122,11 +134,11 @@ func Dim(x, y float32) float32 {
 }
 
 func Erf(x float32) float32 {
-	return float32(math.Erf(float64(x)))
+	return math32.Erf(x)
 }
 
 func Erfc(x float32) float32 {
-	return float32(math.Erfc(float64(x)))
+	return math32.Erfc(x)
 }
 
 func Erfcinv(x float32) float32 {
@@ -138,15 +150,15 @@ func Erfinv(x float32) float32 {
 }
 
 func Exp(x float32) float32 {
-	return float32(math.Exp(float64(x)))
+	return math32.Exp(x)
 }
 
 func Exp2(x float32) float32 {
-	return float32(math.Exp2(float64(x)))
+	return math32.Exp2(x)
 }
 
 func Expm1(x float32) float32 {
-	return float32(math.Expm1(float64(x)))
+	return math32.Expm1(x)
 }
 
 func FMA(x, y, z float32) float32 {
@@ -154,7 +166,7 @@ func FMA(x, y, z float32) float32 {
 }
 
 func Floor(x float32) float32 {
-	return float32(math.Floor(float64(x)))
+	return math32.Floor(x)
 }
 
 func Frexp(f float32) (frac float32, exp int) {
@@ -165,7 +177,7 @@ func Frexp(f float32) (frac float32, exp int) {
 }
 
 func Gamma(x float32) float32 {
-	return float32(math.Gamma(float64(x)))
+	return math32.Gamma(x)
 }
 
 func Hypot(p, q float32) float32 {
@@ -173,7 +185,7 @@ func Hypot(p, q float32) float32 {
 }
 
 func Ilogb(x float32) float32 {
-	return float32(math.Ilogb(float64(x)))
+	return float32(math32.Ilogb(x))
 }
 
 func Inf(sign int) float32 {
@@ -189,11 +201,11 @@ func IsNaN(x float32) bool {
 }
 
 func J0(x float32) float32 {
-	return float32(math.J0(float64(x)))
+	return math32.J0(x)
 }
 
 func J1(x float32) float32 {
-	return float32(math.J1(float64(x)))
+	return math32.J1(x)
 }
 
 func Jn(n int, x float32) float32 {
@@ -217,23 +229,23 @@ func Lgamma(x float32) (lgamma float32, sign int) {
 }
 
 func Log(x float32) float32 {
-	return float32(math.Log(float64(x)))
+	return math32.Log(x)
 }
 
 func Log10(x float32) float32 {
-	return float32(math.Log10(float64(x)))
+	return math32.Log10(x)
 }
 
 func Log1p(x float32) float32 {
-	return float32(math.Log1p(float64(x)))
+	return math32.Log1p(x)
 }
 
 func Log2(x float32) float32 {
-	return float32(math.Log2(float64(x)))
+	return math32.Log2(x)
 }
 
 func Logb(x float32) float32 {
-	return float32(math.Logb(float64(x)))
+	return math32.Logb(x)
 }
 
 func Max(x, y float32) float32 {
@@ -277,7 +289,7 @@ func Remainder(x, y float32) float32 {
 }
 
 func Round(x float32) float32 {
-	return float32(math.Round(float64(x)))
+	return math32.Round(x)
 }
 
 func RoundToEven(x float32) float32 {
@@ -289,7 +301,7 @@ func Signbit(x float32) bool {
 }
 
 func Sin(x float32) float32 {
-	return float32(math.Sin(float64(x)))
+	return math32.Sin(x)
 }
 
 func Sincos(x float32) (sin, cos float32) {
@@ -300,31 +312,31 @@ func Sincos(x float32) (sin, cos float32) {
 }
 
 func Sinh(x float32) float32 {
-	return float32(math.Sinh(float64(x)))
+	return math32.Sinh(x)
 }
 
 func Sqrt(x float32) float32 {
-	return float32(math.Sqrt(float64(x)))
+	return math32.Sqrt(x)
 }
 
 func Tan(x float32) float32 {
-	return float32(math.Tan(float64(x)))
+	return math32.Tan(x)
 }
 
 func Tanh(x float32) float32 {
-	return float32(math.Tanh(float64(x)))
+	return math32.Tanh(x)
 }
 
 func Trunc(x float32) float32 {
-	return float32(math.Trunc(float64(x)))
+	return math32.Trunc(x)
 }
 
 func Y0(x float32) float32 {
-	return float32(math.Y0(float64(x)))
+	return math32.Y0(x)
 }
 
 func Y1(x float32) float32 {
-	return float32(math.Y1(float64(x)))
+	return math32.Y1(x)
 }
 
 func Yn(n int, x float32) float32 {
