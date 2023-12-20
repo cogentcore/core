@@ -139,10 +139,10 @@ func (b *Box2) ExpandByBox(box Box2) {
 // and computes the resulting spanning Box2 of the transformed points
 func (b Box2) MulMat2(m Mat2) Box2 {
 	var cs [4]Vec2
-	cs[0] = m.MulVec2AsPt(Vec2{b.Min.X, b.Min.Y})
-	cs[1] = m.MulVec2AsPt(Vec2{b.Min.X, b.Max.Y})
-	cs[2] = m.MulVec2AsPt(Vec2{b.Max.X, b.Min.Y})
-	cs[3] = m.MulVec2AsPt(Vec2{b.Max.X, b.Max.Y})
+	cs[0] = m.MulVec2AsPt(V2(b.Min.X, b.Min.Y))
+	cs[1] = m.MulVec2AsPt(V2(b.Min.X, b.Max.Y))
+	cs[2] = m.MulVec2AsPt(V2(b.Max.X, b.Min.Y))
+	cs[3] = m.MulVec2AsPt(V2(b.Max.X, b.Max.Y))
 
 	nb := EmptyB2()
 	for i := 0; i < 4; i++ {

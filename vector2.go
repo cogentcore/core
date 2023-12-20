@@ -25,12 +25,12 @@ type Vec2 struct {
 
 // V2 returns a new [Vec2] with the given x and y components.
 func V2(x, y float32) Vec2 {
-	return Vec2{X: x, Y: y}
+	return Vec2{x, y}
 }
 
 // V2Scalar returns a new [Vec2] with all components set to the given scalar value.
 func V2Scalar(s float32) Vec2 {
-	return Vec2{X: s, Y: s}
+	return Vec2{s, s}
 }
 
 // V2FromPoint returns a new [Vec2] from the given [image.Point].
@@ -216,15 +216,15 @@ func (a *Vec2) SetFixed(pt fixed.Point26_6) {
 }
 
 func (a Vec2) ToCeil() Vec2 {
-	return Vec2{Ceil(a.X), Ceil(a.Y)}
+	return V2(Ceil(a.X), Ceil(a.Y))
 }
 
 func (a Vec2) ToFloor() Vec2 {
-	return Vec2{Floor(a.X), Floor(a.Y)}
+	return V2(Floor(a.X), Floor(a.Y))
 }
 
 func (a Vec2) ToRound() Vec2 {
-	return Vec2{Round(a.X), Round(a.Y)}
+	return V2(Round(a.X), Round(a.Y))
 }
 
 func (a Vec2) ToPoint() image.Point {
@@ -281,12 +281,12 @@ func (v Vec2) ToArray(array []float32, offset int) {
 
 // Add adds other vector to this one and returns result in a new vector.
 func (v Vec2) Add(other Vec2) Vec2 {
-	return Vec2{v.X + other.X, v.Y + other.Y}
+	return V2(v.X+other.X, v.Y+other.Y)
 }
 
 // AddScalar adds scalar s to each component of this vector and returns new vector.
 func (v Vec2) AddScalar(s float32) Vec2 {
-	return Vec2{v.X + s, v.Y + s}
+	return V2(v.X+s, v.Y+s)
 }
 
 // SetAdd sets this to addition with other vector (i.e., += or plus-equals).
@@ -303,12 +303,12 @@ func (v *Vec2) SetAddScalar(s float32) {
 
 // Sub subtracts other vector from this one and returns result in new vector.
 func (v Vec2) Sub(other Vec2) Vec2 {
-	return Vec2{v.X - other.X, v.Y - other.Y}
+	return V2(v.X-other.X, v.Y-other.Y)
 }
 
 // SubScalar subtracts scalar s from each component of this vector and returns new vector.
 func (v Vec2) SubScalar(s float32) Vec2 {
-	return Vec2{v.X - s, v.Y - s}
+	return V2(v.X-s, v.Y-s)
 }
 
 // SetSub sets this to subtraction with other vector (i.e., -= or minus-equals).
@@ -326,12 +326,12 @@ func (v *Vec2) SetSubScalar(s float32) {
 // Mul multiplies each component of this vector by the corresponding one from other
 // and returns resulting vector.
 func (v Vec2) Mul(other Vec2) Vec2 {
-	return Vec2{v.X * other.X, v.Y * other.Y}
+	return V2(v.X*other.X, v.Y*other.Y)
 }
 
 // MulScalar multiplies each component of this vector by the scalar s and returns resulting vector.
 func (v Vec2) MulScalar(s float32) Vec2 {
-	return Vec2{v.X * s, v.Y * s}
+	return V2(v.X*s, v.Y*s)
 }
 
 // SetMul sets this to multiplication with other vector (i.e., *= or times-equals).
@@ -349,7 +349,7 @@ func (v *Vec2) SetMulScalar(s float32) {
 // Div divides each component of this vector by the corresponding one from other vector
 // and returns resulting vector.
 func (v Vec2) Div(other Vec2) Vec2 {
-	return Vec2{v.X / other.X, v.Y / other.Y}
+	return V2(v.X/other.X, v.Y/other.Y)
 }
 
 // DivScalar divides each component of this vector by the scalar s and returns resulting vector.
@@ -379,12 +379,12 @@ func (v *Vec2) SetDivScalar(s float32) {
 
 // Abs returns the absolute value for each dimension
 func (v Vec2) Abs() Vec2 {
-	return Vec2{Abs(v.X), Abs(v.Y)}
+	return V2(Abs(v.X), Abs(v.Y))
 }
 
 // Min returns min of this vector components vs. other vector.
 func (v Vec2) Min(other Vec2) Vec2 {
-	return Vec2{Min(v.X, other.X), Min(v.Y, other.Y)}
+	return V2(Min(v.X, other.X), Min(v.Y, other.Y))
 }
 
 // SetMin sets this vector components to the minimum values of itself and other vector.
@@ -395,7 +395,7 @@ func (v *Vec2) SetMin(other Vec2) {
 
 // Max returns max of this vector components vs. other vector.
 func (v Vec2) Max(other Vec2) Vec2 {
-	return Vec2{Max(v.X, other.X), Max(v.Y, other.Y)}
+	return V2(Max(v.X, other.X), Max(v.Y, other.Y))
 }
 
 // SetMax sets this vector components to the maximum value of itself and other vector.
@@ -406,7 +406,7 @@ func (v *Vec2) SetMax(other Vec2) {
 
 // MinPos returns minimum of all positive (> 0) numbers
 func (a Vec2) MinPos(b Vec2) Vec2 {
-	return Vec2{MinPos(a.X, b.X), MinPos(a.Y, b.Y)}
+	return V2(MinPos(a.X, b.X), MinPos(a.Y, b.Y))
 }
 
 // SetMinPos set to minpos of current vs. other
@@ -462,7 +462,7 @@ func (v *Vec2) ClampScalar(minVal, maxVal float32) {
 
 // Floor returns vector with mat32.Floor() applied to each of this vector's components.
 func (v Vec2) Floor() Vec2 {
-	return Vec2{Floor(v.X), Floor(v.Y)}
+	return V2(Floor(v.X), Floor(v.Y))
 }
 
 // SetFloor applies mat32.Floor() to each of this vector's components.
@@ -473,7 +473,7 @@ func (v *Vec2) SetFloor() {
 
 // Ceil returns vector with mat32.Ceil() applied to each of this vector's components.
 func (v Vec2) Ceil() Vec2 {
-	return Vec2{Ceil(v.X), Ceil(v.Y)}
+	return V2(Ceil(v.X), Ceil(v.Y))
 }
 
 // SetCeil applies mat32.Ceil() to each of this vector's components.
@@ -484,7 +484,7 @@ func (v *Vec2) SetCeil() {
 
 // Round returns vector with mat32.Round() applied to each of this vector's components.
 func (v Vec2) Round() Vec2 {
-	return Vec2{Round(v.X), Round(v.Y)}
+	return V2(Round(v.X), Round(v.Y))
 }
 
 // SetRound rounds each of this vector's components.
@@ -495,7 +495,7 @@ func (v *Vec2) SetRound() {
 
 // Negate returns vector with each component negated.
 func (v Vec2) Negate() Vec2 {
-	return Vec2{-v.X, -v.Y}
+	return V2(-v.X, -v.Y)
 }
 
 // SetNegate negates each of this vector's components.
@@ -596,7 +596,7 @@ func (v Vec2) AngleTo(other Vec2) float32 {
 // Lerp returns vector with each components as the linear interpolated value of
 // alpha between itself and the corresponding other component.
 func (v Vec2) Lerp(other Vec2, alpha float32) Vec2 {
-	return Vec2{v.X + (other.X-v.X)*alpha, v.Y + (other.Y-v.Y)*alpha}
+	return V2(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha)
 }
 
 // Lerp sets each of this vector's components to the linear interpolated value of
