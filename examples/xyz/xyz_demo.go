@@ -227,11 +227,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">READ
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	xyz.NewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
+	xyz.NewArrow(sc, sc, "arrow", mat32.V3(-1.5, -.5, .5), mat32.V3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
-	// xyz.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, xyz.Active)
+	// xyz.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.V3(-2, -2, -1), Max: mat32.V3(-1, -1, .5)}, .01, bbclr, xyz.Active)
 
 	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	xyz.NewSolid(sc, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
