@@ -322,20 +322,20 @@ func (t *MatrixAdder) Reset() {
 
 // Start starts a new path
 func (t *MatrixAdder) Start(a fixed.Point26_6) {
-	t.Adder.Start(t.M.TFixed(a))
+	t.Adder.Start(t.M.MulFixedAsPt(a))
 }
 
 // Line adds a linear segment to the current curve.
 func (t *MatrixAdder) Line(b fixed.Point26_6) {
-	t.Adder.Line(t.M.TFixed(b))
+	t.Adder.Line(t.M.MulFixedAsPt(b))
 }
 
 // QuadBezier adds a quadratic segment to the current curve.
 func (t *MatrixAdder) QuadBezier(b, c fixed.Point26_6) {
-	t.Adder.QuadBezier(t.M.TFixed(b), t.M.TFixed(c))
+	t.Adder.QuadBezier(t.M.MulFixedAsPt(b), t.M.MulFixedAsPt(c))
 }
 
 // CubeBezier adds a cubic segment to the current curve.
 func (t *MatrixAdder) CubeBezier(b, c, d fixed.Point26_6) {
-	t.Adder.CubeBezier(t.M.TFixed(b), t.M.TFixed(c), t.M.TFixed(d))
+	t.Adder.CubeBezier(t.M.MulFixedAsPt(b), t.M.MulFixedAsPt(c), t.M.MulFixedAsPt(d))
 }
