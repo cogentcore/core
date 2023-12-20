@@ -59,6 +59,11 @@ func (sw *Scene) OnInit() {
 	sw.SetStyles()
 }
 
+// SceneXYZ returns the xyz.Scene
+func (sw *Scene) SceneXYZ() *xyz.Scene {
+	return sw.Scene
+}
+
 func (sw *Scene) SetStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Pressable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)

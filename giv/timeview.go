@@ -271,8 +271,8 @@ func (dv *DateView) ConfigDateGrid() {
 			dv.SetTime(dt)
 		})
 		bt.Style(func(s *styles.Style) {
-			s.Min.X.Dp(30) // 30 is key for centering
-			s.Min.Y.Dp(30)
+			s.Min.X.Dp(32) // 30 is key for centering
+			s.Min.Y.Dp(32)
 			s.Padding.Set(units.Dp(6)) // 4 min, can go higher
 			s.Align.Content = styles.Center
 			s.Align.Items = styles.Center
