@@ -159,11 +159,11 @@ func (a *Mat2) SetMulCtr(b Mat2, ctr Vec2) {
 	*a = a.MulCtr(b, ctr)
 }
 
-// TFixed transforms a fixed.Point26_6 by the matrix
-func (a Mat2) TFixed(x fixed.Point26_6) (y fixed.Point26_6) {
-	y.X = fixed.Int26_6((float32(x.X)*a.XX + float32(x.Y)*a.XY) + a.X0*32)
-	y.Y = fixed.Int26_6((float32(x.X)*a.YX + float32(x.Y)*a.YY) + a.Y0*32)
-	return
+// MulFixedAsPt multiplies the fixed point as a point, including adding translations.
+func (a Mat2) MulFixedAsPt(fp fixed.Point26_6) fixed.Point26_6 {
+	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
+	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*32)
+	return fixed.Point26_6{x, y}
 }
 
 func (a Mat2) Translate(x, y float32) Mat2 {
