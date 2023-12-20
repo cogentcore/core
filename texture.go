@@ -9,6 +9,7 @@ import (
 	"image"
 	"io/fs"
 	"log"
+	"log/slog"
 
 	"goki.dev/glop/dirs"
 	"goki.dev/grows/images"
@@ -91,19 +92,20 @@ type TextureFile struct {
 	FSys fs.FS
 
 	// filename for the texture
-	File string // gi.FileName
+	File string
 }
 
 // NewTextureFile adds a new texture from file of given name and filename
 func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
 	tx.Nm = name
-	dfs, fnm, err := dirs.DirFS(string(tx.File))
+	dfs, fnm, err := dirs.DirFS(filename)
 	if err != nil {
-		log.Println(err)
+		slog.Error("xyz.NewTextureFile: Image not found error", "file:", filename, "error", err)
+		return nil
 	}
 	tx.FSys = dfs
-	tx.File = fnm // gi.FileName(fnm)
+	tx.File = fnm
 	sc.AddTexture(tx)
 	return tx
 }
@@ -113,7 +115,7 @@ func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *Text
 	tx := &TextureFile{}
 	tx.Nm = name
 	tx.FSys = fsys
-	tx.File = filename // gi.FileName(filename)
+	tx.File = filename
 	sc.AddTexture(tx)
 	return tx
 }
@@ -127,9 +129,9 @@ func (tx *TextureFile) Image() *image.RGBA {
 		log.Println(err)
 		return nil
 	}
-	img, _, err := images.OpenFS(tx.FSys, string(tx.File))
+	img, _, err := images.OpenFS(tx.FSys, tx.File)
 	if err != nil {
-		log.Println(err)
+		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
 	}
 	tx.Img = vgpu.ImageToRGBA(img)

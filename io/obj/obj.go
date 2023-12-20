@@ -20,7 +20,6 @@ import (
 	"io"
 	"io/fs"
 	"math"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -39,8 +38,8 @@ func init() {
 // It also implements the xyz.Decoder interface and an instance
 // is registered to handle .obj files.
 type Decoder struct {
-	Objfile       string               // .obj filename (without path)
-	Objdir        string               // path to .obj file
+	FSys          fs.FS                // filesystem, used for all loading
+	Objfile       string               // .obj filename within FSys
 	Objects       []Object             // decoded objects
 	Matlib        string               // name of the material lib
 	Materials     map[string]*Material // maps material name to object
@@ -90,24 +89,18 @@ func (dec *Decoder) HasScene() bool {
 	return false
 }
 
-func (dec *Decoder) SetFile(fname string) []string {
-	dec.Objdir, dec.Objfile = filepath.Split(fname)
-	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
-	if _, err := os.Stat(mtlf); !os.IsNotExist(err) {
-		return []string{fname, mtlf}
-	} else {
-		return []string{fname}
+func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) ([]string, error) {
+	dec.FSys = fsys
+	exists, err := dirs.FileExistsFS(dec.FSys, fname)
+	if !exists {
+		return nil, errors.New("xyz obj.Decoder: " + err.Error())
 	}
-}
-
-func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) []string {
-	dec.Objdir, dec.Objfile = filepath.Split(fname)
 	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
-	exists, _ := dirs.FileExistsFS(fsys, fname)
+	exists, _ = dirs.FileExistsFS(dec.FSys, fname)
 	if exists {
-		return []string{fname, mtlf}
+		return []string{fname, mtlf}, nil
 	} else {
-		return []string{fname}
+		return []string{fname}, nil
 	}
 }
 
@@ -116,7 +109,7 @@ func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) []string {
 func (dec *Decoder) Decode(rs []io.Reader) error {
 	nf := len(rs)
 	if nf == 0 {
-		return errors.New("obj.Decoder: no readers passed")
+		return errors.New("xyz obj.Decoder: no readers passed")
 	}
 	// Parses obj lines
 	err := dec.parse(rs[0], dec.parseObjLine)
@@ -344,16 +337,10 @@ func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Ma
 	if texfn == "" {
 		return
 	}
-	var texPath string
-	if filepath.IsAbs(texfn) {
-		texPath = texfn
-	} else {
-		texPath = filepath.Join(dec.Objdir, texfn)
-	}
-	_, tfn := filepath.Split(texPath)
+	_, tfn := filepath.Split(texfn)
 	tf, err := sc.TextureByNameTry(tfn)
 	if err != nil {
-		tf = xyz.NewTextureFile(sc, tfn, texPath)
+		tf = xyz.NewTextureFileFS(dec.FSys, sc, tfn, texfn)
 	}
 	sld.Mat.SetTexture(tf)
 	if mat.Tiling.Repeat.X > 0 {

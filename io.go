@@ -24,17 +24,14 @@ type Decoder interface {
 	// Desc returns the description of this decoder
 	Desc() string
 
-	// SetFile sets the file name being used for decoding -- needed in case
-	// of loading other files such as textures / materials from the same directory.
+	// SetFile sets the file name being used for decoding, or error if not found.
 	// Returns a list of files that should be loaded along with the main one, if needed.
-	// For example, .obj decoder adds a corresponding .mtl file.
-	SetFile(fname string) []string
-
-	// SetFileFS sets the file name being used for decoding -- needed in case
-	// of loading other files such as textures / materials from the same directory.
-	// Returns a list of files that should be loaded along with the main one, if needed.
-	// For example, .obj decoder adds a corresponding .mtl file.
-	SetFileFS(fsys fs.FS, fname string) []string
+	// For example, .obj decoder adds a corresponding .mtl file.  In addition,
+	// decoded files may specify further files (textures, etc) that must be located
+	// relative to the same fsys directory.
+	// All file operations use the fsys file system for access, and this should be a
+	// Sub FS anchored at the directory where the filename is located.
+	SetFileFS(fsys fs.FS, fname string) ([]string, error)
 
 	// Decode reads the given data and decodes it, returning a new instance
 	// of the Decoder that contains all the decoded info.
@@ -85,10 +82,21 @@ func DecodeFileFS(fsys fs.FS, fname string) (Decoder, error) {
 		return nil, fmt.Errorf("xyz.DecodeFile: file extension: %v not found in Decoders list for file %v", ext, fname)
 	}
 	dec := dt.New()
-	files := dec.SetFileFS(fsys, fname)
+	fn := fname
+	subdir, fn := filepath.Split(fn)
+	var err error
+	if subdir != "" {
+		fsys, err = fs.Sub(fsys, subdir)
+		if err != nil {
+			return nil, fmt.Errorf("xyz.DecodeFile: file directory not found error: %v for file: %v", err, fname)
+		}
+	}
+	files, err := dec.SetFileFS(fsys, fn)
+	if err != nil {
+		return nil, fmt.Errorf("xyz.DecodeFile: file not found error: %v for file: %v", err, fname)
+	}
 	nf := len(files)
 
-	var err error
 	fs := make([]fs.File, nf)
 	rs := make([]io.Reader, nf)
 	defer func() {
@@ -271,9 +279,10 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 	if !has {
 		return fmt.Errorf("xyz.ReadObj: file extension: %v not found in Decoders list", ext)
 	}
+	dfs, fnm, err := dirs.DirFS(fname)
 	dec := dt.New()
-	dec.SetFile(fname)
-	err := dec.Decode(rs)
+	dec.SetFileFS(dfs, fnm)
+	err = dec.Decode(rs)
 	if err != nil {
 		return err
 	}
@@ -300,9 +309,10 @@ func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 	if !has {
 		return fmt.Errorf("xyz.ReadScene: file extension: %v not found in Decoders list", ext)
 	}
+	dfs, fnm, err := dirs.DirFS(fname)
 	dec := dt.New()
-	dec.SetFile(fname)
-	err := dec.Decode(rs)
+	dec.SetFileFS(dfs, fnm)
+	err = dec.Decode(rs)
 	if err != nil {
 		return err
 	}
