@@ -16,7 +16,6 @@ import (
 	vk "github.com/goki/vulkan"
 	"goki.dev/enums"
 	"goki.dev/grows/images"
-	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -540,7 +539,7 @@ func (im *Image) SetGoImage(img image.Image, layer int, flipY bool) error {
 	if !im.Format.IsStdRGBA() {
 		return fmt.Errorf("vgpu.Image: Format is not standard RGBA format: %s", im.Name)
 	}
-	if laser.AnyIsNil(img) {
+	if img == nil {
 		return fmt.Errorf("vgpu.Image: input image is nil: %s", im.Name)
 	}
 	rimg := ImageToRGBA(img)
