@@ -90,7 +90,7 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos mat32.Vec2, vertexAng, stroke
 		ang, _ = mat32.ParseAngle32(mrk.Orient)
 	}
 	if mrk.ViewBox.Size.IsNil() {
-		mrk.ViewBox.Size = mat32.Vec2{3, 3}
+		mrk.ViewBox.Size = mat32.V2(3, 3)
 	}
 	mrk.Transform = mat32.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
 	mrk.Transform.X0 += vertexPos.X

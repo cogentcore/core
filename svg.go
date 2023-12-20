@@ -245,7 +245,7 @@ func (sv *SVG) FillViewport() {
 // SetRootTransform sets the Root node transform based on Norm, Translate, Scale
 // parameters set on the SVG object.
 func (sv *SVG) SetRootTransform() {
-	sc := mat32.Vec2{1, 1}
+	sc := mat32.V2(1, 1)
 	tr := mat32.Vec2{}
 	if sv.Norm {
 		vb := &sv.Root.ViewBox
