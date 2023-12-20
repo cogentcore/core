@@ -333,7 +333,7 @@ func (nb *NodeBase) RayPick(pos image.Point) mat32.Ray {
 	lpos := mat32.V4FromV3(wpos, 1).MulMat4(invM)
 	ldir := wdir.MulMat4(invM)
 	ldir.SetNormal()
-	ray := mat32.NewRay(mat32.Vec3{lpos.X, lpos.Y, lpos.Z}, mat32.Vec3{ldir.X, ldir.Y, ldir.Z})
+	ray := mat32.NewRay(mat32.V3(lpos.X, lpos.Y, lpos.Z), mat32.V3(ldir.X, ldir.Y, ldir.Z))
 	return *ray
 }
 

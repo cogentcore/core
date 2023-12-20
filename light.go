@@ -184,7 +184,7 @@ func (sl *SpotLight) ViewDir() mat32.Vec3 {
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
 	// sl.Pose.UpdateMVPMatrix(viewMat, idmat)
-	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&sl.Pose.WorldMatrix, 0).Normal()
+	vd := mat32.V3(0, 0, -1).MulMat4AsVec4(&sl.Pose.WorldMatrix, 0).Normal()
 	return vd
 }
 

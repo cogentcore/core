@@ -193,8 +193,8 @@ func (cm *Camera) Orbit(delX, delY float32) {
 // and it moves the target by the same increment, changing the target position.
 func (cm *Camera) Pan(delX, delY float32) {
 	cm.CamMu.Lock()
-	dx := mat32.Vec3{-delX, 0, 0}.MulQuat(cm.Pose.Quat)
-	dy := mat32.Vec3{0, -delY, 0}.MulQuat(cm.Pose.Quat)
+	dx := mat32.V3(-delX, 0, 0).MulQuat(cm.Pose.Quat)
+	dy := mat32.V3(0, -delY, 0).MulQuat(cm.Pose.Quat)
 	td := dx.Add(dy)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
@@ -204,7 +204,7 @@ func (cm *Camera) Pan(delX, delY float32) {
 // PanAxis moves the camera and target along world X,Y axes
 func (cm *Camera) PanAxis(delX, delY float32) {
 	cm.CamMu.Lock()
-	td := mat32.Vec3{-delX, -delY, 0}
+	td := mat32.V3(-delX, -delY, 0)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
 	cm.CamMu.Unlock()
@@ -214,7 +214,7 @@ func (cm *Camera) PanAxis(delX, delY float32) {
 // at the new target location.  It ensures that the target is not
 // identical to the camera position.
 func (cm *Camera) PanTarget(delX, delY, delZ float32) {
-	td := mat32.Vec3{-delX, -delY, delZ}
+	td := mat32.V3(-delX, -delY, delZ)
 	cm.Target.SetAdd(td)
 	dist := cm.ViewVector().Length()
 	cm.CamMu.Lock()

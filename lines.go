@@ -117,7 +117,7 @@ func SetLineStartEnd(ln *Solid, st, ed mat32.Vec3) {
 	dst := st.DistTo(ed)
 	ln.Pose.Scale.Set(dst, wd, wd)
 	dn := d.Normal()
-	ln.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
+	ln.Pose.Quat.SetFromUnitVectors(mat32.V3(1, 0, 0), dn)
 }
 
 const (
@@ -160,8 +160,8 @@ func NewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width flo
 
 	if startArrow {
 		ar := NewSolid(gp, name+"-start-arrow").SetMesh(cm)
-		ar.Pose.Scale.Set(awd, asz, awd)                              // Y is up
-		ar.Pose.Quat.SetFromAxisAngle(mat32.Vec3{0, 0, 1}, math.Pi/2) // rotate from XY up to -X
+		ar.Pose.Scale.Set(awd, asz, awd)                            // Y is up
+		ar.Pose.Quat.SetFromAxisAngle(mat32.V3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
 		ar.Pose.Pos = st.Add(dn.MulScalar(.5 * asz))
 		ar.Mat.Color = clr
@@ -169,7 +169,7 @@ func NewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width flo
 	if endArrow {
 		ar := NewSolid(gp, name+"-end-arrow").SetMesh(cm)
 		ar.Pose.Scale.Set(awd, asz, awd)
-		ar.Pose.Quat.SetFromAxisAngle(mat32.Vec3{0, 0, 1}, -math.Pi/2) // rotate from XY up to +X
+		ar.Pose.Quat.SetFromAxisAngle(mat32.V3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
 		ar.Pose.Pos = ed.Add(dn.MulScalar(-.5 * asz))
 		ar.Mat.Color = clr
@@ -186,17 +186,17 @@ func NewLineBoxMeshes(sc *Scene, meshNm string, bbox mat32.Box3, width float32) 
 	hSz := sz.MulScalar(0.5)
 
 	// front mesh
-	fbl := mat32.Vec3{-hSz.X, -hSz.Y, 0}
-	ftl := mat32.Vec3{-hSz.X, hSz.Y, 0}
-	ftr := mat32.Vec3{hSz.X, hSz.Y, 0}
-	fbr := mat32.Vec3{hSz.X, -hSz.Y, 0}
+	fbl := mat32.V3(-hSz.X, -hSz.Y, 0)
+	ftl := mat32.V3(-hSz.X, hSz.Y, 0)
+	ftr := mat32.V3(hSz.X, hSz.Y, 0)
+	fbr := mat32.V3(hSz.X, -hSz.Y, 0)
 	front = NewLines(sc, meshNm+"-front", []mat32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
 
 	// side mesh in XY plane, Z -> X
-	sbl := mat32.Vec3{-hSz.Z, -hSz.Y, 0}
-	stl := mat32.Vec3{-hSz.Z, hSz.Y, 0}
-	str := mat32.Vec3{hSz.Z, hSz.Y, 0}
-	sbr := mat32.Vec3{hSz.Z, -hSz.Y, 0}
+	sbl := mat32.V3(-hSz.Z, -hSz.Y, 0)
+	stl := mat32.V3(-hSz.Z, hSz.Y, 0)
+	str := mat32.V3(hSz.Z, hSz.Y, 0)
+	sbr := mat32.V3(hSz.Z, -hSz.Y, 0)
 	side = NewLines(sc, meshNm+"-side", []mat32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
 	return
 }
