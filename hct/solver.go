@@ -32,7 +32,7 @@ import (
 func SolveToRGBLin(hue, chroma, tone float32) mat32.Vec3 {
 	if chroma < 0.0001 || tone < 0.0001 || tone > 99.9999 {
 		y := cie.LToY(tone)
-		return mat32.Vec3{y, y, y}
+		return mat32.V3(y, y, y)
 	}
 	tone = mat32.Clamp(tone, 0, 100)
 	hue_deg := cam16.SanitizeDeg(hue)
@@ -91,7 +91,7 @@ func FindResultByJ(hue_rad, chroma, y float32) *mat32.Vec3 {
 		r_c_scaled := cam16.InverseChromaticAdapt(r_a)
 		g_c_scaled := cam16.InverseChromaticAdapt(g_a)
 		b_c_scaled := cam16.InverseChromaticAdapt(b_a)
-		scaled := mat32.Vec3{r_c_scaled, g_c_scaled, b_c_scaled}
+		scaled := mat32.V3(r_c_scaled, g_c_scaled, b_c_scaled)
 		linrgb := MatMul(scaled, kLinrgbFromScaledDiscount)
 
 		if linrgb.X < 0 || linrgb.Y < 0 || linrgb.Z < 0 {
