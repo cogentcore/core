@@ -1,6 +1,6 @@
 Name = "greasi"
 Desc = ""
-Version = "v0.8.20"
+Version = "v0.8.21"
 Type = "Library"
 
 [Build]
