@@ -4,9 +4,9 @@ package goosi
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.23"
+	Version = "v0.0.24"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "cb1844e"
+	GitCommit = "419976c"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-12-20 23:50"
+	VersionDate = "2023-12-21 00:35"
 )
