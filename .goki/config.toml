@@ -1,6 +1,6 @@
 Name = "gti"
 Desc = ""
-Version = "v0.1.30"
+Version = "v0.1.31"
 Type = "Library"
 
 [Build]

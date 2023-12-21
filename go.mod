@@ -4,10 +4,10 @@ go 1.21
 
 require (
 	github.com/iancoleman/strcase v0.3.0
-	goki.dev/gengo v0.3.14
+	goki.dev/gengo v0.3.15
 	goki.dev/glop v0.1.9
-	goki.dev/grease v0.8.41
-	goki.dev/laser v0.1.31
+	goki.dev/grease v0.8.43
+	goki.dev/laser v0.1.32
 	goki.dev/ordmap v0.5.9
 	golang.org/x/tools v0.16.1
 )
@@ -25,10 +25,10 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	goki.dev/cam v0.9.47 // indirect
 	goki.dev/colors v0.8.42 // indirect
-	goki.dev/enums v0.9.53 // indirect
+	goki.dev/enums v0.9.55 // indirect
 	goki.dev/grog v0.0.25 // indirect
-	goki.dev/grows v0.3.28 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.25 // indirect
+	goki.dev/grows v0.3.30 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.26 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
