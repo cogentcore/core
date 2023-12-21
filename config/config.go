@@ -1,9 +1,9 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package config contains the configuration
-// structs for the GoKi tool.
+// structs for the Goki tool.
 package config
 
 import (
@@ -20,7 +20,7 @@ import (
 
 // Config is the main config struct
 // that contains all of the configuration
-// options for the GoKi tool
+// options for the Goki tool
 type Config struct { //gti:add
 
 	// the name of the project

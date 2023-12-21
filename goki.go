@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	opts := grease.DefaultOptions("goki", "GoKi", "Command line and GUI tools for developing apps and libraries using the GoKi framework.")
+	opts := grease.DefaultOptions("goki", "Goki", "Command line and GUI tools for developing apps and libraries using the Goki framework.")
 	opts.DefaultFiles = []string{".goki/config.toml"}
 	opts.SearchUp = true
 	greasi.Run(opts, &config.Config{}, packman.Build, packman.Install, packman.Run, generate.Generate, tools.Init, tools.Setup, packman.Log, packman.Release, packman.GetVersion, packman.SetVersion, packman.UpdateVersion)

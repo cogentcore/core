@@ -1,10 +1,10 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package generate provides the generation
 // of useful methods, variables, and constants
-// for GoKi code.
+// for Goki code.
 package generate
 
 import (
