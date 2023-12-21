@@ -7,13 +7,14 @@ package gi
 import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/glop/sentence"
 )
 
 // Body holds the primary content of a Scene
 type Body struct { //goki:no-new
 	Frame
 
-	// title of the Scene, also used for window title where relevant
+	// title of the Body, also used for window title where relevant
 	Title string
 }
 
@@ -31,6 +32,7 @@ func NewBody(name ...string) *Body {
 		nm = name[0]
 	}
 	bd.InitName(bd, nm)
+	bd.Title = sentence.Case(nm)
 	bd.Sc = NewBodyScene(bd)
 	return bd
 }
@@ -71,5 +73,6 @@ func (bd *Body) AddText(text string) *Body {
 func (bd *Body) SetApp(app *App) *Body {
 	bd.Sc.App = app
 	bd.Nm = app.Name
+	bd.Title = sentence.Case(bd.Nm)
 	return bd
 }
