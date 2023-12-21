@@ -163,7 +163,7 @@ type Buf struct {
 func NewBuf() *Buf {
 	tb := &Buf{}
 	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.EditorPrefs = gi.Prefs.Editor
+	tb.Opts.EditorPrefs = gi.BasicSettings.Editor
 	return tb
 }
 

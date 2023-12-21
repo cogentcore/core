@@ -31,13 +31,13 @@ import (
 // -- automatically called when new window opened, but can be called before
 // then if pref info needed.
 func Init() {
-	if Prefs.Zoom == 0 {
-		Prefs.Defaults()
+	if BasicSettings.Zoom == 0 {
+		BasicSettings.Defaults()
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
-		Prefs.Open()
-		goosi.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
-		Prefs.Apply()
+		BasicSettings.Open()
+		goosi.InitScreenLogicalDPIFunc = BasicSettings.ApplyDPI // called when screens are initialized
+		BasicSettings.Apply()
 		if TheViewIFace != nil {
 			TheViewIFace.HiStyleInit()
 		}
@@ -46,11 +46,9 @@ func Init() {
 	}
 }
 
-// Preferences are the overall user preferences for GoGi, providing some basic
-// customization -- in addition, most gui settings can be styled using
-// CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
-// the GoGi user preferences directory -- see goosi/App for further info.
-type Preferences struct { //gti:add
+// BasicSettingsType is the type of the basic Goki appearance settings.
+// The global current instance is stored as [BasicSettings].
+type BasicSettingsType struct { //gti:add
 
 	// the color theme
 	Theme Themes
@@ -124,14 +122,14 @@ type Preferences struct { //gti:add
 	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
-// Prefs are the overall preferences
-var Prefs = Preferences{}
+// BasicSettings are the currently active global basic Goki settings.
+var BasicSettings = BasicSettingsType{}
 
-// OverridePrefsColor is whether to override the color specified in [Prefs.Color]
+// OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
 // with whatever the developer specifies, typically through [colors.SetSchemes].
 // The intended usage is:
 //
-//	gi.OverridePrefsColor = true
+//	gi.OverrideSettingsColor = true
 //	colors.SetSchemes(colors.Green)
 //
 // It is recommended that you do not set this to give the user more control over
@@ -139,11 +137,11 @@ var Prefs = Preferences{}
 //
 // The user preference color will always be overridden if it is the default value
 // of Google Blue (#4285f4), so a more recommended option would be to set your
-// own custom scheme but not OverridePrefsColor, giving you brand colors unless
+// own custom scheme but not OverrideSettingsColor, giving you brand colors unless
 // your user explicitly states a preference for a specific color.
-var OverridePrefsColor = false
+var OverrideSettingsColor = false
 
-func (pf *Preferences) Defaults() {
+func (pf *BasicSettingsType) Defaults() {
 	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
@@ -161,7 +159,7 @@ func (pf *Preferences) Defaults() {
 
 // UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
-func (pf *Preferences) UpdateAll() { //gti:add
+func (pf *BasicSettingsType) UpdateAll() { //gti:add
 	pf.Apply()
 	gradient.Cache = nil
 	for _, w := range AllRenderWins {
@@ -175,7 +173,7 @@ func (pf *Preferences) UpdateAll() { //gti:add
 var PrefsFileName = "prefs.toml"
 
 // Open preferences from GoGi standard prefs directory
-func (pf *Preferences) Open() error { //gti:add
+func (pf *BasicSettingsType) Open() error { //gti:add
 	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	err := grr.Log(tomls.Open(pf, pnm))
@@ -204,7 +202,7 @@ func (pf *Preferences) Open() error { //gti:add
 }
 
 // Save saves the preferences to the GoGi standard prefs directory
-func (pf *Preferences) Save() error { //gti:add
+func (pf *BasicSettingsType) Save() error { //gti:add
 	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	err := grr.Log(tomls.Save(pf, pnm))
@@ -233,7 +231,7 @@ func (pf *Preferences) Save() error { //gti:add
 // This is an unrecoverable action, and you should only do this if you
 // are absolutely sure you want to. You may want to consider making a copy
 // of your preferences through "Save as" before doing this.
-func (pf *Preferences) Delete() error { //gti:add
+func (pf *BasicSettingsType) Delete() error { //gti:add
 	pdir := GoGiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	return os.Remove(pnm)
@@ -243,7 +241,7 @@ func (pf *Preferences) Delete() error { //gti:add
 
 // LightMode sets the color theme to light mode. It automatically
 // saves the preferences and updates all of the windows.
-func (pf *Preferences) LightMode() { //gti:add
+func (pf *BasicSettingsType) LightMode() { //gti:add
 	pf.Theme = ThemeLight
 	colors.SetScheme(false)
 	grr.Log(pf.Save())
@@ -252,7 +250,7 @@ func (pf *Preferences) LightMode() { //gti:add
 
 // DarkMode sets the color theme to dark mode. It automatically
 // saves the preferences and updates all of the windows.
-func (pf *Preferences) DarkMode() { //gti:add
+func (pf *BasicSettingsType) DarkMode() { //gti:add
 	pf.Theme = ThemeDark
 	colors.SetScheme(true)
 	pf.Save()
@@ -260,7 +258,7 @@ func (pf *Preferences) DarkMode() { //gti:add
 }
 
 // Apply preferences to all the relevant settings.
-func (pf *Preferences) Apply() { //gti:add
+func (pf *BasicSettingsType) Apply() { //gti:add
 	np := len(pf.FavPaths)
 	for i := 0; i < np; i++ {
 		if pf.FavPaths[i].Ic == "" {
@@ -269,7 +267,7 @@ func (pf *Preferences) Apply() { //gti:add
 	}
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
 	// which means that we will always override the color, even without OverridePrefsColor
-	if !OverridePrefsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
+	if !OverrideSettingsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(pf.Color)
 	}
 	// TODO(kai): figure out transparency approach
@@ -311,7 +309,7 @@ func (pf *Preferences) Apply() { //gti:add
 
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
-func (pf *Preferences) ApplyDPI() {
+func (pf *BasicSettingsType) ApplyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
 	goosi.LogicalDPIScale = pf.Zoom / 100
 	// fmt.Println("goosi ldpi:", goosi.LogicalDPIScale)
@@ -337,7 +335,7 @@ func (pf *Preferences) ApplyDPI() {
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
 //   - forCurrentScreen: if true, saves only for current screen
-func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
+func (pf *BasicSettingsType) SaveZoom(forCurrentScreen bool) { //gti:add
 	goosi.ZoomFactor = 1 // reset -- otherwise has 2x effect
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
@@ -357,7 +355,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
 }
 
 // ScreenInfo returns screen info for all screens on the device
-func (pf *Preferences) ScreenInfo() []*goosi.Screen { //gti:add
+func (pf *BasicSettingsType) ScreenInfo() []*goosi.Screen { //gti:add
 	ns := goosi.TheApp.NScreens()
 	res := make([]*goosi.Screen, ns)
 	for i := 0; i < ns; i++ {
@@ -367,7 +365,7 @@ func (pf *Preferences) ScreenInfo() []*goosi.Screen { //gti:add
 }
 
 // VersionInfo returns GoGi version information
-func (pf *Preferences) VersionInfo() string { //gti:add
+func (pf *BasicSettingsType) VersionInfo() string { //gti:add
 	vinfo := "Version: " + Version + "\nDate: " + VersionDate + " UTC\nGit commit: " + GitCommit
 	return vinfo
 }
@@ -376,21 +374,21 @@ func (pf *Preferences) VersionInfo() string { //gti:add
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (pf *Preferences) DeleteSavedWindowGeoms() { //gti:add
+func (pf *BasicSettingsType) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
 // EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /
 // load from other files, etc.  Current avail keymaps are saved and loaded
 // with preferences automatically.
-func (pf *Preferences) EditKeyMaps() { //gti:add
+func (pf *BasicSettingsType) EditKeyMaps() { //gti:add
 	pf.SaveKeyMaps = true
 	pf.Changed = true
 	TheViewIFace.KeyMapsView(&keyfun.AvailMaps)
 }
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
-func (pf *Preferences) EditHiStyles() { //gti:add
+func (pf *BasicSettingsType) EditHiStyles() { //gti:add
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
@@ -399,7 +397,7 @@ func (pf *Preferences) EditHiStyles() { //gti:add
 // really care. Turns on the SaveDetailed flag so these will be
 // saved and loaded automatically; you can toggle that back off
 // if you don't actually want to.
-func (pf *Preferences) EditDetailed() { //gti:add
+func (pf *BasicSettingsType) EditDetailed() { //gti:add
 	pf.SaveDetailed = true
 	pf.Changed = true
 	TheViewIFace.PrefsDetView(&PrefsDet)
@@ -408,12 +406,12 @@ func (pf *Preferences) EditDetailed() { //gti:add
 // EditDebug opens the PrefsDbgView editor to control debugging
 // parameters. These are not saved; they are only set dynamically
 // during running.
-func (pf *Preferences) EditDebug() { //gti:add
+func (pf *BasicSettingsType) EditDebug() { //gti:add
 	TheViewIFace.PrefsDbgView(&PrefsDbg)
 }
 
 // UpdateUser gets the user info from the OS
-func (pf *Preferences) UpdateUser() {
+func (pf *BasicSettingsType) UpdateUser() {
 	usr, err := user.Current()
 	if err == nil {
 		pf.User.User = *usr
@@ -421,7 +419,7 @@ func (pf *Preferences) UpdateUser() {
 }
 
 // PrefFontFamily returns the default FontFamily
-func (pf *Preferences) PrefFontFamily() string {
+func (pf *BasicSettingsType) PrefFontFamily() string {
 	// TODO: where should this go?
 	return string(pf.FontFamily)
 }
@@ -445,7 +443,7 @@ const (
 // DensityMul returns an enum value representing the type
 // of density that the user has selected, based on a set of
 // fixed breakpoints.
-func (pf *Preferences) DensityType() Densities {
+func (pf *BasicSettingsType) DensityType() Densities {
 	switch {
 	case pf.Spacing < 50:
 		return DensityCompact
@@ -459,7 +457,7 @@ func (pf *Preferences) DensityType() Densities {
 // TimeFormat returns the Go time format layout string that should
 // be used for displaying times to the user, based on the value of
 // [Prefs.Clock24].
-func (pf *Preferences) TimeFormat() string {
+func (pf *BasicSettingsType) TimeFormat() string {
 	if pf.Clock24 {
 		return "15:04"
 	}

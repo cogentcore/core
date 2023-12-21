@@ -23,7 +23,7 @@ func (vi *ViewIFace) Inspector(obj ki.Ki) {
 	InspectorDialog(obj)
 }
 
-func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {
+func (vi *ViewIFace) PrefsView(prefs *gi.BasicSettingsType) {
 	PrefsView(prefs)
 }
 

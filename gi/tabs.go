@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -654,7 +654,7 @@ func (tb *Tab) ConfigPartsDeleteButton() {
 				return
 			}
 			idx, _ := ts.TabIndexByLabel(tb.Text)
-			if !Prefs.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
+			if !BasicSettings.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
 				ts.DeleteTabIndex(idx, true)
 			} else {
 				ts.SelectTabIndex(idx) // otherwise select

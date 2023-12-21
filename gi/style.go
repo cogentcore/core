@@ -135,7 +135,7 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 	s.StateLayer = s.State.StateLayer()
 
-	s.Font.Family = string(Prefs.FontFamily)
+	s.Font.Family = string(BasicSettings.FontFamily)
 }
 
 // SetStyles sets the base, widget-universal default
@@ -148,7 +148,7 @@ func (wb *WidgetBase) ResetStyleWidget() {
 // this, to update state flags.
 func (wb *WidgetBase) SetStyles() {
 	wb.Style(func(s *styles.Style) {
-		fsz := Prefs.FontSize / 100
+		fsz := BasicSettings.FontSize / 100
 		s.Font.Size.Val *= fsz
 		s.Text.LineHeight.Val *= fsz
 
@@ -189,7 +189,7 @@ func (wb *WidgetBase) RunStylers() {
 func (wb *WidgetBase) ApplyStylePrefs() {
 	s := &wb.Styles
 
-	spc := Prefs.Spacing / 100
+	spc := BasicSettings.Spacing / 100
 	s.Margin.Top.Val *= spc
 	s.Margin.Right.Val *= spc
 	s.Margin.Bottom.Val *= spc
