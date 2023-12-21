@@ -772,7 +772,8 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 	tv.SortIdx = fldIdx
 	tv.SortSlice()
-	tv.Update() // requires full update due to sort button icon
+	sgh.Update() // requires full update due to sort button icon
+	tv.UpdateWidgets()
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or
