@@ -50,8 +50,22 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
+	Name: "goki.dev/goki/packman.VersionRelease",
+	Doc:  "VersionRelease calls update-version and then release. It is the standard release path.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+})
+
+var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.Release",
-	Doc:  "Release releases the config project\nby calling [ReleaseApp] if it is an app\nand [ReleaseLibrary] if it is a library.",
+	Doc:  "Release releases the project as a git tag. It should be called after update-version or similar.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -93,7 +107,7 @@ var _ = gti.AddFunc(&gti.Func{
 
 var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.SetVersion",
-	Doc:  "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.",
+	Doc:  "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.\nAfter it, release or similar should be called to push the git tags.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -107,7 +121,7 @@ var _ = gti.AddFunc(&gti.Func{
 
 var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.UpdateVersion",
-	Doc:  "UpdateVersion updates the version of the project by one patch version.",
+	Doc:  "UpdateVersion updates the version of the project by one patch version.\nAfter it, release or similar should be called to push the git tags.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},

@@ -11,7 +11,7 @@ var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/goki/config.Config",
 	ShortName: "config.Config",
 	IDName:    "config",
-	Doc:       "Config is the main config struct\nthat contains all of the configuration\noptions for the GoKi tool",
+	Doc:       "Config is the main config struct\nthat contains all of the configuration\noptions for the Goki tool",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},

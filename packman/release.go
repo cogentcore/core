@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -11,9 +11,16 @@ import (
 	"goki.dev/xe"
 )
 
-// Release releases the config project
-// by calling [ReleaseApp] if it is an app
-// and [ReleaseLibrary] if it is a library.
+// VersionRelease calls update-version and then release. It is the standard release path.
+func VersionRelease(c *config.Config) error { //gti:add
+	err := UpdateVersion(c)
+	if err != nil {
+		return err
+	}
+	return Release(c)
+}
+
+// Release releases the project as a git tag. It should be called after update-version or similar.
 func Release(c *config.Config) error { //gti:add
 	if c.Type == config.TypeApp {
 		return ReleaseApp(c)

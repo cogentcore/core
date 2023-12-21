@@ -4,6 +4,7 @@ package config
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
@@ -113,5 +114,8 @@ func (i Types) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Types) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

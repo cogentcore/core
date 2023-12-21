@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -24,6 +24,7 @@ func GetVersion(c *config.Config) error { //gti:add
 
 // SetVersion updates the config and version file of the config project based
 // on the config version and commits and pushes the changes.
+// After it, release or similar should be called to push the git tags.
 func SetVersion(c *config.Config) error { //gti:add
 	// we need to update the config file with the new version
 	// TODO: determine correct config file instead of just first one
@@ -47,6 +48,7 @@ func SetVersion(c *config.Config) error { //gti:add
 }
 
 // UpdateVersion updates the version of the project by one patch version.
+// After it, release or similar should be called to push the git tags.
 func UpdateVersion(c *config.Config) error { //gti:add
 	ver, err := semver.NewVersion(c.Version)
 	if err != nil {
