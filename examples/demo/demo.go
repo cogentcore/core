@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -157,7 +157,6 @@ func makeButtons(ts *gi.Tabs) {
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
-		b.SetState(true, states.Disabled)
 
 		bt := gi.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s).
 			SetTooltip("A standard " + sl + " button with a label")
