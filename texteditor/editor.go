@@ -194,12 +194,12 @@ func (ed *Editor) SetStyles() {
 		ed.CursorColor = colors.C(colors.Scheme.Primary.Base)
 
 		s.Cursor = cursors.Text
-		if gi.BasicSettings.Editor.WordWrap {
+		if gi.AppearanceSettings.Editor.WordWrap {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		} else {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
-		s.Font.Family = string(gi.BasicSettings.MonoFont)
+		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
 		s.Grow.Set(1, 1)
 		s.Overflow.Set(styles.OverflowAuto)   // absorbs all
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
@@ -209,7 +209,7 @@ func (ed *Editor) SetStyles() {
 		s.Align.Content = styles.Start
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
-		s.Text.TabSize = gi.BasicSettings.Editor.TabSize
+		s.Text.TabSize = gi.AppearanceSettings.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
 
 		if s.State.Is(states.Focused) {

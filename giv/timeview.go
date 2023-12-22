@@ -64,7 +64,7 @@ func (tv *TimeView) ConfigWidget() {
 	updt := tv.UpdateStart()
 
 	hour := gi.NewTextField(tv, "hour")
-	if gi.BasicSettings.Clock24 {
+	if gi.AppearanceSettings.Clock24 {
 		tv.Hour = tv.Time.Hour()
 		hour.SetText(strconv.Itoa(tv.Hour))
 	} else {
@@ -120,7 +120,7 @@ func (tv *TimeView) ConfigWidget() {
 		}
 	})
 
-	if !gi.BasicSettings.Clock24 {
+	if !gi.AppearanceSettings.Clock24 {
 		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems([]string{"AM", "PM"})
 		if tv.Time.Hour() < 12 {
 			tv.PM = false
@@ -344,7 +344,7 @@ func (vv *TimeValue) UpdateWidget() {
 	tm := vv.TimeVal()
 
 	fr.ChildByName("date").(*gi.TextField).SetText(tm.Format("1/2/2006"))
-	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.BasicSettings.TimeFormat()))
+	fr.ChildByName("time").(*gi.TextField).SetText(tm.Format(gi.AppearanceSettings.TimeFormat()))
 }
 
 func (vv *TimeValue) ConfigWidget(w gi.Widget) {
@@ -418,7 +418,7 @@ func (vv *TimeValue) ConfigWidget(w gi.Widget) {
 	})
 	tm.SetReadOnly(vv.IsReadOnly())
 	tm.OnChange(func(e events.Event) {
-		t, err := time.Parse(gi.BasicSettings.TimeFormat(), tm.Text())
+		t, err := time.Parse(gi.AppearanceSettings.TimeFormat(), tm.Text())
 		if err != err {
 			// TODO(kai/snack)
 			slog.Error(err.Error())

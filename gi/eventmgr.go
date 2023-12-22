@@ -1063,7 +1063,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		TheViewIFace.Inspector(em.Scene)
 		e.SetHandled()
 	case keyfun.Prefs:
-		TheViewIFace.PrefsView(&BasicSettings)
+		TheViewIFace.PrefsView(&AppearanceSettings)
 		e.SetHandled()
 	case keyfun.WinClose:
 		win.CloseReq()
@@ -1096,7 +1096,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		fmt.Printf("Win: %v display refreshed\n", sc.Name())
 		goosi.TheApp.GetScreens()
-		BasicSettings.UpdateAll()
+		AppearanceSettings.UpdateAll()
 		WinGeomMgr.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()

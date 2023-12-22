@@ -15,7 +15,7 @@ import (
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles
 
 // PrefsView opens a view of user preferences
-func PrefsView(pf *gi.BasicSettingsType) {
+func PrefsView(pf *gi.AppearanceSettingsData) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}

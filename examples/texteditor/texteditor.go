@@ -32,7 +32,7 @@ func app() {
 	splt.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Text.TabSize = 4
-		s.Font.Family = string(gi.BasicSettings.MonoFont)
+		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
 	})
 
 	txed1 := texteditor.NewEditor(splt, "texteditor-1")
