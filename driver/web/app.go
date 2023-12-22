@@ -108,7 +108,7 @@ func (a *App) Resize() {
 
 func (a *App) DataDir() string {
 	// TODO(kai): implement web filesystem
-	return "/data/data"
+	return "/data"
 }
 
 func (a *App) Platform() goosi.Platforms {
