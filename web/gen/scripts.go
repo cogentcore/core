@@ -6,8 +6,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
 )
 
 func main() {
@@ -33,14 +31,14 @@ func main() {
 			Documentation: "DefaultAppWorkersJS is the default template used in [MakeAppWorkerJS] to generate app-worker.js.",
 		},
 		{
-			Var: "WASMExecJSGoCurrent",
-			Filename: filepath.Join(
-				runtime.GOROOT(),
-				"misc",
-				"wasm",
-				"wasm_exec.js",
-			),
+			Var:           "WASMExecJSGoCurrent",
+			Filename:      "gen/wasm_exec.js",
 			Documentation: "WASMExecJSGoCurrent is the wasm_exec.js file for the current version of Go.",
+		},
+		{
+			Var:           "BrowserFSJS",
+			Filename:      "gen/browserfs.js",
+			Documentation: "BrowsferFSJS is the browserfs.js file for the current version of Go.",
 		},
 		{
 			Var:           "AppJS",

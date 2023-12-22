@@ -4,6 +4,8 @@
 
 package web
 
+//go:generate go run gen/scripts.go
+
 import (
 	"crypto/sha1"
 	"fmt"
@@ -54,6 +56,11 @@ func MakeFiles(c *config.Config) error {
 
 	wej := []byte(WASMExecJS())
 	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(odir, "browserfs.js"), []byte(BrowserFSJS), 0666)
 	if err != nil {
 		return err
 	}
