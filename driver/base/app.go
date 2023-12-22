@@ -145,8 +145,8 @@ func (a *App) OpenFiles() []string {
 	return a.OpenFls
 }
 
-func (a *App) GoGiDataDir() string {
-	pdir := filepath.Join(a.This.DataDir(), "GoGi")
+func (a *App) GokiDataDir() string {
+	pdir := filepath.Join(a.This.DataDir(), "Goki")
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }

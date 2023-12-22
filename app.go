@@ -88,9 +88,9 @@ type App interface {
 	// Linux: ~/.config, Windows: ~/AppData/Roaming
 	DataDir() string
 
-	// GoGiDataDir returns the GoGi data directory: DataDir + GoGi --
-	// ensures that the directory exists first.
-	GoGiDataDir() string
+	// GokiDataDir returns the Goki data directory: [App.DataDir] + "Goki".
+	// It ensures that the directory exists first.
+	GokiDataDir() string
 
 	// About is an informative message about the app.  Can use HTML
 	// formatting, including links.
