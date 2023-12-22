@@ -17,17 +17,21 @@ import (
 
 // HandleRecover takes the given value of recover, and, if it is not nil,
 // handles it. The behavior of HandleRecover can be customized by changing
-// it to a custom function, but by default it is [HandleRecoverBase], which
-// safely prints a stack trace and saves a crash log. It is set in gi to
-// a function that does the aforementioned things in addition to creating a
-// GUI error dialog. HandleRecover should be called at the start of every
+// it to a custom function, but by default it calls [HandleRecoverBase] and
+// [HandleRecoverPanic], which safely prints a stack trace, saves a crash log,
+// and panics on non-mobile platforms. It is set in gi to a function that does
+// the aforementioned things in addition to creating a GUI error dialog.
+// HandleRecover should be called at the start of every
 // goroutine whenever possible. The correct usage of HandleRecover is:
 //
 //	func myFunc() {
 //		defer func() { goosi.HandleRecover(recover()) }()
 //		...
 //	}
-var HandleRecover = HandleRecoverBase
+var HandleRecover = func(r any) {
+	HandleRecoverBase(r)
+	HandleRecoverPanic(r)
+}
 
 // HandleRecoverBase is the default base value of [HandleRecover].
 // It can be extended to form a different value of [HandleRecover].
@@ -59,5 +63,17 @@ func HandleRecoverBase(r any) {
 	if grr.Log(err) == nil {
 		print(cf)
 		cf.Close()
+	}
+}
+
+// HandleRecoverPanic panics on r if r is non-nil and [TheApp.Platform] is not mobile.
+// This is because panicking screws up logging on mobile, but is necessary for debugging
+// on desktop.
+func HandleRecoverPanic(r any) {
+	if r == nil {
+		return
+	}
+	if !TheApp.Platform().IsMobile() {
+		panic(r)
 	}
 }
