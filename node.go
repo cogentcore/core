@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -24,7 +24,7 @@ import (
 var StringElideMax = 38
 
 // The Node implements the Ki interface and provides the core functionality
-// for the GoKi tree -- use the Node as an embedded struct or as a struct
+// for the Goki tree -- use the Node as an embedded struct or as a struct
 // field -- the embedded version supports full JSON save / load.
 //
 // The desc: key for fields is used by the GoGi GUI viewer for help / tooltip

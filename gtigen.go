@@ -12,7 +12,7 @@ var NodeType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/ki/v2.Node",
 	ShortName:  "ki.Node",
 	IDName:     "node",
-	Doc:        "The Node implements the Ki interface and provides the core functionality\nfor the GoKi tree -- use the Node as an embedded struct or as a struct\nfield -- the embedded version supports full JSON save / load.\n\nThe desc: key for fields is used by the GoGi GUI viewer for help / tooltip\ninfo -- add these to all your derived struct's fields.  See relevant docs\nfor other such tags controlling a wide range of GUI and other functionality\n-- Ki makes extensive use of such tags.",
+	Doc:        "The Node implements the Ki interface and provides the core functionality\nfor the Goki tree -- use the Node as an embedded struct or as a struct\nfield -- the embedded version supports full JSON save / load.\n\nThe desc: key for fields is used by the GoGi GUI viewer for help / tooltip\ninfo -- add these to all your derived struct's fields.  See relevant docs\nfor other such tags controlling a wide range of GUI and other functionality\n-- Ki makes extensive use of such tags.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Nm", &gti.Field{Name: "Nm", Type: "string", Doc: "Ki.Name() user-supplied name of this node -- can be empty or non-unique", Directives: gti.Directives{}}},
