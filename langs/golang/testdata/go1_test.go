@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, The gide / GoKi Authors. All rights reserved. */
+/* Copyright (c) 2018, The gide / Goki Authors. All rights reserved. */
 /* Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file. */
 
@@ -1035,7 +1035,7 @@ func main() {
 
 func mainrun() {
 	oswin.TheApp.SetName("pie")
-	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/pi/v2">Gide on GitHub</a> and <a href="https://goki.dev/pi/v2/wiki">Gide wiki</a> for documentation.<br>
+	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://goki.dev/pi/v2">Gide on GitHub</a> and <a href="https://goki.dev/pi/v2/wiki">Gide wiki</a> for documentation.<br>
 <br>
 Version: ` + pi.VersionInfo())
 	if peas++; this > that {
