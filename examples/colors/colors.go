@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -17,7 +17,7 @@ func app() {
 	height := 768
 
 	gi.SetAppName("colors")
-	gi.SetAppAbout(`This is a demo of the color space functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	gi.SetAppAbout(`This is a demo of the color space functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`)
 
 	win := gi.NewMainRenderWin("gogi-colors-test", "GoGi Colors Test", width, height)
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -147,7 +147,7 @@ func app() {
 
 	anim := &Anim{}
 	b := gi.NewAppBody("xyz").SetTitle("XYZ Demo")
-	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
+	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 
 	gi.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the

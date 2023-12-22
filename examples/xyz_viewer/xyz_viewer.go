@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -24,7 +24,7 @@ func main() { gimain.Run(app) }
 
 func app() {
 	b := gi.NewAppBody("xyzview").SetTitle("XYZ Object Viewer")
-	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
+	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
 
 	sv := xyzv.NewSceneView(b)
 	sv.Config()

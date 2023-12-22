@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -29,7 +29,7 @@ gimain.Run(app)
 	// gi.LayoutTrace = true
 
 	goosi.TheApp.SetName("text")
-	goosi.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	goosi.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`)
 
 	win := gi.NewMainRenderWin("gogi-textedit-test", "GoGi TextEdit Test", width, height)
 

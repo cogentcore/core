@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -33,7 +33,7 @@ your GUI.
 
 # TreeView
 
-The TreeView displays GoKi Node Trees, using a standard tree-browser with
+The TreeView displays Goki Node Trees, using a standard tree-browser with
 collapse / open widgets and a menu for typical actions such as adding and
 deleting child nodes, along with full drag-n-drop and clipboard Copy/Cut/Paste
 functionality.  You can connect to the selection signal to e.g., display a
