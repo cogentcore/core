@@ -114,7 +114,7 @@ func TextDialog(ctx gi.Widget, title, text string) *Editor {
 			})
 		d.AddOk(pw)
 	})
-	d.NewFullDialog(ctx).Run()
+	d.NewFullDialog(ctx).SetNewWindow(true).Run()
 	return ed
 }
 
