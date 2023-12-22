@@ -65,7 +65,7 @@ type App struct { //gti:add
 // of Main with their platform-specific app instance and its base App field.
 // Other platform-specific initial configuration steps can be called before this.
 func Main(f func(a goosi.App), a goosi.App, ab *App) {
-	defer func() { HandleRecover(recover()) }()
+	defer func() { goosi.HandleRecover(recover()) }()
 	ab.This = a
 	goosi.TheApp = a
 	go func() {

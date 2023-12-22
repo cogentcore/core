@@ -78,7 +78,7 @@ func (a *App) FullDestroyVk() {
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	defer func() { base.HandleRecover(recover()) }()
+	defer func() { goosi.HandleRecover(recover()) }()
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
@@ -108,7 +108,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 // SetSystemWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when [App.Mu] is already locked.
 func (a *App) SetSystemWindow(winptr uintptr) error {
-	defer func() { base.HandleRecover(recover()) }()
+	defer func() { goosi.HandleRecover(recover()) }()
 	var vsf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window

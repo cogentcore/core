@@ -35,7 +35,7 @@ func Main(f func(goosi.App)) {
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
-	defer func() { base.HandleRecover(recover()) }()
+	defer func() { goosi.HandleRecover(recover()) }()
 
 	if goosi.InitScreenLogicalDPIFunc != nil {
 		goosi.InitScreenLogicalDPIFunc()

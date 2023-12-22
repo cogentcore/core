@@ -207,7 +207,7 @@ type windowConfig struct {
 }
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
-	defer func() { base.HandleRecover(recover()) }()
+	defer func() { goosi.HandleRecover(recover()) }()
 
 	aconfig := C.AConfiguration_new()
 	C.AConfiguration_fromAssetManager(aconfig, activity.assetManager)
@@ -294,7 +294,7 @@ func (a *App) MainLoop() {
 	a.MainDone = make(chan struct{})
 	// TODO: maybe merge the RunInputQueue and MainUI functions?
 	go func() {
-		defer func() { base.HandleRecover(recover()) }()
+		defer func() { goosi.HandleRecover(recover()) }()
 		if err := mobileinit.RunOnJVM(RunInputQueue); err != nil {
 			log.Fatalf("app: %v", err)
 		}
@@ -337,7 +337,7 @@ func insetsChanged(top, bottom, left, right int) {
 
 // MainUI runs the main UI loop of the app.
 func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
-	defer func() { base.HandleRecover(recover()) }()
+	defer func() { goosi.HandleRecover(recover()) }()
 
 	var dpi float32
 	var orientation goosi.ScreenOrientation
