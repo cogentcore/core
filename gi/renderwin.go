@@ -10,7 +10,6 @@ import (
 	"log"
 	"log/slog"
 	"runtime"
-	"runtime/debug"
 	"sync"
 	"time"
 
@@ -556,24 +555,8 @@ func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
 func (w *RenderWin) EventLoop() {
-	// this recover allows for debugging on Android, and we need to do it separately
-	// here because this is the main thing in a separate goroutine that goosi doesn't
-	// control. TODO: maybe figure out a more sustainable approach to this.
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("panic:", r)
-			log.Println("")
-			log.Println("----- START OF STACK TRACE: -----")
-			log.Println(string(debug.Stack()))
-			log.Println("----- END OF STACK TRACE -----")
-			// if we are on mobile, panicking leads to crashing too quickly to get the log messages
-			if goosi.TheApp.Platform().IsMobile() {
-				log.Fatalln("Terminating app due to panic stated above")
-			} else {
-				panic(r)
-			}
-		}
-	}()
+	defer func() { goosi.HandleRecover(recover()) }()
+
 	for {
 		if w.HasFlag(WinStopEventLoop) {
 			w.SetFlag(false, WinStopEventLoop)
