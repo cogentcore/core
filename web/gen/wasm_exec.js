@@ -12,13 +12,8 @@
 	};
 
 
-	if (!globalThis.fs) {
-		BrowserFS.configure({
-			fs: "InMemory"
-		});
-		globalThis.fs = BrowserFS.fs;
-		console.log("configured");
-	}
+	// if (!globalThis.fs) { 
+	// }
 
 	if (!globalThis.process) {
 		globalThis.process = {
