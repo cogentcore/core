@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -59,7 +59,7 @@ type Client struct {
 // suitable C compiler located on the system.
 //
 // It is the main command used during a local development workflow, and
-// it serves as a direct replacement for go build when building GoKi
+// it serves as a direct replacement for go build when building Goki
 // apps. In addition to the basic capacities of go build, Build supports
 // cross-compiling CGO applications with ease. Also, it handles the
 // bundling of icons and fonts into the executable.
