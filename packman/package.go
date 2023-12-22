@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -13,7 +13,7 @@ import (
 // Package contains all of the information about a package.
 type Package struct {
 	ID              string   // the unique name of the package (ex: dev)
-	Name            string   // the user friendly name of the package (ex: The GoKi Developer Tools)
+	Name            string   // the user friendly name of the package (ex: The Goki Developer Tools)
 	InstallCommands Commands // the set of commands to run for each operating system to install the package
 }
 
