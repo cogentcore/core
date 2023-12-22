@@ -7,6 +7,7 @@ package goosi
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -63,6 +64,7 @@ func HandleRecoverBase(r any) {
 	if grr.Log(err) == nil {
 		print(cf)
 		cf.Close()
+		log.Println("SAVED CRASH LOG TO", cfnm)
 	}
 }
 
