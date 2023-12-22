@@ -118,10 +118,10 @@ func OpenURL(url string) {
 	goosi.TheApp.OpenURL(url)
 }
 
-// GoGiDataDir returns the GoGi data directory: [DataDir] + "GoGi".
+// GokiDataDir returns the Goki data directory: [DataDir] + "Goki".
 // It ensures that the directory exists first.
-func GoGiDataDir() string {
-	return goosi.TheApp.GoGiDataDir()
+func GokiDataDir() string {
+	return goosi.TheApp.GokiDataDir()
 }
 
 // DataDir returns the OS-specific data directory: Mac: ~/Library,
@@ -198,7 +198,7 @@ func StdOverflowMenu(tb *Toolbar) {
 func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
-			TheViewIFace.PrefsView(&AppearanceSettings)
+			TheViewIFace.PrefsView(AppearanceSettings)
 		})
 	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
 		OnClick(func(e events.Event) {

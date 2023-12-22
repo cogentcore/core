@@ -24,8 +24,17 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
+	"goki.dev/ordmap"
 	"goki.dev/pi/v2/langs/golang"
 )
+
+// AllSettings is a global ordered map containing all of the user [Settings]
+// that the user will see in the settings window. It contains the base Goki
+// settings by default and should be modified by other apps to add their
+// app settings.
+var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
+	{"Appearance", AppearanceSettings},
+})
 
 // Settings is the interface that describes the functionality common to all settings data types.
 type Settings interface {
@@ -43,7 +52,7 @@ type Settings interface {
 // SettingsBase contains base settings logic that other settings data types can extend.
 type SettingsBase struct {
 	// Filenm is the full filename/filepath at which the settings are stored.
-	Filenm string
+	Filenm string `view:"-"`
 }
 
 // Filename returns the full filename/filepath at which the settings are stored.
@@ -62,6 +71,7 @@ func (sb *SettingsBase) Apply() {}
 // be called before then if certain settings info needed.
 func Init() {
 	if AppearanceSettings.Zoom == 0 {
+		AppearanceSettings.Filenm = filepath.Join(GokiDataDir(), "settings.toml")
 		AppearanceSettings.Defaults()
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
@@ -79,6 +89,7 @@ func Init() {
 // AppearanceSettingsData is the data type for the basic Goki appearance settings.
 // The global current instance is stored as [AppearanceSettings].
 type AppearanceSettingsData struct { //gti:add
+	SettingsBase
 
 	// the color theme
 	Theme Themes
@@ -153,7 +164,7 @@ type AppearanceSettingsData struct { //gti:add
 }
 
 // AppearanceSettings are the currently active global Goki appearance settings.
-var AppearanceSettings = AppearanceSettingsData{}
+var AppearanceSettings = &AppearanceSettingsData{}
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
 // with whatever the developer specifies, typically through [colors.SetSchemes].
@@ -204,7 +215,7 @@ var PrefsFileName = "prefs.toml"
 
 // Open preferences from GoGi standard prefs directory
 func (pf *AppearanceSettingsData) Open() error { //gti:add
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	err := grr.Log(tomls.Open(pf, pnm))
 	if err != nil {
@@ -233,7 +244,7 @@ func (pf *AppearanceSettingsData) Open() error { //gti:add
 
 // Save saves the preferences to the GoGi standard prefs directory
 func (pf *AppearanceSettingsData) Save() error { //gti:add
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	err := grr.Log(tomls.Save(pf, pnm))
 	if err != nil {
@@ -262,7 +273,7 @@ func (pf *AppearanceSettingsData) Save() error { //gti:add
 // are absolutely sure you want to. You may want to consider making a copy
 // of your preferences through "Save as" before doing this.
 func (pf *AppearanceSettingsData) Delete() error { //gti:add
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	return os.Remove(pnm)
 }
@@ -688,7 +699,7 @@ var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewE
 // SavePaths saves the active SavedPaths to prefs dir
 func SavePaths() {
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.Save(pnm)
 	// add back after save
@@ -699,7 +710,7 @@ func SavePaths() {
 func OpenPaths() {
 	// remove to be sure we don't have duplicate extras
 	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.Open(pnm)
 	// add back after save
@@ -796,7 +807,7 @@ var PrefsDetailedFileName = "prefs_det.toml"
 
 // Open detailed preferences from GoGi standard prefs directory
 func (pf *PrefsDetailed) Open() error { //gti:add
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	err := grr.Log(tomls.Open(pf, pnm))
 	pf.Changed = false
@@ -805,7 +816,7 @@ func (pf *PrefsDetailed) Open() error { //gti:add
 
 // Save saves current preferences to standard prefs_det.toml file, which is auto-loaded at startup
 func (pf *PrefsDetailed) Save() error { //gti:add
-	pdir := GoGiDataDir()
+	pdir := GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	err := grr.Log(tomls.Save(pf, pnm))
 	pf.Changed = false
