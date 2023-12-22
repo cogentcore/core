@@ -27,6 +27,36 @@ import (
 	"goki.dev/pi/v2/langs/golang"
 )
 
+// Settings is the interface that describes the functionality common to all settings data types.
+type Settings interface {
+
+	// Filename returns the full filename/filepath at which the settings are stored.
+	Filename() string
+
+	// Defaults sets the default values for all of the settings.
+	Defaults()
+
+	// Apply does anything necessary to apply the settings to the app.
+	Apply()
+}
+
+// SettingsBase contains base settings logic that other settings data types can extend.
+type SettingsBase struct {
+	// Filenm is the full filename/filepath at which the settings are stored.
+	Filenm string
+}
+
+// Filename returns the full filename/filepath at which the settings are stored.
+func (sb *SettingsBase) Filename() string {
+	return sb.Filenm
+}
+
+// Defaults does nothing by default and can be extended by other settings data types.
+func (sb *SettingsBase) Defaults() {}
+
+// Apply does nothing by default and can be extended by other settings data types.
+func (sb *SettingsBase) Apply() {}
+
 // Init performs the overall initialization of the Goki system by loading
 // settings. It is automatically called when a new window opened, but can
 // be called before then if certain settings info needed.
@@ -46,8 +76,8 @@ func Init() {
 	}
 }
 
-// AppearanceSettingsData is the type of the basic Goki appearance settings.
-// The global current instance is stored as [BasicSettings].
+// AppearanceSettingsData is the data type for the basic Goki appearance settings.
+// The global current instance is stored as [AppearanceSettings].
 type AppearanceSettingsData struct { //gti:add
 
 	// the color theme
