@@ -122,7 +122,7 @@ func (ed *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
 		spos.X += ed.LineNoOff
 		return spos
 	}
-	spos.Y += ed.Offs[pos.Ln] + mat32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
+	spos.Y += ed.Offs[pos.Ln] + ed.FontDescent
 	spos.X += ed.LineNoOff
 	if len(ed.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
