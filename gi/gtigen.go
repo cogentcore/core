@@ -151,7 +151,7 @@ var BodyType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Scene, also used for window title where relevant", Directives: gti.Directives{}, Tag: ""}},
+		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Body, also used for window title where relevant", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -171,7 +171,7 @@ func (t *Body) New() ki.Ki {
 }
 
 // SetTitle sets the [Body.Title]:
-// title of the Scene, also used for window title where relevant
+// title of the Body, also used for window title where relevant
 func (t *Body) SetTitle(v string) *Body {
 	t.Title = v
 	return t
@@ -1364,10 +1364,10 @@ func (t *Space) SetCustomContextMenu(v func(m *Scene)) *Space {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Preferences",
-	ShortName: "gi.Preferences",
-	IDName:    "preferences",
-	Doc:       "Preferences are the overall user preferences for GoGi, providing some basic\ncustomization -- in addition, most gui settings can be styled using\nCSS-style sheets under CustomStyle.  These prefs are saved and loaded from\nthe GoGi user preferences directory -- see goosi/App for further info.",
+	Name:      "goki.dev/gi/v2/gi.BasicSettingsType",
+	ShortName: "gi.BasicSettingsType",
+	IDName:    "basic-settings-type",
+	Doc:       "BasicSettingsType is the type of the basic Goki appearance settings.\nThe global current instance is stored as [BasicSettings].",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -3081,7 +3081,7 @@ var TabsType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
-		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (true by default)", Directives: gti.Directives{}, Tag: ""}},
+		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (false by default)", Directives: gti.Directives{}, Tag: ""}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs.\nTabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -3147,7 +3147,7 @@ func (t *Tabs) SetNewTabButton(v bool) *Tabs {
 }
 
 // SetDeleteTabButtons sets the [Tabs.DeleteTabButtons]:
-// if true, tabs are user-deleteable (true by default)
+// if true, tabs are user-deleteable (false by default)
 func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
 	t.DeleteTabButtons = v
 	return t

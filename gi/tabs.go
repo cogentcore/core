@@ -40,7 +40,7 @@ type Tabs struct { //goki:embedder
 	// show a new tab button at right of list of tabs
 	NewTabButton bool
 
-	// if true, tabs are user-deleteable (true by default)
+	// if true, tabs are user-deleteable (false by default)
 	DeleteTabButtons bool
 
 	// mutex protecting updates to tabs.
@@ -62,7 +62,6 @@ func (ts *Tabs) OnInit() {
 }
 
 func (ts *Tabs) SetStyles() {
-	ts.DeleteTabButtons = true
 	ts.Style(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?

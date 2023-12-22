@@ -32,7 +32,6 @@ func app() {
 	b.App().About = "The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework."
 
 	ts := gi.NewTabs(b)
-	ts.DeleteTabButtons = false
 
 	makeHome(ts)
 	makeText(ts)
