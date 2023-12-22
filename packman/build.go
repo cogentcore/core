@@ -1,4 +1,4 @@
-// Copyright (c) 2023, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -86,13 +86,16 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	if c.Build.Output == "" {
 		c.Build.Output = filepath.Join(".goki", "bin", "build", c.Build.Package)
 	}
+	tags := []string{"build"}
+	if c.Build.Debug {
+		tags = append(tags, "-tags", "debug")
+	}
 	if platform.OS == "windows" {
 		c.Build.Output += ".exe"
+		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
+		tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
-	tags := []string{"build", "-o", c.Build.Output, origPkg}
-	if c.Build.Debug {
-		tags = append(tags, "-tags debug")
-	}
+	tags = append(tags, "-o", c.Build.Output, origPkg)
 
 	err := xc.Run("go", tags...)
 	if err != nil {
