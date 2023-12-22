@@ -58,6 +58,9 @@ type TableView struct {
 
 	// number of visible fields
 	NVisFields int `copy:"-" view:"-" json:"-" xml:"-"`
+
+	// HeaderWidths has number of characters in each header, per visfields
+	HeaderWidths []int `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl
@@ -140,7 +143,7 @@ func (tv *TableView) SetStyles() {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
-					s.Min.X.Em(1.5)
+					s.Min.X.Ch(5)
 					s.Padding.Right.Dp(4)
 					s.Text.Align = styles.End
 					s.Min.Y.Em(1)
@@ -164,6 +167,11 @@ func (tv *TableView) SetStyles() {
 					fstr = fstr[:dp]    // field idx is -X.
 					idx := grr.Log1(strconv.Atoi(istr))
 					fli := grr.Log1(strconv.Atoi(fstr))
+					hw := 1.1 * float32(tv.HeaderWidths[fli])
+					if fli == tv.SortIdx {
+						hw += 6
+					}
+					s.Min.X.Ch(hw)
 					si := tv.StartIdx + idx
 					if si < tv.SliceSize {
 						tv.This().(SliceViewer).StyleRow(w, si, fli)
@@ -341,6 +349,7 @@ func (tv *TableView) ConfigHeader() {
 	if tv.Is(SliceViewShowIndex) {
 		hcfg.Add(gi.LabelType, "head-idx")
 	}
+	tv.HeaderWidths = make([]int, tv.NVisFields)
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		labnm := "head-" + fld.Name
@@ -358,11 +367,14 @@ func (tv *TableView) ConfigHeader() {
 		field := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonMenu)
+		htxt := ""
 		if lbl, ok := field.Tag.Lookup("label"); ok {
-			hdr.SetText(lbl)
+			htxt = lbl
 		} else {
-			hdr.SetText(sentence.Case(field.Name))
+			htxt = sentence.Case(field.Name)
 		}
+		hdr.SetText(htxt)
+		tv.HeaderWidths[fli] = len(htxt)
 		hdr.Data = fli
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
