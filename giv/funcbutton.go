@@ -98,6 +98,10 @@ type FuncButton struct { //goki:no-new
 	// automatically be set to true.
 	ShowReturnAsDialog bool
 
+	// NewWindow makes the ReturnDialog a NewWindow dialog
+	// (if supported by platform).
+	NewWindow bool
+
 	// WarnUnadded is whether to log warnings when a function that
 	// has not been added to gti is used. It is on by default and
 	// must be set before [FuncButton.SetFunc] is called for it to
@@ -353,7 +357,11 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 			// todo: do something with the args?
 		})
 	})
-	d.NewDialog(ctx).Run()
+	if fb.NewWindow {
+		d.NewDialog(ctx).SetNewWindow(true).Run()
+	} else {
+		d.NewDialog(ctx).Run()
+	}
 }
 
 // SetArgs sets the appropriate [Value] objects for the

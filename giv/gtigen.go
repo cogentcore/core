@@ -322,6 +322,7 @@ var FuncButtonType = gti.AddType(&gti.Type{
 		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", LocalType: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default, unless\nthe function has no return values.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
+		{"NewWindow", &gti.Field{Name: "NewWindow", Type: "bool", LocalType: "bool", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform).", Directives: gti.Directives{}, Tag: ""}},
 		{"WarnUnadded", &gti.Field{Name: "WarnUnadded", Type: "bool", LocalType: "bool", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to gti is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 		{"Context", &gti.Field{Name: "Context", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "gi.Widget", Doc: "Context is used for opening Dialogs if non-nil.", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -371,6 +372,14 @@ func (t *FuncButton) SetShowReturn(v bool) *FuncButton {
 // automatically be set to true.
 func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton {
 	t.ShowReturnAsDialog = v
+	return t
+}
+
+// SetNewWindow sets the [FuncButton.NewWindow]:
+// NewWindow makes the ReturnDialog a NewWindow dialog
+// (if supported by platform).
+func (t *FuncButton) SetNewWindow(v bool) *FuncButton {
+	t.NewWindow = v
 	return t
 }
 
@@ -2021,8 +2030,9 @@ var DateViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Time", &gti.Field{Name: "Time", Type: "time.Time", LocalType: "time.Time", Doc: "the time that we are viewing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change\nis made to one of the underlying values.\npass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view\ndisplayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"ConfigTime", &gti.Field{Name: "ConfigTime", Type: "time.Time", LocalType: "time.Time", Doc: "ConfigTime is the time that was configured", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2050,14 +2060,17 @@ func (t *DateView) New() ki.Ki {
 }
 
 // SetTmpSave sets the [DateView.TmpSave]:
-// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+// value view that needs to have SaveTmp called on it whenever a change
+// is made to one of the underlying values.
+// pass this down to any sub-views created from a parent
 func (t *DateView) SetTmpSave(v Value) *DateView {
 	t.TmpSave = v
 	return t
 }
 
 // SetViewPath sets the [DateView.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+// a record of parent View names that have led up to this view
+// displayed as extra contextual information in view dialog windows
 func (t *DateView) SetViewPath(v string) *DateView {
 	t.ViewPath = v
 	return t
