@@ -69,6 +69,7 @@ func Main(f func(a goosi.App), a goosi.App, ab *App) {
 	ab.This = a
 	goosi.TheApp = a
 	go func() {
+		defer func() { goosi.HandleRecover(recover()) }()
 		f(a)
 		ab.StopMain()
 	}()
