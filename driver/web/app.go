@@ -38,7 +38,6 @@ type App struct { //gti:add
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
-	TheApp.AddEventListeners()
 	base.Main(f, TheApp, &TheApp.App)
 }
 
@@ -63,6 +62,8 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 // SetSystemWindow sets the underlying system window information.
 func (a *App) SetSystemWindow() {
 	defer func() { base.HandleRecover(recover()) }()
+
+	a.AddEventListeners()
 
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	lua := strings.ToLower(ua)
