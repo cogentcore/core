@@ -61,15 +61,17 @@ func HandleRecoverBase(r any) {
 
 	dnm := filepath.Join(TheApp.GokiDataDir(), "crash-logs", TheApp.Name())
 	err := os.MkdirAll(dnm, 0755)
-	if grr.Log(err) == nil {
-		cfnm := filepath.Join(dnm, "crash_"+time.Now().Format("2006-01-02_15-04-05"))
-		cf, err := os.Create(cfnm)
-		if grr.Log(err) == nil {
-			print(cf)
-			cf.Close()
-			log.Println("SAVED CRASH LOG TO", cfnm)
-		}
+	if grr.Log(err) != nil {
+		return
 	}
+	cfnm := filepath.Join(dnm, "crash_"+time.Now().Format("2006-01-02_15-04-05"))
+	cf, err := os.Create(cfnm)
+	if grr.Log(err) != nil {
+		return
+	}
+	print(cf)
+	cf.Close()
+	log.Println("SAVED CRASH LOG TO", cfnm)
 }
 
 // HandleRecoverPanic panics on r if r is non-nil and [TheApp.Platform] is not mobile.
