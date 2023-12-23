@@ -8,7 +8,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -71,7 +71,7 @@ gimain.Run(app)
 		slog.Error(err.Error())
 		// return err
 	}
-	b, err := ioutil.ReadAll(fp)
+	b, err := io.ReadAll(fp)
 	txed.Txt = string(b)
 	fp.Close()
 

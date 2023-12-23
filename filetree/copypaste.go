@@ -6,7 +6,7 @@ package filetree
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -36,7 +36,7 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 			slog.Error(err.Error())
 			return
 		}
-		b, err := ioutil.ReadAll(in)
+		b, err := io.ReadAll(in)
 		if err != nil {
 			slog.Error(err.Error())
 			return
