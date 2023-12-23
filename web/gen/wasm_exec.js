@@ -12,8 +12,12 @@
 	};
 
 
-	// if (!globalThis.fs) { 
-	// }
+	if (!globalThis.fs) {
+		BrowserFS.configure({
+			fs: "LocalStorage"
+		})
+		globalThis.fs = BrowserFS.BFSRequire("fs");
+	}
 
 	if (!globalThis.process) {
 		globalThis.process = {
