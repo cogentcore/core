@@ -173,6 +173,7 @@ func (tv *TableView) SetStyles() {
 					}
 					hv := units.Ch(hw)
 					s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
+					s.Max.X.Val = max(s.Max.X.Val, hv.Convert(s.Max.X.Un, &s.UnContext).Val)
 					si := tv.StartIdx + idx
 					if si < tv.SliceSize {
 						tv.This().(SliceViewer).StyleRow(w, si, fli)
