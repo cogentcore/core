@@ -81,7 +81,7 @@ func HandleRecoverPanic(r any) {
 	if r == nil {
 		return
 	}
-	if !TheApp.Platform().IsMobile() {
+	if !TheApp.Platform().IsMobile() || TheApp.Platform() == Web {
 		panic(r)
 	}
 }
