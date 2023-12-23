@@ -6,9 +6,29 @@
 
 package fs
 
-import "github.com/hack-pad/hackpadfs/indexeddb"
+import (
+	"context"
+	"syscall/js"
+
+	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/indexeddb"
+)
 
 // FS represents a filesystem that implements the Node.js fs API.
+// It is backed by an IndexedDB-based storage mechanism.
 type FS struct {
-	indexeddb.FS
+	*indexeddb.FS
+}
+
+// NewFS returns a new [FS]. Most code should use [Config] instead.
+func NewFS() (*FS, error) {
+	ifs, err := indexeddb.NewFS(context.TODO(), "fs", indexeddb.Options{})
+	if err != nil {
+		return nil, err
+	}
+	return &FS{ifs}, nil
+}
+
+func (fs *FS) Chmod(args []js.Value) {
+	fs.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[0].Int()))
 }
