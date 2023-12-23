@@ -8,7 +8,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"io/ioutil"
 	"log/slog"
 	"os"
 	"strings"
@@ -49,7 +48,7 @@ func FileBytes(fpath string) ([]byte, error) {
 		slog.Error(err.Error())
 		return nil, err
 	}
-	txt, err := ioutil.ReadAll(fp)
+	txt, err := io.ReadAll(fp)
 	fp.Close()
 	if err != nil {
 		slog.Error(err.Error())

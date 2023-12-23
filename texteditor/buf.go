@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"image/color"
-	"io/ioutil"
+	"io"
 	"log"
 	"log/slog"
 	"os"
@@ -554,7 +554,7 @@ func (tb *Buf) OpenFile(filename gi.FileName) error {
 	if err != nil {
 		return err
 	}
-	tb.Txt, err = ioutil.ReadAll(fp)
+	tb.Txt, err = io.ReadAll(fp)
 	fp.Close()
 	tb.SetFilename(string(filename))
 	tb.BytesToLines()

@@ -6,7 +6,6 @@ package giv
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -862,13 +861,11 @@ func (fv *FileView) FileComplete(data any, text string, posLn, posCh int) (md co
 func (fv *FileView) PathComplete(data any, path string, posLn, posCh int) (md complete.Matches) {
 	dir, seed := filepath.Split(path)
 	md.Seed = seed
-	d, err := os.Open(dir)
+
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return md
 	}
-	defer d.Close()
-
-	files, err := ioutil.ReadDir(dir)
 	var dirs = []string{}
 	for _, f := range files {
 		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
