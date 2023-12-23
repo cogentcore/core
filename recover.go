@@ -59,12 +59,16 @@ func HandleRecoverBase(r any) {
 
 	print(os.Stderr)
 
-	cfnm := filepath.Join(TheApp.GokiDataDir(), "crash-logs", TheApp.Name(), "crash_"+time.Now().Format("2006-01-02_15-04-05"))
-	cf, err := os.Create(cfnm)
+	dnm := filepath.Join(TheApp.GokiDataDir(), "crash-logs", TheApp.Name())
+	err := os.MkdirAll(dnm, 0755)
 	if grr.Log(err) == nil {
-		print(cf)
-		cf.Close()
-		log.Println("SAVED CRASH LOG TO", cfnm)
+		cfnm := filepath.Join(dnm, "crash_"+time.Now().Format("2006-01-02_15-04-05"))
+		cf, err := os.Create(cfnm)
+		if grr.Log(err) == nil {
+			print(cf)
+			cf.Close()
+			log.Println("SAVED CRASH LOG TO", cfnm)
+		}
 	}
 }
 
