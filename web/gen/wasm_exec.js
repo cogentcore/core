@@ -24,7 +24,7 @@
 
 	if (!globalThis.fs) {
 		globalThis.fs = new Filer.FileSystem();
-		globalThis.fs.constants = { O_WRONLY: 1, O_RDWR: 1, O_CREAT: 1, O_TRUNC: 1, O_APPEND: 1, O_EXCL: 1 }
+		globalThis.fs.constants = { O_WRONLY: 1, O_RDWR: 2, O_CREAT: 512, O_TRUNC: 1024, O_APPEND: 8, O_EXCL: 2048 }
 	}
 
 
