@@ -11,6 +11,17 @@
 		return err;
 	};
 
+	let outputBuf = "";
+	const writeConsole = function (fd, buf) {
+		outputBuf += decoder.decode(buf);
+		const nl = outputBuf.lastIndexOf("\n");
+		if (nl != -1) {
+			console.log(outputBuf.substring(0, nl));
+			outputBuf = outputBuf.substring(nl + 1);
+		}
+		return buf.length;
+	}
+
 	if (!globalThis.process) {
 		globalThis.process = {
 			getuid() { return -1; },
@@ -51,7 +62,7 @@
 			this.env = {};
 			this.exit = (code) => {
 				if (code !== 0) {
-					console.warn("exit code:", code);
+					console.error("exit code:", code);
 				}
 			};
 			this._exitPromise = new Promise((resolve) => {
@@ -191,7 +202,7 @@
 						const fd = getInt64(sp + 8);
 						const p = getInt64(sp + 16);
 						const n = this.mem.getInt32(sp + 24, true);
-						console.log(fd, new Uint8Array(this._inst.exports.mem.buffer, p, n));
+						writeConsole(fd, new Uint8Array(this._inst.exports.mem.buffer, p, n));
 					},
 
 					// func resetMemoryDataView()
