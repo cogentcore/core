@@ -23,7 +23,7 @@
 	}
 
 	if (!globalThis.fs) {
-		// BrowserFS.configure({ fs: "InMemory" })
+		BrowserFS.configure({ fs: "InMemory" })
 		globalThis.fs = BrowserFS.fs;
 		// globalThis.fs.open = function (path, flags, mode, callback) {
 		// 	console.log("open", path, flags, mode, callback);
