@@ -167,11 +167,12 @@ func (tv *TableView) SetStyles() {
 					fstr = fstr[:dp]    // field idx is -X.
 					idx := grr.Log1(strconv.Atoi(istr))
 					fli := grr.Log1(strconv.Atoi(fstr))
-					hw := 1.1 * float32(tv.HeaderWidths[fli])
+					hw := float32(tv.HeaderWidths[fli])
 					if fli == tv.SortIdx {
 						hw += 6
 					}
-					s.Min.X.Ch(hw)
+					hv := units.Ch(hw)
+					s.Min.X.Val = max(s.Min.X.Val, hv.Convert(s.Min.X.Un, &s.UnContext).Val)
 					si := tv.StartIdx + idx
 					if si < tv.SliceSize {
 						tv.This().(SliceViewer).StyleRow(w, si, fli)
