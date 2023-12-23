@@ -31,6 +31,8 @@ func app() {
 	b := gi.NewAppBody("gogi-demo").SetTitle("GoGi Demo")
 	b.App().About = "The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework."
 
+	// grr.Must(jsons.Save("hello", "/data/test.json"))
+
 	ts := gi.NewTabs(b)
 
 	makeHome(ts)
