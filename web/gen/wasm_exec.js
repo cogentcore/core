@@ -22,7 +22,11 @@
 		return buf.length;
 	}
 
-	globalThis.fs.constants = { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 } // unused
+	if (!globalThis.fs) {
+		globalThis.fs = new Filer.FileSystem();
+		globalThis.fs.constants = { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 } // unused
+	}
+
 
 	if (!globalThis.process) {
 		globalThis.process = {
