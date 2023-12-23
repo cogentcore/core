@@ -25,6 +25,10 @@
 	if (!globalThis.fs) {
 		globalThis.fs = new Filer.FileSystem();
 		globalThis.fs.constants = { O_WRONLY: 1, O_RDWR: 2, O_CREAT: 512, O_TRUNC: 1024, O_APPEND: 8, O_EXCL: 2048 }
+		globalThis.fs.open = function (path, flags, mode, callback) {
+			console.log("fs open", path, flags, mode, callback);
+			callback(null, 0);
+		}
 	}
 
 
