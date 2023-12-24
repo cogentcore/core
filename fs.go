@@ -8,7 +8,9 @@ package fs
 
 import (
 	"context"
+	"os"
 	"sync"
+	"sync/atomic"
 	"syscall/js"
 
 	"github.com/hack-pad/hackpadfs"
@@ -58,7 +60,8 @@ func (f *FS) Chown(args []js.Value) (any, error) {
 }
 
 func (f *FS) Close(args []js.Value) (any, error) {
-	return nil, nil // TODO
+	delete(f.Files, uint64(args[0].Int())) // TODO
+	return nil, nil
 }
 
 func (f *FS) Fchmod(args []js.Value) (any, error) {
@@ -137,7 +140,28 @@ func (f *FS) Open(args []js.Value) (any, error) {
 	f.Mu.Lock()
 	defer f.Mu.Unlock()
 
-	return nil, hackpadfs.MkdirAll(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+	fid := atomic.AddUint64((*uint64)(&f.PreviousFID), 1) - 1
+	fl, err := f.NewFile(args[0].String(), args[1].Int(), hackpadfs.FileMode(args[2].Int()))
+	if err != nil {
+		return nil, err
+	}
+	f.Files[fid] = fl
+
+	return fid, nil
+}
+
+func (f *FS) NewFile(absPath string, flags int, mode os.FileMode) (hackpadfs.File, error) {
+	switch absPath {
+	case "dev/null":
+		return NewNullFile("dev/null"), nil
+	case "dev/stdin":
+		return NewNullFile("dev/stdin"), nil // TODO: can this be mocked?
+	case "dev/stdout":
+		return stdout, nil
+	case "dev/stderr":
+		return stderr, nil
+	}
+	return hackpadfs.OpenFile(f.FS, absPath, flags, mode)
 }
 
 func (f *FS) Stat(args []js.Value) (any, error) {
