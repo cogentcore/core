@@ -29,6 +29,14 @@ func NewFS() (*FS, error) {
 	return &FS{ifs}, nil
 }
 
-func (fs *FS) Chmod(args []js.Value) {
-	fs.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[0].Int()))
+func (fs *FS) Chmod(args []js.Value) (any, error) {
+	return nil, fs.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[0].Int()))
+}
+
+func (fs *FS) Chown(args []js.Value) (any, error) {
+	return nil, hackpadfs.Chown(fs.FS, args[0].String(), args[1].Int(), args[2].Int())
+}
+
+func (fs *FS) Close(args []js.Value) {
+
 }
