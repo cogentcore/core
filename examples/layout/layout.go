@@ -111,11 +111,8 @@ func app() {
 	// gi.UpdateTrace = true
 	// gi.RenderTrace = true
 
-	gi.SetAppName("layout")
-	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`)
-
-	b := gi.NewBody("lay-test").SetTitle("GoGi Layout Test")
-	// gi.DefaultTopAppBar = nil // note: comment out for dialog tests..
+	b := gi.NewBody("goki-layout").SetTitle("Goki Layout Demo")
+	b.App().About = `This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
 	ctrl := &Control{}
 	ctrl.Grow.Set(1, 1)

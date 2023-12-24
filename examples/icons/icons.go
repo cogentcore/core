@@ -17,13 +17,11 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.SetAppName("icons")
-	gi.SetAppAbout(`This is a demo of the icons in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`)
+	b := gi.NewAppBody("goki-icons")
+	b.App().About = `This is a demo of the icons in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
 	// note: can add a path to view other icon sets
 	// svg.CurIconSet.OpenIconsFromPath("/Users/oreilly/github/inkscape/share/icons/multicolor/symbolic/actions")
-
-	b := gi.NewBody().SetTitle("GoGi Icons")
 
 	grid := gi.NewFrame(b, "grid")
 	grid.Style(func(s *styles.Style) {
