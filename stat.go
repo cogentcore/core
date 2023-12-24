@@ -7,7 +7,7 @@
 
 //go:build js
 
-package fs
+package jsfs
 
 import (
 	"os"
