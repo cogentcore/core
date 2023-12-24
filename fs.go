@@ -48,7 +48,7 @@ func (f *FS) GetFile(args []js.Value) (hackpadfs.File, error) {
 }
 
 func (f *FS) Chmod(args []js.Value) (any, error) {
-	return nil, f.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[1].Int()))
+	return nil, hackpadfs.Chmod(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
 }
 
 func (f *FS) Chown(args []js.Value) (any, error) {
@@ -103,8 +103,28 @@ func (f *FS) Ftruncate(args []js.Value) (any, error) {
 	return nil, hackpadfs.TruncateFile(fl, int64(args[1].Int()))
 }
 
+func (f *FS) Lchown(args []js.Value) (any, error) {
+	return nil, hackpadfs.Chown(f.FS, args[0].String(), args[1].Int(), args[2].Int()) // TODO
+}
+
+func (f *FS) Link(args []js.Value) (any, error) {
+	return nil, nil // TODO
+}
+
+func (f *FS) Lstat(args []js.Value) (any, error) {
+	return hackpadfs.LstatOrStat(f.FS, args[0].String())
+}
+
+func (f *FS) Mkdir(args []js.Value) (any, error) {
+	return nil, hackpadfs.Mkdir(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+}
+
+func (f *FS) MkdirAll(args []js.Value) (any, error) {
+	return nil, hackpadfs.MkdirAll(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+}
+
 func (f *FS) Stat(args []js.Value) (any, error) {
-	return f.FS.Stat(args[0].String())
+	return hackpadfs.Stat(f.FS, args[0].String())
 }
 
 func (f *FS) Truncate(args []js.Value) (any, error) {
