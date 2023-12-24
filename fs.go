@@ -80,7 +80,11 @@ func (f *FS) Fstat(args []js.Value) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return fl.Stat()
+	s, err := fl.Stat()
+	if err != nil {
+		return nil, err
+	}
+	return JSStat(s), nil
 }
 
 func (f *FS) Fsync(args []js.Value) (any, error) {
@@ -112,7 +116,11 @@ func (f *FS) Link(args []js.Value) (any, error) {
 }
 
 func (f *FS) Lstat(args []js.Value) (any, error) {
-	return hackpadfs.LstatOrStat(f.FS, args[0].String())
+	s, err := hackpadfs.LstatOrStat(f.FS, args[0].String())
+	if err != nil {
+		return nil, err
+	}
+	return JSStat(s), nil
 }
 
 func (f *FS) Mkdir(args []js.Value) (any, error) {
@@ -124,7 +132,11 @@ func (f *FS) MkdirAll(args []js.Value) (any, error) {
 }
 
 func (f *FS) Stat(args []js.Value) (any, error) {
-	return hackpadfs.Stat(f.FS, args[0].String())
+	s, err := hackpadfs.Stat(f.FS, args[0].String())
+	if err != nil {
+		return nil, err
+	}
+	return JSStat(s), nil
 }
 
 func (f *FS) Truncate(args []js.Value) (any, error) {
