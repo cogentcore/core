@@ -10,6 +10,7 @@ package web
 import (
 	"image"
 	"log/slog"
+	"os"
 	"strings"
 	"syscall/js"
 
@@ -40,6 +41,11 @@ type App struct { //gti:add
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
+
+	err := os.Setenv("HOME", "/home/me")
+	if err != nil {
+		slog.Error("error setting home directory", "err", err)
+	}
 
 	fs, err := jsfs.Config(js.Global().Get("fs"))
 	if err != nil {
