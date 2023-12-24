@@ -11,7 +11,6 @@
 package jsfs
 
 import (
-	"context"
 	"os"
 	"path"
 	"strings"
@@ -22,14 +21,14 @@ import (
 	"time"
 
 	"github.com/hack-pad/hackpadfs"
-	"github.com/hack-pad/hackpadfs/indexeddb"
+	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/pkg/errors"
 )
 
 // FS represents a filesystem that implements the Node.js fs API.
 // It is backed by an IndexedDB-based storage mechanism.
 type FS struct {
-	*indexeddb.FS
+	*mem.FS
 
 	PreviousFID uint64
 	Files       map[uint64]hackpadfs.File
@@ -38,7 +37,7 @@ type FS struct {
 
 // NewFS returns a new [FS]. Most code should use [Config] instead.
 func NewFS() (*FS, error) {
-	ifs, err := indexeddb.NewFS(context.TODO(), "fs", indexeddb.Options{})
+	ifs, err := mem.NewFS()
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +63,11 @@ func NewFS() (*FS, error) {
 // as all go fs paths must be non-rooted.
 func NormPath(p string) string {
 	p = path.Clean(p)
-	return strings.TrimPrefix(p, "/")
+	p = strings.TrimPrefix(p, "/")
+	if p == "" {
+		return "."
+	}
+	return p
 }
 
 // GetFile fetches the file specified by the file descriptor that is the first of the given arguments.
