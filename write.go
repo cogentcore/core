@@ -44,7 +44,7 @@ func (f *FS) Write(args []js.Value) (any, any, error) {
 
 	// 'offset' in Node.js's read is the offset in the buffer to start writing at,
 	// and 'position' is where to begin reading from in the file.
-	if !position.IsUndefined() {
+	if !position.IsUndefined() && !position.IsNull() {
 		_, err := hackpadfs.SeekFile(fl, int64(position.Int()), io.SeekStart)
 		if err != nil {
 			return n, nil, err

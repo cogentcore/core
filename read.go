@@ -41,7 +41,7 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 
 	// 'offset' in Node.js's read is the offset in the buffer to start writing at,
 	// and 'position' is where to begin reading from in the file.
-	if position.IsUndefined() {
+	if position.IsUndefined() || position.IsNull() {
 		readBuf, n, err = blob.Read(fl, length)
 	} else {
 		readerAt, ok := fl.(io.ReaderAt)
