@@ -66,11 +66,11 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 }
 
 func (f *FS) ReadFile(args []js.Value) (any, error) {
-	fda, err := f.Open([]js.Value{args[0], js.ValueOf(0), js.ValueOf(0)})
+	fdu, err := f.OpenImpl(args[0].String(), 0, 0)
 	if err != nil {
 		return nil, err
 	}
-	fd := js.ValueOf(fda)
+	fd := js.ValueOf(fdu)
 	defer f.Close([]js.Value{fd})
 
 	infoa, err := f.Fstat([]js.Value{fd})

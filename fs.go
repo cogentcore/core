@@ -15,6 +15,7 @@ import (
 	"os"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"syscall/js"
 	"time"
 
@@ -43,7 +44,19 @@ func NewFS() (*FS, error) {
 		FS:    ifs,
 		Files: map[uint64]hackpadfs.File{},
 	}
-	return f, nil
+
+	// order matters
+	_, err = f.OpenImpl("/dev/stdin", syscall.O_RDONLY, 0)
+	if err != nil {
+		return nil, err
+	}
+	_, err = f.OpenImpl("/dev/stdout", syscall.O_WRONLY, 0)
+	if err != nil {
+		return nil, err
+	}
+	_, err = f.OpenImpl("/dev/stderr", syscall.O_WRONLY, 0)
+	return f, err
+
 }
 
 // GetFile fetches the file specified by the file descriptor that is the first of the given arguments.
@@ -142,13 +155,17 @@ func (f *FS) MkdirAll(args []js.Value) (any, error) {
 }
 
 func (f *FS) Open(args []js.Value) (any, error) {
+	return f.OpenImpl(args[0].String(), args[1].Int(), hackpadfs.FileMode(args[2].Int()))
+}
+
+func (f *FS) OpenImpl(path string, flags int, mode hackpadfs.FileMode) (uint64, error) {
 	f.Mu.Lock()
 	defer f.Mu.Unlock()
 
 	fid := atomic.AddUint64((*uint64)(&f.PreviousFID), 1) - 1
-	fl, err := f.NewFile(args[0].String(), args[1].Int(), hackpadfs.FileMode(args[2].Int()))
+	fl, err := f.NewFile(path, flags, mode)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	f.Files[fid] = fl
 
@@ -157,13 +174,13 @@ func (f *FS) Open(args []js.Value) (any, error) {
 
 func (f *FS) NewFile(absPath string, flags int, mode os.FileMode) (hackpadfs.File, error) {
 	switch absPath {
-	case "dev/null":
+	case "/dev/null":
 		return NewNullFile("dev/null"), nil
-	case "dev/stdin":
+	case "/dev/stdin":
 		return NewNullFile("dev/stdin"), nil // TODO: can this be mocked?
-	case "dev/stdout":
+	case "/dev/stdout":
 		return Stdout, nil
-	case "dev/stderr":
+	case "/dev/stderr":
 		return Stderr, nil
 	}
 	return hackpadfs.OpenFile(f.FS, absPath, flags, mode)
