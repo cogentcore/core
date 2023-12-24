@@ -51,7 +51,6 @@ func (b *BufferedLogger) Flush() {
 		buf = b.Buf.Bytes()
 		b.Buf.Reset()
 	} else {
-		i++ // include newline char if present
 		buf = make([]byte, i)
 		n, _ := b.Buf.Read(buf) // at time of writing, only io.EOF can be returned -- which we don't need
 		buf = buf[:n]
