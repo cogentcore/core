@@ -180,6 +180,25 @@ func (f *FS) Readdir(args []js.Value) (any, error) {
 	return names, nil
 }
 
+func (f *FS) Readlink(args []js.Value) (any, error) {
+	return nil, nil // TODO
+}
+
+func (f *FS) Rename(args []js.Value) (any, error) {
+	return nil, hackpadfs.Rename(f.FS, args[0].String(), args[1].String())
+}
+
+func (f *FS) Rmdir(args []js.Value) (any, error) {
+	info, err := f.Stat(args)
+	if err != nil {
+		return nil, err
+	}
+	if !js.ValueOf(info).Call("isDirectory").Bool() {
+		return nil, ErrNotDir
+	}
+	return nil, hackpadfs.Remove(f.FS, args[0].String())
+}
+
 func (f *FS) Stat(args []js.Value) (any, error) {
 	s, err := hackpadfs.Stat(f.FS, args[0].String())
 	if err != nil {

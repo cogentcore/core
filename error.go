@@ -84,3 +84,5 @@ func ErrBadFileNumber(fd uint64) error {
 func ErrBadFile(identifier string) error {
 	return WrapError(fmt.Errorf("bad file %q", identifier), "EBADF")
 }
+
+var ErrNotDir = WrapError(errors.New("not a directory"), "ENOTDIR")
