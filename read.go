@@ -10,6 +10,7 @@
 package fs
 
 import (
+	"fmt"
 	"io"
 	"syscall/js"
 
@@ -46,7 +47,8 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 		if ok {
 			readBuf, n, err = blob.ReadAt(readerAt, length, int64(position.Int()))
 		} else {
-			err = &hackpadfs.PathError{Op: "read", Path: fl.openedName, Err: hackpadfs.ErrNotImplemented}
+			// TODO: is this the right path?
+			err = &hackpadfs.PathError{Op: "read", Path: fmt.Sprint(fl), Err: hackpadfs.ErrNotImplemented}
 		}
 	}
 	if err == io.EOF {
@@ -55,7 +57,8 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 	if readBuf != nil {
 		_, setErr := blob.Set(iblob, readBuf, int64(offset))
 		if err == nil && setErr != nil {
-			err = &hackpadfs.PathError{Op: "read", Path: fl.openedName, Err: setErr}
+			// TODO: is this the right path?
+			err = &hackpadfs.PathError{Op: "read", Path: fmt.Sprint(fl), Err: setErr}
 		}
 	}
 	return n, iblob, err
