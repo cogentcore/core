@@ -12,6 +12,7 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
+	"github.com/pkg/errors"
 )
 
 // FS represents a filesystem that implements the Node.js fs API.
@@ -36,6 +37,16 @@ func NewFS() (*FS, error) {
 	return f, nil
 }
 
+// GetFile fetches the file specified by the file descriptor that is the first of the given arguments.
+func (f *FS) GetFile(args []js.Value) (hackpadfs.File, error) {
+	fd := uint64(args[0].Int())
+	fl := f.Files[fd]
+	if fl == nil {
+		return nil, ErrBadFileNumber(fd)
+	}
+	return fl, nil
+}
+
 func (f *FS) Chmod(args []js.Value) (any, error) {
 	return nil, f.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[1].Int()))
 }
@@ -49,34 +60,53 @@ func (f *FS) Close(args []js.Value) (any, error) {
 }
 
 func (f *FS) Fchmod(args []js.Value) (any, error) {
-	fd := uint64(args[0].Int())
-	fl := f.Files[fd]
-	if fl == nil {
-		return nil, ErrBadFileNumber(fd)
+	fl, err := f.GetFile(args)
+	if err != nil {
+		return nil, err
 	}
-	return nil, hackpadfs.ChmodFile(fl, hackpadfs.FileMode(args[1].Int())) // TODO
+	return nil, hackpadfs.ChmodFile(fl, hackpadfs.FileMode(args[1].Int()))
 }
 
 func (f *FS) Fchown(args []js.Value) (any, error) {
-	return f.Chown(args) // TODO
+	fl, err := f.GetFile(args)
+	if err != nil {
+		return nil, err
+	}
+	return nil, hackpadfs.ChownFile(fl, args[1].Int(), args[2].Int())
 }
 
 func (f *FS) Fstat(args []js.Value) (any, error) {
-	return f.Stat(args) // TODO
+	fl, err := f.GetFile(args)
+	if err != nil {
+		return nil, err
+	}
+	return fl.Stat()
 }
 
 func (f *FS) Fsync(args []js.Value) (any, error) {
-	return nil, nil // TODO
+	fl, err := f.GetFile(args)
+	if err != nil {
+		return nil, err
+	}
+	err = hackpadfs.SyncFile(fl)
+	if errors.Is(err, hackpadfs.ErrNotImplemented) {
+		err = nil // not all FS implement Sync(), so fall back to a no-op
+	}
+	return nil, err
 }
 
 func (f *FS) Ftruncate(args []js.Value) (any, error) {
-	return f.Stat(args) // TODO
+	fl, err := f.GetFile(args)
+	if err != nil {
+		return nil, err
+	}
+	return nil, hackpadfs.TruncateFile(fl, int64(args[1].Int()))
 }
 
 func (f *FS) Stat(args []js.Value) (any, error) {
 	return f.FS.Stat(args[0].String())
 }
 
-// func (fs *FS) Truncate(args []js.Value) (any, error) {
-// 	return hackpadfs.TruncateFile(args[0].String())
-// }
+func (f *FS) Truncate(args []js.Value) (any, error) {
+	return nil, nil // TODO
+}
