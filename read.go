@@ -18,10 +18,10 @@ import (
 	"github.com/hack-pad/hackpadfs/keyvalue/blob"
 )
 
-func (f *FS) Read(args []js.Value) (any, error) { // fd FID, buffer blob.Blob, offset, length int, position *int64) (n int, err error) {
+func (f *FS) Read(args []js.Value) (any, any, error) {
 	fl, err := f.GetFile(args)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	// 'offset' in Node.js's read is the offset in the buffer to start writing at,
 	// and 'position' is where to begin reading from in the file.
@@ -29,6 +29,12 @@ func (f *FS) Read(args []js.Value) (any, error) { // fd FID, buffer blob.Blob, o
 	var n int
 
 	buffer := args[1]
+
+	iblob, err := idbblob.New(buffer)
+	if err != nil {
+		return n, nil, err
+	}
+
 	offset := args[2].Int()
 	length := args[3].Int()
 	position := args[4]
@@ -47,16 +53,12 @@ func (f *FS) Read(args []js.Value) (any, error) { // fd FID, buffer blob.Blob, o
 		err = nil
 	}
 	if readBuf != nil {
-		iblob, ierr := idbblob.New(buffer)
-		if ierr != nil {
-			return n, ierr
-		}
 		_, setErr := blob.Set(iblob, readBuf, int64(offset))
 		if err == nil && setErr != nil {
 			err = &hackpadfs.PathError{Op: "read", Path: fl.openedName, Err: setErr}
 		}
 	}
-	return n, err
+	return n, iblob, err
 }
 
 func (f *FS) ReadFile(args []js.Value) (any, error) {
@@ -73,10 +75,7 @@ func (f *FS) ReadFile(args []js.Value) (any, error) {
 	}
 	info := js.ValueOf(infoa)
 
-	buf, err := idbblob.NewLength(info.Get("size").Int())
-	if err != nil {
-		return nil, err
-	}
-	_, err = f.Read([]js.Value{fd, buf.JSValue(), js.ValueOf(0), js.ValueOf(buf.Len())})
+	buf := js.Global().Get("Uint8Array").New(info.Get("size"))
+	_, _, err = f.Read([]js.Value{fd, buf, js.ValueOf(0), js.ValueOf(buf.Length())})
 	return buf, err
 }

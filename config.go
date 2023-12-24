@@ -40,21 +40,33 @@ func Config(jfs js.Value) (*FS, error) {
 }
 
 // Func is the type of a jsfs function.
-type Func func(args []js.Value) (any, error)
+type Func interface {
+	func(args []js.Value) (any, error) | func(args []js.Value) ([]any, error)
+}
 
 // SetFunc sets the function with the given name on the given value to the given function.
-func SetFunc(v js.Value, name string, fn Func) {
+func SetFunc[F Func](v js.Value, name string, fn F) {
 	f := FuncOf(name, fn)
 	v.Set(name, f)
 }
 
 // FuncOf turns the given function into a callback [js.Func].
-func FuncOf(name string, fn Func) js.Func {
+func FuncOf[F Func](name string, fn F) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
 		callback := args[len(args)-1]
 		args = args[:len(args)-1]
 
-		res, err := fn(args)
+		var res []any
+		var err error
+
+		switch fn := any(fn).(type) {
+		case func(args []js.Value) (any, error):
+			r, e := fn(args)
+			res = []any{r}
+			err = e
+		case func(args []js.Value) ([]any, error):
+			res, err = fn(args)
+		}
 
 		errv := JSError(err, name, args...)
 		callback.Invoke(append([]any{errv}, res...))
