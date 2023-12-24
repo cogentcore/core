@@ -23,5 +23,9 @@ func main() {
 	grr.Must1(fs.MkdirAll([]js.Value{js.ValueOf("me"), js.ValueOf(0777)}))
 	ifs := grr.Must1(indexeddb.NewFS(context.Background(), "/me", indexeddb.Options{}))
 	grr.Must(fs.FS.AddMount("me", ifs))
-	js.Global().Get("console").Call("log", "stat file info", grr.Must1(fs.Stat([]js.Value{js.ValueOf("me")})))
+	callback := js.FuncOf(func(this js.Value, args []js.Value) any {
+		js.Global().Get("console").Call("log", "stat file info", args[1])
+		return nil
+	})
+	js.Global().Get("fs").Call("stat", "me", callback)
 }
