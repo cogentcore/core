@@ -38,6 +38,7 @@ func Config(jfs js.Value) (*FS, error) {
 
 	SetFunc(jfs, "chmod", fs.Chmod)
 	SetFunc(jfs, "chown", fs.Chown)
+	SetFunc(jfs, "close", fs.Close)
 
 	return fs, nil
 }
