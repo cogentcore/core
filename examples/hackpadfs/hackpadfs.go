@@ -11,14 +11,15 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"syscall/js"
 
 	"github.com/hack-pad/hackpadfs/indexeddb"
 	"goki.dev/grr"
+	"goki.dev/jsfs"
 )
 
 func main() {
 	idb := grr.Must1(indexeddb.NewFS(context.Background(), "idb", indexeddb.Options{}))
-	grr.Must(idb.Mkdir("me", 0777))
-	fmt.Println("stat file info", grr.Must1(idb.Stat("me")))
+	grr.Must(idb.MkdirAll("me", 0777))
+	js.Global().Get("console").Call("log", "stat file info", jsfs.JSStat(grr.Must1(idb.Stat("me"))))
 }
