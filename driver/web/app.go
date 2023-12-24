@@ -8,10 +8,14 @@
 package web
 
 import (
+	"context"
 	"image"
 	"strings"
 	"syscall/js"
 
+	"github.com/hack-pad/go-indexeddb/idb"
+	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/indexeddb"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
@@ -40,7 +44,12 @@ type App struct { //gti:add
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
-	grr.Log1(jsfs.Config(js.Global().Get("fs")))
+
+	fs := grr.Log1(jsfs.Config(js.Global().Get("fs")))
+	grr.Must(hackpadfs.Mkdir(fs.FS, "me", 0700))
+	ifs := grr.Must1(indexeddb.NewFS(context.Background(), "/me", indexeddb.Options{TransactionDurability: idb.DurabilityRelaxed}))
+	grr.Must(fs.FS.AddMount("me", ifs))
+
 	base.Main(f, TheApp, &TheApp.App)
 }
 
