@@ -66,7 +66,7 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 }
 
 func (f *FS) ReadFile(args []js.Value) (any, error) {
-	fdu, err := f.OpenImpl(args[0].String(), 0, 0)
+	fdu, err := f.OpenImpl(NormPath(args[0].String()), 0, 0)
 	if err != nil {
 		return nil, err
 	}

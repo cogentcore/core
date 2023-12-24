@@ -13,6 +13,8 @@ package jsfs
 import (
 	"context"
 	"os"
+	"path"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -56,7 +58,13 @@ func NewFS() (*FS, error) {
 	}
 	_, err = f.OpenImpl("/dev/stderr", syscall.O_WRONLY, 0)
 	return f, err
+}
 
+// NormPath normalizes the given path by cleaning it and making it non-rooted,
+// as all go fs paths must be non-rooted.
+func NormPath(p string) string {
+	p = path.Clean(p)
+	return strings.TrimPrefix(p, "/")
 }
 
 // GetFile fetches the file specified by the file descriptor that is the first of the given arguments.
@@ -70,11 +78,11 @@ func (f *FS) GetFile(args []js.Value) (hackpadfs.File, error) {
 }
 
 func (f *FS) Chmod(args []js.Value) (any, error) {
-	return nil, hackpadfs.Chmod(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+	return nil, hackpadfs.Chmod(f.FS, NormPath(args[0].String()), hackpadfs.FileMode(args[1].Int()))
 }
 
 func (f *FS) Chown(args []js.Value) (any, error) {
-	return nil, hackpadfs.Chown(f.FS, args[0].String(), args[1].Int(), args[2].Int())
+	return nil, hackpadfs.Chown(f.FS, NormPath(args[0].String()), args[1].Int(), args[2].Int())
 }
 
 func (f *FS) Close(args []js.Value) (any, error) {
@@ -131,7 +139,7 @@ func (f *FS) Ftruncate(args []js.Value) (any, error) {
 }
 
 func (f *FS) Lchown(args []js.Value) (any, error) {
-	return nil, hackpadfs.Chown(f.FS, args[0].String(), args[1].Int(), args[2].Int()) // TODO
+	return nil, hackpadfs.Chown(f.FS, NormPath(args[0].String()), args[1].Int(), args[2].Int()) // TODO
 }
 
 func (f *FS) Link(args []js.Value) (any, error) {
@@ -139,7 +147,7 @@ func (f *FS) Link(args []js.Value) (any, error) {
 }
 
 func (f *FS) Lstat(args []js.Value) (any, error) {
-	s, err := hackpadfs.LstatOrStat(f.FS, args[0].String())
+	s, err := hackpadfs.LstatOrStat(f.FS, NormPath(args[0].String()))
 	if err != nil {
 		return nil, err
 	}
@@ -147,11 +155,11 @@ func (f *FS) Lstat(args []js.Value) (any, error) {
 }
 
 func (f *FS) Mkdir(args []js.Value) (any, error) {
-	return nil, hackpadfs.Mkdir(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+	return nil, hackpadfs.Mkdir(f.FS, NormPath(args[0].String()), hackpadfs.FileMode(args[1].Int()))
 }
 
 func (f *FS) MkdirAll(args []js.Value) (any, error) {
-	return nil, hackpadfs.MkdirAll(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+	return nil, hackpadfs.MkdirAll(f.FS, NormPath(args[0].String()), hackpadfs.FileMode(args[1].Int()))
 }
 
 func (f *FS) Open(args []js.Value) (any, error) {
@@ -159,6 +167,8 @@ func (f *FS) Open(args []js.Value) (any, error) {
 }
 
 func (f *FS) OpenImpl(path string, flags int, mode hackpadfs.FileMode) (uint64, error) {
+	path = NormPath(path)
+
 	f.Mu.Lock()
 	defer f.Mu.Unlock()
 
@@ -174,20 +184,20 @@ func (f *FS) OpenImpl(path string, flags int, mode hackpadfs.FileMode) (uint64, 
 
 func (f *FS) NewFile(absPath string, flags int, mode os.FileMode) (hackpadfs.File, error) {
 	switch absPath {
-	case "/dev/null":
+	case "dev/null":
 		return NewNullFile("dev/null"), nil
-	case "/dev/stdin":
+	case "dev/stdin":
 		return NewNullFile("dev/stdin"), nil // TODO: can this be mocked?
-	case "/dev/stdout":
+	case "dev/stdout":
 		return Stdout, nil
-	case "/dev/stderr":
+	case "dev/stderr":
 		return Stderr, nil
 	}
 	return hackpadfs.OpenFile(f.FS, absPath, flags, mode)
 }
 
 func (f *FS) Readdir(args []js.Value) (any, error) {
-	des, err := hackpadfs.ReadDir(f.FS, args[0].String())
+	des, err := hackpadfs.ReadDir(f.FS, NormPath(args[0].String()))
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +213,7 @@ func (f *FS) Readlink(args []js.Value) (any, error) {
 }
 
 func (f *FS) Rename(args []js.Value) (any, error) {
-	return nil, hackpadfs.Rename(f.FS, args[0].String(), args[1].String())
+	return nil, hackpadfs.Rename(f.FS, NormPath(args[0].String()), NormPath(args[1].String()))
 }
 
 func (f *FS) Rmdir(args []js.Value) (any, error) {
@@ -214,11 +224,11 @@ func (f *FS) Rmdir(args []js.Value) (any, error) {
 	if !js.ValueOf(info).Call("isDirectory").Bool() {
 		return nil, ErrNotDir
 	}
-	return nil, hackpadfs.Remove(f.FS, args[0].String())
+	return nil, hackpadfs.Remove(f.FS, NormPath(args[0].String()))
 }
 
 func (f *FS) Stat(args []js.Value) (any, error) {
-	s, err := hackpadfs.Stat(f.FS, args[0].String())
+	s, err := hackpadfs.Stat(f.FS, NormPath(args[0].String()))
 	if err != nil {
 		return nil, err
 	}
@@ -237,11 +247,11 @@ func (f *FS) Unlink(args []js.Value) (any, error) {
 	if js.ValueOf(info).Call("isDirectory").Bool() {
 		return nil, os.ErrPermission
 	}
-	return nil, hackpadfs.Remove(f.FS, args[0].String())
+	return nil, hackpadfs.Remove(f.FS, NormPath(args[0].String()))
 }
 
 func (f *FS) Utimes(args []js.Value) (any, error) {
-	path := args[0].String()
+	path := NormPath(args[0].String())
 	atime := time.Unix(int64(args[1].Int()), 0)
 	mtime := time.Unix(int64(args[2].Int()), 0)
 
