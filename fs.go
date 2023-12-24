@@ -18,6 +18,9 @@ import (
 // It is backed by an IndexedDB-based storage mechanism.
 type FS struct {
 	*indexeddb.FS
+
+	PreviousFID uint64
+	Files       map[uint64]hackpadfs.File
 }
 
 // NewFS returns a new [FS]. Most code should use [Config] instead.
@@ -26,43 +29,52 @@ func NewFS() (*FS, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &FS{ifs}, nil
+	f := &FS{
+		FS:    ifs,
+		Files: map[uint64]hackpadfs.File{},
+	}
+	return f, nil
 }
 
-func (fs *FS) Chmod(args []js.Value) (any, error) {
-	return nil, fs.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[0].Int()))
+func (f *FS) Chmod(args []js.Value) (any, error) {
+	return nil, f.FS.Chmod(args[0].String(), hackpadfs.FileMode(args[1].Int()))
 }
 
-func (fs *FS) Chown(args []js.Value) (any, error) {
-	return nil, hackpadfs.Chown(fs.FS, args[0].String(), args[1].Int(), args[2].Int())
+func (f *FS) Chown(args []js.Value) (any, error) {
+	return nil, hackpadfs.Chown(f.FS, args[0].String(), args[1].Int(), args[2].Int())
 }
 
-func (fs *FS) Close(args []js.Value) (any, error) {
+func (f *FS) Close(args []js.Value) (any, error) {
 	return nil, nil // TODO
 }
 
-func (fs *FS) Fchmod(args []js.Value) (any, error) {
-	return fs.Chmod(args) // TODO
+func (f *FS) Fchmod(args []js.Value) (any, error) {
+	fd := uint64(args[0].Int())
+	fl := f.Files[fd]
+	if fl == nil {
+		return nil, ErrBadFileNumber(fd)
+	}
+	return nil, hackpadfs.ChmodFile(fl, hackpadfs.FileMode(args[1].Int())) // TODO
 }
 
-func (fs *FS) Fchown(args []js.Value) (any, error) {
-	return fs.Chown(args) // TODO
+func (f *FS) Fchown(args []js.Value) (any, error) {
+	return f.Chown(args) // TODO
 }
 
-func (fs *FS) Fstat(args []js.Value) (any, error) {
-	return fs.Stat(args) // TODO
+func (f *FS) Fstat(args []js.Value) (any, error) {
+	return f.Stat(args) // TODO
 }
 
-func (fs *FS) Fsync(args []js.Value) (any, error) {
+func (f *FS) Fsync(args []js.Value) (any, error) {
 	return nil, nil // TODO
 }
 
-func (fs *FS) Ftruncate(args []js.Value) (any, error) {
-	return fs.Stat(args) // TODO
+func (f *FS) Ftruncate(args []js.Value) (any, error) {
+	return f.Stat(args) // TODO
 }
 
-func (fs *FS) Stat(args []js.Value) (any, error) {
-	return fs.FS.Stat(args[0].String())
+func (f *FS) Stat(args []js.Value) (any, error) {
+	return f.FS.Stat(args[0].String())
 }
 
 // func (fs *FS) Truncate(args []js.Value) (any, error) {
