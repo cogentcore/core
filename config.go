@@ -80,25 +80,31 @@ func SetFunc[F Func](v js.Value, name string, fn F) {
 // FuncOf turns the given function into a callback [js.Func].
 func FuncOf[F Func](name string, fn F) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
+		// the callback is always the last argument
 		callback := args[len(args)-1]
 		args = args[:len(args)-1]
 
-		var res []any
-		var err error
+		// we need to wrap the function call in a separate
+		// goroutine because these functions are asynchronous
+		// and return immediately, calling the callback later
+		go func() {
+			var res []any
+			var err error
 
-		switch fn := any(fn).(type) {
-		case func(args []js.Value) (any, error):
-			r, e := fn(args)
-			res = []any{r}
-			err = e
-		case func(args []js.Value) (any, any, error):
-			r0, r1, e := fn(args)
-			res = []any{r0, r1}
-			err = e
-		}
+			switch fn := any(fn).(type) {
+			case func(args []js.Value) (any, error):
+				r, e := fn(args)
+				res = []any{r}
+				err = e
+			case func(args []js.Value) (any, any, error):
+				r0, r1, e := fn(args)
+				res = []any{r0, r1}
+				err = e
+			}
 
-		errv := JSError(err, name, args...)
-		callback.Invoke(append([]any{errv}, res...)...)
+			errv := JSError(err, name, args...)
+			callback.Invoke(append([]any{errv}, res...)...)
+		}()
 		return nil
 	})
 }

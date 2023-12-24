@@ -28,4 +28,5 @@ func main() {
 		return nil
 	})
 	js.Global().Get("fs").Call("stat", "me", callback)
+	select {}
 }
