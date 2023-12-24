@@ -20,7 +20,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
-	"goki.dev/grows/jsons"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -31,8 +30,6 @@ func main() { gimain.Run(app) }
 func app() {
 	b := gi.NewAppBody("gogi-demo").SetTitle("GoGi Demo")
 	b.App().About = "The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework."
-
-	grr.Log(jsons.Save("hello", "test.json"))
 
 	ts := gi.NewTabs(b)
 
