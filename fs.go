@@ -8,6 +8,7 @@ package fs
 
 import (
 	"context"
+	"sync"
 	"syscall/js"
 
 	"github.com/hack-pad/hackpadfs"
@@ -22,6 +23,7 @@ type FS struct {
 
 	PreviousFID uint64
 	Files       map[uint64]hackpadfs.File
+	Mu          sync.Mutex
 }
 
 // NewFS returns a new [FS]. Most code should use [Config] instead.
@@ -128,6 +130,13 @@ func (f *FS) Mkdir(args []js.Value) (any, error) {
 }
 
 func (f *FS) MkdirAll(args []js.Value) (any, error) {
+	return nil, hackpadfs.MkdirAll(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
+}
+
+func (f *FS) Open(args []js.Value) (any, error) {
+	f.Mu.Lock()
+	defer f.Mu.Unlock()
+
 	return nil, hackpadfs.MkdirAll(f.FS, args[0].String(), hackpadfs.FileMode(args[1].Int()))
 }
 
