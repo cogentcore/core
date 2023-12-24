@@ -168,6 +168,18 @@ func (f *FS) NewFile(absPath string, flags int, mode os.FileMode) (hackpadfs.Fil
 	return hackpadfs.OpenFile(f.FS, absPath, flags, mode)
 }
 
+func (f *FS) Readdir(args []js.Value) (any, error) {
+	des, err := hackpadfs.ReadDir(f.FS, args[0].String())
+	if err != nil {
+		return nil, err
+	}
+	names := make([]any, len(des))
+	for i, de := range des {
+		names[i] = de.Name()
+	}
+	return names, nil
+}
+
 func (f *FS) Stat(args []js.Value) (any, error) {
 	s, err := hackpadfs.Stat(f.FS, args[0].String())
 	if err != nil {
