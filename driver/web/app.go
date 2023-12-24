@@ -18,6 +18,7 @@ import (
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
+	"goki.dev/grr"
 	"goki.dev/jsfs"
 )
 
@@ -35,14 +36,11 @@ type App struct { //gti:add
 	KeyMods key.Modifiers
 }
 
-func init() {
-	jsfs.Config(js.Global().Get("fs"))
-}
-
 // Main is called from main thread when it is time to start running the
 // main loop. When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
+	grr.Log1(jsfs.Config(js.Global().Get("fs")))
 	base.Main(f, TheApp, &TheApp.App)
 }
 
