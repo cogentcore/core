@@ -1,6 +1,6 @@
 module goki.dev/jsfs
 
-go 1.21.4
+go 1.21
 
 require github.com/hack-pad/hackpadfs v0.2.1
 

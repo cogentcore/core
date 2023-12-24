@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Based on https://github.com/hack-pad/hackpad
+// Licensed under the Apache 2.0 License
+
 //go:build js
 
 package fs
@@ -157,9 +160,9 @@ func (f *FS) NewFile(absPath string, flags int, mode os.FileMode) (hackpadfs.Fil
 	case "dev/stdin":
 		return NewNullFile("dev/stdin"), nil // TODO: can this be mocked?
 	case "dev/stdout":
-		return stdout, nil
+		return Stdout, nil
 	case "dev/stderr":
-		return stderr, nil
+		return Stderr, nil
 	}
 	return hackpadfs.OpenFile(f.FS, absPath, flags, mode)
 }

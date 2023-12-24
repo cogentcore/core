@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Based on https://github.com/hack-pad/hackpad
+// Licensed under the Apache 2.0 License
+
 //go:build js
 
 package fs
