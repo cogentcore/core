@@ -10,8 +10,10 @@
 package main
 
 import (
+	"context"
 	"syscall/js"
 
+	"github.com/hack-pad/hackpadfs/indexeddb"
 	"goki.dev/grr"
 	"goki.dev/jsfs"
 )
@@ -19,6 +21,8 @@ import (
 func main() {
 	fs := grr.Must1(jsfs.Config(js.Global().Get("fs")))
 	grr.Must1(fs.MkdirAll([]js.Value{js.ValueOf("me"), js.ValueOf(0777)}))
+	ifs := grr.Must1(indexeddb.NewFS(context.Background(), "/me", indexeddb.Options{}))
+	grr.Must(fs.FS.AddMount("me", ifs))
 	callback := js.FuncOf(func(this js.Value, args []js.Value) any {
 		js.Global().Get("console").Call("log", "stat file info", args[1])
 		return nil
