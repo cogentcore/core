@@ -94,7 +94,7 @@ func FuncOf[F Func](name string, fn F) js.Func {
 		}
 
 		errv := JSError(err, name, args...)
-		callback.Invoke(append([]any{errv}, res...))
+		callback.Invoke(append([]any{errv}, res...)...)
 		return nil
 	})
 }
