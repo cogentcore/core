@@ -66,9 +66,6 @@ func Main(f func(goosi.App)) {
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { goosi.HandleRecover(recover()) }()
 
-	if goosi.InitScreenLogicalDPIFunc != nil {
-		goosi.InitScreenLogicalDPIFunc()
-	}
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
 	a.SetSystemWindow()
@@ -107,6 +104,10 @@ func (a *App) Resize() {
 	dpi := 160 * a.Scrn.DevicePixelRatio
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
+
+	if goosi.InitScreenLogicalDPIFunc != nil {
+		goosi.InitScreenLogicalDPIFunc()
+	}
 
 	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
 	sz := image.Pt(w, h)
