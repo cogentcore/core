@@ -35,13 +35,36 @@ func Config(jfs js.Value) (*FS, error) {
 	SetFunc(jfs, "chmod", fs.Chmod)
 	SetFunc(jfs, "chown", fs.Chown)
 	SetFunc(jfs, "close", fs.Close)
+	SetFunc(jfs, "fchmod", fs.Fchmod)
+	SetFunc(jfs, "fchown", fs.Fchown)
+	SetFunc(jfs, "fstat", fs.Fstat)
+	SetFunc(jfs, "fsync", fs.Fsync)
+	SetFunc(jfs, "ftruncate", fs.Ftruncate)
+	SetFunc(jfs, "lchown", fs.Lchown)
+	SetFunc(jfs, "link", fs.Link)
+	SetFunc(jfs, "lstat", fs.Lstat)
+	SetFunc(jfs, "mkdir", fs.Mkdir)
+	SetFunc(jfs, "mkdirall", fs.MkdirAll)
+	SetFunc(jfs, "open", fs.Open)
+	SetFunc(jfs, "readdir", fs.Readdir)
+	SetFunc(jfs, "readlink", fs.Readlink)
+	SetFunc(jfs, "rename", fs.Rename)
+	SetFunc(jfs, "rmdir", fs.Rmdir)
+	SetFunc(jfs, "stat", fs.Stat)
+	SetFunc(jfs, "symlink", fs.Symlink)
+	SetFunc(jfs, "unlink", fs.Unlink)
+	SetFunc(jfs, "utimes", fs.Utimes)
+	SetFunc(jfs, "truncate", fs.Truncate)
+	SetFunc(jfs, "read", fs.Read)
+	SetFunc(jfs, "readfile", fs.ReadFile)
+	SetFunc(jfs, "write", fs.Write)
 
 	return fs, nil
 }
 
 // Func is the type of a jsfs function.
 type Func interface {
-	func(args []js.Value) (any, error) | func(args []js.Value) ([]any, error)
+	func(args []js.Value) (any, error) | func(args []js.Value) (any, any, error)
 }
 
 // SetFunc sets the function with the given name on the given value to the given function.
@@ -64,8 +87,10 @@ func FuncOf[F Func](name string, fn F) js.Func {
 			r, e := fn(args)
 			res = []any{r}
 			err = e
-		case func(args []js.Value) ([]any, error):
-			res, err = fn(args)
+		case func(args []js.Value) (any, any, error):
+			r0, r1, e := fn(args)
+			res = []any{r0, r1}
+			err = e
 		}
 
 		errv := JSError(err, name, args...)

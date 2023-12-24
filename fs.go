@@ -122,7 +122,7 @@ func (f *FS) Lchown(args []js.Value) (any, error) {
 }
 
 func (f *FS) Link(args []js.Value) (any, error) {
-	return nil, nil // TODO
+	return nil, hackpadfs.ErrNotImplemented // TODO
 }
 
 func (f *FS) Lstat(args []js.Value) (any, error) {
@@ -182,7 +182,7 @@ func (f *FS) Readdir(args []js.Value) (any, error) {
 }
 
 func (f *FS) Readlink(args []js.Value) (any, error) {
-	return nil, nil // TODO
+	return nil, hackpadfs.ErrNotImplemented // TODO
 }
 
 func (f *FS) Rename(args []js.Value) (any, error) {
@@ -209,7 +209,7 @@ func (f *FS) Stat(args []js.Value) (any, error) {
 }
 
 func (f *FS) Symlink(args []js.Value) (any, error) {
-	return nil, nil // TODO
+	return nil, hackpadfs.ErrNotImplemented // TODO
 }
 
 func (f *FS) Unlink(args []js.Value) (any, error) {
@@ -232,5 +232,5 @@ func (f *FS) Utimes(args []js.Value) (any, error) {
 }
 
 func (f *FS) Truncate(args []js.Value) (any, error) {
-	return nil, nil // TODO
+	return nil, hackpadfs.ErrNotImplemented // TODO
 }
