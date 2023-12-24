@@ -60,11 +60,6 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(odir, "browserfs.js"), []byte(BrowserFSJS), 0666)
-	if err != nil {
-		return err
-	}
-
 	ajs, err := MakeAppJS(c)
 	if err != nil {
 		return err
