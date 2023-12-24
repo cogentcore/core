@@ -78,37 +78,37 @@ func NewFS() (*FS, error) {
 // located at /home/me. It is backed by a persistent IndexedDB storage mechanism
 // such that files will persist between browser sessions, and it is initialized
 // to contain .data, Desktop, Documents, and Downloads directories.
-func (f *FS) ConfigUnix() (*FS, error) {
+func (f *FS) ConfigUnix() error {
 	perm := js.ValueOf(0755)
 	_, err := f.MkdirAll([]js.Value{js.ValueOf("/home/me"), perm})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	ifs, err := indexeddb.NewFS(context.Background(), "/home/me", indexeddb.Options{})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = f.FS.AddMount("home/me", ifs)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	_, err = f.MkdirAll([]js.Value{js.ValueOf("/home/me/.data"), perm})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	_, err = f.MkdirAll([]js.Value{js.ValueOf("/home/me/Desktop"), perm})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	_, err = f.MkdirAll([]js.Value{js.ValueOf("/home/me/Documents"), perm})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	_, err = f.MkdirAll([]js.Value{js.ValueOf("/home/me/Downloads"), perm})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return f, nil
+	return nil
 }
 
 // NormPath normalizes the given path by cleaning it and making it non-rooted,
