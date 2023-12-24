@@ -18,6 +18,7 @@ import (
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
+	"goki.dev/jsfs"
 )
 
 // TheApp is the single [goosi.App] for the web platform
@@ -32,6 +33,10 @@ type App struct { //gti:add
 
 	// KeyMods are the current key mods
 	KeyMods key.Modifiers
+}
+
+func init() {
+	jsfs.Config(js.Global().Get("fs"))
 }
 
 // Main is called from main thread when it is time to start running the
