@@ -22,13 +22,14 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/mem"
+	"github.com/hack-pad/hackpadfs/mount"
 	"github.com/pkg/errors"
 )
 
 // FS represents a filesystem that implements the Node.js fs API.
 // It is backed by an IndexedDB-based storage mechanism.
 type FS struct {
-	*mem.FS
+	FS *mount.FS
 
 	PreviousFID uint64
 	Files       map[uint64]hackpadfs.File
@@ -37,12 +38,16 @@ type FS struct {
 
 // NewFS returns a new [FS]. Most code should use [Config] instead.
 func NewFS() (*FS, error) {
-	ifs, err := mem.NewFS()
+	memfs, err := mem.NewFS()
+	if err != nil {
+		return nil, err
+	}
+	monfs, err := mount.NewFS(memfs)
 	if err != nil {
 		return nil, err
 	}
 	f := &FS{
-		FS:    ifs,
+		FS:    monfs,
 		Files: map[uint64]hackpadfs.File{},
 	}
 

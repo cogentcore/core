@@ -21,6 +21,7 @@ import (
 func Config(jfs js.Value) (*FS, error) {
 	fs, err := NewFS()
 	if err != nil {
+		js.Global().Get("console").Call("error", err.Error())
 		return nil, err
 	}
 
