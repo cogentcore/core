@@ -8,21 +8,17 @@
 package web
 
 import (
-	"context"
 	"image"
+	"log/slog"
 	"strings"
 	"syscall/js"
 
-	"github.com/hack-pad/go-indexeddb/idb"
-	"github.com/hack-pad/hackpadfs"
-	"github.com/hack-pad/hackpadfs/indexeddb"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
-	"goki.dev/grr"
 	"goki.dev/jsfs"
 )
 
@@ -45,10 +41,15 @@ type App struct { //gti:add
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
 
-	fs := grr.Log1(jsfs.Config(js.Global().Get("fs")))
-	grr.Must(hackpadfs.Mkdir(fs.FS, "me", 0700))
-	ifs := grr.Must1(indexeddb.NewFS(context.Background(), "/me", indexeddb.Options{TransactionDurability: idb.DurabilityRelaxed}))
-	grr.Must(fs.FS.AddMount("me", ifs))
+	fs, err := jsfs.Config(js.Global().Get("fs"))
+	if err != nil {
+		slog.Error("error configuring basic web filesystem", "err", err)
+	} else {
+		err := fs.ConfigUnix()
+		if err != nil {
+			slog.Error("error setting up standard unix filesystem structure", "err", err)
+		}
+	}
 
 	base.Main(f, TheApp, &TheApp.App)
 }
@@ -119,8 +120,7 @@ func (a *App) Resize() {
 }
 
 func (a *App) DataDir() string {
-	// TODO(kai): implement web filesystem
-	return "/data"
+	return "/home/me/.data"
 }
 
 func (a *App) Platform() goosi.Platforms {
