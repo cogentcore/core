@@ -368,6 +368,10 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			a.Scrn.PhysicalDPI = dpi
 			a.Scrn.LogicalDPI = dpi
 
+			if goosi.InitScreenLogicalDPIFunc != nil {
+				goosi.InitScreenLogicalDPIFunc()
+			}
+
 			physX := 25.4 * float32(widthPx) / dpi
 			physY := 25.4 * float32(heightPx) / dpi
 			a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))

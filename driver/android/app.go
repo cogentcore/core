@@ -90,9 +90,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 			break
 		}
 	}
-	if goosi.InitScreenLogicalDPIFunc != nil {
-		goosi.InitScreenLogicalDPIFunc()
-	}
+
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
 	a.Win = &Window{base.NewWindowSingle(a, opts)}

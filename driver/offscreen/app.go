@@ -37,9 +37,6 @@ func Main(f func(goosi.App)) {
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { goosi.HandleRecover(recover()) }()
 
-	if goosi.InitScreenLogicalDPIFunc != nil {
-		goosi.InitScreenLogicalDPIFunc()
-	}
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
 	a.Scrn.PixSize = opts.Size
@@ -68,6 +65,10 @@ func (a *App) GetScreens() {
 	dpi := float32(160)
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
+
+	if goosi.InitScreenLogicalDPIFunc != nil {
+		goosi.InitScreenLogicalDPIFunc()
+	}
 
 	physX := 25.4 * float32(a.Scrn.PixSize.X) / dpi
 	physY := 25.4 * float32(a.Scrn.PixSize.Y) / dpi

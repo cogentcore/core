@@ -163,6 +163,10 @@ func updateConfig(width, height, orientation int32) {
 	TheApp.Scrn.PhysicalDPI = DisplayMetrics.DPI
 	TheApp.Scrn.LogicalDPI = DisplayMetrics.DPI
 
+	if goosi.InitScreenLogicalDPIFunc != nil {
+		goosi.InitScreenLogicalDPIFunc()
+	}
+
 	physX := 25.4 * float32(width) / DisplayMetrics.DPI
 	physY := 25.4 * float32(height) / DisplayMetrics.DPI
 	TheApp.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
