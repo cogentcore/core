@@ -10,6 +10,7 @@
 package jsfs
 
 import (
+	"os"
 	"syscall"
 	"syscall/js"
 )
@@ -59,7 +60,9 @@ func Config(jfs js.Value) (*FS, error) {
 	SetFunc(jfs, "readfile", fs.ReadFile)
 	SetFunc(jfs, "write", fs.Write)
 
-	return fs, nil
+	// Set up system directories
+	_, err = fs.MkdirAll([]js.Value{js.ValueOf(os.TempDir()), js.ValueOf(0777)})
+	return fs, err
 }
 
 // Func is the type of a jsfs function.
