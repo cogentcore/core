@@ -22,10 +22,9 @@ import (
 func (f *FS) Read(args []js.Value) (any, any, error) {
 	fl, err := f.GetFile(args)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
-	// 'offset' in Node.js's read is the offset in the buffer to start writing at,
-	// and 'position' is where to begin reading from in the file.
+
 	var readBuf blob.Blob
 	var n int
 
@@ -40,6 +39,8 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 	length := args[3].Int()
 	position := args[4]
 
+	// 'offset' in Node.js's read is the offset in the buffer to start writing at,
+	// and 'position' is where to begin reading from in the file.
 	if position.IsUndefined() {
 		readBuf, n, err = blob.Read(fl, length)
 	} else {
@@ -61,7 +62,7 @@ func (f *FS) Read(args []js.Value) (any, any, error) {
 			err = &hackpadfs.PathError{Op: "read", Path: fmt.Sprint(fl), Err: setErr}
 		}
 	}
-	return n, iblob, err
+	return n, buffer, err
 }
 
 func (f *FS) ReadFile(args []js.Value) (any, error) {
