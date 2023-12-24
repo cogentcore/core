@@ -8,19 +8,26 @@ package offscreen
 
 import (
 	"image"
-	"path/filepath"
+	"os"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 )
 
 // TheApp is the single [goosi.App] for the offscreen platform
-var TheApp = &App{base.NewAppSingle[*Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
 // App is the [goosi.App] implementation for the offscreen platform
 type App struct { //gti:add
 	base.AppSingle[*Drawer, *Window]
+
+	// TempDataDir is the path of the app data directory, used as the
+	// return value of [App.DataDir]. It is set to a temporary directory,
+	// as offscreen tests should not be dependent on user preferences and
+	// other data.
+	TempDataDir string
 }
 
 // Main is called from main thread when it is time to start running the
@@ -28,6 +35,9 @@ type App struct { //gti:add
 func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
 	TheApp.GetScreens()
+
+	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir"))
+
 	base.Main(f, TheApp, &TheApp.App)
 }
 
@@ -77,9 +87,15 @@ func (a *App) GetScreens() {
 	a.Drawer.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 }
 
+func (a *App) QuitClean() {
+	if a.TempDataDir != "" {
+		grr.Log(os.RemoveAll(a.TempDataDir))
+	}
+	a.AppSingle.QuitClean()
+}
+
 func (a *App) DataDir() string {
-	// TODO(kai): figure out a better solution to offscreen prefs dir
-	return filepath.Join(".", "tmpDataDir")
+	return a.TempDataDir
 }
 
 func (a *App) Platform() goosi.Platforms {
