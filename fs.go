@@ -16,6 +16,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"syscall/js"
+	"time"
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
@@ -205,6 +206,29 @@ func (f *FS) Stat(args []js.Value) (any, error) {
 		return nil, err
 	}
 	return JSStat(s), nil
+}
+
+func (f *FS) Symlink(args []js.Value) (any, error) {
+	return nil, nil // TODO
+}
+
+func (f *FS) Unlink(args []js.Value) (any, error) {
+	info, err := f.Stat(args)
+	if err != nil {
+		return nil, err
+	}
+	if js.ValueOf(info).Call("isDirectory").Bool() {
+		return nil, os.ErrPermission
+	}
+	return nil, hackpadfs.Remove(f.FS, args[0].String())
+}
+
+func (f *FS) Utimes(args []js.Value) (any, error) {
+	path := args[0].String()
+	atime := time.Unix(int64(args[1].Int()), 0)
+	mtime := time.Unix(int64(args[2].Int()), 0)
+
+	return nil, hackpadfs.Chtimes(f.FS, path, atime, mtime)
 }
 
 func (f *FS) Truncate(args []js.Value) (any, error) {
