@@ -25,9 +25,7 @@
 	if (!globalThis.fs) {
 		globalThis.fs = {
 			constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 }, // unused
-			writeSync(fd, buf) {
-				writeConsole(fd, buf);
-			},
+			writeSync: writeConsole,
 			write(fd, buf, offset, length, position, callback) {
 				if (offset !== 0 || length !== buf.length || position !== null) {
 					callback(enosys());
