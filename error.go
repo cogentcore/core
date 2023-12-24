@@ -14,6 +14,7 @@ import (
 	"io"
 	"log"
 	"os/exec"
+	"syscall"
 	"syscall/js"
 
 	"github.com/hack-pad/hackpadfs"
@@ -45,6 +46,25 @@ func GetErrType(err error, debugMessage string) string {
 	if err := errors.Unwrap(err); err != nil {
 		return GetErrType(err, debugMessage)
 	}
+	if errno, ok := err.(syscall.Errno); ok {
+		switch errno {
+		case syscall.EBADF:
+			return "EBADF"
+		case syscall.ENOENT:
+			return "ENOENT"
+		case syscall.EEXIST:
+			return "EEXIST"
+		case syscall.EISDIR:
+			return "EISDIR"
+		case syscall.EPERM:
+			return "EPERM"
+		case syscall.EINVAL:
+			return "EINVAL"
+		default:
+			log.Printf("jsfs.GetErrType: got unknown syscall error number: (%d) %+v\n\n%s\n", errno, err, debugMessage)
+			return "EPERM"
+		}
+	}
 	switch err {
 	case io.EOF, exec.ErrNotFound:
 		return "ENOENT"
@@ -61,7 +81,7 @@ func GetErrType(err error, debugMessage string) string {
 	case errors.Is(err, hackpadfs.ErrPermission):
 		return "EPERM"
 	default:
-		log.Printf("error: jsfs.GetErrType: unknown error type: (%T) %+v\n\n%s\n", err, err, debugMessage)
+		log.Printf("jsfs.GetErrType: got unknown error type: (%T) %+v\n\n%s\n", err, err, debugMessage)
 		return "EPERM"
 	}
 }
