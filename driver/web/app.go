@@ -11,6 +11,7 @@ import (
 	"image"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 	"syscall/js"
 
@@ -120,6 +121,14 @@ func (a *App) Resize() {
 	canvas := js.Global().Get("document").Call("getElementById", "app")
 	canvas.Set("width", a.Scrn.PixSize.X)
 	canvas.Set("height", a.Scrn.PixSize.Y)
+
+	// we need to manually set the style width and height of the canvas to innerWidth and innerHeight
+	// instead of using 100vw and 100vh because vw and vh are incorrect on mobile browsers
+	// due to the address bar but innerWidth and innerHeight are correct
+	// (see https://stackoverflow.com/questions/43575363/css-100vh-is-too-tall-on-mobile-due-to-browser-ui)
+	cstyle := canvas.Get("style")
+	cstyle.Set("width", strconv.Itoa(w)+"px")
+	cstyle.Set("height", strconv.Itoa(h)+"px")
 
 	a.Drawer.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 
