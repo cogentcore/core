@@ -1384,7 +1384,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fi.DataJson, Data: buf.Bytes()})
 	} else {
-		slog.Error("giv.TreeView MimeData Write JSON error:", err)
+		slog.Error("giv.TreeView MimeData Write JSON error", "err", err)
 	}
 }
 
