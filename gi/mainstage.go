@@ -106,25 +106,19 @@ func (st *Stage) ConfigMainStage() {
 // RunWindow runs a Window with current settings.
 func (st *Stage) RunWindow() *Stage {
 	sc := st.Scene
-	// noTop := false
 	if CurRenderWin == nil {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* MainMgr to get initial pref size
 		st.SetMainMgr(st.FirstWinManager())
 	} else {
 		top := CurRenderWin.MainStageMgr.TopOfType(WindowStage)
-		// if top == nil {
-		// 	// if we have no window in the existing MainMgr (probably because it was deleted),
-		// 	// we are in a similar situation to the situation above with no current render window,
-		// 	// so we need a *temporary* MainMgr to get initial pref size
-		// 	noTop = true
-		// 	st.SetMainMgr(st.FirstWinManager())
-		// } else {
 		if sc.App == nil { // inherit apps
 			sc.App = top.Scene.App
 		}
 		st.SetMainMgr(&CurRenderWin.MainStageMgr)
-		// }
+	}
+	if sc.App == nil {
+		slog.Warn("Scene is missing App", "scene", sc)
 	}
 	st.ConfigMainStage()
 
