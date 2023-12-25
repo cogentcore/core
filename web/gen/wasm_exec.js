@@ -11,12 +11,32 @@
 		return err;
 	};
 
+	let outputBuf = "";
+	const writeConsole = function (fd, buf) {
+		outputBuf += decoder.decode(buf);
+		const nl = outputBuf.lastIndexOf("\n");
+		if (nl != -1) {
+			if (fd == 2) {
+				console.error(outputBuf.substring(0, nl));
+			} else {
+				console.log(outputBuf.substring(0, nl));
+			}
+			outputBuf = outputBuf.substring(nl + 1);
+		}
+		return buf.length;
+	}
 
 	if (!globalThis.fs) {
+<<<<<<< HEAD
 		BrowserFS.configure({
 			fs: "LocalStorage"
 		})
 		globalThis.fs = BrowserFS.BFSRequire("fs");
+=======
+		globalThis.fs = {
+			constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 }, // temporary placeholder that is overwritten by jsfs
+		};
+>>>>>>> phfs
 	}
 
 	if (!globalThis.process) {
@@ -29,7 +49,7 @@
 			pid: -1,
 			ppid: -1,
 			umask() { throw enosys(); },
-			cwd() { throw enosys(); },
+			cwd() { return "/" },
 			chdir() { throw enosys(); },
 		}
 	}
@@ -59,7 +79,7 @@
 			this.env = {};
 			this.exit = (code) => {
 				if (code !== 0) {
-					console.warn("exit code:", code);
+					console.error("exit code:", code);
 				}
 			};
 			this._exitPromise = new Promise((resolve) => {
@@ -199,7 +219,7 @@
 						const fd = getInt64(sp + 8);
 						const p = getInt64(sp + 16);
 						const n = this.mem.getInt32(sp + 24, true);
-						fs.writeSync(fd, new Uint8Array(this._inst.exports.mem.buffer, p, n));
+						writeConsole(fd, new Uint8Array(this._inst.exports.mem.buffer, p, n));
 					},
 
 					// func resetMemoryDataView()

@@ -36,11 +36,6 @@ func main() {
 			Documentation: "WASMExecJSGoCurrent is the wasm_exec.js file for the current version of Go.",
 		},
 		{
-			Var:           "BrowserFSJS",
-			Filename:      "gen/browserfs.js",
-			Documentation: "BrowsferFSJS is the browserfs.js file for the current version of Go.",
-		},
-		{
 			Var:           "AppJS",
 			Filename:      "gen/app.js",
 			Documentation: "AppJS is the string used for [AppJSTmpl].",
