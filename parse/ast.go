@@ -43,15 +43,6 @@ func (ast *Ast) ChildAst(idx int) *Ast {
 	return ast.Child(idx).(*Ast)
 }
 
-// ChildAstTry returns the child at given index as an Ast -- error if not valid
-func (ast *Ast) ChildAstTry(idx int) (*Ast, error) {
-	asti, err := ast.ChildTry(idx)
-	if err != nil {
-		return nil, err
-	}
-	return asti.(*Ast), nil
-}
-
 // ParAst returns the Parent as an Ast.
 func (ast *Ast) ParAst() *Ast {
 	if ast.Par == nil {

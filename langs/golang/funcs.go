@@ -49,10 +49,10 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 
 // NamesFromAst returns a slice of name(s) from namelist nodes
 func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) []string {
-	sast, err := ast.ChildAstTry(idx)
-	if err != nil {
+	sast := ast.ChildAst(idx)
+	if sast == nil {
 		if TraceTypes {
-			fmt.Println(err)
+			fmt.Printf("TraceTypes: could not find child 0 on ast %v", ast)
 		}
 		return nil
 	}
@@ -72,10 +72,10 @@ func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.As
 func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, fty *syms.Type) *syms.Type {
 	// ast.WriteTree(os.Stdout, 0)
 
-	pars, err := ast.ChildAstTry(0)
-	if err != nil {
+	pars := ast.ChildAst(0)
+	if pars == nil {
 		if TraceTypes {
-			fmt.Println(err)
+			fmt.Printf("TraceTypes: could not find child 0 on ast %v", ast)
 		}
 		return nil
 	}
@@ -99,7 +99,7 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 	npars := len(pars.Kids)
 	var sigpars *parse.Ast
 	if npars > 0 && (pars.Nm == "SigParams" || pars.Nm == "SigParamsResult") {
-		if ps, err := pars.ChildAstTry(0); err == nil {
+		if ps := pars.ChildAst(0); ps == nil {
 			sigpars = pars
 			pars = ps
 			npars = len(pars.Kids)

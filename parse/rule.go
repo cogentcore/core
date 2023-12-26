@@ -1520,7 +1520,6 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	apath := useAst.Path()
 	var node ki.Ki
 	var adnl []ki.Ki // additional nodes
-	var err error
 	if act.Path == "" {
 		node = useAst
 	} else if andidx := strings.Index(act.Path, "&"); andidx >= 0 {
@@ -1533,11 +1532,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			}
 			var nd ki.Ki
 			if p[:3] == "../" {
-				nd, err = parAst.FindPathTry(p[3:])
+				nd = parAst.FindPath(p[3:])
 			} else {
-				nd, err = useAst.FindPathTry(p)
+				nd = useAst.FindPath(p)
 			}
-			if err == nil {
+			if nd != nil {
 				if node == nil {
 					node = nd
 				}
@@ -1562,11 +1561,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 				p = strings.TrimSuffix(p, "...")
 			}
 			if p[:3] == "../" {
-				node, err = parAst.FindPathTry(p[3:])
+				node = parAst.FindPath(p[3:])
 			} else {
-				node, err = useAst.FindPathTry(p)
+				node = useAst.FindPath(p)
 			}
-			if err == nil {
+			if node != nil {
 				if findAll {
 					pn := node.Parent()
 					for _, pk := range *pn.Children() {

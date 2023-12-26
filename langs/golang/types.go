@@ -127,10 +127,10 @@ func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		// }
 		return
 	}
-	tyast, err := ty.Ast.(*parse.Ast).ChildAstTry(1)
-	if err != nil {
+	tyast := ty.Ast.(*parse.Ast).ChildAst(1)
+	if tyast == nil {
 		if TraceTypes {
-			fmt.Printf("TypesFromAst: Type has invalid Ast! %v  %v\n", ty.String(), err)
+			fmt.Printf("TypesFromAst: Type has invalid Ast! %v missing child 1\n", ty.String())
 		}
 		return
 	}
@@ -153,10 +153,10 @@ func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 
 // SubTypeFromAst returns a subtype from child ast at given index, nil if failed
 func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) (*syms.Type, bool) {
-	sast, err := ast.ChildAstTry(idx)
-	if err != nil {
+	sast := ast.ChildAst(idx)
+	if sast == nil {
 		if TraceTypes {
-			fmt.Println(err)
+			fmt.Printf("TraceTypes: could not find child %d on ast %v", idx, ast)
 		}
 		return nil, false
 	}
@@ -390,7 +390,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 			case "MethSpecAnonQual":
 				ty.Els.Add(fsrc, fsrc) // anon two are same
 			case "MethSpecName":
-				if nm, err := fld.ChildAstTry(0); err == nil {
+				if nm := fld.ChildAst(0); nm != nil {
 					mty := syms.NewType(ty.Name+":"+nm.Src, syms.Method)
 					pkg.Types.Add(mty)                    // add interface methods as new types..
 					gl.FuncTypeFromAst(fs, pkg, fld, mty) // todo: this is not working -- debug
