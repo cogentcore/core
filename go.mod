@@ -3,7 +3,7 @@ module goki.dev/laser
 go 1.21
 
 require (
-	goki.dev/enums v0.9.55
+	goki.dev/enums v0.9.56
 	goki.dev/glop v0.1.9
 )
 
