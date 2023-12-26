@@ -24,21 +24,23 @@ func SettingsViewWindow() {
 
 // SettingsView adds to the given body a view of user settings
 func SettingsView(b *gi.Body) {
-	b.AddAppBar(func(tb *gi.Toolbar) {
-		NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
-		NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
-		gi.NewSeparator(tb)
-		NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
-		NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
-		NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
-		NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
-		tb.AddOverflowMenu(func(m *gi.Scene) {
-			NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
-			NewFuncButton(m, pf.Delete).SetConfirm(true)
-			NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+	/*
+		b.AddAppBar(func(tb *gi.Toolbar) {
+			NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
+			NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
 			gi.NewSeparator(tb)
+			NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
+			NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
+			NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
+			NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
+			tb.AddOverflowMenu(func(m *gi.Scene) {
+				NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
+				NewFuncButton(m, pf.Delete).SetConfirm(true)
+				NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+				gi.NewSeparator(tb)
+			})
 		})
-	})
+	*/
 
 	tabs := gi.NewTabs(b)
 
@@ -53,19 +55,10 @@ func SettingsView(b *gi.Body) {
 				tab.UpdateBar()
 			}
 			se.Apply()
+			gi.ErrorSnackbar(fr, gi.SaveSettings(se), "Error saving "+nm+" settings")
 			gi.UpdateAll()
 		})
 	}
-
-	sv := NewStructView(b)
-	sv.SetStruct(pf)
-	sv.OnChange(func(e events.Event) {
-		pf.Changed = true
-
-		pf.Apply()
-		pf.Save()
-		pf.UpdateAll()
-	})
 }
 
 // PrefsDetView opens a view of user detailed preferences

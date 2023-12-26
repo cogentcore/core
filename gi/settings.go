@@ -33,7 +33,7 @@ import (
 // settings by default and should be modified by other apps to add their
 // app settings.
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
-	{"Appearance", GeneralSettings},
+	{"General", GeneralSettings},
 })
 
 // Settings is the interface that describes the functionality common to all settings data types.
@@ -65,6 +65,18 @@ func (sb *SettingsBase) Defaults() {}
 
 // Apply does nothing by default and can be extended by other settings data types.
 func (sb *SettingsBase) Apply() {}
+
+// OpenSettings opens the given settings from their [Settings.Filename].
+// The settings must be encoded in TOML.
+func OpenSettings(se Settings) error {
+	se.Defaults()
+	return tomls.Open(se, se.Filename())
+}
+
+// SaveSettings saves the given settings to their [Settings.Filename].
+func SaveSettings(se Settings) error {
+	return tomls.Save(se, se.Filename())
+}
 
 // Init performs the overall initialization of the Goki system by loading
 // settings. It is automatically called when a new window opened, but can
@@ -208,9 +220,6 @@ func UpdateAll() { //gti:add
 		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	}
 }
-
-// PrefsFileName is the name of the preferences file in GoGi prefs directory
-var PrefsFileName = "prefs.toml"
 
 // Open preferences from GoGi standard prefs directory
 func (pf *GeneralSettingsData) Open() error { //gti:add
