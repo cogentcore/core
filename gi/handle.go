@@ -46,9 +46,6 @@ func (hl *Handle) SetStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
 
-		// TODO(kai/margin): this is intentionally designed to work with the
-		// current way margin is handled, but will break after it is fixed.
-		// Width/height should actually be 6dp, not 14dp.
 		if hl.Dim == mat32.X {
 			s.Min.X.Dp(6)
 			s.Min.Y.Em(2)
