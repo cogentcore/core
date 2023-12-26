@@ -12,24 +12,19 @@ import (
 	"goki.dev/icons"
 )
 
-// TODO: make base simplified preferences view, improve organization of information, and maybe add titles
-
-// PrefsView opens a view of user preferences
-func PrefsView(pf *gi.GeneralSettingsData) {
-	if gi.ActivateExistingMainWindow(pf) {
+// SettingsViewWindow makes and runs a new window for viewing user settings.
+func SettingsViewWindow() {
+	if gi.ActivateExistingMainWindow(gi.AllSettings) {
 		return
 	}
-	d := gi.NewBody("gogi-prefs")
-	d.SetTitle("GoGi Preferences")
-	d.Sc.Data = pf
-	d.AddAppBar(func(tb *gi.Toolbar) {
-		NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
-		gi.NewSeparator(tb)
-		NewFuncButton(tb, pf.LightMode)
-		NewFuncButton(tb, pf.DarkMode)
-		gi.NewSeparator(tb)
-		sz := NewFuncButton(tb, pf.SaveZoom).SetIcon(icons.ZoomIn)
-		sz.Args[0].SetValue(true)
+	d := gi.NewBody("settings").SetTitle("Settings").SetData(gi.AllSettings)
+	SettingsView(d)
+	d.NewWindow().Run()
+}
+
+// SettingsView adds to the given body a view of user settings
+func SettingsView(b *gi.Body) {
+	b.AddAppBar(func(tb *gi.Toolbar) {
 		NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
 		NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
 		gi.NewSeparator(tb)
@@ -44,19 +39,33 @@ func PrefsView(pf *gi.GeneralSettingsData) {
 			gi.NewSeparator(tb)
 		})
 	})
-	sv := NewStructView(d)
+
+	tabs := gi.NewTabs(b)
+
+	for _, kv := range gi.AllSettings.Order {
+		nm := kv.Key
+		se := kv.Val
+
+		fr := tabs.NewTab(nm)
+
+		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
+			if tab := b.GetTopAppBar(); tab != nil {
+				tab.UpdateBar()
+			}
+			se.Apply()
+			gi.UpdateAll()
+		})
+	}
+
+	sv := NewStructView(b)
 	sv.SetStruct(pf)
 	sv.OnChange(func(e events.Event) {
 		pf.Changed = true
-		tab := d.GetTopAppBar()
-		if tab != nil {
-			tab.UpdateBar()
-		}
+
 		pf.Apply()
 		pf.Save()
 		pf.UpdateAll()
 	})
-	d.NewWindow().Run()
 }
 
 // PrefsDetView opens a view of user detailed preferences

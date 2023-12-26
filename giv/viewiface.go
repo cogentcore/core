@@ -24,7 +24,7 @@ func (vi *ViewIFace) Inspector(obj ki.Ki) {
 }
 
 func (vi *ViewIFace) PrefsView(prefs *gi.GeneralSettingsData) {
-	PrefsView(prefs)
+	SettingsView(prefs)
 }
 
 func (vi *ViewIFace) KeyMapsView(maps *keyfun.Maps) {

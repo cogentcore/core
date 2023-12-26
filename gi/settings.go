@@ -198,11 +198,10 @@ func (pf *GeneralSettingsData) Defaults() {
 	pf.UpdateUser()
 }
 
-// UpdateAll updates all open windows with current preferences -- triggers
-// rebuild of default styles.
-func (pf *GeneralSettingsData) UpdateAll() { //gti:add
-	pf.Apply()
-	gradient.Cache = nil
+// UpdateAll updates all windows and triggers a full render rebuild.
+// It is typically called when user settings are changed.
+func UpdateAll() { //gti:add
+	gradient.Cache = nil // the cache is invalid now
 	for _, w := range AllRenderWins {
 		rctx := w.MainStageMgr.RenderCtx
 		rctx.LogicalDPI = w.LogicalDPI()
