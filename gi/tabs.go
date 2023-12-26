@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/iancoleman/strcase"
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -128,37 +127,27 @@ func (ts *Tabs) CurTab() (Widget, int, bool) {
 // TODO(kai): once subscenes are working, we should make tabs be subscenes
 
 // NewTab adds a new tab with the given label and returns the resulting tab frame.
-// It is the main end-user API for creating new tabs. If a name is also passed,
-// the internal name (ID) of the tab will be set to that; otherwise, it will default
-// to the kebab-case version of the label.
-func (ts *Tabs) NewTab(label string, name ...string) *Frame {
+// It is the main end-user API for creating new tabs.
+func (ts *Tabs) NewTab(label string) *Frame {
 	fr := ts.Frame()
 	idx := len(*fr.Children())
-	frame := ts.InsertNewTab(label, idx, name...)
+	frame := ts.InsertNewTab(label, idx)
 	return frame
 }
 
 // InsertNewTab inserts a new tab with the given label at the given index position
-// within the list of tabs and returns the resulting tab frame. If a name is also
-// passed, the internal name (ID) of the tab will be set to that; otherwise, it will default
-// to the kebab-case version of the label.
-func (ts *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
+// within the list of tabs and returns the resulting tab frame.
+func (ts *Tabs) InsertNewTab(label string, idx int) *Frame {
 	updt := ts.UpdateStart()
 	defer ts.UpdateEndLayout(updt)
 
 	fr := ts.Frame()
 	fr.SetChildAdded()
-	nm := ""
-	if len(name) > 0 {
-		nm = name[0]
-	} else {
-		nm = strcase.ToKebab(label)
-	}
-	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
+	frame := fr.InsertNewChild(FrameType, idx, label).(*Frame)
 	frame.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	ts.InsertTabOnlyAt(frame, label, idx, nm)
+	ts.InsertTabOnlyAt(frame, label, idx)
 	ts.Update()
 	ts.SetNeedsLayout(true)
 	return frame
@@ -175,18 +164,11 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 
 // InsertTabOnlyAt inserts just the tab at given index, after the panel has
 // already been added to the frame; assumed to be wrapped in update. Generally
-// for internal use only. If a name is also passed, the internal name (ID) of the tab
-// will be set to that; otherwise, it will default to the kebab-case version of the label.
-func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...string) {
+// for internal use only.
+func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tb := ts.Tabs()
 	tb.SetChildAdded()
-	nm := ""
-	if len(name) > 0 {
-		nm = name[0]
-	} else {
-		nm = strcase.ToKebab(label)
-	}
-	tab := tb.InsertNewChild(TabType, idx, nm).(*Tab)
+	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.DeleteButton = ts.DeleteTabButtons
@@ -205,9 +187,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 }
 
 // InsertTab inserts a frame into given index position within list of tabs.
-// If a name is also passed, the internal name (ID) of the tab will be set
-// to that; otherwise, it will default to the kebab-case version of the label.
-func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, name ...string) {
+func (ts *Tabs) InsertTab(frame *Frame, label string, idx int) {
 	ts.Mu.Lock()
 	updt := ts.UpdateStart()
 	defer ts.UpdateEndLayout(updt)
@@ -215,7 +195,7 @@ func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, name ...string) {
 	fr := ts.Frame()
 	fr.SetChildAdded()
 	fr.InsertChild(frame, idx)
-	ts.InsertTabOnlyAt(frame, label, idx, name...)
+	ts.InsertTabOnlyAt(frame, label, idx)
 	ts.Mu.Unlock()
 }
 
@@ -337,9 +317,8 @@ func (ts *Tabs) SelectTabByLabelTry(label string) (*Frame, error) {
 
 // RecycleTab returns a tab with given label, first by looking for an existing one,
 // and if not found, making a new one. If sel, then select it. It returns the
-// frame for the tab. If a label is also passed, the internal label (ID) of any new tab
-// will be set to that; otherwise, it will default to the kebab-case version of the label.
-func (ts *Tabs) RecycleTab(label string, sel bool, name ...string) *Frame {
+// frame for the tab.
+func (ts *Tabs) RecycleTab(label string, sel bool) *Frame {
 	frame, err := ts.TabByLabelTry(label)
 	if err == nil {
 		if sel {
@@ -347,7 +326,7 @@ func (ts *Tabs) RecycleTab(label string, sel bool, name ...string) *Frame {
 		}
 		return frame
 	}
-	frame = ts.NewTab(label, name...)
+	frame = ts.NewTab(label)
 	if sel {
 		ts.SelectTabByLabel(label)
 	}
@@ -358,10 +337,8 @@ func (ts *Tabs) RecycleTab(label string, sel bool, name ...string) *Frame {
 // first by looking for an existing one, with given label, and if not found,
 // making and configuring a new one.
 // If sel, then select it. It returns the Widget item for the tab.
-// If a label is also passed, the internal label (ID) of any new tab
-// will be set to that; otherwise, it will default to the kebab-case version of the label.
-func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type, name ...string) Widget {
-	fr := ts.RecycleTab(label, sel, name...)
+func (ts *Tabs) RecycleTabWidget(label string, sel bool, typ *gti.Type) Widget {
+	fr := ts.RecycleTab(label, sel)
 	if fr.HasChildren() {
 		wi, _ := AsWidget(fr.Child(0))
 		return wi
