@@ -601,7 +601,7 @@ func (tb *Tab) ConfigPartsDeleteButton() {
 				return
 			}
 			idx, _ := ts.TabIndexByLabel(tb.Text)
-			if !AppearanceSettings.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
+			if !GeneralSettings.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
 				ts.DeleteTabIndex(idx, true)
 			} else {
 				ts.SelectTabIndex(idx) // otherwise select

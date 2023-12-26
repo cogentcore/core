@@ -23,7 +23,7 @@ type ViewIFace interface {
 	Inspector(obj ki.Ki)
 
 	// PrefsView opens an interactive view of given preferences object
-	PrefsView(prefs *AppearanceSettingsData)
+	PrefsView(prefs *GeneralSettingsData)
 
 	// KeyMapsView opens an interactive view of KeyMaps object
 	KeyMapsView(maps *keyfun.Maps)

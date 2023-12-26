@@ -86,7 +86,7 @@ func (fb *FileBrowse) OnInit() {
 					s.Grow.Set(1, 1)
 					s.Min.X.Ch(20)
 					s.Min.Y.Ch(10)
-					s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+					s.Font.Family = string(gi.GeneralSettings.MonoFont)
 					s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 					s.Text.TabSize = 4
 				})

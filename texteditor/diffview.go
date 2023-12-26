@@ -164,7 +164,7 @@ func (dv *DiffView) SetStyles() {
 		switch w.PathFrom(dv) {
 		case "text-a", "text-b":
 			w.Style(func(s *styles.Style) {
-				s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+				s.Font.Family = string(gi.GeneralSettings.MonoFont)
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})
