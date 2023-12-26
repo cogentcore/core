@@ -171,14 +171,14 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		var met *gti.Method
 		if gtyp == nil {
 			if fb.WarnUnadded {
-				slog.Info("warning: potential programmer error: giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+				slog.Warn("giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti", "function", fnm)
 			}
 			met = &gti.Method{Name: metnm}
 		} else {
 			met = gtyp.Methods.ValByKey(metnm)
 			if met == nil {
 				if fb.WarnUnadded {
-					slog.Info("warning: potential programmer error: giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself), meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+					slog.Warn("giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself)", "function", fnm)
 				}
 				met = &gti.Method{Name: metnm}
 			}
@@ -200,7 +200,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	f := gti.FuncByName(fnm)
 	if f == nil {
 		if fb.WarnUnadded {
-			slog.Info("warning: potential programmer error: giv.FuncButton.SetFunc called with a function that has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+			slog.Warn("giv.FuncButton.SetFunc called with a function that has not been added to gti", "function", fnm)
 		}
 		f = &gti.Func{Name: fnm}
 	}
