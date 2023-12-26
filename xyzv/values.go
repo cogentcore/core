@@ -5,7 +5,7 @@
 package xyzv
 
 import (
-	"log"
+	"log/slog"
 	"reflect"
 	"sort"
 
@@ -78,9 +78,9 @@ func (vv *MeshValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	if !ok {
 		return false, nil
 	}
-	sci, err := ndi.ParentByTypeTry(xyz.SceneType, ki.Embeds)
-	if err != nil {
-		log.Println(err)
+	sci := ndi.ParentByType(xyz.SceneType, ki.Embeds)
+	if sci == nil {
+		slog.Error("missing parent scene for node", "node", ndi)
 		return false, nil
 	}
 	sc := xyz.AsScene(sci)

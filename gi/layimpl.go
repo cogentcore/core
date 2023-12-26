@@ -604,10 +604,7 @@ func (ls *LayImplState) String() string {
 
 // StackTopWidget returns the StackTop element as a widget
 func (ly *Layout) StackTopWidget() (Widget, *WidgetBase) {
-	sn, err := ly.ChildTry(ly.StackTop)
-	if err != nil {
-		return nil, nil
-	}
+	sn := ly.Child(ly.StackTop)
 	return AsWidget(sn)
 }
 
