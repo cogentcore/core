@@ -261,7 +261,7 @@ func (n *Node) Children() *Slice {
 // Child returns the child at given index and returns nil if
 // the index is out of range.
 func (n *Node) Child(idx int) Ki {
-	if idx >= len(n.Kids) {
+	if idx >= len(n.Kids) || idx < 0 {
 		return nil
 	}
 	return n.Kids[idx]
