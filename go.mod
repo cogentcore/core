@@ -4,13 +4,13 @@ go 1.21
 
 require (
 	github.com/anthonynsimon/bild v0.13.0
-	goki.dev/cam v0.9.48
-	goki.dev/enums v0.9.55
-	goki.dev/grows v0.3.30
+	goki.dev/cam v0.9.49
+	goki.dev/enums v0.9.56
+	goki.dev/grows v0.3.31
 	goki.dev/grr v0.0.11
-	goki.dev/gti v0.1.31
-	goki.dev/mat32/v2 v2.0.0-dev0.0.27
-	goki.dev/ordmap v0.5.9
+	goki.dev/gti v0.1.32
+	goki.dev/mat32/v2 v2.0.0-dev0.0.28
+	goki.dev/ordmap v0.5.10
 	golang.org/x/net v0.19.0
 )
 
@@ -19,7 +19,7 @@ require (
 	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	goki.dev/glop v0.1.9 // indirect
-	goki.dev/laser v0.1.33 // indirect
+	goki.dev/laser v0.1.34 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
