@@ -68,7 +68,6 @@ func (sb *SettingsBase) Apply() {}
 // OpenSettings opens the given settings from their [Settings.Filename].
 // The settings must be encoded in TOML.
 func OpenSettings(se Settings) error {
-	se.Defaults()
 	return tomls.Open(se, se.Filename())
 }
 
@@ -88,24 +87,37 @@ func ResetSettings(se Settings) error {
 	return nil
 }
 
+// LoadSettings sets the defaults of, opens, and applies the given settings.
+func LoadSettings(se Settings) error {
+	se.Defaults()
+	err := OpenSettings(se)
+	if err != nil {
+		return err
+	}
+	se.Apply()
+	return nil
+}
+
+// LoadAllSettings sets the defaults of, opens, and applies [AllSettings].
+func LoadAllSettings() error {
+	for _, kv := range AllSettings.Order {
+		err := LoadSettings(kv.Val)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Init performs the overall initialization of the Goki system by loading
 // settings. It is automatically called when a new window opened, but can
 // be called before then if certain settings info needed.
 func Init() {
-	if GeneralSettings.Zoom == 0 {
-		GeneralSettings.File = filepath.Join(GokiDataDir(), "general-settings.toml")
-		GeneralSettings.Defaults()
-		PrefsDet.Defaults()
-		PrefsDbg.Connect()
-		grr.Log(OpenSettings(GeneralSettings))
-		goosi.InitScreenLogicalDPIFunc = GeneralSettings.ApplyDPI // called when screens are initialized
-		GeneralSettings.Apply()
-		if TheViewIFace != nil {
-			TheViewIFace.HiStyleInit()
-		}
-		WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
-		WinGeomMgr.Open()
-	}
+	GeneralSettings.File = filepath.Join(GokiDataDir(), "general-settings.toml")
+	goosi.InitScreenLogicalDPIFunc = GeneralSettings.ApplyDPI // called when screens are initialized
+	grr.Log(LoadAllSettings())
+	WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+	WinGeomMgr.Open()
 }
 
 // GeneralSettingsData is the data type for the general Goki settings.
