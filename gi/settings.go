@@ -97,7 +97,7 @@ func Init() {
 		GeneralSettings.Defaults()
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
-		GeneralSettings.Open()
+		grr.Log(OpenSettings(GeneralSettings))
 		goosi.InitScreenLogicalDPIFunc = GeneralSettings.ApplyDPI // called when screens are initialized
 		GeneralSettings.Apply()
 		if TheViewIFace != nil {

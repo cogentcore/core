@@ -655,7 +655,7 @@ func (fv *FileView) AddPathToFavs() {
 	}
 	fi := gi.FavPathItem{"folder", fnm, dp}
 	gi.GeneralSettings.FavPaths = append(gi.GeneralSettings.FavPaths, fi)
-	gi.GeneralSettings.Save()
+	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.GeneralSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
 	fv.UpdateFavs()
 }
@@ -784,7 +784,7 @@ func (fv *FileView) SaveSortPrefs() {
 	}
 	gi.GeneralSettings.FileViewSort = sv.SortFieldName()
 	// fmt.Printf("sort: %v\n", gi.Prefs.FileViewSort)
-	gi.GeneralSettings.Save()
+	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.GeneralSettings), "Error saving settings")
 }
 
 func (fv *FileView) ApplyStyle() {
