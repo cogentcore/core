@@ -48,7 +48,7 @@ var CustomConfigStyles func(w Widget)
 // It is the main way for both end-user and internal code
 // to set the styles of a widget.
 // It should only be done before showing the scene
-// during initial configuration -- otherwise requries
+// during initial configuration -- otherwise requires
 // a StyMu mutex lock.
 func (wb *WidgetBase) Style(s func(s *styles.Style)) *WidgetBase {
 	wb.Stylers = append(wb.Stylers, s)
