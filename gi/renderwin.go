@@ -309,7 +309,7 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	// curSz := rctx.Size
 	// nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
 	rctx.Mu.RUnlock()
-	GeneralSettings.UpdateAll()
+	UpdateAll()
 	// w.GoosiWin.SetSize(nsz)
 }
 

@@ -1096,7 +1096,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		fmt.Printf("Win: %v display refreshed\n", sc.Name())
 		goosi.TheApp.GetScreens()
-		GeneralSettings.UpdateAll()
+		UpdateAll()
 		WinGeomMgr.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()

@@ -23,7 +23,6 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/pi/v2/langs/golang"
 )
@@ -74,8 +73,19 @@ func OpenSettings(se Settings) error {
 }
 
 // SaveSettings saves the given settings to their [Settings.Filename].
+// It encodes the settings in TOML.
 func SaveSettings(se Settings) error {
 	return tomls.Save(se, se.Filename())
+}
+
+// ResetSettings resets the given settings to their default values.
+func ResetSettings(se Settings) error {
+	err := os.Remove(se.Filename())
+	if err != nil {
+		return err
+	}
+	se.Defaults()
+	return nil
 }
 
 // Init performs the overall initialization of the Goki system by loading
@@ -221,92 +231,7 @@ func UpdateAll() { //gti:add
 	}
 }
 
-// Open preferences from GoGi standard prefs directory
-func (pf *GeneralSettingsData) Open() error { //gti:add
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsFileName)
-	err := grr.Log(tomls.Open(pf, pnm))
-	if err != nil {
-		return err
-	}
-	if pf.SaveKeyMaps {
-		err = keyfun.AvailMaps.OpenPrefs()
-		if err != nil {
-			pf.SaveKeyMaps = false
-			return err
-		}
-	}
-	if pf.SaveDetailed {
-		err := PrefsDet.Open()
-		if err != nil {
-			pf.SaveDetailed = false
-			return err
-		}
-	}
-	if pf.User.Username == "" {
-		pf.UpdateUser()
-	}
-	pf.Changed = false
-	return err
-}
-
-// Save saves the preferences to the GoGi standard prefs directory
-func (pf *GeneralSettingsData) Save() error { //gti:add
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsFileName)
-	err := grr.Log(tomls.Save(pf, pnm))
-	if err != nil {
-		return err
-	}
-	if pf.SaveKeyMaps {
-		err := keyfun.AvailMaps.SavePrefs()
-		if err != nil {
-			pf.SaveKeyMaps = false
-			return err
-		}
-	}
-	if pf.SaveDetailed {
-		err := PrefsDet.Save()
-		if err != nil {
-			pf.SaveDetailed = false
-			return err
-		}
-	}
-	pf.Changed = false
-	return err
-}
-
-// Delete deletes the preferences from the GoGi standard prefs directory.
-// This is an unrecoverable action, and you should only do this if you
-// are absolutely sure you want to. You may want to consider making a copy
-// of your preferences through "Save as" before doing this.
-func (pf *GeneralSettingsData) Delete() error { //gti:add
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsFileName)
-	return os.Remove(pnm)
-}
-
-// TODO: need to handle auto theme and set things correctly
-
-// LightMode sets the color theme to light mode. It automatically
-// saves the preferences and updates all of the windows.
-func (pf *GeneralSettingsData) LightMode() { //gti:add
-	pf.Theme = ThemeLight
-	colors.SetScheme(false)
-	grr.Log(pf.Save())
-	pf.UpdateAll()
-}
-
-// DarkMode sets the color theme to dark mode. It automatically
-// saves the preferences and updates all of the windows.
-func (pf *GeneralSettingsData) DarkMode() { //gti:add
-	pf.Theme = ThemeDark
-	colors.SetScheme(true)
-	pf.Save()
-	pf.UpdateAll()
-}
-
-// Apply preferences to all the relevant settings.
+// Apply applies the settings.
 func (pf *GeneralSettingsData) Apply() { //gti:add
 	np := len(pf.FavPaths)
 	for i := 0; i < np; i++ {
@@ -381,6 +306,7 @@ func (pf *GeneralSettingsData) ApplyDPI() {
 	}
 }
 
+/*
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
 //   - forCurrentScreen: if true, saves only for current screen
@@ -402,6 +328,7 @@ func (pf *GeneralSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
 	}
 	grr.Log(pf.Save())
 }
+*/
 
 // ScreenInfo returns screen info for all screens on the device
 func (pf *GeneralSettingsData) ScreenInfo() []*goosi.Screen { //gti:add
