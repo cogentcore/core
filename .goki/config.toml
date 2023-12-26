@@ -1,19 +1,43 @@
 Name = "prof"
 Desc = ""
-Version = "v2.0.0-dev0.0.4"
+Version = "v2.0.0-dev0.0.5"
 Type = "Library"
 
 [Build]
   Package = "."
+  Output = ""
+  ID = "com.org.todo.prof"
+  Debug = false
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
 
-[Colorgen]
-  Source = "colors.xml"
-  Output = "colorgen.go"
-  Package = "main"
-  Comment = ""
+[Web]
+  Port = "8080"
+  RandomVersion = false
+  Gzip = false
+  BackgroundColor = "#2d2c2c"
+  ThemeColor = "#2d2c2c"
+  LoadingLabel = ""
+  Lang = "en"
+  Title = ""
+  Description = ""
+  Author = ""
+  Image = ""
+  AutoUpdateInterval = "10s"
+  WasmContentLengthHeader = ""
+  ServiceWorkerTemplate = ""
 
-[Install]
-  Package = "."
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
 
 [Log]
   Target = "android"
@@ -27,7 +51,6 @@ Type = "Library"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
-  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -41,6 +64,7 @@ Type = "Library"
     YAML = false
     SQL = false
     GQL = false
+    Extend = true
   [Generate.Gtigen]
     Dir = "."
     Output = "gtigen.go"
@@ -49,3 +73,4 @@ Type = "Library"
     AddFuncs = false
     Instance = false
     TypeVar = false
+    Setters = false
