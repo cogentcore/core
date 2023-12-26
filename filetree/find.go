@@ -28,9 +28,9 @@ func (fn *Node) FindDirNode(path string) (*Node, error) {
 	}
 	dirs := filepath.SplitList(rp)
 	dir := dirs[0]
-	dni, err := fn.ChildByNameTry(dir, 0)
-	if err != nil {
-		return nil, err
+	dni := fn.ChildByName(dir, 0)
+	if dni == nil {
+		return nil, fmt.Errorf("could not find child %q", dir)
 	}
 	dn := AsNode(dni)
 	if len(dirs) == 1 {

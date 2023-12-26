@@ -260,7 +260,7 @@ func (fn *Node) ConfigOfFiles(path string) ki.Config {
 	typ := fn.FRoot.NodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
-			emsg := fmt.Sprintf("giv.Node ConfigFilesIn Path %q: Error: %v", path, err)
+			emsg := fmt.Sprintf("filetree.Node ConfigFilesIn Path %q: Error: %v", path, err)
 			log.Println(emsg)
 			return nil // ignore
 		}
@@ -347,13 +347,13 @@ func (fn *Node) InitFileInfo() error {
 	effpath, err := filepath.EvalSymlinks(string(fn.FPath))
 	if err != nil {
 		// this happens too often for links -- skip
-		// log.Printf("giv.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
+		// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
 	fn.FPath = gi.FileName(effpath)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
-		emsg := fmt.Errorf("giv.Node InitFileInfo Path %q: Error: %v", fn.FPath, err)
+		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.FPath, err)
 		log.Println(emsg)
 		return emsg
 	}
@@ -488,7 +488,7 @@ func (fn *Node) CloseAll() { //gti:add
 // returns true if file is newly opened
 func (fn *Node) OpenBuf() (bool, error) {
 	if fn.IsDir() {
-		err := fmt.Errorf("giv.Node cannot open directory in editor: %v", fn.FPath)
+		err := fmt.Errorf("filetree.Node cannot open directory in editor: %v", fn.FPath)
 		log.Println(err)
 		return false, err
 	}
@@ -542,7 +542,7 @@ func (fn *Node) RelPath(fpath gi.FileName) string {
 func (fn *Node) DirsTo(path string) (*Node, error) {
 	pth, err := filepath.Abs(path)
 	if err != nil {
-		log.Printf("giv.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
+		log.Printf("filetree.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
 	rpath := fn.RelPath(gi.FileName(pth))
@@ -554,13 +554,13 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 	sz := len(dirs)
 	for i := 0; i < sz; i++ {
 		dr := dirs[i]
-		sfni, err := cfn.ChildByNameTry(dr, 0)
-		if err != nil {
+		sfni := cfn.ChildByName(dr, 0)
+		if sfni == nil {
 			if i == sz-1 { // ok for terminal -- might not exist yet
 				return cfn, nil
 			} else {
-				err = fmt.Errorf("giv.Node could not find node %v in: %v", dr, cfn.FPath)
-				// slog.Error(err.Error())
+				err = fmt.Errorf("filetree.Node could not find node %v in: %v", dr, cfn.FPath)
+				slog.Error(err.Error())
 				return nil, err
 			}
 		}
@@ -573,7 +573,7 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 				cfn = sfn
 			}
 		} else {
-			err := fmt.Errorf("giv.Node non-terminal node %v is not a directory in: %v", dr, cfn.FPath)
+			err := fmt.Errorf("filetree.Node non-terminal node %v is not a directory in: %v", dr, cfn.FPath)
 			slog.Error(err.Error())
 			return nil, err
 		}

@@ -45,7 +45,7 @@ type Tree struct {
 	// otherwise everything is mixed
 	DirsOnTop bool
 
-	// type of node to create -- defaults to giv.Node but can use custom node types
+	// type of node to create -- defaults to filetree.Node but can use custom node types
 	NodeType *gti.Type `view:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
@@ -351,12 +351,12 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	if !ehas {
 		return nil, fmt.Errorf("ExtFile not found on list: %v", fpath)
 	}
-	ekid, err := ft.ChildByNameTry(ExternalFilesName, 0)
-	if err != nil {
+	ekid := ft.ChildByName(ExternalFilesName, 0)
+	if ekid == nil {
 		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
 	}
 	ekids := *ekid.Children()
-	err = ekids.IsValidIndex(i)
+	err := ekids.IsValidIndex(i)
 	if err == nil {
 		kn := AsNode(ekids.Elem(i))
 		return kn, nil

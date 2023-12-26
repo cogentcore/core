@@ -100,8 +100,8 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes) ([]string, *Nod
 		if intl {
 			d = md[i*3+1]
 			npath := string(md[i*3].Data)
-			sfni, err := froot.FindPathTry(npath)
-			if err == nil {
+			sfni := froot.FindPath(npath)
+			if sfni != nil {
 				sfn = AsNode(sfni)
 			}
 		} else {
@@ -138,9 +138,9 @@ func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes) {
 		if intl {
 			d = md[i*3+1]
 			npath := string(md[i*3].Data)
-			sfni, err := froot.FindPathTry(npath)
-			if err != nil {
-				fmt.Println(err)
+			sfni := froot.FindPath(npath)
+			if sfni == nil {
+				slog.Error("filetree.Node: could not find path", "path", npath)
 				continue
 			}
 			sfn := AsNode(sfni)
@@ -303,9 +303,9 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 	nf := len(md) / 3 // always internal
 	for i := 0; i < nf; i++ {
 		npath := string(md[i*3].Data)
-		sfni, err := froot.FindPathTry(npath)
-		if err != nil {
-			fmt.Println(err)
+		sfni := froot.FindPath(npath)
+		if sfni == nil {
+			slog.Error("filetree.Node: could not find path", "path", npath)
 			continue
 		}
 		sfn := AsNode(sfni)
