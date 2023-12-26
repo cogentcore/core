@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"log/slog"
 	"sync"
 
@@ -240,44 +239,27 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	return frame, true
 }
 
-// TabByLabel returns tab with given label (nil if not found -- see TabByLabelTry)
+// TabByLabel returns tab with given label (nil if not found)
 func (ts *Tabs) TabByLabel(label string) *Frame {
-	t, _ := ts.TabByLabelTry(label)
-	return t
-}
-
-// TabByLabelTry returns tab with given label, and an error if not found.
-func (ts *Tabs) TabByLabelTry(label string) (*Frame, error) {
-	idx, err := ts.TabIndexByLabel(label)
-	if err != nil {
-		return nil, err
-	}
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 	fr := ts.Frame()
-	frame := fr.Child(idx).(*Frame)
-	return frame, nil
+	frame, _ := fr.ChildByName(label).(*Frame)
+	return frame
 }
 
-// TabIndexByLabel returns tab index for given tab label, and an error if not found.
-func (ts *Tabs) TabIndexByLabel(label string) (int, error) {
+// TabIndexByLabel returns the tab index for the given tab label
+// and -1, false if it can not be found.
+func (ts *Tabs) TabIndexByLabel(label string) (int, bool) {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
 	tb := ts.Tabs()
-	idx := -1
-	n := len(*tb.Children())
-	for i := 0; i < n; i++ {
-		ti := AsButton(tb.Child(i))
-		if ti.Text == label {
-			idx = i
-			break
-		}
+	tab := tb.ChildByName(label)
+	if tab == nil {
+		return -1, false
 	}
-	if idx < 0 {
-		return -1, fmt.Errorf("gi.Tabs: Tab with label %v not found in %v", label, ts.Path())
-	}
-	return idx, nil
+	return tab.IndexInParent()
 }
 
 // TabLabel returns tab label at given index
@@ -286,41 +268,30 @@ func (ts *Tabs) TabLabel(idx int) string {
 	defer ts.Mu.Unlock()
 
 	tb := ts.Tabs()
-	tbut, err := tb.ChildTry(idx)
-	if err != nil {
+	tbut := tb.Child(idx)
+	if tbut == nil {
 		return ""
 	}
-	return AsButton(tbut).Text
+	return tbut.Name()
 }
 
 // SelectTabByLabel selects tab by label, returning it.
 func (ts *Tabs) SelectTabByLabel(label string) *Frame {
-	idx, err := ts.TabIndexByLabel(label)
-	if err == nil {
-		ts.SelectTabIndex(idx)
-		fr := ts.Frame()
-		return fr.Child(idx).(*Frame)
+	idx, ok := ts.TabIndexByLabel(label)
+	if !ok {
+		return nil
 	}
-	return nil
-}
-
-// SelectTabByLabelTry selects tab by label, returning it.  Returns error if not found.
-func (ts *Tabs) SelectTabByLabelTry(label string) (*Frame, error) {
-	idx, err := ts.TabIndexByLabel(label)
-	if err == nil {
-		ts.SelectTabIndex(idx)
-		fr := ts.Frame()
-		return fr.Child(idx).(*Frame), nil
-	}
-	return nil, err
+	ts.SelectTabIndex(idx)
+	fr := ts.Frame()
+	return fr.Child(idx).(*Frame)
 }
 
 // RecycleTab returns a tab with given label, first by looking for an existing one,
 // and if not found, making a new one. If sel, then select it. It returns the
 // frame for the tab.
 func (ts *Tabs) RecycleTab(label string, sel bool) *Frame {
-	frame, err := ts.TabByLabelTry(label)
-	if err == nil {
+	frame := ts.TabByLabel(label)
+	if frame != nil {
 		if sel {
 			ts.SelectTabByLabel(label)
 		}
