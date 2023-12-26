@@ -1,6 +1,6 @@
 Name = "goosi"
 Desc = ""
-Version = "v0.0.24"
+Version = "v0.0.25"
 Type = "Library"
 
 [Build]
