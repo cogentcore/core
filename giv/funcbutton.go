@@ -349,14 +349,12 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		gi.NewSnackbar(ctx).AddSnackbarText(txt).Stage.Run()
 		return
 	}
-	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip)
+	if len(fb.Returns) == 1 && fb.Returns[0].HasDialog() { // go direct to dialog
+		fb.Returns[0].OpenDialog(ctx, nil)
+		return
+	}
+	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOkOnly()
 	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
-	d.AddBottomBar(func(pw gi.Widget) {
-		d.AddCancel(pw)
-		d.AddOk(pw).OnClick(func(e events.Event) {
-			// todo: do something with the args?
-		})
-	})
 	if fb.NewWindow {
 		d.NewDialog(ctx).SetNewWindow(true).Run()
 	} else {
@@ -445,11 +443,9 @@ func (fb *FuncButton) SetReturns() {
 		view.SetDoc(doc)
 		fb.Returns[i] = view
 	}
-	// todo: only show return by default for non-nil error values
-	// fb.ShowReturn = nret > 0
-	// if nret > 1 || hasComplex {
-	// 	fb.ShowReturnAsDialog = true
-	// }
+	if nret > 1 || hasComplex {
+		fb.ShowReturnAsDialog = true
+	}
 }
 
 // SetReturnValues sets the [reflect.Value]s of the return

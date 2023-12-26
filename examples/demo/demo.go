@@ -320,7 +320,7 @@ func makeValues(ts *gi.Tabs) {
 	giv.NewValue(values, time.Now())
 	giv.NewValue(values, gi.FileName("demo.go"))
 	giv.NewValue(values, giv.ColorMapName("ColdHot"))
-	giv.NewValue(values, hello)
+	giv.NewFuncButton(values, hello).SetShowReturn(true)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
