@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"log/slog"
 	"time"
 
 	"goki.dev/goosi/events"
@@ -17,15 +16,13 @@ import (
 // can be chained directly after the NewPopupStage call.
 // Use Run call at the end to start the Stage running.
 func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
-	if ctx == nil {
-		slog.Error("NewPopupStage needs a context Widget")
-		return nil
-	}
+	ctx = NonNilContext(ctx)
 	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
 	st.Context = ctx
 	st.Pos = ctx.ContextMenuPos(nil)
+	sc.Stage = st
 	// note: not setting all the connections until run
 	return st
 }
