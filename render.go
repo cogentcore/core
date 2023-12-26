@@ -378,8 +378,8 @@ func (sc *Scene) UpdateNodes() {
 // Solids in that group can set their relative Pos etc to display
 // relative to the camera, to achieve "first person" effects.
 func (sc *Scene) TrackCamera() bool {
-	tci, err := sc.ChildByNameTry("TrackCamera", 0)
-	if err != nil {
+	tci := sc.ChildByName("TrackCamera", 0)
+	if tci == nil {
 		return false
 	}
 	tc, ok := tci.(*Group)
