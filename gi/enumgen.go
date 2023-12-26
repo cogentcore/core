@@ -1152,120 +1152,6 @@ func (i *LayoutFlags) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _DensitiesValues = []Densities{0, 1, 2}
-
-// DensitiesN is the highest valid value
-// for type Densities, plus one.
-const DensitiesN Densities = 3
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _DensitiesNoOp() {
-	var x [1]struct{}
-	_ = x[DensityCompact-(0)]
-	_ = x[DensityMedium-(1)]
-	_ = x[DensitySpread-(2)]
-}
-
-var _DensitiesNameToValueMap = map[string]Densities{
-	`Compact`: 0,
-	`compact`: 0,
-	`Medium`:  1,
-	`medium`:  1,
-	`Spread`:  2,
-	`spread`:  2,
-}
-
-var _DensitiesDescMap = map[Densities]string{
-	0: `DensityCompact represents a compact density with minimal whitespace`,
-	1: `DensityMedium represents a medium density with medium whitespace`,
-	2: `DensitySpread represents a spread-out density with a lot of whitespace`,
-}
-
-var _DensitiesMap = map[Densities]string{
-	0: `Compact`,
-	1: `Medium`,
-	2: `Spread`,
-}
-
-// String returns the string representation
-// of this Densities value.
-func (i Densities) String() string {
-	if str, ok := _DensitiesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the Densities value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *Densities) SetString(s string) error {
-	if val, ok := _DensitiesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DensitiesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type Densities")
-}
-
-// Int64 returns the Densities value as an int64.
-func (i Densities) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the Densities value from an int64.
-func (i *Densities) SetInt64(in int64) {
-	*i = Densities(in)
-}
-
-// Desc returns the description of the Densities value.
-func (i Densities) Desc() string {
-	if str, ok := _DensitiesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// DensitiesValues returns all possible values
-// for the type Densities.
-func DensitiesValues() []Densities {
-	return _DensitiesValues
-}
-
-// Values returns all possible values
-// for the type Densities.
-func (i Densities) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_DensitiesValues))
-	for i, d := range _DensitiesValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type Densities.
-func (i Densities) IsValid() bool {
-	_, ok := _DensitiesMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i Densities) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *Densities) UnmarshalText(text []byte) error {
-	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
-	}
-	return nil
-}
-
 var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
 // WinFlagsN is the highest valid value
@@ -1842,6 +1728,120 @@ func (i ScFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ScFlags) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
+}
+
+var _DensitiesValues = []Densities{0, 1, 2}
+
+// DensitiesN is the highest valid value
+// for type Densities, plus one.
+const DensitiesN Densities = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _DensitiesNoOp() {
+	var x [1]struct{}
+	_ = x[DensityCompact-(0)]
+	_ = x[DensityMedium-(1)]
+	_ = x[DensitySpread-(2)]
+}
+
+var _DensitiesNameToValueMap = map[string]Densities{
+	`Compact`: 0,
+	`compact`: 0,
+	`Medium`:  1,
+	`medium`:  1,
+	`Spread`:  2,
+	`spread`:  2,
+}
+
+var _DensitiesDescMap = map[Densities]string{
+	0: `DensityCompact represents a compact density with minimal whitespace`,
+	1: `DensityMedium represents a medium density with medium whitespace`,
+	2: `DensitySpread represents a spread-out density with a lot of whitespace`,
+}
+
+var _DensitiesMap = map[Densities]string{
+	0: `Compact`,
+	1: `Medium`,
+	2: `Spread`,
+}
+
+// String returns the string representation
+// of this Densities value.
+func (i Densities) String() string {
+	if str, ok := _DensitiesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the Densities value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *Densities) SetString(s string) error {
+	if val, ok := _DensitiesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _DensitiesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type Densities")
+}
+
+// Int64 returns the Densities value as an int64.
+func (i Densities) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the Densities value from an int64.
+func (i *Densities) SetInt64(in int64) {
+	*i = Densities(in)
+}
+
+// Desc returns the description of the Densities value.
+func (i Densities) Desc() string {
+	if str, ok := _DensitiesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// DensitiesValues returns all possible values
+// for the type Densities.
+func DensitiesValues() []Densities {
+	return _DensitiesValues
+}
+
+// Values returns all possible values
+// for the type Densities.
+func (i Densities) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_DensitiesValues))
+	for i, d := range _DensitiesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type Densities.
+func (i Densities) IsValid() bool {
+	_, ok := _DensitiesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Densities) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Densities) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
 		log.Println(err)
 	}

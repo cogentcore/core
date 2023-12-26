@@ -1363,278 +1363,6 @@ func (t *Space) SetCustomContextMenu(v func(m *Scene)) *Space {
 	return t
 }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.BasicSettingsType",
-	ShortName: "gi.BasicSettingsType",
-	IDName:    "basic-settings-type",
-	Doc:       "BasicSettingsType is the type of the basic Goki appearance settings.\nThe global current instance is stored as [BasicSettings].",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Theme", &gti.Field{Name: "Theme", Type: "goki.dev/gi/v2/gi.Themes", LocalType: "Themes", Doc: "the color theme", Directives: gti.Directives{}, Tag: ""}},
-		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the primary color used to generate the color scheme", Directives: gti.Directives{}, Tag: ""}},
-		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
-		{"Spacing", &gti.Field{Name: "Spacing", Type: "float32", LocalType: "float32", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
-		{"FontSize", &gti.Field{Name: "FontSize", Type: "float32", LocalType: "float32", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
-		{"ScreenPrefs", &gti.Field{Name: "ScreenPrefs", Type: "map[string]goki.dev/gi/v2/gi.ScreenPrefs", LocalType: "map[string]ScreenPrefs", Doc: "screen-specific preferences -- will override overall defaults if set", Directives: gti.Directives{}, Tag: ""}},
-		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/gi/v2/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highlighting style / theme", Directives: gti.Directives{}, Tag: ""}},
-		{"Clock24", &gti.Field{Name: "Clock24", Type: "bool", LocalType: "bool", Doc: "whether to use a 24-hour clock (instead of AM and PM)", Directives: gti.Directives{}, Tag: "label:\"24-hour clock\""}},
-		{"Params", &gti.Field{Name: "Params", Type: "goki.dev/gi/v2/gi.ParamPrefs", LocalType: "ParamPrefs", Doc: "parameters controlling GUI behavior", Directives: gti.Directives{}, Tag: ""}},
-		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/gi/v2/gi.EditorPrefs", LocalType: "EditorPrefs", Doc: "editor preferences -- for TextEditor etc", Directives: gti.Directives{}, Tag: ""}},
-		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/gi/v2/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list", Directives: gti.Directives{}, Tag: ""}},
-		{"SaveKeyMaps", &gti.Field{Name: "SaveKeyMaps", Type: "bool", LocalType: "bool", Doc: "if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords", Directives: gti.Directives{}, Tag: ""}},
-		{"SaveDetailed", &gti.Field{Name: "SaveDetailed", Type: "bool", LocalType: "bool", Doc: "if set, the detailed preferences are saved and loaded at startup -- only", Directives: gti.Directives{}, Tag: ""}},
-		{"CustomStyles", &gti.Field{Name: "CustomStyles", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive", Directives: gti.Directives{}, Tag: ""}},
-		{"CustomStylesOverride", &gti.Field{Name: "CustomStylesOverride", Type: "bool", LocalType: "bool", Doc: "if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).", Directives: gti.Directives{}, Tag: ""}},
-		{"FontFamily", &gti.Field{Name: "FontFamily", Type: "goki.dev/gi/v2/gi.FontName", LocalType: "FontName", Doc: "default font family when otherwise not specified", Directives: gti.Directives{}, Tag: ""}},
-		{"MonoFont", &gti.Field{Name: "MonoFont", Type: "goki.dev/gi/v2/gi.FontName", LocalType: "FontName", Doc: "default mono-spaced font family", Directives: gti.Directives{}, Tag: ""}},
-		{"FontPaths", &gti.Field{Name: "FontPaths", Type: "[]string", LocalType: "[]string", Doc: "extra font paths, beyond system defaults -- searched first", Directives: gti.Directives{}, Tag: ""}},
-		{"User", &gti.Field{Name: "User", Type: "goki.dev/gi/v2/gi.User", LocalType: "User", Doc: "user info -- partially filled-out automatically if empty / when prefs first created", Directives: gti.Directives{}, Tag: ""}},
-		{"FavPaths", &gti.Field{Name: "FavPaths", Type: "goki.dev/gi/v2/gi.FavPaths", LocalType: "FavPaths", Doc: "favorite paths, shown in FileViewer and also editable there", Directives: gti.Directives{}, Tag: ""}},
-		{"FileViewSort", &gti.Field{Name: "FileViewSort", Type: "string", LocalType: "string", Doc: "column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"ColorFilename", &gti.Field{Name: "ColorFilename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "filename for saving / loading colors", Directives: gti.Directives{}, Tag: "view:\"-\" ext:\".toml\""}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" toml:\"-\" xml:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"UpdateAll", &gti.Method{Name: "UpdateAll", Doc: "UpdateAll updates all open windows with current preferences -- triggers\nrebuild of default styles.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Open", &gti.Method{Name: "Open", Doc: "Open preferences from GoGi standard prefs directory", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"Save", &gti.Method{Name: "Save", Doc: "Save saves the preferences to the GoGi standard prefs directory", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"Delete", &gti.Method{Name: "Delete", Doc: "Delete deletes the preferences from the GoGi standard prefs directory.\nThis is an unrecoverable action, and you should only do this if you\nare absolutely sure you want to. You may want to consider making a copy\nof your preferences through \"Save as\" before doing this.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"DarkMode", &gti.Method{Name: "DarkMode", Doc: "DarkMode sets the color theme to dark mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply preferences to all the relevant settings.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"SaveZoom", &gti.Method{Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen.\n  - forCurrentScreen: if true, saves only for current screen", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the device", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"Screen", &gti.Field{Name: "Screen", Type: "[]*goki.dev/goosi.Screen", LocalType: "[]*goosi.Screen", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"VersionInfo", &gti.Method{Name: "VersionInfo", Doc: "VersionInfo returns GoGi version information", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"DeleteSavedWindowGeoms", &gti.Method{Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"EditKeyMaps", &gti.Method{Name: "EditKeyMaps", Doc: "EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /\nload from other files, etc.  Current avail keymaps are saved and loaded\nwith preferences automatically.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"EditHiStyles", &gti.Method{Name: "EditHiStyles", Doc: "EditHiStyles opens the HiStyleView editor to customize highlighting styles", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"EditDetailed", &gti.Method{Name: "EditDetailed", Doc: "EditDetailed opens the PrefsDetView editor to edit detailed\nparams that are not typically user-modified, but can be if you\nreally care. Turns on the SaveDetailed flag so these will be\nsaved and loaded automatically; you can toggle that back off\nif you don't actually want to.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"EditDebug", &gti.Method{Name: "EditDebug", Doc: "EditDebug opens the PrefsDbgView editor to control debugging\nparameters. These are not saved; they are only set dynamically\nduring running.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-	}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ScreenPrefs",
-	ShortName: "gi.ScreenPrefs",
-	IDName:    "screen-prefs",
-	Doc:       "ScreenPrefs are the per-screen preferences -- see goosi/App/Screen() for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global preferences.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ParamPrefs",
-	ShortName: "gi.ParamPrefs",
-	IDName:    "param-prefs",
-	Doc:       "ParamPrefs contains misc parameters controlling GUI behavior.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"DoubleClickInterval", &gti.Field{Name: "DoubleClickInterval", Type: "time.Duration", LocalType: "time.Duration", Doc: "the maximum time interval in msec between button press events to count as a double-click", Directives: gti.Directives{}, Tag: "min:\"100\" step:\"50\""}},
-		{"ScrollWheelSpeed", &gti.Field{Name: "ScrollWheelSpeed", Type: "float32", LocalType: "float32", Doc: "how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.", Directives: gti.Directives{}, Tag: "min:\"0.01\" step:\"1\""}},
-		{"LocalMainMenu", &gti.Field{Name: "LocalMainMenu", Type: "bool", LocalType: "bool", Doc: "controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.", Directives: gti.Directives{}, Tag: ""}},
-		{"OnlyCloseActiveTab", &gti.Field{Name: "OnlyCloseActiveTab", Type: "bool", LocalType: "bool", Doc: "only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it", Directives: gti.Directives{}, Tag: "def:\"false\""}},
-		{"ZebraStripeWeight", &gti.Field{Name: "ZebraStripeWeight", Type: "float32", LocalType: "float32", Doc: "the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)", Directives: gti.Directives{}, Tag: "def:\"0\" min:\"0\" max:\"100\" step:\"1\""}},
-		{"BigFileSize", &gti.Field{Name: "BigFileSize", Type: "int", LocalType: "int", Doc: "the limit of file size, above which user will be prompted before opening / copying, etc.", Directives: gti.Directives{}, Tag: "def:\"10000000\""}},
-		{"SavedPathsMax", &gti.Field{Name: "SavedPathsMax", Type: "int", LocalType: "int", Doc: "maximum number of saved paths to save in FileView", Directives: gti.Directives{}, Tag: ""}},
-		{"Smooth3D", &gti.Field{Name: "Smooth3D", Type: "bool", LocalType: "bool", Doc: "turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.User",
-	ShortName: "gi.User",
-	IDName:    "user",
-	Doc:       "User basic user information that might be needed for different apps",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Email", &gti.Field{Name: "Email", Type: "string", LocalType: "string", Doc: "default email address -- e.g., for recording changes in a version control system", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"User", &gti.Field{Name: "User", Type: "os/user.User", LocalType: "user.User", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
-	ShortName: "gi.EditorPrefs",
-	IDName:    "editor-prefs",
-	Doc:       "EditorPrefs contains editor preferences.  It can also be set\nfrom ki.Props style properties.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TabSize", &gti.Field{Name: "TabSize", Type: "int", LocalType: "int", Doc: "size of a tab, in chars -- also determines indent level for space indent", Directives: gti.Directives{}, Tag: "xml:\"tab-size\""}},
-		{"SpaceIndent", &gti.Field{Name: "SpaceIndent", Type: "bool", LocalType: "bool", Doc: "use spaces for indentation, otherwise tabs", Directives: gti.Directives{}, Tag: "xml:\"space-indent\""}},
-		{"WordWrap", &gti.Field{Name: "WordWrap", Type: "bool", LocalType: "bool", Doc: "wrap lines at word boundaries -- otherwise long lines scroll off the end", Directives: gti.Directives{}, Tag: "xml:\"word-wrap\""}},
-		{"LineNos", &gti.Field{Name: "LineNos", Type: "bool", LocalType: "bool", Doc: "show line numbers", Directives: gti.Directives{}, Tag: "xml:\"line-nos\""}},
-		{"Completion", &gti.Field{Name: "Completion", Type: "bool", LocalType: "bool", Doc: "use the completion system to suggest options while typing", Directives: gti.Directives{}, Tag: "xml:\"completion\""}},
-		{"SpellCorrect", &gti.Field{Name: "SpellCorrect", Type: "bool", LocalType: "bool", Doc: "suggest corrections for unknown words while typing", Directives: gti.Directives{}, Tag: "xml:\"spell-correct\""}},
-		{"AutoIndent", &gti.Field{Name: "AutoIndent", Type: "bool", LocalType: "bool", Doc: "automatically indent lines when enter, tab, }, etc pressed", Directives: gti.Directives{}, Tag: "xml:\"auto-indent\""}},
-		{"EmacsUndo", &gti.Field{Name: "EmacsUndo", Type: "bool", LocalType: "bool", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo", Directives: gti.Directives{}, Tag: "xml:\"emacs-undo\""}},
-		{"DepthColor", &gti.Field{Name: "DepthColor", Type: "bool", LocalType: "bool", Doc: "colorize the background according to nesting depth", Directives: gti.Directives{}, Tag: "xml:\"depth-color\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.FavPathItem",
-	ShortName: "gi.FavPathItem",
-	IDName:    "fav-path-item",
-	Doc:       "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Ic", &gti.Field{Name: "Ic", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon for item", Directives: gti.Directives{}, Tag: ""}},
-		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "name of the favorite item", Directives: gti.Directives{}, Tag: "width:\"20\""}},
-		{"Path", &gti.Field{Name: "Path", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: "tableview:\"-select\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.PrefsDetailed",
-	ShortName: "gi.PrefsDetailed",
-	IDName:    "prefs-detailed",
-	Doc:       "PrefsDetailed are more detailed params not usually customized, but\navailable for those who really care..",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MenuMaxHeight", &gti.Field{Name: "MenuMaxHeight", Type: "int", LocalType: "int", Doc: "the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.", Directives: gti.Directives{}, Tag: "def:\"30\" min:\"5\" step:\"1\""}},
-		{"DragStartTime", &gti.Field{Name: "DragStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"5\" max:\"1000\" step:\"5\""}},
-		{"DragStartDist", &gti.Field{Name: "DragStartDist", Type: "int", LocalType: "int", Doc: "the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"0\" max:\"100\" step:\"1\""}},
-		{"SlideStartTime", &gti.Field{Name: "SlideStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it", Directives: gti.Directives{}, Tag: "def:\"200\" min:\"5\" max:\"1000\" step:\"5\""}},
-		{"SlideStartDist", &gti.Field{Name: "SlideStartDist", Type: "int", LocalType: "int", Doc: "the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" max:\"100\" step:\"1\""}},
-		{"LongHoverTime", &gti.Field{Name: "LongHoverTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"10\" max:\"10000\" step:\"10\""}},
-		{"LongHoverStopDist", &gti.Field{Name: "LongHoverStopDist", Type: "int", LocalType: "int", Doc: "the maximum number of pixels that mouse can move and still register a Hover event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"0\" max:\"1000\" step:\"1\""}},
-		{"CompleteWaitDuration", &gti.Field{Name: "CompleteWaitDuration", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time to wait before offering completions", Directives: gti.Directives{}, Tag: "def:\"0\" min:\"0\" max:\"10000\" step:\"10\""}},
-		{"CompleteMaxItems", &gti.Field{Name: "CompleteMaxItems", Type: "int", LocalType: "int", Doc: "the maximum number of completions offered in popup", Directives: gti.Directives{}, Tag: "def:\"25\" min:\"5\" step:\"1\""}},
-		{"CursorBlinkTime", &gti.Field{Name: "CursorBlinkTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "time interval for cursor blinking on and off -- set to 0 to disable blinking", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"0\" max:\"1000\" step:\"5\""}},
-		{"LayoutAutoScrollDelay", &gti.Field{Name: "LayoutAutoScrollDelay", Type: "time.Duration", LocalType: "time.Duration", Doc: "is amount of time to wait before trying to autoscroll again", Directives: gti.Directives{}, Tag: "def:\"25\" min:\"1\" step:\"5\""}},
-		{"LayoutPageSteps", &gti.Field{Name: "LayoutPageSteps", Type: "int", LocalType: "int", Doc: "number of steps to take in PageUp / Down events in terms of number of items", Directives: gti.Directives{}, Tag: "def:\"10\" min:\"1\" step:\"1\""}},
-		{"LayoutFocusNameTimeout", &gti.Field{Name: "LayoutFocusNameTimeout", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"0\" max:\"5000\" step:\"20\""}},
-		{"LayoutFocusNameTabTime", &gti.Field{Name: "LayoutFocusNameTabTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time since last focus name event to allow tab to focus on next element with same name.", Directives: gti.Directives{}, Tag: "def:\"2000\" min:\"10\" max:\"10000\" step:\"100\""}},
-		{"DialogsSepRenderWin", &gti.Field{Name: "DialogsSepRenderWin", Type: "bool", LocalType: "bool", Doc: "open dialogs in separate windows -- else do as popups in main window", Directives: gti.Directives{}, Tag: "def:\"true\""}},
-		{"TextEditorClipHistMax", &gti.Field{Name: "TextEditorClipHistMax", Type: "int", LocalType: "int", Doc: "Maximum amount of clipboard history to retain", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"0\" max:\"1000\" step:\"5\""}},
-		{"TextBufMaxScopeLines", &gti.Field{Name: "TextBufMaxScopeLines", Type: "int", LocalType: "int", Doc: "maximum number of lines to look for matching scope syntax (parens, brackets)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" step:\"10\""}},
-		{"TextBufDiffRevertLines", &gti.Field{Name: "TextBufDiffRevertLines", Type: "int", LocalType: "int", Doc: "text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted", Directives: gti.Directives{}, Tag: "def:\"10000\" min:\"0\" step:\"1000\""}},
-		{"TextBufDiffRevertDiffs", &gti.Field{Name: "TextBufDiffRevertDiffs", Type: "int", LocalType: "int", Doc: "text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" step:\"1\""}},
-		{"TextBufMarkupDelayMSec", &gti.Field{Name: "TextBufMarkupDelayMSec", Type: "int", LocalType: "int", Doc: "number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)", Directives: gti.Directives{}, Tag: "def:\"1000\" min:\"100\" step:\"100\""}},
-		{"MapInlineLen", &gti.Field{Name: "MapInlineLen", Type: "int", LocalType: "int", Doc: "the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props", Directives: gti.Directives{}, Tag: "def:\"2\" min:\"1\" step:\"1\""}},
-		{"StructInlineLen", &gti.Field{Name: "StructInlineLen", Type: "int", LocalType: "int", Doc: "the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
-		{"SliceInlineLen", &gti.Field{Name: "SliceInlineLen", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" toml:\"-\" xml:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"Open", &gti.Method{Name: "Open", Doc: "Open detailed preferences from GoGi standard prefs directory", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"Save", &gti.Method{Name: "Save", Doc: "Save saves current preferences to standard prefs_det.toml file, which is auto-loaded at startup", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
-		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply detailed preferences to all the relevant settings.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-	}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.PrefsDebug",
-	ShortName: "gi.PrefsDebug",
-	IDName:    "prefs-debug",
-	Doc:       "PrefsDebug are debugging params",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"UpdateTrace", &gti.Field{Name: "UpdateTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of updates that trigger re-rendering (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderTrace", &gti.Field{Name: "RenderTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of the nodes rendering (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
-		{"LayoutTrace", &gti.Field{Name: "LayoutTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of all layouts (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
-		{"WinEventTrace", &gti.Field{Name: "WinEventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of window events (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
-		{"WinRenderTrace", &gti.Field{Name: "WinRenderTrace", Type: "*bool", LocalType: "*bool", Doc: "reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent", Directives: gti.Directives{}, Tag: ""}},
-		{"WinGeomTrace", &gti.Field{Name: "WinGeomTrace", Type: "*bool", LocalType: "*bool", Doc: "WinGeomTrace records window geometry saving / loading functions", Directives: gti.Directives{}, Tag: ""}},
-		{"KeyEventTrace", &gti.Field{Name: "KeyEventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of keyboard events (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
-		{"EventTrace", &gti.Field{Name: "EventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of event handling (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
-		{"DNDTrace", &gti.Field{Name: "DNDTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of DND events handling", Directives: gti.Directives{}, Tag: ""}},
-		{"GoCompleteTrace", &gti.Field{Name: "GoCompleteTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of Go language completion & lookup process", Directives: gti.Directives{}, Tag: ""}},
-		{"GoTypeTrace", &gti.Field{Name: "GoTypeTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of Go language type parsing and inference process", Directives: gti.Directives{}, Tag: ""}},
-		{"StructViewIfDebug", &gti.Field{Name: "StructViewIfDebug", Type: "*bool", LocalType: "*bool", Doc: "reports errors for viewif directives in struct field tags, for giv.StructView", Directives: gti.Directives{}, Tag: ""}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" toml:\"-\" xml:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"Profile", &gti.Method{Name: "Profile", Doc: "Profile toggles profiling of program on or off, which does both\ntargeted and global CPU and Memory profiling.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-	}),
-})
-
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ProgressBar",
@@ -2041,6 +1769,280 @@ func (t *Separator) SetCustomContextMenu(v func(m *Scene)) *Separator {
 	t.CustomContextMenu = v
 	return t
 }
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.AppearanceSettingsData",
+	ShortName: "gi.AppearanceSettingsData",
+	IDName:    "appearance-settings-data",
+	Doc:       "AppearanceSettingsData is the data type for the basic Goki appearance settings.\nThe global current instance is stored as [AppearanceSettings].",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Theme", &gti.Field{Name: "Theme", Type: "goki.dev/gi/v2/gi.Themes", LocalType: "Themes", Doc: "the color theme", Directives: gti.Directives{}, Tag: ""}},
+		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the primary color used to generate the color scheme", Directives: gti.Directives{}, Tag: ""}},
+		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
+		{"Spacing", &gti.Field{Name: "Spacing", Type: "float32", LocalType: "float32", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
+		{"FontSize", &gti.Field{Name: "FontSize", Type: "float32", LocalType: "float32", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
+		{"ScreenPrefs", &gti.Field{Name: "ScreenPrefs", Type: "map[string]goki.dev/gi/v2/gi.ScreenPrefs", LocalType: "map[string]ScreenPrefs", Doc: "screen-specific preferences -- will override overall defaults if set", Directives: gti.Directives{}, Tag: ""}},
+		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/gi/v2/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highlighting style / theme", Directives: gti.Directives{}, Tag: ""}},
+		{"Clock24", &gti.Field{Name: "Clock24", Type: "bool", LocalType: "bool", Doc: "whether to use a 24-hour clock (instead of AM and PM)", Directives: gti.Directives{}, Tag: "label:\"24-hour clock\""}},
+		{"Params", &gti.Field{Name: "Params", Type: "goki.dev/gi/v2/gi.ParamPrefs", LocalType: "ParamPrefs", Doc: "parameters controlling GUI behavior", Directives: gti.Directives{}, Tag: ""}},
+		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/gi/v2/gi.EditorPrefs", LocalType: "EditorPrefs", Doc: "editor preferences -- for TextEditor etc", Directives: gti.Directives{}, Tag: ""}},
+		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/gi/v2/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list", Directives: gti.Directives{}, Tag: ""}},
+		{"SaveKeyMaps", &gti.Field{Name: "SaveKeyMaps", Type: "bool", LocalType: "bool", Doc: "if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords", Directives: gti.Directives{}, Tag: ""}},
+		{"SaveDetailed", &gti.Field{Name: "SaveDetailed", Type: "bool", LocalType: "bool", Doc: "if set, the detailed preferences are saved and loaded at startup -- only", Directives: gti.Directives{}, Tag: ""}},
+		{"CustomStyles", &gti.Field{Name: "CustomStyles", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive", Directives: gti.Directives{}, Tag: ""}},
+		{"CustomStylesOverride", &gti.Field{Name: "CustomStylesOverride", Type: "bool", LocalType: "bool", Doc: "if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).", Directives: gti.Directives{}, Tag: ""}},
+		{"FontFamily", &gti.Field{Name: "FontFamily", Type: "goki.dev/gi/v2/gi.FontName", LocalType: "FontName", Doc: "default font family when otherwise not specified", Directives: gti.Directives{}, Tag: ""}},
+		{"MonoFont", &gti.Field{Name: "MonoFont", Type: "goki.dev/gi/v2/gi.FontName", LocalType: "FontName", Doc: "default mono-spaced font family", Directives: gti.Directives{}, Tag: ""}},
+		{"FontPaths", &gti.Field{Name: "FontPaths", Type: "[]string", LocalType: "[]string", Doc: "extra font paths, beyond system defaults -- searched first", Directives: gti.Directives{}, Tag: ""}},
+		{"User", &gti.Field{Name: "User", Type: "goki.dev/gi/v2/gi.User", LocalType: "User", Doc: "user info -- partially filled-out automatically if empty / when prefs first created", Directives: gti.Directives{}, Tag: ""}},
+		{"FavPaths", &gti.Field{Name: "FavPaths", Type: "goki.dev/gi/v2/gi.FavPaths", LocalType: "FavPaths", Doc: "favorite paths, shown in FileViewer and also editable there", Directives: gti.Directives{}, Tag: ""}},
+		{"FileViewSort", &gti.Field{Name: "FileViewSort", Type: "string", LocalType: "string", Doc: "column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"ColorFilename", &gti.Field{Name: "ColorFilename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "filename for saving / loading colors", Directives: gti.Directives{}, Tag: "view:\"-\" ext:\".toml\""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" toml:\"-\" xml:\"-\""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/gi/v2/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"UpdateAll", &gti.Method{Name: "UpdateAll", Doc: "UpdateAll updates all open windows with current preferences -- triggers\nrebuild of default styles.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Open", &gti.Method{Name: "Open", Doc: "Open preferences from GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"Save", &gti.Method{Name: "Save", Doc: "Save saves the preferences to the GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"Delete", &gti.Method{Name: "Delete", Doc: "Delete deletes the preferences from the GoGi standard prefs directory.\nThis is an unrecoverable action, and you should only do this if you\nare absolutely sure you want to. You may want to consider making a copy\nof your preferences through \"Save as\" before doing this.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"DarkMode", &gti.Method{Name: "DarkMode", Doc: "DarkMode sets the color theme to dark mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply preferences to all the relevant settings.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"SaveZoom", &gti.Method{Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen.\n  - forCurrentScreen: if true, saves only for current screen", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the device", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"Screen", &gti.Field{Name: "Screen", Type: "[]*goki.dev/goosi.Screen", LocalType: "[]*goosi.Screen", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"VersionInfo", &gti.Method{Name: "VersionInfo", Doc: "VersionInfo returns GoGi version information", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"DeleteSavedWindowGeoms", &gti.Method{Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditKeyMaps", &gti.Method{Name: "EditKeyMaps", Doc: "EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /\nload from other files, etc.  Current avail keymaps are saved and loaded\nwith preferences automatically.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditHiStyles", &gti.Method{Name: "EditHiStyles", Doc: "EditHiStyles opens the HiStyleView editor to customize highlighting styles", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditDetailed", &gti.Method{Name: "EditDetailed", Doc: "EditDetailed opens the PrefsDetView editor to edit detailed\nparams that are not typically user-modified, but can be if you\nreally care. Turns on the SaveDetailed flag so these will be\nsaved and loaded automatically; you can toggle that back off\nif you don't actually want to.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditDebug", &gti.Method{Name: "EditDebug", Doc: "EditDebug opens the PrefsDbgView editor to control debugging\nparameters. These are not saved; they are only set dynamically\nduring running.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.ScreenPrefs",
+	ShortName: "gi.ScreenPrefs",
+	IDName:    "screen-prefs",
+	Doc:       "ScreenPrefs are the per-screen preferences -- see goosi/App/Screen() for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global preferences.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.ParamPrefs",
+	ShortName: "gi.ParamPrefs",
+	IDName:    "param-prefs",
+	Doc:       "ParamPrefs contains misc parameters controlling GUI behavior.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"DoubleClickInterval", &gti.Field{Name: "DoubleClickInterval", Type: "time.Duration", LocalType: "time.Duration", Doc: "the maximum time interval in msec between button press events to count as a double-click", Directives: gti.Directives{}, Tag: "min:\"100\" step:\"50\""}},
+		{"ScrollWheelSpeed", &gti.Field{Name: "ScrollWheelSpeed", Type: "float32", LocalType: "float32", Doc: "how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.", Directives: gti.Directives{}, Tag: "min:\"0.01\" step:\"1\""}},
+		{"LocalMainMenu", &gti.Field{Name: "LocalMainMenu", Type: "bool", LocalType: "bool", Doc: "controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.", Directives: gti.Directives{}, Tag: ""}},
+		{"OnlyCloseActiveTab", &gti.Field{Name: "OnlyCloseActiveTab", Type: "bool", LocalType: "bool", Doc: "only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it", Directives: gti.Directives{}, Tag: "def:\"false\""}},
+		{"ZebraStripeWeight", &gti.Field{Name: "ZebraStripeWeight", Type: "float32", LocalType: "float32", Doc: "the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)", Directives: gti.Directives{}, Tag: "def:\"0\" min:\"0\" max:\"100\" step:\"1\""}},
+		{"BigFileSize", &gti.Field{Name: "BigFileSize", Type: "int", LocalType: "int", Doc: "the limit of file size, above which user will be prompted before opening / copying, etc.", Directives: gti.Directives{}, Tag: "def:\"10000000\""}},
+		{"SavedPathsMax", &gti.Field{Name: "SavedPathsMax", Type: "int", LocalType: "int", Doc: "maximum number of saved paths to save in FileView", Directives: gti.Directives{}, Tag: ""}},
+		{"Smooth3D", &gti.Field{Name: "Smooth3D", Type: "bool", LocalType: "bool", Doc: "turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.User",
+	ShortName: "gi.User",
+	IDName:    "user",
+	Doc:       "User basic user information that might be needed for different apps",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Email", &gti.Field{Name: "Email", Type: "string", LocalType: "string", Doc: "default email address -- e.g., for recording changes in a version control system", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"User", &gti.Field{Name: "User", Type: "os/user.User", LocalType: "user.User", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
+	ShortName: "gi.EditorPrefs",
+	IDName:    "editor-prefs",
+	Doc:       "EditorPrefs contains editor preferences.  It can also be set\nfrom ki.Props style properties.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"TabSize", &gti.Field{Name: "TabSize", Type: "int", LocalType: "int", Doc: "size of a tab, in chars -- also determines indent level for space indent", Directives: gti.Directives{}, Tag: "xml:\"tab-size\""}},
+		{"SpaceIndent", &gti.Field{Name: "SpaceIndent", Type: "bool", LocalType: "bool", Doc: "use spaces for indentation, otherwise tabs", Directives: gti.Directives{}, Tag: "xml:\"space-indent\""}},
+		{"WordWrap", &gti.Field{Name: "WordWrap", Type: "bool", LocalType: "bool", Doc: "wrap lines at word boundaries -- otherwise long lines scroll off the end", Directives: gti.Directives{}, Tag: "xml:\"word-wrap\""}},
+		{"LineNos", &gti.Field{Name: "LineNos", Type: "bool", LocalType: "bool", Doc: "show line numbers", Directives: gti.Directives{}, Tag: "xml:\"line-nos\""}},
+		{"Completion", &gti.Field{Name: "Completion", Type: "bool", LocalType: "bool", Doc: "use the completion system to suggest options while typing", Directives: gti.Directives{}, Tag: "xml:\"completion\""}},
+		{"SpellCorrect", &gti.Field{Name: "SpellCorrect", Type: "bool", LocalType: "bool", Doc: "suggest corrections for unknown words while typing", Directives: gti.Directives{}, Tag: "xml:\"spell-correct\""}},
+		{"AutoIndent", &gti.Field{Name: "AutoIndent", Type: "bool", LocalType: "bool", Doc: "automatically indent lines when enter, tab, }, etc pressed", Directives: gti.Directives{}, Tag: "xml:\"auto-indent\""}},
+		{"EmacsUndo", &gti.Field{Name: "EmacsUndo", Type: "bool", LocalType: "bool", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo", Directives: gti.Directives{}, Tag: "xml:\"emacs-undo\""}},
+		{"DepthColor", &gti.Field{Name: "DepthColor", Type: "bool", LocalType: "bool", Doc: "colorize the background according to nesting depth", Directives: gti.Directives{}, Tag: "xml:\"depth-color\""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.FavPathItem",
+	ShortName: "gi.FavPathItem",
+	IDName:    "fav-path-item",
+	Doc:       "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Ic", &gti.Field{Name: "Ic", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon for item", Directives: gti.Directives{}, Tag: ""}},
+		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "name of the favorite item", Directives: gti.Directives{}, Tag: "width:\"20\""}},
+		{"Path", &gti.Field{Name: "Path", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: "tableview:\"-select\""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.PrefsDetailed",
+	ShortName: "gi.PrefsDetailed",
+	IDName:    "prefs-detailed",
+	Doc:       "PrefsDetailed are more detailed params not usually customized, but\navailable for those who really care..",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"MenuMaxHeight", &gti.Field{Name: "MenuMaxHeight", Type: "int", LocalType: "int", Doc: "the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.", Directives: gti.Directives{}, Tag: "def:\"30\" min:\"5\" step:\"1\""}},
+		{"DragStartTime", &gti.Field{Name: "DragStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"5\" max:\"1000\" step:\"5\""}},
+		{"DragStartDist", &gti.Field{Name: "DragStartDist", Type: "int", LocalType: "int", Doc: "the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"0\" max:\"100\" step:\"1\""}},
+		{"SlideStartTime", &gti.Field{Name: "SlideStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it", Directives: gti.Directives{}, Tag: "def:\"200\" min:\"5\" max:\"1000\" step:\"5\""}},
+		{"SlideStartDist", &gti.Field{Name: "SlideStartDist", Type: "int", LocalType: "int", Doc: "the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" max:\"100\" step:\"1\""}},
+		{"LongHoverTime", &gti.Field{Name: "LongHoverTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"10\" max:\"10000\" step:\"10\""}},
+		{"LongHoverStopDist", &gti.Field{Name: "LongHoverStopDist", Type: "int", LocalType: "int", Doc: "the maximum number of pixels that mouse can move and still register a Hover event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"0\" max:\"1000\" step:\"1\""}},
+		{"CompleteWaitDuration", &gti.Field{Name: "CompleteWaitDuration", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time to wait before offering completions", Directives: gti.Directives{}, Tag: "def:\"0\" min:\"0\" max:\"10000\" step:\"10\""}},
+		{"CompleteMaxItems", &gti.Field{Name: "CompleteMaxItems", Type: "int", LocalType: "int", Doc: "the maximum number of completions offered in popup", Directives: gti.Directives{}, Tag: "def:\"25\" min:\"5\" step:\"1\""}},
+		{"CursorBlinkTime", &gti.Field{Name: "CursorBlinkTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "time interval for cursor blinking on and off -- set to 0 to disable blinking", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"0\" max:\"1000\" step:\"5\""}},
+		{"LayoutAutoScrollDelay", &gti.Field{Name: "LayoutAutoScrollDelay", Type: "time.Duration", LocalType: "time.Duration", Doc: "is amount of time to wait before trying to autoscroll again", Directives: gti.Directives{}, Tag: "def:\"25\" min:\"1\" step:\"5\""}},
+		{"LayoutPageSteps", &gti.Field{Name: "LayoutPageSteps", Type: "int", LocalType: "int", Doc: "number of steps to take in PageUp / Down events in terms of number of items", Directives: gti.Directives{}, Tag: "def:\"10\" min:\"1\" step:\"1\""}},
+		{"LayoutFocusNameTimeout", &gti.Field{Name: "LayoutFocusNameTimeout", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"0\" max:\"5000\" step:\"20\""}},
+		{"LayoutFocusNameTabTime", &gti.Field{Name: "LayoutFocusNameTabTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time since last focus name event to allow tab to focus on next element with same name.", Directives: gti.Directives{}, Tag: "def:\"2000\" min:\"10\" max:\"10000\" step:\"100\""}},
+		{"DialogsSepRenderWin", &gti.Field{Name: "DialogsSepRenderWin", Type: "bool", LocalType: "bool", Doc: "open dialogs in separate windows -- else do as popups in main window", Directives: gti.Directives{}, Tag: "def:\"true\""}},
+		{"TextEditorClipHistMax", &gti.Field{Name: "TextEditorClipHistMax", Type: "int", LocalType: "int", Doc: "Maximum amount of clipboard history to retain", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"0\" max:\"1000\" step:\"5\""}},
+		{"TextBufMaxScopeLines", &gti.Field{Name: "TextBufMaxScopeLines", Type: "int", LocalType: "int", Doc: "maximum number of lines to look for matching scope syntax (parens, brackets)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" step:\"10\""}},
+		{"TextBufDiffRevertLines", &gti.Field{Name: "TextBufDiffRevertLines", Type: "int", LocalType: "int", Doc: "text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted", Directives: gti.Directives{}, Tag: "def:\"10000\" min:\"0\" step:\"1000\""}},
+		{"TextBufDiffRevertDiffs", &gti.Field{Name: "TextBufDiffRevertDiffs", Type: "int", LocalType: "int", Doc: "text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" step:\"1\""}},
+		{"TextBufMarkupDelayMSec", &gti.Field{Name: "TextBufMarkupDelayMSec", Type: "int", LocalType: "int", Doc: "number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)", Directives: gti.Directives{}, Tag: "def:\"1000\" min:\"100\" step:\"100\""}},
+		{"MapInlineLen", &gti.Field{Name: "MapInlineLen", Type: "int", LocalType: "int", Doc: "the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props", Directives: gti.Directives{}, Tag: "def:\"2\" min:\"1\" step:\"1\""}},
+		{"StructInlineLen", &gti.Field{Name: "StructInlineLen", Type: "int", LocalType: "int", Doc: "the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
+		{"SliceInlineLen", &gti.Field{Name: "SliceInlineLen", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" toml:\"-\" xml:\"-\""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Open", &gti.Method{Name: "Open", Doc: "Open detailed preferences from GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"Save", &gti.Method{Name: "Save", Doc: "Save saves current preferences to standard prefs_det.toml file, which is auto-loaded at startup", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply detailed preferences to all the relevant settings.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.PrefsDebug",
+	ShortName: "gi.PrefsDebug",
+	IDName:    "prefs-debug",
+	Doc:       "PrefsDebug are debugging params",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"UpdateTrace", &gti.Field{Name: "UpdateTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of updates that trigger re-rendering (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"RenderTrace", &gti.Field{Name: "RenderTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of the nodes rendering (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"LayoutTrace", &gti.Field{Name: "LayoutTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of all layouts (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"WinEventTrace", &gti.Field{Name: "WinEventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of window events (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"WinRenderTrace", &gti.Field{Name: "WinRenderTrace", Type: "*bool", LocalType: "*bool", Doc: "reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent", Directives: gti.Directives{}, Tag: ""}},
+		{"WinGeomTrace", &gti.Field{Name: "WinGeomTrace", Type: "*bool", LocalType: "*bool", Doc: "WinGeomTrace records window geometry saving / loading functions", Directives: gti.Directives{}, Tag: ""}},
+		{"KeyEventTrace", &gti.Field{Name: "KeyEventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of keyboard events (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"EventTrace", &gti.Field{Name: "EventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of event handling (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"DNDTrace", &gti.Field{Name: "DNDTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of DND events handling", Directives: gti.Directives{}, Tag: ""}},
+		{"GoCompleteTrace", &gti.Field{Name: "GoCompleteTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of Go language completion & lookup process", Directives: gti.Directives{}, Tag: ""}},
+		{"GoTypeTrace", &gti.Field{Name: "GoTypeTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of Go language type parsing and inference process", Directives: gti.Directives{}, Tag: ""}},
+		{"StructViewIfDebug", &gti.Field{Name: "StructViewIfDebug", Type: "*bool", LocalType: "*bool", Doc: "reports errors for viewif directives in struct field tags, for giv.StructView", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" toml:\"-\" xml:\"-\""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Profile", &gti.Method{Name: "Profile", Doc: "Profile toggles profiling of program on or off, which does both\ntargeted and global CPU and Memory profiling.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
+})
 
 // SliderType is the [gti.Type] for [Slider]
 var SliderType = gti.AddType(&gti.Type{
