@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"log"
 
 	"log/slog"
@@ -333,12 +332,8 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 		return false
 	}
 	pos := bt.ContextMenuPos(e)
-	if bt.Parts != nil {
-		if indic := bt.Parts.ChildByName("indicator", 3); indic != nil {
-			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
-		}
-	} else {
-		slog.Error("Button: parts nil", "button", bt)
+	if indic := bt.Parts.ChildByName("indicator", 3); indic != nil {
+		pos = indic.(Widget).ContextMenuPos(nil) // use the pos
 	}
 	m := NewMenu(bt.Menu, bt.This().(Widget), pos)
 	if m == nil {
@@ -397,20 +392,8 @@ func (bt *Button) HandleClickMenu() {
 func (bt *Button) HandleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnLast(events.Click, func(e events.Event) {
-		if bt.Sc != nil && bt.Sc.Stage != nil {
-			pst := bt.Sc.Stage
-			if pst != nil && pst.Type == MenuStage {
-				pst.ClosePopup()
-			} else {
-				fmt.Println("error: popup not menu stage:", pst)
-			}
-		} else {
-			if bt.Sc == nil {
-				slog.Error("bt.Sc == nil")
-			} else if bt.Sc.Stage == nil {
-				slog.Error("bt.Sc.Stage == nil")
-			}
-		}
+		pst := bt.Sc.Stage
+		pst.ClosePopup()
 	})
 }
 

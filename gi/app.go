@@ -7,7 +7,6 @@ package gi
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -160,10 +159,6 @@ func StdAppBarBack(tb *Toolbar) *Button {
 	bt.OnClick(func(e events.Event) {
 		stg := tb.Sc.Stage.Main
 		mm := stg.MainMgr
-		if mm == nil {
-			slog.Error("AppBar has no MainMgr")
-			return
-		}
 		// if we are down to the last window, we don't
 		// let people close it with the back button
 		if mm.Stack.Len() <= 1 {
@@ -279,10 +274,6 @@ func (ac *AppChooser) OnInit() {
 	ac.SetItemsFunc(func() {
 		stg := ac.Sc.Stage.Main
 		mm := stg.MainMgr
-		if mm == nil {
-			slog.Error("AppChooser has no MainMgr")
-			return
-		}
 		urs := ac.Resources.Generate()
 		iln := mm.Stack.Len() + len(urs)
 		ac.Items = make([]any, iln)
@@ -314,10 +305,6 @@ func (ac *AppChooser) OnInit() {
 	ac.OnChange(func(e events.Event) {
 		stg := ac.Sc.Stage.Main
 		mm := stg.MainMgr
-		if mm == nil {
-			slog.Error("AppChooser has no MainMgr")
-			return
-		}
 		cv, ok := ac.CurVal.(uri.URI)
 		if !ok {
 			return

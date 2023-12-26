@@ -177,7 +177,6 @@ func (st *Stage) RunDialog() *Stage {
 
 	// if our main stage manager is nil, we wait until our context is shown and then try again
 	if ms == nil {
-		slog.Error("RunDialog: CurRenderWin is nil")
 		ctx.OnShow(func(e events.Event) {
 			st.RunDialog()
 		})
@@ -237,9 +236,6 @@ func (st *Stage) RunSheet() *Stage {
 }
 
 func (st *Stage) NewRenderWin() *RenderWin {
-	if st.Scene == nil {
-		slog.Error("MainStage.NewRenderWin: Scene is nil")
-	}
 	name := st.Name
 	title := st.Title
 	opts := &goosi.NewWindowOptions{

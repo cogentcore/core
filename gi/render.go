@@ -263,10 +263,6 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 // Config by itself is sufficient during initial construction because
 // everything will be automatically styled during initial display.
 func (wb *WidgetBase) Config() {
-	if wb.This() == nil {
-		slog.Error("nil this in config")
-		return
-	}
 	wi := wb.This().(Widget)
 	updt := wi.UpdateStart()
 	wi.ConfigWidget() // where everything actually happens
@@ -427,10 +423,6 @@ func (sc *Scene) DoUpdate() bool {
 	defer sc.SetFlag(false, ScUpdating)
 
 	rc := sc.RenderCtx()
-	if rc == nil {
-		slog.Error("scene render context is nil", "scene", sc.Nm)
-		return true
-	}
 
 	if sc.ShowIter < SceneShowIters {
 		if sc.ShowIter == 0 { // first time

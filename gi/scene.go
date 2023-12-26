@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/png"
 	"io"
-	"log/slog"
 	"sync"
 
 	"goki.dev/colors"
@@ -149,6 +148,8 @@ func NewScene(name ...string) *Scene {
 	return sc
 }
 
+// TODO: what should we do about sub scenes?
+
 // NewSubScene creates a new [Scene] that will serve as a sub-scene of another [Scene].
 // Scenes can also be added as the content of a [Stage] (without a parent) through the
 // [NewScene] function. If no name is provided, it defaults to "scene".
@@ -244,10 +245,6 @@ func (sc *Scene) RenderWin() *RenderWin {
 // which in turn manage their popups.  This Scene could be in a popup
 // or in a main stage.
 func (sc *Scene) MainStageMgr() *StageMgr {
-	if sc.Stage == nil {
-		slog.Error("Scene has nil Stage", "scene", sc.Nm)
-		return nil
-	}
 	return sc.Stage.MainMgr
 }
 
@@ -317,15 +314,7 @@ func (sc *Scene) ScIsVisible() bool {
 // Close closes the stage associated with this Scene (typically for Dialog)
 func (sc *Scene) Close() {
 	sc.Send(events.Close, nil)
-	if sc.Stage == nil {
-		slog.Error("Close: Scene has no Stage")
-		return
-	}
 	mm := sc.Stage.MainMgr
-	if mm == nil {
-		// slog.Error("Scene has no MainMgr")
-		return
-	}
 	if sc.Stage.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		mm.RenderWin.CloseReq()
 		return

@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log/slog"
 	"strings"
 	"time"
 
@@ -279,9 +278,6 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 
 // Run does the default run behavior based on the type of stage
 func (st *Stage) Run() *Stage {
-	if st.Scene == nil {
-		slog.Error("stage has nil scene")
-	}
 	switch st.Type {
 	case WindowStage:
 		return st.RunWindow()

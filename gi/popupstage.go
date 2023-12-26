@@ -12,17 +12,13 @@ import (
 )
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.
+// The given context widget must be non-nil.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the NewPopupStage call.
 // Use Run call at the end to start the Stage running.
 func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	if ctx == nil {
 		slog.Error("NewPopupStage needs a context Widget")
-		return nil
-	}
-	cwb := ctx.AsWidget()
-	if cwb.Sc == nil || cwb.Sc.Stage == nil {
-		slog.Error("NewPopupStage context doesn't have a Stage")
 		return nil
 	}
 	st := &Stage{}
