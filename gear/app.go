@@ -108,7 +108,7 @@ func (a *App) ConfigWidget() {
 	grr.Log(tb.Stat())
 	te := texteditor.NewEditor(ef, "editor").SetBuf(tb)
 	te.Style(func(s *styles.Style) {
-		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+		s.Font.Family = string(gi.GeneralSettings.MonoFont)
 	})
 	te.OnKeyChord(func(e events.Event) {
 		txt := string(tb.Text())
@@ -155,7 +155,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 		s.Padding.Set(units.Dp(8)).SetBottom(units.Zero())
 	})
 	gi.NewLabel(tr, "cmd").SetType(gi.LabelTitleLarge).SetText(cmd).Style(func(s *styles.Style) {
-		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+		s.Font.Family = string(gi.GeneralSettings.MonoFont)
 		s.Grow.Set(1, 0)
 	})
 	gi.NewButton(tr, "kill").SetType(gi.ButtonAction).SetIcon(icons.Close).OnClick(func(e events.Event) {
@@ -174,7 +174,7 @@ func (a *App) RunCmd(cmd string, cmds *gi.Frame, dir *gi.Label) error {
 
 	te := texteditor.NewEditor(cfr).SetBuf(buf)
 	te.Style(func(s *styles.Style) {
-		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+		s.Font.Family = string(gi.GeneralSettings.MonoFont)
 		s.Min.Set(units.Em(30), units.Em(10))
 		s.Background = cfr.Styles.Background
 	})
