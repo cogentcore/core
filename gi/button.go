@@ -343,13 +343,6 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
-// TODO(kai/menu): do we need ResetMenu?
-
-// ResetMenu removes the menu constructor function
-func (bt *Button) ResetMenu() {
-	bt.Menu = nil
-}
-
 // ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;
 // if defOn is true, an indicator is added even if the Indicator field is unset
 // (as long as it is not explicitly set to [icons.None]);
