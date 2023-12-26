@@ -66,7 +66,7 @@ func (sw *Switches) SetStyles() {
 			if sw.Type != SwitchSegmentedButton {
 				return
 			}
-			ip, _ := w.IndexInParent()
+			ip := w.IndexInParent()
 			brf := styles.BorderRadiusFull.Top
 			ps := &sw.Styles
 			if ip == 0 {
@@ -240,8 +240,7 @@ func (sw *Switches) BitFlagValue(bitflag enums.BitFlagSetter) {
 func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 	swi.OnChange(func(e events.Event) {
 		if sw.Mutex && swi.IsChecked() {
-			ip, _ := swi.IndexInParent()
-			sw.UnCheckAllBut(ip)
+			sw.UnCheckAllBut(swi.IndexInParent())
 		}
 		sw.SendChange(e)
 	})

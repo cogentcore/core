@@ -77,8 +77,7 @@ func (fb *FileBrowse) OnInit() {
 			split.Dim = mat32.X
 		}
 		if w.Parent().PathFrom(fb) == "splits" {
-			ip, _ := w.IndexInParent()
-			if ip == 0 {
+			if w.IndexInParent() == 0 {
 				w.Style(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 				})

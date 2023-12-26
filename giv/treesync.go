@@ -252,8 +252,8 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	if tv.IsRoot(actNm) {
 		return
 	}
-	myidx, ok := tv.IndexInParent()
-	if !ok {
+	myidx := tv.IndexInParent()
+	if myidx < 0 {
 		return
 	}
 	myidx += rel
@@ -346,8 +346,8 @@ func (tv *TreeView) Duplicate() { //gti:add
 		return
 	}
 	par := AsTreeView(tv.Par)
-	myidx, ok := tv.IndexInParent()
-	if !ok {
+	myidx := tv.IndexInParent()
+	if myidx < 0 {
 		return
 	}
 	updt := par.UpdateStart()
@@ -373,8 +373,8 @@ func (tv *TreeView) DuplicateSync() {
 		log.Printf("TreeView %v nil SyncNode in: %v\n", tv, tvpar.Path())
 		return
 	}
-	myidx, ok := sk.IndexInParent()
-	if !ok {
+	myidx := sk.IndexInParent()
+	if myidx < 0 {
 		return
 	}
 	updt := par.UpdateStart()
@@ -474,8 +474,8 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	sl, pl := tv.NodesFromMimeData(md)
 	tvpar := AsTreeView(tv.Par)
 	par := sk.Parent()
-	myidx, ok := sk.IndexInParent()
-	if !ok {
+	myidx := sk.IndexInParent()
+	if myidx < 0 {
 		return
 	}
 	myidx += rel

@@ -956,8 +956,8 @@ func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 	if tv == tv.RootView {
 		return nil
 	}
-	myidx, ok := tv.IndexInParent()
-	if ok && myidx < len(*tv.Par.Children())-1 {
+	myidx := tv.IndexInParent()
+	if myidx < len(*tv.Par.Children())-1 {
 		nn := AsTreeView(tv.Par.Child(myidx + 1))
 		if nn != nil {
 			nn.SelectUpdate(selMode)
@@ -976,8 +976,8 @@ func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
 	if tv.Par == nil || tv == tv.RootView {
 		return nil
 	}
-	myidx, ok := tv.IndexInParent()
-	if ok && myidx > 0 {
+	myidx := tv.IndexInParent()
+	if myidx > 0 {
 		nn := AsTreeView(tv.Par.Child(myidx - 1))
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
@@ -1560,8 +1560,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	sl, pl := tv.NodesFromMimeData(md)
 
-	myidx, ok := tv.IndexInParent()
-	if !ok {
+	myidx := tv.IndexInParent()
+	if myidx < 0 {
 		return
 	}
 	myidx += rel

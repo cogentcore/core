@@ -66,8 +66,7 @@ func (sl *Splits) SetStyles() {
 		if hl, ok := w.(*Handle); ok {
 			// hl.ThumbSize = sl.HandleSize
 			hl.On(events.Change, func(e events.Event) {
-				ip, _ := hl.IndexInParent()
-				sl.SetSplitAction(ip, hl.Value())
+				sl.SetSplitAction(hl.IndexInParent(), hl.Value())
 			})
 			// could enforce our own styles here..
 			// w.Style(func(s *styles.Style) {

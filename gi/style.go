@@ -255,20 +255,20 @@ func (wb *WidgetBase) ParentActualBackground() image.Image {
 
 // IsNthChild returns whether the node is nth-child of its parent
 func (wb *WidgetBase) IsNthChild(n int) bool {
-	idx, ok := wb.IndexInParent()
-	return ok && idx == n
+	idx := wb.IndexInParent()
+	return idx == n
 }
 
 // IsFirstChild returns whether the node is the first child of its parent
 func (wb *WidgetBase) IsFirstChild() bool {
-	idx, ok := wb.IndexInParent()
-	return ok && idx == 0
+	idx := wb.IndexInParent()
+	return idx == 0
 }
 
 // IsLastChild returns whether the node is the last child of its parent
 func (wb *WidgetBase) IsLastChild() bool {
-	idx, ok := wb.IndexInParent()
-	return ok && idx == wb.Par.NumChildren()-1
+	idx := wb.IndexInParent()
+	return idx == wb.Par.NumChildren()-1
 }
 
 // IsOnlyChild returns whether the node is the only child of its parent

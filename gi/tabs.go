@@ -259,7 +259,7 @@ func (ts *Tabs) TabIndexByLabel(label string) (int, bool) {
 	if tab == nil {
 		return -1, false
 	}
-	return tab.IndexInParent()
+	return tab.IndexInParent(), true
 }
 
 // TabLabel returns tab label at given index
