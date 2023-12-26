@@ -171,18 +171,19 @@ func (n *Node) Parent() Ki {
 	return n.Par
 }
 
-// IndexInParent returns our index within our parent object -- caches the
+// IndexInParent returns our index within our parent object. It caches the
 // last value and uses that for an optimized search so subsequent calls
-// are typically quite fast.  Returns false if we don't have a parent.
-func (n *Node) IndexInParent() (int, bool) {
+// are typically quite fast. Returns -1 if we don't have a parent.
+func (n *Node) IndexInParent() int {
 	if n.Par == nil {
-		return -1, false
+		return -1
 	}
 	idx, ok := n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
-	if ok {
-		n.index = idx
+	if !ok {
+		return -1
 	}
-	return idx, ok
+	n.index = idx
+	return idx
 }
 
 // ParentLevel finds a given potential parent node recursively up the

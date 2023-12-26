@@ -37,8 +37,8 @@ func Prev(nd Ki) Ki {
 	if nd.Parent() == nil {
 		return nil
 	}
-	myidx, ok := nd.IndexInParent()
-	if ok && myidx > 0 {
+	myidx := nd.IndexInParent()
+	if myidx > 0 {
 		nn := nd.Parent().Child(myidx - 1)
 		return LastChild(nn)
 	}
@@ -61,11 +61,9 @@ func NextSibling(nd Ki) Ki {
 	if nd.Parent() == nil {
 		return nil
 	}
-	myidx, ok := nd.IndexInParent()
-	if ok {
-		if myidx < nd.Parent().NumChildren()-1 {
-			return nd.Parent().Child(myidx + 1)
-		}
+	myidx := nd.IndexInParent()
+	if myidx >= 0 && myidx < nd.Parent().NumChildren()-1 {
+		return nd.Parent().Child(myidx + 1)
 	}
 	return NextSibling(nd.Parent())
 }

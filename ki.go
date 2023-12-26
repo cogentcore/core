@@ -104,10 +104,10 @@ type Ki interface {
 	// one-parent, no-cycles structure -- see SetParent.
 	Parent() Ki
 
-	// IndexInParent returns our index within our parent object -- caches the
+	// IndexInParent returns our index within our parent object. It caches the
 	// last value and uses that for an optimized search so subsequent calls
-	// are typically quite fast.  Returns false if we don't have a parent.
-	IndexInParent() (int, bool)
+	// are typically quite fast. Returns -1 if we don't have a parent.
+	IndexInParent() int
 
 	// ParentLevel finds a given potential parent node recursively up the
 	// hierarchy, returning level above current node that the parent was
