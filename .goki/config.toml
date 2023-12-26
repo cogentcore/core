@@ -1,6 +1,6 @@
 Name = "xe"
 Desc = ""
-Version = "v0.0.27"
+Version = "v0.0.28"
 Type = "Library"
 
 [Build]
