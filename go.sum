@@ -1,6 +1,6 @@
 github.com/chewxy/math32 v1.10.1 h1:LFpeY0SLJXeaiej/eIp2L40VYfscTvKh/FSEZ68uMkU=
 github.com/chewxy/math32 v1.10.1/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-goki.dev/enums v0.9.55 h1:tYPS9Y0nXqlU6banoVGpi//xg7FyHlSPjQzyh2amqTQ=
-goki.dev/enums v0.9.55/go.mod h1:BrbSAGyPGrJZYb3sqr1db2+MPLl1boH0zDByDbtjKek=
+goki.dev/enums v0.9.56 h1:gQ0ZjDuS3kR1IblvfIdAsoaQYCjgh12PNqNWBu/V00M=
+goki.dev/enums v0.9.56/go.mod h1:ULBqiNxR9VhnfCNyNhzj1sbOCykdOTkecv77hIEj5qM=
 golang.org/x/image v0.14.0 h1:tNgSxAFe3jC4uYqvZdTr84SZoM1KfwdC9SKIFrLjFn4=
 golang.org/x/image v0.14.0/go.mod h1:HUYqC05R2ZcZ3ejNQsIHQDQiwWM4JBqmm6MKANTp4LE=
