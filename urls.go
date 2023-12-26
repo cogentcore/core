@@ -204,10 +204,7 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 // or empty string if none.  Returned value is just the 'name' part
 // of the url, not the full string.
 func NodePropURL(gi Node, prop string) string {
-	fp, err := gi.PropTry(prop)
-	if err != nil {
-		return ""
-	}
+	fp := gi.Prop(prop)
 	fs, iss := fp.(string)
 	if !iss {
 		return ""
