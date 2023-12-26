@@ -14,9 +14,6 @@ import (
 	"sort"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/pi"
 )
 
@@ -193,6 +190,9 @@ func Init() {
 	}
 }
 
+// TODO(kai): remove this
+
+/*
 // StylesProps define the Toolbar and MenuBar for view
 var StylesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
@@ -283,3 +283,4 @@ var StylesProps = ki.Props{
 		}},
 	},
 }
+*/

@@ -10,7 +10,6 @@ import (
 	"goki.dev/enums"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
-	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
 
@@ -61,19 +60,6 @@ func (wb *WidgetBase) SetSelected(sel bool) {
 	wb.SetNeedsRender(true)
 }
 
-// SetSelectedAction sets the Selected state flag
-// to given value and Sends an events.Select event.
-// Only if current selected state is different.
-func (wb *WidgetBase) SetSelectedAction(sel bool) bool {
-	csel := wb.StateIs(states.Selected)
-	if csel == sel {
-		return false
-	}
-	wb.SetState(sel, states.Selected)
-	wb.Send(events.Select, nil)
-	return true
-}
-
 // CanFocus checks if this node can receive keyboard focus
 func (wb *WidgetBase) CanFocus() bool {
 	return wb.Styles.Abilities.HasFlag(abilities.Focusable)
@@ -82,13 +68,6 @@ func (wb *WidgetBase) CanFocus() bool {
 // SetEnabled sets the Disabled flag
 func (wb *WidgetBase) SetEnabled(enabled bool) *WidgetBase {
 	return wb.SetState(!enabled, states.Disabled)
-}
-
-// SetEnabledUpdt sets the Disabled flag
-func (wb *WidgetBase) SetEnabledUpdt(enabled bool) *WidgetBase {
-	wb.SetState(!enabled, states.Disabled)
-	wb.ApplyStyleUpdate()
-	return wb
 }
 
 // IsDisabled tests if this node is flagged as [Disabled].
@@ -137,7 +116,7 @@ func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	return got
 }
 
-// AddClass adds a CSS class name -- does proper space separation
+// AddClass adds a CSS class name; does proper space separation
 func (wb *WidgetBase) AddClass(cls string) *WidgetBase {
 	if wb.Class == "" {
 		wb.Class = cls
