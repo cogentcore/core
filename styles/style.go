@@ -118,10 +118,10 @@ type Style struct { //gti:add
 	// Default is OverflowVisible.  Set to OverflowAuto to enable scrollbars.
 	Overflow XY[Overflows]
 
-	// For layout, extra space added between elements in the layout.
+	// For layouts, extra space added between elements in the layout.
 	Gap units.XY `view:"inline"`
 
-	// For layout, number of columns to use in a grid layout.
+	// For grid layouts, the number of columns to use.
 	// If > 0, number of rows is computed as N elements / Columns.
 	// Used as a constraint in layout if individual elements
 	// do not specify their row, column positions
