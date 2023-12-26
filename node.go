@@ -214,16 +214,6 @@ func (n *Node) ParentByName(name string) Ki {
 	return n.Par.ParentByName(name)
 }
 
-// ParentByNameTry finds first parent recursively up hierarchy that matches
-// given name -- returns error if not found.
-func (n *Node) ParentByNameTry(name string) (Ki, error) {
-	par := n.ParentByName(name)
-	if par != nil {
-		return par, nil
-	}
-	return nil, fmt.Errorf("ki %v: Parent name: %v not found", n.Nm, name)
-}
-
 // ParentByType finds parent recursively up hierarchy, by type, and
 // returns nil if not found. If embeds is true, then it looks for any
 // type that embeds the given type at any level of anonymous embedding.
@@ -241,17 +231,6 @@ func (n *Node) ParentByType(t *gti.Type, embeds bool) Ki {
 		}
 	}
 	return n.Par.ParentByType(t, embeds)
-}
-
-// ParentByTypeTry finds parent recursively up hierarchy, by type, and
-// returns error if not found. If embeds is true, then it looks for any
-// type that embeds the given type at any level of anonymous embedding.
-func (n *Node) ParentByTypeTry(t *gti.Type, embeds bool) (Ki, error) {
-	par := n.ParentByType(t, embeds)
-	if par != nil {
-		return par, nil
-	}
-	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.Nm, t)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -279,29 +258,13 @@ func (n *Node) Children() *Slice {
 	return &n.Kids
 }
 
-// IsValidIndex returns error if given index is not valid for accessing children
-// nil otherwise.
-func (n *Node) IsValidIndex(idx int) error {
-	sz := len(n.Kids)
-	if idx >= 0 && idx < sz {
+// Child returns the child at given index and returns nil if
+// the index is out of range.
+func (n *Node) Child(idx int) Ki {
+	if idx >= len(n.Kids) {
 		return nil
 	}
-	return fmt.Errorf("ki %v: invalid index: %v -- len = %v", n.Nm, idx, sz)
-}
-
-// Child returns the child at given index -- will panic if index is invalid.
-// See methods on ki.Slice for more ways to access.
-func (n *Node) Child(idx int) Ki {
 	return n.Kids[idx]
-}
-
-// ChildTry returns the child at given index.  Try version returns error if index is invalid.
-// See methods on ki.Slice for more ways to access.
-func (n *Node) ChildTry(idx int) (Ki, error) {
-	if err := n.IsValidIndex(idx); err != nil {
-		return nil, err
-	}
-	return n.Kids[idx], nil
 }
 
 // ChildByName returns the first element that has given name, and nil
@@ -313,19 +276,6 @@ func (n *Node) ChildByName(name string, startIdx ...int) Ki {
 	return n.Kids.ElemByName(name, startIdx...)
 }
 
-// ChildByNameTry returns the first element that has given name, and an error
-// if no such element is found. startIdx arg allows for optimized
-// bidirectional find if you have an idea where it might be, which
-// can be a key speedup for large lists. If no value is specified for
-// startIdx, it starts in the middle, which is a good default.
-func (n *Node) ChildByNameTry(name string, startIdx ...int) (Ki, error) {
-	idx, ok := n.Kids.IndexByName(name, startIdx...)
-	if !ok {
-		return nil, fmt.Errorf("ki %v: child named: %v not found", n.Nm, name)
-	}
-	return n.Kids[idx], nil
-}
-
 // ChildByType returns the first element that has the given type, and nil
 // if not found. If embeds is true, then it also looks for any type that
 // embeds the given type at any level of anonymous embedding.
@@ -335,21 +285,6 @@ func (n *Node) ChildByNameTry(name string, startIdx ...int) (Ki, error) {
 // good default.
 func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
 	return n.Kids.ElemByType(t, embeds, startIdx...)
-}
-
-// ChildByTypeTry returns the first element that has the given type, and an
-// error if not found. If embeds is true, then it also looks for any type that
-// embeds the given type at any level of anonymous embedding.
-// startIdx arg allows for optimized bidirectional find if you have an
-// idea where it might be, which can be a key speedup for large lists. If
-// no value is specified for startIdx, it starts in the middle, which is a
-// good default.
-func (n *Node) ChildByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, error) {
-	idx, ok := n.Kids.IndexByType(t, embeds, startIdx...)
-	if !ok {
-		return nil, fmt.Errorf("ki %v: child of type: %s not found", n.Nm, t.Name)
-	}
-	return n.Kids[idx], nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -479,23 +414,6 @@ func (n *Node) FindPath(path string) Ki {
 		}
 	}
 	return curn
-}
-
-// FindPathTry returns Ki object at given path, starting from this node
-// (e.g., the root).  If this node is not the root, then the path
-// to this node is subtracted from the start of the path if present there.
-// FindPath only works correctly when names are unique.
-// Path has node Names separated by / and fields by .
-// Node names escape any existing / and . characters to \\ and \,
-// There is also support for [idx] index-based access for any given path
-// element, for cases when indexes are more useful than names.
-// Returns error if not found.
-func (n *Node) FindPathTry(path string) (Ki, error) {
-	fk := n.This().FindPath(path)
-	if fk != nil {
-		return fk, nil
-	}
-	return nil, fmt.Errorf("ki %v: element at path: %v not found", n.Nm, path)
 }
 
 func (n *Node) FieldByName(field string) (Ki, error) {
@@ -659,13 +577,13 @@ func (n *Node) ConfigChildren(config Config) (mods, updt bool) {
 //////////////////////////////////////////////////////////////////////////
 //  Deleting Children
 
-// DeleteChildAtIndex deletes child at given index (returns error for
-// invalid index).
-// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
-func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
-	child, err := n.ChildTry(idx)
-	if err != nil {
-		return err
+// DeleteChildAtIndex deletes child at given index. It returns false
+// if there is no child at the given index. Wraps delete in UpdateStart / End
+// and sets ChildDeleted flag.
+func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
+	child := n.Child(idx)
+	if child == nil {
+		return false
 	}
 	updt := n.This().UpdateStart()
 	n.SetFlag(true, ChildDeleted)
@@ -683,33 +601,32 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 	}
 	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
 	n.This().UpdateEnd(updt)
-	return nil
+	return true
 }
 
-// DeleteChild deletes child node, returning error if not found in
-// Children.
-// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
-func (n *Node) DeleteChild(child Ki, destroy bool) error {
+// DeleteChild deletes the given child node, returning false if
+// it can not find it. Wraps delete in UpdateStart / End and
+// sets ChildDeleted flag.
+func (n *Node) DeleteChild(child Ki, destroy bool) bool {
 	if child == nil {
-		return errors.New("ki DeleteChild: child is nil")
+		return false
 	}
 	idx, ok := n.Kids.IndexOf(child, 0)
 	if !ok {
-		return fmt.Errorf("ki %v: child: %v not found", n.Nm, child.Path())
+		return false
 	}
 	return n.DeleteChildAtIndex(idx, destroy)
 }
 
-// DeleteChildByName deletes child node by name -- returns child, error
-// if not found.
-// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
-func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
+// DeleteChildByName deletes child node by name, returning false
+// if it can not find it. Wraps delete in UpdateStart / End and
+// sets ChildDeleted flag.
+func (n *Node) DeleteChildByName(name string, destroy bool) bool {
 	idx, ok := n.Kids.IndexByName(name, 0)
 	if !ok {
-		return nil, fmt.Errorf("ki %v: child named: %v not found", n.Nm, name)
+		return false
 	}
-	child := n.Kids[idx]
-	return child, n.DeleteChildAtIndex(idx, destroy)
+	return n.DeleteChildAtIndex(idx, destroy)
 }
 
 // DeleteChildren deletes all children nodes -- destroy will add removed
@@ -832,22 +749,10 @@ func (n *Node) SetProps(props Props) {
 	}
 }
 
-// Prop returns property value for key that is known to exist.
-// Returns nil if it actually doesn't -- this version allows
-// direct conversion of return.  See PropTry for version with
-// error message if uncertain if property exists.
+// Prop returns the property value for the given key.
+// It returns nil if it doesn't exist.
 func (n *Node) Prop(key string) any {
 	return n.Props[key]
-}
-
-// PropTry returns property value for key.  Returns error message
-// if property with that key does not exist.
-func (n *Node) PropTry(key string) (any, error) {
-	v, ok := n.Props[key]
-	if !ok {
-		return v, fmt.Errorf("ki.PropTry, could not find property with key %v on node %v", key, n.Nm)
-	}
-	return v, nil
 }
 
 // PropInherit gets property value from key with options for inheriting

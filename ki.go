@@ -118,19 +118,10 @@ type Ki interface {
 	// given name.  Returns nil if not found.
 	ParentByName(name string) Ki
 
-	// ParentByNameTry finds first parent recursively up hierarchy that matches
-	// given name -- Try version returns error on failure.
-	ParentByNameTry(name string) (Ki, error)
-
 	// ParentByType finds parent recursively up hierarchy, by type, and
 	// returns nil if not found. If embeds is true, then it looks for any
 	// type that embeds the given type at any level of anonymous embedding.
 	ParentByType(t *gti.Type, embeds bool) Ki
-
-	// ParentByTypeTry finds parent recursively up hierarchy, by type, and
-	// returns error if not found. If embeds is true, then it looks for any
-	// type that embeds the given type at any level of anonymous embedding.
-	ParentByTypeTry(t *gti.Type, embeds bool) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Children
@@ -152,14 +143,9 @@ type Ki interface {
 	// method on parent node should be used to ensure proper init.
 	Children() *Slice
 
-	// Child returns the child at given index -- will panic if index is invalid.
-	// See methods on ki.Slice for more ways to access.
+	// Child returns the child at given index and returns nil if
+	// the index is out of range.
 	Child(idx int) Ki
-
-	// ChildTry returns the child at given index -- Try version returns
-	// error if index is invalid.
-	// See methods on ki.Slice for more ways to access.
-	ChildTry(idx int) (Ki, error)
 
 	// ChildByName returns the first element that has given name, and nil
 	// if no such element is found. startIdx arg allows for optimized
@@ -167,13 +153,6 @@ type Ki interface {
 	// can be a key speedup for large lists. If no value is specified for
 	// startIdx, it starts in the middle, which is a good default.
 	ChildByName(name string, startIdx ...int) Ki
-
-	// ChildByNameTry returns the first element that has given name, and an error
-	// if no such element is found. startIdx arg allows for optimized
-	// bidirectional find if you have an idea where it might be, which
-	// can be a key speedup for large lists. If no value is specified for
-	// startIdx, it starts in the middle, which is a good default.
-	ChildByNameTry(name string, startIdx ...int) (Ki, error)
 
 	// ChildByType returns the first element that has the given type, and nil
 	// if not found. If embeds is true, then it also looks for any type that
@@ -183,15 +162,6 @@ type Ki interface {
 	// no value is specified for startIdx, it starts in the middle, which is a
 	// good default.
 	ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki
-
-	// ChildByTypeTry returns the first element that has the given type, and an
-	// error if not found. If embeds is true, then it also looks for any type that
-	// embeds the given type at any level of anonymous embedding.
-	// startIdx arg allows for optimized bidirectional find if you have an
-	// idea where it might be, which can be a key speedup for large lists. If
-	// no value is specified for startIdx, it starts in the middle, which is a
-	// good default.
-	ChildByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Paths
@@ -223,17 +193,6 @@ type Ki interface {
 	// element, for cases when indexes are more useful than names.
 	// Returns nil if not found.
 	FindPath(path string) Ki
-
-	// FindPathTry returns Ki object at given path, starting from this node
-	// (e.g., the root).  If this node is not the root, then the path
-	// to this node is subtracted from the start of the path if present there.
-	// FindPath only works correctly when names are unique.
-	// Path has node Names separated by / and fields by .
-	// Node names escape any existing / and . characters to \\ and \,
-	// There is also support for [idx] index-based access for any given path
-	// element, for cases when indexes are more useful than names.
-	// Returns error if not found.
-	FindPathTry(path string) (Ki, error)
 
 	// FieldByName returns Ki object that is a direct field.
 	// This must be implemented for any types that have Ki fields that
@@ -316,20 +275,20 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Deleting Children
 
-	// DeleteChildAtIndex deletes child at given index (returns error for
-	// invalid index).
-	// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
-	DeleteChildAtIndex(idx int, destroy bool) error
+	// DeleteChildAtIndex deletes child at given index. It returns false
+	// if there is no child at the given index. Wraps delete in UpdateStart / End
+	// and sets ChildDeleted flag.
+	DeleteChildAtIndex(idx int, destroy bool) bool
 
-	// DeleteChild deletes child node, returning error if not found in
-	// Children.
-	// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
-	DeleteChild(child Ki, destroy bool) error
+	// DeleteChild deletes the given child node, returning false if
+	// it can not find it. Wraps delete in UpdateStart / End and
+	// sets ChildDeleted flag.
+	DeleteChild(child Ki, destroy bool) bool
 
-	// DeleteChildByName deletes child node by name -- returns child, error
-	// if not found.
-	// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
-	DeleteChildByName(name string, destroy bool) (Ki, error)
+	// DeleteChildByName deletes child node by name, returning false
+	// if it can not find it. Wraps delete in UpdateStart / End and
+	// sets ChildDeleted flag.
+	DeleteChildByName(name string, destroy bool) bool
 
 	// DeleteChildren deletes all children nodes -- destroy will add removed
 	// children to deleted list, to be destroyed later -- otherwise children
@@ -386,15 +345,9 @@ type Ki interface {
 	// map if nil.
 	SetProp(key string, val any)
 
-	// Prop returns property value for key that is known to exist.
-	// Returns nil if it actually doesn't -- this version allows
-	// direct conversion of return.  See PropTry for version with
-	// error message if uncertain if property exists.
+	// Prop returns the property value for the given key.
+	// It returns nil if it doesn't exist.
 	Prop(key string) any
-
-	// PropTry returns property value for key.  Returns error message
-	// if property with that key does not exist.
-	PropTry(key string) (any, error)
 
 	// PropInherit gets property value from key with options for inheriting
 	// property from parents.  If inherit, then checks all parents.

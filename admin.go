@@ -6,7 +6,7 @@ package ki
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 	"sync"
@@ -38,8 +38,8 @@ func InitNode(this Ki) {
 // and inserted.
 func ThisCheck(k Ki) error {
 	if k.This() == nil {
-		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", k.Name())
-		log.Println(err)
+		err := fmt.Errorf("ki.Node %v ThisCheck: node has null 'this' pointer; must call Init or InitName on root nodes", k.Name())
+		slog.Error(err.Error())
 		return err
 	}
 	return nil
@@ -147,27 +147,11 @@ func ParentByType[T Ki](k Ki, embeds bool) T {
 	return v
 }
 
-// ParentByTypeTry is a generic helper function for [Ki.ParentByTypeTry]
-func ParentByTypeTry[T Ki](k Ki, embeds bool) (T, error) {
-	var n T
-	vi, err := k.ParentByTypeTry(n.KiType(), embeds)
-	v, _ := vi.(T)
-	return v, err
-}
-
 // ChildByType is a generic helper function for [Ki.ChildByType]
 func ChildByType[T Ki](k Ki, embeds bool, startIdx ...int) T {
 	var n T
 	v, _ := k.ChildByType(n.KiType(), embeds, startIdx...).(T)
 	return v
-}
-
-// ChildByTypeTry is a generic helper function for [Ki.ChildByTypeTry]
-func ChildByTypeTry[T Ki](k Ki, embeds bool, startIdx ...int) (T, error) {
-	var n T
-	vi, err := k.ChildByTypeTry(n.KiType(), embeds, startIdx...)
-	v, _ := vi.(T)
-	return v, err
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
