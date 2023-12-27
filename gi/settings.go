@@ -34,6 +34,7 @@ import (
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
 	{"General", GeneralSettings},
 	{"Devices", DeviceSettings},
+	{"Debugging", DebugSettings},
 })
 
 // Settings is the interface that describes the functionality common to all settings data types.
@@ -351,23 +352,6 @@ func (pf *GeneralSettingsData) EditHiStyles() { //gti:add
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
-// EditDetailed opens the PrefsDetView editor to edit detailed
-// params that are not typically user-modified, but can be if you
-// really care. Turns on the SaveDetailed flag so these will be
-// saved and loaded automatically; you can toggle that back off
-// if you don't actually want to.
-func (pf *GeneralSettingsData) EditDetailed() { //gti:add
-	pf.Changed = true
-	TheViewIFace.PrefsDetView(&PrefsDet)
-}
-
-// EditDebug opens the PrefsDbgView editor to control debugging
-// parameters. These are not saved; they are only set dynamically
-// during running.
-func (pf *GeneralSettingsData) EditDebug() { //gti:add
-	TheViewIFace.PrefsDbgView(&PrefsDbg)
-}
-
 // UpdateUser gets the user info from the OS
 func (pf *GeneralSettingsData) UpdateUser() {
 	usr, err := user.Current()
@@ -474,7 +458,7 @@ type DeviceSettingsData struct {
 	LongPressTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
 
 	// The maximum number of pixels that mouse/finger can move and still register a long press event
-	LongPressStopDist int `def:"50" min:"0" max:"1000" step:"1"`
+	LongPressStopDistance int `def:"50" min:"0" max:"1000" step:"1"`
 }
 
 func (ds *DeviceSettingsData) Defaults() {
@@ -491,7 +475,7 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.LongHoverTime = LongHoverTime
 	ds.LongHoverStopDistance = LongHoverStopDistance
 	ds.LongPressTime = LongPressTime
-	ds.LongPressStopDist = LongPressStopDistance
+	ds.LongPressStopDistance = LongPressStopDistance
 }
 
 func (ds *DeviceSettingsData) Apply() {
@@ -512,7 +496,7 @@ func (ds *DeviceSettingsData) Apply() {
 	LongHoverTime = ds.LongHoverTime
 	LongHoverStopDistance = ds.LongHoverStopDistance
 	LongPressTime = ds.LongPressTime
-	LongPressStopDistance = ds.LongPressStopDist
+	LongPressStopDistance = ds.LongPressStopDistance
 }
 
 //////////////////////////////////////////////////////////////////
@@ -857,8 +841,9 @@ func (pf *PrefsDetailed) Apply() { //gti:add
 // viewif struct tag directives in the giv.StructView.
 var StructViewIfDebug = false
 
-// PrefsDebug are debugging params
-type PrefsDebug struct { //gti:add
+// DebugSettingsData is the data type for debugging settings.
+type DebugSettingsData struct { //gti:add
+	SettingsBase
 
 	// reports trace of updates that trigger re-rendering (printfs to stdout)
 	UpdateTrace *bool
@@ -900,11 +885,15 @@ type PrefsDebug struct { //gti:add
 	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
-// PrefsDbg are the overall debugging preferences
-var PrefsDbg = PrefsDebug{}
+// DebugSettings are the currently active debugging settings
+var DebugSettings = &DebugSettingsData{
+	SettingsBase: SettingsBase{
+		File: filepath.Join("goki", "debug-settings.toml"),
+	},
+}
 
 // Connect connects debug fields with actual variables controlling debugging
-func (pf *PrefsDebug) Connect() {
+func (pf *DebugSettingsData) Connect() {
 	pf.UpdateTrace = &UpdateTrace
 	pf.RenderTrace = &RenderTrace
 	pf.LayoutTrace = &LayoutTrace
@@ -920,6 +909,6 @@ func (pf *PrefsDebug) Connect() {
 
 // Profile toggles profiling of program on or off, which does both
 // targeted and global CPU and Memory profiling.
-func (pf *PrefsDebug) Profile() { //gti:add
+func (pf *DebugSettingsData) Profile() { //gti:add
 	ProfileToggle()
 }

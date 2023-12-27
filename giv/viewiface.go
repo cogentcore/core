@@ -73,6 +73,6 @@ func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 	SliceInlineLen = pf.SliceInlineLen
 }
 
-func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
+func (vi *ViewIFace) PrefsDbgView(prefs *gi.DebugSettingsData) {
 	PrefsDbgView(prefs)
 }

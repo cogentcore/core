@@ -89,7 +89,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 }
 
 // PrefsDbgView opens a view of user debugging preferences
-func PrefsDbgView(pf *gi.PrefsDebug) {
+func PrefsDbgView(pf *gi.DebugSettingsData) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}

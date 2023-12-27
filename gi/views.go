@@ -47,7 +47,7 @@ type ViewIFace interface {
 	PrefsDetApply(prefs *PrefsDetailed)
 
 	// PrefsDbgView opens an interactive view of given debugging preferences object
-	PrefsDbgView(prefs *PrefsDebug)
+	PrefsDbgView(prefs *DebugSettingsData)
 }
 
 // TheViewIFace is the implementation of the interface, defined in giv package
