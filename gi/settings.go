@@ -473,6 +473,12 @@ func (ds *DeviceSettingsData) Defaults() {
 
 	ds.DoubleClickInterval = events.DoubleClickInterval
 	ds.ScrollWheelSpeed = events.ScrollWheelSpeed
+	ds.SlideStartTime = 50 * time.Millisecond
+	ds.SlideStartDistance = 4
+	ds.LongHoverTime = 500 * time.Millisecond
+	ds.LongHoverStopDistance = 5
+	ds.LongPressTime = 500 * time.Millisecond
+	ds.LongPressStopDistance = 50
 }
 
 func (ds *DeviceSettingsData) Apply() {
