@@ -7,6 +7,7 @@ package gi
 import (
 	"errors"
 	"image/color"
+	"io/fs"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -91,14 +92,17 @@ func ResetSettings(se Settings) error {
 }
 
 // LoadSettings sets the defaults of, opens, and applies the given settings.
+// If they are not already saved, it saves them.
 func LoadSettings(se Settings) error {
 	se.Defaults()
 	err := OpenSettings(se)
-	if err != nil {
-		return err
-	}
+	// we always apply the settings even if we can't open them
+	// to apply at least the default values
 	se.Apply()
-	return nil
+	if errors.Is(err, fs.ErrNotExist) {
+		return SaveSettings(se)
+	}
+	return err
 }
 
 // LoadAllSettings sets the defaults of, opens, and applies [AllSettings].
