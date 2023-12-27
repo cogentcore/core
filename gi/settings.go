@@ -262,8 +262,6 @@ func (pf *GeneralSettingsData) Apply() { //gti:add
 	if TheViewIFace != nil {
 		TheViewIFace.SetHiStyleDefault(pf.HiStyle)
 	}
-	events.DoubleClickInterval = pf.Params.DoubleClickInterval
-	events.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
 
 	if pf.FontPaths != nil {
@@ -442,11 +440,22 @@ type DeviceSettingsData struct {
 	// If you do not want to have custom key maps, you should leave
 	// this unset so that you always have the latest standard key maps.
 	KeyMaps option.Option[keyfun.Maps]
+
+	// The maximum time interval between button press events to count as a double-click
+	DoubleClickInterval time.Duration `min:"100" step:"50"`
+
+	// How fast the scroll wheel moves, which is typically pixels per wheel step
+	// but units can be arbitrary. It is generally impossible to standardize speed
+	// and variable across devices, and we don't have access to the system settings,
+	// so unfortunately you have to set it here.
+	ScrollWheelSpeed float32 `min:"0.01" step:"1"`
 }
 
 func (ds *DeviceSettingsData) Defaults() {
 	ds.KeyMap = keyfun.DefaultMap
 	ds.KeyMaps.Value = keyfun.AvailMaps
+	ds.DoubleClickInterval = 500 * time.Millisecond
+	ds.ScrollWheelSpeed = 20
 }
 
 func (ds *DeviceSettingsData) Apply() {
@@ -456,6 +465,8 @@ func (ds *DeviceSettingsData) Apply() {
 	if ds.KeyMap != "" {
 		keyfun.SetActiveMapName(ds.KeyMap)
 	}
+	events.DoubleClickInterval = ds.DoubleClickInterval
+	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 }
 
 //////////////////////////////////////////////////////////////////
@@ -472,12 +483,6 @@ type ScreenPrefs struct { //gti:add
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct { //gti:add
-
-	// the maximum time interval in msec between button press events to count as a double-click
-	DoubleClickInterval time.Duration `min:"100" step:"50"`
-
-	// how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
-	ScrollWheelSpeed float32 `min:"0.01" step:"1"`
 
 	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
 	LocalMainMenu bool
@@ -499,8 +504,6 @@ type ParamPrefs struct { //gti:add
 }
 
 func (pf *ParamPrefs) Defaults() {
-	pf.DoubleClickInterval = 500 * time.Millisecond
-	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
 	pf.OnlyCloseActiveTab = false
 	pf.ZebraStripeWeight = 0
