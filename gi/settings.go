@@ -456,25 +456,25 @@ type DeviceSettingsData struct {
 
 	// The number of pixels that must be moved before initiating a regular
 	// slide event (as opposed to a basic press event)
-	SlideStartDist int `label:"Slide start distance" def:"4" min:"0" max:"100" step:"1"`
+	SlideStartDistance int `def:"4" min:"0" max:"100" step:"1"`
 
 	// The amount of time to wait before initiating a drag-n-drop event
 	DragStartTime time.Duration `def:"200" min:"5" max:"1000" step:"5"`
 
 	// The number of pixels that must be moved before initiating a drag-n-drop event
-	DragStartDist int `label:"Drag start distance" def:"20" min:"0" max:"100" step:"1"`
+	DragStartDistance int `def:"20" min:"0" max:"100" step:"1"`
 
 	// The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)
 	LongHoverTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
 
 	// The maximum number of pixels that mouse can move and still register a long hover event
-	LongHoverStopDist int `label:"Long hover stop distance" def:"50" min:"0" max:"1000" step:"1"`
+	LongHoverStopDistance int `def:"50" min:"0" max:"1000" step:"1"`
 
 	// The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)
 	LongPressTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
 
 	// The maximum number of pixels that mouse/finger can move and still register a long press event
-	LongPressStopDist int `label:"Long press stop distance" def:"50" min:"0" max:"1000" step:"1"`
+	LongPressStopDist int `def:"50" min:"0" max:"1000" step:"1"`
 }
 
 func (ds *DeviceSettingsData) Defaults() {
@@ -485,13 +485,13 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.ScrollWheelSpeed = 20
 
 	ds.DragStartTime = DragStartTime
-	ds.DragStartDist = DragStartDist
+	ds.DragStartDistance = DragStartDistance
 	ds.SlideStartTime = SlideStartTime
-	ds.SlideStartDist = SlideStartDist
+	ds.SlideStartDistance = SlideStartDistance
 	ds.LongHoverTime = LongHoverTime
-	ds.LongHoverStopDist = LongHoverStopDist
+	ds.LongHoverStopDistance = LongHoverStopDistance
 	ds.LongPressTime = LongPressTime
-	ds.LongPressStopDist = LongPressStopDist
+	ds.LongPressStopDist = LongPressStopDistance
 }
 
 func (ds *DeviceSettingsData) Apply() {
@@ -506,13 +506,13 @@ func (ds *DeviceSettingsData) Apply() {
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 
 	DragStartTime = ds.DragStartTime
-	DragStartDist = ds.DragStartDist
+	DragStartDistance = ds.DragStartDistance
 	SlideStartTime = ds.SlideStartTime
-	SlideStartDist = ds.SlideStartDist
+	SlideStartDistance = ds.SlideStartDistance
 	LongHoverTime = ds.LongHoverTime
-	LongHoverStopDist = ds.LongHoverStopDist
+	LongHoverStopDistance = ds.LongHoverStopDistance
 	LongPressTime = ds.LongPressTime
-	LongPressStopDist = ds.LongPressStopDist
+	LongPressStopDistance = ds.LongPressStopDist
 }
 
 //////////////////////////////////////////////////////////////////

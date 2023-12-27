@@ -32,28 +32,28 @@ var (
 	// DragStartTime is the time to wait before DragStart
 	DragStartTime = 200 * time.Millisecond
 
-	// DragStartDist is pixel distance that must be moved before DragStart
-	DragStartDist = 20
+	// DragStartDistance is pixel distance that must be moved before DragStart
+	DragStartDistance = 20
 
 	// SlideStartTime is the time to wait before SlideStart
 	SlideStartTime = 50 * time.Millisecond
 
-	// SlideStartDist is pixel distance that must be moved before SlideStart
-	SlideStartDist = 4
+	// SlideStartDistance is pixel distance that must be moved before SlideStart
+	SlideStartDistance = 4
 
 	// LongHoverTime is the time to wait before LongHoverStart event
 	LongHoverTime = 500 * time.Millisecond
 
-	// LongHoverStopDist is the pixel distance beyond which the LongHoverEnd
+	// LongHoverStopDistance is the pixel distance beyond which the LongHoverEnd
 	// event is sent
-	LongHoverStopDist = 5
+	LongHoverStopDistance = 5
 
 	// LongPressTime is the time to wait before sending a LongPress event
 	LongPressTime = 500 * time.Millisecond
 
-	// LongPressStopDist is the pixel distance beyond which the LongPressEnd
+	// LongPressStopDistance is the pixel distance beyond which the LongPressEnd
 	// event is sent
-	LongPressStopDist = 50
+	LongPressStopDistance = 50
 )
 
 const (
@@ -353,12 +353,12 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Drag.Send(events.DragMove, e) // usually ignored
 		case em.Slide != nil:
 		case em.Press != nil && em.Press.AbilityIs(abilities.Slideable):
-			if em.DragStartCheck(e, SlideStartTime, SlideStartDist) {
+			if em.DragStartCheck(e, SlideStartTime, SlideStartDistance) {
 				em.Slide = em.Press
 				em.Slide.Send(events.SlideStart, e)
 			}
 		case em.Press != nil && em.Press.AbilityIs(abilities.Draggable):
-			if em.DragStartCheck(e, DragStartTime, DragStartDist) {
+			if em.DragStartCheck(e, DragStartTime, DragStartDistance) {
 				em.Drag = em.Press
 				em.Drag.Send(events.DragStart, e)
 			}
@@ -480,12 +480,12 @@ func (em *EventMgr) TopLongHover() Widget {
 
 // HandleLongHover handles long hover events
 func (em *EventMgr) HandleLongHover(e events.Event) {
-	em.HandleLong(e, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
+	em.HandleLong(e, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDistance)
 }
 
 // HandleLongPress handles long press events
 func (em *EventMgr) HandleLongPress(e events.Event) {
-	em.HandleLong(e, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
+	em.HandleLong(e, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDistance)
 }
 
 // HandleLong is the implementation of [EventMgr.HandleLongHover] and
