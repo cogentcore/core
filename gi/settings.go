@@ -833,44 +833,46 @@ var StructViewIfDebug = false
 type DebugSettingsData struct { //gti:add
 	SettingsBase
 
-	// reports trace of updates that trigger re-rendering (printfs to stdout)
-	UpdateTrace *bool
+	// Print a trace of updates that trigger re-rendering
+	UpdateTrace bool
 
-	// reports trace of the nodes rendering (printfs to stdout)
-	RenderTrace *bool
+	// Print a trace of the nodes rendering
+	RenderTrace bool
 
-	// reports trace of all layouts (printfs to stdout)
-	LayoutTrace *bool
+	// Print a trace of all layouts
+	LayoutTrace bool
 
-	// reports trace of window events (printfs to stdout)
-	WinEventTrace *bool
+	// Print a trace of window events
+	WinEventTrace bool
 
-	// reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent
-	WinRenderTrace *bool
+	// Print the stack trace leading up to win publish events
+	// which are expensive; wrap multiple updates in
+	// UpdateStart / End to prevent
+	WinRenderTrace bool
 
-	// WinGeomTrace records window geometry saving / loading functions
-	WinGeomTrace *bool
+	// Print a trace of window geometry saving / loading functions
+	WinGeomTrace bool
 
-	// reports trace of keyboard events (printfs to stdout)
-	KeyEventTrace *bool
+	// Print a trace of keyboard events
+	KeyEventTrace bool
 
-	// reports trace of event handling (printfs to stdout)
-	EventTrace *bool
+	// Print a trace of event handling
+	EventTrace bool
 
-	// reports trace of DND events handling
-	DNDTrace *bool
+	// Print a trace of focus changes
+	FocusTrace bool
 
-	// reports trace of Go language completion & lookup process
-	GoCompleteTrace *bool
+	// Print a trace of DND event handling
+	DNDTrace bool
 
-	// reports trace of Go language type parsing and inference process
-	GoTypeTrace *bool
+	// Print a trace of Go language completion and lookup process
+	GoCompleteTrace bool
 
-	// reports errors for viewif directives in struct field tags, for giv.StructView
-	StructViewIfDebug *bool
+	// Print a trace of Go language type parsing and inference process
+	GoTypeTrace bool
 
-	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
+	// Print errors for viewif directives in struct field tags for giv.StructView
+	StructViewIfDebug bool
 }
 
 // DebugSettings are the currently active debugging settings
@@ -880,19 +882,14 @@ var DebugSettings = &DebugSettingsData{
 	},
 }
 
-// Connect connects debug fields with actual variables controlling debugging
-func (pf *DebugSettingsData) Connect() {
-	pf.UpdateTrace = &UpdateTrace
-	pf.RenderTrace = &RenderTrace
-	pf.LayoutTrace = &LayoutTrace
-	pf.WinEventTrace = &WinEventTrace
-	pf.WinRenderTrace = &WinRenderTrace
-	pf.WinGeomTrace = &WinGeomTrace
-	pf.KeyEventTrace = &KeyEventTrace
-	pf.EventTrace = &EventTrace
-	pf.GoCompleteTrace = &golang.CompleteTrace
-	pf.GoTypeTrace = &golang.TraceTypes
-	pf.StructViewIfDebug = &StructViewIfDebug
+func (db *DebugSettingsData) Defaults() {
+	db.GoCompleteTrace = golang.CompleteTrace
+	db.GoTypeTrace = golang.TraceTypes
+}
+
+func (db *DebugSettingsData) Apply() {
+	golang.CompleteTrace = db.GoCompleteTrace
+	golang.TraceTypes = db.GoTypeTrace
 }
 
 // Profile toggles profiling of program on or off, which does both

@@ -671,7 +671,7 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 
 func (ch *Chooser) HandleKeys() {
 	ch.OnKeyChord(func(e events.Event) {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())
