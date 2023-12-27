@@ -383,7 +383,7 @@ func (lb *Label) SizeUpWrapSize() mat32.Vec2 {
 		h = max(h, csz.Y)
 	}
 	sz := mat32.V2(w, h)
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(lb, "SizeUpWrapSize chars:", chars, "area:", area, "sz:", sz)
 	}
 	return sz
@@ -400,7 +400,7 @@ func (lb *Label) SizeUp() {
 	rsz := lb.TextRender.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(lb, "Label SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }
@@ -418,7 +418,7 @@ func (lb *Label) SizeDown(iter int) bool {
 	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(lb, "Label Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}

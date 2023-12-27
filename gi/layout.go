@@ -308,7 +308,7 @@ func (ly *Layout) HandleKeys() {
 		if ly.Is(LayoutNoKeys) {
 			return
 		}
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Println("Layout KeyInput:", ly)
 		}
 		kf := keyfun.Of(e.KeyChord())
@@ -398,7 +398,7 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	if len(ly.PriorityEvents) > 0 { // don't do for priority
 		return false
 	}
-	if KeyEventTrace {
+	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
 	}
 	kf := keyfun.Of(e.KeyChord())

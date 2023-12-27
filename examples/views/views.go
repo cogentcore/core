@@ -132,11 +132,11 @@ func app() {
 
 	// turn this on to see a trace of the rendering
 	// gi.WinEventTrace = true
-	// gi.RenderTrace = true
-	// gi.LayoutTrace = true
-	// gi.WinRenderTrace = true
-	// gi.UpdateTrace = true
-	// gi.KeyEventTrace = true
+	// gi.DebugSettings.RenderTrace = true
+	// gi.DebugSettings.LayoutTrace = true
+	// gi.DebugSettings.WinRenderTrace = true
+	// gi.DebugSettings.UpdateTrace = true
+	// gi.DebugSettings.KeyEventTrace = true
 
 	b := gi.NewAppBody("views").SetTitle("GoGi Views Test")
 

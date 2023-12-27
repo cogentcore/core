@@ -26,7 +26,7 @@ gimain.Run(app)
 	width := 1024
 	height := 768
 
-	// gi.LayoutTrace = true
+	// gi.DebugSettings.LayoutTrace = true
 
 	goosi.TheApp.SetName("text")
 	goosi.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`)

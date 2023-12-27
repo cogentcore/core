@@ -888,13 +888,13 @@ func (rs *RenderScenes) Add(sc *Scene, scIdx map[*Scene]int) int {
 // SetImages calls drw.SetGoImage on all updated Scene images
 func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 	if len(rs.Scenes) == 0 {
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScene.SetImages: no scenes")
 		}
 	}
 	for i, sc := range rs.Scenes {
 		if sc.Is(ScUpdating) || !sc.Is(ScImageUpdated) {
-			if WinRenderTrace {
+			if DebugSettings.WinRenderTrace {
 				if sc.Is(ScUpdating) {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
 				}
@@ -904,7 +904,7 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 			}
 			continue
 		}
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScenes.SetImages:", sc.Name(), sc.Pixels.Bounds())
 		}
 		drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
@@ -959,7 +959,7 @@ func (w *RenderWin) RenderWindow() {
 		return
 	}
 
-	if WinRenderTrace {
+	if DebugSettings.WinRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.Name)
 		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
@@ -976,7 +976,7 @@ func (w *RenderWin) RenderWindow() {
 // DrawScenes does the drawing of RenderScenes to the window.
 func (w *RenderWin) DrawScenes() {
 	if !w.IsVisible() || w.GoosiWin.Is(goosi.Minimized) {
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.Name)
 		}
 		return
@@ -985,7 +985,7 @@ func (w *RenderWin) DrawScenes() {
 	// 	return
 	// }
 	if !w.GoosiWin.Lock() {
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: window was closed: %v\n", w.Name)
 		}
 		return
@@ -1037,7 +1037,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
 		if st.Type == WindowStage {
-			if WinRenderTrace {
+			if DebugSettings.WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			rs.Add(st.Scene, scIdx)
@@ -1050,7 +1050,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValByIdx(i)
 		rs.Add(st.Scene, scIdx)
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
 	}
@@ -1062,7 +1062,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for _, kv := range top.PopupMgr.Stack.Order {
 		st := kv.Val
 		rs.Add(st.Scene, scIdx)
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}

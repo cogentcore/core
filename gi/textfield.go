@@ -1502,7 +1502,7 @@ func (tf *TextField) HandleMouse() {
 
 func (tf *TextField) HandleKeys() {
 	tf.OnKeyChord(func(e events.Event) {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())

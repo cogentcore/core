@@ -245,7 +245,7 @@ func (sp *Spinner) HandleKeys() {
 		if sp.IsReadOnly() {
 			return
 		}
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Printf("Spinner KeyChordEvent: %v\n", sp.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())

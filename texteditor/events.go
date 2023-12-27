@@ -88,7 +88,7 @@ func (ed *Editor) ShiftSelectExtend(kt events.Event) {
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (ed *Editor) KeyInput(kt events.Event) {
-	if gi.KeyEventTrace {
+	if gi.DebugSettings.KeyEventTrace {
 		fmt.Printf("View KeyInput: %v\n", ed.Path())
 	}
 	kf := keyfun.Of(kt.KeyChord())

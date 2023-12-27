@@ -8,12 +8,12 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	// gi.RenderTrace = true
+	// gi.DebugSettings.RenderTrace = true
 	// gi.WinEventTrace = true
 	// gi.EventTrace = true
-	// gi.LayoutTrace = true
-	// gi.LayoutTraceDetail = true
-	// gi.RenderTrace = true
+	// gi.DebugSettings.LayoutTrace = true
+	// gi.DebugSettings.LayoutTraceDetail = true
+	// gi.DebugSettings.RenderTrace = true
 
 	b := gi.NewAppBody("basic")
 	b.App().AppBarConfig = nil

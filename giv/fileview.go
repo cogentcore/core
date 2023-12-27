@@ -800,7 +800,7 @@ func (fv *FileView) HandleEvents() {
 }
 
 func (fv *FileView) KeyInput(kt events.Event) {
-	if gi.KeyEventTrace {
+	if gi.DebugSettings.KeyEventTrace {
 		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
 	}
 	kf := keyfun.Of(kt.KeyChord())

@@ -439,7 +439,7 @@ func (sr *Slider) HandleMouse() {
 
 func (sr *Slider) HandleKeys() {
 	sr.OnKeyChord(func(e events.Event) {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Printf("SliderBase KeyInput: %v\n", sr.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())

@@ -672,7 +672,7 @@ func (wb *WidgetBase) SizeFromStyle() {
 	sz.Internal.SetZero()
 	sz.SetInitContentMin(sz.Min)
 	sz.SetTotalFromContent(&sz.Actual)
-	if LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
+	if DebugSettings.LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
 		fmt.Println(wb, "SizeUp from Style:", sz.Actual.Content.String())
 	}
 }
@@ -785,7 +785,7 @@ func (ly *Layout) LaySetInitCellsFlex() {
 		return ki.Continue
 	})
 	if idx == 0 {
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(ly, "no items:", idx)
 		}
 	}
@@ -806,7 +806,7 @@ func (ly *Layout) LaySetInitCellsWrap() {
 		li.Wraps = nil
 		li.GapSize.SetZero()
 		ly.Geom.Size.InnerSpace.SetZero()
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(ly, "no items:", ni)
 		}
 		return
@@ -902,7 +902,7 @@ func (ly *Layout) LaySetInitCellsGrid() {
 func (ly *Layout) SizeFromChildrenFit(iter int, pass LayoutPasses) {
 	ksz := ly.This().(Layouter).SizeFromChildren(iter, SizeDownPass)
 	ly.LaySetContentFitOverflow(ksz, pass)
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		sz := &ly.Geom.Size
 		fmt.Println(ly, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
 	}
@@ -939,7 +939,7 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 		if pass <= SizeDownPass && iter == 0 && kwb.Styles.GrowWrap {
 			grw.Set(1, 0)
 		}
-		if LayoutTraceDetail {
+		if DebugSettings.LayoutTraceDetail {
 			fmt.Println("SzUp i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		}
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
@@ -969,7 +969,7 @@ func (ly *Layout) SizeFromChildrenCells(iter int, pass LayoutPasses) mat32.Vec2 
 		}
 		return ki.Continue
 	})
-	if LayoutTraceDetail {
+	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "SizeFromChildren")
 		fmt.Println(li.String())
 	}
@@ -1028,7 +1028,7 @@ func (wb *WidgetBase) SizeDownParts(iter int) bool {
 	psz.Alloc.Total = pgrow // parts = content
 	psz.SetContentFromTotal(&psz.Alloc)
 	redo := wb.Parts.SizeDown(iter)
-	if redo && LayoutTrace {
+	if redo && DebugSettings.LayoutTrace {
 		fmt.Println(wb, "Parts triggered redo")
 	}
 	return redo
@@ -1042,7 +1042,7 @@ func (wb *WidgetBase) SizeDownChildren(iter int) bool {
 	redo := false
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		re := kwi.SizeDown(iter)
-		if re && LayoutTrace {
+		if re && DebugSettings.LayoutTrace {
 			fmt.Println(wb, "SizeDownChildren child:", kwb.Nm, "triggered redo")
 		}
 		redo = redo || re
@@ -1098,7 +1098,7 @@ func (wb *WidgetBase) GrowToAllocSize(act, alloc mat32.Vec2) (mat32.Vec2, bool) 
 
 func (ly *Layout) SizeDown(iter int) bool {
 	redo := ly.SizeDownLay(iter)
-	if redo && LayoutTrace {
+	if redo && DebugSettings.LayoutTrace {
 		fmt.Println(ly, "SizeDown redo")
 	}
 	return redo
@@ -1114,7 +1114,7 @@ func (ly *Layout) SizeDownLay(iter int) bool {
 	sz := &ly.Geom.Size
 	styles.SetClampMaxVec(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
 	chg := ly.This().(Layouter).ManageOverflow(iter, true) // this must go first.
@@ -1142,7 +1142,7 @@ func (ly *Layout) SizeDownSetAllocs(iter int) {
 	sz := &ly.Geom.Size
 	extra := sz.Alloc.Content.Sub(sz.Internal) // note: critical to use internal to be accurate
 	if extra.X > 0 || extra.Y > 0 {
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(ly, "SizeDown extra:", extra, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
 		}
 		ly.SizeDownGrow(iter, extra)
@@ -1183,7 +1183,7 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 		case styles.OverflowAuto:
 			if ofd <= 1 {
 				if ly.HasScroll[d] {
-					if LayoutTrace {
+					if DebugSettings.LayoutTrace {
 						fmt.Println(ly, "turned off scroll", d)
 					}
 					change = true
@@ -1197,7 +1197,7 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 			}
 			ly.HasScroll[d] = true
 			ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
-			if change && LayoutTrace {
+			if change && DebugSettings.LayoutTrace {
 				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd, "alloc:", sz.Alloc.Content.Dim(d), "internal:", sz.Internal.Dim(d))
 			}
 		}
@@ -1207,7 +1207,7 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 		sz.SetTotalFromContent(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
 	}
-	if change && LayoutTrace {
+	if change && DebugSettings.LayoutTrace {
 		fmt.Println(ly, "ManageOverflow changed")
 	}
 	return change
@@ -1240,7 +1240,7 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 		if iter == 0 && kwb.Styles.GrowWrap {
 			grw.Set(1, 0)
 		}
-		// if LayoutTrace {
+		// if DebugSettings.LayoutTrace {
 		// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
 		// }
 		for ma := mat32.X; ma <= mat32.Y; ma++ { // main axis = X then Y
@@ -1274,7 +1274,7 @@ func (ly *Layout) SizeDownGrowCells(iter int, extra mat32.Vec2) bool {
 					fmt.Println(ly.LayImpl.CellsSize())
 				}
 			}
-			if LayoutTraceDetail {
+			if DebugSettings.LayoutTraceDetail {
 				fmt.Println(kwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)
@@ -1293,7 +1293,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 	alloc := sz.Alloc.Content
 	gap := li.Gap.Dim(d)
 	fit := alloc.Dim(d)
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(ly, "SizeDownWrap fitting into:", d, fit)
 	}
 	first := true
@@ -1309,7 +1309,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 			return ki.Continue
 		}
 		if sum+ksz.Dim(d)+gap >= fit {
-			if LayoutTraceDetail {
+			if DebugSettings.LayoutTraceDetail {
 				fmt.Println(ly, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}
 			wraps = append(wraps, n)
@@ -1338,7 +1338,7 @@ func (ly *Layout) SizeDownWrap(iter int) bool {
 	if !wrapped {
 		return false
 	}
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(ly, "wrapped:", wraps)
 	}
 	li.Wraps = wraps
@@ -1480,7 +1480,7 @@ func (wb *WidgetBase) GrowToAlloc() bool {
 	sz := &wb.Geom.Size
 	act, change := wb.GrowToAllocSize(sz.Actual.Total, sz.Alloc.Total)
 	if change {
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "GrowToAlloc:", sz.Alloc.Total, "from actual:", sz.Actual.Total)
 		}
 		sz.Actual.Total = act // already has max constraint
@@ -1576,7 +1576,7 @@ func (wb *WidgetBase) PositionWithinAllocMainX(pos mat32.Vec2, parJustify, parAl
 	pos.X += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
 	pos.Y += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
 	wb.Geom.RelPos = pos
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "Position within Main=X:", pos)
 	}
 }
@@ -1586,7 +1586,7 @@ func (wb *WidgetBase) PositionWithinAllocMainY(pos mat32.Vec2, parJustify, parAl
 	pos.Y += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
 	pos.X += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
 	wb.Geom.RelPos = pos
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "Position within Main=Y:", pos)
 	}
 }
@@ -1599,7 +1599,7 @@ func (wb *WidgetBase) PositionParts() {
 	pgm := &wb.Parts.Geom
 	pgm.RelPos.X = styles.AlignPos(wb.Parts.Styles.Justify.Content, pgm.Size.Actual.Total.X, sz.Actual.Content.X)
 	pgm.RelPos.Y = styles.AlignPos(wb.Parts.Styles.Align.Content, pgm.Size.Actual.Total.Y, sz.Actual.Content.Y)
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(wb.Parts, "parts align pos:", pgm.RelPos)
 	}
 	wb.Parts.This().(Widget).Position()
@@ -1649,7 +1649,7 @@ func (ly *Layout) PositionCellsMainX() {
 	// todo: can break apart further into Flex rows
 	gap := ly.LayImpl.Gap
 	sz := &ly.Geom.Size
-	if LayoutTraceDetail {
+	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
 	var stPos mat32.Vec2
@@ -1677,7 +1677,7 @@ func (ly *Layout) PositionCellsMainX() {
 func (ly *Layout) PositionCellsMainY() {
 	gap := ly.LayImpl.Gap
 	sz := &ly.Geom.Size
-	if LayoutTraceDetail {
+	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
 	}
 	var lastSz mat32.Vec2
@@ -1745,7 +1745,7 @@ func (wb *WidgetBase) SetPosFromParent() {
 	}
 	wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
 	wb.SetContentPosFromPos()
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Geom.Pos.Total, "parPos:", parPos)
 	}
 }
@@ -1766,7 +1766,7 @@ func (wb *WidgetBase) SetBBoxes() {
 		wb.Geom.TotalBBox = mat32.RectFromPosSizeMax(mat32.Vec2{}, sz.Alloc.Total)
 		off := wb.Styles.BoxSpace().Pos().Floor()
 		wb.Geom.ContentBBox = mat32.RectFromPosSizeMax(off, sz.Alloc.Content)
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Total BBox:", wb.Geom.TotalBBox)
 			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)
 		}
@@ -1774,13 +1774,13 @@ func (wb *WidgetBase) SetBBoxes() {
 		parBB = pwb.Geom.ContentBBox
 		bb := wb.Geom.TotalRect()
 		wb.Geom.TotalBBox = parBB.Intersect(bb)
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Geom.TotalBBox)
 		}
 
 		cbb := wb.Geom.ContentRect()
 		wb.Geom.ContentBBox = parBB.Intersect(cbb)
-		if LayoutTrace {
+		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Content BBox:", cbb, "parBB:", parBB, "BBox:", wb.Geom.ContentBBox)
 		}
 	}

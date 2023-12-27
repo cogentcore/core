@@ -842,6 +842,9 @@ type DebugSettingsData struct { //gti:add
 	// Print a trace of all layouts
 	LayoutTrace bool
 
+	// Print more detailed info about the underlying layout computations
+	LayoutTraceDetail bool
+
 	// Print a trace of window events
 	WinEventTrace bool
 

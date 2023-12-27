@@ -158,7 +158,7 @@ func Of(chord key.Chord) Funs {
 	kf := Nil
 	if chord != "" {
 		kf = (*ActiveMap)[chord]
-		// if KeyEventTrace {
+		// if DebugSettings.KeyEventTrace {
 		// 	fmt.Printf("keyfun.KeyFun chord: %v = %v\n", chord, kf)
 		// }
 	}

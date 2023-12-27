@@ -20,7 +20,7 @@ var samplefile gi.FileName = "sample.go"
 func main() { gimain.Run(app) }
 
 func app() {
-	// gi.LayoutTrace = true
+	// gi.DebugSettings.LayoutTrace = true
 	// gi.EventTrace = true
 
 	b := gi.NewAppBody("texteditor").SetTitle("GoGi texteditor.Editor Test")
