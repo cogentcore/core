@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"errors"
 	"image/color"
 	"os"
 	"os/user"
@@ -102,13 +103,14 @@ func LoadSettings(se Settings) error {
 
 // LoadAllSettings sets the defaults of, opens, and applies [AllSettings].
 func LoadAllSettings() error {
+	errs := []error{}
 	for _, kv := range AllSettings.Order {
 		err := LoadSettings(kv.Val)
 		if err != nil {
-			return err
+			errs = append(errs, err)
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 // Init performs the overall initialization of the Goki system by loading
