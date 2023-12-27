@@ -449,13 +449,41 @@ type DeviceSettingsData struct {
 	// and variable across devices, and we don't have access to the system settings,
 	// so unfortunately you have to set it here.
 	ScrollWheelSpeed float32 `min:"0.01" step:"1"`
+
+	// The amount of time to wait before initiating a regular mouse slide event
+	// (as opposed to a basic press event)
+	SlideStartTime time.Duration `def:"50" min:"5" max:"1000" step:"5"`
+
+	// The number of pixels that must be moved before initiating a regular mouse
+	// slide event (as opposed to a basic press event)
+	SlideStartDist int `def:"4" min:"0" max:"100" step:"1"`
+
+	// The amount of time to wait before initiating a drag-n-drop event
+	DragStartTime time.Duration `def:"200" min:"5" max:"1000" step:"5"`
+
+	// The number of pixels that must be moved before initiating a drag-n-drop event
+	DragStartDist int `def:"20" min:"0" max:"100" step:"1"`
+
+	// The number of milliseconds to wait before initiating a long hover event (e.g., for opening a tooltip)
+	LongHoverTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
+
+	// The maximum number of pixels that mouse can move and still register a long hover event
+	LongHoverStopDist int `def:"50" min:"0" max:"1000" step:"1"`
 }
 
 func (ds *DeviceSettingsData) Defaults() {
 	ds.KeyMap = keyfun.DefaultMap
 	ds.KeyMaps.Value = keyfun.AvailMaps
+
 	ds.DoubleClickInterval = 500 * time.Millisecond
 	ds.ScrollWheelSpeed = 20
+
+	ds.DragStartTime = DragStartTime
+	ds.DragStartDist = DragStartDist
+	ds.SlideStartTime = SlideStartTime
+	ds.SlideStartDist = SlideStartDist
+	ds.LongHoverTime = LongHoverTime
+	ds.LongHoverStopDist = LongHoverStopDist
 }
 
 func (ds *DeviceSettingsData) Apply() {
@@ -465,8 +493,16 @@ func (ds *DeviceSettingsData) Apply() {
 	if ds.KeyMap != "" {
 		keyfun.SetActiveMapName(ds.KeyMap)
 	}
+
 	events.DoubleClickInterval = ds.DoubleClickInterval
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
+
+	DragStartTime = ds.DragStartTime
+	DragStartDist = ds.DragStartDist
+	SlideStartTime = ds.SlideStartTime
+	SlideStartDist = ds.SlideStartDist
+	LongHoverTime = ds.LongHoverTime
+	LongHoverStopDist = ds.LongHoverStopDist
 }
 
 //////////////////////////////////////////////////////////////////
@@ -685,24 +721,6 @@ type PrefsDetailed struct { //gti:add
 	// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1"`
 
-	// the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)
-	DragStartTime time.Duration `def:"50" min:"5" max:"1000" step:"5"`
-
-	// the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)
-	DragStartDist int `def:"4" min:"0" max:"100" step:"1"`
-
-	// the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
-	SlideStartTime time.Duration `def:"200" min:"5" max:"1000" step:"5"`
-
-	// the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
-	SlideStartDist int `def:"20" min:"0" max:"100" step:"1"`
-
-	// the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
-	LongHoverTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
-
-	// the maximum number of pixels that mouse can move and still register a Hover event
-	LongHoverStopDist int `def:"50" min:"0" max:"1000" step:"1"`
-
 	// the amount of time to wait before offering completions
 	CompleteWaitDuration time.Duration `def:"0" min:"0" max:"10000" step:"10"`
 
@@ -783,12 +801,6 @@ func (pf *PrefsDetailed) Save() error { //gti:add
 // defaults
 func (pf *PrefsDetailed) Defaults() {
 	pf.MenuMaxHeight = MenuMaxHeight
-	pf.DragStartTime = DragStartTime
-	pf.DragStartDist = DragStartDist
-	pf.SlideStartTime = SlideStartTime
-	pf.SlideStartDist = SlideStartDist
-	pf.LongHoverTime = LongHoverTime
-	pf.LongHoverStopDist = LongHoverStopDist
 	pf.CompleteWaitDuration = CompleteWaitDuration
 	pf.CompleteMaxItems = CompleteMaxItems
 	pf.CursorBlinkTime = CursorBlinkTime
@@ -811,12 +823,6 @@ func (pf *PrefsDetailed) Defaults() {
 // Apply detailed preferences to all the relevant settings.
 func (pf *PrefsDetailed) Apply() { //gti:add
 	MenuMaxHeight = pf.MenuMaxHeight
-	DragStartTime = pf.DragStartTime
-	DragStartDist = pf.DragStartDist
-	SlideStartTime = pf.SlideStartTime
-	SlideStartDist = pf.SlideStartDist
-	LongHoverTime = pf.LongHoverTime
-	LongHoverStopDist = pf.LongHoverStopDist
 	CompleteWaitDuration = pf.CompleteWaitDuration
 	CompleteMaxItems = pf.CompleteMaxItems
 	CursorBlinkTime = pf.CursorBlinkTime
