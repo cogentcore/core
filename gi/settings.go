@@ -16,13 +16,13 @@ import (
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/paint"
+	"goki.dev/glop/option"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/jsons"
 	"goki.dev/grows/tomls"
 	"goki.dev/grr"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
 	"goki.dev/pi/v2/langs/golang"
 )
@@ -33,6 +33,7 @@ import (
 // app settings.
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
 	{"General", GeneralSettings},
+	{"Devices", DeviceSettings},
 })
 
 // Settings is the interface that describes the functionality common to all settings data types.
@@ -120,6 +121,9 @@ func Init() {
 	WinGeomMgr.Open()
 }
 
+// GeneralSettings are the currently active global Goki general settings.
+var GeneralSettings = &GeneralSettingsData{}
+
 // GeneralSettingsData is the data type for the general Goki settings.
 // The global current instance is stored as [GeneralSettings].
 type GeneralSettingsData struct { //gti:add
@@ -157,21 +161,6 @@ type GeneralSettingsData struct { //gti:add
 	// editor preferences -- for TextEditor etc
 	Editor EditorPrefs
 
-	// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
-	KeyMap keyfun.MapName
-
-	// if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords
-	SaveKeyMaps bool
-
-	// if set, the detailed preferences are saved and loaded at startup -- only
-	SaveDetailed bool
-
-	// a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive
-	CustomStyles ki.Props
-
-	// if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).
-	CustomStylesOverride bool
-
 	// default font family when otherwise not specified
 	FontFamily FontName
 
@@ -196,9 +185,6 @@ type GeneralSettingsData struct { //gti:add
 	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
-
-// GeneralSettings are the currently active global Goki general settings.
-var GeneralSettings = &GeneralSettingsData{}
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
 // with whatever the developer specifies, typically through [colors.SetSchemes].
@@ -228,7 +214,6 @@ func (pf *GeneralSettingsData) Defaults() {
 	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Roboto"
 	pf.MonoFont = "Roboto Mono"
-	pf.KeyMap = keyfun.DefaultMap
 	pf.UpdateUser()
 }
 
@@ -278,12 +263,6 @@ func (pf *GeneralSettingsData) Apply() { //gti:add
 	events.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
 
-	if pf.KeyMap != "" {
-		keyfun.SetActiveMapName(pf.KeyMap) // fills in missing pieces
-	}
-	if pf.SaveDetailed {
-		PrefsDet.Apply()
-	}
 	if pf.FontPaths != nil {
 		paths := append(pf.FontPaths, paint.FontPaths...)
 		paint.FontLibrary.InitFontPaths(paths...)
@@ -366,15 +345,6 @@ func (pf *GeneralSettingsData) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
-// EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /
-// load from other files, etc.  Current avail keymaps are saved and loaded
-// with preferences automatically.
-func (pf *GeneralSettingsData) EditKeyMaps() { //gti:add
-	pf.SaveKeyMaps = true
-	pf.Changed = true
-	TheViewIFace.KeyMapsView(&keyfun.AvailMaps)
-}
-
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
 func (pf *GeneralSettingsData) EditHiStyles() { //gti:add
 	TheViewIFace.HiStylesView(false) // false = custom
@@ -386,7 +356,6 @@ func (pf *GeneralSettingsData) EditHiStyles() { //gti:add
 // saved and loaded automatically; you can toggle that back off
 // if you don't actually want to.
 func (pf *GeneralSettingsData) EditDetailed() { //gti:add
-	pf.SaveDetailed = true
 	pf.Changed = true
 	TheViewIFace.PrefsDetView(&PrefsDet)
 }
@@ -450,6 +419,36 @@ func (pf *GeneralSettingsData) TimeFormat() string {
 		return "15:04"
 	}
 	return "3:04 PM"
+}
+
+// DeviceSettings are the global device settings.
+var DeviceSettings = &DeviceSettingsData{}
+
+// DeviceSettingsData is the data type for the device settings.
+type DeviceSettingsData struct {
+	SettingsBase
+
+	// The keyboard shortcut map to use
+	KeyMap keyfun.MapName
+
+	// The keyboard shortcut maps available as options for Key map.
+	// If you do not want to have custom key maps, you should leave
+	// this unset so that you always have the latest standard key maps.
+	KeyMaps option.Option[keyfun.Maps]
+}
+
+func (ds *DeviceSettingsData) Defaults() {
+	ds.KeyMap = keyfun.DefaultMap
+	ds.KeyMaps.Value = keyfun.AvailMaps
+}
+
+func (ds *DeviceSettingsData) Apply() {
+	if ds.KeyMaps.Valid {
+		keyfun.AvailMaps = ds.KeyMaps.Value
+	}
+	if ds.KeyMap != "" {
+		keyfun.SetActiveMapName(ds.KeyMap)
+	}
 }
 
 //////////////////////////////////////////////////////////////////
