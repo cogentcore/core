@@ -21,7 +21,7 @@ type Web struct { //gti:add
 	// but should not be enabled in release builds to prevent constant inaccurate
 	// update messages. It is enabled by default in the serve command and disabled
 	// by default otherwise.
-	RandomVersion bool
+	RandomVersion bool `def:"true"`
 
 	// Gzip is whether to gzip the app.wasm file that is built in the build command
 	// and serve it as a gzip-encoded file in the run command.
