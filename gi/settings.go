@@ -39,7 +39,7 @@ var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
 // Settings is the interface that describes the functionality common to all settings data types.
 type Settings interface {
 
-	// Filename returns the full filename/filepath at which the settings are stored.
+	// Filename returns the filename/filepath at which the settings are stored relative to [DataDir].
 	Filename() string
 
 	// Defaults sets the default values for all of the settings.
@@ -51,7 +51,7 @@ type Settings interface {
 
 // SettingsBase contains base settings logic that other settings data types can extend.
 type SettingsBase struct {
-	// File is the full filename/filepath at which the settings are stored.
+	// File is the filename/filepath at which the settings are stored relative to [DataDir].
 	File string `view:"-"`
 }
 
@@ -69,18 +69,18 @@ func (sb *SettingsBase) Apply() {}
 // OpenSettings opens the given settings from their [Settings.Filename].
 // The settings must be encoded in TOML.
 func OpenSettings(se Settings) error {
-	return tomls.Open(se, se.Filename())
+	return tomls.Open(se, filepath.Join(DataDir(), se.Filename()))
 }
 
 // SaveSettings saves the given settings to their [Settings.Filename].
 // It encodes the settings in TOML.
 func SaveSettings(se Settings) error {
-	return tomls.Save(se, se.Filename())
+	return tomls.Save(se, filepath.Join(DataDir(), se.Filename()))
 }
 
 // ResetSettings resets the given settings to their default values.
 func ResetSettings(se Settings) error {
-	err := os.Remove(se.Filename())
+	err := os.Remove(filepath.Join(DataDir(), se.Filename()))
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,6 @@ func LoadAllSettings() error {
 // settings. It is automatically called when a new window opened, but can
 // be called before then if certain settings info needed.
 func Init() {
-	GeneralSettings.File = filepath.Join(GokiDataDir(), "general-settings.toml")
 	goosi.InitScreenLogicalDPIFunc = GeneralSettings.ApplyDPI // called when screens are initialized
 	grr.Log(LoadAllSettings())
 	WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
@@ -122,7 +121,11 @@ func Init() {
 }
 
 // GeneralSettings are the currently active global Goki general settings.
-var GeneralSettings = &GeneralSettingsData{}
+var GeneralSettings = &GeneralSettingsData{
+	SettingsBase: SettingsBase{
+		File: filepath.Join("goki", "general-settings.toml"),
+	},
+}
 
 // GeneralSettingsData is the data type for the general Goki settings.
 // The global current instance is stored as [GeneralSettings].
@@ -422,7 +425,11 @@ func (pf *GeneralSettingsData) TimeFormat() string {
 }
 
 // DeviceSettings are the global device settings.
-var DeviceSettings = &DeviceSettingsData{}
+var DeviceSettings = &DeviceSettingsData{
+	SettingsBase: SettingsBase{
+		File: filepath.Join("goki", "device-settings.toml"),
+	},
+}
 
 // DeviceSettingsData is the data type for the device settings.
 type DeviceSettingsData struct {
