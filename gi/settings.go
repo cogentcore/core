@@ -471,17 +471,8 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.KeyMap = keyfun.DefaultMap
 	ds.KeyMaps.Value = keyfun.AvailMaps
 
-	ds.DoubleClickInterval = 500 * time.Millisecond
-	ds.ScrollWheelSpeed = 20
-
-	ds.DragStartTime = DragStartTime
-	ds.DragStartDistance = DragStartDistance
-	ds.SlideStartTime = SlideStartTime
-	ds.SlideStartDistance = SlideStartDistance
-	ds.LongHoverTime = LongHoverTime
-	ds.LongHoverStopDistance = LongHoverStopDistance
-	ds.LongPressTime = LongPressTime
-	ds.LongPressStopDistance = LongPressStopDistance
+	ds.DoubleClickInterval = events.DoubleClickInterval
+	ds.ScrollWheelSpeed = events.ScrollWheelSpeed
 }
 
 func (ds *DeviceSettingsData) Apply() {
@@ -494,15 +485,6 @@ func (ds *DeviceSettingsData) Apply() {
 
 	events.DoubleClickInterval = ds.DoubleClickInterval
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
-
-	DragStartTime = ds.DragStartTime
-	DragStartDistance = ds.DragStartDistance
-	SlideStartTime = ds.SlideStartTime
-	SlideStartDistance = ds.SlideStartDistance
-	LongHoverTime = ds.LongHoverTime
-	LongHoverStopDistance = ds.LongHoverStopDistance
-	LongPressTime = ds.LongPressTime
-	LongPressStopDistance = ds.LongPressStopDistance
 }
 
 //////////////////////////////////////////////////////////////////
