@@ -610,7 +610,7 @@ func (vv *ValueBase) Send(typ events.Types, orig ...events.Event) {
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
 func (vv *ValueBase) HandleEvent(ev events.Event) {
-	if gi.EventTrace {
+	if gi.DebugSettings.EventTrace {
 		fmt.Println("Event to Value:", vv.String(), ev.String())
 	}
 	vv.Listeners.Call(ev)

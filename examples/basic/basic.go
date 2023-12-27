@@ -9,7 +9,7 @@ func main() { gimain.Run(app) }
 
 func app() {
 	// gi.DebugSettings.RenderTrace = true
-	// gi.WinEventTrace = true
+	// gi.DebugSettings.WinEventTrace = true
 	// gi.EventTrace = true
 	// gi.DebugSettings.LayoutTrace = true
 	// gi.DebugSettings.LayoutTraceDetail = true

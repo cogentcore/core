@@ -201,7 +201,7 @@ func ActivateExistingMainWindow(data any) bool {
 	if !has {
 		return false
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
 	}
 	ew.Raise()
@@ -218,7 +218,7 @@ func ActivateExistingDialogWindow(data any) bool {
 	if !has {
 		return false
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
 	}
 	ew.Raise()
@@ -354,7 +354,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 
 	curSz := rctx.Size
 	if curSz == sz {
-		if WinEventTrace {
+		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curSz)
 		}
 		return
@@ -367,12 +367,12 @@ func (w *RenderWin) Resized(sz image.Point) {
 	// w.InactivateAllSprites()
 	if !w.IsVisible() {
 		rctx.SetFlag(false, RenderVisible)
-		if WinEventTrace {
+		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
 		return
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curSz, sz)
 	}
 	if curSz == (image.Point{}) { // first open
@@ -432,11 +432,11 @@ func (w *RenderWin) Closed() {
 	StringsDelete(&FocusRenderWins, w.Name)
 	RenderWinGlobalMu.Unlock()
 	WinNewCloseStamp()
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.Name)
 	}
 	if w.IsClosed() {
-		if WinEventTrace {
+		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Already Closed\n", w.Name)
 		}
 		return
@@ -448,12 +448,12 @@ func (w *RenderWin) Closed() {
 		RenderWinGlobalMu.Unlock()
 		pfw, has := AllRenderWins.FindName(pf)
 		if has {
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Name, w.Name)
 			}
 			pfw.GoosiWin.Raise()
 		} else {
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v not found to restored focus: %v closed\n", pf, w.Name)
 			}
 		}
@@ -569,7 +569,7 @@ func (w *RenderWin) EventLoop() {
 		}
 		w.HandleEvent(e)
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Name)
 	}
 	if w.HasFlag(WinGoLoop) {
@@ -592,7 +592,7 @@ func (w *RenderWin) HandleEvent(e events.Event) {
 	// debugging on Android. TODO: maybe figure out a more sustainable approach to this.
 
 	et := e.Type()
-	if EventTrace && et != events.WindowPaint && et != events.MouseMove {
+	if DebugSettings.EventTrace && et != events.WindowPaint && et != events.MouseMove {
 		log.Printf("Got event: %s\n", e)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
@@ -639,7 +639,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 		case events.WinShow:
 			e.SetHandled()
 			// note that this is sent delayed by driver
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.Name)
 			}
 			// todo: remove?
@@ -659,19 +659,19 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			if !w.HasFlag(WinGotFocus) {
 				w.SetFlag(true, WinGotFocus)
 				w.SendWinFocusEvent(events.WinFocus)
-				if WinEventTrace {
+				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
 				}
 				// if w.NeedWinMenuUpdate() {
 				// 	w.MainMenuUpdateRenderWins()
 				// }
 			} else {
-				if WinEventTrace {
+				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.Name)
 				}
 			}
 		case events.WinFocusLost:
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
 			}
 			w.SetFlag(false, WinGotFocus)

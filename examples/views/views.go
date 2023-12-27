@@ -131,7 +131,7 @@ func app() {
 	stru.Stuff = make([]float32, 3)
 
 	// turn this on to see a trace of the rendering
-	// gi.WinEventTrace = true
+	// gi.DebugSettings.WinEventTrace = true
 	// gi.DebugSettings.RenderTrace = true
 	// gi.DebugSettings.LayoutTrace = true
 	// gi.DebugSettings.WinRenderTrace = true

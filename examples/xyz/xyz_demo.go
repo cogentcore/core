@@ -140,7 +140,7 @@ func app() {
 	// turn these on to see a traces of various stages of processing..
 	// ki.SignalTrace = true
 	// gi.EventTrace = true
-	// gi.WinEventTrace = true
+	// gi.DebugSettings.WinEventTrace = true
 	// xyz.Update3DTrace = true
 	// gi.Update2DTrace = true
 	// vgpu.Debug = true
