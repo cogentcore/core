@@ -45,7 +45,9 @@ func Pack(c *config.Config) error { //gti:add
 func PackDarwin(c *config.Config) error {
 	// based on https://github.com/machinebox/appify
 
-	apath := filepath.Join(".goki", "bin", "pack", c.Name+".app")
+	anm := c.Name + ".app"
+
+	apath := filepath.Join(".goki", "bin", "pack", anm)
 	cpath := filepath.Join(apath, "Contents")
 	mpath := filepath.Join(cpath, "MacOS")
 	rpath := filepath.Join(cpath, "Resources")
@@ -59,7 +61,7 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", "-p", c.Build.Output, mpath)
+	err = xe.Run("cp", "-p", c.Build.Output, filepath.Join(mpath, anm))
 	if err != nil {
 		return err
 	}
@@ -90,7 +92,7 @@ func PackDarwin(c *config.Config) error {
 	defer fplist.Close()
 	ipd := &InfoPlistData{
 		Name:               c.Name,
-		Executable:         filepath.Join("MacOS", c.Name+".app"),
+		Executable:         filepath.Join("MacOS", anm),
 		Identifier:         c.Build.ID,
 		Version:            c.Version,
 		InfoString:         c.Desc,
