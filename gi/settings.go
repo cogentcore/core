@@ -56,7 +56,7 @@ type Settings interface {
 // SettingsBase contains base settings logic that other settings data types can extend.
 type SettingsBase struct {
 	// File is the filename/filepath at which the settings are stored relative to [DataDir].
-	File string
+	File string `view:"-" toml:"-" json:"-"`
 }
 
 // Filename returns the full filename/filepath at which the settings are stored.
