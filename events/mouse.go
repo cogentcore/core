@@ -16,13 +16,13 @@ import (
 var (
 	// DoubleClickInterval is the maximum time interval between button press
 	// events to count as a double-click.
-	// This is also in gi.Prefs and updated from there.
+	// This is also in gi.DeviceSettings and updated from there.
 	DoubleClickInterval = 500 * time.Millisecond
 
 	// ScrollWheelSpeed controls how fast the scroll wheel moves (typically
 	// interpreted as pixels per wheel step) -- only relevant for some OS's which
 	// do not have a native preference for this setting, e.g., X11
-	// This is also in gi.Prefs and updated from there
+	// This is also in gi.DeviceSettings and updated from there
 	ScrollWheelSpeed = float32(20)
 )
 
