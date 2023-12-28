@@ -9,6 +9,8 @@ import (
 	"goki.dev/goosi/events"
 )
 
+// TODO(kai): improve settings view app bar structure
+
 // SettingsViewWindow makes and runs a new window for viewing user settings.
 func SettingsViewWindow() {
 	if gi.ActivateExistingMainWindow(gi.AllSettings) {
