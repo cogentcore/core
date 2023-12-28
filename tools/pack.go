@@ -92,7 +92,7 @@ func PackDarwin(c *config.Config) error {
 	ipd := &InfoPlistData{
 		Name:               c.Name,
 		Executable:         filepath.Join("MacOS", anm),
-		Identifier:         c.Build.ID,
+		Identifier:         c.ID,
 		Version:            c.Version,
 		InfoString:         c.Desc,
 		ShortVersionString: c.Version,

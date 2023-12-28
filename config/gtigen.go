@@ -16,7 +16,8 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "the name of the project", Directives: gti.Directives{}, Tag: ""}},
+		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "the user-friendly name of the project", Directives: gti.Directives{}, Tag: ""}},
+		{"ID", &gti.Field{Name: "ID", Type: "string", LocalType: "string", Doc: "the bundle / package ID to use of the project (required for building for mobile platforms\nand packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)", Directives: gti.Directives{}, Tag: ""}},
 		{"Desc", &gti.Field{Name: "Desc", Type: "string", LocalType: "string", Doc: "the description of the project", Directives: gti.Directives{}, Tag: ""}},
 		{"Version", &gti.Field{Name: "Version", Type: "string", LocalType: "string", Doc: "the version of the project", Directives: gti.Directives{}, Tag: "cmd:\"set-version\" posarg:\"0\" def:\"v0.0.0\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/config.Types", LocalType: "Types", Doc: "the type of the project (app/library)", Directives: gti.Directives{}, Tag: ""}},
@@ -43,7 +44,6 @@ var _ = gti.AddType(&gti.Type{
 		{"Package", &gti.Field{Name: "Package", Type: "string", LocalType: "string", Doc: "the path of the package to build", Directives: gti.Directives{}, Tag: "def:\".\" posarg:\"0\" required:\"-\""}},
 		{"Target", &gti.Field{Name: "Target", Type: "[]goki.dev/goki/config.Platform", LocalType: "[]Platform", Doc: "the target platforms to build executables for", Directives: gti.Directives{}, Tag: "flag:\"t,target\""}},
 		{"Output", &gti.Field{Name: "Output", Type: "string", LocalType: "string", Doc: "the output file name; if not specified, it depends on the package being built", Directives: gti.Directives{}, Tag: "flag:\"o,output\""}},
-		{"ID", &gti.Field{Name: "ID", Type: "string", LocalType: "string", Doc: "the bundle / package ID to use for the app (required for building for mobile platforms\nand packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)", Directives: gti.Directives{}, Tag: ""}},
 		{"Debug", &gti.Field{Name: "Debug", Type: "bool", LocalType: "bool", Doc: "whether to build/run the app in debug mode; this currently only works on mobile platforms", Directives: gti.Directives{}, Tag: "flag:\"d,debug\""}},
 		{"Rebuild", &gti.Field{Name: "Rebuild", Type: "bool", LocalType: "bool", Doc: "force rebuilding of packages that are already up-to-date", Directives: gti.Directives{}, Tag: "flag:\"a,rebuild\""}},
 		{"Install", &gti.Field{Name: "Install", Type: "bool", LocalType: "bool", Doc: "install the generated executable", Directives: gti.Directives{}, Tag: "flag:\"i,install\""}},

@@ -54,7 +54,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		err := ManifestTmpl.Execute(buf, ManifestTmplData{
-			JavaPkgPath: c.Build.ID,
+			JavaPkgPath: c.ID,
 			Name:        strings.Title(appName),
 			LibName:     libName,
 		})

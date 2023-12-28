@@ -60,7 +60,7 @@ func Run(c *config.Config) error { //gti:add
 			return fmt.Errorf("error installing app: %w", err)
 		}
 		// see https://stackoverflow.com/a/4567928
-		args := []string{"shell", "am", "start", "-n", c.Build.ID + "/org.golang.app.GoNativeActivity"}
+		args := []string{"shell", "am", "start", "-n", c.ID + "/org.golang.app.GoNativeActivity"}
 		// TODO: get adb am debug on Android working
 		// if c.Build.Debug {
 		// args = append(args, "-D")

@@ -11,8 +11,11 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"unicode"
 
 	"goki.dev/enums/enumgen"
+	"goki.dev/glop/sentence"
 	"goki.dev/gti/gtigen"
 	"goki.dev/xe"
 )
@@ -24,8 +27,12 @@ import (
 // options for the Goki tool
 type Config struct { //gti:add
 
-	// the name of the project
+	// the user-friendly name of the project
 	Name string
+
+	// the bundle / package ID to use of the project (required for building for mobile platforms
+	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)
+	ID string
 
 	// the description of the project
 	Desc string
@@ -67,10 +74,6 @@ type Build struct { //gti:add
 
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output"`
-
-	// the bundle / package ID to use for the app (required for building for mobile platforms
-	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)
-	ID string
 
 	// whether to build/run the app in debug mode; this currently only works on mobile platforms
 	Debug bool `flag:"d,debug"`
@@ -156,16 +159,31 @@ type Generate struct { //gti:add
 
 func (c *Config) OnConfig(cmd string) error {
 	xe.SetMajor(xe.Major().SetPrintOnly(c.Build.PrintOnly))
-	if c.Name == "" {
+	if c.Name == "" || c.ID == "" {
 		cdir, err := os.Getwd()
 		if err != nil {
 			return fmt.Errorf("error finding current directory: %w", err)
 		}
 		base := filepath.Base(cdir)
-		c.Name = base
-	}
-	if c.Build.ID == "" {
-		c.Build.ID = "com.org.todo." + c.Name
+		if c.Name == "" {
+			c.Name = sentence.Case(base)
+		}
+
+		if c.ID == "" {
+			dir := filepath.Dir(cdir)
+			// if our directory starts with a v and then has only digits, it is a version directory
+			// so we go up another directory to get to the actual directory
+			if len(dir) > 1 && dir[0] == 'v' && !strings.ContainsFunc(dir[1:], func(r rune) bool {
+				return !unicode.IsDigit(r)
+			}) {
+				dir = filepath.Dir(dir)
+			}
+			// we ignore anything after any dot in the directory name
+			dir, _, _ = strings.Cut(dir, ".")
+			// the default ID is "com.dir.base", which is relatively likely
+			// to be close to "com.org.app", the intended format
+			c.ID = "com." + dir + "." + base
+		}
 	}
 	// if we have no target, we assume it is our current platform
 	if len(c.Build.Target) == 0 {

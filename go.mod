@@ -9,6 +9,7 @@ require (
 	goki.dev/enums v0.9.56
 	goki.dev/gengo v0.3.15
 	goki.dev/girl v0.0.36
+	goki.dev/glop v0.1.10
 	goki.dev/grease v0.8.44
 	goki.dev/greasi v0.8.22
 	goki.dev/grog v0.0.27
@@ -60,7 +61,6 @@ require (
 	goki.dev/cursors v0.0.32 // indirect
 	goki.dev/fi v0.1.19 // indirect
 	goki.dev/gi/v2 v2.0.0-dev0.0.28 // indirect
-	goki.dev/glop v0.1.10 // indirect
 	goki.dev/goosi v0.0.25 // indirect
 	goki.dev/grr v0.0.12 // indirect
 	goki.dev/jsfs v0.0.2 // indirect

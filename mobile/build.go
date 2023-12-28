@@ -99,7 +99,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 		return nil, fmt.Errorf("cannot set -o when building non-main package")
 	}
 
-	if c.Build.ID == "" {
+	if c.ID == "" {
 		return nil, fmt.Errorf("id must be set when building for mobile")
 	}
 
@@ -135,7 +135,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = GoAppleBuild(c, pkg, c.Build.ID, c.Build.Target)
+		nmpkgs, err = GoAppleBuild(c, pkg, c.ID, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
