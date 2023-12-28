@@ -1030,10 +1030,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	// fmt.Println(kf, cs)
 	switch kf {
 	case keyfun.Inspector:
-		TheViewIFace.Inspector(em.Scene)
+		TheViewInterface.Inspector(em.Scene)
 		e.SetHandled()
 	case keyfun.Prefs:
-		TheViewIFace.PrefsView(AppearanceSettings)
+		TheViewInterface.SettingsViewWindow()
 		e.SetHandled()
 	case keyfun.WinClose:
 		win.CloseReq()

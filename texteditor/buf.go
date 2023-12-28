@@ -495,7 +495,7 @@ func (tb *Buf) FileModCheck() bool {
 			gi.NewButton(pw).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
 				// TODO(kai/dialog): add this back -- can't call giv from here!
-				gi.TheViewIFace.CallFunc(sc, tb.SaveAs)
+				gi.TheViewInterface.CallFunc(sc, tb.SaveAs)
 			})
 			gi.NewButton(pw).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()

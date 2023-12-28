@@ -10,22 +10,22 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// giv.ViewIFace is THE implementation of the gi.ViewIFace interface
-type ViewIFace struct{}
+// ViewInterface is the singular implementation of [gi.ViewInterface]
+type ViewInterface struct{}
 
-func (vi *ViewIFace) CallFunc(ctx gi.Widget, fun any) {
+func (vi *ViewInterface) CallFunc(ctx gi.Widget, fun any) {
 	CallFunc(ctx, fun)
 }
 
-func (vi *ViewIFace) Inspector(obj ki.Ki) {
+func (vi *ViewInterface) Inspector(obj ki.Ki) {
 	InspectorDialog(obj)
 }
 
-func (vi *ViewIFace) PrefsView(prefs *gi.AppearanceSettingsData) {
+func (vi *ViewInterface) SettingsViewWindow() {
 	SettingsViewWindow()
 }
 
-func (vi *ViewIFace) HiStylesView(std bool) {
+func (vi *ViewInterface) HiStylesView(std bool) {
 	if std {
 		HiStylesView(&histyle.StdStyles)
 	} else {
@@ -33,10 +33,10 @@ func (vi *ViewIFace) HiStylesView(std bool) {
 	}
 }
 
-func (vi *ViewIFace) HiStyleInit() {
+func (vi *ViewInterface) HiStyleInit() {
 	histyle.Init()
 }
 
-func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
+func (vi *ViewInterface) SetHiStyleDefault(hsty gi.HiStyleName) {
 	histyle.StyleDefault = hsty
 }

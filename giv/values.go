@@ -35,7 +35,7 @@ import (
 // values contains all the Values for basic builtin types
 
 func init() {
-	gi.TheViewIFace = &ViewIFace{}
+	gi.TheViewInterface = &ViewInterface{}
 	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() Value {
 		return &IconValue{}
 	})

@@ -228,8 +228,8 @@ func (pf *AppearanceSettingsData) Apply() { //gti:add
 		pf.HiStyle = "emacs" // todo: need light / dark versions
 	}
 
-	if TheViewIFace != nil {
-		TheViewIFace.SetHiStyleDefault(pf.HiStyle)
+	if TheViewInterface != nil {
+		TheViewInterface.SetHiStyleDefault(pf.HiStyle)
 	}
 
 	pf.ApplyDPI()
@@ -310,7 +310,7 @@ func (pf *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
 func (pf *AppearanceSettingsData) EditHiStyles() { //gti:add
-	TheViewIFace.HiStylesView(false) // false = custom
+	TheViewInterface.HiStylesView(false) // false = custom
 }
 
 // Densities is an enum representing the different

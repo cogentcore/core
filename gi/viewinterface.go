@@ -8,10 +8,10 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// ViewIFace is an interface into the View GUI types in giv subpackage,
+// ViewInterface is an interface into the View GUI types in the giv subpackage,
 // allowing it to be a sub-package with just this narrow set of dependencies
-// of gi on giv. The one impl is in giv/valueview.go.
-type ViewIFace interface {
+// of gi on giv. The one implementation is in giv/viewinterface.go.
+type ViewInterface interface {
 	// CallFunc calls the given function in the context of the given widget,
 	// popping up a dialog to prompt for any arguments and show the return
 	// values of the function. It is a helper function that uses [NewSoloFuncButton]
@@ -21,8 +21,8 @@ type ViewIFace interface {
 	// Inspector opens an interactive editor of given Ki tree, at its root
 	Inspector(obj ki.Ki)
 
-	// PrefsView opens an interactive view of given preferences object
-	PrefsView(prefs *AppearanceSettingsData)
+	// SettingsViewWindow opens a window for editing the user settings
+	SettingsViewWindow()
 
 	// TODO(kai): figure out a better way to structure histyle view things
 
@@ -36,5 +36,5 @@ type ViewIFace interface {
 	HiStyleInit()
 }
 
-// TheViewIFace is the implementation of the interface, defined in giv package
-var TheViewIFace ViewIFace
+// TheViewInterface is the singular implementation of [ViewInterface], defined in the giv package.
+var TheViewInterface ViewInterface

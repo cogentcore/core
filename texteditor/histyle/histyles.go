@@ -167,7 +167,7 @@ func (hs *Styles) Names() []string {
 // ViewStd shows the standard styles that are compiled into the program via
 // chroma package
 func (hs *Styles) ViewStd() {
-	gi.TheViewIFace.HiStylesView(true)
+	gi.TheViewInterface.HiStylesView(true)
 }
 
 // Init must be called to initialize the hi styles -- post startup
