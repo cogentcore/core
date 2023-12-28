@@ -15,6 +15,7 @@ import (
 	"strconv"
 
 	"goki.dev/colors"
+	"goki.dev/girl/paint"
 	"goki.dev/goki/config"
 	"goki.dev/icons"
 	"goki.dev/svg"
@@ -29,7 +30,10 @@ var IconSizes = []int{16, 32, 64, 128, 192, 256, 512, 1024}
 // [icons.SelectWindow]. It is run automatically for apps (not libraries)
 // in goki init.
 func Icons(c *config.Config) error { //gti:add
+	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
+
 	sv := svg.NewSVG(1024, 1024)
+	sv.Norm = true
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 
 	spath := filepath.Join(".goki", "icons", "svg.svg")
