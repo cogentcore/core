@@ -47,7 +47,7 @@ func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
 	histyle.StyleDefault = hsty
 }
 
-func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
+func (vi *ViewIFace) PrefsDetDefaults(pf *gi.SystemSettingsData) {
 	// pf.TextEditorClipHistMax = TextEditorClipHistMax
 	// pf.TextBufMaxScopeLines = TextBufMaxScopeLines
 	// pf.TextBufDiffRevertLines = TextBufDiffRevertLines
@@ -58,7 +58,7 @@ func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
 	pf.SliceInlineLen = SliceInlineLen
 }
 
-func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
+func (vi *ViewIFace) PrefsDetApply(pf *gi.SystemSettingsData) {
 	// TextEditorClipHistMax = pf.TextEditorClipHistMax
 	// TextBufMaxScopeLines = pf.TextBufMaxScopeLines
 	// TextBufDiffRevertLines = pf.TextBufDiffRevertLines

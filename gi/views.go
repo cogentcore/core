@@ -38,10 +38,10 @@ type ViewIFace interface {
 	HiStyleInit()
 
 	// PrefsDetDefaults gets current detailed prefs values as defaults
-	PrefsDetDefaults(prefs *PrefsDetailed)
+	PrefsDetDefaults(prefs *SystemSettingsData)
 
 	// PrefsDetApply applies detailed preferences within giv scope
-	PrefsDetApply(prefs *PrefsDetailed)
+	PrefsDetApply(prefs *SystemSettingsData)
 }
 
 // TheViewIFace is the implementation of the interface, defined in giv package

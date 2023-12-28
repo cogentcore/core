@@ -6,6 +6,7 @@ package gi
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"io/fs"
 	"os"
@@ -35,6 +36,7 @@ import (
 // app settings.
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
 	{"General", GeneralSettings},
+	{"System", SystemSettings},
 	{"Devices", DeviceSettings},
 	{"Debugging", DebugSettings},
 })
@@ -42,7 +44,7 @@ var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
 // Settings is the interface that describes the functionality common to all settings data types.
 type Settings interface {
 
-	// Filename returns the filename/filepath at which the settings are stored relative to [DataDir].
+	// Filename returns the full filename/filepath at which the settings are stored.
 	Filename() string
 
 	// Defaults sets the default values for all of the settings.
@@ -55,12 +57,13 @@ type Settings interface {
 // SettingsBase contains base settings logic that other settings data types can extend.
 type SettingsBase struct {
 	// File is the filename/filepath at which the settings are stored relative to [DataDir].
-	File string `view:"-"`
+	File string
 }
 
 // Filename returns the full filename/filepath at which the settings are stored.
 func (sb *SettingsBase) Filename() string {
-	return sb.File
+	fmt.Println(DataDir(), sb.File)
+	return filepath.Join(DataDir(), sb.File)
 }
 
 // Defaults does nothing by default and can be extended by other settings data types.
@@ -72,18 +75,19 @@ func (sb *SettingsBase) Apply() {}
 // OpenSettings opens the given settings from their [Settings.Filename].
 // The settings must be encoded in TOML.
 func OpenSettings(se Settings) error {
-	return tomls.Open(se, filepath.Join(DataDir(), se.Filename()))
+	return tomls.Open(se, se.Filename())
 }
 
 // SaveSettings saves the given settings to their [Settings.Filename].
 // It encodes the settings in TOML.
 func SaveSettings(se Settings) error {
-	return tomls.Save(se, filepath.Join(DataDir(), se.Filename()))
+	// fmt.Println(se.Filename())
+	return tomls.Save(se, se.Filename())
 }
 
 // ResetSettings resets the given settings to their default values.
 func ResetSettings(se Settings) error {
-	err := os.Remove(filepath.Join(DataDir(), se.Filename()))
+	err := os.Remove(se.Filename())
 	if err != nil {
 		return err
 	}
@@ -157,7 +161,7 @@ type GeneralSettingsData struct { //gti:add
 	FontSize float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
 
 	// screen-specific preferences -- will override overall defaults if set
-	ScreenPrefs map[string]ScreenPrefs
+	ScreenPrefs map[string]ScreenSettings
 
 	// text highlighting style / theme
 	HiStyle HiStyleName
@@ -166,10 +170,10 @@ type GeneralSettingsData struct { //gti:add
 	Clock24 bool `label:"24-hour clock"`
 
 	// parameters controlling GUI behavior
-	Params ParamPrefs
+	Params ParamSettings
 
 	// editor preferences -- for TextEditor etc
-	Editor EditorPrefs
+	Editor EditorSettings
 
 	// default font family when otherwise not specified
 	FontFamily FontName
@@ -188,9 +192,6 @@ type GeneralSettingsData struct { //gti:add
 
 	// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
 	FileViewSort string `view:"-"`
-
-	// filename for saving / loading colors
-	ColorFilename FileName `view:"-" ext:".toml"`
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
@@ -492,20 +493,17 @@ func (ds *DeviceSettingsData) Apply() {
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 }
 
-//////////////////////////////////////////////////////////////////
-//  ParamPrefs
-
-// ScreenPrefs are the per-screen preferences -- see goosi/App/Screen() for
+// ScreenSettings are the per-screen preferences -- see [goosi.App.Screen] for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences.
-type ScreenPrefs struct { //gti:add
+type ScreenSettings struct { //gti:add
 
 	// overall zoom factor as a percentage of the default zoom
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 }
 
-// ParamPrefs contains misc parameters controlling GUI behavior.
-type ParamPrefs struct { //gti:add
+// ParamSettings contains misc parameters controlling GUI behavior.
+type ParamSettings struct { //gti:add
 
 	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
 	LocalMainMenu bool
@@ -526,7 +524,7 @@ type ParamPrefs struct { //gti:add
 	Smooth3D bool
 }
 
-func (pf *ParamPrefs) Defaults() {
+func (pf *ParamSettings) Defaults() {
 	pf.LocalMainMenu = true // much better
 	pf.OnlyCloseActiveTab = false
 	pf.ZebraStripeWeight = 0
@@ -546,9 +544,9 @@ type User struct { //gti:add
 //////////////////////////////////////////////////////////////////
 //  EditorPrefs
 
-// EditorPrefs contains editor preferences.  It can also be set
+// EditorSettings contains editor preferences.  It can also be set
 // from ki.Props style properties.
-type EditorPrefs struct { //gti:add
+type EditorSettings struct { //gti:add
 
 	// size of a tab, in chars -- also determines indent level for space indent
 	TabSize int `xml:"tab-size"`
@@ -579,7 +577,7 @@ type EditorPrefs struct { //gti:add
 }
 
 // Defaults are the defaults for EditorPrefs
-func (pf *EditorPrefs) Defaults() {
+func (pf *EditorSettings) Defaults() {
 	pf.TabSize = 4
 	pf.WordWrap = true
 	pf.LineNos = true
@@ -696,14 +694,9 @@ func OpenPaths() {
 	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 }
 
-//////////////////////////////////////////////////////////////////
-//  PrefsDetailed
-
-// TODO: make all of the MSec things time.Duration
-
-// PrefsDetailed are more detailed params not usually customized, but
-// available for those who really care..
-type PrefsDetailed struct { //gti:add
+// SystemSettingsData is the data type of the global Goki settings.
+type SystemSettingsData struct { //gti:add
+	SettingsBase
 
 	// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1"`
@@ -757,12 +750,16 @@ type PrefsDetailed struct { //gti:add
 	SliceInlineLen int `def:"4" min:"2" step:"1"`
 }
 
-// PrefsDet are the overall detailed preferences
-var PrefsDet = PrefsDetailed{}
+// SystemSettings are the currently active Goki system settings.
+var SystemSettings = &SystemSettingsData{
+	SettingsBase: SettingsBase{
+		File: filepath.Join("goki", "system-settings.toml"),
+	},
+}
 
 // Defaults gets current values of parameters, which are effectively
 // defaults
-func (pf *PrefsDetailed) Defaults() {
+func (pf *SystemSettingsData) Defaults() {
 	pf.MenuMaxHeight = MenuMaxHeight
 	pf.CompleteWaitDuration = CompleteWaitDuration
 	pf.CompleteMaxItems = CompleteMaxItems
@@ -784,7 +781,7 @@ func (pf *PrefsDetailed) Defaults() {
 }
 
 // Apply detailed preferences to all the relevant settings.
-func (pf *PrefsDetailed) Apply() { //gti:add
+func (pf *SystemSettingsData) Apply() { //gti:add
 	MenuMaxHeight = pf.MenuMaxHeight
 	CompleteWaitDuration = pf.CompleteWaitDuration
 	CompleteMaxItems = pf.CompleteMaxItems
