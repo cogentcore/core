@@ -37,8 +37,8 @@ type Config struct { //gti:add
 	// the type of the project (app/library)
 	Type Types
 
-	// the configuration options for the build, install, and run commands
-	Build Build `cmd:"build,install,run" view:"add-fields"`
+	// the configuration options for the build, install, run, and pack commands
+	Build Build `cmd:"build,install,run,pack" view:"add-fields"`
 
 	// the configuration information for web
 	Web Web `cmd:"build,install,run" view:"add-fields"`
