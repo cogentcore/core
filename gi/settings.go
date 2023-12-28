@@ -440,45 +440,6 @@ type ScreenSettings struct { //gti:add
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 }
 
-// BehaviorSettings contains misc parameters controlling GUI behavior.
-type BehaviorSettings struct { //gti:add
-
-	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
-	LocalMainMenu bool
-
-	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
-	OnlyCloseActiveTab bool `def:"false"`
-
-	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
-	ZebraStripeWeight float32 `def:"0" min:"0" max:"100" step:"1"`
-
-	// the limit of file size, above which user will be prompted before opening / copying, etc.
-	BigFileSize int `def:"10000000"`
-
-	// maximum number of saved paths to save in FileView
-	SavedPathsMax int
-
-	// turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
-	Smooth3D bool
-}
-
-func (pf *BehaviorSettings) Defaults() {
-	pf.LocalMainMenu = true // much better
-	pf.OnlyCloseActiveTab = false
-	pf.ZebraStripeWeight = 0
-	pf.BigFileSize = 10000000
-	pf.SavedPathsMax = 50
-	pf.Smooth3D = true
-}
-
-// User basic user information that might be needed for different apps
-type User struct { //gti:add
-	user.User
-
-	// default email address -- e.g., for recording changes in a version control system
-	Email string
-}
-
 //////////////////////////////////////////////////////////////////
 //  EditorPrefs
 
@@ -522,113 +483,6 @@ func (es *EditorSettings) Defaults() {
 	es.SpellCorrect = true
 	es.AutoIndent = true
 	es.DepthColor = true
-}
-
-//////////////////////////////////////////////////////////////////
-//  FavoritePaths
-
-// FavPathItem represents one item in a favorite path list, for display of
-// favorites.  Is an ordered list instead of a map because user can organize
-// in order
-type FavPathItem struct { //gti:add
-
-	// icon for item
-	Ic icons.Icon
-
-	// name of the favorite item
-	Name string `width:"20"`
-
-	//
-	Path string `tableview:"-select"`
-}
-
-// Label satisfies the Labeler interface
-func (fi FavPathItem) Label() string {
-	return fi.Name
-}
-
-// FavPaths is a list (slice) of favorite path items
-type FavPaths []FavPathItem
-
-// SetToDefaults sets the paths to default values
-func (pf *FavPaths) SetToDefaults() {
-	*pf = make(FavPaths, len(DefaultPaths))
-	copy(*pf, DefaultPaths)
-}
-
-// FindPath returns index of path on list, or -1, false if not found
-func (pf *FavPaths) FindPath(path string) (int, bool) {
-	for i, fi := range *pf {
-		if fi.Path == path {
-			return i, true
-		}
-	}
-	return -1, false
-}
-
-// DefaultPaths are default favorite paths
-var DefaultPaths = FavPaths{
-	{icons.Home, "home", "~"},
-	{icons.DesktopMac, "Desktop", "~/Desktop"},
-	{icons.LabProfile, "Documents", "~/Documents"},
-	{icons.Download, "Downloads", "~/Downloads"},
-	{icons.Computer, "root", "/"},
-}
-
-//////////////////////////////////////////////////////////////////
-//  FilePaths
-
-type FilePaths []string
-
-var SavedPaths FilePaths
-
-// Open file paths from a json-formatted file.
-func (pf *FilePaths) Open(filename string) error { //gti:add
-	return grr.Log(jsons.Open(pf, filename))
-}
-
-// Save file paths to a json-formatted file.
-func (pf *FilePaths) Save(filename string) error { //gti:add
-	return grr.Log(jsons.Save(pf, filename))
-}
-
-// AddPath inserts a path to the file paths (at the start), subject to max
-// length -- if path is already on the list then it is moved to the start.
-func (pf *FilePaths) AddPath(path string, max int) {
-	StringsInsertFirstUnique((*[]string)(pf), path, max)
-}
-
-// SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
-var SavedPathsFileName = "saved_paths.json"
-
-// FileViewResetPaths defines a string that is added as an item to the recents menu
-var FileViewResetPaths = "<i>Reset Paths</i>"
-
-// FileViewEditPaths defines a string that is added as an item to the recents menu
-var FileViewEditPaths = "<i>Edit Paths...</i>"
-
-// SavedPathsExtras are the reset and edit items we add to the recents menu
-var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewEditPaths}
-
-// SavePaths saves the active SavedPaths to prefs dir
-func SavePaths() {
-	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.Save(pnm)
-	// add back after save
-	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-}
-
-// OpenPaths loads the active SavedPaths from prefs dir
-func OpenPaths() {
-	// remove to be sure we don't have duplicate extras
-	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, SavedPathsFileName)
-	SavedPaths.Open(pnm)
-	// add back after save
-	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 }
 
 // SystemSettings are the currently active Goki system settings.
@@ -775,8 +629,161 @@ func (pf *SystemSettingsData) UpdateUser() {
 	}
 }
 
+// BehaviorSettings contains misc parameters controlling GUI behavior.
+type BehaviorSettings struct { //gti:add
+
+	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
+	LocalMainMenu bool
+
+	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
+	OnlyCloseActiveTab bool `def:"false"`
+
+	// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
+	ZebraStripeWeight float32 `def:"0" min:"0" max:"100" step:"1"`
+
+	// the limit of file size, above which user will be prompted before opening / copying, etc.
+	BigFileSize int `def:"10000000"`
+
+	// maximum number of saved paths to save in FileView
+	SavedPathsMax int
+
+	// turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
+	Smooth3D bool
+}
+
+func (pf *BehaviorSettings) Defaults() {
+	pf.LocalMainMenu = true // much better
+	pf.OnlyCloseActiveTab = false
+	pf.ZebraStripeWeight = 0
+	pf.BigFileSize = 10000000
+	pf.SavedPathsMax = 50
+	pf.Smooth3D = true
+}
+
+// User basic user information that might be needed for different apps
+type User struct { //gti:add
+	user.User
+
+	// default email address -- e.g., for recording changes in a version control system
+	Email string
+}
+
+//////////////////////////////////////////////////////////////////
+//  FavoritePaths
+
+// FavPathItem represents one item in a favorite path list, for display of
+// favorites.  Is an ordered list instead of a map because user can organize
+// in order
+type FavPathItem struct { //gti:add
+
+	// icon for item
+	Ic icons.Icon
+
+	// name of the favorite item
+	Name string `width:"20"`
+
+	// the path of the favorite item
+	Path string `tableview:"-select"`
+}
+
+// Label satisfies the Labeler interface
+func (fi FavPathItem) Label() string {
+	return fi.Name
+}
+
+// FavPaths is a list (slice) of favorite path items
+type FavPaths []FavPathItem
+
+// SetToDefaults sets the paths to default values
+func (pf *FavPaths) SetToDefaults() {
+	*pf = make(FavPaths, len(DefaultPaths))
+	copy(*pf, DefaultPaths)
+}
+
+// FindPath returns index of path on list, or -1, false if not found
+func (pf *FavPaths) FindPath(path string) (int, bool) {
+	for i, fi := range *pf {
+		if fi.Path == path {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+// DefaultPaths are default favorite paths
+var DefaultPaths = FavPaths{
+	{icons.Home, "home", "~"},
+	{icons.DesktopMac, "Desktop", "~/Desktop"},
+	{icons.LabProfile, "Documents", "~/Documents"},
+	{icons.Download, "Downloads", "~/Downloads"},
+	{icons.Computer, "root", "/"},
+}
+
+//////////////////////////////////////////////////////////////////
+//  FilePaths
+
+type FilePaths []string
+
+var SavedPaths FilePaths
+
+// Open file paths from a json-formatted file.
+func (pf *FilePaths) Open(filename string) error { //gti:add
+	return grr.Log(jsons.Open(pf, filename))
+}
+
+// Save file paths to a json-formatted file.
+func (pf *FilePaths) Save(filename string) error { //gti:add
+	return grr.Log(jsons.Save(pf, filename))
+}
+
+// AddPath inserts a path to the file paths (at the start), subject to max
+// length -- if path is already on the list then it is moved to the start.
+func (pf *FilePaths) AddPath(path string, max int) {
+	StringsInsertFirstUnique((*[]string)(pf), path, max)
+}
+
+// SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
+var SavedPathsFileName = "saved_paths.json"
+
+// FileViewResetPaths defines a string that is added as an item to the recents menu
+var FileViewResetPaths = "<i>Reset Paths</i>"
+
+// FileViewEditPaths defines a string that is added as an item to the recents menu
+var FileViewEditPaths = "<i>Edit Paths...</i>"
+
+// SavedPathsExtras are the reset and edit items we add to the recents menu
+var SavedPathsExtras = []string{MenuTextSeparator, FileViewResetPaths, FileViewEditPaths}
+
+// SavePaths saves the active SavedPaths to prefs dir
+func SavePaths() {
+	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
+	pdir := GokiDataDir()
+	pnm := filepath.Join(pdir, SavedPathsFileName)
+	SavedPaths.Save(pnm)
+	// add back after save
+	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
+}
+
+// OpenPaths loads the active SavedPaths from prefs dir
+func OpenPaths() {
+	// remove to be sure we don't have duplicate extras
+	StringsRemoveExtras((*[]string)(&SavedPaths), SavedPathsExtras)
+	pdir := GokiDataDir()
+	pnm := filepath.Join(pdir, SavedPathsFileName)
+	SavedPaths.Open(pnm)
+	// add back after save
+	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
+}
+
 //////////////////////////////////////////////////////////////////
 //  DebugSettings
+
+// DebugSettings are the currently active debugging settings
+var DebugSettings = &DebugSettingsData{
+	SettingsBase: SettingsBase{
+		File: filepath.Join("goki", "debug-settings.toml"),
+	},
+}
 
 // DebugSettingsData is the data type for debugging settings.
 type DebugSettingsData struct { //gti:add
@@ -824,13 +831,6 @@ type DebugSettingsData struct { //gti:add
 	GoTypeTrace bool
 }
 
-// DebugSettings are the currently active debugging settings
-var DebugSettings = &DebugSettingsData{
-	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "debug-settings.toml"),
-	},
-}
-
 func (db *DebugSettingsData) Defaults() {
 	db.GoCompleteTrace = golang.CompleteTrace
 	db.GoTypeTrace = golang.TraceTypes
@@ -839,10 +839,4 @@ func (db *DebugSettingsData) Defaults() {
 func (db *DebugSettingsData) Apply() {
 	golang.CompleteTrace = db.GoCompleteTrace
 	golang.TraceTypes = db.GoTypeTrace
-}
-
-// Profile toggles profiling of program on or off, which does both
-// targeted and global CPU and Memory profiling.
-func (pf *DebugSettingsData) Profile() { //gti:add
-	ProfileToggle()
 }
