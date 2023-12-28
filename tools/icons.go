@@ -29,7 +29,9 @@ var IconSizes = []int{16, 32, 58, 76, 80, 87, 114, 120, 152, 167, 180}
 // [icons.SelectWindow]. It is run automatically for apps (not libraries)
 // in goki init.
 func Icons(c *config.Config) error { //gti:add
-	sv := svg.NewSVG(0, 0)
+	sv := svg.NewSVG(52, 52)
+	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
+
 	spath := filepath.Join(".goki", "icons", "svg.svg")
 	err := sv.OpenXML(spath)
 	if err != nil {
@@ -52,7 +54,6 @@ func Icons(c *config.Config) error { //gti:add
 		if err != nil {
 			return err
 		}
-		sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 	}
 	for _, sz := range IconSizes {
 		sv.Resize(image.Pt(sz, sz))
