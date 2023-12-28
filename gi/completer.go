@@ -16,15 +16,6 @@ import (
 	"goki.dev/spell"
 )
 
-var (
-	// CompleteWaitDuration is the amount of time to wait before
-	// showing the completion menu
-	CompleteWaitDuration time.Duration = 0
-
-	// CompleteMaxItems is the max number of items to display in completer popup
-	CompleteMaxItems = 25
-)
-
 // Completer interface supports the SetCompleter method for setting completer parameters
 // This is defined e.g., on TextField and textview.Buf
 type Completer interface {
@@ -122,7 +113,7 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 		return
 	}
 
-	wait := CompleteWaitDuration
+	wait := SystemSettings.CompleteWaitDuration
 	if force {
 		wait = 0
 	}
@@ -168,7 +159,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 		return
 	}
 	if !force {
-		if count > CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
+		if count > SystemSettings.CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
 			return
 		}
 	}

@@ -39,10 +39,6 @@ func MenuSceneConfigStyles(msc *Scene) {
 	})
 }
 
-// MenuMaxHeight is the maximum height of any menu popup panel in units of font height
-// scroll bars are enforced beyond that size.
-var MenuMaxHeight = 30
-
 // NewMenuScene constructs a [Scene] for displaying a menu, using the
 // given menu constructor function. If no name is provided, it defaults
 // to "menu".  If no menu items added, returns nil.

@@ -29,24 +29,8 @@ var (
 	// when computing the preferred size (ScPrefSizing)
 	LayoutPrefMaxCols = 20
 
-	// LayoutFocusNameTimeout is the amount of time between keypresses
-	// to combine characters into name to search for within layout -- starts over
-	// after this delay.
-	LayoutFocusNameTimeout = 500 * time.Millisecond
-
-	// LayoutFocusNameTabTime is the number of milliseconds since last focus name
-	// event to allow tab to focus on next element with same name.
-	LayoutFocusNameTabTime = 2000 * time.Millisecond
-
-	// LayoutAutoScrollDelay is amount of time to wait before trying to autoscroll again
-	LayoutAutoScrollDelay = 25 * time.Millisecond
-
 	// AutoScrollRate determines the rate of auto-scrolling of layouts
 	AutoScrollRate = float32(1.0)
-
-	// LayoutPageSteps is the number of steps to take in PageUp / Down events
-	// in terms of number of items.
-	LayoutPageSteps = 10
 )
 
 // Layoutlags has bool flags for Layout
@@ -365,7 +349,7 @@ func (ly *Layout) HandleKeys() {
 				return
 			case keyfun.PageDown:
 				proc := false
-				for st := 0; st < LayoutPageSteps; st++ {
+				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
 					if !ly.FocusNextChild(true) {
 						break
 					}
@@ -377,7 +361,7 @@ func (ly *Layout) HandleKeys() {
 				return
 			case keyfun.PageUp:
 				proc := false
-				for st := 0; st < LayoutPageSteps; st++ {
+				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
 					if !ly.FocusPrevChild(true) {
 						break
 					}
@@ -405,13 +389,13 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	delay := e.Time().Sub(ly.FocusNameTime)
 	ly.FocusNameTime = e.Time()
 	if kf == keyfun.FocusNext { // tab means go to next match -- don't worry about time
-		if ly.FocusName == "" || delay > LayoutFocusNameTabTime {
+		if ly.FocusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
 			ly.FocusName = ""
 			ly.FocusNameLast = nil
 			return false
 		}
 	} else {
-		if delay > LayoutFocusNameTimeout {
+		if delay > SystemSettings.LayoutFocusNameTimeout {
 			ly.FocusName = ""
 		}
 		if !unicode.IsPrint(e.KeyRune()) || e.Modifiers() != 0 {

@@ -631,6 +631,13 @@ func OpenPaths() {
 	StringsAddExtras((*[]string)(&SavedPaths), SavedPathsExtras)
 }
 
+// SystemSettings are the currently active Goki system settings.
+var SystemSettings = &SystemSettingsData{
+	SettingsBase: SettingsBase{
+		File: filepath.Join("goki", "system-settings.toml"),
+	},
+}
+
 // SystemSettingsData is the data type of the global Goki settings.
 type SystemSettingsData struct { //gti:add
 	SettingsBase
@@ -653,7 +660,8 @@ type SystemSettingsData struct { //gti:add
 	// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
 	FileViewSort string `view:"-"`
 
-	// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
+	// the maximum height of any menu popup panel in units of font height;
+	// scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1"`
 
 	// the amount of time to wait before offering completions
@@ -665,7 +673,7 @@ type SystemSettingsData struct { //gti:add
 	// time interval for cursor blinking on and off -- set to 0 to disable blinking
 	CursorBlinkTime time.Duration `def:"500" min:"0" max:"1000" step:"5"`
 
-	// is amount of time to wait before trying to autoscroll again
+	// The amount of time to wait before trying to autoscroll again
 	LayoutAutoScrollDelay time.Duration `def:"25" min:"1" step:"5"`
 
 	// number of steps to take in PageUp / Down events in terms of number of items
@@ -705,27 +713,19 @@ type SystemSettingsData struct { //gti:add
 	SliceInlineLen int `def:"4" min:"2" step:"1"`
 }
 
-// SystemSettings are the currently active Goki system settings.
-var SystemSettings = &SystemSettingsData{
-	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "system-settings.toml"),
-	},
-}
-
 func (pf *SystemSettingsData) Defaults() {
 	pf.Behavior.Defaults()
 	pf.FavPaths.SetToDefaults()
 	pf.UpdateUser()
 
-	pf.MenuMaxHeight = MenuMaxHeight
-	pf.CompleteWaitDuration = CompleteWaitDuration
-	pf.CompleteMaxItems = CompleteMaxItems
-	pf.CursorBlinkTime = CursorBlinkTime
-	pf.LayoutAutoScrollDelay = LayoutAutoScrollDelay
-	pf.LayoutPageSteps = LayoutPageSteps
-	pf.LayoutFocusNameTimeout = LayoutFocusNameTimeout
-	pf.LayoutFocusNameTabTime = LayoutFocusNameTabTime
-	pf.MenuMaxHeight = MenuMaxHeight
+	pf.MenuMaxHeight = 30
+	pf.CompleteWaitDuration = 0
+	pf.CompleteMaxItems = 25
+	pf.CursorBlinkTime = 500 * time.Millisecond
+	pf.LayoutAutoScrollDelay = 25 * time.Millisecond
+	pf.LayoutPageSteps = 10
+	pf.LayoutFocusNameTimeout = 500 * time.Millisecond
+	pf.LayoutFocusNameTabTime = 2000 * time.Millisecond
 	if TheViewIFace != nil {
 		TheViewIFace.PrefsDetDefaults(pf)
 	}
@@ -753,13 +753,6 @@ func (pf *SystemSettingsData) Apply() { //gti:add
 		}
 	}
 
-	MenuMaxHeight = pf.MenuMaxHeight
-	CompleteWaitDuration = pf.CompleteWaitDuration
-	CompleteMaxItems = pf.CompleteMaxItems
-	CursorBlinkTime = pf.CursorBlinkTime
-	LayoutFocusNameTimeout = pf.LayoutFocusNameTimeout
-	LayoutFocusNameTabTime = pf.LayoutFocusNameTabTime
-	MenuMaxHeight = pf.MenuMaxHeight
 	if TheViewIFace != nil {
 		TheViewIFace.PrefsDetApply(pf)
 	}
