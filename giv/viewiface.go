@@ -12,8 +12,7 @@ import (
 )
 
 // giv.ViewIFace is THE implementation of the gi.ViewIFace interface
-type ViewIFace struct {
-}
+type ViewIFace struct{}
 
 func (vi *ViewIFace) CallFunc(ctx gi.Widget, fun any) {
 	CallFunc(ctx, fun)
@@ -45,26 +44,4 @@ func (vi *ViewIFace) HiStyleInit() {
 
 func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
 	histyle.StyleDefault = hsty
-}
-
-func (vi *ViewIFace) PrefsDetDefaults(pf *gi.SystemSettingsData) {
-	// pf.TextEditorClipHistMax = TextEditorClipHistMax
-	// pf.TextBufMaxScopeLines = TextBufMaxScopeLines
-	// pf.TextBufDiffRevertLines = TextBufDiffRevertLines
-	// pf.TextBufDiffRevertDiffs = TextBufDiffRevertDiffs
-	// pf.TextBufMarkupDelayMSec = TextBufMarkupDelayMSec
-	pf.MapInlineLen = MapInlineLen
-	pf.StructInlineLen = StructInlineLen
-	pf.SliceInlineLen = SliceInlineLen
-}
-
-func (vi *ViewIFace) PrefsDetApply(pf *gi.SystemSettingsData) {
-	// TextEditorClipHistMax = pf.TextEditorClipHistMax
-	// TextBufMaxScopeLines = pf.TextBufMaxScopeLines
-	// TextBufDiffRevertLines = pf.TextBufDiffRevertLines
-	// TextBufDiffRevertDiffs = pf.TextBufDiffRevertDiffs
-	// TextBufMarkupDelayMSec = pf.TextBufMarkupDelayMSec
-	MapInlineLen = pf.MapInlineLen
-	StructInlineLen = pf.StructInlineLen
-	SliceInlineLen = pf.SliceInlineLen
 }

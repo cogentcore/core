@@ -71,20 +71,6 @@ func init() {
 	})
 }
 
-var (
-	// MapInlineLen is the number of map elements at or below which an inline
-	// representation of the map will be presented -- more convenient for small
-	// numbers of properties
-	MapInlineLen = 2
-
-	// StructInlineLen is the number of elemental struct fields at or below which an inline
-	// representation of the struct will be presented -- more convenient for small structs
-	StructInlineLen = 4
-
-	// SliceInlineLen is the number of slice elements at or below which inline will be used
-	SliceInlineLen = 4
-)
-
 //////////////////////////////////////////////////////////////////////////////
 //  Valuer -- an interface for selecting Value GUI representation of types
 
@@ -262,21 +248,21 @@ func ToValue(it any, tags string) Value {
 			return &RuneSliceValue{}
 		}
 		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
-		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
+		if !forceNoInline && (forceInline || (!isstru && sz <= gi.SystemSettings.SliceInlineLength && !ki.IsKi(eltyp))) {
 			return &SliceInlineValue{}
 		} else {
 			return &SliceValue{}
 		}
 	case vk == reflect.Map:
 		sz := laser.MapStructElsN(it)
-		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
+		if !forceNoInline && (forceInline || sz <= gi.SystemSettings.MapInlineLength) {
 			return &MapInlineValue{}
 		} else {
 			return &MapValue{}
 		}
 	case vk == reflect.Struct:
 		nfld := laser.AllFieldsN(nptyp)
-		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
+		if nfld > 0 && !forceNoInline && (forceInline || nfld <= gi.SystemSettings.StructInlineLength) {
 			return &StructInlineValue{}
 		} else {
 			return &StructValue{}

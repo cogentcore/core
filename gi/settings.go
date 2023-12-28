@@ -703,14 +703,16 @@ type SystemSettingsData struct { //gti:add
 	// number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
 	TextBufMarkupDelayMSec int `def:"1000" min:"100" step:"100"`
 
-	// the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
-	MapInlineLen int `def:"2" min:"1" step:"1"`
+	// the number of map elements at or below which an inline representation
+	// of the map will be presented, which is more convenient for small #'s of props
+	MapInlineLength int `def:"2" min:"1" step:"1"`
 
-	// the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
-	StructInlineLen int `def:"4" min:"2" step:"1"`
+	// the number of elemental struct fields at or below which an inline representation
+	// of the struct will be presented, which is more convenient for small structs
+	StructInlineLength int `def:"4" min:"2" step:"1"`
 
 	// the number of slice elements below which inline will be used
-	SliceInlineLen int `def:"4" min:"2" step:"1"`
+	SliceInlineLength int `def:"4" min:"2" step:"1"`
 }
 
 func (pf *SystemSettingsData) Defaults() {
@@ -726,15 +728,10 @@ func (pf *SystemSettingsData) Defaults() {
 	pf.LayoutPageSteps = 10
 	pf.LayoutFocusNameTimeout = 500 * time.Millisecond
 	pf.LayoutFocusNameTabTime = 2000 * time.Millisecond
-	if TheViewIFace != nil {
-		TheViewIFace.PrefsDetDefaults(pf)
-	}
-	// in giv:
-	// TextEditorClipHistMax
-	// TextBuf*
-	// MapInlineLen
-	// StructInlineLen
-	// SliceInlineLen
+
+	pf.MapInlineLength = 2
+	pf.StructInlineLength = 4
+	pf.SliceInlineLength = 4
 }
 
 // Apply detailed preferences to all the relevant settings.
@@ -752,16 +749,6 @@ func (pf *SystemSettingsData) Apply() { //gti:add
 			pf.FavPaths[i].Ic = "folder"
 		}
 	}
-
-	if TheViewIFace != nil {
-		TheViewIFace.PrefsDetApply(pf)
-	}
-	// in giv:
-	// TextEditorClipHistMax = pf.TextEditorClipHistMax
-	// TextBuf*
-	// MapInlineLen
-	// StructInlineLen
-	// SliceInlineLen
 }
 
 // TimeFormat returns the Go time format layout string that should

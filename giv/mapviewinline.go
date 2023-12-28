@@ -126,7 +126,7 @@ func (mv *MapViewInline) ConfigMap() bool {
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
 	laser.ValueSliceSort(keys, true)
 	for i, key := range keys {
-		if i >= MapInlineLen {
+		if i >= gi.SystemSettings.MapInlineLength {
 			break
 		}
 		kv := ToValue(key.Interface(), "")
