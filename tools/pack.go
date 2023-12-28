@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
 	"goki.dev/goki/packman"
+	"goki.dev/grows/images"
 	"goki.dev/xe"
 )
 
@@ -41,12 +43,18 @@ func Pack(c *config.Config) error { //gti:add
 
 // PackDarwin packages the app for macOS.
 func PackDarwin(c *config.Config) error {
+	// based on https://github.com/machinebox/appify
+
 	apath := filepath.Join(".goki", "bin", "pack", c.Name+".app")
 	cpath := filepath.Join(apath, "Contents")
 	mpath := filepath.Join(cpath, "MacOS")
 	rpath := filepath.Join(cpath, "Resources")
 
 	err := os.MkdirAll(mpath, 0777)
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(rpath, 0777)
 	if err != nil {
 		return err
 	}
@@ -64,6 +72,21 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
+	inm := filepath.Join(rpath, "icon.icns")
+	fdsi, err := os.Create(inm)
+	if err != nil {
+		return err
+	}
+	defer fdsi.Close()
+	sic, _, err := images.Open(filepath.Join(".goki", "icons", "1024.png"))
+	if err != nil {
+		return err
+	}
+	err = icns.Encode(fdsi, sic)
+	if err != nil {
+		return err
+	}
+
 	fplist, err := os.Create(filepath.Join(cpath, "Info.plist"))
 	if err != nil {
 		return err
@@ -76,7 +99,7 @@ func PackDarwin(c *config.Config) error {
 		Version:            c.Version,
 		InfoString:         c.Desc,
 		ShortVersionString: c.Version,
-		IconFile:           filepath.Join(rpath, "icon.icns"),
+		IconFile:           inm,
 	}
 	err = InfoPlistTmpl.Execute(fplist, ipd)
 	if err != nil {

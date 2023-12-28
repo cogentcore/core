@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/jackmordaunt/icns/v2 v2.2.7
 	goki.dev/colors v0.8.44
 	goki.dev/enums v0.9.56
 	goki.dev/gengo v0.3.15
@@ -52,6 +53,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	goki.dev/cam v0.9.49 // indirect
