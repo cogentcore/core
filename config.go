@@ -11,15 +11,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"goki.dev/glop/dirs"
 	"goki.dev/grog"
 )
 
-// TODO: can we get rid of ConfigFile somehow? we need it in greasi and probably other places too
+// TODO: can we get rid of ConfigFiles somehow? we need it in greasi and probably other places too
 
-// ConfigFile is the name of the config file actually loaded, specified by the
+// ConfigFile are the names of the config file actually loaded, specified by the
 // -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
 var ConfigFiles []string
 
@@ -127,7 +128,8 @@ type OnConfigurer interface {
 //   - Fall back on default config file name passed to `Config` function, if arg not found.
 //   - Read any `Include[s]` files in config file in deepest-first (natural) order,
 //     then the specified config file last.
-//   - if multiple config files are listed, then the first one that exists is used
+//   - If multiple config files are found, then they are applied in reverse order, meaning
+//     that the first specified file takes the highest precedence.
 //   - Process command-line args based on Config field names.
 //   - Boolean flags are set on with plain -flag; use No prefix to turn off
 //     (or explicitly set values to true or false).
@@ -199,6 +201,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		return "", err
 	}
 
+	slices.Reverse(cfgFiles)
 	ConfigFiles = cfgFiles
 	for _, fn := range cfgFiles {
 		err = OpenWithIncludes(opts, cfg, fn)
