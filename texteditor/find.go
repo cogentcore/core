@@ -345,8 +345,8 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	ed.QReplace.Matches = nil
 	ed.QReplace.Pos = -1
 
-	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.GeneralSettings.Params.SavedPathsMax)
-	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.GeneralSettings.Params.SavedPathsMax)
+	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.SystemSettings.Behavior.SavedPathsMax)
+	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.SystemSettings.Behavior.SavedPathsMax)
 
 	ed.QReplaceMatches()
 	ed.QReplace.Pos, _ = ed.MatchFromPos(ed.QReplace.Matches, ed.CursorPos)

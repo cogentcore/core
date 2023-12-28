@@ -297,7 +297,7 @@ func (fv *FileView) ConfigPathBar() {
 	pf.OnChange(func(e events.Event) {
 		sp := pf.CurVal.(string)
 		if sp == gi.FileViewResetPaths {
-			gi.SavedPaths = make(gi.FilePaths, 1, gi.GeneralSettings.Params.SavedPathsMax)
+			gi.SavedPaths = make(gi.FilePaths, 1, gi.SystemSettings.Behavior.SavedPathsMax)
 			gi.SavedPaths[0] = fv.DirPath
 			pf.SetStrings(([]string)(gi.SavedPaths), true, 0)
 			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
@@ -339,7 +339,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 	sv.SelIdx = -1
 	sv.SetReadOnly(true)
-	sv.SetSlice(&gi.GeneralSettings.FavPaths)
+	sv.SetSlice(&gi.SystemSettings.FavPaths)
 	sv.OnSelect(func(e events.Event) {
 		fv.FavSelect(sv.SelIdx)
 	})
@@ -396,8 +396,8 @@ func (fv *FileView) ConfigFilesRow() {
 		}
 	}
 
-	if gi.GeneralSettings.FileViewSort != "" {
-		fsv.SetSortFieldName(gi.GeneralSettings.FileViewSort)
+	if gi.SystemSettings.FileViewSort != "" {
+		fsv.SetSortFieldName(gi.SystemSettings.FileViewSort)
 	}
 	fsv.OnSelect(func(e events.Event) {
 		fv.FileSelectAction(fsv.SelIdx)
@@ -581,7 +581,7 @@ func (fv *FileView) UpdateFiles() {
 	if len(gi.SavedPaths) == 0 {
 		gi.OpenPaths()
 	}
-	gi.SavedPaths.AddPath(fv.DirPath, gi.GeneralSettings.Params.SavedPathsMax)
+	gi.SavedPaths.AddPath(fv.DirPath, gi.SystemSettings.Behavior.SavedPathsMax)
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
 	pf.SetStrings(sp, true, 0)
@@ -648,14 +648,14 @@ func (fv *FileView) AddPathToFavs() {
 	if fnm == "" {
 		fnm = dp
 	}
-	if _, found := gi.GeneralSettings.FavPaths.FindPath(dp); found {
+	if _, found := gi.SystemSettings.FavPaths.FindPath(dp); found {
 		// TODO(kai/snack)
 		// gi.PromptDialog(fv, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp), Ok: true, Cancel: false}, nil)
 		return
 	}
 	fi := gi.FavPathItem{"folder", fnm, dp}
-	gi.GeneralSettings.FavPaths = append(gi.GeneralSettings.FavPaths, fi)
-	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.GeneralSettings), "Error saving settings")
+	gi.SystemSettings.FavPaths = append(gi.SystemSettings.FavPaths, fi)
+	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
 	fv.UpdateFavs()
 }
@@ -768,10 +768,10 @@ func (fv *FileView) SetExtAction(ext string) *FileView {
 
 // FavSelect selects a favorite path and goes there
 func (fv *FileView) FavSelect(idx int) {
-	if idx < 0 || idx >= len(gi.GeneralSettings.FavPaths) {
+	if idx < 0 || idx >= len(gi.SystemSettings.FavPaths) {
 		return
 	}
-	fi := gi.GeneralSettings.FavPaths[idx]
+	fi := gi.SystemSettings.FavPaths[idx]
 	fv.DirPath, _ = homedir.Expand(fi.Path)
 	fv.UpdateFilesAction()
 }
@@ -782,9 +782,9 @@ func (fv *FileView) SaveSortPrefs() {
 	if sv == nil {
 		return
 	}
-	gi.GeneralSettings.FileViewSort = sv.SortFieldName()
+	gi.SystemSettings.FileViewSort = sv.SortFieldName()
 	// fmt.Printf("sort: %v\n", gi.Prefs.FileViewSort)
-	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.GeneralSettings), "Error saving settings")
+	gi.ErrorSnackbar(fv, gi.SaveSettings(gi.SystemSettings), "Error saving settings")
 }
 
 func (fv *FileView) ApplyStyle() {

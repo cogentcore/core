@@ -30,7 +30,7 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 	punq := fn.PathFrom(froot) // note: ki paths have . escaped -> \,
 	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
-	if int(fn.Info.Size) < gi.GeneralSettings.Params.BigFileSize {
+	if int(fn.Info.Size) < gi.SystemSettings.Behavior.BigFileSize {
 		in, err := os.Open(path)
 		if err != nil {
 			slog.Error(err.Error())
