@@ -8,6 +8,20 @@ import (
 )
 
 var _ = gti.AddFunc(&gti.Func{
+	Name: "goki.dev/goki/tools.Icons",
+	Doc:  "Icons converts the icon located at .goki/icons/svg.svg into various\ndifferent formats and sizes necessary for app packaging. If no such\nicon exists, it sets it to a placeholder icon, a blue version of\n[icons.SelectWindow]. It is run automatically for apps (not libraries)\nin goki init.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+})
+
+var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/tools.Init",
 	Doc:  "Init initializes the \".goki\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.",
 	Directives: gti.Directives{

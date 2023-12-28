@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
+	goki.dev/colors v0.8.44
 	goki.dev/enums v0.9.56
 	goki.dev/gengo v0.3.15
 	goki.dev/grease v0.8.44
@@ -11,7 +12,9 @@ require (
 	goki.dev/grog v0.0.27
 	goki.dev/grows v0.3.31
 	goki.dev/gti v0.1.32
+	goki.dev/icons v0.0.17
 	goki.dev/ordmap v0.5.10
+	goki.dev/svg v0.1.28
 	goki.dev/xe v0.0.28
 	golang.org/x/mod v0.14.0
 	golang.org/x/tools v0.16.1
@@ -51,7 +54,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	goki.dev/cam v0.9.49 // indirect
-	goki.dev/colors v0.8.44 // indirect
 	goki.dev/cursors v0.0.32 // indirect
 	goki.dev/fi v0.1.19 // indirect
 	goki.dev/gi/v2 v2.0.0-dev0.0.28 // indirect
@@ -59,7 +61,6 @@ require (
 	goki.dev/glop v0.1.10 // indirect
 	goki.dev/goosi v0.0.25 // indirect
 	goki.dev/grr v0.0.12 // indirect
-	goki.dev/icons v0.0.17 // indirect
 	goki.dev/jsfs v0.0.2 // indirect
 	goki.dev/ki/v2 v2.0.0-dev0.0.33 // indirect
 	goki.dev/laser v0.1.34 // indirect
@@ -67,7 +68,6 @@ require (
 	goki.dev/pi/v2 v2.0.0-dev0.0.26 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.5 // indirect
 	goki.dev/spell v0.1.15 // indirect
-	goki.dev/svg v0.1.28 // indirect
 	goki.dev/vci/v2 v2.0.0-dev0.0.32 // indirect
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.30 // indirect
 	golang.org/x/image v0.14.0 // indirect
