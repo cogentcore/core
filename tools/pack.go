@@ -59,15 +59,11 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", filepath.Join(".goki", "bin", "build", c.Name), mpath)
+	err = xe.Run("cp -p", c.Build.Output, mpath)
 	if err != nil {
 		return err
 	}
 	err = xe.Run("chmod", "+x", mpath)
-	if err != nil {
-		return err
-	}
-	err = xe.Run("chmod", "+x", filepath.Join(mpath, c.Name))
 	if err != nil {
 		return err
 	}
