@@ -1725,6 +1725,7 @@ var TableViewType = gti.AddType(&gti.Type{
 		{"StruType", &gti.Field{Name: "StruType", Type: "reflect.Type", LocalType: "reflect.Type", Doc: "struct type for each row", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"VisFields", &gti.Field{Name: "VisFields", Type: "[]reflect.StructField", LocalType: "[]reflect.StructField", Doc: "the visible fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"NVisFields", &gti.Field{Name: "NVisFields", Type: "int", LocalType: "int", Doc: "number of visible fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"HeaderWidths", &gti.Field{Name: "HeaderWidths", Type: "[]int", LocalType: "[]int", Doc: "HeaderWidths has number of characters in each header, per visfields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "goki.dev/gi/v2/giv.SliceViewBase", LocalType: "SliceViewBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1797,6 +1798,13 @@ func (t *TableView) SetVisFields(v []reflect.StructField) *TableView {
 // number of visible fields
 func (t *TableView) SetNvisFields(v int) *TableView {
 	t.NVisFields = v
+	return t
+}
+
+// SetHeaderWidths sets the [TableView.HeaderWidths]:
+// HeaderWidths has number of characters in each header, per visfields
+func (t *TableView) SetHeaderWidths(v []int) *TableView {
+	t.HeaderWidths = v
 	return t
 }
 

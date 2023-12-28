@@ -70,7 +70,7 @@ func (mgr *WinGeomPrefsMgr) Init() {
 	if mgr.Geoms == nil {
 		mgr.Geoms = make(WinGeomPrefs, 1000)
 		mgr.ResetCache()
-		mgr.FileName = "win_geom_prefs"
+		mgr.FileName = "win-geom-prefs"
 		mgr.LockSleep = 100 * time.Millisecond
 		mgr.SaveDelay = 1 * time.Second
 	}

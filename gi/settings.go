@@ -196,27 +196,27 @@ type AppearanceSettingsData struct { //gti:add
 // your user explicitly states a preference for a specific color.
 var OverrideSettingsColor = false
 
-func (pf *AppearanceSettingsData) Defaults() {
-	pf.Theme = ThemeAuto
-	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
-	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
-	pf.Zoom = 100
-	pf.Spacing = 100
-	pf.FontSize = 100
-	pf.FontFamily = "Roboto"
-	pf.MonoFont = "Roboto Mono"
+func (as *AppearanceSettingsData) Defaults() {
+	as.Theme = ThemeAuto
+	as.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
+	as.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
+	as.Zoom = 100
+	as.Spacing = 100
+	as.FontSize = 100
+	as.FontFamily = "Roboto"
+	as.MonoFont = "Roboto Mono"
 }
 
-func (pf *AppearanceSettingsData) Apply() { //gti:add
+func (as *AppearanceSettingsData) Apply() { //gti:add
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
 	// which means that we will always override the color, even without OverridePrefsColor
-	if !OverrideSettingsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
-		colors.SetSchemes(pf.Color)
+	if !OverrideSettingsColor && as.Color != (color.RGBA{66, 133, 244, 255}) {
+		colors.SetSchemes(as.Color)
 	}
 	// TODO(kai): figure out transparency approach
 	// colors.Schemes.Dark.Background.A = 250
 	// colors.Schemes.Light.Background.A = 250
-	switch pf.Theme {
+	switch as.Theme {
 	case ThemeLight:
 		colors.SetScheme(false)
 	case ThemeDark:
@@ -224,22 +224,22 @@ func (pf *AppearanceSettingsData) Apply() { //gti:add
 	case ThemeAuto:
 		colors.SetScheme(goosi.TheApp.IsDark())
 	}
-	if pf.HiStyle == "" {
-		pf.HiStyle = "emacs" // todo: need light / dark versions
+	if as.HiStyle == "" {
+		as.HiStyle = "emacs" // todo: need light / dark versions
 	}
 
 	if TheViewInterface != nil {
-		TheViewInterface.SetHiStyleDefault(pf.HiStyle)
+		TheViewInterface.SetHiStyleDefault(as.HiStyle)
 	}
 
-	pf.ApplyDPI()
+	as.ApplyDPI()
 }
 
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
-func (pf *AppearanceSettingsData) ApplyDPI() {
+func (as *AppearanceSettingsData) ApplyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
-	goosi.LogicalDPIScale = pf.Zoom / 100
+	goosi.LogicalDPIScale = as.Zoom / 100
 	// fmt.Println("goosi ldpi:", goosi.LogicalDPIScale)
 	n := goosi.TheApp.NScreens()
 	for i := 0; i < n; i++ {
@@ -247,7 +247,7 @@ func (pf *AppearanceSettingsData) ApplyDPI() {
 		if sc == nil {
 			continue
 		}
-		if scp, ok := pf.ScreenPrefs[sc.Name]; ok {
+		if scp, ok := as.ScreenPrefs[sc.Name]; ok {
 			// zoom is percentage, but LogicalDPIScale is multiplier
 			goosi.SetLogicalDPIScale(sc.Name, scp.Zoom/100)
 		}
@@ -284,32 +284,16 @@ func (pf *GeneralSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
 }
 */
 
-// ScreenInfo returns screen info for all screens on the device
-func (pf *AppearanceSettingsData) ScreenInfo() []*goosi.Screen { //gti:add
-	ns := goosi.TheApp.NScreens()
-	res := make([]*goosi.Screen, ns)
-	for i := 0; i < ns; i++ {
-		res[i] = goosi.TheApp.Screen(i)
-	}
-	return res
-}
-
-// VersionInfo returns GoGi version information
-func (pf *AppearanceSettingsData) VersionInfo() string { //gti:add
-	vinfo := "Version: " + Version + "\nDate: " + VersionDate + " UTC\nGit commit: " + GitCommit
-	return vinfo
-}
-
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (pf *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
+func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
-func (pf *AppearanceSettingsData) EditHiStyles() { //gti:add
+func (as *AppearanceSettingsData) EditHiStyles() { //gti:add
 	TheViewInterface.HiStylesView(false) // false = custom
 }
 
@@ -332,11 +316,11 @@ const (
 // DensityMul returns an enum value representing the type
 // of density that the user has selected, based on a set of
 // fixed breakpoints.
-func (pf *AppearanceSettingsData) DensityType() Densities {
+func (as *AppearanceSettingsData) DensityType() Densities {
 	switch {
-	case pf.Spacing < 50:
+	case as.Spacing < 50:
 		return DensityCompact
-	case pf.Spacing > 150:
+	case as.Spacing > 150:
 		return DensitySpread
 	default:
 		return DensityMedium
@@ -522,45 +506,45 @@ type SystemSettingsData struct { //gti:add
 	SliceInlineLength int `def:"4" min:"2" step:"1"`
 }
 
-func (pf *SystemSettingsData) Defaults() {
-	pf.Behavior.Defaults()
-	pf.Editor.Defaults()
-	pf.FavPaths.SetToDefaults()
-	pf.UpdateUser()
+func (ss *SystemSettingsData) Defaults() {
+	ss.Behavior.Defaults()
+	ss.Editor.Defaults()
+	ss.FavPaths.SetToDefaults()
+	ss.UpdateUser()
 
-	pf.MenuMaxHeight = 30
-	pf.CompleteWaitDuration = 0
-	pf.CompleteMaxItems = 25
-	pf.CursorBlinkTime = 500 * time.Millisecond
-	pf.LayoutAutoScrollDelay = 25 * time.Millisecond
-	pf.LayoutPageSteps = 10
-	pf.LayoutFocusNameTimeout = 500 * time.Millisecond
-	pf.LayoutFocusNameTabTime = 2000 * time.Millisecond
+	ss.MenuMaxHeight = 30
+	ss.CompleteWaitDuration = 0
+	ss.CompleteMaxItems = 25
+	ss.CursorBlinkTime = 500 * time.Millisecond
+	ss.LayoutAutoScrollDelay = 25 * time.Millisecond
+	ss.LayoutPageSteps = 10
+	ss.LayoutFocusNameTimeout = 500 * time.Millisecond
+	ss.LayoutFocusNameTabTime = 2000 * time.Millisecond
 
-	pf.TextEditorClipHistMax = 100
-	pf.TextBufMaxScopeLines = 100
-	pf.TextBufDiffRevertLines = 10000
-	pf.TextBufDiffRevertDiffs = 20
-	pf.TextBufMarkupDelay = time.Second
+	ss.TextEditorClipHistMax = 100
+	ss.TextBufMaxScopeLines = 100
+	ss.TextBufDiffRevertLines = 10000
+	ss.TextBufDiffRevertDiffs = 20
+	ss.TextBufMarkupDelay = time.Second
 
-	pf.MapInlineLength = 2
-	pf.StructInlineLength = 4
-	pf.SliceInlineLength = 4
+	ss.MapInlineLength = 2
+	ss.StructInlineLength = 4
+	ss.SliceInlineLength = 4
 }
 
 // Apply detailed preferences to all the relevant settings.
-func (pf *SystemSettingsData) Apply() { //gti:add
-	if pf.FontPaths != nil {
-		paths := append(pf.FontPaths, paint.FontPaths...)
+func (ss *SystemSettingsData) Apply() { //gti:add
+	if ss.FontPaths != nil {
+		paths := append(ss.FontPaths, paint.FontPaths...)
 		paint.FontLibrary.InitFontPaths(paths...)
 	} else {
 		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 	}
 
-	np := len(pf.FavPaths)
+	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
-		if pf.FavPaths[i].Ic == "" {
-			pf.FavPaths[i].Ic = "folder"
+		if ss.FavPaths[i].Ic == "" {
+			ss.FavPaths[i].Ic = "folder"
 		}
 	}
 }
@@ -568,18 +552,18 @@ func (pf *SystemSettingsData) Apply() { //gti:add
 // TimeFormat returns the Go time format layout string that should
 // be used for displaying times to the user, based on the value of
 // [SystemSettingsData.Clock24].
-func (pf *SystemSettingsData) TimeFormat() string {
-	if pf.Clock24 {
+func (ss *SystemSettingsData) TimeFormat() string {
+	if ss.Clock24 {
 		return "15:04"
 	}
 	return "3:04 PM"
 }
 
 // UpdateUser gets the user info from the OS
-func (pf *SystemSettingsData) UpdateUser() {
+func (ss *SystemSettingsData) UpdateUser() {
 	usr, err := user.Current()
 	if err == nil {
-		pf.User.User = *usr
+		ss.User.User = *usr
 	}
 }
 
@@ -605,13 +589,13 @@ type BehaviorSettings struct { //gti:add
 	Smooth3D bool
 }
 
-func (pf *BehaviorSettings) Defaults() {
-	pf.LocalMainMenu = true // much better
-	pf.OnlyCloseActiveTab = false
-	pf.ZebraStripeWeight = 0
-	pf.BigFileSize = 10000000
-	pf.SavedPathsMax = 50
-	pf.Smooth3D = true
+func (bs *BehaviorSettings) Defaults() {
+	bs.LocalMainMenu = true // much better
+	bs.OnlyCloseActiveTab = false
+	bs.ZebraStripeWeight = 0
+	bs.BigFileSize = 10000000
+	bs.SavedPathsMax = 50
+	bs.Smooth3D = true
 }
 
 // User basic user information that might be needed for different apps
@@ -722,23 +706,23 @@ type FilePaths []string
 var SavedPaths FilePaths
 
 // Open file paths from a json-formatted file.
-func (pf *FilePaths) Open(filename string) error { //gti:add
-	return grr.Log(jsons.Open(pf, filename))
+func (fp *FilePaths) Open(filename string) error { //gti:add
+	return grr.Log(jsons.Open(fp, filename))
 }
 
 // Save file paths to a json-formatted file.
-func (pf *FilePaths) Save(filename string) error { //gti:add
-	return grr.Log(jsons.Save(pf, filename))
+func (fp *FilePaths) Save(filename string) error { //gti:add
+	return grr.Log(jsons.Save(fp, filename))
 }
 
 // AddPath inserts a path to the file paths (at the start), subject to max
 // length -- if path is already on the list then it is moved to the start.
-func (pf *FilePaths) AddPath(path string, max int) {
-	StringsInsertFirstUnique((*[]string)(pf), path, max)
+func (fp *FilePaths) AddPath(path string, max int) {
+	StringsInsertFirstUnique((*[]string)(fp), path, max)
 }
 
 // SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory
-var SavedPathsFileName = "saved_paths.json"
+var SavedPathsFileName = "saved-paths.json"
 
 // FileViewResetPaths defines a string that is added as an item to the recents menu
 var FileViewResetPaths = "<i>Reset Paths</i>"
