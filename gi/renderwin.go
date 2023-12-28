@@ -38,13 +38,6 @@ func Wait() {
 var CurRenderWin *RenderWin
 
 var (
-	// LocalMainMenu controls whether the main menu is displayed locally at top of
-	// each window, in addition to the global menu at the top of the screen.  Mac
-	// native apps do not do this, but OTOH it makes things more consistent with
-	// other platforms, and with larger screens, it can be convenient to have
-	// access to all the menu items right there.  Controlled by Prefs.Params
-	// variable.
-	LocalMainMenu = false
 
 	// WinNewCloseTime records last time a new window was opened or another
 	// closed -- used to trigger updating of RenderWin menus on each window.

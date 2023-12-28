@@ -34,8 +34,8 @@ import (
 // settings by default and should be modified by other apps to add their
 // app settings.
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
+	{"Appearance", GeneralSettings},
 	{"System", SystemSettings},
-	{"General", GeneralSettings},
 	{"Devices", DeviceSettings},
 	{"Debugging", DebugSettings},
 })
@@ -79,7 +79,6 @@ func OpenSettings(se Settings) error {
 // SaveSettings saves the given settings to their [Settings.Filename].
 // It encodes the settings in TOML.
 func SaveSettings(se Settings) error {
-	// fmt.Println(se.Filename())
 	return tomls.Save(se, se.Filename())
 }
 
@@ -158,20 +157,11 @@ type GeneralSettingsData struct { //gti:add
 	// of the default font size (higher numbers lead to larger text)
 	FontSize float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
 
-	// screen-specific preferences -- will override overall defaults if set
+	// screen-specific preferences, which will override overall defaults if set
 	ScreenPrefs map[string]ScreenSettings
 
 	// text highlighting style / theme
 	HiStyle HiStyleName
-
-	// whether to use a 24-hour clock (instead of AM and PM)
-	Clock24 bool `label:"24-hour clock"`
-
-	// parameters controlling GUI behavior
-	Params ParamSettings
-
-	// editor preferences -- for TextEditor etc
-	Editor EditorSettings
 
 	// default font family when otherwise not specified
 	FontFamily FontName
@@ -179,17 +169,8 @@ type GeneralSettingsData struct { //gti:add
 	// default mono-spaced font family
 	MonoFont FontName
 
-	// extra font paths, beyond system defaults -- searched first
-	FontPaths []string
-
-	// user info -- partially filled-out automatically if empty / when prefs first created
-	User User
-
-	// favorite paths, shown in FileViewer and also editable there
-	FavPaths FavPaths
-
-	// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
-	FileViewSort string `view:"-"`
+	// editor preferences -- for TextEditor etc
+	Editor EditorSettings
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
@@ -215,12 +196,9 @@ func (pf *GeneralSettingsData) Defaults() {
 	pf.Zoom = 100
 	pf.Spacing = 100
 	pf.FontSize = 100
-	pf.Params.Defaults()
 	pf.Editor.Defaults()
-	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Roboto"
 	pf.MonoFont = "Roboto Mono"
-	pf.UpdateUser()
 }
 
 // UpdateAll updates all windows and triggers a full render rebuild.
@@ -234,14 +212,7 @@ func UpdateAll() { //gti:add
 	}
 }
 
-// Apply applies the settings.
 func (pf *GeneralSettingsData) Apply() { //gti:add
-	np := len(pf.FavPaths)
-	for i := 0; i < np; i++ {
-		if pf.FavPaths[i].Ic == "" {
-			pf.FavPaths[i].Ic = "folder"
-		}
-	}
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
 	// which means that we will always override the color, even without OverridePrefsColor
 	if !OverrideSettingsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
@@ -265,14 +236,7 @@ func (pf *GeneralSettingsData) Apply() { //gti:add
 	if TheViewIFace != nil {
 		TheViewIFace.SetHiStyleDefault(pf.HiStyle)
 	}
-	LocalMainMenu = pf.Params.LocalMainMenu
 
-	if pf.FontPaths != nil {
-		paths := append(pf.FontPaths, paint.FontPaths...)
-		paint.FontLibrary.InitFontPaths(paths...)
-	} else {
-		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
-	}
 	pf.ApplyDPI()
 }
 
@@ -354,20 +318,6 @@ func (pf *GeneralSettingsData) EditHiStyles() { //gti:add
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
-// UpdateUser gets the user info from the OS
-func (pf *GeneralSettingsData) UpdateUser() {
-	usr, err := user.Current()
-	if err == nil {
-		pf.User.User = *usr
-	}
-}
-
-// PrefFontFamily returns the default FontFamily
-func (pf *GeneralSettingsData) PrefFontFamily() string {
-	// TODO: where should this go?
-	return string(pf.FontFamily)
-}
-
 // Densities is an enum representing the different
 // density options in user preferences
 type Densities int32 //enums:enum -trimprefix Density
@@ -396,16 +346,6 @@ func (pf *GeneralSettingsData) DensityType() Densities {
 	default:
 		return DensityMedium
 	}
-}
-
-// TimeFormat returns the Go time format layout string that should
-// be used for displaying times to the user, based on the value of
-// [Prefs.Clock24].
-func (pf *GeneralSettingsData) TimeFormat() string {
-	if pf.Clock24 {
-		return "15:04"
-	}
-	return "3:04 PM"
 }
 
 // DeviceSettings are the global device settings.
@@ -500,8 +440,8 @@ type ScreenSettings struct { //gti:add
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 }
 
-// ParamSettings contains misc parameters controlling GUI behavior.
-type ParamSettings struct { //gti:add
+// BehaviorSettings contains misc parameters controlling GUI behavior.
+type BehaviorSettings struct { //gti:add
 
 	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
 	LocalMainMenu bool
@@ -522,7 +462,7 @@ type ParamSettings struct { //gti:add
 	Smooth3D bool
 }
 
-func (pf *ParamSettings) Defaults() {
+func (pf *BehaviorSettings) Defaults() {
 	pf.LocalMainMenu = true // much better
 	pf.OnlyCloseActiveTab = false
 	pf.ZebraStripeWeight = 0
@@ -574,15 +514,14 @@ type EditorSettings struct { //gti:add
 	DepthColor bool `xml:"depth-color"`
 }
 
-// Defaults are the defaults for EditorPrefs
-func (pf *EditorSettings) Defaults() {
-	pf.TabSize = 4
-	pf.WordWrap = true
-	pf.LineNos = true
-	pf.Completion = true
-	pf.SpellCorrect = true
-	pf.AutoIndent = true
-	pf.DepthColor = true
+func (es *EditorSettings) Defaults() {
+	es.TabSize = 4
+	es.WordWrap = true
+	es.LineNos = true
+	es.Completion = true
+	es.SpellCorrect = true
+	es.AutoIndent = true
+	es.DepthColor = true
 }
 
 //////////////////////////////////////////////////////////////////
@@ -696,6 +635,24 @@ func OpenPaths() {
 type SystemSettingsData struct { //gti:add
 	SettingsBase
 
+	// settings controlling app behavior
+	Behavior BehaviorSettings
+
+	// whether to use a 24-hour clock (instead of AM and PM)
+	Clock24 bool `label:"24-hour clock"`
+
+	// extra font paths, beyond system defaults -- searched first
+	FontPaths []string
+
+	// user info -- partially filled-out automatically if empty / when prefs first created
+	User User
+
+	// favorite paths, shown in FileViewer and also editable there
+	FavPaths FavPaths
+
+	// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
+	FileViewSort string `view:"-"`
+
 	// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1"`
 
@@ -755,9 +712,11 @@ var SystemSettings = &SystemSettingsData{
 	},
 }
 
-// Defaults gets current values of parameters, which are effectively
-// defaults
 func (pf *SystemSettingsData) Defaults() {
+	pf.Behavior.Defaults()
+	pf.FavPaths.SetToDefaults()
+	pf.UpdateUser()
+
 	pf.MenuMaxHeight = MenuMaxHeight
 	pf.CompleteWaitDuration = CompleteWaitDuration
 	pf.CompleteMaxItems = CompleteMaxItems
@@ -780,6 +739,20 @@ func (pf *SystemSettingsData) Defaults() {
 
 // Apply detailed preferences to all the relevant settings.
 func (pf *SystemSettingsData) Apply() { //gti:add
+	if pf.FontPaths != nil {
+		paths := append(pf.FontPaths, paint.FontPaths...)
+		paint.FontLibrary.InitFontPaths(paths...)
+	} else {
+		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
+	}
+
+	np := len(pf.FavPaths)
+	for i := 0; i < np; i++ {
+		if pf.FavPaths[i].Ic == "" {
+			pf.FavPaths[i].Ic = "folder"
+		}
+	}
+
 	MenuMaxHeight = pf.MenuMaxHeight
 	CompleteWaitDuration = pf.CompleteWaitDuration
 	CompleteMaxItems = pf.CompleteMaxItems
@@ -798,8 +771,26 @@ func (pf *SystemSettingsData) Apply() { //gti:add
 	// SliceInlineLen
 }
 
+// TimeFormat returns the Go time format layout string that should
+// be used for displaying times to the user, based on the value of
+// [SystemSettingsData.Clock24].
+func (pf *SystemSettingsData) TimeFormat() string {
+	if pf.Clock24 {
+		return "15:04"
+	}
+	return "3:04 PM"
+}
+
+// UpdateUser gets the user info from the OS
+func (pf *SystemSettingsData) UpdateUser() {
+	usr, err := user.Current()
+	if err == nil {
+		pf.User.User = *usr
+	}
+}
+
 //////////////////////////////////////////////////////////////////
-//  PrefsDebug
+//  DebugSettings
 
 // DebugSettingsData is the data type for debugging settings.
 type DebugSettingsData struct { //gti:add
