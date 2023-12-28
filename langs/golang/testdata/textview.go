@@ -3882,7 +3882,7 @@ func (tv *TextView) ShiftSelectExtend(kt *key.ChordEvent) {
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tv *TextView) KeyInput(kt *key.ChordEvent) {
-	if gi.KeyEventTrace {
+	if gi.DebugSettings.KeyEventTrace {
 		fmt.Printf("TextView KeyInput: %v\n", tv.PathUnique())
 	}
 	kf := keyfun.(kt.Chord())
