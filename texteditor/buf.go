@@ -36,25 +36,6 @@ import (
 	"goki.dev/spell"
 )
 
-var (
-	// BufMaxScopeLines is the maximum lines to search for a scope marker, e.g. '}'
-	BufMaxScopeLines = 100
-
-	// BufDiffRevertLines is max number of lines to use the
-	// diff-based revert, which results in faster reverts but only
-	// if the file isn't too big..
-	BufDiffRevertLines = 10000
-
-	// BufDiffRevertDiffs is max number of difference regions
-	// to apply for diff-based revert otherwise just reopens file
-	BufDiffRevertDiffs = 20
-
-	// BufMarkupDelayMSec is the number of milliseconds to wait
-	// before starting a new background markup process, after
-	// text is entered in the line
-	BufMarkupDelayMSec = 1000
-)
-
 // Buf is a buffer of text, which can be viewed by View(s).
 // It holds the raw text lines (in original string and rune formats,
 // and marked-up from syntax highlighting), and sends signals for making
@@ -571,7 +552,7 @@ func (tb *Buf) Revert() bool {
 	}
 
 	didDiff := false
-	if tb.NLines < BufDiffRevertLines {
+	if tb.NLines < gi.SystemSettings.TextBufDiffRevertLines {
 		ob := NewBuf()
 		err := ob.OpenFile(tb.Filename)
 		if err != nil {
@@ -584,9 +565,9 @@ func (tb *Buf) Revert() bool {
 			return false
 		}
 		tb.Stat() // "own" the new file..
-		if ob.NLines < BufDiffRevertLines {
+		if ob.NLines < gi.SystemSettings.TextBufDiffRevertLines {
 			diffs := tb.DiffBufs(ob)
-			if len(diffs) < BufDiffRevertDiffs {
+			if len(diffs) < gi.SystemSettings.TextBufDiffRevertDiffs {
 				tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 				didDiff = true
 			}
@@ -1083,7 +1064,7 @@ func (tb *Buf) BraceMatch(r rune, st lex.Pos) (en lex.Pos, found bool) {
 	defer tb.LinesMu.RUnlock()
 	tb.MarkupMu.RLock()
 	defer tb.MarkupMu.RUnlock()
-	return lex.BraceMatch(tb.Lines, tb.HiTags, r, st, BufMaxScopeLines)
+	return lex.BraceMatch(tb.Lines, tb.HiTags, r, st, gi.SystemSettings.TextBufMaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1715,12 +1696,11 @@ func (tb *Buf) StartDelayedReMarkup() {
 	if tb.Complete != nil && tb.Complete.IsAboutToShow() {
 		return
 	}
-	tb.MarkupDelayTimer = time.AfterFunc(time.Duration(BufMarkupDelayMSec)*time.Millisecond,
-		func() {
-			// fmt.Printf("delayed remarkup\n")
-			tb.MarkupDelayTimer = nil
-			tb.ReMarkup()
-		})
+	tb.MarkupDelayTimer = time.AfterFunc(gi.SystemSettings.TextBufMarkupDelay, func() {
+		// fmt.Printf("delayed remarkup\n")
+		tb.MarkupDelayTimer = nil
+		tb.ReMarkup()
+	})
 }
 
 // StopDelayedReMarkup stops timer for doing markup after an interval

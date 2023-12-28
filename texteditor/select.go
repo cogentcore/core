@@ -289,12 +289,9 @@ func (ed *Editor) RenderSelectLines() {
 // ViewClipHistory is the text view clipboard history -- everything that has been copied
 var ViewClipHistory [][]byte
 
-// Maximum amount of clipboard history to retain
-var ViewClipHistMax = 100
-
 // ViewClipHistAdd adds the given clipboard bytes to top of history stack
 func ViewClipHistAdd(clip []byte) {
-	max := ViewClipHistMax
+	max := gi.SystemSettings.TextEditorClipHistMax
 	if ViewClipHistory == nil {
 		ViewClipHistory = make([][]byte, 0, max)
 	}

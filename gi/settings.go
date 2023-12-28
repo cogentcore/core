@@ -700,8 +700,8 @@ type SystemSettingsData struct { //gti:add
 	// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
 	TextBufDiffRevertDiffs int `def:"20" min:"0" step:"1"`
 
-	// number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-	TextBufMarkupDelayMSec int `def:"1000" min:"100" step:"100"`
+	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
+	TextBufMarkupDelay time.Duration `def:"1000" min:"100" step:"100"`
 
 	// the number of map elements at or below which an inline representation
 	// of the map will be presented, which is more convenient for small #'s of props
@@ -728,6 +728,12 @@ func (pf *SystemSettingsData) Defaults() {
 	pf.LayoutPageSteps = 10
 	pf.LayoutFocusNameTimeout = 500 * time.Millisecond
 	pf.LayoutFocusNameTabTime = 2000 * time.Millisecond
+
+	pf.TextEditorClipHistMax = 100
+	pf.TextBufMaxScopeLines = 100
+	pf.TextBufDiffRevertLines = 10000
+	pf.TextBufDiffRevertDiffs = 20
+	pf.TextBufMarkupDelay = time.Second
 
 	pf.MapInlineLength = 2
 	pf.StructInlineLength = 4
