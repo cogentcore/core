@@ -17,10 +17,8 @@ import (
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
-	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
@@ -43,8 +41,8 @@ func app() {
 	b.NewWindow().Run().Wait()
 }
 
-//go:embed .goki/icons/512.png
-var giLogo embed.FS
+//go:embed .goki/icon.svg
+var giIcon embed.FS
 
 func makeHome(ts *gi.Tabs) {
 	home := ts.NewTab("Home")
@@ -55,11 +53,11 @@ func makeHome(ts *gi.Tabs) {
 		s.Text.Align = styles.Center
 	})
 
-	img := gi.NewImage(home)
-	grr.Log(img.OpenImageFS(giLogo, ".goki/icons/512.png"))
-	img.Style(func(s *styles.Style) {
-		s.Min.Set(units.Dp(256))
-	})
+	// sv := gi.NewSVG(home)
+	// grr.Log(sv.OpenFS(giIcon, ".goki/icon.svg"))
+	// sv.Style(func(s *styles.Style) {
+	// 	s.Min.Set(units.Dp(256))
+	// })
 
 	gi.NewLabel(home).SetType(gi.LabelDisplayLarge).SetText("The GoGi Demo")
 

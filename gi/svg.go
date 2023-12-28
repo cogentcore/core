@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"io/fs"
 
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
@@ -116,6 +117,11 @@ func (sv *SVG) HandleEvents() {
 // OpenSVG opens an XML-formatted SVG file
 func (sv *SVG) OpenSVG(filename FileName) error { //gti:add
 	return sv.SVG.OpenXML(string(filename))
+}
+
+// OpenSVG opens an XML-formatted SVG file from the given fs
+func (sv *SVG) OpenFS(fsys fs.FS, filename FileName) error {
+	return sv.SVG.OpenFS(fsys, string(filename))
 }
 
 // SaveSVG saves the current SVG to an XML-encoded standard SVG file
