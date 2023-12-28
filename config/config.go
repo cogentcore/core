@@ -178,6 +178,7 @@ func (c *Config) OnConfig(cmd string) error {
 			}) {
 				dir = filepath.Dir(dir)
 			}
+			dir = filepath.Base(dir)
 			// we ignore anything after any dot in the directory name
 			dir, _, _ = strings.Cut(dir, ".")
 			// the default ID is "com.dir.base", which is relatively likely
@@ -185,8 +186,10 @@ func (c *Config) OnConfig(cmd string) error {
 			c.ID = "com." + dir + "." + base
 		}
 	}
-	// if we have no target, we assume it is our current platform
-	if len(c.Build.Target) == 0 {
+	// if we have no target, we assume it is our current platform,
+	// unless we are in init, in which case we do not want to set
+	// the config file to be specific to our platform
+	if len(c.Build.Target) == 0 && cmd != "init" {
 		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
 	}
 	return nil
