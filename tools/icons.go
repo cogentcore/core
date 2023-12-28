@@ -21,7 +21,7 @@ import (
 )
 
 // IconSizes are the different sizes of the icon that are rendered.
-var IconSizes = []int{16, 32, 58, 76, 80, 87, 114, 120, 152, 167, 180}
+var IconSizes = []int{16, 32, 64, 128, 192, 256, 512, 1024}
 
 // Icons converts the icon located at .goki/icons/svg.svg into various
 // different formats and sizes necessary for app packaging. If no such
@@ -29,7 +29,7 @@ var IconSizes = []int{16, 32, 58, 76, 80, 87, 114, 120, 152, 167, 180}
 // [icons.SelectWindow]. It is run automatically for apps (not libraries)
 // in goki init.
 func Icons(c *config.Config) error { //gti:add
-	sv := svg.NewSVG(52, 52)
+	sv := svg.NewSVG(1024, 1024)
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 
 	spath := filepath.Join(".goki", "icons", "svg.svg")
