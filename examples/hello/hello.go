@@ -8,7 +8,7 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	b := gi.NewBody()
+	b := gi.NewAppBody("hello")
 	gi.NewLabel(b).SetText("Hello, World!")
-	b.NewWindow().Run().Wait() // makes a scene behind the scenes..
+	b.NewWindow().Run().Wait()
 }
