@@ -168,9 +168,6 @@ type GeneralSettingsData struct { //gti:add
 
 	// default mono-spaced font family
 	MonoFont FontName
-
-	// editor preferences -- for TextEditor etc
-	Editor EditorSettings
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
@@ -196,7 +193,6 @@ func (pf *GeneralSettingsData) Defaults() {
 	pf.Zoom = 100
 	pf.Spacing = 100
 	pf.FontSize = 100
-	pf.Editor.Defaults()
 	pf.FontFamily = "Roboto"
 	pf.MonoFont = "Roboto Mono"
 }
@@ -440,51 +436,6 @@ type ScreenSettings struct { //gti:add
 	Zoom float32 `def:"100" min:"10" max:"1000" step:"10"`
 }
 
-//////////////////////////////////////////////////////////////////
-//  EditorPrefs
-
-// EditorSettings contains editor preferences.  It can also be set
-// from ki.Props style properties.
-type EditorSettings struct { //gti:add
-
-	// size of a tab, in chars -- also determines indent level for space indent
-	TabSize int `xml:"tab-size"`
-
-	// use spaces for indentation, otherwise tabs
-	SpaceIndent bool `xml:"space-indent"`
-
-	// wrap lines at word boundaries -- otherwise long lines scroll off the end
-	WordWrap bool `xml:"word-wrap"`
-
-	// show line numbers
-	LineNos bool `xml:"line-nos"`
-
-	// use the completion system to suggest options while typing
-	Completion bool `xml:"completion"`
-
-	// suggest corrections for unknown words while typing
-	SpellCorrect bool `xml:"spell-correct"`
-
-	// automatically indent lines when enter, tab, }, etc pressed
-	AutoIndent bool `xml:"auto-indent"`
-
-	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
-	EmacsUndo bool `xml:"emacs-undo"`
-
-	// colorize the background according to nesting depth
-	DepthColor bool `xml:"depth-color"`
-}
-
-func (es *EditorSettings) Defaults() {
-	es.TabSize = 4
-	es.WordWrap = true
-	es.LineNos = true
-	es.Completion = true
-	es.SpellCorrect = true
-	es.AutoIndent = true
-	es.DepthColor = true
-}
-
 // SystemSettings are the currently active Goki system settings.
 var SystemSettings = &SystemSettingsData{
 	SettingsBase: SettingsBase{
@@ -498,6 +449,9 @@ type SystemSettingsData struct { //gti:add
 
 	// settings controlling app behavior
 	Behavior BehaviorSettings
+
+	// text editor settings
+	Editor EditorSettings
 
 	// whether to use a 24-hour clock (instead of AM and PM)
 	Clock24 bool `label:"24-hour clock"`
@@ -571,6 +525,7 @@ type SystemSettingsData struct { //gti:add
 
 func (pf *SystemSettingsData) Defaults() {
 	pf.Behavior.Defaults()
+	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
 	pf.UpdateUser()
 
@@ -666,6 +621,47 @@ type User struct { //gti:add
 
 	// default email address -- e.g., for recording changes in a version control system
 	Email string
+}
+
+// EditorSettings contains text editor settings.
+type EditorSettings struct { //gti:add
+
+	// size of a tab, in chars -- also determines indent level for space indent
+	TabSize int `xml:"tab-size"`
+
+	// use spaces for indentation, otherwise tabs
+	SpaceIndent bool `xml:"space-indent"`
+
+	// wrap lines at word boundaries -- otherwise long lines scroll off the end
+	WordWrap bool `xml:"word-wrap"`
+
+	// show line numbers
+	LineNos bool `xml:"line-nos"`
+
+	// use the completion system to suggest options while typing
+	Completion bool `xml:"completion"`
+
+	// suggest corrections for unknown words while typing
+	SpellCorrect bool `xml:"spell-correct"`
+
+	// automatically indent lines when enter, tab, }, etc pressed
+	AutoIndent bool `xml:"auto-indent"`
+
+	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
+	EmacsUndo bool `xml:"emacs-undo"`
+
+	// colorize the background according to nesting depth
+	DepthColor bool `xml:"depth-color"`
+}
+
+func (es *EditorSettings) Defaults() {
+	es.TabSize = 4
+	es.WordWrap = true
+	es.LineNos = true
+	es.Completion = true
+	es.SpellCorrect = true
+	es.AutoIndent = true
+	es.DepthColor = true
 }
 
 //////////////////////////////////////////////////////////////////
