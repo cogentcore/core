@@ -14,7 +14,6 @@ import (
 	"slices"
 	"strings"
 
-	"goki.dev/glop/dirs"
 	"goki.dev/grog"
 )
 
@@ -174,25 +173,23 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 
 	var cfgFiles []string
 	if mc.Config != "" {
-		cfgFiles = append(cfgFiles, dirs.FindFilesOnPaths(opts.IncludePaths, mc.Config)...)
-	} else {
-		if opts.SearchUp {
-			wd, err := os.Getwd()
-			if err != nil {
-				return "", fmt.Errorf("error getting current directory: %w", err)
-			}
-			pwd := wd
-			for {
-				pwd = wd
-				wd = filepath.Dir(pwd)
-				if wd == pwd { // if there is no change, we have reached the root of the filesystem
-					break
-				}
-				opts.IncludePaths = append(opts.IncludePaths, wd)
-			}
+		cfgFiles = append(cfgFiles, mc.Config)
+	}
+	cfgFiles = append(cfgFiles, opts.DefaultFiles...)
+
+	if opts.SearchUp {
+		wd, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("error getting current directory: %w", err)
 		}
-		for _, fn := range opts.DefaultFiles {
-			cfgFiles = append(cfgFiles, dirs.FindFilesOnPaths(opts.IncludePaths, fn)...)
+		pwd := wd
+		for {
+			pwd = wd
+			wd = filepath.Dir(pwd)
+			if wd == pwd { // if there is no change, we have reached the root of the filesystem
+				break
+			}
+			opts.IncludePaths = append(opts.IncludePaths, wd)
 		}
 	}
 
@@ -201,7 +198,9 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		return "", err
 	}
 
-	slices.Reverse(cfgFiles)
+	slices.Reverse(opts.IncludePaths)
+
+	// TODO(kai): this is not necessarily accurate given IncludePaths
 	ConfigFiles = cfgFiles
 	for _, fn := range cfgFiles {
 		err = OpenWithIncludes(opts, cfg, fn)

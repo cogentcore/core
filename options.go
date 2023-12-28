@@ -39,7 +39,10 @@ type Options struct {
 
 	// IncludePaths is a list of file paths to try for finding config files
 	// specified in Include field or via the command line --config --cfg or -c args.
-	// Set this prior to calling Config -- default is current directory '.' and 'configs'
+	// Set this prior to calling Config; default is current directory '.' and 'configs'.
+	// The include paths are searched in reverse order such that first specified include
+	// paths get the highest precedence (config files found in earlier include paths
+	// override those found in later ones).
 	IncludePaths []string
 
 	// SearchUp indicates whether to search up the filesystem
