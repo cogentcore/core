@@ -1859,7 +1859,7 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 }
 
 func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
-	if gi.KeyEventTrace {
+	if gi.DebugSettings.KeyEventTrace {
 		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
 	}
 	sv.KeyInputNav(kt)
@@ -1908,7 +1908,7 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 }
 
 func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
-	if gi.KeyEventTrace {
+	if gi.DebugSettings.KeyEventTrace {
 		fmt.Printf("SliceViewBase ReadOnly KeyInput: %v\n", sv.Path())
 	}
 	if sv.Is(SliceViewReadOnlyMultiSel) {

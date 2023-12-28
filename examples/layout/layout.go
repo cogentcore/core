@@ -105,12 +105,6 @@ func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 }
 
 func app() {
-	// turn on tracing in preferences, Debug
-	// gi.LayoutTrace = true
-	// gi.LayoutTraceDetail = true
-	// gi.UpdateTrace = true
-	// gi.RenderTrace = true
-
 	b := gi.NewBody("goki-layout").SetTitle("Goki Layout Demo")
 	b.App().About = `This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 

@@ -11,7 +11,7 @@ import (
 	"goki.dev/girl/styles"
 )
 
-var samplefile gi.FileName = "sample.go"
+var samplefile gi.FileName = "../demo/demo.go"
 
 // var samplefile gi.FileName = "../../Makefile"
 
@@ -20,9 +20,6 @@ var samplefile gi.FileName = "sample.go"
 func main() { gimain.Run(app) }
 
 func app() {
-	// gi.LayoutTrace = true
-	// gi.EventTrace = true
-
 	b := gi.NewAppBody("texteditor").SetTitle("GoGi texteditor.Editor Test")
 	b.App().About = `This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
@@ -32,7 +29,7 @@ func app() {
 	splt.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Text.TabSize = 4
-		s.Font.Family = string(gi.GeneralSettings.MonoFont)
+		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
 	})
 
 	txed1 := texteditor.NewEditor(splt, "texteditor-1")

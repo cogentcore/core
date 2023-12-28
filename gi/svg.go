@@ -64,15 +64,15 @@ func (sv *SVG) ConfigToolbar(tb *Toolbar) {
 	NewSeparator(tb)
 	NewButton(tb).SetText("Open SVG").SetIcon(icons.Open).
 		SetTooltip("Open from SVG file").OnClick(func(e events.Event) {
-		TheViewIFace.CallFunc(sv, sv.OpenSVG)
+		TheViewInterface.CallFunc(sv, sv.OpenSVG)
 	})
 	NewButton(tb).SetText("Save SVG").SetIcon(icons.Save).
 		SetTooltip("Save to SVG file").OnClick(func(e events.Event) {
-		TheViewIFace.CallFunc(sv, sv.SaveSVG)
+		TheViewInterface.CallFunc(sv, sv.SaveSVG)
 	})
 	NewButton(tb).SetText("Save PNG").SetIcon(icons.Save).
 		SetTooltip("Save to PNG file").OnClick(func(e events.Event) {
-		TheViewIFace.CallFunc(sv, sv.SavePNG)
+		TheViewInterface.CallFunc(sv, sv.SavePNG)
 	})
 }
 

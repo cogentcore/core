@@ -37,10 +37,6 @@ import (
 const force = true
 const dontForce = false
 
-// CursorBlinkTime is time that cursor blinks on
-// and off -- set to 0 to disable blinking
-var CursorBlinkTime = 500 * time.Millisecond
-
 // TextField is a widget for editing a line of text
 type TextField struct { //goki:embedder
 	WidgetBase
@@ -1156,13 +1152,13 @@ func (tf *TextField) StartCursor() {
 		return
 	}
 	tf.BlinkOn = true
-	if CursorBlinkTime == 0 {
+	if SystemSettings.CursorBlinkTime == 0 {
 		tf.RenderCursor(true)
 		return
 	}
 	TextFieldBlinkMu.Lock()
 	if TextFieldBlinker == nil {
-		TextFieldBlinker = time.NewTicker(CursorBlinkTime)
+		TextFieldBlinker = time.NewTicker(SystemSettings.CursorBlinkTime)
 		go TextFieldBlink()
 	}
 	tf.BlinkOn = true
@@ -1502,7 +1498,7 @@ func (tf *TextField) HandleMouse() {
 
 func (tf *TextField) HandleKeys() {
 	tf.OnKeyChord(func(e events.Event) {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())

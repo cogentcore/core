@@ -26,36 +26,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// TODO(kai): add these to prefs
-
-var (
-	// DragStartTime is the time to wait before DragStart
-	DragStartTime = 200 * time.Millisecond
-
-	// DragStartDist is pixel distance that must be moved before DragStart
-	DragStartDist = 20
-
-	// SlideStartTime is the time to wait before SlideStart
-	SlideStartTime = 50 * time.Millisecond
-
-	// SlideStartDist is pixel distance that must be moved before SlideStart
-	SlideStartDist = 4
-
-	// LongHoverTime is the time to wait before LongHoverStart event
-	LongHoverTime = 500 * time.Millisecond
-
-	// LongHoverStopDist is the pixel distance beyond which the LongHoverEnd
-	// event is sent
-	LongHoverStopDist = 5
-
-	// LongPressTime is the time to wait before sending a LongPress event
-	LongPressTime = 500 * time.Millisecond
-
-	// LongPressStopDist is the pixel distance beyond which the LongPressEnd
-	// event is sent
-	LongPressStopDist = 50
-)
-
 const (
 	DragSpriteName = "__DragSprite__"
 )
@@ -191,12 +161,12 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 	if em.Focus == nil {
 		switch {
 		case em.StartFocus != nil:
-			if FocusTrace {
+			if DebugSettings.FocusTrace {
 				fmt.Println(em.Scene, "StartFocus:", em.StartFocus)
 			}
 			em.SetFocusEvent(em.StartFocus)
 		case em.PrevFocus != nil:
-			if FocusTrace {
+			if DebugSettings.FocusTrace {
 				fmt.Println(em.Scene, "PrevFocus:", em.PrevFocus)
 			}
 			em.SetFocusEvent(em.PrevFocus)
@@ -209,7 +179,7 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 		for _, wi := range em.PriorityFocus {
 			wi.HandleEvent(e)
 			if e.IsHandled() {
-				if FocusTrace {
+				if DebugSettings.FocusTrace {
 					fmt.Println(em.Scene, "PriorityFocus Handled:", wi)
 				}
 				break
@@ -223,7 +193,7 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 		for _, fw := range em.FocusWithinStack {
 			fw.HandleEvent(e)
 			if e.IsHandled() {
-				if FocusTrace {
+				if DebugSettings.FocusTrace {
 					fmt.Println(em.Scene, "FocusWithin Handled:", fw)
 				}
 				break
@@ -281,7 +251,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 
 	n := len(em.MouseInBBox)
 	if n == 0 {
-		if EventTrace && et != events.MouseMove {
+		if DebugSettings.EventTrace && et != events.MouseMove {
 			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
 		return
@@ -353,12 +323,12 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Drag.Send(events.DragMove, e) // usually ignored
 		case em.Slide != nil:
 		case em.Press != nil && em.Press.AbilityIs(abilities.Slideable):
-			if em.DragStartCheck(e, SlideStartTime, SlideStartDist) {
+			if em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.SlideStartDistance) {
 				em.Slide = em.Press
 				em.Slide.Send(events.SlideStart, e)
 			}
 		case em.Press != nil && em.Press.AbilityIs(abilities.Draggable):
-			if em.DragStartCheck(e, DragStartTime, DragStartDist) {
+			if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 				em.Drag = em.Press
 				em.Drag.Send(events.DragStart, e)
 			}
@@ -480,12 +450,12 @@ func (em *EventMgr) TopLongHover() Widget {
 
 // HandleLongHover handles long hover events
 func (em *EventMgr) HandleLongHover(e events.Event) {
-	em.HandleLong(e, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, LongHoverTime, LongHoverStopDist)
+	em.HandleLong(e, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, DeviceSettings.LongHoverTime, DeviceSettings.LongHoverStopDistance)
 }
 
 // HandleLongPress handles long press events
 func (em *EventMgr) HandleLongPress(e events.Event) {
-	em.HandleLong(e, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, LongPressTime, LongPressStopDist)
+	em.HandleLong(e, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, DeviceSettings.LongPressTime, DeviceSettings.LongPressStopDistance)
 }
 
 // HandleLong is the implementation of [EventMgr.HandleLongHover] and
@@ -677,7 +647,7 @@ func (em *EventMgr) DragDrop(drag Widget, e events.Event) {
 	data := em.DragData
 	em.Drag = nil
 	if len(em.DragHovers) == 0 {
-		if EventTrace {
+		if DebugSettings.EventTrace {
 			fmt.Println(drag, "Drop has no target")
 		}
 		return
@@ -690,7 +660,7 @@ func (em *EventMgr) DragDrop(drag Widget, e events.Event) {
 	de.Data = data
 	de.Source = drag
 	de.Target = targ
-	if EventTrace {
+	if DebugSettings.EventTrace {
 		fmt.Println(targ, "Drop with mod:", de.DropMod, "source:", de.Source)
 	}
 	targ.HandleEvent(de)
@@ -763,7 +733,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 // FocusClear saves current focus to FocusPrev
 func (em *EventMgr) FocusClear() bool {
 	if em.Focus != nil {
-		if FocusTrace {
+		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "FocusClear:", em.Focus)
 		}
 		em.PrevFocus = em.Focus
@@ -776,12 +746,12 @@ func (em *EventMgr) FocusClear() bool {
 // This does NOT send the events.Focus event to the widget.
 // See [SetFocusEvent] for version that does send event.
 func (em *EventMgr) SetFocus(w Widget) bool {
-	if FocusTrace {
+	if DebugSettings.FocusTrace {
 		fmt.Println(em.Scene, "SetFocus:", w)
 	}
 	got := em.SetFocusImpl(w, false) // no event
 	if !got {
-		if FocusTrace {
+		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "SetFocus: Failed", w)
 		}
 		return false
@@ -797,12 +767,12 @@ func (em *EventMgr) SetFocus(w Widget) bool {
 // This sends the [events.Focus] event to the widget.
 // See [SetFocus] for a version that does not.
 func (em *EventMgr) SetFocusEvent(w Widget) bool {
-	if FocusTrace {
+	if DebugSettings.FocusTrace {
 		fmt.Println(em.Scene, "SetFocusEvent:", w)
 	}
 	got := em.SetFocusImpl(w, true) // sends event
 	if !got {
-		if FocusTrace {
+		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "SetFocusEvent: Failed", w)
 		}
 		return false
@@ -824,7 +794,7 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 		cfoc = nil
 	}
 	if cfoc != nil && w != nil && cfoc.This() == w.This() {
-		if FocusTrace {
+		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "Already Focus:", cfoc)
 		}
 		// if sendEvent { // still send event
@@ -833,7 +803,7 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 		return false
 	}
 	if cfoc != nil {
-		if FocusTrace {
+		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "Losing focus:", cfoc)
 		}
 		cfoc.Send(events.FocusLost)
@@ -1008,7 +978,7 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 			return ki.Continue
 		}
 		if wb.StateIs(states.Focused) {
-			if EventTrace {
+			if DebugSettings.EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
 			}
 			wi.Send(events.FocusLost)
@@ -1060,10 +1030,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	// fmt.Println(kf, cs)
 	switch kf {
 	case keyfun.Inspector:
-		TheViewIFace.Inspector(em.Scene)
+		TheViewInterface.Inspector(em.Scene)
 		e.SetHandled()
 	case keyfun.Prefs:
-		TheViewIFace.PrefsView(GeneralSettings)
+		TheViewInterface.SettingsViewWindow()
 		e.SetHandled()
 	case keyfun.WinClose:
 		win.CloseReq()
@@ -1096,7 +1066,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		fmt.Printf("Win: %v display refreshed\n", sc.Name())
 		goosi.TheApp.GetScreens()
-		GeneralSettings.UpdateAll()
+		UpdateAll()
 		WinGeomMgr.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()
@@ -1173,7 +1143,7 @@ func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
 	}
 	sa, exists := em.Shortcuts[chord]
 	if exists && sa != bt && sa.Text != bt.Text {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			log.Printf("gi.RenderWin shortcut: %v already exists on button: %v -- will be overwritten with button: %v\n", chord, sa.Text, bt.Text)
 		}
 	}
@@ -1198,7 +1168,7 @@ func (em *EventMgr) DeleteShortcut(chord key.Chord, bt *Button) {
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // buttons, and does not trigger for Disabled buttons.
 func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
-	if KeyEventTrace {
+	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for button\n", chord)
 	}
 	if em.Shortcuts == nil {
@@ -1213,13 +1183,13 @@ func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 		return false
 	}
 	if sa.IsDisabled() {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			fmt.Printf("Shortcut chord: %v, button: %v -- is inactive, not fired\n", chord, sa.Text)
 		}
 		return false
 	}
 
-	if KeyEventTrace {
+	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v, button: %v triggered\n", chord, sa.Text)
 	}
 	sa.Send(events.Click)

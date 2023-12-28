@@ -17,7 +17,7 @@ import (
 type Opts struct {
 
 	// editor prefs from gogi prefs
-	gi.EditorPrefs
+	gi.EditorSettings
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
 	CommentLn string

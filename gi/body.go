@@ -69,10 +69,16 @@ func (bd *Body) AddText(text string) *Body {
 	return bd
 }
 
-// SetApp sets the App
+// SetApp sets the App of the Body's Scene
 func (bd *Body) SetApp(app *App) *Body {
 	bd.Sc.App = app
 	bd.Nm = app.Name
 	bd.Title = sentence.Case(bd.Nm)
+	return bd
+}
+
+// SetData sets the Body's [Scene.Data].
+func (bd *Body) SetData(data any) *Body {
+	bd.Sc.SetData(data)
 	return bd
 }

@@ -141,7 +141,7 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := laser.NonPtrValue(mv)
 
-	sz := min(mvnp.Len(), SliceInlineLen)
+	sz := min(mvnp.Len(), gi.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
 		val := laser.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValue(val.Interface(), "")

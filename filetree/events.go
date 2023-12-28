@@ -26,7 +26,7 @@ func (fn *Node) HandleEvents() {
 }
 
 func (fn *Node) KeyInput(kt events.Event) {
-	if gi.KeyEventTrace {
+	if gi.DebugSettings.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
 	}
 	kf := keyfun.Of(kt.KeyChord())

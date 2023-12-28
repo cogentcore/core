@@ -38,13 +38,6 @@ func Wait() {
 var CurRenderWin *RenderWin
 
 var (
-	// LocalMainMenu controls whether the main menu is displayed locally at top of
-	// each window, in addition to the global menu at the top of the screen.  Mac
-	// native apps do not do this, but OTOH it makes things more consistent with
-	// other platforms, and with larger screens, it can be convenient to have
-	// access to all the menu items right there.  Controlled by Prefs.Params
-	// variable.
-	LocalMainMenu = false
 
 	// WinNewCloseTime records last time a new window was opened or another
 	// closed -- used to trigger updating of RenderWin menus on each window.
@@ -201,7 +194,7 @@ func ActivateExistingMainWindow(data any) bool {
 	if !has {
 		return false
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
 	}
 	ew.Raise()
@@ -218,7 +211,7 @@ func ActivateExistingDialogWindow(data any) bool {
 	if !has {
 		return false
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
 	}
 	ew.Raise()
@@ -301,7 +294,7 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	}
 	// oldzoom := goosi.ZoomFactor
 	goosi.ZoomFactor = nldpinet / cldpi
-	GeneralSettings.ApplyDPI()
+	AppearanceSettings.ApplyDPI()
 	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, goosi.ZoomFactor)
 
 	// actually resize window in proportion:
@@ -309,7 +302,7 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	// curSz := rctx.Size
 	// nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
 	rctx.Mu.RUnlock()
-	GeneralSettings.UpdateAll()
+	UpdateAll()
 	// w.GoosiWin.SetSize(nsz)
 }
 
@@ -354,7 +347,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 
 	curSz := rctx.Size
 	if curSz == sz {
-		if WinEventTrace {
+		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curSz)
 		}
 		return
@@ -367,12 +360,12 @@ func (w *RenderWin) Resized(sz image.Point) {
 	// w.InactivateAllSprites()
 	if !w.IsVisible() {
 		rctx.SetFlag(false, RenderVisible)
-		if WinEventTrace {
+		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
 		return
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curSz, sz)
 	}
 	if curSz == (image.Point{}) { // first open
@@ -432,11 +425,11 @@ func (w *RenderWin) Closed() {
 	StringsDelete(&FocusRenderWins, w.Name)
 	RenderWinGlobalMu.Unlock()
 	WinNewCloseStamp()
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.Name)
 	}
 	if w.IsClosed() {
-		if WinEventTrace {
+		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Already Closed\n", w.Name)
 		}
 		return
@@ -448,12 +441,12 @@ func (w *RenderWin) Closed() {
 		RenderWinGlobalMu.Unlock()
 		pfw, has := AllRenderWins.FindName(pf)
 		if has {
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Name, w.Name)
 			}
 			pfw.GoosiWin.Raise()
 		} else {
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v not found to restored focus: %v closed\n", pf, w.Name)
 			}
 		}
@@ -569,7 +562,7 @@ func (w *RenderWin) EventLoop() {
 		}
 		w.HandleEvent(e)
 	}
-	if WinEventTrace {
+	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Name)
 	}
 	if w.HasFlag(WinGoLoop) {
@@ -592,7 +585,7 @@ func (w *RenderWin) HandleEvent(e events.Event) {
 	// debugging on Android. TODO: maybe figure out a more sustainable approach to this.
 
 	et := e.Type()
-	if EventTrace && et != events.WindowPaint && et != events.MouseMove {
+	if DebugSettings.EventTrace && et != events.WindowPaint && et != events.MouseMove {
 		log.Printf("Got event: %s\n", e)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
@@ -639,7 +632,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 		case events.WinShow:
 			e.SetHandled()
 			// note that this is sent delayed by driver
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.Name)
 			}
 			// todo: remove?
@@ -659,19 +652,19 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			if !w.HasFlag(WinGotFocus) {
 				w.SetFlag(true, WinGotFocus)
 				w.SendWinFocusEvent(events.WinFocus)
-				if WinEventTrace {
+				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
 				}
 				// if w.NeedWinMenuUpdate() {
 				// 	w.MainMenuUpdateRenderWins()
 				// }
 			} else {
-				if WinEventTrace {
+				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got extra focus\n", w.Name)
 				}
 			}
 		case events.WinFocusLost:
-			if WinEventTrace {
+			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
 			}
 			w.SetFlag(false, WinGotFocus)
@@ -888,13 +881,13 @@ func (rs *RenderScenes) Add(sc *Scene, scIdx map[*Scene]int) int {
 // SetImages calls drw.SetGoImage on all updated Scene images
 func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 	if len(rs.Scenes) == 0 {
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScene.SetImages: no scenes")
 		}
 	}
 	for i, sc := range rs.Scenes {
 		if sc.Is(ScUpdating) || !sc.Is(ScImageUpdated) {
-			if WinRenderTrace {
+			if DebugSettings.WinRenderTrace {
 				if sc.Is(ScUpdating) {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
 				}
@@ -904,7 +897,7 @@ func (rs *RenderScenes) SetImages(drw goosi.Drawer) {
 			}
 			continue
 		}
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScenes.SetImages:", sc.Name(), sc.Pixels.Bounds())
 		}
 		drw.SetGoImage(i, 0, sc.Pixels, goosi.NoFlipY)
@@ -959,7 +952,7 @@ func (w *RenderWin) RenderWindow() {
 		return
 	}
 
-	if WinRenderTrace {
+	if DebugSettings.WinRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.Name)
 		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
@@ -976,7 +969,7 @@ func (w *RenderWin) RenderWindow() {
 // DrawScenes does the drawing of RenderScenes to the window.
 func (w *RenderWin) DrawScenes() {
 	if !w.IsVisible() || w.GoosiWin.Is(goosi.Minimized) {
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.Name)
 		}
 		return
@@ -985,7 +978,7 @@ func (w *RenderWin) DrawScenes() {
 	// 	return
 	// }
 	if !w.GoosiWin.Lock() {
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: window was closed: %v\n", w.Name)
 		}
 		return
@@ -1037,7 +1030,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
 		if st.Type == WindowStage {
-			if WinRenderTrace {
+			if DebugSettings.WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			rs.Add(st.Scene, scIdx)
@@ -1050,7 +1043,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValByIdx(i)
 		rs.Add(st.Scene, scIdx)
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
 	}
@@ -1062,7 +1055,7 @@ func (w *RenderWin) GatherScenes() bool {
 	for _, kv := range top.PopupMgr.Stack.Order {
 		st := kv.Val
 		rs.Add(st.Scene, scIdx)
-		if WinRenderTrace {
+		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}

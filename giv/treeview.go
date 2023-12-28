@@ -1724,7 +1724,7 @@ func (tv *TreeView) HandleEvents() {
 
 func (tv *TreeView) HandleKeys() {
 	tv.On(events.KeyChord, func(e events.Event) {
-		if gi.KeyEventTrace {
+		if gi.DebugSettings.KeyEventTrace {
 			fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
 		}
 		kf := keyfun.Of(e.KeyChord())

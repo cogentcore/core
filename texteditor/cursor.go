@@ -68,13 +68,13 @@ func (ed *Editor) StartCursor() {
 		return
 	}
 	ed.BlinkOn = true
-	if gi.CursorBlinkTime == 0 {
+	if gi.SystemSettings.CursorBlinkTime == 0 {
 		ed.RenderCursor(true)
 		return
 	}
 	ViewBlinkMu.Lock()
 	if ViewBlinker == nil {
-		ViewBlinker = time.NewTicker(gi.CursorBlinkTime)
+		ViewBlinker = time.NewTicker(gi.SystemSettings.CursorBlinkTime)
 		go ViewBlink()
 	}
 	ed.BlinkOn = true

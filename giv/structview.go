@@ -541,22 +541,16 @@ func StructViewIf(viewif string, field reflect.StructField, stru any) bool {
 
 	program, err := expr.Compile(viewif, expr.Env(stru), expr.Patch(&viewifPatcher{}), expr.AllowUndefinedVariables())
 	if err != nil {
-		if gi.StructViewIfDebug {
-			fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
-		}
+		fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
 		return true
 	}
 	val, err := expr.Run(program, stru)
 	if err != nil {
-		if gi.StructViewIfDebug {
-			fmt.Printf("giv.StructView viewif tag on field %s: run error: `%s`: %s\n", field.Name, viewif, err)
-		}
+		fmt.Printf("giv.StructView viewif tag on field %s: run error: `%s`: %s\n", field.Name, viewif, err)
 		return true
 	}
 	if err != nil {
-		if gi.StructViewIfDebug {
-			fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
-		}
+		fmt.Printf("giv.StructView viewif tag on field %s: syntax error: `%s`: %s\n", field.Name, viewif, err)
 		return true // visible by default
 	}
 	// fmt.Printf("fld: %s  viewif: %s  val: %t  %+v\n", field.Name, viewif, val, val)
@@ -566,9 +560,7 @@ func StructViewIf(viewif string, field reflect.StructField, stru any) bool {
 	case *bool:
 		return *x
 	}
-	if gi.StructViewIfDebug {
-		fmt.Printf("giv.StructView viewif tag on field %s: didn't evaluate to a boolean: `%s`: type: %t val: %+v\n", field.Name, viewif, val, val)
-	}
+	fmt.Printf("giv.StructView viewif tag on field %s: didn't evaluate to a boolean: `%s`: type: %t val: %+v\n", field.Name, viewif, val, val)
 	return true
 }
 

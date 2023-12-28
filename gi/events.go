@@ -185,7 +185,7 @@ func (wb *WidgetBase) AddPriorityEvent(etype events.Types) {
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
 func (wb *WidgetBase) HandleEvent(ev events.Event) {
-	if EventTrace {
+	if DebugSettings.EventTrace {
 		if ev.Type() != events.MouseMove {
 			fmt.Println("Event to Widget:", wb.Path(), ev.String())
 		}
@@ -394,9 +394,8 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)
-		fmt.Println("magnify event", ev.ScaleFactor)
-		GeneralSettings.Zoom *= ev.ScaleFactor
-		GeneralSettings.UpdateAll()
+		AppearanceSettings.Zoom *= ev.ScaleFactor
+		UpdateAll()
 	})
 }
 
@@ -405,7 +404,7 @@ func (wb *WidgetBase) HandleWidgetMagnify() {
 // but is added in Button and Switch Widgets for example.
 func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	wb.OnKeyChord(func(e events.Event) {
-		if KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			slog.Info("WidgetBase KeyChordEvent", "widget", wb)
 		}
 		kf := keyfun.Of(e.KeyChord())

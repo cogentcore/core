@@ -191,13 +191,13 @@ func StdOverflowMenu(tb *Toolbar) {
 
 // StdOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
-	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
+	NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
-			TheViewIFace.PrefsView(GeneralSettings)
+			TheViewInterface.SettingsViewWindow()
 		})
 	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
 		OnClick(func(e events.Event) {
-			TheViewIFace.Inspector(tb.Sc)
+			TheViewInterface.Inspector(tb.Sc)
 		})
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut

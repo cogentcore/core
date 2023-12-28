@@ -137,14 +137,6 @@ func (an *Anim) Animate() {
 }
 
 func app() {
-	// turn these on to see a traces of various stages of processing..
-	// ki.SignalTrace = true
-	// gi.EventTrace = true
-	// gi.WinEventTrace = true
-	// xyz.Update3DTrace = true
-	// gi.Update2DTrace = true
-	// vgpu.Debug = true
-
 	anim := &Anim{}
 	b := gi.NewAppBody("xyz").SetTitle("XYZ Demo")
 	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>.

@@ -101,8 +101,8 @@ func (wb *WidgetBase) UpdateStart() bool {
 	updt := wb.Node.UpdateStart()
 	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
 		wb.Sc.SetFlag(true, ScUpdating)
-		if UpdateTrace {
-			fmt.Println("UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
+		if DebugSettings.UpdateTrace {
+			fmt.Println("DebugSettings.UpdateTrace Scene Start:", wb.Sc, "from widget:", wb)
 		}
 	}
 	return updt
@@ -112,8 +112,8 @@ func (wb *WidgetBase) UpdateStart() bool {
 func (wb *WidgetBase) UpdateEnd(updt bool) {
 	if updt && !wb.Is(ki.Field) && wb.Sc != nil {
 		wb.Sc.SetFlag(false, ScUpdating)
-		if UpdateTrace {
-			fmt.Println("UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
+		if DebugSettings.UpdateTrace {
+			fmt.Println("DebugSettings.UpdateTrace Scene End:", wb.Sc, "from widget:", wb)
 		}
 	}
 	wb.Node.UpdateEnd(updt)
@@ -179,8 +179,8 @@ func (wb *WidgetBase) SetNeedsRender(updt bool) {
 	if !updt || wb.Sc == nil {
 		return
 	}
-	if UpdateTrace {
-		fmt.Println("\tUpdateTrace: NeedsRender:", wb)
+	if DebugSettings.UpdateTrace {
+		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
 	wb.SetFlag(true, NeedsRender)
 	if wb.Sc != nil {
@@ -223,8 +223,8 @@ func (wb *WidgetBase) SetNeedsLayout(updt bool) {
 	if !updt || wb.Sc == nil {
 		return
 	}
-	if updt && UpdateTrace {
-		fmt.Println("\tUpdateTrace: NeedsLayout:", wb)
+	if updt && DebugSettings.UpdateTrace {
+		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
 	wb.Sc.SetFlag(true, ScNeedsLayout)
 }
@@ -318,8 +318,8 @@ func (wb *WidgetBase) Update() { //gti:add
 		return
 	}
 	updt := wb.UpdateStart()
-	if UpdateTrace {
-		fmt.Println("\tUpdateTrace Update:", wb, "updt:", updt)
+	if DebugSettings.UpdateTrace {
+		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb, "updt:", updt)
 	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config()
@@ -345,7 +345,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 
 // LayoutScene does a layout of the scene: Size, Position
 func (sc *Scene) LayoutScene() {
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
 	sc.SizeUp()
@@ -353,29 +353,29 @@ func (sc *Scene) LayoutScene() {
 	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
 	sz.SetContentFromTotal(&sz.Alloc)
 	// sz.Actual = sz.Alloc // todo: is this needed??
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nSizeDown start:", sc)
 	}
 	maxIter := 3
 	for iter := 0; iter < maxIter; iter++ { // 3  > 2; 4 same as 3
 		redo := sc.SizeDown(iter)
 		if redo && iter < maxIter-1 {
-			if LayoutTrace {
+			if DebugSettings.LayoutTrace {
 				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
 			}
 		} else {
 			break
 		}
 	}
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nSizeFinal start:", sc)
 	}
 	sc.SizeFinal()
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nPosition start:", sc)
 	}
 	sc.Position()
-	if LayoutTrace {
+	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nScenePos start:", sc)
 	}
 	sc.ScenePos()
@@ -560,7 +560,7 @@ func (wb *WidgetBase) PushBounds() bool {
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {
-		if RenderTrace {
+		if DebugSettings.RenderTrace {
 			fmt.Printf("Render empty bbox: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 		}
 		return false
@@ -570,7 +570,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	pc.PushBounds(wb.Geom.TotalBBox)
 	// rs.PushBounds(wb.Sc.Geom.TotalBBox)
 	pc.Defaults() // start with default values
-	if RenderTrace {
+	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}
 	return true
@@ -731,7 +731,8 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 /////////////////////////////////////////////////////////////////////////////
 //	Profiling and Benchmarking, controlled by hot-keys
 
-// ProfileToggle turns profiling on or off
+// ProfileToggle turns profiling on or off, which does both
+// targeted and global CPU and Memory profiling.
 func ProfileToggle() {
 	if prof.Profiling {
 		EndTargProfile()

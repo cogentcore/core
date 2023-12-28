@@ -325,7 +325,7 @@ var LayoutLastAutoScroll time.Time
 func (ly *Layout) AutoScroll(pos image.Point) bool {
 	now := time.Now()
 	lag := now.Sub(LayoutLastAutoScroll)
-	if lag < LayoutAutoScrollDelay {
+	if lag < SystemSettings.LayoutAutoScrollDelay {
 		return false
 	}
 	ly.BBoxMu.RLock()

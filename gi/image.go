@@ -166,7 +166,7 @@ func (im *Image) Render() {
 func (im *Image) ConfigToolbar(tb *Toolbar) {
 	NewButton(tb).SetText("OpenImage").SetIcon(icons.Open).
 		OnClick(func(e events.Event) {
-			TheViewIFace.CallFunc(im, im.OpenImage)
+			TheViewInterface.CallFunc(im, im.OpenImage)
 		})
 }
 

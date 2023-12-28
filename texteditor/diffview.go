@@ -164,7 +164,7 @@ func (dv *DiffView) SetStyles() {
 		switch w.PathFrom(dv) {
 		case "text-a", "text-b":
 			w.Style(func(s *styles.Style) {
-				s.Font.Family = string(gi.GeneralSettings.MonoFont)
+				s.Font.Family = string(gi.AppearanceSettings.MonoFont)
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})
@@ -584,7 +584,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			// fb := giv.NewSoloFuncButton(ctx, dv.SaveFileA)
 			// fb.Args[0].SetValue(dv.FileA)
 			// fb.CallFunc()
-			gi.TheViewIFace.CallFunc(dv, dv.SaveFileA)
+			gi.TheViewInterface.CallFunc(dv, dv.SaveFileA)
 		}).
 		Style(func(s *styles.Style) {
 			s.SetState(!dv.BufA.IsChanged(), states.Disabled)
@@ -636,7 +636,7 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 			// fb := giv.NewSoloFuncButton(ctx, dv.SaveFileB)
 			// fb.Args[0].SetValue(dv.FileB)
 			// fb.CallFunc()
-			gi.TheViewIFace.CallFunc(dv, dv.SaveFileB)
+			gi.TheViewInterface.CallFunc(dv, dv.SaveFileB)
 		}).
 		Style(func(s *styles.Style) {
 			s.SetState(!dv.BufB.IsChanged(), states.Disabled)

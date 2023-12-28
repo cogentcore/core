@@ -5,14 +5,13 @@
 package gi
 
 import (
-	"goki.dev/gi/v2/keyfun"
 	"goki.dev/ki/v2"
 )
 
-// ViewIFace is an interface into the View GUI types in giv subpackage,
+// ViewInterface is an interface into the View GUI types in the giv subpackage,
 // allowing it to be a sub-package with just this narrow set of dependencies
-// of gi on giv. The one impl is in giv/valueview.go.
-type ViewIFace interface {
+// of gi on giv. The one implementation is in giv/viewinterface.go.
+type ViewInterface interface {
 	// CallFunc calls the given function in the context of the given widget,
 	// popping up a dialog to prompt for any arguments and show the return
 	// values of the function. It is a helper function that uses [NewSoloFuncButton]
@@ -22,14 +21,10 @@ type ViewIFace interface {
 	// Inspector opens an interactive editor of given Ki tree, at its root
 	Inspector(obj ki.Ki)
 
-	// PrefsView opens an interactive view of given preferences object
-	PrefsView(prefs *GeneralSettingsData)
+	// SettingsViewWindow opens a window for editing the user settings
+	SettingsViewWindow()
 
-	// KeyMapsView opens an interactive view of KeyMaps object
-	KeyMapsView(maps *keyfun.Maps)
-
-	// PrefsDetView opens an interactive view of given detailed preferences object
-	PrefsDetView(prefs *PrefsDetailed)
+	// TODO(kai): figure out a better way to structure histyle view things
 
 	// HiStylesView opens an interactive view of custom or std highlighting styles.
 	HiStylesView(std bool)
@@ -39,16 +34,7 @@ type ViewIFace interface {
 
 	// HiStyleInit initializes the histyle package -- called during overall gi init.
 	HiStyleInit()
-
-	// PrefsDetDefaults gets current detailed prefs values as defaults
-	PrefsDetDefaults(prefs *PrefsDetailed)
-
-	// PrefsDetApply applies detailed preferences within giv scope
-	PrefsDetApply(prefs *PrefsDetailed)
-
-	// PrefsDbgView opens an interactive view of given debugging preferences object
-	PrefsDbgView(prefs *PrefsDebug)
 }
 
-// TheViewIFace is the implementation of the interface, defined in giv package
-var TheViewIFace ViewIFace
+// TheViewInterface is the singular implementation of [ViewInterface], defined in the giv package.
+var TheViewInterface ViewInterface

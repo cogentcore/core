@@ -132,7 +132,7 @@ func (st *Stage) RunWindow() *Stage {
 		sz = sz.Add(image.Point{20, 20})
 	}
 	st.MainMgr = nil // reset
-	if WinRenderTrace {
+	if DebugSettings.WinRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
@@ -200,7 +200,7 @@ func (st *Stage) RunDialog() *Stage {
 		sz = sz.Add(image.Point{50, 50})
 		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
 	}
-	if WinRenderTrace {
+	if DebugSettings.WinRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
 	}
 
@@ -284,7 +284,7 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 	}
 	st.PopupMgr.PopupHandleEvent(e)
 	if e.IsHandled() || st.PopupMgr.TopIsModal() {
-		if EventTrace && e.Type() != events.MouseMove {
+		if DebugSettings.EventTrace && e.Type() != events.MouseMove {
 			fmt.Println("Event handled by popup:", e)
 		}
 		return
