@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"goki.dev/gi/v2/keyfun"
 	"goki.dev/ki/v2"
 )
 
@@ -25,8 +24,7 @@ type ViewIFace interface {
 	// PrefsView opens an interactive view of given preferences object
 	PrefsView(prefs *AppearanceSettingsData)
 
-	// KeyMapsView opens an interactive view of KeyMaps object
-	KeyMapsView(maps *keyfun.Maps)
+	// TODO(kai): figure out a better way to structure histyle view things
 
 	// HiStylesView opens an interactive view of custom or std highlighting styles.
 	HiStylesView(std bool)

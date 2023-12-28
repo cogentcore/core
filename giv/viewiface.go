@@ -6,7 +6,6 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/ki/v2"
 )
@@ -24,10 +23,6 @@ func (vi *ViewIFace) Inspector(obj ki.Ki) {
 
 func (vi *ViewIFace) PrefsView(prefs *gi.AppearanceSettingsData) {
 	SettingsViewWindow()
-}
-
-func (vi *ViewIFace) KeyMapsView(maps *keyfun.Maps) {
-	KeyMapsView(maps)
 }
 
 func (vi *ViewIFace) HiStylesView(std bool) {
