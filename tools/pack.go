@@ -70,8 +70,7 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	inm := filepath.Join(rpath, "icon.icns")
-	fdsi, err := os.Create(inm)
+	fdsi, err := os.Create(filepath.Join(rpath, "icon.icns"))
 	if err != nil {
 		return err
 	}
@@ -97,7 +96,7 @@ func PackDarwin(c *config.Config) error {
 		Version:            c.Version,
 		InfoString:         c.Desc,
 		ShortVersionString: c.Version,
-		IconFile:           inm,
+		IconFile:           filepath.Join("Contents", "Resources", "icon.icns"),
 	}
 	err = InfoPlistTmpl.Execute(fplist, ipd)
 	if err != nil {
