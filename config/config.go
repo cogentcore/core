@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"goki.dev/enums/enumgen"
 	"goki.dev/gti/gtigen"
@@ -67,8 +68,8 @@ type Build struct { //gti:add
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output"`
 
-	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise);
-	// it is typically in the format com.org.app (eg: com.goki.mail)
+	// the bundle / package ID to use for the app (required for building for mobile platforms
+	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)
 	ID string
 
 	// whether to build/run the app in debug mode; this currently only works on mobile platforms
@@ -165,6 +166,10 @@ func (c *Config) OnConfig(cmd string) error {
 	}
 	if c.Build.ID == "" {
 		c.Build.ID = "com.org.todo." + c.Name
+	}
+	// if we have no target, we assume it is our current platform
+	if len(c.Build.Target) == 0 {
+		c.Build.Target = []Platform{{OS: runtime.GOOS, Arch: runtime.GOARCH}}
 	}
 	return nil
 }
