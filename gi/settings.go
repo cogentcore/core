@@ -191,9 +191,6 @@ type GeneralSettingsData struct { //gti:add
 
 	// filename for saving / loading colors
 	ColorFilename FileName `view:"-" ext:".toml"`
-
-	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
@@ -756,34 +753,10 @@ type PrefsDetailed struct { //gti:add
 
 	// the number of slice elements below which inline will be used
 	SliceInlineLen int `def:"4" min:"2" step:"1"`
-
-	// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-	Changed bool `view:"-" changeflag:"+" json:"-" toml:"-" xml:"-"`
 }
 
 // PrefsDet are the overall detailed preferences
 var PrefsDet = PrefsDetailed{}
-
-// PrefsDetailedFileName is the name of the detailed preferences file in GoGi prefs directory
-var PrefsDetailedFileName = "prefs_det.toml"
-
-// Open detailed preferences from GoGi standard prefs directory
-func (pf *PrefsDetailed) Open() error { //gti:add
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	err := grr.Log(tomls.Open(pf, pnm))
-	pf.Changed = false
-	return err
-}
-
-// Save saves current preferences to standard prefs_det.toml file, which is auto-loaded at startup
-func (pf *PrefsDetailed) Save() error { //gti:add
-	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	err := grr.Log(tomls.Save(pf, pnm))
-	pf.Changed = false
-	return err
-}
 
 // Defaults gets current values of parameters, which are effectively
 // defaults
@@ -831,10 +804,6 @@ func (pf *PrefsDetailed) Apply() { //gti:add
 //////////////////////////////////////////////////////////////////
 //  PrefsDebug
 
-// StrucdtViewIfDebug is a debug flag for getting error messages on
-// viewif struct tag directives in the giv.StructView.
-var StructViewIfDebug = false
-
 // DebugSettingsData is the data type for debugging settings.
 type DebugSettingsData struct { //gti:add
 	SettingsBase
@@ -879,9 +848,6 @@ type DebugSettingsData struct { //gti:add
 
 	// Print a trace of Go language type parsing and inference process
 	GoTypeTrace bool
-
-	// Print errors for viewif directives in struct field tags for giv.StructView
-	StructViewIfDebug bool
 }
 
 // DebugSettings are the currently active debugging settings

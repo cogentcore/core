@@ -31,10 +31,6 @@ func (vi *ViewIFace) KeyMapsView(maps *keyfun.Maps) {
 	KeyMapsView(maps)
 }
 
-func (vi *ViewIFace) PrefsDetView(prefs *gi.PrefsDetailed) {
-	PrefsDetView(prefs)
-}
-
 func (vi *ViewIFace) HiStylesView(std bool) {
 	if std {
 		HiStylesView(&histyle.StdStyles)
@@ -71,8 +67,4 @@ func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 	MapInlineLen = pf.MapInlineLen
 	StructInlineLen = pf.StructInlineLen
 	SliceInlineLen = pf.SliceInlineLen
-}
-
-func (vi *ViewIFace) PrefsDbgView(prefs *gi.DebugSettingsData) {
-	PrefsDbgView(prefs)
 }

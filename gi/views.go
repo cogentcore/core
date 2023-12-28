@@ -28,9 +28,6 @@ type ViewIFace interface {
 	// KeyMapsView opens an interactive view of KeyMaps object
 	KeyMapsView(maps *keyfun.Maps)
 
-	// PrefsDetView opens an interactive view of given detailed preferences object
-	PrefsDetView(prefs *PrefsDetailed)
-
 	// HiStylesView opens an interactive view of custom or std highlighting styles.
 	HiStylesView(std bool)
 
@@ -45,9 +42,6 @@ type ViewIFace interface {
 
 	// PrefsDetApply applies detailed preferences within giv scope
 	PrefsDetApply(prefs *PrefsDetailed)
-
-	// PrefsDbgView opens an interactive view of given debugging preferences object
-	PrefsDbgView(prefs *DebugSettingsData)
 }
 
 // TheViewIFace is the implementation of the interface, defined in giv package

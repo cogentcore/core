@@ -6,10 +6,7 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
-	"goki.dev/icons"
 )
 
 // SettingsViewWindow makes and runs a new window for viewing user settings.
@@ -61,6 +58,7 @@ func SettingsView(b *gi.Body) {
 	}
 }
 
+/*
 // PrefsDetView opens a view of user detailed preferences
 func PrefsDetView(pf *gi.PrefsDetailed) {
 	if gi.ActivateExistingMainWindow(pf) {
@@ -107,3 +105,4 @@ func PrefsDbgView(pf *gi.DebugSettingsData) {
 
 	d.NewWindow().Run()
 }
+*/
