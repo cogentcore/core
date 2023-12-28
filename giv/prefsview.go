@@ -42,6 +42,7 @@ func SettingsView(b *gi.Body) {
 	tabs := gi.NewTabs(b)
 
 	for _, kv := range gi.AllSettings.Order {
+		kv := kv
 		nm := kv.Key
 		se := kv.Val
 

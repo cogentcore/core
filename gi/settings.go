@@ -6,7 +6,6 @@ package gi
 
 import (
 	"errors"
-	"fmt"
 	"image/color"
 	"io/fs"
 	"os"
@@ -35,8 +34,8 @@ import (
 // settings by default and should be modified by other apps to add their
 // app settings.
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
-	{"General", GeneralSettings},
 	{"System", SystemSettings},
+	{"General", GeneralSettings},
 	{"Devices", DeviceSettings},
 	{"Debugging", DebugSettings},
 })
@@ -62,7 +61,6 @@ type SettingsBase struct {
 
 // Filename returns the full filename/filepath at which the settings are stored.
 func (sb *SettingsBase) Filename() string {
-	fmt.Println(DataDir(), sb.File)
 	return filepath.Join(DataDir(), sb.File)
 }
 
