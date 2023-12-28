@@ -11,7 +11,7 @@ import (
 	"goki.dev/girl/styles"
 )
 
-var samplefile gi.FileName = "sample.go"
+var samplefile gi.FileName = "../demo/demo.go"
 
 // var samplefile gi.FileName = "../../Makefile"
 
@@ -20,9 +20,6 @@ var samplefile gi.FileName = "sample.go"
 func main() { gimain.Run(app) }
 
 func app() {
-	// gi.DebugSettings.LayoutTrace = true
-	// gi.EventTrace = true
-
 	b := gi.NewAppBody("texteditor").SetTitle("GoGi texteditor.Editor Test")
 	b.App().About = `This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 

@@ -130,14 +130,6 @@ func app() {
 	stru.Things = make([]*TableStruct, 2)
 	stru.Stuff = make([]float32, 3)
 
-	// turn this on to see a trace of the rendering
-	// gi.DebugSettings.WinEventTrace = true
-	// gi.DebugSettings.RenderTrace = true
-	// gi.DebugSettings.LayoutTrace = true
-	// gi.DebugSettings.WinRenderTrace = true
-	// gi.DebugSettings.UpdateTrace = true
-	// gi.DebugSettings.KeyEventTrace = true
-
 	b := gi.NewAppBody("views").SetTitle("GoGi Views Test")
 
 	b.App().About = `This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`

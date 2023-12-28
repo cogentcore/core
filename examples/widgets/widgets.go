@@ -21,17 +21,6 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	// turn these on to see a traces of various stages of processing..
-	// gi.DebugSettings.UpdateTrace = true
-	// gi.DebugSettings.RenderTrace = true
-	// gi.DebugSettings.LayoutTrace = true
-	// gi.DebugSettings.WinEventTrace = true
-	// gi.DebugSettings.WinRenderTrace = true
-	// gi.EventTrace = true
-	// gi.DebugSettings.KeyEventTrace = true
-	// events.TraceEventCompression = true
-	// events.TraceWindowPaint = true
-
 	b := gi.NewAppBody("widgets").SetTitle("GoGi Widgets Demo")
 
 	b.App().About = `This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`

@@ -36,10 +36,6 @@ func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 }
 
 func app() {
-	// turn this on to see a trace of the rendering
-	// gi.DebugSettings.RenderTrace = true
-	// gi.DebugSettings.LayoutTrace = true
-
 	b := gi.NewAppBody("treeview").SetTitle("TreeView Test")
 	b.App().About = `This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`
