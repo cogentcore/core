@@ -12,7 +12,6 @@ import (
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
 	"goki.dev/goki/packman"
-	"goki.dev/grows/images"
 	"goki.dev/xe"
 )
 
@@ -75,7 +74,8 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 	defer fdsi.Close()
-	sic, _, err := images.Open(filepath.Join(".goki", "icons", "1024.png"))
+	// 1024x1024 is the largest icon size on macOS
+	sic, err := RenderIcon(1024)
 	if err != nil {
 		return err
 	}

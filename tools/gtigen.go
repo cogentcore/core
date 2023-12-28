@@ -8,8 +8,8 @@ import (
 )
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/tools.Icons",
-	Doc:  "Icons converts the icon located at .goki/icons/svg.svg into various\ndifferent formats and sizes necessary for app packaging. If no such\nicon exists, it sets it to a placeholder icon, a blue version of\n[icons.SelectWindow]. It is run automatically for apps (not libraries)\nin goki init.",
+	Name: "goki.dev/goki/tools.Init",
+	Doc:  "Init initializes the \".goki\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -22,8 +22,8 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/tools.Init",
-	Doc:  "Init initializes the \".goki\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.",
+	Name: "goki.dev/goki/tools.Pack",
+	Doc:  "Pack builds and packages the app for the target platform.\nFor android, ios, and js, it is equivalent to build.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
