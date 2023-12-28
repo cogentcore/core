@@ -20,7 +20,8 @@ import (
 	"goki.dev/svg"
 )
 
-var IconSizes = []int{16, 32}
+// IconSizes are the different sizes of the icon that are rendered.
+var IconSizes = []int{16, 32, 58, 76, 80, 87, 114, 120, 152, 167, 180}
 
 // Icons converts the icon located at .goki/icons/svg.svg into various
 // different formats and sizes necessary for app packaging. If no such
@@ -39,6 +40,10 @@ func Icons(c *config.Config) error { //gti:add
 		if err != nil {
 			return err
 		}
+		err = os.MkdirAll(filepath.Join(".goki", "icons"), 0755)
+		if err != nil {
+			return err
+		}
 		err = os.WriteFile(spath, ic, 0666)
 		if err != nil {
 			return err
@@ -51,6 +56,7 @@ func Icons(c *config.Config) error { //gti:add
 	}
 	for _, sz := range IconSizes {
 		sv.Resize(image.Pt(sz, sz))
+		sv.Render()
 		err := sv.SavePNG(filepath.Join(".goki", "icons", strconv.Itoa(sz)+".png"))
 		if err != nil {
 			return err
