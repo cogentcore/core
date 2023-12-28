@@ -59,7 +59,7 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp -p", c.Build.Output, mpath)
+	err = xe.Run("cp", "-p", c.Build.Output, mpath)
 	if err != nil {
 		return err
 	}
