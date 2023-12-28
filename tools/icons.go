@@ -27,7 +27,7 @@ var IconSizes = []int{16, 32, 64, 128, 192, 256, 512, 1024}
 // Icons converts the icon located at .goki/icons/svg.svg into various
 // different formats and sizes necessary for app packaging. If no such
 // icon exists, it sets it to a placeholder icon, a blue version of
-// [icons.SelectWindow]. It is run automatically for apps (not libraries)
+// [icons.Toolbar]. It is run automatically for apps (not libraries)
 // in goki init.
 func Icons(c *config.Config) error { //gti:add
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
@@ -42,7 +42,7 @@ func Icons(c *config.Config) error { //gti:add
 		if !errors.Is(err, fs.ErrNotExist) {
 			return fmt.Errorf("error opening svg icon file: %w", err)
 		}
-		ic, err := fs.ReadFile(icons.Icons, icons.SelectWindow.Filename())
+		ic, err := fs.ReadFile(icons.Icons, icons.Toolbar.Filename())
 		if err != nil {
 			return err
 		}
