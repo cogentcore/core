@@ -1033,7 +1033,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		TheViewIFace.Inspector(em.Scene)
 		e.SetHandled()
 	case keyfun.Prefs:
-		TheViewIFace.PrefsView(GeneralSettings)
+		TheViewIFace.PrefsView(AppearanceSettings)
 		e.SetHandled()
 	case keyfun.WinClose:
 		win.CloseReq()

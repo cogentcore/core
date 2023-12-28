@@ -144,7 +144,7 @@ type Buf struct {
 func NewBuf() *Buf {
 	tb := &Buf{}
 	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.EditorSettings = gi.GeneralSettings.Editor
+	tb.Opts.EditorSettings = gi.SystemSettings.Editor
 	return tb
 }
 

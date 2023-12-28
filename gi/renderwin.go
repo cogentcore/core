@@ -294,7 +294,7 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	}
 	// oldzoom := goosi.ZoomFactor
 	goosi.ZoomFactor = nldpinet / cldpi
-	GeneralSettings.ApplyDPI()
+	AppearanceSettings.ApplyDPI()
 	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, goosi.ZoomFactor)
 
 	// actually resize window in proportion:

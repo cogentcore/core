@@ -34,7 +34,7 @@ import (
 // settings by default and should be modified by other apps to add their
 // app settings.
 var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
-	{"Appearance", GeneralSettings},
+	{"Appearance", AppearanceSettings},
 	{"System", SystemSettings},
 	{"Devices", DeviceSettings},
 	{"Debugging", DebugSettings},
@@ -122,22 +122,32 @@ func LoadAllSettings() error {
 // settings. It is automatically called when a new window opened, but can
 // be called before then if certain settings info needed.
 func Init() {
-	goosi.InitScreenLogicalDPIFunc = GeneralSettings.ApplyDPI // called when screens are initialized
+	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
 	grr.Log(LoadAllSettings())
 	WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
 	WinGeomMgr.Open()
 }
 
-// GeneralSettings are the currently active global Goki general settings.
-var GeneralSettings = &GeneralSettingsData{
+// UpdateAll updates all windows and triggers a full render rebuild.
+// It is typically called when user settings are changed.
+func UpdateAll() { //gti:add
+	gradient.Cache = nil // the cache is invalid now
+	for _, w := range AllRenderWins {
+		rctx := w.MainStageMgr.RenderCtx
+		rctx.LogicalDPI = w.LogicalDPI()
+		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
+	}
+}
+
+// AppearanceSettings are the currently active global Goki appearance settings.
+var AppearanceSettings = &AppearanceSettingsData{
 	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "general-settings.toml"),
+		File: filepath.Join("goki", "appearance-settings.toml"),
 	},
 }
 
-// GeneralSettingsData is the data type for the general Goki settings.
-// The global current instance is stored as [GeneralSettings].
-type GeneralSettingsData struct { //gti:add
+// AppearanceSettingsData is the data type for the global Goki appearance settings.
+type AppearanceSettingsData struct { //gti:add
 	SettingsBase
 
 	// the color theme
@@ -186,7 +196,7 @@ type GeneralSettingsData struct { //gti:add
 // your user explicitly states a preference for a specific color.
 var OverrideSettingsColor = false
 
-func (pf *GeneralSettingsData) Defaults() {
+func (pf *AppearanceSettingsData) Defaults() {
 	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
@@ -197,18 +207,7 @@ func (pf *GeneralSettingsData) Defaults() {
 	pf.MonoFont = "Roboto Mono"
 }
 
-// UpdateAll updates all windows and triggers a full render rebuild.
-// It is typically called when user settings are changed.
-func UpdateAll() { //gti:add
-	gradient.Cache = nil // the cache is invalid now
-	for _, w := range AllRenderWins {
-		rctx := w.MainStageMgr.RenderCtx
-		rctx.LogicalDPI = w.LogicalDPI()
-		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
-	}
-}
-
-func (pf *GeneralSettingsData) Apply() { //gti:add
+func (pf *AppearanceSettingsData) Apply() { //gti:add
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
 	// which means that we will always override the color, even without OverridePrefsColor
 	if !OverrideSettingsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
@@ -238,7 +237,7 @@ func (pf *GeneralSettingsData) Apply() { //gti:add
 
 // ApplyDPI updates the screen LogicalDPI values according to current
 // preferences and zoom factor, and then updates all open windows as well.
-func (pf *GeneralSettingsData) ApplyDPI() {
+func (pf *AppearanceSettingsData) ApplyDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
 	goosi.LogicalDPIScale = pf.Zoom / 100
 	// fmt.Println("goosi ldpi:", goosi.LogicalDPIScale)
@@ -286,7 +285,7 @@ func (pf *GeneralSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
 */
 
 // ScreenInfo returns screen info for all screens on the device
-func (pf *GeneralSettingsData) ScreenInfo() []*goosi.Screen { //gti:add
+func (pf *AppearanceSettingsData) ScreenInfo() []*goosi.Screen { //gti:add
 	ns := goosi.TheApp.NScreens()
 	res := make([]*goosi.Screen, ns)
 	for i := 0; i < ns; i++ {
@@ -296,7 +295,7 @@ func (pf *GeneralSettingsData) ScreenInfo() []*goosi.Screen { //gti:add
 }
 
 // VersionInfo returns GoGi version information
-func (pf *GeneralSettingsData) VersionInfo() string { //gti:add
+func (pf *AppearanceSettingsData) VersionInfo() string { //gti:add
 	vinfo := "Version: " + Version + "\nDate: " + VersionDate + " UTC\nGit commit: " + GitCommit
 	return vinfo
 }
@@ -305,12 +304,12 @@ func (pf *GeneralSettingsData) VersionInfo() string { //gti:add
 // each window, by screen, and clear current in-memory cache. You shouldn't generally
 // need to do this, but sometimes it is useful for testing or windows that are
 // showing up in bad places that you can't recover from.
-func (pf *GeneralSettingsData) DeleteSavedWindowGeoms() { //gti:add
+func (pf *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
 }
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
-func (pf *GeneralSettingsData) EditHiStyles() { //gti:add
+func (pf *AppearanceSettingsData) EditHiStyles() { //gti:add
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
@@ -333,7 +332,7 @@ const (
 // DensityMul returns an enum value representing the type
 // of density that the user has selected, based on a set of
 // fixed breakpoints.
-func (pf *GeneralSettingsData) DensityType() Densities {
+func (pf *AppearanceSettingsData) DensityType() Densities {
 	switch {
 	case pf.Spacing < 50:
 		return DensityCompact

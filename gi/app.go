@@ -193,7 +193,7 @@ func StdOverflowMenu(tb *Toolbar) {
 func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
 	NewButton(m).SetText("System preferences").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
 		OnClick(func(e events.Event) {
-			TheViewIFace.PrefsView(GeneralSettings)
+			TheViewIFace.PrefsView(AppearanceSettings)
 		})
 	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
 		OnClick(func(e events.Event) {
