@@ -67,7 +67,8 @@ type Build struct { //gti:add
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output"`
 
-	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)
+	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise);
+	// it is typically in the format com.org.app (eg: com.goki.mail)
 	ID string
 
 	// whether to build/run the app in debug mode; this currently only works on mobile platforms
