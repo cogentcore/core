@@ -115,13 +115,22 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 	defer fdmg.Close()
-	err = DmgBuildTmpl.Execute(fdmg, 0)
+	dmgbd := &DmgBuildData{
+		AppPath:  apath,
+		AppName:  anm,
+		IconPath: inm,
+	}
+	err = DmgBuildTmpl.Execute(fdmg, dmgbd)
 	if err != nil {
 		return err
 	}
-	return xe.Run("dmgbuild",
+	err = xe.Run("dmgbuild",
 		"-s", dmgsnm,
 		c.Name, filepath.Join(bpath, c.Name+".dmg"))
+	if err != nil {
+		return err
+	}
+	return os.Remove(dmgsnm)
 }
 
 // InfoPlistData is the data passed to [InfoPlistTmpl]
@@ -163,8 +172,17 @@ var InfoPlistTmpl = template.Must(template.New("InfoPlistTmpl").Parse(
 </plist>
 `))
 
+// DmgBuildData is the data passed to [DmgBuildTmpl]
+type DmgBuildData struct {
+	AppPath  string
+	AppName  string
+	IconPath string
+}
+
 // DmgBuildTmpl is the template for the dmgbuild python settings file
 var DmgBuildTmpl = template.Must(template.New("DmgBuildTmpl").Parse(
-	`files = [".goki/bin/darwin/Goki Demo.app"]
+	`files = ['{{.AppPath}}']
 symlinks = {"Applications": "/Applications"}
+icon = '{{.IconPath}}'
+icon_locations = {'{{.AppName}}': (140, 120), "Applications": (500, 120)}
 background = "builtin-arrow"`))
