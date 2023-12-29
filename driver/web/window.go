@@ -23,3 +23,8 @@ var _ goosi.Window = &Window{}
 func (w *Window) Handle() any {
 	return js.Global()
 }
+
+func (w *Window) SetTitle(title string) {
+	w.WindowSingle.SetTitle(title)
+	js.Global().Get("document").Set("title", title)
+}
