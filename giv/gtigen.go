@@ -1474,15 +1474,14 @@ var StructViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Struct", &gti.Field{Name: "Struct", Type: "any", LocalType: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"StructValView", &gti.Field{Name: "StructValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
+		{"StructValView", &gti.Field{Name: "StructValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", LocalType: "*reflect.Value", Doc: "Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
-		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
-		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
-		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
+		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" edit:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1509,27 +1508,6 @@ func (t *StructView) New() ki.Ki {
 	return &StructView{}
 }
 
-// SetStructValView sets the [StructView.StructValView]:
-// Value for the struct itself, if this was created within value view framework -- otherwise nil
-func (t *StructView) SetStructValView(v Value) *StructView {
-	t.StructValView = v
-	return t
-}
-
-// SetChangeFlag sets the [StructView.ChangeFlag]:
-// Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
-func (t *StructView) SetChangeFlag(v *reflect.Value) *StructView {
-	t.ChangeFlag = v
-	return t
-}
-
-// SetFieldViews sets the [StructView.FieldViews]:
-// Value representations of the fields
-func (t *StructView) SetFieldViews(v []Value) *StructView {
-	t.FieldViews = v
-	return t
-}
-
 // SetTmpSave sets the [StructView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 func (t *StructView) SetTmpSave(v Value) *StructView {
@@ -1541,27 +1519,6 @@ func (t *StructView) SetTmpSave(v Value) *StructView {
 // a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 func (t *StructView) SetViewPath(v string) *StructView {
 	t.ViewPath = v
-	return t
-}
-
-// SetHasDefs sets the [StructView.HasDefs]:
-// if true, some fields have default values -- update labels when values change
-func (t *StructView) SetHasDefs(v bool) *StructView {
-	t.HasDefs = v
-	return t
-}
-
-// SetHasViewIfs sets the [StructView.HasViewIfs]:
-// if true, some fields have viewif conditional view tags -- update after..
-func (t *StructView) SetHasViewIfs(v bool) *StructView {
-	t.HasViewIfs = v
-	return t
-}
-
-// SetTypeFieldTags sets the [StructView.TypeFieldTags]:
-// extra tags by field name -- from type properties
-func (t *StructView) SetTypeFieldTags(v map[string]string) *StructView {
-	t.TypeFieldTags = v
 	return t
 }
 

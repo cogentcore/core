@@ -34,16 +34,13 @@ type StructView struct {
 	Struct any `set:"-"`
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView Value
+	StructValView Value `set:"-"`
 
 	// has the value of any field changed?  updated by the ViewSig signals from fields
 	Changed bool `set:"-"`
 
-	// Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
-	ChangeFlag *reflect.Value `json:"-" xml:"-"`
-
 	// Value representations of the fields
-	FieldViews []Value `json:"-" xml:"-"`
+	FieldViews []Value `set:"-" json:"-" xml:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
@@ -52,13 +49,13 @@ type StructView struct {
 	ViewPath string
 
 	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" edit:"-"`
+	HasDefs bool `set:"-" json:"-" xml:"-" edit:"-"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" edit:"-"`
+	HasViewIfs bool `set:"-" json:"-" xml:"-" edit:"-"`
 
 	// extra tags by field name -- from type properties
-	TypeFieldTags map[string]string `json:"-" xml:"-" edit:"-"`
+	TypeFieldTags map[string]string `set:"-" json:"-" xml:"-" edit:"-"`
 }
 
 func (sv *StructView) OnInit() {
@@ -193,12 +190,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 		func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			// todo: check tags, skip various etc
 			ftags := sv.FieldTags(field)
-			_, got := ftags.Lookup("changeflag")
-			if got {
-				if field.Type.Kind() == reflect.Bool {
-					sv.ChangeFlag = &fieldVal
-				}
-			}
 			vwtag := ftags.Get("view")
 			if vwtag == "-" {
 				return true
@@ -318,9 +309,6 @@ func (sv *StructView) ConfigStructGrid() bool {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				sv.Changed = true
-				if sv.ChangeFlag != nil {
-					sv.ChangeFlag.SetBool(true)
-				}
 				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {
 					if updtr, ok := sv.Struct.(gi.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
