@@ -109,6 +109,11 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 	return xe.Run("dmgbuild",
+		"-D", "files="+apath,
+		"-D", "symlinks={Applications: /Applications}",
+		"-D", "icon="+inm,
+		"-D", "icon_locations={"+c.Name+": (140, 120), Applications: (500, 120)}",
+		"-D", "background=builtin-arrow",
 		c.Name, filepath.Join(".goki", "bin", "darwin", c.Name+".dmg"))
 }
 
