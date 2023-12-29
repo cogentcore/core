@@ -168,7 +168,7 @@ func MakeIndexHTML(c *config.Config) ([]byte, error) {
 		Desc:       c.Desc,
 		Keywords:   c.Web.Keywords,
 		ThemeColor: c.Web.ThemeColor,
-		Title:      c.Web.Title,
+		Title:      c.Name,
 		Image:      c.Web.Image,
 	}
 

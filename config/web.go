@@ -50,12 +50,6 @@ type Web struct { //gti:add
 	// DEFAULT: en.
 	Lang string `def:"en"`
 
-	// The page title.
-	Title string
-
-	// The page description.
-	Description string
-
 	// The page authors.
 	Author string
 
