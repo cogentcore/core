@@ -15,6 +15,7 @@ import (
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile"
+	"goki.dev/grows/images"
 	"goki.dev/xe"
 )
 
@@ -54,15 +55,30 @@ func PackLinux(c *config.Config) error {
 
 	bpath := filepath.Join(".goki", "bin", "linux")
 	apath := filepath.Join(bpath, avnm)
-	ubpath := filepath.Join(apath, "usr", "local", "bin")
-	uspath := filepath.Join(apath, "usr", "share", "applications")
+	ulbpath := filepath.Join(apath, "usr", "local", "bin")
+	usipath := filepath.Join(apath, "usr", "share", "icons")
+	usapath := filepath.Join(apath, "usr", "share", "applications")
 	dpath := filepath.Join(apath, "DEBIAN")
 
-	err := os.MkdirAll(ubpath, 0777)
+	err := os.MkdirAll(ulbpath, 0777)
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", "-p", c.Build.Output, filepath.Join(ubpath, anm))
+	err = xe.Run("cp", "-p", c.Build.Output, filepath.Join(ulbpath, anm))
+	if err != nil {
+		return err
+	}
+
+	// see https://martin.hoppenheit.info/blog/2016/where-to-put-application-icons-on-linux/
+	ic, err := mobile.RenderIcon(48)
+	if err != nil {
+		return err
+	}
+	err = images.Save(ic, filepath.Join(usipath, "hicolor", "48x48", "apps", anm+".png"))
+	if err != nil {
+		return err
+	}
+	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(usipath, "hicolor", "scalable", "apps", anm+".svg"))
 	if err != nil {
 		return err
 	}
@@ -72,11 +88,11 @@ func PackLinux(c *config.Config) error {
 		c.Desc = c.Name
 	}
 
-	err = os.MkdirAll(uspath, 0777)
+	err = os.MkdirAll(usapath, 0777)
 	if err != nil {
 		return err
 	}
-	fapp, err := os.Create(filepath.Join(uspath, anm+".desktop"))
+	fapp, err := os.Create(filepath.Join(usapath, anm+".desktop"))
 	if err != nil {
 		return err
 	}
@@ -121,7 +137,8 @@ type DesktopFileData struct {
 
 // DesktopFileTmpl is the template for the Linux .desktop file
 var DesktopFileTmpl = template.Must(template.New("DesktopFileTmpl").Parse(
-	`Type=Application
+	`[Desktop Entry]
+Type=Application
 Version=1.0
 Name={{.Name}}
 Comment={{.Desc}}
