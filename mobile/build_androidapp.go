@@ -192,8 +192,9 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		}
 	}
 
-	// Add the icon.
-	ic, err := RenderIcon(1024)
+	// Add the icon. 512 is the largest icon size on Android
+	// (for the Google Play Store icon).
+	ic, err := RenderIcon(512)
 	if err != nil {
 		return nil, err
 	}
