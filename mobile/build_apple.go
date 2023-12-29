@@ -15,6 +15,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
 	"goki.dev/grows/images"
 	"goki.dev/xe"
@@ -30,8 +31,12 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 
 	infoplist := new(bytes.Buffer)
 	if err := InfoplistTmpl.Execute(infoplist, InfoplistTmplData{
-		BundleID: c.ID,
-		Name:     c.Name,
+		BundleID:           c.ID,
+		Name:               c.Name,
+		Version:            c.Version,
+		InfoString:         c.Desc,
+		ShortVersionString: c.Version,
+		IconFile:           filepath.Join("Contents", "Resources", "icon.icns"),
 	}); err != nil {
 		return nil, err
 	}
@@ -119,6 +124,23 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 
+	inm := filepath.Join(TmpDir+"/build/Release-iphoneos/main.app", "icon.icns")
+	fdsi, err := os.Create(inm)
+	if err != nil {
+		return nil, err
+	}
+	defer fdsi.Close()
+	// 1024x1024 is the largest icon size on iOS
+	// (for the App Store)
+	sic, err := RenderIcon(1024)
+	if err != nil {
+		return nil, err
+	}
+	err = icns.Encode(fdsi, sic)
+	if err != nil {
+		return nil, err
+	}
+
 	// TODO(jbd): Fallback to copying if renaming fails.
 	if c.Build.Output == "" {
 		c.Build.Output = filepath.Join(".goki", "bin", "ios", c.Name+".app")
@@ -196,8 +218,12 @@ func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir strin
 }
 
 type InfoplistTmplData struct {
-	BundleID string
-	Name     string
+	BundleID           string
+	Name               string
+	Version            string
+	InfoString         string
+	ShortVersionString string
+	IconFile           string
 }
 
 var InfoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -216,12 +242,16 @@ var InfoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>{{.Name}}</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
   <key>CFBundleSignature</key>
   <string>????</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>{{ .Version }}</string>
+  <key>CFBundleGetInfoString</key>
+  <string>{{ .InfoString }}</string>
+  <key>CFBundleShortVersionString</key>
+  <string>{{ .ShortVersionString }}</string>
+  <key>CFBundleIconFile</key>
+  <string>{{ .IconFile }}</string>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>UILaunchStoryboardName</key>
