@@ -104,9 +104,15 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	return xe.Run("create-dmg",
+	return xe.Verbose().Run("create-dmg",
 		"--volname", c.Name,
 		"--volicon", inm,
+		"--window-pos", "200", "120",
+		"--window-size", "800", "400",
+		"--icon-size", "100",
+		"--icon", apath, "200", "190",
+		"--hide-extension", apath,
+		"--app-drop-link", "600", "185",
 		filepath.Join(".goki", "bin", "darwin", c.Name+".dmg"),
 		apath)
 }
