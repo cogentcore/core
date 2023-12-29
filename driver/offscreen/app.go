@@ -36,7 +36,7 @@ func Main(f func(goosi.App)) {
 	TheApp.Drawer = &Drawer{}
 	TheApp.GetScreens()
 
-	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir"))
+	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir-"))
 
 	base.Main(f, TheApp, &TheApp.App)
 }
