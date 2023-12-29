@@ -61,7 +61,7 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp -p", c.Build.Output, filepath.Join(ubpath, anm))
+	err = xe.Run("cp", "-p", c.Build.Output, filepath.Join(ubpath, anm))
 	if err != nil {
 		return err
 	}
