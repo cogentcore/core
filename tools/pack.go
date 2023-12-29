@@ -56,7 +56,7 @@ func PackLinux(c *config.Config) error {
 	bpath := filepath.Join(".goki", "bin", "linux")
 	apath := filepath.Join(bpath, avnm)
 	ulbpath := filepath.Join(apath, "usr", "local", "bin")
-	usipath := filepath.Join(apath, "usr", "share", "icons")
+	usipath := filepath.Join(apath, "usr", "share", "icons", "hicolor")
 	usapath := filepath.Join(apath, "usr", "share", "applications")
 	dpath := filepath.Join(apath, "DEBIAN")
 
@@ -74,11 +74,21 @@ func PackLinux(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = images.Save(ic, filepath.Join(usipath, "hicolor", "48x48", "apps", anm+".png"))
+	i48path := filepath.Join(usipath, "48x48", "apps")
+	err = os.MkdirAll(i48path, 0777)
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(usipath, "hicolor", "scalable", "apps", anm+".svg"))
+	err = images.Save(ic, filepath.Join(i48path, anm+".png"))
+	if err != nil {
+		return err
+	}
+	iscpath := filepath.Join(usipath, "scalable", "apps")
+	err = os.MkdirAll(iscpath, 0777)
+	if err != nil {
+		return err
+	}
+	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(iscpath, anm+".svg"))
 	if err != nil {
 		return err
 	}
