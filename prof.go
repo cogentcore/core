@@ -90,7 +90,7 @@ func (p *Profile) End() {
 	if p == nil || !Profiling {
 		return
 	}
-	dur := time.Now().Sub(p.St)
+	dur := time.Since(p.St)
 	p.Tot += dur
 	p.N++
 	p.Avg = float64(p.Tot) / float64(p.N)
