@@ -6,6 +6,7 @@ package tools
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
 
 	"goki.dev/goki/config"
@@ -29,7 +30,9 @@ func Install(c *config.Config) error { //gti:add
 			p.Arch = runtime.GOARCH
 			c.Build.Target[i] = p
 		}
-		if p.OS == "android" || p.OS == "ios" {
+
+		switch p.OS {
+		case "android", "ios":
 			err := Build(c)
 			if err != nil {
 				return fmt.Errorf("error building: %w", err)
@@ -42,29 +45,18 @@ func Install(c *config.Config) error { //gti:add
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
-			continue
+		case "js":
+			return fmt.Errorf("can not install on platform js; use build or run instead")
+		case "darwin":
+			c.Pack.DMG = false
+			err := Pack(c)
+			if err != nil {
+				return err
+			}
+			return xe.Run("cp", "-a", filepath.Join(".goki", "bin", "darwin", c.Name+".app"), "/Applications")
+		default:
+			return xe.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install", c.Build.Package)
 		}
-		if p.OS == "js" {
-			// TODO: implement js
-			continue
-		}
-		err = InstallDesktop(c.Build.Package, p.OS)
-		if err != nil {
-			return fmt.Errorf("install: %w", err)
-		}
-	}
-	return nil
-}
-
-// InstallDesktop builds and installs an executable for the package at the given path for the given desktop platform.
-// InstallDesktop does not check whether operating systems are valid, so it should be called through Install in almost all cases.
-func InstallDesktop(pkgPath string, osName string) error {
-	xc := xe.Major()
-	xc.Env["GOOS"] = osName
-	xc.Env["GOARCH"] = runtime.GOARCH
-	err := xc.Run("go", "install", pkgPath)
-	if err != nil {
-		return fmt.Errorf("error installing on platform %s/%s: %w", osName, runtime.GOARCH, err)
 	}
 	return nil
 }
