@@ -1806,6 +1806,34 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.DeviceSettingsData",
+	ShortName: "gi.DeviceSettingsData",
+	IDName:    "device-settings-data",
+	Doc:       "DeviceSettingsData is the data type for the device settings.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/gi/v2/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "The keyboard shortcut map to use", Directives: gti.Directives{}, Tag: ""}},
+		{"KeyMaps", &gti.Field{Name: "KeyMaps", Type: "goki.dev/glop/option.Option", LocalType: "option.Option[keyfun.Maps]", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps.", Directives: gti.Directives{}, Tag: "toml:\"-\""}},
+		{"DoubleClickInterval", &gti.Field{Name: "DoubleClickInterval", Type: "time.Duration", LocalType: "time.Duration", Doc: "The maximum time interval between button press events to count as a double-click", Directives: gti.Directives{}, Tag: "min:\"100\" step:\"50\""}},
+		{"ScrollWheelSpeed", &gti.Field{Name: "ScrollWheelSpeed", Type: "float32", LocalType: "float32", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here.", Directives: gti.Directives{}, Tag: "min:\"0.01\" step:\"1\""}},
+		{"SlideStartTime", &gti.Field{Name: "SlideStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a regular slide event\n(as opposed to a basic press event)", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"5\" max:\"1000\" step:\"5\""}},
+		{"SlideStartDistance", &gti.Field{Name: "SlideStartDistance", Type: "int", LocalType: "int", Doc: "The number of pixels that must be moved before initiating a regular\nslide event (as opposed to a basic press event)", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"0\" max:\"100\" step:\"1\""}},
+		{"DragStartTime", &gti.Field{Name: "DragStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a drag-n-drop event", Directives: gti.Directives{}, Tag: "def:\"200\" min:\"5\" max:\"1000\" step:\"5\""}},
+		{"DragStartDistance", &gti.Field{Name: "DragStartDistance", Type: "int", LocalType: "int", Doc: "The number of pixels that must be moved before initiating a drag-n-drop event", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" max:\"100\" step:\"1\""}},
+		{"LongHoverTime", &gti.Field{Name: "LongHoverTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"10\" max:\"10000\" step:\"10\""}},
+		{"LongHoverStopDistance", &gti.Field{Name: "LongHoverStopDistance", Type: "int", LocalType: "int", Doc: "The maximum number of pixels that mouse can move and still register a long hover event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"0\" max:\"1000\" step:\"1\""}},
+		{"LongPressTime", &gti.Field{Name: "LongPressTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"10\" max:\"10000\" step:\"10\""}},
+		{"LongPressStopDistance", &gti.Field{Name: "LongPressStopDistance", Type: "int", LocalType: "int", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"0\" max:\"1000\" step:\"1\""}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/gi/v2/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ScreenSettings",
 	ShortName: "gi.ScreenSettings",
 	IDName:    "screen-settings",

@@ -123,6 +123,7 @@ func LoadAllSettings() error {
 // be called before then if certain settings info needed.
 func Init() {
 	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
+	GokiDataDir()                                                // ensure it exists
 	grr.Log(LoadAllSettings())
 	WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
 	WinGeomMgr.Open()
@@ -142,7 +143,7 @@ func UpdateAll() { //gti:add
 // AppearanceSettings are the currently active global Goki appearance settings.
 var AppearanceSettings = &AppearanceSettingsData{
 	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "appearance-settings.toml"),
+		File: filepath.Join("Goki", "appearance-settings.toml"),
 	},
 }
 
@@ -330,12 +331,12 @@ func (as *AppearanceSettingsData) DensityType() Densities {
 // DeviceSettings are the global device settings.
 var DeviceSettings = &DeviceSettingsData{
 	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "device-settings.toml"),
+		File: filepath.Join("Goki", "device-settings.toml"),
 	},
 }
 
 // DeviceSettingsData is the data type for the device settings.
-type DeviceSettingsData struct {
+type DeviceSettingsData struct { //gti:add
 	SettingsBase
 
 	// The keyboard shortcut map to use
@@ -422,7 +423,7 @@ type ScreenSettings struct { //gti:add
 // SystemSettings are the currently active Goki system settings.
 var SystemSettings = &SystemSettingsData{
 	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "system-settings.toml"),
+		File: filepath.Join("Goki", "system-settings.toml"),
 	},
 }
 
@@ -760,7 +761,7 @@ func OpenPaths() {
 // DebugSettings are the currently active debugging settings
 var DebugSettings = &DebugSettingsData{
 	SettingsBase: SettingsBase{
-		File: filepath.Join("goki", "debug-settings.toml"),
+		File: filepath.Join("Goki", "debug-settings.toml"),
 	},
 }
 
