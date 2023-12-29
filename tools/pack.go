@@ -99,12 +99,12 @@ type DebianControlData struct {
 // DebianControlTmpl is the template for the Linux DEBIAN/control file
 var DebianControlTmpl = template.Must(template.New("DebianControlTmpl").Parse(
 	`Package: {{.Name}}
-	Version: {{.Version}}
-	Section: base
-	Priority: optional
-	Architecture: all
-	Maintainer: Your Name <you@email.com>
-	Description: {{.Description}}
+Version: {{.Version}}
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: Your Name <you@email.com>
+Description: {{.Description}}
 `))
 
 // PackDarwin packages the app for macOS by generating a .app and .dmg file.
