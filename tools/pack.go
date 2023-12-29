@@ -6,6 +6,7 @@ package tools
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"text/template"
 
@@ -105,11 +106,14 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("pip", "install", "dmgbuild")
-	if err != nil {
-		return err
+	// install dmgbuild if we don't already have it
+	if _, err := exec.LookPath("dmgbuild"); err != nil {
+		err = xe.Run("pip", "install", "dmgbuild")
+		if err != nil {
+			return err
+		}
 	}
-	dmgsnm := filepath.Join(bpath, "tmpDmgBuildSettings.py")
+	dmgsnm := filepath.Join(bpath, ".tempDmgBuildSettings.py")
 	fdmg, err := os.Create(dmgsnm)
 	if err != nil {
 		return err
