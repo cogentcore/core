@@ -28,6 +28,7 @@ import (
 	"log/slog"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -38,15 +39,20 @@ import (
 // called on it when done timing. It will be nil if not the first to start
 // timing on this function; it assumes nested inner / outer loop structure for
 // calls to the same method. It uses the name of the calling function as the name
-// of the profile struct.
-func Start() *Profile {
+// of the profile struct. Extra information can be passed to Start, which will be added
+// at the end of the name in a period-delimited format.
+func Start(info ...string) *Profile {
 	name := ""
 	pc, _, _, ok := runtime.Caller(1)
 	if ok {
 		name = runtime.FuncForPC(pc).Name()
 	} else {
-		name = "prof.Start: unexpected error: unable to get caller"
-		slog.Error(name)
+		err := "prof.Start: unexpected error: unable to get caller"
+		slog.Error(err)
+		name = "!(" + err + ")"
+	}
+	if len(info) > 0 {
+		name += "." + strings.Join(info, ".")
 	}
 	return Prof.Start(name)
 }
