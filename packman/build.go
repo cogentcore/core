@@ -23,10 +23,6 @@ func Build(c *config.Config) error { //gti:add
 	if len(c.Build.Target) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}
-	err := os.MkdirAll(filepath.Join(".goki", "bin", "build"), 0777)
-	if err != nil {
-		return fmt.Errorf("build: failed to create bin/build directory: %w", err)
-	}
 	for _, platform := range c.Build.Target {
 		err := config.OSSupported(platform.OS)
 		if err != nil {
@@ -51,11 +47,15 @@ func Build(c *config.Config) error { //gti:add
 		if platform.OS == "js" {
 			// need to get real output location so that commands work
 			if c.Build.Output == "" {
-				c.Build.Output = filepath.Join(".goki", "web", "app.wasm")
+				c.Build.Output = filepath.Join(".goki", "bin", "js", "app.wasm")
 			}
 			// we must end with a wasm file
 			if !strings.Contains(filepath.Base(c.Build.Output), ".wasm") {
 				c.Build.Output = filepath.Join(c.Build.Output, "app.wasm")
+			}
+			err := os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+			if err != nil {
+				return err
 			}
 			return web.Build(c)
 		}
@@ -74,17 +74,13 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
 
-	origPkg := c.Build.Package
-	// need to get real package and output location so that install commands work later
-	if c.Build.Package == "." {
-		dir, err := os.Getwd()
-		if err != nil {
-			return fmt.Errorf("error getting current working directory: %w", err)
-		}
-		c.Build.Package = filepath.Base(dir)
-	}
+	// need to get real output location so that install commands work later
 	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".goki", "bin", "build", c.Build.Package)
+		c.Build.Output = filepath.Join(".goki", "bin", platform.OS, c.Name)
+	}
+	err := os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+	if err != nil {
+		return err
 	}
 	tags := []string{"build"}
 	if c.Build.Debug {
@@ -95,9 +91,9 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
-	tags = append(tags, "-o", c.Build.Output, origPkg)
+	tags = append(tags, "-o", c.Build.Output, c.Build.Package)
 
-	err := xc.Run("go", tags...)
+	err = xc.Run("go", tags...)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}

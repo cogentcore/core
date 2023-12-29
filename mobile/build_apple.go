@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -22,21 +21,16 @@ import (
 )
 
 // GoAppleBuild builds the given package with the given bundle ID for the given iOS targets.
-func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targets []config.Platform) (map[string]bool, error) {
+func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
 	src := pkg.PkgPath
 	if c.Build.Output != "" && !strings.HasSuffix(c.Build.Output, ".app") {
 		return nil, fmt.Errorf("-o must have an .app for -target=ios")
 	}
 
-	productName := RFC1034Label(path.Base(pkg.PkgPath))
-	if productName == "" {
-		productName = "ProductName" // like xcode.
-	}
-
 	infoplist := new(bytes.Buffer)
 	if err := InfoplistTmpl.Execute(infoplist, InfoplistTmplData{
-		BundleID: bundleID + "." + productName,
-		Name:     strings.Title(path.Base(pkg.PkgPath)),
+		BundleID: c.ID,
+		Name:     c.Name,
 	}); err != nil {
 		return nil, err
 	}
@@ -126,17 +120,11 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 
 	// TODO(jbd): Fallback to copying if renaming fails.
 	if c.Build.Output == "" {
-		n := pkg.PkgPath
-		if n == "." {
-			// use cwd name
-			cwd, err := os.Getwd()
-			if err != nil {
-				return nil, fmt.Errorf("cannot create .app; cannot get the current working dir: %v", err)
-			}
-			n = cwd
-		}
-		n = path.Base(n)
-		c.Build.Output = filepath.Join(".goki", "bin", "build", n+".app")
+		c.Build.Output = filepath.Join(".goki", "bin", "ios", c.Name+".app")
+	}
+	err = os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+	if err != nil {
+		return nil, err
 	}
 	xe.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output), nil)
 	if !c.Build.PrintOnly {

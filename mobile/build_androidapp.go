@@ -15,7 +15,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -37,8 +36,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	if err != nil {
 		return nil, err
 	}
-	appName := path.Base(pkg.PkgPath)
-	libName := AndroidPkgName(appName)
+	libName := AndroidPkgName(c.Name)
 
 	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
 	// Fix this to work with other Go tools.
@@ -55,7 +53,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		err := ManifestTmpl.Execute(buf, ManifestTmplData{
 			JavaPkgPath: c.ID,
-			Name:        strings.Title(appName),
+			Name:        c.Name,
 			LibName:     libName,
 		})
 		if err != nil {
@@ -107,10 +105,14 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}
 
 	if c.Build.Output == "" {
-		c.Build.Output = filepath.Join(".goki", "bin", "build", AndroidPkgName(path.Base(pkg.PkgPath))+".apk")
+		c.Build.Output = filepath.Join(".goki", "bin", "android", c.Name+".apk")
 	}
 	if !strings.HasSuffix(c.Build.Output, ".apk") {
 		return nil, fmt.Errorf("output file name %q does not end in '.apk'", c.Build.Output)
+	}
+	err = os.MkdirAll(filepath.Dir(c.Build.Output), 0777)
+	if err != nil {
+		return nil, err
 	}
 	var out io.Writer
 	if !c.Build.PrintOnly {

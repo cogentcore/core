@@ -103,7 +103,6 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 		return nil, fmt.Errorf("id must be set when building for mobile")
 	}
 
-	var nmpkgs map[string]bool
 	switch {
 	case IsAndroidPlatform(c.Build.Target[0].OS):
 		if pkg.Name != "main" {
@@ -114,7 +113,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = GoAndroidBuild(c, pkg, c.Build.Target)
+		_, err = GoAndroidBuild(c, pkg, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
@@ -135,21 +134,11 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = GoAppleBuild(c, pkg, c.ID, c.Build.Target)
+		_, err = GoAppleBuild(c, pkg, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	// This is not correctly detecting use of mobile/app.
-	// Furthermore, even if it did, people should be able to use the gomobile build tool
-	// to build things for mobile without using the actual mobile/app package.
-	// Therefore, it has been commented out, at least temporarily.
-	// TODO: decide to what to do here in the long-term.
-	_ = nmpkgs
-	// if !nmpkgs["goki.dev/mobile/app"] {
-	// 	return nil, fmt.Errorf(`%s does not import "goki.dev/mobile/app"`, pkg.PkgPath)
-	// }
 
 	return pkg, nil
 }

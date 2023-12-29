@@ -46,7 +46,7 @@ func PackDarwin(c *config.Config) error {
 
 	anm := c.Name + ".app"
 
-	apath := filepath.Join(".goki", "bin", "pack", anm)
+	apath := filepath.Join(".goki", "bin", "darwin", anm)
 	cpath := filepath.Join(apath, "Contents")
 	mpath := filepath.Join(cpath, "MacOS")
 	rpath := filepath.Join(cpath, "Resources")
