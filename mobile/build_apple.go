@@ -36,7 +36,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		Version:            c.Version,
 		InfoString:         c.Desc,
 		ShortVersionString: c.Version,
-		IconFile:           filepath.Join("assets", "icon.png"),
+		IconFile:           "icon.icns",
 	}); err != nil {
 		return nil, err
 	}
