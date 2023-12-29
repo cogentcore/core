@@ -80,6 +80,10 @@ func PackLinux(c *config.Config) error {
 		Version:     vnm,
 		Description: c.Desc,
 	}
+	// we need a description
+	if dcd.Description == "" {
+		dcd.Description = c.Name
+	}
 	err = DebianControlTmpl.Execute(fctrl, dcd)
 	if err != nil {
 		return err
