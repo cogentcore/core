@@ -22,7 +22,8 @@ var _ = gti.AddType(&gti.Type{
 		{"Version", &gti.Field{Name: "Version", Type: "string", LocalType: "string", Doc: "the version of the project", Directives: gti.Directives{}, Tag: "cmd:\"set-version\" posarg:\"0\" def:\"v0.0.0\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/config.Types", LocalType: "Types", Doc: "the type of the project (app/library)", Directives: gti.Directives{}, Tag: ""}},
 		{"Build", &gti.Field{Name: "Build", Type: "goki.dev/goki/config.Build", LocalType: "Build", Doc: "the configuration options for the build, install, run, and pack commands", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
-		{"Web", &gti.Field{Name: "Web", Type: "goki.dev/goki/config.Web", LocalType: "Web", Doc: "the configuration information for web", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run\" view:\"add-fields\""}},
+		{"Pack", &gti.Field{Name: "Pack", Type: "goki.dev/goki/config.Pack", LocalType: "Pack", Doc: "the configuration information for the pack command", Directives: gti.Directives{}, Tag: "cmd:\"pack\" view:\"add-fields\""}},
+		{"Web", &gti.Field{Name: "Web", Type: "goki.dev/goki/config.Web", LocalType: "Web", Doc: "the configuration information for web", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
 		{"Setup", &gti.Field{Name: "Setup", Type: "goki.dev/goki/config.Setup", LocalType: "Setup", Doc: "the configuration options for the setup command", Directives: gti.Directives{}, Tag: "cmd:\"setup\" view:\"add-fields\""}},
 		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/goki/config.Log", LocalType: "Log", Doc: "the configuration options for the log command", Directives: gti.Directives{}, Tag: "cmd:\"log\" view:\"add-fields\""}},
 		{"Release", &gti.Field{Name: "Release", Type: "goki.dev/goki/config.Release", LocalType: "Release", Doc: "the configuration options for the release command", Directives: gti.Directives{}, Tag: "cmd:\"release\" view:\"add-fields\""}},
@@ -57,6 +58,21 @@ var _ = gti.AddType(&gti.Type{
 		{"IOSVersion", &gti.Field{Name: "IOSVersion", Type: "string", LocalType: "string", Doc: "the minimal version of the iOS SDK to compile against", Directives: gti.Directives{}, Tag: "def:\"13.0\""}},
 		{"AndroidMinSDK", &gti.Field{Name: "AndroidMinSDK", Type: "int", LocalType: "int", Doc: "the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)", Directives: gti.Directives{}, Tag: "def:\"23\" min:\"23\""}},
 		{"AndroidTargetSDK", &gti.Field{Name: "AndroidTargetSDK", Type: "int", LocalType: "int", Doc: "the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)", Directives: gti.Directives{}, Tag: "def:\"29\""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/goki/config.Pack",
+	ShortName: "config.Pack",
+	IDName:    "pack",
+	Doc:       "",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"DMG", &gti.Field{Name: "DMG", Type: "bool", LocalType: "bool", Doc: "whether to build a .dmg file on macOS in addition to a .app file.\nThis is automatically disabled for the install command.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -144,8 +160,6 @@ var _ = gti.AddType(&gti.Type{
 		{"ThemeColor", &gti.Field{Name: "ThemeColor", Type: "string", LocalType: "string", Doc: "The theme color for the application. This affects how the OS displays the\napp (e.g., PWA title bar or Android's task switcher).\n\nDEFAULT: #2d2c2c.", Directives: gti.Directives{}, Tag: "def:\"#2d2c2c\""}},
 		{"LoadingLabel", &gti.Field{Name: "LoadingLabel", Type: "string", LocalType: "string", Doc: "The text displayed while loading a page. Load progress can be inserted by\nincluding \"{progress}\" in the loading label.\n\nDEFAULT: \"{progress}%\".", Directives: gti.Directives{}, Tag: ""}},
 		{"Lang", &gti.Field{Name: "Lang", Type: "string", LocalType: "string", Doc: "The page language.\n\nDEFAULT: en.", Directives: gti.Directives{}, Tag: "def:\"en\""}},
-		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "The page title.", Directives: gti.Directives{}, Tag: ""}},
-		{"Description", &gti.Field{Name: "Description", Type: "string", LocalType: "string", Doc: "The page description.", Directives: gti.Directives{}, Tag: ""}},
 		{"Author", &gti.Field{Name: "Author", Type: "string", LocalType: "string", Doc: "The page authors.", Directives: gti.Directives{}, Tag: ""}},
 		{"Keywords", &gti.Field{Name: "Keywords", Type: "[]string", LocalType: "[]string", Doc: "The page keywords.", Directives: gti.Directives{}, Tag: ""}},
 		{"Image", &gti.Field{Name: "Image", Type: "string", LocalType: "string", Doc: "The path of the default image that is used by social networks when\nlinking the app.", Directives: gti.Directives{}, Tag: ""}},

@@ -106,6 +106,9 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
+	if !c.Pack.DMG {
+		return nil
+	}
 	// install dmgbuild if we don't already have it
 	if _, err := exec.LookPath("dmgbuild"); err != nil {
 		err = xe.Run("pip", "install", "dmgbuild")

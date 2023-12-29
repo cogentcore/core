@@ -48,8 +48,11 @@ type Config struct { //gti:add
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack" view:"add-fields"`
 
+	// the configuration information for the pack command
+	Pack Pack `cmd:"pack" view:"add-fields"`
+
 	// the configuration information for web
-	Web Web `cmd:"build,install,run" view:"add-fields"`
+	Web Web `cmd:"build,install,run,pack" view:"add-fields"`
 
 	// the configuration options for the setup command
 	Setup Setup `cmd:"setup" view:"add-fields"`
@@ -113,6 +116,13 @@ type Build struct { //gti:add
 
 	// the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
 	AndroidTargetSDK int `def:"29"`
+}
+
+type Pack struct { //gti:add
+
+	// whether to build a .dmg file on macOS in addition to a .app file.
+	// This is automatically disabled for the install command.
+	DMG bool `def:"true"`
 }
 
 type Setup struct { //gti:add
