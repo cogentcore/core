@@ -125,8 +125,7 @@ func Save(im image.Image, filename string) error {
 	return Write(im, file, f)
 }
 
-// Write writes the image to the given writer,
-// with the format inferred from the extension.
+// Write writes the image to the given writer using the given foramt.
 // png, jpeg, gif, tiff, and bmp are supported.
 func Write(im image.Image, w io.Writer, f Formats) error {
 	switch f {
