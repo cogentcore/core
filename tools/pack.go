@@ -8,8 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"text/template"
 
+	"github.com/iancoleman/strcase"
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
 	"goki.dev/xe"
@@ -39,6 +41,69 @@ func Pack(c *config.Config) error { //gti:add
 	}
 	return nil
 }
+
+// PackLinux packages the app for Linux by generating a .deb file.
+func PackLinux(c *config.Config) error {
+	// based on https://ubuntuforums.org/showthread.php?t=910717
+
+	anm := strings.ToLower(strcase.ToCamel(c.Name))
+	vnm := strings.TrimPrefix(c.Version, "v")
+	avnm := anm + "_" + vnm
+
+	bpath := filepath.Join(".goki", "bin", "linux")
+	apath := filepath.Join(bpath, avnm)
+	ubpath := filepath.Join(apath, "usr", "local", "bin")
+	dpath := filepath.Join(apath, "DEBIAN")
+
+	err := os.MkdirAll(ubpath, 0777)
+	if err != nil {
+		return err
+	}
+	err = xe.Run("cp -p", c.Build.Output, filepath.Join(ubpath, anm))
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(dpath, 0777)
+	if err != nil {
+		return err
+	}
+	fctrl, err := os.Create(filepath.Join(dpath, "control"))
+	if err != nil {
+		return err
+	}
+	defer fctrl.Close()
+	dcd := &DebianControlData{
+		Name:        anm,
+		Version:     vnm,
+		Description: c.Desc,
+	}
+	err = DebianControlTmpl.Execute(fctrl, dcd)
+	if err != nil {
+		return err
+	}
+	return xe.Run("dpkg-deb", "--build", apath)
+}
+
+// DebianControlData is the data passed to [DebianControlTmpl]
+type DebianControlData struct {
+	Name        string
+	Version     string
+	Description string
+}
+
+// TODO(kai): architecture, maintainer, dependencies, description
+
+// DebianControlTmpl is the template for the Linux DEBIAN/control file
+var DebianControlTmpl = template.Must(template.New("DebianControlTmpl").Parse(
+	`Package: {{.Name}}
+	Version: {{.Version}}
+	Section: base
+	Priority: optional
+	Architecture: all
+	Maintainer: Your Name <you@email.com>
+	Description: {{.Description}}
+`))
 
 // PackDarwin packages the app for macOS by generating a .app and .dmg file.
 func PackDarwin(c *config.Config) error {
@@ -191,4 +256,5 @@ var DmgBuildTmpl = template.Must(template.New("DmgBuildTmpl").Parse(
 symlinks = {"Applications": "/Applications"}
 icon = '{{.IconPath}}'
 icon_locations = {'{{.AppName}}': (140, 120), "Applications": (500, 120)}
-background = "builtin-arrow"`))
+background = "builtin-arrow"
+`))
