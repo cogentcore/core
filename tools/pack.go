@@ -55,6 +55,7 @@ func PackLinux(c *config.Config) error {
 	bpath := filepath.Join(".goki", "bin", "linux")
 	apath := filepath.Join(bpath, avnm)
 	ubpath := filepath.Join(apath, "usr", "local", "bin")
+	uspath := filepath.Join(apath, "usr", "share", "applications")
 	dpath := filepath.Join(apath, "DEBIAN")
 
 	err := os.MkdirAll(ubpath, 0777)
@@ -66,6 +67,16 @@ func PackLinux(c *config.Config) error {
 		return err
 	}
 
+	err = os.MkdirAll(uspath, 0777)
+	if err != nil {
+		return err
+	}
+	fapp, err := os.Create(filepath.Join(uspath, anm+".desktop"))
+	if err != nil {
+		return err
+	}
+	defer fapp.Close()
+
 	err = os.MkdirAll(dpath, 0777)
 	if err != nil {
 		return err
@@ -76,13 +87,13 @@ func PackLinux(c *config.Config) error {
 	}
 	defer fctrl.Close()
 	dcd := &DebianControlData{
-		Name:        anm,
-		Version:     vnm,
-		Description: c.Desc,
+		Name:    anm,
+		Version: vnm,
+		Desc:    c.Desc,
 	}
 	// we need a description
-	if dcd.Description == "" {
-		dcd.Description = c.Name
+	if dcd.Desc == "" {
+		dcd.Desc = c.Name
 	}
 	err = DebianControlTmpl.Execute(fctrl, dcd)
 	if err != nil {
@@ -91,11 +102,30 @@ func PackLinux(c *config.Config) error {
 	return xe.Run("dpkg-deb", "--build", apath)
 }
 
+// DesktopFileData is the data passed to [DesktopFileTmpl]
+type DesktopFileData struct {
+	Name string
+	Desc string
+	Exec string
+}
+
+// DesktopFileTmpl is the template for the Linux .desktop file
+var DesktopFileTmpl = template.Must(template.New("DesktopFileTmpl").Parse(
+	`Type=Application
+Version=1.0
+Name={{.Name}}
+Comment={{.Desc}}
+Path=/usr/local/bin
+Exec={{.Exec}}
+Icon=/usr/share/icons/{{.Exec}}
+Terminal=false
+`))
+
 // DebianControlData is the data passed to [DebianControlTmpl]
 type DebianControlData struct {
-	Name        string
-	Version     string
-	Description string
+	Name    string
+	Version string
+	Desc    string
 }
 
 // TODO(kai): architecture, maintainer, dependencies, description
@@ -108,7 +138,7 @@ Section: base
 Priority: optional
 Architecture: all
 Maintainer: Your Name <you@email.com>
-Description: {{.Description}}
+Description: {{.Desc}}
 `))
 
 // PackDarwin packages the app for macOS by generating a .app and .dmg file.
