@@ -46,7 +46,8 @@ func PackDarwin(c *config.Config) error {
 
 	anm := c.Name + ".app"
 
-	apath := filepath.Join(".goki", "bin", "darwin", anm)
+	bpath := filepath.Join(".goki", "bin", "darwin")
+	apath := filepath.Join(bpath, anm)
 	cpath := filepath.Join(apath, "Contents")
 	mpath := filepath.Join(cpath, "MacOS")
 	rpath := filepath.Join(cpath, "Resources")
@@ -108,13 +109,19 @@ func PackDarwin(c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	dmgsnm := filepath.Join(bpath, "tmpDmgBuildSettings.py")
+	fdmg, err := os.Create(dmgsnm)
+	if err != nil {
+		return err
+	}
+	defer fdmg.Close()
+	err = DmgBuildTmpl.Execute(fdmg, 0)
+	if err != nil {
+		return err
+	}
 	return xe.Run("dmgbuild",
-		"-D", "files="+apath,
-		"-D", "symlinks={Applications: /Applications}",
-		"-D", "icon="+inm,
-		"-D", "icon_locations={"+c.Name+": (140, 120), Applications: (500, 120)}",
-		"-D", "background=builtin-arrow",
-		c.Name, filepath.Join(".goki", "bin", "darwin", c.Name+".dmg"))
+		"-s", dmgsnm,
+		c.Name, filepath.Join(bpath, c.Name+".dmg"))
 }
 
 // InfoPlistData is the data passed to [InfoPlistTmpl]
@@ -155,3 +162,9 @@ var InfoPlistTmpl = template.Must(template.New("InfoPlistTmpl").Parse(
 	</dict>
 </plist>
 `))
+
+// DmgBuildTmpl is the template for the dmgbuild python settings file
+var DmgBuildTmpl = template.Must(template.New("DmgBuildTmpl").Parse(
+	`files = [".goki/bin/darwin/Goki Demo.app"]
+symlinks = {"Applications": "/Applications"}
+background = "builtin-arrow"`))
