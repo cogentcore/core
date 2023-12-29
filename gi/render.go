@@ -298,7 +298,7 @@ func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
+	pr := prof.Start(wb.KiType().Name)
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.Config()
 		return ki.Continue
@@ -335,7 +335,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
+	pr := prof.Start(wb.KiType().Name)
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
 		return ki.Continue
@@ -394,7 +394,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
+	pr := prof.Start(wb.KiType().Name)
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) && !kwi.Is(ki.Updating) {
 			kwi.SetFlag(false, NeedsRender)
