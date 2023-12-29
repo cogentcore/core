@@ -40,7 +40,7 @@ func Pack(c *config.Config) error { //gti:add
 	return nil
 }
 
-// PackDarwin packages the app for macOS.
+// PackDarwin packages the app for macOS by generating a .app and .dmg file.
 func PackDarwin(c *config.Config) error {
 	// based on https://github.com/machinebox/appify
 
