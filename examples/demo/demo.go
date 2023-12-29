@@ -28,8 +28,8 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	b := gi.NewAppBody("gogi-demo").SetTitle("GoGi Demo")
-	b.App().About = "The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework."
+	b := gi.NewAppBody("Goki Demo")
+	b.App().About = "The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework."
 
 	ts := gi.NewTabs(b)
 
@@ -63,9 +63,9 @@ func makeHome(ts *gi.Tabs) {
 		s.Min.Set(units.Dp(256))
 	})
 
-	gi.NewLabel(home).SetType(gi.LabelDisplayLarge).SetText("The GoGi Demo")
+	gi.NewLabel(home).SetType(gi.LabelDisplayLarge).SetText("The Goki Demo")
 
-	gi.NewLabel(home).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev/gi">GoGi</a> 2D and 3D Go GUI <u>framework</u>`)
+	gi.NewLabel(home).SetType(gi.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://goki.dev">Goki</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
 func makeText(ts *gi.Tabs) {
@@ -73,7 +73,7 @@ func makeText(ts *gi.Tabs) {
 
 	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
 	gi.NewLabel(text).SetText(
-		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
+		`Goki provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for _, typ := range gi.LabelTypesValues() {
 		s := sentence.Case(typ.String())
@@ -87,7 +87,7 @@ func makeButtons(ts *gi.Tabs) {
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
 	gi.NewLabel(buttons).SetText(
-		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
+		`Goki provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
 
 	makeRow := func() gi.Widget {
 		return gi.NewLayout(buttons).Style(func(s *styles.Style) {
@@ -188,7 +188,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewLabel(inputs).SetType(gi.LabelHeadlineLarge).SetText("Inputs")
 
 	gi.NewLabel(inputs).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
+		`Goki provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`)
 
 	gi.NewTextField(inputs).SetPlaceholder("Filled")
 	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
@@ -276,7 +276,7 @@ func makeLayouts(ts *gi.Tabs) {
 	gi.NewLabel(layouts).SetType(gi.LabelHeadlineLarge).SetText("Layout")
 
 	gi.NewLabel(layouts).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
+		`Goki provides various adaptable layout types that allow you to easily organize content so that it is easy to use, customize, and understand.`)
 
 	// vw := gi.NewLabel(layouts, "vw", "50vw")
 	// vw.Style(func(s *styles.Style) {
@@ -312,7 +312,7 @@ func makeValues(ts *gi.Tabs) {
 	gi.NewLabel(values).SetType(gi.LabelHeadlineLarge).SetText("Values")
 
 	gi.NewLabel(values).SetType(gi.LabelBodyLarge).SetText(
-		`GoGi provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
+		`Goki provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(values).SetText("Inspector").OnClick(func(e events.Event) {
 		giv.InspectorDialog(ts.Sc)
