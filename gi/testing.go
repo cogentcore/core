@@ -29,6 +29,11 @@ import (
 func RunTest(test func()) {
 	driver.Main(func(a goosi.App) {
 		Init()
+
+		b := NewAppBody("__test-base")
+		b.App().AppBarConfig = nil
+		b.NewWindow().Run()
+
 		test()
 	})
 }

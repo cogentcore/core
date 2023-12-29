@@ -19,7 +19,6 @@ import (
 
 func TestMain(m *testing.M) {
 	RunTest(func() {
-		NewScene("__test-base-scene").NewWindow().Run()
 		os.Exit(m.Run())
 	})
 }
