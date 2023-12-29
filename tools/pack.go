@@ -69,7 +69,8 @@ func PackDarwin(c *config.Config) error {
 		return err
 	}
 
-	fdsi, err := os.Create(filepath.Join(rpath, "icon.icns"))
+	inm := filepath.Join(rpath, "icon.icns")
+	fdsi, err := os.Create(inm)
 	if err != nil {
 		return err
 	}
@@ -102,7 +103,12 @@ func PackDarwin(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	return nil
+
+	return xe.Run("create-dmg",
+		"--volname", c.Name,
+		"--volicon", inm,
+		filepath.Join(".goki", "bin", "darwin", c.Name+".dmg"),
+		apath)
 }
 
 // InfoPlistData is the data passed to [InfoPlistTmpl]
