@@ -12,6 +12,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"image/png"
 	"io"
 	"log"
 	"os"
@@ -191,82 +192,41 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		}
 	}
 
-	// Add any assets.
-	var arsc struct {
-		iconPath string
-	}
-	assetsDir := filepath.Join(dir, "assets")
-	assetsDirExists := true
-	fi, err := os.Stat(assetsDir)
+	// Add the icon.
+	ic, err := RenderIcon(1024)
 	if err != nil {
-		if os.IsNotExist(err) {
-			assetsDirExists = false
-		} else {
-			return nil, err
-		}
-	} else {
-		assetsDirExists = fi.IsDir()
-	}
-	if assetsDirExists {
-		// if assets is a symlink, follow the symlink.
-		assetsDir, err = filepath.EvalSymlinks(assetsDir)
-		if err != nil {
-			return nil, err
-		}
-		err = filepath.Walk(assetsDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if name := filepath.Base(path); strings.HasPrefix(name, ".") {
-				// Do not include the hidden files.
-				return nil
-			}
-			if info.IsDir() {
-				return nil
-			}
-
-			if rel, err := filepath.Rel(assetsDir, path); rel == "icon.png" && err == nil {
-				arsc.iconPath = path
-				// TODO returning here does not write the assets/icon.png to the final assets output,
-				// making it unavailable via the assets API. Should the file be duplicated into assets
-				// or should assets API be able to retrieve files from the generated resource table?
-				return nil
-			}
-
-			name := "assets/" + path[len(assetsDir)+1:]
-			return apkwWriteFile(name, path)
-		})
-		if err != nil {
-			return nil, fmt.Errorf("asset %v", err)
-		}
+		return nil, err
 	}
 
-	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", c.Build.AndroidMinSDK, c.Build.AndroidTargetSDK)
+	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), true, c.Build.AndroidMinSDK, c.Build.AndroidTargetSDK)
 	if err != nil {
 		return nil, err
 	}
 
 	// generate resources.arsc identifying single xxxhdpi icon resource.
-	if arsc.iconPath != "" {
-		pkgname, err := bxml.RawValueByName("manifest", xml.Name{Local: "package"})
-		if err != nil {
-			return nil, err
-		}
-		tbl, name := binres.NewMipmapTable(pkgname)
-		if err := apkwWriteFile(name, arsc.iconPath); err != nil {
-			return nil, err
-		}
-		w, err := apkwCreate("resources.arsc")
-		if err != nil {
-			return nil, err
-		}
-		bin, err := tbl.MarshalBinary()
-		if err != nil {
-			return nil, err
-		}
-		if _, err := w.Write(bin); err != nil {
-			return nil, err
-		}
+	pkgname, err := bxml.RawValueByName("manifest", xml.Name{Local: "package"})
+	if err != nil {
+		return nil, err
+	}
+	tbl, name := binres.NewMipmapTable(pkgname)
+	iw, err := apkwCreate(name)
+	if err != nil {
+		return nil, err
+	}
+	err = png.Encode(iw, ic)
+	if err != nil {
+		return nil, err
+	}
+	resw, err := apkwCreate("resources.arsc")
+	if err != nil {
+		return nil, err
+	}
+	rbin, err := tbl.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := resw.Write(rbin); err != nil {
+		return nil, err
 	}
 
 	w, err = apkwCreate("AndroidManifest.xml")

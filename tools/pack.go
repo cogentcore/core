@@ -14,6 +14,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
+	"goki.dev/goki/mobile"
 	"goki.dev/xe"
 )
 
@@ -142,7 +143,7 @@ func PackDarwin(c *config.Config) error {
 	}
 	defer fdsi.Close()
 	// 1024x1024 is the largest icon size on macOS
-	sic, err := RenderIcon(1024)
+	sic, err := mobile.RenderIcon(1024)
 	if err != nil {
 		return err
 	}
