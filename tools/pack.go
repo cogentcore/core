@@ -67,6 +67,11 @@ func PackLinux(c *config.Config) error {
 		return err
 	}
 
+	// we need a description
+	if c.Desc == "" {
+		c.Desc = c.Name
+	}
+
 	err = os.MkdirAll(uspath, 0777)
 	if err != nil {
 		return err
@@ -76,6 +81,15 @@ func PackLinux(c *config.Config) error {
 		return err
 	}
 	defer fapp.Close()
+	dfd := &DesktopFileData{
+		Name: c.Name,
+		Desc: c.Desc,
+		Exec: anm,
+	}
+	err = DesktopFileTmpl.Execute(fapp, dfd)
+	if err != nil {
+		return err
+	}
 
 	err = os.MkdirAll(dpath, 0777)
 	if err != nil {
@@ -90,10 +104,6 @@ func PackLinux(c *config.Config) error {
 		Name:    anm,
 		Version: vnm,
 		Desc:    c.Desc,
-	}
-	// we need a description
-	if dcd.Desc == "" {
-		dcd.Desc = c.Name
 	}
 	err = DebianControlTmpl.Execute(fctrl, dcd)
 	if err != nil {
@@ -115,9 +125,8 @@ var DesktopFileTmpl = template.Must(template.New("DesktopFileTmpl").Parse(
 Version=1.0
 Name={{.Name}}
 Comment={{.Desc}}
-Path=/usr/local/bin
 Exec={{.Exec}}
-Icon=/usr/share/icons/{{.Exec}}
+Icon={{.Exec}}
 Terminal=false
 `))
 
