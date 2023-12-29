@@ -7,6 +7,8 @@
 // for Goki code.
 package generate
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"slices"

@@ -6,6 +6,8 @@
 // structs for the Goki tool.
 package config
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"os"
