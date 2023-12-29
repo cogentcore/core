@@ -17,7 +17,6 @@ import (
 
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
-	"goki.dev/grows/images"
 	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
@@ -109,7 +108,6 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 
-	// TODO(jbd): Set the launcher icon.
 	if err := AppleCopyAssets(c, pkg, TmpDir); err != nil {
 		return nil, err
 	}
@@ -204,17 +202,7 @@ func DetectTeamID() (string, error) {
 
 func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
-	if err := xe.MkdirAll(dstAssets, 0755); err != nil {
-		return err
-	}
-
-	// Add the icon. 1024 is the largest icon size on iOS
-	// (for the App Store icon).
-	ic, err := RenderIcon(1024)
-	if err != nil {
-		return err
-	}
-	return images.Save(ic, filepath.Join(dstAssets, "icon.png"))
+	return xe.MkdirAll(dstAssets, 0755)
 }
 
 type InfoplistTmplData struct {
