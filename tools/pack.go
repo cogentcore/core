@@ -70,6 +70,7 @@ func PackLinux(c *config.Config) error {
 	}
 
 	// see https://martin.hoppenheit.info/blog/2016/where-to-put-application-icons-on-linux/
+	// TODO(kai): consider rendering more icon sizes and/or an XPM icon
 	ic, err := mobile.RenderIcon(48)
 	if err != nil {
 		return err
@@ -145,6 +146,8 @@ type DesktopFileData struct {
 	Exec string
 }
 
+// TODO(kai): project website
+
 // DesktopFileTmpl is the template for the Linux .desktop file
 var DesktopFileTmpl = template.Must(template.New("DesktopFileTmpl").Parse(
 	`[Desktop Entry]
@@ -164,7 +167,7 @@ type DebianControlData struct {
 	Desc    string
 }
 
-// TODO(kai): architecture, maintainer, dependencies, description
+// TODO(kai): architecture, maintainer, dependencies
 
 // DebianControlTmpl is the template for the Linux DEBIAN/control file
 var DebianControlTmpl = template.Must(template.New("DebianControlTmpl").Parse(
