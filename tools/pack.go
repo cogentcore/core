@@ -49,7 +49,7 @@ func Pack(c *config.Config) error { //gti:add
 func PackLinux(c *config.Config) error {
 	// based on https://ubuntuforums.org/showthread.php?t=910717
 
-	anm := strings.ToLower(strcase.ToCamel(c.Name))
+	anm := strcase.ToKebab(c.Name)
 	vnm := strings.TrimPrefix(c.Version, "v")
 	avnm := anm + "_" + vnm
 
