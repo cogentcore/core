@@ -16,6 +16,7 @@ import (
 	"text/template"
 
 	"goki.dev/goki/config"
+	"goki.dev/grows/images"
 	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
@@ -185,40 +186,13 @@ func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir strin
 		return err
 	}
 
-	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
-	// Fix this to work with other Go tools.
-	srcAssets := filepath.Join(filepath.Dir(pkg.GoFiles[0]), "assets")
-	fi, err := os.Stat(srcAssets)
-	if err != nil {
-		if os.IsNotExist(err) {
-			// skip walking through the directory to deep copy.
-			return nil
-		}
-		return err
-	}
-	if !fi.IsDir() {
-		// skip walking through to deep copy.
-		return nil
-	}
-	// if assets is a symlink, follow the symlink.
-	srcAssets, err = filepath.EvalSymlinks(srcAssets)
+	// Add the icon. 1024 is the largest icon size on iOS
+	// (for the App Store icon).
+	ic, err := RenderIcon(1024)
 	if err != nil {
 		return err
 	}
-	return filepath.Walk(srcAssets, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if name := filepath.Base(path); strings.HasPrefix(name, ".") {
-			// Do not include the hidden files.
-			return nil
-		}
-		if info.IsDir() {
-			return nil
-		}
-		dst := dstAssets + "/" + path[len(srcAssets)+1:]
-		return CopyFile(c, dst, path)
-	})
+	return images.Save(ic, filepath.Join(dstAssets, "icon.png"))
 }
 
 type InfoplistTmplData struct {
