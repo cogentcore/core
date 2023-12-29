@@ -15,7 +15,7 @@
 //	prof.Profiling = *profFlag
 //	...
 //	// surrounding the code of interest:
-//	pr := prof.Start("name of function")
+//	pr := prof.Start()
 //	... code
 //	pr.End()
 //	...
@@ -25,6 +25,8 @@ package prof
 
 import (
 	"fmt"
+	"log/slog"
+	"runtime"
 	"sort"
 	"sync"
 	"time"
@@ -32,11 +34,20 @@ import (
 
 // Main User API:
 
-// Start starts profiling and returns a Profile struct that must have .End()
-// called on it when done timing -- note will be nil if not the first to start
-// timing on this function -- assumes nested inner / outer loop structure for
-// calls to the same method
-func Start(name string) *Profile {
+// Start starts profiling and returns a Profile struct that must have [Profile.End]
+// called on it when done timing. It will be nil if not the first to start
+// timing on this function; it assumes nested inner / outer loop structure for
+// calls to the same method. It uses the name of the calling function as the name
+// of the profile struct.
+func Start() *Profile {
+	name := ""
+	pc, _, _, ok := runtime.Caller(1)
+	if ok {
+		name = runtime.FuncForPC(pc).Name()
+	} else {
+		name = "prof.Start: unexpected error: unable to get caller"
+		slog.Error(name)
+	}
 	return Prof.Start(name)
 }
 
