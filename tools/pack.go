@@ -25,14 +25,15 @@ func Pack(c *config.Config) error { //gti:add
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll(filepath.Join(".goki", "bin", "pack"), 0777)
-	if err != nil {
-		return err
-	}
 	for _, platform := range c.Build.Target {
 		switch platform.OS {
 		case "android", "ios", "js": // build already packages
 			continue
+		case "linux":
+			err := PackLinux(c)
+			if err != nil {
+				return err
+			}
 		case "darwin":
 			err := PackDarwin(c)
 			if err != nil {
