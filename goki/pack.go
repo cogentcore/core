@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tools
+package goki
 
 import (
 	"os"
@@ -12,14 +12,13 @@ import (
 
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
-	"goki.dev/goki/packman"
 	"goki.dev/xe"
 )
 
 // Pack builds and packages the app for the target platform.
 // For android, ios, and js, it is equivalent to build.
 func Pack(c *config.Config) error { //gti:add
-	err := packman.Build(c)
+	err := Build(c)
 	if err != nil {
 		return err
 	}

@@ -45,8 +45,8 @@ Type = "App"
   All = "F"
 
 [Release]
-  VersionFile = "version.go"
-  Package = "main"
+  VersionFile = "goki/version.go"
+  Package = "goki"
 
 [Generate]
   Dir = "."
