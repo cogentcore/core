@@ -270,7 +270,7 @@ func (ac *AppChooser) CopyFieldsFrom(frm any) {
 
 func (ac *AppChooser) OnInit() {
 	ac.Chooser.OnInit()
-	ac.SetEditable(true).SetType(ChooserOutlined)
+	ac.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 	ac.SetItemsFunc(func() {
 		stg := ac.Sc.Stage.Main
 		mm := stg.MainMgr
@@ -289,7 +289,7 @@ func (ac *AppChooser) OnInit() {
 				nm = strings.TrimSuffix(nm, "-scene")
 				nm = sentence.Case(nm)
 			}
-			u := uri.URI{Label: nm, Icon: icons.SelectWindow}
+			u := uri.URI{Label: nm, Icon: icons.Toolbar}
 			u.SetURL("scene", nm, fmt.Sprintf("%d", i))
 			ac.Items[i] = u
 			ac.Icons[i] = u.Icon
@@ -309,8 +309,6 @@ func (ac *AppChooser) OnInit() {
 		if !ok {
 			return
 		}
-		ic := ac.Icons[ac.CurIndex]
-		ac.SetIconUpdate(ic)
 		if cv.HasScheme("scene") {
 			e.SetHandled()
 			// TODO: optimize this?
