@@ -4,7 +4,7 @@
 
 package images
 
-//go:generate enumgen
+//go:generate goki generate
 
 import (
 	"bufio"
