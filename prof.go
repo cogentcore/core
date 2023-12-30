@@ -40,7 +40,7 @@ import (
 // timing on this function; it assumes nested inner / outer loop structure for
 // calls to the same method. It uses the name of the calling function as the name
 // of the profile struct. Extra information can be passed to Start, which will be added
-// at the end of the name in a period-delimited format.
+// at the end of the name in a dash-delimited format.
 func Start(info ...string) *Profile {
 	name := ""
 	pc, _, _, ok := runtime.Caller(1)
@@ -52,7 +52,7 @@ func Start(info ...string) *Profile {
 		name = "!(" + err + ")"
 	}
 	if len(info) > 0 {
-		name += "." + strings.Join(info, ".")
+		name += "-" + strings.Join(info, "-")
 	}
 	return Prof.Start(name)
 }
