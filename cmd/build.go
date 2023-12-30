@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package tools provides utilities for managing
+// Package cmd provides utilities for managing
 // apps and packages that use the Goki framework.
-package tools
+package cmd
 
 //go:generate goki generate
 
