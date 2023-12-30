@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"goki.dev/goosi/events/key"
-	"goki.dev/mat32/v2"
 )
 
 var (
@@ -110,18 +109,4 @@ func NewScroll(where, delta image.Point, mods key.Modifiers) *MouseScroll {
 	ev.Delta = delta
 	ev.Mods = mods
 	return ev
-}
-
-// DimDelta returns the scrolling delta change for the given axis.
-// for X dimension, it returns any non-zero Y delta because often
-// scroll wheels only report Y deltas.
-func (ev MouseScroll) DimDelta(dim mat32.Dims) int {
-	if dim == mat32.X {
-		// TODO(kai): remove this function unless we are adding back this
-		// if ev.Delta.X == 0 {
-		// 	return ev.Delta.Y
-		// }
-		return ev.Delta.X
-	}
-	return ev.Delta.Y
 }
