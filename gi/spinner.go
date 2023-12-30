@@ -225,7 +225,7 @@ func (sp *Spinner) HandleEvents() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		sp.IncrValue(float32(se.DimDelta(mat32.Y)))
+		sp.IncrValue(float32(se.Delta.Y))
 	})
 	sp.OnChange(func(e events.Event) {
 		text := sp.Text()

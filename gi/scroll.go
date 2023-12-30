@@ -206,10 +206,7 @@ func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 // remainder.
 func (ly *Layout) ScrollDelta(e events.Event) {
 	se := e.(*events.MouseScroll)
-	var del image.Point
-	del.X = se.DimDelta(mat32.X)
-	del.Y = se.DimDelta(mat32.Y)
-	fdel := mat32.V2FromPoint(del)
+	fdel := mat32.V2FromPoint(se.Delta)
 
 	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {
@@ -230,16 +227,16 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	} else if ly.HasScroll[mat32.Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, fdel.Y)
-		if del.X != 0 {
+		if se.Delta.X != 0 {
 			se.Delta.Y = 0
 		} else {
 			// e.SetHandled()
 		}
 	} else if ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
-		if del.X != 0 {
+		if se.Delta.X != 0 {
 			ly.ScrollActionDelta(mat32.X, fdel.X)
-			if del.Y != 0 {
+			if se.Delta.Y != 0 {
 				se.Delta.X = 0
 			} else {
 				// e.SetHandled()

@@ -14,7 +14,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 	"goki.dev/svg"
 	"golang.org/x/image/draw"
 )
@@ -94,7 +93,7 @@ func (sv *SVG) HandleEvents() {
 		}
 		e.SetHandled()
 		se := e.(*events.MouseScroll)
-		sv.SVG.Scale += float32(se.DimDelta(mat32.Y)) / 100
+		sv.SVG.Scale += float32(se.Delta.Y) / 100
 		if sv.SVG.Scale <= 0.0000001 {
 			sv.SVG.Scale = 0.01
 		}

@@ -1956,7 +1956,7 @@ func (sv *SliceViewBase) HandleEvents() {
 		se := e.(*events.MouseScroll)
 		sbb := sv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
-		sbb.SetSliderPosAction(cur + float32(se.DimDelta(mat32.Y))) // reverse dir for "natural"
+		sbb.SetSliderPosAction(cur + float32(se.Delta.Y)) // reverse dir for "natural"
 	})
 	sv.OnKeyChord(func(e events.Event) {
 		if sv.IsReadOnly() {
