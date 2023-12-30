@@ -255,7 +255,7 @@ func PackDarwin(c *config.Config) error {
 	}
 	// install dmgbuild if we don't already have it
 	if _, err := exec.LookPath("dmgbuild"); err != nil {
-		err = xe.Run("pip", "install", "dmgbuild")
+		err = xe.Verbose().SetBuffer(false).Run("pip", "install", "dmgbuild")
 		if err != nil {
 			return err
 		}
@@ -348,5 +348,22 @@ func PackWindows(c *config.Config) error {
 			return err
 		}
 	}
-	return xe.Verbose().Run("go-msi", "check-env")
+	// install wix if we don't already have it
+	if _, err := exec.LookPath("wix"); err != nil {
+		out, err := xe.Output("dotnet", "--list-sdks")
+		if err != nil {
+			return err
+		}
+		if len(strings.TrimSpace(out)) == 0 {
+			err = xe.Verbose().SetBuffer(false).Run("winget", "install", "Microsoft.DotNet.SDK.8")
+			if err != nil {
+				return err
+			}
+		}
+		err = xe.Verbose().SetBuffer(false).Run("dotnet", "tool", "install", "--global", "wix")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
