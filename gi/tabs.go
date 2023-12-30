@@ -31,6 +31,9 @@ import (
 type Tabs struct { //goki:embedder
 	Layout
 
+	// Type is the styling type of the tabs
+	Type TabTypes
+
 	// Maximum number of characters to include in tab label.
 	// Elides labels that are longer than that
 	MaxChars int
@@ -45,6 +48,10 @@ type Tabs struct { //goki:embedder
 	// Tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
+
+type TabTypes int32 //enums:enum -trimprefix Tab
+
+const ()
 
 func (ts *Tabs) CopyFieldsFrom(frm any) {
 	fr := frm.(*Tabs)
