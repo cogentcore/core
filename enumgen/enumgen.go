@@ -6,7 +6,7 @@
 // enum methods for enum types.
 package enumgen
 
-//go:generate gtigen
+//go:generate goki generate
 
 import (
 	"fmt"
