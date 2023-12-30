@@ -15,32 +15,33 @@ import (
 // most of these are inherited
 type Text struct { //gti:add
 
-	// prop: text-align (inherited) = how to align text, horizontally.
+	// how to align text, horizontally (inhereted).
 	// This *only* applies to the text within its containing element,
 	// and is typically relevant only for multi-line text:
 	// for single-line text, if element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
 	Align Aligns `xml:"text-align" inherit:"true"`
 
-	// prop: text-vertical-align (inherited) = vertical alignment of text.
+	// vertical alignment of text (inhereted).
 	// This is only applicable for SVG styling, not regular CSS / GoGi,
 	// which uses the global Align.Y.  It *only* applies to the text within
 	// its containing element: if that element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
 	AlignV Aligns `xml:"text-vertical-align" inherit:"true"`
 
-	// prop: text-anchor (inherited) = for svg rendering only:
+	// for svg rendering only (inhereted):
 	// determines the alignment relative to text position coordinate.
 	// For RTL start is right, not left, and start is top for TB
 	Anchor TextAnchors `xml:"text-anchor" inherit:"true"`
 
-	// prop: letter-spacing = spacing between characters and lines
+	// spacing between characters and lines
 	LetterSpacing units.Value `xml:"letter-spacing"`
 
-	// prop: word-spacing (inherited) = extra space to add between words
+	// extra space to add between words (inhereted)
 	WordSpacing units.Value `xml:"word-spacing" inherit:"true"`
 
-	// prop: line-height (inherited) = specified height of a line of text; text is centered within the overall lineheight; the standard way to specify line height is in terms of em
+	// specified height of a line of text (inhereted); text is centered within the overall lineheight;
+	// the standard way to specify line height is in terms of em
 	LineHeight units.Value `xml:"line-height" inherit:"true"`
 
 	// prop: white-space (*not* inherited) specifies how white space is processed,
@@ -48,28 +49,31 @@ type Text struct { //gti:add
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace WhiteSpaces `xml:"white-space"`
 
-	// prop: unicode-bidi (inherited) = determines how to treat unicode bidirectional information
+	// determines how to treat unicode bidirectional information (inhereted)
 	UnicodeBidi UnicodeBidi `xml:"unicode-bidi" inherit:"true"`
 
-	// prop: direction (inherited) = direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements
+	// bidi-override or embed -- applies to all text elements (inhereted)
 	Direction TextDirections `xml:"direction" inherit:"true"`
 
-	// prop: writing-mode (inherited) = overall writing mode -- only for text elements, not span
+	// overall writing mode -- only for text elements, not span (inhereted)
 	WritingMode TextDirections `xml:"writing-mode" inherit:"true"`
 
-	// prop: glyph-orientation-vertical (inherited) = for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright
+	// for TBRL writing mode (only), determines orientation of alphabetic characters (inhereted);
+	// 90 is default (rotated); 0 means keep upright
 	OrientationVert float32 `xml:"glyph-orientation-vertical" inherit:"true"`
 
-	// prop: glyph-orientation-horizontal (inherited) = for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)
+	// for horizontal LR/RL writing mode (only), determines orientation of all characters (inhereted);
+	// 0 is default (upright)
 	OrientationHoriz float32 `xml:"glyph-orientation-horizontal" inherit:"true"`
 
-	// prop: text-indent (inherited) = how much to indent the first line in a paragraph
+	// how much to indent the first line in a paragraph (inhereted)
 	Indent units.Value `xml:"text-indent" inherit:"true"`
 
-	// prop: para-spacing (inherited) = extra spacing between paragraphs -- copied from Style.Margin per CSS spec if that is non-zero, else can be set directly with para-spacing
+	// extra spacing between paragraphs (inhereted); copied from [Style.Margin] per CSS spec
+	// if that is non-zero, else can be set directly with para-spacing
 	ParaSpacing units.Value `xml:"para-spacing" inherit:"true"`
 
-	// prop: tab-size (inherited) = tab size, in number of characters
+	// tab size, in number of characters (inhereted)
 	TabSize int `xml:"tab-size" inherit:"true"`
 }
 

@@ -22,31 +22,31 @@ import (
 // for rendering -- see [FontRender] for that.
 type Font struct { //gti:add
 
-	// prop: font-size (inherited) = size of font to render -- convert to points when getting font to use
+	// size of font to render (inhereted); converted to points when getting font to use
 	Size units.Value `xml:"font-size" inherit:"true"`
 
-	// prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse
+	// font family (inhereted): ordered list of comma-separated names from more general to more specific to use; use split on , to parse
 	Family string `xml:"font-family" inherit:"true"`
 
-	// prop: font-style (inherited) = style -- normal, italic, etc
+	// style (inhereted): normal, italic, etc
 	Style FontStyles `xml:"font-style" inherit:"true"`
 
-	// prop: font-weight (inherited) = weight: normal, bold, etc
+	// weight (inhereted): normal, bold, etc
 	Weight FontWeights `xml:"font-weight" inherit:"true"`
 
-	// prop: font-stretch = font stretch / condense options
+	// font stretch / condense options (inhereted)
 	Stretch FontStretch `xml:"font-stretch" inherit:"true"`
 
-	// prop: font-variant = normal or small caps
+	// normal or small caps (inhereted)
 	Variant FontVariants `xml:"font-variant" inherit:"true"`
 
-	// prop: text-decoration = underline, line-through, etc -- not inherited
+	// underline, line-through, etc (not inherited)
 	Deco TextDecorations `xml:"text-decoration"`
 
-	// prop: baseline-shift = super / sub script -- not inherited
+	// super / sub script (not inherited)
 	Shift BaselineShifts `xml:"baseline-shift"`
 
-	// full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
+	// full font information including enhanced metrics and actual font codes for drawing text; this is a pointer into FontLibrary of loaded fonts
 	Face *FontFace `view:"-"`
 }
 
@@ -424,13 +424,13 @@ func FixFontMods(fn string) string {
 type FontRender struct { //gti:add
 	Font
 
-	// prop: color (inherited) = text color -- also defines the currentColor variable value
+	// text color (inhereted)
 	Color color.RGBA `xml:"color" inherit:"true"`
 
-	// prop: background-color = background color -- not inherited, transparent by default
+	// background color (not inherited, transparent by default)
 	Background image.Image `xml:"background-color"`
 
-	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
+	// alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32 `xml:"opacity"`
 }
 

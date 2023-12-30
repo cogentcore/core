@@ -137,18 +137,18 @@ const (
 // Border contains style parameters for borders
 type Border struct { //gti:add
 
-	// prop: border-style = how to draw the border
+	// how to draw the border
 	Style Sides[BorderStyles] `xml:"style"`
 
-	// prop: border-width = width of the border
+	// width of the border
 	Width SideValues `xml:"width" view:"inline"`
 
-	// prop: border-radius = rounding of the corners
+	// radius (rounding) of the corners
 	Radius SideValues `xml:"radius" view:"inline"`
 
 	// TODO(kai/imageColor)
 
-	// prop: border-color = color of the border
+	// color of the border
 	Color SideColors `xml:"color" view:"inline"`
 }
 
@@ -207,24 +207,25 @@ var (
 // style parameters for shadows
 type Shadow struct { //gti:add
 
-	// prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side
+	// horizontal offset of shadow; positive = right side, negative = left side
 	HOffset units.Value `xml:".h-offset"`
 
-	// prop: .v-offset = vertical offset of shadow -- positive = below, negative = above
+	// vertical offset of shadow; positive = below, negative = above
 	VOffset units.Value `xml:".v-offset"`
 
-	// prop: .blur = blur radius -- higher numbers = more blurry
+	// blur radius; higher numbers = more blurry
 	Blur units.Value `xml:".blur"`
 
-	// prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size
+	// spread radius; positive number increases size of shadow, negative decreases size
 	Spread units.Value `xml:".spread"`
 
 	// TODO(kai/imageColor)
 
-	// prop: .color = color of the shadow
+	// color of the shadow
 	Color color.RGBA `xml:".color"`
 
-	// prop: .inset = shadow is inset within box instead of outset outside of box
+	// if true, shadow is inset within box instead of outset outside of box;
+	// TODO: implement
 	Inset bool `xml:".inset"`
 }
 

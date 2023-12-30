@@ -34,10 +34,10 @@ type Paint struct { //gti:add
 	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
 	TextStyle Text
 
-	// prop: vector-effect = various rendering special effects settings
+	// various rendering special effects settings
 	VecEff VectorEffects `xml:"vector-effect"`
 
-	// prop: transform = our additions to transform -- pushed to render state
+	// our additions to transform -- pushed to render state
 	Transform mat32.Mat2 `xml:"transform"`
 
 	// units context -- parameters necessary for anchoring relative units
@@ -158,13 +158,13 @@ const (
 // Fill contains all the properties for filling a region
 type Fill struct {
 
-	// prop: fill = fill color image specification; filling is off if nil
+	// fill color image specification; filling is off if nil
 	Color image.Image `xml:"fill"`
 
-	// prop: fill-opacity = global alpha opacity / transparency factor between 0 and 1
+	// global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"fill-opacity"`
 
-	// prop: fill-rule = rule for how to fill more complex shapes with crossing lines
+	// rule for how to fill more complex shapes with crossing lines
 	Rule FillRules `xml:"fill-rule"`
 }
 
@@ -213,28 +213,28 @@ const (
 // Stroke contains all the properties for painting a line
 type Stroke struct {
 
-	// prop: stroke = stroke color image specification; stroking is off if nil
+	// stroke color image specification; stroking is off if nil
 	Color image.Image `xml:"stroke"`
 
-	// prop: stroke-opacity = global alpha opacity / transparency factor between 0 and 1
+	// global alpha opacity / transparency factor between 0 and 1
 	Opacity float32 `xml:"stroke-opacity"`
 
-	// prop: stroke-width = line width
+	// line width
 	Width units.Value `xml:"stroke-width"`
 
-	// prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
+	// minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
 	MinWidth units.Value `xml:"stroke-min-width"`
 
-	// prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
+	// 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
 	Dashes []float32 `xml:"stroke-dasharray"`
 
-	// prop: stroke-linecap = how to draw the end cap of lines
+	// how to draw the end cap of lines
 	Cap LineCaps `xml:"stroke-linecap"`
 
-	// prop: stroke-linejoin = how to join line segments
+	// how to join line segments
 	Join LineJoins `xml:"stroke-linejoin"`
 
-	// prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
+	// limit of how far to miter -- must be 1 or larger
 	MiterLimit float32 `xml:"stroke-miterlimit" min:"1"`
 }
 

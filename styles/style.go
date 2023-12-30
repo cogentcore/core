@@ -157,7 +157,7 @@ type Style struct { //gti:add
 	// and it is nil (transparent) by default.
 	Background image.Image
 
-	// prop: opacity = alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
+	// alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
 	Opacity float32
 
 	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the
@@ -180,10 +180,10 @@ type Style struct { //gti:add
 	// Sort children according to this factor
 	ZIndex int
 
-	// prop: row = specifies the row that this element should appear within a grid layout
+	// specifies the row that this element should appear within a grid layout
 	Row int
 
-	// prop: col = specifies the column that this element should appear within a grid layout
+	// specifies the column that this element should appear within a grid layout
 	Col int
 
 	// specifies the number of sequential rows that this element should occupy
