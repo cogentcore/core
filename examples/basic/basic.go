@@ -11,7 +11,7 @@ import (
 	"goki.dev/greasi"
 )
 
-//go:generate gtigen -add-types -add-methods
+//go:generate goki generate -add-types -add-methods
 
 type Config struct {
 
