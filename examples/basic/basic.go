@@ -11,7 +11,7 @@ import (
 	"goki.dev/grog"
 )
 
-//go:generate gtigen -add-types -add-funcs
+//go:generate goki generate -add-types -add-funcs
 
 type Config struct {
 

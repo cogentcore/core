@@ -4,7 +4,7 @@
 
 package grease
 
-//go:generate gtigen
+//go:generate goki generate
 
 import (
 	"errors"
