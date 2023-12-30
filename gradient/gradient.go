@@ -9,6 +9,8 @@
 // Package gradient provides linear, radial, and conic color gradients.
 package gradient
 
+//go:generate goki generate
+
 import (
 	"image"
 	"image/color"

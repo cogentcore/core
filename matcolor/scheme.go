@@ -4,6 +4,8 @@
 
 package matcolor
 
+//go:generate goki generate
+
 import "image/color"
 
 // Scheme contains the colors for one color scheme (ex: light or dark).
