@@ -1,6 +1,6 @@
 package testdata
 
-//go:generate enumgen
+//go:generate goki generate
 
 // Fruits is an enum containing fruits
 type Fruits uint8 //enums:enum
