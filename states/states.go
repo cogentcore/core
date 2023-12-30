@@ -4,7 +4,7 @@
 
 package states
 
-//go:generate enumgen
+//go:generate goki generate
 
 import "goki.dev/enums"
 
