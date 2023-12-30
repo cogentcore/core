@@ -111,51 +111,6 @@ func (g *Generator) GetInterfaces() error {
 	return nil
 }
 
-// TODO(kai): remove this if we are going to go with the new structure
-/*
-// GetInterfaces sets [Generator.Interfaces] based on
-// [Generator.Config.InterfaceConfigs], looking in the
-// given packages. It is a recursive function that should
-// not typically be called by end-user code.
-func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
-	rpkgs := []*types.Package{}
-	for _, pkg := range pkgs {
-		for in := range g.Config.InterfaceConfigs {
-			// ignore ones we already have
-			if _, has := g.Interfaces.IdxByKeyTry(in); has {
-				continue
-			}
-			li := strings.LastIndex(in, ".")
-			if li == -1 {
-				return fmt.Errorf("expected a dot (%q) in the interface config fully-qualified type name (%q)", ".", in)
-			}
-			pkgpath := in[:li]
-			if pkg.Path() == pkgpath {
-				typnm := in[li+1:] // need to get rid of the dot
-				typ := pkg.Scope().Lookup(typnm)
-				if typ == nil {
-					return fmt.Errorf("programmer error: internal error: could not find type %q in package %q (from interface config %q)", typnm, pkgpath, in)
-				}
-				tn, ok := typ.Type().(*types.Named)
-				if !ok {
-					return fmt.Errorf("programmer error: internal error: type %q is not a *types.Named but a %T (type value %v)", in, typ.Type(), typ.Type())
-				}
-				tint, ok := tn.Underlying().(*types.Interface)
-				if !ok {
-					return fmt.Errorf("programmer error: internal error: underlying type of type %q is not a *types.Interface but a %T (type value %v)", in, tn.Underlying(), tn.Underlying())
-				}
-				g.Interfaces.Add(in, tint)
-			}
-		}
-		rpkgs = append(rpkgs, pkg.Imports()...)
-	}
-	if len(pkgs) > 0 {
-		return g.GetInterfaces(rpkgs)
-	}
-	return nil
-}
-*/
-
 // AllowedEnumTypes are the types that can be used for enums
 // that are not bit flags (bit flags can only be int64s).
 // It is stored as a map for quick and convenient access.

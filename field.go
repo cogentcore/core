@@ -26,14 +26,14 @@ type Field struct {
 	// (eg: gi.Button or Button, depending on where this is)
 	LocalType string
 
-	// Doc has all of the comment documentation
+	// Doc, if this is a struct field, has all of the comment documentation
 	// info as one string with directives removed.
 	Doc string
 
-	// Directives has the parsed comment directives
+	// Directives, if this is a struct field, has the parsed comment directives
 	Directives Directives
 
-	// Tag, if this field is part of a struct, contains the struct
+	// Tag, if this is a struct field, contains the struct
 	// tag for it.
 	Tag reflect.StructTag
 }
