@@ -354,12 +354,9 @@ func (vv *ValueBase) Doc() string {
 	}
 	tip := ""
 	if vv.HasDialog() && !goosi.TheApp.Platform().IsMobile() {
-		tip = "[press any modifier key to open dialog in new window] "
+		tip = "[Press any modifier key to open in a new window] "
 	}
-	doc, ok := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
-	if !ok && tip == "" {
-		return ""
-	}
+	doc, _ := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
 	vv.SavedDoc = tip + doc
 	vv.SetFlag(true, ValueHasSavedDoc)
 	return vv.SavedDoc
