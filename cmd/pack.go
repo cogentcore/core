@@ -40,6 +40,11 @@ func Pack(c *config.Config) error { //gti:add
 			if err != nil {
 				return err
 			}
+		case "windows":
+			err := PackWindows(c)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -333,3 +338,15 @@ icon = '{{.IconPath}}'
 icon_locations = {'{{.AppName}}': (140, 120), "Applications": (500, 120)}
 background = "builtin-arrow"
 `))
+
+// PackWindows packages the app for Windows by generating a .msi file.
+func PackWindows(c *config.Config) error {
+	// install go-msi if we don't already have it
+	if _, err := exec.LookPath("go-msi"); err != nil {
+		err := xe.Run("go", "install", "github.com/mh-cbon/go-msi@latest")
+		if err != nil {
+			return err
+		}
+	}
+	return xe.Verbose().Run("go-msi", "check-env")
+}
