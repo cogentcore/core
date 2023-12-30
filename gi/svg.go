@@ -19,7 +19,8 @@ import (
 )
 
 // SVG is a Widget that renders an [svg.SVG] object.
-// If not ReadOnly, the user can pan and zoom the display.
+// If it is not [states.ReadOnly], the user can pan and zoom the display.
+// SVGs do not render a background or border independent of their SVG object.
 type SVG struct {
 	WidgetBase
 

@@ -17,6 +17,7 @@ import (
 
 // Icon contains a svg.SVG element.
 // The rendered version is cached for a given size.
+// Icons do not render a background or border independent of their SVG object.
 type Icon struct {
 	WidgetBase
 
@@ -101,10 +102,6 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 }
 
 func (ic *Icon) DrawIntoScene() {
-	_, st := ic.RenderLock()
-	defer ic.RenderUnlock()
-	ic.RenderStdBox(st)
-
 	if ic.SVG.Pixels == nil {
 		return
 	}
