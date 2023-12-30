@@ -365,5 +365,10 @@ func PackWindows(c *config.Config) error {
 			return err
 		}
 	}
-	return nil
+
+	opath := filepath.Join(".goki", "bin", "windows")
+	jpath := filepath.Join(opath, ".tempWixManifest.json")
+	mpath := filepath.Join(opath, c.Name+".msi")
+
+	return xe.Run("go-msi", "make", "--path", jpath, "--msi", mpath, "--version", c.Version)
 }
