@@ -327,13 +327,20 @@ func (vv *ValueBase) Label() string {
 		return vv.SavedLabel
 	}
 
-	if lbltag, has := vv.Tag("label"); has {
-		return lbltag
+	lbl := ""
+	lbltag, has := vv.Tag("label")
+	switch {
+	case has:
+		lbl = lbltag
+	case vv.Field != nil:
+		lbl = sentence.Case(vv.Field.Name)
+	default:
+		lbl = sentence.Case(vv.Nm)
 	}
-	if vv.Field != nil {
-		return sentence.Case(vv.Field.Name)
-	}
-	return sentence.Case(vv.Nm)
+
+	vv.SavedLabel = lbl
+	vv.SetFlag(true, ValueHasSavedLabel)
+	return vv.SavedLabel
 }
 
 func (vv *ValueBase) SetLabel(label string) {
