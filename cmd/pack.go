@@ -370,7 +370,34 @@ func PackWindows(c *config.Config) error {
 	jpath := filepath.Join(opath, ".tempWixManifest.json")
 	mpath := filepath.Join(opath, c.Name+".msi")
 
-	return xe.Run("go-msi", "make", "--path", jpath, "--msi", mpath, "--version", c.Version)
+	fman, err := os.Create(jpath)
+	if err != nil {
+		return err
+	}
+	defer fman.Close()
+	wmd := &WixManifestData{
+		Name: c.Name,
+		Exec: c.Build.Output,
+		Desc: c.Desc,
+	}
+	err = WixManifestTmpl.Execute(fman, wmd)
+	if err != nil {
+		return err
+	}
+
+	err = xe.Run("go-msi", "make", "--path", jpath, "--msi", mpath, "--version", c.Version)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(jpath)
+}
+
+// WixManifestData is the data passed to [WixManifestTmpl]
+type WixManifestData struct {
+	Name string
+	Exec string
+	Desc string
 }
 
 // WixManifestTmpl is the template for the go-msi wix manifest json file
@@ -396,15 +423,10 @@ var WixManifestTmpl = template.Must(template.New("WixManifestTmpl").Parse(
 		  ]
 		},
 		"hooks": [
-		  {"when": "install", "command": "sc.exe create HelloSvc binPath=\"[INSTALLDIR]hello.exe\" type=share start=auto DisplayName=\"Hello!\""},
-		  {"when": "install", "command": "sc.exe start HelloSvc"},
-		  {"when": "uninstall", "command": "sc.exe delete HelloSvc"}
+		  {"when": "install", "command": "[INSTALLDIR]\\{{.Name}}.exe"},
 		],
 		"choco": {
-		  "description": "hello program",
-		  "project-url": "https://github.com/mh-cbon/go-msi/tree/master/testing",
-		  "tags": "hello",
-		  "license-url": "https://github.com/mh-cbon/go-msi/blob/master/LICENSE"
+		  "description": "{{.Desc}}",
 		}
 	  }
 `))
