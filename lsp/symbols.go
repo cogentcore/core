@@ -8,7 +8,7 @@
 // which are used internally in GoPi.
 package lsp
 
-//go:generate enumgen
+//go:generate goki generate
 
 import (
 	"goki.dev/pi/v2/token"

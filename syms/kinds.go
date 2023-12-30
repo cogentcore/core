@@ -4,7 +4,7 @@
 
 package syms
 
-//go:generate enumgen
+//go:generate goki generate
 
 import (
 	"reflect"
