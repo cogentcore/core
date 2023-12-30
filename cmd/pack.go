@@ -372,3 +372,39 @@ func PackWindows(c *config.Config) error {
 
 	return xe.Run("go-msi", "make", "--path", jpath, "--msi", mpath, "--version", c.Version)
 }
+
+// WixManifestTmpl is the template for the go-msi wix manifest json file
+var WixManifestTmpl = template.Must(template.New("WixManifestTmpl").Parse(
+	`{
+		"product": "{{.Name}}",
+		"files": {
+		  "guid": "",
+		  "items": [
+			"{{.Exec}}"
+		  ]
+		},
+		"shortcuts": {
+		  "guid": "",
+		  "items": [
+			{
+			  "name": "{{.Name}}",
+			  "description": "{{.Name}}",
+			  "target": "[INSTALLDIR]\\{{.Name}}.exe",
+			  "wdir": "INSTALLDIR",
+			  "icon":"ico.ico"
+			}
+		  ]
+		},
+		"hooks": [
+		  {"when": "install", "command": "sc.exe create HelloSvc binPath=\"[INSTALLDIR]hello.exe\" type=share start=auto DisplayName=\"Hello!\""},
+		  {"when": "install", "command": "sc.exe start HelloSvc"},
+		  {"when": "uninstall", "command": "sc.exe delete HelloSvc"}
+		],
+		"choco": {
+		  "description": "hello program",
+		  "project-url": "https://github.com/mh-cbon/go-msi/tree/master/testing",
+		  "tags": "hello",
+		  "license-url": "https://github.com/mh-cbon/go-msi/blob/master/LICENSE"
+		}
+	  }
+`))
