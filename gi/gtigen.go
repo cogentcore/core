@@ -21,6 +21,60 @@ import (
 	"goki.dev/pi/v2/complete"
 )
 
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.App",
+	ShortName: "gi.App",
+	IDName:    "app",
+	Doc:       "App encapsulates various properties of the overall application,\nincluding managing an AppBar and associated elements.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "Name can be used in relevant window titles and prompts,\nand specifies the default application-specific data directory", Directives: gti.Directives{}, Tag: ""}},
+		{"About", &gti.Field{Name: "About", Type: "string", LocalType: "string", Doc: "About sets the 'about' info for the app, which appears as a menu option\nin the default app menu.", Directives: gti.Directives{}, Tag: ""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "[]image.Image", LocalType: "[]image.Image", Doc: "Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG].", Directives: gti.Directives{}, Tag: ""}},
+		{"AppBarConfig", &gti.Field{Name: "AppBarConfig", Type: "func(pw goki.dev/gi/v2/gi.Widget)", LocalType: "func(pw Widget)", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nSet to StdAppBarConfig by default, which makes the standard AppBar behavior.\nMost apps will define their own version to add App-specific\nfunctionality, and set this accordingly.\nIf this is nil, then no TopAppBar will be created by default.", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+// SetName sets the [App.Name]:
+// Name can be used in relevant window titles and prompts,
+// and specifies the default application-specific data directory
+func (t *App) SetName(v string) *App {
+	t.Name = v
+	return t
+}
+
+// SetAbout sets the [App.About]:
+// About sets the 'about' info for the app, which appears as a menu option
+// in the default app menu.
+func (t *App) SetAbout(v string) *App {
+	t.About = v
+	return t
+}
+
+// SetIcon sets the [App.Icon]:
+// Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].
+// It should typically be set using [App.SetIconSVG].
+func (t *App) SetIcon(v []image.Image) *App {
+	t.Icon = v
+	return t
+}
+
+// SetAppBarConfig sets the [App.AppBarConfig]:
+// AppBarConfig is the function that configures the AppBar,
+// typically put in the [Scene.Bars.Top] (i.e., a TopAppBar).
+// Set to StdAppBarConfig by default, which makes the standard AppBar behavior.
+// Most apps will define their own version to add App-specific
+// functionality, and set this accordingly.
+// If this is nil, then no TopAppBar will be created by default.
+func (t *App) SetAppBarConfig(v func(pw Widget)) *App {
+	t.AppBarConfig = v
+	return t
+}
+
 // AppChooserType is the [gti.Type] for [AppChooser]
 var AppChooserType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.AppChooser",
@@ -843,7 +897,7 @@ var IconType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Icon",
 	ShortName:  "gi.Icon",
 	IDName:     "icon",
-	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.",
+	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"IconName", &gti.Field{Name: "IconName", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon name that has been set.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -2750,7 +2804,7 @@ var SVGType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.SVG",
 	ShortName:  "gi.SVG",
 	IDName:     "svg",
-	Doc:        "SVG is a Widget that renders an [svg.SVG] object.\nIf not ReadOnly, the user can pan and zoom the display.",
+	Doc:        "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nSVGs do not render a background or border independent of their SVG object.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -3035,6 +3089,7 @@ var TabsType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tabs", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
 		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (false by default)", Directives: gti.Directives{}, Tag: ""}},
@@ -3084,6 +3139,13 @@ func AsTabs(k ki.Ki) *Tabs {
 
 // AsTabs satisfies the [TabsEmbedder] interface
 func (t *Tabs) AsTabs() *Tabs {
+	return t
+}
+
+// SetType sets the [Tabs.Type]:
+// Type is the styling type of the tabs
+func (t *Tabs) SetType(v TabTypes) *Tabs {
+	t.Type = v
 	return t
 }
 

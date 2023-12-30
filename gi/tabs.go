@@ -51,7 +51,9 @@ type Tabs struct { //goki:embedder
 
 type TabTypes int32 //enums:enum -trimprefix Tab
 
-const ()
+const (
+	BottomNavBar TabTypes = iota
+)
 
 func (ts *Tabs) CopyFieldsFrom(frm any) {
 	fr := frm.(*Tabs)

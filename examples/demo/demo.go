@@ -5,7 +5,6 @@
 package main
 
 import (
-	"bytes"
 	_ "embed"
 	"fmt"
 	"strings"
@@ -33,8 +32,7 @@ var icon []byte
 
 func app() {
 	b := gi.NewAppBody("Goki Demo")
-	b.App().About = "The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework."
-	b.App().SetIconBytes(icon)
+	b.App().SetAbout("The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework.").SetIconBytes(icon)
 
 	ts := gi.NewTabs(b)
 
@@ -59,7 +57,7 @@ func makeHome(ts *gi.Tabs) {
 
 	sv := gi.NewSVG(home)
 	sv.SetReadOnly(true)
-	grr.Log(sv.ReadSVG(bytes.NewReader(icon)))
+	grr.Log(sv.ReadBytes(icon))
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Dp(256))

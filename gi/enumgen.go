@@ -2433,6 +2433,110 @@ func (i *SwitchTypes) UnmarshalText(text []byte) error {
 	return nil
 }
 
+var _TabTypesValues = []TabTypes{0}
+
+// TabTypesN is the highest valid value
+// for type TabTypes, plus one.
+const TabTypesN TabTypes = 1
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _TabTypesNoOp() {
+	var x [1]struct{}
+	_ = x[BottomNavBar-(0)]
+}
+
+var _TabTypesNameToValueMap = map[string]TabTypes{
+	`BottomNavBar`: 0,
+	`bottomnavbar`: 0,
+}
+
+var _TabTypesDescMap = map[TabTypes]string{
+	0: ``,
+}
+
+var _TabTypesMap = map[TabTypes]string{
+	0: `BottomNavBar`,
+}
+
+// String returns the string representation
+// of this TabTypes value.
+func (i TabTypes) String() string {
+	if str, ok := _TabTypesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the TabTypes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *TabTypes) SetString(s string) error {
+	if val, ok := _TabTypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _TabTypesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type TabTypes")
+}
+
+// Int64 returns the TabTypes value as an int64.
+func (i TabTypes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the TabTypes value from an int64.
+func (i *TabTypes) SetInt64(in int64) {
+	*i = TabTypes(in)
+}
+
+// Desc returns the description of the TabTypes value.
+func (i TabTypes) Desc() string {
+	if str, ok := _TabTypesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// TabTypesValues returns all possible values
+// for the type TabTypes.
+func TabTypesValues() []TabTypes {
+	return _TabTypesValues
+}
+
+// Values returns all possible values
+// for the type TabTypes.
+func (i TabTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_TabTypesValues))
+	for i, d := range _TabTypesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type TabTypes.
+func (i TabTypes) IsValid() bool {
+	_, ok := _TabTypesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i TabTypes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *TabTypes) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
+}
+
 var _TextFieldTypesValues = []TextFieldTypes{0, 1}
 
 // TextFieldTypesN is the highest valid value
