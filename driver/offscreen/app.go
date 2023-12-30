@@ -6,6 +6,8 @@
 // to allow for offscreen testing and capturing of apps.
 package offscreen
 
+//go:generate goki generate
+
 import (
 	"image"
 	"os"

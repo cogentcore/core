@@ -10,10 +10,8 @@
 // Package driver provides the default driver for accessing a screen.
 package driver
 
-//go:generate goki generate ./...
-
-// NOTE: go generate must be run with each possible GOOS to generate everything
-// (GOOS=android, GOOS=ios, and GOOS=js)
+// NOTE: go generate must be run in each driver package with the
+// corresponding GOOS to generate everything
 
 import "goki.dev/goosi"
 

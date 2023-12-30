@@ -7,6 +7,8 @@
 // Package ios implements goosi interfaces on iOS mobile devices
 package ios
 
+//go:generate goki generate
+
 import (
 	"log"
 	"os/user"

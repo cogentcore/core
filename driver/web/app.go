@@ -7,6 +7,8 @@
 // Package web implements goosi interfaces on the web through WASM
 package web
 
+//go:generate goki generate
+
 import (
 	"image"
 	"log/slog"

@@ -9,6 +9,8 @@
 
 package desktop
 
+//go:generate goki generate
+
 import (
 	"log"
 	"runtime"
