@@ -92,6 +92,9 @@ func NewGlfwWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window
 	}
 
 	win.SetPos(opts.Pos.X, opts.Pos.Y)
+	if opts.Icon != nil {
+		win.SetIcon(opts.Icon)
+	}
 	return win, err
 }
 

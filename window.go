@@ -290,6 +290,9 @@ type NewWindowOptions struct {
 	// Title specifies the window title.
 	Title string
 
+	// Icon specifies the window icon (see [Window.SetIcon] for more info).
+	Icon []image.Image
+
 	// Flags can be set using WindowFlags to request different types of windows
 	Flags WindowFlags
 }
