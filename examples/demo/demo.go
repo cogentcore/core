@@ -5,7 +5,8 @@
 package main
 
 import (
-	"embed"
+	"bytes"
+	_ "embed"
 	"fmt"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ func main() { gimain.Run(app) }
 func app() {
 	b := gi.NewAppBody("Goki Demo")
 	b.App().About = "The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework."
+	b.App().SetIconSVG(bytes.NewReader(giIcon))
 
 	ts := gi.NewTabs(b)
 
@@ -44,7 +46,7 @@ func app() {
 }
 
 //go:embed .goki/icon.svg
-var giIcon embed.FS
+var giIcon []byte
 
 func makeHome(ts *gi.Tabs) {
 	home := ts.NewTab("Home")
@@ -57,7 +59,7 @@ func makeHome(ts *gi.Tabs) {
 
 	sv := gi.NewSVG(home)
 	sv.SetReadOnly(true)
-	grr.Log(sv.OpenFS(giIcon, ".goki/icon.svg"))
+	grr.Log(sv.ReadXML(bytes.NewReader(giIcon)))
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Dp(256))

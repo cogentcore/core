@@ -7,6 +7,8 @@ package gi
 import (
 	"errors"
 	"fmt"
+	"image"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,11 +23,12 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
+	"goki.dev/svg"
 )
 
 // App encapsulates various properties of the overall application,
 // including managing an AppBar and associated elements.
-type App struct {
+type App struct { //gti:add -setters
 	// Name can be used in relevant window titles and prompts,
 	// and specifies the default application-specific data directory
 	Name string
@@ -33,6 +36,10 @@ type App struct {
 	// About sets the 'about' info for the app, which appears as a menu option
 	// in the default app menu.
 	About string
+
+	// Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].
+	// It should typically be set using [App.SetIconSVG].
+	Icon []image.Image
 
 	// AppBarConfig is the function that configures the AppBar,
 	// typically put in the [Scene.Bars.Top] (i.e., a TopAppBar).
@@ -58,6 +65,31 @@ func NewAppBody(name string) *Body {
 	b := NewBody(name)
 	b.SetApp(NewApp(name))
 	return b
+}
+
+// SetIconSVG sets the icon of the app to the given SVG icon.
+func (app *App) SetIconSVG(r io.Reader) error {
+	app.Icon = make([]image.Image, 3)
+
+	sv := svg.NewSVG(16, 16)
+	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
+	sv.Norm = true
+	err := sv.ReadXML(r)
+	if err != nil {
+		return err
+	}
+
+	sv.Render()
+	app.Icon[0] = sv.Pixels
+
+	sv.Resize(image.Pt(32, 32))
+	sv.Render()
+	app.Icon[1] = sv.Pixels
+
+	sv.Resize(image.Pt(48, 48))
+	sv.Render()
+	app.Icon[2] = sv.Pixels
+	return nil
 }
 
 // Config performs one-time configuration steps after setting

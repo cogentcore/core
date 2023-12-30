@@ -243,7 +243,10 @@ func (st *Stage) NewRenderWin() *RenderWin {
 	name := st.Name
 	title := st.Title
 	opts := &goosi.NewWindowOptions{
-		Title: title, Size: st.Scene.SceneGeom.Size, StdPixels: false,
+		Title:     title,
+		Icon:      st.Scene.App.Icon,
+		Size:      st.Scene.SceneGeom.Size,
+		StdPixels: false,
 	}
 	wgp := WinGeomMgr.Pref(title, nil)
 	if goosi.TheApp.Platform() != goosi.Offscreen && wgp != nil {
