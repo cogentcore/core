@@ -10,6 +10,7 @@
 package base
 
 import (
+	"image"
 	"sync"
 	"time"
 
@@ -165,6 +166,10 @@ func (w *Window[A]) SetTitle(title string) {
 		return
 	}
 	w.Titl = title
+}
+
+func (w *Window[A]) SetIcon(images []image.Image) {
+	// no-op by default
 }
 
 func (w *Window[A]) Flags() goosi.WindowFlags {

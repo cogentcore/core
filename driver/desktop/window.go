@@ -169,6 +169,18 @@ func (w *Window) SetTitle(title string) {
 	})
 }
 
+func (w *Window) SetIcon(images []image.Image) {
+	if w.IsClosed() {
+		return
+	}
+	w.App.RunOnMain(func() {
+		if w.Glw == nil { // by time we got to main, could be diff
+			return
+		}
+		w.Glw.SetIcon(images)
+	})
+}
+
 func (w *Window) SetWinSize(sz image.Point) {
 	if w.IsClosed() {
 		return

@@ -49,6 +49,11 @@ type Window interface {
 	// SetTitle sets the current title of the window, which is displayed in the GUI.
 	SetTitle(title string)
 
+	// SetIcon sets the icon of the window, which is displayed in the title bar
+	// and taskbar on Windows. It takes a list of candidate images and uses the
+	// one closest to the required size. Good sizes are 16x16, 32x32, and 48x48.
+	SetIcon(images []image.Image)
+
 	// Size returns the current size of the window, in raw underlying dots / pixels.
 	// This includes any high DPI factors that may not be used in OS window sizing
 	//  (see WinSize for that size).
