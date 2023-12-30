@@ -4,7 +4,7 @@
 
 package mat32
 
-//go:generate enumgen
+//go:generate goki generate
 
 // Dims is a list of vector dimension (component) names
 type Dims int32 //enums:enum
