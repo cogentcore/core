@@ -263,8 +263,8 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 
 /*
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
-// default or specific to the current screen.
-//   - forCurrentScreen: if true, saves only for current screen
+// default or specific to the current screen. If for current screen is true,
+// it saves only for the current screen.
 func (pf *GeneralSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
 	goosi.ZoomFactor = 1 // reset -- otherwise has 2x effect
 	sc := goosi.TheApp.Screen(0)
