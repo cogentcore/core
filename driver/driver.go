@@ -13,7 +13,7 @@ package driver
 //go:generate goki generate ./...
 
 // NOTE: go generate must be run with each possible GOOS to generate everything
-// (GOOS=android, GOOS=ios, GOOS=js, and GOOS=[any_desktop_os])
+// (GOOS=android, GOOS=ios, and GOOS=js)
 
 import "goki.dev/goosi"
 
