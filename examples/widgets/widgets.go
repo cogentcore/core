@@ -28,7 +28,7 @@ func app() {
 	b.AddAppBar(func(tb *gi.Toolbar) { // put first in top app bar
 		gi.NewButton(tb).SetText("Button 1").SetData(1).
 			OnClick(func(e events.Event) {
-				fmt.Println("TopAppBar Button 1")
+				fmt.Println("AppBar Button 1")
 				gi.NewSnackbar(tb).AddSnackbarText("Something went wrong!").
 					AddSnackbarButton("Try again", func(e events.Event) {
 						fmt.Println("got snackbar try again event")
@@ -39,7 +39,7 @@ func app() {
 			})
 		gi.NewButton(tb).SetText("Button 2").SetData(2).
 			OnClick(func(e events.Event) {
-				fmt.Println("TopAppBar Button 2")
+				fmt.Println("AppBar Button 2")
 			})
 	})
 

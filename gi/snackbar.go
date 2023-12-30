@@ -30,7 +30,7 @@ func NewSnackbar(ctx Widget, name ...string) *Scene {
 		nm = ctx.Name() + "-snackbar"
 	}
 	sc := NewScene(nm)
-	sc.SnackbarStyles()
+	sc.SetSnackbarStyles()
 
 	sc.Stage = NewPopupStage(SnackbarStage, sc, ctx).SetTimeout(SnackbarTimeout)
 	return sc
@@ -57,7 +57,7 @@ func ErrorSnackbar(ctx Widget, err error, label ...string) {
 	MessageSnackbar(ctx, lbl+": "+err.Error())
 }
 
-func (sc *Scene) SnackbarStyles() {
+func (sc *Scene) SetSnackbarStyles() {
 	sc.Style(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size

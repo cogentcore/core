@@ -177,12 +177,11 @@ func (sc *Scene) SetStyles() {
 		s.Direction = styles.Column
 		s.Overflow.Set(styles.OverflowAuto) // screen is always scroller of last resort
 
-		// insets
+		// insets and minimum window padding
 		if sc.Stage == nil {
 			return
 		}
-		ms := sc.Stage
-		if ms == nil || (ms.Type == DialogStage && !ms.FullWindow) {
+		if sc.Stage.Type.IsPopup() || (sc.Stage.Type == DialogStage && !sc.Stage.FullWindow) {
 			return
 		}
 
@@ -196,7 +195,6 @@ func (sc *Scene) SetStyles() {
 		}
 
 		insets := rw.GoosiWin.Insets()
-		// fmt.Println(insets)
 
 		uv := func(val float32) units.Value {
 			return units.Custom(func(uc *units.Context) float32 {
