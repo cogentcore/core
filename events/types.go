@@ -4,7 +4,7 @@
 
 package events
 
-//go:generate enumgen
+//go:generate goki generate
 
 // Types determines the type of GUI event, and also the
 // level at which one can select which events to listen to.
