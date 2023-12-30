@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"io"
 	"io/fs"
 
 	"goki.dev/girl/abilities"
@@ -122,6 +123,11 @@ func (sv *SVG) OpenSVG(filename FileName) error { //gti:add
 // OpenSVG opens an XML-formatted SVG file from the given fs
 func (sv *SVG) OpenFS(fsys fs.FS, filename FileName) error {
 	return sv.SVG.OpenFS(fsys, string(filename))
+}
+
+// ReadSVG reads an XML-formatted SVG file from the given reader
+func (sv *SVG) ReadSVG(r io.Reader) error {
+	return sv.SVG.ReadXML(r)
 }
 
 // SaveSVG saves the current SVG to an XML-encoded standard SVG file

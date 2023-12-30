@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"image"
@@ -22,6 +23,7 @@ import (
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/svg"
 )
@@ -68,6 +70,8 @@ func NewAppBody(name string) *Body {
 }
 
 // SetIconSVG sets the icon of the app to the given SVG icon.
+// It automatically logs any errors in addition to returning
+// them so that end-user code does not have to handle them.
 func (app *App) SetIconSVG(r io.Reader) error {
 	app.Icon = make([]image.Image, 3)
 
@@ -75,7 +79,7 @@ func (app *App) SetIconSVG(r io.Reader) error {
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 	sv.Norm = true
 	err := sv.ReadXML(r)
-	if err != nil {
+	if grr.Log(err) != nil {
 		return err
 	}
 
@@ -90,6 +94,13 @@ func (app *App) SetIconSVG(r io.Reader) error {
 	sv.Render()
 	app.Icon[2] = sv.Pixels
 	return nil
+}
+
+// SetIconBytes sets the icon of the app to the given SVG icon bytes.
+// It automatically logs any errors in addition to returning
+// them so that end-user code does not have to handle them.
+func (app *App) SetIconBytes(b []byte) error {
+	return app.SetIconSVG(bytes.NewReader(b))
 }
 
 // Config performs one-time configuration steps after setting
