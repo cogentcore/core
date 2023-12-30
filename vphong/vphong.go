@@ -4,6 +4,8 @@
 
 package vphong
 
+//go:generate goki generate
+
 import (
 	"sync"
 

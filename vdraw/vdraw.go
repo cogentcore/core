@@ -4,6 +4,8 @@
 
 package vdraw
 
+//go:generate goki generate
+
 import (
 	"image"
 	"sync"

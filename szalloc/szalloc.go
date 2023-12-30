@@ -4,6 +4,8 @@
 
 package szalloc
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"image"
