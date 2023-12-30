@@ -154,7 +154,7 @@ func (em *EventMgr) HandleEvent(e events.Event) {
 }
 
 func (em *EventMgr) HandleOtherEvent(e events.Event) {
-	fmt.Println("TODO: Other event not handled", e)
+	// fmt.Println("TODO: Other event not handled", e)
 }
 
 func (em *EventMgr) HandleFocusEvent(e events.Event) {
