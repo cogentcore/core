@@ -428,7 +428,14 @@ func (sr *Slider) HandleMouse() {
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		del := float32(se.DimDelta(sr.Dim))
+		var del float32
+		// if we are scrolling in the y direction on an x slider,
+		// we still count it
+		if sr.Dim == mat32.X && se.Delta.X != 0 {
+			del = float32(se.Delta.X)
+		} else {
+			del = float32(se.Delta.Y)
+		}
 		if sr.Type == SliderScrollbar {
 			del = -del // invert for "natural" scroll
 		}
