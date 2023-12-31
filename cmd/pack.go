@@ -363,8 +363,7 @@ func PackWindows(c *config.Config) error {
 				return err
 			}
 		}
-		// go-msi does not support wix v4 yet (see https://github.com/mh-cbon/go-msi/issues/57)
-		err = xe.Verbose().SetBuffer(false).Run("dotnet", "tool", "install", "--global", "wix", "--version", "3.11.2")
+		err = xe.Verbose().SetBuffer(false).Run("dotnet", "tool", "install", "--global", "wix", "--version", "4.0.3")
 		if err != nil {
 			return err
 		}
