@@ -23,20 +23,20 @@ func main() {
 	pc.Lock()
 
 	// first, draw a frame around the entire image
-	pc.StrokeStyle.SetColor(colors.Black)
-	pc.FillStyle.SetColor(colors.White)
+	pc.StrokeStyle.Color = colors.C(colors.Black)
+	pc.FillStyle.Color = colors.C(colors.White)
 	pc.StrokeStyle.Width.Dot(1) // use dots directly to render in literal pixels
 	pc.DrawRectangle(0, 0, float32(pc.Image.Rect.Max.X), float32(pc.Image.Rect.Max.Y))
 	pc.FillStrokeClear() // actually render path that has been setup
 
 	// next draw a rounded rectangle
-	pc.FillStyle.SetColor(nil)
+	pc.FillStyle.Color = nil
 	pc.StrokeStyle.Width.Dot(10)
 	pc.DrawRoundedRectangle(20, 20, 150, 100, styles.NewSideFloats(6))
 	pc.FillStrokeClear()
 
 	// use units-based styling instead of dots:
-	pc.StrokeStyle.SetColor(colors.Blue)
+	pc.StrokeStyle.Color = colors.C(colors.Blue)
 	pc.StrokeStyle.Width.Ew(2) // percent of total image (width)
 	pc.ToDots()                // convert pct -> dots based on units context
 	// fmt.Printf("pct dots: %g\n", pc.StrokeStyle.Width.Dots) // 6.4
