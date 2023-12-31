@@ -342,8 +342,14 @@ background = "builtin-arrow"
 // PackWindows packages the app for Windows by generating a .msi file.
 func PackWindows(c *config.Config) error {
 	opath := filepath.Join(".goki", "bin", "windows")
-	gpath := filepath.Join(opath, "tempWindowsInstaller.go")
-	ipath := filepath.Join(opath, c.Name+" Installer.exe")
+	ipath := filepath.Join(opath, "tempWindowsInstaller")
+	gpath := filepath.Join(ipath, "installer.go")
+	epath := filepath.Join(opath, c.Name+" Installer.exe")
+
+	err := os.MkdirAll(ipath, 0777)
+	if err != nil {
+		return err
+	}
 
 	fman, err := os.Create(gpath)
 	if err != nil {
@@ -359,17 +365,17 @@ func PackWindows(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(opath, "tempIcon.svg"))
+	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(ipath, "icon.svg"))
 	if err != nil {
 		return err
 	}
 
-	err = xe.Run("go", "build", "-o", ipath, gpath)
+	err = xe.Run("go", "build", "-o", epath, gpath)
 	if err != nil {
 		return err
 	}
 
-	return os.Remove(gpath)
+	return os.RemoveAll(ipath)
 }
 
 // WindowsInstallerData is the data passed to [WindowsInstallerTmpl]
@@ -389,7 +395,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 )
 
-//go:embed tempIcon.svg
+//go:embed icon.svg
 var icon []byte
 
 func main() { gimain.Run(app) }
