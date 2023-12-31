@@ -377,7 +377,7 @@ func PackWindows(c *config.Config) error {
 	defer fman.Close()
 	wmd := &WixManifestData{
 		Name: c.Name,
-		Exec: c.Build.Output,
+		Exec: strings.ReplaceAll(c.Build.Output, `\`, `\\`), // need to escape
 		Desc: c.Desc,
 	}
 	err = WixManifestTmpl.Execute(fman, wmd)
@@ -403,30 +403,30 @@ type WixManifestData struct {
 // WixManifestTmpl is the template for the go-msi wix manifest json file
 var WixManifestTmpl = template.Must(template.New("WixManifestTmpl").Parse(
 	`{
-		"product": "{{.Name}}",
-		"files": {
-		  "guid": "",
-		  "items": [
-			"{{.Exec}}"
-		  ]
-		},
-		"shortcuts": {
-		  "guid": "",
-		  "items": [
-			{
-			  "name": "{{.Name}}",
-			  "description": "{{.Name}}",
-			  "target": "[INSTALLDIR]\\{{.Name}}.exe",
-			  "wdir": "INSTALLDIR",
-			  "icon":"ico.ico"
-			}
-		  ]
-		},
-		"hooks": [
-		  {"when": "install", "command": "[INSTALLDIR]\\{{.Name}}.exe"},
-		],
-		"choco": {
-		  "description": "{{.Desc}}",
+	"product": "{{.Name}}",
+	"files": {
+		"guid": "",
+		"items": [
+		"{{.Exec}}"
+		]
+	},
+	"shortcuts": {
+		"guid": "",
+		"items": [
+		{
+			"name": "{{.Name}}",
+			"description": "{{.Name}}",
+			"target": "[INSTALLDIR]\\{{.Name}}.exe",
+			"wdir": "INSTALLDIR",
+			"icon":"ico.ico"
 		}
-	  }
+		]
+	},
+	"hooks": [
+		{"when": "install", "command": "[INSTALLDIR]\\{{.Name}}.exe"}
+	],
+	"choco": {
+		"description": "{{.Desc}}"
+	}
+}
 `))
