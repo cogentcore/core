@@ -17,9 +17,6 @@ import (
 	"goki.dev/goki/mobile"
 	"goki.dev/grows/images"
 	"goki.dev/xe"
-
-	// we need to depend on go-msi so that we can find its templates
-	_ "github.com/mh-cbon/go-msi/util"
 )
 
 // Pack builds and packages the app for the target platform.
@@ -344,102 +341,52 @@ background = "builtin-arrow"
 
 // PackWindows packages the app for Windows by generating a .msi file.
 func PackWindows(c *config.Config) error {
-	// install go-msi if we don't already have it
-	if _, err := exec.LookPath("go-msi"); err != nil {
-		err := xe.Run("go", "install", "github.com/mh-cbon/go-msi@latest")
-		if err != nil {
-			return err
-		}
-	}
-	// install wix if we don't already have it
-	if _, err := exec.LookPath("wix"); err != nil {
-		out, err := xe.Output("dotnet", "--list-sdks")
-		if err != nil {
-			return err
-		}
-		if len(strings.TrimSpace(out)) == 0 {
-			err = xe.Verbose().SetBuffer(false).Run("winget", "install", "Microsoft.DotNet.SDK.8")
-			if err != nil {
-				return err
-			}
-		}
-		err = xe.Verbose().SetBuffer(false).Run("dotnet", "tool", "install", "--global", "wix", "--version", "4.0.3")
-		if err != nil {
-			return err
-		}
-	}
-
 	opath := filepath.Join(".goki", "bin", "windows")
-	jpath := filepath.Join(opath, ".tempWixManifest.json")
-	mpath := filepath.Join(opath, c.Name+".msi")
+	gpath := filepath.Join(opath, "tempWindowsInstaller.go")
+	ipath := filepath.Join(opath, c.Name+" Installer.exe")
 
-	fman, err := os.Create(jpath)
+	fman, err := os.Create(gpath)
 	if err != nil {
 		return err
 	}
 	defer fman.Close()
-	wmd := &WixManifestData{
+	wmd := &WindowsInstallerData{
 		Name: c.Name,
-		Exec: strings.ReplaceAll(c.Build.Output, `\`, `\\`), // need to escape
 		Desc: c.Desc,
 	}
-	err = WixManifestTmpl.Execute(fman, wmd)
+	err = WindowsInstallerTmpl.Execute(fman, wmd)
 	if err != nil {
 		return err
 	}
 
-	// see https://stackoverflow.com/questions/67211875/how-to-get-the-path-to-a-go-module-dependency
-	goMsiPath, err := xe.Output("go", "list", "-m", "-f", "{{.Dir}}", "github.com/mh-cbon/go-msi")
+	err = xe.Run("go", "build", "-o", ipath, gpath)
 	if err != nil {
 		return err
 	}
 
-	err = xe.Run("go-msi", "make",
-		"--path", jpath,
-		"--msi", mpath,
-		"--version", c.Version,
-		"--src", filepath.Join(goMsiPath, "templates"))
-	if err != nil {
-		return err
-	}
-
-	return os.Remove(jpath)
+	return os.Remove(gpath)
 }
 
-// WixManifestData is the data passed to [WixManifestTmpl]
-type WixManifestData struct {
+// WindowsInstallerData is the data passed to [WindowsInstallerTmpl]
+type WindowsInstallerData struct {
 	Name string
-	Exec string
 	Desc string
 }
 
-// WixManifestTmpl is the template for the go-msi wix manifest json file
-var WixManifestTmpl = template.Must(template.New("WixManifestTmpl").Parse(
-	`{
-	"product": "{{.Name}}",
-	"files": {
-		"guid": "",
-		"items": [
-		"{{.Exec}}"
-		]
-	},
-	"shortcuts": {
-		"guid": "",
-		"items": [
-		{
-			"name": "{{.Name}}",
-			"description": "{{.Name}}",
-			"target": "[INSTALLDIR]\\{{.Name}}.exe",
-			"wdir": "INSTALLDIR",
-			"icon":"ico.ico"
-		}
-		]
-	},
-	"hooks": [
-		{"when": "install", "command": "[INSTALLDIR]\\{{.Name}}.exe"}
-	],
-	"choco": {
-		"description": "{{.Desc}}"
-	}
+// WindowsInstallerTmpl is the template for the Windows installer Go file
+var WindowsInstallerTmpl = template.Must(template.New("WindowsInstallerTmpl").Parse(
+	`package main
+
+import (
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+)
+
+func main() { gimain.Run(app) }
+
+func app() {
+	b := gi.NewAppBody("{{.Name}} Installer")
+	gi.NewButton(b).SetText("Install {{.Name}}")
+	b.NewWindow().Run().Wait()
 }
 `))
