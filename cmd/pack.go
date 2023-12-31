@@ -395,6 +395,9 @@ import (
 	"goki.dev/gi/v2/gimain"
 )
 
+//go:embed app.exe
+var exe []byte
+
 //go:embed icon.svg
 var icon []byte
 
@@ -403,7 +406,11 @@ func main() { gimain.Run(app) }
 func app() {
 	b := gi.NewAppBody("{{.Name}} Installer")
 	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
-	gi.NewButton(b).SetText("Install {{.Name}}")
+	bt := gi.NewButton(b).SetText("Install {{.Name}}")
+	bt.OnClick(func(e events.Event) {
+		err := os.WriteFile("C:\\Program Files\\{{.Name}}\\{{.Name}}.exe", exe, 0666)
+		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
+	})
 	b.NewWindow().Run().Wait()
 }
 `))
