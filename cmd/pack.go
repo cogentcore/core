@@ -17,6 +17,9 @@ import (
 	"goki.dev/goki/mobile"
 	"goki.dev/grows/images"
 	"goki.dev/xe"
+
+	// we need to depend on go-msi so that we can find its templates
+	_ "github.com/mh-cbon/go-msi/util"
 )
 
 // Pack builds and packages the app for the target platform.
@@ -385,7 +388,17 @@ func PackWindows(c *config.Config) error {
 		return err
 	}
 
-	err = xe.Run("go-msi", "make", "--path", jpath, "--msi", mpath, "--version", c.Version)
+	// see https://stackoverflow.com/questions/67211875/how-to-get-the-path-to-a-go-module-dependency
+	goMsiPath, err := xe.Output("go", "list", "-m", "-f", "{{.Dir}}", "github.com/mh-cbon/go-msi")
+	if err != nil {
+		return err
+	}
+
+	err = xe.Run("go-msi", "make",
+		"--path", jpath,
+		"--msi", mpath,
+		"--version", c.Version,
+		"--src", filepath.Join(goMsiPath, "templates"))
 	if err != nil {
 		return err
 	}

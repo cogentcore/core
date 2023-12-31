@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jackmordaunt/icns/v2 v2.2.7
+	github.com/mh-cbon/go-msi v0.0.0-20230202123407-9625c3dd3939
 	goki.dev/colors v0.8.44
 	goki.dev/enums v0.9.56
 	goki.dev/gengo v0.3.15
