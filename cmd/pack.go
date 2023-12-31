@@ -359,6 +359,11 @@ func PackWindows(c *config.Config) error {
 		return err
 	}
 
+	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(opath, "tempIcon.svg"))
+	if err != nil {
+		return err
+	}
+
 	err = xe.Run("go", "build", "-o", ipath, gpath)
 	if err != nil {
 		return err
@@ -378,14 +383,20 @@ var WindowsInstallerTmpl = template.Must(template.New("WindowsInstallerTmpl").Pa
 	`package main
 
 import (
+	_ "embed"
+
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 )
+
+//go:embed tempIcon.svg
+var icon []byte
 
 func main() { gimain.Run(app) }
 
 func app() {
 	b := gi.NewAppBody("{{.Name}} Installer")
+	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
 	gi.NewButton(b).SetText("Install {{.Name}}")
 	b.NewWindow().Run().Wait()
 }
