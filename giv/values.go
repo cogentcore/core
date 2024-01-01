@@ -34,37 +34,34 @@ import (
 
 func init() {
 	gi.TheViewInterface = &ViewInterface{}
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() Value {
+	ValueMapAdd(icons.Icon(""), func() Value {
 		return &IconValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() Value {
+	ValueMapAdd(gi.FontName(""), func() Value {
 		return &FontValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() Value {
+	ValueMapAdd(gi.FileName(""), func() Value {
 		return &FileValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(keyfun.MapName(""))), func() Value {
+	ValueMapAdd(keyfun.MapName(""), func() Value {
 		return &KeyMapValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gti.Type{})), func() Value {
+	ValueMapAdd(gti.Type{}, func() Value {
 		return &TypeValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(color.RGBA{})), func() Value {
+	ValueMapAdd(color.RGBA{}, func() Value {
 		return &ColorValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() Value {
+	ValueMapAdd(key.Chord(""), func() Value {
 		return &KeyChordValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() Value {
-		return &HiStyleValue{}
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() Value {
+	ValueMapAdd(time.Time{}, func() Value {
 		return &TimeValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Duration(0))), func() Value {
+	ValueMapAdd(time.Duration(0), func() Value {
 		return &DurationValue{}
 	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(fi.FileTime{})), func() Value {
+	ValueMapAdd(fi.FileTime{}, func() Value {
 		return &TimeValue{}
 	})
 }
@@ -114,14 +111,13 @@ type ValueFunc func() Value
 // the type name, as that is how it will be looked up.
 var ValueMap map[string]ValueFunc
 
-// ValueMapAdd adds a ValueFunc for a given type name.
-// You must use laser.LongTypeName (full package name + "." . type name) for
-// the type name, as that is how it will be looked up.
-func ValueMapAdd(typeNm string, fun ValueFunc) {
+// ValueMapAdd adds a ValueFunc for the type of the given value.
+func ValueMapAdd(val any, fun ValueFunc) {
 	if ValueMap == nil {
 		ValueMap = make(map[string]ValueFunc)
 	}
-	ValueMap[typeNm] = fun
+	nm := gti.TypeNameObj(val)
+	ValueMap[nm] = fun
 }
 
 // StructTagVal returns the value for given key in given struct tag string
