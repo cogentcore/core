@@ -77,10 +77,7 @@ func (sv *StructView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
 				s.Columns = 2
-				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
-				// s.Min.X.Em(20)
-				// s.Min.Y.Em(10)
 			})
 		}
 	})

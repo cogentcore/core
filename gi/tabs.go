@@ -105,6 +105,12 @@ func (ts *Tabs) SetStyles() {
 				s.Grow.Set(1, 1)
 			})
 		}
+		if w.Parent() == ts.ChildByName("frame") {
+			// tab frames must scroll independently
+			w.Style(func(s *styles.Style) {
+				s.Overflow.Set(styles.OverflowAuto)
+			})
+		}
 	})
 }
 

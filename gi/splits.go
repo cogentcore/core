@@ -72,6 +72,7 @@ func (sl *Splits) SetStyles() {
 			// w.Style(func(s *styles.Style) {
 			// })
 		} else if w.Parent() == sl.This() {
+			// splits elements must scroll independently
 			w.Style(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowAuto)
 			})
