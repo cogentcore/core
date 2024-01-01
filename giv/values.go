@@ -277,17 +277,19 @@ func ToValue(it any, tags string) Value {
 	case vk == reflect.String:
 		v := reflect.ValueOf(it)
 		str := v.String()
+		_ = str
 		switch vtag {
 		case "text-field", "password":
 			return &ValueBase{}
-		case "text-editor":
-			return &TextEditorValue{}
+		// TODO(kai): figure out how to return text editor values here
+		// case "text-editor":
+		// 	return &TextEditorValue{}
 		case "filename":
 			return &FileValue{}
 		default:
-			if strings.Contains(str, "\n") {
-				return &TextEditorValue{}
-			}
+			// if strings.Contains(str, "\n") {
+			// 	return &TextEditorValue{}
+			// }
 			return &ValueBase{}
 		}
 	}
@@ -1588,65 +1590,6 @@ func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 		vv.UpdateWidget()
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////////
-//  TextEditor
-
-// TextEditorValue presents a [texteditor.Editor] for editing longer text
-type TextEditorValue struct {
-	ValueBase
-}
-
-/*
-func (vv *TextEditorValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = texteditor.EditorType
-	return vv.WidgetTyp
-}
-
-func (vv *TextEditorValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	te := vv.Widget.(*texteditor.Editor)
-	npv := laser.NonPtrValue(vv.Value)
-	te.Buf.SetText([]byte(npv.String()))
-}
-
-func (vv *TextEditorValue) ConfigWidget(w gi.Widget) {
-	if vv.Widget == w {
-		vv.UpdateWidget()
-		return
-	}
-	vv.Widget = w
-	vv.StdConfigWidget(w)
-
-	tb := texteditor.NewBuf()
-	grr.Log(tb.Stat())
-	tb.OnChange(func(e events.Event) {
-		// fmt.Println(tb.Txt)
-		vv.SetValue(string(tb.Txt))
-		fmt.Println(laser.OnePtrUnderlyingValue(vv.Value).Interface())
-	})
-
-	te := w.(*texteditor.Editor)
-	te.SetBuf(tb)
-
-	vv.UpdateWidget()
-}
-
-func (vv *TextEditorValue) HasDialog() bool                      { return true }
-func (vv *TextEditorValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
-
-func (vv *TextEditorValue) ConfigDialog(d *gi.Body) (bool, func()) {
-	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
-		return false, nil
-	}
-	npv := laser.NonPtrValue(vv.Value)
-	tb := texteditor.NewBuf().SetText([]byte(npv.String()))
-	texteditor.NewEditor(d).SetBuf(tb)
-	return true, nil
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 //  FuncValue
