@@ -6,7 +6,6 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/ki/v2"
 )
 
@@ -23,20 +22,4 @@ func (vi *ViewInterface) Inspector(obj ki.Ki) {
 
 func (vi *ViewInterface) SettingsViewWindow() {
 	SettingsViewWindow()
-}
-
-func (vi *ViewInterface) HiStylesView(std bool) {
-	if std {
-		HiStylesView(&histyle.StdStyles)
-	} else {
-		HiStylesView(&histyle.CustomStyles)
-	}
-}
-
-func (vi *ViewInterface) HiStyleInit() {
-	histyle.Init()
-}
-
-func (vi *ViewInterface) SetHiStyleDefault(hsty gi.HiStyleName) {
-	histyle.StyleDefault = hsty
 }

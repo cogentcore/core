@@ -229,9 +229,10 @@ func (as *AppearanceSettingsData) Apply() { //gti:add
 		as.HiStyle = "emacs" // todo: need light / dark versions
 	}
 
-	if TheViewInterface != nil {
-		TheViewInterface.SetHiStyleDefault(as.HiStyle)
-	}
+	// TODO(kai): move HiStyle to a separate text editor settings
+	// if TheViewInterface != nil {
+	// 	TheViewInterface.SetHiStyleDefault(as.HiStyle)
+	// }
 
 	as.ApplyDPI()
 }
@@ -291,11 +292,6 @@ func (pf *GeneralSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
 // showing up in bad places that you can't recover from.
 func (as *AppearanceSettingsData) DeleteSavedWindowGeoms() { //gti:add
 	WinGeomMgr.DeleteAll()
-}
-
-// EditHiStyles opens the HiStyleView editor to customize highlighting styles
-func (as *AppearanceSettingsData) EditHiStyles() { //gti:add
-	TheViewInterface.HiStylesView(false) // false = custom
 }
 
 // Densities is an enum representing the different

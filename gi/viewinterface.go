@@ -23,17 +23,6 @@ type ViewInterface interface {
 
 	// SettingsViewWindow opens a window for editing the user settings
 	SettingsViewWindow()
-
-	// TODO(kai): figure out a better way to structure histyle view things
-
-	// HiStylesView opens an interactive view of custom or std highlighting styles.
-	HiStylesView(std bool)
-
-	// SetHiStyleDefault sets the current default histyle.StyleDefault
-	SetHiStyleDefault(hsty HiStyleName)
-
-	// HiStyleInit initializes the histyle package -- called during overall gi init.
-	HiStyleInit()
 }
 
 // TheViewInterface is the singular implementation of [ViewInterface], defined in the giv package.
