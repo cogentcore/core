@@ -14,7 +14,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -263,11 +262,6 @@ func makeInputs(ts *gi.Tabs) {
 
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
-
-	tb := texteditor.NewBuf()
-	tb.NewBuf(0)
-	tb.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
-	texteditor.NewEditor(inputs).SetBuf(tb)
 }
 
 func makeLayouts(ts *gi.Tabs) {

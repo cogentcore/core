@@ -17,7 +17,6 @@ import (
 	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -25,7 +24,6 @@ import (
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
-	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -1599,6 +1597,7 @@ type TextEditorValue struct {
 	ValueBase
 }
 
+/*
 func (vv *TextEditorValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = texteditor.EditorType
 	return vv.WidgetTyp
@@ -1647,6 +1646,7 @@ func (vv *TextEditorValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	texteditor.NewEditor(d).SetBuf(tb)
 	return true, nil
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 //  FuncValue
