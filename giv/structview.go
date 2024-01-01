@@ -77,7 +77,6 @@ func (sv *StructView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
 				s.Columns = 2
-				s.Grow.Set(1, 1)
 			})
 		}
 	})
