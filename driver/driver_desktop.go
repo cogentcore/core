@@ -20,7 +20,8 @@ import (
 )
 
 func driverMain(f func(goosi.App)) {
-	// TODO(kai): consider supporting running tests on mobile and web
+	// TODO(kai/binsize): consider figuring out how to do this without
+	// increasing binary sizes; also supporting running tests on mobile and web
 	if testing.Testing() {
 		offscreen.Main(f)
 		return
