@@ -26,7 +26,6 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ordmap"
-	"goki.dev/pi/v2/langs/golang"
 )
 
 // AllSettings is a global ordered map containing all of the user [Settings]
@@ -808,11 +807,12 @@ type DebugSettingsData struct { //gti:add
 }
 
 func (db *DebugSettingsData) Defaults() {
-	db.GoCompleteTrace = golang.CompleteTrace
-	db.GoTypeTrace = golang.TraceTypes
+	// TODO(kai/binsize): figure out how to do this without dragging in pi langs dependency
+	// db.GoCompleteTrace = golang.CompleteTrace
+	// db.GoTypeTrace = golang.TraceTypes
 }
 
 func (db *DebugSettingsData) Apply() {
-	golang.CompleteTrace = db.GoCompleteTrace
-	golang.TraceTypes = db.GoTypeTrace
+	// golang.CompleteTrace = db.GoCompleteTrace
+	// golang.TraceTypes = db.GoTypeTrace
 }
