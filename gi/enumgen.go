@@ -1848,6 +1848,120 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return nil
 }
 
+var _SizeClassesValues = []SizeClasses{0, 1, 2}
+
+// SizeClassesN is the highest valid value
+// for type SizeClasses, plus one.
+const SizeClassesN SizeClasses = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _SizeClassesNoOp() {
+	var x [1]struct{}
+	_ = x[Compact-(0)]
+	_ = x[Medium-(1)]
+	_ = x[Expanded-(2)]
+}
+
+var _SizeClassesNameToValueMap = map[string]SizeClasses{
+	`Compact`:  0,
+	`compact`:  0,
+	`Medium`:   1,
+	`medium`:   1,
+	`Expanded`: 2,
+	`expanded`: 2,
+}
+
+var _SizeClassesDescMap = map[SizeClasses]string{
+	0: `Compact is the size class for windows with a width less than 600dp, which typically happens on phones.`,
+	1: `Medium is the size class for windows with a width between 600dp and 840dp inclusive, which typically happens on tablets.`,
+	2: `Expanded is the size class for windows with a width greater than 840dp, which typically happens on desktop and laptop computers.`,
+}
+
+var _SizeClassesMap = map[SizeClasses]string{
+	0: `Compact`,
+	1: `Medium`,
+	2: `Expanded`,
+}
+
+// String returns the string representation
+// of this SizeClasses value.
+func (i SizeClasses) String() string {
+	if str, ok := _SizeClassesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the SizeClasses value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *SizeClasses) SetString(s string) error {
+	if val, ok := _SizeClassesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _SizeClassesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type SizeClasses")
+}
+
+// Int64 returns the SizeClasses value as an int64.
+func (i SizeClasses) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the SizeClasses value from an int64.
+func (i *SizeClasses) SetInt64(in int64) {
+	*i = SizeClasses(in)
+}
+
+// Desc returns the description of the SizeClasses value.
+func (i SizeClasses) Desc() string {
+	if str, ok := _SizeClassesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// SizeClassesValues returns all possible values
+// for the type SizeClasses.
+func SizeClassesValues() []SizeClasses {
+	return _SizeClassesValues
+}
+
+// Values returns all possible values
+// for the type SizeClasses.
+func (i SizeClasses) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_SizeClassesValues))
+	for i, d := range _SizeClassesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type SizeClasses.
+func (i SizeClasses) IsValid() bool {
+	_, ok := _SizeClassesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i SizeClasses) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *SizeClasses) UnmarshalText(text []byte) error {
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
+}
+
 var _SliderTypesValues = []SliderTypes{0, 1}
 
 // SliderTypesN is the highest valid value

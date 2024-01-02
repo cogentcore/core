@@ -1853,9 +1853,6 @@ var _ = gti.AddType(&gti.Type{
 		{"DeleteSavedWindowGeoms", &gti.Method{Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"EditHiStyles", &gti.Method{Name: "EditHiStyles", Doc: "EditHiStyles opens the HiStyleView editor to customize highlighting styles", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 })
 
