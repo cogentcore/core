@@ -6,7 +6,6 @@ require (
 	github.com/Masterminds/vcs v1.13.3
 	github.com/alecthomas/chroma/v2 v2.12.0
 	github.com/anthonynsimon/bild v0.13.0
-	github.com/aymerick/douceur v0.2.0
 	github.com/expr-lang/expr v1.15.7
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/goki/go-difflib v1.2.1
@@ -44,6 +43,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/akutz/sortfold v0.2.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
+	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/c2h5oh/datasize v0.0.0-20231215233829-aa82cc1e6500 // indirect
 	github.com/chewxy/math32 v1.10.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
