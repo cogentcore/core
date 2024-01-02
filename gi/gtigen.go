@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/aymerick/douceur/css"
 	"goki.dev/fi/uri"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -677,65 +676,6 @@ func (t *Complete) SetCompletion(v string) *Complete {
 // Stage is the [PopupStage] associated with the [Complete]
 func (t *Complete) SetStage(v *Stage) *Complete {
 	t.Stage = v
-	return t
-}
-
-// StyleSheetType is the [gti.Type] for [StyleSheet]
-var StyleSheetType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.StyleSheet",
-	ShortName:  "gi.StyleSheet",
-	IDName:     "style-sheet",
-	Doc:        "StyleSheet is a Widget node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Sheet", &gti.Field{Name: "Sheet", Type: "*github.com/aymerick/douceur/css.Stylesheet", LocalType: "*css.Stylesheet", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &StyleSheet{},
-})
-
-// NewStyleSheet adds a new [StyleSheet] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewStyleSheet(par ki.Ki, name ...string) *StyleSheet {
-	return par.NewChild(StyleSheetType, name...).(*StyleSheet)
-}
-
-// KiType returns the [*gti.Type] of [StyleSheet]
-func (t *StyleSheet) KiType() *gti.Type {
-	return StyleSheetType
-}
-
-// New returns a new [*StyleSheet] value
-func (t *StyleSheet) New() ki.Ki {
-	return &StyleSheet{}
-}
-
-// SetSheet sets the [StyleSheet.Sheet]
-func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
-	t.Sheet = v
-	return t
-}
-
-// SetTooltip sets the [StyleSheet.Tooltip]
-func (t *StyleSheet) SetTooltip(v string) *StyleSheet {
-	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [StyleSheet.Class]
-func (t *StyleSheet) SetClass(v string) *StyleSheet {
-	t.Class = v
-	return t
-}
-
-// SetCustomContextMenu sets the [StyleSheet.CustomContextMenu]
-func (t *StyleSheet) SetCustomContextMenu(v func(m *Scene)) *StyleSheet {
-	t.CustomContextMenu = v
 	return t
 }
 
