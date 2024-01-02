@@ -24,10 +24,11 @@
 package prof
 
 import (
+	"cmp"
 	"fmt"
 	"log/slog"
 	"runtime"
-	"sort"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -108,7 +109,7 @@ func (p *Profile) End() {
 }
 
 func (p *Profile) Report(tot, units float64) {
-	fmt.Printf("%24v:\tTot:\t%12.2f\tAvg:\t%12.2f\tN:\t%6d\tPct:\t%5.2f\n",
+	fmt.Printf("%-60sTotal:%8.2f\tAvg:%6.2f\tN:%6d\tPct:%6.2f\n",
 		p.Name, float64(p.Tot)/units, p.Avg/units, p.N, 100.0*float64(p.Tot)/tot)
 }
 
@@ -152,8 +153,8 @@ func (p *Profiler) Report(units time.Duration) {
 		list[idx] = pr
 		idx++
 	}
-	sort.Slice(list, func(i, j int) bool {
-		return list[i].Tot > list[j].Tot
+	slices.SortFunc(list, func(a, b *Profile) int {
+		return cmp.Compare(b.Tot, a.Tot)
 	})
 	for _, pr := range list {
 		pr.Report(tot, float64(units))
