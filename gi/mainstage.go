@@ -123,11 +123,14 @@ func (st *Stage) RunWindow() *Stage {
 	st.ConfigMainStage()
 
 	sz := st.RenderCtx.Size
-	// non-new full windows must take up the whole window
-	// and thus don't consider pref size
 	// offscreen windows always consider pref size because
 	// they must be unbounded by any previous window sizes
-	if st.NewWindow || !st.FullWindow || CurRenderWin == nil || goosi.TheApp.Platform() == goosi.Offscreen {
+	// non-offscreen mobile windows must take up the whole window
+	// and thus don't consider pref size
+	// desktop new windows and non-full windows can pref size
+	if goosi.TheApp.Platform() == goosi.Offscreen ||
+		(!goosi.TheApp.Platform().IsMobile() &&
+			(st.NewWindow || !st.FullWindow || CurRenderWin == nil)) {
 		sz = sc.PrefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
