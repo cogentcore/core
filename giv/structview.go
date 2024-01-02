@@ -66,7 +66,7 @@ func (sv *StructView) OnInit() {
 func (sv *StructView) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
-		s.Grow.Set(1, 1)
+		s.Grow.Set(0, 0)
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		pfrom := w.PathFrom(sv)
@@ -76,6 +76,7 @@ func (sv *StructView) SetStyles() {
 			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
+				s.Grow.Set(0, 0)
 				if sv.SizeClass() == gi.SizeCompact {
 					s.Columns = 1
 				} else {

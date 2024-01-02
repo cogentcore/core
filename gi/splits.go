@@ -72,9 +72,10 @@ func (sl *Splits) SetStyles() {
 			// w.Style(func(s *styles.Style) {
 			// })
 		} else if w.Parent() == sl.This() {
-			// splits elements must scroll independently
+			// splits elements must scroll independently and grow
 			w.Style(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
 			})
 		}
 	})
