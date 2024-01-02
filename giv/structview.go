@@ -76,7 +76,11 @@ func (sv *StructView) SetStyles() {
 			sg.Stripes = gi.RowStripes
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
-				s.Columns = 2
+				if sv.SizeClass() == gi.Compact {
+					s.Columns = 1
+				} else {
+					s.Columns = 2
+				}
 			})
 		}
 	})
