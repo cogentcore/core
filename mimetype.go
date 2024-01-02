@@ -81,7 +81,7 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if mtyp != "" {
 		return mtyp, ext, nil
 	}
-	// TODO(kai): figure out how to do this without dragging in chroma dependency
+	// TODO(kai/binsize): figure out how to do this without dragging in chroma dependency
 	// lexer := lexers.Match(fname) // todo: could get start of file and pass to
 	// // Analyze, but might be too slow..
 	// if lexer != nil {
