@@ -58,9 +58,9 @@ func (sl *Splits) SetStyles() {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
 		s.Padding.Zero()
-		gap := float32(14) / (AppearanceSettings.Spacing / 100) // must be invariant to spacing
+		gap := 14 / (AppearanceSettings.Spacing / 100) // must be invariant to spacing
 		s.Gap.SetDim(sl.Dim, units.Dp(gap))
-		s.Gap.SetDim(sl.Dim.Other(), units.Dp(0))
+		s.Gap.SetDim(sl.Dim.Other(), units.Zero())
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok {
