@@ -1858,9 +1858,9 @@ const SizeClassesN SizeClasses = 3
 // Re-run the enumgen command to generate them again.
 func _SizeClassesNoOp() {
 	var x [1]struct{}
-	_ = x[Compact-(0)]
-	_ = x[Medium-(1)]
-	_ = x[Expanded-(2)]
+	_ = x[SizeCompact-(0)]
+	_ = x[SizeMedium-(1)]
+	_ = x[SizeExpanded-(2)]
 }
 
 var _SizeClassesNameToValueMap = map[string]SizeClasses{
@@ -1873,9 +1873,9 @@ var _SizeClassesNameToValueMap = map[string]SizeClasses{
 }
 
 var _SizeClassesDescMap = map[SizeClasses]string{
-	0: `Compact is the size class for windows with a width less than 600dp, which typically happens on phones.`,
-	1: `Medium is the size class for windows with a width between 600dp and 840dp inclusive, which typically happens on tablets.`,
-	2: `Expanded is the size class for windows with a width greater than 840dp, which typically happens on desktop and laptop computers.`,
+	0: `SizeCompact is the size class for windows with a width less than 600dp, which typically happens on phones.`,
+	1: `SizeMedium is the size class for windows with a width between 600dp and 840dp inclusive, which typically happens on tablets.`,
+	2: `SizeExpanded is the size class for windows with a width greater than 840dp, which typically happens on desktop and laptop computers.`,
 }
 
 var _SizeClassesMap = map[SizeClasses]string{

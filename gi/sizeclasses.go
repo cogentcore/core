@@ -4,21 +4,21 @@
 
 package gi
 
-// SizeClasses are the different size classes that a window can have
-type SizeClasses int32 //enums:enum
+// SizeClasses are the different size classes that a window can have.
+type SizeClasses int32 //enums:enum -trimprefix Size
 
 const (
-	// Compact is the size class for windows with a width less than
+	// SizeCompact is the size class for windows with a width less than
 	// 600dp, which typically happens on phones.
-	Compact SizeClasses = iota
+	SizeCompact SizeClasses = iota
 
-	// Medium is the size class for windows with a width between 600dp
+	// SizeMedium is the size class for windows with a width between 600dp
 	// and 840dp inclusive, which typically happens on tablets.
-	Medium
+	SizeMedium
 
-	// Expanded is the size class for windows with a width greater than
+	// SizeExpanded is the size class for windows with a width greater than
 	// 840dp, which typically happens on desktop and laptop computers.
-	Expanded
+	SizeExpanded
 )
 
 // SizeClass returns the size class of the scene in which it is contained.
@@ -28,10 +28,10 @@ func (wb *WidgetBase) SizeClass() SizeClasses {
 	dp := dots / dpd                    // dots / (dots / dp) = dots * (dp / dots) = dp
 	switch {
 	case dp < 600:
-		return Compact
+		return SizeCompact
 	case dp > 840:
-		return Expanded
+		return SizeExpanded
 	default:
-		return Medium
+		return SizeMedium
 	}
 }
