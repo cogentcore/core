@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/h2non/filetype"
 )
@@ -82,17 +81,18 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if mtyp != "" {
 		return mtyp, ext, nil
 	}
-	lexer := lexers.Match(fname) // todo: could get start of file and pass to
-	// Analyze, but might be too slow..
-	if lexer != nil {
-		config := lexer.Config()
-		if len(config.MimeTypes) > 0 {
-			mtyp = config.MimeTypes[0]
-			return mtyp, ext, nil
-		}
-		mtyp := "application/" + strings.ToLower(config.Name)
-		return mtyp, ext, nil
-	}
+	// TODO(kai): figure out how to do this without dragging in chroma dependency
+	// lexer := lexers.Match(fname) // todo: could get start of file and pass to
+	// // Analyze, but might be too slow..
+	// if lexer != nil {
+	// 	config := lexer.Config()
+	// 	if len(config.MimeTypes) > 0 {
+	// 		mtyp = config.MimeTypes[0]
+	// 		return mtyp, ext, nil
+	// 	}
+	// 	mtyp := "application/" + strings.ToLower(config.Name)
+	// 	return mtyp, ext, nil
+	// }
 	if isplain {
 		return ptyp, ext, nil
 	}
