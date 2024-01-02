@@ -38,14 +38,18 @@ import (
 // Start starts profiling and returns a Profile struct that must have [Profile.End]
 // called on it when done timing. It will be nil if not the first to start
 // timing on this function; it assumes nested inner / outer loop structure for
-// calls to the same method. It uses the name of the calling function as the name
-// of the profile struct. Extra information can be passed to Start, which will be added
-// at the end of the name in a dash-delimited format.
+// calls to the same method. It uses the short, package-qualified name of the
+// calling function as the name of the profile struct. Extra information can be
+// passed to Start, which will be added at the end of the name in a dash-delimited format.
 func Start(info ...string) *Profile {
 	name := ""
 	pc, _, _, ok := runtime.Caller(1)
 	if ok {
 		name = runtime.FuncForPC(pc).Name()
+		// get rid of everything before the package
+		if li := strings.LastIndex(name, "/"); li >= 0 {
+			name = name[li+1:]
+		}
 	} else {
 		err := "prof.Start: unexpected error: unable to get caller"
 		slog.Error(err)
