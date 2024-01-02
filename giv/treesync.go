@@ -411,9 +411,9 @@ func (tv *TreeView) EditNode() { //gti:add
 // If SyncNode is set, operates on Sync Tree.
 func (tv *TreeView) InspectNode() { //gti:add
 	if tv.SyncNode != nil {
-		InspectorDialog(tv.SyncNode)
+		InspectorWindow(tv.SyncNode)
 	} else {
-		InspectorDialog(tv)
+		InspectorWindow(tv)
 	}
 }
 

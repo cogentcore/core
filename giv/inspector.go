@@ -282,20 +282,26 @@ func (is *Inspector) ConfigToolbar(tb *gi.Toolbar) {
 	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
 }
 
-// InspectorDialog opens an interactive editor of the given Ki tree, at its
-// root, returns Inspector and window
-func InspectorDialog(obj ki.Ki) {
-	if gi.ActivateExistingMainWindow(obj) {
+// InspectorWindow opens an interactive editor of the given Ki tree
+// in a new window.
+func InspectorWindow(k ki.Ki) {
+	if gi.ActivateExistingMainWindow(k) {
 		return
 	}
 	d := gi.NewBody("inspector")
-	d.Title = "Inspector"
-	if obj != nil {
-		d.Nm += "-" + obj.Name()
-		d.Title += ": " + obj.Name()
-	}
-	is := NewInspector(d, "inspector")
-	is.SetRoot(obj)
-	d.AddAppBar(is.ConfigToolbar)
+	InspectorView(d, k)
 	d.NewWindow().Run()
+}
+
+// InspectorView configures the given body to have an interactive inspector
+// of the given Ki tree.
+func InspectorView(b *gi.Body, k ki.Ki) {
+	b.SetTitle("Inspector").SetName("inspector")
+	if k != nil {
+		b.Nm += "-" + k.Name()
+		b.Title += ": " + k.Name()
+	}
+	is := NewInspector(b, "inspector")
+	is.SetRoot(k)
+	b.AddAppBar(is.ConfigToolbar)
 }

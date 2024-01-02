@@ -742,7 +742,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 		return
 	}
 	bt := vv.Widget.(*gi.Button)
-	path := "nil"
+	path := "None"
 	k := vv.KiStruct()
 	if k != nil {
 		path = k.AsKi().String()
@@ -758,25 +758,11 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.Indicator = icons.KeyboardArrowDown
-	bt.Tooltip = vv.Doc()
-	bt.Menu = func(m *gi.Scene) {
-		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
-			k := vv.KiStruct()
-			if k != nil {
-				vv.SetDialogType(e)
-				vv.OpenDialog(vv.Widget, nil)
-			}
-		})
-		gi.NewButton(m, "gogi-editor").SetText("Inspector").OnClick(func(e events.Event) {
-			k := vv.KiStruct()
-			if k != nil && !vv.IsReadOnly() {
-				InspectorDialog(k)
-			}
-		})
-	}
-	bt.Config()
+	bt.SetType(gi.ButtonTonal).SetTooltip(vv.Doc())
+	bt.OnClick(func(e events.Event) {
+		vv.SetDialogType(e)
+		vv.OpenDialog(vv.Widget, nil)
+	})
 	vv.UpdateWidget()
 }
 
@@ -788,9 +774,7 @@ func (vv *KiPtrValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	if k == nil {
 		return false, nil
 	}
-	vpath := vv.ViewPath + "/" + laser.NonPtrType(vv.Value.Type()).String()
-	NewStructView(d).SetStruct(k).SetTmpSave(vv.TmpSave).SetViewPath(vpath).
-		SetReadOnly(vv.IsReadOnly())
+	InspectorView(d, k)
 	return true, nil
 }
 

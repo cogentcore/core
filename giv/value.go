@@ -909,6 +909,9 @@ func OpenValueDialog(vv Value, ctx gi.Widget, fun func(), title ...string) {
 		ttl = title[0]
 	}
 	opv := laser.OnePtrUnderlyingValue(vb.Value)
+	if !opv.IsValid() {
+		return
+	}
 	obj := opv.Interface()
 	if gi.RecycleDialog(obj) {
 		return

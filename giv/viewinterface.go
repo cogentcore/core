@@ -17,7 +17,7 @@ func (vi *ViewInterface) CallFunc(ctx gi.Widget, fun any) {
 }
 
 func (vi *ViewInterface) Inspector(obj ki.Ki) {
-	InspectorDialog(obj)
+	InspectorWindow(obj)
 }
 
 func (vi *ViewInterface) SettingsViewWindow() {

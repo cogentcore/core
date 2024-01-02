@@ -209,7 +209,7 @@ func makeInputs(ts *gi.Tabs) {
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
 	fruitDescs := []string{
-		"A round, edible fruit that typically has red skin",
+		"A round`, edible fruit that typically has red skin",
 		"A stonefruit with a yellow or orange color",
 		"A small blue or purple berry",
 		"A small, edible, dark fruit",
@@ -309,7 +309,7 @@ func makeValues(ts *gi.Tabs) {
 		`Goki provides the giv value system, which allows you to instantly turn Go values and functions into type-specific widgets bound to the original values. This powerful system means that you can automatically turn backend data structures into GUI apps with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.`)
 
 	gi.NewButton(values).SetText("Inspector").OnClick(func(e events.Event) {
-		giv.InspectorDialog(ts.Sc)
+		giv.InspectorWindow(ts.Sc)
 	})
 
 	giv.NewValue(values, colors.Orange)
