@@ -90,12 +90,14 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	if c.Build.Debug {
 		tags = append(tags, "-tags", "debug")
 	}
+	// see https://stackoverflow.com/questions/30005878/avoid-debugging-information-on-golang
+	ldflags := "-s -w"
 	if platform.OS == "windows" {
 		c.Build.Output += ".exe"
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
-	tags = append(tags, "-o", c.Build.Output, c.Build.Package)
+	tags = append(tags, "-ldflags", ldflags, "-o", c.Build.Output, c.Build.Package)
 
 	err = xc.Run("go", tags...)
 	if err != nil {
