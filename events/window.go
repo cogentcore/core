@@ -47,7 +47,7 @@ func (ev *WindowEvent) HasPos() bool {
 }
 
 func (ev *WindowEvent) String() string {
-	return fmt.Sprintf("%v{Action: %v, Time: %v}", ev.Type(), ev.Action, ev.Time())
+	return fmt.Sprintf("%v{Action: %v, Time: %v}", ev.Type(), ev.Action, ev.Time().Format("04:05"))
 }
 
 // WinActions is the action taken on the window by the user.

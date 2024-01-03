@@ -59,7 +59,7 @@ func NewMouse(typ Types, but Buttons, where image.Point, mods key.Modifiers) *Mo
 }
 
 func (ev *Mouse) String() string {
-	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time())
+	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
 }
 
 func (ev Mouse) HasPos() bool {
@@ -98,7 +98,7 @@ type MouseScroll struct {
 }
 
 func (ev *MouseScroll) String() string {
-	return fmt.Sprintf("%v{Delta: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Delta, ev.Where, key.ModsString(ev.Mods), ev.Time())
+	return fmt.Sprintf("%v{Delta: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Delta, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
 }
 
 func NewScroll(where, delta image.Point, mods key.Modifiers) *MouseScroll {

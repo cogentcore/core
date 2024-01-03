@@ -20,7 +20,7 @@ func NewOSEvent(typ Types) *OSEvent {
 }
 
 func (ev *OSEvent) String() string {
-	return fmt.Sprintf("%v{Action: %v, Time: %v}", ev.Type(), ev.Time())
+	return fmt.Sprintf("%v{Time: %v}", ev.Type(), ev.Time().Format("04:05"))
 }
 
 // osevent.OpenFilesEvent is for OS open files action to open given files

@@ -43,7 +43,7 @@ func (ev *Touch) HasPos() bool {
 }
 
 func (ev *Touch) String() string {
-	return fmt.Sprintf("%v{Pos: %v, Sequence: %v, Time: %v}", ev.Type(), ev.Where, ev.Sequence, ev.Time())
+	return fmt.Sprintf("%v{Pos: %v, Sequence: %v, Time: %v}", ev.Type(), ev.Where, ev.Sequence, ev.Time().Format("04:05"))
 }
 
 // todo: what about these higher-level abstractions of touch-like events?
