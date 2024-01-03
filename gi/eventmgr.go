@@ -1076,6 +1076,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		AllRenderWins.FocusNext()
 	}
+	// TODO(kai): maybe clean up / document this
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
 		ProfileToggle()
