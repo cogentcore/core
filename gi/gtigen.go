@@ -753,7 +753,6 @@ var HandleType = gti.AddType(&gti.Type{
 	Doc:        "Handle represents a draggable handle that can be\nused to control the size of an element.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the handle slides (opposite of the dimension it is longest on)", Directives: gti.Directives{}, Tag: ""}},
 		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)", Directives: gti.Directives{}, Tag: ""}},
 		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)", Directives: gti.Directives{}, Tag: ""}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]", Directives: gti.Directives{}, Tag: ""}},
@@ -781,13 +780,6 @@ func (t *Handle) KiType() *gti.Type {
 // New returns a new [*Handle] value
 func (t *Handle) New() ki.Ki {
 	return &Handle{}
-}
-
-// SetDim sets the [Handle.Dim]:
-// dimension along which the handle slides (opposite of the dimension it is longest on)
-func (t *Handle) SetDim(v mat32.Dims) *Handle {
-	t.Dim = v
-	return t
 }
 
 // SetMin sets the [Handle.Min]:
@@ -2446,7 +2438,6 @@ var SplitsType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which to split the space", Directives: gti.Directives{}, Tag: ""}},
 		{"Splits", &gti.Field{Name: "Splits", Type: "[]float32", LocalType: "[]float32", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element.\nEnter 0 to collapse a given element", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"SavedSplits", &gti.Field{Name: "SavedSplits", Type: "[]float32", LocalType: "[]float32", Doc: "A saved version of the splits which can be restored.\nFor dynamic collapse / expand operations", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
@@ -2494,13 +2485,6 @@ func AsSplits(k ki.Ki) *Splits {
 
 // AsSplits satisfies the [SplitsEmbedder] interface
 func (t *Splits) AsSplits() *Splits {
-	return t
-}
-
-// SetDim sets the [Splits.Dim]:
-// dimension along which to split the space
-func (t *Splits) SetDim(v mat32.Dims) *Splits {
-	t.Dim = v
 	return t
 }
 
@@ -3618,7 +3602,9 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/gi/v2/gi.GeomState", LocalType: "GeomState", Doc: "Geom has the full layout geometry for size and position of this Widget", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "If true, Override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code. FirstStylers and FinalStylers\nare called before and after these stylers, respectively.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FirstStylers", &gti.Field{Name: "FirstStylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function, which can be called\nby end-user and internal code. These stylers are called before\nStylers and FinalStylers.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FinalStylers", &gti.Field{Name: "FinalStylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function, which can be called\nby end-user and internal code. These stylers are called after\nFirstStylers and Stylers.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/goosi/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: "set:\"-\""}},

@@ -19,9 +19,6 @@ import (
 type Handle struct {
 	Box
 
-	// dimension along which the handle slides (opposite of the dimension it is longest on)
-	Dim mat32.Dims
-
 	// Min is the minimum value that the handle can go to
 	// (typically the lower bound of the dialog/splits)
 	Min float32
@@ -45,8 +42,9 @@ func (hl *Handle) SetStyles() {
 
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
-
-		if hl.Dim == mat32.X {
+	})
+	hl.StyleFinal(func(s *styles.Style) {
+		if s.Direction == styles.Row {
 			s.Min.X.Dp(6)
 			s.Min.Y.Em(2)
 			s.Margin.SetHoriz(units.Dp(4))
@@ -57,7 +55,7 @@ func (hl *Handle) SetStyles() {
 		}
 
 		if !hl.IsReadOnly() {
-			if hl.Dim == mat32.X {
+			if s.Direction == styles.Row {
 				s.Cursor = cursors.ResizeEW
 			} else {
 				s.Cursor = cursors.ResizeNS
@@ -68,7 +66,7 @@ func (hl *Handle) SetStyles() {
 
 func (hl *Handle) HandleEvents() {
 	hl.On(events.SlideMove, func(e events.Event) {
-		hl.Pos = mat32.V2FromPoint(e.Pos()).Dim(hl.Dim)
+		hl.Pos = mat32.V2FromPoint(e.Pos()).Dim(hl.Styles.Direction.Dim())
 		hl.SendChange(e)
 	})
 }

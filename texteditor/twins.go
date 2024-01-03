@@ -8,7 +8,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
 )
 
 // TwinEditors presents two side-by-side [Editor]s in [gi.Splits]
@@ -29,7 +28,6 @@ func (te *TwinEditors) OnInit() {
 }
 
 func (te *TwinEditors) SetStyles() {
-	te.Dim = mat32.X
 	te.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})

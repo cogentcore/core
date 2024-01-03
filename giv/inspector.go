@@ -18,7 +18,6 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // Inspector represents a struct, creating a property editor of the fields --
@@ -233,7 +232,6 @@ func (is *Inspector) ConfigSplits() {
 		return
 	}
 	split := is.Splits()
-	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
 		tvfr := gi.NewFrame(split, "tvfr")

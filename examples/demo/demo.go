@@ -286,7 +286,7 @@ func makeLayouts(ts *gi.Tabs) {
 	// 	s.Color = colors.Scheme.Primary.OnContainer
 	// })
 
-	sv := gi.NewSplits(layouts).SetDim(mat32.X)
+	sv := gi.NewSplits(layouts)
 
 	left := gi.NewFrame(sv).Style(func(s *styles.Style) {
 		s.Direction = styles.Column

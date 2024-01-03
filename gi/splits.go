@@ -27,9 +27,6 @@ import (
 type Splits struct { //goki:embedder
 	Layout
 
-	// dimension along which to split the space
-	Dim mat32.Dims
-
 	// proportion (0-1 normalized, enforced) of space allocated to each element.
 	// Enter 0 to collapse a given element
 	Splits []float32 `set:"-"`
@@ -44,7 +41,6 @@ func (sl *Splits) CopyFieldsFrom(frm any) {
 	sl.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	mat32.CopyFloat32s(&sl.Splits, fr.Splits)
 	mat32.CopyFloat32s(&sl.SavedSplits, fr.SavedSplits)
-	sl.Dim = fr.Dim
 }
 
 func (sl *Splits) OnInit() {
@@ -58,19 +54,27 @@ func (sl *Splits) SetStyles() {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
 		s.Padding.Zero()
+
+		if sl.SizeClass() == SizeCompact {
+			s.Direction = styles.Column
+		} else {
+			s.Direction = styles.Row
+		}
+	})
+	sl.StyleFinal(func(s *styles.Style) {
 		gap := 14 / (AppearanceSettings.Spacing / 100) // must be invariant to spacing
-		s.Gap.SetDim(sl.Dim, units.Dp(gap))
-		s.Gap.SetDim(sl.Dim.Other(), units.Zero())
+		dim := s.Direction.Dim()
+		s.Gap.SetDim(dim, units.Dp(gap))
+		s.Gap.SetDim(dim.Other(), units.Zero())
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok {
-			// hl.ThumbSize = sl.HandleSize
 			hl.On(events.Change, func(e events.Event) {
 				sl.SetSplitAction(hl.IndexInParent(), hl.Value())
 			})
-			// could enforce our own styles here..
-			// w.Style(func(s *styles.Style) {
-			// })
+			w.Style(func(s *styles.Style) {
+				s.Direction = sl.Styles.Direction
+			})
 		} else if w.Parent() == sl.This() {
 			// splits elements must scroll independently and grow
 			w.Style(func(s *styles.Style) {
@@ -264,12 +268,6 @@ func (sl *Splits) ConfigSplitters() {
 	parts := sl.NewParts()
 	sz := len(sl.Kids)
 	mods, updt := parts.SetNChildren(sz-1, HandleType, "handle-")
-	for _, hlk := range *sl.Parts.Children() {
-		hl := hlk.(*Handle)
-		// hl.SplitterNo = i
-		// hl.Icon = spicon
-		hl.Dim = sl.Dim
-	}
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
@@ -321,14 +319,14 @@ func (sl *Splits) ApplyStyle() {
 func (sl *Splits) SizeDownSetAllocs(iter int) {
 	sz := &sl.Geom.Size
 	csz := sz.Alloc.Content
-	// fmt.Println(sl, sz.String())
-	od := sl.Dim.Other()
-	cszd := csz.Dim(sl.Dim)
+	dim := sl.Styles.Direction.Dim()
+	od := dim.Other()
+	cszd := csz.Dim(dim)
 	cszod := csz.Dim(od)
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		sw := mat32.Floor(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
-		ksz.Alloc.Total.SetDim(sl.Dim, sw)
+		ksz.Alloc.Total.SetDim(dim, sw)
 		ksz.Alloc.Total.SetDim(od, cszod)
 		ksz.SetContentFromTotal(&ksz.Alloc)
 		// ksz.Actual = ksz.Alloc
@@ -351,17 +349,18 @@ func (sl *Splits) PositionSplits() {
 	if sl.Parts != nil {
 		sl.Parts.Geom.Size = sl.Geom.Size // inherit: allows bbox to include handle
 	}
-	od := sl.Dim.Other()
+	dim := sl.Styles.Direction.Dim()
+	od := dim.Other()
 	csz := sl.Geom.Size.Alloc.Content // key to use Alloc here!  excludes gaps
-	cszd := csz.Dim(sl.Dim)
+	cszd := csz.Dim(dim)
 	pos := float32(0)
-	gap := mat32.Floor(sl.Styles.Gap.Dim(sl.Dim).Dots)
+	gap := mat32.Floor(sl.Styles.Gap.Dim(dim).Dots)
 
 	mid := .5 * csz.Dim(od)
 	hand := sl.Parts.Child(0).(*Handle)
-	hwd := hand.Geom.Size.Actual.Total.Dim(sl.Dim)
+	hwd := hand.Geom.Size.Actual.Total.Dim(dim)
 	hmrg := hand.Styles.Margin.Dots()
-	if sl.Dim == mat32.X {
+	if dim == mat32.X {
 		hwd -= hmrg.Left
 	} else {
 		hwd -= hmrg.Top
@@ -377,9 +376,9 @@ func (sl *Splits) PositionSplits() {
 		}
 		sw := mat32.Floor(sl.Splits[i-1] * cszd)
 		pos += sw + gap
-		kwb.Geom.RelPos.SetDim(sl.Dim, pos)
+		kwb.Geom.RelPos.SetDim(dim, pos)
 		hl := sl.Parts.Child(i - 1).(*Handle)
-		hl.Geom.RelPos.SetDim(sl.Dim, pos-hwd-2) // todo: Kai -- -2 is needed but not sure why..
+		hl.Geom.RelPos.SetDim(dim, pos-hwd-2) // todo: Kai -- -2 is needed but not sure why..
 		hl.Geom.RelPos.SetDim(od, sod+float32(i-1)*hht)
 		hl.Min = 0
 		hl.Max = cszd
