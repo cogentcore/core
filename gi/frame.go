@@ -41,13 +41,15 @@ func (fr *Frame) SetStyles() {
 		// note: using Pressable here so we get clicks, but don't change to Active state.
 		// getting clicks allows us to clear focus on click.
 		s.SetAbilities(true, abilities.Pressable, abilities.FocusWithinable)
-		s.SetAbilities(fr.HasAnyScroll(), abilities.Scrollable, abilities.Slideable)
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Zero()
 		s.Padding.Set(units.Dp(2))
 		s.Grow.Set(1, 1)
 		// we never want borders on frames
 		s.MaxBorder = styles.Border{}
+	})
+	fr.StyleFinal(func(s *styles.Style) {
+		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
 	})
 }
 
