@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"slices"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
@@ -44,24 +43,33 @@ var CustomConfigStyles func(w Widget)
 ////////////////////////////////////////////////////////////////////
 // 	Widget Styling functions
 
-// Style adds the given styler to the widget's stylers.
-// It is the main way for both end-user and internal code
-// to set the styles of a widget.
-// It should only be done before showing the scene
-// during initial configuration -- otherwise requires
-// a StyMu mutex lock.
+// Style adds the given styler to the widget's Stylers.
+// It is one of the main ways for both end-user and internal code
+// to set the styles of a widget, in addition to StyleFirst
+// and StyleFinal, which add stylers that are called before
+// and after the stylers added by this function, respectively.
 func (wb *WidgetBase) Style(s func(s *styles.Style)) *WidgetBase {
 	wb.Stylers = append(wb.Stylers, s)
 	return wb
 }
 
-// StyleFirst inserts the given styler at the start of the widget's stylers,
-// ensuring that it is run first, before even the WidgetBase default styler.
-// This is useful for any functions that update widget state flags
-// based on other variables, so that these are reflected in the base styling
-// function that updates styles based on state.
+// StyleFirst adds the given styler to the widget's FirstStylers.
+// It is one of the main ways for both end-user and internal code
+// to set the styles of a widget, in addition to Style
+// and StyleFinal, which add stylers that are called after
+// the stylers added by this function.
 func (wb *WidgetBase) StyleFirst(s func(s *styles.Style)) *WidgetBase {
-	wb.Stylers = slices.Insert(wb.Stylers, 0, s)
+	wb.FirstStylers = append(wb.FirstStylers, s)
+	return wb
+}
+
+// StyleFinal adds the given styler to the widget's FinalStylers.
+// It is one of the main ways for both end-user and internal code
+// to set the styles of a widget, in addition to StyleFirst
+// and Style, which add stylers that are called before
+// the stylers added by this function.
+func (wb *WidgetBase) StyleFinal(s func(s *styles.Style)) *WidgetBase {
+	wb.FinalStylers = append(wb.FinalStylers, s)
 	return wb
 }
 
@@ -176,10 +184,16 @@ func (wb *WidgetBase) SetStyles() {
 	})
 }
 
-// RunStylers runs the style functions specified in
-// the StyleFuncs field in sequential ascending order.
+// RunStylers runs the stylers specified in the widget's FirstStylers,
+// Stylers, and FinalStylers in that order in a sequential ascending order.
 func (wb *WidgetBase) RunStylers() {
+	for _, s := range wb.FirstStylers {
+		s(&wb.Styles)
+	}
 	for _, s := range wb.Stylers {
+		s(&wb.Styles)
+	}
+	for _, s := range wb.FinalStylers {
 		s(&wb.Styles)
 	}
 }

@@ -236,8 +236,25 @@ type WidgetBase struct {
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
 	// These should be set using Style function, which can be called
-	// by end-user and internal code.
+	// by end-user and internal code. FirstStylers and FinalStylers
+	// are called before and after these stylers, respectively.
 	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// FirstStylers are a slice of functions that are called in sequential
+	// ascending order (so the last added styler is called last and
+	// thus overrides all other functions) to style the element.
+	// These should be set using StyleFirst function, which can be called
+	// by end-user and internal code. These stylers are called before
+	// Stylers and FinalStylers.
+	FirstStylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
+
+	// FinalStylers are a slice of functions that are called in sequential
+	// ascending order (so the last added styler is called last and
+	// thus overrides all other functions) to style the element.
+	// These should be set using StyleFinal function, which can be called
+	// by end-user and internal code. These stylers are called after
+	// FirstStylers and Stylers.
+	FinalStylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children
 	// to this widget or its children.  These functions are called in sequential
