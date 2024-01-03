@@ -81,21 +81,21 @@ func (tr *Region) IsAfterTime(t time.Time) bool {
 	return tr.Time.Time().After(t)
 }
 
-// AgoMSec returns how long ago this Region's time stamp is relative
+// Ago returns how long ago this Region's time stamp is relative
 // to given time, in milliseconds.
-func (tr *Region) AgoMSec(t time.Time) int {
+func (tr *Region) Ago(t time.Time) int {
 	return int(t.Sub(tr.Time.Time()) / time.Millisecond)
 }
 
-// AgeMSec returns the time interval in milliseconds from time.Now()
-func (tr *Region) AgeMSec() int {
-	return tr.AgoMSec(time.Now())
+// Age returns the time interval in milliseconds from time.Now()
+func (tr *Region) Age() int {
+	return tr.Ago(time.Now())
 }
 
-// SinceMSec returns the time interval in milliseconds between
+// Since returns the time interval in milliseconds between
 // this Region's time stamp and that of the given earlier region's stamp.
-func (tr *Region) SinceMSec(earlier *Region) int {
-	return earlier.AgoMSec(tr.Time.Time())
+func (tr *Region) Since(earlier *Region) int {
+	return earlier.Ago(tr.Time.Time())
 }
 
 // FromString decodes text region from a string representation of form:

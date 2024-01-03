@@ -15,9 +15,9 @@ import (
 // UndoTrace -- set to true to get a report of undo actions
 var UndoTrace = false
 
-// UndoGroupDelayMSec is number of milliseconds above which a new group
+// UndoGroupDelay is number of milliseconds above which a new group
 // is started, for grouping undo events
-var UndoGroupDelayMSec = 250
+var UndoGroupDelay = 250
 
 // Undo is the textview.Buf undo manager
 type Undo struct {
@@ -57,7 +57,7 @@ func (un *Undo) Reset() {
 }
 
 // Save saves given edit to undo stack, with current group marker unless timer interval
-// exceeds UndoGroupDelayMSec since last item.
+// exceeds UndoGroupDelay since last item.
 func (un *Undo) Save(tbe *Edit) {
 	if un.Off {
 		return
@@ -71,8 +71,8 @@ func (un *Undo) Save(tbe *Edit) {
 		un.Stack = un.Stack[:un.Pos]
 	}
 	if len(un.Stack) > 0 {
-		since := tbe.Reg.SinceMSec(&un.Stack[len(un.Stack)-1].Reg)
-		if since > UndoGroupDelayMSec {
+		since := tbe.Reg.Since(&un.Stack[len(un.Stack)-1].Reg)
+		if since > UndoGroupDelay {
 			un.Group++
 			if UndoTrace {
 				fmt.Printf("Undo: incrementing group to: %v since: %v\n", un.Group, since)
