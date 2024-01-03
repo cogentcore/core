@@ -115,6 +115,7 @@ func (ly *Layout) OnInit() {
 func (ly *Layout) SetStyles() {
 	ly.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
+		s.SetAbilities(ly.HasAnyScroll(), abilities.Scrollable, abilities.Slideable)
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
 
@@ -279,8 +280,12 @@ func (ly *Layout) ClosePopup() bool {
 func (ly *Layout) HandleEvents() {
 	ly.HandleKeys()
 	ly.On(events.Scroll, func(e events.Event) {
-		// fmt.Println(ly, "scroll event", e)
 		ly.ScrollDelta(e)
+	})
+	// we treat slide events on layouts as scroll events
+	// we must reverse the delta for "natural" scrolling behavior
+	ly.On(events.SlideMove, func(e events.Event) {
+		ly.ScrollDelta(events.NewScroll(e.Pos(), e.PrevDelta().Mul(-1), e.Modifiers()))
 	})
 }
 

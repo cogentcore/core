@@ -41,6 +41,7 @@ func (fr *Frame) SetStyles() {
 		// note: using Pressable here so we get clicks, but don't change to Active state.
 		// getting clicks allows us to clear focus on click.
 		s.SetAbilities(true, abilities.Pressable, abilities.FocusWithinable)
+		s.SetAbilities(fr.HasAnyScroll(), abilities.Scrollable, abilities.Slideable)
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Zero()
 		s.Padding.Set(units.Dp(2))
