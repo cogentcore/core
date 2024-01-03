@@ -187,7 +187,7 @@ func (wb *WidgetBase) AddPriorityEvent(etype events.Types) {
 func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	if DebugSettings.EventTrace {
 		if ev.Type() != events.MouseMove {
-			fmt.Println("Event to Widget:", wb.Path(), ev.String())
+			fmt.Println(ev, "to", wb)
 		}
 	}
 	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {

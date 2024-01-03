@@ -586,7 +586,7 @@ func (w *RenderWin) HandleEvent(e events.Event) {
 
 	et := e.Type()
 	if DebugSettings.EventTrace && et != events.WindowPaint && et != events.MouseMove {
-		log.Printf("Got event: %s\n", e)
+		fmt.Println("Window got event", e)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.HandleWindowEvents(e)
