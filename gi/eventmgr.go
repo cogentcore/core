@@ -326,8 +326,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		// 	w := em.MouseInBBox[i]
 		// 	w.HandleEvent(e) // first crack at it
 		// }
-		switch {
-		case em.Drag != nil:
+		if em.Drag != nil {
 			hovs := make([]Widget, 0, len(em.MouseInBBox))
 			for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 				wb := w.AsWidget()
@@ -339,16 +338,18 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.DragMove(e)                   // updates sprite position
 			em.Drag.HandleEvent(e)           // raw drag
 			em.Drag.Send(events.DragMove, e) // usually ignored
-		case em.Slide != nil:
-		case em.SlidePress != nil:
-			if em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.SlideStartDistance) {
-				em.Slide = em.SlidePress
-				em.Slide.Send(events.SlideStart, e)
+		} else {
+			if em.SlidePress != nil {
+				if em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.SlideStartDistance) {
+					em.Slide = em.SlidePress
+					em.Slide.Send(events.SlideStart, e)
+				}
 			}
-		case em.DragPress != nil:
-			if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
-				em.Drag = em.DragPress
-				em.Drag.Send(events.DragStart, e)
+			if em.DragPress != nil {
+				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
+					em.Drag = em.DragPress
+					em.Drag.Send(events.DragStart, e)
+				}
 			}
 		}
 		// if we already have a long press widget, we update it based on our dragging movement
