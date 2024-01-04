@@ -388,8 +388,8 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.ScrollWheelSpeed = events.ScrollWheelSpeed
 	ds.SlideStartTime = 50 * time.Millisecond
 	ds.SlideStartDistance = 4
-	ds.DragStartTime = 200 * time.Millisecond
-	ds.DragStartDistance = 20
+	ds.DragStartTime = 50 * time.Millisecond
+	ds.DragStartDistance = 4
 	ds.LongHoverTime = 500 * time.Millisecond
 	ds.LongHoverStopDistance = 5
 	ds.LongPressTime = 500 * time.Millisecond
