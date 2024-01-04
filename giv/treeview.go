@@ -214,7 +214,8 @@ func (tv *TreeView) OnAdd() {
 func (tv *TreeView) SetStyles() {
 	tvi := tv.This().(TreeViewer)
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.Draggable, abilities.Droppable)
+		// our parts are draggable and droppable, not us ourself
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.Em(1)
 		tv.OpenDepth = 4
 		s.Border.Style.Set(styles.BorderNone)
@@ -234,7 +235,6 @@ func (tv *TreeView) SetStyles() {
 		}
 	})
 	tv.OnWidgetAdded(func(w gi.Widget) {
-		// fmt.Println(w.PathFrom(tv))
 		switch w.PathFrom(tv) {
 		case "parts":
 			w.Style(func(s *styles.Style) {
