@@ -16,24 +16,29 @@ import (
 
 func (a *App) AddEventListeners() {
 	g := js.Global()
-	g.Call("addEventListener", "mousedown", js.FuncOf(a.OnMouseDown))
+	AddEventListener(g, "mousedown", a.OnMouseDown)
 	// see https://chromestatus.com/feature/5093566007214080
-	g.Call("addEventListener", "touchstart", js.FuncOf(a.OnTouchStart),
-		map[string]any{"passive": false})
-	g.Call("addEventListener", "mouseup", js.FuncOf(a.OnMouseUp))
-	g.Call("addEventListener", "touchend", js.FuncOf(a.OnTouchEnd))
-	g.Call("addEventListener", "mousemove", js.FuncOf(a.OnMouseMove))
+	AddEventListener(g, "touchstart", a.OnTouchStart, map[string]any{"passive": false})
+	AddEventListener(g, "mouseup", a.OnMouseUp)
+	AddEventListener(g, "touchend", a.OnTouchEnd)
+	AddEventListener(g, "mousemove", a.OnMouseMove)
 	// see https://chromestatus.com/feature/5093566007214080
-	g.Call("addEventListener", "touchmove", js.FuncOf(a.OnTouchMove),
-		map[string]any{"passive": false})
+	AddEventListener(g, "touchmove", a.OnTouchMove, map[string]any{"passive": false})
 	// see https://chromestatus.com/feature/6662647093133312
-	g.Call("addEventListener", "wheel", js.FuncOf(a.OnWheel),
-		map[string]any{"passive": false})
-	g.Call("addEventListener", "contextmenu", js.FuncOf(a.OnContextMenu))
-	g.Call("addEventListener", "keydown", js.FuncOf(a.OnKeyDown))
-	g.Call("addEventListener", "keyup", js.FuncOf(a.OnKeyUp))
-	g.Call("addEventListener", "beforeinput", js.FuncOf(a.OnBeforeInput))
-	g.Call("addEventListener", "resize", js.FuncOf(a.OnResize))
+	AddEventListener(g, "wheel", a.OnWheel, map[string]any{"passive": false})
+	AddEventListener(g, "contextmenu", a.OnContextMenu)
+	AddEventListener(g, "keydown", a.OnKeyDown)
+	AddEventListener(g, "keyup", a.OnKeyUp)
+	AddEventListener(g, "beforeinput", a.OnBeforeInput)
+	AddEventListener(g, "resize", a.OnResize)
+}
+
+func AddEventListener(v js.Value, nm string, fn func(this js.Value, args []js.Value) any, opts ...map[string]any) {
+	if len(opts) > 0 {
+		v.Call("addEventListener", nm, js.FuncOf(fn), opts[0])
+	} else {
+		v.Call("addEventListener", nm, js.FuncOf(fn))
+	}
 }
 
 // EventPos returns the appropriate position for the given event,
