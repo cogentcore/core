@@ -317,11 +317,6 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, e, events.MouseEnter, events.MouseLeave)
 		em.HandleLongHover(e)
 	case events.MouseDrag:
-		// n := len(em.MouseInBBox)
-		// for i := n - 1; i >= 0; i-- {
-		// 	w := em.MouseInBBox[i]
-		// 	w.HandleEvent(e) // first crack at it
-		// }
 		if em.Drag != nil {
 			hovs := make([]Widget, 0, len(em.MouseInBBox))
 			for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
@@ -372,6 +367,12 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			case events.Right: // note: automatically gets Control+Left
 				up.Send(events.ContextMenu, e)
 			}
+		}
+		// if our original pressed widget is different from the one we are
+		// going up on, then it has not gotten a mouse up event yet, so
+		// we need to send it one
+		if em.Press != up && em.Press != nil {
+			em.Press.HandleEvent(e)
 		}
 		em.Press = nil
 
