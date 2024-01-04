@@ -279,6 +279,7 @@ func (ly *Layout) ClosePopup() bool {
 }
 
 func (ly *Layout) HandleEvents() {
+	ly.WidgetBase.HandleEvents()
 	ly.HandleKeys()
 	ly.On(events.Scroll, func(e events.Event) {
 		ly.ScrollDelta(e)
