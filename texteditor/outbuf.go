@@ -30,7 +30,7 @@ type OutBuf struct {
 	// the Buf that we output to
 	Buf *Buf
 
-	// default 200: how many milliseconds to wait while batching output
+	// how much time to wait while batching output (default: 200ms)
 	Batch time.Duration
 
 	// optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input
@@ -58,7 +58,7 @@ func (ob *OutBuf) Init(out io.Reader, buf *Buf, batch time.Duration, markup OutB
 	ob.Buf = buf
 	ob.MarkupFun = markup
 	if batch == 0 {
-		ob.Batch = 200
+		ob.Batch = 200 * time.Millisecond
 	} else {
 		ob.Batch = batch
 	}
@@ -85,13 +85,12 @@ func (ob *OutBuf) MonOut() {
 			mup = ob.MarkupFun(bec)
 		}
 		ob.CurOutMus = append(ob.CurOutMus, mup)
-		now := time.Now()
-		lag := now.Sub(ob.LastOut) / time.Millisecond
+		lag := time.Since(ob.LastOut)
 		if lag > ob.Batch {
-			ob.LastOut = now
+			ob.LastOut = time.Now()
 			ob.OutToBuf()
 		} else {
-			ob.AfterTimer = time.AfterFunc(ob.Batch*2*time.Millisecond, func() {
+			ob.AfterTimer = time.AfterFunc(ob.Batch*2, func() {
 				ob.Mu.Lock()
 				ob.LastOut = time.Now()
 				ob.OutToBuf()

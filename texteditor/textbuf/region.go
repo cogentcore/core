@@ -82,19 +82,19 @@ func (tr *Region) IsAfterTime(t time.Time) bool {
 }
 
 // Ago returns how long ago this Region's time stamp is relative
-// to given time, in milliseconds.
-func (tr *Region) Ago(t time.Time) int {
-	return int(t.Sub(tr.Time.Time()) / time.Millisecond)
+// to given time.
+func (tr *Region) Ago(t time.Time) time.Duration {
+	return t.Sub(tr.Time.Time())
 }
 
-// Age returns the time interval in milliseconds from time.Now()
-func (tr *Region) Age() int {
+// Age returns the time interval from [time.Now]
+func (tr *Region) Age() time.Duration {
 	return tr.Ago(time.Now())
 }
 
-// Since returns the time interval in milliseconds between
+// Since returns the time interval between
 // this Region's time stamp and that of the given earlier region's stamp.
-func (tr *Region) Since(earlier *Region) int {
+func (tr *Region) Since(earlier *Region) time.Duration {
 	return earlier.Ago(tr.Time.Time())
 }
 

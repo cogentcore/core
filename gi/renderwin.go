@@ -47,7 +47,7 @@ var (
 	RenderWinGlobalMu sync.Mutex
 
 	// RenderWinOpenTimer is used for profiling the open time of windows
-	// if doing profiling, it will report the time elapsed in millisecond
+	// if doing profiling, it will report the time elapsed in milliseconds
 	// to point of establishing initial focus in the window.
 	RenderWinOpenTimer time.Time
 )

@@ -15,9 +15,9 @@ import (
 // UndoTrace -- set to true to get a report of undo actions
 var UndoTrace = false
 
-// UndoGroupDelay is number of milliseconds above which a new group
+// UndoGroupDelay is the amount of time above which a new group
 // is started, for grouping undo events
-var UndoGroupDelay = 250
+var UndoGroupDelay = 250 * time.Millisecond
 
 // Undo is the textview.Buf undo manager
 type Undo struct {

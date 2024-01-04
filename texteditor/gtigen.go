@@ -11,7 +11,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 )
 
@@ -479,11 +478,5 @@ func (t *TwinEditors) SetCustomContextMenu(v func(m *gi.Scene)) *TwinEditors {
 // SetStackTop sets the [TwinEditors.StackTop]
 func (t *TwinEditors) SetStackTop(v int) *TwinEditors {
 	t.StackTop = v
-	return t
-}
-
-// SetDim sets the [TwinEditors.Dim]
-func (t *TwinEditors) SetDim(v mat32.Dims) *TwinEditors {
-	t.Dim = v
 	return t
 }
