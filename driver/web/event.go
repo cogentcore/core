@@ -17,13 +17,18 @@ import (
 func (a *App) AddEventListeners() {
 	g := js.Global()
 	g.Call("addEventListener", "mousedown", js.FuncOf(a.OnMouseDown))
-	g.Call("addEventListener", "touchstart", js.FuncOf(a.OnTouchStart))
+	// see https://chromestatus.com/feature/5093566007214080
+	g.Call("addEventListener", "touchstart", js.FuncOf(a.OnTouchStart),
+		map[string]any{"passive": false})
 	g.Call("addEventListener", "mouseup", js.FuncOf(a.OnMouseUp))
 	g.Call("addEventListener", "touchend", js.FuncOf(a.OnTouchEnd))
 	g.Call("addEventListener", "mousemove", js.FuncOf(a.OnMouseMove))
-	g.Call("addEventListener", "touchmove", js.FuncOf(a.OnTouchMove))
+	// see https://chromestatus.com/feature/5093566007214080
+	g.Call("addEventListener", "touchmove", js.FuncOf(a.OnTouchMove),
+		map[string]any{"passive": false})
 	// see https://chromestatus.com/feature/6662647093133312
-	g.Call("addEventListener", "wheel", js.FuncOf(a.OnWheel), map[string]any{"passive": false})
+	g.Call("addEventListener", "wheel", js.FuncOf(a.OnWheel),
+		map[string]any{"passive": false})
 	g.Call("addEventListener", "contextmenu", js.FuncOf(a.OnContextMenu))
 	g.Call("addEventListener", "keydown", js.FuncOf(a.OnKeyDown))
 	g.Call("addEventListener", "keyup", js.FuncOf(a.OnKeyUp))
