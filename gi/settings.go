@@ -361,11 +361,13 @@ type DeviceSettingsData struct { //gti:add
 	// slide event (as opposed to a basic press event)
 	SlideStartDistance int `def:"4" min:"0" max:"100" step:"1"`
 
+	// TODO(kai): maybe remove this and just use Slide properties for both
+
 	// The amount of time to wait before initiating a drag-n-drop event
-	DragStartTime time.Duration `def:"200" min:"5" max:"1000" step:"5"`
+	DragStartTime time.Duration `def:"50" min:"5" max:"1000" step:"5"`
 
 	// The number of pixels that must be moved before initiating a drag-n-drop event
-	DragStartDistance int `def:"20" min:"0" max:"100" step:"1"`
+	DragStartDistance int `def:"4" min:"0" max:"100" step:"1"`
 
 	// The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)
 	LongHoverTime time.Duration `def:"500" min:"10" max:"10000" step:"10"`
