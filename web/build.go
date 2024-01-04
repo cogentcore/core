@@ -107,10 +107,6 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(odir, "icons", "svg.svg"))
-	if err != nil {
-		return err
-	}
 	ic192, err := rendericon.Render(192)
 	if err != nil {
 		return err
@@ -124,6 +120,10 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 	err = images.Save(ic512, filepath.Join(odir, "icons", "512.png"))
+	if err != nil {
+		return err
+	}
+	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(odir, "icons", "svg.svg"))
 	if err != nil {
 		return err
 	}
