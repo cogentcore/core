@@ -86,8 +86,17 @@ const (
 	Column
 )
 
+// Dim returns the corresponding dimension for the direction.
 func (d Directions) Dim() mat32.Dims {
 	return mat32.Dims(d)
+}
+
+// Other returns the opposite (other) direction.
+func (d Directions) Other() Directions {
+	if d == Row {
+		return Column
+	}
+	return Row
 }
 
 // Displays determines how items are displayed
