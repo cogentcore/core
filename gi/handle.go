@@ -14,8 +14,9 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// Handle represents a draggable handle that can be
-// used to control the size of an element.
+// Handle represents a draggable handle that can be used to
+// control the size of an element. The [Handle.Styles.Direction]
+// controls the direction in which the handle moves.
 type Handle struct {
 	Box
 
