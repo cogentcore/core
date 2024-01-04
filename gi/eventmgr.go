@@ -234,12 +234,10 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 	et := e.Type()
 	sc := em.Scene
 
-	isDrag := false
 	switch et {
 	case events.MouseDown:
 		em.ResetOnMouseDown()
 	case events.MouseDrag:
-		isDrag = true
 		if em.Slide != nil {
 			em.Slide.HandleEvent(e)
 			em.Slide.Send(events.SlideMove, e)
@@ -274,9 +272,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			continue
 		}
 
-		if !isDrag {
-			w.HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
-		}
+		w.HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
 		switch et {
 		case events.MouseMove:
 			if move == nil && wb.Styles.Abilities.IsHoverable() {
