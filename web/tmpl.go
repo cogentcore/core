@@ -81,11 +81,7 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 		"index.html",
 	}
 
-	if c.Web.ServiceWorkerTemplate == "" {
-		c.Web.ServiceWorkerTemplate = DefaultAppWorkerJS
-	}
-
-	tmpl, err := template.New("app-worker.js").Parse(c.Web.ServiceWorkerTemplate)
+	tmpl, err := template.New("app-worker.js").Parse(DefaultAppWorkerJS)
 	if err != nil {
 		return nil, err
 	}

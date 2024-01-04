@@ -43,7 +43,7 @@ type Web struct { //gti:add
 	// including "{progress}" in the loading label.
 	//
 	// DEFAULT: "{progress}%".
-	LoadingLabel string
+	LoadingLabel string `def:"{progress}%"`
 
 	// The page language.
 	//
@@ -64,7 +64,7 @@ type Web struct { //gti:add
 	// Zero or negative values deactivates the auto-update mechanism.
 	//
 	// Default is 10 seconds.
-	AutoUpdateInterval time.Duration `def:"10000000000"`
+	AutoUpdateInterval time.Duration `def:"10s"`
 
 	// The environment variables that are passed to the progressive web app.
 	//
@@ -78,12 +78,4 @@ type Web struct { //gti:add
 	// Content length finding falls back to the Content-Length HTTP header when
 	// no content length is found with the defined header.
 	WasmContentLengthHeader string
-
-	// The template used to generate app-worker.js. The template follows the
-	// text/template package model.
-	//
-	// By default set to DefaultAppWorkerJS, changing the template have very
-	// high chances to mess up go-app usage. Any issue related to a custom app
-	// worker template is not supported and will be closed.
-	ServiceWorkerTemplate string
 }

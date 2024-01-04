@@ -17,6 +17,7 @@ import (
 
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
+	"goki.dev/goki/rendericon"
 	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
@@ -130,7 +131,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	defer fdsi.Close()
 	// 1024x1024 is the largest icon size on iOS
 	// (for the App Store)
-	sic, err := RenderIcon(1024)
+	sic, err := rendericon.Render(1024)
 	if err != nil {
 		return nil, err
 	}

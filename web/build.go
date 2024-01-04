@@ -9,12 +9,13 @@ package web
 import (
 	"crypto/sha1"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
 
 	"goki.dev/goki/config"
+	"goki.dev/goki/rendericon"
+	"goki.dev/grows/images"
 	"goki.dev/xe"
 )
 
@@ -102,12 +103,21 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	ics := filepath.Join(c.Build.Package, ".goki", "icons")
-	err = xe.Run("cp", "-r", ics, odir)
+	ic192, err := rendericon.Render(192)
 	if err != nil {
-		// an error copying icons is unfortunate but shouldn't sink the whole build
-		// for example, building without icons should at least be possible
-		slog.Error("error copying icons", "from", ics, "to", odir, "err", err)
+		return err
+	}
+	err = images.Save(ic192, filepath.Join(odir, "icons", "192.png"))
+	if err != nil {
+		return err
+	}
+	ic512, err := rendericon.Render(512)
+	if err != nil {
+		return err
+	}
+	err = images.Save(ic512, filepath.Join(odir, "icons", "512.png"))
+	if err != nil {
+		return err
 	}
 
 	return nil

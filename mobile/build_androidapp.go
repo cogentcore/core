@@ -21,6 +21,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/binres"
+	"goki.dev/goki/rendericon"
 	"goki.dev/grog"
 	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
@@ -194,7 +195,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 
 	// Add the icon. 512 is the largest icon size on Android
 	// (for the Google Play Store icon).
-	ic, err := RenderIcon(512)
+	ic, err := rendericon.Render(512)
 	if err != nil {
 		return nil, err
 	}

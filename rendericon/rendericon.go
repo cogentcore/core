@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package mobile
+package rendericon
 
 import (
 	"bytes"
@@ -19,10 +19,10 @@ import (
 	"goki.dev/svg"
 )
 
-// RenderIcon renders the icon located at .goki/icon.svg at the given size.
+// Render renders the icon located at .goki/icon.svg at the given size.
 // If no such icon exists, it sets it to a placeholder icon, a blue version of
 // [icons.Toolbar].
-func RenderIcon(size int) (*image.RGBA, error) {
+func Render(size int) (*image.RGBA, error) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	sv := svg.NewSVG(size, size)

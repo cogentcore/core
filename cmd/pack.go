@@ -14,7 +14,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/jackmordaunt/icns/v2"
 	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
+	"goki.dev/goki/rendericon"
 	"goki.dev/grows/images"
 	"goki.dev/xe"
 )
@@ -76,7 +76,7 @@ func PackLinux(c *config.Config) error {
 
 	// see https://martin.hoppenheit.info/blog/2016/where-to-put-application-icons-on-linux/
 	// TODO(kai): consider rendering more icon sizes and/or an XPM icon
-	ic, err := mobile.RenderIcon(48)
+	ic, err := rendericon.Render(48)
 	if err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func PackDarwin(c *config.Config) error {
 	}
 	defer fdsi.Close()
 	// 1024x1024 is the largest icon size on macOS
-	sic, err := mobile.RenderIcon(1024)
+	sic, err := rendericon.Render(1024)
 	if err != nil {
 		return err
 	}
