@@ -103,6 +103,14 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
+	err = os.MkdirAll(filepath.Join(odir, "icons"), 0777)
+	if err != nil {
+		return err
+	}
+	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(odir, "icons", "svg.svg"))
+	if err != nil {
+		return err
+	}
 	ic192, err := rendericon.Render(192)
 	if err != nil {
 		return err
