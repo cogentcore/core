@@ -12,7 +12,7 @@ import (
 	"goki.dev/pi/v2/lex"
 )
 
-// UndoTrace -- set to true to get a report of undo actions
+// UndoTrace; set to true to get a report of undo actions
 var UndoTrace = false
 
 // UndoGroupDelay is the amount of time above which a new group

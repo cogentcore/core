@@ -24,7 +24,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
@@ -72,9 +71,6 @@ func (fb *FileBrowse) OnInit() {
 			w.Style(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
-		case "splits":
-			split := w.(*gi.Splits)
-			split.Dim = mat32.X
 		}
 		if w.Parent().PathFrom(fb) == "splits" {
 			if w.IndexInParent() == 0 {

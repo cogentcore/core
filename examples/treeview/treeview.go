@@ -13,7 +13,6 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
@@ -40,12 +39,11 @@ func app() {
 	b.App().About = `This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`
 
-	split := gi.NewSplits(b, "split")
-	split.Dim = mat32.X
+	splits := gi.NewSplits(b)
 
-	tvfr := gi.NewFrame(split, "tvfr")
-	svfr := gi.NewFrame(split, "svfr")
-	split.SetSplits(.3, .7)
+	tvfr := gi.NewFrame(splits)
+	svfr := gi.NewFrame(splits)
+	splits.SetSplits(.3, .7)
 
 	svfr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -61,7 +59,7 @@ func app() {
 		s.Overflow.Y = styles.OverflowAuto
 	})
 
-	tv := giv.NewTreeView(tvfr, "tv")
+	tv := giv.NewTreeView(tvfr)
 
 	depth := 3 // 1 = small tree for testing
 	// depth := 10 // big tree
@@ -70,7 +68,7 @@ func app() {
 	nleaves := tv.RootSetViewIdx()
 	fmt.Println("N leaves:", nleaves)
 
-	sv := giv.NewStructView(svfr, "sv")
+	sv := giv.NewStructView(svfr)
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
