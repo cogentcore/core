@@ -212,7 +212,9 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 func (em *EventMgr) ResetOnMouseDown() {
 	em.Press = nil
 	em.Drag = nil
+	em.DragPress = nil
 	em.Slide = nil
+	em.SlidePress = nil
 
 	// if we have sent a long hover start event, we send an end
 	// event (non-nil widget plus nil timer means we already sent)
@@ -238,11 +240,9 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		em.ResetOnMouseDown()
 	case events.MouseDrag:
 		isDrag = true
-		switch {
-		case em.Slide != nil:
+		if em.Slide != nil {
 			em.Slide.HandleEvent(e)
 			em.Slide.Send(events.SlideMove, e)
-			return // nothing further
 		}
 	case events.Scroll:
 		switch {
@@ -348,6 +348,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			if em.DragPress != nil {
 				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 					em.Drag = em.DragPress
+					fmt.Println("sd", em.Drag)
 					em.Drag.Send(events.DragStart, e)
 				}
 			}
@@ -357,15 +358,16 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.HandleLongPress(e)
 		}
 	case events.MouseUp:
-		switch {
-		case em.Slide != nil:
+		if em.Slide != nil {
 			em.Slide.Send(events.SlideStop, e)
 			em.Slide = nil
-		case em.Drag != nil:
+		}
+		if em.Drag != nil {
 			em.DragDrop(em.Drag, e)
+		}
 		// if we have sent a long press start event, we don't send click
 		// events (non-nil widget plus nil timer means we already sent)
-		case em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil):
+		if em.Press == up && up != nil && !(em.LongPressWidget != nil && em.LongPressTimer == nil) {
 			switch e.MouseButton() {
 			case events.Left:
 				if sc.SelectedWidgetChan != nil {
