@@ -73,14 +73,20 @@ type EventMgr struct {
 	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
 	DragHovers []Widget
 
-	// node that was just pressed
+	// the deepest node that was just pressed
 	Press Widget
 
 	// node receiving mouse dragging events -- for drag-n-drop
 	Drag Widget
 
+	// the deepest draggable node that was just pressed
+	DragPress Widget
+
 	// node receiving mouse sliding events
 	Slide Widget
+
+	// the deepest slideable node that was just pressed
+	SlidePress Widget
 
 	// node receiving mouse scrolling events
 	Scroll Widget
@@ -257,7 +263,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		return
 	}
 
-	var press, move, up Widget
+	var press, dragPress, slidePress, move, up Widget
 	for i := n - 1; i >= 0; i-- {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
@@ -280,6 +286,12 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			if press == nil && wb.Styles.Abilities.IsPressable() {
 				press = w
 			}
+			if dragPress == nil && wb.Styles.Abilities.Is(abilities.Draggable) {
+				dragPress = w
+			}
+			if slidePress == nil && wb.Styles.Abilities.Is(abilities.Slideable) {
+				slidePress = w
+			}
 		case events.MouseUp:
 			if up == nil && wb.Styles.Abilities.IsPressable() {
 				up = w
@@ -290,6 +302,12 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 	case events.MouseDown:
 		if press != nil {
 			em.Press = press
+		}
+		if dragPress != nil {
+			em.DragPress = dragPress
+		}
+		if slidePress != nil {
+			em.SlidePress = slidePress
 		}
 		em.HandleLongPress(e)
 	case events.MouseMove:
@@ -322,14 +340,14 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Drag.HandleEvent(e)           // raw drag
 			em.Drag.Send(events.DragMove, e) // usually ignored
 		case em.Slide != nil:
-		case em.Press != nil && em.Press.AbilityIs(abilities.Slideable):
+		case em.SlidePress != nil:
 			if em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.SlideStartDistance) {
-				em.Slide = em.Press
+				em.Slide = em.SlidePress
 				em.Slide.Send(events.SlideStart, e)
 			}
-		case em.Press != nil && em.Press.AbilityIs(abilities.Draggable):
+		case em.DragPress != nil:
 			if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
-				em.Drag = em.Press
+				em.Drag = em.DragPress
 				em.Drag.Send(events.DragStart, e)
 			}
 		}
