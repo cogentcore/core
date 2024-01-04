@@ -238,13 +238,13 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 	case events.MouseDown:
 		em.ResetOnMouseDown()
 	case events.MouseDrag:
-		if em.Slide != nil {
+		// we can not SlideMove if we are dragging
+		if em.Slide != nil && em.Drag == nil {
 			em.Slide.HandleEvent(e)
 			em.Slide.Send(events.SlideMove, e)
 		}
 	case events.Scroll:
-		switch {
-		case em.Scroll != nil:
+		if em.Scroll != nil {
 			em.Scroll.HandleEvent(e)
 			return
 		}
@@ -335,17 +335,16 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 			em.Drag.HandleEvent(e)           // raw drag
 			em.Drag.Send(events.DragMove, e) // usually ignored
 		} else {
+			if em.DragPress != nil {
+				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
+					em.Drag = em.DragPress
+					em.Drag.Send(events.DragStart, e)
+				}
+			}
 			if em.SlidePress != nil {
 				if em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.SlideStartDistance) {
 					em.Slide = em.SlidePress
 					em.Slide.Send(events.SlideStart, e)
-				}
-			}
-			if em.DragPress != nil {
-				if em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
-					em.Drag = em.DragPress
-					fmt.Println("sd", em.Drag)
-					em.Drag.Send(events.DragStart, e)
 				}
 			}
 		}
