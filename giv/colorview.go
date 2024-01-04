@@ -80,17 +80,24 @@ func (cv *ColorView) ConfigWidget() {
 		s.Direction = styles.Column
 	})
 
+	bs := func(s *styles.Style) {
+		s.Min.Y.Em(2)
+		s.Min.X.Em(1)
+		s.Max.X.Em(40)
+		s.Grow.Set(1, 0)
+		// we don't want any state layer interfering with the way the color looks
+		s.StateLayer = 0
+	}
+
 	hue := gi.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue)
 	hue.OnInput(func(e events.Event) {
 		cv.Color.SetHue(hue.Value)
 		cv.SetHCT(cv.Color)
 	})
 	hue.Style(func(s *styles.Style) {
+		bs(s)
 		hue.ValueColor = nil
 		hue.ThumbColor = colors.C(cv.Color)
-		s.Min.Y.Em(2)
-		s.Min.X.Em(40)
-		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		g := gradient.NewLinear()
 		for h := float32(0); h <= 360; h += 5 {
 			gc := cv.Color.WithHue(h)
@@ -105,11 +112,9 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	chroma.Style(func(s *styles.Style) {
+		bs(s)
 		chroma.ValueColor = nil
 		chroma.ThumbColor = colors.C(cv.Color)
-		s.Min.Y.Em(2)
-		s.Min.X.Em(40)
-		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		g := gradient.NewLinear()
 		for c := float32(0); c <= 150; c += 5 {
 			gc := cv.Color.WithChroma(c)
@@ -124,11 +129,9 @@ func (cv *ColorView) ConfigWidget() {
 		cv.SetHCT(cv.Color)
 	})
 	tone.Style(func(s *styles.Style) {
+		bs(s)
 		tone.ValueColor = nil
 		tone.ThumbColor = colors.C(cv.Color)
-		s.Min.Y.Em(2)
-		s.Min.X.Em(40)
-		s.StateLayer = 0 // we don't want any state layer interfering with the way the color looks
 		g := gradient.NewLinear()
 		for c := float32(0); c <= 100; c += 5 {
 			gc := cv.Color.WithTone(c)
