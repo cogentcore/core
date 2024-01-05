@@ -99,9 +99,6 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		pc.Fill()
 	}
 
-	// pc.StrokeStyle.SetColor(&st.Border.Color)
-	// pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetImage(&st.BackgroundColor)
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	pc.FillStyle.Color = nil
