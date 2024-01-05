@@ -68,7 +68,7 @@ func (sl *Splits) SetStyles() {
 		s.Gap.SetDim(dim.Other(), units.Zero())
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if hl, ok := w.(*Handle); ok {
+		if hl, ok := w.(*Handle); ok && w.Parent() == sl.Parts {
 			hl.On(events.Change, func(e events.Event) {
 				sl.SetSplitAction(hl.IndexInParent(), hl.Value())
 			})
