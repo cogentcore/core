@@ -16,6 +16,7 @@ func (c *Canvas) Draw(f func(pc *paint.Context)) {
 	if c.PushBounds() {
 		pc, _ := c.RenderLock()
 		f(pc)
+		c.RenderUnlock()
 		c.PopBounds()
 	}
 }

@@ -441,6 +441,57 @@ func (t *Button) SetCustomContextMenu(v func(m *Scene)) *Button {
 	return t
 }
 
+// CanvasType is the [gti.Type] for [Canvas]
+var CanvasType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Canvas",
+	ShortName:  "gi.Canvas",
+	IDName:     "canvas",
+	Doc:        "Canvas is a widget that can be arbitrarily drawn to.",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Canvas{},
+})
+
+// NewCanvas adds a new [Canvas] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewCanvas(par ki.Ki, name ...string) *Canvas {
+	return par.NewChild(CanvasType, name...).(*Canvas)
+}
+
+// KiType returns the [*gti.Type] of [Canvas]
+func (t *Canvas) KiType() *gti.Type {
+	return CanvasType
+}
+
+// New returns a new [*Canvas] value
+func (t *Canvas) New() ki.Ki {
+	return &Canvas{}
+}
+
+// SetTooltip sets the [Canvas.Tooltip]
+func (t *Canvas) SetTooltip(v string) *Canvas {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the [Canvas.Class]
+func (t *Canvas) SetClass(v string) *Canvas {
+	t.Class = v
+	return t
+}
+
+// SetCustomContextMenu sets the [Canvas.CustomContextMenu]
+func (t *Canvas) SetCustomContextMenu(v func(m *Scene)) *Canvas {
+	t.CustomContextMenu = v
+	return t
+}
+
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Chooser",
@@ -750,7 +801,7 @@ var HandleType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Handle",
 	ShortName:  "gi.Handle",
 	IDName:     "handle",
-	Doc:        "Handle represents a draggable handle that can be\nused to control the size of an element.",
+	Doc:        "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [Handle.Styles.Direction]\ncontrols the direction in which the handle moves.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)", Directives: gti.Directives{}, Tag: ""}},
@@ -1803,8 +1854,8 @@ var _ = gti.AddType(&gti.Type{
 		{"ScrollWheelSpeed", &gti.Field{Name: "ScrollWheelSpeed", Type: "float32", LocalType: "float32", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here.", Directives: gti.Directives{}, Tag: "min:\"0.01\" step:\"1\""}},
 		{"SlideStartTime", &gti.Field{Name: "SlideStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a regular slide event\n(as opposed to a basic press event)", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"5\" max:\"1000\" step:\"5\""}},
 		{"SlideStartDistance", &gti.Field{Name: "SlideStartDistance", Type: "int", LocalType: "int", Doc: "The number of pixels that must be moved before initiating a regular\nslide event (as opposed to a basic press event)", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"0\" max:\"100\" step:\"1\""}},
-		{"DragStartTime", &gti.Field{Name: "DragStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a drag-n-drop event", Directives: gti.Directives{}, Tag: "def:\"200\" min:\"5\" max:\"1000\" step:\"5\""}},
-		{"DragStartDistance", &gti.Field{Name: "DragStartDistance", Type: "int", LocalType: "int", Doc: "The number of pixels that must be moved before initiating a drag-n-drop event", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" max:\"100\" step:\"1\""}},
+		{"DragStartTime", &gti.Field{Name: "DragStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a drag-n-drop event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"5\" max:\"1000\" step:\"5\""}},
+		{"DragStartDistance", &gti.Field{Name: "DragStartDistance", Type: "int", LocalType: "int", Doc: "The number of pixels that must be moved before initiating a drag-n-drop event", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"0\" max:\"100\" step:\"1\""}},
 		{"LongHoverTime", &gti.Field{Name: "LongHoverTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"10\" max:\"10000\" step:\"10\""}},
 		{"LongHoverStopDistance", &gti.Field{Name: "LongHoverStopDistance", Type: "int", LocalType: "int", Doc: "The maximum number of pixels that mouse can move and still register a long hover event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"0\" max:\"1000\" step:\"1\""}},
 		{"LongPressTime", &gti.Field{Name: "LongPressTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"10\" max:\"10000\" step:\"10\""}},

@@ -14,6 +14,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -78,6 +79,13 @@ func makeText(ts *gi.Tabs) {
 		s := sentence.Case(typ.String())
 		gi.NewLabel(text, "label"+typ.String()).SetType(typ).SetText(s)
 	}
+
+	c := gi.NewCanvas(text)
+	c.Draw(func(pc *paint.Context) {
+		pc.MoveTo(50, 50)
+		pc.LineTo(150, 150)
+		pc.FillStrokeClear()
+	})
 }
 
 func makeButtons(ts *gi.Tabs) {
