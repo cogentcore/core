@@ -274,6 +274,9 @@ async function fetchWithProgress(url, progess) {
   if (!goappWasmContentLengthHeader || !contentLength) {
     contentLength = response.headers.get("Content-Length");
   }
+  if (!contentLength) {
+    contentLength = "60000000"; // 60 mb default
+  }
 
   const total = parseInt(contentLength, 10);
   let loaded = 0;
