@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
 	"goki.dev/grows/images"
 )
@@ -26,17 +24,17 @@ import (
 //		gi.NewLabel(sc).SetText("Something")
 //		sc.AssertPixelsOnShow(t, "something")
 //	}
-func RunTest(test func()) {
-	driver.Main(func(a goosi.App) {
-		Init()
+// func RunTest(test func()) {
+// 	driver.Main(func(a goosi.App) {
+// 		Init()
 
-		b := NewAppBody("__test-base")
-		b.App().AppBarConfig = nil
-		b.NewWindow().Run()
+// 		b := NewAppBody("__test-base")
+// 		b.App().AppBarConfig = nil
+// 		b.NewWindow().Run()
 
-		test()
-	})
-}
+// 		test()
+// 	})
+// }
 
 // AssertPixelsOnShow is a helper function that makes a new window from
 // the scene, waits until it is shown, calls [Scene.AssertPixels]
