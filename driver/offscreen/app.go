@@ -18,7 +18,7 @@ import (
 	"goki.dev/grr"
 )
 
-func init() {
+func Init() {
 	TheApp.Drawer = &Drawer{}
 	TheApp.GetScreens()
 
