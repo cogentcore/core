@@ -26,10 +26,15 @@ import (
 // and decremented when the event loop terminates.
 var WinWait sync.WaitGroup
 
-// Wait waits for all windows to close -- put this at the end of
-// a main function that opens multiple windows.
+// Wait waits for all windows to close and runs the main app loop.
+// This should be put at the end of the main function, and is typically
+// called through [Stage.Wait].
 func Wait() {
-	WinWait.Wait()
+	go func() {
+		WinWait.Wait()
+		goosi.TheApp.Quit()
+	}()
+	goosi.TheApp.MainLoop()
 }
 
 // CurRenderWin is the current RenderWin window.

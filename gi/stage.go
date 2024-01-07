@@ -290,8 +290,8 @@ func (st *Stage) Run() *Stage {
 	}
 }
 
-// Wait waits for the window to close.
-// This should be included after the main window Run() call.
+// Wait waits for all windows to close and runs the main app loop.
+// This should be put at the end of the main function.
 func (st *Stage) Wait() *Stage {
 	Wait()
 	return st
