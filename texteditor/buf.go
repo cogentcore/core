@@ -20,6 +20,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/fi"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/styles"
@@ -494,8 +495,7 @@ func (tb *Buf) FileModCheck() bool {
 		d.AddBottomBar(func(pw gi.Widget) {
 			gi.NewButton(pw).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
-				// TODO(kai/dialog): add this back -- can't call giv from here!
-				gi.TheViewInterface.CallFunc(sc, tb.SaveAs)
+				giv.CallFunc(sc, tb.SaveAs)
 			})
 			gi.NewButton(pw).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()
