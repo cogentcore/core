@@ -4,4 +4,16 @@
 
 package gi
 
-import _ "goki.dev/goosi/driver"
+import (
+	"goki.dev/goosi"
+	_ "goki.dev/goosi/driver"
+	"goki.dev/grr"
+)
+
+func init() {
+	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
+	GokiDataDir()                                                // ensure it exists
+	grr.Log(LoadAllSettings())
+	WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+	WinGeomMgr.Open()
+}
