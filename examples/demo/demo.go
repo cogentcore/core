@@ -12,7 +12,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -25,12 +24,10 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-func main() { gimain.Run(app) }
-
 //go:embed .goki/icon.svg
 var icon []byte
 
-func app() {
+func main() {
 	b := gi.NewAppBody("Goki Demo")
 	b.App().SetAbout("The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework.").SetIconBytes(icon)
 
