@@ -1,14 +1,9 @@
 package main
 
-import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-)
+import "goki.dev/gi/v2/gi"
 
-func main() { gimain.Run(app) }
-
-func app() {
-	b := gi.NewAppBody("hello")
+func main() {
+	b := gi.NewAppBody("Hello")
 	gi.NewLabel(b).SetText("Hello, World!")
 	b.NewWindow().Run().Wait()
 }
