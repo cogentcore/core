@@ -258,9 +258,9 @@ func (km *Map) Update(kmName MapName) {
 /////////////////////////////////////////////////////////////////////////////////
 // KeyMaps -- list of KeyMap's
 
-// DefaultMap is the overall default keymap -- reinitialized in gimain init()
-// depending on platform
-var DefaultMap = MapName("MacEmacs")
+// DefaultMap is the overall default keymap, which is set in init
+// depending on the platform
+var DefaultMap MapName = "LinuxStd"
 
 // MapsItem is an entry in a Maps list
 type MapsItem struct { //gti:add -setters

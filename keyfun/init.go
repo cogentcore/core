@@ -12,8 +12,6 @@ func init() {
 		DefaultMap = "MacStd"
 	case "windows":
 		DefaultMap = "WindowsStd"
-	default:
-		DefaultMap = "LinuxStd"
 	}
 	SetActiveMapName(DefaultMap)
 }
