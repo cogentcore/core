@@ -89,22 +89,13 @@ func (a *App) MainLoop() {
 func (a *App) RunOnMain(f func()) {
 	if a.MainQueue == nil {
 		f()
-	} else {
-		a.This.SendEmptyEvent()
-		done := make(chan struct{})
-		a.MainQueue <- FuncRun{F: f, Done: done}
-		<-done
-		a.This.SendEmptyEvent()
+		return
 	}
-}
-
-// GoRunOnMain runs the given function on the main thread and returns immediately
-func (a *App) GoRunOnMain(f func()) {
-	go func() {
-		a.This.SendEmptyEvent()
-		a.MainQueue <- FuncRun{F: f, Done: nil}
-		a.This.SendEmptyEvent()
-	}()
+	a.This.SendEmptyEvent()
+	done := make(chan struct{})
+	a.MainQueue <- FuncRun{F: f, Done: done}
+	<-done
+	a.This.SendEmptyEvent()
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing
