@@ -7,6 +7,7 @@ package keyfun
 import "runtime"
 
 func init() {
+	AvailMaps.CopyFrom(StdMaps)
 	switch runtime.GOOS {
 	case "darwin":
 		DefaultMap = "MacStd"

@@ -289,10 +289,6 @@ type Maps []MapsItem //gti:add
 // startup.
 var AvailMaps Maps
 
-func init() {
-	AvailMaps.CopyFrom(StdMaps)
-}
-
 // MapByName returns a keymap and index by name -- returns false and emits a
 // message to stdout if not found
 func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
