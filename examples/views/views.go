@@ -10,14 +10,11 @@ import (
 	"fmt"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
-
-func main() { gimain.Run(app) }
 
 // TableStruct is a testing struct for table view
 type TableStruct struct { //gti:add
@@ -97,7 +94,7 @@ type Struct struct { //gti:add
 	Stuff []float32
 }
 
-func app() {
+func main() {
 	tstslice := make([]string, 20)
 
 	for i := 0; i < len(tstslice); i++ {

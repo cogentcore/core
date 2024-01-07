@@ -7,7 +7,6 @@ package main
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/xyzv"
 	"goki.dev/goosi/events"
@@ -20,10 +19,8 @@ import (
 	_ "goki.dev/xyz/io/obj"
 )
 
-func main() { gimain.Run(app) }
-
 func app() {
-	b := gi.NewAppBody("xyzview").SetTitle("XYZ Object Viewer")
+	b := gi.NewAppBody("XYZ Object Viewer")
 	b.App().About = `This is a viewer for the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>. <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/xyzviewer/README.md">README</a> page for this example app has further info.</p>`
 
 	sv := xyzv.NewSceneView(b)

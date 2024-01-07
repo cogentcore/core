@@ -8,16 +8,13 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 )
 
-func main() { gimain.Run(app) }
-
-func app() {
-	b := gi.NewAppBody("goki-icons")
+func main() {
+	b := gi.NewAppBody("Goki Icons")
 	b.App().About = `This is a demo of the icons in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
 	// note: can add a path to view other icon sets

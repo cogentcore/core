@@ -9,7 +9,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -18,8 +17,6 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
-
-func main() { gimain.Run(app) }
 
 type Control struct {
 	// Display controls how items are displayed, in terms of layout
@@ -104,8 +101,8 @@ func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 	return fr
 }
 
-func app() {
-	b := gi.NewBody("goki-layout").SetTitle("Goki Layout Demo")
+func main() {
+	b := gi.NewBody("Goki Layout Demo")
 	b.App().About = `This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
 	ctrl := &Control{}
