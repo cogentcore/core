@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/goosi"
 	_ "goki.dev/goosi/driver"
+	_ "goki.dev/grog"
 	"goki.dev/grr"
 )
 
