@@ -9,33 +9,6 @@ import (
 	"goki.dev/grows/images"
 )
 
-// RunTest runs the given function after calling [driver.Main] and [Init].
-// It should only be used in tests, and it should typically be called in
-// TestMain. For example:
-//
-//	func TestMain(m *testing.M) {
-//		gi.RunTest(func() {
-//			os.Exit(m.Run())
-//		})
-//	}
-//
-//	func TestSomething(t *testing.T) {
-//		sc := gi.NewScene()
-//		gi.NewLabel(sc).SetText("Something")
-//		sc.AssertPixelsOnShow(t, "something")
-//	}
-// func RunTest(test func()) {
-// 	driver.Main(func(a goosi.App) {
-// 		Init()
-
-// 		b := NewAppBody("__test-base")
-// 		b.App().AppBarConfig = nil
-// 		b.NewWindow().Run()
-
-// 		test()
-// 	})
-// }
-
 // AssertPixelsOnShow is a helper function that makes a new window from
 // the scene, waits until it is shown, calls [Scene.AssertPixels]
 // with the given values, and then closes the window.
