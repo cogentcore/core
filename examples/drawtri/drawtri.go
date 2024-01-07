@@ -8,12 +8,10 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	"log"
 	"time"
 
 	"goki.dev/cursors"
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vgpu"
 )
@@ -22,11 +20,6 @@ import (
 var content embed.FS
 
 func main() {
-	log.Println("GoLog: in main.main")
-	driver.Main(mainrun)
-}
-
-func mainrun(a goosi.App) {
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
