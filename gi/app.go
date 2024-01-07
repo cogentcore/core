@@ -52,7 +52,7 @@ type App struct { //gti:add -setters
 	AppBarConfig func(pw Widget)
 }
 
-// NewApp returns a new App initialized with the main properties.
+// NewApp returns a new App initialized with the given name.
 func NewApp(name string) *App {
 	app := &App{}
 	app.Name = name
@@ -62,7 +62,7 @@ func NewApp(name string) *App {
 }
 
 // NewAppBody returns a new Body with a new App initialized with
-// the main properties.
+// the given name.
 func NewAppBody(name string) *Body {
 	b := NewBody(name)
 	b.SetApp(NewApp(name))
