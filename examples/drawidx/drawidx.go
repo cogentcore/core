@@ -187,8 +187,8 @@ func main() {
 				case events.WinShow:
 					make()
 				case events.WinClose:
-					fmt.Println("got events.Close; returning")
-					return
+					fmt.Println("got events.Close; quitting")
+					goosi.TheApp.Quit()
 				}
 			case events.WindowPaint:
 				if w.IsVisible() {
