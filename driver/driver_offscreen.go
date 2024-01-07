@@ -7,10 +7,9 @@
 package driver
 
 import (
-	"goki.dev/goosi"
 	"goki.dev/goosi/driver/offscreen"
 )
 
-func driverMain(f func(goosi.App)) {
-	offscreen.Main(f)
+func init() {
+	offscreen.Init()
 }

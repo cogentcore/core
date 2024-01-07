@@ -6,13 +6,10 @@
 
 package driver
 
-import "C"
-
 import (
-	"goki.dev/goosi"
 	"goki.dev/goosi/driver/android"
 )
 
-func driverMain(f func(goosi.App)) {
-	android.Main(f)
+func init() {
+	android.Init()
 }

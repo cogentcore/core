@@ -7,10 +7,9 @@
 package driver
 
 import (
-	"goki.dev/goosi"
 	"goki.dev/goosi/driver/web"
 )
 
-func driverMain(f func(goosi.App)) {
-	web.Main(f)
+func init() {
+	web.Init()
 }

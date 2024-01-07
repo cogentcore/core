@@ -14,7 +14,6 @@ import (
 	vk "github.com/goki/vulkan"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -29,9 +28,7 @@ type CamView struct {
 	Prjn  mat32.Mat4
 }
 
-func main() { driver.Main(mainrun) }
-
-func mainrun(a goosi.App) {
+func main() {
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,

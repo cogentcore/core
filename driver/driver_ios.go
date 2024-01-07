@@ -6,13 +6,10 @@
 
 package driver
 
-import "C"
-
 import (
-	"goki.dev/goosi"
 	"goki.dev/goosi/driver/ios"
 )
 
-func driverMain(f func(goosi.App)) {
-	ios.Main(f)
+func init() {
+	ios.Init()
 }
