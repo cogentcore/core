@@ -9,6 +9,7 @@ import (
 	"image"
 
 	"goki.dev/goosi"
+	_ "goki.dev/goosi/driver"
 )
 
 func main() {
@@ -25,5 +26,5 @@ func main() {
 
 	fmt.Println("got new window", w)
 
-	select {}
+	goosi.TheApp.MainLoop()
 }
