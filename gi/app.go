@@ -234,14 +234,18 @@ func StdOverflowMenu(tb *Toolbar) {
 
 // StdOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
-	NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
-		OnClick(func(e events.Event) {
-			TheViewInterface.SettingsViewWindow()
-		})
-	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
-		OnClick(func(e events.Event) {
-			TheViewInterface.Inspector(tb.Sc)
-		})
+	if SettingsWindow != nil {
+		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
+			OnClick(func(e events.Event) {
+				SettingsWindow()
+			})
+	}
+	if InspectorWindow != nil {
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
+			OnClick(func(e events.Event) {
+				InspectorWindow(tb.Sc)
+			})
+	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut
 		NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)
