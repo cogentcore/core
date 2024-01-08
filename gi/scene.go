@@ -272,9 +272,6 @@ func (sc *Scene) Resize(nwsz image.Point) {
 			return                   // already good
 		}
 	}
-	if sc.Pixels != nil {
-		sc.Pixels = nil
-	}
 	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 	if sc.PaintContext.State == nil {
 		sc.PaintContext.State = &paint.State{}
@@ -285,7 +282,6 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	sc.PaintContext.Init(nwsz.X, nwsz.Y, sc.Pixels)
 	sc.SceneGeom.Size = nwsz // make sure
 	sc.SetFlag(true, ScNeedsLayout)
-	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
 func (sc *Scene) ScIsVisible() bool {
