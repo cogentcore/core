@@ -1028,7 +1028,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 		XMLAddAttr(&me.Attr, "spreadMethod", gb.Spread.String())
 	}
 
-	if gb.Transform != mat32.Identity2D() {
+	if gb.Transform != mat32.Identity2() {
 		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gb.Transform.XX, gb.Transform.YX, gb.Transform.XY, gb.Transform.YY, gb.Transform.X0, gb.Transform.Y0))
 	}
 

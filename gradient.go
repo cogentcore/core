@@ -288,7 +288,7 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 	}
 	gb := gr.Grad.AsBase()
 	gb.SetBox(n.LocalBBox())
-	gb.SetTransform(mat32.Identity2D())
+	gb.SetTransform(mat32.Identity2())
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node

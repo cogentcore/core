@@ -148,7 +148,7 @@ func (g *NodeBase) SetColorProps(prop, color string) {
 // own transform too.
 func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
 	pars := []Node{}
-	xf := mat32.Identity2D()
+	xf := mat32.Identity2()
 	n := g.This().(Node)
 	for {
 		if n.Parent() == nil {
