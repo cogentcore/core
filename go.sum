@@ -1,7 +1,5 @@
 github.com/Masterminds/vcs v1.13.3 h1:IIA2aBdXvfbIM+yl/eTnL4hb1XwdpvuQLglAix1gweE=
 github.com/Masterminds/vcs v1.13.3/go.mod h1:TiE7xuEjl1N4j016moRd6vezp6e6Lz23gypeXfzXeW8=
-github.com/c2h5oh/datasize v0.0.0-20231215233829-aa82cc1e6500 h1:6lhrsTEnloDPXyeZBvSYvQf8u86jbKehZPVDDlkgDl4=
-github.com/c2h5oh/datasize v0.0.0-20231215233829-aa82cc1e6500/go.mod h1:S/7n9copUssQ56c7aAgHqftWO4LTf4xY6CGWt8Bc+3M=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/gabriel-vasile/mimetype v1.4.3 h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uqxgUFjbI0=
@@ -12,8 +10,8 @@ github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSAS
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 goki.dev/enums v0.9.56 h1:gQ0ZjDuS3kR1IblvfIdAsoaQYCjgh12PNqNWBu/V00M=
 goki.dev/enums v0.9.56/go.mod h1:ULBqiNxR9VhnfCNyNhzj1sbOCykdOTkecv77hIEj5qM=
-goki.dev/glop v0.1.9 h1:s6FFcCXqNy2FLEG5k+ULvxEvbYtHnW7KoqvEw9uPsP0=
-goki.dev/glop v0.1.9/go.mod h1:Q9TPQIlJ5LL38UITJonRUEmEbPPTHWOJED+xD63VmIg=
+goki.dev/glop v0.1.11 h1:VMHHiDZRVOq2paxO9jFsz9ClokbG/W7cSCNznLFdNvI=
+goki.dev/glop v0.1.11/go.mod h1:Q9TPQIlJ5LL38UITJonRUEmEbPPTHWOJED+xD63VmIg=
 goki.dev/grr v0.0.12 h1:g0uvtM9Gj2AkRGf+fl1u8UX/+t/Ju8xADkuVQWPZMSA=
 goki.dev/grr v0.0.12/go.mod h1:i8HvzZY1VPU3u/rNCw4No6/cdwVw0iOUUz4Yo/o/e4c=
 goki.dev/gti v0.1.32 h1:G5TWLYs/fa4njQc8DqtK7T/gsvyB44oqoFukXgjVDB8=
