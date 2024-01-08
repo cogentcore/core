@@ -94,17 +94,6 @@ func (a *App) FullDestroyVk() {
 // Also, it hides all other windows and shows the new one.
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { goosi.HandleRecover(recover()) }()
-	// the actual system window has to exist before we can create the window
-	var winptr uintptr
-	for {
-		a.Mu.Lock()
-		winptr = a.Winptr
-		a.Mu.Unlock()
-
-		if winptr != 0 {
-			break
-		}
-	}
 	if goosi.InitScreenLogicalDPIFunc != nil {
 		goosi.InitScreenLogicalDPIFunc()
 	}
