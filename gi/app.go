@@ -70,52 +70,50 @@ func NewAppBody(name string) *Body {
 }
 
 // SetIconSVG sets the icon of the app to the given SVG icon.
-// It automatically logs any errors in addition to returning
-// them so that end-user code does not have to handle them.
-func (app *App) SetIconSVG(r io.Reader) error {
-	app.Icon = make([]image.Image, 3)
+// It automatically logs any errors.
+func (a *App) SetIconSVG(r io.Reader) *App {
+	a.Icon = make([]image.Image, 3)
 
 	sv := svg.NewSVG(16, 16)
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 	sv.Norm = true
 	err := sv.ReadXML(r)
 	if grr.Log(err) != nil {
-		return err
+		return a
 	}
 
 	sv.Render()
-	app.Icon[0] = sv.Pixels
+	a.Icon[0] = sv.Pixels
 
 	sv.Resize(image.Pt(32, 32))
 	sv.Render()
-	app.Icon[1] = sv.Pixels
+	a.Icon[1] = sv.Pixels
 
 	sv.Resize(image.Pt(48, 48))
 	sv.Render()
-	app.Icon[2] = sv.Pixels
-	return nil
+	a.Icon[2] = sv.Pixels
+	return a
 }
 
 // SetIconBytes sets the icon of the app to the given SVG icon bytes.
-// It automatically logs any errors in addition to returning
-// them so that end-user code does not have to handle them.
-func (app *App) SetIconBytes(b []byte) error {
-	return app.SetIconSVG(bytes.NewReader(b))
+// It automatically logs any errors.
+func (a *App) SetIconBytes(b []byte) *App {
+	return a.SetIconSVG(bytes.NewReader(b))
 }
 
 // Config performs one-time configuration steps after setting
 // properties on the App.
-func (app *App) Config() {
-	goosi.TheApp.SetName(app.Name)
-	goosi.TheApp.SetAbout(app.About)
+func (a *App) Config() {
+	goosi.TheApp.SetName(a.Name)
+	goosi.TheApp.SetAbout(a.About)
 }
 
 // DataDir returns the application-specific data directory:
 // [goosi.DataDir] + [App.Name]. It ensures that the directory exists first.
 // Use this directory to store all app-specific data including preferences.
 // DataDir is: Mac: ~/Library, Linux: ~/.config, Windows: ~/AppData/Roaming
-func (app *App) DataDir() string {
-	pdir := filepath.Join(goosi.TheApp.DataDir(), app.Name)
+func (a *App) DataDir() string {
+	pdir := filepath.Join(goosi.TheApp.DataDir(), a.Name)
 	os.MkdirAll(pdir, 0755)
 	return pdir
 }

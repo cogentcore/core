@@ -29,7 +29,7 @@ var icon []byte
 
 func main() {
 	b := gi.NewAppBody("Goki Demo")
-	b.App().SetAbout("The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework.").SetIconBytes(icon)
+	b.App().SetIconBytes(icon).SetAbout("The Goki Demo demonstrates the various features of the Goki 2D and 3D Go GUI framework.")
 
 	ts := gi.NewTabs(b)
 
