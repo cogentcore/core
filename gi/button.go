@@ -68,7 +68,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.Icon = fr.Icon
 	bt.Indicator = fr.Indicator
 	bt.Shortcut = fr.Shortcut
-	bt.Menu = fr.Menu // TODO(kai/menu): is it safe to copy this?  YES!  must be a lit copy
+	bt.Menu = fr.Menu
 	bt.Data = fr.Data
 }
 
@@ -198,9 +198,6 @@ func (bt *Button) SetStyles() {
 				s.Align.Content = styles.Center
 				s.Align.Items = styles.Center
 				s.Text.AlignV = styles.Center
-				// if bt.Type == ButtonMenu || bt.Type == ButtonAction {
-				// 	s.Align.X = styles.Start
-				// }
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {

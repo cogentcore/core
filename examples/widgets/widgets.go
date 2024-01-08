@@ -73,11 +73,7 @@ func main() {
 			s.Gap.X.Em(1)
 		})
 
-	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box").
-		Style(func(s *styles.Style) {
-			s.Min.X.Em(1.5)
-			s.Min.Y.Em(1.5)
-		})
+	b1 := gi.NewButton(brow).SetIcon(icons.OpenInNew).SetTooltip("press this <i>button</i> to pop up a dialog box")
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
