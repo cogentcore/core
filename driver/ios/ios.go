@@ -129,15 +129,14 @@ func updateConfig(width, height, orientation int32) {
 	}
 	insets := C.getDevicePadding()
 	s := DisplayMetrics.ScreenScale
-	TheApp.RendGeom.Pos = image.Pt(insets.left*s, insets.top*s)
-	TheApp.Insts.Set(
-		float32(insets.top)*fscale,
-		float32(insets.right)*fscale,
-		float32(insets.bottom)*fscale,
-		float32(insets.left)*fscale,
+	TheApp.Insets.Set(
+		insets.top*s,
+		insets.right*s,
+		insets.bottom*s,
+		insets.left*s,
 	)
 
-	TheApp.Scrn.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
+	TheApp.Scrn.DevicePixelRatio = float32(s) // TODO(kai): is this actually DevicePixelRatio?
 	TheApp.Scrn.PixSize = image.Pt(int(width), int(height))
 	TheApp.Scrn.Geometry.Max = TheApp.Scrn.PixSize
 
