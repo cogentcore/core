@@ -130,10 +130,10 @@ func updateConfig(width, height, orientation int32) {
 	insets := C.getDevicePadding()
 	s := DisplayMetrics.ScreenScale
 	TheApp.Insets.Set(
-		insets.top*s,
-		insets.right*s,
-		insets.bottom*s,
-		insets.left*s,
+		int(insets.top)*s,
+		int(insets.right)*s,
+		int(insets.bottom)*s,
+		int(insets.left)*s,
 	)
 
 	TheApp.Scrn.DevicePixelRatio = float32(s) // TODO(kai): is this actually DevicePixelRatio?
