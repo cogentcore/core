@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
 	"goki.dev/enums"
 	"goki.dev/goosi"
@@ -350,7 +351,9 @@ func (w *RenderWin) Resized() {
 	rctx.Mu.RLock()
 	defer rctx.Mu.RUnlock()
 
+	// render geom and window geom
 	rg := w.GoosiWin.RenderGeom()
+	wg := mat32.Geom2DInt{Size: w.GoosiWin.Size()}
 
 	curRg := rctx.Geom
 	if curRg == rg {
@@ -392,6 +395,17 @@ func (w *RenderWin) Resized() {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
 	WinGeomMgr.RecordPref(w)
+
+	// if our window geom is the same as our render geom, we don't need
+	// to fill the background space, as the scenes will do that themselves
+	if wg == rg {
+		return
+	}
+	// otherwise, we need to fill the background so that the insets have
+	// the scheme background color
+	drw.StartDraw(0)
+	drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Src)
+	drw.EndDraw()
 }
 
 // Raise requests that the window be at the top of the stack of windows,
