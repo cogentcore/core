@@ -128,7 +128,8 @@ func updateConfig(width, height, orientation int32) {
 		width, height = height, width
 	}
 	insets := C.getDevicePadding()
-	fscale := float32(DisplayMetrics.ScreenScale)
+	s := DisplayMetrics.ScreenScale
+	TheApp.RendGeom.Pos = image.Pt(insets.left*s, insets.top*s)
 	TheApp.Insts.Set(
 		float32(insets.top)*fscale,
 		float32(insets.right)*fscale,
