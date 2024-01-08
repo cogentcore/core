@@ -298,8 +298,8 @@ func (sv *StructView) ConfigStructGrid() bool {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
-		if wb.Class == "" {
-			wb.Class = "configed"
+		if wb.Prop("configured") == nil {
+			wb.SetProp("configured", true)
 			vv.ConfigWidget(w)
 		} else {
 			vvb.Widget = w

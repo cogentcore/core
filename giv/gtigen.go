@@ -81,12 +81,6 @@ func (t *ArgView) SetTooltip(v string) *ArgView {
 	return t
 }
 
-// SetClass sets the [ArgView.Class]
-func (t *ArgView) SetClass(v string) *ArgView {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [ArgView.CustomContextMenu]
 func (t *ArgView) SetCustomContextMenu(v func(m *gi.Scene)) *ArgView {
 	t.CustomContextMenu = v
@@ -159,12 +153,6 @@ func (t *ColorView) SetViewPath(v string) *ColorView {
 // SetTooltip sets the [ColorView.Tooltip]
 func (t *ColorView) SetTooltip(v string) *ColorView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [ColorView.Class]
-func (t *ColorView) SetClass(v string) *ColorView {
-	t.Class = v
 	return t
 }
 
@@ -278,12 +266,6 @@ func (t *FileView) SetSelectedDoubleClick(v bool) *FileView {
 // SetTooltip sets the [FileView.Tooltip]
 func (t *FileView) SetTooltip(v string) *FileView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [FileView.Class]
-func (t *FileView) SetClass(v string) *FileView {
-	t.Class = v
 	return t
 }
 
@@ -403,12 +385,6 @@ func (t *FuncButton) SetContext(v gi.Widget) *FuncButton {
 // SetTooltip sets the [FuncButton.Tooltip]
 func (t *FuncButton) SetTooltip(v string) *FuncButton {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [FuncButton.Class]
-func (t *FuncButton) SetClass(v string) *FuncButton {
-	t.Class = v
 	return t
 }
 
@@ -534,12 +510,6 @@ func (t *Inspector) SetTooltip(v string) *Inspector {
 	return t
 }
 
-// SetClass sets the [Inspector.Class]
-func (t *Inspector) SetClass(v string) *Inspector {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Inspector.CustomContextMenu]
 func (t *Inspector) SetCustomContextMenu(v func(m *gi.Scene)) *Inspector {
 	t.CustomContextMenu = v
@@ -603,12 +573,6 @@ func (t *KeyChordEdit) SetFocusActive(v bool) *KeyChordEdit {
 // SetTooltip sets the [KeyChordEdit.Tooltip]
 func (t *KeyChordEdit) SetTooltip(v string) *KeyChordEdit {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [KeyChordEdit.Class]
-func (t *KeyChordEdit) SetClass(v string) *KeyChordEdit {
-	t.Class = v
 	return t
 }
 
@@ -728,12 +692,6 @@ func (t *MapView) SetTooltip(v string) *MapView {
 	return t
 }
 
-// SetClass sets the [MapView.Class]
-func (t *MapView) SetClass(v string) *MapView {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [MapView.CustomContextMenu]
 func (t *MapView) SetCustomContextMenu(v func(m *gi.Scene)) *MapView {
 	t.CustomContextMenu = v
@@ -834,12 +792,6 @@ func (t *MapViewInline) SetTooltip(v string) *MapViewInline {
 	return t
 }
 
-// SetClass sets the [MapViewInline.Class]
-func (t *MapViewInline) SetClass(v string) *MapViewInline {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [MapViewInline.CustomContextMenu]
 func (t *MapViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *MapViewInline {
 	t.CustomContextMenu = v
@@ -897,12 +849,6 @@ func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView {
 // SetTooltip sets the [SliceView.Tooltip]
 func (t *SliceView) SetTooltip(v string) *SliceView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [SliceView.Class]
-func (t *SliceView) SetClass(v string) *SliceView {
-	t.Class = v
 	return t
 }
 
@@ -1245,12 +1191,6 @@ func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase {
 	return t
 }
 
-// SetClass sets the [SliceViewBase.Class]
-func (t *SliceViewBase) SetClass(v string) *SliceViewBase {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [SliceViewBase.CustomContextMenu]
 func (t *SliceViewBase) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewBase {
 	t.CustomContextMenu = v
@@ -1330,12 +1270,6 @@ func (t *SliceViewGrid) SetVisRows(v int) *SliceViewGrid {
 // SetTooltip sets the [SliceViewGrid.Tooltip]
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [SliceViewGrid.Class]
-func (t *SliceViewGrid) SetClass(v string) *SliceViewGrid {
-	t.Class = v
 	return t
 }
 
@@ -1447,12 +1381,6 @@ func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline {
 	return t
 }
 
-// SetClass sets the [SliceViewInline.Class]
-func (t *SliceViewInline) SetClass(v string) *SliceViewInline {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [SliceViewInline.CustomContextMenu]
 func (t *SliceViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *SliceViewInline {
 	t.CustomContextMenu = v
@@ -1525,12 +1453,6 @@ func (t *StructView) SetViewPath(v string) *StructView {
 // SetTooltip sets the [StructView.Tooltip]
 func (t *StructView) SetTooltip(v string) *StructView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [StructView.Class]
-func (t *StructView) SetClass(v string) *StructView {
-	t.Class = v
 	return t
 }
 
@@ -1649,12 +1571,6 @@ func (t *StructViewInline) SetTooltip(v string) *StructViewInline {
 	return t
 }
 
-// SetClass sets the [StructViewInline.Class]
-func (t *StructViewInline) SetClass(v string) *StructViewInline {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [StructViewInline.CustomContextMenu]
 func (t *StructViewInline) SetCustomContextMenu(v func(m *gi.Scene)) *StructViewInline {
 	t.CustomContextMenu = v
@@ -1768,12 +1684,6 @@ func (t *TableView) SetHeaderWidths(v []int) *TableView {
 // SetTooltip sets the [TableView.Tooltip]
 func (t *TableView) SetTooltip(v string) *TableView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [TableView.Class]
-func (t *TableView) SetClass(v string) *TableView {
-	t.Class = v
 	return t
 }
 
@@ -1962,12 +1872,6 @@ func (t *TimeView) SetTooltip(v string) *TimeView {
 	return t
 }
 
-// SetClass sets the [TimeView.Class]
-func (t *TimeView) SetClass(v string) *TimeView {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [TimeView.CustomContextMenu]
 func (t *TimeView) SetCustomContextMenu(v func(m *gi.Scene)) *TimeView {
 	t.CustomContextMenu = v
@@ -2044,12 +1948,6 @@ func (t *DateView) SetViewPath(v string) *DateView {
 // SetTooltip sets the [DateView.Tooltip]
 func (t *DateView) SetTooltip(v string) *DateView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [DateView.Class]
-func (t *DateView) SetClass(v string) *DateView {
-	t.Class = v
 	return t
 }
 
@@ -2221,12 +2119,6 @@ func (t *TreeView) SetSelectedNodes(v []TreeViewer) *TreeView {
 // SetTooltip sets the [TreeView.Tooltip]
 func (t *TreeView) SetTooltip(v string) *TreeView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [TreeView.Class]
-func (t *TreeView) SetClass(v string) *TreeView {
-	t.Class = v
 	return t
 }
 

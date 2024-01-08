@@ -169,12 +169,13 @@ func (mv *MapViewInline) ConfigMap() bool {
 		// note: values are always new, but widgets persist!
 		w, wb := gi.AsWidget(mv.Child((i * 2) + 1))
 		kw, kwb := gi.AsWidget(mv.Child(i * 2))
-		if wb.Class == "" {
+		// TODO: is this configured logic right?
+		if wb.Prop("configured") == nil {
 			vv.ConfigWidget(w)
 			kv.ConfigWidget(kw)
 		} else {
-			wb.Class = "configed"
-			kwb.Class = "configed"
+			wb.SetProp("configured", true)
+			kwb.SetProp("configured", true)
 			vvb.Widget = w
 			kvb.Widget = kw
 			vv.UpdateWidget()

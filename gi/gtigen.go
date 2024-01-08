@@ -122,12 +122,6 @@ func (t *AppChooser) SetTooltip(v string) *AppChooser {
 	return t
 }
 
-// SetClass sets the [AppChooser.Class]
-func (t *AppChooser) SetClass(v string) *AppChooser {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [AppChooser.CustomContextMenu]
 func (t *AppChooser) SetCustomContextMenu(v func(m *Scene)) *AppChooser {
 	t.CustomContextMenu = v
@@ -236,12 +230,6 @@ func (t *Body) SetTooltip(v string) *Body {
 	return t
 }
 
-// SetClass sets the [Body.Class]
-func (t *Body) SetClass(v string) *Body {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Body.CustomContextMenu]
 func (t *Body) SetCustomContextMenu(v func(m *Scene)) *Body {
 	t.CustomContextMenu = v
@@ -296,12 +284,6 @@ func (t *Box) New() ki.Ki {
 // SetTooltip sets the [Box.Tooltip]
 func (t *Box) SetTooltip(v string) *Box {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Box.Class]
-func (t *Box) SetClass(v string) *Box {
-	t.Class = v
 	return t
 }
 
@@ -429,12 +411,6 @@ func (t *Button) SetTooltip(v string) *Button {
 	return t
 }
 
-// SetClass sets the [Button.Class]
-func (t *Button) SetClass(v string) *Button {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Button.CustomContextMenu]
 func (t *Button) SetCustomContextMenu(v func(m *Scene)) *Button {
 	t.CustomContextMenu = v
@@ -477,12 +453,6 @@ func (t *Canvas) New() ki.Ki {
 // SetTooltip sets the [Canvas.Tooltip]
 func (t *Canvas) SetTooltip(v string) *Canvas {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Canvas.Class]
-func (t *Canvas) SetClass(v string) *Canvas {
-	t.Class = v
 	return t
 }
 
@@ -617,12 +587,6 @@ func (t *Chooser) SetItemsFunc(v func()) *Chooser {
 // SetTooltip sets the [Chooser.Tooltip]
 func (t *Chooser) SetTooltip(v string) *Chooser {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Chooser.Class]
-func (t *Chooser) SetClass(v string) *Chooser {
-	t.Class = v
 	return t
 }
 
@@ -778,12 +742,6 @@ func (t *Frame) SetTooltip(v string) *Frame {
 	return t
 }
 
-// SetClass sets the [Frame.Class]
-func (t *Frame) SetClass(v string) *Frame {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Frame.CustomContextMenu]
 func (t *Frame) SetCustomContextMenu(v func(m *Scene)) *Frame {
 	t.CustomContextMenu = v
@@ -863,12 +821,6 @@ func (t *Handle) SetTooltip(v string) *Handle {
 	return t
 }
 
-// SetClass sets the [Handle.Class]
-func (t *Handle) SetClass(v string) *Handle {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Handle.CustomContextMenu]
 func (t *Handle) SetCustomContextMenu(v func(m *Scene)) *Handle {
 	t.CustomContextMenu = v
@@ -916,12 +868,6 @@ func (t *Icon) New() ki.Ki {
 // SetTooltip sets the [Icon.Tooltip]
 func (t *Icon) SetTooltip(v string) *Icon {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Icon.Class]
-func (t *Icon) SetClass(v string) *Icon {
-	t.Class = v
 	return t
 }
 
@@ -973,12 +919,6 @@ func (t *Image) New() ki.Ki {
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Image.Class]
-func (t *Image) SetClass(v string) *Image {
-	t.Class = v
 	return t
 }
 
@@ -1069,12 +1009,6 @@ func (t *Label) SetTooltip(v string) *Label {
 	return t
 }
 
-// SetClass sets the [Label.Class]
-func (t *Label) SetClass(v string) *Label {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Label.CustomContextMenu]
 func (t *Label) SetCustomContextMenu(v func(m *Scene)) *Label {
 	t.CustomContextMenu = v
@@ -1144,12 +1078,6 @@ func (t *LabeledTextField) SetErrorText(v string) *LabeledTextField {
 // SetTooltip sets the [LabeledTextField.Tooltip]
 func (t *LabeledTextField) SetTooltip(v string) *LabeledTextField {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [LabeledTextField.Class]
-func (t *LabeledTextField) SetClass(v string) *LabeledTextField {
-	t.Class = v
 	return t
 }
 
@@ -1286,12 +1214,6 @@ func (t *Layout) SetTooltip(v string) *Layout {
 	return t
 }
 
-// SetClass sets the [Layout.Class]
-func (t *Layout) SetClass(v string) *Layout {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Layout.CustomContextMenu]
 func (t *Layout) SetCustomContextMenu(v func(m *Scene)) *Layout {
 	t.CustomContextMenu = v
@@ -1337,12 +1259,6 @@ func (t *Stretch) SetTooltip(v string) *Stretch {
 	return t
 }
 
-// SetClass sets the [Stretch.Class]
-func (t *Stretch) SetClass(v string) *Stretch {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Stretch.CustomContextMenu]
 func (t *Stretch) SetCustomContextMenu(v func(m *Scene)) *Stretch {
 	t.CustomContextMenu = v
@@ -1385,12 +1301,6 @@ func (t *Space) New() ki.Ki {
 // SetTooltip sets the [Space.Tooltip]
 func (t *Space) SetTooltip(v string) *Space {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Space.Class]
-func (t *Space) SetClass(v string) *Space {
-	t.Class = v
 	return t
 }
 
@@ -1462,12 +1372,6 @@ func (t *ProgressBar) SetProgCur(v int) *ProgressBar {
 // SetTooltip sets the [ProgressBar.Tooltip]
 func (t *ProgressBar) SetTooltip(v string) *ProgressBar {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [ProgressBar.Class]
-func (t *ProgressBar) SetClass(v string) *ProgressBar {
-	t.Class = v
 	return t
 }
 
@@ -1723,12 +1627,6 @@ func (t *Scene) SetTooltip(v string) *Scene {
 	return t
 }
 
-// SetClass sets the [Scene.Class]
-func (t *Scene) SetClass(v string) *Scene {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Scene.CustomContextMenu]
 func (t *Scene) SetCustomContextMenu(v func(m *Scene)) *Scene {
 	t.CustomContextMenu = v
@@ -1792,12 +1690,6 @@ func (t *Separator) SetDim(v mat32.Dims) *Separator {
 // SetTooltip sets the [Separator.Tooltip]
 func (t *Separator) SetTooltip(v string) *Separator {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Separator.Class]
-func (t *Separator) SetClass(v string) *Separator {
-	t.Class = v
 	return t
 }
 
@@ -2231,12 +2123,6 @@ func (t *Slider) SetTooltip(v string) *Slider {
 	return t
 }
 
-// SetClass sets the [Slider.Class]
-func (t *Slider) SetClass(v string) *Slider {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Slider.CustomContextMenu]
 func (t *Slider) SetCustomContextMenu(v func(m *Scene)) *Slider {
 	t.CustomContextMenu = v
@@ -2395,12 +2281,6 @@ func (t *Spinner) SetTooltip(v string) *Spinner {
 	return t
 }
 
-// SetClass sets the [Spinner.Class]
-func (t *Spinner) SetClass(v string) *Spinner {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Spinner.CustomContextMenu]
 func (t *Spinner) SetCustomContextMenu(v func(m *Scene)) *Spinner {
 	t.CustomContextMenu = v
@@ -2542,12 +2422,6 @@ func (t *Splits) AsSplits() *Splits {
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Splits.Class]
-func (t *Splits) SetClass(v string) *Splits {
-	t.Class = v
 	return t
 }
 
@@ -2834,12 +2708,6 @@ func (t *SVG) SetTooltip(v string) *SVG {
 	return t
 }
 
-// SetClass sets the [SVG.Class]
-func (t *SVG) SetClass(v string) *SVG {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [SVG.CustomContextMenu]
 func (t *SVG) SetCustomContextMenu(v func(m *Scene)) *SVG {
 	t.CustomContextMenu = v
@@ -2916,12 +2784,6 @@ func (t *Switch) SetIconUnk(v icons.Icon) *Switch {
 // SetTooltip sets the [Switch.Tooltip]
 func (t *Switch) SetTooltip(v string) *Switch {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Switch.Class]
-func (t *Switch) SetClass(v string) *Switch {
-	t.Class = v
 	return t
 }
 
@@ -3024,12 +2886,6 @@ func (t *Switches) SetMutex(v bool) *Switches {
 // SetTooltip sets the [Switches.Tooltip]
 func (t *Switches) SetTooltip(v string) *Switches {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Switches.Class]
-func (t *Switches) SetClass(v string) *Switches {
-	t.Class = v
 	return t
 }
 
@@ -3149,12 +3005,6 @@ func (t *Tabs) SetTooltip(v string) *Tabs {
 	return t
 }
 
-// SetClass sets the [Tabs.Class]
-func (t *Tabs) SetClass(v string) *Tabs {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Tabs.CustomContextMenu]
 func (t *Tabs) SetCustomContextMenu(v func(m *Scene)) *Tabs {
 	t.CustomContextMenu = v
@@ -3221,12 +3071,6 @@ func (t *Tab) SetDeleteButton(v bool) *Tab {
 // SetTooltip sets the [Tab.Tooltip]
 func (t *Tab) SetTooltip(v string) *Tab {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Tab.Class]
-func (t *Tab) SetClass(v string) *Tab {
-	t.Class = v
 	return t
 }
 
@@ -3451,12 +3295,6 @@ func (t *TextField) SetTooltip(v string) *TextField {
 	return t
 }
 
-// SetClass sets the [TextField.Class]
-func (t *TextField) SetClass(v string) *TextField {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [TextField.CustomContextMenu]
 func (t *TextField) SetCustomContextMenu(v func(m *Scene)) *TextField {
 	t.CustomContextMenu = v
@@ -3552,12 +3390,6 @@ func (t *Toolbar) SetTooltip(v string) *Toolbar {
 	return t
 }
 
-// SetClass sets the [Toolbar.Class]
-func (t *Toolbar) SetClass(v string) *Toolbar {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Toolbar.CustomContextMenu]
 func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
 	t.CustomContextMenu = v
@@ -3615,12 +3447,6 @@ func (t *BasicBar) SetTooltip(v string) *BasicBar {
 	return t
 }
 
-// SetClass sets the [BasicBar.Class]
-func (t *BasicBar) SetClass(v string) *BasicBar {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [BasicBar.CustomContextMenu]
 func (t *BasicBar) SetCustomContextMenu(v func(m *Scene)) *BasicBar {
 	t.CustomContextMenu = v
@@ -3648,7 +3474,6 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for the tooltip for this widget, which can use HTML formatting", Directives: gti.Directives{}, Tag: ""}},
-		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "Class has user-defined class name(s) used for user-dependent styling or\nother misc functions.  Multiple class names can be used to combine\nproperties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/gi/v2/gi.GeomState", LocalType: "GeomState", Doc: "Geom has the full layout geometry for size and position of this Widget", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "If true, Override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -3697,15 +3522,6 @@ func (t *WidgetBase) New() ki.Ki {
 // text for the tooltip for this widget, which can use HTML formatting
 func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [WidgetBase.Class]:
-// Class has user-defined class name(s) used for user-dependent styling or
-// other misc functions.  Multiple class names can be used to combine
-// properties: use spaces to separate per css standard
-func (t *WidgetBase) SetClass(v string) *WidgetBase {
-	t.Class = v
 	return t
 }
 

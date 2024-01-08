@@ -142,8 +142,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
 		w, wb := gi.AsWidget(sg.Child((idx * 2) + 1))
-		if wb.Class == "" {
-			wb.Class = "configed"
+		if wb.Prop("configured") == nil {
+			wb.SetProp("configured", true)
 			arg.ConfigWidget(w)
 		} else {
 			arg.AsValueBase().Widget = w

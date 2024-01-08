@@ -128,8 +128,8 @@ func (sv *StructViewInline) ConfigStruct() bool {
 		if hasDef {
 			sv.HasDefs = true
 		}
-		if wb.Class == "" {
-			wb.Class = "configed"
+		if wb.Prop("configured") == nil {
+			wb.SetProp("configured", true)
 			vv.ConfigWidget(w)
 		} else {
 			vvb.Widget = w

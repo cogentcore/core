@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"strings"
-
 	"goki.dev/enums"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
@@ -114,26 +112,4 @@ func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 		return ki.Continue
 	})
 	return got
-}
-
-// AddClass adds a CSS class name; does proper space separation
-func (wb *WidgetBase) AddClass(cls string) *WidgetBase {
-	if wb.Class == "" {
-		wb.Class = cls
-	} else {
-		wb.Class += " " + cls
-	}
-	return wb
-}
-
-// HasClass returns whether the node has the given class name
-// as one of its classes.
-func (wb *WidgetBase) HasClass(cls string) bool {
-	fields := strings.Fields(wb.Class)
-	for _, field := range fields {
-		if field == cls {
-			return true
-		}
-	}
-	return false
 }

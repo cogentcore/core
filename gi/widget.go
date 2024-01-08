@@ -208,11 +208,6 @@ type WidgetBase struct {
 	// text for the tooltip for this widget, which can use HTML formatting
 	Tooltip string
 
-	// Class has user-defined class name(s) used for user-dependent styling or
-	// other misc functions.  Multiple class names can be used to combine
-	// properties: use spaces to separate per css standard
-	Class string
-
 	// Parts are a separate tree of sub-widgets that implement discrete parts
 	// of a widget.  Positions are relative to the parent widget.
 	// These are fully managed by the parent widget
@@ -370,7 +365,6 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined\n", wb.KiType().Name)
 		return
 	}
-	wb.Class = fr.Class
 	wb.Tooltip = fr.Tooltip
 	wb.Styles.CopyFrom(&fr.Styles)
 	wb.Stylers = fr.Stylers
