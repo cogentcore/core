@@ -48,7 +48,8 @@ type Mat2 struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
 
-func Identity2D() Mat2 {
+// Identity2 returns the identity [Mat2] matrix
+func Identity2() Mat2 {
 	return Mat2{
 		1, 0,
 		0, 1,
@@ -314,9 +315,9 @@ func PointsCheckN(pts []float32, n int, errmsg string) error {
 func (a *Mat2) SetString(str string) error {
 	errmsg := "gi.Mat2 SetString"
 	str = strings.ToLower(strings.TrimSpace(str))
-	*a = Identity2D()
+	*a = Identity2()
 	if str == "none" {
-		*a = Identity2D()
+		*a = Identity2()
 		return nil
 	}
 	// could have multiple transforms
