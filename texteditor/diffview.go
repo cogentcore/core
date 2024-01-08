@@ -14,6 +14,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -578,17 +579,15 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 		Style(func(s *styles.Style) {
 			s.SetState(!dv.BufA.IsChanged(), states.Disabled)
 		})
-	gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
-		SetTooltip("save edited version of file with the given -- prompts for filename").
-		OnClick(func(e events.Event) {
-			// fb := giv.NewSoloFuncButton(ctx, dv.SaveFileA)
-			// fb.Args[0].SetValue(dv.FileA)
-			// fb.CallFunc()
-			gi.TheViewInterface.CallFunc(dv, dv.SaveFileA)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(!dv.BufA.IsChanged(), states.Disabled)
-		})
+	sa := gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
+		SetTooltip("save edited version of file with the given -- prompts for filename")
+	sa.OnClick(func(e events.Event) {
+		fb := giv.NewSoloFuncButton(sa, dv.SaveFileA)
+		fb.Args[0].SetValue(dv.FileA)
+		fb.CallFunc()
+	}).Style(func(s *styles.Style) {
+		s.SetState(!dv.BufA.IsChanged(), states.Disabled)
+	})
 
 	gi.NewSeparator(tb)
 
@@ -630,17 +629,15 @@ func (dv *DiffView) ConfigToolbar(tb *gi.Toolbar) {
 		Style(func(s *styles.Style) {
 			s.SetState(!dv.BufB.IsChanged(), states.Disabled)
 		})
-	gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
-		SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function").
-		OnClick(func(e events.Event) {
-			// fb := giv.NewSoloFuncButton(ctx, dv.SaveFileB)
-			// fb.Args[0].SetValue(dv.FileB)
-			// fb.CallFunc()
-			gi.TheViewInterface.CallFunc(dv, dv.SaveFileB)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(!dv.BufB.IsChanged(), states.Disabled)
-		})
+	sb := gi.NewButton(tb).SetText("Save").SetIcon(icons.Save).
+		SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function")
+	sb.OnClick(func(e events.Event) {
+		fb := giv.NewSoloFuncButton(sb, dv.SaveFileB)
+		fb.Args[0].SetValue(dv.FileB)
+		fb.CallFunc()
+	}).Style(func(s *styles.Style) {
+		s.SetState(!dv.BufB.IsChanged(), states.Disabled)
+	})
 }
 
 func (dv *DiffView) TextEditors() (*DiffTextEditor, *DiffTextEditor) {

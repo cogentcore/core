@@ -6,13 +6,11 @@ package main
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 )
 
-func main() { gimain.Run(app) }
-
-func app() {
-	b := gi.NewBody().SetTitle("Cursors")
-	gi.NewLabel(b).SetText("The GoGi Standard Cursors").SetType(gi.LabelHeadlineSmall)
+// TODO: fix
+func main() {
+	b := gi.NewBody().SetTitle("Goki Cursors")
+	gi.NewLabel(b).SetText("The Goki Standard Cursors").SetType(gi.LabelHeadlineSmall)
 	b.NewWindow().Run().Wait()
 }

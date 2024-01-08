@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -16,12 +15,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/laser"
 )
-
-func TestMain(m *testing.M) {
-	RunTest(func() {
-		os.Exit(m.Run())
-	})
-}
 
 func TestBasic(t *testing.T) {
 	sc := NewScene()

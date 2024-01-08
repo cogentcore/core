@@ -33,7 +33,10 @@ import (
 // values contains all the Values for basic builtin types
 
 func init() {
-	gi.TheViewInterface = &ViewInterface{}
+	gi.CallFunc = CallFunc
+	gi.SettingsWindow = SettingsWindow
+	gi.InspectorWindow = InspectorWindow
+
 	ValueMapAdd(icons.Icon(""), func() Value {
 		return &IconValue{}
 	})

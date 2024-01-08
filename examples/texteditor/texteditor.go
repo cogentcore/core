@@ -6,7 +6,6 @@ package main
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
 )
@@ -17,10 +16,8 @@ var samplefile gi.FileName = "../demo/demo.go"
 
 // var samplefile gi.FileName = "../../README.md"
 
-func main() { gimain.Run(app) }
-
-func app() {
-	b := gi.NewAppBody("texteditor").SetTitle("GoGi texteditor.Editor Test")
+func main() {
+	b := gi.NewAppBody("Goki Text Editor Demo")
 	b.App().About = `This is a demo of the texteditor.Editor in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
 	splt := gi.NewSplits(b, "split-view")

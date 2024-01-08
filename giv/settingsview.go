@@ -11,8 +11,8 @@ import (
 
 // TODO(kai): improve settings view app bar structure
 
-// SettingsViewWindow makes and runs a new window for viewing user settings.
-func SettingsViewWindow() {
+// SettingsWindow makes and runs a new window for viewing user settings.
+func SettingsWindow() {
 	if gi.ActivateExistingMainWindow(gi.AllSettings) {
 		return
 	}

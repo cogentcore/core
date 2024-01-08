@@ -12,7 +12,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/xyzv"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
@@ -23,8 +22,6 @@ import (
 
 	"goki.dev/mat32/v2"
 )
-
-func main() { gimain.Run(app) }
 
 // Anim has control for animating
 type Anim struct {
@@ -136,9 +133,9 @@ func (an *Anim) Animate() {
 	}
 }
 
-func app() {
+func main() {
 	anim := &Anim{}
-	b := gi.NewAppBody("xyz").SetTitle("XYZ Demo")
+	b := gi.NewAppBody("XYZ Demo")
 	b.App().About = `This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 

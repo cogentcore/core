@@ -15,7 +15,6 @@ import (
 
 	"goki.dev/gi/v2/filetree"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/gi/v2/texteditor"
@@ -408,9 +407,7 @@ func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
 //////////////////////////////////////////////////////////////////////////////////////
 //  main
 
-func main() { gimain.Run(app) }
-
-func app() {
+func main() {
 	var path string
 
 	// process command args

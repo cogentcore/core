@@ -117,17 +117,6 @@ func LoadAllSettings() error {
 	return errors.Join(errs...)
 }
 
-// Init performs the overall initialization of the Goki system by loading
-// settings. It is automatically called when a new window opened, but can
-// be called before then if certain settings info needed.
-func Init() {
-	goosi.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
-	GokiDataDir()                                                // ensure it exists
-	grr.Log(LoadAllSettings())
-	WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
-	WinGeomMgr.Open()
-}
-
 // UpdateAll updates all windows and triggers a full render rebuild.
 // It is typically called when user settings are changed.
 func UpdateAll() { //gti:add

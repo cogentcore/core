@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Copyright (c) 2023, The Goki Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -52,7 +52,7 @@ type App struct { //gti:add -setters
 	AppBarConfig func(pw Widget)
 }
 
-// NewApp returns a new App initialized with the main properties.
+// NewApp returns a new App initialized with the given name.
 func NewApp(name string) *App {
 	app := &App{}
 	app.Name = name
@@ -62,7 +62,7 @@ func NewApp(name string) *App {
 }
 
 // NewAppBody returns a new Body with a new App initialized with
-// the main properties.
+// the given name.
 func NewAppBody(name string) *Body {
 	b := NewBody(name)
 	b.SetApp(NewApp(name))
@@ -234,14 +234,18 @@ func StdOverflowMenu(tb *Toolbar) {
 
 // StdOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StdOverflowMenu(m *Scene) { //gti:add
-	NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
-		OnClick(func(e events.Event) {
-			TheViewInterface.SettingsViewWindow()
-		})
-	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
-		OnClick(func(e events.Event) {
-			TheViewInterface.Inspector(tb.Sc)
-		})
+	if SettingsWindow != nil {
+		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keyfun.Prefs).
+			OnClick(func(e events.Event) {
+				SettingsWindow()
+			})
+	}
+	if InspectorWindow != nil {
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keyfun.Inspector).
+			OnClick(func(e events.Event) {
+				InspectorWindow(tb.Sc)
+			})
+	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut
 		NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy)

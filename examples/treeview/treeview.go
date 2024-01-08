@@ -9,13 +9,10 @@ import (
 	"math/rand"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 )
-
-func main() { gimain.Run(app) }
 
 func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 	if iter > maxIter {
@@ -34,8 +31,8 @@ func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 	}
 }
 
-func app() {
-	b := gi.NewAppBody("treeview").SetTitle("TreeView Test")
+func main() {
+	b := gi.NewAppBody("Goki Tree View Demo")
 	b.App().About = `This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`
 
