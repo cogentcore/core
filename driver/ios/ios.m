@@ -132,11 +132,6 @@ struct utsname sysInfo;
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 
-	UIPanGestureRecognizer* panGesture = [[UIPanGestureRecognizer alloc] init];
-	panGesture.delegate = self;
-	[panGesture addTarget:self action: @selector(onPan:)];
-	[self.view addGestureRecognizer:panGesture];
-
 	UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] init];
 	pinchGesture.delegate = self;
 	[pinchGesture addTarget:self action: @selector(onPinch:)];
@@ -193,17 +188,6 @@ static void sendTouches(int change, NSSet* touches) {
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
 
-- (void) onPan: (UIPanGestureRecognizer *)panRecognizer {
-	// if (gestureRecognizer.state == .began) {
-		[self becomeFirstResponder];
-		// self.viewForReset = gestureRecognizer.view;
-		printf("GoLog: onPan");
-		CGPoint location = [panRecognizer locationInView:panRecognizer.view];
-		CGPoint translation = [panRecognizer translationInView:panRecognizer.view];
-		scrolled(location.x, location.y, translation.x, translation.y);
-	// }
-}
-
 - (void) onPinch: (UIPinchGestureRecognizer *)pinchRecognizer {
 	// if (gestureRecognizer.state == .began) {
 		[self becomeFirstResponder];
@@ -212,16 +196,6 @@ static void sendTouches(int change, NSSet* touches) {
 		CGFloat scale = pinchRecognizer.scale;
 		CGPoint location = [pinchRecognizer locationInView:pinchRecognizer.view];
 		scaled(scale, location.x, location.y);
-	// }
-}
-
-- (void) onLongPress: (UILongPressGestureRecognizer *)gestureRecognizer {
-	// if (gestureRecognizer.state == .began) {
-		[self becomeFirstResponder];
-		// self.viewForReset = gestureRecognizer.view;
-		printf("GoLog: onLongPress");
-		CGPoint location = [gestureRecognizer locationInView:gestureRecognizer.view];
-		longPressed(location.x, location.y);
 	// }
 }
 

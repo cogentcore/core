@@ -86,25 +86,10 @@ func keyboardDelete() {
 	TheApp.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
-//export scrolled
-func scrolled(posX, posY, distanceX, distanceY C.float) {
-	where := image.Pt(int(posX), int(posY))
-	// make negative so that it goes in the opposite direction
-	// of finger movement (natural scrolling)
-	delta := image.Pt(int(-distanceX), int(-distanceY))
-	TheApp.EvMgr.Scroll(where, delta)
-}
-
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
 	TheApp.EvMgr.Magnify(float32(scaleFactor), where)
-}
-
-//export longPressed
-func longPressed(posX, posY C.float) {
-	// where := image.Pt(int(posX), int(posY))
-	// theApp.window.EvMgr.MouseButton(events.LongPressStart, events.Left, where, 0) // TODO: modifiers
 }
 
 // CodeFromRune is a map from rune to goosi key code
