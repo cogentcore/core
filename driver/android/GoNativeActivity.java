@@ -63,11 +63,7 @@ public class GoNativeActivity extends NativeActivity {
 
 	private native void setDarkMode(boolean dark);
 
-	private native void scrolled(float posX, float posY, float distanceX, float distanceY);
-
 	private native void scaled(float scaleFactor, float posX, float posY);
-
-	private native void longPressed(float posX, float posY);
 
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
@@ -226,7 +222,6 @@ public class GoNativeActivity extends NativeActivity {
 			}
 		});
 
-		mDetector = new GestureDetector(this, new GestureListener());
 		mScaleDetector = new ScaleGestureDetector(this, new ScaleGestureListener());
 	}
 
@@ -298,49 +293,12 @@ public class GoNativeActivity extends NativeActivity {
 		setDarkMode(dark);
 	}
 
-	private GestureDetector mDetector;
 	private ScaleGestureDetector mScaleDetector;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		this.mScaleDetector.onTouchEvent(event);
-		this.mDetector.onTouchEvent(event);
 		return super.onTouchEvent(event);
-	}
-
-	class GestureListener extends GestureDetector.SimpleOnGestureListener {
-		@Override
-		public boolean onDown(MotionEvent event) {
-			Log.d("Go", "onDown: " + event.toString());
-			return true;
-		}
-
-		@Override
-		public boolean onFling(MotionEvent event1, MotionEvent event2,
-				float velocityX, float velocityY) {
-			Log.d("Go", "onFling: " + event1.toString() + event2.toString());
-			return true;
-		}
-
-		@Override
-		public void onLongPress(MotionEvent event) {
-			Log.d("Go", "onLongPress: " + event.toString());
-			longPressed(event.getX(), event.getY());
-		}
-
-		@Override
-		public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
-				float distanceY) {
-			Log.d("Go", "onScroll: " + event1.toString() + event2.toString());
-			scrolled(event2.getX(), event2.getY(), distanceX, distanceY);
-			return true;
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent event) {
-			Log.d("Go", "onDoubleTap: " + event.toString());
-			return true;
-		}
 	}
 
 	class ScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {

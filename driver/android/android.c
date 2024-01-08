@@ -198,17 +198,7 @@ void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz,
 	setDarkMode((bool)dark);
 }
 
-void Java_org_golang_app_GoNativeActivity_scrolled(JNIEnv *env, jclass clazz, jfloat posX, jfloat posY, jfloat distanceX, jfloat distanceY)
-{
-	scrolled((float)posX, (float)posY, (float)distanceX, (float)distanceY);
-}
-
 void Java_org_golang_app_GoNativeActivity_scaled(JNIEnv *env, jclass clazz, jfloat scaleFactor, jfloat posX, jfloat posY)
 {
 	scaled((float)scaleFactor, (float)posX, (float)posY);
-}
-
-void Java_org_golang_app_GoNativeActivity_longPressed(JNIEnv *env, jclass clazz, jfloat posX, jfloat posY)
-{
-	longPressed((float)posX, (float)posY);
 }
