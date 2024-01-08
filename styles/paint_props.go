@@ -184,7 +184,7 @@ var StylePaintFuncs = map[string]StyleFunc{
 			if inh {
 				pc.Transform = par.(*Paint).Transform
 			} else if init {
-				pc.Transform = mat32.Identity2D()
+				pc.Transform = mat32.Identity2()
 			}
 			return
 		}

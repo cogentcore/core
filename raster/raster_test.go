@@ -473,7 +473,7 @@ func TestGradient(t *testing.T) {
 	f := &d.Filler // This is the anon Filler in the Dasher. It also satisfies
 	// the Rasterizer interface, and can only perform a fill on the path.
 
-	offsetPath := &MatrixAdder{Adder: f, M: mat32.Identity2D().Translate(180, 180)}
+	offsetPath := &MatrixAdder{Adder: f, M: mat32.Identity2().Translate(180, 180)}
 
 	p.AddTo(offsetPath)
 
@@ -482,18 +482,18 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	scanner.SetClip(image.Rect(420, 350, 460, 400))
-	offsetPath.M = mat32.Identity2D().Translate(340, 180)
+	offsetPath.M = mat32.Identity2().Translate(340, 180)
 	scanner.SetColor(radial)
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
 	scanner.SetClip(image.ZR)
-	offsetPath.M = mat32.Identity2D().Translate(180, 340)
+	offsetPath.M = mat32.Identity2().Translate(180, 340)
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
 	offsetPath.Reset()
-	if isClose(offsetPath.M, mat32.Identity2D(), 1e-12) == false {
+	if isClose(offsetPath.M, mat32.Identity2(), 1e-12) == false {
 		t.Error("path reset failed", offsetPath)
 	}
 

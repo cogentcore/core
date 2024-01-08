@@ -59,7 +59,7 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.TextStyle.Defaults()
-	pc.Transform = mat32.Identity2D()
+	pc.Transform = mat32.Identity2()
 }
 
 // CopyStyleFrom copies styles from another paint

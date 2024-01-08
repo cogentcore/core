@@ -72,7 +72,7 @@ type State struct {
 
 // Init initializes State -- must be called whenever image size changes
 func (rs *State) Init(width, height int, img *image.RGBA) {
-	rs.CurTransform = mat32.Identity2D()
+	rs.CurTransform = mat32.Identity2()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
 	// rs.Scanner = raster.NewScannerGV(width, height, img, img.Bounds())
@@ -115,7 +115,7 @@ func (rs *State) PopTransform() {
 	sz := len(rs.TransformStack)
 	if sz == 0 {
 		slog.Error("programmer error: paint.State.PopTransform: stack is empty")
-		rs.CurTransform = mat32.Identity2D()
+		rs.CurTransform = mat32.Identity2()
 		return
 	}
 	rs.CurTransform = rs.TransformStack[sz-1]

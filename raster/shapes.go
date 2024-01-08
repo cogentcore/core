@@ -33,7 +33,7 @@ func AddCircle(cx, cy, r float32, p Adder) {
 // x and y radius, (rx, ry), rotated around the center by rot degrees.
 func AddEllipse(cx, cy, rx, ry, rot float32, p Adder) {
 	rotRads := rot * mat32.Pi / 180
-	pt := mat32.Identity2D().Translate(cx, cy).Rotate(rotRads).Translate(-cx, -cy).MulVec2AsPt(mat32.V2(cx+rx, cy))
+	pt := mat32.Identity2().Translate(cx, cy).Rotate(rotRads).Translate(-cx, -cy).MulVec2AsPt(mat32.V2(cx+rx, cy))
 	points := []float32{rx, ry, rot, 1.0, 0.0, pt.X, pt.Y}
 	p.Start(pt.Fixed())
 	AddArc(points, cx, cy, pt.X, pt.Y, p)
@@ -45,7 +45,7 @@ func AddEllipse(cx, cy, rx, ry, rot float32, p Adder) {
 func AddRect(minX, minY, maxX, maxY, rot float32, p Adder) {
 	rot *= mat32.Pi / 180
 	cx, cy := (minX+maxX)/2, (minY+maxY)/2
-	m := mat32.Identity2D().Translate(cx, cy).Rotate(rot).Translate(-cx, -cy)
+	m := mat32.Identity2().Translate(cx, cy).Rotate(rot).Translate(-cx, -cy)
 	q := &MatrixAdder{M: m, Adder: p}
 	q.Start(ToFixedP(minX, minY))
 	q.Line(ToFixedP(maxX, minY))
@@ -78,7 +78,7 @@ func AddRoundRect(minX, minY, maxX, maxY, rx, ry, rot float32, gf GapFunc, p Add
 	}
 	stretch := rx / ry
 	midY := minY + h/2
-	m := mat32.Identity2D().Translate(minX+w/2, midY).Rotate(rot).Scale(1, 1/stretch).Translate(-minX-w/2, -minY-h/2)
+	m := mat32.Identity2().Translate(minX+w/2, midY).Rotate(rot).Scale(1, 1/stretch).Translate(-minX-w/2, -minY-h/2)
 	maxY = midY + h/2*stretch
 	minY = midY - h/2*stretch
 

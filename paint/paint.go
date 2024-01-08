@@ -1077,7 +1077,7 @@ func (pc *Context) DrawImageScaled(fmIm image.Image, x, y, w, h float32) {
 // Identity resets the current transformation matrix to the identity matrix.
 // This results in no translating, scaling, rotating, or shearing.
 func (pc *Context) Identity() {
-	pc.Transform = mat32.Identity2D()
+	pc.Transform = mat32.Identity2()
 }
 
 // Translate updates the current matrix with a translation.

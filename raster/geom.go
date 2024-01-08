@@ -317,7 +317,7 @@ type MatrixAdder struct {
 
 // Reset sets the matrix M to identity
 func (t *MatrixAdder) Reset() {
-	t.M = mat32.Identity2D()
+	t.M = mat32.Identity2()
 }
 
 // Start starts a new path
