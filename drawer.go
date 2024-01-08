@@ -64,16 +64,6 @@ type Drawer interface {
 	// memory up to the GPU.
 	SyncImages()
 
-	// Scale copies texture at given index and layer to render target,
-	// scaling the region defined by src and sr to the destination
-	// such that sr in src-space is mapped to dr in dst-space.
-	// dr is the destination rectangle
-	// sr is the source region (set to image.ZR zero rect for all),
-	// op is the drawing operation: Src = copy source directly (blit),
-	// Over = alpha blend with existing
-	// flipY = flipY axis when drawing this image
-	Scale(idx, layer int, dr image.Rectangle, sr image.Rectangle, op draw.Op, flipY bool) error
-
 	// Copy copies texture at given index and layer to render target.
 	// dp is the destination point,
 	// sr is the source region (set to image.ZR zero rect for all),
