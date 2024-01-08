@@ -97,6 +97,12 @@ type Drawer interface {
 	// Over = alpha blend with existing
 	Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error
 
+	// StartFill starts color fill drawing rendering process on render target
+	StartFill()
+
+	// EndFill ends color filling rendering process on render target
+	EndFill()
+
 	// Surface is the vgpu device being drawn to.
 	// Could be nil on unsupported devices (web).
 	Surface() any
@@ -190,6 +196,16 @@ func (dw *DrawerBase) StartDraw(descIdx int) {
 func (dw *DrawerBase) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
 	draw.Draw(dw.Image, reg, image.NewUniform(clr), image.Point{}, op)
 	return nil
+}
+
+// StartFill starts color fill drawing rendering process on render target
+func (dw *DrawerBase) StartFill() {
+	// no-op
+}
+
+// EndFill ends color filling rendering process on render target
+func (dw *DrawerBase) EndFill() {
+	// no-op
 }
 
 func (dw *DrawerBase) Surface() any {
