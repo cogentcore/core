@@ -609,7 +609,6 @@ func (tb *Tab) ConfigPartsDeleteButton() {
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)
 		cls.Update()
-		cls.SetProp("no-focus", true)
 		cls.OnClick(func(e events.Event) {
 			ts := tb.Tabs()
 			if ts == nil {
