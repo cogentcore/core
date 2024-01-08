@@ -37,7 +37,6 @@ import (
 	"image"
 	"log"
 	"log/slog"
-	"runtime"
 	"strings"
 	"unsafe"
 
@@ -45,31 +44,12 @@ import (
 	"goki.dev/goosi/events"
 )
 
-// InitThreadID is the ID of the thread on which the app was initialized
-var InitThreadID uint64
-
-func init() {
-	// Lock the goroutine responsible for initialization to an OS thread.
-	// This means the goroutine running main (and calling the run function
-	// below) is locked to the OS thread that started the program. This is
-	// necessary for the correct delivery of UIKit events to the process.
-	//
-	// A discussion on this topic:
-	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
-	runtime.LockOSThread()
-	InitThreadID = uint64(C.threadID())
-}
-
 // MainLoop is the main app loop.
 //
 // We process UIKit events in runApp on the initial OS thread and run the
 // standard goosi main loop in another goroutine.
 func (a *App) MainLoop() {
-	if tid := uint64(C.threadID()); tid != InitThreadID {
-		log.Fatalf("App.MainLoop called on thread %d, but init ran on %d", tid, InitThreadID)
-	}
-
-	go a.App.MainLoop()
+	go a.AppSingle.MainLoop()
 
 	C.runApp()
 	log.Fatalln("unexpected return from runApp")

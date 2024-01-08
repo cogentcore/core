@@ -13,6 +13,7 @@ import (
 	"log"
 	"os/user"
 	"path/filepath"
+	"runtime"
 
 	vk "github.com/goki/vulkan"
 	"goki.dev/goosi"
@@ -25,6 +26,15 @@ import (
 )
 
 func Init() {
+	// Lock the goroutine responsible for initialization to an OS thread.
+	// This means the goroutine running main (and calling the run function
+	// below) is locked to the OS thread that started the program. This is
+	// necessary for the correct delivery of UIKit events to the process.
+	//
+	// A discussion on this topic:
+	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
+	runtime.LockOSThread()
+
 	TheApp.InitVk()
 	base.Init(TheApp, &TheApp.App)
 }
