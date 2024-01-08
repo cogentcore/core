@@ -6,7 +6,10 @@ package goosi
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
+
+	"goki.dev/mat32/v2"
 )
 
 const (
@@ -85,6 +88,14 @@ type Drawer interface {
 
 	// EndDraw ends image drawing rendering process on render target
 	EndDraw()
+
+	// Fill fills given color to to render target.
+	// src2dst is the transform mapping source to destination
+	// coordinates (translation, scaling),
+	// reg is the region to fill
+	// op is the drawing operation: Src = copy source directly (blit),
+	// Over = alpha blend with existing
+	Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error
 
 	// Surface is the vgpu device being drawn to.
 	// Could be nil on unsupported devices (web).

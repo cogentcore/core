@@ -6,9 +6,11 @@ package offscreen
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 
 	"goki.dev/goosi"
+	"goki.dev/mat32/v2"
 )
 
 // Drawer is the implementation of [goosi.Drawer] for the offscreen platform
@@ -101,6 +103,17 @@ func (dw *Drawer) EndDraw() {
 		return
 	}
 	goosi.CaptureImage <- dw.Image
+}
+
+// Fill fills given color to to render target.
+// src2dst is the transform mapping source to destination
+// coordinates (translation, scaling),
+// reg is the region to fill
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
+	draw.Draw(dw.Image, reg, image.NewUniform(clr), image.Point{}, op)
+	return nil
 }
 
 func (dw *Drawer) Surface() any {

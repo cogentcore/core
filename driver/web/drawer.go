@@ -8,9 +8,12 @@ package web
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"syscall/js"
 	"unsafe"
+
+	"goki.dev/mat32/v2"
 )
 
 // Drawer is a TEMPORARY, low-performance implementation of [goosi.Drawer].
@@ -108,6 +111,17 @@ func (dw *Drawer) EndDraw() {
 	sz := dw.Image.Bounds().Size()
 	ptr := uintptr(unsafe.Pointer(&dw.Image.Pix[0]))
 	js.Global().Call("displayImage", ptr, len(dw.Image.Pix), sz.X, sz.Y)
+}
+
+// Fill fills given color to to render target.
+// src2dst is the transform mapping source to destination
+// coordinates (translation, scaling),
+// reg is the region to fill
+// op is the drawing operation: Src = copy source directly (blit),
+// Over = alpha blend with existing
+func (dw *Drawer) Fill(clr color.Color, src2dst mat32.Mat3, reg image.Rectangle, op draw.Op) error {
+	draw.Draw(dw.Image, reg, image.NewUniform(clr), image.Point{}, op)
+	return nil
 }
 
 func (dw *Drawer) Surface() any {
