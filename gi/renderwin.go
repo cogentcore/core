@@ -351,9 +351,19 @@ func (w *RenderWin) Resized() {
 	rctx.Mu.RLock()
 	defer rctx.Mu.RUnlock()
 
+	drw := w.GoosiWin.Drawer()
+
 	// render geom and window geom
 	rg := w.GoosiWin.RenderGeom()
 	wg := mat32.Geom2DInt{Size: w.GoosiWin.Size()}
+
+	// if our window geom is not the same as our render geom, we need to fill
+	// the background so that the insets have the scheme background color
+	if wg != rg {
+		drw.StartFill()
+		drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Over)
+		drw.EndFill()
+	}
 
 	curRg := rctx.Geom
 	if curRg == rg {
@@ -367,7 +377,6 @@ func (w *RenderWin) Resized() {
 		}
 		return
 	}
-	drw := w.GoosiWin.Drawer()
 	if drw.MaxTextures() != goosi.MaxTexturesPerSet*3 { // this is essential after hibernate
 		drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3) // use 3 sets
 	}
@@ -395,17 +404,6 @@ func (w *RenderWin) Resized() {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
 	WinGeomMgr.RecordPref(w)
-
-	// if our window geom is the same as our render geom, we don't need
-	// to fill the background space, as the scenes will do that themselves
-	if wg == rg {
-		return
-	}
-	// otherwise, we need to fill the background so that the insets have
-	// the scheme background color
-	drw.StartFill()
-	drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Over)
-	drw.EndFill()
 }
 
 // Raise requests that the window be at the top of the stack of windows,
