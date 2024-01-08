@@ -166,8 +166,9 @@ type App interface {
 // OnSystemWindowCreated is a channel used to communicate that the underlying
 // system window has been created on iOS and Android. If it is nil, it indicates
 // that the current platform does not have an underlying system window that is
-// created asynchronously. If it is non-nil, no actions with the window should
-// be taken until a signal is sent.
+// created asynchronously, or that system window has already been created and
+// thus this is no longer applicable. If it is non-nil, no actions with the window
+// should be taken until a signal is sent.
 var OnSystemWindowCreated chan struct{}
 
 // Platforms are all the supported platforms for Goosi

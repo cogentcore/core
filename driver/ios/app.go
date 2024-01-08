@@ -35,6 +35,7 @@ func Init() {
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
 
+	goosi.OnSystemWindowCreated = make(chan struct{})
 	TheApp.InitVk()
 	base.Init(TheApp, &TheApp.App)
 }
@@ -148,6 +149,8 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	a.Drawer.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
 	a.Winptr = winptr
+	goosi.OnSystemWindowCreated <- struct{}{}
+
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if a.Win != nil {
