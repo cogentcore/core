@@ -6,10 +6,10 @@ package gi
 
 import (
 	"fmt"
-	"image"
 	"sync"
 
 	"goki.dev/goosi/events"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 )
 
@@ -201,10 +201,10 @@ func (sm *StageMgr) DeleteAll() {
 }
 
 // Resize calls Resize on all stages within
-func (sm *StageMgr) Resize(sz image.Point) {
+func (sm *StageMgr) Resize(rg mat32.Geom2DInt) {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Val
-		st.Resize(sz)
+		st.Scene.Resize(rg)
 	}
 }
 

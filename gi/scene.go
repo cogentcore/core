@@ -229,32 +229,26 @@ func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 	if goosi.TheApp.Platform() != goosi.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
-	sc.Resize(geom.Size)
+	sc.Resize(geom)
 	sc.SceneGeom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)
 }
 
-// Resize resizes the scene, creating a new image -- updates Geom Size
-func (sc *Scene) Resize(nwsz image.Point) {
-	if nwsz.X == 0 || nwsz.Y == 0 {
-		return
-	}
-	if sc.Pixels != nil {
-		ib := sc.Pixels.Bounds().Size()
-		if ib == nwsz {
-			sc.SceneGeom.Size = nwsz // make sure
-			return                   // already good
-		}
-	}
-	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+// Resize resizes the scene, creating a new image; updates Geom
+func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	if sc.PaintContext.State == nil {
 		sc.PaintContext.State = &paint.State{}
 	}
 	if sc.PaintContext.Paint == nil {
 		sc.PaintContext.Paint = &styles.Paint{}
 	}
-	sc.PaintContext.Init(nwsz.X, nwsz.Y, sc.Pixels)
-	sc.SceneGeom.Size = nwsz // make sure
+	sc.SceneGeom.Pos = geom.Pos
+	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
+		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
+	}
+	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
+	sc.SceneGeom.Size = geom.Size // make sure
+
 	sc.ApplyStyleScene()
 }
 

@@ -122,7 +122,7 @@ func (st *Stage) RunWindow() *Stage {
 	}
 	st.ConfigMainStage()
 
-	sz := st.RenderCtx.Size
+	sz := st.RenderCtx.Geom.Size
 	// offscreen windows always consider pref size because
 	// they must be unbounded by any previous window sizes
 	// non-offscreen mobile windows must take up the whole window
@@ -144,7 +144,7 @@ func (st *Stage) RunWindow() *Stage {
 	}
 
 	if st.NewWindow || CurRenderWin == nil {
-		sc.Resize(sz)
+		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
 		win := st.NewRenderWin()
 		if CurRenderWin == nil {
 			CurRenderWin = win
@@ -198,12 +198,11 @@ func (st *Stage) RunDialog() *Stage {
 	sc.SceneGeom.Pos = st.Pos
 
 	st.SetMainMgr(ms) // temporary for prefs
-	winsz := ms.RenderCtx.Size
 
-	sz := winsz
+	sz := ms.RenderCtx.Geom.Size
 	if !st.FullWindow {
 		sc.App = ctx.Sc.App // just for reference
-		sz = sc.PrefSize(winsz)
+		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
 		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
 	}
@@ -213,7 +212,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	if st.NewWindow {
 		st.MainMgr = nil
-		sc.Resize(sz)
+		sc.Resize(mat32.Geom2DInt{st.RenderCtx.Geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
@@ -221,10 +220,9 @@ func (st *Stage) RunDialog() *Stage {
 		win.GoStartEventLoop()
 		return st
 	}
-	winGeom := mat32.Geom2DInt{Size: winsz}
 	sc.SceneGeom.Size = sz
 	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
-	sc.FitInWindow(winGeom) // does resize
+	sc.FitInWindow(st.RenderCtx.Geom) // does resize
 	ms.Push(st)
 	// st.SetMainMgr(ms) // already set
 	return st

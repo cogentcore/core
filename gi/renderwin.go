@@ -17,6 +17,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 )
 
@@ -340,7 +341,7 @@ func StackAll() []byte {
 }
 
 // Resized updates internal buffers after a window has been resized.
-func (w *RenderWin) Resized(sz image.Point) {
+func (w *RenderWin) Resized() {
 	rctx := w.RenderCtx()
 	if !w.IsVisible() {
 		rctx.SetFlag(false, RenderVisible)
@@ -349,10 +350,12 @@ func (w *RenderWin) Resized(sz image.Point) {
 	rctx.Mu.RLock()
 	defer rctx.Mu.RUnlock()
 
-	curSz := rctx.Size
-	if curSz == sz {
+	rg := w.GoosiWin.RenderGeom()
+
+	curRg := rctx.Geom
+	if curRg == rg {
 		if DebugSettings.WinEventTrace {
-			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curSz)
+			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curRg)
 		}
 		// still need to apply style even if size is same
 		for _, kv := range w.MainStageMgr.Stack.Order {
@@ -375,16 +378,16 @@ func (w *RenderWin) Resized(sz image.Point) {
 		return
 	}
 	if DebugSettings.WinEventTrace {
-		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curSz, sz)
+		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
 	}
-	if curSz == (image.Point{}) { // first open
+	if curRg == (mat32.Geom2DInt{}) { // first open
 		StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
 	}
-	rctx.Size = sz
+	rctx.Geom = rg
 	rctx.SetFlag(true, RenderVisible)
 	rctx.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
-	w.MainStageMgr.Resize(sz)
+	w.MainStageMgr.Resize(rg)
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
@@ -619,7 +622,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 
 	case events.WindowResize:
 		e.SetHandled()
-		w.Resized(w.GoosiWin.Size())
+		w.Resized()
 
 	case events.Window:
 		ev := e.(*events.WindowEvent)
@@ -679,7 +682,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			w.SetFlag(false, WinGotFocus)
 			w.SendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
-			w.Resized(w.GoosiWin.Size())
+			w.Resized()
 			// TODO: figure out how to restore this stuff without breaking window size on mobile
 
 			// WinGeomMgr.AbortSave() // anything just prior to this is sus
@@ -713,14 +716,14 @@ type RenderParams struct {
 	// window, which should be used for most conversion of standard units.
 	LogicalDPI float32
 
-	// Size of the rendering window, in actual "dot" pixels used for rendering.
-	Size image.Point
+	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
+	Geom mat32.Geom2DInt
 }
 
 // NeedsRestyle returns true if the current render context
 // params differ from those used in last render.
 func (rp *RenderParams) NeedsRestyle(rc *RenderContext) bool {
-	if rp.LogicalDPI != rc.LogicalDPI || rp.Size != rc.Size {
+	if rp.LogicalDPI != rc.LogicalDPI || rp.Geom != rc.Geom {
 		return true
 	}
 	return false
@@ -729,7 +732,7 @@ func (rp *RenderParams) NeedsRestyle(rc *RenderContext) bool {
 // SaveRender grabs current render context params
 func (rp *RenderParams) SaveRender(rc *RenderContext) {
 	rp.LogicalDPI = rc.LogicalDPI
-	rp.Size = rc.Size
+	rp.Geom = rc.Geom
 }
 
 // RenderContextFlags represent RenderContext state
@@ -755,8 +758,8 @@ type RenderContext struct {
 	// window, which should be used for most conversion of standard units.
 	LogicalDPI float32
 
-	// Size of the rendering window, in actual "dot" pixels used for rendering.
-	Size image.Point
+	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
+	Geom mat32.Geom2DInt
 
 	// Mu is mutex for locking out rendering and any destructive updates.
 	// it is Write locked during rendering to provide exclusive blocking
@@ -773,10 +776,10 @@ func NewRenderContext() *RenderContext {
 	rc := &RenderContext{}
 	scr := goosi.TheApp.Screen(0)
 	if scr != nil {
-		rc.Size = scr.Geometry.Size()
+		rc.Geom.SetRect(scr.Geometry)
 		rc.LogicalDPI = scr.LogicalDPI
 	} else {
-		rc.Size = image.Point{1080, 720}
+		rc.Geom = mat32.Geom2DInt{Size: image.Pt(1080, 720)}
 		rc.LogicalDPI = 160
 	}
 	rc.SetFlag(true, RenderVisible)
@@ -824,7 +827,7 @@ func (rc *RenderContext) ReadUnlock() {
 }
 
 func (rc *RenderContext) String() string {
-	str := fmt.Sprintf("Size: %s  Visible: %v", rc.Size, rc.HasFlag(RenderVisible))
+	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.Geom, rc.HasFlag(RenderVisible))
 	return str
 }
 

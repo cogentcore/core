@@ -348,18 +348,3 @@ func (st *Stage) Delete() {
 	st.MainMgr = nil
 	st.RenderCtx = nil
 }
-
-func (st *Stage) Resize(sz image.Point) {
-	if st.Scene == nil {
-		return
-	}
-	switch st.Type {
-	case WindowStage:
-		st.Scene.Resize(sz)
-	case DialogStage:
-		if st.FullWindow {
-			st.Scene.Resize(sz)
-		}
-		// todo: other types fit in constraints
-	}
-}
