@@ -181,7 +181,7 @@ func (a *App) OpenURL(url string) {
 	// no-op by default
 }
 
-func (a *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) clip.Board {
 	// no-op by default
 	return &clip.BoardBase{}
 }

@@ -175,7 +175,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	return w, nil
 }
 
-func (a *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) clip.Board {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()

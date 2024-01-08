@@ -76,10 +76,10 @@ type App interface {
 	// It does not actually close it; see [Window.Close] for that.
 	RemoveWindow(win Window)
 
-	// ClipBoard returns the clip.Board handler for the system,
+	// Clipboard returns the clip.Board handler for the system,
 	// in context of given window, which is optional (can be nil)
 	// but can provide useful context on some systems.
-	ClipBoard(win Window) clip.Board
+	Clipboard(win Window) clip.Board
 
 	// Cursor returns the cursor.Cursor handler for the system, in context of given window.
 	Cursor(win Window) cursor.Cursor

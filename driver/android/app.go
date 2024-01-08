@@ -139,7 +139,7 @@ func (a *App) OpenURL(url string) {
 	// TODO(kai): implement OpenURL on Android
 }
 
-func (a *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) clip.Board {
 	// TODO(kai): implement clipboard on Android
 	return &clip.BoardBase{}
 }

@@ -147,7 +147,7 @@ func (a *App) OpenURL(url string) {
 	js.Global().Call("open", url)
 }
 
-func (a *App) ClipBoard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) clip.Board {
 	return TheClip
 }
 
