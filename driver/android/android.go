@@ -335,6 +335,7 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	TheApp.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
+	TheApp.EvMgr.WindowResize()
 }
 
 // MainUI runs the main UI loop of the app.
@@ -384,7 +385,6 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			}
 
 			a.EvMgr.WindowResize()
-			a.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
