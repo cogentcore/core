@@ -16,7 +16,7 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-// TheApp is the current goosi App -- only ever one in effect
+// TheApp is the current [App]; only one is ever in effect.
 var TheApp App
 
 // App represents the overall OS GUI hardware, and creates Images, Textures
@@ -163,12 +163,21 @@ type App interface {
 	IsDark() bool
 }
 
+// OnSystemWindowCreated is a channel used to communicate that the underlying
+// system window has been created on iOS and Android. If it is nil, it indicates
+// that the current platform does not have an underlying system window that is
+// created asynchronously. If it is non-nil, no actions with the window should
+// be taken until a signal is sent.
+var OnSystemWindowCreated chan struct{}
+
 // Platforms are all the supported platforms for Goosi
 type Platforms int32 //enums:enum
 
 const (
 	// MacOS is a mac desktop machine (aka Darwin)
 	MacOS Platforms = iota
+
+	// TODO(kai): LinuxX11 or Linux? What about LinuxWayland?
 
 	// LinuxX11 is a Linux OS machine running X11 window server
 	LinuxX11
