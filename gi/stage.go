@@ -276,8 +276,22 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 	return st
 }
 
-// Run does the default run behavior based on the type of stage
+// Run runs the stage using the default run behavior based on the type of stage.
 func (st *Stage) Run() *Stage {
+	if goosi.OnSystemWindowCreated == nil {
+		return st.RunImpl()
+	}
+	go func() {
+		<-goosi.OnSystemWindowCreated
+		// no longer applicable
+		goosi.OnSystemWindowCreated = nil
+		st.RunImpl()
+	}()
+	return st
+}
+
+// RunImpl is the implementation of [Stage.Run]; it should not typically be called by end-users.
+func (st *Stage) RunImpl() *Stage {
 	switch st.Type {
 	case WindowStage:
 		return st.RunWindow()
