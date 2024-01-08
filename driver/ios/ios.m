@@ -192,7 +192,6 @@ static void sendTouches(int change, NSSet* touches) {
 	// if (gestureRecognizer.state == .began) {
 		[self becomeFirstResponder];
 		// self.viewForReset = gestureRecognizer.view;
-		printf("GoLog: onPinch");
 		CGFloat scale = pinchRecognizer.scale;
 		CGPoint location = [pinchRecognizer locationInView:pinchRecognizer.view];
 		scaled(scale, location.x, location.y);
@@ -229,7 +228,6 @@ static void sendTouches(int change, NSSet* touches) {
 @end
 
 void runApp(void) {
-	printf("GoLog: ObjectiveC: Goki: RUN APP");
 	char * argv[] = {};
 	@autoreleasepool {
 		UIApplicationMain(0, argv, nil, NSStringFromClass([GoAppAppDelegate class]));
