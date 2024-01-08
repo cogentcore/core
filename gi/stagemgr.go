@@ -200,11 +200,16 @@ func (sm *StageMgr) DeleteAll() {
 	}
 }
 
-// Resize calls Resize on all stages within
+// Resize calls Resize on all stages within based on the given
+// window render geom.
 func (sm *StageMgr) Resize(rg mat32.Geom2DInt) {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Val
-		st.Scene.Resize(rg)
+		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
+			st.Scene.Resize(rg)
+		} else {
+			st.Scene.FitInWindow(rg)
+		}
 	}
 }
 
