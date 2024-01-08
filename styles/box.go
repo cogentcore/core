@@ -138,18 +138,18 @@ const (
 type Border struct { //gti:add
 
 	// how to draw the border
-	Style Sides[BorderStyles] `xml:"style"`
+	Style Sides[BorderStyles]
 
 	// width of the border
-	Width SideValues `xml:"width" view:"inline"`
+	Width SideValues `view:"inline"`
 
 	// radius (rounding) of the corners
-	Radius SideValues `xml:"radius" view:"inline"`
+	Radius SideValues `view:"inline"`
 
 	// TODO(kai/imageColor)
 
 	// color of the border
-	Color SideColors `xml:"color" view:"inline"`
+	Color SideColors `view:"inline"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -208,25 +208,25 @@ var (
 type Shadow struct { //gti:add
 
 	// horizontal offset of shadow; positive = right side, negative = left side
-	HOffset units.Value `xml:".h-offset"`
+	HOffset units.Value
 
 	// vertical offset of shadow; positive = below, negative = above
-	VOffset units.Value `xml:".v-offset"`
+	VOffset units.Value
 
 	// blur radius; higher numbers = more blurry
-	Blur units.Value `xml:".blur"`
+	Blur units.Value
 
 	// spread radius; positive number increases size of shadow, negative decreases size
-	Spread units.Value `xml:".spread"`
+	Spread units.Value
 
 	// TODO(kai/imageColor)
 
 	// color of the shadow
-	Color color.RGBA `xml:".color"`
+	Color color.RGBA
 
 	// if true, shadow is inset within box instead of outset outside of box;
 	// TODO: implement
-	Inset bool `xml:".inset"`
+	Inset bool
 }
 
 func (s *Shadow) HasShadow() bool {

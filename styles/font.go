@@ -23,28 +23,28 @@ import (
 type Font struct { //gti:add
 
 	// size of font to render (inhereted); converted to points when getting font to use
-	Size units.Value `xml:"font-size" inherit:"true"`
+	Size units.Value
 
 	// font family (inhereted): ordered list of comma-separated names from more general to more specific to use; use split on , to parse
-	Family string `xml:"font-family" inherit:"true"`
+	Family string
 
 	// style (inhereted): normal, italic, etc
-	Style FontStyles `xml:"font-style" inherit:"true"`
+	Style FontStyles
 
 	// weight (inhereted): normal, bold, etc
-	Weight FontWeights `xml:"font-weight" inherit:"true"`
+	Weight FontWeights
 
 	// font stretch / condense options (inhereted)
-	Stretch FontStretch `xml:"font-stretch" inherit:"true"`
+	Stretch FontStretch
 
 	// normal or small caps (inhereted)
-	Variant FontVariants `xml:"font-variant" inherit:"true"`
+	Variant FontVariants
 
 	// underline, line-through, etc (not inherited)
-	Deco TextDecorations `xml:"text-decoration"`
+	Deco TextDecorations
 
 	// super / sub script (not inherited)
-	Shift BaselineShifts `xml:"baseline-shift"`
+	Shift BaselineShifts
 
 	// full font information including enhanced metrics and actual font codes for drawing text; this is a pointer into FontLibrary of loaded fonts
 	Face *FontFace `view:"-"`
@@ -425,13 +425,13 @@ type FontRender struct { //gti:add
 	Font
 
 	// text color (inhereted)
-	Color color.RGBA `xml:"color" inherit:"true"`
+	Color color.RGBA
 
 	// background color (not inherited, transparent by default)
-	Background image.Image `xml:"background-color"`
+	Background image.Image
 
 	// alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
-	Opacity float32 `xml:"opacity"`
+	Opacity float32
 }
 
 // FontRender returns the font-rendering-related

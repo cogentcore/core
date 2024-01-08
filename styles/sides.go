@@ -35,16 +35,16 @@ const (
 type Sides[T any] struct { //gti:add
 
 	// top/top-left value
-	Top T `xml:"top"`
+	Top T
 
 	// right/top-right value
-	Right T `xml:"right"`
+	Right T
 
 	// bottom/bottom-right value
-	Bottom T `xml:"bottom"`
+	Bottom T
 
 	// left/bottom-left value
-	Left T `xml:"left"`
+	Left T
 }
 
 // NewSides is a helper that creates new sides/corners of the given type

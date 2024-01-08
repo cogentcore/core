@@ -151,7 +151,7 @@ type Style struct { //gti:add
 	// TODO(kai/imageColor)
 
 	// Color specifies the text / content color, and it is inherited.
-	Color color.RGBA `inherit:"true"`
+	Color color.RGBA
 
 	// Background specifies the background of the element. It is not inherited,
 	// and it is nil (transparent) by default.
@@ -230,7 +230,7 @@ func (s *Style) Defaults() {
 
 // Object-fit for videos
 
-// visibility -- support more than just hidden  inherit:"true"
+// visibility -- support more than just hidden
 
 // transition -- animation of hover, etc
 

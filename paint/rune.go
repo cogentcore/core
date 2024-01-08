@@ -21,15 +21,15 @@ import (
 type Rune struct {
 
 	// fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms
-	Face font.Face `json:"-" xml:"-"`
+	Face font.Face `json:"-"`
 
 	// color to draw characters in
-	Color color.Color `json:"-" xml:"-"`
+	Color color.Color `json:"-"`
 
 	// TODO(kai/imageColor)
 
 	// background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background
-	BackgroundColor color.Color `json:"-" xml:"-"`
+	BackgroundColor color.Color `json:"-"`
 
 	// additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)
 	Deco styles.TextDecorations

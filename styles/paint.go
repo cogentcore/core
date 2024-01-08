@@ -20,7 +20,7 @@ type Paint struct { //gti:add
 	Off bool
 
 	// todo big enum of how to display item -- controls layout etc
-	Display bool `xml:"display"`
+	Display bool
 
 	// stroke (line drawing) parameters
 	StrokeStyle Stroke
@@ -35,13 +35,13 @@ type Paint struct { //gti:add
 	TextStyle Text
 
 	// various rendering special effects settings
-	VecEff VectorEffects `xml:"vector-effect"`
+	VecEff VectorEffects
 
 	// our additions to transform -- pushed to render state
-	Transform mat32.Mat2 `xml:"transform"`
+	Transform mat32.Mat2
 
 	// units context -- parameters necessary for anchoring relative units
-	UnContext units.Context `xml:"-"`
+	UnContext units.Context
 
 	// have the styles already been set?
 	StyleSet bool
@@ -159,13 +159,13 @@ const (
 type Fill struct {
 
 	// fill color image specification; filling is off if nil
-	Color image.Image `xml:"fill"`
+	Color image.Image
 
 	// global alpha opacity / transparency factor between 0 and 1
-	Opacity float32 `xml:"fill-opacity"`
+	Opacity float32
 
 	// rule for how to fill more complex shapes with crossing lines
-	Rule FillRules `xml:"fill-rule"`
+	Rule FillRules
 }
 
 // Defaults initializes default values for paint fill
@@ -214,28 +214,28 @@ const (
 type Stroke struct {
 
 	// stroke color image specification; stroking is off if nil
-	Color image.Image `xml:"stroke"`
+	Color image.Image
 
 	// global alpha opacity / transparency factor between 0 and 1
-	Opacity float32 `xml:"stroke-opacity"`
+	Opacity float32
 
 	// line width
-	Width units.Value `xml:"stroke-width"`
+	Width units.Value
 
 	// minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
-	MinWidth units.Value `xml:"stroke-min-width"`
+	MinWidth units.Value
 
 	// 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
-	Dashes []float32 `xml:"stroke-dasharray"`
+	Dashes []float32
 
 	// how to draw the end cap of lines
-	Cap LineCaps `xml:"stroke-linecap"`
+	Cap LineCaps
 
 	// how to join line segments
-	Join LineJoins `xml:"stroke-linejoin"`
+	Join LineJoins
 
 	// limit of how far to miter -- must be 1 or larger
-	MiterLimit float32 `xml:"stroke-miterlimit" min:"1"`
+	MiterLimit float32 `min:"1"`
 }
 
 // Defaults initializes default values for paint stroke

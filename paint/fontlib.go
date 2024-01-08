@@ -32,13 +32,13 @@ type FontInfo struct {
 	Name string
 
 	// stretch: normal, expanded, condensed, etc
-	Stretch styles.FontStretch `xml:"stretch"`
+	Stretch styles.FontStretch
 
 	// weight: normal, bold, etc
-	Weight styles.FontWeights `xml:"weight"`
+	Weight styles.FontWeights
 
 	// style -- normal, italic, etc
-	Style styles.FontStyles `xml:"style"`
+	Style styles.FontStyles
 
 	// example text -- styled according to font params in chooser
 	Example string
