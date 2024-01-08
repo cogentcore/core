@@ -56,6 +56,8 @@ type Scene struct {
 	// camera determines view onto scene
 	Camera Camera `set:"-"`
 
+	// TODO(kai/imageColor)
+
 	// background color
 	BackgroundColor color.RGBA
 
