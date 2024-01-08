@@ -10,9 +10,9 @@
 package base
 
 import (
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/mat32/v2"
 )
 
 // AppSingle contains the data and logic common to all implementations of [goosi.App]
@@ -35,8 +35,9 @@ type AppSingle[D goosi.Drawer, W goosi.Window] struct { //gti:add
 	// Scrn is the single [goosi.Screen] associated with the app.
 	Scrn *goosi.Screen `label:"Screen"`
 
-	// Insts are the size of any insets on the sides of the screen.
-	Insts styles.SideFloats `label:"Insets"`
+	// RendGeom is the actual effective geometry of the window used
+	// for rendering content.
+	RendGeom mat32.Geom2DInt `label:"Render geometry"`
 }
 
 // AppSingler describes the common functionality implemented by [AppSingle]
@@ -50,8 +51,10 @@ type AppSingler interface {
 	// Drawer returns the single [goosi.Drawer] associated with this app.
 	Drawer() goosi.Drawer
 
-	// Insets returns the size of any insets on the sides of the screen.
-	Insets() styles.SideFloats
+	// RenderGeom returns the actual effective geometry of the window used
+	// for rendering content, which may be different from {0, [goosi.Screen.PixSize]}
+	// due to insets caused by things like status bars and button overlays.
+	RenderGeom() mat32.Geom2DInt
 }
 
 // NewAppSingle makes a new [AppSingle].
@@ -69,8 +72,8 @@ func (a *AppSingle[D, W]) Drawer() goosi.Drawer {
 	return a.Draw
 }
 
-func (a *AppSingle[D, W]) Insets() styles.SideFloats {
-	return a.Insts
+func (a *AppSingle[D, W]) RenderGeom() mat32.Geom2DInt {
+	return a.RendGeom
 }
 
 func (a *AppSingle[D, W]) NScreens() int {

@@ -13,8 +13,8 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/mat32/v2"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -67,9 +67,10 @@ type Window interface {
 	// underlying screen, in OS-specific window manager coordinates.
 	Position() image.Point
 
-	// Insets returns the size of any insets on the window in raw device pixels (dots).
-	// These insets can be caused by status bars, button overlays, or devices cutouts.
-	Insets() styles.SideFloats
+	// RenderGeom returns the actual effective geometry of the window used
+	// for rendering content, which may be different from {0, [Window.Size]}
+	// due to insets caused by things like status bars and button overlays.
+	RenderGeom() mat32.Geom2DInt
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
 	// units that may not include any high DPI factors (DevPixRatio)

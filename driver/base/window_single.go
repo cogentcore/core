@@ -12,9 +12,9 @@ package base
 import (
 	"image"
 
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/mat32/v2"
 )
 
 // WindowSingle contains the data and logic common to all implementations of [goosi.Window]
@@ -113,6 +113,6 @@ func (w *WindowSingle[A]) Minimize() {
 	// no-op
 }
 
-func (w *WindowSingle[A]) Insets() styles.SideFloats {
-	return w.App.Insets()
+func (w *WindowSingle[A]) RenderGeom() mat32.Geom2DInt {
+	return w.App.RenderGeom()
 }

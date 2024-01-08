@@ -14,9 +14,9 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/mat32/v2"
 )
 
 // Window contains the data and logic common to all implementations of [goosi.Window].
@@ -161,9 +161,9 @@ func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUFunc = f
 }
 
-func (w *Window[A]) Insets() styles.SideFloats {
-	// no-op by default
-	return styles.NewSideFloats()
+func (w *Window[A]) RenderGeom() mat32.Geom2DInt {
+	// {0, Size} by default
+	return mat32.Geom2DInt{Size: w.This.Size()}
 }
 
 func (w *Window[A]) SetCloseReqFunc(fun func(win goosi.Window)) {
