@@ -18,6 +18,15 @@ import (
 	"goki.dev/grr"
 )
 
+func Init() {
+	TheApp.Drawer = &Drawer{}
+	TheApp.GetScreens()
+
+	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir-"))
+
+	base.Init(TheApp, &TheApp.App)
+}
+
 // TheApp is the single [goosi.App] for the offscreen platform
 var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
 
@@ -30,17 +39,6 @@ type App struct { //gti:add
 	// as offscreen tests should not be dependent on user preferences and
 	// other data.
 	TempDataDir string
-}
-
-// Main is called from main thread when it is time to start running the
-// main loop. When function f returns, the app ends automatically.
-func Main(f func(goosi.App)) {
-	TheApp.Drawer = &Drawer{}
-	TheApp.GetScreens()
-
-	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir-"))
-
-	base.Main(f, TheApp, &TheApp.App)
 }
 
 // NewWindow creates a new window with the given options.

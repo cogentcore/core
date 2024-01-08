@@ -26,23 +26,7 @@ import (
 	"goki.dev/jsfs"
 )
 
-// TheApp is the single [goosi.App] for the web platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
-
-// App is the [goosi.App] implementation for the web platform
-type App struct { //gti:add
-	base.AppSingle[*Drawer, *Window]
-
-	// SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)
-	SystemPlatform goosi.Platforms
-
-	// KeyMods are the current key mods
-	KeyMods key.Modifiers
-}
-
-// Main is called from main thread when it is time to start running the
-// main loop. When function f returns, the app ends automatically.
-func Main(f func(goosi.App)) {
+func Init() {
 	TheApp.Drawer = &Drawer{}
 
 	err := os.Setenv("HOME", "/home/me")
@@ -60,7 +44,21 @@ func Main(f func(goosi.App)) {
 		}
 	}
 
-	base.Main(f, TheApp, &TheApp.App)
+	base.Init(TheApp, &TheApp.App)
+}
+
+// TheApp is the single [goosi.App] for the web platform
+var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
+
+// App is the [goosi.App] implementation for the web platform
+type App struct { //gti:add
+	base.AppSingle[*Drawer, *Window]
+
+	// SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)
+	SystemPlatform goosi.Platforms
+
+	// KeyMods are the current key mods
+	KeyMods key.Modifiers
 }
 
 // NewWindow creates a new window with the given options.

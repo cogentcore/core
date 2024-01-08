@@ -18,6 +18,11 @@ import (
 	"goki.dev/vgpu/v2/vgpu"
 )
 
+func Init() {
+	TheApp.InitVk()
+	base.Init(TheApp, &TheApp.App)
+}
+
 // TheApp is the single [goosi.App] for the Android platform
 var TheApp = &App{AppSingle: base.NewAppSingle[*vdraw.Drawer, *Window]()}
 
@@ -30,13 +35,6 @@ type App struct { //gti:add
 
 	// Winptr is the pointer to the underlying system window
 	Winptr uintptr
-}
-
-// Main is called from main thread when it is time to start running the
-// main loop. When function f returns, the app ends automatically.
-func Main(f func(goosi.App)) {
-	TheApp.InitVk()
-	base.Main(f, TheApp, &TheApp.App)
 }
 
 // InitVk initializes Vulkan things for the app

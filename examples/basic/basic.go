@@ -9,16 +9,11 @@ import (
 	"image"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
+	_ "goki.dev/goosi/driver"
 )
 
 func main() {
-	fmt.Println("Hello, basic!")
-	driver.Main(mainrun)
-}
-
-func mainrun(a goosi.App) {
-	fmt.Println("mainrun")
+	fmt.Println("Hello, world!")
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
@@ -31,5 +26,5 @@ func mainrun(a goosi.App) {
 
 	fmt.Println("got new window", w)
 
-	select {}
+	goosi.TheApp.MainLoop()
 }

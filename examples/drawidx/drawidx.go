@@ -14,7 +14,7 @@ import (
 	vk "github.com/goki/vulkan"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
+	_ "goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -29,9 +29,7 @@ type CamView struct {
 	Prjn  mat32.Mat4
 }
 
-func main() { driver.Main(mainrun) }
-
-func mainrun(a goosi.App) {
+func main() {
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
@@ -174,36 +172,39 @@ func mainrun(a goosi.App) {
 	}
 
 	haveKeyboard := false
-	for {
-		evi := w.EventMgr().Deque.NextEvent()
-		et := evi.Type()
-		if et != events.WindowPaint {
-			fmt.Println("got event", evi)
+	go func() {
+		for {
+			evi := w.EventMgr().Deque.NextEvent()
+			et := evi.Type()
+			if et != events.WindowPaint && et != events.MouseMove {
+				fmt.Println("got event", evi)
+			}
+			switch et {
+			case events.Window:
+				ev := evi.(*events.WindowEvent)
+				fmt.Println("got window event", ev)
+				switch ev.Action {
+				case events.WinShow:
+					make()
+				case events.WinClose:
+					fmt.Println("got events.Close; quitting")
+					goosi.TheApp.Quit()
+				}
+			case events.WindowPaint:
+				if w.IsVisible() {
+					renderFrame()
+				} else {
+					fmt.Println("skipping paint event")
+				}
+			case events.MouseDown:
+				if haveKeyboard {
+					goosi.TheApp.HideVirtualKeyboard()
+				} else {
+					goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
+				}
+				haveKeyboard = !haveKeyboard
+			}
 		}
-		switch et {
-		case events.Window:
-			ev := evi.(*events.WindowEvent)
-			fmt.Println("got window event", ev)
-			switch ev.Action {
-			case events.WinShow:
-				make()
-			case events.WinClose:
-				fmt.Println("got events.Close; returning")
-				return
-			}
-		case events.WindowPaint:
-			if w.IsVisible() {
-				renderFrame()
-			} else {
-				fmt.Println("skipping paint event")
-			}
-		case events.MouseDown:
-			if haveKeyboard {
-				goosi.TheApp.HideVirtualKeyboard()
-			} else {
-				goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
-			}
-			haveKeyboard = !haveKeyboard
-		}
-	}
+	}()
+	goosi.TheApp.MainLoop()
 }

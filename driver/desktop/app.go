@@ -27,9 +27,12 @@ import (
 	vk "github.com/goki/vulkan"
 )
 
-func init() {
+func Init() {
 	// some operating systems require us to be on the main thread
 	runtime.LockOSThread()
+
+	TheApp.InitVk()
+	base.Init(TheApp, &TheApp.App)
 }
 
 // TheApp is the single [goosi.App] for the desktop platform
@@ -44,13 +47,6 @@ type App struct { //gti:add
 
 	// ShareWin is a non-visible, always-present window that all windows share gl context with
 	ShareWin *glfw.Window
-}
-
-// Main is called from main thread when it is time to start running the
-// main loop.  When function f returns, the app ends automatically.
-func Main(f func(goosi.App)) {
-	TheApp.InitVk()
-	base.Main(f, TheApp, &TheApp.App)
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing
@@ -84,7 +80,7 @@ func (a *App) MainLoop() {
 // InitVk initializes glfw, vulkan, vgpu, and the screens.
 func (a *App) InitVk() {
 	if err := glfw.Init(); err != nil {
-		log.Fatalln("goosi.vkos failed to initialize glfw:", err)
+		log.Fatalln("goosi/driver/desktop failed to initialize glfw:", err)
 	}
 	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
 	vk.Init()

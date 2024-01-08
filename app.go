@@ -135,19 +135,15 @@ type App interface {
 	// Quit closes all windows and exits the program.
 	Quit()
 
-	// MainLoop runs the main loop of the app. It should not be
-	// called by end-user code; it is for driver use only.
+	// MainLoop runs the main loop of the app.
 	MainLoop()
 
-	// RunOnMain runs given function on main thread (where main event loop is running)
+	// RunOnMain runs given function on main thread (where [App.MainLoop] is running).
 	// Some functions (GUI-specific etc) must run on this initial main thread for the
-	// overall app.
+	// overall app. If [App.MainLoop] has not been called yet, RunOnMain assumes that
+	// it is being called from the main thread and thus just calls the given function
+	// directly.
 	RunOnMain(f func())
-
-	// GoRunOnMain runs given function on main thread and returns immediately
-	// Some functions (GUI-specific etc) must run on this initial main thread for the
-	// overall app.
-	GoRunOnMain(f func())
 
 	// SendEmptyEvent sends an empty, blank event to global event processing
 	// system, which has the effect of pushing the system along during cases when

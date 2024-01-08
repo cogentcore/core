@@ -14,17 +14,16 @@ package driver
 import (
 	"testing"
 
-	"goki.dev/goosi"
 	"goki.dev/goosi/driver/desktop"
 	"goki.dev/goosi/driver/offscreen"
 )
 
-func driverMain(f func(goosi.App)) {
+func init() {
 	// TODO(kai/binsize): consider figuring out how to do this without
 	// increasing binary sizes; also supporting running tests on mobile and web
 	if testing.Testing() {
-		offscreen.Main(f)
+		offscreen.Init()
 		return
 	}
-	desktop.Main(f)
+	desktop.Init()
 }

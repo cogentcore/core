@@ -8,12 +8,11 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	"log"
 	"time"
 
 	"goki.dev/cursors"
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver"
+	_ "goki.dev/goosi/driver"
 	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vgpu"
 )
@@ -22,11 +21,6 @@ import (
 var content embed.FS
 
 func main() {
-	log.Println("GoLog: in main.main")
-	driver.Main(mainrun)
-}
-
-func mainrun(a goosi.App) {
 	opts := &goosi.NewWindowOptions{
 		Size:      image.Pt(1024, 768),
 		StdPixels: true,
@@ -112,28 +106,29 @@ func mainrun(a goosi.App) {
 		}
 	}
 
-	for {
-		evi := w.EventMgr().Deque.NextEvent()
-		et := evi.Type()
-		if et != events.WindowPaint {
-			fmt.Println("got event", evi)
-		}
-		switch et {
-		case events.Window:
-			ev := evi.(*events.WindowEvent)
-			fmt.Println("got window event", ev)
-			switch ev.Action {
-			case events.WinShow:
-				make()
-			case events.WinClose:
-				fmt.Println("got events.Close; returning")
-				return
+	go func() {
+		for {
+			evi := w.EventMgr().Deque.NextEvent()
+			et := evi.Type()
+			if et != events.WindowPaint && et != events.MouseMove {
+				fmt.Println("got event", evi)
 			}
-		case events.WindowPaint:
-			// fmt.Println("paint")
-			renderFrame()
-		case events.MouseMove:
-			fmt.Println("got mouse event at pos", evi.Pos())
+			switch et {
+			case events.Window:
+				ev := evi.(*events.WindowEvent)
+				fmt.Println("got window event", ev)
+				switch ev.Action {
+				case events.WinShow:
+					make()
+				case events.WinClose:
+					fmt.Println("got events.Close; quitting")
+					goosi.TheApp.Quit()
+				}
+			case events.WindowPaint:
+				// fmt.Println("paint")
+				renderFrame()
+			}
 		}
-	}
+	}()
+	goosi.TheApp.MainLoop()
 }
