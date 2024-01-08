@@ -181,29 +181,7 @@ func (sc *Scene) SetStyles() {
 			return
 		}
 
-		mm := sc.Stage.MainMgr
-		if mm == nil {
-			return
-		}
-		rw := mm.RenderWin
-		if rw == nil {
-			return
-		}
-
-		insets := rw.GoosiWin.Insets()
-
-		uv := func(val float32) units.Value {
-			return units.Custom(func(uc *units.Context) float32 {
-				return max(val, uc.Dp(8))
-			})
-		}
-
-		s.Padding.Set(
-			uv(insets.Top),
-			uv(insets.Right),
-			uv(insets.Bottom),
-			uv(insets.Left),
-		)
+		s.Padding.Set(units.Dp(8))
 	})
 }
 
