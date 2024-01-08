@@ -152,6 +152,12 @@ func updateConfig(width, height, orientation int32) {
 	TheApp.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
 	TheApp.Dark = bool(C.isDark())
+
+	// we only send OnSystemWindowCreated after we get the screen info
+	if goosi.OnSystemWindowCreated != nil {
+		goosi.OnSystemWindowCreated <- struct{}{}
+	}
+	TheApp.EvMgr.WindowResize()
 }
 
 //export lifecycleDead
