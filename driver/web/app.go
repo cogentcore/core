@@ -27,7 +27,7 @@ import (
 )
 
 func Init() {
-	TheApp.Drawer = &Drawer{}
+	TheApp.Draw = &Drawer{}
 
 	err := os.Setenv("HOME", "/home/me")
 	if err != nil {
