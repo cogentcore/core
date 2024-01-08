@@ -441,31 +441,23 @@ func (sc *Scene) DoUpdate() bool {
 
 	switch {
 	case rc.HasFlag(RenderRebuild):
-		// fmt.Println("rebuild")
 		sc.DoRebuild()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
-		// fmt.Println(sc, "scene restyle")
-		sc.Fill() // full redraw
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
 	case sc.Is(ScNeedsLayout):
-		// fmt.Println(sc, "scene layout start")
-		sc.Fill() // full redraw
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
-		// fmt.Println("scene layout done")
 	case sc.Is(ScNeedsRender):
-		// fmt.Println(sc, "scene render start")
 		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
-		// fmt.Println("scene render done")
 	case len(sc.ReRender) > 0:
 		for _, w := range sc.ReRender {
 			w.SetFlag(true, ScNeedsRender)
@@ -515,21 +507,9 @@ func (sc *Scene) ApplyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
-	sc.Fill() // full redraw
 	sc.ConfigSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutRenderScene()
-}
-
-// Fill fills the scene with BgColor (default transparent)
-// which is the starting base level for rendering.
-// Typically the root Frame fills its background with color
-// but it can e.g., leave corners transparent for popups etc.
-func (sc *Scene) Fill() {
-	pc := &sc.PaintContext
-	pc.Lock()
-	pc.FillBox(mat32.Vec2{}, mat32.V2FromPoint(sc.SceneGeom.Size), sc.Background)
-	pc.Unlock()
 }
 
 // PrefSize computes the preferred size of the scene based on current contents.

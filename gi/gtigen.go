@@ -1485,7 +1485,6 @@ var SceneType = gti.AddType(&gti.Type{
 		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"PaintContext", &gti.Field{Name: "PaintContext", Type: "goki.dev/girl/paint.Context", LocalType: "paint.Context", Doc: "paint context for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"Background", &gti.Field{Name: "Background", Type: "image.Image", LocalType: "image.Image", Doc: "Background for filling scene.\nDefaults to nil so that popups can have rounded corners.", Directives: gti.Directives{}, Tag: ""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"RenderBBoxHue", &gti.Field{Name: "RenderBBoxHue", Type: "float32", LocalType: "float32", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
@@ -1588,14 +1587,6 @@ func (t *Scene) SetBody(v *Body) *Scene {
 // Used e.g., for recycling views of a given item instead of creating new one.
 func (t *Scene) SetData(v any) *Scene {
 	t.Data = v
-	return t
-}
-
-// SetBackground sets the [Scene.Background]:
-// Background for filling scene.
-// Defaults to nil so that popups can have rounded corners.
-func (t *Scene) SetBackground(v image.Image) *Scene {
-	t.Background = v
 	return t
 }
 

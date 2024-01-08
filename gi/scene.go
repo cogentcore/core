@@ -84,10 +84,6 @@ type Scene struct {
 	// live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// Background for filling scene.
-	// Defaults to nil so that popups can have rounded corners.
-	Background image.Image
-
 	// event manager for this scene
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" set:"-"`
 
