@@ -34,6 +34,8 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// TODO(kai): get rid of these?
+
 const force = true
 const dontForce = false
 

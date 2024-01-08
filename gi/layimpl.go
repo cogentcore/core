@@ -1546,7 +1546,7 @@ func (ly *Layout) SizeFinalChildren() {
 func (wb *WidgetBase) StyleSizeUpdate() bool {
 	el := wb.Geom.Size.Actual.Content
 	var par mat32.Vec2
-	_, pwb := wb.ParentWidget()
+	pwb := wb.ParentWidget()
 	if pwb != nil {
 		par = pwb.Geom.Size.Actual.Content
 	}
@@ -1738,7 +1738,7 @@ func (wb *WidgetBase) SetContentPosFromPos() {
 }
 
 func (wb *WidgetBase) SetPosFromParent() {
-	_, pwb := wb.ParentWidget()
+	pwb := wb.ParentWidget()
 	var parPos mat32.Vec2
 	if pwb != nil {
 		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll) // critical that parent adds here but not to self
@@ -1759,7 +1759,7 @@ func (wb *WidgetBase) SetBBoxesFromAllocs() {
 }
 
 func (wb *WidgetBase) SetBBoxes() {
-	_, pwb := wb.ParentWidget()
+	pwb := wb.ParentWidget()
 	var parBB image.Rectangle
 	if pwb == nil { // scene
 		sz := &wb.Geom.Size

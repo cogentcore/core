@@ -130,8 +130,7 @@ func (tb *Toolbar) AllItemsToChildren() {
 
 func (tb *Toolbar) ParentSize() float32 {
 	ma := tb.Styles.Direction.Dim()
-	_, pwb := tb.ParentWidget()
-	psz := pwb.Geom.Size.Alloc.Content.Sub(tb.Geom.Size.Space)
+	psz := tb.ParentWidget().Geom.Size.Alloc.Content.Sub(tb.Geom.Size.Space)
 	avail := psz.Dim(ma)
 	return avail
 }

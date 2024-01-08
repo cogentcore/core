@@ -598,7 +598,7 @@ func (sr *Slider) ScenePos() {
 	if !sr.StayInView {
 		return
 	}
-	_, pwb := sr.ParentWidget()
+	pwb := sr.ParentWidget()
 	zr := image.Rectangle{}
 	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {
 		return

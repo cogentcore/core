@@ -109,7 +109,7 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	}
 	wb.ResetStyleWidget()
 
-	_, pwb := wb.ParentWidget()
+	pwb := wb.ParentWidget()
 	if pwb != nil {
 		wb.Styles.InheritFields(&pwb.Styles)
 	}
@@ -260,11 +260,11 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 // ParentActualBackground returns the actual background of
 // the parent of the widget. If it has no parent, it returns nil.
 func (wb *WidgetBase) ParentActualBackground() image.Image {
-	_, pw := wb.ParentWidget()
-	if pw == nil {
+	pwb := wb.ParentWidget()
+	if pwb == nil {
 		return nil
 	}
-	return pw.Styles.ActualBackground
+	return pwb.Styles.ActualBackground
 }
 
 // IsNthChild returns whether the node is nth-child of its parent

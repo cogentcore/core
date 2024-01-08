@@ -310,8 +310,8 @@ func (wb *WidgetBase) OnInit() {
 // It should be called by all other OnAdd functions defined
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
-	if _, pw := wb.ParentWidget(); pw != nil {
-		wb.Sc = pw.Sc
+	if pwb := wb.ParentWidget(); pwb != nil {
+		wb.Sc = pwb.Sc
 	}
 }
 
@@ -408,14 +408,13 @@ func (wb *WidgetBase) NewParts() *Layout {
 	return parts
 }
 
-// ParentWidget returns the parent as a (Widget, *WidgetBase)
-// or nil if this is the root and has no parent.
-func (wb *WidgetBase) ParentWidget() (Widget, *WidgetBase) {
+// ParentWidget returns the parent as a [WidgetBase] or nil
+// if this is the root and has no parent.
+func (wb *WidgetBase) ParentWidget() *WidgetBase {
 	if wb.Par == nil {
-		return nil, nil
+		return nil
 	}
-	wi := wb.Par.(Widget)
-	return wi, wi.AsWidget()
+	return wb.Par.(Widget).AsWidget()
 }
 
 // ParentWidgetIf returns the nearest widget parent

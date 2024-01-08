@@ -67,7 +67,8 @@ func (hl *Handle) SetStyles() {
 
 func (hl *Handle) HandleEvents() {
 	hl.On(events.SlideMove, func(e events.Event) {
-		hl.Pos = mat32.V2FromPoint(e.Pos()).Dim(hl.Styles.Direction.Dim())
+		pos := hl.ParentWidget().PointToRelPos(e.LocalPos())
+		hl.Pos = mat32.V2FromPoint(pos).Dim(hl.Styles.Direction.Dim())
 		hl.SendChange(e)
 	})
 }
