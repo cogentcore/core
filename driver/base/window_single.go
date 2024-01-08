@@ -14,6 +14,7 @@ import (
 
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 // WindowSingle contains the data and logic common to all implementations of [goosi.Window]
@@ -31,8 +32,12 @@ func NewWindowSingle[A AppSingler](a A, opts *goosi.NewWindowOptions) WindowSing
 	}
 }
 
+func (w *WindowSingle[A]) EventMgr() *events.Mgr {
+	return w.App.EventMgr()
+}
+
 func (w *WindowSingle[A]) Drawer() goosi.Drawer {
-	return w.App.SingleDrawer()
+	return w.App.Drawer()
 }
 
 func (w *WindowSingle[A]) Screen() *goosi.Screen {

@@ -55,9 +55,6 @@ type Window[A goosi.App] struct { //gti:add
 	// FPS is the FPS (frames per second) for rendering the window
 	FPS int
 
-	// EvMgr is the event manager for the window
-	EvMgr events.Mgr `label:"Event manger"`
-
 	// DestroyGPUFunc should be set to a function that will destroy GPU resources
 	// in the main thread prior to destroying the drawer
 	// and the surface; otherwise it is difficult to
@@ -100,7 +97,7 @@ outer:
 			if w.This.IsClosed() {
 				break outer
 			}
-			w.EvMgr.WindowPaint()
+			w.This.EventMgr().WindowPaint()
 		}
 	}
 }
@@ -160,10 +157,6 @@ func (w *Window[A]) SetFPS(fps int) {
 	w.FPS = fps
 }
 
-func (w *Window[A]) EventMgr() *events.Mgr {
-	return &w.EvMgr
-}
-
 func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUFunc = f
 }
@@ -205,7 +198,7 @@ func (w *Window[A]) CloseClean() {
 func (w *Window[A]) Close() {
 	// base implementation doesn't actually close any system windows,
 	// but platform-specific implementations can
-	w.EvMgr.Window(events.WinClose)
+	w.This.EventMgr().Window(events.WinClose)
 
 	w.Mu.Lock()
 	defer w.Mu.Unlock()

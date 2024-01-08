@@ -71,7 +71,7 @@ func (a *App) OnMouseDown(this js.Value, args []js.Value) any {
 		ebut = events.Right
 	}
 	where := a.EventPos(e)
-	a.Win.EvMgr.MouseButton(events.MouseDown, ebut, where, a.KeyMods)
+	a.EvMgr.MouseButton(events.MouseDown, ebut, where, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -82,7 +82,7 @@ func (a *App) OnTouchStart(this js.Value, args []js.Value) any {
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
 		where := a.EventPos(touch)
-		a.Win.EvMgr.MouseButton(events.MouseDown, events.Left, where, 0)
+		a.EvMgr.MouseButton(events.MouseDown, events.Left, where, 0)
 	}
 	e.Call("preventDefault")
 	return nil
@@ -101,7 +101,7 @@ func (a *App) OnMouseUp(this js.Value, args []js.Value) any {
 		ebut = events.Right
 	}
 	where := a.EventPos(e)
-	a.Win.EvMgr.MouseButton(events.MouseUp, ebut, where, a.KeyMods)
+	a.EvMgr.MouseButton(events.MouseUp, ebut, where, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -112,7 +112,7 @@ func (a *App) OnTouchEnd(this js.Value, args []js.Value) any {
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
 		where := a.EventPos(touch)
-		a.Win.EvMgr.MouseButton(events.MouseUp, events.Left, where, 0)
+		a.EvMgr.MouseButton(events.MouseUp, events.Left, where, 0)
 	}
 	e.Call("preventDefault")
 	return nil
@@ -121,7 +121,7 @@ func (a *App) OnTouchEnd(this js.Value, args []js.Value) any {
 func (a *App) OnMouseMove(this js.Value, args []js.Value) any {
 	e := args[0]
 	where := a.EventPos(e)
-	a.Win.EvMgr.MouseMove(where)
+	a.EvMgr.MouseMove(where)
 	e.Call("preventDefault")
 	return nil
 }
@@ -132,7 +132,7 @@ func (a *App) OnTouchMove(this js.Value, args []js.Value) any {
 	for i := 0; i < touches.Length(); i++ {
 		touch := touches.Index(i)
 		where := a.EventPos(touch)
-		a.Win.EvMgr.MouseMove(where)
+		a.EvMgr.MouseMove(where)
 	}
 	e.Call("preventDefault")
 	return nil
@@ -141,7 +141,7 @@ func (a *App) OnTouchMove(this js.Value, args []js.Value) any {
 func (a *App) OnWheel(this js.Value, args []js.Value) any {
 	e := args[0]
 	delta := a.EventPosFor(e.Get("deltaX"), e.Get("deltaY"))
-	a.Win.EvMgr.Scroll(a.EventPos(e), delta)
+	a.EvMgr.Scroll(a.EventPos(e), delta)
 	e.Call("preventDefault")
 	return nil
 }
@@ -200,7 +200,7 @@ func (a *App) OnKeyDown(this js.Value, args []js.Value) any {
 		return nil
 	}
 	r, c := a.RuneAndCodeFromKey(k, true)
-	a.Win.EvMgr.Key(events.KeyDown, r, c, a.KeyMods)
+	a.EvMgr.Key(events.KeyDown, r, c, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -212,7 +212,7 @@ func (a *App) OnKeyUp(this js.Value, args []js.Value) any {
 		return nil
 	}
 	r, c := a.RuneAndCodeFromKey(k, false)
-	a.Win.EvMgr.Key(events.KeyUp, r, c, a.KeyMods)
+	a.EvMgr.Key(events.KeyUp, r, c, a.KeyMods)
 	e.Call("preventDefault")
 	return nil
 }
@@ -224,7 +224,7 @@ func (a *App) OnBeforeInput(this js.Value, args []js.Value) any {
 		return nil
 	}
 	for _, r := range data {
-		a.Win.EvMgr.KeyChord(r, 0, a.KeyMods)
+		a.EvMgr.KeyChord(r, 0, a.KeyMods)
 	}
 	e.Call("preventDefault")
 	return nil

@@ -32,10 +32,12 @@ type App struct { //gti:add
 	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] functions.
 	Mu sync.Mutex `view:"-"`
 
-	// MainQueue is the queue of functions to call on the main loop. To add to it, use [App.RunOnMain].
+	// MainQueue is the queue of functions to call on the main loop.
+	// To add to it, use [App.RunOnMain].
 	MainQueue chan FuncRun `view:"-"`
 
-	// MainDone is a channel on which is a signal is sent when the main loop of the app should be terminated.
+	// MainDone is a channel on which is a signal is sent when the main
+	// loop of the app should be terminated.
 	MainDone chan struct{} `view:"-"`
 
 	// Nm is the name of the app.

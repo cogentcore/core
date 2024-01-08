@@ -19,7 +19,7 @@ import (
 )
 
 func Init() {
-	TheApp.Drawer = &Drawer{}
+	TheApp.Draw = &Drawer{}
 	TheApp.GetScreens()
 
 	TheApp.TempDataDir = grr.Log1(os.MkdirTemp("", "goki-goosi-offscreen-data-dir-"))
@@ -52,10 +52,10 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	a.Scrn.PixSize = opts.Size
 	a.GetScreens()
 
-	a.Win.EvMgr.WindowResize()
-	a.Win.EvMgr.Window(events.WinShow)
-	a.Win.EvMgr.Window(events.ScreenUpdate)
-	a.Win.EvMgr.Window(events.WinFocus)
+	a.EvMgr.WindowResize()
+	a.EvMgr.Window(events.WinShow)
+	a.EvMgr.Window(events.ScreenUpdate)
+	a.EvMgr.Window(events.WinFocus)
 
 	go a.Win.WinLoop()
 
@@ -84,7 +84,7 @@ func (a *App) GetScreens() {
 	physY := 25.4 * float32(a.Scrn.PixSize.Y) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	a.Drawer.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 }
 
 func (a *App) QuitClean() {

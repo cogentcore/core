@@ -94,9 +94,9 @@ func (a *App) SetSystemWindow() {
 	}
 
 	a.Resize()
-	a.Win.EvMgr.Window(events.WinShow)
-	a.Win.EvMgr.Window(events.ScreenUpdate)
-	a.Win.EvMgr.Window(events.WinFocus)
+	a.EvMgr.Window(events.WinShow)
+	a.EvMgr.Window(events.ScreenUpdate)
+	a.EvMgr.Window(events.WinFocus)
 }
 
 // Resize updates the app sizing information and sends a Resize event.
@@ -130,9 +130,9 @@ func (a *App) Resize() {
 	cstyle.Set("width", strconv.Itoa(w)+"px")
 	cstyle.Set("height", strconv.Itoa(h)+"px")
 
-	a.Drawer.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
+	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 
-	a.Win.EvMgr.WindowResize()
+	a.EvMgr.WindowResize()
 }
 
 func (a *App) DataDir() string {

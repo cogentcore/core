@@ -12,6 +12,7 @@ package base
 import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 // AppSingle contains the data and logic common to all implementations of [goosi.App]
@@ -22,8 +23,11 @@ import (
 type AppSingle[D goosi.Drawer, W goosi.Window] struct { //gti:add
 	App
 
-	// Drawer is the single [goosi.Drawer] used for the app.
-	Drawer D
+	// EvMgr is the event manager for the app
+	EvMgr events.Mgr `label:"Event manger"`
+
+	// Draw is the single [goosi.Drawer] used for the app.
+	Draw D
 
 	// Win is the single [goosi.Window] associated with the app.
 	Win W `label:"Window"`
@@ -40,8 +44,11 @@ type AppSingle[D goosi.Drawer, W goosi.Window] struct { //gti:add
 type AppSingler interface {
 	goosi.App
 
-	// SingleDrawer returns the single [goosi.Drawer] associated with this app.
-	SingleDrawer() goosi.Drawer
+	// EventMgr returns the single [events.Mgr] associated with this app.
+	EventMgr() *events.Mgr
+
+	// Drawer returns the single [goosi.Drawer] associated with this app.
+	Drawer() goosi.Drawer
 
 	// Insets returns the size of any insets on the sides of the screen.
 	Insets() styles.SideFloats
@@ -54,8 +61,12 @@ func NewAppSingle[D goosi.Drawer, W goosi.Window]() AppSingle[D, W] {
 	}
 }
 
-func (a *AppSingle[D, W]) SingleDrawer() goosi.Drawer {
-	return a.Drawer
+func (a *AppSingle[D, W]) EventMgr() *events.Mgr {
+	return &a.EvMgr
+}
+
+func (a *AppSingle[D, W]) Drawer() goosi.Drawer {
+	return a.Draw
 }
 
 func (a *AppSingle[D, W]) Insets() styles.SideFloats {

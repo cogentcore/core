@@ -150,9 +150,9 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 	TheApp.Mu.Lock()
 	defer TheApp.Mu.Unlock()
 	if hasFocus > 0 {
-		TheApp.Win.EvMgr.Window(events.WinFocus)
+		TheApp.EvMgr.Window(events.WinFocus)
 	} else {
-		TheApp.Win.EvMgr.Window(events.WinFocusLost)
+		TheApp.EvMgr.Window(events.WinFocusLost)
 	}
 }
 
@@ -378,16 +378,16 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			physY := 25.4 * float32(heightPx) / dpi
 			a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-			a.Win.EvMgr.WindowResize()
-			a.Win.EvMgr.WindowPaint()
+			a.EvMgr.WindowResize()
+			a.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			a.Win.SetSize(image.Point{})
-			a.Win.EvMgr.Window(events.WinMinimize)
+			a.EvMgr.Window(events.WinMinimize)
 			a.DestroyVk()
 		case <-activityDestroyed:
-			a.Win.EvMgr.Window(events.WinClose)
+			a.EvMgr.Window(events.WinClose)
 		}
 	}
 }

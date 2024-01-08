@@ -166,14 +166,14 @@ func lifecycleAlive() {
 //export lifecycleVisible
 func lifecycleVisible() {
 	if TheApp.Win != nil {
-		TheApp.Win.EvMgr.Window(events.WinShow)
+		TheApp.EvMgr.Window(events.WinShow)
 	}
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
 	if TheApp.Win != nil {
-		TheApp.Win.EvMgr.Window(events.WinFocus)
+		TheApp.EvMgr.Window(events.WinFocus)
 	}
 }
 

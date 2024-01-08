@@ -13,6 +13,7 @@ import (
 	"image"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 // WindowMulti contains the data and logic common to all implementations of [goosi.Window]
@@ -22,6 +23,9 @@ import (
 // The [goosi.App] type should embed [AppMulti].
 type WindowMulti[A goosi.App, D goosi.Drawer] struct { //gti:add
 	Window[A]
+
+	// EvMgr is the event manager for the window
+	EvMgr events.Mgr `label:"Event manger"`
 
 	// Draw is the [goosi.Drawer] used for this window.
 	Draw D `label:"Drawer"`
@@ -57,6 +61,10 @@ func NewWindowMulti[A goosi.App, D goosi.Drawer](a A, opts *goosi.NewWindowOptio
 	return WindowMulti[A, D]{
 		Window: NewWindow(a, opts),
 	}
+}
+
+func (w *WindowMulti[A, D]) EventMgr() *events.Mgr {
+	return &w.EvMgr
 }
 
 func (w *WindowMulti[A, D]) Drawer() goosi.Drawer {

@@ -59,10 +59,10 @@ func (a *App) InitVk() {
 func (a *App) DestroyVk() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	vk.DeviceWaitIdle(a.Drawer.Surf.Device.Device)
-	a.Drawer.Destroy()
-	a.Drawer.Surf.Destroy()
-	a.Drawer = nil
+	vk.DeviceWaitIdle(a.Draw.Surf.Device.Device)
+	a.Draw.Destroy()
+	a.Draw.Surf.Destroy()
+	a.Draw = nil
 }
 
 // FullDestroyVk destroys all vulkan things for when the app is fully quit
@@ -93,8 +93,8 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer a.Mu.Unlock()
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
-	a.Win.EvMgr.Window(events.WinShow)
-	a.Win.EvMgr.Window(events.WinFocus)
+	a.EvMgr.Window(events.WinShow)
+	a.EvMgr.Window(events.WinFocus)
 
 	go a.Win.WinLoop()
 
@@ -119,19 +119,19 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	sf.SetRender(&sys.Render)
 	// sys.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
 	sys.Config()
-	a.Drawer = &vdraw.Drawer{
+	a.Draw = &vdraw.Drawer{
 		Sys:     *sys,
 		YIsDown: true,
 	}
-	// a.Drawer.ConfigSys()
-	a.Drawer.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
+	// a.Draw.ConfigSys()
+	a.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
 	a.Winptr = winptr
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if a.Win != nil {
-		a.Win.EvMgr.Window(events.WinShow)
-		a.Win.EvMgr.Window(events.ScreenUpdate)
+		a.EvMgr.Window(events.WinShow)
+		a.EvMgr.Window(events.ScreenUpdate)
 	}
 	return nil
 }
