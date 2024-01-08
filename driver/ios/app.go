@@ -24,7 +24,7 @@ import (
 	"goki.dev/vgpu/v2/vgpu"
 )
 
-func Init(f func(goosi.App)) {
+func Init() {
 	TheApp.InitVk()
 	base.Init(TheApp, &TheApp.App)
 }
