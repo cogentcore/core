@@ -54,6 +54,10 @@ type App struct { //gti:add -setters
 
 // NewApp returns a new App initialized with the given name.
 func NewApp(name string) *App {
+	// we load the settings in NewApp so that people can
+	// add their own settings to AllSettings first
+	grr.Log(LoadAllSettings())
+
 	app := &App{}
 	app.Name = name
 	app.AppBarConfig = StdAppBarConfig
