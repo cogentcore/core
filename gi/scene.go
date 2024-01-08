@@ -281,7 +281,7 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	}
 	sc.PaintContext.Init(nwsz.X, nwsz.Y, sc.Pixels)
 	sc.SceneGeom.Size = nwsz // make sure
-	sc.SetFlag(true, ScNeedsLayout)
+	sc.ApplyStyleScene()
 }
 
 func (sc *Scene) ScIsVisible() bool {

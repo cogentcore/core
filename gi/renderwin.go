@@ -354,6 +354,11 @@ func (w *RenderWin) Resized(sz image.Point) {
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curSz)
 		}
+		// still need to apply style even if size is same
+		for _, kv := range w.MainStageMgr.Stack.Order {
+			sc := kv.Val.Scene
+			sc.ApplyStyleScene()
+		}
 		return
 	}
 	drw := w.GoosiWin.Drawer()
