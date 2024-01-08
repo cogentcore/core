@@ -117,7 +117,6 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	a.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
 	a.Winptr = winptr
-	goosi.OnSystemWindowCreated <- struct{}{}
 
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update

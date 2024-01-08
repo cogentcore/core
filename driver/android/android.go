@@ -378,6 +378,11 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			physY := 25.4 * float32(heightPx) / dpi
 			a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
+			// we only send OnSystemWindowCreated after we get the screen info
+			if goosi.OnSystemWindowCreated != nil {
+				goosi.OnSystemWindowCreated <- struct{}{}
+			}
+
 			a.EvMgr.WindowResize()
 			a.EvMgr.WindowPaint()
 		case <-windowDestroyed:
