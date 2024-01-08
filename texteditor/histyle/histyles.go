@@ -5,7 +5,7 @@
 package histyle
 
 import (
-	"embed"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -18,7 +18,7 @@ import (
 )
 
 //go:embed defaults.histys
-var content embed.FS
+var defaults []byte
 
 // Styles is a collection of styles
 type Styles map[string]*Style
@@ -139,12 +139,7 @@ func (hs *Styles) SaveAll(dir gi.FileName) {
 // OpenDefaults opens the default highlighting styles (from chroma originally)
 // These are encoded as an embed from defaults.histys
 func (hs *Styles) OpenDefaults() error {
-	defb, err := content.ReadFile("defaults.histys")
-	if err != nil {
-		slog.Error(err.Error())
-		return err
-	}
-	err = json.Unmarshal(defb, hs)
+	err := json.Unmarshal(defaults, hs)
 	if err != nil {
 		slog.Error(err.Error())
 		return err
@@ -189,98 +184,3 @@ func Init() {
 		}
 	}
 }
-
-// TODO(kai): remove this
-
-/*
-// StylesProps define the Toolbar and MenuBar for view
-var StylesProps = ki.Props{
-	"MainMenu": ki.PropSlice{
-		{"AppMenu", ki.BlankProp{}},
-		{"File", ki.PropSlice{
-			{"OpenPrefs", ki.Props{}},
-			{"SavePrefs", ki.Props{
-				"shortcut": keyfun.Save,
-				"updtfunc": func(sti any, act *gi.Button) {
-					act.SetEnabledUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
-				},
-			}},
-			{"sep-file", ki.BlankProp{}},
-			{"OpenJSON", ki.Props{
-				"label":    "Open...",
-				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": keyfun.Open,
-				"Args": ki.PropSlice{
-					{"File Name", ki.Props{
-						"ext": ".json",
-					}},
-				},
-			}},
-			{"SaveJSON", ki.Props{
-				"label":    "Save As...",
-				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
-				"shortcut": keyfun.SaveAs,
-				"Args": ki.PropSlice{
-					{"File Name", ki.Props{
-						"ext": ".json",
-					}},
-				},
-			}},
-			{"SaveAll", ki.Props{
-				"label": "Save All...",
-				"desc":  "Saves each style individually to selected directory (be sure to select a dir only!)",
-				"Args": ki.PropSlice{
-					{"Dir Name", ki.Props{}},
-				},
-			}},
-		}},
-		{"Edit", "Copy Cut Paste Dupe"},
-		{"RenderWin", "RenderWins"},
-	},
-	"Toolbar": ki.PropSlice{
-		{"Add", ki.Props{ // note: overrides default Add
-			"desc": "Add a new style to the list.",
-			"icon": icons.Add,
-			"updtfunc": func(sti any, act *gi.Button) {
-				act.SetEnabledUpdt(sti.(*Styles) == &CustomStyles)
-			},
-		}},
-		{"SavePrefs", ki.Props{
-			"desc": "saves styles to app prefs directory, in file hi_styles.json, which will be loaded automatically at startup into your CustomStyles.",
-			"icon": icons.Save,
-			"updtfunc": func(sti any, act *gi.Button) {
-				act.SetEnabledUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
-			},
-		}},
-		{"sep-file", ki.BlankProp{}},
-		{"OpenJSON", ki.Props{
-			"label": "Open from file",
-			"icon":  icons.Open,
-			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"SaveJSON", ki.Props{
-			"label": "Save to file",
-			"icon":  icons.SaveAs,
-			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"sep-std", ki.BlankProp{}},
-		{"ViewStd", ki.Props{
-			"desc":    `Shows the standard styles that are compiled into the program (from <a href="https://github.com/alecthomas/chroma">github.com/alecthomas/chroma</a>).  Save a style from there and load it into custom as a starting point for creating a variant of an existing style.`,
-			"confirm": true,
-			"updtfunc": func(sti any, act *gi.Button) {
-				act.SetEnabledUpdt(sti.(*Styles) != &StdStyles)
-			},
-		}},
-	},
-}
-*/
