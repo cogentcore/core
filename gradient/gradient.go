@@ -115,7 +115,7 @@ func NewBase() Base {
 	return Base{
 		Blend:     colors.RGB, // TODO(kai): figure out a better solution to this
 		Box:       mat32.B2(0, 0, 100, 100),
-		Transform: mat32.Identity2D(),
+		Transform: mat32.Identity2(),
 	}
 }
 
@@ -175,7 +175,7 @@ func (b *Base) UpdateBase() {
 func (b *Base) ComputeObjectMatrix() {
 	w, h := b.Box.Size().X, b.Box.Size().Y
 	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
-	b.ObjectMatrix = mat32.Identity2D().Translate(oriX, oriY).Scale(w, h).
+	b.ObjectMatrix = mat32.Identity2().Translate(oriX, oriY).Scale(w, h).
 		Mul(b.Transform).Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 
