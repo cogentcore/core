@@ -18,8 +18,8 @@ Also supporting dp = density-independent pixel = 1/160 in
 */
 package units
 
-//go:generate go run gen.go
 //go:generate goki generate
+//go:generate go run gen.go
 
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of
 // css-based viewport-dependent factors
@@ -38,11 +38,11 @@ const (
 type Units int32 //enums:enum -trim-prefix Unit -transform lower
 
 const (
-	// UnitPx = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
-	UnitPx Units = iota
+	// UnitDp = density-independent pixels; 1dp = 1/160th of 1in
+	UnitDp Units = iota
 
-	// UnitDp = density-independent pixels -- 1dp = 1/160th of 1in
-	UnitDp
+	// UnitPx = pixels; 1px = 1/96th of 1in; these are NOT raw display pixels
+	UnitPx
 
 	// UnitEw = percentage of element width (equivalent to CSS % in some contexts)
 	UnitEw

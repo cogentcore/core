@@ -6,42 +6,42 @@
 
 package units
 	
-// Px returns a new px value.
-// Px is pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels.
-func Px(val float32) Value {
-	return Value{Val: val, Un: UnitPx}
-}
-
-// Px sets the value in terms of px.
-// Px is pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels.
-func (v *Value) Px(val float32) {
-	v.Val = val
-	v.Un = UnitPx
-}
-
-// Px converts the given px value to dots.
-// Px is pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels.
-func (uc *Context) Px(val float32) float32 {
-	return uc.ToDots(val, UnitPx)
-}
-
 // Dp returns a new dp value.
-// Dp is density-independent pixels -- 1dp = 1/160th of 1in.
+// Dp is density-independent pixels; 1dp = 1/160th of 1in.
 func Dp(val float32) Value {
 	return Value{Val: val, Un: UnitDp}
 }
 
 // Dp sets the value in terms of dp.
-// Dp is density-independent pixels -- 1dp = 1/160th of 1in.
+// Dp is density-independent pixels; 1dp = 1/160th of 1in.
 func (v *Value) Dp(val float32) {
 	v.Val = val
 	v.Un = UnitDp
 }
 
 // Dp converts the given dp value to dots.
-// Dp is density-independent pixels -- 1dp = 1/160th of 1in.
+// Dp is density-independent pixels; 1dp = 1/160th of 1in.
 func (uc *Context) Dp(val float32) float32 {
 	return uc.ToDots(val, UnitDp)
+}
+
+// Px returns a new px value.
+// Px is pixels; 1px = 1/96th of 1in; these are NOT raw display pixels.
+func Px(val float32) Value {
+	return Value{Val: val, Un: UnitPx}
+}
+
+// Px sets the value in terms of px.
+// Px is pixels; 1px = 1/96th of 1in; these are NOT raw display pixels.
+func (v *Value) Px(val float32) {
+	v.Val = val
+	v.Un = UnitPx
+}
+
+// Px converts the given px value to dots.
+// Px is pixels; 1px = 1/96th of 1in; these are NOT raw display pixels.
+func (uc *Context) Px(val float32) float32 {
+	return uc.ToDots(val, UnitPx)
 }
 
 // Ew returns a new ew value.

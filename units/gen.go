@@ -43,9 +43,9 @@ package units
 		// actual desc after =
 		_, d.Desc, _ = strings.Cut(v.Desc(), " = ")
 		d.Desc = html.UnescapeString(d.Desc)
-		grr.Must0(funcs.Execute(buf, d))
+		grr.Must(funcs.Execute(buf, d))
 	}
-	grr.Must0(os.WriteFile("unitgen.go", buf.Bytes(), 0666))
+	grr.Must(os.WriteFile("unitgen.go", buf.Bytes(), 0666))
 }
 
 type data struct {
