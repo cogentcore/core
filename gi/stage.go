@@ -281,11 +281,13 @@ func (st *Stage) Run() *Stage {
 	if goosi.OnSystemWindowCreated == nil {
 		return st.RunImpl()
 	}
+	// need to prevent premature quitting
+	WinWait.Add(1)
 	go func() {
 		<-goosi.OnSystemWindowCreated
-		// no longer applicable
-		goosi.OnSystemWindowCreated = nil
+		goosi.OnSystemWindowCreated = nil // no longer applicable
 		st.RunImpl()
+		WinWait.Done()
 	}()
 	return st
 }

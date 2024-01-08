@@ -21,8 +21,7 @@ import (
 )
 
 // WinWait is a wait group for waiting for all the open window event
-// loops to finish -- this can be used for cases where the initial main run
-// uses a GoStartEventLoop for example.  It is incremented by GoStartEventLoop
+// loops to finish. It is incremented by [RenderWin.GoStartEventLoop]
 // and decremented when the event loop terminates.
 var WinWait sync.WaitGroup
 
