@@ -401,6 +401,13 @@ func (wb *WidgetBase) DoNeedsRender() {
 			kwi.Render()
 			return ki.Break // done
 		}
+		if ly := AsLayout(kwi); ly != nil {
+			for d := mat32.X; d <= mat32.Y; d++ {
+				if ly.HasScroll[d] {
+					ly.Scrolls[d].DoNeedsRender()
+				}
+			}
+		}
 		return ki.Continue
 	})
 	pr.End()

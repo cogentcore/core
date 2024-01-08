@@ -309,6 +309,9 @@ func (sc *Scene) ScIsVisible() bool {
 func (sc *Scene) Close() {
 	sc.Send(events.Close, nil)
 	mm := sc.Stage.MainMgr
+	if mm == nil {
+		return // todo: needed, but not sure why
+	}
 	if sc.Stage.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		mm.RenderWin.CloseReq()
 		return

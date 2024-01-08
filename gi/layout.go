@@ -112,6 +112,14 @@ func (ly *Layout) OnInit() {
 	ly.HandleEvents()
 }
 
+func (ly *Layout) ConfigWidget() {
+	for d := mat32.X; d <= mat32.Y; d++ {
+		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
+			ly.Scrolls[d].ApplyStyle()
+		}
+	}
+}
+
 func (ly *Layout) SetStyles() {
 	ly.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)

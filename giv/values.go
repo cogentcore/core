@@ -747,7 +747,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	path := "None"
 	k := vv.KiStruct()
-	if k != nil {
+	if k != nil && k.This() != nil {
 		path = k.AsKi().String()
 	}
 	bt.SetTextUpdate(path)
