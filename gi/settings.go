@@ -25,22 +25,19 @@ import (
 	"goki.dev/grows/tomls"
 	"goki.dev/grr"
 	"goki.dev/icons"
-	"goki.dev/ordmap"
 )
 
-// AllSettings is a global ordered map containing all of the user [Settings]
+// AllSettings is a global slice containing all of the user [Settings]
 // that the user will see in the settings window. It contains the base Goki
 // settings by default and should be modified by other apps to add their
 // app settings.
-var AllSettings = ordmap.Make([]ordmap.KeyVal[string, Settings]{
-	{"Appearance", AppearanceSettings},
-	{"System", SystemSettings},
-	{"Devices", DeviceSettings},
-	{"Debugging", DebugSettings},
-})
+var AllSettings = []Settings{AppearanceSettings, SystemSettings, DeviceSettings, DebugSettings}
 
 // Settings is the interface that describes the functionality common to all settings data types.
 type Settings interface {
+
+	// Label returns the label text for the settings.
+	Label() string
 
 	// Filename returns the full filename/filepath at which the settings are stored.
 	Filename() string
@@ -54,8 +51,17 @@ type Settings interface {
 
 // SettingsBase contains base settings logic that other settings data types can extend.
 type SettingsBase struct {
+
+	// Name is the name of the settings.
+	Name string `view:"-" toml:"-" json:"-"`
+
 	// File is the filename/filepath at which the settings are stored relative to [DataDir].
 	File string `view:"-" toml:"-" json:"-"`
+}
+
+// Label returns the label text for the settings.
+func (sb *SettingsBase) Label() string {
+	return sb.Name
 }
 
 // Filename returns the full filename/filepath at which the settings are stored.
@@ -108,8 +114,8 @@ func LoadSettings(se Settings) error {
 // LoadAllSettings sets the defaults of, opens, and applies [AllSettings].
 func LoadAllSettings() error {
 	errs := []error{}
-	for _, kv := range AllSettings.Order {
-		err := LoadSettings(kv.Val)
+	for _, se := range AllSettings {
+		err := LoadSettings(se)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -131,6 +137,7 @@ func UpdateAll() { //gti:add
 // AppearanceSettings are the currently active global Goki appearance settings.
 var AppearanceSettings = &AppearanceSettingsData{
 	SettingsBase: SettingsBase{
+		Name: "Appearance",
 		File: filepath.Join("Goki", "appearance-settings.toml"),
 	},
 }
@@ -315,6 +322,7 @@ func (as *AppearanceSettingsData) DensityType() Densities {
 // DeviceSettings are the global device settings.
 var DeviceSettings = &DeviceSettingsData{
 	SettingsBase: SettingsBase{
+		Name: "Device",
 		File: filepath.Join("Goki", "device-settings.toml"),
 	},
 }
@@ -411,6 +419,7 @@ type ScreenSettings struct { //gti:add
 // SystemSettings are the currently active Goki system settings.
 var SystemSettings = &SystemSettingsData{
 	SettingsBase: SettingsBase{
+		Name: "System",
 		File: filepath.Join("Goki", "system-settings.toml"),
 	},
 }
@@ -749,6 +758,7 @@ func OpenPaths() {
 // DebugSettings are the currently active debugging settings
 var DebugSettings = &DebugSettingsData{
 	SettingsBase: SettingsBase{
+		Name: "Debug",
 		File: filepath.Join("Goki", "debug-settings.toml"),
 	},
 }

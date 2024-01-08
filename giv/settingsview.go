@@ -43,19 +43,15 @@ func SettingsView(b *gi.Body) {
 
 	tabs := gi.NewTabs(b)
 
-	for _, kv := range gi.AllSettings.Order {
-		kv := kv
-		nm := kv.Key
-		se := kv.Val
-
-		fr := tabs.NewTab(nm)
+	for _, se := range gi.AllSettings {
+		fr := tabs.NewTab(se.Label())
 
 		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
 			if tab := b.GetTopAppBar(); tab != nil {
 				tab.UpdateBar()
 			}
 			se.Apply()
-			gi.ErrorSnackbar(fr, gi.SaveSettings(se), "Error saving "+nm+" settings")
+			gi.ErrorSnackbar(fr, gi.SaveSettings(se), "Error saving "+se.Label()+" settings")
 			gi.UpdateAll()
 		})
 	}
