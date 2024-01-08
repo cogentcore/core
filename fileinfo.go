@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/c2h5oh/datasize"
+	"goki.dev/glop/datasize"
 	"goki.dev/icons"
 	"goki.dev/vci/v2"
 )
@@ -29,10 +29,11 @@ type FileInfo struct { //gti:add
 	// name of the file, without any path
 	Name string `width:"40"`
 
-	// size of the file in bytes
-	Size FileSize
+	// size of the file
+	Size datasize.Size
 
-	// type of file / directory -- shorter, more user-friendly version of mime type, based on category
+	// type of file / directory; shorter, more user-friendly
+	// version of mime type, based on category
 	Kind string `width:"20" max-width:"20"`
 
 	// full official mime type of the contents
@@ -53,7 +54,7 @@ type FileInfo struct { //gti:add
 	// version control system status, when enabled
 	Vcs vci.FileStatus `tableview:"-"`
 
-	// full path to file, including name -- for file functions
+	// full path to file, including name; for file functions
 	Path string `tableview:"-"`
 }
 
@@ -85,7 +86,7 @@ func (fi *FileInfo) Stat() error {
 	if err != nil {
 		return err
 	}
-	fi.Size = FileSize(info.Size())
+	fi.Size = datasize.Size(info.Size())
 	fi.Mode = info.Mode()
 	fi.ModTime = FileTime(info.ModTime())
 	if info.IsDir() {
@@ -373,22 +374,6 @@ func (ft *FileTime) UnmarshalJSON(data []byte) error {
 
 func (ft *FileTime) UnmarshalText(data []byte) error {
 	return (*time.Time)(ft).UnmarshalText(data)
-}
-
-type FileSize datasize.ByteSize
-
-// Int satisfies the kit.Inter interface for sorting etc
-func (fs FileSize) Int() int64 {
-	return int64(fs) // note: is actually uint64
-}
-
-// FromInt satisfies the ints.Inter interface
-func (fs *FileSize) FromInt(val int64) {
-	*fs = FileSize(val)
-}
-
-func (fs FileSize) String() string {
-	return (datasize.ByteSize)(fs).HumanReadable()
 }
 
 //////////////////////////////////////////////////////////////////////////////
