@@ -1,12 +1,12 @@
 Name = "glop"
+ID = "com.goki.glop"
 Desc = ""
-Version = "v0.1.10"
+Version = "v0.1.11"
 Type = "Library"
 
 [Build]
   Package = "."
   Output = ""
-  ID = "com.org.todo.glop"
   Debug = false
   Rebuild = false
   Install = false
@@ -18,6 +18,13 @@ Type = "Library"
   AndroidMinSDK = 23
   AndroidTargetSDK = 29
 
+  [[Build.Target]]
+    OS = "darwin"
+    Arch = "arm64"
+
+[Pack]
+  DMG = true
+
 [Web]
   Port = "8080"
   RandomVersion = false
@@ -26,13 +33,10 @@ Type = "Library"
   ThemeColor = "#2d2c2c"
   LoadingLabel = ""
   Lang = "en"
-  Title = ""
-  Description = ""
   Author = ""
   Image = ""
   AutoUpdateInterval = "10s"
   WasmContentLengthHeader = ""
-  ServiceWorkerTemplate = ""
 
 [Setup]
   [Setup.Platform]
