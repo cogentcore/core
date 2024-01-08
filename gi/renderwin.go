@@ -1012,7 +1012,6 @@ func (w *RenderWin) DrawScenes() {
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.DestBounds(), image.Rectangle{}, draw.Src, goosi.NoFlipY)
 	rs.DrawAll(drw)
 
 	drw.UseTextureSet(2)
