@@ -19,6 +19,7 @@ import (
 )
 
 func Init() {
+	goosi.OnSystemWindowCreated = make(chan struct{})
 	TheApp.InitVk()
 	base.Init(TheApp, &TheApp.App)
 }
@@ -77,17 +78,6 @@ func (a *App) FullDestroyVk() {
 // Also, it hides all other windows and shows the new one.
 func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	defer func() { goosi.HandleRecover(recover()) }()
-	// the actual system window has to exist before we can create the window
-	var winptr uintptr
-	for {
-		a.Mu.Lock()
-		winptr = a.Winptr
-		a.Mu.Unlock()
-
-		if winptr != 0 {
-			break
-		}
-	}
 
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
@@ -127,6 +117,8 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	a.Draw.ConfigSurface(sf, vgpu.MaxTexturesPerSet)
 
 	a.Winptr = winptr
+	goosi.OnSystemWindowCreated <- struct{}{}
+
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if a.Win != nil {
