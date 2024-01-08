@@ -120,12 +120,6 @@ func (t *FileBrowse) SetTooltip(v string) *FileBrowse {
 	return t
 }
 
-// SetClass sets the [FileBrowse.Class]
-func (t *FileBrowse) SetClass(v string) *FileBrowse {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [FileBrowse.CustomContextMenu]
 func (t *FileBrowse) SetCustomContextMenu(v func(m *gi.Scene)) *FileBrowse {
 	t.CustomContextMenu = v

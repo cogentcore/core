@@ -72,3 +72,16 @@ var _ = gti.AddType(&gti.Type{
 		})}},
 	}),
 })
+
+var _ = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gix/texteditor/histyle.Value",
+	ShortName:  "histyle.Value",
+	IDName:     "value",
+	Doc:        "Value presents a button for selecting a highlight styling method",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "giv.ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})

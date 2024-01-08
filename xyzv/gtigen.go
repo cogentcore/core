@@ -12,7 +12,7 @@ import (
 
 // ManipPtType is the [gti.Type] for [ManipPt]
 var ManipPtType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/xyzv.ManipPt",
+	Name:      "goki.dev/gix/xyzv.ManipPt",
 	ShortName: "xyzv.ManipPt",
 	IDName:    "manip-pt",
 	Doc:       "ManipPt is a manipulation control point",
@@ -45,17 +45,17 @@ func (t *ManipPt) SetMat(v xyz.Material) *ManipPt {
 
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/xyzv.Scene",
+	Name:       "goki.dev/gix/xyzv.Scene",
 	ShortName:  "xyzv.Scene",
 	IDName:     "scene",
 	Doc:        "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/xyz.Scene", LocalType: "*xyz.Scene", Doc: "Scene is the 3D Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"SelMode", &gti.Field{Name: "SelMode", Type: "goki.dev/gi/v2/xyzv.SelModes", LocalType: "SelModes", Doc: "how to deal with selection / manipulation events", Directives: gti.Directives{}, Tag: ""}},
+		{"SelMode", &gti.Field{Name: "SelMode", Type: "goki.dev/gix/xyzv.SelModes", LocalType: "SelModes", Doc: "how to deal with selection / manipulation events", Directives: gti.Directives{}, Tag: ""}},
 		{"CurSel", &gti.Field{Name: "CurSel", Type: "goki.dev/xyz.Node", LocalType: "xyz.Node", Doc: "currently selected node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"CurManipPt", &gti.Field{Name: "CurManipPt", Type: "*goki.dev/gi/v2/xyzv.ManipPt", LocalType: "*ManipPt", Doc: "currently selected manipulation control point", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"SelParams", &gti.Field{Name: "SelParams", Type: "goki.dev/gi/v2/xyzv.SelParams", LocalType: "SelParams", Doc: "parameters for selection / manipulation box", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
+		{"CurManipPt", &gti.Field{Name: "CurManipPt", Type: "*goki.dev/gix/xyzv.ManipPt", LocalType: "*ManipPt", Doc: "currently selected manipulation control point", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"SelParams", &gti.Field{Name: "SelParams", Type: "goki.dev/gix/xyzv.SelParams", LocalType: "SelParams", Doc: "parameters for selection / manipulation box", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -116,12 +116,6 @@ func (t *Scene) SetTooltip(v string) *Scene {
 	return t
 }
 
-// SetClass sets the [Scene.Class]
-func (t *Scene) SetClass(v string) *Scene {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Scene.CustomContextMenu]
 func (t *Scene) SetCustomContextMenu(v func(m *gi.Scene)) *Scene {
 	t.CustomContextMenu = v
@@ -130,7 +124,7 @@ func (t *Scene) SetCustomContextMenu(v func(m *gi.Scene)) *Scene {
 
 // SceneViewType is the [gti.Type] for [SceneView]
 var SceneViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/xyzv.SceneView",
+	Name:       "goki.dev/gix/xyzv.SceneView",
 	ShortName:  "xyzv.SceneView",
 	IDName:     "scene-view",
 	Doc:        "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.",
@@ -164,12 +158,6 @@ func (t *SceneView) New() ki.Ki {
 // SetTooltip sets the [SceneView.Tooltip]
 func (t *SceneView) SetTooltip(v string) *SceneView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [SceneView.Class]
-func (t *SceneView) SetClass(v string) *SceneView {
-	t.Class = v
 	return t
 }
 

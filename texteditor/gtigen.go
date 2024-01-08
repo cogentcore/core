@@ -108,12 +108,6 @@ func (t *DiffView) SetTooltip(v string) *DiffView {
 	return t
 }
 
-// SetClass sets the [DiffView.Class]
-func (t *DiffView) SetClass(v string) *DiffView {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [DiffView.CustomContextMenu]
 func (t *DiffView) SetCustomContextMenu(v func(m *gi.Scene)) *DiffView {
 	t.CustomContextMenu = v
@@ -168,12 +162,6 @@ func (t *DiffTextEditor) New() ki.Ki {
 // SetTooltip sets the [DiffTextEditor.Tooltip]
 func (t *DiffTextEditor) SetTooltip(v string) *DiffTextEditor {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [DiffTextEditor.Class]
-func (t *DiffTextEditor) SetClass(v string) *DiffTextEditor {
-	t.Class = v
 	return t
 }
 
@@ -389,12 +377,6 @@ func (t *Editor) SetTooltip(v string) *Editor {
 	return t
 }
 
-// SetClass sets the [Editor.Class]
-func (t *Editor) SetClass(v string) *Editor {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Editor.CustomContextMenu]
 func (t *Editor) SetCustomContextMenu(v func(m *gi.Scene)) *Editor {
 	t.CustomContextMenu = v
@@ -460,12 +442,6 @@ func (t *TwinEditors) SetBufB(v *Buf) *TwinEditors {
 // SetTooltip sets the [TwinEditors.Tooltip]
 func (t *TwinEditors) SetTooltip(v string) *TwinEditors {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [TwinEditors.Class]
-func (t *TwinEditors) SetClass(v string) *TwinEditors {
-	t.Class = v
 	return t
 }
 

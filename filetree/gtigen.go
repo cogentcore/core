@@ -174,12 +174,6 @@ func (t *Node) SetTooltip(v string) *Node {
 	return t
 }
 
-// SetClass sets the [Node.Class]
-func (t *Node) SetClass(v string) *Node {
-	t.Class = v
-	return t
-}
-
 // SetCustomContextMenu sets the [Node.CustomContextMenu]
 func (t *Node) SetCustomContextMenu(v func(m *gi.Scene)) *Node {
 	t.CustomContextMenu = v
@@ -245,7 +239,7 @@ var TreeType = gti.AddType(&gti.Type{
 		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", LocalType: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}, Tag: ""}},
 		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/gix/filetree.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: ""}},
 		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", LocalType: "bool", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed", Directives: gti.Directives{}, Tag: ""}},
-		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to giv.Node but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", LocalType: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}, Tag: ""}},
 		{"Watcher", &gti.Field{Name: "Watcher", Type: "*gopkg.in/fsnotify.v1.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
@@ -303,7 +297,7 @@ func (t *Tree) SetDirsOnTop(v bool) *Tree {
 }
 
 // SetNodeType sets the [Tree.NodeType]:
-// type of node to create -- defaults to giv.Node but can use custom node types
+// type of node to create -- defaults to filetree.Node but can use custom node types
 func (t *Tree) SetNodeType(v *gti.Type) *Tree {
 	t.NodeType = v
 	return t
@@ -361,12 +355,6 @@ func (t *Tree) SetUpdtMu(v sync.Mutex) *Tree {
 // SetTooltip sets the [Tree.Tooltip]
 func (t *Tree) SetTooltip(v string) *Tree {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [Tree.Class]
-func (t *Tree) SetClass(v string) *Tree {
-	t.Class = v
 	return t
 }
 
@@ -503,12 +491,6 @@ func (t *VCSLogView) SetSetA(v bool) *VCSLogView {
 // SetTooltip sets the [VCSLogView.Tooltip]
 func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [VCSLogView.Class]
-func (t *VCSLogView) SetClass(v string) *VCSLogView {
-	t.Class = v
 	return t
 }
 
