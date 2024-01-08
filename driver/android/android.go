@@ -334,7 +334,8 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	TheApp.Insts.Set(float32(top), float32(right), float32(bottom), float32(left))
+	TheApp.RendGeom.Pos = image.Pt(left, top)
+	TheApp.RendGeom.Size = TheApp.Scrn.PixSize.Sub(TheApp.RendGeom.Pos).Sub(image.Pt(right, bottom))
 	TheApp.EvMgr.WindowResize()
 }
 
