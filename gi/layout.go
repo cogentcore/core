@@ -125,9 +125,6 @@ func (ly *Layout) SetStyles() {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
-	})
-	ly.StyleFinal(func(s *styles.Style) {
-		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
 		switch {
 		case s.Display == styles.Flex:
 			if s.Wrap {
@@ -141,6 +138,9 @@ func (ly *Layout) SetStyles() {
 		case s.Display == styles.Grid:
 			s.Grow.Set(1, 1)
 		}
+	})
+	ly.StyleFinal(func(s *styles.Style) {
+		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
 	})
 }
 
