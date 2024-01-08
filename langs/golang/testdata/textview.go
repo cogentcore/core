@@ -2402,7 +2402,7 @@ func (tv *TextView) PasteHist() {
 		if clip != nil {
 			wupdt := tv.TopUpdateStart()
 			defer tv.TopUpdateEnd(wupdt)
-			oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(clip))
+			oswin.TheApp.Clipboard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
 		}
@@ -2420,7 +2420,7 @@ func (tv *TextView) Cut() *TextBufEdit {
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+		oswin.TheApp.Clipboard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
@@ -2447,7 +2447,7 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
-	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+	oswin.TheApp.Clipboard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -2459,7 +2459,7 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 func (tv *TextView) Paste() {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
+	data := oswin.TheApp.Clipboard(tv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
@@ -2527,7 +2527,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Paste()
 			})
-		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).IsEmpty())
+		ac.SetInactiveState(oswin.TheApp.Clipboard(tv.Viewport.Win.OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
