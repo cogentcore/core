@@ -6,6 +6,7 @@ package key
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 	"unicode"
 )
@@ -45,11 +46,11 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 // OSShortcut translates Command into either Control or Meta depending on platform
 func (ch Chord) OSShortcut() Chord {
 	sc := string(ch)
-	// if goosi.TheApp.Platform() == goosi.MacOS {
-	// 	sc = strings.Replace(sc, "Command+", "Meta+", -1)
-	// } else {
-	sc = strings.Replace(sc, "Command+", "Control+", -1)
-	// }
+	if runtime.GOOS == "darwin" {
+		sc = strings.Replace(sc, "Command+", "Meta+", -1)
+	} else {
+		sc = strings.Replace(sc, "Command+", "Control+", -1)
+	}
 	return Chord(sc)
 }
 
@@ -84,18 +85,17 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 func (ch Chord) Shortcut() string {
 	// TODO: is this smart stuff actually helpful, or would it be much easier for
 	// the user if they could just read the shortcuts in English?
-	cs := strings.Replace(string(ch), "Control+", "^", -1) // ⌃ doesn't look as good
-	// TODO: figure out how to avoid import cycle here
-	// switch goosi.TheApp.Platform() {
-	// case goosi.MacOS:
-	cs = strings.Replace(cs, "Shift+", "⇧", -1)
-	cs = strings.Replace(cs, "Meta+", "⌘", -1)
-	cs = strings.Replace(cs, "Alt+", "⌥", -1)
-	// case goosi.Windows:
-	// 	cs = strings.Replace(cs, "Shift+", "↑", -1)
-	// 	cs = strings.Replace(cs, "Meta+", "Win+", -1) // todo: actual windows key
-	// }
-	cs = strings.Replace(cs, "Backspace", "⌫", -1)
-	cs = strings.Replace(cs, "Delete", "⌦", -1)
+	cs := strings.ReplaceAll(string(ch), "Control", "Ctrl")
+	switch runtime.GOOS {
+	case "darwin":
+		cs = strings.ReplaceAll(cs, "Ctrl+", "^") // ⌃ doesn't look as good
+		cs = strings.ReplaceAll(cs, "Shift+", "⇧")
+		cs = strings.ReplaceAll(cs, "Meta+", "⌘")
+		cs = strings.ReplaceAll(cs, "Alt+", "⌥")
+	case "windows":
+		cs = strings.ReplaceAll(cs, "Meta+", "Win+") // todo: actual windows key
+	}
+	cs = strings.ReplaceAll(cs, "Backspace", "⌫")
+	cs = strings.ReplaceAll(cs, "Delete", "⌦")
 	return cs
 }
