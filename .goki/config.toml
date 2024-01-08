@@ -1,0 +1,76 @@
+Name = "Gix"
+ID = "com.goki.gix"
+Desc = ""
+Version = "v0.0.0"
+Type = "Library"
+
+[Build]
+  Package = "."
+  Output = ""
+  Debug = false
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
+
+[Pack]
+  DMG = true
+
+[Web]
+  Port = "8080"
+  RandomVersion = true
+  Gzip = false
+  BackgroundColor = "#2d2c2c"
+  ThemeColor = "#2d2c2c"
+  LoadingLabel = "{progress}%"
+  Lang = "en"
+  Author = ""
+  Image = ""
+  AutoUpdateInterval = "0s"
+  WasmContentLengthHeader = ""
+
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "version.go"
+  Package = "gix"
+
+[Generate]
+  Dir = "."
+  Output = "gokigen.go"
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = true
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+    Extend = true
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false
+    Setters = false
