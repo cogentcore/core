@@ -18,12 +18,7 @@ import (
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 func (dw *Drawer) FillRect(clr color.Color, reg image.Rectangle, op draw.Op) error {
-	mat := mat32.Mat3{
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1,
-	}
-	return dw.Fill(clr, mat, reg, op)
+	return dw.Fill(clr, mat32.Identity3(), reg, op)
 }
 
 // Fill fills given color to to render target.
