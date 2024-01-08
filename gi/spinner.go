@@ -134,11 +134,18 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	updt := sp.UpdateStart()
 	defer sp.UpdateEndRender(updt)
 	sp.Value = val
-	if sp.HasMax {
-		sp.Value = mat32.Min(sp.Value, sp.Max)
-	}
-	if sp.HasMin {
-		sp.Value = mat32.Max(sp.Value, sp.Min)
+	if sp.HasMax && sp.Value > sp.Max {
+		if sp.HasMin {
+			sp.Value = sp.Min // wrap-around
+		} else {
+			sp.Value = sp.Max
+		}
+	} else if sp.HasMin && sp.Value < sp.Min {
+		if sp.HasMax {
+			sp.Value = sp.Max // wrap-around
+		} else {
+			sp.Value = sp.Min
+		}
 	}
 	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
 	sp.SetTextToValue()
