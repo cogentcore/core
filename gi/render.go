@@ -187,7 +187,7 @@ func (wb *WidgetBase) SetNeedsRender(updt bool) {
 		wb.Sc.SetFlag(true, ScNeedsRender)
 	}
 	// parent of Parts needs to render if parent
-	fi, _ := wb.ParentWidgetIf(func(p *WidgetBase) bool {
+	fi := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		return p.Is(ki.Field)
 	})
 	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {

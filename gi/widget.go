@@ -7,7 +7,6 @@ package gi
 //go:generate goki generate
 
 import (
-	"fmt"
 	"image"
 	"log"
 	"sync"
@@ -419,31 +418,21 @@ func (wb *WidgetBase) ParentWidget() *WidgetBase {
 
 // ParentWidgetIf returns the nearest widget parent
 // of the widget for which the given function returns true.
-// It returns nil if no such parent is found;
-// see [ParentWidgetIfTry] for a version with an error.
-func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) (Widget, *WidgetBase) {
-	pwi, pwb, _ := wb.ParentWidgetIfTry(fun)
-	return pwi, pwb
-}
-
-// ParentWidgetIfTry returns the nearest widget parent
-// of the widget for which the given function returns true.
-// It returns an error if no such parent is found; see
-// [ParentWidgetIf] for a version without an error.
-func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *WidgetBase, error) {
+// It returns nil if no such parent is found.
+func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 	cur := wb
 	for {
 		par := cur.Par
 		if par == nil {
-			return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: got to root: %v without finding", cur)
+			return nil
 		}
 		pwi, ok := par.(Widget)
 		if !ok {
-			return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: parent is not a widget: %v", par)
+			return nil
 		}
 		pwb := pwi.AsWidget()
 		if fun(pwb) {
-			return pwi, pwb, nil
+			return pwb
 		}
 		cur = pwb
 	}
