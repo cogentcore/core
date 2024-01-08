@@ -164,13 +164,6 @@ type Window interface {
 	// is undefined.  See App.Quit methods to quit overall app.
 	Close()
 
-	// RunOnWin runs given function on the window's own separate goroutine
-	RunOnWin(f func())
-
-	// GoRunOnWin runs given function on the window's unique locked thread
-	// and returns immediately.
-	GoRunOnWin(f func())
-
 	// Handle returns the driver-specific handle for this window.
 	// This is only provided for unforeseen emergency backup use;
 	// please file an issue for anything that should be added to the

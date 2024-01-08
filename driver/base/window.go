@@ -33,9 +33,6 @@ type Window[A goosi.App] struct { //gti:add
 	// Mu is the main mutex protecting access to window operations, including [Window.RunOnWin] functions.
 	Mu sync.Mutex `view:"-"`
 
-	// RunQueue is the queue of functions to call on the window loop. To add to it, use [Window.RunOnWin].
-	RunQueue chan FuncRun `view:"-"`
-
 	// WinClose is a channel on which a single is sent to indicate that the
 	// window should close.
 	WinClose chan struct{} `view:"-"`
@@ -74,7 +71,6 @@ type Window[A goosi.App] struct { //gti:add
 // NewWindow makes a new [Window] for the given app with the given options.
 func NewWindow[A goosi.App](a A, opts *goosi.NewWindowOptions) Window[A] {
 	return Window[A]{
-		RunQueue:      make(chan FuncRun),
 		WinClose:      make(chan struct{}),
 		App:           a,
 		Titl:          opts.GetTitle(),
@@ -100,14 +96,6 @@ outer:
 		case <-w.WinClose:
 			winPaint.Stop()
 			break outer
-		case f := <-w.RunQueue:
-			if w.This.IsClosed() {
-				break outer
-			}
-			f.F()
-			if f.Done != nil {
-				f.Done <- struct{}{}
-			}
 		case <-winPaint.C:
 			if w.This.IsClosed() {
 				break outer
@@ -115,26 +103,6 @@ outer:
 			w.EvMgr.WindowPaint()
 		}
 	}
-}
-
-// RunOnWin runs given function on the window's unique locked thread.
-func (w *Window[A]) RunOnWin(f func()) {
-	if w.This.IsClosed() {
-		return
-	}
-	done := make(chan struct{})
-	w.RunQueue <- FuncRun{F: f, Done: done}
-	<-done
-}
-
-// GoRunOnWin runs given function on window's unique locked thread and returns immediately
-func (w *Window[A]) GoRunOnWin(f func()) {
-	if w.This.IsClosed() {
-		return
-	}
-	go func() {
-		w.RunQueue <- FuncRun{F: f, Done: nil}
-	}()
 }
 
 func (w *Window[A]) Lock() bool {
