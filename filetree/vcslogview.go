@@ -97,7 +97,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 			SetTooltip("Copies the revision number / hash for this ").
 			OnClick(func(e events.Event) {
 				cmt := lv.Log[tv.SelIdx]
-				tv.ClipBoard().Write(mimedata.NewText(cmt.Rev))
+				tv.Clipboard().Write(mimedata.NewText(cmt.Rev))
 			})
 		gi.NewButton(m).SetText("Checkout Revision").
 			SetTooltip("Checks out this revision").
@@ -135,7 +135,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		d.AddBottomBar(func(pw gi.Widget) {
 			gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 				OnClick(func(e events.Event) {
-					d.ClipBoard().Write(mimedata.NewTextBytes(cinfo))
+					d.Clipboard().Write(mimedata.NewTextBytes(cinfo))
 				})
 			d.AddOk(pw)
 		})

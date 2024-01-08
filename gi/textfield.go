@@ -864,7 +864,7 @@ func (tf *TextField) Cut() {
 	if cut != "" {
 		em := tf.EventMgr()
 		if em != nil {
-			em.ClipBoard().Write(mimedata.NewText(cut))
+			em.Clipboard().Write(mimedata.NewText(cut))
 		}
 	}
 }
@@ -905,7 +905,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 
 	md := mimedata.NewText(tf.Text())
-	tf.ClipBoard().Write(md)
+	tf.Clipboard().Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -915,7 +915,7 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := tf.ClipBoard().Read([]string{fi.TextPlain})
+	data := tf.Clipboard().Read([]string{fi.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
@@ -964,7 +964,7 @@ func (tf *TextField) TextFieldContextMenu(m *Scene) {
 			OnClick(func(e events.Event) {
 				tf.Paste()
 			})
-		cb := tf.Sc.EventMgr.ClipBoard()
+		cb := tf.Sc.EventMgr.Clipboard()
 		if cb != nil {
 			pbt.SetState(cb.IsEmpty(), states.Disabled)
 		}

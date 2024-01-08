@@ -1327,7 +1327,7 @@ func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
-	cb := tv.Sc.EventMgr.ClipBoard()
+	cb := tv.Sc.EventMgr.Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
@@ -1422,7 +1422,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 			}
 		}
 	}
-	tv.ClipBoard().Write(md)
+	tv.Clipboard().Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -1452,7 +1452,7 @@ func (tv *TreeView) Cut() { //gti:add
 
 // Paste pastes clipboard at given node.
 func (tv *TreeView) Paste() { //gti:add
-	md := tv.ClipBoard().Read([]string{fi.DataJson})
+	md := tv.Clipboard().Read([]string{fi.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}

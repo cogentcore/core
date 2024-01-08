@@ -111,7 +111,7 @@ func TextDialog(ctx gi.Widget, title, text string) *Editor {
 	d.AddBottomBar(func(pw gi.Widget) {
 		gi.NewButton(pw).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
 			OnClick(func(e events.Event) {
-				d.ClipBoard().Write(mimedata.NewText(text))
+				d.Clipboard().Write(mimedata.NewText(text))
 			})
 		d.AddOk(pw)
 	})

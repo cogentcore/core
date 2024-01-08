@@ -342,7 +342,7 @@ func (ed *Editor) PasteHist() {
 		if clip != nil {
 			updt := ed.UpdateStart()
 			defer ed.UpdateEndRender(updt)
-			ed.ClipBoard().Write(mimedata.NewTextBytes(clip))
+			ed.Clipboard().Write(mimedata.NewTextBytes(clip))
 			ed.InsertAtCursor(clip)
 			ed.SavePosHistory(ed.CursorPos)
 		}
@@ -361,7 +361,7 @@ func (ed *Editor) Cut() *textbuf.Edit {
 	cut := ed.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		ed.ClipBoard().Write(mimedata.NewTextBytes(cb))
+		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
 		ViewClipHistAdd(cb)
 	}
 	ed.SetCursorShow(org)
@@ -388,7 +388,7 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 	defer ed.UpdateEndRender(updt)
 	cb := tbe.ToBytes()
 	ViewClipHistAdd(cb)
-	ed.ClipBoard().Write(mimedata.NewTextBytes(cb))
+	ed.Clipboard().Write(mimedata.NewTextBytes(cb))
 	if reset {
 		ed.SelectReset()
 	}
@@ -400,7 +400,7 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 func (ed *Editor) Paste() {
 	updt := ed.UpdateStart()
 	defer ed.UpdateEndRender(updt)
-	data := ed.ClipBoard().Read([]string{fi.TextPlain})
+	data := ed.Clipboard().Read([]string{fi.TextPlain})
 	if data != nil {
 		ed.InsertAtCursor(data.TypeData(fi.TextPlain))
 		ed.SavePosHistory(ed.CursorPos)
@@ -448,7 +448,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	cut := ed.Buf.DeleteTextRect(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		ed.ClipBoard().Write(mimedata.NewTextBytes(cb))
+		ed.Clipboard().Write(mimedata.NewTextBytes(cb))
 		ViewClipRect = cut
 	}
 	ed.SetCursorShow(npos)
@@ -466,7 +466,7 @@ func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
 	updt := ed.UpdateStart()
 	defer ed.UpdateEndRender(updt)
 	cb := tbe.ToBytes()
-	ed.ClipBoard().Write(mimedata.NewTextBytes(cb))
+	ed.Clipboard().Write(mimedata.NewTextBytes(cb))
 	ViewClipRect = tbe
 	if reset {
 		ed.SelectReset()
@@ -538,7 +538,7 @@ func (ed *Editor) ContextMenu(m *gi.Scene) {
 				ed.Cut()
 			})
 		gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
-			SetKey(keyfun.Paste).SetState(ed.ClipBoard().IsEmpty(), states.Disabled).
+			SetKey(keyfun.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Paste()
 			})

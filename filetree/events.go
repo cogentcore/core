@@ -193,7 +193,7 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 		OnClick(func(e events.Event) {
 			fn.Paste()
 		})
-	cb := fn.Sc.EventMgr.ClipBoard()
+	cb := fn.Sc.EventMgr.Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}

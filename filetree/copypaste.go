@@ -59,7 +59,7 @@ func (fn *Node) Cut() {
 }
 
 func (fn *Node) Paste() {
-	md := fn.ClipBoard().Read([]string{fi.TextPlain})
+	md := fn.Clipboard().Read([]string{fi.TextPlain})
 	if md != nil {
 		fn.PasteFiles(md, nil)
 	}

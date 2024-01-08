@@ -301,7 +301,7 @@ func (lb *Label) Copy(reset bool) {
 	md := mimedata.NewText(lb.Text)
 	em := lb.EventMgr()
 	if em != nil {
-		em.ClipBoard().Write(md)
+		em.Clipboard().Write(md)
 	}
 }
 

@@ -23,9 +23,9 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
 }
 
-// ClipBoard returns the clipboard for the [Widget] to use.
-func (wb *WidgetBase) ClipBoard() clip.Board {
-	return wb.EventMgr().ClipBoard()
+// Clipboard returns the clipboard for the [Widget] to use.
+func (wb *WidgetBase) Clipboard() clip.Board {
+	return wb.EventMgr().Clipboard()
 }
 
 // On adds an event listener function for the given event type,

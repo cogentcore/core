@@ -725,14 +725,14 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 // 	// em.HandleEvent(&ke)
 // }
 
-// ClipBoard returns the goosi clip.Board, supplying the window context
+// Clipboard returns the goosi clip.Board, supplying the window context
 // if available.
-func (em *EventMgr) ClipBoard() clip.Board {
+func (em *EventMgr) Clipboard() clip.Board {
 	var gwin goosi.Window
 	if win := em.RenderWin(); win != nil {
 		gwin = win.GoosiWin
 	}
-	return goosi.TheApp.ClipBoard(gwin)
+	return goosi.TheApp.Clipboard(gwin)
 }
 
 // SetCursor sets window cursor to given Cursor
