@@ -122,7 +122,7 @@ func (kc *KeyChordEdit) HandleKeys() {
 		if kc.StateIs(states.Focused) {
 			e.SetHandled()
 			kc.SetText(string(e.KeyChord())) // that's easy!
-			kc.EventMgr().ClipBoard().Write(mimedata.NewText(string(e.KeyChord())))
+			kc.ClipBoard().Write(mimedata.NewText(string(e.KeyChord())))
 			kc.SendChange()
 		}
 	})

@@ -905,10 +905,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 
 	md := mimedata.NewText(tf.Text())
-	em := tf.EventMgr()
-	if em != nil {
-		em.ClipBoard().Write(md)
-	}
+	tf.ClipBoard().Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -918,11 +915,7 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	em := tf.EventMgr()
-	if em == nil {
-		return
-	}
-	data := em.ClipBoard().Read([]string{fi.TextPlain})
+	data := tf.ClipBoard().Read([]string{fi.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()

@@ -1422,7 +1422,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 			}
 		}
 	}
-	tv.EventMgr().ClipBoard().Write(md)
+	tv.ClipBoard().Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -1452,7 +1452,7 @@ func (tv *TreeView) Cut() { //gti:add
 
 // Paste pastes clipboard at given node.
 func (tv *TreeView) Paste() { //gti:add
-	md := tv.EventMgr().ClipBoard().Read([]string{fi.DataJson})
+	md := tv.ClipBoard().Read([]string{fi.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}

@@ -12,16 +12,20 @@ import (
 	"goki.dev/gi/v2/keyfun"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
+	"goki.dev/goosi/clip"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/ki/v2"
 )
 
+// EventMgr returns the event manager for this [Widget]'s [Scene].
 func (wb *WidgetBase) EventMgr() *EventMgr {
-	if wb.Sc == nil {
-		return nil
-	}
 	return &wb.Sc.EventMgr
+}
+
+// ClipBoard returns the clipboard for the [Widget] to use.
+func (wb *WidgetBase) ClipBoard() clip.Board {
+	return wb.EventMgr().ClipBoard()
 }
 
 // On adds an event listener function for the given event type,

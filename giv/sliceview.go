@@ -1558,7 +1558,7 @@ func (sv *SliceViewBase) CopyIdxs(reset bool) { //gti:add
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	if md != nil {
-		sv.EventMgr().ClipBoard().Write(md)
+		sv.ClipBoard().Write(md)
 	}
 	if reset {
 		sv.UnselectAllIdxs()
@@ -1605,7 +1605,7 @@ func (sv *SliceViewBase) CutIdxs() { //gti:add
 func (sv *SliceViewBase) PasteIdx(idx int) { //gti:add
 	sv.TmpIdx = idx
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := sv.EventMgr().ClipBoard().Read([]string{dt})
+	md := sv.ClipBoard().Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.TmpIdx)
 	}
@@ -1708,7 +1708,7 @@ func (sv *SliceViewBase) Duplicate() int { //gti:add
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := sv.EventMgr().ClipBoard().Read([]string{dt})
+	md := sv.ClipBoard().Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
