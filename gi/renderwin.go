@@ -403,9 +403,9 @@ func (w *RenderWin) Resized() {
 	}
 	// otherwise, we need to fill the background so that the insets have
 	// the scheme background color
-	drw.StartDraw(0)
-	drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Src)
-	drw.EndDraw()
+	drw.StartFill()
+	drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Over)
+	drw.EndFill()
 }
 
 // Raise requests that the window be at the top of the stack of windows,
