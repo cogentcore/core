@@ -392,7 +392,8 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			a.EvMgr.Window(events.WinMinimize)
 			a.DestroyVk()
 		case <-activityDestroyed:
-			a.EvMgr.Window(events.WinClose)
+			// TODO(kai): needed to stop crashing when changing orientation
+			// a.EvMgr.Window(events.WinClose)
 		}
 	}
 }
