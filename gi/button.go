@@ -239,6 +239,12 @@ func (bt *Button) SetStyles() {
 				s.Align.Self = styles.End
 			})
 		case "parts/shortcut":
+			sc := w.(*Label)
+			if bt.Type == ButtonMenu {
+				sc.Type = LabelBodyMedium
+			} else {
+				sc.Type = LabelLabelLarge
+			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
