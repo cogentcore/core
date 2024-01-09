@@ -7,7 +7,6 @@ package greasi
 import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
@@ -17,16 +16,7 @@ import (
 
 // GUI starts the GUI for the given Grease app, which must be passed as
 // a pointer. It should typically not be called by end-user code; see [Run].
-
 func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
-	gimain.Run(func() {
-		App(opts, cfg, cmds...)
-	})
-}
-
-// App does runs the GUI. It should be called on the main thread.
-// It should typically not be called by end-user code; see [Run].
-func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	b := gi.NewAppBody(opts.AppName).SetTitle(opts.AppTitle)
 	b.App().About = opts.AppAbout
 
