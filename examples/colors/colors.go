@@ -8,7 +8,7 @@ package main
 func main() {}
 
 /*
-func app() {
+func main() {
 	width := 1024
 	height := 768
 

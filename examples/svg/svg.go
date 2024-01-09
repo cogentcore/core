@@ -8,8 +8,6 @@ func main() {}
 
 // TODO: fix
 /*
-func main() { gimain.Run(app) }
-
 var CurFilename = ""
 var TheSVG *svg.Editor
 var TheZoom *gi.Spinner
@@ -49,7 +47,7 @@ func FileViewOpenSVG(ctx gi.Widget) {
 		})
 }
 
-func app() {
+func main() {
 	width := 1600
 	height := 1200
 
