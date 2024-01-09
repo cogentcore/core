@@ -401,9 +401,7 @@ var exe []byte
 //go:embed icon.svg
 var icon []byte
 
-func main() { gimain.Run(app) }
-
-func app() {
+func main() {
 	b := gi.NewAppBody("{{.Name}} Installer")
 	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
 	bt := gi.NewButton(b).SetText("Install {{.Name}}")
