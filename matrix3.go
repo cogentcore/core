@@ -15,9 +15,9 @@ import "errors"
 // Mat3 is 3x3 matrix organized internally as column matrix
 type Mat3 [9]float32
 
-// Identity3 returns the identity [Mat3] matrix
-func Identity3() Mat3 {
-	m := Mat3{}
+// Identity3 returns a new identity [Mat3] matrix
+func Identity3() *Mat3 {
+	m := &Mat3{}
 	m.SetIdentity()
 	return m
 }

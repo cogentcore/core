@@ -48,7 +48,7 @@ type Mat2 struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
 
-// Identity2 returns the identity [Mat2] matrix
+// Identity2 returns a new identity [Mat2] matrix
 func Identity2() Mat2 {
 	return Mat2{
 		1, 0,

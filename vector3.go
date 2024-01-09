@@ -655,7 +655,7 @@ func NewEulerAnglesFromMatrix(m *Mat4) Vec3 {
 // SetEulerAnglesFromQuat sets this vector components to the Euler angles
 // from the specified quaternion.
 func (v *Vec3) SetEulerAnglesFromQuat(q Quat) {
-	mat := NewMat4()
+	mat := Identity4()
 	mat.SetRotationFromQuat(q)
 	v.SetEulerAnglesFromMatrix(mat)
 }

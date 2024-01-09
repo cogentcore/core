@@ -15,8 +15,8 @@ import "errors"
 // Mat4 is 4x4 matrix organized internally as column matrix.
 type Mat4 [16]float32
 
-// NewMat4 creates and returns a pointer to a new Mat4 initialized as the identity matrix.
-func NewMat4() *Mat4 {
+// Identity4 returns a new identity [Mat4] matrix
+func Identity4() *Mat4 {
 	m := &Mat4{}
 	m.SetIdentity()
 	return m
