@@ -149,14 +149,16 @@ type Widget interface {
 	// call HandleEvent directly for any existing events.
 	Send(e events.Types, orig ...events.Event)
 
-	// ContextMenu adds the context menu items (typically [Button]s)
-	// for the widget to the given menu scene. No context menu is defined
-	// by default, but widget types can implement this function if they
-	// have a context menu. ContextMenu also calls
-	// [WidgetBase.CustomContextMenu] if it is not nil.
+	// AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
+	// It is the main way that code should modify a widget's context menus.
+	// Context menu functions are run in reverse order.
+	AddContextMenu(menu func(m *Scene)) *WidgetBase
+
+	// ContextMenu adds the [Widget.ContextMenus] to the given menu scene
+	// in reverse order.
 	ContextMenu(m *Scene)
 
-	// ContextMenuPos returns the default position for popup menus --
+	// ContextMenuPos returns the default position for popup menus;
 	// by default in the middle its Bounding Box, but can be adapted as
 	// appropriate for different widgets.
 	ContextMenuPos(e events.Event) image.Point
@@ -165,7 +167,7 @@ type Widget interface {
 	// to perform on a Widget, activated by default on the ShowContextMenu
 	// event, triggered by a Right mouse click.
 	// Returns immediately, and actions are all executed directly
-	// (later) via the action signals.  Calls MakeContextMenu and
+	// (later) via the action signals. Calls ContextMenu and
 	// ContextMenuPos.
 	ShowContextMenu(e events.Event)
 
@@ -266,12 +268,12 @@ type WidgetBase struct {
 	// widgets to get first access to these events.
 	PriorityEvents []events.Types `set:"-"`
 
-	// CustomContextMenu is an optional context menu constructor function
-	// called by [Widget.MakeContextMenu].  If it is set, then
-	// it takes over full control of making the context menu for the
-	// [events.ContextMenu] event.  It can call other standard menu functions
-	// as needed.
-	CustomContextMenu func(m *Scene) `copy:"-" json:"-" xml:"-"`
+	// ContextMenus is a slice of menu functions to call to construct
+	// the widget's context menu on an [events.ContextMenu]. The
+	// functions are called in reverse order such that the elements
+	// added in the last function are the first in the menu.
+	// Context menus should be added through [Widget.AddContextMenu].
+	ContextMenus []func(m *Scene) `json:"-" xml:"-" set:"-"`
 
 	// Sc is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
@@ -369,7 +371,7 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.Styles.CopyFrom(&fr.Styles)
 	wb.Stylers = fr.Stylers
 	wb.Listeners = fr.Listeners // direct copy -- functions..
-	wb.CustomContextMenu = fr.CustomContextMenu
+	wb.ContextMenus = fr.ContextMenus
 }
 
 func (wb *WidgetBase) Destroy() {

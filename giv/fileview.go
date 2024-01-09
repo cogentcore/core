@@ -344,7 +344,7 @@ func (fv *FileView) ConfigFilesRow() {
 		fv.FavSelect(sv.SelIdx)
 	})
 
-	fsv.CustomContextMenu = func(m *gi.Scene) {
+	fsv.AddContextMenu(func(m *gi.Scene) {
 		gi.NewButton(m).SetText("Open").SetIcon(icons.Open).
 			SetTooltip("Open the selected file using the default app").
 			OnClick(func(e events.Event) {
@@ -378,7 +378,7 @@ func (fv *FileView) ConfigFilesRow() {
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
 				d.AddOkOnly().NewDialog(fsv).Run()
 			})
-	}
+	})
 	fv.ReadFiles()
 	fsv.SetReadOnly(true)
 	fsv.SetSlice(&fv.Files)

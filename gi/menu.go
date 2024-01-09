@@ -108,10 +108,19 @@ func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
 	return NewMenuStage(NewMenuScene(menu, ctx.Name()), ctx, pos)
 }
 
+// AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
+// It is the main way that code should modify a widget's context menus.
+// Context menu functions are run in reverse order.
+func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) *WidgetBase {
+	wb.ContextMenus = append(wb.ContextMenus, menu)
+	return wb
+}
+
+// ContextMenu adds the [Widget.ContextMenus] to the given menu scene
+// in reverse order.
 func (wb *WidgetBase) ContextMenu(m *Scene) {
-	// derived types put native menu code here
-	if wb.CustomContextMenu != nil {
-		wb.CustomContextMenu(m)
+	for i := len(wb.ContextMenus) - 1; i >= 0; i-- {
+		wb.ContextMenus[i](m)
 	}
 }
 

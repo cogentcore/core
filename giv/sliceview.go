@@ -281,6 +281,7 @@ func (sv *SliceViewBase) OnInit() {
 	sv.Frame.OnInit()
 	sv.HandleEvents()
 	sv.SetStyles()
+	sv.AddContextMenu(sv.SliceViewContextMenu)
 }
 
 func (sv *SliceViewBase) SetStyles() {
@@ -661,7 +662,7 @@ func (sv *SliceViewBase) ConfigRows() {
 				sv.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
-			idxlab.CustomContextMenu = sv.CustomContextMenu
+			idxlab.ContextMenus = sv.ContextMenus
 		}
 
 		w := ki.NewOfType(vtyp).(gi.Widget)
@@ -672,7 +673,7 @@ func (sv *SliceViewBase) ConfigRows() {
 			e.SetHandled()
 			sv.UpdateSelectRow(i)
 		})
-		wb.CustomContextMenu = sv.CustomContextMenu
+		wb.ContextMenus = sv.ContextMenus
 
 		if sv.IsReadOnly() {
 			w.AsWidget().SetReadOnly(true)
@@ -1795,14 +1796,6 @@ func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 
 //////////////////////////////////////////////////////////////////////////////
 //    Events
-
-func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
-	if sv.CustomContextMenu != nil {
-		sv.CustomContextMenu(m)
-		return
-	}
-	sv.SliceViewContextMenu(m)
-}
 
 func (sv *SliceViewBase) SliceViewContextMenu(m *gi.Scene) {
 	if sv.IsReadOnly() || sv.Is(SliceViewIsArray) {

@@ -76,6 +76,7 @@ func (tv *TableView) OnInit() {
 	tv.Frame.OnInit()
 	tv.SliceViewBase.HandleEvents()
 	tv.SetStyles()
+	tv.AddContextMenu(tv.TableViewContextMenu)
 }
 
 func (tv *TableView) SetStyles() {
@@ -507,7 +508,7 @@ func (tv *TableView) ConfigRows() {
 				tv.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
-			idxlab.CustomContextMenu = tv.CustomContextMenu
+			idxlab.ContextMenus = tv.ContextMenus
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
@@ -536,7 +537,7 @@ func (tv *TableView) ConfigRows() {
 				e.SetHandled()
 				tv.UpdateSelectRow(i)
 			})
-			wb.CustomContextMenu = tv.CustomContextMenu
+			wb.ContextMenus = tv.ContextMenus
 
 			if tv.IsReadOnly() {
 				w.AsWidget().SetReadOnly(true)
@@ -968,14 +969,6 @@ func (tv *TableView) EditIdx(idx int) {
 		d.AddOk(pw)
 	})
 	d.NewFullDialog(tv).Run()
-}
-
-func (tv *TableView) ContextMenu(m *gi.Scene) {
-	if tv.CustomContextMenu != nil {
-		tv.CustomContextMenu(m)
-		return
-	}
-	tv.TableViewContextMenu(m)
 }
 
 func (tv *TableView) TableViewContextMenu(m *gi.Scene) {

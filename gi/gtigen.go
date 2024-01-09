@@ -122,12 +122,6 @@ func (t *AppChooser) SetTooltip(v string) *AppChooser {
 	return t
 }
 
-// SetCustomContextMenu sets the [AppChooser.CustomContextMenu]
-func (t *AppChooser) SetCustomContextMenu(v func(m *Scene)) *AppChooser {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetType sets the [AppChooser.Type]
 func (t *AppChooser) SetType(v ChooserTypes) *AppChooser {
 	t.Type = v
@@ -161,6 +155,12 @@ func (t *AppChooser) SetAllowNew(v bool) *AppChooser {
 // SetItems sets the [AppChooser.Items]
 func (t *AppChooser) SetItems(v []any) *AppChooser {
 	t.Items = v
+	return t
+}
+
+// SetLabels sets the [AppChooser.Labels]
+func (t *AppChooser) SetLabels(v []string) *AppChooser {
+	t.Labels = v
 	return t
 }
 
@@ -230,12 +230,6 @@ func (t *Body) SetTooltip(v string) *Body {
 	return t
 }
 
-// SetCustomContextMenu sets the [Body.CustomContextMenu]
-func (t *Body) SetCustomContextMenu(v func(m *Scene)) *Body {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [Body.StackTop]
 func (t *Body) SetStackTop(v int) *Body {
 	t.StackTop = v
@@ -287,12 +281,6 @@ func (t *Box) SetTooltip(v string) *Box {
 	return t
 }
 
-// SetCustomContextMenu sets the [Box.CustomContextMenu]
-func (t *Box) SetCustomContextMenu(v func(m *Scene)) *Box {
-	t.CustomContextMenu = v
-	return t
-}
-
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Button",
@@ -308,7 +296,7 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope.\nAvoid conflict with other shortcuts (a log message will be emitted if so).\nShortcuts are processed after all other processing of keyboard input.\nUse Command for Control / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: ""}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that can be used for event handling", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -411,12 +399,6 @@ func (t *Button) SetTooltip(v string) *Button {
 	return t
 }
 
-// SetCustomContextMenu sets the [Button.CustomContextMenu]
-func (t *Button) SetCustomContextMenu(v func(m *Scene)) *Button {
-	t.CustomContextMenu = v
-	return t
-}
-
 // CanvasType is the [gti.Type] for [Canvas]
 var CanvasType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Canvas",
@@ -456,12 +438,6 @@ func (t *Canvas) SetTooltip(v string) *Canvas {
 	return t
 }
 
-// SetCustomContextMenu sets the [Canvas.CustomContextMenu]
-func (t *Canvas) SetCustomContextMenu(v func(m *Scene)) *Canvas {
-	t.CustomContextMenu = v
-	return t
-}
-
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Chooser",
@@ -479,6 +455,7 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", LocalType: "[]any", Doc: "items available for selection", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Labels", &gti.Field{Name: "Labels", Type: "[]string", LocalType: "[]string", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Icons", &gti.Field{Name: "Icons", Type: "[]goki.dev/icons.Icon", LocalType: "[]icons.Icon", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", LocalType: "[]string", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -552,6 +529,14 @@ func (t *Chooser) SetItems(v []any) *Chooser {
 	return t
 }
 
+// SetLabels sets the [Chooser.Labels]:
+// an optional list of labels displayed for Chooser items;
+// the indices for the labels correspond to those for the items
+func (t *Chooser) SetLabels(v []string) *Chooser {
+	t.Labels = v
+	return t
+}
+
 // SetIcons sets the [Chooser.Icons]:
 // an optional list of icons displayed for Chooser items;
 // the indices for the icons correspond to those for the items
@@ -587,12 +572,6 @@ func (t *Chooser) SetItemsFunc(v func()) *Chooser {
 // SetTooltip sets the [Chooser.Tooltip]
 func (t *Chooser) SetTooltip(v string) *Chooser {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Chooser.CustomContextMenu]
-func (t *Chooser) SetCustomContextMenu(v func(m *Scene)) *Chooser {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -742,12 +721,6 @@ func (t *Frame) SetTooltip(v string) *Frame {
 	return t
 }
 
-// SetCustomContextMenu sets the [Frame.CustomContextMenu]
-func (t *Frame) SetCustomContextMenu(v func(m *Scene)) *Frame {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [Frame.StackTop]
 func (t *Frame) SetStackTop(v int) *Frame {
 	t.StackTop = v
@@ -821,12 +794,6 @@ func (t *Handle) SetTooltip(v string) *Handle {
 	return t
 }
 
-// SetCustomContextMenu sets the [Handle.CustomContextMenu]
-func (t *Handle) SetCustomContextMenu(v func(m *Scene)) *Handle {
-	t.CustomContextMenu = v
-	return t
-}
-
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Icon",
@@ -868,12 +835,6 @@ func (t *Icon) New() ki.Ki {
 // SetTooltip sets the [Icon.Tooltip]
 func (t *Icon) SetTooltip(v string) *Icon {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Icon.CustomContextMenu]
-func (t *Icon) SetCustomContextMenu(v func(m *Scene)) *Icon {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -919,12 +880,6 @@ func (t *Image) New() ki.Ki {
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Image.CustomContextMenu]
-func (t *Image) SetCustomContextMenu(v func(m *Scene)) *Image {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -1009,12 +964,6 @@ func (t *Label) SetTooltip(v string) *Label {
 	return t
 }
 
-// SetCustomContextMenu sets the [Label.CustomContextMenu]
-func (t *Label) SetCustomContextMenu(v func(m *Scene)) *Label {
-	t.CustomContextMenu = v
-	return t
-}
-
 // LabeledTextFieldType is the [gti.Type] for [LabeledTextField]
 var LabeledTextFieldType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.LabeledTextField",
@@ -1078,12 +1027,6 @@ func (t *LabeledTextField) SetErrorText(v string) *LabeledTextField {
 // SetTooltip sets the [LabeledTextField.Tooltip]
 func (t *LabeledTextField) SetTooltip(v string) *LabeledTextField {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [LabeledTextField.CustomContextMenu]
-func (t *LabeledTextField) SetCustomContextMenu(v func(m *Scene)) *LabeledTextField {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -1214,12 +1157,6 @@ func (t *Layout) SetTooltip(v string) *Layout {
 	return t
 }
 
-// SetCustomContextMenu sets the [Layout.CustomContextMenu]
-func (t *Layout) SetCustomContextMenu(v func(m *Scene)) *Layout {
-	t.CustomContextMenu = v
-	return t
-}
-
 // StretchType is the [gti.Type] for [Stretch]
 var StretchType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Stretch",
@@ -1259,12 +1196,6 @@ func (t *Stretch) SetTooltip(v string) *Stretch {
 	return t
 }
 
-// SetCustomContextMenu sets the [Stretch.CustomContextMenu]
-func (t *Stretch) SetCustomContextMenu(v func(m *Scene)) *Stretch {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Space",
@@ -1301,12 +1232,6 @@ func (t *Space) New() ki.Ki {
 // SetTooltip sets the [Space.Tooltip]
 func (t *Space) SetTooltip(v string) *Space {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Space.CustomContextMenu]
-func (t *Space) SetCustomContextMenu(v func(m *Scene)) *Space {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -1372,12 +1297,6 @@ func (t *ProgressBar) SetProgCur(v int) *ProgressBar {
 // SetTooltip sets the [ProgressBar.Tooltip]
 func (t *ProgressBar) SetTooltip(v string) *ProgressBar {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [ProgressBar.CustomContextMenu]
-func (t *ProgressBar) SetCustomContextMenu(v func(m *Scene)) *ProgressBar {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -1618,12 +1537,6 @@ func (t *Scene) SetTooltip(v string) *Scene {
 	return t
 }
 
-// SetCustomContextMenu sets the [Scene.CustomContextMenu]
-func (t *Scene) SetCustomContextMenu(v func(m *Scene)) *Scene {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [Scene.StackTop]
 func (t *Scene) SetStackTop(v int) *Scene {
 	t.StackTop = v
@@ -1681,12 +1594,6 @@ func (t *Separator) SetDim(v mat32.Dims) *Separator {
 // SetTooltip sets the [Separator.Tooltip]
 func (t *Separator) SetTooltip(v string) *Separator {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Separator.CustomContextMenu]
-func (t *Separator) SetCustomContextMenu(v func(m *Scene)) *Separator {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -2114,12 +2021,6 @@ func (t *Slider) SetTooltip(v string) *Slider {
 	return t
 }
 
-// SetCustomContextMenu sets the [Slider.CustomContextMenu]
-func (t *Slider) SetCustomContextMenu(v func(m *Scene)) *Slider {
-	t.CustomContextMenu = v
-	return t
-}
-
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Spell",
 	ShortName: "gi.Spell",
@@ -2272,12 +2173,6 @@ func (t *Spinner) SetTooltip(v string) *Spinner {
 	return t
 }
 
-// SetCustomContextMenu sets the [Spinner.CustomContextMenu]
-func (t *Spinner) SetCustomContextMenu(v func(m *Scene)) *Spinner {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetPlaceholder sets the [Spinner.Placeholder]
 func (t *Spinner) SetPlaceholder(v string) *Spinner {
 	t.Placeholder = v
@@ -2413,12 +2308,6 @@ func (t *Splits) AsSplits() *Splits {
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Splits.CustomContextMenu]
-func (t *Splits) SetCustomContextMenu(v func(m *Scene)) *Splits {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -2699,12 +2588,6 @@ func (t *SVG) SetTooltip(v string) *SVG {
 	return t
 }
 
-// SetCustomContextMenu sets the [SVG.CustomContextMenu]
-func (t *SVG) SetCustomContextMenu(v func(m *Scene)) *SVG {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SwitchType is the [gti.Type] for [Switch]
 var SwitchType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Switch",
@@ -2775,12 +2658,6 @@ func (t *Switch) SetIconUnk(v icons.Icon) *Switch {
 // SetTooltip sets the [Switch.Tooltip]
 func (t *Switch) SetTooltip(v string) *Switch {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Switch.CustomContextMenu]
-func (t *Switch) SetCustomContextMenu(v func(m *Scene)) *Switch {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -2877,12 +2754,6 @@ func (t *Switches) SetMutex(v bool) *Switches {
 // SetTooltip sets the [Switches.Tooltip]
 func (t *Switches) SetTooltip(v string) *Switches {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Switches.CustomContextMenu]
-func (t *Switches) SetCustomContextMenu(v func(m *Scene)) *Switches {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -2996,12 +2867,6 @@ func (t *Tabs) SetTooltip(v string) *Tabs {
 	return t
 }
 
-// SetCustomContextMenu sets the [Tabs.CustomContextMenu]
-func (t *Tabs) SetCustomContextMenu(v func(m *Scene)) *Tabs {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [Tabs.StackTop]
 func (t *Tabs) SetStackTop(v int) *Tabs {
 	t.StackTop = v
@@ -3062,12 +2927,6 @@ func (t *Tab) SetDeleteButton(v bool) *Tab {
 // SetTooltip sets the [Tab.Tooltip]
 func (t *Tab) SetTooltip(v string) *Tab {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Tab.CustomContextMenu]
-func (t *Tab) SetCustomContextMenu(v func(m *Scene)) *Tab {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -3286,12 +3145,6 @@ func (t *TextField) SetTooltip(v string) *TextField {
 	return t
 }
 
-// SetCustomContextMenu sets the [TextField.CustomContextMenu]
-func (t *TextField) SetCustomContextMenu(v func(m *Scene)) *TextField {
-	t.CustomContextMenu = v
-	return t
-}
-
 // ToolbarType is the [gti.Type] for [Toolbar]
 var ToolbarType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Toolbar",
@@ -3381,12 +3234,6 @@ func (t *Toolbar) SetTooltip(v string) *Toolbar {
 	return t
 }
 
-// SetCustomContextMenu sets the [Toolbar.CustomContextMenu]
-func (t *Toolbar) SetCustomContextMenu(v func(m *Scene)) *Toolbar {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [Toolbar.StackTop]
 func (t *Toolbar) SetStackTop(v int) *Toolbar {
 	t.StackTop = v
@@ -3438,12 +3285,6 @@ func (t *BasicBar) SetTooltip(v string) *BasicBar {
 	return t
 }
 
-// SetCustomContextMenu sets the [BasicBar.CustomContextMenu]
-func (t *BasicBar) SetCustomContextMenu(v func(m *Scene)) *BasicBar {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [BasicBar.StackTop]
 func (t *BasicBar) SetStackTop(v int) *BasicBar {
 	t.StackTop = v
@@ -3475,7 +3316,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/goosi/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "CustomContextMenu is an optional context menu constructor function\ncalled by [Widget.MakeContextMenu].  If it is set, then\nit takes over full control of making the context menu for the\n[events.ContextMenu] event.  It can call other standard menu functions\nas needed.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"ContextMenus", &gti.Field{Name: "ContextMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "Sc is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent.\nIt is passed to most Config, Layout, and Render functions as\na convenience.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -3513,17 +3354,6 @@ func (t *WidgetBase) New() ki.Ki {
 // text for the tooltip for this widget, which can use HTML formatting
 func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [WidgetBase.CustomContextMenu]:
-// CustomContextMenu is an optional context menu constructor function
-// called by [Widget.MakeContextMenu].  If it is set, then
-// it takes over full control of making the context menu for the
-// [events.ContextMenu] event.  It can call other standard menu functions
-// as needed.
-func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
-	t.CustomContextMenu = v
 	return t
 }
 

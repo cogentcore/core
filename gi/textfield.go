@@ -154,6 +154,8 @@ func (tf *TextField) OnInit() {
 	tf.WidgetBase.OnInit()
 	tf.HandleEvents()
 	tf.SetStyles()
+	// fmt.Println("tfoi", tf)
+	tf.AddContextMenu(tf.TextFieldContextMenu)
 }
 
 func (tf *TextField) OnAdd() {
@@ -942,14 +944,6 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
-}
-
-func (tf *TextField) ContextMenu(m *Scene) {
-	if tf.CustomContextMenu != nil {
-		tf.CustomContextMenu(m)
-		return
-	}
-	tf.TextFieldContextMenu(m)
 }
 
 func (tf *TextField) TextFieldContextMenu(m *Scene) {

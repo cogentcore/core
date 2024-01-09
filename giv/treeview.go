@@ -199,6 +199,7 @@ func (tv *TreeView) OnInit() {
 	tv.WidgetBase.OnInit()
 	tv.HandleEvents()
 	tv.SetStyles()
+	tv.AddContextMenu(tv.TreeViewContextMenu)
 }
 
 func (tv *TreeView) OnAdd() {
@@ -1286,6 +1287,10 @@ func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
 }
 
 func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
+	if tv.IsReadOnly() {
+		tv.TreeViewContextMenuReadOnly(m)
+		return
+	}
 	tvi := tv.This().(TreeViewer)
 	gi.NewButton(m).SetText("Add child").SetIcon(icons.Add).
 		SetState(!tv.HasSelection(), states.Disabled).
@@ -1343,19 +1348,6 @@ func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
 		SetState(!tv.HasSelection(), states.Disabled)
 	NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
 		SetState(!tv.HasSelection(), states.Disabled)
-}
-
-func (tv *TreeView) ContextMenu(m *gi.Scene) {
-	// derived types put native menu code here
-	if tv.CustomContextMenu != nil {
-		tv.CustomContextMenu(m)
-		return
-	}
-	if tv.IsReadOnly() {
-		tv.TreeViewContextMenuReadOnly(m)
-	} else {
-		tv.TreeViewContextMenu(m)
-	}
 }
 
 // IsRoot returns true if given node is the root of the tree.

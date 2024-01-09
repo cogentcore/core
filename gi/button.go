@@ -50,7 +50,7 @@ type Button struct { //goki:embedder
 
 	// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
 	// The constructor function should add buttons to the scene that it is passed.
-	Menu func(m *Scene)
+	Menu func(m *Scene) `json:"-" xml:"-"`
 
 	// optional data that can be used for event handling
 	Data any `json:"-" xml:"-" view:"-"`
