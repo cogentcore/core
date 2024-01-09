@@ -253,6 +253,11 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.ApplyStyleScene()
+	if goosi.TheApp.Platform().IsMobile() {
+		// restart the multi-render updating after resize, for FillInsets to overwrite mysterious
+		// black bars that otherwise are rendered in both ios and android in different contexts.
+		sc.ShowIter = 0
+	}
 }
 
 func (sc *Scene) ScIsVisible() bool {
