@@ -390,16 +390,13 @@ func (sf *Surface) PresentImage(frameIdx uint32) error {
 	})
 
 	switch ret {
-	case vk.ErrorOutOfDate:
+	case vk.ErrorOutOfDate, vk.Suboptimal:
 		sf.ReConfigSwapchain()
 		if Debug {
 			fmt.Printf("vgpu.Surface:PresentImage, new format: %#v\n", sf.Format)
 		}
 		return fmt.Errorf("vgpu.Surface:PresentImage: swapchain was out of date, reinitialized -- not rendered")
 	case vk.Success:
-		return nil
-	case vk.Suboptimal:
-		// TODO(kai): we shouldn't handle suboptimal on mobile, but we need to on desktop
 		return nil
 	default:
 		return NewError(ret)
