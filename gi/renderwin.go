@@ -1044,7 +1044,7 @@ func (w *RenderWin) FillInsets() {
 
 	fill := func(x0, y0, x1, y1 int) {
 		r := image.Rect(x0, y0, x1, y1)
-		if r.Dx() == 0 && r.Dy() == 0 {
+		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
 		drw.Fill(colors.Scheme.Background, mat32.Identity3(), r, draw.Src)
