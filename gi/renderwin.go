@@ -31,7 +31,9 @@ var WinWait sync.WaitGroup
 // This should be put at the end of the main function, and is typically
 // called through [Stage.Wait].
 func Wait() {
+	defer func() { goosi.HandleRecover(recover()) }()
 	go func() {
+		defer func() { goosi.HandleRecover(recover()) }()
 		WinWait.Wait()
 		goosi.TheApp.Quit()
 	}()

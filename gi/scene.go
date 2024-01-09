@@ -236,6 +236,9 @@ func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 
 // Resize resizes the scene, creating a new image; updates Geom
 func (sc *Scene) Resize(geom mat32.Geom2DInt) {
+	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
+		return
+	}
 	if sc.PaintContext.State == nil {
 		sc.PaintContext.State = &paint.State{}
 	}
