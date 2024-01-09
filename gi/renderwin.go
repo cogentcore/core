@@ -355,9 +355,7 @@ func (w *RenderWin) Resized() {
 
 	drw := w.GoosiWin.Drawer()
 
-	// render geom and window geom
 	rg := w.GoosiWin.RenderGeom()
-	wg := mat32.Geom2DInt{Size: w.GoosiWin.Size()}
 
 	curRg := rctx.Geom
 	if curRg == rg {
@@ -398,14 +396,6 @@ func (w *RenderWin) Resized() {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
 	WinGeomMgr.RecordPref(w)
-
-	// if our window geom is not the same as our render geom, we need to fill
-	// the background so that the insets have the scheme background color
-	if wg != rg {
-		drw.StartFill()
-		drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Src)
-		drw.EndFill()
-	}
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -1024,6 +1014,7 @@ func (w *RenderWin) DrawScenes() {
 	}
 
 	drw.SyncImages()
+	w.FillInsets()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
 	rs.DrawAll(drw)
@@ -1034,6 +1025,24 @@ func (w *RenderWin) DrawScenes() {
 	drw.EndDraw()
 
 	// pr.End()
+}
+
+// FillInsets fills the window insets, if any, with [colors.Scheme.Background].
+func (w *RenderWin) FillInsets() {
+	// render geom and window geom
+	rg := w.GoosiWin.RenderGeom()
+	wg := mat32.Geom2DInt{Size: w.GoosiWin.Size()}
+
+	// if our window geom is the same as our render geom, we have no
+	// window insets to fill
+	if wg == rg {
+		return
+	}
+
+	drw := w.GoosiWin.Drawer()
+	drw.StartFill()
+	drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Src)
+	drw.EndFill()
 }
 
 // GatherScenes finds all the Scene elements that drive rendering
