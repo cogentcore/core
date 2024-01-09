@@ -46,7 +46,7 @@ func KeyMapsView(km *keyfun.Maps) {
 		NewFuncButton(tb, km.MarkdownDoc).SetIcon(icons.Document).
 			SetShowReturn(true).SetShowReturnAsDialog(true)
 		tb.AddOverflowMenu(func(m *gi.Scene) {
-			NewFuncButton(m, km.OpenPrefs).SetIcon(icons.Open).SetKey(keyfun.OpenAlt1)
+			NewFuncButton(m, km.OpenSettings).SetIcon(icons.Open).SetKey(keyfun.OpenAlt1)
 		})
 	})
 

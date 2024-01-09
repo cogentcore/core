@@ -69,7 +69,7 @@ var _ = gti.AddType(&gti.Type{
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
-		{"OpenPrefs", &gti.Method{Name: "OpenPrefs", Doc: "OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.\nThis is called automatically, so calling it manually should not be necessary in most cases.", Directives: gti.Directives{
+		{"OpenSettings", &gti.Method{Name: "OpenSettings", Doc: "OpenSettings opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.\nThis is called automatically, so calling it manually should not be necessary in most cases.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},

@@ -47,6 +47,12 @@ type Settings interface {
 
 	// Apply does anything necessary to apply the settings to the app.
 	Apply()
+
+	// Save saves the settings
+	Save() error
+
+	// Open opens the settings
+	Open() error
 }
 
 // SettingsBase contains base settings logic that other settings data types can extend.
@@ -101,12 +107,12 @@ func ResetSettings(se Settings) error {
 // If they are not already saved, it saves them.
 func LoadSettings(se Settings) error {
 	se.Defaults()
-	err := OpenSettings(se)
+	err := se.Open()
 	// we always apply the settings even if we can't open them
 	// to apply at least the default values
 	se.Apply()
 	if errors.Is(err, fs.ErrNotExist) {
-		return SaveSettings(se)
+		return se.Save()
 	}
 	return err
 }
@@ -202,6 +208,9 @@ func (as *AppearanceSettingsData) Defaults() {
 	as.FontFamily = "Roboto"
 	as.MonoFont = "Roboto Mono"
 }
+
+func (as *AppearanceSettingsData) Save() error { return SaveSettings(as) }
+func (as *AppearanceSettingsData) Open() error { return OpenSettings(as) }
 
 func (as *AppearanceSettingsData) Apply() { //gti:add
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
@@ -395,6 +404,9 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.LongPressStopDistance = 50
 }
 
+func (ds *DeviceSettingsData) Save() error { return SaveSettings(ds) }
+func (ds *DeviceSettingsData) Open() error { return OpenSettings(ds) }
+
 func (ds *DeviceSettingsData) Apply() {
 	if ds.KeyMaps.Valid {
 		keyfun.AvailMaps = ds.KeyMaps.Value
@@ -474,24 +486,6 @@ type SystemSettingsData struct { //gti:add
 	// the amount of time since last focus name event to allow tab to focus on next element with same name.
 	LayoutFocusNameTabTime time.Duration `def:"2000" min:"10" max:"10000" step:"100"`
 
-	// open dialogs in separate windows -- else do as popups in main window
-	DialogsSepRenderWin bool `def:"true"`
-
-	// Maximum amount of clipboard history to retain
-	TextEditorClipHistMax int `def:"100" min:"0" max:"1000" step:"5"`
-
-	// maximum number of lines to look for matching scope syntax (parens, brackets)
-	TextBufMaxScopeLines int `def:"100" min:"10" step:"10"`
-
-	// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
-	TextBufDiffRevertLines int `def:"10000" min:"0" step:"1000"`
-
-	// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
-	TextBufDiffRevertDiffs int `def:"20" min:"0" step:"1"`
-
-	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-	TextBufMarkupDelay time.Duration `def:"1000" min:"100" step:"100"`
-
 	// the number of map elements at or below which an inline representation
 	// of the map will be presented, which is more convenient for small #'s of props
 	MapInlineLength int `def:"2" min:"1" step:"1"`
@@ -519,16 +513,13 @@ func (ss *SystemSettingsData) Defaults() {
 	ss.LayoutFocusNameTimeout = 500 * time.Millisecond
 	ss.LayoutFocusNameTabTime = 2000 * time.Millisecond
 
-	ss.TextEditorClipHistMax = 100
-	ss.TextBufMaxScopeLines = 100
-	ss.TextBufDiffRevertLines = 10000
-	ss.TextBufDiffRevertDiffs = 20
-	ss.TextBufMarkupDelay = time.Second
-
 	ss.MapInlineLength = 2
 	ss.StructInlineLength = 4
 	ss.SliceInlineLength = 4
 }
+
+func (ss *SystemSettingsData) Save() error { return SaveSettings(ss) }
+func (ss *SystemSettingsData) Open() error { return OpenSettings(ss) }
 
 // Apply detailed preferences to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //gti:add
@@ -567,10 +558,6 @@ func (ss *SystemSettingsData) UpdateUser() {
 
 // BehaviorSettings contains misc parameters controlling GUI behavior.
 type BehaviorSettings struct { //gti:add
-
-	// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
-	LocalMainMenu bool
-
 	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
 	OnlyCloseActiveTab bool `def:"false"`
 
@@ -582,18 +569,13 @@ type BehaviorSettings struct { //gti:add
 
 	// maximum number of saved paths to save in FileView
 	SavedPathsMax int
-
-	// turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
-	Smooth3D bool
 }
 
 func (bs *BehaviorSettings) Defaults() {
-	bs.LocalMainMenu = true // much better
 	bs.OnlyCloseActiveTab = false
 	bs.ZebraStripeWeight = 0
 	bs.BigFileSize = 10000000
 	bs.SavedPathsMax = 50
-	bs.Smooth3D = true
 }
 
 // User basic user information that might be needed for different apps
@@ -814,6 +796,9 @@ func (db *DebugSettingsData) Defaults() {
 	// db.GoCompleteTrace = golang.CompleteTrace
 	// db.GoTypeTrace = golang.TraceTypes
 }
+
+func (db *DebugSettingsData) Save() error { return SaveSettings(db) }
+func (db *DebugSettingsData) Open() error { return OpenSettings(db) }
 
 func (db *DebugSettingsData) Apply() {
 	// golang.CompleteTrace = db.GoCompleteTrace

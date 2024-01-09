@@ -318,9 +318,9 @@ func (km *Maps) Save(filename string) error { //gti:add
 	return grr.Log(jsons.Save(km, filename))
 }
 
-// OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
+// OpenSettings opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
 // This is called automatically, so calling it manually should not be necessary in most cases.
-func (km *Maps) OpenPrefs() error { //gti:add
+func (km *Maps) OpenSettings() error { //gti:add
 	pdir := goosi.TheApp.GokiDataDir()
 	pnm := filepath.Join(pdir, PrefsMapsFileName)
 	AvailMapsChanged = false
