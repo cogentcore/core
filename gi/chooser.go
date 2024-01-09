@@ -20,6 +20,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -63,6 +64,10 @@ type Chooser struct {
 
 	// items available for selection
 	Items []any `json:"-" xml:"-"`
+
+	// an optional list of labels displayed for Chooser items;
+	// the indices for the labels correspond to those for the items
+	Labels []string `json:"-" xml:"-"`
 
 	// an optional list of icons displayed for Chooser items;
 	// the indices for the icons correspond to those for the items
@@ -422,9 +427,11 @@ func (ch *Chooser) SetIconItems(el []icons.Icon, setFirst bool, maxLen int) *Cho
 		return ch
 	}
 	ch.Items = make([]any, n)
+	ch.Labels = make([]string, n)
 	ch.Icons = make([]icons.Icon, n)
 	for i, ic := range el {
 		ch.Items[i] = ic
+		ch.Labels[i] = sentence.Case(string(ic))
 		ch.Icons[i] = ic
 	}
 	if maxLen > 0 {
@@ -446,10 +453,17 @@ func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser
 		return ch
 	}
 	ch.Items = make([]any, n)
+	ch.Labels = make([]string, n)
 	ch.Tooltips = make([]string, n)
 	for i, enum := range el {
 		ch.Items[i] = enum
-		ch.Tooltips[i] = enum.Desc()
+		str := enum.String()
+		lbl := sentence.Case(str)
+		ch.Labels[i] = lbl
+		// TODO(kai): this desc is not always correct because we
+		// don't have the name of the enum value pre-generator-transformation
+		// (same as with Switches)
+		ch.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
 	}
 	if maxLen > 0 {
 		ch.SetToMaxLength(maxLen)
@@ -503,7 +517,11 @@ func (ch *Chooser) SetCurVal(it any) int {
 		ch.CurIndex = len(ch.Items)
 		ch.Items = append(ch.Items, it)
 	}
-	ch.ShowCurVal(ToLabel(ch.CurVal))
+	if len(ch.Labels) > ch.CurIndex {
+		ch.ShowCurVal(ch.Labels[ch.CurIndex])
+	} else {
+		ch.ShowCurVal(ToLabel(ch.CurVal))
+	}
 	return ch.CurIndex
 }
 
@@ -518,7 +536,11 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 		ch.ShowCurVal(fmt.Sprintf("idx %v > len", idx))
 	} else {
 		ch.CurVal = ch.Items[idx]
-		ch.ShowCurVal(ToLabel(ch.CurVal))
+		if len(ch.Labels) > ch.CurIndex {
+			ch.ShowCurVal(ch.Labels[ch.CurIndex])
+		} else {
+			ch.ShowCurVal(ToLabel(ch.CurVal))
+		}
 	}
 	return ch.CurVal
 }
@@ -625,7 +647,11 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	for i, it := range ch.Items {
 		nm := "item-" + strconv.Itoa(i)
 		bt := NewButton(m, nm).SetType(ButtonMenu)
-		bt.SetText(ToLabel(it))
+		if len(ch.Labels) > i {
+			bt.SetText(ch.Labels[i])
+		} else {
+			bt.SetText(ToLabel(it))
+		}
 		if len(ch.Icons) > i {
 			bt.SetIcon(ch.Icons[i])
 		}

@@ -11,6 +11,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
@@ -187,12 +188,18 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 	sw.Items = make([]string, sz)
 	sw.Tooltips = make([]string, sz)
 	for i, enum := range el {
+		str := ""
 		if bf, ok := enum.(enums.BitFlag); ok {
-			sw.Items[i] = bf.BitIndexString()
+			str = bf.BitIndexString()
 		} else {
-			sw.Items[i] = enum.String()
+			str = enum.String()
 		}
-		sw.Tooltips[i] = enum.Desc()
+		lbl := sentence.Case(str)
+		sw.Items[i] = lbl
+		// TODO(kai): this desc is not always correct because we
+		// don't have the name of the enum value pre-generator-transformation
+		// (same as with Chooser)
+		sw.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
 	}
 	return sw
 }
