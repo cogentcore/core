@@ -198,7 +198,7 @@ func (sw *Switches) SetEnums(el []enums.Enum) *Switches {
 		sw.Items[i] = lbl
 		// TODO(kai): this desc is not always correct because we
 		// don't have the name of the enum value pre-generator-transformation
-		// (same as with Chooser)
+		// (same as with Chooser) (#774)
 		sw.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
 	}
 	return sw

@@ -462,7 +462,7 @@ func (ch *Chooser) SetEnums(el []enums.Enum, setFirst bool, maxLen int) *Chooser
 		ch.Labels[i] = lbl
 		// TODO(kai): this desc is not always correct because we
 		// don't have the name of the enum value pre-generator-transformation
-		// (same as with Switches)
+		// (same as with Switches) (#774)
 		ch.Tooltips[i] = sentence.Doc(enum.Desc(), str, lbl)
 	}
 	if maxLen > 0 {
