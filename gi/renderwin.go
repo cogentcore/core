@@ -1047,7 +1047,7 @@ func (w *RenderWin) FillInsets() {
 		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
-		drw.Fill(colors.Scheme.Background, mat32.Identity3(), r, draw.Src)
+		drw.Fill(colors.Scheme.Background, *mat32.Identity3(), r, draw.Src)
 	}
 	rb := rg.Bounds()
 	wb := wg.Bounds()

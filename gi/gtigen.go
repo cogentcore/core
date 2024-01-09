@@ -2857,7 +2857,7 @@ func (t *Tabs) SetNewTabButton(v bool) *Tabs {
 // SetDeleteTabButtons sets the [Tabs.DeleteTabButtons]:
 // if true, tabs are user-deleteable (false by default)
 func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
-	t.DeleteTabButtons = v
+	t.DeleteButtons = v
 	return t
 }
 

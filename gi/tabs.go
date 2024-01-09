@@ -42,7 +42,7 @@ type Tabs struct { //goki:embedder
 	NewTabButton bool
 
 	// if true, tabs are user-deleteable (false by default)
-	DeleteTabButtons bool
+	DeleteButtons bool
 
 	// mutex protecting updates to tabs.
 	// Tabs can be driven programmatically and via user input so need extra protection
@@ -205,7 +205,8 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
 	tab.Data = idx
 	tab.Tooltip = label
-	tab.DeleteButton = ts.DeleteTabButtons
+	tab.Type = ts.Type
+	tab.DeleteButton = ts.DeleteButtons
 	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
@@ -488,11 +489,15 @@ func (ts *Tabs) Render() {
 type Tab struct {
 	Button
 
+	// Type is the styling type of the tab. This property
+	// must be set on the parent [Tabs] for it to work correctly.
+	Type TabTypes
+
 	// Maximum number of characters to include in tab label.
 	// Elides labels that are longer than that
 	MaxChars int
 
-	// if true, this tab has a delete button (true by default)
+	// if true, this tab has a delete button (false by default)
 	DeleteButton bool
 }
 
