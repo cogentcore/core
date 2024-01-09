@@ -10,6 +10,7 @@ package vgpu
 import (
 	"errors"
 	"fmt"
+	"runtime"
 
 	vk "github.com/goki/vulkan"
 )
@@ -391,6 +392,11 @@ func (sf *Surface) PresentImage(frameIdx uint32) error {
 
 	switch ret {
 	case vk.ErrorOutOfDate, vk.Suboptimal:
+		// we do not handle out of date and suboptimal on Android,
+		// as this leads to crashing and they are not necessary
+		if runtime.GOOS == "android" {
+			return nil
+		}
 		sf.ReConfigSwapchain()
 		if Debug {
 			fmt.Printf("vgpu.Surface:PresentImage, new format: %#v\n", sf.Format)
