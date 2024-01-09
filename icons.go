@@ -73,10 +73,10 @@ func (i Icon) IsFilled() bool {
 	return strings.HasSuffix(string(i), "-fill")
 }
 
-// IsNil returns whether the icon name is empty,
-// [None], or "nil"; those indicate not to use an icon.
+// IsNil returns whether the icon name is "" or
+// [None], which indicates not to use an icon.
 func (i Icon) IsNil() bool {
-	return i == "" || i == None || i == "nil"
+	return i == "" || i == None
 }
 
 // Filename returns the filename of the icon in [Icons]
