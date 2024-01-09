@@ -49,10 +49,25 @@ type Tabs struct { //goki:embedder
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
+// TabTypes are the different styling types of tabs.
 type TabTypes int32 //enums:enum -trimprefix Tab
 
 const (
-	BottomNavBar TabTypes = iota
+	// StandardTabs indicates to render the standard type
+	// of Material Design style tabs.
+	StandardTabs TabTypes = iota
+
+	// BottomNavBar indicates to render the tabs as a
+	// bottom navigation bar.
+	BottomNavBar
+
+	// NavigationRail indicates to render the tabs as a
+	// side navigation rail, which only has icons.
+	NavigationRail
+
+	// NavigationDrawer indicates to render the tabs as a
+	// side navigation drawer, which has full text labels and icons.
+	NavigationDrawer
 )
 
 func (ts *Tabs) CopyFieldsFrom(frm any) {
