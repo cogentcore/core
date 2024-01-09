@@ -25,6 +25,8 @@ func (fn *Node) OnInit() {
 	fn.TreeView.OnInit()
 	fn.HandleEvents()
 	fn.SetStyles()
+	fn.ContextMenus = nil // do not include treeview
+	fn.AddContextMenu(fn.ContextMenu)
 }
 
 func (fn *Node) SetStyles() {

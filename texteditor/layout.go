@@ -91,7 +91,6 @@ func (ed *Editor) Position() {
 
 func (ed *Editor) ScenePos() {
 	ed.Layout.ScenePos()
-	ed.GetScrollPosition()
 	ed.PositionScrolls()
 }
 
