@@ -274,7 +274,7 @@ func (sc *Scene) UpdateMeshBBox() {
 
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
 func UpdateWorldMatrix(n ki.Ki) {
-	idmtx := mat32.NewMat4()
+	idmtx := mat32.Identity4()
 	n.WalkPre(func(k ki.Ki) bool {
 		ni, _ := AsNode(k)
 		if ni == nil {

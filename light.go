@@ -180,7 +180,7 @@ func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *Sp
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
 func (sl *SpotLight) ViewDir() mat32.Vec3 {
-	idmat := mat32.NewMat4()
+	idmat := mat32.Identity4()
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
 	// sl.Pose.UpdateMVPMatrix(viewMat, idmat)
