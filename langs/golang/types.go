@@ -121,7 +121,7 @@ func (gl *GoLang) TypesFromAst(fs *pi.FileState, pkg *syms.Symbol) {
 
 // InitTypeFromAst initializes given type from ast
 func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
-	if ty.Ast == nil {
+	if ty.Ast == nil || len(*ty.Ast.Children()) < 2 {
 		// if TraceTypes {
 		// 	fmt.Printf("TypesFromAst: Type has nil Ast! %v\n", ty.String())
 		// }

@@ -72,6 +72,9 @@ func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.As
 func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, fty *syms.Type) *syms.Type {
 	// ast.WriteTree(os.Stdout, 0)
 
+	if ast == nil || !ast.HasChildren() {
+		return nil
+	}
 	pars := ast.ChildAst(0)
 	if pars == nil {
 		if TraceTypes {
