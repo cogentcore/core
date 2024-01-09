@@ -1556,6 +1556,7 @@ func (vv *FileValue) HasDialog() bool                      { return true }
 func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func()) { OpenValueDialog(vv, ctx, fun) }
 
 func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
+	vv.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
 	fv := NewFileView(d).SetFilename(cur, ext)
