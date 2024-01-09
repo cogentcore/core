@@ -209,6 +209,9 @@ func (bt *Button) SetStyles() {
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
+				if bt.Text != "" {
+					s.Margin.Right.Ch(1)
+				}
 			})
 		case "parts/space":
 			w.Style(func(s *styles.Style) {
@@ -415,6 +418,8 @@ func (bt *Button) HandleEvents() {
 
 func (bt *Button) ConfigWidget() {
 	parts := bt.NewParts()
+	config := ki.Config{}
+
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
 	if bt.HasMenu() {
@@ -432,34 +437,30 @@ func (bt *Button) ConfigWidget() {
 			}
 		}
 	}
-	config := ki.Config{}
 
-	icIdx := -1
-	lbIdx := -1
+	ici := -1
+	lbi := -1
 	if bt.Icon.IsValid() {
-		icIdx = len(config)
+		ici = len(config)
 		config.Add(IconType, "icon")
-		if bt.Text != "" {
-			config.Add(SpaceType, "space")
-		}
 	}
 	if bt.Text != "" {
-		lbIdx = len(config)
+		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
 
-	indIdx := -1
+	indi := -1
 	if !bt.Indicator.IsNil() {
 		config.Add(StretchType, "ind-stretch")
-		indIdx = len(config)
+		indi = len(config)
 		config.Add(IconType, "indicator")
 	}
 
-	scIdx := -1
+	sci := -1
 	if bt.Type == ButtonMenu {
-		if indIdx < 0 && bt.Shortcut != "" {
+		if indi < 0 && bt.Shortcut != "" {
 			config.Add(StretchType, "sc-stretch")
-			scIdx = len(config)
+			sci = len(config)
 			config.Add(LabelType, "shortcut")
 		} else if bt.Shortcut != "" {
 			slog.Error("programmer error: gi.Button: shortcut cannot be used on a sub-menu for", "button", bt)
@@ -468,24 +469,24 @@ func (bt *Button) ConfigWidget() {
 
 	mods, updt := parts.ConfigChildren(config)
 
-	if icIdx >= 0 {
-		ic := bt.Parts.Child(icIdx).(*Icon)
+	if ici >= 0 {
+		ic := bt.Parts.Child(ici).(*Icon)
 		ic.SetIcon(bt.Icon)
 	}
-	if lbIdx >= 0 {
-		lbl := bt.Parts.Child(lbIdx).(*Label)
+	if lbi >= 0 {
+		lbl := bt.Parts.Child(lbi).(*Label)
 		if lbl.Text != bt.Text {
 			lbl.SetTextUpdate(bt.Text)
 		}
 	}
 
-	if indIdx >= 0 {
-		ic := bt.Parts.Child(indIdx).(*Icon)
+	if indi >= 0 {
+		ic := bt.Parts.Child(indi).(*Icon)
 		ic.SetIcon(bt.Indicator)
 	}
 
-	if scIdx >= 0 {
-		sc := bt.Parts.Child(scIdx).(*Label)
+	if sci >= 0 {
+		sc := bt.Parts.Child(sci).(*Label)
 		sctxt := bt.Shortcut.Shortcut()
 		if sc.Text != sctxt {
 			sc.SetTextUpdate(sctxt)

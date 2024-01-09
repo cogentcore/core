@@ -620,11 +620,15 @@ func (tb *Tab) Tabs() *Tabs {
 	return AsTabs(ts)
 }
 
-func (tb *Tab) ConfigParts() {
+func (tb *Tab) ConfigWidget() {
+	parts := tb.NewParts()
+	config := ki.Config{}
+
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}
-	if tb.DeleteButton {
+
+	if !tb.CloseIcon.IsNil() {
 		tb.ConfigPartsDeleteButton()
 		return
 	}
@@ -664,8 +668,4 @@ func (tb *Tab) ConfigPartsDeleteButton() {
 		})
 		tb.UpdateEnd(updt)
 	}
-}
-
-func (tb *Tab) ConfigWidget() {
-	tb.ConfigParts()
 }

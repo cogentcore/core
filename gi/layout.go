@@ -521,8 +521,3 @@ func (sp *Space) OnInit() {
 		s.Border.Width.Zero()
 	})
 }
-
-func (sp *Space) CopyFieldsFrom(frm any) {
-	fr := frm.(*Space)
-	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-}
