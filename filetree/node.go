@@ -559,8 +559,8 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 			if i == sz-1 { // ok for terminal -- might not exist yet
 				return cfn, nil
 			} else {
-				err = fmt.Errorf("filetree.Node could not find node %v in: %v", dr, cfn.FPath)
-				slog.Error(err.Error())
+				err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.FPath, pth, rpath)
+				// slog.Error(err.Error()) // note: this is expected sometimes
 				return nil, err
 			}
 		}

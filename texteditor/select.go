@@ -291,7 +291,7 @@ var ViewClipHistory [][]byte
 
 // ViewClipHistAdd adds the given clipboard bytes to top of history stack
 func ViewClipHistAdd(clip []byte) {
-	max := gi.SystemSettings.TextEditorClipHistMax
+	max := ClipHistMax
 	if ViewClipHistory == nil {
 		ViewClipHistory = make([][]byte, 0, max)
 	}

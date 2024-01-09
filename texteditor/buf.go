@@ -552,7 +552,7 @@ func (tb *Buf) Revert() bool {
 	}
 
 	didDiff := false
-	if tb.NLines < gi.SystemSettings.TextBufDiffRevertLines {
+	if tb.NLines < DiffRevertLines {
 		ob := NewBuf()
 		err := ob.OpenFile(tb.Filename)
 		if err != nil {
@@ -565,9 +565,9 @@ func (tb *Buf) Revert() bool {
 			return false
 		}
 		tb.Stat() // "own" the new file..
-		if ob.NLines < gi.SystemSettings.TextBufDiffRevertLines {
+		if ob.NLines < DiffRevertLines {
 			diffs := tb.DiffBufs(ob)
-			if len(diffs) < gi.SystemSettings.TextBufDiffRevertDiffs {
+			if len(diffs) < DiffRevertDiffs {
 				tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 				didDiff = true
 			}
@@ -1064,7 +1064,7 @@ func (tb *Buf) BraceMatch(r rune, st lex.Pos) (en lex.Pos, found bool) {
 	defer tb.LinesMu.RUnlock()
 	tb.MarkupMu.RLock()
 	defer tb.MarkupMu.RUnlock()
-	return lex.BraceMatch(tb.Lines, tb.HiTags, r, st, gi.SystemSettings.TextBufMaxScopeLines)
+	return lex.BraceMatch(tb.Lines, tb.HiTags, r, st, MaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1696,7 +1696,7 @@ func (tb *Buf) StartDelayedReMarkup() {
 	if tb.Complete != nil && tb.Complete.IsAboutToShow() {
 		return
 	}
-	tb.MarkupDelayTimer = time.AfterFunc(gi.SystemSettings.TextBufMarkupDelay, func() {
+	tb.MarkupDelayTimer = time.AfterFunc(MarkupDelay, func() {
 		// fmt.Printf("delayed remarkup\n")
 		tb.MarkupDelayTimer = nil
 		tb.ReMarkup()
