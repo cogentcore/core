@@ -9,6 +9,7 @@ require (
 	goki.dev/colors v0.8.44
 	goki.dev/gi/v2 v2.0.0-dev0.0.28
 	goki.dev/girl v0.0.36
+	goki.dev/gix v0.0.0-20240108223952-8a8a3d7e3cd4
 	goki.dev/glop v0.1.10
 	goki.dev/goosi v0.0.25
 	goki.dev/grease v0.8.44
@@ -16,7 +17,6 @@ require (
 	goki.dev/gti v0.1.32
 	goki.dev/icons v0.0.17
 	goki.dev/ki/v2 v2.0.0-dev0.0.33
-	goki.dev/mat32/v2 v2.0.0-dev0.0.28
 	goki.dev/ordmap v0.5.10
 	goki.dev/xe v0.0.28
 )
@@ -60,6 +60,7 @@ require (
 	goki.dev/grows v0.3.31 // indirect
 	goki.dev/jsfs v0.0.2 // indirect
 	goki.dev/laser v0.1.34 // indirect
+	goki.dev/mat32/v2 v2.0.0-dev0.0.28 // indirect
 	goki.dev/pi/v2 v2.0.0-dev0.0.26 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.5 // indirect
 	goki.dev/spell v0.1.15 // indirect

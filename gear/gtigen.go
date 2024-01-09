@@ -18,6 +18,8 @@ var AppType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Cmd", &gti.Field{Name: "Cmd", Type: "*goki.dev/gear/gear.Cmd", LocalType: "*Cmd", Doc: "Cmd is the root command associated with this app.", Directives: gti.Directives{}, Tag: ""}},
+		{"CurCmd", &gti.Field{Name: "CurCmd", Type: "string", LocalType: "string", Doc: "CurCmd is the current root command being typed in.", Directives: gti.Directives{}, Tag: ""}},
+		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "Dir is the current directory of the app.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -51,21 +53,23 @@ func (t *App) SetCmd(v *Cmd) *App {
 	return t
 }
 
+// SetCurCmd sets the [App.CurCmd]:
+// CurCmd is the current root command being typed in.
+func (t *App) SetCurCmd(v string) *App {
+	t.CurCmd = v
+	return t
+}
+
+// SetDir sets the [App.Dir]:
+// Dir is the current directory of the app.
+func (t *App) SetDir(v string) *App {
+	t.Dir = v
+	return t
+}
+
 // SetTooltip sets the [App.Tooltip]
 func (t *App) SetTooltip(v string) *App {
 	t.Tooltip = v
-	return t
-}
-
-// SetClass sets the [App.Class]
-func (t *App) SetClass(v string) *App {
-	t.Class = v
-	return t
-}
-
-// SetCustomContextMenu sets the [App.CustomContextMenu]
-func (t *App) SetCustomContextMenu(v func(m *gi.Scene)) *App {
-	t.CustomContextMenu = v
 	return t
 }
 

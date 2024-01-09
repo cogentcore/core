@@ -4,10 +4,11 @@
 
 package main
 
+//go:generate goki generate
+
 import (
 	"goki.dev/gear/gear"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
 	"goki.dev/grease"
 )
 
@@ -26,25 +27,14 @@ func main() {
 }
 
 func run(c *config) error {
-	var err error
-	gimain.Run(func() {
-		err = app(c)
-	})
-	return err
-}
-
-func app(c *config) error {
-	gi.SetAppName("gear")
-	b := gi.NewBody().SetTitle("Gear")
+	b := gi.NewAppBody("Gear")
 	cmd := gear.NewCmd(c.Command)
 	err := cmd.Parse()
 	if err != nil {
 		return err
 	}
 	app := gear.NewApp(b).SetCmd(cmd)
-	b.AddTopBar(func(pw gi.Widget) {
-		app.TopAppBar(b.TopAppBar(pw))
-	})
+	b.AddAppBar(app.AppBar)
 	b.NewWindow().Run().Wait()
 	return nil
 }

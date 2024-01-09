@@ -4,6 +4,8 @@
 
 package gear
 
+//go:generate goki generate
+
 import (
 	"context"
 	"fmt"
@@ -23,15 +25,14 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/keyfun"
-	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/gix/texteditor"
 	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/xe"
 )
 
@@ -56,8 +57,7 @@ func (a *App) OnInit() {
 	a.Dir = grr.Log1(os.Getwd())
 }
 
-func (a *App) TopAppBar(tb *gi.TopAppBar) {
-	gi.DefaultTopAppBarStd(tb)
+func (a *App) AppBar(tb *gi.Toolbar) {
 	for _, cmd := range a.Cmd.Cmds {
 		cmd := cmd
 		fields := strings.Fields(cmd.Cmd)
@@ -88,7 +88,10 @@ func (a *App) ConfigWidget() {
 	// st := StructForFlags(a.Cmd.Flags)
 	// giv.NewStructView(a).SetStruct(st)
 
-	sp := gi.NewSplits(a, "splits").SetDim(mat32.Y)
+	sp := gi.NewSplits(a, "splits")
+	sp.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 
 	cmds := gi.NewFrame(sp, "commands")
 	cmds.Style(func(s *styles.Style) {
