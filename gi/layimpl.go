@@ -120,6 +120,20 @@ type Layouter interface {
 	// updated as a result of change from adding scrollbars
 	// (generally should be true, but some cases not)
 	ManageOverflow(iter int, updtSize bool) bool
+
+	// ScrollChanged is called in the OnInput event handler for updating
+	// when the scrollbar value has changed, for given dimension
+	ScrollChanged(d mat32.Dims, sb *Slider)
+
+	// ScrollValues returns the maximum size that could be scrolled,
+	// the visible size (which could be less than the max size, in which
+	// case no scrollbar is needed), and visSize / maxSize as the VisiblePct.
+	// This is used in updating the scrollbar and determining whether one is
+	// needed in the first place
+	ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32)
+
+	// ScrollGeom returns the target position and size for scrollbars
+	ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2)
 }
 
 // AsLayout returns the given value as a value of type Layout if the type
@@ -1158,7 +1172,6 @@ func (ly *Layout) SizeDownSetAllocs(iter int) {
 // (generally should be true, but some cases not)
 func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 	sz := &ly.Geom.Size
-	oflow := sz.Internal.Sub(sz.Alloc.Content)
 	sbw := mat32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	change := false
 	if iter == 0 {
@@ -1175,7 +1188,8 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 		}
 	}
 	for d := mat32.X; d <= mat32.Y; d++ {
-		ofd := oflow.Dim(d)
+		maxSize, visSize, _ := ly.This().(Layouter).ScrollValues(d)
+		ofd := maxSize - visSize
 		switch ly.Styles.Overflow.Dim(d) {
 		// case styles.OverflowVisible:
 		// note: this shouldn't happen -- just have this in here for monitoring
@@ -1826,7 +1840,7 @@ func (ly *Layout) ScenePosLay() {
 		ly.ScenePosWidget() // behave like a widget
 		return
 	}
-	ly.GetScrollPosition()
+	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
 	ly.ScenePosWidget()
 	ly.ScenePosChildren()
 	ly.PositionScrolls()

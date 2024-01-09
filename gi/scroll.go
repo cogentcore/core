@@ -75,7 +75,7 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 		s.MaxBorder.Width.Zero()
 		s.Border.Width.Zero()
 		od := d.Other()
-		_, sz := ly.ScrollGeom(d)
+		_, sz := ly.This().(Layouter).ScrollGeom(d)
 		if sz.X > 0 && sz.Y > 0 {
 			s.SetState(false, states.Invisible)
 			s.Min.SetDim(d, units.Dot(sz.Dim(d)))
@@ -87,27 +87,32 @@ func (ly *Layout) ConfigScroll(d mat32.Dims) {
 	})
 	sb.OnInput(func(e events.Event) {
 		e.SetHandled()
-		// fmt.Println("change event")
-		updt := ly.UpdateStart()
-		ly.This().(Widget).ScenePos() // gets pos from scrolls, positions scrollbars
-		ly.UpdateEndRender(updt)
+		ly.This().(Layouter).ScrollChanged(d, sb)
 	})
 	sb.Update()
 }
 
-// GetScrollPosition sets our layout Scroll position from scrollbars
-func (ly *Layout) GetScrollPosition() {
-	for d := mat32.X; d <= mat32.Y; d++ {
-		ly.Geom.Scroll.SetDim(d, 0)
-		if ly.HasScroll[d] {
-			sb := ly.Scrolls[d]
-			if sb == nil {
-				ly.HasScroll[d] = false
-				continue
-			}
-			ly.Geom.Scroll.SetDim(d, -sb.Value)
-		}
-	}
+// ScrollChanged is called in the OnInput event handler for updating,
+// when the scrollbar value has changed, for given dimension.
+// This is part of the Layouter interface.
+func (ly *Layout) ScrollChanged(d mat32.Dims, sb *Slider) {
+	updt := ly.UpdateStart()
+	ly.Geom.Scroll.SetDim(d, -sb.Value)
+	ly.This().(Layouter).ScenePos() // computes updated positions
+	ly.UpdateEndRender(updt)
+}
+
+// ScrollValues returns the maximum size that could be scrolled,
+// the visible size (which could be less than the max size, in which
+// case no scrollbar is needed), and visSize / maxSize as the VisiblePct.
+// This is used in updating the scrollbar and determining whether one is
+// needed in the first place
+func (ly *Layout) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) {
+	sz := &ly.Geom.Size
+	maxSize = sz.Internal.Dim(d)
+	visSize = sz.Alloc.Content.Dim(d)
+	visPct = visSize / maxSize
+	return
 }
 
 // PositionScrolls arranges scrollbars
@@ -121,12 +126,9 @@ func (ly *Layout) PositionScrolls() {
 
 func (ly *Layout) PositionScroll(d mat32.Dims) {
 	sb := ly.Scrolls[d]
-	sz := &ly.Geom.Size
-	pos, ssz := ly.ScrollGeom(d)
-	asz := sz.Alloc.Content.Dim(d)
-	csz := sz.Internal.Dim(d)
-	vis := asz / csz
-	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == vis {
+	pos, ssz := ly.This().(Layouter).ScrollGeom(d)
+	maxSize, _, visPct := ly.This().(Layouter).ScrollValues(d)
+	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == visPct {
 		return
 	}
 	if ssz.X <= 0 || ssz.Y <= 0 {
@@ -134,10 +136,10 @@ func (ly *Layout) PositionScroll(d mat32.Dims) {
 		return
 	}
 	sb.SetState(false, states.Invisible)
-	sb.Max = csz                       // only scrollbar
+	sb.Max = maxSize
 	sb.Step = ly.Styles.Font.Size.Dots // step by lines
 	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
-	sb.SetVisiblePct(vis)
+	sb.SetVisiblePct(visPct)
 	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
 
