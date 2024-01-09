@@ -35,11 +35,11 @@ type Tree struct {
 	Node
 
 	// external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update
-	ExtFiles []string
+	ExtFiles []string `set:"-"`
 
 	// records state of directories within the tree (encoded using paths relative to root),
 	// e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
-	Dirs DirFlagMap
+	Dirs DirFlagMap `set:"-"`
 
 	// if true, then all directories are placed at the top of the tree view
 	// otherwise everything is mixed
@@ -49,25 +49,25 @@ type Tree struct {
 	NodeType *gti.Type `view:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
-	InOpenAll bool
+	InOpenAll bool `set:"-"`
 
 	// change notify for all dirs
-	Watcher *fsnotify.Watcher `view:"-"`
+	Watcher *fsnotify.Watcher `set:"-" view:"-"`
 
 	// channel to close watcher watcher
-	DoneWatcher chan bool `view:"-"`
+	DoneWatcher chan bool `set:"-" view:"-"`
 
 	// map of paths that have been added to watcher -- only active if bool = true
-	WatchedPaths map[string]bool `view:"-"`
+	WatchedPaths map[string]bool `set:"-" view:"-"`
 
 	// last path updated by watcher
-	LastWatchUpdt string `view:"-"`
+	LastWatchUpdt string `set:"-" view:"-"`
 
 	// timestamp of last update
-	LastWatchTime time.Time `view:"-"`
+	LastWatchTime time.Time `set:"-" view:"-"`
 
 	// Update mutex
-	UpdtMu sync.Mutex `view:"-"`
+	UpdtMu sync.Mutex `set:"-" view:"-"`
 }
 
 func (ft *Tree) CopyFieldsFrom(frm any) {
@@ -229,7 +229,7 @@ func (ft *Tree) WatchUpdt(path string) {
 
 // WatchPath adds given path to those watched
 func (ft *Tree) WatchPath(path gi.FileName) error {
-	return nil // disable for all platforms for now -- getting some issues
+	return nil // TODO: disable for all platforms for now -- getting some issues
 	if goosi.TheApp.Platform() == goosi.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}

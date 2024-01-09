@@ -120,12 +120,6 @@ func (t *FileBrowse) SetTooltip(v string) *FileBrowse {
 	return t
 }
 
-// SetCustomContextMenu sets the [FileBrowse.CustomContextMenu]
-func (t *FileBrowse) SetCustomContextMenu(v func(m *gi.Scene)) *FileBrowse {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetStackTop sets the [FileBrowse.StackTop]
 func (t *FileBrowse) SetStackTop(v int) *FileBrowse {
 	t.StackTop = v

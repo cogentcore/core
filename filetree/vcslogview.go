@@ -80,7 +80,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.RevB = ""
 	lv.SetA = true
 	lv.ConfigToolbar()
-	tv.CustomContextMenu = func(m *gi.Scene) {
+	tv.AddContextMenu(func(m *gi.Scene) {
 		gi.NewButton(m).SetText("Set Revision A").
 			SetTooltip("Set Buffer A's revision to this").
 			OnClick(func(e events.Event) {
@@ -105,7 +105,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 				cmt := lv.Log[tv.SelIdx]
 				grr.Log(repo.UpdateVersion(cmt.Rev))
 			})
-	}
+	})
 	tv.OnDoubleClick(func(e events.Event) {
 		idx := tv.SelIdx
 		if idx < 0 || idx >= len(lv.Log) {

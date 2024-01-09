@@ -70,7 +70,7 @@ func VCSLabelFunc(fn *Node, label string) string {
 	return label
 }
 
-func (fn *Node) FileNodeVCSContextMenu(m *gi.Scene) {
+func (fn *Node) VCSContextMenu(m *gi.Scene) {
 	giv.NewFuncButton(m, fn.AddToVCSSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.Vcs != vci.Untracked, states.Disabled)
@@ -103,7 +103,7 @@ func (fn *Node) FileNodeVCSContextMenu(m *gi.Scene) {
 		})
 }
 
-func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
+func (fn *Node) ContextMenu(m *gi.Scene) {
 	gi.NewButton(m).SetText("File info").SetIcon(icons.Info).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
@@ -163,7 +163,7 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 		})
 	gi.NewSeparator(m)
 
-	fn.FileNodeVCSContextMenu(m)
+	fn.VCSContextMenu(m)
 	gi.NewSeparator(m)
 
 	giv.NewFuncButton(m, fn.RemoveFromExterns).SetIcon(icons.Delete).
@@ -196,18 +196,5 @@ func (fn *Node) FileNodeContextMenu(m *gi.Scene) {
 	cb := fn.Sc.EventMgr.Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
-	}
-}
-
-func (fn *Node) ContextMenu(m *gi.Scene) {
-	// derived types put native menu code here
-	if fn.CustomContextMenu != nil {
-		fn.CustomContextMenu(m)
-		return
-	}
-	if fn.IsReadOnly() {
-		fn.TreeViewContextMenuReadOnly(m)
-	} else {
-		fn.FileNodeContextMenu(m)
 	}
 }

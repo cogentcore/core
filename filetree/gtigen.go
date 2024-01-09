@@ -3,10 +3,6 @@
 package filetree
 
 import (
-	"sync"
-	"time"
-
-	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/units"
 	"goki.dev/gti"
@@ -15,7 +11,6 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vci/v2"
-	"gopkg.in/fsnotify.v1"
 )
 
 // NodeType is the [gti.Type] for [Node]
@@ -174,12 +169,6 @@ func (t *Node) SetTooltip(v string) *Node {
 	return t
 }
 
-// SetCustomContextMenu sets the [Node.CustomContextMenu]
-func (t *Node) SetCustomContextMenu(v func(m *gi.Scene)) *Node {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SetText sets the [Node.Text]
 func (t *Node) SetText(v string) *Node {
 	t.Text = v
@@ -236,17 +225,17 @@ var TreeType = gti.AddType(&gti.Type{
 	Doc:        "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a TreeView to provide a GUI\ninterface into it.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", LocalType: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}, Tag: ""}},
-		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/gix/filetree.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: ""}},
+		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", LocalType: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/gix/filetree.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", LocalType: "bool", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed", Directives: gti.Directives{}, Tag: ""}},
 		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
-		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", LocalType: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}, Tag: ""}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*gopkg.in/fsnotify.v1.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", LocalType: "map[string]bool", Doc: "map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", LocalType: "string", Doc: "last path updated by watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", LocalType: "time.Time", Doc: "timestamp of last update", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", LocalType: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Watcher", &gti.Field{Name: "Watcher", Type: "*gopkg.in/fsnotify.v1.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", LocalType: "map[string]bool", Doc: "map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", LocalType: "string", Doc: "last path updated by watcher", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", LocalType: "time.Time", Doc: "timestamp of last update", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/gix/filetree.Node", LocalType: "Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -273,21 +262,6 @@ func (t *Tree) New() ki.Ki {
 	return &Tree{}
 }
 
-// SetExtFiles sets the [Tree.ExtFiles]:
-// external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update
-func (t *Tree) SetExtFiles(v []string) *Tree {
-	t.ExtFiles = v
-	return t
-}
-
-// SetDirs sets the [Tree.Dirs]:
-// records state of directories within the tree (encoded using paths relative to root),
-// e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
-func (t *Tree) SetDirs(v DirFlagMap) *Tree {
-	t.Dirs = v
-	return t
-}
-
 // SetDirsOnTop sets the [Tree.DirsOnTop]:
 // if true, then all directories are placed at the top of the tree view
 // otherwise everything is mixed
@@ -303,64 +277,9 @@ func (t *Tree) SetNodeType(v *gti.Type) *Tree {
 	return t
 }
 
-// SetInOpenAll sets the [Tree.InOpenAll]:
-// if true, we are in midst of an OpenAll call -- nodes should open all dirs
-func (t *Tree) SetInOpenAll(v bool) *Tree {
-	t.InOpenAll = v
-	return t
-}
-
-// SetWatcher sets the [Tree.Watcher]:
-// change notify for all dirs
-func (t *Tree) SetWatcher(v *fsnotify.Watcher) *Tree {
-	t.Watcher = v
-	return t
-}
-
-// SetDoneWatcher sets the [Tree.DoneWatcher]:
-// channel to close watcher watcher
-func (t *Tree) SetDoneWatcher(v chan bool) *Tree {
-	t.DoneWatcher = v
-	return t
-}
-
-// SetWatchedPaths sets the [Tree.WatchedPaths]:
-// map of paths that have been added to watcher -- only active if bool = true
-func (t *Tree) SetWatchedPaths(v map[string]bool) *Tree {
-	t.WatchedPaths = v
-	return t
-}
-
-// SetLastWatchUpdt sets the [Tree.LastWatchUpdt]:
-// last path updated by watcher
-func (t *Tree) SetLastWatchUpdt(v string) *Tree {
-	t.LastWatchUpdt = v
-	return t
-}
-
-// SetLastWatchTime sets the [Tree.LastWatchTime]:
-// timestamp of last update
-func (t *Tree) SetLastWatchTime(v time.Time) *Tree {
-	t.LastWatchTime = v
-	return t
-}
-
-// SetUpdtMu sets the [Tree.UpdtMu]:
-// Update mutex
-func (t *Tree) SetUpdtMu(v sync.Mutex) *Tree {
-	t.UpdtMu = v
-	return t
-}
-
 // SetTooltip sets the [Tree.Tooltip]
 func (t *Tree) SetTooltip(v string) *Tree {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Tree.CustomContextMenu]
-func (t *Tree) SetCustomContextMenu(v func(m *gi.Scene)) *Tree {
-	t.CustomContextMenu = v
 	return t
 }
 
@@ -491,12 +410,6 @@ func (t *VCSLogView) SetSetA(v bool) *VCSLogView {
 // SetTooltip sets the [VCSLogView.Tooltip]
 func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [VCSLogView.CustomContextMenu]
-func (t *VCSLogView) SetCustomContextMenu(v func(m *gi.Scene)) *VCSLogView {
-	t.CustomContextMenu = v
 	return t
 }
 

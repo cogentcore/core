@@ -3,7 +3,6 @@
 package xyzv
 
 import (
-	"goki.dev/gi/v2/gi"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
@@ -116,12 +115,6 @@ func (t *Scene) SetTooltip(v string) *Scene {
 	return t
 }
 
-// SetCustomContextMenu sets the [Scene.CustomContextMenu]
-func (t *Scene) SetCustomContextMenu(v func(m *gi.Scene)) *Scene {
-	t.CustomContextMenu = v
-	return t
-}
-
 // SceneViewType is the [gti.Type] for [SceneView]
 var SceneViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gix/xyzv.SceneView",
@@ -158,12 +151,6 @@ func (t *SceneView) New() ki.Ki {
 // SetTooltip sets the [SceneView.Tooltip]
 func (t *SceneView) SetTooltip(v string) *SceneView {
 	t.Tooltip = v
-	return t
-}
-
-// SetCustomContextMenu sets the [SceneView.CustomContextMenu]
-func (t *SceneView) SetCustomContextMenu(v func(m *gi.Scene)) *SceneView {
-	t.CustomContextMenu = v
 	return t
 }
 
