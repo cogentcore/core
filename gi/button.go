@@ -417,7 +417,6 @@ func (bt *Button) HandleEvents() {
 }
 
 func (bt *Button) ConfigWidget() {
-	parts := bt.NewParts()
 	config := ki.Config{}
 
 	// we check if the icons are unset, not if they are nil, so
@@ -467,37 +466,31 @@ func (bt *Button) ConfigWidget() {
 		}
 	}
 
-	mods, updt := parts.ConfigChildren(config)
-
-	if ici >= 0 {
-		ic := bt.Parts.Child(ici).(*Icon)
-		ic.SetIcon(bt.Icon)
-	}
-	if lbi >= 0 {
-		lbl := bt.Parts.Child(lbi).(*Label)
-		if lbl.Text != bt.Text {
-			lbl.SetTextUpdate(bt.Text)
+	bt.ConfigPartsImpl(config, func(parts *Layout) {
+		if ici >= 0 {
+			ic := bt.Parts.Child(ici).(*Icon)
+			ic.SetIcon(bt.Icon)
 		}
-	}
-
-	if indi >= 0 {
-		ic := bt.Parts.Child(indi).(*Icon)
-		ic.SetIcon(bt.Indicator)
-	}
-
-	if sci >= 0 {
-		sc := bt.Parts.Child(sci).(*Label)
-		sctxt := bt.Shortcut.Shortcut()
-		if sc.Text != sctxt {
-			sc.SetTextUpdate(sctxt)
+		if lbi >= 0 {
+			lbl := bt.Parts.Child(lbi).(*Label)
+			if lbl.Text != bt.Text {
+				lbl.SetTextUpdate(bt.Text)
+			}
 		}
-	}
 
-	if mods {
-		parts.Update()
-		parts.UpdateEnd(updt)
-		bt.SetNeedsLayout(updt)
-	}
+		if indi >= 0 {
+			ic := bt.Parts.Child(indi).(*Icon)
+			ic.SetIcon(bt.Indicator)
+		}
+
+		if sci >= 0 {
+			sc := bt.Parts.Child(sci).(*Label)
+			sctxt := bt.Shortcut.Shortcut()
+			if sc.Text != sctxt {
+				sc.SetTextUpdate(sctxt)
+			}
+		}
+	})
 }
 
 // NOTE: all menus are dynamic.  This obviates the need for updating them.
