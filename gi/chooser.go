@@ -34,7 +34,7 @@ import (
 // to strings for the display.  If the items are of type [icons.Icon], then they
 // are displayed using icons instead.
 type Chooser struct {
-	WidgetBase
+	Box
 
 	// the type of combo box
 	Type ChooserTypes
@@ -52,15 +52,6 @@ type Chooser struct {
 
 	// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
 	AllowNew bool
-
-	// CurLabel is the string label for the current value
-	CurLabel string `set:"-"`
-
-	// current selected value
-	CurVal any `json:"-" xml:"-" set:"-"`
-
-	// current index in list of possible items
-	CurIndex int `json:"-" xml:"-" set:"-"`
 
 	// items available for selection
 	Items []any `json:"-" xml:"-"`
@@ -87,11 +78,20 @@ type Chooser struct {
 	// of the chooser, which is typically used to configure them (eg: if they
 	// are based on dynamic data)
 	ItemsFunc func()
+
+	// CurLabel is the string label for the current value
+	CurLabel string `set:"-"`
+
+	// current selected value
+	CurVal any `json:"-" xml:"-" set:"-"`
+
+	// current index in list of possible items
+	CurIndex int `json:"-" xml:"-" set:"-"`
 }
 
 func (ch *Chooser) CopyFieldsFrom(frm any) {
 	fr := frm.(*Chooser)
-	ch.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	ch.Box.CopyFieldsFrom(&fr.Box)
 	ch.Editable = fr.Editable
 	ch.CurVal = fr.CurVal
 	ch.CurIndex = fr.CurIndex
@@ -115,7 +115,7 @@ const (
 )
 
 func (ch *Chooser) OnInit() {
-	ch.WidgetBase.OnInit()
+	ch.Box.OnInit()
 	ch.HandleEvents()
 	ch.SetStyles()
 }
@@ -222,56 +222,52 @@ func (ch *Chooser) SetStyles() {
 }
 
 func (ch *Chooser) ConfigWidget() {
-	ch.ConfigParts()
-}
-
-func (ch *Chooser) ConfigParts() {
 	parts := ch.NewParts()
 	config := ki.Config{}
 
-	icIdx := -1
-	var lbIdx, txIdx, indIdx int
+	ici := -1
+	var lbi, txi, indi int
 	if ch.Icon.IsValid() && !ch.Editable {
 		config.Add(IconType, "icon")
 		config.Add(SpaceType, "space")
-		icIdx = 0
+		ici = 0
 	}
 	if ch.Editable {
-		lbIdx = -1
-		txIdx = len(config)
+		lbi = -1
+		txi = len(config)
 		config.Add(TextFieldType, "text")
 	} else {
-		txIdx = -1
-		lbIdx = len(config)
+		txi = -1
+		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
 	if !ch.Indicator.IsValid() {
 		ch.Indicator = icons.KeyboardArrowRight
 	}
-	indIdx = len(config)
+	indi = len(config)
 	config.Add(IconType, "indicator")
 
 	mods, updt := parts.ConfigChildren(config)
 
-	if icIdx >= 0 {
-		ic := ch.Parts.Child(icIdx).(*Icon)
+	if ici >= 0 {
+		ic := ch.Parts.Child(ici).(*Icon)
 		ic.SetIcon(ch.Icon)
 	}
 	if ch.Editable {
-		tx := ch.Parts.Child(txIdx).(*TextField)
+		tx := ch.Parts.Child(txi).(*TextField)
 		tx.SetText(ch.CurLabel)
 		tx.SetLeadingIcon(ch.Icon)
 		tx.Config() // this is essential
 		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 	} else {
-		lbl := ch.Parts.Child(lbIdx).(*Label)
+		lbl := ch.Parts.Child(lbi).(*Label)
 		lbl.SetText(ch.CurLabel)
 		lbl.Config() // this is essential
 	}
-	{ // indicator
-		ic := ch.Parts.Child(indIdx).(*Icon)
-		ic.SetIcon(ch.Indicator)
-	}
+
+	ic := ch.Parts.Child(indi).(*Icon)
+	ic.SetIcon(ch.Indicator)
+
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
@@ -819,20 +815,5 @@ func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion
 	return complete.Edit{
 		NewText:       completion.Text,
 		ForwardDelete: len([]rune(text)),
-	}
-}
-
-func (ch *Chooser) RenderChooser() {
-	_, st := ch.RenderLock()
-	ch.RenderStdBox(st)
-	ch.RenderUnlock()
-}
-
-func (ch *Chooser) Render() {
-	if ch.PushBounds() {
-		ch.RenderChooser()
-		ch.RenderParts()
-		ch.RenderChildren()
-		ch.PopBounds()
 	}
 }

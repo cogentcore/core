@@ -66,7 +66,7 @@ type Button struct { //goki:embedder
 
 func (bt *Button) CopyFieldsFrom(frm any) {
 	fr := frm.(*Button)
-	bt.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	bt.Box.CopyFieldsFrom(&fr.Box)
 	bt.Type = fr.Type
 	bt.Text = fr.Text
 	bt.Icon = fr.Icon
@@ -132,7 +132,7 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.WidgetBase.OnInit()
+	bt.Box.OnInit()
 	bt.HandleEvents()
 	bt.SetStyles()
 }
