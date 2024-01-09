@@ -1041,7 +1041,21 @@ func (w *RenderWin) FillInsets() {
 
 	drw := w.GoosiWin.Drawer()
 	drw.StartFill()
-	drw.Fill(colors.Scheme.Background, mat32.Identity3(), wg.Bounds(), draw.Src)
+
+	fill := func(x0, y0, x1, y1 int) {
+		r := image.Rect(x0, y0, x1, y1)
+		if r.Dx() == 0 && r.Dy() == 0 {
+			return
+		}
+		drw.Fill(colors.Scheme.Background, mat32.Identity3(), r, draw.Src)
+	}
+	rb := rg.Bounds()
+	wb := wg.Bounds()
+	fill(0, 0, wb.Max.X, rb.Min.Y)        // top
+	fill(0, rb.Max.Y, wb.Max.X, wb.Max.Y) // bottom
+	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
+	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
+
 	drw.EndFill()
 }
 
