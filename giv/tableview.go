@@ -76,7 +76,8 @@ func (tv *TableView) OnInit() {
 	tv.Frame.OnInit()
 	tv.SliceViewBase.HandleEvents()
 	tv.SetStyles()
-	tv.AddContextMenu(tv.TableViewContextMenu)
+	tv.AddContextMenu(tv.SliceViewBase.ContextMenu)
+	tv.AddContextMenu(tv.ContextMenu)
 }
 
 func (tv *TableView) SetStyles() {
@@ -971,7 +972,7 @@ func (tv *TableView) EditIdx(idx int) {
 	d.NewFullDialog(tv).Run()
 }
 
-func (tv *TableView) TableViewContextMenu(m *gi.Scene) {
+func (tv *TableView) ContextMenu(m *gi.Scene) {
 	if !tv.Is(SliceViewIsArray) {
 		gi.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
@@ -979,7 +980,6 @@ func (tv *TableView) TableViewContextMenu(m *gi.Scene) {
 			})
 		gi.NewSeparator(m)
 	}
-	tv.SliceViewContextMenu(m)
 }
 
 //////////////////////////////////////////////////////

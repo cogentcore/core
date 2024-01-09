@@ -154,9 +154,9 @@ type Widget interface {
 	// Context menu functions are run in reverse order.
 	AddContextMenu(menu func(m *Scene)) *WidgetBase
 
-	// ContextMenu adds the [Widget.ContextMenus] to the given menu scene
+	// ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
 	// in reverse order.
-	ContextMenu(m *Scene)
+	ApplyContextMenus(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus;
 	// by default in the middle its Bounding Box, but can be adapted as

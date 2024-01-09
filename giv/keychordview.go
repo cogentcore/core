@@ -80,6 +80,7 @@ func (kc *KeyChordEdit) OnInit() {
 	kc.Label.OnInit()
 	kc.HandleEvents()
 	kc.SetStyles()
+	kc.AddContextMenu(kc.ContextMenu)
 }
 
 func (kc *KeyChordEdit) SetStyles() {

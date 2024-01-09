@@ -281,7 +281,7 @@ func (sv *SliceViewBase) OnInit() {
 	sv.Frame.OnInit()
 	sv.HandleEvents()
 	sv.SetStyles()
-	sv.AddContextMenu(sv.SliceViewContextMenu)
+	sv.AddContextMenu(sv.ContextMenu)
 }
 
 func (sv *SliceViewBase) SetStyles() {
@@ -1797,7 +1797,7 @@ func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (sv *SliceViewBase) SliceViewContextMenu(m *gi.Scene) {
+func (sv *SliceViewBase) ContextMenu(m *gi.Scene) {
 	if sv.IsReadOnly() || sv.Is(SliceViewIsArray) {
 		return
 	}

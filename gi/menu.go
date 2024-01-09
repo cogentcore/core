@@ -116,9 +116,9 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) *WidgetBase {
 	return wb
 }
 
-// ContextMenu adds the [Widget.ContextMenus] to the given menu scene
+// ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
 // in reverse order.
-func (wb *WidgetBase) ContextMenu(m *Scene) {
+func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
 	for i := len(wb.ContextMenus) - 1; i >= 0; i-- {
 		wb.ContextMenus[i](m)
 	}
@@ -144,7 +144,7 @@ func (wb *WidgetBase) HandleWidgetContextMenu() {
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	e.SetHandled() // always
 	wi := wb.This().(Widget)
-	nm := NewMenu(wi.ContextMenu, wi, wi.ContextMenuPos(e))
+	nm := NewMenu(wi.ApplyContextMenus, wi, wi.ContextMenuPos(e))
 	if nm == nil { // no items
 		return
 	}

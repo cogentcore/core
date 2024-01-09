@@ -199,7 +199,7 @@ func (tv *TreeView) OnInit() {
 	tv.WidgetBase.OnInit()
 	tv.HandleEvents()
 	tv.SetStyles()
-	tv.AddContextMenu(tv.TreeViewContextMenu)
+	tv.AddContextMenu(tv.ContextMenu)
 }
 
 func (tv *TreeView) OnAdd() {
@@ -1268,7 +1268,7 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
+func (tv *TreeView) ContextMenuReadOnly(m *gi.Scene) {
 	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keyfun.Copy).
 		SetState(!tv.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
@@ -1286,9 +1286,9 @@ func (tv *TreeView) TreeViewContextMenuReadOnly(m *gi.Scene) {
 		})
 }
 
-func (tv *TreeView) TreeViewContextMenu(m *gi.Scene) {
+func (tv *TreeView) ContextMenu(m *gi.Scene) {
 	if tv.IsReadOnly() {
-		tv.TreeViewContextMenuReadOnly(m)
+		tv.ContextMenuReadOnly(m)
 		return
 	}
 	tvi := tv.This().(TreeViewer)
