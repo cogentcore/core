@@ -50,15 +50,20 @@ type Tabs struct { //goki:embedder
 }
 
 // TabTypes are the different styling types of tabs.
-type TabTypes int32 //enums:enum -trimprefix Tab
+type TabTypes int32 //enums:enum
 
 const (
 	// StandardTabs indicates to render the standard type
 	// of Material Design style tabs.
 	StandardTabs TabTypes = iota
 
+	// FunctionalTabs indicates to render functional tabs
+	// like those in Google Chrome. These tabs take up less
+	// space and can be more easily moved and closed.
+	FunctionalTabs
+
 	// BottomNavBar indicates to render the tabs as a
-	// bottom navigation bar.
+	// bottom navigation bar with text and icons.
 	BottomNavBar
 
 	// NavigationRail indicates to render the tabs as a
