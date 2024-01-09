@@ -292,12 +292,12 @@ var ButtonType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: ""}},
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
-		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
-		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope.\nAvoid conflict with other shortcuts (a log message will be emitted if so).\nShortcuts are processed after all other processing of keyboard input.\nUse Command for Control / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that can be used for event handling", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the button.\nIf it is blank, no icon is shown.", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
+		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Indicator is the menu indicator icon to present.\nIf it is blank, no indicator is shown. It is\nautomatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless\n[icons.None] is set.", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
+		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is optional data that can be used for event handling", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -354,40 +354,47 @@ func (t *Button) SetType(v ButtonTypes) *Button {
 }
 
 // SetIcon sets the [Button.Icon]:
-// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
+// Icon is the icon for the button.
+// If it is blank, no icon is shown.
 func (t *Button) SetIcon(v icons.Icon) *Button {
 	t.Icon = v
 	return t
 }
 
 // SetIndicator sets the [Button.Indicator]:
-// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
+// Indicator is the menu indicator icon to present.
+// If it is blank, no indicator is shown. It is
+// automatically set to [icons.KeyboardArrowDown]
+// when there is a Menu elements present unless
+// [icons.None] is set.
 func (t *Button) SetIndicator(v icons.Icon) *Button {
 	t.Indicator = v
 	return t
 }
 
 // SetShortcut sets the [Button.Shortcut]:
-// optional shortcut keyboard chord to trigger this button,
-// active in window-wide scope.
-// Avoid conflict with other shortcuts (a log message will be emitted if so).
-// Shortcuts are processed after all other processing of keyboard input.
-// Use Command for Control / Meta (Mac Command key) per platform.
+// Shortcut is an optional shortcut keyboard chord to trigger this button,
+// active in window-wide scope. Avoid conflicts with other shortcuts
+// (a log message will be emitted if so). Shortcuts are processed after
+// all other processing of keyboard input. Use Command for
+// Control / Meta (Mac Command key) per platform.
 func (t *Button) SetShortcut(v key.Chord) *Button {
 	t.Shortcut = v
 	return t
 }
 
 // SetMenu sets the [Button.Menu]:
-// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
-// The constructor function should add buttons to the scene that it is passed.
+// Menu is a menu constructor function used to build and display
+// a menu whenever the button is clicked. There will be no menu
+// if it is nil. The constructor function should add buttons
+// to the Scene that it is passed.
 func (t *Button) SetMenu(v func(m *Scene)) *Button {
 	t.Menu = v
 	return t
 }
 
 // SetData sets the [Button.Data]:
-// optional data that can be used for event handling
+// Data is optional data that can be used for event handling
 func (t *Button) SetData(v any) *Button {
 	t.Data = v
 	return t
@@ -1696,12 +1703,6 @@ var _ = gti.AddType(&gti.Type{
 		{"LayoutPageSteps", &gti.Field{Name: "LayoutPageSteps", Type: "int", LocalType: "int", Doc: "number of steps to take in PageUp / Down events in terms of number of items", Directives: gti.Directives{}, Tag: "def:\"10\" min:\"1\" step:\"1\""}},
 		{"LayoutFocusNameTimeout", &gti.Field{Name: "LayoutFocusNameTimeout", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay", Directives: gti.Directives{}, Tag: "def:\"500\" min:\"0\" max:\"5000\" step:\"20\""}},
 		{"LayoutFocusNameTabTime", &gti.Field{Name: "LayoutFocusNameTabTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time since last focus name event to allow tab to focus on next element with same name.", Directives: gti.Directives{}, Tag: "def:\"2000\" min:\"10\" max:\"10000\" step:\"100\""}},
-		{"DialogsSepRenderWin", &gti.Field{Name: "DialogsSepRenderWin", Type: "bool", LocalType: "bool", Doc: "open dialogs in separate windows -- else do as popups in main window", Directives: gti.Directives{}, Tag: "def:\"true\""}},
-		{"TextEditorClipHistMax", &gti.Field{Name: "TextEditorClipHistMax", Type: "int", LocalType: "int", Doc: "Maximum amount of clipboard history to retain", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"0\" max:\"1000\" step:\"5\""}},
-		{"TextBufMaxScopeLines", &gti.Field{Name: "TextBufMaxScopeLines", Type: "int", LocalType: "int", Doc: "maximum number of lines to look for matching scope syntax (parens, brackets)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" step:\"10\""}},
-		{"TextBufDiffRevertLines", &gti.Field{Name: "TextBufDiffRevertLines", Type: "int", LocalType: "int", Doc: "text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted", Directives: gti.Directives{}, Tag: "def:\"10000\" min:\"0\" step:\"1000\""}},
-		{"TextBufDiffRevertDiffs", &gti.Field{Name: "TextBufDiffRevertDiffs", Type: "int", LocalType: "int", Doc: "text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert", Directives: gti.Directives{}, Tag: "def:\"20\" min:\"0\" step:\"1\""}},
-		{"TextBufMarkupDelay", &gti.Field{Name: "TextBufMarkupDelay", Type: "time.Duration", LocalType: "time.Duration", Doc: "amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)", Directives: gti.Directives{}, Tag: "def:\"1000\" min:\"100\" step:\"100\""}},
 		{"MapInlineLength", &gti.Field{Name: "MapInlineLength", Type: "int", LocalType: "int", Doc: "the number of map elements at or below which an inline representation\nof the map will be presented, which is more convenient for small #'s of props", Directives: gti.Directives{}, Tag: "def:\"2\" min:\"1\" step:\"1\""}},
 		{"StructInlineLength", &gti.Field{Name: "StructInlineLength", Type: "int", LocalType: "int", Doc: "the number of elemental struct fields at or below which an inline representation\nof the struct will be presented, which is more convenient for small structs", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
 		{"SliceInlineLength", &gti.Field{Name: "SliceInlineLength", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
@@ -1725,12 +1726,10 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"LocalMainMenu", &gti.Field{Name: "LocalMainMenu", Type: "bool", LocalType: "bool", Doc: "controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.", Directives: gti.Directives{}, Tag: ""}},
 		{"OnlyCloseActiveTab", &gti.Field{Name: "OnlyCloseActiveTab", Type: "bool", LocalType: "bool", Doc: "only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it", Directives: gti.Directives{}, Tag: "def:\"false\""}},
 		{"ZebraStripeWeight", &gti.Field{Name: "ZebraStripeWeight", Type: "float32", LocalType: "float32", Doc: "the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)", Directives: gti.Directives{}, Tag: "def:\"0\" min:\"0\" max:\"100\" step:\"1\""}},
 		{"BigFileSize", &gti.Field{Name: "BigFileSize", Type: "int", LocalType: "int", Doc: "the limit of file size, above which user will be prompted before opening / copying, etc.", Directives: gti.Directives{}, Tag: "def:\"10000000\""}},
 		{"SavedPathsMax", &gti.Field{Name: "SavedPathsMax", Type: "int", LocalType: "int", Doc: "maximum number of saved paths to save in FileView", Directives: gti.Directives{}, Tag: ""}},
-		{"Smooth3D", &gti.Field{Name: "Smooth3D", Type: "bool", LocalType: "bool", Doc: "turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -2779,10 +2778,10 @@ var TabsType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tabs", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tabs. It must be set\nbefore the tabs are first configured.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
-		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (false by default)", Directives: gti.Directives{}, Tag: ""}},
+		{"DeleteButtons", &gti.Field{Name: "DeleteButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (false by default)", Directives: gti.Directives{}, Tag: ""}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs.\nTabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2833,7 +2832,8 @@ func (t *Tabs) AsTabs() *Tabs {
 }
 
 // SetType sets the [Tabs.Type]:
-// Type is the styling type of the tabs
+// Type is the styling type of the tabs. It must be set
+// before the tabs are first configured.
 func (t *Tabs) SetType(v TabTypes) *Tabs {
 	t.Type = v
 	return t
@@ -2854,9 +2854,9 @@ func (t *Tabs) SetNewTabButton(v bool) *Tabs {
 	return t
 }
 
-// SetDeleteTabButtons sets the [Tabs.DeleteTabButtons]:
+// SetDeleteButtons sets the [Tabs.DeleteButtons]:
 // if true, tabs are user-deleteable (false by default)
-func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
+func (t *Tabs) SetDeleteButtons(v bool) *Tabs {
 	t.DeleteButtons = v
 	return t
 }
@@ -2881,11 +2881,13 @@ var TabType = gti.AddType(&gti.Type{
 	Doc:        "Tab is a tab button that contains a larger select button\nand a smaller close button. The Indicator icon is used for\nthe close icon.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly.", Directives: gti.Directives{}, Tag: ""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the tab.\nIf it is blank, no label is shown.\nLabels are never shown for [NavigationRail] tabs.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
-		{"DeleteButton", &gti.Field{Name: "DeleteButton", Type: "bool", LocalType: "bool", Doc: "if true, this tab has a delete button (true by default)", Directives: gti.Directives{}, Tag: ""}},
+		{"DeleteButton", &gti.Field{Name: "DeleteButton", Type: "bool", LocalType: "bool", Doc: "if true, this tab has a delete button (false by default)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Button", &gti.Field{Name: "Button", Type: "goki.dev/gi/v2/gi.Button", LocalType: "Button", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Tab{},
@@ -2909,6 +2911,23 @@ func (t *Tab) New() ki.Ki {
 	return &Tab{}
 }
 
+// SetType sets the [Tab.Type]:
+// Type is the styling type of the tab. This property
+// must be set on the parent [Tabs] for it to work correctly.
+func (t *Tab) SetType(v TabTypes) *Tab {
+	t.Type = v
+	return t
+}
+
+// SetText sets the [Tab.Text]:
+// Text is the label text for the tab.
+// If it is blank, no label is shown.
+// Labels are never shown for [NavigationRail] tabs.
+func (t *Tab) SetText(v string) *Tab {
+	t.Text = v
+	return t
+}
+
 // SetMaxChars sets the [Tab.MaxChars]:
 // Maximum number of characters to include in tab label.
 // Elides labels that are longer than that
@@ -2918,7 +2937,7 @@ func (t *Tab) SetMaxChars(v int) *Tab {
 }
 
 // SetDeleteButton sets the [Tab.DeleteButton]:
-// if true, this tab has a delete button (true by default)
+// if true, this tab has a delete button (false by default)
 func (t *Tab) SetDeleteButton(v bool) *Tab {
 	t.DeleteButton = v
 	return t
@@ -2927,42 +2946,6 @@ func (t *Tab) SetDeleteButton(v bool) *Tab {
 // SetTooltip sets the [Tab.Tooltip]
 func (t *Tab) SetTooltip(v string) *Tab {
 	t.Tooltip = v
-	return t
-}
-
-// SetType sets the [Tab.Type]
-func (t *Tab) SetType(v ButtonTypes) *Tab {
-	t.Type = v
-	return t
-}
-
-// SetIcon sets the [Tab.Icon]
-func (t *Tab) SetIcon(v icons.Icon) *Tab {
-	t.Icon = v
-	return t
-}
-
-// SetIndicator sets the [Tab.Indicator]
-func (t *Tab) SetIndicator(v icons.Icon) *Tab {
-	t.Indicator = v
-	return t
-}
-
-// SetShortcut sets the [Tab.Shortcut]
-func (t *Tab) SetShortcut(v key.Chord) *Tab {
-	t.Shortcut = v
-	return t
-}
-
-// SetMenu sets the [Tab.Menu]
-func (t *Tab) SetMenu(v func(m *Scene)) *Tab {
-	t.Menu = v
-	return t
-}
-
-// SetData sets the [Tab.Data]
-func (t *Tab) SetData(v any) *Tab {
-	t.Data = v
 	return t
 }
 

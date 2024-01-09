@@ -2547,30 +2547,50 @@ func (i *SwitchTypes) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _TabTypesValues = []TabTypes{0}
+var _TabTypesValues = []TabTypes{0, 1, 2, 3, 4}
 
 // TabTypesN is the highest valid value
 // for type TabTypes, plus one.
-const TabTypesN TabTypes = 1
+const TabTypesN TabTypes = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TabTypesNoOp() {
 	var x [1]struct{}
-	_ = x[BottomNavBar-(0)]
+	_ = x[StandardTabs-(0)]
+	_ = x[FunctionalTabs-(1)]
+	_ = x[NavigationBar-(2)]
+	_ = x[NavigationRail-(3)]
+	_ = x[NavigationDrawer-(4)]
 }
 
 var _TabTypesNameToValueMap = map[string]TabTypes{
-	`BottomNavBar`: 0,
-	`bottomnavbar`: 0,
+	`StandardTabs`:     0,
+	`standardtabs`:     0,
+	`FunctionalTabs`:   1,
+	`functionaltabs`:   1,
+	`NavigationBar`:    2,
+	`navigationbar`:    2,
+	`NavigationRail`:   3,
+	`navigationrail`:   3,
+	`NavigationDrawer`: 4,
+	`navigationdrawer`: 4,
 }
 
 var _TabTypesDescMap = map[TabTypes]string{
-	0: ``,
+	0: `StandardTabs indicates to render the standard type of Material Design style tabs.`,
+	1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and can be more easily moved and closed.`,
+	2: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`,
+	3: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`,
+	4: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text labels and icons.`,
 }
 
 var _TabTypesMap = map[TabTypes]string{
-	0: `BottomNavBar`,
+	0: `StandardTabs`,
+	1: `FunctionalTabs`,
+	2: `NavigationBar`,
+	3: `NavigationRail`,
+	4: `NavigationDrawer`,
 }
 
 // String returns the string representation

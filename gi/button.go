@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"log"
-
 	"log/slog"
 
 	"goki.dev/colors"
@@ -27,41 +25,47 @@ import (
 // Button is a pressable button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event with OnClick(...).
 type Button struct { //goki:embedder
-	WidgetBase
+	Box
 
 	// the type of button
 	Type ButtonTypes
 
-	// label for the button -- if blank then no label is presented
+	// Text is the label text for the button.
+	//If it is blank, no label is shown.
 	Text string `set:"-"`
 
-	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
+	// Icon is the icon for the button.
+	// If it is "" or [icons.None], no icon is shown.
 	Icon icons.Icon `xml:"icon" view:"show-name"`
 
-	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
+	// Indicator is the menu indicator icon to present.
+	// If it is "" or [icons.None],, no indicator is shown.
+	// It is automatically set to [icons.KeyboardArrowDown]
+	// when there is a Menu elements present unless it is
+	// set to [icons.None].
 	Indicator icons.Icon `xml:"indicator" view:"show-name"`
 
-	// optional shortcut keyboard chord to trigger this button,
-	// active in window-wide scope.
-	// Avoid conflict with other shortcuts (a log message will be emitted if so).
-	// Shortcuts are processed after all other processing of keyboard input.
-	// Use Command for Control / Meta (Mac Command key) per platform.
+	// Shortcut is an optional shortcut keyboard chord to trigger this button,
+	// active in window-wide scope. Avoid conflicts with other shortcuts
+	// (a log message will be emitted if so). Shortcuts are processed after
+	// all other processing of keyboard input. Use Command for
+	// Control / Meta (Mac Command key) per platform.
 	Shortcut key.Chord `xml:"shortcut"`
 
-	// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
-	// The constructor function should add buttons to the scene that it is passed.
+	// Menu is a menu constructor function used to build and display
+	// a menu whenever the button is clicked. There will be no menu
+	// if it is nil. The constructor function should add buttons
+	// to the Scene that it is passed.
 	Menu func(m *Scene) `json:"-" xml:"-"`
 
-	// optional data that can be used for event handling
+	// TODO(kai): remove data
+
+	// Data is optional data that can be used for event handling
 	Data any `json:"-" xml:"-" view:"-"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*Button)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Button one\n", bt.KiType().Name)
-		return
-	}
+	fr := frm.(*Button)
 	bt.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	bt.Type = fr.Type
 	bt.Text = fr.Text
@@ -536,20 +540,6 @@ func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
 	scIdx := len(*config)
 	config.Add(LabelType, "shortcut")
 	return scIdx
-}
-
-func (bt *Button) RenderButton() {
-	_, st := bt.RenderLock()
-	bt.RenderStdBox(st)
-	bt.RenderUnlock()
-}
-
-func (bt *Button) Render() {
-	if bt.PushBounds() {
-		bt.RenderButton()
-		bt.RenderParts()
-		bt.PopBounds()
-	}
 }
 
 // NOTE: all menus are dynamic.  This obviates the need for updating them.

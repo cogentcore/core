@@ -31,7 +31,8 @@ import (
 type Tabs struct { //goki:embedder
 	Layout
 
-	// Type is the styling type of the tabs
+	// Type is the styling type of the tabs. It must be set
+	// before the tabs are first configured.
 	Type TabTypes
 
 	// Maximum number of characters to include in tab label.
@@ -62,9 +63,9 @@ const (
 	// space and can be more easily moved and closed.
 	FunctionalTabs
 
-	// BottomNavBar indicates to render the tabs as a
+	// NavigationBar indicates to render the tabs as a
 	// bottom navigation bar with text and icons.
-	BottomNavBar
+	NavigationBar
 
 	// NavigationRail indicates to render the tabs as a
 	// side navigation rail, which only has icons.
@@ -97,6 +98,9 @@ func (ts *Tabs) SetStyles() {
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
+		if ts.Type == NavigationRail || ts.Type == NavigationDrawer {
+			s.Direction = styles.Row
+		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ts) {
@@ -203,7 +207,6 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tb := ts.Tabs()
 	tb.SetChildAdded()
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
-	tab.Data = idx
 	tab.Tooltip = label
 	tab.Type = ts.Type
 	tab.DeleteButton = ts.DeleteButtons
@@ -425,11 +428,14 @@ func (ts *Tabs) ConfigWidget() {
 	if len(ts.Kids) != 0 {
 		return
 	}
-	ts.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-	NewFrame(ts, "tabs")
-	NewFrame(ts, "frame")
+	// frame only comes before tabs in bottom nav bar
+	if ts.Type == NavigationBar {
+		NewFrame(ts, "frame")
+		NewFrame(ts, "tabs")
+	} else {
+		NewFrame(ts, "tabs")
+		NewFrame(ts, "frame")
+	}
 	ts.ConfigNewTabButton()
 }
 
@@ -437,14 +443,14 @@ func (ts *Tabs) ConfigWidget() {
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
 	ts.ConfigWidget()
-	return ts.Child(0).(*Frame)
+	return ts.ChildByName("tabs", 0).(*Frame)
 }
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Frame() *Frame {
 	ts.ConfigWidget()
-	return ts.Child(1).(*Frame)
+	return ts.ChildByName("frame", 1).(*Frame)
 }
 
 // UnselectOtherTabs turns off all the tabs except given one
@@ -487,32 +493,42 @@ func (ts *Tabs) Render() {
 // and a smaller close button. The Indicator icon is used for
 // the close icon.
 type Tab struct {
-	Button
+	Box
 
 	// Type is the styling type of the tab. This property
 	// must be set on the parent [Tabs] for it to work correctly.
 	Type TabTypes
 
+	// Text is the label text for the tab.
+	// If it is nil, no label is shown.
+	// Labels are never shown for [NavigationRail] tabs.
+	Text string
+
+	// Icon is the icon for the tab.
+	// If it is "" or [icons.None], no icon is shown.
+	Icon icons.Icon
+
+	// CloseIcon is the icon used as a close button for the tab.
+	// If it is "" or [icons.None], the tab is not closeable.
+	CloseIcon icons.Icon
+
+	// TODO(kai): replace this with general text overflow property (#778)
+
 	// Maximum number of characters to include in tab label.
 	// Elides labels that are longer than that
 	MaxChars int
-
-	// if true, this tab has a delete button (false by default)
-	DeleteButton bool
 }
 
 func (tb *Tab) OnInit() {
 	tb.WidgetBase.OnInit()
-	tb.Button.HandleEvents()
 	tb.SetStyles()
 }
 
 func (tb *Tab) SetStyles() {
 	tb.MaxChars = 16
-	tb.DeleteButton = true
+	tb.CloseIcon = icons.Close
 	tb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-		s.SetAbilities(tb.ShortcutTooltip() != "", abilities.LongHoverable)
 
 		if !tb.IsReadOnly() {
 			s.Cursor = cursors.Pointer
