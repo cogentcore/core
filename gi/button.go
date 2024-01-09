@@ -350,35 +350,6 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
-// ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;
-// if defOn is true, an indicator is added even if the Indicator field is unset
-// (as long as it is not explicitly set to [icons.None]);
-// returns the index in Parts of the indicator object, which is named "indicator";
-// an "ind-stretch" is added as well to put on the right by default.
-func (bt *Button) ConfigPartsAddIndicator(config *ki.Config, defOn bool) int {
-	needInd := !bt.Indicator.IsNil() || (defOn && bt.Indicator != icons.None)
-	if !needInd {
-		return -1
-	}
-	indIdx := -1
-	config.Add(StretchType, "ind-stretch")
-	indIdx = len(*config)
-	config.Add(IconType, "indicator")
-	return indIdx
-}
-
-func (bt *Button) ConfigPartsIndicator(indIdx int) {
-	if indIdx < 0 {
-		return
-	}
-	ic := bt.Parts.Child(indIdx).(*Icon)
-	icnm := bt.Indicator
-	if icnm.IsNil() {
-		icnm = icons.KeyboardArrowDown
-	}
-	ic.SetIcon(icnm)
-}
-
 //////////////////////////////////////////////////////////////////
 //		Events
 
@@ -443,10 +414,6 @@ func (bt *Button) HandleEvents() {
 }
 
 func (bt *Button) ConfigWidget() {
-	bt.ConfigParts()
-}
-
-func (bt *Button) ConfigParts() {
 	parts := bt.NewParts()
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
@@ -466,80 +433,70 @@ func (bt *Button) ConfigParts() {
 		}
 	}
 	config := ki.Config{}
-	icIdx, lbIdx := bt.ConfigPartsIconLabel(&config, bt.Icon, bt.Text)
-	indIdx := bt.ConfigPartsAddIndicator(&config, false) // default off
+
+	icIdx := -1
+	lbIdx := -1
+	if bt.Icon.IsValid() {
+		icIdx = len(config)
+		config.Add(IconType, "icon")
+		if bt.Text != "" {
+			config.Add(SpaceType, "space")
+		}
+	}
+	if bt.Text != "" {
+		lbIdx = len(config)
+		config.Add(LabelType, "label")
+	}
+
+	indIdx := -1
+	if !bt.Indicator.IsNil() {
+		config.Add(StretchType, "ind-stretch")
+		indIdx = len(config)
+		config.Add(IconType, "indicator")
+	}
+
 	scIdx := -1
 	if bt.Type == ButtonMenu {
 		if indIdx < 0 && bt.Shortcut != "" {
-			scIdx = bt.ConfigPartsAddShortcut(&config)
+			config.Add(StretchType, "sc-stretch")
+			scIdx = len(config)
+			config.Add(LabelType, "shortcut")
 		} else if bt.Shortcut != "" {
-			slog.Error("gi.Button: shortcut cannot be used on a sub-menu for", "button", bt)
+			slog.Error("programmer error: gi.Button: shortcut cannot be used on a sub-menu for", "button", bt)
 		}
 	}
+
 	mods, updt := parts.ConfigChildren(config)
-	bt.ConfigPartsSetIconLabel(bt.Icon, bt.Text, icIdx, lbIdx)
-	bt.ConfigPartsIndicator(indIdx)
-	bt.ConfigPartsShortcut(scIdx)
+
+	if icIdx >= 0 {
+		ic := bt.Parts.Child(icIdx).(*Icon)
+		ic.SetIcon(bt.Icon)
+	}
+	if lbIdx >= 0 {
+		lbl := bt.Parts.Child(lbIdx).(*Label)
+		if lbl.Text != bt.Text {
+			lbl.SetTextUpdate(bt.Text)
+		}
+	}
+
+	if indIdx >= 0 {
+		ic := bt.Parts.Child(indIdx).(*Icon)
+		ic.SetIcon(bt.Indicator)
+	}
+
+	if scIdx >= 0 {
+		sc := bt.Parts.Child(scIdx).(*Label)
+		sctxt := bt.Shortcut.Shortcut()
+		if sc.Text != sctxt {
+			sc.SetTextUpdate(sctxt)
+		}
+	}
+
 	if mods {
 		parts.Update()
 		parts.UpdateEnd(updt)
 		bt.SetNeedsLayout(updt)
 	}
-}
-
-// ConfigPartsIconLabel adds to config to create parts, of icon
-// and label left-to right in a row, based on whether items are nil or empty
-func (bt *Button) ConfigPartsIconLabel(config *ki.Config, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
-	icIdx = -1
-	lbIdx = -1
-	if icnm.IsValid() {
-		icIdx = len(*config)
-		config.Add(IconType, "icon")
-		if txt != "" {
-			config.Add(SpaceType, "space")
-		}
-	}
-	if txt != "" {
-		lbIdx = len(*config)
-		config.Add(LabelType, "label")
-	}
-	return
-}
-
-// ConfigPartsSetIconLabel sets the icon and text values in parts, and get
-// part style props, using given props if not set in object props
-func (bt *Button) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
-	if icIdx >= 0 {
-		ic := bt.Parts.Child(icIdx).(*Icon)
-		ic.SetIcon(icnm)
-	}
-	if lbIdx >= 0 {
-		lbl := bt.Parts.Child(lbIdx).(*Label)
-		if lbl.Text != txt {
-			lbl.SetText(txt)
-			lbl.Config() // this is essential
-		}
-	}
-}
-
-// ConfigPartsShortcut sets the shortcut
-func (bt *Button) ConfigPartsShortcut(scIdx int) {
-	if scIdx < 0 {
-		return
-	}
-	sc := bt.Parts.Child(scIdx).(*Label)
-	sclbl := bt.Shortcut.Shortcut()
-	if sc.Text != sclbl {
-		sc.Text = sclbl
-	}
-}
-
-// ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
-func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
-	config.Add(StretchType, "sc-stretch")
-	scIdx := len(*config)
-	config.Add(LabelType, "shortcut")
-	return scIdx
 }
 
 // NOTE: all menus are dynamic.  This obviates the need for updating them.
