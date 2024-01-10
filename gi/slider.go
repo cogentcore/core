@@ -416,6 +416,19 @@ func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Dim)
 }
 
+// ScrollScale returns scaled value of scroll delta,
+// as a function of the step size, ensuring at least one step unit taken
+func (sr *Slider) ScrollScale(del float32) float32 {
+	if mat32.Abs(del) < 1 {
+		if del < 0 {
+			del = -1
+		} else {
+			del = 1
+		}
+	}
+	return del * sr.Step
+}
+
 func (sr *Slider) HandleMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
 		pos := sr.PointToRelPos(e.LocalPos())
@@ -443,14 +456,15 @@ func (sr *Slider) HandleMouse() {
 		// if we are scrolling in the y direction on an x slider,
 		// we still count it
 		if sr.Dim == mat32.X && se.Delta.X != 0 {
-			del = float32(se.Delta.X)
+			del = se.Delta.X
 		} else {
-			del = float32(se.Delta.Y)
+			del = se.Delta.Y
 		}
 		if sr.Type == SliderScrollbar {
 			del = -del // invert for "natural" scroll
 		}
-		sr.SetSliderPosAction(sr.Pos - del)
+		edel := sr.ScrollScale(del)
+		sr.SetValueAction(sr.Value + edel)
 		sr.SendChanged()
 	})
 }

@@ -183,7 +183,7 @@ func (ly *Layout) SetScrollsOff() {
 func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 	if ly.HasScroll[d] {
 		sb := ly.Scrolls[d]
-		nval := sb.Value + delta
+		nval := sb.Value + sb.ScrollScale(delta)
 		sb.SetValueAction(nval)
 		ly.SetNeedsRender(true) // only render needed -- scroll updates pos
 	}
@@ -215,7 +215,7 @@ func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
 // remainder.
 func (ly *Layout) ScrollDelta(e events.Event) {
 	se := e.(*events.MouseScroll)
-	fdel := mat32.V2FromPoint(se.Delta)
+	fdel := se.Delta
 
 	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {
