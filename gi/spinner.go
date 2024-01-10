@@ -23,32 +23,38 @@ import (
 type Spinner struct { //goki:embedder
 	TextField
 
-	// current value
-	Value float32 `xml:"value" set:"-"`
+	// Value is the current value
+	Value float32 `set:"-"`
 
-	// is there a minimum value to enforce
-	HasMin bool `xml:"has-min" set:"-"`
+	// HasMin is whether there is a minimum value to enforce
+	HasMin bool `set:"-"`
 
-	// minimum value in range
-	Min float32 `xml:"min" set:"-"`
+	// If HasMin is true, Min is the the minimum value in range
+	Min float32 `set:"-"`
 
-	// is there a maximumvalue to enforce
-	HasMax bool `xml:"has-max" set:"-"`
+	// HaxMax is whether there is a maximum value to enforce
+	HasMax bool `set:"-"`
 
-	// maximum value in range
-	Max float32 `xml:"max" set:"-"`
+	// If HasMax is true, Max is the maximum value in range
+	Max float32 `set:"-"`
 
-	// smallest step size to increment
-	Step float32 `xml:"step"`
+	// Step is the smallest step size to increment
+	Step float32
 
-	// larger PageUp / Dn step size
-	PageStep float32 `xml:"pagestep"`
+	// PageStep is a larger step size used for PageUp and PageDown
+	PageStep float32
 
-	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
+	// Prec specifies the precision of decimal places
+	// (total, not after the decimal point) to use in
+	// representing the number. This helps to truncate
+	// small weird floating point values.
 	Prec int
 
-	// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
-	Format string `xml:"format"`
+	// Format is the format string to use for printing the value.
+	// If it unset, %g is used. If it is decimal based
+	// (ends in d, b, c, o, O, q, x, X, or U) then the value is
+	// converted to decimal prior to printing.
+	Format string
 }
 
 func (sp *Spinner) CopyFieldsFrom(frm any) {
