@@ -47,12 +47,24 @@ type Settings interface {
 
 	// Apply does anything necessary to apply the settings to the app.
 	Apply()
+}
 
-	// Save saves the settings
-	Save() error
+// SettingsOpener is an optional additional interface that
+// [Settings] can satisfy to customize the behavior of [OpenSettings].
+type SettingsOpener interface {
+	Settings
 
 	// Open opens the settings
 	Open() error
+}
+
+// SettingsSaver is an optional additional interface that
+// [Settings] can satisfy to customize the behavior of [SaveSettings].
+type SettingsSaver interface {
+	Settings
+
+	// Save saves the settings
+	Save() error
 }
 
 // SettingsBase contains base settings logic that other settings data types can extend.
@@ -82,15 +94,33 @@ func (sb *SettingsBase) Defaults() {}
 func (sb *SettingsBase) Apply() {}
 
 // OpenSettings opens the given settings from their [Settings.Filename].
-// The settings must be encoded in TOML.
+// The settings are assumed to be in TOML unless they have a .json file
+// extension. If they satisfy the [SettingsOpener] interface,
+// [SettingsOpener.Open] will be used instead.
 func OpenSettings(se Settings) error {
-	return tomls.Open(se, se.Filename())
+	if so, ok := se.(SettingsOpener); ok {
+		return so.Open()
+	}
+	fnm := se.Filename()
+	if filepath.Ext(fnm) == ".json" {
+		return jsons.Open(se, fnm)
+	}
+	return tomls.Open(se, fnm)
 }
 
 // SaveSettings saves the given settings to their [Settings.Filename].
-// It encodes the settings in TOML.
+// The settings will be encoded in TOML unless they have a .json file
+// extension. If they satisfy the [SettingsSaver] interface,
+// [SettingsSaver.Save] will be used instead.
 func SaveSettings(se Settings) error {
-	return tomls.Save(se, se.Filename())
+	if ss, ok := se.(SettingsSaver); ok {
+		return ss.Save()
+	}
+	fnm := se.Filename()
+	if filepath.Ext(fnm) == ".json" {
+		return jsons.Save(se, fnm)
+	}
+	return tomls.Save(se, fnm)
 }
 
 // ResetSettings resets the given settings to their default values.
@@ -107,12 +137,12 @@ func ResetSettings(se Settings) error {
 // If they are not already saved, it saves them.
 func LoadSettings(se Settings) error {
 	se.Defaults()
-	err := se.Open()
+	err := OpenSettings(se)
 	// we always apply the settings even if we can't open them
 	// to apply at least the default values
 	se.Apply()
 	if errors.Is(err, fs.ErrNotExist) {
-		return se.Save()
+		return nil // it is okay for settings to not be saved
 	}
 	return err
 }
@@ -208,9 +238,6 @@ func (as *AppearanceSettingsData) Defaults() {
 	as.FontFamily = "Roboto"
 	as.MonoFont = "Roboto Mono"
 }
-
-func (as *AppearanceSettingsData) Save() error { return SaveSettings(as) }
-func (as *AppearanceSettingsData) Open() error { return OpenSettings(as) }
 
 func (as *AppearanceSettingsData) Apply() { //gti:add
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
@@ -404,9 +431,6 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.LongPressStopDistance = 50
 }
 
-func (ds *DeviceSettingsData) Save() error { return SaveSettings(ds) }
-func (ds *DeviceSettingsData) Open() error { return OpenSettings(ds) }
-
 func (ds *DeviceSettingsData) Apply() {
 	if ds.KeyMaps.Valid {
 		keyfun.AvailMaps = ds.KeyMaps.Value
@@ -517,9 +541,6 @@ func (ss *SystemSettingsData) Defaults() {
 	ss.StructInlineLength = 4
 	ss.SliceInlineLength = 4
 }
-
-func (ss *SystemSettingsData) Save() error { return SaveSettings(ss) }
-func (ss *SystemSettingsData) Open() error { return OpenSettings(ss) }
 
 // Apply detailed preferences to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //gti:add
@@ -796,9 +817,6 @@ func (db *DebugSettingsData) Defaults() {
 	// db.GoCompleteTrace = golang.CompleteTrace
 	// db.GoTypeTrace = golang.TraceTypes
 }
-
-func (db *DebugSettingsData) Save() error { return SaveSettings(db) }
-func (db *DebugSettingsData) Open() error { return OpenSettings(db) }
 
 func (db *DebugSettingsData) Apply() {
 	// golang.CompleteTrace = db.GoCompleteTrace
