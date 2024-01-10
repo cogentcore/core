@@ -52,7 +52,7 @@ func SettingsView(b *gi.Body) {
 				tab.UpdateBar()
 			}
 			se.Apply()
-			gi.ErrorSnackbar(fr, se.Save(), "Error saving "+se.Label()+" settings")
+			gi.ErrorSnackbar(fr, gi.SaveSettings(se), "Error saving "+se.Label()+" settings")
 			gi.UpdateAll()
 		})
 	}
