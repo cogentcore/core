@@ -129,6 +129,7 @@ const (
 	// BorderDashed indicates to render a dashed border
 	BorderDashed
 
+	// TODO(kai): implement these
 	BorderDouble
 	BorderGroove
 	BorderRidge
