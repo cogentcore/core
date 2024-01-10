@@ -609,7 +609,29 @@ func (tb *Tab) ConfigWidget() {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}
 
-	tb.ConfigParts(config)
+	ici := -1
+	lbi := -1
+	if tb.Icon.IsValid() {
+		ici = len(config)
+		config.Add(IconType, "icon")
+	}
+	if tb.Text != "" {
+		lbi = len(config)
+		config.Add(LabelType, "label")
+	}
+
+	tb.ConfigParts(config, func(parts *Layout) {
+		if ici >= 0 {
+			ic := tb.Parts.Child(ici).(*Icon)
+			ic.SetIcon(tb.Icon)
+		}
+		if lbi >= 0 {
+			lbl := tb.Parts.Child(lbi).(*Label)
+			if lbl.Text != tb.Text {
+				lbl.SetTextUpdate(tb.Text)
+			}
+		}
+	})
 	/*
 		ici, lbi := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 		// config.Add(StretchType, "close-stretch")
