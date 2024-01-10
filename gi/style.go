@@ -172,7 +172,7 @@ func (wb *WidgetBase) SetStyles() {
 			return
 		}
 		// TODO(kai): what about context menus on mobile?
-		s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable, abilities.LongPressable)
+		s.SetAbilities(wb.This().(Widget).WidgetTooltip() != "", abilities.LongHoverable, abilities.LongPressable)
 
 		if s.Is(states.Focused) {
 			s.Border = s.MaxBorder

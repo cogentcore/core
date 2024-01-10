@@ -140,7 +140,6 @@ func (bt *Button) OnInit() {
 func (bt *Button) SetStyles() {
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
 		if !bt.IsDisabled() {
 			s.Cursor = cursors.Pointer
 		}
@@ -366,12 +365,9 @@ func (bt *Button) HandleClickDismissMenu() {
 	})
 }
 
-// ShortcutTooltip returns the effective tooltip of the button
+// WidgetTooltip returns the effective tooltip of the button
 // with any keyboard shortcut included.
-func (bt *Button) ShortcutTooltip() string {
-	if bt.Tooltip == "" && bt.Shortcut == "" {
-		return ""
-	}
+func (bt *Button) WidgetTooltip() string {
 	res := bt.Tooltip
 	if bt.Shortcut != "" {
 		res = "[ " + bt.Shortcut.Shortcut() + " ]"
@@ -382,27 +378,7 @@ func (bt *Button) ShortcutTooltip() string {
 	return res
 }
 
-func (bt *Button) HandleLongHoverTooltip() {
-	bt.On(events.LongHoverStart, func(e events.Event) {
-		tt := bt.ShortcutTooltip()
-		if tt == "" {
-			return
-		}
-		e.SetHandled()
-		NewTooltipText(bt, tt).Run()
-	})
-	bt.On(events.LongPressStart, func(e events.Event) {
-		tt := bt.ShortcutTooltip()
-		if tt == "" {
-			return
-		}
-		e.SetHandled()
-		NewTooltipText(bt, tt).Run()
-	})
-}
-
 func (bt *Button) HandleEvents() {
-	bt.HandleLongHoverTooltip() // our own version adds the shortcut
 	bt.HandleClickOnEnterSpace()
 	bt.OnClick(func(e events.Event) {
 		if bt.OpenMenu(e) {

@@ -27,7 +27,7 @@ func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 // NewTooltip returns a new tooltip stage displaying the tooltip text
 // for the given widget based on the widget's position and size.
 func NewTooltip(w Widget) *Stage {
-	return NewTooltipText(w, w.AsWidget().Tooltip)
+	return NewTooltipText(w, w.WidgetTooltip())
 }
 
 // NewTooltipText returns a new tooltip stage displaying the given tooltip text

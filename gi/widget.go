@@ -149,6 +149,12 @@ type Widget interface {
 	// call HandleEvent directly for any existing events.
 	Send(e events.Types, orig ...events.Event)
 
+	// WidgetTooltip returns the tooltip text that should be used for this
+	// widget. By default, it just returns [WidgetBase.Tooltip], but widgets
+	// can override it to do different things. For example, buttons add their
+	// shortcut to the tooltip here.
+	WidgetTooltip() string
+
 	// AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
 	// It is the main way that code should modify a widget's context menus.
 	// Context menu functions are run in reverse order.
@@ -207,7 +213,8 @@ type Widget interface {
 type WidgetBase struct {
 	ki.Node
 
-	// text for the tooltip for this widget, which can use HTML formatting
+	// Tooltip is the text for the tooltip for this widget,
+	// which can use HTML formatting.
 	Tooltip string
 
 	// Parts are a separate tree of sub-widgets that implement discrete parts
@@ -535,4 +542,10 @@ func (wb *WidgetBase) WidgetPrevVisible() (Widget, *WidgetBase) {
 		nwi, nwb = AsWidget(ki.Prev(nwb.This()))
 	}
 	return nwi, nwb
+}
+
+// WidgetTooltip is the base implementation of [Widget.WidgetTooltip],
+// which just returns [WidgetBase.Tooltip].
+func (wb *WidgetBase) WidgetTooltip() string {
+	return wb.Tooltip
 }
