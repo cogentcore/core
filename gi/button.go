@@ -466,7 +466,7 @@ func (bt *Button) ConfigWidget() {
 		}
 	}
 
-	bt.ConfigPartsImpl(config, func(parts *Layout) {
+	bt.ConfigParts(config, func(parts *Layout) {
 		if ici >= 0 {
 			ic := bt.Parts.Child(ici).(*Icon)
 			ic.SetIcon(bt.Icon)

@@ -24,10 +24,6 @@ type LabeledTextField struct {
 }
 
 func (lt *LabeledTextField) ConfigWidget() {
-	lt.ConfigParts()
-}
-
-func (lt *LabeledTextField) ConfigParts() {
 	config := ki.Config{}
 	if lt.Label != "" {
 		config.Add(LabelType, "label")
@@ -38,5 +34,5 @@ func (lt *LabeledTextField) ConfigParts() {
 	if lt.ErrorText != "" {
 		config.Add(LabelType, "error")
 	}
-	lt.ConfigPartsImpl(config)
+	lt.ConfigParts(config)
 }

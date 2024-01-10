@@ -274,34 +274,12 @@ func (sw *Switch) LabelWidget() *Label {
 }
 
 // SetIcons sets the icons for the on (checked), off (unchecked)
-// and indeterminante (unknown) states.  See [SetIconsUpdate] for
+// and indeterminate (unknown) states.  See [SetIconsUpdate] for
 // a version that updates the icon rendering
 func (sw *Switch) SetIcons(on, off, unk icons.Icon) *Switch {
 	sw.IconOn = on
 	sw.IconOff = off
 	sw.IconUnk = unk
-	return sw
-}
-
-// SetIconsUpdate sets the icons for the on (checked), off (unchecked)
-// and indeterminante (unknown) states.  Drives updating of
-// underlying icon rendering, for use post-display.
-func (sw *Switch) SetIconsUpdate(on, off, unk icons.Icon) *Switch {
-	updt := sw.UpdateStart()
-	defer sw.UpdateEndRender(updt)
-
-	sw.SetIcons(on, off, unk)
-	if sw.Parts == nil || !sw.Parts.HasChildren() {
-		return sw
-	}
-	ist := sw.Parts.Child(0).(*Layout)
-	icon := ist.Child(0).(*Icon)
-	icon.SetIconUpdate(sw.IconOn)
-	icoff := ist.Child(1).(*Icon)
-	icoff.SetIconUpdate(sw.IconOff)
-	icunk := ist.Child(2).(*Icon)
-	icunk.SetIconUpdate(sw.IconUnk)
-	sw.Update()
 	return sw
 }
 
@@ -314,29 +292,23 @@ func (sw *Switch) ClearIcons() *Switch {
 }
 
 func (sw *Switch) ConfigWidget() {
-	sw.ConfigParts()
-}
-
-func (sw *Switch) ConfigParts() {
-	parts := sw.NewParts()
+	config := ki.Config{}
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}
 	if sw.IconOff == "" {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
-	config := ki.Config{}
-	icIdx := 0 // always there
-	lbIdx := -1
+	ici := 0 // always there
+	lbi := -1
 	config.Add(LayoutType, "stack")
 	if sw.Text != "" {
 		config.Add(SpaceType, "space")
-		lbIdx = len(config)
+		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
-	mods, updt := parts.ConfigChildren(config)
-	ist := parts.Child(icIdx).(*Layout)
-	if mods || sw.NeedsRebuild() {
+	sw.ConfigParts(config, func(parts *Layout) {
+		ist := parts.Child(ici).(*Layout)
 		ist.SetNChildren(3, IconType, "icon")
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(sw.IconOn)
@@ -344,19 +316,14 @@ func (sw *Switch) ConfigParts() {
 		icoff.SetIcon(sw.IconOff)
 		icunk := ist.Child(2).(*Icon)
 		icunk.SetIcon(sw.IconUnk)
-	}
-	sw.SetIconFromState()
-	if lbIdx >= 0 {
-		lbl := parts.Child(lbIdx).(*Label)
-		if lbl.Text != sw.Text {
-			lbl.SetText(sw.Text)
+		sw.SetIconFromState()
+		if lbi >= 0 {
+			lbl := parts.Child(lbi).(*Label)
+			if lbl.Text != sw.Text {
+				lbl.SetText(sw.Text)
+			}
 		}
-	}
-	if mods {
-		parts.Update()
-		parts.UpdateEnd(updt)
-		sw.SetNeedsLayout(updt)
-	}
+	})
 }
 
 func (sw *Switch) RenderSwitch() {

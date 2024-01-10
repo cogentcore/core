@@ -277,12 +277,12 @@ func (wb *WidgetBase) ConfigWidget() {
 	// this must be defined for each widget type
 }
 
-// ConfigPartsImpl initializes the parts of the widget if they
+// ConfigParts initializes the parts of the widget if they
 // are not already through [WidgetBase.NewParts], calls
 // [ki.Node.ConfigChildren] on those parts with the given config,
 // calls the given after function with the parts if it is specified,
 // and then handles necessary updating logic with the given scene.
-func (wb *WidgetBase) ConfigPartsImpl(config ki.Config, after ...func(parts *Layout)) {
+func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func(parts *Layout)) {
 	parts := wb.NewParts()
 	mods, updt := parts.ConfigChildren(config)
 	if len(after) > 0 {

@@ -222,7 +222,6 @@ func (ch *Chooser) SetStyles() {
 }
 
 func (ch *Chooser) ConfigWidget() {
-	parts := ch.NewParts()
 	config := ki.Config{}
 
 	ici := -1
@@ -247,32 +246,26 @@ func (ch *Chooser) ConfigWidget() {
 	indi = len(config)
 	config.Add(IconType, "indicator")
 
-	mods, updt := parts.ConfigChildren(config)
+	ch.ConfigParts(config, func(parts *Layout) {
+		if ici >= 0 {
+			ic := ch.Parts.Child(ici).(*Icon)
+			ic.SetIcon(ch.Icon)
+		}
+		if ch.Editable {
+			tx := ch.Parts.Child(txi).(*TextField)
+			tx.SetText(ch.CurLabel)
+			tx.SetLeadingIcon(ch.Icon)
+			tx.Config() // this is essential
+			tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
+		} else {
+			lbl := ch.Parts.Child(lbi).(*Label)
+			lbl.SetText(ch.CurLabel)
+			lbl.Config() // this is essential
+		}
 
-	if ici >= 0 {
-		ic := ch.Parts.Child(ici).(*Icon)
-		ic.SetIcon(ch.Icon)
-	}
-	if ch.Editable {
-		tx := ch.Parts.Child(txi).(*TextField)
-		tx.SetText(ch.CurLabel)
-		tx.SetLeadingIcon(ch.Icon)
-		tx.Config() // this is essential
-		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
-	} else {
-		lbl := ch.Parts.Child(lbi).(*Label)
-		lbl.SetText(ch.CurLabel)
-		lbl.Config() // this is essential
-	}
-
-	ic := ch.Parts.Child(indi).(*Icon)
-	ic.SetIcon(ch.Indicator)
-
-	if mods {
-		parts.Update()
-		parts.UpdateEnd(updt)
-		ch.SetNeedsLayout(updt)
-	}
+		ic := ch.Parts.Child(indi).(*Icon)
+		ic.SetIcon(ch.Indicator)
+	})
 }
 
 // LabelWidget returns the label widget if present
