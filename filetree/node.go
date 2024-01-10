@@ -315,7 +315,7 @@ func (fn *Node) SetFileIcon() {
 	}
 	if bp, ok := fn.BranchPart(); ok {
 		if bp.IconUnk != ic {
-			bp.SetIconsUpdate(icons.FolderOpen, icons.Folder, ic)
+			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
 			fn.Update()
 		}
 	}
