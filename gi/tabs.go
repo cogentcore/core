@@ -100,6 +100,8 @@ func (ts *Tabs) SetStyles() {
 		s.Grow.Set(1, 1)
 		if ts.Type == NavigationRail || ts.Type == NavigationDrawer {
 			s.Direction = styles.Row
+		} else {
+			s.Direction = styles.Column
 		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
