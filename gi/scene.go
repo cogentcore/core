@@ -253,11 +253,12 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.ApplyStyleScene()
-	if goosi.TheApp.Platform().IsMobile() {
-		// restart the multi-render updating after resize, for FillInsets to overwrite mysterious
-		// black bars that otherwise are rendered in both ios and android in different contexts.
-		sc.ShowIter = 0
-	}
+	// restart the multi-render updating after resize, to get windows to update correctly while
+	// resizing on Windows (OS) and Linux (see https://github.com/goki/gi/issues/584), to get
+	// windows on Windows (OS) to update after a window snap (see https://github.com/goki/gi/issues/497),
+	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
+	// and Android in different contexts.
+	sc.ShowIter = 0
 }
 
 func (sc *Scene) ScIsVisible() bool {
