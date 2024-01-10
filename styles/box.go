@@ -120,16 +120,23 @@ func (st *Style) ResizeImage(img image.Image, size mat32.Vec2) image.Image {
 type BorderStyles int32 //enums:enum -trim-prefix Border
 
 const (
+	// BorderSolid indicates to render a solid border.
 	BorderSolid BorderStyles = iota
+
+	// BorderDotted indicates to render a dotted border
 	BorderDotted
+
+	// BorderDashed indicates to render a dashed border
 	BorderDashed
+
 	BorderDouble
 	BorderGroove
 	BorderRidge
 	BorderInset
 	BorderOutset
+
+	// BorderNone indicates to render no border
 	BorderNone
-	BorderHidden
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleBorderFuncs

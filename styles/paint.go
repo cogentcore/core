@@ -239,19 +239,29 @@ type Stroke struct {
 }
 
 // Defaults initializes default values for paint stroke
-func (ps *Stroke) Defaults() {
+func (ss *Stroke) Defaults() {
 	// stroking is off by default in svg
-	ps.Color = nil
-	ps.Width.Px(1)
-	ps.MinWidth.Dot(.5)
-	ps.Cap = LineCapButt
-	ps.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
-	ps.MiterLimit = 10.0
-	ps.Opacity = 1.0
+	ss.Color = nil
+	ss.Width.Px(1)
+	ss.MinWidth.Dot(.5)
+	ss.Cap = LineCapButt
+	ss.Join = LineJoinMiter // Miter not yet supported, but that is the default -- falls back on bevel
+	ss.MiterLimit = 10.0
+	ss.Opacity = 1.0
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ss *Stroke) ToDots(uc *units.Context) {
 	ss.Width.ToDots(uc)
 	ss.MinWidth.ToDots(uc)
+}
+
+// ApplyBorderStyle applies the given border style to the stroke style.
+func (ss *Stroke) ApplyBorderStyle(bs BorderStyles) {
+	switch bs {
+	case BorderNone:
+		ss.Color = nil
+	case BorderDashed:
+		ss.Dashes = []float32{2, 2}
+	}
 }

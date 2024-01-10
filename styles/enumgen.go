@@ -137,11 +137,11 @@ func (i *ObjectFits) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var _BorderStylesValues = []BorderStyles{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+var _BorderStylesValues = []BorderStyles{0, 1, 2, 3, 4, 5, 6, 7, 8}
 
 // BorderStylesN is the highest valid value
 // for type BorderStyles, plus one.
-const BorderStylesN BorderStyles = 10
+const BorderStylesN BorderStyles = 9
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -156,7 +156,6 @@ func _BorderStylesNoOp() {
 	_ = x[BorderInset-(6)]
 	_ = x[BorderOutset-(7)]
 	_ = x[BorderNone-(8)]
-	_ = x[BorderHidden-(9)]
 }
 
 var _BorderStylesNameToValueMap = map[string]BorderStyles{
@@ -178,21 +177,18 @@ var _BorderStylesNameToValueMap = map[string]BorderStyles{
 	`outset`: 7,
 	`None`:   8,
 	`none`:   8,
-	`Hidden`: 9,
-	`hidden`: 9,
 }
 
 var _BorderStylesDescMap = map[BorderStyles]string{
-	0: ``,
-	1: ``,
-	2: ``,
+	0: `BorderSolid indicates to render a solid border.`,
+	1: `BorderDotted indicates to render a dotted border`,
+	2: `BorderDashed indicates to render a dashed border`,
 	3: ``,
 	4: ``,
 	5: ``,
 	6: ``,
 	7: ``,
-	8: ``,
-	9: ``,
+	8: `BorderNone indicates to render no border`,
 }
 
 var _BorderStylesMap = map[BorderStyles]string{
@@ -205,7 +201,6 @@ var _BorderStylesMap = map[BorderStyles]string{
 	6: `Inset`,
 	7: `Outset`,
 	8: `None`,
-	9: `Hidden`,
 }
 
 // String returns the string representation

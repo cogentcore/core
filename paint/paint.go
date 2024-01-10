@@ -552,11 +552,13 @@ func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
 	if styles.SidesAreSame(bs.Style) && styles.SidesAreSame(bs.Color.Sides) && styles.SidesAreSame(bs.Width.Dots().Sides) {
-		// set the color if it is not nil and the stroke style is not set to the correct color
+		// set the color if it is not nil and the stroke style
+		// is not set to the correct color
 		if !colors.IsNil(bs.Color.Top) && bs.Color.Top != colors.ToUniform(pc.StrokeStyle.Color) {
 			pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
+		pc.StrokeStyle.ApplyBorderStyle(bs.Style.Top)
 		if styles.SidesAreZero(r.Sides) {
 			pc.DrawRectangle(x, y, w, h)
 		} else {
