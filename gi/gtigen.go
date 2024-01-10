@@ -2602,7 +2602,7 @@ var SwitchType = gti.AddType(&gti.Type{
 		{"IconUnk", &gti.Field{Name: "IconUnk", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the indeterminate (unknown) state", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Switch{},
@@ -2781,7 +2781,7 @@ var TabsType = gti.AddType(&gti.Type{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tabs. It must be set\nbefore the tabs are first configured.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
-		{"DeleteButtons", &gti.Field{Name: "DeleteButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (false by default)", Directives: gti.Directives{}, Tag: ""}},
+		{"CloseIcon", &gti.Field{Name: "CloseIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed.", Directives: gti.Directives{}, Tag: ""}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs.\nTabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2854,10 +2854,14 @@ func (t *Tabs) SetNewTabButton(v bool) *Tabs {
 	return t
 }
 
-// SetDeleteButtons sets the [Tabs.DeleteButtons]:
-// if true, tabs are user-deleteable (false by default)
-func (t *Tabs) SetDeleteButtons(v bool) *Tabs {
-	t.DeleteButtons = v
+// SetCloseIcon sets the [Tabs.CloseIcon]:
+// CloseIcon is the icon used for tab close buttons.
+// If it is "" or [icons.None], the tab is not closeable.
+// The default value is [icons.Close].
+// Only [FunctionalTabs] can be closed; all other types of
+// tabs will not render a close button and can not be closed.
+func (t *Tabs) SetCloseIcon(v icons.Icon) *Tabs {
+	t.CloseIcon = v
 	return t
 }
 
@@ -2884,7 +2888,7 @@ var TabType = gti.AddType(&gti.Type{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly.", Directives: gti.Directives{}, Tag: ""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs.", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown.", Directives: gti.Directives{}, Tag: ""}},
-		{"CloseIcon", &gti.Field{Name: "CloseIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.", Directives: gti.Directives{}, Tag: ""}},
+		{"CloseIcon", &gti.Field{Name: "CloseIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2940,6 +2944,9 @@ func (t *Tab) SetIcon(v icons.Icon) *Tab {
 // SetCloseIcon sets the [Tab.CloseIcon]:
 // CloseIcon is the icon used as a close button for the tab.
 // If it is "" or [icons.None], the tab is not closeable.
+// The default value is [icons.Close].
+// Only [FunctionalTabs] can be closed; all other types of
+// tabs will not render a close button and can not be closed.
 func (t *Tab) SetCloseIcon(v icons.Icon) *Tab {
 	t.CloseIcon = v
 	return t

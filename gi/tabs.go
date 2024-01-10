@@ -42,8 +42,12 @@ type Tabs struct { //goki:embedder
 	// show a new tab button at right of list of tabs
 	NewTabButton bool
 
-	// if true, tabs are user-deleteable (false by default)
-	DeleteButtons bool
+	// CloseIcon is the icon used for tab close buttons.
+	// If it is "" or [icons.None], the tab is not closeable.
+	// The default value is [icons.Close].
+	// Only [FunctionalTabs] can be closed; all other types of
+	// tabs will not render a close button and can not be closed.
+	CloseIcon icons.Icon
 
 	// mutex protecting updates to tabs.
 	// Tabs can be driven programmatically and via user input so need extra protection
@@ -90,6 +94,8 @@ func (ts *Tabs) OnInit() {
 }
 
 func (ts *Tabs) SetStyles() {
+	ts.MaxChars = 16
+	ts.CloseIcon = icons.Close
 	ts.Style(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -211,7 +217,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
 	tab.Tooltip = label
 	tab.Type = ts.Type
-	// tab.DeleteButton = ts.DeleteButtons
+	tab.CloseIcon = ts.CloseIcon
 	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
