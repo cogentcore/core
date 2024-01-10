@@ -94,7 +94,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		pc.FillBox(mpos, msz, st.ActualBackground)
 	} else {
 		pc.FillStyle.Color = st.ActualBackground
-		// no border -- fill onl
+		// no border; fill on
 		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
 		pc.Fill()
 	}
