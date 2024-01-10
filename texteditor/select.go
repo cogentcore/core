@@ -200,6 +200,9 @@ func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 // returns true if word selected
 func (ed *Editor) SelectWord() bool {
+	if ed.Buf == nil {
+		return false
+	}
 	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
