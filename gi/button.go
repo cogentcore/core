@@ -213,11 +213,6 @@ func (bt *Button) SetStyles() {
 					s.Margin.Right.Ch(1)
 				}
 			})
-		case "parts/space":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Dp(8)
-				s.Min.X.Dp(8)
-			})
 		case "parts/label":
 			label := w.(*Label)
 			if bt.Type == ButtonMenu {
@@ -235,7 +230,7 @@ func (bt *Button) SetStyles() {
 			})
 		case "parts/ind-stretch":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Dp(3.2)
+				s.Min.X.Em(0.2)
 			})
 		case "parts/indicator":
 			w.Style(func(s *styles.Style) {

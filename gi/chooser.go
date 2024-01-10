@@ -170,6 +170,7 @@ func (ch *Chooser) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Margin.Zero()
 				s.Padding.Zero()
+				s.Margin.Right.Ch(1)
 			})
 		case "parts/label":
 			w.Style(func(s *styles.Style) {
@@ -228,7 +229,6 @@ func (ch *Chooser) ConfigWidget() {
 	var lbi, txi, indi int
 	if ch.Icon.IsValid() && !ch.Editable {
 		config.Add(IconType, "icon")
-		config.Add(SpaceType, "space")
 		ici = 0
 	}
 	if ch.Editable {
