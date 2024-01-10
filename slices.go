@@ -46,7 +46,7 @@ func SliceElValue(sl any) reflect.Value {
 // SliceNewAt inserts a new blank element at given index in the slice.
 // -1 means the end.
 func SliceNewAt(sl any, idx int) {
-	svl := reflect.ValueOf(sl)
+	svl := OnePtrValue(reflect.ValueOf(sl))
 	svnp := NonPtrValue(svl)
 	val := SliceElValue(sl)
 	sz := svnp.Len()
@@ -60,7 +60,7 @@ func SliceNewAt(sl any, idx int) {
 
 // SliceDeleteAt deletes element at given index from slice
 func SliceDeleteAt(sl any, idx int) {
-	svl := reflect.ValueOf(sl)
+	svl := OnePtrValue(reflect.ValueOf(sl))
 	svnp := NonPtrValue(svl)
 	svtyp := svnp.Type()
 	nval := reflect.New(svtyp.Elem())
