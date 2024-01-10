@@ -64,7 +64,8 @@ const (
 
 	// FunctionalTabs indicates to render functional tabs
 	// like those in Google Chrome. These tabs take up less
-	// space and can be more easily moved and closed.
+	// space and are the only kind that can be closed.
+	// They can also be moved.
 	FunctionalTabs
 
 	// NavigationBar indicates to render the tabs as a

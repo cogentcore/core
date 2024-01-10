@@ -2579,7 +2579,7 @@ var _TabTypesNameToValueMap = map[string]TabTypes{
 
 var _TabTypesDescMap = map[TabTypes]string{
 	0: `StandardTabs indicates to render the standard type of Material Design style tabs.`,
-	1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and can be more easily moved and closed.`,
+	1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`,
 	2: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`,
 	3: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`,
 	4: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text labels and icons.`,
