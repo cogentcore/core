@@ -121,20 +121,6 @@ func (sp *Spinner) SetMax(max float32) *Spinner {
 	return sp
 }
 
-// SetMinMax sets the min and max limits on the value
-func (sp *Spinner) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) *Spinner {
-	sp.HasMin = hasMin
-	sp.Min = min
-	sp.HasMax = hasMax
-	sp.Max = max
-	if sp.Max < sp.Min {
-		slog.Warn("gi.Spinner.SetMinMax: max was less than min; disabling limits")
-		sp.HasMax = false
-		sp.HasMin = false
-	}
-	return sp
-}
-
 // SetValue sets the value, enforcing any limits, and updates the display
 func (sp *Spinner) SetValue(val float32) *Spinner {
 	updt := sp.UpdateStart()
