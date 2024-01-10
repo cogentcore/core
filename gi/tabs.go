@@ -123,11 +123,7 @@ func (ts *Tabs) SetStyles() {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
-				s.Gap.Zero()
-
-				if ts.Type == FunctionalTabs {
-					s.Background = colors.C(colors.Scheme.SurfaceContainer)
-				}
+				s.Gap.Set(units.Dp(4))
 
 				if ts.Type.IsColumn() {
 					s.Direction = styles.Column
@@ -554,7 +550,7 @@ func (tb *Tab) SetStyles() {
 			s.Border.Radius = styles.BorderRadiusFull
 			s.Padding.Set(units.Dp(16))
 		} else {
-			s.Border.Radius.Zero()
+			s.Border.Radius = styles.BorderRadiusSmall
 			s.Padding.Set(units.Dp(10))
 		}
 
@@ -562,6 +558,9 @@ func (tb *Tab) SetStyles() {
 			s.Color = colors.Scheme.Select.OnContainer
 		} else {
 			s.Color = colors.Scheme.OnSurfaceVariant
+			if tb.Type == FunctionalTabs {
+				s.Background = colors.C(colors.Scheme.SurfaceContainer)
+			}
 		}
 
 		// s.Border.Style.Set(styles.BorderNone)
