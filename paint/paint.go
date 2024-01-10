@@ -551,13 +551,13 @@ func (pc *Context) DrawPolygonPxToDots(points []mat32.Vec2) {
 // an potentially rounded border box with the given position, size, and border styles.
 func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
-	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
+	if styles.SidesAreSame(bs.Style) && styles.SidesAreSame(bs.Color.Sides) && styles.SidesAreSame(bs.Width.Dots().Sides) {
 		// set the color if it is not nil and the stroke style is not set to the correct color
 		if !colors.IsNil(bs.Color.Top) && bs.Color.Top != colors.ToUniform(pc.StrokeStyle.Color) {
 			pc.StrokeStyle.Color = colors.C(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
-		if r.IsZero() {
+		if styles.SidesAreZero(r.Sides) {
 			pc.DrawRectangle(x, y, w, h)
 		} else {
 			pc.DrawRoundedRectangle(x, y, w, h, r)

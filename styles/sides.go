@@ -98,6 +98,12 @@ func (s *Sides[T]) Set(vals ...T) *Sides[T] {
 	return s
 }
 
+// Zero sets the values of all of the sides to zero.
+func (s *Sides[T]) Zero() *Sides[T] {
+	s.Set()
+	return s
+}
+
 // SetVert sets the values for the sides/corners in the
 // vertical/diagonally descending direction
 // (top/top-left and bottom/bottom-right) to the given value
@@ -200,6 +206,17 @@ func (s *Sides[T]) SetString(str string) error {
 	return nil
 }
 
+// SidesAreSame returns whether all of the sides/corners are the same
+func SidesAreSame[T comparable](s Sides[T]) bool {
+	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
+}
+
+// SidesAreZero returns whether all of the sides/corners are equal to zero
+func SidesAreZero[T comparable](s Sides[T]) bool {
+	var zv T
+	return s.Top == zv && s.Right == zv && s.Bottom == zv && s.Left == zv
+}
+
 // SideValues contains units.Value values for each side/corner of a box
 type SideValues struct { //gti:add
 	Sides[units.Value]
@@ -234,12 +251,6 @@ func (sv SideValues) Dots() SideFloats {
 		sv.Bottom.Dots,
 		sv.Left.Dots,
 	)
-}
-
-// Zero sets the values of all of the sides to zero.
-func (sv *SideValues) Zero() *SideValues {
-	sv.Set()
-	return sv
 }
 
 // SideFloats contains float32 values for each side/corner of a box
@@ -320,22 +331,6 @@ func (sf SideFloats) ToValues() SideValues {
 	)
 }
 
-// AllSame returns whether all of the sides/corners are the same
-func (sf SideFloats) AllSame() bool {
-	return sf.Right == sf.Top && sf.Bottom == sf.Top && sf.Left == sf.Top
-}
-
-// IsZero returns whether all of the sides/corners are equal to zero
-func (sf SideFloats) IsZero() bool {
-	return sf.Top == 0 && sf.Right == 0 && sf.Bottom == 0 && sf.Left == 0
-}
-
-// Zero sets the values of all of the sides to zero.
-func (sf *SideFloats) Zero() *SideFloats {
-	sf.Set()
-	return sf
-}
-
 // SideColors contains color values for each side/corner of a box
 type SideColors struct { //gti:add
 	Sides[color.RGBA]
@@ -388,20 +383,4 @@ func (s *SideColors) SetString(str string, base color.Color) error {
 	}
 	s.Set(vals...)
 	return nil
-}
-
-// AllSame returns whether all of the sides/corners are the same
-func (s SideColors) AllSame() bool {
-	return s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top
-}
-
-// IsZero returns whether all of the sides/corners are equal to zero
-func (s SideColors) IsZero() bool {
-	return colors.IsNil(s.Top) && colors.IsNil(s.Right) && colors.IsNil(s.Bottom) && colors.IsNil(s.Left)
-}
-
-// Zero sets the values of all of the sides to zero.
-func (s *SideColors) Zero() *SideColors {
-	s.Set()
-	return s
 }

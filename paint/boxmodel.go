@@ -12,12 +12,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// DrawBox calls DrawBorder with position, size and border parameters
-// as a convenience method for DrawStdBox
-func (pc *Context) DrawBox(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
-	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
-}
-
 // DrawStdBox draws the CSS "standard box" model using the given styling information,
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, textfields, etc in a GUI.
@@ -90,7 +84,7 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if rad.IsZero() {
+	if styles.SidesAreZero(rad.Sides) {
 		pc.FillBox(mpos, msz, st.ActualBackground)
 	} else {
 		pc.FillStyle.Color = st.ActualBackground
@@ -99,10 +93,10 @@ func (pc *Context) DrawStdBox(st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, p
 		pc.Fill()
 	}
 
+	// now that we have drawn background color
+	// above, we can draw the border
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
 	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	pc.FillStyle.Color = nil
-	// now that we have drawn background color
-	// above, we can draw the border
-	pc.DrawBox(mpos, msz, st.Border)
+	pc.DrawBorder(mpos.X, mpos.Y, msz.X, msz.Y, st.Border)
 }

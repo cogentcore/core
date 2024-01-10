@@ -350,11 +350,11 @@ func (s *Style) BoxSpace() SideFloats {
 // of the max properties when the values do not change.
 func (s *Style) TotalMargin() SideFloats {
 	mbw := s.MaxBorder.Width.Dots()
-	if mbw.IsZero() {
+	if SidesAreZero(mbw.Sides) {
 		mbw = s.Border.Width.Dots()
 	}
 	mbsm := s.MaxBoxShadowMargin()
-	if mbsm.IsZero() {
+	if SidesAreZero(mbsm.Sides) {
 		mbsm = s.BoxShadowMargin()
 	}
 	return s.Margin.Dots().Add(mbw).Add(mbsm)
