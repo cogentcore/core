@@ -118,7 +118,7 @@ func (tv *TableView) SetStyles() {
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)
-				s.Overflow.Set(styles.OverflowAuto)
+				s.Overflow.Y = styles.OverflowAuto
 				s.Gap.Set(units.Em(0.5)) // note: match header
 				// baseline mins:
 				s.Min.X.Ch(20)
@@ -395,7 +395,7 @@ func (tv *TableView) ConfigHeader() {
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, within SliceFrame
 func (tv *TableView) SliceGrid() *SliceViewGrid {
-	return tv.ChildByName("grid", 0).(*SliceViewGrid)
+	return tv.Child(1).(*SliceViewGrid)
 }
 
 // SliceHeader returns the Frame header for slice grid

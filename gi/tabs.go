@@ -232,7 +232,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabByLabel(tab.Text)
+		ts.SelectTabByLabel(tab.Nm)
 	})
 	fr := ts.Frame()
 	if len(fr.Kids) == 1 {
