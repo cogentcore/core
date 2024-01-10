@@ -1907,11 +1907,11 @@ var _LineCapsNameToValueMap = map[string]LineCaps{
 }
 
 var _LineCapsDescMap = map[LineCaps]string{
-	0: ``,
-	1: ``,
-	2: ``,
-	3: `rasterx extension`,
-	4: `rasterx extension`,
+	0: `LineCapButt indicates to draw no line caps; it draws a line with the length of the specified length.`,
+	1: `LineCapRound indicates to draw a semicircle on each line end with a diameter of the stroke width.`,
+	2: `LineCapSquare indicates to draw a rectangle on each line end with a height of the stroke width and a width of half of the stroke width.`,
+	3: `LineCapCubic is a rasterx extension`,
+	4: `LineCapQuadratic is a rasterx extension`,
 }
 
 var _LineCapsMap = map[LineCaps]string{

@@ -186,12 +186,22 @@ func (fs *Fill) ToDots(uc *units.Context) {
 type LineCaps int32 //enums:enum -trim-prefix LineCap
 
 const (
+	// LineCapButt indicates to draw no line caps; it draws a
+	// line with the length of the specified length.
 	LineCapButt LineCaps = iota
+
+	// LineCapRound indicates to draw a semicircle on each line
+	// end with a diameter of the stroke width.
 	LineCapRound
+
+	// LineCapSquare indicates to draw a rectangle on each line end
+	// with a height of the stroke width and a width of half of the
+	// stroke width.
 	LineCapSquare
-	// rasterx extension
+
+	// LineCapCubic is a rasterx extension
 	LineCapCubic
-	// rasterx extension
+	// LineCapQuadratic is a rasterx extension
 	LineCapQuadratic
 )
 
@@ -261,7 +271,10 @@ func (ss *Stroke) ApplyBorderStyle(bs BorderStyles) {
 	switch bs {
 	case BorderNone:
 		ss.Color = nil
+	case BorderDotted:
+		ss.Dashes = []float32{1, 12}
+		ss.Cap = LineCapRound
 	case BorderDashed:
-		ss.Dashes = []float32{2, 2}
+		ss.Dashes = []float32{8, 6}
 	}
 }
