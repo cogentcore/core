@@ -79,8 +79,10 @@ func TestBorderStyle(t *testing.T) {
 			s := styles.NewStyle()
 			s.Background = colors.C(colors.Lightgray)
 			s.Border.Style.Set(typ)
-			s.Border.Width.Set(units.Dp(2))
+			s.Border.Width.Set(units.Dp(10))
 			s.Border.Color.Set(colors.Blue)
+			s.Border.Radius.Set(units.Dp(50))
+			s.ToDots()
 
 			sz := s.BoxSpace().Size().Add(mat32.V2(200, 100))
 			pc.DrawStdBox(s, mat32.V2(50, 100), sz, colors.C(colors.White))
