@@ -158,7 +158,7 @@ func main() {
 	tst := ts.NewTab("StructView")
 	tmv := ts.NewTab("MapView")
 	tsl := ts.NewTab("SliceView")
-	ttv := ts.NewTab("TabView")
+	ttv := ts.NewTab("TableView")
 	_, _, _, _ = tst, tmv, tsl, ttv
 
 	strv := giv.NewStructView(tst, "strv")

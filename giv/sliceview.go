@@ -131,9 +131,6 @@ type SliceViewer interface {
 	// which contains all the fields and values
 	SliceGrid() *SliceViewGrid
 
-	// ScrollBar returns the SliceGrid scrollbar
-	ScrollBar() *gi.Slider
-
 	// RowWidgetNs returns number of widgets per row and
 	// offset for index label
 	RowWidgetNs() (nWidgPerRow, idxOff int)
@@ -301,11 +298,7 @@ func (sv *SliceViewBase) SetStyles() {
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv) {
-		case "grid-lay": // grid layout
-			w.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 1) // for this to work, ALL layers above need it too
-			})
-		case "grid-lay/grid": // slice grid
+		case "grid": // slice grid
 			sg := w.(*SliceViewGrid)
 			sg.Stripes = gi.RowStripes
 			sg.Style(func(s *styles.Style) {
@@ -314,25 +307,13 @@ func (sv *SliceViewBase) SetStyles() {
 				nWidgPerRow, _ := sv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.Grow.Set(1, 1)
+				s.Overflow.Set(styles.OverflowAuto)
 				// baseline mins:
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(6)
 			})
-		case "grid-lay/scrollbar":
-			sb := w.(*gi.Slider)
-			sb.Style(func(s *styles.Style) {
-				sb.Type = gi.SliderScrollbar
-				// s.Min.Y.Zero()
-				s.Min.X = sv.Styles.ScrollBarWidth
-				s.Grow.Set(0, 1)
-			})
-			sb.OnInput(func(e events.Event) {
-				sv.StartIdx = int(sb.Value)
-				svi.UpdateWidgets()
-			})
-
 		}
-		if w.Parent().PathFrom(sv) == "grid-lay/grid" {
+		if w.Parent().PathFrom(sv) == "grid" {
 			switch {
 			case strings.HasPrefix(w.Name(), "index-"):
 				w.Style(func(s *styles.Style) {
@@ -488,7 +469,6 @@ func (sv *SliceViewBase) ConfigSliceView() {
 	sv.ConfigFrame()
 	sv.This().(SliceViewer).ConfigRows()
 	sv.This().(SliceViewer).UpdateWidgets()
-	sv.ConfigScroll()
 	sv.ApplyStyleTree()
 	sv.UpdateEndLayout(updt)
 }
@@ -498,37 +478,13 @@ func (sv *SliceViewBase) ConfigFrame() {
 		return
 	}
 	sv.VisRows = sv.MinRows
-	gl := gi.NewLayout(sv, "grid-lay")
-	gl.SetFlag(true, gi.LayoutNoKeys)
-	NewSliceViewGrid(gl, "grid")
-	gi.NewSlider(gl, "scrollbar")
-}
-
-// ConfigScroll configures the scrollbar
-func (sv *SliceViewBase) ConfigScroll() {
-	sb := sv.This().(SliceViewer).ScrollBar()
-	sb.Type = gi.SliderScrollbar
-	// sb.StayInView = true
-	sb.Dim = mat32.Y
-	sb.Min = 0
-	sb.Step = 1
-	sv.UpdateScroll()
-}
-
-// GridLayout returns the Layout containing the Grid and the scrollbar
-func (sv *SliceViewBase) GridLayout() *gi.Layout {
-	return sv.ChildByName("grid-lay", 0).(*gi.Layout)
+	NewSliceViewGrid(sv, "grid")
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values
 func (sv *SliceViewBase) SliceGrid() *SliceViewGrid {
-	return sv.GridLayout().ChildByName("grid", 0).(*SliceViewGrid)
-}
-
-// ScrollBar returns the SliceGrid scrollbar
-func (sv *SliceViewBase) ScrollBar() *gi.Slider {
-	return sv.GridLayout().ChildByName("scrollbar", 1).(*gi.Slider)
+	return sv.ChildByName("grid", 0).(*SliceViewGrid)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -586,22 +542,13 @@ func (sv *SliceViewBase) UpdateStartIdx() {
 	}
 }
 
-// UpdateScroll updates grid scrollbar based on display
+// UpdateScroll updates the scroll value
 func (sv *SliceViewBase) UpdateScroll() {
-	sb := sv.This().(SliceViewer).ScrollBar()
-	updt := sb.UpdateStart()
-	sb.Max = float32(sv.SliceSize) + 0.01 // bit of extra to ensure last line always shows up
-	if sv.VisRows > 0 {
-		sb.PageStep = float32(sv.VisRows) * sb.Step
-		sb.SetVisiblePct(float32(sv.VisRows) / float32(sv.SliceSize))
-	} else {
-		sb.PageStep = 10 * sb.Step
-		sb.SetVisiblePct(1)
+	sg := sv.This().(SliceViewer).SliceGrid()
+	if sg == nil {
+		return
 	}
-	sb.InputThreshold = sb.Step
-	sb.SetValue(float32(sv.StartIdx)) // essential for updating pos from value
-	sb.SetState(sv.VisRows == sv.SliceSize, states.Invisible)
-	sb.UpdateEndRender(updt)
+	sg.UpdateScroll(sv.StartIdx)
 }
 
 // ConfigRows configures VisRows worth of widgets
@@ -818,7 +765,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	if sv.IsReadOnly() && sv.SelIdx >= 0 {
 		sv.SelectIdx(sv.SelIdx)
 	}
-	sv.UpdateScroll()
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -1944,13 +1890,6 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 }
 
 func (sv *SliceViewBase) HandleEvents() {
-	sv.On(events.Scroll, func(e events.Event) {
-		e.SetHandled()
-		se := e.(*events.MouseScroll)
-		sbb := sv.This().(SliceViewer).ScrollBar()
-		cur := float32(sbb.Pos)
-		sbb.SetSliderPosAction(cur + float32(se.Delta.Y)) // reverse dir for "natural"
-	})
 	sv.OnKeyChord(func(e events.Event) {
 		if sv.IsReadOnly() {
 			if sv.Is(SliceViewReadOnlyKeyNav) {
@@ -2014,6 +1953,67 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass gi.LayoutPasses) mat32.
 	_ = visHt
 	csz.Y = minHt
 	return csz
+}
+
+func (sg *SliceViewGrid) SetScrollParams(d mat32.Dims, sb *gi.Slider) {
+	if d == mat32.X {
+		sg.Frame.SetScrollParams(d, sb)
+		return
+	}
+	sb.Min = 0
+	sb.Step = 1
+	if sg.VisRows > 0 {
+		sb.PageStep = float32(sg.VisRows)
+	} else {
+		sb.PageStep = 10
+	}
+	sb.InputThreshold = sb.Step
+}
+
+func (sg *SliceViewGrid) SliceView() (SliceViewer, *SliceViewBase) {
+	svi := sg.ParentByType(SliceViewBaseType, ki.Embeds)
+	if svi == nil {
+		return nil, nil
+	}
+	sv := svi.(SliceViewer)
+	return sv, sv.AsSliceViewBase()
+}
+
+func (sg *SliceViewGrid) ScrollChanged(d mat32.Dims, sb *gi.Slider) {
+	if d == mat32.X {
+		sg.Frame.ScrollChanged(d, sb)
+		return
+	}
+	_, sv := sg.SliceView()
+	if sv == nil {
+		return
+	}
+	updt := sg.UpdateStart()
+	sv.StartIdx = int(sb.Value)
+	sv.This().(SliceViewer).UpdateWidgets()
+	sg.UpdateEndRender(updt)
+}
+
+func (sg *SliceViewGrid) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) {
+	if d == mat32.X {
+		return sg.Frame.ScrollValues(d)
+	}
+	_, sv := sg.SliceView()
+	if sv == nil {
+		return
+	}
+	maxSize = float32(max(sv.SliceSize, 1)) // + 0.01 // bit of extra to ensure last line always shows up
+	visSize = float32(sg.VisRows)
+	visPct = visSize / maxSize
+	return
+}
+
+func (sg *SliceViewGrid) UpdateScroll(idx int) {
+	if !sg.HasScroll[mat32.Y] || sg.Scrolls[mat32.Y] == nil {
+		return
+	}
+	sb := sg.Scrolls[mat32.Y]
+	sb.SetValue(float32(idx))
 }
 
 func (sv *SliceViewBase) SizeFinal() {

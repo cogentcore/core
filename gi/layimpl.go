@@ -134,6 +134,11 @@ type Layouter interface {
 
 	// ScrollGeom returns the target position and size for scrollbars
 	ScrollGeom(d mat32.Dims) (pos, sz mat32.Vec2)
+
+	// SetScrollParams sets scrollbar parameters.  Must set Step and PageStep,
+	// but can also set others as needed.
+	// Max and VisiblePct are automatically set based on ScrollValues maxSize, visPct.
+	SetScrollParams(d mat32.Dims, sb *Slider)
 }
 
 // AsLayout returns the given value as a value of type Layout if the type

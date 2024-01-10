@@ -115,6 +115,14 @@ func (ly *Layout) ScrollValues(d mat32.Dims) (maxSize, visSize, visPct float32) 
 	return
 }
 
+// SetScrollParams sets scrollbar parameters.  Must set Step and PageStep,
+// but can also set others as needed.
+// Max and VisiblePct are automatically set based on ScrollValues maxSize, visPct.
+func (ly *Layout) SetScrollParams(d mat32.Dims, sb *Slider) {
+	sb.Step = ly.Styles.Font.Size.Dots // step by lines
+	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
+}
+
 // PositionScrolls arranges scrollbars
 func (ly *Layout) PositionScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -137,11 +145,10 @@ func (ly *Layout) PositionScroll(d mat32.Dims) {
 	}
 	sb.SetState(false, states.Invisible)
 	sb.Max = maxSize
-	sb.Step = ly.Styles.Font.Size.Dots // step by lines
-	sb.PageStep = 10.0 * sb.Step       // todo: more dynamic
 	sb.SetVisiblePct(visPct)
 	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
+	ly.This().(Layouter).SetScrollParams(d, sb)
 
 	sb.Update() // applies style
 	sb.SizeUp()
