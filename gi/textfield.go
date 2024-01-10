@@ -1679,52 +1679,42 @@ func (tf *TextField) HandleStateFromFocus() {
 	})
 }
 
-func (tf *TextField) ConfigParts() {
-	parts := tf.NewParts()
-	if tf.IsReadOnly() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
-		parts.DeleteChildren(ki.DestroyKids)
-		return
-	}
+func (tf *TextField) ConfigWidget() {
 	config := ki.Config{}
-	leadIconIdx, trailIconIdx := -1, -1
-	if !tf.LeadingIcon.IsNil() {
-		config.Add(ButtonType, "lead-icon")
-		leadIconIdx = 0
-	}
-	if !tf.TrailingIcon.IsNil() {
-		config.Add(StretchType, "trail-icon-str")
-		config.Add(ButtonType, "trail-icon")
-		if leadIconIdx == -1 {
-			trailIconIdx = 1
-		} else {
-			trailIconIdx = 2
-		}
-	}
 
-	mods, updt := parts.ConfigChildren(config)
-	if mods || tf.NeedsRebuild() {
-		if leadIconIdx != -1 {
-			leadIcon := parts.Child(leadIconIdx).(*Button)
-			leadIcon.SetIcon(tf.LeadingIcon)
+	tf.EditTxt = []rune(tf.Txt)
+	tf.Edited = false
+
+	lii, tii := -1, -1
+	if !tf.IsReadOnly() {
+		if !tf.LeadingIcon.IsNil() {
+			config.Add(ButtonType, "lead-icon")
+			lii = 0
 		}
-		if trailIconIdx != -1 {
-			trailIcon := parts.Child(trailIconIdx).(*Button)
-			trailIcon.SetIcon(tf.TrailingIcon)
+		if !tf.TrailingIcon.IsNil() {
+			config.Add(StretchType, "trail-icon-str")
+			config.Add(ButtonType, "trail-icon")
+			if lii == -1 {
+				tii = 1
+			} else {
+				tii = 2
+			}
 		}
-		parts.Update()
-		parts.UpdateEnd(updt)
-		tf.SetNeedsLayout(updt)
 	}
+	tf.ConfigParts(config, func(parts *Layout) {
+		if lii >= 0 {
+			li := parts.Child(lii).(*Button)
+			li.SetIcon(tf.LeadingIcon)
+		}
+		if tii != -1 {
+			ti := parts.Child(tii).(*Button)
+			ti.SetIcon(tf.TrailingIcon)
+		}
+	})
 }
 
 ////////////////////////////////////////////////////
 //  Widget Interface
-
-func (tf *TextField) ConfigWidget() {
-	tf.EditTxt = []rune(tf.Txt)
-	tf.Edited = false
-	tf.ConfigParts()
-}
 
 // StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField() {
