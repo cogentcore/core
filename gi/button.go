@@ -365,14 +365,12 @@ func (bt *Button) HandleClickDismissMenu() {
 	})
 }
 
-// WidgetTooltip returns the effective tooltip of the button
-// with any keyboard shortcut included.
 func (bt *Button) WidgetTooltip() string {
 	res := bt.Tooltip
 	if bt.Shortcut != "" {
 		res = "[ " + bt.Shortcut.Shortcut() + " ]"
 		if bt.Tooltip != "" {
-			res += ": " + bt.Tooltip
+			res += " " + bt.Tooltip
 		}
 	}
 	return res

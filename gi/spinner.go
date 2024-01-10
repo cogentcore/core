@@ -224,6 +224,30 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 	return fval, grr.Log(err)
 }
 
+func (sp *Spinner) WidgetTooltip() string {
+	res := sp.Tooltip
+	if sp.HasMin {
+		if res != "" {
+			res += " "
+		}
+		res += fmt.Sprintf("(minimum: %g", sp.Min)
+		if !sp.HasMax {
+			res += ")"
+		}
+	}
+	if sp.HasMax {
+		if sp.HasMin {
+			res += ", "
+		} else if res != "" {
+			res += " ("
+		} else {
+			res += "("
+		}
+		res += fmt.Sprintf("maximum: %g)", sp.Max)
+	}
+	return res
+}
+
 func (sp *Spinner) HandleEvents() {
 	sp.TextField.HandleEvents()
 	sp.On(events.Scroll, func(e events.Event) {
