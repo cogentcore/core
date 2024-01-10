@@ -353,6 +353,20 @@ func (s *Style) TotalMargin() SideFloats {
 	if SidesAreZero(mbw.Sides) {
 		mbw = s.Border.Width.Dots()
 	}
+
+	if s.Border.Style.Top == BorderNone {
+		mbw.Top = 0
+	}
+	if s.Border.Style.Right == BorderNone {
+		mbw.Right = 0
+	}
+	if s.Border.Style.Bottom == BorderNone {
+		mbw.Bottom = 0
+	}
+	if s.Border.Style.Left == BorderNone {
+		mbw.Left = 0
+	}
+
 	mbsm := s.MaxBoxShadowMargin()
 	if SidesAreZero(mbsm.Sides) {
 		mbsm = s.BoxShadowMargin()
