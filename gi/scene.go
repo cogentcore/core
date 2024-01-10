@@ -258,6 +258,7 @@ func (sc *Scene) Resize(geom mat32.Geom2DInt) {
 	// windows on Windows (OS) to update after a window snap (see https://github.com/goki/gi/issues/497),
 	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
 	// and Android in different contexts.
+	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.ShowIter = 0
 }
 
