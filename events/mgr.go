@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/glop/nptime"
 	"goki.dev/goosi/events/key"
+	"goki.dev/mat32/v2"
 )
 
 // TraceWindowPaint prints out a . for each WindowPaint event
@@ -144,7 +145,7 @@ func (em *Mgr) MouseMove(where image.Point) {
 }
 
 // Scroll creates and sends a scroll event with given values
-func (em *Mgr) Scroll(where, delta image.Point) {
+func (em *Mgr) Scroll(where image.Point, delta mat32.Vec2) {
 	ev := NewScroll(where, delta, em.Last.Mods)
 	ev.Init()
 	em.Deque.Send(ev)

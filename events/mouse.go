@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"goki.dev/goosi/events/key"
+	"goki.dev/mat32/v2"
 )
 
 var (
@@ -22,7 +23,7 @@ var (
 	// interpreted as pixels per wheel step) -- only relevant for some OS's which
 	// do not have a native preference for this setting, e.g., X11
 	// This is also in gi.DeviceSettings and updated from there
-	ScrollWheelSpeed = float32(20)
+	ScrollWheelSpeed = float32(1)
 )
 
 // Buttons is a mouse button.
@@ -94,14 +95,14 @@ type MouseScroll struct {
 	Mouse
 
 	// Delta is the amount of scrolling in each axis
-	Delta image.Point
+	Delta mat32.Vec2
 }
 
 func (ev *MouseScroll) String() string {
 	return fmt.Sprintf("%v{Delta: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Delta, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
 }
 
-func NewScroll(where, delta image.Point, mods key.Modifiers) *MouseScroll {
+func NewScroll(where image.Point, delta mat32.Vec2, mods key.Modifiers) *MouseScroll {
 	ev := &MouseScroll{}
 	ev.Typ = Scroll
 	// not unique, but delta integrated!
