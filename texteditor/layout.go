@@ -5,7 +5,6 @@
 package texteditor
 
 import (
-	"goki.dev/colors"
 	"goki.dev/girl/paint"
 	"goki.dev/mat32/v2"
 )
@@ -134,7 +133,7 @@ func (ed *Editor) LayoutAllLines() {
 
 	sty := &ed.Styles
 	fst := sty.FontRender()
-	fst.Background = colors.C(nil)
+	fst.Background = nil
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
@@ -177,7 +176,7 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	}
 	sty := &ed.Styles
 	fst := sty.FontRender()
-	fst.Background = colors.C(nil)
+	fst.Background = nil
 	mxwd := float32(ed.LinesSize.X)
 	needLay := false
 
