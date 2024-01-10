@@ -289,7 +289,6 @@ func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func(parts *Layout)
 		after[0](parts)
 	}
 	if !mods && !wb.NeedsRebuild() {
-		parts.UpdateEnd(updt)
 		return
 	}
 	parts.Update()

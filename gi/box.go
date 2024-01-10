@@ -23,6 +23,7 @@ func (bx *Box) RenderBox() {
 func (bx *Box) Render() {
 	if bx.PushBounds() {
 		bx.RenderBox()
+		bx.RenderParts()
 		bx.RenderChildren()
 		bx.PopBounds()
 	}

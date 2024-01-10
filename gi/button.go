@@ -31,7 +31,7 @@ type Button struct { //goki:embedder
 	Type ButtonTypes
 
 	// Text is the label text for the button.
-	//If it is blank, no label is shown.
+	// If it is blank, no label is shown.
 	Text string `set:"-"`
 
 	// Icon is the icon for the button.
