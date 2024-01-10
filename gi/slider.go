@@ -388,6 +388,17 @@ func (sr *Slider) SetValueAction(val float32) {
 	sr.SendChange()
 }
 
+func (sr *Slider) WidgetTooltip() string {
+	res := sr.Tooltip
+	if res != "" {
+		res += " "
+	}
+	res += fmt.Sprintf("(value: %g, ", sr.Value)
+	res += fmt.Sprintf("minimum: %g, ", sr.Min)
+	res += fmt.Sprintf("maximum: %g)", sr.Max)
+	return res
+}
+
 ///////////////////////////////////////////////////////////
 // 	Events
 
