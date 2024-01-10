@@ -293,14 +293,14 @@ var ButtonType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: ""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the button.\nIf it is blank, no icon is shown.", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
-		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Indicator is the menu indicator icon to present.\nIf it is blank, no indicator is shown. It is\nautomatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless\n[icons.None] is set.", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown.", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
+		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None].", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is optional data that can be used for event handling", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Button{},
@@ -355,7 +355,7 @@ func (t *Button) SetType(v ButtonTypes) *Button {
 
 // SetIcon sets the [Button.Icon]:
 // Icon is the icon for the button.
-// If it is blank, no icon is shown.
+// If it is "" or [icons.None], no icon is shown.
 func (t *Button) SetIcon(v icons.Icon) *Button {
 	t.Icon = v
 	return t
@@ -363,10 +363,10 @@ func (t *Button) SetIcon(v icons.Icon) *Button {
 
 // SetIndicator sets the [Button.Indicator]:
 // Indicator is the menu indicator icon to present.
-// If it is blank, no indicator is shown. It is
-// automatically set to [icons.KeyboardArrowDown]
-// when there is a Menu elements present unless
-// [icons.None] is set.
+// If it is "" or [icons.None],, no indicator is shown.
+// It is automatically set to [icons.KeyboardArrowDown]
+// when there is a Menu elements present unless it is
+// set to [icons.None].
 func (t *Button) SetIndicator(v icons.Icon) *Button {
 	t.Indicator = v
 	return t
@@ -458,9 +458,6 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the indicator icon to present.", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", LocalType: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}, Tag: ""}},
 		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", LocalType: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}, Tag: ""}},
-		{"CurLabel", &gti.Field{Name: "CurLabel", Type: "string", LocalType: "string", Doc: "CurLabel is the string label for the current value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", LocalType: "[]any", Doc: "items available for selection", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Labels", &gti.Field{Name: "Labels", Type: "[]string", LocalType: "[]string", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Icons", &gti.Field{Name: "Icons", Type: "[]goki.dev/icons.Icon", LocalType: "[]icons.Icon", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
@@ -468,9 +465,12 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", LocalType: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}, Tag: ""}},
 		{"ItemsFunc", &gti.Field{Name: "ItemsFunc", Type: "func()", LocalType: "func()", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)", Directives: gti.Directives{}, Tag: ""}},
+		{"CurLabel", &gti.Field{Name: "CurLabel", Type: "string", LocalType: "string", Doc: "CurLabel is the string label for the current value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Chooser{},
@@ -2882,9 +2882,10 @@ var TabType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly.", Directives: gti.Directives{}, Tag: ""}},
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the tab.\nIf it is blank, no label is shown.\nLabels are never shown for [NavigationRail] tabs.", Directives: gti.Directives{}, Tag: ""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs.", Directives: gti.Directives{}, Tag: ""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown.", Directives: gti.Directives{}, Tag: ""}},
+		{"CloseIcon", &gti.Field{Name: "CloseIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
-		{"DeleteButton", &gti.Field{Name: "DeleteButton", Type: "bool", LocalType: "bool", Doc: "if true, this tab has a delete button (false by default)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2921,10 +2922,26 @@ func (t *Tab) SetType(v TabTypes) *Tab {
 
 // SetText sets the [Tab.Text]:
 // Text is the label text for the tab.
-// If it is blank, no label is shown.
+// If it is nil, no label is shown.
 // Labels are never shown for [NavigationRail] tabs.
 func (t *Tab) SetText(v string) *Tab {
 	t.Text = v
+	return t
+}
+
+// SetIcon sets the [Tab.Icon]:
+// Icon is the icon for the tab.
+// If it is "" or [icons.None], no icon is shown.
+func (t *Tab) SetIcon(v icons.Icon) *Tab {
+	t.Icon = v
+	return t
+}
+
+// SetCloseIcon sets the [Tab.CloseIcon]:
+// CloseIcon is the icon used as a close button for the tab.
+// If it is "" or [icons.None], the tab is not closeable.
+func (t *Tab) SetCloseIcon(v icons.Icon) *Tab {
+	t.CloseIcon = v
 	return t
 }
 
@@ -2933,13 +2950,6 @@ func (t *Tab) SetText(v string) *Tab {
 // Elides labels that are longer than that
 func (t *Tab) SetMaxChars(v int) *Tab {
 	t.MaxChars = v
-	return t
-}
-
-// SetDeleteButton sets the [Tab.DeleteButton]:
-// if true, this tab has a delete button (false by default)
-func (t *Tab) SetDeleteButton(v bool) *Tab {
-	t.DeleteButton = v
 	return t
 }
 

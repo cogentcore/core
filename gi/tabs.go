@@ -209,7 +209,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
 	tab.Tooltip = label
 	tab.Type = ts.Type
-	tab.DeleteButton = ts.DeleteButtons
+	// tab.DeleteButton = ts.DeleteButtons
 	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
@@ -383,7 +383,6 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	}
 	fr.DeleteChildAtIndex(idx, destroy)
 	tb.DeleteChildAtIndex(idx, ki.DestroyKids) // always destroy -- we manage
-	ts.RenumberTabs()
 	ts.Mu.Unlock()
 	if nxtidx >= 0 {
 		ts.SelectTabIndex(nxtidx)
@@ -465,16 +464,6 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 		if tb.StateIs(states.Selected) {
 			tb.SetSelected(false)
 		}
-	}
-}
-
-// RenumberTabs assigns proper index numbers to each tab
-func (ts *Tabs) RenumberTabs() {
-	sz := ts.NTabs()
-	tbs := ts.Tabs()
-	for i := 0; i < sz; i++ {
-		tb := tbs.Child(i).(*Tab)
-		tb.Data = i
 	}
 }
 
@@ -621,51 +610,42 @@ func (tb *Tab) Tabs() *Tabs {
 }
 
 func (tb *Tab) ConfigWidget() {
-	parts := tb.NewParts()
 	config := ki.Config{}
-
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}
 
-	if !tb.CloseIcon.IsNil() {
-		tb.ConfigPartsDeleteButton()
-		return
-	}
-	tb.Button.ConfigParts() // regular
-}
+	tb.ConfigParts(config)
+	/*
+		ici, lbi := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
+		// config.Add(StretchType, "close-stretch")
+		clsIdx := len(config)
+		config.Add(ButtonType, "close")
+		mods, updt := parts.ConfigChildren(config)
+		tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, ici, lbi)
+		if mods {
+			cls := parts.Child(clsIdx).(*Button)
+			if tb.Indicator.IsNil() {
+				tb.Indicator = icons.Close
+			}
 
-func (tb *Tab) ConfigPartsDeleteButton() {
-	parts := tb.NewParts()
-	config := ki.Config{}
-	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
-	// config.Add(StretchType, "close-stretch")
-	clsIdx := len(config)
-	config.Add(ButtonType, "close")
-	mods, updt := parts.ConfigChildren(config)
-	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
-	if mods {
-		cls := parts.Child(clsIdx).(*Button)
-		if tb.Indicator.IsNil() {
-			tb.Indicator = icons.Close
+			cls.SetType(ButtonAction)
+			icnm := tb.Indicator
+			cls.SetIcon(icnm)
+			cls.Update()
+			cls.OnClick(func(e events.Event) {
+				ts := tb.Tabs()
+				if ts == nil {
+					return
+				}
+				idx, _ := ts.TabIndexByLabel(tb.Text)
+				if !SystemSettings.Behavior.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
+					ts.DeleteTabIndex(idx, true)
+				} else {
+					ts.SelectTabIndex(idx) // otherwise select
+				}
+			})
+			tb.UpdateEnd(updt)
 		}
-
-		cls.SetType(ButtonAction)
-		icnm := tb.Indicator
-		cls.SetIcon(icnm)
-		cls.Update()
-		cls.OnClick(func(e events.Event) {
-			ts := tb.Tabs()
-			if ts == nil {
-				return
-			}
-			idx, _ := ts.TabIndexByLabel(tb.Text)
-			if !SystemSettings.Behavior.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
-				ts.DeleteTabIndex(idx, true)
-			} else {
-				ts.SelectTabIndex(idx) // otherwise select
-			}
-		})
-		tb.UpdateEnd(updt)
-	}
+	*/
 }
