@@ -307,8 +307,8 @@ func (sw *Switch) ConfigWidget() {
 		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
-	sw.ConfigParts(config, func(parts *Layout) {
-		ist := parts.Child(ici).(*Layout)
+	sw.ConfigParts(config, func() {
+		ist := sw.Parts.Child(ici).(*Layout)
 		ist.SetNChildren(3, IconType, "icon")
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(sw.IconOn)
@@ -318,7 +318,7 @@ func (sw *Switch) ConfigWidget() {
 		icunk.SetIcon(sw.IconUnk)
 		sw.SetIconFromState()
 		if lbi >= 0 {
-			lbl := parts.Child(lbi).(*Label)
+			lbl := sw.Parts.Child(lbi).(*Label)
 			if lbl.Text != sw.Text {
 				lbl.SetText(sw.Text)
 			}

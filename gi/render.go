@@ -280,13 +280,13 @@ func (wb *WidgetBase) ConfigWidget() {
 // ConfigParts initializes the parts of the widget if they
 // are not already through [WidgetBase.NewParts], calls
 // [ki.Node.ConfigChildren] on those parts with the given config,
-// calls the given after function with the parts if it is specified,
-// and then handles necessary updating logic with the given scene.
-func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func(parts *Layout)) {
+// calls the given after function if it is specified,
+// and then handles necessary updating logic.
+func (wb *WidgetBase) ConfigParts(config ki.Config, after ...func()) {
 	parts := wb.NewParts()
 	mods, updt := parts.ConfigChildren(config)
 	if len(after) > 0 {
-		after[0](parts)
+		after[0]()
 	}
 	if !mods && !wb.NeedsRebuild() {
 		return

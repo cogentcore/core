@@ -246,7 +246,7 @@ func (ch *Chooser) ConfigWidget() {
 	indi = len(config)
 	config.Add(IconType, "indicator")
 
-	ch.ConfigParts(config, func(parts *Layout) {
+	ch.ConfigParts(config, func() {
 		if ici >= 0 {
 			ic := ch.Parts.Child(ici).(*Icon)
 			ic.SetIcon(ch.Icon)

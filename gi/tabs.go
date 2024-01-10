@@ -620,7 +620,7 @@ func (tb *Tab) ConfigWidget() {
 		config.Add(LabelType, "label")
 	}
 
-	tb.ConfigParts(config, func(parts *Layout) {
+	tb.ConfigParts(config, func() {
 		if ici >= 0 {
 			ic := tb.Parts.Child(ici).(*Icon)
 			ic.SetIcon(tb.Icon)

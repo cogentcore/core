@@ -1701,13 +1701,13 @@ func (tf *TextField) ConfigWidget() {
 			}
 		}
 	}
-	tf.ConfigParts(config, func(parts *Layout) {
+	tf.ConfigParts(config, func() {
 		if lii >= 0 {
-			li := parts.Child(lii).(*Button)
+			li := tf.Parts.Child(lii).(*Button)
 			li.SetIcon(tf.LeadingIcon)
 		}
 		if tii != -1 {
-			ti := parts.Child(tii).(*Button)
+			ti := tf.Parts.Child(tii).(*Button)
 			ti.SetIcon(tf.TrailingIcon)
 		}
 	})
