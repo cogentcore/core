@@ -467,14 +467,6 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 	}
 }
 
-func (ts *Tabs) Render() {
-	if ts.PushBounds() {
-		ts.RenderScrolls()
-		ts.RenderChildren()
-		ts.PopBounds()
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // Tab
 

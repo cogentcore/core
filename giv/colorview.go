@@ -501,7 +501,7 @@ func (cv *ColorView) UpdateNums() {
 
 // func (cv *ColorView) Render(sc *gi.Scene) {
 // 	if cv.PushBounds(sc) {
-// 		cv.FrameStdRender(sc)
+// 		cv.RenderFrame(sc)
 // 		cv.RenderChildren(sc)
 // 		cv.PopBounds(sc)
 // 	}

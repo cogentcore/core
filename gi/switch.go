@@ -19,7 +19,7 @@ import (
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 type Switch struct {
-	WidgetBase
+	Box
 
 	// the type of switch that this is
 	Type SwitchTypes `set:"-"`
@@ -57,7 +57,7 @@ const (
 
 func (sw *Switch) CopyFieldsFrom(frm any) {
 	fr := frm.(*Switch)
-	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sw.Box.CopyFieldsFrom(&fr.Box)
 	sw.Type = fr.Type
 	sw.Text = fr.Text
 	sw.IconOn = fr.IconOn
@@ -66,7 +66,7 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switch) OnInit() {
-	sw.WidgetBase.OnInit()
+	sw.Box.OnInit()
 	sw.HandleEvents()
 	sw.SetStyles()
 }
@@ -326,12 +326,6 @@ func (sw *Switch) ConfigWidget() {
 	})
 }
 
-func (sw *Switch) RenderSwitch() {
-	_, st := sw.RenderLock()
-	sw.RenderStdBox(st)
-	sw.RenderUnlock()
-}
-
 func (sw *Switch) Render() {
 	sw.SetIconFromState() // make sure we're always up-to-date on render
 	if sw.Parts != nil {
@@ -340,10 +334,5 @@ func (sw *Switch) Render() {
 			ist.(*Layout).UpdateStackedVisibility()
 		}
 	}
-	if sw.PushBounds() {
-		sw.RenderSwitch()
-		sw.RenderParts()
-		sw.RenderChildren()
-		sw.PopBounds()
-	}
+	sw.Box.Render()
 }

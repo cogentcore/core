@@ -62,8 +62,8 @@ const (
 	ColStripes
 )
 
-// FrameStdRender does the standard rendering of the frame itself
-func (fr *Frame) FrameStdRender() {
+// RenderFrame does the standard rendering of the frame itself
+func (fr *Frame) RenderFrame() {
 	_, st := fr.RenderLock()
 	fr.RenderStdBox(st)
 	fr.RenderUnlock()
@@ -125,7 +125,7 @@ func (fr *Frame) RenderStripes() {
 
 func (fr *Frame) Render() {
 	if fr.PushBounds() {
-		fr.FrameStdRender()
+		fr.RenderFrame()
 		fr.RenderChildren()
 		fr.RenderScrolls()
 		fr.PopBounds()
