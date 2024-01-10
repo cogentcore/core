@@ -659,7 +659,7 @@ func (wb *WidgetBase) RenderUnlock() {
 // paint params have already been set
 func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 	pc := &wb.Sc.PaintContext
-	pc.DrawBox(pos, sz, bs)
+	pc.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // RenderStdBox draws standard box using given style.
