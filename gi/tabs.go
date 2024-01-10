@@ -80,6 +80,11 @@ const (
 	NavigationDrawer
 )
 
+// IsColumn returns whether the tabs should be arranged in a column.
+func (tt TabTypes) IsColumn() bool {
+	return tt == NavigationRail || tt == NavigationDrawer
+}
+
 func (ts *Tabs) CopyFieldsFrom(frm any) {
 	fr := frm.(*Tabs)
 	ts.Layout.CopyFieldsFrom(&fr.Layout)
@@ -104,7 +109,7 @@ func (ts *Tabs) SetStyles() {
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
-		if ts.Type == NavigationRail || ts.Type == NavigationDrawer {
+		if ts.Type.IsColumn() {
 			s.Direction = styles.Row
 		} else {
 			s.Direction = styles.Column
@@ -119,9 +124,12 @@ func (ts *Tabs) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Gap.Zero()
-				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 
-				if ts.Type == NavigationRail || ts.Type == NavigationDrawer {
+				if ts.Type == FunctionalTabs {
+					s.Background = colors.C(colors.Scheme.SurfaceContainer)
+				}
+
+				if ts.Type.IsColumn() {
 					s.Direction = styles.Column
 					s.Grow.Set(0, 1)
 				} else {
@@ -538,10 +546,23 @@ func (tb *Tab) SetStyles() {
 		// s.Border.Color.Right = colors.Scheme.OutlineVariant
 		// s.Border.Width.Right.Dp(1)
 
-		s.Border.Radius.Zero()
 		s.Text.Align = styles.Center
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(10))
+
+		if tb.Type.IsColumn() {
+			s.Grow.X = 1
+			s.Border.Radius = styles.BorderRadiusFull
+			s.Padding.Set(units.Dp(16))
+		} else {
+			s.Border.Radius.Zero()
+			s.Padding.Set(units.Dp(10))
+		}
+
+		if tb.StateIs(states.Selected) {
+			s.Color = colors.Scheme.Select.OnContainer
+		} else {
+			s.Color = colors.Scheme.OnSurfaceVariant
+		}
 
 		// s.Border.Style.Set(styles.BorderNone)
 		// if tb.StateIs(states.Selected) {
@@ -565,7 +586,11 @@ func (tb *Tab) SetStyles() {
 			})
 		case "parts/label":
 			label := w.(*Label)
-			label.Type = LabelBodyMedium
+			if tb.Type == FunctionalTabs {
+				label.Type = LabelBodyMedium
+			} else {
+				label.Type = LabelLabelLarge
+			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
