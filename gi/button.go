@@ -146,7 +146,7 @@ func (bt *Button) SetStyles() {
 		}
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Dp(10), units.Dp(24))
-		if !bt.Icon.IsNil() {
+		if bt.Icon.IsValid() {
 			s.Padding.Left.Dp(16)
 		}
 		if bt.Text == "" {
@@ -444,7 +444,7 @@ func (bt *Button) ConfigWidget() {
 	}
 
 	indi := -1
-	if !bt.Indicator.IsNil() {
+	if bt.Indicator.IsValid() {
 		config.Add(StretchType, "ind-stretch")
 		indi = len(config)
 		config.Add(IconType, "indicator")

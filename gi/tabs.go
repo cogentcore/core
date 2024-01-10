@@ -290,17 +290,17 @@ func (ts *Tabs) TabByLabel(label string) *Frame {
 }
 
 // TabIndexByLabel returns the tab index for the given tab label
-// and -1, false if it can not be found.
-func (ts *Tabs) TabIndexByLabel(label string) (int, bool) {
+// and -1 if it can not be found.
+func (ts *Tabs) TabIndexByLabel(label string) int {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
 	tb := ts.Tabs()
 	tab := tb.ChildByName(label)
 	if tab == nil {
-		return -1, false
+		return -1
 	}
-	return tab.IndexInParent(), true
+	return tab.IndexInParent()
 }
 
 // TabLabel returns tab label at given index
@@ -318,8 +318,8 @@ func (ts *Tabs) TabLabel(idx int) string {
 
 // SelectTabByLabel selects tab by label, returning it.
 func (ts *Tabs) SelectTabByLabel(label string) *Frame {
-	idx, ok := ts.TabIndexByLabel(label)
-	if !ok {
+	idx := ts.TabIndexByLabel(label)
+	if idx < 0 {
 		return nil
 	}
 	ts.SelectTabIndex(idx)
@@ -493,6 +493,9 @@ type Tab struct {
 
 	// CloseIcon is the icon used as a close button for the tab.
 	// If it is "" or [icons.None], the tab is not closeable.
+	// The default value is [icons.Close].
+	// Only [FunctionalTabs] can be closed; all other types of
+	// tabs will not render a close button and can not be closed.
 	CloseIcon icons.Icon
 
 	// TODO(kai): replace this with general text overflow property (#778)
@@ -503,7 +506,7 @@ type Tab struct {
 }
 
 func (tb *Tab) OnInit() {
-	tb.WidgetBase.OnInit()
+	tb.Box.OnInit()
 	tb.SetStyles()
 }
 
@@ -611,6 +614,7 @@ func (tb *Tab) ConfigWidget() {
 
 	ici := -1
 	lbi := -1
+	clsi := -1
 	if tb.Icon.IsValid() {
 		ici = len(config)
 		config.Add(IconType, "icon")
@@ -618,6 +622,10 @@ func (tb *Tab) ConfigWidget() {
 	if tb.Text != "" {
 		lbi = len(config)
 		config.Add(LabelType, "label")
+	}
+	if tb.Type == FunctionalTabs && tb.CloseIcon.IsValid() {
+		clsi = len(config)
+		config.Add(ButtonType, "close")
 	}
 
 	tb.ConfigParts(config, func() {
@@ -631,37 +639,21 @@ func (tb *Tab) ConfigWidget() {
 				lbl.SetTextUpdate(tb.Text)
 			}
 		}
-	})
-	/*
-		ici, lbi := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
-		// config.Add(StretchType, "close-stretch")
-		clsIdx := len(config)
-		config.Add(ButtonType, "close")
-		mods, updt := parts.ConfigChildren(config)
-		tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, ici, lbi)
-		if mods {
-			cls := parts.Child(clsIdx).(*Button)
-			if tb.Indicator.IsNil() {
-				tb.Indicator = icons.Close
-			}
-
-			cls.SetType(ButtonAction)
-			icnm := tb.Indicator
-			cls.SetIcon(icnm)
-			cls.Update()
-			cls.OnClick(func(e events.Event) {
+		if clsi >= 0 {
+			cls := tb.Parts.Child(clsi).(*Button)
+			cls.SetType(ButtonAction).SetIcon(tb.CloseIcon).OnClick(func(e events.Event) {
 				ts := tb.Tabs()
 				if ts == nil {
 					return
 				}
-				idx, _ := ts.TabIndexByLabel(tb.Text)
-				if !SystemSettings.Behavior.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
+				idx := ts.TabIndexByLabel(tb.Text)
+				// if OnlyCloseActiveTab is on, only process delete when already selected
+				if !SystemSettings.Behavior.OnlyCloseActiveTab || tb.StateIs(states.Selected) {
 					ts.DeleteTabIndex(idx, true)
 				} else {
 					ts.SelectTabIndex(idx) // otherwise select
 				}
 			})
-			tb.UpdateEnd(updt)
 		}
-	*/
+	})
 }
