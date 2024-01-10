@@ -114,13 +114,20 @@ func (ts *Tabs) SetStyles() {
 		switch w.PathFrom(ts) {
 		case "tabs":
 			w.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
 				s.Wrap = true
-				s.Overflow.X = styles.OverflowHidden // no scrollbars!
+				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Margin.Zero()
 				s.Padding.Zero()
 				s.Gap.Zero()
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
+
+				if ts.Type == NavigationRail || ts.Type == NavigationDrawer {
+					s.Direction = styles.Column
+					s.Grow.Set(0, 1)
+				} else {
+					s.Direction = styles.Row
+					s.Grow.Set(1, 0)
+				}
 
 				// s.Border.Style.Set(styles.BorderNone)
 				// s.Border.Style.Bottom = styles.BorderSolid
