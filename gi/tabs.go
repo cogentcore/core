@@ -478,10 +478,9 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Tab
 
-// Tab is a tab button that contains a larger select button
-// and a smaller close button. The Indicator icon is used for
-// the close icon.
-type Tab struct {
+// Tab is a tab button that contains any, all, or none of a label, an icon,
+// and a close icon. Tabs should be made using the [Tabs.NewTab] function.
+type Tab struct { //goki:no-new
 	Box
 
 	// Type is the styling type of the tab. This property

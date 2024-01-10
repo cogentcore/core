@@ -2879,11 +2879,13 @@ func (t *Tabs) SetStackTop(v int) *Tabs {
 
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Tab",
-	ShortName:  "gi.Tab",
-	IDName:     "tab",
-	Doc:        "Tab is a tab button that contains a larger select button\nand a smaller close button. The Indicator icon is used for\nthe close icon.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Tab",
+	ShortName: "gi.Tab",
+	IDName:    "tab",
+	Doc:       "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly.", Directives: gti.Directives{}, Tag: ""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs.", Directives: gti.Directives{}, Tag: ""}},
@@ -2897,14 +2899,6 @@ var TabType = gti.AddType(&gti.Type{
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Tab{},
 })
-
-// NewTab adds a new [Tab] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTab(par ki.Ki, name ...string) *Tab {
-	return par.NewChild(TabType, name...).(*Tab)
-}
 
 // KiType returns the [*gti.Type] of [Tab]
 func (t *Tab) KiType() *gti.Type {
