@@ -1,0 +1,178 @@
+// Copyright (c) 2018, The Goki Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package paint
+
+import (
+	"os"
+	"testing"
+
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/grows/images"
+	"goki.dev/mat32/v2"
+)
+
+func TestMain(m *testing.M) {
+	FontLibrary.InitFontPaths(FontPaths...)
+	os.Exit(m.Run())
+}
+
+// RunTest makes a rendering state, paint, and image with the given size, calls the given
+// function, and then asserts the image using [images.Assert] with the given name.
+func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)) {
+	pc := NewContext(width, height)
+	pc.PushBounds(pc.Image.Rect)
+	pc.Lock()
+
+	f(pc)
+
+	pc.Unlock()
+
+	images.Assert(t, pc.Image, nm)
+}
+
+func TestRender(t *testing.T) {
+	RunTest(t, "render", 300, 300, func(pc *Context) {
+		bs := styles.Border{}
+		bs.Color.Set(colors.Red, colors.Blue, colors.Green, colors.Orange)
+		bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
+		bs.ToDots(&pc.UnContext)
+
+		// first, draw a frame around the entire image
+		// pc.StrokeStyle.Color = colors.C(blk)
+		pc.FillStyle.Color = colors.C(colors.White)
+		// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
+		pc.DrawBorder(0, 0, 300, 300, bs)
+		pc.FillStrokeClear() // actually render path that has been setup
+
+		// next draw a rounded rectangle
+		bs.Color.Set(colors.Purple, colors.Green, colors.Red, colors.Blue)
+		// bs.Width.Set(units.NewDot(10))
+		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
+		pc.FillStyle.Color = colors.C(colors.Lightblue)
+		pc.StrokeStyle.Width.Dot(10)
+		bs.ToDots(&pc.UnContext)
+		pc.DrawBorder(60, 60, 150, 100, bs)
+		pc.FillStrokeClear()
+
+		tsty := &styles.Text{}
+		tsty.Defaults()
+		fsty := &styles.FontRender{}
+		fsty.Defaults()
+
+		tsty.Align = styles.Center
+
+		txt := &Text{}
+		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)
+
+		// the last, size arg provides constraints for layout to fit within -- uses width mainly
+		tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.V2(100, 40))
+		if tsz.X != 100 || tsz.Y != 40 {
+			t.Errorf("unexpected text size: %v", tsz)
+		}
+
+		txt.Render(pc, mat32.V2(85, 80))
+	})
+}
+
+func TestPaintPath(t *testing.T) {
+	test := func(nm string, f func(pc *Context)) {
+		RunTest(t, nm, 300, 300, func(pc *Context) {
+			pc.FillBox(mat32.Vec2{}, mat32.V2(300, 300), colors.C(colors.White))
+			f(pc)
+			pc.StrokeStyle.Color = colors.C(colors.Blue)
+			pc.FillStyle.Color = colors.C(colors.Yellow)
+			pc.StrokeStyle.Width.Dot(3)
+			pc.FillStrokeClear()
+		})
+	}
+	test("line_to", func(pc *Context) {
+		pc.MoveTo(100, 200)
+		pc.LineTo(200, 100)
+	})
+	test("quadratic_to", func(pc *Context) {
+		pc.MoveTo(100, 200)
+		pc.QuadraticTo(120, 140, 200, 100)
+	})
+	test("cubic_to", func(pc *Context) {
+		pc.MoveTo(100, 200)
+		pc.CubicTo(130, 110, 160, 180, 200, 100)
+	})
+	test("close_path", func(pc *Context) {
+		pc.MoveTo(100, 200)
+		pc.LineTo(200, 100)
+		pc.LineTo(250, 150)
+		pc.ClosePath()
+	})
+	test("clear_path", func(pc *Context) {
+		pc.MoveTo(100, 200)
+		pc.MoveTo(200, 100)
+		pc.ClearPath()
+	})
+}
+
+func TestPaintFill(t *testing.T) {
+	test := func(nm string, f func(pc *Context)) {
+		RunTest(t, nm, 300, 300, func(pc *Context) {
+			f(pc)
+		})
+	}
+	test("fill_box_color", func(pc *Context) {
+		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
+	})
+	test("fill_box_solid", func(pc *Context) {
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Blue))
+	})
+	test("fill_box_linear_gradient_black_white", func(pc *Context) {
+		g := gradient.NewLinear().AddStop(colors.Black, 0).AddStop(colors.White, 1)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+	})
+	test("fill_box_linear_gradient_red_green", func(pc *Context) {
+		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Limegreen, 1)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+	})
+	test("fill_box_linear_gradient_red_yellow_green", func(pc *Context) {
+		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Yellow, 0.3).AddStop(colors.Green, 1)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+	})
+	test("fill_box_radial_gradient", func(pc *Context) {
+		g := gradient.NewRadial().AddStop(colors.ApplyOpacity(colors.Green, 0.5), 0).AddStop(colors.Blue, 0.6).
+			AddStop(colors.ApplyOpacity(colors.Purple, 0.3), 1)
+		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+	})
+	test("blur_box", func(pc *Context) {
+		pc.FillBoxColor(mat32.V2(10, 100), mat32.V2(200, 100), colors.Green)
+		pc.BlurBox(mat32.V2(0, 50), mat32.V2(300, 200), 10)
+	})
+
+	test("fill", func(pc *Context) {
+		pc.FillStyle.Color = colors.C(colors.Purple)
+		pc.StrokeStyle.Color = colors.C(colors.Orange)
+		pc.DrawRectangle(50, 25, 150, 200)
+		pc.Fill()
+	})
+	test("stroke", func(pc *Context) {
+		pc.FillStyle.Color = colors.C(colors.Purple)
+		pc.StrokeStyle.Color = colors.C(colors.Orange)
+		pc.DrawRectangle(50, 25, 150, 200)
+		pc.Stroke()
+	})
+
+	// testing whether nil values turn off stroking/filling with FillStrokeClear
+	test("fill_stroke_clear_fill", func(pc *Context) {
+		pc.FillStyle.Color = colors.C(colors.Purple)
+		pc.StrokeStyle.Color = nil
+		pc.DrawRectangle(50, 25, 150, 200)
+		pc.FillStrokeClear()
+	})
+	test("fill_stroke_clear_stroke", func(pc *Context) {
+		pc.FillStyle.Color = nil
+		pc.StrokeStyle.Color = colors.C(colors.Orange)
+		pc.DrawRectangle(50, 25, 150, 200)
+		pc.FillStrokeClear()
+	})
+}
