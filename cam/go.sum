@@ -1,0 +1,12 @@
+github.com/chewxy/math32 v1.10.1 h1:LFpeY0SLJXeaiej/eIp2L40VYfscTvKh/FSEZ68uMkU=
+github.com/chewxy/math32 v1.10.1/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
+goki.dev/enums v0.9.56 h1:gQ0ZjDuS3kR1IblvfIdAsoaQYCjgh12PNqNWBu/V00M=
+goki.dev/enums v0.9.56/go.mod h1:ULBqiNxR9VhnfCNyNhzj1sbOCykdOTkecv77hIEj5qM=
+goki.dev/glop v0.1.9 h1:s6FFcCXqNy2FLEG5k+ULvxEvbYtHnW7KoqvEw9uPsP0=
+goki.dev/glop v0.1.9/go.mod h1:Q9TPQIlJ5LL38UITJonRUEmEbPPTHWOJED+xD63VmIg=
+goki.dev/grows v0.3.31 h1:uVN/LnDGB66SDMWFF75COEIupzihLEN5Eg/qJ0s8gAE=
+goki.dev/grows v0.3.31/go.mod h1:2F4f+WVz3Abp720oe0Hm36l6C+YY0L5kLDHdEiAQ378=
+goki.dev/mat32/v2 v2.0.0-dev0.0.28 h1:pRl2AhLX7rxQsAT3RTV4YBuicIUqEWFAWd30gKjTbNU=
+goki.dev/mat32/v2 v2.0.0-dev0.0.28/go.mod h1:bPTyw4IYkM7znzTwXrSg6cK1/8Yhhvq/+FTTzqsZvM4=
+golang.org/x/image v0.14.0 h1:tNgSxAFe3jC4uYqvZdTr84SZoM1KfwdC9SKIFrLjFn4=
+golang.org/x/image v0.14.0/go.mod h1:HUYqC05R2ZcZ3ejNQsIHQDQiwWM4JBqmm6MKANTp4LE=
