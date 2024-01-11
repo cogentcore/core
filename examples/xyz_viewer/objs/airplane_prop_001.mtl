@@ -1,0 +1,46 @@
+#
+## Alias OBJ Material File
+# Exported from SketchUp, (c) 2000-2012 Trimble Navigation Limited
+
+newmtl Material___1
+Ka 0.000000 0.000000 0.000000
+Kd 0.239216 0.223529 0.168627
+Ks 0.330000 0.330000 0.330000
+map_Kd airplane_prop_001/Material___1.jpg
+
+newmtl _Metal_Aluminum_Anodized_1
+Ka 0.000000 0.000000 0.000000
+Kd 0.043137 0.035294 0.023529
+Ks 0.330000 0.330000 0.330000
+map_Kd airplane_prop_001/_Metal_Aluminum_Anodized_1.jpg
+
+newmtl Metal_Brushed
+Ka 0.000000 0.000000 0.000000
+Kd 0.168627 0.149020 0.078431
+Ks 0.330000 0.330000 0.330000
+map_Kd airplane_prop_001/Metal_Brushed.jpg
+
+newmtl Metal_Aluminum_Anodized
+Ka 0.000000 0.000000 0.000000
+Kd 0.505882 0.478431 0.345098
+Ks 0.330000 0.330000 0.330000
+map_Kd airplane_prop_001/Metal_Aluminum_Anodized.jpg
+
+newmtl FrontColor
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.330000 0.330000 0.330000
+
+newmtl Material___2
+Ka 0.000000 0.000000 0.000000
+Kd 0.125490 0.078431 0.058824
+Ks 0.330000 0.330000 0.330000
+map_Kd airplane_prop_001/Material___2.jpg
+
+newmtl Translucent_Glass_Sky_Reflection
+Ka 0.000000 0.000000 0.000000
+Kd 0.494118 0.541176 0.717647
+Ks 0.330000 0.330000 0.330000
+d 0.520000
+map_Kd airplane_prop_001/Translucent_Glass_Sky_Reflection.jpg
+
