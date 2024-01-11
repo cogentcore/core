@@ -435,7 +435,7 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 	}
 	codes := m.GetOpCodes()
 	if len(codes) == 0 {
-		codes = []OpCode{OpCode{'e', 0, 1, 0, 1}}
+		codes = []OpCode{{'e', 0, 1, 0, 1}}
 	}
 	// Fixup leading and trailing groups if they show no changes.
 	if codes[0].Tag == 'e' {
@@ -587,7 +587,7 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 		} else if current.Tag == 'e' {
 			g = d.Dump(" ", a, alo, ahi)
 		} else {
-			return nil, errors.New(fmt.Sprintf("unknown tag %q", current.Tag))
+			return nil, fmt.Errorf("unknown tag %q", current.Tag)
 		}
 		diffs = append(diffs, g...)
 	}
@@ -727,8 +727,8 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 				atags += strings.Repeat(" ", la)
 				btags += strings.Repeat(" ", lb)
 			} else {
-				return nil, errors.New(fmt.Sprintf("unknown tag %q",
-					current.Tag))
+				return nil, fmt.Errorf("unknown tag %q",
+					current.Tag)
 			}
 		}
 		out = append(out, d.QFormat(aelt, belt, atags, btags)...)
@@ -913,7 +913,7 @@ func WriteUnifiedDiff(writer io.Writer, diff LineDiffParams) error {
 func GetUnifiedDiffString(diff LineDiffParams) (string, error) {
 	w := &bytes.Buffer{}
 	err := WriteUnifiedDiff(w, diff)
-	return string(w.Bytes()), err
+	return w.String(), err
 }
 
 // Convert range to the "ed" format.
@@ -1043,7 +1043,7 @@ func WriteContextDiff(writer io.Writer, diff LineDiffParams) error {
 func GetContextDiffString(diff LineDiffParams) (string, error) {
 	w := &bytes.Buffer{}
 	err := WriteContextDiff(w, diff)
-	return string(w.Bytes()), err
+	return w.String(), err
 }
 
 // Split a string on "\n" while preserving them. The output can be used

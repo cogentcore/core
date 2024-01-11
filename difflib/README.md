@@ -1,15 +1,8 @@
-go-difflib
-==========
+# Difflib
 
-The previous owner of this project (pmezard) did not have the time to continue
-working on it. Additionally I (ianbruene) needed additional ported features.
+> Difflib is a fork of https://github.com/ianbruene/go-difflib, which itself is a fork of https://github.com/pmezard/go-difflib
 
-For these reasons I have taken over maintenance and further development of the
-project.
-
-[![GoDoc](https://godoc.org/github.com/ianbruene/go-difflib/difflib?status.svg)](https://godoc.org/github.com/ianbruene/go-difflib/difflib)
-
-Go-difflib is an as yet partial port of python 3's difflib package.
+Difflib is an as yet partial port of python 3's difflib package.
 
 The following publicly visible classes and functions have been ported:
 
@@ -20,8 +13,8 @@ The following publicly visible classes and functions have been ported:
 
 ## Installation
 
-```bash
-$ go get github.com/ianbruene/go-difflib/difflib
+```sh
+$ go get goki.dev/difflib
 ```
 
 ### UnifiedDiff Quick Start

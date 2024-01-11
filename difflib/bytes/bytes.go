@@ -26,20 +26,6 @@ import (
 	"unicode"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func calculateRatio(matches, length int) float64 {
 	if length > 0 {
 		return 2.0 * float64(matches) / float64(length)
@@ -496,7 +482,7 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 	}
 	codes := m.GetOpCodes()
 	if len(codes) == 0 {
-		codes = []OpCode{OpCode{'e', 0, 1, 0, 1}}
+		codes = []OpCode{{'e', 0, 1, 0, 1}}
 	}
 	// Fixup leading and trailing groups if they show no changes.
 	if codes[0].Tag == 'e' {
@@ -658,7 +644,7 @@ func (d *Differ) Compare(a [][]byte, b [][]byte) (diffs [][]byte, err error) {
 		} else if current.Tag == 'e' {
 			g = d.Dump(SPACE, a, alo, ahi)
 		} else {
-			return nil, errors.New(fmt.Sprintf("unknown tag %q", current.Tag))
+			return nil, fmt.Errorf("unknown tag %q", current.Tag)
 		}
 		diffs = append(diffs, g...)
 	}
@@ -798,8 +784,8 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 				atags = append(atags, bytes.Repeat(SPACE, la)...)
 				btags = append(btags, bytes.Repeat(SPACE, lb)...)
 			} else {
-				return nil, errors.New(fmt.Sprintf("unknown tag %q",
-					current.Tag))
+				return nil, fmt.Errorf("unknown tag %q",
+					current.Tag)
 			}
 		}
 		out = append(out, d.QFormat(aelt, belt, atags, btags)...)
