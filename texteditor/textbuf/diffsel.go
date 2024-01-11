@@ -7,7 +7,7 @@ package textbuf
 import (
 	"slices"
 
-	"github.com/goki/go-difflib/difflib"
+	"goki.dev/goki/go-difflib/difflib"
 )
 
 // DiffSelData contains data for one set of text
