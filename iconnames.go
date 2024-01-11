@@ -3,221 +3,8 @@
 package icons
 
 const (
-	// X10K is https://github.com/goki/icons/blob/main/svg/10k.svg
-	X10K Icon = "10k"
-
-	// X10Mp is https://github.com/goki/icons/blob/main/svg/10mp.svg
-	X10Mp Icon = "10mp"
-
-	// X11Mp is https://github.com/goki/icons/blob/main/svg/11mp.svg
-	X11Mp Icon = "11mp"
-
-	// X123 is https://github.com/goki/icons/blob/main/svg/123.svg
-	X123 Icon = "123"
-
-	// X12Mp is https://github.com/goki/icons/blob/main/svg/12mp.svg
-	X12Mp Icon = "12mp"
-
-	// X13Mp is https://github.com/goki/icons/blob/main/svg/13mp.svg
-	X13Mp Icon = "13mp"
-
-	// X14Mp is https://github.com/goki/icons/blob/main/svg/14mp.svg
-	X14Mp Icon = "14mp"
-
-	// X15Mp is https://github.com/goki/icons/blob/main/svg/15mp.svg
-	X15Mp Icon = "15mp"
-
-	// X16Mp is https://github.com/goki/icons/blob/main/svg/16mp.svg
-	X16Mp Icon = "16mp"
-
-	// X17Mp is https://github.com/goki/icons/blob/main/svg/17mp.svg
-	X17Mp Icon = "17mp"
-
-	// X18UpRating is https://github.com/goki/icons/blob/main/svg/18_up_rating.svg
-	X18UpRating Icon = "18_up_rating"
-
-	// X18Mp is https://github.com/goki/icons/blob/main/svg/18mp.svg
-	X18Mp Icon = "18mp"
-
-	// X19Mp is https://github.com/goki/icons/blob/main/svg/19mp.svg
-	X19Mp Icon = "19mp"
-
-	// X1K is https://github.com/goki/icons/blob/main/svg/1k.svg
-	X1K Icon = "1k"
-
-	// X1KPlus is https://github.com/goki/icons/blob/main/svg/1k_plus.svg
-	X1KPlus Icon = "1k_plus"
-
-	// X1XMobiledata is https://github.com/goki/icons/blob/main/svg/1x_mobiledata.svg
-	X1XMobiledata Icon = "1x_mobiledata"
-
-	// X1XMobiledataBadge is https://github.com/goki/icons/blob/main/svg/1x_mobiledata_badge.svg
-	X1XMobiledataBadge Icon = "1x_mobiledata_badge"
-
-	// X20Mp is https://github.com/goki/icons/blob/main/svg/20mp.svg
-	X20Mp Icon = "20mp"
-
-	// X21Mp is https://github.com/goki/icons/blob/main/svg/21mp.svg
-	X21Mp Icon = "21mp"
-
-	// X22Mp is https://github.com/goki/icons/blob/main/svg/22mp.svg
-	X22Mp Icon = "22mp"
-
-	// X23Mp is https://github.com/goki/icons/blob/main/svg/23mp.svg
-	X23Mp Icon = "23mp"
-
-	// X24Mp is https://github.com/goki/icons/blob/main/svg/24mp.svg
-	X24Mp Icon = "24mp"
-
-	// X2D is https://github.com/goki/icons/blob/main/svg/2d.svg
-	X2D Icon = "2d"
-
-	// X2K is https://github.com/goki/icons/blob/main/svg/2k.svg
-	X2K Icon = "2k"
-
-	// X2KPlus is https://github.com/goki/icons/blob/main/svg/2k_plus.svg
-	X2KPlus Icon = "2k_plus"
-
-	// X2Mp is https://github.com/goki/icons/blob/main/svg/2mp.svg
-	X2Mp Icon = "2mp"
-
-	// X30Fps is https://github.com/goki/icons/blob/main/svg/30fps.svg
-	X30Fps Icon = "30fps"
-
-	// X30FpsSelect is https://github.com/goki/icons/blob/main/svg/30fps_select.svg
-	X30FpsSelect Icon = "30fps_select"
-
-	// X360 is https://github.com/goki/icons/blob/main/svg/360.svg
-	X360 Icon = "360"
-
-	// X3DRotation is https://github.com/goki/icons/blob/main/svg/3d_rotation.svg
-	X3DRotation Icon = "3d_rotation"
-
-	// X3GMobiledata is https://github.com/goki/icons/blob/main/svg/3g_mobiledata.svg
-	X3GMobiledata Icon = "3g_mobiledata"
-
-	// X3GMobiledataBadge is https://github.com/goki/icons/blob/main/svg/3g_mobiledata_badge.svg
-	X3GMobiledataBadge Icon = "3g_mobiledata_badge"
-
-	// X3K is https://github.com/goki/icons/blob/main/svg/3k.svg
-	X3K Icon = "3k"
-
-	// X3KPlus is https://github.com/goki/icons/blob/main/svg/3k_plus.svg
-	X3KPlus Icon = "3k_plus"
-
-	// X3Mp is https://github.com/goki/icons/blob/main/svg/3mp.svg
-	X3Mp Icon = "3mp"
-
-	// X3P is https://github.com/goki/icons/blob/main/svg/3p.svg
-	X3P Icon = "3p"
-
-	// X4GMobiledata is https://github.com/goki/icons/blob/main/svg/4g_mobiledata.svg
-	X4GMobiledata Icon = "4g_mobiledata"
-
-	// X4GMobiledataBadge is https://github.com/goki/icons/blob/main/svg/4g_mobiledata_badge.svg
-	X4GMobiledataBadge Icon = "4g_mobiledata_badge"
-
-	// X4GPlusMobiledata is https://github.com/goki/icons/blob/main/svg/4g_plus_mobiledata.svg
-	X4GPlusMobiledata Icon = "4g_plus_mobiledata"
-
-	// X4K is https://github.com/goki/icons/blob/main/svg/4k.svg
-	X4K Icon = "4k"
-
-	// X4KPlus is https://github.com/goki/icons/blob/main/svg/4k_plus.svg
-	X4KPlus Icon = "4k_plus"
-
-	// X4Mp is https://github.com/goki/icons/blob/main/svg/4mp.svg
-	X4Mp Icon = "4mp"
-
-	// X50Mp is https://github.com/goki/icons/blob/main/svg/50mp.svg
-	X50Mp Icon = "50mp"
-
-	// X5G is https://github.com/goki/icons/blob/main/svg/5g.svg
-	X5G Icon = "5g"
-
-	// X5GMobiledataBadge is https://github.com/goki/icons/blob/main/svg/5g_mobiledata_badge.svg
-	X5GMobiledataBadge Icon = "5g_mobiledata_badge"
-
-	// X5K is https://github.com/goki/icons/blob/main/svg/5k.svg
-	X5K Icon = "5k"
-
-	// X5KPlus is https://github.com/goki/icons/blob/main/svg/5k_plus.svg
-	X5KPlus Icon = "5k_plus"
-
-	// X5Mp is https://github.com/goki/icons/blob/main/svg/5mp.svg
-	X5Mp Icon = "5mp"
-
-	// X60Fps is https://github.com/goki/icons/blob/main/svg/60fps.svg
-	X60Fps Icon = "60fps"
-
-	// X60FpsSelect is https://github.com/goki/icons/blob/main/svg/60fps_select.svg
-	X60FpsSelect Icon = "60fps_select"
-
-	// X6FtApart is https://github.com/goki/icons/blob/main/svg/6_ft_apart.svg
-	X6FtApart Icon = "6_ft_apart"
-
-	// X6K is https://github.com/goki/icons/blob/main/svg/6k.svg
-	X6K Icon = "6k"
-
-	// X6KPlus is https://github.com/goki/icons/blob/main/svg/6k_plus.svg
-	X6KPlus Icon = "6k_plus"
-
-	// X6Mp is https://github.com/goki/icons/blob/main/svg/6mp.svg
-	X6Mp Icon = "6mp"
-
-	// X7K is https://github.com/goki/icons/blob/main/svg/7k.svg
-	X7K Icon = "7k"
-
-	// X7KPlus is https://github.com/goki/icons/blob/main/svg/7k_plus.svg
-	X7KPlus Icon = "7k_plus"
-
-	// X7Mp is https://github.com/goki/icons/blob/main/svg/7mp.svg
-	X7Mp Icon = "7mp"
-
-	// X8K is https://github.com/goki/icons/blob/main/svg/8k.svg
-	X8K Icon = "8k"
-
-	// X8KPlus is https://github.com/goki/icons/blob/main/svg/8k_plus.svg
-	X8KPlus Icon = "8k_plus"
-
-	// X8Mp is https://github.com/goki/icons/blob/main/svg/8mp.svg
-	X8Mp Icon = "8mp"
-
-	// X9K is https://github.com/goki/icons/blob/main/svg/9k.svg
-	X9K Icon = "9k"
-
-	// X9KPlus is https://github.com/goki/icons/blob/main/svg/9k_plus.svg
-	X9KPlus Icon = "9k_plus"
-
-	// X9Mp is https://github.com/goki/icons/blob/main/svg/9mp.svg
-	X9Mp Icon = "9mp"
-
 	// Abc is https://github.com/goki/icons/blob/main/svg/abc.svg
 	Abc Icon = "abc"
-
-	// AcUnit is https://github.com/goki/icons/blob/main/svg/ac_unit.svg
-	AcUnit Icon = "ac_unit"
-
-	// Accessibility is https://github.com/goki/icons/blob/main/svg/accessibility.svg
-	Accessibility Icon = "accessibility"
-
-	// AccessibilityNew is https://github.com/goki/icons/blob/main/svg/accessibility_new.svg
-	AccessibilityNew Icon = "accessibility_new"
-
-	// Accessible is https://github.com/goki/icons/blob/main/svg/accessible.svg
-	Accessible Icon = "accessible"
-
-	// AccessibleForward is https://github.com/goki/icons/blob/main/svg/accessible_forward.svg
-	AccessibleForward Icon = "accessible_forward"
-
-	// AccountBalance is https://github.com/goki/icons/blob/main/svg/account_balance.svg
-	AccountBalance Icon = "account_balance"
-
-	// AccountBalanceWallet is https://github.com/goki/icons/blob/main/svg/account_balance_wallet.svg
-	AccountBalanceWallet Icon = "account_balance_wallet"
-
-	// AccountBox is https://github.com/goki/icons/blob/main/svg/account_box.svg
-	AccountBox Icon = "account_box"
 
 	// AccountCircle is https://github.com/goki/icons/blob/main/svg/account_circle.svg
 	AccountCircle Icon = "account_circle"
@@ -225,29 +12,11 @@ const (
 	// AccountCircleOff is https://github.com/goki/icons/blob/main/svg/account_circle_off.svg
 	AccountCircleOff Icon = "account_circle_off"
 
-	// AccountTree is https://github.com/goki/icons/blob/main/svg/account_tree.svg
-	AccountTree Icon = "account_tree"
-
-	// ActivityZone is https://github.com/goki/icons/blob/main/svg/activity_zone.svg
-	ActivityZone Icon = "activity_zone"
-
-	// Acute is https://github.com/goki/icons/blob/main/svg/acute.svg
-	Acute Icon = "acute"
-
 	// Ad is https://github.com/goki/icons/blob/main/svg/ad.svg
 	Ad Icon = "ad"
 
-	// AdGroup is https://github.com/goki/icons/blob/main/svg/ad_group.svg
-	AdGroup Icon = "ad_group"
-
-	// AdGroupOff is https://github.com/goki/icons/blob/main/svg/ad_group_off.svg
-	AdGroupOff Icon = "ad_group_off"
-
 	// AdOff is https://github.com/goki/icons/blob/main/svg/ad_off.svg
 	AdOff Icon = "ad_off"
-
-	// AdUnits is https://github.com/goki/icons/blob/main/svg/ad_units.svg
-	AdUnits Icon = "ad_units"
 
 	// Adb is https://github.com/goki/icons/blob/main/svg/adb.svg
 	Adb Icon = "adb"
@@ -258,17 +27,11 @@ const (
 	// AddAPhoto is https://github.com/goki/icons/blob/main/svg/add_a_photo.svg
 	AddAPhoto Icon = "add_a_photo"
 
-	// AddAd is https://github.com/goki/icons/blob/main/svg/add_ad.svg
-	AddAd Icon = "add_ad"
-
 	// AddAlert is https://github.com/goki/icons/blob/main/svg/add_alert.svg
 	AddAlert Icon = "add_alert"
 
 	// AddBox is https://github.com/goki/icons/blob/main/svg/add_box.svg
 	AddBox Icon = "add_box"
-
-	// AddBusiness is https://github.com/goki/icons/blob/main/svg/add_business.svg
-	AddBusiness Icon = "add_business"
 
 	// AddCall is https://github.com/goki/icons/blob/main/svg/add_call.svg
 	AddCall Icon = "add_call"
@@ -297,23 +60,8 @@ const (
 	// AddLocation is https://github.com/goki/icons/blob/main/svg/add_location.svg
 	AddLocation Icon = "add_location"
 
-	// AddLocationAlt is https://github.com/goki/icons/blob/main/svg/add_location_alt.svg
-	AddLocationAlt Icon = "add_location_alt"
-
-	// AddModerator is https://github.com/goki/icons/blob/main/svg/add_moderator.svg
-	AddModerator Icon = "add_moderator"
-
 	// AddNotes is https://github.com/goki/icons/blob/main/svg/add_notes.svg
 	AddNotes Icon = "add_notes"
-
-	// AddPhotoAlternate is https://github.com/goki/icons/blob/main/svg/add_photo_alternate.svg
-	AddPhotoAlternate Icon = "add_photo_alternate"
-
-	// AddReaction is https://github.com/goki/icons/blob/main/svg/add_reaction.svg
-	AddReaction Icon = "add_reaction"
-
-	// AddRoad is https://github.com/goki/icons/blob/main/svg/add_road.svg
-	AddRoad Icon = "add_road"
 
 	// AddShoppingCart is https://github.com/goki/icons/blob/main/svg/add_shopping_cart.svg
 	AddShoppingCart Icon = "add_shopping_cart"
@@ -321,20 +69,8 @@ const (
 	// AddTask is https://github.com/goki/icons/blob/main/svg/add_task.svg
 	AddTask Icon = "add_task"
 
-	// AddToDrive is https://github.com/goki/icons/blob/main/svg/add_to_drive.svg
-	AddToDrive Icon = "add_to_drive"
-
-	// AddToHomeScreen is https://github.com/goki/icons/blob/main/svg/add_to_home_screen.svg
-	AddToHomeScreen Icon = "add_to_home_screen"
-
-	// AddToPhotos is https://github.com/goki/icons/blob/main/svg/add_to_photos.svg
-	AddToPhotos Icon = "add_to_photos"
-
 	// AddToQueue is https://github.com/goki/icons/blob/main/svg/add_to_queue.svg
 	AddToQueue Icon = "add_to_queue"
-
-	// AdfScanner is https://github.com/goki/icons/blob/main/svg/adf_scanner.svg
-	AdfScanner Icon = "adf_scanner"
 
 	// Adjust is https://github.com/goki/icons/blob/main/svg/adjust.svg
 	Adjust Icon = "adjust"
@@ -345,9 +81,6 @@ const (
 	// AdminPanelSettings is https://github.com/goki/icons/blob/main/svg/admin_panel_settings.svg
 	AdminPanelSettings Icon = "admin_panel_settings"
 
-	// AdsClick is https://github.com/goki/icons/blob/main/svg/ads_click.svg
-	AdsClick Icon = "ads_click"
-
 	// Agender is https://github.com/goki/icons/blob/main/svg/agender.svg
 	Agender Icon = "agender"
 
@@ -357,62 +90,8 @@ const (
 	// Air is https://github.com/goki/icons/blob/main/svg/air.svg
 	Air Icon = "air"
 
-	// AirFreshener is https://github.com/goki/icons/blob/main/svg/air_freshener.svg
-	AirFreshener Icon = "air_freshener"
-
-	// AirPurifierGen is https://github.com/goki/icons/blob/main/svg/air_purifier_gen.svg
-	AirPurifierGen Icon = "air_purifier_gen"
-
-	// AirlineSeatFlat is https://github.com/goki/icons/blob/main/svg/airline_seat_flat.svg
-	AirlineSeatFlat Icon = "airline_seat_flat"
-
-	// AirlineSeatFlatAngled is https://github.com/goki/icons/blob/main/svg/airline_seat_flat_angled.svg
-	AirlineSeatFlatAngled Icon = "airline_seat_flat_angled"
-
-	// AirlineSeatIndividualSuite is https://github.com/goki/icons/blob/main/svg/airline_seat_individual_suite.svg
-	AirlineSeatIndividualSuite Icon = "airline_seat_individual_suite"
-
-	// AirlineSeatLegroomExtra is https://github.com/goki/icons/blob/main/svg/airline_seat_legroom_extra.svg
-	AirlineSeatLegroomExtra Icon = "airline_seat_legroom_extra"
-
-	// AirlineSeatLegroomNormal is https://github.com/goki/icons/blob/main/svg/airline_seat_legroom_normal.svg
-	AirlineSeatLegroomNormal Icon = "airline_seat_legroom_normal"
-
-	// AirlineSeatLegroomReduced is https://github.com/goki/icons/blob/main/svg/airline_seat_legroom_reduced.svg
-	AirlineSeatLegroomReduced Icon = "airline_seat_legroom_reduced"
-
-	// AirlineSeatReclineExtra is https://github.com/goki/icons/blob/main/svg/airline_seat_recline_extra.svg
-	AirlineSeatReclineExtra Icon = "airline_seat_recline_extra"
-
-	// AirlineSeatReclineNormal is https://github.com/goki/icons/blob/main/svg/airline_seat_recline_normal.svg
-	AirlineSeatReclineNormal Icon = "airline_seat_recline_normal"
-
-	// AirlineStops is https://github.com/goki/icons/blob/main/svg/airline_stops.svg
-	AirlineStops Icon = "airline_stops"
-
-	// Airlines is https://github.com/goki/icons/blob/main/svg/airlines.svg
-	Airlines Icon = "airlines"
-
-	// AirplaneTicket is https://github.com/goki/icons/blob/main/svg/airplane_ticket.svg
-	AirplaneTicket Icon = "airplane_ticket"
-
-	// AirplanemodeActive is https://github.com/goki/icons/blob/main/svg/airplanemode_active.svg
-	AirplanemodeActive Icon = "airplanemode_active"
-
-	// AirplanemodeInactive is https://github.com/goki/icons/blob/main/svg/airplanemode_inactive.svg
-	AirplanemodeInactive Icon = "airplanemode_inactive"
-
 	// Airplay is https://github.com/goki/icons/blob/main/svg/airplay.svg
 	Airplay Icon = "airplay"
-
-	// AirportShuttle is https://github.com/goki/icons/blob/main/svg/airport_shuttle.svg
-	AirportShuttle Icon = "airport_shuttle"
-
-	// Airware is https://github.com/goki/icons/blob/main/svg/airware.svg
-	Airware Icon = "airware"
-
-	// Airwave is https://github.com/goki/icons/blob/main/svg/airwave.svg
-	Airwave Icon = "airwave"
 
 	// Alarm is https://github.com/goki/icons/blob/main/svg/alarm.svg
 	Alarm Icon = "alarm"
@@ -425,9 +104,6 @@ const (
 
 	// AlarmOn is https://github.com/goki/icons/blob/main/svg/alarm_on.svg
 	AlarmOn Icon = "alarm_on"
-
-	// AlarmSmartWake is https://github.com/goki/icons/blob/main/svg/alarm_smart_wake.svg
-	AlarmSmartWake Icon = "alarm_smart_wake"
 
 	// Album is https://github.com/goki/icons/blob/main/svg/album.svg
 	Album Icon = "album"
@@ -510,20 +186,11 @@ const (
 	// AllInbox is https://github.com/goki/icons/blob/main/svg/all_inbox.svg
 	AllInbox Icon = "all_inbox"
 
-	// AllInclusive is https://github.com/goki/icons/blob/main/svg/all_inclusive.svg
-	AllInclusive Icon = "all_inclusive"
-
 	// AllMatch is https://github.com/goki/icons/blob/main/svg/all_match.svg
 	AllMatch Icon = "all_match"
 
 	// AllOut is https://github.com/goki/icons/blob/main/svg/all_out.svg
 	AllOut Icon = "all_out"
-
-	// Allergies is https://github.com/goki/icons/blob/main/svg/allergies.svg
-	Allergies Icon = "allergies"
-
-	// Allergy is https://github.com/goki/icons/blob/main/svg/allergy.svg
-	Allergy Icon = "allergy"
 
 	// AltRoute is https://github.com/goki/icons/blob/main/svg/alt_route.svg
 	AltRoute Icon = "alt_route"
@@ -534,17 +201,8 @@ const (
 	// Altitude is https://github.com/goki/icons/blob/main/svg/altitude.svg
 	Altitude Icon = "altitude"
 
-	// AmbientScreen is https://github.com/goki/icons/blob/main/svg/ambient_screen.svg
-	AmbientScreen Icon = "ambient_screen"
-
-	// Ambulance is https://github.com/goki/icons/blob/main/svg/ambulance.svg
-	Ambulance Icon = "ambulance"
-
 	// Amend is https://github.com/goki/icons/blob/main/svg/amend.svg
 	Amend Icon = "amend"
-
-	// AmpStories is https://github.com/goki/icons/blob/main/svg/amp_stories.svg
-	AmpStories Icon = "amp_stories"
 
 	// Analytics is https://github.com/goki/icons/blob/main/svg/analytics.svg
 	Analytics Icon = "analytics"
@@ -557,15 +215,6 @@ const (
 
 	// Animation is https://github.com/goki/icons/blob/main/svg/animation.svg
 	Animation Icon = "animation"
-
-	// Aod is https://github.com/goki/icons/blob/main/svg/aod.svg
-	Aod Icon = "aod"
-
-	// AodTablet is https://github.com/goki/icons/blob/main/svg/aod_tablet.svg
-	AodTablet Icon = "aod_tablet"
-
-	// AodWatch is https://github.com/goki/icons/blob/main/svg/aod_watch.svg
-	AodWatch Icon = "aod_watch"
 
 	// Apartment is https://github.com/goki/icons/blob/main/svg/apartment.svg
 	Apartment Icon = "apartment"
@@ -617,9 +266,6 @@ const (
 
 	// AreaChart is https://github.com/goki/icons/blob/main/svg/area_chart.svg
 	AreaChart Icon = "area_chart"
-
-	// ArmingCountdown is https://github.com/goki/icons/blob/main/svg/arming_countdown.svg
-	ArmingCountdown Icon = "arming_countdown"
 
 	// ArrowAndEdge is https://github.com/goki/icons/blob/main/svg/arrow_and_edge.svg
 	ArrowAndEdge Icon = "arrow_and_edge"
@@ -717,56 +363,17 @@ const (
 	// ArrowsOutward is https://github.com/goki/icons/blob/main/svg/arrows_outward.svg
 	ArrowsOutward Icon = "arrows_outward"
 
-	// ArtTrack is https://github.com/goki/icons/blob/main/svg/art_track.svg
-	ArtTrack Icon = "art_track"
-
 	// Article is https://github.com/goki/icons/blob/main/svg/article.svg
 	Article Icon = "article"
 
 	// AspectRatio is https://github.com/goki/icons/blob/main/svg/aspect_ratio.svg
 	AspectRatio Icon = "aspect_ratio"
 
-	// Assignment is https://github.com/goki/icons/blob/main/svg/assignment.svg
-	Assignment Icon = "assignment"
-
-	// AssignmentAdd is https://github.com/goki/icons/blob/main/svg/assignment_add.svg
-	AssignmentAdd Icon = "assignment_add"
-
-	// AssignmentInd is https://github.com/goki/icons/blob/main/svg/assignment_ind.svg
-	AssignmentInd Icon = "assignment_ind"
-
-	// AssignmentLate is https://github.com/goki/icons/blob/main/svg/assignment_late.svg
-	AssignmentLate Icon = "assignment_late"
-
-	// AssignmentReturn is https://github.com/goki/icons/blob/main/svg/assignment_return.svg
-	AssignmentReturn Icon = "assignment_return"
-
-	// AssignmentReturned is https://github.com/goki/icons/blob/main/svg/assignment_returned.svg
-	AssignmentReturned Icon = "assignment_returned"
-
-	// AssignmentTurnedIn is https://github.com/goki/icons/blob/main/svg/assignment_turned_in.svg
-	AssignmentTurnedIn Icon = "assignment_turned_in"
-
-	// AssistWalker is https://github.com/goki/icons/blob/main/svg/assist_walker.svg
-	AssistWalker Icon = "assist_walker"
-
 	// AssistantDirection is https://github.com/goki/icons/blob/main/svg/assistant_direction.svg
 	AssistantDirection Icon = "assistant_direction"
 
 	// AssistantNavigation is https://github.com/goki/icons/blob/main/svg/assistant_navigation.svg
 	AssistantNavigation Icon = "assistant_navigation"
-
-	// AssistantOnHub is https://github.com/goki/icons/blob/main/svg/assistant_on_hub.svg
-	AssistantOnHub Icon = "assistant_on_hub"
-
-	// AssuredWorkload is https://github.com/goki/icons/blob/main/svg/assured_workload.svg
-	AssuredWorkload Icon = "assured_workload"
-
-	// Atm is https://github.com/goki/icons/blob/main/svg/atm.svg
-	Atm Icon = "atm"
-
-	// Atr is https://github.com/goki/icons/blob/main/svg/atr.svg
-	Atr Icon = "atr"
 
 	// AttachEmail is https://github.com/goki/icons/blob/main/svg/attach_email.svg
 	AttachEmail Icon = "attach_email"
@@ -783,9 +390,6 @@ const (
 	// Attachment is https://github.com/goki/icons/blob/main/svg/attachment.svg
 	Attachment Icon = "attachment"
 
-	// Attractions is https://github.com/goki/icons/blob/main/svg/attractions.svg
-	Attractions Icon = "attractions"
-
 	// Attribution is https://github.com/goki/icons/blob/main/svg/attribution.svg
 	Attribution Icon = "attribution"
 
@@ -795,12 +399,6 @@ const (
 	// AudioVideoReceiver is https://github.com/goki/icons/blob/main/svg/audio_video_receiver.svg
 	AudioVideoReceiver Icon = "audio_video_receiver"
 
-	// AutoAwesomeMosaic is https://github.com/goki/icons/blob/main/svg/auto_awesome_mosaic.svg
-	AutoAwesomeMosaic Icon = "auto_awesome_mosaic"
-
-	// AutoAwesomeMotion is https://github.com/goki/icons/blob/main/svg/auto_awesome_motion.svg
-	AutoAwesomeMotion Icon = "auto_awesome_motion"
-
 	// AutoDelete is https://github.com/goki/icons/blob/main/svg/auto_delete.svg
 	AutoDelete Icon = "auto_delete"
 
@@ -809,9 +407,6 @@ const (
 
 	// AutoReadPlay is https://github.com/goki/icons/blob/main/svg/auto_read_play.svg
 	AutoReadPlay Icon = "auto_read_play"
-
-	// AutoStories is https://github.com/goki/icons/blob/main/svg/auto_stories.svg
-	AutoStories Icon = "auto_stories"
 
 	// AutofpsSelect is https://github.com/goki/icons/blob/main/svg/autofps_select.svg
 	AutofpsSelect Icon = "autofps_select"
@@ -831,20 +426,8 @@ const (
 	// AvTimer is https://github.com/goki/icons/blob/main/svg/av_timer.svg
 	AvTimer Icon = "av_timer"
 
-	// AvgPace is https://github.com/goki/icons/blob/main/svg/avg_pace.svg
-	AvgPace Icon = "avg_pace"
-
-	// AvgTime is https://github.com/goki/icons/blob/main/svg/avg_time.svg
-	AvgTime Icon = "avg_time"
-
 	// AwardStar is https://github.com/goki/icons/blob/main/svg/award_star.svg
 	AwardStar Icon = "award_star"
-
-	// Azm is https://github.com/goki/icons/blob/main/svg/azm.svg
-	Azm Icon = "azm"
-
-	// BabyChangingStation is https://github.com/goki/icons/blob/main/svg/baby_changing_station.svg
-	BabyChangingStation Icon = "baby_changing_station"
 
 	// BackHand is https://github.com/goki/icons/blob/main/svg/back_hand.svg
 	BackHand Icon = "back_hand"
@@ -867,9 +450,6 @@ const (
 	// BacklightLow is https://github.com/goki/icons/blob/main/svg/backlight_low.svg
 	BacklightLow Icon = "backlight_low"
 
-	// Backpack is https://github.com/goki/icons/blob/main/svg/backpack.svg
-	Backpack Icon = "backpack"
-
 	// Backspace is https://github.com/goki/icons/blob/main/svg/backspace.svg
 	Backspace Icon = "backspace"
 
@@ -885,14 +465,8 @@ const (
 	// BadgeCriticalBattery is https://github.com/goki/icons/blob/main/svg/badge_critical_battery.svg
 	BadgeCriticalBattery Icon = "badge_critical_battery"
 
-	// BakeryDining is https://github.com/goki/icons/blob/main/svg/bakery_dining.svg
-	BakeryDining Icon = "bakery_dining"
-
 	// Balance is https://github.com/goki/icons/blob/main/svg/balance.svg
 	Balance Icon = "balance"
-
-	// Balcony is https://github.com/goki/icons/blob/main/svg/balcony.svg
-	Balcony Icon = "balcony"
 
 	// Ballot is https://github.com/goki/icons/blob/main/svg/ballot.svg
 	Ballot Icon = "ballot"
@@ -912,26 +486,8 @@ const (
 	// BarcodeScanner is https://github.com/goki/icons/blob/main/svg/barcode_scanner.svg
 	BarcodeScanner Icon = "barcode_scanner"
 
-	// Barefoot is https://github.com/goki/icons/blob/main/svg/barefoot.svg
-	Barefoot Icon = "barefoot"
-
 	// BatchPrediction is https://github.com/goki/icons/blob/main/svg/batch_prediction.svg
 	BatchPrediction Icon = "batch_prediction"
-
-	// BathOutdoor is https://github.com/goki/icons/blob/main/svg/bath_outdoor.svg
-	BathOutdoor Icon = "bath_outdoor"
-
-	// BathPrivate is https://github.com/goki/icons/blob/main/svg/bath_private.svg
-	BathPrivate Icon = "bath_private"
-
-	// BathPublicLarge is https://github.com/goki/icons/blob/main/svg/bath_public_large.svg
-	BathPublicLarge Icon = "bath_public_large"
-
-	// Bathroom is https://github.com/goki/icons/blob/main/svg/bathroom.svg
-	Bathroom Icon = "bathroom"
-
-	// Bathtub is https://github.com/goki/icons/blob/main/svg/bathtub.svg
-	Bathtub Icon = "bathtub"
 
 	// Battery0Bar is https://github.com/goki/icons/blob/main/svg/battery_0_bar.svg
 	Battery0Bar Icon = "battery_0_bar"
@@ -1017,47 +573,14 @@ const (
 	// BatteryVeryLow is https://github.com/goki/icons/blob/main/svg/battery_very_low.svg
 	BatteryVeryLow Icon = "battery_very_low"
 
-	// BeachAccess is https://github.com/goki/icons/blob/main/svg/beach_access.svg
-	BeachAccess Icon = "beach_access"
-
 	// Bed is https://github.com/goki/icons/blob/main/svg/bed.svg
 	Bed Icon = "bed"
-
-	// BedroomBaby is https://github.com/goki/icons/blob/main/svg/bedroom_baby.svg
-	BedroomBaby Icon = "bedroom_baby"
-
-	// BedroomChild is https://github.com/goki/icons/blob/main/svg/bedroom_child.svg
-	BedroomChild Icon = "bedroom_child"
-
-	// BedroomParent is https://github.com/goki/icons/blob/main/svg/bedroom_parent.svg
-	BedroomParent Icon = "bedroom_parent"
 
 	// Bedtime is https://github.com/goki/icons/blob/main/svg/bedtime.svg
 	Bedtime Icon = "bedtime"
 
 	// BedtimeOff is https://github.com/goki/icons/blob/main/svg/bedtime_off.svg
 	BedtimeOff Icon = "bedtime_off"
-
-	// Beenhere is https://github.com/goki/icons/blob/main/svg/beenhere.svg
-	Beenhere Icon = "beenhere"
-
-	// Bento is https://github.com/goki/icons/blob/main/svg/bento.svg
-	Bento Icon = "bento"
-
-	// Bia is https://github.com/goki/icons/blob/main/svg/bia.svg
-	Bia Icon = "bia"
-
-	// BidLandscape is https://github.com/goki/icons/blob/main/svg/bid_landscape.svg
-	BidLandscape Icon = "bid_landscape"
-
-	// BidLandscapeDisabled is https://github.com/goki/icons/blob/main/svg/bid_landscape_disabled.svg
-	BidLandscapeDisabled Icon = "bid_landscape_disabled"
-
-	// BikeScooter is https://github.com/goki/icons/blob/main/svg/bike_scooter.svg
-	BikeScooter Icon = "bike_scooter"
-
-	// Biotech is https://github.com/goki/icons/blob/main/svg/biotech.svg
-	Biotech Icon = "biotech"
 
 	// Blanket is https://github.com/goki/icons/blob/main/svg/blanket.svg
 	Blanket Icon = "blanket"
@@ -1076,12 +599,6 @@ const (
 
 	// Block is https://github.com/goki/icons/blob/main/svg/block.svg
 	Block Icon = "block"
-
-	// BloodPressure is https://github.com/goki/icons/blob/main/svg/blood_pressure.svg
-	BloodPressure Icon = "blood_pressure"
-
-	// Bloodtype is https://github.com/goki/icons/blob/main/svg/bloodtype.svg
-	Bloodtype Icon = "bloodtype"
 
 	// Bluetooth is https://github.com/goki/icons/blob/main/svg/bluetooth.svg
 	Bluetooth Icon = "bluetooth"
@@ -1115,12 +632,6 @@ const (
 
 	// BlurShort is https://github.com/goki/icons/blob/main/svg/blur_short.svg
 	BlurShort Icon = "blur_short"
-
-	// BodyFat is https://github.com/goki/icons/blob/main/svg/body_fat.svg
-	BodyFat Icon = "body_fat"
-
-	// BodySystem is https://github.com/goki/icons/blob/main/svg/body_system.svg
-	BodySystem Icon = "body_system"
 
 	// Bolt is https://github.com/goki/icons/blob/main/svg/bolt.svg
 	Bolt Icon = "bolt"
@@ -1218,24 +729,6 @@ const (
 	// Boy is https://github.com/goki/icons/blob/main/svg/boy.svg
 	Boy Icon = "boy"
 
-	// BrandAwareness is https://github.com/goki/icons/blob/main/svg/brand_awareness.svg
-	BrandAwareness Icon = "brand_awareness"
-
-	// BrandingWatermark is https://github.com/goki/icons/blob/main/svg/branding_watermark.svg
-	BrandingWatermark Icon = "branding_watermark"
-
-	// BreakfastDining is https://github.com/goki/icons/blob/main/svg/breakfast_dining.svg
-	BreakfastDining Icon = "breakfast_dining"
-
-	// BreakingNews is https://github.com/goki/icons/blob/main/svg/breaking_news.svg
-	BreakingNews Icon = "breaking_news"
-
-	// BreakingNewsAlt1 is https://github.com/goki/icons/blob/main/svg/breaking_news_alt_1.svg
-	BreakingNewsAlt1 Icon = "breaking_news_alt_1"
-
-	// Breastfeeding is https://github.com/goki/icons/blob/main/svg/breastfeeding.svg
-	Breastfeeding Icon = "breastfeeding"
-
 	// Brightness1 is https://github.com/goki/icons/blob/main/svg/brightness_1.svg
 	Brightness1 Icon = "brightness_1"
 
@@ -1275,9 +768,6 @@ const (
 	// BrightnessMedium is https://github.com/goki/icons/blob/main/svg/brightness_medium.svg
 	BrightnessMedium Icon = "brightness_medium"
 
-	// BringYourOwnIp is https://github.com/goki/icons/blob/main/svg/bring_your_own_ip.svg
-	BringYourOwnIp Icon = "bring_your_own_ip"
-
 	// BroadcastOnHome is https://github.com/goki/icons/blob/main/svg/broadcast_on_home.svg
 	BroadcastOnHome Icon = "broadcast_on_home"
 
@@ -1298,9 +788,6 @@ const (
 
 	// BrowserUpdated is https://github.com/goki/icons/blob/main/svg/browser_updated.svg
 	BrowserUpdated Icon = "browser_updated"
-
-	// BrunchDining is https://github.com/goki/icons/blob/main/svg/brunch_dining.svg
-	BrunchDining Icon = "brunch_dining"
 
 	// Brush is https://github.com/goki/icons/blob/main/svg/brush.svg
 	Brush Icon = "brush"
@@ -1323,17 +810,8 @@ const (
 	// BuildCircle is https://github.com/goki/icons/blob/main/svg/build_circle.svg
 	BuildCircle Icon = "build_circle"
 
-	// Bungalow is https://github.com/goki/icons/blob/main/svg/bungalow.svg
-	Bungalow Icon = "bungalow"
-
 	// BurstMode is https://github.com/goki/icons/blob/main/svg/burst_mode.svg
 	BurstMode Icon = "burst_mode"
-
-	// BusAlert is https://github.com/goki/icons/blob/main/svg/bus_alert.svg
-	BusAlert Icon = "bus_alert"
-
-	// BusinessCenter is https://github.com/goki/icons/blob/main/svg/business_center.svg
-	BusinessCenter Icon = "business_center"
 
 	// BusinessChip is https://github.com/goki/icons/blob/main/svg/business_chip.svg
 	BusinessChip Icon = "business_chip"
@@ -1343,9 +821,6 @@ const (
 
 	// ButtonsAlt is https://github.com/goki/icons/blob/main/svg/buttons_alt.svg
 	ButtonsAlt Icon = "buttons_alt"
-
-	// Cabin is https://github.com/goki/icons/blob/main/svg/cabin.svg
-	Cabin Icon = "cabin"
 
 	// Cable is https://github.com/goki/icons/blob/main/svg/cable.svg
 	Cable Icon = "cable"
@@ -1383,39 +858,6 @@ const (
 	// CalendarViewWeek is https://github.com/goki/icons/blob/main/svg/calendar_view_week.svg
 	CalendarViewWeek Icon = "calendar_view_week"
 
-	// Call is https://github.com/goki/icons/blob/main/svg/call.svg
-	Call Icon = "call"
-
-	// CallEnd is https://github.com/goki/icons/blob/main/svg/call_end.svg
-	CallEnd Icon = "call_end"
-
-	// CallLog is https://github.com/goki/icons/blob/main/svg/call_log.svg
-	CallLog Icon = "call_log"
-
-	// CallMade is https://github.com/goki/icons/blob/main/svg/call_made.svg
-	CallMade Icon = "call_made"
-
-	// CallMerge is https://github.com/goki/icons/blob/main/svg/call_merge.svg
-	CallMerge Icon = "call_merge"
-
-	// CallMissed is https://github.com/goki/icons/blob/main/svg/call_missed.svg
-	CallMissed Icon = "call_missed"
-
-	// CallMissedOutgoing is https://github.com/goki/icons/blob/main/svg/call_missed_outgoing.svg
-	CallMissedOutgoing Icon = "call_missed_outgoing"
-
-	// CallQuality is https://github.com/goki/icons/blob/main/svg/call_quality.svg
-	CallQuality Icon = "call_quality"
-
-	// CallReceived is https://github.com/goki/icons/blob/main/svg/call_received.svg
-	CallReceived Icon = "call_received"
-
-	// CallSplit is https://github.com/goki/icons/blob/main/svg/call_split.svg
-	CallSplit Icon = "call_split"
-
-	// CallToAction is https://github.com/goki/icons/blob/main/svg/call_to_action.svg
-	CallToAction Icon = "call_to_action"
-
 	// Camera is https://github.com/goki/icons/blob/main/svg/camera.svg
 	Camera Icon = "camera"
 
@@ -1440,12 +882,6 @@ const (
 	// Cameraswitch is https://github.com/goki/icons/blob/main/svg/cameraswitch.svg
 	Cameraswitch Icon = "cameraswitch"
 
-	// Campaign is https://github.com/goki/icons/blob/main/svg/campaign.svg
-	Campaign Icon = "campaign"
-
-	// Camping is https://github.com/goki/icons/blob/main/svg/camping.svg
-	Camping Icon = "camping"
-
 	// Cancel is https://github.com/goki/icons/blob/main/svg/cancel.svg
 	Cancel Icon = "cancel"
 
@@ -1458,41 +894,14 @@ const (
 	// CandlestickChart is https://github.com/goki/icons/blob/main/svg/candlestick_chart.svg
 	CandlestickChart Icon = "candlestick_chart"
 
-	// CaptivePortal is https://github.com/goki/icons/blob/main/svg/captive_portal.svg
-	CaptivePortal Icon = "captive_portal"
-
 	// Capture is https://github.com/goki/icons/blob/main/svg/capture.svg
 	Capture Icon = "capture"
-
-	// CarCrash is https://github.com/goki/icons/blob/main/svg/car_crash.svg
-	CarCrash Icon = "car_crash"
-
-	// CarRental is https://github.com/goki/icons/blob/main/svg/car_rental.svg
-	CarRental Icon = "car_rental"
-
-	// CarRepair is https://github.com/goki/icons/blob/main/svg/car_repair.svg
-	CarRepair Icon = "car_repair"
 
 	// CardMembership is https://github.com/goki/icons/blob/main/svg/card_membership.svg
 	CardMembership Icon = "card_membership"
 
-	// CardTravel is https://github.com/goki/icons/blob/main/svg/card_travel.svg
-	CardTravel Icon = "card_travel"
-
-	// Cardiology is https://github.com/goki/icons/blob/main/svg/cardiology.svg
-	Cardiology Icon = "cardiology"
-
 	// Cards is https://github.com/goki/icons/blob/main/svg/cards.svg
 	Cards Icon = "cards"
-
-	// Carpenter is https://github.com/goki/icons/blob/main/svg/carpenter.svg
-	Carpenter Icon = "carpenter"
-
-	// Cases is https://github.com/goki/icons/blob/main/svg/cases.svg
-	Cases Icon = "cases"
-
-	// Casino is https://github.com/goki/icons/blob/main/svg/casino.svg
-	Casino Icon = "casino"
 
 	// Cast is https://github.com/goki/icons/blob/main/svg/cast.svg
 	Cast Icon = "cast"
@@ -1500,17 +909,11 @@ const (
 	// CastConnected is https://github.com/goki/icons/blob/main/svg/cast_connected.svg
 	CastConnected Icon = "cast_connected"
 
-	// CastForEducation is https://github.com/goki/icons/blob/main/svg/cast_for_education.svg
-	CastForEducation Icon = "cast_for_education"
-
 	// CastPause is https://github.com/goki/icons/blob/main/svg/cast_pause.svg
 	CastPause Icon = "cast_pause"
 
 	// CastWarning is https://github.com/goki/icons/blob/main/svg/cast_warning.svg
 	CastWarning Icon = "cast_warning"
-
-	// Castle is https://github.com/goki/icons/blob/main/svg/castle.svg
-	Castle Icon = "castle"
 
 	// Category is https://github.com/goki/icons/blob/main/svg/category.svg
 	Category Icon = "category"
@@ -1521,12 +924,6 @@ const (
 	// CellMerge is https://github.com/goki/icons/blob/main/svg/cell_merge.svg
 	CellMerge Icon = "cell_merge"
 
-	// CellTower is https://github.com/goki/icons/blob/main/svg/cell_tower.svg
-	CellTower Icon = "cell_tower"
-
-	// CellWifi is https://github.com/goki/icons/blob/main/svg/cell_wifi.svg
-	CellWifi Icon = "cell_wifi"
-
 	// CenterFocusStrong is https://github.com/goki/icons/blob/main/svg/center_focus_strong.svg
 	CenterFocusStrong Icon = "center_focus_strong"
 
@@ -1536,12 +933,6 @@ const (
 	// Chair is https://github.com/goki/icons/blob/main/svg/chair.svg
 	Chair Icon = "chair"
 
-	// ChairAlt is https://github.com/goki/icons/blob/main/svg/chair_alt.svg
-	ChairAlt Icon = "chair_alt"
-
-	// Chalet is https://github.com/goki/icons/blob/main/svg/chalet.svg
-	Chalet Icon = "chalet"
-
 	// ChangeCircle is https://github.com/goki/icons/blob/main/svg/change_circle.svg
 	ChangeCircle Icon = "change_circle"
 
@@ -1550,9 +941,6 @@ const (
 
 	// Charger is https://github.com/goki/icons/blob/main/svg/charger.svg
 	Charger Icon = "charger"
-
-	// ChargingStation is https://github.com/goki/icons/blob/main/svg/charging_station.svg
-	ChargingStation Icon = "charging_station"
 
 	// ChartData is https://github.com/goki/icons/blob/main/svg/chart_data.svg
 	ChartData Icon = "chart_data"
@@ -1602,9 +990,6 @@ const (
 	// ChecklistRtl is https://github.com/goki/icons/blob/main/svg/checklist_rtl.svg
 	ChecklistRtl Icon = "checklist_rtl"
 
-	// Checkroom is https://github.com/goki/icons/blob/main/svg/checkroom.svg
-	Checkroom Icon = "checkroom"
-
 	// Cheer is https://github.com/goki/icons/blob/main/svg/cheer.svg
 	Cheer Icon = "cheer"
 
@@ -1617,35 +1002,11 @@ const (
 	// ChevronRight is https://github.com/goki/icons/blob/main/svg/chevron_right.svg
 	ChevronRight Icon = "chevron_right"
 
-	// ChildCare is https://github.com/goki/icons/blob/main/svg/child_care.svg
-	ChildCare Icon = "child_care"
-
-	// ChildFriendly is https://github.com/goki/icons/blob/main/svg/child_friendly.svg
-	ChildFriendly Icon = "child_friendly"
-
-	// ChipExtraction is https://github.com/goki/icons/blob/main/svg/chip_extraction.svg
-	ChipExtraction Icon = "chip_extraction"
-
 	// Chips is https://github.com/goki/icons/blob/main/svg/chips.svg
 	Chips Icon = "chips"
 
-	// ChromeReaderMode is https://github.com/goki/icons/blob/main/svg/chrome_reader_mode.svg
-	ChromeReaderMode Icon = "chrome_reader_mode"
-
-	// Chromecast2 is https://github.com/goki/icons/blob/main/svg/chromecast_2.svg
-	Chromecast2 Icon = "chromecast_2"
-
-	// ChromecastDevice is https://github.com/goki/icons/blob/main/svg/chromecast_device.svg
-	ChromecastDevice Icon = "chromecast_device"
-
 	// Chronic is https://github.com/goki/icons/blob/main/svg/chronic.svg
 	Chronic Icon = "chronic"
-
-	// Church is https://github.com/goki/icons/blob/main/svg/church.svg
-	Church Icon = "church"
-
-	// CinematicBlur is https://github.com/goki/icons/blob/main/svg/cinematic_blur.svg
-	CinematicBlur Icon = "cinematic_blur"
 
 	// Circle is https://github.com/goki/icons/blob/main/svg/circle.svg
 	Circle Icon = "circle"
@@ -1662,15 +1023,6 @@ const (
 	// Clarify is https://github.com/goki/icons/blob/main/svg/clarify.svg
 	Clarify Icon = "clarify"
 
-	// CleanHands is https://github.com/goki/icons/blob/main/svg/clean_hands.svg
-	CleanHands Icon = "clean_hands"
-
-	// CleaningBucket is https://github.com/goki/icons/blob/main/svg/cleaning_bucket.svg
-	CleaningBucket Icon = "cleaning_bucket"
-
-	// CleaningServices is https://github.com/goki/icons/blob/main/svg/cleaning_services.svg
-	CleaningServices Icon = "cleaning_services"
-
 	// ClearAll is https://github.com/goki/icons/blob/main/svg/clear_all.svg
 	ClearAll Icon = "clear_all"
 
@@ -1679,12 +1031,6 @@ const (
 
 	// ClearNight is https://github.com/goki/icons/blob/main/svg/clear_night.svg
 	ClearNight Icon = "clear_night"
-
-	// ClimateMiniSplit is https://github.com/goki/icons/blob/main/svg/climate_mini_split.svg
-	ClimateMiniSplit Icon = "climate_mini_split"
-
-	// ClinicalNotes is https://github.com/goki/icons/blob/main/svg/clinical_notes.svg
-	ClinicalNotes Icon = "clinical_notes"
 
 	// ClockLoader10 is https://github.com/goki/icons/blob/main/svg/clock_loader_10.svg
 	ClockLoader10 Icon = "clock_loader_10"
@@ -1737,15 +1083,6 @@ const (
 	// CloudUpload is https://github.com/goki/icons/blob/main/svg/cloud_upload.svg
 	CloudUpload Icon = "cloud_upload"
 
-	// CloudySnowing is https://github.com/goki/icons/blob/main/svg/cloudy_snowing.svg
-	CloudySnowing Icon = "cloudy_snowing"
-
-	// Co2 is https://github.com/goki/icons/blob/main/svg/co2.svg
-	Co2 Icon = "co2"
-
-	// CoPresent is https://github.com/goki/icons/blob/main/svg/co_present.svg
-	CoPresent Icon = "co_present"
-
 	// Code is https://github.com/goki/icons/blob/main/svg/code.svg
 	Code Icon = "code"
 
@@ -1757,9 +1094,6 @@ const (
 
 	// Coffee is https://github.com/goki/icons/blob/main/svg/coffee.svg
 	Coffee Icon = "coffee"
-
-	// CoffeeMaker is https://github.com/goki/icons/blob/main/svg/coffee_maker.svg
-	CoffeeMaker Icon = "coffee_maker"
 
 	// Cognition is https://github.com/goki/icons/blob/main/svg/cognition.svg
 	Cognition Icon = "cognition"
@@ -1797,23 +1131,14 @@ const (
 	// Communities is https://github.com/goki/icons/blob/main/svg/communities.svg
 	Communities Icon = "communities"
 
-	// Commute is https://github.com/goki/icons/blob/main/svg/commute.svg
-	Commute Icon = "commute"
-
 	// Compare is https://github.com/goki/icons/blob/main/svg/compare.svg
 	Compare Icon = "compare"
 
 	// CompareArrows is https://github.com/goki/icons/blob/main/svg/compare_arrows.svg
 	CompareArrows Icon = "compare_arrows"
 
-	// CompassCalibration is https://github.com/goki/icons/blob/main/svg/compass_calibration.svg
-	CompassCalibration Icon = "compass_calibration"
-
 	// ComponentExchange is https://github.com/goki/icons/blob/main/svg/component_exchange.svg
 	ComponentExchange Icon = "component_exchange"
-
-	// Compost is https://github.com/goki/icons/blob/main/svg/compost.svg
-	Compost Icon = "compost"
 
 	// Compress is https://github.com/goki/icons/blob/main/svg/compress.svg
 	Compress Icon = "compress"
@@ -1821,14 +1146,8 @@ const (
 	// Computer is https://github.com/goki/icons/blob/main/svg/computer.svg
 	Computer Icon = "computer"
 
-	// Conditions is https://github.com/goki/icons/blob/main/svg/conditions.svg
-	Conditions Icon = "conditions"
-
 	// ConfirmationNumber is https://github.com/goki/icons/blob/main/svg/confirmation_number.svg
 	ConfirmationNumber Icon = "confirmation_number"
-
-	// Congenital is https://github.com/goki/icons/blob/main/svg/congenital.svg
-	Congenital Icon = "congenital"
 
 	// ConnectWithoutContact is https://github.com/goki/icons/blob/main/svg/connect_without_contact.svg
 	ConnectWithoutContact Icon = "connect_without_contact"
@@ -1926,12 +1245,6 @@ const (
 	// CookieOff is https://github.com/goki/icons/blob/main/svg/cookie_off.svg
 	CookieOff Icon = "cookie_off"
 
-	// Cooking is https://github.com/goki/icons/blob/main/svg/cooking.svg
-	Cooking Icon = "cooking"
-
-	// CoolToDry is https://github.com/goki/icons/blob/main/svg/cool_to_dry.svg
-	CoolToDry Icon = "cool_to_dry"
-
 	// Copy is https://github.com/goki/icons/blob/main/svg/copy.svg
 	Copy Icon = "copy"
 
@@ -1940,15 +1253,6 @@ const (
 
 	// Copyright is https://github.com/goki/icons/blob/main/svg/copyright.svg
 	Copyright Icon = "copyright"
-
-	// Coronavirus is https://github.com/goki/icons/blob/main/svg/coronavirus.svg
-	Coronavirus Icon = "coronavirus"
-
-	// CorporateFare is https://github.com/goki/icons/blob/main/svg/corporate_fare.svg
-	CorporateFare Icon = "corporate_fare"
-
-	// Cottage is https://github.com/goki/icons/blob/main/svg/cottage.svg
-	Cottage Icon = "cottage"
 
 	// Counter0 is https://github.com/goki/icons/blob/main/svg/counter_0.svg
 	Counter0 Icon = "counter_0"
@@ -1980,9 +1284,6 @@ const (
 	// Counter9 is https://github.com/goki/icons/blob/main/svg/counter_9.svg
 	Counter9 Icon = "counter_9"
 
-	// Countertops is https://github.com/goki/icons/blob/main/svg/countertops.svg
-	Countertops Icon = "countertops"
-
 	// CreateNewFolder is https://github.com/goki/icons/blob/main/svg/create_new_folder.svg
 	CreateNewFolder Icon = "create_new_folder"
 
@@ -1994,9 +1295,6 @@ const (
 
 	// CreditScore is https://github.com/goki/icons/blob/main/svg/credit_score.svg
 	CreditScore Icon = "credit_score"
-
-	// Crib is https://github.com/goki/icons/blob/main/svg/crib.svg
-	Crib Icon = "crib"
 
 	// CrisisAlert is https://github.com/goki/icons/blob/main/svg/crisis_alert.svg
 	CrisisAlert Icon = "crisis_alert"
@@ -2031,14 +1329,8 @@ const (
 	// CropSquare is https://github.com/goki/icons/blob/main/svg/crop_square.svg
 	CropSquare Icon = "crop_square"
 
-	// Crossword is https://github.com/goki/icons/blob/main/svg/crossword.svg
-	Crossword Icon = "crossword"
-
 	// Crowdsource is https://github.com/goki/icons/blob/main/svg/crowdsource.svg
 	Crowdsource Icon = "crowdsource"
-
-	// CrueltyFree is https://github.com/goki/icons/blob/main/svg/cruelty_free.svg
-	CrueltyFree Icon = "cruelty_free"
 
 	// Css is https://github.com/goki/icons/blob/main/svg/css.svg
 	Css Icon = "css"
@@ -2072,12 +1364,6 @@ const (
 
 	// CurrencyYuan is https://github.com/goki/icons/blob/main/svg/currency_yuan.svg
 	CurrencyYuan Icon = "currency_yuan"
-
-	// Curtains is https://github.com/goki/icons/blob/main/svg/curtains.svg
-	Curtains Icon = "curtains"
-
-	// CurtainsClosed is https://github.com/goki/icons/blob/main/svg/curtains_closed.svg
-	CurtainsClosed Icon = "curtains_closed"
 
 	// CustomTypography is https://github.com/goki/icons/blob/main/svg/custom_typography.svg
 	CustomTypography Icon = "custom_typography"
@@ -2154,9 +1440,6 @@ const (
 	// Debug is https://github.com/goki/icons/blob/main/svg/debug.svg
 	Debug Icon = "debug"
 
-	// Deceased is https://github.com/goki/icons/blob/main/svg/deceased.svg
-	Deceased Icon = "deceased"
-
 	// DecimalDecrease is https://github.com/goki/icons/blob/main/svg/decimal_decrease.svg
 	DecimalDecrease Icon = "decimal_decrease"
 
@@ -2178,9 +1461,6 @@ const (
 	// DeleteSweep is https://github.com/goki/icons/blob/main/svg/delete_sweep.svg
 	DeleteSweep Icon = "delete_sweep"
 
-	// Demography is https://github.com/goki/icons/blob/main/svg/demography.svg
-	Demography Icon = "demography"
-
 	// DensityLarge is https://github.com/goki/icons/blob/main/svg/density_large.svg
 	DensityLarge Icon = "density_large"
 
@@ -2189,12 +1469,6 @@ const (
 
 	// DensitySmall is https://github.com/goki/icons/blob/main/svg/density_small.svg
 	DensitySmall Icon = "density_small"
-
-	// Dentistry is https://github.com/goki/icons/blob/main/svg/dentistry.svg
-	Dentistry Icon = "dentistry"
-
-	// DepartureBoard is https://github.com/goki/icons/blob/main/svg/departure_board.svg
-	DepartureBoard Icon = "departure_board"
 
 	// DeployedCode is https://github.com/goki/icons/blob/main/svg/deployed_code.svg
 	DeployedCode Icon = "deployed_code"
@@ -2207,9 +1481,6 @@ const (
 
 	// DeployedCodeUpdate is https://github.com/goki/icons/blob/main/svg/deployed_code_update.svg
 	DeployedCodeUpdate Icon = "deployed_code_update"
-
-	// Dermatology is https://github.com/goki/icons/blob/main/svg/dermatology.svg
-	Dermatology Icon = "dermatology"
 
 	// Description is https://github.com/goki/icons/blob/main/svg/description.svg
 	Description Icon = "description"
@@ -2240,9 +1511,6 @@ const (
 
 	// Details is https://github.com/goki/icons/blob/main/svg/details.svg
 	Details Icon = "details"
-
-	// DetectionAndZone is https://github.com/goki/icons/blob/main/svg/detection_and_zone.svg
-	DetectionAndZone Icon = "detection_and_zone"
 
 	// Detector is https://github.com/goki/icons/blob/main/svg/detector.svg
 	Detector Icon = "detector"
@@ -2307,12 +1575,6 @@ const (
 	// DevicesWearables is https://github.com/goki/icons/blob/main/svg/devices_wearables.svg
 	DevicesWearables Icon = "devices_wearables"
 
-	// DewPoint is https://github.com/goki/icons/blob/main/svg/dew_point.svg
-	DewPoint Icon = "dew_point"
-
-	// Diagnosis is https://github.com/goki/icons/blob/main/svg/diagnosis.svg
-	Diagnosis Icon = "diagnosis"
-
 	// DialerSip is https://github.com/goki/icons/blob/main/svg/dialer_sip.svg
 	DialerSip Icon = "dialer_sip"
 
@@ -2328,9 +1590,6 @@ const (
 	// Difference is https://github.com/goki/icons/blob/main/svg/difference.svg
 	Difference Icon = "difference"
 
-	// DigitalOutOfHome is https://github.com/goki/icons/blob/main/svg/digital_out_of_home.svg
-	DigitalOutOfHome Icon = "digital_out_of_home"
-
 	// Dining is https://github.com/goki/icons/blob/main/svg/dining.svg
 	Dining Icon = "dining"
 
@@ -2340,38 +1599,8 @@ const (
 	// Directions is https://github.com/goki/icons/blob/main/svg/directions.svg
 	Directions Icon = "directions"
 
-	// DirectionsAlt is https://github.com/goki/icons/blob/main/svg/directions_alt.svg
-	DirectionsAlt Icon = "directions_alt"
-
-	// DirectionsAltOff is https://github.com/goki/icons/blob/main/svg/directions_alt_off.svg
-	DirectionsAltOff Icon = "directions_alt_off"
-
-	// DirectionsBike is https://github.com/goki/icons/blob/main/svg/directions_bike.svg
-	DirectionsBike Icon = "directions_bike"
-
-	// DirectionsBoat is https://github.com/goki/icons/blob/main/svg/directions_boat.svg
-	DirectionsBoat Icon = "directions_boat"
-
-	// DirectionsBus is https://github.com/goki/icons/blob/main/svg/directions_bus.svg
-	DirectionsBus Icon = "directions_bus"
-
-	// DirectionsCar is https://github.com/goki/icons/blob/main/svg/directions_car.svg
-	DirectionsCar Icon = "directions_car"
-
 	// DirectionsOff is https://github.com/goki/icons/blob/main/svg/directions_off.svg
 	DirectionsOff Icon = "directions_off"
-
-	// DirectionsRailway is https://github.com/goki/icons/blob/main/svg/directions_railway.svg
-	DirectionsRailway Icon = "directions_railway"
-
-	// DirectionsRun is https://github.com/goki/icons/blob/main/svg/directions_run.svg
-	DirectionsRun Icon = "directions_run"
-
-	// DirectionsSubway is https://github.com/goki/icons/blob/main/svg/directions_subway.svg
-	DirectionsSubway Icon = "directions_subway"
-
-	// DirectionsWalk is https://github.com/goki/icons/blob/main/svg/directions_walk.svg
-	DirectionsWalk Icon = "directions_walk"
 
 	// DirectorySync is https://github.com/goki/icons/blob/main/svg/directory_sync.svg
 	DirectorySync Icon = "directory_sync"
@@ -2387,12 +1616,6 @@ const (
 
 	// DiscFull is https://github.com/goki/icons/blob/main/svg/disc_full.svg
 	DiscFull Icon = "disc_full"
-
-	// DiscoverTune is https://github.com/goki/icons/blob/main/svg/discover_tune.svg
-	DiscoverTune Icon = "discover_tune"
-
-	// DishwasherGen is https://github.com/goki/icons/blob/main/svg/dishwasher_gen.svg
-	DishwasherGen Icon = "dishwasher_gen"
 
 	// DisplayExternalInput is https://github.com/goki/icons/blob/main/svg/display_external_input.svg
 	DisplayExternalInput Icon = "display_external_input"
@@ -2423,15 +1646,6 @@ const (
 
 	// DoNotDisturbOn is https://github.com/goki/icons/blob/main/svg/do_not_disturb_on.svg
 	DoNotDisturbOn Icon = "do_not_disturb_on"
-
-	// DoNotDisturbOnTotalSilence is https://github.com/goki/icons/blob/main/svg/do_not_disturb_on_total_silence.svg
-	DoNotDisturbOnTotalSilence Icon = "do_not_disturb_on_total_silence"
-
-	// DoNotStep is https://github.com/goki/icons/blob/main/svg/do_not_step.svg
-	DoNotStep Icon = "do_not_step"
-
-	// DoNotTouch is https://github.com/goki/icons/blob/main/svg/do_not_touch.svg
-	DoNotTouch Icon = "do_not_touch"
 
 	// Dock is https://github.com/goki/icons/blob/main/svg/dock.svg
 	Dock Icon = "dock"
@@ -2472,9 +1686,6 @@ const (
 	// DomainVerificationOff is https://github.com/goki/icons/blob/main/svg/domain_verification_off.svg
 	DomainVerificationOff Icon = "domain_verification_off"
 
-	// DominoMask is https://github.com/goki/icons/blob/main/svg/domino_mask.svg
-	DominoMask Icon = "domino_mask"
-
 	// Done is https://github.com/goki/icons/blob/main/svg/done.svg
 	Done Icon = "done"
 
@@ -2490,35 +1701,11 @@ const (
 	// DonutSmall is https://github.com/goki/icons/blob/main/svg/donut_small.svg
 	DonutSmall Icon = "donut_small"
 
-	// DoorBack is https://github.com/goki/icons/blob/main/svg/door_back.svg
-	DoorBack Icon = "door_back"
-
-	// DoorFront is https://github.com/goki/icons/blob/main/svg/door_front.svg
-	DoorFront Icon = "door_front"
-
 	// DoorOpen is https://github.com/goki/icons/blob/main/svg/door_open.svg
 	DoorOpen Icon = "door_open"
 
-	// DoorSensor is https://github.com/goki/icons/blob/main/svg/door_sensor.svg
-	DoorSensor Icon = "door_sensor"
-
-	// DoorSliding is https://github.com/goki/icons/blob/main/svg/door_sliding.svg
-	DoorSliding Icon = "door_sliding"
-
-	// Doorbell is https://github.com/goki/icons/blob/main/svg/doorbell.svg
-	Doorbell Icon = "doorbell"
-
-	// Doorbell3P is https://github.com/goki/icons/blob/main/svg/doorbell_3p.svg
-	Doorbell3P Icon = "doorbell_3p"
-
-	// DoorbellChime is https://github.com/goki/icons/blob/main/svg/doorbell_chime.svg
-	DoorbellChime Icon = "doorbell_chime"
-
 	// DoubleArrow is https://github.com/goki/icons/blob/main/svg/double_arrow.svg
 	DoubleArrow Icon = "double_arrow"
-
-	// DownhillSkiing is https://github.com/goki/icons/blob/main/svg/downhill_skiing.svg
-	DownhillSkiing Icon = "downhill_skiing"
 
 	// Download is https://github.com/goki/icons/blob/main/svg/download.svg
 	Download Icon = "download"
@@ -2562,9 +1749,6 @@ const (
 	// DrawCollage is https://github.com/goki/icons/blob/main/svg/draw_collage.svg
 	DrawCollage Icon = "draw_collage"
 
-	// Dresser is https://github.com/goki/icons/blob/main/svg/dresser.svg
-	Dresser Icon = "dresser"
-
 	// DriveFileMove is https://github.com/goki/icons/blob/main/svg/drive_file_move.svg
 	DriveFileMove Icon = "drive_file_move"
 
@@ -2574,17 +1758,8 @@ const (
 	// Dropdown is https://github.com/goki/icons/blob/main/svg/dropdown.svg
 	Dropdown Icon = "dropdown"
 
-	// Dry is https://github.com/goki/icons/blob/main/svg/dry.svg
-	Dry Icon = "dry"
-
-	// DryCleaning is https://github.com/goki/icons/blob/main/svg/dry_cleaning.svg
-	DryCleaning Icon = "dry_cleaning"
-
 	// DualScreen is https://github.com/goki/icons/blob/main/svg/dual_screen.svg
 	DualScreen Icon = "dual_screen"
-
-	// Duo is https://github.com/goki/icons/blob/main/svg/duo.svg
-	Duo Icon = "duo"
 
 	// Dvr is https://github.com/goki/icons/blob/main/svg/dvr.svg
 	Dvr Icon = "dvr"
@@ -2595,50 +1770,17 @@ const (
 	// DynamicForm is https://github.com/goki/icons/blob/main/svg/dynamic_form.svg
 	DynamicForm Icon = "dynamic_form"
 
-	// E911Avatar is https://github.com/goki/icons/blob/main/svg/e911_avatar.svg
-	E911Avatar Icon = "e911_avatar"
-
-	// E911Emergency is https://github.com/goki/icons/blob/main/svg/e911_emergency.svg
-	E911Emergency Icon = "e911_emergency"
-
-	// EMobiledata is https://github.com/goki/icons/blob/main/svg/e_mobiledata.svg
-	EMobiledata Icon = "e_mobiledata"
-
-	// EMobiledataBadge is https://github.com/goki/icons/blob/main/svg/e_mobiledata_badge.svg
-	EMobiledataBadge Icon = "e_mobiledata_badge"
-
 	// Earbuds is https://github.com/goki/icons/blob/main/svg/earbuds.svg
 	Earbuds Icon = "earbuds"
 
 	// EarbudsBattery is https://github.com/goki/icons/blob/main/svg/earbuds_battery.svg
 	EarbudsBattery Icon = "earbuds_battery"
 
-	// EarlyOn is https://github.com/goki/icons/blob/main/svg/early_on.svg
-	EarlyOn Icon = "early_on"
-
-	// Earthquake is https://github.com/goki/icons/blob/main/svg/earthquake.svg
-	Earthquake Icon = "earthquake"
-
 	// East is https://github.com/goki/icons/blob/main/svg/east.svg
 	East Icon = "east"
 
-	// Ecg is https://github.com/goki/icons/blob/main/svg/ecg.svg
-	Ecg Icon = "ecg"
-
-	// EcgHeart is https://github.com/goki/icons/blob/main/svg/ecg_heart.svg
-	EcgHeart Icon = "ecg_heart"
-
 	// Eco is https://github.com/goki/icons/blob/main/svg/eco.svg
 	Eco Icon = "eco"
-
-	// Eda is https://github.com/goki/icons/blob/main/svg/eda.svg
-	Eda Icon = "eda"
-
-	// EdgesensorHigh is https://github.com/goki/icons/blob/main/svg/edgesensor_high.svg
-	EdgesensorHigh Icon = "edgesensor_high"
-
-	// EdgesensorLow is https://github.com/goki/icons/blob/main/svg/edgesensor_low.svg
-	EdgesensorLow Icon = "edgesensor_low"
 
 	// Edit is https://github.com/goki/icons/blob/main/svg/edit.svg
 	Edit Icon = "edit"
@@ -2667,9 +1809,6 @@ const (
 	// EditOff is https://github.com/goki/icons/blob/main/svg/edit_off.svg
 	EditOff Icon = "edit_off"
 
-	// EditRoad is https://github.com/goki/icons/blob/main/svg/edit_road.svg
-	EditRoad Icon = "edit_road"
-
 	// EditSquare is https://github.com/goki/icons/blob/main/svg/edit_square.svg
 	EditSquare Icon = "edit_square"
 
@@ -2682,59 +1821,14 @@ const (
 	// Eject is https://github.com/goki/icons/blob/main/svg/eject.svg
 	Eject Icon = "eject"
 
-	// Elderly is https://github.com/goki/icons/blob/main/svg/elderly.svg
-	Elderly Icon = "elderly"
-
-	// ElderlyWoman is https://github.com/goki/icons/blob/main/svg/elderly_woman.svg
-	ElderlyWoman Icon = "elderly_woman"
-
-	// ElectricBike is https://github.com/goki/icons/blob/main/svg/electric_bike.svg
-	ElectricBike Icon = "electric_bike"
-
-	// ElectricBolt is https://github.com/goki/icons/blob/main/svg/electric_bolt.svg
-	ElectricBolt Icon = "electric_bolt"
-
-	// ElectricCar is https://github.com/goki/icons/blob/main/svg/electric_car.svg
-	ElectricCar Icon = "electric_car"
-
-	// ElectricMeter is https://github.com/goki/icons/blob/main/svg/electric_meter.svg
-	ElectricMeter Icon = "electric_meter"
-
-	// ElectricMoped is https://github.com/goki/icons/blob/main/svg/electric_moped.svg
-	ElectricMoped Icon = "electric_moped"
-
-	// ElectricRickshaw is https://github.com/goki/icons/blob/main/svg/electric_rickshaw.svg
-	ElectricRickshaw Icon = "electric_rickshaw"
-
-	// ElectricScooter is https://github.com/goki/icons/blob/main/svg/electric_scooter.svg
-	ElectricScooter Icon = "electric_scooter"
-
 	// ElectricalServices is https://github.com/goki/icons/blob/main/svg/electrical_services.svg
 	ElectricalServices Icon = "electrical_services"
 
 	// Elevation is https://github.com/goki/icons/blob/main/svg/elevation.svg
 	Elevation Icon = "elevation"
 
-	// Elevator is https://github.com/goki/icons/blob/main/svg/elevator.svg
-	Elevator Icon = "elevator"
-
 	// Emergency is https://github.com/goki/icons/blob/main/svg/emergency.svg
 	Emergency Icon = "emergency"
-
-	// EmergencyHeat is https://github.com/goki/icons/blob/main/svg/emergency_heat.svg
-	EmergencyHeat Icon = "emergency_heat"
-
-	// EmergencyHome is https://github.com/goki/icons/blob/main/svg/emergency_home.svg
-	EmergencyHome Icon = "emergency_home"
-
-	// EmergencyRecording is https://github.com/goki/icons/blob/main/svg/emergency_recording.svg
-	EmergencyRecording Icon = "emergency_recording"
-
-	// EmergencyShare is https://github.com/goki/icons/blob/main/svg/emergency_share.svg
-	EmergencyShare Icon = "emergency_share"
-
-	// EmergencyShareOff is https://github.com/goki/icons/blob/main/svg/emergency_share_off.svg
-	EmergencyShareOff Icon = "emergency_share_off"
 
 	// EmojiEvents is https://github.com/goki/icons/blob/main/svg/emoji_events.svg
 	EmojiEvents Icon = "emoji_events"
@@ -2772,15 +1866,6 @@ const (
 	// Encrypted is https://github.com/goki/icons/blob/main/svg/encrypted.svg
 	Encrypted Icon = "encrypted"
 
-	// Endocrinology is https://github.com/goki/icons/blob/main/svg/endocrinology.svg
-	Endocrinology Icon = "endocrinology"
-
-	// EnergyProgramSaving is https://github.com/goki/icons/blob/main/svg/energy_program_saving.svg
-	EnergyProgramSaving Icon = "energy_program_saving"
-
-	// EnergyProgramTimeUsed is https://github.com/goki/icons/blob/main/svg/energy_program_time_used.svg
-	EnergyProgramTimeUsed Icon = "energy_program_time_used"
-
 	// EnergySavingsLeaf is https://github.com/goki/icons/blob/main/svg/energy_savings_leaf.svg
 	EnergySavingsLeaf Icon = "energy_savings_leaf"
 
@@ -2789,9 +1874,6 @@ const (
 
 	// EnhancedEncryption is https://github.com/goki/icons/blob/main/svg/enhanced_encryption.svg
 	EnhancedEncryption Icon = "enhanced_encryption"
-
-	// Ent is https://github.com/goki/icons/blob/main/svg/ent.svg
-	Ent Icon = "ent"
 
 	// Equal is https://github.com/goki/icons/blob/main/svg/equal.svg
 	Equal Icon = "equal"
@@ -2802,32 +1884,11 @@ const (
 	// Error is https://github.com/goki/icons/blob/main/svg/error.svg
 	Error Icon = "error"
 
-	// ErrorMed is https://github.com/goki/icons/blob/main/svg/error_med.svg
-	ErrorMed Icon = "error_med"
-
-	// Escalator is https://github.com/goki/icons/blob/main/svg/escalator.svg
-	Escalator Icon = "escalator"
-
-	// EscalatorWarning is https://github.com/goki/icons/blob/main/svg/escalator_warning.svg
-	EscalatorWarning Icon = "escalator_warning"
-
 	// Euro is https://github.com/goki/icons/blob/main/svg/euro.svg
 	Euro Icon = "euro"
 
 	// EuroSymbol is https://github.com/goki/icons/blob/main/svg/euro_symbol.svg
 	EuroSymbol Icon = "euro_symbol"
-
-	// EvCharger is https://github.com/goki/icons/blob/main/svg/ev_charger.svg
-	EvCharger Icon = "ev_charger"
-
-	// EvMobiledataBadge is https://github.com/goki/icons/blob/main/svg/ev_mobiledata_badge.svg
-	EvMobiledataBadge Icon = "ev_mobiledata_badge"
-
-	// EvShadow is https://github.com/goki/icons/blob/main/svg/ev_shadow.svg
-	EvShadow Icon = "ev_shadow"
-
-	// EvStation is https://github.com/goki/icons/blob/main/svg/ev_station.svg
-	EvStation Icon = "ev_station"
 
 	// Event is https://github.com/goki/icons/blob/main/svg/event.svg
 	Event Icon = "event"
@@ -2925,9 +1986,6 @@ const (
 	// ExtensionOff is https://github.com/goki/icons/blob/main/svg/extension_off.svg
 	ExtensionOff Icon = "extension_off"
 
-	// Eyeglasses is https://github.com/goki/icons/blob/main/svg/eyeglasses.svg
-	Eyeglasses Icon = "eyeglasses"
-
 	// Face is https://github.com/goki/icons/blob/main/svg/face.svg
 	Face Icon = "face"
 
@@ -2955,29 +2013,17 @@ const (
 	// Factory is https://github.com/goki/icons/blob/main/svg/factory.svg
 	Factory Icon = "factory"
 
-	// Falling is https://github.com/goki/icons/blob/main/svg/falling.svg
-	Falling Icon = "falling"
-
-	// FamiliarFaceAndZone is https://github.com/goki/icons/blob/main/svg/familiar_face_and_zone.svg
-	FamiliarFaceAndZone Icon = "familiar_face_and_zone"
-
 	// FamilyHistory is https://github.com/goki/icons/blob/main/svg/family_history.svg
 	FamilyHistory Icon = "family_history"
 
 	// FamilyLink is https://github.com/goki/icons/blob/main/svg/family_link.svg
 	FamilyLink Icon = "family_link"
 
-	// FamilyRestroom is https://github.com/goki/icons/blob/main/svg/family_restroom.svg
-	FamilyRestroom Icon = "family_restroom"
-
 	// FastForward is https://github.com/goki/icons/blob/main/svg/fast_forward.svg
 	FastForward Icon = "fast_forward"
 
 	// FastRewind is https://github.com/goki/icons/blob/main/svg/fast_rewind.svg
 	FastRewind Icon = "fast_rewind"
-
-	// Fastfood is https://github.com/goki/icons/blob/main/svg/fastfood.svg
-	Fastfood Icon = "fastfood"
 
 	// Faucet is https://github.com/goki/icons/blob/main/svg/faucet.svg
 	Faucet Icon = "faucet"
@@ -3006,35 +2052,11 @@ const (
 	// Female is https://github.com/goki/icons/blob/main/svg/female.svg
 	Female Icon = "female"
 
-	// Femur is https://github.com/goki/icons/blob/main/svg/femur.svg
-	Femur Icon = "femur"
-
-	// FemurAlt is https://github.com/goki/icons/blob/main/svg/femur_alt.svg
-	FemurAlt Icon = "femur_alt"
-
 	// Fence is https://github.com/goki/icons/blob/main/svg/fence.svg
 	Fence Icon = "fence"
 
-	// Fertile is https://github.com/goki/icons/blob/main/svg/fertile.svg
-	Fertile Icon = "fertile"
-
 	// Festival is https://github.com/goki/icons/blob/main/svg/festival.svg
 	Festival Icon = "festival"
-
-	// FiberDvr is https://github.com/goki/icons/blob/main/svg/fiber_dvr.svg
-	FiberDvr Icon = "fiber_dvr"
-
-	// FiberManualRecord is https://github.com/goki/icons/blob/main/svg/fiber_manual_record.svg
-	FiberManualRecord Icon = "fiber_manual_record"
-
-	// FiberNew is https://github.com/goki/icons/blob/main/svg/fiber_new.svg
-	FiberNew Icon = "fiber_new"
-
-	// FiberPin is https://github.com/goki/icons/blob/main/svg/fiber_pin.svg
-	FiberPin Icon = "fiber_pin"
-
-	// FiberSmartRecord is https://github.com/goki/icons/blob/main/svg/fiber_smart_record.svg
-	FiberSmartRecord Icon = "fiber_smart_record"
 
 	// Field is https://github.com/goki/icons/blob/main/svg/field.svg
 	Field Icon = "field"
@@ -3150,18 +2172,6 @@ const (
 	// Fingerprint is https://github.com/goki/icons/blob/main/svg/fingerprint.svg
 	Fingerprint Icon = "fingerprint"
 
-	// FireExtinguisher is https://github.com/goki/icons/blob/main/svg/fire_extinguisher.svg
-	FireExtinguisher Icon = "fire_extinguisher"
-
-	// FireHydrant is https://github.com/goki/icons/blob/main/svg/fire_hydrant.svg
-	FireHydrant Icon = "fire_hydrant"
-
-	// FireTruck is https://github.com/goki/icons/blob/main/svg/fire_truck.svg
-	FireTruck Icon = "fire_truck"
-
-	// Fireplace is https://github.com/goki/icons/blob/main/svg/fireplace.svg
-	Fireplace Icon = "fireplace"
-
 	// FirstPage is https://github.com/goki/icons/blob/main/svg/first_page.svg
 	FirstPage Icon = "first_page"
 
@@ -3173,9 +2183,6 @@ const (
 
 	// FitWidth is https://github.com/goki/icons/blob/main/svg/fit_width.svg
 	FitWidth Icon = "fit_width"
-
-	// FitnessCenter is https://github.com/goki/icons/blob/main/svg/fitness_center.svg
-	FitnessCenter Icon = "fitness_center"
 
 	// Flag is https://github.com/goki/icons/blob/main/svg/flag.svg
 	Flag Icon = "flag"
@@ -3189,23 +2196,11 @@ const (
 	// Flare is https://github.com/goki/icons/blob/main/svg/flare.svg
 	Flare Icon = "flare"
 
-	// FlashAuto is https://github.com/goki/icons/blob/main/svg/flash_auto.svg
-	FlashAuto Icon = "flash_auto"
-
-	// FlashOff is https://github.com/goki/icons/blob/main/svg/flash_off.svg
-	FlashOff Icon = "flash_off"
-
-	// FlashOn is https://github.com/goki/icons/blob/main/svg/flash_on.svg
-	FlashOn Icon = "flash_on"
-
 	// FlashlightOff is https://github.com/goki/icons/blob/main/svg/flashlight_off.svg
 	FlashlightOff Icon = "flashlight_off"
 
 	// FlashlightOn is https://github.com/goki/icons/blob/main/svg/flashlight_on.svg
 	FlashlightOn Icon = "flashlight_on"
-
-	// Flatware is https://github.com/goki/icons/blob/main/svg/flatware.svg
-	Flatware Icon = "flatware"
 
 	// FlexDirection is https://github.com/goki/icons/blob/main/svg/flex_direction.svg
 	FlexDirection Icon = "flex_direction"
@@ -3218,15 +2213,6 @@ const (
 
 	// Flight is https://github.com/goki/icons/blob/main/svg/flight.svg
 	Flight Icon = "flight"
-
-	// FlightClass is https://github.com/goki/icons/blob/main/svg/flight_class.svg
-	FlightClass Icon = "flight_class"
-
-	// FlightLand is https://github.com/goki/icons/blob/main/svg/flight_land.svg
-	FlightLand Icon = "flight_land"
-
-	// FlightTakeoff is https://github.com/goki/icons/blob/main/svg/flight_takeoff.svg
-	FlightTakeoff Icon = "flight_takeoff"
 
 	// Flightsmode is https://github.com/goki/icons/blob/main/svg/flightsmode.svg
 	Flightsmode Icon = "flightsmode"
@@ -3246,14 +2232,8 @@ const (
 	// FlipToFront is https://github.com/goki/icons/blob/main/svg/flip_to_front.svg
 	FlipToFront Icon = "flip_to_front"
 
-	// Flood is https://github.com/goki/icons/blob/main/svg/flood.svg
-	Flood Icon = "flood"
-
 	// Floor is https://github.com/goki/icons/blob/main/svg/floor.svg
 	Floor Icon = "floor"
-
-	// FloorLamp is https://github.com/goki/icons/blob/main/svg/floor_lamp.svg
-	FloorLamp Icon = "floor_lamp"
 
 	// Flowsheet is https://github.com/goki/icons/blob/main/svg/flowsheet.svg
 	Flowsheet Icon = "flowsheet"
@@ -3267,23 +2247,11 @@ const (
 	// FluidMed is https://github.com/goki/icons/blob/main/svg/fluid_med.svg
 	FluidMed Icon = "fluid_med"
 
-	// Fluorescent is https://github.com/goki/icons/blob/main/svg/fluorescent.svg
-	Fluorescent Icon = "fluorescent"
-
 	// Flutter is https://github.com/goki/icons/blob/main/svg/flutter.svg
 	Flutter Icon = "flutter"
 
 	// FlutterDash is https://github.com/goki/icons/blob/main/svg/flutter_dash.svg
 	FlutterDash Icon = "flutter_dash"
-
-	// FmdBad is https://github.com/goki/icons/blob/main/svg/fmd_bad.svg
-	FmdBad Icon = "fmd_bad"
-
-	// Foggy is https://github.com/goki/icons/blob/main/svg/foggy.svg
-	Foggy Icon = "foggy"
-
-	// FoldedHands is https://github.com/goki/icons/blob/main/svg/folded_hands.svg
-	FoldedHands Icon = "folded_hands"
 
 	// Folder is https://github.com/goki/icons/blob/main/svg/folder.svg
 	Folder Icon = "folder"
@@ -3315,35 +2283,11 @@ const (
 	// FolderZip is https://github.com/goki/icons/blob/main/svg/folder_zip.svg
 	FolderZip Icon = "folder_zip"
 
-	// FollowTheSigns is https://github.com/goki/icons/blob/main/svg/follow_the_signs.svg
-	FollowTheSigns Icon = "follow_the_signs"
-
 	// FontDownload is https://github.com/goki/icons/blob/main/svg/font_download.svg
 	FontDownload Icon = "font_download"
 
 	// FontDownloadOff is https://github.com/goki/icons/blob/main/svg/font_download_off.svg
 	FontDownloadOff Icon = "font_download_off"
-
-	// FoodBank is https://github.com/goki/icons/blob/main/svg/food_bank.svg
-	FoodBank Icon = "food_bank"
-
-	// FootBones is https://github.com/goki/icons/blob/main/svg/foot_bones.svg
-	FootBones Icon = "foot_bones"
-
-	// Footprint is https://github.com/goki/icons/blob/main/svg/footprint.svg
-	Footprint Icon = "footprint"
-
-	// Forest is https://github.com/goki/icons/blob/main/svg/forest.svg
-	Forest Icon = "forest"
-
-	// ForkLeft is https://github.com/goki/icons/blob/main/svg/fork_left.svg
-	ForkLeft Icon = "fork_left"
-
-	// ForkRight is https://github.com/goki/icons/blob/main/svg/fork_right.svg
-	ForkRight Icon = "fork_right"
-
-	// Forklift is https://github.com/goki/icons/blob/main/svg/forklift.svg
-	Forklift Icon = "forklift"
 
 	// FormatAlignCenter is https://github.com/goki/icons/blob/main/svg/format_align_center.svg
 	FormatAlignCenter Icon = "format_align_center"
@@ -3486,9 +2430,6 @@ const (
 	// FormsAppsScript is https://github.com/goki/icons/blob/main/svg/forms_apps_script.svg
 	FormsAppsScript Icon = "forms_apps_script"
 
-	// Fort is https://github.com/goki/icons/blob/main/svg/fort.svg
-	Fort Icon = "fort"
-
 	// Forum is https://github.com/goki/icons/blob/main/svg/forum.svg
 	Forum Icon = "forum"
 
@@ -3513,9 +2454,6 @@ const (
 	// ForwardToInbox is https://github.com/goki/icons/blob/main/svg/forward_to_inbox.svg
 	ForwardToInbox Icon = "forward_to_inbox"
 
-	// Foundation is https://github.com/goki/icons/blob/main/svg/foundation.svg
-	Foundation Icon = "foundation"
-
 	// FrameInspect is https://github.com/goki/icons/blob/main/svg/frame_inspect.svg
 	FrameInspect Icon = "frame_inspect"
 
@@ -3537,9 +2475,6 @@ const (
 	// FrontHand is https://github.com/goki/icons/blob/main/svg/front_hand.svg
 	FrontHand Icon = "front_hand"
 
-	// FrontLoader is https://github.com/goki/icons/blob/main/svg/front_loader.svg
-	FrontLoader Icon = "front_loader"
-
 	// FullCoverage is https://github.com/goki/icons/blob/main/svg/full_coverage.svg
 	FullCoverage Icon = "full_coverage"
 
@@ -3558,12 +2493,6 @@ const (
 	// Functions is https://github.com/goki/icons/blob/main/svg/functions.svg
 	Functions Icon = "functions"
 
-	// GMobiledata is https://github.com/goki/icons/blob/main/svg/g_mobiledata.svg
-	GMobiledata Icon = "g_mobiledata"
-
-	// GMobiledataBadge is https://github.com/goki/icons/blob/main/svg/g_mobiledata_badge.svg
-	GMobiledataBadge Icon = "g_mobiledata_badge"
-
 	// GTranslate is https://github.com/goki/icons/blob/main/svg/g_translate.svg
 	GTranslate Icon = "g_translate"
 
@@ -3572,30 +2501,6 @@ const (
 
 	// Gamepad is https://github.com/goki/icons/blob/main/svg/gamepad.svg
 	Gamepad Icon = "gamepad"
-
-	// Garage is https://github.com/goki/icons/blob/main/svg/garage.svg
-	Garage Icon = "garage"
-
-	// GarageHome is https://github.com/goki/icons/blob/main/svg/garage_home.svg
-	GarageHome Icon = "garage_home"
-
-	// GardenCart is https://github.com/goki/icons/blob/main/svg/garden_cart.svg
-	GardenCart Icon = "garden_cart"
-
-	// GasMeter is https://github.com/goki/icons/blob/main/svg/gas_meter.svg
-	GasMeter Icon = "gas_meter"
-
-	// Gastroenterology is https://github.com/goki/icons/blob/main/svg/gastroenterology.svg
-	Gastroenterology Icon = "gastroenterology"
-
-	// Gate is https://github.com/goki/icons/blob/main/svg/gate.svg
-	Gate Icon = "gate"
-
-	// Gavel is https://github.com/goki/icons/blob/main/svg/gavel.svg
-	Gavel Icon = "gavel"
-
-	// Genetics is https://github.com/goki/icons/blob/main/svg/genetics.svg
-	Genetics Icon = "genetics"
 
 	// Genres is https://github.com/goki/icons/blob/main/svg/genres.svg
 	Genres Icon = "genres"
@@ -3618,9 +2523,6 @@ const (
 	// Git is https://github.com/goki/icons/blob/main/svg/git.svg
 	Git Icon = "git"
 
-	// Gite is https://github.com/goki/icons/blob/main/svg/gite.svg
-	Gite Icon = "gite"
-
 	// GlassCup is https://github.com/goki/icons/blob/main/svg/glass_cup.svg
 	GlassCup Icon = "glass_cup"
 
@@ -3629,9 +2531,6 @@ const (
 
 	// GlobeUk is https://github.com/goki/icons/blob/main/svg/globe_uk.svg
 	GlobeUk Icon = "globe_uk"
-
-	// Glucose is https://github.com/goki/icons/blob/main/svg/glucose.svg
-	Glucose Icon = "glucose"
 
 	// Glyphs is https://github.com/goki/icons/blob/main/svg/glyphs.svg
 	Glyphs Icon = "glyphs"
@@ -3642,21 +2541,6 @@ const (
 	// GoToLine is https://github.com/goki/icons/blob/main/svg/go_to_line.svg
 	GoToLine Icon = "go_to_line"
 
-	// GolfCourse is https://github.com/goki/icons/blob/main/svg/golf_course.svg
-	GolfCourse Icon = "golf_course"
-
-	// GoogleTvRemote is https://github.com/goki/icons/blob/main/svg/google_tv_remote.svg
-	GoogleTvRemote Icon = "google_tv_remote"
-
-	// GoogleWifi is https://github.com/goki/icons/blob/main/svg/google_wifi.svg
-	GoogleWifi Icon = "google_wifi"
-
-	// GppBad is https://github.com/goki/icons/blob/main/svg/gpp_bad.svg
-	GppBad Icon = "gpp_bad"
-
-	// GppMaybe is https://github.com/goki/icons/blob/main/svg/gpp_maybe.svg
-	GppMaybe Icon = "gpp_maybe"
-
 	// Grade is https://github.com/goki/icons/blob/main/svg/grade.svg
 	Grade Icon = "grade"
 
@@ -3666,14 +2550,8 @@ const (
 	// Grading is https://github.com/goki/icons/blob/main/svg/grading.svg
 	Grading Icon = "grading"
 
-	// Grain is https://github.com/goki/icons/blob/main/svg/grain.svg
-	Grain Icon = "grain"
-
 	// GraphicEq is https://github.com/goki/icons/blob/main/svg/graphic_eq.svg
 	GraphicEq Icon = "graphic_eq"
-
-	// Grass is https://github.com/goki/icons/blob/main/svg/grass.svg
-	Grass Icon = "grass"
 
 	// Grid3X3 is https://github.com/goki/icons/blob/main/svg/grid_3x3.svg
 	Grid3X3 Icon = "grid_3x3"
@@ -3726,38 +2604,11 @@ const (
 	// Groups3 is https://github.com/goki/icons/blob/main/svg/groups_3.svg
 	Groups3 Icon = "groups_3"
 
-	// Gynecology is https://github.com/goki/icons/blob/main/svg/gynecology.svg
-	Gynecology Icon = "gynecology"
-
-	// HMobiledata is https://github.com/goki/icons/blob/main/svg/h_mobiledata.svg
-	HMobiledata Icon = "h_mobiledata"
-
-	// HMobiledataBadge is https://github.com/goki/icons/blob/main/svg/h_mobiledata_badge.svg
-	HMobiledataBadge Icon = "h_mobiledata_badge"
-
-	// HPlusMobiledata is https://github.com/goki/icons/blob/main/svg/h_plus_mobiledata.svg
-	HPlusMobiledata Icon = "h_plus_mobiledata"
-
-	// HPlusMobiledataBadge is https://github.com/goki/icons/blob/main/svg/h_plus_mobiledata_badge.svg
-	HPlusMobiledataBadge Icon = "h_plus_mobiledata_badge"
-
-	// Hail is https://github.com/goki/icons/blob/main/svg/hail.svg
-	Hail Icon = "hail"
-
-	// Hallway is https://github.com/goki/icons/blob/main/svg/hallway.svg
-	Hallway Icon = "hallway"
-
-	// HandBones is https://github.com/goki/icons/blob/main/svg/hand_bones.svg
-	HandBones Icon = "hand_bones"
-
 	// HandGesture is https://github.com/goki/icons/blob/main/svg/hand_gesture.svg
 	HandGesture Icon = "hand_gesture"
 
 	// Handshake is https://github.com/goki/icons/blob/main/svg/handshake.svg
 	Handshake Icon = "handshake"
-
-	// Handyman is https://github.com/goki/icons/blob/main/svg/handyman.svg
-	Handyman Icon = "handyman"
 
 	// HangoutVideo is https://github.com/goki/icons/blob/main/svg/hangout_video.svg
 	HangoutVideo Icon = "hangout_video"
@@ -3777,36 +2628,6 @@ const (
 	// Hd is https://github.com/goki/icons/blob/main/svg/hd.svg
 	Hd Icon = "hd"
 
-	// HdrAuto is https://github.com/goki/icons/blob/main/svg/hdr_auto.svg
-	HdrAuto Icon = "hdr_auto"
-
-	// HdrAutoSelect is https://github.com/goki/icons/blob/main/svg/hdr_auto_select.svg
-	HdrAutoSelect Icon = "hdr_auto_select"
-
-	// HdrEnhancedSelect is https://github.com/goki/icons/blob/main/svg/hdr_enhanced_select.svg
-	HdrEnhancedSelect Icon = "hdr_enhanced_select"
-
-	// HdrOff is https://github.com/goki/icons/blob/main/svg/hdr_off.svg
-	HdrOff Icon = "hdr_off"
-
-	// HdrOffSelect is https://github.com/goki/icons/blob/main/svg/hdr_off_select.svg
-	HdrOffSelect Icon = "hdr_off_select"
-
-	// HdrOn is https://github.com/goki/icons/blob/main/svg/hdr_on.svg
-	HdrOn Icon = "hdr_on"
-
-	// HdrOnSelect is https://github.com/goki/icons/blob/main/svg/hdr_on_select.svg
-	HdrOnSelect Icon = "hdr_on_select"
-
-	// HdrPlus is https://github.com/goki/icons/blob/main/svg/hdr_plus.svg
-	HdrPlus Icon = "hdr_plus"
-
-	// HdrStrong is https://github.com/goki/icons/blob/main/svg/hdr_strong.svg
-	HdrStrong Icon = "hdr_strong"
-
-	// HdrWeak is https://github.com/goki/icons/blob/main/svg/hdr_weak.svg
-	HdrWeak Icon = "hdr_weak"
-
 	// Headphones is https://github.com/goki/icons/blob/main/svg/headphones.svg
 	Headphones Icon = "headphones"
 
@@ -3819,35 +2640,11 @@ const (
 	// HeadsetOff is https://github.com/goki/icons/blob/main/svg/headset_off.svg
 	HeadsetOff Icon = "headset_off"
 
-	// Healing is https://github.com/goki/icons/blob/main/svg/healing.svg
-	Healing Icon = "healing"
-
-	// HealthAndSafety is https://github.com/goki/icons/blob/main/svg/health_and_safety.svg
-	HealthAndSafety Icon = "health_and_safety"
-
-	// HealthMetrics is https://github.com/goki/icons/blob/main/svg/health_metrics.svg
-	HealthMetrics Icon = "health_metrics"
-
-	// HeapSnapshotLarge is https://github.com/goki/icons/blob/main/svg/heap_snapshot_large.svg
-	HeapSnapshotLarge Icon = "heap_snapshot_large"
-
-	// HeapSnapshotMultiple is https://github.com/goki/icons/blob/main/svg/heap_snapshot_multiple.svg
-	HeapSnapshotMultiple Icon = "heap_snapshot_multiple"
-
-	// HeapSnapshotThumbnail is https://github.com/goki/icons/blob/main/svg/heap_snapshot_thumbnail.svg
-	HeapSnapshotThumbnail Icon = "heap_snapshot_thumbnail"
-
 	// Hearing is https://github.com/goki/icons/blob/main/svg/hearing.svg
 	Hearing Icon = "hearing"
 
 	// HearingDisabled is https://github.com/goki/icons/blob/main/svg/hearing_disabled.svg
 	HearingDisabled Icon = "hearing_disabled"
-
-	// HeartBroken is https://github.com/goki/icons/blob/main/svg/heart_broken.svg
-	HeartBroken Icon = "heart_broken"
-
-	// HeartCheck is https://github.com/goki/icons/blob/main/svg/heart_check.svg
-	HeartCheck Icon = "heart_check"
 
 	// HeartMinus is https://github.com/goki/icons/blob/main/svg/heart_minus.svg
 	HeartMinus Icon = "heart_minus"
@@ -3855,32 +2652,11 @@ const (
 	// HeartPlus is https://github.com/goki/icons/blob/main/svg/heart_plus.svg
 	HeartPlus Icon = "heart_plus"
 
-	// HeatPump is https://github.com/goki/icons/blob/main/svg/heat_pump.svg
-	HeatPump Icon = "heat_pump"
-
-	// HeatPumpBalance is https://github.com/goki/icons/blob/main/svg/heat_pump_balance.svg
-	HeatPumpBalance Icon = "heat_pump_balance"
-
 	// Height is https://github.com/goki/icons/blob/main/svg/height.svg
 	Height Icon = "height"
 
-	// Helicopter is https://github.com/goki/icons/blob/main/svg/helicopter.svg
-	Helicopter Icon = "helicopter"
-
 	// Help is https://github.com/goki/icons/blob/main/svg/help.svg
 	Help Icon = "help"
-
-	// HelpCenter is https://github.com/goki/icons/blob/main/svg/help_center.svg
-	HelpCenter Icon = "help_center"
-
-	// HelpClinic is https://github.com/goki/icons/blob/main/svg/help_clinic.svg
-	HelpClinic Icon = "help_clinic"
-
-	// Hematology is https://github.com/goki/icons/blob/main/svg/hematology.svg
-	Hematology Icon = "hematology"
-
-	// Hevc is https://github.com/goki/icons/blob/main/svg/hevc.svg
-	Hevc Icon = "hevc"
 
 	// Hexagon is https://github.com/goki/icons/blob/main/svg/hexagon.svg
 	Hexagon Icon = "hexagon"
@@ -3918,14 +2694,8 @@ const (
 	// HighlighterSize5 is https://github.com/goki/icons/blob/main/svg/highlighter_size_5.svg
 	HighlighterSize5 Icon = "highlighter_size_5"
 
-	// Hiking is https://github.com/goki/icons/blob/main/svg/hiking.svg
-	Hiking Icon = "hiking"
-
 	// History is https://github.com/goki/icons/blob/main/svg/history.svg
 	History Icon = "history"
-
-	// HistoryEdu is https://github.com/goki/icons/blob/main/svg/history_edu.svg
-	HistoryEdu Icon = "history_edu"
 
 	// HistoryToggleOff is https://github.com/goki/icons/blob/main/svg/history_toggle_off.svg
 	HistoryToggleOff Icon = "history_toggle_off"
@@ -3933,50 +2703,20 @@ const (
 	// Hive is https://github.com/goki/icons/blob/main/svg/hive.svg
 	Hive Icon = "hive"
 
-	// Hls is https://github.com/goki/icons/blob/main/svg/hls.svg
-	Hls Icon = "hls"
-
-	// HlsOff is https://github.com/goki/icons/blob/main/svg/hls_off.svg
-	HlsOff Icon = "hls_off"
-
-	// HolidayVillage is https://github.com/goki/icons/blob/main/svg/holiday_village.svg
-	HolidayVillage Icon = "holiday_village"
-
 	// Home is https://github.com/goki/icons/blob/main/svg/home.svg
 	Home Icon = "home"
 
 	// HomeAppLogo is https://github.com/goki/icons/blob/main/svg/home_app_logo.svg
 	HomeAppLogo Icon = "home_app_logo"
 
-	// HomeHealth is https://github.com/goki/icons/blob/main/svg/home_health.svg
-	HomeHealth Icon = "home_health"
-
 	// HomeIotDevice is https://github.com/goki/icons/blob/main/svg/home_iot_device.svg
 	HomeIotDevice Icon = "home_iot_device"
-
-	// HomeMax is https://github.com/goki/icons/blob/main/svg/home_max.svg
-	HomeMax Icon = "home_max"
-
-	// HomeMaxDots is https://github.com/goki/icons/blob/main/svg/home_max_dots.svg
-	HomeMaxDots Icon = "home_max_dots"
-
-	// HomeMini is https://github.com/goki/icons/blob/main/svg/home_mini.svg
-	HomeMini Icon = "home_mini"
 
 	// HomePin is https://github.com/goki/icons/blob/main/svg/home_pin.svg
 	HomePin Icon = "home_pin"
 
-	// HomeRepairService is https://github.com/goki/icons/blob/main/svg/home_repair_service.svg
-	HomeRepairService Icon = "home_repair_service"
-
-	// HomeSpeaker is https://github.com/goki/icons/blob/main/svg/home_speaker.svg
-	HomeSpeaker Icon = "home_speaker"
-
 	// HomeStorage is https://github.com/goki/icons/blob/main/svg/home_storage.svg
 	HomeStorage Icon = "home_storage"
-
-	// HomeWork is https://github.com/goki/icons/blob/main/svg/home_work.svg
-	HomeWork Icon = "home_work"
 
 	// HorizontalDistribute is https://github.com/goki/icons/blob/main/svg/horizontal_distribute.svg
 	HorizontalDistribute Icon = "horizontal_distribute"
@@ -3986,15 +2726,6 @@ const (
 
 	// HorizontalSplit is https://github.com/goki/icons/blob/main/svg/horizontal_split.svg
 	HorizontalSplit Icon = "horizontal_split"
-
-	// HotTub is https://github.com/goki/icons/blob/main/svg/hot_tub.svg
-	HotTub Icon = "hot_tub"
-
-	// Hotel is https://github.com/goki/icons/blob/main/svg/hotel.svg
-	Hotel Icon = "hotel"
-
-	// HotelClass is https://github.com/goki/icons/blob/main/svg/hotel_class.svg
-	HotelClass Icon = "hotel_class"
 
 	// HourglassBottom is https://github.com/goki/icons/blob/main/svg/hourglass_bottom.svg
 	HourglassBottom Icon = "hourglass_bottom"
@@ -4011,24 +2742,6 @@ const (
 	// House is https://github.com/goki/icons/blob/main/svg/house.svg
 	House Icon = "house"
 
-	// HouseSiding is https://github.com/goki/icons/blob/main/svg/house_siding.svg
-	HouseSiding Icon = "house_siding"
-
-	// HouseWithShield is https://github.com/goki/icons/blob/main/svg/house_with_shield.svg
-	HouseWithShield Icon = "house_with_shield"
-
-	// Houseboat is https://github.com/goki/icons/blob/main/svg/houseboat.svg
-	Houseboat Icon = "houseboat"
-
-	// HowToReg is https://github.com/goki/icons/blob/main/svg/how_to_reg.svg
-	HowToReg Icon = "how_to_reg"
-
-	// HowToVote is https://github.com/goki/icons/blob/main/svg/how_to_vote.svg
-	HowToVote Icon = "how_to_vote"
-
-	// HrResting is https://github.com/goki/icons/blob/main/svg/hr_resting.svg
-	HrResting Icon = "hr_resting"
-
 	// Html is https://github.com/goki/icons/blob/main/svg/html.svg
 	Html Icon = "html"
 
@@ -4037,36 +2750,6 @@ const (
 
 	// Hub is https://github.com/goki/icons/blob/main/svg/hub.svg
 	Hub Icon = "hub"
-
-	// Humerus is https://github.com/goki/icons/blob/main/svg/humerus.svg
-	Humerus Icon = "humerus"
-
-	// HumerusAlt is https://github.com/goki/icons/blob/main/svg/humerus_alt.svg
-	HumerusAlt Icon = "humerus_alt"
-
-	// HumidityHigh is https://github.com/goki/icons/blob/main/svg/humidity_high.svg
-	HumidityHigh Icon = "humidity_high"
-
-	// HumidityLow is https://github.com/goki/icons/blob/main/svg/humidity_low.svg
-	HumidityLow Icon = "humidity_low"
-
-	// HumidityMid is https://github.com/goki/icons/blob/main/svg/humidity_mid.svg
-	HumidityMid Icon = "humidity_mid"
-
-	// HumidityPercentage is https://github.com/goki/icons/blob/main/svg/humidity_percentage.svg
-	HumidityPercentage Icon = "humidity_percentage"
-
-	// Hvac is https://github.com/goki/icons/blob/main/svg/hvac.svg
-	Hvac Icon = "hvac"
-
-	// IceSkating is https://github.com/goki/icons/blob/main/svg/ice_skating.svg
-	IceSkating Icon = "ice_skating"
-
-	// Icecream is https://github.com/goki/icons/blob/main/svg/icecream.svg
-	Icecream Icon = "icecream"
-
-	// Ifl is https://github.com/goki/icons/blob/main/svg/ifl.svg
-	Ifl Icon = "ifl"
 
 	// Iframe is https://github.com/goki/icons/blob/main/svg/iframe.svg
 	Iframe Icon = "iframe"
@@ -4086,23 +2769,14 @@ const (
 	// ImageSearch is https://github.com/goki/icons/blob/main/svg/image_search.svg
 	ImageSearch Icon = "image_search"
 
-	// ImagesearchRoller is https://github.com/goki/icons/blob/main/svg/imagesearch_roller.svg
-	ImagesearchRoller Icon = "imagesearch_roller"
-
 	// Imagesmode is https://github.com/goki/icons/blob/main/svg/imagesmode.svg
 	Imagesmode Icon = "imagesmode"
-
-	// Immunology is https://github.com/goki/icons/blob/main/svg/immunology.svg
-	Immunology Icon = "immunology"
 
 	// ImportContacts is https://github.com/goki/icons/blob/main/svg/import_contacts.svg
 	ImportContacts Icon = "import_contacts"
 
 	// ImportantDevices is https://github.com/goki/icons/blob/main/svg/important_devices.svg
 	ImportantDevices Icon = "important_devices"
-
-	// InHomeMode is https://github.com/goki/icons/blob/main/svg/in_home_mode.svg
-	InHomeMode Icon = "in_home_mode"
 
 	// InactiveOrder is https://github.com/goki/icons/blob/main/svg/inactive_order.svg
 	InactiveOrder Icon = "inactive_order"
@@ -4143,9 +2817,6 @@ const (
 	// InkPen is https://github.com/goki/icons/blob/main/svg/ink_pen.svg
 	InkPen Icon = "ink_pen"
 
-	// Inpatient is https://github.com/goki/icons/blob/main/svg/inpatient.svg
-	Inpatient Icon = "inpatient"
-
 	// Input is https://github.com/goki/icons/blob/main/svg/input.svg
 	Input Icon = "input"
 
@@ -4179,9 +2850,6 @@ const (
 	// Interests is https://github.com/goki/icons/blob/main/svg/interests.svg
 	Interests Icon = "interests"
 
-	// InterpreterMode is https://github.com/goki/icons/blob/main/svg/interpreter_mode.svg
-	InterpreterMode Icon = "interpreter_mode"
-
 	// Inventory is https://github.com/goki/icons/blob/main/svg/inventory.svg
 	Inventory Icon = "inventory"
 
@@ -4196,12 +2864,6 @@ const (
 
 	// IosShare is https://github.com/goki/icons/blob/main/svg/ios_share.svg
 	IosShare Icon = "ios_share"
-
-	// Iron is https://github.com/goki/icons/blob/main/svg/iron.svg
-	Iron Icon = "iron"
-
-	// JamboardKiosk is https://github.com/goki/icons/blob/main/svg/jamboard_kiosk.svg
-	JamboardKiosk Icon = "jamboard_kiosk"
 
 	// Javascript is https://github.com/goki/icons/blob/main/svg/javascript.svg
 	Javascript Icon = "javascript"
@@ -4226,15 +2888,6 @@ const (
 
 	// JumpToElement is https://github.com/goki/icons/blob/main/svg/jump_to_element.svg
 	JumpToElement Icon = "jump_to_element"
-
-	// Kayaking is https://github.com/goki/icons/blob/main/svg/kayaking.svg
-	Kayaking Icon = "kayaking"
-
-	// KebabDining is https://github.com/goki/icons/blob/main/svg/kebab_dining.svg
-	KebabDining Icon = "kebab_dining"
-
-	// Kettle is https://github.com/goki/icons/blob/main/svg/kettle.svg
-	Kettle Icon = "kettle"
 
 	// Key is https://github.com/goki/icons/blob/main/svg/key.svg
 	Key Icon = "key"
@@ -4326,24 +2979,6 @@ const (
 	// KeyboardVoice is https://github.com/goki/icons/blob/main/svg/keyboard_voice.svg
 	KeyboardVoice Icon = "keyboard_voice"
 
-	// KingBed is https://github.com/goki/icons/blob/main/svg/king_bed.svg
-	KingBed Icon = "king_bed"
-
-	// Kitchen is https://github.com/goki/icons/blob/main/svg/kitchen.svg
-	Kitchen Icon = "kitchen"
-
-	// Kitesurfing is https://github.com/goki/icons/blob/main/svg/kitesurfing.svg
-	Kitesurfing Icon = "kitesurfing"
-
-	// LabPanel is https://github.com/goki/icons/blob/main/svg/lab_panel.svg
-	LabPanel Icon = "lab_panel"
-
-	// LabProfile is https://github.com/goki/icons/blob/main/svg/lab_profile.svg
-	LabProfile Icon = "lab_profile"
-
-	// LabResearch is https://github.com/goki/icons/blob/main/svg/lab_research.svg
-	LabResearch Icon = "lab_research"
-
 	// Label is https://github.com/goki/icons/blob/main/svg/label.svg
 	Label Icon = "label"
 
@@ -4434,26 +3069,14 @@ const (
 	// Latex is https://github.com/goki/icons/blob/main/svg/latex.svg
 	Latex Icon = "latex"
 
-	// Laundry is https://github.com/goki/icons/blob/main/svg/laundry.svg
-	Laundry Icon = "laundry"
-
 	// Layers is https://github.com/goki/icons/blob/main/svg/layers.svg
 	Layers Icon = "layers"
 
 	// LayersClear is https://github.com/goki/icons/blob/main/svg/layers_clear.svg
 	LayersClear Icon = "layers_clear"
 
-	// Lda is https://github.com/goki/icons/blob/main/svg/lda.svg
-	Lda Icon = "lda"
-
 	// Leaderboard is https://github.com/goki/icons/blob/main/svg/leaderboard.svg
 	Leaderboard Icon = "leaderboard"
-
-	// LeakAdd is https://github.com/goki/icons/blob/main/svg/leak_add.svg
-	LeakAdd Icon = "leak_add"
-
-	// LeakRemove is https://github.com/goki/icons/blob/main/svg/leak_remove.svg
-	LeakRemove Icon = "leak_remove"
 
 	// LeftClick is https://github.com/goki/icons/blob/main/svg/left_click.svg
 	LeftClick Icon = "left_click"
@@ -4466,9 +3089,6 @@ const (
 
 	// LegendToggle is https://github.com/goki/icons/blob/main/svg/legend_toggle.svg
 	LegendToggle Icon = "legend_toggle"
-
-	// Lens is https://github.com/goki/icons/blob/main/svg/lens.svg
-	Lens Icon = "lens"
 
 	// LensBlur is https://github.com/goki/icons/blob/main/svg/lens_blur.svg
 	LensBlur Icon = "lens_blur"
@@ -4488,17 +3108,8 @@ const (
 	// LibraryMusic is https://github.com/goki/icons/blob/main/svg/library_music.svg
 	LibraryMusic Icon = "library_music"
 
-	// LiftToTalk is https://github.com/goki/icons/blob/main/svg/lift_to_talk.svg
-	LiftToTalk Icon = "lift_to_talk"
-
 	// Light is https://github.com/goki/icons/blob/main/svg/light.svg
 	Light Icon = "light"
-
-	// LightGroup is https://github.com/goki/icons/blob/main/svg/light_group.svg
-	LightGroup Icon = "light_group"
-
-	// LightMode is https://github.com/goki/icons/blob/main/svg/light_mode.svg
-	LightMode Icon = "light_mode"
 
 	// Lightbulb is https://github.com/goki/icons/blob/main/svg/lightbulb.svg
 	Lightbulb Icon = "lightbulb"
@@ -4563,12 +3174,6 @@ const (
 	// LinkOff is https://github.com/goki/icons/blob/main/svg/link_off.svg
 	LinkOff Icon = "link_off"
 
-	// LinkedCamera is https://github.com/goki/icons/blob/main/svg/linked_camera.svg
-	LinkedCamera Icon = "linked_camera"
-
-	// Liquor is https://github.com/goki/icons/blob/main/svg/liquor.svg
-	Liquor Icon = "liquor"
-
 	// List is https://github.com/goki/icons/blob/main/svg/list.svg
 	List Icon = "list"
 
@@ -4587,89 +3192,11 @@ const (
 	// LiveTv is https://github.com/goki/icons/blob/main/svg/live_tv.svg
 	LiveTv Icon = "live_tv"
 
-	// Living is https://github.com/goki/icons/blob/main/svg/living.svg
-	Living Icon = "living"
-
-	// LocalActivity is https://github.com/goki/icons/blob/main/svg/local_activity.svg
-	LocalActivity Icon = "local_activity"
-
-	// LocalAtm is https://github.com/goki/icons/blob/main/svg/local_atm.svg
-	LocalAtm Icon = "local_atm"
-
-	// LocalBar is https://github.com/goki/icons/blob/main/svg/local_bar.svg
-	LocalBar Icon = "local_bar"
-
-	// LocalCafe is https://github.com/goki/icons/blob/main/svg/local_cafe.svg
-	LocalCafe Icon = "local_cafe"
-
-	// LocalCarWash is https://github.com/goki/icons/blob/main/svg/local_car_wash.svg
-	LocalCarWash Icon = "local_car_wash"
-
-	// LocalConvenienceStore is https://github.com/goki/icons/blob/main/svg/local_convenience_store.svg
-	LocalConvenienceStore Icon = "local_convenience_store"
-
-	// LocalDining is https://github.com/goki/icons/blob/main/svg/local_dining.svg
-	LocalDining Icon = "local_dining"
-
-	// LocalDrink is https://github.com/goki/icons/blob/main/svg/local_drink.svg
-	LocalDrink Icon = "local_drink"
-
-	// LocalFireDepartment is https://github.com/goki/icons/blob/main/svg/local_fire_department.svg
-	LocalFireDepartment Icon = "local_fire_department"
-
-	// LocalFlorist is https://github.com/goki/icons/blob/main/svg/local_florist.svg
-	LocalFlorist Icon = "local_florist"
-
-	// LocalGasStation is https://github.com/goki/icons/blob/main/svg/local_gas_station.svg
-	LocalGasStation Icon = "local_gas_station"
-
-	// LocalHospital is https://github.com/goki/icons/blob/main/svg/local_hospital.svg
-	LocalHospital Icon = "local_hospital"
-
-	// LocalLaundryService is https://github.com/goki/icons/blob/main/svg/local_laundry_service.svg
-	LocalLaundryService Icon = "local_laundry_service"
-
-	// LocalLibrary is https://github.com/goki/icons/blob/main/svg/local_library.svg
-	LocalLibrary Icon = "local_library"
-
-	// LocalMall is https://github.com/goki/icons/blob/main/svg/local_mall.svg
-	LocalMall Icon = "local_mall"
-
-	// LocalParking is https://github.com/goki/icons/blob/main/svg/local_parking.svg
-	LocalParking Icon = "local_parking"
-
-	// LocalPharmacy is https://github.com/goki/icons/blob/main/svg/local_pharmacy.svg
-	LocalPharmacy Icon = "local_pharmacy"
-
-	// LocalPizza is https://github.com/goki/icons/blob/main/svg/local_pizza.svg
-	LocalPizza Icon = "local_pizza"
-
-	// LocalPolice is https://github.com/goki/icons/blob/main/svg/local_police.svg
-	LocalPolice Icon = "local_police"
-
-	// LocalPostOffice is https://github.com/goki/icons/blob/main/svg/local_post_office.svg
-	LocalPostOffice Icon = "local_post_office"
-
-	// LocalSee is https://github.com/goki/icons/blob/main/svg/local_see.svg
-	LocalSee Icon = "local_see"
-
-	// LocalShipping is https://github.com/goki/icons/blob/main/svg/local_shipping.svg
-	LocalShipping Icon = "local_shipping"
-
-	// LocalTaxi is https://github.com/goki/icons/blob/main/svg/local_taxi.svg
-	LocalTaxi Icon = "local_taxi"
-
 	// LocationAway is https://github.com/goki/icons/blob/main/svg/location_away.svg
 	LocationAway Icon = "location_away"
 
 	// LocationChip is https://github.com/goki/icons/blob/main/svg/location_chip.svg
 	LocationChip Icon = "location_chip"
-
-	// LocationCity is https://github.com/goki/icons/blob/main/svg/location_city.svg
-	LocationCity Icon = "location_city"
-
-	// LocationDisabled is https://github.com/goki/icons/blob/main/svg/location_disabled.svg
-	LocationDisabled Icon = "location_disabled"
 
 	// LocationHome is https://github.com/goki/icons/blob/main/svg/location_home.svg
 	LocationHome Icon = "location_home"
@@ -4679,9 +3206,6 @@ const (
 
 	// LocationOn is https://github.com/goki/icons/blob/main/svg/location_on.svg
 	LocationOn Icon = "location_on"
-
-	// LocationSearching is https://github.com/goki/icons/blob/main/svg/location_searching.svg
-	LocationSearching Icon = "location_searching"
 
 	// Lock is https://github.com/goki/icons/blob/main/svg/lock.svg
 	Lock Icon = "lock"
@@ -4710,27 +3234,6 @@ const (
 	// Logout is https://github.com/goki/icons/blob/main/svg/logout.svg
 	Logout Icon = "logout"
 
-	// Looks is https://github.com/goki/icons/blob/main/svg/looks.svg
-	Looks Icon = "looks"
-
-	// Looks3 is https://github.com/goki/icons/blob/main/svg/looks_3.svg
-	Looks3 Icon = "looks_3"
-
-	// Looks4 is https://github.com/goki/icons/blob/main/svg/looks_4.svg
-	Looks4 Icon = "looks_4"
-
-	// Looks5 is https://github.com/goki/icons/blob/main/svg/looks_5.svg
-	Looks5 Icon = "looks_5"
-
-	// Looks6 is https://github.com/goki/icons/blob/main/svg/looks_6.svg
-	Looks6 Icon = "looks_6"
-
-	// LooksOne is https://github.com/goki/icons/blob/main/svg/looks_one.svg
-	LooksOne Icon = "looks_one"
-
-	// LooksTwo is https://github.com/goki/icons/blob/main/svg/looks_two.svg
-	LooksTwo Icon = "looks_two"
-
 	// Loupe is https://github.com/goki/icons/blob/main/svg/loupe.svg
 	Loupe Icon = "loupe"
 
@@ -4742,24 +3245,6 @@ const (
 
 	// Loyalty is https://github.com/goki/icons/blob/main/svg/loyalty.svg
 	Loyalty Icon = "loyalty"
-
-	// LteMobiledata is https://github.com/goki/icons/blob/main/svg/lte_mobiledata.svg
-	LteMobiledata Icon = "lte_mobiledata"
-
-	// LteMobiledataBadge is https://github.com/goki/icons/blob/main/svg/lte_mobiledata_badge.svg
-	LteMobiledataBadge Icon = "lte_mobiledata_badge"
-
-	// LtePlusMobiledata is https://github.com/goki/icons/blob/main/svg/lte_plus_mobiledata.svg
-	LtePlusMobiledata Icon = "lte_plus_mobiledata"
-
-	// LtePlusMobiledataBadge is https://github.com/goki/icons/blob/main/svg/lte_plus_mobiledata_badge.svg
-	LtePlusMobiledataBadge Icon = "lte_plus_mobiledata_badge"
-
-	// Luggage is https://github.com/goki/icons/blob/main/svg/luggage.svg
-	Luggage Icon = "luggage"
-
-	// LunchDining is https://github.com/goki/icons/blob/main/svg/lunch_dining.svg
-	LunchDining Icon = "lunch_dining"
 
 	// Lyrics is https://github.com/goki/icons/blob/main/svg/lyrics.svg
 	Lyrics Icon = "lyrics"
@@ -4824,9 +3309,6 @@ const (
 	// Map is https://github.com/goki/icons/blob/main/svg/map.svg
 	Map Icon = "map"
 
-	// MapsUgc is https://github.com/goki/icons/blob/main/svg/maps_ugc.svg
-	MapsUgc Icon = "maps_ugc"
-
 	// Margin is https://github.com/goki/icons/blob/main/svg/margin.svg
 	Margin Icon = "margin"
 
@@ -4854,17 +3336,11 @@ const (
 	// MaskedTransitions is https://github.com/goki/icons/blob/main/svg/masked_transitions.svg
 	MaskedTransitions Icon = "masked_transitions"
 
-	// Masks is https://github.com/goki/icons/blob/main/svg/masks.svg
-	Masks Icon = "masks"
-
 	// MatchCase is https://github.com/goki/icons/blob/main/svg/match_case.svg
 	MatchCase Icon = "match_case"
 
 	// MatchWord is https://github.com/goki/icons/blob/main/svg/match_word.svg
 	MatchWord Icon = "match_word"
-
-	// Matter is https://github.com/goki/icons/blob/main/svg/matter.svg
-	Matter Icon = "matter"
 
 	// Maximize is https://github.com/goki/icons/blob/main/svg/maximize.svg
 	Maximize Icon = "maximize"
@@ -4881,35 +3357,11 @@ const (
 	// MediaLink is https://github.com/goki/icons/blob/main/svg/media_link.svg
 	MediaLink Icon = "media_link"
 
-	// Mediation is https://github.com/goki/icons/blob/main/svg/mediation.svg
-	Mediation Icon = "mediation"
-
-	// MedicalInformation is https://github.com/goki/icons/blob/main/svg/medical_information.svg
-	MedicalInformation Icon = "medical_information"
-
-	// MedicalMask is https://github.com/goki/icons/blob/main/svg/medical_mask.svg
-	MedicalMask Icon = "medical_mask"
-
-	// MedicalServices is https://github.com/goki/icons/blob/main/svg/medical_services.svg
-	MedicalServices Icon = "medical_services"
-
-	// Medication is https://github.com/goki/icons/blob/main/svg/medication.svg
-	Medication Icon = "medication"
-
-	// MedicationLiquid is https://github.com/goki/icons/blob/main/svg/medication_liquid.svg
-	MedicationLiquid Icon = "medication_liquid"
-
-	// MeetingRoom is https://github.com/goki/icons/blob/main/svg/meeting_room.svg
-	MeetingRoom Icon = "meeting_room"
-
 	// Memory is https://github.com/goki/icons/blob/main/svg/memory.svg
 	Memory Icon = "memory"
 
 	// MemoryAlt is https://github.com/goki/icons/blob/main/svg/memory_alt.svg
 	MemoryAlt Icon = "memory_alt"
-
-	// MenstrualHealth is https://github.com/goki/icons/blob/main/svg/menstrual_health.svg
-	MenstrualHealth Icon = "menstrual_health"
 
 	// Menu is https://github.com/goki/icons/blob/main/svg/menu.svg
 	Menu Icon = "menu"
@@ -4926,14 +3378,8 @@ const (
 	// MergeType is https://github.com/goki/icons/blob/main/svg/merge_type.svg
 	MergeType Icon = "merge_type"
 
-	// Metabolism is https://github.com/goki/icons/blob/main/svg/metabolism.svg
-	Metabolism Icon = "metabolism"
-
 	// Method is https://github.com/goki/icons/blob/main/svg/method.svg
 	Method Icon = "method"
-
-	// MfgNestYaleLock is https://github.com/goki/icons/blob/main/svg/mfg_nest_yale_lock.svg
-	MfgNestYaleLock Icon = "mfg_nest_yale_lock"
 
 	// Mic is https://github.com/goki/icons/blob/main/svg/mic.svg
 	Mic Icon = "mic"
@@ -4950,41 +3396,11 @@ const (
 	// MicOff is https://github.com/goki/icons/blob/main/svg/mic_off.svg
 	MicOff Icon = "mic_off"
 
-	// Microbiology is https://github.com/goki/icons/blob/main/svg/microbiology.svg
-	Microbiology Icon = "microbiology"
-
-	// Microwave is https://github.com/goki/icons/blob/main/svg/microwave.svg
-	Microwave Icon = "microwave"
-
-	// MicrowaveGen is https://github.com/goki/icons/blob/main/svg/microwave_gen.svg
-	MicrowaveGen Icon = "microwave_gen"
-
-	// MilitaryTech is https://github.com/goki/icons/blob/main/svg/military_tech.svg
-	MilitaryTech Icon = "military_tech"
-
-	// Mimo is https://github.com/goki/icons/blob/main/svg/mimo.svg
-	Mimo Icon = "mimo"
-
-	// MimoDisconnect is https://github.com/goki/icons/blob/main/svg/mimo_disconnect.svg
-	MimoDisconnect Icon = "mimo_disconnect"
-
-	// Mindfulness is https://github.com/goki/icons/blob/main/svg/mindfulness.svg
-	Mindfulness Icon = "mindfulness"
-
 	// Minimize is https://github.com/goki/icons/blob/main/svg/minimize.svg
 	Minimize Icon = "minimize"
 
-	// MinorCrash is https://github.com/goki/icons/blob/main/svg/minor_crash.svg
-	MinorCrash Icon = "minor_crash"
-
 	// MissedVideoCall is https://github.com/goki/icons/blob/main/svg/missed_video_call.svg
 	MissedVideoCall Icon = "missed_video_call"
-
-	// Mist is https://github.com/goki/icons/blob/main/svg/mist.svg
-	Mist Icon = "mist"
-
-	// MixtureMed is https://github.com/goki/icons/blob/main/svg/mixture_med.svg
-	MixtureMed Icon = "mixture_med"
 
 	// Mms is https://github.com/goki/icons/blob/main/svg/mms.svg
 	Mms Icon = "mms"
@@ -5000,9 +3416,6 @@ const (
 
 	// MobiledataOff is https://github.com/goki/icons/blob/main/svg/mobiledata_off.svg
 	MobiledataOff Icon = "mobiledata_off"
-
-	// ModeComment is https://github.com/goki/icons/blob/main/svg/mode_comment.svg
-	ModeComment Icon = "mode_comment"
 
 	// ModeCool is https://github.com/goki/icons/blob/main/svg/mode_cool.svg
 	ModeCool Icon = "mode_cool"
@@ -5025,12 +3438,6 @@ const (
 	// ModeHeatOff is https://github.com/goki/icons/blob/main/svg/mode_heat_off.svg
 	ModeHeatOff Icon = "mode_heat_off"
 
-	// ModeNight is https://github.com/goki/icons/blob/main/svg/mode_night.svg
-	ModeNight Icon = "mode_night"
-
-	// ModeOfTravel is https://github.com/goki/icons/blob/main/svg/mode_of_travel.svg
-	ModeOfTravel Icon = "mode_of_travel"
-
 	// ModeOffOn is https://github.com/goki/icons/blob/main/svg/mode_off_on.svg
 	ModeOffOn Icon = "mode_off_on"
 
@@ -5052,18 +3459,6 @@ const (
 	// Monitor is https://github.com/goki/icons/blob/main/svg/monitor.svg
 	Monitor Icon = "monitor"
 
-	// MonitorHeart is https://github.com/goki/icons/blob/main/svg/monitor_heart.svg
-	MonitorHeart Icon = "monitor_heart"
-
-	// MonitorWeight is https://github.com/goki/icons/blob/main/svg/monitor_weight.svg
-	MonitorWeight Icon = "monitor_weight"
-
-	// MonitorWeightGain is https://github.com/goki/icons/blob/main/svg/monitor_weight_gain.svg
-	MonitorWeightGain Icon = "monitor_weight_gain"
-
-	// MonitorWeightLoss is https://github.com/goki/icons/blob/main/svg/monitor_weight_loss.svg
-	MonitorWeightLoss Icon = "monitor_weight_loss"
-
 	// Monitoring is https://github.com/goki/icons/blob/main/svg/monitoring.svg
 	Monitoring Icon = "monitoring"
 
@@ -5075,9 +3470,6 @@ const (
 
 	// MoodBad is https://github.com/goki/icons/blob/main/svg/mood_bad.svg
 	MoodBad Icon = "mood_bad"
-
-	// Mop is https://github.com/goki/icons/blob/main/svg/mop.svg
-	Mop Icon = "mop"
 
 	// More is https://github.com/goki/icons/blob/main/svg/more.svg
 	More Icon = "more"
@@ -5096,45 +3488,6 @@ const (
 
 	// MoreVert is https://github.com/goki/icons/blob/main/svg/more_vert.svg
 	MoreVert Icon = "more_vert"
-
-	// Mosque is https://github.com/goki/icons/blob/main/svg/mosque.svg
-	Mosque Icon = "mosque"
-
-	// MotionBlur is https://github.com/goki/icons/blob/main/svg/motion_blur.svg
-	MotionBlur Icon = "motion_blur"
-
-	// MotionMode is https://github.com/goki/icons/blob/main/svg/motion_mode.svg
-	MotionMode Icon = "motion_mode"
-
-	// MotionPhotosAuto is https://github.com/goki/icons/blob/main/svg/motion_photos_auto.svg
-	MotionPhotosAuto Icon = "motion_photos_auto"
-
-	// MotionPhotosOff is https://github.com/goki/icons/blob/main/svg/motion_photos_off.svg
-	MotionPhotosOff Icon = "motion_photos_off"
-
-	// MotionPhotosOn is https://github.com/goki/icons/blob/main/svg/motion_photos_on.svg
-	MotionPhotosOn Icon = "motion_photos_on"
-
-	// MotionPhotosPaused is https://github.com/goki/icons/blob/main/svg/motion_photos_paused.svg
-	MotionPhotosPaused Icon = "motion_photos_paused"
-
-	// MotionSensorActive is https://github.com/goki/icons/blob/main/svg/motion_sensor_active.svg
-	MotionSensorActive Icon = "motion_sensor_active"
-
-	// MotionSensorAlert is https://github.com/goki/icons/blob/main/svg/motion_sensor_alert.svg
-	MotionSensorAlert Icon = "motion_sensor_alert"
-
-	// MotionSensorIdle is https://github.com/goki/icons/blob/main/svg/motion_sensor_idle.svg
-	MotionSensorIdle Icon = "motion_sensor_idle"
-
-	// MotionSensorUrgent is https://github.com/goki/icons/blob/main/svg/motion_sensor_urgent.svg
-	MotionSensorUrgent Icon = "motion_sensor_urgent"
-
-	// Motorcycle is https://github.com/goki/icons/blob/main/svg/motorcycle.svg
-	Motorcycle Icon = "motorcycle"
-
-	// MountainFlag is https://github.com/goki/icons/blob/main/svg/mountain_flag.svg
-	MountainFlag Icon = "mountain_flag"
 
 	// Mouse is https://github.com/goki/icons/blob/main/svg/mouse.svg
 	Mouse Icon = "mouse"
@@ -5187,26 +3540,11 @@ const (
 	// Moving is https://github.com/goki/icons/blob/main/svg/moving.svg
 	Moving Icon = "moving"
 
-	// MovingBeds is https://github.com/goki/icons/blob/main/svg/moving_beds.svg
-	MovingBeds Icon = "moving_beds"
-
-	// MovingMinistry is https://github.com/goki/icons/blob/main/svg/moving_ministry.svg
-	MovingMinistry Icon = "moving_ministry"
-
-	// Mp is https://github.com/goki/icons/blob/main/svg/mp.svg
-	Mp Icon = "mp"
-
-	// Multicooker is https://github.com/goki/icons/blob/main/svg/multicooker.svg
-	Multicooker Icon = "multicooker"
-
 	// MultilineChart is https://github.com/goki/icons/blob/main/svg/multiline_chart.svg
 	MultilineChart Icon = "multiline_chart"
 
 	// MultipleStop is https://github.com/goki/icons/blob/main/svg/multiple_stop.svg
 	MultipleStop Icon = "multiple_stop"
-
-	// Museum is https://github.com/goki/icons/blob/main/svg/museum.svg
-	Museum Icon = "museum"
 
 	// MusicNote is https://github.com/goki/icons/blob/main/svg/music_note.svg
 	MusicNote Icon = "music_note"
@@ -5223,14 +3561,8 @@ const (
 	// Mystery is https://github.com/goki/icons/blob/main/svg/mystery.svg
 	Mystery Icon = "mystery"
 
-	// Nat is https://github.com/goki/icons/blob/main/svg/nat.svg
-	Nat Icon = "nat"
-
 	// Nature is https://github.com/goki/icons/blob/main/svg/nature.svg
 	Nature Icon = "nature"
-
-	// NaturePeople is https://github.com/goki/icons/blob/main/svg/nature_people.svg
-	NaturePeople Icon = "nature_people"
 
 	// NavigateBefore is https://github.com/goki/icons/blob/main/svg/navigate_before.svg
 	NavigateBefore Icon = "navigate_before"
@@ -5241,164 +3573,11 @@ const (
 	// Navigation is https://github.com/goki/icons/blob/main/svg/navigation.svg
 	Navigation Icon = "navigation"
 
-	// NearMe is https://github.com/goki/icons/blob/main/svg/near_me.svg
-	NearMe Icon = "near_me"
-
-	// NearMeDisabled is https://github.com/goki/icons/blob/main/svg/near_me_disabled.svg
-	NearMeDisabled Icon = "near_me_disabled"
-
-	// Nearby is https://github.com/goki/icons/blob/main/svg/nearby.svg
-	Nearby Icon = "nearby"
-
-	// NearbyError is https://github.com/goki/icons/blob/main/svg/nearby_error.svg
-	NearbyError Icon = "nearby_error"
-
-	// NearbyOff is https://github.com/goki/icons/blob/main/svg/nearby_off.svg
-	NearbyOff Icon = "nearby_off"
-
-	// Nephrology is https://github.com/goki/icons/blob/main/svg/nephrology.svg
-	Nephrology Icon = "nephrology"
-
-	// NestAudio is https://github.com/goki/icons/blob/main/svg/nest_audio.svg
-	NestAudio Icon = "nest_audio"
-
-	// NestCamFloodlight is https://github.com/goki/icons/blob/main/svg/nest_cam_floodlight.svg
-	NestCamFloodlight Icon = "nest_cam_floodlight"
-
-	// NestCamIndoor is https://github.com/goki/icons/blob/main/svg/nest_cam_indoor.svg
-	NestCamIndoor Icon = "nest_cam_indoor"
-
-	// NestCamIq is https://github.com/goki/icons/blob/main/svg/nest_cam_iq.svg
-	NestCamIq Icon = "nest_cam_iq"
-
-	// NestCamIqOutdoor is https://github.com/goki/icons/blob/main/svg/nest_cam_iq_outdoor.svg
-	NestCamIqOutdoor Icon = "nest_cam_iq_outdoor"
-
-	// NestCamMagnetMount is https://github.com/goki/icons/blob/main/svg/nest_cam_magnet_mount.svg
-	NestCamMagnetMount Icon = "nest_cam_magnet_mount"
-
-	// NestCamOutdoor is https://github.com/goki/icons/blob/main/svg/nest_cam_outdoor.svg
-	NestCamOutdoor Icon = "nest_cam_outdoor"
-
-	// NestCamStand is https://github.com/goki/icons/blob/main/svg/nest_cam_stand.svg
-	NestCamStand Icon = "nest_cam_stand"
-
-	// NestCamWallMount is https://github.com/goki/icons/blob/main/svg/nest_cam_wall_mount.svg
-	NestCamWallMount Icon = "nest_cam_wall_mount"
-
-	// NestCamWiredStand is https://github.com/goki/icons/blob/main/svg/nest_cam_wired_stand.svg
-	NestCamWiredStand Icon = "nest_cam_wired_stand"
-
-	// NestClockFarsightAnalog is https://github.com/goki/icons/blob/main/svg/nest_clock_farsight_analog.svg
-	NestClockFarsightAnalog Icon = "nest_clock_farsight_analog"
-
-	// NestClockFarsightDigital is https://github.com/goki/icons/blob/main/svg/nest_clock_farsight_digital.svg
-	NestClockFarsightDigital Icon = "nest_clock_farsight_digital"
-
-	// NestConnect is https://github.com/goki/icons/blob/main/svg/nest_connect.svg
-	NestConnect Icon = "nest_connect"
-
-	// NestDetect is https://github.com/goki/icons/blob/main/svg/nest_detect.svg
-	NestDetect Icon = "nest_detect"
-
-	// NestDisplay is https://github.com/goki/icons/blob/main/svg/nest_display.svg
-	NestDisplay Icon = "nest_display"
-
-	// NestDisplayMax is https://github.com/goki/icons/blob/main/svg/nest_display_max.svg
-	NestDisplayMax Icon = "nest_display_max"
-
-	// NestDoorbellVisitor is https://github.com/goki/icons/blob/main/svg/nest_doorbell_visitor.svg
-	NestDoorbellVisitor Icon = "nest_doorbell_visitor"
-
-	// NestEcoLeaf is https://github.com/goki/icons/blob/main/svg/nest_eco_leaf.svg
-	NestEcoLeaf Icon = "nest_eco_leaf"
-
-	// NestFarsightWeather is https://github.com/goki/icons/blob/main/svg/nest_farsight_weather.svg
-	NestFarsightWeather Icon = "nest_farsight_weather"
-
-	// NestFoundSavings is https://github.com/goki/icons/blob/main/svg/nest_found_savings.svg
-	NestFoundSavings Icon = "nest_found_savings"
-
-	// NestHeatLinkE is https://github.com/goki/icons/blob/main/svg/nest_heat_link_e.svg
-	NestHeatLinkE Icon = "nest_heat_link_e"
-
-	// NestHeatLinkGen3 is https://github.com/goki/icons/blob/main/svg/nest_heat_link_gen_3.svg
-	NestHeatLinkGen3 Icon = "nest_heat_link_gen_3"
-
-	// NestHelloDoorbell is https://github.com/goki/icons/blob/main/svg/nest_hello_doorbell.svg
-	NestHelloDoorbell Icon = "nest_hello_doorbell"
-
-	// NestMini is https://github.com/goki/icons/blob/main/svg/nest_mini.svg
-	NestMini Icon = "nest_mini"
-
-	// NestMultiRoom is https://github.com/goki/icons/blob/main/svg/nest_multi_room.svg
-	NestMultiRoom Icon = "nest_multi_room"
-
-	// NestProtect is https://github.com/goki/icons/blob/main/svg/nest_protect.svg
-	NestProtect Icon = "nest_protect"
-
-	// NestRemote is https://github.com/goki/icons/blob/main/svg/nest_remote.svg
-	NestRemote Icon = "nest_remote"
-
-	// NestRemoteComfortSensor is https://github.com/goki/icons/blob/main/svg/nest_remote_comfort_sensor.svg
-	NestRemoteComfortSensor Icon = "nest_remote_comfort_sensor"
-
-	// NestSecureAlarm is https://github.com/goki/icons/blob/main/svg/nest_secure_alarm.svg
-	NestSecureAlarm Icon = "nest_secure_alarm"
-
-	// NestSunblock is https://github.com/goki/icons/blob/main/svg/nest_sunblock.svg
-	NestSunblock Icon = "nest_sunblock"
-
-	// NestTag is https://github.com/goki/icons/blob/main/svg/nest_tag.svg
-	NestTag Icon = "nest_tag"
-
-	// NestThermostat is https://github.com/goki/icons/blob/main/svg/nest_thermostat.svg
-	NestThermostat Icon = "nest_thermostat"
-
-	// NestThermostatEEu is https://github.com/goki/icons/blob/main/svg/nest_thermostat_e_eu.svg
-	NestThermostatEEu Icon = "nest_thermostat_e_eu"
-
-	// NestThermostatGen3 is https://github.com/goki/icons/blob/main/svg/nest_thermostat_gen_3.svg
-	NestThermostatGen3 Icon = "nest_thermostat_gen_3"
-
-	// NestThermostatSensor is https://github.com/goki/icons/blob/main/svg/nest_thermostat_sensor.svg
-	NestThermostatSensor Icon = "nest_thermostat_sensor"
-
-	// NestThermostatSensorEu is https://github.com/goki/icons/blob/main/svg/nest_thermostat_sensor_eu.svg
-	NestThermostatSensorEu Icon = "nest_thermostat_sensor_eu"
-
-	// NestThermostatZirconiumEu is https://github.com/goki/icons/blob/main/svg/nest_thermostat_zirconium_eu.svg
-	NestThermostatZirconiumEu Icon = "nest_thermostat_zirconium_eu"
-
-	// NestTrueRadiant is https://github.com/goki/icons/blob/main/svg/nest_true_radiant.svg
-	NestTrueRadiant Icon = "nest_true_radiant"
-
-	// NestWakeOnApproach is https://github.com/goki/icons/blob/main/svg/nest_wake_on_approach.svg
-	NestWakeOnApproach Icon = "nest_wake_on_approach"
-
-	// NestWakeOnPress is https://github.com/goki/icons/blob/main/svg/nest_wake_on_press.svg
-	NestWakeOnPress Icon = "nest_wake_on_press"
-
-	// NestWifiGale is https://github.com/goki/icons/blob/main/svg/nest_wifi_gale.svg
-	NestWifiGale Icon = "nest_wifi_gale"
-
-	// NestWifiPoint is https://github.com/goki/icons/blob/main/svg/nest_wifi_point.svg
-	NestWifiPoint Icon = "nest_wifi_point"
-
-	// NestWifiRouter is https://github.com/goki/icons/blob/main/svg/nest_wifi_router.svg
-	NestWifiRouter Icon = "nest_wifi_router"
-
 	// NetworkCell is https://github.com/goki/icons/blob/main/svg/network_cell.svg
 	NetworkCell Icon = "network_cell"
 
 	// NetworkCheck is https://github.com/goki/icons/blob/main/svg/network_check.svg
 	NetworkCheck Icon = "network_check"
-
-	// NetworkIntelligenceHistory is https://github.com/goki/icons/blob/main/svg/network_intelligence_history.svg
-	NetworkIntelligenceHistory Icon = "network_intelligence_history"
-
-	// NetworkIntelligenceUpdate is https://github.com/goki/icons/blob/main/svg/network_intelligence_update.svg
-	NetworkIntelligenceUpdate Icon = "network_intelligence_update"
 
 	// NetworkLocked is https://github.com/goki/icons/blob/main/svg/network_locked.svg
 	NetworkLocked Icon = "network_locked"
@@ -5420,9 +3599,6 @@ const (
 
 	// NetworkWifi3Bar is https://github.com/goki/icons/blob/main/svg/network_wifi_3_bar.svg
 	NetworkWifi3Bar Icon = "network_wifi_3_bar"
-
-	// Neurology is https://github.com/goki/icons/blob/main/svg/neurology.svg
-	Neurology Icon = "neurology"
 
 	// NewLabel is https://github.com/goki/icons/blob/main/svg/new_label.svg
 	NewLabel Icon = "new_label"
@@ -5451,41 +3627,14 @@ const (
 	// Nfc is https://github.com/goki/icons/blob/main/svg/nfc.svg
 	Nfc Icon = "nfc"
 
-	// NightShelter is https://github.com/goki/icons/blob/main/svg/night_shelter.svg
-	NightShelter Icon = "night_shelter"
-
-	// NightSightAuto is https://github.com/goki/icons/blob/main/svg/night_sight_auto.svg
-	NightSightAuto Icon = "night_sight_auto"
-
-	// NightSightAutoOff is https://github.com/goki/icons/blob/main/svg/night_sight_auto_off.svg
-	NightSightAutoOff Icon = "night_sight_auto_off"
-
-	// NightSightMax is https://github.com/goki/icons/blob/main/svg/night_sight_max.svg
-	NightSightMax Icon = "night_sight_max"
-
-	// Nightlife is https://github.com/goki/icons/blob/main/svg/nightlife.svg
-	Nightlife Icon = "nightlife"
-
-	// Nightlight is https://github.com/goki/icons/blob/main/svg/nightlight.svg
-	Nightlight Icon = "nightlight"
-
-	// NightsStay is https://github.com/goki/icons/blob/main/svg/nights_stay.svg
-	NightsStay Icon = "nights_stay"
-
 	// NoAccounts is https://github.com/goki/icons/blob/main/svg/no_accounts.svg
 	NoAccounts Icon = "no_accounts"
 
 	// NoAdultContent is https://github.com/goki/icons/blob/main/svg/no_adult_content.svg
 	NoAdultContent Icon = "no_adult_content"
 
-	// NoBackpack is https://github.com/goki/icons/blob/main/svg/no_backpack.svg
-	NoBackpack Icon = "no_backpack"
-
 	// NoCrash is https://github.com/goki/icons/blob/main/svg/no_crash.svg
 	NoCrash Icon = "no_crash"
-
-	// NoDrinks is https://github.com/goki/icons/blob/main/svg/no_drinks.svg
-	NoDrinks Icon = "no_drinks"
 
 	// NoEncryption is https://github.com/goki/icons/blob/main/svg/no_encryption.svg
 	NoEncryption Icon = "no_encryption"
@@ -5493,44 +3642,14 @@ const (
 	// NoFlash is https://github.com/goki/icons/blob/main/svg/no_flash.svg
 	NoFlash Icon = "no_flash"
 
-	// NoFood is https://github.com/goki/icons/blob/main/svg/no_food.svg
-	NoFood Icon = "no_food"
-
-	// NoLuggage is https://github.com/goki/icons/blob/main/svg/no_luggage.svg
-	NoLuggage Icon = "no_luggage"
-
-	// NoMeals is https://github.com/goki/icons/blob/main/svg/no_meals.svg
-	NoMeals Icon = "no_meals"
-
-	// NoMeetingRoom is https://github.com/goki/icons/blob/main/svg/no_meeting_room.svg
-	NoMeetingRoom Icon = "no_meeting_room"
-
-	// NoPhotography is https://github.com/goki/icons/blob/main/svg/no_photography.svg
-	NoPhotography Icon = "no_photography"
-
 	// NoSim is https://github.com/goki/icons/blob/main/svg/no_sim.svg
 	NoSim Icon = "no_sim"
 
 	// NoSound is https://github.com/goki/icons/blob/main/svg/no_sound.svg
 	NoSound Icon = "no_sound"
 
-	// NoStroller is https://github.com/goki/icons/blob/main/svg/no_stroller.svg
-	NoStroller Icon = "no_stroller"
-
 	// NoTransfer is https://github.com/goki/icons/blob/main/svg/no_transfer.svg
 	NoTransfer Icon = "no_transfer"
-
-	// NoiseAware is https://github.com/goki/icons/blob/main/svg/noise_aware.svg
-	NoiseAware Icon = "noise_aware"
-
-	// NoiseControlOff is https://github.com/goki/icons/blob/main/svg/noise_control_off.svg
-	NoiseControlOff Icon = "noise_control_off"
-
-	// NoiseControlOn is https://github.com/goki/icons/blob/main/svg/noise_control_on.svg
-	NoiseControlOn Icon = "noise_control_on"
-
-	// NordicWalking is https://github.com/goki/icons/blob/main/svg/nordic_walking.svg
-	NordicWalking Icon = "nordic_walking"
 
 	// North is https://github.com/goki/icons/blob/main/svg/north.svg
 	North Icon = "north"
@@ -5540,12 +3659,6 @@ const (
 
 	// NorthWest is https://github.com/goki/icons/blob/main/svg/north_west.svg
 	NorthWest Icon = "north_west"
-
-	// NotAccessible is https://github.com/goki/icons/blob/main/svg/not_accessible.svg
-	NotAccessible Icon = "not_accessible"
-
-	// NotListedLocation is https://github.com/goki/icons/blob/main/svg/not_listed_location.svg
-	NotListedLocation Icon = "not_listed_location"
 
 	// NotStarted is https://github.com/goki/icons/blob/main/svg/not_started.svg
 	NotStarted Icon = "not_started"
@@ -5586,15 +3699,6 @@ const (
 	// Numbers is https://github.com/goki/icons/blob/main/svg/numbers.svg
 	Numbers Icon = "numbers"
 
-	// Nutrition is https://github.com/goki/icons/blob/main/svg/nutrition.svg
-	Nutrition Icon = "nutrition"
-
-	// Ods is https://github.com/goki/icons/blob/main/svg/ods.svg
-	Ods Icon = "ods"
-
-	// Odt is https://github.com/goki/icons/blob/main/svg/odt.svg
-	Odt Icon = "odt"
-
 	// OfflineBolt is https://github.com/goki/icons/blob/main/svg/offline_bolt.svg
 	OfflineBolt Icon = "offline_bolt"
 
@@ -5604,20 +3708,11 @@ const (
 	// OfflineShare is https://github.com/goki/icons/blob/main/svg/offline_share.svg
 	OfflineShare Icon = "offline_share"
 
-	// OilBarrel is https://github.com/goki/icons/blob/main/svg/oil_barrel.svg
-	OilBarrel Icon = "oil_barrel"
-
 	// OnDeviceTraining is https://github.com/goki/icons/blob/main/svg/on_device_training.svg
 	OnDeviceTraining Icon = "on_device_training"
 
-	// Oncology is https://github.com/goki/icons/blob/main/svg/oncology.svg
-	Oncology Icon = "oncology"
-
 	// OnlinePrediction is https://github.com/goki/icons/blob/main/svg/online_prediction.svg
 	OnlinePrediction Icon = "online_prediction"
-
-	// Onsen is https://github.com/goki/icons/blob/main/svg/onsen.svg
-	Onsen Icon = "onsen"
 
 	// Opacity is https://github.com/goki/icons/blob/main/svg/opacity.svg
 	Opacity Icon = "opacity"
@@ -5643,32 +3738,14 @@ const (
 	// OpenInPhone is https://github.com/goki/icons/blob/main/svg/open_in_phone.svg
 	OpenInPhone Icon = "open_in_phone"
 
-	// OpenJam is https://github.com/goki/icons/blob/main/svg/open_jam.svg
-	OpenJam Icon = "open_jam"
-
 	// OpenWith is https://github.com/goki/icons/blob/main/svg/open_with.svg
 	OpenWith Icon = "open_with"
-
-	// Ophthalmology is https://github.com/goki/icons/blob/main/svg/ophthalmology.svg
-	Ophthalmology Icon = "ophthalmology"
-
-	// OralDisease is https://github.com/goki/icons/blob/main/svg/oral_disease.svg
-	OralDisease Icon = "oral_disease"
 
 	// OrderApprove is https://github.com/goki/icons/blob/main/svg/order_approve.svg
 	OrderApprove Icon = "order_approve"
 
 	// OrderPlay is https://github.com/goki/icons/blob/main/svg/order_play.svg
 	OrderPlay Icon = "order_play"
-
-	// Orthopedics is https://github.com/goki/icons/blob/main/svg/orthopedics.svg
-	Orthopedics Icon = "orthopedics"
-
-	// OtherAdmission is https://github.com/goki/icons/blob/main/svg/other_admission.svg
-	OtherAdmission Icon = "other_admission"
-
-	// OtherHouses is https://github.com/goki/icons/blob/main/svg/other_houses.svg
-	OtherHouses Icon = "other_houses"
 
 	// Outbound is https://github.com/goki/icons/blob/main/svg/outbound.svg
 	Outbound Icon = "outbound"
@@ -5679,23 +3756,11 @@ const (
 	// OutboxAlt is https://github.com/goki/icons/blob/main/svg/outbox_alt.svg
 	OutboxAlt Icon = "outbox_alt"
 
-	// OutdoorGarden is https://github.com/goki/icons/blob/main/svg/outdoor_garden.svg
-	OutdoorGarden Icon = "outdoor_garden"
-
-	// OutdoorGrill is https://github.com/goki/icons/blob/main/svg/outdoor_grill.svg
-	OutdoorGrill Icon = "outdoor_grill"
-
 	// OutgoingMail is https://github.com/goki/icons/blob/main/svg/outgoing_mail.svg
 	OutgoingMail Icon = "outgoing_mail"
 
 	// Outlet is https://github.com/goki/icons/blob/main/svg/outlet.svg
 	Outlet Icon = "outlet"
-
-	// Outpatient is https://github.com/goki/icons/blob/main/svg/outpatient.svg
-	Outpatient Icon = "outpatient"
-
-	// OutpatientMed is https://github.com/goki/icons/blob/main/svg/outpatient_med.svg
-	OutpatientMed Icon = "outpatient_med"
 
 	// Output is https://github.com/goki/icons/blob/main/svg/output.svg
 	Output Icon = "output"
@@ -5703,23 +3768,14 @@ const (
 	// OutputCircle is https://github.com/goki/icons/blob/main/svg/output_circle.svg
 	OutputCircle Icon = "output_circle"
 
-	// OvenGen is https://github.com/goki/icons/blob/main/svg/oven_gen.svg
-	OvenGen Icon = "oven_gen"
-
 	// Overview is https://github.com/goki/icons/blob/main/svg/overview.svg
 	Overview Icon = "overview"
 
 	// OverviewKey is https://github.com/goki/icons/blob/main/svg/overview_key.svg
 	OverviewKey Icon = "overview_key"
 
-	// OxygenSaturation is https://github.com/goki/icons/blob/main/svg/oxygen_saturation.svg
-	OxygenSaturation Icon = "oxygen_saturation"
-
 	// Pace is https://github.com/goki/icons/blob/main/svg/pace.svg
 	Pace Icon = "pace"
-
-	// Pacemaker is https://github.com/goki/icons/blob/main/svg/pacemaker.svg
-	Pacemaker Icon = "pacemaker"
 
 	// Package is https://github.com/goki/icons/blob/main/svg/package.svg
 	Package Icon = "package"
@@ -5760,50 +3816,11 @@ const (
 	// Panorama is https://github.com/goki/icons/blob/main/svg/panorama.svg
 	Panorama Icon = "panorama"
 
-	// PanoramaFishEye is https://github.com/goki/icons/blob/main/svg/panorama_fish_eye.svg
-	PanoramaFishEye Icon = "panorama_fish_eye"
-
-	// PanoramaHorizontal is https://github.com/goki/icons/blob/main/svg/panorama_horizontal.svg
-	PanoramaHorizontal Icon = "panorama_horizontal"
-
-	// PanoramaPhotosphere is https://github.com/goki/icons/blob/main/svg/panorama_photosphere.svg
-	PanoramaPhotosphere Icon = "panorama_photosphere"
-
-	// PanoramaVertical is https://github.com/goki/icons/blob/main/svg/panorama_vertical.svg
-	PanoramaVertical Icon = "panorama_vertical"
-
-	// PanoramaWideAngle is https://github.com/goki/icons/blob/main/svg/panorama_wide_angle.svg
-	PanoramaWideAngle Icon = "panorama_wide_angle"
-
-	// Paragliding is https://github.com/goki/icons/blob/main/svg/paragliding.svg
-	Paragliding Icon = "paragliding"
-
-	// Park is https://github.com/goki/icons/blob/main/svg/park.svg
-	Park Icon = "park"
-
-	// PartlyCloudyDay is https://github.com/goki/icons/blob/main/svg/partly_cloudy_day.svg
-	PartlyCloudyDay Icon = "partly_cloudy_day"
-
-	// PartlyCloudyNight is https://github.com/goki/icons/blob/main/svg/partly_cloudy_night.svg
-	PartlyCloudyNight Icon = "partly_cloudy_night"
-
-	// PartnerExchange is https://github.com/goki/icons/blob/main/svg/partner_exchange.svg
-	PartnerExchange Icon = "partner_exchange"
-
-	// PartnerReports is https://github.com/goki/icons/blob/main/svg/partner_reports.svg
-	PartnerReports Icon = "partner_reports"
-
-	// PartyMode is https://github.com/goki/icons/blob/main/svg/party_mode.svg
-	PartyMode Icon = "party_mode"
-
 	// Password is https://github.com/goki/icons/blob/main/svg/password.svg
 	Password Icon = "password"
 
 	// Paste is https://github.com/goki/icons/blob/main/svg/paste.svg
 	Paste Icon = "paste"
-
-	// PatientList is https://github.com/goki/icons/blob/main/svg/patient_list.svg
-	PatientList Icon = "patient_list"
 
 	// Pattern is https://github.com/goki/icons/blob/main/svg/pattern.svg
 	Pattern Icon = "pattern"
@@ -5819,12 +3836,6 @@ const (
 
 	// Payments is https://github.com/goki/icons/blob/main/svg/payments.svg
 	Payments Icon = "payments"
-
-	// PedalBike is https://github.com/goki/icons/blob/main/svg/pedal_bike.svg
-	PedalBike Icon = "pedal_bike"
-
-	// Pediatrics is https://github.com/goki/icons/blob/main/svg/pediatrics.svg
-	Pediatrics Icon = "pediatrics"
 
 	// PenSize1 is https://github.com/goki/icons/blob/main/svg/pen_size_1.svg
 	PenSize1 Icon = "pen_size_1"
@@ -5852,9 +3863,6 @@ const (
 
 	// Percent is https://github.com/goki/icons/blob/main/svg/percent.svg
 	Percent Icon = "percent"
-
-	// Pergola is https://github.com/goki/icons/blob/main/svg/pergola.svg
-	Pergola Icon = "pergola"
 
 	// PermCameraMic is https://github.com/goki/icons/blob/main/svg/perm_camera_mic.svg
 	PermCameraMic Icon = "perm_camera_mic"
@@ -5925,21 +3933,6 @@ const (
 	// PersonSearch is https://github.com/goki/icons/blob/main/svg/person_search.svg
 	PersonSearch Icon = "person_search"
 
-	// PersonalInjury is https://github.com/goki/icons/blob/main/svg/personal_injury.svg
-	PersonalInjury Icon = "personal_injury"
-
-	// PestControl is https://github.com/goki/icons/blob/main/svg/pest_control.svg
-	PestControl Icon = "pest_control"
-
-	// PestControlRodent is https://github.com/goki/icons/blob/main/svg/pest_control_rodent.svg
-	PestControlRodent Icon = "pest_control_rodent"
-
-	// PetSupplies is https://github.com/goki/icons/blob/main/svg/pet_supplies.svg
-	PetSupplies Icon = "pet_supplies"
-
-	// Pets is https://github.com/goki/icons/blob/main/svg/pets.svg
-	Pets Icon = "pets"
-
 	// Phishing is https://github.com/goki/icons/blob/main/svg/phishing.svg
 	Phishing Icon = "phishing"
 
@@ -5976,24 +3969,6 @@ const (
 	// PhonePaused is https://github.com/goki/icons/blob/main/svg/phone_paused.svg
 	PhonePaused Icon = "phone_paused"
 
-	// PhonelinkErase is https://github.com/goki/icons/blob/main/svg/phonelink_erase.svg
-	PhonelinkErase Icon = "phonelink_erase"
-
-	// PhonelinkLock is https://github.com/goki/icons/blob/main/svg/phonelink_lock.svg
-	PhonelinkLock Icon = "phonelink_lock"
-
-	// PhonelinkOff is https://github.com/goki/icons/blob/main/svg/phonelink_off.svg
-	PhonelinkOff Icon = "phonelink_off"
-
-	// PhonelinkRing is https://github.com/goki/icons/blob/main/svg/phonelink_ring.svg
-	PhonelinkRing Icon = "phonelink_ring"
-
-	// PhonelinkRingOff is https://github.com/goki/icons/blob/main/svg/phonelink_ring_off.svg
-	PhonelinkRingOff Icon = "phonelink_ring_off"
-
-	// PhonelinkSetup is https://github.com/goki/icons/blob/main/svg/phonelink_setup.svg
-	PhonelinkSetup Icon = "phonelink_setup"
-
 	// Photo is https://github.com/goki/icons/blob/main/svg/photo.svg
 	Photo Icon = "photo"
 
@@ -6026,9 +4001,6 @@ const (
 
 	// Php is https://github.com/goki/icons/blob/main/svg/php.svg
 	Php Icon = "php"
-
-	// PhysicalTherapy is https://github.com/goki/icons/blob/main/svg/physical_therapy.svg
-	PhysicalTherapy Icon = "physical_therapy"
 
 	// Piano is https://github.com/goki/icons/blob/main/svg/piano.svg
 	Piano Icon = "piano"
@@ -6090,9 +4062,6 @@ const (
 	// Plagiarism is https://github.com/goki/icons/blob/main/svg/plagiarism.svg
 	Plagiarism Icon = "plagiarism"
 
-	// PlannerBannerAdPt is https://github.com/goki/icons/blob/main/svg/planner_banner_ad_pt.svg
-	PlannerBannerAdPt Icon = "planner_banner_ad_pt"
-
 	// PlayArrow is https://github.com/goki/icons/blob/main/svg/play_arrow.svg
 	PlayArrow Icon = "play_arrow"
 
@@ -6135,14 +4104,8 @@ const (
 	// PlaylistRemove is https://github.com/goki/icons/blob/main/svg/playlist_remove.svg
 	PlaylistRemove Icon = "playlist_remove"
 
-	// Plumbing is https://github.com/goki/icons/blob/main/svg/plumbing.svg
-	Plumbing Icon = "plumbing"
-
 	// Podcasts is https://github.com/goki/icons/blob/main/svg/podcasts.svg
 	Podcasts Icon = "podcasts"
-
-	// Podiatry is https://github.com/goki/icons/blob/main/svg/podiatry.svg
-	Podiatry Icon = "podiatry"
 
 	// Podium is https://github.com/goki/icons/blob/main/svg/podium.svg
 	Podium Icon = "podium"
@@ -6162,9 +4125,6 @@ const (
 	// Polymer is https://github.com/goki/icons/blob/main/svg/polymer.svg
 	Polymer Icon = "polymer"
 
-	// Pool is https://github.com/goki/icons/blob/main/svg/pool.svg
-	Pool Icon = "pool"
-
 	// PortableWifiOff is https://github.com/goki/icons/blob/main/svg/portable_wifi_off.svg
 	PortableWifiOff Icon = "portable_wifi_off"
 
@@ -6183,9 +4143,6 @@ const (
 	// PostAdd is https://github.com/goki/icons/blob/main/svg/post_add.svg
 	PostAdd Icon = "post_add"
 
-	// PottedPlant is https://github.com/goki/icons/blob/main/svg/potted_plant.svg
-	PottedPlant Icon = "potted_plant"
-
 	// Power is https://github.com/goki/icons/blob/main/svg/power.svg
 	Power Icon = "power"
 
@@ -6198,23 +4155,8 @@ const (
 	// PowerSettingsNew is https://github.com/goki/icons/blob/main/svg/power_settings_new.svg
 	PowerSettingsNew Icon = "power_settings_new"
 
-	// PrayerTimes is https://github.com/goki/icons/blob/main/svg/prayer_times.svg
-	PrayerTimes Icon = "prayer_times"
-
-	// PrecisionManufacturing is https://github.com/goki/icons/blob/main/svg/precision_manufacturing.svg
-	PrecisionManufacturing Icon = "precision_manufacturing"
-
-	// Pregnancy is https://github.com/goki/icons/blob/main/svg/pregnancy.svg
-	Pregnancy Icon = "pregnancy"
-
-	// PregnantWoman is https://github.com/goki/icons/blob/main/svg/pregnant_woman.svg
-	PregnantWoman Icon = "pregnant_woman"
-
 	// Preliminary is https://github.com/goki/icons/blob/main/svg/preliminary.svg
 	Preliminary Icon = "preliminary"
-
-	// Prescriptions is https://github.com/goki/icons/blob/main/svg/prescriptions.svg
-	Prescriptions Icon = "prescriptions"
 
 	// PresentToAll is https://github.com/goki/icons/blob/main/svg/present_to_all.svg
 	PresentToAll Icon = "present_to_all"
@@ -6267,14 +4209,8 @@ const (
 	// Problem is https://github.com/goki/icons/blob/main/svg/problem.svg
 	Problem Icon = "problem"
 
-	// Procedure is https://github.com/goki/icons/blob/main/svg/procedure.svg
-	Procedure Icon = "procedure"
-
 	// ProcessChart is https://github.com/goki/icons/blob/main/svg/process_chart.svg
 	ProcessChart Icon = "process_chart"
-
-	// ProductionQuantityLimits is https://github.com/goki/icons/blob/main/svg/production_quantity_limits.svg
-	ProductionQuantityLimits Icon = "production_quantity_limits"
 
 	// Productivity is https://github.com/goki/icons/blob/main/svg/productivity.svg
 	Productivity Icon = "productivity"
@@ -6282,35 +4218,11 @@ const (
 	// ProgressActivity is https://github.com/goki/icons/blob/main/svg/progress_activity.svg
 	ProgressActivity Icon = "progress_activity"
 
-	// Propane is https://github.com/goki/icons/blob/main/svg/propane.svg
-	Propane Icon = "propane"
-
-	// PropaneTank is https://github.com/goki/icons/blob/main/svg/propane_tank.svg
-	PropaneTank Icon = "propane_tank"
-
-	// Psychiatry is https://github.com/goki/icons/blob/main/svg/psychiatry.svg
-	Psychiatry Icon = "psychiatry"
-
-	// Psychology is https://github.com/goki/icons/blob/main/svg/psychology.svg
-	Psychology Icon = "psychology"
-
-	// PsychologyAlt is https://github.com/goki/icons/blob/main/svg/psychology_alt.svg
-	PsychologyAlt Icon = "psychology_alt"
-
-	// Public is https://github.com/goki/icons/blob/main/svg/public.svg
-	Public Icon = "public"
-
-	// PublicOff is https://github.com/goki/icons/blob/main/svg/public_off.svg
-	PublicOff Icon = "public_off"
-
 	// Publish is https://github.com/goki/icons/blob/main/svg/publish.svg
 	Publish Icon = "publish"
 
 	// PublishedWithChanges is https://github.com/goki/icons/blob/main/svg/published_with_changes.svg
 	PublishedWithChanges Icon = "published_with_changes"
-
-	// Pulmonology is https://github.com/goki/icons/blob/main/svg/pulmonology.svg
-	Pulmonology Icon = "pulmonology"
 
 	// PunchClock is https://github.com/goki/icons/blob/main/svg/punch_clock.svg
 	PunchClock Icon = "punch_clock"
@@ -6357,17 +4269,8 @@ const (
 	// Quickreply is https://github.com/goki/icons/blob/main/svg/quickreply.svg
 	Quickreply Icon = "quickreply"
 
-	// QuietTime is https://github.com/goki/icons/blob/main/svg/quiet_time.svg
-	QuietTime Icon = "quiet_time"
-
-	// QuietTimeActive is https://github.com/goki/icons/blob/main/svg/quiet_time_active.svg
-	QuietTimeActive Icon = "quiet_time_active"
-
 	// Quiz is https://github.com/goki/icons/blob/main/svg/quiz.svg
 	Quiz Icon = "quiz"
-
-	// RMobiledata is https://github.com/goki/icons/blob/main/svg/r_mobiledata.svg
-	RMobiledata Icon = "r_mobiledata"
 
 	// Radar is https://github.com/goki/icons/blob/main/svg/radar.svg
 	Radar Icon = "radar"
@@ -6384,53 +4287,14 @@ const (
 	// RadioButtonUnchecked is https://github.com/goki/icons/blob/main/svg/radio_button_unchecked.svg
 	RadioButtonUnchecked Icon = "radio_button_unchecked"
 
-	// Radiology is https://github.com/goki/icons/blob/main/svg/radiology.svg
-	Radiology Icon = "radiology"
-
-	// RailwayAlert is https://github.com/goki/icons/blob/main/svg/railway_alert.svg
-	RailwayAlert Icon = "railway_alert"
-
-	// Rainy is https://github.com/goki/icons/blob/main/svg/rainy.svg
-	Rainy Icon = "rainy"
-
-	// RainyHeavy is https://github.com/goki/icons/blob/main/svg/rainy_heavy.svg
-	RainyHeavy Icon = "rainy_heavy"
-
-	// RainyLight is https://github.com/goki/icons/blob/main/svg/rainy_light.svg
-	RainyLight Icon = "rainy_light"
-
-	// RainySnow is https://github.com/goki/icons/blob/main/svg/rainy_snow.svg
-	RainySnow Icon = "rainy_snow"
-
-	// RamenDining is https://github.com/goki/icons/blob/main/svg/ramen_dining.svg
-	RamenDining Icon = "ramen_dining"
-
-	// RampLeft is https://github.com/goki/icons/blob/main/svg/ramp_left.svg
-	RampLeft Icon = "ramp_left"
-
-	// RampRight is https://github.com/goki/icons/blob/main/svg/ramp_right.svg
-	RampRight Icon = "ramp_right"
-
-	// RangeHood is https://github.com/goki/icons/blob/main/svg/range_hood.svg
-	RangeHood Icon = "range_hood"
-
 	// RateReview is https://github.com/goki/icons/blob/main/svg/rate_review.svg
 	RateReview Icon = "rate_review"
-
-	// RawOff is https://github.com/goki/icons/blob/main/svg/raw_off.svg
-	RawOff Icon = "raw_off"
-
-	// RawOn is https://github.com/goki/icons/blob/main/svg/raw_on.svg
-	RawOn Icon = "raw_on"
 
 	// ReadMore is https://github.com/goki/icons/blob/main/svg/read_more.svg
 	ReadMore Icon = "read_more"
 
 	// ReadinessScore is https://github.com/goki/icons/blob/main/svg/readiness_score.svg
 	ReadinessScore Icon = "readiness_score"
-
-	// RealEstateAgent is https://github.com/goki/icons/blob/main/svg/real_estate_agent.svg
-	RealEstateAgent Icon = "real_estate_agent"
 
 	// RearCamera is https://github.com/goki/icons/blob/main/svg/rear_camera.svg
 	RearCamera Icon = "rear_camera"
@@ -6446,12 +4310,6 @@ const (
 
 	// ReceiptLong is https://github.com/goki/icons/blob/main/svg/receipt_long.svg
 	ReceiptLong Icon = "receipt_long"
-
-	// RecentActors is https://github.com/goki/icons/blob/main/svg/recent_actors.svg
-	RecentActors Icon = "recent_actors"
-
-	// RecentPatient is https://github.com/goki/icons/blob/main/svg/recent_patient.svg
-	RecentPatient Icon = "recent_patient"
 
 	// Recommend is https://github.com/goki/icons/blob/main/svg/recommend.svg
 	Recommend Icon = "recommend"
@@ -6506,9 +4364,6 @@ const (
 
 	// RemoveModerator is https://github.com/goki/icons/blob/main/svg/remove_moderator.svg
 	RemoveModerator Icon = "remove_moderator"
-
-	// RemoveRoad is https://github.com/goki/icons/blob/main/svg/remove_road.svg
-	RemoveRoad Icon = "remove_road"
 
 	// RemoveSelection is https://github.com/goki/icons/blob/main/svg/remove_selection.svg
 	RemoveSelection Icon = "remove_selection"
@@ -6576,17 +4431,8 @@ const (
 	// Resize is https://github.com/goki/icons/blob/main/svg/resize.svg
 	Resize Icon = "resize"
 
-	// RespiratoryRate is https://github.com/goki/icons/blob/main/svg/respiratory_rate.svg
-	RespiratoryRate Icon = "respiratory_rate"
-
 	// RestartAlt is https://github.com/goki/icons/blob/main/svg/restart_alt.svg
 	RestartAlt Icon = "restart_alt"
-
-	// Restaurant is https://github.com/goki/icons/blob/main/svg/restaurant.svg
-	Restaurant Icon = "restaurant"
-
-	// RestaurantMenu is https://github.com/goki/icons/blob/main/svg/restaurant_menu.svg
-	RestaurantMenu Icon = "restaurant_menu"
 
 	// RestoreFromTrash is https://github.com/goki/icons/blob/main/svg/restore_from_trash.svg
 	RestoreFromTrash Icon = "restore_from_trash"
@@ -6600,18 +4446,6 @@ const (
 	// Reviews is https://github.com/goki/icons/blob/main/svg/reviews.svg
 	Reviews Icon = "reviews"
 
-	// RewardedAds is https://github.com/goki/icons/blob/main/svg/rewarded_ads.svg
-	RewardedAds Icon = "rewarded_ads"
-
-	// Rheumatology is https://github.com/goki/icons/blob/main/svg/rheumatology.svg
-	Rheumatology Icon = "rheumatology"
-
-	// RibCage is https://github.com/goki/icons/blob/main/svg/rib_cage.svg
-	RibCage Icon = "rib_cage"
-
-	// RiceBowl is https://github.com/goki/icons/blob/main/svg/rice_bowl.svg
-	RiceBowl Icon = "rice_bowl"
-
 	// RightClick is https://github.com/goki/icons/blob/main/svg/right_click.svg
 	RightClick Icon = "right_click"
 
@@ -6623,9 +4457,6 @@ const (
 
 	// RingVolume is https://github.com/goki/icons/blob/main/svg/ring_volume.svg
 	RingVolume Icon = "ring_volume"
-
-	// Ripples is https://github.com/goki/icons/blob/main/svg/ripples.svg
-	Ripples Icon = "ripples"
 
 	// Robot is https://github.com/goki/icons/blob/main/svg/robot.svg
 	Robot Icon = "robot"
@@ -6639,24 +4470,6 @@ const (
 	// RocketLaunch is https://github.com/goki/icons/blob/main/svg/rocket_launch.svg
 	RocketLaunch Icon = "rocket_launch"
 
-	// RollerShades is https://github.com/goki/icons/blob/main/svg/roller_shades.svg
-	RollerShades Icon = "roller_shades"
-
-	// RollerShadesClosed is https://github.com/goki/icons/blob/main/svg/roller_shades_closed.svg
-	RollerShadesClosed Icon = "roller_shades_closed"
-
-	// RollerSkating is https://github.com/goki/icons/blob/main/svg/roller_skating.svg
-	RollerSkating Icon = "roller_skating"
-
-	// Roofing is https://github.com/goki/icons/blob/main/svg/roofing.svg
-	Roofing Icon = "roofing"
-
-	// RoomPreferences is https://github.com/goki/icons/blob/main/svg/room_preferences.svg
-	RoomPreferences Icon = "room_preferences"
-
-	// RoomService is https://github.com/goki/icons/blob/main/svg/room_service.svg
-	RoomService Icon = "room_service"
-
 	// Rotate90DegreesCcw is https://github.com/goki/icons/blob/main/svg/rotate_90_degrees_ccw.svg
 	Rotate90DegreesCcw Icon = "rotate_90_degrees_ccw"
 
@@ -6669,12 +4482,6 @@ const (
 	// RotateRight is https://github.com/goki/icons/blob/main/svg/rotate_right.svg
 	RotateRight Icon = "rotate_right"
 
-	// RoundaboutLeft is https://github.com/goki/icons/blob/main/svg/roundabout_left.svg
-	RoundaboutLeft Icon = "roundabout_left"
-
-	// RoundaboutRight is https://github.com/goki/icons/blob/main/svg/roundabout_right.svg
-	RoundaboutRight Icon = "roundabout_right"
-
 	// RoundedCorner is https://github.com/goki/icons/blob/main/svg/rounded_corner.svg
 	RoundedCorner Icon = "rounded_corner"
 
@@ -6686,9 +4493,6 @@ const (
 
 	// Routine is https://github.com/goki/icons/blob/main/svg/routine.svg
 	Routine Icon = "routine"
-
-	// Rowing is https://github.com/goki/icons/blob/main/svg/rowing.svg
-	Rowing Icon = "rowing"
 
 	// RssFeed is https://github.com/goki/icons/blob/main/svg/rss_feed.svg
 	RssFeed Icon = "rss_feed"
@@ -6714,23 +4518,11 @@ const (
 	// RunningWithErrors is https://github.com/goki/icons/blob/main/svg/running_with_errors.svg
 	RunningWithErrors Icon = "running_with_errors"
 
-	// RvHookup is https://github.com/goki/icons/blob/main/svg/rv_hookup.svg
-	RvHookup Icon = "rv_hookup"
-
 	// SafetyCheck is https://github.com/goki/icons/blob/main/svg/safety_check.svg
 	SafetyCheck Icon = "safety_check"
 
 	// SafetyCheckOff is https://github.com/goki/icons/blob/main/svg/safety_check_off.svg
 	SafetyCheckOff Icon = "safety_check_off"
-
-	// SafetyDivider is https://github.com/goki/icons/blob/main/svg/safety_divider.svg
-	SafetyDivider Icon = "safety_divider"
-
-	// Sailing is https://github.com/goki/icons/blob/main/svg/sailing.svg
-	Sailing Icon = "sailing"
-
-	// Salinity is https://github.com/goki/icons/blob/main/svg/salinity.svg
-	Salinity Icon = "salinity"
 
 	// Sanitizer is https://github.com/goki/icons/blob/main/svg/sanitizer.svg
 	Sanitizer Icon = "sanitizer"
@@ -6740,9 +4532,6 @@ const (
 
 	// SatelliteAlt is https://github.com/goki/icons/blob/main/svg/satellite_alt.svg
 	SatelliteAlt Icon = "satellite_alt"
-
-	// Sauna is https://github.com/goki/icons/blob/main/svg/sauna.svg
-	Sauna Icon = "sauna"
 
 	// Save is https://github.com/goki/icons/blob/main/svg/save.svg
 	Save Icon = "save"
@@ -6843,9 +4632,6 @@ const (
 	// ScrollableHeader is https://github.com/goki/icons/blob/main/svg/scrollable_header.svg
 	ScrollableHeader Icon = "scrollable_header"
 
-	// ScubaDiving is https://github.com/goki/icons/blob/main/svg/scuba_diving.svg
-	ScubaDiving Icon = "scuba_diving"
-
 	// Sd is https://github.com/goki/icons/blob/main/svg/sd.svg
 	Sd Icon = "sd"
 
@@ -6894,12 +4680,6 @@ const (
 	// SelectWindowOff is https://github.com/goki/icons/blob/main/svg/select_window_off.svg
 	SelectWindowOff Icon = "select_window_off"
 
-	// SelfCare is https://github.com/goki/icons/blob/main/svg/self_care.svg
-	SelfCare Icon = "self_care"
-
-	// SelfImprovement is https://github.com/goki/icons/blob/main/svg/self_improvement.svg
-	SelfImprovement Icon = "self_improvement"
-
 	// Sell is https://github.com/goki/icons/blob/main/svg/sell.svg
 	Sell Icon = "sell"
 
@@ -6917,15 +4697,6 @@ const (
 
 	// SendToMobile is https://github.com/goki/icons/blob/main/svg/send_to_mobile.svg
 	SendToMobile Icon = "send_to_mobile"
-
-	// SensorDoor is https://github.com/goki/icons/blob/main/svg/sensor_door.svg
-	SensorDoor Icon = "sensor_door"
-
-	// SensorOccupied is https://github.com/goki/icons/blob/main/svg/sensor_occupied.svg
-	SensorOccupied Icon = "sensor_occupied"
-
-	// SensorWindow is https://github.com/goki/icons/blob/main/svg/sensor_window.svg
-	SensorWindow Icon = "sensor_window"
 
 	// Sensors is https://github.com/goki/icons/blob/main/svg/sensors.svg
 	Sensors Icon = "sensors"
@@ -6972,9 +4743,6 @@ const (
 	// SentimentWorried is https://github.com/goki/icons/blob/main/svg/sentiment_worried.svg
 	SentimentWorried Icon = "sentiment_worried"
 
-	// SetMeal is https://github.com/goki/icons/blob/main/svg/set_meal.svg
-	SetMeal Icon = "set_meal"
-
 	// Settings is https://github.com/goki/icons/blob/main/svg/settings.svg
 	Settings Icon = "settings"
 
@@ -7005,9 +4773,6 @@ const (
 	// SettingsCell is https://github.com/goki/icons/blob/main/svg/settings_cell.svg
 	SettingsCell Icon = "settings_cell"
 
-	// SettingsCinematicBlur is https://github.com/goki/icons/blob/main/svg/settings_cinematic_blur.svg
-	SettingsCinematicBlur Icon = "settings_cinematic_blur"
-
 	// SettingsEthernet is https://github.com/goki/icons/blob/main/svg/settings_ethernet.svg
 	SettingsEthernet Icon = "settings_ethernet"
 
@@ -7016,24 +4781,6 @@ const (
 
 	// SettingsInputComponent is https://github.com/goki/icons/blob/main/svg/settings_input_component.svg
 	SettingsInputComponent Icon = "settings_input_component"
-
-	// SettingsInputHdmi is https://github.com/goki/icons/blob/main/svg/settings_input_hdmi.svg
-	SettingsInputHdmi Icon = "settings_input_hdmi"
-
-	// SettingsInputSvideo is https://github.com/goki/icons/blob/main/svg/settings_input_svideo.svg
-	SettingsInputSvideo Icon = "settings_input_svideo"
-
-	// SettingsMotionMode is https://github.com/goki/icons/blob/main/svg/settings_motion_mode.svg
-	SettingsMotionMode Icon = "settings_motion_mode"
-
-	// SettingsNightSight is https://github.com/goki/icons/blob/main/svg/settings_night_sight.svg
-	SettingsNightSight Icon = "settings_night_sight"
-
-	// SettingsOverscan is https://github.com/goki/icons/blob/main/svg/settings_overscan.svg
-	SettingsOverscan Icon = "settings_overscan"
-
-	// SettingsPanorama is https://github.com/goki/icons/blob/main/svg/settings_panorama.svg
-	SettingsPanorama Icon = "settings_panorama"
 
 	// SettingsPhone is https://github.com/goki/icons/blob/main/svg/settings_phone.svg
 	SettingsPhone Icon = "settings_phone"
@@ -7047,26 +4794,11 @@ const (
 	// SettingsRemote is https://github.com/goki/icons/blob/main/svg/settings_remote.svg
 	SettingsRemote Icon = "settings_remote"
 
-	// SettingsSlowMotion is https://github.com/goki/icons/blob/main/svg/settings_slow_motion.svg
-	SettingsSlowMotion Icon = "settings_slow_motion"
-
-	// SettingsSystemDaydream is https://github.com/goki/icons/blob/main/svg/settings_system_daydream.svg
-	SettingsSystemDaydream Icon = "settings_system_daydream"
-
-	// SettingsTimelapse is https://github.com/goki/icons/blob/main/svg/settings_timelapse.svg
-	SettingsTimelapse Icon = "settings_timelapse"
-
 	// SettingsVideoCamera is https://github.com/goki/icons/blob/main/svg/settings_video_camera.svg
 	SettingsVideoCamera Icon = "settings_video_camera"
 
 	// SettingsVoice is https://github.com/goki/icons/blob/main/svg/settings_voice.svg
 	SettingsVoice Icon = "settings_voice"
-
-	// SettopComponent is https://github.com/goki/icons/blob/main/svg/settop_component.svg
-	SettopComponent Icon = "settop_component"
-
-	// SevereCold is https://github.com/goki/icons/blob/main/svg/severe_cold.svg
-	SevereCold Icon = "severe_cold"
 
 	// Shadow is https://github.com/goki/icons/blob/main/svg/shadow.svg
 	Shadow Icon = "shadow"
@@ -7149,29 +4881,17 @@ const (
 	// ShoppingCartCheckout is https://github.com/goki/icons/blob/main/svg/shopping_cart_checkout.svg
 	ShoppingCartCheckout Icon = "shopping_cart_checkout"
 
-	// ShortStay is https://github.com/goki/icons/blob/main/svg/short_stay.svg
-	ShortStay Icon = "short_stay"
-
 	// ShortText is https://github.com/goki/icons/blob/main/svg/short_text.svg
 	ShortText Icon = "short_text"
 
 	// ShowChart is https://github.com/goki/icons/blob/main/svg/show_chart.svg
 	ShowChart Icon = "show_chart"
 
-	// Shower is https://github.com/goki/icons/blob/main/svg/shower.svg
-	Shower Icon = "shower"
-
 	// Shuffle is https://github.com/goki/icons/blob/main/svg/shuffle.svg
 	Shuffle Icon = "shuffle"
 
 	// ShuffleOn is https://github.com/goki/icons/blob/main/svg/shuffle_on.svg
 	ShuffleOn Icon = "shuffle_on"
-
-	// ShutterSpeed is https://github.com/goki/icons/blob/main/svg/shutter_speed.svg
-	ShutterSpeed Icon = "shutter_speed"
-
-	// Sick is https://github.com/goki/icons/blob/main/svg/sick.svg
-	Sick Icon = "sick"
 
 	// SideNavigation is https://github.com/goki/icons/blob/main/svg/side_navigation.svg
 	SideNavigation Icon = "side_navigation"
@@ -7248,41 +4968,11 @@ const (
 	// Signature is https://github.com/goki/icons/blob/main/svg/signature.svg
 	Signature Icon = "signature"
 
-	// Signpost is https://github.com/goki/icons/blob/main/svg/signpost.svg
-	Signpost Icon = "signpost"
-
-	// SimCard is https://github.com/goki/icons/blob/main/svg/sim_card.svg
-	SimCard Icon = "sim_card"
-
-	// SimCardDownload is https://github.com/goki/icons/blob/main/svg/sim_card_download.svg
-	SimCardDownload Icon = "sim_card_download"
-
-	// SingleBed is https://github.com/goki/icons/blob/main/svg/single_bed.svg
-	SingleBed Icon = "single_bed"
-
-	// Sip is https://github.com/goki/icons/blob/main/svg/sip.svg
-	Sip Icon = "sip"
-
-	// Skateboarding is https://github.com/goki/icons/blob/main/svg/skateboarding.svg
-	Skateboarding Icon = "skateboarding"
-
-	// Skeleton is https://github.com/goki/icons/blob/main/svg/skeleton.svg
-	Skeleton Icon = "skeleton"
-
 	// SkipNext is https://github.com/goki/icons/blob/main/svg/skip_next.svg
 	SkipNext Icon = "skip_next"
 
 	// SkipPrevious is https://github.com/goki/icons/blob/main/svg/skip_previous.svg
 	SkipPrevious Icon = "skip_previous"
-
-	// Skull is https://github.com/goki/icons/blob/main/svg/skull.svg
-	Skull Icon = "skull"
-
-	// Sledding is https://github.com/goki/icons/blob/main/svg/sledding.svg
-	Sledding Icon = "sledding"
-
-	// SleepScore is https://github.com/goki/icons/blob/main/svg/sleep_score.svg
-	SleepScore Icon = "sleep_score"
 
 	// SlideLibrary is https://github.com/goki/icons/blob/main/svg/slide_library.svg
 	SlideLibrary Icon = "slide_library"
@@ -7314,12 +5004,6 @@ const (
 	// SmbShare is https://github.com/goki/icons/blob/main/svg/smb_share.svg
 	SmbShare Icon = "smb_share"
 
-	// SmokeFree is https://github.com/goki/icons/blob/main/svg/smoke_free.svg
-	SmokeFree Icon = "smoke_free"
-
-	// SmokingRooms is https://github.com/goki/icons/blob/main/svg/smoking_rooms.svg
-	SmokingRooms Icon = "smoking_rooms"
-
 	// Sms is https://github.com/goki/icons/blob/main/svg/sms.svg
 	Sms Icon = "sms"
 
@@ -7329,32 +5013,8 @@ const (
 	// Snooze is https://github.com/goki/icons/blob/main/svg/snooze.svg
 	Snooze Icon = "snooze"
 
-	// Snowboarding is https://github.com/goki/icons/blob/main/svg/snowboarding.svg
-	Snowboarding Icon = "snowboarding"
-
-	// Snowing is https://github.com/goki/icons/blob/main/svg/snowing.svg
-	Snowing Icon = "snowing"
-
-	// SnowingHeavy is https://github.com/goki/icons/blob/main/svg/snowing_heavy.svg
-	SnowingHeavy Icon = "snowing_heavy"
-
-	// Snowmobile is https://github.com/goki/icons/blob/main/svg/snowmobile.svg
-	Snowmobile Icon = "snowmobile"
-
-	// Snowshoeing is https://github.com/goki/icons/blob/main/svg/snowshoeing.svg
-	Snowshoeing Icon = "snowshoeing"
-
-	// Soap is https://github.com/goki/icons/blob/main/svg/soap.svg
-	Soap Icon = "soap"
-
-	// SocialDistance is https://github.com/goki/icons/blob/main/svg/social_distance.svg
-	SocialDistance Icon = "social_distance"
-
 	// SocialLeaderboard is https://github.com/goki/icons/blob/main/svg/social_leaderboard.svg
 	SocialLeaderboard Icon = "social_leaderboard"
-
-	// SolarPower is https://github.com/goki/icons/blob/main/svg/solar_power.svg
-	SolarPower Icon = "solar_power"
 
 	// Sort is https://github.com/goki/icons/blob/main/svg/sort.svg
 	Sort Icon = "sort"
@@ -7364,21 +5024,6 @@ const (
 
 	// Sos is https://github.com/goki/icons/blob/main/svg/sos.svg
 	Sos Icon = "sos"
-
-	// SoundDetectionDogBarking is https://github.com/goki/icons/blob/main/svg/sound_detection_dog_barking.svg
-	SoundDetectionDogBarking Icon = "sound_detection_dog_barking"
-
-	// SoundDetectionGlassBreak is https://github.com/goki/icons/blob/main/svg/sound_detection_glass_break.svg
-	SoundDetectionGlassBreak Icon = "sound_detection_glass_break"
-
-	// SoundDetectionLoudSound is https://github.com/goki/icons/blob/main/svg/sound_detection_loud_sound.svg
-	SoundDetectionLoudSound Icon = "sound_detection_loud_sound"
-
-	// SoundSampler is https://github.com/goki/icons/blob/main/svg/sound_sampler.svg
-	SoundSampler Icon = "sound_sampler"
-
-	// SoupKitchen is https://github.com/goki/icons/blob/main/svg/soup_kitchen.svg
-	SoupKitchen Icon = "soup_kitchen"
 
 	// SourceNotes is https://github.com/goki/icons/blob/main/svg/source_notes.svg
 	SourceNotes Icon = "source_notes"
@@ -7394,9 +5039,6 @@ const (
 
 	// SouthWest is https://github.com/goki/icons/blob/main/svg/south_west.svg
 	SouthWest Icon = "south_west"
-
-	// Spa is https://github.com/goki/icons/blob/main/svg/spa.svg
-	Spa Icon = "spa"
 
 	// SpaceBar is https://github.com/goki/icons/blob/main/svg/space_bar.svg
 	SpaceBar Icon = "space_bar"
@@ -7431,9 +5073,6 @@ const (
 	// SpecialCharacter is https://github.com/goki/icons/blob/main/svg/special_character.svg
 	SpecialCharacter Icon = "special_character"
 
-	// SpecificGravity is https://github.com/goki/icons/blob/main/svg/specific_gravity.svg
-	SpecificGravity Icon = "specific_gravity"
-
 	// SpeechToText is https://github.com/goki/icons/blob/main/svg/speech_to_text.svg
 	SpeechToText Icon = "speech_to_text"
 
@@ -7458,74 +5097,11 @@ const (
 	// SplitscreenTop is https://github.com/goki/icons/blob/main/svg/splitscreen_top.svg
 	SplitscreenTop Icon = "splitscreen_top"
 
-	// Spo2 is https://github.com/goki/icons/blob/main/svg/spo2.svg
-	Spo2 Icon = "spo2"
-
 	// Spoke is https://github.com/goki/icons/blob/main/svg/spoke.svg
 	Spoke Icon = "spoke"
 
 	// Sports is https://github.com/goki/icons/blob/main/svg/sports.svg
 	Sports Icon = "sports"
-
-	// SportsBar is https://github.com/goki/icons/blob/main/svg/sports_bar.svg
-	SportsBar Icon = "sports_bar"
-
-	// SportsBaseball is https://github.com/goki/icons/blob/main/svg/sports_baseball.svg
-	SportsBaseball Icon = "sports_baseball"
-
-	// SportsBasketball is https://github.com/goki/icons/blob/main/svg/sports_basketball.svg
-	SportsBasketball Icon = "sports_basketball"
-
-	// SportsCricket is https://github.com/goki/icons/blob/main/svg/sports_cricket.svg
-	SportsCricket Icon = "sports_cricket"
-
-	// SportsEsports is https://github.com/goki/icons/blob/main/svg/sports_esports.svg
-	SportsEsports Icon = "sports_esports"
-
-	// SportsFootball is https://github.com/goki/icons/blob/main/svg/sports_football.svg
-	SportsFootball Icon = "sports_football"
-
-	// SportsGolf is https://github.com/goki/icons/blob/main/svg/sports_golf.svg
-	SportsGolf Icon = "sports_golf"
-
-	// SportsGymnastics is https://github.com/goki/icons/blob/main/svg/sports_gymnastics.svg
-	SportsGymnastics Icon = "sports_gymnastics"
-
-	// SportsHandball is https://github.com/goki/icons/blob/main/svg/sports_handball.svg
-	SportsHandball Icon = "sports_handball"
-
-	// SportsHockey is https://github.com/goki/icons/blob/main/svg/sports_hockey.svg
-	SportsHockey Icon = "sports_hockey"
-
-	// SportsKabaddi is https://github.com/goki/icons/blob/main/svg/sports_kabaddi.svg
-	SportsKabaddi Icon = "sports_kabaddi"
-
-	// SportsMartialArts is https://github.com/goki/icons/blob/main/svg/sports_martial_arts.svg
-	SportsMartialArts Icon = "sports_martial_arts"
-
-	// SportsMma is https://github.com/goki/icons/blob/main/svg/sports_mma.svg
-	SportsMma Icon = "sports_mma"
-
-	// SportsMotorsports is https://github.com/goki/icons/blob/main/svg/sports_motorsports.svg
-	SportsMotorsports Icon = "sports_motorsports"
-
-	// SportsRugby is https://github.com/goki/icons/blob/main/svg/sports_rugby.svg
-	SportsRugby Icon = "sports_rugby"
-
-	// SportsScore is https://github.com/goki/icons/blob/main/svg/sports_score.svg
-	SportsScore Icon = "sports_score"
-
-	// SportsSoccer is https://github.com/goki/icons/blob/main/svg/sports_soccer.svg
-	SportsSoccer Icon = "sports_soccer"
-
-	// SportsTennis is https://github.com/goki/icons/blob/main/svg/sports_tennis.svg
-	SportsTennis Icon = "sports_tennis"
-
-	// SportsVolleyball is https://github.com/goki/icons/blob/main/svg/sports_volleyball.svg
-	SportsVolleyball Icon = "sports_volleyball"
-
-	// Sprinkler is https://github.com/goki/icons/blob/main/svg/sprinkler.svg
-	Sprinkler Icon = "sprinkler"
 
 	// Sprint is https://github.com/goki/icons/blob/main/svg/sprint.svg
 	Sprint Icon = "sprint"
@@ -7535,9 +5111,6 @@ const (
 
 	// SquareFoot is https://github.com/goki/icons/blob/main/svg/square_foot.svg
 	SquareFoot Icon = "square_foot"
-
-	// SsidChart is https://github.com/goki/icons/blob/main/svg/ssid_chart.svg
-	SsidChart Icon = "ssid_chart"
 
 	// Stack is https://github.com/goki/icons/blob/main/svg/stack.svg
 	Stack Icon = "stack"
@@ -7559,15 +5132,6 @@ const (
 
 	// StackedLineChart is https://github.com/goki/icons/blob/main/svg/stacked_line_chart.svg
 	StackedLineChart Icon = "stacked_line_chart"
-
-	// StadiaController is https://github.com/goki/icons/blob/main/svg/stadia_controller.svg
-	StadiaController Icon = "stadia_controller"
-
-	// Stadium is https://github.com/goki/icons/blob/main/svg/stadium.svg
-	Stadium Icon = "stadium"
-
-	// Stairs is https://github.com/goki/icons/blob/main/svg/stairs.svg
-	Stairs Icon = "stairs"
 
 	// Star is https://github.com/goki/icons/blob/main/svg/star.svg
 	Star Icon = "star"
@@ -7635,15 +5199,6 @@ const (
 	// Steps is https://github.com/goki/icons/blob/main/svg/steps.svg
 	Steps Icon = "steps"
 
-	// Stethoscope is https://github.com/goki/icons/blob/main/svg/stethoscope.svg
-	Stethoscope Icon = "stethoscope"
-
-	// StethoscopeArrow is https://github.com/goki/icons/blob/main/svg/stethoscope_arrow.svg
-	StethoscopeArrow Icon = "stethoscope_arrow"
-
-	// StethoscopeCheck is https://github.com/goki/icons/blob/main/svg/stethoscope_check.svg
-	StethoscopeCheck Icon = "stethoscope_check"
-
 	// StickyNote is https://github.com/goki/icons/blob/main/svg/sticky_note.svg
 	StickyNote Icon = "sticky_note"
 
@@ -7658,18 +5213,6 @@ const (
 
 	// StopScreenShare is https://github.com/goki/icons/blob/main/svg/stop_screen_share.svg
 	StopScreenShare Icon = "stop_screen_share"
-
-	// Storage is https://github.com/goki/icons/blob/main/svg/storage.svg
-	Storage Icon = "storage"
-
-	// Store is https://github.com/goki/icons/blob/main/svg/store.svg
-	Store Icon = "store"
-
-	// Storefront is https://github.com/goki/icons/blob/main/svg/storefront.svg
-	Storefront Icon = "storefront"
-
-	// Storm is https://github.com/goki/icons/blob/main/svg/storm.svg
-	Storm Icon = "storm"
 
 	// Straight is https://github.com/goki/icons/blob/main/svg/straight.svg
 	Straight Icon = "straight"
@@ -7689,9 +5232,6 @@ const (
 	// Streetview is https://github.com/goki/icons/blob/main/svg/streetview.svg
 	Streetview Icon = "streetview"
 
-	// StressManagement is https://github.com/goki/icons/blob/main/svg/stress_management.svg
-	StressManagement Icon = "stress_management"
-
 	// StrikethroughS is https://github.com/goki/icons/blob/main/svg/strikethrough_s.svg
 	StrikethroughS Icon = "strikethrough_s"
 
@@ -7700,9 +5240,6 @@ const (
 
 	// StrokePartial is https://github.com/goki/icons/blob/main/svg/stroke_partial.svg
 	StrokePartial Icon = "stroke_partial"
-
-	// Stroller is https://github.com/goki/icons/blob/main/svg/stroller.svg
-	Stroller Icon = "stroller"
 
 	// Style is https://github.com/goki/icons/blob/main/svg/style.svg
 	Style Icon = "style"
@@ -7734,9 +5271,6 @@ const (
 	// Subscript is https://github.com/goki/icons/blob/main/svg/subscript.svg
 	Subscript Icon = "subscript"
 
-	// Subscriptions is https://github.com/goki/icons/blob/main/svg/subscriptions.svg
-	Subscriptions Icon = "subscriptions"
-
 	// Subtitles is https://github.com/goki/icons/blob/main/svg/subtitles.svg
 	Subtitles Icon = "subtitles"
 
@@ -7749,20 +5283,8 @@ const (
 	// Summarize is https://github.com/goki/icons/blob/main/svg/summarize.svg
 	Summarize Icon = "summarize"
 
-	// Sunny is https://github.com/goki/icons/blob/main/svg/sunny.svg
-	Sunny Icon = "sunny"
-
-	// SunnySnowing is https://github.com/goki/icons/blob/main/svg/sunny_snowing.svg
-	SunnySnowing Icon = "sunny_snowing"
-
 	// Superscript is https://github.com/goki/icons/blob/main/svg/superscript.svg
 	Superscript Icon = "superscript"
-
-	// SupervisedUserCircle is https://github.com/goki/icons/blob/main/svg/supervised_user_circle.svg
-	SupervisedUserCircle Icon = "supervised_user_circle"
-
-	// SupervisedUserCircleOff is https://github.com/goki/icons/blob/main/svg/supervised_user_circle_off.svg
-	SupervisedUserCircleOff Icon = "supervised_user_circle_off"
 
 	// SupervisorAccount is https://github.com/goki/icons/blob/main/svg/supervisor_account.svg
 	SupervisorAccount Icon = "supervisor_account"
@@ -7773,23 +5295,11 @@ const (
 	// SupportAgent is https://github.com/goki/icons/blob/main/svg/support_agent.svg
 	SupportAgent Icon = "support_agent"
 
-	// Surfing is https://github.com/goki/icons/blob/main/svg/surfing.svg
-	Surfing Icon = "surfing"
-
-	// Surgical is https://github.com/goki/icons/blob/main/svg/surgical.svg
-	Surgical Icon = "surgical"
-
 	// SurroundSound is https://github.com/goki/icons/blob/main/svg/surround_sound.svg
 	SurroundSound Icon = "surround_sound"
 
 	// Svg is https://github.com/goki/icons/blob/main/svg/svg.svg
 	Svg Icon = "svg"
-
-	// SwapCalls is https://github.com/goki/icons/blob/main/svg/swap_calls.svg
-	SwapCalls Icon = "swap_calls"
-
-	// SwapDrivingAppsWheel is https://github.com/goki/icons/blob/main/svg/swap_driving_apps_wheel.svg
-	SwapDrivingAppsWheel Icon = "swap_driving_apps_wheel"
 
 	// SwapHoriz is https://github.com/goki/icons/blob/main/svg/swap_horiz.svg
 	SwapHoriz Icon = "swap_horiz"
@@ -7842,12 +5352,6 @@ const (
 	// SwitchAccess is https://github.com/goki/icons/blob/main/svg/switch_access.svg
 	SwitchAccess Icon = "switch_access"
 
-	// SwitchAccessShortcut is https://github.com/goki/icons/blob/main/svg/switch_access_shortcut.svg
-	SwitchAccessShortcut Icon = "switch_access_shortcut"
-
-	// SwitchAccessShortcutAdd is https://github.com/goki/icons/blob/main/svg/switch_access_shortcut_add.svg
-	SwitchAccessShortcutAdd Icon = "switch_access_shortcut_add"
-
 	// SwitchAccount is https://github.com/goki/icons/blob/main/svg/switch_account.svg
 	SwitchAccount Icon = "switch_account"
 
@@ -7865,18 +5369,6 @@ const (
 
 	// Switches is https://github.com/goki/icons/blob/main/svg/switches.svg
 	Switches Icon = "switches"
-
-	// SwordRose is https://github.com/goki/icons/blob/main/svg/sword_rose.svg
-	SwordRose Icon = "sword_rose"
-
-	// Swords is https://github.com/goki/icons/blob/main/svg/swords.svg
-	Swords Icon = "swords"
-
-	// Symptoms is https://github.com/goki/icons/blob/main/svg/symptoms.svg
-	Symptoms Icon = "symptoms"
-
-	// Synagogue is https://github.com/goki/icons/blob/main/svg/synagogue.svg
-	Synagogue Icon = "synagogue"
 
 	// Sync is https://github.com/goki/icons/blob/main/svg/sync.svg
 	Sync Icon = "sync"
@@ -7896,14 +5388,8 @@ const (
 	// SyncSavedLocally is https://github.com/goki/icons/blob/main/svg/sync_saved_locally.svg
 	SyncSavedLocally Icon = "sync_saved_locally"
 
-	// Syringe is https://github.com/goki/icons/blob/main/svg/syringe.svg
-	Syringe Icon = "syringe"
-
 	// SystemUpdate is https://github.com/goki/icons/blob/main/svg/system_update.svg
 	SystemUpdate Icon = "system_update"
-
-	// SystemUpdateAlt is https://github.com/goki/icons/blob/main/svg/system_update_alt.svg
-	SystemUpdateAlt Icon = "system_update_alt"
 
 	// Tab is https://github.com/goki/icons/blob/main/svg/tab.svg
 	Tab Icon = "tab"
@@ -7935,20 +5421,11 @@ const (
 	// Table is https://github.com/goki/icons/blob/main/svg/table.svg
 	Table Icon = "table"
 
-	// TableBar is https://github.com/goki/icons/blob/main/svg/table_bar.svg
-	TableBar Icon = "table_bar"
-
 	// TableChart is https://github.com/goki/icons/blob/main/svg/table_chart.svg
 	TableChart Icon = "table_chart"
 
 	// TableChartView is https://github.com/goki/icons/blob/main/svg/table_chart_view.svg
 	TableChartView Icon = "table_chart_view"
-
-	// TableLamp is https://github.com/goki/icons/blob/main/svg/table_lamp.svg
-	TableLamp Icon = "table_lamp"
-
-	// TableRestaurant is https://github.com/goki/icons/blob/main/svg/table_restaurant.svg
-	TableRestaurant Icon = "table_restaurant"
 
 	// TableRows is https://github.com/goki/icons/blob/main/svg/table_rows.svg
 	TableRows Icon = "table_rows"
@@ -7974,15 +5451,6 @@ const (
 	// Tag is https://github.com/goki/icons/blob/main/svg/tag.svg
 	Tag Icon = "tag"
 
-	// TakeoutDining is https://github.com/goki/icons/blob/main/svg/takeout_dining.svg
-	TakeoutDining Icon = "takeout_dining"
-
-	// TamperDetectionOff is https://github.com/goki/icons/blob/main/svg/tamper_detection_off.svg
-	TamperDetectionOff Icon = "tamper_detection_off"
-
-	// TamperDetectionOn is https://github.com/goki/icons/blob/main/svg/tamper_detection_on.svg
-	TamperDetectionOn Icon = "tamper_detection_on"
-
 	// TapAndPlay is https://github.com/goki/icons/blob/main/svg/tap_and_play.svg
 	TapAndPlay Icon = "tap_and_play"
 
@@ -7997,27 +5465,6 @@ const (
 
 	// TaskAlt is https://github.com/goki/icons/blob/main/svg/task_alt.svg
 	TaskAlt Icon = "task_alt"
-
-	// Taunt is https://github.com/goki/icons/blob/main/svg/taunt.svg
-	Taunt Icon = "taunt"
-
-	// TaxiAlert is https://github.com/goki/icons/blob/main/svg/taxi_alert.svg
-	TaxiAlert Icon = "taxi_alert"
-
-	// TeamDashboard is https://github.com/goki/icons/blob/main/svg/team_dashboard.svg
-	TeamDashboard Icon = "team_dashboard"
-
-	// TempPreferencesEco is https://github.com/goki/icons/blob/main/svg/temp_preferences_eco.svg
-	TempPreferencesEco Icon = "temp_preferences_eco"
-
-	// TempleBuddhist is https://github.com/goki/icons/blob/main/svg/temple_buddhist.svg
-	TempleBuddhist Icon = "temple_buddhist"
-
-	// TempleHindu is https://github.com/goki/icons/blob/main/svg/temple_hindu.svg
-	TempleHindu Icon = "temple_hindu"
-
-	// Tenancy is https://github.com/goki/icons/blob/main/svg/tenancy.svg
-	Tenancy Icon = "tenancy"
 
 	// Terminal is https://github.com/goki/icons/blob/main/svg/terminal.svg
 	Terminal Icon = "terminal"
@@ -8097,12 +5544,6 @@ const (
 	// Texture is https://github.com/goki/icons/blob/main/svg/texture.svg
 	Texture Icon = "texture"
 
-	// TheaterComedy is https://github.com/goki/icons/blob/main/svg/theater_comedy.svg
-	TheaterComedy Icon = "theater_comedy"
-
-	// Theaters is https://github.com/goki/icons/blob/main/svg/theaters.svg
-	Theaters Icon = "theaters"
-
 	// Thermometer is https://github.com/goki/icons/blob/main/svg/thermometer.svg
 	Thermometer Icon = "thermometer"
 
@@ -8132,15 +5573,6 @@ const (
 
 	// ThumbsUpDown is https://github.com/goki/icons/blob/main/svg/thumbs_up_down.svg
 	ThumbsUpDown Icon = "thumbs_up_down"
-
-	// Thunderstorm is https://github.com/goki/icons/blob/main/svg/thunderstorm.svg
-	Thunderstorm Icon = "thunderstorm"
-
-	// Tibia is https://github.com/goki/icons/blob/main/svg/tibia.svg
-	Tibia Icon = "tibia"
-
-	// TibiaAlt is https://github.com/goki/icons/blob/main/svg/tibia_alt.svg
-	TibiaAlt Icon = "tibia_alt"
 
 	// TimeAuto is https://github.com/goki/icons/blob/main/svg/time_auto.svg
 	TimeAuto Icon = "time_auto"
@@ -8181,9 +5613,6 @@ const (
 	// Title is https://github.com/goki/icons/blob/main/svg/title.svg
 	Title Icon = "title"
 
-	// Toast is https://github.com/goki/icons/blob/main/svg/toast.svg
-	Toast Icon = "toast"
-
 	// Toc is https://github.com/goki/icons/blob/main/svg/toc.svg
 	Toc Icon = "toc"
 
@@ -8202,35 +5631,11 @@ const (
 	// Token is https://github.com/goki/icons/blob/main/svg/token.svg
 	Token Icon = "token"
 
-	// Toll is https://github.com/goki/icons/blob/main/svg/toll.svg
-	Toll Icon = "toll"
-
 	// Tonality is https://github.com/goki/icons/blob/main/svg/tonality.svg
 	Tonality Icon = "tonality"
 
 	// Toolbar is https://github.com/goki/icons/blob/main/svg/toolbar.svg
 	Toolbar Icon = "toolbar"
-
-	// ToolsFlatHead is https://github.com/goki/icons/blob/main/svg/tools_flat_head.svg
-	ToolsFlatHead Icon = "tools_flat_head"
-
-	// ToolsInstallationKit is https://github.com/goki/icons/blob/main/svg/tools_installation_kit.svg
-	ToolsInstallationKit Icon = "tools_installation_kit"
-
-	// ToolsLadder is https://github.com/goki/icons/blob/main/svg/tools_ladder.svg
-	ToolsLadder Icon = "tools_ladder"
-
-	// ToolsLevel is https://github.com/goki/icons/blob/main/svg/tools_level.svg
-	ToolsLevel Icon = "tools_level"
-
-	// ToolsPhillips is https://github.com/goki/icons/blob/main/svg/tools_phillips.svg
-	ToolsPhillips Icon = "tools_phillips"
-
-	// ToolsPliersWireStripper is https://github.com/goki/icons/blob/main/svg/tools_pliers_wire_stripper.svg
-	ToolsPliersWireStripper Icon = "tools_pliers_wire_stripper"
-
-	// ToolsPowerDrill is https://github.com/goki/icons/blob/main/svg/tools_power_drill.svg
-	ToolsPowerDrill Icon = "tools_power_drill"
 
 	// Tooltip is https://github.com/goki/icons/blob/main/svg/tooltip.svg
 	Tooltip Icon = "tooltip"
@@ -8243,12 +5648,6 @@ const (
 
 	// Topic is https://github.com/goki/icons/blob/main/svg/topic.svg
 	Topic Icon = "topic"
-
-	// Tornado is https://github.com/goki/icons/blob/main/svg/tornado.svg
-	Tornado Icon = "tornado"
-
-	// TotalDissolvedSolids is https://github.com/goki/icons/blob/main/svg/total_dissolved_solids.svg
-	TotalDissolvedSolids Icon = "total_dissolved_solids"
 
 	// TouchApp is https://github.com/goki/icons/blob/main/svg/touch_app.svg
 	TouchApp Icon = "touch_app"
@@ -8271,47 +5670,14 @@ const (
 	// Traffic is https://github.com/goki/icons/blob/main/svg/traffic.svg
 	Traffic Icon = "traffic"
 
-	// TrailLength is https://github.com/goki/icons/blob/main/svg/trail_length.svg
-	TrailLength Icon = "trail_length"
-
-	// TrailLengthMedium is https://github.com/goki/icons/blob/main/svg/trail_length_medium.svg
-	TrailLengthMedium Icon = "trail_length_medium"
-
-	// TrailLengthShort is https://github.com/goki/icons/blob/main/svg/trail_length_short.svg
-	TrailLengthShort Icon = "trail_length_short"
-
-	// Train is https://github.com/goki/icons/blob/main/svg/train.svg
-	Train Icon = "train"
-
-	// Tram is https://github.com/goki/icons/blob/main/svg/tram.svg
-	Tram Icon = "tram"
-
 	// Transcribe is https://github.com/goki/icons/blob/main/svg/transcribe.svg
 	Transcribe Icon = "transcribe"
-
-	// TransferWithinAStation is https://github.com/goki/icons/blob/main/svg/transfer_within_a_station.svg
-	TransferWithinAStation Icon = "transfer_within_a_station"
 
 	// Transform is https://github.com/goki/icons/blob/main/svg/transform.svg
 	Transform Icon = "transform"
 
-	// Transgender is https://github.com/goki/icons/blob/main/svg/transgender.svg
-	Transgender Icon = "transgender"
-
-	// TransitEnterexit is https://github.com/goki/icons/blob/main/svg/transit_enterexit.svg
-	TransitEnterexit Icon = "transit_enterexit"
-
 	// Translate is https://github.com/goki/icons/blob/main/svg/translate.svg
 	Translate Icon = "translate"
-
-	// Transportation is https://github.com/goki/icons/blob/main/svg/transportation.svg
-	Transportation Icon = "transportation"
-
-	// Travel is https://github.com/goki/icons/blob/main/svg/travel.svg
-	Travel Icon = "travel"
-
-	// TravelExplore is https://github.com/goki/icons/blob/main/svg/travel_explore.svg
-	TravelExplore Icon = "travel_explore"
 
 	// TrendingDown is https://github.com/goki/icons/blob/main/svg/trending_down.svg
 	TrendingDown Icon = "trending_down"
@@ -8322,20 +5688,11 @@ const (
 	// TrendingUp is https://github.com/goki/icons/blob/main/svg/trending_up.svg
 	TrendingUp Icon = "trending_up"
 
-	// TripOrigin is https://github.com/goki/icons/blob/main/svg/trip_origin.svg
-	TripOrigin Icon = "trip_origin"
-
-	// Trolley is https://github.com/goki/icons/blob/main/svg/trolley.svg
-	Trolley Icon = "trolley"
-
 	// Trophy is https://github.com/goki/icons/blob/main/svg/trophy.svg
 	Trophy Icon = "trophy"
 
 	// Troubleshoot is https://github.com/goki/icons/blob/main/svg/troubleshoot.svg
 	Troubleshoot Icon = "troubleshoot"
-
-	// Tsunami is https://github.com/goki/icons/blob/main/svg/tsunami.svg
-	Tsunami Icon = "tsunami"
 
 	// Tsv is https://github.com/goki/icons/blob/main/svg/tsv.svg
 	Tsv Icon = "tsv"
@@ -8376,38 +5733,11 @@ const (
 	// TvOff is https://github.com/goki/icons/blob/main/svg/tv_off.svg
 	TvOff Icon = "tv_off"
 
-	// TvOptionsEditChannels is https://github.com/goki/icons/blob/main/svg/tv_options_edit_channels.svg
-	TvOptionsEditChannels Icon = "tv_options_edit_channels"
-
 	// TvRemote is https://github.com/goki/icons/blob/main/svg/tv_remote.svg
 	TvRemote Icon = "tv_remote"
 
 	// TvSignin is https://github.com/goki/icons/blob/main/svg/tv_signin.svg
 	TvSignin Icon = "tv_signin"
-
-	// TvWithAssistant is https://github.com/goki/icons/blob/main/svg/tv_with_assistant.svg
-	TvWithAssistant Icon = "tv_with_assistant"
-
-	// TwoWheeler is https://github.com/goki/icons/blob/main/svg/two_wheeler.svg
-	TwoWheeler Icon = "two_wheeler"
-
-	// TypeSpecimen is https://github.com/goki/icons/blob/main/svg/type_specimen.svg
-	TypeSpecimen Icon = "type_specimen"
-
-	// UTurnLeft is https://github.com/goki/icons/blob/main/svg/u_turn_left.svg
-	UTurnLeft Icon = "u_turn_left"
-
-	// UTurnRight is https://github.com/goki/icons/blob/main/svg/u_turn_right.svg
-	UTurnRight Icon = "u_turn_right"
-
-	// UlnaRadius is https://github.com/goki/icons/blob/main/svg/ulna_radius.svg
-	UlnaRadius Icon = "ulna_radius"
-
-	// UlnaRadiusAlt is https://github.com/goki/icons/blob/main/svg/ulna_radius_alt.svg
-	UlnaRadiusAlt Icon = "ulna_radius_alt"
-
-	// Umbrella is https://github.com/goki/icons/blob/main/svg/umbrella.svg
-	Umbrella Icon = "umbrella"
 
 	// Unarchive is https://github.com/goki/icons/blob/main/svg/unarchive.svg
 	Unarchive Icon = "unarchive"
@@ -8478,26 +5808,14 @@ const (
 	// UsbOff is https://github.com/goki/icons/blob/main/svg/usb_off.svg
 	UsbOff Icon = "usb_off"
 
-	// Vaccines is https://github.com/goki/icons/blob/main/svg/vaccines.svg
-	Vaccines Icon = "vaccines"
-
 	// Valve is https://github.com/goki/icons/blob/main/svg/valve.svg
 	Valve Icon = "valve"
-
-	// VapeFree is https://github.com/goki/icons/blob/main/svg/vape_free.svg
-	VapeFree Icon = "vape_free"
-
-	// VapingRooms is https://github.com/goki/icons/blob/main/svg/vaping_rooms.svg
-	VapingRooms Icon = "vaping_rooms"
 
 	// Variable is https://github.com/goki/icons/blob/main/svg/variable.svg
 	Variable Icon = "variable"
 
 	// Variables is https://github.com/goki/icons/blob/main/svg/variables.svg
 	Variables Icon = "variables"
-
-	// Ventilator is https://github.com/goki/icons/blob/main/svg/ventilator.svg
-	Ventilator Icon = "ventilator"
 
 	// Verified is https://github.com/goki/icons/blob/main/svg/verified.svg
 	Verified Icon = "verified"
@@ -8525,9 +5843,6 @@ const (
 
 	// VerticalSplit is https://github.com/goki/icons/blob/main/svg/vertical_split.svg
 	VerticalSplit Icon = "vertical_split"
-
-	// Vibration is https://github.com/goki/icons/blob/main/svg/vibration.svg
-	Vibration Icon = "vibration"
 
 	// VideoCall is https://github.com/goki/icons/blob/main/svg/video_call.svg
 	VideoCall Icon = "video_call"
@@ -8643,9 +5958,6 @@ const (
 	// Vignette is https://github.com/goki/icons/blob/main/svg/vignette.svg
 	Vignette Icon = "vignette"
 
-	// Villa is https://github.com/goki/icons/blob/main/svg/villa.svg
-	Villa Icon = "villa"
-
 	// Visibility is https://github.com/goki/icons/blob/main/svg/visibility.svg
 	Visibility Icon = "visibility"
 
@@ -8655,9 +5967,6 @@ const (
 	// VisibilityOff is https://github.com/goki/icons/blob/main/svg/visibility_off.svg
 	VisibilityOff Icon = "visibility_off"
 
-	// VitalSigns is https://github.com/goki/icons/blob/main/svg/vital_signs.svg
-	VitalSigns Icon = "vital_signs"
-
 	// VoiceChat is https://github.com/goki/icons/blob/main/svg/voice_chat.svg
 	VoiceChat Icon = "voice_chat"
 
@@ -8666,9 +5975,6 @@ const (
 
 	// Voicemail is https://github.com/goki/icons/blob/main/svg/voicemail.svg
 	Voicemail Icon = "voicemail"
-
-	// Volcano is https://github.com/goki/icons/blob/main/svg/volcano.svg
-	Volcano Icon = "volcano"
 
 	// VolumeDown is https://github.com/goki/icons/blob/main/svg/volume_down.svg
 	VolumeDown Icon = "volume_down"
@@ -8685,9 +5991,6 @@ const (
 	// VolumeUp is https://github.com/goki/icons/blob/main/svg/volume_up.svg
 	VolumeUp Icon = "volume_up"
 
-	// VolunteerActivism is https://github.com/goki/icons/blob/main/svg/volunteer_activism.svg
-	VolunteerActivism Icon = "volunteer_activism"
-
 	// VotingChip is https://github.com/goki/icons/blob/main/svg/voting_chip.svg
 	VotingChip Icon = "voting_chip"
 
@@ -8703,18 +6006,6 @@ const (
 	// VpnLock is https://github.com/goki/icons/blob/main/svg/vpn_lock.svg
 	VpnLock Icon = "vpn_lock"
 
-	// Vr180Create2D is https://github.com/goki/icons/blob/main/svg/vr180_create2d.svg
-	Vr180Create2D Icon = "vr180_create2d"
-
-	// Vrpano is https://github.com/goki/icons/blob/main/svg/vrpano.svg
-	Vrpano Icon = "vrpano"
-
-	// WallArt is https://github.com/goki/icons/blob/main/svg/wall_art.svg
-	WallArt Icon = "wall_art"
-
-	// WallLamp is https://github.com/goki/icons/blob/main/svg/wall_lamp.svg
-	WallLamp Icon = "wall_lamp"
-
 	// Wallet is https://github.com/goki/icons/blob/main/svg/wallet.svg
 	Wallet Icon = "wallet"
 
@@ -8723,9 +6014,6 @@ const (
 
 	// WallpaperSlideshow is https://github.com/goki/icons/blob/main/svg/wallpaper_slideshow.svg
 	WallpaperSlideshow Icon = "wallpaper_slideshow"
-
-	// Ward is https://github.com/goki/icons/blob/main/svg/ward.svg
-	Ward Icon = "ward"
 
 	// Warehouse is https://github.com/goki/icons/blob/main/svg/warehouse.svg
 	Warehouse Icon = "warehouse"
@@ -8757,92 +6045,11 @@ const (
 	// Water is https://github.com/goki/icons/blob/main/svg/water.svg
 	Water Icon = "water"
 
-	// WaterBottle is https://github.com/goki/icons/blob/main/svg/water_bottle.svg
-	WaterBottle Icon = "water_bottle"
-
-	// WaterBottleLarge is https://github.com/goki/icons/blob/main/svg/water_bottle_large.svg
-	WaterBottleLarge Icon = "water_bottle_large"
-
-	// WaterDamage is https://github.com/goki/icons/blob/main/svg/water_damage.svg
-	WaterDamage Icon = "water_damage"
-
-	// WaterDo is https://github.com/goki/icons/blob/main/svg/water_do.svg
-	WaterDo Icon = "water_do"
-
-	// WaterDrop is https://github.com/goki/icons/blob/main/svg/water_drop.svg
-	WaterDrop Icon = "water_drop"
-
-	// WaterEc is https://github.com/goki/icons/blob/main/svg/water_ec.svg
-	WaterEc Icon = "water_ec"
-
-	// WaterFull is https://github.com/goki/icons/blob/main/svg/water_full.svg
-	WaterFull Icon = "water_full"
-
-	// WaterHeater is https://github.com/goki/icons/blob/main/svg/water_heater.svg
-	WaterHeater Icon = "water_heater"
-
-	// WaterLock is https://github.com/goki/icons/blob/main/svg/water_lock.svg
-	WaterLock Icon = "water_lock"
-
-	// WaterLoss is https://github.com/goki/icons/blob/main/svg/water_loss.svg
-	WaterLoss Icon = "water_loss"
-
-	// WaterLux is https://github.com/goki/icons/blob/main/svg/water_lux.svg
-	WaterLux Icon = "water_lux"
-
-	// WaterMedium is https://github.com/goki/icons/blob/main/svg/water_medium.svg
-	WaterMedium Icon = "water_medium"
-
-	// WaterOrp is https://github.com/goki/icons/blob/main/svg/water_orp.svg
-	WaterOrp Icon = "water_orp"
-
-	// WaterPh is https://github.com/goki/icons/blob/main/svg/water_ph.svg
-	WaterPh Icon = "water_ph"
-
-	// WaterPump is https://github.com/goki/icons/blob/main/svg/water_pump.svg
-	WaterPump Icon = "water_pump"
-
-	// WaterVoc is https://github.com/goki/icons/blob/main/svg/water_voc.svg
-	WaterVoc Icon = "water_voc"
-
 	// WaterfallChart is https://github.com/goki/icons/blob/main/svg/waterfall_chart.svg
 	WaterfallChart Icon = "waterfall_chart"
 
-	// Waves is https://github.com/goki/icons/blob/main/svg/waves.svg
-	Waves Icon = "waves"
-
 	// WavingHand is https://github.com/goki/icons/blob/main/svg/waving_hand.svg
 	WavingHand Icon = "waving_hand"
-
-	// WbAuto is https://github.com/goki/icons/blob/main/svg/wb_auto.svg
-	WbAuto Icon = "wb_auto"
-
-	// WbIncandescent is https://github.com/goki/icons/blob/main/svg/wb_incandescent.svg
-	WbIncandescent Icon = "wb_incandescent"
-
-	// WbIridescent is https://github.com/goki/icons/blob/main/svg/wb_iridescent.svg
-	WbIridescent Icon = "wb_iridescent"
-
-	// WbShade is https://github.com/goki/icons/blob/main/svg/wb_shade.svg
-	WbShade Icon = "wb_shade"
-
-	// WbSunny is https://github.com/goki/icons/blob/main/svg/wb_sunny.svg
-	WbSunny Icon = "wb_sunny"
-
-	// WbTwilight is https://github.com/goki/icons/blob/main/svg/wb_twilight.svg
-	WbTwilight Icon = "wb_twilight"
-
-	// Wc is https://github.com/goki/icons/blob/main/svg/wc.svg
-	Wc Icon = "wc"
-
-	// WeatherHail is https://github.com/goki/icons/blob/main/svg/weather_hail.svg
-	WeatherHail Icon = "weather_hail"
-
-	// WeatherMix is https://github.com/goki/icons/blob/main/svg/weather_mix.svg
-	WeatherMix Icon = "weather_mix"
-
-	// WeatherSnowy is https://github.com/goki/icons/blob/main/svg/weather_snowy.svg
-	WeatherSnowy Icon = "weather_snowy"
 
 	// Web is https://github.com/goki/icons/blob/main/svg/web.svg
 	Web Icon = "web"
@@ -8862,20 +6069,11 @@ const (
 	// Weekend is https://github.com/goki/icons/blob/main/svg/weekend.svg
 	Weekend Icon = "weekend"
 
-	// Weight is https://github.com/goki/icons/blob/main/svg/weight.svg
-	Weight Icon = "weight"
-
 	// West is https://github.com/goki/icons/blob/main/svg/west.svg
 	West Icon = "west"
 
 	// Whatshot is https://github.com/goki/icons/blob/main/svg/whatshot.svg
 	Whatshot Icon = "whatshot"
-
-	// WheelchairPickup is https://github.com/goki/icons/blob/main/svg/wheelchair_pickup.svg
-	WheelchairPickup Icon = "wheelchair_pickup"
-
-	// WhereToVote is https://github.com/goki/icons/blob/main/svg/where_to_vote.svg
-	WhereToVote Icon = "where_to_vote"
 
 	// Widgets is https://github.com/goki/icons/blob/main/svg/widgets.svg
 	Widgets Icon = "widgets"
@@ -8904,21 +6102,6 @@ const (
 	// WifiAdd is https://github.com/goki/icons/blob/main/svg/wifi_add.svg
 	WifiAdd Icon = "wifi_add"
 
-	// WifiCalling is https://github.com/goki/icons/blob/main/svg/wifi_calling.svg
-	WifiCalling Icon = "wifi_calling"
-
-	// WifiCalling1 is https://github.com/goki/icons/blob/main/svg/wifi_calling_1.svg
-	WifiCalling1 Icon = "wifi_calling_1"
-
-	// WifiCalling2 is https://github.com/goki/icons/blob/main/svg/wifi_calling_2.svg
-	WifiCalling2 Icon = "wifi_calling_2"
-
-	// WifiCalling3 is https://github.com/goki/icons/blob/main/svg/wifi_calling_3.svg
-	WifiCalling3 Icon = "wifi_calling_3"
-
-	// WifiChannel is https://github.com/goki/icons/blob/main/svg/wifi_channel.svg
-	WifiChannel Icon = "wifi_channel"
-
 	// WifiFind is https://github.com/goki/icons/blob/main/svg/wifi_find.svg
 	WifiFind Icon = "wifi_find"
 
@@ -8934,27 +6117,6 @@ const (
 	// WifiOff is https://github.com/goki/icons/blob/main/svg/wifi_off.svg
 	WifiOff Icon = "wifi_off"
 
-	// WifiPassword is https://github.com/goki/icons/blob/main/svg/wifi_password.svg
-	WifiPassword Icon = "wifi_password"
-
-	// WifiProtectedSetup is https://github.com/goki/icons/blob/main/svg/wifi_protected_setup.svg
-	WifiProtectedSetup Icon = "wifi_protected_setup"
-
-	// WifiProxy is https://github.com/goki/icons/blob/main/svg/wifi_proxy.svg
-	WifiProxy Icon = "wifi_proxy"
-
-	// WifiTethering is https://github.com/goki/icons/blob/main/svg/wifi_tethering.svg
-	WifiTethering Icon = "wifi_tethering"
-
-	// WifiTetheringError is https://github.com/goki/icons/blob/main/svg/wifi_tethering_error.svg
-	WifiTetheringError Icon = "wifi_tethering_error"
-
-	// WifiTetheringOff is https://github.com/goki/icons/blob/main/svg/wifi_tethering_off.svg
-	WifiTetheringOff Icon = "wifi_tethering_off"
-
-	// WindPower is https://github.com/goki/icons/blob/main/svg/wind_power.svg
-	WindPower Icon = "wind_power"
-
 	// Window is https://github.com/goki/icons/blob/main/svg/window.svg
 	Window Icon = "window"
 
@@ -8966,9 +6128,6 @@ const (
 
 	// WindowSensor is https://github.com/goki/icons/blob/main/svg/window_sensor.svg
 	WindowSensor Icon = "window_sensor"
-
-	// WineBar is https://github.com/goki/icons/blob/main/svg/wine_bar.svg
-	WineBar Icon = "wine_bar"
 
 	// Woman is https://github.com/goki/icons/blob/main/svg/woman.svg
 	Woman Icon = "woman"
@@ -8994,9 +6153,6 @@ const (
 	// Workspaces is https://github.com/goki/icons/blob/main/svg/workspaces.svg
 	Workspaces Icon = "workspaces"
 
-	// WoundsInjuries is https://github.com/goki/icons/blob/main/svg/wounds_injuries.svg
-	WoundsInjuries Icon = "wounds_injuries"
-
 	// WrapText is https://github.com/goki/icons/blob/main/svg/wrap_text.svg
 	WrapText Icon = "wrap_text"
 
@@ -9009,26 +6165,11 @@ const (
 	// Wysiwyg is https://github.com/goki/icons/blob/main/svg/wysiwyg.svg
 	Wysiwyg Icon = "wysiwyg"
 
-	// Yard is https://github.com/goki/icons/blob/main/svg/yard.svg
-	Yard Icon = "yard"
-
-	// YourTrips is https://github.com/goki/icons/blob/main/svg/your_trips.svg
-	YourTrips Icon = "your_trips"
-
 	// YoutubeActivity is https://github.com/goki/icons/blob/main/svg/youtube_activity.svg
 	YoutubeActivity Icon = "youtube_activity"
 
 	// YoutubeSearchedFor is https://github.com/goki/icons/blob/main/svg/youtube_searched_for.svg
 	YoutubeSearchedFor Icon = "youtube_searched_for"
-
-	// ZonePersonAlert is https://github.com/goki/icons/blob/main/svg/zone_person_alert.svg
-	ZonePersonAlert Icon = "zone_person_alert"
-
-	// ZonePersonIdle is https://github.com/goki/icons/blob/main/svg/zone_person_idle.svg
-	ZonePersonIdle Icon = "zone_person_idle"
-
-	// ZonePersonUrgent is https://github.com/goki/icons/blob/main/svg/zone_person_urgent.svg
-	ZonePersonUrgent Icon = "zone_person_urgent"
 
 	// ZoomIn is https://github.com/goki/icons/blob/main/svg/zoom_in.svg
 	ZoomIn Icon = "zoom_in"
