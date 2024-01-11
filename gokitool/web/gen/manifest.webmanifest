@@ -1,0 +1,27 @@
+{
+  "short_name": "{{.ShortName}}",
+  "name": "{{.Name}}",
+  "description": "{{.Description}}",
+  "icons": [
+    {
+      "src": "{{.SVGIcon}}",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "{{.LargeIcon}}",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "{{.DefaultIcon}}",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "scope": "{{.Scope}}",
+  "start_url": "{{.StartURL}}",
+  "background_color": "{{.BackgroundColor}}",
+  "theme_color": "{{.ThemeColor}}",
+  "display": "standalone"
+}
