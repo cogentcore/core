@@ -12,8 +12,8 @@ package main
 import (
 	"syscall/js"
 
-	"goki.dev/grr"
-	"goki.dev/jsfs"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/jsfs"
 )
 
 func main() {

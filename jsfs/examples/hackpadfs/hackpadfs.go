@@ -14,8 +14,8 @@ import (
 	"syscall/js"
 
 	"github.com/hack-pad/hackpadfs/indexeddb"
-	"goki.dev/grr"
-	"goki.dev/jsfs"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/jsfs"
 )
 
 func main() {

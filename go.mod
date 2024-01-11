@@ -29,9 +29,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robert-nix/ansihtml v1.0.1
 	github.com/zergon321/reisen v0.1.9
-	goki.dev/grr v0.0.12
 	goki.dev/icons v0.0.17
-	goki.dev/jsfs v0.0.2
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.30
 	golang.org/x/image v0.14.0
 	golang.org/x/mod v0.14.0
@@ -57,6 +55,7 @@ require (
 	goki.dev/enums v0.9.56 // indirect
 	goki.dev/glop v0.1.9 // indirect
 	goki.dev/grows v0.3.31 // indirect
+	goki.dev/grr v0.0.12 // indirect
 	goki.dev/gti v0.1.32 // indirect
 	goki.dev/laser v0.1.34 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.28 // indirect
