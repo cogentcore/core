@@ -1,0 +1,16 @@
+github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
+github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
+github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
+github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+goki.dev/enums v0.9.56 h1:gQ0ZjDuS3kR1IblvfIdAsoaQYCjgh12PNqNWBu/V00M=
+goki.dev/enums v0.9.56/go.mod h1:ULBqiNxR9VhnfCNyNhzj1sbOCykdOTkecv77hIEj5qM=
+goki.dev/glop v0.1.9 h1:s6FFcCXqNy2FLEG5k+ULvxEvbYtHnW7KoqvEw9uPsP0=
+goki.dev/glop v0.1.9/go.mod h1:Q9TPQIlJ5LL38UITJonRUEmEbPPTHWOJED+xD63VmIg=
+goki.dev/grows v0.3.31 h1:uVN/LnDGB66SDMWFF75COEIupzihLEN5Eg/qJ0s8gAE=
+goki.dev/grows v0.3.31/go.mod h1:2F4f+WVz3Abp720oe0Hm36l6C+YY0L5kLDHdEiAQ378=
+goki.dev/gti v0.1.32 h1:G5TWLYs/fa4njQc8DqtK7T/gsvyB44oqoFukXgjVDB8=
+goki.dev/gti v0.1.32/go.mod h1:SKxIYGI350swbf5hkqYqDZTu38XV67C1U2zddI+th6k=
+goki.dev/laser v0.1.34 h1:Rd6oyLl0FzAyooY3tlyxpJmoIYv6UEHXgqKrWNxX3dA=
+goki.dev/laser v0.1.34/go.mod h1:KMfsuS0/16oPshX4uw1ndadZFFx7gKAiGtsho+0nmT8=
+goki.dev/ordmap v0.5.10 h1:3lKuixjoUW+IETEwoiP8cqcMrDDqk2ty8j1CmeXtdq8=
+goki.dev/ordmap v0.5.10/go.mod h1:m3CYoDJcio+Z9aXipUdg3yLUjKspxnVc8es6GWrDAwQ=
