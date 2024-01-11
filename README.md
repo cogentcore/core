@@ -1,15 +1,14 @@
 <h1 align="center">
     <a href="https://goki.dev">
-        <img alt="GoGi Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
+        <img alt="Goki Blue Logo" width="150" height="150" src="logo/gogi_logo_blue_transparent.png">
     </a>
 </h1>
 
 <p align="center">
-    <a href="https://goreportcard.com/report/goki.dev/gi"><img src="https://goreportcard.com/badge/goki.dev/gi" alt="Go Report Card"></a>
-    <a href="https://pkg.go.dev/goki.dev/gi"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
-    <a href="https://github.com/goki/gi/actions/workflows/ci.yml"><img src="https://github.com/goki/gi/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-    <a href="https://www.tickgit.com/browse?repo=github.com/goki/gi"><img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi" alt="TODOs"></a>
-    <a href="https://github.com/goki/gi/releases/"><img src="https://img.shields.io/github/release/goki/gi?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
+    <a href="https://goreportcard.com/report/goki.dev"><img src="https://goreportcard.com/badge/goki.dev" alt="Go Report Card"></a>
+    <a href="https://pkg.go.dev/goki.dev"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
+    <a href="https://github.com/goki/goki/actions/workflows/go.yml"><img src="https://github.com/github/docs/actions/workflows/go.yml/badge.svg" alt="CI Workflow"></a>
+    <a href="https://github.com/goki/goki/releases/"><img src="https://img.shields.io/github/release/goki/goki?include_prereleases=&sort=semver&color=blue" alt="GitHub release"></a>
 </p>
 
 **NOTE:** Goki is currently undergoing a period of significant development to make it easier to make powerful, fast, and beautiful apps and support running apps on mobile. As such, some of the information in this repository and on the [Goki website](https://Goki.dev) may be incorrect. Furthermore, there will be breaking changes soon, so starting new apps with this framework is not recommended at this time; if you do, please be ready to adjust to any breaking changes. If you want to accelerate the improvement of Goki, please contribute by following the [Contribution Guidelines](https://goki.dev/docs/general/contributionguidelines/). Development of Gi is currently happening on this branch. For the latest stable version of Gi, import version 1.3.19 and see the [v1 branch](https://github.com/goki/gi/tree/v1).
