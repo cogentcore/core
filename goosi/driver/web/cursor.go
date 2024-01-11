@@ -10,9 +10,9 @@ import (
 	"strings"
 	"syscall/js"
 
-	"goki.dev/cursors"
-	"goki.dev/enums"
-	"goki.dev/goosi/cursor"
+	"goki.dev/goki/cursor"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/enums"
 )
 
 // TheCursor is the single [goosi.Cursor] for the web platform

@@ -7,7 +7,7 @@ package styles
 import (
 	"fmt"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // XY represents X,Y values

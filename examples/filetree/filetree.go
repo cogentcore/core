@@ -13,16 +13,16 @@ import (
 	"os"
 	"path/filepath"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/gix/filetree"
-	"goki.dev/gix/texteditor"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/filetree"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/texteditor"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and

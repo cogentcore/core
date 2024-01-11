@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 var _PathCommandValues = []PathCommand{0, 1, 2, 3, 4}

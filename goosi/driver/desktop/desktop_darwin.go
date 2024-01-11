@@ -46,10 +46,10 @@ import (
 	"path/filepath"
 	"unsafe"
 
-	"goki.dev/fi"
-	"goki.dev/goosi"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/grr"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/mimedata"
 )
 
 /////////////////////////////////////////////////////////////////

@@ -11,12 +11,12 @@ import (
 	"io"
 	"io/fs"
 
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/events"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/svg"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/svg"
 	"golang.org/x/image/draw"
 )
 

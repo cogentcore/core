@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 var _SpreadsValues = []Spreads{0, 1, 2}

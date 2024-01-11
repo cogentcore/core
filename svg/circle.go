@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Circle is a SVG circle

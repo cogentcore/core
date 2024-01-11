@@ -9,9 +9,9 @@ import (
 	"log"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/pi/v2/langs"
-	"goki.dev/pi/v2/lex"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/pi/langs"
+	"goki.dev/goki/pi/lex"
 )
 
 // LangFlags are special properties of a given language

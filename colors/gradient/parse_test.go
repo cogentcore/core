@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/grr"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/mat32"
 )
 
 func TestFromString(t *testing.T) {

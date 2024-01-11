@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/girl/units"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/units"
 )
 
 // "reflect"

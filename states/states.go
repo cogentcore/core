@@ -6,7 +6,7 @@ package states
 
 //go:generate goki generate
 
-import "goki.dev/enums"
+import "goki.dev/goki/enums"
 
 // States are GUI states of elements that are relevant for styling based on
 // [CSS Pseudo-classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
@@ -122,7 +122,7 @@ func (st States) Is(flag enums.BitFlag) bool {
 }
 
 // StateLayer returns the state layer opacity for the state, appropriate for use
-// as the value of [goki.dev/girl/styles.Style.StateLayer]
+// as the value of [goki.dev/goki/styles.Style.StateLayer]
 func (st States) StateLayer() float32 {
 	switch {
 	case st.Is(Disabled):

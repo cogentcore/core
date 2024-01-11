@@ -6,7 +6,7 @@ package abilities
 
 //go:generate goki generate
 
-import "goki.dev/enums"
+import "goki.dev/goki/enums"
 
 // Abilities represent abilities of GUI elements to take on different States,
 // and are aligned with the States flags.  All elements can be disabled.

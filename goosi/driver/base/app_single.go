@@ -12,10 +12,10 @@ package base
 import (
 	"image"
 
-	"goki.dev/girl/styles"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/styles"
 )
 
 // AppSingle contains the data and logic common to all implementations of [goosi.App]

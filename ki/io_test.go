@@ -8,9 +8,9 @@ import (
 	"bytes"
 	"testing"
 
-	"goki.dev/grows/jsons"
-	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/testdata"
+	"goki.dev/goki/grows/jsons"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/ki/testdata"
 )
 
 func TestNodeJSON(t *testing.T) {

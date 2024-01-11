@@ -3,12 +3,12 @@
 package matcolor
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/matcolor.Accent",
+	Name:      "goki.dev/goki/colors/matcolor.Accent",
 	ShortName: "matcolor.Accent",
 	IDName:    "accent",
 	Doc:       "Accent contains the four standard variations of a base accent color.",
@@ -26,7 +26,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/matcolor.Key",
+	Name:      "goki.dev/goki/colors/matcolor.Key",
 	ShortName: "matcolor.Key",
 	IDName:    "key",
 	Doc:       "Key contains the set of key colors used to generate\na [Scheme] and [Palette]",
@@ -50,7 +50,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/matcolor.Palette",
+	Name:      "goki.dev/goki/colors/matcolor.Palette",
 	ShortName: "matcolor.Palette",
 	IDName:    "palette",
 	Doc:       "Palette contains a tonal palette with tonal values\nfor each of the standard colors and any custom colors.\nUse [NewPalette] to create a new palette.",
@@ -58,23 +58,23 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Primary", &gti.Field{Name: "Primary", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the primary key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Secondary", &gti.Field{Name: "Secondary", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the secondary key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Tertiary", &gti.Field{Name: "Tertiary", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the tertiary key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Select", &gti.Field{Name: "Select", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the select key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Error", &gti.Field{Name: "Error", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the error key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Success", &gti.Field{Name: "Success", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the success key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Warn", &gti.Field{Name: "Warn", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the warn key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Neutral", &gti.Field{Name: "Neutral", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the neutral key color", Directives: gti.Directives{}, Tag: ""}},
-		{"NeutralVariant", &gti.Field{Name: "NeutralVariant", Type: "goki.dev/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the neutral variant key color", Directives: gti.Directives{}, Tag: ""}},
-		{"Custom", &gti.Field{Name: "Custom", Type: "map[string]goki.dev/colors/matcolor.Tones", LocalType: "map[string]Tones", Doc: "an optional map of tones for custom accent key colors", Directives: gti.Directives{}, Tag: ""}},
+		{"Primary", &gti.Field{Name: "Primary", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the primary key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Secondary", &gti.Field{Name: "Secondary", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the secondary key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Tertiary", &gti.Field{Name: "Tertiary", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the tertiary key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Select", &gti.Field{Name: "Select", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the select key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Error", &gti.Field{Name: "Error", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the error key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Success", &gti.Field{Name: "Success", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the success key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Warn", &gti.Field{Name: "Warn", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the warn key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Neutral", &gti.Field{Name: "Neutral", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the neutral key color", Directives: gti.Directives{}, Tag: ""}},
+		{"NeutralVariant", &gti.Field{Name: "NeutralVariant", Type: "goki.dev/goki/colors/matcolor.Tones", LocalType: "Tones", Doc: "the tones for the neutral variant key color", Directives: gti.Directives{}, Tag: ""}},
+		{"Custom", &gti.Field{Name: "Custom", Type: "map[string]goki.dev/goki/colors/matcolor.Tones", LocalType: "map[string]Tones", Doc: "an optional map of tones for custom accent key colors", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/matcolor.Scheme",
+	Name:      "goki.dev/goki/colors/matcolor.Scheme",
 	ShortName: "matcolor.Scheme",
 	IDName:    "scheme",
 	Doc:       "Scheme contains the colors for one color scheme (ex: light or dark).\nTo generate a scheme, use [NewScheme].",
@@ -82,14 +82,14 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Primary", &gti.Field{Name: "Primary", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Primary is the primary color applied to important elements", Directives: gti.Directives{}, Tag: ""}},
-		{"Secondary", &gti.Field{Name: "Secondary", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Secondary is the secondary color applied to less important elements", Directives: gti.Directives{}, Tag: ""}},
-		{"Tertiary", &gti.Field{Name: "Tertiary", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Tertiary is the tertiary color applied as an accent to highlight elements and create contrast between other colors", Directives: gti.Directives{}, Tag: ""}},
-		{"Select", &gti.Field{Name: "Select", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Select is the selection color applied to selected or highlighted elements and text", Directives: gti.Directives{}, Tag: ""}},
-		{"Error", &gti.Field{Name: "Error", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Error is the error color applied to elements that indicate an error or danger", Directives: gti.Directives{}, Tag: ""}},
-		{"Success", &gti.Field{Name: "Success", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Success is the color applied to elements that indicate success", Directives: gti.Directives{}, Tag: ""}},
-		{"Warn", &gti.Field{Name: "Warn", Type: "goki.dev/colors/matcolor.Accent", LocalType: "Accent", Doc: "Warn is the color applied to elements that indicate a warning", Directives: gti.Directives{}, Tag: ""}},
-		{"Custom", &gti.Field{Name: "Custom", Type: "map[string]goki.dev/colors/matcolor.Accent", LocalType: "map[string]Accent", Doc: "an optional map of custom accent colors", Directives: gti.Directives{}, Tag: ""}},
+		{"Primary", &gti.Field{Name: "Primary", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Primary is the primary color applied to important elements", Directives: gti.Directives{}, Tag: ""}},
+		{"Secondary", &gti.Field{Name: "Secondary", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Secondary is the secondary color applied to less important elements", Directives: gti.Directives{}, Tag: ""}},
+		{"Tertiary", &gti.Field{Name: "Tertiary", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Tertiary is the tertiary color applied as an accent to highlight elements and create contrast between other colors", Directives: gti.Directives{}, Tag: ""}},
+		{"Select", &gti.Field{Name: "Select", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Select is the selection color applied to selected or highlighted elements and text", Directives: gti.Directives{}, Tag: ""}},
+		{"Error", &gti.Field{Name: "Error", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Error is the error color applied to elements that indicate an error or danger", Directives: gti.Directives{}, Tag: ""}},
+		{"Success", &gti.Field{Name: "Success", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Success is the color applied to elements that indicate success", Directives: gti.Directives{}, Tag: ""}},
+		{"Warn", &gti.Field{Name: "Warn", Type: "goki.dev/goki/colors/matcolor.Accent", LocalType: "Accent", Doc: "Warn is the color applied to elements that indicate a warning", Directives: gti.Directives{}, Tag: ""}},
+		{"Custom", &gti.Field{Name: "Custom", Type: "map[string]goki.dev/goki/colors/matcolor.Accent", LocalType: "map[string]Accent", Doc: "an optional map of custom accent colors", Directives: gti.Directives{}, Tag: ""}},
 		{"SurfaceDim", &gti.Field{Name: "SurfaceDim", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)", Directives: gti.Directives{}, Tag: ""}},
 		{"Surface", &gti.Field{Name: "Surface", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Surface is the color applied to contained areas, like the background of an app", Directives: gti.Directives{}, Tag: ""}},
 		{"SurfaceBright", &gti.Field{Name: "SurfaceBright", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "SurfaceBright is the color applied to elements that will always have the brightest surface color (see Surface for more information)", Directives: gti.Directives{}, Tag: ""}},

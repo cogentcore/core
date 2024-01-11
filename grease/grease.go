@@ -9,16 +9,16 @@ import (
 	"log/slog"
 	"os"
 
-	"goki.dev/grog"
+	"goki.dev/goki/grog"
 )
 
 // Run runs an app with the given options, configuration struct,
-// and commands. It does not run the GUI; see [goki.dev/greasi.Run]
+// and commands. It does not run the GUI; see [goki.dev/goki/greasi.Run]
 // for that. The configuration struct should be passed as a pointer, and
 // configuration options should be defined as fields on the configuration
 // struct. The commands can be specified as either functions or struct
 // objects; the functions are more concise but require using gti
-// (see https://goki.dev/gti). In addition to the given commands,
+// (see https://goki.dev/goki/gti). In addition to the given commands,
 // Run adds a "help" command that prints the result of [Usage], which
 // will also be the root command if no other root command is specified.
 // Also, it adds the fields in [MetaConfig] as configuration options.

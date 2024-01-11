@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/glop/dirs"
-	"goki.dev/goosi"
-	"goki.dev/gti"
-	"goki.dev/ki/v2"
-	"goki.dev/vci/v2"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/vci"
 	"gopkg.in/fsnotify.v1"
 )
 

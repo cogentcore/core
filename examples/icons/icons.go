@@ -7,9 +7,9 @@ package main
 import (
 	"strings"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
 )
 

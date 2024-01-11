@@ -9,9 +9,9 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/glop/nptime"
-	"goki.dev/goosi/events/key"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/glop/nptime"
+	"goki.dev/goki/mat32"
 )
 
 // TraceWindowPaint prints out a . for each WindowPaint event

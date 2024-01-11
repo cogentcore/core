@@ -7,17 +7,17 @@ package gi
 import (
 	"log/slog"
 
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay

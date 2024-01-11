@@ -7,14 +7,14 @@ package gi
 import (
 	"image"
 
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 // Styling logic:
@@ -37,7 +37,7 @@ import (
 // By default, it is nil. If you set it, you should mostly call
 // AddStyleFunc within it. For reference on
 // how you should structure your CustomStyleFunc, you
-// should look at https://goki.dev/docs/gi/styling.
+// should look at https://goki.dev/goki/docs/gi/styling.
 var CustomConfigStyles func(w Widget)
 
 ////////////////////////////////////////////////////////////////////

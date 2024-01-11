@@ -7,8 +7,8 @@ package styles
 import (
 	"log/slog"
 
-	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/units"
 )
 
 // todo: for style

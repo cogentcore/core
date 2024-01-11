@@ -22,8 +22,8 @@ package hct
 import (
 	"image/color"
 
-	"goki.dev/cam/cie"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/cam/cie"
+	"goki.dev/goki/mat32"
 )
 
 const (

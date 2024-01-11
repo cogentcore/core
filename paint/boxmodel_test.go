@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/colors"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 func TestBoxModel(t *testing.T) {

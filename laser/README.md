@@ -1,7 +1,7 @@
 # laser: reflection optimized
 
-[![Go Report Card](https://goreportcard.com/badge/goki.dev/laser)](https://goreportcard.com/report/goki.dev/laser)
-    <a href="https://pkg.go.dev/goki.dev/laser"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
+[![Go Report Card](https://goreportcard.com/badge/goki.dev/goki/laser)](https://goreportcard.com/report/goki.dev/goki/laser)
+    <a href="https://pkg.go.dev/goki.dev/goki/laser"><img src="https://img.shields.io/badge/dev-reference-007d9c?logo=go&logoColor=white&style=flat" alt="pkg.go.dev docs"></a>
 
 Package laser is a highly reflective package of golang reflect helpers (lasers work by bouncing light back and forth between two mirrors).  It also connotes the "lazy" aspect of reflection -- running dynamically instead of statically precompiled.  It is derived from the [ki/kit](https://github.com/goki/ki/tree/v1) package in v1 of Ki.
 

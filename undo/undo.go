@@ -27,7 +27,7 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/gix/texteditor/textbuf"
+	"goki.dev/goki/texteditor/textbuf"
 )
 
 // DefaultRawInterval is interval for saving raw state -- need to do this

@@ -7,7 +7,7 @@ package pi
 import (
 	"sync"
 
-	"goki.dev/fi"
+	"goki.dev/goki/fi"
 )
 
 // FileStates contains two FileState's: one is being processed while the

@@ -9,9 +9,9 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/mat32"
 )
 
 // NewMainStage returns a new MainStage with given type and scene contents.

@@ -9,13 +9,13 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
-	"goki.dev/goosi/clip"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/clip"
+	"goki.dev/goki/events"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/states"
 )
 
 // EventMgr returns the event manager for this [Widget]'s [Scene].

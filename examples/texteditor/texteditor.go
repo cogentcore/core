@@ -5,9 +5,9 @@
 package main
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/gix/texteditor"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/texteditor"
 )
 
 var samplefile gi.FileName = "texteditor.go"

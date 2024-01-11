@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"goki.dev/goki/config"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/xe"
 )
 
 // Setup does platform-specific setup that ensures that development can be done

@@ -3,12 +3,12 @@
 package vdraw
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vdraw.Mtxs",
+	Name:       "goki.dev/goki/vgpu/vdraw.Mtxs",
 	ShortName:  "vdraw.Mtxs",
 	IDName:     "mtxs",
 	Doc:        "Mtxs are the projection matricies",
@@ -22,7 +22,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vdraw.DrawerImpl",
+	Name:       "goki.dev/goki/vgpu/vdraw.DrawerImpl",
 	ShortName:  "vdraw.DrawerImpl",
 	IDName:     "drawer-impl",
 	Doc:        "DrawerImpl contains implementation state -- ignore..",
@@ -38,7 +38,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vdraw.Drawer",
+	Name:       "goki.dev/goki/vgpu/vdraw.Drawer",
 	ShortName:  "vdraw.Drawer",
 	IDName:     "drawer",
 	Doc:        "Drawer is the vDraw implementation, which draws Textures\nor Fills solid colors to a render target (Surface, RenderFrame).\nImage and color palette must be set prior to a given render pass.\nMultiple fill operations can be performed in one pass, but only\none Image can be used at a time.",

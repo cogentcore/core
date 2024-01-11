@@ -5,9 +5,9 @@
 package pi
 
 import (
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/parse"
-	"goki.dev/pi/v2/syms"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/parse"
+	"goki.dev/goki/pi/syms"
 )
 
 // Lang provides a general interface for language-specific management

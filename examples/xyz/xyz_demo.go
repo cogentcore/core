@@ -10,17 +10,17 @@ import (
 	"math"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/gix/xyzv"
-	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
-	"goki.dev/xyz"
-	"goki.dev/xyz/examples/assets"
-	_ "goki.dev/xyz/io/obj"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/xyz"
+	"goki.dev/goki/xyz/examples/assets"
+	_ "goki.dev/goki/xyz/io/obj"
+	"goki.dev/goki/xyzv"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Anim has control for animating
@@ -140,7 +140,7 @@ func main() {
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> page for this example app has further info.</p>`
 
 	gi.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the
-<a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
+<a href="https://goki.dev/goki/gi/v2">GoGi</a> <i>3D</i> Framework<br>
 See <a href="https://github.com/goki/gi/blob/master/examples/xyz/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {

@@ -35,10 +35,10 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"goki.dev/glop/indent"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/glop/indent"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/token"
 )
 
 // Symbol contains the information for everything about a given

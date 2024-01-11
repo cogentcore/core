@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"goki.dev/goki/config"
-	"goki.dev/grog"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/grog"
 )
 
 // Serve serves the build output directory on the default network address at the config port.

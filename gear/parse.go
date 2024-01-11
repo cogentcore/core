@@ -12,8 +12,8 @@ import (
 	"unicode"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/grr"
-	"goki.dev/xe"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/xe"
 )
 
 // Parse uses the help messages of the app to fill in its data fields.

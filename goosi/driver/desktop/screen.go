@@ -9,10 +9,10 @@ import (
 	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/laser"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/mat32"
 )
 
 // MonitorDebug turns on various debugging statements about monitor changes

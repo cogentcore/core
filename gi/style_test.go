@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/colors"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 func TestParentActualBackground(t *testing.T) {

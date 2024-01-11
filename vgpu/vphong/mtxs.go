@@ -7,7 +7,7 @@ package vphong
 import (
 	"unsafe"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Mtxs contains the camera view and projection matricies, for uniform uploading

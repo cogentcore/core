@@ -3,12 +3,12 @@
 package ios
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goosi/driver/ios.App",
+	Name:      "goki.dev/goki/goosi/driver/ios.App",
 	ShortName: "ios.App",
 	IDName:    "app",
 	Doc:       "App is the [goosi.App] implementation for the iOS platform",
@@ -16,17 +16,17 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"GPU", &gti.Field{Name: "GPU", Type: "*goki.dev/vgpu/v2/vgpu.GPU", LocalType: "*vgpu.GPU", Doc: "GPU is the system GPU used for the app", Directives: gti.Directives{}, Tag: ""}},
+		{"GPU", &gti.Field{Name: "GPU", Type: "*goki.dev/goki/vgpu.GPU", LocalType: "*vgpu.GPU", Doc: "GPU is the system GPU used for the app", Directives: gti.Directives{}, Tag: ""}},
 		{"Winptr", &gti.Field{Name: "Winptr", Type: "uintptr", LocalType: "uintptr", Doc: "Winptr is the pointer to the underlying system window", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"AppSingle", &gti.Field{Name: "AppSingle", Type: "goki.dev/goosi/driver/base.AppSingle", LocalType: "base.AppSingle[*vdraw.Drawer, *Window]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"AppSingle", &gti.Field{Name: "AppSingle", Type: "goki.dev/goki/goosi/driver/base.AppSingle", LocalType: "base.AppSingle[*vdraw.Drawer, *Window]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goosi/driver/ios.Window",
+	Name:      "goki.dev/goki/goosi/driver/ios.Window",
 	ShortName: "ios.Window",
 	IDName:    "window",
 	Doc:       "Window is the implementation of [goosi.Window] for the iOS platform.",
@@ -35,7 +35,7 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WindowSingle", &gti.Field{Name: "WindowSingle", Type: "goki.dev/goosi/driver/base.WindowSingle", LocalType: "base.WindowSingle[*App]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WindowSingle", &gti.Field{Name: "WindowSingle", Type: "goki.dev/goki/goosi/driver/base.WindowSingle", LocalType: "base.WindowSingle[*App]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })

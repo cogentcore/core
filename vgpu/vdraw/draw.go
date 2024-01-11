@@ -12,8 +12,8 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu"
 )
 
 // These draw.Op constants are provided so that users of this package don't

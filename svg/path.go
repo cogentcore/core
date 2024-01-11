@@ -12,9 +12,9 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/girl/paint"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
 )
 
 // Path renders SVG data sequences that can render just about anything

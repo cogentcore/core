@@ -3,14 +3,14 @@
 package gradient
 
 import (
-	"goki.dev/colors"
-	"goki.dev/gti"
-	"goki.dev/mat32/v2"
-	"goki.dev/ordmap"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/gradient.Base",
+	Name:      "goki.dev/goki/colors/gradient.Base",
 	ShortName: "gradient.Base",
 	IDName:    "base",
 	Doc:       "Base contains the data and logic common to all gradient types.",
@@ -18,13 +18,13 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/colors/gradient.Stop", LocalType: "[]Stop", Doc: "the stops for the gradient; use AddStop to add stops", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/colors/gradient.Spreads", LocalType: "Spreads", Doc: "the spread method used for the gradient if it stops before the end", Directives: gti.Directives{}, Tag: ""}},
-		{"Blend", &gti.Field{Name: "Blend", Type: "goki.dev/colors.BlendTypes", LocalType: "colors.BlendTypes", Doc: "the colorspace algorithm to use for blending colors", Directives: gti.Directives{}, Tag: ""}},
-		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient", Directives: gti.Directives{}, Tag: ""}},
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/mat32/v2.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox].", Directives: gti.Directives{}, Tag: ""}},
-		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points.", Directives: gti.Directives{}, Tag: ""}},
-		{"ObjectMatrix", &gti.Field{Name: "ObjectMatrix", Type: "goki.dev/mat32/v2.Mat2", LocalType: "mat32.Mat2", Doc: "ObjectMatrix is the computed effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Stops", &gti.Field{Name: "Stops", Type: "[]goki.dev/goki/colors/gradient.Stop", LocalType: "[]Stop", Doc: "the stops for the gradient; use AddStop to add stops", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Spread", &gti.Field{Name: "Spread", Type: "goki.dev/goki/colors/gradient.Spreads", LocalType: "Spreads", Doc: "the spread method used for the gradient if it stops before the end", Directives: gti.Directives{}, Tag: ""}},
+		{"Blend", &gti.Field{Name: "Blend", Type: "goki.dev/goki/colors.BlendTypes", LocalType: "colors.BlendTypes", Doc: "the colorspace algorithm to use for blending colors", Directives: gti.Directives{}, Tag: ""}},
+		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/goki/colors/gradient.Units", LocalType: "Units", Doc: "the units to use for the gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/mat32.Box2", LocalType: "mat32.Box2", Doc: "the bounding box of the object with the gradient; this is used when rendering\ngradients with [Units] of [ObjectBoundingBox].", Directives: gti.Directives{}, Tag: ""}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/goki/mat32.Mat2", LocalType: "mat32.Mat2", Doc: "Transform is the transformation matrix applied to the gradient's points.", Directives: gti.Directives{}, Tag: ""}},
+		{"ObjectMatrix", &gti.Field{Name: "ObjectMatrix", Type: "goki.dev/goki/mat32.Mat2", LocalType: "mat32.Mat2", Doc: "ObjectMatrix is the computed effective object transformation matrix for a gradient\nwith [Units] of [ObjectBoundingBox]. It should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -67,7 +67,7 @@ func (t *Base) SetTransform(v mat32.Mat2) *Base {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/gradient.Linear",
+	Name:      "goki.dev/goki/colors/gradient.Linear",
 	ShortName: "gradient.Linear",
 	IDName:    "linear",
 	Doc:       "Linear represents a linear gradient. It implements the [image.Image] interface.",
@@ -75,13 +75,13 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point of the gradient (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: ""}},
-		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point of the gradient (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
-		{"EffStart", &gti.Field{Name: "EffStart", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "EffStart is the computed effective transformed starting point of the gradient.\nIt should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"EffEnd", &gti.Field{Name: "EffEnd", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "EffEnd is the computed effective transformed ending point of the gradient.\nIt should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "the starting point of the gradient (x1 and y1 in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"End", &gti.Field{Name: "End", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "the ending point of the gradient (x2 and y2 in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"EffStart", &gti.Field{Name: "EffStart", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "EffStart is the computed effective transformed starting point of the gradient.\nIt should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"EffEnd", &gti.Field{Name: "EffEnd", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "EffEnd is the computed effective transformed ending point of the gradient.\nIt should not be set by end users.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Base", &gti.Field{Name: "Base", Type: "goki.dev/colors/gradient.Base", LocalType: "Base", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Base", &gti.Field{Name: "Base", Type: "goki.dev/goki/colors/gradient.Base", LocalType: "Base", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
@@ -131,7 +131,7 @@ func (t *Linear) SetTransform(v mat32.Mat2) *Linear {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/colors/gradient.Radial",
+	Name:      "goki.dev/goki/colors/gradient.Radial",
 	ShortName: "gradient.Radial",
 	IDName:    "radial",
 	Doc:       "Radial represents a radial gradient. It implements the [image.Image] interface.",
@@ -139,12 +139,12 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Center", &gti.Field{Name: "Center", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the center point of the gradient (cx and cy in SVG)", Directives: gti.Directives{}, Tag: ""}},
-		{"Focal", &gti.Field{Name: "Focal", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the focal point of the gradient (fx and fy in SVG)", Directives: gti.Directives{}, Tag: ""}},
-		{"Radius", &gti.Field{Name: "Radius", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "the radius of the gradient (rx and ry in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"Center", &gti.Field{Name: "Center", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "the center point of the gradient (cx and cy in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"Focal", &gti.Field{Name: "Focal", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "the focal point of the gradient (fx and fy in SVG)", Directives: gti.Directives{}, Tag: ""}},
+		{"Radius", &gti.Field{Name: "Radius", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "the radius of the gradient (rx and ry in SVG)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Base", &gti.Field{Name: "Base", Type: "goki.dev/colors/gradient.Base", LocalType: "Base", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Base", &gti.Field{Name: "Base", Type: "goki.dev/goki/colors/gradient.Base", LocalType: "Base", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })

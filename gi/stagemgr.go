@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"sync"
 
-	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
-	"goki.dev/ordmap"
+	"goki.dev/goki/events"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/ordmap"
 )
 
 // StageMgr manages a stack of Stage elements

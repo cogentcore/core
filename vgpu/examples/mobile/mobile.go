@@ -1,3 +1,5 @@
+//go:build not_me
+
 package main
 
 import (
@@ -6,12 +8,12 @@ import (
 	"time"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/mobile/app"
-	"goki.dev/mobile/event/lifecycle"
-	"goki.dev/mobile/event/paint"
-	"goki.dev/mobile/event/size"
-	"goki.dev/mobile/event/touch"
-	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/goki/mobile/app"
+	"goki.dev/goki/mobile/event/lifecycle"
+	"goki.dev/goki/mobile/event/paint"
+	"goki.dev/goki/mobile/event/size"
+	"goki.dev/goki/mobile/event/touch"
+	"goki.dev/goki/vgpu"
 )
 
 //go:embed *.spv

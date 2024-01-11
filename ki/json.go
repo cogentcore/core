@@ -17,13 +17,13 @@ import (
 	"os"
 	"strconv"
 
-	"goki.dev/grows/jsons"
-	"goki.dev/gti"
+	"goki.dev/goki/grows/jsons"
+	"goki.dev/goki/gti"
 )
 
-// see https://goki.dev/ki/v2/wiki/Naming for IO naming conventions
+// see https://goki.dev/goki/ki/wiki/Naming for IO naming conventions
 
-// note: use [goki.dev/grows/jsons] for standard read / write of JSON files
+// note: use [goki.dev/goki/grows/jsons] for standard read / write of JSON files
 // for Ki trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
 

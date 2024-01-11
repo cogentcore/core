@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/glop/datasize"
+	"goki.dev/goki/glop/datasize"
+	"goki.dev/goki/vci"
 	"goki.dev/icons"
-	"goki.dev/vci/v2"
 )
 
 // FileInfo represents the information about a given file / directory,

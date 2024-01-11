@@ -9,12 +9,12 @@ import (
 	"reflect"
 	"strconv"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // SliceViewInline represents a slice as a single line widget,

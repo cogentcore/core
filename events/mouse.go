@@ -9,8 +9,8 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/goosi/events/key"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/mat32"
 )
 
 var (

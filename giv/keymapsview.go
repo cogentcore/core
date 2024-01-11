@@ -5,13 +5,13 @@
 package giv
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
 	"goki.dev/icons"
-	"goki.dev/laser"
 )
 
 // KeyMapsView opens a view of a key maps table

@@ -13,10 +13,10 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/jackmordaunt/icns/v2"
-	"goki.dev/goki/config"
-	"goki.dev/goki/rendericon"
-	"goki.dev/grows/images"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/gokitool/rendericon"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/xe"
 )
 
 // Pack builds and packages the app for the target platform.
@@ -391,8 +391,8 @@ var WindowsInstallerTmpl = template.Must(template.New("WindowsInstallerTmpl").Pa
 import (
 	_ "embed"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gimain"
 )
 
 //go:embed app.exe

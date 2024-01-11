@@ -8,7 +8,7 @@ import (
 	"slices"
 	"time"
 
-	"goki.dev/pi/v2/lex"
+	"goki.dev/goki/pi/lex"
 )
 
 // Edit describes an edit action to a buffer -- this is the data passed

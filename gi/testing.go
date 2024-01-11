@@ -5,8 +5,8 @@
 package gi
 
 import (
-	"goki.dev/goosi/events"
-	"goki.dev/grows/images"
+	"goki.dev/goki/events"
+	"goki.dev/goki/grows/images"
 )
 
 // AssertPixelsOnShow is a helper function that makes a new window from

@@ -15,10 +15,10 @@ import (
 	"os"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/parse"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/parse"
 )
 
 // Parser is the overall parser for managing the parsing

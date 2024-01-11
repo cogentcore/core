@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/grog"
-	"goki.dev/gti"
-	"goki.dev/laser"
+	"goki.dev/goki/grog"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/laser"
 )
 
 // Indent is the value used for indentation in [Usage].

@@ -3,12 +3,12 @@
 package grease
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/grease.metaConfigFields",
+	Name:      "goki.dev/goki/grease.metaConfigFields",
 	ShortName: "grease.metaConfigFields",
 	IDName:    "meta-config-fields",
 	Doc:       "metaConfigFields is the struct used for the implementation\nof [AddMetaConfigFields], and for the usage information for\nmeta configuration options in [Usage].\nNOTE: we could do this through [MetaConfig], but that\ncauses problems with the HelpCmd field capturing\neverything, so it easier to just add through a separate struct.\nTODO: maybe improve the structure of this\nTODO: can we get HelpCmd to display correctly in usage?",

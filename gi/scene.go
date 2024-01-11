@@ -10,17 +10,17 @@ import (
 	"io"
 	"sync"
 
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/enums"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 // see:

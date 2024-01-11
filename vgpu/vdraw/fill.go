@@ -10,8 +10,8 @@ import (
 	"image/draw"
 	"unsafe"
 
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu"
 )
 
 // FillRect fills given color to render target, to given region.

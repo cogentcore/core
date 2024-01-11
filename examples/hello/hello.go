@@ -1,6 +1,6 @@
 package main
 
-import "goki.dev/gi/v2/gi"
+import "goki.dev/goki/gi"
 
 func main() {
 	b := gi.NewAppBody("Hello")

@@ -1,6 +1,6 @@
 # ordmap: ordered map using Go 1.18 generics
 
-[![Go Reference](https://pkg.go.dev/badge/goki.dev/ordmap.svg)](https://pkg.go.dev/goki.dev/ordmap)
+[![Go Reference](https://pkg.go.dev/badge/goki.dev/goki/ordmap.svg)](https://pkg.go.dev/goki.dev/goki/ordmap)
 
 Package `ordmap` implements an ordered map that retains the order of items added to a slice, while also providing fast key-based map lookup of items, using the Go 1.18 generics system.
 

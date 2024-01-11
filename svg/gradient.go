@@ -8,9 +8,9 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/colors/gradient"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors/gradient"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
 )
 
 /////////////////////////////////////////////////////////////////////////////

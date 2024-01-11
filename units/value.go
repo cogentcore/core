@@ -10,7 +10,7 @@ import (
 
 	"log/slog"
 
-	"goki.dev/laser"
+	"goki.dev/goki/laser"
 	"golang.org/x/image/math/fixed"
 )
 

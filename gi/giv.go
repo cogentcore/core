@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"goki.dev/ki/v2"
+	"goki.dev/goki/ki"
 )
 
 // Variables for functions the giv package, allowing for it to be a separate package

@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/glop/dirs"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/ki"
 )
 
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.

@@ -7,7 +7,7 @@ package ki
 import (
 	"fmt"
 
-	"goki.dev/gti"
+	"goki.dev/goki/gti"
 )
 
 // TypeAndName holds a type and a name.

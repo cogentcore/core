@@ -5,13 +5,13 @@
 package filetree
 
 import (
-	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
-	"goki.dev/grr"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/vci"
 	"goki.dev/icons"
-	"goki.dev/vci/v2"
 )
 
 func (ft *Tree) OnInit() {

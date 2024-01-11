@@ -12,11 +12,11 @@ import (
 	"slices"
 
 	"github.com/anthonynsimon/bild/clone"
-	"goki.dev/colors"
-	"goki.dev/colors/gradient"
-	"goki.dev/girl/raster"
-	"goki.dev/girl/styles"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/colors/gradient"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/raster"
+	"goki.dev/goki/styles"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

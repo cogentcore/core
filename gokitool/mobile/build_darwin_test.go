@@ -10,9 +10,9 @@ import (
 	"testing"
 	"text/template"
 
-	"goki.dev/goki/config"
-	"goki.dev/grease"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/grease"
+	"goki.dev/goki/xe"
 )
 
 func TestAppleBuild(t *testing.T) {
@@ -40,8 +40,8 @@ func TestAppleBuild(t *testing.T) {
 		pkg  string
 		main bool
 	}{
-		{"goki.dev/mobile/example/basic", true},
-		{"goki.dev/mobile/bind/testdata/testpkg", false},
+		{"goki.dev/goki/mobile/example/basic", true},
+		{"goki.dev/goki/mobile/bind/testdata/testpkg", false},
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)

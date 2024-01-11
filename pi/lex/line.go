@@ -9,7 +9,7 @@ import (
 	"sort"
 	"unicode"
 
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/pi/token"
 )
 
 // Line is one line of Lex'd text

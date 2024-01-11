@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io/fs"
 
-	"goki.dev/glop/dirs"
-	"goki.dev/grows/tomls"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/grows/tomls"
 )
 
 // TODO: use glop/dirs and grows for these things

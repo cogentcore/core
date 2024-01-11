@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/fs"
 
-	"goki.dev/grows"
+	"goki.dev/goki/grows"
 )
 
 // Open reads the given object from the given filename using JSON encoding

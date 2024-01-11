@@ -12,14 +12,14 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"goki.dev/fi"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gix/texteditor/histyle"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/pi"
-	_ "goki.dev/pi/v2/suplangs"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/pi"
+	"goki.dev/goki/pi/lex"
+	_ "goki.dev/goki/pi/suplangs"
+	"goki.dev/goki/pi/token"
+	"goki.dev/goki/texteditor/histyle"
 )
 
 // HiMarkup manages the syntax highlighting state for Buf.

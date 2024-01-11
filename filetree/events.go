@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"strings"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/vci"
 	"goki.dev/icons"
-	"goki.dev/vci/v2"
 )
 
 func (fn *Node) HandleEvents() {

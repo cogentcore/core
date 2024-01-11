@@ -17,7 +17,7 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/goki/mobile/binres"
+	"goki.dev/goki/gokitool/mobile/binres"
 )
 
 const tmpl = `// Copyright 2016 The Go Authors.  All rights reserved.

@@ -9,9 +9,9 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/enums"
-	"goki.dev/glop/nptime"
-	"goki.dev/goosi/events/key"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/glop/nptime"
 )
 
 // Base is the base type for events.

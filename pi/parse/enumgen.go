@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/ki"
 )
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}

@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"unsafe"
 
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu"
 )
 
 func init() {

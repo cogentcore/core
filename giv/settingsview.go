@@ -5,8 +5,8 @@
 package giv
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
 )
 
 // TODO(kai): improve settings view app bar structure

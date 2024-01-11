@@ -5,15 +5,15 @@
 package texteditor
 
 import (
-	"goki.dev/fi"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/states"
-	"goki.dev/gix/texteditor/textbuf"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
+	"goki.dev/goki/events"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/mimedata"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/states"
+	"goki.dev/goki/texteditor/textbuf"
 	"goki.dev/icons"
-	"goki.dev/pi/v2/lex"
 )
 
 //////////////////////////////////////////////////////////

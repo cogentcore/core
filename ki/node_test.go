@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 
-	"goki.dev/gti"
-	. "goki.dev/ki/v2"
-	"goki.dev/ki/v2/testdata"
+	"goki.dev/goki/gti"
+	. "goki.dev/goki/ki"
+	"goki.dev/goki/ki/testdata"
 )
 
 func TestNodeAddChild(t *testing.T) {

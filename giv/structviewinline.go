@@ -7,11 +7,11 @@ package giv
 import (
 	"reflect"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
 )
 
 // StructViewInline represents a struct as a single line widget,

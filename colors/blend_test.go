@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"goki.dev/grows/images"
+	"goki.dev/goki/grows/images"
 )
 
 func TestAlphaBlend(t *testing.T) {

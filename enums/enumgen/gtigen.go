@@ -3,12 +3,12 @@
 package enumgen
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/enums/enumgen.Config",
+	Name:      "goki.dev/goki/enums/enumgen.Config",
 	ShortName: "enumgen.Config",
 	IDName:    "config",
 	Doc:       "Config contains the configuration information\nused by enumgen",
@@ -35,14 +35,14 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/enums/enumgen.Generate",
+	Name: "goki.dev/goki/enums/enumgen.Generate",
 	Doc:  "Generate generates enum methods, using the\nconfiguration information, loading the packages from the\nconfiguration source directory, and writing the result\nto the configuration output file.\n\nIt is a simple entry point to enumgen that does all\nof the steps; for more specific functionality, create\na new [Generator] with [NewGenerator] and call methods on it.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"cfg", &gti.Field{Name: "cfg", Type: "*goki.dev/enums/enumgen.Config", LocalType: "*Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"cfg", &gti.Field{Name: "cfg", Type: "*goki.dev/goki/enums/enumgen.Config", LocalType: "*Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},

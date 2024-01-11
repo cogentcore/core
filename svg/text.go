@@ -7,11 +7,11 @@ package svg
 import (
 	"image"
 
-	"goki.dev/colors"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 // Text renders SVG text, handling both text and tspan elements.

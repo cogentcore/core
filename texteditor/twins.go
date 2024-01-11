@@ -5,9 +5,9 @@
 package texteditor
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/styles"
 )
 
 // TwinEditors presents two side-by-side [Editor]s in [gi.Splits]

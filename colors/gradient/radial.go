@@ -11,7 +11,7 @@ package gradient
 import (
 	"image/color"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Radial represents a radial gradient. It implements the [image.Image] interface.

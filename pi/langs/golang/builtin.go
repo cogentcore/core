@@ -8,9 +8,9 @@ import (
 	"strings"
 	"unsafe"
 
-	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/pi"
-	"goki.dev/pi/v2/syms"
+	"goki.dev/goki/pi"
+	"goki.dev/goki/pi/complete"
+	"goki.dev/goki/pi/syms"
 )
 
 var BuiltinTypes syms.TypeMap

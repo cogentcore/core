@@ -3,24 +3,24 @@
 package pi
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.FileState",
+	Name:       "goki.dev/goki/pi.FileState",
 	ShortName:  "pi.FileState",
 	IDName:     "file-state",
 	Doc:        "FileState contains the full lexing and parsing state information for a given file.\nIt is the master state record for everything that happens in GoPi.  One of these\nshould be maintained for each file -- giv.TextBuf has one as PiState field.\n\nSeparate State structs are maintained for each stage (Lexing, PassTwo, Parsing) and\nthe final output of Parsing goes into the Ast and Syms fields.\n\nThe Src lex.File field maintains all the info about the source file, and the basic\ntokenized version of the source produced initially by lexing and updated by the\nremaining passes.  It has everything that is maintained at a line-by-line level.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Src", &gti.Field{Name: "Src", Type: "goki.dev/pi/v2/lex.File", LocalType: "lex.File", Doc: "the source to be parsed -- also holds the full lexed tokens", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"LexState", &gti.Field{Name: "LexState", Type: "goki.dev/pi/v2/lex.State", LocalType: "lex.State", Doc: "state for lexing", Directives: gti.Directives{}, Tag: "json:\"_\" xml:\"-\""}},
-		{"TwoState", &gti.Field{Name: "TwoState", Type: "goki.dev/pi/v2/lex.TwoState", LocalType: "lex.TwoState", Doc: "state for second pass nesting depth and EOS matching", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"ParseState", &gti.Field{Name: "ParseState", Type: "goki.dev/pi/v2/parse.State", LocalType: "parse.State", Doc: "state for parsing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Ast", &gti.Field{Name: "Ast", Type: "goki.dev/pi/v2/parse.Ast", LocalType: "parse.Ast", Doc: "ast output tree from parsing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Syms", &gti.Field{Name: "Syms", Type: "goki.dev/pi/v2/syms.SymMap", LocalType: "syms.SymMap", Doc: "symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"ExtSyms", &gti.Field{Name: "ExtSyms", Type: "goki.dev/pi/v2/syms.SymMap", LocalType: "syms.SymMap", Doc: "External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Src", &gti.Field{Name: "Src", Type: "goki.dev/goki/pi/lex.File", LocalType: "lex.File", Doc: "the source to be parsed -- also holds the full lexed tokens", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"LexState", &gti.Field{Name: "LexState", Type: "goki.dev/goki/pi/lex.State", LocalType: "lex.State", Doc: "state for lexing", Directives: gti.Directives{}, Tag: "json:\"_\" xml:\"-\""}},
+		{"TwoState", &gti.Field{Name: "TwoState", Type: "goki.dev/goki/pi/lex.TwoState", LocalType: "lex.TwoState", Doc: "state for second pass nesting depth and EOS matching", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ParseState", &gti.Field{Name: "ParseState", Type: "goki.dev/goki/pi/parse.State", LocalType: "parse.State", Doc: "state for parsing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Ast", &gti.Field{Name: "Ast", Type: "goki.dev/goki/pi/parse.Ast", LocalType: "parse.Ast", Doc: "ast output tree from parsing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Syms", &gti.Field{Name: "Syms", Type: "goki.dev/goki/pi/syms.SymMap", LocalType: "syms.SymMap", Doc: "symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ExtSyms", &gti.Field{Name: "ExtSyms", Type: "goki.dev/goki/pi/syms.SymMap", LocalType: "syms.SymMap", Doc: "External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"SymsMu", &gti.Field{Name: "SymsMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting updates / reading of Syms symbols", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"WaitGp", &gti.Field{Name: "WaitGp", Type: "sync.WaitGroup", LocalType: "sync.WaitGroup", Doc: "waitgroup for coordinating processing of other items", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"AnonCtr", &gti.Field{Name: "AnonCtr", Type: "int", LocalType: "int", Doc: "anonymous counter -- counts up", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
@@ -31,18 +31,18 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.FileStates",
+	Name:       "goki.dev/goki/pi.FileStates",
 	ShortName:  "pi.FileStates",
 	IDName:     "file-states",
 	Doc:        "FileStates contains two FileState's: one is being processed while the\nother is being used externally.  The FileStates maintains\na common set of file information set in each of the FileState items when\nthey are used.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "the filename", Directives: gti.Directives{}, Tag: ""}},
-		{"Sup", &gti.Field{Name: "Sup", Type: "goki.dev/fi.Known", LocalType: "fi.Known", Doc: "the known file type, if known (typically only known files are processed)", Directives: gti.Directives{}, Tag: ""}},
+		{"Sup", &gti.Field{Name: "Sup", Type: "goki.dev/goki/fi.Known", LocalType: "fi.Known", Doc: "the known file type, if known (typically only known files are processed)", Directives: gti.Directives{}, Tag: ""}},
 		{"BasePath", &gti.Field{Name: "BasePath", Type: "string", LocalType: "string", Doc: "base path for reporting file names -- this must be set externally e.g., by gide for the project root path", Directives: gti.Directives{}, Tag: ""}},
 		{"DoneIdx", &gti.Field{Name: "DoneIdx", Type: "int", LocalType: "int", Doc: "index of the state that is done", Directives: gti.Directives{}, Tag: ""}},
-		{"FsA", &gti.Field{Name: "FsA", Type: "goki.dev/pi/v2/pi.FileState", LocalType: "FileState", Doc: "one filestate", Directives: gti.Directives{}, Tag: ""}},
-		{"FsB", &gti.Field{Name: "FsB", Type: "goki.dev/pi/v2/pi.FileState", LocalType: "FileState", Doc: "one filestate", Directives: gti.Directives{}, Tag: ""}},
+		{"FsA", &gti.Field{Name: "FsA", Type: "goki.dev/goki/pi.FileState", LocalType: "FileState", Doc: "one filestate", Directives: gti.Directives{}, Tag: ""}},
+		{"FsB", &gti.Field{Name: "FsB", Type: "goki.dev/goki/pi.FileState", LocalType: "FileState", Doc: "one filestate", Directives: gti.Directives{}, Tag: ""}},
 		{"SwitchMu", &gti.Field{Name: "SwitchMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex locking the switching of Done vs. Proc states", Directives: gti.Directives{}, Tag: ""}},
 		{"ProcMu", &gti.Field{Name: "ProcMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching", Directives: gti.Directives{}, Tag: ""}},
 		{"Meta", &gti.Field{Name: "Meta", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra meta data associated with this FileStates", Directives: gti.Directives{}, Tag: ""}},
@@ -52,7 +52,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.Lang",
+	Name:       "goki.dev/goki/pi.Lang",
 	ShortName:  "pi.Lang",
 	IDName:     "lang",
 	Doc:        "Lang provides a general interface for language-specific management\nof the lexing, parsing, and symbol lookup process.\nThe GoPi lexer and parser machinery is entirely language-general\nbut specific languages may need specific ways of managing these\nprocesses, and processing their outputs, to best support the\nfeatures of those languages.  That is what this interface provides.\n\nEach language defines a type supporting this interface, which is\nin turn registered with the StdLangProps map.  Each supported\nlanguage has its own .go file in this pi package that defines its\nown implementation of the interface and any other associated\nfunctionality.\n\nThe Lang is responsible for accessing the appropriate pi.Parser for this\nlanguage (initialized and managed via LangSupport.OpenStd() etc)\nand the pi.FileState structure contains all the input and output\nstate information for a given file.\n\nThis interface is likely to evolve as we expand the range of supported\nlanguages.",
@@ -62,7 +62,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.LangDirOpts",
+	Name:       "goki.dev/goki/pi.LangDirOpts",
 	ShortName:  "pi.LangDirOpts",
 	IDName:     "lang-dir-opts",
 	Doc:        "LangDirOpts provides options for Lang ParseDir method",
@@ -77,7 +77,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/pi/v2/pi.LangFlags",
+	Name:      "goki.dev/goki/pi.LangFlags",
 	ShortName: "pi.LangFlags",
 	IDName:    "lang-flags",
 	Doc:       "LangFlags are special properties of a given language",
@@ -89,26 +89,26 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.LangProps",
+	Name:       "goki.dev/goki/pi.LangProps",
 	ShortName:  "pi.LangProps",
 	IDName:     "lang-props",
 	Doc:        "LangProps contains properties of languages supported by the Pi parser\nframework",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Sup", &gti.Field{Name: "Sup", Type: "goki.dev/fi.Known", LocalType: "fi.Known", Doc: "language -- must be a supported one from Known list", Directives: gti.Directives{}, Tag: ""}},
+		{"Sup", &gti.Field{Name: "Sup", Type: "goki.dev/goki/fi.Known", LocalType: "fi.Known", Doc: "language -- must be a supported one from Known list", Directives: gti.Directives{}, Tag: ""}},
 		{"CommentLn", &gti.Field{Name: "CommentLn", Type: "string", LocalType: "string", Doc: "character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used", Directives: gti.Directives{}, Tag: ""}},
 		{"CommentSt", &gti.Field{Name: "CommentSt", Type: "string", LocalType: "string", Doc: "character(s) that start a multi-line comment or one that requires both start and end", Directives: gti.Directives{}, Tag: ""}},
 		{"CommentEd", &gti.Field{Name: "CommentEd", Type: "string", LocalType: "string", Doc: "character(s) that end a multi-line comment or one that requires both start and end", Directives: gti.Directives{}, Tag: ""}},
-		{"Flags", &gti.Field{Name: "Flags", Type: "[]goki.dev/pi/v2/pi.LangFlags", LocalType: "[]LangFlags", Doc: "special properties for this language -- as an explicit list of options to make them easier to see and set in defaults", Directives: gti.Directives{}, Tag: ""}},
-		{"Lang", &gti.Field{Name: "Lang", Type: "goki.dev/pi/v2/pi.Lang", LocalType: "Lang", Doc: "Lang interface for this language", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Parser", &gti.Field{Name: "Parser", Type: "*goki.dev/pi/v2/pi.Parser", LocalType: "*Parser", Doc: "parser for this language -- initialized in OpenStd", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Flags", &gti.Field{Name: "Flags", Type: "[]goki.dev/goki/pi.LangFlags", LocalType: "[]LangFlags", Doc: "special properties for this language -- as an explicit list of options to make them easier to see and set in defaults", Directives: gti.Directives{}, Tag: ""}},
+		{"Lang", &gti.Field{Name: "Lang", Type: "goki.dev/goki/pi.Lang", LocalType: "Lang", Doc: "Lang interface for this language", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Parser", &gti.Field{Name: "Parser", Type: "*goki.dev/goki/pi.Parser", LocalType: "*Parser", Doc: "parser for this language -- initialized in OpenStd", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.LangSupporter",
+	Name:       "goki.dev/goki/pi.LangSupporter",
 	ShortName:  "pi.LangSupporter",
 	IDName:     "lang-supporter",
 	Doc:        "LangSupporter provides general support for supported languages.\ne.g., looking up lexers and parsers by name.\nAlso implements the lex.LangLexer interface to provide access to other\nGuest Lexers",
@@ -119,15 +119,15 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/pi/v2/pi.Parser",
+	Name:       "goki.dev/goki/pi.Parser",
 	ShortName:  "pi.Parser",
 	IDName:     "parser",
 	Doc:        "Parser is the overall parser for managing the parsing",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Lexer", &gti.Field{Name: "Lexer", Type: "goki.dev/pi/v2/lex.Rule", LocalType: "lex.Rule", Doc: "lexer rules for first pass of lexing file", Directives: gti.Directives{}, Tag: ""}},
-		{"PassTwo", &gti.Field{Name: "PassTwo", Type: "goki.dev/pi/v2/lex.PassTwo", LocalType: "lex.PassTwo", Doc: "second pass after lexing -- computes nesting depth and EOS finding", Directives: gti.Directives{}, Tag: ""}},
-		{"Parser", &gti.Field{Name: "Parser", Type: "goki.dev/pi/v2/parse.Rule", LocalType: "parse.Rule", Doc: "parser rules for parsing lexed tokens", Directives: gti.Directives{}, Tag: ""}},
+		{"Lexer", &gti.Field{Name: "Lexer", Type: "goki.dev/goki/pi/lex.Rule", LocalType: "lex.Rule", Doc: "lexer rules for first pass of lexing file", Directives: gti.Directives{}, Tag: ""}},
+		{"PassTwo", &gti.Field{Name: "PassTwo", Type: "goki.dev/goki/pi/lex.PassTwo", LocalType: "lex.PassTwo", Doc: "second pass after lexing -- computes nesting depth and EOS finding", Directives: gti.Directives{}, Tag: ""}},
+		{"Parser", &gti.Field{Name: "Parser", Type: "goki.dev/goki/pi/parse.Rule", LocalType: "parse.Rule", Doc: "parser rules for parsing lexed tokens", Directives: gti.Directives{}, Tag: ""}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name for overall parser (not file being parsed!)", Directives: gti.Directives{}, Tag: ""}},
 		{"ReportErrs", &gti.Field{Name: "ReportErrs", Type: "bool", LocalType: "bool", Doc: "if true, reports errors after parsing, to stdout", Directives: gti.Directives{}, Tag: ""}},
 		{"ModTime", &gti.Field{Name: "ModTime", Type: "time.Time", LocalType: "time.Time", Doc: "when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},

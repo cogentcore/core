@@ -17,15 +17,15 @@ import (
 	"os"
 	"strings"
 
-	"goki.dev/cam/hct"
-	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
+	"goki.dev/goki/cam/hct"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/colors/matcolor"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/pi/token"
+	"goki.dev/goki/styles"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/token"
 )
 
 // Trilean value for StyleEntry value inheritance.

@@ -7,21 +7,21 @@ import (
 	"image/color"
 	"time"
 
-	"goki.dev/fi/uri"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/gti"
+	"goki.dev/goki/events"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/fi/uri"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/ordmap"
+	"goki.dev/goki/pi/complete"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-	"goki.dev/ordmap"
-	"goki.dev/pi/v2/complete"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.App",
+	Name:      "goki.dev/goki/gi.App",
 	ShortName: "gi.App",
 	IDName:    "app",
 	Doc:       "App encapsulates various properties of the overall application,\nincluding managing an AppBar and associated elements.",
@@ -32,7 +32,7 @@ var _ = gti.AddType(&gti.Type{
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "Name can be used in relevant window titles and prompts,\nand specifies the default application-specific data directory", Directives: gti.Directives{}, Tag: ""}},
 		{"About", &gti.Field{Name: "About", Type: "string", LocalType: "string", Doc: "About sets the 'about' info for the app, which appears as a menu option\nin the default app menu.", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "[]image.Image", LocalType: "[]image.Image", Doc: "Icon specifies the app icon, which is passed to [goosi.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG].", Directives: gti.Directives{}, Tag: ""}},
-		{"AppBarConfig", &gti.Field{Name: "AppBarConfig", Type: "func(pw goki.dev/gi/v2/gi.Widget)", LocalType: "func(pw Widget)", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nSet to StdAppBarConfig by default, which makes the standard AppBar behavior.\nMost apps will define their own version to add App-specific\nfunctionality, and set this accordingly.\nIf this is nil, then no TopAppBar will be created by default.", Directives: gti.Directives{}, Tag: ""}},
+		{"AppBarConfig", &gti.Field{Name: "AppBarConfig", Type: "func(pw goki.dev/goki/gi.Widget)", LocalType: "func(pw Widget)", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nSet to StdAppBarConfig by default, which makes the standard AppBar behavior.\nMost apps will define their own version to add App-specific\nfunctionality, and set this accordingly.\nIf this is nil, then no TopAppBar will be created by default.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -76,16 +76,16 @@ func (t *App) SetAppBarConfig(v func(pw Widget)) *App {
 
 // AppChooserType is the [gti.Type] for [AppChooser]
 var AppChooserType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.AppChooser",
+	Name:       "goki.dev/goki/gi.AppChooser",
 	ShortName:  "gi.AppChooser",
 	IDName:     "app-chooser",
 	Doc:        "AppChooser is an editable chooser element, typically placed at the start\nof the TopAppBar, that provides direct access to all manner of app resources.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Resources", &gti.Field{Name: "Resources", Type: "goki.dev/fi/uri.Resources", LocalType: "uri.Resources", Doc: "Resources are generators for resources accessible by the AppChooser", Directives: gti.Directives{}, Tag: ""}},
+		{"Resources", &gti.Field{Name: "Resources", Type: "goki.dev/goki/fi/uri.Resources", LocalType: "uri.Resources", Doc: "Resources are generators for resources accessible by the AppChooser", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Chooser", &gti.Field{Name: "Chooser", Type: "goki.dev/gi/v2/gi.Chooser", LocalType: "Chooser", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Chooser", &gti.Field{Name: "Chooser", Type: "goki.dev/goki/gi.Chooser", LocalType: "Chooser", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &AppChooser{},
@@ -190,7 +190,7 @@ func (t *AppChooser) SetItemsFunc(v func()) *AppChooser {
 
 // BodyType is the [gti.Type] for [Body]
 var BodyType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Body",
+	Name:      "goki.dev/goki/gi.Body",
 	ShortName: "gi.Body",
 	IDName:    "body",
 	Doc:       "Body holds the primary content of a Scene",
@@ -201,7 +201,7 @@ var BodyType = gti.AddType(&gti.Type{
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Body, also used for window title where relevant", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Body{},
@@ -244,14 +244,14 @@ func (t *Body) SetStripes(v Stripes) *Body {
 
 // BoxType is the [gti.Type] for [Box]
 var BoxType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Box",
+	Name:       "goki.dev/goki/gi.Box",
 	ShortName:  "gi.Box",
 	IDName:     "box",
 	Doc:        "Box is a simple base [Widget] that renders the Std Box model",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Box{},
@@ -283,7 +283,7 @@ func (t *Box) SetTooltip(v string) *Box {
 
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Button",
+	Name:      "goki.dev/goki/gi.Button",
 	ShortName: "gi.Button",
 	IDName:    "button",
 	Doc:       "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).",
@@ -291,16 +291,16 @@ var ButtonType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: ""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown.", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None].", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
-		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goki/events/key.Chord", LocalType: "key.Chord", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/goki/gi.Scene)", LocalType: "func(m *Scene)", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is optional data that can be used for event handling", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Button{},
@@ -408,14 +408,14 @@ func (t *Button) SetTooltip(v string) *Button {
 
 // CanvasType is the [gti.Type] for [Canvas]
 var CanvasType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Canvas",
+	Name:       "goki.dev/goki/gi.Canvas",
 	ShortName:  "gi.Canvas",
 	IDName:     "canvas",
 	Doc:        "Canvas is a widget that can be arbitrarily drawn to.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Canvas{},
@@ -447,13 +447,13 @@ func (t *Canvas) SetTooltip(v string) *Canvas {
 
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Chooser",
+	Name:       "goki.dev/goki/gi.Chooser",
 	ShortName:  "gi.Chooser",
 	IDName:     "chooser",
 	Doc:        "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ChooserTypes", LocalType: "ChooserTypes", Doc: "the type of combo box", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.ChooserTypes", LocalType: "ChooserTypes", Doc: "the type of combo box", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the indicator icon to present.", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", LocalType: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}, Tag: ""}},
@@ -470,7 +470,7 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Chooser{},
@@ -583,7 +583,7 @@ func (t *Chooser) SetTooltip(v string) *Chooser {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Complete",
+	Name:      "goki.dev/goki/gi.Complete",
 	ShortName: "gi.Complete",
 	IDName:    "complete",
 	Doc:       "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the [PopupStage] associated with it.",
@@ -591,17 +591,17 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MatchFunc", &gti.Field{Name: "MatchFunc", Type: "goki.dev/pi/v2/complete.MatchFunc", LocalType: "complete.MatchFunc", Doc: "function to get the list of possible completions", Directives: gti.Directives{}, Tag: ""}},
-		{"LookupFunc", &gti.Field{Name: "LookupFunc", Type: "goki.dev/pi/v2/complete.LookupFunc", LocalType: "complete.LookupFunc", Doc: "function to get the text to show for lookup", Directives: gti.Directives{}, Tag: ""}},
-		{"EditFunc", &gti.Field{Name: "EditFunc", Type: "goki.dev/pi/v2/complete.EditFunc", LocalType: "complete.EditFunc", Doc: "function to edit text using the selected completion", Directives: gti.Directives{}, Tag: ""}},
+		{"MatchFunc", &gti.Field{Name: "MatchFunc", Type: "goki.dev/goki/pi/complete.MatchFunc", LocalType: "complete.MatchFunc", Doc: "function to get the list of possible completions", Directives: gti.Directives{}, Tag: ""}},
+		{"LookupFunc", &gti.Field{Name: "LookupFunc", Type: "goki.dev/goki/pi/complete.LookupFunc", LocalType: "complete.LookupFunc", Doc: "function to get the text to show for lookup", Directives: gti.Directives{}, Tag: ""}},
+		{"EditFunc", &gti.Field{Name: "EditFunc", Type: "goki.dev/goki/pi/complete.EditFunc", LocalType: "complete.EditFunc", Doc: "function to edit text using the selected completion", Directives: gti.Directives{}, Tag: ""}},
 		{"Context", &gti.Field{Name: "Context", Type: "any", LocalType: "any", Doc: "the object that implements complete.Func", Directives: gti.Directives{}, Tag: ""}},
 		{"SrcLn", &gti.Field{Name: "SrcLn", Type: "int", LocalType: "int", Doc: "line number in source that completion is operating on, if relevant", Directives: gti.Directives{}, Tag: ""}},
 		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", LocalType: "int", Doc: "character position in source that completion is operating on", Directives: gti.Directives{}, Tag: ""}},
-		{"Completions", &gti.Field{Name: "Completions", Type: "goki.dev/pi/v2/complete.Completions", LocalType: "complete.Completions", Doc: "the list of potential completions", Directives: gti.Directives{}, Tag: ""}},
+		{"Completions", &gti.Field{Name: "Completions", Type: "goki.dev/goki/pi/complete.Completions", LocalType: "complete.Completions", Doc: "the list of potential completions", Directives: gti.Directives{}, Tag: ""}},
 		{"Seed", &gti.Field{Name: "Seed", Type: "string", LocalType: "string", Doc: "current completion seed", Directives: gti.Directives{}, Tag: ""}},
 		{"Completion", &gti.Field{Name: "Completion", Type: "string", LocalType: "string", Doc: "the user's completion selection", Directives: gti.Directives{}, Tag: ""}},
-		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "the event listeners for the completer (it sends Select events)", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
-		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]", Directives: gti.Directives{}, Tag: ""}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goki/events.Listeners", LocalType: "events.Listeners", Doc: "the event listeners for the completer (it sends Select events)", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/goki/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]", Directives: gti.Directives{}, Tag: ""}},
 		{"DelayTimer", &gti.Field{Name: "DelayTimer", Type: "*time.Timer", LocalType: "*time.Timer", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DelayMu", &gti.Field{Name: "DelayMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
@@ -682,16 +682,16 @@ func (t *Complete) SetStage(v *Stage) *Complete {
 
 // FrameType is the [gti.Type] for [Frame]
 var FrameType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Frame",
+	Name:       "goki.dev/goki/gi.Frame",
 	ShortName:  "gi.Frame",
 	IDName:     "frame",
 	Doc:        "Frame is a Layout that renders a background according to the\nbackground-color style setting, and optional striping for grid layouts",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stripes", &gti.Field{Name: "Stripes", Type: "goki.dev/gi/v2/gi.Stripes", LocalType: "Stripes", Doc: "options for striped backgrounds -- rendered as darker bands relative to background color", Directives: gti.Directives{}, Tag: ""}},
+		{"Stripes", &gti.Field{Name: "Stripes", Type: "goki.dev/goki/gi.Stripes", LocalType: "Stripes", Doc: "options for striped backgrounds -- rendered as darker bands relative to background color", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/goki/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Frame{},
@@ -736,7 +736,7 @@ func (t *Frame) SetStackTop(v int) *Frame {
 
 // HandleType is the [gti.Type] for [Handle]
 var HandleType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Handle",
+	Name:       "goki.dev/goki/gi.Handle",
 	ShortName:  "gi.Handle",
 	IDName:     "handle",
 	Doc:        "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [Handle.Styles.Direction]\ncontrols the direction in which the handle moves.",
@@ -747,7 +747,7 @@ var HandleType = gti.AddType(&gti.Type{
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Handle{},
@@ -803,7 +803,7 @@ func (t *Handle) SetTooltip(v string) *Handle {
 
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Icon",
+	Name:       "goki.dev/goki/gi.Icon",
 	ShortName:  "gi.Icon",
 	IDName:     "icon",
 	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.",
@@ -811,11 +811,11 @@ var IconType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"IconName", &gti.Field{Name: "IconName", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon name that has been set.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"SVG", &gti.Field{Name: "SVG", Type: "goki.dev/svg.SVG", LocalType: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SVG", &gti.Field{Name: "SVG", Type: "goki.dev/goki/svg.SVG", LocalType: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"RendSize", &gti.Field{Name: "RendSize", Type: "image.Point", LocalType: "image.Point", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Icon{},
@@ -847,20 +847,20 @@ func (t *Icon) SetTooltip(v string) *Icon {
 
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Image",
+	Name:       "goki.dev/goki/gi.Image",
 	ShortName:  "gi.Image",
 	IDName:     "image",
 	Doc:        "Image is a Widget that renders a static bitmap image.\nSee [Styles.ObjectFits] for how to control the image rendering within\nthe allocated size.  The minimum requested size is the pixel size in\nDp units (1/160th of an inch).",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/goki/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "the bitmap image", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 		{"PrevPixels", &gti.Field{Name: "PrevPixels", Type: "image.Image", LocalType: "image.Image", Doc: "cached last rendered image", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
-		{"PrevObjectFit", &gti.Field{Name: "PrevObjectFit", Type: "goki.dev/girl/styles.ObjectFits", LocalType: "styles.ObjectFits", Doc: "cached [styles.Style.ObjectFit] of the last rendered image", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
-		{"PrevSize", &gti.Field{Name: "PrevSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "cached allocated size for the last rendered image", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"PrevObjectFit", &gti.Field{Name: "PrevObjectFit", Type: "goki.dev/goki/styles.ObjectFits", LocalType: "styles.ObjectFits", Doc: "cached [styles.Style.ObjectFit] of the last rendered image", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"PrevSize", &gti.Field{Name: "PrevSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "cached allocated size for the last rendered image", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Image{},
@@ -892,7 +892,7 @@ func (t *Image) SetTooltip(v string) *Image {
 
 // LabelType is the [gti.Type] for [Label]
 var LabelType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Label",
+	Name:      "goki.dev/goki/gi.Label",
 	ShortName: "gi.Label",
 	IDName:    "label",
 	Doc:       "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.",
@@ -901,11 +901,11 @@ var LabelType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label to display", Directives: gti.Directives{}, Tag: ""}},
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.LabelTypes", LocalType: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}, Tag: ""}},
-		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.LabelTypes", LocalType: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}, Tag: ""}},
+		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/goki/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Label{},
@@ -973,7 +973,7 @@ func (t *Label) SetTooltip(v string) *Label {
 
 // LabeledTextFieldType is the [gti.Type] for [LabeledTextField]
 var LabeledTextFieldType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.LabeledTextField",
+	Name:       "goki.dev/goki/gi.LabeledTextField",
 	ShortName:  "gi.LabeledTextField",
 	IDName:     "labeled-text-field",
 	Doc:        "LabeledTextField is a [Label] with optional associated label,\nhint, and error text.",
@@ -984,7 +984,7 @@ var LabeledTextFieldType = gti.AddType(&gti.Type{
 		{"ErrorText", &gti.Field{Name: "ErrorText", Type: "string", LocalType: "string", Doc: "ErrorText is the error text for the text field.\nIf it is specified, it will be shown instead of\n[LabeledTextField.HintText].", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/gi/v2/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/goki/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &LabeledTextField{},
@@ -1111,22 +1111,22 @@ func (t *LabeledTextField) SetSelectMode(v bool) *LabeledTextField {
 
 // LayoutType is the [gti.Type] for [Layout]
 var LayoutType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Layout",
+	Name:       "goki.dev/goki/gi.Layout",
 	ShortName:  "gi.Layout",
 	IDName:     "layout",
 	Doc:        "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack.\nOnly the node at this index is rendered -- if not a valid index, nothing is rendered.", Directives: gti.Directives{}, Tag: ""}},
-		{"LayImpl", &gti.Field{Name: "LayImpl", Type: "goki.dev/gi/v2/gi.LayImplState", LocalType: "LayImplState", Doc: "LayImpl contains implementational state info for doing layout", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"LayImpl", &gti.Field{Name: "LayImpl", Type: "goki.dev/goki/gi.LayImplState", LocalType: "LayImplState", Doc: "LayImpl contains implementational state info for doing layout", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/gi/v2/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/goki/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/goki/ki.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Layout{},
@@ -1166,14 +1166,14 @@ func (t *Layout) SetTooltip(v string) *Layout {
 
 // StretchType is the [gti.Type] for [Stretch]
 var StretchType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Stretch",
+	Name:       "goki.dev/goki/gi.Stretch",
 	ShortName:  "gi.Stretch",
 	IDName:     "stretch",
 	Doc:        "Stretch adds an infinitely stretchy element for spacing out layouts\n(max-size = -1) set the width / height property to determine how much it\ntakes relative to other stretchy elements",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Stretch{},
@@ -1205,14 +1205,14 @@ func (t *Stretch) SetTooltip(v string) *Stretch {
 
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Space",
+	Name:       "goki.dev/goki/gi.Space",
 	ShortName:  "gi.Space",
 	IDName:     "space",
 	Doc:        "Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.\nSet width / height property to change.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Space{},
@@ -1244,7 +1244,7 @@ func (t *Space) SetTooltip(v string) *Space {
 
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ProgressBar",
+	Name:       "goki.dev/goki/gi.ProgressBar",
 	ShortName:  "gi.ProgressBar",
 	IDName:     "progress-bar",
 	Doc:        "ProgressBar is a progress bar that fills up bar as progress continues.\nCall Start with a maximum value to work toward, and ProgStep each time\na progress step has been accomplished -- increments the ProgCur by one\nand display is updated every ProgInc such steps.",
@@ -1256,7 +1256,7 @@ var ProgressBarType = gti.AddType(&gti.Type{
 		{"ProgMu", &gti.Field{Name: "ProgMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating progress", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Slider", &gti.Field{Name: "Slider", Type: "goki.dev/gi/v2/gi.Slider", LocalType: "Slider", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Slider", &gti.Field{Name: "Slider", Type: "goki.dev/goki/gi.Slider", LocalType: "Slider", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ProgressBar{},
@@ -1393,7 +1393,7 @@ func (t *ProgressBar) SetStayInView(v bool) *ProgressBar {
 
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Scene",
+	Name:      "goki.dev/goki/gi.Scene",
 	ShortName: "gi.Scene",
 	IDName:    "scene",
 	Doc:       "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context, representing the unit\nof rendering in the GoGi framework.",
@@ -1402,27 +1402,27 @@ var SceneType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"App", &gti.Field{Name: "App", Type: "*goki.dev/gi/v2/gi.App", LocalType: "*App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there.", Directives: gti.Directives{}, Tag: ""}},
-		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/girl/styles.Sides", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
-		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/girl/styles.Sides", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
-		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.", Directives: gti.Directives{}, Tag: ""}},
-		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/gi/v2/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
+		{"App", &gti.Field{Name: "App", Type: "*goki.dev/goki/gi.App", LocalType: "*App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there.", Directives: gti.Directives{}, Tag: ""}},
+		{"Bars", &gti.Field{Name: "Bars", Type: "goki.dev/goki/styles.Sides", LocalType: "styles.Sides[BarFuncs]", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first.", Directives: gti.Directives{}, Tag: ""}},
+		{"BarsInherit", &gti.Field{Name: "BarsInherit", Type: "goki.dev/goki/styles.Sides", LocalType: "styles.Sides[bool]", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs", Directives: gti.Directives{}, Tag: ""}},
+		{"AppBars", &gti.Field{Name: "AppBars", Type: "goki.dev/goki/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene.", Directives: gti.Directives{}, Tag: ""}},
+		{"Body", &gti.Field{Name: "Body", Type: "*goki.dev/goki/gi.Body", LocalType: "*Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions.", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
-		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
-		{"PaintContext", &gti.Field{Name: "PaintContext", Type: "goki.dev/girl/paint.Context", LocalType: "paint.Context", Doc: "paint context for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"SceneGeom", &gti.Field{Name: "SceneGeom", Type: "goki.dev/goki/mat32.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
+		{"PaintContext", &gti.Field{Name: "PaintContext", Type: "goki.dev/goki/paint.Context", LocalType: "paint.Context", Doc: "paint context for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/goki/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/goki/gi.Stage", LocalType: "*Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"RenderBBoxHue", &gti.Field{Name: "RenderBBoxHue", Type: "float32", LocalType: "float32", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"SelectedWidget", &gti.Field{Name: "SelectedWidget", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "Widget", Doc: "the currently selected widget through the inspect editor selection mode", Directives: gti.Directives{}, Tag: ""}},
-		{"SelectedWidgetChan", &gti.Field{Name: "SelectedWidgetChan", Type: "chan goki.dev/gi/v2/gi.Widget", LocalType: "chan Widget", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting", Directives: gti.Directives{}, Tag: ""}},
-		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
+		{"SelectedWidget", &gti.Field{Name: "SelectedWidget", Type: "goki.dev/goki/gi.Widget", LocalType: "Widget", Doc: "the currently selected widget through the inspect editor selection mode", Directives: gti.Directives{}, Tag: ""}},
+		{"SelectedWidgetChan", &gti.Field{Name: "SelectedWidgetChan", Type: "chan goki.dev/goki/gi.Widget", LocalType: "chan Widget", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting", Directives: gti.Directives{}, Tag: ""}},
+		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/goki/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"ShowIter", &gti.Field{Name: "ShowIter", Type: "int", LocalType: "int", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"ReRender", &gti.Field{Name: "ReRender", Type: "[]goki.dev/gi/v2/gi.Widget", LocalType: "[]Widget", Doc: "ReRender items are re-rendered after the current pass", Directives: gti.Directives{}, Tag: ""}},
+		{"ReRender", &gti.Field{Name: "ReRender", Type: "[]goki.dev/goki/gi.Widget", LocalType: "[]Widget", Doc: "ReRender items are re-rendered after the current pass", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Scene{},
@@ -1558,16 +1558,16 @@ func (t *Scene) SetStripes(v Stripes) *Scene {
 
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Separator",
+	Name:       "goki.dev/goki/gi.Separator",
 	ShortName:  "gi.Separator",
 	IDName:     "separator",
 	Doc:        "Separator draws a vertical or horizontal line",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)", Directives: gti.Directives{}, Tag: ""}},
+		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/goki/mat32.Dims", LocalType: "mat32.Dims", Doc: "Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Separator{},
@@ -1605,7 +1605,7 @@ func (t *Separator) SetTooltip(v string) *Separator {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.AppearanceSettingsData",
+	Name:      "goki.dev/goki/gi.AppearanceSettingsData",
 	ShortName: "gi.AppearanceSettingsData",
 	IDName:    "appearance-settings-data",
 	Doc:       "AppearanceSettingsData is the data type for the global Goki appearance settings.",
@@ -1613,18 +1613,18 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Theme", &gti.Field{Name: "Theme", Type: "goki.dev/gi/v2/gi.Themes", LocalType: "Themes", Doc: "the color theme", Directives: gti.Directives{}, Tag: ""}},
+		{"Theme", &gti.Field{Name: "Theme", Type: "goki.dev/goki/gi.Themes", LocalType: "Themes", Doc: "the color theme", Directives: gti.Directives{}, Tag: ""}},
 		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the primary color used to generate the color scheme", Directives: gti.Directives{}, Tag: ""}},
 		{"Zoom", &gti.Field{Name: "Zoom", Type: "float32", LocalType: "float32", Doc: "overall zoom factor as a percentage of the default zoom", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "float32", LocalType: "float32", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
 		{"FontSize", &gti.Field{Name: "FontSize", Type: "float32", LocalType: "float32", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)", Directives: gti.Directives{}, Tag: "def:\"100\" min:\"10\" max:\"1000\" step:\"10\" format:\"%g%%\""}},
-		{"ScreenPrefs", &gti.Field{Name: "ScreenPrefs", Type: "map[string]goki.dev/gi/v2/gi.ScreenSettings", LocalType: "map[string]ScreenSettings", Doc: "screen-specific preferences, which will override overall defaults if set", Directives: gti.Directives{}, Tag: ""}},
-		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/gi/v2/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highlighting style / theme", Directives: gti.Directives{}, Tag: ""}},
-		{"FontFamily", &gti.Field{Name: "FontFamily", Type: "goki.dev/gi/v2/gi.FontName", LocalType: "FontName", Doc: "default font family when otherwise not specified", Directives: gti.Directives{}, Tag: ""}},
-		{"MonoFont", &gti.Field{Name: "MonoFont", Type: "goki.dev/gi/v2/gi.FontName", LocalType: "FontName", Doc: "default mono-spaced font family", Directives: gti.Directives{}, Tag: ""}},
+		{"ScreenPrefs", &gti.Field{Name: "ScreenPrefs", Type: "map[string]goki.dev/goki/gi.ScreenSettings", LocalType: "map[string]ScreenSettings", Doc: "screen-specific preferences, which will override overall defaults if set", Directives: gti.Directives{}, Tag: ""}},
+		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "goki.dev/goki/gi.HiStyleName", LocalType: "HiStyleName", Doc: "text highlighting style / theme", Directives: gti.Directives{}, Tag: ""}},
+		{"FontFamily", &gti.Field{Name: "FontFamily", Type: "goki.dev/goki/gi.FontName", LocalType: "FontName", Doc: "default font family when otherwise not specified", Directives: gti.Directives{}, Tag: ""}},
+		{"MonoFont", &gti.Field{Name: "MonoFont", Type: "goki.dev/goki/gi.FontName", LocalType: "FontName", Doc: "default mono-spaced font family", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/gi/v2/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/goki/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Apply", &gti.Method{Name: "Apply", Doc: "", Directives: gti.Directives{
@@ -1637,7 +1637,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.DeviceSettingsData",
+	Name:      "goki.dev/goki/gi.DeviceSettingsData",
 	ShortName: "gi.DeviceSettingsData",
 	IDName:    "device-settings-data",
 	Doc:       "DeviceSettingsData is the data type for the device settings.",
@@ -1645,8 +1645,8 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/gi/v2/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "The keyboard shortcut map to use", Directives: gti.Directives{}, Tag: ""}},
-		{"KeyMaps", &gti.Field{Name: "KeyMaps", Type: "goki.dev/glop/option.Option", LocalType: "option.Option[keyfun.Maps]", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps.", Directives: gti.Directives{}, Tag: "toml:\"-\""}},
+		{"KeyMap", &gti.Field{Name: "KeyMap", Type: "goki.dev/goki/keyfun.MapName", LocalType: "keyfun.MapName", Doc: "The keyboard shortcut map to use", Directives: gti.Directives{}, Tag: ""}},
+		{"KeyMaps", &gti.Field{Name: "KeyMaps", Type: "goki.dev/goki/glop/option.Option", LocalType: "option.Option[keyfun.Maps]", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps.", Directives: gti.Directives{}, Tag: "toml:\"-\""}},
 		{"DoubleClickInterval", &gti.Field{Name: "DoubleClickInterval", Type: "time.Duration", LocalType: "time.Duration", Doc: "The maximum time interval between button press events to count as a double-click", Directives: gti.Directives{}, Tag: "min:\"100\" step:\"50\""}},
 		{"ScrollWheelSpeed", &gti.Field{Name: "ScrollWheelSpeed", Type: "float32", LocalType: "float32", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here.", Directives: gti.Directives{}, Tag: "min:\"0.01\" step:\"1\""}},
 		{"SlideStartTime", &gti.Field{Name: "SlideStartTime", Type: "time.Duration", LocalType: "time.Duration", Doc: "The amount of time to wait before initiating a regular slide event\n(as opposed to a basic press event)", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"5\" max:\"1000\" step:\"5\""}},
@@ -1659,13 +1659,13 @@ var _ = gti.AddType(&gti.Type{
 		{"LongPressStopDistance", &gti.Field{Name: "LongPressStopDistance", Type: "int", LocalType: "int", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event", Directives: gti.Directives{}, Tag: "def:\"50\" min:\"0\" max:\"1000\" step:\"1\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/gi/v2/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/goki/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ScreenSettings",
+	Name:      "goki.dev/goki/gi.ScreenSettings",
 	ShortName: "gi.ScreenSettings",
 	IDName:    "screen-settings",
 	Doc:       "ScreenSettings are the per-screen preferences -- see [goosi.App.Screen] for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global preferences.",
@@ -1680,7 +1680,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.SystemSettingsData",
+	Name:      "goki.dev/goki/gi.SystemSettingsData",
 	ShortName: "gi.SystemSettingsData",
 	IDName:    "system-settings-data",
 	Doc:       "SystemSettingsData is the data type of the global Goki settings.",
@@ -1688,12 +1688,12 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Behavior", &gti.Field{Name: "Behavior", Type: "goki.dev/gi/v2/gi.BehaviorSettings", LocalType: "BehaviorSettings", Doc: "settings controlling app behavior", Directives: gti.Directives{}, Tag: ""}},
-		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/gi/v2/gi.EditorSettings", LocalType: "EditorSettings", Doc: "text editor settings", Directives: gti.Directives{}, Tag: ""}},
+		{"Behavior", &gti.Field{Name: "Behavior", Type: "goki.dev/goki/gi.BehaviorSettings", LocalType: "BehaviorSettings", Doc: "settings controlling app behavior", Directives: gti.Directives{}, Tag: ""}},
+		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/goki/gi.EditorSettings", LocalType: "EditorSettings", Doc: "text editor settings", Directives: gti.Directives{}, Tag: ""}},
 		{"Clock24", &gti.Field{Name: "Clock24", Type: "bool", LocalType: "bool", Doc: "whether to use a 24-hour clock (instead of AM and PM)", Directives: gti.Directives{}, Tag: "label:\"24-hour clock\""}},
 		{"FontPaths", &gti.Field{Name: "FontPaths", Type: "[]string", LocalType: "[]string", Doc: "extra font paths, beyond system defaults -- searched first", Directives: gti.Directives{}, Tag: ""}},
-		{"User", &gti.Field{Name: "User", Type: "goki.dev/gi/v2/gi.User", LocalType: "User", Doc: "user info -- partially filled-out automatically if empty / when prefs first created", Directives: gti.Directives{}, Tag: ""}},
-		{"FavPaths", &gti.Field{Name: "FavPaths", Type: "goki.dev/gi/v2/gi.FavPaths", LocalType: "FavPaths", Doc: "favorite paths, shown in FileViewer and also editable there", Directives: gti.Directives{}, Tag: ""}},
+		{"User", &gti.Field{Name: "User", Type: "goki.dev/goki/gi.User", LocalType: "User", Doc: "user info -- partially filled-out automatically if empty / when prefs first created", Directives: gti.Directives{}, Tag: ""}},
+		{"FavPaths", &gti.Field{Name: "FavPaths", Type: "goki.dev/goki/gi.FavPaths", LocalType: "FavPaths", Doc: "favorite paths, shown in FileViewer and also editable there", Directives: gti.Directives{}, Tag: ""}},
 		{"FileViewSort", &gti.Field{Name: "FileViewSort", Type: "string", LocalType: "string", Doc: "column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 		{"MenuMaxHeight", &gti.Field{Name: "MenuMaxHeight", Type: "int", LocalType: "int", Doc: "the maximum height of any menu popup panel in units of font height;\nscroll bars are enforced beyond that size.", Directives: gti.Directives{}, Tag: "def:\"30\" min:\"5\" step:\"1\""}},
 		{"CompleteWaitDuration", &gti.Field{Name: "CompleteWaitDuration", Type: "time.Duration", LocalType: "time.Duration", Doc: "the amount of time to wait before offering completions", Directives: gti.Directives{}, Tag: "def:\"0\" min:\"0\" max:\"10000\" step:\"10\""}},
@@ -1708,7 +1708,7 @@ var _ = gti.AddType(&gti.Type{
 		{"SliceInlineLength", &gti.Field{Name: "SliceInlineLength", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"4\" min:\"2\" step:\"1\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/gi/v2/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/goki/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply detailed preferences to all the relevant settings.", Directives: gti.Directives{
@@ -1718,7 +1718,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.BehaviorSettings",
+	Name:      "goki.dev/goki/gi.BehaviorSettings",
 	ShortName: "gi.BehaviorSettings",
 	IDName:    "behavior-settings",
 	Doc:       "BehaviorSettings contains misc parameters controlling GUI behavior.",
@@ -1736,7 +1736,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.User",
+	Name:      "goki.dev/goki/gi.User",
 	ShortName: "gi.User",
 	IDName:    "user",
 	Doc:       "User basic user information that might be needed for different apps",
@@ -1753,7 +1753,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.EditorSettings",
+	Name:      "goki.dev/goki/gi.EditorSettings",
 	ShortName: "gi.EditorSettings",
 	IDName:    "editor-settings",
 	Doc:       "EditorSettings contains text editor settings.",
@@ -1776,7 +1776,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.FavPathItem",
+	Name:      "goki.dev/goki/gi.FavPathItem",
 	ShortName: "gi.FavPathItem",
 	IDName:    "fav-path-item",
 	Doc:       "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order",
@@ -1793,7 +1793,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.DebugSettingsData",
+	Name:      "goki.dev/goki/gi.DebugSettingsData",
 	ShortName: "gi.DebugSettingsData",
 	IDName:    "debug-settings-data",
 	Doc:       "DebugSettingsData is the data type for debugging settings.",
@@ -1816,14 +1816,14 @@ var _ = gti.AddType(&gti.Type{
 		{"GoTypeTrace", &gti.Field{Name: "GoTypeTrace", Type: "bool", LocalType: "bool", Doc: "Print a trace of Go language type parsing and inference process", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/gi/v2/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"SettingsBase", &gti.Field{Name: "SettingsBase", Type: "goki.dev/goki/gi.SettingsBase", LocalType: "SettingsBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 // SliderType is the [gti.Type] for [Slider]
 var SliderType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Slider",
+	Name:      "goki.dev/goki/gi.Slider",
 	ShortName: "gi.Slider",
 	IDName:    "slider",
 	Doc:       "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.",
@@ -1831,15 +1831,15 @@ var SliderType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider, which determines the visual and functional properties", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider, which determines the visual and functional properties", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "Current value, represented by the position of the thumb.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the slider slides", Directives: gti.Directives{}, Tag: ""}},
+		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/goki/mat32.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the slider slides", Directives: gti.Directives{}, Tag: ""}},
 		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: ""}},
 		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: ""}},
 		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}, Tag: ""}},
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: ""}},
 		{"VisiblePct", &gti.Field{Name: "VisiblePct", Type: "float32", LocalType: "float32", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment.", Directives: gti.Directives{}, Tag: ""}},
+		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment.", Directives: gti.Directives{}, Tag: ""}},
 		{"TrackSize", &gti.Field{Name: "TrackSize", Type: "float32", LocalType: "float32", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the dragging knob", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"InputThreshold", &gti.Field{Name: "InputThreshold", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting an input event", Directives: gti.Directives{}, Tag: ""}},
@@ -1855,7 +1855,7 @@ var SliderType = gti.AddType(&gti.Type{
 		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Slider{},
@@ -2021,7 +2021,7 @@ func (t *Slider) SetTooltip(v string) *Slider {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Spell",
+	Name:      "goki.dev/goki/gi.Spell",
 	ShortName: "gi.Spell",
 	IDName:    "spell",
 	Doc:       "Spell",
@@ -2035,8 +2035,8 @@ var _ = gti.AddType(&gti.Type{
 		{"Word", &gti.Field{Name: "Word", Type: "string", LocalType: "string", Doc: "word being checked", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", LocalType: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Correction", &gti.Field{Name: "Correction", Type: "string", LocalType: "string", Doc: "the user's correction selection", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "the event listeners for the spell (it sends Select events)", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
-		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]", Directives: gti.Directives{}, Tag: ""}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goki/events.Listeners", LocalType: "events.Listeners", Doc: "the event listeners for the spell (it sends Select events)", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/goki/gi.Stage", LocalType: "*Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -2073,7 +2073,7 @@ func (t *Spell) SetStage(v *Stage) *Spell {
 
 // SpinnerType is the [gti.Type] for [Spinner]
 var SpinnerType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Spinner",
+	Name:      "goki.dev/goki/gi.Spinner",
 	ShortName: "gi.Spinner",
 	IDName:    "spinner",
 	Doc:       "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
@@ -2092,7 +2092,7 @@ var SpinnerType = gti.AddType(&gti.Type{
 		{"Format", &gti.Field{Name: "Format", Type: "string", LocalType: "string", Doc: "prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing", Directives: gti.Directives{}, Tag: "xml:\"format\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/gi/v2/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/goki/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Spinner{},
@@ -2246,7 +2246,7 @@ func (t *Spinner) SetSelectMode(v bool) *Spinner {
 
 // SplitsType is the [gti.Type] for [Splits]
 var SplitsType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Splits",
+	Name:      "goki.dev/goki/gi.Splits",
 	ShortName: "gi.Splits",
 	IDName:    "splits",
 	Doc:       "Splits allocates a fixed proportion of space to each child, along given\ndimension.  It uses the Widget Parts to hold the Handle widgets\nseparately from the children that contain the rest of the scene to be\ndisplayed within each panel.",
@@ -2258,7 +2258,7 @@ var SplitsType = gti.AddType(&gti.Type{
 		{"SavedSplits", &gti.Field{Name: "SavedSplits", Type: "[]float32", LocalType: "[]float32", Doc: "A saved version of the splits which can be restored.\nFor dynamic collapse / expand operations", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/goki/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Splits{},
@@ -2317,7 +2317,7 @@ func (t *Splits) SetStackTop(v int) *Splits {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Stage",
+	Name:      "goki.dev/goki/gi.Stage",
 	ShortName: "gi.Stage",
 	IDName:    "stage",
 	Doc:       "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (Window, Dialog, Sheet) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).",
@@ -2325,9 +2325,9 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.StageTypes", LocalType: "StageTypes", Doc: "type of Stage: determines behavior and Styling", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "Scene contents of this Stage -- what it displays", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Context", &gti.Field{Name: "Context", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "Widget", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.StageTypes", LocalType: "StageTypes", Doc: "type of Stage: determines behavior and Styling", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/goki/gi.Scene", LocalType: "*Scene", Doc: "Scene contents of this Stage -- what it displays", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Context", &gti.Field{Name: "Context", Type: "goki.dev/goki/gi.Widget", LocalType: "Widget", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)", Directives: gti.Directives{}, Tag: ""}},
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "name of the Stage -- generally auto-set based on Scene Name", Directives: gti.Directives{}, Tag: ""}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "Title of the Stage -- generally auto-set based on Scene Title.\nUsed for title of Window and Dialog types.", Directives: gti.Directives{}, Tag: ""}},
 		{"Modal", &gti.Field{Name: "Modal", Type: "bool", LocalType: "bool", Doc: "if true, blocks input to all other stages.", Directives: gti.Directives{}, Tag: ""}},
@@ -2340,13 +2340,13 @@ var _ = gti.AddType(&gti.Type{
 		{"Movable", &gti.Field{Name: "Movable", Type: "bool", LocalType: "bool", Doc: "for Dialogs: adds a handle titlebar Decor for moving", Directives: gti.Directives{}, Tag: ""}},
 		{"Resizable", &gti.Field{Name: "Resizable", Type: "bool", LocalType: "bool", Doc: "for Dialogs: adds a resize handle Decor for resizing", Directives: gti.Directives{}, Tag: ""}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "image.Point", LocalType: "image.Point", Doc: "Target position for Scene to be placed within RenderWin", Directives: gti.Directives{}, Tag: ""}},
-		{"Side", &gti.Field{Name: "Side", Type: "goki.dev/gi/v2/gi.StageSides", LocalType: "StageSides", Doc: "Side for Stages that can operate on different sides, e.g.,\nfor Sheets: which side does the sheet come out from", Directives: gti.Directives{}, Tag: ""}},
+		{"Side", &gti.Field{Name: "Side", Type: "goki.dev/goki/gi.StageSides", LocalType: "StageSides", Doc: "Side for Stages that can operate on different sides, e.g.,\nfor Sheets: which side does the sheet come out from", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is item represented by this main stage -- used for recycling windows", Directives: gti.Directives{}, Tag: ""}},
-		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)\nIf a Main Stage, it points to itself.", Directives: gti.Directives{}, Tag: ""}},
-		{"PopupMgr", &gti.Field{Name: "PopupMgr", Type: "*goki.dev/gi/v2/gi.StageMgr", LocalType: "*StageMgr", Doc: "For Main stages, this is the manager for the popups within it (created\nspecifically for the main stage).\nFor Popups, this is the pointer to the PopupMgr within the\nMain Stage managing it.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"MainMgr", &gti.Field{Name: "MainMgr", Type: "*goki.dev/gi/v2/gi.StageMgr", LocalType: "*StageMgr", Doc: "For all stages, this is the Main stage manager that lives in a RenderWin\nand manages the Main Scenes.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context which has info about the RenderWin onto which we render.\nThis should be used instead of the RenderWin itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil.", Directives: gti.Directives{}, Tag: ""}},
-		{"Sprites", &gti.Field{Name: "Sprites", Type: "goki.dev/gi/v2/gi.Sprites", LocalType: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/goki/gi.Stage", LocalType: "*Stage", Doc: "If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)\nIf a Main Stage, it points to itself.", Directives: gti.Directives{}, Tag: ""}},
+		{"PopupMgr", &gti.Field{Name: "PopupMgr", Type: "*goki.dev/goki/gi.StageMgr", LocalType: "*StageMgr", Doc: "For Main stages, this is the manager for the popups within it (created\nspecifically for the main stage).\nFor Popups, this is the pointer to the PopupMgr within the\nMain Stage managing it.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"MainMgr", &gti.Field{Name: "MainMgr", Type: "*goki.dev/goki/gi.StageMgr", LocalType: "*StageMgr", Doc: "For all stages, this is the Main stage manager that lives in a RenderWin\nand manages the Main Scenes.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/goki/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context which has info about the RenderWin onto which we render.\nThis should be used instead of the RenderWin itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil.", Directives: gti.Directives{}, Tag: ""}},
+		{"Sprites", &gti.Field{Name: "Sprites", Type: "goki.dev/goki/gi.Sprites", LocalType: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"SpriteDragging", &gti.Field{Name: "SpriteDragging", Type: "string", LocalType: "string", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Timeout", &gti.Field{Name: "Timeout", Type: "time.Duration", LocalType: "time.Duration", Doc: "if > 0, disappears after a timeout duration", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -2504,7 +2504,7 @@ func (t *Stage) SetTimeout(v time.Duration) *Stage {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.StageMgr",
+	Name:      "goki.dev/goki/gi.StageMgr",
 	ShortName: "gi.StageMgr",
 	IDName:    "stage-mgr",
 	Doc:       "StageMgr manages a stack of Stage elements",
@@ -2512,12 +2512,12 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/ordmap.Map", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Stack", &gti.Field{Name: "Stack", Type: "goki.dev/goki/ordmap.Map", LocalType: "ordmap.Map[string, *Stage]", Doc: "stack of stages managed by this stage manager.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Modified", &gti.Field{Name: "Modified", Type: "bool", LocalType: "bool", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWin each render cycle.", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/gi/v2/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderWin", &gti.Field{Name: "RenderWin", Type: "*goki.dev/gi/v2/gi.RenderWin", LocalType: "*RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderCtx wherever possible.", Directives: gti.Directives{}, Tag: ""}},
-		{"History", &gti.Field{Name: "History", Type: "[]*goki.dev/gi/v2/gi.Stage", LocalType: "[]*Stage", Doc: "growing stack of viewing history of all stages.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/gi/v2/gi.Stage", LocalType: "*Stage", Doc: "Main is the Main Stage that owns this StageMgr, only set for Popup stages", Directives: gti.Directives{}, Tag: ""}},
+		{"RenderCtx", &gti.Field{Name: "RenderCtx", Type: "*goki.dev/goki/gi.RenderContext", LocalType: "*RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWin in which the stages are running.\nthe MainStageMgr within the RenderWin", Directives: gti.Directives{}, Tag: ""}},
+		{"RenderWin", &gti.Field{Name: "RenderWin", Type: "*goki.dev/goki/gi.RenderWin", LocalType: "*RenderWin", Doc: "render window to which we are rendering.\nrely on the RenderCtx wherever possible.", Directives: gti.Directives{}, Tag: ""}},
+		{"History", &gti.Field{Name: "History", Type: "[]*goki.dev/goki/gi.Stage", LocalType: "[]*Stage", Doc: "growing stack of viewing history of all stages.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Main", &gti.Field{Name: "Main", Type: "*goki.dev/goki/gi.Stage", LocalType: "*Stage", Doc: "Main is the Main Stage that owns this StageMgr, only set for Popup stages", Directives: gti.Directives{}, Tag: ""}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read.", Directives: gti.Directives{}, Tag: "view:\"-\" set:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -2526,36 +2526,36 @@ var _ = gti.AddType(&gti.Type{
 
 // SVGType is the [gti.Type] for [SVG]
 var SVGType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.SVG",
+	Name:       "goki.dev/goki/gi.SVG",
 	ShortName:  "gi.SVG",
 	IDName:     "svg",
 	Doc:        "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nSVGs do not render a background or border independent of their SVG object.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SVG", &gti.Field{Name: "SVG", Type: "*goki.dev/goki/svg.SVG", LocalType: "*svg.SVG", Doc: "SVG is the SVG object associated with the element.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"OpenSVG", &gti.Method{Name: "OpenSVG", Doc: "OpenSVG opens an XML-formatted SVG file", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/goki/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
 		{"SaveSVG", &gti.Method{Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/goki/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
 		{"SavePNG", &gti.Method{Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/goki/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
@@ -2589,20 +2589,20 @@ func (t *SVG) SetTooltip(v string) *SVG {
 
 // SwitchType is the [gti.Type] for [Switch]
 var SwitchType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Switch",
+	Name:       "goki.dev/goki/gi.Switch",
 	ShortName:  "gi.Switch",
 	IDName:     "switch",
 	Doc:        "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SwitchTypes", LocalType: "SwitchTypes", Doc: "the type of switch that this is", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.SwitchTypes", LocalType: "SwitchTypes", Doc: "the type of switch that this is", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "the label text for the switch", Directives: gti.Directives{}, Tag: ""}},
 		{"IconOn", &gti.Field{Name: "IconOn", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the on, checked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"IconOff", &gti.Field{Name: "IconOff", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the off, unchecked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"IconUnk", &gti.Field{Name: "IconUnk", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the indeterminate (unknown) state", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Switch{},
@@ -2662,7 +2662,7 @@ func (t *Switch) SetTooltip(v string) *Switch {
 
 // SwitchesType is the [gti.Type] for [Switches]
 var SwitchesType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Switches",
+	Name:      "goki.dev/goki/gi.Switches",
 	ShortName: "gi.Switches",
 	IDName:    "switches",
 	Doc:       "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
@@ -2670,13 +2670,13 @@ var SwitchesType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SwitchTypes", LocalType: "SwitchTypes", Doc: "the type of switches that will be made", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.SwitchTypes", LocalType: "SwitchTypes", Doc: "the type of switches that will be made", Directives: gti.Directives{}, Tag: ""}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]string", LocalType: "[]string", Doc: "the list of items (switch labels)", Directives: gti.Directives{}, Tag: ""}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", LocalType: "[]string", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}, Tag: ""}},
 		{"Mutex", &gti.Field{Name: "Mutex", Type: "bool", LocalType: "bool", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Switches{},
@@ -2770,7 +2770,7 @@ func (t *Switches) SetStripes(v Stripes) *Switches {
 
 // TabsType is the [gti.Type] for [Tabs]
 var TabsType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Tabs",
+	Name:      "goki.dev/goki/gi.Tabs",
 	ShortName: "gi.Tabs",
 	IDName:    "tabs",
 	Doc:       "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
@@ -2778,14 +2778,14 @@ var TabsType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tabs. It must be set\nbefore the tabs are first configured.", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tabs. It must be set\nbefore the tabs are first configured.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
 		{"CloseIcon", &gti.Field{Name: "CloseIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed.", Directives: gti.Directives{}, Tag: ""}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs.\nTabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/goki/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Tabs{},
@@ -2879,7 +2879,7 @@ func (t *Tabs) SetStackTop(v int) *Tabs {
 
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Tab",
+	Name:      "goki.dev/goki/gi.Tab",
 	ShortName: "gi.Tab",
 	IDName:    "tab",
 	Doc:       "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.",
@@ -2887,14 +2887,14 @@ var TabType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly.", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.TabTypes", LocalType: "TabTypes", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly.", Directives: gti.Directives{}, Tag: ""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs.", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown.", Directives: gti.Directives{}, Tag: ""}},
 		{"CloseIcon", &gti.Field{Name: "CloseIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed.", Directives: gti.Directives{}, Tag: ""}},
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/gi/v2/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Box", &gti.Field{Name: "Box", Type: "goki.dev/goki/gi.Box", LocalType: "Box", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Tab{},
@@ -2962,7 +2962,7 @@ func (t *Tab) SetTooltip(v string) *Tab {
 
 // TextFieldType is the [gti.Type] for [TextField]
 var TextFieldType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.TextField",
+	Name:      "goki.dev/goki/gi.TextField",
 	ShortName: "gi.TextField",
 	IDName:    "text-field",
 	Doc:       "TextField is a widget for editing a line of text",
@@ -2972,22 +2972,22 @@ var TextFieldType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Txt", &gti.Field{Name: "Txt", Type: "string", LocalType: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"text\" set:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"placeholder\""}},
-		{"Complete", &gti.Field{Name: "Complete", Type: "*goki.dev/gi/v2/gi.Complete", LocalType: "*Complete", Doc: "functions and data for textfield completion", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Complete", &gti.Field{Name: "Complete", Type: "*goki.dev/goki/gi.Complete", LocalType: "*Complete", Doc: "functions and data for textfield completion", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"NoEcho", &gti.Field{Name: "NoEcho", Type: "bool", LocalType: "bool", Doc: "replace displayed characters with bullets to conceal text", Directives: gti.Directives{}, Tag: ""}},
 		{"LeadingIcon", &gti.Field{Name: "LeadingIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "if specified, a button will be added at the start of the text field with this icon", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"LeadingIconOnClick", &gti.Field{Name: "LeadingIconOnClick", Type: "func(e goki.dev/goosi/events.Event)", LocalType: "func(e events.Event)", Doc: "if LeadingIcon is specified, the function to call when the leading icon is clicked", Directives: gti.Directives{}, Tag: ""}},
+		{"LeadingIconOnClick", &gti.Field{Name: "LeadingIconOnClick", Type: "func(e goki.dev/goki/events.Event)", LocalType: "func(e events.Event)", Doc: "if LeadingIcon is specified, the function to call when the leading icon is clicked", Directives: gti.Directives{}, Tag: ""}},
 		{"TrailingIcon", &gti.Field{Name: "TrailingIcon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "if specified, a button will be added at the end of the text field with this icon", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"TrailingIconOnClick", &gti.Field{Name: "TrailingIconOnClick", Type: "func(e goki.dev/goosi/events.Event)", LocalType: "func(e events.Event)", Doc: "if TrailingIcon is specified, the function to call when the trailing icon is clicked", Directives: gti.Directives{}, Tag: ""}},
-		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}, Tag: "xml:\"cursor-width\""}},
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.TextFieldTypes", LocalType: "TextFieldTypes", Doc: "the type of the text field", Directives: gti.Directives{}, Tag: ""}},
+		{"TrailingIconOnClick", &gti.Field{Name: "TrailingIconOnClick", Type: "func(e goki.dev/goki/events.Event)", LocalType: "func(e events.Event)", Doc: "if TrailingIcon is specified, the function to call when the trailing icon is clicked", Directives: gti.Directives{}, Tag: ""}},
+		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "goki.dev/goki/units.Value", LocalType: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}, Tag: "xml:\"cursor-width\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gi.TextFieldTypes", LocalType: "TextFieldTypes", Doc: "the type of the text field", Directives: gti.Directives{}, Tag: ""}},
 		{"PlaceholderColor", &gti.Field{Name: "PlaceholderColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color", Directives: gti.Directives{}, Tag: ""}},
 		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"Edited", &gti.Field{Name: "Edited", Type: "bool", LocalType: "bool", Doc: "true if the text has been edited relative to the original", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"EditTxt", &gti.Field{Name: "EditTxt", Type: "[]rune", LocalType: "[]rune", Doc: "the live text string being edited, with latest modifications -- encoded as runes", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"MaxWidthReq", &gti.Field{Name: "MaxWidthReq", Type: "int", LocalType: "int", Doc: "maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override", Directives: gti.Directives{}, Tag: ""}},
-		{"EffPos", &gti.Field{Name: "EffPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective position with any leading icon space added", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective size, subtracting any leading and trailing icon space", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"EffPos", &gti.Field{Name: "EffPos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "effective position with any leading icon space added", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "effective size, subtracting any leading and trailing icon space", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StartPos", &gti.Field{Name: "StartPos", Type: "int", LocalType: "int", Doc: "starting display position in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"EndPos", &gti.Field{Name: "EndPos", Type: "int", LocalType: "int", Doc: "ending display position in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "int", LocalType: "int", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -2996,14 +2996,14 @@ var TextFieldType = gti.AddType(&gti.Type{
 		{"SelectEnd", &gti.Field{Name: "SelectEnd", Type: "int", LocalType: "int", Doc: "ending position of selection in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"SelectInit", &gti.Field{Name: "SelectInit", Type: "int", LocalType: "int", Doc: "initial selection position -- where it started", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", LocalType: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"RenderAll", &gti.Field{Name: "RenderAll", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of entire text, for sizing", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"RenderVis", &gti.Field{Name: "RenderVis", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of just visible text", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"RenderAll", &gti.Field{Name: "RenderAll", Type: "goki.dev/goki/paint.Text", LocalType: "paint.Text", Doc: "render version of entire text, for sizing", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"RenderVis", &gti.Field{Name: "RenderVis", Type: "goki.dev/goki/paint.Text", LocalType: "paint.Text", Doc: "render version of just visible text", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating cursor between blinker and field", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/goki/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TextField{},
@@ -3141,7 +3141,7 @@ func (t *TextField) SetTooltip(v string) *TextField {
 
 // ToolbarType is the [gti.Type] for [Toolbar]
 var ToolbarType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Toolbar",
+	Name:      "goki.dev/goki/gi.Toolbar",
 	ShortName: "gi.Toolbar",
 	IDName:    "toolbar",
 	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).",
@@ -3149,19 +3149,19 @@ var ToolbarType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/ki/v2.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
-		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
-		{"ToolbarFuncs", &gti.Field{Name: "ToolbarFuncs", Type: "goki.dev/gi/v2/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config", Directives: gti.Directives{}, Tag: ""}},
-		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/gi/v2/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
+		{"OverflowItems", &gti.Field{Name: "OverflowItems", Type: "goki.dev/goki/ki.Slice", LocalType: "ki.Slice", Doc: "items moved from the main toolbar, will be shown in the overflow menu", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"OverflowMenus", &gti.Field{Name: "OverflowMenus", Type: "[]func(m *goki.dev/goki/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last.", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"ToolbarFuncs", &gti.Field{Name: "ToolbarFuncs", Type: "goki.dev/goki/gi.ToolbarFuncs", LocalType: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config", Directives: gti.Directives{}, Tag: ""}},
+		{"OverflowButton", &gti.Field{Name: "OverflowButton", Type: "*goki.dev/goki/gi.Button", LocalType: "*Button", Doc: "This is the overflow button", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"StdOverflowMenu", &gti.Method{Name: "StdOverflowMenu", Doc: "StdOverflowMenu adds standard overflow menu items.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"m", &gti.Field{Name: "m", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"m", &gti.Field{Name: "m", Type: "*goki.dev/goki/gi.Scene", LocalType: "*Scene", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 	Instance: &Toolbar{},
@@ -3242,14 +3242,14 @@ func (t *Toolbar) SetStripes(v Stripes) *Toolbar {
 
 // BasicBarType is the [gti.Type] for [BasicBar]
 var BasicBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.BasicBar",
+	Name:       "goki.dev/goki/gi.BasicBar",
 	ShortName:  "gi.BasicBar",
 	IDName:     "basic-bar",
 	Doc:        "BasicBar is just a styled Frame layout for holding buttons\nand other widgets.  Use this when the more advanced features\nof the Toolbar are not needed.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &BasicBar{},
@@ -3293,30 +3293,30 @@ func (t *BasicBar) SetStripes(v Stripes) *BasicBar {
 
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.WidgetBase",
+	Name:       "goki.dev/goki/gi.WidgetBase",
 	ShortName:  "gi.WidgetBase",
 	IDName:     "widget-base",
 	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for the tooltip for this widget, which can use HTML formatting", Directives: gti.Directives{}, Tag: ""}},
-		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/gi/v2/gi.GeomState", LocalType: "GeomState", Doc: "Geom has the full layout geometry for size and position of this Widget", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/goki/gi.Layout", LocalType: "*Layout", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/goki/gi.GeomState", LocalType: "GeomState", Doc: "Geom has the full layout geometry for size and position of this Widget", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "If true, Override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code. FirstStylers and FinalStylers\nare called before and after these stylers, respectively.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FirstStylers", &gti.Field{Name: "FirstStylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function, which can be called\nby end-user and internal code. These stylers are called before\nStylers and FinalStylers.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FinalStylers", &gti.Field{Name: "FinalStylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function, which can be called\nby end-user and internal code. These stylers are called after\nFirstStylers and Stylers.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/goosi/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ContextMenus", &gti.Field{Name: "ContextMenus", Type: "[]func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "Sc is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent.\nIt is passed to most Config, Layout, and Render functions as\na convenience.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/goki/styles.Style", LocalType: "styles.Style", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/goki/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code. FirstStylers and FinalStylers\nare called before and after these stylers, respectively.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FirstStylers", &gti.Field{Name: "FirstStylers", Type: "[]func(s *goki.dev/goki/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function, which can be called\nby end-user and internal code. These stylers are called before\nStylers and FinalStylers.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FinalStylers", &gti.Field{Name: "FinalStylers", Type: "[]func(s *goki.dev/goki/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function, which can be called\nby end-user and internal code. These stylers are called after\nFirstStylers and Stylers.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/goki/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goki/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/goki/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ContextMenus", &gti.Field{Name: "ContextMenus", Type: "[]func(m *goki.dev/goki/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/goki/gi.Scene", LocalType: "*Scene", Doc: "Sc is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent.\nIt is passed to most Config, Layout, and Render functions as\na convenience.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/goki/ki.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Update", &gti.Method{Name: "Update", Doc: "Update calls Config and then ApplyStyle\non every Widget in the tree from me.\nThis should be used after any structural changes\nto currently-displayed widgets.\nIt wraps everything in UpdateStart / UpdateEndRender\nso node will render on next pass.\nCall SetNeedsLayout to also trigger a layout where needed.", Directives: gti.Directives{
@@ -3352,7 +3352,7 @@ func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 }
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/gi/v2/gi.UpdateAll",
+	Name: "goki.dev/goki/gi.UpdateAll",
 	Doc:  "UpdateAll updates all windows and triggers a full render rebuild.\nIt is typically called when user settings are changed.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},

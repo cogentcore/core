@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
 )
 
 // Layout uses 3 Size passes, 2 Position passes:

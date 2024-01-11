@@ -5,7 +5,7 @@
 package styles
 
 import (
-	"goki.dev/girl/units"
+	"goki.dev/goki/units"
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleTextFuncs

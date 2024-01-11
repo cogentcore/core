@@ -10,8 +10,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/girl/units"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/units"
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleFontFuncs

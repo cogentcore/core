@@ -12,12 +12,12 @@ import (
 	"image/color"
 	"sync"
 
-	"goki.dev/colors"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-	"goki.dev/ordmap"
-	"goki.dev/vgpu/v2/vgpu"
-	"goki.dev/vgpu/v2/vphong"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/ordmap"
+	"goki.dev/goki/vgpu"
+	"goki.dev/goki/vgpu/vphong"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating

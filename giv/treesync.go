@@ -11,14 +11,14 @@ import (
 	"log/slog"
 	"strings"
 
-	"goki.dev/fi"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/gti"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
+	"goki.dev/goki/events"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/mimedata"
+	"goki.dev/goki/states"
 )
 
 // note: see this file has all the SyncNode specific

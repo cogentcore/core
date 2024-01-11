@@ -4,7 +4,7 @@
 
 package grease
 
-import "goki.dev/laser"
+import "goki.dev/goki/laser"
 
 // SetFromDefaults sets the values of the given config object
 // from `def:` field tag values. Parsing errors are automatically logged.

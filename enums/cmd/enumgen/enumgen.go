@@ -7,8 +7,8 @@
 package main
 
 import (
-	"goki.dev/enums/enumgen"
-	"goki.dev/grease"
+	"goki.dev/goki/enums/enumgen"
+	"goki.dev/goki/grease"
 )
 
 func main() {

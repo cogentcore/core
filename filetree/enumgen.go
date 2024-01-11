@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/gi/v2/giv"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/giv"
 )
 
 var _DirFlagsValues = []DirFlags{0, 1, 2, 3}

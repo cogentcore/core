@@ -5,10 +5,10 @@
 package gi
 
 import (
-	"goki.dev/enums"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/states"
 )
 
 // WidgetFlags define Widget node bitflags for tracking common high-frequency GUI

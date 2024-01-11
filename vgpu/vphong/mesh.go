@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log"
 
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu"
 )
 
 // Mesh records the number of elements in an indexed triangle mesh,

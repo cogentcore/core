@@ -3,18 +3,18 @@
 package cmd
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Build",
+	Name: "goki.dev/goki/gokitool/cmd.Build",
 	Doc:  "Build builds an executable for the package\nat the config path for the config platforms.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -22,13 +22,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Init",
+	Name: "goki.dev/goki/gokitool/cmd.Init",
 	Doc:  "Init initializes the \".goki\" directory\nand a \"config.toml\" file inside it.\nThe \"config.toml\" file has the given\nconfig info. Init also sets the config name\nto the current directory if it is unset.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -36,13 +36,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Install",
+	Name: "goki.dev/goki/gokitool/cmd.Install",
 	Doc:  "Install installs the package on the local system.\nIt uses the same config info as build.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -50,13 +50,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Log",
+	Name: "goki.dev/goki/gokitool/cmd.Log",
 	Doc:  "Log prints the logs from your app running on Android to the terminal.\nAndroid is the only supported platform for log; use the -debug flag on\nrun for other platforms.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -64,13 +64,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Pack",
+	Name: "goki.dev/goki/gokitool/cmd.Pack",
 	Doc:  "Pack builds and packages the app for the target platform.\nFor android, ios, and js, it is equivalent to build.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -78,13 +78,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.VersionRelease",
+	Name: "goki.dev/goki/gokitool/cmd.VersionRelease",
 	Doc:  "VersionRelease calls update-version and then release. It is the standard release path.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -92,13 +92,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Release",
+	Name: "goki.dev/goki/gokitool/cmd.Release",
 	Doc:  "Release releases the project as a git tag. It should be called after update-version or similar.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -106,13 +106,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Run",
+	Name: "goki.dev/goki/gokitool/cmd.Run",
 	Doc:  "Run builds and runs the config package. It also displays the logs generated\nby the app. It uses the same config info as build.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -120,13 +120,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.Setup",
+	Name: "goki.dev/goki/gokitool/cmd.Setup",
 	Doc:  "Setup does platform-specific setup that ensures that development can be done\nfor the config platform, mostly by installing necessary tools.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -134,13 +134,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.GetVersion",
+	Name: "goki.dev/goki/gokitool/cmd.GetVersion",
 	Doc:  "GetVersion prints the version of the project.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -148,13 +148,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.SetVersion",
+	Name: "goki.dev/goki/gokitool/cmd.SetVersion",
 	Doc:  "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.\nAfter it, release or similar should be called to push the git tags.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -162,13 +162,13 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/cmd.UpdateVersion",
+	Name: "goki.dev/goki/gokitool/cmd.UpdateVersion",
 	Doc:  "UpdateVersion updates the version of the project by one patch version.\nAfter it, release or similar should be called to push the git tags.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"c", &gti.Field{Name: "c", Type: "*goki.dev/goki/gokitool/config.Config", LocalType: "*config.Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},

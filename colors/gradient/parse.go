@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/mat32"
 	"golang.org/x/net/html/charset"
 )
 
@@ -316,7 +316,7 @@ func ParseColorStop(stop *Stop, prev color.RGBA, par string) error {
 	return nil
 }
 
-// NOTE: XML marshalling functionality is at [goki.dev/svg.SVGNodeXMLGrad] instead of here
+// NOTE: XML marshalling functionality is at [goki.dev/goki/svg.SVGNodeXMLGrad] instead of here
 // because it uses a lot of SVG and XML infrastructure defined there.
 
 // ReadXML reads an XML-formatted gradient color from the given io.Reader and

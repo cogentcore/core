@@ -3,12 +3,12 @@
 package vshape
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Box",
+	Name:       "goki.dev/goki/vgpu/vshape.Box",
 	ShortName:  "vshape.Box",
 	IDName:     "box",
 	Doc:        "Box is a rectangular-shaped solid (cuboid)",
@@ -24,7 +24,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Capsule",
+	Name:       "goki.dev/goki/vgpu/vshape.Capsule",
 	ShortName:  "vshape.Capsule",
 	IDName:     "capsule",
 	Doc:        "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.",
@@ -46,7 +46,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Cylinder",
+	Name:       "goki.dev/goki/vgpu/vshape.Cylinder",
 	ShortName:  "vshape.Cylinder",
 	IDName:     "cylinder",
 	Doc:        "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.",
@@ -69,7 +69,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.ShapeGroup",
+	Name:       "goki.dev/goki/vgpu/vshape.ShapeGroup",
 	ShortName:  "vshape.ShapeGroup",
 	IDName:     "shape-group",
 	Doc:        "ShapeGroup is a group of shapes -- returns summary data for shape elements",
@@ -84,7 +84,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Lines",
+	Name:       "goki.dev/goki/vgpu/vshape.Lines",
 	ShortName:  "vshape.Lines",
 	IDName:     "lines",
 	Doc:        "Lines are lines rendered as long thin boxes defined by points\nand width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0\nor a constant unless specifically relevant to have full 3D variation).\nRotate the solid to put into other planes.",
@@ -102,7 +102,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Plane",
+	Name:       "goki.dev/goki/vgpu/vshape.Plane",
 	ShortName:  "vshape.Plane",
 	IDName:     "plane",
 	Doc:        "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative",
@@ -121,7 +121,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Shape",
+	Name:       "goki.dev/goki/vgpu/vshape.Shape",
 	ShortName:  "vshape.Shape",
 	IDName:     "shape",
 	Doc:        "Shape is an interface for all shape-constructing elements",
@@ -131,7 +131,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.ShapeBase",
+	Name:       "goki.dev/goki/vgpu/vshape.ShapeBase",
 	ShortName:  "vshape.ShapeBase",
 	IDName:     "shape-base",
 	Doc:        "ShapeBase is the base shape element",
@@ -147,7 +147,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Sphere",
+	Name:       "goki.dev/goki/vgpu/vshape.Sphere",
 	ShortName:  "vshape.Sphere",
 	IDName:     "sphere",
 	Doc:        "Sphere is a sphere shape (can be a partial sphere too)",
@@ -168,7 +168,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/vgpu/v2/vshape.Torus",
+	Name:       "goki.dev/goki/vgpu/vshape.Torus",
 	ShortName:  "vshape.Torus",
 	IDName:     "torus",
 	Doc:        "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.",

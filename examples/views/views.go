@@ -9,11 +9,11 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/mat32"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 )
 
 // TableStruct is a testing struct for table view

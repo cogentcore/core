@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 var _SetsValues = []Sets{0, 1, 2, 3}

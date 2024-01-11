@@ -13,7 +13,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"goki.dev/colors"
+	"goki.dev/goki/colors"
 )
 
 const (

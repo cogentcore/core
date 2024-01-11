@@ -5,8 +5,8 @@
 package main
 
 import (
-	"goki.dev/grease"
-	"goki.dev/gti/gtigen"
+	"goki.dev/goki/grease"
+	"goki.dev/goki/gti/gtigen"
 )
 
 func main() {

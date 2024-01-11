@@ -9,9 +9,9 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/girl/paint"
-	"goki.dev/grows/images"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )

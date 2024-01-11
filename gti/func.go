@@ -4,12 +4,12 @@
 
 package gti
 
-import "goki.dev/ordmap"
+import "goki.dev/goki/ordmap"
 
 // Func represents a global function
 type Func struct {
 	// Name is the fully-qualified name of the function
-	// (eg: goki.dev/gi/v2/gi.NewButton)
+	// (eg: goki.dev/goki/gi.NewButton)
 	Name string
 
 	// Doc has all of the comment documentation

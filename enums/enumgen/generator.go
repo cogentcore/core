@@ -25,8 +25,8 @@ import (
 	"strings"
 	"text/template"
 
-	"goki.dev/gengo"
-	"goki.dev/grease"
+	"goki.dev/goki/gengo"
+	"goki.dev/goki/grease"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -62,7 +62,7 @@ func (g *Generator) Printf(format string, args ...any) {
 func (g *Generator) PrintHeader() {
 	// we need a manual import of enums because it is
 	// external, but goimports will handle everything else
-	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/enums")
+	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "goki.dev/goki/enums")
 }
 
 // FindEnumTypes goes through all of the types in the package

@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
-	"goki.dev/enums"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/colors/matcolor"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/mat32"
 	"golang.org/x/image/draw"
 )
 

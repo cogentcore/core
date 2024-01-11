@@ -9,16 +9,16 @@ import (
 	"strconv"
 	"time"
 
-	"goki.dev/colors"
-	"goki.dev/fi"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // TimeView is a view for selecting a time

@@ -10,9 +10,9 @@ import (
 	"unicode"
 
 	"github.com/akutz/sortfold"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/syms"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/syms"
+	"goki.dev/goki/pi/token"
 )
 
 // Completion holds one potential completion

@@ -5,18 +5,18 @@
 package giv
 
 import (
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/gti"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/mimedata"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/laser"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

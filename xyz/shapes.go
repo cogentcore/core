@@ -5,8 +5,8 @@
 package xyz
 
 import (
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vshape"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu/vshape"
 )
 
 const (

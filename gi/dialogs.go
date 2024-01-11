@@ -5,13 +5,13 @@
 package gi
 
 import (
-	"goki.dev/colors"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
-	"goki.dev/laser"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 // todo: need a mechanism for nil Context to attach later

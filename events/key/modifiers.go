@@ -9,7 +9,7 @@ package key
 import (
 	"strings"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 // Modifiers are used as bitflags representing a set of modifier keys.

@@ -7,8 +7,8 @@ package gi
 import (
 	"time"
 
-	"goki.dev/grr"
-	"goki.dev/laser"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/laser"
 )
 
 // todo: store a map of [value]ticker -- close the ticker if existing.

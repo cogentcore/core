@@ -9,13 +9,13 @@ import (
 	"log/slog"
 	"strconv"
 
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
-	"goki.dev/grr"
+	"goki.dev/goki/events"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 )
 
 // Spinner combines a TextField with up / down buttons for incrementing /

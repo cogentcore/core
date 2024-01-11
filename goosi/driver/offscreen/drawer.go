@@ -7,7 +7,7 @@ package offscreen
 import (
 	"image"
 
-	"goki.dev/goosi"
+	"goki.dev/goki/goosi"
 )
 
 // Drawer is the implementation of [goosi.Drawer] for the offscreen platform

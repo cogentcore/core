@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
-	"goki.dev/goki/web"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/gokitool/mobile"
+	"goki.dev/goki/gokitool/web"
+	"goki.dev/goki/grog"
+	"goki.dev/goki/xe"
 )
 
 // Run builds and runs the config package. It also displays the logs generated

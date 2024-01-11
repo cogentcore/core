@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 var _ImageFlagsValues = []ImageFlags{0, 1, 2, 3, 4, 5, 6, 7}

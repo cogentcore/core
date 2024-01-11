@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/fi"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/parse"
-	"goki.dev/pi/v2/syms"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/parse"
+	"goki.dev/goki/pi/syms"
 )
 
 // FileState contains the full lexing and parsing state information for a given file.

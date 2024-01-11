@@ -17,7 +17,7 @@ import (
 	"maps"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/laser"
+	"goki.dev/goki/laser"
 )
 
 const (

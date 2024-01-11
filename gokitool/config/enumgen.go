@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 var _TypesValues = []Types{0, 1}

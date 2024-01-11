@@ -1,6 +1,6 @@
 package gotypes
 
-import "goki.dev/ki/v2"
+import "goki.dev/goki/ki"
 
 type Ityp int
 

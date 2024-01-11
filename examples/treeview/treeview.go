@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"math/rand"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/styles"
 )
 
 func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {

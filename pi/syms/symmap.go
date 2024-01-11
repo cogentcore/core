@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/token"
 )
 
 // SymMap is a map between symbol names and their full information.

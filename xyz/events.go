@@ -9,10 +9,10 @@ import (
 	"image"
 	"strings"
 
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
 )
 
 var (

@@ -4,15 +4,15 @@ package video
 
 import (
 	"github.com/zergon321/reisen"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gti"
-	"goki.dev/ki/v2"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/ordmap"
 )
 
 // VideoType is the [gti.Type] for [Video]
 var VideoType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/video.Video",
+	Name:       "goki.dev/goki/video.Video",
 	ShortName:  "video.Video",
 	IDName:     "video",
 	Doc:        "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.",
@@ -21,7 +21,7 @@ var VideoType = gti.AddType(&gti.Type{
 		{"Media", &gti.Field{Name: "Media", Type: "*github.com/zergon321/reisen.Media", LocalType: "*reisen.Media", Doc: "Media is the video media.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Image", &gti.Field{Name: "Image", Type: "goki.dev/gi/v2/gi.Image", LocalType: "gi.Image", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Image", &gti.Field{Name: "Image", Type: "goki.dev/goki/gi.Image", LocalType: "gi.Image", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Video{},

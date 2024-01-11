@@ -5,8 +5,8 @@
 package lex
 
 import (
-	"goki.dev/glop/indent"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/glop/indent"
+	"goki.dev/goki/pi/token"
 )
 
 // these functions support indentation algorithms,

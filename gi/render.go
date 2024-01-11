@@ -14,13 +14,13 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"goki.dev/cam/hct"
-	"goki.dev/colors"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-	"goki.dev/prof/v2"
+	"goki.dev/goki/cam/hct"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
+	"goki.dev/goki/prof"
+	"goki.dev/goki/styles"
 )
 
 // Rendering logic:

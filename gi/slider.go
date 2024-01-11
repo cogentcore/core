@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 )
 
 // Slider is a slideable widget that provides slider functionality for two Types:

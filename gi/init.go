@@ -7,9 +7,9 @@ package gi
 import (
 	"testing"
 
-	"goki.dev/goosi"
-	_ "goki.dev/goosi/driver"
-	_ "goki.dev/grog"
+	"goki.dev/goki/goosi"
+	_ "goki.dev/goki/goosi/driver"
+	_ "goki.dev/goki/grog"
 )
 
 func init() {

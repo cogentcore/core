@@ -7,8 +7,8 @@ package xyz
 import (
 	"sort"
 
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of

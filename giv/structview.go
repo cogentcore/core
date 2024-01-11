@@ -15,13 +15,13 @@ import (
 
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/ast"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/glop/bools"
-	"goki.dev/glop/sentence"
-	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/glop/bools"
+	"goki.dev/goki/glop/sentence"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
 )
 
 // StructView represents a struct, creating a property editor of the fields --

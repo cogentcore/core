@@ -5,7 +5,7 @@
 package events
 
 import (
-	"goki.dev/goosi/events/key"
+	"goki.dev/goki/events/key"
 )
 
 // SelectModes interprets the modifier keys to determine what type of selection mode to use.

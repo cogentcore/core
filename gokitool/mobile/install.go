@@ -7,8 +7,8 @@ package mobile
 import (
 	"fmt"
 
-	"goki.dev/goki/config"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/xe"
 )
 
 // Install installs the app named by the import path on the attached mobile device.

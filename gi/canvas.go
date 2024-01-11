@@ -4,7 +4,7 @@
 
 package gi
 
-import "goki.dev/girl/paint"
+import "goki.dev/goki/paint"
 
 // Canvas is a widget that can be arbitrarily drawn to.
 type Canvas struct {

@@ -7,17 +7,17 @@ package filetree
 import (
 	"log/slog"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/gix/texteditor"
-	"goki.dev/glop/dirs"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/grr"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/mimedata"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/texteditor"
+	"goki.dev/goki/vci"
 	"goki.dev/icons"
-	"goki.dev/vci/v2"
 )
 
 // VCSLogView is a view of the VCS log data

@@ -12,14 +12,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/fi"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/gix/texteditor"
-	"goki.dev/glop/dirs"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/grr"
+	"goki.dev/goki/events"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/grr"
+	"goki.dev/goki/mimedata"
+	"goki.dev/goki/texteditor"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,

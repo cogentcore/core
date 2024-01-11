@@ -13,7 +13,7 @@ import (
 	"image/color"
 
 	"github.com/anthonynsimon/bild/adjust"
-	"goki.dev/colors"
+	"goki.dev/goki/colors"
 )
 
 // ApplyOpacity applies the given opacity to the given image, handling

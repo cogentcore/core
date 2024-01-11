@@ -8,9 +8,9 @@ import (
 	"image/color"
 	"log"
 
-	"goki.dev/colors"
-	"goki.dev/laser"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/mat32"
 )
 
 // Tiling are the texture tiling parameters

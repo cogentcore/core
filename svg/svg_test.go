@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/girl/paint"
-	"goki.dev/glop/dirs"
-	"goki.dev/grows/images"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/paint"
 )
 
 func TestSVG(t *testing.T) {

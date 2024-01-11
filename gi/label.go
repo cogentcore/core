@@ -7,16 +7,16 @@ package gi
 import (
 	"fmt"
 
-	"goki.dev/cursors"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/mimedata"
+	"goki.dev/goki/paint"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
 )
 
 // Label is a widget for rendering text labels -- supports full widget model

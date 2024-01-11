@@ -5,8 +5,8 @@
 package golang
 
 import (
-	"goki.dev/pi/v2/syms"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/pi/syms"
+	"goki.dev/goki/pi/token"
 )
 
 // FuncParams returns the parameters of given function / method symbol,

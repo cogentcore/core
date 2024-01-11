@@ -10,7 +10,7 @@ import (
 	"unicode"
 
 	"github.com/mattn/go-shellwords"
-	"goki.dev/gti"
+	"goki.dev/goki/gti"
 )
 
 // ParseDirective parses and returns a comment directive from

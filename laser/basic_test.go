@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"goki.dev/laser/testdata"
+	"goki.dev/goki/laser/testdata"
 )
 
 func AFun(aa any) bool {

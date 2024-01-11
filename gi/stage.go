@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/goosi"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/ki"
 )
 
 // StageTypes are the types of Stage containers.

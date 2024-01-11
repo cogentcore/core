@@ -15,9 +15,9 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/enums"
-	"goki.dev/glop/elide"
-	"goki.dev/gti"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/glop/elide"
+	"goki.dev/goki/gti"
 )
 
 // StringElideMax is the Max width for String() path printout of Ki nodes.

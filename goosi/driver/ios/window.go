@@ -7,7 +7,7 @@
 package ios
 
 import (
-	"goki.dev/goosi/driver/base"
+	"goki.dev/goki/goosi/driver/base"
 )
 
 // Window is the implementation of [goosi.Window] for the iOS platform.

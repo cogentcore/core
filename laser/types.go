@@ -8,7 +8,7 @@ import (
 	"path"
 	"reflect"
 
-	"goki.dev/glop/sentence"
+	"goki.dev/goki/glop/sentence"
 )
 
 // LongTypeName returns the long, full package-path qualified type name.

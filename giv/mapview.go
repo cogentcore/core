@@ -8,14 +8,14 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
+	"goki.dev/goki/styles"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // MapView represents a map, creating a property editor of the values --

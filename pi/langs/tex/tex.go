@@ -9,13 +9,13 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/fi"
-	"goki.dev/glop/indent"
-	"goki.dev/pi/v2/langs"
-	"goki.dev/pi/v2/langs/bibtex"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/pi"
-	"goki.dev/pi/v2/syms"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/glop/indent"
+	"goki.dev/goki/pi"
+	"goki.dev/goki/pi/langs"
+	"goki.dev/goki/pi/langs/bibtex"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/syms"
 )
 
 //go:embed tex.pi

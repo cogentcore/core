@@ -40,8 +40,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
+	"goki.dev/goki/events"
+	"goki.dev/goki/goosi"
 )
 
 // MainLoop is the main app loop.

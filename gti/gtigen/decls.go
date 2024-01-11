@@ -9,8 +9,8 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.

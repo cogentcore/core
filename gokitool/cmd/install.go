@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/gokitool/mobile"
+	"goki.dev/goki/xe"
 )
 
 // Install installs the package on the local system.

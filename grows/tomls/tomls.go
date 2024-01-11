@@ -13,8 +13,8 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
-	"goki.dev/glop/dirs"
-	"goki.dev/grows"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/grows"
 )
 
 // Decoder is needed to return a standard Decode function signature for toml.

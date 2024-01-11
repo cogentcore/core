@@ -11,7 +11,7 @@ package gradient
 import (
 	"image/color"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Linear represents a linear gradient. It implements the [image.Image] interface.

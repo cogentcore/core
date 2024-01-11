@@ -13,8 +13,8 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"goki.dev/goosi/events"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/events"
+	"goki.dev/goki/mat32"
 )
 
 // Window is a double-buffered OS-specific hardware window.

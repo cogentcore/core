@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"goki.dev/enums"
-	"goki.dev/glop/bools"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/glop/bools"
 )
 
 // Has convenience functions for converting any (e.g. properties) to given
@@ -76,7 +76,7 @@ func ValueIsZero(v reflect.Value) bool {
 
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such) using a big type switch organized
-// for greatest efficiency. It tries the [goki.dev/glop/bools.Booler]
+// for greatest efficiency. It tries the [goki.dev/goki/glop/bools.Booler]
 // interface if not a bool type. It falls back on reflection when all
 // else fails.
 //

@@ -3,8 +3,8 @@
 package main
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
@@ -20,7 +20,7 @@ var _ = gti.AddType(&gti.Type{
 		{"IntField", &gti.Field{Name: "IntField", Type: "int", LocalType: "int", Doc: "an integer field", Directives: gti.Directives{}, Tag: ""}},
 		{"FloatField", &gti.Field{Name: "FloatField", Type: "float32", LocalType: "float32", Doc: "a float field", Directives: gti.Directives{}, Tag: ""}},
 		{"StrField", &gti.Field{Name: "StrField", Type: "string", LocalType: "string", Doc: "a string field", Directives: gti.Directives{}, Tag: ""}},
-		{"File", &gti.Field{Name: "File", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "a file", Directives: gti.Directives{}, Tag: ""}},
+		{"File", &gti.Field{Name: "File", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "a file", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -39,7 +39,7 @@ var _ = gti.AddType(&gti.Type{
 		{"ShowMe", &gti.Field{Name: "ShowMe", Type: "string", LocalType: "string", Doc: "can u see me?", Directives: gti.Directives{}, Tag: "viewif:\"On\""}},
 		{"Cond", &gti.Field{Name: "Cond", Type: "int", LocalType: "int", Doc: "a conditional", Directives: gti.Directives{}, Tag: "viewif:\"On\""}},
 		{"Cond1", &gti.Field{Name: "Cond1", Type: "string", LocalType: "string", Doc: "On and Cond=0 -- note that slbool as bool cannot be used directly..", Directives: gti.Directives{}, Tag: "viewif:\"On&&Cond==0\""}},
-		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/gi/v2/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"On&&Cond<=1\""}},
+		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/goki/gi/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"On&&Cond<=1\""}},
 		{"Val", &gti.Field{Name: "Val", Type: "float32", LocalType: "float32", Doc: "a value", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -55,17 +55,17 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stripes", &gti.Field{Name: "Stripes", Type: "goki.dev/gi/v2/gi.Stripes", LocalType: "gi.Stripes", Doc: "an enum", Directives: gti.Directives{}, Tag: ""}},
+		{"Stripes", &gti.Field{Name: "Stripes", Type: "goki.dev/goki/gi.Stripes", LocalType: "gi.Stripes", Doc: "an enum", Directives: gti.Directives{}, Tag: ""}},
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "a string", Directives: gti.Directives{}, Tag: "viewif:\"!(Stripes==[RowStripes,ColStripes])\""}},
 		{"ShowNext", &gti.Field{Name: "ShowNext", Type: "bool", LocalType: "bool", Doc: "click to show next", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowMe", &gti.Field{Name: "ShowMe", Type: "string", LocalType: "string", Doc: "can u see me?", Directives: gti.Directives{}, Tag: "viewif:\"ShowNext\""}},
-		{"Inline", &gti.Field{Name: "Inline", Type: "goki.dev/gi/v2/examples/views.ILStruct", LocalType: "ILStruct", Doc: "how about that", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
+		{"Inline", &gti.Field{Name: "Inline", Type: "goki.dev/goki/gi/examples/views.ILStruct", LocalType: "ILStruct", Doc: "how about that", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
 		{"Cond", &gti.Field{Name: "Cond", Type: "int", LocalType: "int", Doc: "a conditional", Directives: gti.Directives{}, Tag: ""}},
 		{"Cond1", &gti.Field{Name: "Cond1", Type: "string", LocalType: "string", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond==0\""}},
-		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/gi/v2/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond>=0\""}},
+		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/goki/gi/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond>=0\""}},
 		{"Val", &gti.Field{Name: "Val", Type: "float32", LocalType: "float32", Doc: "a value", Directives: gti.Directives{}, Tag: ""}},
-		{"Vec", &gti.Field{Name: "Vec", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Things", &gti.Field{Name: "Things", Type: "[]*goki.dev/gi/v2/examples/views.TableStruct", LocalType: "[]*TableStruct", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Vec", &gti.Field{Name: "Vec", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Things", &gti.Field{Name: "Things", Type: "[]*goki.dev/goki/gi/examples/views.TableStruct", LocalType: "[]*TableStruct", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		{"Stuff", &gti.Field{Name: "Stuff", Type: "[]float32", LocalType: "[]float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),

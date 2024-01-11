@@ -10,12 +10,12 @@ import (
 	"image/color"
 	"log"
 
-	"goki.dev/colors"
-	"goki.dev/grows/images"
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vgpu"
-	"goki.dev/xyz"
-	"goki.dev/xyz/examples/assets"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu"
+	"goki.dev/goki/xyz"
+	"goki.dev/goki/xyz/examples/assets"
 )
 
 func main() {

@@ -11,12 +11,12 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"goki.dev/fi"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/vci/v2"
+	"goki.dev/goki/events"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/giv"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/vci"
 )
 
 // OSOpenCommand returns the generic file 'open' command to open file with default app

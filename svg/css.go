@@ -10,7 +10,7 @@ import (
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 
-	"goki.dev/ki/v2"
+	"goki.dev/goki/ki"
 )
 
 // StyleSheet is a Node2D node that contains a stylesheet -- property values

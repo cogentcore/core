@@ -7,7 +7,7 @@ package svg
 import (
 	"image"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Group groups together SVG elements.

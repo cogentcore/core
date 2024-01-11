@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"goki.dev/grease"
-	"goki.dev/grog"
+	"goki.dev/goki/grease"
+	"goki.dev/goki/grog"
 )
 
 // Run runs the given app with the given default

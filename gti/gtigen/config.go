@@ -7,7 +7,7 @@ package gtigen
 import (
 	"text/template"
 
-	"goki.dev/ordmap"
+	"goki.dev/goki/ordmap"
 )
 
 // Config contains the configuration information

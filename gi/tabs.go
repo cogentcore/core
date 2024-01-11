@@ -8,17 +8,17 @@ import (
 	"log/slog"
 	"sync"
 
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/girl/abilities"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/glop/elide"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
+	"goki.dev/goki/abilities"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/cursors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/glop/elide"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/states"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 // Tabs switches among child widgets via tabs.  The selected widget gets

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/gi/v2/gi"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/gi"
 )
 
 var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5, 6}

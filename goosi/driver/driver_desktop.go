@@ -14,8 +14,8 @@ package driver
 import (
 	"testing"
 
-	"goki.dev/goosi/driver/desktop"
-	"goki.dev/goosi/driver/offscreen"
+	"goki.dev/goki/goosi/driver/desktop"
+	"goki.dev/goki/goosi/driver/offscreen"
 )
 
 func init() {

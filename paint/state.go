@@ -9,9 +9,9 @@ import (
 	"log/slog"
 	"sync"
 
-	"goki.dev/girl/raster"
-	"goki.dev/girl/scan"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/raster"
+	"goki.dev/goki/scan"
 )
 
 // The State holds all the current rendering state information used

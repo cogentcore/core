@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
+	"goki.dev/goki/enums"
 )
 
 var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}

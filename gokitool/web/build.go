@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"goki.dev/goki/config"
-	"goki.dev/goki/rendericon"
-	"goki.dev/grows/images"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/gokitool/rendericon"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/xe"
 )
 
 // Build builds an app for web using the given configuration information.

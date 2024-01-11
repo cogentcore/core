@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/enums"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/enums"
+	"goki.dev/goki/ki"
 )
 
 var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5, 6}

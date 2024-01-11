@@ -8,9 +8,9 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/pi"
+	"goki.dev/goki/pi"
+	"goki.dev/goki/pi/complete"
+	"goki.dev/goki/pi/lex"
 )
 
 func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {

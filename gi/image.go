@@ -13,12 +13,12 @@ import (
 	"os"
 
 	"github.com/anthonynsimon/bild/clone"
-	"goki.dev/colors"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
-	"goki.dev/grows/images"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/styles"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 )
 

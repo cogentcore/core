@@ -7,8 +7,8 @@ package paint
 import (
 	"image"
 
-	"goki.dev/girl/styles"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/styles"
 )
 
 // TextLink represents a hyperlink within rendered text

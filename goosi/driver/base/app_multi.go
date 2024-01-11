@@ -12,7 +12,7 @@ package base
 import (
 	"slices"
 
-	"goki.dev/goosi"
+	"goki.dev/goki/goosi"
 )
 
 // AppMulti contains the data and logic common to all implementations of [goosi.App]

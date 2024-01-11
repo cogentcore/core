@@ -10,10 +10,10 @@ import (
 	"testing"
 	"text/template"
 
-	"goki.dev/grease"
-	"goki.dev/gti"
-	"goki.dev/gti/gtigen/testdata"
-	"goki.dev/ordmap"
+	"goki.dev/goki/grease"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/gti/gtigen/testdata"
+	"goki.dev/goki/ordmap"
 )
 
 func TestGenerate(t *testing.T) {
@@ -69,7 +69,7 @@ func TestGenerate(t *testing.T) {
 
 func TestPerson(t *testing.T) {
 	want := testdata.PersonType
-	have := gti.TypeByName("goki.dev/gti/gtigen/testdata.Person")
+	have := gti.TypeByName("goki.dev/goki/gti/gtigen/testdata.Person")
 	if have != want {
 		t.Errorf("expected TypeByName to return %v, but got %v", want, have)
 	}
@@ -80,8 +80,8 @@ func TestPerson(t *testing.T) {
 	if _, ok := have.Instance.(*testdata.Person); !ok {
 		t.Errorf("expected instance to be a Person, but it is a %T (value %v)", have.Instance, have.Instance)
 	}
-	if have.Name != "goki.dev/gti/gtigen/testdata.Person" {
-		t.Errorf("expected name to be 'goki.dev/gti/gtigen/testdata.Person', but got %s", have.Name)
+	if have.Name != "goki.dev/goki/gti/gtigen/testdata.Person" {
+		t.Errorf("expected name to be 'goki.dev/goki/gti/gtigen/testdata.Person', but got %s", have.Name)
 	}
 	if len(have.Directives) != 2 {
 		t.Errorf("expected 1 directive, but got %d", len(have.Directives))

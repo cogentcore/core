@@ -8,7 +8,7 @@ import (
 	"io"
 	"io/fs"
 
-	"goki.dev/grows"
+	"goki.dev/goki/grows"
 	"gopkg.in/yaml.v3"
 )
 

@@ -13,14 +13,14 @@ import (
 	"unicode"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/glop/sentence"
-	"goki.dev/goosi/events"
-	"goki.dev/gti"
+	"goki.dev/goki/events"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/glop/sentence"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/laser"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // CallFunc calls the given function in the context of the given widget,

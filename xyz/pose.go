@@ -5,7 +5,7 @@
 package xyz
 
 import (
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Pose contains the full specification of position and orientation,

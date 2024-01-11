@@ -12,13 +12,13 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/colors"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/grows/images"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/paint"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 )
 
 // SVG is an SVG object.

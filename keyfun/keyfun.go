@@ -13,10 +13,10 @@ import (
 	"sort"
 	"strings"
 
-	"goki.dev/goosi"
-	"goki.dev/goosi/events/key"
-	"goki.dev/grows/jsons"
-	"goki.dev/grr"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/grows/jsons"
+	"goki.dev/goki/grr"
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts

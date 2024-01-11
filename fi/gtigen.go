@@ -3,12 +3,12 @@
 package fi
 
 import (
-	"goki.dev/gti"
-	"goki.dev/ordmap"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/fi.FileInfo",
+	Name:      "goki.dev/goki/fi.FileInfo",
 	ShortName: "fi.FileInfo",
 	IDName:    "file-info",
 	Doc:       "FileInfo represents the information about a given file / directory,\nincluding icon, mimetype, etc",
@@ -18,14 +18,14 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Ic", &gti.Field{Name: "Ic", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon for file", Directives: gti.Directives{}, Tag: "tableview:\"no-header\""}},
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "name of the file, without any path", Directives: gti.Directives{}, Tag: "width:\"40\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/fi.FileSize", LocalType: "FileSize", Doc: "size of the file in bytes", Directives: gti.Directives{}, Tag: ""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/goki/fi.FileSize", LocalType: "FileSize", Doc: "size of the file in bytes", Directives: gti.Directives{}, Tag: ""}},
 		{"Kind", &gti.Field{Name: "Kind", Type: "string", LocalType: "string", Doc: "type of file / directory -- shorter, more user-friendly version of mime type, based on category", Directives: gti.Directives{}, Tag: "width:\"20\" max-width:\"20\""}},
 		{"Mime", &gti.Field{Name: "Mime", Type: "string", LocalType: "string", Doc: "full official mime type of the contents", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
-		{"Cat", &gti.Field{Name: "Cat", Type: "goki.dev/fi.Cat", LocalType: "Cat", Doc: "functional category of the file, based on mime data etc", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
-		{"Known", &gti.Field{Name: "Known", Type: "goki.dev/fi.Known", LocalType: "Known", Doc: "known file type", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
+		{"Cat", &gti.Field{Name: "Cat", Type: "goki.dev/goki/fi.Cat", LocalType: "Cat", Doc: "functional category of the file, based on mime data etc", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
+		{"Known", &gti.Field{Name: "Known", Type: "goki.dev/goki/fi.Known", LocalType: "Known", Doc: "known file type", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
 		{"Mode", &gti.Field{Name: "Mode", Type: "io/fs.FileMode", LocalType: "os.FileMode", Doc: "file mode bits", Directives: gti.Directives{}, Tag: ""}},
-		{"ModTime", &gti.Field{Name: "ModTime", Type: "goki.dev/fi.FileTime", LocalType: "FileTime", Doc: "time that contents (only) were last modified", Directives: gti.Directives{}, Tag: ""}},
-		{"Vcs", &gti.Field{Name: "Vcs", Type: "goki.dev/vci/v2.FileStatus", LocalType: "vci.FileStatus", Doc: "version control system status, when enabled", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
+		{"ModTime", &gti.Field{Name: "ModTime", Type: "goki.dev/goki/fi.FileTime", LocalType: "FileTime", Doc: "time that contents (only) were last modified", Directives: gti.Directives{}, Tag: ""}},
+		{"Vcs", &gti.Field{Name: "Vcs", Type: "goki.dev/goki/vci.FileStatus", LocalType: "vci.FileStatus", Doc: "version control system status, when enabled", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
 		{"Path", &gti.Field{Name: "Path", Type: "string", LocalType: "string", Doc: "full path to file, including name -- for file functions", Directives: gti.Directives{}, Tag: "tableview:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),

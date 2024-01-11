@@ -23,9 +23,9 @@ import (
 
 	"maps"
 
-	"goki.dev/goki/config"
-	"goki.dev/grog"
-	"goki.dev/xe"
+	"goki.dev/goki/gokitool/config"
+	"goki.dev/goki/grog"
+	"goki.dev/goki/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -147,7 +147,7 @@ var NmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^
 
 func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, error) {
 	if c.Build.PrintOnly {
-		return map[string]bool{"goki.dev/mobile/app": true}, nil // TODO: fix import paths
+		return map[string]bool{"goki.dev/goki/mobile/app": true}, nil // TODO: fix import paths
 	}
 	r, w := io.Pipe()
 	cmd := exec.Command(nm, path)

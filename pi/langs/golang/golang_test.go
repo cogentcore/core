@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"goki.dev/fi"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/pi"
-	"goki.dev/prof/v2"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/pi"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/prof"
 )
 
 func init() {

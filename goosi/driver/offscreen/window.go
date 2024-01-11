@@ -5,8 +5,8 @@
 package offscreen
 
 import (
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver/base"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/goosi/driver/base"
 )
 
 // Window is the implementation of [goosi.Window] for the offscreen platform.

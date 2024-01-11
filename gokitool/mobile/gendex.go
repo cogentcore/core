@@ -31,7 +31,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/goki/mobile/sdkpath"
+	"goki.dev/goki/gokitool/mobile/sdkpath"
 )
 
 var outfile = flag.String("o", "", "result will be written file")

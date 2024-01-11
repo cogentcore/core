@@ -11,10 +11,10 @@ import (
 	"log"
 	"log/slog"
 
-	"goki.dev/glop/dirs"
-	"goki.dev/grows/images"
-	"goki.dev/vgpu/v2/vgpu"
-	"goki.dev/vgpu/v2/vphong"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/grows/images"
+	"goki.dev/goki/vgpu"
+	"goki.dev/goki/vgpu/vphong"
 )
 
 // TexName provides a GUI interface for choosing textures

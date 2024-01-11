@@ -7,8 +7,8 @@ package gi
 import (
 	"testing"
 
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
+	"goki.dev/goki/styles"
+	"goki.dev/goki/units"
 	"goki.dev/icons"
 )
 

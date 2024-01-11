@@ -10,8 +10,8 @@ import (
 	"log"
 	"log/slog"
 
-	"goki.dev/mat32/v2"
-	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/vgpu"
 )
 
 // Texture has texture image -- stored as image.RGBA for GPU compatibility

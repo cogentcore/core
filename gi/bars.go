@@ -7,8 +7,8 @@ package gi
 import (
 	"strings"
 
-	"goki.dev/girl/styles"
-	"goki.dev/ki/v2"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/styles"
 )
 
 // BarFuncs are functions for creating control bars,

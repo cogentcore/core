@@ -7,7 +7,7 @@ package hct
 import (
 	"image/color"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Lighten returns a color that is lighter by the

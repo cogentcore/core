@@ -9,7 +9,7 @@ package web
 import (
 	"syscall/js"
 
-	"goki.dev/goosi/mimedata"
+	"goki.dev/goki/mimedata"
 )
 
 // TODO(kai/web): support copying images and other mime formats, etc

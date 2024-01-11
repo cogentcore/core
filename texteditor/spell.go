@@ -8,12 +8,12 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/fi"
-	"goki.dev/gi/v2/keyfun"
-	"goki.dev/gix/texteditor/textbuf"
-	"goki.dev/goosi/events"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/events"
+	"goki.dev/goki/fi"
+	"goki.dev/goki/keyfun"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/token"
+	"goki.dev/goki/texteditor/textbuf"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

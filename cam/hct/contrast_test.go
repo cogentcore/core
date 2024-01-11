@@ -8,7 +8,7 @@ import (
 	"image/color"
 	"testing"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 func TestContrastRatio(t *testing.T) {

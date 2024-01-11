@@ -9,7 +9,7 @@ import (
 	"image/color"
 	"log"
 
-	"goki.dev/mat32/v2"
+	"goki.dev/goki/mat32"
 )
 
 // Colors are the material colors with padding for direct uploading to shader

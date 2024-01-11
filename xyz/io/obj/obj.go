@@ -24,10 +24,10 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/colors"
-	"goki.dev/glop/dirs"
-	"goki.dev/mat32/v2"
-	"goki.dev/xyz"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/glop/dirs"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/xyz"
 )
 
 func init() {

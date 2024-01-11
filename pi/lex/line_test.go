@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"goki.dev/glop/nptime"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/glop/nptime"
+	"goki.dev/goki/pi/token"
 )
 
 func TestLineMerge(t *testing.T) {

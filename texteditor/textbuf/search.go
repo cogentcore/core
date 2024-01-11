@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"goki.dev/glop/runes"
-	"goki.dev/pi/v2/lex"
+	"goki.dev/goki/glop/runes"
+	"goki.dev/goki/pi/lex"
 )
 
 // Match records one match for search within file, positions in runes

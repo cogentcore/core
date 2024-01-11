@@ -5,8 +5,8 @@
 package syms
 
 import (
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/pi/lex"
+	"goki.dev/goki/pi/token"
 )
 
 // SymStack is a simple stack (slice) of symbols

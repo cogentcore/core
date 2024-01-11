@@ -12,9 +12,9 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"goki.dev/glop/indent"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/token"
+	"goki.dev/goki/glop/indent"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/pi/token"
 )
 
 var Trace = false

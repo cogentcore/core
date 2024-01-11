@@ -8,10 +8,10 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/langs/bibtex"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/pi"
+	"goki.dev/goki/pi"
+	"goki.dev/goki/pi/complete"
+	"goki.dev/goki/pi/langs/bibtex"
+	"goki.dev/goki/pi/lex"
 )
 
 // CompleteCite does completion on citation

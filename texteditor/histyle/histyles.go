@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/pi/v2/pi"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/pi"
 )
 
 //go:embed defaults.histys

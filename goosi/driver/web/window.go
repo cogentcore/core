@@ -9,8 +9,8 @@ package web
 import (
 	"syscall/js"
 
-	"goki.dev/goosi"
-	"goki.dev/goosi/driver/base"
+	"goki.dev/goki/goosi"
+	"goki.dev/goki/goosi/driver/base"
 )
 
 // Window is the implementation of [goosi.Window] for the web platform.

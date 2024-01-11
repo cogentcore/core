@@ -7,12 +7,12 @@ package xyzv
 import (
 	"image/color"
 
-	"goki.dev/colors"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-	"goki.dev/xyz"
+	"goki.dev/goki/colors"
+	"goki.dev/goki/events"
+	"goki.dev/goki/events/key"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/mat32"
+	"goki.dev/goki/xyz"
 )
 
 // SelModes are selection modes for Scene

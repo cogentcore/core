@@ -3,11 +3,11 @@
 package main
 
 import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gix/filetree"
-	"goki.dev/gti"
-	"goki.dev/ki/v2"
-	"goki.dev/ordmap"
+	"goki.dev/goki/filetree"
+	"goki.dev/goki/gi"
+	"goki.dev/goki/gti"
+	"goki.dev/goki/ki"
+	"goki.dev/goki/ordmap"
 )
 
 // FileBrowseType is the [gti.Type] for [FileBrowse]
@@ -18,15 +18,15 @@ var FileBrowseType = gti.AddType(&gti.Type{
 	Doc:        "FileBrowse is a simple file browser / viewer / editor with a file tree and\none or more editor windows.  It is based on an early version of the Gide\nIDE framework, and remains simple to test / demo the file tree component.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ProjRoot", &gti.Field{Name: "ProjRoot", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename", Directives: gti.Directives{}, Tag: "desc:\"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename\""}},
-		{"ActiveFilename", &gti.Field{Name: "ActiveFilename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "filename of the currently-active texteditor", Directives: gti.Directives{}, Tag: "desc:\"filename of the currently-active texteditor\""}},
+		{"ProjRoot", &gti.Field{Name: "ProjRoot", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename", Directives: gti.Directives{}, Tag: "desc:\"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename\""}},
+		{"ActiveFilename", &gti.Field{Name: "ActiveFilename", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "filename of the currently-active texteditor", Directives: gti.Directives{}, Tag: "desc:\"filename of the currently-active texteditor\""}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the root changed?  we receive update signals from root for changes", Directives: gti.Directives{}, Tag: "json:\"-\" desc:\"has the root changed?  we receive update signals from root for changes\""}},
-		{"Files", &gti.Field{Name: "Files", Type: "*goki.dev/gix/filetree.Tree", LocalType: "*filetree.Tree", Doc: "all the files in the project directory and subdirectories", Directives: gti.Directives{}, Tag: "desc:\"all the files in the project directory and subdirectories\""}},
+		{"Files", &gti.Field{Name: "Files", Type: "*goki.dev/goki/filetree.Tree", LocalType: "*filetree.Tree", Doc: "all the files in the project directory and subdirectories", Directives: gti.Directives{}, Tag: "desc:\"all the files in the project directory and subdirectories\""}},
 		{"NTextEditors", &gti.Field{Name: "NTextEditors", Type: "int", LocalType: "int", Doc: "number of texteditors available for editing files (default 2) -- configurable with n-text-views property", Directives: gti.Directives{}, Tag: "xml:\"n-text-views\" desc:\"number of texteditors available for editing files (default 2) -- configurable with n-text-views property\""}},
 		{"ActiveTextEditorIdx", &gti.Field{Name: "ActiveTextEditorIdx", Type: "int", LocalType: "int", Doc: "index of the currently-active texteditor -- new files will be viewed in other views if available", Directives: gti.Directives{}, Tag: "json:\"-\" desc:\"index of the currently-active texteditor -- new files will be viewed in other views if available\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"UpdateFiles", &gti.Method{Name: "UpdateFiles", Doc: "UpdateFiles updates the list of files saved in project", Directives: gti.Directives{
@@ -35,7 +35,7 @@ var FileBrowseType = gti.AddType(&gti.Type{
 		{"OpenPath", &gti.Method{Name: "OpenPath", Doc: "OpenPath opens a new browser viewer at given path, which can either be a\nspecific file or a directory containing multiple files of interest -- opens\nin current FileBrowse object if it is empty, or otherwise opens a new\nwindow.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"path", &gti.Field{Name: "path", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"path", &gti.Field{Name: "path", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"SaveActiveView", &gti.Method{Name: "SaveActiveView", Doc: "SaveActiveView saves the contents of the currently-active texteditor", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
@@ -43,12 +43,12 @@ var FileBrowseType = gti.AddType(&gti.Type{
 		{"SaveActiveViewAs", &gti.Method{Name: "SaveActiveViewAs", Doc: "SaveActiveViewAs save with specified filename the contents of the\ncurrently-active texteditor", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"ConfigToolbar", &gti.Method{Name: "ConfigToolbar", Doc: "", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"tb", &gti.Field{Name: "tb", Type: "*goki.dev/gi/v2/gi.Toolbar", LocalType: "*gi.Toolbar", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"tb", &gti.Field{Name: "tb", Type: "*goki.dev/goki/gi.Toolbar", LocalType: "*gi.Toolbar", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 	Instance: &FileBrowse{},
