@@ -6156,9 +6156,6 @@ const (
 	// WrapText is https://github.com/goki/icons/blob/main/svg/wrap_text.svg
 	WrapText Icon = "wrap_text"
 
-	// Wrist is https://github.com/goki/icons/blob/main/svg/wrist.svg
-	Wrist Icon = "wrist"
-
 	// WrongLocation is https://github.com/goki/icons/blob/main/svg/wrong_location.svg
 	WrongLocation Icon = "wrong_location"
 
