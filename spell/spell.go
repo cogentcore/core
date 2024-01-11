@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/goki/pi/lex"
+	"goki.dev/pi/lex"
 )
 
 //go:embed spell_en_us.json

@@ -17,13 +17,13 @@ import (
 	"strings"
 	"syscall/js"
 
-	"goki.dev/goki/clip"
-	"goki.dev/goki/cursor"
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/goosi/driver/base"
-	"goki.dev/goki/jsfs"
+	"goki.dev/clip"
+	"goki.dev/cursor"
+	"goki.dev/events"
+	"goki.dev/events/key"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
+	"goki.dev/jsfs"
 )
 
 func Init() {

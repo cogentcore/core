@@ -16,13 +16,13 @@ import (
 	"runtime"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/clip"
-	"goki.dev/goki/cursor"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/goosi/driver/base"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/vgpu"
-	"goki.dev/goki/vgpu/vdraw"
+	"goki.dev/clip"
+	"goki.dev/cursor"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
+	"goki.dev/grr"
+	"goki.dev/vgpu"
+	"goki.dev/vgpu/vdraw"
 
 	vk "github.com/goki/vulkan"
 )

@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Config notes: only needs config when number of kids changes

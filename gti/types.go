@@ -11,13 +11,13 @@ import (
 	"sort"
 	"sync/atomic"
 
-	"goki.dev/goki/glop/sentence"
-	"goki.dev/goki/laser"
+	"goki.dev/glop/sentence"
+	"goki.dev/laser"
 )
 
 var (
 	// Types records all types (i.e., a type registry)
-	// key is long type name: package_url.Type, e.g., goki.dev/goki/gi.Button
+	// key is long type name: package_url.Type, e.g., goki.dev/gi.Button
 	Types = map[string]*Type{}
 
 	// TypeIDCounter is an atomically incremented uint64 used
@@ -25,7 +25,7 @@ var (
 	TypeIDCounter uint64
 )
 
-// TypeByName returns a Type by name (package_url.Type, e.g., goki.dev/goki/gi.Button),
+// TypeByName returns a Type by name (package_url.Type, e.g., goki.dev/gi.Button),
 func TypeByName(nm string) *Type {
 	tp, ok := Types[nm]
 	if !ok {
@@ -34,7 +34,7 @@ func TypeByName(nm string) *Type {
 	return tp
 }
 
-// TypeByNameTry returns a Type by name (package_url.Type, e.g., goki.dev/goki/gi.Button),
+// TypeByNameTry returns a Type by name (package_url.Type, e.g., goki.dev/gi.Button),
 // or error if not found
 func TypeByNameTry(nm string) (*Type, error) {
 	tp, ok := Types[nm]

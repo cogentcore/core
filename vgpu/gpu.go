@@ -22,8 +22,8 @@ import (
 	"log/slog"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/vgpu/vkinit"
+	"goki.dev/laser"
+	"goki.dev/vgpu/vkinit"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/

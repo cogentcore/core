@@ -3,14 +3,14 @@
 package testdata
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/ordmap"
 )
 
 // TestNodeType is the [gti.Type] for [TestNode]
 var TestNodeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/ki/testdata.TestNode",
+	Name:       "goki.dev/ki/testdata.TestNode",
 	ShortName:  "testdata.TestNode",
 	IDName:     "test-node",
 	Doc:        "",
@@ -43,7 +43,7 @@ func (t *TestNode) New() ki.Ki {
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
 var NodeEmbedType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/ki/testdata.NodeEmbed",
+	Name:      "goki.dev/ki/testdata.NodeEmbed",
 	ShortName: "testdata.NodeEmbed",
 	IDName:    "node-embed",
 	Doc:       "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti",
@@ -81,7 +81,7 @@ func (t *NodeEmbed) New() ki.Ki {
 
 // NodeFieldType is the [gti.Type] for [NodeField]
 var NodeFieldType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/ki/testdata.NodeField",
+	Name:       "goki.dev/ki/testdata.NodeField",
 	ShortName:  "testdata.NodeField",
 	IDName:     "node-field",
 	Doc:        "",
@@ -116,7 +116,7 @@ func (t *NodeField) New() ki.Ki {
 
 // NodeField2Type is the [gti.Type] for [NodeField2]
 var NodeField2Type = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/ki/testdata.NodeField2",
+	Name:       "goki.dev/ki/testdata.NodeField2",
 	ShortName:  "testdata.NodeField2",
 	IDName:     "node-field-2",
 	Doc:        "",

@@ -9,15 +9,15 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/goki/fi"
-	"goki.dev/goki/glop/indent"
-	"goki.dev/goki/pi"
-	"goki.dev/goki/pi/complete"
-	"goki.dev/goki/pi/langs"
-	"goki.dev/goki/pi/langs/bibtex"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/pi/syms"
-	"goki.dev/goki/pi/token"
+	"goki.dev/fi"
+	"goki.dev/glop/indent"
+	"goki.dev/pi"
+	"goki.dev/pi/complete"
+	"goki.dev/pi/langs"
+	"goki.dev/pi/langs/bibtex"
+	"goki.dev/pi/lex"
+	"goki.dev/pi/syms"
+	"goki.dev/pi/token"
 )
 
 //go:embed markdown.pi

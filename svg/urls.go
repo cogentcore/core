@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
+	"goki.dev/ki"
+	"goki.dev/laser"
 )
 
 /////////////////////////////////////////////////////////////////////////////

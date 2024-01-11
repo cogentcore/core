@@ -9,9 +9,9 @@ import (
 	"io"
 	"slices"
 
-	"goki.dev/goki/glop/indent"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/pi/lex"
+	"goki.dev/glop/indent"
+	"goki.dev/ki"
+	"goki.dev/pi/lex"
 )
 
 // Type contains all the information about types.  Types can be builtin

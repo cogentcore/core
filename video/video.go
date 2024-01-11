@@ -14,8 +14,8 @@ import (
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/zergon321/reisen"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/ki"
+	"goki.dev/gi"
+	"goki.dev/ki"
 )
 
 // Video represents a video playback widget without any controls.

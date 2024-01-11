@@ -1,8 +1,8 @@
 # XYZ
 
-[![Go Reference](https://pkg.go.dev/badge/goki.dev/goki/xyz/xyz.svg)](https://pkg.go.dev/goki.dev/goki/xyz)
+[![Go Reference](https://pkg.go.dev/badge/goki.dev/xyz/xyz.svg)](https://pkg.go.dev/goki.dev/xyz)
 
-`xyz` is a 3D graphics framework written in Go.  It was originally developed as `gi3d`, included in the [GoGi](https;//goki.dev/goki/GoGi) GUI framework, but is now a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The `xyzv` package in GoGi provides an integration of xyz in GoGi, for dynamic and efficient 3D rendering within 2D GUI windows.
+`xyz` is a 3D graphics framework written in Go.  It was originally developed as `gi3d`, included in the [GoGi](https;//goki.dev/GoGi) GUI framework, but is now a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The `xyzv` package in GoGi provides an integration of xyz in GoGi, for dynamic and efficient 3D rendering within 2D GUI windows.
 
 `xyz` is built on the [vgpu](https://github.com/goki/vgpu) Vulkan GPU framework, and uses the [goki](https://github.com/goki/ki) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of Vulkan which is highly efficient.  See [eve](https://github.com/emer/eve) for a virtual environment framework built on top of xyz, which provides a physics engine for simulating 3D worlds (for use in training neural network models).
 

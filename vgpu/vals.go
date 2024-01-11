@@ -11,9 +11,9 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/vgpu/szalloc"
+	"goki.dev/enums"
+	"goki.dev/mat32"
+	"goki.dev/vgpu/szalloc"
 )
 
 // Val represents a specific value of a Var variable.

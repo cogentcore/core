@@ -7,11 +7,11 @@ package texteditor
 import (
 	"unicode"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/texteditor/textbuf"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/pi/lex"
+	"goki.dev/styles"
+	"goki.dev/texteditor/textbuf"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

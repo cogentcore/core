@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	"github.com/Masterminds/vcs"
-	"goki.dev/goki/glop/dirs"
+	"goki.dev/glop/dirs"
 )
 
 var (

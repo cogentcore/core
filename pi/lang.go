@@ -5,10 +5,10 @@
 package pi
 
 import (
-	"goki.dev/goki/glop/indent"
-	"goki.dev/goki/pi/complete"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/pi/syms"
+	"goki.dev/glop/indent"
+	"goki.dev/pi/complete"
+	"goki.dev/pi/lex"
+	"goki.dev/pi/syms"
 )
 
 // Lang provides a general interface for language-specific management

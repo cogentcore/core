@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/goki/pi/lex"
+	"goki.dev/pi/lex"
 )
 
 // UndoTrace; set to true to get a report of undo actions

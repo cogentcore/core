@@ -14,8 +14,8 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/units"
+	"goki.dev/grr"
+	"goki.dev/units"
 )
 
 func main() {

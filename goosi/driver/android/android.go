@@ -56,11 +56,11 @@ import (
 	"time"
 	"unsafe"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/goosi/driver/base"
-	"goki.dev/goki/goosi/driver/mobile/callfn"
-	"goki.dev/goki/goosi/driver/mobile/mobileinit"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
+	"goki.dev/goosi/driver/mobile/callfn"
+	"goki.dev/goosi/driver/mobile/mobileinit"
 )
 
 // mimeMap contains standard mime entries that are missing on Android

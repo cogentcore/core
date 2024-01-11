@@ -7,7 +7,7 @@ package gi
 import (
 	"time"
 
-	"goki.dev/goki/events"
+	"goki.dev/events"
 )
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.

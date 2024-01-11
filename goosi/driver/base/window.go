@@ -14,9 +14,9 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/mat32"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	"goki.dev/mat32"
 )
 
 // Window contains the data and logic common to all implementations of [goosi.Window].

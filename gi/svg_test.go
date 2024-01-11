@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/svg"
+	"goki.dev/mat32"
+	"goki.dev/svg"
 )
 
 func TestSVG(t *testing.T) {

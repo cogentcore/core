@@ -4,7 +4,7 @@
 
 package vshape
 
-import "goki.dev/goki/mat32"
+import "goki.dev/mat32"
 
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.

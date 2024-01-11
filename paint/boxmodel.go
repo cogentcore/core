@@ -7,9 +7,9 @@ package paint
 import (
 	"image"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/styles"
 )
 
 // DrawStdBox draws the CSS "standard box" model using the given styling information,

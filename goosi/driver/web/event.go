@@ -10,8 +10,8 @@ import (
 	"image"
 	"syscall/js"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
+	"goki.dev/events"
+	"goki.dev/events/key"
 )
 
 func (a *App) AddEventListeners() {

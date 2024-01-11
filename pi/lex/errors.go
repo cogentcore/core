@@ -16,8 +16,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
+	"goki.dev/ki"
+	"goki.dev/laser"
 )
 
 // In an ErrorList, an error is represented by an *Error.

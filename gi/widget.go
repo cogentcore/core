@@ -11,13 +11,13 @@ import (
 	"log"
 	"sync"
 
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
+	"goki.dev/abilities"
+	"goki.dev/enums"
+	"goki.dev/events"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/states"
+	"goki.dev/styles"
 )
 
 // Widget is the interface for all GoGi Widget Nodes

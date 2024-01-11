@@ -4,7 +4,7 @@
 
 package gi
 
-import "goki.dev/goki/ki"
+import "goki.dev/ki"
 
 // LabeledTextField is a [Label] with optional associated label,
 // hint, and error text.

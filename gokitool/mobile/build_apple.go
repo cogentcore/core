@@ -16,9 +16,9 @@ import (
 	"text/template"
 
 	"github.com/jackmordaunt/icns/v2"
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/gokitool/rendericon"
-	"goki.dev/goki/xe"
+	"goki.dev/gokitool/config"
+	"goki.dev/gokitool/rendericon"
+	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
 

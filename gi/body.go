@@ -5,9 +5,9 @@
 package gi
 
 import (
-	"goki.dev/goki/colors"
-	"goki.dev/goki/glop/sentence"
-	"goki.dev/goki/styles"
+	"goki.dev/colors"
+	"goki.dev/glop/sentence"
+	"goki.dev/styles"
 )
 
 // Body holds the primary content of a Scene

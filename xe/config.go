@@ -10,7 +10,7 @@ import (
 
 	"log/slog"
 
-	"goki.dev/goki/grog"
+	"goki.dev/grog"
 )
 
 // Config contains the configuration information that

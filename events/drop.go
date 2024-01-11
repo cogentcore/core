@@ -7,7 +7,7 @@ package events
 import (
 	"fmt"
 
-	"goki.dev/goki/events/key"
+	"goki.dev/events/key"
 )
 
 // DragDrop represents the drag-and-drop Drop event

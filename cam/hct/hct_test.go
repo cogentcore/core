@@ -7,7 +7,7 @@ package hct
 import (
 	"testing"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 func expect(t *testing.T, ref, val float32) {

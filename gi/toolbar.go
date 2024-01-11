@@ -5,13 +5,13 @@
 package gi
 
 import (
-	"goki.dev/goki/colors"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
 	"goki.dev/icons"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.

@@ -6,71 +6,71 @@
     "Kids": [
       {
         "n": 33,
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "InCommentMulti",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "InStrBacktick",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "StartCommentMulti",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "LitStrBacktick",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "CommentLine",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "SkipWhite",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Letter",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Number",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Dot",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "LitStrSingle",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "LitStrDouble",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "LParen",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "RParen",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "LBrack",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "RBrack",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "LBrace",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "RBrace",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Comma",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Semi",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Colon",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Plus",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Minus",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Mult",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Div",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Rem",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Xor",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Rangle",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Langle",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Equals",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Not",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "And",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "Or",
-        "type": "goki.dev/goki/pi/lex.Rule",
+        "type": "goki.dev/pi/lex.Rule",
         "name": "AnyText"
       },
       {
@@ -80,11 +80,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "EndMulti",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "StartEmbededMulti",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Comment"
           },
           {
@@ -170,11 +170,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "QuotedStrBacktick",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "EndStrBacktick",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "StrBacktick"
           },
           {
@@ -343,13 +343,13 @@
         "Kids": [
           {
             "n": 4,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Keyword",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Type",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Builtins",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Name"
           },
           {
@@ -359,59 +359,59 @@
             "Kids": [
               {
                 "n": 27,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "break",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "case",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "chan",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "const",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "continue",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "default",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "defer",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "else",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "fallthrough",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "for",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "func",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "go",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "goto",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "if",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "import",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "interface",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "map",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "make",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "new",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "package",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "range",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "return",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "select",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "struct",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "switch",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "type",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "var"
               },
               {
@@ -975,43 +975,43 @@
             "Kids": [
               {
                 "n": 19,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "bool",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "byte",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "complex64",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "complex128",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "float32",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "float64",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "int",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "int8",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "int16",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "int32",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "int64",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "rune",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "string",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "uint",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "uint8",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "uint16",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "uint32",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "uint64",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "uintptr"
               },
               {
@@ -1415,41 +1415,41 @@
             "Kids": [
               {
                 "n": 18,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "append",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "cap",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "close",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "complex",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "copy",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "delete",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "error",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "imag",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "len",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "panic",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "print",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "println",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "real",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "recover",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "true",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "false",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "iota",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "nil"
               },
               {
@@ -1887,11 +1887,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "NextNum",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "NextDot",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Period"
           },
           {
@@ -1921,7 +1921,7 @@
             "Kids": [
               {
                 "n": 1,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "Ellipsis"
               },
               {
@@ -2199,9 +2199,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Define",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Colon"
           },
           {
@@ -2265,11 +2265,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnAdd",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnInc",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Add"
           },
           {
@@ -2353,11 +2353,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnSub",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnDec",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Sub"
           },
           {
@@ -2441,9 +2441,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnMul",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Mult"
           },
           {
@@ -2507,9 +2507,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnDiv",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Div"
           },
           {
@@ -2573,9 +2573,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnRem",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Rem"
           },
           {
@@ -2639,9 +2639,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnXor",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Xor"
           },
           {
@@ -2705,11 +2705,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "GtEq",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "ShiftRight",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Greater"
           },
           {
@@ -2739,9 +2739,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "AsgnShiftRight",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "ShiftRight"
               },
               {
@@ -2839,13 +2839,13 @@
         "Kids": [
           {
             "n": 4,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "LtEq",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnArrow",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "ShiftLeft",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Less"
           },
           {
@@ -2895,9 +2895,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "AsgnShiftLeft",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "ShiftLeft"
               },
               {
@@ -2995,9 +2995,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Equality",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Asgn"
           },
           {
@@ -3061,9 +3061,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "NotEqual",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "Not"
           },
           {
@@ -3127,13 +3127,13 @@
         "Kids": [
           {
             "n": 4,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnAnd",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AndNot",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "LogAnd",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "BitAnd"
           },
           {
@@ -3163,9 +3163,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "AsgnAndNot",
-                "type": "goki.dev/goki/pi/lex.Rule",
+                "type": "goki.dev/pi/lex.Rule",
                 "name": "AndNot"
               },
               {
@@ -3283,11 +3283,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "AsgnOr",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "LogOr",
-            "type": "goki.dev/goki/pi/lex.Rule",
+            "type": "goki.dev/pi/lex.Rule",
             "name": "BitOr"
           },
           {
@@ -3474,19 +3474,19 @@
     "Kids": [
       {
         "n": 7,
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "File",
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "ExprRules",
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "TypeRules",
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "FuncRules",
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "StmtRules",
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "ImportRules",
-        "type": "goki.dev/goki/pi/parse.Rule",
+        "type": "goki.dev/pi/parse.Rule",
         "name": "DeclRules"
       },
       {
@@ -3496,19 +3496,19 @@
         "Kids": [
           {
             "n": 7,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "PackageSpec",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Imports",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Consts",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Types",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Vars",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Funcs",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Stmts"
           },
           {
@@ -3641,37 +3641,37 @@
         "Kids": [
           {
             "n": 16,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "FullName",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "NameList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ExprList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Expr",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "UnaryExpr",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "BinaryExpr",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "PrimaryExpr",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "LiteralType",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "LiteralValue",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ElementList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Key",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "RecvType",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "SliceExpr",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "SliceIdxs",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ArgsExpr",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ArgsList"
           },
           {
@@ -3681,9 +3681,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "QualName",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Name"
               },
               {
@@ -3707,9 +3707,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "NameLit",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "KeyName"
                   },
                   {
@@ -3767,9 +3767,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NameListEls",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NameListEl"
               },
               {
@@ -3817,9 +3817,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ExprListEls",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ExprListEl"
               },
               {
@@ -3867,15 +3867,15 @@
             "Kids": [
               {
                 "n": 5,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "CompLit",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FunLitCall",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FunLit",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "BinExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "UnryExpr"
               },
               {
@@ -3965,21 +3965,21 @@
             "Kids": [
               {
                 "n": 8,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PosExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NegExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "UnaryXorExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NotExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "DePtrExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AddrExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SendExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PrimExpr"
               },
               {
@@ -4111,43 +4111,43 @@
             "Kids": [
               {
                 "n": 19,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NotEqExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "EqExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LogOrExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LogAndExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "GtEqExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "GreaterExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LtEqExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LessExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "BitOrExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "BitAndExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "BitXorExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "BitAndNotExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ShiftRightExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ShiftLeftExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SubExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AddExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "RemExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "DivExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MultExpr"
               },
               {
@@ -4433,37 +4433,37 @@
             "Kids": [
               {
                 "n": 16,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Lits",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FuncExpr",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MakeCall",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NewCall",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Paren",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Convert",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeAssertSel",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeAssert",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Selector",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "CompositeLit",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceCall",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Slice",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethCall",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FuncCallFun",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FuncCall",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "OpName"
               },
               {
@@ -4473,19 +4473,19 @@
                 "Kids": [
                   {
                     "n": 7,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitRune",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitNumInteger",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitNumFloat",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitNumImag",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitStringDbl",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitStringTicks",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitString"
                   },
                   {
@@ -4565,7 +4565,7 @@
                     "Kids": [
                       {
                         "n": 1,
-                        "type": "goki.dev/goki/pi/parse.Rule",
+                        "type": "goki.dev/pi/parse.Rule",
                         "name": "LitStringTickGp"
                       },
                       {
@@ -4575,9 +4575,9 @@
                         "Kids": [
                           {
                             "n": 2,
-                            "type": "goki.dev/goki/pi/parse.Rule",
+                            "type": "goki.dev/pi/parse.Rule",
                             "name": "LitStringTickList",
-                            "type": "goki.dev/goki/pi/parse.Rule",
+                            "type": "goki.dev/pi/parse.Rule",
                             "name": "LitStringTick"
                           },
                           {
@@ -4659,9 +4659,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "FuncLitCall",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "FuncLit"
                   },
                   {
@@ -4737,13 +4737,13 @@
                 "Kids": [
                   {
                     "n": 4,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ConvertParensSel",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ConvertParens",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ParenSelector",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ParenExpr"
                   },
                   {
@@ -5015,15 +5015,15 @@
             "Kids": [
               {
                 "n": 5,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LitStructType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LitIFaceType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LitSliceOrArray",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LitMapType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LitTypeName"
               },
               {
@@ -5083,11 +5083,11 @@
                 "Kids": [
                   {
                     "n": 3,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitSliceType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitArrayAutoType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "LitArrayType"
                   },
                   {
@@ -5261,9 +5261,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ElementListEls",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "KeyedEl"
               },
               {
@@ -5287,9 +5287,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "KeyEl",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "Element"
                   },
                   {
@@ -5313,11 +5313,11 @@
                     "Kids": [
                       {
                         "n": 3,
-                        "type": "goki.dev/goki/pi/parse.Rule",
+                        "type": "goki.dev/pi/parse.Rule",
                         "name": "EmptyEl",
-                        "type": "goki.dev/goki/pi/parse.Rule",
+                        "type": "goki.dev/pi/parse.Rule",
                         "name": "ElExpr",
-                        "type": "goki.dev/goki/pi/parse.Rule",
+                        "type": "goki.dev/pi/parse.Rule",
                         "name": "ElLitVal"
                       },
                       {
@@ -5399,9 +5399,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "KeyLitVal",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "KeyExpr"
               },
               {
@@ -5449,11 +5449,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "RecvPtrType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ParenRecvType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "RecvTp"
               },
               {
@@ -5515,11 +5515,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceThree",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceTwo",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceOne"
               },
               {
@@ -5581,11 +5581,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceIdx1",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceIdx2",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceIdx3"
               },
               {
@@ -5647,9 +5647,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ArgsEllipsis",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Args"
               },
               {
@@ -5697,9 +5697,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ArgsListEls",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ArgsListEl"
               },
               {
@@ -5757,21 +5757,21 @@
         "Kids": [
           {
             "n": 8,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Type",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "TypeLiteral",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "FieldDecls",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "FieldDecl",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "FieldTag",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "TypeDeclN",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "TypeDecls",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "TypeList"
           },
           {
@@ -5781,11 +5781,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ParenType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeLit",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeName"
               },
               {
@@ -5823,13 +5823,13 @@
                 "Kids": [
                   {
                     "n": 4,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "BasicType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "QualType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "QualBasicType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "TypeNm"
                   },
                   {
@@ -5939,21 +5939,21 @@
             "Kids": [
               {
                 "n": 8,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SliceOrArray",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "StructType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PointerType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FuncType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "InterfaceType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MapType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SendChanType",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ChannelType"
               },
               {
@@ -5963,11 +5963,11 @@
                 "Kids": [
                   {
                     "n": 3,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SliceType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ArrayAutoType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ArrayType"
                   },
                   {
@@ -6217,9 +6217,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "RecvChanType",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SRChanType"
                   },
                   {
@@ -6291,11 +6291,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AnonQualField",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AnonPtrField",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "NamedField"
               },
               {
@@ -6416,9 +6416,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeDeclGroup",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeDeclEl"
               },
               {
@@ -6509,9 +6509,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeListEls",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeListEl"
               },
               {
@@ -6569,21 +6569,21 @@
         "Kids": [
           {
             "n": 8,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "FunDecl",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "MethRecv",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Signature",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "MethodSpec",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "MethodSpecs",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Result",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ParamsList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Params"
           },
           {
@@ -6593,9 +6593,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethDecl",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FuncDecl"
               },
               {
@@ -6722,9 +6722,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethRecvName",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethRecvNoNm"
               },
               {
@@ -6795,9 +6795,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SigParamsResult",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SigParams"
               },
               {
@@ -6845,13 +6845,13 @@
             "Kids": [
               {
                 "n": 4,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethSpecAnonQual",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethSpecName",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethSpecAnonLocal",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "MethSpecNone"
               },
               {
@@ -6986,9 +6986,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Results",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ResultOne"
               },
               {
@@ -7036,11 +7036,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ParNameEllipsis",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ParName",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ParType"
               },
               {
@@ -7148,19 +7148,19 @@
         "Kids": [
           {
             "n": 7,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "StmtList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "BlockList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Stmt",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "SimpleStmt",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "PostStmt",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Asgn",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "Elses"
           },
           {
@@ -7198,43 +7198,43 @@
             "Kids": [
               {
                 "n": 19,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ConstDeclStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "TypeDeclStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "VarDeclStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ReturnStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "BreakStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ContStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "GotoStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "GoStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "FallthroughStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "DeferStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "IfStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ForStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SwitchStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SelectStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "CaseStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "DefaultStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "LabeledStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Block",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SimpleSt"
               },
               {
@@ -7384,9 +7384,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "IfStmtExpr",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "IfStmtInit"
                   },
                   {
@@ -7434,17 +7434,17 @@
                 "Kids": [
                   {
                     "n": 6,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ForRangeExisting",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ForRangeNewLit",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ForRangeNew",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ForRangeOnly",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ForExpr",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ForClauseStmt"
                   },
                   {
@@ -7586,17 +7586,17 @@
                 "Kids": [
                   {
                     "n": 6,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SwitchTypeName",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SwitchTypeAnon",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SwitchExpr",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SwitchTypeNameInit",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SwitchTypeAnonInit",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SwitchInit"
                   },
                   {
@@ -7774,19 +7774,19 @@
                 "Kids": [
                   {
                     "n": 7,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "TypeCaseEmptyStmt",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "TypeCaseStmt",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SelCaseRecvExistStmt",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SelCaseRecvNewStmt",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "SelCaseSendStmt",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "CaseEmptyStmt",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "CaseExprStmt"
                   },
                   {
@@ -7978,15 +7978,15 @@
             "Kids": [
               {
                 "n": 5,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "IncrStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "DecrStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AsgnStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "SendStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ExprStmt"
               },
               {
@@ -8076,21 +8076,21 @@
             "Kids": [
               {
                 "n": 8,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostSendStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostIncrStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostDecrStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostAsgnExisting",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostAsgnBit",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostAsgnMath",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostAsgnNew",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "PostExprStmt"
               },
               {
@@ -8244,13 +8244,13 @@
             "Kids": [
               {
                 "n": 4,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AsgnExisting",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AsgnNew",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AsgnMath",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "AsgnBit"
               },
               {
@@ -8348,11 +8348,11 @@
             "Kids": [
               {
                 "n": 3,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ElseIfStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ElseStmt",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ElseIfStmtInit"
               },
               {
@@ -8424,9 +8424,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ImportN",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ImportList"
           },
           {
@@ -8436,9 +8436,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ImportGroup",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ImportOne"
               },
               {
@@ -8486,9 +8486,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ImportAlias",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "Import"
               },
               {
@@ -8576,19 +8576,19 @@
         "Kids": [
           {
             "n": 7,
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "TypeDecl",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ConstDecl",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "VarDecl",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ConstDeclN",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "ConstList",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "VarDeclN",
-            "type": "goki.dev/goki/pi/parse.Rule",
+            "type": "goki.dev/pi/parse.Rule",
             "name": "VarList"
           },
           {
@@ -8640,9 +8640,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ConstGroup",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "ConstOpts"
               },
               {
@@ -8666,9 +8666,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ConstSpec",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "ConstSpecName"
                   },
                   {
@@ -8777,9 +8777,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "VarGroup",
-                "type": "goki.dev/goki/pi/parse.Rule",
+                "type": "goki.dev/pi/parse.Rule",
                 "name": "VarOpts"
               },
               {
@@ -8803,9 +8803,9 @@
                 "Kids": [
                   {
                     "n": 2,
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "VarSpecExpr",
-                    "type": "goki.dev/goki/pi/parse.Rule",
+                    "type": "goki.dev/pi/parse.Rule",
                     "name": "VarSpec"
                   },
                   {

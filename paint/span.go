@@ -11,10 +11,10 @@ import (
 	"sync"
 	"unicode"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/styles"
+	"goki.dev/units"
 	"golang.org/x/image/font"
 )
 

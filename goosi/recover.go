@@ -13,7 +13,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"goki.dev/goki/grr"
+	"goki.dev/grr"
 )
 
 // HandleRecover takes the given value of recover, and, if it is not nil,

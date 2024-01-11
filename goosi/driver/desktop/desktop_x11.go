@@ -13,9 +13,9 @@ import (
 	"path/filepath"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/mimedata"
+	"goki.dev/goosi"
+	"goki.dev/grr"
+	"goki.dev/mimedata"
 )
 
 // Notes on intermixing glfw and xgb: bottom line, can't do:

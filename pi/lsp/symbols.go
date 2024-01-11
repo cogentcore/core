@@ -11,7 +11,7 @@ package lsp
 //go:generate goki generate
 
 import (
-	"goki.dev/goki/pi/token"
+	"goki.dev/pi/token"
 )
 
 // SymbolKind is the Language Server Protocol (LSP) SymbolKind, which

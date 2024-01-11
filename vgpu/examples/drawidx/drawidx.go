@@ -14,8 +14,8 @@ import (
 	vk "github.com/goki/vulkan"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/vgpu"
+	"goki.dev/mat32"
+	"goki.dev/vgpu"
 )
 
 func init() {

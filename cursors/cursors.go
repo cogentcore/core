@@ -11,7 +11,7 @@ import (
 	"embed"
 	"image"
 
-	"goki.dev/goki/enums"
+	"goki.dev/enums"
 )
 
 // Cursors contains all of the default embedded svg cursors

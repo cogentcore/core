@@ -9,8 +9,8 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/goki/glop/nptime"
-	"goki.dev/goki/pi/token"
+	"goki.dev/glop/nptime"
+	"goki.dev/pi/token"
 )
 
 // LangLexer looks up lexer for given language -- impl in parent pi package

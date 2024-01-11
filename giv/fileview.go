@@ -16,16 +16,16 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/fi"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/keyfun"
-	"goki.dev/goki/pi/complete"
-	"goki.dev/goki/styles"
+	"goki.dev/colors"
+	"goki.dev/events"
+	"goki.dev/fi"
+	"goki.dev/gi"
+	"goki.dev/goosi"
+	"goki.dev/grr"
 	"goki.dev/icons"
+	"goki.dev/keyfun"
+	"goki.dev/pi/complete"
+	"goki.dev/styles"
 )
 
 func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfile string)) {

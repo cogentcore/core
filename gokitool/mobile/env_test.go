@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/grease"
+	"goki.dev/gokitool/config"
+	"goki.dev/grease"
 )
 
 func TestNdkRoot(t *testing.T) {

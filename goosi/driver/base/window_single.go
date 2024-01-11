@@ -12,9 +12,9 @@ package base
 import (
 	"image"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/mat32"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	"goki.dev/mat32"
 )
 
 // WindowSingle contains the data and logic common to all implementations of [goosi.Window]

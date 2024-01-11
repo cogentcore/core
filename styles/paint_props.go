@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/enums"
+	"goki.dev/grr"
+	"goki.dev/laser"
+	"goki.dev/mat32"
+	"goki.dev/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////

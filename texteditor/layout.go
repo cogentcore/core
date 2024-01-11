@@ -5,8 +5,8 @@
 package texteditor
 
 import (
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/paint"
+	"goki.dev/mat32"
+	"goki.dev/paint"
 )
 
 // StyleSizes gets the size info based on Style settings.

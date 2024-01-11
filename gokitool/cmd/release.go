@@ -7,8 +7,8 @@ package cmd
 import (
 	"fmt"
 
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/xe"
+	"goki.dev/gokitool/config"
+	"goki.dev/xe"
 )
 
 // VersionRelease calls update-version and then release. It is the standard release path.

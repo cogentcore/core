@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/goki/enums"
+	"goki.dev/enums"
 )
 
 var _TestEnumValues = []TestEnum{0, 1}

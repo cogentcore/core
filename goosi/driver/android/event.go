@@ -27,8 +27,8 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
+	"goki.dev/events"
+	"goki.dev/events/key"
 )
 
 //export keyboardTyped

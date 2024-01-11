@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/goki/enums"
+	"goki.dev/enums"
 )
 
 var _FormatsValues = []Formats{0, 1, 2, 3, 4, 5, 6}

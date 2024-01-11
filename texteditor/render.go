@@ -9,16 +9,16 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/goki/cam/hct"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/colors/matcolor"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/texteditor/textbuf"
+	"goki.dev/cam/hct"
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/colors/matcolor"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/pi/lex"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/texteditor/textbuf"
 )
 
 // Rendering Notes: all rendering is done in Render call.

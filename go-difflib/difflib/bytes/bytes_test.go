@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"goki.dev/goki/go-difflib/difflib/tester"
+	"goki.dev/go-difflib/difflib/tester"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {

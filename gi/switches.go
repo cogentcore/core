@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"slices"
 
-	"goki.dev/goki/enums"
-	"goki.dev/goki/events"
-	"goki.dev/goki/glop/sentence"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/enums"
+	"goki.dev/events"
+	"goki.dev/glop/sentence"
+	"goki.dev/ki"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Switches is a widget for containing a set of switches.

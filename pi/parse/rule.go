@@ -17,11 +17,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"goki.dev/goki/glop/indent"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/pi/syms"
-	"goki.dev/goki/pi/token"
+	"goki.dev/glop/indent"
+	"goki.dev/ki"
+	"goki.dev/pi/lex"
+	"goki.dev/pi/syms"
+	"goki.dev/pi/token"
 )
 
 // Set GuiActive to true if the gui (piview) is active -- ensures that the
@@ -1473,7 +1473,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 		// have two children, named identically (e.g., Expr, Expr) and it will not update
 		// after our swap.  If we could use UniqNames then it would be ok, but that doesn't
 		// work for treeview names.. really need an option that supports uniqname AND reg names
-		// https://goki.dev/goki/ki/issues/2
+		// https://goki.dev/ki/issues/2
 		// ourAst.NewChild(AstType, "Dummy")
 		// ourAst.DeleteChildAtIndex(2, true)
 		// }

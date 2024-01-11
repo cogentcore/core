@@ -14,11 +14,11 @@ import (
 
 	"testing"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/grows/images"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/scan"
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/grows/images"
+	"goki.dev/mat32"
+	"goki.dev/scan"
 	"golang.org/x/image/math/fixed"
 )
 

@@ -21,8 +21,8 @@ import "C"
 import (
 	"image"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
+	"goki.dev/events"
+	"goki.dev/events/key"
 )
 
 // TouchIDs are the current active touches. The position in the array

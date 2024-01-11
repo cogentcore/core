@@ -9,8 +9,8 @@ import (
 	"maps"
 	"sort"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
+	"goki.dev/colors"
+	"goki.dev/mat32"
 )
 
 // Map maps a value onto a color by interpolating between a list of colors

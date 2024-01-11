@@ -3,12 +3,12 @@
 package units
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/units.Value",
+	Name:      "goki.dev/units.Value",
 	ShortName: "units.Value",
 	IDName:    "value",
 	Doc:       "Value and units, and converted value into raw pixels (dots in DPI)",
@@ -17,16 +17,16 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Val", &gti.Field{Name: "Val", Type: "float32", LocalType: "float32", Doc: "the value in terms of the specified unit", Directives: gti.Directives{}, Tag: "label:\"\""}},
-		{"Un", &gti.Field{Name: "Un", Type: "goki.dev/goki/units.Units", LocalType: "Units", Doc: "the unit used for the value", Directives: gti.Directives{}, Tag: "label:\"\""}},
+		{"Un", &gti.Field{Name: "Un", Type: "goki.dev/units.Units", LocalType: "Units", Doc: "the unit used for the value", Directives: gti.Directives{}, Tag: "label:\"\""}},
 		{"Dots", &gti.Field{Name: "Dots", Type: "float32", LocalType: "float32", Doc: "the computed value in raw pixels (dots in DPI)", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"Custom", &gti.Field{Name: "Custom", Type: "func(uc *goki.dev/goki/units.Context) float32", LocalType: "func(uc *Context) float32", Doc: "custom function that returns the dots of the value;\nif non-nil, it overrides all other fields;\nif nil, standard ToDots with the other fields is used", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"Custom", &gti.Field{Name: "Custom", Type: "func(uc *goki.dev/units.Context) float32", LocalType: "func(uc *Context) float32", Doc: "custom function that returns the dots of the value;\nif non-nil, it overrides all other fields;\nif nil, standard ToDots with the other fields is used", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/units.XY",
+	Name:      "goki.dev/units.XY",
 	ShortName: "units.XY",
 	IDName:    "xy",
 	Doc:       "XY represents unit Value for X and Y dimensions",
@@ -34,8 +34,8 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"X", &gti.Field{Name: "X", Type: "goki.dev/goki/units.Value", LocalType: "Value", Doc: "X is the horizontal axis value", Directives: gti.Directives{}, Tag: ""}},
-		{"Y", &gti.Field{Name: "Y", Type: "goki.dev/goki/units.Value", LocalType: "Value", Doc: "Y is the vertical axis value", Directives: gti.Directives{}, Tag: ""}},
+		{"X", &gti.Field{Name: "X", Type: "goki.dev/units.Value", LocalType: "Value", Doc: "X is the horizontal axis value", Directives: gti.Directives{}, Tag: ""}},
+		{"Y", &gti.Field{Name: "Y", Type: "goki.dev/units.Value", LocalType: "Value", Doc: "Y is the vertical axis value", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),

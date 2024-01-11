@@ -11,9 +11,9 @@ import (
 	"unicode"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/states"
 	"goki.dev/icons"
+	"goki.dev/laser"
+	"goki.dev/states"
 )
 
 func TestBasic(t *testing.T) {

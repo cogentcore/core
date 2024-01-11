@@ -3,19 +3,19 @@
 package filetree
 
 import (
-	"goki.dev/goki/giv"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/ordmap"
-	"goki.dev/goki/units"
-	"goki.dev/goki/vci"
+	"goki.dev/giv"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/ordmap"
+	"goki.dev/units"
+	"goki.dev/vci"
 	"goki.dev/icons"
 )
 
 // NodeType is the [gti.Type] for [Node]
 var NodeType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/filetree.Node",
+	Name:      "goki.dev/filetree.Node",
 	ShortName: "filetree.Node",
 	IDName:    "node",
 	Doc:       "Node represents a file in the file system, as a TreeView node.\nThe name of the node is the name of the file.\nFolders have children containing further nodes.",
@@ -23,15 +23,15 @@ var NodeType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FPath", &gti.Field{Name: "FPath", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/goki/fi.FileInfo", LocalType: "fi.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/goki/texteditor.Buf", LocalType: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"FRoot", &gti.Field{Name: "FRoot", Type: "*goki.dev/goki/filetree.Tree", LocalType: "*Tree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "goki.dev/goki/vci.Repo", LocalType: "vci.Repo", Doc: "version control system repository for this directory,\nonly non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
-		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "goki.dev/goki/vci.Files", LocalType: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"FPath", &gti.Field{Name: "FPath", Type: "goki.dev/gi.FileName", LocalType: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/fi.FileInfo", LocalType: "fi.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/texteditor.Buf", LocalType: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"FRoot", &gti.Field{Name: "FRoot", Type: "*goki.dev/filetree.Tree", LocalType: "*Tree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "goki.dev/vci.Repo", LocalType: "vci.Repo", Doc: "version control system repository for this directory,\nonly non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "goki.dev/vci.Files", LocalType: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}, Tag: "edit:\"-\" set:\"-\" json:\"-\" xml:\"-\" copy:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TreeView", &gti.Field{Name: "TreeView", Type: "goki.dev/goki/giv.TreeView", LocalType: "giv.TreeView", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"TreeView", &gti.Field{Name: "TreeView", Type: "goki.dev/giv.TreeView", LocalType: "giv.TreeView", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"OpenFilesDefault", &gti.Method{Name: "OpenFilesDefault", Doc: "OpenFilesDefault opens selected files with default app for that file type (os defined).\nruns open on Mac, xdg-open on Linux, and start on Windows", Directives: gti.Directives{
@@ -219,16 +219,16 @@ func (t *Node) SetSelectedNodes(v []giv.TreeViewer) *Node {
 
 // TreeType is the [gti.Type] for [Tree]
 var TreeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/filetree.Tree",
+	Name:       "goki.dev/filetree.Tree",
 	ShortName:  "filetree.Tree",
 	IDName:     "tree",
 	Doc:        "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a TreeView to provide a GUI\ninterface into it.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", LocalType: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/goki/filetree.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/filetree.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", LocalType: "bool", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed", Directives: gti.Directives{}, Tag: ""}},
-		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/goki/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", LocalType: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Watcher", &gti.Field{Name: "Watcher", Type: "*gopkg.in/fsnotify.v1.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
@@ -238,7 +238,7 @@ var TreeType = gti.AddType(&gti.Type{
 		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/goki/filetree.Node", LocalType: "Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/filetree.Node", LocalType: "Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Tree{},
@@ -333,22 +333,22 @@ func (t *Tree) SetSelectedNodes(v []giv.TreeViewer) *Tree {
 
 // VCSLogViewType is the [gti.Type] for [VCSLogView]
 var VCSLogViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/filetree.VCSLogView",
+	Name:       "goki.dev/filetree.VCSLogView",
 	ShortName:  "filetree.VCSLogView",
 	IDName:     "vcs-log-view",
 	Doc:        "VCSLogView is a view of the VCS log data",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/goki/vci.Log", LocalType: "vci.Log", Doc: "current log", Directives: gti.Directives{}, Tag: ""}},
+		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/vci.Log", LocalType: "vci.Log", Doc: "current log", Directives: gti.Directives{}, Tag: ""}},
 		{"File", &gti.Field{Name: "File", Type: "string", LocalType: "string", Doc: "file that this is a log of -- if blank then it is entire repository", Directives: gti.Directives{}, Tag: ""}},
 		{"Since", &gti.Field{Name: "Since", Type: "string", LocalType: "string", Doc: "date expression for how long ago to include log entries from", Directives: gti.Directives{}, Tag: ""}},
-		{"Repo", &gti.Field{Name: "Repo", Type: "goki.dev/goki/vci.Repo", LocalType: "vci.Repo", Doc: "version control system repository", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Repo", &gti.Field{Name: "Repo", Type: "goki.dev/vci.Repo", LocalType: "vci.Repo", Doc: "version control system repository", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
 		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision A -- defaults to HEAD", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision B -- blank means current working copy", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"SetA", &gti.Field{Name: "SetA", Type: "bool", LocalType: "bool", Doc: "double-click will set the A revision -- else B", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/goki/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &VCSLogView{},

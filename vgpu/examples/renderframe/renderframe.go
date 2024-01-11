@@ -17,12 +17,12 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/goki/grows/images"
-	"goki.dev/goki/mat32"
+	"goki.dev/grows/images"
+	"goki.dev/mat32"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/vgpu"
-	"goki.dev/goki/vgpu/vdraw"
+	"goki.dev/vgpu"
+	"goki.dev/vgpu/vdraw"
 )
 
 type CamView struct {

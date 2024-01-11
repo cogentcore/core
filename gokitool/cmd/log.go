@@ -7,8 +7,8 @@ package cmd
 import (
 	"fmt"
 
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/xe"
+	"goki.dev/gokitool/config"
+	"goki.dev/xe"
 )
 
 // Log prints the logs from your app running on Android to the terminal.

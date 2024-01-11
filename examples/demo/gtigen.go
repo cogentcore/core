@@ -3,8 +3,8 @@
 package main
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddFunc(&gti.Func{

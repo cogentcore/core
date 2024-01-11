@@ -7,13 +7,13 @@ package gi
 import (
 	"image"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/events"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // MenuSceneConfigStyles configures the default styles

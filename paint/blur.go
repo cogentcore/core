@@ -11,7 +11,7 @@ import (
 
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/convolution"
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // scipy impl:

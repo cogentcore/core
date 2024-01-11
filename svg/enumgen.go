@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"goki.dev/goki/enums"
-	"goki.dev/goki/ki"
+	"goki.dev/enums"
+	"goki.dev/ki"
 )
 
 var _NodeFlagsValues = []NodeFlags{7}

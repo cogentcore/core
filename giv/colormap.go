@@ -7,18 +7,18 @@ package giv
 import (
 	"log/slog"
 
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/colormap"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/cursors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/abilities"
+	"goki.dev/colors"
+	"goki.dev/colors/colormap"
+	"goki.dev/colors/gradient"
+	"goki.dev/cursors"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/gti"
+	"goki.dev/laser"
+	"goki.dev/mat32"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // ColorMapName represents the name of a color map, which can be edited using a [ColorMapValue].

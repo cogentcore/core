@@ -8,10 +8,10 @@ import (
 	"image"
 	"log/slog"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/svg"
+	"goki.dev/colors"
 	"goki.dev/icons"
+	"goki.dev/styles"
+	"goki.dev/svg"
 	"golang.org/x/image/draw"
 )
 

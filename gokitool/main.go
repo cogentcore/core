@@ -5,10 +5,10 @@
 package main
 
 import (
-	"goki.dev/goki/gokitool/cmd"
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/gokitool/generate"
-	"goki.dev/goki/grease"
+	"goki.dev/gokitool/cmd"
+	"goki.dev/gokitool/config"
+	"goki.dev/gokitool/generate"
+	"goki.dev/grease"
 )
 
 func main() {

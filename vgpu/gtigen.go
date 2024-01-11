@@ -3,12 +3,12 @@
 package vgpu
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.CmdPool",
+	Name:       "goki.dev/vgpu.CmdPool",
 	ShortName:  "vgpu.CmdPool",
 	IDName:     "cmd-pool",
 	Doc:        "CmdPool is a command pool and buffer",
@@ -22,7 +22,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Topologies",
+	Name:       "goki.dev/vgpu.Topologies",
 	ShortName:  "vgpu.Topologies",
 	IDName:     "topologies",
 	Doc:        "Topologies are the different vertex topology",
@@ -32,7 +32,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.StackFrame",
+	Name:       "goki.dev/vgpu.StackFrame",
 	ShortName:  "vgpu.StackFrame",
 	IDName:     "stack-frame",
 	Doc:        "A StackFrame contains all necessary information about to generate a line\nin a callstack.",
@@ -49,7 +49,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Device",
+	Name:       "goki.dev/vgpu.Device",
 	ShortName:  "vgpu.Device",
 	IDName:     "device",
 	Doc:        "Device holds Device and associated Queue info",
@@ -64,7 +64,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Framebuffer",
+	Name:       "goki.dev/vgpu.Framebuffer",
 	ShortName:  "vgpu.Framebuffer",
 	IDName:     "framebuffer",
 	Doc:        "Framebuffer combines an Image and Render info (which has a depth buffer)",
@@ -81,7 +81,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.GPU",
+	Name:       "goki.dev/vgpu.GPU",
 	ShortName:  "vgpu.GPU",
 	IDName:     "gpu",
 	Doc:        "GPU represents the GPU hardware",
@@ -111,7 +111,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.ImageFormat",
+	Name:       "goki.dev/vgpu.ImageFormat",
 	ShortName:  "vgpu.ImageFormat",
 	IDName:     "image-format",
 	Doc:        "ImageFormat describes the size and vulkan format of an Image\nIf Layers > 1, all must be the same size.",
@@ -127,7 +127,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Image",
+	Name:       "goki.dev/vgpu.Image",
 	ShortName:  "vgpu.Image",
 	IDName:     "image",
 	Doc:        "Image represents a vulkan image with an associated ImageView.\nThe vulkan Image is in device memory, in an optimized format.\nThere can also be an optional host-visible, plain pixel buffer\nwhich can be a pointer into a larger buffer or owned by the Image.",
@@ -148,7 +148,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.HostImage",
+	Name:       "goki.dev/vgpu.HostImage",
 	ShortName:  "vgpu.HostImage",
 	IDName:     "host-image",
 	Doc:        "HostImage is the host representation of an Image",
@@ -165,7 +165,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.ImageFlags",
+	Name:       "goki.dev/vgpu.ImageFlags",
 	ShortName:  "vgpu.ImageFlags",
 	IDName:     "image-flags",
 	Doc:        "ImageFlags are bitflags for Image state",
@@ -175,7 +175,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.MemBuff",
+	Name:       "goki.dev/vgpu.MemBuff",
 	ShortName:  "vgpu.MemBuff",
 	IDName:     "mem-buff",
 	Doc:        "MemBuff is a memory buffer holding a particular type of memory\nwith staging Host-based memory and Device memory",
@@ -197,7 +197,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.BuffTypes",
+	Name:       "goki.dev/vgpu.BuffTypes",
 	ShortName:  "vgpu.BuffTypes",
 	IDName:     "buff-types",
 	Doc:        "BuffTypes are memory buffer types managed by the Memory object",
@@ -207,7 +207,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.MemReg",
+	Name:       "goki.dev/vgpu.MemReg",
 	ShortName:  "vgpu.MemReg",
 	IDName:     "mem-reg",
 	Doc:        "MemReg is a region of memory for transferring to / from GPU",
@@ -223,7 +223,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.VarMem",
+	Name:       "goki.dev/vgpu.VarMem",
 	ShortName:  "vgpu.VarMem",
 	IDName:     "var-mem",
 	Doc:        "VarMem is memory allocation info per Var, for Storage types.\nUsed in initial allocation algorithm.",
@@ -239,7 +239,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Memory",
+	Name:       "goki.dev/vgpu.Memory",
 	ShortName:  "vgpu.Memory",
 	IDName:     "memory",
 	Doc:        "Memory manages memory for the GPU, using separate buffers for\ndifferent roles, defined in the BuffTypes and managed by a MemBuff.\nMemory is organized by Vars with associated Vals.",
@@ -258,7 +258,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.OptionStates",
+	Name:       "goki.dev/vgpu.OptionStates",
 	ShortName:  "vgpu.OptionStates",
 	IDName:     "option-states",
 	Doc:        "OptionStates are options for the physical device features",
@@ -268,7 +268,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.CPUOptions",
+	Name:       "goki.dev/vgpu.CPUOptions",
 	ShortName:  "vgpu.CPUOptions",
 	IDName:     "cpu-options",
 	Doc:        "GPUOptions specifies supported options for the vgpu device\nupon initialization.  Several vulkan device features are\nautomatically enabled, which are required for the\nbasic functionality of vgpu supported graphics,\nbut these are optional and may be required for\nother uses (e.g., compute shaders).\nSee also InstanceExts, DeviceExts, and ValidationLayers.",
@@ -278,7 +278,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.GPUOpts",
+	Name:       "goki.dev/vgpu.GPUOpts",
 	ShortName:  "vgpu.GPUOpts",
 	IDName:     "gpu-opts",
 	Doc:        "GPUOpts is the collection of CPUOption states",
@@ -288,7 +288,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Pipeline",
+	Name:       "goki.dev/vgpu.Pipeline",
 	ShortName:  "vgpu.Pipeline",
 	IDName:     "pipeline",
 	Doc:        "Pipeline manages Shader program(s) that accomplish a specific\ntype of rendering or compute function, using Vars / Vals\ndefined by the overall System.\nIn the graphics context, each pipeline could handle a different\nclass of materials (textures, Phong lighting, etc).",
@@ -307,7 +307,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Render",
+	Name:       "goki.dev/vgpu.Render",
 	ShortName:  "vgpu.Render",
 	IDName:     "render",
 	Doc:        "Render manages various elements needed for rendering,\nincluding a vulkan RenderPass object,\nwhich specifies parameters for rendering to a Framebuffer.\nIt holds the Depth buffer if one is used, and a multisampling image too.\nThe Render object lives on the System, and any associated Surface,\nRenderFrame, and Framebuffers point to it.",
@@ -332,7 +332,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.RenderFrame",
+	Name:       "goki.dev/vgpu.RenderFrame",
 	ShortName:  "vgpu.RenderFrame",
 	IDName:     "render-frame",
 	Doc:        "RenderFrame is an offscreen, non-window-backed rendering target,\nfunctioning like a Surface",
@@ -354,7 +354,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.VarRoles",
+	Name:       "goki.dev/vgpu.VarRoles",
 	ShortName:  "vgpu.VarRoles",
 	IDName:     "var-roles",
 	Doc:        "VarRoles are the functional roles of variables, corresponding\nto Vertex input vectors and all the different \"uniform\" types\nas enumerated in vk.DescriptorType.  This does NOT map directly\nto DescriptorType because we combine vertex and uniform data\nand require a different ordering.",
@@ -364,7 +364,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Shader",
+	Name:       "goki.dev/vgpu.Shader",
 	ShortName:  "vgpu.Shader",
 	IDName:     "shader",
 	Doc:        "Shader manages a single Shader program",
@@ -379,7 +379,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.ShaderTypes",
+	Name:       "goki.dev/vgpu.ShaderTypes",
 	ShortName:  "vgpu.ShaderTypes",
 	IDName:     "shader-types",
 	Doc:        "ShaderTypes is a list of GPU shader types",
@@ -389,7 +389,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Surface",
+	Name:       "goki.dev/vgpu.Surface",
 	ShortName:  "vgpu.Surface",
 	IDName:     "surface",
 	Doc:        "Surface manages the physical device for the visible image\nof a window surface, and the swapchain for presenting images.",
@@ -413,7 +413,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.System",
+	Name:       "goki.dev/vgpu.System",
 	ShortName:  "vgpu.System",
 	IDName:     "system",
 	Doc:        "System manages a system of Pipelines that all share\na common collection of Vars, Vals, and a Memory manager.\nFor example, this could be a collection of different\npipelines for different material types, or different\ncompute operations performed on a common set of data.\nIt maintains its own logical device and associated queue.",
@@ -439,7 +439,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Texture",
+	Name:       "goki.dev/vgpu.Texture",
 	ShortName:  "vgpu.Texture",
 	IDName:     "texture",
 	Doc:        "Texture supplies an Image and a Sampler",
@@ -453,7 +453,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Sampler",
+	Name:       "goki.dev/vgpu.Sampler",
 	ShortName:  "vgpu.Sampler",
 	IDName:     "sampler",
 	Doc:        "Sampler represents a vulkan image sampler",
@@ -471,7 +471,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.SamplerModes",
+	Name:       "goki.dev/vgpu.SamplerModes",
 	ShortName:  "vgpu.SamplerModes",
 	IDName:     "sampler-modes",
 	Doc:        "Texture image sampler modes",
@@ -481,7 +481,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.BorderColors",
+	Name:       "goki.dev/vgpu.BorderColors",
 	ShortName:  "vgpu.BorderColors",
 	IDName:     "border-colors",
 	Doc:        "Texture image sampler modes",
@@ -491,7 +491,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Types",
+	Name:       "goki.dev/vgpu.Types",
 	ShortName:  "vgpu.Types",
 	IDName:     "types",
 	Doc:        "Types is a list of supported GPU data types, which can be stored\nproperly aligned in device memory, and used by the shader code.\nNote that a Vec3 or arrays of single scalar values such as Float32\nare not well supported outside of Vertex due to the std410 convention:\nhttp://www.opengl.org/registry/doc/glspec45.core.pdf#page=159\nThe Struct type is particularly challenging as each member\nmust be aligned in general on a 16 byte boundary (i.e., vec4)\n(unless all elements are exactly 4 bytes, which might work?).\nGo automatically aligns members to 8 bytes on 64 bit machines,\nbut that doesn't quite cut it.",
@@ -501,7 +501,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Val",
+	Name:       "goki.dev/vgpu.Val",
 	ShortName:  "vgpu.Val",
 	IDName:     "val",
 	Doc:        "Val represents a specific value of a Var variable.",
@@ -522,7 +522,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Vals",
+	Name:       "goki.dev/vgpu.Vals",
 	ShortName:  "vgpu.Vals",
 	IDName:     "vals",
 	Doc:        "Vals is a list container of Val values, accessed by index or name",
@@ -538,7 +538,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.ValFlags",
+	Name:       "goki.dev/vgpu.ValFlags",
 	ShortName:  "vgpu.ValFlags",
 	IDName:     "val-flags",
 	Doc:        "ValFlags are bitflags for Val state",
@@ -548,7 +548,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Var",
+	Name:       "goki.dev/vgpu.Var",
 	ShortName:  "vgpu.Var",
 	IDName:     "var",
 	Doc:        "Var specifies a variable used in a pipeline, accessed in shader programs.\nA Var represents a type of input or output into the GPU program,\nincluding things like Vertex arrays, transformation matricies (Uniforms),\nImages (Textures), and arbitrary Structs for Compute shaders.\nEach Var belongs to a Set, and its binding location is allocated within that.\nEach set is updated at the same time scale, and all vars in the set have the same\nnumber of allocated Val instances representing a specific value of the variable.\nThere must be a unique Val instance for each value of the variable used in\na single render -- a previously-used Val's contents cannot be updated within\nthe render pass, but new information can be written to an as-yet unused Val\nprior to using in a render (although this comes at a performance cost).",
@@ -574,7 +574,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.VarList",
+	Name:       "goki.dev/vgpu.VarList",
 	ShortName:  "vgpu.VarList",
 	IDName:     "var-list",
 	Doc:        "VarList is a list of variables",
@@ -588,7 +588,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.Vars",
+	Name:       "goki.dev/vgpu.Vars",
 	ShortName:  "vgpu.Vars",
 	IDName:     "vars",
 	Doc:        "Vars are all the variables that are used by a pipeline,\norganized into Sets (optionally including the special VertexSet\nor PushSet).\nVars are allocated to bindings / locations sequentially in the\norder added!",
@@ -613,7 +613,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu.VarSet",
+	Name:       "goki.dev/vgpu.VarSet",
 	ShortName:  "vgpu.VarSet",
 	IDName:     "var-set",
 	Doc:        "VarSet contains a set of Var variables that are all updated at the same time\nand have the same number of distinct Vals values per Var per render pass.\nThe first set at index -1 contains Vertex and Index data, handed separately.",

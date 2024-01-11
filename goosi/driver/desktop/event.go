@@ -8,11 +8,11 @@ import (
 	"image"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/mimedata"
+	"goki.dev/events"
+	"goki.dev/events/key"
+	"goki.dev/goosi"
+	"goki.dev/mat32"
+	"goki.dev/mimedata"
 )
 
 func GlfwMods(mod glfw.ModifierKey) key.Modifiers {

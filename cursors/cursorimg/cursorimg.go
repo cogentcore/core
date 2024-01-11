@@ -10,9 +10,9 @@ import (
 	"image"
 	_ "image/png"
 
-	"goki.dev/goki/cursors"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/grows/images"
+	"goki.dev/cursors"
+	"goki.dev/enums"
+	"goki.dev/grows/images"
 )
 
 // Cursor represents a cached rendered cursor, with the [image.Image]

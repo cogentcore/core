@@ -6,12 +6,12 @@ package greasi
 
 import (
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/giv"
-	"goki.dev/goki/glop/sentence"
-	"goki.dev/goki/grease"
-	"goki.dev/goki/grog"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/giv"
+	"goki.dev/glop/sentence"
+	"goki.dev/grease"
+	"goki.dev/grog"
 )
 
 // GUI starts the GUI for the given Grease app, which must be passed as

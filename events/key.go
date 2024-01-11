@@ -7,7 +7,7 @@ package events
 import (
 	"fmt"
 
-	"goki.dev/goki/events/key"
+	"goki.dev/events/key"
 )
 
 // events.Key is a low-level immediately-generated key event, tracking press

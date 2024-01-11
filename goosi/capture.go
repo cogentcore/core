@@ -7,8 +7,8 @@ package goosi
 import (
 	"image"
 
-	"goki.dev/goki/grows/images"
-	"goki.dev/goki/grr"
+	"goki.dev/grows/images"
+	"goki.dev/grr"
 )
 
 // Capture tells the app drawer to capture its next frame as an image.

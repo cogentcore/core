@@ -7,7 +7,7 @@
 package driver
 
 import (
-	"goki.dev/goki/goosi/driver/android"
+	"goki.dev/goosi/driver/android"
 )
 
 func init() {

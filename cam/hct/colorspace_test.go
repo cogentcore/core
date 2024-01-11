@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"goki.dev/goki/grows/images"
+	"goki.dev/grows/images"
 )
 
 func TestColorSpace(t *testing.T) {

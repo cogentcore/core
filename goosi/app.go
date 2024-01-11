@@ -12,8 +12,8 @@ package goosi
 //go:generate goki generate
 
 import (
-	"goki.dev/goki/clip"
-	"goki.dev/goki/cursor"
+	"goki.dev/clip"
+	"goki.dev/cursor"
 )
 
 // TheApp is the current [App]; only one is ever in effect.

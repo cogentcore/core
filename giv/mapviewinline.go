@@ -7,12 +7,12 @@ package giv
 import (
 	"reflect"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/styles"
+	"goki.dev/events"
+	"goki.dev/gi"
 	"goki.dev/icons"
+	"goki.dev/ki"
+	"goki.dev/laser"
+	"goki.dev/styles"
 )
 
 // MapViewInline represents a map as a single line widget,

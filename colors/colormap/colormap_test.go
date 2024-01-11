@@ -11,8 +11,8 @@ import (
 	"slices"
 	"testing"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/grows/images"
+	"goki.dev/colors"
+	"goki.dev/grows/images"
 )
 
 func TestColorMaps(t *testing.T) {

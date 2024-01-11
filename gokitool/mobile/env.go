@@ -15,10 +15,10 @@ import (
 
 	"slices"
 
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/gokitool/mobile/sdkpath"
-	"goki.dev/goki/grog"
-	"goki.dev/goki/xe"
+	"goki.dev/gokitool/config"
+	"goki.dev/gokitool/mobile/sdkpath"
+	"goki.dev/grog"
+	"goki.dev/xe"
 )
 
 // General mobile build environment. Initialized by envInit.

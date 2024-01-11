@@ -3,26 +3,26 @@
 package gear
 
 import (
-	"goki.dev/goki/gi"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gi"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/ordmap"
 )
 
 // AppType is the [gti.Type] for [App]
 var AppType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/gear/gear.App",
+	Name:       "goki.dev/gear/gear.App",
 	ShortName:  "gear.App",
 	IDName:     "app",
 	Doc:        "App is a GUI view of a gear command.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Cmd", &gti.Field{Name: "Cmd", Type: "*goki.dev/goki/gear/gear.Cmd", LocalType: "*Cmd", Doc: "Cmd is the root command associated with this app.", Directives: gti.Directives{}, Tag: ""}},
+		{"Cmd", &gti.Field{Name: "Cmd", Type: "*goki.dev/gear/gear.Cmd", LocalType: "*Cmd", Doc: "Cmd is the root command associated with this app.", Directives: gti.Directives{}, Tag: ""}},
 		{"CurCmd", &gti.Field{Name: "CurCmd", Type: "string", LocalType: "string", Doc: "CurCmd is the current root command being typed in.", Directives: gti.Directives{}, Tag: ""}},
 		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "Dir is the current directory of the app.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &App{},

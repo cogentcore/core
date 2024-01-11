@@ -11,15 +11,15 @@ import (
 	"log/slog"
 	"sort"
 
-	"goki.dev/goki/cam/hct"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/styles"
+	"goki.dev/cam/hct"
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/gti"
 	"goki.dev/icons"
+	"goki.dev/laser"
+	"goki.dev/styles"
 	"golang.org/x/image/colornames"
 )
 

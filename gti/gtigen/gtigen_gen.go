@@ -3,12 +3,12 @@
 package gtigen
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gti/gtigen.Config",
+	Name:      "goki.dev/gti/gtigen.Config",
 	ShortName: "gtigen.Config",
 	IDName:    "config",
 	Doc:       "Config contains the configuration information\nused by gtigen",
@@ -21,7 +21,7 @@ var _ = gti.AddType(&gti.Type{
 		{"AddTypes", &gti.Field{Name: "AddTypes", Type: "bool", LocalType: "bool", Doc: "whether to add types to gtigen by default", Directives: gti.Directives{}, Tag: ""}},
 		{"AddMethods", &gti.Field{Name: "AddMethods", Type: "bool", LocalType: "bool", Doc: "whether to add methods to gtigen by default", Directives: gti.Directives{}, Tag: ""}},
 		{"AddFuncs", &gti.Field{Name: "AddFuncs", Type: "bool", LocalType: "bool", Doc: "whether to add functions to gtigen by default", Directives: gti.Directives{}, Tag: ""}},
-		{"InterfaceConfigs", &gti.Field{Name: "InterfaceConfigs", Type: "map[string]*goki.dev/goki/gti/gtigen.Config", LocalType: "map[string]*Config", Doc: "A map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it.\nNote: the package gtigen is run on must explicitly reference this interface at some point for this to work; adding a simple\n`var _ MyInterface = (*MyType)(nil)` statement to check for interface implementation is an easy way to accomplish that.\nNote: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.", Directives: gti.Directives{}, Tag: ""}},
+		{"InterfaceConfigs", &gti.Field{Name: "InterfaceConfigs", Type: "map[string]*goki.dev/gti/gtigen.Config", LocalType: "map[string]*Config", Doc: "A map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it.\nNote: the package gtigen is run on must explicitly reference this interface at some point for this to work; adding a simple\n`var _ MyInterface = (*MyType)(nil)` statement to check for interface implementation is an easy way to accomplish that.\nNote: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.", Directives: gti.Directives{}, Tag: ""}},
 		{"Instance", &gti.Field{Name: "Instance", Type: "bool", LocalType: "bool", Doc: "whether to generate an instance of the type(s)", Directives: gti.Directives{}, Tag: ""}},
 		{"TypeVar", &gti.Field{Name: "TypeVar", Type: "bool", LocalType: "bool", Doc: "whether to generate a global type variable of the form 'TypeNameType'", Directives: gti.Directives{}, Tag: ""}},
 		{"Setters", &gti.Field{Name: "Setters", Type: "bool", LocalType: "bool", Doc: "Whether to generate chaining `Set*` methods for each field of each type (eg: \"SetText\" for field \"Text\").\nIf this is set to true, then you can add `set:\"-\"` struct tags to individual fields\nto prevent Set methods being generated for them.", Directives: gti.Directives{}, Tag: ""}},
@@ -32,14 +32,14 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/gti/gtigen.Generate",
+	Name: "goki.dev/gti/gtigen.Generate",
 	Doc:  "Generate generates gti type info, using the\nconfiguration information, loading the packages from the\nconfiguration source directory, and writing the result\nto the configuration output file.\n\nIt is a simple entry point to gtigen that does all\nof the steps; for more specific functionality, create\na new [Generator] with [NewGenerator] and call methods on it.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"cfg", &gti.Field{Name: "cfg", Type: "*goki.dev/goki/gti/gtigen.Config", LocalType: "*Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"cfg", &gti.Field{Name: "cfg", Type: "*goki.dev/gti/gtigen.Config", LocalType: "*Config", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},

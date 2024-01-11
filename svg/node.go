@@ -10,12 +10,12 @@ import (
 	"reflect"
 	"strings"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/paint"
-	"goki.dev/goki/styles"
+	"goki.dev/colors"
+	"goki.dev/grr"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/paint"
+	"goki.dev/styles"
 )
 
 // Node is the interface for all SVG nodes

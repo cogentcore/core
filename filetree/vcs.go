@@ -12,17 +12,17 @@ import (
 	"strings"
 
 	"github.com/Masterminds/vcs"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/giv"
-	"goki.dev/goki/glop/dirs"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/texteditor"
-	"goki.dev/goki/texteditor/textbuf"
-	"goki.dev/goki/vci"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/giv"
+	"goki.dev/glop/dirs"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/laser"
+	"goki.dev/styles"
+	"goki.dev/texteditor"
+	"goki.dev/texteditor/textbuf"
+	"goki.dev/vci"
 )
 
 // FirstVCS returns the first VCS repository starting from this node and going down.

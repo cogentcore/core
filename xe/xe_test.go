@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"testing"
 
-	"goki.dev/goki/grog"
+	"goki.dev/grog"
 )
 
 func TestRun(t *testing.T) {

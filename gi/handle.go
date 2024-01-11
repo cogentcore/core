@@ -5,13 +5,13 @@
 package gi
 
 import (
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/cursors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/abilities"
+	"goki.dev/colors"
+	"goki.dev/cursors"
+	"goki.dev/events"
+	"goki.dev/mat32"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Handle represents a draggable handle that can be used to

@@ -9,12 +9,12 @@ import (
 	"image"
 	"image/draw"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/paint"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
-	"goki.dev/goki/vgpu"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/paint"
+	"goki.dev/styles"
+	"goki.dev/units"
+	"goki.dev/vgpu"
 )
 
 // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.

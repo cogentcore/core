@@ -17,12 +17,12 @@ import (
 	"time"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/vgpu"
-	"goki.dev/goki/vgpu/vphong"
-	"goki.dev/goki/vgpu/vshape"
+	"goki.dev/vgpu"
+	"goki.dev/vgpu/vphong"
+	"goki.dev/vgpu/vshape"
 )
 
 func init() {

@@ -9,13 +9,13 @@ import (
 	"reflect"
 	"sort"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/giv"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/xyz"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/giv"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/laser"
+	"goki.dev/xyz"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/goki/styles"
+	"goki.dev/styles"
 )
 
 var (

@@ -15,7 +15,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"goki.dev/goki/grog"
+	"goki.dev/grog"
 )
 
 // Exec executes the command, piping its stdout and stderr to the config

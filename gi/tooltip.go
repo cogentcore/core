@@ -7,10 +7,10 @@ package gi
 import (
 	"image"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // TODO: rich tooltips

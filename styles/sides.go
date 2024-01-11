@@ -11,9 +11,9 @@ import (
 
 	"log/slog"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/units"
 )
 
 // SideIndexes provides names for the Sides in order defined

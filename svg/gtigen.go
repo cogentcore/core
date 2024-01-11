@@ -6,27 +6,27 @@ import (
 	"image"
 
 	"github.com/aymerick/douceur/css"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/ordmap"
-	"goki.dev/goki/paint"
+	"goki.dev/colors/gradient"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/ordmap"
+	"goki.dev/paint"
 )
 
 // CircleType is the [gti.Type] for [Circle]
 var CircleType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Circle",
+	Name:       "goki.dev/svg.Circle",
 	ShortName:  "svg.Circle",
 	IDName:     "circle",
 	Doc:        "Circle is a SVG circle",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the center of the circle", Directives: gti.Directives{}, Tag: "xml:\"{cx,cy}\" set:\"-\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the center of the circle", Directives: gti.Directives{}, Tag: "xml:\"{cx,cy}\" set:\"-\""}},
 		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "radius of the circle", Directives: gti.Directives{}, Tag: "xml:\"r\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Circle{},
@@ -65,14 +65,14 @@ func (t *Circle) SetClass(v string) *Circle {
 
 // ClipPathType is the [gti.Type] for [ClipPath]
 var ClipPathType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.ClipPath",
+	Name:       "goki.dev/svg.ClipPath",
 	ShortName:  "svg.ClipPath",
 	IDName:     "clip-path",
 	Doc:        "ClipPath is used for holding a path that renders as a clip path",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ClipPath{},
@@ -104,7 +104,7 @@ func (t *ClipPath) SetClass(v string) *ClipPath {
 
 // StyleSheetType is the [gti.Type] for [StyleSheet]
 var StyleSheetType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.StyleSheet",
+	Name:       "goki.dev/svg.StyleSheet",
 	ShortName:  "svg.StyleSheet",
 	IDName:     "style-sheet",
 	Doc:        "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
@@ -113,7 +113,7 @@ var StyleSheetType = gti.AddType(&gti.Type{
 		{"Sheet", &gti.Field{Name: "Sheet", Type: "*github.com/aymerick/douceur/css.Stylesheet", LocalType: "*css.Stylesheet", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StyleSheet{},
@@ -151,7 +151,7 @@ func (t *StyleSheet) SetClass(v string) *StyleSheet {
 
 // MetaDataType is the [gti.Type] for [MetaData]
 var MetaDataType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.MetaData",
+	Name:       "goki.dev/svg.MetaData",
 	ShortName:  "svg.MetaData",
 	IDName:     "meta-data",
 	Doc:        "MetaData is used for holding meta data info",
@@ -160,7 +160,7 @@ var MetaDataType = gti.AddType(&gti.Type{
 		{"MetaData", &gti.Field{Name: "MetaData", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MetaData{},
@@ -198,17 +198,17 @@ func (t *MetaData) SetClass(v string) *MetaData {
 
 // EllipseType is the [gti.Type] for [Ellipse]
 var EllipseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Ellipse",
+	Name:       "goki.dev/svg.Ellipse",
 	ShortName:  "svg.Ellipse",
 	IDName:     "ellipse",
 	Doc:        "Ellipse is a SVG ellipse",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the center of the ellipse", Directives: gti.Directives{}, Tag: "xml:\"{cx,cy}\" set:\"-\""}},
-		{"Radii", &gti.Field{Name: "Radii", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "radii of the ellipse in the horizontal, vertical axes", Directives: gti.Directives{}, Tag: "xml:\"{rx,ry}\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the center of the ellipse", Directives: gti.Directives{}, Tag: "xml:\"{cx,cy}\" set:\"-\""}},
+		{"Radii", &gti.Field{Name: "Radii", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "radii of the ellipse in the horizontal, vertical axes", Directives: gti.Directives{}, Tag: "xml:\"{rx,ry}\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Ellipse{},
@@ -247,7 +247,7 @@ func (t *Ellipse) SetClass(v string) *Ellipse {
 
 // FilterType is the [gti.Type] for [Filter]
 var FilterType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Filter",
+	Name:       "goki.dev/svg.Filter",
 	ShortName:  "svg.Filter",
 	IDName:     "filter",
 	Doc:        "Filter represents SVG filter* elements",
@@ -256,7 +256,7 @@ var FilterType = gti.AddType(&gti.Type{
 		{"FilterType", &gti.Field{Name: "FilterType", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Filter{},
@@ -294,7 +294,7 @@ func (t *Filter) SetClass(v string) *Filter {
 
 // FlowType is the [gti.Type] for [Flow]
 var FlowType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Flow",
+	Name:       "goki.dev/svg.Flow",
 	ShortName:  "svg.Flow",
 	IDName:     "flow",
 	Doc:        "Flow represents SVG flow* elements",
@@ -303,7 +303,7 @@ var FlowType = gti.AddType(&gti.Type{
 		{"FlowType", &gti.Field{Name: "FlowType", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Flow{},
@@ -341,17 +341,17 @@ func (t *Flow) SetClass(v string) *Flow {
 
 // GradientType is the [gti.Type] for [Gradient]
 var GradientType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Gradient",
+	Name:       "goki.dev/svg.Gradient",
 	ShortName:  "svg.Gradient",
 	IDName:     "gradient",
 	Doc:        "Gradient is used for holding a specified color gradient.\nThe name is the id for lookup in url",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Grad", &gti.Field{Name: "Grad", Type: "goki.dev/goki/colors/gradient.Gradient", LocalType: "gradient.Gradient", Doc: "the color gradient", Directives: gti.Directives{}, Tag: ""}},
+		{"Grad", &gti.Field{Name: "Grad", Type: "goki.dev/colors/gradient.Gradient", LocalType: "gradient.Gradient", Doc: "the color gradient", Directives: gti.Directives{}, Tag: ""}},
 		{"StopsName", &gti.Field{Name: "StopsName", Type: "string", LocalType: "string", Doc: "name of another gradient to get stops from", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Gradient{},
@@ -397,14 +397,14 @@ func (t *Gradient) SetClass(v string) *Gradient {
 
 // GroupType is the [gti.Type] for [Group]
 var GroupType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Group",
+	Name:       "goki.dev/svg.Group",
 	ShortName:  "svg.Group",
 	IDName:     "group",
 	Doc:        "Group groups together SVG elements.\nProvides a common transform for all group elements\nand shared style properties.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Group{},
@@ -436,20 +436,20 @@ func (t *Group) SetClass(v string) *Group {
 
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Image",
+	Name:       "goki.dev/svg.Image",
 	ShortName:  "svg.Image",
 	IDName:     "image",
 	Doc:        "Image is an SVG image (bitmap)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the top-left of the image", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)", Directives: gti.Directives{}, Tag: "xml:\"{width,height}\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the top-left of the image", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)", Directives: gti.Directives{}, Tag: "xml:\"{width,height}\""}},
 		{"PreserveAspectRatio", &gti.Field{Name: "PreserveAspectRatio", Type: "bool", LocalType: "bool", Doc: "directs resize operations to preserve aspect ratio", Directives: gti.Directives{}, Tag: "xml:\"preserveAspectRatio\""}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: ""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "the image pixels", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Image{},
@@ -516,17 +516,17 @@ func (t *Image) SetClass(v string) *Image {
 
 // LineType is the [gti.Type] for [Line]
 var LineType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Line",
+	Name:       "goki.dev/svg.Line",
 	ShortName:  "svg.Line",
 	IDName:     "line",
 	Doc:        "Line is a SVG line",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the start of the line", Directives: gti.Directives{}, Tag: "xml:\"{x1,y1}\""}},
-		{"End", &gti.Field{Name: "End", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the end of the line", Directives: gti.Directives{}, Tag: "xml:\"{x2,y2}\""}},
+		{"Start", &gti.Field{Name: "Start", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the start of the line", Directives: gti.Directives{}, Tag: "xml:\"{x1,y1}\""}},
+		{"End", &gti.Field{Name: "End", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the end of the line", Directives: gti.Directives{}, Tag: "xml:\"{x2,y2}\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Line{},
@@ -572,25 +572,25 @@ func (t *Line) SetClass(v string) *Line {
 
 // MarkerType is the [gti.Type] for [Marker]
 var MarkerType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Marker",
+	Name:       "goki.dev/svg.Marker",
 	ShortName:  "svg.Marker",
 	IDName:     "marker",
 	Doc:        "Marker represents marker elements that can be drawn along paths (arrow heads, etc)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"RefPos", &gti.Field{Name: "RefPos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "reference position to align the vertex position with, specified in ViewBox coordinates", Directives: gti.Directives{}, Tag: "xml:\"{refX,refY}\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "size of marker to render, in Units units", Directives: gti.Directives{}, Tag: "xml:\"{markerWidth,markerHeight}\""}},
-		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/goki/svg.MarkerUnits", LocalType: "MarkerUnits", Doc: "units to use", Directives: gti.Directives{}, Tag: "xml:\"markerUnits\""}},
-		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "goki.dev/goki/svg.ViewBox", LocalType: "ViewBox", Doc: "viewbox defines the internal coordinate system for the drawing elements within the marker", Directives: gti.Directives{}, Tag: ""}},
+		{"RefPos", &gti.Field{Name: "RefPos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "reference position to align the vertex position with, specified in ViewBox coordinates", Directives: gti.Directives{}, Tag: "xml:\"{refX,refY}\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "size of marker to render, in Units units", Directives: gti.Directives{}, Tag: "xml:\"{markerWidth,markerHeight}\""}},
+		{"Units", &gti.Field{Name: "Units", Type: "goki.dev/svg.MarkerUnits", LocalType: "MarkerUnits", Doc: "units to use", Directives: gti.Directives{}, Tag: "xml:\"markerUnits\""}},
+		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "goki.dev/svg.ViewBox", LocalType: "ViewBox", Doc: "viewbox defines the internal coordinate system for the drawing elements within the marker", Directives: gti.Directives{}, Tag: ""}},
 		{"Orient", &gti.Field{Name: "Orient", Type: "string", LocalType: "string", Doc: "orientation of the marker -- either 'auto' or an angle", Directives: gti.Directives{}, Tag: "xml:\"orient\""}},
-		{"VertexPos", &gti.Field{Name: "VertexPos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "current vertex position", Directives: gti.Directives{}, Tag: ""}},
+		{"VertexPos", &gti.Field{Name: "VertexPos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "current vertex position", Directives: gti.Directives{}, Tag: ""}},
 		{"VertexAngle", &gti.Field{Name: "VertexAngle", Type: "float32", LocalType: "float32", Doc: "current vertex angle in radians", Directives: gti.Directives{}, Tag: ""}},
 		{"StrokeWidth", &gti.Field{Name: "StrokeWidth", Type: "float32", LocalType: "float32", Doc: "current stroke width", Directives: gti.Directives{}, Tag: ""}},
-		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/goki/mat32.Mat2", LocalType: "mat32.Mat2", Doc: "net transform computed from settings and current values -- applied prior to rendering", Directives: gti.Directives{}, Tag: ""}},
-		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "effective size for actual rendering", Directives: gti.Directives{}, Tag: ""}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "goki.dev/mat32.Mat2", LocalType: "mat32.Mat2", Doc: "net transform computed from settings and current values -- applied prior to rendering", Directives: gti.Directives{}, Tag: ""}},
+		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "effective size for actual rendering", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Marker{},
@@ -692,21 +692,21 @@ func (t *Marker) SetClass(v string) *Marker {
 
 // NodeBaseType is the [gti.Type] for [NodeBase]
 var NodeBaseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.NodeBase",
+	Name:       "goki.dev/svg.NodeBase",
 	ShortName:  "svg.NodeBase",
 	IDName:     "node-base",
 	Doc:        "svg.NodeBase is the base type for elements within the SVG scenegraph",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
-		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/goki/ki.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "xml:\"css\" set:\"-\""}},
-		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/goki/ki.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\" view:\"no-inline\""}},
+		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: "xml:\"css\" set:\"-\""}},
+		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\" view:\"no-inline\""}},
 		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/goki/styles.Paint", LocalType: "styles.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Paint", &gti.Field{Name: "Paint", Type: "goki.dev/styles.Paint", LocalType: "styles.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/goki/ki.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &NodeBase{},
@@ -739,17 +739,17 @@ func (t *NodeBase) SetClass(v string) *NodeBase {
 
 // PathType is the [gti.Type] for [Path]
 var PathType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Path",
+	Name:       "goki.dev/svg.Path",
 	ShortName:  "svg.Path",
 	IDName:     "path",
 	Doc:        "Path renders SVG data sequences that can render just about anything",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Data", &gti.Field{Name: "Data", Type: "[]goki.dev/goki/svg.PathData", LocalType: "[]PathData", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow", Directives: gti.Directives{}, Tag: "xml:\"-\" set:\"-\""}},
+		{"Data", &gti.Field{Name: "Data", Type: "[]goki.dev/svg.PathData", LocalType: "[]PathData", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow", Directives: gti.Directives{}, Tag: "xml:\"-\" set:\"-\""}},
 		{"DataStr", &gti.Field{Name: "DataStr", Type: "string", LocalType: "string", Doc: "string version of the path data", Directives: gti.Directives{}, Tag: "xml:\"d\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Path{},
@@ -788,14 +788,14 @@ func (t *Path) SetClass(v string) *Path {
 
 // PolygonType is the [gti.Type] for [Polygon]
 var PolygonType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Polygon",
+	Name:       "goki.dev/svg.Polygon",
 	ShortName:  "svg.Polygon",
 	IDName:     "polygon",
 	Doc:        "Polygon is a SVG polygon",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Polyline", &gti.Field{Name: "Polyline", Type: "goki.dev/goki/svg.Polyline", LocalType: "Polyline", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Polyline", &gti.Field{Name: "Polyline", Type: "goki.dev/svg.Polyline", LocalType: "Polyline", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Polygon{},
@@ -833,16 +833,16 @@ func (t *Polygon) SetPoints(v []mat32.Vec2) *Polygon {
 
 // PolylineType is the [gti.Type] for [Polyline]
 var PolylineType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Polyline",
+	Name:       "goki.dev/svg.Polyline",
 	ShortName:  "svg.Polyline",
 	IDName:     "polyline",
 	Doc:        "Polyline is a SVG multi-line shape",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Points", &gti.Field{Name: "Points", Type: "[]goki.dev/goki/mat32.Vec2", LocalType: "[]mat32.Vec2", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest", Directives: gti.Directives{}, Tag: "xml:\"points\""}},
+		{"Points", &gti.Field{Name: "Points", Type: "[]goki.dev/mat32.Vec2", LocalType: "[]mat32.Vec2", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest", Directives: gti.Directives{}, Tag: "xml:\"points\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Polyline{},
@@ -881,18 +881,18 @@ func (t *Polyline) SetClass(v string) *Polyline {
 
 // RectType is the [gti.Type] for [Rect]
 var RectType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Rect",
+	Name:       "goki.dev/svg.Rect",
 	ShortName:  "svg.Rect",
 	IDName:     "rect",
 	Doc:        "Rect is a SVG rectangle, optionally with rounded corners",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the top-left of the rectangle", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "size of the rectangle", Directives: gti.Directives{}, Tag: "xml:\"{width,height}\""}},
-		{"Radius", &gti.Field{Name: "Radius", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "radii for curved corners, as a proportion of width, height", Directives: gti.Directives{}, Tag: "xml:\"{rx,ry}\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the top-left of the rectangle", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "size of the rectangle", Directives: gti.Directives{}, Tag: "xml:\"{width,height}\""}},
+		{"Radius", &gti.Field{Name: "Radius", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "radii for curved corners, as a proportion of width, height", Directives: gti.Directives{}, Tag: "xml:\"{rx,ry}\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Rect{},
@@ -945,16 +945,16 @@ func (t *Rect) SetClass(v string) *Rect {
 
 // SVGNodeType is the [gti.Type] for [SVGNode]
 var SVGNodeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.SVGNode",
+	Name:       "goki.dev/svg.SVGNode",
 	ShortName:  "svg.SVGNode",
 	IDName:     "svg-node",
 	Doc:        "SVGNode represents the root of an SVG tree",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "goki.dev/goki/svg.ViewBox", LocalType: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering", Directives: gti.Directives{}, Tag: ""}},
+		{"ViewBox", &gti.Field{Name: "ViewBox", Type: "goki.dev/svg.ViewBox", LocalType: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Group", &gti.Field{Name: "Group", Type: "goki.dev/goki/svg.Group", LocalType: "Group", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Group", &gti.Field{Name: "Group", Type: "goki.dev/svg.Group", LocalType: "Group", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SVGNode{},
@@ -993,16 +993,16 @@ func (t *SVGNode) SetClass(v string) *SVGNode {
 
 // TextType is the [gti.Type] for [Text]
 var TextType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/svg.Text",
+	Name:       "goki.dev/svg.Text",
 	ShortName:  "svg.Text",
 	IDName:     "text",
 	Doc:        "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the left, baseline of the text", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\" set:\"-\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position of the left, baseline of the text", Directives: gti.Directives{}, Tag: "xml:\"{x,y}\" set:\"-\""}},
 		{"Width", &gti.Field{Name: "Width", Type: "float32", LocalType: "float32", Doc: "width of text to render if using word-wrapping", Directives: gti.Directives{}, Tag: "xml:\"width\""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "text string to render", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
-		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/goki/paint.Text", LocalType: "paint.Text", Doc: "render version of text", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
+		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/paint.Text", LocalType: "paint.Text", Doc: "render version of text", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
 		{"CharPosX", &gti.Field{Name: "CharPosX", Type: "[]float32", LocalType: "[]float32", Doc: "character positions along X axis, if specified", Directives: gti.Directives{}, Tag: ""}},
 		{"CharPosY", &gti.Field{Name: "CharPosY", Type: "[]float32", LocalType: "[]float32", Doc: "character positions along Y axis, if specified", Directives: gti.Directives{}, Tag: ""}},
 		{"CharPosDX", &gti.Field{Name: "CharPosDX", Type: "[]float32", LocalType: "[]float32", Doc: "character delta-positions along X axis, if specified", Directives: gti.Directives{}, Tag: ""}},
@@ -1010,11 +1010,11 @@ var TextType = gti.AddType(&gti.Type{
 		{"CharRots", &gti.Field{Name: "CharRots", Type: "[]float32", LocalType: "[]float32", Doc: "character rotations, if specified", Directives: gti.Directives{}, Tag: ""}},
 		{"TextLength", &gti.Field{Name: "TextLength", Type: "float32", LocalType: "float32", Doc: "author's computed text length, if specified -- we attempt to match", Directives: gti.Directives{}, Tag: ""}},
 		{"AdjustGlyphs", &gti.Field{Name: "AdjustGlyphs", Type: "bool", LocalType: "bool", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?", Directives: gti.Directives{}, Tag: ""}},
-		{"LastPos", &gti.Field{Name: "LastPos", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "last text render position -- lower-left baseline of start", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
-		{"LastBBox", &gti.Field{Name: "LastBBox", Type: "goki.dev/goki/mat32.Box2", LocalType: "mat32.Box2", Doc: "last actual bounding box in display units (dots)", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
+		{"LastPos", &gti.Field{Name: "LastPos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "last text render position -- lower-left baseline of start", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
+		{"LastBBox", &gti.Field{Name: "LastBBox", Type: "goki.dev/mat32.Box2", LocalType: "mat32.Box2", Doc: "last actual bounding box in display units (dots)", Directives: gti.Directives{}, Tag: "xml:\"-\" json:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/goki/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/svg.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Text{},

@@ -5,7 +5,7 @@
 package main
 
 import (
-	"goki.dev/goki/gi"
+	"goki.dev/gi"
 )
 
 // TODO: fix

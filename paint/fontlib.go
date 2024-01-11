@@ -17,8 +17,8 @@ import (
 
 	"github.com/fatih/camelcase"
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/styles"
+	"goki.dev/grr"
+	"goki.dev/styles"
 )
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe

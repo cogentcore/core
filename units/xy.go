@@ -5,7 +5,7 @@
 package units
 
 import (
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // XY represents unit Value for X and Y dimensions

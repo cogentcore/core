@@ -7,9 +7,9 @@ package gi
 import (
 	"testing"
 
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
 	"goki.dev/icons"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 func TestTabs(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/goki/enums"
-	"goki.dev/goki/events/key"
+	"goki.dev/enums"
+	"goki.dev/events/key"
 )
 
 // GoGi event structure was originally derived from go.wde and golang/x/mobile/event

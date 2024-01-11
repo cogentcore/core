@@ -14,9 +14,9 @@ import (
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/grows/images"
-	"goki.dev/goki/mat32"
+	"goki.dev/enums"
+	"goki.dev/grows/images"
+	"goki.dev/mat32"
 )
 
 // SRGBToLinearComp converts an sRGB rgb component to linear space (removes gamma).

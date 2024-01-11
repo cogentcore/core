@@ -7,7 +7,7 @@
 package suplangs
 
 import (
-	_ "goki.dev/goki/pi/langs/golang"
-	_ "goki.dev/goki/pi/langs/markdown"
-	_ "goki.dev/goki/pi/langs/tex"
+	_ "goki.dev/pi/langs/golang"
+	_ "goki.dev/pi/langs/markdown"
+	_ "goki.dev/pi/langs/tex"
 )

@@ -5,9 +5,9 @@
 package main
 
 import (
-	"goki.dev/goki/gi"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/video"
+	"goki.dev/gi"
+	"goki.dev/grr"
+	"goki.dev/video"
 )
 
 func main() {

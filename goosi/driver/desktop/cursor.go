@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/cursor"
-	"goki.dev/goki/cursors/cursorimg"
-	"goki.dev/goki/enums"
+	"goki.dev/cursor"
+	"goki.dev/cursors/cursorimg"
+	"goki.dev/enums"
 )
 
 // TheCursor is the single [goosi.Cursor] for the desktop platform

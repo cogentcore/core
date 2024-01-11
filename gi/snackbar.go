@@ -7,12 +7,12 @@ package gi
 import (
 	"time"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/events"
 	"goki.dev/icons"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 var (

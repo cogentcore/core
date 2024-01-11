@@ -9,8 +9,8 @@ import (
 	"image/color"
 	"testing"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
+	"goki.dev/colors"
+	"goki.dev/mat32"
 )
 
 func ExampleLinear() {

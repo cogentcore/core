@@ -9,8 +9,8 @@ import (
 	"log"
 	"strings"
 
-	"goki.dev/goki/glop/indent"
-	"goki.dev/goki/vgpu/szalloc"
+	"goki.dev/glop/indent"
+	"goki.dev/vgpu/szalloc"
 
 	vk "github.com/goki/vulkan"
 )

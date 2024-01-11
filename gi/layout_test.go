@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/grr"
+	"goki.dev/mat32"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 func LayoutTestFile(t *testing.T) string {

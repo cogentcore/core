@@ -9,8 +9,8 @@ import (
 	"image/draw"
 	"testing"
 
-	"goki.dev/goki/cam/hct"
-	"goki.dev/goki/grows/images"
+	"goki.dev/cam/hct"
+	"goki.dev/grows/images"
 )
 
 func TestSpacedLight(t *testing.T) {

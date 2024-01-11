@@ -7,7 +7,7 @@ package svg
 import (
 	"log"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)

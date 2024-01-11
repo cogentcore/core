@@ -5,7 +5,7 @@
 package styles
 
 import (
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 	"golang.org/x/image/font"
 )
 

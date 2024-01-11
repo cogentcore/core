@@ -11,11 +11,11 @@ import (
 	"strings"
 
 	"github.com/goki/freetype/truetype"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/grr"
+	"goki.dev/ki"
+	"goki.dev/styles"
+	"goki.dev/units"
 	"golang.org/x/image/font/opentype"
 )
 

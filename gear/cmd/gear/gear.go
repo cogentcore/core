@@ -7,9 +7,9 @@ package main
 //go:generate goki generate
 
 import (
-	"goki.dev/goki/gear"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/grease"
+	"goki.dev/gear"
+	"goki.dev/gi"
+	"goki.dev/grease"
 )
 
 type config struct { //gti:add

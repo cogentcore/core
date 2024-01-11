@@ -16,13 +16,13 @@ import (
 	"runtime"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/goki/clip"
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/goosi/driver/base"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/vgpu"
-	"goki.dev/goki/vgpu/vdraw"
+	"goki.dev/clip"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
+	"goki.dev/grr"
+	"goki.dev/vgpu"
+	"goki.dev/vgpu/vdraw"
 )
 
 func Init() {

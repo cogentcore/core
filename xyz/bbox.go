@@ -5,7 +5,7 @@
 package xyz
 
 import (
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // BBox contains bounding box and other gross solid properties

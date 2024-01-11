@@ -1,4 +1,4 @@
-module goki.dev/goki
+module goki.dev
 
 go 1.21
 

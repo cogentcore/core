@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/goki/fi"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/ki"
+	"goki.dev/fi"
+	"goki.dev/gi"
+	"goki.dev/ki"
 )
 
 // FindDirNode finds directory node by given path.

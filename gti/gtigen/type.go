@@ -7,13 +7,13 @@ package gtigen
 import (
 	"go/ast"
 
-	"goki.dev/goki/gti"
+	"goki.dev/gti"
 )
 
 // Type represents a parsed type.
 type Type struct {
 	Name           string         // The name of the type in its package (eg: MyType)
-	FullName       string         // The fully package-path-qualified name of the type (eg: goki.dev/goki/gi.Button)
+	FullName       string         // The fully package-path-qualified name of the type (eg: goki.dev/gi.Button)
 	ShortName      string         // The short, package-qualified name of the type (eg: gi.Button)
 	IDName         string         // The short, package-unqualified, kebab-case name of the type, suitable for use in an ID (eg: button)
 	Type           *ast.TypeSpec  // The standard AST type value

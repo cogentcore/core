@@ -7,7 +7,7 @@
 package android
 
 import (
-	"goki.dev/goki/goosi/driver/base"
+	"goki.dev/goosi/driver/base"
 )
 
 // Window is the implementation of [goosi.Window] for the Android platform.

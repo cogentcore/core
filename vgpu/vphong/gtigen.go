@@ -3,12 +3,12 @@
 package vphong
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.Colors",
+	Name:       "goki.dev/vgpu/vphong.Colors",
 	ShortName:  "vphong.Colors",
 	IDName:     "colors",
 	Doc:        "Colors are the material colors with padding for direct uploading to shader",
@@ -23,7 +23,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.NLights",
+	Name:       "goki.dev/vgpu/vphong.NLights",
 	ShortName:  "vphong.NLights",
 	IDName:     "n-lights",
 	Doc:        "Number of different lights active",
@@ -39,7 +39,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.AmbientLight",
+	Name:       "goki.dev/vgpu/vphong.AmbientLight",
 	ShortName:  "vphong.AmbientLight",
 	IDName:     "ambient-light",
 	Doc:        "AmbientLight provides diffuse uniform lighting -- typically only one of these",
@@ -53,7 +53,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.DirLight",
+	Name:       "goki.dev/vgpu/vphong.DirLight",
 	ShortName:  "vphong.DirLight",
 	IDName:     "dir-light",
 	Doc:        "DirLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)",
@@ -69,7 +69,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.PointLight",
+	Name:       "goki.dev/vgpu/vphong.PointLight",
 	ShortName:  "vphong.PointLight",
 	IDName:     "point-light",
 	Doc:        "PointLight is an omnidirectional light with a position\nand associated decay factors, which divide the light intensity as a function of\nlinear and quadratic distance.  The quadratic factor dominates at longer distances.",
@@ -87,7 +87,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.SpotLight",
+	Name:       "goki.dev/vgpu/vphong.SpotLight",
 	ShortName:  "vphong.SpotLight",
 	IDName:     "spot-light",
 	Doc:        "Spotlight is a light with a position and direction and\nassociated decay factors and angles,\nwhich divide the light intensity as a function of\nlinear and quadratic distance.\nThe quadratic factor dominates at longer distances.",
@@ -106,7 +106,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.Mesh",
+	Name:       "goki.dev/vgpu/vphong.Mesh",
 	ShortName:  "vphong.Mesh",
 	IDName:     "mesh",
 	Doc:        "Mesh records the number of elements in an indexed triangle mesh,\nwhich always includes normals and texture coordinates, and\noptionally per-vertex colors.",
@@ -121,7 +121,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.Mtxs",
+	Name:       "goki.dev/vgpu/vphong.Mtxs",
 	ShortName:  "vphong.Mtxs",
 	IDName:     "mtxs",
 	Doc:        "Mtxs contains the camera view and projection matricies, for uniform uploading",
@@ -135,7 +135,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.Sets",
+	Name:       "goki.dev/vgpu/vphong.Sets",
 	ShortName:  "vphong.Sets",
 	IDName:     "sets",
 	Doc:        "Sets are variable set numbers - must coordinate with System sets!",
@@ -145,7 +145,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.CurRender",
+	Name:       "goki.dev/vgpu/vphong.CurRender",
 	ShortName:  "vphong.CurRender",
 	IDName:     "cur-render",
 	Doc:        "CurRender holds info about the current render as updated by\nUse* methods -- determines which pipeline is used.\nDefault is single color.",
@@ -165,7 +165,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.PushU",
+	Name:       "goki.dev/vgpu/vphong.PushU",
 	ShortName:  "vphong.PushU",
 	IDName:     "push-u",
 	Doc:        "PushU is the push constants structure, holding everything that\nupdates per object -- avoids any limitations on capacity.",
@@ -180,7 +180,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.Texture",
+	Name:       "goki.dev/vgpu/vphong.Texture",
 	ShortName:  "vphong.Texture",
 	IDName:     "texture",
 	Doc:        "Texture has texture image -- stored as image.RGBA for GPU compatibility",
@@ -193,7 +193,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.TexPars",
+	Name:       "goki.dev/vgpu/vphong.TexPars",
 	ShortName:  "vphong.TexPars",
 	IDName:     "tex-pars",
 	Doc:        "TexPars holds texture parameters: how often to repeat the texture image and offset",
@@ -207,7 +207,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/vgpu/vphong.Phong",
+	Name:       "goki.dev/vgpu/vphong.Phong",
 	ShortName:  "vphong.Phong",
 	IDName:     "phong",
 	Doc:        "Phong implements standard Blinn-Phong rendering pipelines in a vgpu System.\nMust Add all Lights, Meshes, Colors, Textures first, and call\nConfig() to configure everything prior to first RenderStart.\n\nMeshes are configured initially with numbers of points, then\nafter Config(), points are set by calling MeshFloatsBy* and\nassigning values.\n\nIf any changes are made to numbers or sizes of anything,\nyou must call Config() again.\n\nChanges to data only can be synced by calling Sync()\n\nRendering starts with RenderStart, followed by Use* calls\nto specify the parameters for each item, and then a Draw call\nto add the rendering command, followed by RenderEnd.",

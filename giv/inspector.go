@@ -7,17 +7,17 @@ package giv
 import (
 	"fmt"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/grows/jsons"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/keyfun"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/goosi"
+	"goki.dev/grows/jsons"
+	"goki.dev/grr"
 	"goki.dev/icons"
+	"goki.dev/keyfun"
+	"goki.dev/ki"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Inspector represents a struct, creating a property editor of the fields --

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/goki/enums"
+	"goki.dev/enums"
 )
 
 var _LangFlagsValues = []LangFlags{0, 1, 2, 3}

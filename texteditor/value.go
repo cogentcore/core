@@ -7,12 +7,12 @@ package texteditor
 import (
 	"fmt"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/giv"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/laser"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/giv"
+	"goki.dev/grr"
+	"goki.dev/gti"
+	"goki.dev/laser"
 )
 
 // Value is a [texteditor.Editor] [giv.Value] for editing longer text

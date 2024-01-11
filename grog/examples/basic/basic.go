@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/goki/colors"
+	"goki.dev/colors"
 
 	"github.com/muesli/termenv"
 )

@@ -10,9 +10,9 @@ import (
 	"image/draw"
 
 	"github.com/anthonynsimon/bild/transform"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/units"
 )
 
 // ObjectFits are the different ways in which a replaced element

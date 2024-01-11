@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/goki/goosi"
+	"goki.dev/goosi"
 )
 
 var (

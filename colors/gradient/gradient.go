@@ -15,8 +15,8 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
+	"goki.dev/colors"
+	"goki.dev/mat32"
 )
 
 // Gradient is the interface that all gradient types satisfy.

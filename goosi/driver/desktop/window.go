@@ -14,10 +14,10 @@ import (
 	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/goosi/driver/base"
-	"goki.dev/goki/vgpu/vdraw"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/base"
+	"goki.dev/vgpu/vdraw"
 
 	vk "github.com/goki/vulkan"
 )

@@ -11,13 +11,13 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/events"
-	"goki.dev/goki/keyfun"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
+	"goki.dev/abilities"
+	"goki.dev/enums"
+	"goki.dev/events"
+	"goki.dev/keyfun"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/styles"
 )
 
 var (

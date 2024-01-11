@@ -5,15 +5,15 @@
 package gi
 
 import (
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/cursors"
-	"goki.dev/goki/events"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/abilities"
+	"goki.dev/colors"
+	"goki.dev/cursors"
+	"goki.dev/events"
 	"goki.dev/icons"
+	"goki.dev/ki"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Switch is a widget that can toggle between an on and off state.

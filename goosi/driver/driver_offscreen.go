@@ -7,7 +7,7 @@
 package driver
 
 import (
-	"goki.dev/goki/goosi/driver/offscreen"
+	"goki.dev/goosi/driver/offscreen"
 )
 
 func init() {

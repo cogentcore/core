@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/mattn/go-shellwords"
-	"goki.dev/goki/grog"
+	"goki.dev/grog"
 )
 
 // Args returns a string parsed into separate args

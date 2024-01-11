@@ -10,7 +10,7 @@
 package clip
 
 import (
-	"goki.dev/goki/mimedata"
+	"goki.dev/mimedata"
 )
 
 // clip.Board interface defines the methods for reading and writing data to

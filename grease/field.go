@@ -13,8 +13,8 @@ import (
 	"slices"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/ordmap"
+	"goki.dev/laser"
+	"goki.dev/ordmap"
 )
 
 // Field represents a struct field in a configuration struct.

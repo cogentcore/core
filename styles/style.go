@@ -12,16 +12,16 @@ import (
 	"image/color"
 	"strings"
 
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/cursors"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/states"
-	"goki.dev/goki/units"
+	"goki.dev/abilities"
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/cursors"
+	"goki.dev/enums"
+	"goki.dev/ki"
+	"goki.dev/laser"
+	"goki.dev/mat32"
+	"goki.dev/states"
+	"goki.dev/units"
 )
 
 // style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp

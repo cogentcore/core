@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/grows/tomls"
+	"goki.dev/gokitool/config"
+	"goki.dev/grows/tomls"
 )
 
 // Init initializes the ".goki" directory

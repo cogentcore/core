@@ -20,8 +20,8 @@
 package cam16
 
 import (
-	"goki.dev/goki/cam/cie"
-	"goki.dev/goki/mat32"
+	"goki.dev/cam/cie"
+	"goki.dev/mat32"
 )
 
 // View represents viewing conditions under which a color is being perceived,

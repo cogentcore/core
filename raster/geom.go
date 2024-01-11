@@ -11,7 +11,7 @@ package raster
 import (
 	"fmt"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 	"golang.org/x/image/math/fixed"
 )
 

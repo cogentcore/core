@@ -11,13 +11,13 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/goki/ki"
-	"goki.dev/goki/pi"
-	"goki.dev/goki/pi/complete"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/pi/parse"
-	"goki.dev/goki/pi/syms"
-	"goki.dev/goki/pi/token"
+	"goki.dev/ki"
+	"goki.dev/pi"
+	"goki.dev/pi/complete"
+	"goki.dev/pi/lex"
+	"goki.dev/pi/parse"
+	"goki.dev/pi/syms"
+	"goki.dev/pi/token"
 )
 
 var CompleteTrace = false

@@ -7,7 +7,7 @@ package langs
 import (
 	"fmt"
 
-	"goki.dev/goki/fi"
+	"goki.dev/fi"
 )
 
 var ParserBytes map[fi.Known][]byte = make(map[fi.Known][]byte)

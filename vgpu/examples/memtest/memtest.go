@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"runtime"
 
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/vgpu"
+	"goki.dev/mat32"
+	"goki.dev/vgpu"
 )
 
 func init() {

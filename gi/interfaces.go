@@ -7,8 +7,8 @@ package gi
 import (
 	"reflect"
 
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
+	"goki.dev/ki"
+	"goki.dev/laser"
 )
 
 // This file contains all the special-purpose interfaces

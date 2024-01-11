@@ -15,10 +15,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/gokitool/mobile"
-	"goki.dev/goki/gokitool/web"
-	"goki.dev/goki/xe"
+	"goki.dev/gokitool/config"
+	"goki.dev/gokitool/mobile"
+	"goki.dev/gokitool/web"
+	"goki.dev/xe"
 )
 
 // Build builds an executable for the package

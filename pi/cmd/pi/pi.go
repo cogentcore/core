@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/goki/fi"
-	"goki.dev/goki/glop/dirs"
-	"goki.dev/goki/pi"
-	_ "goki.dev/goki/pi/langs"
-	"goki.dev/goki/pi/syms"
+	"goki.dev/fi"
+	"goki.dev/glop/dirs"
+	"goki.dev/pi"
+	_ "goki.dev/pi/langs"
+	"goki.dev/pi/syms"
 )
 
 var Excludes []string

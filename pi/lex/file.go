@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"goki.dev/goki/fi"
-	"goki.dev/goki/pi/token"
+	"goki.dev/fi"
+	"goki.dev/pi/token"
 )
 
 // File contains the contents of the file being parsed -- all kept in

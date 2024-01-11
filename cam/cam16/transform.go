@@ -7,8 +7,8 @@ package cam16
 import (
 	"image/color"
 
-	"goki.dev/goki/cam/cie"
-	"goki.dev/goki/mat32"
+	"goki.dev/cam/cie"
+	"goki.dev/mat32"
 )
 
 // Blend returns a color that is the given percent blend between the first

@@ -7,7 +7,7 @@ package keyfun
 import (
 	"strings"
 
-	"goki.dev/goki/events/key"
+	"goki.dev/events/key"
 )
 
 // MarkdownDoc generates a markdown table of all the key mappings

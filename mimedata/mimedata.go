@@ -23,7 +23,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"goki.dev/goki/fi"
+	"goki.dev/fi"
 )
 
 const (

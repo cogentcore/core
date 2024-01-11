@@ -7,9 +7,9 @@ package gi
 import (
 	"log"
 
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/abilities"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // Frame is a Layout that renders a background according to the

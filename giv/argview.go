@@ -8,10 +8,10 @@ import (
 	"fmt"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/styles"
+	"goki.dev/gi"
+	"goki.dev/ki"
+	"goki.dev/laser"
+	"goki.dev/styles"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the

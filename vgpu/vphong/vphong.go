@@ -9,8 +9,8 @@ package vphong
 import (
 	"sync"
 
-	"goki.dev/goki/ordmap"
-	"goki.dev/goki/vgpu"
+	"goki.dev/ordmap"
+	"goki.dev/vgpu"
 )
 
 // MaxLights is upper limit on number of any given type of light

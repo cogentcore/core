@@ -13,11 +13,11 @@ import (
 
 	vk "github.com/goki/vulkan"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/goosi"
-	_ "goki.dev/goki/goosi/driver"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/vgpu"
+	"goki.dev/events"
+	"goki.dev/goosi"
+	_ "goki.dev/goosi/driver"
+	"goki.dev/mat32"
+	"goki.dev/vgpu"
 )
 
 //go:embed *.spv

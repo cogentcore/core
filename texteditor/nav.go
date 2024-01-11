@@ -7,12 +7,12 @@ package texteditor
 import (
 	"image"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/texteditor/textbuf"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/laser"
+	"goki.dev/mat32"
+	"goki.dev/pi/lex"
+	"goki.dev/texteditor/textbuf"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

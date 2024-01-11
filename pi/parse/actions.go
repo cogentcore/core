@@ -7,8 +7,8 @@ package parse
 import (
 	"fmt"
 
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/pi/token"
+	"goki.dev/pi/lex"
+	"goki.dev/pi/token"
 )
 
 // Actions are parsing actions to perform

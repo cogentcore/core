@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	"goki.dev/goki/cursors"
-	"goki.dev/goki/grows/images"
+	"goki.dev/cursors"
+	"goki.dev/grows/images"
 )
 
 func TestHotspot(t *testing.T) {

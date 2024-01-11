@@ -19,7 +19,7 @@
 
 package cam16
 
-import "goki.dev/goki/mat32"
+import "goki.dev/mat32"
 
 // SanitizeDegInt ensures that degrees is in [0-360) range
 func SanitizeDegInt(deg int) int {

@@ -7,7 +7,7 @@ package gti
 import (
 	"reflect"
 
-	"goki.dev/goki/ordmap"
+	"goki.dev/ordmap"
 )
 
 // Field represents a field or embed in a struct,
@@ -18,7 +18,7 @@ type Field struct {
 
 	// Type has the fully-package-path-qualified name of the type,
 	// which can be used to look up the type in the Types registry
-	// (eg: goki.dev/goki/gi.Button)
+	// (eg: goki.dev/gi.Button)
 	Type string
 
 	// LocalType is the shorter, local name of the type from the

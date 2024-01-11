@@ -8,9 +8,9 @@ import (
 	"image"
 	"image/color"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/units"
 )
 
 // Paint provides the styling parameters for SVG-style rendering

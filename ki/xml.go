@@ -14,10 +14,10 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/goki/gti"
+	"goki.dev/gti"
 )
 
-// see https://goki.dev/goki/ki/wiki/Naming for IO naming conventions
+// see https://goki.dev/ki/wiki/Naming for IO naming conventions
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.

@@ -9,13 +9,13 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/events"
+	"goki.dev/events/key"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // HasAnyScroll returns true if layout has

@@ -13,10 +13,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/paint"
-	"goki.dev/goki/svg"
+	"goki.dev/colors"
 	"goki.dev/icons"
+	"goki.dev/paint"
+	"goki.dev/svg"
 )
 
 // Render renders the icon located at .goki/icon.svg at the given size.

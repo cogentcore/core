@@ -6,7 +6,7 @@ package testdata
 
 //go:generate goki generate
 
-import "goki.dev/goki/ki"
+import "goki.dev/ki"
 
 type TestNode struct {
 	ki.Node

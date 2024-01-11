@@ -1,7 +1,7 @@
 # Enums in Go
 
-[![Go Reference](https://pkg.go.dev/badge/goki.dev/goki/enums.svg)](https://pkg.go.dev/goki.dev/goki/enums)
-[![Go Report Card](https://goreportcard.com/badge/goki.dev/goki/enums)](https://goreportcard.com/report/goki.dev/goki/enums)
+[![Go Reference](https://pkg.go.dev/badge/goki.dev/enums.svg)](https://pkg.go.dev/goki.dev/enums)
+[![Go Report Card](https://goreportcard.com/badge/goki.dev/enums)](https://goreportcard.com/report/goki.dev/enums)
 
 Enums provides utilities for creating and using enumerated types in Go. There are two main parts of enums: command `enumgen` and package `enums`. Most end-users should only have to interact with `enumgen`.
 
@@ -10,7 +10,7 @@ Enums provides utilities for creating and using enumerated types in Go. There ar
 Enumgen generates code for enumerated types that aids in various operations with them, including printing, setting, and marshalling. Enumgen is based on [dmarkham/enumer](https://github.com/dmarkham/enumer) and [stringer](https://pkg.go.dev/golang.org/x/tools/cmd/stringer). To install enumgen, run:
 
 ```sh
-go install goki.dev/goki/enums/cmd/enumgen@latest
+go install goki.dev/enums/cmd/enumgen@latest
 ```
 
 Then, in any package you have enums, add *one* `go:generate` line at the top of a file (**only** one per package):

@@ -7,7 +7,7 @@ package colors
 import (
 	"image/color"
 
-	"goki.dev/goki/colors/matcolor"
+	"goki.dev/colors/matcolor"
 )
 
 // Palette contains the main, global [MatPalette]. It can

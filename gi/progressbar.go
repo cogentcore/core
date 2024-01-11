@@ -7,9 +7,9 @@ package gi
 import (
 	"sync"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
+	"goki.dev/colors"
+	"goki.dev/mat32"
+	"goki.dev/styles"
 )
 
 // ProgressBar is a progress bar that fills up bar as progress continues.

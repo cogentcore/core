@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Line is a SVG line

@@ -5,7 +5,7 @@
 package vshape
 
 import (
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Cylinder is a generalized cylinder shape, including a cone

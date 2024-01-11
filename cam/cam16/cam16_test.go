@@ -7,8 +7,8 @@ package cam16
 import (
 	"testing"
 
-	"goki.dev/goki/cam/cie"
-	"goki.dev/goki/mat32"
+	"goki.dev/cam/cie"
+	"goki.dev/mat32"
 )
 
 func expect(t *testing.T, ref, val float32) {

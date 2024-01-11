@@ -7,7 +7,7 @@ package ki
 import (
 	"fmt"
 
-	"goki.dev/goki/gti"
+	"goki.dev/gti"
 )
 
 // Slice is just a slice of ki elements: []Ki, providing methods for accessing

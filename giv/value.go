@@ -12,18 +12,18 @@ import (
 	"log/slog"
 	"reflect"
 
-	"goki.dev/goki/enums"
-	"goki.dev/goki/events"
-	"goki.dev/goki/events/key"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/glop/sentence"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/states"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
+	"goki.dev/enums"
+	"goki.dev/events"
+	"goki.dev/events/key"
+	"goki.dev/gi"
+	"goki.dev/glop/sentence"
+	"goki.dev/goosi"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/laser"
+	"goki.dev/states"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
 
 // NewValue makes and returns a new [Value] from the given value and creates
@@ -208,13 +208,13 @@ type Value interface {
 
 	// SetTags sets tags for this valueview, for non-struct values, to
 	// influence interface for this value -- see
-	// https://goki.dev/goki/wiki/Tags for valid options.  Adds to
+	// https://goki.dev/wiki/Tags for valid options.  Adds to
 	// existing tags if some are already set.
 	SetTags(tags map[string]string)
 
 	// SetTag sets given tag to given value for this valueview, for non-struct
 	// values, to influence interface for this value -- see
-	// https://goki.dev/goki/wiki/Tags for valid options.
+	// https://goki.dev/wiki/Tags for valid options.
 	SetTag(tag, value string)
 
 	// Tag returns value for given tag -- looks first at tags set by

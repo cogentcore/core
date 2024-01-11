@@ -3,12 +3,12 @@
 package keyfun
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/keyfun.MapsItem",
+	Name:      "goki.dev/keyfun.MapsItem",
 	ShortName: "keyfun.MapsItem",
 	IDName:    "maps-item",
 	Doc:       "MapsItem is an entry in a Maps list",
@@ -18,7 +18,7 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "name of keymap", Directives: gti.Directives{}, Tag: "width:\"20\""}},
 		{"Desc", &gti.Field{Name: "Desc", Type: "string", LocalType: "string", Doc: "description of keymap -- good idea to include source it was derived from", Directives: gti.Directives{}, Tag: ""}},
-		{"Map", &gti.Field{Name: "Map", Type: "goki.dev/goki/keyfun.Map", LocalType: "Map", Doc: "to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu", Directives: gti.Directives{}, Tag: ""}},
+		{"Map", &gti.Field{Name: "Map", Type: "goki.dev/keyfun.Map", LocalType: "Map", Doc: "to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -46,7 +46,7 @@ func (t *MapsItem) SetMap(v Map) *MapsItem {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/keyfun.Maps",
+	Name:      "goki.dev/keyfun.Maps",
 	ShortName: "keyfun.Maps",
 	IDName:    "maps",
 	Doc:       "Maps is a list of KeyMap's -- users can edit these in Prefs -- to create\na custom one, just duplicate an existing map, rename, and customize",

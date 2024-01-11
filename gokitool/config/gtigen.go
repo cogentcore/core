@@ -3,12 +3,12 @@
 package config
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Config",
+	Name:      "goki.dev/gokitool/config.Config",
 	ShortName: "config.Config",
 	IDName:    "config",
 	Doc:       "Config is the main config struct\nthat contains all of the configuration\noptions for the Goki tool",
@@ -20,21 +20,21 @@ var _ = gti.AddType(&gti.Type{
 		{"ID", &gti.Field{Name: "ID", Type: "string", LocalType: "string", Doc: "the bundle / package ID to use of the project (required for building for mobile platforms\nand packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)", Directives: gti.Directives{}, Tag: ""}},
 		{"Desc", &gti.Field{Name: "Desc", Type: "string", LocalType: "string", Doc: "the description of the project", Directives: gti.Directives{}, Tag: ""}},
 		{"Version", &gti.Field{Name: "Version", Type: "string", LocalType: "string", Doc: "the version of the project", Directives: gti.Directives{}, Tag: "cmd:\"set-version\" posarg:\"0\" def:\"v0.0.0\""}},
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/gokitool/config.Types", LocalType: "Types", Doc: "the type of the project (app/library)", Directives: gti.Directives{}, Tag: ""}},
-		{"Build", &gti.Field{Name: "Build", Type: "goki.dev/goki/gokitool/config.Build", LocalType: "Build", Doc: "the configuration options for the build, install, run, and pack commands", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
-		{"Pack", &gti.Field{Name: "Pack", Type: "goki.dev/goki/gokitool/config.Pack", LocalType: "Pack", Doc: "the configuration information for the pack command", Directives: gti.Directives{}, Tag: "cmd:\"pack\" view:\"add-fields\""}},
-		{"Web", &gti.Field{Name: "Web", Type: "goki.dev/goki/gokitool/config.Web", LocalType: "Web", Doc: "the configuration information for web", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
-		{"Setup", &gti.Field{Name: "Setup", Type: "goki.dev/goki/gokitool/config.Setup", LocalType: "Setup", Doc: "the configuration options for the setup command", Directives: gti.Directives{}, Tag: "cmd:\"setup\" view:\"add-fields\""}},
-		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/goki/gokitool/config.Log", LocalType: "Log", Doc: "the configuration options for the log command", Directives: gti.Directives{}, Tag: "cmd:\"log\" view:\"add-fields\""}},
-		{"Release", &gti.Field{Name: "Release", Type: "goki.dev/goki/gokitool/config.Release", LocalType: "Release", Doc: "the configuration options for the release command", Directives: gti.Directives{}, Tag: "cmd:\"release\" view:\"add-fields\""}},
-		{"Generate", &gti.Field{Name: "Generate", Type: "goki.dev/goki/gokitool/config.Generate", LocalType: "Generate", Doc: "the configuration options for the generate command", Directives: gti.Directives{}, Tag: "cmd:\"generate\" view:\"add-fields\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gokitool/config.Types", LocalType: "Types", Doc: "the type of the project (app/library)", Directives: gti.Directives{}, Tag: ""}},
+		{"Build", &gti.Field{Name: "Build", Type: "goki.dev/gokitool/config.Build", LocalType: "Build", Doc: "the configuration options for the build, install, run, and pack commands", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
+		{"Pack", &gti.Field{Name: "Pack", Type: "goki.dev/gokitool/config.Pack", LocalType: "Pack", Doc: "the configuration information for the pack command", Directives: gti.Directives{}, Tag: "cmd:\"pack\" view:\"add-fields\""}},
+		{"Web", &gti.Field{Name: "Web", Type: "goki.dev/gokitool/config.Web", LocalType: "Web", Doc: "the configuration information for web", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
+		{"Setup", &gti.Field{Name: "Setup", Type: "goki.dev/gokitool/config.Setup", LocalType: "Setup", Doc: "the configuration options for the setup command", Directives: gti.Directives{}, Tag: "cmd:\"setup\" view:\"add-fields\""}},
+		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/gokitool/config.Log", LocalType: "Log", Doc: "the configuration options for the log command", Directives: gti.Directives{}, Tag: "cmd:\"log\" view:\"add-fields\""}},
+		{"Release", &gti.Field{Name: "Release", Type: "goki.dev/gokitool/config.Release", LocalType: "Release", Doc: "the configuration options for the release command", Directives: gti.Directives{}, Tag: "cmd:\"release\" view:\"add-fields\""}},
+		{"Generate", &gti.Field{Name: "Generate", Type: "goki.dev/gokitool/config.Generate", LocalType: "Generate", Doc: "the configuration options for the generate command", Directives: gti.Directives{}, Tag: "cmd:\"generate\" view:\"add-fields\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Build",
+	Name:      "goki.dev/gokitool/config.Build",
 	ShortName: "config.Build",
 	IDName:    "build",
 	Doc:       "",
@@ -43,7 +43,7 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Package", &gti.Field{Name: "Package", Type: "string", LocalType: "string", Doc: "the path of the package to build", Directives: gti.Directives{}, Tag: "def:\".\" posarg:\"0\" required:\"-\""}},
-		{"Target", &gti.Field{Name: "Target", Type: "[]goki.dev/goki/gokitool/config.Platform", LocalType: "[]Platform", Doc: "the target platforms to build executables for", Directives: gti.Directives{}, Tag: "flag:\"t,target\""}},
+		{"Target", &gti.Field{Name: "Target", Type: "[]goki.dev/gokitool/config.Platform", LocalType: "[]Platform", Doc: "the target platforms to build executables for", Directives: gti.Directives{}, Tag: "flag:\"t,target\""}},
 		{"Output", &gti.Field{Name: "Output", Type: "string", LocalType: "string", Doc: "the output file name; if not specified, it depends on the package being built", Directives: gti.Directives{}, Tag: "flag:\"o,output\""}},
 		{"Debug", &gti.Field{Name: "Debug", Type: "bool", LocalType: "bool", Doc: "whether to build/run the app in debug mode; this currently only works on mobile platforms", Directives: gti.Directives{}, Tag: "flag:\"d,debug\""}},
 		{"Rebuild", &gti.Field{Name: "Rebuild", Type: "bool", LocalType: "bool", Doc: "force rebuilding of packages that are already up-to-date", Directives: gti.Directives{}, Tag: "flag:\"a,rebuild\""}},
@@ -64,7 +64,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Pack",
+	Name:      "goki.dev/gokitool/config.Pack",
 	ShortName: "config.Pack",
 	IDName:    "pack",
 	Doc:       "",
@@ -79,7 +79,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Setup",
+	Name:      "goki.dev/gokitool/config.Setup",
 	ShortName: "config.Setup",
 	IDName:    "setup",
 	Doc:       "",
@@ -87,14 +87,14 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Platform", &gti.Field{Name: "Platform", Type: "goki.dev/goki/gokitool/config.Platform", LocalType: "Platform", Doc: "the platform to set things up for", Directives: gti.Directives{}, Tag: "posarg:\"0\""}},
+		{"Platform", &gti.Field{Name: "Platform", Type: "goki.dev/gokitool/config.Platform", LocalType: "Platform", Doc: "the platform to set things up for", Directives: gti.Directives{}, Tag: "posarg:\"0\""}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Log",
+	Name:      "goki.dev/gokitool/config.Log",
 	ShortName: "config.Log",
 	IDName:    "log",
 	Doc:       "",
@@ -111,7 +111,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Release",
+	Name:      "goki.dev/gokitool/config.Release",
 	ShortName: "config.Release",
 	IDName:    "release",
 	Doc:       "",
@@ -127,7 +127,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Generate",
+	Name:      "goki.dev/gokitool/config.Generate",
 	ShortName: "config.Generate",
 	IDName:    "generate",
 	Doc:       "",
@@ -135,8 +135,8 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Enumgen", &gti.Field{Name: "Enumgen", Type: "goki.dev/goki/enums/enumgen.Config", LocalType: "enumgen.Config", Doc: "the enum generation configuration options passed to enumgen", Directives: gti.Directives{}, Tag: ""}},
-		{"Gtigen", &gti.Field{Name: "Gtigen", Type: "goki.dev/goki/gti/gtigen.Config", LocalType: "gtigen.Config", Doc: "the generation configuration options passed to gtigen", Directives: gti.Directives{}, Tag: ""}},
+		{"Enumgen", &gti.Field{Name: "Enumgen", Type: "goki.dev/enums/enumgen.Config", LocalType: "enumgen.Config", Doc: "the enum generation configuration options passed to enumgen", Directives: gti.Directives{}, Tag: ""}},
+		{"Gtigen", &gti.Field{Name: "Gtigen", Type: "goki.dev/gti/gtigen.Config", LocalType: "gtigen.Config", Doc: "the generation configuration options passed to gtigen", Directives: gti.Directives{}, Tag: ""}},
 		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "the source directory to run generate on (can be multiple through ./...)", Directives: gti.Directives{}, Tag: "def:\".\" posarg:\"0\" required:\"-\" nest:\"-\""}},
 		{"Output", &gti.Field{Name: "Output", Type: "string", LocalType: "string", Doc: "the output file location relative to the package on which generate is being called", Directives: gti.Directives{}, Tag: "def:\"gokigen.go\""}},
 	}),
@@ -145,7 +145,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gokitool/config.Web",
+	Name:      "goki.dev/gokitool/config.Web",
 	ShortName: "config.Web",
 	IDName:    "web",
 	Doc:       "Web containts the configuration information for building for web and creating\nthe HTML page that loads a Go wasm app and its resources.",

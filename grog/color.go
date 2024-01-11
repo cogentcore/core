@@ -9,8 +9,8 @@ import (
 	"log/slog"
 
 	"github.com/muesli/termenv"
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/matcolor"
+	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 )
 
 var (

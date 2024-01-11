@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/goki/pi/token"
+	"goki.dev/pi/token"
 )
 
 // these functions provide "manual" lexing support for specific cases

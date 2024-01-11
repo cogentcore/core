@@ -3,13 +3,13 @@
 package lex
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Actions",
+	Name:       "goki.dev/pi/lex.Actions",
 	Doc:        "Actions are lexing actions to perform",
 	Directives: gti.Directives{},
 
@@ -17,7 +17,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Error",
+	Name:       "goki.dev/pi/lex.Error",
 	Doc:        "In an ErrorList, an error is represented by an *Error.\nThe position Pos, if valid, points to the beginning of\nthe offending token, and the error condition is described\nby Msg.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -32,7 +32,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.ErrorList",
+	Name:       "goki.dev/pi/lex.ErrorList",
 	Doc:        "ErrorList is a list of *Errors.\nThe zero value for an ErrorList is an empty ErrorList ready to use.",
 	Directives: gti.Directives{},
 
@@ -40,7 +40,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.File",
+	Name:       "goki.dev/pi/lex.File",
 	Doc:        "File contains the contents of the file being parsed -- all kept in\nmemory, and represented by Line as runes, so that positions in\nthe file are directly convertible to indexes in Lines structure",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -58,7 +58,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Lex",
+	Name:       "goki.dev/pi/lex.Lex",
 	Doc:        "Lex represents a single lexical element, with a token, and start and end rune positions\nwithin a line of a file.  Critically it also contains the nesting depth computed from\nall the parens, brackets, braces.  Todo: also support XML < > </ > tag depth.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -72,7 +72,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Line",
+	Name:       "goki.dev/pi/lex.Line",
 	Doc:        "Line is one line of Lex'd text",
 	Directives: gti.Directives{},
 
@@ -80,7 +80,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Matches",
+	Name:       "goki.dev/pi/lex.Matches",
 	Doc:        "Matches are what kind of lexing matches to make",
 	Directives: gti.Directives{},
 
@@ -88,7 +88,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.MatchPos",
+	Name:       "goki.dev/pi/lex.MatchPos",
 	Doc:        "MatchPos are special positions for a match to occur",
 	Directives: gti.Directives{},
 
@@ -96,7 +96,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.PassTwo",
+	Name:       "goki.dev/pi/lex.PassTwo",
 	Doc:        "PassTwo performs second pass(s) through the lexicalized version of the source,\ncomputing nesting depth for every token once and for all -- this is essential for\nproperly matching tokens and also for colorization in syntax highlighting.\nOptionally, a subsequent pass finds end-of-statement (EOS) tokens, which are essential\nfor parsing to first break the source down into statement-sized chunks.  A separate\nlist of EOS token positions is maintained for very fast access.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -112,7 +112,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.TwoState",
+	Name:       "goki.dev/pi/lex.TwoState",
 	Doc:        "TwoState is the state maintained for the PassTwo process",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -126,7 +126,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Pos",
+	Name:       "goki.dev/pi/lex.Pos",
 	Doc:        "Pos is a position within the source file -- it is recorded always in 0, 0\noffset positions, but is converted into 1,1 offset for public consumption\nCh positions are always in runes, not bytes.  Also used for lex token indexes.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -138,7 +138,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Reg",
+	Name:       "goki.dev/pi/lex.Reg",
 	Doc:        "Reg is a contiguous region within the source file",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -150,7 +150,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.EosPos",
+	Name:       "goki.dev/pi/lex.EosPos",
 	Doc:        "EosPos is a line of EOS token positions, always sorted low-to-high",
 	Directives: gti.Directives{},
 
@@ -158,7 +158,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.TokenMap",
+	Name:       "goki.dev/pi/lex.TokenMap",
 	Doc:        "TokenMap is a token map, for optimizing token exclusion",
 	Directives: gti.Directives{},
 
@@ -166,7 +166,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Lexer",
+	Name:       "goki.dev/pi/lex.Lexer",
 	Doc:        "Lexer is the interface type for lexers -- likely not necessary except is essential\nfor defining the BaseIface for gui in making new nodes",
 	Directives: gti.Directives{},
 
@@ -175,7 +175,7 @@ var _ = gti.AddType(&gti.Type{
 
 // RuleType is the [gti.Type] for [Rule]
 var RuleType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Rule",
+	Name:       "goki.dev/pi/lex.Rule",
 	Doc:        "lex.Rule operates on the text input to produce the lexical tokens.\n\nLexing is done line-by-line -- you must push and pop states to\ncoordinate across multiple lines, e.g., for multi-line comments.\n\nThere is full access to entire line and you can decide based on future\n(offset) characters.\n\nIn general it is best to keep lexing as simple as possible and\nleave the more complex things for the parsing step.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -218,7 +218,7 @@ func (t *Rule) New() ki.Ki {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.Stack",
+	Name:       "goki.dev/pi/lex.Stack",
 	Doc:        "Stack is the stack for states",
 	Directives: gti.Directives{},
 
@@ -226,7 +226,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.LangLexer",
+	Name:       "goki.dev/pi/lex.LangLexer",
 	Doc:        "LangLexer looks up lexer for given language -- impl in parent pi package\nso we need the interface",
 	Directives: gti.Directives{},
 
@@ -234,7 +234,7 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/pi/lex.State",
+	Name:       "goki.dev/pi/lex.State",
 	Doc:        "lex.State is the state maintained for lexing",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

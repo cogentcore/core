@@ -8,9 +8,9 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
 	"goki.dev/icons"
+	"goki.dev/ki"
+	"goki.dev/mat32"
 )
 
 // Camera defines the properties of the camera

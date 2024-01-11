@@ -9,9 +9,9 @@ import (
 	"image/color"
 	"math"
 
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/vgpu/vshape"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/vgpu/vshape"
 )
 
 // Note: Raw line rendering via OpenGL is not very effective

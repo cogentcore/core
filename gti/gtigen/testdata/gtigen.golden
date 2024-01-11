@@ -3,13 +3,13 @@
 package testdata
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 // PersonType is the [gti.Type] for [Person]
 var PersonType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/gti/gtigen/testdata.Person",
+	Name:      "goki.dev/gti/gtigen/testdata.Person",
 	ShortName: "testdata.Person",
 	IDName:    "person",
 	Doc:       "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
@@ -25,7 +25,7 @@ var PersonType = gti.AddType(&gti.Type{
 		{"Age", &gti.Field{Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
 		}, Tag: "json:\"-\""}},
-		{"Type", &gti.Field{Name: "Type", Type: "*goki.dev/goki/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"RGBA", &gti.Field{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -91,7 +91,7 @@ func (t *Person) SetA(v uint8) *Person {
 }
 
 var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/goki/gti/gtigen/testdata.Alert",
+	Name:       "goki.dev/gti/gtigen/testdata.Alert",
 	Doc:        "Alert prints an alert with the given message",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -101,7 +101,7 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/goki/gti/gtigen/testdata.TypeOmittedArgs0",
+	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -112,7 +112,7 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/goki/gti/gtigen/testdata.TypeOmittedArgs1",
+	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs1",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -124,7 +124,7 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/goki/gti/gtigen/testdata.TypeOmittedArgs2",
+	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs2",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -136,7 +136,7 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/goki/gti/gtigen/testdata.TypeOmittedArgs3",
+	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs3",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -149,7 +149,7 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/goki/gti/gtigen/testdata.TypeOmittedArgs4",
+	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs4",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

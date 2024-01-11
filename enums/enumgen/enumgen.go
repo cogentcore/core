@@ -11,7 +11,7 @@ package enumgen
 import (
 	"fmt"
 
-	"goki.dev/goki/gengo"
+	"goki.dev/gengo"
 	"golang.org/x/tools/go/packages"
 )
 

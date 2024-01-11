@@ -7,8 +7,8 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/goki/grease"
-	"goki.dev/goki/greasi"
+	"goki.dev/grease"
+	"goki.dev/greasi"
 )
 
 //go:generate goki generate -add-types -add-methods

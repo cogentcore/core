@@ -7,7 +7,7 @@ package xyz
 import (
 	"image/color"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Light represents a light that illuminates a scene

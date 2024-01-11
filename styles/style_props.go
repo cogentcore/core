@@ -7,13 +7,13 @@ package styles
 import (
 	"log/slog"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/colors/gradient"
-	"goki.dev/goki/enums"
-	"goki.dev/goki/glop/num"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/laser"
-	"goki.dev/goki/units"
+	"goki.dev/colors"
+	"goki.dev/colors/gradient"
+	"goki.dev/enums"
+	"goki.dev/glop/num"
+	"goki.dev/grr"
+	"goki.dev/laser"
+	"goki.dev/units"
 )
 
 // StyleInhInit detects the style values of "inherit" and "initial",

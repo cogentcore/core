@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Copied from golang.org/x/image/vector

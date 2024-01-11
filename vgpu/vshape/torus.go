@@ -7,7 +7,7 @@ package vshape
 import (
 	"math"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the

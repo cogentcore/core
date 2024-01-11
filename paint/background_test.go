@@ -7,11 +7,11 @@ package paint
 import (
 	"testing"
 
-	"goki.dev/goki/colors"
-	"goki.dev/goki/grows/images"
-	"goki.dev/goki/grr"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/styles"
+	"goki.dev/colors"
+	"goki.dev/grows/images"
+	"goki.dev/grr"
+	"goki.dev/mat32"
+	"goki.dev/styles"
 )
 
 func TestBackgroundColor(t *testing.T) {

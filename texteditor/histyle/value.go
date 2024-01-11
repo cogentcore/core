@@ -5,12 +5,12 @@
 package histyle
 
 import (
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/giv"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/laser"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/giv"
+	"goki.dev/gti"
 	"goki.dev/icons"
+	"goki.dev/laser"
 )
 
 func init() {

@@ -11,9 +11,9 @@ import (
 	"errors"
 	"reflect"
 
-	"goki.dev/goki/glop/dirs"
-	"goki.dev/goki/grows/tomls"
-	"goki.dev/goki/laser"
+	"goki.dev/glop/dirs"
+	"goki.dev/grows/tomls"
+	"goki.dev/laser"
 )
 
 // TODO(kai): this seems bad

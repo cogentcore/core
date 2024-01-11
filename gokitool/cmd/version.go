@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/Masterminds/semver/v3"
-	"goki.dev/goki/gokitool/config"
-	"goki.dev/goki/grease"
-	"goki.dev/goki/xe"
+	"goki.dev/gokitool/config"
+	"goki.dev/grease"
+	"goki.dev/xe"
 )
 
 // GetVersion prints the version of the project.

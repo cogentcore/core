@@ -9,7 +9,7 @@ package cursor
 //go:generate goki generate
 
 import (
-	"goki.dev/goki/enums"
+	"goki.dev/enums"
 )
 
 // Cursor manages the mouse cursor / pointer appearance.  Currently only a
@@ -18,7 +18,7 @@ import (
 type Cursor interface {
 
 	// Current returns the current cursor as an enum, which is a
-	// [goki.dev/goki/cursors.Cursor]
+	// [goki.dev/cursors.Cursor]
 	// by default, but could be something else if you are extending
 	// the default cursor set.
 	Current() enums.Enum
@@ -27,7 +27,7 @@ type Cursor interface {
 	// a [cursors.Cursor], unless you are extending the default cursor set, in
 	// which case it should be a type you defined. The string version of the
 	// enum value must correspond to a filename of the form "name.svg" in
-	// [goki.dev/goki/cursors.Cursors]; this will be satisfied automatically by all
+	// [goki.dev/cursors.Cursors]; this will be satisfied automatically by all
 	// [cursor.Cursor] values.
 	Set(cursor enums.Enum) error
 

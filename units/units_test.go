@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 func TestToDots(t *testing.T) {

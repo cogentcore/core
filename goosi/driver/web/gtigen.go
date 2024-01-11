@@ -3,12 +3,12 @@
 package web
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/goosi/driver/web.App",
+	Name:      "goki.dev/goosi/driver/web.App",
 	ShortName: "web.App",
 	IDName:    "app",
 	Doc:       "App is the [goosi.App] implementation for the web platform",
@@ -16,17 +16,17 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SystemPlatform", &gti.Field{Name: "SystemPlatform", Type: "goki.dev/goki/goosi.Platforms", LocalType: "goosi.Platforms", Doc: "SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)", Directives: gti.Directives{}, Tag: ""}},
-		{"KeyMods", &gti.Field{Name: "KeyMods", Type: "goki.dev/goki/events/key.Modifiers", LocalType: "key.Modifiers", Doc: "KeyMods are the current key mods", Directives: gti.Directives{}, Tag: ""}},
+		{"SystemPlatform", &gti.Field{Name: "SystemPlatform", Type: "goki.dev/goosi.Platforms", LocalType: "goosi.Platforms", Doc: "SystemPlatform is the underlying system SystemPlatform (Android, iOS, etc)", Directives: gti.Directives{}, Tag: ""}},
+		{"KeyMods", &gti.Field{Name: "KeyMods", Type: "goki.dev/events/key.Modifiers", LocalType: "key.Modifiers", Doc: "KeyMods are the current key mods", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"AppSingle", &gti.Field{Name: "AppSingle", Type: "goki.dev/goki/goosi/driver/base.AppSingle", LocalType: "base.AppSingle[*Drawer, *Window]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"AppSingle", &gti.Field{Name: "AppSingle", Type: "goki.dev/goosi/driver/base.AppSingle", LocalType: "base.AppSingle[*Drawer, *Window]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/goosi/driver/web.Window",
+	Name:      "goki.dev/goosi/driver/web.Window",
 	ShortName: "web.Window",
 	IDName:    "window",
 	Doc:       "Window is the implementation of [goosi.Window] for the web platform.",
@@ -35,7 +35,7 @@ var _ = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WindowSingle", &gti.Field{Name: "WindowSingle", Type: "goki.dev/goki/goosi/driver/base.WindowSingle", LocalType: "base.WindowSingle[*App]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"WindowSingle", &gti.Field{Name: "WindowSingle", Type: "goki.dev/goosi/driver/base.WindowSingle", LocalType: "base.WindowSingle[*App]", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })

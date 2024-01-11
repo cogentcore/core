@@ -7,7 +7,7 @@ package xyz
 import (
 	"fmt"
 
-	"goki.dev/goki/ki"
+	"goki.dev/ki"
 )
 
 // AddToLibrary adds given Group to library, using group's name as unique key

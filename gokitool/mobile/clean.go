@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"goki.dev/goki/grog"
-	"goki.dev/goki/xe"
+	"goki.dev/grog"
+	"goki.dev/xe"
 )
 
 // Clean removes object files and cached NDK files downloaded by gomobile init

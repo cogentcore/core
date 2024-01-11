@@ -13,9 +13,9 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/goki/events"
-	"goki.dev/goki/glop/dirs"
-	"goki.dev/goki/spell"
+	"goki.dev/events"
+	"goki.dev/glop/dirs"
+	"goki.dev/spell"
 )
 
 // InitSpell tries to load the saved fuzzy.spell model.
@@ -47,7 +47,7 @@ func OpenSpellModel() error {
 
 // NewSpellModelFromText builds a NEW spelling model from text
 func NewSpellModelFromText() error {
-	bigdatapath, err := dirs.GoSrcDir("goki.dev/goki/pi/spell")
+	bigdatapath, err := dirs.GoSrcDir("goki.dev/pi/spell")
 	if err != nil {
 		slog.Error("getting path to corpus directory", "err", err)
 		return err

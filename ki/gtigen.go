@@ -3,13 +3,13 @@
 package ki
 
 import (
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ordmap"
+	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 // NodeType is the [gti.Type] for [Node]
 var NodeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/ki.Node",
+	Name:       "goki.dev/ki.Node",
 	ShortName:  "ki.Node",
 	IDName:     "node",
 	Doc:        "The Node implements the Ki interface and provides the core functionality\nfor the Goki tree -- use the Node as an embedded struct or as a struct\nfield -- the embedded version supports full JSON save / load.\n\nThe desc: key for fields is used by the GoGi GUI viewer for help / tooltip\ninfo -- add these to all your derived struct's fields.  See relevant docs\nfor other such tags controlling a wide range of GUI and other functionality\n-- Ki makes extensive use of such tags.",

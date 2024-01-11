@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/goki/gi"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/mat32"
-	"goki.dev/goki/pi/lex"
-	"goki.dev/goki/states"
+	"goki.dev/gi"
+	"goki.dev/ki"
+	"goki.dev/mat32"
+	"goki.dev/pi/lex"
+	"goki.dev/states"
 )
 
 // ViewBlinkMu is mutex protecting ViewBlink updating and access

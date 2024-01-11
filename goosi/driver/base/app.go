@@ -18,9 +18,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"goki.dev/goki/clip"
-	"goki.dev/goki/cursor"
-	"goki.dev/goki/goosi"
+	"goki.dev/clip"
+	"goki.dev/cursor"
+	"goki.dev/goosi"
 )
 
 // App contains the data and logic common to all implementations of [goosi.App].

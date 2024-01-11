@@ -12,14 +12,14 @@ import (
 	"log"
 	"log/slog"
 
-	"goki.dev/goki/abilities"
-	"goki.dev/goki/events"
-	"goki.dev/goki/gi"
-	"goki.dev/goki/goosi"
-	"goki.dev/goki/styles"
-	"goki.dev/goki/units"
-	"goki.dev/goki/vgpu"
-	"goki.dev/goki/xyz"
+	"goki.dev/abilities"
+	"goki.dev/events"
+	"goki.dev/gi"
+	"goki.dev/goosi"
+	"goki.dev/styles"
+	"goki.dev/units"
+	"goki.dev/vgpu"
+	"goki.dev/xyz"
 )
 
 // Scene is a gi.Widget that manages a xyz.Scene,

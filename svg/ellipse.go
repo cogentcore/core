@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"goki.dev/goki/mat32"
+	"goki.dev/mat32"
 )
 
 // Ellipse is a SVG ellipse

@@ -11,7 +11,7 @@ import (
 
 // Type represents a type
 type Type struct {
-	// Name is the fully package-path-qualified name of the type (eg: goki.dev/goki/gi.Button)
+	// Name is the fully package-path-qualified name of the type (eg: goki.dev/gi.Button)
 	Name string
 
 	// ShortName is the short, package-qualified name of the type (eg: gi.Button)

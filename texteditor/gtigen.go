@@ -5,18 +5,18 @@ package texteditor
 import (
 	"image"
 
-	"goki.dev/goki/gi"
-	"goki.dev/goki/gti"
-	"goki.dev/goki/ki"
-	"goki.dev/goki/ordmap"
-	"goki.dev/goki/paint"
-	"goki.dev/goki/texteditor/textbuf"
-	"goki.dev/goki/units"
+	"goki.dev/gi"
+	"goki.dev/gti"
+	"goki.dev/ki"
+	"goki.dev/ordmap"
+	"goki.dev/paint"
+	"goki.dev/texteditor/textbuf"
+	"goki.dev/units"
 )
 
 // DiffViewType is the [gti.Type] for [DiffView]
 var DiffViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/texteditor.DiffView",
+	Name:       "goki.dev/texteditor.DiffView",
 	ShortName:  "texteditor.DiffView",
 	IDName:     "diff-view",
 	Doc:        "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).",
@@ -26,24 +26,24 @@ var DiffViewType = gti.AddType(&gti.Type{
 		{"FileB", &gti.Field{Name: "FileB", Type: "string", LocalType: "string", Doc: "second file name being compared", Directives: gti.Directives{}, Tag: ""}},
 		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision for first file, if relevant", Directives: gti.Directives{}, Tag: ""}},
 		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision for second file, if relevant", Directives: gti.Directives{}, Tag: ""}},
-		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/goki/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/goki/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"AlignD", &gti.Field{Name: "AlignD", Type: "goki.dev/goki/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "aligned diffs records diff for aligned lines", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Diffs", &gti.Field{Name: "Diffs", Type: "goki.dev/goki/texteditor/textbuf.DiffSelected", LocalType: "textbuf.DiffSelected", Doc: "Diffs applied", Directives: gti.Directives{}, Tag: ""}},
+		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B showing the aligned edit view", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"AlignD", &gti.Field{Name: "AlignD", Type: "goki.dev/texteditor/textbuf.Diffs", LocalType: "textbuf.Diffs", Doc: "aligned diffs records diff for aligned lines", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Diffs", &gti.Field{Name: "Diffs", Type: "goki.dev/texteditor/textbuf.DiffSelected", LocalType: "textbuf.DiffSelected", Doc: "Diffs applied", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/goki/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"SaveFileA", &gti.Method{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"fname", &gti.Field{Name: "fname", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"fname", &gti.Field{Name: "fname", Type: "goki.dev/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"SaveFileB", &gti.Method{Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"fname", &gti.Field{Name: "fname", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"fname", &gti.Field{Name: "fname", Type: "goki.dev/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 	Instance: &DiffView{},
@@ -122,14 +122,14 @@ func (t *DiffView) SetStripes(v gi.Stripes) *DiffView {
 
 // DiffTextEditorType is the [gti.Type] for [DiffTextEditor]
 var DiffTextEditorType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/texteditor.DiffTextEditor",
+	Name:       "goki.dev/texteditor.DiffTextEditor",
 	ShortName:  "texteditor.DiffTextEditor",
 	IDName:     "diff-text-editor",
 	Doc:        "DiffTextEditor supports double-click based application of edits from one\nbuffer to the other.",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/goki/texteditor.Editor", LocalType: "Editor", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Editor", &gti.Field{Name: "Editor", Type: "goki.dev/texteditor.Editor", LocalType: "Editor", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &DiffTextEditor{},
@@ -209,7 +209,7 @@ func (t *DiffTextEditor) SetLinkHandler(v func(tl *paint.TextLink)) *DiffTextEdi
 
 // EditorType is the [gti.Type] for [Editor]
 var EditorType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/texteditor.Editor",
+	Name:      "goki.dev/texteditor.Editor",
 	ShortName: "texteditor.Editor",
 	IDName:    "editor",
 	Doc:       "Editor is a widget for editing multiple lines of text (as compared to\n[gi.TextField] for a single line).  The Editor is driven by a [Buf]\nbuffer which contains all the text, and manages all the edits,\nsending update signals out to the views.\n\nUse SetNeedsRender to drive an render update for any change that does\nnot change the line-level layout of the text.\nUse SetNeedsLayout whenever there are changes across lines that require\nre-layout of the text.  This sets the Widget NeedsRender flag and triggers\nlayout during that render.\n\nMultiple views can be attached to a given buffer.  All updating in the\nEditor should be within a single goroutine, as it would require\nextensive protections throughout code otherwise.",
@@ -217,50 +217,50 @@ var EditorType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/goki/texteditor.Buf", LocalType: "*Buf", Doc: "the text buffer that we're editing", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/texteditor.Buf", LocalType: "*Buf", Doc: "the text buffer that we're editing", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"placeholder\""}},
-		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "goki.dev/goki/units.Value", LocalType: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}, Tag: "xml:\"cursor-width\""}},
+		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "goki.dev/units.Value", LocalType: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}, Tag: "xml:\"cursor-width\""}},
 		{"LineNumberColor", &gti.Field{Name: "LineNumberColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the user text selection background color; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"HighlightColor", &gti.Field{Name: "HighlightColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "image.Image", LocalType: "image.Image", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"NLines", &gti.Field{Name: "NLines", Type: "int", LocalType: "int", Doc: "number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"Renders", &gti.Field{Name: "Renders", Type: "[]goki.dev/goki/paint.Text", LocalType: "[]paint.Text", Doc: "renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
+		{"Renders", &gti.Field{Name: "Renders", Type: "[]goki.dev/paint.Text", LocalType: "[]paint.Text", Doc: "renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
 		{"Offs", &gti.Field{Name: "Offs", Type: "[]float32", LocalType: "[]float32", Doc: "starting render offsets for top of each line", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"LineNoDigs", &gti.Field{Name: "LineNoDigs", Type: "int", LocalType: "int", Doc: "number of line number digits needed", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"LineNoOff", &gti.Field{Name: "LineNoOff", Type: "float32", LocalType: "float32", Doc: "horizontal offset for start of text after line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"LineNoRender", &gti.Field{Name: "LineNoRender", Type: "goki.dev/goki/paint.Text", LocalType: "paint.Text", Doc: "render for line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "goki.dev/goki/pi/lex.Pos", LocalType: "lex.Pos", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"CursorTarg", &gti.Field{Name: "CursorTarg", Type: "goki.dev/goki/pi/lex.Pos", LocalType: "lex.Pos", Doc: "target cursor position for externally-set targets: ensures that it is visible", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LineNoRender", &gti.Field{Name: "LineNoRender", Type: "goki.dev/paint.Text", LocalType: "paint.Text", Doc: "render for line numbers", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "goki.dev/pi/lex.Pos", LocalType: "lex.Pos", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"CursorTarg", &gti.Field{Name: "CursorTarg", Type: "goki.dev/pi/lex.Pos", LocalType: "lex.Pos", Doc: "target cursor position for externally-set targets: ensures that it is visible", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorCol", &gti.Field{Name: "CursorCol", Type: "int", LocalType: "int", Doc: "desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"PosHistIdx", &gti.Field{Name: "PosHistIdx", Type: "int", LocalType: "int", Doc: "current index within PosHistory", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "goki.dev/goki/pi/lex.Pos", LocalType: "lex.Pos", Doc: "starting point for selection -- will either be the start or end of selected region depending on subsequent selection.", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectReg", &gti.Field{Name: "SelectReg", Type: "goki.dev/goki/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "current selection region", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"PrevSelectReg", &gti.Field{Name: "PrevSelectReg", Type: "goki.dev/goki/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "previous selection region, that was actually rendered -- needed to update render", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"Highlights", &gti.Field{Name: "Highlights", Type: "[]goki.dev/goki/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, e.g., for search results", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"Scopelights", &gti.Field{Name: "Scopelights", Type: "[]goki.dev/goki/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, specific to scope markers", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "goki.dev/pi/lex.Pos", LocalType: "lex.Pos", Doc: "starting point for selection -- will either be the start or end of selected region depending on subsequent selection.", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectReg", &gti.Field{Name: "SelectReg", Type: "goki.dev/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "current selection region", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"PrevSelectReg", &gti.Field{Name: "PrevSelectReg", Type: "goki.dev/texteditor/textbuf.Region", LocalType: "textbuf.Region", Doc: "previous selection region, that was actually rendered -- needed to update render", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"Highlights", &gti.Field{Name: "Highlights", Type: "[]goki.dev/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, e.g., for search results", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"Scopelights", &gti.Field{Name: "Scopelights", Type: "[]goki.dev/texteditor/textbuf.Region", LocalType: "[]textbuf.Region", Doc: "highlighted regions, specific to scope markers", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", LocalType: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"ForceComplete", &gti.Field{Name: "ForceComplete", Type: "bool", LocalType: "bool", Doc: "if true, complete regardless of any disqualifying reasons", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"ISearch", &gti.Field{Name: "ISearch", Type: "goki.dev/goki/texteditor.ISearch", LocalType: "ISearch", Doc: "interactive search data", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"QReplace", &gti.Field{Name: "QReplace", Type: "goki.dev/goki/texteditor.QReplace", LocalType: "QReplace", Doc: "query replace data", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"ISearch", &gti.Field{Name: "ISearch", Type: "goki.dev/texteditor.ISearch", LocalType: "ISearch", Doc: "interactive search data", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"QReplace", &gti.Field{Name: "QReplace", Type: "goki.dev/texteditor.QReplace", LocalType: "QReplace", Doc: "query replace data", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"LineHeight", &gti.Field{Name: "LineHeight", Type: "float32", LocalType: "float32", Doc: "line height, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"FontAscent", &gti.Field{Name: "FontAscent", Type: "float32", LocalType: "float32", Doc: "font ascent, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"FontDescent", &gti.Field{Name: "FontDescent", Type: "float32", LocalType: "float32", Doc: "font descent, cached during styling", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"NLinesChars", &gti.Field{Name: "NLinesChars", Type: "image.Point", LocalType: "image.Point", Doc: "height in lines and width in chars of the visible area", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"LinesSize", &gti.Field{Name: "LinesSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "total size of all lines as rendered", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"TotalSize", &gti.Field{Name: "TotalSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "TotalSize = LinesSize plus extra space and line numbers etc", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"LineLayoutSize", &gti.Field{Name: "LineLayoutSize", Type: "goki.dev/goki/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "LineLayoutSize is Geom.Size.Actual.Total subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LinesSize", &gti.Field{Name: "LinesSize", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "total size of all lines as rendered", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"TotalSize", &gti.Field{Name: "TotalSize", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "TotalSize = LinesSize plus extra space and line numbers etc", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
+		{"LineLayoutSize", &gti.Field{Name: "LineLayoutSize", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "LineLayoutSize is Geom.Size.Actual.Total subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
 		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting cursor rendering -- shared between blink and main code", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
 		{"HasLinks", &gti.Field{Name: "HasLinks", Type: "bool", LocalType: "bool", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements", Directives: gti.Directives{}, Tag: "set:\"-\" edit:\"-\" json:\"-\" xml:\"-\""}},
-		{"LinkHandler", &gti.Field{Name: "LinkHandler", Type: "func(tl *goki.dev/goki/paint.TextLink)", LocalType: "func(tl *paint.TextLink)", Doc: "handles link clicks -- if nil, they are sent to the standard web URL handler", Directives: gti.Directives{}, Tag: ""}},
+		{"LinkHandler", &gti.Field{Name: "LinkHandler", Type: "func(tl *goki.dev/paint.TextLink)", LocalType: "func(tl *paint.TextLink)", Doc: "handles link clicks -- if nil, they are sent to the standard web URL handler", Directives: gti.Directives{}, Tag: ""}},
 		{"lastRecenter", &gti.Field{Name: "lastRecenter", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"lastAutoInsert", &gti.Field{Name: "lastAutoInsert", Type: "rune", LocalType: "rune", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"lastFilename", &gti.Field{Name: "lastFilename", Type: "goki.dev/goki/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"lastFilename", &gti.Field{Name: "lastFilename", Type: "goki.dev/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/goki/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Lookup", &gti.Method{Name: "Lookup", Doc: "Lookup attempts to lookup symbol at current location, popping up a window\nif something is found", Directives: gti.Directives{
@@ -373,17 +373,17 @@ func (t *Editor) SetStackTop(v int) *Editor {
 
 // TwinEditorsType is the [gti.Type] for [TwinEditors]
 var TwinEditorsType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/goki/texteditor.TwinEditors",
+	Name:       "goki.dev/texteditor.TwinEditors",
 	ShortName:  "texteditor.TwinEditors",
 	IDName:     "twin-editors",
 	Doc:        "TwinEditors presents two side-by-side [Editor]s in [gi.Splits]\nthat scroll in sync with each other.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/goki/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/goki/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"BufA", &gti.Field{Name: "BufA", Type: "*goki.dev/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"BufB", &gti.Field{Name: "BufB", Type: "*goki.dev/texteditor.Buf", LocalType: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Splits", &gti.Field{Name: "Splits", Type: "goki.dev/goki/gi.Splits", LocalType: "gi.Splits", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Splits", &gti.Field{Name: "Splits", Type: "goki.dev/gi.Splits", LocalType: "gi.Splits", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TwinEditors{},
