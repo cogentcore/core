@@ -52,14 +52,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	goki.dev/enums v0.9.56 // indirect
-	goki.dev/glop v0.1.9 // indirect
-	goki.dev/grows v0.3.31 // indirect
-	goki.dev/grr v0.0.12 // indirect
-	goki.dev/gti v0.1.32 // indirect
-	goki.dev/laser v0.1.34 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.28 // indirect
-	goki.dev/ordmap v0.5.10 // indirect
 	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
 	golang.org/x/mobile v0.0.0-20210208171126-f462b3930c8f // indirect
 	golang.org/x/text v0.14.0 // indirect
