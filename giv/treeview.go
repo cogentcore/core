@@ -761,6 +761,9 @@ func (tv *TreeView) UnselectAll() {
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		vt := v.AsTreeView()
+		if vt == nil || vt.This() == nil || vt.Is(ki.Deleted) {
+			continue
+		}
 		vt.SetSelected(false)
 		v.ApplyStyle()
 		vt.SetNeedsRender(true)
