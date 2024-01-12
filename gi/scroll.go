@@ -126,7 +126,7 @@ func (ly *Layout) SetScrollParams(d mat32.Dims, sb *Slider) {
 // PositionScrolls arranges scrollbars
 func (ly *Layout) PositionScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.HasScroll[d] {
+		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 			ly.PositionScroll(d)
 		}
 	}
@@ -134,9 +134,6 @@ func (ly *Layout) PositionScrolls() {
 
 func (ly *Layout) PositionScroll(d mat32.Dims) {
 	sb := ly.Scrolls[d]
-	if sb == nil {
-		return
-	}
 	pos, ssz := ly.This().(Layouter).ScrollGeom(d)
 	maxSize, _, visPct := ly.This().(Layouter).ScrollValues(d)
 	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == visPct {
@@ -168,7 +165,7 @@ func (ly *Layout) PositionScroll(d mat32.Dims) {
 // RenderScrolls draws the scrollbars
 func (ly *Layout) RenderScrolls() {
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.HasScroll[d] {
+		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 			ly.Scrolls[d].Render()
 		}
 	}
@@ -184,7 +181,7 @@ func (ly *Layout) SetScrollsOff() {
 // ScrollActionDelta moves the scrollbar in given dimension by given delta
 // and emits a ScrollSig signal.
 func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
-	if ly.HasScroll[d] {
+	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		nval := sb.Value + sb.ScrollScale(delta)
 		sb.SetValueAction(nval)
@@ -195,7 +192,7 @@ func (ly *Layout) ScrollActionDelta(d mat32.Dims, delta float32) {
 // ScrollActionPos moves the scrollbar in given dimension to given
 // position and emits a ScrollSig signal.
 func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
-	if ly.HasScroll[d] {
+	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
 		ly.SetNeedsRender(true)
@@ -205,7 +202,7 @@ func (ly *Layout) ScrollActionPos(d mat32.Dims, pos float32) {
 // ScrollToPos moves the scrollbar in given dimension to given
 // position and DOES NOT emit a ScrollSig signal.
 func (ly *Layout) ScrollToPos(d mat32.Dims, pos float32) {
-	if ly.HasScroll[d] {
+	if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 		sb := ly.Scrolls[d]
 		sb.SetValueAction(pos)
 		ly.SetNeedsRender(true)
@@ -223,35 +220,25 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
-			// e.SetHandled()
 			return
 		}
 		ly.ScrollActionDelta(mat32.X, fdel.Y)
-		// e.SetHandled()
 		return
 	}
 
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
-		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, fdel.Y)
 		ly.ScrollActionDelta(mat32.X, fdel.X)
-		// e.SetHandled()
 	} else if ly.HasScroll[mat32.Y] {
-		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, fdel.Y)
 		if se.Delta.X != 0 {
 			se.Delta.Y = 0
-		} else {
-			// e.SetHandled()
 		}
 	} else if ly.HasScroll[mat32.X] {
-		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
 		if se.Delta.X != 0 {
 			ly.ScrollActionDelta(mat32.X, fdel.X)
 			if se.Delta.Y != 0 {
 				se.Delta.X = 0
-			} else {
-				// e.SetHandled()
 			}
 		}
 	}
