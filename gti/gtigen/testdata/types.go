@@ -19,11 +19,9 @@ type Person struct { //goki:embedder
 	color.RGBA
 
 	// Name is the name of the person
-	//gi:toolbar -hide
-	Name string //goki:setter
+	Name string
 
 	// Age is the age of the person
-	//gi:view inline
 	Age int `json:"-"`
 
 	// Type is the type of the person

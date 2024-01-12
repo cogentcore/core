@@ -95,5 +95,4 @@ func TestPerson(t *testing.T) {
 	if have.Methods.Len() != 1 {
 		t.Errorf("expected 1 method, but got %d", have.Methods.Len())
 	}
-
 }

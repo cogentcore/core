@@ -18,25 +18,20 @@ var PersonType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-hide"}},
-			&gti.Directive{Tool: "goki", Directive: "setter", Args: []string{}},
-		}, Tag: ""}},
-		{"Age", &gti.Field{Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
-		}, Tag: "json:\"-\""}},
-		{"Type", &gti.Field{Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person", Directives: gti.Directives{}, Tag: ""}},
-		{"Nicknames", &gti.Field{Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person", Directives: gti.Directives{}, Tag: ""}},
+		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person"}},
+		{"Age", &gti.Field{Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person"}},
+		{"Type", &gti.Field{Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person"}},
+		{"Nicknames", &gti.Field{Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person"}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"RGBA", &gti.Field{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"RGBA", &gti.Field{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Introduction", &gti.Method{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: ""}},
 		})}},
 	}),
 	Instance: &Person{},
@@ -103,7 +98,7 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "Alert prints an alert with the given message",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"msg", &gti.Field{Name: "msg", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"msg", &gti.Field{Name: "msg", Type: "string", LocalType: "string", Doc: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })
@@ -113,8 +108,8 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"x", &gti.Field{Name: "x", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"y", &gti.Field{Name: "y", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"x", &gti.Field{Name: "x", Type: "float32", LocalType: "float32", Doc: ""}},
+		{"y", &gti.Field{Name: "y", Type: "float32", LocalType: "float32", Doc: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })
@@ -124,9 +119,9 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"y", &gti.Field{Name: "y", Type: "struct{}", LocalType: "struct{}", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"z", &gti.Field{Name: "z", Type: "struct{}", LocalType: "struct{}", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: ""}},
+		{"y", &gti.Field{Name: "y", Type: "struct{}", LocalType: "struct{}", Doc: ""}},
+		{"z", &gti.Field{Name: "z", Type: "struct{}", LocalType: "struct{}", Doc: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })
@@ -136,9 +131,9 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"y", &gti.Field{Name: "y", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"z", &gti.Field{Name: "z", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: ""}},
+		{"y", &gti.Field{Name: "y", Type: "int", LocalType: "int", Doc: ""}},
+		{"z", &gti.Field{Name: "z", Type: "int", LocalType: "int", Doc: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })
@@ -148,10 +143,10 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"y", &gti.Field{Name: "y", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"z", &gti.Field{Name: "z", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"w", &gti.Field{Name: "w", Type: "float32", LocalType: "float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"x", &gti.Field{Name: "x", Type: "int", LocalType: "int", Doc: ""}},
+		{"y", &gti.Field{Name: "y", Type: "bool", LocalType: "bool", Doc: ""}},
+		{"z", &gti.Field{Name: "z", Type: "bool", LocalType: "bool", Doc: ""}},
+		{"w", &gti.Field{Name: "w", Type: "float32", LocalType: "float32", Doc: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })
@@ -161,10 +156,10 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"x", &gti.Field{Name: "x", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"y", &gti.Field{Name: "y", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"z", &gti.Field{Name: "z", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"w", &gti.Field{Name: "w", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"x", &gti.Field{Name: "x", Type: "string", LocalType: "string", Doc: ""}},
+		{"y", &gti.Field{Name: "y", Type: "string", LocalType: "string", Doc: ""}},
+		{"z", &gti.Field{Name: "z", Type: "string", LocalType: "string", Doc: ""}},
+		{"w", &gti.Field{Name: "w", Type: "bool", LocalType: "bool", Doc: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })
