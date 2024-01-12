@@ -34,7 +34,7 @@ import (
 // OS-specific methods
 
 func (a *App) Platform() goosi.Platforms {
-	return goosi.LinuxX11
+	return goosi.Linux
 }
 
 func (a *App) OpenURL(url string) {
