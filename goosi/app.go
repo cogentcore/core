@@ -12,7 +12,6 @@ package goosi
 //go:generate goki generate
 
 import (
-	"goki.dev/clip"
 	"goki.dev/cursor"
 )
 
@@ -77,10 +76,10 @@ type App interface {
 	// It does not actually close it; see [Window.Close] for that.
 	RemoveWindow(win Window)
 
-	// Clipboard returns the clip.Board handler for the system,
+	// Clipboard returns the [Clipboard] handler for the system,
 	// in context of given window, which is optional (can be nil)
 	// but can provide useful context on some systems.
-	Clipboard(win Window) clip.Board
+	Clipboard(win Window) Clipboard
 
 	// Cursor returns the cursor.Cursor handler for the system, in context of given window.
 	Cursor(win Window) cursor.Cursor

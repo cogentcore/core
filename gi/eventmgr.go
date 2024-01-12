@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"goki.dev/abilities"
-	"goki.dev/clip"
 	"goki.dev/cursors"
 	"goki.dev/events"
 	"goki.dev/events/key"
@@ -724,9 +723,9 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 // 	// em.HandleEvent(&ke)
 // }
 
-// Clipboard returns the goosi clip.Board, supplying the window context
+// Clipboard returns the goosi goosi.Clipboard, supplying the window context
 // if available.
-func (em *EventMgr) Clipboard() clip.Board {
+func (em *EventMgr) Clipboard() goosi.Clipboard {
 	var gwin goosi.Window
 	if win := em.RenderWin(); win != nil {
 		gwin = win.GoosiWin

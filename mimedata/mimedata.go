@@ -149,7 +149,7 @@ func (mi Mimes) Text(typ string) string {
 }
 
 // ToMultipart produces a MIME multipart representation of multiple data
-// elements present in the stream -- this should be used in clip.Board
+// elements present in the stream -- this should be used in goosi.Clipboard
 // whenever there are multiple elements to be pasted, because windows doesn't
 // support multiple clip elements, and linux isn't very convenient either
 func (mi Mimes) ToMultipart() []byte {

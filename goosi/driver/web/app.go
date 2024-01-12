@@ -17,7 +17,6 @@ import (
 	"strings"
 	"syscall/js"
 
-	"goki.dev/clip"
 	"goki.dev/cursor"
 	"goki.dev/events"
 	"goki.dev/events/key"
@@ -147,7 +146,7 @@ func (a *App) OpenURL(url string) {
 	js.Global().Call("open", url)
 }
 
-func (a *App) Clipboard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	return TheClip
 }
 

@@ -48,7 +48,7 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// Cut copies to clip.Board and deletes selected items
+// Cut copies to goosi.Clipboard and deletes selected items
 func (fn *Node) Cut() {
 	if fn.IsRoot("Cut") {
 		return

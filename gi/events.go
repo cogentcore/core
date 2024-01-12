@@ -10,9 +10,9 @@ import (
 	"log/slog"
 
 	"goki.dev/abilities"
-	"goki.dev/clip"
 	"goki.dev/events"
 	"goki.dev/events/key"
+	"goki.dev/goosi"
 	"goki.dev/keyfun"
 	"goki.dev/ki"
 	"goki.dev/states"
@@ -24,7 +24,7 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
-func (wb *WidgetBase) Clipboard() clip.Board {
+func (wb *WidgetBase) Clipboard() goosi.Clipboard {
 	return wb.EventMgr().Clipboard()
 }
 
