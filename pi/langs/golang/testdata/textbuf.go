@@ -7,6 +7,7 @@ package giv
 import (
 	"bytes"
 	"fmt"
+	"goki.dev/difflib"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki/kit"
-	"github.com/pmezard/go-difflib/difflib"
 	"goki.dev/glop/indent"
 	"goki.dev/ki"
 	"goki.dev/ki/nptime"
