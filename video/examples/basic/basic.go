@@ -4,6 +4,8 @@
 
 package main
 
+/*
+
 import (
 	"goki.dev/gi"
 	"goki.dev/grr"
@@ -18,3 +20,5 @@ func main() {
 	grr.Log(v.Play(0, 0))
 	w.Wait()
 }
+
+*/

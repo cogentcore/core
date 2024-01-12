@@ -2,9 +2,10 @@
 
 package video
 
+/*
+
 import (
 	"github.com/zergon321/reisen"
-	"goki.dev/gi"
 	"goki.dev/gti"
 	"goki.dev/ki"
 	"goki.dev/ordmap"
@@ -58,14 +59,4 @@ func (t *Video) SetTooltip(v string) *Video {
 	return t
 }
 
-// SetClass sets the [Video.Class]
-func (t *Video) SetClass(v string) *Video {
-	t.Class = v
-	return t
-}
-
-// SetCustomContextMenu sets the [Video.CustomContextMenu]
-func (t *Video) SetCustomContextMenu(v func(m *gi.Scene)) *Video {
-	t.CustomContextMenu = v
-	return t
-}
+*/

@@ -12,7 +12,6 @@ require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/chewxy/math32 v1.10.1
 	github.com/expr-lang/expr v1.15.7
-	github.com/faiface/beep v1.1.0
 	github.com/fatih/camelcase v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gabriel-vasile/mimetype v1.4.3
@@ -28,8 +27,6 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/pkg/errors v0.9.1
 	github.com/robert-nix/ansihtml v1.0.1
-	github.com/zergon321/reisen v0.1.9
-	goki.dev/vgpu/v2 v2.0.0-dev0.0.30
 	golang.org/x/image v0.14.0
 	golang.org/x/mod v0.14.0
 	golang.org/x/net v0.19.0
@@ -45,14 +42,10 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect
 	github.com/hack-pad/safejs v0.1.1 // indirect
-	github.com/hajimehoshi/oto v0.7.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	goki.dev/mat32/v2 v2.0.0-dev0.0.28 // indirect
-	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
-	golang.org/x/mobile v0.0.0-20210208171126-f462b3930c8f // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
