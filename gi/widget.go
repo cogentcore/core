@@ -280,6 +280,7 @@ type WidgetBase struct {
 	// functions are called in reverse order such that the elements
 	// added in the last function are the first in the menu.
 	// Context menus should be added through [Widget.AddContextMenu].
+	// Separators will be added between each context menu function.
 	ContextMenus []func(m *Scene) `json:"-" xml:"-" set:"-"`
 
 	// Sc is the overall Scene to which we belong. It is automatically

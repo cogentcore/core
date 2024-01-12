@@ -110,17 +110,21 @@ func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
 
 // AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
 // It is the main way that code should modify a widget's context menus.
-// Context menu functions are run in reverse order.
+// Context menu functions are run in reverse order, and separators are
+// automatically added between each context menu function.
 func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) *WidgetBase {
 	wb.ContextMenus = append(wb.ContextMenus, menu)
 	return wb
 }
 
 // ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
-// in reverse order.
+// in reverse order. It also adds separators between each context menu function.
 func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
 	for i := len(wb.ContextMenus) - 1; i >= 0; i-- {
 		wb.ContextMenus[i](m)
+		if i != 0 {
+			NewSeparator(m)
+		}
 	}
 }
 
