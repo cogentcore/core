@@ -25,7 +25,7 @@ func OSOpenCommand() string {
 	switch goosi.TheApp.Platform() {
 	case goosi.MacOS:
 		return "open"
-	case goosi.LinuxX11:
+	case goosi.Linux:
 		return "xdg-open"
 	case goosi.Windows:
 		return "start"
