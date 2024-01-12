@@ -585,8 +585,13 @@ func (tb *Tab) SetStyles() {
 			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
+				s.Min.X.Dp(18)
+				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
+				if tb.Text != "" {
+					s.Margin.Right.Ch(1)
+				}
 			})
 		case "parts/label":
 			label := w.(*Label)
