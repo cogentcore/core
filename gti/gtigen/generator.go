@@ -473,7 +473,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, has
 				return nil, false, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
 			}
 		}
-		dirs = append(dirs, dir)
+		dirs = append(dirs, *dir)
 	}
 	return dirs, hasAdd, hasSkip, nil
 }

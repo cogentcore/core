@@ -13,7 +13,7 @@ var _ = gti.AddType(&gti.Type{
 	IDName:    "config",
 	Doc:       "Config contains the configuration information\nused by gtigen",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "the source directory to run gtigen on (can be set to multiple through paths like ./...)"}},
@@ -35,8 +35,8 @@ var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/gti/gtigen.Generate",
 	Doc:  "Generate generates gti type info, using the\nconfiguration information, loading the packages from the\nconfiguration source directory, and writing the result\nto the configuration output file.\n\nIt is a simple entry point to gtigen that does all\nof the steps; for more specific functionality, create\na new [Generator] with [NewGenerator] and call methods on it.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
+		gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"cfg", &gti.Field{Name: "cfg", Type: "*goki.dev/gti/gtigen.Config", LocalType: "*Config", Doc: ""}},

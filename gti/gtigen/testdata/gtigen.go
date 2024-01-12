@@ -14,8 +14,8 @@ var PersonType = gti.AddType(&gti.Type{
 	IDName:    "person",
 	Doc:       "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}},
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+		{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}},
+		{Tool: "goki", Directive: "embedder"},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person"}},
@@ -28,8 +28,8 @@ var PersonType = gti.AddType(&gti.Type{
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Introduction", &gti.Method{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+			{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
+			{Tool: "gti", Directive: "add"},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: ""}},
 		})}},
