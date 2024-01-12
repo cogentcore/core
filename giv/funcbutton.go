@@ -15,6 +15,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/events"
 	"goki.dev/gi"
+	"goki.dev/glop/dirs"
 	"goki.dev/glop/sentence"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -229,7 +230,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	// we default to the icon with the same name as
 	// the function, if it exists
 	ic := icons.Icon(strcase.ToSnake(snm))
-	if ic.IsValid() {
+	if ok, err := dirs.FileExistsFS(icons.Icons, ic.Filename()); err != nil && ok {
 		fb.SetIcon(ic)
 	}
 	fb.OnClick(func(e events.Event) {
