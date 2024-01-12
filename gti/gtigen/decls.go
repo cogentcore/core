@@ -10,7 +10,6 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
-	"goki.dev/ordmap"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.
@@ -49,16 +48,16 @@ var FuncTmpl = template.Must(template.New("Func").Parse(
 var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	Funcs(template.FuncMap{
 		"SetterFields": SetterFields,
-		"SetterName":   SetterName,
+		"ToCamel":      strcase.ToCamel,
 		"SetterType":   SetterType,
 		"DocToComment": DocToComment,
 	}).Parse(
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
-	// Set{{SetterName .}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
+	// Set{{ToCamel .Name}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.Name}}) Set{{SetterName .}}(v {{SetterType .LocalType}}) *{{$typ.Name}} {
+	func (t *{{$typ.Name}}) Set{{ToCamel .Name}}(v {{SetterType .LocalType}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
 		return t
 	}
@@ -69,11 +68,11 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 // that don't have a `set:"-"` struct tag.
 func SetterFields(typ *Type) []*gti.Field {
 	res := []*gti.Field{}
-	do := func(fields *ordmap.Map[string, *gti.Field]) {
+	do := func(fields *Fields) {
 		for _, kv := range fields.Order {
 			f := kv.Val
 			// unspecified indicates to add a set method; only "-" means no set
-			hasSetter := f.Tag.Get("set") != "-"
+			hasSetter := fields.Tags.ValByKey(kv.Key).Get("set") != "-"
 			if hasSetter {
 				res = append(res, f)
 			}
@@ -82,17 +81,6 @@ func SetterFields(typ *Type) []*gti.Field {
 	do(typ.Fields)
 	do(typ.EmbeddedFields)
 	return res
-}
-
-// SetterName returns the name that should be used for the setter function
-// for the given field. It first checks the 'set' struct tag and falls back on
-// the name of the field.
-func SetterName(field *gti.Field) string {
-	if tag, ok := field.Tag.Lookup("set"); ok {
-		return tag
-	}
-	// could be lowercase so need to make camel
-	return strcase.ToCamel(field.Name)
 }
 
 // SetterType converts the given local type name to one that can be used

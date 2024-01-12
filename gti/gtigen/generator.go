@@ -209,7 +209,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 			typ.Fields = fields
 
-			typ.EmbeddedFields = &gti.Fields{}
+			typ.EmbeddedFields = &Fields{}
 			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
 			g.GetEmbeddedFields(typ.EmbeddedFields, tp, tp)
 		}
@@ -236,7 +236,7 @@ func LocalTypeNameQualifier(pkg *types.Package) types.Qualifier {
 // GetEmbeddedFields recursively adds to the given set of embedded fields all of the embedded
 // fields for the given type. It does not add the fields in the given starting type,
 // as those fields aren't embedded.
-func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ, startTyp types.Type) {
+func (g *Generator) GetEmbeddedFields(efields *Fields, typ, startTyp types.Type) {
 	s, ok := typ.Underlying().(*types.Struct)
 	if !ok {
 		return
@@ -256,9 +256,9 @@ func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ, startTyp types.T
 			Name:      f.Name(),
 			Type:      f.Type().String(),
 			LocalType: types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types)),
-			Tag:       reflect.StructTag(s.Tag(i)),
 		}
 		efields.Add(field.Name, field)
+		efields.Tags.Add(field.Name, reflect.StructTag(s.Tag(i)))
 	}
 }
 
@@ -286,12 +286,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting function args: %w", err)
 		}
-		fun.Args = args
+		fun.Args = &args.Fields
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting function return values: %w", err)
 		}
-		fun.Returns = rets
+		fun.Returns = &rets.Fields
 		g.Funcs.Add(fun.Name, fun)
 	} else {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
@@ -306,12 +306,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting method args: %w", err)
 		}
-		method.Args = args
+		method.Args = &args.Fields
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting method return values: %w", err)
 		}
-		method.Returns = rets
+		method.Returns = &rets.Fields
 
 		typ := fd.Recv.List[0].Type
 		// get rid of any pointer receiver
@@ -338,8 +338,8 @@ func FullName(pkg *packages.Package, name string) string {
 // given surrounding config. If the given field list is
 // nil, GetFields still returns an empty but valid
 // [gti.Fields] value and no error.
-func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
-	res := &gti.Fields{}
+func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*Fields, error) {
+	res := &Fields{}
 	if list == nil {
 		return res, nil
 	}
@@ -381,34 +381,24 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 				if err != nil {
 					return nil, err
 				}
-				res.Copy(nfields)
+				res.Copy(&nfields.Fields)
 			}
 			continue
 		}
-		dirs := gti.Directives{}
-		if field.Doc != nil {
-			lcfg := &Config{}
-			*lcfg = *cfg
-			sdirs, _, _, err := LoadFromComments(lcfg, field.Doc, field.Comment)
-			if err != nil {
-				return nil, err
-			}
-			dirs = sdirs
+		fo := &gti.Field{
+			Name:      name,
+			Type:      tn,
+			LocalType: ltn,
+			Doc:       strings.TrimSuffix(field.Doc.Text(), "\n"),
 		}
+		res.Add(name, fo)
+
 		tag := reflect.StructTag("")
 		if field.Tag != nil {
 			// need to get rid of leading and trailing backquotes
 			tag = reflect.StructTag(strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`"))
 		}
-		fo := &gti.Field{
-			Name:       name,
-			Type:       tn,
-			LocalType:  ltn,
-			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
-			Directives: dirs,
-			Tag:        tag,
-		}
-		res.Add(name, fo)
+		res.Tags.Add(name, tag)
 	}
 	return res, nil
 }

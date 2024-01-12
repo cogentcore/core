@@ -5,8 +5,6 @@
 package gti
 
 import (
-	"reflect"
-
 	"goki.dev/ordmap"
 )
 
@@ -29,13 +27,6 @@ type Field struct {
 	// Doc, if this is a struct field, has all of the comment documentation
 	// info as one string with directives removed.
 	Doc string
-
-	// Directives, if this is a struct field, has the parsed comment directives
-	Directives Directives
-
-	// Tag, if this is a struct field, contains the struct
-	// tag for it.
-	Tag reflect.StructTag
 }
 
 // Fields represents a set of multiple [Field] objects
