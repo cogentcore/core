@@ -182,20 +182,20 @@ func (ts *Tabs) CurTab() (Widget, int, bool) {
 	return w, fr.StackTop, true
 }
 
-// TODO(kai): once subscenes are working, we should make tabs be subscenes
-
 // NewTab adds a new tab with the given label and returns the resulting tab frame.
-// It is the main end-user API for creating new tabs.
-func (ts *Tabs) NewTab(label string) *Frame {
+// It is the main end-user API for creating new tabs. An optional icon can also
+// be passed for the tab button.
+func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 	fr := ts.Frame()
 	idx := len(*fr.Children())
-	frame := ts.InsertNewTab(label, idx)
+	frame := ts.InsertNewTab(label, idx, icon...)
 	return frame
 }
 
 // InsertNewTab inserts a new tab with the given label at the given index position
-// within the list of tabs and returns the resulting tab frame.
-func (ts *Tabs) InsertNewTab(label string, idx int) *Frame {
+// within the list of tabs and returns the resulting tab frame. An optional icon
+// can also be passed for the tab button.
+func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	updt := ts.UpdateStart()
 	defer ts.UpdateEndLayout(updt)
 
@@ -205,7 +205,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int) *Frame {
 	frame.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	ts.InsertTabOnlyAt(frame, label, idx)
+	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.Update()
 	ts.SetNeedsLayout(true)
 	return frame
@@ -220,10 +220,10 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 	return idx
 }
 
-// InsertTabOnlyAt inserts just the tab at given index, after the panel has
+// InsertTabOnlyAt inserts just the tab button at given index, after the panel has
 // already been added to the frame; assumed to be wrapped in update. Generally
-// for internal use only.
-func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
+// for internal use only. An optional icon can also be passed for the tab button.
+func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	tb := ts.Tabs()
 	tb.SetChildAdded()
 	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
@@ -232,6 +232,9 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 	tab.CloseIcon = ts.CloseIcon
 	tab.MaxChars = ts.MaxChars
 	tab.SetText(label)
+	if len(icon) > 0 {
+		tab.SetIcon(icon[0])
+	}
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabByLabel(tab.Nm)
 	})
@@ -245,7 +248,8 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int) {
 }
 
 // InsertTab inserts a frame into given index position within list of tabs.
-func (ts *Tabs) InsertTab(frame *Frame, label string, idx int) {
+// An optional icon can also be passed for the tab button.
+func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	ts.Mu.Lock()
 	updt := ts.UpdateStart()
 	defer ts.UpdateEndLayout(updt)
@@ -253,7 +257,7 @@ func (ts *Tabs) InsertTab(frame *Frame, label string, idx int) {
 	fr := ts.Frame()
 	fr.SetChildAdded()
 	fr.InsertChild(frame, idx)
-	ts.InsertTabOnlyAt(frame, label, idx)
+	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.Mu.Unlock()
 }
 
