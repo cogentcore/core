@@ -19,7 +19,10 @@ func main() {
 	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
 	bt := gi.NewButton(b).SetText("Install {{.Name}}")
 	bt.OnClick(func(e events.Event) {
-		err := os.WriteFile("C:\\Program Files\\{{.Name}}\\{{.Name}}.exe", exe, 0666)
+		dir := "C:\\Program Files\\{{.Name}}"
+		err := os.MkdirAll(dir, 0777)
+		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
+		err = os.WriteFile(dir+"\\{{.Name}}.exe", exe, 0666)
 		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
 	})
 	b.NewWindow().Run().Wait()
