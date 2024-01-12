@@ -134,6 +134,9 @@ func (ly *Layout) PositionScrolls() {
 
 func (ly *Layout) PositionScroll(d mat32.Dims) {
 	sb := ly.Scrolls[d]
+	if sb == nil {
+		return
+	}
 	pos, ssz := ly.This().(Layouter).ScrollGeom(d)
 	maxSize, _, visPct := ly.This().(Layouter).ScrollValues(d)
 	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == visPct {
