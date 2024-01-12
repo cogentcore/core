@@ -356,12 +356,12 @@ func PackWindows(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	defer fman.Close()
 	wmd := &WindowsInstallerData{
 		Name: c.Name,
 		Desc: c.Desc,
 	}
 	err = WindowsInstallerTmpl.Execute(fman, wmd)
+	fman.Close()
 	if err != nil {
 		return err
 	}
