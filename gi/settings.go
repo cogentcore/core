@@ -694,7 +694,7 @@ func (pf *FavPaths) FindPath(path string) (int, bool) {
 var DefaultPaths = FavPaths{
 	{icons.Home, "home", "~"},
 	{icons.DesktopMac, "Desktop", "~/Desktop"},
-	{icons.LabProfile, "Documents", "~/Documents"},
+	{icons.Document, "Documents", "~/Documents"},
 	{icons.Download, "Downloads", "~/Downloads"},
 	{icons.Computer, "root", "/"},
 }
