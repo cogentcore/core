@@ -200,10 +200,11 @@ func (w *Window[A]) Close() {
 	// but platform-specific implementations can
 	w.This.EventMgr().Window(events.WinClose)
 
+	w.WinClose <- struct{}{}
+
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 
-	w.WinClose <- struct{}{}
 	w.CloseClean()
 	w.App.RemoveWindow(w.This)
 }
