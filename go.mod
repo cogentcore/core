@@ -29,7 +29,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robert-nix/ansihtml v1.0.1
 	github.com/zergon321/reisen v0.1.9
-	goki.dev/icons v0.0.17
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.30
 	golang.org/x/image v0.14.0
 	golang.org/x/mod v0.14.0

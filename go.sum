@@ -129,8 +129,6 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/zergon321/reisen v0.1.9 h1:jMMR/8Bup8reC1UOwNnEXd6ZYUZeOyxQLlmgdS1gyUQ=
 github.com/zergon321/reisen v0.1.9/go.mod h1:2qMVJqVTOt0DxXSm6/jN/4erba+Z+2jgjqiagDrAiOQ=
-goki.dev/icons v0.0.17 h1:Tl+udiLB/UdlhdgWxz+DJNM4jbCFJTIIDlaDf330ZOc=
-goki.dev/icons v0.0.17/go.mod h1:4taKJ83iqeTePmFxtPkN0zfBZ7uAUqSPgyqC30smp2U=
 goki.dev/mat32/v2 v2.0.0-dev0.0.28 h1:pRl2AhLX7rxQsAT3RTV4YBuicIUqEWFAWd30gKjTbNU=
 goki.dev/mat32/v2 v2.0.0-dev0.0.28/go.mod h1:bPTyw4IYkM7znzTwXrSg6cK1/8Yhhvq/+FTTzqsZvM4=
 goki.dev/vgpu/v2 v2.0.0-dev0.0.30 h1:iHQRNwRXsB+u0GmEVsDuKhGdjjjHwYWApMlHoFKflGs=
