@@ -366,6 +366,10 @@ func PackWindows(c *config.Config) error {
 		return err
 	}
 
+	err = xe.Run("cp", filepath.Join(".goki", "bin", "windows", c.Name+".exe"), filepath.Join(ipath, "app.exe"))
+	if err != nil {
+		return err
+	}
 	err = xe.Run("cp", filepath.Join(".goki", "icon.svg"), filepath.Join(ipath, "icon.svg"))
 	if err != nil {
 		return err
