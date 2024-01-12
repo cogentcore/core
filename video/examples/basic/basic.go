@@ -4,6 +4,8 @@
 
 package main
 
+func main() {}
+
 /*
 
 import (
