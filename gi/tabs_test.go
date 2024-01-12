@@ -24,9 +24,9 @@ func TestTabs(t *testing.T) {
 			s.Min.Set(units.Dp(800))
 		})
 		ts := NewTabs(sc).SetType(typ)
-		configTab(ts.NewTab("Search"))
-		configTab(ts.NewTab("Discover"))
-		configTab(ts.NewTab("History"))
+		configTab(ts.NewTab("Search", icons.Search))
+		configTab(ts.NewTab("Discover", icons.Explore))
+		configTab(ts.NewTab("History", icons.History))
 		sc.AssertPixelsOnShow(t, testName("tabs", typ))
 	}
 }

@@ -50,10 +50,10 @@ func (w *Window) Handle() any {
 /////////////////////////////////////////////////////////////////
 //   Clipboard
 
-// TheClip is the single [clip.Board] for Windows
+// TheClip is the single [goosi.Clipboard] for Windows
 var TheClip = &Clip{}
 
-// Clip is the [clip.Board] implementation for Windows
+// Clip is the [goosi.Clipboard] implementation for Windows
 type Clip struct{}
 
 func (cl *Clip) IsEmpty() bool {

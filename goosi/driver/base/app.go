@@ -18,7 +18,6 @@ import (
 	"path/filepath"
 	"sync"
 
-	"goki.dev/clip"
 	"goki.dev/cursor"
 	"goki.dev/goosi"
 )
@@ -181,9 +180,9 @@ func (a *App) OpenURL(url string) {
 	// no-op by default
 }
 
-func (a *App) Clipboard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	// no-op by default
-	return &clip.BoardBase{}
+	return &goosi.ClipboardBase{}
 }
 
 func (a *App) Cursor(win goosi.Window) cursor.Cursor {

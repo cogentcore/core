@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"goki.dev/abilities"
-	"goki.dev/clip"
 	"goki.dev/cursors"
 	"goki.dev/events"
 	"goki.dev/events/key"
@@ -230,7 +229,7 @@ func (em *EventMgr) ResetOnMouseDown() {
 }
 
 func (em *EventMgr) HandlePosEvent(e events.Event) {
-	pos := e.LocalPos()
+	pos := e.Pos()
 	et := e.Type()
 	sc := em.Scene
 
@@ -496,7 +495,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 		// fmt.Println("cleared hover")
 	}
 
-	cpos := e.Pos()
+	cpos := e.WindowPos()
 	dst := int(mat32.Hypot(float32(pos.X-cpos.X), float32(pos.Y-cpos.Y)))
 	// fmt.Println("dist:", dst)
 
@@ -556,7 +555,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 	// now we can set it to our new widget
 	*w = deep
 	// fmt.Println("setting new:", deep)
-	*pos = e.Pos()
+	*pos = e.WindowPos()
 	*t = time.AfterFunc(stime, func() {
 		em.TimerMu.Lock()
 		defer em.TimerMu.Unlock()
@@ -616,7 +615,7 @@ func (em *EventMgr) DragStart(w Widget, data any, e events.Event) {
 		return
 	}
 	em.DragData = data
-	sp := NewSprite(DragSpriteName, image.Point{}, e.Pos())
+	sp := NewSprite(DragSpriteName, image.Point{}, e.WindowPos())
 	sp.GrabRenderFrom(w) // todo: show number of items?
 	ImageClearer(sp.Pixels, 50.0)
 	sp.On = true
@@ -634,7 +633,7 @@ func (em *EventMgr) DragMove(e events.Event) {
 		fmt.Println("Drag sprite not found")
 		return
 	}
-	sp.Geom.Pos = e.Pos()
+	sp.Geom.Pos = e.WindowPos()
 	em.Scene.SetNeedsRender(true)
 }
 
@@ -724,9 +723,9 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 // 	// em.HandleEvent(&ke)
 // }
 
-// Clipboard returns the goosi clip.Board, supplying the window context
+// Clipboard returns the goosi goosi.Clipboard, supplying the window context
 // if available.
-func (em *EventMgr) Clipboard() clip.Board {
+func (em *EventMgr) Clipboard() goosi.Clipboard {
 	var gwin goosi.Window
 	if win := em.RenderWin(); win != nil {
 		gwin = win.GoosiWin

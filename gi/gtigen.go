@@ -11,13 +11,13 @@ import (
 	"goki.dev/events/key"
 	"goki.dev/fi/uri"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/ki"
 	"goki.dev/mat32"
 	"goki.dev/ordmap"
 	"goki.dev/pi/complete"
 	"goki.dev/styles"
 	"goki.dev/units"
-	"goki.dev/icons"
 )
 
 var _ = gti.AddType(&gti.Type{
@@ -2081,15 +2081,15 @@ var SpinnerType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "xml:\"value\" set:\"-\""}},
-		{"HasMin", &gti.Field{Name: "HasMin", Type: "bool", LocalType: "bool", Doc: "is there a minimum value to enforce", Directives: gti.Directives{}, Tag: "xml:\"has-min\" set:\"-\""}},
-		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: "xml:\"min\" set:\"-\""}},
-		{"HasMax", &gti.Field{Name: "HasMax", Type: "bool", LocalType: "bool", Doc: "is there a maximumvalue to enforce", Directives: gti.Directives{}, Tag: "xml:\"has-max\" set:\"-\""}},
-		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: "xml:\"max\" set:\"-\""}},
-		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}, Tag: "xml:\"step\""}},
-		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: "xml:\"pagestep\""}},
-		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: ""}},
-		{"Format", &gti.Field{Name: "Format", Type: "string", LocalType: "string", Doc: "prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing", Directives: gti.Directives{}, Tag: "xml:\"format\""}},
+		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "Value is the current value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"HasMin", &gti.Field{Name: "HasMin", Type: "bool", LocalType: "bool", Doc: "HasMin is whether there is a minimum value to enforce", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "If HasMin is true, Min is the the minimum value in range", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"HasMax", &gti.Field{Name: "HasMax", Type: "bool", LocalType: "bool", Doc: "HaxMax is whether there is a maximum value to enforce", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "If HasMax is true, Max is the maximum value in range", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "Step is the smallest step size to increment", Directives: gti.Directives{}, Tag: ""}},
+		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "PageStep is a larger step size used for PageUp and PageDown", Directives: gti.Directives{}, Tag: ""}},
+		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values.", Directives: gti.Directives{}, Tag: ""}},
+		{"Format", &gti.Field{Name: "Format", Type: "string", LocalType: "string", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"TextField", &gti.Field{Name: "TextField", Type: "goki.dev/gi.TextField", LocalType: "TextField", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2139,28 +2139,34 @@ func (t *Spinner) AsSpinner() *Spinner {
 }
 
 // SetStep sets the [Spinner.Step]:
-// smallest step size to increment
+// Step is the smallest step size to increment
 func (t *Spinner) SetStep(v float32) *Spinner {
 	t.Step = v
 	return t
 }
 
 // SetPageStep sets the [Spinner.PageStep]:
-// larger PageUp / Dn step size
+// PageStep is a larger step size used for PageUp and PageDown
 func (t *Spinner) SetPageStep(v float32) *Spinner {
 	t.PageStep = v
 	return t
 }
 
 // SetPrec sets the [Spinner.Prec]:
-// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
+// Prec specifies the precision of decimal places
+// (total, not after the decimal point) to use in
+// representing the number. This helps to truncate
+// small weird floating point values.
 func (t *Spinner) SetPrec(v int) *Spinner {
 	t.Prec = v
 	return t
 }
 
 // SetFormat sets the [Spinner.Format]:
-// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
+// Format is the format string to use for printing the value.
+// If it unset, %g is used. If it is decimal based
+// (ends in d, b, c, o, O, q, x, X, or U) then the value is
+// converted to decimal prior to printing.
 func (t *Spinner) SetFormat(v string) *Spinner {
 	t.Format = v
 	return t
@@ -3299,7 +3305,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for the tooltip for this widget, which can use HTML formatting", Directives: gti.Directives{}, Tag: ""}},
+		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting.", Directives: gti.Directives{}, Tag: ""}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi.Layout", LocalType: "*Layout", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/gi.GeomState", LocalType: "GeomState", Doc: "Geom has the full layout geometry for size and position of this Widget", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "If true, Override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -3310,7 +3316,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"PriorityEvents", &gti.Field{Name: "PriorityEvents", Type: "[]goki.dev/events.Types", LocalType: "[]events.Types", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ContextMenus", &gti.Field{Name: "ContextMenus", Type: "[]func(m *goki.dev/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ContextMenus", &gti.Field{Name: "ContextMenus", Type: "[]func(m *goki.dev/gi.Scene)", LocalType: "[]func(m *Scene)", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi.Scene", LocalType: "*Scene", Doc: "Sc is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent.\nIt is passed to most Config, Layout, and Render functions as\na convenience.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -3345,7 +3351,8 @@ func (t *WidgetBase) New() ki.Ki {
 }
 
 // SetTooltip sets the [WidgetBase.Tooltip]:
-// text for the tooltip for this widget, which can use HTML formatting
+// Tooltip is the text for the tooltip for this widget,
+// which can use HTML formatting.
 func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 	t.Tooltip = v
 	return t

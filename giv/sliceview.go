@@ -1497,7 +1497,7 @@ func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
 	return md
 }
 
-// CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection
+// CopyIdxs copies selected idxs to goosi.Clipboard, optionally resetting the selection
 func (sv *SliceViewBase) CopyIdxs(reset bool) { //gti:add
 	nitms := len(sv.SelIdxs)
 	if nitms == 0 {
@@ -1528,7 +1528,7 @@ func (sv *SliceViewBase) DeleteIdxs() { //gti:add
 	sv.This().(SliceViewer).UpdateWidgets()
 }
 
-// CutIdxs copies selected indexes to clip.Board and deletes selected indexes
+// CutIdxs copies selected indexes to goosi.Clipboard and deletes selected indexes
 func (sv *SliceViewBase) CutIdxs() { //gti:add
 	if len(sv.SelIdxs) == 0 {
 		return
@@ -1679,7 +1679,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 func (sv *SliceViewBase) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	svi := sv.This().(SliceViewer)
-	pos := de.LocalPos()
+	pos := de.Pos()
 	idx, ok := sv.IdxFromPos(pos.Y)
 	if ok {
 		// sv.DraggedIdxs = nil

@@ -32,10 +32,10 @@ func init() {
 
 func OpenImage(fname string) image.Image {
 	file, err := os.Open(fname)
-	defer file.Close()
 	if err != nil {
 		fmt.Printf("image: %s\n", err)
 	}
+	defer file.Close()
 	gimg, _, err := image.Decode(file)
 	if err != nil {
 		fmt.Println(err)
@@ -135,7 +135,7 @@ func main() {
 	nVtx, nIdx = torus.N()
 	ph.AddMesh("torus", nVtx, nIdx, false)
 
-	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0), {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), false)
+	lines := vshape.NewLines([]mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), false)
 	nVtx, nIdx = lines.N()
 	ph.AddMesh("lines", nVtx, nIdx, false)
 
@@ -174,7 +174,7 @@ func main() {
 
 	// This is the standard camera view projection computation
 	campos := mat32.V3(0, 2, 10)
-	view := vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.Vec3Y)
+	view := vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.V3(0, 1, 0))
 
 	aspect := sf.Format.Aspect()
 	var prjn mat32.Mat4
@@ -244,7 +244,7 @@ func main() {
 
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
-		view = vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.Vec3Y)
+		view = vphong.CameraViewMat(campos, mat32.V3(0, 0, 0), mat32.V3(0, 1, 0))
 		prjn.SetVkPerspective(45, aspect, 0.01, 100)
 		ph.SetViewPrjn(view, &prjn)
 	}

@@ -150,7 +150,7 @@ func main() {
 	campos := mat32.V3(0, 0, 2)
 	target := mat32.V3(0, 0, 0)
 	var lookq mat32.Quat
-	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.Vec3Y))
+	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.V3(0, 1, 0)))
 	scale := mat32.V3(1, 1, 1)
 	var cview mat32.Mat4
 	cview.SetTransform(campos, lookq, scale)

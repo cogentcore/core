@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
-	"goki.dev/glop/dirs"
 	"goki.dev/grr"
 )
 
@@ -79,19 +78,15 @@ func (i Icon) IsNil() bool {
 	return i == "" || i == None
 }
 
+// IsValid returns whether the icon name is valid, in which
+// case an icon should be rendered. It is the opposite of [Icon.IsNil].
+func (i Icon) IsValid() bool {
+	return !i.IsNil()
+}
+
 // Filename returns the filename of the icon in [Icons]
 func (i Icon) Filename() string {
 	return string(i) + ".svg"
-}
-
-// IsValid returns whether the icon name corresponds to
-// a valid existing icon.
-func (i Icon) IsValid() bool {
-	if i.IsNil() {
-		return false
-	}
-	ex, _ := dirs.FileExistsFS(Icons, i.Filename())
-	return ex
 }
 
 // AllIcons is a list of all icons

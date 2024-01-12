@@ -1437,11 +1437,11 @@ func (tf *TextField) HandleMouse() {
 		e.SetHandled()
 		switch e.MouseButton() {
 		case events.Left:
-			pt := tf.PointToRelPos(e.LocalPos())
+			pt := tf.PointToRelPos(e.Pos())
 			tf.SetCursorFromPixel(float32(pt.X), e.SelectMode())
 		case events.Middle:
 			e.SetHandled()
-			pt := tf.PointToRelPos(e.LocalPos())
+			pt := tf.PointToRelPos(e.Pos())
 			tf.SetCursorFromPixel(float32(pt.X), e.SelectMode())
 			tf.Paste()
 		}
@@ -1479,7 +1479,7 @@ func (tf *TextField) HandleMouse() {
 		if !tf.SelectMode {
 			tf.SelectModeToggle()
 		}
-		pt := tf.PointToRelPos(e.LocalPos())
+		pt := tf.PointToRelPos(e.Pos())
 		tf.SetCursorFromPixel(float32(pt.X), events.SelectOne)
 	})
 }

@@ -957,7 +957,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
-		{"CopyIdxs", &gti.Method{Name: "CopyIdxs", Doc: "CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection", Directives: gti.Directives{
+		{"CopyIdxs", &gti.Method{Name: "CopyIdxs", Doc: "CopyIdxs copies selected idxs to goosi.Clipboard, optionally resetting the selection", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"reset", &gti.Field{Name: "reset", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -965,7 +965,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"DeleteIdxs", &gti.Method{Name: "DeleteIdxs", Doc: "DeleteIdxs deletes all selected indexes", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"CutIdxs", &gti.Method{Name: "CutIdxs", Doc: "CutIdxs copies selected indexes to clip.Board and deletes selected indexes", Directives: gti.Directives{
+		{"CutIdxs", &gti.Method{Name: "CutIdxs", Doc: "CutIdxs copies selected indexes to goosi.Clipboard and deletes selected indexes", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"PasteIdx", &gti.Method{Name: "PasteIdx", Doc: "PasteIdx pastes clipboard at given idx", Directives: gti.Directives{
@@ -1917,12 +1917,12 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"CloseAll", &gti.Method{Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Copy", &gti.Method{Name: "Copy", Doc: "Copy copies to clip.Board, optionally resetting the selection.", Directives: gti.Directives{
+		{"Copy", &gti.Method{Name: "Copy", Doc: "Copy copies to goosi.Clipboard, optionally resetting the selection.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"reset", &gti.Field{Name: "reset", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Cut", &gti.Method{Name: "Cut", Doc: "Cut copies to clip.Board and deletes selected items.", Directives: gti.Directives{
+		{"Cut", &gti.Method{Name: "Cut", Doc: "Cut copies to goosi.Clipboard and deletes selected items.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"Paste", &gti.Method{Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: gti.Directives{

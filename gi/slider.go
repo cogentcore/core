@@ -331,7 +331,6 @@ func (sr *Slider) SetSliderPos(pos float32) {
 func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
 	if mat32.Abs(sr.PrevSlide-sr.Value) > sr.InputThreshold {
-		// TODO(kai/input): we need this for InputThreshold to work, but it breaks Change events
 		sr.PrevSlide = sr.Value
 		sr.Send(events.Input)
 	}
@@ -393,7 +392,7 @@ func (sr *Slider) WidgetTooltip() string {
 	if res != "" {
 		res += " "
 	}
-	res += fmt.Sprintf("(value: %g, ", sr.Value)
+	res += fmt.Sprintf("(value: %9.4g, ", sr.Value)
 	res += fmt.Sprintf("minimum: %g, ", sr.Min)
 	res += fmt.Sprintf("maximum: %g)", sr.Max)
 	return res
@@ -431,7 +430,7 @@ func (sr *Slider) ScrollScale(del float32) float32 {
 
 func (sr *Slider) HandleMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
-		pos := sr.PointToRelPos(e.LocalPos())
+		pos := sr.PointToRelPos(e.Pos())
 		sr.SetSliderPosAction(pos)
 		sr.SlideStartPos = sr.Pos
 	})
@@ -445,7 +444,7 @@ func (sr *Slider) HandleMouse() {
 		}
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		pos := sr.PointToRelPos(e.LocalPos())
+		pos := sr.PointToRelPos(e.Pos())
 		sr.SetSliderPosAction(pos)
 		sr.SendChanged()
 	})

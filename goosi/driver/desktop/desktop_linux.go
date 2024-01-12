@@ -34,7 +34,7 @@ import (
 // OS-specific methods
 
 func (a *App) Platform() goosi.Platforms {
-	return goosi.LinuxX11
+	return goosi.Linux
 }
 
 func (a *App) OpenURL(url string) {
@@ -58,10 +58,10 @@ func (w *Window) Handle() any {
 /////////////////////////////////////////////////////////////////
 //   Clipboard
 
-// TheClip is the single [clip.Board] for Linux
+// TheClip is the single [goosi.Clipboard] for Linux
 var TheClip = &Clip{}
 
-// Clip is the [clip.Board] implementation for Linux
+// Clip is the [goosi.Clipboard] implementation for Linux
 type Clip struct{}
 
 func (cl *Clip) IsEmpty() bool {

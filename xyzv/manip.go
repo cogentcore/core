@@ -198,7 +198,7 @@ func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
 	sc := sw.Scene
 	pos := sw.Geom.ContentBBox.Min
 	e.SetLocalOff(e.LocalOff().Add(pos))
-	ns := xyz.NodesUnderPoint(sc, e.LocalPos())
+	ns := xyz.NodesUnderPoint(sc, e.Pos())
 	nsel := len(ns)
 	switch {
 	case nsel == 0:

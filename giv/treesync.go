@@ -524,7 +524,7 @@ func (tv *TreeView) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 	tv.SendChangeEventReSync(nil)
 }
 
-// CutSync copies to clip.Board and deletes selected items.
+// CutSync copies to goosi.Clipboard and deletes selected items.
 func (tv *TreeView) CutSync() {
 	tv.Copy(false)
 	sels := tv.SelectedSyncNodes()

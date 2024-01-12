@@ -1,0 +1,29 @@
+package main
+
+import (
+	_ "embed"
+	"os"
+
+	"goki.dev/events"
+	"goki.dev/gi"
+)
+
+//go:embed app.exe
+var exe []byte
+
+//go:embed icon.svg
+var icon []byte
+
+func main() {
+	b := gi.NewAppBody("{{.Name}} Installer")
+	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
+	bt := gi.NewButton(b).SetText("Install {{.Name}}")
+	bt.OnClick(func(e events.Event) {
+		dir := "C:\\Program Files\\{{.Name}}"
+		err := os.MkdirAll(dir, 0777)
+		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
+		err = os.WriteFile(dir+"\\{{.Name}}.exe", exe, 0666)
+		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
+	})
+	b.NewWindow().Run().Wait()
+}

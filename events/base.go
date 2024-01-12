@@ -173,24 +173,24 @@ func (ev Base) HasPos() bool {
 	return false
 }
 
-func (ev Base) Pos() image.Point {
+func (ev Base) WindowPos() image.Point {
 	return ev.Where
 }
 
-func (ev Base) StartPos() image.Point {
+func (ev Base) WindowStartPos() image.Point {
 	return ev.Start
 }
 
-func (ev Base) PrevPos() image.Point {
+func (ev Base) WindowPrevPos() image.Point {
 	return ev.Prev
 }
 
 func (ev Base) StartDelta() image.Point {
-	return ev.Where.Sub(ev.Start)
+	return ev.Pos().Sub(ev.StartPos())
 }
 
 func (ev Base) PrevDelta() image.Point {
-	return ev.Where.Sub(ev.Prev)
+	return ev.Pos().Sub(ev.PrevPos())
 }
 
 func (ev *Base) SetLocalOff(off image.Point) {
@@ -204,15 +204,15 @@ func (ev Base) LocalOff() image.Point {
 	return ev.LocalOffset
 }
 
-func (ev Base) LocalPos() image.Point {
+func (ev Base) Pos() image.Point {
 	return ev.WhereLocal
 }
 
-func (ev Base) LocalStartPos() image.Point {
+func (ev Base) StartPos() image.Point {
 	return ev.StartLocal
 }
 
-func (ev Base) LocalPrevPos() image.Point {
+func (ev Base) PrevPos() image.Point {
 	return ev.PrevLocal
 }
 

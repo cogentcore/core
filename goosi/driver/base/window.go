@@ -85,7 +85,7 @@ func (w *Window[A]) WinLoop() {
 	if w.FPS > 0 {
 		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
 	} else {
-		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
+		winPaint = &time.Ticker{C: make(chan time.Time)} // no-op
 	}
 outer:
 	for {

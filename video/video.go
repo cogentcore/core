@@ -2,8 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package video implements a video player widget in GoGi.
+// Package video implements a video player widget in Goki.
 package video
+
+// TODO(kai): video
+
+/*
+
+//go:generate goki generate
 
 import (
 	"bytes"
@@ -121,17 +127,6 @@ func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan
 		return nil, nil, nil, err
 	}
 
-	/*err = v.Media.Streams()[0].Rewind(60 * time.Second)
-
-	if err != nil {
-		return nil, nil, nil, err
-	}*/
-
-	/*err = v.Media.Streams()[0].ApplyFilter("h264_mp4toannexb")
-
-	if err != nil {
-		return nil, nil, nil, err
-	}*/
 
 	go func() {
 		for {
@@ -147,8 +142,6 @@ func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan
 				break
 			}
 
-			/*hash := sha256.Sum256(packet.Data())
-			fmt.Println(base58.Encode(hash[:]))*/
 
 			switch packet.Type() {
 			case reisen.StreamVideo:
@@ -261,3 +254,5 @@ func (v *Video) StreamSamples(sampleSource <-chan [2]float64) beep.Streamer {
 		return numRead, true
 	})
 }
+
+*/

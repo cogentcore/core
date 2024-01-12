@@ -1,5 +1,9 @@
 package main
 
+func main() {}
+
+/*
+
 import (
 	"bytes"
 	"encoding/binary"
@@ -17,6 +21,7 @@ import (
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 )
+
 
 const (
 	frameBufferSize                   = 1024
@@ -56,18 +61,6 @@ func readVideoAndAudio(media *reisen.Media) (<-chan *image.RGBA, <-chan [2]float
 		return nil, nil, nil, err
 	}
 
-	/*err = media.Streams()[0].Rewind(60 * time.Second)
-
-	if err != nil {
-		return nil, nil, nil, err
-	}*/
-
-	/*err = media.Streams()[0].ApplyFilter("h264_mp4toannexb")
-
-	if err != nil {
-		return nil, nil, nil, err
-	}*/
-
 	go func() {
 		for {
 			packet, gotPacket, err := media.ReadPacket()
@@ -82,8 +75,6 @@ func readVideoAndAudio(media *reisen.Media) (<-chan *image.RGBA, <-chan [2]float
 				break
 			}
 
-			/*hash := sha256.Sum256(packet.Data())
-			fmt.Println(base58.Encode(hash[:]))*/
 
 			switch packet.Type() {
 			case reisen.StreamVideo:
@@ -359,3 +350,5 @@ func main() {
 		}
 	}
 }
+
+*/

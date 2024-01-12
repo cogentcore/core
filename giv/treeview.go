@@ -1263,7 +1263,7 @@ func (tv *TreeView) OpenParents() {
 
 func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	if e != nil {
-		pos = e.Pos()
+		pos = e.WindowPos()
 		return
 	}
 	pos.X = tv.Geom.TotalBBox.Min.X + int(tv.Indent.Dots)
@@ -1404,7 +1404,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 	return sl, pl
 }
 
-// Copy copies to clip.Board, optionally resetting the selection.
+// Copy copies to goosi.Clipboard, optionally resetting the selection.
 func (tv *TreeView) Copy(reset bool) { //gti:add
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
@@ -1423,7 +1423,7 @@ func (tv *TreeView) Copy(reset bool) { //gti:add
 	}
 }
 
-// Cut copies to clip.Board and deletes selected items.
+// Cut copies to goosi.Clipboard and deletes selected items.
 func (tv *TreeView) Cut() { //gti:add
 	if tv.IsRoot("Cut") {
 		return

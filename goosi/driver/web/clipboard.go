@@ -14,10 +14,10 @@ import (
 
 // TODO(kai/web): support copying images and other mime formats, etc
 
-// TheClip is the single [clip.Board] for the offscreen platform
+// TheClip is the single [goosi.Clipboard] for the offscreen platform
 var TheClip = &Clip{}
 
-// Clip is the [clip.Board] implementation for the web platform
+// Clip is the [goosi.Clipboard] implementation for the web platform
 type Clip struct{}
 
 func (cl *Clip) IsEmpty() bool {

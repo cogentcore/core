@@ -16,7 +16,6 @@ import (
 	"runtime"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/clip"
 	"goki.dev/events"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
@@ -161,7 +160,7 @@ func (a *App) OpenURL(url string) {
 	// TODO(kai): implement OpenURL on iOS
 }
 
-func (a *App) Clipboard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	// TODO(kai): implement clipboard on iOS
-	return &clip.BoardBase{}
+	return &goosi.ClipboardBase{}
 }

@@ -12,7 +12,6 @@ package goosi
 //go:generate goki generate
 
 import (
-	"goki.dev/clip"
 	"goki.dev/cursor"
 )
 
@@ -23,8 +22,9 @@ var TheApp App
 // and Windows, appropriate for that hardware / OS, and maintains data about
 // the physical screen(s)
 type App interface {
-	// Platform returns the platform type -- can use this for conditionalizing
-	// behavior in minor, simple ways
+
+	// Platform returns the platform type, which can be used
+	// for conditionalizing behavior
 	Platform() Platforms
 
 	// Name is the overall name of the application -- used for specifying an
@@ -76,10 +76,10 @@ type App interface {
 	// It does not actually close it; see [Window.Close] for that.
 	RemoveWindow(win Window)
 
-	// Clipboard returns the clip.Board handler for the system,
+	// Clipboard returns the [Clipboard] handler for the system,
 	// in context of given window, which is optional (can be nil)
 	// but can provide useful context on some systems.
-	Clipboard(win Window) clip.Board
+	Clipboard(win Window) Clipboard
 
 	// Cursor returns the cursor.Cursor handler for the system, in context of given window.
 	Cursor(win Window) cursor.Cursor
@@ -171,17 +171,15 @@ type App interface {
 // should be taken until a signal is sent.
 var OnSystemWindowCreated chan struct{}
 
-// Platforms are all the supported platforms for Goosi
+// Platforms are all the supported platforms for goosi
 type Platforms int32 //enums:enum
 
 const (
-	// MacOS is a mac desktop machine (aka Darwin)
+	// MacOS is a Mac OS machine (aka Darwin)
 	MacOS Platforms = iota
 
-	// TODO(kai): LinuxX11 or Linux? What about LinuxWayland?
-
-	// LinuxX11 is a Linux OS machine running X11 window server
-	LinuxX11
+	// Linux is a Linux OS machine
+	Linux
 
 	// Windows is a Microsoft Windows machine
 	Windows
@@ -202,7 +200,7 @@ const (
 
 // IsMobile returns whether the platform is a mobile platform
 // (iOS, Android, Web, or Offscreen). Web and Offscreen are
-// considered mobile platforms because they only supports one window.
+// considered mobile platforms because they only support one window.
 func (p Platforms) IsMobile() bool {
 	return p == IOS || p == Android || p == Web || p == Offscreen
 }

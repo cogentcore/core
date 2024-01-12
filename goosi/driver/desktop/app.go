@@ -16,7 +16,6 @@ import (
 	"runtime"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/clip"
 	"goki.dev/cursor"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
@@ -175,7 +174,7 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	return w, nil
 }
 
-func (a *App) Clipboard(win goosi.Window) clip.Board {
+func (a *App) Clipboard(win goosi.Window) goosi.Clipboard {
 	a.Mu.Lock()
 	a.CtxWindow = win.(*Window)
 	a.Mu.Unlock()

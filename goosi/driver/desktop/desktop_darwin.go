@@ -101,12 +101,12 @@ func (w *Window) Handle() any {
 }
 
 /////////////////////////////////////////////////////////////////
-// clip.Board impl
+// goosi.Clipboard impl
 
-// TheClip is the single [clip.Board] for MacOS
+// TheClip is the single [goosi.Clipboard] for MacOS
 var TheClip = &Clip{}
 
-// Clip is the [clip.Board] implementation for MacOS
+// Clip is the [goosi.Clipboard] implementation for MacOS
 type Clip struct {
 	// Data is the current clipboard data
 	Data mimedata.Mimes
