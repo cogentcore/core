@@ -41,10 +41,6 @@ type TimeView struct {
 	PM bool `set:"-"`
 }
 
-func (tv *TimeView) OnInit() {
-	tv.Frame.OnInit()
-}
-
 // SetTime sets the source time and updates the view
 func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	updt := tv.UpdateStart()
