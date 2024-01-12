@@ -102,7 +102,7 @@ func BoxFrame(par gi.Widget, nm ...string) *gi.Frame {
 }
 
 func main() {
-	b := gi.NewBody("Goki Layout Demo")
+	b := gi.NewAppBody("Goki Layout Demo")
 	b.App().About = `This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Goki on GitHub</a>`
 
 	ctrl := &Control{}
