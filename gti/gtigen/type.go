@@ -9,7 +9,6 @@ import (
 	"reflect"
 
 	"goki.dev/gti"
-	"goki.dev/ordmap"
 )
 
 // Type represents a parsed type.
@@ -22,15 +21,15 @@ type Type struct {
 	Doc            string         // The documentation for the type
 	Pkg            string         // The name of the package the type is in
 	Directives     gti.Directives // The directives for the type; guaranteed to be non-nil
-	Fields         *Fields        // The fields of the struct type; nil if not a struct
-	Embeds         *Fields        // The embeds of the struct type; nil if not a struct
-	EmbeddedFields *Fields        // The fields contained within the embeds of the struct type; nil if not a struct, and used for generating setters only
-	Methods        *gti.Methods   // The methods of the type; guaranteed to be non-nil
+	Fields         Fields         // The fields of the struct type; nil if not a struct
+	Embeds         Fields         // The embeds of the struct type; nil if not a struct
+	EmbeddedFields Fields         // The fields contained within the embeds of the struct type; nil if not a struct, and used for generating setters only
+	Methods        gti.Methods    // The methods of the type; guaranteed to be non-nil
 	Config         *Config        // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
 
 // Fields extends [gti.Fields] to provide the struct tags for each field.
 type Fields struct {
-	gti.Fields
-	Tags ordmap.Map[string, reflect.StructTag]
+	Fields gti.Fields
+	Tags   map[string]reflect.StructTag
 }

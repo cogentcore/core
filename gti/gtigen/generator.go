@@ -28,16 +28,16 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config     *Config                               // The configuration information
-	Buf        bytes.Buffer                          // The accumulated output.
-	Pkgs       []*packages.Package                   // The packages we are scanning.
-	Pkg        *packages.Package                     // The packages we are currently on.
-	File       *ast.File                             // The file we are currently on.
-	Cmap       ast.CommentMap                        // The comment map for the file we are currently on.
-	Types      []*Type                               // The types
-	Methods    *ordmap.Map[string, []*gti.Method]    // The methods, keyed by the the full package name of the type of the receiver
-	Funcs      *ordmap.Map[string, *gti.Func]        // The functions
-	Interfaces *ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
+	Config     *Config                              // The configuration information
+	Buf        bytes.Buffer                         // The accumulated output.
+	Pkgs       []*packages.Package                  // The packages we are scanning.
+	Pkg        *packages.Package                    // The packages we are currently on.
+	File       *ast.File                            // The file we are currently on.
+	Cmap       ast.CommentMap                       // The comment map for the file we are currently on.
+	Types      []*Type                              // The types
+	Methods    ordmap.Map[string, []gti.Method]     // The methods, keyed by the the full package name of the type of the receiver
+	Funcs      ordmap.Map[string, gti.Func]         // The functions
+	Interfaces ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
 }
 
 // NewGenerator returns a new generator with the
@@ -80,8 +80,6 @@ func (g *Generator) Find() error {
 		return err
 	}
 	g.Types = []*Type{}
-	g.Methods = &ordmap.Map[string, []*gti.Method]{}
-	g.Funcs = &ordmap.Map[string, *gti.Func]{}
 	err = gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
@@ -93,7 +91,6 @@ func (g *Generator) Find() error {
 // [Generator.Config.InterfaceConfigs]. It should typically not
 // be called by end-user code.
 func (g *Generator) GetInterfaces() error {
-	g.Interfaces = &ordmap.Map[string, *types.Interface]{}
 	if g.Config.InterfaceConfigs.Len() == 0 {
 		return nil
 	}
@@ -209,7 +206,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 			typ.Fields = fields
 
-			typ.EmbeddedFields = &Fields{}
+			typ.EmbeddedFields = Fields{}
 			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
 			g.GetEmbeddedFields(typ.EmbeddedFields, tp, tp)
 		}
@@ -236,7 +233,7 @@ func LocalTypeNameQualifier(pkg *types.Package) types.Qualifier {
 // GetEmbeddedFields recursively adds to the given set of embedded fields all of the embedded
 // fields for the given type. It does not add the fields in the given starting type,
 // as those fields aren't embedded.
-func (g *Generator) GetEmbeddedFields(efields *Fields, typ, startTyp types.Type) {
+func (g *Generator) GetEmbeddedFields(efields Fields, typ, startTyp types.Type) {
 	s, ok := typ.Underlying().(*types.Struct)
 	if !ok {
 		return
@@ -252,13 +249,13 @@ func (g *Generator) GetEmbeddedFields(efields *Fields, typ, startTyp types.Type)
 		if typ == startTyp {
 			continue
 		}
-		field := &gti.Field{
+		field := gti.Field{
 			Name:      f.Name(),
 			Type:      f.Type().String(),
 			LocalType: types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types)),
 		}
-		efields.Add(field.Name, field)
-		efields.Tags.Add(field.Name, reflect.StructTag(s.Tag(i)))
+		efields.Fields = append(efields.Fields, field)
+		efields.Tags[field.Name] = reflect.StructTag(s.Tag(i))
 	}
 }
 
@@ -277,7 +274,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if (!hasAdd && !cfg.AddFuncs) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
-		fun := &gti.Func{
+		fun := gti.Func{
 			Name:       FullName(g.Pkg, fd.Name.Name),
 			Doc:        doc,
 			Directives: dirs,
@@ -297,7 +294,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
-		method := &gti.Method{
+		method := gti.Method{
 			Name:       fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
@@ -338,8 +335,8 @@ func FullName(pkg *packages.Package, name string) string {
 // given surrounding config. If the given field list is
 // nil, GetFields still returns an empty but valid
 // [gti.Fields] value and no error.
-func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*Fields, error) {
-	res := &Fields{}
+func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) {
+	var res Fields
 	if list == nil {
 		return res, nil
 	}
@@ -379,26 +376,26 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*Fields, error)
 				nlist := &ast.FieldList{List: []*ast.Field{&nfield}}
 				nfields, err := g.GetFields(nlist, cfg)
 				if err != nil {
-					return nil, err
+					return res, err
 				}
-				res.Copy(&nfields.Fields)
+				res.Fields = append(res.Fields, nfields.Fields...)
 			}
 			continue
 		}
-		fo := &gti.Field{
+		fo := gti.Field{
 			Name:      name,
 			Type:      tn,
 			LocalType: ltn,
 			Doc:       strings.TrimSuffix(field.Doc.Text(), "\n"),
 		}
-		res.Add(name, fo)
+		res.Fields = append(res.Fields, fo)
 
 		tag := reflect.StructTag("")
 		if field.Tag != nil {
 			// need to get rid of leading and trailing backquotes
 			tag = reflect.StructTag(strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`"))
 		}
-		res.Tags.Add(name, tag)
+		res.Tags[name] = tag
 	}
 	return res, nil
 }
@@ -488,9 +485,9 @@ func (g *Generator) Generate() (bool, error) {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		typ.Methods = &gti.Methods{}
+		typ.Methods = gti.Methods{}
 		for _, meth := range g.Methods.ValByKey(typ.FullName) {
-			typ.Methods.Add(meth.Name, meth)
+			typ.Methods = append(typ.Methods, meth)
 		}
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {

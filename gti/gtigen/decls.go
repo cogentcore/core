@@ -66,13 +66,12 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 
 // SetterFields returns all of the fields and embedded fields of the given type
 // that don't have a `set:"-"` struct tag.
-func SetterFields(typ *Type) []*gti.Field {
-	res := []*gti.Field{}
-	do := func(fields *Fields) {
-		for _, kv := range fields.Order {
-			f := kv.Val
+func SetterFields(typ *Type) []gti.Field {
+	res := []gti.Field{}
+	do := func(fields Fields) {
+		for _, f := range fields.Fields {
 			// unspecified indicates to add a set method; only "-" means no set
-			hasSetter := fields.Tags.ValByKey(kv.Key).Get("set") != "-"
+			hasSetter := fields.Tags[f.Name].Get("set") != "-"
 			if hasSetter {
 				res = append(res, f)
 			}

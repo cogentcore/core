@@ -32,15 +32,15 @@ type Type struct {
 	ID uint64
 
 	// Methods are available for all types
-	Methods *Methods
+	Methods Methods
 
 	// Embedded fields for struct types
-	Embeds *Fields
+	Embeds Fields
 
 	// Fields for struct types
-	Fields *Fields
+	Fields Fields
 
-	// instance of the type
+	// Optional instance of the type
 	Instance any
 
 	// All embedded fields (including nested ones) for struct types;
@@ -84,7 +84,7 @@ func (tp *Type) HasEmbed(typ *Type) bool {
 }
 
 func (tp *Type) CompileEmbeds() {
-	if tp.Embeds == nil {
+	if len(tp.Embeds) == 0 {
 		return
 	}
 	rt := tp.ReflectType()
@@ -92,8 +92,8 @@ func (tp *Type) CompileEmbeds() {
 		return
 	}
 	tp.AllEmbeds = make(map[uint64]*Type)
-	for _, em := range tp.Embeds.Order {
-		enm := em.Val.Name
+	for _, em := range tp.Embeds {
+		enm := em.Name
 		if idx := strings.LastIndex(enm, "."); idx >= 0 {
 			enm = enm[idx+1:]
 		}

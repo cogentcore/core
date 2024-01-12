@@ -4,8 +4,6 @@
 
 package gti
 
-import "goki.dev/ordmap"
-
 // Func represents a global function
 type Func struct {
 	// Name is the fully-qualified name of the function
@@ -49,4 +47,4 @@ type Method struct {
 }
 
 // Methods represents a set of multiple [Method] objects
-type Methods = ordmap.Map[string, *Method]
+type Methods = []Method
