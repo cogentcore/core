@@ -24,6 +24,7 @@ import (
 	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/keyfun"
+	"goki.dev/mat32"
 	"goki.dev/paint"
 )
 
@@ -47,6 +48,9 @@ type Settings interface {
 
 	// Apply does anything necessary to apply the settings to the app.
 	Apply()
+
+	// ConfigToolbar is optional method to configure the settings view toolbar with setting-related actions to perform
+	ConfigToolbar(tb *Toolbar)
 }
 
 // SettingsOpener is an optional additional interface that
@@ -92,6 +96,9 @@ func (sb *SettingsBase) Defaults() {}
 
 // Apply does nothing by default and can be extended by other settings data types.
 func (sb *SettingsBase) Apply() {}
+
+// ConfigToolbar does nothing by default and can be extended by other settings data types.
+func (sb *SettingsBase) ConfigToolbar(tb *Toolbar) {}
 
 // OpenSettings opens the given settings from their [Settings.Filename].
 // The settings are assumed to be in TOML unless they have a .json file
@@ -159,6 +166,18 @@ func LoadAllSettings() error {
 	return errors.Join(errs...)
 }
 
+// SaveAllSettings saves [AllSettings].
+func SaveAllSettings() error {
+	errs := []error{}
+	for _, se := range AllSettings {
+		err := SaveSettings(se)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
+
 // UpdateAll updates all windows and triggers a full render rebuild.
 // It is typically called when user settings are changed.
 func UpdateAll() { //gti:add
@@ -200,7 +219,7 @@ type AppearanceSettingsData struct { //gti:add
 	FontSize float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
 
 	// screen-specific preferences, which will override overall defaults if set
-	ScreenPrefs map[string]ScreenSettings
+	Screens map[string]ScreenSettings
 
 	// text highlighting style / theme
 	HiStyle HiStyleName
@@ -210,6 +229,9 @@ type AppearanceSettingsData struct { //gti:add
 
 	// default mono-spaced font family
 	MonoFont FontName
+
+	// toolbar configuration function -- set in giv -- allows use of FuncButton
+	TBConfig func(tb *Toolbar) `set:"-" view:"-" toml:"-" json:"-" xml:"-"`
 }
 
 // OverrideSettingsColor is whether to override the color specified in [Prefs.Color]
@@ -237,6 +259,12 @@ func (as *AppearanceSettingsData) Defaults() {
 	as.FontSize = 100
 	as.FontFamily = "Roboto"
 	as.MonoFont = "Roboto Mono"
+}
+
+func (as *AppearanceSettingsData) ConfigToolbar(tb *Toolbar) {
+	if as.TBConfig != nil {
+		as.TBConfig(tb)
+	}
 }
 
 func (as *AppearanceSettingsData) Apply() { //gti:add
@@ -280,7 +308,7 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 		if sc == nil {
 			continue
 		}
-		if scp, ok := as.ScreenPrefs[sc.Name]; ok {
+		if scp, ok := as.Screens[sc.Name]; ok {
 			// zoom is percentage, but LogicalDPIScale is multiplier
 			goosi.SetLogicalDPIScale(sc.Name, scp.Zoom/100)
 		}
@@ -293,29 +321,27 @@ func (as *AppearanceSettingsData) ApplyDPI() {
 	}
 }
 
-/*
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen. If for current screen is true,
 // it saves only for the current screen.
-func (pf *GeneralSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
+func (as *AppearanceSettingsData) SaveZoom(forCurrentScreen bool) { //gti:add
 	goosi.ZoomFactor = 1 // reset -- otherwise has 2x effect
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
-		sp, ok := pf.ScreenPrefs[sc.Name]
+		sp, ok := as.Screens[sc.Name]
 		if !ok {
-			sp = ScreenPrefs{}
+			sp = ScreenSettings{}
 		}
 		sp.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
-		if pf.ScreenPrefs == nil {
-			pf.ScreenPrefs = make(map[string]ScreenPrefs)
+		if as.Screens == nil {
+			as.Screens = make(map[string]ScreenSettings)
 		}
-		pf.ScreenPrefs[sc.Name] = sp
+		as.Screens[sc.Name] = sp
 	} else {
-		pf.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
+		as.Zoom = mat32.Truncate(100*sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
-	grr.Log(pf.Save())
+	grr.Log(SaveSettings(as))
 }
-*/
 
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache. You shouldn't generally

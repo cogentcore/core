@@ -7,9 +7,23 @@ package giv
 import (
 	"goki.dev/events"
 	"goki.dev/gi"
+	"goki.dev/icons"
 )
 
-// TODO(kai): improve settings view app bar structure
+func init() {
+	gi.AppearanceSettings.TBConfig = SettingsConfigToolbar
+}
+
+func SettingsConfigToolbar(tb *gi.Toolbar) {
+	as := gi.AppearanceSettings
+	NewFuncButton(tb, as.SaveZoom).SetIcon(icons.ZoomIn)
+	// NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
+	// NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
+	tb.AddOverflowMenu(func(m *gi.Scene) {
+		NewFuncButton(m, as.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+		gi.NewSeparator(tb)
+	})
+}
 
 // SettingsWindow makes and runs a new window for viewing user settings.
 func SettingsWindow() {
@@ -23,23 +37,12 @@ func SettingsWindow() {
 
 // SettingsView adds to the given body a view of user settings
 func SettingsView(b *gi.Body) {
-	/*
-		b.AddAppBar(func(tb *gi.Toolbar) {
-			NewFuncButton(tb, pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
-			NewFuncButton(tb, pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
-			gi.NewSeparator(tb)
-			NewFuncButton(tb, pf.EditKeyMaps).SetIcon(icons.Keyboard)
-			NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
-			NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
-			NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
-			tb.AddOverflowMenu(func(m *gi.Scene) {
-				NewFuncButton(m, pf.Open).SetKey(keyfun.Open)
-				NewFuncButton(m, pf.Delete).SetConfirm(true)
-				NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-				gi.NewSeparator(tb)
-			})
-		})
-	*/
+	b.AddAppBar(func(tb *gi.Toolbar) {
+		for _, se := range gi.AllSettings {
+			se := se
+			se.ConfigToolbar(tb)
+		}
+	})
 
 	tabs := gi.NewTabs(b)
 
