@@ -1,7 +1,7 @@
 Name = "Goki"
 ID = "com.goki.goki"
 Desc = ""
-Version = "v0.0.0"
+Version = "v0.0.1"
 Type = "Library"
 
 [Build]
