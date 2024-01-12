@@ -68,6 +68,14 @@ const (
 	// They can also be moved.
 	FunctionalTabs
 
+	// NavigationAuto indicates to render the tabs as either
+	// [NavigationBar], [NavigationRail], or [NavigationDrawer],
+	// if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium],
+	// or [SizeExpanded], respectively. NavigationAuto should
+	// typically be used instead of one of the specific navigation
+	// types for better cross-platform compatability.
+	NavigationAuto
+
 	// NavigationBar indicates to render the tabs as a
 	// bottom navigation bar with text and icons.
 	NavigationBar
@@ -80,6 +88,23 @@ const (
 	// side navigation drawer, which has full text labels and icons.
 	NavigationDrawer
 )
+
+// EffectiveType returns the effective tab type in the context
+// of the given widget, handling [NavigationAuto] based on
+// [WidgetBase.SizeClass].
+func (tt TabTypes) Effective(w Widget) TabTypes {
+	if tt != NavigationAuto {
+		return tt
+	}
+	switch w.AsWidget().SizeClass() {
+	case SizeCompact:
+		return NavigationBar
+	case SizeMedium:
+		return NavigationRail
+	default:
+		return NavigationDrawer
+	}
+}
 
 // IsColumn returns whether the tabs should be arranged in a column.
 func (tt TabTypes) IsColumn() bool {
@@ -110,7 +135,7 @@ func (ts *Tabs) SetStyles() {
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
-		if ts.Type.IsColumn() {
+		if ts.Type.Effective(ts).IsColumn() {
 			s.Direction = styles.Row
 		} else {
 			s.Direction = styles.Column
@@ -126,7 +151,7 @@ func (ts *Tabs) SetStyles() {
 				s.Padding.Zero()
 				s.Gap.Set(units.Dp(4))
 
-				if ts.Type.IsColumn() {
+				if ts.Type.Effective(ts).IsColumn() {
 					s.Direction = styles.Column
 					s.Grow.Set(0, 1)
 				} else {
@@ -452,7 +477,7 @@ func (ts *Tabs) ConfigWidget() {
 		return
 	}
 	// frame only comes before tabs in bottom nav bar
-	if ts.Type == NavigationBar {
+	if ts.Type.Effective(ts) == NavigationBar {
 		NewFrame(ts, "frame")
 		NewFrame(ts, "tabs")
 	} else {
@@ -550,7 +575,7 @@ func (tb *Tab) SetStyles() {
 		s.Text.Align = styles.Center
 		s.Margin.Zero()
 
-		if tb.Type.IsColumn() {
+		if tb.Type.Effective(tb).IsColumn() {
 			s.Grow.X = 1
 			s.Border.Radius = styles.BorderRadiusFull
 			s.Padding.Set(units.Dp(16))
@@ -563,7 +588,7 @@ func (tb *Tab) SetStyles() {
 			s.Color = colors.Scheme.Select.OnContainer
 		} else {
 			s.Color = colors.Scheme.OnSurfaceVariant
-			if tb.Type == FunctionalTabs {
+			if tb.Type.Effective(tb) == FunctionalTabs {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 			}
 		}
@@ -595,7 +620,7 @@ func (tb *Tab) SetStyles() {
 			})
 		case "parts/label":
 			label := w.(*Label)
-			if tb.Type == FunctionalTabs {
+			if tb.Type.Effective(tb) == FunctionalTabs {
 				label.Type = LabelBodyMedium
 			} else {
 				label.Type = LabelLabelLarge
@@ -669,7 +694,7 @@ func (tb *Tab) ConfigWidget() {
 		lbi = len(config)
 		config.Add(LabelType, "label")
 	}
-	if tb.Type == FunctionalTabs && tb.CloseIcon.IsValid() {
+	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsValid() {
 		clsi = len(config)
 		config.Add(ButtonType, "close")
 	}
