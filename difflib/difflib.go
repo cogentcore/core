@@ -25,19 +25,19 @@ import (
 	"unicode"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
+//func min(a, b int) int {
+//	if a < b {
+//		return a
+//	}
+//	return b
+//}
+//
+//func max(a, b int) int {
+//	if a > b {
+//		return a
+//	}
+//	return b
+//}
 
 func calculateRatio(matches, length int) float64 {
 	if length > 0 {
@@ -121,13 +121,13 @@ func NewMatcherWithJunk(a, b []string, autoJunk bool,
 	return &m
 }
 
-// Set two sequences to be compared.
+// SetSeqs Set two sequences to be compared.
 func (m *SequenceMatcher) SetSeqs(a, b []string) {
 	m.SetSeq1(a)
 	m.SetSeq2(b)
 }
 
-// Set the first sequence to be compared. The second sequence to be compared is
+// SetSeq1 Set the first sequence to be compared. The second sequence to be compared is
 // not changed.
 //
 // SequenceMatcher computes and caches detailed information about the second
@@ -145,7 +145,7 @@ func (m *SequenceMatcher) SetSeq1(a []string) {
 	m.opCodes = nil
 }
 
-// Set the second sequence to be compared. The first sequence to be compared is
+// SetSeq2 Set the second sequence to be compared. The first sequence to be compared is
 // not changed.
 func (m *SequenceMatcher) SetSeq2(b []string) {
 	if &b == &m.b {
@@ -310,7 +310,7 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	return Match{A: besti, B: bestj, Size: bestsize}
 }
 
-// Return list of triples describing matching subsequences.
+// GetMatchingBlocks Return list of triples describing matching subsequences.
 //
 // Each triple is of the form (i, j, n), and means that
 // a[i:i+n] == b[j:j+n].  The triples are monotonically increasing in
@@ -345,7 +345,7 @@ func (m *SequenceMatcher) GetMatchingBlocks() []Match {
 
 	// It's possible that we have adjacent equal blocks in the
 	// matching_blocks list now.
-	nonAdjacent := []Match{}
+	var nonAdjacent []Match
 	i1, j1, k1 := 0, 0, 0
 	for _, b := range matched {
 		// Is this block adjacent to i1, j1, k1?
@@ -374,7 +374,7 @@ func (m *SequenceMatcher) GetMatchingBlocks() []Match {
 	return m.matchingBlocks
 }
 
-// Return list of 5-tuples describing how to turn a into b.
+// GetOpCodes Return list of 5-tuples describing how to turn a into b.
 //
 // Each tuple is of the form (tag, i1, i2, j1, j2).  The first tuple
 // has i1 == j1 == 0, and remaining tuples have i1 == the i2 from the
@@ -425,7 +425,7 @@ func (m *SequenceMatcher) GetOpCodes() []OpCode {
 	return m.opCodes
 }
 
-// Isolate change clusters by eliminating ranges with no changes.
+// GetGroupedOpCodes Isolate change clusters by eliminating ranges with no changes.
 //
 // Return a generator of groups with up to n lines of context.
 // Each group is in the same format as returned by GetOpCodes().
@@ -449,8 +449,12 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 		codes[len(codes)-1] = OpCode{c.Tag, i1, min(i2, i1+n), j1, min(j2, j1+n)}
 	}
 	nn := n + n
-	groups := [][]OpCode{}
-	group := []OpCode{}
+
+	var (
+		groups [][]OpCode
+		group  []OpCode
+	)
+
 	for _, c := range codes {
 		i1, i2, j1, j2 := c.I1, c.I2, c.J1, c.J2
 		// End the current group and start a new one whenever
@@ -470,7 +474,7 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 	return groups
 }
 
-// Return a measure of the sequences' similarity (float in [0,1]).
+// Ratio Return a measure of the sequences' similarity (float in [0,1]).
 //
 // Where T is the total number of elements in both sequences, and
 // M is the number of matches, this is 2.0*M / T.
@@ -489,7 +493,7 @@ func (m *SequenceMatcher) Ratio() float64 {
 	return calculateRatio(matches, len(m.a)+len(m.b))
 }
 
-// Return an upper bound on ratio() relatively quickly.
+// QuickRatio Return an upper bound on ratio() relatively quickly.
 //
 // This isn't defined beyond that it is an upper bound on .Ratio(), and
 // is faster to compute.
@@ -521,7 +525,7 @@ func (m *SequenceMatcher) QuickRatio() float64 {
 	return calculateRatio(matches, len(m.a)+len(m.b))
 }
 
-// Return an upper bound on ratio() very quickly.
+// RealQuickRatio Return an upper bound on ratio() very quickly.
 //
 // This isn't defined beyond that it is an upper bound on .Ratio(), and
 // is faster to compute than either .Ratio() or .QuickRatio().
@@ -793,7 +797,7 @@ func formatRangeUnified(start, stop int) string {
 	return fmt.Sprintf("%d,%d", beginning, length)
 }
 
-// Unified diff parameters
+// LineDiffParams Unified diff parameters
 type LineDiffParams struct {
 	A          []string          // First sequence lines
 	FromFile   string            // First file name
@@ -807,7 +811,7 @@ type LineDiffParams struct {
 	IsJunkLine func(string) bool // How to spot junk lines
 }
 
-// Compare two sequences of lines; generate the delta as a unified diff.
+// WriteUnifiedDiff Compare two sequences of lines; generate the delta as a unified diff.
 //
 // Unified diffs are a compact way of showing line changes and a few
 // lines of context.  The number of context lines is set by 'n' which
@@ -909,7 +913,7 @@ func WriteUnifiedDiff(writer io.Writer, diff LineDiffParams) error {
 	return nil
 }
 
-// Like WriteUnifiedDiff but returns the diff a string.
+// GetUnifiedDiffString Like WriteUnifiedDiff but returns the diff a string.
 func GetUnifiedDiffString(diff LineDiffParams) (string, error) {
 	w := &bytes.Buffer{}
 	err := WriteUnifiedDiff(w, diff)
@@ -930,11 +934,11 @@ func formatRangeContext(start, stop int) string {
 	return fmt.Sprintf("%d,%d", beginning, beginning+length-1)
 }
 
-// For backward compatibility. Ugh.
+// ContextDiff For backward compatibility. Ugh.
 type ContextDiff = LineDiffParams
 type UnifiedDiff = LineDiffParams
 
-// Compare two sequences of lines; generate the delta as a context diff.
+// WriteContextDiff Compare two sequences of lines; generate the delta as a context diff.
 //
 // Context diffs are a compact way of showing line changes and a few
 // lines of context. The number of context lines is set by diff.Context
@@ -1039,14 +1043,14 @@ func WriteContextDiff(writer io.Writer, diff LineDiffParams) error {
 	return diffErr
 }
 
-// Like WriteContextDiff but returns the diff as a string.
+// GetContextDiffString Like WriteContextDiff but returns the diff as a string.
 func GetContextDiffString(diff LineDiffParams) (string, error) {
 	w := &bytes.Buffer{}
 	err := WriteContextDiff(w, diff)
 	return w.String(), err
 }
 
-// Split a string on "\n" while preserving them. The output can be used
+// SplitLines Split a string on "\n" while preserving them. The output can be used
 // as input for LineDiffParams.
 func SplitLines(s string) []string {
 	lines := strings.SplitAfter(s, "\n")
