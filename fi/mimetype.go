@@ -53,12 +53,13 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if mtyp, has := ExtMimeMap[ext]; has { // use our map first: very fast!
 		return mtyp, ext, nil
 	}
-	fc := fname[0]
-	lc := fname[len(fname)-1]
+	_, fn := filepath.Split(fname)
+	fc := fn[0]
+	lc := fn[len(fn)-1]
 	if fc == '~' || fc == '%' || fc == '#' || lc == '~' || lc == '%' || lc == '#' {
 		return MimeString(Trash), ext, nil
 	}
-	mtypt, err := filetype.MatchFile(fname) // h2non next -- has good coverage
+	mtypt, err := filetype.MatchFile(fn) // h2non next -- has good coverage
 	ptyp := ""
 	isplain := false
 	if err == nil {
@@ -68,7 +69,7 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 			isplain = true
 			ptyp = mtyp
 		} else if mtyp == "application/zip" {
-			mime, err := mimetype.DetectFile(fname) // can detect zipped types
+			mime, err := mimetype.DetectFile(fn) // can detect zipped types
 			if err == nil && mime.String() != "" {
 				return mime.String(), mime.Extension(), err
 			}
@@ -82,7 +83,7 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 		return mtyp, ext, nil
 	}
 	// TODO(kai/binsize): figure out how to do this without dragging in chroma dependency
-	// lexer := lexers.Match(fname) // todo: could get start of file and pass to
+	// lexer := lexers.Match(fn) // todo: could get start of file and pass to
 	// // Analyze, but might be too slow..
 	// if lexer != nil {
 	// 	config := lexer.Config()
@@ -96,7 +97,10 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if isplain {
 		return ptyp, ext, nil
 	}
-	return "", ext, fmt.Errorf("fi.MimeFromFile could not find mime type for ext: %v file: %v", ext, fname)
+	if strings.ToLower(fn) == "makefile" {
+		return MimeString(Makefile), ext, nil
+	}
+	return "", ext, fmt.Errorf("fi.MimeFromFile could not find mime type for ext: %v file: %v", ext, fn)
 }
 
 // todo: use this to check against mime types!

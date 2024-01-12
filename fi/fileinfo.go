@@ -285,7 +285,7 @@ func (fi *FileInfo) Rename(path string) (newpath string, err error) { //gti:add
 // extension.  Returns true on success.
 func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	if fi.IsDir() {
-		return "folder", true
+		return icons.Folder, true
 	}
 	if fi.Known != Unknown {
 		snm := strings.ToLower(fi.Known.String())
@@ -322,6 +322,9 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 		if icn := icons.Icon(ext[1:]); icn.IsValid() {
 			return icn, true
 		}
+	}
+	if fi.IsExec() {
+		return icons.PlayArrow, true
 	}
 
 	icn := icons.None
