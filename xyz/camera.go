@@ -8,8 +8,6 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/icons"
-	"goki.dev/ki"
 	"goki.dev/mat32"
 )
 
@@ -274,56 +272,4 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	cm.CamMu.Unlock()
 	cm.UpdateMatrix()
 	cm.TargetFmView()
-}
-
-// CameraProps define the Toolbar and MenuBar for StructView
-var CameraProps = ki.Props{
-	"Toolbar": ki.PropSlice{
-		{"Defaults", ki.Props{
-			"label": "Defaults",
-			"icon":  icons.DeviceReset,
-		}},
-		{"LookAt", ki.Props{
-			"icon": icons.Visibility,
-			"Args": ki.PropSlice{
-				{"Target", ki.BlankProp{}},
-				{"UpDir", ki.BlankProp{}},
-			},
-		}},
-		{"Orbit", ki.Props{
-			"icon": icons.X3DRotation,
-			"Args": ki.PropSlice{
-				{"DeltaX", ki.BlankProp{}},
-				{"DeltaY", ki.BlankProp{}},
-			},
-		}},
-		{"Pan", ki.Props{
-			"icon": icons.PanTool,
-			"Args": ki.PropSlice{
-				{"DeltaX", ki.BlankProp{}},
-				{"DeltaY", ki.BlankProp{}},
-			},
-		}},
-		{"PanAxis", ki.Props{
-			"icon": icons.PanTool,
-			"Args": ki.PropSlice{
-				{"DeltaX", ki.BlankProp{}},
-				{"DeltaY", ki.BlankProp{}},
-			},
-		}},
-		{"PanTarget", ki.Props{
-			"icon": icons.PanTool,
-			"Args": ki.PropSlice{
-				{"DeltaX", ki.BlankProp{}},
-				{"DeltaY", ki.BlankProp{}},
-				{"DeltaZ", ki.BlankProp{}},
-			},
-		}},
-		{"Zoom", ki.Props{
-			"icon": icons.ZoomIn,
-			"Args": ki.PropSlice{
-				{"ZoomPct", ki.BlankProp{}},
-			},
-		}},
-	},
 }
