@@ -718,11 +718,12 @@ func (tb *Tab) ConfigWidget() {
 					return
 				}
 				idx := ts.TabIndexByLabel(tb.Text)
+				// fmt.Println(SystemSettings.Behavior.OnlyCloseActiveTab, tb.Styles.State)
 				// if OnlyCloseActiveTab is on, only process delete when already selected
-				if !SystemSettings.Behavior.OnlyCloseActiveTab || tb.StateIs(states.Selected) {
-					ts.DeleteTabIndex(idx, true)
+				if SystemSettings.Behavior.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+					ts.SelectTabIndex(idx)
 				} else {
-					ts.SelectTabIndex(idx) // otherwise select
+					ts.DeleteTabIndex(idx, true)
 				}
 			})
 		}
