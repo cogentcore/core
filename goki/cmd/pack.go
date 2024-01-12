@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	_ "embed"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -384,31 +385,8 @@ type WindowsInstallerData struct {
 	Desc string
 }
 
+//go:embed windowsinstaller.go.tmpl
+var windowsInstallerTmplString string
+
 // WindowsInstallerTmpl is the template for the Windows installer Go file
-var WindowsInstallerTmpl = template.Must(template.New("WindowsInstallerTmpl").Parse(
-	`package main
-
-import (
-	_ "embed"
-
-	"goki.dev/gi"
-	"goki.dev/gimain"
-)
-
-//go:embed app.exe
-var exe []byte
-
-//go:embed icon.svg
-var icon []byte
-
-func main() {
-	b := gi.NewAppBody("{{.Name}} Installer")
-	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
-	bt := gi.NewButton(b).SetText("Install {{.Name}}")
-	bt.OnClick(func(e events.Event) {
-		err := os.WriteFile("C:\\Program Files\\{{.Name}}\\{{.Name}}.exe", exe, 0666)
-		gi.ErrorDialog(bt, err, "Error installing {{.Name}}")
-	})
-	b.NewWindow().Run().Wait()
-}
-`))
+var WindowsInstallerTmpl = template.Must(template.New("WindowsInstallerTmpl").Parse(windowsInstallerTmplString))
