@@ -17,14 +17,20 @@ import (
 //ki:flagtype NodeFlags -field Flag
 type Person struct { //goki:embedder
 	color.RGBA
+
 	// Name is the name of the person
 	//gi:toolbar -hide
 	Name string //goki:setter
+
 	// Age is the age of the person
 	//gi:view inline
 	Age int `json:"-"`
+
 	// Type is the type of the person
 	Type *gti.Type
+
+	// Nicknames are the nicknames of the person
+	Nicknames []string
 }
 
 var _ = fmt.Stringer(&Person{})

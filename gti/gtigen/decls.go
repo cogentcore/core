@@ -50,6 +50,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	Funcs(template.FuncMap{
 		"SetterFields": SetterFields,
 		"SetterName":   SetterName,
+		"SetterType":   SetterType,
 		"DocToComment": DocToComment,
 	}).Parse(
 	`
@@ -57,7 +58,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	{{range (SetterFields .)}}
 	// Set{{SetterName .}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.Name}}) Set{{SetterName .}}(v {{.LocalType}}) *{{$typ.Name}} {
+	func (t *{{$typ.Name}}) Set{{SetterName .}}(v {{SetterType .LocalType}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
 		return t
 	}
@@ -92,6 +93,15 @@ func SetterName(field *gti.Field) string {
 	}
 	// could be lowercase so need to make camel
 	return strcase.ToCamel(field.Name)
+}
+
+// SetterType converts the given local type name to one that can be used
+// in a setter by converting slices to variadic arguments.
+func SetterType(typ string) string {
+	if strings.HasPrefix(typ, "[]") {
+		return "..." + strings.TrimPrefix(typ, "[]")
+	}
+	return typ
 }
 
 // DocToComment converts the given doc string to an appropriate comment string.

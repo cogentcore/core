@@ -26,6 +26,7 @@ var PersonType = gti.AddType(&gti.Type{
 			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
 		}, Tag: "json:\"-\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person", Directives: gti.Directives{}, Tag: ""}},
+		{"Nicknames", &gti.Field{Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"RGBA", &gti.Field{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -63,6 +64,13 @@ func (t *Person) SetAge(v int) *Person {
 // Type is the type of the person
 func (t *Person) SetType(v *gti.Type) *Person {
 	t.Type = v
+	return t
+}
+
+// SetNicknames sets the [Person.Nicknames]:
+// Nicknames are the nicknames of the person
+func (t *Person) SetNicknames(v ...string) *Person {
+	t.Nicknames = v
 	return t
 }
 
