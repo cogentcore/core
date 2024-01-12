@@ -1679,7 +1679,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 func (sv *SliceViewBase) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	svi := sv.This().(SliceViewer)
-	pos := de.LocalPos()
+	pos := de.Pos()
 	idx, ok := sv.IdxFromPos(pos.Y)
 	if ok {
 		// sv.DraggedIdxs = nil

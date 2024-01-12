@@ -670,7 +670,7 @@ func (tv *DiffTextEditor) DiffView() *DiffView {
 
 func (tv *DiffTextEditor) HandleDoubleClick() {
 	tv.On(events.DoubleClick, func(e events.Event) {
-		pt := tv.PointToRelPos(e.LocalPos())
+		pt := tv.PointToRelPos(e.Pos())
 		if pt.X >= 0 && pt.X < int(tv.LineNoOff) {
 			newPos := tv.PixelToCursor(pt)
 			ln := newPos.Ln

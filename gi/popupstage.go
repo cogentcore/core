@@ -173,7 +173,7 @@ func (pm *StageMgr) PopupHandleEvent(e events.Event) {
 	}
 
 	if e.HasPos() {
-		pos := e.Pos()
+		pos := e.WindowPos()
 		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
 		if pos.In(ts.SceneGeom.Bounds()) {
 			top.PopupHandleEvent(e)

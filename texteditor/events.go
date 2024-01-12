@@ -567,7 +567,7 @@ func (ed *Editor) HandleMouse() {
 		if !ed.StateIs(states.Focused) {
 			ed.SetFocusEvent()
 		}
-		pt := ed.PointToRelPos(e.LocalPos())
+		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		switch e.MouseButton() {
 		case events.Left:
@@ -619,7 +619,7 @@ func (ed *Editor) HandleMouse() {
 		if !ed.SelectMode {
 			ed.SelectModeToggle()
 		}
-		pt := ed.PointToRelPos(e.LocalPos())
+		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		ed.SetCursorFromMouse(pt, newPos, events.SelectOne)
 	})
@@ -630,7 +630,7 @@ func (ed *Editor) HandleLinkCursor() {
 		if !ed.HasLinks {
 
 		}
-		pt := ed.PointToRelPos(e.LocalPos())
+		pt := ed.PointToRelPos(e.Pos())
 		mpos := ed.PixelToCursor(pt)
 		if mpos.Ln >= ed.NLines {
 			return
@@ -642,7 +642,7 @@ func (ed *Editor) HandleLinkCursor() {
 		inLink := false
 		for _, tl := range rend.Links {
 			tlb := tl.Bounds(rend, pos)
-			if e.LocalPos().In(tlb) {
+			if e.Pos().In(tlb) {
 				inLink = true
 				break
 			}

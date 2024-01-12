@@ -71,9 +71,9 @@ type Event interface {
 	// HasPos returns true if the event has a window position where it takes place
 	HasPos() bool
 
-	// Pos returns the original window-based position in raw display dots
+	// WindowPos returns the original window-based position in raw display dots
 	// (pixels) where event took place.
-	Pos() image.Point
+	WindowPos() image.Point
 
 	// SetLocalOff sets the offset subtracted from window-based positions
 	// to compute Local versions of positions, which are updated.
@@ -83,26 +83,25 @@ type Event interface {
 	// to compute Local versions of positions.
 	LocalOff() image.Point
 
-	// LocalPos returns the local position,
-	// which can be adjusted from the window pos
-	// via SubLocalOffset based on a local top-left
-	// coordinate for a region within the window.
-	LocalPos() image.Point
+	// Pos returns the local position, which is adjusted from the WindowPos
+	// via SubLocalOffset based on a local top-left coordinate for a region
+	// within the window.
+	Pos() image.Point
 
-	// StartPos returns the starting (MouseDown) window-based position.
+	// WindowStartPos returns the starting (MouseDown) window-based position.
+	WindowStartPos() image.Point
+
+	// StartPos returns the starting (MouseDown) local position
 	StartPos() image.Point
-
-	// LocalStartPos returns the starting (MouseDown) local position
-	LocalStartPos() image.Point
 
 	// StartDelta returns Pos - Start
 	StartDelta() image.Point
 
-	// PrevPos returns the previous (MouseMove/Drag) window-based position.
-	PrevPos() image.Point
+	// WindowPrevPos returns the previous (MouseMove/Drag) window-based position.
+	WindowPrevPos() image.Point
 
-	// LocalPrevPos returns the previous (MouseMove/Drag) local position
-	LocalPrevPos() image.Point
+	// PrevPos returns the previous (MouseMove/Drag) local position
+	PrevPos() image.Point
 
 	// PrevDelta returns Pos - Prev
 	PrevDelta() image.Point

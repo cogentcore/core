@@ -1263,7 +1263,7 @@ func (tv *TreeView) OpenParents() {
 
 func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	if e != nil {
-		pos = e.Pos()
+		pos = e.WindowPos()
 		return
 	}
 	pos.X = tv.Geom.TotalBBox.Min.X + int(tv.Indent.Dots)

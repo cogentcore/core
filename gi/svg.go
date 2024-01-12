@@ -103,7 +103,7 @@ func (sv *SVG) HandleEvents() {
 		sv.SetNeedsRender(true)
 	})
 	sv.On(events.LongHoverStart, func(e events.Event) {
-		pos := e.LocalPos()
+		pos := e.Pos()
 		objs := svg.NodesContainingPoint(&sv.SVG.Root, pos, true)
 		sv.Tooltip = "no objects under mouse"
 		if len(objs) > 0 {

@@ -431,7 +431,7 @@ func (sr *Slider) ScrollScale(del float32) float32 {
 
 func (sr *Slider) HandleMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
-		pos := sr.PointToRelPos(e.LocalPos())
+		pos := sr.PointToRelPos(e.Pos())
 		sr.SetSliderPosAction(pos)
 		sr.SlideStartPos = sr.Pos
 	})
@@ -445,7 +445,7 @@ func (sr *Slider) HandleMouse() {
 		}
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		pos := sr.PointToRelPos(e.LocalPos())
+		pos := sr.PointToRelPos(e.Pos())
 		sr.SetSliderPosAction(pos)
 		sr.SendChanged()
 	})

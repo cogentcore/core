@@ -241,7 +241,7 @@ func (lb *Label) HandleEvents() {
 				continue
 			}
 			tlb := tl.Bounds(&lb.TextRender, pos)
-			if e.LocalPos().In(tlb) {
+			if e.Pos().In(tlb) {
 				inLink = true
 				if lb.StateIs(states.LongHovered) || lb.StateIs(states.LongPressed) {
 					NewTooltipTextAt(lb, tl.URL, tlb.Min, tlb.Size()).Run()
@@ -288,7 +288,7 @@ func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 				continue
 			}
 			tlb := tl.Bounds(&lb.TextRender, pos)
-			if e.LocalPos().In(tlb) {
+			if e.Pos().In(tlb) {
 				openLink(&tl)
 				e.SetHandled()
 				return

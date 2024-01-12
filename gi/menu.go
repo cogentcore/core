@@ -129,7 +129,7 @@ func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
 // event if non-nil: should handle both cases.
 func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
 	if e != nil {
-		return e.Pos()
+		return e.WindowPos()
 	}
 	return wb.WinPos(.5, .5) // center
 }
