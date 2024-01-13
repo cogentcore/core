@@ -16,9 +16,6 @@ type Type struct {
 	// Name is the fully package-path-qualified name of the type (eg: goki.dev/gi.Button)
 	Name string
 
-	// ShortName is the short, package-qualified name of the type (eg: gi.Button)
-	ShortName string
-
 	// IDName is the short, package-unqualified, kebab-case name of the type that is suitable
 	// for use in an ID (eg: button)
 	IDName string
@@ -67,7 +64,9 @@ func (tp Type) GoString() string {
 }
 
 func (tp *Type) Label() string {
-	return tp.ShortName
+	// get rid of everything except for package.Type
+	li := strings.LastIndex(tp.Name, "/")
+	return tp.Name[li+1:]
 }
 
 // ReflectType returns the [reflect.Type] for this type, using the Instance

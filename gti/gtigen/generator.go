@@ -172,7 +172,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		typ := &Type{
 			Type: gti.Type{
 				Name:       FullName(g.Pkg, ts.Name.Name),
-				ShortName:  g.Pkg.Name + "." + ts.Name.Name,
 				IDName:     strcase.ToKebab(ts.Name.Name),
 				Doc:        doc,
 				Directives: dirs,
