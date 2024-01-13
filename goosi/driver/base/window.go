@@ -10,6 +10,7 @@
 package base
 
 import (
+	"fmt"
 	"image"
 	"sync"
 	"time"
@@ -95,6 +96,7 @@ outer:
 			break outer
 		case <-winPaint.C:
 			if w.This.IsClosed() {
+				fmt.Println("win IsClosed in paint:", w.Name())
 				break outer
 			}
 			w.This.EventMgr().WindowPaint()

@@ -45,7 +45,9 @@ func (ed *Editor) UpdateFromAlloc() {
 		ed.NLinesChars.X = 80
 	} else {
 		ed.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / ed.LineHeight))
-		ed.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
+		if sty.Font.Face != nil {
+			ed.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
+		}
 	}
 	ed.LineLayoutSize.X -= ed.LineNoOff
 }
