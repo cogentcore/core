@@ -29,6 +29,18 @@ func (t *Person) SetType(v *gti.Type) *Person { t.Type = v; return t }
 // Nicknames are the nicknames of the person
 func (t *Person) SetNicknames(v ...string) *Person { t.Nicknames = v; return t }
 
+// SetR sets the [Person.R]
+func (t *Person) SetR(v uint8) *Person { t.R = v; return t }
+
+// SetG sets the [Person.G]
+func (t *Person) SetG(v uint8) *Person { t.G = v; return t }
+
+// SetB sets the [Person.B]
+func (t *Person) SetB(v uint8) *Person { t.B = v; return t }
+
+// SetA sets the [Person.A]
+func (t *Person) SetA(v uint8) *Person { t.A = v; return t }
+
 var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 
 var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0", Args: []string{"x", "y"}})
