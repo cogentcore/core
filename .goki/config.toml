@@ -18,10 +18,6 @@ Type = "Library"
   AndroidMinSDK = 23
   AndroidTargetSDK = 29
 
-  [[Build.Target]]
-    OS = "windows"
-    Arch = "amd64"
-
 [Pack]
   DMG = true
 
