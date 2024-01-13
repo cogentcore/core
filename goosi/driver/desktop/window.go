@@ -33,6 +33,12 @@ type Window struct { //gti:add
 	ScreenWindow string
 }
 
+func (w *Window) SetDropCallback(callback func(w goosi.Window, names []string)) {
+	w.Glw.SetDropCallback(func(w *glfw.Window, names []string) {
+
+	})
+}
+
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
 // MakeCurrentContext on OpenGL).

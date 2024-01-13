@@ -14,6 +14,11 @@ type Window struct { //gti:add
 	base.WindowSingle[*App]
 }
 
+func (w *Window) SetDropCallback(callback func(w goosi.Window, names []string)) {
+	//TODO implement me
+	panic("implement me")
+}
+
 var _ goosi.Window = &Window{}
 
 func (w *Window) Handle() any {
