@@ -4,6 +4,7 @@ package parse
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -155,7 +156,10 @@ func (i Actions) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Actions) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _AstActsValues = []AstActs{0, 1, 2, 3, 4}
@@ -276,7 +280,10 @@ func (i AstActs) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *AstActs) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _RuleFlagsValues = []RuleFlags{7, 8, 9, 10, 11, 12, 13}
@@ -393,6 +400,8 @@ func (i *RuleFlags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _RuleFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
 			err := (*ki.Flags)(i).SetStringOr(flg)
 			if err != nil {
@@ -488,7 +497,10 @@ func (i RuleFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RuleFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _StepsValues = []Steps{0, 1, 2, 3, 4}
@@ -609,5 +621,8 @@ func (i Steps) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Steps) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

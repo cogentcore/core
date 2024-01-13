@@ -4,70 +4,10 @@ package main
 
 import (
 	"goki.dev/gti"
-	"goki.dev/ordmap"
 )
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "main.TableStruct",
-	ShortName: "main.TableStruct",
-	IDName:    "table-struct",
-	Doc:       "TableStruct is a testing struct for table view",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "an icon", Directives: gti.Directives{}, Tag: ""}},
-		{"IntField", &gti.Field{Name: "IntField", Type: "int", LocalType: "int", Doc: "an integer field", Directives: gti.Directives{}, Tag: ""}},
-		{"FloatField", &gti.Field{Name: "FloatField", Type: "float32", LocalType: "float32", Doc: "a float field", Directives: gti.Directives{}, Tag: ""}},
-		{"StrField", &gti.Field{Name: "StrField", Type: "string", LocalType: "string", Doc: "a string field", Directives: gti.Directives{}, Tag: ""}},
-		{"File", &gti.Field{Name: "File", Type: "goki.dev/gi.FileName", LocalType: "gi.FileName", Doc: "a file", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "main.TableStruct", IDName: "table-struct", Doc: "TableStruct is a testing struct for table view", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Icon", Doc: "an icon"}, {Name: "IntField", Doc: "an integer field"}, {Name: "FloatField", Doc: "a float field"}, {Name: "StrField", Doc: "a string field"}, {Name: "File", Doc: "a file"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "main.ILStruct",
-	ShortName: "main.ILStruct",
-	IDName:    "il-struct",
-	Doc:       "ILStruct is an inline-viewed struct",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"On", &gti.Field{Name: "On", Type: "bool", LocalType: "bool", Doc: "click to show next", Directives: gti.Directives{}, Tag: ""}},
-		{"ShowMe", &gti.Field{Name: "ShowMe", Type: "string", LocalType: "string", Doc: "can u see me?", Directives: gti.Directives{}, Tag: "viewif:\"On\""}},
-		{"Cond", &gti.Field{Name: "Cond", Type: "int", LocalType: "int", Doc: "a conditional", Directives: gti.Directives{}, Tag: "viewif:\"On\""}},
-		{"Cond1", &gti.Field{Name: "Cond1", Type: "string", LocalType: "string", Doc: "On and Cond=0 -- note that slbool as bool cannot be used directly..", Directives: gti.Directives{}, Tag: "viewif:\"On&&Cond==0\""}},
-		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/gi/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"On&&Cond<=1\""}},
-		{"Val", &gti.Field{Name: "Val", Type: "float32", LocalType: "float32", Doc: "a value", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "main.ILStruct", IDName: "il-struct", Doc: "ILStruct is an inline-viewed struct", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "On", Doc: "click to show next"}, {Name: "ShowMe", Doc: "can u see me?"}, {Name: "Cond", Doc: "a conditional"}, {Name: "Cond1", Doc: "On and Cond=0 -- note that slbool as bool cannot be used directly.."}, {Name: "Cond2", Doc: "if Cond=0"}, {Name: "Val", Doc: "a value"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "main.Struct",
-	ShortName: "main.Struct",
-	IDName:    "struct",
-	Doc:       "Struct is a testing struct for struct view",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Stripes", &gti.Field{Name: "Stripes", Type: "goki.dev/gi.Stripes", LocalType: "gi.Stripes", Doc: "an enum", Directives: gti.Directives{}, Tag: ""}},
-		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "a string", Directives: gti.Directives{}, Tag: "viewif:\"!(Stripes==[RowStripes,ColStripes])\""}},
-		{"ShowNext", &gti.Field{Name: "ShowNext", Type: "bool", LocalType: "bool", Doc: "click to show next", Directives: gti.Directives{}, Tag: ""}},
-		{"ShowMe", &gti.Field{Name: "ShowMe", Type: "string", LocalType: "string", Doc: "can u see me?", Directives: gti.Directives{}, Tag: "viewif:\"ShowNext\""}},
-		{"Inline", &gti.Field{Name: "Inline", Type: "goki.dev/gi/examples/views.ILStruct", LocalType: "ILStruct", Doc: "how about that", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
-		{"Cond", &gti.Field{Name: "Cond", Type: "int", LocalType: "int", Doc: "a conditional", Directives: gti.Directives{}, Tag: ""}},
-		{"Cond1", &gti.Field{Name: "Cond1", Type: "string", LocalType: "string", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond==0\""}},
-		{"Cond2", &gti.Field{Name: "Cond2", Type: "goki.dev/gi/examples/views.TableStruct", LocalType: "TableStruct", Doc: "if Cond=0", Directives: gti.Directives{}, Tag: "viewif:\"Cond>=0\""}},
-		{"Val", &gti.Field{Name: "Val", Type: "float32", LocalType: "float32", Doc: "a value", Directives: gti.Directives{}, Tag: ""}},
-		{"Vec", &gti.Field{Name: "Vec", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Things", &gti.Field{Name: "Things", Type: "[]*goki.dev/gi/examples/views.TableStruct", LocalType: "[]*TableStruct", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Stuff", &gti.Field{Name: "Stuff", Type: "[]float32", LocalType: "[]float32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "main.Struct", IDName: "struct", Doc: "Struct is a testing struct for struct view", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Stripes", Doc: "an enum"}, {Name: "Name", Doc: "a string"}, {Name: "ShowNext", Doc: "click to show next"}, {Name: "ShowMe", Doc: "can u see me?"}, {Name: "Inline", Doc: "how about that"}, {Name: "Cond", Doc: "a conditional"}, {Name: "Cond1", Doc: "if Cond=0"}, {Name: "Cond2", Doc: "if Cond=0"}, {Name: "Val", Doc: "a value"}, {Name: "Vec"}, {Name: "Things"}, {Name: "Stuff"}}})
