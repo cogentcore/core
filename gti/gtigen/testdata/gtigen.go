@@ -14,14 +14,14 @@ var PersonType = gti.AddType(&gti.Type{
 	Doc:       "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
 	Directives: gti.Directives{
 		{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}},
-		{Tool: "goki", Directive: "embedder", Args: []string{}},
+		{Tool: "goki", Directive: "embedder"},
 	},
 	Fields: []gti.Field{{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person"}, {Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person"}, {Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person"}},
 	Embeds: []gti.Field{{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA"}},
-	Methods: []gti.Method{gti.Method{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
+	Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
 		{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
-		{Tool: "gti", Directive: "add", Args: []string{}},
-	}, Args: []gti.Field(nil), Returns: []gti.Field{{Name: "string", Type: "string", LocalType: "string"}}}},
+		{Tool: "gti", Directive: "add"},
+	}, Returns: []gti.Field{{Name: "string", Type: "string", LocalType: "string"}}}},
 	Instance: &Person{},
 })
 

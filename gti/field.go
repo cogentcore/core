@@ -25,9 +25,7 @@ type Field struct {
 	Doc string
 }
 
-func (f Field) GoString() string {
-	return StructGoString(f)
-}
+func (f Field) GoString() string { return StructGoString(f) }
 
 // Fields represents a set of multiple [Field] objects
 type Fields = []Field

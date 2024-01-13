@@ -27,10 +27,7 @@ func (d Directive) String() string {
 	return "//" + d.Tool + ":" + d.Directive + " " + strings.Join(d.Args, " ")
 }
 
-// GoString returns the directive as Go code.
-func (d Directive) GoString() string {
-	return StructGoString(d)
-}
+func (d Directive) GoString() string { return StructGoString(d) }
 
 // StructGoString creates a GoString for the given struct while omitting
 // any zero values.

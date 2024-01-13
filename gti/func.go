@@ -27,6 +27,8 @@ type Func struct {
 	ID uint64
 }
 
+func (f Func) GoString() string { return StructGoString(f) }
+
 // Method represents a method
 type Method struct {
 	// Name is the name of the method (eg: NewChild)
@@ -45,6 +47,8 @@ type Method struct {
 	// Returns are return values of the method
 	Returns Fields
 }
+
+func (m Method) GoString() string { return StructGoString(m) }
 
 // Methods represents a set of multiple [Method] objects
 type Methods = []Method
