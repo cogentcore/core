@@ -43,6 +43,8 @@ func Init() {
 		}
 	}
 
+	TheApp.SetSystemWindow()
+
 	base.Init(TheApp, &TheApp.App)
 }
 
@@ -68,7 +70,6 @@ func (a *App) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
-	a.SetSystemWindow()
 
 	go a.Win.WinLoop()
 
