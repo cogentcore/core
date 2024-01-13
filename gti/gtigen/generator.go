@@ -283,12 +283,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting function args: %w", err)
 		}
-		fun.Args = &args.Fields
+		fun.Args = args.Fields
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting function return values: %w", err)
 		}
-		fun.Returns = &rets.Fields
+		fun.Returns = rets.Fields
 		g.Funcs.Add(fun.Name, fun)
 	} else {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
@@ -303,12 +303,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting method args: %w", err)
 		}
-		method.Args = &args.Fields
+		method.Args = args.Fields
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting method return values: %w", err)
 		}
-		method.Returns = &rets.Fields
+		method.Returns = rets.Fields
 
 		typ := fd.Recv.List[0].Type
 		// get rid of any pointer receiver

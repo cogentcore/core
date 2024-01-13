@@ -18,10 +18,10 @@ type Func struct {
 	Directives Directives
 
 	// Args are arguments to the function
-	Args *Fields
+	Args Fields
 
 	// Returns are return values of the function
-	Returns *Fields
+	Returns Fields
 
 	// unique type ID number
 	ID uint64
@@ -40,10 +40,10 @@ type Method struct {
 	Directives Directives
 
 	// Args are arguments to the method
-	Args *Fields
+	Args Fields
 
 	// Returns are return values of the method
-	Returns *Fields
+	Returns Fields
 }
 
 // Methods represents a set of multiple [Method] objects

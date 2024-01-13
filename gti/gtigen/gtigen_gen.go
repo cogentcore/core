@@ -26,6 +26,6 @@ var _ = gti.AddFunc(&gti.Func{
 		{Tool: "grease", Directive: "cmd", Args: []string{"-root"}},
 		{Tool: "gti", Directive: "add", Args: []string{}},
 	},
-	Args:    &[]gti.Field{{Name: "cfg", Type: "*goki.dev/gti/gtigen.Config", LocalType: "*Config"}},
-	Returns: &[]gti.Field{{Name: "error", Type: "error", LocalType: "error"}},
+	Args:    []gti.Field{{Name: "cfg", Type: "*goki.dev/gti/gtigen.Config", LocalType: "*Config"}},
+	Returns: []gti.Field{{Name: "error", Type: "error", LocalType: "error"}},
 })
