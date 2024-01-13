@@ -6,6 +6,7 @@ package events
 
 import (
 	"fmt"
+	"image"
 
 	"goki.dev/events/key"
 )
@@ -30,7 +31,8 @@ type DragDrop struct {
 	// typically a mimedata encoded representation.
 	Data any
 
-	// Source of the drop -- only available for internal DND actions
+	// Source of the drop, only available for internal DND actions.
+	// If it is an external drop, this will be nil.
 	Source any
 
 	// Target of the drop -- receiver of an accepted drop should set this to
@@ -44,6 +46,17 @@ func NewDragDrop(typ Types, mdrag *Mouse) *DragDrop {
 	ev.Flags.SetFlag(false, Handled)
 	ev.Typ = typ
 	ev.DefaultMod()
+	return ev
+}
+
+func NewExternalDrop(typ Types, but Buttons, where image.Point, mods key.Modifiers, data any) *DragDrop {
+	ev := &DragDrop{}
+	ev.Typ = typ
+	ev.SetUnique()
+	ev.Button = but
+	ev.Where = where
+	ev.Mods = mods
+	ev.Data = data
 	return ev
 }
 

@@ -61,43 +61,36 @@ func (fn *Node) Cut() {
 func (fn *Node) Paste() {
 	md := fn.Clipboard().Read([]string{fi.TextPlain})
 	if md != nil {
-		fn.PasteFiles(md, nil)
+		fn.PasteFiles(md, false, nil)
 	}
 }
 
 func (fn *Node) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	md := de.Data.(mimedata.Mimes)
-	fn.PasteFiles(md, func() {
+	fn.PasteFiles(md, de.Source == nil, func() {
 		fn.This().(giv.TreeViewer).DropFinalize(de)
 	})
 }
 
-// todo: not yet implemented
-// func (fn *Node) DropExternal(md mimedata.Mimes, mod events.DropMods) {
-// 	fn.PasteFiles(md)
-// }
-
 // PasteCheckExisting checks for existing files in target node directory if
 // that is non-nil (otherwise just uses absolute path), and returns list of existing
 // and node for last one if exists.
-func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes) ([]string, *Node) {
+func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bool) ([]string, *Node) {
 	froot := fn.FRoot
 	tpath := ""
 	if tfn != nil {
 		tpath = string(tfn.FPath)
 	}
-	// intl := ftv.EventMgr.DNDIsInternalSrc() // todo
-	intl := true
 	nf := len(md)
-	if intl {
+	if !externalDrop {
 		nf /= 3
 	}
 	var sfn *Node
 	var existing []string
 	for i := 0; i < nf; i++ {
 		var d *mimedata.Data
-		if intl {
+		if !externalDrop {
 			d = md[i*3+1]
 			npath := string(md[i*3].Data)
 			sfni := froot.FindPath(npath)
@@ -124,18 +117,16 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes) ([]string, *Nod
 }
 
 // PasteCopyFiles copies files in given data into given target directory
-func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes) {
+func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool) {
 	froot := fn.FRoot
-	// intl := ftv.EventMgr.DNDIsInternalSrc()
-	intl := true
 	nf := len(md)
-	if intl {
+	if !externalDrop {
 		nf /= 3
 	}
 	for i := 0; i < nf; i++ {
 		var d *mimedata.Data
 		mode := os.FileMode(0664)
-		if intl {
+		if !externalDrop {
 			d = md[i*3+1]
 			npath := string(md[i*3].Data)
 			sfni := froot.FindPath(npath)
@@ -159,10 +150,10 @@ func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes) {
 
 // PasteCopyFilesCheck copies files into given directory node,
 // first checking if any already exist -- if they exist, prompts.
-func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, dropFinal func()) {
-	existing, _ := fn.PasteCheckExisting(tdir, md)
+func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop bool, dropFinal func()) {
+	existing, _ := fn.PasteCheckExisting(tdir, md, externalDrop)
 	if len(existing) == 0 {
-		fn.PasteCopyFiles(tdir, md)
+		fn.PasteCopyFiles(tdir, md, externalDrop)
 		if dropFinal != nil {
 			dropFinal()
 		}
@@ -173,7 +164,7 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, dropFinal fun
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText("Overwrite").OnClick(func(e events.Event) {
-			fn.PasteCopyFiles(tdir, md)
+			fn.PasteCopyFiles(tdir, md, externalDrop)
 			if dropFinal != nil {
 				dropFinal()
 			}
@@ -182,9 +173,10 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, dropFinal fun
 	d.NewDialog(fn).Run()
 }
 
-// PasteFiles applies a paste / drop of mime data onto this node
-// always does a copy of files into / onto target
-func (fn *Node) PasteFiles(md mimedata.Mimes, dropFinal func()) {
+// PasteFiles applies a paste / drop of mime data onto this node.
+// always does a copy of files into / onto target.
+// externalDrop is true if this is an externally-generated Drop event (from OS)
+func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func()) {
 	if len(md) == 0 {
 		return
 	}
@@ -197,26 +189,24 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, dropFinal func()) {
 	tpath := string(fn.FPath)
 	isdir := fn.IsDir()
 	if isdir {
-		fn.PasteCopyFilesCheck(fn, md, dropFinal)
+		fn.PasteCopyFilesCheck(fn, md, externalDrop, dropFinal)
 		return
 	}
 	if len(md) > 3 { // multiple files -- automatically goes into parent dir
 		tdir := AsNode(fn.Parent())
-		fn.PasteCopyFilesCheck(tdir, md, dropFinal)
+		fn.PasteCopyFilesCheck(tdir, md, externalDrop, dropFinal)
 		return
 	}
 	// single file dropped onto a single target file
 	srcpath := ""
-	// intl := ftv.EventMgr.DNDIsInternalSrc() // todo
-	intl := true
-	if intl {
-		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
-	} else {
+	if externalDrop {
 		srcpath = string(md[0].Data) // just file path
+	} else {
+		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
 	}
 	fname := filepath.Base(srcpath)
 	tdir := AsNode(fn.Parent())
-	existing, sfn := fn.PasteCheckExisting(tdir, md)
+	existing, sfn := fn.PasteCheckExisting(tdir, md, externalDrop)
 	mode := os.FileMode(0664)
 	if sfn != nil {
 		mode = sfn.Info.Mode

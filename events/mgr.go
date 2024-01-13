@@ -12,6 +12,7 @@ import (
 	"goki.dev/events/key"
 	"goki.dev/glop/nptime"
 	"goki.dev/mat32"
+	"goki.dev/mimedata"
 )
 
 // TraceWindowPaint prints out a . for each WindowPaint event
@@ -147,6 +148,14 @@ func (em *Mgr) MouseMove(where image.Point) {
 // Scroll creates and sends a scroll event with given values
 func (em *Mgr) Scroll(where image.Point, delta mat32.Vec2) {
 	ev := NewScroll(where, delta, em.Last.Mods)
+	ev.Init()
+	em.Deque.Send(ev)
+}
+
+// DropExternal creates and sends a Drop event with given values
+func (em *Mgr) DropExternal(where image.Point, md mimedata.Mimes) {
+	ev := NewExternalDrop(Drop, em.Last.MouseButton, where, em.Last.Mods, md)
+	em.Last.MousePos = where
 	ev.Init()
 	em.Deque.Send(ev)
 }

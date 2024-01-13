@@ -146,8 +146,8 @@ func (w *Window) DropEvent(gw *glfw.Window, names []string) {
 	for i, s := range names {
 		md[i] = mimedata.NewTextData(s)
 	}
-	// where := w.curMousePosPoint(gw)
-	// w.EvMgr.DND(dnd.External, where, md)
+	where := w.CurMousePosPoint(gw)
+	w.EvMgr.DropExternal(where, md)
 }
 
 // TODO: should this be a map?
