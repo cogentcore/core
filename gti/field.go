@@ -4,7 +4,11 @@
 
 package gti
 
-import "reflect"
+import (
+	"reflect"
+
+	"goki.dev/laser"
+)
 
 // Field represents a field or embed in a struct.
 type Field struct {
@@ -24,6 +28,7 @@ func (f Field) GoString() string { return StructGoString(f) }
 // by searching through all of the embeds if it can not find
 // it directly in the struct.
 func GetField(val reflect.Value, field string) *Field {
+	val = laser.NonPtrValue(val)
 	typ := TypeByName(TypeName(val.Type()))
 	// if we are not in the gti registry, there is nothing that we can do
 	if typ == nil {
