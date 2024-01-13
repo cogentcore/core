@@ -10,6 +10,7 @@ import (
 	"testing"
 	"text/template"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/grease"
 	"goki.dev/ordmap"
 )
@@ -93,4 +94,12 @@ func TestPerson(t *testing.T) {
 	// if len(have.Methods) != 1 {
 	// 	t.Errorf("expected 1 method, but got %d", len(have.Methods))
 	// }
+}
+
+func BenchmarkIDName(b *testing.B) {
+	const path = "goki.dev/gi.Button"
+	for i := 0; i < b.N; i++ {
+		li := strings.LastIndex(path, ".")
+		_ = strcase.ToKebab(path[li+1:])
+	}
 }
