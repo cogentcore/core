@@ -68,12 +68,3 @@ func AddFunc(fun *Func) *Func {
 func FuncName(f any) string {
 	return runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
 }
-
-// example constructor:
-// var FuncMyFunc = gti.AddFunc(&gti.Func{
-// 	Name: "goki.dev/ki.MyFunc",
-// 	Comment: `my func is awesome`,
-// 	Directives: gti.Directives{},
-// 	Args: ordmap.Make(...),
-// 	Returns: ordmap.Make(...),
-// })

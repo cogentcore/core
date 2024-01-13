@@ -422,19 +422,25 @@ func (ts *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	tb := ts.Tabs()
 	updt := ts.UpdateStart()
 	defer ts.UpdateEndLayout(updt)
-	nxtidx := -1
+	nidx := -1
 	if fr.StackTop == idx {
 		if idx > 0 {
-			nxtidx = idx - 1
+			nidx = idx - 1
 		} else if idx < sz-1 {
-			nxtidx = idx
+			nidx = idx
 		}
+	}
+	// if we didn't delete the current tab and have at least one
+	// other tab, we go to the next tab over
+	if nidx < 0 && ts.NTabs() > 1 {
+		nidx = max(idx-1, 0)
 	}
 	fr.DeleteChildAtIndex(idx, destroy)
 	tb.DeleteChildAtIndex(idx, ki.DestroyKids) // always destroy -- we manage
 	ts.Mu.Unlock()
-	if nxtidx >= 0 {
-		ts.SelectTabIndex(nxtidx)
+
+	if nidx >= 0 {
+		ts.SelectTabIndex(nidx)
 	}
 	if destroy {
 		return nil, tnm, true

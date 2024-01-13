@@ -4,6 +4,8 @@
 
 package main
 
+//go:generate goki generate
+
 import (
 	_ "embed"
 	"fmt"
@@ -222,43 +224,43 @@ func makeInputs(ts *gi.Tabs) {
 		"A widely consumed small, red fruit",
 	}
 
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs)
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs).SetType(gi.ChooserOutlined)
-	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs)
-	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs).SetType(gi.ChooserOutlined)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs...)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs...)
+	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
 
 	gi.NewSwitch(inputs).SetText("Toggle")
 
-	gi.NewSwitches(inputs).SetItems([]string{"Switch 1", "Switch 2", "Switch 3"}).
-		SetTooltips([]string{"A description for Switch 1", "A description for Switch 2", "A description for Switch 3"})
+	gi.NewSwitches(inputs).SetItems("Switch 1", "Switch 2", "Switch 3").
+		SetTooltips("A description for Switch 1", "A description for Switch 2", "A description for Switch 3")
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchChip).SetItems([]string{"Chip 1", "Chip 2", "Chip 3"}).
-		SetTooltips([]string{"A description for Chip 1", "A description for Chip 2", "A description for Chip 3"})
+	gi.NewSwitches(inputs).SetType(gi.SwitchChip).SetItems("Chip 1", "Chip 2", "Chip 3").
+		SetTooltips("A description for Chip 1", "A description for Chip 2", "A description for Chip 3")
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}).
-		SetTooltips([]string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"})
+	gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems("Checkbox 1", "Checkbox 2", "Checkbox 3").
+		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
 
-	is := gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Indeterminate 1", "Indeterminate 2", "Indeterminate 3"}).
-		SetTooltips([]string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"})
+	is := gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+		SetTooltips("A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3")
 	is.Config()
 	for _, swi := range is.Kids {
 		sw := swi.(*gi.Switch)
 		sw.SetState(true, states.Indeterminate)
 	}
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems([]string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}).
-		SetTooltips([]string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"})
+	gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems("Radio Button 1", "Radio Button 2", "Radio Button 3").
+		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
 
-	is = gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetItems([]string{"Indeterminate 1", "Indeterminate 2", "Indeterminate 3"}).
-		SetTooltips([]string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"})
+	is = gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetItems("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+		SetTooltips("A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3")
 	is.Config()
 	for _, swi := range is.Kids {
 		sw := swi.(*gi.Switch)
 		sw.SetState(true, states.Indeterminate)
 	}
 
-	gi.NewSwitches(inputs).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems([]string{"Segmented Button 1", "Segmented Button 2", "Segmented Button 3"}).
-		SetTooltips([]string{"A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3"})
+	gi.NewSwitches(inputs).SetType(gi.SwitchSegmentedButton).SetMutex(true).SetItems("Segmented Button 1", "Segmented Button 2", "Segmented Button 3").
+		SetTooltips("A description for Segmented Button 1", "A description for Segmented Button 2", "A description for Segmented Button 3")
 
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)

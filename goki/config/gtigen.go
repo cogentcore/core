@@ -4,170 +4,20 @@ package config
 
 import (
 	"goki.dev/gti"
-	"goki.dev/ordmap"
 )
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Config",
-	ShortName: "config.Config",
-	IDName:    "config",
-	Doc:       "Config is the main config struct\nthat contains all of the configuration\noptions for the Goki tool",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "the user-friendly name of the project", Directives: gti.Directives{}, Tag: ""}},
-		{"ID", &gti.Field{Name: "ID", Type: "string", LocalType: "string", Doc: "the bundle / package ID to use of the project (required for building for mobile platforms\nand packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)", Directives: gti.Directives{}, Tag: ""}},
-		{"Desc", &gti.Field{Name: "Desc", Type: "string", LocalType: "string", Doc: "the description of the project", Directives: gti.Directives{}, Tag: ""}},
-		{"Version", &gti.Field{Name: "Version", Type: "string", LocalType: "string", Doc: "the version of the project", Directives: gti.Directives{}, Tag: "cmd:\"set-version\" posarg:\"0\" def:\"v0.0.0\""}},
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/goki/config.Types", LocalType: "Types", Doc: "the type of the project (app/library)", Directives: gti.Directives{}, Tag: ""}},
-		{"Build", &gti.Field{Name: "Build", Type: "goki.dev/goki/config.Build", LocalType: "Build", Doc: "the configuration options for the build, install, run, and pack commands", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
-		{"Pack", &gti.Field{Name: "Pack", Type: "goki.dev/goki/config.Pack", LocalType: "Pack", Doc: "the configuration information for the pack command", Directives: gti.Directives{}, Tag: "cmd:\"pack\" view:\"add-fields\""}},
-		{"Web", &gti.Field{Name: "Web", Type: "goki.dev/goki/config.Web", LocalType: "Web", Doc: "the configuration information for web", Directives: gti.Directives{}, Tag: "cmd:\"build,install,run,pack\" view:\"add-fields\""}},
-		{"Setup", &gti.Field{Name: "Setup", Type: "goki.dev/goki/config.Setup", LocalType: "Setup", Doc: "the configuration options for the setup command", Directives: gti.Directives{}, Tag: "cmd:\"setup\" view:\"add-fields\""}},
-		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/goki/config.Log", LocalType: "Log", Doc: "the configuration options for the log command", Directives: gti.Directives{}, Tag: "cmd:\"log\" view:\"add-fields\""}},
-		{"Release", &gti.Field{Name: "Release", Type: "goki.dev/goki/config.Release", LocalType: "Release", Doc: "the configuration options for the release command", Directives: gti.Directives{}, Tag: "cmd:\"release\" view:\"add-fields\""}},
-		{"Generate", &gti.Field{Name: "Generate", Type: "goki.dev/goki/config.Generate", LocalType: "Generate", Doc: "the configuration options for the generate command", Directives: gti.Directives{}, Tag: "cmd:\"generate\" view:\"add-fields\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Config", IDName: "config", Doc: "Config is the main config struct\nthat contains all of the configuration\noptions for the Goki tool", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Name", Doc: "the user-friendly name of the project"}, {Name: "ID", Doc: "the bundle / package ID to use of the project (required for building for mobile platforms\nand packaging for desktop platforms). It is typically in the format com.org.app (eg: com.goki.mail)"}, {Name: "Desc", Doc: "the description of the project"}, {Name: "Version", Doc: "the version of the project"}, {Name: "Type", Doc: "the type of the project (app/library)"}, {Name: "Build", Doc: "the configuration options for the build, install, run, and pack commands"}, {Name: "Pack", Doc: "the configuration information for the pack command"}, {Name: "Web", Doc: "the configuration information for web"}, {Name: "Setup", Doc: "the configuration options for the setup command"}, {Name: "Log", Doc: "the configuration options for the log command"}, {Name: "Release", Doc: "the configuration options for the release command"}, {Name: "Generate", Doc: "the configuration options for the generate command"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Build",
-	ShortName: "config.Build",
-	IDName:    "build",
-	Doc:       "",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Package", &gti.Field{Name: "Package", Type: "string", LocalType: "string", Doc: "the path of the package to build", Directives: gti.Directives{}, Tag: "def:\".\" posarg:\"0\" required:\"-\""}},
-		{"Target", &gti.Field{Name: "Target", Type: "[]goki.dev/goki/config.Platform", LocalType: "[]Platform", Doc: "the target platforms to build executables for", Directives: gti.Directives{}, Tag: "flag:\"t,target\""}},
-		{"Output", &gti.Field{Name: "Output", Type: "string", LocalType: "string", Doc: "the output file name; if not specified, it depends on the package being built", Directives: gti.Directives{}, Tag: "flag:\"o,output\""}},
-		{"Debug", &gti.Field{Name: "Debug", Type: "bool", LocalType: "bool", Doc: "whether to build/run the app in debug mode; this currently only works on mobile platforms", Directives: gti.Directives{}, Tag: "flag:\"d,debug\""}},
-		{"Rebuild", &gti.Field{Name: "Rebuild", Type: "bool", LocalType: "bool", Doc: "force rebuilding of packages that are already up-to-date", Directives: gti.Directives{}, Tag: "flag:\"a,rebuild\""}},
-		{"Install", &gti.Field{Name: "Install", Type: "bool", LocalType: "bool", Doc: "install the generated executable", Directives: gti.Directives{}, Tag: "flag:\"i,install\""}},
-		{"PrintOnly", &gti.Field{Name: "PrintOnly", Type: "bool", LocalType: "bool", Doc: "print the commands but do not run them", Directives: gti.Directives{}, Tag: "flag:\"n,print-only\""}},
-		{"Print", &gti.Field{Name: "Print", Type: "bool", LocalType: "bool", Doc: "print the commands", Directives: gti.Directives{}, Tag: "flag:\"x,print\""}},
-		{"GCFlags", &gti.Field{Name: "GCFlags", Type: "[]string", LocalType: "[]string", Doc: "arguments to pass on each go tool compile invocation", Directives: gti.Directives{}, Tag: ""}},
-		{"LDFlags", &gti.Field{Name: "LDFlags", Type: "[]string", LocalType: "[]string", Doc: "arguments to pass on each go tool link invocation", Directives: gti.Directives{}, Tag: ""}},
-		{"Tags", &gti.Field{Name: "Tags", Type: "[]string", LocalType: "[]string", Doc: "a comma-separated list of additional build tags to consider satisfied during the build", Directives: gti.Directives{}, Tag: ""}},
-		{"Trimpath", &gti.Field{Name: "Trimpath", Type: "bool", LocalType: "bool", Doc: "remove all file system paths from the resulting executable. Instead of absolute file system paths, the recorded file names will begin either a module path@version (when using modules), or a plain import path (when using the standard library, or GOPATH).", Directives: gti.Directives{}, Tag: ""}},
-		{"Work", &gti.Field{Name: "Work", Type: "bool", LocalType: "bool", Doc: "print the name of the temporary work directory and do not delete it when exiting", Directives: gti.Directives{}, Tag: ""}},
-		{"IOSVersion", &gti.Field{Name: "IOSVersion", Type: "string", LocalType: "string", Doc: "the minimal version of the iOS SDK to compile against", Directives: gti.Directives{}, Tag: "def:\"13.0\""}},
-		{"AndroidMinSDK", &gti.Field{Name: "AndroidMinSDK", Type: "int", LocalType: "int", Doc: "the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)", Directives: gti.Directives{}, Tag: "def:\"23\" min:\"23\""}},
-		{"AndroidTargetSDK", &gti.Field{Name: "AndroidTargetSDK", Type: "int", LocalType: "int", Doc: "the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)", Directives: gti.Directives{}, Tag: "def:\"29\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Build", IDName: "build", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Package", Doc: "the path of the package to build"}, {Name: "Target", Doc: "the target platforms to build executables for"}, {Name: "Output", Doc: "the output file name; if not specified, it depends on the package being built"}, {Name: "Debug", Doc: "whether to build/run the app in debug mode; this currently only works on mobile platforms"}, {Name: "Rebuild", Doc: "force rebuilding of packages that are already up-to-date"}, {Name: "Install", Doc: "install the generated executable"}, {Name: "PrintOnly", Doc: "print the commands but do not run them"}, {Name: "Print", Doc: "print the commands"}, {Name: "GCFlags", Doc: "arguments to pass on each go tool compile invocation"}, {Name: "LDFlags", Doc: "arguments to pass on each go tool link invocation"}, {Name: "Tags", Doc: "a comma-separated list of additional build tags to consider satisfied during the build"}, {Name: "Trimpath", Doc: "remove all file system paths from the resulting executable. Instead of absolute file system paths, the recorded file names will begin either a module path@version (when using modules), or a plain import path (when using the standard library, or GOPATH)."}, {Name: "Work", Doc: "print the name of the temporary work directory and do not delete it when exiting"}, {Name: "IOSVersion", Doc: "the minimal version of the iOS SDK to compile against"}, {Name: "AndroidMinSDK", Doc: "the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)"}, {Name: "AndroidTargetSDK", Doc: "the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Pack",
-	ShortName: "config.Pack",
-	IDName:    "pack",
-	Doc:       "",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"DMG", &gti.Field{Name: "DMG", Type: "bool", LocalType: "bool", Doc: "whether to build a .dmg file on macOS in addition to a .app file.\nThis is automatically disabled for the install command.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Pack", IDName: "pack", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "DMG", Doc: "whether to build a .dmg file on macOS in addition to a .app file.\nThis is automatically disabled for the install command."}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Setup",
-	ShortName: "config.Setup",
-	IDName:    "setup",
-	Doc:       "",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Platform", &gti.Field{Name: "Platform", Type: "goki.dev/goki/config.Platform", LocalType: "Platform", Doc: "the platform to set things up for", Directives: gti.Directives{}, Tag: "posarg:\"0\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Setup", IDName: "setup", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Platform", Doc: "the platform to set things up for"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Log",
-	ShortName: "config.Log",
-	IDName:    "log",
-	Doc:       "",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Target", &gti.Field{Name: "Target", Type: "string", LocalType: "string", Doc: "the target platform to view the logs for (ios or android)", Directives: gti.Directives{}, Tag: "def:\"android\""}},
-		{"Keep", &gti.Field{Name: "Keep", Type: "bool", LocalType: "bool", Doc: "whether to keep the previous log messages or clear them", Directives: gti.Directives{}, Tag: "def:\"false\""}},
-		{"All", &gti.Field{Name: "All", Type: "string", LocalType: "string", Doc: "messages not generated from your app equal to or above this log level will be shown", Directives: gti.Directives{}, Tag: "def:\"F\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Log", IDName: "log", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Target", Doc: "the target platform to view the logs for (ios or android)"}, {Name: "Keep", Doc: "whether to keep the previous log messages or clear them"}, {Name: "All", Doc: "messages not generated from your app equal to or above this log level will be shown"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Release",
-	ShortName: "config.Release",
-	IDName:    "release",
-	Doc:       "",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"VersionFile", &gti.Field{Name: "VersionFile", Type: "string", LocalType: "string", Doc: "the Go file to store version information in", Directives: gti.Directives{}, Tag: "def:\"version.go\""}},
-		{"Package", &gti.Field{Name: "Package", Type: "string", LocalType: "string", Doc: "the Go package in which the version file will be stored", Directives: gti.Directives{}, Tag: "def:\"main\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Release", IDName: "release", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "VersionFile", Doc: "the Go file to store version information in"}, {Name: "Package", Doc: "the Go package in which the version file will be stored"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Generate",
-	ShortName: "config.Generate",
-	IDName:    "generate",
-	Doc:       "",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Enumgen", &gti.Field{Name: "Enumgen", Type: "goki.dev/enums/enumgen.Config", LocalType: "enumgen.Config", Doc: "the enum generation configuration options passed to enumgen", Directives: gti.Directives{}, Tag: ""}},
-		{"Gtigen", &gti.Field{Name: "Gtigen", Type: "goki.dev/gti/gtigen.Config", LocalType: "gtigen.Config", Doc: "the generation configuration options passed to gtigen", Directives: gti.Directives{}, Tag: ""}},
-		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "the source directory to run generate on (can be multiple through ./...)", Directives: gti.Directives{}, Tag: "def:\".\" posarg:\"0\" required:\"-\" nest:\"-\""}},
-		{"Output", &gti.Field{Name: "Output", Type: "string", LocalType: "string", Doc: "the output file location relative to the package on which generate is being called", Directives: gti.Directives{}, Tag: "def:\"gokigen.go\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Generate", IDName: "generate", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Enumgen", Doc: "the enum generation configuration options passed to enumgen"}, {Name: "Gtigen", Doc: "the generation configuration options passed to gtigen"}, {Name: "Dir", Doc: "the source directory to run generate on (can be multiple through ./...)"}, {Name: "Output", Doc: "the output file location relative to the package on which generate is being called"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/goki/config.Web",
-	ShortName: "config.Web",
-	IDName:    "web",
-	Doc:       "Web containts the configuration information for building for web and creating\nthe HTML page that loads a Go wasm app and its resources.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Port", &gti.Field{Name: "Port", Type: "string", LocalType: "string", Doc: "Port is the port to serve the page at when using the serve command.", Directives: gti.Directives{}, Tag: "def:\"8080\""}},
-		{"RandomVersion", &gti.Field{Name: "RandomVersion", Type: "bool", LocalType: "bool", Doc: "RandomVersion is whether to automatically add a random string to the\nend of the version string for the app when building for web. This is\nnecessary in order for changes made during local development to show up,\nbut should not be enabled in release builds to prevent constant inaccurate\nupdate messages. It is enabled by default in the serve command and disabled\nby default otherwise.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
-		{"Gzip", &gti.Field{Name: "Gzip", Type: "bool", LocalType: "bool", Doc: "Gzip is whether to gzip the app.wasm file that is built in the build command\nand serve it as a gzip-encoded file in the run command.", Directives: gti.Directives{}, Tag: ""}},
-		{"BackgroundColor", &gti.Field{Name: "BackgroundColor", Type: "string", LocalType: "string", Doc: "A placeholder background color for the application page to display before\nits stylesheets are loaded.\n\nDEFAULT: #2d2c2c.", Directives: gti.Directives{}, Tag: "def:\"#2d2c2c\""}},
-		{"ThemeColor", &gti.Field{Name: "ThemeColor", Type: "string", LocalType: "string", Doc: "The theme color for the application. This affects how the OS displays the\napp (e.g., PWA title bar or Android's task switcher).\n\nDEFAULT: #2d2c2c.", Directives: gti.Directives{}, Tag: "def:\"#2d2c2c\""}},
-		{"LoadingLabel", &gti.Field{Name: "LoadingLabel", Type: "string", LocalType: "string", Doc: "The text displayed while loading a page. Load progress can be inserted by\nincluding \"{progress}\" in the loading label.\n\nDEFAULT: \"{progress}%\".", Directives: gti.Directives{}, Tag: ""}},
-		{"Lang", &gti.Field{Name: "Lang", Type: "string", LocalType: "string", Doc: "The page language.\n\nDEFAULT: en.", Directives: gti.Directives{}, Tag: "def:\"en\""}},
-		{"Author", &gti.Field{Name: "Author", Type: "string", LocalType: "string", Doc: "The page authors.", Directives: gti.Directives{}, Tag: ""}},
-		{"Keywords", &gti.Field{Name: "Keywords", Type: "[]string", LocalType: "[]string", Doc: "The page keywords.", Directives: gti.Directives{}, Tag: ""}},
-		{"Image", &gti.Field{Name: "Image", Type: "string", LocalType: "string", Doc: "The path of the default image that is used by social networks when\nlinking the app.", Directives: gti.Directives{}, Tag: ""}},
-		{"AutoUpdateInterval", &gti.Field{Name: "AutoUpdateInterval", Type: "time.Duration", LocalType: "time.Duration", Doc: "The interval between each app auto-update while running in a web browser.\nZero or negative values deactivates the auto-update mechanism.\n\nDefault is 10 seconds.", Directives: gti.Directives{}, Tag: "def:\"10000000000\""}},
-		{"Env", &gti.Field{Name: "Env", Type: "map[string]string", LocalType: "map[string]string", Doc: "The environment variables that are passed to the progressive web app.\n\nReserved keys:\n- GOAPP_VERSION\n- GOAPP_GOAPP_STATIC_RESOURCES_URL", Directives: gti.Directives{}, Tag: ""}},
-		{"WasmContentLengthHeader", &gti.Field{Name: "WasmContentLengthHeader", Type: "string", LocalType: "string", Doc: "The HTTP header to retrieve the WebAssembly file content length.\n\nContent length finding falls back to the Content-Length HTTP header when\nno content length is found with the defined header.", Directives: gti.Directives{}, Tag: ""}},
-		{"ServiceWorkerTemplate", &gti.Field{Name: "ServiceWorkerTemplate", Type: "string", LocalType: "string", Doc: "The template used to generate app-worker.js. The template follows the\ntext/template package model.\n\nBy default set to DefaultAppWorkerJS, changing the template have very\nhigh chances to mess up go-app usage. Any issue related to a custom app\nworker template is not supported and will be closed.", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/goki/config.Web", IDName: "web", Doc: "Web containts the configuration information for building for web and creating\nthe HTML page that loads a Go wasm app and its resources.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Fields: []gti.Field{{Name: "Port", Doc: "Port is the port to serve the page at when using the serve command."}, {Name: "RandomVersion", Doc: "RandomVersion is whether to automatically add a random string to the\nend of the version string for the app when building for web. This is\nnecessary in order for changes made during local development to show up,\nbut should not be enabled in release builds to prevent constant inaccurate\nupdate messages. It is enabled by default in the serve command and disabled\nby default otherwise."}, {Name: "Gzip", Doc: "Gzip is whether to gzip the app.wasm file that is built in the build command\nand serve it as a gzip-encoded file in the run command."}, {Name: "BackgroundColor", Doc: "A placeholder background color for the application page to display before\nits stylesheets are loaded.\n\nDEFAULT: #2d2c2c."}, {Name: "ThemeColor", Doc: "The theme color for the application. This affects how the OS displays the\napp (e.g., PWA title bar or Android's task switcher).\n\nDEFAULT: #2d2c2c."}, {Name: "LoadingLabel", Doc: "The text displayed while loading a page. Load progress can be inserted by\nincluding \"{progress}\" in the loading label.\n\nDEFAULT: \"{progress}%\"."}, {Name: "Lang", Doc: "The page language.\n\nDEFAULT: en."}, {Name: "Author", Doc: "The page authors."}, {Name: "Keywords", Doc: "The page keywords."}, {Name: "Image", Doc: "The path of the default image that is used by social networks when\nlinking the app."}, {Name: "AutoUpdateInterval", Doc: "The interval between each app auto-update while running in a web browser.\nZero or negative values deactivates the auto-update mechanism.\n\nDefault is 10 seconds."}, {Name: "Env", Doc: "The environment variables that are passed to the progressive web app.\n\nReserved keys:\n- GOAPP_VERSION\n- GOAPP_GOAPP_STATIC_RESOURCES_URL"}, {Name: "WasmContentLengthHeader", Doc: "The HTTP header to retrieve the WebAssembly file content length.\n\nContent length finding falls back to the Content-Length HTTP header when\nno content length is found with the defined header."}}})

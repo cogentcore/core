@@ -5,26 +5,11 @@ package xyzv
 import (
 	"goki.dev/gti"
 	"goki.dev/ki"
-	"goki.dev/ordmap"
 	"goki.dev/xyz"
 )
 
 // ManipPtType is the [gti.Type] for [ManipPt]
-var ManipPtType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyzv.ManipPt",
-	ShortName: "xyzv.ManipPt",
-	IDName:    "manip-pt",
-	Doc:       "ManipPt is a manipulation control point",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Solid", &gti.Field{Name: "Solid", Type: "goki.dev/xyz.Solid", LocalType: "xyz.Solid", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ManipPt{},
-})
+var ManipPtType = gti.AddType(&gti.Type{Name: "goki.dev/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPt{}})
 
 // KiType returns the [*gti.Type] of [ManipPt]
 func (t *ManipPt) KiType() *gti.Type {
@@ -37,36 +22,16 @@ func (t *ManipPt) New() ki.Ki {
 }
 
 // SetMat sets the [ManipPt.Mat]
-func (t *ManipPt) SetMat(v xyz.Material) *ManipPt {
-	t.Mat = v
-	return t
-}
+func (t *ManipPt) SetMat(v xyz.Material) *ManipPt { t.Mat = v; return t }
 
 // SceneType is the [gti.Type] for [Scene]
-var SceneType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyzv.Scene",
-	ShortName:  "xyzv.Scene",
-	IDName:     "scene",
-	Doc:        "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Scene", &gti.Field{Name: "Scene", Type: "*goki.dev/xyz.Scene", LocalType: "*xyz.Scene", Doc: "Scene is the 3D Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"SelMode", &gti.Field{Name: "SelMode", Type: "goki.dev/xyzv.SelModes", LocalType: "SelModes", Doc: "how to deal with selection / manipulation events", Directives: gti.Directives{}, Tag: ""}},
-		{"CurSel", &gti.Field{Name: "CurSel", Type: "goki.dev/xyz.Node", LocalType: "xyz.Node", Doc: "currently selected node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"CurManipPt", &gti.Field{Name: "CurManipPt", Type: "*goki.dev/xyzv.ManipPt", LocalType: "*ManipPt", Doc: "currently selected manipulation control point", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"SelParams", &gti.Field{Name: "SelParams", Type: "goki.dev/xyzv.SelParams", LocalType: "SelParams", Doc: "parameters for selection / manipulation box", Directives: gti.Directives{}, Tag: "view:\"inline\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Scene{},
-})
+var SceneType = gti.AddType(&gti.Type{Name: "goki.dev/xyzv.Scene", IDName: "scene", Doc: "Scene is a gi.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D gi gui context.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Scene", Doc: "Scene is the 3D Scene"}, {Name: "SelMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurSel", Doc: "currently selected node"}, {Name: "CurManipPt", Doc: "currently selected manipulation control point"}, {Name: "SelParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
-// NewScene adds a new [Scene] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewScene adds a new [Scene] with
+// the given name to the given parent:
+// // Scene is a gi.Widget that manages a xyz.Scene,
+// providing the basic rendering logic for the 3D scene
+// in the 2D gi gui context.
 func NewScene(par ki.Ki, name ...string) *Scene {
 	return par.NewChild(SceneType, name...).(*Scene)
 }
@@ -83,57 +48,30 @@ func (t *Scene) New() ki.Ki {
 
 // SetSelMode sets the [Scene.SelMode]:
 // how to deal with selection / manipulation events
-func (t *Scene) SetSelMode(v SelModes) *Scene {
-	t.SelMode = v
-	return t
-}
+func (t *Scene) SetSelMode(v SelModes) *Scene { t.SelMode = v; return t }
 
 // SetCurSel sets the [Scene.CurSel]:
 // currently selected node
-func (t *Scene) SetCurSel(v xyz.Node) *Scene {
-	t.CurSel = v
-	return t
-}
+func (t *Scene) SetCurSel(v xyz.Node) *Scene { t.CurSel = v; return t }
 
 // SetCurManipPt sets the [Scene.CurManipPt]:
 // currently selected manipulation control point
-func (t *Scene) SetCurManipPt(v *ManipPt) *Scene {
-	t.CurManipPt = v
-	return t
-}
+func (t *Scene) SetCurManipPt(v *ManipPt) *Scene { t.CurManipPt = v; return t }
 
 // SetSelParams sets the [Scene.SelParams]:
 // parameters for selection / manipulation box
-func (t *Scene) SetSelParams(v SelParams) *Scene {
-	t.SelParams = v
-	return t
-}
+func (t *Scene) SetSelParams(v SelParams) *Scene { t.SelParams = v; return t }
 
 // SetTooltip sets the [Scene.Tooltip]
-func (t *Scene) SetTooltip(v string) *Scene {
-	t.Tooltip = v
-	return t
-}
+func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
 
 // SceneViewType is the [gti.Type] for [SceneView]
-var SceneViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyzv.SceneView",
-	ShortName:  "xyzv.SceneView",
-	IDName:     "scene-view",
-	Doc:        "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SceneView{},
-})
+var SceneViewType = gti.AddType(&gti.Type{Name: "goki.dev/xyzv.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.", Embeds: []gti.Field{{Name: "Layout"}}, Instance: &SceneView{}})
 
-// NewSceneView adds a new [SceneView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewSceneView adds a new [SceneView] with
+// the given name to the given parent:
+// // SceneView provides a toolbar controller for an xyz.Scene,
+// and manipulation abilities.
 func NewSceneView(par ki.Ki, name ...string) *SceneView {
 	return par.NewChild(SceneViewType, name...).(*SceneView)
 }
@@ -149,13 +87,7 @@ func (t *SceneView) New() ki.Ki {
 }
 
 // SetTooltip sets the [SceneView.Tooltip]
-func (t *SceneView) SetTooltip(v string) *SceneView {
-	t.Tooltip = v
-	return t
-}
+func (t *SceneView) SetTooltip(v string) *SceneView { t.Tooltip = v; return t }
 
 // SetStackTop sets the [SceneView.StackTop]
-func (t *SceneView) SetStackTop(v int) *SceneView {
-	t.StackTop = v
-	return t
-}
+func (t *SceneView) SetStackTop(v int) *SceneView { t.StackTop = v; return t }

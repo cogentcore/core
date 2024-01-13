@@ -29,49 +29,49 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	Funcs(template.FuncMap{
 		"HasEmbedDirective": HasEmbedDirective,
 		"HasNoNewDirective": HasNoNewDirective,
+		"DocToComment":      gtigen.DocToComment,
 		"KiPkg":             KiPkg,
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
-	// New{{.Name}} adds a new [{{.Name}}] with the given name
-	// to the given parent. If the name is unspecified, it defaults
-	// to the ID (kebab-case) name of the type, plus the
-	// [{{KiPkg .}}Ki.NumLifetimeChildren] of the given parent.
-	func New{{.Name}}(par {{KiPkg .}}Ki, name ...string) *{{.Name}} {
-		return par.NewChild({{.Name}}Type, name...).(*{{.Name}})
+	// New{{.LocalName}} adds a new [{{.LocalName}}] with
+	// the given name to the given parent:
+	// {{DocToComment .Doc}}
+	func New{{.LocalName}}(par {{KiPkg .}}Ki, name ...string) *{{.LocalName}} {
+		return par.NewChild({{.LocalName}}Type, name...).(*{{.LocalName}})
 	}
 	{{end}}
 
-	// KiType returns the [*gti.Type] of [{{.Name}}]
-	func (t *{{.Name}}) KiType() *gti.Type {
-		return {{.Name}}Type
+	// KiType returns the [*gti.Type] of [{{.LocalName}}]
+	func (t *{{.LocalName}}) KiType() *gti.Type {
+		return {{.LocalName}}Type
 	}
 
-	// New returns a new [*{{.Name}}] value
-	func (t *{{.Name}}) New() {{KiPkg .}}Ki {
-		return &{{.Name}}{}
+	// New returns a new [*{{.LocalName}}] value
+	func (t *{{.LocalName}}) New() {{KiPkg .}}Ki {
+		return &{{.LocalName}}{}
 	}
 	
 	{{if HasEmbedDirective .}}
-	// {{.Name}}Embedder is an interface that all types that embed {{.Name}} satisfy
-	type {{.Name}}Embedder interface {
-		As{{.Name}}() *{{.Name}}
+	// {{.LocalName}}Embedder is an interface that all types that embed {{.LocalName}} satisfy
+	type {{.LocalName}}Embedder interface {
+		As{{.LocalName}}() *{{.LocalName}}
 	}
 	
-	// As{{.Name}} returns the given value as a value of type {{.Name}} if the type
-	// of the given value embeds {{.Name}}, or nil otherwise
-	func As{{.Name}}(k {{KiPkg .}}Ki) *{{.Name}} {
+	// As{{.LocalName}} returns the given value as a value of type {{.LocalName}} if the type
+	// of the given value embeds {{.LocalName}}, or nil otherwise
+	func As{{.LocalName}}(k {{KiPkg .}}Ki) *{{.LocalName}} {
 		if k == nil || k.This() == nil {
 			return nil
 		}
-		if t, ok := k.({{.Name}}Embedder); ok {
-			return t.As{{.Name}}()
+		if t, ok := k.({{.LocalName}}Embedder); ok {
+			return t.As{{.LocalName}}()
 		}
 		return nil
 	}
 	
-	// As{{.Name}} satisfies the [{{.Name}}Embedder] interface
-	func (t *{{.Name}}) As{{.Name}}() *{{.Name}} {
+	// As{{.LocalName}} satisfies the [{{.LocalName}}Embedder] interface
+	func (t *{{.LocalName}}) As{{.LocalName}}() *{{.LocalName}} {
 		return t
 	}
 	{{end}}
@@ -91,7 +91,7 @@ func KiPkg(typ *gtigen.Type) string {
 // HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embedder"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasEmbedDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc(typ.Directives, func(d *gti.Directive) bool {
+	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
 		return d.Tool == "goki" && d.Directive == "embedder"
 	})
 }
@@ -99,7 +99,7 @@ func HasEmbedDirective(typ *gtigen.Type) bool {
 // HasNoNewDirective returns whether the given [gtigen.Type] has a "goki:no-new"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasNoNewDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc(typ.Directives, func(d *gti.Directive) bool {
+	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
 		return d.Tool == "goki" && d.Directive == "no-new"
 	})
 }

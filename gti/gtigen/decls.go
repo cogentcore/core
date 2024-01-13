@@ -5,43 +5,48 @@
 package gtigen
 
 import (
+	"reflect"
 	"strings"
 	"text/template"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
-	"goki.dev/ordmap"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.
 // It takes a [*Type] as its value.
-var TypeTmpl = template.Must(template.New("Type").Parse(
+var TypeTmpl = template.Must(template.New("Type").
+	Funcs(template.FuncMap{
+		"GtiTypeOf": GtiTypeOf,
+	}).Parse(
 	`
-	{{if .Config.TypeVar}} // {{.Name}}Type is the [gti.Type] for [{{.Name}}]
-	var {{.Name}}Type {{else}} var _ {{end}} = gti.AddType(&gti.Type{
-		Name: "{{.FullName}}",
-		ShortName: "{{.ShortName}}",
-		IDName: "{{.IDName}}",
-		Doc: {{printf "%q" .Doc}},
-		Directives: {{printf "%#v" .Directives}},
-		{{if ne .Fields nil}} Fields: {{printf "%#v" .Fields}}, {{end}}
-		{{if ne .Embeds nil}} Embeds: {{printf "%#v" .Embeds}}, {{end}}
-		Methods: {{printf "%#v" .Methods}},
-		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
-	})
+	{{if .Config.TypeVar}} // {{.LocalName}}Type is the [gti.Type] for [{{.LocalName}}]
+	var {{.LocalName}}Type {{else}} var _ {{end}} = gti.AddType(&gti.Type
+		{{- $typ := GtiTypeOf . -}}
+		{{- printf "%#v" $typ -}}
+	)
 	`))
+
+// GtiTypeOf converts the given [*Type] to a [*gti.Type]
+func GtiTypeOf(typ *Type) *gti.Type {
+	cp := typ.Type
+	res := &cp
+	res.Fields = typ.Fields.Fields
+	res.Embeds = typ.Embeds.Fields
+	if typ.Config.Instance {
+		// quotes are removed in gti.Type.GoString
+		res.Instance = "&" + typ.LocalName + "{}"
+	}
+	return res
+}
 
 // FuncTmpl is the template for [gti.Func] declarations.
 // It takes a [*gti.Func] as its value.
 var FuncTmpl = template.Must(template.New("Func").Parse(
 	`
-	var _ = gti.AddFunc(&gti.Func{
-		Name: "{{.Name}}",
-		Doc: {{printf "%q" .Doc}},
-		Directives: {{printf "%#v" .Directives}},
-		Args: {{printf "%#v" .Args}},
-		Returns: {{printf "%#v" .Returns}},
-	})
+	var _ = gti.AddFunc(&gti.Func
+		{{- printf "%#v" . -}}
+	)
 	`))
 
 // SetterMethodsTmpl is the template for setter methods for a type.
@@ -49,30 +54,27 @@ var FuncTmpl = template.Must(template.New("Func").Parse(
 var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	Funcs(template.FuncMap{
 		"SetterFields": SetterFields,
-		"SetterName":   SetterName,
+		"ToCamel":      strcase.ToCamel,
+		"SetterType":   SetterType,
 		"DocToComment": DocToComment,
 	}).Parse(
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
-	// Set{{SetterName .}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
+	// Set{{ToCamel .Name}} sets the [{{$typ.LocalName}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.Name}}) Set{{SetterName .}}(v {{.LocalType}}) *{{$typ.Name}} {
-		t.{{.Name}} = v
-		return t
-	}
+	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} { t.{{.Name}} = v; return t }
 	{{end}}
 `))
 
 // SetterFields returns all of the fields and embedded fields of the given type
 // that don't have a `set:"-"` struct tag.
-func SetterFields(typ *Type) []*gti.Field {
-	res := []*gti.Field{}
-	do := func(fields *ordmap.Map[string, *gti.Field]) {
-		for _, kv := range fields.Order {
-			f := kv.Val
+func SetterFields(typ *Type) []gti.Field {
+	res := []gti.Field{}
+	do := func(fields Fields) {
+		for _, f := range fields.Fields {
 			// unspecified indicates to add a set method; only "-" means no set
-			hasSetter := f.Tag.Get("set") != "-"
+			hasSetter := reflect.StructTag(fields.Tags[f.Name]).Get("set") != "-"
 			if hasSetter {
 				res = append(res, f)
 			}
@@ -83,15 +85,17 @@ func SetterFields(typ *Type) []*gti.Field {
 	return res
 }
 
-// SetterName returns the name that should be used for the setter function
-// for the given field. It first checks the 'set' struct tag and falls back on
-// the name of the field.
-func SetterName(field *gti.Field) string {
-	if tag, ok := field.Tag.Lookup("set"); ok {
-		return tag
+// SetterType returns the setter type name for the given field in the context of the
+// given type. It converts slices to variadic arguments.
+func SetterType(f gti.Field, typ *Type) string {
+	lt, ok := typ.Fields.LocalTypes[f.Name]
+	if !ok {
+		lt = typ.EmbeddedFields.LocalTypes[f.Name]
 	}
-	// could be lowercase so need to make camel
-	return strcase.ToCamel(field.Name)
+	if strings.HasPrefix(lt, "[]") {
+		return "..." + strings.TrimPrefix(lt, "[]")
+	}
+	return lt
 }
 
 // DocToComment converts the given doc string to an appropriate comment string.

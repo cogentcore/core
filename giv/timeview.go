@@ -41,10 +41,6 @@ type TimeView struct {
 	PM bool `set:"-"`
 }
 
-func (tv *TimeView) OnInit() {
-	tv.Frame.OnInit()
-}
-
 // SetTime sets the source time and updates the view
 func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	updt := tv.UpdateStart()
@@ -121,7 +117,7 @@ func (tv *TimeView) ConfigWidget() {
 	})
 
 	if !gi.SystemSettings.Clock24 {
-		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems([]string{"AM", "PM"})
+		sw := gi.NewSwitches(tv, "am-pm").SetMutex(true).SetType(gi.SwitchSegmentedButton).SetItems("AM", "PM")
 		if tv.Time.Hour() < 12 {
 			tv.PM = false
 			sw.SelectItemAction(0)

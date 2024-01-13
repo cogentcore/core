@@ -3,7 +3,8 @@
 package ki
 
 import (
-	"errors"
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -115,8 +116,10 @@ func (i *Flags) SetStringOr(s string) error {
 			i.SetFlag(true, &val)
 		} else if val, ok := _FlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
+		} else if flg == "" {
+			continue
 		} else {
-			return errors.New(flg + " is not a valid value for type Flags")
+			return fmt.Errorf("%q is not a valid value for type Flags", flg)
 		}
 	}
 	return nil
@@ -193,5 +196,8 @@ func (i Flags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Flags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

@@ -183,7 +183,7 @@ var _BorderStylesDescMap = map[BorderStyles]string{
 	0: `BorderSolid indicates to render a solid border.`,
 	1: `BorderDotted indicates to render a dotted border`,
 	2: `BorderDashed indicates to render a dashed border`,
-	3: ``,
+	3: `TODO(kai): implement these`,
 	4: ``,
 	5: ``,
 	6: ``,

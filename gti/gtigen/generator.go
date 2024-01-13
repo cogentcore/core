@@ -10,7 +10,6 @@ import (
 	"go/ast"
 	"go/types"
 	"os"
-	"reflect"
 	"slices"
 	"strings"
 	"text/template"
@@ -28,16 +27,16 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config     *Config                               // The configuration information
-	Buf        bytes.Buffer                          // The accumulated output.
-	Pkgs       []*packages.Package                   // The packages we are scanning.
-	Pkg        *packages.Package                     // The packages we are currently on.
-	File       *ast.File                             // The file we are currently on.
-	Cmap       ast.CommentMap                        // The comment map for the file we are currently on.
-	Types      []*Type                               // The types
-	Methods    *ordmap.Map[string, []*gti.Method]    // The methods, keyed by the the full package name of the type of the receiver
-	Funcs      *ordmap.Map[string, *gti.Func]        // The functions
-	Interfaces *ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
+	Config     *Config                              // The configuration information
+	Buf        bytes.Buffer                         // The accumulated output.
+	Pkgs       []*packages.Package                  // The packages we are scanning.
+	Pkg        *packages.Package                    // The packages we are currently on.
+	File       *ast.File                            // The file we are currently on.
+	Cmap       ast.CommentMap                       // The comment map for the file we are currently on.
+	Types      []*Type                              // The types
+	Methods    ordmap.Map[string, []gti.Method]     // The methods, keyed by the the full package name of the type of the receiver
+	Funcs      ordmap.Map[string, gti.Func]         // The functions
+	Interfaces ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
 }
 
 // NewGenerator returns a new generator with the
@@ -80,8 +79,6 @@ func (g *Generator) Find() error {
 		return err
 	}
 	g.Types = []*Type{}
-	g.Methods = &ordmap.Map[string, []*gti.Method]{}
-	g.Funcs = &ordmap.Map[string, *gti.Func]{}
 	err = gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
@@ -93,7 +90,6 @@ func (g *Generator) Find() error {
 // [Generator.Config.InterfaceConfigs]. It should typically not
 // be called by end-user code.
 func (g *Generator) GetInterfaces() error {
-	g.Interfaces = &ordmap.Map[string, *types.Interface]{}
 	if g.Config.InterfaceConfigs.Len() == 0 {
 		return nil
 	}
@@ -174,15 +170,16 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		}
 
 		typ := &Type{
-			Name:       ts.Name.Name,
-			FullName:   FullName(g.Pkg, ts.Name.Name),
-			ShortName:  g.Pkg.Name + "." + ts.Name.Name,
-			IDName:     strcase.ToKebab(ts.Name.Name),
-			Type:       ts,
-			Doc:        doc,
-			Pkg:        g.Pkg.Name,
-			Directives: dirs,
-			Config:     cfg,
+			Type: gti.Type{
+				Name:       FullName(g.Pkg, ts.Name.Name),
+				IDName:     strcase.ToKebab(ts.Name.Name),
+				Doc:        doc,
+				Directives: dirs,
+			},
+			LocalName: ts.Name.Name,
+			AST:       ts,
+			Pkg:       g.Pkg.Name,
+			Config:    cfg,
 		}
 		st, ok := ts.Type.(*ast.StructType)
 		if ok && st.Fields != nil {
@@ -209,9 +206,9 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 			typ.Fields = fields
 
-			typ.EmbeddedFields = &gti.Fields{}
+			typ.EmbeddedFields = Fields{LocalTypes: map[string]string{}, Tags: map[string]string{}}
 			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
-			g.GetEmbeddedFields(typ.EmbeddedFields, tp, tp)
+			g.GetEmbeddedFields(&typ.EmbeddedFields, tp, tp)
 		}
 		g.Types = append(g.Types, typ)
 	}
@@ -236,7 +233,7 @@ func LocalTypeNameQualifier(pkg *types.Package) types.Qualifier {
 // GetEmbeddedFields recursively adds to the given set of embedded fields all of the embedded
 // fields for the given type. It does not add the fields in the given starting type,
 // as those fields aren't embedded.
-func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ, startTyp types.Type) {
+func (g *Generator) GetEmbeddedFields(efields *Fields, typ, startTyp types.Type) {
 	s, ok := typ.Underlying().(*types.Struct)
 	if !ok {
 		return
@@ -252,13 +249,12 @@ func (g *Generator) GetEmbeddedFields(efields *gti.Fields, typ, startTyp types.T
 		if typ == startTyp {
 			continue
 		}
-		field := &gti.Field{
-			Name:      f.Name(),
-			Type:      f.Type().String(),
-			LocalType: types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types)),
-			Tag:       reflect.StructTag(s.Tag(i)),
+		field := gti.Field{
+			Name: f.Name(),
 		}
-		efields.Add(field.Name, field)
+		efields.Fields = append(efields.Fields, field)
+		efields.LocalTypes[field.Name] = types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types))
+		efields.Tags[field.Name] = s.Tag(i)
 	}
 }
 
@@ -277,7 +273,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if (!hasAdd && !cfg.AddFuncs) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
-		fun := &gti.Func{
+		fun := gti.Func{
 			Name:       FullName(g.Pkg, fd.Name.Name),
 			Doc:        doc,
 			Directives: dirs,
@@ -286,18 +282,22 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting function args: %w", err)
 		}
-		fun.Args = args
+		for _, arg := range args.Fields {
+			fun.Args = append(fun.Args, arg.Name)
+		}
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting function return values: %w", err)
 		}
-		fun.Returns = rets
+		for _, ret := range rets.Fields {
+			fun.Returns = append(fun.Returns, ret.Name)
+		}
 		g.Funcs.Add(fun.Name, fun)
 	} else {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
 			return true, nil
 		}
-		method := &gti.Method{
+		method := gti.Method{
 			Name:       fd.Name.Name,
 			Doc:        doc,
 			Directives: dirs,
@@ -306,12 +306,16 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting method args: %w", err)
 		}
-		method.Args = args
+		for _, arg := range args.Fields {
+			method.Args = append(method.Args, arg.Name)
+		}
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting method return values: %w", err)
 		}
-		method.Returns = rets
+		for _, ret := range rets.Fields {
+			method.Returns = append(method.Returns, ret.Name)
+		}
 
 		typ := fd.Recv.List[0].Type
 		// get rid of any pointer receiver
@@ -338,8 +342,8 @@ func FullName(pkg *packages.Package, name string) string {
 // given surrounding config. If the given field list is
 // nil, GetFields still returns an empty but valid
 // [gti.Fields] value and no error.
-func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
-	res := &gti.Fields{}
+func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) {
+	res := Fields{LocalTypes: map[string]string{}, Tags: map[string]string{}}
 	if list == nil {
 		return res, nil
 	}
@@ -379,43 +383,33 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 				nlist := &ast.FieldList{List: []*ast.Field{&nfield}}
 				nfields, err := g.GetFields(nlist, cfg)
 				if err != nil {
-					return nil, err
+					return res, err
 				}
-				res.Copy(nfields)
+				res.Fields = append(res.Fields, nfields.Fields...)
 			}
 			continue
 		}
-		dirs := gti.Directives{}
-		if field.Doc != nil {
-			lcfg := &Config{}
-			*lcfg = *cfg
-			sdirs, _, _, err := LoadFromComments(lcfg, field.Doc, field.Comment)
-			if err != nil {
-				return nil, err
-			}
-			dirs = sdirs
+		fo := gti.Field{
+			Name: name,
+			Doc:  strings.TrimSuffix(field.Doc.Text(), "\n"),
 		}
-		tag := reflect.StructTag("")
+		res.Fields = append(res.Fields, fo)
+
+		res.LocalTypes[name] = ltn
+
+		tag := ""
 		if field.Tag != nil {
 			// need to get rid of leading and trailing backquotes
-			tag = reflect.StructTag(strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`"))
+			tag = strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`")
 		}
-		fo := &gti.Field{
-			Name:       name,
-			Type:       tn,
-			LocalType:  ltn,
-			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
-			Directives: dirs,
-			Tag:        tag,
-		}
-		res.Add(name, fo)
+		res.Tags[name] = tag
 	}
 	return res, nil
 }
 
 // LoadFromNodeComments is a helper function that calls [LoadFromComments] with the correctly
 // filtered comment map comments of the given node.
-func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
 	cs := g.Cmap.Filter(n).Comments()
 	tf := g.Pkg.Fset.File(g.File.FileStart)
 	np := tf.Line(n.Pos())
@@ -432,7 +426,7 @@ func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs gti.Dire
 
 // LoadFromComments is a helper function that combines the results of [LoadFromComment]
 // for the given comment groups.
-func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
 	for _, cg := range c {
 		cdirs, cadd, cskip, err := LoadFromComment(cg, cfg)
 		if err != nil {
@@ -451,8 +445,7 @@ func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs gti.Directives,
 // there was a gti:add directive, and any error. If the given
 // documentation is nil, LoadFromComment still returns an empty but valid
 // [gti.Directives] value, false, and no error.
-func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
-	dirs = gti.Directives{}
+func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
 	if c == nil {
 		return
 	}
@@ -483,7 +476,7 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, has
 				return nil, false, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
 			}
 		}
-		dirs = append(dirs, dir)
+		dirs = append(dirs, *dir)
 	}
 	return dirs, hasAdd, hasSkip, nil
 }
@@ -498,10 +491,7 @@ func (g *Generator) Generate() (bool, error) {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		typ.Methods = &gti.Methods{}
-		for _, meth := range g.Methods.ValByKey(typ.FullName) {
-			typ.Methods.Add(meth.Name, meth)
-		}
+		typ.Methods = append(typ.Methods, g.Methods.ValByKey(typ.Name)...)
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {
 			g.ExecTmpl(tmpl, typ)

@@ -8,70 +8,19 @@ import (
 	"goki.dev/gti"
 	"goki.dev/ki"
 	"goki.dev/mat32"
-	"goki.dev/ordmap"
 )
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.BBox",
-	ShortName:  "xyz.BBox",
-	IDName:     "b-box",
-	Doc:        "BBox contains bounding box and other gross solid properties",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"BBox", &gti.Field{Name: "BBox", Type: "goki.dev/mat32.Box3", LocalType: "mat32.Box3", Doc: "bounding box in local coords", Directives: gti.Directives{}, Tag: ""}},
-		{"BSphere", &gti.Field{Name: "BSphere", Type: "goki.dev/mat32.Sphere", LocalType: "mat32.Sphere", Doc: "bounding sphere in local coords", Directives: gti.Directives{}, Tag: ""}},
-		{"Area", &gti.Field{Name: "Area", Type: "float32", LocalType: "float32", Doc: "area", Directives: gti.Directives{}, Tag: ""}},
-		{"Volume", &gti.Field{Name: "Volume", Type: "float32", LocalType: "float32", Doc: "volume", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.BBox", IDName: "b-box", Doc: "BBox contains bounding box and other gross solid properties", Fields: []gti.Field{{Name: "BBox", Doc: "bounding box in local coords"}, {Name: "BSphere", Doc: "bounding sphere in local coords"}, {Name: "Area", Doc: "area"}, {Name: "Volume", Doc: "volume"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Camera",
-	ShortName:  "xyz.Camera",
-	IDName:     "camera",
-	Doc:        "Camera defines the properties of the camera",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pose", &gti.Field{Name: "Pose", Type: "goki.dev/xyz.Pose", LocalType: "Pose", Doc: "overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction", Directives: gti.Directives{}, Tag: ""}},
-		{"CamMu", &gti.Field{Name: "CamMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting camera data", Directives: gti.Directives{}, Tag: ""}},
-		{"Target", &gti.Field{Name: "Target", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method", Directives: gti.Directives{}, Tag: ""}},
-		{"UpDir", &gti.Field{Name: "UpDir", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method", Directives: gti.Directives{}, Tag: ""}},
-		{"Ortho", &gti.Field{Name: "Ortho", Type: "bool", LocalType: "bool", Doc: "default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far).", Directives: gti.Directives{}, Tag: ""}},
-		{"FOV", &gti.Field{Name: "FOV", Type: "float32", LocalType: "float32", Doc: "field of view in degrees", Directives: gti.Directives{}, Tag: ""}},
-		{"Aspect", &gti.Field{Name: "Aspect", Type: "float32", LocalType: "float32", Doc: "aspect ratio (width/height)", Directives: gti.Directives{}, Tag: ""}},
-		{"Near", &gti.Field{Name: "Near", Type: "float32", LocalType: "float32", Doc: "near plane z coordinate", Directives: gti.Directives{}, Tag: ""}},
-		{"Far", &gti.Field{Name: "Far", Type: "float32", LocalType: "float32", Doc: "far plane z coordinate", Directives: gti.Directives{}, Tag: ""}},
-		{"ViewMatrix", &gti.Field{Name: "ViewMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "view matrix (inverse of the Pose.Matrix)", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"PrjnMatrix", &gti.Field{Name: "PrjnMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "projection matrix, defining the camera perspective / ortho transform", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"VkPrjnMatrix", &gti.Field{Name: "VkPrjnMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"InvPrjnMatrix", &gti.Field{Name: "InvPrjnMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "inverse of the projection matrix", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"Frustum", &gti.Field{Name: "Frustum", Type: "*goki.dev/mat32.Frustum", LocalType: "*mat32.Frustum", Doc: "frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Camera", IDName: "camera", Doc: "Camera defines the properties of the camera", Fields: []gti.Field{{Name: "Pose", Doc: "overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"}, {Name: "CamMu", Doc: "mutex protecting camera data"}, {Name: "Target", Doc: "target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"}, {Name: "UpDir", Doc: "up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"}, {Name: "Ortho", Doc: "default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."}, {Name: "FOV", Doc: "field of view in degrees"}, {Name: "Aspect", Doc: "aspect ratio (width/height)"}, {Name: "Near", Doc: "near plane z coordinate"}, {Name: "Far", Doc: "far plane z coordinate"}, {Name: "ViewMatrix", Doc: "view matrix (inverse of the Pose.Matrix)"}, {Name: "PrjnMatrix", Doc: "projection matrix, defining the camera perspective / ortho transform"}, {Name: "VkPrjnMatrix", Doc: "vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math"}, {Name: "InvPrjnMatrix", Doc: "inverse of the projection matrix"}, {Name: "Frustum", Doc: "frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"}}})
 
 // GroupType is the [gti.Type] for [Group]
-var GroupType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Group",
-	ShortName:  "xyz.Group",
-	IDName:     "group",
-	Doc:        "Group collects individual elements in a scene but does not have a Mesh or Material of\nits own.  It does have a transform that applies to all nodes under it.",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/xyz.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Group{},
-})
+var GroupType = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Group", IDName: "group", Doc: "Group collects individual elements in a scene but does not have a Mesh or Material of\nits own.  It does have a transform that applies to all nodes under it.", Embeds: []gti.Field{{Name: "NodeBase"}}, Instance: &Group{}})
 
-// NewGroup adds a new [Group] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewGroup adds a new [Group] with
+// the given name to the given parent:
+// // Group collects individual elements in a scene but does not have a Mesh or Material of
+// its own.  It does have a transform that applies to all nodes under it.
 func NewGroup(par ki.Ki, name ...string) *Group {
 	return par.NewChild(GroupType, name...).(*Group)
 }
@@ -86,364 +35,92 @@ func (t *Group) New() ki.Ki {
 	return &Group{}
 }
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.SolidPoint",
-	ShortName:  "xyz.SolidPoint",
-	IDName:     "solid-point",
-	Doc:        "SolidPoint contains a Solid and a Point on that solid",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Solid", &gti.Field{Name: "Solid", Type: "*goki.dev/xyz.Solid", LocalType: "*Solid", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Point", &gti.Field{Name: "Point", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.SolidPoint", IDName: "solid-point", Doc: "SolidPoint contains a Solid and a Point on that solid", Fields: []gti.Field{{Name: "Solid"}, {Name: "Point"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Decoder",
-	ShortName:  "xyz.Decoder",
-	IDName:     "decoder",
-	Doc:        "Decoder parses 3D object / scene file(s) and imports into a Group or Scene.\nThis interface is implemented by the different format-specific decoders.",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Decoder", IDName: "decoder", Doc: "Decoder parses 3D object / scene file(s) and imports into a Group or Scene.\nThis interface is implemented by the different format-specific decoders."})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene\nthese are stored on the Scene object and not within the graph"})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Light",
-	ShortName:  "xyz.Light",
-	IDName:     "light",
-	Doc:        "Light represents a light that illuminates a scene\nthese are stored on the Scene object and not within the graph",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the base implementation for Light interface", Fields: []gti.Field{{Name: "Nm", Doc: "name of light -- lights accessed by name so it matters"}, {Name: "On", Doc: "whether light is on or off"}, {Name: "Lumns", Doc: "brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"}, {Name: "Clr", Doc: "color of light a full intensity"}}})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.AmbientLight", IDName: "ambient-light", Doc: "AmbientLight provides diffuse uniform lighting -- typically only one of these", Embeds: []gti.Field{{Name: "LightBase"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.LightBase",
-	ShortName:  "xyz.LightBase",
-	IDName:     "light-base",
-	Doc:        "LightBase provides the base implementation for Light interface",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Nm", &gti.Field{Name: "Nm", Type: "string", LocalType: "string", Doc: "name of light -- lights accessed by name so it matters", Directives: gti.Directives{}, Tag: ""}},
-		{"On", &gti.Field{Name: "On", Type: "bool", LocalType: "bool", Doc: "whether light is on or off", Directives: gti.Directives{}, Tag: ""}},
-		{"Lumns", &gti.Field{Name: "Lumns", Type: "float32", LocalType: "float32", Doc: "brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness", Directives: gti.Directives{}, Tag: "min:\"0\" step:\"0.1\""}},
-		{"Clr", &gti.Field{Name: "Clr", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "color of light a full intensity", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.DirLight", IDName: "dir-light", Doc: "DirLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)", Embeds: []gti.Field{{Name: "LightBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of direct light -- assumed to point at the origin so this determines direction"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.AmbientLight",
-	ShortName:  "xyz.AmbientLight",
-	IDName:     "ambient-light",
-	Doc:        "AmbientLight provides diffuse uniform lighting -- typically only one of these",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"LightBase", &gti.Field{Name: "LightBase", Type: "goki.dev/xyz.LightBase", LocalType: "LightBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.PointLight", IDName: "point-light", Doc: "PointLight is an omnidirectional light with a position\nand associated decay factors, which divide the light intensity as a function of\nlinear and quadratic distance.  The quadratic factor dominates at longer distances.", Embeds: []gti.Field{{Name: "LightBase"}}, Fields: []gti.Field{{Name: "Pos", Doc: "position of light in world coordinates"}, {Name: "LinDecay", Doc: "Distance linear decay factor -- defaults to .1"}, {Name: "QuadDecay", Doc: "Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.DirLight",
-	ShortName:  "xyz.DirLight",
-	IDName:     "dir-light",
-	Doc:        "DirLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "position of direct light -- assumed to point at the origin so this determines direction", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"LightBase", &gti.Field{Name: "LightBase", Type: "goki.dev/xyz.LightBase", LocalType: "LightBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.SpotLight", IDName: "spot-light", Doc: "Spotlight is a light with a position and direction and associated decay factors and angles.\nwhich divide the light intensity as a function of linear and quadratic distance.\nThe quadratic factor dominates at longer distances.", Embeds: []gti.Field{{Name: "LightBase"}}, Fields: []gti.Field{{Name: "Pose"}, {Name: "AngDecay", Doc: "Angular decay factor -- defaults to 15"}, {Name: "CutoffAngle", Doc: "Cut off angle (in degrees) -- defaults to 45 -- max of 90"}, {Name: "LinDecay", Doc: "Distance linear decay factor -- defaults to .01"}, {Name: "QuadDecay", Doc: "Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.PointLight",
-	ShortName:  "xyz.PointLight",
-	IDName:     "point-light",
-	Doc:        "PointLight is an omnidirectional light with a position\nand associated decay factors, which divide the light intensity as a function of\nlinear and quadratic distance.  The quadratic factor dominates at longer distances.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "position of light in world coordinates", Directives: gti.Directives{}, Tag: ""}},
-		{"LinDecay", &gti.Field{Name: "LinDecay", Type: "float32", LocalType: "float32", Doc: "Distance linear decay factor -- defaults to .1", Directives: gti.Directives{}, Tag: ""}},
-		{"QuadDecay", &gti.Field{Name: "QuadDecay", Type: "float32", LocalType: "float32", Doc: "Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"LightBase", &gti.Field{Name: "LightBase", Type: "goki.dev/xyz.LightBase", LocalType: "LightBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.LightColors", IDName: "light-colors", Doc: "LightColors are standard light colors for different light sources", Directives: []gti.Directive{{Tool: "enums", Directive: "enum"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.SpotLight",
-	ShortName:  "xyz.SpotLight",
-	IDName:     "spot-light",
-	Doc:        "Spotlight is a light with a position and direction and associated decay factors and angles.\nwhich divide the light intensity as a function of linear and quadratic distance.\nThe quadratic factor dominates at longer distances.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pose", &gti.Field{Name: "Pose", Type: "goki.dev/xyz.Pose", LocalType: "Pose", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"AngDecay", &gti.Field{Name: "AngDecay", Type: "float32", LocalType: "float32", Doc: "Angular decay factor -- defaults to 15", Directives: gti.Directives{}, Tag: ""}},
-		{"CutoffAngle", &gti.Field{Name: "CutoffAngle", Type: "float32", LocalType: "float32", Doc: "Cut off angle (in degrees) -- defaults to 45 -- max of 90", Directives: gti.Directives{}, Tag: "max:\"90\" min:\"1\""}},
-		{"LinDecay", &gti.Field{Name: "LinDecay", Type: "float32", LocalType: "float32", Doc: "Distance linear decay factor -- defaults to .01", Directives: gti.Directives{}, Tag: ""}},
-		{"QuadDecay", &gti.Field{Name: "QuadDecay", Type: "float32", LocalType: "float32", Doc: "Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"LightBase", &gti.Field{Name: "LightBase", Type: "goki.dev/xyz.LightBase", LocalType: "LightBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Lines", IDName: "lines", Doc: "Lines are lines rendered as long thin boxes defined by points\nand width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0\nor a constant unless specifically relevant to have full 3D variation).\nRotate the solid to put into other planes.", Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Points", Doc: "line points (must be 2 or more)"}, {Name: "Width", Doc: "line width, Y = height perpendicular to line direction, and X = depth"}, {Name: "Colors", Doc: "optional colors for each point -- actual color interpolates between"}, {Name: "Closed", Doc: "if true, connect the first and last points to form a closed shape"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.LightColors",
-	ShortName: "xyz.LightColors",
-	IDName:    "light-colors",
-	Doc:       "LightColors are standard light colors for different light sources",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "enums", Directive: "enum", Args: []string{}},
-	},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Tiling", IDName: "tiling", Doc: "Tiling are the texture tiling parameters", Fields: []gti.Field{{Name: "Repeat", Doc: "how often to repeat the texture in each direction"}, {Name: "Off", Doc: "offset for when to start the texure in each direction"}}})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Lines",
-	ShortName:  "xyz.Lines",
-	IDName:     "lines",
-	Doc:        "Lines are lines rendered as long thin boxes defined by points\nand width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0\nor a constant unless specifically relevant to have full 3D variation).\nRotate the solid to put into other planes.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Points", &gti.Field{Name: "Points", Type: "[]goki.dev/mat32.Vec3", LocalType: "[]mat32.Vec3", Doc: "line points (must be 2 or more)", Directives: gti.Directives{}, Tag: ""}},
-		{"Width", &gti.Field{Name: "Width", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "line width, Y = height perpendicular to line direction, and X = depth", Directives: gti.Directives{}, Tag: ""}},
-		{"Colors", &gti.Field{Name: "Colors", Type: "[]image/color.RGBA", LocalType: "[]color.RGBA", Doc: "optional colors for each point -- actual color interpolates between", Directives: gti.Directives{}, Tag: ""}},
-		{"Closed", &gti.Field{Name: "Closed", Type: "bool", LocalType: "bool", Doc: "if true, connect the first and last points to form a closed shape", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Tiling",
-	ShortName:  "xyz.Tiling",
-	IDName:     "tiling",
-	Doc:        "Tiling are the texture tiling parameters",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Repeat", &gti.Field{Name: "Repeat", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "how often to repeat the texture in each direction", Directives: gti.Directives{}, Tag: ""}},
-		{"Off", &gti.Field{Name: "Off", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "offset for when to start the texure in each direction", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Material",
-	ShortName: "xyz.Material",
-	IDName:    "material",
-	Doc:       "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering", Directives: gti.Directives{}, Tag: ""}},
-		{"Emissive", &gti.Field{Name: "Emissive", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object", Directives: gti.Directives{}, Tag: ""}},
-		{"Shiny", &gti.Field{Name: "Shiny", Type: "float32", LocalType: "float32", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.", Directives: gti.Directives{}, Tag: ""}},
-		{"Reflective", &gti.Field{Name: "Reflective", Type: "float32", LocalType: "float32", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.", Directives: gti.Directives{}, Tag: ""}},
-		{"Bright", &gti.Field{Name: "Bright", Type: "float32", LocalType: "float32", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters", Directives: gti.Directives{}, Tag: ""}},
-		{"Texture", &gti.Field{Name: "Texture", Type: "goki.dev/xyz.TexName", LocalType: "TexName", Doc: "prop: texture = texture to provide color for the surface", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Tiling", &gti.Field{Name: "Tiling", Type: "goki.dev/xyz.Tiling", LocalType: "Tiling", Doc: "texture tiling parameters -- repeat and offset", Directives: gti.Directives{}, Tag: "view:\"inline\" viewif:\"Texture!=''\""}},
-		{"CullBack", &gti.Field{Name: "CullBack", Type: "bool", LocalType: "bool", Doc: "prop: cull-back = cull the back-facing surfaces", Directives: gti.Directives{}, Tag: ""}},
-		{"CullFront", &gti.Field{Name: "CullFront", Type: "bool", LocalType: "bool", Doc: "prop: cull-front = cull the front-facing surfaces", Directives: gti.Directives{}, Tag: ""}},
-		{"TexPtr", &gti.Field{Name: "TexPtr", Type: "goki.dev/xyz.Texture", LocalType: "Texture", Doc: "pointer to texture", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Color", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "Texture", Doc: "prop: texture = texture to provide color for the surface"}, {Name: "Tiling", Doc: "texture tiling parameters -- repeat and offset"}, {Name: "CullBack", Doc: "prop: cull-back = cull the back-facing surfaces"}, {Name: "CullFront", Doc: "prop: cull-front = cull the front-facing surfaces"}, {Name: "TexPtr", Doc: "pointer to texture"}}})
 
 // SetColor sets the [Material.Color]:
 // prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
-func (t *Material) SetColor(v color.RGBA) *Material {
-	t.Color = v
-	return t
-}
+func (t *Material) SetColor(v color.RGBA) *Material { t.Color = v; return t }
 
 // SetEmissive sets the [Material.Emissive]:
 // prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
-func (t *Material) SetEmissive(v color.RGBA) *Material {
-	t.Emissive = v
-	return t
-}
+func (t *Material) SetEmissive(v color.RGBA) *Material { t.Emissive = v; return t }
 
 // SetShiny sets the [Material.Shiny]:
 // prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
-func (t *Material) SetShiny(v float32) *Material {
-	t.Shiny = v
-	return t
-}
+func (t *Material) SetShiny(v float32) *Material { t.Shiny = v; return t }
 
 // SetReflective sets the [Material.Reflective]:
 // prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
-func (t *Material) SetReflective(v float32) *Material {
-	t.Reflective = v
-	return t
-}
+func (t *Material) SetReflective(v float32) *Material { t.Reflective = v; return t }
 
 // SetBright sets the [Material.Bright]:
 // prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
-func (t *Material) SetBright(v float32) *Material {
-	t.Bright = v
-	return t
-}
+func (t *Material) SetBright(v float32) *Material { t.Bright = v; return t }
 
 // SetTiling sets the [Material.Tiling]:
 // texture tiling parameters -- repeat and offset
-func (t *Material) SetTiling(v Tiling) *Material {
-	t.Tiling = v
-	return t
-}
+func (t *Material) SetTiling(v Tiling) *Material { t.Tiling = v; return t }
 
 // SetCullBack sets the [Material.CullBack]:
 // prop: cull-back = cull the back-facing surfaces
-func (t *Material) SetCullBack(v bool) *Material {
-	t.CullBack = v
-	return t
-}
+func (t *Material) SetCullBack(v bool) *Material { t.CullBack = v; return t }
 
 // SetCullFront sets the [Material.CullFront]:
 // prop: cull-front = cull the front-facing surfaces
-func (t *Material) SetCullFront(v bool) *Material {
-	t.CullFront = v
-	return t
-}
+func (t *Material) SetCullFront(v bool) *Material { t.CullFront = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.MeshName",
-	ShortName:  "xyz.MeshName",
-	IDName:     "mesh-name",
-	Doc:        "MeshName is a mesh name -- provides an automatic gui chooser for meshes.\nUsed on Solid to link to meshes by name.",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.MeshName", IDName: "mesh-name", Doc: "MeshName is a mesh name -- provides an automatic gui chooser for meshes.\nUsed on Solid to link to meshes by name."})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Mesh", IDName: "mesh", Doc: "Mesh parameterizes the mesh-based shape used for rendering a Solid.\nOnly indexed triangle meshes are supported.\nAll Mesh's must know in advance the number of vertex and index points\nthey require, and the SetVerticies method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVerticies call (default is to do nothing)."})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Mesh",
-	ShortName:  "xyz.Mesh",
-	IDName:     "mesh",
-	Doc:        "Mesh parameterizes the mesh-based shape used for rendering a Solid.\nOnly indexed triangle meshes are supported.\nAll Mesh's must know in advance the number of vertex and index points\nthey require, and the SetVerticies method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVerticies call (default is to do nothing).",
-	Directives: gti.Directives{},
-
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.MeshBase",
-	ShortName: "xyz.MeshBase",
-	IDName:    "mesh-base",
-	Doc:       "MeshBase provides the core implementation of Mesh interface",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Nm", &gti.Field{Name: "Nm", Type: "string", LocalType: "string", Doc: "name of mesh -- meshes are linked to Solids by name so this matters", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"NVtx", &gti.Field{Name: "NVtx", Type: "int", LocalType: "int", Doc: "number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"NIdx", &gti.Field{Name: "NIdx", Type: "int", LocalType: "int", Doc: "number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Color", &gti.Field{Name: "Color", Type: "bool", LocalType: "bool", Doc: "has per-vertex colors, as mat32.Vec4 per vertex", Directives: gti.Directives{}, Tag: ""}},
-		{"Dynamic", &gti.Field{Name: "Dynamic", Type: "bool", LocalType: "bool", Doc: "if true, this mesh changes frequently -- otherwise considered to be static", Directives: gti.Directives{}, Tag: ""}},
-		{"Trans", &gti.Field{Name: "Trans", Type: "bool", LocalType: "bool", Doc: "set to true if color has transparency -- not worth checking manually", Directives: gti.Directives{}, Tag: ""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "computed bounding-box and other gross solid properties", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on bbox access", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of Mesh interface", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Fields: []gti.Field{{Name: "Nm", Doc: "name of mesh -- meshes are linked to Solids by name so this matters"}, {Name: "NVtx", Doc: "number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIdx", Doc: "number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as mat32.Vec4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
 
 // SetColor sets the [MeshBase.Color]:
 // has per-vertex colors, as mat32.Vec4 per vertex
-func (t *MeshBase) SetColor(v bool) *MeshBase {
-	t.Color = v
-	return t
-}
+func (t *MeshBase) SetColor(v bool) *MeshBase { t.Color = v; return t }
 
 // SetDynamic sets the [MeshBase.Dynamic]:
 // if true, this mesh changes frequently -- otherwise considered to be static
-func (t *MeshBase) SetDynamic(v bool) *MeshBase {
-	t.Dynamic = v
-	return t
-}
+func (t *MeshBase) SetDynamic(v bool) *MeshBase { t.Dynamic = v; return t }
 
 // SetTrans sets the [MeshBase.Trans]:
 // set to true if color has transparency -- not worth checking manually
-func (t *MeshBase) SetTrans(v bool) *MeshBase {
-	t.Trans = v
-	return t
-}
+func (t *MeshBase) SetTrans(v bool) *MeshBase { t.Trans = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.GenMesh",
-	ShortName:  "xyz.GenMesh",
-	IDName:     "gen-mesh",
-	Doc:        "GenMesh is a generic, arbitrary Mesh, storing its values",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Vtx", &gti.Field{Name: "Vtx", Type: "goki.dev/mat32.ArrayF32", LocalType: "mat32.ArrayF32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Norm", &gti.Field{Name: "Norm", Type: "goki.dev/mat32.ArrayF32", LocalType: "mat32.ArrayF32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Tex", &gti.Field{Name: "Tex", Type: "goki.dev/mat32.ArrayF32", LocalType: "mat32.ArrayF32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Clr", &gti.Field{Name: "Clr", Type: "goki.dev/mat32.ArrayF32", LocalType: "mat32.ArrayF32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"Idx", &gti.Field{Name: "Idx", Type: "goki.dev/mat32.ArrayU32", LocalType: "mat32.ArrayU32", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.GenMesh", IDName: "gen-mesh", Doc: "GenMesh is a generic, arbitrary Mesh, storing its values", Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Vtx"}, {Name: "Norm"}, {Name: "Tex"}, {Name: "Clr"}, {Name: "Idx"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Node",
-	ShortName:  "xyz.Node",
-	IDName:     "node",
-	Doc:        "Node is the common interface for all xyz scenegraph nodes",
-	Directives: gti.Directives{},
-
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz scenegraph nodes"})
 
 // NodeBaseType is the [gti.Type] for [NodeBase]
-var NodeBaseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.NodeBase",
-	ShortName:  "xyz.NodeBase",
-	IDName:     "node-base",
-	Doc:        "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pose", &gti.Field{Name: "Pose", Type: "goki.dev/xyz.Pose", LocalType: "Pose", Doc: "complete specification of position and orientation", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/xyz.Scene", LocalType: "*Scene", Doc: "Sc is the cached Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"PoseMu", &gti.Field{Name: "PoseMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex on pose access -- needed for parallel updating", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\"  set:\"-\""}},
-		{"MeshBBox", &gti.Field{Name: "MeshBBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "mesh-based local bounding box (aggregated for groups)", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"WorldBBox", &gti.Field{Name: "WorldBBox", Type: "goki.dev/xyz.BBox", LocalType: "BBox", Doc: "world coordinates bounding box", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"NDCBBox", &gti.Field{Name: "NDCBBox", Type: "goki.dev/mat32.Box3", LocalType: "mat32.Box3", Doc: "normalized display coordinates bounding box, used for frustrum clipping", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds.", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds.", Directives: gti.Directives{}, Tag: "edit:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &NodeBase{},
-})
+var NodeBaseType = gti.AddType(&gti.Type{Name: "goki.dev/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Pose", Doc: "complete specification of position and orientation"}, {Name: "Sc", Doc: "Sc is the cached Scene"}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "ScBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
 
-// NewNodeBase adds a new [NodeBase] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewNodeBase adds a new [NodeBase] with
+// the given name to the given parent:
+// // NodeBase is the basic 3D scenegraph node, which has the full transform information
+// relative to parent, and computed bounding boxes, etc.
+// There are only two different kinds of Nodes: Group and Solid
 func NewNodeBase(par ki.Ki, name ...string) *NodeBase {
 	return par.NewChild(NodeBaseType, name...).(*NodeBase)
 }
@@ -458,86 +135,14 @@ func (t *NodeBase) New() ki.Ki {
 	return &NodeBase{}
 }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.NodeFlags",
-	ShortName: "xyz.NodeFlags",
-	IDName:    "node-flags",
-	Doc:       "NodeFlags extend ki.Flags to hold 3D node state",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "enums", Directive: "bitflag", Args: []string{}},
-	},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.NodeFlags", IDName: "node-flags", Doc: "NodeFlags extend ki.Flags to hold 3D node state", Directives: []gti.Directive{{Tool: "enums", Directive: "bitflag"}}})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Pose", IDName: "pose", Doc: "Pose contains the full specification of position and orientation,\nalways relevant to the parent element.", Fields: []gti.Field{{Name: "Pos", Doc: "position of center of element (relative to parent)"}, {Name: "Scale", Doc: "scale (relative to parent)"}, {Name: "Quat", Doc: "Node rotation specified as a Quat (relative to parent)"}, {Name: "Matrix", Doc: "Local matrix. Contains all position/rotation/scale information (relative to parent)"}, {Name: "ParMatrix", Doc: "Parent's world matrix -- we cache this so that we can independently update our own matrix"}, {Name: "WorldMatrix", Doc: "World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"}, {Name: "MVMatrix", Doc: "model * view matrix -- tranforms into camera-centered coords"}, {Name: "MVPMatrix", Doc: "model * view * projection matrix -- full final render matrix"}, {Name: "NormMatrix", Doc: "normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Pose",
-	ShortName:  "xyz.Pose",
-	IDName:     "pose",
-	Doc:        "Pose contains the full specification of position and orientation,\nalways relevant to the parent element.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Pos", &gti.Field{Name: "Pos", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "position of center of element (relative to parent)", Directives: gti.Directives{}, Tag: ""}},
-		{"Scale", &gti.Field{Name: "Scale", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "scale (relative to parent)", Directives: gti.Directives{}, Tag: ""}},
-		{"Quat", &gti.Field{Name: "Quat", Type: "goki.dev/mat32.Quat", LocalType: "mat32.Quat", Doc: "Node rotation specified as a Quat (relative to parent)", Directives: gti.Directives{}, Tag: ""}},
-		{"Matrix", &gti.Field{Name: "Matrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "Local matrix. Contains all position/rotation/scale information (relative to parent)", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"ParMatrix", &gti.Field{Name: "ParMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "Parent's world matrix -- we cache this so that we can independently update our own matrix", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"WorldMatrix", &gti.Field{Name: "WorldMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"MVMatrix", &gti.Field{Name: "MVMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "model * view matrix -- tranforms into camera-centered coords", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"MVPMatrix", &gti.Field{Name: "MVPMatrix", Type: "goki.dev/mat32.Mat4", LocalType: "mat32.Mat4", Doc: "model * view * projection matrix -- full final render matrix", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"NormMatrix", &gti.Field{Name: "NormMatrix", Type: "goki.dev/mat32.Mat3", LocalType: "mat32.Mat3", Doc: "normal matrix has no offsets, for normal vector rotation only, based on MVMatrix", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.RenderClasses",
-	ShortName: "xyz.RenderClasses",
-	IDName:    "render-classes",
-	Doc:       "RenderClasses define the different classes of rendering",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "enums", Directive: "enum", Args: []string{"-trimprefix", "RClass"}},
-	},
-
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.RenderClasses", IDName: "render-classes", Doc: "RenderClasses define the different classes of rendering", Directives: []gti.Directive{{Tool: "enums", Directive: "enum", Args: []string{"-trimprefix", "RClass"}}}})
 
 // SceneType is the [gti.Type] for [Scene]
-var SceneType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Scene",
-	ShortName: "xyz.Scene",
-	IDName:    "scene",
-	Doc:       "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via gi3v.Scene,\nwhere it is copied into an overall gi.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Viewport-level viewbox within any parent Viewport2D", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"MultiSample", &gti.Field{Name: "MultiSample", Type: "int", LocalType: "int", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame", Directives: gti.Directives{}, Tag: "def:\"4\""}},
-		{"Wireframe", &gti.Field{Name: "Wireframe", Type: "bool", LocalType: "bool", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)", Directives: gti.Directives{}, Tag: "def:\"false\""}},
-		{"Camera", &gti.Field{Name: "Camera", Type: "goki.dev/xyz.Camera", LocalType: "Camera", Doc: "camera determines view onto scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"BackgroundColor", &gti.Field{Name: "BackgroundColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "background color", Directives: gti.Directives{}, Tag: ""}},
-		{"Lights", &gti.Field{Name: "Lights", Type: "goki.dev/ordmap.Map", LocalType: "ordmap.Map[string, Light]", Doc: "all lights used in the scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Meshes", &gti.Field{Name: "Meshes", Type: "goki.dev/ordmap.Map", LocalType: "ordmap.Map[string, Mesh]", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Textures", &gti.Field{Name: "Textures", Type: "goki.dev/ordmap.Map", LocalType: "ordmap.Map[string, Texture]", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Library", &gti.Field{Name: "Library", Type: "map[string]*goki.dev/xyz.Group", LocalType: "map[string]*Group", Doc: "library of objects that can be used in the scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"NoNav", &gti.Field{Name: "NoNav", Type: "bool", LocalType: "bool", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene", Directives: gti.Directives{}, Tag: ""}},
-		{"SavedCams", &gti.Field{Name: "SavedCams", Type: "map[string]goki.dev/xyz.Camera", LocalType: "map[string]Camera", Doc: "saved cameras -- can Save and Set these to view the scene from different angles", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", LocalType: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}, Tag: "view:\"-\" set:\"-\""}},
-		{"Phong", &gti.Field{Name: "Phong", Type: "goki.dev/vgpu/vphong.Phong", LocalType: "vphong.Phong", Doc: "the vphong rendering system", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Frame", &gti.Field{Name: "Frame", Type: "*goki.dev/vgpu.RenderFrame", LocalType: "*vgpu.RenderFrame", Doc: "the vgpu render frame holding the rendered scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ImgCopy", &gti.Field{Name: "ImgCopy", Type: "image.RGBA", LocalType: "image.RGBA", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [glop/images.CloneAsRGBA].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"DirUpIdx", &gti.Field{Name: "DirUpIdx", Type: "int", LocalType: "int", Doc: "index in list of window direct uploading images", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"RenderMu", &gti.Field{Name: "RenderMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex on rendering", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Scene{},
-})
+var SceneType = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzv.Scene,\nwhere it is copied into an overall gi.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}, {Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [glop/images.CloneAsRGBA]."}, {Name: "DirUpIdx", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
 
 // KiType returns the [*gti.Type] of [Scene]
 func (t *Scene) KiType() *gti.Type {
@@ -573,567 +178,244 @@ func (t *Scene) AsScene() *Scene {
 
 // SetMultiSample sets the [Scene.MultiSample]:
 // number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
-func (t *Scene) SetMultiSample(v int) *Scene {
-	t.MultiSample = v
-	return t
-}
+func (t *Scene) SetMultiSample(v int) *Scene { t.MultiSample = v; return t }
 
 // SetWireframe sets the [Scene.Wireframe]:
 // render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)
-func (t *Scene) SetWireframe(v bool) *Scene {
-	t.Wireframe = v
-	return t
-}
+func (t *Scene) SetWireframe(v bool) *Scene { t.Wireframe = v; return t }
 
 // SetBackgroundColor sets the [Scene.BackgroundColor]:
 // background color
-func (t *Scene) SetBackgroundColor(v color.RGBA) *Scene {
-	t.BackgroundColor = v
-	return t
-}
+func (t *Scene) SetBackgroundColor(v color.RGBA) *Scene { t.BackgroundColor = v; return t }
 
 // SetNoNav sets the [Scene.NoNav]:
 // don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene
-func (t *Scene) SetNoNav(v bool) *Scene {
-	t.NoNav = v
-	return t
-}
+func (t *Scene) SetNoNav(v bool) *Scene { t.NoNav = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.ScFlags",
-	ShortName: "xyz.ScFlags",
-	IDName:    "sc-flags",
-	Doc:       "ScFlags has critical state information signaling when rendering,\nupdating, or config needs to be done",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "enums", Directive: "bitflag", Args: []string{}},
-	},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.ScFlags", IDName: "sc-flags", Doc: "ScFlags has critical state information signaling when rendering,\nupdating, or config needs to be done", Directives: []gti.Directive{{Tool: "enums", Directive: "bitflag"}}})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Plane",
-	ShortName: "xyz.Plane",
-	IDName:    "plane",
-	Doc:       "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NormAxis", &gti.Field{Name: "NormAxis", Type: "goki.dev/mat32.Dims", LocalType: "mat32.Dims", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.", Directives: gti.Directives{}, Tag: ""}},
-		{"NormNeg", &gti.Field{Name: "NormNeg", Type: "bool", LocalType: "bool", Doc: "if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true", Directives: gti.Directives{}, Tag: ""}},
-		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "2D size of plane", Directives: gti.Directives{}, Tag: ""}},
-		{"Segs", &gti.Field{Name: "Segs", Type: "goki.dev/mat32.Vec2i", LocalType: "mat32.Vec2i", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1", Directives: gti.Directives{}, Tag: ""}},
-		{"Offset", &gti.Field{Name: "Offset", Type: "float32", LocalType: "float32", Doc: "offset from origin along direction of normal to the plane", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Plane", IDName: "plane", Doc: "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "NormAxis", Doc: "axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."}, {Name: "NormNeg", Doc: "if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"}, {Name: "Size", Doc: "2D size of plane"}, {Name: "Segs", Doc: "number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}, {Name: "Offset", Doc: "offset from origin along direction of normal to the plane"}}})
 
 // SetNormAxis sets the [Plane.NormAxis]:
 // axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-func (t *Plane) SetNormAxis(v mat32.Dims) *Plane {
-	t.NormAxis = v
-	return t
-}
+func (t *Plane) SetNormAxis(v mat32.Dims) *Plane { t.NormAxis = v; return t }
 
 // SetNormNeg sets the [Plane.NormNeg]:
 // if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
-func (t *Plane) SetNormNeg(v bool) *Plane {
-	t.NormNeg = v
-	return t
-}
+func (t *Plane) SetNormNeg(v bool) *Plane { t.NormNeg = v; return t }
 
 // SetSize sets the [Plane.Size]:
 // 2D size of plane
-func (t *Plane) SetSize(v mat32.Vec2) *Plane {
-	t.Size = v
-	return t
-}
+func (t *Plane) SetSize(v mat32.Vec2) *Plane { t.Size = v; return t }
 
 // SetSegs sets the [Plane.Segs]:
 // number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-func (t *Plane) SetSegs(v mat32.Vec2i) *Plane {
-	t.Segs = v
-	return t
-}
+func (t *Plane) SetSegs(v mat32.Vec2i) *Plane { t.Segs = v; return t }
 
 // SetOffset sets the [Plane.Offset]:
 // offset from origin along direction of normal to the plane
-func (t *Plane) SetOffset(v float32) *Plane {
-	t.Offset = v
-	return t
-}
+func (t *Plane) SetOffset(v float32) *Plane { t.Offset = v; return t }
 
 // SetColor sets the [Plane.Color]
-func (t *Plane) SetColor(v bool) *Plane {
-	t.Color = v
-	return t
-}
+func (t *Plane) SetColor(v bool) *Plane { t.Color = v; return t }
 
 // SetDynamic sets the [Plane.Dynamic]
-func (t *Plane) SetDynamic(v bool) *Plane {
-	t.Dynamic = v
-	return t
-}
+func (t *Plane) SetDynamic(v bool) *Plane { t.Dynamic = v; return t }
 
 // SetTrans sets the [Plane.Trans]
-func (t *Plane) SetTrans(v bool) *Plane {
-	t.Trans = v
-	return t
-}
+func (t *Plane) SetTrans(v bool) *Plane { t.Trans = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Box",
-	ShortName: "xyz.Box",
-	IDName:    "box",
-	Doc:       "Box is a rectangular-shaped solid (cuboid)",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Size", &gti.Field{Name: "Size", Type: "goki.dev/mat32.Vec3", LocalType: "mat32.Vec3", Doc: "size along each dimension", Directives: gti.Directives{}, Tag: ""}},
-		{"Segs", &gti.Field{Name: "Segs", Type: "goki.dev/mat32.Vec3i", LocalType: "mat32.Vec3i", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}}})
 
 // SetSize sets the [Box.Size]:
 // size along each dimension
-func (t *Box) SetSize(v mat32.Vec3) *Box {
-	t.Size = v
-	return t
-}
+func (t *Box) SetSize(v mat32.Vec3) *Box { t.Size = v; return t }
 
 // SetSegs sets the [Box.Segs]:
 // number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-func (t *Box) SetSegs(v mat32.Vec3i) *Box {
-	t.Segs = v
-	return t
-}
+func (t *Box) SetSegs(v mat32.Vec3i) *Box { t.Segs = v; return t }
 
 // SetColor sets the [Box.Color]
-func (t *Box) SetColor(v bool) *Box {
-	t.Color = v
-	return t
-}
+func (t *Box) SetColor(v bool) *Box { t.Color = v; return t }
 
 // SetDynamic sets the [Box.Dynamic]
-func (t *Box) SetDynamic(v bool) *Box {
-	t.Dynamic = v
-	return t
-}
+func (t *Box) SetDynamic(v bool) *Box { t.Dynamic = v; return t }
 
 // SetTrans sets the [Box.Trans]
-func (t *Box) SetTrans(v bool) *Box {
-	t.Trans = v
-	return t
-}
+func (t *Box) SetTrans(v bool) *Box { t.Trans = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Sphere",
-	ShortName: "xyz.Sphere",
-	IDName:    "sphere",
-	Doc:       "Sphere is a sphere mesh",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "radius of the sphere", Directives: gti.Directives{}, Tag: ""}},
-		{"WidthSegs", &gti.Field{Name: "WidthSegs", Type: "int", LocalType: "int", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)", Directives: gti.Directives{}, Tag: "min:\"3\""}},
-		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", LocalType: "int", Doc: "number of height segments (32 is reasonable default for full height)", Directives: gti.Directives{}, Tag: "min:\"3\""}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", LocalType: "float32", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", LocalType: "float32", Doc: "total radial angle to generate in degrees (max = 360)", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-		{"ElevStart", &gti.Field{Name: "ElevStart", Type: "float32", LocalType: "float32", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"180\" step:\"5\""}},
-		{"ElevLen", &gti.Field{Name: "ElevLen", Type: "float32", LocalType: "float32", Doc: "total angle to generate in degrees (max = 180)", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"180\" step:\"5\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Sphere", IDName: "sphere", Doc: "Sphere is a sphere mesh", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Radius", Doc: "radius of the sphere"}, {Name: "WidthSegs", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}, {Name: "ElevStart", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"}, {Name: "ElevLen", Doc: "total angle to generate in degrees (max = 180)"}}})
 
 // SetRadius sets the [Sphere.Radius]:
 // radius of the sphere
-func (t *Sphere) SetRadius(v float32) *Sphere {
-	t.Radius = v
-	return t
-}
+func (t *Sphere) SetRadius(v float32) *Sphere { t.Radius = v; return t }
 
 // SetWidthSegs sets the [Sphere.WidthSegs]:
 // number of segments around the width of the sphere (32 is reasonable default for full circle)
-func (t *Sphere) SetWidthSegs(v int) *Sphere {
-	t.WidthSegs = v
-	return t
-}
+func (t *Sphere) SetWidthSegs(v int) *Sphere { t.WidthSegs = v; return t }
 
 // SetHeightSegs sets the [Sphere.HeightSegs]:
 // number of height segments (32 is reasonable default for full height)
-func (t *Sphere) SetHeightSegs(v int) *Sphere {
-	t.HeightSegs = v
-	return t
-}
+func (t *Sphere) SetHeightSegs(v int) *Sphere { t.HeightSegs = v; return t }
 
 // SetAngStart sets the [Sphere.AngStart]:
 // starting radial angle in degrees, relative to -1,0,0 left side starting point
-func (t *Sphere) SetAngStart(v float32) *Sphere {
-	t.AngStart = v
-	return t
-}
+func (t *Sphere) SetAngStart(v float32) *Sphere { t.AngStart = v; return t }
 
 // SetAngLen sets the [Sphere.AngLen]:
 // total radial angle to generate in degrees (max = 360)
-func (t *Sphere) SetAngLen(v float32) *Sphere {
-	t.AngLen = v
-	return t
-}
+func (t *Sphere) SetAngLen(v float32) *Sphere { t.AngLen = v; return t }
 
 // SetElevStart sets the [Sphere.ElevStart]:
 // starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom
-func (t *Sphere) SetElevStart(v float32) *Sphere {
-	t.ElevStart = v
-	return t
-}
+func (t *Sphere) SetElevStart(v float32) *Sphere { t.ElevStart = v; return t }
 
 // SetElevLen sets the [Sphere.ElevLen]:
 // total angle to generate in degrees (max = 180)
-func (t *Sphere) SetElevLen(v float32) *Sphere {
-	t.ElevLen = v
-	return t
-}
+func (t *Sphere) SetElevLen(v float32) *Sphere { t.ElevLen = v; return t }
 
 // SetColor sets the [Sphere.Color]
-func (t *Sphere) SetColor(v bool) *Sphere {
-	t.Color = v
-	return t
-}
+func (t *Sphere) SetColor(v bool) *Sphere { t.Color = v; return t }
 
 // SetDynamic sets the [Sphere.Dynamic]
-func (t *Sphere) SetDynamic(v bool) *Sphere {
-	t.Dynamic = v
-	return t
-}
+func (t *Sphere) SetDynamic(v bool) *Sphere { t.Dynamic = v; return t }
 
 // SetTrans sets the [Sphere.Trans]
-func (t *Sphere) SetTrans(v bool) *Sphere {
-	t.Trans = v
-	return t
-}
+func (t *Sphere) SetTrans(v bool) *Sphere { t.Trans = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Cylinder",
-	ShortName: "xyz.Cylinder",
-	IDName:    "cylinder",
-	Doc:       "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Height", &gti.Field{Name: "Height", Type: "float32", LocalType: "float32", Doc: "height of the cylinder", Directives: gti.Directives{}, Tag: ""}},
-		{"TopRad", &gti.Field{Name: "TopRad", Type: "float32", LocalType: "float32", Doc: "radius of the top -- set to 0 for a cone", Directives: gti.Directives{}, Tag: ""}},
-		{"BotRad", &gti.Field{Name: "BotRad", Type: "float32", LocalType: "float32", Doc: "radius of the bottom", Directives: gti.Directives{}, Tag: ""}},
-		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", LocalType: "int", Doc: "number of radial segments (32 is a reasonable default for full circle)", Directives: gti.Directives{}, Tag: "min:\"1\""}},
-		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", LocalType: "int", Doc: "number of height segments", Directives: gti.Directives{}, Tag: ""}},
-		{"Top", &gti.Field{Name: "Top", Type: "bool", LocalType: "bool", Doc: "render the top disc", Directives: gti.Directives{}, Tag: ""}},
-		{"Bottom", &gti.Field{Name: "Bottom", Type: "bool", LocalType: "bool", Doc: "render the bottom disc", Directives: gti.Directives{}, Tag: ""}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", LocalType: "float32", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", LocalType: "float32", Doc: "total angle to generate in degrees (max 360)", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Cylinder", IDName: "cylinder", Doc: "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Height", Doc: "height of the cylinder"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "Top", Doc: "render the top disc"}, {Name: "Bottom", Doc: "render the bottom disc"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Cylinder.Height]:
 // height of the cylinder
-func (t *Cylinder) SetHeight(v float32) *Cylinder {
-	t.Height = v
-	return t
-}
+func (t *Cylinder) SetHeight(v float32) *Cylinder { t.Height = v; return t }
 
 // SetTopRad sets the [Cylinder.TopRad]:
 // radius of the top -- set to 0 for a cone
-func (t *Cylinder) SetTopRad(v float32) *Cylinder {
-	t.TopRad = v
-	return t
-}
+func (t *Cylinder) SetTopRad(v float32) *Cylinder { t.TopRad = v; return t }
 
 // SetBotRad sets the [Cylinder.BotRad]:
 // radius of the bottom
-func (t *Cylinder) SetBotRad(v float32) *Cylinder {
-	t.BotRad = v
-	return t
-}
+func (t *Cylinder) SetBotRad(v float32) *Cylinder { t.BotRad = v; return t }
 
 // SetRadialSegs sets the [Cylinder.RadialSegs]:
 // number of radial segments (32 is a reasonable default for full circle)
-func (t *Cylinder) SetRadialSegs(v int) *Cylinder {
-	t.RadialSegs = v
-	return t
-}
+func (t *Cylinder) SetRadialSegs(v int) *Cylinder { t.RadialSegs = v; return t }
 
 // SetHeightSegs sets the [Cylinder.HeightSegs]:
 // number of height segments
-func (t *Cylinder) SetHeightSegs(v int) *Cylinder {
-	t.HeightSegs = v
-	return t
-}
+func (t *Cylinder) SetHeightSegs(v int) *Cylinder { t.HeightSegs = v; return t }
 
 // SetTop sets the [Cylinder.Top]:
 // render the top disc
-func (t *Cylinder) SetTop(v bool) *Cylinder {
-	t.Top = v
-	return t
-}
+func (t *Cylinder) SetTop(v bool) *Cylinder { t.Top = v; return t }
 
 // SetBottom sets the [Cylinder.Bottom]:
 // render the bottom disc
-func (t *Cylinder) SetBottom(v bool) *Cylinder {
-	t.Bottom = v
-	return t
-}
+func (t *Cylinder) SetBottom(v bool) *Cylinder { t.Bottom = v; return t }
 
 // SetAngStart sets the [Cylinder.AngStart]:
 // starting angle in degrees, relative to -1,0,0 left side starting point
-func (t *Cylinder) SetAngStart(v float32) *Cylinder {
-	t.AngStart = v
-	return t
-}
+func (t *Cylinder) SetAngStart(v float32) *Cylinder { t.AngStart = v; return t }
 
 // SetAngLen sets the [Cylinder.AngLen]:
 // total angle to generate in degrees (max 360)
-func (t *Cylinder) SetAngLen(v float32) *Cylinder {
-	t.AngLen = v
-	return t
-}
+func (t *Cylinder) SetAngLen(v float32) *Cylinder { t.AngLen = v; return t }
 
 // SetColor sets the [Cylinder.Color]
-func (t *Cylinder) SetColor(v bool) *Cylinder {
-	t.Color = v
-	return t
-}
+func (t *Cylinder) SetColor(v bool) *Cylinder { t.Color = v; return t }
 
 // SetDynamic sets the [Cylinder.Dynamic]
-func (t *Cylinder) SetDynamic(v bool) *Cylinder {
-	t.Dynamic = v
-	return t
-}
+func (t *Cylinder) SetDynamic(v bool) *Cylinder { t.Dynamic = v; return t }
 
 // SetTrans sets the [Cylinder.Trans]
-func (t *Cylinder) SetTrans(v bool) *Cylinder {
-	t.Trans = v
-	return t
-}
+func (t *Cylinder) SetTrans(v bool) *Cylinder { t.Trans = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Capsule",
-	ShortName: "xyz.Capsule",
-	IDName:    "capsule",
-	Doc:       "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Height", &gti.Field{Name: "Height", Type: "float32", LocalType: "float32", Doc: "height of the cylinder portion", Directives: gti.Directives{}, Tag: ""}},
-		{"TopRad", &gti.Field{Name: "TopRad", Type: "float32", LocalType: "float32", Doc: "radius of the top -- set to 0 for a cone", Directives: gti.Directives{}, Tag: ""}},
-		{"BotRad", &gti.Field{Name: "BotRad", Type: "float32", LocalType: "float32", Doc: "radius of the bottom", Directives: gti.Directives{}, Tag: ""}},
-		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", LocalType: "int", Doc: "number of radial segments (32 is a reasonable default for full circle)", Directives: gti.Directives{}, Tag: "min:\"1\""}},
-		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", LocalType: "int", Doc: "number of height segments", Directives: gti.Directives{}, Tag: ""}},
-		{"CapSegs", &gti.Field{Name: "CapSegs", Type: "int", LocalType: "int", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)", Directives: gti.Directives{}, Tag: ""}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", LocalType: "float32", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", LocalType: "float32", Doc: "total angle to generate in degrees (max 360)", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Capsule.Height]:
 // height of the cylinder portion
-func (t *Capsule) SetHeight(v float32) *Capsule {
-	t.Height = v
-	return t
-}
+func (t *Capsule) SetHeight(v float32) *Capsule { t.Height = v; return t }
 
 // SetTopRad sets the [Capsule.TopRad]:
 // radius of the top -- set to 0 for a cone
-func (t *Capsule) SetTopRad(v float32) *Capsule {
-	t.TopRad = v
-	return t
-}
+func (t *Capsule) SetTopRad(v float32) *Capsule { t.TopRad = v; return t }
 
 // SetBotRad sets the [Capsule.BotRad]:
 // radius of the bottom
-func (t *Capsule) SetBotRad(v float32) *Capsule {
-	t.BotRad = v
-	return t
-}
+func (t *Capsule) SetBotRad(v float32) *Capsule { t.BotRad = v; return t }
 
 // SetRadialSegs sets the [Capsule.RadialSegs]:
 // number of radial segments (32 is a reasonable default for full circle)
-func (t *Capsule) SetRadialSegs(v int) *Capsule {
-	t.RadialSegs = v
-	return t
-}
+func (t *Capsule) SetRadialSegs(v int) *Capsule { t.RadialSegs = v; return t }
 
 // SetHeightSegs sets the [Capsule.HeightSegs]:
 // number of height segments
-func (t *Capsule) SetHeightSegs(v int) *Capsule {
-	t.HeightSegs = v
-	return t
-}
+func (t *Capsule) SetHeightSegs(v int) *Capsule { t.HeightSegs = v; return t }
 
 // SetCapSegs sets the [Capsule.CapSegs]:
 // number of segments in the hemisphere cap ends (16 is a reasonable default)
-func (t *Capsule) SetCapSegs(v int) *Capsule {
-	t.CapSegs = v
-	return t
-}
+func (t *Capsule) SetCapSegs(v int) *Capsule { t.CapSegs = v; return t }
 
 // SetAngStart sets the [Capsule.AngStart]:
 // starting angle in degrees, relative to -1,0,0 left side starting point
-func (t *Capsule) SetAngStart(v float32) *Capsule {
-	t.AngStart = v
-	return t
-}
+func (t *Capsule) SetAngStart(v float32) *Capsule { t.AngStart = v; return t }
 
 // SetAngLen sets the [Capsule.AngLen]:
 // total angle to generate in degrees (max 360)
-func (t *Capsule) SetAngLen(v float32) *Capsule {
-	t.AngLen = v
-	return t
-}
+func (t *Capsule) SetAngLen(v float32) *Capsule { t.AngLen = v; return t }
 
 // SetColor sets the [Capsule.Color]
-func (t *Capsule) SetColor(v bool) *Capsule {
-	t.Color = v
-	return t
-}
+func (t *Capsule) SetColor(v bool) *Capsule { t.Color = v; return t }
 
 // SetDynamic sets the [Capsule.Dynamic]
-func (t *Capsule) SetDynamic(v bool) *Capsule {
-	t.Dynamic = v
-	return t
-}
+func (t *Capsule) SetDynamic(v bool) *Capsule { t.Dynamic = v; return t }
 
 // SetTrans sets the [Capsule.Trans]
-func (t *Capsule) SetTrans(v bool) *Capsule {
-	t.Trans = v
-	return t
-}
+func (t *Capsule) SetTrans(v bool) *Capsule { t.Trans = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/xyz.Torus",
-	ShortName: "xyz.Torus",
-	IDName:    "torus",
-	Doc:       "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Radius", &gti.Field{Name: "Radius", Type: "float32", LocalType: "float32", Doc: "larger radius of the torus ring", Directives: gti.Directives{}, Tag: ""}},
-		{"TubeRadius", &gti.Field{Name: "TubeRadius", Type: "float32", LocalType: "float32", Doc: "radius of the solid tube", Directives: gti.Directives{}, Tag: ""}},
-		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", LocalType: "int", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)", Directives: gti.Directives{}, Tag: "min:\"1\""}},
-		{"TubeSegs", &gti.Field{Name: "TubeSegs", Type: "int", LocalType: "int", Doc: "number of segments for the tube itself (32 is reasonable default for full height)", Directives: gti.Directives{}, Tag: "min:\"1\""}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", LocalType: "float32", Doc: "starting radial angle in degrees relative to 1,0,0 starting point", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", LocalType: "float32", Doc: "total radial angle to generate in degrees (max = 360)", Directives: gti.Directives{}, Tag: "min:\"0\" max:\"360\" step:\"5\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"MeshBase", &gti.Field{Name: "MeshBase", Type: "goki.dev/xyz.MeshBase", LocalType: "MeshBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Torus", IDName: "torus", Doc: "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.", Directives: []gti.Directive{{Tool: "gti", Directive: "add", Args: []string{"-setters"}}}, Embeds: []gti.Field{{Name: "MeshBase"}}, Fields: []gti.Field{{Name: "Radius", Doc: "larger radius of the torus ring"}, {Name: "TubeRadius", Doc: "radius of the solid tube"}, {Name: "RadialSegs", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)"}, {Name: "TubeSegs", Doc: "number of segments for the tube itself (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees relative to 1,0,0 starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}}})
 
 // SetRadius sets the [Torus.Radius]:
 // larger radius of the torus ring
-func (t *Torus) SetRadius(v float32) *Torus {
-	t.Radius = v
-	return t
-}
+func (t *Torus) SetRadius(v float32) *Torus { t.Radius = v; return t }
 
 // SetTubeRadius sets the [Torus.TubeRadius]:
 // radius of the solid tube
-func (t *Torus) SetTubeRadius(v float32) *Torus {
-	t.TubeRadius = v
-	return t
-}
+func (t *Torus) SetTubeRadius(v float32) *Torus { t.TubeRadius = v; return t }
 
 // SetRadialSegs sets the [Torus.RadialSegs]:
 // number of segments around the radius of the torus (32 is reasonable default for full circle)
-func (t *Torus) SetRadialSegs(v int) *Torus {
-	t.RadialSegs = v
-	return t
-}
+func (t *Torus) SetRadialSegs(v int) *Torus { t.RadialSegs = v; return t }
 
 // SetTubeSegs sets the [Torus.TubeSegs]:
 // number of segments for the tube itself (32 is reasonable default for full height)
-func (t *Torus) SetTubeSegs(v int) *Torus {
-	t.TubeSegs = v
-	return t
-}
+func (t *Torus) SetTubeSegs(v int) *Torus { t.TubeSegs = v; return t }
 
 // SetAngStart sets the [Torus.AngStart]:
 // starting radial angle in degrees relative to 1,0,0 starting point
-func (t *Torus) SetAngStart(v float32) *Torus {
-	t.AngStart = v
-	return t
-}
+func (t *Torus) SetAngStart(v float32) *Torus { t.AngStart = v; return t }
 
 // SetAngLen sets the [Torus.AngLen]:
 // total radial angle to generate in degrees (max = 360)
-func (t *Torus) SetAngLen(v float32) *Torus {
-	t.AngLen = v
-	return t
-}
+func (t *Torus) SetAngLen(v float32) *Torus { t.AngLen = v; return t }
 
 // SetColor sets the [Torus.Color]
-func (t *Torus) SetColor(v bool) *Torus {
-	t.Color = v
-	return t
-}
+func (t *Torus) SetColor(v bool) *Torus { t.Color = v; return t }
 
 // SetDynamic sets the [Torus.Dynamic]
-func (t *Torus) SetDynamic(v bool) *Torus {
-	t.Dynamic = v
-	return t
-}
+func (t *Torus) SetDynamic(v bool) *Torus { t.Dynamic = v; return t }
 
 // SetTrans sets the [Torus.Trans]
-func (t *Torus) SetTrans(v bool) *Torus {
-	t.Trans = v
-	return t
-}
+func (t *Torus) SetTrans(v bool) *Torus { t.Trans = v; return t }
 
 // SolidType is the [gti.Type] for [Solid]
-var SolidType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Solid",
-	ShortName:  "xyz.Solid",
-	IDName:     "solid",
-	Doc:        "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Mesh", &gti.Field{Name: "Mesh", Type: "goki.dev/xyz.MeshName", LocalType: "MeshName", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Mat", &gti.Field{Name: "Mat", Type: "goki.dev/xyz.Material", LocalType: "Material", Doc: "material properties of the surface (color, shininess, texture, etc)", Directives: gti.Directives{}, Tag: "view:\"add-fields\""}},
-		{"MeshPtr", &gti.Field{Name: "MeshPtr", Type: "goki.dev/xyz.Mesh", LocalType: "Mesh", Doc: "cached pointer to mesh", Directives: gti.Directives{}, Tag: "view:\"-\" set:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NodeBase", &gti.Field{Name: "NodeBase", Type: "goki.dev/xyz.NodeBase", LocalType: "NodeBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Solid{},
-})
+var SolidType = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []gti.Field{{Name: "NodeBase"}}, Fields: []gti.Field{{Name: "Mesh", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "MeshPtr", Doc: "cached pointer to mesh"}}, Instance: &Solid{}})
 
-// NewSolid adds a new [Solid] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewSolid adds a new [Solid] with
+// the given name to the given parent:
+// // Solid represents an individual 3D solid element.
+// It has its own unique spatial transforms and material properties,
+// and points to a mesh structure defining the shape of the solid.
 func NewSolid(par ki.Ki, name ...string) *Solid {
 	return par.NewChild(SolidType, name...).(*Solid)
 }
@@ -1150,36 +432,26 @@ func (t *Solid) New() ki.Ki {
 
 // SetMat sets the [Solid.Mat]:
 // material properties of the surface (color, shininess, texture, etc)
-func (t *Solid) SetMat(v Material) *Solid {
-	t.Mat = v
-	return t
-}
+func (t *Solid) SetMat(v Material) *Solid { t.Mat = v; return t }
 
 // Text2DType is the [gti.Type] for [Text2D]
-var Text2DType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Text2D",
-	ShortName:  "xyz.Text2D",
-	IDName:     "text-2-d",
-	Doc:        "Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "the text string to display", Directives: gti.Directives{}, Tag: ""}},
-		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/styles.Style", LocalType: "styles.Style", Doc: "styling settings for the text", Directives: gti.Directives{}, Tag: "set:\"-\" json:\"-\" xml:\"-\""}},
-		{"TxtPos", &gti.Field{Name: "TxtPos", Type: "goki.dev/mat32.Vec2", LocalType: "mat32.Vec2", Doc: "position offset of start of text rendering relative to upper-left corner", Directives: gti.Directives{}, Tag: "set:\"-\" xml:\"-\" json:\"-\""}},
-		{"TxtRender", &gti.Field{Name: "TxtRender", Type: "goki.dev/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "set:\"-\" xml:\"-\" json:\"-\""}},
-		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/paint.State", LocalType: "paint.State", Doc: "render state for rendering text", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Solid", &gti.Field{Name: "Solid", Type: "goki.dev/xyz.Solid", LocalType: "Solid", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Text2D{},
-})
+var Text2DType = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Text2D", IDName: "text-2-d", Doc: "Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []gti.Field{{Name: "Solid"}}, Fields: []gti.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TxtPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TxtRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}}, Instance: &Text2D{}})
 
-// NewText2D adds a new [Text2D] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewText2D adds a new [Text2D] with
+// the given name to the given parent:
+// // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.
+// Call SetText() which calls RenderText to update fortext changes (re-renders texture).
+// The native scale is such that a unit height value is the height of the default font
+// set by the font-size property, and the X axis is scaled proportionally based on the
+// rendered text size to maintain the aspect ratio.  Further scaling can be applied on
+// top of that by setting the Pose.Scale values as usual.
+// Standard styling properties can be set on the node to set font size, family,
+// and text alignment relative to the Pose.Pos position (e.g., Left, Top puts the
+// upper-left corner of text at Pos).
+// Note that higher quality is achieved by using a larger font size (36 default).
+// The margin property creates blank margin of the background color around the text
+// (2 px default) and the background-color defaults to transparent
+// but can be set to any color.
 func NewText2D(par ki.Ki, name ...string) *Text2D {
 	return par.NewChild(Text2DType, name...).(*Text2D)
 }
@@ -1196,77 +468,17 @@ func (t *Text2D) New() ki.Ki {
 
 // SetText sets the [Text2D.Text]:
 // the text string to display
-func (t *Text2D) SetText(v string) *Text2D {
-	t.Text = v
-	return t
-}
+func (t *Text2D) SetText(v string) *Text2D { t.Text = v; return t }
 
 // SetMat sets the [Text2D.Mat]
-func (t *Text2D) SetMat(v Material) *Text2D {
-	t.Mat = v
-	return t
-}
+func (t *Text2D) SetMat(v Material) *Text2D { t.Mat = v; return t }
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.TexName",
-	ShortName:  "xyz.TexName",
-	IDName:     "tex-name",
-	Doc:        "TexName provides a GUI interface for choosing textures",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.TexName", IDName: "tex-name", Doc: "TexName provides a GUI interface for choosing textures"})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures"})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.Texture",
-	ShortName:  "xyz.Texture",
-	IDName:     "texture",
-	Doc:        "Texture is the interface for all textures",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.TextureBase", IDName: "texture-base", Doc: "TextureBase is the base texture implementation\nit uses an image.RGBA as underlying image storage to facilitate interface with GPU", Fields: []gti.Field{{Name: "Nm", Doc: "name of the texture -- textures are connected to material by name"}, {Name: "Trans", Doc: "set to true if texture has transparency"}, {Name: "Img", Doc: "cached image"}}})
 
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.TextureFile", IDName: "texture-file", Doc: "TextureFile is a texture loaded from a file", Embeds: []gti.Field{{Name: "TextureBase"}}, Fields: []gti.Field{{Name: "FSys", Doc: "filesystem for embedded etc"}, {Name: "File", Doc: "filename for the texture"}}})
 
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.TextureBase",
-	ShortName:  "xyz.TextureBase",
-	IDName:     "texture-base",
-	Doc:        "TextureBase is the base texture implementation\nit uses an image.RGBA as underlying image storage to facilitate interface with GPU",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Nm", &gti.Field{Name: "Nm", Type: "string", LocalType: "string", Doc: "name of the texture -- textures are connected to material by name", Directives: gti.Directives{}, Tag: ""}},
-		{"Trans", &gti.Field{Name: "Trans", Type: "bool", LocalType: "bool", Doc: "set to true if texture has transparency", Directives: gti.Directives{}, Tag: ""}},
-		{"Img", &gti.Field{Name: "Img", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "cached image", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.TextureFile",
-	ShortName:  "xyz.TextureFile",
-	IDName:     "texture-file",
-	Doc:        "TextureFile is a texture loaded from a file",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FSys", &gti.Field{Name: "FSys", Type: "io/fs.FS", LocalType: "fs.FS", Doc: "filesystem for embedded etc", Directives: gti.Directives{}, Tag: ""}},
-		{"File", &gti.Field{Name: "File", Type: "string", LocalType: "string", Doc: "filename for the texture", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TextureBase", &gti.Field{Name: "TextureBase", Type: "goki.dev/xyz.TextureBase", LocalType: "TextureBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/xyz.TextureGi2D",
-	ShortName:  "xyz.TextureGi2D",
-	IDName:     "texture-gi-2-d",
-	Doc:        "TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport\nanything rendered to the viewport will be projected onto the surface of any\nsolid using this texture.",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TextureBase", &gti.Field{Name: "TextureBase", Type: "goki.dev/xyz.TextureBase", LocalType: "TextureBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.TextureGi2D", IDName: "texture-gi-2-d", Doc: "TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport\nanything rendered to the viewport will be projected onto the surface of any\nsolid using this texture.", Embeds: []gti.Field{{Name: "TextureBase"}}})

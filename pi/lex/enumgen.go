@@ -4,6 +4,7 @@ package lex
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
@@ -158,7 +159,10 @@ func (i Actions) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Actions) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _MatchesValues = []Matches{0, 1, 2, 3, 4, 5, 6}
@@ -289,7 +293,10 @@ func (i Matches) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Matches) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }
 
 var _MatchPosValues = []MatchPos{0, 1, 2, 3, 4, 5, 6}
@@ -420,5 +427,8 @@ func (i MatchPos) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *MatchPos) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
+	if err := i.SetString(string(text)); err != nil {
+		log.Println(err)
+	}
+	return nil
 }

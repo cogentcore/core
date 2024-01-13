@@ -127,12 +127,8 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 	}
 
 	// otherwise, we get our field documentation in our parent
-	otyp := TypeByReflectType(owner.Type())
-	if otyp != nil {
-		f := GetField(otyp, field.Name)
-		if f == nil {
-			return "", false
-		}
+	f := GetField(owner, field.Name)
+	if f != nil {
 		return sentence.Doc(f.Doc, field.Name, label), true
 	}
 	// if we aren't in gti, we fall back on struct tag

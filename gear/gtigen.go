@@ -6,32 +6,14 @@ import (
 	"goki.dev/gi"
 	"goki.dev/gti"
 	"goki.dev/ki"
-	"goki.dev/ordmap"
 )
 
 // AppType is the [gti.Type] for [App]
-var AppType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gear/gear.App",
-	ShortName:  "gear.App",
-	IDName:     "app",
-	Doc:        "App is a GUI view of a gear command.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Cmd", &gti.Field{Name: "Cmd", Type: "*goki.dev/gear/gear.Cmd", LocalType: "*Cmd", Doc: "Cmd is the root command associated with this app.", Directives: gti.Directives{}, Tag: ""}},
-		{"CurCmd", &gti.Field{Name: "CurCmd", Type: "string", LocalType: "string", Doc: "CurCmd is the current root command being typed in.", Directives: gti.Directives{}, Tag: ""}},
-		{"Dir", &gti.Field{Name: "Dir", Type: "string", LocalType: "string", Doc: "Dir is the current directory of the app.", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &App{},
-})
+var AppType = gti.AddType(&gti.Type{Name: "goki.dev/gear.App", IDName: "app", Doc: "App is a GUI view of a gear command.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Cmd", Doc: "Cmd is the root command associated with this app."}, {Name: "CurCmd", Doc: "CurCmd is the current root command being typed in."}, {Name: "Dir", Doc: "Dir is the current directory of the app."}}, Instance: &App{}})
 
-// NewApp adds a new [App] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
+// NewApp adds a new [App] with
+// the given name to the given parent:
+// // App is a GUI view of a gear command.
 func NewApp(par ki.Ki, name ...string) *App {
 	return par.NewChild(AppType, name...).(*App)
 }
@@ -48,39 +30,21 @@ func (t *App) New() ki.Ki {
 
 // SetCmd sets the [App.Cmd]:
 // Cmd is the root command associated with this app.
-func (t *App) SetCmd(v *Cmd) *App {
-	t.Cmd = v
-	return t
-}
+func (t *App) SetCmd(v *Cmd) *App { t.Cmd = v; return t }
 
 // SetCurCmd sets the [App.CurCmd]:
 // CurCmd is the current root command being typed in.
-func (t *App) SetCurCmd(v string) *App {
-	t.CurCmd = v
-	return t
-}
+func (t *App) SetCurCmd(v string) *App { t.CurCmd = v; return t }
 
 // SetDir sets the [App.Dir]:
 // Dir is the current directory of the app.
-func (t *App) SetDir(v string) *App {
-	t.Dir = v
-	return t
-}
+func (t *App) SetDir(v string) *App { t.Dir = v; return t }
 
 // SetTooltip sets the [App.Tooltip]
-func (t *App) SetTooltip(v string) *App {
-	t.Tooltip = v
-	return t
-}
+func (t *App) SetTooltip(v string) *App { t.Tooltip = v; return t }
 
 // SetStackTop sets the [App.StackTop]
-func (t *App) SetStackTop(v int) *App {
-	t.StackTop = v
-	return t
-}
+func (t *App) SetStackTop(v int) *App { t.StackTop = v; return t }
 
 // SetStripes sets the [App.Stripes]
-func (t *App) SetStripes(v gi.Stripes) *App {
-	t.Stripes = v
-	return t
-}
+func (t *App) SetStripes(v gi.Stripes) *App { t.Stripes = v; return t }

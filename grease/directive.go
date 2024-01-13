@@ -44,5 +44,8 @@ func ParseDirective(comment string) (*gti.Directive, error) {
 		directive.Directive = directive.Args[0]
 		directive.Args = directive.Args[1:]
 	}
+	if len(directive.Args) == 0 {
+		directive.Args = nil
+	}
 	return directive, nil
 }

@@ -5,7 +5,9 @@
 package gti
 
 import (
+	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -13,9 +15,6 @@ import (
 type Type struct {
 	// Name is the fully package-path-qualified name of the type (eg: goki.dev/gi.Button)
 	Name string
-
-	// ShortName is the short, package-qualified name of the type (eg: gi.Button)
-	ShortName string
 
 	// IDName is the short, package-unqualified, kebab-case name of the type that is suitable
 	// for use in an ID (eg: button)
@@ -26,22 +25,22 @@ type Type struct {
 	Doc string
 
 	// Directives has the parsed comment directives
-	Directives Directives
-
-	// unique type ID number
-	ID uint64
+	Directives []Directive
 
 	// Methods are available for all types
-	Methods *Methods
+	Methods []Method
 
 	// Embedded fields for struct types
-	Embeds *Fields
+	Embeds []Field
 
 	// Fields for struct types
-	Fields *Fields
+	Fields []Field
 
-	// instance of the type
+	// Instance is an optional instance of the type
 	Instance any
+
+	// ID is the unique type ID number
+	ID uint64
 
 	// All embedded fields (including nested ones) for struct types;
 	// not set by gtigen -- HasEmbed automatically compiles it as needed.
@@ -53,8 +52,14 @@ func (tp *Type) String() string {
 	return tp.Name
 }
 
+// ShortName returns the short name of the type (package.Type)
+func (tp *Type) ShortName() string {
+	li := strings.LastIndex(tp.Name, "/")
+	return tp.Name[li+1:]
+}
+
 func (tp *Type) Label() string {
-	return tp.ShortName
+	return tp.ShortName()
 }
 
 // ReflectType returns the [reflect.Type] for this type, using the Instance
@@ -84,7 +89,7 @@ func (tp *Type) HasEmbed(typ *Type) bool {
 }
 
 func (tp *Type) CompileEmbeds() {
-	if tp.Embeds == nil {
+	if len(tp.Embeds) == 0 {
 		return
 	}
 	rt := tp.ReflectType()
@@ -92,8 +97,8 @@ func (tp *Type) CompileEmbeds() {
 		return
 	}
 	tp.AllEmbeds = make(map[uint64]*Type)
-	for _, em := range tp.Embeds.Order {
-		enm := em.Val.Name
+	for _, em := range tp.Embeds {
+		enm := em.Name
 		if idx := strings.LastIndex(enm, "."); idx >= 0 {
 			enm = enm[idx+1:]
 		}
@@ -115,4 +120,33 @@ func (tp *Type) CompileEmbeds() {
 			tp.AllEmbeds[id] = ct
 		}
 	}
+}
+
+// StructGoString creates a GoString for the given struct,
+// omitting any zero values.
+func StructGoString(str any) string {
+	s := reflect.ValueOf(str)
+	typ := s.Type()
+	strs := []string{}
+	for i := 0; i < s.NumField(); i++ {
+		f := s.Field(i)
+		if f.IsZero() {
+			continue
+		}
+		nm := typ.Field(i).Name
+		strs = append(strs, fmt.Sprintf("%s: %#v", nm, f))
+
+	}
+	return "{" + strings.Join(strs, ", ") + "}"
+}
+
+// need to get rid of quotes around instance
+var typeInstanceRegexp = regexp.MustCompile(`Instance: "(.+)"`)
+
+func (tp Type) GoString() string {
+	res := StructGoString(tp)
+	if tp.Instance == nil {
+		return res
+	}
+	return typeInstanceRegexp.ReplaceAllString(res, "Instance: $1")
 }
