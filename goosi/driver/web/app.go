@@ -23,6 +23,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/base"
 	"goki.dev/jsfs"
+	"goki.dev/mat32"
 )
 
 func Init() {
@@ -113,7 +114,7 @@ func (a *App) Resize() {
 	w, h := js.Global().Get("innerWidth").Int(), js.Global().Get("innerHeight").Int()
 	sz := image.Pt(w, h)
 	a.Scrn.Geometry.Max = sz
-	a.Scrn.PixSize = image.Pt(int(float32(sz.X)*a.Scrn.DevicePixelRatio), int(float32(sz.Y)*a.Scrn.DevicePixelRatio))
+	a.Scrn.PixSize = image.Pt(int(mat32.Ceil(float32(sz.X)*a.Scrn.DevicePixelRatio)), int(mat32.Ceil(float32(sz.Y)*a.Scrn.DevicePixelRatio)))
 	physX := 25.4 * float32(w) / dpi
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
