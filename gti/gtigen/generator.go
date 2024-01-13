@@ -487,7 +487,6 @@ func (g *Generator) Generate() (bool, error) {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		typ.Methods = gti.Methods{}
 		typ.Methods = append(typ.Methods, g.Methods.ValByKey(typ.Name)...)
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {
