@@ -10,10 +10,10 @@ package web
 //go:generate goki generate
 
 import (
+	"fmt"
 	"image"
 	"log/slog"
 	"os"
-	"strconv"
 	"strings"
 	"syscall/js"
 
@@ -123,13 +123,19 @@ func (a *App) Resize() {
 	canvas.Set("width", a.Scrn.PixSize.X)
 	canvas.Set("height", a.Scrn.PixSize.Y)
 
-	// we need to manually set the style width and height of the canvas to innerWidth and innerHeight
+	// we need to manually set the style width and height of the canvas
 	// instead of using 100vw and 100vh because vw and vh are incorrect on mobile browsers
 	// due to the address bar but innerWidth and innerHeight are correct
 	// (see https://stackoverflow.com/questions/43575363/css-100vh-is-too-tall-on-mobile-due-to-browser-ui)
+	//
+	// we also need to divide by the pixel size by the pixel ratio again instead of just using innerWidth
+	// and innerHeight so that there are no rounding errors (CSS supports fractional pixels but HTML doesn't);
+	// these rounding errors lead to blurriness on devices with fractional device pixel ratios
+	// (see https://github.com/goki/goki/issues/779 and
+	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
 	cstyle := canvas.Get("style")
-	cstyle.Set("width", strconv.Itoa(w)+"px")
-	cstyle.Set("height", strconv.Itoa(h)+"px")
+	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.X)/a.Scrn.DevicePixelRatio))
+	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixSize.Y)/a.Scrn.DevicePixelRatio))
 
 	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 
