@@ -206,7 +206,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 			typ.Fields = fields
 
-			typ.EmbeddedFields = Fields{}
+			typ.EmbeddedFields = Fields{Tags: map[string]reflect.StructTag{}}
 			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
 			g.GetEmbeddedFields(typ.EmbeddedFields, tp, tp)
 		}
@@ -336,7 +336,7 @@ func FullName(pkg *packages.Package, name string) string {
 // nil, GetFields still returns an empty but valid
 // [gti.Fields] value and no error.
 func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) {
-	var res Fields
+	res := Fields{Tags: map[string]reflect.StructTag{}}
 	if list == nil {
 		return res, nil
 	}
@@ -486,9 +486,7 @@ func (g *Generator) Generate() (bool, error) {
 	}
 	for _, typ := range g.Types {
 		typ.Methods = gti.Methods{}
-		for _, meth := range g.Methods.ValByKey(typ.FullName) {
-			typ.Methods = append(typ.Methods, meth)
-		}
+		typ.Methods = append(typ.Methods, g.Methods.ValByKey(typ.FullName)...)
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {
 			g.ExecTmpl(tmpl, typ)

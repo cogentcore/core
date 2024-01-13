@@ -6,6 +6,7 @@ package gti
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -28,20 +29,25 @@ func (d Directive) String() string {
 
 // GoString returns the directive as Go code.
 func (d Directive) GoString() string {
-	res := "{"
-	elems := []string{}
-	if d.Tool != "" {
-		elems = append(elems, fmt.Sprintf("Tool: %q", d.Tool))
+	return StructGoString(d)
+}
+
+// StructGoString creates a GoString for the given struct while omitting
+// any zero values.
+func StructGoString(str any) string {
+	s := reflect.ValueOf(str)
+	typ := s.Type()
+	strs := []string{}
+	for i := 0; i < s.NumField(); i++ {
+		f := s.Field(i)
+		if f.IsZero() {
+			continue
+		}
+		nm := typ.Field(i).Name
+		strs = append(strs, fmt.Sprintf("%s: %#v", nm, f))
+
 	}
-	if d.Directive != "" {
-		elems = append(elems, fmt.Sprintf("Directive: %q", d.Directive))
-	}
-	if len(d.Args) > 0 {
-		elems = append(elems, fmt.Sprintf("Args: %#v", d.Args))
-	}
-	res += strings.Join(elems, ", ")
-	res += "}"
-	return res
+	return "{" + strings.Join(strs, ", ") + "}"
 }
 
 // this is helpful for literals
