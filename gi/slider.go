@@ -415,16 +415,9 @@ func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 	return ptf - sr.Geom.Pos.Content.Dim(sr.Dim)
 }
 
-// ScrollScale returns scaled value of scroll delta,
-// as a function of the step size, ensuring at least one step unit taken
+// ScrollScale returns scaled value of scroll delta
+// as a function of the step size.
 func (sr *Slider) ScrollScale(del float32) float32 {
-	if mat32.Abs(del) < 1 {
-		if del < 0 {
-			del = -1
-		} else {
-			del = 1
-		}
-	}
 	return del * sr.Step
 }
 
