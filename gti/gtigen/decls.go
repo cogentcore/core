@@ -34,8 +34,8 @@ func GtiTypeOf(typ *Type) *gti.Type {
 	res.Fields = typ.Fields.Fields
 	res.Embeds = typ.Embeds.Fields
 	if typ.Config.Instance {
-		// TODO(kai)
-		typ.Instance = "&" + typ.LocalName + "{}"
+		// quotes are removed in gti.Type.GoString
+		res.Instance = "&" + typ.LocalName + "{}"
 	}
 	return res
 }

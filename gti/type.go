@@ -7,6 +7,7 @@ package gti
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -54,7 +55,16 @@ func (tp *Type) String() string {
 	return tp.Name
 }
 
-func (tp Type) GoString() string { return StructGoString(tp) }
+// need to get rid of quotes around instance
+var typeInstanceRegexp = regexp.MustCompile(`Instance: "(.+)"`)
+
+func (tp Type) GoString() string {
+	res := StructGoString(tp)
+	if tp.Instance == nil {
+		return res
+	}
+	return typeInstanceRegexp.ReplaceAllString(res, "Instance: $1")
+}
 
 func (tp *Type) Label() string {
 	return tp.ShortName
