@@ -5,6 +5,7 @@
 package gti
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -52,6 +53,8 @@ type Type struct {
 func (tp *Type) String() string {
 	return tp.Name
 }
+
+func (tp Type) GoString() string { return StructGoString(tp) }
 
 func (tp *Type) Label() string {
 	return tp.ShortName
@@ -115,4 +118,22 @@ func (tp *Type) CompileEmbeds() {
 			tp.AllEmbeds[id] = ct
 		}
 	}
+}
+
+// StructGoString creates a GoString for the given struct,
+// omitting any zero values.
+func StructGoString(str any) string {
+	s := reflect.ValueOf(str)
+	typ := s.Type()
+	strs := []string{}
+	for i := 0; i < s.NumField(); i++ {
+		f := s.Field(i)
+		if f.IsZero() {
+			continue
+		}
+		nm := typ.Field(i).Name
+		strs = append(strs, fmt.Sprintf("%s: %#v", nm, f))
+
+	}
+	return "{" + strings.Join(strs, ", ") + "}"
 }
