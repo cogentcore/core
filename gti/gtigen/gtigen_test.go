@@ -26,7 +26,7 @@ func TestGenerate(t *testing.T) {
 				Setters:  true,
 				Templates: []*template.Template{
 					template.Must(template.New("Stringer").Parse(`
-					func (t *{{.Name}}) MyCustomFuncForStringers(a any) error {
+					func (t *{{.LocalName}}) MyCustomFuncForStringers(a any) error {
 						return nil
 					}`)),
 				},

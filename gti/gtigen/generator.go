@@ -171,15 +171,17 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		}
 
 		typ := &Type{
-			Name:       ts.Name.Name,
-			FullName:   FullName(g.Pkg, ts.Name.Name),
-			ShortName:  g.Pkg.Name + "." + ts.Name.Name,
-			IDName:     strcase.ToKebab(ts.Name.Name),
-			Type:       ts,
-			Doc:        doc,
-			Pkg:        g.Pkg.Name,
-			Directives: dirs,
-			Config:     cfg,
+			Type: gti.Type{
+				Name:       FullName(g.Pkg, ts.Name.Name),
+				ShortName:  g.Pkg.Name + "." + ts.Name.Name,
+				IDName:     strcase.ToKebab(ts.Name.Name),
+				Doc:        doc,
+				Directives: dirs,
+			},
+			LocalName: ts.Name.Name,
+			AST:       ts,
+			Pkg:       g.Pkg.Name,
+			Config:    cfg,
 		}
 		st, ok := ts.Type.(*ast.StructType)
 		if ok && st.Fields != nil {
@@ -486,7 +488,7 @@ func (g *Generator) Generate() (bool, error) {
 	}
 	for _, typ := range g.Types {
 		typ.Methods = gti.Methods{}
-		typ.Methods = append(typ.Methods, g.Methods.ValByKey(typ.FullName)...)
+		typ.Methods = append(typ.Methods, g.Methods.ValByKey(typ.Name)...)
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {
 			g.ExecTmpl(tmpl, typ)

@@ -14,21 +14,29 @@ import (
 
 // TypeTmpl is the template for [gti.Type] declarations.
 // It takes a [*Type] as its value.
-var TypeTmpl = template.Must(template.New("Type").Parse(
+var TypeTmpl = template.Must(template.New("Type").
+	Funcs(template.FuncMap{
+		"GtiTypeOf": GtiTypeOf,
+	}).Parse(
 	`
-	{{if .Config.TypeVar}} // {{.Name}}Type is the [gti.Type] for [{{.Name}}]
-	var {{.Name}}Type {{else}} var _ {{end}} = gti.AddType(&gti.Type{
-		Name: "{{.FullName}}",
-		ShortName: "{{.ShortName}}",
-		IDName: "{{.IDName}}",
-		Doc: {{printf "%q" .Doc}},
-		Directives: {{printf "%#v" .Directives}},
-		{{if ne .Fields nil}} Fields: {{printf "%#v" .Fields.Fields}}, {{end}}
-		{{if ne .Embeds nil}} Embeds: {{printf "%#v" .Embeds.Fields}}, {{end}}
-		Methods: {{printf "%#v" .Methods}},
-		{{if .Config.Instance}} Instance: &{{.Name}}{}, {{end}}
-	})
+	{{if .Config.TypeVar}} // {{.LocalName}}Type is the [gti.Type] for [{{.LocalName}}]
+	var {{.LocalName}}Type {{else}} var _ {{end}} = gti.AddType(
+		{{- $typ := GtiTypeOf . -}}
+		{{- printf "%#v" $typ -}}
+	)
 	`))
+
+// GtiTypeOf converts the given [*Type] to a [*gti.Type]
+func GtiTypeOf(typ *Type) *gti.Type {
+	cp := typ.Type
+	res := &cp
+	res.Fields = typ.Fields.Fields
+	res.Embeds = typ.Embeds.Fields
+	if typ.Config.Instance {
+		typ.Instance = "&" + typ.LocalName + "{}"
+	}
+	return res
+}
 
 // FuncTmpl is the template for [gti.Func] declarations.
 // It takes a [*gti.Func] as its value.
@@ -57,7 +65,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	{{range (SetterFields .)}}
 	// Set{{ToCamel .Name}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.Name}}) Set{{ToCamel .Name}}(v {{SetterType .LocalType}}) *{{$typ.Name}} {
+	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType .LocalType}}) *{{$typ.LocalName}} {
 		t.{{.Name}} = v
 		return t
 	}

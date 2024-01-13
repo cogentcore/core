@@ -13,19 +13,30 @@ import (
 
 // Type represents a parsed type.
 type Type struct {
-	Name           string         // The name of the type in its package (eg: MyType)
-	FullName       string         // The fully package-path-qualified name of the type (eg: goki.dev/gi.Button)
-	ShortName      string         // The short, package-qualified name of the type (eg: gi.Button)
-	IDName         string         // The short, package-unqualified, kebab-case name of the type, suitable for use in an ID (eg: button)
-	Type           *ast.TypeSpec  // The standard AST type value
-	Doc            string         // The documentation for the type
-	Pkg            string         // The name of the package the type is in
-	Directives     gti.Directives // The directives for the type; guaranteed to be non-nil
-	Fields         Fields         // The fields of the struct type; nil if not a struct
-	Embeds         Fields         // The embeds of the struct type; nil if not a struct
-	EmbeddedFields Fields         // The fields contained within the embeds of the struct type; nil if not a struct, and used for generating setters only
-	Methods        gti.Methods    // The methods of the type; guaranteed to be non-nil
-	Config         *Config        // Configuration information set in the comment directive for the type; is initialized to generator config info first
+	gti.Type
+
+	// LocalName is the name of the type in its package
+	LocalName string
+
+	// The standard AST type value
+	AST *ast.TypeSpec
+
+	// The name of the package the type is in
+	Pkg string
+
+	// The fields of the struct type; nil if not a struct
+	Fields Fields
+
+	// The embeds of the struct type; nil if not a struct
+	Embeds Fields
+
+	// The fields contained within the embeds of the struct type;
+	// nil if not a struct, and used for generating setters only
+	EmbeddedFields Fields
+
+	// Configuration information set in the comment directive for the type;
+	// is initialized to generator config info first
+	Config *Config
 }
 
 // Fields extends [gti.Fields] to provide the struct tags for each field.

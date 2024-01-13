@@ -7,50 +7,40 @@ import (
 )
 
 // PersonType is the [gti.Type] for [Person]
-var PersonType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gti/gtigen/testdata.Person",
-	ShortName: "testdata.Person",
-	IDName:    "person",
-	Doc:       "Person represents a person and their attributes.\nThe zero value of a Person is not valid.",
-	Directives: gti.Directives{
-		{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}},
-		{Tool: "goki", Directive: "embedder"},
-	},
-	Fields: []gti.Field{{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person"}, {Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person"}, {Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person"}},
-	Embeds: []gti.Field{{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA"}},
-	Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
-		{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
-		{Tool: "gti", Directive: "add"},
-	}, Returns: []gti.Field{{Name: "string", Type: "string", LocalType: "string"}}}},
-	Instance: &Person{},
-})
+var PersonType = gti.AddType(&gti.Type{Name: "goki.dev/gti/gtigen/testdata.Person", ShortName: "testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: gti.Directives{
+	{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}},
+	{Tool: "goki", Directive: "embedder"},
+}, ID: 0x0, Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
+	{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
+	{Tool: "gti", Directive: "add"},
+}, Returns: []gti.Field{{Name: "string", Type: "string", LocalType: "string"}}}}, Embeds: []gti.Field{{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA"}}, Fields: []gti.Field{{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person"}, {Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person"}, {Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person"}}, Instance: interface{}(nil), AllEmbeds: map[uint64]*gti.Type(nil)})
 
 func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
 }
 
-// SetName sets the [Person.Name]:
+// SetName sets the [goki.dev/gti/gtigen/testdata.Person.Name]:
 // Name is the name of the person
 func (t *Person) SetName(v string) *Person {
 	t.Name = v
 	return t
 }
 
-// SetAge sets the [Person.Age]:
+// SetAge sets the [goki.dev/gti/gtigen/testdata.Person.Age]:
 // Age is the age of the person
 func (t *Person) SetAge(v int) *Person {
 	t.Age = v
 	return t
 }
 
-// SetType sets the [Person.Type]:
+// SetType sets the [goki.dev/gti/gtigen/testdata.Person.Type]:
 // Type is the type of the person
 func (t *Person) SetType(v *gti.Type) *Person {
 	t.Type = v
 	return t
 }
 
-// SetNicknames sets the [Person.Nicknames]:
+// SetNicknames sets the [goki.dev/gti/gtigen/testdata.Person.Nicknames]:
 // Nicknames are the nicknames of the person
 func (t *Person) SetNicknames(v ...string) *Person {
 	t.Nicknames = v
