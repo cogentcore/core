@@ -42,13 +42,9 @@ func GtiTypeOf(typ *Type) *gti.Type {
 // It takes a [*gti.Func] as its value.
 var FuncTmpl = template.Must(template.New("Func").Parse(
 	`
-	var _ = gti.AddFunc(&gti.Func{
-		Name: "{{.Name}}",
-		Doc: {{printf "%q" .Doc}},
-		Directives: {{printf "%#v" .Directives}},
-		Args: {{printf "%#v" .Args}},
-		Returns: {{printf "%#v" .Returns}},
-	})
+	var _ = gti.AddFunc(&gti.Func
+		{{- printf "%#v" . -}}
+	)
 	`))
 
 // SetterMethodsTmpl is the template for setter methods for a type.

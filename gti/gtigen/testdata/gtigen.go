@@ -41,50 +41,14 @@ func (t *Person) SetNicknames(v ...string) *Person {
 	return t
 }
 
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/gti/gtigen/testdata.Alert",
-	Doc:        "Alert prints an alert with the given message",
-	Directives: gti.Directives(nil),
-	Args:       []gti.Field{{Name: "msg", Type: "string", LocalType: "string"}},
-	Returns:    []gti.Field(nil),
-})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []gti.Field{{Name: "msg", Type: "string", LocalType: "string"}}})
 
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0",
-	Doc:        "",
-	Directives: gti.Directives(nil),
-	Args:       []gti.Field{{Name: "x", Type: "float32", LocalType: "float32"}, {Name: "y", Type: "float32", LocalType: "float32"}},
-	Returns:    []gti.Field(nil),
-})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0", Args: []gti.Field{{Name: "x", Type: "float32", LocalType: "float32"}, {Name: "y", Type: "float32", LocalType: "float32"}}})
 
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs1",
-	Doc:        "",
-	Directives: gti.Directives(nil),
-	Args:       []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "struct{}", LocalType: "struct{}"}, {Name: "z", Type: "struct{}", LocalType: "struct{}"}},
-	Returns:    []gti.Field(nil),
-})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs1", Args: []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "struct{}", LocalType: "struct{}"}, {Name: "z", Type: "struct{}", LocalType: "struct{}"}}})
 
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs2",
-	Doc:        "",
-	Directives: gti.Directives(nil),
-	Args:       []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "int", LocalType: "int"}, {Name: "z", Type: "int", LocalType: "int"}},
-	Returns:    []gti.Field(nil),
-})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs2", Args: []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "int", LocalType: "int"}, {Name: "z", Type: "int", LocalType: "int"}}})
 
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs3",
-	Doc:        "",
-	Directives: gti.Directives(nil),
-	Args:       []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "bool", LocalType: "bool"}, {Name: "z", Type: "bool", LocalType: "bool"}, {Name: "w", Type: "float32", LocalType: "float32"}},
-	Returns:    []gti.Field(nil),
-})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs3", Args: []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "bool", LocalType: "bool"}, {Name: "z", Type: "bool", LocalType: "bool"}, {Name: "w", Type: "float32", LocalType: "float32"}}})
 
-var _ = gti.AddFunc(&gti.Func{
-	Name:       "goki.dev/gti/gtigen/testdata.TypeOmittedArgs4",
-	Doc:        "",
-	Directives: gti.Directives(nil),
-	Args:       []gti.Field{{Name: "x", Type: "string", LocalType: "string"}, {Name: "y", Type: "string", LocalType: "string"}, {Name: "z", Type: "string", LocalType: "string"}, {Name: "w", Type: "bool", LocalType: "bool"}},
-	Returns:    []gti.Field(nil),
-})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs4", Args: []gti.Field{{Name: "x", Type: "string", LocalType: "string"}, {Name: "y", Type: "string", LocalType: "string"}, {Name: "z", Type: "string", LocalType: "string"}, {Name: "w", Type: "bool", LocalType: "bool"}}})
