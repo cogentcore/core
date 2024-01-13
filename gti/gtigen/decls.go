@@ -5,6 +5,7 @@
 package gtigen
 
 import (
+	"reflect"
 	"strings"
 	"text/template"
 
@@ -33,6 +34,7 @@ func GtiTypeOf(typ *Type) *gti.Type {
 	res.Fields = typ.Fields.Fields
 	res.Embeds = typ.Embeds.Fields
 	if typ.Config.Instance {
+		// TODO(kai)
 		typ.Instance = "&" + typ.LocalName + "{}"
 	}
 	return res
@@ -61,7 +63,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	{{range (SetterFields .)}}
 	// Set{{ToCamel .Name}} sets the [{{$typ.LocalName}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType .LocalType}}) *{{$typ.LocalName}} {
+	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} {
 		t.{{.Name}} = v
 		return t
 	}
@@ -75,7 +77,7 @@ func SetterFields(typ *Type) []gti.Field {
 	do := func(fields Fields) {
 		for _, f := range fields.Fields {
 			// unspecified indicates to add a set method; only "-" means no set
-			hasSetter := fields.Tags[f.Name].Get("set") != "-"
+			hasSetter := reflect.StructTag(fields.Tags[f.Name]).Get("set") != "-"
 			if hasSetter {
 				res = append(res, f)
 			}
@@ -86,13 +88,17 @@ func SetterFields(typ *Type) []gti.Field {
 	return res
 }
 
-// SetterType converts the given local type name to one that can be used
-// in a setter by converting slices to variadic arguments.
-func SetterType(typ string) string {
-	if strings.HasPrefix(typ, "[]") {
-		return "..." + strings.TrimPrefix(typ, "[]")
+// SetterType returns the setter type name for the given field in the context of the
+// given type. It converts slices to variadic arguments.
+func SetterType(f gti.Field, typ *Type) string {
+	lt, ok := typ.Fields.LocalTypes[f.Name]
+	if !ok {
+		lt = typ.EmbeddedFields.LocalTypes[f.Name]
 	}
-	return typ
+	if strings.HasPrefix(lt, "[]") {
+		return "..." + strings.TrimPrefix(lt, "[]")
+	}
+	return lt
 }
 
 // DocToComment converts the given doc string to an appropriate comment string.

@@ -7,7 +7,7 @@ import (
 )
 
 // PersonType is the [gti.Type] for [Person]
-var PersonType = gti.AddType(&gti.Type{Name: "goki.dev/gti/gtigen/testdata.Person", ShortName: "testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: gti.Directives{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "goki", Directive: "embedder"}}, Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "gti", Directive: "add"}}, Returns: []gti.Field{{Name: "string", Type: "string", LocalType: "string"}}}}, Embeds: []gti.Field{{Name: "RGBA", Type: "image/color.RGBA", LocalType: "color.RGBA"}}, Fields: []gti.Field{{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person"}, {Name: "Age", Type: "int", LocalType: "int", Doc: "Age is the age of the person"}, {Name: "Type", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Type: "[]string", LocalType: "[]string", Doc: "Nicknames are the nicknames of the person"}}})
+var PersonType = gti.AddType(&gti.Type{Name: "goki.dev/gti/gtigen/testdata.Person", ShortName: "testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: gti.Directives{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "goki", Directive: "embedder"}}, Methods: []gti.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "gti", Directive: "add"}}, Returns: []gti.Field{{Name: "string"}}}}, Embeds: []gti.Field{{Name: "RGBA"}}, Fields: []gti.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}})
 
 func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
@@ -41,14 +41,14 @@ func (t *Person) SetNicknames(v ...string) *Person {
 	return t
 }
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []gti.Field{{Name: "msg", Type: "string", LocalType: "string"}}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []gti.Field{{Name: "msg"}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0", Args: []gti.Field{{Name: "x", Type: "float32", LocalType: "float32"}, {Name: "y", Type: "float32", LocalType: "float32"}}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs0", Args: []gti.Field{{Name: "x"}, {Name: "y"}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs1", Args: []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "struct{}", LocalType: "struct{}"}, {Name: "z", Type: "struct{}", LocalType: "struct{}"}}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs1", Args: []gti.Field{{Name: "x"}, {Name: "y"}, {Name: "z"}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs2", Args: []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "int", LocalType: "int"}, {Name: "z", Type: "int", LocalType: "int"}}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs2", Args: []gti.Field{{Name: "x"}, {Name: "y"}, {Name: "z"}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs3", Args: []gti.Field{{Name: "x", Type: "int", LocalType: "int"}, {Name: "y", Type: "bool", LocalType: "bool"}, {Name: "z", Type: "bool", LocalType: "bool"}, {Name: "w", Type: "float32", LocalType: "float32"}}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs3", Args: []gti.Field{{Name: "x"}, {Name: "y"}, {Name: "z"}, {Name: "w"}}})
 
-var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs4", Args: []gti.Field{{Name: "x", Type: "string", LocalType: "string"}, {Name: "y", Type: "string", LocalType: "string"}, {Name: "z", Type: "string", LocalType: "string"}, {Name: "w", Type: "bool", LocalType: "bool"}}})
+var _ = gti.AddFunc(&gti.Func{Name: "goki.dev/gti/gtigen/testdata.TypeOmittedArgs4", Args: []gti.Field{{Name: "x"}, {Name: "y"}, {Name: "z"}, {Name: "w"}}})

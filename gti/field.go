@@ -10,16 +10,6 @@ type Field struct {
 	// Name is the name of the field (eg: Icon)
 	Name string
 
-	// Type has the fully-package-path-qualified name of the type,
-	// which can be used to look up the type in the Types registry
-	// (eg: goki.dev/gi.Button)
-	Type string
-
-	// LocalType is the shorter, local name of the type from the
-	// perspective of the code where this field is declared
-	// (eg: gi.Button or Button, depending on where this is)
-	LocalType string
-
 	// Doc, if this is a struct field, has all of the comment documentation
 	// info as one string with directives removed.
 	Doc string
@@ -41,18 +31,19 @@ func GetField(typ *Type, field string) *Field {
 			return &f
 		}
 	}
-	// otherwise, we go through all of the embeds and call GetField recursively on them
-	for _, e := range typ.Embeds {
-		etyp := TypeByName(e.Type)
-		// we can't do anything if we have an un-added type
-		if etyp == nil {
-			return nil
-		}
-		f := GetField(etyp, field)
-		// we have successfully gotten the field
-		if f != nil {
-			return f
-		}
-	}
+	// TODO(kai)
+	// // otherwise, we go through all of the embeds and call GetField recursively on them
+	// for _, e := range typ.Embeds {
+	// 	etyp := TypeByName(e.Type)
+	// 	// we can't do anything if we have an un-added type
+	// 	if etyp == nil {
+	// 		return nil
+	// 	}
+	// 	f := GetField(etyp, field)
+	// 	// we have successfully gotten the field
+	// 	if f != nil {
+	// 		return f
+	// 	}
+	// }
 	return nil
 }

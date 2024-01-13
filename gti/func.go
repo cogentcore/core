@@ -23,7 +23,7 @@ type Func struct {
 	// Returns are return values of the function
 	Returns Fields
 
-	// unique type ID number
+	// ID is the unique type ID number
 	ID uint64
 }
 

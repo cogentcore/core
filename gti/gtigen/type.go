@@ -6,7 +6,6 @@ package gtigen
 
 import (
 	"go/ast"
-	"reflect"
 
 	"goki.dev/gti"
 )
@@ -39,8 +38,9 @@ type Type struct {
 	Config *Config
 }
 
-// Fields extends [gti.Fields] to provide the struct tags for each field.
+// Fields extends [gti.Fields] to provide the local type names and struct tags for each field.
 type Fields struct {
-	Fields gti.Fields
-	Tags   map[string]reflect.StructTag
+	Fields     gti.Fields
+	LocalTypes map[string]string
+	Tags       map[string]string
 }

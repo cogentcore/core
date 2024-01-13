@@ -10,7 +10,6 @@ import (
 	"go/ast"
 	"go/types"
 	"os"
-	"reflect"
 	"slices"
 	"strings"
 	"text/template"
@@ -208,7 +207,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 			typ.Fields = fields
 
-			typ.EmbeddedFields = Fields{Tags: map[string]reflect.StructTag{}}
+			typ.EmbeddedFields = Fields{LocalTypes: map[string]string{}, Tags: map[string]string{}}
 			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
 			g.GetEmbeddedFields(typ.EmbeddedFields, tp, tp)
 		}
@@ -252,12 +251,11 @@ func (g *Generator) GetEmbeddedFields(efields Fields, typ, startTyp types.Type) 
 			continue
 		}
 		field := gti.Field{
-			Name:      f.Name(),
-			Type:      f.Type().String(),
-			LocalType: types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types)),
+			Name: f.Name(),
 		}
 		efields.Fields = append(efields.Fields, field)
-		efields.Tags[field.Name] = reflect.StructTag(s.Tag(i))
+		efields.LocalTypes[field.Name] = types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types))
+		efields.Tags[field.Name] = s.Tag(i)
 	}
 }
 
@@ -338,7 +336,7 @@ func FullName(pkg *packages.Package, name string) string {
 // nil, GetFields still returns an empty but valid
 // [gti.Fields] value and no error.
 func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) {
-	res := Fields{Tags: map[string]reflect.StructTag{}}
+	res := Fields{LocalTypes: map[string]string{}, Tags: map[string]string{}}
 	if list == nil {
 		return res, nil
 	}
@@ -385,17 +383,17 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) 
 			continue
 		}
 		fo := gti.Field{
-			Name:      name,
-			Type:      tn,
-			LocalType: ltn,
-			Doc:       strings.TrimSuffix(field.Doc.Text(), "\n"),
+			Name: name,
+			Doc:  strings.TrimSuffix(field.Doc.Text(), "\n"),
 		}
 		res.Fields = append(res.Fields, fo)
 
-		tag := reflect.StructTag("")
+		res.LocalTypes[name] = ltn
+
+		tag := ""
 		if field.Tag != nil {
 			// need to get rid of leading and trailing backquotes
-			tag = reflect.StructTag(strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`"))
+			tag = strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`")
 		}
 		res.Tags[name] = tag
 	}
