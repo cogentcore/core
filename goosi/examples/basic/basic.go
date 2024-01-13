@@ -25,10 +25,5 @@ func main() {
 	}
 
 	fmt.Println("got new window", w)
-	w.SetDropCallback(func(w goosi.Window, names []string) {
-		for _, name := range names {
-			println(name)
-		}
-	})
 	goosi.TheApp.MainLoop()
 }
