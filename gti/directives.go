@@ -26,19 +26,3 @@ func (d Directive) String() string {
 }
 
 func (d Directive) GoString() string { return StructGoString(d) }
-
-// this is helpful for literals
-
-type Directives []Directive
-
-// ForTool returns all of the directives in these
-// directives that have the given tool name.
-func (d Directives) ForTool(tool string) Directives {
-	res := Directives{}
-	for _, dir := range d {
-		if dir.Tool == tool {
-			res = append(res, dir)
-		}
-	}
-	return res
-}

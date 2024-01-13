@@ -283,12 +283,16 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting function args: %w", err)
 		}
-		fun.Args = args.Fields
+		for _, arg := range args.Fields {
+			fun.Args = append(fun.Args, arg.Name)
+		}
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting function return values: %w", err)
 		}
-		fun.Returns = rets.Fields
+		for _, ret := range rets.Fields {
+			fun.Returns = append(fun.Returns, ret.Name)
+		}
 		g.Funcs.Add(fun.Name, fun)
 	} else {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
@@ -303,12 +307,16 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("error getting method args: %w", err)
 		}
-		method.Args = args.Fields
+		for _, arg := range args.Fields {
+			method.Args = append(method.Args, arg.Name)
+		}
 		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting method return values: %w", err)
 		}
-		method.Returns = rets.Fields
+		for _, ret := range rets.Fields {
+			method.Returns = append(method.Returns, ret.Name)
+		}
 
 		typ := fd.Recv.List[0].Type
 		// get rid of any pointer receiver
@@ -402,7 +410,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (Fields, error) 
 
 // LoadFromNodeComments is a helper function that calls [LoadFromComments] with the correctly
 // filtered comment map comments of the given node.
-func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
 	cs := g.Cmap.Filter(n).Comments()
 	tf := g.Pkg.Fset.File(g.File.FileStart)
 	np := tf.Line(n.Pos())
@@ -419,7 +427,7 @@ func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs gti.Dire
 
 // LoadFromComments is a helper function that combines the results of [LoadFromComment]
 // for the given comment groups.
-func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
 	for _, cg := range c {
 		cdirs, cadd, cskip, err := LoadFromComment(cg, cfg)
 		if err != nil {
@@ -438,7 +446,7 @@ func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs gti.Directives,
 // there was a gti:add directive, and any error. If the given
 // documentation is nil, LoadFromComment still returns an empty but valid
 // [gti.Directives] value, false, and no error.
-func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs []gti.Directive, hasAdd bool, hasSkip bool, err error) {
 	if c == nil {
 		return
 	}

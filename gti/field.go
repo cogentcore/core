@@ -4,21 +4,18 @@
 
 package gti
 
-// Field represents a field or embed in a struct,
-// or an argument or return value of a function.
+// Field represents a field or embed in a struct.
 type Field struct {
+
 	// Name is the name of the field (eg: Icon)
 	Name string
 
-	// Doc, if this is a struct field, has all of the comment documentation
+	// Doc has all of the comment documentation
 	// info as one string with directives removed.
 	Doc string
 }
 
 func (f Field) GoString() string { return StructGoString(f) }
-
-// Fields represents a set of multiple [Field] objects
-type Fields = []Field
 
 // GetField recursively attempts to extract the [gti.Field]
 // with the given name from the given struct [gti.Type],

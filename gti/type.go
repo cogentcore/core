@@ -27,19 +27,19 @@ type Type struct {
 	Doc string
 
 	// Directives has the parsed comment directives
-	Directives Directives
+	Directives []Directive
 
 	// unique type ID number
 	ID uint64
 
 	// Methods are available for all types
-	Methods Methods
+	Methods []Method
 
 	// Embedded fields for struct types
-	Embeds Fields
+	Embeds []Field
 
 	// Fields for struct types
-	Fields Fields
+	Fields []Field
 
 	// Optional instance of the type
 	Instance any

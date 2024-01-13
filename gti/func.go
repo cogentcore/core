@@ -4,7 +4,7 @@
 
 package gti
 
-// Func represents a global function
+// Func represents a global function.
 type Func struct {
 	// Name is the fully-qualified name of the function
 	// (eg: goki.dev/gi.NewButton)
@@ -14,22 +14,22 @@ type Func struct {
 	// info as one string with directives removed.
 	Doc string
 
-	// Directives has the parsed comment directives
-	Directives Directives
+	// Directives are the parsed comment directives
+	Directives []Directive
 
-	// Args are arguments to the function
-	Args Fields
+	// Args are the names of the arguments to the function
+	Args []string
 
-	// Returns are return values of the function
-	Returns Fields
+	// Returns are the names of the return values of the function
+	Returns []string
 
-	// ID is the unique type ID number
+	// ID is the unique function ID number
 	ID uint64
 }
 
 func (f Func) GoString() string { return StructGoString(f) }
 
-// Method represents a method
+// Method represents a method.
 type Method struct {
 	// Name is the name of the method (eg: NewChild)
 	Name string
@@ -38,17 +38,14 @@ type Method struct {
 	// info as one string with directives removed.
 	Doc string
 
-	// Directives has the parsed comment directives
-	Directives Directives
+	// Directives are the parsed comment directives
+	Directives []Directive
 
-	// Args are arguments to the method
-	Args Fields
+	// Args are the names of the arguments to the function
+	Args []string
 
-	// Returns are return values of the method
-	Returns Fields
+	// Returns are the names of the return values of the function
+	Returns []string
 }
 
 func (m Method) GoString() string { return StructGoString(m) }
-
-// Methods represents a set of multiple [Method] objects
-type Methods = []Method
