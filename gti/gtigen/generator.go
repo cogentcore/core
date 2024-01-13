@@ -441,7 +441,6 @@ func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs gti.Directives,
 // documentation is nil, LoadFromComment still returns an empty but valid
 // [gti.Directives] value, false, and no error.
 func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
-	dirs = gti.Directives{}
 	if c == nil {
 		return
 	}
