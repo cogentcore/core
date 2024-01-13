@@ -33,10 +33,8 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
-	// New{{.Name}} adds a new [{{.Name}}] with the given name
-	// to the given parent. If the name is unspecified, it defaults
-	// to the ID (kebab-case) name of the type, plus the
-	// [{{KiPkg .}}Ki.NumLifetimeChildren] of the given parent.
+	// New{{.Name}} adds a new [{{.Name}}] with the given name to the given parent:
+	// {{.Doc}}
 	func New{{.Name}}(par {{KiPkg .}}Ki, name ...string) *{{.Name}} {
 		return par.NewChild({{.Name}}Type, name...).(*{{.Name}})
 	}
@@ -91,7 +89,7 @@ func KiPkg(typ *gtigen.Type) string {
 // HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embedder"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasEmbedDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc(typ.Directives, func(d *gti.Directive) bool {
+	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
 		return d.Tool == "goki" && d.Directive == "embedder"
 	})
 }
@@ -99,7 +97,7 @@ func HasEmbedDirective(typ *gtigen.Type) bool {
 // HasNoNewDirective returns whether the given [gtigen.Type] has a "goki:no-new"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasNoNewDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc(typ.Directives, func(d *gti.Directive) bool {
+	return slices.ContainsFunc(typ.Directives, func(d gti.Directive) bool {
 		return d.Tool == "goki" && d.Directive == "no-new"
 	})
 }
