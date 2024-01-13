@@ -27,9 +27,6 @@ type Type struct {
 	// Directives has the parsed comment directives
 	Directives []Directive
 
-	// unique type ID number
-	ID uint64
-
 	// Methods are available for all types
 	Methods []Method
 
@@ -39,8 +36,11 @@ type Type struct {
 	// Fields for struct types
 	Fields []Field
 
-	// Optional instance of the type
+	// Instance is an optional instance of the type
 	Instance any
+
+	// ID is the unique type ID number
+	ID uint64
 
 	// All embedded fields (including nested ones) for struct types;
 	// not set by gtigen -- HasEmbed automatically compiles it as needed.
