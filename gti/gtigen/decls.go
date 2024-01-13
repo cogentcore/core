@@ -63,10 +63,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	{{range (SetterFields .)}}
 	// Set{{ToCamel .Name}} sets the [{{$typ.LocalName}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} {
-		t.{{.Name}} = v
-		return t
-	}
+	func (t *{{$typ.LocalName}}) Set{{ToCamel .Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} { t.{{.Name}} = v; return t }
 	{{end}}
 `))
 
