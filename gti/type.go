@@ -52,21 +52,14 @@ func (tp *Type) String() string {
 	return tp.Name
 }
 
-// need to get rid of quotes around instance
-var typeInstanceRegexp = regexp.MustCompile(`Instance: "(.+)"`)
-
-func (tp Type) GoString() string {
-	res := StructGoString(tp)
-	if tp.Instance == nil {
-		return res
-	}
-	return typeInstanceRegexp.ReplaceAllString(res, "Instance: $1")
+// ShortName returns the short name of the type (package.Type)
+func (tp *Type) ShortName() string {
+	li := strings.LastIndex(tp.Name, "/")
+	return tp.Name[li+1:]
 }
 
 func (tp *Type) Label() string {
-	// get rid of everything except for package.Type
-	li := strings.LastIndex(tp.Name, "/")
-	return tp.Name[li+1:]
+	return tp.ShortName()
 }
 
 // ReflectType returns the [reflect.Type] for this type, using the Instance
@@ -145,4 +138,15 @@ func StructGoString(str any) string {
 
 	}
 	return "{" + strings.Join(strs, ", ") + "}"
+}
+
+// need to get rid of quotes around instance
+var typeInstanceRegexp = regexp.MustCompile(`Instance: "(.+)"`)
+
+func (tp Type) GoString() string {
+	res := StructGoString(tp)
+	if tp.Instance == nil {
+		return res
+	}
+	return typeInstanceRegexp.ReplaceAllString(res, "Instance: $1")
 }

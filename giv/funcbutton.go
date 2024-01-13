@@ -176,7 +176,12 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 			}
 			met = &gti.Method{Name: metnm}
 		} else {
-			met = gtyp.Methods.ValByKey(metnm)
+			for _, m := range gtyp.Methods {
+				if m.Name == metnm {
+					met = &m
+					break
+				}
+			}
 			if met == nil {
 				if fb.WarnUnadded {
 					slog.Warn("giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself)", "function", fnm)
@@ -296,7 +301,7 @@ func (fb *FuncButton) CallFunc() {
 		return
 	}
 	d := gi.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
-	NewArgView(d).SetArgs(fb.Args)
+	NewArgView(d).SetArgs(fb.Args...)
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).SetText(fb.Text).OnClick(func(e events.Event) {
@@ -355,7 +360,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		return
 	}
 	d := gi.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOkOnly()
-	NewArgView(d).SetArgs(fb.Returns).SetReadOnly(true)
+	NewArgView(d).SetArgs(fb.Returns...).SetReadOnly(true)
 	if fb.NewWindow {
 		d.NewDialog(ctx).SetNewWindow(true).Run()
 	} else {
@@ -375,18 +380,10 @@ func (fb *FuncButton) SetArgs() {
 
 		name := ""
 		doc := ""
-		if fb.Func.Args != nil && len(fb.Func.Args.Order) > i {
-			ga := fb.Func.Args.ValByIdx(i)
-			if ga != nil {
-				name = ga.Name
-				doc = ga.Doc
-			} else {
-				name = laser.NonPtrType(atyp).Name()
-				doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
-			}
+		if fb.Func.Args != nil && len(fb.Func.Args) > i {
+			name = fb.Func.Args[i]
 		} else {
 			name = laser.NonPtrType(atyp).Name()
-			doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
 		}
 
 		label := sentence.Case(name)
@@ -420,18 +417,10 @@ func (fb *FuncButton) SetReturns() {
 
 		name := ""
 		doc := ""
-		if fb.Func.Returns != nil {
-			ga := fb.Func.Returns.ValByIdx(i)
-			if ga != nil {
-				name = ga.Name
-				doc = ga.Doc
-			} else {
-				name = laser.NonPtrType(rtyp).Name()
-				doc = "Unnamed return value of type " + laser.LongTypeName(rtyp)
-			}
+		if fb.Func.Returns != nil && len(fb.Func.Returns) > i {
+			name = fb.Func.Returns[i]
 		} else {
 			name = laser.NonPtrType(rtyp).Name()
-			doc = "Unnamed return value of type " + laser.LongTypeName(rtyp)
 		}
 
 		label := sentence.Case(name)
