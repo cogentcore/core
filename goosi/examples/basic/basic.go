@@ -25,6 +25,5 @@ func main() {
 	}
 
 	fmt.Println("got new window", w)
-
 	goosi.TheApp.MainLoop()
 }
