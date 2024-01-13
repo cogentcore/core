@@ -643,17 +643,22 @@ func (tb *Tab) SetStyles() {
 			})
 		case "parts/close":
 			w.Style(func(s *styles.Style) {
-				// s.Margin.Zero()
-				s.Padding.Set(units.Dp(0))
-				s.Padding.Left.Dp(16)
+				s.Padding.Zero()
+				s.Margin.Left.Dp(16)
 				s.Border.Radius = styles.BorderRadiusFull
-				s.Background = nil
-				// if we have some state, we amplify it so we
-				// are clearly distinguishable from our parent button
-				// TODO: get this working
-				// if s.StateLayer > 0 {
-				// 	s.StateLayer += 0.12
-				// }
+			})
+			w.OnClick(func(e events.Event) {
+				ts := tb.Tabs()
+				if ts == nil {
+					return
+				}
+				idx := ts.TabIndexByLabel(tb.Text)
+				// if OnlyCloseActiveTab is on, only process delete when already selected
+				if SystemSettings.Behavior.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+					ts.SelectTabIndex(idx)
+				} else {
+					ts.DeleteTabIndex(idx, true)
+				}
 			})
 		case "parts/sc-stretch":
 			w.Style(func(s *styles.Style) {
@@ -712,19 +717,7 @@ func (tb *Tab) ConfigWidget() {
 		}
 		if clsi >= 0 {
 			cls := tb.Parts.Child(clsi).(*Button)
-			cls.SetType(ButtonAction).SetIcon(tb.CloseIcon).OnClick(func(e events.Event) {
-				ts := tb.Tabs()
-				if ts == nil {
-					return
-				}
-				idx := ts.TabIndexByLabel(tb.Text)
-				// if OnlyCloseActiveTab is on, only process delete when already selected
-				if !SystemSettings.Behavior.OnlyCloseActiveTab || tb.StateIs(states.Selected) {
-					ts.DeleteTabIndex(idx, true)
-				} else {
-					ts.SelectTabIndex(idx) // otherwise select
-				}
-			})
+			cls.SetType(ButtonAction).SetIcon(tb.CloseIcon)
 		}
 	})
 }
