@@ -6,6 +6,8 @@
 
 package android
 
+//go:generate goki generate
+
 import (
 	"log"
 

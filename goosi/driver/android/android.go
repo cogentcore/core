@@ -24,8 +24,6 @@ All-Go apps built using NativeActivity enter at ANativeActivity_onCreate.
 */
 package android
 
-//go:generate goki generate
-
 /*
 #cgo LDFLAGS: -landroid -llog
 
