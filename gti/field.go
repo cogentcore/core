@@ -4,6 +4,8 @@
 
 package gti
 
+import "reflect"
+
 // Field represents a field or embed in a struct.
 type Field struct {
 
@@ -18,29 +20,30 @@ type Field struct {
 func (f Field) GoString() string { return StructGoString(f) }
 
 // GetField recursively attempts to extract the [gti.Field]
-// with the given name from the given struct [gti.Type],
+// with the given name from the given struct [reflect.Value],
 // by searching through all of the embeds if it can not find
 // it directly in the struct.
-func GetField(typ *Type, field string) *Field {
+func GetField(val reflect.Value, field string) *Field {
+	typ := TypeByName(TypeName(val.Type()))
+	// if we are not in the gti registry, there is nothing that we can do
+	if typ == nil {
+		return nil
+	}
 	for _, f := range typ.Fields {
 		if f.Name == field {
 			// we have successfully gotten the field
 			return &f
 		}
 	}
-	// TODO(kai)
-	// // otherwise, we go through all of the embeds and call GetField recursively on them
-	// for _, e := range typ.Embeds {
-	// 	etyp := TypeByName(e.Type)
-	// 	// we can't do anything if we have an un-added type
-	// 	if etyp == nil {
-	// 		return nil
-	// 	}
-	// 	f := GetField(etyp, field)
-	// 	// we have successfully gotten the field
-	// 	if f != nil {
-	// 		return f
-	// 	}
-	// }
+	// otherwise, we go through all of the embeds and call
+	// GetField recursively on them
+	for _, e := range typ.Embeds {
+		rf := val.FieldByName(e.Name)
+		f := GetField(rf, field)
+		// we have successfully gotten the field
+		if f != nil {
+			return f
+		}
+	}
 	return nil
 }
