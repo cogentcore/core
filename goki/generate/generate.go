@@ -34,9 +34,8 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
-	// New{{.LocalName}} adds a new [{{.LocalName}}] with
-	// the given name to the given parent:
-	// {{DocToComment .Doc}}
+	// New{{.LocalName}} adds a new [{{.LocalName}}] with the given name to the given parent:
+	{{DocToComment .Doc}}
 	func New{{.LocalName}}(par {{KiPkg .}}Ki, name ...string) *{{.LocalName}} {
 		return par.NewChild({{.LocalName}}Type, name...).(*{{.LocalName}})
 	}

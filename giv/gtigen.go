@@ -19,9 +19,8 @@ import (
 // ArgViewType is the [gti.Type] for [ArgView]
 var ArgViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.ArgView", IDName: "arg-view", Doc: "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Title", Doc: "title / prompt to show above the editor fields"}, {Name: "Args", Doc: "the args that we are a view onto"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &ArgView{}})
 
-// NewArgView adds a new [ArgView] with
-// the given name to the given parent:
-// // ArgView represents a slice of reflect.Value's and associated names, for the
+// NewArgView adds a new [ArgView] with the given name to the given parent:
+// ArgView represents a slice of reflect.Value's and associated names, for the
 // purpose of supplying arguments to methods called via the MethodView
 // framework.
 func NewArgView(par ki.Ki, name ...string) *ArgView {
@@ -62,9 +61,8 @@ func (t *ArgView) SetStripes(v gi.Stripes) *ArgView { t.Stripes = v; return t }
 // ColorViewType is the [gti.Type] for [ColorView]
 var ColorViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Color", Doc: "the color that we view"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &ColorView{}})
 
-// NewColorView adds a new [ColorView] with
-// the given name to the given parent:
-// // ColorView shows a color, using sliders or numbers to set values.
+// NewColorView adds a new [ColorView] with the given name to the given parent:
+// ColorView shows a color, using sliders or numbers to set values.
 func NewColorView(par ki.Ki, name ...string) *ColorView {
 	return par.NewChild(ColorViewType, name...).(*ColorView)
 }
@@ -99,9 +97,8 @@ func (t *ColorView) SetStripes(v gi.Stripes) *ColorView { t.Stripes = v; return 
 // FileViewType is the [gti.Type] for [FileView]
 var FileViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "SelFile", Doc: "selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIdx", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "SelectedDoubleClick", Doc: "set to true if a file was selected via double-click,\nwhich can then be a signal to dialogs to accept."}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdtMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
 
-// NewFileView adds a new [FileView] with
-// the given name to the given parent:
-// // FileView is a viewer onto files -- core of the file chooser dialog
+// NewFileView adds a new [FileView] with the given name to the given parent:
+// FileView is a viewer onto files -- core of the file chooser dialog
 func NewFileView(par ki.Ki, name ...string) *FileView {
 	return par.NewChild(FileViewType, name...).(*FileView)
 }
@@ -226,9 +223,8 @@ func (t *FuncButton) SetData(v any) *FuncButton { t.Data = v; return t }
 // InspectorType is the [gti.Type] for [Inspector]
 var InspectorType = gti.AddType(&gti.Type{Name: "goki.dev/giv.Inspector", IDName: "inspector", Doc: "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked", Methods: []gti.Method{{Name: "UpdateItems", Doc: "UpdateItems updates the objects being edited (e.g., updating display changes)", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}}, {Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}}, {Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "KiRoot", Doc: "root of tree being edited"}, {Name: "Changed", Doc: "has the root changed via gui actions?  updated from treeview and structview for changes"}, {Name: "Filename", Doc: "current filename for saving / loading"}}, Instance: &Inspector{}})
 
-// NewInspector adds a new [Inspector] with
-// the given name to the given parent:
-// // Inspector represents a struct, creating a property editor of the fields --
+// NewInspector adds a new [Inspector] with the given name to the given parent:
+// Inspector represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
@@ -266,9 +262,8 @@ func (t *Inspector) SetStripes(v gi.Stripes) *Inspector { t.Stripes = v; return 
 // KeyChordEditType is the [gti.Type] for [KeyChordEdit]
 var KeyChordEditType = gti.AddType(&gti.Type{Name: "goki.dev/giv.KeyChordEdit", IDName: "key-chord-edit", Doc: "KeyChordEdit is a label widget that shows a key chord string, and, when in\nfocus (after being clicked) will update to whatever key chord is typed --\nused for representing and editing key chords.", Embeds: []gti.Field{{Name: "Label"}}, Fields: []gti.Field{{Name: "FocusActive", Doc: "true if the keyboard focus is active or not -- when we lose active focus we apply changes"}}, Instance: &KeyChordEdit{}})
 
-// NewKeyChordEdit adds a new [KeyChordEdit] with
-// the given name to the given parent:
-// // KeyChordEdit is a label widget that shows a key chord string, and, when in
+// NewKeyChordEdit adds a new [KeyChordEdit] with the given name to the given parent:
+// KeyChordEdit is a label widget that shows a key chord string, and, when in
 // focus (after being clicked) will update to whatever key chord is typed --
 // used for representing and editing key chords.
 func NewKeyChordEdit(par ki.Ki, name ...string) *KeyChordEdit {
@@ -301,9 +296,8 @@ func (t *KeyChordEdit) SetType(v gi.LabelTypes) *KeyChordEdit { t.Type = v; retu
 // MapViewType is the [gti.Type] for [MapView]
 var MapViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.MapView", IDName: "map-view", Doc: "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the map values"}, {Name: "SortVals", Doc: "sort by values instead of keys"}, {Name: "NCols", Doc: "the number of columns in the map; do not set externally; generally only access internally"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &MapView{}})
 
-// NewMapView adds a new [MapView] with
-// the given name to the given parent:
-// // MapView represents a map, creating a property editor of the values --
+// NewMapView adds a new [MapView] with the given name to the given parent:
+// MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
 func NewMapView(par ki.Ki, name ...string) *MapView {
@@ -360,9 +354,8 @@ func (t *MapView) SetStripes(v gi.Stripes) *MapView { t.Stripes = v; return t }
 // MapViewInlineType is the [gti.Type] for [MapViewInline]
 var MapViewInlineType = gti.AddType(&gti.Type{Name: "goki.dev/giv.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &MapViewInline{}})
 
-// NewMapViewInline adds a new [MapViewInline] with
-// the given name to the given parent:
-// // MapViewInline represents a map as a single line widget,
+// NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
+// MapViewInline represents a map as a single line widget,
 // for smaller maps and those explicitly marked inline.
 func NewMapViewInline(par ki.Ki, name ...string) *MapViewInline {
 	return par.NewChild(MapViewInlineType, name...).(*MapViewInline)
@@ -407,9 +400,8 @@ func (t *MapViewInline) SetStackTop(v int) *MapViewInline { t.StackTop = v; retu
 // SliceViewType is the [gti.Type] for [SliceView]
 var SliceViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice, creating an interactive viewer / editor of the\nelements as rows in a table.  Widgets to show the index / value pairs, within an\noverall frame.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Embeds: []gti.Field{{Name: "SliceViewBase"}}, Fields: []gti.Field{{Name: "StyleFunc", Doc: "optional styling function"}}, Instance: &SliceView{}})
 
-// NewSliceView adds a new [SliceView] with
-// the given name to the given parent:
-// // SliceView represents a slice, creating an interactive viewer / editor of the
+// NewSliceView adds a new [SliceView] with the given name to the given parent:
+// SliceView represents a slice, creating an interactive viewer / editor of the
 // elements as rows in a table.  Widgets to show the index / value pairs, within an
 // overall frame.
 // Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
@@ -498,9 +490,8 @@ func (t *SliceView) SetElVal(v reflect.Value) *SliceView { t.ElVal = v; return t
 // SliceViewBaseType is the [gti.Type] for [SliceViewBase]
 var SliceViewBaseType = gti.AddType(&gti.Type{Name: "goki.dev/giv.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Methods: []gti.Method{{Name: "CopyIdxs", Doc: "CopyIdxs copies selected idxs to goosi.Clipboard, optionally resetting the selection", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIdxs", Doc: "DeleteIdxs deletes all selected indexes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CutIdxs", Doc: "CutIdxs copies selected indexes to goosi.Clipboard and deletes selected indexes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "PasteIdx", Doc: "PasteIdx pastes clipboard at given idx", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto -- must be a pointer to that slice"}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewMu", Doc: "optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "Changed", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way"}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValView", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "SelVal", Doc: "current selection value -- initially select this value if set"}, {Name: "SelIdx", Doc: "index of currently-selected item, in ReadOnly mode only"}, {Name: "SelIdxs", Doc: "list of currently-selected slice indexes"}, {Name: "InitSelIdx", Doc: "index of row to select at start"}, {Name: "DraggedIdxs", Doc: "list of currently-dragged indexes"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIdx", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIdx", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}}, Instance: &SliceViewBase{}})
 
-// NewSliceViewBase adds a new [SliceViewBase] with
-// the given name to the given parent:
-// // SliceViewBase is the base for SliceView and TableView and any other viewers
+// NewSliceViewBase adds a new [SliceViewBase] with the given name to the given parent:
+// SliceViewBase is the base for SliceView and TableView and any other viewers
 // of array-like data.  It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
@@ -609,9 +600,8 @@ func (t *SliceViewBase) SetStripes(v gi.Stripes) *SliceViewBase { t.Stripes = v;
 // SliceViewGridType is the [gti.Type] for [SliceViewGrid]
 var SliceViewGridType = gti.AddType(&gti.Type{Name: "goki.dev/giv.SliceViewGrid", IDName: "slice-view-grid", Doc: "SliceViewGrid handles the resizing logic for SliceView, TableView.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}}, Instance: &SliceViewGrid{}})
 
-// NewSliceViewGrid adds a new [SliceViewGrid] with
-// the given name to the given parent:
-// // SliceViewGrid handles the resizing logic for SliceView, TableView.
+// NewSliceViewGrid adds a new [SliceViewGrid] with the given name to the given parent:
+// SliceViewGrid handles the resizing logic for SliceView, TableView.
 func NewSliceViewGrid(par ki.Ki, name ...string) *SliceViewGrid {
 	return par.NewChild(SliceViewGridType, name...).(*SliceViewGrid)
 }
@@ -650,9 +640,8 @@ func (t *SliceViewGrid) SetStripes(v gi.Stripes) *SliceViewGrid { t.Stripes = v;
 // SliceViewInlineType is the [gti.Type] for [SliceViewInline]
 var SliceViewInlineType = gti.AddType(&gti.Type{Name: "goki.dev/giv.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValView", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}}, Instance: &SliceViewInline{}})
 
-// NewSliceViewInline adds a new [SliceViewInline] with
-// the given name to the given parent:
-// // SliceViewInline represents a slice as a single line widget,
+// NewSliceViewInline adds a new [SliceViewInline] with the given name to the given parent:
+// SliceViewInline represents a slice as a single line widget,
 // for smaller slices and those explicitly marked inline.
 func NewSliceViewInline(par ki.Ki, name ...string) *SliceViewInline {
 	return par.NewChild(SliceViewInlineType, name...).(*SliceViewInline)
@@ -701,9 +690,8 @@ func (t *SliceViewInline) SetStackTop(v int) *SliceViewInline { t.StackTop = v; 
 // StructViewType is the [gti.Type] for [StructView]
 var StructViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.StructView", IDName: "struct-view", Doc: "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValView", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil"}, {Name: "Changed", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "HasDefs", Doc: "if true, some fields have default values -- update labels when values change"}, {Name: "HasViewIfs", Doc: "if true, some fields have viewif conditional view tags -- update after.."}, {Name: "TypeFieldTags", Doc: "extra tags by field name -- from type properties"}}, Instance: &StructView{}})
 
-// NewStructView adds a new [StructView] with
-// the given name to the given parent:
-// // StructView represents a struct, creating a property editor of the fields --
+// NewStructView adds a new [StructView] with the given name to the given parent:
+// StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
 func NewStructView(par ki.Ki, name ...string) *StructView {
@@ -740,9 +728,8 @@ func (t *StructView) SetStripes(v gi.Stripes) *StructView { t.Stripes = v; retur
 // StructViewInlineType is the [gti.Type] for [StructViewInline]
 var StructViewInlineType = gti.AddType(&gti.Type{Name: "goki.dev/giv.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct as a single line widget,\nfor smaller structs and those explicitly marked inline.", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Struct", Doc: "the struct that we are a view onto"}, {Name: "StructValView", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil"}, {Name: "AddButton", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"}, {Name: "FieldViews", Doc: "Value representations of the fields"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "HasDefs", Doc: "if true, some fields have default values -- update labels when values change"}, {Name: "HasViewIfs", Doc: "if true, some fields have viewif conditional view tags -- update after.."}}, Instance: &StructViewInline{}})
 
-// NewStructViewInline adds a new [StructViewInline] with
-// the given name to the given parent:
-// // StructViewInline represents a struct as a single line widget,
+// NewStructViewInline adds a new [StructViewInline] with the given name to the given parent:
+// StructViewInline represents a struct as a single line widget,
 // for smaller structs and those explicitly marked inline.
 func NewStructViewInline(par ki.Ki, name ...string) *StructViewInline {
 	return par.NewChild(StructViewInlineType, name...).(*StructViewInline)
@@ -795,9 +782,8 @@ func (t *StructViewInline) SetStackTop(v int) *StructViewInline { t.StackTop = v
 // TableViewType is the [gti.Type] for [TableView]
 var TableViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.TableView", IDName: "table-view", Doc: "TableView represents a slice-of-structs as a table, where the fields are\nthe columns, within an overall frame.  It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nIf ReadOnly, it functions as a mutually-exclusive item\nselector, highlighting the selected row and emitting a Selected action.", Embeds: []gti.Field{{Name: "SliceViewBase"}}, Fields: []gti.Field{{Name: "StyleFunc", Doc: "optional styling function"}, {Name: "SelField", Doc: "current selection field -- initially select value in this field"}, {Name: "SortIdx", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "StruType", Doc: "struct type for each row"}, {Name: "VisFields", Doc: "the visible fields"}, {Name: "NVisFields", Doc: "number of visible fields"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}}, Instance: &TableView{}})
 
-// NewTableView adds a new [TableView] with
-// the given name to the given parent:
-// // TableView represents a slice-of-structs as a table, where the fields are
+// NewTableView adds a new [TableView] with the given name to the given parent:
+// TableView represents a slice-of-structs as a table, where the fields are
 // the columns, within an overall frame.  It is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop.
 // If ReadOnly, it functions as a mutually-exclusive item
@@ -914,9 +900,8 @@ func (t *TableView) SetElVal(v reflect.Value) *TableView { t.ElVal = v; return t
 // TimeViewType is the [gti.Type] for [TimeView]
 var TimeViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
 
-// NewTimeView adds a new [TimeView] with
-// the given name to the given parent:
-// // TimeView is a view for selecting a time
+// NewTimeView adds a new [TimeView] with the given name to the given parent:
+// TimeView is a view for selecting a time
 func NewTimeView(par ki.Ki, name ...string) *TimeView {
 	return par.NewChild(TimeViewType, name...).(*TimeView)
 }
@@ -951,9 +936,8 @@ func (t *TimeView) SetStripes(v gi.Stripes) *TimeView { t.Stripes = v; return t 
 // DateViewType is the [gti.Type] for [DateView]
 var DateViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "TmpSave", Doc: "value view that needs to have SaveTmp called on it whenever a change\nis made to one of the underlying values.\npass this down to any sub-views created from a parent"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view\ndisplayed as extra contextual information in view dialog windows"}, {Name: "ConfigTime", Doc: "ConfigTime is the time that was configured"}}, Instance: &DateView{}})
 
-// NewDateView adds a new [DateView] with
-// the given name to the given parent:
-// // DateView is a view for selecting a date
+// NewDateView adds a new [DateView] with the given name to the given parent:
+// DateView is a view for selecting a date
 func NewDateView(par ki.Ki, name ...string) *DateView {
 	return par.NewChild(DateViewType, name...).(*DateView)
 }
@@ -991,9 +975,8 @@ func (t *DateView) SetStripes(v gi.Stripes) *DateView { t.Stripes = v; return t 
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []gti.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to goosi.Clipboard, optionally resetting the selection.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to goosi.Clipboard and deletes selected items.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "SyncNode", Doc: "If non-nil, the Ki Node that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [ki.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "ViewIdx", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "WidgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}}, Instance: &TreeView{}})
 
-// NewTreeView adds a new [TreeView] with
-// the given name to the given parent:
-// // TreeView provides a graphical representation of a tree tructure
+// NewTreeView adds a new [TreeView] with the given name to the given parent:
+// TreeView provides a graphical representation of a tree tructure
 // providing full navigation and manipulation abilities.
 //
 // If the SyncNode field is non-nil, typically via

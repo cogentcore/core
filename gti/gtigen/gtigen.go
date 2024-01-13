@@ -6,7 +6,7 @@
 // type information for Go types, methods, functions and variables
 package gtigen
 
-//go:generate go run ../cmd/gtigen generate -output gtigen_gen.go
+//go:generate go run ../cmd/gtigen -output gtigen_gen.go
 
 import (
 	"fmt"

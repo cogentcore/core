@@ -11,9 +11,8 @@ import (
 // AppType is the [gti.Type] for [App]
 var AppType = gti.AddType(&gti.Type{Name: "goki.dev/gear.App", IDName: "app", Doc: "App is a GUI view of a gear command.", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Cmd", Doc: "Cmd is the root command associated with this app."}, {Name: "CurCmd", Doc: "CurCmd is the current root command being typed in."}, {Name: "Dir", Doc: "Dir is the current directory of the app."}}, Instance: &App{}})
 
-// NewApp adds a new [App] with
-// the given name to the given parent:
-// // App is a GUI view of a gear command.
+// NewApp adds a new [App] with the given name to the given parent:
+// App is a GUI view of a gear command.
 func NewApp(par ki.Ki, name ...string) *App {
 	return par.NewChild(AppType, name...).(*App)
 }

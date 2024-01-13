@@ -48,9 +48,8 @@ func (t *App) SetAppBarConfig(v func(pw Widget)) *App { t.AppBarConfig = v; retu
 // AppChooserType is the [gti.Type] for [AppChooser]
 var AppChooserType = gti.AddType(&gti.Type{Name: "goki.dev/gi.AppChooser", IDName: "app-chooser", Doc: "AppChooser is an editable chooser element, typically placed at the start\nof the TopAppBar, that provides direct access to all manner of app resources.", Embeds: []gti.Field{{Name: "Chooser"}}, Fields: []gti.Field{{Name: "Resources", Doc: "Resources are generators for resources accessible by the AppChooser"}}, Instance: &AppChooser{}})
 
-// NewAppChooser adds a new [AppChooser] with
-// the given name to the given parent:
-// // AppChooser is an editable chooser element, typically placed at the start
+// NewAppChooser adds a new [AppChooser] with the given name to the given parent:
+// AppChooser is an editable chooser element, typically placed at the start
 // of the TopAppBar, that provides direct access to all manner of app resources.
 func NewAppChooser(par ki.Ki, name ...string) *AppChooser {
 	return par.NewChild(AppChooserType, name...).(*AppChooser)
@@ -135,9 +134,8 @@ func (t *Body) SetStripes(v Stripes) *Body { t.Stripes = v; return t }
 // BoxType is the [gti.Type] for [Box]
 var BoxType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Box", IDName: "box", Doc: "Box is a simple base [Widget] that renders the Std Box model", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Box{}})
 
-// NewBox adds a new [Box] with
-// the given name to the given parent:
-// // Box is a simple base [Widget] that renders the Std Box model
+// NewBox adds a new [Box] with the given name to the given parent:
+// Box is a simple base [Widget] that renders the Std Box model
 func NewBox(par ki.Ki, name ...string) *Box {
 	return par.NewChild(BoxType, name...).(*Box)
 }
@@ -158,9 +156,8 @@ func (t *Box) SetTooltip(v string) *Box { t.Tooltip = v; return t }
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Button", IDName: "button", Doc: "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of button"}, {Name: "Text", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}, {Name: "Data", Doc: "Data is optional data that can be used for event handling"}}, Instance: &Button{}})
 
-// NewButton adds a new [Button] with
-// the given name to the given parent:
-// // Button is a pressable button with text, an icon, an indicator, a shortcut,
+// NewButton adds a new [Button] with the given name to the given parent:
+// Button is a pressable button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event with OnClick(...).
 func NewButton(par ki.Ki, name ...string) *Button {
 	return par.NewChild(ButtonType, name...).(*Button)
@@ -240,9 +237,8 @@ func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }
 // CanvasType is the [gti.Type] for [Canvas]
 var CanvasType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Canvas{}})
 
-// NewCanvas adds a new [Canvas] with
-// the given name to the given parent:
-// // Canvas is a widget that can be arbitrarily drawn to.
+// NewCanvas adds a new [Canvas] with the given name to the given parent:
+// Canvas is a widget that can be arbitrarily drawn to.
 func NewCanvas(par ki.Ki, name ...string) *Canvas {
 	return par.NewChild(CanvasType, name...).(*Canvas)
 }
@@ -263,9 +259,8 @@ func (t *Canvas) SetTooltip(v string) *Canvas { t.Tooltip = v; return t }
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Chooser", IDName: "chooser", Doc: "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of combo box"}, {Name: "Icon", Doc: "optional icon"}, {Name: "Indicator", Doc: "name of the indicator icon to present."}, {Name: "Editable", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property"}, {Name: "AllowNew", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"}, {Name: "Items", Doc: "items available for selection"}, {Name: "Labels", Doc: "an optional list of labels displayed for Chooser items;\nthe indices for the labels correspond to those for the items"}, {Name: "Icons", Doc: "an optional list of icons displayed for Chooser items;\nthe indices for the icons correspond to those for the items"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for Chooser items;\nthe indices for the tooltips correspond to those for the items"}, {Name: "Placeholder", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"}, {Name: "MaxLength", Doc: "maximum label length (in runes)"}, {Name: "ItemsFunc", Doc: "ItemsFunc, if non-nil, is a function to call before showing the items\nof the chooser, which is typically used to configure them (eg: if they\nare based on dynamic data)"}, {Name: "CurLabel", Doc: "CurLabel is the string label for the current value"}, {Name: "CurVal", Doc: "current selected value"}, {Name: "CurIndex", Doc: "current index in list of possible items"}}, Instance: &Chooser{}})
 
-// NewChooser adds a new [Chooser] with
-// the given name to the given parent:
-// // Chooser is for selecting items from a dropdown list, with an optional
+// NewChooser adds a new [Chooser] with the given name to the given parent:
+// Chooser is for selecting items from a dropdown list, with an optional
 // edit TextField for typing directly.
 // The items can be of any type, including enum values -- they are converted
 // to strings for the display.  If the items are of type [icons.Icon], then they
@@ -381,9 +376,8 @@ func (t *Complete) SetStage(v *Stage) *Complete { t.Stage = v; return t }
 // FrameType is the [gti.Type] for [Frame]
 var FrameType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Frame", IDName: "frame", Doc: "Frame is a Layout that renders a background according to the\nbackground-color style setting, and optional striping for grid layouts", Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Stripes", Doc: "options for striped backgrounds -- rendered as darker bands relative to background color"}}, Instance: &Frame{}})
 
-// NewFrame adds a new [Frame] with
-// the given name to the given parent:
-// // Frame is a Layout that renders a background according to the
+// NewFrame adds a new [Frame] with the given name to the given parent:
+// Frame is a Layout that renders a background according to the
 // background-color style setting, and optional striping for grid layouts
 func NewFrame(par ki.Ki, name ...string) *Frame {
 	return par.NewChild(FrameType, name...).(*Frame)
@@ -412,9 +406,8 @@ func (t *Frame) SetStackTop(v int) *Frame { t.StackTop = v; return t }
 // HandleType is the [gti.Type] for [Handle]
 var HandleType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Handle", IDName: "handle", Doc: "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [Handle.Styles.Direction]\ncontrols the direction in which the handle moves.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Min", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)"}, {Name: "Max", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)"}, {Name: "Pos", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]"}}, Instance: &Handle{}})
 
-// NewHandle adds a new [Handle] with
-// the given name to the given parent:
-// // Handle represents a draggable handle that can be used to
+// NewHandle adds a new [Handle] with the given name to the given parent:
+// Handle represents a draggable handle that can be used to
 // control the size of an element. The [Handle.Styles.Direction]
 // controls the direction in which the handle moves.
 func NewHandle(par ki.Ki, name ...string) *Handle {
@@ -452,9 +445,8 @@ func (t *Handle) SetTooltip(v string) *Handle { t.Tooltip = v; return t }
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Icon", IDName: "icon", Doc: "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "IconName", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing"}, {Name: "RendSize", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used."}}, Instance: &Icon{}})
 
-// NewIcon adds a new [Icon] with
-// the given name to the given parent:
-// // Icon contains a svg.SVG element.
+// NewIcon adds a new [Icon] with the given name to the given parent:
+// Icon contains a svg.SVG element.
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
 func NewIcon(par ki.Ki, name ...string) *Icon {
@@ -477,9 +469,8 @@ func (t *Icon) SetTooltip(v string) *Icon { t.Tooltip = v; return t }
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Image", IDName: "image", Doc: "Image is a Widget that renders a static bitmap image.\nSee [Styles.ObjectFits] for how to control the image rendering within\nthe allocated size.  The minimum requested size is the pixel size in\nDp units (1/160th of an inch).", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "Pixels", Doc: "the bitmap image"}, {Name: "PrevPixels", Doc: "cached last rendered image"}, {Name: "PrevObjectFit", Doc: "cached [styles.Style.ObjectFit] of the last rendered image"}, {Name: "PrevSize", Doc: "cached allocated size for the last rendered image"}}, Instance: &Image{}})
 
-// NewImage adds a new [Image] with
-// the given name to the given parent:
-// // Image is a Widget that renders a static bitmap image.
+// NewImage adds a new [Image] with the given name to the given parent:
+// Image is a Widget that renders a static bitmap image.
 // See [Styles.ObjectFits] for how to control the image rendering within
 // the allocated size.  The minimum requested size is the pixel size in
 // Dp units (1/160th of an inch).
@@ -503,9 +494,8 @@ func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
 // LabelType is the [gti.Type] for [Label]
 var LabelType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Label", IDName: "label", Doc: "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Text", Doc: "label to display"}, {Name: "Type", Doc: "the type of label"}, {Name: "TextRender", Doc: "render data for text label"}}, Instance: &Label{}})
 
-// NewLabel adds a new [Label] with
-// the given name to the given parent:
-// // Label is a widget for rendering text labels -- supports full widget model
+// NewLabel adds a new [Label] with the given name to the given parent:
+// Label is a widget for rendering text labels -- supports full widget model
 // including box rendering, and full HTML styling, including links -- LinkSig
 // emits link with data of URL -- opens default browser if nobody receiving
 // signal.  The default white-space option is 'pre' -- set to 'normal' or
@@ -560,9 +550,8 @@ func (t *Label) SetTooltip(v string) *Label { t.Tooltip = v; return t }
 // LabeledTextFieldType is the [gti.Type] for [LabeledTextField]
 var LabeledTextFieldType = gti.AddType(&gti.Type{Name: "goki.dev/gi.LabeledTextField", IDName: "labeled-text-field", Doc: "LabeledTextField is a [Label] with optional associated label,\nhint, and error text.", Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Label", Doc: "Label is the label for the text field"}, {Name: "HintText", Doc: "HintText is the hint text for the text field"}, {Name: "ErrorText", Doc: "ErrorText is the error text for the text field.\nIf it is specified, it will be shown instead of\n[LabeledTextField.HintText]."}}, Instance: &LabeledTextField{}})
 
-// NewLabeledTextField adds a new [LabeledTextField] with
-// the given name to the given parent:
-// // LabeledTextField is a [Label] with optional associated label,
+// NewLabeledTextField adds a new [LabeledTextField] with the given name to the given parent:
+// LabeledTextField is a [Label] with optional associated label,
 // hint, and error text.
 func NewLabeledTextField(par ki.Ki, name ...string) *LabeledTextField {
 	return par.NewChild(LabeledTextFieldType, name...).(*LabeledTextField)
@@ -652,9 +641,8 @@ func (t *LabeledTextField) SetSelectMode(v bool) *LabeledTextField { t.SelectMod
 // LayoutType is the [gti.Type] for [Layout]
 var LayoutType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "StackTop", Doc: "for Stacked layout, index of node to use as the top of the stack.\nOnly the node at this index is rendered -- if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementational state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
 
-// NewLayout adds a new [Layout] with
-// the given name to the given parent:
-// // Layout is the primary node type responsible for organizing the sizes
+// NewLayout adds a new [Layout] with the given name to the given parent:
+// Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background color will have no effect.
 // All arbitrary collections of widgets should generally be contained
@@ -691,9 +679,8 @@ func (t *Layout) SetTooltip(v string) *Layout { t.Tooltip = v; return t }
 // StretchType is the [gti.Type] for [Stretch]
 var StretchType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Stretch", IDName: "stretch", Doc: "Stretch adds an infinitely stretchy element for spacing out layouts\n(max-size = -1) set the width / height property to determine how much it\ntakes relative to other stretchy elements", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Stretch{}})
 
-// NewStretch adds a new [Stretch] with
-// the given name to the given parent:
-// // Stretch adds an infinitely stretchy element for spacing out layouts
+// NewStretch adds a new [Stretch] with the given name to the given parent:
+// Stretch adds an infinitely stretchy element for spacing out layouts
 // (max-size = -1) set the width / height property to determine how much it
 // takes relative to other stretchy elements
 func NewStretch(par ki.Ki, name ...string) *Stretch {
@@ -716,9 +703,8 @@ func (t *Stretch) SetTooltip(v string) *Stretch { t.Tooltip = v; return t }
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Space", IDName: "space", Doc: "Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.\nSet width / height property to change.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Space{}})
 
-// NewSpace adds a new [Space] with
-// the given name to the given parent:
-// // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.
+// NewSpace adds a new [Space] with the given name to the given parent:
+// Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout.
 // Set width / height property to change.
 func NewSpace(par ki.Ki, name ...string) *Space {
 	return par.NewChild(SpaceType, name...).(*Space)
@@ -740,9 +726,8 @@ func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{Name: "goki.dev/gi.ProgressBar", IDName: "progress-bar", Doc: "ProgressBar is a progress bar that fills up bar as progress continues.\nCall Start with a maximum value to work toward, and ProgStep each time\na progress step has been accomplished -- increments the ProgCur by one\nand display is updated every ProgInc such steps.", Embeds: []gti.Field{{Name: "Slider"}}, Fields: []gti.Field{{Name: "ProgMax", Doc: "maximum amount of progress to be achieved"}, {Name: "ProgInc", Doc: "progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten"}, {Name: "ProgCur", Doc: "current progress level"}, {Name: "ProgMu", Doc: "mutex for updating progress"}}, Instance: &ProgressBar{}})
 
-// NewProgressBar adds a new [ProgressBar] with
-// the given name to the given parent:
-// // ProgressBar is a progress bar that fills up bar as progress continues.
+// NewProgressBar adds a new [ProgressBar] with the given name to the given parent:
+// ProgressBar is a progress bar that fills up bar as progress continues.
 // Call Start with a maximum value to work toward, and ProgStep each time
 // a progress step has been accomplished -- increments the ProgCur by one
 // and display is updated every ProgInc such steps.
@@ -915,9 +900,8 @@ func (t *Scene) SetStripes(v Stripes) *Scene { t.Stripes = v; return t }
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Separator", IDName: "separator", Doc: "Separator draws a vertical or horizontal line", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Dim", Doc: "Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)"}}, Instance: &Separator{}})
 
-// NewSeparator adds a new [Separator] with
-// the given name to the given parent:
-// // Separator draws a vertical or horizontal line
+// NewSeparator adds a new [Separator] with the given name to the given parent:
+// Separator draws a vertical or horizontal line
 func NewSeparator(par ki.Ki, name ...string) *Separator {
 	return par.NewChild(SeparatorType, name...).(*Separator)
 }
@@ -939,7 +923,7 @@ func (t *Separator) SetDim(v mat32.Dims) *Separator { t.Dim = v; return t }
 // SetTooltip sets the [Separator.Tooltip]
 func (t *Separator) SetTooltip(v string) *Separator { t.Tooltip = v; return t }
 
-var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.AppearanceSettingsData", IDName: "appearance-settings-data", Doc: "AppearanceSettingsData is the data type for the global Goki appearance settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Methods: []gti.Method{{Name: "Apply", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "Theme", Doc: "the color theme"}, {Name: "Color", Doc: "the primary color used to generate the color scheme"}, {Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}, {Name: "Spacing", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)"}, {Name: "FontSize", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)"}, {Name: "ScreenPrefs", Doc: "screen-specific preferences, which will override overall defaults if set"}, {Name: "HiStyle", Doc: "text highlighting style / theme"}, {Name: "FontFamily", Doc: "default font family when otherwise not specified"}, {Name: "MonoFont", Doc: "default mono-spaced font family"}}})
+var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.AppearanceSettingsData", IDName: "appearance-settings-data", Doc: "AppearanceSettingsData is the data type for the global Goki appearance settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Methods: []gti.Method{{Name: "Apply", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}, {Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen. If for current screen is true,\nit saves only for the current screen.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"forCurrentScreen"}}, {Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "Theme", Doc: "the color theme"}, {Name: "Color", Doc: "the primary color used to generate the color scheme"}, {Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}, {Name: "Spacing", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)"}, {Name: "FontSize", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)"}, {Name: "Screens", Doc: "screen-specific preferences, which will override overall defaults if set"}, {Name: "HiStyle", Doc: "text highlighting style / theme"}, {Name: "FontFamily", Doc: "default font family when otherwise not specified"}, {Name: "MonoFont", Doc: "default mono-spaced font family"}, {Name: "TBConfig", Doc: "toolbar configuration function -- set in giv -- allows use of FuncButton"}}})
 
 var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.DeviceSettingsData", IDName: "device-settings-data", Doc: "DeviceSettingsData is the data type for the device settings.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Embeds: []gti.Field{{Name: "SettingsBase"}}, Fields: []gti.Field{{Name: "KeyMap", Doc: "The keyboard shortcut map to use"}, {Name: "KeyMaps", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps."}, {Name: "DoubleClickInterval", Doc: "The maximum time interval between button press events to count as a double-click"}, {Name: "ScrollWheelSpeed", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here."}, {Name: "SlideStartTime", Doc: "The amount of time to wait before initiating a regular slide event\n(as opposed to a basic press event)"}, {Name: "SlideStartDistance", Doc: "The number of pixels that must be moved before initiating a regular\nslide event (as opposed to a basic press event)"}, {Name: "DragStartTime", Doc: "The amount of time to wait before initiating a drag-n-drop event"}, {Name: "DragStartDistance", Doc: "The number of pixels that must be moved before initiating a drag-n-drop event"}, {Name: "LongHoverTime", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)"}, {Name: "LongHoverStopDistance", Doc: "The maximum number of pixels that mouse can move and still register a long hover event"}, {Name: "LongPressTime", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)"}, {Name: "LongPressStopDistance", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event"}}})
 
@@ -960,9 +944,8 @@ var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.DebugSettingsData", IDName: "de
 // SliderType is the [gti.Type] for [Slider]
 var SliderType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of the slider, which determines the visual and functional properties"}, {Name: "Value", Doc: "Current value, represented by the position of the thumb."}, {Name: "Dim", Doc: "dimension along which the slider slides"}, {Name: "Min", Doc: "minimum value in range"}, {Name: "Max", Doc: "maximum value in range"}, {Name: "Step", Doc: "smallest step size to increment"}, {Name: "PageStep", Doc: "larger PageUp / Dn step size"}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "Icon", Doc: "optional icon for the dragging knob"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Snap", Doc: "whether to snap the values to Step size increments"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
 
-// NewSlider adds a new [Slider] with
-// the given name to the given parent:
-// // Slider is a slideable widget that provides slider functionality for two Types:
+// NewSlider adds a new [Slider] with the given name to the given parent:
+// Slider is a slideable widget that provides slider functionality for two Types:
 // Slider type provides a movable thumb that represents Value as the center of thumb
 // Pos position, with room reserved at ends for 1/2 of the thumb size.
 // Scrollbar has a VisiblePct factor that specifies the percent of the content
@@ -1102,9 +1085,8 @@ func (t *Spell) SetStage(v *Stage) *Spell { t.Stage = v; return t }
 // SpinnerType is the [gti.Type] for [Spinner]
 var SpinnerType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "TextField"}}, Fields: []gti.Field{{Name: "Value", Doc: "Value is the current value"}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce"}, {Name: "Min", Doc: "If HasMin is true, Min is the the minimum value in range"}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce"}, {Name: "Max", Doc: "If HasMax is true, Max is the maximum value in range"}, {Name: "Step", Doc: "Step is the smallest step size to increment"}, {Name: "PageStep", Doc: "PageStep is a larger step size used for PageUp and PageDown"}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
 
-// NewSpinner adds a new [Spinner] with
-// the given name to the given parent:
-// // Spinner combines a TextField with up / down buttons for incrementing /
+// NewSpinner adds a new [Spinner] with the given name to the given parent:
+// Spinner combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
 func NewSpinner(par ki.Ki, name ...string) *Spinner {
 	return par.NewChild(SpinnerType, name...).(*Spinner)
@@ -1212,9 +1194,8 @@ func (t *Spinner) SetSelectMode(v bool) *Spinner { t.SelectMode = v; return t }
 // SplitsType is the [gti.Type] for [Splits]
 var SplitsType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Splits", IDName: "splits", Doc: "Splits allocates a fixed proportion of space to each child, along given\ndimension.  It uses the Widget Parts to hold the Handle widgets\nseparately from the children that contain the rest of the scene to be\ndisplayed within each panel.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Splits", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element.\nEnter 0 to collapse a given element"}, {Name: "SavedSplits", Doc: "A saved version of the splits which can be restored.\nFor dynamic collapse / expand operations"}}, Instance: &Splits{}})
 
-// NewSplits adds a new [Splits] with
-// the given name to the given parent:
-// // Splits allocates a fixed proportion of space to each child, along given
+// NewSplits adds a new [Splits] with the given name to the given parent:
+// Splits allocates a fixed proportion of space to each child, along given
 // dimension.  It uses the Widget Parts to hold the Handle widgets
 // separately from the children that contain the rest of the scene to be
 // displayed within each panel.
@@ -1356,9 +1337,8 @@ var _ = gti.AddType(&gti.Type{Name: "goki.dev/gi.StageMgr", IDName: "stage-mgr",
 // SVGType is the [gti.Type] for [SVG]
 var SVGType = gti.AddType(&gti.Type{Name: "goki.dev/gi.SVG", IDName: "svg", Doc: "SVG is a Widget that renders an [svg.SVG] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the display.\nSVGs do not render a background or border independent of their SVG object.", Methods: []gti.Method{{Name: "OpenSVG", Doc: "OpenSVG opens an XML-formatted SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SaveSVG", Doc: "SaveSVG saves the current SVG to an XML-encoded standard SVG file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered SVG image to an PNG image file", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "SVG", Doc: "SVG is the SVG object associated with the element."}}, Instance: &SVG{}})
 
-// NewSVG adds a new [SVG] with
-// the given name to the given parent:
-// // SVG is a Widget that renders an [svg.SVG] object.
+// NewSVG adds a new [SVG] with the given name to the given parent:
+// SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // SVGs do not render a background or border independent of their SVG object.
 func NewSVG(par ki.Ki, name ...string) *SVG {
@@ -1381,9 +1361,8 @@ func (t *SVG) SetTooltip(v string) *SVG { t.Tooltip = v; return t }
 // SwitchType is the [gti.Type] for [Switch]
 var SwitchType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.", Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of switch that this is"}, {Name: "Text", Doc: "the label text for the switch"}, {Name: "IconOn", Doc: "icon to use for the on, checked state of the switch"}, {Name: "IconOff", Doc: "icon to use for the off, unchecked state of the switch"}, {Name: "IconUnk", Doc: "icon to use for the indeterminate (unknown) state"}}, Instance: &Switch{}})
 
-// NewSwitch adds a new [Switch] with
-// the given name to the given parent:
-// // Switch is a widget that can toggle between an on and off state.
+// NewSwitch adds a new [Switch] with the given name to the given parent:
+// Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 func NewSwitch(par ki.Ki, name ...string) *Switch {
 	return par.NewChild(SwitchType, name...).(*Switch)
@@ -1421,9 +1400,8 @@ func (t *Switch) SetTooltip(v string) *Switch { t.Tooltip = v; return t }
 // SwitchesType is the [gti.Type] for [Switches]
 var SwitchesType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Type", Doc: "the type of switches that will be made"}, {Name: "Items", Doc: "the list of items (switch labels)"}, {Name: "Tooltips", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"}, {Name: "Mutex", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)"}}, Instance: &Switches{}})
 
-// NewSwitches adds a new [Switches] with
-// the given name to the given parent:
-// // Switches is a widget for containing a set of switches.
+// NewSwitches adds a new [Switches] with the given name to the given parent:
+// Switches is a widget for containing a set of switches.
 // It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
@@ -1491,9 +1469,8 @@ func (t *Switches) SetStripes(v Stripes) *Switches { t.Stripes = v; return t }
 // TabsType is the [gti.Type] for [Tabs]
 var TabsType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Layout"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. It must be set\nbefore the tabs are first configured."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}, {Name: "NewTabButton", Doc: "show a new tab button at right of list of tabs"}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "Mu", Doc: "mutex protecting updates to tabs.\nTabs can be driven programmatically and via user input so need extra protection"}}, Instance: &Tabs{}})
 
-// NewTabs adds a new [Tabs] with
-// the given name to the given parent:
-// // Tabs switches among child widgets via tabs.  The selected widget gets
+// NewTabs adds a new [Tabs] with the given name to the given parent:
+// Tabs switches among child widgets via tabs.  The selected widget gets
 // the full allocated space avail after the tabs are accounted for.  The
 // Tabs is just a Vertical layout that manages two child widgets: a
 // HorizFlow Layout for the tabs (which can flow across multiple rows as
@@ -1612,9 +1589,8 @@ func (t *Tab) SetTooltip(v string) *Tab { t.Tooltip = v; return t }
 // TextFieldType is the [gti.Type] for [TextField]
 var TextFieldType = gti.AddType(&gti.Type{Name: "goki.dev/gi.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Txt", Doc: "the last saved value of the text string being edited"}, {Name: "Placeholder", Doc: "text that is displayed when the field is empty, in a lower-contrast manner"}, {Name: "Complete", Doc: "functions and data for textfield completion"}, {Name: "NoEcho", Doc: "replace displayed characters with bullets to conceal text"}, {Name: "LeadingIcon", Doc: "if specified, a button will be added at the start of the text field with this icon"}, {Name: "LeadingIconOnClick", Doc: "if LeadingIcon is specified, the function to call when the leading icon is clicked"}, {Name: "TrailingIcon", Doc: "if specified, a button will be added at the end of the text field with this icon"}, {Name: "TrailingIconOnClick", Doc: "if TrailingIcon is specified, the function to call when the trailing icon is clicked"}, {Name: "CursorWidth", Doc: "width of cursor -- set from cursor-width property (inherited)"}, {Name: "Type", Doc: "the type of the text field"}, {Name: "PlaceholderColor", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"}, {Name: "SelectColor", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"}, {Name: "CursorColor", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"}, {Name: "Edited", Doc: "true if the text has been edited relative to the original"}, {Name: "EditTxt", Doc: "the live text string being edited, with latest modifications -- encoded as runes"}, {Name: "MaxWidthReq", Doc: "maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"}, {Name: "EffPos", Doc: "effective position with any leading icon space added"}, {Name: "EffSize", Doc: "effective size, subtracting any leading and trailing icon space"}, {Name: "StartPos", Doc: "starting display position in the string"}, {Name: "EndPos", Doc: "ending display position in the string"}, {Name: "CursorPos", Doc: "current cursor position"}, {Name: "CharWidth", Doc: "approximate number of chars that can be displayed at any time -- computed from font size etc"}, {Name: "SelectStart", Doc: "starting position of selection in the string"}, {Name: "SelectEnd", Doc: "ending position of selection in the string"}, {Name: "SelectInit", Doc: "initial selection position -- where it started"}, {Name: "SelectMode", Doc: "if true, select text as cursor moves"}, {Name: "RenderAll", Doc: "render version of entire text, for sizing"}, {Name: "RenderVis", Doc: "render version of just visible text"}, {Name: "FontHeight", Doc: "font height, cached during styling"}, {Name: "BlinkOn", Doc: "oscillates between on and off for blinking"}, {Name: "CursorMu", Doc: "mutex for updating cursor between blinker and field"}}, Instance: &TextField{}})
 
-// NewTextField adds a new [TextField] with
-// the given name to the given parent:
-// // TextField is a widget for editing a line of text
+// NewTextField adds a new [TextField] with the given name to the given parent:
+// TextField is a widget for editing a line of text
 func NewTextField(par ki.Ki, name ...string) *TextField {
 	return par.NewChild(TextFieldType, name...).(*TextField)
 }
@@ -1711,9 +1687,8 @@ func (t *TextField) SetTooltip(v string) *TextField { t.Tooltip = v; return t }
 // ToolbarType is the [gti.Type] for [Toolbar]
 var ToolbarType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).", Directives: []gti.Directive{{Tool: "goki", Directive: "embedder"}}, Methods: []gti.Method{{Name: "StdOverflowMenu", Doc: "StdOverflowMenu adds standard overflow menu items.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "OverflowItems", Doc: "items moved from the main toolbar, will be shown in the overflow menu"}, {Name: "OverflowMenus", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last."}, {Name: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config"}, {Name: "OverflowButton", Doc: "This is the overflow button"}}, Instance: &Toolbar{}})
 
-// NewToolbar adds a new [Toolbar] with
-// the given name to the given parent:
-// // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
+// NewToolbar adds a new [Toolbar] with the given name to the given parent:
+// Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
 // In general it should be possible to use a single toolbar + overflow to
@@ -1779,9 +1754,8 @@ func (t *Toolbar) SetStripes(v Stripes) *Toolbar { t.Stripes = v; return t }
 // BasicBarType is the [gti.Type] for [BasicBar]
 var BasicBarType = gti.AddType(&gti.Type{Name: "goki.dev/gi.BasicBar", IDName: "basic-bar", Doc: "BasicBar is just a styled Frame layout for holding buttons\nand other widgets.  Use this when the more advanced features\nof the Toolbar are not needed.", Embeds: []gti.Field{{Name: "Frame"}}, Instance: &BasicBar{}})
 
-// NewBasicBar adds a new [BasicBar] with
-// the given name to the given parent:
-// // BasicBar is just a styled Frame layout for holding buttons
+// NewBasicBar adds a new [BasicBar] with the given name to the given parent:
+// BasicBar is just a styled Frame layout for holding buttons
 // and other widgets.  Use this when the more advanced features
 // of the Toolbar are not needed.
 func NewBasicBar(par ki.Ki, name ...string) *BasicBar {
@@ -1810,9 +1784,8 @@ func (t *BasicBar) SetStripes(v Stripes) *BasicBar { t.Stripes = v; return t }
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{Name: "goki.dev/gi.WidgetBase", IDName: "widget-base", Doc: "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.", Methods: []gti.Method{{Name: "Update", Doc: "Update calls Config and then ApplyStyle\non every Widget in the tree from me.\nThis should be used after any structural changes\nto currently-displayed widgets.\nIt wraps everything in UpdateStart / UpdateEndRender\nso node will render on next pass.\nCall SetNeedsLayout to also trigger a layout where needed.", Directives: []gti.Directive{{Tool: "gti", Directive: "add"}}}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget"}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, Override the computed styles and allow directly editing Style"}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function, which can be called\nby end-user and internal code. FirstStylers and FinalStylers\nare called before and after these stylers, respectively."}, {Name: "FirstStylers", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function, which can be called\nby end-user and internal code. These stylers are called before\nStylers and FinalStylers."}, {Name: "FinalStylers", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function, which can be called\nby end-user and internal code. These stylers are called after\nFirstStylers and Stylers."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized."}, {Name: "PriorityEvents", Doc: "PriorityEvents has event type(s) that this widget gets sent first.\nEvents are sent in depth-first order, so this enables outer container\nwidgets to get first access to these events."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Sc", Doc: "Sc is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent.\nIt is passed to most Config, Layout, and Render functions as\na convenience."}, {Name: "StyMu", Doc: "mutex protecting the Style field"}, {Name: "BBoxMu", Doc: "mutex protecting the BBox fields"}}, Instance: &WidgetBase{}})
 
-// NewWidgetBase adds a new [WidgetBase] with
-// the given name to the given parent:
-// // WidgetBase is the base type for all Widget Widget elements, which are
+// NewWidgetBase adds a new [WidgetBase] with the given name to the given parent:
+// WidgetBase is the base type for all Widget Widget elements, which are
 // managed by a containing Layout, and use all 5 rendering passes.  All
 // elemental widgets must support the ReadOnly and Selected states in a
 // reasonable way (Selected only essential when also ReadOnly), so they can
