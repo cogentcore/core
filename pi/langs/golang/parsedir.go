@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -218,15 +219,14 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 			continue
 		}
 		// fmt.Printf("parsing file: %v\n", fnm)
-		// stt := time.Now()
+		stt := time.Now()
 		pr.LexAll(fs)
 		// lxdur := time.Now().Sub(stt)
 		pr.ParseAll(fs)
-		// prdur := time.Now().Sub(stt)
-		// pdms := prdur / time.Millisecond
-		// if pdms > 500 {
-		// 	fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
-		// }
+		prdur := time.Now().Sub(stt)
+		if prdur > 5*time.Second {
+			fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
+		}
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
 			gl.DeleteUnexported(pkg, pkg.Name)

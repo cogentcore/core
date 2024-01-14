@@ -905,8 +905,10 @@ func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 	}
 	w.AsWidget().SetTooltip(tip)
 	w.OnClick(func(e events.Event) {
-		vv.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
-		vv.OpenDialog(vb.Widget, nil)
+		if allowReadOnly || !vv.IsReadOnly() {
+			vv.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
+			vv.OpenDialog(vb.Widget, nil)
+		}
 	})
 }
 

@@ -14,6 +14,7 @@ import (
 	"goki.dev/giv"
 	"goki.dev/icons"
 	"goki.dev/mat32"
+	"goki.dev/states"
 )
 
 // TableStruct is a testing struct for table view
@@ -172,7 +173,7 @@ func main() {
 	sv.SetSlice(&tstslice)
 
 	tv := giv.NewTableView(ttv, "tv")
-	// tv.SetState(true, states.ReadOnly)
+	tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 
 	b.NewWindow().Run().Wait()
