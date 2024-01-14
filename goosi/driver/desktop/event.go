@@ -103,13 +103,8 @@ func (w *Window) MouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, acti
 }
 
 func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
-	if TheApp.Platform() == goosi.MacOS {
-		xoff *= float64(events.ScrollWheelSpeed)
-		yoff *= float64(events.ScrollWheelSpeed)
-	} else { // others have lower multipliers in general
-		xoff *= 4 * float64(events.ScrollWheelSpeed)
-		yoff *= 4 * float64(events.ScrollWheelSpeed)
-	}
+	xoff *= float64(events.ScrollWheelSpeed)
+	yoff *= float64(events.ScrollWheelSpeed)
 	delta := mat32.V2(float32(-xoff), float32(-yoff))
 	where := w.CurMousePosPoint(gw)
 	w.EvMgr.Scroll(where, delta)

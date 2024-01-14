@@ -62,9 +62,8 @@ func (sl *Splits) SetStyles() {
 		}
 	})
 	sl.StyleFinal(func(s *styles.Style) {
-		gap := 14 / (AppearanceSettings.Spacing / 100) // must be invariant to spacing
 		dim := s.Direction.Dim()
-		s.Gap.SetDim(dim, units.Dp(gap))
+		s.Gap.SetDim(dim, units.Dp(20))
 		s.Gap.SetDim(dim.Other(), units.Zero())
 	})
 	sl.OnWidgetAdded(func(w Widget) {
