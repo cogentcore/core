@@ -48,11 +48,11 @@ func (hl *Handle) SetStyles() {
 		if s.Direction == styles.Row {
 			s.Min.X.Dp(6)
 			s.Min.Y.Em(2)
-			s.Margin.SetHoriz(units.Dp(7))
+			s.Margin.SetHoriz(units.Dp(6))
 		} else {
 			s.Min.X.Em(2)
 			s.Min.Y.Dp(6)
-			s.Margin.SetVert(units.Dp(7))
+			s.Margin.SetVert(units.Dp(6))
 		}
 
 		if !hl.IsReadOnly() {
