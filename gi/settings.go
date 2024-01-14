@@ -208,15 +208,15 @@ type AppearanceSettingsData struct { //gti:add
 	Color color.RGBA
 
 	// overall zoom factor as a percentage of the default zoom
-	Zoom float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
+	Zoom float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall spacing factor as a percentage of the default amount of spacing
 	// (higher numbers lead to more space and lower numbers lead to higher density)
-	Spacing float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
+	Spacing float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall font size factor applied to all text as a percentage
 	// of the default font size (higher numbers lead to larger text)
-	FontSize float32 `def:"100" min:"10" max:"1000" step:"10" format:"%g%%"`
+	FontSize float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// screen-specific preferences, which will override overall defaults if set
 	Screens map[string]ScreenSettings
