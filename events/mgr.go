@@ -7,7 +7,6 @@ package events
 import (
 	"fmt"
 	"image"
-	"time"
 
 	"goki.dev/events/key"
 	"goki.dev/glop/nptime"
@@ -51,12 +50,6 @@ type MgrState struct {
 
 	// position at MouseDown
 	MouseDownPos image.Point
-
-	// button at MouseDown
-	MouseDownButton Buttons
-
-	// time of Click event -- for double-click
-	ClickTime nptime.Time
 
 	// position of mouse from move events
 	MousePos image.Point
@@ -107,13 +100,6 @@ func (em *Mgr) MouseButton(typ Types, but Buttons, where image.Point, mods key.M
 	em.Last.MouseButtonType = typ
 	em.Last.MouseButton = but
 	em.Last.MousePos = where
-	if typ == MouseDown {
-		em.Last.MouseDownPos = where
-		interval := time.Now().Sub(em.Last.MouseDownTime.Time())
-		if interval < DoubleClickInterval {
-			ev.Typ = DoubleClick
-		}
-	}
 	ev.Init()
 	if typ == MouseDown {
 		em.Last.MouseDownTime = ev.GenTime

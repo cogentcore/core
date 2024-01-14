@@ -51,6 +51,12 @@ type EventMgr struct {
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
 	Hovers []Widget
 
+	// LastClickWidget is the last widget that has been clicked on
+	LastClickWidget Widget
+
+	// LastClickTime is the time the last widget was clicked on
+	LastClickTime time.Time
+
 	// the current candidate for a long hover event
 	LongHoverWidget Widget
 
@@ -362,7 +368,14 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				if sc.SelectedWidgetChan != nil {
 					sc.SelectedWidgetChan <- up
 				}
+				if em.LastClickWidget == up && up.AbilityIs(abilities.DoubleClickable) && time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval {
+					up.Send(events.DoubleClick)
+					em.LastClickWidget = nil
+					break
+				}
 				up.Send(events.Click, e)
+				em.LastClickTime = time.Now()
+				em.LastClickWidget = up
 			case events.Right: // note: automatically gets Control+Left
 				up.Send(events.ContextMenu, e)
 			}

@@ -443,7 +443,6 @@ func (ds *DeviceSettingsData) Defaults() {
 	ds.KeyMap = keyfun.DefaultMap
 	ds.KeyMaps.Value = keyfun.AvailMaps
 
-	ds.DoubleClickInterval = events.DoubleClickInterval
 	ds.ScrollWheelSpeed = events.ScrollWheelSpeed
 	ds.SlideStartTime = 50 * time.Millisecond
 	ds.SlideStartDistance = 4
@@ -463,7 +462,6 @@ func (ds *DeviceSettingsData) Apply() {
 		keyfun.SetActiveMapName(ds.KeyMap)
 	}
 
-	events.DoubleClickInterval = ds.DoubleClickInterval
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 }
 
