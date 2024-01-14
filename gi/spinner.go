@@ -222,7 +222,7 @@ func (sp *Spinner) WidgetTooltip() string {
 		if res != "" {
 			res += " "
 		}
-		res += fmt.Sprintf("(minimum: %g", sp.Min)
+		res += "(minimum: " + sp.ValToString(sp.Min)
 		if !sp.HasMax {
 			res += ")"
 		}
@@ -235,7 +235,7 @@ func (sp *Spinner) WidgetTooltip() string {
 		} else {
 			res += "("
 		}
-		res += fmt.Sprintf("maximum: %g)", sp.Max)
+		res += "maximum: " + sp.ValToString(sp.Max) + ")"
 	}
 	return res
 }
