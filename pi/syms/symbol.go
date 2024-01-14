@@ -32,7 +32,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"goki.dev/glop/indent"
@@ -251,7 +251,7 @@ func (sy *Symbol) CopyFromScope(src *Symbol) {
 
 // OpenJSON opens from a JSON-formatted file.
 func (sy *Symbol) OpenJSON(filename string) error {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func (sy *Symbol) SaveJSON(filename string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filename, b, 0644)
+	err = os.WriteFile(filename, b, 0644)
 	return err
 }
 

@@ -6,7 +6,7 @@ package lex
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"slices"
@@ -142,7 +142,7 @@ func OpenFileBytes(fname string) ([]byte, error) {
 		log.Println(err.Error())
 		return nil, err
 	}
-	alltxt, err := ioutil.ReadAll(fp)
+	alltxt, err := io.ReadAll(fp)
 	fp.Close()
 	if err != nil {
 		log.Println(err.Error())

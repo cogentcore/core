@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -330,7 +329,7 @@ func CheckNDKRoot(c *config.Config, ndkRoot string, targets []config.Platform) e
 
 // CompatibleNDKRoots searches the side-by-side NDK dirs for compatible SDKs.
 func CompatibleNDKRoots(c *config.Config, ndkForest string, targets []config.Platform) ([]string, error) {
-	ndkDirs, err := ioutil.ReadDir(ndkForest)
+	ndkDirs, err := os.ReadDir(ndkForest)
 	if err != nil {
 		return nil, err
 	}

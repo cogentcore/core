@@ -8,7 +8,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"reflect"
 	"strconv"
@@ -53,7 +52,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 		log.Println(err)
 		return err
 	}
-	b, err := ioutil.ReadAll(reader)
+	b, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println(err)
 		return err

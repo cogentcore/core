@@ -9,7 +9,6 @@ package pi
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"log/slog"
 	"os"
@@ -300,7 +299,7 @@ func (pr *Parser) ReadJSON(b []byte) error {
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
 func (pr *Parser) OpenJSON(filename string) error {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -314,7 +313,7 @@ func (pr *Parser) SaveJSON(filename string) error {
 		log.Println(err) // unlikely
 		return err
 	}
-	err = ioutil.WriteFile(filename, b, 0644)
+	err = os.WriteFile(filename, b, 0644)
 	if err != nil {
 		log.Println(err)
 	}

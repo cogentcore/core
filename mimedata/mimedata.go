@@ -16,7 +16,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime"
 	"mime/multipart"
@@ -232,7 +231,7 @@ func FromMultipart(body []byte, boundary string) Mimes {
 			log.Printf("mimedata.IsMultipart: malformed multipart MIME: %v\n", err)
 			return mi
 		}
-		b, err := ioutil.ReadAll(p)
+		b, err := io.ReadAll(p)
 		if err != nil {
 			log.Printf("mimedata.IsMultipart: bad ReadAll of multipart MIME: %v\n", err)
 			return mi

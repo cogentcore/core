@@ -13,7 +13,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"strconv"
 
@@ -35,7 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("arsc.go", []byte(fmt.Sprintf(tmpl, strconv.Quote(string(arsc)))), 0644); err != nil {
+	if err := os.WriteFile("arsc.go", []byte(fmt.Sprintf(tmpl, strconv.Quote(string(arsc)))), 0644); err != nil {
 		log.Fatal(err)
 	}
 }
