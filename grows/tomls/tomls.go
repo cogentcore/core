@@ -5,10 +5,12 @@
 package tomls
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 
 	"github.com/pelletier/go-toml/v2"
+	"goki.dev/glop/dirs"
 	"goki.dev/grows"
 )
 
@@ -68,4 +70,14 @@ func Write(v any, writer io.Writer) error {
 // using TOML encoding
 func WriteBytes(v any) ([]byte, error) {
 	return grows.WriteBytes(v, NewEncoder)
+}
+
+// OpenFromPaths reads the given object from the given TOML file,
+// looking on paths for the file.
+func OpenFromPaths(v any, file string, paths []string) error {
+	filenames := dirs.FindFilesOnPaths(paths, file)
+	if len(filenames) == 0 {
+		return fmt.Errorf("OpenFromPaths: no files found")
+	}
+	return Open(v, filenames[0])
 }
