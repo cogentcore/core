@@ -127,17 +127,9 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	defer sp.UpdateEndRender(updt)
 	sp.Value = val
 	if sp.HasMax && sp.Value > sp.Max {
-		if sp.HasMin {
-			sp.Value = sp.Min // wrap-around
-		} else {
-			sp.Value = sp.Max
-		}
+		sp.Value = sp.Max
 	} else if sp.HasMin && sp.Value < sp.Min {
-		if sp.HasMax {
-			sp.Value = sp.Max // wrap-around
-		} else {
-			sp.Value = sp.Min
-		}
+		sp.Value = sp.Min
 	}
 	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
 	sp.SetTextToValue()
@@ -160,6 +152,7 @@ func (sp *Spinner) IncrValue(steps float32) *Spinner {
 	}
 	val := sp.Value + steps*sp.Step
 	val = mat32.IntMultiple(val, sp.Step)
+	val = sp.WrapAround(val)
 	return sp.SetValueAction(val)
 }
 
@@ -172,7 +165,23 @@ func (sp *Spinner) PageIncrValue(steps float32) *Spinner {
 	}
 	val := sp.Value + steps*sp.PageStep
 	val = mat32.IntMultiple(val, sp.PageStep)
+	val = sp.WrapAround(val)
 	return sp.SetValueAction(val)
+}
+
+// WrapAround, if the spinner has a min and a max, converts values less
+// than min to max and values greater than max to min.
+func (sp *Spinner) WrapAround(val float32) float32 {
+	if !sp.HasMin || !sp.HasMax {
+		return val
+	}
+	if val < sp.Min {
+		return sp.Max
+	}
+	if val > sp.Max {
+		return sp.Min
+	}
+	return val
 }
 
 // FormatIsInt returns true if the format string requires an integer value
