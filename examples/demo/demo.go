@@ -224,10 +224,10 @@ func makeInputs(ts *gi.Tabs) {
 		"A widely consumed small, red fruit",
 	}
 
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs...)
-	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
-	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs...)
-	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
+	gi.NewChooser(choosers).SetPlaceholder("Select a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
+	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...)
+	gi.NewChooser(inputs).SetEditable(true).SetPlaceholder("Select or type a fruit").SetItems(fruits...).SetTooltips(fruitDescs...).SetType(gi.ChooserOutlined)
 
 	gi.NewSwitch(inputs).SetText("Toggle")
 

@@ -204,7 +204,7 @@ func (dv *DateView) ConfigWidget() {
 	for i, sm := range shortMonths {
 		sms[i] = sm
 	}
-	month := gi.NewChooser(trow, "month").SetItems(sms)
+	month := gi.NewChooser(trow, "month").SetItems(sms...)
 	month.SetCurIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
 		// set our month
@@ -217,7 +217,7 @@ func (dv *DateView) ConfigWidget() {
 	for i := yr - 100; i <= yr+100; i++ {
 		yrs = append(yrs, i)
 	}
-	year := gi.NewChooser(trow, "year").SetItems(yrs)
+	year := gi.NewChooser(trow, "year").SetItems(yrs...)
 	year.SetCurVal(yr)
 	year.OnChange(func(e events.Event) {
 		// we are centered at current year with 100 in each direction
@@ -521,7 +521,7 @@ func (vv *DurationValue) ConfigWidget(w gi.Widget) {
 		units = append(units, u)
 	}
 
-	ch = gi.NewChooser(ly, "unit").SetTooltip("The unit of time").SetItems(units)
+	ch = gi.NewChooser(ly, "unit").SetTooltip("The unit of time").SetItems(units...)
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
 		npv := laser.NonPtrValue(vv.Value)
