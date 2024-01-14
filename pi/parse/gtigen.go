@@ -5,8 +5,6 @@ package parse
 import (
 	"goki.dev/gti"
 	"goki.dev/ki"
-	"goki.dev/pi/lex"
-	"goki.dev/pi/syms"
 )
 
 // AstType is the [gti.Type] for [Ast]
@@ -30,22 +28,6 @@ func (t *Ast) KiType() *gti.Type {
 func (t *Ast) New() ki.Ki {
 	return &Ast{}
 }
-
-// SetTokReg sets the [Ast.TokReg]:
-// region in source lexical tokens corresponding to this Ast node -- Ch = index in lex lines
-func (t *Ast) SetTokReg(v lex.Reg) *Ast { t.TokReg = v; return t }
-
-// SetSrcReg sets the [Ast.SrcReg]:
-// region in source file corresponding to this Ast node
-func (t *Ast) SetSrcReg(v lex.Reg) *Ast { t.SrcReg = v; return t }
-
-// SetSrc sets the [Ast.Src]:
-// source code corresponding to this Ast node
-func (t *Ast) SetSrc(v string) *Ast { t.Src = v; return t }
-
-// SetSyms sets the [Ast.Syms]:
-// stack of symbols created for this node
-func (t *Ast) SetSyms(v syms.SymStack) *Ast { t.Syms = v; return t }
 
 // RuleType is the [gti.Type] for [Rule]
 var RuleType = gti.AddType(&gti.Type{Name: "goki.dev/pi/parse.Rule", IDName: "rule", Doc: "The first step is matching which searches in order for matches within the\nchildren of parent nodes, and for explicit rule nodes, it looks first\nthrough all the explicit tokens in the rule.  If there are no explicit tokens\nthen matching defers to ONLY the first node listed by default -- you can\nadd a @ prefix to indicate a rule that is also essential to match.\n\nAfter a rule matches, it then proceeds through the rules narrowing the scope\nand calling the sub-nodes..", Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Off", Doc: "disable this rule -- useful for testing and exploration"}, {Name: "Desc", Doc: "description / comments about this rule"}, {Name: "Rule", Doc: "the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -"}, {Name: "StackMatch", Doc: "if present, this rule only fires if stack has this on it"}, {Name: "Ast", Doc: "what action should be take for this node when it matches"}, {Name: "Acts", Doc: "actions to perform based on parsed Ast tree data, when this rule is done executing"}, {Name: "OptTokMap", Doc: "for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens"}, {Name: "FirstTokMap", Doc: "for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case"}, {Name: "Rules", Doc: "rule elements compiled from Rule string"}, {Name: "Order", Doc: "strategic matching order for matching the rules"}, {Name: "FiTokMap", Doc: "map from first tokens / keywords to rules for FirstTokMap case"}, {Name: "FiTokElseIdx", Doc: "for FirstTokMap, the start of the else cases not covered by the map"}, {Name: "ExclKeyIdx", Doc: "exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules"}, {Name: "ExclFwd", Doc: "exclusionary forward-search rule elements compiled from Rule string"}, {Name: "ExclRev", Doc: "exclusionary reverse-search rule elements compiled from Rule string"}}, Instance: &Rule{}})
