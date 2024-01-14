@@ -642,7 +642,7 @@ func (w *RenderWin) HandleWindowEvents(e events.Event) {
 			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
-			// if goosi.TheApp.Platform().IsMobile() {
+			// if Platform().IsMobile() {
 			// 	w.Scene.Geom.Size = image.Point{}
 			// }
 		case events.WinShow:

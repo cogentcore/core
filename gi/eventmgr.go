@@ -389,7 +389,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
 		// hovered state
-		if up != nil && goosi.TheApp.Platform().IsMobile() {
+		if up != nil && Platform().IsMobile() {
 			up.Send(events.MouseLeave, e)
 		}
 	case events.Scroll:

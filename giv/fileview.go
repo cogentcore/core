@@ -611,7 +611,7 @@ func (fv *FileView) UpdateFiles() {
 	}
 
 	if fv.PrevPath != fv.DirPath {
-		if goosi.TheApp.Platform() != goosi.MacOS {
+		if gi.Platform() != goosi.MacOS {
 			// mac is not supported in a high-capacity fashion at this point
 			if fv.PrevPath == "" {
 				fv.ConfigWatcher()

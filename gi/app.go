@@ -127,6 +127,11 @@ func (wb *WidgetBase) App() *App {
 	return wb.Sc.App
 }
 
+// Platform returns the current platform / operating system the app is running on.
+func Platform() goosi.Platforms {
+	return goosi.TheApp.Platform()
+}
+
 // todo: deal with this stuff too:
 
 // SetQuitReqFunc sets the function that is called whenever there is a

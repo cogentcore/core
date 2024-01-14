@@ -277,7 +277,7 @@ func (sl *Splits) HandleEvents() {
 	sl.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
-		if goosi.TheApp.Platform() == goosi.MacOS {
+		if Platform() == goosi.MacOS {
 			mod = "Meta+"
 		}
 		if !strings.HasPrefix(kc, mod) {

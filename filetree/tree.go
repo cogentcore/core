@@ -230,7 +230,7 @@ func (ft *Tree) WatchUpdt(path string) {
 // WatchPath adds given path to those watched
 func (ft *Tree) WatchPath(path gi.FileName) error {
 	return nil // TODO: disable for all platforms for now -- getting some issues
-	if goosi.TheApp.Platform() == goosi.MacOS {
+	if gi.Platform() == goosi.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
 	rp := ft.RelPath(path)

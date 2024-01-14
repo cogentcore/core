@@ -17,7 +17,6 @@ import (
 	"goki.dev/events/key"
 	"goki.dev/gi"
 	"goki.dev/glop/sentence"
-	"goki.dev/goosi"
 	"goki.dev/gti"
 	"goki.dev/ki"
 	"goki.dev/laser"
@@ -898,7 +897,7 @@ func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 	vb := vv.AsValueBase()
 	tip := vv.Doc()
 	// windows are never new on mobile
-	if !goosi.TheApp.Platform().IsMobile() {
+	if !gi.Platform().IsMobile() {
 		if tip != "" {
 			tip += " "
 		}
