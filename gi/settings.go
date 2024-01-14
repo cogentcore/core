@@ -396,12 +396,10 @@ type DeviceSettingsData struct { //gti:add
 	// The keyboard shortcut map to use
 	KeyMap keyfun.MapName
 
-	// TODO(kai): re-enable this once we figure out how to fix toml panic
-
 	// The keyboard shortcut maps available as options for Key map.
 	// If you do not want to have custom key maps, you should leave
 	// this unset so that you always have the latest standard key maps.
-	KeyMaps option.Option[keyfun.Maps] `toml:"-"`
+	KeyMaps option.Option[keyfun.Maps]
 
 	// The maximum time interval between button press events to count as a double-click
 	DoubleClickInterval time.Duration `min:"100" step:"50"`
