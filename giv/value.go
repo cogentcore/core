@@ -895,20 +895,16 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 // is read only.
 func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 	vb := vv.AsValueBase()
-	tip := "(Press any modifier key to open in a new window)"
-	if d := vv.Doc(); d != "" {
-		tip += " " + d
+	tip := vv.Doc()
+	if tip != "" {
+		tip += " "
 	}
+	tip += "(press shift to open in a new window)"
 	w.AsWidget().SetTooltip(tip)
 	w.OnClick(func(e events.Event) {
-		vb.SetDialogType(e)
+		vv.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
 		vv.OpenDialog(vb.Widget, nil)
 	})
-}
-
-// SetDialogType sets whether the dialog is in a new window based on the given event.
-func (vv *ValueBase) SetDialogType(e events.Event) {
-	vv.SetFlag(e.HasAnyModifier(key.Shift, key.Alt, key.Control, key.Meta), ValueDialogNewWindow)
 }
 
 // OpenValueDialog is a helper for OpenDialog for cases that use
