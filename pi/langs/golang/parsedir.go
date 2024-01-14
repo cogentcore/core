@@ -248,9 +248,12 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	pfs := fss[0]                       // pi.NewFileState()            // master overall package file state
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
-	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debuggin
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, fi.Go, pkgPathAbs)
+	}
+	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debuggin
+	for _, fs := range fss {
+		fs.Destroy()
 	}
 	return pkgsym
 }

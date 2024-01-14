@@ -669,20 +669,13 @@ func (n *Node) Delete(destroy bool) {
 	}
 }
 
-// Destroy calls DisconnectAll to cut all pointers and signal connections,
-// and remove all children and their childrens-children, etc.
+// Destroy deletes and destroys all children and their childrens-children, etc.
 func (n *Node) Destroy() {
 	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.Nm, n.This(), n.This(), len(n.Kids))
 	if n.This() == nil { // already dead!
 		return
 	}
-	n.DeleteChildren(true) // first delete all my children
-	// and destroy all my fields
-	//
-	// n.FuncFields(0, nil, func(k Ki) bool {
-	// 	k.Destroy()
-	// 	return true
-	// })
+	n.DeleteChildren(true)  // first delete all my children
 	DelMgr.DestroyDeleted() // then destroy all those kids
 	n.SetFlag(true, Destroyed)
 	n.Ths = nil // last gasp: lose our own sense of self..

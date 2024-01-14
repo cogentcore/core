@@ -50,14 +50,37 @@ type State struct {
 func (ps *State) Init(src *lex.File, ast *Ast) {
 	ps.Src = src
 	ps.Ast = ast
-	ps.Ast.DeleteChildren(true)
+	if ps.Ast != nil {
+		ps.Ast.DeleteChildren(true)
+	}
+	ps.Syms.ClearAst()
 	ps.Syms.Reset()
+	ps.Scopes.ClearAst()
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
-	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
+	if ps.Src != nil {
+		ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
+	}
 	ps.Errs.Reset()
 	ps.Trace.Init()
 	ps.AllocRules()
+}
+
+func (ps *State) Destroy() {
+	if ps.Ast != nil && ps.Ast.This() != nil {
+		ps.Ast.DeleteChildren(true)
+	}
+	ps.Ast = nil
+	ps.Syms.ClearAst()
+	ps.Syms.Reset()
+	ps.Scopes.ClearAst()
+	ps.Scopes.Reset()
+	ps.Stack.Reset()
+	if ps.Src != nil {
+		ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
+	}
+	ps.Errs.Reset()
+	ps.Trace.Init()
 }
 
 // AllocRules allocate the match, nonmatch rule state in correspondence with the src state

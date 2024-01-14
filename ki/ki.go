@@ -301,8 +301,7 @@ type Ki interface {
 	// child remains intact but parent is nil -- could be inserted elsewhere.
 	Delete(destroy bool)
 
-	// Destroy calls DisconnectAll to cut all signal connections,
-	// and remove all children and their childrens-children, etc.
+	// Destroy deletes and destroys all children and their childrens-children, etc.
 	Destroy()
 
 	//////////////////////////////////////////////////////////////////////////

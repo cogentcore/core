@@ -375,7 +375,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 						wb := w.AsWidget()
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
 							sentDouble = true
-							wb.Send(events.DoubleClick)
+							wb.Send(events.DoubleClick, e)
 							break
 						}
 					}

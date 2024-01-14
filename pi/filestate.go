@@ -81,6 +81,17 @@ func NewFileState() *FileState {
 	return fs
 }
 
+func (fs *FileState) Destroy() {
+	fs.Syms.ClearAst()
+	fs.Syms = nil
+	fs.ExtSyms.ClearAst()
+	fs.ExtSyms = nil
+	fs.Ast.Destroy()
+	fs.LexState.Init()
+	fs.TwoState.Init()
+	fs.ParseState.Destroy()
+}
+
 // SetSrc sets source to be parsed, and filename it came from, and also the
 // base path for project for reporting filenames relative to
 // (if empty, path to filename is used)

@@ -37,6 +37,11 @@ type Ast struct {
 	Syms syms.SymStack `set:"-"`
 }
 
+func (ast *Ast) Destroy() {
+	ast.Syms = nil
+	ast.Node.Destroy()
+}
+
 // ChildAst returns the Child at given index as an Ast.
 // Will panic if index is invalid -- use Try if unsure.
 func (ast *Ast) ChildAst(idx int) *Ast {
