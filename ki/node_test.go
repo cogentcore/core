@@ -580,12 +580,9 @@ func TestProps(t *testing.T) {
 	}
 
 	// test type directives: replacement for type props
-	tdirs := typ.Directives.ForTool("direct")
-	if len(tdirs) == 0 {
-		t.Errorf("Type directives error: tool 'direct' not found\n")
-	}
-	if tdirs[0].Directive != "value" {
-		t.Errorf("Type directives error: directive should be `value`, got: %s\n", tdirs[0].Directive)
+	dir := typ.Directives[0]
+	if dir.Tool != "direct" || dir.Directive != "value" {
+		t.Errorf("Type directives error: directive should be `direct:value`, got %s", dir)
 	}
 }
 

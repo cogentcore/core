@@ -83,11 +83,10 @@ func SetSubProps(pr Props, key string, sp Props) {
 	pr[key] = sp
 }
 
+// TODO(kai): do we need this?
+
 // special key prefix indicating type info
 var struTypeKey = "__type:"
-
-// special key prefix for enums
-var enumTypeKey = "__enum:"
 
 // BlankProp is an empty property, for when there isn't any need for the value
 type BlankProp struct{}

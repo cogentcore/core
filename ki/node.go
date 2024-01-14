@@ -5,6 +5,7 @@
 package ki
 
 //go:generate goki generate
+//go:generate goki generate ./testdata
 
 import (
 	"errors"
