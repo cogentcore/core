@@ -323,7 +323,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	cszd := csz.Dim(dim)
 	cszod := csz.Dim(od)
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
-		sw := sl.Splits[i] * cszd
+		sw := mat32.Round(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, sw)
 		ksz.Alloc.Total.SetDim(od, cszod)
@@ -353,7 +353,7 @@ func (sl *Splits) PositionSplits() {
 	csz := sl.Geom.Size.Alloc.Content // key to use Alloc here!  excludes gaps
 	cszd := csz.Dim(dim)
 	pos := float32(0)
-	gap := sl.Styles.Gap.Dim(dim).Dots
+	gap := mat32.Round(sl.Styles.Gap.Dim(dim).Dots)
 
 	mid := .5 * csz.Dim(od)
 	hand := sl.Parts.Child(0).(*Handle)
@@ -367,7 +367,7 @@ func (sl *Splits) PositionSplits() {
 		if i == 0 {
 			return ki.Continue
 		}
-		sw := sl.Splits[i-1] * cszd
+		sw := mat32.Round(sl.Splits[i-1] * cszd)
 		pos += sw + gap
 		kwb.Geom.RelPos.SetDim(dim, pos)
 		hl := sl.Parts.Child(i - 1).(*Handle)
