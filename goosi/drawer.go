@@ -151,12 +151,14 @@ func (dw *DrawerBase) SetGoImage(idx, layer int, img image.Image, flipY bool) {
 // to fit the default image format specified by the given width, height,
 // and number of layers.
 func (dw *DrawerBase) ConfigImageDefaultFormat(idx int, width int, height int, layers int) {
-	dw.Image = image.NewRGBA(image.Rect(0, 0, width, height))
+	// no-op
 }
 
 // SyncImages must be called after images have been updated, to sync
 // memory up to the GPU.
-func (dw *DrawerBase) SyncImages() {}
+func (dw *DrawerBase) SyncImages() {
+	// no-op
+}
 
 // Copy copies texture at given index and layer to render target.
 // dp is the destination point,
@@ -173,7 +175,9 @@ func (dw *DrawerBase) Copy(idx, layer int, dp image.Point, sr image.Rectangle, o
 // UseTextureSet selects the descriptor set to use --
 // choose this based on the bank of 16
 // texture values if number of textures > MaxTexturesPerSet.
-func (dw *DrawerBase) UseTextureSet(descIdx int) {}
+func (dw *DrawerBase) UseTextureSet(descIdx int) {
+	// no-op
+}
 
 // StartDraw starts image drawing rendering process on render target
 // No images can be added or set after this point.
