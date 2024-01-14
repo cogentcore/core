@@ -9,11 +9,37 @@ import (
 	"testing"
 
 	"goki.dev/grr"
+	"goki.dev/mat32"
+	"goki.dev/styles"
+	"goki.dev/units"
 )
+
+var testImagePath = FileName(filepath.Join("..", "logo", "goki_logo.png"))
 
 func TestImageBasic(t *testing.T) {
 	sc := NewScene()
 	img := NewImage(sc)
-	grr.Test(t, img.OpenImage(FileName(filepath.Join("..", "logo", "goki_logo.png"))))
+	grr.Test(t, img.OpenImage(testImagePath))
 	sc.AssertPixelsOnShow(t, filepath.Join("image", "basic"))
+}
+
+func TestImageCropped(t *testing.T) {
+	sc := NewScene()
+	sc.Style(func(s *styles.Style) {
+		s.Max.Set(units.Dp(75))
+	})
+	img := NewImage(sc)
+	grr.Test(t, img.OpenImage(testImagePath))
+	sc.AssertPixelsOnShow(t, filepath.Join("image", "cropped"))
+}
+
+func TestImageScrolled(t *testing.T) {
+	sc := NewScene()
+	sc.Style(func(s *styles.Style) {
+		s.Max.Set(units.Dp(75))
+	})
+	img := NewImage(sc)
+	grr.Test(t, img.OpenImage(testImagePath))
+	sc.ScrollToPos(mat32.Y, 75)
+	sc.AssertPixelsOnShow(t, filepath.Join("image", "scrolled"))
 }
