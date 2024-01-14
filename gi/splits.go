@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"log/slog"
 	"strconv"
 	"strings"
 
@@ -15,7 +14,6 @@ import (
 	"goki.dev/mat32"
 	"goki.dev/states"
 	"goki.dev/styles"
-	"goki.dev/units"
 )
 
 // Config notes: only needs config when number of kids changes
@@ -61,16 +59,6 @@ func (sl *Splits) SetStyles() {
 		} else {
 			s.Direction = styles.Row
 		}
-	})
-	sl.StyleFinal(func(s *styles.Style) {
-		dim := s.Direction.Dim()
-		s.Gap.SetDim(dim.Other(), units.Zero())
-
-		// 8dp of spacing invariant gap (6dp handle width + 1dp handle max border on each side)
-		gap := 8 / (AppearanceSettings.Spacing / 100)
-		// 12dp of spacing variant gap (6dp of handle margin on each side)
-		gap += 12
-		s.Gap.SetDim(dim, units.Dp(gap))
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok && w.Parent() == sl.Parts {
@@ -359,7 +347,6 @@ func (sl *Splits) PositionSplits() {
 	csz := sl.Geom.Size.Alloc.Content // key to use Alloc here!  excludes gaps
 	cszd := csz.Dim(dim)
 	pos := float32(0)
-	gap := mat32.Round(sl.Styles.Gap.Dim(dim).Dots)
 
 	mid := .5 * csz.Dim(od)
 	hand := sl.Parts.Child(0).(*Handle)
@@ -368,17 +355,13 @@ func (sl *Splits) PositionSplits() {
 	nhand := float32(len(*sl.Parts.Children()))
 	sod := mid - .5*nhand*hht
 
-	if gap != hwd {
-		slog.Error("gi.Splits: internal error: gap is different from handle width", "gap", gap, "handleWidth", hwd)
-	}
-
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
 		if i == 0 {
 			return ki.Continue
 		}
 		sw := mat32.Round(sl.Splits[i-1] * cszd)
-		pos += sw + gap
+		pos += sw + hwd
 		kwb.Geom.RelPos.SetDim(dim, pos)
 		hl := sl.Parts.Child(i - 1).(*Handle)
 		hl.Geom.RelPos.SetDim(dim, pos-hwd)
