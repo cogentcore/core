@@ -289,6 +289,37 @@ func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
 	}
 }
 
+// ClearAst sets the Ast pointers to nil for all symbols in this one.
+// otherwise the Ast memory is never freed and can get quite large.
+func (sm *Symbol) ClearAst() {
+	sm.Ast = nil
+	sm.Children.ClearAst()
+	sm.Types.ClearAst()
+}
+
+// ClearAst sets the Ast pointers to nil for all symbols.
+// otherwise the Ast memory is never freed and can get quite large.
+func (sm *SymMap) ClearAst() {
+	for _, ss := range *sm {
+		ss.ClearAst()
+	}
+}
+
+// ClearAst sets the Ast pointers to nil for all symbols in this one.
+// otherwise the Ast memory is never freed and can get quite large.
+func (ty *Type) ClearAst() {
+	ty.Ast = nil
+	ty.Meths.ClearAst()
+}
+
+// ClearAst sets the Ast pointers to nil for all symbols.
+// otherwise the Ast memory is never freed and can get quite large.
+func (tm *TypeMap) ClearAst() {
+	for _, ty := range *tm {
+		ty.ClearAst()
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 // SymNames
 

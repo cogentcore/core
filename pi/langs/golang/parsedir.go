@@ -224,7 +224,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 		// lxdur := time.Now().Sub(stt)
 		pr.ParseAll(fs)
 		prdur := time.Now().Sub(stt)
-		if prdur > 5*time.Second {
+		if prdur > 500*time.Millisecond {
 			fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
 		}
 		if len(fs.ParseState.Scopes) > 0 { // should be
@@ -248,6 +248,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	pfs := fss[0]                       // pi.NewFileState()            // master overall package file state
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
+	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debuggin
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, fi.Go, pkgPathAbs)
 	}
