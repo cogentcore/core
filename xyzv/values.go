@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"sort"
 
-	"goki.dev/events"
 	"goki.dev/gi"
 	"goki.dev/giv"
 	"goki.dev/gti"
@@ -55,13 +54,7 @@ func (vv *MeshValue) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(bt, nil)
-		}
-	})
+	giv.ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
 

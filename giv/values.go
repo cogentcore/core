@@ -388,12 +388,7 @@ func (vv *StructValue) ConfigWidget(w gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip = vv.Doc()
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		vv.SetDialogType(e)
-		vv.OpenDialog(vv.Widget, nil)
-	})
+	ConfigDialogWidget(vv, bt, true)
 	vv.UpdateWidget()
 }
 
@@ -514,12 +509,7 @@ func (vv *SliceValue) ConfigWidget(w gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip = vv.Doc()
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		vv.SetDialogType(e)
-		vv.OpenDialog(vv.Widget, nil)
-	})
+	ConfigDialogWidget(vv, bt, true)
 	vv.UpdateWidget()
 }
 
@@ -639,12 +629,7 @@ func (vv *MapValue) ConfigWidget(w gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip = vv.Doc()
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		vv.SetDialogType(e)
-		vv.OpenDialog(vv.Widget, nil)
-	})
+	ConfigDialogWidget(vv, bt, true)
 	vv.UpdateWidget()
 }
 
@@ -761,11 +746,8 @@ func (vv *KiPtrValue) ConfigWidget(w gi.Widget) {
 	vv.Widget = w
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal).SetTooltip(vv.Doc())
-	bt.OnClick(func(e events.Event) {
-		vv.SetDialogType(e)
-		vv.OpenDialog(vv.Widget, nil)
-	})
+	bt.SetType(gi.ButtonTonal)
+	ConfigDialogWidget(vv, bt, true)
 	vv.UpdateWidget()
 }
 
@@ -1398,13 +1380,7 @@ func (vv *IconValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
 
@@ -1462,13 +1438,7 @@ func (vv *FontValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
 
@@ -1542,13 +1512,7 @@ func (vv *FileValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
 

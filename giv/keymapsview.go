@@ -92,13 +92,7 @@ func (vv *KeyMapValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
 

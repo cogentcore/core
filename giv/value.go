@@ -17,7 +17,6 @@ import (
 	"goki.dev/events/key"
 	"goki.dev/gi"
 	"goki.dev/glop/sentence"
-	"goki.dev/goosi"
 	"goki.dev/gti"
 	"goki.dev/ki"
 	"goki.dev/laser"
@@ -352,12 +351,8 @@ func (vv *ValueBase) Doc() string {
 	if vv.Is(ValueHasSavedDoc) {
 		return vv.SavedDoc
 	}
-	tip := ""
-	if vv.HasDialog() && !goosi.TheApp.Platform().IsMobile() {
-		tip = "[Press any modifier key to open in a new window] "
-	}
 	doc, _ := gti.GetDoc(vv.Value, reflect.ValueOf(vv.Owner), vv.Field, vv.Label())
-	vv.SavedDoc = tip + doc
+	vv.SavedDoc = doc
 	vv.SetFlag(true, ValueHasSavedDoc)
 	return vv.SavedDoc
 }
@@ -894,6 +889,24 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 	})
 }
 
+// ConfigDialogWidget configures the given widget to open the dialog for
+// the given value when clicked and have the appropriate tooltip for that.
+// If allowReadOnly is false, the dialog will not be opened if the value
+// is read only.
+func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
+	vb := vv.AsValueBase()
+	tip := "(Press any modifier key to open in a new window)"
+	if d := vv.Doc(); d != "" {
+		tip += " " + d
+	}
+	w.AsWidget().SetTooltip(tip)
+	w.OnClick(func(e events.Event) {
+		vb.SetDialogType(e)
+		vv.OpenDialog(vb.Widget, nil)
+	})
+}
+
+// SetDialogType sets whether the dialog is in a new window based on the given event.
 func (vv *ValueBase) SetDialogType(e events.Event) {
 	vv.SetFlag(e.HasAnyModifier(key.Shift, key.Alt, key.Control, key.Meta), ValueDialogNewWindow)
 }

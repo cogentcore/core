@@ -605,13 +605,7 @@ func (vv *ColorValue) ConfigWidget(w gi.Widget) {
 
 	bt.SetText("Edit color")
 	bt.SetIcon(icons.Colors)
-	bt.Tooltip = "Open color picker dialog"
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, bt, false)
 	bt.Style(func(s *styles.Style) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
@@ -678,13 +672,7 @@ func (vv *ColorNameValue) ConfigWidget(w gi.Widget) {
 	vv.StdConfigWidget(w)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
-	bt.Config()
-	bt.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, bt, false)
 	vv.UpdateWidget()
 }
 

@@ -12,7 +12,6 @@ import (
 	"goki.dev/colors/colormap"
 	"goki.dev/colors/gradient"
 	"goki.dev/cursors"
-	"goki.dev/events"
 	"goki.dev/gi"
 	"goki.dev/gti"
 	"goki.dev/laser"
@@ -61,12 +60,7 @@ func (vv *ColorMapValue) ConfigWidget(w gi.Widget) {
 	fr := vv.Widget.(*gi.Frame)
 	fr.Config()
 	fr.HandleClickOnEnterSpace()
-	fr.OnClick(func(e events.Event) {
-		if !vv.IsReadOnly() {
-			vv.SetDialogType(e)
-			vv.OpenDialog(vv.Widget, nil)
-		}
-	})
+	ConfigDialogWidget(vv, fr, false)
 	fr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable, abilities.Pressable, abilities.Focusable)
 		s.Cursor = cursors.Pointer
