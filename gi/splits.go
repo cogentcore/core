@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -63,8 +64,13 @@ func (sl *Splits) SetStyles() {
 	})
 	sl.StyleFinal(func(s *styles.Style) {
 		dim := s.Direction.Dim()
-		s.Gap.SetDim(dim, units.Dp(20))
 		s.Gap.SetDim(dim.Other(), units.Zero())
+
+		// 8dp of spacing invariant gap (6dp handle width + 1dp handle max border on each side)
+		gap := 8 / (AppearanceSettings.Spacing / 100)
+		// 12dp of spacing variant gap (6dp of handle margin on each side)
+		gap += 12
+		s.Gap.SetDim(dim, units.Dp(gap))
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if hl, ok := w.(*Handle); ok && w.Parent() == sl.Parts {
@@ -361,6 +367,10 @@ func (sl *Splits) PositionSplits() {
 	hht := hand.Geom.Size.Actual.Total.Dim(od)
 	nhand := float32(len(*sl.Parts.Children()))
 	sod := mid - .5*nhand*hht
+
+	if gap != hwd {
+		slog.Error("gi.Splits: internal error: gap is different from handle width", "gap", gap, "handleWidth", hwd)
+	}
 
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
