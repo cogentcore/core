@@ -138,12 +138,11 @@ func (sv *SliceViewInline) ConfigSlice() bool {
 	// always start fresh!
 	sv.Values = make([]Value, 0)
 
-	mv := reflect.ValueOf(sv.Slice)
-	mvnp := laser.NonPtrValue(mv)
+	sl := laser.NonPtrValue(laser.OnePtrUnderlyingValue(reflect.ValueOf(sv.Slice)))
 
-	sz := min(mvnp.Len(), gi.SystemSettings.SliceInlineLength)
+	sz := min(sl.Len(), gi.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
-		val := laser.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
+		val := laser.OnePtrUnderlyingValue(sl.Index(i)) // deal with pointer lists
 		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			fmt.Printf("nil value view!\n")
