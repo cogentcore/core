@@ -40,8 +40,7 @@ func TestAppleBuild(t *testing.T) {
 		pkg  string
 		main bool
 	}{
-		{"goki.dev/mobile/example/basic", true},
-		{"goki.dev/mobile/bind/testdata/testpkg", false},
+		{"goki.dev/goosi/examples/drawtri", true},
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)

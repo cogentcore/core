@@ -92,7 +92,7 @@ func TestAndroidBuild(t *testing.T) {
 	if GOOS == "windows" {
 		os.Setenv("HOMEDRIVE", "C:")
 	}
-	c.Build.Package = "goki.dev/mobile/example/basic"
+	c.Build.Package = "goki.dev/goosi/examples/drawtri"
 	oldTags := c.Build.Tags
 	c.Build.Tags = []string{"tag1"}
 	defer func() {
@@ -265,7 +265,7 @@ func TestBuildWithGoModules(t *testing.T) {
 			}{
 				{
 					Name: "Absolute Path",
-					Path: "goki.dev/mobile/example/basic",
+					Path: "goki.dev/goosi/examples/drawtri",
 				},
 				{
 					Name: "Relative Path",
