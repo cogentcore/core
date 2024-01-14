@@ -10,11 +10,11 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/chewxy/math32 v1.10.1
-	github.com/expr-lang/expr v1.15.7
+	github.com/expr-lang/expr v1.15.8
 	github.com/fatih/camelcase v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gabriel-vasile/mimetype v1.4.3
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231223183121-56fa3ac82ce7
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240108052320-294b0144ba39
 	github.com/goki/freetype v1.0.1
 	github.com/goki/vulkan v1.0.7
 	github.com/h2non/filetype v1.1.3
@@ -27,11 +27,11 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/robert-nix/ansihtml v1.0.1
-	golang.org/x/image v0.14.0
+	golang.org/x/image v0.15.0
 	golang.org/x/mod v0.14.0
-	golang.org/x/net v0.19.0
-	golang.org/x/sys v0.15.0
-	golang.org/x/tools v0.16.1
+	golang.org/x/net v0.20.0
+	golang.org/x/sys v0.16.0
+	golang.org/x/tools v0.17.0
 	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v3 v3.0.1
 )

@@ -10,7 +10,7 @@ package vgpu
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"runtime"
 	"strings"
 )
@@ -64,7 +64,7 @@ func (frame *StackFrame) String() string {
 
 // SourceLine gets the line of code (from File and Line) of the original source if possible
 func (frame *StackFrame) SourceLine() (string, error) {
-	data, err := ioutil.ReadFile(frame.File)
+	data, err := os.ReadFile(frame.File)
 
 	if err != nil {
 		return "", err

@@ -6,7 +6,6 @@ package mobile
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -224,8 +223,7 @@ func TestBuildWithGoModules(t *testing.T) {
 	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		t.Skipf("gomobile are not available on %s", runtime.GOOS)
 	}
-
-	dir, err := ioutil.TempDir("", "gomobile-test")
+	dir, err := os.MkdirTemp("", "gomobile-test")
 	if err != nil {
 		t.Fatal(err)
 	}

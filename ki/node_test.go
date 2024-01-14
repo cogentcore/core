@@ -667,8 +667,8 @@ func TestNodeFieldJSONSave(t *testing.T) {
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
-			ioutil.WriteFile("/tmp/jsonout1", b, 0644)
-			ioutil.WriteFile("/tmp/jsonout2", tstb, 0644)
+			os.WriteFile("/tmp/jsonout1", b, 0644)
+			os.WriteFile("/tmp/jsonout2", tstb, 0644)
 		}
 	}
 
@@ -724,8 +724,8 @@ func TestClone(t *testing.T) {
 		// fmt.Printf("test loaded json output: %v\n", string(tstb))
 		if !bytes.Equal(tstb, b) {
 			t.Error("original and unmarshal'd json rep are not equivalent")
-			ioutil.WriteFile("/tmp/jsonout1", b, 0644)
-			ioutil.WriteFile("/tmp/jsonout2", tstb, 0644)
+			os.WriteFile("/tmp/jsonout1", b, 0644)
+			os.WriteFile("/tmp/jsonout2", tstb, 0644)
 		}
 	*/
 }

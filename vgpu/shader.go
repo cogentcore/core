@@ -8,8 +8,8 @@
 package vgpu
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"unsafe"
 
 	vk "github.com/goki/vulkan"
@@ -30,7 +30,7 @@ func (sh *Shader) Init(name string, typ ShaderTypes) {
 
 // OpenFile loads given SPIR-V ".spv" code from file for the Shader.
 func (sh *Shader) OpenFile(dev vk.Device, fname string) error {
-	b, err := ioutil.ReadFile(fname)
+	b, err := os.ReadFile(fname)
 	if err != nil {
 		log.Printf("vgpu.Shader OpenFile: %s\n", err)
 		return err

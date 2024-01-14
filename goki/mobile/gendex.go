@@ -24,7 +24,6 @@ import (
 	"flag"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -42,7 +41,7 @@ func main() {
 	flag.Parse()
 
 	var err error
-	tmpdir, err = ioutil.TempDir("", "gendex-")
+	tmpdir, err = os.MkdirTemp("", "gendex-")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -7,7 +7,7 @@ package syms
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -226,7 +226,7 @@ func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, extraLns int, ki
 
 // OpenJSON opens from a JSON-formatted file.
 func (sm *SymMap) OpenJSON(filename string) error {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func (sm *SymMap) SaveJSON(filename string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filename, b, 0644)
+	err = os.WriteFile(filename, b, 0644)
 	return err
 }
 

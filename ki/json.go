@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"log/slog"
 	"os"
@@ -224,7 +223,7 @@ func ReadRootTypeJSON(b []byte) (*gti.Type, []byte, error) {
 // ReadNewJSON reads a new Ki tree from a JSON-encoded byte string,
 // using type information at start of file to create an object of the proper type
 func ReadNewJSON(reader io.Reader) (Ki, error) {
-	b, err := ioutil.ReadAll(reader)
+	b, err := io.ReadAll(reader)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, err
