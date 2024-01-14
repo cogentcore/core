@@ -8,7 +8,7 @@ package gi
 
 import (
 	"image"
-	"log"
+	"log/slog"
 	"sync"
 
 	"goki.dev/abilities"
@@ -372,7 +372,7 @@ func AsWidgetBase(k ki.Ki) *WidgetBase {
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined\n", wb.KiType().Name)
+		slog.Error("widget needs a CopyFieldsFrom method defined", "type", wb.This().(Widget).KiType())
 		return
 	}
 	wb.Tooltip = fr.Tooltip
