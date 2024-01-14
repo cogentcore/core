@@ -235,7 +235,7 @@ func (i CompletionKind) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *CompletionKind) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("CompletionKind.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -280,60 +280,60 @@ func _SymbolKindNoOp() {
 }
 
 var _SymbolKindNameToValueMap = map[string]SymbolKind{
-	`NoSymbolKind`: 0,
-	`nosymbolkind`: 0,
-	`1 in LSP`:     1,
-	`1 in lsp`:     1,
-	`Module`:       2,
-	`module`:       2,
-	`Namespace`:    3,
-	`namespace`:    3,
-	`Package`:      4,
-	`package`:      4,
-	`Class`:        5,
-	`class`:        5,
-	`Method`:       6,
-	`method`:       6,
-	`Property`:     7,
-	`property`:     7,
-	`Field`:        8,
-	`field`:        8,
-	`Constructor`:  9,
-	`constructor`:  9,
-	`Enum`:         10,
-	`enum`:         10,
-	`Interface`:    11,
-	`interface`:    11,
-	`Function`:     12,
-	`function`:     12,
-	`Variable`:     13,
-	`variable`:     13,
-	`Constant`:     14,
-	`constant`:     14,
-	`String`:       15,
-	`string`:       15,
-	`Number`:       16,
-	`number`:       16,
-	`Boolean`:      17,
-	`boolean`:      17,
-	`Array`:        18,
-	`array`:        18,
-	`Object`:       19,
-	`object`:       19,
-	`Key`:          20,
-	`key`:          20,
-	`Null`:         21,
-	`null`:         21,
-	`EnumMember`:   22,
-	`enummember`:   22,
-	`Struct`:       23,
-	`struct`:       23,
-	`Event`:        24,
-	`event`:        24,
-	`Operator`:     25,
-	`operator`:     25,
-	`26 in LSP`:    26,
-	`26 in lsp`:    26,
+	`NoSymbolKind`:  0,
+	`nosymbolkind`:  0,
+	`File`:          1,
+	`file`:          1,
+	`Module`:        2,
+	`module`:        2,
+	`Namespace`:     3,
+	`namespace`:     3,
+	`Package`:       4,
+	`package`:       4,
+	`Class`:         5,
+	`class`:         5,
+	`Method`:        6,
+	`method`:        6,
+	`Property`:      7,
+	`property`:      7,
+	`Field`:         8,
+	`field`:         8,
+	`Constructor`:   9,
+	`constructor`:   9,
+	`Enum`:          10,
+	`enum`:          10,
+	`Interface`:     11,
+	`interface`:     11,
+	`Function`:      12,
+	`function`:      12,
+	`Variable`:      13,
+	`variable`:      13,
+	`Constant`:      14,
+	`constant`:      14,
+	`String`:        15,
+	`string`:        15,
+	`Number`:        16,
+	`number`:        16,
+	`Boolean`:       17,
+	`boolean`:       17,
+	`Array`:         18,
+	`array`:         18,
+	`Object`:        19,
+	`object`:        19,
+	`Key`:           20,
+	`key`:           20,
+	`Null`:          21,
+	`null`:          21,
+	`EnumMember`:    22,
+	`enummember`:    22,
+	`Struct`:        23,
+	`struct`:        23,
+	`Event`:         24,
+	`event`:         24,
+	`Operator`:      25,
+	`operator`:      25,
+	`TypeParameter`: 26,
+	`typeparameter`: 26,
 }
 
 var _SymbolKindDescMap = map[SymbolKind]string{
@@ -368,7 +368,7 @@ var _SymbolKindDescMap = map[SymbolKind]string{
 
 var _SymbolKindMap = map[SymbolKind]string{
 	0:  `NoSymbolKind`,
-	1:  `1 in LSP`,
+	1:  `File`,
 	2:  `Module`,
 	3:  `Namespace`,
 	4:  `Package`,
@@ -393,7 +393,7 @@ var _SymbolKindMap = map[SymbolKind]string{
 	23: `Struct`,
 	24: `Event`,
 	25: `Operator`,
-	26: `26 in LSP`,
+	26: `TypeParameter`,
 }
 
 // String returns the string representation
@@ -469,7 +469,7 @@ func (i SymbolKind) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SymbolKind) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("SymbolKind.UnmarshalText:", err)
 	}
 	return nil
 }

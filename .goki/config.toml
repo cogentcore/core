@@ -31,7 +31,6 @@ Type = "Library"
   Lang = "en"
   Author = ""
   Image = ""
-  AutoUpdateInterval = "0s"
   WasmContentLengthHeader = ""
 
 [Setup]
@@ -57,7 +56,7 @@ Type = "Library"
     Transform = ""
     TrimPrefix = ""
     AddPrefix = ""
-    LineComment = true
+    LineComment = false
     AcceptLower = true
     Text = true
     JSON = false

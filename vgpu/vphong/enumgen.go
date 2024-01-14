@@ -125,7 +125,7 @@ func (i Sets) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Sets) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Sets.UnmarshalText:", err)
 	}
 	return nil
 }

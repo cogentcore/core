@@ -182,7 +182,7 @@ func (i LightColors) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LightColors) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("LightColors.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -379,7 +379,7 @@ func (i NodeFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *NodeFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("NodeFlags.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -404,19 +404,20 @@ func _RenderClassesNoOp() {
 }
 
 var _RenderClassesNameToValueMap = map[string]RenderClasses{
-	`None`:                              0,
-	`none`:                              0,
-	`textures tend to be in background`: 1,
-	`OpaqueUniform`:                     2,
-	`opaqueuniform`:                     2,
-	`OpaqueVertex`:                      3,
-	`opaquevertex`:                      3,
-	`TransTexture`:                      4,
-	`transtexture`:                      4,
-	`TransUniform`:                      5,
-	`transuniform`:                      5,
-	`TransVertex`:                       6,
-	`transvertex`:                       6,
+	`None`:          0,
+	`none`:          0,
+	`OpaqueTexture`: 1,
+	`opaquetexture`: 1,
+	`OpaqueUniform`: 2,
+	`opaqueuniform`: 2,
+	`OpaqueVertex`:  3,
+	`opaquevertex`:  3,
+	`TransTexture`:  4,
+	`transtexture`:  4,
+	`TransUniform`:  5,
+	`transuniform`:  5,
+	`TransVertex`:   6,
+	`transvertex`:   6,
 }
 
 var _RenderClassesDescMap = map[RenderClasses]string{
@@ -431,7 +432,7 @@ var _RenderClassesDescMap = map[RenderClasses]string{
 
 var _RenderClassesMap = map[RenderClasses]string{
 	0: `None`,
-	1: `textures tend to be in background`,
+	1: `OpaqueTexture`,
 	2: `OpaqueUniform`,
 	3: `OpaqueVertex`,
 	4: `TransTexture`,
@@ -512,7 +513,7 @@ func (i RenderClasses) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RenderClasses) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("RenderClasses.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -714,7 +715,7 @@ func (i ScFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ScFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("ScFlags.UnmarshalText:", err)
 	}
 	return nil
 }

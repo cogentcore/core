@@ -697,7 +697,7 @@ func (i Codes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Codes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Codes.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -872,7 +872,7 @@ func (i Modifiers) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Modifiers) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Modifiers.UnmarshalText:", err)
 	}
 	return nil
 }

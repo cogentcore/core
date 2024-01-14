@@ -120,7 +120,7 @@ func (i Trilean) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Trilean) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Trilean.UnmarshalText:", err)
 	}
 	return nil
 }

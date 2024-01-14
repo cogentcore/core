@@ -125,7 +125,7 @@ func (i LangFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LangFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("LangFlags.UnmarshalText:", err)
 	}
 	return nil
 }

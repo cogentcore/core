@@ -195,7 +195,7 @@ func (i NodeFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *NodeFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("NodeFlags.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -304,7 +304,7 @@ func (i ViewBoxMeetOrSlice) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ViewBoxMeetOrSlice) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("ViewBoxMeetOrSlice.UnmarshalText:", err)
 	}
 	return nil
 }

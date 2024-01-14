@@ -130,7 +130,7 @@ func (i PathCommand) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *PathCommand) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("PathCommand.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -259,7 +259,7 @@ func (i JoinMode) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *JoinMode) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("JoinMode.UnmarshalText:", err)
 	}
 	return nil
 }

@@ -142,7 +142,7 @@ func (i Platforms) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Platforms) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Platforms.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -256,7 +256,7 @@ func (i VirtualKeyboardTypes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *VirtualKeyboardTypes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("VirtualKeyboardTypes.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -370,7 +370,7 @@ func (i ScreenOrientation) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ScreenOrientation) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("ScreenOrientation.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -555,7 +555,7 @@ func (i WindowFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WindowFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("WindowFlags.UnmarshalText:", err)
 	}
 	return nil
 }

@@ -157,7 +157,7 @@ func (i Actions) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Actions) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Actions.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -281,7 +281,7 @@ func (i AstActs) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *AstActs) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("AstActs.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -498,7 +498,7 @@ func (i RuleFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *RuleFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("RuleFlags.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -622,7 +622,7 @@ func (i Steps) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Steps) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Steps.UnmarshalText:", err)
 	}
 	return nil
 }

@@ -189,7 +189,7 @@ func (i Units) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Units) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Units.UnmarshalText:", err)
 	}
 	return nil
 }

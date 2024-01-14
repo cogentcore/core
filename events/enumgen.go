@@ -132,7 +132,7 @@ func (i DropMods) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *DropMods) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("DropMods.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -251,7 +251,7 @@ func (i Buttons) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Buttons) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Buttons.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -385,7 +385,7 @@ func (i SelectModes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SelectModes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("SelectModes.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -709,7 +709,7 @@ func (i Types) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Types) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Types.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -874,7 +874,7 @@ func (i EventFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *EventFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("EventFlags.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1013,7 +1013,7 @@ func (i WinActions) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WinActions) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("WinActions.UnmarshalText:", err)
 	}
 	return nil
 }

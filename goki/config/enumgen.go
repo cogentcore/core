@@ -115,7 +115,7 @@ func (i Types) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Types) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Types.UnmarshalText:", err)
 	}
 	return nil
 }

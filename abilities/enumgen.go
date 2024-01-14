@@ -237,7 +237,7 @@ func (i Abilities) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Abilities) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Abilities.UnmarshalText:", err)
 	}
 	return nil
 }

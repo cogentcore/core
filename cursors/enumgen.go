@@ -265,7 +265,7 @@ func (i Cursor) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Cursor) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Cursor.UnmarshalText:", err)
 	}
 	return nil
 }

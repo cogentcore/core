@@ -120,7 +120,7 @@ func (i Opponents) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Opponents) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Opponents.UnmarshalText:", err)
 	}
 	return nil
 }

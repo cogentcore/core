@@ -142,7 +142,7 @@ func (i BufSignals) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BufSignals) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("BufSignals.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -349,7 +349,7 @@ func (i BufFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BufFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("BufFlags.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -556,7 +556,7 @@ func (i EditorFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *EditorFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("EditorFlags.UnmarshalText:", err)
 	}
 	return nil
 }

@@ -160,7 +160,7 @@ func (i Actions) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Actions) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Actions.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -294,7 +294,7 @@ func (i Matches) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Matches) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Matches.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -428,7 +428,7 @@ func (i MatchPos) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *MatchPos) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("MatchPos.UnmarshalText:", err)
 	}
 	return nil
 }

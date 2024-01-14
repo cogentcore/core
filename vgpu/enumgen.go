@@ -203,7 +203,7 @@ func (i ImageFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ImageFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("ImageFlags.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -322,7 +322,7 @@ func (i BuffTypes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BuffTypes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("BuffTypes.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -441,7 +441,7 @@ func (i OptionStates) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *OptionStates) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("OptionStates.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -815,7 +815,7 @@ func (i CPUOptions) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *CPUOptions) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("CPUOptions.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -845,24 +845,24 @@ func _VarRolesNoOp() {
 var _VarRolesNameToValueMap = map[string]VarRoles{
 	`UndefVarRole`: 0,
 	`undefvarrole`: 0,
-	`vertex shader input data: mesh geometry points, normals, etc.  These are automatically located in a separate Set, VertexSet (-2), and managed separately.`:                                                                                                                                                                                      1,
-	`vertex shader input data: mesh geometry points, normals, etc.  these are automatically located in a separate set, vertexset (-2), and managed separately.`:                                                                                                                                                                                      1,
-	`for indexed access to Vertex data, also located in VertexSet (-2) -- only one such Var per VarSet should be present -- will automatically be used if a dynamically bound val is set`:                                                                                                                                                            2,
-	`for indexed access to vertex data, also located in vertexset (-2) -- only one such var per varset should be present -- will automatically be used if a dynamically bound val is set`:                                                                                                                                                            2,
-	`for push constants, which have a minimum of 128 bytes and are stored directly in the command buffer -- they do not require any host-device synchronization or buffering, and are fully dynamic.  They are ideal for transformation matricies or indexes for accessing data.  They are stored in a special PushSet (-1) and managed separately.`: 3,
-	`for push constants, which have a minimum of 128 bytes and are stored directly in the command buffer -- they do not require any host-device synchronization or buffering, and are fully dynamic.  they are ideal for transformation matricies or indexes for accessing data.  they are stored in a special pushset (-1) and managed separately.`: 3,
-	`read-only general purpose data, uses UniformBufferDynamic with offset specified at binding time, not during initial configuration -- compared to Storage, Uniform items can be put in local cache for each shader and thus can be much faster to access -- use for a smaller number of parameters such as transformation matricies`:             4,
-	`read-only general purpose data, uses uniformbufferdynamic with offset specified at binding time, not during initial configuration -- compared to storage, uniform items can be put in local cache for each shader and thus can be much faster to access -- use for a smaller number of parameters such as transformation matricies`:             4,
-	`read-write general purpose data, in StorageBufferDynamic (offset set at binding) -- this is a larger but slower pool of memory, with more flexible alignment constraints, used primarily for compute data`:                                                                                                                                      5,
-	`read-write general purpose data, in storagebufferdynamic (offset set at binding) -- this is a larger but slower pool of memory, with more flexible alignment constraints, used primarily for compute data`:                                                                                                                                      5,
-	`read-only image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful.  No Dynamic mode is available, so this can only be used for a fixed Val.`:                                                                             6,
-	`read-only image-formatted data, which cannot be accessed via imageview or sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful.  no dynamic mode is available, so this can only be used for a fixed val.`:                                                                             6,
-	`read-write image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful. No Dynamic mode is available, so this can only be used for a fixed Val.`:                                                                             7,
-	`read-write image-formatted data, which cannot be accessed via imageview or sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful. no dynamic mode is available, so this can only be used for a fixed val.`:                                                                             7,
-	`read-write access through an ImageView (but not a Sampler) of an Image`:                                                                                        8,
-	`read-write access through an imageview (but not a sampler) of an image`:                                                                                        8,
-	`a Texture is a CombinedImageSampler in Vulkan terminology -- a combination of a Sampler and a specific Image, which appears as a single entity in the shader.`: 9,
-	`a texture is a combinedimagesampler in vulkan terminology -- a combination of a sampler and a specific image, which appears as a single entity in the shader.`: 9,
+	`Vertex`:       1,
+	`vertex`:       1,
+	`Index`:        2,
+	`index`:        2,
+	`Push`:         3,
+	`push`:         3,
+	`Uniform`:      4,
+	`uniform`:      4,
+	`Storage`:      5,
+	`storage`:      5,
+	`UniformTexel`: 6,
+	`uniformtexel`: 6,
+	`StorageTexel`: 7,
+	`storagetexel`: 7,
+	`StorageImage`: 8,
+	`storageimage`: 8,
+	`TextureRole`:  9,
+	`texturerole`:  9,
 }
 
 var _VarRolesDescMap = map[VarRoles]string{
@@ -880,15 +880,15 @@ var _VarRolesDescMap = map[VarRoles]string{
 
 var _VarRolesMap = map[VarRoles]string{
 	0: `UndefVarRole`,
-	1: `vertex shader input data: mesh geometry points, normals, etc.  These are automatically located in a separate Set, VertexSet (-2), and managed separately.`,
-	2: `for indexed access to Vertex data, also located in VertexSet (-2) -- only one such Var per VarSet should be present -- will automatically be used if a dynamically bound val is set`,
-	3: `for push constants, which have a minimum of 128 bytes and are stored directly in the command buffer -- they do not require any host-device synchronization or buffering, and are fully dynamic.  They are ideal for transformation matricies or indexes for accessing data.  They are stored in a special PushSet (-1) and managed separately.`,
-	4: `read-only general purpose data, uses UniformBufferDynamic with offset specified at binding time, not during initial configuration -- compared to Storage, Uniform items can be put in local cache for each shader and thus can be much faster to access -- use for a smaller number of parameters such as transformation matricies`,
-	5: `read-write general purpose data, in StorageBufferDynamic (offset set at binding) -- this is a larger but slower pool of memory, with more flexible alignment constraints, used primarily for compute data`,
-	6: `read-only image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful.  No Dynamic mode is available, so this can only be used for a fixed Val.`,
-	7: `read-write image-formatted data, which cannot be accessed via ImageView or Sampler -- only for rare cases where optimized image format (e.g., rgb values of specific bit count) is useful. No Dynamic mode is available, so this can only be used for a fixed Val.`,
-	8: `read-write access through an ImageView (but not a Sampler) of an Image`,
-	9: `a Texture is a CombinedImageSampler in Vulkan terminology -- a combination of a Sampler and a specific Image, which appears as a single entity in the shader.`,
+	1: `Vertex`,
+	2: `Index`,
+	3: `Push`,
+	4: `Uniform`,
+	5: `Storage`,
+	6: `UniformTexel`,
+	7: `StorageTexel`,
+	8: `StorageImage`,
+	9: `TextureRole`,
 }
 
 // String returns the string representation
@@ -964,7 +964,7 @@ func (i VarRoles) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *VarRoles) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("VarRoles.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1088,7 +1088,7 @@ func (i SamplerModes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SamplerModes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("SamplerModes.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1202,7 +1202,7 @@ func (i BorderColors) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BorderColors) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("BorderColors.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1244,51 +1244,54 @@ func _TypesNoOp() {
 }
 
 var _TypesNameToValueMap = map[string]Types{
-	`UndefType`:   0,
-	`undeftype`:   0,
-	`Bool32`:      1,
-	`bool32`:      1,
-	`Int16`:       2,
-	`int16`:       2,
-	`Uint16`:      3,
-	`uint16`:      3,
-	`Int32`:       4,
-	`int32`:       4,
-	`Int32Vec2`:   5,
-	`int32vec2`:   5,
-	`Int32Vec4`:   6,
-	`int32vec4`:   6,
-	`Uint32`:      7,
-	`uint32`:      7,
-	`Uint32Vec2`:  8,
-	`uint32vec2`:  8,
-	`Uint32Vec4`:  9,
-	`uint32vec4`:  9,
-	`Float32`:     10,
-	`float32`:     10,
-	`Float32Vec2`: 11,
-	`float32vec2`: 11,
-	`note: only use for vertex data -- not properly aligned for uniforms`: 12,
-	`Float32Vec4`: 13,
-	`float32vec4`: 13,
-	`Float64`:     14,
-	`float64`:     14,
-	`Float64Vec2`: 15,
-	`float64vec2`: 15,
-	`Float64Vec3`: 16,
-	`float64vec3`: 16,
-	`Float64Vec4`: 17,
-	`float64vec4`: 17,
-	`std transform matrix: mat32.Mat4 works directly`:                  18,
-	`std transform matrix: mat32.mat4 works directly`:                  18,
-	`std transform matrix: mat32.Mat3 works directly`:                  19,
-	`std transform matrix: mat32.mat3 works directly`:                  19,
-	`32 bits with 8 bits per component of R,G,B,A -- std image format`: 20,
-	`32 bits with 8 bits per component of r,g,b,a -- std image format`: 20,
-	`standard float32 depth buffer`:                                    21,
-	`standard 24 bit float with 8 bit stencil`:                         22,
-	`Struct`: 23,
-	`struct`: 23,
+	`UndefType`:    0,
+	`undeftype`:    0,
+	`Bool32`:       1,
+	`bool32`:       1,
+	`Int16`:        2,
+	`int16`:        2,
+	`Uint16`:       3,
+	`uint16`:       3,
+	`Int32`:        4,
+	`int32`:        4,
+	`Int32Vec2`:    5,
+	`int32vec2`:    5,
+	`Int32Vec4`:    6,
+	`int32vec4`:    6,
+	`Uint32`:       7,
+	`uint32`:       7,
+	`Uint32Vec2`:   8,
+	`uint32vec2`:   8,
+	`Uint32Vec4`:   9,
+	`uint32vec4`:   9,
+	`Float32`:      10,
+	`float32`:      10,
+	`Float32Vec2`:  11,
+	`float32vec2`:  11,
+	`Float32Vec3`:  12,
+	`float32vec3`:  12,
+	`Float32Vec4`:  13,
+	`float32vec4`:  13,
+	`Float64`:      14,
+	`float64`:      14,
+	`Float64Vec2`:  15,
+	`float64vec2`:  15,
+	`Float64Vec3`:  16,
+	`float64vec3`:  16,
+	`Float64Vec4`:  17,
+	`float64vec4`:  17,
+	`Float32Mat4`:  18,
+	`float32mat4`:  18,
+	`Float32Mat3`:  19,
+	`float32mat3`:  19,
+	`ImageRGBA32`:  20,
+	`imagergba32`:  20,
+	`Depth32`:      21,
+	`depth32`:      21,
+	`Depth24Sten8`: 22,
+	`depth24sten8`: 22,
+	`Struct`:       23,
+	`struct`:       23,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -1331,17 +1334,17 @@ var _TypesMap = map[Types]string{
 	9:  `Uint32Vec4`,
 	10: `Float32`,
 	11: `Float32Vec2`,
-	12: `note: only use for vertex data -- not properly aligned for uniforms`,
+	12: `Float32Vec3`,
 	13: `Float32Vec4`,
 	14: `Float64`,
 	15: `Float64Vec2`,
 	16: `Float64Vec3`,
 	17: `Float64Vec4`,
-	18: `std transform matrix: mat32.Mat4 works directly`,
-	19: `std transform matrix: mat32.Mat3 works directly`,
-	20: `32 bits with 8 bits per component of R,G,B,A -- std image format`,
-	21: `standard float32 depth buffer`,
-	22: `standard 24 bit float with 8 bit stencil`,
+	18: `Float32Mat4`,
+	19: `Float32Mat3`,
+	20: `ImageRGBA32`,
+	21: `Depth32`,
+	22: `Depth24Sten8`,
 	23: `Struct`,
 }
 
@@ -1418,7 +1421,7 @@ func (i Types) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Types) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Types.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1588,7 +1591,7 @@ func (i ValFlags) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ValFlags) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("ValFlags.UnmarshalText:", err)
 	}
 	return nil
 }

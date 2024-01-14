@@ -140,7 +140,7 @@ func (i FileStatus) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FileStatus) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("FileStatus.UnmarshalText:", err)
 	}
 	return nil
 }

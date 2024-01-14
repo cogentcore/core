@@ -125,7 +125,7 @@ func (i SelModes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SelModes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("SelModes.UnmarshalText:", err)
 	}
 	return nil
 }

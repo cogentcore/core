@@ -132,7 +132,7 @@ func (i ObjectFits) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ObjectFits) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("ObjectFits.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -276,7 +276,7 @@ func (i BorderStyles) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BorderStyles) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("BorderStyles.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -390,7 +390,7 @@ func (i FontStyles) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontStyles) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("FontStyles.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -580,7 +580,7 @@ func (i FontWeights) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontWeights) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("FontWeights.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -734,7 +734,7 @@ func (i FontStretch) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontStretch) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("FontStretch.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -939,7 +939,7 @@ func (i TextDecorations) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextDecorations) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("TextDecorations.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1053,7 +1053,7 @@ func (i BaselineShifts) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *BaselineShifts) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("BaselineShifts.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1162,7 +1162,7 @@ func (i FontVariants) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FontVariants) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("FontVariants.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1271,7 +1271,7 @@ func (i Directions) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Directions) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Directions.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1395,7 +1395,7 @@ func (i Displays) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Displays) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Displays.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1534,7 +1534,7 @@ func (i Aligns) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Aligns) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Aligns.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1653,7 +1653,7 @@ func (i Overflows) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Overflows) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Overflows.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1762,7 +1762,7 @@ func (i FillRules) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FillRules) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("FillRules.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1871,7 +1871,7 @@ func (i VectorEffects) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *VectorEffects) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("VectorEffects.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1995,7 +1995,7 @@ func (i LineCaps) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LineCaps) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("LineCaps.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -2124,7 +2124,7 @@ func (i LineJoins) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *LineJoins) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("LineJoins.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -2243,7 +2243,7 @@ func (i SideIndexes) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SideIndexes) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("SideIndexes.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -2357,7 +2357,7 @@ func (i UnicodeBidi) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *UnicodeBidi) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("UnicodeBidi.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -2496,7 +2496,7 @@ func (i TextDirections) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextDirections) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("TextDirections.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -2610,7 +2610,7 @@ func (i TextAnchors) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextAnchors) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("TextAnchors.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -2734,7 +2734,7 @@ func (i WhiteSpaces) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *WhiteSpaces) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("WhiteSpaces.UnmarshalText:", err)
 	}
 	return nil
 }
