@@ -34,11 +34,6 @@ func FileViewDialog(ctx gi.Widget, filename, exts, title string, fun func(selfil
 		d.SetTitle(title)
 	}
 	fv := NewFileView(d).SetFilename(filename, exts)
-	fv.OnDoubleClick(func(e events.Event) {
-		if fv.SelectedDoubleClick {
-			d.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
-		}
-	})
 	d.AddBottomBar(func(pw gi.Widget) {
 		d.AddCancel(pw)
 		d.AddOk(pw).OnClick(func(e events.Event) {
@@ -81,10 +76,6 @@ type FileView struct {
 
 	// index of currently-selected file in Files list (-1 if none)
 	SelectedIdx int `set:"-" edit:"-"`
-
-	// set to true if a file was selected via double-click,
-	// which can then be a signal to dialogs to accept.
-	SelectedDoubleClick bool
 
 	// change notify for current dir
 	Watcher *fsnotify.Watcher `set:"-" view:"-"`
@@ -406,7 +397,7 @@ func (fv *FileView) ConfigFilesRow() {
 		if !fv.SelectFile() {
 			e.SetHandled() // don't pass along; keep dialog open
 		} else {
-			fv.SelectedDoubleClick = true
+			fv.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
 		}
 	})
 }

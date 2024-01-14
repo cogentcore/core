@@ -95,7 +95,7 @@ func (t *ColorView) SetStackTop(v int) *ColorView { t.StackTop = v; return t }
 func (t *ColorView) SetStripes(v gi.Stripes) *ColorView { t.Stripes = v; return t }
 
 // FileViewType is the [gti.Type] for [FileView]
-var FileViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "SelFile", Doc: "selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIdx", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "SelectedDoubleClick", Doc: "set to true if a file was selected via double-click,\nwhich can then be a signal to dialogs to accept."}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdtMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
+var FileViewType = gti.AddType(&gti.Type{Name: "goki.dev/giv.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "SelFile", Doc: "selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIdx", Doc: "index of currently-selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdtMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
 
 // NewFileView adds a new [FileView] with the given name to the given parent:
 // FileView is a viewer onto files -- core of the file chooser dialog
@@ -132,11 +132,6 @@ func (t *FileView) SetExtMap(v map[string]string) *FileView { t.ExtMap = v; retu
 // SetFiles sets the [FileView.Files]:
 // files for current directory
 func (t *FileView) SetFiles(v ...*fi.FileInfo) *FileView { t.Files = v; return t }
-
-// SetSelectedDoubleClick sets the [FileView.SelectedDoubleClick]:
-// set to true if a file was selected via double-click,
-// which can then be a signal to dialogs to accept.
-func (t *FileView) SetSelectedDoubleClick(v bool) *FileView { t.SelectedDoubleClick = v; return t }
 
 // SetTooltip sets the [FileView.Tooltip]
 func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }

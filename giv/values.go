@@ -1524,14 +1524,6 @@ func (vv *FileValue) ConfigDialog(d *gi.Body) (bool, func()) {
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
 	fv := NewFileView(d).SetFilename(cur, ext)
-	fv.OnSelect(func(e events.Event) {
-		cur = fv.SelectedFile()
-	}).OnDoubleClick(func(e events.Event) {
-		if fv.SelectedDoubleClick {
-			cur = fv.SelectedFile()
-			d.Sc.SendKeyFun(keyfun.Accept, e) // activates Ok button code
-		}
-	})
 	return true, func() {
 		cur = fv.SelectedFile()
 		vv.SetValue(cur)

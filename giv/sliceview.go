@@ -290,7 +290,7 @@ func (sv *SliceViewBase) SetStyles() {
 	svi := sv.This().(SliceViewer)
 
 	sv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.FocusWithinable)
+		s.SetAbilities(true, abilities.FocusWithinable, abilities.DoubleClickable)
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
 		s.Overflow.X = styles.OverflowAuto

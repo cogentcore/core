@@ -368,8 +368,19 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 				if sc.SelectedWidgetChan != nil {
 					sc.SelectedWidgetChan <- up
 				}
-				if em.LastClickWidget == up && up.AbilityIs(abilities.DoubleClickable) && time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval {
-					up.Send(events.DoubleClick)
+				sentDouble := false
+				if em.LastClickWidget == up && time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval {
+					for i := n - 1; i >= 0; i-- {
+						w := em.MouseInBBox[i]
+						wb := w.AsWidget()
+						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
+							sentDouble = true
+							wb.Send(events.DoubleClick)
+							break
+						}
+					}
+				}
+				if sentDouble {
 					em.LastClickWidget = nil
 					break
 				}
