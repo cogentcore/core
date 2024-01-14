@@ -17,6 +17,7 @@ import (
 	"goki.dev/events/key"
 	"goki.dev/gi"
 	"goki.dev/glop/sentence"
+	"goki.dev/goosi"
 	"goki.dev/gti"
 	"goki.dev/ki"
 	"goki.dev/laser"
@@ -896,10 +897,13 @@ func (vv *ValueBase) StdConfigWidget(w gi.Widget) {
 func ConfigDialogWidget(vv Value, w gi.Widget, allowReadOnly bool) {
 	vb := vv.AsValueBase()
 	tip := vv.Doc()
-	if tip != "" {
-		tip += " "
+	// windows are never new on mobile
+	if !goosi.TheApp.Platform().IsMobile() {
+		if tip != "" {
+			tip += " "
+		}
+		tip += "(press shift to open in a new window)"
 	}
-	tip += "(press shift to open in a new window)"
 	w.AsWidget().SetTooltip(tip)
 	w.OnClick(func(e events.Event) {
 		vv.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
