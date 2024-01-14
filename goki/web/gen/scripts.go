@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 )
@@ -64,6 +65,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
+		b = bytes.ReplaceAll(b, []byte{'\r'}, nil)
 
 		if g.Documentation != "" {
 			fmt.Fprintln(f, "//", g.Documentation)
