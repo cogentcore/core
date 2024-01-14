@@ -26,7 +26,7 @@ import (
 // Funs are functions that keyboard events can perform in the GUI.
 // It seems possible to keep this flat and consistent across different contexts,
 // as long as the functions can be appropriately reinterpreted for each context.
-type Funs int32 //enums:enum -no-line-comment
+type Funs int32 //enums:enum
 
 const (
 	Nil Funs = iota

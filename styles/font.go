@@ -191,7 +191,7 @@ var FontStyleNames = []string{"Normal", "Italic", "Oblique"}
 // FontWeights are the valid names for different weights of font, with both
 // the numeric and standard names given.  The regularized font names in the
 // font library use the names, as those are typically found in the font files.
-type FontWeights int32 //enums:enum -trim-prefix Weight -no-line-comment
+type FontWeights int32 //enums:enum -trim-prefix Weight
 
 const (
 	WeightNormal FontWeights = iota

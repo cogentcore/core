@@ -145,7 +145,7 @@ func (i Fruits) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Fruits) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Fruits.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -162,7 +162,7 @@ func (i *Fruits) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if err := i.SetString(s); err != nil {
-		log.Println(err)
+		log.Println("Fruits.UnmarshalJSON:", err)
 	}
 	return nil
 }
@@ -295,7 +295,7 @@ func (i Foods) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Foods) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Foods.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -312,7 +312,7 @@ func (i *Foods) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if err := i.SetString(s); err != nil {
-		log.Println(err)
+		log.Println("Foods.UnmarshalJSON:", err)
 	}
 	return nil
 }
@@ -435,7 +435,7 @@ func (i Days) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Days) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Days.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -636,7 +636,7 @@ func (i *States) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if err := i.SetString(s); err != nil {
-		log.Println(err)
+		log.Println("States.UnmarshalJSON:", err)
 	}
 	return nil
 }
@@ -882,7 +882,7 @@ func (i Languages) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Languages) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("Languages.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -899,7 +899,7 @@ func (i *Languages) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if err := i.SetString(s); err != nil {
-		log.Println(err)
+		log.Println("Languages.UnmarshalJSON:", err)
 	}
 	return nil
 }
@@ -1083,7 +1083,7 @@ func (i MoreLanguages) MarshalText() ([]byte, error) {
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *MoreLanguages) UnmarshalText(text []byte) error {
 	if err := i.SetString(string(text)); err != nil {
-		log.Println(err)
+		log.Println("MoreLanguages.UnmarshalText:", err)
 	}
 	return nil
 }
@@ -1100,7 +1100,7 @@ func (i *MoreLanguages) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if err := i.SetString(s); err != nil {
-		log.Println(err)
+		log.Println("MoreLanguages.UnmarshalJSON:", err)
 	}
 	return nil
 }
