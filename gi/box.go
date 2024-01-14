@@ -9,8 +9,9 @@ type Box struct {
 	WidgetBase
 }
 
-func (bx *Box) OnInit() {
-	bx.WidgetBase.OnInit()
+func (bx *Box) CopyFieldsFrom(frm any) {
+	fr := frm.(*Box)
+	bx.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
 // RenderBox does the standard box model rendering

@@ -377,9 +377,15 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	}
 	wb.Tooltip = fr.Tooltip
 	wb.Styles.CopyFrom(&fr.Styles)
-	wb.Stylers = fr.Stylers
-	wb.Listeners = fr.Listeners // direct copy -- functions..
-	wb.ContextMenus = fr.ContextMenus
+	n := len(wb.Stylers)
+	if len(fr.Stylers) > n {
+		wb.Stylers = append(wb.Stylers, fr.Stylers[n:]...)
+	}
+	wb.Listeners.CopyFromExtra(fr.Listeners)
+	n = len(wb.ContextMenus)
+	if len(fr.ContextMenus) > n {
+		wb.ContextMenus = append(wb.ContextMenus, fr.ContextMenus[n:]...)
+	}
 }
 
 func (wb *WidgetBase) Destroy() {

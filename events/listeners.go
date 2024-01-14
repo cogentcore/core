@@ -61,3 +61,20 @@ func (ls *Listeners) Call(ev Event) {
 		}
 	}
 }
+
+// CopyFromExtra copies additional listeners from given source
+// beyond those present in the receiver.
+func (ls *Listeners) CopyFromExtra(fr Listeners) {
+	for typ, l := range *ls {
+		fl, has := fr[typ]
+		if has {
+			n := len(l)
+			if len(fl) > n {
+				l = append(l, fl[n:]...)
+				(*ls)[typ] = l
+			}
+		} else {
+			(*ls)[typ] = fl
+		}
+	}
+}

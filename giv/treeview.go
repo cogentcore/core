@@ -341,7 +341,13 @@ func (tv *TreeView) SetStyles() {
 			})
 			// the context menu events will get sent to the parts, so it
 			// needs to intercept them and send them up
-			w.On(events.ContextMenu, tv.ShowContextMenu)
+			w.On(events.ContextMenu, func(e events.Event) {
+				sels := tv.SelectedViews()
+				if len(sels) == 0 {
+					tv.SelectAction(e.SelectMode())
+				}
+				tv.ShowContextMenu(e)
+			})
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Em(1)

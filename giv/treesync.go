@@ -355,14 +355,14 @@ func (tv *TreeView) Duplicate() { //gti:add
 	tv.Unselect()
 	nwkid := tv.Clone()
 	nwkid.SetName(nm)
+	ntv := AsTreeView(nwkid)
 	par.SetChildAdded()
 	par.InsertChild(nwkid, myidx+1)
-	ntv := AsTreeView(nwkid)
 	ntv.Update()
 	par.Update()
 	par.TreeViewChanged(nil)
 	par.UpdateEndLayout(updt)
-	ntv.SelectAction(events.SelectOne)
+	// ntv.SelectAction(events.SelectOne)
 }
 
 func (tv *TreeView) DuplicateSync() {
