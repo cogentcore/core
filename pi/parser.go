@@ -4,7 +4,7 @@
 
 package pi
 
-//go:generate goki generate
+//go:generate goki generate -add-types
 
 import (
 	"encoding/json"
