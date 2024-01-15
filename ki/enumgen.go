@@ -33,19 +33,12 @@ func _FlagsNoOp() {
 
 var _FlagsNameToValueMap = map[string]Flags{
 	`Field`:           0,
-	`field`:           0,
 	`Updating`:        1,
-	`updating`:        1,
 	`Deleted`:         2,
-	`deleted`:         2,
 	`Destroyed`:       3,
-	`destroyed`:       3,
 	`ChildAdded`:      4,
-	`childadded`:      4,
 	`ChildDeleted`:    5,
-	`childdeleted`:    5,
 	`ChildrenDeleted`: 6,
-	`childrendeleted`: 6,
 }
 
 var _FlagsDescMap = map[Flags]string{
@@ -113,8 +106,6 @@ func (i *Flags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _FlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _FlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

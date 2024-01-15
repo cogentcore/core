@@ -35,21 +35,13 @@ func _ImageFlagsNoOp() {
 
 var _ImageFlagsNameToValueMap = map[string]ImageFlags{
 	`Active`:           0,
-	`active`:           0,
 	`HostActive`:       1,
-	`hostactive`:       1,
 	`OwnsImage`:        2,
-	`ownsimage`:        2,
 	`OwnsHost`:         3,
-	`ownshost`:         3,
 	`IsVal`:            4,
-	`isval`:            4,
 	`DepthImage`:       5,
-	`depthimage`:       5,
 	`FramebufferImage`: 6,
-	`framebufferimage`: 6,
 	`OnHostOnly`:       7,
-	`onhostonly`:       7,
 }
 
 var _ImageFlagsDescMap = map[ImageFlags]string{
@@ -119,8 +111,6 @@ func (i *ImageFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _ImageFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ImageFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -226,13 +216,9 @@ func _BuffTypesNoOp() {
 
 var _BuffTypesNameToValueMap = map[string]BuffTypes{
 	`VtxIdxBuff`:  0,
-	`vtxidxbuff`:  0,
 	`UniformBuff`: 1,
-	`uniformbuff`: 1,
 	`StorageBuff`: 2,
-	`storagebuff`: 2,
 	`TextureBuff`: 3,
-	`texturebuff`: 3,
 }
 
 var _BuffTypesDescMap = map[BuffTypes]string{
@@ -263,10 +249,6 @@ func (i BuffTypes) String() string {
 // error if the string is invalid.
 func (i *BuffTypes) SetString(s string) error {
 	if val, ok := _BuffTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _BuffTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -345,13 +327,9 @@ func _OptionStatesNoOp() {
 
 var _OptionStatesNameToValueMap = map[string]OptionStates{
 	`Disabled`: 0,
-	`disabled`: 0,
 	`Optional`: 1,
-	`optional`: 1,
 	`Required`: 2,
-	`required`: 2,
 	`Enabled`:  3,
-	`enabled`:  3,
 }
 
 var _OptionStatesDescMap = map[OptionStates]string{
@@ -382,10 +360,6 @@ func (i OptionStates) String() string {
 // error if the string is invalid.
 func (i *OptionStates) SetString(s string) error {
 	if val, ok := _OptionStatesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _OptionStatesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -515,115 +489,60 @@ func _CPUOptionsNoOp() {
 
 var _CPUOptionsNameToValueMap = map[string]CPUOptions{
 	`RobustBufferAccess`:                      0,
-	`robustbufferaccess`:                      0,
 	`FullDrawIndexUint32`:                     1,
-	`fulldrawindexuint32`:                     1,
 	`ImageCubeArray`:                          2,
-	`imagecubearray`:                          2,
 	`IndependentBlend`:                        3,
-	`independentblend`:                        3,
 	`GeometryShader`:                          4,
-	`geometryshader`:                          4,
 	`TessellationShader`:                      5,
-	`tessellationshader`:                      5,
 	`SampleRateShading`:                       6,
-	`samplerateshading`:                       6,
 	`DualSrcBlend`:                            7,
-	`dualsrcblend`:                            7,
 	`LogicOp`:                                 8,
-	`logicop`:                                 8,
 	`MultiDrawIndirect`:                       9,
-	`multidrawindirect`:                       9,
 	`DrawIndirectFirstInstance`:               10,
-	`drawindirectfirstinstance`:               10,
 	`DepthClamp`:                              11,
-	`depthclamp`:                              11,
 	`DepthBiasClamp`:                          12,
-	`depthbiasclamp`:                          12,
 	`FillModeNonSolid`:                        13,
-	`fillmodenonsolid`:                        13,
 	`DepthBounds`:                             14,
-	`depthbounds`:                             14,
 	`WideLines`:                               15,
-	`widelines`:                               15,
 	`LargePoints`:                             16,
-	`largepoints`:                             16,
 	`AlphaToOne`:                              17,
-	`alphatoone`:                              17,
 	`MultiViewport`:                           18,
-	`multiviewport`:                           18,
 	`SamplerAnisotropy`:                       19,
-	`sampleranisotropy`:                       19,
 	`TextureCompressionETC2`:                  20,
-	`texturecompressionetc2`:                  20,
 	`TextureCompressionASTC_LDR`:              21,
-	`texturecompressionastc_ldr`:              21,
 	`TextureCompressionBC`:                    22,
-	`texturecompressionbc`:                    22,
 	`OcclusionQueryPrecise`:                   23,
-	`occlusionqueryprecise`:                   23,
 	`PipelineStatisticsQuery`:                 24,
-	`pipelinestatisticsquery`:                 24,
 	`VertexPipelineStoresAndAtomics`:          25,
-	`vertexpipelinestoresandatomics`:          25,
 	`FragmentStoresAndAtomics`:                26,
-	`fragmentstoresandatomics`:                26,
 	`ShaderTessellationAndGeometryPointSize`:  27,
-	`shadertessellationandgeometrypointsize`:  27,
 	`ShaderImageGatherExtended`:               28,
-	`shaderimagegatherextended`:               28,
 	`ShaderStorageImageExtendedFormats`:       29,
-	`shaderstorageimageextendedformats`:       29,
 	`ShaderStorageImageMultisample`:           30,
-	`shaderstorageimagemultisample`:           30,
 	`ShaderStorageImageReadWithoutFormat`:     31,
-	`shaderstorageimagereadwithoutformat`:     31,
 	`ShaderStorageImageWriteWithoutFormat`:    32,
-	`shaderstorageimagewritewithoutformat`:    32,
 	`ShaderUniformBufferArrayDynamicIndexing`: 33,
-	`shaderuniformbufferarraydynamicindexing`: 33,
 	`ShaderSampledImageArrayDynamicIndexing`:  34,
-	`shadersampledimagearraydynamicindexing`:  34,
 	`ShaderStorageBufferArrayDynamicIndexing`: 35,
-	`shaderstoragebufferarraydynamicindexing`: 35,
 	`ShaderStorageImageArrayDynamicIndexing`:  36,
-	`shaderstorageimagearraydynamicindexing`:  36,
 	`ShaderClipDistance`:                      37,
-	`shaderclipdistance`:                      37,
 	`ShaderCullDistance`:                      38,
-	`shaderculldistance`:                      38,
 	`ShaderFloat64`:                           39,
-	`shaderfloat64`:                           39,
 	`ShaderInt64`:                             40,
-	`shaderint64`:                             40,
 	`ShaderInt16`:                             41,
-	`shaderint16`:                             41,
 	`ShaderResourceResidency`:                 42,
-	`shaderresourceresidency`:                 42,
 	`ShaderResourceMinLod`:                    43,
-	`shaderresourceminlod`:                    43,
 	`SparseBinding`:                           44,
-	`sparsebinding`:                           44,
 	`SparseResidencyBuffer`:                   45,
-	`sparseresidencybuffer`:                   45,
 	`SparseResidencyImage2D`:                  46,
-	`sparseresidencyimage2d`:                  46,
 	`SparseResidencyImage3D`:                  47,
-	`sparseresidencyimage3d`:                  47,
 	`SparseResidency2Samples`:                 48,
-	`sparseresidency2samples`:                 48,
 	`SparseResidency4Samples`:                 49,
-	`sparseresidency4samples`:                 49,
 	`SparseResidency8Samples`:                 50,
-	`sparseresidency8samples`:                 50,
 	`SparseResidency16Samples`:                51,
-	`sparseresidency16samples`:                51,
 	`SparseResidencyAliased`:                  52,
-	`sparseresidencyaliased`:                  52,
 	`VariableMultisampleRate`:                 53,
-	`variablemultisamplerate`:                 53,
 	`InheritedQueries`:                        54,
-	`inheritedqueries`:                        54,
 }
 
 var _CPUOptionsDescMap = map[CPUOptions]string{
@@ -759,10 +678,6 @@ func (i *CPUOptions) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	if val, ok := _CPUOptionsNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
 	return errors.New(s + " is not a valid value for type CPUOptions")
 }
 
@@ -844,25 +759,15 @@ func _VarRolesNoOp() {
 
 var _VarRolesNameToValueMap = map[string]VarRoles{
 	`UndefVarRole`: 0,
-	`undefvarrole`: 0,
 	`Vertex`:       1,
-	`vertex`:       1,
 	`Index`:        2,
-	`index`:        2,
 	`Push`:         3,
-	`push`:         3,
 	`Uniform`:      4,
-	`uniform`:      4,
 	`Storage`:      5,
-	`storage`:      5,
 	`UniformTexel`: 6,
-	`uniformtexel`: 6,
 	`StorageTexel`: 7,
-	`storagetexel`: 7,
 	`StorageImage`: 8,
-	`storageimage`: 8,
 	`TextureRole`:  9,
-	`texturerole`:  9,
 }
 
 var _VarRolesDescMap = map[VarRoles]string{
@@ -905,10 +810,6 @@ func (i VarRoles) String() string {
 // error if the string is invalid.
 func (i *VarRoles) SetString(s string) error {
 	if val, ok := _VarRolesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _VarRolesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -988,15 +889,10 @@ func _SamplerModesNoOp() {
 
 var _SamplerModesNameToValueMap = map[string]SamplerModes{
 	`Repeat`:            0,
-	`repeat`:            0,
 	`MirroredRepeat`:    1,
-	`mirroredrepeat`:    1,
 	`ClampToEdge`:       2,
-	`clamptoedge`:       2,
 	`ClampToBorder`:     3,
-	`clamptoborder`:     3,
 	`MirrorClampToEdge`: 4,
-	`mirrorclamptoedge`: 4,
 }
 
 var _SamplerModesDescMap = map[SamplerModes]string{
@@ -1029,10 +925,6 @@ func (i SamplerModes) String() string {
 // error if the string is invalid.
 func (i *SamplerModes) SetString(s string) error {
 	if val, ok := _SamplerModesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SamplerModesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1110,11 +1002,8 @@ func _BorderColorsNoOp() {
 
 var _BorderColorsNameToValueMap = map[string]BorderColors{
 	`Trans`: 0,
-	`trans`: 0,
 	`Black`: 1,
-	`black`: 1,
 	`White`: 2,
-	`white`: 2,
 }
 
 var _BorderColorsDescMap = map[BorderColors]string{
@@ -1143,10 +1032,6 @@ func (i BorderColors) String() string {
 // error if the string is invalid.
 func (i *BorderColors) SetString(s string) error {
 	if val, ok := _BorderColorsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _BorderColorsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1245,53 +1130,29 @@ func _TypesNoOp() {
 
 var _TypesNameToValueMap = map[string]Types{
 	`UndefType`:    0,
-	`undeftype`:    0,
 	`Bool32`:       1,
-	`bool32`:       1,
 	`Int16`:        2,
-	`int16`:        2,
 	`Uint16`:       3,
-	`uint16`:       3,
 	`Int32`:        4,
-	`int32`:        4,
 	`Int32Vec2`:    5,
-	`int32vec2`:    5,
 	`Int32Vec4`:    6,
-	`int32vec4`:    6,
 	`Uint32`:       7,
-	`uint32`:       7,
 	`Uint32Vec2`:   8,
-	`uint32vec2`:   8,
 	`Uint32Vec4`:   9,
-	`uint32vec4`:   9,
 	`Float32`:      10,
-	`float32`:      10,
 	`Float32Vec2`:  11,
-	`float32vec2`:  11,
 	`Float32Vec3`:  12,
-	`float32vec3`:  12,
 	`Float32Vec4`:  13,
-	`float32vec4`:  13,
 	`Float64`:      14,
-	`float64`:      14,
 	`Float64Vec2`:  15,
-	`float64vec2`:  15,
 	`Float64Vec3`:  16,
-	`float64vec3`:  16,
 	`Float64Vec4`:  17,
-	`float64vec4`:  17,
 	`Float32Mat4`:  18,
-	`float32mat4`:  18,
 	`Float32Mat3`:  19,
-	`float32mat3`:  19,
 	`ImageRGBA32`:  20,
-	`imagergba32`:  20,
 	`Depth32`:      21,
-	`depth32`:      21,
 	`Depth24Sten8`: 22,
-	`depth24sten8`: 22,
 	`Struct`:       23,
-	`struct`:       23,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -1362,10 +1223,6 @@ func (i Types) String() string {
 // error if the string is invalid.
 func (i *Types) SetString(s string) error {
 	if val, ok := _TypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1443,11 +1300,8 @@ func _ValFlagsNoOp() {
 
 var _ValFlagsNameToValueMap = map[string]ValFlags{
 	`Mod`:         0,
-	`mod`:         0,
 	`PaddedArray`: 1,
-	`paddedarray`: 1,
 	`TextureOwns`: 2,
-	`textureowns`: 2,
 }
 
 var _ValFlagsDescMap = map[ValFlags]string{
@@ -1507,8 +1361,6 @@ func (i *ValFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _ValFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ValFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

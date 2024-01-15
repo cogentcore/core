@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -30,15 +29,10 @@ func _PathCommandNoOp() {
 
 var _PathCommandNameToValueMap = map[string]PathCommand{
 	`PathMoveTo`:  0,
-	`pathmoveto`:  0,
 	`PathLineTo`:  1,
-	`pathlineto`:  1,
 	`PathQuadTo`:  2,
-	`pathquadto`:  2,
 	`PathCubicTo`: 3,
-	`pathcubicto`: 3,
 	`PathClose`:   4,
-	`pathclose`:   4,
 }
 
 var _PathCommandDescMap = map[PathCommand]string{
@@ -71,10 +65,6 @@ func (i PathCommand) String() string {
 // error if the string is invalid.
 func (i *PathCommand) SetString(s string) error {
 	if val, ok := _PathCommandNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _PathCommandNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -155,17 +145,11 @@ func _JoinModeNoOp() {
 
 var _JoinModeNameToValueMap = map[string]JoinMode{
 	`Arc`:       0,
-	`arc`:       0,
 	`ArcClip`:   1,
-	`arcclip`:   1,
 	`Miter`:     2,
-	`miter`:     2,
 	`MiterClip`: 3,
-	`miterclip`: 3,
 	`Bevel`:     4,
-	`bevel`:     4,
 	`Round`:     5,
-	`round`:     5,
 }
 
 var _JoinModeDescMap = map[JoinMode]string{
@@ -200,10 +184,6 @@ func (i JoinMode) String() string {
 // error if the string is invalid.
 func (i *JoinMode) SetString(s string) error {
 	if val, ok := _JoinModeNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _JoinModeNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

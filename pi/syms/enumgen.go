@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -76,107 +75,56 @@ func _KindsNoOp() {
 
 var _KindsNameToValueMap = map[string]Kinds{
 	`Unknown`:    0,
-	`unknown`:    0,
 	`Primitive`:  1,
-	`primitive`:  1,
 	`Numeric`:    2,
-	`numeric`:    2,
 	`Integer`:    3,
-	`integer`:    3,
 	`Signed`:     4,
-	`signed`:     4,
 	`Int`:        5,
-	`int`:        5,
 	`Int8`:       6,
-	`int8`:       6,
 	`Int16`:      7,
-	`int16`:      7,
 	`Int32`:      8,
-	`int32`:      8,
 	`Int64`:      9,
-	`int64`:      9,
 	`Unsigned`:   10,
-	`unsigned`:   10,
 	`Uint`:       11,
-	`uint`:       11,
 	`Uint8`:      12,
-	`uint8`:      12,
 	`Uint16`:     13,
-	`uint16`:     13,
 	`Uint32`:     14,
-	`uint32`:     14,
 	`Uint64`:     15,
-	`uint64`:     15,
 	`Uintptr`:    16,
-	`uintptr`:    16,
 	`Ptr`:        17,
-	`ptr`:        17,
 	`Ref`:        18,
-	`ref`:        18,
 	`UnsafePtr`:  19,
-	`unsafeptr`:  19,
 	`Fixed`:      20,
-	`fixed`:      20,
 	`Fixed26_6`:  21,
-	`fixed26_6`:  21,
 	`Fixed16_6`:  22,
-	`fixed16_6`:  22,
 	`Fixed0_32`:  23,
-	`fixed0_32`:  23,
 	`Float`:      24,
-	`float`:      24,
 	`Float16`:    25,
-	`float16`:    25,
 	`Float32`:    26,
-	`float32`:    26,
 	`Float64`:    27,
-	`float64`:    27,
 	`Complex`:    28,
-	`complex`:    28,
 	`Complex64`:  29,
-	`complex64`:  29,
 	`Complex128`: 30,
-	`complex128`: 30,
 	`Bool`:       31,
-	`bool`:       31,
 	`Composite`:  32,
-	`composite`:  32,
 	`Tuple`:      33,
-	`tuple`:      33,
 	`Range`:      34,
-	`range`:      34,
 	`Array`:      35,
-	`array`:      35,
 	`List`:       36,
-	`list`:       36,
 	`String`:     37,
-	`string`:     37,
 	`Matrix`:     38,
-	`matrix`:     38,
 	`Tensor`:     39,
-	`tensor`:     39,
 	`Map`:        40,
-	`map`:        40,
 	`Set`:        41,
-	`set`:        41,
 	`FrozenSet`:  42,
-	`frozenset`:  42,
 	`Struct`:     43,
-	`struct`:     43,
 	`Class`:      44,
-	`class`:      44,
 	`Object`:     45,
-	`object`:     45,
 	`Chan`:       46,
-	`chan`:       46,
 	`Function`:   47,
-	`function`:   47,
 	`Func`:       48,
-	`func`:       48,
 	`Method`:     49,
-	`method`:     49,
 	`Interface`:  50,
-	`interface`:  50,
 }
 
 var _KindsDescMap = map[Kinds]string{
@@ -301,10 +249,6 @@ func (i Kinds) String() string {
 // error if the string is invalid.
 func (i *Kinds) SetString(s string) error {
 	if val, ok := _KindsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _KindsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

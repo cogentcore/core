@@ -25,14 +25,10 @@ func NewGroup(par ki.Ki, name ...string) *Group {
 }
 
 // KiType returns the [*gti.Type] of [Group]
-func (t *Group) KiType() *gti.Type {
-	return GroupType
-}
+func (t *Group) KiType() *gti.Type { return GroupType }
 
 // New returns a new [*Group] value
-func (t *Group) New() ki.Ki {
-	return &Group{}
-}
+func (t *Group) New() ki.Ki { return &Group{} }
 
 var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.SolidPoint", IDName: "solid-point", Doc: "SolidPoint contains a Solid and a Point on that solid", Fields: []gti.Field{{Name: "Solid"}, {Name: "Point"}}})
 
@@ -124,14 +120,10 @@ func NewNodeBase(par ki.Ki, name ...string) *NodeBase {
 }
 
 // KiType returns the [*gti.Type] of [NodeBase]
-func (t *NodeBase) KiType() *gti.Type {
-	return NodeBaseType
-}
+func (t *NodeBase) KiType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
-func (t *NodeBase) New() ki.Ki {
-	return &NodeBase{}
-}
+func (t *NodeBase) New() ki.Ki { return &NodeBase{} }
 
 var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.NodeFlags", IDName: "node-flags", Doc: "NodeFlags extend ki.Flags to hold 3D node state", Directives: []gti.Directive{{Tool: "enums", Directive: "bitflag"}}})
 
@@ -143,14 +135,10 @@ var _ = gti.AddType(&gti.Type{Name: "goki.dev/xyz.RenderClasses", IDName: "rende
 var SceneType = gti.AddType(&gti.Type{Name: "goki.dev/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzv.Scene,\nwhere it is copied into an overall gi.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}, {Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [glop/images.CloneAsRGBA]."}, {Name: "DirUpIdx", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
 
 // KiType returns the [*gti.Type] of [Scene]
-func (t *Scene) KiType() *gti.Type {
-	return SceneType
-}
+func (t *Scene) KiType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
-func (t *Scene) New() ki.Ki {
-	return &Scene{}
-}
+func (t *Scene) New() ki.Ki { return &Scene{} }
 
 // SceneEmbedder is an interface that all types that embed Scene satisfy
 type SceneEmbedder interface {
@@ -170,9 +158,7 @@ func AsScene(k ki.Ki) *Scene {
 }
 
 // AsScene satisfies the [SceneEmbedder] interface
-func (t *Scene) AsScene() *Scene {
-	return t
-}
+func (t *Scene) AsScene() *Scene { return t }
 
 // SetMultiSample sets the [Scene.MultiSample]:
 // number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
@@ -418,14 +404,10 @@ func NewSolid(par ki.Ki, name ...string) *Solid {
 }
 
 // KiType returns the [*gti.Type] of [Solid]
-func (t *Solid) KiType() *gti.Type {
-	return SolidType
-}
+func (t *Solid) KiType() *gti.Type { return SolidType }
 
 // New returns a new [*Solid] value
-func (t *Solid) New() ki.Ki {
-	return &Solid{}
-}
+func (t *Solid) New() ki.Ki { return &Solid{} }
 
 // SetMat sets the [Solid.Mat]:
 // material properties of the surface (color, shininess, texture, etc)
@@ -453,14 +435,10 @@ func NewText2D(par ki.Ki, name ...string) *Text2D {
 }
 
 // KiType returns the [*gti.Type] of [Text2D]
-func (t *Text2D) KiType() *gti.Type {
-	return Text2DType
-}
+func (t *Text2D) KiType() *gti.Type { return Text2DType }
 
 // New returns a new [*Text2D] value
-func (t *Text2D) New() ki.Ki {
-	return &Text2D{}
-}
+func (t *Text2D) New() ki.Ki { return &Text2D{} }
 
 // SetText sets the [Text2D.Text]:
 // the text string to display

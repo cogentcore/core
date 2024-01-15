@@ -34,19 +34,12 @@ func _BufSignalsNoOp() {
 
 var _BufSignalsNameToValueMap = map[string]BufSignals{
 	`BufDone`:     0,
-	`bufdone`:     0,
 	`BufNew`:      1,
-	`bufnew`:      1,
 	`BufMods`:     2,
-	`bufmods`:     2,
 	`BufInsert`:   3,
-	`bufinsert`:   3,
 	`BufDelete`:   4,
-	`bufdelete`:   4,
 	`BufMarkUpdt`: 5,
-	`bufmarkupdt`: 5,
 	`BufClosed`:   6,
-	`bufclosed`:   6,
 }
 
 var _BufSignalsDescMap = map[BufSignals]string{
@@ -83,10 +76,6 @@ func (i BufSignals) String() string {
 // error if the string is invalid.
 func (i *BufSignals) SetString(s string) error {
 	if val, ok := _BufSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _BufSignalsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -166,15 +155,10 @@ func _BufFlagsNoOp() {
 
 var _BufFlagsNameToValueMap = map[string]BufFlags{
 	`AutoSaving`: 8,
-	`autosaving`: 8,
 	`MarkingUp`:  9,
-	`markingup`:  9,
 	`Changed`:    10,
-	`changed`:    10,
 	`NotSaved`:   11,
-	`notsaved`:   11,
 	`FileModOk`:  12,
-	`filemodok`:  12,
 }
 
 var _BufFlagsDescMap = map[BufFlags]string{
@@ -248,8 +232,6 @@ func (i *BufFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _BufFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _BufFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -373,15 +355,10 @@ func _EditorFlagsNoOp() {
 
 var _EditorFlagsNameToValueMap = map[string]EditorFlags{
 	`EditorHasLineNos`:   8,
-	`editorhaslinenos`:   8,
 	`EditorNeedsLayout`:  9,
-	`editorneedslayout`:  9,
 	`EditorLastWasTabAI`: 10,
-	`editorlastwastabai`: 10,
 	`EditorLastWasUndo`:  11,
-	`editorlastwasundo`:  11,
 	`EditorTargetSet`:    12,
-	`editortargetset`:    12,
 }
 
 var _EditorFlagsDescMap = map[EditorFlags]string{
@@ -455,8 +432,6 @@ func (i *EditorFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _EditorFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _EditorFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

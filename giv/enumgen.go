@@ -37,25 +37,15 @@ func _SliceViewFlagsNoOp() {
 
 var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
 	`Configed`:         8,
-	`configed`:         8,
 	`NoAdd`:            9,
-	`noadd`:            9,
 	`NoDelete`:         10,
-	`nodelete`:         10,
 	`IsArray`:          11,
-	`isarray`:          11,
 	`ShowIndex`:        12,
-	`showindex`:        12,
 	`ReadOnlyKeyNav`:   13,
-	`readonlykeynav`:   13,
 	`SelectMode`:       14,
-	`selectmode`:       14,
 	`ReadOnlyMultiSel`: 15,
-	`readonlymultisel`: 15,
 	`InFocusGrab`:      16,
-	`infocusgrab`:      16,
 	`InFullRebuild`:    17,
-	`infullrebuild`:    17,
 }
 
 var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
@@ -139,8 +129,6 @@ func (i *SliceViewFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _SliceViewFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _SliceViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -262,11 +250,8 @@ func _TreeViewFlagsNoOp() {
 
 var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
 	`Closed`:         8,
-	`closed`:         8,
 	`SelectMode`:     9,
-	`selectmode`:     9,
 	`TreeViewInOpen`: 10,
-	`treeviewinopen`: 10,
 }
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
@@ -336,8 +321,6 @@ func (i *TreeViewFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _TreeViewFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _TreeViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -461,15 +444,10 @@ func _ValueFlagsNoOp() {
 
 var _ValueFlagsNameToValueMap = map[string]ValueFlags{
 	`ReadOnly`:        0,
-	`readonly`:        0,
 	`MapKey`:          1,
-	`mapkey`:          1,
 	`HasSavedLabel`:   2,
-	`hassavedlabel`:   2,
 	`HasSavedDoc`:     3,
-	`hassaveddoc`:     3,
 	`DialogNewWindow`: 4,
-	`dialognewwindow`: 4,
 }
 
 var _ValueFlagsDescMap = map[ValueFlags]string{
@@ -533,8 +511,6 @@ func (i *ValueFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _ValueFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ValueFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

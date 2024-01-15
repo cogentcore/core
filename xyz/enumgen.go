@@ -42,35 +42,20 @@ func _LightColorsNoOp() {
 
 var _LightColorsNameToValueMap = map[string]LightColors{
 	`DirectSun`:    0,
-	`directsun`:    0,
 	`CarbonArc`:    1,
-	`carbonarc`:    1,
 	`Halogen`:      2,
-	`halogen`:      2,
 	`Tungsten100W`: 3,
-	`tungsten100w`: 3,
 	`Tungsten40W`:  4,
-	`tungsten40w`:  4,
 	`Candle`:       5,
-	`candle`:       5,
 	`Overcast`:     6,
-	`overcast`:     6,
 	`FluorWarm`:    7,
-	`fluorwarm`:    7,
 	`FluorStd`:     8,
-	`fluorstd`:     8,
 	`FluorCool`:    9,
-	`fluorcool`:    9,
 	`FluorFull`:    10,
-	`fluorfull`:    10,
 	`FluorGrow`:    11,
-	`fluorgrow`:    11,
 	`MercuryVapor`: 12,
-	`mercuryvapor`: 12,
 	`SodiumVapor`:  13,
-	`sodiumvapor`:  13,
 	`MetalHalide`:  14,
-	`metalhalide`:  14,
 }
 
 var _LightColorsDescMap = map[LightColors]string{
@@ -123,10 +108,6 @@ func (i LightColors) String() string {
 // error if the string is invalid.
 func (i *LightColors) SetString(s string) error {
 	if val, ok := _LightColorsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _LightColorsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -204,11 +185,8 @@ func _NodeFlagsNoOp() {
 
 var _NodeFlagsNameToValueMap = map[string]NodeFlags{
 	`WorldMatrixUpdated`: 7,
-	`worldmatrixupdated`: 7,
 	`VectorsUpdated`:     8,
-	`vectorsupdated`:     8,
 	`Invisible`:          9,
-	`invisible`:          9,
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
@@ -278,8 +256,6 @@ func (i *NodeFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _NodeFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -405,19 +381,12 @@ func _RenderClassesNoOp() {
 
 var _RenderClassesNameToValueMap = map[string]RenderClasses{
 	`None`:          0,
-	`none`:          0,
 	`OpaqueTexture`: 1,
-	`opaquetexture`: 1,
 	`OpaqueUniform`: 2,
-	`opaqueuniform`: 2,
 	`OpaqueVertex`:  3,
-	`opaquevertex`:  3,
 	`TransTexture`:  4,
-	`transtexture`:  4,
 	`TransUniform`:  5,
-	`transuniform`:  5,
 	`TransVertex`:   6,
-	`transvertex`:   6,
 }
 
 var _RenderClassesDescMap = map[RenderClasses]string{
@@ -454,10 +423,6 @@ func (i RenderClasses) String() string {
 // error if the string is invalid.
 func (i *RenderClasses) SetString(s string) error {
 	if val, ok := _RenderClassesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _RenderClassesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -536,13 +501,9 @@ func _ScFlagsNoOp() {
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
 	`ScUpdating`:    7,
-	`scupdating`:    7,
 	`ScNeedsConfig`: 8,
-	`scneedsconfig`: 8,
 	`ScNeedsUpdate`: 9,
-	`scneedsupdate`: 9,
 	`ScNeedsRender`: 10,
-	`scneedsrender`: 10,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -614,8 +575,6 @@ func (i *ScFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

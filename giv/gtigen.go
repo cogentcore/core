@@ -28,14 +28,10 @@ func NewArgView(par ki.Ki, name ...string) *ArgView {
 }
 
 // KiType returns the [*gti.Type] of [ArgView]
-func (t *ArgView) KiType() *gti.Type {
-	return ArgViewType
-}
+func (t *ArgView) KiType() *gti.Type { return ArgViewType }
 
 // New returns a new [*ArgView] value
-func (t *ArgView) New() ki.Ki {
-	return &ArgView{}
-}
+func (t *ArgView) New() ki.Ki { return &ArgView{} }
 
 // SetTitle sets the [ArgView.Title]:
 // title / prompt to show above the editor fields
@@ -68,14 +64,10 @@ func NewColorView(par ki.Ki, name ...string) *ColorView {
 }
 
 // KiType returns the [*gti.Type] of [ColorView]
-func (t *ColorView) KiType() *gti.Type {
-	return ColorViewType
-}
+func (t *ColorView) KiType() *gti.Type { return ColorViewType }
 
 // New returns a new [*ColorView] value
-func (t *ColorView) New() ki.Ki {
-	return &ColorView{}
-}
+func (t *ColorView) New() ki.Ki { return &ColorView{} }
 
 // SetTmpSave sets the [ColorView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
@@ -104,14 +96,10 @@ func NewFileView(par ki.Ki, name ...string) *FileView {
 }
 
 // KiType returns the [*gti.Type] of [FileView]
-func (t *FileView) KiType() *gti.Type {
-	return FileViewType
-}
+func (t *FileView) KiType() *gti.Type { return FileViewType }
 
 // New returns a new [*FileView] value
-func (t *FileView) New() ki.Ki {
-	return &FileView{}
-}
+func (t *FileView) New() ki.Ki { return &FileView{} }
 
 // SetDirPath sets the [FileView.DirPath]:
 // path to directory of files to display
@@ -146,14 +134,10 @@ func (t *FileView) SetStripes(v gi.Stripes) *FileView { t.Stripes = v; return t 
 var FuncButtonType = gti.AddType(&gti.Type{Name: "goki.dev/giv.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti to get documentation information, but that is not required;\nadd a `//gti:add` comment directive and run `goki generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to gti to get documentation.", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Button"}}, Fields: []gti.Field{{Name: "Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [Value] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [Value] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\ndefault values and other options. The [reflect.Value]s of\nthe [Value] objects are not set until the function is\ncalled, and are thus not typically applicable to access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default, unless\nthe function has no return values."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to gti is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}}, Instance: &FuncButton{}})
 
 // KiType returns the [*gti.Type] of [FuncButton]
-func (t *FuncButton) KiType() *gti.Type {
-	return FuncButtonType
-}
+func (t *FuncButton) KiType() *gti.Type { return FuncButtonType }
 
 // New returns a new [*FuncButton] value
-func (t *FuncButton) New() ki.Ki {
-	return &FuncButton{}
-}
+func (t *FuncButton) New() ki.Ki { return &FuncButton{} }
 
 // SetConfirm sets the [FuncButton.Confirm]:
 // Confirm is whether to prompt the user for confirmation
@@ -228,14 +212,10 @@ func NewInspector(par ki.Ki, name ...string) *Inspector {
 }
 
 // KiType returns the [*gti.Type] of [Inspector]
-func (t *Inspector) KiType() *gti.Type {
-	return InspectorType
-}
+func (t *Inspector) KiType() *gti.Type { return InspectorType }
 
 // New returns a new [*Inspector] value
-func (t *Inspector) New() ki.Ki {
-	return &Inspector{}
-}
+func (t *Inspector) New() ki.Ki { return &Inspector{} }
 
 // SetKiRoot sets the [Inspector.KiRoot]:
 // root of tree being edited
@@ -266,14 +246,10 @@ func NewKeyChordEdit(par ki.Ki, name ...string) *KeyChordEdit {
 }
 
 // KiType returns the [*gti.Type] of [KeyChordEdit]
-func (t *KeyChordEdit) KiType() *gti.Type {
-	return KeyChordEditType
-}
+func (t *KeyChordEdit) KiType() *gti.Type { return KeyChordEditType }
 
 // New returns a new [*KeyChordEdit] value
-func (t *KeyChordEdit) New() ki.Ki {
-	return &KeyChordEdit{}
-}
+func (t *KeyChordEdit) New() ki.Ki { return &KeyChordEdit{} }
 
 // SetFocusActive sets the [KeyChordEdit.FocusActive]:
 // true if the keyboard focus is active or not -- when we lose active focus we apply changes
@@ -300,14 +276,10 @@ func NewMapView(par ki.Ki, name ...string) *MapView {
 }
 
 // KiType returns the [*gti.Type] of [MapView]
-func (t *MapView) KiType() *gti.Type {
-	return MapViewType
-}
+func (t *MapView) KiType() *gti.Type { return MapViewType }
 
 // New returns a new [*MapView] value
-func (t *MapView) New() ki.Ki {
-	return &MapView{}
-}
+func (t *MapView) New() ki.Ki { return &MapView{} }
 
 // SetMapValView sets the [MapView.MapValView]:
 // Value for the map itself, if this was created within value view framework -- otherwise nil
@@ -357,14 +329,10 @@ func NewMapViewInline(par ki.Ki, name ...string) *MapViewInline {
 }
 
 // KiType returns the [*gti.Type] of [MapViewInline]
-func (t *MapViewInline) KiType() *gti.Type {
-	return MapViewInlineType
-}
+func (t *MapViewInline) KiType() *gti.Type { return MapViewInlineType }
 
 // New returns a new [*MapViewInline] value
-func (t *MapViewInline) New() ki.Ki {
-	return &MapViewInline{}
-}
+func (t *MapViewInline) New() ki.Ki { return &MapViewInline{} }
 
 // SetMapValView sets the [MapViewInline.MapValView]:
 // Value for the map itself, if this was created within value view framework -- otherwise nil
@@ -406,14 +374,10 @@ func NewSliceView(par ki.Ki, name ...string) *SliceView {
 }
 
 // KiType returns the [*gti.Type] of [SliceView]
-func (t *SliceView) KiType() *gti.Type {
-	return SliceViewType
-}
+func (t *SliceView) KiType() *gti.Type { return SliceViewType }
 
 // New returns a new [*SliceView] value
-func (t *SliceView) New() ki.Ki {
-	return &SliceView{}
-}
+func (t *SliceView) New() ki.Ki { return &SliceView{} }
 
 // SetStyleFunc sets the [SliceView.StyleFunc]:
 // optional styling function
@@ -497,14 +461,10 @@ func NewSliceViewBase(par ki.Ki, name ...string) *SliceViewBase {
 }
 
 // KiType returns the [*gti.Type] of [SliceViewBase]
-func (t *SliceViewBase) KiType() *gti.Type {
-	return SliceViewBaseType
-}
+func (t *SliceViewBase) KiType() *gti.Type { return SliceViewBaseType }
 
 // New returns a new [*SliceViewBase] value
-func (t *SliceViewBase) New() ki.Ki {
-	return &SliceViewBase{}
-}
+func (t *SliceViewBase) New() ki.Ki { return &SliceViewBase{} }
 
 // SetMinRows sets the [SliceViewBase.MinRows]:
 // MinRows specifies the minimum number of rows to display, to ensure
@@ -602,14 +562,10 @@ func NewSliceViewGrid(par ki.Ki, name ...string) *SliceViewGrid {
 }
 
 // KiType returns the [*gti.Type] of [SliceViewGrid]
-func (t *SliceViewGrid) KiType() *gti.Type {
-	return SliceViewGridType
-}
+func (t *SliceViewGrid) KiType() *gti.Type { return SliceViewGridType }
 
 // New returns a new [*SliceViewGrid] value
-func (t *SliceViewGrid) New() ki.Ki {
-	return &SliceViewGrid{}
-}
+func (t *SliceViewGrid) New() ki.Ki { return &SliceViewGrid{} }
 
 // SetMinRows sets the [SliceViewGrid.MinRows]:
 // MinRows is set from parent SV
@@ -643,14 +599,10 @@ func NewSliceViewInline(par ki.Ki, name ...string) *SliceViewInline {
 }
 
 // KiType returns the [*gti.Type] of [SliceViewInline]
-func (t *SliceViewInline) KiType() *gti.Type {
-	return SliceViewInlineType
-}
+func (t *SliceViewInline) KiType() *gti.Type { return SliceViewInlineType }
 
 // New returns a new [*SliceViewInline] value
-func (t *SliceViewInline) New() ki.Ki {
-	return &SliceViewInline{}
-}
+func (t *SliceViewInline) New() ki.Ki { return &SliceViewInline{} }
 
 // SetSliceValView sets the [SliceViewInline.SliceValView]:
 // Value for the slice itself, if this was created within value view framework -- otherwise nil
@@ -694,14 +646,10 @@ func NewStructView(par ki.Ki, name ...string) *StructView {
 }
 
 // KiType returns the [*gti.Type] of [StructView]
-func (t *StructView) KiType() *gti.Type {
-	return StructViewType
-}
+func (t *StructView) KiType() *gti.Type { return StructViewType }
 
 // New returns a new [*StructView] value
-func (t *StructView) New() ki.Ki {
-	return &StructView{}
-}
+func (t *StructView) New() ki.Ki { return &StructView{} }
 
 // SetTmpSave sets the [StructView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
@@ -731,14 +679,10 @@ func NewStructViewInline(par ki.Ki, name ...string) *StructViewInline {
 }
 
 // KiType returns the [*gti.Type] of [StructViewInline]
-func (t *StructViewInline) KiType() *gti.Type {
-	return StructViewInlineType
-}
+func (t *StructViewInline) KiType() *gti.Type { return StructViewInlineType }
 
 // New returns a new [*StructViewInline] value
-func (t *StructViewInline) New() ki.Ki {
-	return &StructViewInline{}
-}
+func (t *StructViewInline) New() ki.Ki { return &StructViewInline{} }
 
 // SetStructValView sets the [StructViewInline.StructValView]:
 // Value for the struct itself, if this was created within value view framework -- otherwise nil
@@ -788,14 +732,10 @@ func NewTableView(par ki.Ki, name ...string) *TableView {
 }
 
 // KiType returns the [*gti.Type] of [TableView]
-func (t *TableView) KiType() *gti.Type {
-	return TableViewType
-}
+func (t *TableView) KiType() *gti.Type { return TableViewType }
 
 // New returns a new [*TableView] value
-func (t *TableView) New() ki.Ki {
-	return &TableView{}
-}
+func (t *TableView) New() ki.Ki { return &TableView{} }
 
 // SetStyleFunc sets the [TableView.StyleFunc]:
 // optional styling function
@@ -902,14 +842,10 @@ func NewTimeView(par ki.Ki, name ...string) *TimeView {
 }
 
 // KiType returns the [*gti.Type] of [TimeView]
-func (t *TimeView) KiType() *gti.Type {
-	return TimeViewType
-}
+func (t *TimeView) KiType() *gti.Type { return TimeViewType }
 
 // New returns a new [*TimeView] value
-func (t *TimeView) New() ki.Ki {
-	return &TimeView{}
-}
+func (t *TimeView) New() ki.Ki { return &TimeView{} }
 
 // SetTmpSave sets the [TimeView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
@@ -938,14 +874,10 @@ func NewDateView(par ki.Ki, name ...string) *DateView {
 }
 
 // KiType returns the [*gti.Type] of [DateView]
-func (t *DateView) KiType() *gti.Type {
-	return DateViewType
-}
+func (t *DateView) KiType() *gti.Type { return DateViewType }
 
 // New returns a new [*DateView] value
-func (t *DateView) New() ki.Ki {
-	return &DateView{}
-}
+func (t *DateView) New() ki.Ki { return &DateView{} }
 
 // SetTmpSave sets the [DateView.TmpSave]:
 // value view that needs to have SaveTmp called on it whenever a change
@@ -991,14 +923,10 @@ func NewTreeView(par ki.Ki, name ...string) *TreeView {
 }
 
 // KiType returns the [*gti.Type] of [TreeView]
-func (t *TreeView) KiType() *gti.Type {
-	return TreeViewType
-}
+func (t *TreeView) KiType() *gti.Type { return TreeViewType }
 
 // New returns a new [*TreeView] value
-func (t *TreeView) New() ki.Ki {
-	return &TreeView{}
-}
+func (t *TreeView) New() ki.Ki { return &TreeView{} }
 
 // SetText sets the [TreeView.Text]:
 // The text to display for the tree view item label, which automatically

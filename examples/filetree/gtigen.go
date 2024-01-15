@@ -21,14 +21,10 @@ func NewFileBrowse(par ki.Ki, name ...string) *FileBrowse {
 }
 
 // KiType returns the [*gti.Type] of [FileBrowse]
-func (t *FileBrowse) KiType() *gti.Type {
-	return FileBrowseType
-}
+func (t *FileBrowse) KiType() *gti.Type { return FileBrowseType }
 
 // New returns a new [*FileBrowse] value
-func (t *FileBrowse) New() ki.Ki {
-	return &FileBrowse{}
-}
+func (t *FileBrowse) New() ki.Ki { return &FileBrowse{} }
 
 // SetProjRoot sets the [FileBrowse.ProjRoot]:
 // root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename

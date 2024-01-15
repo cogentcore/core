@@ -32,15 +32,10 @@ func _DropModsNoOp() {
 
 var _DropModsNameToValueMap = map[string]DropMods{
 	`NoDropMod`: 0,
-	`nodropmod`: 0,
 	`Copy`:      1,
-	`copy`:      1,
 	`Move`:      2,
-	`move`:      2,
 	`Link`:      3,
-	`link`:      3,
 	`Ignore`:    4,
-	`ignore`:    4,
 }
 
 var _DropModsDescMap = map[DropMods]string{
@@ -73,10 +68,6 @@ func (i DropMods) String() string {
 // error if the string is invalid.
 func (i *DropMods) SetString(s string) error {
 	if val, ok := _DropModsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DropModsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -155,13 +146,9 @@ func _ButtonsNoOp() {
 
 var _ButtonsNameToValueMap = map[string]Buttons{
 	`NoButton`: 0,
-	`nobutton`: 0,
 	`Left`:     1,
-	`left`:     1,
 	`Middle`:   2,
-	`middle`:   2,
 	`Right`:    3,
-	`right`:    3,
 }
 
 var _ButtonsDescMap = map[Buttons]string{
@@ -192,10 +179,6 @@ func (i Buttons) String() string {
 // error if the string is invalid.
 func (i *Buttons) SetString(s string) error {
 	if val, ok := _ButtonsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ButtonsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -277,19 +260,12 @@ func _SelectModesNoOp() {
 
 var _SelectModesNameToValueMap = map[string]SelectModes{
 	`SelectOne`:        0,
-	`selectone`:        0,
 	`ExtendContinuous`: 1,
-	`extendcontinuous`: 1,
 	`ExtendOne`:        2,
-	`extendone`:        2,
 	`NoSelect`:         3,
-	`noselect`:         3,
 	`Unselect`:         4,
-	`unselect`:         4,
 	`SelectQuiet`:      5,
-	`selectquiet`:      5,
 	`UnselectQuiet`:    6,
-	`unselectquiet`:    6,
 }
 
 var _SelectModesDescMap = map[SelectModes]string{
@@ -326,10 +302,6 @@ func (i SelectModes) String() string {
 // error if the string is invalid.
 func (i *SelectModes) SetString(s string) error {
 	if val, ok := _SelectModesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SelectModesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -449,95 +421,50 @@ func _TypesNoOp() {
 
 var _TypesNameToValueMap = map[string]Types{
 	`UnknownType`:      0,
-	`unknowntype`:      0,
 	`MouseDown`:        1,
-	`mousedown`:        1,
 	`MouseUp`:          2,
-	`mouseup`:          2,
 	`MouseMove`:        3,
-	`mousemove`:        3,
 	`MouseDrag`:        4,
-	`mousedrag`:        4,
 	`Click`:            5,
-	`click`:            5,
 	`DoubleClick`:      6,
-	`doubleclick`:      6,
 	`ContextMenu`:      7,
-	`contextmenu`:      7,
 	`LongPressStart`:   8,
-	`longpressstart`:   8,
 	`LongPressEnd`:     9,
-	`longpressend`:     9,
 	`MouseEnter`:       10,
-	`mouseenter`:       10,
 	`MouseLeave`:       11,
-	`mouseleave`:       11,
 	`LongHoverStart`:   12,
-	`longhoverstart`:   12,
 	`LongHoverEnd`:     13,
-	`longhoverend`:     13,
 	`DragStart`:        14,
-	`dragstart`:        14,
 	`DragMove`:         15,
-	`dragmove`:         15,
 	`DragEnter`:        16,
-	`dragenter`:        16,
 	`DragLeave`:        17,
-	`dragleave`:        17,
 	`Drop`:             18,
-	`drop`:             18,
 	`DropDeleteSource`: 19,
-	`dropdeletesource`: 19,
 	`SlideStart`:       20,
-	`slidestart`:       20,
 	`SlideMove`:        21,
-	`slidemove`:        21,
 	`SlideStop`:        22,
-	`slidestop`:        22,
 	`Scroll`:           23,
-	`scroll`:           23,
 	`KeyDown`:          24,
-	`keydown`:          24,
 	`KeyUp`:            25,
-	`keyup`:            25,
 	`KeyChord`:         26,
-	`keychord`:         26,
 	`TouchStart`:       27,
-	`touchstart`:       27,
 	`TouchEnd`:         28,
-	`touchend`:         28,
 	`TouchMove`:        29,
-	`touchmove`:        29,
 	`Magnify`:          30,
-	`magnify`:          30,
 	`Rotate`:           31,
-	`rotate`:           31,
 	`Select`:           32,
-	`select`:           32,
 	`Focus`:            33,
-	`focus`:            33,
 	`FocusLost`:        34,
-	`focuslost`:        34,
 	`Change`:           35,
-	`change`:           35,
 	`Input`:            36,
-	`input`:            36,
 	`Show`:             37,
-	`show`:             37,
 	`Close`:            38,
-	`close`:            38,
 	`Window`:           39,
-	`window`:           39,
 	`WindowResize`:     40,
-	`windowresize`:     40,
 	`WindowPaint`:      41,
-	`windowpaint`:      41,
 	`OS`:               42,
-	`os`:               42,
 	`OSOpenFiles`:      43,
-	`osopenfiles`:      43,
 	`Custom`:           44,
-	`custom`:           44,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -653,10 +580,6 @@ func (i *Types) SetString(s string) error {
 		*i = val
 		return nil
 	}
-	if val, ok := _TypesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
 	return errors.New(s + " is not a valid value for type Types")
 }
 
@@ -730,9 +653,7 @@ func _EventFlagsNoOp() {
 
 var _EventFlagsNameToValueMap = map[string]EventFlags{
 	`Handled`: 0,
-	`handled`: 0,
 	`Unique`:  1,
-	`unique`:  1,
 }
 
 var _EventFlagsDescMap = map[EventFlags]string{
@@ -790,8 +711,6 @@ func (i *EventFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _EventFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _EventFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -901,21 +820,13 @@ func _WinActionsNoOp() {
 
 var _WinActionsNameToValueMap = map[string]WinActions{
 	`NoWinAction`:  0,
-	`nowinaction`:  0,
 	`Close`:        1,
-	`close`:        1,
 	`Minimize`:     2,
-	`minimize`:     2,
 	`Move`:         3,
-	`move`:         3,
 	`Focus`:        4,
-	`focus`:        4,
 	`FocusLost`:    5,
-	`focuslost`:    5,
 	`Show`:         6,
-	`show`:         6,
 	`ScreenUpdate`: 7,
-	`screenupdate`: 7,
 }
 
 var _WinActionsDescMap = map[WinActions]string{
@@ -954,10 +865,6 @@ func (i WinActions) String() string {
 // error if the string is invalid.
 func (i *WinActions) SetString(s string) error {
 	if val, ok := _WinActionsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _WinActionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

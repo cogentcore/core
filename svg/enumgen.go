@@ -28,7 +28,6 @@ func _NodeFlagsNoOp() {
 
 var _NodeFlagsNameToValueMap = map[string]NodeFlags{
 	`IsDef`: 7,
-	`isdef`: 7,
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
@@ -94,8 +93,6 @@ func (i *NodeFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _NodeFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -216,9 +213,7 @@ func _ViewBoxMeetOrSliceNoOp() {
 
 var _ViewBoxMeetOrSliceNameToValueMap = map[string]ViewBoxMeetOrSlice{
 	`Meet`:  0,
-	`meet`:  0,
 	`Slice`: 1,
-	`slice`: 1,
 }
 
 var _ViewBoxMeetOrSliceDescMap = map[ViewBoxMeetOrSlice]string{
@@ -245,10 +240,6 @@ func (i ViewBoxMeetOrSlice) String() string {
 // error if the string is invalid.
 func (i *ViewBoxMeetOrSlice) SetString(s string) error {
 	if val, ok := _ViewBoxMeetOrSliceNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ViewBoxMeetOrSliceNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

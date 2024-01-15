@@ -18,14 +18,10 @@ func NewApp(par ki.Ki, name ...string) *App {
 }
 
 // KiType returns the [*gti.Type] of [App]
-func (t *App) KiType() *gti.Type {
-	return AppType
-}
+func (t *App) KiType() *gti.Type { return AppType }
 
 // New returns a new [*App] value
-func (t *App) New() ki.Ki {
-	return &App{}
-}
+func (t *App) New() ki.Ki { return &App{} }
 
 // SetCmd sets the [App.Cmd]:
 // Cmd is the root command associated with this app.

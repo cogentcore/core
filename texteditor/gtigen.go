@@ -24,14 +24,10 @@ func NewDiffView(par ki.Ki, name ...string) *DiffView {
 }
 
 // KiType returns the [*gti.Type] of [DiffView]
-func (t *DiffView) KiType() *gti.Type {
-	return DiffViewType
-}
+func (t *DiffView) KiType() *gti.Type { return DiffViewType }
 
 // New returns a new [*DiffView] value
-func (t *DiffView) New() ki.Ki {
-	return &DiffView{}
-}
+func (t *DiffView) New() ki.Ki { return &DiffView{} }
 
 // SetFileA sets the [DiffView.FileA]:
 // first file name being compared
@@ -73,14 +69,10 @@ func NewDiffTextEditor(par ki.Ki, name ...string) *DiffTextEditor {
 }
 
 // KiType returns the [*gti.Type] of [DiffTextEditor]
-func (t *DiffTextEditor) KiType() *gti.Type {
-	return DiffTextEditorType
-}
+func (t *DiffTextEditor) KiType() *gti.Type { return DiffTextEditorType }
 
 // New returns a new [*DiffTextEditor] value
-func (t *DiffTextEditor) New() ki.Ki {
-	return &DiffTextEditor{}
-}
+func (t *DiffTextEditor) New() ki.Ki { return &DiffTextEditor{} }
 
 // SetTooltip sets the [DiffTextEditor.Tooltip]
 func (t *DiffTextEditor) SetTooltip(v string) *DiffTextEditor { t.Tooltip = v; return t }
@@ -141,14 +133,10 @@ func NewEditor(par ki.Ki, name ...string) *Editor {
 }
 
 // KiType returns the [*gti.Type] of [Editor]
-func (t *Editor) KiType() *gti.Type {
-	return EditorType
-}
+func (t *Editor) KiType() *gti.Type { return EditorType }
 
 // New returns a new [*Editor] value
-func (t *Editor) New() ki.Ki {
-	return &Editor{}
-}
+func (t *Editor) New() ki.Ki { return &Editor{} }
 
 // EditorEmbedder is an interface that all types that embed Editor satisfy
 type EditorEmbedder interface {
@@ -168,9 +156,7 @@ func AsEditor(k ki.Ki) *Editor {
 }
 
 // AsEditor satisfies the [EditorEmbedder] interface
-func (t *Editor) AsEditor() *Editor {
-	return t
-}
+func (t *Editor) AsEditor() *Editor { return t }
 
 // SetPlaceholder sets the [Editor.Placeholder]:
 // text that is displayed when the field is empty, in a lower-contrast manner
@@ -217,14 +203,10 @@ func NewTwinEditors(par ki.Ki, name ...string) *TwinEditors {
 }
 
 // KiType returns the [*gti.Type] of [TwinEditors]
-func (t *TwinEditors) KiType() *gti.Type {
-	return TwinEditorsType
-}
+func (t *TwinEditors) KiType() *gti.Type { return TwinEditorsType }
 
 // New returns a new [*TwinEditors] value
-func (t *TwinEditors) New() ki.Ki {
-	return &TwinEditors{}
-}
+func (t *TwinEditors) New() ki.Ki { return &TwinEditors{} }
 
 // SetBufA sets the [TwinEditors.BufA]:
 // textbuf for A

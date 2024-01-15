@@ -34,19 +34,12 @@ func _PlatformsNoOp() {
 
 var _PlatformsNameToValueMap = map[string]Platforms{
 	`MacOS`:     0,
-	`macos`:     0,
 	`Linux`:     1,
-	`linux`:     1,
 	`Windows`:   2,
-	`windows`:   2,
 	`IOS`:       3,
-	`ios`:       3,
 	`Android`:   4,
-	`android`:   4,
 	`Web`:       5,
-	`web`:       5,
 	`Offscreen`: 6,
-	`offscreen`: 6,
 }
 
 var _PlatformsDescMap = map[Platforms]string{
@@ -83,10 +76,6 @@ func (i Platforms) String() string {
 // error if the string is invalid.
 func (i *Platforms) SetString(s string) error {
 	if val, ok := _PlatformsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _PlatformsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -164,11 +153,8 @@ func _VirtualKeyboardTypesNoOp() {
 
 var _VirtualKeyboardTypesNameToValueMap = map[string]VirtualKeyboardTypes{
 	`DefaultKeyboard`:    0,
-	`defaultkeyboard`:    0,
 	`SingleLineKeyboard`: 1,
-	`singlelinekeyboard`: 1,
 	`NumberKeyboard`:     2,
-	`numberkeyboard`:     2,
 }
 
 var _VirtualKeyboardTypesDescMap = map[VirtualKeyboardTypes]string{
@@ -197,10 +183,6 @@ func (i VirtualKeyboardTypes) String() string {
 // error if the string is invalid.
 func (i *VirtualKeyboardTypes) SetString(s string) error {
 	if val, ok := _VirtualKeyboardTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _VirtualKeyboardTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -278,11 +260,8 @@ func _ScreenOrientationNoOp() {
 
 var _ScreenOrientationNameToValueMap = map[string]ScreenOrientation{
 	`OrientationUnknown`: 0,
-	`orientationunknown`: 0,
 	`Portrait`:           1,
-	`portrait`:           1,
 	`Landscape`:          2,
-	`landscape`:          2,
 }
 
 var _ScreenOrientationDescMap = map[ScreenOrientation]string{
@@ -311,10 +290,6 @@ func (i ScreenOrientation) String() string {
 // error if the string is invalid.
 func (i *ScreenOrientation) SetString(s string) error {
 	if val, ok := _ScreenOrientationNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ScreenOrientationNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -395,17 +370,11 @@ func _WindowFlagsNoOp() {
 
 var _WindowFlagsNameToValueMap = map[string]WindowFlags{
 	`Dialog`:     0,
-	`dialog`:     0,
 	`Modal`:      1,
-	`modal`:      1,
 	`Tool`:       2,
-	`tool`:       2,
 	`Fullscreen`: 3,
-	`fullscreen`: 3,
 	`Minimized`:  4,
-	`minimized`:  4,
 	`Focused`:    5,
-	`focused`:    5,
 }
 
 var _WindowFlagsDescMap = map[WindowFlags]string{
@@ -471,8 +440,6 @@ func (i *WindowFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _WindowFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _WindowFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

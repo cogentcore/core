@@ -23,11 +23,7 @@ func NewNode(par Ki, name ...string) *Node {
 }
 
 // KiType returns the [*gti.Type] of [Node]
-func (t *Node) KiType() *gti.Type {
-	return NodeType
-}
+func (t *Node) KiType() *gti.Type { return NodeType }
 
 // New returns a new [*Node] value
-func (t *Node) New() Ki {
-	return &Node{}
-}
+func (t *Node) New() Ki { return &Node{} }

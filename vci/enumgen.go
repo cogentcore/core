@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -32,19 +31,12 @@ func _FileStatusNoOp() {
 
 var _FileStatusNameToValueMap = map[string]FileStatus{
 	`Untracked`:  0,
-	`untracked`:  0,
 	`Stored`:     1,
-	`stored`:     1,
 	`Modified`:   2,
-	`modified`:   2,
 	`Added`:      3,
-	`added`:      3,
 	`Deleted`:    4,
-	`deleted`:    4,
 	`Conflicted`: 5,
-	`conflicted`: 5,
 	`Updated`:    6,
-	`updated`:    6,
 }
 
 var _FileStatusDescMap = map[FileStatus]string{
@@ -81,10 +73,6 @@ func (i FileStatus) String() string {
 // error if the string is invalid.
 func (i *FileStatus) SetString(s string) error {
 	if val, ok := _FileStatusNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FileStatusNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

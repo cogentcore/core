@@ -31,13 +31,9 @@ func _DirFlagsNoOp() {
 
 var _DirFlagsNameToValueMap = map[string]DirFlags{
 	`Mark`:          0,
-	`mark`:          0,
 	`IsOpen`:        1,
-	`isopen`:        1,
 	`SortByName`:    2,
-	`sortbyname`:    2,
 	`SortByModTime`: 3,
-	`sortbymodtime`: 3,
 }
 
 var _DirFlagsDescMap = map[DirFlags]string{
@@ -99,8 +95,6 @@ func (i *DirFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _DirFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _DirFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -204,9 +198,7 @@ func _NodeFlagsNoOp() {
 
 var _NodeFlagsNameToValueMap = map[string]NodeFlags{
 	`Open`:    11,
-	`open`:    11,
 	`SymLink`: 12,
-	`symlink`: 12,
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
@@ -274,8 +266,6 @@ func (i *NodeFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _NodeFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _NodeFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

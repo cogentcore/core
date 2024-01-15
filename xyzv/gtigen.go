@@ -12,14 +12,10 @@ import (
 var ManipPtType = gti.AddType(&gti.Type{Name: "goki.dev/xyzv.ManipPt", IDName: "manip-pt", Doc: "ManipPt is a manipulation control point", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Solid"}}, Instance: &ManipPt{}})
 
 // KiType returns the [*gti.Type] of [ManipPt]
-func (t *ManipPt) KiType() *gti.Type {
-	return ManipPtType
-}
+func (t *ManipPt) KiType() *gti.Type { return ManipPtType }
 
 // New returns a new [*ManipPt] value
-func (t *ManipPt) New() ki.Ki {
-	return &ManipPt{}
-}
+func (t *ManipPt) New() ki.Ki { return &ManipPt{} }
 
 // SetMat sets the [ManipPt.Mat]
 func (t *ManipPt) SetMat(v xyz.Material) *ManipPt { t.Mat = v; return t }
@@ -36,14 +32,10 @@ func NewScene(par ki.Ki, name ...string) *Scene {
 }
 
 // KiType returns the [*gti.Type] of [Scene]
-func (t *Scene) KiType() *gti.Type {
-	return SceneType
-}
+func (t *Scene) KiType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
-func (t *Scene) New() ki.Ki {
-	return &Scene{}
-}
+func (t *Scene) New() ki.Ki { return &Scene{} }
 
 // SetSelMode sets the [Scene.SelMode]:
 // how to deal with selection / manipulation events
@@ -75,14 +67,10 @@ func NewSceneView(par ki.Ki, name ...string) *SceneView {
 }
 
 // KiType returns the [*gti.Type] of [SceneView]
-func (t *SceneView) KiType() *gti.Type {
-	return SceneViewType
-}
+func (t *SceneView) KiType() *gti.Type { return SceneViewType }
 
 // New returns a new [*SceneView] value
-func (t *SceneView) New() ki.Ki {
-	return &SceneView{}
-}
+func (t *SceneView) New() ki.Ki { return &SceneView{} }
 
 // SetTooltip sets the [SceneView.Tooltip]
 func (t *SceneView) SetTooltip(v string) *SceneView { t.Tooltip = v; return t }

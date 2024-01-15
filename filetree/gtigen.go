@@ -24,14 +24,10 @@ func NewNode(par ki.Ki, name ...string) *Node {
 }
 
 // KiType returns the [*gti.Type] of [Node]
-func (t *Node) KiType() *gti.Type {
-	return NodeType
-}
+func (t *Node) KiType() *gti.Type { return NodeType }
 
 // New returns a new [*Node] value
-func (t *Node) New() ki.Ki {
-	return &Node{}
-}
+func (t *Node) New() ki.Ki { return &Node{} }
 
 // NodeEmbedder is an interface that all types that embed Node satisfy
 type NodeEmbedder interface {
@@ -51,9 +47,7 @@ func AsNode(k ki.Ki) *Node {
 }
 
 // AsNode satisfies the [NodeEmbedder] interface
-func (t *Node) AsNode() *Node {
-	return t
-}
+func (t *Node) AsNode() *Node { return t }
 
 // SetTooltip sets the [Node.Tooltip]
 func (t *Node) SetTooltip(v string) *Node { t.Tooltip = v; return t }
@@ -95,14 +89,10 @@ func NewTree(par ki.Ki, name ...string) *Tree {
 }
 
 // KiType returns the [*gti.Type] of [Tree]
-func (t *Tree) KiType() *gti.Type {
-	return TreeType
-}
+func (t *Tree) KiType() *gti.Type { return TreeType }
 
 // New returns a new [*Tree] value
-func (t *Tree) New() ki.Ki {
-	return &Tree{}
-}
+func (t *Tree) New() ki.Ki { return &Tree{} }
 
 // SetDirsOnTop sets the [Tree.DirsOnTop]:
 // if true, then all directories are placed at the top of the tree view
@@ -150,14 +140,10 @@ func NewVCSLogView(par ki.Ki, name ...string) *VCSLogView {
 }
 
 // KiType returns the [*gti.Type] of [VCSLogView]
-func (t *VCSLogView) KiType() *gti.Type {
-	return VCSLogViewType
-}
+func (t *VCSLogView) KiType() *gti.Type { return VCSLogViewType }
 
 // New returns a new [*VCSLogView] value
-func (t *VCSLogView) New() ki.Ki {
-	return &VCSLogView{}
-}
+func (t *VCSLogView) New() ki.Ki { return &VCSLogView{} }
 
 // SetLog sets the [VCSLogView.Log]:
 // current log

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -29,13 +28,9 @@ func _DimsNoOp() {
 
 var _DimsNameToValueMap = map[string]Dims{
 	`X`: 0,
-	`x`: 0,
 	`Y`: 1,
-	`y`: 1,
 	`Z`: 2,
-	`z`: 2,
 	`W`: 3,
-	`w`: 3,
 }
 
 var _DimsDescMap = map[Dims]string{
@@ -66,10 +61,6 @@ func (i Dims) String() string {
 // error if the string is invalid.
 func (i *Dims) SetString(s string) error {
 	if val, ok := _DimsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DimsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -28,11 +27,8 @@ func _TrileanNoOp() {
 
 var _TrileanNameToValueMap = map[string]Trilean{
 	`Pass`: 0,
-	`pass`: 0,
 	`Yes`:  1,
-	`yes`:  1,
 	`No`:   2,
-	`no`:   2,
 }
 
 var _TrileanDescMap = map[Trilean]string{
@@ -61,10 +57,6 @@ func (i Trilean) String() string {
 // error if the string is invalid.
 func (i *Trilean) SetString(s string) error {
 	if val, ok := _TrileanNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TrileanNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

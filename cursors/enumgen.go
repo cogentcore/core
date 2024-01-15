@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -206,10 +205,6 @@ func (i Cursor) String() string {
 // error if the string is invalid.
 func (i *Cursor) SetString(s string) error {
 	if val, ok := _CursorNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _CursorNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

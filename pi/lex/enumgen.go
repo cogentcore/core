@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -36,27 +35,16 @@ func _ActionsNoOp() {
 
 var _ActionsNameToValueMap = map[string]Actions{
 	`Next`:        0,
-	`next`:        0,
 	`Name`:        1,
-	`name`:        1,
 	`Number`:      2,
-	`number`:      2,
 	`Quoted`:      3,
-	`quoted`:      3,
 	`QuotedRaw`:   4,
-	`quotedraw`:   4,
 	`EOL`:         5,
-	`eol`:         5,
 	`ReadUntil`:   6,
-	`readuntil`:   6,
 	`PushState`:   7,
-	`pushstate`:   7,
 	`PopState`:    8,
-	`popstate`:    8,
 	`SetGuestLex`: 9,
-	`setguestlex`: 9,
 	`PopGuestLex`: 10,
-	`popguestlex`: 10,
 }
 
 var _ActionsDescMap = map[Actions]string{
@@ -101,10 +89,6 @@ func (i Actions) String() string {
 // error if the string is invalid.
 func (i *Actions) SetString(s string) error {
 	if val, ok := _ActionsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ActionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -186,19 +170,12 @@ func _MatchesNoOp() {
 
 var _MatchesNameToValueMap = map[string]Matches{
 	`String`:     0,
-	`string`:     0,
 	`StrName`:    1,
-	`strname`:    1,
 	`Letter`:     2,
-	`letter`:     2,
 	`Digit`:      3,
-	`digit`:      3,
 	`WhiteSpace`: 4,
-	`whitespace`: 4,
 	`CurState`:   5,
-	`curstate`:   5,
 	`AnyRune`:    6,
-	`anyrune`:    6,
 }
 
 var _MatchesDescMap = map[Matches]string{
@@ -235,10 +212,6 @@ func (i Matches) String() string {
 // error if the string is invalid.
 func (i *Matches) SetString(s string) error {
 	if val, ok := _MatchesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _MatchesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -320,19 +293,12 @@ func _MatchPosNoOp() {
 
 var _MatchPosNameToValueMap = map[string]MatchPos{
 	`AnyPos`:       0,
-	`anypos`:       0,
 	`StartOfLine`:  1,
-	`startofline`:  1,
 	`EndOfLine`:    2,
-	`endofline`:    2,
 	`MiddleOfLine`: 3,
-	`middleofline`: 3,
 	`StartOfWord`:  4,
-	`startofword`:  4,
 	`EndOfWord`:    5,
-	`endofword`:    5,
 	`MiddleOfWord`: 6,
-	`middleofword`: 6,
 }
 
 var _MatchPosDescMap = map[MatchPos]string{
@@ -369,10 +335,6 @@ func (i MatchPos) String() string {
 // error if the string is invalid.
 func (i *MatchPos) SetString(s string) error {
 	if val, ok := _MatchPosNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _MatchPosNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

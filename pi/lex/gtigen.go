@@ -27,14 +27,10 @@ func NewRule(par ki.Ki, name ...string) *Rule {
 }
 
 // KiType returns the [*gti.Type] of [Rule]
-func (t *Rule) KiType() *gti.Type {
-	return RuleType
-}
+func (t *Rule) KiType() *gti.Type { return RuleType }
 
 // New returns a new [*Rule] value
-func (t *Rule) New() ki.Ki {
-	return &Rule{}
-}
+func (t *Rule) New() ki.Ki { return &Rule{} }
 
 // SetOff sets the [Rule.Off]:
 // disable this rule -- useful for testing and exploration

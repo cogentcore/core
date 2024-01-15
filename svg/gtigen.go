@@ -23,14 +23,10 @@ func NewCircle(par ki.Ki, name ...string) *Circle {
 }
 
 // KiType returns the [*gti.Type] of [Circle]
-func (t *Circle) KiType() *gti.Type {
-	return CircleType
-}
+func (t *Circle) KiType() *gti.Type { return CircleType }
 
 // New returns a new [*Circle] value
-func (t *Circle) New() ki.Ki {
-	return &Circle{}
-}
+func (t *Circle) New() ki.Ki { return &Circle{} }
 
 // SetRadius sets the [Circle.Radius]:
 // radius of the circle
@@ -49,14 +45,10 @@ func NewClipPath(par ki.Ki, name ...string) *ClipPath {
 }
 
 // KiType returns the [*gti.Type] of [ClipPath]
-func (t *ClipPath) KiType() *gti.Type {
-	return ClipPathType
-}
+func (t *ClipPath) KiType() *gti.Type { return ClipPathType }
 
 // New returns a new [*ClipPath] value
-func (t *ClipPath) New() ki.Ki {
-	return &ClipPath{}
-}
+func (t *ClipPath) New() ki.Ki { return &ClipPath{} }
 
 // SetClass sets the [ClipPath.Class]
 func (t *ClipPath) SetClass(v string) *ClipPath { t.Class = v; return t }
@@ -73,14 +65,10 @@ func NewStyleSheet(par ki.Ki, name ...string) *StyleSheet {
 }
 
 // KiType returns the [*gti.Type] of [StyleSheet]
-func (t *StyleSheet) KiType() *gti.Type {
-	return StyleSheetType
-}
+func (t *StyleSheet) KiType() *gti.Type { return StyleSheetType }
 
 // New returns a new [*StyleSheet] value
-func (t *StyleSheet) New() ki.Ki {
-	return &StyleSheet{}
-}
+func (t *StyleSheet) New() ki.Ki { return &StyleSheet{} }
 
 // SetSheet sets the [StyleSheet.Sheet]
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet { t.Sheet = v; return t }
@@ -98,14 +86,10 @@ func NewMetaData(par ki.Ki, name ...string) *MetaData {
 }
 
 // KiType returns the [*gti.Type] of [MetaData]
-func (t *MetaData) KiType() *gti.Type {
-	return MetaDataType
-}
+func (t *MetaData) KiType() *gti.Type { return MetaDataType }
 
 // New returns a new [*MetaData] value
-func (t *MetaData) New() ki.Ki {
-	return &MetaData{}
-}
+func (t *MetaData) New() ki.Ki { return &MetaData{} }
 
 // SetMetaData sets the [MetaData.MetaData]
 func (t *MetaData) SetMetaData(v string) *MetaData { t.MetaData = v; return t }
@@ -123,14 +107,10 @@ func NewEllipse(par ki.Ki, name ...string) *Ellipse {
 }
 
 // KiType returns the [*gti.Type] of [Ellipse]
-func (t *Ellipse) KiType() *gti.Type {
-	return EllipseType
-}
+func (t *Ellipse) KiType() *gti.Type { return EllipseType }
 
 // New returns a new [*Ellipse] value
-func (t *Ellipse) New() ki.Ki {
-	return &Ellipse{}
-}
+func (t *Ellipse) New() ki.Ki { return &Ellipse{} }
 
 // SetRadii sets the [Ellipse.Radii]:
 // radii of the ellipse in the horizontal, vertical axes
@@ -149,14 +129,10 @@ func NewFilter(par ki.Ki, name ...string) *Filter {
 }
 
 // KiType returns the [*gti.Type] of [Filter]
-func (t *Filter) KiType() *gti.Type {
-	return FilterType
-}
+func (t *Filter) KiType() *gti.Type { return FilterType }
 
 // New returns a new [*Filter] value
-func (t *Filter) New() ki.Ki {
-	return &Filter{}
-}
+func (t *Filter) New() ki.Ki { return &Filter{} }
 
 // SetFilterType sets the [Filter.FilterType]
 func (t *Filter) SetFilterType(v string) *Filter { t.FilterType = v; return t }
@@ -174,14 +150,10 @@ func NewFlow(par ki.Ki, name ...string) *Flow {
 }
 
 // KiType returns the [*gti.Type] of [Flow]
-func (t *Flow) KiType() *gti.Type {
-	return FlowType
-}
+func (t *Flow) KiType() *gti.Type { return FlowType }
 
 // New returns a new [*Flow] value
-func (t *Flow) New() ki.Ki {
-	return &Flow{}
-}
+func (t *Flow) New() ki.Ki { return &Flow{} }
 
 // SetFlowType sets the [Flow.FlowType]
 func (t *Flow) SetFlowType(v string) *Flow { t.FlowType = v; return t }
@@ -200,14 +172,10 @@ func NewGradient(par ki.Ki, name ...string) *Gradient {
 }
 
 // KiType returns the [*gti.Type] of [Gradient]
-func (t *Gradient) KiType() *gti.Type {
-	return GradientType
-}
+func (t *Gradient) KiType() *gti.Type { return GradientType }
 
 // New returns a new [*Gradient] value
-func (t *Gradient) New() ki.Ki {
-	return &Gradient{}
-}
+func (t *Gradient) New() ki.Ki { return &Gradient{} }
 
 // SetGrad sets the [Gradient.Grad]:
 // the color gradient
@@ -232,14 +200,10 @@ func NewGroup(par ki.Ki, name ...string) *Group {
 }
 
 // KiType returns the [*gti.Type] of [Group]
-func (t *Group) KiType() *gti.Type {
-	return GroupType
-}
+func (t *Group) KiType() *gti.Type { return GroupType }
 
 // New returns a new [*Group] value
-func (t *Group) New() ki.Ki {
-	return &Group{}
-}
+func (t *Group) New() ki.Ki { return &Group{} }
 
 // SetClass sets the [Group.Class]
 func (t *Group) SetClass(v string) *Group { t.Class = v; return t }
@@ -254,14 +218,10 @@ func NewImage(par ki.Ki, name ...string) *Image {
 }
 
 // KiType returns the [*gti.Type] of [Image]
-func (t *Image) KiType() *gti.Type {
-	return ImageType
-}
+func (t *Image) KiType() *gti.Type { return ImageType }
 
 // New returns a new [*Image] value
-func (t *Image) New() ki.Ki {
-	return &Image{}
-}
+func (t *Image) New() ki.Ki { return &Image{} }
 
 // SetPos sets the [Image.Pos]:
 // position of the top-left of the image
@@ -296,14 +256,10 @@ func NewLine(par ki.Ki, name ...string) *Line {
 }
 
 // KiType returns the [*gti.Type] of [Line]
-func (t *Line) KiType() *gti.Type {
-	return LineType
-}
+func (t *Line) KiType() *gti.Type { return LineType }
 
 // New returns a new [*Line] value
-func (t *Line) New() ki.Ki {
-	return &Line{}
-}
+func (t *Line) New() ki.Ki { return &Line{} }
 
 // SetStart sets the [Line.Start]:
 // position of the start of the line
@@ -326,14 +282,10 @@ func NewMarker(par ki.Ki, name ...string) *Marker {
 }
 
 // KiType returns the [*gti.Type] of [Marker]
-func (t *Marker) KiType() *gti.Type {
-	return MarkerType
-}
+func (t *Marker) KiType() *gti.Type { return MarkerType }
 
 // New returns a new [*Marker] value
-func (t *Marker) New() ki.Ki {
-	return &Marker{}
-}
+func (t *Marker) New() ki.Ki { return &Marker{} }
 
 // SetRefPos sets the [Marker.RefPos]:
 // reference position to align the vertex position with, specified in ViewBox coordinates
@@ -388,14 +340,10 @@ func NewNodeBase(par ki.Ki, name ...string) *NodeBase {
 }
 
 // KiType returns the [*gti.Type] of [NodeBase]
-func (t *NodeBase) KiType() *gti.Type {
-	return NodeBaseType
-}
+func (t *NodeBase) KiType() *gti.Type { return NodeBaseType }
 
 // New returns a new [*NodeBase] value
-func (t *NodeBase) New() ki.Ki {
-	return &NodeBase{}
-}
+func (t *NodeBase) New() ki.Ki { return &NodeBase{} }
 
 // SetClass sets the [NodeBase.Class]:
 // user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
@@ -411,14 +359,10 @@ func NewPath(par ki.Ki, name ...string) *Path {
 }
 
 // KiType returns the [*gti.Type] of [Path]
-func (t *Path) KiType() *gti.Type {
-	return PathType
-}
+func (t *Path) KiType() *gti.Type { return PathType }
 
 // New returns a new [*Path] value
-func (t *Path) New() ki.Ki {
-	return &Path{}
-}
+func (t *Path) New() ki.Ki { return &Path{} }
 
 // SetDataStr sets the [Path.DataStr]:
 // string version of the path data
@@ -437,14 +381,10 @@ func NewPolygon(par ki.Ki, name ...string) *Polygon {
 }
 
 // KiType returns the [*gti.Type] of [Polygon]
-func (t *Polygon) KiType() *gti.Type {
-	return PolygonType
-}
+func (t *Polygon) KiType() *gti.Type { return PolygonType }
 
 // New returns a new [*Polygon] value
-func (t *Polygon) New() ki.Ki {
-	return &Polygon{}
-}
+func (t *Polygon) New() ki.Ki { return &Polygon{} }
 
 // SetClass sets the [Polygon.Class]
 func (t *Polygon) SetClass(v string) *Polygon { t.Class = v; return t }
@@ -462,14 +402,10 @@ func NewPolyline(par ki.Ki, name ...string) *Polyline {
 }
 
 // KiType returns the [*gti.Type] of [Polyline]
-func (t *Polyline) KiType() *gti.Type {
-	return PolylineType
-}
+func (t *Polyline) KiType() *gti.Type { return PolylineType }
 
 // New returns a new [*Polyline] value
-func (t *Polyline) New() ki.Ki {
-	return &Polyline{}
-}
+func (t *Polyline) New() ki.Ki { return &Polyline{} }
 
 // SetPoints sets the [Polyline.Points]:
 // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
@@ -488,14 +424,10 @@ func NewRect(par ki.Ki, name ...string) *Rect {
 }
 
 // KiType returns the [*gti.Type] of [Rect]
-func (t *Rect) KiType() *gti.Type {
-	return RectType
-}
+func (t *Rect) KiType() *gti.Type { return RectType }
 
 // New returns a new [*Rect] value
-func (t *Rect) New() ki.Ki {
-	return &Rect{}
-}
+func (t *Rect) New() ki.Ki { return &Rect{} }
 
 // SetPos sets the [Rect.Pos]:
 // position of the top-left of the rectangle
@@ -522,14 +454,10 @@ func NewSVGNode(par ki.Ki, name ...string) *SVGNode {
 }
 
 // KiType returns the [*gti.Type] of [SVGNode]
-func (t *SVGNode) KiType() *gti.Type {
-	return SVGNodeType
-}
+func (t *SVGNode) KiType() *gti.Type { return SVGNodeType }
 
 // New returns a new [*SVGNode] value
-func (t *SVGNode) New() ki.Ki {
-	return &SVGNode{}
-}
+func (t *SVGNode) New() ki.Ki { return &SVGNode{} }
 
 // SetViewBox sets the [SVGNode.ViewBox]:
 // viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
@@ -549,14 +477,10 @@ func NewText(par ki.Ki, name ...string) *Text {
 }
 
 // KiType returns the [*gti.Type] of [Text]
-func (t *Text) KiType() *gti.Type {
-	return TextType
-}
+func (t *Text) KiType() *gti.Type { return TextType }
 
 // New returns a new [*Text] value
-func (t *Text) New() ki.Ki {
-	return &Text{}
-}
+func (t *Text) New() ki.Ki { return &Text{} }
 
 // SetWidth sets the [Text.Width]:
 // width of text to render if using word-wrapping

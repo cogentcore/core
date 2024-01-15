@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -29,13 +28,9 @@ func _SelModesNoOp() {
 
 var _SelModesNameToValueMap = map[string]SelModes{
 	`NotSelectable`: 0,
-	`notselectable`: 0,
 	`Selectable`:    1,
-	`selectable`:    1,
 	`SelectionBox`:  2,
-	`selectionbox`:  2,
 	`Manipulable`:   3,
-	`manipulable`:   3,
 }
 
 var _SelModesDescMap = map[SelModes]string{
@@ -66,10 +61,6 @@ func (i SelModes) String() string {
 // error if the string is invalid.
 func (i *SelModes) SetString(s string) error {
 	if val, ok := _SelModesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SelModesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -29,13 +28,9 @@ func _SetsNoOp() {
 
 var _SetsNameToValueMap = map[string]Sets{
 	`MtxsSet`:   0,
-	`mtxsset`:   0,
 	`NLightSet`: 1,
-	`nlightset`: 1,
 	`LightSet`:  2,
-	`lightset`:  2,
 	`TexSet`:    3,
-	`texset`:    3,
 }
 
 var _SetsDescMap = map[Sets]string{
@@ -66,10 +61,6 @@ func (i Sets) String() string {
 // error if the string is invalid.
 func (i *Sets) SetString(s string) error {
 	if val, ok := _SetsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SetsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -130,10 +129,6 @@ func (i Units) String() string {
 // error if the string is invalid.
 func (i *Units) SetString(s string) error {
 	if val, ok := _UnitsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _UnitsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

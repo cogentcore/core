@@ -35,19 +35,12 @@ func _ButtonTypesNoOp() {
 
 var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
 	`Filled`:   0,
-	`filled`:   0,
 	`Tonal`:    1,
-	`tonal`:    1,
 	`Elevated`: 2,
-	`elevated`: 2,
 	`Outlined`: 3,
-	`outlined`: 3,
 	`Text`:     4,
-	`text`:     4,
 	`Action`:   5,
-	`action`:   5,
 	`Menu`:     6,
-	`menu`:     6,
 }
 
 var _ButtonTypesDescMap = map[ButtonTypes]string{
@@ -84,10 +77,6 @@ func (i ButtonTypes) String() string {
 // error if the string is invalid.
 func (i *ButtonTypes) SetString(s string) error {
 	if val, ok := _ButtonTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ButtonTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -164,9 +153,7 @@ func _ChooserTypesNoOp() {
 
 var _ChooserTypesNameToValueMap = map[string]ChooserTypes{
 	`Filled`:   0,
-	`filled`:   0,
 	`Outlined`: 1,
-	`outlined`: 1,
 }
 
 var _ChooserTypesDescMap = map[ChooserTypes]string{
@@ -193,10 +180,6 @@ func (i ChooserTypes) String() string {
 // error if the string is invalid.
 func (i *ChooserTypes) SetString(s string) error {
 	if val, ok := _ChooserTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ChooserTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -273,9 +256,7 @@ func _CompleteSignalsNoOp() {
 
 var _CompleteSignalsNameToValueMap = map[string]CompleteSignals{
 	`Select`: 0,
-	`select`: 0,
 	`Extend`: 1,
-	`extend`: 1,
 }
 
 var _CompleteSignalsDescMap = map[CompleteSignals]string{
@@ -302,10 +283,6 @@ func (i CompleteSignals) String() string {
 // error if the string is invalid.
 func (i *CompleteSignals) SetString(s string) error {
 	if val, ok := _CompleteSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _CompleteSignalsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -381,7 +358,6 @@ func _WidgetFlagsNoOp() {
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 	`NeedsRender`: 7,
-	`needsrender`: 7,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
@@ -447,8 +423,6 @@ func (i *WidgetFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _WidgetFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _WidgetFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -570,11 +544,8 @@ func _StripesNoOp() {
 
 var _StripesNameToValueMap = map[string]Stripes{
 	`NoStripes`:  0,
-	`nostripes`:  0,
 	`RowStripes`: 1,
-	`rowstripes`: 1,
 	`ColStripes`: 2,
-	`colstripes`: 2,
 }
 
 var _StripesDescMap = map[Stripes]string{
@@ -603,10 +574,6 @@ func (i Stripes) String() string {
 // error if the string is invalid.
 func (i *Stripes) SetString(s string) error {
 	if val, ok := _StripesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _StripesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -696,35 +663,20 @@ func _LabelTypesNoOp() {
 
 var _LabelTypesNameToValueMap = map[string]LabelTypes{
 	`DisplayLarge`:   0,
-	`displaylarge`:   0,
 	`DisplayMedium`:  1,
-	`displaymedium`:  1,
 	`DisplaySmall`:   2,
-	`displaysmall`:   2,
 	`HeadlineLarge`:  3,
-	`headlinelarge`:  3,
 	`HeadlineMedium`: 4,
-	`headlinemedium`: 4,
 	`HeadlineSmall`:  5,
-	`headlinesmall`:  5,
 	`TitleLarge`:     6,
-	`titlelarge`:     6,
 	`TitleMedium`:    7,
-	`titlemedium`:    7,
 	`TitleSmall`:     8,
-	`titlesmall`:     8,
 	`BodyLarge`:      9,
-	`bodylarge`:      9,
 	`BodyMedium`:     10,
-	`bodymedium`:     10,
 	`BodySmall`:      11,
-	`bodysmall`:      11,
 	`LabelLarge`:     12,
-	`labellarge`:     12,
 	`LabelMedium`:    13,
-	`labelmedium`:    13,
 	`LabelSmall`:     14,
-	`labelsmall`:     14,
 }
 
 var _LabelTypesDescMap = map[LabelTypes]string{
@@ -777,10 +729,6 @@ func (i LabelTypes) String() string {
 // error if the string is invalid.
 func (i *LabelTypes) SetString(s string) error {
 	if val, ok := _LabelTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _LabelTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -858,11 +806,8 @@ func _LayoutPassesNoOp() {
 
 var _LayoutPassesNameToValueMap = map[string]LayoutPasses{
 	`SizeUpPass`:    0,
-	`sizeuppass`:    0,
 	`SizeDownPass`:  1,
-	`sizedownpass`:  1,
 	`SizeFinalPass`: 2,
-	`sizefinalpass`: 2,
 }
 
 var _LayoutPassesDescMap = map[LayoutPasses]string{
@@ -891,10 +836,6 @@ func (i LayoutPasses) String() string {
 // error if the string is invalid.
 func (i *LayoutPasses) SetString(s string) error {
 	if val, ok := _LayoutPassesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _LayoutPassesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -972,11 +913,8 @@ func _LayoutFlagsNoOp() {
 
 var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{
 	`StackTopOnly`: 8,
-	`stacktoponly`: 8,
 	`NeedsRedo`:    9,
-	`needsredo`:    9,
 	`NoKeys`:       10,
-	`nokeys`:       10,
 }
 
 var _LayoutFlagsDescMap = map[LayoutFlags]string{
@@ -1046,8 +984,6 @@ func (i *LayoutFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _LayoutFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _LayoutFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -1174,21 +1110,13 @@ func _WinFlagsNoOp() {
 
 var _WinFlagsNameToValueMap = map[string]WinFlags{
 	`HasGeomPrefs`:  0,
-	`hasgeomprefs`:  0,
 	`Closing`:       1,
-	`closing`:       1,
 	`Resizing`:      2,
-	`resizing`:      2,
 	`GotFocus`:      3,
-	`gotfocus`:      3,
 	`SentShow`:      4,
-	`sentshow`:      4,
 	`GoLoop`:        5,
-	`goloop`:        5,
 	`StopEventLoop`: 6,
-	`stopeventloop`: 6,
 	`SelectionMode`: 7,
-	`selectionmode`: 7,
 }
 
 var _WinFlagsDescMap = map[WinFlags]string{
@@ -1258,8 +1186,6 @@ func (i *WinFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _WinFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _WinFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -1363,9 +1289,7 @@ func _RenderContextFlagsNoOp() {
 
 var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{
 	`Visible`: 0,
-	`visible`: 0,
 	`Rebuild`: 1,
-	`rebuild`: 1,
 }
 
 var _RenderContextFlagsDescMap = map[RenderContextFlags]string{
@@ -1423,8 +1347,6 @@ func (i *RenderContextFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _RenderContextFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _RenderContextFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -1534,21 +1456,13 @@ func _ScFlagsNoOp() {
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
 	`ScUpdating`:     8,
-	`scupdating`:     8,
 	`ScNeedsRender`:  9,
-	`scneedsrender`:  9,
 	`ScNeedsLayout`:  10,
-	`scneedslayout`:  10,
 	`ScNeedsRebuild`: 11,
-	`scneedsrebuild`: 11,
 	`ScImageUpdated`: 12,
-	`scimageupdated`: 12,
 	`ScPrefSizing`:   13,
-	`scprefsizing`:   13,
 	`ScPreserve`:     14,
-	`scpreserve`:     14,
 	`ScRenderBBoxes`: 15,
-	`screnderbboxes`: 15,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -1628,8 +1542,6 @@ func (i *ScFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -1751,11 +1663,8 @@ func _DensitiesNoOp() {
 
 var _DensitiesNameToValueMap = map[string]Densities{
 	`Compact`: 0,
-	`compact`: 0,
 	`Medium`:  1,
-	`medium`:  1,
 	`Spread`:  2,
-	`spread`:  2,
 }
 
 var _DensitiesDescMap = map[Densities]string{
@@ -1784,10 +1693,6 @@ func (i Densities) String() string {
 // error if the string is invalid.
 func (i *Densities) SetString(s string) error {
 	if val, ok := _DensitiesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DensitiesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1865,11 +1770,8 @@ func _SizeClassesNoOp() {
 
 var _SizeClassesNameToValueMap = map[string]SizeClasses{
 	`Compact`:  0,
-	`compact`:  0,
 	`Medium`:   1,
-	`medium`:   1,
 	`Expanded`: 2,
-	`expanded`: 2,
 }
 
 var _SizeClassesDescMap = map[SizeClasses]string{
@@ -1898,10 +1800,6 @@ func (i SizeClasses) String() string {
 // error if the string is invalid.
 func (i *SizeClasses) SetString(s string) error {
 	if val, ok := _SizeClassesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SizeClassesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1978,9 +1876,7 @@ func _SliderTypesNoOp() {
 
 var _SliderTypesNameToValueMap = map[string]SliderTypes{
 	`Slider`:    0,
-	`slider`:    0,
 	`Scrollbar`: 1,
-	`scrollbar`: 1,
 }
 
 var _SliderTypesDescMap = map[SliderTypes]string{
@@ -2007,10 +1903,6 @@ func (i SliderTypes) String() string {
 // error if the string is invalid.
 func (i *SliderTypes) SetString(s string) error {
 	if val, ok := _SliderTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SliderTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2087,9 +1979,7 @@ func _SpellSignalsNoOp() {
 
 var _SpellSignalsNameToValueMap = map[string]SpellSignals{
 	`Select`: 0,
-	`select`: 0,
 	`Ignore`: 1,
-	`ignore`: 1,
 }
 
 var _SpellSignalsDescMap = map[SpellSignals]string{
@@ -2116,10 +2006,6 @@ func (i SpellSignals) String() string {
 // error if the string is invalid.
 func (i *SpellSignals) SetString(s string) error {
 	if val, ok := _SpellSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SpellSignalsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2201,19 +2087,12 @@ func _StageTypesNoOp() {
 
 var _StageTypesNameToValueMap = map[string]StageTypes{
 	`WindowStage`:    0,
-	`windowstage`:    0,
 	`DialogStage`:    1,
-	`dialogstage`:    1,
 	`SheetStage`:     2,
-	`sheetstage`:     2,
 	`MenuStage`:      3,
-	`menustage`:      3,
 	`TooltipStage`:   4,
-	`tooltipstage`:   4,
 	`SnackbarStage`:  5,
-	`snackbarstage`:  5,
 	`CompleterStage`: 6,
-	`completerstage`: 6,
 }
 
 var _StageTypesDescMap = map[StageTypes]string{
@@ -2250,10 +2129,6 @@ func (i StageTypes) String() string {
 // error if the string is invalid.
 func (i *StageTypes) SetString(s string) error {
 	if val, ok := _StageTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _StageTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2330,9 +2205,7 @@ func _StageSidesNoOp() {
 
 var _StageSidesNameToValueMap = map[string]StageSides{
 	`BottomSheet`: 0,
-	`bottomsheet`: 0,
 	`SideSheet`:   1,
-	`sidesheet`:   1,
 }
 
 var _StageSidesDescMap = map[StageSides]string{
@@ -2359,10 +2232,6 @@ func (i StageSides) String() string {
 // error if the string is invalid.
 func (i *StageSides) SetString(s string) error {
 	if val, ok := _StageSidesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _StageSidesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2442,15 +2311,10 @@ func _SwitchTypesNoOp() {
 
 var _SwitchTypesNameToValueMap = map[string]SwitchTypes{
 	`Switch`:          0,
-	`switch`:          0,
 	`Chip`:            1,
-	`chip`:            1,
 	`Checkbox`:        2,
-	`checkbox`:        2,
 	`RadioButton`:     3,
-	`radiobutton`:     3,
 	`SegmentedButton`: 4,
-	`segmentedbutton`: 4,
 }
 
 var _SwitchTypesDescMap = map[SwitchTypes]string{
@@ -2483,10 +2347,6 @@ func (i SwitchTypes) String() string {
 // error if the string is invalid.
 func (i *SwitchTypes) SetString(s string) error {
 	if val, ok := _SwitchTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SwitchTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2567,17 +2427,11 @@ func _TabTypesNoOp() {
 
 var _TabTypesNameToValueMap = map[string]TabTypes{
 	`StandardTabs`:     0,
-	`standardtabs`:     0,
 	`FunctionalTabs`:   1,
-	`functionaltabs`:   1,
 	`NavigationAuto`:   2,
-	`navigationauto`:   2,
 	`NavigationBar`:    3,
-	`navigationbar`:    3,
 	`NavigationRail`:   4,
-	`navigationrail`:   4,
 	`NavigationDrawer`: 5,
-	`navigationdrawer`: 5,
 }
 
 var _TabTypesDescMap = map[TabTypes]string{
@@ -2612,10 +2466,6 @@ func (i TabTypes) String() string {
 // error if the string is invalid.
 func (i *TabTypes) SetString(s string) error {
 	if val, ok := _TabTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TabTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2692,9 +2542,7 @@ func _TextFieldTypesNoOp() {
 
 var _TextFieldTypesNameToValueMap = map[string]TextFieldTypes{
 	`TextFieldFilled`:   0,
-	`textfieldfilled`:   0,
 	`TextFieldOutlined`: 1,
-	`textfieldoutlined`: 1,
 }
 
 var _TextFieldTypesDescMap = map[TextFieldTypes]string{
@@ -2721,10 +2569,6 @@ func (i TextFieldTypes) String() string {
 // error if the string is invalid.
 func (i *TextFieldTypes) SetString(s string) error {
 	if val, ok := _TextFieldTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TextFieldTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2802,11 +2646,8 @@ func _ThemesNoOp() {
 
 var _ThemesNameToValueMap = map[string]Themes{
 	`Auto`:  0,
-	`auto`:  0,
 	`Light`: 1,
-	`light`: 1,
 	`Dark`:  2,
-	`dark`:  2,
 }
 
 var _ThemesDescMap = map[Themes]string{
@@ -2835,10 +2676,6 @@ func (i Themes) String() string {
 // error if the string is invalid.
 func (i *Themes) SetString(s string) error {
 	if val, ok := _ThemesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ThemesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

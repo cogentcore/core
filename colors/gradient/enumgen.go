@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -58,10 +57,6 @@ func (i Spreads) String() string {
 // error if the string is invalid.
 func (i *Spreads) SetString(s string) error {
 	if val, ok := _SpreadsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SpreadsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -138,9 +133,7 @@ func _UnitsNoOp() {
 
 var _UnitsNameToValueMap = map[string]Units{
 	`objectBoundingBox`: 0,
-	`objectboundingbox`: 0,
 	`userSpaceOnUse`:    1,
-	`userspaceonuse`:    1,
 }
 
 var _UnitsDescMap = map[Units]string{
@@ -167,10 +160,6 @@ func (i Units) String() string {
 // error if the string is invalid.
 func (i *Units) SetString(s string) error {
 	if val, ok := _UnitsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _UnitsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

@@ -41,35 +41,20 @@ func _AbilitiesNoOp() {
 
 var _AbilitiesNameToValueMap = map[string]Abilities{
 	`Editable`:        0,
-	`editable`:        0,
 	`Selectable`:      1,
-	`selectable`:      1,
 	`Activatable`:     2,
-	`activatable`:     2,
 	`Pressable`:       3,
-	`pressable`:       3,
 	`LongPressable`:   4,
-	`longpressable`:   4,
 	`DoubleClickable`: 5,
-	`doubleclickable`: 5,
 	`Draggable`:       6,
-	`draggable`:       6,
 	`Droppable`:       7,
-	`droppable`:       7,
 	`Slideable`:       8,
-	`slideable`:       8,
 	`Checkable`:       9,
-	`checkable`:       9,
 	`Scrollable`:      10,
-	`scrollable`:      10,
 	`Focusable`:       11,
-	`focusable`:       11,
 	`FocusWithinable`: 12,
-	`focuswithinable`: 12,
 	`Hoverable`:       13,
-	`hoverable`:       13,
 	`LongHoverable`:   14,
-	`longhoverable`:   14,
 }
 
 var _AbilitiesDescMap = map[Abilities]string{
@@ -153,8 +138,6 @@ func (i *Abilities) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _AbilitiesNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _AbilitiesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

@@ -56,14 +56,10 @@ func NewAppChooser(par ki.Ki, name ...string) *AppChooser {
 }
 
 // KiType returns the [*gti.Type] of [AppChooser]
-func (t *AppChooser) KiType() *gti.Type {
-	return AppChooserType
-}
+func (t *AppChooser) KiType() *gti.Type { return AppChooserType }
 
 // New returns a new [*AppChooser] value
-func (t *AppChooser) New() ki.Ki {
-	return &AppChooser{}
-}
+func (t *AppChooser) New() ki.Ki { return &AppChooser{} }
 
 // SetResources sets the [AppChooser.Resources]:
 // Resources are generators for resources accessible by the AppChooser
@@ -109,14 +105,10 @@ func (t *AppChooser) SetItemsFunc(v func()) *AppChooser { t.ItemsFunc = v; retur
 var BodyType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Body", IDName: "body", Doc: "Body holds the primary content of a Scene", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "Title", Doc: "title of the Body, also used for window title where relevant"}}, Instance: &Body{}})
 
 // KiType returns the [*gti.Type] of [Body]
-func (t *Body) KiType() *gti.Type {
-	return BodyType
-}
+func (t *Body) KiType() *gti.Type { return BodyType }
 
 // New returns a new [*Body] value
-func (t *Body) New() ki.Ki {
-	return &Body{}
-}
+func (t *Body) New() ki.Ki { return &Body{} }
 
 // SetTitle sets the [Body.Title]:
 // title of the Body, also used for window title where relevant
@@ -141,14 +133,10 @@ func NewBox(par ki.Ki, name ...string) *Box {
 }
 
 // KiType returns the [*gti.Type] of [Box]
-func (t *Box) KiType() *gti.Type {
-	return BoxType
-}
+func (t *Box) KiType() *gti.Type { return BoxType }
 
 // New returns a new [*Box] value
-func (t *Box) New() ki.Ki {
-	return &Box{}
-}
+func (t *Box) New() ki.Ki { return &Box{} }
 
 // SetTooltip sets the [Box.Tooltip]
 func (t *Box) SetTooltip(v string) *Box { t.Tooltip = v; return t }
@@ -164,14 +152,10 @@ func NewButton(par ki.Ki, name ...string) *Button {
 }
 
 // KiType returns the [*gti.Type] of [Button]
-func (t *Button) KiType() *gti.Type {
-	return ButtonType
-}
+func (t *Button) KiType() *gti.Type { return ButtonType }
 
 // New returns a new [*Button] value
-func (t *Button) New() ki.Ki {
-	return &Button{}
-}
+func (t *Button) New() ki.Ki { return &Button{} }
 
 // ButtonEmbedder is an interface that all types that embed Button satisfy
 type ButtonEmbedder interface {
@@ -191,9 +175,7 @@ func AsButton(k ki.Ki) *Button {
 }
 
 // AsButton satisfies the [ButtonEmbedder] interface
-func (t *Button) AsButton() *Button {
-	return t
-}
+func (t *Button) AsButton() *Button { return t }
 
 // SetType sets the [Button.Type]:
 // the type of button
@@ -235,7 +217,7 @@ func (t *Button) SetData(v any) *Button { t.Data = v; return t }
 func (t *Button) SetTooltip(v string) *Button { t.Tooltip = v; return t }
 
 // CanvasType is the [gti.Type] for [Canvas]
-var CanvasType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Instance: &Canvas{}})
+var CanvasType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Canvas", IDName: "canvas", Doc: "Canvas is a widget that can be arbitrarily drawn to.", Embeds: []gti.Field{{Name: "WidgetBase"}}, Fields: []gti.Field{{Name: "Context", Doc: "Context is the paint context that we use for drawing."}}, Instance: &Canvas{}})
 
 // NewCanvas adds a new [Canvas] with the given name to the given parent:
 // Canvas is a widget that can be arbitrarily drawn to.
@@ -244,14 +226,10 @@ func NewCanvas(par ki.Ki, name ...string) *Canvas {
 }
 
 // KiType returns the [*gti.Type] of [Canvas]
-func (t *Canvas) KiType() *gti.Type {
-	return CanvasType
-}
+func (t *Canvas) KiType() *gti.Type { return CanvasType }
 
 // New returns a new [*Canvas] value
-func (t *Canvas) New() ki.Ki {
-	return &Canvas{}
-}
+func (t *Canvas) New() ki.Ki { return &Canvas{} }
 
 // SetTooltip sets the [Canvas.Tooltip]
 func (t *Canvas) SetTooltip(v string) *Canvas { t.Tooltip = v; return t }
@@ -270,14 +248,10 @@ func NewChooser(par ki.Ki, name ...string) *Chooser {
 }
 
 // KiType returns the [*gti.Type] of [Chooser]
-func (t *Chooser) KiType() *gti.Type {
-	return ChooserType
-}
+func (t *Chooser) KiType() *gti.Type { return ChooserType }
 
 // New returns a new [*Chooser] value
-func (t *Chooser) New() ki.Ki {
-	return &Chooser{}
-}
+func (t *Chooser) New() ki.Ki { return &Chooser{} }
 
 // SetType sets the [Chooser.Type]:
 // the type of combo box
@@ -384,14 +358,10 @@ func NewFrame(par ki.Ki, name ...string) *Frame {
 }
 
 // KiType returns the [*gti.Type] of [Frame]
-func (t *Frame) KiType() *gti.Type {
-	return FrameType
-}
+func (t *Frame) KiType() *gti.Type { return FrameType }
 
 // New returns a new [*Frame] value
-func (t *Frame) New() ki.Ki {
-	return &Frame{}
-}
+func (t *Frame) New() ki.Ki { return &Frame{} }
 
 // SetStripes sets the [Frame.Stripes]:
 // options for striped backgrounds -- rendered as darker bands relative to background color
@@ -415,14 +385,10 @@ func NewHandle(par ki.Ki, name ...string) *Handle {
 }
 
 // KiType returns the [*gti.Type] of [Handle]
-func (t *Handle) KiType() *gti.Type {
-	return HandleType
-}
+func (t *Handle) KiType() *gti.Type { return HandleType }
 
 // New returns a new [*Handle] value
-func (t *Handle) New() ki.Ki {
-	return &Handle{}
-}
+func (t *Handle) New() ki.Ki { return &Handle{} }
 
 // SetMin sets the [Handle.Min]:
 // Min is the minimum value that the handle can go to
@@ -454,14 +420,10 @@ func NewIcon(par ki.Ki, name ...string) *Icon {
 }
 
 // KiType returns the [*gti.Type] of [Icon]
-func (t *Icon) KiType() *gti.Type {
-	return IconType
-}
+func (t *Icon) KiType() *gti.Type { return IconType }
 
 // New returns a new [*Icon] value
-func (t *Icon) New() ki.Ki {
-	return &Icon{}
-}
+func (t *Icon) New() ki.Ki { return &Icon{} }
 
 // SetTooltip sets the [Icon.Tooltip]
 func (t *Icon) SetTooltip(v string) *Icon { t.Tooltip = v; return t }
@@ -479,14 +441,10 @@ func NewImage(par ki.Ki, name ...string) *Image {
 }
 
 // KiType returns the [*gti.Type] of [Image]
-func (t *Image) KiType() *gti.Type {
-	return ImageType
-}
+func (t *Image) KiType() *gti.Type { return ImageType }
 
 // New returns a new [*Image] value
-func (t *Image) New() ki.Ki {
-	return &Image{}
-}
+func (t *Image) New() ki.Ki { return &Image{} }
 
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
@@ -505,14 +463,10 @@ func NewLabel(par ki.Ki, name ...string) *Label {
 }
 
 // KiType returns the [*gti.Type] of [Label]
-func (t *Label) KiType() *gti.Type {
-	return LabelType
-}
+func (t *Label) KiType() *gti.Type { return LabelType }
 
 // New returns a new [*Label] value
-func (t *Label) New() ki.Ki {
-	return &Label{}
-}
+func (t *Label) New() ki.Ki { return &Label{} }
 
 // LabelEmbedder is an interface that all types that embed Label satisfy
 type LabelEmbedder interface {
@@ -532,9 +486,7 @@ func AsLabel(k ki.Ki) *Label {
 }
 
 // AsLabel satisfies the [LabelEmbedder] interface
-func (t *Label) AsLabel() *Label {
-	return t
-}
+func (t *Label) AsLabel() *Label { return t }
 
 // SetText sets the [Label.Text]:
 // label to display
@@ -558,14 +510,10 @@ func NewLabeledTextField(par ki.Ki, name ...string) *LabeledTextField {
 }
 
 // KiType returns the [*gti.Type] of [LabeledTextField]
-func (t *LabeledTextField) KiType() *gti.Type {
-	return LabeledTextFieldType
-}
+func (t *LabeledTextField) KiType() *gti.Type { return LabeledTextFieldType }
 
 // New returns a new [*LabeledTextField] value
-func (t *LabeledTextField) New() ki.Ki {
-	return &LabeledTextField{}
-}
+func (t *LabeledTextField) New() ki.Ki { return &LabeledTextField{} }
 
 // SetLabel sets the [LabeledTextField.Label]:
 // Label is the label for the text field
@@ -659,14 +607,10 @@ func NewLayout(par ki.Ki, name ...string) *Layout {
 }
 
 // KiType returns the [*gti.Type] of [Layout]
-func (t *Layout) KiType() *gti.Type {
-	return LayoutType
-}
+func (t *Layout) KiType() *gti.Type { return LayoutType }
 
 // New returns a new [*Layout] value
-func (t *Layout) New() ki.Ki {
-	return &Layout{}
-}
+func (t *Layout) New() ki.Ki { return &Layout{} }
 
 // SetStackTop sets the [Layout.StackTop]:
 // for Stacked layout, index of node to use as the top of the stack.
@@ -688,14 +632,10 @@ func NewStretch(par ki.Ki, name ...string) *Stretch {
 }
 
 // KiType returns the [*gti.Type] of [Stretch]
-func (t *Stretch) KiType() *gti.Type {
-	return StretchType
-}
+func (t *Stretch) KiType() *gti.Type { return StretchType }
 
 // New returns a new [*Stretch] value
-func (t *Stretch) New() ki.Ki {
-	return &Stretch{}
-}
+func (t *Stretch) New() ki.Ki { return &Stretch{} }
 
 // SetTooltip sets the [Stretch.Tooltip]
 func (t *Stretch) SetTooltip(v string) *Stretch { t.Tooltip = v; return t }
@@ -711,14 +651,10 @@ func NewSpace(par ki.Ki, name ...string) *Space {
 }
 
 // KiType returns the [*gti.Type] of [Space]
-func (t *Space) KiType() *gti.Type {
-	return SpaceType
-}
+func (t *Space) KiType() *gti.Type { return SpaceType }
 
 // New returns a new [*Space] value
-func (t *Space) New() ki.Ki {
-	return &Space{}
-}
+func (t *Space) New() ki.Ki { return &Space{} }
 
 // SetTooltip sets the [Space.Tooltip]
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
@@ -736,14 +672,10 @@ func NewProgressBar(par ki.Ki, name ...string) *ProgressBar {
 }
 
 // KiType returns the [*gti.Type] of [ProgressBar]
-func (t *ProgressBar) KiType() *gti.Type {
-	return ProgressBarType
-}
+func (t *ProgressBar) KiType() *gti.Type { return ProgressBarType }
 
 // New returns a new [*ProgressBar] value
-func (t *ProgressBar) New() ki.Ki {
-	return &ProgressBar{}
-}
+func (t *ProgressBar) New() ki.Ki { return &ProgressBar{} }
 
 // SetProgMax sets the [ProgressBar.ProgMax]:
 // maximum amount of progress to be achieved
@@ -806,14 +738,10 @@ func (t *ProgressBar) SetStayInView(v bool) *ProgressBar { t.StayInView = v; ret
 var SceneType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Scene", IDName: "scene", Doc: "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context, representing the unit\nof rendering in the GoGi framework.", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}, {Tool: "goki", Directive: "embedder"}}, Embeds: []gti.Field{{Name: "Frame"}}, Fields: []gti.Field{{Name: "App", Doc: "App is the pointer to the application to which this scene belongs.\nThe first Main Window Scene must set this, and others will automatically\ngrab from there."}, {Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "EventMgr", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "RenderBBoxHue", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode"}, {Name: "SelectedWidget", Doc: "the currently selected widget through the inspect editor selection mode"}, {Name: "SelectedWidgetChan", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting"}, {Name: "LastRender", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "StyleMu", Doc: "StyleMu is RW mutex protecting access to Style-related global vars"}, {Name: "ShowIter", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "ReRender", Doc: "ReRender items are re-rendered after the current pass"}}, Instance: &Scene{}})
 
 // KiType returns the [*gti.Type] of [Scene]
-func (t *Scene) KiType() *gti.Type {
-	return SceneType
-}
+func (t *Scene) KiType() *gti.Type { return SceneType }
 
 // New returns a new [*Scene] value
-func (t *Scene) New() ki.Ki {
-	return &Scene{}
-}
+func (t *Scene) New() ki.Ki { return &Scene{} }
 
 // SceneEmbedder is an interface that all types that embed Scene satisfy
 type SceneEmbedder interface {
@@ -833,9 +761,7 @@ func AsScene(k ki.Ki) *Scene {
 }
 
 // AsScene satisfies the [SceneEmbedder] interface
-func (t *Scene) AsScene() *Scene {
-	return t
-}
+func (t *Scene) AsScene() *Scene { return t }
 
 // SetApp sets the [Scene.App]:
 // App is the pointer to the application to which this scene belongs.
@@ -907,14 +833,10 @@ func NewSeparator(par ki.Ki, name ...string) *Separator {
 }
 
 // KiType returns the [*gti.Type] of [Separator]
-func (t *Separator) KiType() *gti.Type {
-	return SeparatorType
-}
+func (t *Separator) KiType() *gti.Type { return SeparatorType }
 
 // New returns a new [*Separator] value
-func (t *Separator) New() ki.Ki {
-	return &Separator{}
-}
+func (t *Separator) New() ki.Ki { return &Separator{} }
 
 // SetDim sets the [Separator.Dim]:
 // Dim is the dimension the separator goes along (X means it goes longer horizontally, etc)
@@ -959,14 +881,10 @@ func NewSlider(par ki.Ki, name ...string) *Slider {
 }
 
 // KiType returns the [*gti.Type] of [Slider]
-func (t *Slider) KiType() *gti.Type {
-	return SliderType
-}
+func (t *Slider) KiType() *gti.Type { return SliderType }
 
 // New returns a new [*Slider] value
-func (t *Slider) New() ki.Ki {
-	return &Slider{}
-}
+func (t *Slider) New() ki.Ki { return &Slider{} }
 
 // SliderEmbedder is an interface that all types that embed Slider satisfy
 type SliderEmbedder interface {
@@ -986,9 +904,7 @@ func AsSlider(k ki.Ki) *Slider {
 }
 
 // AsSlider satisfies the [SliderEmbedder] interface
-func (t *Slider) AsSlider() *Slider {
-	return t
-}
+func (t *Slider) AsSlider() *Slider { return t }
 
 // SetDim sets the [Slider.Dim]:
 // dimension along which the slider slides
@@ -1093,14 +1009,10 @@ func NewSpinner(par ki.Ki, name ...string) *Spinner {
 }
 
 // KiType returns the [*gti.Type] of [Spinner]
-func (t *Spinner) KiType() *gti.Type {
-	return SpinnerType
-}
+func (t *Spinner) KiType() *gti.Type { return SpinnerType }
 
 // New returns a new [*Spinner] value
-func (t *Spinner) New() ki.Ki {
-	return &Spinner{}
-}
+func (t *Spinner) New() ki.Ki { return &Spinner{} }
 
 // SpinnerEmbedder is an interface that all types that embed Spinner satisfy
 type SpinnerEmbedder interface {
@@ -1120,9 +1032,7 @@ func AsSpinner(k ki.Ki) *Spinner {
 }
 
 // AsSpinner satisfies the [SpinnerEmbedder] interface
-func (t *Spinner) AsSpinner() *Spinner {
-	return t
-}
+func (t *Spinner) AsSpinner() *Spinner { return t }
 
 // SetStep sets the [Spinner.Step]:
 // Step is the smallest step size to increment
@@ -1204,14 +1114,10 @@ func NewSplits(par ki.Ki, name ...string) *Splits {
 }
 
 // KiType returns the [*gti.Type] of [Splits]
-func (t *Splits) KiType() *gti.Type {
-	return SplitsType
-}
+func (t *Splits) KiType() *gti.Type { return SplitsType }
 
 // New returns a new [*Splits] value
-func (t *Splits) New() ki.Ki {
-	return &Splits{}
-}
+func (t *Splits) New() ki.Ki { return &Splits{} }
 
 // SplitsEmbedder is an interface that all types that embed Splits satisfy
 type SplitsEmbedder interface {
@@ -1231,9 +1137,7 @@ func AsSplits(k ki.Ki) *Splits {
 }
 
 // AsSplits satisfies the [SplitsEmbedder] interface
-func (t *Splits) AsSplits() *Splits {
-	return t
-}
+func (t *Splits) AsSplits() *Splits { return t }
 
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits { t.Tooltip = v; return t }
@@ -1346,14 +1250,10 @@ func NewSVG(par ki.Ki, name ...string) *SVG {
 }
 
 // KiType returns the [*gti.Type] of [SVG]
-func (t *SVG) KiType() *gti.Type {
-	return SVGType
-}
+func (t *SVG) KiType() *gti.Type { return SVGType }
 
 // New returns a new [*SVG] value
-func (t *SVG) New() ki.Ki {
-	return &SVG{}
-}
+func (t *SVG) New() ki.Ki { return &SVG{} }
 
 // SetTooltip sets the [SVG.Tooltip]
 func (t *SVG) SetTooltip(v string) *SVG { t.Tooltip = v; return t }
@@ -1369,14 +1269,10 @@ func NewSwitch(par ki.Ki, name ...string) *Switch {
 }
 
 // KiType returns the [*gti.Type] of [Switch]
-func (t *Switch) KiType() *gti.Type {
-	return SwitchType
-}
+func (t *Switch) KiType() *gti.Type { return SwitchType }
 
 // New returns a new [*Switch] value
-func (t *Switch) New() ki.Ki {
-	return &Switch{}
-}
+func (t *Switch) New() ki.Ki { return &Switch{} }
 
 // SetText sets the [Switch.Text]:
 // the label text for the switch
@@ -1410,14 +1306,10 @@ func NewSwitches(par ki.Ki, name ...string) *Switches {
 }
 
 // KiType returns the [*gti.Type] of [Switches]
-func (t *Switches) KiType() *gti.Type {
-	return SwitchesType
-}
+func (t *Switches) KiType() *gti.Type { return SwitchesType }
 
 // New returns a new [*Switches] value
-func (t *Switches) New() ki.Ki {
-	return &Switches{}
-}
+func (t *Switches) New() ki.Ki { return &Switches{} }
 
 // SwitchesEmbedder is an interface that all types that embed Switches satisfy
 type SwitchesEmbedder interface {
@@ -1437,9 +1329,7 @@ func AsSwitches(k ki.Ki) *Switches {
 }
 
 // AsSwitches satisfies the [SwitchesEmbedder] interface
-func (t *Switches) AsSwitches() *Switches {
-	return t
-}
+func (t *Switches) AsSwitches() *Switches { return t }
 
 // SetType sets the [Switches.Type]:
 // the type of switches that will be made
@@ -1482,14 +1372,10 @@ func NewTabs(par ki.Ki, name ...string) *Tabs {
 }
 
 // KiType returns the [*gti.Type] of [Tabs]
-func (t *Tabs) KiType() *gti.Type {
-	return TabsType
-}
+func (t *Tabs) KiType() *gti.Type { return TabsType }
 
 // New returns a new [*Tabs] value
-func (t *Tabs) New() ki.Ki {
-	return &Tabs{}
-}
+func (t *Tabs) New() ki.Ki { return &Tabs{} }
 
 // TabsEmbedder is an interface that all types that embed Tabs satisfy
 type TabsEmbedder interface {
@@ -1509,9 +1395,7 @@ func AsTabs(k ki.Ki) *Tabs {
 }
 
 // AsTabs satisfies the [TabsEmbedder] interface
-func (t *Tabs) AsTabs() *Tabs {
-	return t
-}
+func (t *Tabs) AsTabs() *Tabs { return t }
 
 // SetType sets the [Tabs.Type]:
 // Type is the styling type of the tabs. It must be set
@@ -1545,14 +1429,10 @@ func (t *Tabs) SetStackTop(v int) *Tabs { t.StackTop = v; return t }
 var TabType = gti.AddType(&gti.Type{Name: "goki.dev/gi.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []gti.Directive{{Tool: "goki", Directive: "no-new"}}, Embeds: []gti.Field{{Name: "Box"}}, Fields: []gti.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}}, Instance: &Tab{}})
 
 // KiType returns the [*gti.Type] of [Tab]
-func (t *Tab) KiType() *gti.Type {
-	return TabType
-}
+func (t *Tab) KiType() *gti.Type { return TabType }
 
 // New returns a new [*Tab] value
-func (t *Tab) New() ki.Ki {
-	return &Tab{}
-}
+func (t *Tab) New() ki.Ki { return &Tab{} }
 
 // SetType sets the [Tab.Type]:
 // Type is the styling type of the tab. This property
@@ -1596,14 +1476,10 @@ func NewTextField(par ki.Ki, name ...string) *TextField {
 }
 
 // KiType returns the [*gti.Type] of [TextField]
-func (t *TextField) KiType() *gti.Type {
-	return TextFieldType
-}
+func (t *TextField) KiType() *gti.Type { return TextFieldType }
 
 // New returns a new [*TextField] value
-func (t *TextField) New() ki.Ki {
-	return &TextField{}
-}
+func (t *TextField) New() ki.Ki { return &TextField{} }
 
 // TextFieldEmbedder is an interface that all types that embed TextField satisfy
 type TextFieldEmbedder interface {
@@ -1623,9 +1499,7 @@ func AsTextField(k ki.Ki) *TextField {
 }
 
 // AsTextField satisfies the [TextFieldEmbedder] interface
-func (t *TextField) AsTextField() *TextField {
-	return t
-}
+func (t *TextField) AsTextField() *TextField { return t }
 
 // SetPlaceholder sets the [TextField.Placeholder]:
 // text that is displayed when the field is empty, in a lower-contrast manner
@@ -1702,14 +1576,10 @@ func NewToolbar(par ki.Ki, name ...string) *Toolbar {
 }
 
 // KiType returns the [*gti.Type] of [Toolbar]
-func (t *Toolbar) KiType() *gti.Type {
-	return ToolbarType
-}
+func (t *Toolbar) KiType() *gti.Type { return ToolbarType }
 
 // New returns a new [*Toolbar] value
-func (t *Toolbar) New() ki.Ki {
-	return &Toolbar{}
-}
+func (t *Toolbar) New() ki.Ki { return &Toolbar{} }
 
 // ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
 type ToolbarEmbedder interface {
@@ -1729,9 +1599,7 @@ func AsToolbar(k ki.Ki) *Toolbar {
 }
 
 // AsToolbar satisfies the [ToolbarEmbedder] interface
-func (t *Toolbar) AsToolbar() *Toolbar {
-	return t
-}
+func (t *Toolbar) AsToolbar() *Toolbar { return t }
 
 // SetToolbarFuncs sets the [Toolbar.ToolbarFuncs]:
 // ToolbarFuncs contains functions for configuring this toolbar,
@@ -1763,14 +1631,10 @@ func NewBasicBar(par ki.Ki, name ...string) *BasicBar {
 }
 
 // KiType returns the [*gti.Type] of [BasicBar]
-func (t *BasicBar) KiType() *gti.Type {
-	return BasicBarType
-}
+func (t *BasicBar) KiType() *gti.Type { return BasicBarType }
 
 // New returns a new [*BasicBar] value
-func (t *BasicBar) New() ki.Ki {
-	return &BasicBar{}
-}
+func (t *BasicBar) New() ki.Ki { return &BasicBar{} }
 
 // SetTooltip sets the [BasicBar.Tooltip]
 func (t *BasicBar) SetTooltip(v string) *BasicBar { t.Tooltip = v; return t }
@@ -1796,14 +1660,10 @@ func NewWidgetBase(par ki.Ki, name ...string) *WidgetBase {
 }
 
 // KiType returns the [*gti.Type] of [WidgetBase]
-func (t *WidgetBase) KiType() *gti.Type {
-	return WidgetBaseType
-}
+func (t *WidgetBase) KiType() *gti.Type { return WidgetBaseType }
 
 // New returns a new [*WidgetBase] value
-func (t *WidgetBase) New() ki.Ki {
-	return &WidgetBase{}
-}
+func (t *WidgetBase) New() ki.Ki { return &WidgetBase{} }
 
 // SetTooltip sets the [WidgetBase.Tooltip]:
 // Tooltip is the text for the tooltip for this widget,

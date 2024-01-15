@@ -16,14 +16,10 @@ func NewTestNode(par ki.Ki, name ...string) *TestNode {
 }
 
 // KiType returns the [*gti.Type] of [TestNode]
-func (t *TestNode) KiType() *gti.Type {
-	return TestNodeType
-}
+func (t *TestNode) KiType() *gti.Type { return TestNodeType }
 
 // New returns a new [*TestNode] value
-func (t *TestNode) New() ki.Ki {
-	return &TestNode{}
-}
+func (t *TestNode) New() ki.Ki { return &TestNode{} }
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
 var NodeEmbedType = gti.AddType(&gti.Type{Name: "goki.dev/ki/testdata.NodeEmbed", IDName: "node-embed", Doc: "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti", Directives: []gti.Directive{{Tool: "direct", Directive: "value"}}, Embeds: []gti.Field{{Name: "Node"}}, Fields: []gti.Field{{Name: "Mbr1"}, {Name: "Mbr2"}}, Instance: &NodeEmbed{}})
@@ -36,14 +32,10 @@ func NewNodeEmbed(par ki.Ki, name ...string) *NodeEmbed {
 }
 
 // KiType returns the [*gti.Type] of [NodeEmbed]
-func (t *NodeEmbed) KiType() *gti.Type {
-	return NodeEmbedType
-}
+func (t *NodeEmbed) KiType() *gti.Type { return NodeEmbedType }
 
 // New returns a new [*NodeEmbed] value
-func (t *NodeEmbed) New() ki.Ki {
-	return &NodeEmbed{}
-}
+func (t *NodeEmbed) New() ki.Ki { return &NodeEmbed{} }
 
 // SetMbr1 sets the [NodeEmbed.Mbr1]
 func (t *NodeEmbed) SetMbr1(v string) *NodeEmbed { t.Mbr1 = v; return t }
@@ -60,14 +52,10 @@ func NewNodeField(par ki.Ki, name ...string) *NodeField {
 }
 
 // KiType returns the [*gti.Type] of [NodeField]
-func (t *NodeField) KiType() *gti.Type {
-	return NodeFieldType
-}
+func (t *NodeField) KiType() *gti.Type { return NodeFieldType }
 
 // New returns a new [*NodeField] value
-func (t *NodeField) New() ki.Ki {
-	return &NodeField{}
-}
+func (t *NodeField) New() ki.Ki { return &NodeField{} }
 
 // SetField1 sets the [NodeField.Field1]
 func (t *NodeField) SetField1(v NodeEmbed) *NodeField { t.Field1 = v; return t }
@@ -87,14 +75,10 @@ func NewNodeField2(par ki.Ki, name ...string) *NodeField2 {
 }
 
 // KiType returns the [*gti.Type] of [NodeField2]
-func (t *NodeField2) KiType() *gti.Type {
-	return NodeField2Type
-}
+func (t *NodeField2) KiType() *gti.Type { return NodeField2Type }
 
 // New returns a new [*NodeField2] value
-func (t *NodeField2) New() ki.Ki {
-	return &NodeField2{}
-}
+func (t *NodeField2) New() ki.Ki { return &NodeField2{} }
 
 // SetField2 sets the [NodeField2.Field2]
 func (t *NodeField2) SetField2(v NodeEmbed) *NodeField2 { t.Field2 = v; return t }

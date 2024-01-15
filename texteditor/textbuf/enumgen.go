@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -32,19 +31,12 @@ func _CasesNoOp() {
 
 var _CasesNameToValueMap = map[string]Cases{
 	`LowerCase`:      0,
-	`lowercase`:      0,
 	`UpperCase`:      1,
-	`uppercase`:      1,
 	`CamelCase`:      2,
-	`camelcase`:      2,
 	`LowerCamelCase`: 3,
-	`lowercamelcase`: 3,
 	`SnakeCase`:      4,
-	`snakecase`:      4,
 	`UpperSnakeCase`: 5,
-	`uppersnakecase`: 5,
 	`KebabCase`:      6,
-	`kebabcase`:      6,
 }
 
 var _CasesDescMap = map[Cases]string{
@@ -81,10 +73,6 @@ func (i Cases) String() string {
 // error if the string is invalid.
 func (i *Cases) SetString(s string) error {
 	if val, ok := _CasesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _CasesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

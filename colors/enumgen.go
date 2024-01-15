@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -28,11 +27,8 @@ func _BlendTypesNoOp() {
 
 var _BlendTypesNameToValueMap = map[string]BlendTypes{
 	`HCT`:   0,
-	`hct`:   0,
 	`RGB`:   1,
-	`rgb`:   1,
 	`CAM16`: 2,
-	`cam16`: 2,
 }
 
 var _BlendTypesDescMap = map[BlendTypes]string{
@@ -61,10 +57,6 @@ func (i BlendTypes) String() string {
 // error if the string is invalid.
 func (i *BlendTypes) SetString(s string) error {
 	if val, ok := _BlendTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _BlendTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

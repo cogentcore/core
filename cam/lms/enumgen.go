@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -28,11 +27,8 @@ func _OpponentsNoOp() {
 
 var _OpponentsNameToValueMap = map[string]Opponents{
 	`WhiteBlack`: 0,
-	`whiteblack`: 0,
 	`RedGreen`:   1,
-	`redgreen`:   1,
 	`BlueYellow`: 2,
-	`blueyellow`: 2,
 }
 
 var _OpponentsDescMap = map[Opponents]string{
@@ -61,10 +57,6 @@ func (i Opponents) String() string {
 // error if the string is invalid.
 func (i *Opponents) SetString(s string) error {
 	if val, ok := _OpponentsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _OpponentsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

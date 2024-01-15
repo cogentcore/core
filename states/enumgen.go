@@ -49,51 +49,28 @@ func _StatesNoOp() {
 
 var _StatesNameToValueMap = map[string]States{
 	`Invisible`:     0,
-	`invisible`:     0,
 	`Disabled`:      1,
-	`disabled`:      1,
 	`ReadOnly`:      2,
-	`readonly`:      2,
 	`Selected`:      3,
-	`selected`:      3,
 	`Active`:        4,
-	`active`:        4,
 	`Dragging`:      5,
-	`dragging`:      5,
 	`Sliding`:       6,
-	`sliding`:       6,
 	`Scrolling`:     7,
-	`scrolling`:     7,
 	`Focused`:       8,
-	`focused`:       8,
 	`FocusedWithin`: 9,
-	`focusedwithin`: 9,
 	`Checked`:       10,
-	`checked`:       10,
 	`Indeterminate`: 11,
-	`indeterminate`: 11,
 	`Hovered`:       12,
-	`hovered`:       12,
 	`LongHovered`:   13,
-	`longhovered`:   13,
 	`LongPressed`:   14,
-	`longpressed`:   14,
 	`DragHovered`:   15,
-	`draghovered`:   15,
 	`DropOK`:        16,
-	`dropok`:        16,
 	`Invalid`:       17,
-	`invalid`:       17,
 	`Required`:      18,
-	`required`:      18,
 	`Blank`:         19,
-	`blank`:         19,
 	`Link`:          20,
-	`link`:          20,
 	`Visited`:       21,
-	`visited`:       21,
 	`AnyLink`:       22,
-	`anylink`:       22,
 }
 
 var _StatesDescMap = map[States]string{
@@ -193,8 +170,6 @@ func (i *States) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _StatesNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _StatesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue

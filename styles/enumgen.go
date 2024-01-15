@@ -31,16 +31,11 @@ func _ObjectFitsNoOp() {
 }
 
 var _ObjectFitsNameToValueMap = map[string]ObjectFits{
-	`Fill`:      0,
-	`fill`:      0,
-	`Contain`:   1,
-	`contain`:   1,
-	`Cover`:     2,
-	`cover`:     2,
-	`None`:      3,
-	`none`:      3,
-	`ScaleDown`: 4,
-	`scaledown`: 4,
+	`fill`:       0,
+	`contain`:    1,
+	`cover`:      2,
+	`none`:       3,
+	`scale-down`: 4,
 }
 
 var _ObjectFitsDescMap = map[ObjectFits]string{
@@ -52,11 +47,11 @@ var _ObjectFitsDescMap = map[ObjectFits]string{
 }
 
 var _ObjectFitsMap = map[ObjectFits]string{
-	0: `Fill`,
-	1: `Contain`,
-	2: `Cover`,
-	3: `None`,
-	4: `ScaleDown`,
+	0: `fill`,
+	1: `contain`,
+	2: `cover`,
+	3: `none`,
+	4: `scale-down`,
 }
 
 // String returns the string representation
@@ -73,10 +68,6 @@ func (i ObjectFits) String() string {
 // error if the string is invalid.
 func (i *ObjectFits) SetString(s string) error {
 	if val, ok := _ObjectFitsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ObjectFitsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -159,23 +150,14 @@ func _BorderStylesNoOp() {
 }
 
 var _BorderStylesNameToValueMap = map[string]BorderStyles{
-	`Solid`:  0,
 	`solid`:  0,
-	`Dotted`: 1,
 	`dotted`: 1,
-	`Dashed`: 2,
 	`dashed`: 2,
-	`Double`: 3,
 	`double`: 3,
-	`Groove`: 4,
 	`groove`: 4,
-	`Ridge`:  5,
 	`ridge`:  5,
-	`Inset`:  6,
 	`inset`:  6,
-	`Outset`: 7,
 	`outset`: 7,
-	`None`:   8,
 	`none`:   8,
 }
 
@@ -192,15 +174,15 @@ var _BorderStylesDescMap = map[BorderStyles]string{
 }
 
 var _BorderStylesMap = map[BorderStyles]string{
-	0: `Solid`,
-	1: `Dotted`,
-	2: `Dashed`,
-	3: `Double`,
-	4: `Groove`,
-	5: `Ridge`,
-	6: `Inset`,
-	7: `Outset`,
-	8: `None`,
+	0: `solid`,
+	1: `dotted`,
+	2: `dashed`,
+	3: `double`,
+	4: `groove`,
+	5: `ridge`,
+	6: `inset`,
+	7: `outset`,
+	8: `none`,
 }
 
 // String returns the string representation
@@ -217,10 +199,6 @@ func (i BorderStyles) String() string {
 // error if the string is invalid.
 func (i *BorderStyles) SetString(s string) error {
 	if val, ok := _BorderStylesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _BorderStylesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -297,11 +275,8 @@ func _FontStylesNoOp() {
 }
 
 var _FontStylesNameToValueMap = map[string]FontStyles{
-	`Normal`:  0,
 	`normal`:  0,
-	`Italic`:  1,
 	`italic`:  1,
-	`Oblique`: 2,
 	`oblique`: 2,
 }
 
@@ -312,9 +287,9 @@ var _FontStylesDescMap = map[FontStyles]string{
 }
 
 var _FontStylesMap = map[FontStyles]string{
-	0: `Normal`,
-	1: `Italic`,
-	2: `Oblique`,
+	0: `normal`,
+	1: `italic`,
+	2: `oblique`,
 }
 
 // String returns the string representation
@@ -331,10 +306,6 @@ func (i FontStyles) String() string {
 // error if the string is invalid.
 func (i *FontStyles) SetString(s string) error {
 	if val, ok := _FontStylesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FontStylesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -428,37 +399,26 @@ func _FontWeightsNoOp() {
 }
 
 var _FontWeightsNameToValueMap = map[string]FontWeights{
-	`Normal`:     0,
-	`normal`:     0,
-	`100`:        1,
-	`Thin`:       2,
-	`thin`:       2,
-	`200`:        3,
-	`ExtraLight`: 4,
-	`extralight`: 4,
-	`300`:        5,
-	`Light`:      6,
-	`light`:      6,
-	`400`:        7,
-	`500`:        8,
-	`Medium`:     9,
-	`medium`:     9,
-	`600`:        10,
-	`SemiBold`:   11,
-	`semibold`:   11,
-	`700`:        12,
-	`Bold`:       13,
-	`bold`:       13,
-	`800`:        14,
-	`ExtraBold`:  15,
-	`extrabold`:  15,
-	`900`:        16,
-	`Black`:      17,
-	`black`:      17,
-	`Bolder`:     18,
-	`bolder`:     18,
-	`Lighter`:    19,
-	`lighter`:    19,
+	`normal`:      0,
+	`100`:         1,
+	`thin`:        2,
+	`200`:         3,
+	`extra-light`: 4,
+	`300`:         5,
+	`light`:       6,
+	`400`:         7,
+	`500`:         8,
+	`medium`:      9,
+	`600`:         10,
+	`semi-bold`:   11,
+	`700`:         12,
+	`bold`:        13,
+	`800`:         14,
+	`extra-bold`:  15,
+	`900`:         16,
+	`black`:       17,
+	`bolder`:      18,
+	`lighter`:     19,
 }
 
 var _FontWeightsDescMap = map[FontWeights]string{
@@ -485,26 +445,26 @@ var _FontWeightsDescMap = map[FontWeights]string{
 }
 
 var _FontWeightsMap = map[FontWeights]string{
-	0:  `Normal`,
+	0:  `normal`,
 	1:  `100`,
-	2:  `Thin`,
+	2:  `thin`,
 	3:  `200`,
-	4:  `ExtraLight`,
+	4:  `extra-light`,
 	5:  `300`,
-	6:  `Light`,
+	6:  `light`,
 	7:  `400`,
 	8:  `500`,
-	9:  `Medium`,
+	9:  `medium`,
 	10: `600`,
-	11: `SemiBold`,
+	11: `semi-bold`,
 	12: `700`,
-	13: `Bold`,
+	13: `bold`,
 	14: `800`,
-	15: `ExtraBold`,
+	15: `extra-bold`,
 	16: `900`,
-	17: `Black`,
-	18: `Bolder`,
-	19: `Lighter`,
+	17: `black`,
+	18: `bolder`,
+	19: `lighter`,
 }
 
 // String returns the string representation
@@ -521,10 +481,6 @@ func (i FontWeights) String() string {
 // error if the string is invalid.
 func (i *FontWeights) SetString(s string) error {
 	if val, ok := _FontWeightsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FontWeightsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -610,27 +566,16 @@ func _FontStretchNoOp() {
 
 var _FontStretchNameToValueMap = map[string]FontStretch{
 	`Normal`:         0,
-	`normal`:         0,
 	`UltraCondensed`: 1,
-	`ultracondensed`: 1,
 	`ExtraCondensed`: 2,
-	`extracondensed`: 2,
 	`SemiCondensed`:  3,
-	`semicondensed`:  3,
 	`SemiExpanded`:   4,
-	`semiexpanded`:   4,
 	`ExtraExpanded`:  5,
-	`extraexpanded`:  5,
 	`UltraExpanded`:  6,
-	`ultraexpanded`:  6,
 	`Condensed`:      7,
-	`condensed`:      7,
 	`Expanded`:       8,
-	`expanded`:       8,
 	`Narrower`:       9,
-	`narrower`:       9,
 	`Wider`:          10,
-	`wider`:          10,
 }
 
 var _FontStretchDescMap = map[FontStretch]string{
@@ -675,10 +620,6 @@ func (i FontStretch) String() string {
 // error if the string is invalid.
 func (i *FontStretch) SetString(s string) error {
 	if val, ok := _FontStretchNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FontStretchNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -762,26 +703,16 @@ func _TextDecorationsNoOp() {
 }
 
 var _TextDecorationsNameToValueMap = map[string]TextDecorations{
-	`None`:            0,
-	`none`:            0,
-	`Underline`:       1,
-	`underline`:       1,
-	`Overline`:        2,
-	`overline`:        2,
-	`LineThrough`:     3,
-	`linethrough`:     3,
-	`Blink`:           4,
-	`blink`:           4,
-	`DottedUnderline`: 5,
-	`dottedunderline`: 5,
-	`ParaStart`:       6,
-	`parastart`:       6,
-	`Super`:           7,
-	`super`:           7,
-	`Sub`:             8,
-	`sub`:             8,
-	`BackgroundColor`: 9,
-	`backgroundcolor`: 9,
+	`none`:             0,
+	`underline`:        1,
+	`overline`:         2,
+	`line-through`:     3,
+	`blink`:            4,
+	`dotted-underline`: 5,
+	`para-start`:       6,
+	`super`:            7,
+	`sub`:              8,
+	`background-color`: 9,
 }
 
 var _TextDecorationsDescMap = map[TextDecorations]string{
@@ -798,16 +729,16 @@ var _TextDecorationsDescMap = map[TextDecorations]string{
 }
 
 var _TextDecorationsMap = map[TextDecorations]string{
-	0: `None`,
-	1: `Underline`,
-	2: `Overline`,
-	3: `LineThrough`,
-	4: `Blink`,
-	5: `DottedUnderline`,
-	6: `ParaStart`,
-	7: `Super`,
-	8: `Sub`,
-	9: `BackgroundColor`,
+	0: `none`,
+	1: `underline`,
+	2: `overline`,
+	3: `line-through`,
+	4: `blink`,
+	5: `dotted-underline`,
+	6: `para-start`,
+	7: `super`,
+	8: `sub`,
+	9: `background-color`,
 }
 
 // String returns the string representation
@@ -855,8 +786,6 @@ func (i *TextDecorations) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _TextDecorationsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _TextDecorationsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -960,11 +889,8 @@ func _BaselineShiftsNoOp() {
 }
 
 var _BaselineShiftsNameToValueMap = map[string]BaselineShifts{
-	`Baseline`: 0,
 	`baseline`: 0,
-	`Super`:    1,
 	`super`:    1,
-	`Sub`:      2,
 	`sub`:      2,
 }
 
@@ -975,9 +901,9 @@ var _BaselineShiftsDescMap = map[BaselineShifts]string{
 }
 
 var _BaselineShiftsMap = map[BaselineShifts]string{
-	0: `Baseline`,
-	1: `Super`,
-	2: `Sub`,
+	0: `baseline`,
+	1: `super`,
+	2: `sub`,
 }
 
 // String returns the string representation
@@ -994,10 +920,6 @@ func (i BaselineShifts) String() string {
 // error if the string is invalid.
 func (i *BaselineShifts) SetString(s string) error {
 	if val, ok := _BaselineShiftsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _BaselineShiftsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1073,10 +995,8 @@ func _FontVariantsNoOp() {
 }
 
 var _FontVariantsNameToValueMap = map[string]FontVariants{
-	`Normal`:    0,
-	`normal`:    0,
-	`SmallCaps`: 1,
-	`smallcaps`: 1,
+	`normal`:     0,
+	`small-caps`: 1,
 }
 
 var _FontVariantsDescMap = map[FontVariants]string{
@@ -1085,8 +1005,8 @@ var _FontVariantsDescMap = map[FontVariants]string{
 }
 
 var _FontVariantsMap = map[FontVariants]string{
-	0: `Normal`,
-	1: `SmallCaps`,
+	0: `normal`,
+	1: `small-caps`,
 }
 
 // String returns the string representation
@@ -1103,10 +1023,6 @@ func (i FontVariants) String() string {
 // error if the string is invalid.
 func (i *FontVariants) SetString(s string) error {
 	if val, ok := _FontVariantsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FontVariantsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1183,9 +1099,7 @@ func _DirectionsNoOp() {
 
 var _DirectionsNameToValueMap = map[string]Directions{
 	`Row`:    0,
-	`row`:    0,
 	`Column`: 1,
-	`column`: 1,
 }
 
 var _DirectionsDescMap = map[Directions]string{
@@ -1212,10 +1126,6 @@ func (i Directions) String() string {
 // error if the string is invalid.
 func (i *Directions) SetString(s string) error {
 	if val, ok := _DirectionsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DirectionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1294,16 +1204,11 @@ func _DisplaysNoOp() {
 }
 
 var _DisplaysNameToValueMap = map[string]Displays{
-	`Flex`:     0,
-	`flex`:     0,
-	`Stacked`:  1,
-	`stacked`:  1,
-	`Grid`:     2,
-	`grid`:     2,
-	`NoLayout`: 3,
-	`nolayout`: 3,
-	`None`:     4,
-	`none`:     4,
+	`flex`:      0,
+	`stacked`:   1,
+	`grid`:      2,
+	`no-layout`: 3,
+	`none`:      4,
 }
 
 var _DisplaysDescMap = map[Displays]string{
@@ -1315,11 +1220,11 @@ var _DisplaysDescMap = map[Displays]string{
 }
 
 var _DisplaysMap = map[Displays]string{
-	0: `Flex`,
-	1: `Stacked`,
-	2: `Grid`,
-	3: `NoLayout`,
-	4: `None`,
+	0: `flex`,
+	1: `stacked`,
+	2: `grid`,
+	3: `no-layout`,
+	4: `none`,
 }
 
 // String returns the string representation
@@ -1336,10 +1241,6 @@ func (i Displays) String() string {
 // error if the string is invalid.
 func (i *Displays) SetString(s string) error {
 	if val, ok := _DisplaysNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _DisplaysNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1421,22 +1322,14 @@ func _AlignsNoOp() {
 }
 
 var _AlignsNameToValueMap = map[string]Aligns{
-	`Auto`:         0,
-	`auto`:         0,
-	`Start`:        1,
-	`start`:        1,
-	`End`:          2,
-	`end`:          2,
-	`Center`:       3,
-	`center`:       3,
-	`Baseline`:     4,
-	`baseline`:     4,
-	`SpaceBetween`: 5,
-	`spacebetween`: 5,
-	`SpaceAround`:  6,
-	`spacearound`:  6,
-	`SpaceEvenly`:  7,
-	`spaceevenly`:  7,
+	`auto`:          0,
+	`start`:         1,
+	`end`:           2,
+	`center`:        3,
+	`baseline`:      4,
+	`space-between`: 5,
+	`space-around`:  6,
+	`space-evenly`:  7,
 }
 
 var _AlignsDescMap = map[Aligns]string{
@@ -1451,14 +1344,14 @@ var _AlignsDescMap = map[Aligns]string{
 }
 
 var _AlignsMap = map[Aligns]string{
-	0: `Auto`,
-	1: `Start`,
-	2: `End`,
-	3: `Center`,
-	4: `Baseline`,
-	5: `SpaceBetween`,
-	6: `SpaceAround`,
-	7: `SpaceEvenly`,
+	0: `auto`,
+	1: `start`,
+	2: `end`,
+	3: `center`,
+	4: `baseline`,
+	5: `space-between`,
+	6: `space-around`,
+	7: `space-evenly`,
 }
 
 // String returns the string representation
@@ -1475,10 +1368,6 @@ func (i Aligns) String() string {
 // error if the string is invalid.
 func (i *Aligns) SetString(s string) error {
 	if val, ok := _AlignsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _AlignsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1556,13 +1445,9 @@ func _OverflowsNoOp() {
 }
 
 var _OverflowsNameToValueMap = map[string]Overflows{
-	`Visible`: 0,
 	`visible`: 0,
-	`Hidden`:  1,
 	`hidden`:  1,
-	`Auto`:    2,
 	`auto`:    2,
-	`Scroll`:  3,
 	`scroll`:  3,
 }
 
@@ -1574,10 +1459,10 @@ var _OverflowsDescMap = map[Overflows]string{
 }
 
 var _OverflowsMap = map[Overflows]string{
-	0: `Visible`,
-	1: `Hidden`,
-	2: `Auto`,
-	3: `Scroll`,
+	0: `visible`,
+	1: `hidden`,
+	2: `auto`,
+	3: `scroll`,
 }
 
 // String returns the string representation
@@ -1594,10 +1479,6 @@ func (i Overflows) String() string {
 // error if the string is invalid.
 func (i *Overflows) SetString(s string) error {
 	if val, ok := _OverflowsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _OverflowsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1673,10 +1554,8 @@ func _FillRulesNoOp() {
 }
 
 var _FillRulesNameToValueMap = map[string]FillRules{
-	`NonZero`: 0,
-	`nonzero`: 0,
-	`EvenOdd`: 1,
-	`evenodd`: 1,
+	`non-zero`: 0,
+	`even-odd`: 1,
 }
 
 var _FillRulesDescMap = map[FillRules]string{
@@ -1685,8 +1564,8 @@ var _FillRulesDescMap = map[FillRules]string{
 }
 
 var _FillRulesMap = map[FillRules]string{
-	0: `NonZero`,
-	1: `EvenOdd`,
+	0: `non-zero`,
+	1: `even-odd`,
 }
 
 // String returns the string representation
@@ -1703,10 +1582,6 @@ func (i FillRules) String() string {
 // error if the string is invalid.
 func (i *FillRules) SetString(s string) error {
 	if val, ok := _FillRulesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FillRulesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1782,10 +1657,8 @@ func _VectorEffectsNoOp() {
 }
 
 var _VectorEffectsNameToValueMap = map[string]VectorEffects{
-	`None`:             0,
-	`none`:             0,
-	`NonScalingStroke`: 1,
-	`nonscalingstroke`: 1,
+	`none`:               0,
+	`non-scaling-stroke`: 1,
 }
 
 var _VectorEffectsDescMap = map[VectorEffects]string{
@@ -1794,8 +1667,8 @@ var _VectorEffectsDescMap = map[VectorEffects]string{
 }
 
 var _VectorEffectsMap = map[VectorEffects]string{
-	0: `None`,
-	1: `NonScalingStroke`,
+	0: `none`,
+	1: `non-scaling-stroke`,
 }
 
 // String returns the string representation
@@ -1812,10 +1685,6 @@ func (i VectorEffects) String() string {
 // error if the string is invalid.
 func (i *VectorEffects) SetString(s string) error {
 	if val, ok := _VectorEffectsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _VectorEffectsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -1894,15 +1763,10 @@ func _LineCapsNoOp() {
 }
 
 var _LineCapsNameToValueMap = map[string]LineCaps{
-	`Butt`:      0,
 	`butt`:      0,
-	`Round`:     1,
 	`round`:     1,
-	`Square`:    2,
 	`square`:    2,
-	`Cubic`:     3,
 	`cubic`:     3,
-	`Quadratic`: 4,
 	`quadratic`: 4,
 }
 
@@ -1915,11 +1779,11 @@ var _LineCapsDescMap = map[LineCaps]string{
 }
 
 var _LineCapsMap = map[LineCaps]string{
-	0: `Butt`,
-	1: `Round`,
-	2: `Square`,
-	3: `Cubic`,
-	4: `Quadratic`,
+	0: `butt`,
+	1: `round`,
+	2: `square`,
+	3: `cubic`,
+	4: `quadratic`,
 }
 
 // String returns the string representation
@@ -1936,10 +1800,6 @@ func (i LineCaps) String() string {
 // error if the string is invalid.
 func (i *LineCaps) SetString(s string) error {
 	if val, ok := _LineCapsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _LineCapsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2019,18 +1879,12 @@ func _LineJoinsNoOp() {
 }
 
 var _LineJoinsNameToValueMap = map[string]LineJoins{
-	`Miter`:     0,
-	`miter`:     0,
-	`MiterClip`: 1,
-	`miterclip`: 1,
-	`Round`:     2,
-	`round`:     2,
-	`Bevel`:     3,
-	`bevel`:     3,
-	`Arcs`:      4,
-	`arcs`:      4,
-	`ArcsClip`:  5,
-	`arcsclip`:  5,
+	`miter`:      0,
+	`miter-clip`: 1,
+	`round`:      2,
+	`bevel`:      3,
+	`arcs`:       4,
+	`arcs-clip`:  5,
 }
 
 var _LineJoinsDescMap = map[LineJoins]string{
@@ -2043,12 +1897,12 @@ var _LineJoinsDescMap = map[LineJoins]string{
 }
 
 var _LineJoinsMap = map[LineJoins]string{
-	0: `Miter`,
-	1: `MiterClip`,
-	2: `Round`,
-	3: `Bevel`,
-	4: `Arcs`,
-	5: `ArcsClip`,
+	0: `miter`,
+	1: `miter-clip`,
+	2: `round`,
+	3: `bevel`,
+	4: `arcs`,
+	5: `arcs-clip`,
 }
 
 // String returns the string representation
@@ -2065,10 +1919,6 @@ func (i LineJoins) String() string {
 // error if the string is invalid.
 func (i *LineJoins) SetString(s string) error {
 	if val, ok := _LineJoinsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _LineJoinsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2147,13 +1997,9 @@ func _SideIndexesNoOp() {
 
 var _SideIndexesNameToValueMap = map[string]SideIndexes{
 	`Top`:    0,
-	`top`:    0,
 	`Right`:  1,
-	`right`:  1,
 	`Bottom`: 2,
-	`bottom`: 2,
 	`Left`:   3,
-	`left`:   3,
 }
 
 var _SideIndexesDescMap = map[SideIndexes]string{
@@ -2184,10 +2030,6 @@ func (i SideIndexes) String() string {
 // error if the string is invalid.
 func (i *SideIndexes) SetString(s string) error {
 	if val, ok := _SideIndexesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SideIndexesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2264,12 +2106,9 @@ func _UnicodeBidiNoOp() {
 }
 
 var _UnicodeBidiNameToValueMap = map[string]UnicodeBidi{
-	`Normal`:       0,
-	`normal`:       0,
-	`Embed`:        1,
-	`embed`:        1,
-	`BidiOverride`: 2,
-	`bidioverride`: 2,
+	`normal`:        0,
+	`embed`:         1,
+	`bidi-override`: 2,
 }
 
 var _UnicodeBidiDescMap = map[UnicodeBidi]string{
@@ -2279,9 +2118,9 @@ var _UnicodeBidiDescMap = map[UnicodeBidi]string{
 }
 
 var _UnicodeBidiMap = map[UnicodeBidi]string{
-	0: `Normal`,
-	1: `Embed`,
-	2: `BidiOverride`,
+	0: `normal`,
+	1: `embed`,
+	2: `bidi-override`,
 }
 
 // String returns the string representation
@@ -2298,10 +2137,6 @@ func (i UnicodeBidi) String() string {
 // error if the string is invalid.
 func (i *UnicodeBidi) SetString(s string) error {
 	if val, ok := _UnicodeBidiNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _UnicodeBidiNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2383,21 +2218,13 @@ func _TextDirectionsNoOp() {
 }
 
 var _TextDirectionsNameToValueMap = map[string]TextDirections{
-	`LRTB`: 0,
 	`lrtb`: 0,
-	`RLTB`: 1,
 	`rltb`: 1,
-	`TBRL`: 2,
 	`tbrl`: 2,
-	`LR`:   3,
 	`lr`:   3,
-	`RL`:   4,
 	`rl`:   4,
-	`TB`:   5,
 	`tb`:   5,
-	`LTR`:  6,
 	`ltr`:  6,
-	`RTL`:  7,
 	`rtl`:  7,
 }
 
@@ -2413,14 +2240,14 @@ var _TextDirectionsDescMap = map[TextDirections]string{
 }
 
 var _TextDirectionsMap = map[TextDirections]string{
-	0: `LRTB`,
-	1: `RLTB`,
-	2: `TBRL`,
-	3: `LR`,
-	4: `RL`,
-	5: `TB`,
-	6: `LTR`,
-	7: `RTL`,
+	0: `lrtb`,
+	1: `rltb`,
+	2: `tbrl`,
+	3: `lr`,
+	4: `rl`,
+	5: `tb`,
+	6: `ltr`,
+	7: `rtl`,
 }
 
 // String returns the string representation
@@ -2437,10 +2264,6 @@ func (i TextDirections) String() string {
 // error if the string is invalid.
 func (i *TextDirections) SetString(s string) error {
 	if val, ok := _TextDirectionsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TextDirectionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2517,11 +2340,8 @@ func _TextAnchorsNoOp() {
 }
 
 var _TextAnchorsNameToValueMap = map[string]TextAnchors{
-	`Start`:  0,
 	`start`:  0,
-	`Middle`: 1,
 	`middle`: 1,
-	`End`:    2,
 	`end`:    2,
 }
 
@@ -2532,9 +2352,9 @@ var _TextAnchorsDescMap = map[TextAnchors]string{
 }
 
 var _TextAnchorsMap = map[TextAnchors]string{
-	0: `Start`,
-	1: `Middle`,
-	2: `End`,
+	0: `start`,
+	1: `middle`,
+	2: `end`,
 }
 
 // String returns the string representation
@@ -2551,10 +2371,6 @@ func (i TextAnchors) String() string {
 // error if the string is invalid.
 func (i *TextAnchors) SetString(s string) error {
 	if val, ok := _TextAnchorsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TextAnchorsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -2634,15 +2450,10 @@ func _WhiteSpacesNoOp() {
 
 var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{
 	`Normal`:  0,
-	`normal`:  0,
 	`Nowrap`:  1,
-	`nowrap`:  1,
 	`Pre`:     2,
-	`pre`:     2,
 	`PreLine`: 3,
-	`preline`: 3,
 	`PreWrap`: 4,
-	`prewrap`: 4,
 }
 
 var _WhiteSpacesDescMap = map[WhiteSpaces]string{
@@ -2675,10 +2486,6 @@ func (i WhiteSpaces) String() string {
 // error if the string is invalid.
 func (i *WhiteSpaces) SetString(s string) error {
 	if val, ok := _WhiteSpacesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _WhiteSpacesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -29,13 +28,9 @@ func _LangFlagsNoOp() {
 
 var _LangFlagsNameToValueMap = map[string]LangFlags{
 	`NoFlags`:      0,
-	`noflags`:      0,
 	`IndentSpace`:  1,
-	`indentspace`:  1,
 	`IndentTab`:    2,
-	`indenttab`:    2,
 	`ReAutoIndent`: 3,
-	`reautoindent`: 3,
 }
 
 var _LangFlagsDescMap = map[LangFlags]string{
@@ -66,10 +61,6 @@ func (i LangFlags) String() string {
 // error if the string is invalid.
 func (i *LangFlags) SetString(s string) error {
 	if val, ok := _LangFlagsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _LangFlagsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

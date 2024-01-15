@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -27,9 +26,7 @@ func _TypesNoOp() {
 
 var _TypesNameToValueMap = map[string]Types{
 	`App`:     0,
-	`app`:     0,
 	`Library`: 1,
-	`library`: 1,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -56,10 +53,6 @@ func (i Types) String() string {
 // error if the string is invalid.
 func (i *Types) SetString(s string) error {
 	if val, ok := _TypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

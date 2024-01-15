@@ -37,25 +37,15 @@ func _ActionsNoOp() {
 
 var _ActionsNameToValueMap = map[string]Actions{
 	`ChgToken`:     0,
-	`chgtoken`:     0,
 	`AddSymbol`:    1,
-	`addsymbol`:    1,
 	`PushScope`:    2,
-	`pushscope`:    2,
 	`PushNewScope`: 3,
-	`pushnewscope`: 3,
 	`PopScope`:     4,
-	`popscope`:     4,
 	`PopScopeReg`:  5,
-	`popscopereg`:  5,
 	`AddDetail`:    6,
-	`adddetail`:    6,
 	`AddType`:      7,
-	`addtype`:      7,
 	`PushStack`:    8,
-	`pushstack`:    8,
 	`PopStack`:     9,
-	`popstack`:     9,
 }
 
 var _ActionsDescMap = map[Actions]string{
@@ -98,10 +88,6 @@ func (i Actions) String() string {
 // error if the string is invalid.
 func (i *Actions) SetString(s string) error {
 	if val, ok := _ActionsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ActionsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -181,15 +167,10 @@ func _AstActsNoOp() {
 
 var _AstActsNameToValueMap = map[string]AstActs{
 	`NoAst`:          0,
-	`noast`:          0,
 	`AddAst`:         1,
-	`addast`:         1,
 	`SubAst`:         2,
-	`subast`:         2,
 	`AnchorAst`:      3,
-	`anchorast`:      3,
 	`AnchorFirstAst`: 4,
-	`anchorfirstast`: 4,
 }
 
 var _AstActsDescMap = map[AstActs]string{
@@ -222,10 +203,6 @@ func (i AstActs) String() string {
 // error if the string is invalid.
 func (i *AstActs) SetString(s string) error {
 	if val, ok := _AstActsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _AstActsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
@@ -307,19 +284,12 @@ func _RuleFlagsNoOp() {
 
 var _RuleFlagsNameToValueMap = map[string]RuleFlags{
 	`SetsScope`:     7,
-	`setsscope`:     7,
 	`Reverse`:       8,
-	`reverse`:       8,
 	`NoToks`:        9,
-	`notoks`:        9,
 	`OnlyToks`:      10,
-	`onlytoks`:      10,
 	`MatchEOS`:      11,
-	`matcheos`:      11,
 	`MultiEOS`:      12,
-	`multieos`:      12,
 	`TokMatchGroup`: 13,
-	`tokmatchgroup`: 13,
 }
 
 var _RuleFlagsDescMap = map[RuleFlags]string{
@@ -397,8 +367,6 @@ func (i *RuleFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
 		if val, ok := _RuleFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _RuleFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else if flg == "" {
 			continue
@@ -522,15 +490,10 @@ func _StepsNoOp() {
 
 var _StepsNameToValueMap = map[string]Steps{
 	`Match`:    0,
-	`match`:    0,
 	`SubMatch`: 1,
-	`submatch`: 1,
 	`NoMatch`:  2,
-	`nomatch`:  2,
 	`Run`:      3,
-	`run`:      3,
 	`RunAct`:   4,
-	`runact`:   4,
 }
 
 var _StepsDescMap = map[Steps]string{
@@ -563,10 +526,6 @@ func (i Steps) String() string {
 // error if the string is invalid.
 func (i *Steps) SetString(s string) error {
 	if val, ok := _StepsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _StepsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}

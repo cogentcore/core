@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"strings"
 
 	"goki.dev/enums"
 )
@@ -32,19 +31,12 @@ func _FormatsNoOp() {
 
 var _FormatsNameToValueMap = map[string]Formats{
 	`None`: 0,
-	`none`: 0,
 	`PNG`:  1,
-	`png`:  1,
 	`JPEG`: 2,
-	`jpeg`: 2,
 	`GIF`:  3,
-	`gif`:  3,
 	`TIFF`: 4,
-	`tiff`: 4,
 	`BMP`:  5,
-	`bmp`:  5,
 	`WebP`: 6,
-	`webp`: 6,
 }
 
 var _FormatsDescMap = map[Formats]string{
@@ -81,10 +73,6 @@ func (i Formats) String() string {
 // error if the string is invalid.
 func (i *Formats) SetString(s string) error {
 	if val, ok := _FormatsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _FormatsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
