@@ -26,8 +26,10 @@ func TestImageBasic(t *testing.T) {
 
 func TestImageCropped(t *testing.T) {
 	sc := NewScene()
-	fr := NewFrame(sc).Style(func(s *styles.Style) {
+	sc.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
+	})
+	fr := NewFrame(sc).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	img := NewImage(fr)
@@ -37,8 +39,10 @@ func TestImageCropped(t *testing.T) {
 
 func TestImageScrolled(t *testing.T) {
 	sc := NewScene()
-	fr := NewFrame(sc).Style(func(s *styles.Style) {
+	sc.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
+	})
+	fr := NewFrame(sc).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	img := NewImage(fr)
