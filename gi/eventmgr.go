@@ -763,7 +763,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 	if win == nil {
 		return
 	}
-	if win.Is(WinClosing) {
+	if !win.IsVisible() {
 		return
 	}
 	grr.Log(goosi.TheApp.Cursor(win.GoosiWin).Set(cur))
