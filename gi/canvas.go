@@ -4,19 +4,35 @@
 
 package gi
 
-import "goki.dev/paint"
+import (
+	"image"
+
+	"goki.dev/paint"
+	"golang.org/x/image/draw"
+)
 
 // Canvas is a widget that can be arbitrarily drawn to.
 type Canvas struct {
 	WidgetBase
+
+	// Context is the paint context that we use for drawing.
+	Context paint.Context `set:"-"`
 }
 
 // Draw draws to the canvas by calling the given function with its paint context.
 func (c *Canvas) Draw(f func(pc *paint.Context)) {
+	f(&c.Context)
+	c.SetNeedsRender(true)
+}
+
+func (c *Canvas) DrawIntoScene() {
+	draw.Draw(c.Sc.Pixels, c.Geom.ContentBBox, c.Context.Image, image.Point{}, draw.Over)
+}
+
+func (c *Canvas) Render() {
 	if c.PushBounds() {
-		pc, _ := c.RenderLock()
-		f(pc)
-		c.RenderUnlock()
+		c.DrawIntoScene()
+		c.RenderChildren()
 		c.PopBounds()
 	}
 }
