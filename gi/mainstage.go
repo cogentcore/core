@@ -136,6 +136,11 @@ func (st *Stage) RunWindow() *Stage {
 		// possible representation of the content
 		if Platform() != goosi.Offscreen {
 			sz = sz.Add(image.Pt(20, 20))
+			if st.NewWindow {
+				// we require the window to be at least half of the screen size
+				scsz := goosi.TheApp.Screen(0).PixSize // TODO(kai): is there a better screen to get here?
+				sz = image.Pt(max(sz.X, scsz.X/2), max(sz.Y, scsz.Y/2))
+			}
 		}
 	}
 	st.MainMgr = nil // reset
