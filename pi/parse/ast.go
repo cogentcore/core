@@ -38,6 +38,7 @@ type Ast struct {
 }
 
 func (ast *Ast) Destroy() {
+	ast.Syms.ClearAst()
 	ast.Syms = nil
 	ast.Node.Destroy()
 }

@@ -49,6 +49,9 @@ type State struct {
 // Init initializes the state at start of parsing
 func (ps *State) Init(src *lex.File, ast *Ast) {
 	ps.Src = src
+	if ps.Ast != nil {
+		ps.Ast.DeleteChildren(true)
+	}
 	ps.Ast = ast
 	if ps.Ast != nil {
 		ps.Ast.DeleteChildren(true)

@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -219,14 +218,14 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 			continue
 		}
 		// fmt.Printf("parsing file: %v\n", fnm)
-		stt := time.Now()
+		// stt := time.Now()
 		pr.LexAll(fs)
 		// lxdur := time.Now().Sub(stt)
 		pr.ParseAll(fs)
-		prdur := time.Now().Sub(stt)
-		if prdur > 500*time.Millisecond {
-			fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
-		}
+		// prdur := time.Now().Sub(stt)
+		// if prdur > 500*time.Millisecond {
+		// 	fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
+		// }
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
 			gl.DeleteUnexported(pkg, pkg.Name)
@@ -251,7 +250,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, fi.Go, pkgPathAbs)
 	}
-	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debuggin
+	pkgsym.ClearAst() // otherwise memory can be huge -- can comment this out for debugging
 	for _, fs := range fss {
 		fs.Destroy()
 	}
@@ -361,6 +360,10 @@ func (gl *GoLang) AddImportsToExts(fss *pi.FileStates, pfs *pi.FileState, pkg *s
 		fmt.Printf("\n#####################\nResolving Types now for: %v\n", pfs.Src.Filename)
 	}
 	gl.ResolveTypes(pfs, pkg, true) // true = do include function-internal scope items
+	pkg.ClearAst()
+	if pfs.Ast.HasChildren() {
+		pfs.Ast.DeleteChildren(true)
+	}
 }
 
 // AddImportToExts adds given import into pi.FileState.ExtSyms list
@@ -409,6 +412,8 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	} else {
 		fs.Syms[pkg.Name] = pkg
 	}
+	fs.Syms.ClearAst()
+	fs.Ast.DeleteChildren(true)
 	fs.SymsMu.Unlock()
 	return has
 }
