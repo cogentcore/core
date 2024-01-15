@@ -210,10 +210,10 @@ type AppearanceSettingsData struct { //gti:add
 	SettingsBase
 
 	// the color theme
-	Theme Themes
+	Theme Themes `def:"Auto"`
 
 	// the primary color used to generate the color scheme
-	Color color.RGBA
+	Color color.RGBA `def:"#4285f4"`
 
 	// overall zoom factor as a percentage of the default zoom
 	Zoom float32 `def:"100" min:"10" max:"500" step:"10" format:"%g%%"`
@@ -230,13 +230,13 @@ type AppearanceSettingsData struct { //gti:add
 	Screens map[string]ScreenSettings
 
 	// text highlighting style / theme
-	HiStyle HiStyleName
+	HiStyle HiStyleName `def:"emacs"`
 
 	// default font family when otherwise not specified
-	FontFamily FontName
+	FontFamily FontName `def:"Roboto"`
 
 	// default mono-spaced font family
-	MonoFont FontName
+	MonoFont FontName `def:"Roboto Mono"`
 
 	// toolbar configuration function -- set in giv -- allows use of FuncButton
 	TBConfig func(tb *Toolbar) `set:"-" view:"-" toml:"-" json:"-" xml:"-"`
@@ -257,17 +257,6 @@ type AppearanceSettingsData struct { //gti:add
 // own custom scheme but not OverrideSettingsColor, giving you brand colors unless
 // your user explicitly states a preference for a specific color.
 var OverrideSettingsColor = false
-
-func (as *AppearanceSettingsData) Defaults() {
-	as.Theme = ThemeAuto
-	as.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
-	as.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
-	as.Zoom = 100
-	as.Spacing = 100
-	as.FontSize = 100
-	as.FontFamily = "Roboto"
-	as.MonoFont = "Roboto Mono"
-}
 
 func (as *AppearanceSettingsData) ConfigToolbar(tb *Toolbar) {
 	if as.TBConfig != nil {
@@ -502,25 +491,25 @@ type SystemSettingsData struct { //gti:add
 	MenuMaxHeight int `def:"30" min:"5" step:"1"`
 
 	// the amount of time to wait before offering completions
-	CompleteWaitDuration time.Duration `def:"0" min:"0" max:"10000" step:"10"`
+	CompleteWaitDuration time.Duration `def:"0ms" min:"0ms" max:"10s" step:"10ms"`
 
 	// the maximum number of completions offered in popup
 	CompleteMaxItems int `def:"25" min:"5" step:"1"`
 
 	// time interval for cursor blinking on and off -- set to 0 to disable blinking
-	CursorBlinkTime time.Duration `def:"500" min:"0" max:"1000" step:"5"`
+	CursorBlinkTime time.Duration `def:"500ms" min:"0ms" max:"1s" step:"5ms"`
 
 	// The amount of time to wait before trying to autoscroll again
-	LayoutAutoScrollDelay time.Duration `def:"25" min:"1" step:"5"`
+	LayoutAutoScrollDelay time.Duration `def:"25ms" min:"1ms" step:"5ms"`
 
 	// number of steps to take in PageUp / Down events in terms of number of items
 	LayoutPageSteps int `def:"10" min:"1" step:"1"`
 
 	// the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay
-	LayoutFocusNameTimeout time.Duration `def:"500" min:"0" max:"5000" step:"20"`
+	LayoutFocusNameTimeout time.Duration `def:"500ms" min:"0ms" max:"5s" step:"20ms"`
 
 	// the amount of time since last focus name event to allow tab to focus on next element with same name.
-	LayoutFocusNameTabTime time.Duration `def:"2000" min:"10" max:"10000" step:"100"`
+	LayoutFocusNameTabTime time.Duration `def:"2s" min:"10ms" max:"10s" step:"100ms"`
 
 	// the number of map elements at or below which an inline representation
 	// of the map will be presented, which is more convenient for small #'s of props
@@ -535,23 +524,8 @@ type SystemSettingsData struct { //gti:add
 }
 
 func (ss *SystemSettingsData) Defaults() {
-	ss.Behavior.Defaults()
-	ss.Editor.Defaults()
 	ss.FavPaths.SetToDefaults()
 	ss.UpdateUser()
-
-	ss.MenuMaxHeight = 30
-	ss.CompleteWaitDuration = 0
-	ss.CompleteMaxItems = 25
-	ss.CursorBlinkTime = 500 * time.Millisecond
-	ss.LayoutAutoScrollDelay = 25 * time.Millisecond
-	ss.LayoutPageSteps = 10
-	ss.LayoutFocusNameTimeout = 500 * time.Millisecond
-	ss.LayoutFocusNameTabTime = 2000 * time.Millisecond
-
-	ss.MapInlineLength = 2
-	ss.StructInlineLength = 4
-	ss.SliceInlineLength = 4
 }
 
 // Apply detailed preferences to all the relevant settings.
@@ -601,14 +575,7 @@ type BehaviorSettings struct { //gti:add
 	BigFileSize int `def:"10000000"`
 
 	// maximum number of saved paths to save in FileView
-	SavedPathsMax int
-}
-
-func (bs *BehaviorSettings) Defaults() {
-	bs.OnlyCloseActiveTab = false
-	bs.ZebraStripeWeight = 0
-	bs.BigFileSize = 10000000
-	bs.SavedPathsMax = 50
+	SavedPathsMax int `def:"50"`
 }
 
 // User basic user information that might be needed for different apps
@@ -623,41 +590,31 @@ type User struct { //gti:add
 type EditorSettings struct { //gti:add
 
 	// size of a tab, in chars -- also determines indent level for space indent
-	TabSize int `xml:"tab-size"`
+	TabSize int `def:"4" xml:"tab-size"`
 
 	// use spaces for indentation, otherwise tabs
 	SpaceIndent bool `xml:"space-indent"`
 
 	// wrap lines at word boundaries -- otherwise long lines scroll off the end
-	WordWrap bool `xml:"word-wrap"`
+	WordWrap bool `def:"true" xml:"word-wrap"`
 
 	// show line numbers
-	LineNos bool `xml:"line-nos"`
+	LineNos bool `def:"true" xml:"line-nos"`
 
 	// use the completion system to suggest options while typing
-	Completion bool `xml:"completion"`
+	Completion bool `def:"true" xml:"completion"`
 
 	// suggest corrections for unknown words while typing
-	SpellCorrect bool `xml:"spell-correct"`
+	SpellCorrect bool `def:"true" xml:"spell-correct"`
 
 	// automatically indent lines when enter, tab, }, etc pressed
-	AutoIndent bool `xml:"auto-indent"`
+	AutoIndent bool `def:"true" xml:"auto-indent"`
 
 	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
 	EmacsUndo bool `xml:"emacs-undo"`
 
 	// colorize the background according to nesting depth
-	DepthColor bool `xml:"depth-color"`
-}
-
-func (es *EditorSettings) Defaults() {
-	es.TabSize = 4
-	es.WordWrap = true
-	es.LineNos = true
-	es.Completion = true
-	es.SpellCorrect = true
-	es.AutoIndent = true
-	es.DepthColor = true
+	DepthColor bool `def:"true" xml:"depth-color"`
 }
 
 //////////////////////////////////////////////////////////////////
