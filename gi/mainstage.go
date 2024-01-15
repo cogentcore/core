@@ -205,7 +205,7 @@ func (st *Stage) RunDialog() *Stage {
 	st.SetMainMgr(ms) // temporary for prefs
 
 	sz := ms.RenderCtx.Geom.Size
-	if !st.FullWindow {
+	if !st.FullWindow || st.NewWindow {
 		sc.App = ctx.Sc.App // just for reference
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
