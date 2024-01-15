@@ -156,7 +156,7 @@ func (gl *GoLang) ParseDirImpl(fs *pi.FileState, path string, opts pi.LangDirOpt
 		// fmt.Printf("Parsing, loading path: %v\n", path)
 	}
 
-	files = dirs.ExtFileNames(pkgPathAbs, []string{".go"})
+	files = dirs.ExtFilenames(pkgPathAbs, []string{".go"})
 	if len(files) == 0 {
 		// fmt.Printf("No go files, bailing\n")
 		return nil

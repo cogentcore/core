@@ -197,9 +197,9 @@ func (fi *FileInfo) Delete() error { //gti:add
 	// note: we should be deleted now!
 }
 
-// FileNames recursively adds fullpath filenames within the starting directory to the "names" slice.
+// Filenames recursively adds fullpath filenames within the starting directory to the "names" slice.
 // Directory names within the starting directory are not added.
-func FileNames(d os.File, names *[]string) (err error) {
+func Filenames(d os.File, names *[]string) (err error) {
 	nms, err := d.Readdirnames(-1)
 	if err != nil {
 		return err
@@ -216,7 +216,7 @@ func FileNames(d os.File, names *[]string) (err error) {
 				return err
 			}
 			defer dd.Close()
-			FileNames(*dd, names)
+			Filenames(*dd, names)
 		} else {
 			*names = append(*names, fp)
 		}
@@ -224,10 +224,10 @@ func FileNames(d os.File, names *[]string) (err error) {
 	return nil
 }
 
-// FileNames returns a slice of file names from the starting directory and its subdirectories
-func (fi *FileInfo) FileNames(names *[]string) (err error) {
+// Filenames returns a slice of file names from the starting directory and its subdirectories
+func (fi *FileInfo) Filenames(names *[]string) (err error) {
 	if !fi.IsDir() {
-		err = errors.New("not a directory: FileNames returns a list of files within a directory")
+		err = errors.New("not a directory: Filenames returns a list of files within a directory")
 		return err
 	}
 	path := fi.Path
@@ -237,7 +237,7 @@ func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	}
 	defer d.Close()
 
-	err = FileNames(*d, names)
+	err = Filenames(*d, names)
 	return err
 }
 

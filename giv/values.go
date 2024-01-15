@@ -1480,7 +1480,7 @@ func (vv *FontValue) ConfigDialog(d *gi.Body) (bool, func()) {
 //////////////////////////////////////////////////////////////////////////////
 //  FileValue
 
-// FileValue presents an action for displaying a FileName and selecting
+// FileValue presents an action for displaying a Filename and selecting
 // icons from FileChooserDialog
 type FileValue struct {
 	ValueBase

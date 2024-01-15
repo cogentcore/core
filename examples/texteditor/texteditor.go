@@ -12,9 +12,9 @@ import (
 
 var samplefile gi.Filename = "texteditor.go"
 
-// var samplefile gi.FileName = "../../Makefile"
+// var samplefile gi.Filename = "../../Makefile"
 
-// var samplefile gi.FileName = "../../README.md"
+// var samplefile gi.Filename = "../../README.md"
 
 func main() {
 	b := gi.NewAppBody("Goki Text Editor Demo")

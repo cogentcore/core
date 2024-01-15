@@ -301,9 +301,9 @@ func (km *Maps) MapByName(name MapName) (*Map, int, bool) {
 	return nil, -1, false
 }
 
-// PrefsMapsFileName is the name of the preferences file in GoGi prefs
+// PrefsMapsFilename is the name of the preferences file in GoGi prefs
 // directory for saving / loading the default AvailMaps key maps list
-var PrefsMapsFileName = "key_maps_prefs.json"
+var PrefsMapsFilename = "key_maps_prefs.json"
 
 // Open opens keymaps from a json-formatted file.
 // You can save and open key maps to / from files to share, experiment, transfer, etc
@@ -322,7 +322,7 @@ func (km *Maps) Save(filename string) error { //gti:add
 // This is called automatically, so calling it manually should not be necessary in most cases.
 func (km *Maps) OpenSettings() error { //gti:add
 	pdir := goosi.TheApp.GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsMapsFileName)
+	pnm := filepath.Join(pdir, PrefsMapsFilename)
 	AvailMapsChanged = false
 	return km.Open(pnm)
 }
@@ -332,7 +332,7 @@ func (km *Maps) OpenSettings() error { //gti:add
 // (should be if you're using custom keymaps)
 func (km *Maps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsMapsFileName)
+	pnm := filepath.Join(pdir, PrefsMapsFilename)
 	AvailMapsChanged = false
 	return km.Save(pnm)
 }

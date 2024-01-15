@@ -195,7 +195,7 @@ func (fn *Node) DeleteFilesImpl() {
 		}
 		openList := []string{}
 		var fns []string
-		fn.Info.FileNames(&fns)
+		fn.Info.Filenames(&fns)
 		ft := fn.FRoot
 		for _, filename := range fns {
 			fn, ok := ft.FindFile(filename)

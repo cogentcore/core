@@ -169,7 +169,7 @@ type Value interface {
 	ConfigWidget(w gi.Widget)
 
 	// HasDialog returns true if this value has an associated Dialog,
-	// e.g., for FileName, StructView, SliceView, etc.
+	// e.g., for Filename, StructView, SliceView, etc.
 	// The OpenDialog method will open the dialog.
 	HasDialog() bool
 

@@ -75,9 +75,9 @@ func ExtFiles(path string, exts []string) []fs.DirEntry {
 	return files
 }
 
-// ExtFileNames returns all the file names with given extension(s) in directory
+// ExtFilenames returns all the file names with given extension(s) in directory
 // in sorted order (if exts is empty then all files are returned)
-func ExtFileNames(path string, exts []string) []string {
+func ExtFilenames(path string, exts []string) []string {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil

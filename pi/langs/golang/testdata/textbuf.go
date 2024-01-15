@@ -7,13 +7,15 @@ package giv
 import (
 	"bytes"
 	"fmt"
-	"goki.dev/difflib"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"goki.dev/difflib"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
@@ -145,7 +147,7 @@ type TextBuf struct {
 	Opts TextBufOpts `desc:"options for how text editing / viewing works"`
 
 	// filename of file last loaded or saved
-	Filename gi.FileName `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
+	Filename gi.Filename `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 
 	// full info about file
 	Info FileInfo `desc:"full info about file"`
@@ -495,7 +497,7 @@ func (tb *TextBuf) FileModCheck() bool {
 }
 
 // Open loads text from a file into the buffer
-func (tb *TextBuf) Open(filename gi.FileName) error {
+func (tb *TextBuf) Open(filename gi.Filename) error {
 	tb.Defaults()
 	err := tb.OpenFile(filename)
 	if err != nil {
@@ -520,7 +522,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 
 // OpenFile just loads a file into the buffer -- doesn't do any markup or
 // notification -- for temp bufs
-func (tb *TextBuf) OpenFile(filename gi.FileName) error {
+func (tb *TextBuf) OpenFile(filename gi.Filename) error {
 	fp, err := os.Open(string(filename))
 	if err != nil {
 		return err
@@ -576,7 +578,7 @@ func (tb *TextBuf) Revert() bool {
 // SaveAsFunc saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
-func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
+func (tb *TextBuf) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
 	if _, err := os.Stat(string(filename)); os.IsNotExist(err) {
@@ -606,12 +608,12 @@ func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-func (tb *TextBuf) SaveAs(filename gi.FileName) {
+func (tb *TextBuf) SaveAs(filename gi.Filename) {
 	tb.SaveAsFunc(filename, nil)
 }
 
 // SaveFile writes current buffer to file, with no prompting, etc
-func (tb *TextBuf) SaveFile(filename gi.FileName) error {
+func (tb *TextBuf) SaveFile(filename gi.Filename) error {
 	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)

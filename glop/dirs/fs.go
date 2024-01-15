@@ -26,10 +26,10 @@ func DirFS(fpath string) (fs.FS, string, error) {
 	return dfs, fname, nil
 }
 
-// ExtFileNamesFS returns all the file names with given extension(s)
+// ExtFilenamesFS returns all the file names with given extension(s)
 // in given FS filesystem,
 // in sorted order (if exts is empty then all files are returned)
-func ExtFileNamesFS(fsys fs.FS, path string, exts ...string) []string {
+func ExtFilenamesFS(fsys fs.FS, path string, exts ...string) []string {
 	files, err := fs.ReadDir(fsys, path)
 	if err != nil {
 		return nil

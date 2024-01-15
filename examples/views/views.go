@@ -123,7 +123,7 @@ func main() {
 	stru.Cond2.IntField = 22
 	stru.Cond2.FloatField = 44.4
 	stru.Cond2.StrField = "fi"
-	// stru.Cond2.File = gi.FileName("views.go")
+	// stru.Cond2.File = gi.Filename("views.go")
 	stru.Things = make([]*TableStruct, 2)
 	stru.Stuff = make([]float32, 3)
 

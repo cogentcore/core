@@ -142,7 +142,7 @@ type TextView struct {
 	HasLinks       bool `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
 	lastRecenter   int
 	lastAutoInsert rune
-	lastFilename   gi.FileName
+	lastFilename   gi.Filename
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)

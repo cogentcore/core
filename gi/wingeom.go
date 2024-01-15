@@ -44,7 +44,7 @@ type WinGeomPrefsMgr struct {
 	Cache WinGeomPrefs
 
 	// base name of the preferences file in GoGi prefs directory
-	FileName string
+	Filename string
 
 	// when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying
 	LastSave time.Time
@@ -70,7 +70,7 @@ func (mgr *WinGeomPrefsMgr) Init() {
 	if mgr.Geoms == nil {
 		mgr.Geoms = make(WinGeomPrefs, 1000)
 		mgr.ResetCache()
-		mgr.FileName = "win-geom-prefs"
+		mgr.Filename = "win-geom-prefs"
 		mgr.LockSleep = 100 * time.Millisecond
 		mgr.SaveDelay = 1 * time.Second
 	}
@@ -84,7 +84,7 @@ func (mgr *WinGeomPrefsMgr) ResetCache() {
 // LockFile attempts to create the win_geom_prefs lock file
 func (mgr *WinGeomPrefsMgr) LockFile() error {
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".lck")
+	pnm := filepath.Join(pdir, mgr.Filename+".lck")
 	for rep := 0; rep < 10; rep++ {
 		if _, err := os.Stat(pnm); os.IsNotExist(err) {
 			b, _ := time.Now().MarshalJSON()
@@ -119,7 +119,7 @@ func (mgr *WinGeomPrefsMgr) LockFile() error {
 // UnLockFile unlocks the win_geom_prefs lock file (just removes it)
 func (mgr *WinGeomPrefsMgr) UnlockFile() {
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".lck")
+	pnm := filepath.Join(pdir, mgr.Filename+".lck")
 	os.Remove(pnm)
 }
 
@@ -127,7 +127,7 @@ func (mgr *WinGeomPrefsMgr) UnlockFile() {
 // when we last saved.  Called under mutex.
 func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".lst")
+	pnm := filepath.Join(pdir, mgr.Filename+".lst")
 	if _, err := os.Stat(pnm); os.IsNotExist(err) {
 		return false
 	}
@@ -152,7 +152,7 @@ func (mgr *WinGeomPrefsMgr) NeedToReload() bool {
 // SaveLastSave saves timestamp (now) of last save to win geom
 func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".lst")
+	pnm := filepath.Join(pdir, mgr.Filename+".lst")
 	mgr.LastSave = time.Now()
 	b, _ := mgr.LastSave.MarshalJSON()
 	os.WriteFile(pnm, b, 0644)
@@ -163,7 +163,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".json")
+	pnm := filepath.Join(pdir, mgr.Filename+".json")
 	b, err := os.ReadFile(pnm)
 	if err != nil {
 		// slog.Error(err.Error())rror())
@@ -198,7 +198,7 @@ func (mgr *WinGeomPrefsMgr) Save() error {
 		return nil
 	}
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".json")
+	pnm := filepath.Join(pdir, mgr.Filename+".json")
 	b, err := json.MarshalIndent(mgr.Geoms, "", "\t")
 	if err != nil {
 		slog.Error(err.Error())
@@ -382,7 +382,7 @@ func (mgr *WinGeomPrefsMgr) DeleteAll() {
 	defer mgr.Mu.Unlock()
 
 	pdir := GokiDataDir()
-	pnm := filepath.Join(pdir, mgr.FileName+".json")
+	pnm := filepath.Join(pdir, mgr.Filename+".json")
 	os.Remove(pnm)
 	mgr.Geoms = make(WinGeomPrefs, 1000)
 }

@@ -104,25 +104,25 @@ func (hs *Styles) SaveJSON(filename gi.Filename) error { //gti:add
 	return err
 }
 
-// PrefsStylesFileName is the name of the preferences file in App prefs
+// PrefsStylesFilename is the name of the preferences file in App prefs
 // directory for saving / loading the custom styles
-var PrefsStylesFileName = "hi_styles.json"
+var PrefsStylesFilename = "hi_styles.json"
 
 // StylesChanged is used for gui updating while editing
 var StylesChanged = false
 
-// OpenPrefs opens Styles from GoGi standard prefs directory, using PrefsStylesFileName
+// OpenPrefs opens Styles from GoGi standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) OpenPrefs() error {
 	pdir := gi.GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsStylesFileName)
+	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	return hs.OpenJSON(gi.Filename(pnm))
 }
 
-// SavePrefs saves Styles to GoGi standard prefs directory, using PrefsStylesFileName
+// SavePrefs saves Styles to GoGi standard prefs directory, using PrefsStylesFilename
 func (hs *Styles) SavePrefs() error {
 	pdir := gi.GokiDataDir()
-	pnm := filepath.Join(pdir, PrefsStylesFileName)
+	pnm := filepath.Join(pdir, PrefsStylesFilename)
 	StylesChanged = false
 	MergeAvailStyles()
 	return hs.SaveJSON(gi.Filename(pnm))
