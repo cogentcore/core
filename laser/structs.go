@@ -451,14 +451,17 @@ func NonDefaultFields(v any) map[string]any {
 		}
 		def = FormatDefault(def)
 		if def == "" {
+			res[ft.Name] = fv.Interface()
 			continue
 		}
 		dv := reflect.New(ft.Type)
 		err := SetRobust(dv.Interface(), def)
 		if err != nil {
 			slog.Error("laser.NonDefaultFields: error getting value from default struct tag", "field", ft.Name, "type", rt, "defaultStructTag", def, "err", err)
+			res[ft.Name] = fv.Interface()
+			continue
 		}
-		if err != nil || !reflect.DeepEqual(fv.Interface(), dv.Elem().Interface()) {
+		if !reflect.DeepEqual(fv.Interface(), dv.Elem().Interface()) {
 			res[ft.Name] = fv.Interface()
 		}
 	}

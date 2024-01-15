@@ -209,7 +209,7 @@ type person struct {
 }
 
 type pet struct {
-	Name string `def:"Go Gopher's Pet"`
+	Name string
 	Type string `def:"Gopher"`
 	Age  int    `def:"7"`
 }
