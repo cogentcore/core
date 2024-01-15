@@ -213,7 +213,7 @@ type pet struct {
 	Type       string `def:"Gopher"`
 	Age        int    `def:"7"`
 	IsSick     bool
-	LikesFoods map[string]bool
+	LikesFoods []string
 }
 
 func TestNonDefaultFields(t *testing.T) {
@@ -223,10 +223,9 @@ func TestNonDefaultFields(t *testing.T) {
 		ProgrammingLanguage: "Go",
 		FavoriteFruit:       "Peach",
 		Pet: pet{
-			Name:       "Pet Gopher",
-			Type:       "Dog",
-			Age:        7,
-			LikesFoods: map[string]bool{},
+			Name: "Pet Gopher",
+			Type: "Dog",
+			Age:  7,
 		},
 	}
 	want := map[string]any{

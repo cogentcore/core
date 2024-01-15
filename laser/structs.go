@@ -452,7 +452,7 @@ func NonDefaultFields(v any) map[string]any {
 		}
 		def = FormatDefault(def)
 		if def == "" {
-			if !fv.IsZero() && !((fv.Kind() == reflect.Map || fv.Kind() == reflect.Slice) && fv.Len() == 0) {
+			if !fv.IsZero() {
 				res[ft.Name] = fv.Interface()
 			}
 			continue
