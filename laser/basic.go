@@ -7,10 +7,12 @@ package laser
 import (
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"reflect"
 	"strconv"
 	"time"
 
+	"goki.dev/colors"
 	"goki.dev/enums"
 	"goki.dev/glop/bools"
 )
@@ -1022,6 +1024,14 @@ func SetRobust(to, frm any) error {
 			*td = fd
 			return nil
 		}
+	}
+	if cd, ok := to.(*color.RGBA); ok {
+		fc, err := colors.FromAny(frm)
+		if err != nil {
+			return err
+		}
+		*cd = fc
+		return nil
 	}
 
 	if AnyIsNil(to) {
