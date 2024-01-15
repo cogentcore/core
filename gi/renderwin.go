@@ -167,6 +167,14 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	}
 	win.GoosiWin.SetName(title)
 	win.GoosiWin.SetTitleBarIsDark(matcolor.SchemeIsDark)
+
+	// we require the window to be at least half of the screen size
+	scsz := win.GoosiWin.Screen().PixSize
+	sz := image.Pt(max(opts.Size.X, scsz.X/2), max(opts.Size.Y, scsz.Y/2))
+	if sz != opts.Size {
+		win.GoosiWin.SetWinSize(sz)
+	}
+
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(goosi.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = goosi.MaxTexturesPerSet * 2 // reserve last for sprites
