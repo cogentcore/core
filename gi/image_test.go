@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"image"
 	"path/filepath"
 	"testing"
 
@@ -48,5 +49,7 @@ func TestImageScrolled(t *testing.T) {
 	img := NewImage(fr)
 	grr.Test(t, img.OpenImage(testImagePath))
 	sc.ScrollToPos(mat32.Y, 75)
-	sc.AssertPixelsOnShow(t, filepath.Join("image", "scrolled"))
+	sc.AssertPixelsOnShow(t, filepath.Join("image", "scrolled"), func() {
+		sc.GoosiEventMgr().Scroll(image.Pt(10, 10), mat32.V2(30, 30))
+	})
 }

@@ -18,9 +18,16 @@ import (
 	"goki.dev/states"
 )
 
-// EventMgr returns the event manager for this [Widget]'s [Scene].
+// EventMgr returns the higher-level gi event manager
+// for this [Widget]'s [Scene].
 func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
+}
+
+// GoosiEventMgr returns the lower-level goosi event
+// manager for this [Widget]'s [Scene].
+func (wb *WidgetBase) GoosiEventMgr() *events.Mgr {
+	return wb.Sc.RenderWin().GoosiWin.EventMgr()
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
