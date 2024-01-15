@@ -555,7 +555,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Style = par.(*Border).Style
 			} else if init {
-				bs.Style.Set(BorderNone)
+				bs.Style.Set(BorderSolid)
 			}
 			return
 		}
